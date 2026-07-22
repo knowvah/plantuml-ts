@@ -11,7 +11,7 @@ unchanged.
 | T13 | Paper gate v3: 3 targets from port-emitted DOT, zero unverified assertions | debugger | derivation-doc addendum | T12 | MISS (paper) - stopped before code |
 | T14 | Re-apply T9 ten-item wiring; measure; hard bar | typescript-pro (T9 agent resumed) | T9 write-set | T13 | NOT RUN (T13 stop) |
 | T16 | Port jar svek DOT emission order (statement order incl. cyclic-pass sensitivity) | typescript-pro | graph-layout-build.ts + state-composite-pass.ts + tests | T13 | [x] |
-| T17 | Paper gate v4: 3 targets from post-T16 port-emitted DOT | debugger | derivation-doc addendum | T16 | [ ] |
+| T17 | Paper gate v4: 3 targets from post-T16 port-emitted DOT | debugger | derivation-doc addendum | T16 | MISS (pesita +2.5px, edge-label gap) - stopped |
 | T14b | Re-apply T9/T8 ten-item wiring; measure; hard bar | typescript-pro | T9 write-set | T17 | [ ] |
 | T15 | Family sweep, pins/backlog, close | typescript-pro | pins/backlog/journal/README | T14b | [ ] |
 

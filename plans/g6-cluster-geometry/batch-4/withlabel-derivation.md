@@ -2249,3 +2249,398 @@ confirmed structurally sufficient (isomorphic to jar) for pesita too.
   the repo, all deleted before finishing.
 - No production files modified. `git status` clean apart from this
   doc.
+
+---
+
+# Paper gate v4 (G7 T17)
+
+**Verdict: bitaxo EXACT, kotagu EXACT, pesita `AA` PAPER-GATE-MISS — with a
+NEWLY-ISOLATED, NAMED, orthogonal mechanism.** T14b's own ten-item
+border-point wiring is CONFIRMED CORRECT (byte-exact on all three targets
+once the blocking mechanism is corrected in an isolated experiment). The
+`~7px "autonom-sizing" residual` T13/T16 flagged for follow-up is
+**RULED OUT** by direct substitution (below) — it is NOT the cause of any
+residual on the current, post-T16 tree. The real cause is a pre-existing,
+general (not border-point-specific) gap in how the REAL LAYOUT PATH sizes
+edge labels, plus two smaller construction-precision fixes to T8's own
+edit list discovered by fresh probing (naming, `ensureMinWidth` rounding).
+
+## 0. Method
+
+Per the mission's PROBE mandate and the D3/T5 lesson ("derive from what the
+PORT emits, not from a prior round's citation, and verify — do not assert"):
+every number below comes from instrumented execution against the CURRENT
+(post-T16) tree this session, via disposable probes
+(`scripts/_tmp-g7-t17-{capture,capture2,simulate,bisect,minimal,minimal2,
+textpath,dumpdot,debug-bitaxo}.ts`, `npx tsx`, all deleted before finishing):
+
+1. **Captured the CURRENT pipeline's real `DotInputGraph` passes** for all
+   three fixtures via `setLayoutInputObserver` + `renderSync` (the same
+   seam `tests/unit/state/state-composites-dot.test.ts` and T13 use) — node
+   sizes, edge attrs (incl. `minLen`/labels), and `DotInputCluster` fields
+   (`portRanks`, `portAnchorId`, `portRanksLabelOnEe`, `labelWidth/Height`)
+   exactly as the CURRENT (T7/T11/T12/T16-landed, T14b-NOT-landed) tree
+   produces them today. Confirmed `titleTableEligible` still excludes
+   `hasBorderPointChildren` (`state-composite-cluster.ts:357-360`) and
+   `graph-layout-build.ts#addClusters` still has zero `portRanks`
+   references — T14b genuinely unwired, matching every prior round's
+   journal entry.
+2. **T14b construction** — a literal extension of the CURRENT, T16-landed
+   `graph-layout-build.ts#addClusters` (verbatim copy of the non-border
+   branch, unmodified addNodes/applyGraphAttrs reused as-is) plus a NEW
+   `portRanksLabelOnEe` branch implementing T8's ten items, built with the
+   REAL `graphviz-ts` programmatic builder (`createGraph`/`addSubgraph`/
+   `addNode`/`setHtmlAttr`/`render`/`getLayout`) fed the CAPTURED (step 1)
+   data, augmented only with `titleTableWidth/Height` (= the already-T11-
+   correct, already-unconditionally-computed `labelWidth/Height` — no new
+   computation, just copying an existing correct value into the field
+   `resolveClusterComposite` will populate once item 1's gate relaxes) and
+   an out-of-band `borderPointAncestorWrap` predicate computed by calling
+   the REAL `classifyDiagram`/`isGroupTouched` against each fixture's real
+   parsed AST (not read from a prior round's citation).
+3. **Frontier correction** — the already-committed, unmodified
+   `frontierCalculator`/`ensureMinWidth`
+   (`src/diagrams/state/state-composite-frontier.ts`), imported directly.
+4. **Controlled bisection (pesita only, after step 2 missed)** — isolated
+   the blocking mechanism by substituting one variable at a time against
+   the REAL graphviz-ts builder/layout call (not a hand-reconstructed DOT
+   text, unlike T13's own §4 method) and re-running the full pipeline after
+   each substitution.
+
+## 1. bitaxo `C` and kotagu `CompositeState` — EXACT
+
+```
+bitaxo: initial {x:155,y:11,w:42,h:115.72}; insides=[]; points=[{176,25}]
+        -> core 42x101.72 -> ensureMinWidth no-op -> FINAL 42 x 101.72
+kotagu: initial {x:8,y:8,w:303,h:358};
+        insides=[{24,193,20,20}(sh0011/[*]), {68,57,191,277}(SubComposite)]
+        points=[{297,108}](entry1) -> core 289x358 -> no-op
+        -> FINAL 289 x 358
+```
+
+Both **byte-identical** to T4/T8/T13's own independently-derived values —
+confirms the T14b construction reproduces the same `initial`/`insides`/
+`points` every prior round found, via the REAL builder this time (not a
+hand-derivation). `wrap(a+i)`=false for both (`isGroupTouched`=false,
+re-confirmed live against the real AST, matching T8 Round-3/T13).
+
+## 2. pesita `AA` — MISS on the current tree, mechanism isolated
+
+T14b construction (`wrap(a+i)`=true, `isGroupTouched('AA')`=true,
+re-confirmed live), CURRENT tree (T16-landed order fix, production
+`addEdges`, unmodified):
+
+```
+initial: {x:634,y:166.5,w:148,h:121.22}
+insides: []
+points:  [{680,273.72}]  (aa_ok_ex center)
+core (post-frontier): 120 x 107.22
+final (post-ensureMinWidth, minWidth rounded): 126 x 107.22
+TARGET: 126 x 104.72   ->  MISS, height off by +2.5px
+```
+
+Width is exact (126, see §4 item 3 for why rounding matters). Height is
+off by +2.5px. `initial`'s raw width (148) already matches T4/T8/T13's own
+jar-derived value exactly; `initial`'s raw height (121.22) does not match
+jar's real value (118.72, independently re-confirmed this session by
+feeding jar's own verbatim `svek-3.dot` through `parse()`+`getLayout()`:
+`cluster6` -> `148 x 115.72...` no — direct node check:
+`sh0010@(176,25)`, `zaent0003@(176,110.36)` for **bitaxo**; for **AA**
+specifically the jar-verbatim-DOT recheck reproduces T13 §4 item 1's own
+`148x118.720012` exactly, re-derived this session, not copied).
+
+## 3. Bisection — what does NOT explain the +2.5px (all tested on the REAL
+   builder/layout call, not a hand-reconstructed DOT text)
+
+1. **Reanimate/Closing/Idle "autonom" node dimensions** (the mechanism
+   T13/T16 named and flagged for T17 to adjudicate). Substituted jar's own
+   real node sizes (inches*72, from cached `svek-3.dot`: Closing
+   436.0x342.0, Reanimate 284.0375x315.0, Idle 180.0375x50.0 — Idle already
+   matched the port's own value exactly; Closing/Reanimate genuinely
+   differ from the port's own 450.09x347/284.04x318) for the CURRENT
+   tree's captured nodes, holding everything else fixed. **AA's own
+   cluster height did not change at all** (121.22, bit-identical, in both
+   the broken-edge-label and later the fixed-edge-label configurations,
+   §4). **RULED OUT, conclusively, by direct zero-sensitivity — not by
+   plausibility.** Mechanism: `insides=[]` for AA (no direct NORMAL
+   member), so `frontierCalculator`'s `core` seed is a degenerate 2x2 box
+   around `initial`'s own center, extended only by `points` (aa_ok_ex's
+   center) — Reanimate/Closing/Idle are unrelated siblings on far-away
+   ranks with no edge directly constraining AA's own local rank gap; their
+   size affects the OVERALL PASS's bounding box, not AA's own cluster
+   bbox. The T13/T16 "~7px autonom-sizing" attribution was a
+   misidentification — likely an artifact of T13's own §4 item 5 method
+   (a hand-reconstructed DOT-TEXT substitution into jar's real structure,
+   not a full real-builder-path simulation; that method never exercised
+   the actual `graph-layout-build.ts` construction T14b will use, so its
+   own residual number is not directly comparable to this session's).
+2. **The port's edge-label `attributes.labelWidth/labelHeight` INPUT
+   field values** (the already-known `\n`-not-split bug, T13 §4 item 2).
+   Overriding this field alone (single-line 14->15, `\n`-containing
+   14->28, matching jar's cached per-edge DOT values) had **zero effect**
+   on AA's height. **RULED OUT as a standalone fix** — not because the
+   underlying measurement isn't wrong (it is, see §4 item 2), but because
+   this specific INPUT FIELD is never read by the real layout path at
+   all: `graph-layout-build.ts#addEdges` (:350-411) only forwards
+   `attrs.label` (the raw text) and `attrs.fontname` to
+   `b.addEdge(...)` — it never sets any width/height DOT attr from
+   `DotInputEdge.attributes.labelWidth/labelHeight`. Those fields are
+   `layoutGraph()`-OUTPUT-side-only (echoed back to renderers via
+   `toEdgeEntry`, `graph-layout.ts:74-97`); the REAL layout call measures
+   the label fresh, internally, from the `label` text string via
+   graphviz-ts's own configured text measurer. Confirms the two intended
+   bisections (§4 item 2 in T13, and this session's own first attempt)
+   were literal no-ops from the start, not genuine negative evidence
+   about the `\n`/height-formula bug itself.
+3. **`hasBorderPointChildren`'s `a`+`i` ancestor-wrap presence/absence.**
+   Forcing `wrap=false` (dropping both `cluster1a` and `cluster1i`)
+   changes `initial` height from 121.22 to 113.22 (an 8px margin
+   contribution, as expected for two dropped `CL_OFFSET`-equivalent
+   nesting layers) — real and structurally necessary (matches jar,
+   T8/T13's own already-verified nesting), but moves AWAY from, not
+   toward, the target either way (113.22 is further from 118.72 than
+   121.22 is). Not the residual's cause; the wrap itself is correct.
+
+## 4. What DOES explain it — two real, pre-existing, orthogonal gaps
+
+**Divergent term:** `initial`'s raw height (121.22 vs jar's real 118.72,
++2.5px, propagating unchanged through `frontierCalculator`/
+`ensureMinWidth` to the final +2.5px miss — same "carries straight
+through" behavior T13 §4 already established for this insides-empty case).
+
+1. **`graph-layout-build.ts#addEdges` never reserves a FIXEDSIZE label box
+   for the real layout call — the DOT-parity TEXT EMITTER already does,
+   and is already jar-verified byte-exact.**
+   `src/core/svek-dot-emit.ts:182-183` (`labelTable(a.labelWidth,
+   a.labelHeight, ...)`) emits every labeled edge as
+   `label=<<TABLE FIXEDSIZE="TRUE" WIDTH=... HEIGHT=...>>` — an EXACT
+   mirror of jar's own real cached DOT (every edge in `svek-3.dot` carries
+   `label=<<TABLE ... FIXEDSIZE="TRUE" WIDTH="N" HEIGHT="N">...>`, never
+   plain text) — already verified structurally correct (this is why the
+   state DOT-parity gate is 268/268). `src/core/graph-layout-build.ts`'s
+   `addEdges` (:350-411, the REAL LAYOUT path, a SEPARATE code path from
+   the emitter, per that file's own header comment) instead sets
+   `attrs.label = a.label` (:380-381) as PLAIN TEXT, relying on
+   graphviz-ts's own internal text measurement (whatever its configured
+   `LutTextMeasurer` computes for that text+font) rather than the port's
+   own pre-computed, jar-calibrated `labelWidth`/`labelHeight`. This is
+   the EXACT SAME class of gap the cluster-title-table mechanism already
+   fixed (`addClusters`'s `main.setHtmlAttr('label', ...)`,
+   `graph-layout-build.ts:308-314`) — but for edge labels, it was never
+   ported. Confirmed the mechanism (not just plausible) by direct
+   controlled experiment: replacing `addEdges`'s plain-text label attr
+   with the SAME `setHtmlAttr` FIXEDSIZE-table call `svek-dot-emit.ts`
+   already uses (fed the port's OWN `labelWidth/Height` values, bugs and
+   all) changes AA's raw `initial` height from 121.22 to 111.72 — a real,
+   large (10px) shift, proving the mechanism.
+2. **Even with FIXEDSIZE wired, the port's OWN edge-label
+   `labelWidth`/`labelHeight` computation is itself off from jar's real
+   per-edge value** — two components, both at
+   `src/diagrams/state/state-composite-edge-label.ts:64-75`
+   (`edgeLabelAttrs`):
+   - **The already-known `\n`-not-split bug** (T13 §4 item 2, now
+     precisely localized): line 66,
+     `const labelDims = ... measurer.measure(text, font)` measures the
+     WHOLE label string, including any literal `\n`, as ONE line — never
+     splitting on it, unlike its own sibling `measureLinkNote` three
+     lines above (line 42, `text.split('\n')`), which DOES split
+     correctly. Every jar cached edge label in this pass whose source
+     text contains `\n` shows a 2-line `HEIGHT="28"` in `svek-3.dot`
+     (`zaent0001->sh0013`, `sh0010->zaent0002`); this port's captured
+     equivalents (`edge-7`, `edge-11`) both measure a single-line
+     `labelHeight:14`.
+   - **A previously-undocumented, SEPARATE 1px/line shortfall on
+     single-line labels too.** `src/core/measurer.ts:186-193`
+     (`WidthTableMeasurer.measure`) returns `height: font.size` (14 for
+     this fixture's 14pt theme) for ANY text, a flat single-line-height
+     simplification with no per-diagram calibration term layered on top
+     — contrast cluster titles, which DO carry one
+     (`computeTitleTableHeight`, `state-composite-header.ts`). EVERY
+     single-line edge label in jar's cached `svek-3.dot` for this pass
+     shows `HEIGHT="15"` (`sh0012->sh0010`, `zaent0002->sh0011`,
+     `sh0014->zaent0002`, `zaent0002->sh0012`, `sh0010->sh0011`,
+     `sh0011->sh0012`, `sh0012->sh0013`) — one px more than this port's
+     uniform 14, for the same 14pt font. Real Java `FontMetrics`-based
+     line height (jar) vs. this port's bare-`font.size` simplification
+     (`measurer.measure`) is the plausible proximate cause; the exact
+     jar formula in `SvekEdge.java`'s label-dimension chain
+     (`TextBlock.calculateDimension`, line ~1194-1200) was NOT traced
+     further this session — **named, not chased**, matching this
+     mission's own established convention for out-of-scope items (T13
+     §7 items 11/12).
+   - **Confirmed by fix-and-reverify (both components, plus FIXEDSIZE
+     from item 1, plus the rounding fix in item 3 below), together, on
+     the REAL builder/layout call:** `initial` becomes
+     `{x:511,y:165,w:148,h:118.72}` — **byte-identical to jar's own real
+     value, independently re-derived twice this session** (§2, and via
+     `parse()` of jar's verbatim DOT). Final (post-frontier,
+     post-`ensureMinWidth`): **126 x 104.72 — EXACT MATCH to target.**
+     Re-run WITH item 1's node-size substitution added on top
+     (Reanimate/Closing/Idle -> jar's real dims): **still 126 x 104.72,
+     bit-identical** — double-confirms §3 item 1's ruling-out; the
+     autonom-sizing divergence is not merely non-dominant, it is
+     entirely inert for this specific miss.
+3. **`ensureMinWidth`'s `minWidth` argument must use the ROUNDED (int)
+   `titleTableWidth`, not the raw double.** Cross-checked against the real
+   oracle SVG directly (`test-results/dot-cache/state/pesita-10-dene726/
+   in.svg`): AA's cluster `<rect>` is `width="126"` **exactly** (not
+   `126.4625`) — the oracle is a real rendered value, not a doc-rounded
+   headline number. Using the raw `titleTableWidth` (116.4625) for
+   `ensureMinWidth`'s `minWidth = titleTableWidth + 10` gives
+   `126.4625`; using `Math.round(titleTableWidth) + 10` (116+10=126 —
+   the SAME rounded value the FIXEDSIZE DOT table's own `WIDTH=` attr
+   already carries, `Math.round`, `graph-layout-build.ts:311`) gives
+   exactly `126`. This is a genuine, small (0.4625px) precision
+   correction to §2c's own term-mapping table (`ensureMinWidth minWidth`
+   row) — previously stated as unrounded `title.width + 10` — confirmed
+   against the real oracle, not merely against a prior round's rounded
+   headline figure. Verified independent of items 1/2 (bitaxo/kotagu
+   unaffected either way — their `minWidth` never binds).
+
+## 5. Ruled out (this round, beyond §3)
+
+1. **A T14b structural defect (rank/`ee`/`i`/`a` nesting shape).** Ruled
+   out: the SAME construction reproduces bitaxo and kotagu EXACTLY, and
+   for `AA` specifically, `initial`'s WIDTH component (148) is exact in
+   EVERY variant tried this session (broken and fixed alike) — only the
+   HEIGHT, driven by the edge-label mechanism above, varies. A structural
+   defect in the nesting would be expected to also perturb the width or
+   the bitaxo/kotagu results; neither happens.
+2. **A graphviz-ts library defect.** Not implicated: item 4/§4's
+   FIXEDSIZE-table fix uses the SAME public `GvGraphBuilder.setHtmlAttr`
+   surface already relied on for cluster titles (no new API gap); the
+   remaining shortfall (item 2's 1px/line + `\n`-split) is entirely
+   upstream of graphviz-ts, in this port's OWN text-dimension computation
+   fed to it.
+3. **The "cluster"-prefix naming bug this session found (§6 below)
+   being pesita-specific.** It is NOT — it broke bitaxo FIRST (the
+   simplest fixture, zero wrap, zero edges) and would have broken every
+   `portRanksLabelOnEe` cluster; already corrected in the construction
+   used throughout §1/§2 above (`__rank_${outerName}_${N}`, not
+   `${outerName}rank_${N}`).
+
+## 6. Naming bug found this session (T8 Round-2's own suggestion was wrong)
+
+T8's Round 2 (§ "rankSpec", "Synthetic subgraph names...") suggested
+`${outerName}rank_source`/`${outerName}rank_sink` for the border-point
+rank-constraint subgraph, reasoning only about the DOT-parity comparator's
+`^cluster\d+$` regex. That name STARTS WITH "cluster" (e.g.
+`cluster0rank_source`) — and real graphviz (DOT language convention,
+faithfully mirrored by graphviz-ts) treats ANY subgraph whose name begins
+with "cluster" as its own independent VISUAL cluster with its own bounding
+box, not a bare rank-grouping construct. Jar's own real DOT uses an
+ANONYMOUS (unnamed) `{rank=source;...}` block for this — no cluster
+semantics at all. Confirmed by direct repro on **bitaxo** (the simplest
+target — zero edges, zero wrap): naming the rank subgraph
+`cluster0rank_0` gives `initial={x:154,y:8,w:79,h:55.36}` (WRONG — `d` and
+`__zaent_C` end up on the SAME rank, side-by-side, each getting its own
+nested-cluster bbox); renaming to `__rank_cluster0_0` (mirroring
+production `addNodes`'s OWN existing, already-correct, non-
+"cluster"-prefixed rank-subgraph naming convention, `__rank_${N}`,
+`graph-layout-build.ts:179`) gives `initial={x:155,y:11,w:42,h:115.72}` —
+**exact**, matching T4/T8/T13's own value and real `dot`'s output on
+jar's verbatim DOT. This is a real correction to T8's own Round-2 naming
+suggestion, not a new mechanism — the STRUCTURAL placement (child of the
+cluster's own handle, per T8 Round-2's `markClusterNode` finding) was
+already right; only the literal string needed a non-"cluster" prefix.
+
+## 7. Predicted vs. target summary
+
+| Fixture / composite | Target (w×h) | T14b-only, current tree (w×h) | T14b + edge-label fix (w×h) | Verdict |
+|---|---|---|---|---|
+| `bitaxo-18-tamo974` / `C` | 42 × 101.72 | 42 × 101.72 | (unaffected) | **Exact** |
+| `pesita-10-dene726` / `AA` | 126 × 104.72 | 126 × 107.22 | 126 × 104.72 | **PAPER-GATE-MISS** on the current tree; T14b wiring itself confirmed correct |
+| `kotagu-43-miza629` / `CompositeState` | 289 × 358 | 289 × 358 | (unaffected) | **Exact** |
+
+## 8. Autonom-residual adjudication (the one open item this task was
+   scoped to close)
+
+The `~7px "autonom-sizing" residual` T13 named and T16 flagged for T17 to
+adjudicate is **not real** — it does not exist as a blocking mechanism on
+the current, post-T16 tree, and (per §3 item 1's double confirmation,
+tested both before and after the real fix) it never meaningfully
+contributed even under T13's own pre-T16 numbers; it was a
+misidentification, most likely from T13's own §4 item 5 hand-reconstructed
+DOT-text substitution method, which never exercised the actual
+`graph-layout-build.ts` construction path T14b uses and so cannot be
+directly compared to a real-builder-path residual. The genuine, confirmed
+blocking mechanism for pesita `AA`'s remaining miss is a pre-existing,
+general (not border-point-specific) gap in real-layout edge-label sizing
+(§4 items 1-2, two components) plus a minor `ensureMinWidth` rounding
+precision fix (§4 item 3) — none of which are in scope for T14b's own
+ten-item wiring, and none of which block bitaxo or kotagu.
+
+## 9. FINAL edit list for T14b (delta vs T8's 10 items / T13's confirmed-
+   unchanged list)
+
+**T8's 10 items remain unchanged and confirmed sufficient** for the
+border-point wiring itself (relax `titleTableEligible`, D4 stereo
+exclusion, `innerMarginLevels`/`unwrappedNodeId`/`borderPointAncestorWrap`
+guards, new `DotInputCluster` field, `handlesFor`'s new border-point
+branch, member-placement early branch, `frontierCalculator` wiring,
+bottom-up correction order, regression coverage, doc update) — bitaxo and
+kotagu reproduce byte-exact using them as-is; pesita reproduces byte-exact
+too, once the two items below (both PRE-EXISTING, both OUT of T14b's own
+scope) are separately addressed.
+
+**Two corrections TO T8's OWN naming/formula choices** (in-scope for
+T14b, since T14b is the task that writes this exact code):
+
+11. **Border-point rank-constraint subgraph naming**: use
+    `__rank_${outerName}_${N}` (mirroring `addNodes`'s own existing
+    convention) — **NOT** `${outerName}rank_source`/`${outerName}rank_sink`
+    as T8 Round 2 suggested. §6 above.
+12. **`ensureMinWidth`'s `minWidth` argument**: `Math.round(titleTableWidth)
+    + 10`, not the raw unrounded double. §4 item 3 above.
+
+**One NEW item, confirmed real but OUT of T14b's own scope** (a
+pre-existing, general gap — affects any pass with labeled edges, not just
+border-point clusters; candidate write-set for a dedicated follow-up
+task):
+
+13. **Real-layout edge-label sizing.** `graph-layout-build.ts#addEdges`
+    needs the SAME `setHtmlAttr` FIXEDSIZE-table mechanism
+    `addClusters` already uses for cluster titles (mirroring
+    `svek-dot-emit.ts#labelTable`, the already-jar-verified DOT-parity
+    emitter), AND `state-composite-edge-label.ts#edgeLabelAttrs` needs
+    (a) to split on literal `\n` before measuring (mirroring its own
+    sibling `measureLinkNote`) and (b) a per-line calibration term for
+    single-line labels (jar's real per-edge label height is
+    `fontSize+1`, e.g. 15 for 14pt, vs this port's uncalibrated
+    `font.size`, e.g. 14 — jar's own `SvekEdge.java`/`TextBlock` formula
+    not traced further this session). This item is CONFIRMED to fully
+    resolve pesita `AA`'s remaining miss (§4.2, fix-and-reverify to
+    126×104.72 exact) but is explicitly OUT of T14b's own write-set —
+    T14b should proceed on bitaxo/kotagu's already-exact evidence and
+    file this as its own follow-up task; a pesita-family fixture will
+    stay a known, named, non-blocking miss until item 13 lands
+    separately (mirroring T13's own item-11/12 convention for
+    out-of-scope, real, named residuals).
+
+## 10. Files/paths used
+
+- `test-results/dot-cache/state/{bitaxo-18-tamo974,pesita-10-dene726,
+  kotagu-43-miza629}/{in.puml,in.svg,svek-*.dot}` (read only, ground
+  truth — `in.svg` newly consulted this session for the oracle's own
+  exact `width="126"` value, §4 item 3)
+- `src/diagrams/state/state-composite-cluster.ts`,
+  `state-composite-header.ts`, `state-composite-edge-label.ts`,
+  `state-composite-frontier.ts`, `state-composite-classify.ts`,
+  `state-composite-detect.ts` (read only)
+- `src/core/graph-layout-build.ts`, `graph-layout.ts`,
+  `graph-layout.types.ts`, `svek-dot-emit.ts`, `measurer.ts` (read only)
+- `node_modules/graphviz-ts/dist/api/{builder,geometry}.d.ts` (read only
+  — `GvGraphBuilder`/`getLayout` public surface, confirming no new API
+  gap for §4 item 1's fix)
+- jar: `~/git/plantuml/.../svek/SvekEdge.java` (read only — confirmed
+  `appendTable`'s plain `(int)` truncation, no added margin, ruling out
+  a jar-side rounding formula as an alternative explanation for §4 item
+  2's 1px/line gap)
+- Real `dot` 15.1.0 (`dot -Tplain`, `dot -Txdot`) on jar's cached DOT —
+  cross-checked bitaxo's and AA's own real geometry independently of
+  graphviz-ts, confirming every graphviz-ts result above against the
+  actual external binary, not just the pinned library.
+- Probes (`scripts/_tmp-g7-t17-{capture,capture2,simulate,bisect,
+  minimal,minimal2,textpath,dumpdot,debug-bitaxo}.ts`, `npx tsx`, this
+  session) — all deleted before finishing. No `/tmp` artifacts retained.
+- No production files modified. `git status` clean apart from this doc.

@@ -12,7 +12,12 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: ACTIVE - ATTEMPT 6 cont. (T16 sign-off 2026-07-22)
+## Status: BLOCKED - paper gate v4 miss (pesita +2.5px); awaiting sign-off
+<!-- 2026-07-22. Fourth pre-existing gap: real-layout edge-label
+     sizing (addEdges lacks the FIXEDSIZE HTML-table label wiring;
+     edgeLabelAttrs under-measures heights). Probe-verified fix
+     lands pesita 126x104.72 exactly. Proposed: T18 (edge-label
+     sizing) -> paper gate v5 -> T14b -> T15. -->
 <!-- 2026-07-22. T11+T12 landed and hold. Third pre-existing gap:
      port declares all nodes before edges; jar's svek emission order
      differs, and graphviz cycle-breaking DFS is order-sensitive for
