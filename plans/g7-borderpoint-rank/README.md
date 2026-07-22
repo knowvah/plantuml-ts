@@ -28,9 +28,9 @@ rule; subagents never run git mutations).
 
 | Batch | Scope | Tasks | Status |
 |-------|-------|-------|--------|
-| [1](batch-1/overview.md) | Isolation matrix + adjudication | T1, T2 | [ ] |
+| [1](batch-1/overview.md) | Isolation matrix + adjudication | T1, T2 | [x] |
 | — | **CONDITIONAL PAUSE** (library path only) | — | — |
-| [2](batch-2/overview.md) | New-.tgz adoption (library path only; SKIP on usage verdict) | T3 | [ ] |
+| [2](batch-2/overview.md) | New-.tgz adoption (library path only; SKIP on usage verdict) | T3 | SKIPPED (usage verdict, T2) |
 | [3](batch-3/overview.md) | Attempt 4: paper gate → implementation | T4, T5 | [ ] |
 | [4](batch-4/overview.md) | Family sweep + close | T6 | [ ] |
 

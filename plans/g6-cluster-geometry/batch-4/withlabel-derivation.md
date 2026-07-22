@@ -858,3 +858,193 @@ C3/C7 path, outside both Round 2 mechanisms.
   `scripts/_tmp-g6-t8-round2-rank-probe2.ts`,
   `scripts/_tmp-g6-t8-round2-iwrapper-probe.ts`); `git status` clean
   of `src/`/`tests/`/`scripts/` changes.
+
+---
+
+# Round 3 (G7 T1 — isolation-matrix adjudication of the suspected second bug)
+
+**Verdict: USAGE DEFECT, NOT A LIBRARY DEFECT. No issue 09 exists.**
+graphviz-ts's raw layout output (the `initial` bbox `FrontierCalculator`
+consumes, `getLayout().clusters`) is byte-exact vs. real `dot` 15.1.0 for
+every context variable that distinguishes pesita/kotagu from the already-
+verified bitaxo control — individually and in the exact two-variable
+combinations that mirror pesita's and kotagu's real shapes. batch-4
+retry-3's misses (pesita 55×293.61 vs. target 126×104.72; kotagu
+248×398 vs. target 289×358 — see the "batch-4 retry-3" decision-journal
+row above) are therefore **not** explained by any graphviz-ts behavior
+this round could reproduce a divergence for. The mechanism must lie in
+plantuml-ts's own code (§4 below).
+
+## 1. Isolation matrix — full results
+
+Disposable probes (`scripts/_tmp-g7-t1-matrix.ts`,
+`scripts/_tmp-g7-t1-endanchor.ts`, `npx tsx`, deleted before finishing;
+DOT fixtures written only to the session scratchpad, never the repo),
+calling graphviz-ts's real `parse`/`createGraph`/`render`/`getLayout`
+directly — the same functions `graph-layout.ts` uses — plus real `dot
+-Txdot` as ground truth. Cluster w×h in points (native y-up frame,
+delta of the `bb=` corners); node y is the ranked port node's native-frame
+y (native y-up: larger y = visually higher; the `sink` rank lands near
+the cluster's minimum y).
+
+| Cell | Shape | realDot (w×h, y) | text-path (w×h, y) | builder (w×h, y) | Agree? |
+|---|---|---|---|---|---|
+| C0 | control: rank + bare anchor in `ee` (bitaxo shape) | 66×149.72, y=40 | 66×149.72, y=40 | 66×149.72, y=40 | **yes** |
+| C1 | C0 + `${id}i` wrapper around the anchor | 66×157.72, y=40 | 66×157.72, y=40 | 66×157.72, y=40 | **yes** |
+| C2 | C0 + nested child cluster inside `ee` | 111×193, y=40 | 111×193, y=40 | 111×193, y=40 | **yes** |
+| C3 | C0 wrapped in a parent cluster | 66×149.72, y=48 | 66×149.72, y=48 | 66×149.72, y=48 | **yes** |
+| C4 | C0 + non-border pseudo-node sharing `ee` | 75×156.2, y=40 | 75×156.2, y=40 | 75×156.2, y=40 | **yes** |
+| C1+C3 | i-wrapper + parent cluster (**pesita mirror**) | 66×157.72, y=48 | 66×157.72, y=48 | 66×157.72, y=48 | **yes** |
+| C2+C4 | nested child cluster + pseudo-node (**kotagu mirror**) | 119×193, y=228 | 119×193, y=228 | 119×193, y=228 | **yes** |
+
+End-anchor confirmation — text-path vs. real `dot` on the ACTUAL cached
+production DOT (raw cluster bbox, before any `FrontierCalculator`
+correction):
+
+| Fixture | Cluster | realDot (w×h) | text-path (w×h) | Agree? |
+|---|---|---|---|---|
+| `pesita-10-dene726/svek-3.dot` | `cluster15` | 148 × 118.72 | 148 × 118.72 | **yes** |
+| `kotagu-43-miza629/svek-1.dot` | `cluster6` | 303 × 358 | 303 × 358 | **yes** |
+
+No cell, single-variable or compound, and no end-anchor fixture showed
+any divergence. C0's three-way agreement validates the harness before
+any other cell counts (acceptance bar); every subsequent cell then
+carries equal evidentiary weight.
+
+## 2. Correct builder call sequence per context variable
+
+All four verified against real `dot` + text-path + builder agreement
+above. `c` = the border-point cluster's own handle
+(`b.addSubgraph('cluster15', {...})`); `ee` = `c.addSubgraph('cluster15ee',
+{label: ...})`. The rank-group subgraph name must never start with
+`cluster` (issue 08); every OTHER wrapper/nested-cluster name below
+deliberately DOES start with `cluster`, matching jar's own DOT emission,
+because those ARE meant to be treated as real clusters by `isACluster`
+(margin/bbox machinery), unlike the rank group.
+
+- **rank group (baseline, C0 — already the issue-08 Resolution
+  sequence, reconfirmed here):**
+  `c.addSubgraph('sink_group_15', {rank: 'sink'}).addNode(id)` +
+  `c.addNode(id, {shape: 'rect', ...})`. Child of `c`, NOT of the root
+  builder or of `ee`.
+
+- **`${id}i` wrapper (C1):** child of `ee`, not of `c` directly:
+  `const i = ee.addSubgraph('cluster15i', {label: ''}); i.addNode(anchorId,
+  {shape: 'point', ...})`. The anchor is added to `i`, not directly to
+  `ee`, when the wrapper fires (gated on `isGroupTouched`, per Round 2).
+  Verified: cluster height grows by exactly the wrapper's own margin
+  (149.72→157.72, +8) in all three paths identically.
+
+- **nested child cluster inside `ee` (C2):** child of `ee`, a genuine
+  independent cluster subgraph (own `style`/`color`/`labeljust`/`label`
+  attrs, its own members): `const child = ee.addSubgraph('cluster16',
+  {style: 'solid', color: ..., labeljust: 'c', label: ...});
+  child.addNode(innerId, {...})`. Verified: outer cluster's bbox grows to
+  enclose the nested cluster's own box plus margin (149.72×66 →
+  193×111) identically in all three paths — this is the
+  `insides`-nonempty case (kotagu's `SubComposite`).
+
+- **parent cluster wrapping the whole border-point cluster (C3):**
+  `c` becomes a child of another cluster handle, not of the root
+  builder: `const parent = b.addSubgraph('cluster14', {style: 'solid',
+  color: ..., labeljust: 'c', label: ''}); const c =
+  parent.addSubgraph('cluster15', {...})`. Verified: `cluster15`'s OWN
+  bbox is unaffected (66×149.72 unchanged); only the ranked node's
+  absolute y shifts by the parent's own top/side margin (40→48),
+  identically in all three paths. No special-casing needed for a
+  border-point cluster nested inside a plain parent cluster.
+
+- **non-border pseudo-node sharing `ee` (C4):** added directly to `ee`
+  alongside the anchor, like any other non-port member: `ee.addNode(
+  pseudoId, {shape: 'circle', ...})`. No separate subgraph, no special
+  attrs. Verified: cluster width grows to include it (66→75) identically
+  in all three paths.
+
+- **compounding (C1+C3, C2+C4):** every combination above composes with
+  no additional interaction term — each variable's effect (verified in
+  isolation) is present unchanged in the compound cell, and all three
+  paths still agree exactly. A correct wiring therefore needs no extra
+  logic for "i-wrapper AND parent nesting" or "nested cluster AND
+  pseudo-node" beyond applying each rule above independently.
+
+## 3. Ruled out
+
+1. **Rank-subgraph `cluster`-prefix naming as the residual cause.**
+   Ruled out: every cell used the non-`cluster`-prefixed
+   `sink_group_15` name (issue 08's fix); all seven cells still agree
+   three-way, so a naming regression is not present in any tested shape.
+2. **`${id}i` wrapper mis-handling in graphviz-ts.** Ruled out (C1,
+   C1+C3): isolated cell and the pesita-mirror compound cell agree
+   exactly across all three paths; the +8pt height delta it introduces
+   is identical real-dot/text/builder.
+3. **Nested child cluster inside `ee` mis-handling in graphviz-ts.**
+   Ruled out (C2, C2+C4): agrees exactly in isolation and combined with
+   the pseudo-node.
+4. **Parent-cluster nesting shifting the rank-forced node or the
+   cluster's own bbox incorrectly.** Ruled out (C3, C1+C3): bbox and y
+   both agree exactly; only the node's absolute y-offset shifts
+   uniformly by the parent's own margin, identically in all three
+   paths.
+5. **Non-border pseudo-node co-membership in `ee` corrupting
+   `points`/`insides` computation in graphviz-ts.** Ruled out (C4,
+   C2+C4): agrees exactly in isolation and combined with a nested child
+   cluster.
+6. **graphviz-ts's raw layout diverging from real dot on the actual
+   production fixtures (as opposed to minimal repros).** Ruled out
+   directly: `parse`+`render`+`getLayout` on pesita's full `svek-3.dot`
+   and kotagu's full `svek-1.dot` reproduce real dot's cluster bbox
+   exactly (148×118.72 and 303×358 respectively).
+7. **A previously-fixed defect still being present in the current
+   tree.** Checked: `src/core/graph-layout-build.ts` has zero
+   references to `portRanks`/`hasBorderPointChildren`/rank-subgraph
+   construction on the current branch; `state-composite-frontier.ts:11`
+   still documents "NOT WIRED into `materializeCluster`" as of the G6 T9
+   stop. The wiring that produced retry-3's numbers was built on a
+   separate branch and fully reverted (2026-07-22 "batch-4 retry-3"
+   decision-journal row, "Full revert verified") — it is not
+   inspectable in the current tree, which is why this round is a
+   from-scratch isolation matrix rather than a code read.
+
+## 4. Downstream-suspect statement (for the next implementation attempt)
+
+Raw layout is proven correct for the full context set (§1). The defect
+that produced retry-3's misses must therefore lie in one (or both) of:
+
+- **plantuml-ts's `addClusters` border-point wiring** building a graph
+  shape different from the cells verified in §2 — e.g. wrong nesting
+  parent, wrong subgraph naming, wrong call order, or member-list
+  wiring that doesn't route `portRanks`/non-port members/nested
+  children the way §2 specifies; or
+- **the `FrontierCalculator`/`materializeCluster` post-layout correction
+  pass** (`src/diagrams/state/state-composite-frontier.ts` — confirmed
+  **NOT wired** into `state-composite-geo.ts#materializeCluster` as of
+  this round) misapplying `insides`/`points` once nesting/`i`-wrapper/
+  pseudo-node content is present, even when the raw layout it consumes
+  is correct.
+
+**The reverted attempt-3 wiring is not inspectable** (fully reverted,
+per §3 item 7) — attempt 4 must be derived from this document's §2 call
+sequences and the existing `frontierCalculator` pure-function port
+(already tested, already correct per T9's own hand-trace verification),
+not from memory or assumption about what attempt 3 did differently.
+No further measurement is needed before attempt 4 begins: this round's
+matrix is the complete input a paper derivation needs.
+
+## 5. Round 3 files/paths used
+
+- `node_modules/graphviz-ts/dist/{api,render,parser}/*.d.ts` (`parse`,
+  `createGraph`, `render`, `getLayout` signatures)
+- `src/core/graph-layout.ts` (existing `layoutGraph` call pattern,
+  read for the builder/text-path construction template — not modified)
+- `src/core/graph-layout-build.ts` (confirmed zero `portRanks`/
+  `hasBorderPointChildren` references on the current branch)
+- `src/diagrams/state/state-composite-frontier.ts` (confirmed
+  `frontierCalculator` exported but not wired into `materializeCluster`)
+- `test-results/dot-cache/state/{pesita-10-dene726/svek-3.dot,
+  kotagu-43-miza629/svek-1.dot}` (end-anchor confirmation)
+- `plans/g6-cluster-geometry/decision-journal.md` (batch-4 retry-3 row,
+  read for the target numbers being adjudicated)
+- No production files, oracles, or goldens modified; both probe scripts
+  deleted (`scripts/_tmp-g7-t1-matrix.ts`,
+  `scripts/_tmp-g7-t1-endanchor.ts`); `git status` clean of
+  `src/`/`tests/`/`scripts/` changes.
