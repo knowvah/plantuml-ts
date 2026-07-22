@@ -7,7 +7,7 @@ unchanged.
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
 | T11 | Port ClusterHeader titleAndAttributeWidth (max of title/stereo and attribute text) | typescript-pro | state-composite-cluster.ts (+types) + tests | - | [x] |
-| T12 | Consume Transition.direction: jar-faithful edge reversal before graphviz | typescript-pro | state-composite-pass.ts (+types) + tests | T11 | [ ] |
+| T12 | Consume Transition.direction: jar-faithful edge reversal before graphviz | typescript-pro | state-composite-pass.ts (+types) + tests | T11 | [x] |
 | T13 | Paper gate v3: 3 targets from port-emitted DOT, zero unverified assertions | debugger | derivation-doc addendum | T12 | [ ] |
 | T14 | Re-apply T9 ten-item wiring; measure; hard bar | typescript-pro (T9 agent resumed) | T9 write-set | T13 | [ ] |
 | T15 | Family sweep, pins/backlog, close | typescript-pro | pins/backlog/journal/README | T14 | [ ] |
