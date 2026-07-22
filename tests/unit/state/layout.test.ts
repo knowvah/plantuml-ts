@@ -961,7 +961,13 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
     expect(cluster?.titleTableWidth).toBeCloseTo(9.333, 2);
   });
 
-  it('a C3-ineligible composite (multi-line title) keeps the plain-text label attr, unaffected by the HEIGHT fix', () => {
+  // G6 T7: `title.lineCount === 1` RELAXED (`title-height-derivation.md`
+  // §5) -- a multi-line title composite is now `titleTableEligible` too;
+  // `computeTitleTableHeight` is `titleLines`-parametric and jar-verified
+  // exact at titleLines=3 (37, `sosoxe-55-demi451`/`teseci-80-sivi292`).
+  // This 2-line case (`(0+2)*14 - 5 = 23`) is the same formula at a
+  // different, unverified-but-algebraically-identical line count.
+  it('a multi-line title composite is now titleTableEligible (G6 T7 relax) with a formula-computed HEIGHT, not the flat old constant', () => {
     const child = makeState('Child');
     const a = makeState('A', { display: 'line1\nline2', children: [child] });
     const ext = makeState('External');
@@ -977,7 +983,84 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       setLayoutInputObserver(undefined);
     }
     const cluster = captured[0]?.clusters?.find((c) => c.label === 'line1\nline2');
-    expect(cluster?.titleTableHeight).toBeUndefined();
-    expect(cluster?.titleTableWidth).toBeUndefined();
+    expect(cluster?.titleTableHeight).toBe(23);
+    // titleTableWidth = max line width across both lines ('line2' is wider
+    // than 'line1' under the stub measurer's per-char width) -- unaffected
+    // by the G6 T7 height formula, out of this test's scope.
+    expect(cluster?.titleTableWidth).toBeCloseTo(29.75, 2);
+  });
+
+  // G6 T7 jar-verified: `sosoxe-55-demi451`/`teseci-80-sivi292`'s `A`
+  // (titleLines=3, attrLines=0) -- direct DOT `HEIGHT="37"` ground truth,
+  // `title-height-derivation.md` §3.
+  it('a 3-line title composite (jar-verified sosoxe-55-demi451/teseci-80-sivi292 shape) reduces to HEIGHT=37', () => {
+    const child = makeState('Child');
+    const a = makeState('A', { display: 'line1\nline2\nline3', children: [child] });
+    const ext = makeState('External');
+    const ast: StateDiagramAST = {
+      states: [a, ext],
+      transitions: [{ from: 'Child', to: 'External' }],
+    };
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutState(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'line1\nline2\nline3');
+    expect(cluster?.titleTableHeight).toBe(37);
+  });
+
+  // G6 T7 jar-verified: `bajelo-54-dixe684`'s `Track_FSM.Run` (titleLines=1,
+  // attrLines=2, its own `entry`/`exit` body lines) -- direct DOT
+  // `HEIGHT="42"` ground truth, `title-height-derivation.md` §3.
+  it('a single-line title composite with a 2-line body/description reduces to HEIGHT=42 (action-zone term)', () => {
+    const child = makeState('Child');
+    const a = makeState('A', {
+      children: [child],
+      description: ['entry / enter_run();', 'exit / exit_run();'],
+    });
+    const ext = makeState('External');
+    const ast: StateDiagramAST = {
+      states: [a, ext],
+      transitions: [{ from: 'Child', to: 'External' }],
+    };
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutState(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'A');
+    expect(cluster?.titleTableHeight).toBe(42);
+  });
+
+  // G6 T7: `stereoLines` term -- UNVERIFIED against a real jar oracle this
+  // iteration (`title-height-derivation.md` §5, "Stereotype term": no
+  // titled+stereotyped, non-concurrent-region composite cluster with a
+  // cached `svek-*.dot` was found in the corpus). Ships per the derivation
+  // doc's own authorization (source-derived, not curve-fit); this test
+  // pins the CURRENT formula output, not a jar-confirmed value -- a future
+  // oracle fixture may prove this wrong, in which case this test (not the
+  // formula) is the thing to revisit.
+  it('a single-line title composite with a stereotype adds one stereoLines term (UNVERIFIED against jar oracle, formula-consistent)', () => {
+    const child = makeState('Child');
+    const a = makeState('A', { children: [child], stereotype: 'someStereotype' });
+    const ext = makeState('External');
+    const ast: StateDiagramAST = {
+      states: [a, ext],
+      transitions: [{ from: 'Child', to: 'External' }],
+    };
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutState(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'A');
+    expect(cluster?.titleTableHeight).toBe(23);
   });
 });
