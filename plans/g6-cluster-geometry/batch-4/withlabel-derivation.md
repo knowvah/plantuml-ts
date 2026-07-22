@@ -850,6 +850,352 @@ C3/C7 path, outside both Round 2 mechanisms.
   vs. `touched`, confirmed distinct)
 - jar: `ClusterDotString.java:91-204`, `Cluster.java:102-103`,
   `SvekEdge.java:1270-1272`
+
+---
+
+# Paper gate (G7 T4)
+
+**Verdict: PASS — all three targets reproduce EXACTLY.** No code was
+written; no probe scripts were left in the repo (all arithmetic below
+was done with `dot -Txdot` on the fixtures' already-cached, ground-truth
+`svek-N.dot` files plus a disposable Python cross-check in the session
+scratchpad, never `scripts/`). This closes the paper-gate stop condition
+from Round 3 §4 for the three named targets; it does not re-derive
+anything Rounds 1-3 already isolated (`FrontierCalculator` itself,
+`titleAndAttributeHeight`, the builder call sequences) — it only walks
+those already-verified pieces through concrete numbers end-to-end,
+which no prior round had done against a byte-exact `initial` on this
+machine's pinned `dot` 15.1.0 for all three fixtures simultaneously.
+
+## Method
+
+For each fixture: ran `dot -Txdot` (graphviz 15.1.0, this machine)
+directly on the fixture's real cached jar DOT
+(`test-results/dot-cache/state/<fixture>/svek-*.dot`) to obtain the
+border-point cluster's raw `initial` bbox and every relevant member's
+post-layout box/center — this is the exact input Round 3 §1's
+"end-anchor confirmation" table already proved byte-exact vs.
+graphviz-ts's own `getLayout()` (both `parse`+`render` text-path and,
+per Round 3's isolation matrix, the programmatic builder path once
+wired per Round 3 §2's call sequences). Then hand-applied
+`frontierCalculator`/`ensureMinWidth` exactly as committed in
+`src/diagrams/state/state-composite-frontier.ts` (read, not modified;
+cross-checked with a disposable Python transliteration of that exact
+file to eliminate manual-arithmetic error — output below, script not
+retained). `insides`/`points` were read directly off the same `dot`
+run, per the term mapping in §2c/Round 2/Round 3 §2 (no fixture-specific
+terms — the same four-input contract, `initial`/`insides`/`points`/
+`rankdir`, drives all three).
+
+## Walkthrough 1 — `bitaxo-18-tamo974` / `C` (control)
+
+**Context variables (Round 3 vocabulary):** rank group only (`sink`... 
+correction: `{rank=source;sh0010;}` — ENTRY_POINT `d` → `source`), no
+`${id}i` wrapper (`isGroupTouched('C', allTransitions) === false` — zero
+transitions in the whole diagram), no nested child cluster, no parent
+cluster wrapping `cluster6`. This is Round 3's C0 cell shape exactly.
+
+- Title table (plain formula, no stereotype on `C`): width=10, height=9
+  (cached DOT `cluster6ee` label `WIDTH="10" HEIGHT="9"`, jar-exact,
+  already re-confirmed Round 1 §2a) — D4 irrelevant here (no
+  `<<O-O>>`/no stereotype at all on `C`).
+- `initial` (real `dot -Txdot` on `svek-1.dot`, `cluster6`'s own `bb`):
+  `155,8,197,123.72` → **42 × 115.72** (raw, pre-correction).
+- `insides = []` (no direct NORMAL-position member; `cluster6ee`
+  contains only the anchor point `zaent0003`, which is excluded from
+  `insides` per the term mapping).
+- `points = [{x:176, y:109.72}]` (`sh0010`'s post-layout center; node
+  drawn at `x∈[170,182], y∈[103.72,115.72]`, center = pos = `176,109.72`).
+- **Frontier arithmetic:**
+  1. seed (insides empty): degenerate box centered on `initial`'s
+     center `(176, 65.86)` → `{minX:175, minY:64.86, maxX:177,
+     maxY:66.86}`.
+  2. merge point `(176,109.72)` → `{minX:175, minY:64.86, maxX:177,
+     maxY:109.72}`.
+  3. touch/fallback: point's `x=176` touches neither `175` nor `177` →
+     both X bounds fall back to `initial` (`155`, `197`). Point's
+     `y=109.72` touches `maxY` (`109.72`, kept) but not `minY` → `minY`
+     falls back to `initial.minY = 8`. Core: `{155, 8, 197, 109.72}` →
+     **42 × 101.72** (pre-push).
+  4. push detection: `p.y == core.maxY` → checks `|176-197|=21` (not
+     `<18`) and `|176-155|=21` (not `<18`) — **no push fires**.
+  5. corner exclusion: no push flags set, no-op.
+  6. `ensureMinWidth(minWidth = 10+10 = 20)`: current width 42 ≥ 20 →
+     no-op.
+- **Final: 42 × 101.72 — EXACT MATCH to target (42 × 101.72).**
+
+This reproduces the decision-journal's own "batch-4 retry-3" byte-exact
+bitaxo result independently, using this session's own `dot -Txdot` run
+(not a readback of that journal entry) — confirms Round 1's ~0.36px
+residual was a probe-tool/graphviz-version artifact, as Round 1 §5 item
+4 already attributed, not a formula gap.
+
+## Walkthrough 2 — `pesita-10-dene726` / `AA`
+
+**Context variables:** rank group (`{rank=sink;sh0019;}` —
+EXIT_POINT `aa_ok_ex` → `sink`), `${id}i` wrapper PRESENT
+(`isGroupTouched('AA', allTransitions) === true`: `[*] --> AA`,
+`AA --> Closing`), no nested child cluster inside `ee`, cluster15
+sits inside an "a" ancestor wrapper only (no "p0", forced-false
+protection — ruled out as a geometry contributor, Round 1 §5 item 6).
+This is Round 3's **C1** cell shape (i-wrapper only, no parent-cluster
+variant needed since `cluster15a` is layout-irrelevant per Round 1).
+
+- Title table: **D4 applies.** `AA` has title="AA" (1 line), stereotype
+  `<<O-O>>` (the `isWithOOSymbol` sentinel — excluded from
+  `stereoLines` per D4), attribute "entry / set_timeout()" (1 line).
+  `titleAndAttributeHeight = (0+1)*14 + 1*14 + 5 = 33` → DOT
+  `HEIGHT = 33-5 = 28`. **This is 28, NOT 42** — confirmed against the
+  cached DOT itself: `cluster15ee` label `WIDTH="116" HEIGHT="28"`.
+  Width: `max(measure("AA",14), measure("entry / set_timeout()",14)) =
+  max(18.7, 116.46) → 116`. Both exact vs. cached DOT (jar ground
+  truth, unaffected by whatever plantuml-ts's own current stereoLines
+  bug computes — this walkthrough uses the JAR'S OWN emitted DOT as
+  `initial`'s source, so it is not sensitive to D4 by construction; D4
+  matters for what T5's OWN generated DOT must reproduce, see §edit-list).
+- `initial` (real `dot -Txdot` on `svek-3.dot`, `cluster15`'s own `bb`):
+  `610,823,758,941.72` → **148 × 118.72** (raw; matches Round 3 §1's
+  own end-anchor confirmation number exactly).
+- `insides = []` (no direct NORMAL-position member of `cluster15`;
+  `cluster15ee` contains only the anchor `zaent0002`, itself excluded).
+- `points = [{x:656, y:837}]` (`sh0019`/`aa_ok_ex` center; node drawn
+  at `x∈[650,662], y∈[831,843]`).
+- **Frontier arithmetic:**
+  1. seed (insides empty): center of `initial` = `(684, 882.36)` →
+     `{minX:683, minY:881.36, maxX:685, maxY:883.36}`.
+  2. merge point `(656,837)` → `{minX:656, minY:837, maxX:685,
+     maxY:883.36}`.
+  3. touch/fallback: `x=656` touches `minX(656)` → kept; does not
+     touch `maxX(685)` → falls back to `initial.maxX=758`. `y=837`
+     touches `minY(837)` → kept; does not touch `maxY(883.36)` →
+     falls back to `initial.maxY=941.72`. Core: `{656, 837, 758,
+     941.72}` → 102 × 104.72 (pre-push).
+  4. push detection: point sits exactly at `(core.minX, core.minY)` —
+     `p.y==core.minY` → `|656-758|=102` (no) but `|656-656|=0 < 18` →
+     `pushMinX=true`. `p.x==core.minX` → `|837-941.72|=104.72` (no) but
+     `|837-837|=0 < 18` → `pushMinY=true`.
+  5. corner exclusion (rankdir=TB, `else` branch): point has
+     `y==core.minY` AND `x==core.minX` → **cancels `pushMinY`**
+     (`pushMinX` is untouched by the TB branch, which only ever cancels
+     a Y-push at an X-matching corner). Net: `pushMinX=true,
+     pushMinY=false`.
+  6. apply: `core.minX -= 18` → `638`. Core: `{638, 837, 758,
+     941.72}` → **120 × 104.72**.
+  - `ensureMinWidth(minWidth = 116+10 = 126)`: `delta = 120-126 = -6`.
+    `newMinX = 638 + (-6)/2 = 635`; `newMaxX = 758 - (-3) = 761`.
+    `error = 635 - initial.minX(610) = 25`, not `<0` → no further shift.
+    Final X-bounds: `{635, 761}` → width **126**.
+- **Final: 126 × 104.72 — EXACT MATCH to target (126 × 104.72).**
+  Height fixed at step 3 (never touched by the push or
+  `ensureMinWidth`, both X-only here); width is entirely determined by
+  the `pushMinX` + `ensureMinWidth` interaction — this is the
+  non-trivial cell the prior attempt-3 misses (55×293.61) most likely
+  broke, since a wrong `initial`/`insides`/`points` triple or a missed
+  `i`-wrapper/rank wiring changes which corner the anchor lands on,
+  changing which push/fallback branch fires.
+
+Independently verified with a disposable Python transliteration of
+`state-composite-frontier.ts` (see script output below) — matches the
+by-hand trace to the digit.
+
+## Walkthrough 3 — `kotagu-43-miza629` / `CompositeState`
+
+**Context variables:** rank group (`{rank=source;sh0010;}` — ENTRY_POINT
+`entry1` → `source`), no `${id}i` wrapper
+(`isGroupTouched('CompositeState', allTransitions) === false` — `[*]
+-up-> SubComposite` and `entry1 --> B` both connect *descendants*, never
+`CompositeState` itself), nested child cluster (`SubComposite`) PRESENT
+directly inside `cluster6ee`, plus a non-border pseudo-node (`sh0011`,
+`[*]`) sharing `ee`. This is Round 3's **C2+C4** compound cell.
+
+- Title table: no stereotype on `CompositeState`, title 1 line → 
+  `(0+1)*14 = 14` → DOT `HEIGHT=14-5=9`; matches cached DOT `WIDTH="99"
+  HEIGHT="9"` exactly. D4 not applicable (no `<<O-O>>` here).
+- `initial` (real `dot -Txdot` on `svek-1.dot`, `cluster6`'s own `bb`):
+  `8,8,311,366` → **303 × 358** (raw; matches Round 3 §1's own
+  end-anchor confirmation number exactly).
+- `insides = [sh0011's box, cluster12(SubComposite)'s own raw box]`:
+  - `sh0011` (`[*]`, non-border NORMAL member): drawn as `e 34 171 10
+    10` (ellipse, center `(34,171)`, rx=ry=10) → box `{minX:24,
+    minY:161, maxX:44, maxY:181}`.
+  - `cluster12` (`SubComposite`'s own subgraph, NOT the `a`/`p0`
+    ancestor wrappers — same "own box, not ancestor wrapper" rule
+    Round 1 §5 item 6 already established for `AA`/`cluster15` itself):
+    real `dot`'s `bb="68,40,259,317"` → **191 × 277**, which is itself
+    already the jar-exact `SubComposite` target (Round 1 §4's own
+    entry) with NO frontier correction needed (`SubComposite` is a
+    plain, non-border-point cluster — the pre-existing C3/C7 path reads
+    a cluster's own `DotLayoutResult.clusters[id]` box directly as its
+    final box, the same "own box" seam `initial` itself uses for
+    border-point clusters, Round 1 §2c's `initial` row).
+  - Union: `{minX:24, minY:40, maxX:259, maxY:317}`.
+- `points = [{x:297, y:266}]` (`sh0010`/`entry1` center; node drawn at
+  `x∈[291,303], y∈[260,272]`).
+- **Frontier arithmetic:**
+  1. seed = insides union = `{24, 40, 259, 317}`.
+  2. merge point `(297,266)` → `{24, 40, 297, 317}`.
+  3. touch/fallback: `x=297` touches `maxX(297)` → kept; does not touch
+     `minX(24)` → falls back to `initial.minX=8`. `y=266` touches
+     neither `minY(40)` nor `maxY(317)` → BOTH Y-bounds fall back to
+     `initial` (`8`, `366`). Core: `{8, 8, 297, 366}` → **289 × 358**
+     (pre-push).
+  4. push detection: `p.y==core.minY(8)`? no. `p.y==core.maxY(366)`?
+     no → neither X-push check runs. `p.x==core.maxX(297)`? yes →
+     `|266-366|=100` (no), `|266-8|=258` (no) → `pushMaxY` and
+     `pushMinY` both stay false. **No pushes fire.**
+  5. corner exclusion: no-op (no flags set).
+  6. apply: no-op.
+  - `ensureMinWidth(minWidth = 99+10 = 109)`: current width 289 ≥ 109
+    → no-op.
+- **Final: 289 × 358 — EXACT MATCH to target (289 × 358).**
+
+Sanity check (not part of the load-bearing derivation, run to test
+robustness of the `insides` definition): re-ran with `insides =
+[cluster12 only]` (dropping `sh0011`) — identical final `{8,8,297,366}`,
+because `sh0011`'s box is fully inside `cluster12`'s Y-range and its
+smaller `minX=24` gets overwritten by the `initial`-fallback at step 3
+regardless (the anchor point's `x=297` never touches the union's
+`minX` either way, `24` or `68`). This fixture does not numerically
+discriminate whether `sh0011` belongs in `insides`, so it is *not*
+evidence that omitting non-border members from `insides` is safe in
+general — T5 must still implement the full definition (member leaves +
+child cluster boxes), since other family fixtures (T10 sweep) are
+expected to be sensitive to it even though these three targets are not.
+
+## Cross-check script (Python transliteration of `state-composite-frontier.ts`, disposable, not retained)
+
+```
+bitaxo core [155, 8, 197, 109.72] (42, 101.72)
+bitaxo final [155, 8, 197, 109.72] (42, 101.72)
+
+pesita core [638, 837, 758, 941.72] (120, 104.72)
+pesita final [635.0, 837, 761.0, 941.72] (126.0, 104.72)
+
+kotagu core [8, 8, 297, 366] (289, 358)
+kotagu final [8, 8, 297, 366] (289, 358)
+kotagu core (no sh0011) [8, 8, 297, 366] (289, 358)
+```
+
+All three: **exact digit-for-digit match** to target, both by hand and
+by the independent script re-implementation.
+
+## Summary table
+
+| Fixture / composite | Target (w×h) | Predicted (w×h) | Match |
+|---|---|---|---|
+| `bitaxo-18-tamo974` / `C` | 42 × 101.72 | 42 × 101.72 | **Exact** |
+| `pesita-10-dene726` / `AA` | 126 × 104.72 | 126 × 104.72 | **Exact** |
+| `kotagu-43-miza629` / `CompositeState` | 289 × 358 | 289 × 358 | **Exact** |
+
+## Exact edit list for T5 (attempt 4) — what must be DIFFERENT from attempt 3
+
+Attempt 3 (reverted, not inspectable — Round 3 §3 item 7) got bitaxo
+byte-exact but missed pesita and kotagu badly (55×293.61 vs 126×104.72;
+248×398 vs 289×358), despite Round 3's isolation matrix proving
+graphviz-ts's raw layout correct for every context variable and
+compound that distinguishes those two fixtures from bitaxo. The defect
+is therefore necessarily in plantuml-ts's own wiring, not the
+algorithm. This derivation pins down precisely what that wiring must
+produce; T5 must implement to these exact contracts, not attempt3's
+(unknown, unrecoverable) approach:
+
+1. **`state-composite-cluster.ts:377-380` — relax `titleTableEligible`**
+   exactly per Round 1 §7's diff (drop the `!hasBorderPointChildren`
+   conjunct only; `ctx.theme.fontSize === 14` and
+   `ctx.insideAutonomPass !== true` stay). Confirmed still unrelaxed on
+   the current tree (read, not modified, this session).
+2. **`state-composite-cluster.ts:340` — apply D4.** `stereoLines` must
+   exclude any stereotype for which `Stereotype.isWithOOSymbol()` holds
+   (bracket-stripped value `"o-o"`, from `<<O-O>>`) — currently
+   `splitCreoleLines(s.stereotype).length` unconditionally, with no
+   sentinel check. Confirmed still unfixed on the current tree this
+   session. Without this, `AA`'s own `${id}ee` label emits
+   `HEIGHT="42"` instead of the jar-exact `"28"` this walkthrough
+   verified, corrupting `initial` for pesita specifically (the only one
+   of the three targets with an `<<O-O>>`-style stereotype) — a
+   necessary, though not necessarily sufficient, explanation for
+   attempt 3's much-larger pesita miss vs. its correct bitaxo/kotagu-
+   shape handling elsewhere.
+3. **`graph-layout-build.ts#addClusters` — build the exact shapes
+   Round 3 §2 verified**, not a re-derivation:
+   - rank-group subgraph: child of the border-point cluster's own
+     handle, name must NOT start with `cluster` (issue 08) —
+     `c.addSubgraph(nonClusterName, {rank: 'source'|'sink'})
+     .addNode(portId)`, PLUS `c.addNode(portId, {...})` directly on `c`.
+   - `${id}i` wrapper: child of `ee` (not of `c`), gated on
+     `isGroupTouched(s.id, ctx.classify.allTransitions)` — **not**
+     `needsZaentPoint`, per Round 2's explicit ruled-out distinction.
+     Anchor node goes INTO `i` when it fires, not directly into `ee`.
+   - nested child cluster inside `ee`: a genuine cluster subgraph (own
+     `style`/`color`/`labeljust`/`label`, own members) — `ee`'s child,
+     built as its own independent cluster.
+   - parent-cluster-wraps-whole-composite case: not needed for these 3
+     targets (none exercises it) but already verified safe (Round 3 C3)
+     if the family sweep hits it later.
+4. **`state-composite-geo.ts#materializeCluster` — wire the ALREADY-
+   correct, already-tested `frontierCalculator`/`ensureMinWidth`**
+   (`state-composite-frontier.ts`, unmodified, do not re-port) with:
+   - `initial = DotLayoutResult.clusters[c.id]` (the OUTER `cluster<N>`
+     subgraph's real post-layout box — the SAME id `addClusters` names
+     its outer subgraph, not the `${id}ee`/`${id}i`/`a`/`p0` ids).
+   - `insides` = direct NORMAL-position member leaf boxes (from
+     `DotLayoutResult.nodes`) **UNION** direct child clusters' own
+     boxes (`DotLayoutResult.clusters[childId]`, already-corrected if
+     the child is itself a border-point cluster — bottom-up order,
+     Round 1 §6 item 1, unverified against a real fixture but the
+     reasonable default) — **excluding** the anchor `zaent`-equivalent
+     point node from `insides` in all three walkthroughs above.
+   - `points` = direct border-point member node CENTERS (`x +
+     width/2`, `y + height/2`) from `DotLayoutResult.nodes`.
+   - `ensureMinWidth`'s `minWidth` = `titleAndAttributeWidth + 10` (the
+     same value already computed for the `${id}ee` label's `WIDTH`
+     attr — do not recompute independently).
+5. **Bottom-up correction order** (child border-point clusters
+   corrected before a parent reads their box) remains an unverified-
+   but-reasonable default (Round 1 §6 item 1) — not exercised by any of
+   these 3 targets (`SubComposite` is a plain, non-border-point
+   cluster; no fixture here nests one WithLabel cluster directly inside
+   another). T5 should implement it as the default and flag rather than
+   guess if T10's family sweep turns up a fixture that actually
+   exercises it.
+6. **Regression coverage for the failure mode named in Round 2's
+   "Anything else" note:** add a unit assertion on the actual numeric
+   `DotLayoutResult.clusters[...]` bbox (not just DOT-shape presence)
+   for at least one rank-bearing fixture, since `markClusterNode`'s
+   conflict-eviction is a silent `console.error`, not a thrown
+   exception — a future accidental root-level (or `cluster`-prefixed)
+   rank-subgraph placement regresses silently past the DOT-parity gate
+   and typecheck/lint.
+
+No other files are implicated by this derivation. All three formulas
+(`frontierCalculator`, `ensureMinWidth`, the title-table height/width
+functions) are used **exactly as already committed** — none needed a
+change to reproduce the targets; only the wiring around them (items 1-4
+above) was missing or wrong.
+
+## Files/paths used (T4)
+
+- `test-results/dot-cache/state/{pesita-10-dene726/svek-3.dot,
+  kotagu-43-miza629/svek-1.dot, bitaxo-18-tamo974/svek-1.dot}` (real
+  `dot -Txdot` run against each, this session, ground truth for
+  `initial`/`insides`/`points`)
+- `src/diagrams/state/state-composite-frontier.ts` (read only —
+  `frontierCalculator`/`ensureMinWidth`, unmodified; cross-checked with
+  a disposable Python transliteration, not retained)
+- `src/diagrams/state/state-composite-cluster.ts:330-408` (read only —
+  confirmed `titleTableEligible`'s `!hasBorderPointChildren` conjunct
+  and the unguarded `stereoLines` computation are both still present,
+  unfixed, on the current tree)
+- `src/core/graph-layout-build.ts` (read only — confirmed zero
+  `portRanks`/`hasBorderPointChildren` references, matching Round 3 §3
+  item 7)
+- `plans/g6-cluster-geometry/decision-journal.md` (2026-07-22 rows, for
+  the target numbers and attempt-3's measured misses)
+- No production files modified. No probe scripts created under
+  `scripts/`; all cross-checks used `dot -Txdot` directly plus a
+  disposable Python script run in the session scratchpad
+  (`/private/tmp/.../scratchpad/g7t4/`, outside the repo, not
+  committed). `git status` clean apart from this doc.
 - Cached DOT re-examined: `pesita-10-dene726/svek-3.dot`,
   `bitaxo-18-tamo974/svek-1.dot`, `kotagu-43-miza629/svek-1.dot`,
   `jucori-40-cevo136/svek-1.dot` (source+sink rank co-occurrence check)
