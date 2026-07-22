@@ -1156,5 +1156,82 @@ export function parseStyleBlock(raw: string): StyleMap {
     // Lines matching none of the above are silently skipped
   }
 
+  // mission G6 T4: bare `<style> stateDiagram { BackgroundColor/LineColor/
+  // FontColor ... } }` (NO nested selector) cascades to EVERY element
+  // reachable from a state diagram -- boxes, composite/cluster boxes, AND
+  // edges -- per upstream's compound StyleSignature (`StyleSignatureBasic.of
+  // (root, element, stateDiagram, state)` for a box, `(root, arrow,
+  // stateDiagram)` for an edge: the bare "stateDiagram" selector token alone
+  // satisfies both chains). Jar-verified `decede-10-buvu414`: a lone
+  // `stateDiagram { RoundCorner 2; Shadowing 0; BackgroundColor cyan;
+  // LineColor green; FontColor red }` tints every box's fill/stroke/text AND
+  // the transition's own path+arrowhead stroke, while the SAME properties
+  // scoped to a bare `state { ... }` selector (no diagram-type wrapper)
+  // reach ONLY the element bucket, never the edge (verified against the jar
+  // oracle directly -- see the T4 diagnosis artifact).
+  //
+  // Alias the bare "statediagram" declarations into the two selector keys
+  // the REST of the style machinery already reads directly and unmodified:
+  // "statediagram.state" (the generic per-element bucket,
+  // `style-map-element.ts#collectElementStyleBuckets`'s own
+  // `<diagramType>.<bucket>` nesting rule) and "statediagram.arrow"
+  // (`style-map-theme.ts#applyStyleMap`'s pre-existing `stateArrowLineColor`
+  // reader, mission G4 S16). A property is only ALIASED when the target
+  // selector does not already declare it explicitly — a real, more-specific
+  // `state { ... }`/`arrow { ... }` sub-block (or a same-named selector from
+  // a SEPARATE `<style>` block merged later) always wins, matching upstream's
+  // more-specific-overrides-less-specific cascade rule.
+  applyStateDiagramCascadeAliases(result);
+
   return result;
+}
+
+/**
+ * Alias-target mapping for {@link applyStateDiagramCascadeAliases}: each
+ * entry is `[targetSelector, [[sourceKey, destKey], ...]]`. "LineColor" is
+ * aliased under TWO different destination keys because its two consumers
+ * expect different property names: `collectElementStyleBuckets` reads
+ * "bordercolor" (mirroring the flat `<sname>BorderColor` skinparam suffix
+ * convention, `matchElementColorKey`), while `applyStyleMap`'s
+ * `statediagram.arrow` reader reads "linecolor" (the raw upstream style
+ * property name, matching `style-cascade-class.ts`'s own `'linecolor'`
+ * usage for the class engine's identical arrow selector).
+ */
+const STATE_DIAGRAM_CASCADE_TARGETS: ReadonlyArray<
+  readonly [target: string, mapping: ReadonlyArray<readonly [srcKey: string, destKey: string]>]
+> = [
+  [
+    'statediagram.state',
+    [
+      ['backgroundcolor', 'backgroundcolor'],
+      ['linecolor', 'bordercolor'],
+      ['fontcolor', 'fontcolor'],
+    ],
+  ],
+  ['statediagram.arrow', [['linecolor', 'linecolor']]],
+];
+
+/**
+ * Mutates `result` in place: propagates the bare "statediagram" selector's
+ * cascadable properties (see {@link STATE_DIAGRAM_CASCADE_TARGETS}) into the
+ * "statediagram.state"/"statediagram.arrow" entries, WITHOUT overwriting a
+ * property either target already declares explicitly (`dest.has(destKey)`
+ * guard below) — see {@link parseStyleBlock}'s own call-site doc comment for
+ * the full mechanism and jar evidence.
+ */
+function applyStateDiagramCascadeAliases(result: StyleMap): void {
+  const bare = result.get('statediagram');
+  if (bare === undefined) return;
+  for (const [target, mapping] of STATE_DIAGRAM_CASCADE_TARGETS) {
+    for (const [srcKey, destKey] of mapping) {
+      const value = bare.get(srcKey);
+      if (value === undefined) continue;
+      let dest = result.get(target);
+      if (dest === undefined) {
+        dest = new Map<string, string>();
+        result.set(target, dest);
+      }
+      if (!dest.has(destKey)) dest.set(destKey, value);
+    }
+  }
 }

@@ -36,7 +36,7 @@
 import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line, text, path } from '../../core/svg.js';
-import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateFontSize, textAscent } from './state-render-colors.js';
+import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateFontSize, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
 import { javaRound4 } from '../../core/number-format.js';
 
 const STATE_BOX_RX = 12.5;
@@ -154,12 +154,15 @@ function renderEmptyDescription(node: StateNodeGeo, theme: Theme, box: string): 
 export function renderSdlReceive(node: StateNodeGeo, theme: Theme): string {
   const fill = resolveStateFillBucketed(node, theme, STATE_DEFAULT_BACKGROUND);
   const border = resolveStateBorder(node, theme);
+  // mission G6 T4: `<style> stateDiagram { RoundCorner N } }` cascade --
+  // see `resolveStateBoxRadius`'s own doc comment.
+  const radius = resolveStateBoxRadius(theme, STATE_BOX_RX);
   const box = rect(node.x, node.y, node.width, node.height, {
     fill,
     stroke: border,
     strokeWidth: STATE_BORDER_STROKE_WIDTH,
-    rx: STATE_BOX_RX,
-    ry: STATE_BOX_RX,
+    rx: radius,
+    ry: radius,
   });
 
   const textWidth = node.width / 3;
@@ -198,12 +201,15 @@ export function renderNormal(node: StateNodeGeo, theme: Theme): string {
   // G4 S9: `StateBorderColor<<X>>` cascade -- see `resolveStateBorder`'s own
   // doc comment.
   const border = resolveStateBorder(node, theme);
+  // mission G6 T4: `<style> stateDiagram { RoundCorner N } }` cascade --
+  // see `resolveStateBoxRadius`'s own doc comment.
+  const radius = resolveStateBoxRadius(theme, STATE_BOX_RX);
   const box = rect(node.x, node.y, node.width, node.height, {
     fill,
     stroke: border,
     strokeWidth: STATE_BORDER_STROKE_WIDTH,
-    rx: STATE_BOX_RX,
-    ry: STATE_BOX_RX,
+    rx: radius,
+    ry: radius,
   });
 
   if (node.headerLines === undefined) {

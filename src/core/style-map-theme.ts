@@ -91,6 +91,19 @@ export function applyStyleMap(styleMap: StyleMap, base: Theme): Theme {
     if (hc !== undefined) graphOverride.stateArrowHeadColor = hc;
   }
 
+  // mission G6 T4: `<style> stateDiagram { RoundCorner N } }` -- the bare
+  // (un-nested) "statediagram" selector's own RoundCorner declaration, see
+  // `theme.ts#stateCascadeRoundCorner`'s own doc comment for the full
+  // derivation and jar evidence (`decede-10-buvu414`).
+  const stateDiagramBare = styleMap.get('statediagram');
+  if (stateDiagramBare !== undefined) {
+    const rc = stateDiagramBare.get('roundcorner');
+    if (rc !== undefined) {
+      const parsed = Number.parseFloat(rc);
+      if (Number.isFinite(parsed)) graphOverride.stateCascadeRoundCorner = parsed;
+    }
+  }
+
   // mission G4 S16: `<style> activityBar { .fork { BackGroundColor }
   // .join { BackGroundColor } } }` -- selectors "activitybar..fork"/
   // "activitybar..join" (`theme.ts#activityBarForkColor`'s own doc

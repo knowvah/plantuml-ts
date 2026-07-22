@@ -26,7 +26,7 @@
  * @see plans/g4-state-svg/ledger.md (S15, S16)
  */
 import { describe, it, expect } from 'vitest';
-import { resolveSkinparam } from '../../../src/core/skinparam.js';
+import { resolveSkinparam, parseStyleBlock } from '../../../src/core/skinparam.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
 describe('resolveSkinparam — statebackgroundcolor<<X>>/statefontcolor<<X>> (mission G4 S15)', () => {
@@ -120,5 +120,113 @@ describe('resolveSkinparam — statefontsize<<X>> (mission G4 S16)', () => {
     expect(theme.colors.graph.stateBackgroundColorByStereo).toEqual({ foo: 'red' });
     expect(theme.colors.graph.stateFontColorByStereo).toEqual({ foo: 'yellow' });
     expect(theme.colors.graph.stateFontSizeByStereo).toEqual({ foo: 30 });
+  });
+});
+
+/**
+ * `core/skinparam.ts#parseStyleBlock`'s bare `stateDiagram { ... }` cascade
+ * alias (mission G6 T4). Jar-verified `decede-10-buvu414`: `<style>
+ * stateDiagram { RoundCorner 2; Shadowing 0; BackgroundColor cyan; LineColor
+ * green; FontColor red } </style>` tints every box's fill/stroke/text AND
+ * the transition's own path+arrowhead stroke, while the SAME properties on a
+ * bare `state { ... }` selector (no diagram-type wrapper) reach ONLY the
+ * element bucket, never the edge (see `state-render-colors.ts
+ * #resolveStateBorder`/`#resolveStateArrowHeadColor`'s own doc comments for
+ * the consumption side of this same mechanism). Kept in `tests/unit/state/`
+ * per this file's own top doc-comment rationale (a state-scoped test of a
+ * `core/skinparam.ts` function).
+ */
+describe('parseStyleBlock — bare stateDiagram{} cascade alias (mission G6 T4)', () => {
+  it('aliases BackgroundColor/LineColor/FontColor into statediagram.state (bordercolor renamed from linecolor)', () => {
+    const styleMap = parseStyleBlock(`
+      stateDiagram {
+        RoundCorner 2
+        Shadowing 0
+        BackgroundColor cyan
+        LineColor green
+        FontColor red
+      }
+    `);
+    expect(styleMap.get('statediagram.state')).toEqual(
+      new Map([
+        ['backgroundcolor', 'cyan'],
+        ['bordercolor', 'green'],
+        ['fontcolor', 'red'],
+      ]),
+    );
+  });
+
+  it('aliases LineColor into statediagram.arrow (linecolor key unchanged)', () => {
+    const styleMap = parseStyleBlock(`
+      stateDiagram {
+        LineColor green
+      }
+    `);
+    expect(styleMap.get('statediagram.arrow')).toEqual(new Map([['linecolor', 'green']]));
+  });
+
+  it('does not alias RoundCorner/Shadowing (unconsumed by either target)', () => {
+    const styleMap = parseStyleBlock(`
+      stateDiagram {
+        RoundCorner 2
+        Shadowing 0
+      }
+    `);
+    expect(styleMap.get('statediagram.state')).toBeUndefined();
+    expect(styleMap.get('statediagram.arrow')).toBeUndefined();
+  });
+
+  it('does not overwrite an explicit nested state{} selector own BackgroundColor', () => {
+    const styleMap = parseStyleBlock(`
+      stateDiagram {
+        BackgroundColor cyan
+        state {
+          BackgroundColor yellow
+        }
+      }
+    `);
+    expect(styleMap.get('statediagram.state')?.get('backgroundcolor')).toBe('yellow');
+  });
+
+  it('does not overwrite an explicit nested arrow{} selector own LineColor', () => {
+    const styleMap = parseStyleBlock(`
+      stateDiagram {
+        LineColor green
+        arrow {
+          LineColor blue
+        }
+      }
+    `);
+    expect(styleMap.get('statediagram.arrow')?.get('linecolor')).toBe('blue');
+  });
+
+  // Negative case: a bare classDiagram{} block must NOT leak into either
+  // state-diagram cascade target — selector "classdiagram" shares no token
+  // with the "statediagram" bare-key lookup this alias keys off.
+  it('does NOT alias a bare classDiagram{} block into statediagram.state/statediagram.arrow', () => {
+    const styleMap = parseStyleBlock(`
+      classDiagram {
+        BackgroundColor cyan
+        LineColor green
+      }
+    `);
+    expect(styleMap.get('statediagram.state')).toBeUndefined();
+    expect(styleMap.get('statediagram.arrow')).toBeUndefined();
+    expect(styleMap.get('classdiagram')).toEqual(
+      new Map([
+        ['backgroundcolor', 'cyan'],
+        ['linecolor', 'green'],
+      ]),
+    );
+  });
+
+  it('a bare stateDiagram{} block with no color properties produces no alias entries', () => {
+    const styleMap = parseStyleBlock(`
+      stateDiagram {
+        LineThickness 2
+      }
+    `);
+    expect(styleMap.get('statediagram.state')).toBeUndefined();
+    expect(styleMap.get('statediagram.arrow')).toBeUndefined();
   });
 });
