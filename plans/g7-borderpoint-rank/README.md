@@ -12,7 +12,7 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: BLOCKED - ATTEMPT-5-MISS; awaiting sign-off for attempt 6
+## Status: ACTIVE - ATTEMPT 6 (human sign-off 2026-07-22)
 <!-- 2026-07-22. T9 wiring verified structurally correct (nesting
      isomorphic to jar DOT). Two remaining pre-existing gaps, journal
      T9 row: (1) titleTableWidth lacks jar's max(title, attributes)
@@ -43,7 +43,8 @@ rule; subagents never run git mutations).
 | [2](batch-2/overview.md) | New-.tgz adoption (library path only; SKIP on usage verdict) | T3 | SKIPPED (usage verdict, T2) |
 | [3](batch-3/overview.md) | Attempt 4: paper gate → implementation | T4, T5 | T4 [x]; T5 MISS — permanent stop |
 | [4](batch-4/overview.md) | Family sweep + close | T6 | NOT RUN (T5 stop) |
-| [5](batch-5/overview.md) | Attempt 5: a/p0 port → paper gate v2 → wiring → sweep | T7, T8, T9, T10 | [ ] |
+| [5](batch-5/overview.md) | Attempt 5: a/p0 port → paper gate v2 → wiring → sweep | T7, T8, T9, T10 | T7-T8 [x]; T9 MISS; T10 not run |
+| [6](batch-6/overview.md) | Attempt 6: two gap fixes → paper gate v3 → wiring → sweep | T11-T15 | [ ] |
 
 ## Resume procedure (cold-start, after external graphviz-ts fix)
 
