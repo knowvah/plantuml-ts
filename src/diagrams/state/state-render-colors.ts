@@ -52,6 +52,31 @@ function resolveStateBucketBackground(theme: Theme): string | undefined {
   return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : undefined;
 }
 
+/** mission G6 T4: `theme.colors.elements['state'].border` -- the SAME
+ *  generic bucket {@link resolveStateBucketBackground} reads, applied to a
+ *  state box/composite-cluster outline's own stroke. Populated by a bare
+ *  `<style> state { LineColor ... } }` selector directly, OR (mission G6
+ *  T4) by `core/skinparam.ts#parseStyleBlock`'s own bare `stateDiagram {
+ *  LineColor ... } }` cascade alias (`decede-10-buvu414`, jar-verified --
+ *  see `resolveStateBorder`'s own doc comment for the full precedence
+ *  tier). A Gradient `Paint` bucket value is unsupported here for the SAME
+ *  reason {@link resolveStateBucketBackground} documents. */
+function resolveStateBucketBorder(theme: Theme): string | undefined {
+  const bucket = theme.colors.elements?.['state']?.border;
+  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : undefined;
+}
+
+/** mission G6 T4: `theme.colors.elements['state'].font` -- the SAME generic
+ *  bucket {@link resolveStateBucketBackground} reads, applied to a state
+ *  box's own label text color. See {@link resolveStateBucketBorder}'s own
+ *  doc comment for the identical population mechanism (bare `state {
+ *  FontColor ... } }` OR the `stateDiagram { FontColor ... } }` cascade
+ *  alias). */
+function resolveStateBucketFontColor(theme: Theme): string | undefined {
+  const bucket = theme.colors.elements?.['state']?.font;
+  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : undefined;
+}
+
 /** mission G4 S15: `skinparam stateBackgroundColor<<stereo>> #X` --
  *  `theme.colors.graph.stateBackgroundColorByStereo`'s own doc comment
  *  (theme.ts) for the precedence tier this sits at (below the `#color`
@@ -93,42 +118,47 @@ export function resolveStateFillBucketed(
  * `skinparam StateBorderColor<<X>> #color` -- `SkinParam#getColor(ColorParam,
  * Stereotype)`, a direct stereotype-qualified VALUE lookup (mission G4 S9,
  * mirrors the class engine's `classBorderThicknessByStereo` mechanism, G2
- * N51). Wins over the plain `theme.colors.border` default when `node`'s OWN
- * stereotype (lowercased, matching `core/skinparam.ts`'s own lowercased-key
- * storage) has a matching entry in `theme.colors.graph.stateBorderColorByStereo`.
- * Jar-verified `semala-31-joji042` (`skinparam StateBorderColor<<meblue>>
- * blue`, `state a<<meblue>>` -> box/divider `stroke="#0000FF"`; its plain,
- * non-stereotyped children keep the `#181818` default).
+ * N51). Wins over the `state`-element bucket tier (mission G6 T4,
+ * {@link resolveStateBucketBorder}) when `node`'s OWN stereotype (lowercased,
+ * matching `core/skinparam.ts`'s own lowercased-key storage) has a matching
+ * entry in `theme.colors.graph.stateBorderColorByStereo`. Jar-verified
+ * `semala-31-joji042` (`skinparam StateBorderColor<<meblue>> blue`, `state
+ * a<<meblue>>` -> box/divider `stroke="#0000FF"`; its plain, non-stereotyped
+ * children keep the `#181818` default). The bucket tier itself falls back to
+ * the plain `theme.colors.border` default, matching {@link
+ * resolveStateFillBucketed}'s own precedence shape.
  */
 export function resolveStateBorder(
   node: Pick<StateNodeGeo, 'stereotype'>,
-  theme: Pick<Theme, 'colors'>,
+  theme: Theme,
 ): string {
   if (node.stereotype !== undefined) {
     const override = theme.colors.graph.stateBorderColorByStereo?.[node.stereotype.toLowerCase()];
     if (override !== undefined) return resolveColorToSvgHex(override);
   }
-  return theme.colors.border;
+  return resolveStateBucketBorder(theme) ?? theme.colors.border;
 }
 
 /**
  * `skinparam StateFontColor<<X>> #color` -- mission G4 S15, the SAME
  * direct-value-lookup mechanism as {@link resolveStateBorder}, applied to
- * a state box's own label text color. Wins over `fallback` (the box's
- * pre-existing hardcoded `#000000` text default) when `node`'s OWN
- * stereotype (lowercased) has a matching entry in
- * `theme.colors.graph.stateFontColorByStereo`.
+ * a state box's own label text color. Wins over the `state`-element bucket
+ * tier (mission G6 T4, {@link resolveStateBucketFontColor}) when `node`'s
+ * OWN stereotype (lowercased) has a matching entry in
+ * `theme.colors.graph.stateFontColorByStereo`; the bucket tier itself wins
+ * over `fallback` (the box's pre-existing hardcoded `#000000` text default),
+ * matching {@link resolveStateFillBucketed}'s own precedence shape.
  */
 export function resolveStateFontColor(
   node: Pick<StateNodeGeo, 'stereotype'>,
-  theme: Pick<Theme, 'colors'>,
+  theme: Theme,
   fallback: string,
 ): string {
   if (node.stereotype !== undefined) {
     const override = theme.colors.graph.stateFontColorByStereo?.[node.stereotype.toLowerCase()];
     if (override !== undefined) return resolveColorToSvgHex(override);
   }
-  return fallback;
+  return resolveStateBucketFontColor(theme) ?? fallback;
 }
 
 /**
@@ -172,11 +202,40 @@ export function resolveStateArrowLineColor(theme: Pick<Theme, 'colors'>, fallbac
  * the SAME cascade as {@link resolveStateArrowLineColor}, applied to the
  * arrowhead `<polygon>`'s OWN fill AND stroke (both, jar-verified
  * `nanozi-96-foda024` -- see `theme.ts#stateArrowHeadColor`'s own doc
- * comment).
+ * comment). Mission G6 T4: when NO explicit HeadColor cascade is set, jar's
+ * own default for the arrowhead is the transition's OWN `LineColor`
+ * (`stateArrowLineColor`), not `fallback` directly -- jar-verified against
+ * `decede-10-buvu414` (a lone `stateDiagram { LineColor green }`, no nested
+ * `arrow { HeadColor ... } }`, tints the arrowhead polygon green too) and a
+ * targeted probe (`stateDiagram { arrow { LineColor blue } } }` alone ->
+ * polygon `fill="#0000FF" stroke="#0000FF"`). `fallback` is reached only
+ * when NEITHER HeadColor nor LineColor cascade is set.
  */
 export function resolveStateArrowHeadColor(theme: Pick<Theme, 'colors'>, fallback: string): string {
   const override = theme.colors.graph.stateArrowHeadColor;
-  return override !== undefined ? resolveColorToSvgHex(override) : fallback;
+  if (override !== undefined) return resolveColorToSvgHex(override);
+  const lineOverride = theme.colors.graph.stateArrowLineColor;
+  if (lineOverride !== undefined) return resolveColorToSvgHex(lineOverride);
+  return fallback;
+}
+
+/**
+ * `<style> stateDiagram { RoundCorner N } }` -- mission G6 T4 residual
+ * closure. jar's `URectangle` halving convention: `rx`/`ry` = RoundCorner/2
+ * (verified directly against the jar oracle: `RoundCorner 2` -> `rx="1"`,
+ * `RoundCorner 10` -> `rx="5"`, no override -> `rx="12.5"` i.e. jar's own
+ * default `RoundCorner 25` -- mirrors `theme.ts#classCascadeRoundCorner`'s
+ * identical halving formula for the class engine). Applies uniformly to
+ * EVERY state-diagram box shape (leaf box, composite/cluster outline, AND
+ * the composite header's own half-rounded arc) since jar's bare
+ * `stateDiagram { RoundCorner }` selector reaches all of them (mission G6
+ * T4 diagnosis, `decede-10-buvu414`). `fallback` is the pre-existing
+ * hardcoded `STATE_BOX_RX` (12.5) -- every call site passes it unchanged,
+ * so the DEFAULT (no `<style>` RoundCorner) render stays byte-identical.
+ */
+export function resolveStateBoxRadius(theme: Pick<Theme, 'colors'>, fallback: number): number {
+  const raw = theme.colors.graph.stateCascadeRoundCorner;
+  return raw !== undefined ? raw / 2 : fallback;
 }
 
 /**

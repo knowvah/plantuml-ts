@@ -9,7 +9,7 @@
  * comment for the full derivation.
  */
 import { describe, it, expect } from 'vitest';
-import { resolveStateBorder, resolveStateFillBucketed, resolveStateFontColor, resolveStateFontSize, resolveStateArrowLineColor, resolveStateArrowHeadColor, resolveActivityBarForkColor, resolveActivityBarJoinColor } from '../../../src/diagrams/state/state-render-colors.js';
+import { resolveStateBorder, resolveStateFillBucketed, resolveStateFontColor, resolveStateFontSize, resolveStateArrowLineColor, resolveStateArrowHeadColor, resolveActivityBarForkColor, resolveActivityBarJoinColor, resolveStateBoxRadius } from '../../../src/diagrams/state/state-render-colors.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 
 describe('resolveStateBorder', () => {
@@ -210,5 +210,118 @@ describe('resolveActivityBarJoinColor', () => {
       colors: { graph: { activityBarJoinColor: 'orange' } },
     });
     expect(resolveActivityBarJoinColor(theme)).toBe('#FFA500');
+  });
+});
+
+// mission G6 T4: `theme.colors.elements['state'].border`/`.font` -- the SAME
+// generic ELEMENT_BUCKET_SNAMES bucket `resolveStateFillBucketed` already
+// reuses for `.background`, now also consulted by `resolveStateBorder`/
+// `resolveStateFontColor` for LineColor/FontColor. Populated either by a
+// bare `<style> state { LineColor/FontColor ... } }` selector directly, or
+// (this mission) by `core/skinparam.ts#parseStyleBlock`'s own bare
+// `stateDiagram { ... }` cascade alias -- jar-verified `decede-10-buvu414`.
+describe('resolveStateBorder — state-element bucket tier (mission G6 T4)', () => {
+  it('the state-element bucket border wins over the theme.colors.border default', () => {
+    const theme = deepMergeTheme(defaultTheme, { colors: { elements: { state: { border: 'green' } } } });
+    expect(resolveStateBorder({}, theme)).toBe('#008000');
+  });
+
+  it('the stereotype-scoped skinparam still wins over the state-element bucket', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: {
+        elements: { state: { border: 'green' } },
+        graph: { stateBorderColorByStereo: { foo: 'blue' } },
+      },
+    });
+    expect(resolveStateBorder({ stereotype: 'Foo' }, theme)).toBe('#0000FF');
+  });
+
+  it('a non-string bucket value (unsupported gradient) falls through to theme.colors.border', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { elements: { state: { border: { color1: '#FF0000', color2: '#FFFF00', policy: '/' } } } },
+    });
+    expect(resolveStateBorder({}, theme)).toBe(defaultTheme.colors.border);
+  });
+});
+
+describe('resolveStateFontColor — state-element bucket tier (mission G6 T4)', () => {
+  it('the state-element bucket font color wins over the given default', () => {
+    const theme = deepMergeTheme(defaultTheme, { colors: { elements: { state: { font: 'red' } } } });
+    expect(resolveStateFontColor({}, theme, '#000000')).toBe('#FF0000');
+  });
+
+  it('the stereotype-scoped skinparam still wins over the state-element bucket', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: {
+        elements: { state: { font: 'red' } },
+        graph: { stateFontColorByStereo: { foo: 'yellow' } },
+      },
+    });
+    expect(resolveStateFontColor({ stereotype: 'Foo' }, theme, '#000000')).toBe('#FFFF00');
+  });
+
+  it('a non-string bucket value (unsupported gradient) falls through to the given default', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { elements: { state: { font: { color1: '#FF0000', color2: '#FFFF00', policy: '/' } } } },
+    });
+    expect(resolveStateFontColor({}, theme, '#000000')).toBe('#000000');
+  });
+});
+
+// mission G6 T4: jar's own arrowhead default, absent an explicit HeadColor
+// cascade, is the transition's OWN LineColor -- jar-verified against
+// `decede-10-buvu414` (bare `stateDiagram { LineColor green }`, no nested
+// `arrow { HeadColor ... } }`, still tints the arrowhead polygon green) and
+// a targeted probe (`stateDiagram { arrow { LineColor blue } } }` alone ->
+// polygon fill/stroke `#0000FF`).
+describe('resolveStateArrowHeadColor — falls back to stateArrowLineColor (mission G6 T4)', () => {
+  it('falls back to the stateArrowLineColor cascade when HeadColor is unset but LineColor is set', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { graph: { stateArrowLineColor: 'green' } },
+    });
+    expect(resolveStateArrowHeadColor(theme, '#181818')).toBe('#008000');
+  });
+
+  it('an explicit HeadColor cascade still wins over stateArrowLineColor', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { graph: { stateArrowHeadColor: 'red', stateArrowLineColor: 'green' } },
+    });
+    expect(resolveStateArrowHeadColor(theme, '#181818')).toBe('#FF0000');
+  });
+
+  it('falls back to the given default when neither HeadColor nor LineColor cascade is set', () => {
+    expect(resolveStateArrowHeadColor(defaultTheme, '#181818')).toBe('#181818');
+  });
+});
+
+// mission G6 T4 (residual closure): `<style> stateDiagram { RoundCorner N
+// } }` -- jar's own `rx`/`ry` = RoundCorner/2 halving convention, verified
+// directly against the jar oracle (RoundCorner 2 -> rx="1", RoundCorner 10
+// -> rx="5", no override -> rx="12.5" i.e. jar's own default RoundCorner
+// 25) -- see `theme.ts#stateCascadeRoundCorner`'s own doc comment.
+describe('resolveStateBoxRadius (mission G6 T4)', () => {
+  it('falls back to the given default when no RoundCorner cascade is set', () => {
+    expect(resolveStateBoxRadius(defaultTheme, 12.5)).toBe(12.5);
+  });
+
+  it('halves the stateDiagram{} RoundCorner cascade value (RoundCorner 2 -> rx 1)', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { graph: { stateCascadeRoundCorner: 2 } },
+    });
+    expect(resolveStateBoxRadius(theme, 12.5)).toBe(1);
+  });
+
+  it('halves an arbitrary RoundCorner cascade value (RoundCorner 10 -> rx 5)', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { graph: { stateCascadeRoundCorner: 10 } },
+    });
+    expect(resolveStateBoxRadius(theme, 12.5)).toBe(5);
+  });
+
+  it('RoundCorner 0 (sharp corners) is a real value, not treated as unset', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { graph: { stateCascadeRoundCorner: 0 } },
+    });
+    expect(resolveStateBoxRadius(theme, 12.5)).toBe(0);
   });
 });

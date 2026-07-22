@@ -300,6 +300,28 @@ export interface Theme {
        */
       stateArrowHeadColor?: string;
       /**
+       * mission G6 T4: `<style> stateDiagram { RoundCorner N } }` -- the
+       * bare "statediagram" selector's own RoundCorner declaration, RAW
+       * (unhalved) per `classCascadeRoundCorner`'s own storage convention
+       * above -- `rx`/`ry` = value/2 at consumption time
+       * (`state-render-colors.ts#resolveStateBoxRadius`). Populated directly
+       * from the bare `"statediagram"` StyleMap key
+       * (`style-map-theme.ts#applyStyleMap`, mirroring `stateArrowLineColor`'s
+       * own injection point but reading the UN-nested selector, since
+       * RoundCorner has no established nested `state {}`/`arrow {}`
+       * sub-selector reach of its own in this port). Applies uniformly to
+       * EVERY state-diagram box shape (leaf, composite/cluster outline, AND
+       * the composite header's own half-rounded arc) -- jar's compound
+       * StyleSignature reaches all of them from one bare selector (mission
+       * G6 T4 diagnosis, `decede-10-buvu414`: `RoundCorner 2` -> `rx="1"`
+       * on all 8 entities; a targeted probe confirms the halving formula
+       * generally, `RoundCorner 10` -> `rx="5"`). Absent = the pre-existing
+       * hardcoded `STATE_BOX_RX` (12.5, i.e. the jar default `RoundCorner
+       * 25`) -- zero behavior change for every state diagram with no
+       * `<style>` RoundCorner override.
+       */
+      stateCascadeRoundCorner?: number;
+      /**
        * mission G4 S16: `<style> activityBar { .fork { BackGroundColor }
        * .join { BackGroundColor } } }` -- selector `activitybar..fork`/
        * `activitybar..join` (the double-dot is `parseStyleBlock`'s own

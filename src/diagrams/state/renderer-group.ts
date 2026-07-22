@@ -26,25 +26,24 @@
  * initial/final/normal/choice, which all DO wrap. See `renderer.ts
  * #wrapClassFor`'s own doc comment for the per-`StateKind` dispatch table.
  *
- * NOT MODELED (named remainder, not chased this iteration): a composite
- * state (`children.length > 0`) sometimes wraps as `class="entity"`
- * (an "autonom" composite, flattened to a fixed-size leaf image) and
- * sometimes as `class="cluster"` (a "non-autonom" composite, a real nested
- * `Cluster` — `layout.ts`'s own header doc comment names this T4
- * classification) — jar-verified via `bajelo-54-dixe684`: `Track_FSM`
- * (top-level, 2 children) and `Track_FSM.Run.Do_Sector` (1 child) both wrap
- * `entity`, but `Track_FSM.Run` (1 child) wraps `cluster`. This port's
- * `state-composite-geo.ts` does not thread the autonom/non-autonom
- * classification onto the public `StateNodeGeo` it returns (verified: no
- * `autonom`/`isAutonom` field on that type), so this module wraps EVERY
- * composite as `entity` uniformly — correct for the common (autonom) case,
- * a real per-fixture `class` attribute diff for the non-autonom (real
- * nested cluster) case. Threading the classification through would need a
- * new `StateNodeGeo` field plumbed from `state-composite-pass.ts`'s
- * internal `GeoSpec.kind` — a genuinely separate write-set expansion, named
- * here rather than guessed at.
+ * COMPOSITE class dispatch (G6 T3, closing G4 S1's own "NOT MODELED" gap
+ * below): a composite state (`children.length > 0`) wraps `class="cluster"`
+ * via {@link wrapCluster} when it is drawn with the real jar-native cluster
+ * shape (`node.clusterHeaderHeight !== undefined` — same gate
+ * `renderer-composite-box.ts#renderComposite` already dispatches its shape
+ * on, and `renderer.ts#renderChildNode` already dispatches structural
+ * flat-sibling-vs-nested placement on, G5 C3) — jar-verified
+ * `gojuja-90-pune699`'s `A`, `decede-10-buvu414`'s `E`. Every OTHER
+ * composite (an "autonom" composite, flattened to a fixed-size leaf image,
+ * OR a 'cluster'-classified composite this port's eligibility gate excluded
+ * from the real-shape path — `state-composite-cluster.ts
+ * #resolveClusterComposite`'s own doc comment) still wraps `entity` via
+ * {@link wrapEntity}, unchanged — jar-verified `bajelo-54-dixe684`:
+ * `Track_FSM` (top-level, 2 children) and `Track_FSM.Run.Do_Sector` (1
+ * child) both wrap `entity`, `Track_FSM.Run` (1 child) wraps `cluster`.
  *
  * @see plans/g4-state-svg/ledger.md (S1, mechanism 2)
+ * @see plans/g6-cluster-geometry/decisions.md (D3)
  */
 import { group } from '../../core/svg.js';
 
@@ -62,9 +61,22 @@ function escAttr(value: string): string {
 /** Wraps a state/pseudostate's rendered body in the jar's `<g
  *  class="entity" data-qualified-name="..." id="...">` group — the
  *  `normal`/`json`/`choice`/composite ('entity'-wrapped, see module doc
- *  comment's "NOT MODELED" note for the composite caveat) case. */
+ *  comment's composite class dispatch note) case. */
 export function wrapEntity(qualifiedName: string, uid: string, inner: string): string {
   return group(inner, { class: 'entity', 'data-qualified-name': escAttr(qualifiedName), id: uid });
+}
+
+/** Wraps a `'cluster'`-classified composite's OWN shape (`node.
+ *  clusterHeaderHeight !== undefined`, `renderer-composite-box.ts
+ *  #renderComposite`'s own dispatch gate) in the jar's `<g class="cluster"
+ *  data-qualified-name="..." id="...">` group — same attribute shape as
+ *  {@link wrapEntity}, only the `class` value differs (jar-verified
+ *  `gojuja-90-pune699`'s `A`, `decede-10-buvu414`'s `E`: `<g class="cluster"
+ *  data-qualified-name="A" id="ent0001">`). Callers must use this ONLY for
+ *  the composite's own wrap, never its (flat-sibling, G5 C3) children — see
+ *  `renderer.ts#renderClusterSiblingMarkup`. */
+export function wrapCluster(qualifiedName: string, uid: string, inner: string): string {
+  return group(inner, { class: 'cluster', 'data-qualified-name': escAttr(qualifiedName), id: uid });
 }
 
 /** Wraps an `initial` pseudostate in the jar's `<g class="start_entity"

@@ -48,6 +48,57 @@ function measureClusterTitle(display: string, ctx: DiagramCtx): { width: number;
 }
 
 /**
+ * `ClusterHeader`'s core height formula (jar constructor,
+ * `ClusterHeader.java:73-96`) — see
+ * `plans/g6-cluster-geometry/batch-3/title-height-derivation.md` (mission
+ * G6 T6) for the full jar-citation derivation and oracle verification
+ * table (6/6 exact: 9, 42, 37 across 5 fixture instances).
+ *
+ * `titleAndAttributeHeight = dimLabel.getHeight() + attributeHeight
+ *   + marginForFields + suppHeightBecauseOfShape`
+ *
+ * `dimLabel` is `mergeTB(stereo, title)` — a vertical STACK (sum of
+ * heights, not max; `XDimension2D.java:94-98`), so `(stereoLines +
+ * titleLines) * fontSize` reproduces it exactly since both text blocks
+ * share the same per-line `height = fontSize` convention this port already
+ * uses (`WidthTableMeasurer`, `src/core/measurer.ts:186-193`).
+ * `attributeHeight` is the composite's OWN `entry`/`exit`/body description
+ * lines (`g.getStateDescription()`, `Entity.java:610-633` — NOT nested
+ * children's own bodies), `marginForFields` is `IEntityImage.MARGIN` (5)
+ * when any attribute line is present, and `suppHeightBecauseOfShape` is 0
+ * for every plain (non-`USymbol`) state composite in this port's corpus
+ * (`ClusterHeader.java:87-93` — no USymbol override applies here).
+ *
+ * `stereoLines`: derived from `s.stereotype` via the same `splitCreoleLines`
+ * convention as title/attribute text (`ClusterHeader.java:78-81`'s
+ * `getStereoBlock`, merged into `dimLabel` via the SAME `mergeTB` stacking
+ * math cited above) — UNVERIFIED against a real jar oracle this iteration
+ * (no titled+stereotyped, non-concurrent-region composite cluster with a
+ * cached `svek-*.dot` was found in the corpus; see the derivation doc §5
+ * "Stereotype term"). Algebraically sound, source-derived, not curve-fit;
+ * ships per the derivation doc's own authorization, gated on this task's
+ * re-measurement sweep finding zero contradicting fixtures.
+ */
+const CLUSTER_HEADER_MARGIN = 5;
+function titleAndAttributeHeight(titleLines: number, stereoLines: number, attrLines: number, fontSize: number): number {
+  const marginForFields = attrLines > 0 ? CLUSTER_HEADER_MARGIN : 0;
+  return (stereoLines + titleLines) * fontSize + attrLines * fontSize + marginForFields;
+}
+
+/**
+ * DOT emission: `HEIGHT = cluster.getTitleAndAttributeHeight() - 5`
+ * (`ClusterDotString.java:124`) — the value fed to
+ * `DotInputCluster.titleTableHeight`. Reduces to the pre-G6-T7 pinned
+ * constant `9` exactly for the plain single-line-no-attribute case
+ * (`titleLines=1, stereoLines=0, attrLines=0, fontSize=14`):
+ * `(0+1)*14 - 5 = 9`.
+ */
+const DOT_TITLE_TABLE_HEIGHT_OFFSET = 5;
+function computeTitleTableHeight(titleLines: number, stereoLines: number, attrLines: number, fontSize: number): number {
+  return titleAndAttributeHeight(titleLines, stereoLines, attrLines, fontSize) - DOT_TITLE_TABLE_HEIGHT_OFFSET;
+}
+
+/**
  * G5 C3, mechanism 16 shape half — jar-calibrated constants for a genuine
  * `'cluster'`-classified composite's single-line title reservation, verified
  * against the REAL PlantUML jar (not derived from `ClusterHeader.java`'s own
@@ -61,9 +112,23 @@ function measureClusterTitle(display: string, ctx: DiagramCtx): { width: number;
  * box.ts`, using its OWN measured line width).
  *
  * `CLUSTER_TITLE_TABLE_HEIGHT` (fed to `DotInputCluster.titleTableHeight`,
- * consumed by `graph-layout-build.ts#addClusters`'s `setHtmlAttr` seam) is
- * the value G5 C2's own 15-point marker sweep found reproduces jar's real
- * gap through graphviz-ts's `gap = HEIGHT + 16` relationship: `3 + 16 = 19`.
+ * consumed by `graph-layout-build.ts#addClusters`'s `setHtmlAttr` seam) was
+ * ORIGINALLY set to 3 by G5 C2's own 15-point marker sweep, on the theory
+ * that graphviz-ts's `gap = HEIGHT + 16` (`3 + 16 = 19`, matching
+ * `CLUSTER_HEADER_HEIGHT` below) reproduced jar's real header gap —
+ * WRONG: mission G6 T1 (`plans/g6-cluster-geometry/decision-journal.md`,
+ * "T1 mechanism artifact") found the jar's REAL svek DOT emission is
+ * `HEIGHT="9"`, a content-independent constant verified across 70+ cached
+ * `test-results/dot-cache/state` (nested per-fixture) `svek-N.dot`
+ * samples — feeding `HEIGHT=3` starved graphviz-ts's cluster-label
+ * TOP-border formula
+ * (`border[TOP_IX] = label.dimen.y + 2*GAP`, GAP=4, graphviz-ts's own
+ * `graph-label.ts:113`, a faithful port of `lib/common/input.c:885-892`)
+ * by exactly 6pt per `titleTableEligible` cluster, compounding by nesting
+ * depth. `9` is the jar-verified value; the `3 + 16 = 19` coincidence above
+ * only ever matched `CLUSTER_HEADER_HEIGHT` (a SEPARATE, unchanged,
+ * renderer-side constant, its own paragraph below) — it was never a
+ * correct derivation of the DOT-layout-input value here.
  *
  * `CLUSTER_HEADER_HEIGHT` (the real header-to-divider gap `renderer-
  * composite-box.ts`'s new cluster shape draws at) was re-confirmed this
@@ -93,7 +158,14 @@ function measureClusterTitle(display: string, ctx: DiagramCtx): { width: number;
  * composites entirely (deferred — ledger.md's own "entrypoint/exitpoint
  * family" C3+ queue item).
  */
-const CLUSTER_TITLE_TABLE_HEIGHT = 3;
+// G6 T7: `CLUSTER_TITLE_TABLE_HEIGHT` (flat 9px, jar-verified ONLY for the
+// single-line/no-attribute case) is SUPERSEDED by the jar-real
+// `computeTitleTableHeight` formula above — `titleTableEligible` below no
+// longer requires `lineCount === 1`, so a fixed per-cluster constant can no
+// longer represent every eligible cluster's reservation. The formula
+// reduces to exactly 9 for the single-line/no-attribute case (see its own
+// doc comment), so this supersession is behavior-preserving for every
+// fixture the doc block above verified.
 const CLUSTER_HEADER_HEIGHT = 19;
 /** `node.y + CLUSTER_TITLE_BASELINE_MARGIN + textAscent(fontSize)` — jar-
  *  verified 14.8889 = 4 + 10.8889 (`textAscent(14)`) on both real fixtures
@@ -257,6 +329,15 @@ export function resolveClusterComposite(
 ): GeoSpec {
   const clusterId = nextClusterId();
   const title = measureClusterTitle(s.display, ctx);
+  // G6 T7: `attrLines`/`stereoLines` feed `computeTitleTableHeight` below --
+  // `s.description` is the SAME field `state-composite-sizing.ts:71`'s
+  // `bodyLines` reads for the autonom shape's own action-zone height (the
+  // composite's OWN entry/exit/body lines, jar's `getStateDescription()`,
+  // NOT nested children's own bodies). `stereoLines` mirrors the same
+  // `splitCreoleLines` convention -- see `titleAndAttributeHeight`'s own
+  // doc comment for the unverified-but-source-derived caveat.
+  const attrLines = (s.description ?? []).flatMap(splitCreoleLines).length;
+  const stereoLines = s.stereotype !== undefined ? splitCreoleLines(s.stereotype).length : 0;
   const directMembers = s.children;
   // G5 C3, mechanism 16 shape half: `applyBorderPointRanks`'s own real
   // eligibility test (below) -- NOT the broader `ctx.classify.needsAnchor`
@@ -273,21 +354,27 @@ export function resolveClusterComposite(
   const hasBorderPointChildren = directMembers.some(
     (c) => isInputPosition(getEntityPosition(c)) || isOutputPosition(getEntityPosition(c)),
   );
-  // Eligible for the jar-real HTML title table + render shape ONLY for a
-  // single-line title at the default font-size (the ONLY case this
-  // iteration jar-verified, `CLUSTER_HEADER_HEIGHT`'s own doc comment
-  // above) that does NOT ALSO get `portRanksLabelOnEe` (a DIFFERENT jar
-  // code path, its own -- verified but not this iteration's scope --
-  // baseline offset; deferred, ledger.md's own entrypoint/exitpoint C3+
-  // queue item) AND is NOT nested inside a separately-fired autonom/
-  // concurrent-region pass (`ctx.insideAutonomPass`'s own doc comment,
-  // state-composite-pass.ts -- jar-verified size-backlog regression on
-  // `fotuje-06-fifa085`/`rovese-43-tadu368`, traced to the ALREADY-PARKED
-  // `buildPlainAutonomSpec#Math.max` floor). Ineligible composites keep the
-  // pre-C3 plain-text `label` + `boundingBox(children)` +
-  // dashed-rect-fallback shape, byte-identical to before this iteration.
+  // Eligible for the jar-real HTML title table + render shape at the
+  // default font-size (G6 T7: `title.lineCount === 1` RELAXED -- the
+  // `computeTitleTableHeight` formula is `titleLines`-parametric and
+  // jar-verified exact at BOTH titleLines=1 (9, 42) and titleLines=3 (37),
+  // per `plans/g6-cluster-geometry/batch-3/title-height-derivation.md` §5 --
+  // no lineCount-dependent special case exists in `ClusterHeader.java`)
+  // that does NOT ALSO get `portRanksLabelOnEe` (a DIFFERENT jar code path,
+  // its own -- verified but not this iteration's scope -- baseline offset;
+  // deferred, ledger.md's own entrypoint/exitpoint C3+ queue item) AND is
+  // NOT nested inside a separately-fired autonom/concurrent-region pass
+  // (`ctx.insideAutonomPass`'s own doc comment, state-composite-pass.ts --
+  // jar-verified size-backlog regression on `fotuje-06-fifa085`/`rovese-43-
+  // tadu368`, traced to the ALREADY-PARKED `buildPlainAutonomSpec#Math.max`
+  // floor). `ctx.theme.fontSize === 14` is DELIBERATELY NOT relaxed --
+  // derivation doc §5: the formula is algebraically fontSize-parametric but
+  // no non-default-font-size oracle fixture was available to verify it;
+  // unverified, not found to fail, so left gated per diagnosis discipline.
+  // Ineligible composites keep the pre-C3 plain-text `label` +
+  // `boundingBox(children)` + dashed-rect-fallback shape, byte-identical to
+  // before this iteration.
   const titleTableEligible =
-    title.lineCount === 1 &&
     ctx.theme.fontSize === 14 &&
     !hasBorderPointChildren &&
     ctx.insideAutonomPass !== true;
@@ -313,7 +400,10 @@ export function resolveClusterComposite(
     labelWidth: title.width,
     labelHeight: title.height,
     ...(titleTableEligible
-      ? { titleTableWidth: title.width, titleTableHeight: CLUSTER_TITLE_TABLE_HEIGHT }
+      ? {
+          titleTableWidth: title.width,
+          titleTableHeight: computeTitleTableHeight(title.lineCount, stereoLines, attrLines, ctx.theme.fontSize),
+        }
       : {}),
     ...(titleTableEligible ? { innerMarginLevels: needsZaentPoint ? 2 : 1 } : {}),
     ...(needsZaentPoint ? { unwrappedNodeId: anchorId } : {}),

@@ -27,7 +27,7 @@ import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { INITIAL_ID, FINAL_ID } from './state-dot-graph.js';
 import { buildStateUidPlan } from './renderer-uid.js';
 import type { StateUidPlan } from './renderer-uid.js';
-import { wrapEntity, wrapStartEntity, wrapEndEntity, wrapLink } from './renderer-group.js';
+import { wrapEntity, wrapCluster, wrapStartEntity, wrapEndEntity, wrapLink } from './renderer-group.js';
 import { buildTransitionArrowhead, applyHeadTrim, buildCircleEndMarkup, buildCrossStartMarkup } from './renderer-arrowhead.js';
 import {
   renderInitial,
@@ -253,7 +253,7 @@ function renderClusterSiblingMarkup(
 ): string {
   const ownShape = renderShape(node, theme);
   const uid = uidPlan.nodeUid.get(node.id) ?? '';
-  const ownWrap = wrapEntity(node.id, uid, ownShape);
+  const ownWrap = wrapCluster(node.id, uid, ownShape);
   const childrenMarkup = node.children
     .map((c) => renderChildNode(c, theme, uidPlan, concurrentGlobalIds))
     .join('');
