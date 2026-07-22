@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createGraph } from 'graphviz-ts';
 import type { Graph } from 'graphviz-ts';
-import { addClusters } from '../../../src/core/graph-layout-build.js';
+import { addClusters, addNodes, firstEncounterOrder } from '../../../src/core/graph-layout-build.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
 /**
@@ -175,5 +175,107 @@ describe('addClusters — issue-08 rank-name regression lock (docs/graphviz-issu
     // Exactly one bare `cluster<N>` name may exist per real input cluster —
     // the cluster's own `main` handle. Every wrapper name must be excluded.
     expect(bareMatches).toEqual(['cluster0']);
+  });
+});
+
+/**
+ * G7 T16 (`plans/g7-borderpoint-rank/batch-6/overview.md`, T16 row;
+ * `plans/g6-cluster-geometry/batch-4/withlabel-derivation.md` §4 has the full
+ * jar-verified derivation): `firstEncounterOrder` mirrors jar's
+ * `Bibliotekon.java#addLine`/`DotStringFactory.java#createDotString`
+ * `lines0`-before-everything-else statement order — every node touched by a
+ * `minLen===0` edge (`link.getLength()==1`, `CommandLinkStateCommon.java:
+ * 176-182`'s LEFT/RIGHT-direction rule) is declared to graphviz-ts's builder
+ * BEFORE any other node, in edge-encounter order, so this port's node
+ * CREATION order matches the order graphviz's cycle-breaking DFS
+ * (`dotgen/acyclic.c`) would see in jar's real DOT text.
+ */
+describe('firstEncounterOrder — jar lines0 node-creation order (G7 T16)', () => {
+  it('no minLen===0 edges: returns the input node array unchanged (acyclic-pass regression guard)', () => {
+    const input: DotInputGraph = {
+      nodes: [{ id: 'a', width: 1, height: 1 }, { id: 'b', width: 1, height: 1 }],
+      edges: [{ id: 'e1', from: 'a', to: 'b', attributes: { minLen: 1 } }],
+      // clusters/other fields absent -- irrelevant to this pure function.
+    };
+    expect(firstEncounterOrder(input)).toBe(input.nodes);
+  });
+
+  it('one minLen===0 edge: its tail then its head come first, remaining nodes keep their existing order', () => {
+    const input: DotInputGraph = {
+      nodes: [
+        { id: 'first', width: 1, height: 1 },
+        { id: 'tail', width: 1, height: 1 },
+        { id: 'head', width: 1, height: 1 },
+        { id: 'last', width: 1, height: 1 },
+      ],
+      edges: [{ id: 'e1', from: 'tail', to: 'head', attributes: { minLen: 0 } }],
+    };
+    expect(firstEncounterOrder(input).map((n) => n.id)).toEqual(['tail', 'head', 'first', 'last']);
+  });
+
+  it('pesita/AA shape: two minLen===0 reversed edges reorder the 4-node cycle to jar\'s DFS-root order', () => {
+    // Mirrors pesita-10-dene726's `nasreq_auth` pass (G7 T13 derivation):
+    // `Closing->Idle` and `__zaent_AA->Reanimate`, both T12-reversed
+    // (`-left-`) transitions with length===1/minLen===0. Jar's cached
+    // `svek-3.dot` declares `sh0012->sh0010` (Closing->Idle) as the file's
+    // literal first statement, making `Closing` the DFS root.
+    const input: DotInputGraph = {
+      nodes: [
+        { id: 'aa_ok_ex', width: 1, height: 1 },
+        { id: '__zaent_AA', width: 1, height: 1 },
+        { id: 'Idle', width: 1, height: 1 },
+        { id: 'Reanimate', width: 1, height: 1 },
+        { id: 'Closing', width: 1, height: 1 },
+      ],
+      edges: [
+        { id: 'e1', from: 'Closing', to: 'Idle', attributes: { minLen: 0 } },
+        { id: 'e2', from: '__zaent_AA', to: 'Reanimate', attributes: { minLen: 0 } },
+        { id: 'e3', from: 'Idle', to: '__zaent_AA', attributes: { minLen: 1 } },
+      ],
+    };
+    expect(firstEncounterOrder(input).map((n) => n.id)).toEqual([
+      'Closing',
+      'Idle',
+      '__zaent_AA',
+      'Reanimate',
+      'aa_ok_ex',
+    ]);
+  });
+
+  it('a node touched by multiple minLen===0 edges is placed once, at its first occurrence', () => {
+    const input: DotInputGraph = {
+      nodes: [
+        { id: 'a', width: 1, height: 1 },
+        { id: 'b', width: 1, height: 1 },
+        { id: 'c', width: 1, height: 1 },
+      ],
+      edges: [
+        { id: 'e1', from: 'a', to: 'b', attributes: { minLen: 0 } },
+        { id: 'e2', from: 'b', to: 'c', attributes: { minLen: 0 } },
+      ],
+    };
+    expect(firstEncounterOrder(input).map((n) => n.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('a dangling minLen===0 edge (unknown endpoint) is skipped without throwing — addEdges owns dropping it', () => {
+    const input: DotInputGraph = {
+      nodes: [{ id: 'a', width: 1, height: 1 }, { id: 'b', width: 1, height: 1 }],
+      edges: [{ id: 'e1', from: 'a', to: 'ghost', attributes: { minLen: 0 } }],
+    };
+    expect(firstEncounterOrder(input).map((n) => n.id)).toEqual(['a', 'b']);
+  });
+
+  it('addNodes declares reordered nodes to the builder before any other node (integration)', () => {
+    const input: DotInputGraph = {
+      nodes: [
+        { id: 'first', width: 10, height: 10 },
+        { id: 'tail', width: 10, height: 10 },
+        { id: 'head', width: 10, height: 10 },
+      ],
+      edges: [{ id: 'e1', from: 'tail', to: 'head', attributes: { minLen: 0 } }],
+    };
+    const b = createGraph({ directed: true });
+    addNodes(b, input);
+    expect([...b.graph.nodes.keys()]).toEqual(['tail', 'head', 'first']);
   });
 });

@@ -12,7 +12,7 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: BLOCKED - paper gate v3 miss; awaiting sign-off (emission order)
+## Status: ACTIVE - ATTEMPT 6 cont. (T16 sign-off 2026-07-22)
 <!-- 2026-07-22. T11+T12 landed and hold. Third pre-existing gap:
      port declares all nodes before edges; jar's svek emission order
      differs, and graphviz cycle-breaking DFS is order-sensitive for
