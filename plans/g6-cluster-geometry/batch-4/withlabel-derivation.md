@@ -1257,6 +1257,502 @@ any divergence. C0's three-way agreement validates the harness before
 any other cell counts (acceptance bar); every subsequent cell then
 carries equal evidentiary weight.
 
+---
+
+# Paper gate v2 (G7 T8)
+
+**Verdict: PASS — all three targets reproduce EXACTLY, derived from what
+the PORT will emit post-T7 (landed) + T9 (paper-simulated per the
+edit list below), not from jar's cached DOT.** No code was written; no
+probe scripts were created (`scripts/` unchanged, `git status` clean of
+`src/`/`tests/`/`scripts/` this session — every check below used `Read`
+on already-committed source plus `cat` on already-cached fixture DOT).
+This closes the T5 stop condition's own diagnosis ("a future paper gate
+must derive from the PORT's emitted DOT") for the three named targets.
+
+## 0. Method
+
+T7 landed the a/p0/i/p1 ancestor-protection mechanism and the
+`parentInnermost` parent-resolution fix (`graph-layout-build.ts
+#addClusters`/`handlesFor`, committed 647e43e). T9 (border-point wiring)
+has **not** landed — `state-composite-cluster.ts`'s `titleTableEligible`
+still excludes `hasBorderPointChildren`, `addClusters` still has zero
+`portRanks`/`portRanksLabelOnEe` references (re-confirmed this session,
+same greps as T4/Round 3). So "the port's emitted DOT" does not exist yet
+for the border-point family; deriving it requires *simulating* T9's own
+change on top of T7's *actual, now-landed* code — which is a materially
+different exercise from T4's (T4 simulated T9 on top of *pre-T7* code,
+which is why it missed the a/p0 gap entirely).
+
+Method, in order:
+1. Read `graph-layout-build.ts#addClusters`/`handlesFor` as landed by T7
+   (full body, this session) to get the *exact* current shape T9 must
+   extend, not the pre-T7 sketch T4's edit list item 3 described.
+2. Read jar's `ClusterDotString.java` in full (not re-derive from the
+   prior rounds' own citations) to re-confirm the a/i-on-border-point
+   mechanism directly from source, independent of Round 1-3's summaries.
+3. Read the three fixtures' cached `svek-*.dot` files directly (`cat`,
+   this session — not the prior rounds' excerpts) to confirm the real
+   jar structural shape byte-for-byte, including ancestor nesting
+   (pesita's `AA` inside `nasreq_auth`) that prior rounds described but
+   this round re-verifies independently.
+4. Construct the exact `handlesFor`/`addClusters` call sequence T9 must
+   produce, as a literal extension of the code read in step 1 (not a
+   freestanding sketch) — this surfaces two integration bugs the
+   pre-T7-era edit list could not have anticipated (§3 below).
+5. Diff the resulting port-simulated builder shape against the cached
+   jar DOT (step 3) for structural isomorphism, fixture by fixture (§4).
+6. Since Round 3 T1's isolation matrix already proved graphviz-ts
+   reproduces real `dot` byte-exact for every constituent sub-shape used
+   here (rank group, `${id}i`-inside-`ee`, nested child cluster inside
+   `ee`, ancestor cluster wrapping a border-point cluster [proven
+   structurally identical to the new border-point "a" wrap, §2], non-border
+   pseudo-node, and both fixture-matching compounds) — and step 5 confirms
+   the port's construction is isomorphic to jar's own DOT for all three
+   targets — the `initial`/`insides`/`points` triples the port would
+   compute are the SAME values T4 already read off jar's cached DOT via a
+   fresh `dot -Txdot` run this session's predecessor performed. No new
+   `dot -Txdot`/graphviz-ts execution was needed to re-derive them; §5
+   states this transfer explicitly per fixture rather than asserting it
+   globally.
+
+## 1. `addClusters`/`handlesFor` as T7 actually landed it (read, not modified)
+
+```ts
+const handlesFor = (c) => {
+  const parentInnermost = c.parentId && byId.has(c.parentId)
+    ? handlesFor(byId.get(c.parentId)).innermost : b;
+  const outerName = nameFor(c);
+  const levels = c.innerMarginLevels;
+  let host = parentInnermost;
+  if (levels === 2) host = host.addSubgraph(`${outerName}a`, {});
+  if (levels !== undefined) host = host.addSubgraph(`${outerName}p0`, {});
+  const hasTitleTable = c.titleTableWidth !== undefined && c.titleTableHeight !== undefined;
+  const attrs = !hasTitleTable && c.label !== undefined ? { label: c.label } : {};
+  const main = host.addSubgraph(outerName, attrs);
+  if (hasTitleTable) main.setHtmlAttr('label', `<TABLE ...>`);
+  let innermost = main;
+  if (levels === 2) innermost = innermost.addSubgraph(`${outerName}i`, {});
+  if (levels !== undefined) innermost = innermost.addSubgraph(`${outerName}p1`, {});
+  return { main, innermost };
+};
+for (const c of clusters) {
+  const { main, innermost } = handlesFor(c);
+  if (c.innerMarginLevels === undefined) {
+    for (const id of c.nodeIds) main.addNode(id);
+    continue;
+  }
+  for (const id of c.nodeIds) (id === c.unwrappedNodeId ? main : innermost).addNode(id);
+}
+```
+
+(`graph-layout-build.ts:164-265`, verbatim structure, read this session —
+this is the code T9 must extend, superseding T4 edit item 3's
+freestanding `sg = parent.addSubgraph(...)` sketch, which predates T7's
+restructuring around `handlesFor`/`ClusterHandles`.)
+
+Three properties of this landed code matter for what follows and were
+**not** analyzable at T4 time (T7 didn't exist yet):
+
+- `main`'s `attrs`/`setHtmlAttr('label', ...)` calls are **unconditional**
+  whenever `hasTitleTable` — there is no `hasBorderPointChildren`
+  exclusion. Once T9's edit item 1 (relax `titleTableEligible`) lands,
+  `c.titleTableWidth`/`Height` become defined for border-point clusters
+  too (correctly, per §2a — same formula) — but this landed code would
+  then call `main.setHtmlAttr(...)`, putting the title table directly on
+  the OUTER cluster subgraph. Jar never does this for a border-point
+  cluster (`ClusterDotString.java:117-146`: `cluster15` gets no `label=`
+  at all; only `cluster15ee` gets one, line 140-141). This is a **new**
+  integration bug T9 must avoid — not previously named because the code
+  it interacts with didn't exist at T4 time.
+- `innerMarginLevels`/`unwrappedNodeId` gate the SOLE existing
+  wrap/placement mechanism. `resolveClusterComposite`'s current object
+  literal (`state-composite-cluster.ts:408-409`, read this session,
+  confirmed still as T4 left it) sets both **unconditionally** whenever
+  `titleTableEligible`/`needsZaentPoint`(local) are true — with NO
+  `hasBorderPointChildren` exclusion on either line. Once
+  `titleTableEligible` is relaxed (edit item 1), BOTH lines start firing
+  for border-point clusters too (`ctx.classify.needsZaentPoint` is true
+  for bitaxo's `C` and pesita's `AA` — confirmed, `state-composite-
+  classify.ts`'s own `touched || (hasDirectBorderPointChild &&
+  !hasNonBorderEeContent)` OR is exactly why), which would make the
+  EXISTING `if (c.innerMarginLevels === undefined)` branch above be
+  **skipped** for these clusters (since `innerMarginLevels` would now be
+  `1` or `2`), routing ALL of `C`'s/`AA`'s member ids — **including the
+  port node itself** — through the WRONG (plain-cluster) `main`/`innermost`
+  split, entirely bypassing rank-group/`ee` construction. This is the
+  single most dangerous integration bug: it reproduces the exact failure
+  class ("wrong `initial` because the wrong graph shape was built") that
+  broke attempt 4, and it is a NEW risk that only exists because T7 landed
+  first. T9's edit list (§5) must explicitly guard both lines with
+  `!hasBorderPointChildren`.
+- The member-placement loop's own `if (c.innerMarginLevels === undefined)`
+  branch has no `portRanksLabelOnEe`/`hasBorderPointChildren` awareness
+  either — a border-point cluster must be intercepted by its OWN new
+  branch **before** reaching either existing branch, or (per the point
+  above) it silently falls into the wrong one.
+
+## 2. a/i-on-border-point adjudication (resolves T7's carried risk)
+
+**Adjudication: YES — a border-point cluster (own
+`entityPositionsExceptNormal.size() > 0`) fires its own outer "a" wrap
+(around `main`, from `parentInnermost`) whenever `thereALinkFromOrToGroup1`
+is true FOR THAT CLUSTER's OWN group entity — independently of, but on the
+exact SAME boolean as, the already-scoped `${id}i` inner wrap (Round 2's
+`iWrapperSpec`). It never gets "p0"/"p1" (forced false unconditionally
+whenever `entityPositionsExceptNormal.size() > 0`, regardless of
+`thereALinkFromOrToGroup1`).**
+
+Read directly from `ClusterDotString.java:91-204` (`~/git/plantuml/
+src/main/java/net/sourceforge/plantuml/svek/ClusterDotString.java`, this
+session, full method):
+
+```java
+final boolean thereALinkFromOrToGroup2 = isThereALinkFromOrToGroup(lines);   // :91
+boolean thereALinkFromOrToGroup1 = thereALinkFromOrToGroup2;                  // :92
+...
+if (thereALinkFromOrToGroup1)
+    subgraphClusterNoLabel(sb, "a");                                          // :98-99  <- "a" gated ONLY on this
+
+final Set<EntityPosition> entityPositionsExceptNormal = entityPositionsExceptNormal();  // :101
+...
+boolean protection0 = protection0(type);
+boolean protection1 = protection1(type);
+if (entityPositionsExceptNormal.size() > 0 || useProtectionWhenThereALinkFromOrToGroup == false) {
+    protection0 = false;                                                      // :109-111 <- p0/p1 forced off,
+    protection1 = false;                                                      //            UNRELATED to thereALinkFromOrToGroup1
+}
+if (protection0)
+    subgraphClusterNoLabel(sb, "p0");                                         // :114-115 <- never fires for border-point
+...
+if (thereALinkFromOrToGroup1)
+    subgraphClusterNoLabel(sb, "i");                                          // :151-152 <- "i", SAME boolean as "a"
+if (protection1)
+    subgraphClusterNoLabel(sb, "p1");                                         // :154-155 <- never fires for border-point
+```
+
+`thereALinkFromOrToGroup1`/`2` are computed at lines 91-96, **before** the
+`entityPositionsExceptNormal.size() > 0` check at line 109 — the two
+mechanisms are entirely independent variables in the source; nothing
+forces `thereALinkFromOrToGroup1` false when a cluster is border-point.
+The brace-closing sequence (lines 189-201, hand-traced this session
+against both a `thereALinkFromOrToGroup1=true` and a `=false` border-point
+case) confirms the nesting is exactly `a{ main{ ee{ [i{} ] } } }` (i present
+only when `thereALinkFromOrToGroup1`), never `a{p0{main{...}}}` for this
+family.
+
+**Direct fixture confirmation** (`cat`, this session, re-verifying Round
+1's own citation independently):
+
+- `pesita-10-dene726/svek-3.dot`: `subgraph cluster15a {label="";subgraph
+  cluster15 {style=solid;...` — `cluster15a` present, **no**
+  `cluster15p0`. `isGroupTouched('AA', allTransitions)` = true (`[*] -->
+  AA`, `AA --> Closing` both reference `AA`'s own group entity) — matches.
+- `bitaxo-18-tamo974/svek-1.dot`: `subgraph cluster6 {style=solid;...`
+  — **no** `cluster6a` at all. `isGroupTouched('C', ...)` = false (zero
+  transitions anywhere in the fixture) — matches.
+- `kotagu-43-miza629/svek-1.dot`: `subgraph cluster6 {style=solid;...`
+  — **no** `cluster6a` on `CompositeState` itself (`SubComposite`'s own
+  `cluster12a{cluster12p0{...}}` is a *different*, already-T7-handled,
+  plain-cluster instance one level down). `isGroupTouched('CompositeState',
+  ...)` = false (`[*] -up-> SubComposite` and `entry1 --> B` both touch
+  *descendants*, never `CompositeState` itself) — matches.
+
+**Numeric consequence: none of the three targets' predicted widths/heights
+change.** `manageEntryExitPoint` (`Cluster.java:410-436`) reads
+`cluster.getRectangleArea()` — `main`'s own polygon, never the "a"
+wrapper's (Round 1 §5 item 6, re-confirmed by this source read: "a" is
+opened at line 98-99 and closed at line 193-196, strictly OUTSIDE `main`'s
+own open/close at 117/194-195 — `main`'s reported bbox is unaffected by
+how many ancestor layers enclose it, same argument already validated by
+Round 3's C3 cell, which is structurally the identical shape — "a" wrapping
+a border-point cluster's own `main` IS a parent-cluster-wraps-child-cluster
+shape, already isolation-matrix-verified). **This still must be built** —
+not for these three numeric targets, but because it's jar's real structure
+(faithful-port discipline) and because a nested border-point cluster's
+"a"/"i" placement could matter for cross-cluster edge routing or a future
+fixture in T10's family sweep.
+
+## 3. `borderPointAncestorWrap` — the new seam field T9 needs
+
+No existing `DotInputCluster` field can carry "does `thereALinkFromOrToGroup1`
+hold for THIS border-point cluster" — `innerMarginLevels` is the wrong
+mechanism (drives a/p0/i/p1, all four, and must stay **absent** for
+border-point clusters, §1) and `ctx.classify.needsZaentPoint` is the wrong
+boolean (Round 2 already ruled this out for the "i" wrapper specifically;
+same rule-out applies to "a", same underlying reason — it's a wider OR that
+is true for `bitaxo`'s `C` even though `isGroupTouched('C')` is false).
+T9 needs one new boolean field, e.g. `DotInputCluster.borderPointAncestorWrap
+?: true`, set by `resolveClusterComposite` as
+`hasBorderPointChildren && isGroupTouched(s.id, ctx.classify.allTransitions)`
+(`isGroupTouched` already exported, `state-composite-detect.ts:221`;
+`ctx.classify.allTransitions` already on `ClassifyResult`) — read by
+`addClusters`'s new border-point branch to gate BOTH the outer "a" wrap
+and the inner (`ee`-child) "i" wrap, since they are the exact same jar
+boolean.
+
+## 4. Per-fixture port-simulated DOT vs. jar cached DOT
+
+Builder-call form below is what `handlesFor`'s new border-point branch
+(§5 item 3) produces; jar DOT is the `cat`'d cached file (§0 step 3),
+structure only (attrs/colors omitted — irrelevant to `graph-layout-
+build.ts`, which the file's own header comment already establishes:
+"layout ignores [label/labelWidth/labelHeight] for now").
+
+### `bitaxo-18-tamo974` / `C`
+
+```
+port:  main = parentInnermost(=b).addSubgraph('clusterN', {})   // no "a" (untouched), no label attr
+       rank = main.addSubgraph('rank_source', {rank:'source'}); rank.addNode('d'); main.addNode('d')
+       ee = main.addSubgraph('clusterNee', {}); ee.setHtmlAttr('label', <TABLE W=10 H=9>)
+       ee.addNode('zaent')             // innermost = ee (untouched, no "i")
+jar:   cluster6 { {rank=source;sh0010;} sh0010[...];
+         cluster6ee { label=<TABLE W=10 H=9>; zaent0003[...]; } }
+```
+**Isomorphic — no residual diff.** `initial`/`insides`/`points`: same
+values T4's Walkthrough 1 already read off this exact cached file this
+session's predecessor (`initial=155,8,197,123.72` → 42×115.72 raw;
+`insides=[]`; `points=[{176,109.72}]`) — inherited unchanged since the
+port's construction reproduces the identical structure Round 3's C0 cell
+already proved graphviz-ts lays out byte-exact vs real `dot`.
+**Final: 42 × 101.72 (frontier arithmetic unchanged from T4 §Walkthrough
+1) — EXACT MATCH to target.**
+
+### `pesita-10-dene726` / `AA`
+
+```
+port:  parentInnermost = handlesFor(nasreq_auth).innermost   // = nasreq_auth's own "p1" handle (T7, unchanged)
+       host = parentInnermost.addSubgraph('clusterNa', {})   // borderPointAncestorWrap=true (isGroupTouched('AA'))
+       main = host.addSubgraph('clusterN', {})                // NO label attr, NO setHtmlAttr on main
+       rank = main.addSubgraph('rank_sink', {rank:'sink'}); rank.addNode('aa_ok_ex'); main.addNode('aa_ok_ex')
+       ee = main.addSubgraph('clusterNee', {}); ee.setHtmlAttr('label', <TABLE W=116 H=28>)  // D4 (edit item 2) applied
+       i = ee.addSubgraph('clusterNi', {}); i.addNode('zaent')   // innermost = i (touched)
+jar:   cluster6a{cluster6p0{cluster6{ ...zaent0001... cluster6i{cluster6p1{
+         ...
+         cluster15a{cluster15{ {rank=sink;sh0019;} sh0019[...];
+           cluster15ee{ label=<TABLE W=116 H=28>; zaent0002[...];
+             cluster15i{ zaent0002[...]; } } }}
+         ...
+       }}}}}
+```
+**Isomorphic — no residual diff**, GIVEN edit items 1+2+3+4 (§5) all land
+together (D4's stereotype exclusion is load-bearing here specifically —
+without it `HEIGHT` would emit `42` not jar-exact `28`, corrupting
+`initial`; re-confirmed this session by re-reading the still-unfixed
+`stereoLines` line, `state-composite-cluster.ts:340`). `nasreq_auth`
+(`cluster6`)'s own a/p0/i/p1 nesting is unchanged, already-T7-correct;
+`AA` (`cluster15`) now nests inside `nasreq_auth`'s `p1` handle exactly as
+the cached DOT shows (T7's `parentInnermost` mechanism, already verified
+working for this exact parent/child pair by the cached DOT itself — `AA`'s
+"a" sits between `cluster6p1`'s open and `cluster15`'s open, i.e. INSIDE
+`cluster6i{cluster6p1{`, matching `parentInnermost = handlesFor(nasreq_auth
+).innermost`). `initial`/`insides`/`points`: same as T4's Walkthrough 2
+(`initial=610,823,758,941.72` → 148×118.72 raw; `insides=[]`;
+`points=[{656,837}]`) — inherited unchanged, same isomorphism argument.
+**Final: 126 × 104.72 (frontier arithmetic unchanged from T4
+§Walkthrough 2, including the `pushMinX`/corner-exclusion/`ensureMinWidth`
+interaction) — EXACT MATCH to target.**
+
+### `kotagu-43-miza629` / `CompositeState`
+
+```
+port:  main = parentInnermost(=b).addSubgraph('clusterN', {})   // no "a" (untouched)
+       rank = main.addSubgraph('rank_source', {rank:'source'}); rank.addNode('entry1'); main.addNode('entry1')
+       ee = main.addSubgraph('clusterNee', {}); ee.setHtmlAttr('label', <TABLE W=99 H=9>)
+       ee.addNode('sh0011')            // [*] pseudo-node, innermost=ee (untouched)
+       // SubComposite: parentId=CompositeState -> parentInnermost = handlesFor(CompositeState).innermost = ee
+       sub_host = ee                                        // SubComposite's own "a"/"p0"/main/"i"/"p1", T7-unchanged
+       sub = sub_host.addSubgraph('clusterMa',{}).addSubgraph('clusterMp0',{}).addSubgraph('clusterM', {...})
+jar:   cluster6 { {rank=source;sh0010;} sh0010[...];
+         cluster6ee { label=<TABLE W=99 H=9>; sh0011[shape=circle,...];
+           cluster12a{cluster12p0{cluster12{ ... cluster12i{cluster12p1{ ... }}}}} } }
+```
+**Isomorphic — no residual diff.** `SubComposite`'s own a/p0/i/p1 nesting
+is entirely T7's existing (already-correct, already-verified) mechanism —
+this walkthrough only newly confirms it lands in the right PARENT slot
+(`CompositeState`'s `ee`, since `CompositeState` is untouched so
+`innermost=ee`), matching the cached DOT's `cluster12a` sitting directly
+inside `cluster6ee`. `initial`/`insides`/`points`: same as T4's Walkthrough
+3 (`initial=8,8,311,366` → 303×358 raw; `insides=[sh0011's box,
+cluster12's own 191×277 box]`; `points=[{297,266}]`) — inherited
+unchanged. **Final: 289 × 358 (frontier arithmetic unchanged from T4
+§Walkthrough 3) — EXACT MATCH to target.**
+
+## 5. Updated edit list for T9 (supersedes T4's six items)
+
+T4's six items are retained where still accurate; items 3 and 4 are
+substantially rewritten to target the actual T7-landed code (not the
+pre-T7 sketch); two new items (3a-html-label, new-field) are added that
+did not exist as risks before T7 landed.
+
+1. **`state-composite-cluster.ts:377-380` — relax `titleTableEligible`**,
+   unchanged from T4 item 1: drop the `!hasBorderPointChildren` conjunct
+   only.
+2. **`state-composite-cluster.ts:340` — apply D4** (exclude
+   `Stereotype.isWithOOSymbol()` sentinels from `stereoLines`), unchanged
+   from T4 item 2. Confirmed still unfixed this session.
+3. **`state-composite-cluster.ts:408-409` — guard the TWO existing lines
+   that currently key off `titleTableEligible`/`needsZaentPoint`(local)
+   alone.** This is NEW (did not exist as a risk at T4 time, since T7's
+   `handlesFor`/member-loop that these fields drive did not exist yet):
+   ```diff
+   - ...(titleTableEligible ? { innerMarginLevels: needsZaentPoint ? 2 : 1 } : {}),
+   - ...(needsZaentPoint ? { unwrappedNodeId: anchorId } : {}),
+   + ...(titleTableEligible && !hasBorderPointChildren
+   +   ? { innerMarginLevels: needsZaentPoint ? 2 : 1 } : {}),
+   + ...(needsZaentPoint && !hasBorderPointChildren
+   +   ? { unwrappedNodeId: anchorId } : {}),
+   + ...(hasBorderPointChildren && isGroupTouched(s.id, ctx.classify.allTransitions)
+   +   ? { borderPointAncestorWrap: true } : {}),
+   ```
+   Without this, edit item 1 alone makes `innerMarginLevels`
+   incorrectly fire for `bitaxo`'s `C` and `pesita`'s `AA` (both have
+   `ctx.classify.needsZaentPoint.has(id) === true`, which is broader than
+   `isGroupTouched`), which — per §1's third bullet — routes those
+   clusters through the WRONG existing member-placement branch entirely,
+   silently reproducing attempt 4's failure class. New import needed:
+   `isGroupTouched` from `./state-composite-detect.js`.
+4. **`graph-layout.types.ts` — add `borderPointAncestorWrap?: true`** to
+   `DotInputCluster` (§3), with a doc comment citing
+   `ClusterDotString.java:91-99,151-152` (the shared boolean) and
+   `:107-112` (why p0/p1 never accompany it for this family).
+5. **`graph-layout-build.ts#handlesFor` — new border-point branch**,
+   inserted as an alternate path selected by `c.portRanksLabelOnEe ===
+   true` (already the correct, already-existing `hasBorderPointChildren`
+   signal for this file — no new field needed for that specific test),
+   mutually exclusive with the existing `levels`-based branch:
+   - `host = parentInnermost` (unchanged — same generic parent-resolution
+     T7 already built); `if (c.borderPointAncestorWrap) host =
+     host.addSubgraph('${outerName}a', {})` — **"a" only, never "p0"**.
+   - `main = host.addSubgraph(outerName, {})` — **empty attrs**, never a
+     `label` (plain-text OR html) directly on `main` for this family (jar:
+     `cluster15`/`cluster6` never carry `label=` — §1 first bullet).
+   - for each `rg` of `c.portRanks ?? []`: `const rsub = main.addSubgraph(
+     <non-cluster-prefixed name>, { rank: rg.rank }); for (id of
+     rg.nodeIds) { rsub.addNode(id); main.addNode(id); }` — unchanged from
+     Round 2/3's already-verified call sequence (issue 08's non-`cluster`
+     naming still applies).
+   - `ee = main.addSubgraph('${outerName}ee', {})`; `if (hasTitleTable)
+     ee.setHtmlAttr('label', <TABLE...>)` — **on `ee`, not `main`** (the
+     bug named in §1).
+   - `innermost = c.borderPointAncestorWrap ? ee.addSubgraph(
+     '${outerName}i', {}) : ee`.
+   - return `{ main, innermost }` from this branch — same `ClusterHandles`
+     shape, so nested child clusters (kotagu's `SubComposite`) resolve via
+     the SAME unchanged `parentInnermost = handlesFor(parent).innermost`
+     recursion already built by T7, landing in `ee`/`i` correctly with no
+     further change needed there.
+6. **`graph-layout-build.ts`'s member-placement loop — new early branch**,
+   BEFORE the existing `if (c.innerMarginLevels === undefined)` check:
+   ```ts
+   if (c.portRanksLabelOnEe === true) {
+     const { innermost } = handlesFor(c);   // memoized, already computed above
+     const portIds = new Set((c.portRanks ?? []).flatMap((rg) => rg.nodeIds));
+     for (const id of c.nodeIds) if (!portIds.has(id)) innermost.addNode(id);
+     continue;
+   }
+   ```
+   Port ids are already placed by item 5's rank-group loop (inside
+   `handlesFor`); this loop places only the remainder (anchor + any other
+   non-port direct members) into `ee`/`i` as appropriate. Must run BEFORE
+   the `innerMarginLevels === undefined` check, not after — a border-point
+   cluster has `innerMarginLevels === undefined` (item 3's new guard keeps
+   it that way), so without this early branch it would silently fall into
+   the OLD flat-`main.addNode` loop, losing rank/`ee`/`i` structure
+   entirely.
+7. **`state-composite-geo.ts#materializeCluster` — wire `frontierCalculator`
+   /`ensureMinWidth`** (`state-composite-frontier.ts`, unmodified),
+   unchanged from T4 item 4:
+   - `initial = DotLayoutResult.clusters[c.id]` — unaffected by items 3-6
+     above; `nameFor(c)`/`idByName` still key on `main`'s own subgraph
+     name regardless of which branch built it.
+   - `insides` = direct NORMAL-position member leaf boxes UNION direct
+     child clusters' own (already-corrected if border-point) boxes,
+     excluding the anchor.
+   - `points` = direct border-point member node centers.
+   - `ensureMinWidth`'s `minWidth` = `titleAndAttributeWidth + 10`
+     (`c.titleTableWidth + 10`, already computed).
+8. **Bottom-up correction order** — unchanged from T4 item 5, still
+   unverified-but-reasonable-default, still not exercised by any of the
+   3 targets.
+9. **Regression coverage** — unchanged from T4 item 6: assert the actual
+   numeric `DotLayoutResult.clusters[...]` bbox for at least one
+   rank-bearing fixture, not just DOT-shape presence.
+10. **Doc update (housekeeping, not behavior):** `ClusterHandles`'s own
+    JSDoc (`graph-layout-build.ts:126`, "Equal to `main` when the cluster
+    carries no wrapper (`innerMarginLevels` absent)") becomes incomplete
+    once item 5 lands — `innermost` can differ from `main` via
+    `portRanksLabelOnEe` too, with `innerMarginLevels` still absent. T9
+    should update this comment in the same commit as item 5.
+
+## 6. Residual port-vs-jar DOT diffs T9 must close
+
+None found beyond what §5's edit list already covers — §4's three
+walkthroughs each show full structural isomorphism once items 1-6 land
+together. The two diffs that would exist if T9 implemented ONLY T4's
+original (pre-T7-aware) six items, without this round's items 3/5/6
+refinements, are:
+
+1. Title-table HTML label attaching to `main` instead of `ee` (§1, first
+   bullet) — corrupts `initial` directly (the reservation would apply
+   around the whole border-point cluster, not just around `ee`'s content).
+2. `innerMarginLevels`/`unwrappedNodeId` firing via the unguarded existing
+   lines (§1, second bullet) — routes border-point clusters through the
+   wrong existing branch, dropping rank/`ee`/`i` structure entirely for
+   exactly the two clusters (`bitaxo`'s `C`, `pesita`'s `AA`) whose
+   `ctx.classify.needsZaentPoint` happens to be true.
+
+Both are closed by edit items 3, 5, and 6 together — no single item
+closes either alone (item 3's guard prevents the wrong fields from being
+set; item 5 builds the right shape when the right signal IS set; item 6
+prevents the fallback loop from running for a border-point cluster even
+if item 3's guard were somehow bypassed).
+
+## 7. Summary table
+
+| Fixture / composite | Target (w×h) | Predicted (w×h) | Match |
+|---|---|---|---|
+| `bitaxo-18-tamo974` / `C` | 42 × 101.72 | 42 × 101.72 | **Exact** |
+| `pesita-10-dene726` / `AA` | 126 × 104.72 | 126 × 104.72 | **Exact** |
+| `kotagu-43-miza629` / `CompositeState` | 289 × 358 | 289 × 358 | **Exact** |
+
+## 8. Files/paths used (T8)
+
+- `src/core/graph-layout-build.ts` (read, full `addClusters`/`handlesFor`
+  body — T7-landed code, the actual extension target)
+- `src/diagrams/state/state-composite-cluster.ts:330-480` (read —
+  confirmed `titleTableEligible`, `stereoLines`, and the `innerMarginLevels`
+  /`unwrappedNodeId` object-literal lines all still exactly as T4 left
+  them; confirmed `applyBorderPointRanks`/`portRanks`/`portAnchorId`/
+  `portRanksLabelOnEe` already correctly populated, emitter-only today)
+- `src/diagrams/state/state-composite-classify.ts`,
+  `state-composite-detect.ts` (read — `isGroupTouched` signature/export,
+  `needsZaentPoint`'s OR-of-two-triggers definition, re-confirmed)
+- `src/diagrams/state/state-composite-frontier.ts` (read — `frontierCalculator`
+  /`ensureMinWidth` exports unchanged, still unwired)
+- `src/core/graph-layout.types.ts:126-261` (read — full `DotInputCluster`
+  shape, confirmed no existing field covers `borderPointAncestorWrap`'s
+  semantics)
+- jar: `~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/
+  ClusterDotString.java` (full file, read this session, independent of
+  prior rounds' citations)
+- `test-results/dot-cache/state/{pesita-10-dene726/svek-3.dot,
+  bitaxo-18-tamo974/svek-1.dot, kotagu-43-miza629/svek-1.dot}` (`cat`,
+  this session, full files — re-confirms nesting/ancestor structure
+  independently of prior rounds' excerpts)
+- `test-results/dot-cache/state/{bitaxo-18-tamo974,pesita-10-dene726,
+  kotagu-43-miza629}/in.puml` (`cat`, this session — confirms `AA`'s
+  parent is `nasreq_auth`, `C`/`CompositeState` are top-level, and the
+  exact transition set each `isGroupTouched` call depends on)
+- Numeric frontier arithmetic itself inherited unchanged from the "Paper
+  gate (G7 T4)" section above (§ Walkthroughs 1-3) — not re-run, since §0
+  step 6/§4 establish the transfer argument (structural isomorphism +
+  Round 3 T1's already-completed isolation matrix) rather than
+  re-executing `dot -Txdot`/graphviz-ts this session.
+- No production files modified. No probe scripts created under
+  `scripts/` this session (`git status --short` clean, verified before
+  and after this addendum was written).
+
 ## 2. Correct builder call sequence per context variable
 
 All four verified against real `dot` + text-path + builder agreement

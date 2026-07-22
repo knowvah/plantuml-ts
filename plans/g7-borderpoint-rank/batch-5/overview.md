@@ -8,7 +8,7 @@ re-attempt the border-point wiring unchanged.
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
 | T7 | Port a/p0 ancestor wrappers + parent-resolution fix | typescript-pro | graph-layout-build + types + state seam fields + tests | — | [x] |
-| T8 | Paper gate v2: derive 3 targets from PORT-emitted DOT | debugger | derivation-doc addendum | T7 | [ ] |
+| T8 | Paper gate v2: derive 3 targets from PORT-emitted DOT | debugger | derivation-doc addendum | T7 | [x] |
 | T9 | Border-point wiring (T5 six-item edit list, unchanged) | typescript-pro | T5 write-set | T8 | [ ] |
 | T10 | Family sweep, pins/backlog, close | typescript-pro | pins/backlog/journal/README | T9 | [ ] |
 
