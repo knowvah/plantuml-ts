@@ -13,6 +13,6 @@ forbidden. If the jar path can't be isolated, the batch stops.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T8 | Derive jar's WithLabel/portRanksLabelOnEe path (evidence doc) | debugger | plans/g6-cluster-geometry/batch-4/withlabel-derivation.md | — | [ ] |
-| T9 | Port the sizing; widen hasBorderPointChildren gate | typescript-pro | state-composite-cluster.ts, state-composite-sizing.ts, state-dot-graph.ts, unit tests | T8 | [ ] |
-| T10 | Family sweep (20 fixtures) + mission close | general-purpose | goldens, size-backlog.json, plan README | T9 | [ ] |
+| T8 | Derive jar's WithLabel/portRanksLabelOnEe path (evidence doc) | debugger | plans/g6-cluster-geometry/batch-4/withlabel-derivation.md | — | [x] (2 rounds; spec still incomplete — see journal) |
+| T9 | Port the sizing; widen hasBorderPointChildren gate | typescript-pro | corrected: graph-layout-build.ts, state-composite-geo.ts, state-composite-frontier.ts, cluster gate | T8 | STOPPED — 2 attempts, all predictions missed, fully reverted; FrontierCalculator port kept unwired (60fe88a) |
+| T10 | Family sweep (20 fixtures) + mission close | general-purpose | goldens, size-backlog.json, plan README | T9 | not run (T9 stopped); close performed by orchestrator |

@@ -27,7 +27,7 @@ decision journal). One commit per task: `feat(T3): ...` /
 | [1](batch-1/overview.md) | Vertical/height residual (diagnose → fix at origin) | T1, T2 | [x] |
 | [2](batch-2/overview.md) | Byte-exact pins: class attr, decede style, pin sweep | T3, T4, T5 | [x] |
 | [3](batch-3/overview.md) | Multi-line/action-text/stereotype title height | T6, T7 | [x] |
-| [4](batch-4/overview.md) | Entrypoint/exitpoint WithLabel family | T8, T9, T10 | [ ] |
+| [4](batch-4/overview.md) | Entrypoint/exitpoint WithLabel family | T8, T9, T10 | STOPPED (stop cond. 8 / D5 — see summary) |
 
 Batches are strictly sequential (each gates the next). Within batch 2,
 T3 ∥ T4 may run in parallel (disjoint write-sets); T5 waits for both.
@@ -114,3 +114,42 @@ Hard bars carried from G5 (non-negotiable, apply to every task):
   run `npm run typecheck` as their post-edit bar.
 - Out of scope entirely: `insideAutonomPass` relaxation, SvekEdge
   placement port, any re-derivation of the side-margin mechanism.
+
+## Mission summary (closed 2026-07-22)
+
+**Tasks: 7 of 10 completed** (T1-T7 done; T8 done ×2 rounds but spec
+incomplete; T9 stopped after 2 authorized attempts; T10 not run).
+
+**Landed** (all gates green at every commit; branch tip 10192 tests):
+- Batch 1: cluster vertical residual root-caused and fixed —
+  title-table HEIGHT 3→9 (jar-exact heights on the single-line set).
+- Batch 2: `class="cluster"` emission (D3); decede's full
+  `<style>stateDiagram{}</style>` cascade (D4) incl. FontColor,
+  RoundCorner, arrow colors; **svg-state pins 52→57** (fevida +
+  gageze/lasasi/lukuma/soxene), backlog 92 entries, widened none.
+- Batch 3: jar's derived title-table height formula (D2) replacing the
+  constant; lineCount gate relaxed; multi-line (37), attr (28), and
+  stereotype (23) cases oracle-verified.
+- Batch 4 salvage: pure `FrontierCalculator` port + 9 unit tests
+  (unwired, `60fe88a`).
+
+**Stopped:** batch 4's border-point (WithLabel) geometry — two
+derivation rounds + two implementation attempts; all predictions
+missed; every attempt fully reverted (zero behavior change). Blocking
+unknown: T8-R2 and T9 obtained CONTRADICTORY minimal-repro results
+for graphviz-ts's in-cluster `rank=source/sink` handling (height
+change vs width-margin-only). Resolve that contradiction first;
+candidate graphviz-ts finding, not yet filed (fails the "verified"
+bar).
+
+**Decisions:** 14 journal rows; 5 flagged for review (T3 renderer.ts
+write-set amendment; T4 theme.ts/style-map-theme.ts amendment; T9
+corrected write-set; the batch-4 continuation ruling; the batch-4
+stop + repro contradiction).
+
+**Follow-ups carried:** cakaxu −1.5 edge-label rank-spacing;
+kideju B/A nested-margin composition; `__zaent_` edge-id leak
+(gojuja+cakaxu); gojuja −5px band shift + start-edge spline; decede
+half-pixel bands; `skin debug` unimplemented; batch-4 repro
+contradiction (all detailed in decision-journal.md / batch-2 residual
+section).
