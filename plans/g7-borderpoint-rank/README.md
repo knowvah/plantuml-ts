@@ -12,10 +12,13 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: ACTIVE
-<!-- Set to: PAUSED — waiting on graphviz-issues/09 (see Resume
-     procedure) when T2 takes the library path. Set to CLOSED at
-     mission end. -->
+## Status: CLOSED — ATTEMPT-4-MISS, permanent stop (cond. 7)
+<!-- 2026-07-22. Fifth attempt requires human sign-off. Root cause
+     identified (journal T5 row): pre-existing addClusters
+     parent-resolution gap + unported jar "a"/"p0" ancestor-wrapper
+     mechanism (graph-layout-build.ts:154-159). Any attempt 5 must
+     port that FIRST and re-run the paper gate against the PORT's
+     emitted DOT, not the jar's cached DOT. -->
 
 ## Branch
 
@@ -31,8 +34,8 @@ rule; subagents never run git mutations).
 | [1](batch-1/overview.md) | Isolation matrix + adjudication | T1, T2 | [x] |
 | — | **CONDITIONAL PAUSE** (library path only) | — | — |
 | [2](batch-2/overview.md) | New-.tgz adoption (library path only; SKIP on usage verdict) | T3 | SKIPPED (usage verdict, T2) |
-| [3](batch-3/overview.md) | Attempt 4: paper gate → implementation | T4, T5 | [ ] |
-| [4](batch-4/overview.md) | Family sweep + close | T6 | [ ] |
+| [3](batch-3/overview.md) | Attempt 4: paper gate → implementation | T4, T5 | T4 [x]; T5 MISS — permanent stop |
+| [4](batch-4/overview.md) | Family sweep + close | T6 | NOT RUN (T5 stop) |
 
 ## Resume procedure (cold-start, after external graphviz-ts fix)
 
@@ -113,3 +116,31 @@ rule; subagents never run git mutations).
   `oracle/goldens/state/<slug>/` + cached svek DOT/SVG under
   `test-results/dot-cache/state/<slug>/`. Measurement =
   `data-qualified-name`-matched box extraction (G5 ledger §C8).
+
+## Mission summary (2026-07-22, session end)
+
+- **Tasks:** T1 [x], T2 [x] (usage verdict — no issue 09), T3 skipped
+  (library path not taken), T4 [x] (paper gate PASS), T5 **MISS →
+  full revert → permanent stop**, T6 not run.
+- **Outcome:** graphviz-ts fully exonerated (7-cell isolation matrix
+  + end-anchors, all byte-exact three-way). Attempt 4 implemented the
+  gated spec; bitaxo exact, pesita/kotagu missed identically to
+  attempt 3. Root cause found and journaled (T5 row): pre-existing
+  `addClusters` parent-resolution at `graph-layout-build.ts:154-159`
+  never nests a child cluster inside an active protection wrapper,
+  and jar's "a"/"p0" ancestor-wrapper mechanism
+  (`ClusterDotString.java` protection0/thereALinkFromOrToGroup1) is
+  unimplemented repo-wide. Out of T5's write-set → hard bar honored.
+- **Paper-gate blind spot (process lesson):** T4 derived `initial`
+  from the JAR's cached DOT — which already contains the a/p0
+  wrappers — so it validated frontier math but not the port's own
+  DOT emission. A future gate must derive from the PORT's DOT.
+- **Decisions:** 4 journal rows; T5 row flagged for review.
+- **Gates:** all green at every commit; final state: 10192 tests
+  pass, typecheck/lint/build clean, working tree byte-identical to
+  the docs-only commits (no production code landed).
+- **Follow-ups for a human-approved attempt 5:** (1) port the a/p0
+  ancestor-wrapper mechanism; (2) fix parent-resolution to nest into
+  the active wrapper handle; (3) re-run the paper gate on port-emitted
+  DOT; (4) then re-attempt border-point wiring (T5 spec unchanged).
+- **Branch:** left unmerged pending human review (docs-only commits).
