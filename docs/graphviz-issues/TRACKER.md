@@ -12,3 +12,4 @@ object ratchets and census re-run instantly against an updated `.tgz`).
 - [x] 05-cluster-label-dimensions-ignored.md
 - [x] 06-cluster-bbox-not-in-getlayout.md
 - [x] 07-html-label-mark-not-exported.md
+- [ ] 08-cluster-scoped-rank-subgraph-bbox.md
