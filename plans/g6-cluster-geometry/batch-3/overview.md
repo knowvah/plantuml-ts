@@ -13,5 +13,5 @@ here, not a target fixture.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T6 | Derive jar's title-table height formula (evidence doc) | debugger | plans/g6-cluster-geometry/batch-3/title-height-derivation.md | — | [ ] |
-| T7 | Implement formula; relax lineCount gate; re-measure | typescript-pro | state-composite-cluster.ts, unit tests, size-backlog.json | T6 | [ ] |
+| T6 | Derive jar's title-table height formula (evidence doc) | debugger | plans/g6-cluster-geometry/batch-3/title-height-derivation.md | — | [x] |
+| T7 | Implement formula; relax lineCount gate; re-measure | typescript-pro | state-composite-cluster.ts, unit tests, size-backlog.json | T6 | [x] |
