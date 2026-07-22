@@ -188,8 +188,11 @@ export interface DotInputCluster {
    *  INDEPENDENT constant 19px on 132/134 real corpus cluster samples (the
    *  2 exceptions both multi-line titles, `sosoxe-55-demi451`/`teseci-80-
    *  sivi292`, out of this iteration's scope — see `state-composite-
-   *  cluster.ts`'s own doc comment), so `titleTableHeight=3` (19-16) is the
-   *  jar-verified constant for that case — NOT `cluster.getTitleAndAttribute
+   *  cluster.ts`'s own doc comment). G6 T1 superseded the C2-era `3`
+   *  (19-16) calibration: jar's real svek DOT emission is a content-
+   *  independent `HEIGHT="9"` (70+ cached svek-*.dot samples), so
+   *  `titleTableHeight=9` is the jar-verified constant for that case —
+   *  NOT `cluster.getTitleAndAttribute
    *  Height()-5`'s Java-internal value, which this port does not reproduce
    *  bit-for-bit (a deliberately decoupled, resolved discrepancy — G5 C2's
    *  own "C3+ queue" sub-item 3). Additive: absent (every pre-C3 caller,

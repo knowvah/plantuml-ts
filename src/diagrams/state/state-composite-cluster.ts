@@ -61,9 +61,23 @@ function measureClusterTitle(display: string, ctx: DiagramCtx): { width: number;
  * box.ts`, using its OWN measured line width).
  *
  * `CLUSTER_TITLE_TABLE_HEIGHT` (fed to `DotInputCluster.titleTableHeight`,
- * consumed by `graph-layout-build.ts#addClusters`'s `setHtmlAttr` seam) is
- * the value G5 C2's own 15-point marker sweep found reproduces jar's real
- * gap through graphviz-ts's `gap = HEIGHT + 16` relationship: `3 + 16 = 19`.
+ * consumed by `graph-layout-build.ts#addClusters`'s `setHtmlAttr` seam) was
+ * ORIGINALLY set to 3 by G5 C2's own 15-point marker sweep, on the theory
+ * that graphviz-ts's `gap = HEIGHT + 16` (`3 + 16 = 19`, matching
+ * `CLUSTER_HEADER_HEIGHT` below) reproduced jar's real header gap —
+ * WRONG: mission G6 T1 (`plans/g6-cluster-geometry/decision-journal.md`,
+ * "T1 mechanism artifact") found the jar's REAL svek DOT emission is
+ * `HEIGHT="9"`, a content-independent constant verified across 70+ cached
+ * `test-results/dot-cache/state` (nested per-fixture) `svek-N.dot`
+ * samples — feeding `HEIGHT=3` starved graphviz-ts's cluster-label
+ * TOP-border formula
+ * (`border[TOP_IX] = label.dimen.y + 2*GAP`, GAP=4, graphviz-ts's own
+ * `graph-label.ts:113`, a faithful port of `lib/common/input.c:885-892`)
+ * by exactly 6pt per `titleTableEligible` cluster, compounding by nesting
+ * depth. `9` is the jar-verified value; the `3 + 16 = 19` coincidence above
+ * only ever matched `CLUSTER_HEADER_HEIGHT` (a SEPARATE, unchanged,
+ * renderer-side constant, its own paragraph below) — it was never a
+ * correct derivation of the DOT-layout-input value here.
  *
  * `CLUSTER_HEADER_HEIGHT` (the real header-to-divider gap `renderer-
  * composite-box.ts`'s new cluster shape draws at) was re-confirmed this
@@ -93,7 +107,7 @@ function measureClusterTitle(display: string, ctx: DiagramCtx): { width: number;
  * composites entirely (deferred — ledger.md's own "entrypoint/exitpoint
  * family" C3+ queue item).
  */
-const CLUSTER_TITLE_TABLE_HEIGHT = 3;
+const CLUSTER_TITLE_TABLE_HEIGHT = 9;
 const CLUSTER_HEADER_HEIGHT = 19;
 /** `node.y + CLUSTER_TITLE_BASELINE_MARGIN + textAscent(fontSize)` — jar-
  *  verified 14.8889 = 4 + 10.8889 (`textAscent(14)`) on both real fixtures

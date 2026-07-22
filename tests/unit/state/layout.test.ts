@@ -25,6 +25,8 @@ import type {
 } from '../../../src/diagrams/state/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
+import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
+import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
 const measurer = new FormulaMeasurer();
 const theme = defaultTheme;
@@ -875,6 +877,15 @@ describe('layoutState — parallel transitions between same states', () => {
 // ---------------------------------------------------------------------------
 
 describe('layoutState -- cluster inner margin wiring (G5 C7, mechanism 16 margin half)', () => {
+  // G6 T2 (`plans/g6-cluster-geometry/decision-journal.md`, "T1 mechanism
+  // artifact"): the two `height`/`y` values below were re-measured after
+  // `CLUSTER_TITLE_TABLE_HEIGHT` moved 3 -> 9 (state-composite-cluster.ts) --
+  // both composites here are `titleTableEligible` (single-line title, no
+  // border points), so each picks up the jar-verified +6pt TOP margin the
+  // old HEIGHT=3 value was starving (`border[TOP_IX] = label.dimen.y +
+  // 2*GAP`, graphviz-ts's graph-label.ts:113). `width` is UNCHANGED -- the
+  // fix is TOP-margin-only, confirming it doesn't touch the G5 C7 side-
+  // margin mechanism this describe block also covers.
   it('an UNTOUCHED cluster composite (no transition references A by its own name) gets a single wrap level', () => {
     const child = makeState('Child');
     const a = makeState('A', { children: [child] });
@@ -887,7 +898,7 @@ describe('layoutState -- cluster inner margin wiring (G5 C7, mechanism 16 margin
     const comp = result.states.find((s) => s.id === 'A');
     expect(comp?.clusterHeaderHeight).toBe(19);
     expect(comp?.width).toBeCloseTo(84, 1);
-    expect(comp?.height).toBeCloseTo(93, 1);
+    expect(comp?.height).toBeCloseTo(99, 1);
   });
 
   it('a TOUCHED cluster composite ([*] --> A, the group entity itself) gets a deeper 2-level wrap', () => {
@@ -911,7 +922,62 @@ describe('layoutState -- cluster inner margin wiring (G5 C7, mechanism 16 margin
     // (a real structural difference, not just the margin delta) pushes A's
     // own box measurably wider/taller/lower than the untouched case above.
     expect(comp?.width).toBeCloseTo(119, 1);
-    expect(comp?.height).toBeCloseTo(109, 1);
-    expect(comp?.y).toBeCloseTo(51, 1);
+    expect(comp?.height).toBeCloseTo(115, 1);
+    expect(comp?.y).toBeCloseTo(45, 1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// G6 T2: CLUSTER_TITLE_TABLE_HEIGHT seam-level fix (3 -> 9). T1's mechanism
+// artifact (decision-journal.md) traced the vertical residual to the seam
+// feeding graphviz-ts's `setHtmlAttr` HTML title-table `HEIGHT` attr with
+// the WRONG dims -- this block asserts the fix at the seam itself (the
+// `DotInputCluster.titleTableHeight` value `setLayoutInputObserver`
+// captures before it reaches graphviz-ts), not just its downstream pixel
+// effect (covered by the describe block above).
+// ---------------------------------------------------------------------------
+
+describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 vertical residual fix)', () => {
+  it('a titleTableEligible composite feeds graphviz-ts titleTableHeight=9 (jar-verified svek HEIGHT="9"), not the old 3', () => {
+    const child = makeState('Child');
+    const a = makeState('A', { children: [child] });
+    const ext = makeState('External');
+    const ast: StateDiagramAST = {
+      states: [a, ext],
+      transitions: [{ from: 'Child', to: 'External' }],
+    };
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutState(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    expect(captured).toHaveLength(1);
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'A');
+    expect(cluster?.titleTableHeight).toBe(9);
+    // titleTableWidth is untouched by this fix -- confirms the change is
+    // HEIGHT-only, matching T1's formula (`border[TOP_IX]` only).
+    expect(cluster?.titleTableWidth).toBeCloseTo(9.333, 2);
+  });
+
+  it('a C3-ineligible composite (multi-line title) keeps the plain-text label attr, unaffected by the HEIGHT fix', () => {
+    const child = makeState('Child');
+    const a = makeState('A', { display: 'line1\nline2', children: [child] });
+    const ext = makeState('External');
+    const ast: StateDiagramAST = {
+      states: [a, ext],
+      transitions: [{ from: 'Child', to: 'External' }],
+    };
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutState(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'line1\nline2');
+    expect(cluster?.titleTableHeight).toBeUndefined();
+    expect(cluster?.titleTableWidth).toBeUndefined();
   });
 });
