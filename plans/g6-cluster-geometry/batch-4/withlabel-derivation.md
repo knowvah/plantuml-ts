@@ -1890,3 +1890,362 @@ matrix is the complete input a paper derivation needs.
   deleted (`scripts/_tmp-g7-t1-matrix.ts`,
   `scripts/_tmp-g7-t1-endanchor.ts`); `git status` clean of
   `src/`/`tests/`/`scripts/` changes.
+
+---
+
+# Paper gate v3 (G7 T13)
+
+**Verdict: PAPER-GATE-MISS.** bitaxo and kotagu reproduce their targets
+EXACTLY, both fully probed (no asserted values) from the current tree
+(T7+T11+T12 landed, T14 not landed, simulated per T8's edit list).
+pesita's `AA` does NOT reproduce — not because of the border-point
+cluster-structure wiring (which is confirmed, by direct construction,
+structurally correct and jar-isomorphic, same as T8/T9 found) but
+because of a newly-isolated FOURTH mechanism, orthogonal to T7/T11/T12
+and outside T14's edit-list scope entirely: **graphviz's cycle-breaking
+DFS root is sensitive to node/edge DECLARATION ORDER, and this port's
+declaration order differs from jar's Svek emission order for any pass
+whose edge set contains a cycle** — which `AA`'s own pass does (a
+4-node cycle formed by two of T12's own direction-reversed edges) and
+neither bitaxo's (zero edges) nor kotagov's (two edges, no cycle) does.
+This is a genuine root cause, isolated by controlled single-variable
+experiments below (not asserted), and it was invisible to every prior
+round's isolation matrix (Round 3 T1's C1+C3 "pesita mirror" cell used
+a synthetic 2-node/2-edge repro with no cycle).
+
+## 0. Method
+
+Per the mission's PROBE mandate, every input below was extracted from
+the CURRENT tree by instrumented execution, not read from a prior
+round's citation:
+
+1. **Composite header dims (`labelWidth`/`labelHeight`, T11-fixed) and
+   the full builder input the state pipeline hands `graph-layout`
+   TODAY** — captured via `setLayoutInputObserver` +`renderSync` (the
+   exact seam `tests/unit/state/state-composites-dot.test.ts` already
+   uses), for all three fixtures, this session
+   (`scripts/_tmp-g7-t13-capture.ts`, deleted).
+2. **`isGroupTouched`/`titleTableEligible`-adjudication booleans** —
+   called the real `classifyDiagram`/`isGroupTouched` functions
+   directly against each fixture's real parsed AST (`parseState`),
+   not re-read from T8's citations (`scripts/_tmp-g7-t13-classify.ts`,
+   deleted). Confirmed identical to T8 Round-3 §2's adjudication:
+   `bitaxo/C`=false, `pesita/AA`=true, `pesita/nasreq_auth`=true,
+   `kotagu/CompositeState`=false, `kotagu/SubComposite`=true.
+3. **T14 simulation** — wrote a literal extension of the CURRENT,
+   T7-landed `graph-layout-build.ts#handlesFor`/`addClusters` (verbatim
+   copy of the existing non-border-point branch + one new
+   `portRanksLabelOnEe` branch implementing T8 Round-3 §5 items 1/3/5/6),
+   built with the REAL `graphviz-ts` programmatic builder
+   (`createGraph`/`addSubgraph`/`addNode`/`setHtmlAttr`/`render`/
+   `getLayout`) fed the CAPTURED (step 1) node/edge/cluster data —
+   not hand-copied numbers (`scripts/_tmp-g7-t13-simulate.ts`, deleted).
+4. **Frontier correction** — applied the already-committed, unmodified
+   `frontierCalculator`/`ensureMinWidth`
+   (`src/diagrams/state/state-composite-frontier.ts`, imported directly,
+   not re-derived) with `minWidth` read from the SAME captured
+   `cluster.labelWidth + 10` (not copied from any prior doc).
+5. **Divergence isolation (pesita only, after step 3 missed)** — ran
+   real `dot` 15.1.0 directly on jar's own VERBATIM cached
+   `svek-3.dot` (unmodified) to reconfirm graphviz-ts's text path
+   reproduces it byte-exact (it does — rules out a graphviz-ts defect
+   outright), then performed a controlled bisection: substituted
+   individual pieces (node sizes, edge-label dimensions, cluster names,
+   ids, named-vs-anonymous rank subgraph) between jar's real DOT and
+   this session's own reconstruction one variable at a time, re-running
+   real `dot` after each substitution, until the exact divergent
+   variable was isolated (§4 below). No probe scripts or `/tmp` files
+   retained.
+
+## 1. Probed cluster inputs (T11/T12-correct, captured this session)
+
+| Fixture / cluster | `label` | `labelWidth`/`labelHeight` (T11 formula) | `portRanks` | `portAnchorId` | `parentId` |
+|---|---|---|---|---|---|
+| `bitaxo` / `C` (cluster0) | `"C"` | 10.15 / 9 | `[{source:[d]}]` | `__zaent_C` | — |
+| `pesita` / `AA` (cluster1) | `"AA"` | 116.4625 / 28 | `[{sink:[aa_ok_ex]}]` | `__zaent_AA` | cluster0 (nasreq_auth) |
+| `pesita` / `nasreq_auth` (cluster0) | `"NASREQ auth session"` | 133.9625 / 28 | — (not border-point) | — | — |
+| `kotagu` / `CompositeState` (cluster0) | `"CompositeState"` | 99.575 / 9 | `[{source:[entry1]}]` | `__zaent_CompositeState` | — |
+| `kotagu` / `SubComposite` (cluster1) | `"SubComposite"` | 91.875 / 9 | — (not border-point) | — | cluster0 |
+
+`AA`'s 116.4625/28 and `CompositeState`'s 99.575/9 match jar's cached
+`WIDTH="116" HEIGHT="28"` / `WIDTH="99" HEIGHT="9"` exactly (truncated)
+— confirms T11 is correctly wired and probeable, not asserted.
+
+Edge reversal (T12) reconfirmed present on the fixtures that need it:
+`kotagu`'s pass has `__zaent_SubComposite -> __init_CompositeState`
+(the `[*] -up-> SubComposite` reversal, matching jar's cached
+`svek-1.dot:24` `zaent0003->sh0011`); `pesita`'s pass has
+`Closing -> Idle` (minLen 0, the `Idle -left-> Closing` reversal) and
+`__zaent_AA -> Reanimate` (minLen 0, the `Reanimate -left-> AA`
+reversal) — both correctly reversed, both later implicated in §4.
+
+## 2. bitaxo / `C` — EXACT
+
+Simulated T14 construction (rank subgraph named `sink_group_cluster0`,
+non-`cluster`-prefixed per `docs/graphviz-issues/08`'s resolution; no
+`a`/`i` wrap, `isGroupTouched('C')`=false, matching probed value):
+
+- probed `initial` (graphviz-ts `getLayout().clusters['cluster0']`,
+  native frame, ALREADY top-left-corner — not center, see §5 note):
+  `{x:155,y:11,width:42,height:115.72}`
+- `insides=[]`, `points=[{x:176,y:25}]` (probed `d`'s post-layout
+  center)
+- `frontierCalculator` → core `{155,25,197,126.72}` = 42×101.72 (no
+  pushes fire, matches T4/T8's hand-traced arithmetic)
+- `ensureMinWidth(minWidth=10.15+10=20.15)` → no-op (42 ≥ 20.15)
+- **FINAL: 42 × 101.72 — EXACT MATCH.**
+
+## 3. kotagu / `CompositeState` — EXACT
+
+Simulated T14 construction (no `a`/`i` wrap, `isGroupTouched('Composite
+State')`=false, matching probed value; `SubComposite` nests via the
+EXISTING T7 `parentInnermost` mechanism, unchanged, inside
+`CompositeState`'s `ee`):
+
+- probed `initial`: `{x:8,y:8,width:303,height:358}`
+- `insides=[{x:24,y:193,w:20,h:20} (sh0011/[*] pseudo-node),
+  {x:68,y:57,w:191,h:277} (SubComposite's own already-correct
+  cluster box)]`, `points=[{x:297,y:108}]` (probed `entry1` center)
+- `frontierCalculator` → core `{8,8,297,366}` = 289×358 (no pushes
+  fire, matches T4/T8)
+- `ensureMinWidth(minWidth=99.575+10=109.575)` → no-op
+- **FINAL: 289 × 358 — EXACT MATCH.**
+
+## 4. pesita / `AA` — MISS, mechanism isolated
+
+Simulated T14 construction (same code as §2/§3, `a`-only wrap + `i`
+wrap since `isGroupTouched('AA')`=true, matching probed value; nests
+inside `nasreq_auth`'s EXISTING T7 `p1` handle, unchanged):
+
+- probed `initial`: `{x:156,y:325.64,width:148,height:307.61}` —
+  **width exact (148, matches T4/T8's own jar-derived value); height
+  wildly wrong (307.61 vs jar's real 118.72, a >2.5x miss)**.
+- `insides=[]`, `points=[{x:290,y:619.25}]`
+- `frontierCalculator`/`ensureMinWidth` (mechanically correct,
+  unmodified) propagate the wrong `initial` straight through:
+  **FINAL: 152 × 293.61 vs target 126 × 104.72.**
+
+### Divergent term
+
+**`initial`'s height** (148×307.61 raw vs jar's real 148×118.72) —
+everything downstream (frontier arithmetic, `ensureMinWidth`) is
+correct given its input; the input itself is wrong.
+
+### Mechanism (isolated by controlled bisection, `dot` 15.1.0)
+
+1. Confirmed graphviz-ts is not the cause: `parse()`+`render()`+
+   `getLayout()` on jar's own VERBATIM cached `svek-3.dot` (unmodified,
+   byte-for-byte) reproduces `cluster15` (`AA`) at exactly
+   `148×118.720012` — matching real `dot` to the sub-px level. No
+   graphviz-ts defect exists for this shape.
+2. Confirmed it is not a numeric-value difference: substituted this
+   session's own captured node sizes (Reanimate/Closing/etc, which do
+   differ slightly from jar's — a KNOWN, separate, unrelated autonom-
+   sizing divergence, out of scope) AND this session's own captured
+   edge-label dimensions into jar's OTHERWISE-UNMODIFIED real DOT
+   structure — real `dot` still gives ≈148×111.72 (small, correct
+   order of magnitude). Ruled out: wrong Reanimate/Closing size,
+   wrong edge-label width/height (including the SEPARATE,
+   confirmed-real, unrelated `\n`-not-split-into-lines bug in this
+   port's edge-label measurer — verified present via label dimension
+   comparison, e.g. this port's `Idle->AA` label measures 274×14
+   single-line vs jar's 156×28 two-line for the SAME source text; does
+   NOT by itself reproduce the blowup when substituted alone).
+3. Confirmed it is not ids, cluster names, or named-vs-anonymous rank
+   subgraph naming: swapped jar's real DOT's ids/cluster-names to this
+   port's own ids/names, and separately swapped jar's anonymous
+   `{rank=sink;sh0019;}` for a named, non-`cluster`-prefixed subgraph
+   (`docs/graphviz-issues/08`'s own resolved form) — real `dot` still
+   gives the small, correct ≈148×111.72 in both cases.
+4. **Isolated the actual variable: which NODE is encountered FIRST in
+   the DOT text.** `AA`'s own pass contains a 4-node CYCLE among
+   ranked siblings: `Idle -> __zaent_AA -> Reanimate -> Closing ->
+   Idle`, closed specifically by TWO of T12's own direction-reversed
+   edges (`Closing->Idle`, from `Idle -left-> Closing`; `__zaent_AA->
+   Reanimate`, from `Reanimate -left-> AA`). graphviz's cycle-breaking
+   pass (`dotgen/acyclic.c`, a DFS run before rank assignment) starts
+   from the FIRST node registered in the graph — which is whichever
+   node a node declaration OR an edge statement first mentions. Jar's
+   real Svek DOT happens to declare an edge (`sh0012->sh0010`, i.e.
+   `Closing->Idle`) as literally the FIRST statement in the file,
+   before any node's own shape line — making `Closing` graphviz's DFS
+   root. This port's `addNodes` (`graph-layout-build.ts:64-99`)
+   unconditionally declares every node's shape FIRST, in
+   `PassAccumulator.nodes` push order (`aa_ok_ex` first for this
+   pass), before any edge is emitted — making `aa_ok_ex` the DFS root
+   instead. **Different DFS roots choose different back-edges to
+   virtually reverse when breaking the SAME cycle, producing a
+   materially different rank assignment and hence a >2.5x taller
+   cluster bbox for the exact same cluster-structure input.**
+   Confirmed by 4 independent single-variable experiments on this
+   session's own reconstructed DOT (fed to real `dot`, not just
+   graphviz-ts): (a) moving BOTH reversed edges to the top of the file
+   (matching jar's position) → fixes the height (≈111.72); (b) moving
+   only ONE of the two → also fixes it (either back-edge choice from a
+   different root still resolves the same cycle correctly once the
+   root changes); (c) a NEGATIVE control — moving an UNRELATED, non-
+   cyclic edge to the top instead (also establishing a new DFS root,
+   incidentally) → ALSO fixes it, proving the mechanism is "which node
+   is first," not "where the minlen=0 edges specifically sit"; (d)
+   reordering ONLY the node-declaration block (no edges touched at
+   all) so `Closing` is declared first → ALSO fixes it, isolating the
+   variable to node/edge FIRST-ENCOUNTER order, full stop.
+5. Applying the frontier arithmetic to the order-fixed reconstruction's
+   `initial` (`{511,810,659,921.72}` = 148×111.72,
+   `points=[{557,824}]`) gives **126.46 × 97.72** — width now exact
+   (126, matching target's 126 to the rounding digit) but height still
+   off by ~7px (97.72 vs 104.72), consistent with the SEPARATE,
+   already-named, out-of-scope Reanimate/Closing autonom-sizing
+   divergence (§ bullet 2) contributing residual noise once the
+   dominant (cycle-order) term is corrected. This confirms the
+   cycle-breaking-order mechanism is the DOMINANT term, not the sole
+   one, and that fixing it (out of scope for a paper gate) would not
+   by itself guarantee an exact re-match without ALSO addressing the
+   pre-existing autonom-sizing gap.
+
+## 5. Ruled out
+
+1. **T14's own border-point cluster-structure wiring (a/p0 vs a-only,
+   rank-group placement, `ee`/`i` nesting).** Ruled out: the SAME
+   simulated construction reproduces bitaxo and kotagu EXACTLY, and
+   for pesita, structural inspection of the rendered SVG confirms
+   `cluster1`(AA)'s nesting (`cluster1a > cluster1 > [rank group +
+   node] > cluster1ee > cluster1i > anchor`) is isomorphic to jar's
+   real `cluster15a>cluster15>{rank=sink;...}>...>cluster15ee>
+   cluster15i` — the WIDTH component of pesita's own miss (152 raw,
+   126.46 after order-fix) already matches target exactly once the
+   unrelated order issue is corrected, confirming the structure itself
+   is right.
+2. **A graphviz-ts library defect.** Ruled out directly: graphviz-ts's
+   real `parse`/`render`/`getLayout` reproduces jar's own verbatim
+   cached DOT byte-exact (148×118.72). The order-sensitivity itself
+   (§4 item 4) was independently reproduced against the REAL `dot`
+   15.1.0 binary, not just graphviz-ts — confirming it is standard,
+   documented `dot` layout-engine behavior (DFS-root-dependent cycle
+   breaking), not a graphviz-ts-specific bug.
+3. **T11's `titleAndAttributeWidth` fix.** Ruled out as the cause of
+   THIS specific miss: `AA`'s probed `labelWidth`/`labelHeight`
+   (116.4625/28) already match jar's cached DOT exactly (§1);
+   substituting jar's exact numbers into this port's own reconstructed
+   STRUCTURE still produces the wrong height (§4 item 2 control),
+   confirming T11 is fully orthogonal to this miss.
+4. **T12's edge-direction-reversal correctness.** Ruled out as
+   incorrect: the two reversed edges (`Closing->Idle`,
+   `__zaent_AA->Reanimate`) are semantically exactly right (verified
+   against jar's cached `svek-3.dot`'s own `sh0012->sh0010`/
+   `zaent0002->sh0011`, same tail/head pairs after id normalization) —
+   T12 correctly produces the CYCLE-closing edges jar's own DOT also
+   has; the divergence is which node graphviz treats as the DFS root
+   given those edges exist, not whether the edges themselves are
+   correct.
+5. **Missing `nasreq_auth`'s own title table in the reconstruction.**
+   Tested directly (added `cluster0`'s own HTML title-table label to
+   the broken reconstruction) — height stayed broken (306.36),
+   ruling this out as a contributing term.
+6. **The `zaent0002`/`__zaent_AA` "declared twice" (once directly in
+   `ee`, once again in `i`) jar quirk** (`ClusterDotString.java:148-149`
+   unconditional declare + `:182-184` `added==null` fallback
+   re-declare) that T8 Round-2/3's own translation to a builder call
+   sequence only ever added ONCE (into `i`, never also directly into
+   `ee`). Tested directly (added the redundant `ee`-level declaration
+   to this session's reconstruction) — height stayed broken (306.36),
+   ruling this out as the cause of THIS miss. Flagged as a genuine,
+   separate, small residual DOT-shape gap in T8's own edit list (§7
+   below) since it is real (confirmed present in jar's DOT) even
+   though it doesn't explain this specific numeric miss.
+7. **Named vs. anonymous rank-subgraph syntax**
+   (`docs/graphviz-issues/08`'s own resolved distinction). Ruled out
+   directly (§4 item 3) — both forms give the identical small/correct
+   bbox once embedded in jar's own otherwise-unmodified structure.
+
+## 6. Confirmation that bitaxo/kotagu have no such cycle
+
+`bitaxo`'s pass has zero edges (no cycle possible by construction).
+`kotagu`'s pass has exactly two edges touching `CompositeState`'s
+neighborhood (`__zaent_SubComposite->__init_CompositeState`,
+`entry1->B`) — neither forms a cycle with any other edge in the pass
+(`SubComposite`/`CompositeState`/`entry1`/`B`/`A` have no return path).
+This is why both reproduce exactly regardless of node/edge declaration
+order, while `pesita`'s `AA` — the only one of the three targets whose
+LOCAL neighborhood contains a T12-reversed-edge-induced cycle — does
+not.
+
+## 7. Final T14 edit-list delta vs T8's 10 items
+
+**No item in T8's 10-item edit list changes.** All 10 items (relax
+`titleTableEligible`, D4 stereo exclusion — now superseded by T11's
+general formula but functionally unchanged, `innerMarginLevels`/
+`unwrappedNodeId`/`borderPointAncestorWrap` guards, new
+`DotInputCluster` field, `handlesFor`'s new border-point branch, the
+member-placement early branch, `frontierCalculator` wiring, bottom-up
+correction order, regression coverage, doc update) are confirmed
+correct and sufficient to reproduce bitaxo and kotagu exactly, and are
+confirmed structurally sufficient (isomorphic to jar) for pesita too.
+
+**One item is ADDED, out of T14's own scope, for the mission record:**
+
+11. **(NEW, NOT part of T14, filed for follow-up)** This port's global
+    node/edge declaration order (`graph-layout-build.ts#addNodes`/
+    `addEdges`, driven by `PassAccumulator.nodes`/`edges` push order,
+    itself driven by `resolveMember`'s tree-walk + `addLevelEdges`'s
+    per-transition push order) does not match jar's Svek emission
+    order closely enough to guarantee identical graphviz cycle-
+    breaking (`dotgen/acyclic.c`) decisions whenever a pass's edge set
+    contains a cycle. This is INVISIBLE to non-cyclic passes (the vast
+    majority of the corpus, including bitaxo/kotagu) and only matters
+    for a pass whose edges form a cycle among ranked siblings — which
+    a `-left-`/`-up-`/reverse-arrow transition (T12) can newly
+    introduce into a previously-acyclic neighborhood. Not fixable
+    within T14's write-set (T14 only touches cluster/subgraph
+    construction, not the top-level node/edge declaration sequence)
+    and not something a hand-derivation can safely simulate away —
+    flag for a dedicated follow-up mission/task (candidate write-set:
+    `state-composite-pass.ts`'s node/edge push order, or
+    `graph-layout-build.ts#addNodes`/`addEdges`'s own emission order)
+    once a human decides whether/how to match jar's Svek ordering
+    rule (unclear from this session's evidence alone what that rule
+    IS beyond "puts at least one cycle-closing edge first" — jar's own
+    `DotStringFactory`/`SvekEdge` ordering logic was not read this
+    session; out of a paper gate's scope).
+12. **(NEW, NOT part of T14, minor DOT-shape completeness item)** The
+    anchor/zaent node's "declared twice" jar quirk (§5 item 6) — T8's
+    own builder translation only ever adds the anchor node to `i`
+    (when the `i` wrapper fires), never ALSO directly to `ee` as jar's
+    DOT does. Confirmed NOT to matter for any of the 3 targets'
+    numeric bboxes (§5 item 6), so not blocking, but should be added
+    to `handlesFor`'s border-point branch for DOT-shape fidelity if a
+    future DOT-parity fixture happens to be sensitive to it.
+
+## 8. Predicted vs. target summary
+
+| Fixture / composite | Target (w×h) | Predicted (w×h) | Match |
+|---|---|---|---|
+| `bitaxo-18-tamo974` / `C` | 42 × 101.72 | 42 × 101.72 | **Exact** |
+| `pesita-10-dene726` / `AA` | 126 × 104.72 | 152 × 293.61 | **MISS** (see §4) |
+| `kotagu-43-miza629` / `CompositeState` | 289 × 358 | 289 × 358 | **Exact** |
+
+## 9. Files/paths used
+
+- `test-results/dot-cache/state/{bitaxo-18-tamo974,pesita-10-dene726,
+  kotagu-43-miza629}/{in.puml,svek-*.dot}` (read only, ground truth)
+- `src/diagrams/state/state-composite-cluster.ts`,
+  `state-composite-header.ts`, `state-composite-pass.ts`,
+  `state-composite-classify.ts`, `state-composite-detect.ts`,
+  `state-composite-frontier.ts` (read only — confirmed T11/T12 landed,
+  T14 not landed, exactly as the prior rounds' journal rows state)
+- `src/core/graph-layout-build.ts`, `graph-layout.ts`,
+  `graph-layout.types.ts` (read only — `handlesFor`/`addClusters` as
+  T7 actually landed it; confirmed zero `portRanks` references,
+  matching Round 3/T8)
+- `docs/graphviz-issues/08-cluster-scoped-rank-subgraph-bbox.md` (read
+  only — cluster-prefix naming rule, reused to construct the T14
+  simulation's rank-subgraph names correctly)
+- jar: `~/git/plantuml/.../svek/ClusterDotString.java` (re-confirmed
+  the `zaent`-declared-twice shape cited in §5 item 6/§7 item 12)
+- Probes (`scripts/_tmp-g7-t13-{capture,classify,simulate,jardot,
+  textpath}.ts`, `npx tsx`, this session) — all deleted before
+  finishing. Cross-check artifacts (`dot -Txdot` runs, Python text
+  substitutions) written only to `/tmp/pesita-*.dot`/`.xdot`, outside
+  the repo, all deleted before finishing.
+- No production files modified. `git status` clean apart from this
+  doc.

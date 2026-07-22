@@ -12,7 +12,13 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: ACTIVE - ATTEMPT 6 (human sign-off 2026-07-22)
+## Status: BLOCKED - paper gate v3 miss; awaiting sign-off (emission order)
+<!-- 2026-07-22. T11+T12 landed and hold. Third pre-existing gap:
+     port declares all nodes before edges; jar's svek emission order
+     differs, and graphviz cycle-breaking DFS is order-sensitive for
+     cyclic passes (pesita AA). Fix = port jar's svek emission order
+     (pin-risk: 57 byte-exact pins depend on current order), then
+     paper gate v4, then T14. -->
 <!-- 2026-07-22. T9 wiring verified structurally correct (nesting
      isomorphic to jar DOT). Two remaining pre-existing gaps, journal
      T9 row: (1) titleTableWidth lacks jar's max(title, attributes)
