@@ -165,3 +165,27 @@ clean — the border-point wiring itself remains unimplemented (G6
 batch-4 stopped; see plans/g6-cluster-geometry/README.md). The
 re-attempt is unblocked by this resolution but is a separate,
 maintainer-authorized effort.
+
+---
+
+**VERIFIED (graphviz-ts maintainer, 2026-07-22).** Re-ran the minimal
+repro three ways against real dot 15.1.0 as ground truth. This upgrades
+the finding from "investigation requested" to confirmed; the numbers
+settle the Session A / Session B contradiction definitively:
+
+| path | cluster15 (w×h) | sh0019 | vs real dot |
+|---|---|---|---|
+| real `dot -Txdot` (ground truth) | 66 × 149.72 | sink (bottom, y≈40) | — |
+| graphviz-ts DOT-text (`renderSvg`/`getLayout`) | 66.00 × 149.72 | y=40 (sink) | exact |
+| builder, rank-subgraph name `cluster15rank_sink` | **117 × 97** | y=132 (NOT sink) | broken |
+| builder, rank-subgraph name `sink_group_15` | 66.00 × 149.72 | y=40 (sink) | exact |
+
+The `cluster`-prefixed name is the whole defect: `isACluster`
+(`src/layout/dot/rank.ts:87-91`) treats it as a real cluster (C-faithful
+— real dot's `is_a_cluster` has the identical name-prefix rule), so the
+rank set is routed through `makeNewCluster`/`nodeInduce` instead of
+`csProcessRankset`, giving a wrong bbox (117×97) and no rank forcing
+(sh0019 at y=132, not the sink). A non-`cluster` name reproduces real dot
+to the digit. Call order and node-membership variants were irrelevant.
+**graphviz-ts confirmed closed — no library change.** Session A used a
+clean name; Session B used the `cluster`-prefixed one.
