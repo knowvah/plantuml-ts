@@ -923,7 +923,17 @@ describe('layoutState -- cluster inner margin wiring (G5 C7, mechanism 16 margin
     // own box measurably wider/taller/lower than the untouched case above.
     expect(comp?.width).toBeCloseTo(119, 1);
     expect(comp?.height).toBeCloseTo(115, 1);
-    expect(comp?.y).toBeCloseTo(45, 1);
+    // G7 T7: `y` moved 45 -> 50 once `graph-layout-build.ts#addClusters`
+    // started porting jar's OUTER "a"/"p0" ancestor-protection pair
+    // (`ClusterDotString.java:91-116`) -- A is `innerMarginLevels: 2`
+    // (touched), so it now ALSO gets wrapped in two more real graphviz
+    // `cluster*` subgraphs OUTSIDE its own boundary (matching jar exactly,
+    // verified structurally against `kotagu-43-miza629`'s cached svek DOT,
+    // `plans/g7-borderpoint-rank/decision-journal.md` T7 row), which shifts
+    // the outer `[*] --> A` layout enough to push A's own box down 5px --
+    // this pin was computed by the PRE-T7 code (a/p0 unported), not by jar;
+    // 50 is the corrected, jar-faithful, deterministic value.
+    expect(comp?.y).toBeCloseTo(50, 1);
   });
 });
 

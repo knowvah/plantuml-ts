@@ -382,4 +382,58 @@ describe('layoutGraph — cluster inner margin levels (G5 C7, mechanism 16 margi
     // not the deep innerMarginLevels:2 value the wrapped 'a' node gets.
     expect(anchor.y - c.y).toBeCloseTo(8, 5);
   });
+
+  // G7 T7 (`plans/g7-borderpoint-rank/decision-journal.md`, T5 root-cause
+  // row): before the parent-resolution fix, `addClusters#builderFor`'s
+  // parent lookup returned the parent's OUTER `main` handle -- cached
+  // before the parent's own "i"/"p1" wrap was built -- so a nested child
+  // cluster landed as a SIBLING of the parent's protection wrappers instead
+  // of a descendant (pesita-10-dene726's `AA`, which must nest inside
+  // `nasreq_auth`'s innermost wrap). Mirrored white-box (exact subgraph
+  // nesting) in graph-layout-build.test.ts; this proves the same fix
+  // black-box, through the numeric consequence a caller of the public
+  // `layoutGraph()` API actually observes.
+  it('a nested child cluster sits inside the parent innermost wrap (24px in, G7 T5/T7 parent-resolution fix)', () => {
+    const g: DotInputGraph = {
+      nodes: [box('x')],
+      edges: [],
+      clusters: [
+        { id: 'outer', nodeIds: [], innerMarginLevels: 2 },
+        { id: 'inner', nodeIds: ['x'], parentId: 'outer' },
+      ],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    const outer = r.clusters!.find((cl) => cl.id === 'outer')!;
+    const inner = r.clusters!.find((cl) => cl.id === 'inner')!;
+    // Matches the un-nested "triples the side margin" case above exactly:
+    // `inner` sits inside `outer`'s "p1" handle, 24px (2-level wrap) from
+    // `outer`'s own reported boundary on every side -- had the parent-
+    // resolution bug still been present, `inner` would sit as a sibling of
+    // `outer`'s protection wrappers instead, at a materially different
+    // (unwrapped, ~8px or negative) offset.
+    expect(inner.x - outer.x).toBeCloseTo(24, 5);
+    expect(inner.y - outer.y).toBeCloseTo(24, 5);
+    expect(outer.x + outer.width - (inner.x + inner.width)).toBeCloseTo(24, 5);
+    expect(outer.y + outer.height - (inner.y + inner.height)).toBeCloseTo(24, 5);
+  });
+
+  // Issue-08 regression lock (docs/graphviz-issues/08-cluster-scoped-rank-
+  // subgraph-bbox.md): the oracle DOT-parity comparator's `parseClusters`
+  // treats any REAL graphviz cluster subgraph as a member of the result --
+  // this proves the new outer "a"/"p0" wrapper pair (like the pre-existing
+  // inner "i"/"p1" pair) never leaks an extra entry into `DotLayoutResult
+  // .clusters` through the SAME `ClusterIndex.idByName` filtering the
+  // DOT-parity gate itself relies on being exhaustive.
+  it('a touched, wrapped cluster reports EXACTLY one clusters[] entry -- the "a"/"p0"/"i"/"p1" wrappers never leak', () => {
+    const g: DotInputGraph = {
+      nodes: [box('a')],
+      edges: [],
+      clusters: [{ id: 'grp1', nodeIds: ['a'], innerMarginLevels: 2 }],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    expect(r.clusters).toHaveLength(1);
+    expect(r.clusters![0]!.id).toBe('grp1');
+  });
 });

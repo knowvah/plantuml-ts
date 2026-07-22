@@ -12,7 +12,7 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: CLOSED — ATTEMPT-4-MISS, permanent stop (cond. 7)
+## Status: ACTIVE — ATTEMPT 5 (human sign-off 2026-07-22)
 <!-- 2026-07-22. Fifth attempt requires human sign-off. Root cause
      identified (journal T5 row): pre-existing addClusters
      parent-resolution gap + unported jar "a"/"p0" ancestor-wrapper
@@ -36,6 +36,7 @@ rule; subagents never run git mutations).
 | [2](batch-2/overview.md) | New-.tgz adoption (library path only; SKIP on usage verdict) | T3 | SKIPPED (usage verdict, T2) |
 | [3](batch-3/overview.md) | Attempt 4: paper gate → implementation | T4, T5 | T4 [x]; T5 MISS — permanent stop |
 | [4](batch-4/overview.md) | Family sweep + close | T6 | NOT RUN (T5 stop) |
+| [5](batch-5/overview.md) | Attempt 5: a/p0 port → paper gate v2 → wiring → sweep | T7, T8, T9, T10 | [ ] |
 
 ## Resume procedure (cold-start, after external graphviz-ts fix)
 

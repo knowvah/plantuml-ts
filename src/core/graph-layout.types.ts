@@ -234,7 +234,20 @@ export interface DotInputCluster {
    *  entrypoint/exitpoint family, excluded from `titleTableEligible`) reads
    *  member positions directly rather than graphviz's own reported cluster
    *  bbox, so this margin mechanism does not apply there (unverified,
-   *  deferred). */
+   *  deferred).
+   *
+   *  G7 T7 (`plans/g7-borderpoint-rank/decision-journal.md`, T5 root-cause
+   *  row): the SAME value ALSO gates jar's OUTER "a"/"p0" ancestor pair
+   *  (`ClusterDotString.java:91-116`), which `graph-layout-build.ts
+   *  #addClusters` wraps around the whole cluster (a/p0/main/i/p1, outer to
+   *  inner) — `protection0()` is unconditionally true whenever this field is
+   *  set (same non-swimlane reasoning as `protection1()` above), and jar's
+   *  `thereALinkFromOrToGroup1` is the exact boolean this field's own `2`
+   *  value already encodes, so no separate field is needed. Verified against
+   *  the real jar's cached svek DOT (`kotagu-43-miza629`'s `SubComposite`:
+   *  `cluster12a{cluster12p0{cluster12{...cluster12i{cluster12p1{...}}}}}}`)
+   *  and corpus-wide (307/307 cached DOTs pair "p0" with "p1"; 93/93 pair "a"
+   *  with "i"; zero counterexamples). */
   innerMarginLevels?: 1 | 2;
   /** The one member of `nodeIds` that stays a DIRECT child of the outer
    *  cluster subgraph, unwrapped by `innerMarginLevels` — jar's zaent

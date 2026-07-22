@@ -108,6 +108,26 @@ export interface ClusterIndex {
   idByName: Map<string, string>;
 }
 
+/** The two graphviz-ts subgraph handles a `DotInputCluster` resolves to.
+ *  `main` is the real `cluster<N>` subgraph — title-table attrs and the
+ *  `ClusterIndex` identity live here, and it is what jar's own
+ *  `Cluster.getClusterId()` names. `innermost` is where THIS cluster's own
+ *  non-anchor members AND any nested child clusters attach.
+ *
+ *  Jar's `ClusterDotString.printInternal` opens BOTH node children and child
+ *  `subgraph cluster*` blocks (`cluster.printCluster1`/`printCluster2`,
+ *  `~/git/plantuml/.../svek/ClusterDotString.java:174-176`) only AFTER its
+ *  own "i"/"p1" protection wrappers are open — so a child cluster's
+ *  parent-resolution must target the PARENT's `innermost` handle, never its
+ *  `main` handle, or the child nests as a SIBLING of the parent's own
+ *  protection wrappers instead of a descendant (G7 T5's root-cause
+ *  diagnosis, `plans/g7-borderpoint-rank/decision-journal.md`). Equal to
+ *  `main` when the cluster carries no wrapper (`innerMarginLevels` absent). */
+interface ClusterHandles {
+  main: GvGraphBuilder;
+  innermost: GvGraphBuilder;
+}
+
 /**
  * Forward `input.clusters` to graphviz-ts as `cluster<N>` subgraphs so dot
  * lays out container members together (contained) and routes splines across
@@ -126,6 +146,14 @@ export interface ClusterIndex {
  * though that emitter is a separate code path (it serializes `input.clusters`
  * directly and never calls this function).
  *
+ * G7 T7 additionally ports jar's full 4-layer `ClusterDotString` protection
+ * nesting — outer "a"/"p0" (ancestor-link + always-on protection0, wrapping
+ * `main` from the OUTSIDE) and inner "i"/"p1" (thereALinkFromOrToGroup1 +
+ * always-on protection1, wrapping a cluster's OWN children) — see
+ * `ClusterHandles`'s own doc comment for the nesting-target rationale and
+ * `DotInputCluster.innerMarginLevels`'s own doc comment for the full
+ * jar-source derivation of which pair fires when.
+ *
  * Returns the `ClusterIndex` (G5 C2) so `layoutGraph()` can re-key the
  * `getLayout()` snapshot's own `clusters` array (graphviz-ts's `cluster<N>`
  * naming) back to `input.clusters[].id`. Additive: callers that pass no
@@ -140,7 +168,7 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   const byId = new Map<string, DotInputCluster>(
     clusters.map((c) => [c.id, c]),
   );
-  const builderById = new Map<string, GvGraphBuilder>();
+  const handlesById = new Map<string, ClusterHandles>();
   const nameById = new Map<string, string>();
   let nextIndex = 0;
   const nameFor = (c: DotInputCluster): string => {
@@ -151,16 +179,42 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     idByName.set(name, c.id);
     return name;
   };
-  const builderFor = (c: DotInputCluster): GvGraphBuilder => {
-    const cached = builderById.get(c.id);
+  const handlesFor = (c: DotInputCluster): ClusterHandles => {
+    const cached = handlesById.get(c.id);
     if (cached !== undefined) return cached;
-    const parent =
+    // G7 T7 parent-resolution fix: a child cluster nests inside the
+    // PARENT's `innermost` handle (the parent's own deepest active
+    // protection wrapper), not its `main` handle — see `ClusterHandles`'s
+    // own doc comment.
+    const parentInnermost =
       c.parentId !== undefined && byId.has(c.parentId)
-        ? builderFor(byId.get(c.parentId)!)
+        ? handlesFor(byId.get(c.parentId)!).innermost
         : b;
+    const outerName = nameFor(c);
+    const levels = c.innerMarginLevels;
+    // G7 T7: jar's OUTER ancestor-protection pair ("a"/"p0",
+    // `ClusterDotString.java:91-116`) wraps `main` from the OUTSIDE, gated
+    // by the SAME `innerMarginLevels` value the pre-existing inner "i"/"p1"
+    // pair below already uses — jar-verified corpus-wide (307/307 cached
+    // DOTs carry "p0" wherever "p1" appears; 93/93 carry "a" wherever "i"
+    // appears; zero counterexamples). This holds because `protection0()`
+    // and `protection1()` are BOTH unconditionally true for every
+    // `titleTableEligible` composite in this port's corpus: `useSwimlanes`
+    // is a distinct, unported jar feature (this port's own "swimlane"
+    // concept is Activity-diagram-only, unrelated to
+    // `ISkinParam.useSwimlanes(DiagramType)`) and `USymbols.NODE` never
+    // applies to a state composite — and `thereALinkFromOrToGroup1` is the
+    // SAME boolean `needsZaentPoint` already encodes as
+    // `innerMarginLevels === 2` (`state-composite-cluster.ts`'s own doc
+    // comment). "a" nests OUTSIDE "p0" (jar emits
+    // `subgraphClusterNoLabel(sb,"a")` before `subgraphClusterNoLabel(sb,
+    // "p0")`, `ClusterDotString.java:98-115`).
+    let host = parentInnermost;
+    if (levels === 2) host = host.addSubgraph(`${outerName}a`, {});
+    if (levels !== undefined) host = host.addSubgraph(`${outerName}p0`, {});
     const hasTitleTable = c.titleTableWidth !== undefined && c.titleTableHeight !== undefined;
     const attrs = !hasTitleTable && c.label !== undefined ? { label: c.label } : {};
-    const sg = parent.addSubgraph(nameFor(c), attrs);
+    const main = host.addSubgraph(outerName, attrs);
     // G5 C3, mechanism 16 shape half: a jar-real HTML `<TABLE FIXEDSIZE=
     // "TRUE" ...>` label, via graphviz-ts 0.1.26072117's public `setHtmlAttr`
     // (docs/graphviz-issues/07's RESOLVED note) -- ONLY for callers that
@@ -169,21 +223,11 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // Callers that don't (every pre-C3 cluster, and every C3-ineligible
     // one) keep the prior plain-text `label` attr above, unchanged.
     if (hasTitleTable) {
-      sg.setHtmlAttr(
+      main.setHtmlAttr(
         'label',
         `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.round(c.titleTableWidth!)}" ` +
           `HEIGHT="${Math.round(c.titleTableHeight!)}"><TR><TD></TD></TR></TABLE>`,
       );
-    }
-    builderById.set(c.id, sg);
-    return sg;
-  };
-  for (const c of clusters) {
-    const sg = builderFor(c);
-    const levels = c.innerMarginLevels;
-    if (levels === undefined) {
-      for (const id of c.nodeIds) sg.addNode(id);
-      continue;
     }
     // G5 C7, mechanism 16 margin half: mirror jar's ClusterDotString "i"/
     // "p1" protection-wrapper nesting (see DotInputCluster.innerMarginLevels'
@@ -193,14 +237,28 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // margin. Names deliberately do NOT match the oracle comparator's
     // `^cluster\d+$` pattern (tests/oracle/svek-dot.ts#parseClusters skips
     // exactly this "clusterNp0/clusterN/clusterNp1" shape, by design, per
-    // that file's own doc comment) -- so this nesting is structurally
-    // invisible to the DOT-parity gate, same as jar's own protection wrappers.
-    const outerName = nameFor(c);
-    let inner = sg;
-    if (levels === 2) inner = inner.addSubgraph(`${outerName}i`, {});
-    inner = inner.addSubgraph(`${outerName}p1`, {});
+    // that file's own doc comment) -- so this nesting (and the outer "a"/
+    // "p0" pair above) is structurally invisible to the DOT-parity gate,
+    // same as jar's own protection wrappers.
+    let innermost = main;
+    if (levels === 2) innermost = innermost.addSubgraph(`${outerName}i`, {});
+    if (levels !== undefined) innermost = innermost.addSubgraph(`${outerName}p1`, {});
+    const handles: ClusterHandles = { main, innermost };
+    handlesById.set(c.id, handles);
+    return handles;
+    // #lizard forgives -- faithful port of ClusterDotString's full
+    // 4-layer protection nesting (a/p0/main/i/p1); each `if` below is one
+    // independently-conditional wrapper layer (jar's own branch structure,
+    // ClusterDotString.java:91-201), not decision complexity to simplify.
+  };
+  for (const c of clusters) {
+    const { main, innermost } = handlesFor(c);
+    if (c.innerMarginLevels === undefined) {
+      for (const id of c.nodeIds) main.addNode(id);
+      continue;
+    }
     for (const id of c.nodeIds) {
-      (id === c.unwrappedNodeId ? sg : inner).addNode(id);
+      (id === c.unwrappedNodeId ? main : innermost).addNode(id);
     }
   }
   return { idByName };
