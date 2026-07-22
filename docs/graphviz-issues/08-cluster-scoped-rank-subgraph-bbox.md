@@ -84,7 +84,10 @@ zaent0002->sh0020[arrowtail=none,arrowhead=none,minlen=1];
 2. Builder path: reconstruct the same graph via the programmatic API —
    root graph attrs as above; `const c = builder.addSubgraph('cluster15',
    {style, color, labeljust})` + HTML label via `setHtmlAttr`;
-   `c.addSubgraph('cluster15rank_sink', {rank:'sink'}).addNode('sh0019')`;
+   `c.addSubgraph('sink_group_15', {rank:'sink'}).addNode('sh0019')`
+   (the rank-subgraph name must NOT start with `cluster` — see
+   Resolution; this document originally said `cluster15rank_sink`
+   here, which IS the bug);
    `c.addNode('sh0019')` (shape/width/height as above);
    `c.addSubgraph('cluster15ee', {label:''}).addNode('zaent0002')`
    (point); root-level `sh0020` + edge. Compare `getLayout()`'s
@@ -118,3 +121,47 @@ bitaxo `C` 42×~101.4).
 - Unwired-but-tested FrontierCalculator port ready to consume a fixed
   layout: `src/diagrams/state/state-composite-frontier.ts` (commit
   60fe88a).
+
+---
+
+**RESOLVED — usage defect, no graphviz-ts change (investigated
+2026-07-22, graphviz-ts side closed).** The contradiction adjudicated:
+`isACluster(g)` (`graphviz-ts/src/layout/dot/rank.ts:87-91`,
+C-faithful port of `lib/common/utils.c:is_a_cluster`) treats ANY
+subgraph whose name starts with `cluster` (case-insensitive) as a
+real rendered cluster. G6 T8-R2's suggested rank-subgraph naming
+(`${outerName}rank_sink` → e.g. `cluster15rank_sink`) tripped this:
+`csSetupCluster` routed the rank group through
+`makeNewCluster`/`nodeInduce` (nested-cluster machinery — own bbox,
+margins, no rank forcing) instead of `csProcessRankset`
+(`rank-dot2.ts:163-170`, the actual rank=sink implementation).
+Session B (T9) followed that naming and saw exactly this failure;
+Session A evidently used a non-cluster-prefixed name. Call order and
+membership-call variants ruled out (identical results). Jar's real
+DOT uses ANONYMOUS rank subgraphs (auto-named `%N` — can never start
+with `cluster`), so real dot and graphviz-ts's DOT-text path were
+never affected.
+
+Verified: minimal repro builder path with a non-`cluster`-prefixed
+name matches real dot 15.1.0 exactly (cluster15 66×149.72, sh0019
+forced to sink rank); pesita's full svek-3.dot text-path cluster15
+matches real dot within float tolerance (148×118.72). The pinned
+.tgz needs no change.
+
+Correct builder sequence for plantuml-ts's future border-point wiring
+(order-independent):
+
+```ts
+const c = builder.addSubgraph('cluster15', { style, color, labeljust });
+c.setHtmlAttr('label', htmlLabel);
+c.addSubgraph('sink_group_15', { rank: 'sink' }).addNode('sh0019');   // name must not start with "cluster"
+c.addNode('sh0019', { shape: 'rect', width: '0.693576', height: '0.666667', label: '' });
+c.addSubgraph('cluster15ee', { label: '' }).addNode('zaent0002', /* point */);
+```
+
+Tracker box checked on this basis: nothing pending in graphviz-ts.
+NOTE: the affected plantuml-ts fixtures have NOT yet re-measured
+clean — the border-point wiring itself remains unimplemented (G6
+batch-4 stopped; see plans/g6-cluster-geometry/README.md). The
+re-attempt is unblocked by this resolution but is a separate,
+maintainer-authorized effort.
