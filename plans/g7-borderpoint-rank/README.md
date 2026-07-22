@@ -12,7 +12,14 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: ACTIVE — ATTEMPT 5 (human sign-off 2026-07-22)
+## Status: BLOCKED - ATTEMPT-5-MISS; awaiting sign-off for attempt 6
+<!-- 2026-07-22. T9 wiring verified structurally correct (nesting
+     isomorphic to jar DOT). Two remaining pre-existing gaps, journal
+     T9 row: (1) titleTableWidth lacks jar's max(title, attributes)
+     (ClusterHeader.java titleAndAttributeWidth); (2) addLevelEdges
+     ignores Transition.direction (jar reverses -up-> edges before
+     graphviz). Recommended attempt-6 shape: fix both as standalone
+     jar-faithful tasks, paper gate v3, then re-apply T9. -->
 <!-- 2026-07-22. Fifth attempt requires human sign-off. Root cause
      identified (journal T5 row): pre-existing addClusters
      parent-resolution gap + unported jar "a"/"p0" ancestor-wrapper

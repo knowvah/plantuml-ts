@@ -9,8 +9,8 @@ re-attempt the border-point wiring unchanged.
 |----|-------------|-------|--------|-----------|------|
 | T7 | Port a/p0 ancestor wrappers + parent-resolution fix | typescript-pro | graph-layout-build + types + state seam fields + tests | — | [x] |
 | T8 | Paper gate v2: derive 3 targets from PORT-emitted DOT | debugger | derivation-doc addendum | T7 | [x] |
-| T9 | Border-point wiring (T5 six-item edit list, unchanged) | typescript-pro | T5 write-set | T8 | [ ] |
-| T10 | Family sweep, pins/backlog, close | typescript-pro | pins/backlog/journal/README | T9 | [ ] |
+| T9 | Border-point wiring (T8 ten-item edit list) | typescript-pro | T5 write-set | T8 | MISS - reverted, stopped |
+| T10 | Family sweep, pins/backlog, close | typescript-pro | pins/backlog/journal/README | T9 | NOT RUN (T9 stop) |
 
 Hard bars carry over from D3/D5: T8 paper miss → stop before code;
 T9 measured miss → full revert → stop (a SIXTH attempt needs fresh
