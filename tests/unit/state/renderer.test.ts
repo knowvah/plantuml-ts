@@ -453,6 +453,77 @@ describe('renderState — composite state', () => {
     const result = assembleSvg(renderState(geo, defaultTheme));
     expect(result).toContain('Inner');
   });
+
+  // G6 T3: an ordinary ('autonom'-classified, no `clusterHeaderHeight`)
+  // composite's own wrap stays `class="entity"` -- unaffected by the new
+  // `class="cluster"` dispatch below (D3, plans/g6-cluster-geometry/
+  // decisions.md).
+  it('wraps an ordinary composite in class="entity" (autonom, unaffected by G6 T3)', () => {
+    const child = makeNode({ id: 'child', kind: 'normal', display: 'Child', x: 20, y: 50, width: 60, height: 30 });
+    const parent = makeNode({
+      id: 'parent',
+      kind: 'normal',
+      display: 'Parent',
+      x: 0,
+      y: 0,
+      width: 200,
+      height: 150,
+      children: [child],
+    });
+    const geo = makeGeo({ states: [parent] });
+    const result = assembleSvg(renderState(geo, defaultTheme));
+    expect(result).toContain('<g class="entity" data-qualified-name="parent"');
+    expect(result).not.toContain('class="cluster"');
+  });
+
+  // G6 T3 / D3: `node.clusterHeaderHeight !== undefined` is the existing
+  // 'cluster'-classified-and-eligible gate `renderer-composite-box.ts
+  // #renderComposite` already dispatches its real jar-native shape on
+  // (G5 C3) -- the SAME gate now selects `class="cluster"` over
+  // `class="entity"` for the composite's own wrap, jar-verified
+  // `gojuja-90-pune699`'s `A`, `decede-10-buvu414`'s `E`.
+  describe('cluster-classified composite (node.clusterHeaderHeight set)', () => {
+    function makeCluster(): StateNodeGeo {
+      return makeNode({
+        id: 'E',
+        kind: 'normal',
+        display: 'E',
+        x: 0,
+        y: 0,
+        width: 200,
+        height: 150,
+        children: [
+          makeNode({ id: 'F', kind: 'normal', display: 'F', x: 10, y: 40, width: 50, height: 30 }),
+          makeNode({ id: '__init_E', kind: 'initial', display: '', x: 10, y: 10, width: 20, height: 20 }),
+        ],
+        headerLines: [{ text: 'E', width: 20 }],
+        clusterHeaderHeight: 9,
+      });
+    }
+
+    it('wraps the composite\'s own shape in class="cluster", not "entity"', () => {
+      const geo = makeGeo({ states: [makeCluster()] });
+      const result = assembleSvg(renderState(geo, defaultTheme));
+      expect(result).toContain('<g class="cluster" data-qualified-name="E" id="');
+      expect(result).not.toContain('<g class="entity" data-qualified-name="E" ');
+    });
+
+    it('renders cluster children as flat siblings (G5 C3), each keeping its own normal wrap class', () => {
+      const geo = makeGeo({ states: [makeCluster()] });
+      const result = assembleSvg(renderState(geo, defaultTheme));
+      // The cluster's own <g> must CLOSE before the sibling children open --
+      // proof they are not nested inside it (renderer.ts
+      // #renderClusterSiblingMarkup's own doc comment).
+      const clusterOpen = result.indexOf('<g class="cluster" data-qualified-name="E"');
+      const clusterClose = result.indexOf('</g>', clusterOpen);
+      const childFOpen = result.indexOf('<g class="entity" data-qualified-name="F"');
+      const childInitOpen = result.indexOf('<g class="start_entity" data-qualified-name="__init_E"');
+      expect(clusterOpen).toBeGreaterThanOrEqual(0);
+      expect(clusterClose).toBeGreaterThan(clusterOpen);
+      expect(childFOpen).toBeGreaterThan(clusterClose);
+      expect(childInitOpen).toBeGreaterThan(clusterClose);
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
