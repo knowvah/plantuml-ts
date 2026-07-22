@@ -24,8 +24,8 @@ decision journal). One commit per task: `feat(T3): ...` /
 
 | Batch | Scope | Tasks | Status |
 |-------|-------|-------|--------|
-| [1](batch-1/overview.md) | Vertical/height residual (diagnose → fix at origin) | T1, T2 | [ ] |
-| [2](batch-2/overview.md) | Byte-exact pins: class attr, decede style, pin sweep | T3, T4, T5 | [ ] |
+| [1](batch-1/overview.md) | Vertical/height residual (diagnose → fix at origin) | T1, T2 | [x] |
+| [2](batch-2/overview.md) | Byte-exact pins: class attr, decede style, pin sweep | T3, T4, T5 | [x] |
 | [3](batch-3/overview.md) | Multi-line/action-text/stereotype title height | T6, T7 | [ ] |
 | [4](batch-4/overview.md) | Entrypoint/exitpoint WithLabel family | T8, T9, T10 | [ ] |
 

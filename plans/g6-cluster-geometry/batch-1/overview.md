@@ -7,8 +7,8 @@ every sample checked, NOT proportional to `innerMarginLevels`
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | Diagnose vertical residual; state mechanism + fix location | debugger | disposable probes only (deleted) | — | [ ] |
-| T2 | Fix at origin per T1's verdict; re-measure; tighten backlog | typescript-pro | see task file (conditional on T1) | T1 | [ ] |
+| T1 | Diagnose vertical residual; state mechanism + fix location | debugger | disposable probes only (deleted) | — | [x] |
+| T2 | Fix at origin per T1's verdict; re-measure; tighten backlog | typescript-pro | see task file (conditional on T1) | T1 | [x] |
 
 T1 produces no committed code — its deliverable is the mechanism
 artifact appended to `decision-journal.md`. T2's commit is the batch's
