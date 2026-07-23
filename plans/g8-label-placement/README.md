@@ -16,14 +16,19 @@ T20b ink-walk label-box aggregation). Success: zero size-backlog
 widenings, the 14-fixture set within tolerance, then G7 resumes at
 T19 toward pesita `AA` 126×104.72.
 
-## Status: RESUMED — Option 1 authorized (2026-07-23)
+## Status: STOPPED — scope boundary at T2 (2026-07-23)
 
-T1 stop report (stop cond. 5): pesita-10's AA-pass mincross ordering is
-left-right reversed vs the jar even with jar-exact boxes on all 9
-labeled edges (ranks/Y exact). Human authorized Option 1: task T1b
-(port the remaining jar svek emission order — the edge-statement-order
-piece T16 deferred) runs before T2. Exit criterion: T1's full-seam
-pesita simulation verifies via the spec formula, clearing stop cond. 5.
+T1 ✅ (formula + harness, 9df7d95). T1b ✅ (portRanks fix cleared the
+pesita ordering blocker, bf376da). T2 STOPPED + fully reverted:
+stop conditions 1 + 6. The placement switch + reverted stack land
+correctly (and a real `\n`-split defect fix resolved pesita), but 4
+fixtures (bajelo-54, nimana-36, rovese-43, fotuje-06) then widen — the
+outer autonom **wrapper**-sizing formula (`state-composite-sizing.ts#
+measureAutonomWrapper`, in **no** task's write-set) undershoots the
+jar once fed the now-accurate smaller inner ink-box. This is the gap
+`state-composite-autonom.ts:127-130` already names ("Queued for S5").
+Awaiting a scope decision — options in the decision-journal T2 STOP row
+and the session summary below. Parallel to the G7 T18→T20 escalation.
 
 ## Branch
 
