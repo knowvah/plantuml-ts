@@ -12,7 +12,7 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: BLOCKED - label-placement gap (6th layer); awaiting direction
+## Status: PAUSED - waiting on the label-placement mission (option 1, 2026-07-23)
 <!-- 2026-07-23. T20 ink-walk aggregation verified correct but the
      backlog bar is blocked by attachTransitionLabel's LABEL_PERP=12
      divergence from jar's spline-based SvekEdge label placement
