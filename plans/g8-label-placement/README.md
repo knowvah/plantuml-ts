@@ -16,15 +16,28 @@ T20b ink-walk label-box aggregation). Success: zero size-backlog
 widenings, the 14-fixture set within tolerance, then G7 resumes at
 T19 toward pesita `AA` 126×104.72.
 
-## Status: RESUMED — Option 1 (T1c cluster-title fix) authorized (2026-07-23)
+## Status: STOPPED — 4th scope layer at T2 (2026-07-23)
 
-T1c (prerequisite before re-landing T2): fix the border-point
-cluster-title FIXEDSIZE **width** in the real layout so the port's DOT
-matches jar's `svek-2.dot` byte-for-byte. Characterization localized
-the gap: the port emits cluster-title W=108 (`Math.round`) where jar
-has W=107 (truncation, T1 spec §1a). Must be jar-source-derived (one
-mechanism reproducing kotagu 126 AND bajelo-54 107 — D5), paper-gated,
-pins+parity+harness must hold. Then T2 re-lands.
+T1 ✅ · T1b ✅ · **T1c ✅** (cluster-title floor, 0c99813). T2 re-landed
+on T1c and reverted a 3rd time — but the DOT-diff discipline named the
+true mechanism. The 4 residual fixtures were NEVER a cluster-title-value
+gap; they're denied a title reservation entirely by a guard:
+`state-composite-cluster.ts:357-360` — `ctx.insideAutonomPass !== true`.
+That guard's own doc comment says it exists only to work around the
+`buildPlainAutonomSpec#Math.max` floor regression on fotuje-06/rovese-43
+— **the exact floor D6 removes.** So the guard is a workaround for a bug
+that no longer exists. Relaxing it (with corpus re-verification) should
+close 3 of 4 (bajelo-54, fotuje-06, rovese-43). **nimana-36** is a 4th,
+separate, still-unexplained residual (autonom-nested leaves + edge
+labels, no cluster title). Edge-label + placement wiring verified
+correct (jar-exact 69/62/15). Awaiting a scope decision — options in the
+T2 STOP row and below.
+
+---
+
+## (prior) Status: RESUMED — Option 1 (T1c cluster-title fix) 2026-07-23
+
+T1c: fix the border-point cluster-title FIXEDSIZE width. LANDED.
 
 ---
 
