@@ -308,11 +308,28 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // graph-layout.types.ts, has the full jar-calibration derivation).
     // Callers that don't (every pre-C3 cluster, and every C3-ineligible
     // one) keep the prior plain-text `label` attr above, unchanged.
+    //
+    // G8 T1c: jar TRUNCATES both dims towards zero here, it never rounds --
+    // `ClusterDotString.java:124`'s `SvekEdge.appendTable(sblabel,
+    // cluster.getTitleAndAttributeWidth(), cluster.getTitleAndAttributeHeight()
+    // - 5, ...)` feeds `appendTable`'s own `(int)` cast on both dims
+    // (`SvekEdge.java:504-507`, the SAME mechanism spec.md G8/T1 §1a already
+    // verified for edge labels: `reservedWidth = Math.floor(dimNote.width)`).
+    // Verified against 3 independent jar cached-DOT ground-truth values
+    // (`test-results/dot-cache/state/{bajelo-54-dixe684,kotagu-43-miza629}`):
+    // Run 107.8875->107 (was Math.round->108, a miss), SubComposite
+    // 91.875->91 (was round->92, a miss), CompositeState-ee 99.575->99 (not
+    // yet wired to this seam, but floor matches there too) -- floor is
+    // correct in all 3; round is wrong in 2/3. `titleTableHeight` is already
+    // an exact integer in every corpus sample (`computeTitleTableHeight`'s
+    // own formula), so `Math.floor` is behavior-preserving there and is
+    // applied for mechanism-fidelity (jar floors both dims from the SAME
+    // `appendTable` call), not because a height regression was found.
     if (hasTitleTable) {
       main.setHtmlAttr(
         'label',
-        `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.round(c.titleTableWidth!)}" ` +
-          `HEIGHT="${Math.round(c.titleTableHeight!)}"><TR><TD></TD></TR></TABLE>`,
+        `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.floor(c.titleTableWidth!)}" ` +
+          `HEIGHT="${Math.floor(c.titleTableHeight!)}"><TR><TD></TD></TR></TABLE>`,
       );
     }
     // G5 C7, mechanism 16 margin half: mirror jar's ClusterDotString "i"/

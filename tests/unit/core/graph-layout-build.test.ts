@@ -386,3 +386,43 @@ describe('firstEncounterOrder — jar lines0 node-creation order (G7 T16)', () =
     expect([...b.graph.nodes.keys()]).toEqual(['tail', 'head', 'first']);
   });
 });
+
+describe('addClusters — title-table FIXEDSIZE dims truncate, never round (G8 T1c)', () => {
+  // `ClusterDotString.java:124` -> `SvekEdge.appendTable`'s own `(int)` cast
+  // (`SvekEdge.java:504-507`) truncates BOTH dims towards zero before they
+  // reach dot's FIXEDSIZE table -- jar never rounds. Verified against jar's
+  // own cached DOT for bajelo-54-dixe684 (Run: 107.8875 -> WIDTH="107", NOT
+  // "108") and kotagu-43-miza629 (SubComposite: 91.875 -> WIDTH="91", NOT
+  // "92") -- see spec.md's "T1c" section for the full derivation.
+  it('a fractional width/height >= .5 floors down, not up (would round up if using Math.round)', () => {
+    const input: DotInputGraph = {
+      nodes: [{ id: 'a', width: 1, height: 1 }],
+      edges: [],
+      clusters: [
+        { id: 'grp', nodeIds: ['a'], titleTableWidth: 107.8875, titleTableHeight: 42 },
+      ],
+    };
+    const b = createGraph({ directed: true });
+    addClusters(b, input);
+    const main = b.graph.subgraphs.get('cluster0')!;
+    const label = main.attrs.get('label')!;
+    expect(label).toContain('WIDTH="107"');
+    expect(label).not.toContain('WIDTH="108"');
+    expect(label).toContain('HEIGHT="42"');
+  });
+
+  it('reproduces the kotagu-43-miza629 SubComposite ground truth (91.875 -> 91)', () => {
+    const input: DotInputGraph = {
+      nodes: [{ id: 'a', width: 1, height: 1 }],
+      edges: [],
+      clusters: [
+        { id: 'grp', nodeIds: ['a'], titleTableWidth: 91.875, titleTableHeight: 9 },
+      ],
+    };
+    const b = createGraph({ directed: true });
+    addClusters(b, input);
+    const label = b.graph.subgraphs.get('cluster0')!.attrs.get('label')!;
+    expect(label).toContain('WIDTH="91"');
+    expect(label).toContain('HEIGHT="9"');
+  });
+});

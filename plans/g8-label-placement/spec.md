@@ -509,3 +509,133 @@ box/anchor work early.
 - `tests/unit/core/graph-layout-build.test.ts`: 17/17 passed (4 new cases
   for the `portRanks` mechanism; the 13 pre-existing G7 T7/T16 cases
   unmodified and still passing).
+
+## T1c — cluster-title FIXEDSIZE width: round → floor (2026-07-23)
+
+### Step 1: round-vs-floor, not a `headerWidth` gap (case (a))
+
+The port's `headerWidth` float (`state-composite-header.ts#titleAndAttributeWidth`,
+fed into `DotInputCluster.titleTableWidth`) is ALREADY jar-exact — confirmed
+directly via `WidthTableMeasurer` (the same jar-calibrated measurer
+`tests/oracle/*` inject; `renderSync`'s environment default, `CanvasMeasurer`,
+is NOT jar-calibrated and must never be used for this kind of probe — an
+early probe using the default measurer produced a spurious 8px gap that
+disappeared once `WidthTableMeasurer` was passed explicitly). The ONLY defect
+is `graph-layout-build.ts:314`'s `Math.round` where jar
+(`ClusterDotString.java:124` → `SvekEdge.appendTable`'s `(int)` cast,
+`SvekEdge.java:504-507`) truncates towards zero — the SAME mechanism T1 §1a
+already proved for edge labels.
+
+| Fixture | Cluster | Port raw float | jar `WIDTH=` | `Math.round` (old) | `Math.floor` (new) |
+|---|---|---|---|---|---|
+| bajelo-54-dixe684 | Run (`cluster6`, svek-2.dot) | 107.8875 | 107 | 108 (miss) | 107 (exact) |
+| kotagu-43-miza629 | SubComposite (`cluster12`, svek-1.dot) | 91.875 | 91 | 92 (miss) | 91 (exact) |
+| kotagu-43-miza629 | CompositeState `ee` (`cluster6ee`, svek-1.dot; informational — this wrapper is NOT wired to `titleTableWidth` yet, `hasBorderPointChildren` excludes it) | 99.575 | 99 | 100 (miss) | 99 (exact) |
+
+**D5 correction (this task's own brief mis-cited the constraint):** the
+brief's "G7 T17 confirmed kotagu's cluster title is width 126" does not
+match the evidence trail. Re-reading `plans/g7-borderpoint-rank/decision-
+journal.md` T4/T8/T9/T13/T17 rows: `126` is **pesita-10-dene726's `AA`
+cluster's OVERALL bounding-box width** (`126×104.72`/`126×107.22`, matching
+the oracle in every attempt), not any cluster's title-table `WIDTH=`. Kotagu's
+own cached `svek-1.dot` (`test-results/dot-cache/state/kotagu-43-miza629/
+svek-1.dot:10,12`) has title-table `WIDTH="99"` (CompositeState `ee`) and
+`WIDTH="91"` (SubComposite) — never `126`. T8's own journal text — "`ensureMin
+Width` uses ROUNDED `titleTableWidth`, oracle width=126 confirmed" — refers to
+a DIFFERENT, still-unwired mechanism (`state-composite-frontier.ts#ensureMinWidth`,
+`Cluster.java:427-428`'s `frontierCalculator.ensureMinWidth(getTitleAndAttribute
+Width() + 10)`, called nowhere in the state diagram pipeline today, grepped) —
+NOT the `graph-layout-build.ts:311-317` seam this task owns. For pesita's AA,
+round and floor happen to COINCIDE (116.46 → 116 either way, +10 = 126), which
+is exactly why G7 never distinguished the two mechanisms with that fixture.
+The real, corroborating evidence is the corpus sweep below.
+
+### Corpus-wide validation (271 cached fixtures, disposable probe)
+
+Every jar cached `svek-N.dot`'s cluster-title `WIDTH=`/`HEIGHT=` (a bare
+`subgraph clusterN {style=solid...label=<<TABLE...>`, i.e. excluding edge
+labels and the unwired `ee`-wrapper informational case) was matched (by
+height, jar-verified exact independently) against the port's own
+`titleTableWidth` for the SAME slug, rendered with `WidthTableMeasurer`:
+
+- 114 jar cluster-title samples found across the corpus.
+- 24 have NO port candidate — these are exactly the currently-**ineligible**
+  composites (`titleTableEligible` excludes `hasBorderPointChildren` or
+  `ctx.insideAutonomPass`), including bajelo-54's `Run`, and all of
+  nimana-36-veco708/rovese-43-tadu368/fotuje-06-fifa085's analogous
+  clusters — confirming this task's own premise that the real production
+  path does not yet reach this seam for those 4 fixtures (T2's job, D3;
+  not in this task's write-set).
+- Of the 90 resolvable pairs: **`Math.floor` matches jar 88/90; `Math.round`
+  matches jar only 57/90.** Zero cases exist where `round` succeeds and
+  `floor` fails (floor strictly dominates). The 2 floor "misses"
+  (`gopudo-91-bego999`, both its `A`/`C` clusters, jar `WIDTH="36"` vs port
+  raw `30.3625` — floor AND round both give `30`) are a DIFFERENT, unrelated
+  defect: `A : * a list` is a creole bullet-list attribute line, and jar's
+  real bullet-glyph/indent width isn't reproduced by `measureLines`' plain
+  per-line text measurement — out of this task's write-set and D5 scope
+  (not a round/floor question; both mechanisms are equally wrong there).
+  Logged for a future task, not filed as a `docs/graphviz-issues/` entry
+  (this is a port-side measurement gap, not a graphviz-ts finding).
+- 28 slugs have at least one title where `floor(width) !== round(width)`
+  (i.e. this fix changes real production DOT output for them): `cakaxu-97-
+  nexe753, cesifo-37-rugu443, desebo-47-maro096, dikipu-79-noko487, dogeji-46-
+  sapo750, fajegu-17-joba577, fevida-60-kope208, gageze-91-fese022, jijuze-43-
+  ceva131, komeja-83-pufo140, kotagu-43-miza629, lukuma-74-loti931, mefici-97-
+  tudu030, nenita-48-zuze128, nevezi-29-momo816, pesita-10-dene726, rufosi-58-
+  kegi649, sosoxe-55-demi451, teseci-80-sivi292, tilili-10-buca517, vagexa-37-
+  gijo825, vakama-53-jata958, vedapo-96-xoro464, vekoja-22-made430, vubale-26-
+  daza585, zecivu-62-pagu681, zujuxa-28-buka872, zumeri-82-julo078`. 7 of
+  these are already in the 149-fixture harness (`dogeji-46-sapo750`,
+  `jijuze-43-ceva131`, `mefici-97-tudu030`, `pesita-10-dene726` in the
+  size-backlog; `fevida-60-kope208`, `gageze-91-fese022`, `lukuma-74-loti931`
+  pinned) — the harness re-measured all of them at `unchanged` (§ below):
+  the title-table reservation is not the binding width constraint for any
+  of the 7 (a nested child's own content width already exceeds it), so a
+  smaller-but-still-non-binding reservation produces byte-identical final
+  layout, consistent with this mission's own prior finding that cluster-
+  title reservations are frequently non-binding.
+
+### Step 3: paper-gate — convergence for the 4 residual fixtures
+
+Composing three independently-verified facts (none re-derived here, per the
+mission's own "do not re-litigate" instruction for the third):
+
+1. This fix makes the port's cluster-title term for bajelo-54's `Run`
+   byte-identical to jar's cached `svek-2.dot` (`107.8875 → 107`, verified
+   above against the ground-truth cached DOT, not assumed).
+2. T2's (separately owned, out of this task's write-set) edge-label
+   FIXEDSIZE fix already reproduces jar's edge-label terms exactly
+   (`W=69/62 H=15`, spec §1a/§2, 11/11 anchor matches jar-verified).
+3. graphviz-ts is byte-faithful given byte-identical input (orchestrator's
+   own prior verification, "Decisive facts" section above: jar's own
+   `svek-2.dot` run through graphviz-ts equals real `dot -Tsvg`, 0.00 on
+   every node).
+
+Once T2 relands (its own task, including whatever relaxation of
+`titleTableEligible` is needed for a composite that is itself the target of
+an external edge — outside this task's mandate to implement or decide), (1)
++ (2) make the port's emitted DOT for this pass byte-identical to jar's own
+`svek-2.dot`, and (3) guarantees that byte-identical input converges to
+jar's exact node positions. This task's own contribution to that convergence
+(the cluster-title term) is proven exact above; it does not itself flip
+`titleTableEligible`, so `npx tsx scripts/measure-state-size-deltas.ts`
+correctly reports `unchanged` for bajelo-54/nimana-36/rovese-43/fotuje-06
+today (§ below) — the residual only resolves once T2 re-lands.
+
+### T1c harness/gate results
+
+- `npx tsx scripts/measure-state-size-deltas.ts`: 149/149, 0 widened, 0
+  improved (7 of the 28 behavior-changed slugs are in this 149-set; all
+  `unchanged` — the reservation is non-binding for every one, confirmed
+  above).
+- `npm run typecheck` / `npm run lint` / `npm run build`: all clean.
+- `tests/oracle/state-dot-parity.test.ts`: 268/268 passed.
+- `tests/oracle/svg-conformance/state.golden.ratchet.test.ts`: 59/59 passed
+  (57 pins + 2 harness meta-tests).
+- `tests/unit/core/graph-layout-build.test.ts`: 19/19 passed (2 new cases
+  asserting the truncation, incl. the exact bajelo-54/kotagu ground-truth
+  values; all 17 pre-existing cases unmodified and still passing).
+- `npm test`: 10241 passed, 5 skipped (0 failed), 384 test files.
+- Probes deleted; `git status --porcelain` shows only `src/core/graph-
+  layout-build.ts` and `tests/unit/core/graph-layout-build.test.ts`.
