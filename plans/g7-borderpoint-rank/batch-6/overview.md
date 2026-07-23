@@ -13,9 +13,10 @@ unchanged.
 | T16 | Port jar svek DOT emission order (statement order incl. cyclic-pass sensitivity) | typescript-pro | graph-layout-build.ts + state-composite-pass.ts + tests | T13 | [x] |
 | T17 | Paper gate v4: 3 targets from post-T16 port-emitted DOT | debugger | derivation-doc addendum | T16 | MISS (pesita +2.5px, edge-label gap) - stopped |
 | T18 | Real-layout edge-label sizing: FIXEDSIZE table wiring + height measurement | typescript-pro | graph-layout-build.ts + state-composite-edge-label.ts + tests | T17 | REVERTED - widens 15 backlog entries via autonom gap (stop cond. 4) |
-| T19 | Paper gate v5: 3 targets from post-T18 port-emitted DOT | debugger | derivation-doc addendum | T18 | NOT RUN (T18 stop) |
-| T14b | Re-apply ten-item wiring + items 11/12; measure; hard bar | typescript-pro | T9 write-set | T19 | NOT RUN (T18 stop) |
-| T15 | Family sweep, pins/backlog, close | typescript-pro | pins/backlog/journal/README | T14b | NOT RUN (T18 stop) |
+| T20 | Autonom ink aggregation + coupled label fixes (13pt width, FIXEDSIZE/height), atomically | typescript-pro (T18 agent resumed) | autonom + edge-label + graph-layout-build + tests | T18 | STOPPED x3 (ink walk correct; blocked on label placement) |
+| T19 | Paper gate v5: 3 targets from post-T20 port-emitted DOT | debugger | derivation-doc addendum | T20 | NOT RUN (T20 stop) |
+| T14b | Re-apply ten-item wiring + items 11/12; measure; hard bar | typescript-pro | T9 write-set | T19 | NOT RUN (T20 stop) |
+| T15 | Family sweep, pins/backlog, close | typescript-pro | pins/backlog/journal/README | T14b | NOT RUN (T20 stop) |
 
 Hard bars: T13 paper miss -> stop before code; T14 measured miss ->
 full revert -> stop (SEVENTH attempt needs fresh sign-off). DOT gate

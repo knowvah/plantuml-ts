@@ -12,7 +12,15 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: BLOCKED - T18 reverted (stop cond. 4); awaiting SCOPE decision
+## Status: BLOCKED - label-placement gap (6th layer); awaiting direction
+<!-- 2026-07-23. T20 ink-walk aggregation verified correct but the
+     backlog bar is blocked by attachTransitionLabel's LABEL_PERP=12
+     divergence from jar's spline-based SvekEdge label placement
+     (~11px on vertical short-label edges). Three T20 variants failed
+     the same check -> consecutive-fix stop. Options: (1) label-
+     placement port as its own mission, then T19->T14b->T15; (2)
+     amend D3 to descope pesita, proceed on bitaxo+kotagu; (3) close.
+     bitaxo/kotagu derive EXACT on paper today. -->
 <!-- 2026-07-23. Edge-label sizing fix is jar-exact per label but
      widens 15 backlog entries through the fifth pre-existing gap:
      state-composite-autonom.ts#buildPlainAutonomSpec never folds
