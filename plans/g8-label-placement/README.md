@@ -16,7 +16,16 @@ T20b ink-walk label-box aggregation). Success: zero size-backlog
 widenings, the 14-fixture set within tolerance, then G7 resumes at
 T19 toward pesita `AA` 126×104.72.
 
-## Status: READY
+## Status: STOPPED — stop condition 5 (2026-07-23, after T1)
+
+Pesita-10-dene726's label positions cannot be reproduced: with jar-exact
+FIXEDSIZE boxes on all 9 labeled edges of its AA pass (verified 9/9 vs
+`svek-3.dot`), the layout's mincross ordering is left-right REVERSED vs
+the jar (Idle/Closing swapped; ranks/Y match exactly). Same open gap as
+G7 T13/T16 (emission-order sensitivity, cyclic pass). The conversion
+formula itself is jar-exact on 11/11 labels across the other 4 fixtures
+— see `spec.md`. Awaiting human direction; options in the
+decision-journal T1 STOP row.
 
 ## Branch
 
@@ -32,7 +41,7 @@ run git mutations.
 
 | Batch | Scope | Tasks | Status |
 |-------|-------|-------|--------|
-| [1](batch-1/overview.md) | Convention spec + committed delta harness | T1 | [ ] |
+| [1](batch-1/overview.md) | Convention spec + committed delta harness | T1 | [x] (stop-report form) |
 | [2](batch-2/overview.md) | Atomic implementation (placement + reverted stack) | T2 | [ ] |
 | [3](batch-3/overview.md) | Close-out: backlog tighten, pins, docs, G7 unblock | T3 | [ ] |
 
@@ -114,3 +123,20 @@ run git mutations.
   pesita-10-dene726.
 - On G8 close: flip `plans/g7-borderpoint-rank/README.md` from
   PAUSED to "unblocked — resume at T19".
+
+## Session summary (2026-07-23 — stopped after Batch 1)
+
+- Tasks completed: 1 of 3 (T1, in its stop-report form). T2/T3 not
+  started — stop condition 5.
+- Decisions: 3 journal rows; the T1 STOP row is flagged for review
+  with the three options for the human.
+- Quality gates at the T1 commit: npm test 10235 passed (384 files),
+  typecheck, lint, build all green; harness reproduces the untouched
+  baseline 149/149 (92 backlog + 57 pins), exit 0, ~1.5 s.
+- Delivered: `scripts/measure-state-size-deltas.ts` (permanent SLI
+  instrument), comparator unit tests, `spec.md` (conversion formula
+  jar-exact 11/11 with the margin+floor FIXEDSIZE mechanism newly
+  characterized; §5 pesita divergence report).
+- Known issue blocking resume: pesita AA-pass mincross ordering
+  reversed vs jar even with jar-exact label boxes (G7 T13/T16 gap).
+  T2 is otherwise fully specced by spec.md.
