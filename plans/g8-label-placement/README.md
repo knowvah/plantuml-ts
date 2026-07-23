@@ -16,7 +16,22 @@ T20b ink-walk label-box aggregation). Success: zero size-backlog
 widenings, the 14-fixture set within tolerance, then G7 resumes at
 T19 toward pesita `AA` 126×104.72.
 
-## Status: STOPPED — 4th scope layer at T2 (2026-07-23)
+## Status: STOPPED — guard fix proven; 1 fixture (nimana-36) holdout (2026-07-23)
+
+Guard relaxation (A) SUCCEEDED and is corpus-verified: removing the
+`insideAutonomPass` clause closed bajelo-54/fotuje-06/rovese-43, drove
+**pesita-10 to near-exact (0.000519)**, and improved 35 fixtures total
+(placement switch + full stack). Best-attempt harness: widened=1,
+improved=33. ONLY **nimana-36** still widens (0.111 vs 0.090) — an 8px
+ink-walk content-height gap where jar's `getMinMax` captures more than
+the port's from byte-identical node geometry; irreducible from cached
+DOT/SVG artifacts, needs jar source-level tracing. Reverted to ea76ece.
+Decision needed: descope nimana-36 (named divergence) and land the
+proven win, or authorize a jar-source-tracing task first.
+
+---
+
+## (prior) Status: STOPPED — 4th scope layer at T2 (2026-07-23)
 
 T1 ✅ · T1b ✅ · **T1c ✅** (cluster-title floor, 0c99813). T2 re-landed
 on T1c and reverted a 3rd time — but the DOT-diff discipline named the
