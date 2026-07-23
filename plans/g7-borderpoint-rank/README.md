@@ -12,7 +12,15 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: BLOCKED - paper gate v4 miss (pesita +2.5px); awaiting sign-off
+## Status: BLOCKED - T18 reverted (stop cond. 4); awaiting SCOPE decision
+<!-- 2026-07-23. Edge-label sizing fix is jar-exact per label but
+     widens 15 backlog entries through the fifth pre-existing gap:
+     state-composite-autonom.ts#buildPlainAutonomSpec never folds
+     edge-label ink into geometry.width (same gap that forced the
+     G5/C1 revert; TDD suites preserved as describe.skip). The
+     autonom pass borders mission-excluded territory (stop cond. 9).
+     Human decision needed: extend scope to the autonom fix, or
+     accept pesita cannot reach exactness in this mission. -->
 <!-- 2026-07-22. Fourth pre-existing gap: real-layout edge-label
      sizing (addEdges lacks the FIXEDSIZE HTML-table label wiring;
      edgeLabelAttrs under-measures heights). Probe-verified fix
