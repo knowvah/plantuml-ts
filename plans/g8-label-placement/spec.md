@@ -349,3 +349,163 @@ at `delta: 0`. Runs in ~1.5s (well under the 2-minute bar). Pure comparator
 (`classifyDelta`, `summarize`) unit-tested in isolation:
 `tests/unit/scripts/measure-state-size-deltas.test.ts` (10 cases, including
 the ±epsilon boundary and the zero-allowed/pin-only path).
+
+## T1b — pesita mincross-order defect: root cause and fix
+
+**Status: RESOLVED.** Clears stop condition 5 for pesita-10-dene726.
+
+### Mechanism
+
+`src/core/graph-layout-build.ts#addClusters` never wired
+`DotInputCluster.portRanks`/`portAnchorId`/`portRanksLabelOnEe` into the REAL
+graphviz-ts layout builder call — these fields were consumed only by the
+Svek-DOT TEXT emitter (`svek-dot-emit.ts`, for the DOT-parity oracle
+comparator), never by the actual `layoutGraph()` seam. Jar's
+`ClusterDotString.printRanks` (`Cluster.java`'s `RANK_SOURCE`/`RANK_SINK`,
+`ClusterDotString.java:136-137,254-287`) gives a border-point (entry/exit
+-point) composite's direct port children a REAL graphviz `{rank=source|sink;
+<ids>;}` constraint scoped to that cluster's own subgraph — a genuine
+network-simplex RANK constraint, not merely a declaration-order effect. Its
+total absence from this port's real layout call meant every border-point
+composite (the `<<entrypoint>>`/`<<exitpoint>>` family, `AA`'s `aa_ok_ex` in
+pesita) laid out with one fewer rank constraint than jar, which can shift the
+whole graph's rank assignment and hence its mincross crossing-minimization
+landscape — exactly the divergence T1 found in the `Idle`/`__zaent_AA`/
+`Reanimate`/`Closing` cycle.
+
+### Origin
+
+`src/core/graph-layout-build.ts` — `addClusters`, inside the `handlesFor`
+closure, immediately after the existing "i"/"p1" wrapper block (previously
+ended at `return handles;` with no port-rank handling at all).
+
+### Causal chain
+
+1. `AA`'s exitpoint child `aa_ok_ex` needs `{rank=sink; aa_ok_ex;}` inside
+   AA's own cluster subgraph (jar's real `svek-3.dot`: `{rank=sink;sh0019;}`
+   inside `cluster15`).
+2. Pre-fix, `addClusters` built AA's cluster as a bare `subgraph cluster1 {
+   aa_ok_ex; __zaent_AA; }` with no rank constraint at all — `aa_ok_ex`
+   ranked wherever the unconstrained network-simplex solver put it.
+3. Without that constraint, dot's rank/mincross solution for the WHOLE graph
+   (not just AA's own cluster) differs from jar's: the `Idle`/`Reanimate`/
+   `Closing` same-cycle siblings come out in reversed left-right order
+   (`Idle(138)<Reanimate(298)<Closing(645)`, T1's finding) instead of jar's
+   real order (`Closing(249)<Reanimate(612)<Idle(687)`).
+4. Adding the missing `{rank=sink; aa_ok_ex;}` constraint (and the symmetric
+   `{rank=source; ...}` for input-position children, when present) restores
+   jar's rank/mincross solution: the same full-seam simulation (production
+   `addNodes`+`addClusters`, jar-exact FIXEDSIZE boxes on all 9 labeled
+   edges) now yields `Closing(273.0)<Reanimate(643.0)<Idle(718.0)` —
+   matching jar's real order exactly (same relative ordering; the residual
+   ~24-31px offset from jar's raw coordinates is the pre-existing, separately
+   tracked `size-backlog.json` sizing gap for `Closing`/`Reanimate`'s own
+   autonom-composite box dimensions — see "Ruled out" below — not a T1b
+   defect).
+
+### Bisection table (disposable text-probe ablations, DOT-text `parse()` against real graphviz-ts, using pesita's own node ids/sizes/structure)
+
+| Dimension varied | Result |
+|---|---|
+| Flat node declaration order (T16 unchanged / removed / jar-first-mention-exact) | Never alone reproduces jar's order — always either `Idle<Reanimate<Closing` (T16-shape) or `Reanimate<Closing<Idle` (no-T16 shape) |
+| Edge registration order (lines0-first vs unchanged) | No effect once flat node order is fixed |
+| `cluster.nodeIds` reorder (Closing-first, mirroring `getNodesOrderedTop`) | Zero effect — node CREATION already happened via the flat `addNodes` pass; a later subgraph-membership reference (`agsubnode`) never reorders `root.nodes` (confirmed by reading `graphviz-ts/src/model/cgraph-ops.ts#agnode`: first-mention order is fixed at `root.nodes.set()`, a `Map` — insertion-ordered) |
+| `addEdge`-before-`addNode` auto-vivification (mimicking jar's implicit node creation via an edge statement) | Zero effect — confirms creation-order hypotheses are not the mechanism |
+| AA's outer "a" wrapper / inner "i" wrapper (present vs absent) | Zero effect on order in all 4 combinations |
+| AA's "ee" WithLabel wrapper + FIXEDSIZE title reservation | Zero effect on order (with or without `{rank=sink;...}` present) |
+| Plain-text `label="AA"` on AA's own cluster (vs blank) | Zero effect |
+| **`{rank=sink; aa_ok_ex;}` constraint inside AA's cluster** | **Necessary AND sufficient** — flips `Idle(138)<Reanimate(298)<Closing(645)` to `Closing(273)<Reanimate(643)<Idle(718)` (jar-exact order) regardless of every other dimension above |
+| Rank-group subgraph name `cluster1ranksink` (starts with "cluster") vs `__portrank_N` | **Critical naming pitfall**: `cluster1ranksink` is silently promoted to a real nested CLUSTER by graphviz-ts's bare `name.toLowerCase().startsWith('cluster')` detection (`graphviz-ts/src/layout/dot/rank.ts:89`), reproducing the WRONG order even with the rank constraint logically present. Confirmed by dumping the built `Graph` model's subgraph tree directly (not assumed) — production code uses `__portrank_N`, never `cluster`-prefixed. |
+
+### Ruled out
+
+- **`transitionLabelAnchor` (§2 formula)**: unaffected — inputs (centre, box)
+  are unchanged; the mechanism is graphviz's own rank/mincross decision, not
+  a label-anchor computation.
+- **T16's `firstEncounterOrder`**: NOT the cause and NOT touched by this fix
+  — verified via the bisection table's first two rows (every construction-
+  order permutation, with or without T16, fails to reproduce jar's order on
+  its own). T16 remains necessary for its own documented purpose (DFS-root
+  selection for the cycle's rank assignment) and continues to pass its own
+  5 unit tests unmodified.
+- **Node/edge declaration/registration order in general** (the original
+  working hypothesis entering this task): ruled out by 6 independent
+  ablations (flat order × 3, edge order × 1, cluster.nodeIds × 1, auto-
+  vivify-via-edge × 1) — none reproduce jar's order in isolation or combined
+  with each other. Confirmed instead that feeding jar's LITERAL `svek-3.dot`
+  through `graphviz-ts`'s own `parse()` (no builder API at all) reproduces
+  jar's exact positions (`sh0012`=266.0, `sh0011`=629.0, `sh0010`=704.0,
+  matching real `dot -Tplain`'s own output to 2 decimals) — proving
+  graphviz-ts itself is not the defect; the defect is specifically the
+  missing `portRanks` wiring in this port's construction.
+- **AA's "a"/"i"/"ee" wrapper nesting and title-table reservation**: ruled
+  out as unnecessary for THIS defect specifically (4-way + label-presence
+  ablations, all zero-effect on order) — left unwired deliberately to keep
+  this fix minimal; flagged as a documented, separate, additive geometry
+  concern for a future task (jar's `portRanksLabelOnEe` WithLabel path still
+  moves the border-point composite's rendered title onto the "ee" subgraph,
+  which this port's real layout does not reproduce yet — orthogonal to
+  ordering).
+- **The pre-existing `Closing`/`Reanimate` autonom-box sizing residual**:
+  confirmed via the oracle `in.svg`: this port's captured `Closing` node is
+  450.09×347px vs jar's real outer box 435.9925×342px (a ~14px width / 5px
+  height gap) — already reflected in `size-backlog.json`'s
+  `pesita-10-dene726: 0.19579199999999997` entry (unrelated to node
+  ordering: this residual exists identically before and after this fix, and
+  `measure-state-size-deltas.ts` confirms it does not widen, 149/149
+  unchanged). This is why the full-seam simulation's per-node offset from
+  jar's raw coordinates is not perfectly uniform (`Idle`-derived dx=-31.0 vs
+  `Closing`-derived dx=-24.0, a ~7px residual) despite the ORDER now being
+  exact — a separately tracked, pre-existing sizing gap, not a T1b defect.
+
+### Production change
+
+`src/core/graph-layout-build.ts#addClusters`: inside `handlesFor`, after
+resolving `innermost`, wire `c.portRanks` into a fresh, never-`cluster`-
+prefixed rank-group subgraph (`__portrank_N`) under `main` per port-rank
+entry, with `{rank: pr.rank}` and each `pr.nodeIds` member added via
+`rankSub.addNode(id)`. Additive: clusters without `portRanks` (every pre-
+existing caller) are byte-identical (confirmed: 268/268 DOT-parity, 59/59
+pins, 149/149 size-delta measurements unchanged, zero widened).
+
+### Re-verification table (pesita-10-dene726, full-seam simulation: production `addNodes`+`addClusters`, jar-exact FIXEDSIZE boxes on all 9 labeled edges)
+
+Mincross order: `Closing(273.0) < Reanimate(643.0) < Idle(718.0)` — matches
+jar's real order `Closing(249.0) < Reanimate(612.0) < Idle(687.0)` exactly
+(same relative ordering; residual offset is the pre-existing sizing gap
+above, not an ordering defect). Per-edge label centre (raw graphviz-ts
+coordinate, pre-shift) for all 9 labeled edges in this pass, confirming
+every edge now resolves a label position (none fall back to
+`undefined`/orphan handling):
+
+| Edge | Text (first line) | Raw label centre |
+|---|---|---|
+| `__zaent_nasreq_auth→__final_nasreq_auth` | `Rcv-STR / remove_session(),` | (965.86, 669.22) |
+| `__init_nasreq_auth→__zaent_AA` | `/ set_request_types(both)` | (756.50, 141.50) |
+| `__zaent_AA→Closing` | `SubCompletion` | (602.00, 234.22) |
+| `Idle→__zaent_AA` | `Rcv-AAR {stay} /` | (769.34, 234.22) |
+| `Idle→Reanimate` | `Timeout [may_continue()]` | (712.50, 669.22) |
+| `Closing→Idle` | `Timeout [default]` | (563.01, 441.22) |
+| `__zaent_AA→Reanimate` | `Rcv-AAR {stay}` | (915.93, 451.72) |
+| `Reanimate→Closing` | `Timeout` | (425.00, 669.22) |
+| `Closing→__final_nasreq_auth` | `Completion` | (594.50, 669.22) |
+
+A full byte-exact anchor-to-oracle-`<text>` verification (spec §2's formula,
+matching §3's methodology) is deferred to T2, which lands the FIXEDSIZE
+box-wiring + `labelWidth`/`labelHeight` reservation this simulation only
+approximates by hand here — this section's scope is proving stop condition 5
+is CLEARED (the ordering divergence is resolved), not re-deriving T2's own
+box/anchor work early.
+
+### Harness/gate results
+
+- `npm run typecheck`: clean (production files; probe scripts deleted before
+  finishing).
+- `npm run lint`: clean.
+- `npx tsx scripts/measure-state-size-deltas.ts`: 149/149 unchanged (92
+  backlog + 57 pins), 0 widened, 0 improved.
+- `tests/oracle/state-dot-parity.test.ts`: 268/268 passed.
+- `tests/oracle/svg-conformance/state.golden.ratchet.test.ts`: 59/59 passed.
+- `tests/unit/core/graph-layout-build.test.ts`: 17/17 passed (4 new cases
+  for the `portRanks` mechanism; the 13 pre-existing G7 T7/T16 cases
+  unmodified and still passing).

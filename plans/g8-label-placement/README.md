@@ -16,16 +16,14 @@ T20b ink-walk label-box aggregation). Success: zero size-backlog
 widenings, the 14-fixture set within tolerance, then G7 resumes at
 T19 toward pesita `AA` 126×104.72.
 
-## Status: STOPPED — stop condition 5 (2026-07-23, after T1)
+## Status: RESUMED — Option 1 authorized (2026-07-23)
 
-Pesita-10-dene726's label positions cannot be reproduced: with jar-exact
-FIXEDSIZE boxes on all 9 labeled edges of its AA pass (verified 9/9 vs
-`svek-3.dot`), the layout's mincross ordering is left-right REVERSED vs
-the jar (Idle/Closing swapped; ranks/Y match exactly). Same open gap as
-G7 T13/T16 (emission-order sensitivity, cyclic pass). The conversion
-formula itself is jar-exact on 11/11 labels across the other 4 fixtures
-— see `spec.md`. Awaiting human direction; options in the
-decision-journal T1 STOP row.
+T1 stop report (stop cond. 5): pesita-10's AA-pass mincross ordering is
+left-right reversed vs the jar even with jar-exact boxes on all 9
+labeled edges (ranks/Y exact). Human authorized Option 1: task T1b
+(port the remaining jar svek emission order — the edge-statement-order
+piece T16 deferred) runs before T2. Exit criterion: T1's full-seam
+pesita simulation verifies via the spec formula, clearing stop cond. 5.
 
 ## Branch
 

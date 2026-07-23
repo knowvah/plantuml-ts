@@ -254,6 +254,9 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   const handlesById = new Map<string, ClusterHandles>();
   const nameById = new Map<string, string>();
   let nextIndex = 0;
+  // T1b: fresh counter for port-rank grouping subgraphs (`__portrank_N`) --
+  // deliberately NOT `cluster`-prefixed, see the naming-pitfall note below.
+  let portRankSubId = 0;
   const nameFor = (c: DotInputCluster): string => {
     const cached = nameById.get(c.id);
     if (cached !== undefined) return cached;
@@ -326,13 +329,59 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     let innermost = main;
     if (levels === 2) innermost = innermost.addSubgraph(`${outerName}i`, {});
     if (levels !== undefined) innermost = innermost.addSubgraph(`${outerName}p1`, {});
+    // T1b: `ClusterDotString.printRanks` (`Cluster.RANK_SOURCE`/`RANK_SINK`,
+    // `ClusterDotString.java:136-137,254-287`) -- a border-point (entry
+    // /exit-point) composite's direct port children get a REAL graphviz
+    // `{rank=source|sink; <ids>;}` constraint scoped to this cluster's own
+    // subgraph, forcing them to the extremal rank WITHIN it. Pre-fix, this
+    // field (`DotInputCluster.portRanks`) was wired to the Svek-DOT TEXT
+    // emitter only (`svek-dot-emit.ts`, for the DOT-parity oracle) and never
+    // reached the REAL graphviz-ts layout call here -- so every border-point
+    // composite's rank constraint was silently absent from actual layout.
+    // Jar-verified root cause of the pesita-10-dene726 mincross-order defect
+    // (G8 T1b): `AA`'s exitpoint child `aa_ok_ex` needs `{rank=sink;
+    // aa_ok_ex;}` inside AA's own cluster -- a disposable text-probe
+    // ablation (4-way: with/without this block × with/without the sibling
+    // "ee" title-wrapper) isolated this constraint alone as necessary AND
+    // sufficient to flip the `Idle`/`Reanimate`/`Closing` cycle's mincross
+    // order from wrong (`Idle`(138)<`Reanimate`(298)<`Closing`(645)) to
+    // jar-exact (`Closing`(273)<`Reanimate`(643)<`Idle`(718)) -- a rank
+    // constraint changes the network-simplex rank GRAPH itself, not merely
+    // node/edge declaration order (the mechanism G7 T13/T16 already fixed
+    // for this same cycle's DFS-root selection). The "ee" WithLabel wrapper
+    // + FIXEDSIZE title reservation (`portRanksLabelOnEe`) is a SEPARATE,
+    // additive geometry concern (jar-verified to have ZERO effect on this
+    // ordering bug in the same ablation) -- deliberately NOT wired here to
+    // keep this fix minimal and scoped to the ordering defect; left as a
+    // documented residual for a future geometry-focused task.
+    //
+    // Naming pitfall this fix had to avoid (caught by a dump of the built
+    // Graph model, not assumed): graphviz-ts's cluster detection is a bare
+    // `name.toLowerCase().startsWith('cluster')` check
+    // (graphviz-ts/src/layout/dot/rank.ts) -- an EARLIER attempt named this
+    // subgraph `${outerName}rank${pr.rank}` (e.g. "cluster1ranksink"), which
+    // ITSELF starts with "cluster" and so was silently promoted to a real
+    // nested CLUSTER (wrong: jar's own `{rank=sink;...}` block is a bare,
+    // non-cluster anonymous subgraph, `ClusterDotString.java#printRanks`) --
+    // reproducing the wrong mincross order despite the constraint being
+    // present. `__portrank_N` (a fresh global counter, never
+    // "cluster"-prefixed) avoids this entirely.
+    // @see ~/git/plantuml/.../svek/ClusterDotString.java#printRanks
+    // @see ~/git/plantuml/.../svek/Cluster.java (RANK_SOURCE/RANK_SINK)
+    if (c.portRanks !== undefined) {
+      for (const pr of c.portRanks) {
+        const rankSub = main.addSubgraph(`__portrank_${portRankSubId++}`, { rank: pr.rank });
+        for (const id of pr.nodeIds) rankSub.addNode(id);
+      }
+    }
     const handles: ClusterHandles = { main, innermost };
     handlesById.set(c.id, handles);
     return handles;
     // #lizard forgives -- faithful port of ClusterDotString's full
-    // 4-layer protection nesting (a/p0/main/i/p1); each `if` below is one
-    // independently-conditional wrapper layer (jar's own branch structure,
-    // ClusterDotString.java:91-201), not decision complexity to simplify.
+    // 4-layer protection nesting (a/p0/main/i/p1) plus the RANK_SOURCE/
+    // RANK_SINK port-rank constraint; each block is one independently-
+    // conditional jar mechanism (ClusterDotString.java:91-201,254-287), not
+    // decision complexity to simplify.
   };
   for (const c of clusters) {
     const { main, innermost } = handlesFor(c);
