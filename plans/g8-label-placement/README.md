@@ -16,7 +16,19 @@ T20b ink-walk label-box aggregation). Success: zero size-backlog
 widenings, the 14-fixture set within tolerance, then G7 resumes at
 T19 toward pesita `AA` 126×104.72.
 
-## Status: STOPPED — scope boundary at T2, 2nd revert (2026-07-23)
+## Status: RESUMED — Option 1 (T1c cluster-title fix) authorized (2026-07-23)
+
+T1c (prerequisite before re-landing T2): fix the border-point
+cluster-title FIXEDSIZE **width** in the real layout so the port's DOT
+matches jar's `svek-2.dot` byte-for-byte. Characterization localized
+the gap: the port emits cluster-title W=108 (`Math.round`) where jar
+has W=107 (truncation, T1 spec §1a). Must be jar-source-derived (one
+mechanism reproducing kotagu 126 AND bajelo-54 107 — D5), paper-gated,
+pins+parity+harness must hold. Then T2 re-lands.
+
+---
+
+## (prior) Status: STOPPED — scope boundary at T2, 2nd revert (2026-07-23)
 
 T1 ✅ (formula + harness, 9df7d95). T1b ✅ (portRanks cleared the pesita
 ordering blocker, bf376da). T2 STOPPED + fully reverted TWICE
