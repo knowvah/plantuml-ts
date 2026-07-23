@@ -16,19 +16,29 @@ T20b ink-walk label-box aggregation). Success: zero size-backlog
 widenings, the 14-fixture set within tolerance, then G7 resumes at
 T19 toward pesita `AA` 126×104.72.
 
-## Status: STOPPED — scope boundary at T2 (2026-07-23)
+## Status: STOPPED — scope boundary at T2, 2nd revert (2026-07-23)
 
-T1 ✅ (formula + harness, 9df7d95). T1b ✅ (portRanks fix cleared the
-pesita ordering blocker, bf376da). T2 STOPPED + fully reverted:
-stop conditions 1 + 6. The placement switch + reverted stack land
-correctly (and a real `\n`-split defect fix resolved pesita), but 4
-fixtures (bajelo-54, nimana-36, rovese-43, fotuje-06) then widen — the
-outer autonom **wrapper**-sizing formula (`state-composite-sizing.ts#
-measureAutonomWrapper`, in **no** task's write-set) undershoots the
-jar once fed the now-accurate smaller inner ink-box. This is the gap
-`state-composite-autonom.ts:127-130` already names ("Queued for S5").
-Awaiting a scope decision — options in the decision-journal T2 STOP row
-and the session summary below. Parallel to the G7 T18→T20 escalation.
+T1 ✅ (formula + harness, 9df7d95). T1b ✅ (portRanks cleared the pesita
+ordering blocker, bf376da). T2 STOPPED + fully reverted TWICE
+(consecutive-fix rule). Verified correct and ready to reapply: the
+placement switch, T18 FIXEDSIZE wiring, 13pt width, T20b ink-walk fold,
+AND a genuine `\n`-split defect fix (splitCreoleLines) that resolves
+pesita. `measureAutonomWrapper` was added to scope and confirmed a
+faithful port (not the bug).
+
+Residual: 4 fixtures (bajelo-54, nimana-36, rovese-43, fotuje-06) widen
+0.4–1.5px once T18 lands. Instrumented diagnosis: 3 of 4 are
+NODE-position-bound (not label-bound); the divergence is graphviz
+positioning reacting to T18's edge-label FIXEDSIZE reservation.
+**Orchestrator proved graphviz-ts is byte-faithful** (jar's own
+svek-2.dot → graphviz-ts renderSvg == real `dot -Tsvg`, 0.00 on every
+node) — so this is **NOT** a graphviz-ts library issue (stop cond. 8
+excluded); it is a **port DOT-emission gap** in nested border-point
+composites (the unwired `portRanksLabelOnEe`/cluster-title path, in
+`state-composite-cluster.ts`/`addClusters` — no current write-set).
+T18 is required for the placement switch, so it can't be dropped (D3).
+Awaiting a scope decision — options in the T2 STOP row and the session
+summary below.
 
 ## Branch
 
