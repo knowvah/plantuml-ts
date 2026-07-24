@@ -1,11 +1,14 @@
 # Skin-file loading (`skin <name>`) + shadow rendering
 
-## Status: DRAFT (for review) — 2026-07-23
+## Status: IN PROGRESS — Batch 1 (2026-07-24)
 
-Drafted at the close of G8, which surfaced the dependency. Not yet
-authorized for execution. Review D1–D4 and the batch split, then run
-`/plan-mission` to expand into full `batch-N/TN-*.md` task files, or
-adjust here first.
+Reviewed + corrected (commit 653fc8a). Branch `feat/skin-file-loading`
+off main. Verified execution seam: `src/index.ts:204-227` is the theme
+cascade (`resolveTheme` base → `resolveSkinparam(skinparam)` →
+`resolveSkinparam(style-root)` → `applyStyleMap(style-elements)`); a
+`skin <name>` file reuses the SAME `parseStyleBlock` + `resolveSkinparam`
++ `applyStyleMap` machinery, applied as an early BASE layer (D6) between
+`resolveTheme` and the user's skinparam.
 
 ## Objective
 
