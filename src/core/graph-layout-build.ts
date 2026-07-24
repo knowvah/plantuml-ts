@@ -5,7 +5,7 @@
  * rank subgraphs, cluster subgraphs, and edge declarations with the
  * (tail,head)→id EdgeIndex the snapshot mapper consumes.
  */
-import type { GvGraphBuilder } from 'graphviz-ts';
+import type { GvGraphBuilder } from '@knowvah/dot-engine';
 import type {
   DotInputCluster,
   DotInputEdge,

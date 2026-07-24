@@ -1,4 +1,4 @@
-import { parse, ParseError } from 'graphviz-ts';
+import { parse, ParseError } from '@knowvah/dot-engine';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';

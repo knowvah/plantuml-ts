@@ -51,7 +51,7 @@
  * back to the caller's own id only in this function's returned map.
  */
 
-import { createGraph, render, setTextMeasurer, LutTextMeasurer } from 'graphviz-ts';
+import { createGraph, render, setTextMeasurer, LutTextMeasurer } from '@knowvah/dot-engine';
 import type { RectangleArea, Point } from './frontier-calculator.js';
 
 // plantuml-ts is a pure SVG library -- no DOM, no canvas (see graph-layout.ts's

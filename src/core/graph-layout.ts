@@ -14,8 +14,8 @@ import {
   getLayout,
   setTextMeasurer,
   LutTextMeasurer,
-} from 'graphviz-ts';
-import type { LayoutSnapshot } from 'graphviz-ts';
+} from '@knowvah/dot-engine';
+import type { LayoutSnapshot } from '@knowvah/dot-engine';
 import {
   applyGraphAttrs,
   addNodes,

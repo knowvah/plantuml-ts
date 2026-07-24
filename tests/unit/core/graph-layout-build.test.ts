@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createGraph } from 'graphviz-ts';
-import type { Graph } from 'graphviz-ts';
+import { createGraph } from '@knowvah/dot-engine';
+import type { Graph } from '@knowvah/dot-engine';
 import { addClusters, addNodes, firstEncounterOrder } from '../../../src/core/graph-layout-build.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
