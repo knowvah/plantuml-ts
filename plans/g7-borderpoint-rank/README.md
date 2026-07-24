@@ -12,7 +12,15 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: PAUSED - waiting on the label-placement mission (option 1, 2026-07-23)
+## Status: UNBLOCKED — resume at T19 (paper gate v5)
+<!-- 2026-07-23. Unblocked by G8 close (T3): the label-placement port
+     landed (attachTransitionLabel now consumes graphviz-returned
+     labelX/labelY; LABEL_PERP=12 retired as fallback only), the
+     autonom edge-label ink gap is closed, and the size-backlog is
+     re-tightened (widened=0). Resume at T19 → paper gate v5 → T14b →
+     T15 per the batch-6 plan. History below retained for context. -->
+<!-- (prior) PAUSED - waiting on the label-placement mission (option 1, 2026-07-23) -->
+
 <!-- 2026-07-23. T20 ink-walk aggregation verified correct but the
      backlog bar is blocked by attachTransitionLabel's LABEL_PERP=12
      divergence from jar's spline-based SvekEdge label placement

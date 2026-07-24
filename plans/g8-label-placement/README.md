@@ -16,69 +16,22 @@ T20b ink-walk label-box aggregation). Success: zero size-backlog
 widenings, the 14-fixture set within tolerance, then G7 resumes at
 T19 toward pesita `AA` 126×104.72.
 
-## Status: STOPPED — guard fix proven; 1 fixture (nimana-36) holdout (2026-07-23)
+## Status: COMPLETE — all batches landed (2026-07-23)
 
-Guard relaxation (A) SUCCEEDED and is corpus-verified: removing the
-`insideAutonomPass` clause closed bajelo-54/fotuje-06/rovese-43, drove
-**pesita-10 to near-exact (0.000519)**, and improved 35 fixtures total
-(placement switch + full stack). Best-attempt harness: widened=1,
-improved=33. ONLY **nimana-36** still widens (0.111 vs 0.090) — an 8px
-ink-walk content-height gap where jar's `getMinMax` captures more than
-the port's from byte-identical node geometry; irreducible from cached
-DOT/SVG artifacts, needs jar source-level tracing. Reverted to ea76ece.
-Decision needed: descope nimana-36 (named divergence) and land the
-proven win, or authorize a jar-source-tracing task first.
+T1 ✅ · T1b ✅ (portRanks) · T1c ✅ (cluster-title floor) · T2 ✅ (the
+atomic placement stack + guard relaxation) · T3 ✅ (close-out). Final
+harness: **0 widened, 33 improved** (pesita-10 0.196→0.0005;
+bajelo-54/fotuje-06/rovese-43 closed; beguxu-19 reached 0 and was
+removed). 10246 tests, 268/268 DOT-parity, 57 pins byte-identical.
+G7 is UNBLOCKED (resume at T19). See the **G8 summary** at the bottom
+for the full task/decision record and the full arc in
+`decision-journal.md`.
 
----
-
-## (prior) Status: STOPPED — 4th scope layer at T2 (2026-07-23)
-
-T1 ✅ · T1b ✅ · **T1c ✅** (cluster-title floor, 0c99813). T2 re-landed
-on T1c and reverted a 3rd time — but the DOT-diff discipline named the
-true mechanism. The 4 residual fixtures were NEVER a cluster-title-value
-gap; they're denied a title reservation entirely by a guard:
-`state-composite-cluster.ts:357-360` — `ctx.insideAutonomPass !== true`.
-That guard's own doc comment says it exists only to work around the
-`buildPlainAutonomSpec#Math.max` floor regression on fotuje-06/rovese-43
-— **the exact floor D6 removes.** So the guard is a workaround for a bug
-that no longer exists. Relaxing it (with corpus re-verification) should
-close 3 of 4 (bajelo-54, fotuje-06, rovese-43). **nimana-36** is a 4th,
-separate, still-unexplained residual (autonom-nested leaves + edge
-labels, no cluster title). Edge-label + placement wiring verified
-correct (jar-exact 69/62/15). Awaiting a scope decision — options in the
-T2 STOP row and below.
-
----
-
-## (prior) Status: RESUMED — Option 1 (T1c cluster-title fix) 2026-07-23
-
-T1c: fix the border-point cluster-title FIXEDSIZE width. LANDED.
-
----
-
-## (prior) Status: STOPPED — scope boundary at T2, 2nd revert (2026-07-23)
-
-T1 ✅ (formula + harness, 9df7d95). T1b ✅ (portRanks cleared the pesita
-ordering blocker, bf376da). T2 STOPPED + fully reverted TWICE
-(consecutive-fix rule). Verified correct and ready to reapply: the
-placement switch, T18 FIXEDSIZE wiring, 13pt width, T20b ink-walk fold,
-AND a genuine `\n`-split defect fix (splitCreoleLines) that resolves
-pesita. `measureAutonomWrapper` was added to scope and confirmed a
-faithful port (not the bug).
-
-Residual: 4 fixtures (bajelo-54, nimana-36, rovese-43, fotuje-06) widen
-0.4–1.5px once T18 lands. Instrumented diagnosis: 3 of 4 are
-NODE-position-bound (not label-bound); the divergence is graphviz
-positioning reacting to T18's edge-label FIXEDSIZE reservation.
-**Orchestrator proved graphviz-ts is byte-faithful** (jar's own
-svek-2.dot → graphviz-ts renderSvg == real `dot -Tsvg`, 0.00 on every
-node) — so this is **NOT** a graphviz-ts library issue (stop cond. 8
-excluded); it is a **port DOT-emission gap** in nested border-point
-composites (the unwired `portRanksLabelOnEe`/cluster-title path, in
-`state-composite-cluster.ts`/`addClusters` — no current write-set).
-T18 is required for the placement switch, so it can't be dropped (D3).
-Awaiting a scope decision — options in the T2 STOP row and the session
-summary below.
+**One tracked follow-up:** `nimana-36-veco708`'s `skin rose`
+drop-shadow ink (8px) is unreachable until bundled `skin <name>`
+stylesheet loading lands — its backlog entry is bumped with a `_doc`
+note (not a DIVERGENCES entry: a pending feature, not a deliberate
+divergence). Owned by `plans/skin-file-loading/` (drafted).
 
 ## Branch
 
@@ -95,8 +48,8 @@ run git mutations.
 | Batch | Scope | Tasks | Status |
 |-------|-------|-------|--------|
 | [1](batch-1/overview.md) | Convention spec + committed delta harness | T1 | [x] (stop-report form) |
-| [2](batch-2/overview.md) | Atomic implementation (placement + reverted stack) | T2 | [ ] |
-| [3](batch-3/overview.md) | Close-out: backlog tighten, pins, docs, G7 unblock | T3 | [ ] |
+| [2](batch-2/overview.md) | Atomic implementation (placement + reverted stack) | T2 | [x] |
+| [3](batch-3/overview.md) | Close-out: backlog tighten, pins, docs, G7 unblock | T3 | [x] |
 
 ## Docs
 
@@ -193,3 +146,48 @@ run git mutations.
 - Known issue blocking resume: pesita AA-pass mincross ordering
   reversed vs jar even with jar-exact label boxes (G7 T13/T16 gap).
   T2 is otherwise fully specced by spec.md.
+
+## G8 summary
+
+Mission complete (landed at 9b650bc + T3 close-out).
+
+**Tasks completed:** T1, T1b, T1c, T2, T3.
+- T1 — conversion spec + committed 92-fixture delta harness
+  (`scripts/measure-state-size-deltas.ts`, jar-exact 11/11 labels).
+- T1b/T1c — portRanks ordering fix + border-point cluster-title
+  FIXEDSIZE width floor.
+- T2 — atomic landing of the coupled set (graphviz-returned
+  `labelX/labelY` placement, T18 FIXEDSIZE/heights, G5/C1 13pt arrow
+  width, T20b ink-walk label-box fold) as one commit. **T1d (guard
+  relaxation — removing the `insideAutonomPass` clause per D6) folded
+  into T2's landing**, not run as a separate task; it closed
+  bajelo-54/fotuje-06/rovese-43 and drove pesita-10 near-exact.
+- A **shadow-ink task** (nimana-36's YES-inner-pass `skin rose`
+  Shadowing=4.0 drop-shadow) was investigated and **surfaced the
+  skin-file-loading dependency**: the 8px is structurally unreachable
+  until bundled `skin <name>` stylesheets + shadow-ink modeling land.
+  nimana-36 is tracked as a size-backlog exception (0.111111 +
+  `_doc`), not a divergence.
+- T3 — close-out: re-measured the backlog fresh, **tightened 32
+  entries** to their measured deltas, **removed 1** (beguxu-19-tize774,
+  reached 0), left nimana-36 untouched; swept for new byte-exact pins
+  (none qualified — the state pin mechanism requires a committed
+  jar-oracle `golden.svg`, and every existing golden is already
+  pinned); flipped G7 to UNBLOCKED.
+
+**Decisions:** 6 locked architecture decisions (D1–D6, `decisions.md`);
+~22 decision-journal entries across the mission.
+
+**Final gate results (T3 close-out):**
+- `npm test` — **10246 tests passed** (385 files), exit 0.
+- State DOT parity — **268/268**.
+- svg-state ratchet — **57 pins** (unchanged; no new fixture qualified).
+- Size-backlog harness — **widened=0, improved=33** (the T2 win: 32
+  tightened + 1 driven to 0); after T3's tighten all 33 sit exactly at
+  their new tolerances (post-tighten re-measure: widened=0, improved=0).
+- `npm run typecheck` / `lint` / `build` — all green.
+
+**Follow-ups:** the `skin <name>` stylesheet-loading mission (bundled
+skins + drop-shadow ink modeling) will close nimana-36-veco708 —
+returning it to ≤0.090278 — and is the one remaining tracked gap from
+this mission.
