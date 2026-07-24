@@ -52,6 +52,23 @@ function resolveStateBucketBackground(theme: Theme): string | undefined {
   return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : undefined;
 }
 
+/** mission skin-file-loading Batch 1 (D3): `theme.colors.graph.
+ *  rootElementBackground` -- the GLOBAL `skin <name>`/`<style> root {}`/
+ *  `<style> element {}` universal BackgroundColor cascade (`style-map-
+ *  element.ts#resolveGlobalBackground`'s own doc comment for the full
+ *  mechanism and why it is a DEDICATED field, not `theme.colors.
+ *  background`). Sits BELOW the `state`-element bucket tier ({@link
+ *  resolveStateBucketBackground}) and ABOVE each shape's own hardcoded
+ *  default -- a bare `state { BackgroundColor }` selector is strictly
+ *  more specific than the universal `root`/`element` fallback, matching
+ *  every other tiered resolver in this module. Jar-verified
+ *  `nimana-36-veco708` (`skin rose`, no `state {}` override -> box
+ *  `fill="#FEFECE"`, rose's `root { BackGroundColor #FEFECE }` value). */
+function resolveStateRootElementBackground(theme: Theme): string | undefined {
+  const raw = theme.colors.graph.rootElementBackground;
+  return raw !== undefined ? resolveColorToSvgHex(raw) : undefined;
+}
+
 /** mission G6 T4: `theme.colors.elements['state'].border` -- the SAME
  *  generic bucket {@link resolveStateBucketBackground} reads, applied to a
  *  state box/composite-cluster outline's own stroke. Populated by a bare
@@ -101,8 +118,10 @@ function resolveStateBackgroundByStereo(
  * comment's own scoping note; `core/skinparam.ts`'s `'state'` bucket entry
  * doc comment). Precedence: `#color`/`#back:color` inline override (highest)
  * -> `skinparam stateBackgroundColor<<stereo>>` (mission G4 S15) ->
- * `skinparam stateBackgroundColor` bucket -> `fallback` (the per-kind
- * hardcoded default, e.g. {@link STATE_DEFAULT_BACKGROUND}).
+ * `skinparam stateBackgroundColor` bucket -> the `skin <name>`/`<style>
+ * root {}`/`element {}` universal cascade (mission skin-file-loading
+ * Batch 1, D3 -- {@link resolveStateRootElementBackground}) -> `fallback`
+ * (the per-kind hardcoded default, e.g. {@link STATE_DEFAULT_BACKGROUND}).
  */
 export function resolveStateFillBucketed(
   node: Pick<StateNodeGeo, 'color' | 'stereotype'>,
@@ -111,7 +130,12 @@ export function resolveStateFillBucketed(
 ): string {
   const override = resolveBareOrBackColor(node.color);
   if (override !== undefined) return resolveColorToSvgHex(override);
-  return resolveStateBackgroundByStereo(node, theme) ?? resolveStateBucketBackground(theme) ?? fallback;
+  return (
+    resolveStateBackgroundByStereo(node, theme) ??
+    resolveStateBucketBackground(theme) ??
+    resolveStateRootElementBackground(theme) ??
+    fallback
+  );
 }
 
 /**
