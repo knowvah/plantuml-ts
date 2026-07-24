@@ -254,6 +254,9 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   const handlesById = new Map<string, ClusterHandles>();
   const nameById = new Map<string, string>();
   let nextIndex = 0;
+  // T1b: fresh counter for port-rank grouping subgraphs (`__portrank_N`) --
+  // deliberately NOT `cluster`-prefixed, see the naming-pitfall note below.
+  let portRankSubId = 0;
   const nameFor = (c: DotInputCluster): string => {
     const cached = nameById.get(c.id);
     if (cached !== undefined) return cached;
@@ -305,11 +308,28 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // graph-layout.types.ts, has the full jar-calibration derivation).
     // Callers that don't (every pre-C3 cluster, and every C3-ineligible
     // one) keep the prior plain-text `label` attr above, unchanged.
+    //
+    // G8 T1c: jar TRUNCATES both dims towards zero here, it never rounds --
+    // `ClusterDotString.java:124`'s `SvekEdge.appendTable(sblabel,
+    // cluster.getTitleAndAttributeWidth(), cluster.getTitleAndAttributeHeight()
+    // - 5, ...)` feeds `appendTable`'s own `(int)` cast on both dims
+    // (`SvekEdge.java:504-507`, the SAME mechanism spec.md G8/T1 §1a already
+    // verified for edge labels: `reservedWidth = Math.floor(dimNote.width)`).
+    // Verified against 3 independent jar cached-DOT ground-truth values
+    // (`test-results/dot-cache/state/{bajelo-54-dixe684,kotagu-43-miza629}`):
+    // Run 107.8875->107 (was Math.round->108, a miss), SubComposite
+    // 91.875->91 (was round->92, a miss), CompositeState-ee 99.575->99 (not
+    // yet wired to this seam, but floor matches there too) -- floor is
+    // correct in all 3; round is wrong in 2/3. `titleTableHeight` is already
+    // an exact integer in every corpus sample (`computeTitleTableHeight`'s
+    // own formula), so `Math.floor` is behavior-preserving there and is
+    // applied for mechanism-fidelity (jar floors both dims from the SAME
+    // `appendTable` call), not because a height regression was found.
     if (hasTitleTable) {
       main.setHtmlAttr(
         'label',
-        `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.round(c.titleTableWidth!)}" ` +
-          `HEIGHT="${Math.round(c.titleTableHeight!)}"><TR><TD></TD></TR></TABLE>`,
+        `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.floor(c.titleTableWidth!)}" ` +
+          `HEIGHT="${Math.floor(c.titleTableHeight!)}"><TR><TD></TD></TR></TABLE>`,
       );
     }
     // G5 C7, mechanism 16 margin half: mirror jar's ClusterDotString "i"/
@@ -326,13 +346,59 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     let innermost = main;
     if (levels === 2) innermost = innermost.addSubgraph(`${outerName}i`, {});
     if (levels !== undefined) innermost = innermost.addSubgraph(`${outerName}p1`, {});
+    // T1b: `ClusterDotString.printRanks` (`Cluster.RANK_SOURCE`/`RANK_SINK`,
+    // `ClusterDotString.java:136-137,254-287`) -- a border-point (entry
+    // /exit-point) composite's direct port children get a REAL graphviz
+    // `{rank=source|sink; <ids>;}` constraint scoped to this cluster's own
+    // subgraph, forcing them to the extremal rank WITHIN it. Pre-fix, this
+    // field (`DotInputCluster.portRanks`) was wired to the Svek-DOT TEXT
+    // emitter only (`svek-dot-emit.ts`, for the DOT-parity oracle) and never
+    // reached the REAL graphviz-ts layout call here -- so every border-point
+    // composite's rank constraint was silently absent from actual layout.
+    // Jar-verified root cause of the pesita-10-dene726 mincross-order defect
+    // (G8 T1b): `AA`'s exitpoint child `aa_ok_ex` needs `{rank=sink;
+    // aa_ok_ex;}` inside AA's own cluster -- a disposable text-probe
+    // ablation (4-way: with/without this block × with/without the sibling
+    // "ee" title-wrapper) isolated this constraint alone as necessary AND
+    // sufficient to flip the `Idle`/`Reanimate`/`Closing` cycle's mincross
+    // order from wrong (`Idle`(138)<`Reanimate`(298)<`Closing`(645)) to
+    // jar-exact (`Closing`(273)<`Reanimate`(643)<`Idle`(718)) -- a rank
+    // constraint changes the network-simplex rank GRAPH itself, not merely
+    // node/edge declaration order (the mechanism G7 T13/T16 already fixed
+    // for this same cycle's DFS-root selection). The "ee" WithLabel wrapper
+    // + FIXEDSIZE title reservation (`portRanksLabelOnEe`) is a SEPARATE,
+    // additive geometry concern (jar-verified to have ZERO effect on this
+    // ordering bug in the same ablation) -- deliberately NOT wired here to
+    // keep this fix minimal and scoped to the ordering defect; left as a
+    // documented residual for a future geometry-focused task.
+    //
+    // Naming pitfall this fix had to avoid (caught by a dump of the built
+    // Graph model, not assumed): graphviz-ts's cluster detection is a bare
+    // `name.toLowerCase().startsWith('cluster')` check
+    // (graphviz-ts/src/layout/dot/rank.ts) -- an EARLIER attempt named this
+    // subgraph `${outerName}rank${pr.rank}` (e.g. "cluster1ranksink"), which
+    // ITSELF starts with "cluster" and so was silently promoted to a real
+    // nested CLUSTER (wrong: jar's own `{rank=sink;...}` block is a bare,
+    // non-cluster anonymous subgraph, `ClusterDotString.java#printRanks`) --
+    // reproducing the wrong mincross order despite the constraint being
+    // present. `__portrank_N` (a fresh global counter, never
+    // "cluster"-prefixed) avoids this entirely.
+    // @see ~/git/plantuml/.../svek/ClusterDotString.java#printRanks
+    // @see ~/git/plantuml/.../svek/Cluster.java (RANK_SOURCE/RANK_SINK)
+    if (c.portRanks !== undefined) {
+      for (const pr of c.portRanks) {
+        const rankSub = main.addSubgraph(`__portrank_${portRankSubId++}`, { rank: pr.rank });
+        for (const id of pr.nodeIds) rankSub.addNode(id);
+      }
+    }
     const handles: ClusterHandles = { main, innermost };
     handlesById.set(c.id, handles);
     return handles;
     // #lizard forgives -- faithful port of ClusterDotString's full
-    // 4-layer protection nesting (a/p0/main/i/p1); each `if` below is one
-    // independently-conditional wrapper layer (jar's own branch structure,
-    // ClusterDotString.java:91-201), not decision complexity to simplify.
+    // 4-layer protection nesting (a/p0/main/i/p1) plus the RANK_SOURCE/
+    // RANK_SINK port-rank constraint; each block is one independently-
+    // conditional jar mechanism (ClusterDotString.java:91-201,254-287), not
+    // decision complexity to simplify.
   };
   for (const c of clusters) {
     const { main, innermost } = handlesFor(c);
@@ -377,7 +443,21 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
       : {};
     if (a?.weight !== undefined) attrs.weight = a.weight.toString();
     if (a?.minLen !== undefined) attrs.minlen = a.minLen.toString();
-    if (a?.label !== undefined) {
+    // G8 T2 (spec.md §1a, mirrors `addClusters`' own `hasTitleTable` gate
+    // above — that seam is T1c's, unmodified here): a caller that supplies
+    // BOTH `labelBoxWidth`/`labelBoxHeight` (currently only the state
+    // composite pipeline's own plain, note-free labels,
+    // `state-composite-edge-label.ts#edgeLabelAttrs`) gets a REAL
+    // jar-faithful `<TABLE FIXEDSIZE="TRUE" WIDTH=".." HEIGHT="..">` label
+    // reservation instead of the plain-text `label` attr below — the SAME
+    // margin+floor box `state-transition-label.ts#attachTransitionLabel`
+    // independently recomputes for the draw anchor (D3's "one mechanism,
+    // two consumers" shape). Every other caller (class, component, usecase,
+    // the flat state pipeline, a state transition with an attached `note on
+    // link`) doesn't set these two fields, so its plain-text path below is
+    // byte-for-byte unchanged.
+    const hasLabelBox = a?.labelBoxWidth !== undefined && a?.labelBoxHeight !== undefined;
+    if (a?.label !== undefined && !hasLabelBox) {
       attrs.label = a.label;
       // Measure with a LUT-known font (graphviz's default "Times,serif" warns).
       attrs.fontname = 'Times';
@@ -401,7 +481,21 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
       attrs.labelfontname = 'Times';
       attrs.labelfontsize = CARDINALITY_FONT_SIZE.toString();
     }
-    b.addEdge(e.from, e.to, attrs);
+    const edge = b.addEdge(e.from, e.to, attrs);
+    if (a?.label !== undefined && hasLabelBox) {
+      // T1c precedent (addClusters' own title-table seam, above): jar
+      // TRUNCATES both dims towards zero here (`appendTable`'s `(int)`
+      // cast, SvekEdge.java:504-507), never rounds -- `labelBoxWidth`/
+      // `labelBoxHeight` are already exact integers by construction
+      // (`computeReservedLabelBox`'s own `Math.floor`/integer-arithmetic
+      // formula), so `Math.floor` here is a defensive no-op matching that
+      // convention, not a behavior change.
+      edge.setHtmlAttr(
+        'label',
+        `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.floor(a.labelBoxWidth!)}" ` +
+          `HEIGHT="${Math.floor(a.labelBoxHeight!)}"><TR><TD></TD></TR></TABLE>`,
+      );
+    }
 
     const k = edgeKey(e.from, e.to);
     const q = idQueues.get(k) ?? [];

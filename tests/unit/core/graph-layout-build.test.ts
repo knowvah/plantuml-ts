@@ -179,6 +179,113 @@ describe('addClusters — issue-08 rank-name regression lock (docs/graphviz-issu
 });
 
 /**
+ * G8 T1b (`plans/g8-label-placement/spec.md` §T1b): `ClusterDotString
+ * .printRanks` (`Cluster.RANK_SOURCE`/`RANK_SINK`,
+ * `ClusterDotString.java:136-137,254-287`) -- a border-point (entry/exit
+ * -point) composite's direct port children get a REAL graphviz
+ * `{rank=source|sink; <ids>;}` constraint scoped to the cluster's own
+ * subgraph. Pre-fix, `DotInputCluster.portRanks` was wired to the Svek-DOT
+ * TEXT emitter only; `addClusters` (the REAL graphviz-ts layout seam) never
+ * read it, so every border-point composite's real graphviz rank constraint
+ * was silently absent from actual layout -- the root cause of
+ * pesita-10-dene726's mincross-order defect (jar-verified: this constraint
+ * ALONE, independent of the "ee"/"i"/"a" wrapper nesting, flips the
+ * `Idle`/`Reanimate`/`Closing` cycle's mincross order to jar-exact).
+ */
+describe('addClusters — portRanks rank constraint (G8 T1b)', () => {
+  it('no portRanks: no rank-group subgraph is created (backward compatible)', () => {
+    const input: DotInputGraph = {
+      nodes: [{ id: 'a', width: 1, height: 1 }],
+      edges: [],
+      clusters: [{ id: 'grp', nodeIds: ['a'] }],
+    };
+    expect(subgraphPaths(build(input))).toEqual(['cluster0']);
+  });
+
+  it('one portRanks entry: adds a non-"cluster"-prefixed rank-group subgraph with the rank attr set', () => {
+    const input: DotInputGraph = {
+      nodes: [
+        { id: 'exitPoint', width: 1, height: 1 },
+        { id: 'anchor', width: 1, height: 1 },
+      ],
+      edges: [],
+      clusters: [
+        {
+          id: 'grp',
+          nodeIds: ['exitPoint', 'anchor'],
+          portRanks: [{ rank: 'sink', nodeIds: ['exitPoint'] }],
+          portAnchorId: 'anchor',
+          portRanksLabelOnEe: true,
+        },
+      ],
+    };
+    const b = createGraph({ directed: true });
+    addClusters(b, input);
+    const main = b.graph.subgraphs.get('cluster0')!;
+    const rankSubs = [...main.subgraphs.values()];
+    expect(rankSubs).toHaveLength(1);
+    const rankSub = rankSubs[0]!;
+    // Never "cluster"-prefixed -- graphviz-ts's cluster detection is a bare
+    // `name.toLowerCase().startsWith('cluster')` check
+    // (graphviz-ts/src/layout/dot/rank.ts): an earlier attempt named this
+    // subgraph `cluster0ranksink`, which itself starts with "cluster" and so
+    // was silently promoted to a real nested CLUSTER, reproducing the wrong
+    // mincross order despite the constraint being present.
+    expect(rankSub.name.toLowerCase().startsWith('cluster')).toBe(false);
+    expect(rankSub.attrs.get('rank')).toBe('sink');
+    expect([...rankSub.nodes.keys()]).toEqual(['exitPoint']);
+    // Membership propagates up to `main` too (cgraph subgraph semantics).
+    expect([...main.nodes.keys()]).toContain('exitPoint');
+  });
+
+  it('two portRanks entries (source + sink): each gets its own rank-group subgraph', () => {
+    const input: DotInputGraph = {
+      nodes: [
+        { id: 'entryPoint', width: 1, height: 1 },
+        { id: 'exitPoint', width: 1, height: 1 },
+      ],
+      edges: [],
+      clusters: [
+        {
+          id: 'grp',
+          nodeIds: ['entryPoint', 'exitPoint'],
+          portRanks: [
+            { rank: 'source', nodeIds: ['entryPoint'] },
+            { rank: 'sink', nodeIds: ['exitPoint'] },
+          ],
+        },
+      ],
+    };
+    const b = createGraph({ directed: true });
+    addClusters(b, input);
+    const main = b.graph.subgraphs.get('cluster0')!;
+    const ranks = [...main.subgraphs.values()].map((sg) => sg.attrs.get('rank'));
+    expect(ranks.sort()).toEqual(['sink', 'source']);
+  });
+
+  it('multiple clusters with portRanks get distinct rank-group subgraph names (no id collision)', () => {
+    const input: DotInputGraph = {
+      nodes: [
+        { id: 'x1', width: 1, height: 1 },
+        { id: 'x2', width: 1, height: 1 },
+      ],
+      edges: [],
+      clusters: [
+        { id: 'grp1', nodeIds: ['x1'], portRanks: [{ rank: 'sink', nodeIds: ['x1'] }] },
+        { id: 'grp2', nodeIds: ['x2'], portRanks: [{ rank: 'sink', nodeIds: ['x2'] }] },
+      ],
+    };
+    const b = createGraph({ directed: true });
+    addClusters(b, input);
+    const main1 = b.graph.subgraphs.get('cluster0')!;
+    const main2 = b.graph.subgraphs.get('cluster1')!;
+    const name1 = [...main1.subgraphs.keys()][0]!;
+    const name2 = [...main2.subgraphs.keys()][0]!;
+    expect(name1).not.toEqual(name2);
+  });
+});
+
+/**
  * G7 T16 (`plans/g7-borderpoint-rank/batch-6/overview.md`, T16 row;
  * `plans/g6-cluster-geometry/batch-4/withlabel-derivation.md` §4 has the full
  * jar-verified derivation): `firstEncounterOrder` mirrors jar's
@@ -277,5 +384,45 @@ describe('firstEncounterOrder — jar lines0 node-creation order (G7 T16)', () =
     const b = createGraph({ directed: true });
     addNodes(b, input);
     expect([...b.graph.nodes.keys()]).toEqual(['tail', 'head', 'first']);
+  });
+});
+
+describe('addClusters — title-table FIXEDSIZE dims truncate, never round (G8 T1c)', () => {
+  // `ClusterDotString.java:124` -> `SvekEdge.appendTable`'s own `(int)` cast
+  // (`SvekEdge.java:504-507`) truncates BOTH dims towards zero before they
+  // reach dot's FIXEDSIZE table -- jar never rounds. Verified against jar's
+  // own cached DOT for bajelo-54-dixe684 (Run: 107.8875 -> WIDTH="107", NOT
+  // "108") and kotagu-43-miza629 (SubComposite: 91.875 -> WIDTH="91", NOT
+  // "92") -- see spec.md's "T1c" section for the full derivation.
+  it('a fractional width/height >= .5 floors down, not up (would round up if using Math.round)', () => {
+    const input: DotInputGraph = {
+      nodes: [{ id: 'a', width: 1, height: 1 }],
+      edges: [],
+      clusters: [
+        { id: 'grp', nodeIds: ['a'], titleTableWidth: 107.8875, titleTableHeight: 42 },
+      ],
+    };
+    const b = createGraph({ directed: true });
+    addClusters(b, input);
+    const main = b.graph.subgraphs.get('cluster0')!;
+    const label = main.attrs.get('label')!;
+    expect(label).toContain('WIDTH="107"');
+    expect(label).not.toContain('WIDTH="108"');
+    expect(label).toContain('HEIGHT="42"');
+  });
+
+  it('reproduces the kotagu-43-miza629 SubComposite ground truth (91.875 -> 91)', () => {
+    const input: DotInputGraph = {
+      nodes: [{ id: 'a', width: 1, height: 1 }],
+      edges: [],
+      clusters: [
+        { id: 'grp', nodeIds: ['a'], titleTableWidth: 91.875, titleTableHeight: 9 },
+      ],
+    };
+    const b = createGraph({ directed: true });
+    addClusters(b, input);
+    const label = b.graph.subgraphs.get('cluster0')!.attrs.get('label')!;
+    expect(label).toContain('WIDTH="91"');
+    expect(label).toContain('HEIGHT="9"');
   });
 });

@@ -16,7 +16,22 @@ T20b ink-walk label-box aggregation). Success: zero size-backlog
 widenings, the 14-fixture set within tolerance, then G7 resumes at
 T19 toward pesita `AA` 126×104.72.
 
-## Status: READY
+## Status: COMPLETE — all batches landed (2026-07-23)
+
+T1 ✅ · T1b ✅ (portRanks) · T1c ✅ (cluster-title floor) · T2 ✅ (the
+atomic placement stack + guard relaxation) · T3 ✅ (close-out). Final
+harness: **0 widened, 33 improved** (pesita-10 0.196→0.0005;
+bajelo-54/fotuje-06/rovese-43 closed; beguxu-19 reached 0 and was
+removed). 10246 tests, 268/268 DOT-parity, 57 pins byte-identical.
+G7 is UNBLOCKED (resume at T19). See the **G8 summary** at the bottom
+for the full task/decision record and the full arc in
+`decision-journal.md`.
+
+**One tracked follow-up:** `nimana-36-veco708`'s `skin rose`
+drop-shadow ink (8px) is unreachable until bundled `skin <name>`
+stylesheet loading lands — its backlog entry is bumped with a `_doc`
+note (not a DIVERGENCES entry: a pending feature, not a deliberate
+divergence). Owned by `plans/skin-file-loading/` (drafted).
 
 ## Branch
 
@@ -32,9 +47,9 @@ run git mutations.
 
 | Batch | Scope | Tasks | Status |
 |-------|-------|-------|--------|
-| [1](batch-1/overview.md) | Convention spec + committed delta harness | T1 | [ ] |
-| [2](batch-2/overview.md) | Atomic implementation (placement + reverted stack) | T2 | [ ] |
-| [3](batch-3/overview.md) | Close-out: backlog tighten, pins, docs, G7 unblock | T3 | [ ] |
+| [1](batch-1/overview.md) | Convention spec + committed delta harness | T1 | [x] (stop-report form) |
+| [2](batch-2/overview.md) | Atomic implementation (placement + reverted stack) | T2 | [x] |
+| [3](batch-3/overview.md) | Close-out: backlog tighten, pins, docs, G7 unblock | T3 | [x] |
 
 ## Docs
 
@@ -114,3 +129,65 @@ run git mutations.
   pesita-10-dene726.
 - On G8 close: flip `plans/g7-borderpoint-rank/README.md` from
   PAUSED to "unblocked — resume at T19".
+
+## Session summary (2026-07-23 — stopped after Batch 1)
+
+- Tasks completed: 1 of 3 (T1, in its stop-report form). T2/T3 not
+  started — stop condition 5.
+- Decisions: 3 journal rows; the T1 STOP row is flagged for review
+  with the three options for the human.
+- Quality gates at the T1 commit: npm test 10235 passed (384 files),
+  typecheck, lint, build all green; harness reproduces the untouched
+  baseline 149/149 (92 backlog + 57 pins), exit 0, ~1.5 s.
+- Delivered: `scripts/measure-state-size-deltas.ts` (permanent SLI
+  instrument), comparator unit tests, `spec.md` (conversion formula
+  jar-exact 11/11 with the margin+floor FIXEDSIZE mechanism newly
+  characterized; §5 pesita divergence report).
+- Known issue blocking resume: pesita AA-pass mincross ordering
+  reversed vs jar even with jar-exact label boxes (G7 T13/T16 gap).
+  T2 is otherwise fully specced by spec.md.
+
+## G8 summary
+
+Mission complete (landed at 9b650bc + T3 close-out).
+
+**Tasks completed:** T1, T1b, T1c, T2, T3.
+- T1 — conversion spec + committed 92-fixture delta harness
+  (`scripts/measure-state-size-deltas.ts`, jar-exact 11/11 labels).
+- T1b/T1c — portRanks ordering fix + border-point cluster-title
+  FIXEDSIZE width floor.
+- T2 — atomic landing of the coupled set (graphviz-returned
+  `labelX/labelY` placement, T18 FIXEDSIZE/heights, G5/C1 13pt arrow
+  width, T20b ink-walk label-box fold) as one commit. **T1d (guard
+  relaxation — removing the `insideAutonomPass` clause per D6) folded
+  into T2's landing**, not run as a separate task; it closed
+  bajelo-54/fotuje-06/rovese-43 and drove pesita-10 near-exact.
+- A **shadow-ink task** (nimana-36's YES-inner-pass `skin rose`
+  Shadowing=4.0 drop-shadow) was investigated and **surfaced the
+  skin-file-loading dependency**: the 8px is structurally unreachable
+  until bundled `skin <name>` stylesheets + shadow-ink modeling land.
+  nimana-36 is tracked as a size-backlog exception (0.111111 +
+  `_doc`), not a divergence.
+- T3 — close-out: re-measured the backlog fresh, **tightened 32
+  entries** to their measured deltas, **removed 1** (beguxu-19-tize774,
+  reached 0), left nimana-36 untouched; swept for new byte-exact pins
+  (none qualified — the state pin mechanism requires a committed
+  jar-oracle `golden.svg`, and every existing golden is already
+  pinned); flipped G7 to UNBLOCKED.
+
+**Decisions:** 6 locked architecture decisions (D1–D6, `decisions.md`);
+~22 decision-journal entries across the mission.
+
+**Final gate results (T3 close-out):**
+- `npm test` — **10246 tests passed** (385 files), exit 0.
+- State DOT parity — **268/268**.
+- svg-state ratchet — **57 pins** (unchanged; no new fixture qualified).
+- Size-backlog harness — **widened=0, improved=33** (the T2 win: 32
+  tightened + 1 driven to 0); after T3's tighten all 33 sit exactly at
+  their new tolerances (post-tighten re-measure: widened=0, improved=0).
+- `npm run typecheck` / `lint` / `build` — all green.
+
+**Follow-ups:** the `skin <name>` stylesheet-loading mission (bundled
+skins + drop-shadow ink modeling) will close nimana-36-veco708 —
+returning it to ≤0.090278 — and is the one remaining tracked gap from
+this mission.

@@ -70,6 +70,14 @@ export type { DiagramCtx, GeoSpec };
  *  this same constant, not a re-derived copy. */
 export const ANCHOR_SIZE = 0.72;
 
+/** `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13,
+ *  normal)`, klimt/font/FontParam.java:54) -- the transition/edge-label
+ *  font, distinct from `theme.fontSize`/`STATE(14, normal)` (state
+ *  body/title text). Duplicated locally (D1, avoid-import-cycle convention)
+ *  rather than imported from `state-dot-graph.ts` -- same value as
+ *  `description/renderer-edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
+const ARROW_LABEL_FONT_SIZE = 13;
+
 export interface PassAccumulator {
   nodes: DotInputNode[];
   edges: DotInputEdge[];
@@ -81,10 +89,20 @@ export interface PassAccumulator {
    *  every un-hinted or `-right-`/`-down-` transition (the pre-existing,
    *  un-swapped shape). */
   edgeSources: { t: Transition; edgeId: string; reversed?: boolean }[];
+  /** G8 T2: the transition/edge-label font (`ARROW_LABEL_FONT_SIZE`, 13pt)
+   *  + measurer this pass's own `buildLevelTransitionGeos` call needs to
+   *  convert a labeled edge's graphviz-returned centre into a draw anchor
+   *  (`state-transition-label.ts#attachTransitionLabel`). Optional: passes
+   *  built by a `newAccumulator()` call outside this task's write-set
+   *  (state-composite-concurrent.ts's own concurrent-region passes) don't
+   *  set these, and `attachTransitionLabel` degrades gracefully to its
+   *  pre-existing perpendicular-only, no-box formula when they're absent. */
+  labelFont?: FontSpec;
+  measurer?: StringMeasurer;
 }
 
-export function newAccumulator(): PassAccumulator {
-  return { nodes: [], edges: [], clusters: [], edgeSources: [] };
+export function newAccumulator(labelFont?: FontSpec, measurer?: StringMeasurer): PassAccumulator {
+  return { nodes: [], edges: [], clusters: [], edgeSources: [], ...(labelFont !== undefined ? { labelFont } : {}), ...(measurer !== undefined ? { measurer } : {}) };
 }
 
 let edgeCounter = 0;
@@ -150,7 +168,11 @@ function isReversedDirection(direction: TransitionDirection | undefined): boolea
 }
 
 export function addLevelEdges(scopeId: string, transitions: readonly Transition[], acc: PassAccumulator, ctx: DiagramCtx): void {
-  const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
+  // G5/C1 + G8 T2: `FontParam.ARROW(13)`, not `theme.fontSize` (14, the
+  // STATE body/title-text default) -- WIDTH-ONLY in the sense that this
+  // swaps ONLY the edge-label measurement call site, not state's body/title
+  // text elsewhere (state-sizing.ts etc., unaffected).
+  const font: FontSpec = { family: ctx.theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
   for (const t of transitions) {
     const edgeId = nextEdgeId();
     const from = levelEndpointId(t.from, true, scopeId, ctx);
@@ -242,7 +264,8 @@ function collectRegularTransitions(ast: StateDiagramAST): Transition[] {
  */
 export function sweepOrphanEdges(acc: PassAccumulator, ctx: DiagramCtx): void {
   const nodeIds = new Set(acc.nodes.map((n) => n.id));
-  const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
+  // G5/C1 + G8 T2: same ARROW(13) width-only fix as `addLevelEdges` above.
+  const font: FontSpec = { family: ctx.theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
   for (const t of ctx.pool) {
     if (ctx.consumed.has(t)) continue;
     const from = resolveEndpoint(t.from, ctx.classify);
@@ -409,7 +432,7 @@ export function buildLevelTransitionGeos(acc: PassAccumulator, result: DotLayout
     const edgeResult = edgePosMap.get(edgeId);
     if (edgeResult === undefined) continue;
     const geo = resolveTransitionGeometry(reversed, edgeResult.points, edgeEndpoints.get(edgeId));
-    const label = attachTransitionLabel(t, geo.points);
+    const label = attachTransitionLabel(t, geo.points, edgeResult, acc.labelFont, acc.measurer);
     geos.push({
       from: geo.from ?? t.from, to: geo.to ?? t.to, points: geo.points, ...(label !== undefined ? { label } : {}),
       ...(t.creationIndex !== undefined ? { creationIndex: t.creationIndex } : {}),
@@ -440,7 +463,7 @@ export function buildTopLevelPass(
     pseudoCreationIndex: ast.pseudoCreationIndex ?? new Map(),
   };
   resolveAllAutonomPasses(ctx);
-  const acc = newAccumulator();
+  const acc = newAccumulator({ family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE }, measurer);
   const specs = ast.states.map((s) => resolveMember(s, acc, ctx, undefined));
   const pseudoSpecs = addLocalPseudoNodes('', ast.transitions, acc, ctx.pseudoCreationIndex);
   addScopeNotes('', ctx, acc);
