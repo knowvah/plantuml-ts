@@ -1,0 +1,6 @@
+# Skin-file-loading — decision journal
+
+| Date | Batch | Decision | Rationale | Flagged |
+|------|-------|----------|-----------|---------|
+| 2026-07-24 | B1 | Batch 1 landed (c065310): skin <name> loads rose/debug/strictuml into the theme cascade as a base layer (D6); colors + Shadowing VALUE resolve; no-skin fixtures byte-identical; niveno/sumiri improved. Deliberate gaps flagged: element{} not a general N-SName subset matcher; FontColor unconsumed; class/description test-harness cascade duplicates not wired. | Reuses parseStyleBlock+resolveSkinparam+applyStyleMap; verified seam index.ts:204-227. | No |
+| 2026-07-24 | B2 | SCOPE DECISION: Batch 2 does STATE shadow rendering + ink ONLY. The brief's D3 ("shadow resolved+drawn for all diagram types", incl. fixing Cluster.ts:110's hardcoded shadowing:0 for class/description) is DEFERRED to a follow-on increment. Reason: a concurrent session is actively working class-diagram rendering in this shared repo; touching Cluster.ts / class render files now would collide at merge for no immediate gain — nimana-36 (the mission's primary target) is a STATE fixture, closable with state-only shadow. Class/description shadow tracked as a deferred D3 sub-item. | Coordination: avoid a cross-session merge conflict; achieve the primary deliverable (close nimana) without it. Push-forward, journaled. | No |
