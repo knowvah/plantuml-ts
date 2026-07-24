@@ -208,7 +208,15 @@ export interface TransitionGeo {
   from: string;
   to: string;
   points: Array<{ x: number; y: number }>;
-  label?: { text: string; x: number; y: number };
+  /** `width`/`height` (G8 T2, additive): the jar-verified reserved label
+   *  box (`state-transition-label.ts#computeReservedLabelBox`, spec.md §1a
+   *  -- margin+floor around the measured text) that both the renderer and
+   *  the ink walk (`layout-ink-extent.ts`'s `labelInk` param) need. Absent
+   *  for a label built without a font/measurer available (concurrent-region
+   *  passes, `state-composite-concurrent.ts`, out of this task's write-set)
+   *  -- both consumers already treat absence as "fold the point only",
+   *  the pre-existing behavior. */
+  label?: { text: string; x: number; y: number; width?: number; height?: number };
   /** mission G4 S7 -- see `StateNodeGeo.creationIndex`'s own doc comment;
    *  same raw-value contract, sourced from `Transition.creationIndex`. */
   creationIndex?: number;

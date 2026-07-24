@@ -443,7 +443,21 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
       : {};
     if (a?.weight !== undefined) attrs.weight = a.weight.toString();
     if (a?.minLen !== undefined) attrs.minlen = a.minLen.toString();
-    if (a?.label !== undefined) {
+    // G8 T2 (spec.md §1a, mirrors `addClusters`' own `hasTitleTable` gate
+    // above — that seam is T1c's, unmodified here): a caller that supplies
+    // BOTH `labelBoxWidth`/`labelBoxHeight` (currently only the state
+    // composite pipeline's own plain, note-free labels,
+    // `state-composite-edge-label.ts#edgeLabelAttrs`) gets a REAL
+    // jar-faithful `<TABLE FIXEDSIZE="TRUE" WIDTH=".." HEIGHT="..">` label
+    // reservation instead of the plain-text `label` attr below — the SAME
+    // margin+floor box `state-transition-label.ts#attachTransitionLabel`
+    // independently recomputes for the draw anchor (D3's "one mechanism,
+    // two consumers" shape). Every other caller (class, component, usecase,
+    // the flat state pipeline, a state transition with an attached `note on
+    // link`) doesn't set these two fields, so its plain-text path below is
+    // byte-for-byte unchanged.
+    const hasLabelBox = a?.labelBoxWidth !== undefined && a?.labelBoxHeight !== undefined;
+    if (a?.label !== undefined && !hasLabelBox) {
       attrs.label = a.label;
       // Measure with a LUT-known font (graphviz's default "Times,serif" warns).
       attrs.fontname = 'Times';
@@ -467,7 +481,21 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
       attrs.labelfontname = 'Times';
       attrs.labelfontsize = CARDINALITY_FONT_SIZE.toString();
     }
-    b.addEdge(e.from, e.to, attrs);
+    const edge = b.addEdge(e.from, e.to, attrs);
+    if (a?.label !== undefined && hasLabelBox) {
+      // T1c precedent (addClusters' own title-table seam, above): jar
+      // TRUNCATES both dims towards zero here (`appendTable`'s `(int)`
+      // cast, SvekEdge.java:504-507), never rounds -- `labelBoxWidth`/
+      // `labelBoxHeight` are already exact integers by construction
+      // (`computeReservedLabelBox`'s own `Math.floor`/integer-arithmetic
+      // formula), so `Math.floor` here is a defensive no-op matching that
+      // convention, not a behavior change.
+      edge.setHtmlAttr(
+        'label',
+        `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.floor(a.labelBoxWidth!)}" ` +
+          `HEIGHT="${Math.floor(a.labelBoxHeight!)}"><TR><TD></TD></TR></TABLE>`,
+      );
+    }
 
     const k = edgeKey(e.from, e.to);
     const q = idQueues.get(k) ?? [];

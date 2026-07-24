@@ -342,22 +342,42 @@ export function resolveClusterComposite(
   // no lineCount-dependent special case exists in `ClusterHeader.java`)
   // that does NOT ALSO get `portRanksLabelOnEe` (a DIFFERENT jar code path,
   // its own -- verified but not this iteration's scope -- baseline offset;
-  // deferred, ledger.md's own entrypoint/exitpoint C3+ queue item) AND is
-  // NOT nested inside a separately-fired autonom/concurrent-region pass
-  // (`ctx.insideAutonomPass`'s own doc comment, state-composite-pass.ts --
-  // jar-verified size-backlog regression on `fotuje-06-fifa085`/`rovese-43-
-  // tadu368`, traced to the ALREADY-PARKED `buildPlainAutonomSpec#Math.max`
-  // floor). `ctx.theme.fontSize === 14` is DELIBERATELY NOT relaxed --
-  // derivation doc §5: the formula is algebraically fontSize-parametric but
-  // no non-default-font-size oracle fixture was available to verify it;
+  // deferred, ledger.md's own entrypoint/exitpoint C3+ queue item).
+  // `ctx.theme.fontSize === 14` is DELIBERATELY NOT relaxed -- derivation
+  // doc §5: the formula is algebraically fontSize-parametric but no
+  // non-default-font-size oracle fixture was available to verify it;
   // unverified, not found to fail, so left gated per diagnosis discipline.
   // Ineligible composites keep the pre-C3 plain-text `label` +
   // `boundingBox(children)` + dashed-rect-fallback shape, byte-identical to
   // before this iteration.
-  const titleTableEligible =
-    ctx.theme.fontSize === 14 &&
-    !hasBorderPointChildren &&
-    ctx.insideAutonomPass !== true;
+  //
+  // G8 T2 (`plans/g8-label-placement/`): `ctx.insideAutonomPass !== true`
+  // REMOVED. Jar's own `ClusterHeader`/`SvekEdge#appendTable` eligibility
+  // test has no concept of "is this cluster nested inside a separately-
+  // fired autonom pass" at all -- that distinction is purely an artifact of
+  // this PORT's own architecture (splitting jar's single upstream drawing
+  // pass into multiple `layoutGraph()` calls, one per autonom composite,
+  // mechanisms.md §3); jar draws the SAME title table for a cluster
+  // regardless of which "pass" the port's own construction happens to
+  // resolve it in. The clause's own doc comment (pre-G8) stated its ONLY
+  // rationale was a jar-verified size-backlog regression on
+  // `fotuje-06-fifa085`/`rovese-43-tadu368`, traced to
+  // `buildPlainAutonomSpec`'s `Math.max(geometry.*, result.*)` floor
+  // under-crediting a composite's own content ink once its title-table-
+  // widened member needed more room -- i.e. a workaround for a bug in a
+  // DIFFERENT mechanism, not a real jar behavioral difference. G8/T2 closes
+  // that floor's OWN root cause directly (the `labelInk` ink-walk box fold,
+  // `layout-ink-extent.ts#computeSvekResultGeometry`, folds real edge-label
+  // ink so the floor is provably redundant -- D6, `state-composite-
+  // autonom.ts`'s own doc comment), so the workaround's blocking cause is
+  // gone and the clause is removed rather than merely relaxed further.
+  // Corpus-wide re-verification (149-fixture size-delta harness + spot
+  // check against the broader ~271 cached svek-N.dot corpus via
+  // `toSvekDot`): zero regressions, `bajelo-54-dixe684`/`fotuje-06-fifa085`/
+  // `rovese-43-tadu368` all close (or improve past) their pinned
+  // size-backlog tolerance -- see `plans/g8-label-placement/` decision
+  // journal for the fixture-by-fixture before/after table.
+  const titleTableEligible = ctx.theme.fontSize === 14 && !hasBorderPointChildren;
   // G5 C7, mechanism 16 margin half (ledger.md §C7, `DotInputCluster
   // .innerMarginLevels`'s own doc comment has the full jar-source
   // derivation): `needsZaentPoint` reduces to EXACTLY jar's own

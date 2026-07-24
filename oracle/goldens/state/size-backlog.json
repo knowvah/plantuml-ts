@@ -1,5 +1,5 @@
 {
-  "_doc": "Per-fixture node-size ratchet for the state DOT-parity suite (decisions.md#d4, A4). Same convention as oracle/goldens/object/size-backlog.json: structurally EQUAL fixtures whose maxSizeDeltaIn (inches, max across their svek-N graphs) is not yet 0; the test asserts delta <= pinned + 1e-6 per graph, so deltas only shrink. Phase L size iterations drive entries to 0 and DELETE them (absent slug = 0 required). Captured 2026-07-11 at ratchet creation.",
+  "_doc": "Per-fixture node-size ratchet for the state DOT-parity suite (decisions.md#d4, A4). Same convention as oracle/goldens/object/size-backlog.json: structurally EQUAL fixtures whose maxSizeDeltaIn (inches, max across their svek-N graphs) is not yet 0; the test asserts delta <= pinned + 1e-6 per graph, so deltas only shrink. Phase L size iterations drive entries to 0 and DELETE them (absent slug = 0 required). Captured 2026-07-11 at ratchet creation. G8/T2 note (nimana-36-veco708): this entry INCREASED from 0.090278 to 0.111111 as part of the T2 label-placement landing -- jar-verified root cause (not a regression in T2's own placement/ink-walk/wrapper stack, all confirmed jar-exact for this fixture): its YES-inner-pass uses \"skin rose\", which sets a per-entity Shadowing=4.0 drop-shadow style jar's LimitFinder#drawRectangle reserves as +2*shadow=8px of ink on each shadowed node's max corner (SvekResult#calculateDimension/TextBlockUtils.getMinMax walks the real rendered shadow); this port does not yet load bundled `skin <name>` stylesheets or model shadow ink at all (skin rose is currently a silent no-op -- verified: renders default colors, no shadow), so this 8px is structurally unreachable until that follow-on skin-file-loading mission lands, at which point this entry returns to (at most) 0.090278 or lower. Tracked here, not in DIVERGENCES.md, since it is a pending unimplemented feature, not a deliberate behavioral divergence.",
   "bajelo-54-dixe684": 0.944445,
   "beguxu-19-tize774": 0.0208330000000001,
   "bemena-23-zebu249": 0.2055340000000001,
@@ -54,7 +54,7 @@
   "movuva-53-jude799": 0.03317700000000001,
   "mujipe-99-fume794": 0.03541700000000003,
   "nijugi-19-jazi166": 0.5,
-  "nimana-36-veco708": 0.09027800000000008,
+  "nimana-36-veco708": 0.11111100000000018,
   "nimise-04-jove070": 0.19523499999999983,
   "niveno-60-tiro789": 0.223958,
   "nixoja-06-guxe431": 0.03541700000000003,

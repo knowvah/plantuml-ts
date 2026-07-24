@@ -75,6 +75,23 @@ export interface DotInputEdge {
     label?: string;
     labelWidth?: number;
     labelHeight?: number;
+    /** G8 T2 (`plans/g8-label-placement/`): the REAL FIXEDSIZE HTML-table
+     *  label-box reservation `graph-layout-build.ts#addEdges` feeds
+     *  graphviz-ts for THIS edge (mirrors `DotInputCluster.titleTableWidth`/
+     *  `.titleTableHeight`'s identical additive pattern -- see that field's
+     *  own doc comment for the full `setHtmlAttr` mechanism). Deliberately
+     *  DISTINCT from `labelWidth`/`labelHeight` above (the pre-existing,
+     *  UN-margined/UN-floored Svek-DOT TEXT emitter convention -- kept
+     *  unchanged for every caller, including the one that also sets this
+     *  field): the state composite/flat pipelines set BOTH, one for the
+     *  oracle/emitter path, one for the real FIXEDSIZE layout-input
+     *  reservation. Additive: absent (every pre-existing caller -- class,
+     *  component, usecase edges, and a state transition with an attached
+     *  `note on link`, whose merged label+note margin story is
+     *  unverified this iteration) falls back to the pre-existing
+     *  plain-text `label` DOT attr, unchanged. */
+    labelBoxWidth?: number;
+    labelBoxHeight?: number;
     /** Tail/head end labels (association cardinality/roles). Sizing-only
      *  (`tailLabelWidth`/`tailLabelHeight`/`headLabelWidth`/`headLabelHeight`)
      *  is emitter-only (Svek-DOT text, `svek-dot-emit.ts`); the DOT-gate
