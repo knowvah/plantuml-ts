@@ -2643,4 +2643,235 @@ task):
 - Probes (`scripts/_tmp-g7-t17-{capture,capture2,simulate,bisect,
   minimal,minimal2,textpath,dumpdot,debug-bitaxo}.ts`, `npx tsx`, this
   session) — all deleted before finishing. No `/tmp` artifacts retained.
+
+# Paper gate v5 (G7 T19)
+
+**Verdict: ALL THREE TARGETS EXACT on the CURRENT (post-G8-merge) tree.**
+T14b's ten-item border-point wiring (T8, confirmed unchanged) plus items
+11/12 (T17) is cleared to proceed.
+
+## 0. What changed since T17, and why this session had to re-derive
+
+Between T17 and this session, the G8 label-placement mission merged into
+this branch (merge 7ef0134, journal 2026-07-24): T18's edge-label
+FIXEDSIZE + height fix landed for real (`state-composite-edge-label.ts`'s
+`computeReservedLabelBox`/`labelBoxWidth`/`labelBoxHeight`,
+`graph-layout-build.ts#addEdges` now emits a real
+`<TABLE FIXEDSIZE="TRUE" ...>` label for plain edge labels — no longer a
+probe-only substitution), the ink-walk aggregation (T20b) landed, label
+placement now consumes graphviz-returned `labelX`/`labelY`, and the
+`insideAutonomPass` title-table guard was relaxed. The engine package was
+also renamed `graphviz-ts` → `@knowvah/dot-engine` (byte-identical
+layout, per the 2026-07-24 journal row). None of this is asserted here —
+every number below comes from this session's own instrumented execution
+against the CURRENT tree.
+
+**Also newly discovered this session** (grepped, not assumed): a
+narrower, separate fix (G8/T1b, NOT part of T14b's own ten items) already
+landed in `graph-layout-build.ts#addClusters` — the `portRanks` rank
+constraint (`{rank=source|sink;...}`) is now wired into the REAL layout
+call, with the non-`cluster`-prefixed name `__portrank_${N}` (fixing the
+same naming pitfall T17 §6 independently found for its OWN, still-unwired
+`ee`-wrapper construction). This T1b fix targets the mincross-ORDER
+defect only — it does NOT wire `titleTableEligible`/the `ee`/`i`
+wrapper/`borderPointAncestorWrap` for border-point clusters (confirmed:
+`state-composite-cluster.ts:380`'s `titleTableEligible` still excludes
+`hasBorderPointChildren`; `frontierCalculator`/`ensureMinWidth`
+(`state-composite-frontier.ts`) still have zero call sites outside their
+own unit tests, grepped this session). **T14b's own construction (the ee/
+i wrapper + frontier correction) remains entirely unwired** — this gate
+re-derives it exactly as T8/T17 did, on top of the CURRENT tree.
+
+## 1. Method
+
+Per-fixture, via one disposable probe (`scripts/_tmp-g7-t19-gate.ts`,
+`npx tsx`, deleted before finishing):
+
+1. **Captured the CURRENT production `DotInputGraph` pass** for each
+   fixture via `setLayoutInputObserver` + `renderSync` (same seam as
+   every prior round) — reflects every currently-landed fix (T7 a/p0,
+   T16 emission order, G8/T1b portRanks rank constraint, G8/T18 edge-
+   label FIXEDSIZE+height, G8/T20b ink walk — the last two are pass/
+   composite-bbox concerns, not cluster-internal, so shouldn't matter
+   here, and §3 below confirms they don't).
+2. **T14b construction**, applied to the captured graph as a patch (NOT
+   a re-simulation of the whole pipeline): for every captured cluster
+   with `portRanksLabelOnEe === true` (bitaxo `C`, pesita `AA`, kotagu
+   `CompositeState`), set `titleTableWidth`/`titleTableHeight` = the
+   already-unconditionally-computed `labelWidth`/`labelHeight` (T11,
+   unchanged since T8/T17) and `borderPointAncestorWrap` = the REAL
+   `isGroupTouched(stateId, classify.allTransitions)` call against the
+   REAL parsed AST (`parseState`/`classifyDiagram`, not a citation).
+3. **`addClustersT14b`** — a literal copy of the CURRENT, T1b-landed
+   `graph-layout-build.ts#addClusters`, with ONE new branch selected by
+   `c.portRanksLabelOnEe === true` (T8 item 5, T17 item 11's naming
+   correction applied: `__rank_${outerName}_${N}`, not `${outerName}
+   rank_source`) — mutually exclusive with the existing `innerMarginLevels`-
+   gated path, which is otherwise reused UNCHANGED (verbatim) for every
+   non-border-point cluster. `addNodes`/`addEdges`/`applyGraphAttrs` are
+   the REAL, unmodified, current production functions (imported directly,
+   not copied).
+4. **Frontier correction** — the already-committed, unmodified
+   `frontierCalculator`/`ensureMinWidth` (`state-composite-frontier.ts`),
+   imported directly. `insides`/`points` derived from the target state's
+   real AST children (`getEntityPosition`/`isInputPosition`/
+   `isOutputPosition`, the SAME production classifiers) cross-referenced
+   against the real `DotLayoutResult` node positions from step 3's layout
+   call.
+5. Layout itself runs through the REAL `@knowvah/dot-engine`
+   (`createGraph`/`render`/`getLayout`), not a hand-derived DOT text or a
+   citation of a prior round's cached numbers.
+
+## 2. Results
+
+```
+bitaxo-18-tamo974 / C:
+  initial: {x:155, y:11, width:42, height:115.72}
+  insides: []
+  points:  [{176, 25}]
+  titleTableWidth=10.15 -> minWidth 20 (non-binding)
+  core (post-frontier): 42 x 101.72
+  FINAL: 42 x 101.72        TARGET: 42 x 101.72        EXACT
+
+pesita-10-dene726 / AA:
+  initial: {x:610, y:165, width:148, height:118.72}
+  insides: []
+  points:  [{656, 269.72}]
+  titleTableWidth=116.4625 -> minWidth 126 (Math.round(116.4625)+10)
+  core (post-frontier): 120 x 104.72
+  FINAL: 126 x 104.72       TARGET: 126 x 104.72       EXACT
+
+kotagu-43-miza629 / CompositeState:
+  initial: {x:8, y:8, width:303, height:358}
+  insides: [{68, 57, width:191, height:277}]   (SubComposite's own box)
+  points:  [{297, 108}]                         (entry1 center)
+  titleTableWidth=99.575 -> minWidth 110 (non-binding)
+  core (post-frontier): 289 x 358
+  FINAL: 289 x 358          TARGET: 289 x 358          EXACT
+```
+
+`initial`'s raw width/height for all three are byte-identical to T4/T8/
+T13/T16/T17's own independently-derived values on every prior round
+(148×118.72 for AA in particular — the EXACT value T17 §4 established
+only after its edge-label fix, now reproduced for free because that fix
+is real production code today, `state-composite-edge-label.ts`'s
+`computeReservedLabelBox` + `graph-layout-build.ts#addEdges`'s
+`labelBoxWidth`/`labelBoxHeight` FIXEDSIZE wiring). This directly
+confirms T17's own §4 finding: the edge-label sizing gap was the ENTIRE
+blocking mechanism for pesita, and G8/T18+T20b closed it completely, with
+zero new residual.
+
+## 3. Cross-checks / things verified, not assumed
+
+1. **kotagu's `insides` completeness.** `stateNode.children` (the real
+   AST children of `CompositeState`) is `[entry1, SubComposite]` —
+   `entry1` is border (goes to `points`), `SubComposite` is the nested
+   cluster (goes to `insides`). The `[*]` pseudo-node inside
+   `CompositeState`'s own scope (`sh0011` in jar's cached DOT, T4/T8's own
+   walkthroughs list it as a THIRD `insides` entry) is synthesized by
+   `addLocalPseudoNodes`, not a member of `State.children` — this probe's
+   `insides` therefore omits it. **Verified by hand re-derivation (both
+   with and without `sh0011`'s box) that `frontierCalculator`'s output is
+   IDENTICAL either way**: `core`'s `touch/fallback` step (§2c step 3)
+   resets both `minX` and `minY` back to `initial`'s own bounds in BOTH
+   scenarios (neither variant makes `entry1`'s center touch `core`'s
+   `minX`/`minY` boundary), so the final box is 289×358 regardless. Not a
+   probe defect that affects the verdict — flagged for T14b's own
+   `insides`-collection code to include local pseudo-nodes for
+   completeness/general correctness, since a DIFFERENT fixture could be
+   sensitive to it even though these three are not.
+2. **`points`' y-coordinate frame offset** (kotagu: this session's
+   `{297,108}` vs T4/T8's own `{297,266}`, both against the same
+   `entry1`). Immaterial to the verdict — `frontierCalculator`'s
+   touch-detection only checks whether a point's y equals `core`'s
+   `minY`/`maxY` extremes; `108` and `266` both fail that test against
+   this fixture's `core` (`57`/`334`) identically, producing the same
+   fallback-to-`initial` outcome either way. Attributable to a coordinate-
+   frame difference between this session's direct
+   `getLayout({yAxis:'down'})` read (pre-`shiftToOrigin`) and T4/T8's own
+   jar-cached-DOT-derived values, not a mechanism divergence — not chased
+   further since it doesn't touch the final bbox.
+3. **G8's edge-label/ink-walk/label-placement changes do not perturb
+   cluster-internal geometry.** Confirmed, not assumed: all three
+   `initial` values match every prior round's own independently-derived
+   number exactly (bitaxo/kotagu, unaffected since T4; pesita, now
+   matching T17's OWN fix-and-reverify number for the first time on real
+   production code) — `DotLayoutResult.clusters[id]` is graphviz's raw
+   per-cluster bbox, computed before any autonom-pass ink-walk
+   aggregation or label-placement post-processing runs, so those G8
+   mechanisms have no seam into this computation.
+4. **Derivation used PORT-emitted DOT, not jar-cached DOT.** Every
+   `DotInputGraph` in this session came from `setLayoutInputObserver`
+   capturing the CURRENT production `renderSync` call on each fixture's
+   own `in.puml` — the only jar-cached artifact touched this session was
+   reading `in.puml` itself (the diagram SOURCE, not its DOT/SVG output).
+
+## 4. FINAL edit list for T14b (unchanged from T17's §9, one refinement)
+
+**T8's 10 items** (relax `titleTableEligible`, D4 stereo exclusion,
+`innerMarginLevels`/`unwrappedNodeId`/`borderPointAncestorWrap` guards,
+new `DotInputCluster` field, `handlesFor`'s new border-point branch,
+member-placement early branch, `frontierCalculator` wiring, bottom-up
+correction order, regression coverage, doc update) — **unchanged,
+confirmed sufficient again this session**, with one note: item 5's
+border-point branch and item 7's `portRanks` rank-constraint sub-loop are
+now PARTIALLY pre-landed by G8/T1b (the rank-constraint mechanism only,
+directly inside the CURRENT non-border `handlesFor` path, not yet inside
+a dedicated border-point branch) — T14b's own implementation should
+subsume/replace that code with the full ee/i-wrapped branch per item 5,
+not layer on top of it.
+
+**T17's items 11/12, unchanged, reconfirmed**:
+
+11. Border-point rank-constraint subgraph naming: `__rank_${outerName}_
+    ${N}` (never `cluster`-prefixed) — this session's own probe uses this
+    exact name and reproduces all three targets exactly.
+12. `ensureMinWidth`'s `minWidth` = `Math.round(titleTableWidth) + 10`.
+    **Refinement found this session**: use `Math.floor(titleTableWidth) +
+    10` instead of `Math.round` — for AA's own value (116.4625), floor
+    and round agree (both give 116), so this is NOT visible in any of the
+    three targets, but G8/T1c independently jar-verified (3 ground-truth
+    samples, `graph-layout-build.ts`'s own comment) that jar's real
+    `appendTable`/`(int)` cast TRUNCATES (floors) both title-table
+    dimensions, never rounds — the SAME `Math.floor` T14b's item 5 ee-
+    wrapper must already use for the `WIDTH=`/`HEIGHT=` FIXEDSIZE attrs.
+    Using `Math.floor` for `ensureMinWidth`'s `minWidth` too keeps both
+    consumers of `titleTableWidth` on the SAME jar-faithful truncation
+    rule instead of two different rounding rules that merely happen to
+    coincide on this fixture set.
+
+**T17's item 13 (edge-label sizing) is NO LONGER an open item** — it
+landed as part of the G8 mission (T18 FIXEDSIZE + height, T20b ink-walk
+aggregation) and is confirmed, by this session's own re-derivation, to
+fully resolve pesita's remaining miss with zero new residual.
+
+## 5. Summary table
+
+| Fixture / composite | Target (w×h) | This session (w×h) | Verdict |
+|---|---|---|---|
+| `bitaxo-18-tamo974` / `C` | 42 × 101.72 | 42 × 101.72 | **Exact** |
+| `pesita-10-dene726` / `AA` | 126 × 104.72 | 126 × 104.72 | **Exact** |
+| `kotagu-43-miza629` / `CompositeState` | 289 × 358 | 289 × 358 | **Exact** |
+
+**T14b is CLEARED to proceed** on the ten-item wiring (T8) + items 11/12
+(T17, item 12 refined to `Math.floor` above) — no new blocking mechanism
+found.
+
+## 6. Files/paths used
+
+- `test-results/dot-cache/state/{bitaxo-18-tamo974,pesita-10-dene726,
+  kotagu-43-miza629}/in.puml` (read only — diagram SOURCE, not any
+  cached DOT/SVG oracle artifact)
+- `src/diagrams/state/state-composite-cluster.ts`,
+  `state-composite-header.ts`, `state-composite-edge-label.ts`,
+  `state-composite-frontier.ts`, `state-composite-classify.ts`,
+  `state-composite-detect.ts`, `state-entity-position.ts`,
+  `state-transition-label.ts`, `parser.ts` (read only)
+- `src/core/graph-layout-build.ts`, `graph-layout.ts` (read only)
+- `node_modules/@knowvah/dot-engine/dist/api/geometry.d.ts` (read only —
+  `LayoutSnapshot`/`ClusterGeometry`/`NodeGeometry` public surface)
+- `plans/g7-borderpoint-rank/decision-journal.md` (read only — T16/T17/
+  2026-07-24 rows)
+- Probe (`scripts/_tmp-g7-t19-gate.ts`, `npx tsx`, this session) —
+  deleted before finishing. No `/tmp` artifacts retained.
 - No production files modified. `git status` clean apart from this doc.
