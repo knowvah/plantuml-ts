@@ -12,7 +12,7 @@ usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
 and the unwired FrontierCalculator port (commit 60fe88a) carry over.
 
-## Status: UNBLOCKED — resume at T19 (paper gate v5)
+## Status: COMPLETE
 <!-- 2026-07-23. Unblocked by G8 close (T3): the label-placement port
      landed (attachTransitionLabel now consumes graphviz-returned
      labelX/labelY; LABEL_PERP=12 retired as fallback only), the
@@ -188,3 +188,101 @@ rule; subagents never run git mutations).
   the active wrapper handle; (3) re-run the paper gate on port-emitted
   DOT; (4) then re-attempt border-point wiring (T5 spec unchanged).
 - **Branch:** left unmerged pending human review (docs-only commits).
+
+## G7 mission summary (2026-07-24, COMPLETE)
+
+**Objective met.** The ~20-fixture entrypoint/exitpoint (border-point)
+family is unblocked: the border-point→composite wiring landed (T14b) and
+the family re-measures clean. G7 took six adjudicated attempts across three
+human sign-offs; the decisive unblock came from a *separate* mission (G8
+label-placement), not from more wiring iterations.
+
+### Task arc (T1–T20b, then T16–T19, T14b–T15)
+
+- **Batch 1 (T1–T2):** 7-cell isolation matrix → **usage-defect** verdict;
+  graphviz-ts exonerated byte-exact three-way, no issue-09 filed.
+- **Batch 3 (T4–T5):** paper gate v1 PASS; attempt 4 **MISS** (pesita/
+  kotagu) → permanent stop. Root cause: unported a/p0 ancestor wrappers +
+  `addClusters` parent-resolution gap.
+- **Batch 5 (T7–T9):** a/p0 port + paper gate v2 PASS; attempt 5 **MISS** →
+  stop. Two pre-existing gaps found (titleAndAttributeWidth,
+  Transition.direction).
+- **Batch 6 (T11–T20b):** titleAndAttributeWidth (T11) + edge reversal
+  (T12) landed; paper gate v3 **MISS** (emission order) → T16 jar svek
+  emission order landed → paper gate v4 **MISS** (edge-label sizing, +2.5px
+  on pesita) → T18/T20/T20b edge-label + ink-walk fixes all **reverted**
+  (backlog-widening; sixth gap = LABEL_PERP placement). Each miss was caught
+  by the paper gate *before* code (T4 lesson applied), peeling one
+  pre-existing gap at a time.
+- **Unblock (G8):** the label-placement mission landed on this branch
+  (merge commit `7ef0134`): `attachTransitionLabel` now consumes
+  graphviz-returned `labelX/labelY` (LABEL_PERP retired to fallback), T18
+  FIXEDSIZE edge-labels + T20b ink walk in, `insideAutonomPass` relaxed,
+  size-backlog re-tightened (33 improved, pesita-10 → 0.000519). The
+  +2.5px edge-label gap is closed on this tree.
+- **Engine rename (mid-resume):** layout dependency
+  `graphviz-ts@0.1.26072117` → `@knowvah/dot-engine@1.0.0` (commit
+  `6db6548`) — verified byte-identical layout, a true drop-in.
+- **T19 (paper gate v5):** PASS — all 3 targets exact on the post-G8 tree.
+- **T14b:** border-point ee/i-wrapped cluster wiring landed (commit
+  `d74cfde`); bitaxo C 42×101.72, pesita AA 126×104.72, kotagu 289×358
+  exact.
+- **T15 (this task):** family sweep + close-out — measure-only, no code.
+
+### Family sweep outcome
+
+Border-point family enumerated by stereotype grep = **22 state fixtures**
+(corpus/class sources using `<<entrypoint>>`/`<<exitpoint>>`/
+`<<expansionInput>>` into composites; the 4 stereotype-word matches with
+no state golden are class diagrams, excluded). The mission's definition
+also covers `[*]`-into-composite members (e.g. `gojuja-90-pune699`,
+`kotagu-43-miza629`) which the stereotype grep does not capture but which
+measure size-exact all the same. Fresh measurement
+(`measure-state-size-deltas.ts`, current tree):
+
+- **18 / 22 size-exact** (DOT node-size delta 0), plus every T14b named +
+  spot-checked member that is a `[*]` case: **kotagu** (a fully-realized
+  T14b win, absent from backlog = 0), **gojuja**, and the other spot-checks
+  (fukexa, jucori, lulozu) all size-exact.
+- **4 / 22 with a residual fixture-max delta** — all *pre-existing pinned*
+  backlog entries, unchanged by T15 (the border-point boxes themselves are
+  exact per T19/T14b; the residual comes from a non-border-point node in
+  another svek graph of the same fixture): `bitaxo-18-tamo974` 0.138888,
+  `resido-15-reza040` 0.138889, `nijugi-19-jazi166` 0.5,
+  `pesita-10-dene726` 0.000519 (sub-pixel).
+
+### Backlog / pins / census (T15 measured results)
+
+- **Backlog** (`size-backlog.json`, 91 entries): harness reports
+  `improved:0, widened:0` — **nothing to tighten, nothing to remove**; the
+  T14b/G8 wins were already folded in by the G8 re-tighten. `nimana-36-
+  veco708` (G8 skin-rose exception) left byte-identical. File unchanged.
+- **Pins** (`ratchet.json`, 57): **none qualified.** No size-exact family
+  fixture has a committed `golden.svg` (pin prerequisite; golden creation
+  is out of close-out scope). Pin count stays **57**. Follow-up below.
+- **Census** (`docs/svg-conformance.md`): unmoved — the sweep added 0 pins
+  and moved 0 floors; no state pin counts are tracked there. Left as-is.
+
+### Final gate results (T15)
+
+- `measure-state-size-deltas.ts`: 148 measurements, **widened 0**,
+  improved 0, unchanged 148.
+- `npm test`: **10250 passed** (386 files); state DOT-parity **268/268**;
+  57 svg-state pins hold.
+- `npm run typecheck` / `lint` / `build`: all clean.
+
+### Follow-ups (out of T15 scope)
+
+1. **Generate svg-state goldens** for the 18 size-exact family fixtures,
+   confirm SVG byte-exact + stable, then pin them (they are DOT-EQUAL in
+   `parity-state.json`, so eligible once a golden exists).
+2. **Residual fixture-max deltas** on bitaxo/resido/nijugi (material) trace
+   to non-border-point nodes, not the border-point interaction — a
+   separate size-parity task, not a G7 defect.
+3. **Reversed-edge SVG path text** (T12 documented divergence) matters only
+   when the 17 re-ranked fixtures become pin candidates.
+
+### Branch
+
+Left unmerged — the G7→main merge (merge commit, never squash) is the
+orchestrator/human's call.
