@@ -12,7 +12,7 @@ import type { DotInputGraph } from '../../../src/core/graph-layout.js';
  * .java:91-201`) and the parent-resolution fix (a child cluster nests inside
  * the parent's INNERMOST active wrapper, not its outer `main` handle).
  *
- * Asserts the exact `subgraph` name tree graphviz-ts's builder receives —
+ * Asserts the exact `subgraph` name tree @knowvah/dot-engine's builder receives —
  * the numeric px consequences of this same mechanism are covered
  * black-box in `graph-layout.test.ts`'s "cluster inner margin levels"
  * describe block (that file also owns the DOT-parity/issue-08 blindness
@@ -185,7 +185,7 @@ describe('addClusters — issue-08 rank-name regression lock (docs/graphviz-issu
  * -point) composite's direct port children get a REAL graphviz
  * `{rank=source|sink; <ids>;}` constraint scoped to the cluster's own
  * subgraph. Pre-fix, `DotInputCluster.portRanks` was wired to the Svek-DOT
- * TEXT emitter only; `addClusters` (the REAL graphviz-ts layout seam) never
+ * TEXT emitter only; `addClusters` (the REAL @knowvah/dot-engine layout seam) never
  * read it, so every border-point composite's real graphviz rank constraint
  * was silently absent from actual layout -- the root cause of
  * pesita-10-dene726's mincross-order defect (jar-verified: this constraint
@@ -234,9 +234,9 @@ describe('addClusters — portRanks rank constraint (G8 T1b)', () => {
     const ee = main.subgraphs.get('cluster0ee')!;
     expect(ee).toBeDefined();
     const rankSub = subs.find((sg) => sg !== ee)!;
-    // Never "cluster"-prefixed -- graphviz-ts's cluster detection is a bare
+    // Never "cluster"-prefixed -- @knowvah/dot-engine's cluster detection is a bare
     // `name.toLowerCase().startsWith('cluster')` check
-    // (graphviz-ts/src/layout/dot/rank.ts): an earlier attempt named this
+    // (@knowvah/dot-engine/src/layout/dot/rank.ts): an earlier attempt named this
     // subgraph `cluster0ranksink`, which itself starts with "cluster" and so
     // was silently promoted to a real nested CLUSTER, reproducing the wrong
     // mincross order despite the constraint being present.
@@ -304,7 +304,7 @@ describe('addClusters — portRanks rank constraint (G8 T1b)', () => {
  * `Bibliotekon.java#addLine`/`DotStringFactory.java#createDotString`
  * `lines0`-before-everything-else statement order — every node touched by a
  * `minLen===0` edge (`link.getLength()==1`, `CommandLinkStateCommon.java:
- * 176-182`'s LEFT/RIGHT-direction rule) is declared to graphviz-ts's builder
+ * 176-182`'s LEFT/RIGHT-direction rule) is declared to @knowvah/dot-engine's builder
  * BEFORE any other node, in edge-encounter order, so this port's node
  * CREATION order matches the order graphviz's cycle-breaking DFS
  * (`dotgen/acyclic.c`) would see in jar's real DOT text.

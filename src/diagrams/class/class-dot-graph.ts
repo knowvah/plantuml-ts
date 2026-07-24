@@ -85,7 +85,7 @@ export interface DotGraphParts {
    *  cluster and, per `plans/g2-class-svg/ledger.md` N17/N18, occupies a
    *  rank slot ABOVE the topmost classifier when the package is used as a
    *  relationship/note endpoint -- `ns.classifiers` alone misses it). Pure
-   *  data export, no change to what is emitted to graphviz-ts. */
+   *  data export, no change to what is emitted to @knowvah/dot-engine. */
   anchors: Map<string, string>;
 }
 
@@ -344,9 +344,9 @@ export function buildDotGraph(
     // rewrite, never updated when class stopped using markers. Every jar
     // svek DOT edge line already carries `arrowtail=none,arrowhead=none`
     // unconditionally (`svek-dot-emit.ts`, confirmed corpus-wide), so
-    // withholding this flag left graphviz-ts reserving a real-graphviz-
+    // withholding this flag left @knowvah/dot-engine reserving a real-graphviz-
     // divergent gap at every edge endpoint -- root cause of the ~400-fixture
-    // "graphviz-ts routing divergence" attribution the orchestrator's
+    // "@knowvah/dot-engine routing divergence" attribution the orchestrator's
     // 2026-07-17 falsification entry re-opened (bosiki-11-xaza958/
     // farina-07-foti023 byte-diff evidence, `plans/g2-class-svg/ledger.md`
     // N29): the shortfall was a seam invocation gap, not an engine bug.

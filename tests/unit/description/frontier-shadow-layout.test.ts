@@ -1,5 +1,5 @@
 /**
- * Unit tests for `frontier-shadow-layout.ts` — the isolated graphviz-ts
+ * Unit tests for `frontier-shadow-layout.ts` — the isolated @knowvah/dot-engine
  * shadow graph that reproduces `Cluster.getRectangleArea()`'s pre-
  * `manageEntryExitPoint` value (the `initial` `FrontierCalculator` needs,
  * see that module's doc comment for why the real `layoutGraph()`
@@ -7,7 +7,7 @@
  *
  * `component/gafegu-06-nito976`'s real graphviz-native numbers (`dot
  * -Txdot` on the jar's own cached `svek-1.dot`, cross-checked against
- * graphviz-ts directly — decision-journal.md's J2 entry) are the oracle:
+ * @knowvah/dot-engine directly — decision-journal.md's J2 entry) are the oracle:
  * cluster bb `(8,8)-(177,121)` (native y-up), 4 ports at native y=107,
  * x=22/69/116/163, each 12x12, nodesep=35/ranksep=60, anchor 50x17 (this
  * fixture's own title-table render size).
@@ -46,7 +46,7 @@ describe('computePortClusterInitialRect', () => {
     // shadow graph is self-contained (just the cluster, no other diagram
     // content), so its own root bb total height differs from the real
     // fixture's full-diagram height -- 22 is this SELF-CONTAINED graph's
-    // own y-DOWN value (verified directly against graphviz-ts's own xdot
+    // own y-DOWN value (verified directly against @knowvah/dot-engine's own xdot
     // output, not derived from the real fixture's unrelated total height).
     const xs = ['p80', 'p81', 'p82', 'p83'].map((id) => result.portCenters.get(id)!.x);
     expect(xs).toEqual([22, 69, 116, 163]);

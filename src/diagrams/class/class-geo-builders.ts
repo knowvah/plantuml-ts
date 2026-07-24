@@ -178,7 +178,7 @@ function resolveNamespaceInkShape(theme: Theme): 'polygon' | 'rect' | undefined 
 }
 
 /**
- * Attach the edge label if present, positioned from graphviz-ts's own
+ * Attach the edge label if present, positioned from @knowvah/dot-engine's own
  * native edge `label=` placement (`edgeResult.labelX`/`.labelY`, already
  * computed by `getLayout()` -- `core/graph-layout.ts#toEdgeEntry`'s
  * `ge.label`, unconditional, no SVG-scan extraction needed unlike
@@ -199,8 +199,8 @@ function resolveNamespaceInkShape(theme: Theme): 'polygon' | 'rect' | undefined 
  * Reuses `portLabelAnchor`'s CENTER-to-left/baseline-anchor conversion
  * unchanged.
  *
- * Still bound by the SAME graphviz-ts-vs-real-graphviz label-placement
- * residual N25 already named (gvts-genuine, out of scope): graphviz-ts's
+ * Still bound by the SAME @knowvah/dot-engine-vs-real-graphviz label-placement
+ * residual N25 already named (gvts-genuine, out of scope): @knowvah/dot-engine's
  * own internal label-box measurement doesn't match this port's real
  * sans-serif metrics, so the extracted position is structurally correct
  * (real engine decision, not a guess) but not guaranteed byte-exact.
@@ -319,7 +319,7 @@ function attachMagicArrow(
  * `m.height`/`baselineOffset` formula `portLabelAnchor` already uses, so at
  * `lines.length === 1` this function's `x`/`y` are algebraically identical
  * to `portLabelAnchor`'s. Still bound by the SAME gvts-genuine
- * label-placement residual N25/N62 already named (graphviz-ts's own
+ * label-placement residual N25/N62 already named (@knowvah/dot-engine's own
  * box-center doesn't match jar's sub-pixel placement) -- structurally
  * correct, not guaranteed byte-exact.
  */
@@ -359,7 +359,7 @@ function multiLineLabelAnchor(
  * every OTHER text element in this engine's own established convention,
  * `class-member-rows.ts`'s doc comment: "un-centered `<text>`... `y =
  * lineTop + baselineOffset`"). `measurer`/`CARDINALITY_FONT_SIZE` give the
- * SAME box graphviz-ts itself measured the text with (`core/graph-layout.ts
+ * SAME box @knowvah/dot-engine itself measured the text with (`core/graph-layout.ts
  * #addEdges`'s `labelfontsize`), so the conversion is self-consistent.
  */
 function portLabelAnchor(

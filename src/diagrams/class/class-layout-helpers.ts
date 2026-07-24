@@ -89,7 +89,7 @@ const CONSTRAINT_SPOT = 10;
  * `<text font-size="13">` multiplicity/role glyph in `test-results/dot-cache
  * /class/*` `in.svg`. G2/N25: used for the label's REAL rendered size
  * (`class-geo-builders.ts#attachPortLabels`'s baseline conversion + the
- * `textLength` this port's own `renderer.ts` emits) and for graphviz-ts's
+ * `textLength` this port's own `renderer.ts` emits) and for @knowvah/dot-engine's
  * own placement search (`core/graph-layout.ts#CARDINALITY_FONT_SIZE`, an
  * independent same-value constant in that module -- core/ does not import
  * class-local constants). NOT the same font `edgeLabelAttrs` below measures
@@ -206,7 +206,7 @@ export function wrapPlainTextLine(
  * WIDEST line's width and the full stacked height (`lines.length *` the
  * single-line measured height) instead of measuring the raw string (which
  * would count the literal `\\n`/`\\l`/`\\r` characters as visible glyphs
- * and never reflect the real multi-row reserved space) -- feeds graphviz-ts's
+ * and never reflect the real multi-row reserved space) -- feeds @knowvah/dot-engine's
  * OWN layout/label-placement search with the true reserved box size, matching
  * jar's own `dimNote = labelText.calculateDimension(...)` over the FULL
  * multi-line `TextBlock` (`SvekEdge.java:440`). DOT-gate safe: the frozen
@@ -264,7 +264,7 @@ export function edgeLabelAttrs(
     const m = measurer.measure(rel.fromMultiplicity, font);
     attrs.tailLabelWidth = m.width;
     attrs.tailLabelHeight = m.height;
-    // G2/N25: the actual text, fed into the real graphviz-ts layout call so
+    // G2/N25: the actual text, fed into the real @knowvah/dot-engine layout call so
     // it computes a real position (`core/graph-layout.ts
     // #extractPortLabelPositions`) -- see that field's own doc comment.
     attrs.tailLabel = rel.fromMultiplicity;

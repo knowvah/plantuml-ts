@@ -8,7 +8,7 @@
  * 3, matching class's G2 N1) draws its arrowhead as an inline `<polygon>`
  * at the raw spline endpoint, not an SVG `<marker>`. Without this flag,
  * `graph-layout-build.ts#addEdges` defaults to `arrowhead=normal` and
- * graphviz-ts reserves a ~10-11px arrow-clip gap when solving the spline,
+ * @knowvah/dot-engine reserves a ~10-11px arrow-clip gap when solving the spline,
  * shortening every routed transition well short of its target node's
  * boundary — verified directly against real `dot -Tplain` on
  * `nelupe-49-xova546`'s own pinned `oracle/goldens/state/<slug>/svek-3.dot`
@@ -20,7 +20,7 @@
  * through `layoutGraph()` without `manualArrowheads` stopped at y=44.51,
  * ~11.5px short of the 56px target boundary. This is the SAME root cause
  * G2 N29 already diagnosed and fixed for class (a seam invocation gap, not
- * a graphviz-ts engine bug) — state's S1 arrowhead-rendering switch never
+ * a @knowvah/dot-engine engine bug) — state's S1 arrowhead-rendering switch never
  * carried the flag over.
  */
 import { describe, it, expect, afterAll } from 'vitest';
@@ -78,7 +78,7 @@ describe('state DotInputGraph — manualArrowheads (mission G4 S8, mechanism 19)
     // Numeric-tolerant, mirroring this project's own established
     // conformance bar (tests/oracle/svg-conformance/compare.ts's 0.01
     // absolute-delta tolerance) -- jar's own Smetana spline solver and
-    // graphviz-ts's solver land on the SAME single-segment shape and
+    // @knowvah/dot-engine's solver land on the SAME single-segment shape and
     // endpoints (both a 1+3*1 bezier from the circle's bottom to just
     // short of chat1's top boundary) but differ by a few thousandths of a
     // pixel on the two interior control points, well inside that bar.

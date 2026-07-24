@@ -140,7 +140,7 @@ class UnicodeBlock {
 }
 
 /**
- * Deterministic width-table measurer — the plantuml-ts analog of graphviz-ts's
+ * Deterministic width-table measurer — the plantuml-ts analog of @knowvah/dot-engine's
  * EstimateTextMeasurer. Reproduces StringBounderFromWidthTable.calculateDimension:
  *
  *   width  = Σ charWidth(cp) × (size / 16),   charWidth via the SANS_SERIF table

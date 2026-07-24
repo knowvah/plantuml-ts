@@ -490,7 +490,7 @@ function groupNodeSize(
  * G2/N14: `noArrow: true` always -- a note connector NEVER draws a real
  * arrowhead (merged into the note's own Opale outline when opalisable, a
  * bare undecorated dashed line otherwise, `renderer-note.ts#renderNote`'s
- * own connector draw has no marker) -- without it, graphviz-ts reserves its
+ * own connector draw has no marker) -- without it, @knowvah/dot-engine reserves its
  * default ~10-11px arrowhead-clip gap when trimming the routed spline to
  * the note's box boundary (`core/graph-layout.ts#addEdges`'s own doc
  * comment), which made `resolveOpaleConnector`'s notch anchor land ~11px

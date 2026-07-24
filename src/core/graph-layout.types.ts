@@ -77,7 +77,7 @@ export interface DotInputEdge {
     labelHeight?: number;
     /** G8 T2 (`plans/g8-label-placement/`): the REAL FIXEDSIZE HTML-table
      *  label-box reservation `graph-layout-build.ts#addEdges` feeds
-     *  graphviz-ts for THIS edge (mirrors `DotInputCluster.titleTableWidth`/
+     *  @knowvah/dot-engine for THIS edge (mirrors `DotInputCluster.titleTableWidth`/
      *  `.titleTableHeight`'s identical additive pattern -- see that field's
      *  own doc comment for the full `setHtmlAttr` mechanism). Deliberately
      *  DISTINCT from `labelWidth`/`labelHeight` above (the pre-existing,
@@ -106,7 +106,7 @@ export interface DotInputEdge {
      * (FROM-side) and head (TO-side) edge-end labels
      * (`SvekEdge.java:447-468`'s `taillabel=<TABLE>`/`headlabel=<TABLE>`
      * DOT attrs). Unlike the `*Width`/`*Height` pair above, these ARE fed
-     * into the real graphviz-ts layout call (`graph-layout.ts#addEdges`)
+     * into the real @knowvah/dot-engine layout call (`graph-layout.ts#addEdges`)
      * so its own faithfully-ported external-label placement algorithm
      * (`label/xlabels.ts`, `lib/label/xlabels.c:placeLabels`/`xladjust`)
      * computes the position graphviz would — upstream never sets
@@ -127,7 +127,7 @@ export interface DotInputEdge {
      * G2/N14: per-edge override of `DotInputGraph.manualArrowheads` — this
      * edge draws NO arrowhead at all (a class-diagram note connector,
      * merged into the note's own Opale outline, `SvekEdge#drawU`'s `if
-     * (opale) return;`), so graphviz-ts must NOT reserve its default
+     * (opale) return;`), so @knowvah/dot-engine must NOT reserve its default
      * ~10-11px arrow-length clip gap when trimming the routed spline to the
      * target node's boundary (`graph-layout.ts#addEdges`'s own doc comment
      * — the SAME mechanism `manualArrowheads` already handles graph-wide,
@@ -184,9 +184,9 @@ export interface DotInputCluster {
    *  class/component/description PORTIN/PORTOUT precedent) is unaffected. */
   portRanksLabelOnEe?: true;
   /** G5 C3, mechanism 16 shape half (docs/graphviz-issues/07's RESOLVED
-   *  note, graphviz-ts 0.1.26072117's `setHtmlAttr`): the real HTML
+   *  note, @knowvah/dot-engine's `setHtmlAttr`): the real HTML
    *  `<TABLE FIXEDSIZE="TRUE" WIDTH=".." HEIGHT="..">` title-label
-   *  reservation `graph-layout-build.ts#addClusters` feeds graphviz-ts's
+   *  reservation `graph-layout-build.ts#addClusters` feeds @knowvah/dot-engine's
    *  builder for THIS cluster's own subgraph, mirroring jar's real
    *  `ClusterDotString`/`ClusterHeader` mechanism (`SvekEdge.appendTable`,
    *  `label=<TABLE FIXEDSIZE="TRUE" WIDTH="cluster.getTitleAndAttribute
@@ -201,7 +201,7 @@ export interface DotInputCluster {
    *  sole role is a graphviz layout-space RESERVATION signal (the visible
    *  title text is drawn separately, by this port's own renderer,
    *  `renderer-composite-box.ts`), so its value is jar-CALIBRATED, not
-   *  jar-Java-internal-derived: G5 C2's marker sweep found graphviz-ts
+   *  jar-Java-internal-derived: G5 C2's marker sweep found @knowvah/dot-engine
    *  reserves `gap = HEIGHT + 16` above the first content rank (15-point
    *  linear sweep through this exact `setHtmlAttr` seam); G5 C3 confirmed
    *  jar's real single-line-title header gap is a CONTENT-WIDTH-
@@ -344,7 +344,7 @@ export interface DotInputGraph {
    *  text emitter already reflects this faithfully for EVERY diagram type
    *  (`svek-dot-emit.ts`: every edge line carries
    *  `arrowtail=none,arrowhead=none`, confirmed universal across the whole
-   *  cached-fixture corpus) — but `layoutGraph()`'s graphviz-ts seam only
+   *  cached-fixture corpus) — but `layoutGraph()`'s @knowvah/dot-engine seam only
    *  honors it when this flag is set, because callers that draw arrowheads
    *  via `marker-end` (class/state/dot/json — see each renderer's own
    *  `markerEnd`/`targetMarker` call sites) rely on graphviz's *default*
@@ -368,7 +368,7 @@ export interface DotLayoutResult {
     labelHeight?: number;
     /** G2/N25: computed position for `attributes.tailLabel`/`.headLabel`
      *  (see that field's own doc comment) — the CENTER point of the label
-     *  box graphviz-ts's own `xladjust` placed, in the same origin-shifted
+     *  box @knowvah/dot-engine's own `xladjust` placed, in the same origin-shifted
      *  frame as `points`/`labelX`/`labelY`. Absent when the input edge did
      *  not carry `tailLabel`/`headLabel`. */
     tailLabelX?: number;
@@ -381,11 +381,11 @@ export interface DotLayoutResult {
   width: number;
   height: number;
   /** G5 C2: real per-cluster bbox from graphviz's own subgraph-cluster
-   *  layout (graphviz-ts 0.1.26072115's `getLayout().clusters`, see
+   *  layout (@knowvah/dot-engine's `getLayout().clusters`, see
    *  docs/graphviz-issues/06-cluster-bbox-not-in-getlayout.md's RESOLVED
-   *  note) — keyed by `DotInputCluster.id` (re-mapped from graphviz-ts's own
+   *  note) — keyed by `DotInputCluster.id` (re-mapped from @knowvah/dot-engine's own
    *  `cluster<N>` naming by `graph-layout-build.ts#addClusters`'s
-   *  `ClusterIndex`, NOT graphviz-ts's internal name). `x`/`y` are the
+   *  `ClusterIndex`, NOT @knowvah/dot-engine's internal name). `x`/`y` are the
    *  top-left corner in the SAME origin-shifted frame as `nodes`/`edges`
    *  (`shiftToOrigin` applies the identical node/edge-derived translation to
    *  these boxes too — clusters never participate in DERIVING that

@@ -883,7 +883,7 @@ describe('layoutState -- cluster inner margin wiring (G5 C7, mechanism 16 margin
   // both composites here are `titleTableEligible` (single-line title, no
   // border points), so each picks up the jar-verified +6pt TOP margin the
   // old HEIGHT=3 value was starving (`border[TOP_IX] = label.dimen.y +
-  // 2*GAP`, graphviz-ts's graph-label.ts:113). `width` is UNCHANGED -- the
+  // 2*GAP`, @knowvah/dot-engine's graph-label.ts:113). `width` is UNCHANGED -- the
   // fix is TOP-margin-only, confirming it doesn't touch the G5 C7 side-
   // margin mechanism this describe block also covers.
   it('an UNTOUCHED cluster composite (no transition references A by its own name) gets a single wrap level', () => {
@@ -940,15 +940,15 @@ describe('layoutState -- cluster inner margin wiring (G5 C7, mechanism 16 margin
 // ---------------------------------------------------------------------------
 // G6 T2: CLUSTER_TITLE_TABLE_HEIGHT seam-level fix (3 -> 9). T1's mechanism
 // artifact (decision-journal.md) traced the vertical residual to the seam
-// feeding graphviz-ts's `setHtmlAttr` HTML title-table `HEIGHT` attr with
+// feeding @knowvah/dot-engine's `setHtmlAttr` HTML title-table `HEIGHT` attr with
 // the WRONG dims -- this block asserts the fix at the seam itself (the
 // `DotInputCluster.titleTableHeight` value `setLayoutInputObserver`
-// captures before it reaches graphviz-ts), not just its downstream pixel
+// captures before it reaches @knowvah/dot-engine), not just its downstream pixel
 // effect (covered by the describe block above).
 // ---------------------------------------------------------------------------
 
 describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 vertical residual fix)', () => {
-  it('a titleTableEligible composite feeds graphviz-ts titleTableHeight=9 (jar-verified svek HEIGHT="9"), not the old 3', () => {
+  it('a titleTableEligible composite feeds @knowvah/dot-engine titleTableHeight=9 (jar-verified svek HEIGHT="9"), not the old 3', () => {
     const child = makeState('Child');
     const a = makeState('A', { children: [child] });
     const ext = makeState('External');

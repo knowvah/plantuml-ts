@@ -148,7 +148,7 @@ describe('buildEdgeGeos — tail/head multiplicity-label width rounding (G2 N35)
  * perpendicular" formula that was NEVER jar-verified (no ratchet-pinned
  * fixture ever exercised a plain edge label) -- confirmed wrong two ways
  * against `siteza-47-lixe343`'s golden SVG (`class Foo; class Bar; Foo -->
- * Bar : demo`): the position ignored graphviz-ts's own real `label=`
+ * Bar : demo`): the position ignored @knowvah/dot-engine's own real `label=`
  * placement (`edgeResult.labelX`/`.labelY`, already computed by
  * `getLayout()` -- `core/graph-layout.ts#toEdgeEntry`'s `ge.label`)
  * entirely, and the width/textLength this fed into the render layer used
@@ -178,13 +178,13 @@ describe('buildEdgeGeos — plain edge label position/width (G2 N62)', () => {
     expect(edge.label!.text).toBe('demo');
     // jar-verified byte-exact (`test-results/dot-cache/class/siteza-47-
     // lixe343/in.svg`'s own `<text ... textLength="32.5" ...>demo</text>`)
-    // -- textLength is measurer-derived, independent of graphviz-ts's own
+    // -- textLength is measurer-derived, independent of @knowvah/dot-engine's own
     // internal label-placement search, so it matches exactly even though
     // x/y (below) carry the SAME gvts-genuine placement residual `ledger
     // .md` N25 already named (structurally correct, not byte-exact).
     expect(edge.label!.width).toBe(32.5);
     expect(edge.label!.width).toBe(javaRound4(edge.label!.width));
-    // Position now comes from graphviz-ts's own native `label=` placement
+    // Position now comes from @knowvah/dot-engine's own native `label=` placement
     // (not the pre-N62 hand-rolled midpoint) -- merely asserts it is a
     // finite, distinct-from-origin value; byte-exact match is blocked by
     // the named gvts-genuine residual, not asserted here.
@@ -192,8 +192,8 @@ describe('buildEdgeGeos — plain edge label position/width (G2 N62)', () => {
     expect(Number.isFinite(edge.label!.y)).toBe(true);
   });
 
-  it('omits the label when graphviz-ts reports no label position for the edge', () => {
-    // Degenerate 0/1-classifier diagrams skip DOT/graphviz-ts entirely
+  it('omits the label when @knowvah/dot-engine reports no label position for the edge', () => {
+    // Degenerate 0/1-classifier diagrams skip DOT/@knowvah/dot-engine entirely
     // (`class-geo-builders.ts`'s own degenerate-skip doc comment) -- a
     // relationship referencing an undefined classifier never reaches
     // `buildEdgeGeos`'s `result.edges.find` match, so `attachEdgeLabel`

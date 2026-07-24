@@ -29,7 +29,7 @@
 import type { GvGraphBuilder } from '@knowvah/dot-engine';
 import type { DotInputCluster } from './graph-layout.types.js';
 
-/** The two graphviz-ts subgraph handles a border-point `DotInputCluster`
+/** The two @knowvah/dot-engine subgraph handles a border-point `DotInputCluster`
  *  resolves to — see `graph-layout-build.ts`'s own (non-border-point)
  *  `ClusterHandles` for the general shape this mirrors. `main` is the real
  *  `cluster<N>` subgraph (rank groups + port node lines only, no title

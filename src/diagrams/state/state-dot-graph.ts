@@ -289,7 +289,7 @@ export function buildDotGraph(
     // writes arrowtail=none,arrowhead=none on every edge line
     // (svek-dot-emit.ts, corpus-wide). Without this flag,
     // graph-layout-build.ts#addEdges defaults to arrowhead=normal and
-    // graphviz-ts reserves a ~10-11px arrow-clip gap when solving the
+    // @knowvah/dot-engine reserves a ~10-11px arrow-clip gap when solving the
     // spline, stopping every routed transition well short of its target
     // node's boundary -- verified against real `dot -Tplain` on
     // nelupe-49-xova546's own pinned svek-3.dot golden (see

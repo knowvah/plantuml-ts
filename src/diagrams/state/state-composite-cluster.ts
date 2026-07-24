@@ -58,15 +58,15 @@ import {
  * `CLUSTER_TITLE_TABLE_HEIGHT` (fed to `DotInputCluster.titleTableHeight`,
  * consumed by `graph-layout-build.ts#addClusters`'s `setHtmlAttr` seam) was
  * ORIGINALLY set to 3 by G5 C2's own 15-point marker sweep, on the theory
- * that graphviz-ts's `gap = HEIGHT + 16` (`3 + 16 = 19`, matching
+ * that @knowvah/dot-engine's `gap = HEIGHT + 16` (`3 + 16 = 19`, matching
  * `CLUSTER_HEADER_HEIGHT` below) reproduced jar's real header gap —
  * WRONG: mission G6 T1 (`plans/g6-cluster-geometry/decision-journal.md`,
  * "T1 mechanism artifact") found the jar's REAL svek DOT emission is
  * `HEIGHT="9"`, a content-independent constant verified across 70+ cached
  * `test-results/dot-cache/state` (nested per-fixture) `svek-N.dot`
- * samples — feeding `HEIGHT=3` starved graphviz-ts's cluster-label
+ * samples — feeding `HEIGHT=3` starved @knowvah/dot-engine's cluster-label
  * TOP-border formula
- * (`border[TOP_IX] = label.dimen.y + 2*GAP`, GAP=4, graphviz-ts's own
+ * (`border[TOP_IX] = label.dimen.y + 2*GAP`, GAP=4, @knowvah/dot-engine's own
  * `graph-label.ts:113`, a faithful port of `lib/common/input.c:885-892`)
  * by exactly 6pt per `titleTableEligible` cluster, compounding by nesting
  * depth. `9` is the jar-verified value; the `3 + 16 = 19` coincidence above

@@ -9,7 +9,7 @@
  *
  * Buckets:
  *   match        — DOT input structurally identical → any SVG diff is a real
- *                  render/graphviz-ts bug worth chasing.
+ *                  render/@knowvah/dot-engine bug worth chasing.
  *   diverge      — DOT differs → our parser/layout produces a different graph;
  *                  SVG diff is expected, not investigated (per policy).
  *   count        — different number of graphs emitted.

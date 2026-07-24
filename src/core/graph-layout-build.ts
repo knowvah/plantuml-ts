@@ -1,5 +1,5 @@
 /**
- * graphviz-ts builder construction for `layoutGraph()` — split from
+ * @knowvah/dot-engine builder construction for `layoutGraph()` — split from
  * `graph-layout.ts` (500-line file cap). Owns the input→builder projection:
  * graph attrs, node declarations (shape mirroring `svek-dot-emit.ts#nodeLine`),
  * rank subgraphs, cluster subgraphs, and edge declarations with the
@@ -40,7 +40,7 @@ export function applyGraphAttrs(b: GvGraphBuilder, input: DotInputGraph): void {
  *  or spline clipping at node boundaries solves differently (proven on
  *  bunuce-10-vere519: laying the 4px `circle` couple points out as `box`
  *  reproduces the exact 0.03-1.1px path/@d drift previously mis-attributed
- *  to graphviz-ts getLayout; honoring `circle` matches the jar byte-exact).
+ *  to @knowvah/dot-engine getLayout; honoring `circle` matches the jar byte-exact).
  *  `plaintext` and title-label nodes still lay out as boxes — their emitter
  *  form is an HTML label table, which layout does not model yet. */
 function layoutShape(n: DotInputNode): string {
@@ -169,17 +169,17 @@ export function addNodes(b: GvGraphBuilder, input: DotInputGraph): void {
   }
 }
 
-/** Maps graphviz-ts's own `cluster<N>` subgraph name back to OUR
+/** Maps @knowvah/dot-engine's own `cluster<N>` subgraph name back to OUR
  *  `DotInputCluster.id` (G5 C2: threaded so `layoutGraph()` can re-key
- *  `getLayout()`'s new `clusters` snapshot entries — graphviz-ts 0.1.26072115,
+ *  `getLayout()`'s new `clusters` snapshot entries — @knowvah/dot-engine,
  *  docs/graphviz-issues/06-cluster-bbox-not-in-getlayout.md's RESOLVED note —
  *  into the caller's own id space; see `DotLayoutResult.clusters`). */
 export interface ClusterIndex {
-  /** graphviz-ts cluster name (`cluster0`, `cluster1`, …) → our cluster id. */
+  /** @knowvah/dot-engine cluster name (`cluster0`, `cluster1`, …) → our cluster id. */
   idByName: Map<string, string>;
 }
 
-/** The two graphviz-ts subgraph handles a `DotInputCluster` resolves to.
+/** The two @knowvah/dot-engine subgraph handles a `DotInputCluster` resolves to.
  *  `main` is the real `cluster<N>` subgraph — title-table attrs and the
  *  `ClusterIndex` identity live here, and it is what jar's own
  *  `Cluster.getClusterId()` names. `innermost` is where THIS cluster's own
@@ -202,7 +202,7 @@ interface ClusterHandles {
 }
 
 /**
- * Forward `input.clusters` to graphviz-ts as `cluster<N>` subgraphs so dot
+ * Forward `input.clusters` to @knowvah/dot-engine as `cluster<N>` subgraphs so dot
  * lays out container members together (contained) and routes splines across
  * cluster boundaries — the faithful upstream model (one graph, cluster
  * subgraphs, single pass). Nesting is honored via `parentId`. Member ids
@@ -240,7 +240,7 @@ interface ClusterHandles {
  * post-layout box correction this nesting's `initial` bbox feeds.
  *
  * Returns the `ClusterIndex` (G5 C2) so `layoutGraph()` can re-key the
- * `getLayout()` snapshot's own `clusters` array (graphviz-ts's `cluster<N>`
+ * `getLayout()` snapshot's own `clusters` array (@knowvah/dot-engine's `cluster<N>`
  * naming) back to `input.clusters[].id`. Additive: callers that pass no
  * `clusters` are unaffected (the field was previously emitter-only) — they
  * get back an empty `idByName` map, which `layoutGraph()` uses to omit
@@ -329,7 +329,7 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     const attrs = !hasTitleTable && c.label !== undefined ? { label: c.label } : {};
     const main = host.addSubgraph(outerName, attrs);
     // G5 C3, mechanism 16 shape half: a jar-real HTML `<TABLE FIXEDSIZE=
-    // "TRUE" ...>` label, via graphviz-ts 0.1.26072117's public `setHtmlAttr`
+    // "TRUE" ...>` label, via @knowvah/dot-engine's public `setHtmlAttr`
     // (docs/graphviz-issues/07's RESOLVED note) -- ONLY for callers that
     // supply BOTH dims (`titleTableWidth`/`Height`'s own doc comment,
     // graph-layout.types.ts, has the full jar-calibration derivation).
@@ -383,9 +383,9 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // never reaches this block.
     //
     // Naming pitfall this fix had to avoid (caught by a dump of the built
-    // Graph model, not assumed): graphviz-ts's cluster detection is a bare
+    // Graph model, not assumed): @knowvah/dot-engine's cluster detection is a bare
     // `name.toLowerCase().startsWith('cluster')` check
-    // (graphviz-ts/src/layout/dot/rank.ts) -- an EARLIER attempt named this
+    // (@knowvah/dot-engine/src/layout/dot/rank.ts) -- an EARLIER attempt named this
     // subgraph `${outerName}rank${pr.rank}` (e.g. "cluster1ranksink"), which
     // ITSELF starts with "cluster" and so was silently promoted to a real
     // nested CLUSTER (wrong: jar's own `{rank=sink;...}` block is a bare,

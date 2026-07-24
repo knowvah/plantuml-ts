@@ -26,7 +26,7 @@
  *    `ast.relationships`) — `class-dot-graph.ts` uses this to set
  *    `noArrow: true` on an eligible relationship's DOT edge BEFORE layout
  *    runs, mirroring N14's identical fix for the synthetic note-attachment
- *    edge (`note-layout.ts#groupEdge`) — without it, graphviz-ts reserves
+ *    edge (`note-layout.ts#groupEdge`) — without it, @knowvah/dot-engine reserves
  *    its default ~10-11px arrow-clip gap when trimming the spline to the
  *    note's box boundary, landing `resolveOpaleConnector`'s notch anchor
  *    short of the real edge (jar-verified wrong against `doseko-41-

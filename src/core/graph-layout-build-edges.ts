@@ -3,7 +3,7 @@
  * compliance, forced by G7 T14b's border-point wiring additions; pure move,
  * no behavior change). Owns edge declarations with the (tail,head)→id
  * `EdgeIndex` the snapshot mapper consumes, mirroring `svek-dot-emit.ts`'s
- * per-edge attr assembly (`SvekEdge`) for the real graphviz-ts layout call.
+ * per-edge attr assembly (`SvekEdge`) for the real @knowvah/dot-engine layout call.
  * Re-exported verbatim from `graph-layout-build.ts` so `graph-layout.ts` (and
  * any other pre-existing importer) keeps working unchanged.
  */
@@ -13,12 +13,12 @@ import type { DotInputEdge, DotInputGraph } from './graph-layout.types.js';
 /** `plantuml.skin`'s `arrow { FontSize 13 }` block (`svek/GraphvizImageBuilder
  *  .java#getStyleArrowCardinality` resolves the `arrow.cardinality` style,
  *  which falls through to the plain `arrow` block — no diagram in the corpus
- *  overrides `cardinality` specifically) — the font graphviz-ts must measure
+ *  overrides `cardinality` specifically) — the font @knowvah/dot-engine must measure
  *  `tailLabel`/`headLabel` text with so its `xladjust` placement search uses
  *  the same box size jar's own `cardinalityFont` would. */
 export const CARDINALITY_FONT_SIZE = 13;
 
-/** Maps graphviz-ts (tail,head)-keyed edges back to our edge ids. */
+/** Maps @knowvah/dot-engine (tail,head)-keyed edges back to our edge ids. */
 export interface EdgeIndex {
   /** (tail,head) → our edge ids, in input order (consumed left-to-right). */
   idQueues: Map<string, string[]>;
@@ -37,7 +37,7 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
     if (!nodeIds.has(e.from) || !nodeIds.has(e.to)) continue;
     // I9 mechanism (plans/g1-description-svg/ledger.md): callers that draw
     // arrowheads manually (`DotInputGraph.manualArrowheads` — currently only
-    // `description`'s SvekEdge/extremity polygons) must tell graphviz-ts the
+    // `description`'s SvekEdge/extremity polygons) must tell @knowvah/dot-engine the
     // same `arrowhead=none`/`arrowtail=none` the Svek-DOT text emitter
     // already writes for every diagram type, or it defaults to
     // `arrowhead=normal` and reserves an arrow-length gap when clipping the
@@ -76,13 +76,13 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
       attrs.fontname = 'Times';
     }
     // G2/N25: feed the ACTUAL text (not just DOT-gate sizing) into the real
-    // layout call so graphviz-ts's own `placeLabels`/`xladjust` (`label/
+    // layout call so @knowvah/dot-engine's own `placeLabels`/`xladjust` (`label/
     // xlabels.ts`, a faithful port of `lib/label/xlabels.c`) computes the
     // same external-label position real graphviz would — see
     // `DotInputEdge.attributes.tailLabel`'s own doc comment for why the
     // angle/distance formula never applies here. `layoutGraph()` extracts
     // the computed position back out via `extractPortLabelPositions` (no
-    // public snapshot API exposes it directly — ADR-1 in graphviz-ts hides
+    // public snapshot API exposes it directly — ADR-1 in @knowvah/dot-engine hides
     // the internal `Edge` model).
     if (a?.tailLabel !== undefined) {
       attrs.taillabel = a.tailLabel;

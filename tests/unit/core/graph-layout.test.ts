@@ -54,7 +54,7 @@ describe('layoutGraph — node and edge geometry', () => {
   // faithfully — every emitted edge line carries `arrowtail=none,
   // arrowhead=none` (svek-dot-emit.ts), confirmed universal across the whole
   // cached-fixture corpus (zero counterexamples, 1196 `.dot` files spanning
-  // component/usecase/class/object/state). Without telling graphviz-ts the
+  // component/usecase/class/object/state). Without telling @knowvah/dot-engine the
   // same thing on this seam via `manualArrowheads`, it silently defaults to
   // `arrowhead=normal` and reserves an arrow-length gap when clipping the
   // spline to the target node's boundary — shortening the routed edge by
@@ -149,12 +149,12 @@ describe('layoutGraph — defensive and option paths', () => {
   });
 });
 
-// G5 C2: graphviz-ts 0.1.26072115 landed `clusters` in getLayout()'s
+// G5 C2: @knowvah/dot-engine landed `clusters` in getLayout()'s
 // snapshot (docs/graphviz-issues/06-cluster-bbox-not-in-getlayout.md,
 // RESOLVED note). layoutGraph() must thread the real cluster bbox back to
-// the caller, keyed by OUR OWN DotInputCluster.id (not graphviz-ts's
+// the caller, keyed by OUR OWN DotInputCluster.id (not @knowvah/dot-engine's
 // internal `cluster0`/`cluster1` name) — the seam consumers (state
-// composite pipeline, mechanism 16) never see graphviz-ts's naming scheme.
+// composite pipeline, mechanism 16) never see @knowvah/dot-engine's naming scheme.
 describe('layoutGraph — cluster geometry (G5 C2, mechanism 16)', () => {
   it('omits the clusters field when the input graph has no clusters', () => {
     const g: DotInputGraph = {
@@ -243,7 +243,7 @@ describe('layoutGraph — cluster geometry (G5 C2, mechanism 16)', () => {
 });
 
 // G5 C3, mechanism 16 shape half: `titleTableWidth`/`titleTableHeight` feed
-// graphviz-ts's `setHtmlAttr` (docs/graphviz-issues/07's RESOLVED note) via
+// @knowvah/dot-engine's `setHtmlAttr` (docs/graphviz-issues/07's RESOLVED note) via
 // `addClusters`, so a cluster's own graphviz-reported bbox reflects jar's
 // real HTML `<TABLE FIXEDSIZE="TRUE" ...>` title reservation instead of the
 // prior plain-text `label` attr. Jar-calibrated numbers per the mission's own

@@ -3,7 +3,7 @@
 // All graph diagram types (class, component, state, usecase, dot, json — plus
 // the transitive object→class and yaml/hcl→json paths) route their layout
 // through `layoutGraph()`, the only seam consumer. This adapter wires that seam
-// to the `graphviz-ts` package: it serializes a DotInputGraph into a graphviz-ts
+// to the `@knowvah/dot-engine` package: it serializes a DotInputGraph into a @knowvah/dot-engine
 // builder graph, runs the requested engine, reads back the geometry snapshot,
 // and maps it to the DotLayoutResult shape the renderers already consume (burn
 // decision D4 — renderers untouched). See plans/burn-graphviz-engines/.
@@ -31,7 +31,7 @@ import type {
   DotLayoutResult,
 } from './graph-layout.types.js';
 
-// plantuml-ts is a pure SVG library — no DOM, no canvas. graphviz-ts otherwise
+// plantuml-ts is a pure SVG library — no DOM, no canvas. @knowvah/dot-engine otherwise
 // auto-selects a canvas-backed text measurer when a `document` is present
 // (jsdom, browsers), which both violates that guarantee and is unimplemented
 // under jsdom. Pin its built-in lookup-table measurer: canvas-free and
@@ -84,7 +84,7 @@ function toEdgeEntry(
     entry.labelX = ge.label.x;
     entry.labelY = ge.label.y;
   }
-  // graphviz-ts returns only the label position; echo back the caller's
+  // @knowvah/dot-engine returns only the label position; echo back the caller's
   // measured label box so renderers size the label as before.
   if (inp?.attributes?.labelWidth !== undefined) {
     entry.labelWidth = inp.attributes.labelWidth;
@@ -108,13 +108,13 @@ function mapEdges(snap: LayoutSnapshot, idx: EdgeIndex): OutEdges {
 }
 
 /** G5 C2: re-keys `getLayout()`'s `clusters` snapshot entries from
- *  graphviz-ts's own `cluster<N>` naming back to the caller's
+ *  @knowvah/dot-engine's own `cluster<N>` naming back to the caller's
  *  `DotInputCluster.id`, via the `ClusterIndex` `addClusters` built while
  *  constructing the builder graph. `undefined` when the input graph carried
  *  no clusters (empty `idByName` — mirrors `DotInputGraph.clusters` being
  *  optional). A snapshot entry with no matching id is defensively skipped
  *  (cannot occur given `addClusters`'s own naming contract: every name it
- *  hands graphviz-ts is recorded in `idByName` before use). */
+ *  hands @knowvah/dot-engine is recorded in `idByName` before use). */
 function mapClusters(snap: LayoutSnapshot, idx: ClusterIndex): OutClusters | undefined {
   if (idx.idByName.size === 0) return undefined;
   const out: OutClusters = [];
@@ -129,7 +129,7 @@ function mapClusters(snap: LayoutSnapshot, idx: ClusterIndex): OutClusters | und
 // ---------------------------------------------------------------------------
 // External tail/head label position extraction (G2/N25)
 //
-// graphviz-ts's public `getLayout()` snapshot never exposes `tail_label`/
+// @knowvah/dot-engine's public `getLayout()` snapshot never exposes `tail_label`/
 // `head_label` positions (ADR-1: the internal `Edge` model is intentionally
 // not re-exported), even though the SAME layout call already computes them
 // (`gvPostprocess` -> `addXLabels`, `label/xlabels.ts`) whenever an edge
@@ -142,7 +142,7 @@ function mapClusters(snap: LayoutSnapshot, idx: ClusterIndex): OutClusters | und
 // of re-deriving the placement algorithm by hand.
 // ---------------------------------------------------------------------------
 
-/** Minimal decode for the handful of entities graphviz-ts's SVG emitter uses
+/** Minimal decode for the handful of entities @knowvah/dot-engine's SVG emitter uses
  *  in `<title>` text (`->` renders as `&#45;&gt;`). */
 function decodeSvgEntities(s: string): string {
   return s
@@ -155,7 +155,7 @@ function decodeSvgEntities(s: string): string {
 
 /** Bounding-box center of a `<g id="nodeN" class="node">` block's own
  *  `<polygon points="...">`, keyed by the node id in its `<title>` — used to
- *  derive the constant translation between graphviz-ts's raw `render()`
+ *  derive the constant translation between @knowvah/dot-engine's raw `render()`
  *  coordinate frame and `getLayout()`'s frame (see `computeRenderOffset`). */
 function parseNodeRenderCenters(svg: string): Map<string, { x: number; y: number }> {
   const centers = new Map<string, { x: number; y: number }>();
@@ -180,7 +180,7 @@ function parseNodeRenderCenters(svg: string): Map<string, { x: number; y: number
   return centers;
 }
 
-/** Constant (dx,dy) translation from graphviz-ts's raw `render()` SVG frame
+/** Constant (dx,dy) translation from @knowvah/dot-engine's raw `render()` SVG frame
  *  into `getLayout({yAxis:'down'})`'s frame — derived from any one node
  *  present in both (a pure translation: one match fully determines it).
  *  `undefined` when no id matched (defensive; not expected for a non-empty
@@ -351,7 +351,7 @@ function canvasSize(nodes: OutNodes, edges: OutEdges): { width: number; height: 
 }
 
 /**
- * Lay out a graph via graphviz-ts. The single seam between the graph diagram
+ * Lay out a graph via @knowvah/dot-engine. The single seam between the graph diagram
  * types and the layout engine.
  *
  * @param input - the graph to lay out (node/edge geometry + rank hints).

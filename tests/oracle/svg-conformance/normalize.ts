@@ -1,14 +1,14 @@
 /**
  * SVG normalizer for the golden-SVG conformance harness.
  *
- * Ported near-verbatim from graphviz-ts's `test/golden/normalize.ts` (see
+ * Ported near-verbatim from @knowvah/dot-engine's `test/golden/normalize.ts` (see
  * `.claude/catalog.md` / mission decision journal for provenance). Parses an
  * SVG string with `@xmldom/xmldom` and reduces it to a `NormalizedNode` tree:
  * attributes sorted alphabetically, numeric attribute/path/points/transform
  * values rounded to 6 significant figures, whitespace-only text nodes and
  * comment/processing-instruction nodes dropped.
  *
- * plantuml adaptations over the graphviz-ts source (see mission decision
+ * plantuml adaptations over the @knowvah/dot-engine source (see mission decision
  * journal for the full list):
  *   1. `style="k:v;..."` declarations are resolved into individual
  *      attributes (a style declaration wins over a same-named presentation
