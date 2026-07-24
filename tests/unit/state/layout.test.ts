@@ -883,7 +883,7 @@ describe('layoutState -- cluster inner margin wiring (G5 C7, mechanism 16 margin
   // both composites here are `titleTableEligible` (single-line title, no
   // border points), so each picks up the jar-verified +6pt TOP margin the
   // old HEIGHT=3 value was starving (`border[TOP_IX] = label.dimen.y +
-  // 2*GAP`, graphviz-ts's graph-label.ts:113). `width` is UNCHANGED -- the
+  // 2*GAP`, @knowvah/dot-engine's graph-label.ts:113). `width` is UNCHANGED -- the
   // fix is TOP-margin-only, confirming it doesn't touch the G5 C7 side-
   // margin mechanism this describe block also covers.
   it('an UNTOUCHED cluster composite (no transition references A by its own name) gets a single wrap level', () => {
@@ -923,22 +923,32 @@ describe('layoutState -- cluster inner margin wiring (G5 C7, mechanism 16 margin
     // own box measurably wider/taller/lower than the untouched case above.
     expect(comp?.width).toBeCloseTo(119, 1);
     expect(comp?.height).toBeCloseTo(115, 1);
-    expect(comp?.y).toBeCloseTo(45, 1);
+    // G7 T7: `y` moved 45 -> 50 once `graph-layout-build.ts#addClusters`
+    // started porting jar's OUTER "a"/"p0" ancestor-protection pair
+    // (`ClusterDotString.java:91-116`) -- A is `innerMarginLevels: 2`
+    // (touched), so it now ALSO gets wrapped in two more real graphviz
+    // `cluster*` subgraphs OUTSIDE its own boundary (matching jar exactly,
+    // verified structurally against `kotagu-43-miza629`'s cached svek DOT,
+    // `plans/g7-borderpoint-rank/decision-journal.md` T7 row), which shifts
+    // the outer `[*] --> A` layout enough to push A's own box down 5px --
+    // this pin was computed by the PRE-T7 code (a/p0 unported), not by jar;
+    // 50 is the corrected, jar-faithful, deterministic value.
+    expect(comp?.y).toBeCloseTo(50, 1);
   });
 });
 
 // ---------------------------------------------------------------------------
 // G6 T2: CLUSTER_TITLE_TABLE_HEIGHT seam-level fix (3 -> 9). T1's mechanism
 // artifact (decision-journal.md) traced the vertical residual to the seam
-// feeding graphviz-ts's `setHtmlAttr` HTML title-table `HEIGHT` attr with
+// feeding @knowvah/dot-engine's `setHtmlAttr` HTML title-table `HEIGHT` attr with
 // the WRONG dims -- this block asserts the fix at the seam itself (the
 // `DotInputCluster.titleTableHeight` value `setLayoutInputObserver`
-// captures before it reaches graphviz-ts), not just its downstream pixel
+// captures before it reaches @knowvah/dot-engine), not just its downstream pixel
 // effect (covered by the describe block above).
 // ---------------------------------------------------------------------------
 
 describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 vertical residual fix)', () => {
-  it('a titleTableEligible composite feeds graphviz-ts titleTableHeight=9 (jar-verified svek HEIGHT="9"), not the old 3', () => {
+  it('a titleTableEligible composite feeds @knowvah/dot-engine titleTableHeight=9 (jar-verified svek HEIGHT="9"), not the old 3', () => {
     const child = makeState('Child');
     const a = makeState('A', { children: [child] });
     const ext = makeState('External');
@@ -1037,15 +1047,25 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
     expect(cluster?.titleTableHeight).toBe(42);
   });
 
-  // G6 T7: `stereoLines` term -- UNVERIFIED against a real jar oracle this
-  // iteration (`title-height-derivation.md` §5, "Stereotype term": no
+  // G7 T11: `stereoLines`/`stereoWidth` -- was UNVERIFIED against a real
+  // jar oracle (`title-height-derivation.md` §5, "Stereotype term": no
   // titled+stereotyped, non-concurrent-region composite cluster with a
-  // cached `svek-*.dot` was found in the corpus). Ships per the derivation
-  // doc's own authorization (source-derived, not curve-fit); this test
-  // pins the CURRENT formula output, not a jar-confirmed value -- a future
-  // oracle fixture may prove this wrong, in which case this test (not the
-  // formula) is the thing to revisit.
-  it('a single-line title composite with a stereotype adds one stereoLines term (UNVERIFIED against jar oracle, formula-consistent)', () => {
+  // cached `svek-*.dot` was found in the corpus at the time). This iteration
+  // found and diagnosed the first such oracle fixture
+  // (`pesita-10-dene726`'s `AA`, `state AA <<O-O>>`) and PROVED the opposite
+  // of the prior formula-consistent guess: state diagrams' own svek pass
+  // hardcodes `PortionShower.ALL` (`GroupMakerState.java:145`), whose
+  // `getVisibleStereotypeLabels` unconditionally returns an empty list
+  // (`PortionShower.java:51-53`), so `ClusterHeader`'s stereo `TextBlock` is
+  // ALWAYS empty for a state cluster header regardless of `s.stereotype`
+  // content -- `state-composite-cluster.ts`'s own `resolveClusterComposite`
+  // now hardcodes `stereoLines`/`stereoWidth` to 0 (see its own doc comment
+  // for the full citation). This test now pins the CORRECTED, jar-verified
+  // value: a stereotype makes NO difference to `titleTableHeight` (23 -- the
+  // OLD, now-disproven guess -- would mean the stereo term still
+  // contributed; 9 is the SAME value as the no-stereotype case,
+  // demonstrating the term is a true no-op).
+  it('a single-line title composite with a stereotype is UNAFFECTED (jar-verified: state diagrams never show cluster-header stereotypes)', () => {
     const child = makeState('Child');
     const a = makeState('A', { children: [child], stereotype: 'someStereotype' });
     const ext = makeState('External');
@@ -1061,6 +1081,122 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       setLayoutInputObserver(undefined);
     }
     const cluster = captured[0]?.clusters?.find((c) => c.label === 'A');
-    expect(cluster?.titleTableHeight).toBe(23);
+    expect(cluster?.titleTableHeight).toBe(9);
+    expect(cluster?.titleTableWidth).toBeCloseTo(9.333, 2);
+  });
+
+  // -------------------------------------------------------------------------
+  // G7 T11: `titleAndAttributeWidth` (ClusterHeader.java:91) -- the WIDTH
+  // companion to the height formula above, jar-verified against
+  // pesita-10-dene726's `AA` (`docs/graphviz-issues/08-cluster-scoped-rank-
+  // subgraph-bbox.md`'s cited oracle DOT: `cluster15ee` `WIDTH="116"
+  // HEIGHT="28"`, matching `titleAndAttributeWidth(18.72, 0, 116.46) ->
+  // truncate(116)` and `computeTitleTableHeight(1, 0, 1, 14) = 28` exactly,
+  // via the real `WidthTableMeasurer`; this suite uses the deterministic
+  // `FormulaMeasurer` instead, so the exact numbers differ from the oracle's
+  // real-font pixel values, but the SHAPE of the fix -- attribute text can
+  // widen the header reservation past the title's own width -- is identical
+  // and is what these cases assert).
+  // -------------------------------------------------------------------------
+
+  it('title wider than its one attribute line: titleTableWidth stays the title width (attribute term does not shrink it)', () => {
+    const child = makeState('Child');
+    const a = makeState('LongCompositeTitle', { children: [child], description: ['hi'] });
+    const ext = makeState('External');
+    const ast: StateDiagramAST = {
+      states: [a, ext],
+      transitions: [{ from: 'Child', to: 'External' }],
+    };
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutState(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'LongCompositeTitle');
+    // Title-only width (no description) for the SAME string is identical --
+    // the short "hi" attribute line never dominates the max().
+    expect(cluster?.titleTableWidth).toBeCloseTo(124.833, 2);
+    expect(cluster?.labelWidth).toBeCloseTo(124.833, 2);
+  });
+
+  it('attribute line wider than its title (pesita-10-dene726 AA shape): titleTableWidth/labelWidth widen to the attribute width', () => {
+    const child = makeState('Child');
+    const a = makeState('AA', { children: [child], description: ['entry / set_timeout()'] });
+    const ext = makeState('External');
+    const ast: StateDiagramAST = {
+      states: [a, ext],
+      transitions: [{ from: 'Child', to: 'External' }],
+    };
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutState(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'AA');
+    // "AA" alone measures 18.667 under FormulaMeasurer (cf. jar-real 18.72
+    // under WidthTableMeasurer) -- the attribute line pulls the reservation
+    // up to 124.483, nowhere near the title-only value. Pre-T11, this field
+    // would have stayed at the title-only 18.667 -- the exact defect T11
+    // fixes (pesita's `AA` renders a 55px-narrower cluster than the jar
+    // oracle without this term).
+    expect(cluster?.titleTableWidth).toBeCloseTo(124.483, 2);
+    expect(cluster?.labelWidth).toBeCloseTo(124.483, 2);
+    expect(cluster?.titleTableHeight).toBe(28);
+    expect(cluster?.labelHeight).toBe(28);
+  });
+
+  it('attribute-wider composite ALSO carrying a stereotype: value is unchanged from the no-stereotype case (stereo term is a jar-verified no-op)', () => {
+    const child = makeState('Child');
+    const a = makeState('AA', {
+      children: [child],
+      description: ['entry / set_timeout()'],
+      stereotype: 'O-O',
+    });
+    const ext = makeState('External');
+    const ast: StateDiagramAST = {
+      states: [a, ext],
+      transitions: [{ from: 'Child', to: 'External' }],
+    };
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutState(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'AA');
+    // Identical to the stereotype-free case above -- proves the stereotype
+    // contributes neither width nor height (pesita's `AA` is literally
+    // `state AA <<O-O>>`, this is the real-fixture shape, not a synthetic
+    // worst case).
+    expect(cluster?.titleTableWidth).toBeCloseTo(124.483, 2);
+    expect(cluster?.titleTableHeight).toBe(28);
+  });
+
+  it('no-attribute, no-stereotype composite: titleTableWidth/Height are byte-identical to the pre-T11 title-only formula', () => {
+    const child = makeState('Child');
+    const a = makeState('A', { children: [child] });
+    const ext = makeState('External');
+    const ast: StateDiagramAST = {
+      states: [a, ext],
+      transitions: [{ from: 'Child', to: 'External' }],
+    };
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutState(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'A');
+    // Matches the pre-existing G6 T2 seam test above exactly (titleTableHeight
+    // 9, titleTableWidth 9.333) -- the T11 formula change is a strict no-op
+    // when there is no attribute/stereo text to widen or heighten the header.
+    expect(cluster?.titleTableHeight).toBe(9);
+    expect(cluster?.titleTableWidth).toBeCloseTo(9.333, 2);
   });
 });

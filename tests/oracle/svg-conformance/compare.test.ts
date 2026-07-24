@@ -1,7 +1,7 @@
 /**
  * Unit tests for the golden-SVG conformance comparator (T1).
  *
- * Ports the acceptance-criteria checks from graphviz-ts's in-source Vitest
+ * Ports the acceptance-criteria checks from @knowvah/dot-engine's in-source Vitest
  * block (`test/golden/compare.ts`) into this project's standalone
  * `*.test.ts` convention, plus additional coverage for the `d`/`points`/
  * `viewBox`/`transform` structural comparators and the exported tolerance

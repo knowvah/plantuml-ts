@@ -148,7 +148,7 @@ describe('parseDot', () => {
   // -------------------------------------------------------------------------
   // 12. HTML label stripping
   //
-  // Parsing is delegated to graphviz-ts's DOT grammar, so HTML labels use
+  // Parsing is delegated to @knowvah/dot-engine's DOT grammar, so HTML labels use
   // standard DOT syntax: <<...>> (angle-delimited) or a quoted "<...>". Tags
   // are stripped to plain text. The old hand-parser also accepted the bare,
   // delimiter-less form `label=<b>Bold</b>`, but the oracle (real PlantUML)

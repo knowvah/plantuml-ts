@@ -6,12 +6,12 @@
  * from `DotStringFactory.java:425-434`'s `cluster.setPosition(min,max)`
  * BEFORE `manageEntryExitPoint` overwrites it).
  *
- * `graphviz-ts`'s public API (`LayoutSnapshot`, `getLayout()`) does not
+ * `@knowvah/dot-engine`'s public API (`LayoutSnapshot`, `getLayout()`) does not
  * expose per-cluster geometry (nodes/edges/overall bounds only) — and this
- * project treats `graphviz-ts` as an out-of-scope, pinned dependency (no
+ * project treats `@knowvah/dot-engine` as an out-of-scope, pinned dependency (no
  * reaching into its internal `Graph`/`GraphInfo` model, which isn't part of
  * its public `exports` map either). What IS public: `render(graph, 'xdot',
- * opts)` (`graphviz-ts/render`), which re-serializes the laid-out graph as
+ * opts)` (`@knowvah/dot-engine/render`), which re-serializes the laid-out graph as
  * xdot text — including every subgraph's own `bb="minx,miny,maxx,maxy"`
  * (verified byte-identical to real `dot -Txdot` for this exact shape, see
  * decision-journal.md's J2 entry).
@@ -19,7 +19,7 @@
  * This module builds a small, ISOLATED shadow graph — mirroring `svek-dot-
  * emit.ts`'s own `portClusterBlock` structure exactly (ports ranked at the
  * cluster's own level with an ordering chain, a nested `${id}ee` subgraph
- * holding the port-chain's anchor) — runs it through graphviz-ts's public
+ * holding the port-chain's anchor) — runs it through @knowvah/dot-engine's public
  * `render(...,'xdot')`, and text-parses the cluster's own `bb=` plus each
  * port's `pos=` back out. It is deliberately NOT wired into the real
  * `layoutGraph()`/`addClusters` construction (the shared seam every diagram
@@ -51,13 +51,13 @@
  * back to the caller's own id only in this function's returned map.
  */
 
-import { createGraph, render, setTextMeasurer, LutTextMeasurer } from 'graphviz-ts';
+import { createGraph, render, setTextMeasurer, LutTextMeasurer } from '@knowvah/dot-engine';
 import type { RectangleArea, Point } from './frontier-calculator.js';
 
 // plantuml-ts is a pure SVG library -- no DOM, no canvas (see graph-layout.ts's
-// identical pin, this module's own independent graphviz-ts consumer). Text
+// identical pin, this module's own independent @knowvah/dot-engine consumer). Text
 // measurement is moot here (every shadow node is fixedsize with an empty
-// label), but graphviz-ts still probes for a canvas-backed measurer at
+// label), but @knowvah/dot-engine still probes for a canvas-backed measurer at
 // context-creation time unless one is pinned -- pin the canvas-free
 // lookup-table measurer so this module works under jsdom/browsers too.
 setTextMeasurer(new LutTextMeasurer());

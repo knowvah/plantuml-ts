@@ -13,15 +13,15 @@ exist: `skinparam.ts` (resolveSkinparam, parseStyleBlock), `latex.ts` (KaTeX),
 exact Java packages, reuse targets, architecture constraints, and common agent
 mistakes per remaining phase.
 
-## graphviz-ts issue tracking
+## @knowvah/dot-engine issue tracking
 
-Verified graphviz-ts library findings live in `docs/graphviz-issues/` — one
+Verified @knowvah/dot-engine library findings live in `docs/graphviz-issues/` — one
 `.md` per issue, self-contained: the finding, its census impact, a minimal
 repro (ideally the exact DOT text that reproduces it) plus any
 prompt/procedure needed to observe the divergence, and a pointer to the
 evidence trail. `docs/graphviz-issues/TRACKER.md` is the status list: a
 plain checklist with exactly one item per issue file, nothing else. Check a
-box only when the fix has landed in the pinned graphviz-ts `.tgz` and the
+box only when the fix has landed in the pinned @knowvah/dot-engine `.tgz` and the
 affected fixtures re-measure clean. Any iteration that verifies a NEW
 library finding must file it here (issue file + tracker line) before the
 iteration closes — a finding that exists only in a mission ledger is not
@@ -72,7 +72,7 @@ live call site is in `net.atmp`, and the real mechanism went undiagnosed
 
 For the dot layout algorithm itself, prefer the graphviz C source (see Reference
 Corpora below) over `sdot`/Smetana's mangled transpile — this port's dot pipeline
-is graphviz-ts. Every ported symbol carries a JSDoc `@see` to its Java origin,
+is @knowvah/dot-engine. Every ported symbol carries a JSDoc `@see` to its Java origin,
 e.g. `/** @see .../svek/SvekEdge.java#solveLine */`.
 
 ## The long tail is the deliverable (YAGNI does not apply)
@@ -100,6 +100,40 @@ tooling, test harness, CI.)
   regression.
 - Don't optimize for time or space. The Java's complexity reflects the problem,
   not accident — match it unless a behavior is verified preserved.
+
+### "Hard" and "out of scope" are triggers to VERIFY, not to skip
+
+We do the hard things because they are what give the audience a faithful
+reproduction of the Java. They get that functionality, or the port has failed
+them. So when you catch yourself about to recommend descoping, deferring, or
+naming a divergence because something "looks hard," "is out of scope," or
+"needs a separate feature" — stop. That reflex is wrong here by default. The
+first move is to size the real work, and the strong default is to do it.
+
+- **Verify a scope claim against the code before repeating it.** A subagent's
+  (or your own) "the port has no support for X" is a hypothesis to check, not a
+  finding to relay. Grep for the infrastructure, read the analogous path that
+  already works, and size the actual change yourself. Real example: "no
+  shadowing anywhere" actually meant "the state render path never wired in
+  shadow support that already exists in the svek Cluster path" — a bounded fix,
+  not a missing subsystem. Relaying the unchecked claim nearly dropped a
+  reproducible feature.
+- **A named divergence is not an escape hatch.** `DIVERGENCES.md` is only for a
+  DELIBERATE decision to render something differently from (or better than)
+  upstream — see "Preserve behavior; diverge only deliberately" below. A
+  feature upstream ships and you could reproduce, but found hard, is a gap to
+  close, never a divergence to declare. If your reason for the divergence is
+  effort or difficulty rather than a considered product choice, it is not a
+  divergence.
+- **"Bounded but in another file / render path / subsystem" is still in
+  scope.** Crossing a module boundary to reach the fix is the work, not a
+  reason to stop. When the change genuinely exceeds a task's declared write-set,
+  escalate for the scope decision — but lead with the plan to do it and its
+  measured size (files, blast radius, verification cost), not with the option
+  to skip.
+- **Only "genuinely large AND separable" earns a deferral** — and you prove
+  both with measurement, not adjectives. Then it becomes its own tracked
+  mission that WILL be done, not a permanent hole.
 
 ## Porting discipline: working with an accreted codebase
 

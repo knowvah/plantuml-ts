@@ -36,6 +36,13 @@ import { resolveEndpoint } from './state-composite-classify.js';
 
 type ExtractAutonomSpec = Extract<GeoSpec, { kind: 'autonom' }>;
 
+/** `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13,
+ *  normal)`) -- the transition/edge-label font this pass's own accumulator
+ *  needs for `buildLevelTransitionGeos`'s label-anchor conversion (G8 T2).
+ *  Duplicated locally (D1, avoid-import-cycle convention) -- same value as
+ *  `state-composite-pass.ts`'s own identical constant. */
+const ARROW_LABEL_FONT_SIZE = 13;
+
 /** Uniformly translate a pass's own raw layout result — mission G4 S4,
  *  mechanism 7's own position-offset half: reproduces `SvekResult
  *  #calculateDimension()`'s `clusterManager.moveDelta(...)` side effect
@@ -111,23 +118,22 @@ export function shiftDotLayoutResult(result: DotLayoutResult, dx: number, dy: nu
  *  `bajelo-54-dixe684` (3 levels, unchanged/non-regressing) — see
  *  plans/g4-state-svg/ledger.md S4.
  *
- *  `childImg` takes `Math.max(geometry.*, result.*)`, NOT `geometry.*`
- *  alone — NAMED, NOT FULLY CLOSED this iteration: a composite whose own
- *  dominant content is 1-2 short INTERNAL labeled transitions
- *  (`bunade-42-fudu910`'s `NotShooting`, `[*] --> Idle`/`Idle <-->
- *  Configuring`) needs edge-LABEL ink (its own measured text width, which
- *  `TransitionGeo.label` does not carry) folded in to reach jar's real
- *  size; a same-iteration attempt to measure it inline (`ctx.measurer`) was
- *  jar-verified DIRECTIONALLY correct on `bunade` but OVERSHOT on other
- *  single-labeled-edge fixtures (`beguxu-19-tize774`), a worse net result
- *  than not attempting it at all — reverted. `result.*` (the SAME raw
- *  canvas value used before mechanism 7 landed) stands in as a
- *  non-regressing FLOOR for every case the ink-extent computation still
- *  undercounts, while the ink-extent value wins wherever it's ALREADY
- *  bigger (every jar-verified case above). Queued for S5: a byte-exact fix
- *  needs the label's real measured width reconciled against
- *  `attachTransitionLabel`'s own placement formula (`state-transition-
- *  label.ts`), not a floor.
+ *  `childImg` is `geometry.*` alone (G8 T2 CLOSED this iteration's own
+ *  Queued-for-S5 item): the composite-width gap S4 named above --
+ *  `TransitionGeo.label` not carrying edge-label ink -- is now closed by
+ *  {@link computeSvekResultGeometry}'s own `labelInk` box fold (spec.md
+ *  §1a/§2, `layout-ink-extent.ts`), which folds each labeled transition's
+ *  REAL reserved box at its jar-faithful graphviz-returned anchor, not a
+ *  guessed inline measurement. The previous `Math.max(geometry.*,
+ *  result.*)` FLOOR (guarding against the still-undercounting ink-extent
+ *  computation) is PROVEN REDUNDANT now that the box fold lands: the full
+ *  149-measurement size-delta harness (`scripts/measure-state-size-
+ *  deltas.ts`) produces BYTE-IDENTICAL widened/improved/unchanged sets and
+ *  deltas with the floor present or removed (D6 -- evidence decides, not
+ *  preference) -- `geometry.*` is never smaller than `result.*` once the
+ *  box fold folds real label ink into it. Removed rather than kept-with-
+ *  comment per D6's own "remove it only if the full sweep shows zero
+ *  widenings without it" rule.
  *
  *  `s.transitions` can hold a SELF-referencing entry (`Radio_Configuring -->
  *  Vendor_Radio_Enabled`, written literally inside `state Radio_Configuring {
@@ -151,7 +157,7 @@ export function shiftDotLayoutResult(result: DotLayoutResult, dx: number, dy: nu
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java#buildImage (attempts
  *      EVERY diagram link; a missing SvekNode drops it at THIS pass only) */
 export function buildPlainAutonomSpec(s: State, ctx: DiagramCtx): ExtractAutonomSpec {
-  const acc = newAccumulator();
+  const acc = newAccumulator({ family: ctx.theme.fontFamily, size: ARROW_LABEL_FONT_SIZE }, ctx.measurer);
   // G5 C3, mechanism 16 shape half: `insideAutonomPass` -- see that field's
   // own doc comment (state-composite-pass.ts) for why a nested cluster
   // inside THIS pass must stay title-table-ineligible this iteration
@@ -179,8 +185,8 @@ export function buildPlainAutonomSpec(s: State, ctx: DiagramCtx): ExtractAutonom
   const inkTransitions = buildLevelTransitionGeos(acc, result);
   const geometry = computeSvekResultGeometry(inkStates, inkTransitions);
   const childImg = {
-    width: Math.max(geometry.width, result.width),
-    height: Math.max(geometry.height, result.height),
+    width: geometry.width,
+    height: geometry.height,
   };
 
   const wrapper = measureAutonomWrapper(s, childImg, ctx.theme, ctx.measurer);

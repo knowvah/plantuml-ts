@@ -1,7 +1,7 @@
 /**
  * SVG comparator for the golden-SVG conformance harness.
  *
- * Ported near-verbatim from graphviz-ts's `test/golden/compare.ts` (see
+ * Ported near-verbatim from @knowvah/dot-engine's `test/golden/compare.ts` (see
  * mission decision journal for provenance), including the positional
  * tree-walk comparator (`compareNodes`) and the CLI entry point.
  *
@@ -11,7 +11,7 @@
  * sfdp, ...) to tolerance classes, which has no equivalent in the SVG-
  * conformance domain (there is exactly one emitter here, not a choice of
  * layout engines), so it is dropped rather than ported unused. The in-source
- * Vitest tests from the graphviz-ts original are ported to the standalone
+ * Vitest tests from the @knowvah/dot-engine original are ported to the standalone
  * `compare.test.ts` file instead, per this project's "tests never colocate
  * with source" convention.
  */
@@ -385,7 +385,7 @@ export function compareSvg(
 //
 // Not exercised by the unit-test suite: reaching it requires running this
 // module as a subprocess (`node .../compare.js <a> <b> <class>`), which the
-// v8 coverage provider does not instrument. Same profile as graphviz-ts's
+// v8 coverage provider does not instrument. Same profile as @knowvah/dot-engine's
 // source CLI block. Excluded from coverage rather than left as a silent gap.
 
 /* v8 ignore start */

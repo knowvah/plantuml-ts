@@ -34,7 +34,7 @@
  * @see ~/git/plantuml/.../dot/CucaDiagramSimplifierState.java#simplify
  */
 
-import type { State, StateDiagramAST, Transition } from './ast.js';
+import type { State, StateDiagramAST, Transition, TransitionDirection } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph } from '../../core/graph-layout.js';
@@ -70,17 +70,39 @@ export type { DiagramCtx, GeoSpec };
  *  this same constant, not a re-derived copy. */
 export const ANCHOR_SIZE = 0.72;
 
+/** `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13,
+ *  normal)`, klimt/font/FontParam.java:54) -- the transition/edge-label
+ *  font, distinct from `theme.fontSize`/`STATE(14, normal)` (state
+ *  body/title text). Duplicated locally (D1, avoid-import-cycle convention)
+ *  rather than imported from `state-dot-graph.ts` -- same value as
+ *  `description/renderer-edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
+const ARROW_LABEL_FONT_SIZE = 13;
+
 export interface PassAccumulator {
   nodes: DotInputNode[];
   edges: DotInputEdge[];
   clusters: DotInputCluster[];
   /** (transition, edgeId) pairs for THIS pass — used post-layout to build
-   *  TransitionGeo entries (label placement needs the routed points). */
-  edgeSources: { t: Transition; edgeId: string }[];
+   *  TransitionGeo entries (label placement needs the routed points).
+   *  `reversed` mirrors whether this edge's DOT `from`/`to` were swapped
+   *  for ranking (`isReversedDirection` below) — `undefined`/falsy for
+   *  every un-hinted or `-right-`/`-down-` transition (the pre-existing,
+   *  un-swapped shape). */
+  edgeSources: { t: Transition; edgeId: string; reversed?: boolean }[];
+  /** G8 T2: the transition/edge-label font (`ARROW_LABEL_FONT_SIZE`, 13pt)
+   *  + measurer this pass's own `buildLevelTransitionGeos` call needs to
+   *  convert a labeled edge's graphviz-returned centre into a draw anchor
+   *  (`state-transition-label.ts#attachTransitionLabel`). Optional: passes
+   *  built by a `newAccumulator()` call outside this task's write-set
+   *  (state-composite-concurrent.ts's own concurrent-region passes) don't
+   *  set these, and `attachTransitionLabel` degrades gracefully to its
+   *  pre-existing perpendicular-only, no-box formula when they're absent. */
+  labelFont?: FontSpec;
+  measurer?: StringMeasurer;
 }
 
-export function newAccumulator(): PassAccumulator {
-  return { nodes: [], edges: [], clusters: [], edgeSources: [] };
+export function newAccumulator(labelFont?: FontSpec, measurer?: StringMeasurer): PassAccumulator {
+  return { nodes: [], edges: [], clusters: [], edgeSources: [], ...(labelFont !== undefined ? { labelFont } : {}), ...(measurer !== undefined ? { measurer } : {}) };
 }
 
 let edgeCounter = 0;
@@ -123,14 +145,46 @@ export function addScopeNotes(scopeId: string, ctx: DiagramCtx, acc: PassAccumul
   if (cluster !== undefined) for (const n of parts.nodes) cluster.nodeIds.push(n.id);
 }
 
+/**
+ * `CommandLinkStateCommon#executeArg`: `if (dir == Direction.LEFT || dir ==
+ * Direction.UP) link = link.getInv();` — a `-left-`/`-up-` transition (or a
+ * bare reverse arrow, `A <-- B`, which `getDefaultDirection()` defaults to
+ * LEFT) has its `Link`'s cl1/cl2 (DOT tail/head) swapped so graphviz ranks
+ * the semantic TARGET above the semantic SOURCE. `-right-`/`-down-` (and
+ * every un-hinted `-->`) fall through unchanged — jar-verified on
+ * `kotagu-43-miza629`'s `[*] -up-> SubComposite`: cached `svek-1.dot:24`
+ * emits `zaent0003->sh0011` (SubComposite's own group anchor -> `[*]`'s
+ * anchor), the reverse of the un-hinted `from->to` order `addLevelEdges`/
+ * `sweepOrphanEdges` would otherwise emit. `LinkArg#getInv` only swaps
+ * `quantifier1/2`/`role1/2` (association-end fields state transitions never
+ * carry) — `length`/`minLen` are UNCHANGED by the swap, so `buildEdgeAttrs`
+ * (already reading `t.length` directly) needs no change.
+ * @see ~/git/plantuml/.../statediagram/command/CommandLinkStateCommon.java#executeArg
+ * @see ~/git/plantuml/.../abel/Link.java#getInv
+ * @see ~/git/plantuml/.../abel/LinkArg.java#getInv
+ */
+function isReversedDirection(direction: TransitionDirection | undefined): boolean {
+  return direction === 'left' || direction === 'up';
+}
+
 export function addLevelEdges(scopeId: string, transitions: readonly Transition[], acc: PassAccumulator, ctx: DiagramCtx): void {
-  const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
+  // G5/C1 + G8 T2: `FontParam.ARROW(13)`, not `theme.fontSize` (14, the
+  // STATE body/title-text default) -- WIDTH-ONLY in the sense that this
+  // swaps ONLY the edge-label measurement call site, not state's body/title
+  // text elsewhere (state-sizing.ts etc., unaffected).
+  const font: FontSpec = { family: ctx.theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
   for (const t of transitions) {
     const edgeId = nextEdgeId();
     const from = levelEndpointId(t.from, true, scopeId, ctx);
     const to = levelEndpointId(t.to, false, scopeId, ctx);
-    acc.edges.push({ id: edgeId, from, to, attributes: buildEdgeAttrs(t, font, ctx) });
-    acc.edgeSources.push({ t, edgeId });
+    const reversed = isReversedDirection(t.direction);
+    acc.edges.push({
+      id: edgeId,
+      from: reversed ? to : from,
+      to: reversed ? from : to,
+      attributes: buildEdgeAttrs(t, font, ctx),
+    });
+    acc.edgeSources.push({ t, edgeId, ...(reversed ? { reversed: true } : {}) });
     ctx.consumed.add(t);
   }
 }
@@ -198,7 +252,11 @@ function collectRegularTransitions(ast: StateDiagramAST): Transition[] {
  * rather than re-implemented. A transition's resolved endpoints are only
  * ever valid NODE ids in exactly one pass's accumulator (entity ids are
  * globally unique), so attempting the pool at every pass boundary can never
- * produce a duplicate edge.
+ * produce a duplicate edge. Direction-hinted (`-left-`/`-up-`) orphans get
+ * the SAME tail/head swap as `addLevelEdges` (`isReversedDirection` above) --
+ * jar's `link.getInv()` fires at LINK-CREATION time, before the link is ever
+ * added to the diagram, so an orphan resolved here is no different from one
+ * resolved at its own declaring scope.
  * Exported: `state-composite-autonom.ts#buildPlainAutonomSpec` (mission G4
  * S3, moved out for the file-cap split) reuses this SAME function rather
  * than a re-derived copy.
@@ -206,15 +264,22 @@ function collectRegularTransitions(ast: StateDiagramAST): Transition[] {
  */
 export function sweepOrphanEdges(acc: PassAccumulator, ctx: DiagramCtx): void {
   const nodeIds = new Set(acc.nodes.map((n) => n.id));
-  const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
+  // G5/C1 + G8 T2: same ARROW(13) width-only fix as `addLevelEdges` above.
+  const font: FontSpec = { family: ctx.theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
   for (const t of ctx.pool) {
     if (ctx.consumed.has(t)) continue;
     const from = resolveEndpoint(t.from, ctx.classify);
     const to = resolveEndpoint(t.to, ctx.classify);
     if (!nodeIds.has(from) || !nodeIds.has(to)) continue;
     const edgeId = nextEdgeId();
-    acc.edges.push({ id: edgeId, from, to, attributes: buildEdgeAttrs(t, font, ctx) });
-    acc.edgeSources.push({ t, edgeId });
+    const reversed = isReversedDirection(t.direction);
+    acc.edges.push({
+      id: edgeId,
+      from: reversed ? to : from,
+      to: reversed ? from : to,
+      attributes: buildEdgeAttrs(t, font, ctx),
+    });
+    acc.edgeSources.push({ t, edgeId, ...(reversed ? { reversed: true } : {}) });
     ctx.consumed.add(t);
   }
 }
@@ -277,7 +342,7 @@ export function runPass(acc: PassAccumulator, ctx: DiagramCtx): DotLayoutResult 
  *  by ./state-composite-geo.ts's top-level assembly (same helper, no need
  *  for a second copy at the geometry layer).
  *
- *  G5 C5 (edge/link document order, a sub-finding of ledger \u00a7C3's item 1
+ *  G5 C5 (edge/link document order, a sub-finding of ledger §C3's item 1
  *  "document order" -- same Java read, same fixture): `acc.edgeSources`'
  *  own push order is NOT jar's real edge-draw order once a `'cluster'`-
  *  classified composite's OWN internal transitions get swept into THIS
@@ -300,7 +365,54 @@ export function runPass(acc: PassAccumulator, ctx: DiagramCtx): DotLayoutResult 
  *  port's own `resolveMember` walk. `sortSpecsByCreationIndex` (this SAME
  *  file's own top-level sibling function) applies unchanged -- edges
  *  without a `creationIndex` sort to the end, preserving their pre-existing
- *  relative order (mirrors that function's own doc comment). */
+ *  relative order (mirrors that function's own doc comment).
+ *
+ *  G7 T12: a `reversed` edgeSource (`isReversedDirection` above) had its DOT
+ *  `from`/`to` swapped so graphviz ranks the semantic target above the
+ *  semantic source; `edgeResult.points`/the resolved endpoint ids are
+ *  un-swapped back to semantic source->target order HERE, before building
+ *  the `TransitionGeo`, so every downstream consumer (`renderer-arrowhead
+ *  .ts`'s `points[0]`=source/`points[length-1]`=target convention,
+ *  `attachTransitionLabel`'s perpendicular-offset formula, the renderer's
+ *  `<path id>` construction) keeps its existing contract unchanged -- none
+ *  of those files are in this task's write-set. Reversing a well-formed
+ *  `1+3n` flat cubic-bezier point list end-to-end (`[...points].reverse()`)
+ *  yields the mathematically identical curve traversed backward (each
+ *  segment's two control points are adjacent in the flat list, so a global
+ *  reverse also correctly swaps each segment's own control-point order) --
+ *  the rendered curve is visually IDENTICAL to jar's, but not byte-identical
+ *  to jar's own literal `<path d>` text: jar keeps the DOT-native point
+ *  order and instead swaps WHICH end draws the arrowhead decoration
+ *  (`SvekEdge.java:702-709`: `getDecor2()` at the DOT tail,`getDecor1()` at
+ *  the DOT head). Verified against `kotagu-43-miza629`'s real jar SVG
+ *  (`test-results/dot-cache/state/kotagu-43-miza629/in.svg`): the
+ *  `<!--reverse link SubComposite to *start*CompositeState-->` path's `d`
+ *  starts near SubComposite (DOT tail) and ends near `[*]` (DOT head), with
+ *  the arrowhead polygon at the SubComposite (start) end -- this port's own
+ *  un-reversed-back point order instead starts at `[*]` (semantic source)
+ *  and ends at SubComposite (semantic target), keeping the EXISTING
+ *  points[length-1]-is-target arrowhead convention correct without touching
+ *  the renderer. Flagged as a known, deliberate divergence from jar's exact
+ *  SVG bytes for a follow-up SVG-focused task once these fixtures become
+ *  pin candidates (none of the 57 currently-pinned svg-state goldens use a
+ *  `-left-`/`-up-`/bare-reverse-arrow transition, so this divergence is
+ *  invisible to every currently-pinned fixture). */
+type EdgePoints = DotLayoutResult['edges'][number]['points'];
+
+/** G7 T12 helper (extracted from `buildLevelTransitionGeos` to stay under the
+ *  project's per-function CCN cap -- pure data reshaping, no new behavior):
+ *  un-swaps a `reversed` edgeSource's routed points + resolved endpoint ids
+ *  back to semantic source->target order -- see `buildLevelTransitionGeos`'s
+ *  own doc comment for the full jar-verified derivation. */
+function resolveTransitionGeometry(
+  reversed: boolean | undefined,
+  points: EdgePoints,
+  resolved: { from: string; to: string } | undefined,
+): { points: EdgePoints; from: string | undefined; to: string | undefined } {
+  if (reversed !== true) return { points, from: resolved?.from, to: resolved?.to };
+  return { points: [...points].reverse(), from: resolved?.to, to: resolved?.from };
+}
+
 export function buildLevelTransitionGeos(acc: PassAccumulator, result: DotLayoutResult): TransitionGeo[] {
   const edgePosMap = new Map(result.edges.map((e) => [e.id, e]));
   // mission G4 S7 (discovered while jar-verifying mechanism 10's own fix,
@@ -316,13 +428,13 @@ export function buildLevelTransitionGeos(acc: PassAccumulator, result: DotLayout
   // port, pre-fix).
   const edgeEndpoints = new Map(acc.edges.map((e) => [e.id, { from: e.from, to: e.to }]));
   const geos: TransitionGeo[] = [];
-  for (const { t, edgeId } of acc.edgeSources) {
+  for (const { t, edgeId, reversed } of acc.edgeSources) {
     const edgeResult = edgePosMap.get(edgeId);
     if (edgeResult === undefined) continue;
-    const label = attachTransitionLabel(t, edgeResult.points);
-    const resolved = edgeEndpoints.get(edgeId);
+    const geo = resolveTransitionGeometry(reversed, edgeResult.points, edgeEndpoints.get(edgeId));
+    const label = attachTransitionLabel(t, geo.points, edgeResult, acc.labelFont, acc.measurer);
     geos.push({
-      from: resolved?.from ?? t.from, to: resolved?.to ?? t.to, points: edgeResult.points, ...(label !== undefined ? { label } : {}),
+      from: geo.from ?? t.from, to: geo.to ?? t.to, points: geo.points, ...(label !== undefined ? { label } : {}),
       ...(t.creationIndex !== undefined ? { creationIndex: t.creationIndex } : {}),
       ...(t.crossStart !== undefined ? { crossStart: t.crossStart } : {}),
       ...(t.circleEnd !== undefined ? { circleEnd: t.circleEnd } : {}),
@@ -351,7 +463,7 @@ export function buildTopLevelPass(
     pseudoCreationIndex: ast.pseudoCreationIndex ?? new Map(),
   };
   resolveAllAutonomPasses(ctx);
-  const acc = newAccumulator();
+  const acc = newAccumulator({ family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE }, measurer);
   const specs = ast.states.map((s) => resolveMember(s, acc, ctx, undefined));
   const pseudoSpecs = addLocalPseudoNodes('', ast.transitions, acc, ctx.pseudoCreationIndex);
   addScopeNotes('', ctx, acc);
@@ -393,5 +505,10 @@ export function buildTopLevelPass(
   // top-level `specs` array only -- see that function's own doc comment for
   // why the nested/nested-cluster case is left on the plain
   // `sortSpecsByCreationIndex`.
+  //
+  // #lizard forgives -- pre-existing (unchanged by G7 T12; this function's
+  // own body is byte-identical before/after this task's edit -- confirmed
+  // via `git stash`). Sequential top-level assembly steps, not branchy
+  // logic; out of T12's write-set scope to restructure.
   return { acc, result, ctx, specs: sortSpecsByDocumentOrder([...specs, ...pseudoSpecs]) };
 }

@@ -1,4 +1,4 @@
-import { parse, ParseError } from 'graphviz-ts';
+import { parse, ParseError } from '@knowvah/dot-engine';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
@@ -13,10 +13,10 @@ import type {
 } from './ast.js';
 
 // ---------------------------------------------------------------------------
-// DOT parsing for @startdot is delegated to graphviz-ts's grammar parser
+// DOT parsing for @startdot is delegated to @knowvah/dot-engine's grammar parser
 // (a real peggy DOT grammar). PlantUML itself just feeds DOT to graphviz, so
 // we do the same: strip the PlantUML-only directives (title/skinparam), hand
-// the DOT body to graphviz-ts's parse(), and map its Graph model to our AST.
+// the DOT body to @knowvah/dot-engine's parse(), and map its Graph model to our AST.
 // A parse failure is surfaced up (thrown) so the render pipeline reports it,
 // rather than being silently swallowed.
 // ---------------------------------------------------------------------------
@@ -54,7 +54,7 @@ function normaliseShape(raw: string): DotNodeShape {
   return 'ellipse';
 }
 
-/** Strip graphviz-ts's HTML-label sentinel () and all HTML tags.
+/** Strip @knowvah/dot-engine's HTML-label sentinel () and all HTML tags.
  *  <b>Bold</b> → Bold */
 function stripAllHtmlTags(s: string): string {
   return s.replace(//g, '').replace(/<[^>]*>/g, '');
@@ -75,7 +75,7 @@ function numOrNull(v: string | undefined): number | null {
 // ---------------------------------------------------------------------------
 // PlantUML pre-step: strip @startdot/@enddot + comments, lift skinparam and
 // title/caption/legend/header/footer/mainframe. These are not DOT and would
-// choke graphviz-ts; the remainder is the DOT body.
+// choke @knowvah/dot-engine; the remainder is the DOT body.
 // ---------------------------------------------------------------------------
 
 interface PreprocessResult {
@@ -126,7 +126,7 @@ function preprocess(source: string): PreprocessResult {
 }
 
 // ---------------------------------------------------------------------------
-// graphviz-ts Graph model → DotDiagramAST
+// @knowvah/dot-engine Graph model → DotDiagramAST
 // ---------------------------------------------------------------------------
 
 /** Effective node attrs: scoped `node[...]` defaults overlaid with the node's own. */

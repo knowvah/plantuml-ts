@@ -143,7 +143,7 @@ describe('layoutClass / renderClass -- single page unaffected by T7', () => {
     // G2 N29: re-captured after `class-dot-graph.ts#buildDotGraph` started
     // forwarding `manualArrowheads: true` to the layout seam -- class
     // ALREADY drew every arrowhead as an inline extremity polygon (N1), but
-    // never told `graph-layout.ts#addEdges` so, so graphviz-ts reserved its
+    // never told `graph-layout.ts#addEdges` so, so @knowvah/dot-engine reserved its
     // *default* ~10-11px arrow-length spline-clip gap on every edge (jar's
     // own svek DOT sets `arrowtail=none,arrowhead=none` unconditionally on
     // every edge line -- confirmed corpus-wide). N28's comment above

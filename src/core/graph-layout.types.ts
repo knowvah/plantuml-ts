@@ -75,6 +75,23 @@ export interface DotInputEdge {
     label?: string;
     labelWidth?: number;
     labelHeight?: number;
+    /** G8 T2 (`plans/g8-label-placement/`): the REAL FIXEDSIZE HTML-table
+     *  label-box reservation `graph-layout-build.ts#addEdges` feeds
+     *  @knowvah/dot-engine for THIS edge (mirrors `DotInputCluster.titleTableWidth`/
+     *  `.titleTableHeight`'s identical additive pattern -- see that field's
+     *  own doc comment for the full `setHtmlAttr` mechanism). Deliberately
+     *  DISTINCT from `labelWidth`/`labelHeight` above (the pre-existing,
+     *  UN-margined/UN-floored Svek-DOT TEXT emitter convention -- kept
+     *  unchanged for every caller, including the one that also sets this
+     *  field): the state composite/flat pipelines set BOTH, one for the
+     *  oracle/emitter path, one for the real FIXEDSIZE layout-input
+     *  reservation. Additive: absent (every pre-existing caller -- class,
+     *  component, usecase edges, and a state transition with an attached
+     *  `note on link`, whose merged label+note margin story is
+     *  unverified this iteration) falls back to the pre-existing
+     *  plain-text `label` DOT attr, unchanged. */
+    labelBoxWidth?: number;
+    labelBoxHeight?: number;
     /** Tail/head end labels (association cardinality/roles). Sizing-only
      *  (`tailLabelWidth`/`tailLabelHeight`/`headLabelWidth`/`headLabelHeight`)
      *  is emitter-only (Svek-DOT text, `svek-dot-emit.ts`); the DOT-gate
@@ -89,7 +106,7 @@ export interface DotInputEdge {
      * (FROM-side) and head (TO-side) edge-end labels
      * (`SvekEdge.java:447-468`'s `taillabel=<TABLE>`/`headlabel=<TABLE>`
      * DOT attrs). Unlike the `*Width`/`*Height` pair above, these ARE fed
-     * into the real graphviz-ts layout call (`graph-layout.ts#addEdges`)
+     * into the real @knowvah/dot-engine layout call (`graph-layout.ts#addEdges`)
      * so its own faithfully-ported external-label placement algorithm
      * (`label/xlabels.ts`, `lib/label/xlabels.c:placeLabels`/`xladjust`)
      * computes the position graphviz would — upstream never sets
@@ -110,7 +127,7 @@ export interface DotInputEdge {
      * G2/N14: per-edge override of `DotInputGraph.manualArrowheads` — this
      * edge draws NO arrowhead at all (a class-diagram note connector,
      * merged into the note's own Opale outline, `SvekEdge#drawU`'s `if
-     * (opale) return;`), so graphviz-ts must NOT reserve its default
+     * (opale) return;`), so @knowvah/dot-engine must NOT reserve its default
      * ~10-11px arrow-length clip gap when trimming the routed spline to the
      * target node's boundary (`graph-layout.ts#addEdges`'s own doc comment
      * — the SAME mechanism `manualArrowheads` already handles graph-wide,
@@ -140,7 +157,10 @@ export interface DotInputCluster {
    *  regex-based edge parser only extracts the LAST hop of a multi-hop
    *  chain statement, so matching this syntax exactly keeps both sides of
    *  the comparison symmetric) then links the last node to `portAnchorId`.
-   *  Emitter-only. */
+   *  Emitter- AND real-layout-consuming (`graph-layout-build.ts#addClusters`,
+   *  G8/T1b's generic rank-constraint wiring for genuine PORTIN/PORTOUT
+   *  ports, and G7 T14b's own dedicated `portRanksLabelOnEe` branch for the
+   *  state border-point family). */
   portRanks?: { rank: 'source' | 'sink'; nodeIds: string[] }[];
   /** DOT id of this cluster's shared group-anchor node (`groupAnchorNodeId`
    *  / Svek's `Cluster.getSpecialPointId`) — required whenever `portRanks`
@@ -164,9 +184,9 @@ export interface DotInputCluster {
    *  class/component/description PORTIN/PORTOUT precedent) is unaffected. */
   portRanksLabelOnEe?: true;
   /** G5 C3, mechanism 16 shape half (docs/graphviz-issues/07's RESOLVED
-   *  note, graphviz-ts 0.1.26072117's `setHtmlAttr`): the real HTML
+   *  note, @knowvah/dot-engine's `setHtmlAttr`): the real HTML
    *  `<TABLE FIXEDSIZE="TRUE" WIDTH=".." HEIGHT="..">` title-label
-   *  reservation `graph-layout-build.ts#addClusters` feeds graphviz-ts's
+   *  reservation `graph-layout-build.ts#addClusters` feeds @knowvah/dot-engine's
    *  builder for THIS cluster's own subgraph, mirroring jar's real
    *  `ClusterDotString`/`ClusterHeader` mechanism (`SvekEdge.appendTable`,
    *  `label=<TABLE FIXEDSIZE="TRUE" WIDTH="cluster.getTitleAndAttribute
@@ -181,7 +201,7 @@ export interface DotInputCluster {
    *  sole role is a graphviz layout-space RESERVATION signal (the visible
    *  title text is drawn separately, by this port's own renderer,
    *  `renderer-composite-box.ts`), so its value is jar-CALIBRATED, not
-   *  jar-Java-internal-derived: G5 C2's marker sweep found graphviz-ts
+   *  jar-Java-internal-derived: G5 C2's marker sweep found @knowvah/dot-engine
    *  reserves `gap = HEIGHT + 16` above the first content rank (15-point
    *  linear sweep through this exact `setHtmlAttr` seam); G5 C3 confirmed
    *  jar's real single-line-title header gap is a CONTENT-WIDTH-
@@ -228,13 +248,28 @@ export interface DotInputCluster {
    *  cluster, outside "p1" (24px) — mirroring jar's exact nesting order.
    *  Additive: absent (every pre-C7 caller) falls back to the plain,
    *  unwrapped `sg.addNode(id)` loop (graphviz's bare 8pt default),
-   *  unchanged. Set ONLY for `titleTableEligible` clusters (`state-
-   *  composite-cluster.ts#resolveClusterComposite`) — jar's own
-   *  `Cluster#manageEntryExitPoint`/`FrontierCalculator` path (the
-   *  entrypoint/exitpoint family, excluded from `titleTableEligible`) reads
-   *  member positions directly rather than graphviz's own reported cluster
-   *  bbox, so this margin mechanism does not apply there (unverified,
-   *  deferred). */
+   *  unchanged. Set ONLY for `titleTableEligible` clusters that are NOT
+   *  ALSO border-point (`state-composite-cluster.ts
+   *  #resolveClusterComposite`'s own `!hasBorderPointChildren` guard) —
+   *  jar's own `Cluster#manageEntryExitPoint`/`FrontierCalculator` path (the
+   *  entrypoint/exitpoint family) reads member positions directly rather
+   *  than graphviz's own reported raw cluster bbox, and `protection0()`/
+   *  `protection1()` are unconditionally FALSE for that family regardless
+   *  (`ClusterDotString.java:107-112`) — see `borderPointAncestorWrap`
+   *  below for its own, narrower, replacement boolean (G7 T14b).
+   *
+   *  G7 T7 (`plans/g7-borderpoint-rank/decision-journal.md`, T5 root-cause
+   *  row): the SAME value ALSO gates jar's OUTER "a"/"p0" ancestor pair
+   *  (`ClusterDotString.java:91-116`), which `graph-layout-build.ts
+   *  #addClusters` wraps around the whole cluster (a/p0/main/i/p1, outer to
+   *  inner) — `protection0()` is unconditionally true whenever this field is
+   *  set (same non-swimlane reasoning as `protection1()` above), and jar's
+   *  `thereALinkFromOrToGroup1` is the exact boolean this field's own `2`
+   *  value already encodes, so no separate field is needed. Verified against
+   *  the real jar's cached svek DOT (`kotagu-43-miza629`'s `SubComposite`:
+   *  `cluster12a{cluster12p0{cluster12{...cluster12i{cluster12p1{...}}}}}}`)
+   *  and corpus-wide (307/307 cached DOTs pair "p0" with "p1"; 93/93 pair "a"
+   *  with "i"; zero counterexamples). */
   innerMarginLevels?: 1 | 2;
   /** The one member of `nodeIds` that stays a DIRECT child of the outer
    *  cluster subgraph, unwrapped by `innerMarginLevels` — jar's zaent
@@ -245,6 +280,20 @@ export interface DotInputCluster {
    *  `cluster6`, sibling to — not descendant of — `cluster6i`). Ignored
    *  when `innerMarginLevels` is absent. */
   unwrappedNodeId?: string;
+  /** G7 T14b (`plans/g6-cluster-geometry/batch-4/withlabel-derivation.md`
+   *  §5 item 4, T19's confirmed edit list): `thereALinkFromOrToGroup1`
+   *  (`ClusterDotString.java:91-96`) for a border-point (`portRanksLabelOnEe`)
+   *  cluster SPECIFICALLY — `protection0()`/`protection1()` are forced FALSE
+   *  whenever `entityPositionsExceptNormal.size() > 0` (`ClusterDotString
+   *  .java:107-112`), so the plain family's `innerMarginLevels === 2`
+   *  encoding of this SAME upstream boolean cannot double as this family's
+   *  own trigger — a separate field is required. Gates BOTH `graph-layout-
+   *  build.ts#addClusters`'s outer `${outerName}a` wrap (NEVER a `p0`
+   *  sibling — protection0 is always off here) and its inner `${outerName}i`
+   *  wrap (nested inside `${outerName}ee`, wrapping that subgraph's own
+   *  non-port content). Meaningful ONLY when `portRanksLabelOnEe` is also
+   *  `true`; ignored otherwise. */
+  borderPointAncestorWrap?: true;
 }
 
 export interface DotInputGraph {
@@ -295,7 +344,7 @@ export interface DotInputGraph {
    *  text emitter already reflects this faithfully for EVERY diagram type
    *  (`svek-dot-emit.ts`: every edge line carries
    *  `arrowtail=none,arrowhead=none`, confirmed universal across the whole
-   *  cached-fixture corpus) — but `layoutGraph()`'s graphviz-ts seam only
+   *  cached-fixture corpus) — but `layoutGraph()`'s @knowvah/dot-engine seam only
    *  honors it when this flag is set, because callers that draw arrowheads
    *  via `marker-end` (class/state/dot/json — see each renderer's own
    *  `markerEnd`/`targetMarker` call sites) rely on graphviz's *default*
@@ -319,7 +368,7 @@ export interface DotLayoutResult {
     labelHeight?: number;
     /** G2/N25: computed position for `attributes.tailLabel`/`.headLabel`
      *  (see that field's own doc comment) — the CENTER point of the label
-     *  box graphviz-ts's own `xladjust` placed, in the same origin-shifted
+     *  box @knowvah/dot-engine's own `xladjust` placed, in the same origin-shifted
      *  frame as `points`/`labelX`/`labelY`. Absent when the input edge did
      *  not carry `tailLabel`/`headLabel`. */
     tailLabelX?: number;
@@ -332,11 +381,11 @@ export interface DotLayoutResult {
   width: number;
   height: number;
   /** G5 C2: real per-cluster bbox from graphviz's own subgraph-cluster
-   *  layout (graphviz-ts 0.1.26072115's `getLayout().clusters`, see
+   *  layout (@knowvah/dot-engine's `getLayout().clusters`, see
    *  docs/graphviz-issues/06-cluster-bbox-not-in-getlayout.md's RESOLVED
-   *  note) — keyed by `DotInputCluster.id` (re-mapped from graphviz-ts's own
+   *  note) — keyed by `DotInputCluster.id` (re-mapped from @knowvah/dot-engine's own
    *  `cluster<N>` naming by `graph-layout-build.ts#addClusters`'s
-   *  `ClusterIndex`, NOT graphviz-ts's internal name). `x`/`y` are the
+   *  `ClusterIndex`, NOT @knowvah/dot-engine's internal name). `x`/`y` are the
    *  top-left corner in the SAME origin-shifted frame as `nodes`/`edges`
    *  (`shiftToOrigin` applies the identical node/edge-derived translation to
    *  these boxes too — clusters never participate in DERIVING that

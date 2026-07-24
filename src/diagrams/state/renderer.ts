@@ -25,6 +25,13 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 import { path, text, line } from '../../core/svg.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { INITIAL_ID, FINAL_ID } from './state-dot-graph.js';
+
+/** `plantuml.skin`'s `arrow { FontSize 13 }` block -- the transition/edge-
+ *  label font this file's own transition-label draw site renders at (G8
+ *  T2). Duplicated locally (D1, avoid-import-cycle convention) rather than
+ *  imported from `state-dot-graph.ts` -- same value as `description/
+ *  renderer-edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
+const ARROW_LABEL_FONT_SIZE = 13;
 import { buildStateUidPlan } from './renderer-uid.js';
 import type { StateUidPlan } from './renderer-uid.js';
 import { wrapEntity, wrapCluster, wrapStartEntity, wrapEndEntity, wrapLink } from './renderer-group.js';
@@ -427,7 +434,11 @@ function buildTransitionInnerMarkup(
       ? ''
       : text(transition.label.x, transition.label.y, transition.label.text, {
           fontFamily: theme.fontFamily,
-          fontSize: theme.fontSize,
+          // `FontParam.ARROW(13)` (klimt/font/FontParam.java:54), NOT
+          // `theme.fontSize` (14, the STATE body/title-text default) --
+          // G8 T2, same jar-verified constant `state-transition-
+          // label.ts`/`state-composite-pass.ts` measure this SAME text at.
+          fontSize: ARROW_LABEL_FONT_SIZE,
           fill: theme.colors.text,
         });
 

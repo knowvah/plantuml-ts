@@ -99,7 +99,7 @@ function errText(e: unknown): string {
 }
 
 // ---------------------------------------------------------------------------
-// Pure verdict logic (ported near-verbatim from graphviz-ts's survey.ts,
+// Pure verdict logic (ported near-verbatim from @knowvah/dot-engine's survey.ts,
 // adapted to this project's field names).
 // ---------------------------------------------------------------------------
 
@@ -233,7 +233,7 @@ function renderOneMode(dir: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// Subprocess plumbing (adapted from graphviz-ts's spawnCapture; simpler here
+// Subprocess plumbing (adapted from @knowvah/dot-engine's spawnCapture; simpler here
 // since `jiti` runs the render directly — no grandchild process to group-kill).
 // ---------------------------------------------------------------------------
 

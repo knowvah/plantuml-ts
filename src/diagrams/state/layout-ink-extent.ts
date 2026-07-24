@@ -198,11 +198,11 @@ function addNoteInk(box: InkBox, x: number, y: number, w: number, h: number): vo
  *  covered before the restructuring (previously via a flat
  *  `outTransitions` accumulator merged into the top-level `transitions`
  *  array by the caller). */
-function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolean): void {
+function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolean, labelInk: boolean): void {
   if (node.children.length > 0) {
     addStateBoxInk(box, node.x, node.y, node.width, node.height);
-    for (const child of node.children) addNodeInk(box, child, includeArrowheadInk);
-    for (const t of node.transitions) addTransitionInk(box, t, includeArrowheadInk);
+    for (const child of node.children) addNodeInk(box, child, includeArrowheadInk, labelInk);
+    for (const t of node.transitions) addTransitionInk(box, t, includeArrowheadInk, labelInk);
     return;
   }
   switch (node.kind) {
@@ -244,9 +244,31 @@ function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolea
  *  over the placed `ExtremityArrow`) — see module doc comment's
  *  mechanism-7 note for why {@link computeSvekResultGeometry} passes
  *  `false`. */
-function addTransitionInk(box: InkBox, transition: TransitionGeo, includeArrowheadInk: boolean): void {
+function addTransitionInk(
+  box: InkBox,
+  transition: TransitionGeo,
+  includeArrowheadInk: boolean,
+  labelInk: boolean,
+): void {
   for (const p of transition.points) addPoint(box, p.x, p.y);
-  if (transition.label !== undefined) addPoint(box, transition.label.x, transition.label.y);
+  // G8 T2 (mission g7-borderpoint-rank T20b's verified mechanism): fold the
+  // label's own reserved BOX -- `[x, x+w] x [y-h, y]`, `label.x`/`.y` being
+  // the draw anchor (top-left-ish, per state-transition-label.ts's own
+  // anchor convention) -- at the RETURNED (graphviz) position, not just its
+  // anchor POINT. Only when both a width/height are present AND the caller
+  // opted in (`labelInk`, mirroring `includeArrowheadInk` below) --
+  // `computeStateDocumentDims`/`computeStateInkShift` (the document-level,
+  // already-pinned functions) pass `false` and keep the pre-existing
+  // point-only fold unchanged; `computeSvekResultGeometry` (the composite
+  // autonom-sizing aggregation T20b targeted) passes `true`.
+  if (transition.label !== undefined) {
+    if (labelInk && transition.label.width !== undefined && transition.label.height !== undefined) {
+      addPoint(box, transition.label.x, transition.label.y - transition.label.height);
+      addPoint(box, transition.label.x + transition.label.width, transition.label.y);
+    } else {
+      addPoint(box, transition.label.x, transition.label.y);
+    }
+  }
   if (!includeArrowheadInk) return;
   const arrowInk = transitionArrowheadInk(transition);
   if (arrowInk !== undefined) {
@@ -261,10 +283,11 @@ function buildInkBox(
   states: readonly StateNodeGeo[],
   transitions: readonly TransitionGeo[],
   includeArrowheadInk: boolean,
+  labelInk: boolean,
 ): InkBox {
   const box = newInkBox();
-  for (const n of states) addNodeInk(box, n, includeArrowheadInk);
-  for (const t of transitions) addTransitionInk(box, t, includeArrowheadInk);
+  for (const n of states) addNodeInk(box, n, includeArrowheadInk, labelInk);
+  for (const t of transitions) addTransitionInk(box, t, includeArrowheadInk, labelInk);
   return box;
 }
 
@@ -284,7 +307,10 @@ export function computeStateDocumentDims(
   states: readonly StateNodeGeo[],
   transitions: readonly TransitionGeo[],
 ): StateDocumentDims {
-  const box = buildInkBox(states, transitions, true);
+  // `labelInk: false` -- this function is already jar-verified/pinned
+  // (57 svg-state goldens) at the pre-existing point-only label fold;
+  // G8 T2's box fold is scoped to `computeSvekResultGeometry` below.
+  const box = buildInkBox(states, transitions, true, false);
   if (!Number.isFinite(box.minX)) return { width: 0, height: 0 };
 
   const rawWidth = box.maxX - box.minX + INK_DELTA;
@@ -317,7 +343,10 @@ export function computeStateInkShift(
   states: readonly StateNodeGeo[],
   transitions: readonly TransitionGeo[],
 ): StateInkShift {
-  const box = buildInkBox(states, transitions, true);
+  // `labelInk: false` -- same already-pinned point-only fold as
+  // `computeStateDocumentDims` above (shares its own ink-extent bbox
+  // mechanism, must stay consistent with it).
+  const box = buildInkBox(states, transitions, true, false);
   if (!Number.isFinite(box.minX)) return { dx: 0, dy: 0 };
   return {
     dx: JAR_INK_MARGIN - box.minX,
@@ -373,7 +402,13 @@ export function computeSvekResultGeometry(
   states: readonly StateNodeGeo[],
   transitions: readonly TransitionGeo[],
 ): SvekResultGeometry {
-  const box = buildInkBox(states, transitions, false);
+  // `labelInk: true` -- G8 T2 (mission g7-borderpoint-rank T20b's verified
+  // mechanism): fold each labeled transition's own reserved BOX, not just
+  // its anchor point, into the composite's own content ink -- this is the
+  // aggregation gap `buildPlainAutonomSpec`'s `Math.max` floor used to
+  // compensate for (see that call site's own doc comment: proven redundant
+  // once this box fold lands, D6, and removed there).
+  const box = buildInkBox(states, transitions, false, true);
   if (!Number.isFinite(box.minX)) return { width: 0, height: 0, dx: 0, dy: 0 };
   return {
     width: box.maxX - box.minX + INK_DELTA,

@@ -1,34 +1,26 @@
 /**
- * Mission G5/C1, sites 2 and 3 — WRITTEN TDD-first, PROVEN CORRECT, but
- * NOT LANDED this iteration (see `plans/g5-measurer-calibration/
- * ledger.md` §C1 for the full finding). `state-composite-pass.ts
- * #addLevelEdges` (site 2) and `#sweepOrphanEdges` (site 3) DO need to
- * measure transition-label text at upstream's `FontParam.ARROW` default
- * size (13), not `theme.fontSize` (14) — every assertion below is
- * jar-verified (real oracle `textLength` values from `in.svg`) and PASSES
- * once the one-line font-size fix is applied. (Site 2 is also the S13
+ * Mission G5/C1, sites 2 and 3, LANDED via G8/T2 -- `state-composite-pass.ts
+ * #addLevelEdges` (site 2) and `#sweepOrphanEdges` (site 3) measure
+ * transition-label text at upstream's `FontParam.ARROW` default size (13),
+ * not `theme.fontSize` (14) — every assertion below is jar-verified (real
+ * oracle `textLength` values from `in.svg`). (Site 2 is also the S13
  * `bemena-23-zebu249`/`"EvNewValueSaved"` founding evidence's own call
  * site.)
  *
- * REVERTED after landing: applying the fix regressed the PROTECTED
- * `tests/oracle/state-dot-parity.test.ts` size-backlog ratchet (16/17
- * fixtures' `maxSizeDeltaIn` grew past their pinned `size-backlog.json`
- * tolerance — e.g. `bemena-23-zebu249`: 0.2055in actual delta before the
- * fix, 0.2651in after, against a pinned ceiling of 0.2312in). Root cause
- * (bisected site-by-site, `git show HEAD:<path>` A/B, per diagnosis.md):
- * NOT a defect in this fix — every affected fixture ALREADY carried a
- * nonzero `size-backlog.json` entry BEFORE this change (a pre-existing,
- * unrelated gap in how an autonom composite's solved-layout bbox width
- * gets computed from its own internal content, under-crediting the
- * horizontal space an edge label actually needs — the SAME family of gap
- * G4 S11-S13 named "a label-placement divergence" compounding with the
- * measurement gap). Shrinking the label width INPUT (13pt, jar-correct)
- * feeds a SMALLER number through that already-lossy formula, widening the
- * VISIBLE symptom for 16-17 already-imperfect fixtures even though the
- * font-size input itself is now exactly right. Fixing the bbox formula is
- * a separate, larger mechanism (state-composite-autonom.ts or its
- * frontier-bbox equivalent) outside this iteration's five-site write-set
- * -- queued for C2, see the ledger's §C1 recommendation.
+ * Originally REVERTED (G5/C1): applying the font-size fix alone regressed
+ * the PROTECTED `tests/oracle/state-dot-parity.test.ts` size-backlog
+ * ratchet, because the composite-bbox-width gap it exposed (an autonom
+ * composite's solved-layout bbox under-crediting the horizontal space an
+ * edge label actually needs) was not yet closed. G8/T2 closes that
+ * companion gap atomically alongside this fix: the FIXEDSIZE edge-label
+ * box reservation (`graph-layout-build.ts#addEdges`) + the jar-faithful
+ * centre->anchor placement (`state-transition-label.ts`) + the ink-walk
+ * `labelInk` box fold (`layout-ink-extent.ts#computeSvekResultGeometry`)
+ * + the jar-derived relaxation of `state-composite-cluster.ts`'s title-
+ * eligibility guard together reproduce jar's real composite sizing, so
+ * the font-size fix no longer widens the backlog -- see
+ * `scripts/measure-state-size-deltas.ts`'s own harness (widened=0 gate)
+ * for the corpus-wide verification.
  *
  * `nimana-36-veco708` (`plans/state-dot-sync` link-hoisting fixture,
  * `tests/unit/state/state-link-hoisting.test.ts`'s own primary evidence)
@@ -91,9 +83,7 @@ function findEdgeByLabel(graphs: readonly DotInputGraph[], label: string): DotIn
   throw new Error(`no edge with label "${label}" found in any captured graph`);
 }
 
-// Skipped: source fix reverted this iteration (see file header). Re-enable
-// once C2 lands the composite-bbox-width companion fix these depend on.
-describe.skip('state-composite-pass.ts addLevelEdges — site 2, top-level scope call', () => {
+describe('state-composite-pass.ts addLevelEdges — site 2, top-level scope call', () => {
   const graphs = captureAll(readPuml('nimana-36-veco708'));
 
   it('measures "go to yes" at font-size 13 (jar-exact 45.5px), not 14', () => {
@@ -110,7 +100,7 @@ describe.skip('state-composite-pass.ts addLevelEdges — site 2, top-level scope
   });
 });
 
-describe.skip('state-composite-pass.ts addLevelEdges — non-top-level scope call (bemena-23-zebu249, S13 founding evidence)', () => {
+describe('state-composite-pass.ts addLevelEdges — non-top-level scope call (bemena-23-zebu249, S13 founding evidence)', () => {
   const graphs = captureAll(readPuml('bemena-23-zebu249'));
 
   it('measures "EvNewValueSaved" at font-size 13 (jar-exact 111.475px), not 14 (120.05px)', () => {
@@ -122,7 +112,7 @@ describe.skip('state-composite-pass.ts addLevelEdges — non-top-level scope cal
   });
 });
 
-describe.skip('state-composite-pass.ts sweepOrphanEdges — site 3', () => {
+describe('state-composite-pass.ts sweepOrphanEdges — site 3', () => {
   const graphs = captureAll(readPuml('nimana-36-veco708'));
 
   it('measures "go to yes-yes" at font-size 13 (jar-exact 70.0375px), not 14', () => {

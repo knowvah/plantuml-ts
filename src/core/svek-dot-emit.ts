@@ -3,7 +3,7 @@
 // Serializes a DotInputGraph into the DOT text PlantUML's Svek feeds graphviz,
 // so our generated DOT can be compared (at DOT granularity) against the oracle's
 // svek-*.dot dumps. This is for parity inspection/testing only — it is NOT on
-// the layout path (the graphviz-ts adapter ignores the emitter-only fields).
+// the layout path (the @knowvah/dot-engine adapter ignores the emitter-only fields).
 //
 // Faithful to Svek's shape (see ~/git/plantuml .../svek/{DotStringFactory,
 // SvekNode,SvekEdge,ClusterDotString,SvekUtils}.java):

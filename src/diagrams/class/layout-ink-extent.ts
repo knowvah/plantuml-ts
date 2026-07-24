@@ -109,7 +109,7 @@
  * the graph's raw origin `x=0` has ink-min-x `-1`). Confirmed via N10's own
  * `ducoka-05-cuce457` sample (`rect y="0"` vs jar's `y="7"`, same `+7`
  * delta) — this is the SAME already-named "~7-8px multi-component/box
- * position/margin residual" (N7/N10), not a graphviz-ts coordinate issue:
+ * position/margin residual" (N7/N10), not a @knowvah/dot-engine coordinate issue:
  * the shift is a PURE post-layout translation this port never applied,
  * independent of dot's own routing accuracy.
  */

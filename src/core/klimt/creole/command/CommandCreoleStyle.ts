@@ -15,7 +15,7 @@
  * `com.plantuml.ubrex` is a general-purpose pattern-matching ENGINE, not
  * creole-specific logic — porting it symbol-for-symbol (its own
  * Challenge/Repetition/CharClass/LookAround hierarchy) is out of this
- * mission's charter the same way graphviz-ts is out of E2r's charter (a
+ * mission's charter the same way @knowvah/dot-engine is out of E2r's charter (a
  * foundational dependency, not diagram behavior). This file instead
  * implements the exact OBSERABLE match semantics the three factories
  * produce for L1's five styles directly:

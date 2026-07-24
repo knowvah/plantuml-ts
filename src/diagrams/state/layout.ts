@@ -38,6 +38,15 @@ import { computeStateDocumentDims, computeStateInkShift } from './layout-ink-ext
 import { buildStateGeoTextFields } from './state-sizing.js';
 import { buildFlatNoteGeos, type FlatNoteGeoCtx } from './renderer-note.js';
 
+/** `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13, normal)`,
+ *  klimt/font/FontParam.java:54) -- the transition/edge-label font, distinct
+ *  from `STATE(14, normal)` (`theme.fontSize`, body/entity-name text).
+ *  Duplicated locally rather than imported from `state-dot-graph.ts` (D1,
+ *  same avoid-import-cycle convention that file's own `transitionLabelText`
+ *  re-export already documents) -- same value as `description/renderer-
+ *  edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
+const ARROW_LABEL_FONT_SIZE = 13;
+
 /** A state (or top-level ast) is composite-free iff no state anywhere has
  *  local content (`hasLocalContent`, state-composite-detect.ts) OR its OWN
  *  scope-declared transitions — since every real composite is always an
@@ -116,14 +125,26 @@ function buildFlatStateGeos(ast: StateDiagramAST, ctx: FlatNoteGeoCtx): StateNod
   return sortSpecsByCreationIndex(geos);
 }
 
-function buildFlatTransitionGeos(ast: StateDiagramAST, result: DotLayoutResult): TransitionGeo[] {
+function buildFlatTransitionGeos(
+  ast: StateDiagramAST,
+  result: DotLayoutResult,
+  theme: Theme,
+  measurer: StringMeasurer,
+): TransitionGeo[] {
   const edgePosMap = new Map(result.edges.map((e) => [e.id, e]));
+  // `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13)`,
+  // klimt/font/FontParam.java:54) -- the transition/edge-label font, distinct
+  // from `theme.fontSize` (state body/entity-name text). Duplicated locally
+  // (not imported from state-dot-graph.ts) per this file's own D1
+  // avoid-import-cycle convention -- same value as description/renderer-
+  // edge.ts's own `ARROW_LABEL_FONT_SIZE`.
+  const font = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
   const geos: TransitionGeo[] = [];
   for (let i = 0; i < ast.transitions.length; i++) {
     const t = ast.transitions[i]!;
     const edgeResult = edgePosMap.get(`edge-${i}`);
     if (edgeResult === undefined) continue;
-    const label = attachTransitionLabel(t, edgeResult.points);
+    const label = attachTransitionLabel(t, edgeResult.points, edgeResult, font, measurer);
     // mission G4 S2: resolve `'[*]'` through the SAME shared start/end
     // anchor id `buildDotEdges` (state-dot-graph.ts) already uses for the
     // DOT graph itself -- see `endpointId`'s own doc comment for the bug
@@ -154,7 +175,7 @@ function layoutFlat(ast: StateDiagramAST, theme: Theme, measurer: StringMeasurer
     totalWidth: result.width,
     totalHeight: result.height,
     states: buildFlatStateGeos(ast, { posMap, edgePosMap, theme, measurer }),
-    transitions: buildFlatTransitionGeos(ast, result),
+    transitions: buildFlatTransitionGeos(ast, result, theme, measurer),
   };
 }
 

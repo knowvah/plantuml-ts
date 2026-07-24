@@ -13,6 +13,7 @@ import type { NotePosition, Transition } from './ast.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import type { DiagramCtx } from './state-composite-pass.js';
+import { computeReservedLabelBox } from './state-transition-label.js';
 
 /** Guard/action/plain label — same precedence as ./state-dot-graph.ts's
  *  `transitionLabelText` (duplicated to avoid an import cycle: layout.ts
@@ -68,10 +69,25 @@ function edgeLabelAttrs(t: Transition, font: FontSpec, measurer: StringMeasurer)
   if (labelDims === undefined && noteDims === undefined) return {};
   const merged =
     noteDims === undefined ? labelDims! : mergeNoteWithLabel(labelDims, noteDims, t.linkNotePosition ?? 'bottom');
-  return { label: text ?? t.linkNote ?? '', labelWidth: merged.width, labelHeight: merged.height };
+  const attrs: EdgeAttrs = { label: text ?? t.linkNote ?? '', labelWidth: merged.width, labelHeight: merged.height };
+  // G8 T2 (spec.md §1a/§6): the REAL FIXEDSIZE layout-input reservation
+  // (margin+floor around the measured text) -- ONLY for a plain (note-free)
+  // label: the merged label+note box's own margin story is a SEPARATE,
+  // not-yet-jar-verified mechanism (spec.md's 11/11 table covers plain
+  // guard/action labels only), so a note-attached transition deliberately
+  // keeps the pre-existing plain-text `label` DOT path unchanged rather than
+  // guessing an unverified formula.
+  if (text !== undefined && noteDims === undefined) {
+    const box = computeReservedLabelBox(text, font, measurer, t.from === t.to);
+    attrs.labelBoxWidth = box.reservedWidth;
+    attrs.labelBoxHeight = box.reservedHeight;
+  }
+  return attrs;
   // #lizard forgives -- pure move from state-composite-pass.ts (mission A4
-  // Phase L file-cap split), unchanged logic: two independent optional
-  // dimension sources merged, no new branching.
+  // Phase L file-cap split), unchanged legacy logic (two independent
+  // optional dimension sources merged) plus ONE additive, independently-
+  // conditional G8 T2 branch (plain-label-only FIXEDSIZE reservation), not
+  // decision complexity to simplify.
 }
 
 /** Under `skinparam linetype ortho`, svek routes the main edge label through
