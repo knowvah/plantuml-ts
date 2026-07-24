@@ -21,6 +21,7 @@ import type { StateNodeGeo, TransitionGeo, StateGeometry, StateRegionGeo } from 
 import type { StateDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import { frontierCalculator, ensureMinWidth, type Box } from './state-composite-frontier.js';
 
 /** Exported (mission G4 S4): `state-composite-autonom.ts#buildPlainAutonomSpec`
  *  reuses this SAME node-position lookup shape to build a LOCAL (pre-outer-
@@ -216,6 +217,44 @@ function materializeAutonom(
  *  cluster shape instead of the dashed-rect fallback. Falls back to the
  *  pre-C3 shape, unchanged, whenever the lookup misses (ineligible this
  *  iteration, or a hand-built test geometry). */
+/**
+ * G7 T14b (`Cluster#manageEntryExitPoint`, `Cluster.java:410-436`): a
+ * border-point (`hasBorderPointChildren`) composite's final box is NOT
+ * graphviz's raw cluster polygon directly -- it is that polygon corrected
+ * by `frontierCalculator`/`ensureMinWidth` (`state-composite-frontier.ts`,
+ * a faithful, unmodified port). `children` are already materialized
+ * (absolute-frame `StateNodeGeo`s) by the time this runs, so this partitions
+ * them by `borderPointMemberIds` into the SAME two terms jar's own
+ * `Cluster.entityPositions(NORMAL)`/`entityPositionsExceptNormal()` split
+ * computes: `insides` (every OTHER child -- normal members, nested
+ * clusters, already bottom-up-corrected if they are themselves
+ * border-point) and `points` (these ids' own centers). This naturally
+ * satisfies "bottom-up correction order" (T8 edit-list item 8): a nested
+ * child cluster's own box is already final by the time its PARENT's
+ * `materializeCluster` call reads it here, since `materializeSpecs(spec
+ * .children, ...)` above runs before this function computes its own box.
+ */
+function borderPointBox(
+  initial: Box,
+  children: readonly StateNodeGeo[],
+  borderPointMemberIds: readonly string[],
+  minWidth: number,
+  rankdir: 'TB' | 'LR',
+): Box {
+  const borderSet = new Set(borderPointMemberIds);
+  const insides: Box[] = [];
+  const points: { x: number; y: number }[] = [];
+  for (const c of children) {
+    if (borderSet.has(c.id)) {
+      points.push({ x: c.x + c.width / 2, y: c.y + c.height / 2 });
+    } else {
+      insides.push({ x: c.x, y: c.y, width: c.width, height: c.height });
+    }
+  }
+  const core = frontierCalculator(initial, insides, points, rankdir);
+  return ensureMinWidth(core, minWidth, initial);
+}
+
 function materializeCluster(
   spec: Extract<GeoSpec, { kind: 'cluster' }>,
   posMap: PosMap,
@@ -225,9 +264,17 @@ function materializeCluster(
   if (children.length === 0) return undefined;
   const real = spec.clusterId !== undefined ? clusterPosMap.get(spec.clusterId) : undefined;
   if (real !== undefined && spec.clusterHeaderHeight !== undefined && spec.titleWidth !== undefined) {
+    // G7 T14b: `borderPointMemberIds` is set ONLY for `hasBorderPointChildren`
+    // composites (`state-composite-cluster.ts#resolveClusterComposite`) --
+    // every other cluster (the pre-T14b path) keeps using `real` directly,
+    // byte-identical to before this task.
+    const box =
+      spec.borderPointMemberIds !== undefined && spec.borderPointMemberIds.length > 0
+        ? borderPointBox(real, children, spec.borderPointMemberIds, spec.frontierMinWidth ?? 0, spec.rankdir ?? 'TB')
+        : real;
     return {
       id: spec.id, kind: 'normal', display: spec.display,
-      x: real.x, y: real.y, width: real.width, height: real.height,
+      x: box.x, y: box.y, width: box.width, height: box.height,
       children, transitions: [],
       headerLines: [{ text: spec.display, width: spec.titleWidth }],
       clusterHeaderHeight: spec.clusterHeaderHeight,

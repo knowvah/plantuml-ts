@@ -157,7 +157,10 @@ export interface DotInputCluster {
    *  regex-based edge parser only extracts the LAST hop of a multi-hop
    *  chain statement, so matching this syntax exactly keeps both sides of
    *  the comparison symmetric) then links the last node to `portAnchorId`.
-   *  Emitter-only. */
+   *  Emitter- AND real-layout-consuming (`graph-layout-build.ts#addClusters`,
+   *  G8/T1b's generic rank-constraint wiring for genuine PORTIN/PORTOUT
+   *  ports, and G7 T14b's own dedicated `portRanksLabelOnEe` branch for the
+   *  state border-point family). */
   portRanks?: { rank: 'source' | 'sink'; nodeIds: string[] }[];
   /** DOT id of this cluster's shared group-anchor node (`groupAnchorNodeId`
    *  / Svek's `Cluster.getSpecialPointId`) — required whenever `portRanks`
@@ -245,13 +248,15 @@ export interface DotInputCluster {
    *  cluster, outside "p1" (24px) — mirroring jar's exact nesting order.
    *  Additive: absent (every pre-C7 caller) falls back to the plain,
    *  unwrapped `sg.addNode(id)` loop (graphviz's bare 8pt default),
-   *  unchanged. Set ONLY for `titleTableEligible` clusters (`state-
-   *  composite-cluster.ts#resolveClusterComposite`) — jar's own
-   *  `Cluster#manageEntryExitPoint`/`FrontierCalculator` path (the
-   *  entrypoint/exitpoint family, excluded from `titleTableEligible`) reads
-   *  member positions directly rather than graphviz's own reported cluster
-   *  bbox, so this margin mechanism does not apply there (unverified,
-   *  deferred).
+   *  unchanged. Set ONLY for `titleTableEligible` clusters that are NOT
+   *  ALSO border-point (`state-composite-cluster.ts
+   *  #resolveClusterComposite`'s own `!hasBorderPointChildren` guard) —
+   *  jar's own `Cluster#manageEntryExitPoint`/`FrontierCalculator` path (the
+   *  entrypoint/exitpoint family) reads member positions directly rather
+   *  than graphviz's own reported raw cluster bbox, and `protection0()`/
+   *  `protection1()` are unconditionally FALSE for that family regardless
+   *  (`ClusterDotString.java:107-112`) — see `borderPointAncestorWrap`
+   *  below for its own, narrower, replacement boolean (G7 T14b).
    *
    *  G7 T7 (`plans/g7-borderpoint-rank/decision-journal.md`, T5 root-cause
    *  row): the SAME value ALSO gates jar's OUTER "a"/"p0" ancestor pair
@@ -275,6 +280,20 @@ export interface DotInputCluster {
    *  `cluster6`, sibling to — not descendant of — `cluster6i`). Ignored
    *  when `innerMarginLevels` is absent. */
   unwrappedNodeId?: string;
+  /** G7 T14b (`plans/g6-cluster-geometry/batch-4/withlabel-derivation.md`
+   *  §5 item 4, T19's confirmed edit list): `thereALinkFromOrToGroup1`
+   *  (`ClusterDotString.java:91-96`) for a border-point (`portRanksLabelOnEe`)
+   *  cluster SPECIFICALLY — `protection0()`/`protection1()` are forced FALSE
+   *  whenever `entityPositionsExceptNormal.size() > 0` (`ClusterDotString
+   *  .java:107-112`), so the plain family's `innerMarginLevels === 2`
+   *  encoding of this SAME upstream boolean cannot double as this family's
+   *  own trigger — a separate field is required. Gates BOTH `graph-layout-
+   *  build.ts#addClusters`'s outer `${outerName}a` wrap (NEVER a `p0`
+   *  sibling — protection0 is always off here) and its inner `${outerName}i`
+   *  wrap (nested inside `${outerName}ee`, wrapping that subgraph's own
+   *  non-port content). Meaningful ONLY when `portRanksLabelOnEe` is also
+   *  `true`; ignored otherwise. */
+  borderPointAncestorWrap?: true;
 }
 
 export interface DotInputGraph {

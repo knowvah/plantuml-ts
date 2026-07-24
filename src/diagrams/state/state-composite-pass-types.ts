@@ -209,6 +209,32 @@ export type GeoSpec =
        *  shape's own `MARGIN`. Always set together with
        *  `clusterHeaderHeight`. */
       titleBaselineMargin?: number;
+      /** G7 T14b (`plans/g6-cluster-geometry/batch-4/withlabel-derivation.md`
+       *  §2c/§5, `Cluster#manageEntryExitPoint`): direct border-point
+       *  (entry/exit-point) member ids -- `state-composite-cluster.ts
+       *  #resolveClusterComposite`'s own `borderPointMemberIds` local, the
+       *  SAME set `applyBorderPointRanks` partitions into `cluster.portRanks`.
+       *  `state-composite-geo.ts#materializeCluster` uses this to split its
+       *  own already-materialized `children` into `frontierCalculator`'s
+       *  `insides` (every OTHER child -- normal members, nested clusters) and
+       *  `points` (these ids' own centers) terms. Set ONLY when non-empty
+       *  (mirrors `hasBorderPointChildren`); absent means the plain
+       *  `real`-bbox-direct shape applies unchanged. */
+      borderPointMemberIds?: readonly string[];
+      /** G7 T14b: `Cluster.java:427-428`'s `frontierCalculator.ensureMinWidth(
+       *  getTitleAndAttributeWidth() + 10)` -- `Math.floor(headerWidth) + 10`
+       *  (G8/T1c's own truncation rule, the SAME `titleTableWidth` above
+       *  already uses at the `addClusters` seam). Always set together with
+       *  `borderPointMemberIds`. */
+      frontierMinWidth?: number;
+      /** G7 T14b: `ctx.rankdir`, threaded through so `materializeCluster`'s
+       *  `frontierCalculator` call uses the SAME axis convention this specific
+       *  pass laid out under (`FrontierCalculator`'s own rankdir-dependent
+       *  corner-exclusion step, §2c step 5) -- every fixture verified this
+       *  mission is `'TB'`; `'LR'` is ported faithfully in
+       *  `state-composite-frontier.ts` but has zero fixture coverage. Always
+       *  set together with `borderPointMemberIds`. */
+      rankdir?: 'TB' | 'LR';
     };
 
 /** `DiagramCtx.resolvedAutonom`'s own value type -- exported so callers

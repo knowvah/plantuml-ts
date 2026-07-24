@@ -8,33 +8,21 @@
 import type { GvGraphBuilder } from '@knowvah/dot-engine';
 import type {
   DotInputCluster,
-  DotInputEdge,
   DotInputGraph,
   DotInputNode,
 } from './graph-layout.types.js';
+import { buildBorderPointClusterHandles } from './graph-layout-build-borderpoint.js';
 
 /** graphviz width/height/nodesep/ranksep attrs are in inches; our measured
  *  sizes are in pixels. getLayout returns points (inches × 72), so dividing px
  *  by 72 on the way in round-trips: output points == original pixel value. */
 export const PX_PER_INCH = 72;
 
-
-/** `plantuml.skin`'s `arrow { FontSize 13 }` block (`svek/GraphvizImageBuilder
- *  .java#getStyleArrowCardinality` resolves the `arrow.cardinality` style,
- *  which falls through to the plain `arrow` block — no diagram in the corpus
- *  overrides `cardinality` specifically) — the font graphviz-ts must measure
- *  `tailLabel`/`headLabel` text with so its `xladjust` placement search uses
- *  the same box size jar's own `cardinalityFont` would. */
-export const CARDINALITY_FONT_SIZE = 13;
-
-/** Maps graphviz-ts (tail,head)-keyed edges back to our edge ids. */
-export interface EdgeIndex {
-  /** (tail,head) → our edge ids, in input order (consumed left-to-right). */
-  idQueues: Map<string, string[]>;
-  inputEdgeById: Map<string, DotInputEdge>;
-}
-
-export const edgeKey = (tail: string, head: string): string => `${tail} ${head}`;
+// `addEdges`/`EdgeIndex`/`edgeKey`/`CARDINALITY_FONT_SIZE` moved to
+// ./graph-layout-build-edges.ts (G7 T14b, 500-line file-cap compliance --
+// pure move). Re-exported here so `graph-layout.ts`'s existing import path
+// keeps working unchanged.
+export { addEdges, edgeKey, CARDINALITY_FONT_SIZE, type EdgeIndex } from './graph-layout-build-edges.js';
 
 export function applyGraphAttrs(b: GvGraphBuilder, input: DotInputGraph): void {
   if (input.rankDir !== undefined) b.setAttr('rankdir', input.rankDir);
@@ -205,7 +193,9 @@ export interface ClusterIndex {
  *  `main` handle, or the child nests as a SIBLING of the parent's own
  *  protection wrappers instead of a descendant (G7 T5's root-cause
  *  diagnosis, `plans/g7-borderpoint-rank/decision-journal.md`). Equal to
- *  `main` when the cluster carries no wrapper (`innerMarginLevels` absent). */
+ *  `main` when the cluster carries no wrapper (`innerMarginLevels` absent
+ *  AND not a `portRanksLabelOnEe` border-point cluster with
+ *  `borderPointAncestorWrap` set — G7 T14b, `ee` when that flag is unset). */
 interface ClusterHandles {
   main: GvGraphBuilder;
   innermost: GvGraphBuilder;
@@ -237,6 +227,18 @@ interface ClusterHandles {
  * `DotInputCluster.innerMarginLevels`'s own doc comment for the full
  * jar-source derivation of which pair fires when.
  *
+ * G7 T14b additionally ports the border-point (`<<entrypoint>>`/
+ * `<<exitpoint>>`-child, `portRanksLabelOnEe`) family's OWN, structurally
+ * DIFFERENT nesting — `${outerName}a` (ancestor wrap ONLY, never a `p0`
+ * sibling — `entityPositionsExceptNormal.size() > 0` forces `protection0`
+ * off, `ClusterDotString.java:91-116`), `main` (rank groups + port node
+ * lines, never a `label` attr), `${outerName}ee` (the title-table HTML
+ * label), `${outerName}i` (the SAME `borderPointAncestorWrap` boolean that
+ * gates `a`, wrapping `ee`'s own non-port content —
+ * `ClusterDotString.java:151-152`) — see `plans/g6-cluster-geometry/batch-4/
+ * withlabel-derivation.md` §2c/§5 and `state-composite-frontier.ts` for the
+ * post-layout box correction this nesting's `initial` bbox feeds.
+ *
  * Returns the `ClusterIndex` (G5 C2) so `layoutGraph()` can re-key the
  * `getLayout()` snapshot's own `clusters` array (graphviz-ts's `cluster<N>`
  * naming) back to `input.clusters[].id`. Additive: callers that pass no
@@ -256,7 +258,18 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   let nextIndex = 0;
   // T1b: fresh counter for port-rank grouping subgraphs (`__portrank_N`) --
   // deliberately NOT `cluster`-prefixed, see the naming-pitfall note below.
+  // Scoped to the GENERIC (non-`portRanksLabelOnEe`) case -- genuine
+  // PORTIN/PORTOUT ports (`src/diagrams/description/layout-dot-tree.ts
+  // #buildDotClusters`'s own `portRanks` without `portRanksLabelOnEe`,
+  // `ClusterDotString.java`'s `hasPort()` branch); the state border-point
+  // family below has its OWN counter and naming.
   let portRankSubId = 0;
+  // G7 T14b: separate counter for the border-point family's OWN rank-group
+  // subgraphs (`__rank_${outerName}_N`, withlabel-derivation.md "Paper gate
+  // v5" item 11's naming) -- kept distinct from `portRankSubId` above so
+  // neither counter's numbering depends on which clusters in
+  // `input.clusters` take which branch.
+  let borderRankSubId = 0;
   const nameFor = (c: DotInputCluster): string => {
     const cached = nameById.get(c.id);
     if (cached !== undefined) return cached;
@@ -277,6 +290,20 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
         ? handlesFor(byId.get(c.parentId)!).innermost
         : b;
     const outerName = nameFor(c);
+    // G7 T14b: full ee/i-wrapped border-point (entry/exit-point) branch --
+    // MUTUALLY EXCLUSIVE with the plain-cluster branch below, for the SAME
+    // cluster (jar's own `ClusterDotString`: `entityPositionsExceptNormal
+    // .size() > 0` selects ONE shape or the other, never both). SUPERSEDES
+    // G8/T1b's own rank-constraint-only wiring for THIS specific case (a
+    // bare `__portrank_N` subgraph directly under `main`, no `ee`/`i`
+    // wrapper or title-table reservation) -- that mechanism stays exactly
+    // as-is, below, for genuine PORTIN/PORTOUT ports (`c.portRanks` set
+    // WITHOUT `portRanksLabelOnEe`), which this branch does not touch.
+    if (c.portRanksLabelOnEe === true) {
+      const handles = buildBorderPointClusterHandles(c, outerName, parentInnermost, () => borderRankSubId++);
+      handlesById.set(c.id, handles);
+      return handles;
+    }
     const levels = c.innerMarginLevels;
     // G7 T7: jar's OUTER ancestor-protection pair ("a"/"p0",
     // `ClusterDotString.java:91-116`) wraps `main` from the OUTSIDE, gated
@@ -347,30 +374,13 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     if (levels === 2) innermost = innermost.addSubgraph(`${outerName}i`, {});
     if (levels !== undefined) innermost = innermost.addSubgraph(`${outerName}p1`, {});
     // T1b: `ClusterDotString.printRanks` (`Cluster.RANK_SOURCE`/`RANK_SINK`,
-    // `ClusterDotString.java:136-137,254-287`) -- a border-point (entry
-    // /exit-point) composite's direct port children get a REAL graphviz
-    // `{rank=source|sink; <ids>;}` constraint scoped to this cluster's own
-    // subgraph, forcing them to the extremal rank WITHIN it. Pre-fix, this
-    // field (`DotInputCluster.portRanks`) was wired to the Svek-DOT TEXT
-    // emitter only (`svek-dot-emit.ts`, for the DOT-parity oracle) and never
-    // reached the REAL graphviz-ts layout call here -- so every border-point
-    // composite's rank constraint was silently absent from actual layout.
-    // Jar-verified root cause of the pesita-10-dene726 mincross-order defect
-    // (G8 T1b): `AA`'s exitpoint child `aa_ok_ex` needs `{rank=sink;
-    // aa_ok_ex;}` inside AA's own cluster -- a disposable text-probe
-    // ablation (4-way: with/without this block × with/without the sibling
-    // "ee" title-wrapper) isolated this constraint alone as necessary AND
-    // sufficient to flip the `Idle`/`Reanimate`/`Closing` cycle's mincross
-    // order from wrong (`Idle`(138)<`Reanimate`(298)<`Closing`(645)) to
-    // jar-exact (`Closing`(273)<`Reanimate`(643)<`Idle`(718)) -- a rank
-    // constraint changes the network-simplex rank GRAPH itself, not merely
-    // node/edge declaration order (the mechanism G7 T13/T16 already fixed
-    // for this same cycle's DFS-root selection). The "ee" WithLabel wrapper
-    // + FIXEDSIZE title reservation (`portRanksLabelOnEe`) is a SEPARATE,
-    // additive geometry concern (jar-verified to have ZERO effect on this
-    // ordering bug in the same ablation) -- deliberately NOT wired here to
-    // keep this fix minimal and scoped to the ordering defect; left as a
-    // documented residual for a future geometry-focused task.
+    // `ClusterDotString.java:136-137,254-287`) -- GENERIC rank-constraint
+    // wiring for genuine PORTIN/PORTOUT ports (`hasPort()`, the NoLabel/
+    // chained branch): `layout-dot-tree.ts#buildDotClusters` sets
+    // `c.portRanks` WITHOUT `portRanksLabelOnEe` for this case. State's
+    // border-point (WithLabel) family takes the dedicated branch above
+    // instead (its OWN rank subgraphs, `__rank_${outerName}_N` naming) and
+    // never reaches this block.
     //
     // Naming pitfall this fix had to avoid (caught by a dump of the built
     // Graph model, not assumed): graphviz-ts's cluster detection is a bare
@@ -395,13 +405,28 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     handlesById.set(c.id, handles);
     return handles;
     // #lizard forgives -- faithful port of ClusterDotString's full
-    // 4-layer protection nesting (a/p0/main/i/p1) plus the RANK_SOURCE/
-    // RANK_SINK port-rank constraint; each block is one independently-
+    // 4-layer protection nesting (a/p0/main/i/p1), the border-point family's
+    // OWN a/main/ee/i nesting, plus the RANK_SOURCE/RANK_SINK port-rank
+    // constraint (both flavors); each block is one independently-
     // conditional jar mechanism (ClusterDotString.java:91-201,254-287), not
     // decision complexity to simplify.
   };
   for (const c of clusters) {
     const { main, innermost } = handlesFor(c);
+    // G7 T14b: border-point clusters place their OWN remainder (anchor +
+    // any other non-port direct member) into `innermost` (`ee`/`i`,
+    // whichever `handlesFor` resolved) -- port ids are already placed by
+    // the rank-group loop above, inside `handlesFor`'s border-point branch.
+    // Must run BEFORE the `innerMarginLevels === undefined` check below: a
+    // border-point cluster always has `innerMarginLevels === undefined`
+    // (`state-composite-cluster.ts`'s own guard), so without this early
+    // branch it would silently fall into the flat `main.addNode` loop,
+    // losing the rank/`ee`/`i` structure entirely.
+    if (c.portRanksLabelOnEe === true) {
+      const portIds = new Set((c.portRanks ?? []).flatMap((rg) => rg.nodeIds));
+      for (const id of c.nodeIds) if (!portIds.has(id)) innermost.addNode(id);
+      continue;
+    }
     if (c.innerMarginLevels === undefined) {
       for (const id of c.nodeIds) main.addNode(id);
       continue;
@@ -413,99 +438,3 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   return { idByName };
 }
 
-export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
-  const nodeIds = new Set(input.nodes.map((n) => n.id));
-  const idQueues = new Map<string, string[]>();
-  const inputEdgeById = new Map<string, DotInputEdge>();
-  for (const e of input.edges) {
-    // Defensive: skip edges to/from unknown nodes (the old engine dropped
-    // dangling edges in buildWorkingGraph).
-    if (!nodeIds.has(e.from) || !nodeIds.has(e.to)) continue;
-    // I9 mechanism (plans/g1-description-svg/ledger.md): callers that draw
-    // arrowheads manually (`DotInputGraph.manualArrowheads` — currently only
-    // `description`'s SvekEdge/extremity polygons) must tell graphviz-ts the
-    // same `arrowhead=none`/`arrowtail=none` the Svek-DOT text emitter
-    // already writes for every diagram type, or it defaults to
-    // `arrowhead=normal` and reserves an arrow-length gap when clipping the
-    // spline to the target node's boundary — shortening the routed edge by
-    // ~10-11px versus both real graphviz and the jar's own layout (verified
-    // by feeding one fixture's exact node/edge geometry to both `dot -Txdot`
-    // and this seam — splines matched only once the attrs below were added).
-    // NOT applied unconditionally: `class`/`state`/`dot`/`json` draw their
-    // arrowhead via an SVG `marker-end` sitting at the raw spline endpoint
-    // and rely on graphviz's default reservation to leave room for it
-    // without overlapping the target box (see `DotInputGraph
-    // .manualArrowheads`'s own doc comment) — scoped to avoid regressing
-    // their already-correct, already-tested output.
-    const a = e.attributes;
-    const attrs: Record<string, string> = input.manualArrowheads === true || a?.noArrow === true
-      ? { arrowtail: 'none', arrowhead: 'none' }
-      : {};
-    if (a?.weight !== undefined) attrs.weight = a.weight.toString();
-    if (a?.minLen !== undefined) attrs.minlen = a.minLen.toString();
-    // G8 T2 (spec.md §1a, mirrors `addClusters`' own `hasTitleTable` gate
-    // above — that seam is T1c's, unmodified here): a caller that supplies
-    // BOTH `labelBoxWidth`/`labelBoxHeight` (currently only the state
-    // composite pipeline's own plain, note-free labels,
-    // `state-composite-edge-label.ts#edgeLabelAttrs`) gets a REAL
-    // jar-faithful `<TABLE FIXEDSIZE="TRUE" WIDTH=".." HEIGHT="..">` label
-    // reservation instead of the plain-text `label` attr below — the SAME
-    // margin+floor box `state-transition-label.ts#attachTransitionLabel`
-    // independently recomputes for the draw anchor (D3's "one mechanism,
-    // two consumers" shape). Every other caller (class, component, usecase,
-    // the flat state pipeline, a state transition with an attached `note on
-    // link`) doesn't set these two fields, so its plain-text path below is
-    // byte-for-byte unchanged.
-    const hasLabelBox = a?.labelBoxWidth !== undefined && a?.labelBoxHeight !== undefined;
-    if (a?.label !== undefined && !hasLabelBox) {
-      attrs.label = a.label;
-      // Measure with a LUT-known font (graphviz's default "Times,serif" warns).
-      attrs.fontname = 'Times';
-    }
-    // G2/N25: feed the ACTUAL text (not just DOT-gate sizing) into the real
-    // layout call so graphviz-ts's own `placeLabels`/`xladjust` (`label/
-    // xlabels.ts`, a faithful port of `lib/label/xlabels.c`) computes the
-    // same external-label position real graphviz would — see
-    // `DotInputEdge.attributes.tailLabel`'s own doc comment for why the
-    // angle/distance formula never applies here. `layoutGraph()` extracts
-    // the computed position back out via `extractPortLabelPositions` (no
-    // public snapshot API exposes it directly — ADR-1 in graphviz-ts hides
-    // the internal `Edge` model).
-    if (a?.tailLabel !== undefined) {
-      attrs.taillabel = a.tailLabel;
-      attrs.labelfontname = 'Times';
-      attrs.labelfontsize = CARDINALITY_FONT_SIZE.toString();
-    }
-    if (a?.headLabel !== undefined) {
-      attrs.headlabel = a.headLabel;
-      attrs.labelfontname = 'Times';
-      attrs.labelfontsize = CARDINALITY_FONT_SIZE.toString();
-    }
-    const edge = b.addEdge(e.from, e.to, attrs);
-    if (a?.label !== undefined && hasLabelBox) {
-      // T1c precedent (addClusters' own title-table seam, above): jar
-      // TRUNCATES both dims towards zero here (`appendTable`'s `(int)`
-      // cast, SvekEdge.java:504-507), never rounds -- `labelBoxWidth`/
-      // `labelBoxHeight` are already exact integers by construction
-      // (`computeReservedLabelBox`'s own `Math.floor`/integer-arithmetic
-      // formula), so `Math.floor` here is a defensive no-op matching that
-      // convention, not a behavior change.
-      edge.setHtmlAttr(
-        'label',
-        `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.floor(a.labelBoxWidth!)}" ` +
-          `HEIGHT="${Math.floor(a.labelBoxHeight!)}"><TR><TD></TD></TR></TABLE>`,
-      );
-    }
-
-    const k = edgeKey(e.from, e.to);
-    const q = idQueues.get(k) ?? [];
-    q.push(e.id);
-    idQueues.set(k, q);
-    inputEdgeById.set(e.id, e);
-  }
-  return { idQueues, inputEdgeById };
-  // #lizard forgives -- pre-existing (unmodified by G5 C7) faithful mirror
-  // of SvekEdge's per-edge attr assembly; each branch below is one
-  // independently-conditional DOT attr (label/tailLabel/headLabel/weight/
-  // minlen/arrowhead override), not decision complexity to simplify.
-}

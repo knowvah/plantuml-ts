@@ -5,31 +5,22 @@
  * /`<<exitpoint>>`-child, `portRanksLabelOnEe`) cluster instead of using
  * graphviz's own raw cluster polygon directly. Small, closed-form, no
  * approximation: a faithful whole-file port, not a re-derivation. Verified
- * correct by hand-tracing every step against jar's real values on 2 of the
- * 3 fixtures T8's derivation named (unit tests below).
+ * correct by hand-tracing every step against jar's real values on all 3
+ * fixtures T8's derivation named, and re-confirmed against the real
+ * `@knowvah/dot-engine` layout call by "Paper gate v5" (G7 T19).
  *
- * NOT WIRED into `materializeCluster` as of G6 T9's close (STOP condition
- * hit, not a design choice): the ALGORITHM here is correct, but its INPUT
- * -- `DotLayoutResult.clusters[id]`, the "initial" raw graphviz-ts bbox --
- * is not, for a `portRanksLabelOnEe` cluster. `graph-layout-build.ts
- * #addClusters` places a border-point cluster's port node(s) in the outer
- * subgraph with NO rank constraint (`DotInputCluster.portRanks`/
- * `portAnchorId` are marked "Emitter-only" and `addClusters` never reads
- * them), so graphviz-ts lays the port node out on an arbitrary rank
- * relative to the `${id}ee` subgraph's own content instead of jar's real
- * `{rank=source;...}`/`{rank=sink;...}`-forced position -- verified via a
- * minimal graphviz-ts repro (this session, not committed) reproducing a
- * visibly wrong wide/short cluster shape without the rank constraint, and a
- * SEPARATE gap for `thereALinkFromOrToGroup1` composites (jar nests an
- * extra `${id}i` wrapper INSIDE `${id}ee`, `ClusterDotString.java:151-152`,
- * not accounted for in T8's own ruled-out item #5). Left unwired,
- * exported, and unit-tested so the NEXT diagnosis pass can reuse this piece
- * once `addClusters` carries the missing rank-constraint mechanism —
- * re-deriving it would be pure waste.
+ * WIRED (G7 T14b) into `state-composite-geo.ts#materializeCluster`, gated on
+ * `GeoSpec`'s `borderPointMemberIds` (set only for `hasBorderPointChildren`
+ * composites, `state-composite-cluster.ts#resolveClusterComposite`). The two
+ * gaps this module's doc previously named as blocking (`addClusters` never
+ * reading `portRanks`/`portAnchorId` at all; no `${id}i` wrapper) are BOTH
+ * closed — the former by G8/T1b + this task's own dedicated border-point
+ * branch (`graph-layout-build.ts#addClusters`), the latter by this task's
+ * `borderPointAncestorWrap`-gated `${outerName}i` nesting (same file).
  *
- * Pure functions only — a future `state-composite-geo.ts#materializeCluster`
- * caller supplies the already-laid-out boxes; this module has zero
- * production call sites today.
+ * Pure functions, unchanged by this wiring — `materializeCluster` supplies
+ * the already-laid-out boxes; no production call site duplicates this
+ * arithmetic.
  *
  * @see ~/git/plantuml/.../svek/FrontierCalculator.java (whole file, 169 lines)
  * @see ~/git/plantuml/.../svek/Cluster.java#manageEntryExitPoint (:410-436)

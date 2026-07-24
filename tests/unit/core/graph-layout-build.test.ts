@@ -202,7 +202,14 @@ describe('addClusters — portRanks rank constraint (G8 T1b)', () => {
     expect(subgraphPaths(build(input))).toEqual(['cluster0']);
   });
 
-  it('one portRanks entry: adds a non-"cluster"-prefixed rank-group subgraph with the rank attr set', () => {
+  it('one portRanks entry (portRanksLabelOnEe): the border-point branch adds the rank subgraph AND an "ee" title wrapper under "main"', () => {
+    // G7 T14b: `portRanksLabelOnEe: true` now selects the FULL ee/i-wrapped
+    // border-point branch (`ClusterDotString.java:91-201,254-287`), which
+    // SUPERSEDES G8/T1b's own bare-rank-subgraph-only wiring for this exact
+    // case -- `main` therefore carries TWO subgraphs (the rank group AND
+    // `cluster0ee`), not one; genuine PORTIN/PORTOUT ports (`portRanks`
+    // WITHOUT `portRanksLabelOnEe`, the next two tests below) still take the
+    // unchanged, bare-rank-subgraph-only path this test previously asserted.
     const input: DotInputGraph = {
       nodes: [
         { id: 'exitPoint', width: 1, height: 1 },
@@ -222,9 +229,11 @@ describe('addClusters — portRanks rank constraint (G8 T1b)', () => {
     const b = createGraph({ directed: true });
     addClusters(b, input);
     const main = b.graph.subgraphs.get('cluster0')!;
-    const rankSubs = [...main.subgraphs.values()];
-    expect(rankSubs).toHaveLength(1);
-    const rankSub = rankSubs[0]!;
+    const subs = [...main.subgraphs.values()];
+    expect(subs).toHaveLength(2);
+    const ee = main.subgraphs.get('cluster0ee')!;
+    expect(ee).toBeDefined();
+    const rankSub = subs.find((sg) => sg !== ee)!;
     // Never "cluster"-prefixed -- graphviz-ts's cluster detection is a bare
     // `name.toLowerCase().startsWith('cluster')` check
     // (graphviz-ts/src/layout/dot/rank.ts): an earlier attempt named this
@@ -236,6 +245,9 @@ describe('addClusters — portRanks rank constraint (G8 T1b)', () => {
     expect([...rankSub.nodes.keys()]).toEqual(['exitPoint']);
     // Membership propagates up to `main` too (cgraph subgraph semantics).
     expect([...main.nodes.keys()]).toContain('exitPoint');
+    // The anchor (non-port remainder) lands in `ee`, not `main` directly --
+    // no `borderPointAncestorWrap`, so `innermost === ee` (no "i" nesting).
+    expect([...ee.nodes.keys()]).toContain('anchor');
   });
 
   it('two portRanks entries (source + sink): each gets its own rank-group subgraph', () => {

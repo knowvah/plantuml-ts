@@ -25,6 +25,7 @@ import {
   titleAndAttributeWidth,
 } from './state-composite-header.js';
 import { zaentId } from './state-composite-classify.js';
+import { isGroupTouched } from './state-composite-detect.js';
 import { getEntityPosition, isInputPosition, isOutputPosition } from './state-entity-position.js';
 import { concurrentRegionScopeId } from './state-parse-state.js';
 import {
@@ -95,11 +96,12 @@ import {
  * ...), whose title moves onto the `${id}ee` subgraph's own `label=`
  * (`DotInputCluster.portRanksLabelOnEe`'s own doc comment) — a DIFFERENT
  * jar code path with its own (verified-but-unimplemented-this-iteration)
- * baseline offset. `CLUSTER_TITLE_BASELINE_MARGIN` below is therefore
- * jar-verified ONLY for the plain (non-border-point) case; the eligibility
- * gate in `resolveClusterComposite` excludes `ctx.classify.needsAnchor`
- * composites entirely (deferred — ledger.md's own "entrypoint/exitpoint
- * family" C3+ queue item).
+ * baseline offset. `CLUSTER_TITLE_BASELINE_MARGIN` below is jar-verified
+ * ONLY for the plain case; G7 T14b applies it uniformly to border-point
+ * composites too, since the WithLabel family's own `=5` correction
+ * (withlabel-derivation.md §2b) is OUT of the confirmed ten-item edit list
+ * (render-position-only, doesn't affect box width/height) — named residual,
+ * not tuned in here.
  */
 // G6 T7: `CLUSTER_TITLE_TABLE_HEIGHT` (flat 9px, jar-verified ONLY for the
 // single-line/no-attribute case) is SUPERSEDED by the jar-real
@@ -305,7 +307,9 @@ export function resolveClusterComposite(
   // discipline), and `titleAndAttributeHeight`/`titleAndAttributeWidth`
   // (state-composite-header.ts) keep their `stereoLines`/`stereoWidth`
   // parameters general for any future diagram type that DOES pass a
-  // stereotype-showing `PortionShower`.
+  // stereotype-showing `PortionShower`. Subsumes G6 T8's own D4 finding
+  // (`<<O-O>>`-sentinel-only exclusion) -- T11 found the suppression is
+  // unconditional for state, so no separate exclusion branch is needed.
   const stereoLines = 0;
   const stereoWidth = 0;
   const headerFont: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
@@ -331,68 +335,70 @@ export function resolveClusterComposite(
   // directly here excluded `A` from the title-table entirely, wrongly
   // falling back to the dashed-rect shape for a case this iteration DOES
   // cover -- caught by direct SVG diff inspection, not assumed.
-  const hasBorderPointChildren = directMembers.some(
-    (c) => isInputPosition(getEntityPosition(c)) || isOutputPosition(getEntityPosition(c)),
-  );
-  // Eligible for the jar-real HTML title table + render shape at the
-  // default font-size (G6 T7: `title.lineCount === 1` RELAXED -- the
-  // `computeTitleTableHeight` formula is `titleLines`-parametric and
-  // jar-verified exact at BOTH titleLines=1 (9, 42) and titleLines=3 (37),
-  // per `plans/g6-cluster-geometry/batch-3/title-height-derivation.md` §5 --
-  // no lineCount-dependent special case exists in `ClusterHeader.java`)
-  // that does NOT ALSO get `portRanksLabelOnEe` (a DIFFERENT jar code path,
-  // its own -- verified but not this iteration's scope -- baseline offset;
-  // deferred, ledger.md's own entrypoint/exitpoint C3+ queue item).
-  // `ctx.theme.fontSize === 14` is DELIBERATELY NOT relaxed -- derivation
-  // doc §5: the formula is algebraically fontSize-parametric but no
-  // non-default-font-size oracle fixture was available to verify it;
-  // unverified, not found to fail, so left gated per diagnosis discipline.
-  // Ineligible composites keep the pre-C3 plain-text `label` +
-  // `boundingBox(children)` + dashed-rect-fallback shape, byte-identical to
-  // before this iteration.
   //
-  // G8 T2 (`plans/g8-label-placement/`): `ctx.insideAutonomPass !== true`
-  // REMOVED. Jar's own `ClusterHeader`/`SvekEdge#appendTable` eligibility
-  // test has no concept of "is this cluster nested inside a separately-
-  // fired autonom pass" at all -- that distinction is purely an artifact of
-  // this PORT's own architecture (splitting jar's single upstream drawing
-  // pass into multiple `layoutGraph()` calls, one per autonom composite,
-  // mechanisms.md §3); jar draws the SAME title table for a cluster
-  // regardless of which "pass" the port's own construction happens to
-  // resolve it in. The clause's own doc comment (pre-G8) stated its ONLY
-  // rationale was a jar-verified size-backlog regression on
-  // `fotuje-06-fifa085`/`rovese-43-tadu368`, traced to
-  // `buildPlainAutonomSpec`'s `Math.max(geometry.*, result.*)` floor
-  // under-crediting a composite's own content ink once its title-table-
-  // widened member needed more room -- i.e. a workaround for a bug in a
-  // DIFFERENT mechanism, not a real jar behavioral difference. G8/T2 closes
-  // that floor's OWN root cause directly (the `labelInk` ink-walk box fold,
-  // `layout-ink-extent.ts#computeSvekResultGeometry`, folds real edge-label
-  // ink so the floor is provably redundant -- D6, `state-composite-
-  // autonom.ts`'s own doc comment), so the workaround's blocking cause is
-  // gone and the clause is removed rather than merely relaxed further.
-  // Corpus-wide re-verification (149-fixture size-delta harness + spot
-  // check against the broader ~271 cached svek-N.dot corpus via
-  // `toSvekDot`): zero regressions, `bajelo-54-dixe684`/`fotuje-06-fifa085`/
-  // `rovese-43-tadu368` all close (or improve past) their pinned
-  // size-backlog tolerance -- see `plans/g8-label-placement/` decision
-  // journal for the fixture-by-fixture before/after table.
-  const titleTableEligible = ctx.theme.fontSize === 14 && !hasBorderPointChildren;
-  // G5 C7, mechanism 16 margin half (ledger.md §C7, `DotInputCluster
-  // .innerMarginLevels`'s own doc comment has the full jar-source
-  // derivation): `needsZaentPoint` reduces to EXACTLY jar's own
+  // G7 T14b: also collects the direct border-point member ids themselves
+  // (not just the boolean) -- `state-composite-geo.ts#materializeCluster`
+  // needs this exact set to partition its own already-materialized
+  // `children` into FrontierCalculator's `insides`/`points` terms (see
+  // `GeoSpec`'s `borderPointMemberIds` doc comment, state-composite-
+  // pass-types.ts).
+  const borderPointMemberIds = directMembers
+    .filter((c) => isInputPosition(getEntityPosition(c)) || isOutputPosition(getEntityPosition(c)))
+    .map((c) => c.id);
+  const hasBorderPointChildren = borderPointMemberIds.length > 0;
+  // Eligible for the jar-real HTML title table + render shape at the
+  // default font-size (G6 T7: `title.lineCount === 1` RELAXED, formula is
+  // `titleLines`-parametric, jar-verified exact at titleLines=1 and 3 --
+  // `plans/g6-cluster-geometry/batch-3/title-height-derivation.md` §5).
+  //
+  // G7 T14b: `!hasBorderPointChildren` REMOVED. Jar's `ClusterHeader`
+  // computes the SAME title/attribute-table reservation regardless of
+  // `entityPositionsExceptNormal.size()` -- the border-point family only
+  // differs in WHERE that table attaches (`${id}ee`'s own `label=`) and in
+  // the outer box's post-layout correction (`Cluster#manageEntryExitPoint`/
+  // `FrontierCalculator`, wired below via `state-composite-geo.ts
+  // #materializeCluster`) -- both now landed, closing the deferred item
+  // this comment previously named (`withlabel-derivation.md`'s multi-round
+  // derivation + "Paper gate v5 (G7 T19)" confirmation). `hasBorderPointChildren`
+  // remains a live, needed local -- it still gates `applyBorderPointRanks`
+  // and additionally gates: (a) `innerMarginLevels`/`unwrappedNodeId`
+  // staying UNSET for this family (protection0/1 forced off,
+  // `ClusterDotString.java:107-112`); (b) `addClusters`'s ee/i-wrapped
+  // branch (`portRanksLabelOnEe`); (c) the FrontierCalculator correction
+  // pass (`borderPointMemberIds`/`frontierMinWidth` below).
+  //
+  // `ctx.theme.fontSize === 14` is DELIBERATELY NOT relaxed -- unverified at
+  // non-default font sizes, left gated per diagnosis discipline. Ineligible
+  // composites keep the pre-C3 plain shape, byte-identical to before.
+  //
+  // G8 T2: `ctx.insideAutonomPass !== true` REMOVED -- jar's own eligibility
+  // test has no concept of "which port pass" a cluster resolves in; the
+  // `buildPlainAutonomSpec` `Math.max` floor this guarded against is now
+  // provably redundant once the `labelInk` ink-walk fold lands (D6). See
+  // `plans/g8-label-placement/` decision journal for the full writeup.
+  const titleTableEligible = ctx.theme.fontSize === 14;
+  // G5 C7 (ledger.md §C7, `DotInputCluster.innerMarginLevels`'s doc has the
+  // full derivation): `needsZaentPoint` reduces to jar's own
   // `thereALinkFromOrToGroup` ("touched") boolean for every
-  // `titleTableEligible` composite specifically -- its OTHER disjunct
-  // (`hasDirectBorderPointChild(s) && !hasNonBorderEeContent(...)`)
-  // requires `hasBorderPointChildren`, which `titleTableEligible` already
-  // excludes above -- confirmed corpus-wide (84/84 cached cluster-bearing
-  // svek DOTs: "i"-wrapper presence matches `zaent` special-point presence
-  // with zero counterexamples). `anchorId` is computed here (not only in
-  // the anchor-node block below) so `unwrappedNodeId` can be set in the
-  // same object literal as `innerMarginLevels`; `zaentId` is a pure
-  // function of `s.id`, so calling it twice for the same state is safe.
+  // `titleTableEligible` composite -- guarded `!hasBorderPointChildren`
+  // below since protection0/1 are forced off for that family regardless
+  // (`ClusterDotString.java:107-112`; `borderPointAncestorWrap` below is
+  // its own, narrower, replacement). `anchorId` is computed here so
+  // `unwrappedNodeId` can share this object literal; `zaentId` is pure.
   const needsZaentPoint = titleTableEligible && ctx.classify.needsZaentPoint.has(s.id);
   const anchorId = zaentId(s.id);
+  // G7 T14b: `thereALinkFromOrToGroup1` (`ClusterDotString.java:91-96`) --
+  // gates BOTH the outer "a" wrap and the inner "${id}i" wrap for a
+  // border-point composite (`protection0`/`protection1` forced OFF whenever
+  // `entityPositionsExceptNormal.size() > 0`, so the plain family's
+  // `innerMarginLevels===2` encoding doesn't apply -- `graph-layout.types.ts`'s
+  // `borderPointAncestorWrap` doc has the full derivation). NARROWER than
+  // `ctx.classify.needsZaentPoint` (which ALSO fires via
+  // `hasDirectBorderPointChild && !hasNonBorderEeContent`, unrelated) --
+  // `bitaxo-18-tamo974`'s `C` is the counterexample ruling out reuse: it has
+  // a zaent anchor (fallback path) but ZERO transitions diagram-wide
+  // (`isGroupTouched('C', ...)` false) -- no "a"/"i" wrap in jar's own DOT.
+  const borderPointAncestorWrap = hasBorderPointChildren && isGroupTouched(s.id, ctx.classify.allTransitions);
   const cluster: DotInputCluster = {
     id: clusterId,
     nodeIds: [],
@@ -405,8 +411,9 @@ export function resolveClusterComposite(
           titleTableHeight: headerHeight,
         }
       : {}),
-    ...(titleTableEligible ? { innerMarginLevels: needsZaentPoint ? 2 : 1 } : {}),
-    ...(needsZaentPoint ? { unwrappedNodeId: anchorId } : {}),
+    ...(titleTableEligible && !hasBorderPointChildren ? { innerMarginLevels: needsZaentPoint ? 2 : 1 } : {}),
+    ...(needsZaentPoint && !hasBorderPointChildren ? { unwrappedNodeId: anchorId } : {}),
+    ...(borderPointAncestorWrap ? { borderPointAncestorWrap: true as const } : {}),
     ...(parentClusterId !== undefined ? { parentId: parentClusterId } : {}),
   };
   acc.clusters.push(cluster);
@@ -446,6 +453,16 @@ export function resolveClusterComposite(
     clusterId,
     ...(titleTableEligible
       ? { titleWidth: title.width, clusterHeaderHeight: CLUSTER_HEADER_HEIGHT, titleBaselineMargin: CLUSTER_TITLE_BASELINE_MARGIN }
+      : {}),
+    // G7 T14b: `Cluster#manageEntryExitPoint`'s own inputs, threaded onto the
+    // GeoSpec so `state-composite-geo.ts#materializeCluster` can run
+    // `frontierCalculator`/`ensureMinWidth` (`state-composite-frontier.ts`)
+    // once this pass's real `DotLayoutResult` is available -- `Math.floor`
+    // matches G8/T1c's own jar-verified truncation rule (`SvekEdge
+    // .appendTable`'s `(int)` cast), the SAME rounding convention
+    // `titleTableWidth` above already uses at the `addClusters` seam.
+    ...(hasBorderPointChildren
+      ? { borderPointMemberIds, frontierMinWidth: Math.floor(headerWidth) + 10, rankdir: ctx.rankdir }
       : {}),
     ...(s.creationIndex !== undefined ? { creationIndex: s.creationIndex } : {}),
   };
