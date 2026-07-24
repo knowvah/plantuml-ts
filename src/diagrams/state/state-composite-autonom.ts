@@ -181,7 +181,19 @@ export function buildPlainAutonomSpec(s: State, ctx: DiagramCtx): ExtractAutonom
   // (via `addNodeInk`) recurses into that field, so ink coverage is
   // unchanged (see `state-composite-geo.ts#materializeAutonom`'s own doc
   // comment).
-  const inkStates = materializeSpecs(localSpecs, rawPosMap);
+  //
+  // mission skin-file-loading Batch 2: `ctx.theme.shadowing` threads onto
+  // THIS pass's own local children too -- this is the mechanism that closes
+  // nimana-36-veco708's size-backlog entry: `computeSvekResultGeometry`'s
+  // ink walk over `inkStates` (yesno/yesyes, each a shadowed leaf) now
+  // reserves their own `2*shadow` ink, growing `childImg`/`wrapper.width`/
+  // `.height` -- the SAME `SvekResult#calculateDimension`/`TextBlockUtils
+  // .getMinMax` mechanism jar's real `InnerStateAutonom.calculateDimensionSlow`
+  // uses to size the "yes" composite's OWN DOT-fed node size in the
+  // CONTAINING (top-level) pass. See `oracle/goldens/state/size-backlog
+  // .json`'s own nimana-36-veco708 note for the jar-verified root cause this
+  // closes.
+  const inkStates = materializeSpecs(localSpecs, rawPosMap, undefined, ctx.theme.shadowing ?? 0);
   const inkTransitions = buildLevelTransitionGeos(acc, result);
   const geometry = computeSvekResultGeometry(inkStates, inkTransitions);
   const childImg = {

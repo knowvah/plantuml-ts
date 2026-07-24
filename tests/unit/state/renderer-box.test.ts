@@ -73,3 +73,20 @@ describe('renderNormal — stateFontSize<<X>> (mission G4 S16)', () => {
     expect(svg).toContain(`font-size="${defaultTheme.fontSize}"`);
   });
 });
+
+describe('renderNormal — shadow (mission skin-file-loading Batch 2)', () => {
+  it('emits filter="url(#stateShadow)" on the box rect when node.shadowing > 0', () => {
+    const svg = renderNormal(makeNode({ shadowing: 4 }), defaultTheme);
+    expect(svg).toContain('filter="url(#stateShadow)"');
+  });
+
+  it('emits NO filter attribute when node.shadowing is absent', () => {
+    const svg = renderNormal(makeNode(), defaultTheme);
+    expect(svg).not.toContain('filter=');
+  });
+
+  it('emits NO filter attribute when node.shadowing is explicitly 0', () => {
+    const svg = renderNormal(makeNode({ shadowing: 0 }), defaultTheme);
+    expect(svg).not.toContain('filter=');
+  });
+});

@@ -723,3 +723,40 @@ describe('statePlugin.accepts', () => {
     expect(statePlugin.accepts(lines)).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Shadow filter def (mission skin-file-loading Batch 2)
+// ---------------------------------------------------------------------------
+
+describe('renderState — shadow filter extraDefs', () => {
+  it('emits the shared <filter> def when theme.shadowing > 0', () => {
+    const geo = makeGeo({
+      totalWidth: 200, totalHeight: 100,
+      states: [makeNode({ kind: 'normal', headerLines: [{ text: 'A', width: 10 }], shadowing: 4 })],
+    });
+    const theme = deepMergeTheme(defaultTheme, { shadowing: 4 });
+    const result = assembleSvg(renderState(geo, theme));
+    expect(result).toContain('<filter id="stateShadow"');
+    expect(result).toContain('filter="url(#stateShadow)"');
+  });
+
+  it('emits NO <filter> def when theme.shadowing is absent (byte-identical to pre-Batch-2 output)', () => {
+    const geo = makeGeo({
+      totalWidth: 200, totalHeight: 100,
+      states: [makeNode({ kind: 'normal', headerLines: [{ text: 'A', width: 10 }] })],
+    });
+    const result = assembleSvg(renderState(geo, defaultTheme));
+    expect(result).not.toContain('<filter');
+    expect(result).not.toContain('filter=');
+  });
+
+  it('emits NO <filter> def when theme.shadowing is explicitly 0', () => {
+    const geo = makeGeo({
+      totalWidth: 200, totalHeight: 100,
+      states: [makeNode({ kind: 'normal', headerLines: [{ text: 'A', width: 10 }] })],
+    });
+    const theme = deepMergeTheme(defaultTheme, { shadowing: 0 });
+    const result = assembleSvg(renderState(geo, theme));
+    expect(result).not.toContain('<filter');
+  });
+});

@@ -140,10 +140,34 @@ function addPoint(box: InkBox, x: number, y: number): void {
 }
 
 /** Leaf `normal`/`json` state box + composite (best-effort) — see module
- *  doc comment for the jar-verified asymmetric-per-axis mechanism. */
-function addStateBoxInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+ *  doc comment for the jar-verified asymmetric-per-axis mechanism.
+ *
+ *  mission skin-file-loading Batch 2 (D3's rendering half): `shadow` (the
+ *  node's own resolved `theme.shadowing`, `StateNodeGeo.shadowing`'s own
+ *  doc comment; `0` for every pre-Batch-2 fixture) folds jar's real
+ *  `LimitFinder#drawRectangle` shadow term (`addPoint(x-1,y-1);
+ *  addPoint(x+w-1+2*shadow, y+h-1+2*shadow)`, `~/git/plantuml/.../klimt/
+ *  drawing/LimitFinder.java:184-188`) into this rule's own max corner via
+ *  `Math.max` against the pre-existing unshadowed divider-line point
+ *  (`x+w`/`y+h-1`) — NOT a replacement of it: jar's `LimitFinder` walks
+ *  EVERY shape a box draws (the shadowed outline rect AND the unshadowed
+ *  divider `<line>`), so the real max corner is whichever shape's own ink
+ *  reaches furthest, and for `shadow=0` the rect's own `x+w-1`/`y+h-1`
+ *  never exceeds the line's `x+w`/rect's own `y+h-1` (verified: `Math.max`
+ *  degenerates to this function's pre-Batch-2 return value exactly when
+ *  `shadow=0`, so every shadow-off fixture is byte-identical). For
+ *  `shadow>0` the rect's shadow-widened corner dominates on BOTH axes
+ *  (`x+w-1+2*shadow > x+w` once `shadow>=1`; `y+h-1+2*shadow` always
+ *  exceeds the line's un-widened `y+h-1`) — jar-verified mechanism (not the
+ *  numeric value) via `RoundedContainer.java`/`EntityImageStateCommon
+ *  .java#getShape`, both of which set `deltaShadow` on the SAME outline
+ *  rect this function's own unshadowed half already models. */
+function addStateBoxInk(box: InkBox, x: number, y: number, w: number, h: number, shadow = 0): void {
   addPoint(box, x - 1, y - 1);
   addPoint(box, x + w, y + h - 1);
+  if (shadow > 0) {
+    addPoint(box, x + w - 1 + 2 * shadow, y + h - 1 + 2 * shadow);
+  }
 }
 
 /** `fork`/`join`/`syncBar` bar — `LimitFinder#drawRectangle`'s real rule,
@@ -200,7 +224,7 @@ function addNoteInk(box: InkBox, x: number, y: number, w: number, h: number): vo
  *  array by the caller). */
 function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolean, labelInk: boolean): void {
   if (node.children.length > 0) {
-    addStateBoxInk(box, node.x, node.y, node.width, node.height);
+    addStateBoxInk(box, node.x, node.y, node.width, node.height, node.shadowing ?? 0);
     for (const child of node.children) addNodeInk(box, child, includeArrowheadInk, labelInk);
     for (const t of node.transitions) addTransitionInk(box, t, includeArrowheadInk, labelInk);
     return;
@@ -226,7 +250,7 @@ function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolea
     }
     case 'normal':
     case 'json':
-      addStateBoxInk(box, node.x, node.y, node.width, node.height);
+      addStateBoxInk(box, node.x, node.y, node.width, node.height, node.shadowing ?? 0);
       return;
     case 'note':
       addNoteInk(box, node.x, node.y, node.width, node.height);

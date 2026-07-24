@@ -47,6 +47,7 @@ import { renderNormal, renderSdlReceive } from './renderer-box.js';
 import { resolveStateArrowLineColor, resolveStateArrowHeadColor } from './state-render-colors.js';
 import { renderComposite } from './renderer-composite-box.js';
 import { renderStateNote } from './renderer-note.js';
+import { buildStateShadowFilterDef } from './state-shadow.js';
 
 // ---------------------------------------------------------------------------
 // Node shape renderers
@@ -492,11 +493,21 @@ export function renderState(geo: StateGeometry, theme: Theme): RenderFragment {
   // fixture's `<defs/>` is immediately followed by the content `<g>`, no
   // background rect). The pre-S1 renderer's own manual background `<rect>`
   // is removed accordingly.
+  //
+  // mission skin-file-loading Batch 2: ONE shared shadow filter def per
+  // diagram (`state-shadow.ts`'s own doc comment for why a single
+  // diagram-wide gate on `theme.shadowing` is equivalent to jar's own
+  // per-shape `manageShadow`/`withShadow` once-per-document dedup -- state
+  // resolves ONE shadowing value for the whole diagram via the theme
+  // cascade, mission skin-file-loading Batch 1). `undefined` (svgRoot's own
+  // default empty extraDefs) for every pre-Batch-2/shadow-off fixture.
+  const extraDefs = theme.shadowing !== undefined && theme.shadowing > 0 ? buildStateShadowFilterDef() : undefined;
   return {
     body: children.join(''),
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: resolveColorToSvgHex(theme.colors.background),
     stateShell: true,
+    ...(extraDefs !== undefined ? { extraDefs } : {}),
   };
 }

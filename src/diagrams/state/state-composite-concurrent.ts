@@ -111,13 +111,22 @@ export interface ConcurrentRegionPassResult {
  *  asymmetry — `layout-ink-extent.ts#addNodeInk` — folded into `JAR_INK_
  *  MARGIN(6) - (-1) = 7`). Renamed from `regionInkDim` to `regionInkGeometry`
  *  since it's no longer JUST a dimension. */
-function regionInkGeometry(p: ConcurrentRegionPassResult): { width: number; height: number; dx: number; dy: number } {
+function regionInkGeometry(
+  p: ConcurrentRegionPassResult,
+  // mission skin-file-loading Batch 2: the diagram's own resolved
+  // `theme.shadowing` -- see `materializeSpecs`'s own doc comment
+  // (state-composite-geo.ts). No corpus fixture combines `skin <name>` with
+  // `--`-delimited concurrent regions this iteration, but threading it
+  // through avoids a silent per-shape-family gap the SAME way every other
+  // `materializeSpecs` call site in this codebase now does.
+  shadowing = 0,
+): { width: number; height: number; dx: number; dy: number } {
   const posMap: PosMap = new Map(p.result.nodes.map((n) => [n.id, n]));
   // mission G4 S5: `materializeSpecs` no longer takes an `outTransitions`
   // accumulator -- see `state-composite-geo.ts#materializeAutonom`'s own
   // doc comment; `computeSvekResultGeometry`'s ink walk recurses into each
   // materialized node's own `.transitions` field directly.
-  const states = materializeSpecs(p.specs, posMap);
+  const states = materializeSpecs(p.specs, posMap, undefined, shadowing);
   const transitions = buildLevelTransitionGeos(p.acc, p.result);
   const ink = computeSvekResultGeometry(states, transitions);
   return {
@@ -187,7 +196,12 @@ export function buildConcurrentAutonomSpec(s: State, ctx: DiagramCtx): Extract<G
   // Visual stacking order matches SOURCE order (region 0 on top).
   const passes = ownPass !== undefined ? [ownPass, ...regionPasses] : regionPasses;
 
-  const stacked = stackConcurrentRegions(passes.map(regionInkGeometry));
+  // mission skin-file-loading Batch 2: explicit arrow (not a bare
+  // `passes.map(regionInkGeometry)` point-free reference) -- `regionInkGeometry`
+  // now takes a second `shadowing` param, and `Array#map`'s own callback
+  // signature `(item, index, array)` would otherwise silently pass the
+  // per-pass INDEX as `shadowing`.
+  const stacked = stackConcurrentRegions(passes.map((p) => regionInkGeometry(p, ctx.theme.shadowing ?? 0)));
   const wrapper = measureAutonomWrapper(s, stacked, ctx.theme, ctx.measurer);
   return combineConcurrentPasses(s, passes, wrapper, stacked.width, ctx);
 }
@@ -308,7 +322,7 @@ function combineConcurrentPasses(
     // position correction (`geom.dx`/`.dy`) BEFORE stacking -- see
     // `regionInkGeometry`'s own doc comment for why this was missing
     // pre-S6 (a consistent +7,+7 absolute-position gap, jar-verified).
-    const geom = regionInkGeometry(p);
+    const geom = regionInkGeometry(p, ctx.theme.shadowing ?? 0);
     const shiftedResult = shiftDotLayoutResult(p.result, geom.dx, geom.dy);
     for (const n of shiftedResult.nodes) allNodes.push({ ...n, y: n.y + yShift });
     const regionTransitions = buildLevelTransitionGeos(p.acc, shiftedResult).map((t) => shiftTransitionY(t, yShift));

@@ -147,6 +147,7 @@ function boundingBox(children: readonly StateNodeGeo[]): { x: number; y: number;
 function materializeAutonom(
   spec: Extract<GeoSpec, { kind: 'autonom' }>,
   posMap: PosMap,
+  shadowing = 0,
 ): StateNodeGeo | undefined {
   const pos = posMap.get(spec.id);
   if (pos === undefined) return undefined;
@@ -171,13 +172,13 @@ function materializeAutonom(
   // autonom composite, which keeps the pre-S6 flat-materialization path
   // unchanged.
   const regionsOut: StateRegionGeo[] | undefined = spec.regions?.map((r) => ({
-    children: materializeSpecs(r.specs, localPosMap, localClusterPosMap).map((g) => shiftGeo(g, dx, dy)),
+    children: materializeSpecs(r.specs, localPosMap, localClusterPosMap, shadowing).map((g) => shiftGeo(g, dx, dy)),
     transitions: r.transitions.map((t) => shiftTransition(t, dx, dy)),
   }));
   const children =
     regionsOut !== undefined
       ? regionsOut.flatMap((r) => r.children)
-      : materializeSpecs(spec.localStates, localPosMap, localClusterPosMap).map((g) => shiftGeo(g, dx, dy));
+      : materializeSpecs(spec.localStates, localPosMap, localClusterPosMap, shadowing).map((g) => shiftGeo(g, dx, dy));
   const transitions =
     regionsOut !== undefined
       ? regionsOut.flatMap((r) => r.transitions)
@@ -197,6 +198,11 @@ function materializeAutonom(
     ...(spec.color !== undefined ? { color: spec.color } : {}),
     ...(spec.stereotype !== undefined ? { stereotype: spec.stereotype } : {}),
     ...(spec.creationIndex !== undefined ? { creationIndex: spec.creationIndex } : {}),
+    // mission skin-file-loading Batch 2: only the InnerStateAutonom/
+    // RoundedContainer shape (spec.headerLines set -- renderCompositeMeasured,
+    // NOT the pre-mechanism-6 dashed-rect fallback) draws jar's shadow --
+    // see StateNodeGeo.shadowing's own doc comment.
+    ...(shadowing > 0 && spec.headerLines !== undefined ? { shadowing } : {}),
   };
 }
 
@@ -259,8 +265,15 @@ function materializeCluster(
   spec: Extract<GeoSpec, { kind: 'cluster' }>,
   posMap: PosMap,
   clusterPosMap: ClusterPosMap,
+  shadowing = 0,
 ): StateNodeGeo | undefined {
-  const children = materializeSpecs(spec.children, posMap, clusterPosMap);
+  // mission skin-file-loading Batch 2: `shadowing` threads DOWN into this
+  // cluster's own children (a leaf/autonom nested inside a 'cluster'
+  // composite still draws its OWN shadow) but is never set on THIS node's
+  // own return below -- jar-verified `ClusterDotString.java`/`ClusterHeader
+  // .java` (the shape this composite kind draws) carry no shadow at all,
+  // see StateNodeGeo.shadowing's own doc comment.
+  const children = materializeSpecs(spec.children, posMap, clusterPosMap, shadowing);
   if (children.length === 0) return undefined;
   const real = spec.clusterId !== undefined ? clusterPosMap.get(spec.clusterId) : undefined;
   if (real !== undefined && spec.clusterHeaderHeight !== undefined && spec.titleWidth !== undefined) {
@@ -313,6 +326,13 @@ export function materializeSpecs(
   specs: readonly GeoSpec[],
   posMap: PosMap,
   clusterPosMap: ClusterPosMap = EMPTY_CLUSTER_POS_MAP,
+  // mission skin-file-loading Batch 2: the diagram's own resolved
+  // `theme.shadowing` (`0` for every pre-Batch-2 caller/fixture) -- threaded
+  // through every recursive call below so a nested leaf/autonom sees the
+  // SAME value its ancestor did, matching jar's single diagram-wide style
+  // cascade (StateNodeGeo.shadowing's own doc comment has the full
+  // per-node-kind eligibility rule).
+  shadowing = 0,
 ): StateNodeGeo[] {
   const out: StateNodeGeo[] = [];
   for (const spec of specs) {
@@ -328,12 +348,27 @@ export function materializeSpecs(
         ...(spec.color !== undefined ? { color: spec.color } : {}),
         ...(spec.stereotype !== undefined ? { stereotype: spec.stereotype } : {}),
         ...(spec.creationIndex !== undefined ? { creationIndex: spec.creationIndex } : {}),
+        // mission skin-file-loading Batch 2: only `EntityImageState`'s own
+        // `'normal'`/`'json'` leaf shape draws jar's shadow -- see
+        // StateNodeGeo.shadowing's own doc comment (pseudostates excluded,
+        // named scope limit). `<<sdlreceive>>` is ALSO excluded despite
+        // `stateKind==='normal'`: `renderer-box.ts#renderSdlReceive`
+        // dispatches to a genuinely different upstream shape
+        // (`EntityImageState2`/`USymbolFrame`, not `EntityImageState`) that
+        // this mission's own Jar refs do not cover -- gating here keeps the
+        // ink reservation (this value) consistent with what the render path
+        // actually draws.
+        ...(shadowing > 0
+          && (spec.stateKind === 'normal' || spec.stateKind === 'json')
+          && spec.stereotype?.toLowerCase() !== 'sdlreceive'
+          ? { shadowing }
+          : {}),
       });
     } else if (spec.kind === 'autonom') {
-      const g = materializeAutonom(spec, posMap);
+      const g = materializeAutonom(spec, posMap, shadowing);
       if (g !== undefined) out.push(g);
     } else {
-      const g = materializeCluster(spec, posMap, clusterPosMap);
+      const g = materializeCluster(spec, posMap, clusterPosMap, shadowing);
       if (g !== undefined) out.push(g);
     }
   }
@@ -351,7 +386,11 @@ export function layoutComposite(ast: StateDiagramAST, theme: Theme, measurer: St
     return { totalWidth: 0, totalHeight: 0, states: [], transitions: [] };
   }
   const posMap: PosMap = new Map(result.nodes.map((n) => [n.id, n]));
-  const states = materializeSpecs(specs, posMap, clusterPosMapOf(result));
+  // mission skin-file-loading Batch 2: `theme.shadowing` (Batch 1's resolved
+  // `skin <name>`/`<style>` value) threads through the WHOLE materialized
+  // tree from this single top-level entry point -- see `materializeSpecs`'s
+  // own doc comment.
+  const states = materializeSpecs(specs, posMap, clusterPosMapOf(result), theme.shadowing ?? 0);
   const transitions = buildLevelTransitionGeos(acc, result);
   return { totalWidth: result.width, totalHeight: result.height, states, transitions };
 }

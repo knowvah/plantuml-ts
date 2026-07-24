@@ -83,6 +83,7 @@ import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line, text, path } from '../../core/svg.js';
 import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
+import { stateShadowFilterUrl } from './state-shadow.js';
 import { javaRound4 } from '../../core/number-format.js';
 
 /** `URectangle.halfRounded`'s own `roundCorner/2` — SAME `rx`/`ry` value as
@@ -185,7 +186,7 @@ function renderCompositeFallback(node: StateNodeGeo, theme: Theme): string {
  *  shared values {@link buildActionZone} needs (`dividerY1`/`ascent`/`fill`)
  *  so the two halves never independently re-derive the same numbers. */
 function buildCoreLayers(node: StateNodeGeo, theme: Theme): {
-  header: string; outline: string; divider1: string; title: string; dividerY1: number; ascent: number; fill: string; fontColor: string;
+  header: string; outline: string; shadowRect: string; divider1: string; title: string; dividerY1: number; ascent: number; fill: string; fontColor: string;
 } {
   const headerLines = node.headerLines!;
   // mission G4 S10: `state`-element bucket tier -- see `resolveStateFillBucketed`'s own doc comment.
@@ -207,10 +208,27 @@ function buildCoreLayers(node: StateNodeGeo, theme: Theme): {
   const outline = rect(node.x, node.y, node.width, node.height, {
     fill: 'none', stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH, rx: radius, ry: radius,
   });
+  // mission skin-file-loading Batch 2: `RoundedContainer.drawU`
+  // (`~/git/plantuml/.../svek/RoundedContainer.java:78-92`) draws a SECOND,
+  // shadow-only rect at the SAME geometry/border/radius as `outline` above
+  // (`fill=none`/transparent bg, `filter="url(#...)"`) FIRST -- before the
+  // header/action-zone panels -- whenever `shadowing > 0`; `outline` itself
+  // (drawn AFTER the panels, so the border shows on top of the fills) never
+  // carries the filter attr. jar-verified byte-shape against nimana-36-
+  // veco708's own "yes" composite: TWO identical `<rect x=7 y=144 .../>`
+  // entries, the FIRST (pre-fills) carrying `filter="url(#...)"`, the SECOND
+  // (post-fills, this function's own `outline`) not.
+  const shadowRect =
+    node.shadowing !== undefined && node.shadowing > 0
+      ? rect(node.x, node.y, node.width, node.height, {
+          fill: 'none', stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH, rx: radius, ry: radius,
+          filter: stateShadowFilterUrl(),
+        })
+      : '';
   const divider1 = line(node.x, dividerY1, node.x + node.width, dividerY1, { stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH });
   const title = renderCompositeTextLines(headerLines, (ln) => node.x + node.width / 2 - ln.width / 2, node.y + MARGIN + ascent, theme, fontColor);
 
-  return { header, outline, divider1, title, dividerY1, ascent, fill, fontColor };
+  return { header, outline, shadowRect, divider1, title, dividerY1, ascent, fill, fontColor };
 }
 
 interface ActionZone {
@@ -253,7 +271,13 @@ function buildActionZone(
 function renderCompositeMeasured(node: StateNodeGeo, theme: Theme): string {
   const core = buildCoreLayers(node, theme);
   const action = buildActionZone(node, theme, core.dividerY1, core.ascent, core.fill, core.fontColor);
-  return core.header + action.bg + core.outline + core.divider1 + action.divider2 + core.title + action.text;
+  // mission skin-file-loading Batch 2: `core.shadowRect` (empty string when
+  // `node.shadowing` is unset/0 -- byte-identical to the pre-Batch-2 return
+  // for every shadow-off fixture) is drawn FIRST, matching jar's own
+  // `RoundedContainer.drawU` order (shadow rect, then header/action-zone
+  // panels, then the border-only `outline` on top) -- see
+  // `buildCoreLayers`'s own doc comment.
+  return core.shadowRect + core.header + action.bg + core.outline + core.divider1 + action.divider2 + core.title + action.text;
 }
 
 /**
