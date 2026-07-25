@@ -102,6 +102,11 @@ function buildFlatStateGeos(ast: StateDiagramAST, ctx: FlatNoteGeoCtx): StateNod
   const { posMap, theme, measurer } = ctx;
   const geos: StateNodeGeo[] = [];
   const hideEmptyDescription = ast.hideEmptyDescription ?? false;
+  // mission skin-file-loading Batch 2: see `StateNodeGeo.shadowing`'s own
+  // doc comment for the per-kind eligibility rule -- the flat pipeline's
+  // leaf geos are built directly here (not via `state-composite-geo.ts
+  // #materializeSpecs`), so the SAME gate is reproduced inline.
+  const shadowing = theme.shadowing ?? 0;
   for (const s of ast.states) {
     const pos = posMap.get(s.id);
     if (pos === undefined) continue;
@@ -109,6 +114,13 @@ function buildFlatStateGeos(ast: StateDiagramAST, ctx: FlatNoteGeoCtx): StateNod
       id: s.id, kind: s.kind, display: s.display, x: pos.x, y: pos.y, width: pos.width, height: pos.height,
       children: [], transitions: [], ...buildStateGeoTextFields(s, theme, measurer, hideEmptyDescription),
       ...(s.creationIndex !== undefined ? { creationIndex: s.creationIndex } : {}),
+      // see state-composite-geo.ts#materializeSpecs's identical gate/doc
+      // comment for why `<<sdlreceive>>` is excluded despite kind==='normal'.
+      ...(shadowing > 0
+        && (s.kind === 'normal' || s.kind === 'json')
+        && s.stereotype?.toLowerCase() !== 'sdlreceive'
+        ? { shadowing }
+        : {}),
     });
   }
   geos.push(...buildPseudoNodeGeos(posMap, ast.pseudoCreationIndex ?? new Map()));

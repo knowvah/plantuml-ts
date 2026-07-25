@@ -172,3 +172,50 @@ describe('renderComposite — per-node #color override resolves through the head
     expect(out).toContain('stroke="#FF0000" stroke-width="1"');
   });
 });
+
+describe('renderComposite — shadow (mission skin-file-loading Batch 2)', () => {
+  function makeMeasuredComposite(overrides: Partial<StateNodeGeo> = {}): StateNodeGeo {
+    return makeComposite({
+      x: 7,
+      y: 144,
+      width: 188.4147,
+      height: 227,
+      children: [],
+      headerLines: [{ text: 'YES', width: 28.0875 }],
+      ...overrides,
+    });
+  }
+
+  it('draws a shadow-only rect FIRST (fill=none, filter attr) when node.shadowing > 0', () => {
+    const out = renderComposite(makeMeasuredComposite({ shadowing: 4 }), defaultTheme);
+    // First element in the returned markup must be the shadow rect.
+    expect(out.indexOf('<rect')).toBe(0);
+    const firstRectEnd = out.indexOf('/>') + 2;
+    const firstRect = out.slice(0, firstRectEnd);
+    expect(firstRect).toContain('fill="none"');
+    expect(firstRect).toContain('filter="url(#stateShadow)"');
+    expect(firstRect).toContain('x="7"');
+    expect(firstRect).toContain('y="144"');
+  });
+
+  it('still draws the pre-existing (non-filtered) border-only outline rect AFTER the fills', () => {
+    const out = renderComposite(makeMeasuredComposite({ shadowing: 4 }), defaultTheme);
+    // Two <rect ...> occurrences with the SAME geometry: one filtered (shadow), one not (outline).
+    const rectMatches = [...out.matchAll(/<rect[^>]*\/>/g)].map((m) => m[0]);
+    const outlineRects = rectMatches.filter((r) => r.includes('x="7"') && r.includes('y="144"') && !r.includes('filter='));
+    expect(outlineRects).toHaveLength(1);
+  });
+
+  it('draws NO shadow rect when node.shadowing is absent (byte-identical to pre-Batch-2 shape)', () => {
+    const out = renderComposite(makeMeasuredComposite(), defaultTheme);
+    expect(out).not.toContain('filter=');
+    // First element is the header path, not a shadow rect (pre-Batch-2 order unchanged).
+    expect(out.indexOf('<path')).toBe(0);
+  });
+
+  it('draws NO shadow rect when node.shadowing is explicitly 0', () => {
+    const out = renderComposite(makeMeasuredComposite({ shadowing: 0 }), defaultTheme);
+    expect(out).not.toContain('filter=');
+    expect(out.indexOf('<path')).toBe(0);
+  });
+});

@@ -16,6 +16,9 @@ import {
   collectElementStyleBuckets,
   resolveDocumentBackground,
   computeNoteStyleTagCascade,
+  resolveGlobalShadowing,
+  resolveGlobalBackground,
+  resolveGlobalBorder,
 } from './style-map-element.js';
 import { computeClassStyleCascadeOverrides } from './style-cascade-class.js';
 
@@ -537,18 +540,33 @@ export function applyStyleMap(styleMap: StyleMap, base: Theme): Theme {
   // `style-map-element.ts#computeNoteStyleTagCascade`'s own doc comment.
   const noteTagCascade = computeNoteStyleTagCascade(styleMap);
   const hasNoteTagCascade = Object.keys(noteTagCascade).length > 0;
+  // mission skin-file-loading Batch 1 (D3): see `style-map-element.ts
+  // #resolveGlobalShadowing`'s own doc comment for the bare root/element
+  // selector precedence this resolves.
+  const shadowing = resolveGlobalShadowing(styleMap);
+  // Same bare root/element cascade, applied to BackgroundColor (a
+  // dedicated `rootElementBackground` field -- see its own doc comment
+  // for why it is NOT `theme.colors.background`) and LineColor (feeds
+  // `theme.colors.border` directly -- no overload conflict).
+  const rootElementBackground = resolveGlobalBackground(styleMap);
+  const rootElementBorderRaw = resolveGlobalBorder(styleMap);
+  if (rootElementBackground !== undefined) graphOverride.rootElementBackground = rootElementBackground;
   if (
     Object.keys(graphOverride).length === 0 &&
     documentBg === undefined &&
     !hasElements &&
-    !hasNoteTagCascade
+    !hasNoteTagCascade &&
+    shadowing === undefined &&
+    rootElementBorderRaw === undefined
   ) {
     return base;
   }
   const partial: Partial<Theme> = {
+    ...(shadowing !== undefined ? { shadowing } : {}),
     colors: {
       ...base.colors,
       ...(documentBg !== undefined ? { background: documentBg } : {}),
+      ...(rootElementBorderRaw !== undefined ? { border: resolveColor(rootElementBorderRaw) } : {}),
       ...(hasElements ? { elements } : {}),
       ...(hasNoteTagCascade ? { noteTagCascade } : {}),
       graph: { ...base.colors.graph, ...graphOverride },

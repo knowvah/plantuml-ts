@@ -102,6 +102,26 @@ export interface Theme {
    *  untraced this iteration, named remainder. */
   monochrome?: 'true' | 'reverse';
   strictUml?: boolean;
+  /**
+   * mission skin-file-loading Batch 1 (D3): `skin <name>` /
+   * `<style> root { Shadowing N } }` / `<style> element { Shadowing N } }`
+   * -- upstream `EntityImageState`/`InnerStateAutonom`/`Cluster`'s shared
+   * `getShadowing()` read (`style.getShadowing()`), resolved ONCE for every
+   * diagram type via the SAME cascade (not state-only). Populated by
+   * `style-map-theme.ts#applyStyleMap`'s own bare `"root"`/`"element"`
+   * selector reader -- the LAST Shadowing declaration registered under
+   * EITHER bare selector wins (textual/insertion-order merge, mirrors
+   * `style-map-element.ts#resolveStyleCascade`'s own "no specificity,
+   * last-registered-wins" algorithm), matching upstream's compound
+   * `StyleSignatureBasic` subset-match semantics for the common case where
+   * only the two UNIVERSAL selectors (root, element) are in play. A
+   * per-bucket-type Shadowing override (`<style> node { Shadowing 2.0 } }`)
+   * is NOT modeled here -- out of this batch's scope (D3), a later
+   * increment if a fixture needs it. Absent = 0 (no shadow) -- Batch 2
+   * consumes this value to draw the shadow filter + reserve ink; this
+   * batch only resolves it.
+   */
+  shadowing?: number;
   /** G2 N59: `skinparam packageStyle rect|rectangle` -- selects the plain
    *  `<rect>` package/namespace outline (`svek/PackageStyle.java
    *  #RECTANGLE`) instead of the default folder-tab notch shape, jar-
@@ -299,6 +319,23 @@ export interface Theme {
        * #resolveStateArrowHeadColor`.
        */
       stateArrowHeadColor?: string;
+      /**
+       * mission skin-file-loading Batch 1 (D3): the GLOBAL root/element
+       * universal-selector BackgroundColor cascade -- see `style-map-
+       * element.ts#resolveGlobalBackground`'s own doc comment for the
+       * bare "root"/"element" precedence algorithm and why this is a
+       * DEDICATED field (not `theme.colors.background`, which the
+       * document/canvas-background cascade already claims with a
+       * DIFFERENT precedence rule). RAW (unresolved) -- resolved via
+       * `resolveColorToSvgHex` at consumption time, mirroring
+       * `stateArrowLineColor`'s own convention. Read by `state-render-
+       * colors.ts#resolveStateFillBucketed` as a fallback tier BELOW the
+       * `state`-element bucket and ABOVE each shape's own hardcoded
+       * default. State is this field's first consumer (D3: other diagram
+       * types are a later increment, when a fixture needs it -- no corpus
+       * sample outside the state family exercises `skin <name>` today).
+       */
+      rootElementBackground?: string;
       /**
        * mission G6 T4: `<style> stateDiagram { RoundCorner N } }` -- the
        * bare "statediagram" selector's own RoundCorner declaration, RAW
@@ -984,6 +1021,8 @@ export type ThemeOverride = {
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
   strictUml?: boolean;
   monochrome?: 'true' | 'reverse';
+  /** See `Theme.shadowing`'s own doc comment. */
+  shadowing?: number;
   packageStyle?: 'rect';
   nodeSep?: number;
   rankSep?: number;
@@ -1047,6 +1086,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'componentStyle',
   'strictUml',
   'monochrome',
+  'shadowing',
   'packageStyle',
   'nodeSep',
   'rankSep',

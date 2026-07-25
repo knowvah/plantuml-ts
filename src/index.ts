@@ -7,6 +7,7 @@ import { svgRoot } from './core/svg.js';
 import { resolveTheme, deepMergeTheme } from './core/theme.js';
 import { resolveSkinparam, parseStyleBlock } from './core/skinparam.js';
 import { applyStyleMap } from './core/style-map-theme.js';
+import { applySkinLayer } from './core/skin-loader.js';
 import { computeClassTagCascadeGenerations } from './core/style-cascade-class.js';
 import { applyChrome, isEmpty as isAnnotationsEmpty } from './core/annotations/index.js';
 import type { DiagramAnnotations } from './core/annotations/index.js';
@@ -170,10 +171,14 @@ export function assembleSvg(fragment: AssembledSvg): string {
 
 
 /**
- * Four-stage theme resolution:
+ * Five-stage theme resolution:
  *
  * Stage 1 — Named base theme.
  *   String options.theme overrides !theme from source (existing behavior).
+ *
+ * Stage 1.5 — Apply a `skin <name>` directive's own base layer (D6,
+ *   skin-file-loading mission Batch 1). BELOW Stage 2/3 so the document's
+ *   own skinparam/`<style>` always wins over the loaded skin.
  *
  * Stage 2 — Apply skinparam directives from source on top of the base theme.
  *
@@ -203,8 +208,16 @@ function buildTheme(preprocessed: PreprocessorResult, options?: RenderOptions): 
       : (preprocessed.theme ?? 'default');
   const base = resolveTheme(themeName);
 
+  // Stage 1.5: apply a `skin <name>` directive's own base layer (D6,
+  // skin-file-loading mission Batch 1) -- BELOW the document's own
+  // skinparam/`<style>` application below, so a diagram combining
+  // `skin rose` with an explicit `skinparam` still lets the document's
+  // own skinparam win. No-op when `preprocessed.skin` is absent or names
+  // an unrecognized/preprocessor-grammar skin (D1).
+  const withSkin = applySkinLayer(preprocessed, base);
+
   // Stage 2: apply skinparam directives from source
-  const withSkinparam = resolveSkinparam(preprocessed.skinparam, base).theme;
+  const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
 
   // Stage 3: apply <style> blocks from source
   // 3a. Merge all StyleMaps (last writer wins per selector+property)

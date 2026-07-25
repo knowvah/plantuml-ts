@@ -493,3 +493,37 @@ describe('linePositions — G2 N9 line-tracking plumbing', () => {
     expect(preprocess('').linePositions).toEqual([]);
   });
 });
+
+describe('skin <name> directive -- skin-file-loading mission Batch 1', () => {
+  it('captures a single-line `skin <name>` directive, lowercased', () => {
+    const result = preprocess('@startuml\nskin rose\nstate a\n@enduml');
+    expect(result.skin).toBe('rose');
+  });
+
+  it('is case-insensitive and normalizes the captured name to lowercase', () => {
+    const result = preprocess('@startuml\nSKIN Rose\nstate a\n@enduml');
+    expect(result.skin).toBe('rose');
+  });
+
+  it('removes the skin line from the emitted lines (consumed, not content)', () => {
+    const result = preprocess('@startuml\nskin debug\nstate a\n@enduml');
+    expect(result.lines).not.toContain('skin debug');
+    expect(result.lines).toContain('state a');
+  });
+
+  it('does not match a `skinparam` line as a skin directive', () => {
+    const result = preprocess('@startuml\nskinparam backgroundColor red\nstate a\n@enduml');
+    expect(result.skin).toBeUndefined();
+    expect(result.skinparam.get('backgroundcolor')).toBe('red');
+  });
+
+  it('is undefined when the document has no skin directive', () => {
+    const result = preprocess('@startuml\nstate a\n@enduml');
+    expect(result.skin).toBeUndefined();
+  });
+
+  it('last skin line wins when the directive repeats', () => {
+    const result = preprocess('@startuml\nskin rose\nskin debug\nstate a\n@enduml');
+    expect(result.skin).toBe('debug');
+  });
+});

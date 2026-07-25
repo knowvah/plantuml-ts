@@ -186,6 +186,32 @@ export interface StateNodeGeo {
    *  (state-composite-cluster.ts) for why this differs from the autonom
    *  shape's own `MARGIN`. Always set together with `clusterHeaderHeight`. */
   clusterTitleBaselineMargin?: number;
+  /**
+   * mission skin-file-loading Batch 2 (D3's rendering half, STATE-scoped):
+   * the resolved `theme.shadowing` value (`skin <name>`/`<style> element {
+   * Shadowing N } }`, `Theme.shadowing`'s own doc comment) this node's own
+   * box draws WITH -- upstream `EntityImageState`/`InnerStateAutonom`'s
+   * shared `getStyleState().getShadowing()` read. Populated ONLY for the
+   * node kinds jar actually draws a shadow for (`kind:'normal'`/`'json'`
+   * leaf boxes via `EntityImageStateCommon#getShape`, and a composite whose
+   * `headerLines` is set AND `clusterHeaderHeight` is NOT set -- the
+   * `InnerStateAutonom`/`RoundedContainer` shape `renderer-composite-
+   * box.ts#renderCompositeMeasured` draws, NOT the `ClusterDotString`/
+   * `ClusterHeader` shape `renderClusterMeasured` draws, which jar-verified
+   * carries no shadow at all, `~/git/plantuml/.../svek/ClusterDotString
+   * .java`/`ClusterHeader.java` grepped clean of `Shadow`) -- every OTHER
+   * kind (pseudostates: initial/final/history/deepHistory/fork/join/
+   * syncBar/choice) is left `undefined` even when `theme.shadowing > 0`,
+   * a deliberate, named scope limit (no corpus fixture combines a bundled
+   * skin with a pseudostate this iteration -- the mission's own Jar refs
+   * cite only `EntityImageState.java`/`InnerStateAutonom.java`). `undefined`
+   * or `0` behave identically (no shadow) -- absent for every pre-Batch-2
+   * fixture (`theme.shadowing` is always `undefined` before `skin <name>`
+   * loading, Batch 1) and for a hand-built test geometry.
+   * @see layout-ink-extent.ts#addStateBoxInk (ink reservation)
+   * @see renderer-box.ts#renderNormal / renderer-composite-box.ts#renderCompositeMeasured (draw)
+   */
+  shadowing?: number;
 }
 
 /** One stacked concurrent region's own materialized content -- see

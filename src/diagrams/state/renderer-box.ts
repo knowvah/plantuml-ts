@@ -37,6 +37,7 @@ import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line, text, path } from '../../core/svg.js';
 import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateFontSize, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
+import { stateShadowFilterUrl } from './state-shadow.js';
 import { javaRound4 } from '../../core/number-format.js';
 
 const STATE_BOX_RX = 12.5;
@@ -204,12 +205,20 @@ export function renderNormal(node: StateNodeGeo, theme: Theme): string {
   // mission G6 T4: `<style> stateDiagram { RoundCorner N } }` cascade --
   // see `resolveStateBoxRadius`'s own doc comment.
   const radius = resolveStateBoxRadius(theme, STATE_BOX_RX);
+  // mission skin-file-loading Batch 2: `EntityImageStateCommon#getShape`
+  // sets `deltaShadow` directly on this SAME outline rect (jar draws ONE
+  // rect, fill+shadow combined -- unlike the composite shape's own
+  // separate shadow-only duplicate, `renderer-composite-box.ts
+  // #renderCompositeMeasured`) -- see `StateNodeGeo.shadowing`'s own doc
+  // comment for the per-kind eligibility gate this reads (`undefined`/`0`
+  // for every pre-Batch-2 fixture, byte-identical `rect()` call).
   const box = rect(node.x, node.y, node.width, node.height, {
     fill,
     stroke: border,
     strokeWidth: STATE_BORDER_STROKE_WIDTH,
     rx: radius,
     ry: radius,
+    ...(node.shadowing !== undefined && node.shadowing > 0 ? { filter: stateShadowFilterUrl() } : {}),
   });
 
   if (node.headerLines === undefined) {

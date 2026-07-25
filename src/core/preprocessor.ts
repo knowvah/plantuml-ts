@@ -30,6 +30,19 @@ import { TVariableScope } from './tim/TVariableScope.js';
 export interface PreprocessorResult {
   readonly lines: readonly string[];
   readonly theme: string | null;
+  /**
+   * mission skin-file-loading Batch 1: the `skin <name>` directive's
+   * captured argument (`skin rose` -> `"rose"`), lowercased. Upstream
+   * grammar: `CommandSkin`/`SkinLoader` (`net/sourceforge/plantuml/
+   * sequencediagram/command/CommandSkin.java`) -- `^skin\\s+([\\w.]+)$`,
+   * a bare directive line like `skinparam`/`theme`, NOT a TIM `!` command.
+   * `undefined` when the document has no `skin` line. `skin-loader.ts`
+   * resolves the name against the embedded `<style>`-grammar registry
+   * (`skins-builtin.ts`); an unrecognized or preprocessor-grammar name
+   * (`reddress`/`sonyxperiadev`, D1) is a no-op there, not here -- this
+   * field only captures what the directive line SAID, unvalidated.
+   */
+  readonly skin?: string | undefined;
   readonly styles: readonly string[];
   readonly skinparam: ReadonlyMap<string, string>;
   /**
@@ -92,6 +105,13 @@ const RE_STYLE_CLOSE = /^<\/style>$/i;
 // the key word is `<`, not whitespace), silently dropping the entire
 // line -- diagnosed G2 N51 (`ragona-89-fadi984`).
 const RE_SKINPARAM_LINE = /^skinparam\s+(\w+(?:<<[^<>]+>>)?)\s+(.+)$/;
+/** mission skin-file-loading Batch 1: `skin <name>` -- mirrors upstream's
+ *  `CommandSkin` grammar (`^skin\\s+([\\w.]+)$`, see `skins-builtin.ts`'s
+ *  own doc comment). The `\\s+` after the literal `skin` prefix means this
+ *  can never match a `skinparam ...` line (the char right after "skin" in
+ *  "skinparam" is "p", not whitespace) -- no negative lookahead needed.
+ *  Case-insensitive, matching every other directive-keyword regex here. */
+const RE_SKIN_LINE = /^skin\s+([\w.]+)\s*$/i;
 const RE_SKINPARAM_BLOCK_OPEN = /^skinparam\s*\{$/;
 /** Selector-scoped block, e.g. `skinparam component {` -- inner entries are
  *  keyed `<selector><name>` (upstream sugar: `component { Style X }` is
@@ -126,6 +146,11 @@ class StyleAndSkinparamCollector {
    *  .stylePositions`'s doc comment. */
   readonly stylePositions: (number | undefined)[] = [];
   readonly skinparam = new Map<string, string>();
+  /** mission skin-file-loading Batch 1: see `PreprocessorResult.skin`'s
+   *  own doc comment. Last `skin <name>` line in the document wins (no
+   *  corpus fixture repeats the directive; mirrors `skinparam`'s own
+   *  last-write-wins Map semantics for a repeated key). */
+  skin: string | undefined;
 
   private inStyleBlock = false;
   private readonly styleBuffer: string[] = [];
@@ -144,6 +169,11 @@ class StyleAndSkinparamCollector {
     if (RE_STYLE_OPEN.test(trimmed)) {
       this.inStyleBlock = true;
       this.stylePositions.push(line.getLocation()?.getPosition());
+      return true;
+    }
+    const skinMatch = RE_SKIN_LINE.exec(trimmed);
+    if (skinMatch !== null) {
+      this.skin = skinMatch[1]!.trim().toLowerCase();
       return true;
     }
     return this.openSkinparam(trimmed);
@@ -366,6 +396,7 @@ export function preprocessLinesOrError(
       lines: flattened.lines,
       linePositions: flattened.positions,
       theme: context.getThemeName() ?? null,
+      skin: collector.skin,
       styles: collector.styles,
       stylePositions: collector.stylePositions,
       skinparam: collector.skinparam,

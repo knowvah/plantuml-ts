@@ -1,11 +1,44 @@
 # Skin-file loading (`skin <name>`) + shadow rendering
 
-## Status: DRAFT (for review) — 2026-07-23
+## Status: STATE MVP COMPLETE (B1–B3) — class/desc + Batch 4 deferred (2026-07-24)
 
-Drafted at the close of G8, which surfaced the dependency. Not yet
-authorized for execution. Review D1–D4 and the batch split, then run
-`/plan-mission` to expand into full `batch-N/TN-*.md` task files, or
-adjust here first.
+The state MVP is landed on `feat/skin-file-loading`:
+- **B1** (c065310): `skin <name>` loads rose/debug/strictuml into the
+  theme cascade (D6 base layer); colors + `Shadowing` VALUE resolve.
+- **B2** (bedf58b): state drop-shadow rendering + ink reservation.
+- **B3** (this): backlog tighten + close-out. **nimana-36 closed**:
+  0.111111 → 0.043169 (below its pre-G8 0.090278; the G8 tracked
+  exception is retired). niveno-60 → 0 (removed), sumiri-68 → 0.000026.
+
+`skin rose` now renders rose's `#FEFECE`/`#A80036` + drop shadow;
+`skin debug` renders its palette (shadow off). No-skin fixtures
+byte-identical throughout. Gates: 10293 tests, 268/268 parity, 57 pins
+byte-identical, harness widened=0.
+
+### Deferred to follow-on increments (tracked, not dropped)
+1. **Class/description shadow (D3):** shadow rendering for those types
+   (fix `renderer-cluster.ts:110`'s hardcoded `shadowing: 0`). Deferred
+   in B2 to avoid colliding with a concurrent class-diagram session in
+   this shared repo. State-only was sufficient to close nimana.
+2. **Batch 4 — preprocessor skins** (`reddress`, `sonyxperiadev`): route
+   through the preprocessor + `resolveSkinparam` (not `parseStyleBlock`).
+   No harness fixture needs them.
+3. **`element {}` general subset matcher:** B1 added a narrow
+   root/element last-wins resolver; a per-bucket override (e.g. rose
+   `node { Shadowing 2.0 }`) is not modeled.
+4. **FontColor** resolution from skins; class/description test-harness
+   cascade duplicates (production `index.ts` already covers all types).
+5. nimana's residual 0.043169 is a pre-existing NON-shadow size gap on
+   another svek graph — a separate size-parity task.
+
+## (design) Verified execution seam
+
+`src/index.ts:204-227` is the theme cascade (`resolveTheme` base →
+`resolveSkinparam(skinparam)` → `resolveSkinparam(style-root)` →
+`applyStyleMap(style-elements)`); a `skin <name>` file reuses the SAME
+`parseStyleBlock` + `resolveSkinparam` + `applyStyleMap` machinery,
+applied as an early BASE layer (D6) between `resolveTheme` and the
+user's skinparam.
 
 ## Objective
 
