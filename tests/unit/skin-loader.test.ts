@@ -91,24 +91,38 @@ describe('applySkinLayer -- skin-file-loading mission Batch 4 (preprocessor+skin
   });
 
   it(
-    'documents the pre-existing TIM macro-substitution gap: a skinparam ' +
-      "line's value is captured before !define/!$var substitution runs " +
-      '(.agent-notes/skin-batch4-preproc.md) -- reddress bare renders its ' +
-      'FONTNAME/BORDERCOLOR/BOXBG tokens LITERALLY, not resolved',
+    'resolves reddress\'s unconditional !define FONTNAME (skin-reddress-variants ' +
+      'Fix 1 -- skinparam VALUES now run through TIM substitution; the ' +
+      'macro-substitution gap tracked in .agent-notes/skin-batch4-preproc.md ' +
+      'is fixed for the skinparam-line path)',
+    () => {
+      const result = applySkinLayer({ skin: 'reddress' }, defaultTheme);
+      // `!define FONTNAME "Verdana"` (top-level `!ifndef` default, active in
+      // EVERY reddress mode) now resolves -- the value INCLUDES the quote
+      // characters, since `!define` substitution is plain text replacement.
+      expect(result.colors.graph.classFontFamily).toBe('"Verdana"');
+    },
+  );
+
+  it(
+    'still renders BOXBG/BORDERCOLOR literally in BARE mode -- correctly, ' +
+      'not a residual bug: those macros are `!define`d only inside the ' +
+      '`!ifdef DARKSTYLE`/`!ifdef LIGHTSTYLE` branches, which a bare ' +
+      '`skin reddress` (no DARKBLUE/LIGHTBLUE/... flag) never enters, so ' +
+      "the names genuinely aren't registered functions to substitute",
     () => {
       const result = applySkinLayer({ skin: 'reddress' }, defaultTheme);
       expect(result.colors.graph.classBackground).toBe('BOXBG');
       expect(result.colors.graph.classBorder).toBe('BORDERCOLOR');
-      expect(result.colors.graph.classFontFamily).toBe('FONTNAME');
     },
   );
 
   it('threads a bare `!define DARKBLUE` from the document into reddress\'s own `!ifdef` gate', () => {
-    // `!ifdef DARKBLUE` only checks EXISTENCE (EaterIfdef#isTrue), so this
-    // proves gate selection even though ACCENT itself (a macro reference,
-    // not a literal) still hits the same substitution gap as the test
-    // above. `skinparam backgroundColor 777` inside the DARKBLUE branch IS
-    // a literal token, so it resolves correctly and is the observable proof.
+    // `!ifdef DARKBLUE` only checks EXISTENCE (EaterIfdef#isTrue). Both the
+    // gate AND the value now resolve (Fix 1): `skinparam backgroundColor 777`
+    // (a literal) and `skinparam stereotypeCBackgroundColor ACCENT` (a macro
+    // reference resolved via the SAME DARKBLUE-branch `!define ACCENT
+    // 1a66c2`) both land.
     const withThreading = applySkinLayer({ skin: 'reddress' }, defaultTheme, [
       '!define DARKBLUE',
       'skin reddress',
@@ -119,6 +133,23 @@ describe('applySkinLayer -- skin-file-loading mission Batch 4 (preprocessor+skin
     expect(withThreading.colors.background).not.toBe(untouched.colors.background);
     expect(withThreading.colors.background).toBe('777');
   });
+
+  it(
+    'resolves reddress\'s DARKBLUE-branch !define ACCENT into ' +
+      'stereotypeCBackgroundColor (skin-reddress-variants Fix 1 -- the ' +
+      '!ifdef GATE alone was already threaded by Batch 4; this proves the ' +
+      "VALUE macro reference inside the selected branch now resolves too, " +
+      "not just literal tokens)",
+    () => {
+      const result = applySkinLayer({ skin: 'reddress' }, defaultTheme, [
+        '!define DARKBLUE',
+        'skin reddress',
+      ]);
+      // `resolveSkinparam` maps `stereotypeCBackgroundColor` to the "spot C"
+      // class-stereotype element bucket.
+      expect(result.colors.elements?.spotclass?.background).toBe('1a66c2');
+    },
+  );
 
   it('is a no-op for a bare `!define DARKBLUE` with no matching skin (defensive)', () => {
     const result = applySkinLayer({ skin: undefined }, defaultTheme, ['!define DARKBLUE']);

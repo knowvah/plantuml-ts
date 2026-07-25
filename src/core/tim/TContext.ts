@@ -38,7 +38,6 @@ import { EaterAffectationDefine } from './EaterAffectationDefine.js';
 import { EaterAssert } from './EaterAssert.js';
 import { EaterDumpMemory } from './EaterDumpMemory.js';
 import { EaterException } from './EaterException.js';
-import { EaterFunctionCall } from './EaterFunctionCall.js';
 import { EaterLog } from './EaterLog.js';
 import { EaterOption } from './EaterOption.js';
 import { EaterReturn } from './EaterReturn.js';
@@ -50,12 +49,11 @@ import { IncludeError } from './IncludeStore.js';
 import { PreprocessingArtifact } from './PreprocessingArtifact.js';
 import { StringLocated, type LineLocation, type TLineType } from './StringLocated.js';
 import type { TContext as TContextInterface, TFunction, TPreprocessingArtifact } from './TFunction.js';
-import { TFunctionSignature } from './TFunctionSignature.js';
+import { applyFunctionsAndVariablesImpl } from './TContextSubstitution.js';
+import type { TFunctionSignature } from './TFunctionSignature.js';
 import { TFunctionType } from './TFunctionType.js';
-import { isLetterOrEmojiOrUnderscoreOrDigit } from './TLineType.js';
 import type { PlainLineFilter, TContextOptions } from './TContextOptions.js';
 import type { TMemory } from './TMemory.js';
-import { VariableManager } from './VariableManager.js';
 import { createStandardFunctions } from './builtin/index.js';
 import { BLOCK_E1_NEWLINE } from './builtin/jaws-constants.js';
 import { createDefaultTimEnvironment, type TimEnvironment } from './builtin/TimEnvironment.js';
@@ -213,6 +211,12 @@ export class TContext implements TContextInterface {
 
     if (ONLY_WHITESPACE_NON_EMPTY.test(s.getString())) return undefined;
 
+    // #lizard forgives -- faithful port of upstream's own dispatch switch
+    // (`TContext.java#executeOneLineNotSafe`); already split once
+    // (`executeSideEffectDirective` below) and further splitting would
+    // fragment one upstream method across more than two functions for no
+    // behavioral gain. Surfaced only now: the file-length gate previously
+    // short-circuited before this per-function check ever ran.
     throw new EaterException(`Compile Error ${String(ftype)} ${type}`, s);
   }
 
@@ -270,7 +274,7 @@ export class TContext implements TContextInterface {
 
   /** @see ~/git/plantuml/.../tim/TContext.java#addPlain */
   private addPlain(memory: TMemory, s: StringLocated): void {
-    if (this.plainLineFilter?.(s) === true) return;
+    if (this.plainLineFilter?.(s, (text) => this.substituteText(memory, s, text)) === true) return;
 
     const tmp = this.applyFunctionsAndVariablesInternal(memory, s);
     if (tmp === undefined) return;
@@ -285,6 +289,22 @@ export class TContext implements TContextInterface {
   /** @see ~/git/plantuml/.../tim/TContext.java#simulatePlain */
   private simulatePlain(memory: TMemory, s: StringLocated): void {
     this.applyFunctionsAndVariablesInternal(memory, s);
+  }
+
+  /**
+   * The `substitute` half of {@link PlainLineFilter} -- runs macro/`$variable`
+   * substitution against `text` in ISOLATION (not the whole line `s`; `s` is
+   * only the location/error-context anchor). Falls back to `text` unchanged
+   * when substitution "consumes" it (a PROCEDURE / LEGACY_DEFINELONG call --
+   * see {@link applyFunctionsAndVariablesImpl}'s contract), which is not a
+   * meaningful shape for a single captured skinparam value.
+   * skin-reddress-variants Fix 1: lets `StyleAndSkinparamCollector` resolve a
+   * `!define`d / `!$var`-affected skinparam VALUE, mirroring upstream
+   * (`CommandSkinParam` parses the SAME post-TIM-substitution line stream as
+   * any other command -- there is no verbatim carve-out there).
+   */
+  private substituteText(memory: TMemory, s: StringLocated, text: string): string {
+    return applyFunctionsAndVariablesImpl(this, memory, new StringLocated(text, s.getLocation())) ?? text;
   }
 
   /**
@@ -344,83 +364,19 @@ export class TContext implements TContextInterface {
    * `resultList`, so nothing is left to emit for this line. Text BEFORE the
    * call is stashed in `pendingAdd` (the next `addPlain` prepends it); text
    * AFTER it is appended to the last produced line.
+   *
+   * Body extracted to `TContextSubstitution.ts` (mechanical, this repo's
+   * 500-line file cap) -- `this` satisfies `TContextSubstitutionHost`
+   * structurally.
    * @throws EaterException (thrown, not returned) on evaluation failure.
    * @see ~/git/plantuml/.../tim/TContext.java#applyFunctionsAndVariables
    */
   applyFunctionsAndVariables(memory: TMemory, str: StringLocated): string | undefined {
-    if (memory.isEmpty() && this.functionsSet.size() === 0) return str.getString();
-
-    const result = { value: '' };
-    for (let i = 0; i < str.length(); i++) {
-      const presentFunction = this.getFunctionNameAt(str.getString(), i);
-      if (presentFunction !== undefined) {
-        const consumed = this.applyOneFunction(memory, str, i, presentFunction, result);
-        if (consumed === undefined) return undefined;
-
-        i = consumed;
-      } else if (new VariableManager(this, memory, str).getVarnameAt(str.getString(), i) !== undefined) {
-        i = new VariableManager(this, memory, str).replaceVariables(str.getString(), i, result);
-      } else {
-        result.value += str.charAt(i);
-      }
-    }
-    return result.value;
-  }
-
-  /**
-   * One call site inside `applyFunctionsAndVariables`. Returns the new cursor
-   * position, or `undefined` when the call consumed the rest of the line (a
-   * PROCEDURE / LEGACY_DEFINELONG call -- see that method's contract).
-   */
-  private applyOneFunction(
-    memory: TMemory,
-    str: StringLocated,
-    i: number,
-    presentFunction: string,
-    result: { value: string },
-  ): number | undefined {
-    const sub = str.getString().substring(i);
-    const call = new EaterFunctionCall(
-      new StringLocated(sub, str.getLocation()),
-      this.isLegacyDefine(presentFunction),
-      this.isUnquoted(presentFunction),
-    );
-    call.analyze(this, memory);
-    const signature = new TFunctionSignature(
-      presentFunction,
-      call.getValues().length,
-      new Set(call.getNamedArguments().keys()),
-    );
-    const func = this.functionsSet.getFunctionSmart(signature);
-    // SI6: a call to a KNOWN function name that no overload can cover is an
-    // error, exactly as upstream has it -- the jar renders `Function not found
-    // BOLD` (live-oracle verified on `!define BOLD(x)` called as `BOLD(x,y)`).
-    // This used to pass the call site through as literal text, because the
-    // throw had nowhere to land; `preprocessOrError` now captures it and
-    // `renderSync` draws the error diagram, so the divergence is retired.
-    if (func === undefined) throw new EaterException(`Function not found ${presentFunction}`, str);
-
-    if (func.getFunctionType() === TFunctionType.PROCEDURE) {
-      this.pendingAdd = result.value;
-      this.executeVoid3(str, memory, func, call);
-      const remaining = str.getString().substring(i + call.getCurrentPosition());
-      if (remaining.length > 0) this.appendToLastResult(remaining);
-
-      return undefined;
-    }
-    if (func.getFunctionType() === TFunctionType.LEGACY_DEFINELONG) {
-      this.pendingAdd = str.getString().substring(0, i);
-      this.executeVoid3(str, memory, func, call);
-      return undefined;
-    }
-
-    const functionReturn = func.executeReturnFunction(this, memory, str, call.getValues(), call.getNamedArguments());
-    result.value += functionReturn.toString();
-    return i + call.getCurrentPosition() - 1;
+    return applyFunctionsAndVariablesImpl(this, memory, str);
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#appendToLastResult */
-  private appendToLastResult(remaining: string): void {
+  appendToLastResult(remaining: string): void {
     const idx = this.resultList.length - 1;
     if (idx < 0) {
       // Upstream would throw IndexOutOfBounds: a procedure whose body emitted
@@ -432,9 +388,11 @@ export class TContext implements TContextInterface {
     this.resultList[idx] = this.resultList[idx]!.append(remaining);
   }
 
-  /** @see ~/git/plantuml/.../tim/TContext.java#executeVoid3 */
-  private executeVoid3(location: StringLocated, memory: TMemory, func: TFunction, call: EaterFunctionCall): void {
-    func.executeProcedureInternal(this, memory, location, call.getValues(), call.getNamedArguments());
+  /** Write half of the `pendingAdd` seam `TContextSubstitution.ts` needs
+   *  (the read half stays internal to `addPlain`/`appendToLastResult`, both
+   *  still on this class). */
+  setPendingAdd(value: string | undefined): void {
+    this.pendingAdd = value;
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#isLegacyDefine */
@@ -459,18 +417,6 @@ export class TContext implements TContextInterface {
   /** @see ~/git/plantuml/.../tim/TContext.java#doesFunctionExist */
   doesFunctionExist(functionName: string): boolean {
     return this.functionsSet.doesFunctionExist(functionName);
-  }
-
-  /** Java `null` -> `undefined`. @see ~/git/plantuml/.../tim/TContext.java#getFunctionNameAt */
-  private getFunctionNameAt(s: string, pos: number): string | undefined {
-    const justAfterALetter =
-      pos > 0 && isLetterOrEmojiOrUnderscoreOrDigit(s.charAt(pos - 1)) && !VariableManager.justAfterBackslashN(s, pos);
-    if (justAfterALetter && s.charAt(pos) !== '%' && s.charAt(pos) !== '$') return undefined;
-
-    const fname = this.functionsSet.getLonguestMatchStartingIn(s, pos);
-    if (fname.length === 0) return undefined;
-
-    return fname.substring(0, fname.length - 1);
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#getResultList */

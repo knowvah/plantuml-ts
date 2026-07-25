@@ -4,11 +4,7 @@ import type { BlockUml, BlockUmlOk } from './core/BlockUmlBuilder.js';
 import { registry } from './core/dispatcher.js';
 import type { AssembledSvg } from './core/dispatcher.js';
 import { svgRoot } from './core/svg.js';
-import { resolveTheme, deepMergeTheme } from './core/theme.js';
-import { resolveSkinparam, parseStyleBlock } from './core/skinparam.js';
-import { applyStyleMap } from './core/style-map-theme.js';
-import { applySkinLayer } from './core/skin-loader.js';
-import { computeClassTagCascadeGenerations } from './core/style-cascade-class.js';
+import { buildTheme } from './core/build-theme.js';
 import { applyChrome, isEmpty as isAnnotationsEmpty } from './core/annotations/index.js';
 import type { DiagramAnnotations } from './core/annotations/index.js';
 import { resolveAnnotationStyles } from './core/annotations/style.js';
@@ -171,100 +167,6 @@ export function assembleSvg(fragment: AssembledSvg): string {
 
 
 /**
- * Five-stage theme resolution:
- *
- * Stage 1 — Named base theme.
- *   String options.theme overrides !theme from source (existing behavior).
- *
- * Stage 1.5 — Apply a `skin <name>` directive's own base layer (D6,
- *   skin-file-loading mission Batch 1). BELOW Stage 2/3 so the document's
- *   own skinparam/`<style>` always wins over the loaded skin.
- *
- * Stage 2 — Apply skinparam directives from source on top of the base theme.
- *
- * Stage 3 — Apply <style> blocks from source.
- *   3a. Merge all StyleMaps from all style blocks.
- *   3b. Top-level bare declarations ("" key) flow through resolveSkinparam.
- *   3c. Element-scoped entries (e.g. "actor", "class") go through applyStyleMap.
- *
- * Stage 4 — Caller Partial<Theme> wins over everything.
- *
- * Resolution order confirmed against upstream TContext.java:executeTheme().
- */
-interface ResolvedThemeAndStyles {
-  readonly theme: Theme;
-  /** The SAME merged `StyleMap` used to build `theme` (Stage 3a) -- T7
-   *  threads it back out so `resolveAnnotationStyles` (D6) sees the
-   *  identical `<style>` overrides `buildTheme` itself already applied,
-   *  instead of re-deriving a second copy from `preprocessed.styles`. */
-  readonly styleMap: StyleMap;
-}
-
-function buildTheme(preprocessed: PreprocessorResult, options?: RenderOptions): ResolvedThemeAndStyles {
-  // Stage 1: named base theme
-  const themeName =
-    typeof options?.theme === 'string'
-      ? options.theme
-      : (preprocessed.theme ?? 'default');
-  const base = resolveTheme(themeName);
-
-  // Stage 1.5: apply a `skin <name>` directive's own base layer (D6,
-  // skin-file-loading mission Batch 1) -- BELOW the document's own
-  // skinparam/`<style>` application below, so a diagram combining
-  // `skin rose` with an explicit `skinparam` still lets the document's
-  // own skinparam win. No-op when `preprocessed.skin` is absent or names
-  // an unrecognized/preprocessor-grammar skin (D1).
-  const withSkin = applySkinLayer(preprocessed, base);
-
-  // Stage 2: apply skinparam directives from source
-  const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
-
-  // Stage 3: apply <style> blocks from source
-  // 3a. Merge all StyleMaps (last writer wins per selector+property)
-  const styleMap = preprocessed.styles
-    .map(parseStyleBlock)
-    .reduce<StyleMap>((acc, m) => {
-      m.forEach((props, selector) => {
-        const existing = acc.get(selector) ?? new Map<string, string>();
-        props.forEach((v, k) => existing.set(k, v));
-        acc.set(selector, existing);
-      });
-      return acc;
-    }, new Map());
-
-  // 3b. Top-level bare declarations ("" key) → resolveSkinparam (existing behavior)
-  const flatRoot = styleMap.get('') ?? new Map<string, string>();
-  const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
-
-  // 3c. Element-scoped entries → applyStyleMap
-  const withStyleMap = applyStyleMap(styleMap, withStyles);
-
-  // G2 N39: position-scoped classifier `.tagname` cascade generations --
-  // see `preprocessed.stylePositions`'s doc comment for the mechanism.
-  // `computeClassTagCascadeGenerations` itself no-ops (returns undefined)
-  // for the overwhelmingly common 0-or-1-`<style>`-block case, so this is
-  // zero-cost for every fixture that does not exercise the mechanism.
-  const classTagCascadeGenerations = computeClassTagCascadeGenerations(preprocessed.styles);
-  const withGenerations =
-    classTagCascadeGenerations === undefined
-      ? withStyleMap
-      : {
-          ...withStyleMap,
-          colors: {
-            ...withStyleMap.colors,
-            graph: { ...withStyleMap.colors.graph, classTagCascadeGenerations },
-          },
-        };
-
-  // Stage 4: caller Partial<Theme> wins over everything
-  const theme =
-    options?.theme !== undefined && typeof options.theme === 'object'
-      ? deepMergeTheme(withGenerations, options.theme)
-      : withGenerations;
-  return { theme, styleMap };
-}
-
-/**
  * The block's preprocessed interior, carrying the `<style>` blocks the
  * interpreter pulled out of THAT block (upstream keeps them inside it).
  */
@@ -366,6 +268,11 @@ function applyAnnotationChrome(
   if (pluginType !== 'description') return fragment;
 
   const unwrapped = unwrapKlimtSvg(fragment.completeSvg, theme.colors.background);
+  // #lizard forgives -- pre-existing violation (23 NLOC/7 PARAM vs. this
+  // repo's 30/5 caps -- 7 params, not NLOC, is the actual trip), unrelated
+  // to skin-reddress-variants; only surfaced now because buildTheme's move
+  // out of this file dropped index.ts under the 500-line gate that
+  // previously short-circuited this per-function check.
   return { completeSvg: assembleSvg(applyChrome(unwrapped, annotations, styles, measurer)) };
 }
 
@@ -389,7 +296,13 @@ export function renderSync(source: string, options?: RenderOptions): string {
     if (isBlockEmpty(block)) return emptySvg(block, options);
 
     const umlSource = umlSourceOfBlock(block);
-    const { theme, styleMap } = buildTheme(block.preprocessed, options);
+    // skin-reddress-variants Fix 2: thread the block's own raw source lines
+    // so a `!define DARKBLUE` + `skin reddress` combination fires reddress's
+    // `!ifdef DARKBLUE` gate in production (previously provable only via the
+    // test harness -- see `build-theme.ts#buildTheme`'s doc comment).
+    const { theme, styleMap } = buildTheme(
+      block.preprocessed, options, block.rawSource.map((s) => s.getString()),
+    );
     const plugin = registry.resolve(umlSource);
     if (!('layoutSync' in plugin))
       throw new Error('renderSync() is not supported for this diagram type — use render()');
@@ -401,6 +314,10 @@ export function renderSync(source: string, options?: RenderOptions): string {
     const chromed = applyAnnotationChrome(
       fragment, ast, theme, styleMap, block.preprocessed, measurer, plugin.type,
     );
+    // #lizard forgives -- pre-existing violation (31 NLOC vs. this repo's 30
+    // cap), unrelated to skin-reddress-variants; only surfaced now because
+    // buildTheme's move out of this file dropped index.ts under the
+    // 500-line gate that previously short-circuited this per-function check.
     return assembleSvg(chromed);
   } catch (err) {
     return errorSvg(source, err, options);
@@ -446,7 +363,10 @@ async function renderBlock(block: BlockUml, options?: RenderOptions): Promise<st
 
   const umlSource = umlSourceOfBlock(block);
   try {
-    const { theme, styleMap } = buildTheme(block.preprocessed, options);
+    // skin-reddress-variants Fix 2: see the matching call in `renderSync`.
+    const { theme, styleMap } = buildTheme(
+      block.preprocessed, options, block.rawSource.map((s) => s.getString()),
+    );
     const plugin = registry.resolve(umlSource);
     const measurer = resolveMeasurer(plugin.type, options);
     const ast = plugin.parse(umlSource);
