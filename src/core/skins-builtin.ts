@@ -1,580 +1,32 @@
 /**
- * Built-in PlantUML `<style>`-grammar skin stylesheets (`skin <name>`
- * directive) -- skin-file-loading mission, Batch 1 (decisions D1/D2).
+ * Built-in PlantUML skin stylesheets (`skin <name>` directive) --
+ * skin-file-loading mission, Batches 1 (D1/D2) and 4.
  *
  * Verbatim text of `~/git/plantuml/src/main/resources/skin/<name>.skin`
- * (upstream jar resources) -- the SAME `<style>`-block grammar
- * (`parseStyleBlock`, `src/core/skinparam.ts`) an inline `<style>` block
- * uses, so `skin-loader.ts` parses and applies these with NO new parser.
+ * (upstream jar resources). Two grammars (D1), both routed by
+ * `skin-loader.ts` to the SAME machinery an inline document already uses
+ * for that grammar -- no new parser either way:
  *
- * Only the three skins that use this grammar are embedded: `rose`,
- * `debug`, `strictuml` (verified by parsing each -- root {}/element {}/
- * <diagramType> {} blocks throughout, no `!`-prefixed preprocessor
- * directive or bare `skinparam` line anywhere). `reddress` and
- * `sonyxperiadev` use a DIFFERENT grammar (TIM preprocessor macros +
- * bare `skinparam` lines) and are deliberately NOT embedded here -- D1,
- * Batch 4. `plantuml.skin` is already the baked-in root default
- * (`resolveTheme`'s own default theme) and is not re-embedded either --
- * a `skin <name>` file layers ON TOP of it (D2), it does not replace it.
+ *  - `rose`, `debug`, `strictuml`: `<style>`-block grammar (`root {}`/
+ *    `element {}`/`<diagramType> {}`) -- `parseStyleBlock`.
+ *  - `reddress`, `sonyxperiadev`: TIM preprocessor macros (`!ifndef`/
+ *    `!define`/`!ifdef`) and/or bare `skinparam`/`SkinParam` lines, NOT
+ *    `<style>` blocks -- `preprocess()` + `resolveSkinparam` (Batch 4).
+ *
+ * `plantuml.skin` is already the baked-in root default (`resolveTheme`'s
+ * own default theme) and is not re-embedded either -- a `skin <name>`
+ * file layers ON TOP of it (D2), it does not replace it.
  *
  * Keys are the skin name exactly as PlantUML's `skin` directive spells
  * it, lowercased -- `skin-loader.ts` lowercases the captured directive
  * argument before lookup (mirrors `BUILTIN_THEMES`' own case convention,
  * `themes-builtin.ts`).
  */
+import { ROSE_SKIN_PART1 } from './skins-builtin-rose-1.js';
+import { ROSE_SKIN_PART2 } from './skins-builtin-rose-2.js';
+
 export const BUILTIN_SKINS: Readonly<Record<string, string>> = {
-  rose: `root {
-  FontName SansSerif
-  HyperLinkColor blue
-  HyperLinkUnderlineThickness 1
-  FontColor black
-  FontSize 14
-  FontStyle plain
-  HorizontalAlignment left
-  RoundCorner 0
-  DiagonalCorner 0
-  LineThickness 1.0
-  LineColor #A80036
-  BackGroundColor #FEFECE
-  Shadowing 0.0
-}
-
-document {
-  BackGroundColor white
-  header {
-    HorizontalAlignment right
-    FontSize 10
-    FontColor #8
-    BackGroundColor transparent
-    LineColor transparent
-  }
-  title {
-    HorizontalAlignment center
-    FontSize 14
-    FontStyle bold
-    Padding 5
-    Margin 5
-    LineColor transparent
-    BackGroundColor transparent
-  }
-  footer {
-    HorizontalAlignment center
-    FontSize 10
-    FontColor #8
-    BackGroundColor transparent
-    LineColor transparent
-  }
-  legend {
-    LineColor black
-    BackGroundColor #d
-    FontSize 14
-    RoundCorner 15
-    Padding 6
-    Margin 8
-  }
-  caption {
-    HorizontalAlignment center
-    FontSize 14
-    Padding 0
-    Margin 1
-    LineColor transparent
-    BackGroundColor transparent
-  }
-  frame {
-    LineColor black
-    LineThickness 1.5
-  }
-}
-
-stereotype {
-  FontStyle italic
-}
-
-
-
-element {
-  Shadowing 4.0
-  composite {
-    title {
-      FontStyle bold
-    }
-  }
-}
-
-artifact {
-  Shadowing 4.0
-}
-node {
-  Shadowing 2.0
-}
-person {
-  Shadowing 2.0
-}
-queue {
-  Shadowing 2.0
-}
-rectangle {
-  Shadowing 3.0
-}
-stack {
-  Shadowing 3.0
-}
-storage {
-  Shadowing 3.0
-}
-boundary {
-  Shadowing 4.0
-}
-card {
-  Shadowing 3.0
-}
-cloud {
-  Shadowing 3.0
-}
-collections {
-  Shadowing 3.0
-}
-component {
-  Shadowing 4.0
-}
-database {
-  Shadowing 3.0
-}
-file {
-  Shadowing 3.0
-}
-frame {
-  Shadowing 3.0
-}
-folder {
-  Shadowing 3.0
-}
-group {
-  package {
-    LineThickness 1.5
-    LineColor black
-  }
-  folder {
-    LineThickness 1.5
-    LineColor black
-  }
-}
-
-group {
-    BackGroundColor transparent
-}
-
-componentDiagram {
-  node, rectangle {
-    LineColor black
-    LineThickness 1.5
-  }
-}
-
-
-sequenceDiagram {
-  group {
-    LineColor black
-    LineThickness 2.0
-    FontSize 11
-    FontStyle bold
-  }
-
-  groupHeader {
-    BackGroundColor #e
-    LineColor black
-    FontSize 13
-    FontStyle bold
-  }
-
-  lifeLine {
-    LineStyle 5
-  }
-
-  activationBox {
-    BackGroundColor white
-  }
-
-
-	destroy {
-	}
-
-	reference {
-	  FontSize 12
-	  LineColor black
-	  BackGroundColor white
-	  LineThickness 2.0
-	  HorizontalAlignment center
-	}
-
-	referenceHeader {
-	  LineColor black
-	  BackGroundColor #e
-	  FontColor black
-	  FontSize 13
-	  FontStyle bold
-	  LineThickness 2.0
-	}
-
-	box {
-	  BackGroundColor #d
-
-	  FontSize 13
-	  FontStyle bold
-	}
-
-	separator {
-	  LineColor black
-	  LineThickness 2.0
-	  BackGroundColor #e
-
-	  FontSize 13
-	  FontStyle bold
-	  Padding 4
-	}
-
-	participant,actor,boundary,control,entity,queue,database,collections {
-	  Padding 7
-	}
-
-}
-
-classDiagram {
-}
-
-visibilityIcon {
-  public {
-    LineColor #038048
-    BackgroundColor #84BE84
-  }
-  private {
-    LineColor #C82930
-    BackgroundColor #F24D5C
-  }
-  protected {
-    LineColor #B38D22
-    BackgroundColor #FFFF44
-  }
-  package {
-    LineColor #1963A0
-    BackgroundColor #4177AF
-  }
-  IEMandatory {
-    LineColor black
-    BackgroundColor black
-  }
-}
-
-spot {
-  spotAnnotation {
-    BackgroundColor #E3664A
-  }
-  spotAbstractClass {
-    BackgroundColor #A9DCDF
-  }
-  spotClass {
-    BackgroundColor #ADD1B2
-  }
-  spotInterface {
-    BackgroundColor #B4A7E5
-  }
-  spotEnum {
-    BackgroundColor #EB937F
-  }
-  spotEntity {
-    BackgroundColor #ADD1B2
-  }
-}
-
-
-stateDiagram {
-  state {
-    RoundCorner 25
-  }
-  element {
-	title {
-	  FontStyle plain
-	}
-  }
-  circle {
-    start, stop, end {
-	    LineColor black
-	    BackgroundColor black
-    }
-  }
-}
-
-
-delay {
-  FontSize 11
-  FontStyle plain
-  HorizontalAlignment center
-}
-
-participant {
-  LineThickness 1.5
-  HorizontalAlignment center
-}
-
-actor {
-  LineThickness 2.0
-  HorizontalAlignment center
-}
-
-boundary {
-  LineThickness 2.0
-  HorizontalAlignment center
-}
-
-control {
-  LineThickness 2.0
-  HorizontalAlignment center
-}
-
-entity {
-  LineThickness 2.0
-  HorizontalAlignment center
-}
-
-queue {
-  LineThickness 2.0
-  HorizontalAlignment center
-}
-
-database {
-  HorizontalAlignment center
-}
-
-collections {
-  LineThickness 1.5
-  HorizontalAlignment center
-}
-
-swimlane {
-  BackGroundColor transparent
-  LineColor black
-  LineThickness 2
-  FontSize 18
-}
-
-diamond {
-  Shadowing 3.0
-}
-
-arrow {
-  FontSize 13
-  BackGroundColor black
-}
-
-note {
-  FontSize 13
-  BackGroundColor #FBFB77
-}
-
-partition {
-}
-
-circle {
-}
-
-mindmapDiagram {
-}
-
-mindmapDiagram {
-	node {
-	    Padding 10
-	    Margin 10
-	    RoundCorner 25
-	    LineThickness 1.5
-	}
-	arrow {
-	    LineThickness 1.0
-	}
-}
-
-
-wbsDiagram {
-    Padding 10
-    Margin 15
-    RoundCorner 0
-    LineThickness 1.5
-    FontSize 12
-}
-
-activityDiagram {
-  Shadowing 3.0
-}
-
-activityDiagram {
-	activity {
-	    LineThickness 1.5
-	    Padding 10
-	    FontSize 12
-	    RoundCorner 25
-	}
-	composite {
-	    LineColor black
-	    BackgroundColor transparent
-	}
-	diamond {
-	    FontSize 11
-	}
-	arrow {
-	    FontSize 11
-	}
-	circle {
-	    start, stop, end {
-		    LineColor black
-		    BackgroundColor black
-	    }
-	}
-	activityBar {
-	  Shadowing 3.0
-	  BackgroundColor black
-	}
-}
-
-
-task {
-    FontSize 11
-}
-
-milestone {
-    FontSize 11
-	BackGroundColor black
-	LineColor black
-}
-
-ganttDiagram {
-	arrow {
-	  LineThickness 1.5
-	}
-	note {
-	  FontSize 9
-      Shadowing 0.0
-	}
-	separator {
-	  FontSize 11
-	  FontStyle plain
-	  BackGroundColor transparent
-	  Margin 5
-	  Padding 5
-	}
-	timeline {
-	    BackgroundColor transparent
-	    LineColor #C0C0C0
-	}
-	closed {
-        BackGroundColor #E0E8E8
-        FontColor #909898
-    }
-	task {
-		RoundCorner 0
-        Margin 2 2 2 2
-        Padding 0
-	}
-	undone {
-        BackGroundColor white
-	}
-	milestone {
-        Margin 2
-        Padding 3
-	}
-}
-
-
-usecase {
-  HorizontalAlignment center
-}
-
-yamlDiagram,jsonDiagram {
-  BackGroundColor white
-  FontColor black
-  LineColor black
-  arrow {
-    LineThickness 1
-    LineStyle 3-3
-  }
-  node {
-    LineThickness 1.5
-  	RoundCorner 10
-  	separator {
-      LineThickness 1
-  	}
-  	header {
-  	  FontStyle bold
-  	}
-    highlight {
-	  BackGroundColor #ccff02
-    }
-  }
-}
-
-
-timingDiagram {
-	LineColor #3
-	FontColor #3
-	FontStyle bold
-    LineThickness 1.5
-    timeline {
-	  FontStyle plain
-	  FontSize 11
-    }
-	arrow {
-	    FontName Serif
-	    FontSize 14
-	    FontStyle plain
-	    FontColor darkblue
-	    LineColor darkblue
-	    LineThickness 1.5
-	}
-	constraintArrow {
-	    FontSize 12
-		FontStyle plain
-	    FontColor darkred
-	    LineColor darkred
-	    LineThickness 1.5
-	}
-	clock {
-	  LineColor darkgreen
-	}
-	concise {
-	  FontSize 12
-	  LineColor darkgreen
-	  BackgroundColor #c
-      LineThickness 1.5
-	}
-	robust {
-	  FontStyle plain
-	  FontSize 12
-	  LineColor darkgreen
-      LineThickness 2
-	  BackgroundColor #c
-	}
-	highlight {
-	  BackgroundColor #e
-	  LineThickness 2
-	  LineStyle 4-4
-	}
-}
-
-nwdiagDiagram {
-	network {
-		FontSize 12
-		Shadowing 1.0
-	}
-	server {
-		FontSize 12
-	}
-	group {
-		FontSize 12
-		BackGroundColor #ddd
-	}
-	arrow {
-		FontSize 11
-	}
-}
-`,
+  rose: ROSE_SKIN_PART1 + ROSE_SKIN_PART2,
   debug: `root {
   FontName SansSerif
   HyperLinkColor red
@@ -807,5 +259,159 @@ node {
 element {
   Shadowing 0.0
 }
+`,
+  reddress: `!ifndef FONTNAME
+!define FONTNAME "Verdana"
+!endif
+
+!ifndef FONTSIZE
+!define FONTSIZE 11
+!endif
+
+!ifdef DARKBLUE
+skinparam backgroundColor 777
+!define ACCENT 1a66c2
+!define ACCENTDARK 002642
+skinparam stereotypeCBackgroundColor ACCENT
+!define DARKSTYLE
+!endif
+!ifdef LIGHTBLUE
+!define ACCENT 2a86e2
+!define ACCENTDARK 1a66c2
+skinparam stereotypeCBackgroundColor ACCENTDARK
+!define LIGHTSTYLE
+!endif
+
+!ifdef DARKRED
+!define ACCENT 880000
+!define ACCENTDARK 330000
+skinparam stereotypeCBackgroundColor ACCENT
+!define DARKSTYLE
+!endif
+!ifdef LIGHTRED
+!define ACCENT CC0033
+!define ACCENTDARK AA0033
+skinparam stereotypeCBackgroundColor ACCENTDARK
+!define LIGHTSTYLE
+!endif
+
+!ifdef DARKGREEN
+!define ACCENT 228811
+!define ACCENTDARK 113300
+skinparam stereotypeCBackgroundColor ACCENT
+!define DARKSTYLE
+!endif
+!ifdef LIGHTGREEN
+!define ACCENT 55BB33
+!define ACCENTDARK 338822
+skinparam stereotypeCBackgroundColor ACCENTDARK
+!define LIGHTSTYLE
+!endif
+
+!ifdef DARKORANGE
+!define ACCENT BB6600
+!define ACCENTDARK 662200
+skinparam stereotypeCBackgroundColor ACCENT
+!define DARKSTYLE
+!endif
+!ifdef LIGHTORANGE
+!define ACCENT FF8800
+!define ACCENTDARK BB6600
+skinparam stereotypeCBackgroundColor ACCENT
+!define LIGHTSTYLE
+!endif
+
+!ifdef LIGHTSTYLE
+!define PRIMARY 000
+!define SECONDARY 333
+!define ARROWCOLOR 000
+!define ARROWFONTCOLOR 333
+!define BORDERCOLOR aaa
+!define BOXBG ccc
+skinparam backgroundColor fff
+!endif
+
+!ifdef DARKSTYLE
+!define PRIMARY fff
+!define SECONDARY aaa
+!define ARROWCOLOR fff
+!define ARROWFONTCOLOR bbb
+!define BORDERCOLOR 1b1b1b
+!define BOXBG 2e2e2e
+skinparam backgroundColor 777
+!endif
+
+
+skinparam circledCharacter {
+  radius 8
+  fontSize FONTSIZE
+  fontName FONTNAME
+}
+
+skinparam class {
+  backgroundColor BOXBG
+  borderColor BORDERCOLOR
+
+  fontColor PRIMARY
+  fontName FONTNAME
+  fontSize FONTSIZE
+
+	arrowColor ARROWCOLOR
+	arrowFontName FONTNAME
+	arrowFontColor ARROWFONTCOLOR
+	arrowFontSize FONTSIZE
+
+  attributeFontColor SECONDARY
+  attributeFontSize FONTSIZE
+  attributeIconSize FONTSIZE
+  stereotypeFontColor SECONDARY
+  stereotypeFontSize FONTSIZE
+}
+
+skinparam note {
+  backgroundColor ACCENT
+  borderColor ACCENTDARK
+
+  fontColor PRIMARY
+  fontName FONTNAME
+  fontSize FONTSIZE
+}`,
+  sonyxperiadev: `SkinParam BackgroundColor #white
+SkinParam Shadowing false
+SkinParam SequenceMessageAlign center
+SkinParam DefaultFontName Arial
+SkinParam DefaultFontStyle bold
+SkinParam DefaultFontColor #333333
+
+SkinParam NoteBackgroundColor #fbfb77
+SkinParam NoteBorderColor #cbcb47
+
+SkinParam NoteBackgroundColor #ffffcd
+SkinParam NoteBorderColor #a9a980
+SkinParam NoteFontColor #676735
+SkinParam NoteFontStyle italic
+
+SkinParam SequenceArrowColor #555555
+SkinParam SequenceArrowFontColor #555555
+SkinParam SequenceArrowFontStyle none
+
+SkinParam SequenceBoxBackgroundColor #fafafa
+SkinParam SequenceBoxBorderColor #eeeeee
+SkinParam SequenceBoxFontColor #666666
+SkinParam SequenceBoxFontSize 12
+SkinParam SequenceBoxFontStyle italic
+
+SkinParam ParticipantBackgroundColor #dde5ff
+SkinParam ParticipantBorderColor #cccccc
+SkinParam ParticipantFontColor #333333
+SkinParam ParticipantFontStyle bold
+
+SkinParam DatabaseBackgroundColor #df4646
+SkinParam DatabaseFontColor #red
+SkinParam DatabaseFontStyle bold
+
+SkinParam EntityBackgroundColor #999999
+
+SkinParam SequenceLifeLineBorderColor #bbbbbb
 `,
 };

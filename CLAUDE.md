@@ -94,6 +94,17 @@ tooling, test harness, CI.)
   fixtures or docs, it is in scope.
 - Upstream's `.puml` corpus is the spec and the work queue, not a post-hoc
   validation suite — every fixture encodes a real case someone hit.
+- **The corpus is a starting point, not a ceiling — author fixtures to cover
+  gaps.** The ~5600 upstream fixtures are what someone happened to hit and
+  file; real PlantUML features have zero coverage there (e.g. the bundled skins
+  `reddress`/`sonyxperiadev` are exercised by NO upstream fixture). When a
+  feature has no fixture, do NOT skip it or verify only synthetically — WRITE
+  new `.puml` fixtures that exercise it and generate their jar oracles (`java
+  -DPLANTUML_DUMP_DOT=<dir> -jar oracle/dist/plantuml-oracle.jar -tsvg -o <dir>
+  <puml>`, the pinned oracle jar; `scripts/oracle-corpus.ts#runOracle`), then
+  implement and verify against them. Skins change colors/fonts (SVG), not
+  structure (DOT), so byte-exact SVG golden comparison is the right gate for
+  them, not DOT-parity. "One can do better" than upstream's coverage.
 - The bar is "pleasing aesthetic alignment with upstream," not "produces a
   correct diagram." Layout, spacing, label placement, edge routing, and styling
   all count; a structurally-correct diagram that looks worse than upstream is a
