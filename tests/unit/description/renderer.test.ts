@@ -1366,3 +1366,69 @@ describe('assembleKlimtShell (G1 I1)', () => {
     expect(doc.endsWith('<g class="mark">X</g></svg>')).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// mission skin-file-loading (deferred D3 item): entity + cluster drop
+// shadow. `resolveElementShadowing(theme, node.symbol) > 0` -> a klimt
+// `deltaShadow`/`shadowing` value threaded into `EntityImageDescription`/
+// `Cluster` (both already draw the shadow given a nonzero value — see
+// `renderer-entity.ts`/`renderer-cluster.ts`'s own doc comments). Jar-
+// verified malado-53-noso561 (`skinparam databaseShadowing true`).
+// ---------------------------------------------------------------------------
+describe('renderDescription — entity/cluster shadow (deferred D3 item)', () => {
+  it('a leaf entity with a per-sname shadowing override draws the shared filter + filter attr', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { elements: { database: { shadowing: 3 } } },
+    });
+    const geo = makeGeo({ nodes: [makeDNode({ symbol: 'database' })] });
+    const svg = renderDescription(geo, theme);
+    expect(svg).toContain('<filter');
+    expect(svg).toContain('feGaussianBlur');
+    expect(svg).toContain('filter="url(#');
+  });
+
+  it('emits no filter at all when no element/diagram shadowing is set (byte-identical bar)', () => {
+    const geo = makeGeo({ nodes: [makeDNode({ symbol: 'database' })] });
+    const svg = renderDescription(geo, defaultTheme);
+    expect(svg).not.toContain('<filter');
+    expect(svg).not.toContain('filter="url(');
+  });
+
+  it('a sibling sname with no bucket override draws no shadow even when another sname has one ' +
+    '(malado-53-noso561: actor false, database true)', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { elements: { database: { shadowing: 3 }, actor: { shadowing: 0 } } },
+    });
+    const geo = makeGeo({
+      nodes: [
+        makeDNode({ id: 'n1', symbol: 'database', x: 10, y: 10 }),
+        makeDNode({ id: 'n2', symbol: 'actor', x: 150, y: 10 }),
+      ],
+    });
+    const svg = renderDescription(geo, theme);
+    // Exactly one shadowed shape -> exactly one filter reference.
+    expect(svg.match(/filter="url\(#/g)?.length).toBe(1);
+  });
+
+  it('a container (cluster) node with a shadowed USymbol bucket draws the filter attr on its box', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { elements: { package: { shadowing: 3 } } },
+    });
+    const geo = makeGeo({
+      nodes: [
+        makeDNode({
+          id: 'pkg1',
+          symbol: 'package',
+          display: 'pkg1',
+          x: 5,
+          y: 5,
+          width: 150,
+          height: 100,
+          children: [makeDNode({ id: 'n1', symbol: 'component', x: 20, y: 30 })],
+        }),
+      ],
+    });
+    const svg = renderDescription(geo, theme);
+    expect(svg).toContain('filter="url(#');
+  });
+});

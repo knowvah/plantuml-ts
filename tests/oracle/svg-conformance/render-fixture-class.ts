@@ -21,6 +21,7 @@ import type { PreprocessOptions, PreprocessorResult } from '../../../src/core/pr
 import { resolveTheme } from '../../../src/core/theme.js';
 import { resolveSkinparam, parseStyleBlock } from '../../../src/core/skinparam.js';
 import { applyStyleMap } from '../../../src/core/style-map-theme.js';
+import { applySkinLayer } from '../../../src/core/skin-loader.js';
 import { computeClassTagCascadeGenerations } from '../../../src/core/style-cascade-class.js';
 import type { Theme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
@@ -40,7 +41,15 @@ interface ResolvedThemeAndStyles {
 
 function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAndStyles {
   const base = resolveTheme(preprocessed.theme ?? 'default');
-  const withSkinparam = resolveSkinparam(preprocessed.skinparam, base).theme;
+  // mission skin-file-loading Batch 1 (D6) / deferred D3 item: mirrors
+  // src/index.ts#buildTheme's own Stage 1.5 -- applied BEFORE the
+  // document's own skinparam so the document always wins. Previously
+  // missing from this harness (only render-fixture-state.ts had it),
+  // so a `skin rose` class fixture never saw its loaded Shadowing value
+  // under this test pipeline even though production (`src/index.ts`)
+  // already resolved it correctly.
+  const withSkin = applySkinLayer(preprocessed, base);
+  const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
 
   const styleMap = preprocessed.styles
     .map(parseStyleBlock)

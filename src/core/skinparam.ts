@@ -290,6 +290,35 @@ function matchElementFontSizeKey(
   return undefined;
 }
 
+/**
+ * mission skin-file-loading (deferred D3 item): `<sname>Shadowing`
+ * (`<sname>` a bucket SName -- `ELEMENT_BUCKET_SNAMES`), the per-element
+ * skinparam form of `Theme.shadowing`/`ElementColors.shadowing`'s own doc
+ * comment. Mirrors `matchElementFontSizeKey`'s identical suffix-match shape;
+ * the bare (no-sname) `shadowing` key is handled as its OWN switch case
+ * (below), not here -- an empty `sname` slice is never a bucket SName.
+ */
+function matchElementShadowingKey(key: string): { sname: string } | undefined {
+  const suffix = 'shadowing';
+  if (!key.endsWith(suffix)) return undefined;
+  const sname = key.slice(0, key.length - suffix.length);
+  return ELEMENT_BUCKET_SNAMES.has(sname) ? { sname } : undefined;
+}
+
+/**
+ * Upstream `FromSkinparamToStyle.java#getShadowingValue`: `false`/`no` ->
+ * `0`, `true`/`yes` -> `3`, else the raw numeric value passed through.
+ * Returns `undefined` for a non-numeric, non-boolean-word value (mirrors
+ * this file's other numeric parsers' `Number.isFinite` guard).
+ */
+function parseShadowingValue(value: string): number | undefined {
+  const lower = value.toLowerCase();
+  if (lower === 'false' || lower === 'no') return 0;
+  if (lower === 'true' || lower === 'yes') return 3;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 // G2 N51: `skinparam classBorderThickness<<X>>` -- the ONE stereotype-
 // qualified skinparam key this port models (see `resolveSkinparam`'s own
 // `<<` early-branch comment for why the rest stay in `unknown[]`). Built
@@ -362,6 +391,10 @@ export function resolveSkinparam(
   let monochrome: 'true' | 'reverse' | undefined;
   let packageStyle: 'rect' | undefined;
   let fixCircleLabelOverlapping: boolean | undefined;
+  // mission skin-file-loading (deferred D3 item): bare `skinparam
+  // shadowing N/true/false` -- the global root/element form,
+  // `Theme.shadowing`'s own doc comment.
+  let shadowing: number | undefined;
   let background: string | undefined;
   let border: string | undefined;
   let text: string | undefined;
@@ -668,6 +701,11 @@ export function resolveSkinparam(
       case 'fixcirclelabeloverlapping':
         fixCircleLabelOverlapping = value.trim().toLowerCase() === 'true';
         break;
+      case 'shadowing': {
+        const parsed = parseShadowingValue(value);
+        if (parsed !== undefined) shadowing = parsed;
+        break;
+      }
       case 'classbackgroundcolor':
         classBackground = color;
         break;
@@ -837,6 +875,19 @@ export function resolveSkinparam(
             break;
           }
         }
+        // mission skin-file-loading (deferred D3 item): `<sname>Shadowing`
+        // (`skinparam databaseShadowing true` / `skinparam actor {
+        // Shadowing false }`) → per-element bucket. Jar-verified
+        // malado-53-noso561.
+        const shadowElem = matchElementShadowingKey(key);
+        if (shadowElem !== undefined) {
+          const parsedShadow = parseShadowingValue(value);
+          if (parsedShadow !== undefined) {
+            const bucket = (elements[shadowElem.sname] ??= {});
+            bucket.shadowing = parsedShadow;
+            break;
+          }
+        }
         unknown.push(key);
       }
     }
@@ -926,6 +977,7 @@ export function resolveSkinparam(
   if (monochrome !== undefined) partial.monochrome = monochrome;
   if (packageStyle !== undefined) partial.packageStyle = packageStyle;
   if (fixCircleLabelOverlapping !== undefined) partial.fixCircleLabelOverlapping = fixCircleLabelOverlapping;
+  if (shadowing !== undefined) partial.shadowing = shadowing;
 
   if (hasColorsOverride) {
     const graphOverride: Partial<Theme['colors']['graph']> = {};

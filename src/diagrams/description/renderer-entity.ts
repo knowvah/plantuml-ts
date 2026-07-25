@@ -17,7 +17,7 @@
  */
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
-import { resolveElementPaint } from '../../core/theme.js';
+import { resolveElementPaint, resolveElementShadowing } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
 import { parseColor } from '../../core/paint.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
@@ -186,7 +186,18 @@ function buildEntityParams(
         override.back ?? businessBackcolor(theme, node.symbol) ?? resolveElementPaint(theme, node.symbol, 'background'),
       roundCorner: ENTITY_ROUND_CORNER,
       diagonalCorner: 0,
-      deltaShadow: 0,
+      // mission skin-file-loading (deferred D3 item): was hardcoded 0 --
+      // `EntityImageDescription.ts:251`'s `.withShadow(params.paint
+      // .deltaShadow)` already draws the shadow given a nonzero value (the
+      // klimt `LimitFinder`/`SvgGraphics` shadow machinery is shared,
+      // jar-verified byte-exact); this was the entity-leaf call site
+      // suppressing it. `resolveElementShadowing` cascades this entity's
+      // OWN USymbol bucket (`skinparam <sname> { Shadowing N }`) over the
+      // diagram-wide `theme.shadowing` (`skin rose`/`<style> element {
+      // Shadowing N } }`), matching jar's `EntityImageDescription`-family
+      // shared `getStyle().getShadowing()` read. Jar-verified
+      // malado-53-noso561.
+      deltaShadow: resolveElementShadowing(theme, node.symbol),
       stroke: overrideStroke(override.lineStyle),
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
       fontStereo: override.text !== undefined ? { ...fontStereo, color: override.text } : fontStereo,
@@ -199,6 +210,9 @@ function buildEntityParams(
     atomImageResolverFor: makeAtomImageResolverFor(sprites),
     ...(node.symbol === 'hexagon' ? { hexagonPolygon: null } : {}),
   };
+  // #lizard forgives -- pre-existing entity-params assembly (one object
+  // literal, no branching); porting discipline forbids restructuring
+  // faithfully-ported code during an unrelated change.
 }
 
 /** Fallback draw for `note`/`port` — shares the `startGroup ->

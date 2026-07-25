@@ -29,6 +29,7 @@ import { ASSOC_POINT_SIZE, LOLLIPOP_SIZE } from './class-lollipop.js';
 import { renderClassifierBox, renderRow } from './renderer-classifier-box.js';
 import { renderNamespaceFolder, renderNamespaceRect, renderEmptyPackageIcon } from './class-namespace-shape.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
+import { buildClassShadowFilterDef } from './class-shadow.js';
 
 // ---------------------------------------------------------------------------
 // Association-class-couple "point" entity (`(A,B) .. C`)
@@ -496,6 +497,16 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
         ? applyMonochromeHex(resolvedHoverHex, theme.monochrome)
         : resolvedHoverHex;
     extraDefs += `<style type="text/css"><![CDATA[path:hover { stroke: ${hoverHex} !important;}]]></style>`;
+  }
+
+  // mission skin-file-loading (deferred D3 item): ONE shared shadow filter
+  // def per diagram, gated on the SAME `theme.shadowing > 0` diagram-level
+  // check `class-shadow.ts#buildClassShadowFilterDef`'s own doc comment
+  // establishes (mirrors `state/renderer.ts`'s identical Batch-2 gate) --
+  // byte-identical (empty extraDefs) for every pre-mission/shadow-off
+  // fixture.
+  if (theme.shadowing !== undefined && theme.shadowing > 0) {
+    extraDefs += buildClassShadowFilterDef();
   }
 
   // G2 N4/N48: full-canvas background rect, ONLY for a non-default

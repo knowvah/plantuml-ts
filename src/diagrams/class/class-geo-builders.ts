@@ -35,12 +35,20 @@ import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry } from './layout.js';
 
-/** Build ClassifierGeo entries from pre-measured sizes + dot-assigned positions. */
+/**
+ * Build ClassifierGeo entries from pre-measured sizes + dot-assigned
+ * positions.
+ *
+ * mission skin-file-loading (deferred D3 item): `theme` is a NEW param,
+ * consumed ONLY for `shadowing` (`drawsBorderedBox` below) -- every other
+ * field's derivation is unchanged (theme-independent, pre-existing).
+ */
 export function buildClassifierGeos(
   ast: ClassDiagramAST,
   measuredMap: Map<string, MeasuredClassifier>,
   posMap: Map<string, DotLayoutResult['nodes'][number]>,
   hiddenIds: ReadonlySet<string>,
+  theme: Theme,
 ): ClassifierGeo[] {
   const classifiers: ClassifierGeo[] = [];
   for (const classifier of ast.classifiers) {
@@ -88,9 +96,38 @@ export function buildClassifierGeos(
       ...(classifier.styleGeneration !== undefined
         ? { styleGeneration: classifier.styleGeneration }
         : {}),
+      // mission skin-file-loading (deferred D3 item): see
+      // `ClassifierGeo.shadowing`'s own doc comment (class-geo-types.ts)
+      // for the full jar-verified mechanism and the eligibility gate
+      // `drawsBorderedBox` below reproduces.
+      ...(theme.shadowing !== undefined &&
+      theme.shadowing > 0 &&
+      drawsBorderedBox(classifier, measured)
+        ? { shadowing: theme.shadowing }
+        : {}),
     });
   }
   return classifiers;
+}
+
+/**
+ * True for every classifier kind that reaches `renderer-classifier-box.ts
+ * #renderClassifierBox`'s bordered-rect draw path -- mirrors `renderer.ts
+ * #renderClassifier`'s own dispatch order EXACTLY (assoc-circle and a
+ * folder-tab leaf are unwrapped BEFORE `renderClassifier` is ever called,
+ * `renderer.ts`'s own classifier-loop comments; lollipop and a
+ * `tryRenderUSymbol`-served icon kind decline inside it). See
+ * `ClassifierGeo.shadowing`'s own doc comment for why only THESE kinds are
+ * eligible (jar draws the shadow via `EntityImageClass`/`Object`/`Map`/
+ * `Json`'s shared `setDeltaShadow` on the outer bordered rect -- a
+ * different jar image class, with no shadow, draws every other kind here).
+ */
+function drawsBorderedBox(classifier: ClassDiagramAST['classifiers'][number], measured: MeasuredClassifier): boolean {
+  if (classifier.kind === 'assoc-circle' || classifier.kind === 'lollipop') return false;
+  if (measured.folderTab !== undefined) return false;
+  if (classifier.kind === 'usecase') return false;
+  if (classifier.usymbol !== undefined) return false;
+  return true;
 }
 
 /**

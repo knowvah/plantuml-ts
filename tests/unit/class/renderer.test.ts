@@ -1716,3 +1716,49 @@ describe('renderClass — classCascadeRoundCorner from a bare skinparam (G2 N65 
     expect(svg).toContain('ry="2.5"');
   });
 });
+
+// ---------------------------------------------------------------------------
+// mission skin-file-loading (deferred D3 item): classifier-box drop shadow.
+// `geo.shadowing > 0` -> `filter="url(#classShadow)"` on the bordered rect
+// + a shared `<filter>` def, gated diagram-wide on `theme.shadowing`.
+// Jar-verified filoxo-23-fafi328/rakopi-21-sufa571 (skin rose, Shadowing 4.0).
+// ---------------------------------------------------------------------------
+describe('renderClass — classifier-box shadow (deferred D3 item)', () => {
+  it('emits the shared filter def + filter="url(#classShadow)" on a shadowed classifier', () => {
+    const geo = makeMinimalGeo({
+      classifiers: [makeClassifierGeo('Foo', 'Foo', { shadowing: 4 })],
+    });
+    const theme = deepMergeTheme(defaultTheme, { shadowing: 4 });
+    const svg = assembleSvg(renderClass(geo, theme));
+    expect(svg).toContain(
+      '<filter id="classShadow" x="-1" y="-1" width="300%" height="300%">' +
+        '<feGaussianBlur result="blurOut" stdDeviation="2"/>' +
+        '<feColorMatrix type="matrix" in="blurOut" result="blurOut2" ' +
+        'values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/>' +
+        '<feOffset result="blurOut3" in="blurOut2" dx="4" dy="4"/>' +
+        '<feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/>' +
+        '</filter>',
+    );
+    expect(svg).toContain('filter="url(#classShadow)"');
+  });
+
+  it('emits neither the filter def nor the attribute when shadowing is 0/unset (byte-identical bar)', () => {
+    const geo = makeMinimalGeo({ classifiers: [makeClassifierGeo('Foo', 'Foo')] });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).not.toContain('<filter');
+    expect(svg).not.toContain('filter="url(');
+  });
+
+  it('a diagram-wide theme.shadowing with no geo.shadowing on the classifier draws no filter attr ' +
+    '(object/map/json/degenerate paths that never set the field)', () => {
+    const geo = makeMinimalGeo({
+      classifiers: [makeClassifierGeo('Foo', 'Foo')], // no shadowing field
+    });
+    const theme = deepMergeTheme(defaultTheme, { shadowing: 4 });
+    const svg = assembleSvg(renderClass(geo, theme));
+    // The shared filter def still emits (diagram-level gate), but no shape
+    // references it.
+    expect(svg).toContain('<filter id="classShadow"');
+    expect(svg).not.toContain('filter="url(');
+  });
+});
