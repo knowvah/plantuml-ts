@@ -8,10 +8,8 @@ describe('applySkinLayer -- skin-file-loading mission Batch 1', () => {
     expect(result).toBe(defaultTheme);
   });
 
-  it('is a no-op for an unrecognized/preprocessor-grammar skin name (D1)', () => {
-    // `reddress`/`sonyxperiadev` are NOT embedded (D1) -- lookup fails and
-    // this must render unaffected, never throw.
-    const result = applySkinLayer({ skin: 'reddress' }, defaultTheme);
+  it('is a no-op for an unrecognized skin name', () => {
+    const result = applySkinLayer({ skin: 'not-a-real-skin' }, defaultTheme);
     expect(result).toBe(defaultTheme);
   });
 
@@ -60,5 +58,70 @@ describe('applySkinLayer -- skin-file-loading mission Batch 1', () => {
     // this ever runs -- verify the registry key itself is lowercase.
     const result = applySkinLayer({ skin: 'rose' }, defaultTheme);
     expect(result).not.toBe(defaultTheme);
+  });
+});
+
+describe('applySkinLayer -- skin-file-loading mission Batch 4 (preprocessor+skinparam skins)', () => {
+  it('resolves sonyxperiadev colors/font/shadowing via preprocess() + resolveSkinparam', () => {
+    // sonyxperiadev.skin is embedded VERBATIM with upstream's `SkinParam`
+    // capitalization -- this also exercises the loader's own case
+    // normalization (`normalizeSkinparamKeywordCase`), not just the D1
+    // grammar routing: without it, preprocess()'s collector (which matches
+    // the literal lowercase `skinparam` keyword only) would capture NOTHING
+    // and every assertion below would see `defaultTheme`'s own values.
+    const result = applySkinLayer({ skin: 'sonyxperiadev' }, defaultTheme);
+    expect(result.fontFamily).toBe('Arial'); // SkinParam DefaultFontName Arial
+    expect(result.shadowing).toBe(0); // SkinParam Shadowing false
+    expect(result.colors.elements?.entity?.background).toBe('#999999'); // SkinParam EntityBackgroundColor
+    // SkinParam NoteBackgroundColor/NoteBorderColor each appear TWICE in the
+    // verbatim upstream file -- last occurrence wins (#ffffcd/#a9a980), not
+    // the first (#fbfb77/#cbcb47).
+    expect(result.colors.elements?.note?.border).toBe('#a9a980');
+  });
+
+  it('resolves reddress via the SAME preprocess() + resolveSkinparam path (no <style> mis-parse)', () => {
+    // Before Batch 4, `reddress` (leading `!ifndef`) was absent from
+    // BUILTIN_SKINS entirely (D1's Batch-1 guard) -- now it resolves
+    // SOMETHING rather than being silently dropped. `circledCharacterRadius
+    // 8` is a plain numeric literal (not a `!define`d macro token), so it
+    // resolves correctly even though the macro-substitution gap below
+    // blocks every FONTNAME/FONTSIZE/ACCENT-style reference.
+    const result = applySkinLayer({ skin: 'reddress' }, defaultTheme);
+    expect(result.colors.graph.circledCharacterRadius).toBe(8);
+  });
+
+  it(
+    'documents the pre-existing TIM macro-substitution gap: a skinparam ' +
+      "line's value is captured before !define/!$var substitution runs " +
+      '(.agent-notes/skin-batch4-preproc.md) -- reddress bare renders its ' +
+      'FONTNAME/BORDERCOLOR/BOXBG tokens LITERALLY, not resolved',
+    () => {
+      const result = applySkinLayer({ skin: 'reddress' }, defaultTheme);
+      expect(result.colors.graph.classBackground).toBe('BOXBG');
+      expect(result.colors.graph.classBorder).toBe('BORDERCOLOR');
+      expect(result.colors.graph.classFontFamily).toBe('FONTNAME');
+    },
+  );
+
+  it('threads a bare `!define DARKBLUE` from the document into reddress\'s own `!ifdef` gate', () => {
+    // `!ifdef DARKBLUE` only checks EXISTENCE (EaterIfdef#isTrue), so this
+    // proves gate selection even though ACCENT itself (a macro reference,
+    // not a literal) still hits the same substitution gap as the test
+    // above. `skinparam backgroundColor 777` inside the DARKBLUE branch IS
+    // a literal token, so it resolves correctly and is the observable proof.
+    const withThreading = applySkinLayer({ skin: 'reddress' }, defaultTheme, [
+      '!define DARKBLUE',
+      'skin reddress',
+    ]);
+    // `documentRawSourceLines` omitted -- gate never fires, root theme
+    // background is untouched (default, `undefined` background override).
+    const untouched = applySkinLayer({ skin: 'reddress' }, defaultTheme);
+    expect(withThreading.colors.background).not.toBe(untouched.colors.background);
+    expect(withThreading.colors.background).toBe('777');
+  });
+
+  it('is a no-op for a bare `!define DARKBLUE` with no matching skin (defensive)', () => {
+    const result = applySkinLayer({ skin: undefined }, defaultTheme, ['!define DARKBLUE']);
+    expect(result).toBe(defaultTheme);
   });
 });

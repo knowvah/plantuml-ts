@@ -1,6 +1,28 @@
 # Skin-file loading (`skin <name>`) + shadow rendering
 
-## Status: STATE MVP COMPLETE (B1–B3) — class/desc + Batch 4 deferred (2026-07-24)
+## Status: B1–B4 landed — class/desc shadow still deferred (2026-07-25)
+
+**Batch 4** (branch `feat/skin-batch4-preproc`): `reddress`/`sonyxperiadev`
+now load via `preprocess()` + `resolveSkinparam` (D1's second grammar
+family). Both resolve at the THEME level (unit-verified, byte-checked
+against the verbatim embedded skin text) — see
+`.agent-notes/skin-batch4-preproc.md` for two findings that cap what
+"resolves" means in practice: (1) `preprocess()`'s skinparam-line
+collector captures a value BEFORE TIM `!define`/`!$var` substitution
+runs on it, so `reddress`'s FONTNAME/FONTSIZE/ACCENT-style macro
+references render as literal token text, not their intended values —
+pre-existing, unrelated to skin loading, reproduces in a bare 2-line
+document with no skin involved; (2) the PINNED ORACLE JAR itself
+crashes (`NullPointerException`/`StyleParsingException`) rendering
+EITHER skin on every diagram type tried (state, object/class,
+sequence) — confirmed via a same-jar `skin rose` control (renders
+clean) and a bundled-resource-presence control (both `.skin` files ARE
+in the jar, byte-identical to `~/git/plantuml`'s source). No usable jar
+SVG oracle exists for these two skins today, so no new SVG fixture is
+pinned for Batch 4 — resolution is proven via
+`tests/unit/skin-loader.test.ts` instead (10318 tests total, 486/486
+svg-conformance including all 57 pre-existing svg-state pins
+byte-identical, 1062/1062 DOT-parity, typecheck/lint/build clean).
 
 The state MVP is landed on `feat/skin-file-loading`:
 - **B1** (c065310): `skin <name>` loads rose/debug/strictuml into the
@@ -128,7 +150,7 @@ a self-contained later increment.
 | 1 | **`<style>`-skin loading + resolution.** Embed rose/debug/strictuml as browser-safe string constants; add `RE_SKIN_DIRECTIVE` dispatch in `preprocessor.ts`; `parseStyleBlock` → `applyStyleMap` into the theme AS THE BASE cascade (below skinparam/inline `<style>` — see D6). **Extend `Theme` with a `shadowing` field + `applyStyleMap` to map `Shadowing`/`element {}` onto it** (the resolution half of shadow — see finding above). Verify rose/debug **colors AND the resolved Shadowing value** land (nimana resolves `#FEFECE`/`#A80036` + shadowing 4.0). | [ ] |
 | 2 | **Shadow rendering + ink** (consumes Batch 1's resolved value). Thread `theme.shadowing` onto entity geo for ALL diagram types (fix `renderer-cluster.ts:110`'s hardcoded `shadowing: 0` AND wire the state bespoke render path); draw the existing `svg-graphics-shadow.ts` filter when shadow > 0; reserve `2×shadow` ink in `layout-ink-extent.ts`. Verify nimana's shadow matches jar (id-normalized) and its box size. | [ ] |
 | 3 | **Corpus sweep + G8 close-out.** Verify all `<style>`-skin fixtures across diagram types render faithfully (colors + shadow); re-check class/description parity+census (the feature touches them via D3); **remove/lower `nimana-36-veco708`** from the state size-backlog (returns to ≤ 0.090278); tighten niveno/sumiri; docs. | [ ] |
-| 4 | **Preprocessor+skinparam skins** (`reddress`, `sonyxperiadev`) — later increment: route these through the preprocessor macro engine + `resolveSkinparam` instead of `parseStyleBlock`. No harness fixture depends on it; do only if the corpus later needs it. | [ ] |
+| 4 | **Preprocessor+skinparam skins** (`reddress`, `sonyxperiadev`) — route these through `preprocess()` + `resolveSkinparam` instead of `parseStyleBlock`. Landed (2026-07-25, `feat/skin-batch4-preproc`): both resolve at the theme level; no SVG fixture pinned (pinned oracle jar crashes rendering either skin on every diagram type tried — see `.agent-notes/skin-batch4-preproc.md`). | [x] |
 
 ## Quality gates (after every task that lands code)
 

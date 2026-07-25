@@ -43,12 +43,23 @@ interface ResolvedThemeAndStyles {
   readonly styleMap: StyleMap;
 }
 
-function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAndStyles {
+function buildThemeForFixture(
+  preprocessed: PreprocessorResult,
+  rawSourceLines?: readonly string[],
+): ResolvedThemeAndStyles {
   const base = resolveTheme(preprocessed.theme ?? 'default');
   // mission skin-file-loading Batch 1 (D6): mirrors src/index.ts#buildTheme's
   // own Stage 1.5 -- applied BEFORE the document's own skinparam so the
-  // document always wins.
-  const withSkin = applySkinLayer(preprocessed, base);
+  // document always wins. `rawSourceLines` (Batch 4) threads the document's
+  // own bare `!define NAME` flags into a preprocessor-grammar skin's
+  // `!ifdef` branches -- see `skin-loader.ts#applySkinLayer`'s own doc
+  // comment. NOT wired into `src/index.ts`'s own `buildTheme` (a deliberate,
+  // journaled scope decision -- that file is already a pre-existing >500-
+  // line complexity-hook violation outside this batch's write-set, and
+  // splitting it is a materially larger, out-of-scope change). This harness
+  // exercises the mechanism directly so the reddress `+DARKBLUE` fixture can
+  // still be verified.
+  const withSkin = applySkinLayer(preprocessed, base, rawSourceLines);
   const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
 
   const styleMap = preprocessed.styles
@@ -85,7 +96,8 @@ export function renderFixtureState(
   if (!first.ok) throw first.failure.cause;
 
   const preprocessed = first.preprocessed;
-  const { theme, styleMap } = buildThemeForFixture(preprocessed);
+  const rawSourceLines = first.rawSource.map((s) => s.getString());
+  const { theme, styleMap } = buildThemeForFixture(preprocessed, rawSourceLines);
   const block = { ...first.source, rawStyles: preprocessed.styles };
   const ast = parseState(block);
   const geo = layoutState(ast, theme, measurer);

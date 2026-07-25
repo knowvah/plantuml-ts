@@ -675,3 +675,37 @@ design choice.
 
 **Affects:** `@startpacketdiag` diagrams where a spanning field begins
 mid-row and its first chunk fills the remaining columns exactly.
+
+---
+
+## Bundled skins `sonyxperiadev` / `reddress` render instead of crashing
+
+**Category:** limitation (upstream has a known gap — we fill it)
+
+**Upstream:** `skin sonyxperiadev` and `skin reddress` crash the PlantUML
+renderer with an unhandled exception (NullPointerException / StyleParsingException
+respectively) on every diagram type, producing an empty/degraded SVG. Reproduced
+in both the pinned oracle jar (1.2026.7beta3) and stable 1.2026.6. See
+`docs/upstream-plantuml-issues/01-bundled-skins-crash-renderer.md`.
+
+**This port:** loads both skins via the preprocessor+skinparam path
+(`skin-loader.ts`) and renders a real diagram, resolving the skins' skinparams
+as a base cascade layer. `sonyxperiadev` resolves fully (Arial font, shadowing
+off, entity/note colors). `reddress` bare resolves its font defaults; its
+`!ifdef`-gated colour variants do NOT yet work via `renderSync` — the document's
+own `!define`s aren't threaded into the isolated skin preprocess pass in
+production `index.ts`, and a separate pre-existing defect captures skinparam
+line values before TIM `!define` substitution runs (both tracked in
+`.agent-notes/skin-batch4-preproc.md`).
+
+**Reason:** upstream crashes, so there is no jar oracle to reproduce and no
+"correct" output to match — reproducing a crash is not a goal. Rendering the
+skin's declared skinparams is strictly more useful than a stack trace, and
+matches this port's charter (lower-friction PlantUML). Because upstream can't
+render these skins, the port's output here is verified against the skin files'
+own skinparam definitions (unit tests), not against a jar oracle — a deliberate,
+documented exception to the "author a jar oracle" rule, made because the jar
+itself is broken here.
+
+**Affects:** any diagram using `skin sonyxperiadev` (fully) or `skin reddress`
+(bare only). No upstream corpus fixture uses either.
