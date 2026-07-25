@@ -6,6 +6,7 @@
  * un-translated `ug` (see `Cluster.ts`'s `ClusterDecoration#drawU`).
  */
 import type { Theme } from '../../core/theme.js';
+import { resolveElementShadowing } from '../../core/theme.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -107,7 +108,15 @@ function buildHeader(node: DescriptionNodeGeo, theme: Theme): ClusterHeaderInfo 
 function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults {
   const folder = isFolderStyled(symbol);
   return {
-    shadowing: 0,
+    // mission skin-file-loading (deferred D3 item): was hardcoded 0 --
+    // `Cluster.ts:319`'s `decoration.drawU(..., style.shadowing, ...)`
+    // already draws the shadow given a nonzero value; this was the ONE
+    // call site suppressing it. `resolveElementShadowing` cascades this
+    // container's OWN USymbol bucket (`skin <name>`/`skinparam <sname> {
+    // Shadowing N }`) over the diagram-wide `theme.shadowing` (`skin
+    // rose`/`<style> element { Shadowing N } }`), matching jar's
+    // `Cluster.java` shared `getStyle().getShadowing()` read.
+    shadowing: resolveElementShadowing(theme, symbol),
     // G1 I10: folder-style clusters use the SAME roundCorner as every
     // other container (5 -- jar-verified `A2.5,2.5`/`A3.75,3.75` arcs on
     // component/fetefi-28-figu176, sacuso-94-gugi476, texacu-57-daci050,

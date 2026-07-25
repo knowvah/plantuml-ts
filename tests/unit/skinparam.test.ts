@@ -831,17 +831,21 @@ describe('resolveSkinparam — unknown keys', () => {
   });
 
   it('mixes known and unknown keys correctly', () => {
+    // mission skin-file-loading (deferred D3 item): 'shadowing' swapped for
+    // 'nonsensicalkey' -- 'shadowing' is now a recognized bare skinparam
+    // key (see the dedicated 'resolveSkinparam — shadowing' describe block
+    // below), no longer a valid "unknown key" example.
     const { theme, unknown } = resolveSkinparam(
       new Map([
         ['backgroundcolor', '#FF0000'],
         ['handwritten', 'true'],
-        ['shadowing', 'false'],
+        ['nonsensicalkey', 'false'],
       ]),
       defaultTheme,
     );
     expect(theme.colors.background).toBe('#FF0000');
     expect(unknown).toContain('handwritten');
-    expect(unknown).toContain('shadowing');
+    expect(unknown).toContain('nonsensicalkey');
     expect(unknown).not.toContain('backgroundcolor');
   });
 });
@@ -1203,6 +1207,55 @@ describe('resolveSkinparam — element font-size buckets (G1 I4b)', () => {
     );
     expect(theme.colors.elements).toBeUndefined();
     expect(unknown).toContain('componentfontsize');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveSkinparam — shadowing (mission skin-file-loading, deferred D3 item)
+// ---------------------------------------------------------------------------
+describe('resolveSkinparam — shadowing', () => {
+  it('bare "shadowing true" resolves to the diagram-wide value 3 (jar getShadowingValue)', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['shadowing', 'true']]), defaultTheme);
+    expect(theme.shadowing).toBe(3);
+    expect(unknown).toEqual([]);
+  });
+
+  it('bare "shadowing false" resolves to 0', () => {
+    const { theme } = resolveSkinparam(new Map([['shadowing', 'false']]), defaultTheme);
+    expect(theme.shadowing).toBe(0);
+  });
+
+  it('bare "shadowing" accepts a raw numeric value', () => {
+    const { theme } = resolveSkinparam(new Map([['shadowing', '2.5']]), defaultTheme);
+    expect(theme.shadowing).toBe(2.5);
+  });
+
+  it('routes databaseShadowing into the database element bucket (malado-53-noso561)', () => {
+    const { theme, unknown } = resolveSkinparam(
+      new Map([['databaseshadowing', 'true']]),
+      defaultTheme,
+    );
+    expect(theme.colors.elements?.database?.shadowing).toBe(3);
+    expect(theme.shadowing).toBeUndefined();
+    expect(unknown).toEqual([]);
+  });
+
+  it('routes actor { shadowing false } (block form) into the actor element bucket', () => {
+    const { theme } = resolveSkinparam(new Map([['actorshadowing', 'false']]), defaultTheme);
+    expect(theme.colors.elements?.actor?.shadowing).toBe(0);
+  });
+
+  it('malado-53-noso561: actor false + database true, no root-level Shadowing', () => {
+    const { theme } = resolveSkinparam(
+      new Map([
+        ['actorshadowing', 'false'],
+        ['databaseshadowing', 'true'],
+      ]),
+      defaultTheme,
+    );
+    expect(theme.shadowing).toBeUndefined();
+    expect(theme.colors.elements?.actor?.shadowing).toBe(0);
+    expect(theme.colors.elements?.database?.shadowing).toBe(3);
   });
 });
 

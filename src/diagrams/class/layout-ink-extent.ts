@@ -179,9 +179,21 @@ function addPoint(box: InkBox, x: number, y: number): void {
  *  see `plans/g2-class-svg/ledger.md` N5): ink box = `[x-1, x+w] ×
  *  [y-1, y+h]` — nominal box size plus exactly 1px on the min side only,
  *  not the classic symmetric `-1`-inset URectangle rule. */
-function addRectInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+function addRectInk(box: InkBox, x: number, y: number, w: number, h: number, shadow = 0): void {
   addPoint(box, x - 1, y - 1);
   addPoint(box, x + w, y + h);
+  // mission skin-file-loading (deferred D3 item): `LimitFinder
+  // #drawRectangle`'s own shadow term (`addPoint(x+w-1+2*shadow,
+  // y+h-1+2*shadow)`, see `state/layout-ink-extent.ts#addStateBoxInk`'s
+  // identical citation) -- applies to the visible bordered rect's OWN
+  // corner only, NOT the invisible `UEmpty` reservation this function's
+  // own doc comment establishes (a shape with no fill/stroke has nothing
+  // to cast a shadow), so it is a THIRD `addPoint` call layered on top of
+  // the existing net rule rather than a replacement -- `shadow=0` (every
+  // pre-mission fixture) reduces to `addPoint(x+w-1,y+h-1)`, strictly
+  // dominated by the existing `x+w,y+h` UEmpty point, so this is a
+  // zero-behavior-change no-op for every shadow-off fixture.
+  if (shadow > 0) addPoint(box, x + w - 1 + 2 * shadow, y + h - 1 + 2 * shadow);
 }
 
 /**
@@ -337,9 +349,14 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo): void {
   // comment for the jar-verified mechanism and why this is gated to
   // `object` specifically, not class/interface/enum).
   if (c.kind === 'object' && c.dividerYs.length === 0) {
+    // mission skin-file-loading (deferred D3 item): shadow NOT modeled
+    // here -- no fixture in this mission's corpus combines a shadowed
+    // skin with a suppressed-body object/map/json classifier; see
+    // `addRectInkEmptyBody`'s own doc comment for the (separately jar-
+    // verified) unshadowed rule this leaves unchanged.
     addRectInkEmptyBody(box, c.x, c.y, c.width, c.height);
   } else {
-    addRectInk(box, c.x, c.y, c.width, c.height);
+    addRectInk(box, c.x, c.y, c.width, c.height, c.shadowing ?? 0);
   }
   if (c.kind === 'lollipop') addLollipopRowInk(box, c);
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box is drawn

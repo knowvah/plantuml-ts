@@ -41,6 +41,7 @@ import { javaRound4 } from '../../core/number-format.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
 import { renderEnhancedBody } from './renderer-body-enhanced.js';
+import { classShadowFilterUrl } from './class-shadow.js';
 
 // ---------------------------------------------------------------------------
 // Classifier kind → fill color
@@ -705,6 +706,12 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimit
   let body = rect(geo.x, geo.y, geo.width, geo.height, {
     fill: classifierFill(geo, theme), stroke: classBorder(geo, theme), strokeWidth: classBorderStrokeWidth(geo, theme),
     rx: roundCorner / 2, ry: roundCorner / 2,
+    // mission skin-file-loading (deferred D3 item): `geo.shadowing`'s own
+    // doc comment -- the outer bordered rect is the ONE shape jar's
+    // `EntityImageClass`/`Object`/`Map`/`Json` all draw the shadow on
+    // (`rect.setDeltaShadow(shadow)`), matching state's identical
+    // `renderer-box.ts` precedent.
+    ...(geo.shadowing !== undefined && geo.shadowing > 0 ? { filter: classShadowFilterUrl() } : {}),
   });
   // G3/O4: `<style> <sname> { header { BackgroundColor } } }` -- object/
   // map/json only (`headerBackgroundPath`'s own doc comment); drawn ONLY

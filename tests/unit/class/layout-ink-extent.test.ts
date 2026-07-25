@@ -205,6 +205,66 @@ describe('computeClassDocumentDims', () => {
   });
 });
 
+// mission skin-file-loading (deferred D3 item): `ClassifierGeo.shadowing`
+// widens `addRectInk`'s own max corner by `2*shadow` -- see that function's
+// own doc comment for the jar-verified `LimitFinder#drawRectangle` formula.
+describe('computeClassDocumentDims — shadow ink (deferred D3 item)', () => {
+  it('shadow=0 is byte-identical to the unshadowed dims (no regression)', () => {
+    const classifiers = [makeClassifierGeo({ x: 0, y: 0, shadowing: 0 })];
+    const withShadowField = computeClassDocumentDims(classifiers, [], [], []);
+    const withoutShadowField = computeClassDocumentDims(
+      [makeClassifierGeo({ x: 0, y: 0 })],
+      [],
+      [],
+      [],
+    );
+    expect(withShadowField).toEqual(withoutShadowField);
+  });
+
+  it('shadow>0 widens both dims by 2*shadow-1 (filoxo-23-fafi328, skin rose ' +
+    'Shadowing 4.0) — measured on the raw (pre-floor) ink dims, since the ' +
+    'final margined dims\' SvgGraphics#ensureVisible truncation can absorb a ' +
+    'fractional part differently depending on which corner dominates. The ' +
+    '"-1" (not a flat 2*shadow=8) is because the UNSHADOWED baseline this ' +
+    'delta is measured against already picked the un-inset `x+w` UEmpty ' +
+    'corner as dominant (addRectInk\'s own doc comment) -- the shadowed ' +
+    'rect corner is `x+w-1+2*shadow`, exactly `2*shadow-1` past that ' +
+    'baseline, not past the rect\'s own un-shadowed `-1`-inset corner. ' +
+    'Matches the full-pipeline measurement exactly: filoxo/rakopi\'s canvas ' +
+    'grew 249->256 and 234->241 (both +7) once this ink rule landed.', () => {
+    const unshadowed = computeClassRawInkDims(
+      [makeClassifierGeo({ x: 0, y: 0 })],
+      [],
+      [],
+      [],
+    );
+    const shadowed = computeClassRawInkDims(
+      [makeClassifierGeo({ x: 0, y: 0, shadowing: 4 })],
+      [],
+      [],
+      [],
+    );
+    expect(shadowed.width).toBe(unshadowed.width + 7);
+    expect(shadowed.height).toBe(unshadowed.height + 7);
+  });
+
+  it('an undefined shadowing field behaves identically to shadowing=0', () => {
+    const withUndefined = computeClassDocumentDims(
+      [makeClassifierGeo({ x: 0, y: 0 })],
+      [],
+      [],
+      [],
+    );
+    const withZero = computeClassDocumentDims(
+      [makeClassifierGeo({ x: 0, y: 0, shadowing: 0 })],
+      [],
+      [],
+      [],
+    );
+    expect(withUndefined).toEqual(withZero);
+  });
+});
+
 // G3/O2: object classifiers whose field/body compartment is entirely
 // suppressed (`dividerYs: []` -- "hide members"/"hide empty members" on an
 // object with no visible members left) lose the invisible-`UEmpty`-

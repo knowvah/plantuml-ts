@@ -4,6 +4,7 @@ import {
   deepMergeTheme,
   resolveElementPaint,
   resolveElementFontSize,
+  resolveElementShadowing,
 } from '../../../src/core/theme.js';
 import type { Theme, ElementColors } from '../../../src/core/theme.js';
 import type { Paint } from '../../../src/core/paint.js';
@@ -112,5 +113,38 @@ describe('resolveElementFontSize (G1 I4b)', () => {
     const theme = freshTheme();
     theme.colors.elements = { node: { stereotypeFontSize: 20 } };
     expect(resolveElementFontSize(theme, 'node', 'title')).toBeUndefined();
+  });
+});
+
+// mission skin-file-loading (deferred D3 item): resolveElementShadowing.
+describe('resolveElementShadowing', () => {
+  it('returns 0 when neither the element bucket nor the diagram-wide value is set', () => {
+    const theme = freshTheme();
+    expect(resolveElementShadowing(theme, 'database')).toBe(0);
+  });
+
+  it('falls back to the diagram-wide theme.shadowing when no bucket override is set', () => {
+    const theme = freshTheme();
+    theme.shadowing = 4;
+    expect(resolveElementShadowing(theme, 'database')).toBe(4);
+  });
+
+  it('prefers the element-specific bucket over the diagram-wide value', () => {
+    const theme = freshTheme();
+    theme.shadowing = 4;
+    theme.colors.elements = { database: { shadowing: 3 } };
+    expect(resolveElementShadowing(theme, 'database')).toBe(3);
+    // A sibling element with no bucket override still cascades to global.
+    expect(resolveElementShadowing(theme, 'actor')).toBe(4);
+  });
+
+  it('an element bucket value of 0 wins over a nonzero diagram-wide value (malado-53-noso561)', () => {
+    // `skinparam actor { shadowing false }` alongside `skinparam
+    // databaseShadowing true`, with no root-level Shadowing set at all.
+    const theme = freshTheme();
+    theme.colors.elements = { actor: { shadowing: 0 }, database: { shadowing: 3 } };
+    expect(resolveElementShadowing(theme, 'actor')).toBe(0);
+    expect(resolveElementShadowing(theme, 'database')).toBe(3);
+    expect(resolveElementShadowing(theme, 'component')).toBe(0);
   });
 });
