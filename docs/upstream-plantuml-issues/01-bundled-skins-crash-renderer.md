@@ -1,6 +1,6 @@
 # Upstream PlantUML: bundled skins `sonyxperiadev` and `reddress` crash the renderer
 
-**Status:** open (upstream defect). Filed from plantuml-ts skin-file-loading mission, Batch 4.
+**Status:** filed upstream — https://github.com/plantuml/plantuml/issues/2797 (from plantuml-ts skin-file-loading Batch 4).
 **Not a graphviz-ts / this-port issue** — reproduced with unmodified upstream PlantUML.
 
 ## Summary
