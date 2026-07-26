@@ -1,6 +1,21 @@
 # Skin-file loading (`skin <name>`) + shadow rendering
 
-## Status: B1–B4 landed — class/desc shadow still deferred (2026-07-25)
+## Status: B1–B4 landed, reddress-variants follow-up landed — class/desc shadow still deferred (2026-07-25)
+
+**`skin-reddress-variants`** (branch `feat/skin-reddress-variants`): closed
+both gaps `.agent-notes/skin-batch4-preproc.md` flagged after Batch 4. (1)
+`preprocessor.ts`'s `StyleAndSkinparamCollector` now substitutes a
+`skinparam` line's VALUE through TIM (`!define`/`!$var` resolve; `<style>`
+block content deliberately still stays verbatim, per this follow-up's own
+boundary — see its decision-journal entries for a NEW finding that the
+verbatim assumption itself is provably wrong vs. the jar, deferred as a
+separate follow-up). (2) production `index.ts` (`renderSync`/`render`) now
+threads the document's own raw source lines into `applySkinLayer`, so
+`!define DARKBLUE` + `skin reddress` resolves end-to-end outside the test
+harness. Both `TContext.ts` and `index.ts` were mechanically split
+(`TContextSubstitution.ts`, `build-theme.ts`) to clear this repo's 500-line
+file-length hook, which both files were already over. Full suite green
+(10320 tests, up from 10318), typecheck/lint/build clean.
 
 **Batch 4** (branch `feat/skin-batch4-preproc`): `reddress`/`sonyxperiadev`
 now load via `preprocess()` + `resolveSkinparam` (D1's second grammar

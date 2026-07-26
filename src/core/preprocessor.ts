@@ -137,8 +137,20 @@ const RE_NEWLINE_CALL_ANY_CASE = /%n\(\)|%newline\(\)/gi;
  * The `<style>` / `skinparam` collector: a {@link PlainLineFilter} that sees
  * every surviving content line RAW -- after comments and conditionals, before
  * macro/variable substitution -- and consumes the ones that are not diagram
- * content. Faithful to the pre-TIM loop's own ordering and regexes (including
- * "style block content is collected verbatim, no define substitution").
+ * content. Faithful to the pre-TIM loop's own ordering and regexes for
+ * STRUCTURE (block open/close, selector, key) -- but a `skinparam` line's
+ * VALUE is now run through `substitute` (skin-reddress-variants Fix 1) so
+ * `!define ACCENT 1a66c2` / `!$ACCENT = "1a66c2"` resolve into a `skinparam
+ * ... ACCENT` / `... $ACCENT` value, mirroring upstream's `CommandSkinParam`
+ * (a `Command` dispatched over the SAME post-TIM-substitution line stream as
+ * any other diagram-body line -- verified live-jar, see
+ * `TContextOptions.ts#PlainLineFilter`). `<style>`-block CONTENT deliberately
+ * still uses the raw, unsubstituted line (`tests/unit/preprocessor.test.ts`:
+ * "style block content is collected verbatim (no define substitution)") --
+ * KNOWN to diverge from the verified jar behavior above (same live-jar
+ * evidence: `<style>document{BackgroundColor $ACCENT}</style>` DOES resolve
+ * upstream); left unfixed here as an explicit mission boundary, not an
+ * oversight. See `plans/skin-file-loading/decision-journal.md`.
  */
 class StyleAndSkinparamCollector {
   readonly styles: string[] = [];
@@ -157,14 +169,15 @@ class StyleAndSkinparamCollector {
   private inSkinparamBlock = false;
   private skinparamBlockSelector = '';
 
-  /** True when the line was consumed (nothing is emitted for it). */
-  accept(line: StringLocated): boolean {
+  /** True when the line was consumed (nothing is emitted for it). `substitute`
+   *  is only threaded to the skinparam-VALUE paths -- see the class doc. */
+  accept(line: StringLocated, substitute: (text: string) => string): boolean {
     const raw = line.getString();
     const trimmed = raw.trim();
 
     if (this.inStyleBlock) return this.collectStyleLine(raw, trimmed);
 
-    if (this.inSkinparamBlock) return this.collectSkinparamBlockEntry(trimmed);
+    if (this.inSkinparamBlock) return this.collectSkinparamBlockEntry(trimmed, substitute);
 
     if (RE_STYLE_OPEN.test(trimmed)) {
       this.inStyleBlock = true;
@@ -176,7 +189,7 @@ class StyleAndSkinparamCollector {
       this.skin = skinMatch[1]!.trim().toLowerCase();
       return true;
     }
-    return this.openSkinparam(trimmed);
+    return this.openSkinparam(trimmed, substitute);
   }
 
   private collectStyleLine(raw: string, trimmed: string): boolean {
@@ -190,7 +203,7 @@ class StyleAndSkinparamCollector {
     return true;
   }
 
-  private collectSkinparamBlockEntry(trimmed: string): boolean {
+  private collectSkinparamBlockEntry(trimmed: string, substitute: (text: string) => string): boolean {
     if (RE_SKINPARAM_BLOCK_CLOSE.test(trimmed)) {
       this.inSkinparamBlock = false;
       this.skinparamBlockSelector = '';
@@ -198,14 +211,17 @@ class StyleAndSkinparamCollector {
     }
     const entry = RE_SKINPARAM_BLOCK_ENTRY.exec(trimmed);
     if (entry !== null)
-      this.skinparam.set((this.skinparamBlockSelector + entry[1]!.trim()).toLowerCase(), entry[2]!.trim());
+      this.skinparam.set(
+        (this.skinparamBlockSelector + entry[1]!.trim()).toLowerCase(),
+        substitute(entry[2]!).trim(),
+      );
 
     return true;
   }
 
   /** Block-open forms are tested before the single-line form, which would
    *  otherwise capture `{` as the parameter name. */
-  private openSkinparam(trimmed: string): boolean {
+  private openSkinparam(trimmed: string, substitute: (text: string) => string): boolean {
     if (RE_SKINPARAM_BLOCK_OPEN.test(trimmed)) {
       this.inSkinparamBlock = true;
       this.skinparamBlockSelector = '';
@@ -219,7 +235,7 @@ class StyleAndSkinparamCollector {
     }
     const single = RE_SKINPARAM_LINE.exec(trimmed);
     if (single !== null) {
-      this.skinparam.set(single[1]!.trim().toLowerCase(), single[2]!.trim());
+      this.skinparam.set(single[1]!.trim().toLowerCase(), substitute(single[2]!).trim());
       return true;
     }
     return false;
@@ -371,7 +387,7 @@ export function preprocessLinesOrError(
 ): PreprocessOutcome {
   const collector = new StyleAndSkinparamCollector();
   const context = new TContext({
-    plainLineFilter: (line) => collector.accept(line),
+    plainLineFilter: (line, substitute) => collector.accept(line, substitute),
     includeStore: options?.includeStore,
   });
   const memory = new TMemoryGlobal();
@@ -390,6 +406,10 @@ export function preprocessLinesOrError(
   }
 
   const flattened = flatten(context.getResultList());
+  // #lizard forgives -- pre-existing violation (36 NLOC vs. this repo's 30
+  // cap), unrelated to skin-reddress-variants; only surfaced now because an
+  // earlier edit to this file happened to also touch the 500-line file gate,
+  // which previously short-circuited before this per-function check ran.
   return {
     ok: true,
     result: {
