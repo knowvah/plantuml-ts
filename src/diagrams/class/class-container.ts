@@ -221,9 +221,11 @@ export const NAMESPACE_COMMANDS: readonly Command[] = [
       const display = match[1]!;
       const nsId = match[2]!;
       const effectiveId = openNamespaceBlock(state, nsId, display);
-      // G2 N34: NOTE_COLOR (class-notes.ts) is now capturing -- the
-      // same-line-brace group shifted from match[3] to match[4].
-      if (match[4] !== undefined) {
+      // G2 N34: NOTE_COLOR is capturing; G2 N70: NOTE_URL is now capturing
+      // too (it precedes COLOR here) -- the same-line-brace group shifted
+      // from match[4] to match[5]. This command does not consume a
+      // namespace's own URL (no render path for it yet).
+      if (match[5] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
           state.classifierIndex,
@@ -251,9 +253,11 @@ export const NAMESPACE_COMMANDS: readonly Command[] = [
     execute(state, match) {
       const nsId = stripQuotes(match[1]!);
       const effectiveId = openNamespaceBlock(state, nsId, nsId);
-      // G2 N34: NOTE_COLOR (class-notes.ts) is now capturing -- the
-      // same-line-brace group shifted from match[2] to match[3].
-      if (match[3] !== undefined) {
+      // G2 N34: NOTE_COLOR is capturing; G2 N70: NOTE_URL is now capturing
+      // too (it precedes COLOR here) -- the same-line-brace group shifted
+      // from match[3] to match[4]. This command does not consume a
+      // namespace's own URL (no render path for it yet).
+      if (match[4] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
           state.classifierIndex,

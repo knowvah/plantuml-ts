@@ -49,6 +49,7 @@ import {
 } from './class-notes.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { applyUrlStatement, URL_STATEMENT_RE } from './class-url-command.js';
+import { parseUrlBracket } from './class-url.js';
 import {
   applyStereotypeStatement,
   STEREOTYPE_STATEMENT_RE,
@@ -511,6 +512,9 @@ export const COMMANDS: readonly Command[] = [
       'i',
     ),
     execute(state, match) {
+      // G2 N70: NOTE_URL is now capturing (group 5) -- the brace-closer
+      // shifted from match[5] to match[6]. See NOTE_URL's own doc comment.
+      const url = match[5] !== undefined ? parseUrlBracket(match[5]) : undefined;
       state.pendingNote = {
         kind: 'attached',
         position: match[1]!.toLowerCase() as NotePosition,
@@ -519,11 +523,11 @@ export const COMMANDS: readonly Command[] = [
         textLines: [],
         namespace: state.activeNamespace,
         // G2 N37: NOTE_STEREO_CAPTURE is now capturing (group 3) -- COLOR
-        // shifted from match[3] to match[4], the brace-closer from match[4]
-        // to match[5].
+        // shifted from match[3] to match[4].
         ...(match[3] !== undefined ? { stereotype: match[3] } : {}),
         ...(match[4] !== undefined ? { color: match[4] } : {}),
-        ...(match[5] !== undefined ? { closer: 'brace' } : {}),
+        ...(url !== undefined ? { url } : {}),
+        ...(match[6] !== undefined ? { closer: 'brace' } : {}),
       };
     },
   },
@@ -548,18 +552,21 @@ export const COMMANDS: readonly Command[] = [
       const target = match[2] ?? state.lastEntity ?? undefined;
       if (target === undefined) return; // "Nothing to note to" — silent no-op
       // G2 N37: NOTE_STEREO_CAPTURE is now capturing (group 3) -- COLOR
-      // shifted from match[3] to match[4], the text group from match[4] to
-      // match[5].
+      // shifted from match[3] to match[4].
+      // G2 N70: NOTE_URL is now capturing (group 5) -- the text group shifted
+      // from match[5] to match[6]. See NOTE_URL's own doc comment.
+      const url = match[5] !== undefined ? parseUrlBracket(match[5]) : undefined;
       const id = addNote(
         state.ast,
         match[1]!.toLowerCase() as NotePosition,
         target,
-        match[5]!.trim(),
+        match[6]!.trim(),
         {
           namespace: state.activeNamespace,
           implicitTarget: match[2] === undefined,
           ...(match[3] !== undefined ? { stereotype: match[3] } : {}),
           ...(match[4] !== undefined ? { color: match[4] } : {}),
+          ...(url !== undefined ? { url } : {}),
         },
         state.creationCounter,
         state.tipGroupsSeen,

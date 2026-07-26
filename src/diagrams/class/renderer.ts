@@ -14,6 +14,7 @@ import {
   text,
   path,
   ellipse,
+  linkWrap,
 } from '../../core/svg.js';
 import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
@@ -158,7 +159,12 @@ function renderOneNote(note: NoteGeo, uidPlan: ClassUidPlan, theme: Theme): stri
   if (note.dropped === true) return [];
   if (note.tip !== undefined) return [renderTipNote(note, theme)];
   const uid = uidPlan.noteUid.get(note.id) ?? '';
-  const inner = note.opale !== undefined ? renderOpaleNote(note, theme) : renderNote(note, theme);
+  const raw = note.opale !== undefined ? renderOpaleNote(note, theme) : renderNote(note, theme);
+  // G2 N70: a note's own `[[url]]` wraps its ENTIRE drawn body in one
+  // `<a xlink:href>` INSIDE the `<g class="entity">` -- upstream's
+  // `note.addUrl(url)` + `SvgGraphics` anchor open/close around the note
+  // shape. Jar-verified `danozo-79-nunu375`.
+  const inner = note.url !== undefined ? linkWrap(raw, note.url) : raw;
   return [wrapEntity(note.id, uid, note.id, false, inner)];
 }
 
