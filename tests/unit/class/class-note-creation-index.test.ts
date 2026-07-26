@@ -69,13 +69,17 @@ describe('note creation-index / phantom-slot threading (G2 N15)', () => {
     expect(ast.notes[0]!.phantomSlot).toBeUndefined();
   });
 
-  it('a classifier created AFTER a note reflects the note\'s two-slot ' +
+  it('a classifier created AFTER a note reflects the note\'s three-slot ' +
      'consumption in its own creationIndex, keeping later entities ' +
      'correctly interleaved', () => {
+    // G2 N68: `CommandFactoryNoteOnEntity` burns THREE ranks -- the GMN
+    // phantom (slot 2), the note entity (slot 3, `creationIndex`), and the
+    // note<->host connector Link (slot 4, a `noDisplay` dashed link). `b`
+    // therefore lands at 5, not 4 (jar-verified `lenunu-95-bame774`).
     const ast = parse('class a\nnote right of a: hi\nclass b');
     expect(ast.classifiers[0]).toMatchObject({ id: 'a', creationIndex: 1 });
     expect(ast.notes[0]).toMatchObject({ creationIndex: 3, phantomSlot: true });
-    expect(ast.classifiers[1]).toMatchObject({ id: 'b', creationIndex: 4 });
+    expect(ast.classifiers[1]).toMatchObject({ id: 'b', creationIndex: 5 });
   });
 
   it('a classifier created AFTER a freestanding note only reflects one ' +

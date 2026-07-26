@@ -112,9 +112,10 @@ describe('buildClassUidPlan — note creation-index / phantom-slot handling (G2 
     const plan = buildClassUidPlan(g);
     expect(plan.classifierUid.get('a')).toBe('ent0001');
     expect(plan.noteUid.get('n1')).toBe('ent0003');
-    // Exact pass consumed ranks 1 (a) + 2 (phantom) + 3 (n1) = 3 ranks;
-    // the fallback continuation starts at 3 + 1 = 4.
-    expect(plan.noteUid.get('tip1')).toBe('ent0004');
+    // G2 N68: the exact pass consumed ranks 1 (a) + 2 (GMN phantom) + 3 (n1)
+    // + 4 (n1's note<->host connector-link phantom) = 4 ranks; the fallback
+    // continuation starts at 4 + 1 = 5.
+    expect(plan.noteUid.get('tip1')).toBe('ent0005');
   });
 
   it('when the overall geometry is NOT exact (a classifier lacks ' +
