@@ -1,0 +1,390 @@
+/**
+ * Namespace-qualified id parsing & reference resolution for class
+ * diagrams. Split out of `class-namespace.ts` (line cap); re-exported from
+ * it so existing `from './class-namespace.js'` import sites are unchanged.
+ */
+
+import type { Classifier, Namespace, Relationship } from './ast.js';
+
+/**
+ * Split a qualified id on the namespace separator into its non-empty segments,
+ * or null when the id is not qualified (no separator) or splitting is disabled
+ * (`sep` null/empty).
+ */
+/**
+ * Characters that never appear in a namespace-qualified id (upstream name
+ * charset is `[%pLN_][-%pLN_.:\/]*`). Their presence means decoration leaked
+ * into a classifier id — a link `[[url]]`, color/style `#...line.dashed`,
+ * quoted display, or whitespace — so the id must not be split into namespaces.
+ * Kept as a string constant (not a regex literal) so lizard's brace-based
+ * complexity parser is not confused by `{}`/`()` inside a pattern. Whitespace is
+ * intentionally NOT included: a quoted package/namespace name may contain spaces
+ * (`"Voici mon package"`), and its members' qualified ids inherit those spaces.
+ */
+const NON_QUALIFIED_ID_CHARS = '[]#;<>(){}"\'';
+
+/**
+ * Bounded (4-level) nested `<...>` generic-body regex — mirrors upstream
+ * `GenericRegexProducer.getGenericRegex(level)`; used for a classifier's own
+ * generic clause and for a discarded trailing generic on an
+ * extends/implements parent (`extends BaseChat<A>`). Bounding at 4 is
+ * upstream's own choice, not an approximation.
+ * @see ~/git/plantuml/.../classdiagram/command/GenericRegexProducer.java
+ */
+function nestedGenericBodyRegex(level: number): string {
+  const inner = level <= 0 ? '' : nestedGenericBodyRegex(level - 1);
+  return `(?:[^<>/]|<${inner}>)*`;
+}
+export const GENERIC_BODY_PATTERN = '[^<>/]' + nestedGenericBodyRegex(4);
+export const GENERIC_CLAUSE_RE = new RegExp(`^<(${GENERIC_BODY_PATTERN})>$`);
+
+/** Split on top-level commas only — a comma nested in a param's own
+ *  `<...>` (`Map<K, V>`) does not split. */
+export function splitTopLevelCommas(raw: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < raw.length; i++) {
+    if (raw[i] === '<') depth++;
+    else if (raw[i] === '>') depth--;
+    else if (raw[i] === ',' && depth === 0) {
+      parts.push(raw.slice(start, i));
+      start = i + 1;
+    }
+  }
+  parts.push(raw.slice(start));
+  return parts.map((p) => p.trim()).filter((p) => p !== '');
+}
+
+/**
+ * Split `id` on the namespace separator, guarding against decoration leaking
+ * into a FRESH reference — but not against a caller-supplied `trustedPrefix`
+ * (an already-resolved namespace id) that legitimately carries such
+ * characters. A `package`/`namespace` given no `as CODE` alias uses its raw
+ * quoted DISPLAY text as its id verbatim (mirrors upstream `CommandPackage`'s
+ * `idShort = display`, `AbstractEntityDiagram.cleanId` only strips
+ * surrounding quotes) — so a creole-decorated display like
+ * `"<size:18>styled</size>\nshould be styled"` is a valid, EXISTING namespace
+ * id, not leaked decoration. Re-qualifying a reference inside that namespace
+ * (`activeNamespace + sep + name`) must not re-reject those characters just
+ * because they came along for the ride in the trusted prefix — only the
+ * freshly-appended tail is scanned in that case. Verified against the oracle
+ * DOT for daxeno-00-kasu166: `package "<size:18>styled2</size>\nshould be
+ * styled" <<Database>> { class foo }` — without the exemption, `foo`'s
+ * `nsId` resolved to null (dropped from its cluster) because the guard saw
+ * the package's own `<`/`>` markup in the fully-qualified id.
+ */
+export function splitOnSeparator(
+  id: string,
+  sep: string | null,
+  trustedPrefix?: string,
+): string[] | null {
+  if (sep === null || sep === '' || !id.includes(sep)) return null;
+  const scanFrom =
+    trustedPrefix !== undefined && id.startsWith(trustedPrefix + sep)
+      ? trustedPrefix.length + sep.length
+      : 0;
+  for (let i = scanFrom; i < id.length; i++) {
+    if (NON_QUALIFIED_ID_CHARS.includes(id[i]!)) return null;
+  }
+  const parts = id.split(sep).filter((p) => p.length > 0);
+  return parts.length >= 2 ? parts : null;
+}
+
+/**
+ * Ensure the nested namespace chain for the given display segments exists in
+ * `namespaces`, each level linked to its parent via `parentId`. Ids are the
+ * cumulative join on the separator (`['a','b']` → namespaces `a` and `a.b`).
+ * Returns the innermost namespace id.
+ */
+export function ensureNamespaceChain(
+  namespaces: Namespace[],
+  sep: string,
+  segments: string[],
+  counter?: { value: number },
+  // G2 N8 (N2's diagnosed-but-unfixed off-by-one): when a classifier
+  // declaration is later reopened as a package/namespace of the SAME
+  // qualified id (`class-container.ts#muteClassifierToGroup`), upstream
+  // MUTATES that same Entity object in place (`Entity#muteToGroupType` --
+  // this file's own header doc comment) rather than allocating a fresh
+  // uid, so the resulting group keeps the muted classifier's OWN
+  // `creationIndex`. `reuseCreationIndex` names exactly ONE id (the exact
+  // qualified id whose classifier was just muted -- never an
+  // intermediate parent segment of a dotted chain, which IS a genuine new
+  // group and gets a fresh counter slot as normal) to reuse instead of
+  // bumping `counter`.
+  reuseCreationIndex?: { id: string; creationIndex: number },
+): string {
+  let parent: string | undefined;
+  let acc = '';
+  for (const seg of segments) {
+    acc = acc === '' ? seg : acc + sep + seg;
+    if (namespaces.find((n) => n.id === acc) === undefined) {
+      const ns: Namespace = { id: acc, display: seg, classifiers: [] };
+      if (parent !== undefined) ns.parentId = parent;
+      // G2 N2 (mechanism 3): stamp parse-time creation order when the
+      // caller threads a shared counter -- see ast.ts#Classifier
+      // .creationIndex's doc comment for the exact/fallback gate this
+      // feeds. Absent when no counter is passed (e.g. hand-built test
+      // callers), matching every other optional-field convention here.
+      if (reuseCreationIndex !== undefined && acc === reuseCreationIndex.id) {
+        ns.creationIndex = reuseCreationIndex.creationIndex;
+      } else if (counter !== undefined) {
+        counter.value += 1;
+        ns.creationIndex = counter.value;
+      }
+      namespaces.push(ns);
+    }
+    parent = acc;
+  }
+  return acc;
+}
+
+export interface ResolveInput {
+  namespaces: Namespace[];
+  sep: string | null;
+  activeNamespace: string | null;
+  /** The raw reference as written (a declaration name or relationship endpoint). */
+  name: string;
+  /** Declaration display (defaulted to the raw name); undefined for endpoints. */
+  display: string | undefined;
+  /**
+   * When false (`!pragma useIntermediatePackages false`), a dotted qualifier
+   * collapses to a single namespace instead of a nested chain (`A.B.C.Z` → one
+   * namespace `A.B.C`, not `A` > `A.B` > `A.B.C`).
+   */
+  intermediatePackages: boolean;
+  /** All classifiers declared so far in the diagram — read by the
+   *  unique-match reuse lookup below (`countByName`/`firstWithName`). */
+  classifiers: Classifier[];
+  /**
+   * Mirrors upstream `quarkInContext(reuseExistingChild, full)`
+   * (`CucaDiagram.java:244-245`): true at relation-endpoint resolution sites
+   * (`CommandLinkClass`'s link/couple endpoints), false at declaration sites
+   * (`CommandCreateClass`). When true and `name` is a bare (non-dotted)
+   * reference that uniquely matches (`countByName` === 1) an existing
+   * classifier anywhere in the diagram, resolution reuses that classifier's
+   * id/namespace instead of creating a new scope-local one.
+   */
+  reuseExistingChild: boolean;
+  /**
+   * G2 N2 (mechanism 3): shared parse-time creation counter, threaded
+   * through to `ensureNamespaceChain` when a namespace is created as a
+   * side effect of resolving this reference. Optional -- callers that
+   * don't care about exact uid ordering (most existing call sites this
+   * iteration did not wire) simply omit it.
+   */
+  counter?: { value: number };
+}
+
+export interface ResolvedRef {
+  /** Fully-qualified classifier id (the entity's identity). */
+  id: string;
+  /** Innermost owning namespace id, or null at the root. */
+  nsId: string | null;
+  /** Leaf display for a default display; an explicit alias/quoted display wins. */
+  display: string | undefined;
+}
+
+/**
+ * Compute a reference's fully-qualified id under the resolution rule: at the
+ * root it is the name as written; inside a namespace it is absolute (the name
+ * as written) when the name is dotted and its first segment matches an existing
+ * namespace, else relative (`activeNamespace + sep + name`).
+ */
+export function qualifiedId(
+  name: string,
+  activeNamespace: string | null,
+  sep: string | null,
+  namespaces: Namespace[],
+): string {
+  if (activeNamespace === null) return name;
+  const head = splitOnSeparator(name, sep)?.[0];
+  const absolute = head !== undefined && namespaces.some((n) => n.id === head);
+  return absolute ? name : activeNamespace + (sep ?? '.') + name;
+}
+
+/**
+ * Compute the "simple/leaf name" of a fully-qualified id: the last segment
+ * after splitting on the namespace separator, or the whole id when it is not
+ * namespace-qualified. Mirrors what upstream registers as a Quark's identity
+ * (`Quark.java`'s `name` field — the raw path segment passed to `child()`),
+ * which is the key `Plasma#firstWithName`/`countByName` look up.
+ * @see ~/git/plantuml/.../net/sourceforge/plantuml/plasma/Plasma.java:57-108
+ */
+function leafName(id: string, sep: string | null): string {
+  const segments = splitOnSeparator(id, sep);
+  return segments === null ? id : segments[segments.length - 1]!;
+}
+
+/**
+ * Count classifiers across the WHOLE diagram whose leaf/simple name equals
+ * `name`, mirroring upstream `CucaDiagram#countByName` → `Plasma#countByName`:
+ * every classifier is a registered Quark, keyed by its simple name regardless
+ * of its namespace qualifier — a plain (unmemoized) equivalent of that map.
+ * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:923-925
+ * @see ~/git/plantuml/.../net/sourceforge/plantuml/plasma/Plasma.java:104-108
+ */
+export function countByName(
+  classifiers: Classifier[],
+  sep: string | null,
+  name: string,
+): number {
+  return classifiers.filter((c) => leafName(c.id, sep) === name).length;
+}
+
+/**
+ * The first classifier (in declaration order) whose leaf/simple name equals
+ * `name`, mirroring upstream `CucaDiagram#firstWithName` → `Plasma#firstWithName`.
+ * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:919-921
+ * @see ~/git/plantuml/.../net/sourceforge/plantuml/plasma/Plasma.java:96-100
+ */
+export function firstWithName(
+  classifiers: readonly Classifier[],
+  sep: string | null,
+  name: string,
+): Classifier | undefined {
+  return classifiers.find((c) => leafName(c.id, sep) === name);
+}
+
+/**
+ * Unique-match reuse: a bare (non-dotted) RELATION-ENDPOINT reference that
+ * matches exactly one existing classifier anywhere in the diagram resolves
+ * to that classifier instead of spawning a new scope-local one. Mirrors
+ * `quarkInContext`'s x===-1 branch (`CucaDiagram.java:264-271`). Returns null
+ * when the reuse rule does not apply (dotted name, disabled, or no unique
+ * match), signalling the caller to fall through to scope-local resolution.
+ *
+ * The `found.id !== activeNamespace` guard mirrors upstream's
+ * `byName != currentQuark` (`CucaDiagram.java:269`): in upstream's unified
+ * Quark tree, a package and a same-named classifier declared before the
+ * package opens are literally the SAME node — `getCurrentGroup().getQuark()`
+ * (`currentQuark`) IS that node once you're inside the package. Our port
+ * keeps `classifiers`/`namespaces` as separate id spaces, so the guard
+ * becomes an id-string comparison: a bare self-named reference from INSIDE a
+ * package must not resolve to that package's own (pre-existing, same-id)
+ * classifier — it creates a new nested `P.P` instead. Verified against
+ * bejusa-95-gafo325 (`class PCAN_DRV` never declared; `VCAN_DRV -- PCAN_DRV`
+ * at root creates a root classifier `PCAN_DRV`, then `package PCAN_DRV { PCAN_DRV
+ * -- Bus_Control }` must still nest `PCAN_DRV.PCAN_DRV`, not reuse the root one).
+ */
+function tryReuseExisting(input: ResolveInput): ResolvedRef | null {
+  const { sep, name, display, classifiers, namespaces, reuseExistingChild, activeNamespace } = input;
+  if (!reuseExistingChild || splitOnSeparator(name, sep) !== null) return null;
+  if (countByName(classifiers, sep, name) !== 1) return null;
+  // Upstream's `countByName` (Plasma.java:96-108) counts EVERY registered
+  // quark sharing a simple name — leaf classifiers AND group/namespace
+  // quarks alike, since both funnel through the same `Quark` registration
+  // (Quark.java:57-66). A namespace whose own simple name collides with the
+  // matched classifier's therefore makes upstream's count >=2, so its
+  // reuse-shortcut (`countByName(full)==1`, CucaDiagram.java:265) never
+  // fires — the reference falls through to `currentQuark.child(full)`
+  // instead, resolving to the EXISTING namespace quark, not the classifier.
+  // Ported as an extra bail here (`classifiers`/`namespaces` are separate
+  // id spaces in this port, so there is no single quark to fall through
+  // TO — the caller's `resolveQualified` already produces the namespace's
+  // own id for a bare non-dotted name at its own scope). Verified against
+  // delasa-80-jusu462: a bare `dlpbbgsv` edge endpoint must resolve to the
+  // (non-empty) package `dlpbbgsv`, not the identically-named classifier
+  // declared inside `dlpbbgsv.siwd`, so it gets a `zaent` point anchor.
+  if (namespaces.some((ns) => leafName(ns.id, sep) === name)) return null;
+  const found = firstWithName(classifiers, sep, name)!;
+  if (found.id === activeNamespace) return null;
+  return { id: found.id, nsId: found.namespace ?? null, display };
+}
+
+/**
+ * Resolve a class reference to its fully-qualified id + owning namespace,
+ * mirroring upstream's Quark resolution (verified against the class DOT oracle):
+ *  - not dotted, `reuseExistingChild` and a unique existing match → that
+ *    classifier's own id/namespace, wherever it lives (see `tryReuseExisting`);
+ *  - not dotted otherwise → local to the active namespace (`C.name`, or
+ *    `name` at root);
+ *  - dotted whose first segment matches an EXISTING namespace → absolute
+ *    (the name as written) — e.g. `classic.collections.ArrayList` when a
+ *    `classic` namespace exists, or a self-reference `net.…` from inside `net`;
+ *  - dotted otherwise → relative to the active namespace.
+ * The resolved qualifier's nested namespace chain is created as a side effect
+ * (skipped when an existing classifier is reused).
+ */
+/**
+ * The non-reuse, non-absolute resolution path: qualify `input.name` under
+ * `input.activeNamespace`, split the result into namespace segments, and
+ * ensure the chain exists. Split out of `resolveReference` to keep that
+ * function's branch count under the complexity gate. `sep` is the caller's
+ * already-null-checked separator (narrowed from `input.sep`).
+ */
+function resolveQualified(input: ResolveInput, sep: string): ResolvedRef {
+  const { namespaces, activeNamespace, name, display, intermediatePackages } = input;
+  const id = qualifiedId(name, activeNamespace, sep, namespaces);
+  // `activeNamespace` is an already-resolved, existing namespace id — trust
+  // any decoration-looking characters it contributes to `id` (see
+  // `splitOnSeparator`'s doc); only the freshly-appended tail is scanned.
+  const qSegments = splitOnSeparator(id, sep, activeNamespace ?? undefined);
+  if (qSegments === null) return { id, nsId: null, display };
+  const leaf = qSegments[qSegments.length - 1]!;
+  const qualifier = qSegments.slice(0, -1);
+  const nsSegments = intermediatePackages ? qualifier : [qualifier.join(sep)];
+  const isDefaultDisplay = display === undefined || display === name;
+  return {
+    id,
+    nsId: ensureNamespaceChain(namespaces, sep, nsSegments, input.counter),
+    display: isDefaultDisplay ? leaf : display,
+  };
+}
+
+export function resolveReference(input: ResolveInput): ResolvedRef {
+  const { sep, activeNamespace, name, display } = input;
+  // `set separator none` (sep null/empty): no qualification — the entity keeps
+  // its raw id and belongs directly to the active namespace, if any.
+  if (sep === null || sep === '') return { id: name, nsId: activeNamespace, display };
+  // Leading-dot = absolute reference from the root namespace: strip the leading
+  // separator and resolve the remainder at root, mirroring upstream
+  // `CucaDiagram.quarkInContextSafe` (`root.child(full.substring(sep.length))`).
+  // That upstream branch returns immediately, before ever reaching the
+  // reuseExistingChild check below — so the recursive call disables it too.
+  if (name.startsWith(sep) && name.length > sep.length) {
+    return resolveReference({
+      ...input,
+      name: name.slice(sep.length),
+      activeNamespace: null,
+      reuseExistingChild: false,
+    });
+  }
+  const reused = tryReuseExisting(input);
+  if (reused !== null) return reused;
+  return resolveQualified(input, sep);
+}
+
+/** Unordered classifier-pair equality for two relationship endpoints. */
+function samePair(a: Relationship, b: Relationship): boolean {
+  if (a.from === b.from && a.to === b.to) return true;
+  return a.from === b.to && a.to === b.from;
+}
+
+/** Effective arrow length: upstream's default when a relationship's own
+ *  arrow body never set one (`class-dot-graph.ts`'s `rel.length ?? 2`). */
+function effectiveLength(rel: Relationship): number {
+  return rel.length ?? 2;
+}
+
+/**
+ * Force every relationship connecting the SAME (unordered) pair of
+ * classifiers to arrow length 1 whenever ANY relationship between that pair
+ * already has length 1 — e.g. `A <|-- B` (length 1) alongside a separate
+ * `A "0..*" o-- B` aggregation (length 2 by default): the second link is
+ * forced to length 1 too, even though its own arrow body never encoded that.
+ * Not a namespace concern — colocated here (like the generic-pattern
+ * helpers above) only to stay under the per-file line cap; run once, after
+ * all lines are parsed, over the complete relationship list.
+ * @see ~/git/plantuml/.../classdiagram/ClassDiagram.java:74-82 checkFinalError
+ */
+export function normalizeSameConnectionLengths(relationships: Relationship[]): void {
+  for (const rel of relationships) {
+    if (effectiveLength(rel) !== 1) continue;
+    for (const other of relationships) {
+      if (other === rel || !samePair(other, rel)) continue;
+      if (effectiveLength(other) !== 1) other.length = 1;
+    }
+  }
+}
