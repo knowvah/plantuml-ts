@@ -60,9 +60,19 @@ byte-identical, harness widened=0.
 2. **Batch 4 — preprocessor skins** (`reddress`, `sonyxperiadev`): route
    through the preprocessor + `resolveSkinparam` (not `parseStyleBlock`).
    No harness fixture needs them.
-3. **`element {}` general subset matcher:** B1 added a narrow
-   root/element last-wins resolver; a per-bucket override (e.g. rose
-   `node { Shadowing 2.0 }`) is not modeled.
+3. **`element {}` general subset matcher:** ✅ CLOSED (2026-07-25). B1
+   added a narrow root/element last-wins resolver; a per-bucket override
+   (e.g. rose `node { Shadowing 2.0 }`) was not modeled. Now
+   `collectElementStyleBuckets` (`style-map-element.ts`) captures each
+   bucket's `Shadowing` into `elements[sname].shadowing`, which the
+   pre-existing `resolveElementShadowing` two-tier cascade layers over the
+   global `element {}` default (specific bucket wins). rose now resolves
+   node/person/queue→2, rectangle/…/database→3, component/artifact/
+   boundary→4 instead of a uniform 4. Verified: 4 new
+   `skin-loader.test.ts` assertions + end-to-end render smoke
+   (`skin rose` deployment). SVG-golden pin against a rose description
+   oracle remains a possible further step (blocked only by general
+   deployment-diagram DOT/SVG parity, not by shadowing).
 4. **FontColor** resolution from skins; class/description test-harness
    cascade duplicates (production `index.ts` already covers all types).
 5. nimana's residual 0.043169 is a pre-existing NON-shadow size gap on

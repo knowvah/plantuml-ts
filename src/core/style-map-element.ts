@@ -107,6 +107,21 @@ export function collectElementStyleBuckets(
         const size = Number(fs);
         if (Number.isFinite(size)) bucket.fontSize = size;
       }
+      // mission skin-file-loading follow-on (README deferred #3, `element {}`
+      // general subset matcher): the PER-BUCKET `Shadowing` override -- rose's
+      // `node { Shadowing 2.0 }` / `rectangle { Shadowing 3.0 }` / ... each
+      // beat the bare `element { Shadowing 4.0 }` universal default for their
+      // own USymbol kind. `resolveElementShadowing` (`theme.ts`) already
+      // cascades `elements[sname].shadowing` over the global
+      // `theme.shadowing` (bare root/element, {@link resolveGlobalShadowing}),
+      // so populating the per-bucket field here is the only missing wire.
+      // Parsed with `parseFloat` to match `resolveGlobalShadowing`'s own
+      // convention (values are `2.0`/`4.0`).
+      const sh = props.get('shadowing');
+      if (sh !== undefined) {
+        const shadow = Number.parseFloat(sh);
+        if (Number.isFinite(shadow)) bucket.shadowing = shadow;
+      }
       if (Object.keys(bucket).length > 0) {
         elements[bucketName] = { ...elements[bucketName], ...bucket };
       }
@@ -354,10 +369,14 @@ export function computeNoteStyleTagCascade(
  * includes both `root` and `element` as member SNames, per
  * `EntityImageStateCommon`/`EntityImageObject`'s own signature chains --
  * this module's head doc comment), so a bare declaration under either one
- * cascades to EVERY entity kind, unlike a per-bucket-type Shadowing
- * override (`<style> node { Shadowing 2.0 } }`), which is NOT modeled here
- * -- out of this batch's narrow scope (D3), a later increment if a fixture
- * needs it. `element` is declared LATER than `root` in every sampled skin
+ * cascades to EVERY entity kind. This resolves ONLY the diagram-wide
+ * default; a per-bucket-type Shadowing override (`<style> node { Shadowing
+ * 2.0 } }`) is captured separately by {@link collectElementStyleBuckets}
+ * into `elements[sname].shadowing` and layered on top by
+ * `theme.ts#resolveElementShadowing`'s two-tier cascade (specific bucket
+ * beats this global) -- the README-deferred `element {}` general subset
+ * matcher, closed as a follow-on. `element` is declared LATER than `root`
+ * in every sampled skin
  * (`rose.skin`: root's `Shadowing 0.0` then element's `Shadowing 4.0`), so
  * it naturally wins there; `debug.skin`'s `element {}` block sets no
  * Shadowing at all, so root's `Shadowing 0.0` stands unchanged. Returns
