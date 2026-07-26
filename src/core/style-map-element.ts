@@ -100,8 +100,20 @@ export function collectElementStyleBuckets(
       if (bg !== undefined) bucket.background = parseColor(bg);
       const bd = props.get('bordercolor');
       if (bd !== undefined) bucket.border = parseColor(bd);
+      // `LineColor` is the canonical `<style>`-block border/line color PName
+      // (`BorderColor` above is the skinparam-side alias); read last so an
+      // explicit LineColor wins. `skin rose`'s `componentDiagram { node,
+      // rectangle { LineColor black } }` tints deployment node/rectangle
+      // borders black, overriding root's own #A80036 (a more-specific SName).
+      const lc = props.get('linecolor');
+      if (lc !== undefined) bucket.border = parseColor(lc);
       const fc = props.get('fontcolor');
       if (fc !== undefined) bucket.font = parseColor(fc);
+      const lt = props.get('linethickness');
+      if (lt !== undefined) {
+        const thickness = Number.parseFloat(lt);
+        if (Number.isFinite(thickness)) bucket.lineThickness = thickness;
+      }
       const fs = props.get('fontsize');
       if (fs !== undefined) {
         const size = Number(fs);

@@ -79,7 +79,12 @@ export function renderFixture(markup: string, measurer: StringMeasurer): string 
   const { theme, styleMap } = buildThemeForFixture(preprocessed);
   const block = { ...first.source, rawStyles: preprocessed.styles };
   const ast = parseDescription(block);
-  const seeded = { ...ast, seed: seedOf(['@startuml', ...block.lines, '@enduml'].join('\n')) };
+  // Seed over the RAW block source (directives + @start/@end included),
+  // matching the jar's `UmlSource.seed()` and production
+  // `descriptionPlugin.parse` -- `block.lines` is directive-stripped, which
+  // omits `skin`/`!define`/etc. and diverges the shadow/gradient/uid id
+  // (see `UmlSource.rawSourceLines`'s doc comment).
+  const seeded = { ...ast, seed: seedOf(first.rawSource.map((s) => s.getString()).join('\n')) };
   const geo = layoutDescription(seeded, theme, measurer);
   const completeSvg = renderDescription(geo, theme, measurer);
 

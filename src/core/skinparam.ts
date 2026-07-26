@@ -1160,11 +1160,21 @@ export function parseStyleBlock(raw: string): StyleMap {
   // selector, `.static lib`, not two. The dot-branch consumes everything up
   // to the opening brace (trimmed below); the non-dot branch is unchanged
   // (stops at the first space, exactly as before).
-  const selectorOpen = /^\s*(\.[^{]+|[\w.-]+)\s*\{/;
+  // Non-dot branch additionally accepts a COMMA-separated selector list
+  // (`node, rectangle { ... }`) -- upstream `StyleParser.readWithComma`
+  // reads STRING+COMMA tokens into one `full` selector string, pushed as a
+  // single context that `StyleContext.toStyles()` later expands into one
+  // Style per comma token (cross-producted with the parent context). See the
+  // stack cross-product below for the port's equivalent expansion.
+  const selectorOpen = /^\s*(\.[^{]+|[\w.-]+(?:\s*,\s*[\w.-]+)*)\s*\{/;
   const blockClose = /^\s*\}\s*$/;
   const declaration = /^\s*([\w-]+)(?:\s*:\s*|\s+)(.+)$/;
 
-  const stack: string[] = [];
+  // Each frame is the list of comma-separated selector alternatives at that
+  // nesting depth (usually one). A declaration writes to the cross-product of
+  // every frame's alternatives -- for all-single-token frames this is exactly
+  // the old `stack.join('.')`, so non-comma input is byte-identical.
+  const stack: string[][] = [];
 
   for (const rawLine of normalized.split('\n')) {
     // Strip trailing \r so that CRLF line endings are handled cleanly.
@@ -1172,8 +1182,13 @@ export function parseStyleBlock(raw: string): StyleMap {
 
     const openMatch = selectorOpen.exec(line);
     if (openMatch !== null) {
-      const selector = openMatch[1]!.trim().toLowerCase();
-      stack.push(selector);
+      const alternatives = openMatch[1]!
+        .trim()
+        .toLowerCase()
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+      stack.push(alternatives);
       continue;
     }
 
@@ -1184,7 +1199,15 @@ export function parseStyleBlock(raw: string): StyleMap {
 
     const m = declaration.exec(line);
     if (m !== null) {
-      const selectorPath = stack.join('.');
+      // Cross-product every frame's comma alternatives into the concrete
+      // selector path(s) this declaration targets. All-single-token frames
+      // collapse to one path (== the old `stack.join('.')`); a comma frame
+      // multiplies the paths, mirroring upstream's per-comma-token Style
+      // expansion. An empty stack yields the single root path `''`.
+      const selectorPaths = stack.reduce<string[]>(
+        (prefixes, frame) => prefixes.flatMap((p) => frame.map((tok) => (p === '' ? tok : `${p}.${tok}`))),
+        [''],
+      );
       const key = m[1]!.toLowerCase();
       let value = m[2]!.trim();
       // Strip trailing semicolon if present (may appear after normalization
@@ -1198,12 +1221,14 @@ export function parseStyleBlock(raw: string): StyleMap {
         value = value.slice(1, -1);
       }
 
-      let inner = result.get(selectorPath);
-      if (inner === undefined) {
-        inner = new Map<string, string>();
-        result.set(selectorPath, inner);
+      for (const selectorPath of selectorPaths) {
+        let inner = result.get(selectorPath);
+        if (inner === undefined) {
+          inner = new Map<string, string>();
+          result.set(selectorPath, inner);
+        }
+        inner.set(key, value);
       }
-      inner.set(key, value);
     }
     // Lines matching none of the above are silently skipped
   }

@@ -7,7 +7,6 @@
  */
 
 import { BUILTIN_THEMES } from './themes-builtin.js';
-import type { Paint } from './paint.js';
 // mission skin-file-loading: ElementColors/ThemeGraphColors moved to
 // theme-graph-colors.ts (re-exported below) to keep this file under the
 // project's 500-line file-size cap — see that module's own doc comment.
@@ -436,62 +435,12 @@ export function resolveTheme(
   return deepMergeTheme(defaultTheme, option);
 }
 
-/**
- * Resolve the {@link Paint} for one element's color role, cascading
- * element-specific (SName) bucket → root default (decision D4). Never throws on
- * an unrecognized `sname` — it falls through to the root default.
- *
- * `background` resolves to the root node fill (`nodeBackground`, `#F1F1F1` by
- * default), NOT the class-specific `classBackground`, so a `database` (or any
- * non-`class` element) is not tinted with the class color.
- */
-export function resolveElementPaint(
-  theme: Theme,
-  sname: string,
-  role: 'background' | 'border' | 'font',
-): Paint {
-  const specific = theme.colors.elements?.[sname]?.[role];
-  if (specific !== undefined) return specific;
-  switch (role) {
-    case 'background':
-      return theme.colors.nodeBackground;
-    case 'border':
-      return theme.colors.border;
-    case 'font':
-      return theme.colors.text;
-  }
-}
-
-/**
- * Resolve the entity/cluster text FONT SIZE override for one element's
- * `sname` and text role, cascading STEREOTYPE-specific → the element's own
- * plain override → `undefined` (caller applies its own `theme.fontSize +
- * sizeDelta` default — G1 I4b, `renderer-symbol.ts#textFont`). Mirrors
- * `resolveElementPaint`'s cascade shape but returns `undefined` rather than
- * a hard default, since the numeric default varies by caller (title vs
- * stereotype vs a role-specific `sizeDelta`).
- */
-export function resolveElementFontSize(
-  theme: Theme,
-  sname: string,
-  role: 'title' | 'stereotype',
-): number | undefined {
-  const bucket = theme.colors.elements?.[sname];
-  if (bucket === undefined) return undefined;
-  if (role === 'stereotype' && bucket.stereotypeFontSize !== undefined) return bucket.stereotypeFontSize;
-  return bucket.fontSize;
-}
-
-/**
- * mission skin-file-loading (deferred D3 item): resolve one element's own
- * `getStyle().getShadowing()` — cascades `theme.colors.elements[sname]
- * .shadowing` (`ElementColors.shadowing`'s doc comment) over the
- * diagram-wide `theme.shadowing` (bare `root`/`element`, Batch 1). Mirrors
- * `resolveElementPaint`'s two-tier cascade; always returns a number (never
- * `undefined`), matching `Style#getShadowing()`'s "absent -> 0" default.
- */
-export function resolveElementShadowing(theme: Theme, sname: string): number {
-  const specific = theme.colors.elements?.[sname]?.shadowing;
-  if (specific !== undefined) return specific;
-  return theme.shadowing ?? 0;
-}
+// Per-element (SName) resolution helpers moved to `theme-element-resolve.ts`
+// (mechanical extraction to keep this file under the 500-line cap) and
+// re-exported here so existing `from './theme.js'` call sites are unaffected.
+export {
+  resolveElementPaint,
+  resolveElementFontSize,
+  resolveElementShadowing,
+  resolveElementLineThickness,
+} from './theme-element-resolve.js';

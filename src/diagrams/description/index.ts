@@ -35,6 +35,12 @@ import { renderDescription } from './renderer.js';
  * majority of description diagrams.
  */
 function reconstructSourceForSeed(block: UmlSource): string {
+  // Prefer the RAW block lines (`@start`/`@end` + directives included) --
+  // the exact list the jar's `UmlSource.seed()` hashes. Falls back to the
+  // directive-stripped interior wrapped in `@startuml`/`@enduml` for
+  // hand-built literal fixtures that carry no raw source (always directive-
+  // free, so the two agree). See `UmlSource.rawSourceLines`'s doc comment.
+  if (block.rawSourceLines !== undefined) return block.rawSourceLines.join('\n');
   return ['@startuml', ...block.lines, '@enduml'].join('\n');
 }
 
