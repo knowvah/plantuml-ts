@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { applySkinLayer } from '../../src/core/skin-loader.js';
-import { defaultTheme } from '../../src/core/theme.js';
+import { defaultTheme, resolveElementShadowing } from '../../src/core/theme.js';
 
 describe('applySkinLayer -- skin-file-loading mission Batch 1', () => {
   it('is a no-op when no skin directive is present', () => {
@@ -22,6 +22,28 @@ describe('applySkinLayer -- skin-file-loading mission Batch 1', () => {
   it('resolves rose Shadowing 4.0 from the bare element {} selector', () => {
     const result = applySkinLayer({ skin: 'rose' }, defaultTheme);
     expect(result.shadowing).toBe(4);
+  });
+
+  it('captures rose per-bucket Shadowing overrides (element {} general subset matcher follow-on)', () => {
+    // rose declares `element { Shadowing 4.0 }` (global default) plus
+    // per-USymbol overrides: `node { Shadowing 2.0 }`,
+    // `rectangle { Shadowing 3.0 }`, `component { Shadowing 4.0 }`, ...
+    // Each must land on `elements[sname].shadowing`, NOT collapse to 4.
+    const result = applySkinLayer({ skin: 'rose' }, defaultTheme);
+    expect(result.colors.elements?.node?.shadowing).toBe(2);
+    expect(result.colors.elements?.rectangle?.shadowing).toBe(3);
+    expect(result.colors.elements?.database?.shadowing).toBe(3);
+    expect(result.colors.elements?.component?.shadowing).toBe(4);
+  });
+
+  it('cascades rose per-bucket Shadowing over the global element default', () => {
+    // `resolveElementShadowing` prefers the specific bucket, falling back to
+    // the diagram-wide `theme.shadowing` for USymbol kinds rose leaves alone.
+    const result = applySkinLayer({ skin: 'rose' }, defaultTheme);
+    expect(resolveElementShadowing(result, 'node')).toBe(2); // specific wins
+    expect(resolveElementShadowing(result, 'rectangle')).toBe(3);
+    expect(resolveElementShadowing(result, 'interface')).toBe(4); // -> global
+    expect(resolveElementShadowing(result, 'actor')).toBe(4); // -> global
   });
 
   it('resolves rose document { BackgroundColor white } as the canvas background, not the entity default', () => {
