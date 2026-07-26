@@ -19869,3 +19869,68 @@ tractable mechanisms this and every prior iteration have been harvesting --
 diminishing per-iteration returns are now structural (the corpus's
 remaining non-gvts population is increasingly singleton-mechanism), not a
 triage failure.
+
+## N68 -- harvest: +5 newly-conformant fixtures pinned (census re-measure);
+## note-on-entity uid connector-burn mechanism diagnosed (lenunu), deferred
+
+### Harvest (LANDED)
+
+Live DeterministicMeasurer census re-measure (post rose-svg-golden merge):
+`308/718 zero-diff` (was 303 pinned) -- FIVE fixtures had become conformant
+since the last pin pass and were unpinned. All FIVE verified `dotEqual=true`
+in `parity-class.json` (AC3-eligible) and pinned into
+`oracle/goldens/svg-class/`: `buxuso-47-tara486`, `kepado-34-risa735`,
+`kogifo-65-xotu512`, `vezato-03-rafu718`, `zucedi-63-rugu584`. Class ratchet
+303 -> 308 pins (305 -> 310 tests). Full suite 10324 -> 10329, all green.
+(These became conformant as a side effect of prior mechanism landings; this
+pass only locks them -- no new mechanism was needed to reach zero-diff.)
+
+### Near-zero bucket after harvest: 25 fixtures (1-3 diffs)
+
+Categorized: childCount singletons (`foxiki`/`vudepo`/`cenubi`/`danozo`/
+`fogexa`/`nisune` -- creole member trees, entity-count deltas); uid-ordering
+(`lenunu`, `zuxoxu`); 1px dims (`gatula`/`jubobo`/`xosiza` -- likely gvts/
+rounding); deferred subsystems (`zirori` mode-dark, `dizuse` gradient);
+draw-order (`sejuzo` line/anchor/text); larger dims (gvts/feature-blocked:
+`bijevi`/`bujedi` splines, `gadufu`/`lacote`/`lazeju`/`mefike`
+groupInheritance, `lejoga`/`pijiju`/`temise`).
+
+### DIAGNOSED (deferred -- shared-model change, needs its own regression pass):
+### note-on-entity burns a THIRD counter slot (connector rank) the port omits
+
+**Fixture**: `lenunu-95-bame774` (`class Example {}` + `note left ... end
+note` + `Example *-- Data` + `note right { ... }`). Port uid counter runs
+exactly 1 BEHIND jar for every element after the first note.
+
+**Instrumented (parseClass dump vs jar `in.svg` ids)**:
+- Port ranks: Example=1, [phantom 2], note_0=3, Data=4, rel=5, [phantom 6],
+  note_1=7 -> ids `ent0001 ent0003 ent0004 ent0007 lnk5`.
+- Jar ranks:  Example=1, [phantom 2], note_0=3, **[phantom 4]**, Data=5,
+  rel=6, [phantom 7], note_1=8 -> ids `ent0001 ent0003 ent0005 ent0008 lnk6`.
+- The SOLE divergence is jar's extra burn at slot 4 (between note_0 and Data).
+
+**Mechanism**: `class-notes.ts#188` burns exactly TWO counter increments per
+non-tip note-on-entity (`getUniqueSequence("GMN")` phantom + the note
+Entity's own slot; `creationIndex` = 2nd, `phantomSlot=true` records the
+pre-burn). `CommandFactoryNoteOnEntity` in the jar burns a THIRD slot -- the
+note's CONNECTOR-link rank, immediately AFTER the note entity -- which is
+INVISIBLE when the note is the last emitted element (its slot lands past the
+last id) but SHIFTS every later element when the note precedes them (as
+note_0 precedes Data here). note_1 is last, so its 3rd burn is unobservable.
+
+**Two candidate attributions (NOT yet disambiguated)**: (A) the note's own
+connector-link post-burn [favored -- the GMN model is note-scoped]; (B) an
+auto-created relationship endpoint (`Data`, referenced only in `*--`) burning
+a pre-slot. Disambiguating needs a fixture with an auto-created endpoint but
+no preceding note, OR a mid-sequence note with an explicit (non-auto)
+endpoint.
+
+**Why deferred, not fixed inline**: adding a 3rd note-burn changes the
+SHARED note-uid model all 308 pins (many note-heavy) depend on. If any
+passing fixture has a mid-sequence note-on-entity, a universal 3rd burn
+regresses it. This is the note-vs-classifier ordering N67 named -- a proper
+one-mechanism iteration with a full class-ratchet + census regression scan,
+not a drive-by. Starting point for that iteration: try the post-connector
+burn in `class-notes.ts` (record it as a `type: 'phantom'` Ranked entry at
+`creationIndex + 1` in `renderer-uid.ts`), then measure the full 308-pin
+ratchet + census delta before keeping it.
