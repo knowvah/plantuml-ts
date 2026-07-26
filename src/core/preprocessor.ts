@@ -170,12 +170,16 @@ class StyleAndSkinparamCollector {
   private skinparamBlockSelector = '';
 
   /** True when the line was consumed (nothing is emitted for it). `substitute`
-   *  is only threaded to the skinparam-VALUE paths -- see the class doc. */
+   *  (macro/`$variable` substitution) is threaded to the skinparam-VALUE paths
+   *  AND `<style>`-block content -- both substitute upstream (jar-verified:
+   *  `CommandSkinParam`/`CommandStyleMultilinesCSS` both dispatch over the
+   *  post-substitution line stream; there is no verbatim carve-out in
+   *  `TContext.java#addPlain`). */
   accept(line: StringLocated, substitute: (text: string) => string): boolean {
     const raw = line.getString();
     const trimmed = raw.trim();
 
-    if (this.inStyleBlock) return this.collectStyleLine(raw, trimmed);
+    if (this.inStyleBlock) return this.collectStyleLine(raw, trimmed, substitute);
 
     if (this.inSkinparamBlock) return this.collectSkinparamBlockEntry(trimmed, substitute);
 
@@ -192,13 +196,22 @@ class StyleAndSkinparamCollector {
     return this.openSkinparam(trimmed, substitute);
   }
 
-  private collectStyleLine(raw: string, trimmed: string): boolean {
+  private collectStyleLine(
+    raw: string,
+    trimmed: string,
+    substitute: (text: string) => string,
+  ): boolean {
     if (RE_STYLE_CLOSE.test(trimmed)) {
       this.styles.push(this.styleBuffer.join('\n'));
       this.styleBuffer.length = 0;
       this.inStyleBlock = false;
     } else {
-      this.styleBuffer.push(raw);
+      // `<style>`-block content IS macro/`$variable`-substituted upstream
+      // (jar-verified: `!$ACCENT="1a66c2"` + `<style>...BackgroundColor
+      // $ACCENT...` renders #1A66C2). CommandStyleMultilinesCSS dispatches over
+      // the post-substitution stream, same as skinparam -- NOT verbatim.
+      // @see ~/git/plantuml/.../tim/TContext.java#addPlain
+      this.styleBuffer.push(substitute(raw));
     }
     return true;
   }

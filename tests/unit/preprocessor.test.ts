@@ -144,11 +144,16 @@ describe('preprocessor', () => {
     expect(styles[1]).toBe('font: bold');
   });
 
-  it('style block content is collected verbatim (no define substitution)', () => {
+  it('style block content IS macro/$var-substituted (jar-verified, not verbatim)', () => {
+    // Upstream substitutes !define/$var tokens inside <style> blocks
+    // (CommandStyleMultilinesCSS dispatches over the post-substitution stream,
+    // same as skinparam) -- see preprocessor.ts#collectStyleLine.
     const { styles } = preprocess(
       '!define BG red\n<style>\nbackground: BG\n</style>',
     );
-    expect(styles).toEqual(['background: BG']);
+    expect(styles).toEqual(['background: red']);
+    const affect = preprocess('!$c = "#1a66c2"\n<style>\nBackgroundColor $c\n</style>');
+    expect(affect.styles).toEqual(['BackgroundColor #1a66c2']);
   });
 
   it('style block with multi-line content joins lines with newline', () => {
