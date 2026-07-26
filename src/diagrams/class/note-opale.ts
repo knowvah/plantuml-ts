@@ -30,6 +30,7 @@
 // ---------------------------------------------------------------------------
 
 import type { NoteGeo } from './note-layout.js';
+import type { UrlInfo } from './ast.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 
 export interface OpalePoint {
@@ -297,7 +298,7 @@ export function resolveOpaleConnector(
  * this one).
  */
 export function buildOpaleNoteGeo(
-  note: { id: string; creationIndex?: number; phantomSlot?: true; color?: string; stereotype?: string },
+  note: { id: string; creationIndex?: number; phantomSlot?: true; color?: string; stereotype?: string; url?: UrlInfo },
   // G2 N55: `lineAtoms` added, threading `NoteGeo.lineAtoms`'s own doc
   // comment through this note-shape builder too (the general-opalisable
   // branch of `mapGroupNoteGeos`'s singleton-group dispatch) -- kept as a
@@ -327,6 +328,7 @@ export function buildOpaleNoteGeo(
     ...(note.phantomSlot !== undefined ? { phantomSlot: note.phantomSlot } : {}),
     ...(note.color !== undefined ? { color: note.color } : {}),
     ...(note.stereotype !== undefined ? { stereotype: note.stereotype } : {}),
+    ...(note.url !== undefined ? { url: note.url } : {}),
   };
 }
 

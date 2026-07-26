@@ -19971,3 +19971,46 @@ the jar-verified 3-slot expectation (`class-note-creation-index.test.ts`
 classifier-after-note `creationIndex 4 -> 5`; `renderer-uid.test.ts` tip-note
 continuation `ent0004 -> ent0005`). Gates: typecheck / lint / 10330 tests /
 build all green.
+
+## N70 -- note-on-entity `[[url]]` wraps the note body in `<a xlink:href>`
+
+**Fixture**: `danozo-79-nunu375` (`Title` + `note left of Alice [[url]]` block
+note). Diff was `svg/g[1]/g[3][childCount]: ours=3 jar=1` -- the jar wraps the
+note's ENTIRE drawn body (2 paths + text) in ONE `<a xlink:href>` inside the
+note `<g class="entity">`; the port emitted the 3 elements unwrapped.
+
+**Jar mechanism**: `CommandFactoryNoteOnEntity` calls `note.addUrl(url)` after
+creating the note Leaf; `SvgGraphics` opens/closes an `<a>` around the note
+shape. The port dropped the note's `[[url]]` entirely at parse time.
+
+**Fix** (parse -> AST -> geo -> render, reusing the existing member/classifier
+URL machinery):
+- `class-notes.ts`: `NOTE_URL` made CAPTURING (the full `[[...]]` bracket) --
+  adds one capture group at all FOUR use sites, shifting each site's trailing
+  group indices +1. `PendingNote.url`/`addNote` opts/`finalizePendingNote`
+  thread a parsed `UrlInfo`.
+- `class-commands.ts` note rules 6a (block opener) + 6b (single-line): read
+  `parseUrlBracket(match[5])`; brace/text group shifted 5->6.
+- `class-container.ts` namespace rules (COLLATERAL -- they share `NOTE_URL`):
+  brace group shifted +1 (4->5, 3->4). Namespace's own URL not consumed (no
+  render path needed by any fixture).
+- `ast.ts#ClassNote.url` / `note-layout.ts#NoteGeo.url` fields; threaded in
+  `plainNoteGeo`, the tip-note builder, AND `note-opale.ts#buildOpaleNoteGeo`
+  (danozo's note is OPALISABLE -- the singleton-group opale path, initially
+  missed; caught by a render-time trace showing `opale=true, url=undefined`).
+- `renderer.ts#renderOneNote`: wraps the note's rendered inner SVG (opale or
+  plain) in `svg.ts#linkWrap` when `NoteGeo.url` is set, INSIDE `wrapEntity`.
+
+**Result**: `danozo-79-nunu375` byte-exact, pinned -> class conformance
+309 -> 310. Census `0-diff 309->310`, `1-3 24->23`, zero regressions. Class
+ratchet 311 -> 312 green (the 309 prior pins unchanged), DOT gate frozen (class
+708/708 -- the namespace index shifts do not affect DOT). Two synthetic unit
+tests updated in the prior N69 commit are unaffected. Gates: typecheck / lint /
+10331 tests / build all green.
+
+**Infra note**: `addNote`/`addFreestandingNote` are pre-existing over-budget
+(14 CCN / 7 PARAM) faithful ports of upstream's note commands. Editing
+`class-notes.ts` for this fix surfaced the complexity-hook block; `#lizard
+forgives` suppresses CCN but NOT the PARAM warning, so the file was added to
+`~/.claude/hooks/complexity-ignore` by maintainer decision (2026-07-26) rather
+than refactoring the faithful-port signatures.

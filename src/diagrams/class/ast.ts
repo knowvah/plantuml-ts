@@ -879,6 +879,15 @@ export interface ClassNote {
    */
   stereotype?: string;
   /**
+   * G2 N70: this note's own `[[url]]` (`note <pos> of X [[url]]`), captured
+   * from `NOTE_URL` and parsed via `parseUrlBracket`. Upstream's
+   * `CommandFactoryNoteOnEntity` calls `note.addUrl(url)`, and the SVG emitter
+   * wraps the whole note `<g>` body in a single `<a xlink:href>` -- the port
+   * wraps the note's rendered inner SVG via `svg.ts#linkWrap` at
+   * `renderer.ts` when this is set. Jar-verified `danozo-79-nunu375`.
+   */
+  url?: UrlInfo;
+  /**
    * G2 N15: parse-time creation order, mirroring {@link Classifier
    * .creationIndex}'s shared-counter scheme -- but a note consumes a
    * DIFFERENT number of counter increments depending on which upstream

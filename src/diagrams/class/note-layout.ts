@@ -15,7 +15,7 @@
  * each member-tip note's target row (fuzzy match, `note-opale.ts`) and
  * computes its notch anchor points; see that function's own doc comment.
  */
-import type { ClassNote, NotePosition } from './ast.js';
+import type { ClassNote, NotePosition, UrlInfo } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type {
@@ -136,6 +136,10 @@ export interface NoteGeo {
    *  comment (`renderer-note.ts#resolveNoteBackground` consumes it for the
    *  `.tagname` `<style>` cascade). Absent for a dropped note. */
   stereotype?: string;
+  /** G2 N70: copied from `ClassNote.url` — `renderer.ts` wraps the note's
+   *  rendered inner SVG in a single `<a xlink:href>` via `svg.ts#linkWrap`
+   *  when set. Absent for a note with no `[[url]]`. */
+  url?: UrlInfo;
   /**
    * G2 N52: the host classifier's `Classifier.id` this note is attached to
    * (`ClassNote.target`, copied verbatim -- NOT the `::member` port suffix,
@@ -654,6 +658,7 @@ function buildTipNoteGeo(
     tip: { direction: ctx.direction, pp1: { x: 0, y: m.height / 2 }, pp2 },
     ...(note.color !== undefined ? { color: note.color } : {}),
     ...(note.stereotype !== undefined ? { stereotype: note.stereotype } : {}),
+    ...(note.url !== undefined ? { url: note.url } : {}),
   };
 }
 
@@ -677,6 +682,7 @@ function plainNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; 
     ...(note.phantomSlot !== undefined ? { phantomSlot: note.phantomSlot } : {}),
     ...(note.color !== undefined ? { color: note.color } : {}),
     ...(note.stereotype !== undefined ? { stereotype: note.stereotype } : {}),
+    ...(note.url !== undefined ? { url: note.url } : {}),
   };
 }
 

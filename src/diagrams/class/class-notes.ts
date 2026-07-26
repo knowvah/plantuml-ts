@@ -6,6 +6,7 @@
  */
 
 import type { ClassDiagramAST, NotePosition } from './ast.js';
+import type { UrlInfo } from './class-url.js';
 import { registerInNamespace } from './class-namespace.js';
 import { splitEndpointPort, stripQuotes } from './class-relationship-parser.js';
 
@@ -48,7 +49,12 @@ export const NOTE_STEREO_CAPTURE = '(?:\\s*<<([^<>]+)>>)?';
 // match (not just dropping the extra attrs) since nothing else in the note
 // grammar accounts for a stray `;`.
 export const NOTE_COLOR = '(?:\\s*(#[-\\w./|\\\\;:]+))?';
-export const NOTE_URL = '(?:\\s*\\[\\[[^\\]]*\\]\\])?';
+// G2 N70: now CAPTURING (the full `[[...]]` bracket) so a note's own URL
+// reaches `parseUrlBracket`. Adds ONE capture group at every use site -- each
+// site's trailing group indices shift +1 (see the `execute` comments at the
+// `class-commands.ts` note rules 6a/6b and the `class-container.ts` namespace
+// rules). `[^\]]*` keeps the pre-N70 "stops at first `]`" behavior.
+export const NOTE_URL = '(?:\\s*(\\[\\[[^\\]]*\\]\\]))?';
 /**
  * `note <pos> of <Entity>` target: a bare id, a quoted string, or either
  * followed by a `::member`/`::"quoted member"` suffix (legacy UML namespace
@@ -106,6 +112,9 @@ export type PendingNote =
        *  `NOTE_STEREO_CAPTURE` — see `ClassNote.stereotype`'s doc comment
        *  (ast.ts). */
       stereotype?: string;
+      /** G2 N70: this note's own `[[url]]`, captured from `NOTE_URL` and
+       *  parsed via `parseUrlBracket` — see `ClassNote.url`'s doc comment. */
+      url?: UrlInfo;
     }
   | {
       kind: 'freestanding';
@@ -164,11 +173,11 @@ export function addNote(
   position: NotePosition,
   target: string,
   text: string,
-  opts: { namespace: string | null; implicitTarget: boolean; color?: string; stereotype?: string },
+  opts: { namespace: string | null; implicitTarget: boolean; color?: string; stereotype?: string; url?: UrlInfo },
   counter?: NoteCreationCounter,
   tipGroupsSeen?: TipGroupSeenSet,
 ): string {
-  const { namespace, implicitTarget, color, stereotype } = opts;
+  const { namespace, implicitTarget, color, stereotype, url } = opts;
   const id = `__note_${ast.notes.length}`;
   // `Class::member`/`Class::"quoted member"` (NOTE_TARGET grammar above) — the
   // note anchors to the host classifier; the member suffix is metadata only
@@ -228,6 +237,7 @@ export function addNote(
     ...(tipGroupPhantomIndex !== undefined ? { tipGroupPhantomIndex } : {}),
     ...(color !== undefined ? { color } : {}),
     ...(stereotype !== undefined ? { stereotype } : {}),
+    ...(url !== undefined ? { url } : {}),
   });
   registerInNamespace(ast.namespaces, namespace, id);
   return id;
@@ -284,6 +294,7 @@ export function finalizePendingNote(
       implicitTarget: note.implicitTarget,
       ...(note.color !== undefined ? { color: note.color } : {}),
       ...(note.stereotype !== undefined ? { stereotype: note.stereotype } : {}),
+      ...(note.url !== undefined ? { url: note.url } : {}),
     }, counter, tipGroupsSeen);
   }
   return addFreestandingNote(ast, note.alias, text, note.namespace, note.color, counter, note.stereotype);
