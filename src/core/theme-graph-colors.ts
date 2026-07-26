@@ -79,6 +79,17 @@ export interface ElementColors {
    * through to {@link Theme.shadowing}).
    */
   shadowing?: number;
+  /**
+   * `<style> <sname> { LineThickness N } }` -- the per-element border/line
+   * thickness, registered under this element's own `SName` bucket
+   * (`StyleSignatureBasic.of(root, element, <diagramType>, <sname>)`), which
+   * wins over the renderer's built-in default (`ENTITY_STROKE_WIDTH` 0.5 for
+   * description leaves) when set. `skin rose`'s `componentDiagram { node,
+   * rectangle { LineThickness 1.5 } }` is the first consumer -- a deployment
+   * node/rectangle draws a 1.5-wide border, not the 0.5 default. Absent = no
+   * per-element override (the renderer's default thickness stands).
+   */
+  lineThickness?: number;
 }
 
 export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB;

@@ -56,6 +56,19 @@ export interface UmlSource {
    * {@link linePositions}.
    */
   readonly stylePositions?: readonly (number | undefined)[];
+  /**
+   * The block's RAW source lines, `@start`/`@end` and every directive
+   * (`skin`, `!define`, `skinparam`, ...) included -- upstream's
+   * `BlockUml#rawSource`, the exact list `UmlSource.seed()` hashes
+   * (`svg-graphics-core.ts#seedOf`). {@link lines} is the DIRECTIVE-STRIPPED
+   * interior, so seeding over it omits directive lines and diverges from the
+   * jar's seed for any diagram carrying one (surfacing as a mismatched
+   * shadow/gradient/uid id). Populated by `index.ts#umlSourceOfBlock`; absent
+   * for a hand-built literal fixture (the seed falls back to the wrapped
+   * {@link lines}, unchanged for the directive-free diagrams those fixtures
+   * always are).
+   */
+  readonly rawSourceLines?: readonly string[];
 }
 
 // ---------------------------------------------------------------------------

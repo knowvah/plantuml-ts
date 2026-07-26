@@ -17,7 +17,11 @@
  */
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
-import { resolveElementPaint, resolveElementShadowing } from '../../core/theme.js';
+import {
+  resolveElementPaint,
+  resolveElementShadowing,
+  resolveElementLineThickness,
+} from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
 import { parseColor } from '../../core/paint.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
@@ -156,11 +160,18 @@ function parseColorOverride(raw: string): ColorOverride {
  *  `.bold`, all with `nonZeroThickness()` = 1 (no thickness override
  *  syntax reaches entity declarations). Falls back to this renderer's
  *  default entity stroke when no line-style override is present. */
-function overrideStroke(lineStyle: ColorOverride['lineStyle']): UStroke {
+function overrideStroke(
+  lineStyle: ColorOverride['lineStyle'],
+  defaultThickness: number = ENTITY_STROKE_WIDTH,
+): UStroke {
   if (lineStyle === 'dashed') return new UStroke(7, 7, 1);
   if (lineStyle === 'dotted') return new UStroke(1, 3, 1);
   if (lineStyle === 'bold') return UStroke.withThickness(2);
-  return UStroke.withThickness(ENTITY_STROKE_WIDTH);
+  // No inline line-style override: the element's own resolved LineThickness
+  // (`skin rose`'s `componentDiagram { node { LineThickness 1.5 } }`) stands
+  // in for the built-in `ENTITY_STROKE_WIDTH` default -- the dashed/dotted/
+  // bold branches keep their fixed upstream thicknesses (LinkStyle.getStroke3).
+  return UStroke.withThickness(defaultThickness);
 }
 
 function buildEntityParams(
@@ -198,7 +209,7 @@ function buildEntityParams(
       // shared `getStyle().getShadowing()` read. Jar-verified
       // malado-53-noso561.
       deltaShadow: resolveElementShadowing(theme, node.symbol),
-      stroke: overrideStroke(override.lineStyle),
+      stroke: overrideStroke(override.lineStyle, resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH),
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
       fontStereo: override.text !== undefined ? { ...fontStereo, color: override.text } : fontStereo,
       titleAlignment: HorizontalAlignment.CENTER,

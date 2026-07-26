@@ -1,0 +1,4 @@
+@startuml
+skin rose
+node n1
+@enduml

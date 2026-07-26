@@ -171,7 +171,14 @@ export function assembleSvg(fragment: AssembledSvg): string {
  * interpreter pulled out of THAT block (upstream keeps them inside it).
  */
 function umlSourceOfBlock(block: BlockUmlOk): UmlSource {
-  return { ...block.source, rawStyles: block.preprocessed.styles, stylePositions: block.preprocessed.stylePositions };
+  return {
+    ...block.source,
+    rawStyles: block.preprocessed.styles,
+    stylePositions: block.preprocessed.stylePositions,
+    // Raw lines (incl. @start/@end + directives) for the jar-faithful diagram
+    // seed -- see `UmlSource.rawSourceLines`'s doc comment.
+    rawSourceLines: block.rawSource.map((s) => s.getString()),
+  };
 }
 
 /**

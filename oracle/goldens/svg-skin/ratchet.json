@@ -1,0 +1,10 @@
+{
+  "fixtures": [
+    {
+      "skin": "rose",
+      "slug": "rose-node-shadow",
+      "addedAt": "2026-07-26",
+      "exercises": "skin <name> load; per-bucket Shadowing (node 2.0 over element 4.0); componentDiagram { node, rectangle { LineColor black; LineThickness 1.5 } } comma-selector border; root BackGroundColor #FEFECE entity fill; FontName SansSerif -> sans-serif; raw-source (directive-inclusive) seed"
+    }
+  ]
+}

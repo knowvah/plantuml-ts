@@ -55,6 +55,35 @@ export interface TextOptions {
   readonly orientation?: number;
 }
 
+/**
+ * Maps a resolved font-family definition to its SVG `font-family` value.
+ * @see .../klimt/font/FontStack.java#getSvgFamily — the three logical Java
+ * family names PlantUML resolves fonts through (`Serif`/`SansSerif`/
+ * `Monospaced`, case-sensitive) map to their CSS generic equivalents; any
+ * other definition passes through with `"` rewritten to `'` (SVG attribute
+ * quoting). Upstream this runs in `UFont.getFamily(UFontContext.SVG)` —
+ * called per text run by `DriverTextSvg` BEFORE the family reaches
+ * `SvgGraphics.text`. This port has no full `UFont` layer (see
+ * `StringBounder.ts`'s doc comment), so it runs at {@link
+ * SvgGraphicsElements.applyTextFontFamily}, the single per-text emission
+ * choke point, immediately before the `SvgGraphics.java`-level
+ * monospaced/roboto handling — reproducing the jar's exact two-layer
+ * sequence. Idempotent for already-CSS values (e.g. the default
+ * `sans-serif` theme family falls through unchanged).
+ */
+function getSvgFamily(fullDefinition: string): string {
+  switch (fullDefinition) {
+    case 'Serif':
+      return 'serif';
+    case 'SansSerif':
+      return 'sans-serif';
+    case 'Monospaced':
+      return 'monospace';
+    default:
+      return fullDefinition.split('"').join("'");
+  }
+}
+
 /** See the module doc comment above for the `svgRectangle` param collapse. */
 export interface RectangleGeometry {
   readonly x: number;
@@ -223,9 +252,12 @@ export class SvgGraphicsElements extends SvgGraphicsShadow {
   // http://plantuml.sourceforge.net/qa/?qa=5432/svg-monospace-output-has-wrong-font-family
   private applyTextFontFamily(elt: XmlNode, fontFamily: string | null, text: string): string {
     if (fontFamily === null) return text;
-    if (fontFamily.toLowerCase() === 'roboto') this.addRoboto();
+    // Upstream: UFont.getFamily(SVG) runs getSvgFamily before SvgGraphics.text
+    // sees the family (logical Java name -> CSS generic). See getSvgFamily.
+    const svgFamily = getSvgFamily(fontFamily);
+    if (svgFamily.toLowerCase() === 'roboto') this.addRoboto();
 
-    const resolvedFamily = fontFamily.toLowerCase() === 'monospaced' ? 'monospace' : fontFamily;
+    const resolvedFamily = svgFamily.toLowerCase() === 'monospaced' ? 'monospace' : svgFamily;
     elt.setAttribute('font-family', resolvedFamily);
 
     const lower = resolvedFamily.toLowerCase();
