@@ -171,6 +171,11 @@ function assignExact(geo: ClassGeometry, maps: UidMaps): number {
         ? [
             { type: 'phantom', creationIndex: n.creationIndex! - 1 },
             { type: 'note', id: n.id, creationIndex: n.creationIndex! },
+            // G2 N68: the note's own note<->host CONNECTOR link (a `noDisplay`
+            // dashed `Link` the jar's `CommandFactoryNoteOnEntity` always
+            // creates) burns ONE more rank immediately AFTER the note entity --
+            // see `class-notes.ts`'s own doc comment for the jar mechanism.
+            { type: 'phantom', creationIndex: n.creationIndex! + 1 },
           ]
         : [{ type: 'note', id: n.id, creationIndex: n.creationIndex! }],
     ),

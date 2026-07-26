@@ -187,6 +187,16 @@ export function addNote(
     counter.value += 1; // phantom GMN slot -- consumes a rank, never an entity
     counter.value += 1;
     creationIndex = counter.value;
+    // G2 N68: `CommandFactoryNoteOnEntity` (jar) ALSO creates the note's
+    // note<->host CONNECTOR `Link` (a `noDisplay` dashed link, added via
+    // `diagram.addLink` right after the note Leaf) -- it burns ONE more
+    // shared-counter rank AFTER the note entity. Invisible when the note is
+    // the last emitted element (its slot lands past the last id), but shifts
+    // every element declared after the note (jar-verified `lenunu-95-bame774`:
+    // note-left's connector burns the slot between it and the auto-created
+    // `Data`). Recorded as a `type: 'phantom'` Ranked entry at
+    // `creationIndex + 1` in `renderer-uid.ts`.
+    counter.value += 1;
     phantomSlot = true;
   }
   // G2 N53 (ast.ts#ClassNote.tipGroupPhantomIndex's doc comment): a

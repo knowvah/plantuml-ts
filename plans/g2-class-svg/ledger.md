@@ -19934,3 +19934,40 @@ not a drive-by. Starting point for that iteration: try the post-connector
 burn in `class-notes.ts` (record it as a `type: 'phantom'` Ranked entry at
 `creationIndex + 1` in `renderer-uid.ts`), then measure the full 308-pin
 ratchet + census delta before keeping it.
+
+## N69 -- LANDED the N68-diagnosed note connector-burn mechanism
+
+N68 diagnosed and DEFERRED the note-on-entity connector-link uid burn; this
+iteration LANDED it (the deferral was resolved same-session once the upstream
+mechanism was confirmed and the no-regression argument verified empirically).
+
+**Upstream confirmation**: `CommandFactoryNoteOnEntity.java:327-360` creates,
+in order: the GMN `getUniqueSequence` phantom, the note `Entity`, AND a
+`noDisplay` dashed note<->host connector `Link` (`diagram.addLink`). The
+connector burns one shared-counter rank AFTER the note entity -- the slot the
+port's 2-increment model omitted.
+
+**Fix** (2 source lines of logic): `class-notes.ts` adds a third
+`counter.value += 1` (the connector) after the note's own slot;
+`renderer-uid.ts` adds a matching `type: 'phantom'` Ranked entry at
+`creationIndex + 1`. Both gated on the SAME `phantomSlot`/`port === undefined`
+condition as the existing GMN burn, so freestanding notes (`CommandFactoryNote`,
+no host, no connector) and member-tip notes (`CommandFactoryTipOnEntity`, no
+GMN) are untouched.
+
+**No-regression argument (verified)**: any previously-passing note fixture must
+already have had its notes positioned so the (then-missing) connector slot fell
+past the last emitted id -- otherwise its ids would not have matched the jar
+golden and it would not have been pinned. Adding the burn keeps those slots
+past the last id, so no pinned fixture shifts. Confirmed: class ratchet
+310/310 -> 311/311 green (the 308 pre-existing pins unchanged), DOT gate frozen
+(class 708/708).
+
+**Result**: `lenunu-95-bame774` byte-exact (was uid off-by-one throughout),
+pinned -> ratchet 308 -> 309 conformant. Census re-measure: `0-diff 308 -> 309`,
+`1-3: 25 -> 24`, and one fixture improved `11-30 -> 4-10` (partial gain from the
+same burn). Zero regressions anywhere. Two synthetic N15 unit tests updated to
+the jar-verified 3-slot expectation (`class-note-creation-index.test.ts`
+classifier-after-note `creationIndex 4 -> 5`; `renderer-uid.test.ts` tip-note
+continuation `ent0004 -> ent0005`). Gates: typecheck / lint / 10330 tests /
+build all green.
