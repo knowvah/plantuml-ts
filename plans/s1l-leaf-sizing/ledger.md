@@ -52,7 +52,7 @@ containers.)
 | sprite / stdlib-macro / icon | 11 | scaled sprite dims via `<$…>` or `!include <awslib\|c4\|…>` macros mis-sized (kofuca-08-pafi749 → 478in), unknown sprite/icon → 0 dims. e.g. kofuca-08-pafi749, vivido-49-nisu863, bivira-53-boja685 | **S1L-f** |
 | interface shield | 11 | shielded `interface` sized as a generic box, not the fixed 0.25in circle; `isInterfaceShielded` gate exists, sizing does not. e.g. turasu-73-zoni468, cojege-69-ruku138, cegale-42-loxa672 | **S1L-c** |
 | min-width floor | 1 | **S1L-b/S1L-g DONE.** `skinparam minClassWidth` (S1L-g) + the `[…]` HR-height fix (S1L-b) made dexigu/kenece/zifaji **conformant** (deleted). `zotiru-33`'s scoped `<style> package { MinimumWidth 300 }` is now wired (S1L-b T5, `resolveElementMinimumWidth`): its `not_nested` package is exact at 4.583in, delta 2.655→0.914. Its remaining 0.914 is the `nested` package **cluster** floor. | **S1L-e** (nested-cluster residual) |
-| display-text expansion | 4 | **Bracket-body + creole-`====` HR DONE (S1L-b); codepoint decode-ordering DONE (S1L-b-unicode T1).** `[ … ]` bodies reach `measureLeafNode`; creole HR renders + sizes at 8px; `<U+…>`/`&#…;` now decode per-line at measure time (AFTER the `\n` split), so codepoint newlines are inline — heights no longer over-split. The 4 pinned fixtures are now DIAGNOSED, NAMED residuals (not simple bracket cases): **gafico-37-cuma657 (5.68→3.75)** + **nujito-06-neca370 (3.35→3.12)** — both driven by node c's UNPORTED `<code>` block (S1L-b-unicode T2, deferred E2r L2), NOT quoted-title literalness (Rule 2 corrected); **lurupu-11-fubo915 (2.05, unchanged)** — a sizer↔renderer creole-lexer divergence on `<font Name>`/unclosed-`<b>` (S1L-b-unicode T3), NOT emoji width (emoji measures exactly); **xufexu-38-fola855 (1.46)** — bracket-body + container (S1L-e). See the three S1L-b-unicode sections below. | `<code>` (E2r L2) / creole-lexer sync / **S1L-e** |
+| display-text expansion | 4 | **Bracket-body + creole-`====` HR DONE (S1L-b); codepoint decode-ordering DONE (S1L-b-unicode T1).** `[ … ]` bodies reach `measureLeafNode`; creole HR renders + sizes at 8px; `<U+…>`/`&#…;` now decode per-line at measure time (AFTER the `\n` split), so codepoint newlines are inline — heights no longer over-split. The 4 pinned fixtures are now DIAGNOSED, NAMED residuals (not simple bracket cases): **gafico-37-cuma657 (5.68→3.75)** + **nujito-06-neca370 (3.35→3.12)** — both driven by node c's UNPORTED `<code>` block (S1L-b-unicode T2, deferred E2r L2), NOT quoted-title literalness (Rule 2 corrected); **lurupu-11-fubo915 (2.05→CONFORMANT)** — was a sizer↔renderer creole-lexer divergence on `<font Name>`/unclosed-`<b>` (S1L-b-unicode T3), RESOLVED by creole-lexer-unification (2026-07-27, below); **xufexu-38-fola855 (1.46→0.153)** — bracket-body + container (S1L-e). See the three S1L-b-unicode sections + the creole-lexer-unification section below. | `<code>` (E2r L2) / ~~creole-lexer sync~~ DONE / **S1L-e** |
 | package / folder tab (leaf) | 3 | form-dependent leaf tab geometry (`package "X"` no braces). e.g. codabo-50-mupa164, tajadu-40-juro990, cobuju-30-paxo591 | **S1L-a** |
 | latex (DIVERGENCE) | 2 | KaTeX ≠ JLaTeXMath — see below. gevozu-46-sasu860, sunuju-01-pote718 | DIVERGENCES |
 | wrapWidth | 1 | `skinparam wrapWidth` word-wrapping unimplemented. mejoxi-96-cegu294 | **S1L-d** |
@@ -190,11 +190,55 @@ emoji-width measurer change) and **high blast radius** (routing the sizer's
 visible-text through `buildStripeAtoms` would re-measure every description leaf
 — it must be measured, not assumed). **Flagged as a scoped follow-on:
 "sizer↔renderer creole visible-text unification."** Kept pinned at 2.045912.
+**RESOLVED — see creole-lexer-unification below; lurupu-11 now conformant.**
+
+## creole-lexer-unification (2026-07-27) — the follow-on, DONE
+
+The "sizer↔renderer creole visible-text unification" follow-on (flagged in
+S1L-b-unicode T3 above) landed. `plans/creole-lexer-unification/`.
+
+- **T1 (spike, GATE):** `scripts/measure-creole-lexer-delta.ts` measured the
+  corpus impact of switching the sizer's visible-text lexer from `parseCreole`
+  to the renderer's stripe engine — 28 shrink / 319 neutral / 1 widen across
+  348 goldens. It **DISPROVED the brief's premise** that gafico-37/nujito-06
+  would shrink: their `<color:green>`/`<u:blue>` tags sit adjacent to a decoded
+  `<U+000A>` where `buildStripeAtoms`'s command scanner ALSO leaves them
+  literal — both lexers agree, so the unification is a no-op for them. They
+  stay pinned, driven by node c's `<code>` block (deferred, unchanged).
+- **T2 (unify):** extracted one shared `StripeSimple.ts#buildLineAtoms` helper;
+  `EntityImageDescriptionSupport.ts#buildLine` delegates to it (renderer output
+  byte-identical) and `leaf-sizing.ts#creoleVisibleText` now calls it (dropped
+  `parseCreole`). The sizer strips exactly what the renderer strips. **lurupu-11
+  → conformant.**
+- **T3 (scope-expanded, user-approved):** T2 un-masked a pre-existing gap on the
+  URL-`<img>` cannot-decode fixtures (the old sizer accidentally measured the
+  long raw `<img:URL>` markup ≈ the jar's `(Cannot decode: URL)`). Fixed
+  faithfully in `creole-atoms.ts#cannotDecodeText`: http/https raster →
+  `(Cannot decode: <url>)`, `.svg` URL → `(Cannot decode SVG: <url>)`
+  (`AtomImg.java:214/218/226/230`); data-URI/file stay short (megabyte /
+  security-profile reasons). That exposed a SECOND pre-existing bug: the
+  description parser leaked the `[body] as alias` wrapper into `node.display`
+  for the keyword+bracket form (`component [X] as Y`) — fixed in
+  `command-table-containers.ts` KEYWORD_RE by routing a leading `[...] as ...`
+  through the existing `parseBracketDeclaration`. Together these made
+  **pebace-74 and togeke-15 conformant**.
+
+Net (measure re-baseline): **236/351 (67.2%) → 239/351 (68.1%)** conformant,
+zero widened, dot-sync 262/262 + 90/90 unchanged. Deleted pins: lurupu-11,
+pebace-74, zotiru-33. Shrunk: nobiza-91 1.460→0.669, tuliba-37 6.736→0.521,
+gevozu-46/sunuju-01 4.670→0.612, vivido-49 2.520→0.157, jecici-56 3.183→0.315,
+xufexu-38 1.458→0.153, nenedo-78 0.865→0.169.
+
+**Residuals still named (separate pre-existing gaps, NOT this mission's):**
+nobiza-91 (0.669) — its note cannot-decode text measures at NOTE font 13 vs the
+jar's 14 (note-font gap); gafico-37/nujito-06 — node c `<code>` block (deferred
+E2r L2); per-atom font-SIZE width parity (ADR-2, `<size:N>`/`==` headings).
 
 ## Size backlog
 
-`oracle/goldens/description/size-backlog.json` — 120 shrink-only per-fixture
+`oracle/goldens/description/size-backlog.json` — 112 shrink-only per-fixture
 pins (incl. the 2 LaTeX fixtures, tracked for non-regression even though
-excluded from the reported denominator). Its `_doc` records the capture
+excluded from the reported denominator; 115 → 112 after creole-lexer-unification
+deleted lurupu-11/pebace-74/zotiru-33). Its `_doc` records the capture
 provenance. Re-measure with `npx tsx scripts/measure-description-size-deltas.ts`
 (exit 0 iff zero widened).
