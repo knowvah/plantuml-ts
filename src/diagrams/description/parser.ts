@@ -18,7 +18,7 @@ import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import type { DescriptionDiagramAST } from './ast.js';
-import { ELEMENT_MULTILINE_OPEN_RE, makeNode } from './parse-helpers.js';
+import { ELEMENT_MULTILINE_OPEN_RE, finalizeDisplay, makeNode } from './parse-helpers.js';
 import { classifyNoteOpen, isNoteTerminator } from './note-grammar.js';
 import {
   closePendingNote,
@@ -59,23 +59,55 @@ function makeInitialState(): ParseState {
  *  dispatch phase should be tried. */
 type LineOutcome = number | null;
 
+/** Push one `[ … ]` body content line (trimmed; the closing `]` already
+ *  stripped) if it carries text — blank body lines add no label content. */
+function pushElementBody(state: ParseState, content: string): void {
+  // Body lines are label content — finalize each (resolve `\t`/escape
+  // sequences and newline literals) exactly like the single-line display path.
+  const t = finalizeDisplay(content.trim());
+  if (t !== '') state.elementBlockBody!.push(t);
+}
+
+/** Close the multi-line element block: the accumulated body IS the element's
+ *  display/label (S1L-b — CommandCreateElementMultilines body, previously
+ *  discarded when sizes were tolerant). Empty body ⇒ display stays the code. */
+function finishElementBlock(state: ParseState): void {
+  const node = state.elementBlockNode;
+  const body = state.elementBlockBody;
+  if (node !== undefined && body !== undefined && body.length > 0) {
+    node.display = body.join('\n');
+  }
+  state.inElementBlock = false;
+  state.elementBlockNode = undefined;
+  state.elementBlockBody = undefined;
+}
+
 /** `<keyword> <code> [ … ]` multi-line element description
- *  (CommandCreateElementMultilines TYPE1) — body lines are label content;
- *  consume until a line ends with `]`. */
+ *  (CommandCreateElementMultilines TYPE1) — the `[ … ]` body is the element's
+ *  label; accumulate it until a line ends with `]`. */
 function tryElementBlock(state: ParseState, line: string): LineOutcome {
   if (state.inElementBlock) {
-    if (/\]\s*$/.test(line)) state.inElementBlock = false;
+    const closes = /\]\s*$/.test(line);
+    pushElementBody(state, closes ? line.replace(/\]\s*$/, '') : line);
+    if (closes) finishElementBlock(state);
     return 1;
   }
   const elemOpen = ELEMENT_MULTILINE_OPEN_RE.exec(line);
   if (elemOpen === null) return null;
-  const kw = elemOpen[1]!.toLowerCase();
-  const symbol = KEYWORD_TO_SYMBOL.get(kw);
+  const symbol = KEYWORD_TO_SYMBOL.get(elemOpen[1]!.toLowerCase());
   if (symbol === undefined) return null;
   const code = elemOpen[2]!;
-  emitNode(state, makeNode(code, code, symbol));
-  // A one-line form (`component c [ desc ]`) closes on the same line.
-  if (!/\]\s*$/.test(line)) state.inElementBlock = true;
+  const node = makeNode(code, code, symbol);
+  emitNode(state, node);
+  state.elementBlockNode = node;
+  state.elementBlockBody = [];
+  // Inline body on the open line: everything after the first `[` (a one-line
+  // `component c [ desc ]` also closes here).
+  const closes = /\]\s*$/.test(line);
+  const inline = line.slice(line.indexOf('[') + 1);
+  pushElementBody(state, closes ? inline.replace(/\]\s*$/, '') : inline);
+  if (closes) finishElementBlock(state);
+  else state.inElementBlock = true;
   return 1;
 }
 

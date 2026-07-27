@@ -20,6 +20,8 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureNodeLabel } from '../../core/latex.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import { measureLineWithAtoms, lineAtomHeightExcess, type SpriteDimsLookup } from '../../core/creole-atoms.js';
+import { parseCreole } from '../../core/creole.js';
+import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
 
 /** `skinparam componentStyle` — only `uml2` (the default) draws the corner
  *  component icon; `uml1` and `rectangle` render a plain box. */
@@ -309,7 +311,7 @@ function measureBox(
   const [iconW, iconH] = boxIcon(node.symbol, opts?.componentStyle);
   const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
   let contentW = maxLineWidth(node.display, fontSpec, measurer, sprites);
-  let contentH = lineCount(node.display) * lineH + atomHeightBonus(node.display, fontSpec, sprites);
+  let contentH = textBlockHeight(node.display, lineH) + atomHeightBonus(node.display, fontSpec, sprites);
   if (node.stereotype !== undefined && node.stereotype.length > 0) {
     // G1 I5b: one guillemet line per stereotype tag (Stereotype
     // #getMultipleLabels(), EntityImageDescription.java:200-201) -- width
@@ -334,10 +336,53 @@ function lineCount(display: string): number {
   return display.split('\n').length;
 }
 
+/** A creole horizontal-rule line (`----`/`====`/`....`) renders as a thin
+ *  separator, not a text line. Height verified 8px vs the deterministic oracle
+ *  (`node [ foo1 ==== foo2 ]` = 14 + 8 + 14 + 30 margin = 66px); a fixed 8px
+ *  across styles (S1L-b ADR-4 — no per-style split needed). */
+const CREOLE_HR_HEIGHT = 8;
+
+/** True when the display line draws as a horizontal rule rather than glyphs.
+ *  Delegated to the render-side `classifyStripeLine` (the same classifier the
+ *  leaf renderer uses) so the sizer measures EXACTLY what the renderer draws —
+ *  e.g. `----`/`====`/`....` are rules, but `____` (underscores) is NOT a rule
+ *  in this creole dialect and renders as literal text (S1L-b ADR-4 refinement,
+ *  decision-journal). Keeping the two in lock-step avoids a size/ink mismatch. */
+function isCreoleHrLine(line: string): boolean {
+  return classifyStripeLine(line).type === 'HORIZONTAL_LINE';
+}
+
+/** Text-block height: each display line contributes one `lineH`, except creole
+ *  horizontal rules which contribute the thinner `CREOLE_HR_HEIGHT` (S1L-b) —
+ *  matching upstream's `UHorizontalLine`-carrying stripe, which draws a rule
+ *  instead of a glyph line. */
+function textBlockHeight(display: string, lineH: number): number {
+  let h = 0;
+  for (const ln of display.split('\n')) {
+    h += isCreoleHrLine(ln) ? CREOLE_HR_HEIGHT : lineH;
+  }
+  return h;
+}
+
+/** Visible (glyph-bearing) text of a creole line: `parseCreole` resolves
+ *  formatting tags (`<b>`, `<i>`, `<color:…>`, `<size:…>`, …) into span flags,
+ *  so only the text that actually draws remains. The deterministic
+ *  `WidthTableMeasurer` is weight-agnostic (bold == normal advance widths —
+ *  see its own doc), so summing the span *text* at normal weight is exact
+ *  against the oracle (S1L-b ADR-2). Atom markup (`<img>`/`<$sprite>`) is not
+ *  a formatting tag, so the lexer leaves it verbatim in the span text for
+ *  `measureLineWithAtoms` to scan (verified: `<img:x>` round-trips unchanged). */
+function creoleVisibleText(line: string): string {
+  return parseCreole(line)
+    .map((s) => s.text)
+    .join('');
+}
+
 /** Width of the widest display line, measured per line (not the whole
- *  string). Atom-aware (D9): a line's `<img>`/`<$sprite>` markup stops
- *  contributing text width and the atom's own scaled width is added
- *  instead -- see `creole-atoms.ts#measureLineWithAtoms`, which is a
+ *  string). Creole formatting tags are resolved away first (S1L-b ADR-2 —
+ *  see `creoleVisibleText`). Atom-aware (D9): a line's `<img>`/`<$sprite>`
+ *  markup stops contributing text width and the atom's own scaled width is
+ *  added instead -- see `creole-atoms.ts#measureLineWithAtoms`, which is a
  *  zero-diff drop-in for `measurer.measure(ln, fontSpec).width` on any
  *  atom-free line. */
 function maxLineWidth(
@@ -347,7 +392,8 @@ function maxLineWidth(
   sprites?: SpriteDimsLookup,
 ): number {
   let max = 0;
-  for (const ln of display.split('\n')) {
+  for (const raw of display.split('\n')) {
+    const ln = creoleVisibleText(raw);
     const w = measureLineWithAtoms(ln, fontSpec, measurer, sprites).width;
     if (w > max) max = w;
   }
