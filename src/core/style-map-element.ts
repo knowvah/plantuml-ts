@@ -114,6 +114,17 @@ export function collectElementStyleBuckets(
         const thickness = Number.parseFloat(lt);
         if (Number.isFinite(thickness)) bucket.lineThickness = thickness;
       }
+      // S1L-b T5: the per-element `MinimumWidth` content-width floor
+      // (`PName.MinimumWidth`), scoped to this bucket's SName --
+      // `resolveElementMinimumWidth` cascades it over the global
+      // `theme.minimumWidth` (bare `skinparam minClassWidth`). zotiru-33's
+      // `<style> package { MinimumWidth 300 }` floors packages but not a
+      // sibling card (ADR-3). Parsed with `parseFloat` like `linethickness`.
+      const mw = props.get('minimumwidth');
+      if (mw !== undefined) {
+        const minWidth = Number.parseFloat(mw);
+        if (Number.isFinite(minWidth)) bucket.minimumWidth = minWidth;
+      }
       const fs = props.get('fontsize');
       if (fs !== undefined) {
         const size = Number(fs);

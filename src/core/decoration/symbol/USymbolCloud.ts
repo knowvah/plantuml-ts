@@ -7,6 +7,7 @@ import { XPoint2D } from '../../klimt/geom/XPoint2D.js';
 import { CoordinateChange } from '../../klimt/geom/CoordinateChange.js';
 import { UTranslate } from '../../klimt/UTranslate.js';
 import { UPath } from '../../klimt/shape/UPath.js';
+import { UGraphicStencil } from '../../klimt/drawing/UGraphicStencil.js';
 import { USymbol, Margin } from './USymbol.js';
 import type { SName } from './USymbol.js';
 import type { SymbolContext } from './SymbolContext.js';
@@ -304,6 +305,18 @@ export class USymbolCloud extends USymbol {
       calculateDimension,
       drawU(ug: UGraphic): void {
         const dim = calculateDimension(ug.getStringBounder());
+        // `ug = UGraphicStencil.create(ug, dim)` — restored (S1L-b T1): a
+        // creole horizontal-rule line (`----`/`====`) in the cloud body
+        // draws a `UHorizontalLine`, an infinite stencil-clipped shape that
+        // ONLY an `AbstractUGraphicHorizontalLine` wrapper can render. Without
+        // this wrap the raw shape reaches `LimitFinder` during the ink-extent
+        // pass (any 2+ element diagram) and throws `unsupported shape
+        // UHorizontalLine` (codabo-50). Present+active in upstream
+        // `USymbolCloud.java#asSmall#drawU`; a prior port drop had replaced it
+        // with a comment falsely claiming upstream omits it. Output-neutral
+        // for HR-free clouds (`UGraphicStencil` passes every other shape
+        // straight through), matching every sibling `asSmall`'s own wrap.
+        ug = UGraphicStencil.create(ug, dim);
         ug = symbolContext.apply(ug);
         drawCloud(ug, dim.getWidth(), dim.getHeight(), symbolContext.getDeltaShadow());
         const margin = getMargin();
@@ -311,14 +324,6 @@ export class USymbolCloud extends USymbol {
         tb.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));
       },
     };
-    // #lizard forgives -- the `drawU` closure faithfully ports
-    // `USymbolCloud.java#asSmall`'s anonymous `TextBlock` body verbatim
-    // (dimension recompute, symbolContext.apply, drawCloud, margin
-    // translate) -- upstream deliberately omits `UGraphicStencil.create`
-    // here (unlike every other `asSmall` in this family): `drawCloud`'s
-    // bump path is generated FROM `dim`, so wrapping `ug` in a stencil
-    // clipped to that same `dim` would be a no-op, and upstream's own
-    // source has no such call in this one method.
   }
 
   asBig(

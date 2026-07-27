@@ -89,3 +89,18 @@ export function resolveElementShadowing(theme: Theme, sname: string): number {
 export function resolveElementLineThickness(theme: Theme, sname: string): number | undefined {
   return theme.colors.elements?.[sname]?.lineThickness;
 }
+
+/**
+ * Resolve one element's own `MinimumWidth` content-width floor
+ * (`<style> <sname> { MinimumWidth N }`, `PName.MinimumWidth`), cascading the
+ * element-specific (SName) bucket over the diagram-wide `theme.minimumWidth`
+ * (bare `skinparam minClassWidth`) — S1L-b T5, ADR-3. So `<style> package {
+ * MinimumWidth 300 }` floors package boxes while a sibling `card` (no scoped
+ * override, no global floor) falls through to `undefined` and the box default.
+ * Returns `undefined` when neither tier is set, letting `measureBox` apply its
+ * own `BOX_MIN_WIDTH_DEFAULT` — mirrors `resolveElementLineThickness`'s
+ * "absent -> caller default" shape.
+ */
+export function resolveElementMinimumWidth(theme: Theme, sname: string): number | undefined {
+  return theme.colors.elements?.[sname]?.minimumWidth ?? theme.minimumWidth;
+}

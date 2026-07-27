@@ -90,6 +90,18 @@ export interface ElementColors {
    * per-element override (the renderer's default thickness stands).
    */
   lineThickness?: number;
+  /**
+   * `<style> <sname> { MinimumWidth N } }` -- the per-element content-width
+   * floor, registered under this element's own `SName` bucket
+   * (`StyleSignatureBasic.of(root, element, <sname>)`, `PName.MinimumWidth`),
+   * which wins over the diagram-wide `Theme.minimumWidth` (bare
+   * `skinparam minClassWidth`) when set (S1L-b T5, ADR-3). `zotiru-33`'s
+   * `<style> package { MinimumWidth 300 }` floors package boxes' content at
+   * 300 while leaving a sibling `card` unfloored. Absent = no per-element
+   * override (falls through to {@link Theme.minimumWidth}, then the box
+   * default). See `resolveElementMinimumWidth`.
+   */
+  minimumWidth?: number;
 }
 
 export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB;

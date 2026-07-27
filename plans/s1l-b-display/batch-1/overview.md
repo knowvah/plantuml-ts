@@ -1,4 +1,13 @@
-# Batch 1 — Core: unblock body render + size
+# Batch 1 — Core: unblock body render + size  ✅ DONE (2026-07-27)
+
+**Result:** T1–T4 complete. The HR render crash was `USymbolCloud` (a dropped
+upstream `UGraphicStencil.create` line), NOT `renderer-cluster.ts` — see the
+decision journal. dexigu-24/kenece-24/zifaji-87 conformant (delta 0); backlog
+re-baselined (236/351 = 67.2% conformant); fariba-82 re-pinned for Batch 2.
+Gates green: size-harness exit 0, dot-sync 262/262 + 90/90, ratchet 351/351,
+typecheck/lint/build/full-suite (10357) all pass. Commits: T1 = `e02b2a2`;
+T2+T3+T4 = `9c86259` (combined — the size ratchet couples them, journal).
+
 
 Land the parser body accumulation, creole-aware sizing, and the creole-HR render
 wiring **together** so the discarded `[ … ]` body becomes the node's label

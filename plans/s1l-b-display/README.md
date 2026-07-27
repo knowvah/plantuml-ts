@@ -18,9 +18,38 @@ exposes that creole horizontal rules (`====`/`----`) crash `LimitFinder`
 
 ## Status
 
-- [ ] Batch 1 — Core (render-HR wiring, parser body, sizer, backlog re-baseline)
-- [ ] Batch 2 — Last fixtures (scoped-style MinimumWidth, fariba diagnosis)
-- [ ] Batch 3 — Close (re-measure, ledger, mission-index)
+- [x] Batch 1 — Core (render-HR wiring, parser body, sizer, backlog re-baseline)
+- [x] Batch 2 — Last fixtures (scoped-style MinimumWidth, fariba diagnosis)
+- [x] Batch 3 — Close (re-measure, ledger, mission-index)
+
+## Mission summary (2026-07-27 — COMPLETE)
+
+All 7 tasks done; full gate green (measure exit 0, dot-sync 262/262 + 90/90,
+typecheck, lint, build, full suite 10361). Description size-conformance
+**231→236 / 351 (65.8%→67.2%)**.
+
+**Definition of done — met:**
+- `dexigu-24`, `kenece-24`, `zifaji-87` size-conformant (delta 0), backlog
+  entries deleted. Bonus: `butebe-90`, `zavitu-69` also flipped.
+- No fixture renders an error diagram — the HR-body fixtures (incl. codabo-50)
+  render. Structure stayed 100% EQUAL.
+- `zotiru-33` pin shrunk 2.655→0.914 (scoped `<style> MinimumWidth` wired);
+  `fariba-82` diagnosed + pinned (1.024479, documented in the ledger).
+- Ledger + `planning/mission-index.md` updated with the new conformant % and
+  named residuals.
+
+**Key finding (flagged for review):** T1's brief premise was wrong. The HR
+render crash was NOT unwired interception in `renderer-cluster.ts` — every
+symbol already intercepts. The real cause was a single dropped upstream line
+(`ug = UGraphicStencil.create(ug, dim)`) in `USymbolCloud.asSmall`, carrying a
+false comment claiming upstream omits it. Fix is a 1-line restoration in
+`src/core/decoration/symbol/USymbolCloud.ts` (outside T1's declared write-set) —
+faithful to upstream, matches ADR-1. See `decision-journal.md`.
+
+**Residuals (all named, routed):** zotiru `nested` cluster → S1L-e; fariba
+awslib sprite → S1L-f + `file`-body wrap → S1L-d; `$var`/emoji expansion
+(gafico/nujito/lurupu) → S1L-b follow-on. S1L-g (min-width) closed; S1L-b
+family remains `wip` for the $var/emoji sub-scope.
 
 ## Startup (read in this order)
 

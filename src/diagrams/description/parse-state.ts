@@ -37,6 +37,11 @@ export interface ParseState {
    *  (CommandCreateElementMultilines TYPE1) — body lines are consumed until
    *  one ends with `]`. */
   inElementBlock: boolean;
+  /** The node whose `[ … ]` body is being accumulated (S1L-b) — the body is
+   *  the element's display/label, set when the block closes. */
+  elementBlockNode?: DescriptiveNode | undefined;
+  /** Accumulated `[ … ]` body content lines for `elementBlockNode`. */
+  elementBlockBody?: string[] | undefined;
   /** Stack of open container nodes (package, node, folder, etc.). */
   containerStack: DescriptiveNode[];
   /** Every node created so far, by id — lets the link grammar auto-create
