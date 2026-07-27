@@ -295,6 +295,13 @@ export function renderDot(geo: DotGeometry, theme: Theme): RenderFragment {
   const minClusterY = geo.clusters.reduce((min, cl) => Math.min(min, cl.y), 0);
   const extraTopPad = minClusterY < 0 ? Math.ceil(-minClusterY) : 0;
 
+  // NOTE: no horizontal analog (extraLeftPad from minClusterX) is wired up.
+  // The burn-graphviz mission's pre-flight stash proposed one for symmetry, but
+  // measurement showed it is a no-op: no cluster in the full fixture corpus ever
+  // has negative x (unlike y, where label strips push clusters above 0 — the
+  // 2b536a8 top-clipping fix). Add the left/right guard here if a diagram ever
+  // produces a cluster left of x=0 (or right-edge stroke clipping) — not before.
+
   const finalWidth = geo.totalWidth + MARGIN;
   const xOffset = MARGIN;
   const yOffset = MARGIN + extraTopPad;
