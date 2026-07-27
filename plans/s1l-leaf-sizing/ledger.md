@@ -66,6 +66,32 @@ These 2 are the **only** exclusion. Sprites, OpenIconic, and `<style>` blocks
 are ported subsystems (gaps in coverage, not divergences) and stay in the
 denominator, routed to S1L-f/S1L-b above.
 
+## S1L-b T6 — fariba-82 documented residual (diagnosed, pinned)
+
+`fariba-82-xolu802` (`file policy <<policy>> [ JSON body ]` + an awslib `User`
+sprite) sits at delta **1.024479in** after S1L-b T1–T3 (it *widened* 0.034in
+past its prior 0.990278 pin when T2 first routed the `[ … ]` body to the sizer
+— expected, not a regression). Diagnosed (evidence, not guess), pinned at its
+true delta per ADR-5; **no cheap in-scope fix exists**. Compound of two factors:
+
+1. **awslib `User` sprite (`user` node) — OUT OF SCOPE (S1L-f).** Our sprite
+   node measures ~2.18in vs the oracle ~1.46in. Sprite sizing is the S1L-f
+   sub-mission, explicitly excluded by T6's boundaries.
+2. **`policy` `file` box over-wide — a body-wrap gap, not a leaf-width bug.**
+   Our box is ~3.8in, the jar's ~2.4in. The widest body line
+   `"Resource": "arn:aws:iam::1:role/role"` measures 229px via our width table
+   (`leaf-sizing.ts#maxLineWidth`) — table-correct and weight-agnostic — but
+   the jar's `file` body box is far narrower, i.e. the jar constrains/wraps the
+   long un-wrapped JSON line in a way this port does not yet reproduce (a
+   word-wrap/MaximumWidth behavior, → **S1L-d** territory, not a one-line fix).
+
+**Ruled out (with evidence):** bold-glyph width — the deterministic measurer is
+weight-agnostic, `<b>arn</b>` measures exactly as `arn` (ADR-2); tab width —
+`WidthTableMeasurer` gives `\t` **0 width**, so the JSON's leading tabs do NOT
+inflate our box; creole formatting tags — stripped by T3's `creoleVisibleText`.
+Origin: `src/diagrams/description/leaf-sizing.ts#maxLineWidth` (correct per
+table) + sprite sizing (`render-atoms.ts`, S1L-f). Kept pinned at 1.024479.
+
 ## Size backlog
 
 `oracle/goldens/description/size-backlog.json` — 120 shrink-only per-fixture
