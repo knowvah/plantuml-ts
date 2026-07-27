@@ -25,6 +25,16 @@ import { measureLineWithAtoms, lineAtomHeightExcess, type SpriteDimsLookup } fro
  *  component icon; `uml1` and `rectangle` render a plain box. */
 export type ComponentStyle = 'uml2' | 'uml1' | 'rectangle';
 
+/** Per-diagram box-sizing context threaded from `ClassifyCtx` into
+ *  `measureLeafNode`. Bundled (rather than separate params) to keep the
+ *  sizing signatures within the argument-count budget. */
+export interface BoxSizingOpts {
+  componentStyle?: ComponentStyle | undefined;
+  /** `skinparam minClassWidth` / style `MinimumWidth` (`PName.MinimumWidth`) —
+   *  floors the text-block CONTENT width, before margin + icon. Default 0. */
+  minimumWidth?: number | undefined;
+}
+
 /** Legacy actor box constants (kept for the re-export; the DOT size now comes
  *  from the stickman + label stack below). */
 export const ACTOR_WIDTH = 50;
@@ -45,13 +55,13 @@ const USECASE_ELLIPSE_BIGGER = 6;
 const USECASE_ALPHA_MIN = 0.2;
 const USECASE_ALPHA_MAX = 0.8;
 /**
- * Box text-block minimum width. This is the `MinimumWidth` style value
- * (`EntityImageDescription:186` / `BodyEnhanced2:114`), whose default is 0 —
- * a narrow box is sized purely by its text + margin (verified: oracle
- * `rectangle "i"` = 24px, not floored). The `minClassWidth` skinparam raises
- * it (mapped to `PName.MinimumWidth`), still to be wired through.
+ * Default box text-block minimum width (`MinimumWidth` style,
+ * `EntityImageDescription:186` / `BodyEnhanced2:114`): 0 — a narrow box is
+ * sized purely by its text + margin (verified: oracle `rectangle "i"` = 24px,
+ * not floored). `skinparam minClassWidth` / style `MinimumWidth` raise it via
+ * `BoxSizingOpts.minimumWidth` (S1L-g).
  */
-const BOX_MIN_WIDTH = 0;
+const BOX_MIN_WIDTH_DEFAULT = 0;
 
 /**
  * Per-USymbol box margin `[horizontal (x1+x2), vertical (y1+y2)]` in px,
@@ -149,7 +159,7 @@ export function measureLeafNode(
   node: DescriptiveNode,
   fontSpec: FontSpec,
   measurer: StringMeasurer,
-  componentStyle?: ComponentStyle,
+  opts?: BoxSizingOpts,
   sprites?: SpriteDimsLookup,
 ): Dim {
   switch (node.symbol) {
@@ -167,7 +177,7 @@ export function measureLeafNode(
     case 'usecase-business':
       return measureUsecase(node.display, fontSpec, measurer, sprites, node.stereotype);
     default:
-      return measureBox(node, fontSpec, measurer, componentStyle, sprites);
+      return measureBox(node, fontSpec, measurer, opts, sprites);
   }
 }
 
@@ -292,11 +302,11 @@ function measureBox(
   node: DescriptiveNode,
   fontSpec: FontSpec,
   measurer: StringMeasurer,
-  componentStyle: ComponentStyle | undefined,
+  opts: BoxSizingOpts | undefined,
   sprites?: SpriteDimsLookup,
 ): Dim {
   const [marginH, marginV] = SYMBOL_BOX_MARGIN[node.symbol] ?? DEFAULT_BOX_MARGIN;
-  const [iconW, iconH] = boxIcon(node.symbol, componentStyle);
+  const [iconW, iconH] = boxIcon(node.symbol, opts?.componentStyle);
   const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
   let contentW = maxLineWidth(node.display, fontSpec, measurer, sprites);
   let contentH = lineCount(node.display) * lineH + atomHeightBonus(node.display, fontSpec, sprites);
@@ -308,8 +318,13 @@ function measureBox(
     contentW = Math.max(contentW, stereoWidth + STEREO_MARGIN);
     contentH += lineH * node.stereotype.length; // one stereotype line per tag, above the label
   }
+  // MinimumWidth floors the CONTENT width (before margin + icon), matching the
+  // oracle: `skinparam minClassWidth 200` gives `component foo` 240px =
+  // max(text,200) + 20 margin + 20 icon; package `not_nested` @MinimumWidth 300
+  // = 300 + 30 margin. Default 0 (no floor).
+  const minContentW = opts?.minimumWidth ?? BOX_MIN_WIDTH_DEFAULT;
   return {
-    width: Math.max(BOX_MIN_WIDTH, contentW + marginH + iconW),
+    width: Math.max(minContentW, contentW) + marginH + iconW,
     height: contentH + marginV + iconH,
   };
 }

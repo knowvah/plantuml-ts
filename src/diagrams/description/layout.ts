@@ -91,6 +91,9 @@ export interface ClassifyCtx {
   counter: { n: number };
   /** `skinparam componentStyle` — gates the UML2 component corner icon. */
   componentStyle: ComponentStyle | undefined;
+  /** `skinparam minClassWidth` / style `MinimumWidth` — leaf-box content width
+   *  floor (S1L-g). undefined ⇒ 0 (no floor). */
+  minimumWidth: number | undefined;
   /** Container-scoped identity (mission I1b) — bare ids that are TRUE
    *  cross-scope collisions across the WHOLE diagram
    *  (namespace-groups.ts#findCollidingIds), read by `dotKeyFor` to decide
@@ -405,6 +408,7 @@ export function layoutDescription(
     leafIdSet: new Set(), containers: [],
     containerById: new Map(), astNodeById: new Map(), counter: { n: 0 },
     componentStyle: theme.componentStyle,
+    minimumWidth: theme.minimumWidth,
     collidingIds, qualifiedPathToDotKey: new Map(),
     sprites: ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined,
   };
@@ -424,7 +428,10 @@ export function layoutDescription(
   // removed filter) — use the raw cluster predicate, not the removal-aware
   // classification.
   const rawContainers = countRawContainers(ast.nodes);
-  const degenerate = degenerateSingleLeaf(ast, rawContainers, fontSpec, measurer, theme.componentStyle);
+  const degenerate = degenerateSingleLeaf(ast, rawContainers, fontSpec, measurer, {
+    componentStyle: theme.componentStyle,
+    minimumWidth: theme.minimumWidth,
+  });
   if (degenerate !== undefined) {
     return {
       ...degenerate,
