@@ -23,7 +23,7 @@ residuals"** mission, NOT "flip all 3 conformant" (see `decisions.md`).
 
 ## Status
 
-- [ ] Batch 1 — Decode-ordering: codepoint escapes decode per-line (T1)
+- [x] Batch 1 — Decode-ordering: codepoint escapes decode per-line (T1)
 - [ ] Batch 2 — Quoted-title literalness: scoped fix or document (T2)
 - [ ] Batch 3 — Emoji width (T3) + accounting close (T4)
 

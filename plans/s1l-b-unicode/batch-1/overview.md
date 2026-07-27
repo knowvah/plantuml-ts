@@ -7,7 +7,7 @@ HEIGHT over-splitting that inflates all three target fixtures.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | Decode codepoints per-line, not in `finalizeDisplay` | typescript-pro | `parse-helpers-strings.ts`, `leaf-sizing.ts`, `EntityImageDescriptionSupport.ts`, new unit test | — | ☐ |
+| T1 | Decode codepoints per-line, not in `finalizeDisplay` | typescript-pro | `parse-helpers-strings.ts`, `leaf-sizing.ts`, `EntityImageDescriptionSupport.ts`, new unit test | — | ☑ |
 
 **Exit bar:** `measure-description-size-deltas.ts` exit 0 (zero widened);
 `dot-sync-report component usecase` stays 262/262 + 90/90; the 3 targets'

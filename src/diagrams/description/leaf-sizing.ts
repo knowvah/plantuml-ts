@@ -22,6 +22,7 @@ import type { USymbol } from '../../core/descriptive-keywords.js';
 import { measureLineWithAtoms, lineAtomHeightExcess, type SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { parseCreole } from '../../core/creole.js';
 import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
+import { resolveTextEscapes } from '../../core/text-escapes.js';
 
 /** `skinparam componentStyle` — only `uml2` (the default) draws the corner
  *  component icon; `uml1` and `rectangle` render a plain box. */
@@ -393,7 +394,14 @@ function maxLineWidth(
 ): number {
   let max = 0;
   for (const raw of display.split('\n')) {
-    const ln = creoleVisibleText(raw);
+    // Decode `<U+XXXX>`/`&#NNN;` per-line, AFTER the `\n` split and creole
+    // style-strip — mirroring upstream's per-atom `AtomText.manageSpecialChars`
+    // (S1L-b-unicode ADR-1). A decoded inline newline (`<U+000A>`) stays within
+    // this line and measures ~0 in the width table (it never re-splits, since
+    // the split above ran on the raw, still-encoded display). The renderer
+    // (`EntityImageDescriptionSupport.ts#buildLine`) decodes identically — the
+    // sizer↔renderer sync invariant.
+    const ln = resolveTextEscapes(creoleVisibleText(raw));
     const w = measureLineWithAtoms(ln, fontSpec, measurer, sprites).width;
     if (w > max) max = w;
   }
