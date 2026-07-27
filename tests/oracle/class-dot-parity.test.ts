@@ -23,7 +23,9 @@
  *   its committed `svek-N.dot` files, and each is asserted
  *   `compareStructural(...).structurallyEqual === true`. Any regression in
  *   our DOT emission (or in this zero-graph count) for a pinned fixture fails
- *   `npm test`.
+ *   `npm test`. Node width/height are also pinned (A-phase size-gating): each
+ *   fixture's `maxSizeDeltaIn` must stay ≤ its `size-backlog.json` allowance
+ *   (or ≤0.01in when absent) — shrink-only, tightened by mission A2s.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
@@ -38,6 +40,7 @@ import {
   parseSvekDot,
   dotInputToStructural,
   compareStructural,
+  SIZE_CONFORMANCE_TOLERANCE_IN,
 } from './svek-dot.js';
 import { expectNoErrorDiagram } from '../helpers/error-diagram.js';
 
@@ -45,6 +48,15 @@ const GOLDENS = join(
   dirname(fileURLToPath(import.meta.url)),
   '../../oracle/goldens/class',
 );
+
+/** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-conformant RATCHET
+ *  fixtures (A-phase size-gating; measured by
+ *  scripts/measure-class-size-deltas.ts). Absent slug ⇒ ≤0.01in `conformant`;
+ *  backlog entries ratchet downward only. The tail is class HTML-record node
+ *  sizing — see size-backlog.json's `_doc` and the A2 note in mission-index. */
+const sizeBacklog: Record<string, number> = existsSync(join(GOLDENS, 'size-backlog.json'))
+  ? (JSON.parse(readFileSync(join(GOLDENS, 'size-backlog.json'), 'utf8')) as Record<string, number>)
+  : {};
 
 const allDirs = existsSync(GOLDENS)
   ? readdirSync(GOLDENS, { withFileTypes: true })
@@ -133,6 +145,15 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — cla
           diff.structurallyEqual,
           `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
         ).toBe(true);
+        // A-phase size-gating: node width/height pinned. Non-backlog fixtures
+        // must stay within the 0.01in `conformant` bar; backlog fixtures
+        // ratchet downward only (a class node-sizing fix drops one to ≤0.01
+        // and deletes its entry).
+        const allowed = sizeBacklog[name] ?? SIZE_CONFORMANCE_TOLERANCE_IN;
+        expect(
+          diff.maxSizeDeltaIn,
+          `${name}/${file}: node size drift — maxSizeDeltaIn=${diff.maxSizeDeltaIn} > allowed ${allowed}`,
+        ).toBeLessThanOrEqual(allowed + 1e-6);
       }
     });
   }
