@@ -473,9 +473,11 @@ corrected pass 14's "tolerance-exclusion ~67%" framing: the number is not
 reached by excluding portable gaps.
 
 The 120 misses are routed in `plans/s1l-leaf-sizing/ledger.md` → sub-missions
-**S1L-a** (package/folder tabs, 20), **S1L-b** (display-text expansion, 18),
-**S1L-c** (interface shield, 17), **S1L-d** (wrapWidth, 1), **S1L-e**
-(container/cluster, 30), **S1L-f** (sprite/stdlib-macro/icon, 13), plus 19
+(counts re-bucketed 2026-07-27 for accuracy — container detection now precedes
+the leaf checks): **S1L-e** container/cluster **47** (dominant), **S1L-f**
+sprite/stdlib-macro/icon 11, **S1L-c** interface shield 11, **S1L-g**
+minClassWidth/MinimumWidth floor 4, **S1L-b** display-text expansion 4,
+**S1L-a** leaf package/folder tab 3, **S1L-d** wrapWidth 1, plus 37
 uncategorized folded in during those missions' re-runs. LaTeX (2) → permanent
 DIVERGENCES exclusion. Each sub-mission flips its fixtures to
 asserted-`conformant` by driving their backlog entries to ≤0.01 and deleting

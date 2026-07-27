@@ -69,12 +69,23 @@ export function classifyDelta(
   return 'unchanged';
 }
 
-/** (regex, cause) table for `detectCause`, most-specific first. */
+/** Container keywords that, when followed by `{`, form a cluster (not a leaf). */
+const CONTAINER_KW =
+  'package|node|rectangle|folder|frame|cloud|database|artifact|card|component|' +
+  'together|storage|queue|stack|agent|collections|file|person|hexagon|label';
+
+/** (regex, cause) table for `detectCause`, most-specific first. Container
+ *  detection (a container keyword opening a `{` block, or a bare `{` line)
+ *  precedes the leaf package/interface/bracket checks — a `package X { … }` is
+ *  a cluster (S1L-e), not a leaf tab; likewise a bracket body inside a `{}`
+ *  block is cluster sizing, not display expansion. */
 const CAUSE_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
   [/<\/?(?:latex|math)>/i, 'latex'],
   [/\bwrapWidth\b/i, 'wrapWidth'],
+  [/\b(?:minClassWidth|MinimumWidth)\b/i, 'min-width'],
+  [new RegExp(`^\\s*(?:${CONTAINER_KW})\\b[^\\n{]*\\{|^\\s*\\{`, 'im'), 'container-cluster'],
   [/<U\+[0-9A-Fa-f]{2,6}>/, 'emoji-unicode'],
-  [/<\$[\w-]+>/, 'sprite'],
+  [/<\$[\w-]+>|!include\s*</, 'sprite'],
   [/<&[\w-]+>|<:[^:>\n]+:>/, 'icon'],
   [/^\s*(?:package|folder|artifact)\b/im, 'package-folder-tab'],
   [/\binterface\b/i, 'interface-shield'],
