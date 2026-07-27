@@ -119,3 +119,26 @@ pin values.
   "sizer calls the renderer's `buildTextBlock.calculateDimension` wholesale"
   width+height unification; per-atom font-SIZE width parity (`<size:N>`,
   `==` heading runs).
+
+## Mission summary (closed 2026-07-27)
+
+**All 3 tasks complete.** Commits (on `feature/creole-lexer-unification`, ready
+to merge — mission-branch merge-commit convention): T1 `7ffdd84`, T2 `d8975e1`,
+T3 `7ea6e1f`.
+
+- **T1 (spike/GATE):** disproved the brief's premise that gafico-37/nujito-06
+  would shrink (both lexers agree on their newline-adjacent tags) → those two
+  re-scoped OUT with user approval.
+- **T2 (unify):** one shared `StripeSimple#buildLineAtoms`; renderer
+  byte-identical; sizer dropped `parseCreole`. lurupu-11 → conformant.
+- **T3 (scope-expanded ×2, user-approved):** faithful URL cannot-decode text
+  (`creole-atoms.ts`) + fixed a pre-existing `component [body] as alias`
+  parser-leak (`command-table-containers.ts`). pebace-74 + togeke-15 →
+  conformant.
+
+**Result:** conformant 236 → **239/351 (68.1%)**, zero widened, dot-sync
+262/262 + 90/90, all tests green (10380), typecheck/lint/build green. Two
+decision-checkpoints surfaced to the human (T1 gate, T2/T3 residuals); 3
+scope-expansion decisions taken with approval. **Residuals filed:** nobiza-91
+note cannot-decode font 13-vs-14; gafico-37/nujito-06 node-c `<code>` block
+(deferred). See `decision-journal.md`.
