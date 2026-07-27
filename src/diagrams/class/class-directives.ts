@@ -9,7 +9,6 @@
 import type {
   ClassDiagramAST,
   ClassifierKind,
-  ClassNote,
   HideShowDirective,
   HideShowEntityDirective,
   HideShowKindDirective,
