@@ -30,7 +30,7 @@ prove the corpus is net-positive before editing production, then re-baseline.
 
 ## Status
 
-- [ ] Batch 1 — Spike: measure corpus impact of the lexer switch (T1, GATE)
+- [x] Batch 1 — Spike: measure corpus impact of the lexer switch (T1, GATE) — DONE; gate = STOP-and-ask (2 deviations, see decision-journal)
 - [ ] Batch 2 — Unify: shared visible-atoms helper; rewire sizer + renderer (T2)
 - [ ] Batch 3 — Re-baseline backlog + ledger + mission-index; full gate (T3)
 
