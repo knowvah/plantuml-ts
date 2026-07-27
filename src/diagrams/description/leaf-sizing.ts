@@ -19,10 +19,16 @@ import type { DescriptiveNode } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureNodeLabel } from '../../core/latex.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
-import { measureLineWithAtoms, lineAtomHeightExcess, type SpriteDimsLookup } from '../../core/creole-atoms.js';
-import { parseCreole } from '../../core/creole.js';
+import {
+  measureLineWithAtoms,
+  measureInlineAtom,
+  lineAtomHeightExcess,
+  type SpriteDimsLookup,
+} from '../../core/creole-atoms.js';
 import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
-import { resolveTextEscapes } from '../../core/text-escapes.js';
+import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { JAR_DEFAULT_TEXT_COLOR } from './renderer-symbol.js';
 
 /** `skinparam componentStyle` — only `uml2` (the default) draws the corner
  *  component icon; `uml1` and `rectangle` render a plain box. */
@@ -365,27 +371,69 @@ function textBlockHeight(display: string, lineH: number): number {
   return h;
 }
 
-/** Visible (glyph-bearing) text of a creole line: `parseCreole` resolves
- *  formatting tags (`<b>`, `<i>`, `<color:…>`, `<size:…>`, …) into span flags,
- *  so only the text that actually draws remains. The deterministic
- *  `WidthTableMeasurer` is weight-agnostic (bold == normal advance widths —
- *  see its own doc), so summing the span *text* at normal weight is exact
- *  against the oracle (S1L-b ADR-2). Atom markup (`<img>`/`<$sprite>`) is not
- *  a formatting tag, so the lexer leaves it verbatim in the span text for
- *  `measureLineWithAtoms` to scan (verified: `<img:x>` round-trips unchanged). */
-function creoleVisibleText(line: string): string {
-  return parseCreole(line)
-    .map((s) => s.text)
-    .join('');
+/** Base `FontConfiguration` built from a `FontSpec` solely to drive
+ *  `buildLineAtoms`' tag-stripping (creole-lexer-unification ADR-3): family
+ *  + size carry over, styles start empty, color is the jar's default text
+ *  fill. No font FIDELITY is needed here — width is font-agnostic in the
+ *  deterministic width table (S1L-b ADR-2), so this shim only needs to be
+ *  well-formed, not visually accurate. */
+function baseFontConfiguration(fontSpec: FontSpec): FontConfiguration {
+  return { family: fontSpec.family, size: fontSpec.size, color: JAR_DEFAULT_TEXT_COLOR, styles: new Set() };
+}
+
+/** Visible (glyph-bearing) text of a creole line: routes through the SAME
+ *  shared "line -> visible atoms" lexer the renderer draws with
+ *  (`StripeSimple.ts#buildLineAtoms`, creole-lexer-unification ADR-1) rather
+ *  than the separate `parseCreole` lexer this sizer used to call — the two
+ *  disagreed on unclosed/`:`-variant tags, sizing wider than the renderer's
+ *  actual ink. Concatenating every `'text'`-kind atom's own text mirrors what
+ *  the renderer actually draws as glyphs. `'inline'` (`<img>`/`<$sprite>`)
+ *  and `'latex'` atoms are recognized (and consumed) by the same unified
+ *  scan and so are NOT part of the returned text — their own width is
+ *  restored separately by `inlineAtomWidth` below (D9 parity: the shared
+ *  lexer's atom recognition must not silently drop an `<img>`/`<$sprite>`
+ *  atom's width the way a plain text-only concatenation would). The
+ *  deterministic `WidthTableMeasurer` is weight-agnostic (bold == normal
+ *  advance widths), so summing plain text at the base font is exact against
+ *  the oracle. */
+function creoleVisibleText(line: string, fontSpec: FontSpec): string {
+  const built = buildLineAtoms(line, baseFontConfiguration(fontSpec));
+  let text = '';
+  for (const atom of built.atoms) {
+    if (atom.kind === 'text') text += atom.text;
+  }
+  return text;
+}
+
+/** Sum of every `'inline'`-kind atom's own scaled width on one display line
+ *  (D9) — the shared lexer (`buildLineAtoms`) recognizes `<img>`/`<$sprite>`
+ *  markup and carves it OUT of `creoleVisibleText`'s returned text (unlike
+ *  the pre-ADR-1 `parseCreole` output, whose untouched markup let
+ *  `measureLineWithAtoms`'s own regex re-detect and add it), so this restores
+ *  that width contribution directly from the already-parsed atom list, via
+ *  the SAME `measureInlineAtom` (`creole-atoms.ts`) the renderer's own
+ *  `measureAtomsWidthHeight` sums — drawn and measured width agree. Returns 0
+ *  for any atom-free line (`built.atoms` then carries no `'inline'` entry). */
+function inlineAtomWidth(line: string, fontSpec: FontSpec, sprites: SpriteDimsLookup | undefined): number {
+  const built = buildLineAtoms(line, baseFontConfiguration(fontSpec));
+  let width = 0;
+  for (const atom of built.atoms) {
+    if (atom.kind === 'inline') width += measureInlineAtom(atom.atom, sprites, fontSpec.size).width;
+  }
+  return width;
 }
 
 /** Width of the widest display line, measured per line (not the whole
  *  string). Creole formatting tags are resolved away first (S1L-b ADR-2 —
- *  see `creoleVisibleText`). Atom-aware (D9): a line's `<img>`/`<$sprite>`
- *  markup stops contributing text width and the atom's own scaled width is
- *  added instead -- see `creole-atoms.ts#measureLineWithAtoms`, which is a
- *  zero-diff drop-in for `measurer.measure(ln, fontSpec).width` on any
- *  atom-free line. */
+ *  see `creoleVisibleText`); `<U+XXXX>`/`&#NNN;` escapes are ALSO already
+ *  decoded by `creoleVisibleText` (it now shares the renderer's lexer,
+ *  creole-lexer-unification ADR-1, which decodes internally per-line —
+ *  no separate outer `resolveTextEscapes` pass needed here anymore, unlike
+ *  pre-ADR-1). `measureLineWithAtoms` (`creole-atoms.ts`) still runs its own
+ *  atom-aware scan over that (now atom-markup-free) text — a no-op scan, so
+ *  it is a zero-diff drop-in for `measurer.measure(ln, fontSpec).width` —
+ *  `inlineAtomWidth` (D9) adds back each line's own `<img>`/`<$sprite>`
+ *  contribution the shared lexer already carved out of `ln`. */
 function maxLineWidth(
   display: string,
   fontSpec: FontSpec,
@@ -394,15 +442,12 @@ function maxLineWidth(
 ): number {
   let max = 0;
   for (const raw of display.split('\n')) {
-    // Decode `<U+XXXX>`/`&#NNN;` per-line, AFTER the `\n` split and creole
-    // style-strip — mirroring upstream's per-atom `AtomText.manageSpecialChars`
-    // (S1L-b-unicode ADR-1). A decoded inline newline (`<U+000A>`) stays within
-    // this line and measures ~0 in the width table (it never re-splits, since
-    // the split above ran on the raw, still-encoded display). The renderer
-    // (`EntityImageDescriptionSupport.ts#buildLine`) decodes identically — the
-    // sizer↔renderer sync invariant.
-    const ln = resolveTextEscapes(creoleVisibleText(raw));
-    const w = measureLineWithAtoms(ln, fontSpec, measurer, sprites).width;
+    // Classification/HR detection (inside `creoleVisibleText`) still runs on
+    // the RAW, still-`<U+XXXX>`-encoded line, in lock-step with the sizer's
+    // own `isCreoleHrLine` and the renderer's `buildLine` — the sizer↔
+    // renderer sync invariant.
+    const ln = creoleVisibleText(raw, fontSpec);
+    const w = measureLineWithAtoms(ln, fontSpec, measurer, sprites).width + inlineAtomWidth(raw, fontSpec, sprites);
     if (w > max) max = w;
   }
   return max;

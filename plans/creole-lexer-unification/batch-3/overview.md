@@ -5,7 +5,7 @@ accounting. Single task (docs + pins).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T3 | Re-baseline size-backlog; update ledger + mission-index; full gate | typescript-pro | `oracle/goldens/description/size-backlog.json`, `plans/s1l-leaf-sizing/ledger.md`, `planning/mission-index.md` | T1, T2 | ☐ |
+| T3 | Re-baseline size-backlog; update ledger + mission-index; full gate | typescript-pro | `oracle/goldens/description/size-backlog.json`, `plans/s1l-leaf-sizing/ledger.md`, `planning/mission-index.md` | T1, T2 | ☑ |
 
 **Exit bar:** full gate green (measure exit 0, dot-sync 262/262 + 90/90, npm
 test, typecheck, lint, build); every improved fixture's pin shrunk or deleted;

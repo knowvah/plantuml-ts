@@ -7,7 +7,7 @@ byte-identical; only the sizer's width changes.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T2 | Shared helper in StripeSimple.ts; rewire buildLine + creoleVisibleText | typescript-pro | `StripeSimple.ts`, `EntityImageDescriptionSupport.ts`, `leaf-sizing.ts`, new unit test | T1 | ☐ |
+| T2 | Shared helper in StripeSimple.ts; rewire buildLine + creoleVisibleText | typescript-pro | `StripeSimple.ts`, `EntityImageDescriptionSupport.ts`, `leaf-sizing.ts`, new unit test | T1 | ☑ |
 
 **Exit bar:** `measure` exit 0 (zero widened) with lurupu-11 + gafico/nujito
 nodes a+b SHRUNK; `dot-sync component usecase` stays 262/262 + 90/90;

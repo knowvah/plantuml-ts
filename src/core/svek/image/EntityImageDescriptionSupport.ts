@@ -42,9 +42,7 @@ import { UHorizontalLine } from '../../klimt/shape/UHorizontalLine.js';
 import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import type { AtomImageResolver } from '../../creole-atoms.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
-import { classifyStripeLine, type StripeClassification } from '../../klimt/creole/legacy/CreoleStripeSimpleParser.js';
-import { buildStripeAtoms, buildLiteralAtoms, fontConfigurationForHeading } from '../../klimt/creole/legacy/StripeSimple.js';
-import { resolveTextEscapes } from '../../text-escapes.js';
+import { buildLineAtoms, type LineBuildAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
 import { getSplitted } from '../../klimt/creole/Fission.js';
 import { renderLatexAsImage } from '../../latex.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
@@ -177,34 +175,24 @@ const SEPARATOR_DRAW_ADVANCE = SEPARATOR_SIZE_HEIGHT / 2;
 const SEPARATOR_WIDTH_CONTRIBUTION = SEPARATOR_DRAW_ADVANCE;
 const SEPARATOR_DEFAULT_THICKNESS = 1;
 
-/** One display line's classification plus its built atom sequence (E2r/L1)
- *  — `atoms` is empty for a `HORIZONTAL_LINE` line (nothing to measure/draw
- *  as text; `drawSeparatorLine` handles it directly), `lineFont` is the
- *  BASE font for `NORMAL`, or the heading-cascaded font
+/** One display line's classification plus its built atom sequence (E2r/L1,
+ *  unified onto the shared lexer per creole-lexer-unification ADR-1) —
+ *  `atoms` is empty for a `HORIZONTAL_LINE` line (nothing to measure/draw as
+ *  text; `drawSeparatorLine` handles it directly), `lineFont` is the BASE
+ *  font for `NORMAL`, or the heading-cascaded font
  *  (`fontConfigurationForHeading`) for `HEADING` — the font every atom on
  *  this line's OWN style flags/color start from before any nested
- *  `<b>`/`**`/etc. run adds more. */
-interface LineBuild {
-  readonly classification: StripeClassification;
-  readonly atoms: readonly CreoleAtom[];
-  readonly lineFont: FontConfiguration;
-}
+ *  `<b>`/`**`/etc. run adds more. Alias of `StripeSimple.ts`'s
+ *  `LineBuildAtoms`, the shared shape both this renderer and
+ *  `leaf-sizing.ts#creoleVisibleText` (the sizer) now consume. */
+type LineBuild = LineBuildAtoms;
 
+/** Thin delegate to the shared "line -> visible atoms" lexer
+ *  (`StripeSimple.ts#buildLineAtoms`, ADR-1) — this renderer's own
+ *  classification-dispatch logic MOVED there verbatim; this function's
+ *  output (and therefore every downstream draw) is byte-unchanged. */
 function buildLine(line: string, font: FontConfiguration): LineBuild {
-  const classification = classifyStripeLine(line);
-  if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
-  // Decode `<U+XXXX>`/`&#NNN;` per-line, AFTER stripe classification (so an
-  // HR is still classified on the raw line, in lock-step with the sizer's
-  // `isCreoleHrLine`) but BEFORE atoms are built — mirroring upstream's
-  // per-atom `AtomText.manageSpecialChars` (S1L-b-unicode ADR-1). The sizer
-  // (`leaf-sizing.ts#maxLineWidth`) decodes the same content, so glyph widths
-  // match (the sizer↔renderer sync invariant).
-  const content = resolveTextEscapes(classification.content);
-  if (classification.type === 'LITERAL') {
-    return { classification, atoms: buildLiteralAtoms(content, font), lineFont: font };
-  }
-  const lineFont = classification.type === 'HEADING' ? fontConfigurationForHeading(font, classification.order) : font;
-  return { classification, atoms: buildStripeAtoms(content, lineFont), lineFont };
+  return buildLineAtoms(line, font);
 }
 
 /** Sums each atom's own width (text run measured under ITS own
