@@ -9,17 +9,47 @@
  * Re-exported verbatim from state-composite-pass.ts so every pre-existing
  * importer of `DiagramCtx`/`GeoSpec` FROM that module keeps working
  * unchanged.
+ *
+ * `PassAccumulator` joined this leaf in a later split (state-composite-pass
+ * .ts's own 500-line cap was hit again once ./state-composite-pass-edges.ts
+ * was carved out): both `state-composite-pass.ts` (orchestration) and
+ * `state-composite-pass-edges.ts` (edge/note accumulation) need the type, so
+ * it has to live below both in the import DAG, not in either -- same
+ * "types-leaf-first" rationale as `DiagramCtx`/`GeoSpec` above.
  */
 
 import type { StateKind, Transition } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer } from '../../core/measurer.js';
-import type { DotLayoutResult } from '../../core/graph-layout.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import type { DotLayoutResult, DotInputNode, DotInputEdge, DotInputCluster } from '../../core/graph-layout.js';
 import type { AutonomOffset } from './state-composite-sizing.js';
 import type { ClassifyResult } from './state-composite-classify.js';
 import type { ConcurrentRegionPassResult } from './state-composite-concurrent.js';
 import type { TransitionGeo, StateTextLine } from './state-geo-types.js';
 import type { NoteEdgeCandidate, ScopeNoteParts } from './state-note-layout.js';
+
+export interface PassAccumulator {
+  nodes: DotInputNode[];
+  edges: DotInputEdge[];
+  clusters: DotInputCluster[];
+  /** (transition, edgeId) pairs for THIS pass — used post-layout to build
+   *  TransitionGeo entries (label placement needs the routed points).
+   *  `reversed` mirrors whether this edge's DOT `from`/`to` were swapped
+   *  for ranking (`isReversedDirection`, state-composite-pass-edges.ts) --
+   *  `undefined`/falsy for every un-hinted or `-right-`/`-down-` transition
+   *  (the pre-existing, un-swapped shape). */
+  edgeSources: { t: Transition; edgeId: string; reversed?: boolean }[];
+  /** G8 T2: the transition/edge-label font (`ARROW_LABEL_FONT_SIZE`, 13pt)
+   *  + measurer this pass's own `buildLevelTransitionGeos` call needs to
+   *  convert a labeled edge's graphviz-returned centre into a draw anchor
+   *  (`state-transition-label.ts#attachTransitionLabel`). Optional: passes
+   *  built by a `newAccumulator()` call outside this task's write-set
+   *  (state-composite-concurrent.ts's own concurrent-region passes) don't
+   *  set these, and `attachTransitionLabel` degrades gracefully to its
+   *  pre-existing perpendicular-only, no-box formula when they're absent. */
+  labelFont?: FontSpec;
+  measurer?: StringMeasurer;
+}
 
 export interface DiagramCtx {
   theme: Theme;
