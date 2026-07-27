@@ -3,12 +3,15 @@
  *
  * Extracted verbatim from src/index.ts to keep that entry module under the
  * line cap. Mirrors upstream StyleSignature resolution: selector paths map to
- * specific Theme color fields. NOTE: applyStyleMap is a large pre-existing
- * sequential mapping function — relocated as-is, not refactored (see
- * .agent-notes). Cleanup into per-selector helpers is a follow-up.
+ * specific Theme color fields. `applyStyleMap` itself is a composition of
+ * several table-driven sub-resolvers (`style-map-simple-fields.ts`,
+ * `style-map-json-diagram.ts`, `style-map-element.ts`,
+ * `style-cascade-class.ts`) split out purely to satisfy per-file/per-function
+ * size limits — the field mappings, cascade/priority order, and defaults are
+ * unchanged from the original single-function version (see .agent-notes).
  */
 
-import type { Theme } from './theme.js';
+import type { Theme, ElementColors } from './theme.js';
 import type { StyleMap } from './skinparam.js';
 import { deepMergeTheme } from './theme.js';
 import { resolveColor } from './skinparam.js';
@@ -21,6 +24,124 @@ import {
   resolveGlobalBorder,
 } from './style-map-element.js';
 import { computeClassStyleCascadeOverrides } from './style-cascade-class.js';
+import { computeSimpleSelectorOverrides } from './style-map-simple-fields.js';
+import {
+  computeJsonFamilyOverride,
+  computeYamlFamilyOverride,
+  computeHclFamilyOverride,
+  computeHighlightClassesOverride,
+} from './style-map-json-diagram.js';
+
+type GraphColors = Theme['colors']['graph'];
+type JsonGraphOverride = Partial<NonNullable<GraphColors['json']>>;
+
+/**
+ * JSON diagram: element / element.header / element.highlight /
+ * jsondiagram.node (from jsonDiagram { node { … } } style block), plus the
+ * yamlDiagram/hclDiagram siblings sharing the same "json" graph bucket —
+ * see `style-map-json-diagram.ts`'s own head doc comment. Each family is
+ * merged in the SAME order the original if-chain processed them (json, then
+ * yaml, then hcl) so a fixture combining more than one family resolves
+ * identically to before. Returns `undefined` when no family (nor any
+ * `.tagname` highlight class) contributed anything — matching the original
+ * "only assign `graphOverride.json` when non-empty" gate.
+ */
+function computeJsonGraphOverride(styleMap: StyleMap, jsonBase: JsonGraphOverride): JsonGraphOverride | undefined {
+  const jsonOverride: JsonGraphOverride = {
+    ...computeJsonFamilyOverride(styleMap),
+    ...computeYamlFamilyOverride(styleMap),
+    ...computeHclFamilyOverride(styleMap),
+  };
+  const highlightClasses = computeHighlightClassesOverride(styleMap);
+  if (highlightClasses !== undefined) jsonOverride.highlightClasses = highlightClasses;
+  return Object.keys(jsonOverride).length > 0 ? { ...jsonBase, ...jsonOverride } : undefined;
+}
+
+/**
+ * Every `Theme.colors.graph` override reachable from `styleMap` alone
+ * (i.e. everything except the document/elements/shadowing/border extras
+ * handled by {@link computeStyleMapExtras}): the simple single-selector
+ * table, the json/yaml/hcl diagram family, the class-cascade ancestor
+ * overrides (G2 N36), and the bare root/element BackgroundColor cascade
+ * (D3).
+ */
+function computeGraphOverride(styleMap: StyleMap, base: Theme): Partial<GraphColors> {
+  const graphOverride: Partial<GraphColors> = { ...computeSimpleSelectorOverrides(styleMap) };
+  const json = computeJsonGraphOverride(styleMap, base.colors.graph.json ?? {});
+  if (json !== undefined) graphOverride.json = json;
+  // G2 N36: classDiagram/root/nested-class-selector ancestor cascade (box
+  // background/border/font, badge root-fallback, edge stroke) -- merged
+  // into graphOverride BEFORE the early-return check below so a fixture
+  // with ONLY a cascade-shaped <style> block (no bare `class {}`/
+  // `database {}` selector) still produces a non-base Theme.
+  Object.assign(graphOverride, computeClassStyleCascadeOverrides(styleMap));
+  // mission skin-file-loading Batch 1 (D3): see `style-map-element.ts
+  // #resolveGlobalBackground`'s own doc comment for the bare root/element
+  // selector precedence this resolves.
+  const rootElementBackground = resolveGlobalBackground(styleMap);
+  if (rootElementBackground !== undefined) graphOverride.rootElementBackground = rootElementBackground;
+  return graphOverride;
+}
+
+/** The non-`graph` StyleMap-derived Theme overrides, computed once and
+ *  threaded through {@link applyStyleMapHasNoOverrides} and {@link
+ *  buildStyleMapPartialTheme}. */
+interface StyleMapExtras {
+  readonly documentBg: string | undefined;
+  readonly elements: Record<string, ElementColors>;
+  readonly hasElements: boolean;
+  readonly noteTagCascade: Readonly<Record<string, ElementColors>>;
+  readonly hasNoteTagCascade: boolean;
+  readonly shadowing: number | undefined;
+  readonly rootElementBorderRaw: string | undefined;
+}
+
+/**
+ * document { BackgroundColor } canvas bg; database { … } → per-element
+ * buckets (D4); the `.tagname` note-bucket cascade (G2 N37); and the bare
+ * root/element Shadowing/LineColor cascade (D3).
+ */
+function computeStyleMapExtras(styleMap: StyleMap): StyleMapExtras {
+  const elements = collectElementStyleBuckets(styleMap);
+  const noteTagCascade = computeNoteStyleTagCascade(styleMap);
+  return {
+    documentBg: resolveDocumentBackground(styleMap),
+    elements,
+    hasElements: Object.keys(elements).length > 0,
+    noteTagCascade,
+    hasNoteTagCascade: Object.keys(noteTagCascade).length > 0,
+    shadowing: resolveGlobalShadowing(styleMap),
+    rootElementBorderRaw: resolveGlobalBorder(styleMap),
+  };
+}
+
+/** True when neither `graphOverride` nor any extra resolved to anything —
+ *  `applyStyleMap` returns `base` unchanged in that case. */
+function styleMapHasNoOverrides(graphOverride: Partial<GraphColors>, extras: StyleMapExtras): boolean {
+  return (
+    Object.keys(graphOverride).length === 0 &&
+    extras.documentBg === undefined &&
+    !extras.hasElements &&
+    !extras.hasNoteTagCascade &&
+    extras.shadowing === undefined &&
+    extras.rootElementBorderRaw === undefined
+  );
+}
+
+/** Assemble the `Partial<Theme>` passed to `deepMergeTheme`. */
+function buildStyleMapPartialTheme(base: Theme, graphOverride: Partial<GraphColors>, extras: StyleMapExtras): Partial<Theme> {
+  return {
+    ...(extras.shadowing !== undefined ? { shadowing: extras.shadowing } : {}),
+    colors: {
+      ...base.colors,
+      ...(extras.documentBg !== undefined ? { background: extras.documentBg } : {}),
+      ...(extras.rootElementBorderRaw !== undefined ? { border: resolveColor(extras.rootElementBorderRaw) } : {}),
+      ...(extras.hasElements ? { elements: extras.elements } : {}),
+      ...(extras.hasNoteTagCascade ? { noteTagCascade: extras.noteTagCascade } : {}),
+      graph: { ...base.colors.graph, ...graphOverride },
+    },
+  };
+}
 
 /**
  * Apply element-scoped StyleMap entries to a base Theme.
@@ -31,547 +152,9 @@ import { computeClassStyleCascadeOverrides } from './style-cascade-class.js';
  *
  * Returns a new Theme — neither `base` nor the StyleMap is mutated.
  */
-// NOTE: applyStyleMap is a large pre-existing sequential selector→field mapper
-// (relocated verbatim from index.ts); its CCN is inherent to PlantUML's style
-// selector space, and porting discipline forbids restructuring it. Element
-// bucket routing (D4/T5) is delegated to ./style-map-element. The
-// `#lizard forgives` directive sits near the function's end (below), where
-// lizard reliably associates it with this function.
 export function applyStyleMap(styleMap: StyleMap, base: Theme): Theme {
-  const graphOverride: Partial<Theme['colors']['graph']> = {};
-
-  const actor = styleMap.get('actor');
-  if (actor !== undefined) {
-    const bg = actor.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.actorFill = bg;
-  }
-
-  const actorBusiness = styleMap.get('actor.business');
-  if (actorBusiness !== undefined) {
-    const bg = actorBusiness.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.businessActorFill = bg;
-  }
-
-  const usecase = styleMap.get('usecase');
-  if (usecase !== undefined) {
-    const bg = usecase.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.usecaseFill = bg;
-  }
-
-  const usecaseBusiness = styleMap.get('usecase.business');
-  if (usecaseBusiness !== undefined) {
-    const bg = usecaseBusiness.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.businessUsecaseFill = bg;
-  }
-
-  const cls = styleMap.get('class');
-  if (cls !== undefined) {
-    const bg = cls.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.classBackground = bg;
-  }
-
-  const iface = styleMap.get('interface');
-  if (iface !== undefined) {
-    const bg = iface.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.interfaceBackground = bg;
-  }
-
-  const en = styleMap.get('enum');
-  if (en !== undefined) {
-    const bg = en.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.enumBackground = bg;
-  }
-
-  // mission G4 S16: `<style> stateDiagram { arrow { LineColor HeadColor
-  // } } }` -- selector "statediagram.arrow" (`theme.ts
-  // #stateArrowLineColor`'s own doc comment for the full derivation and
-  // jar evidence).
-  const stateArrow = styleMap.get('statediagram.arrow');
-  if (stateArrow !== undefined) {
-    const lc = stateArrow.get('linecolor');
-    if (lc !== undefined) graphOverride.stateArrowLineColor = lc;
-    const hc = stateArrow.get('headcolor');
-    if (hc !== undefined) graphOverride.stateArrowHeadColor = hc;
-  }
-
-  // mission G6 T4: `<style> stateDiagram { RoundCorner N } }` -- the bare
-  // (un-nested) "statediagram" selector's own RoundCorner declaration, see
-  // `theme.ts#stateCascadeRoundCorner`'s own doc comment for the full
-  // derivation and jar evidence (`decede-10-buvu414`).
-  const stateDiagramBare = styleMap.get('statediagram');
-  if (stateDiagramBare !== undefined) {
-    const rc = stateDiagramBare.get('roundcorner');
-    if (rc !== undefined) {
-      const parsed = Number.parseFloat(rc);
-      if (Number.isFinite(parsed)) graphOverride.stateCascadeRoundCorner = parsed;
-    }
-  }
-
-  // mission G4 S16: `<style> activityBar { .fork { BackGroundColor }
-  // .join { BackGroundColor } } }` -- selectors "activitybar..fork"/
-  // "activitybar..join" (`theme.ts#activityBarForkColor`'s own doc
-  // comment for the double-dot selector-key derivation).
-  const activityBarFork = styleMap.get('activitybar..fork');
-  if (activityBarFork !== undefined) {
-    const bg = activityBarFork.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.activityBarForkColor = bg;
-  }
-  const activityBarJoin = styleMap.get('activitybar..join');
-  if (activityBarJoin !== undefined) {
-    const bg = activityBarJoin.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.activityBarJoinColor = bg;
-  }
-
-  const pkg = styleMap.get('package');
-  if (pkg !== undefined) {
-    const bg = pkg.get('backgroundcolor');
-    if (bg !== undefined) graphOverride.packageBackground = bg;
-    const border = pkg.get('bordercolor');
-    if (border !== undefined) graphOverride.packageBorder = border;
-  }
-
-  // JSON diagram: element / element.header / element.highlight /
-  // jsondiagram.node (from jsonDiagram { node { … } } style block)
-  const jsonBase = base.colors.graph.json ?? {};
-  const jsonOverride: NonNullable<Theme['colors']['graph']['json']> = {};
-  let hasJsonOverride = false;
-  const elem = styleMap.get('element');
-  if (elem !== undefined) {
-    const bg = elem.get('backgroundcolor');
-    if (bg !== undefined) { jsonOverride.background = resolveColor(bg); hasJsonOverride = true; }
-    const lc = elem.get('linecolor');
-    if (lc !== undefined) {
-      jsonOverride.border = resolveColor(lc);
-      jsonOverride.arrowColor = resolveColor(lc);
-      hasJsonOverride = true;
-    }
-  }
-  const elemHeader = styleMap.get('element.header');
-  if (elemHeader !== undefined) {
-    const hbg = elemHeader.get('backgroundcolor');
-    if (hbg !== undefined) { jsonOverride.headerBackground = resolveColor(hbg); hasJsonOverride = true; }
-    const fs = elemHeader.get('fontstyle');
-    if (fs !== undefined) { jsonOverride.headerFontBold = fs.toLowerCase().includes('bold'); hasJsonOverride = true; }
-  }
-  const elemHighlight = styleMap.get('element.highlight');
-  if (elemHighlight !== undefined) {
-    const hlbg = elemHighlight.get('backgroundcolor');
-    if (hlbg !== undefined) { jsonOverride.highlightBackground = resolveColor(hlbg); hasJsonOverride = true; }
-  }
-
-  // jsonDiagram { node { … } } — selector key "jsondiagram.node"
-  // (parseStyleBlock lowercases each level: jsonDiagram → jsondiagram, node → node)
-  const jsonNode = styleMap.get('jsondiagram.node');
-  if (jsonNode !== undefined) {
-    const bg = jsonNode.get('backgroundcolor');
-    if (bg !== undefined) { jsonOverride.background = resolveColor(bg); hasJsonOverride = true; }
-    const lc = jsonNode.get('linecolor');
-    if (lc !== undefined) {
-      jsonOverride.border = resolveColor(lc);
-      jsonOverride.arrowColor = resolveColor(lc);
-      hasJsonOverride = true;
-    }
-    const lt = jsonNode.get('linethickness');
-    if (lt !== undefined) {
-      const parsed = parseFloat(lt);
-      if (!isNaN(parsed)) { jsonOverride.nodeLineThickness = parsed; hasJsonOverride = true; }
-    }
-    const rc = jsonNode.get('roundcorner');
-    if (rc !== undefined) {
-      const parsed = parseFloat(rc);
-      if (!isNaN(parsed)) { jsonOverride.roundCorner = parsed; hasJsonOverride = true; }
-    }
-    const mw = jsonNode.get('maximumwidth');
-    if (mw !== undefined) {
-      const parsed = parseFloat(mw);
-      if (!isNaN(parsed)) { jsonOverride.maximumWidth = parsed; hasJsonOverride = true; }
-    }
-    const ha = jsonNode.get('horizontalalignment');
-    if (ha !== undefined) {
-      const lower = ha.toLowerCase();
-      if (lower === 'center' || lower === 'left' || lower === 'right') {
-        jsonOverride.textAlign = lower;
-        hasJsonOverride = true;
-      }
-    }
-    const fc = jsonNode.get('fontcolor');
-    if (fc !== undefined) { jsonOverride.nodeFontColor = resolveColor(fc); hasJsonOverride = true; }
-    const fsz = jsonNode.get('fontsize');
-    if (fsz !== undefined) {
-      const parsed = parseFloat(fsz);
-      if (!isNaN(parsed)) { jsonOverride.nodeFontSize = parsed; hasJsonOverride = true; }
-    }
-    const fn_ = jsonNode.get('fontname');
-    if (fn_ !== undefined) { jsonOverride.nodeFontFamily = fn_; hasJsonOverride = true; }
-    const fst = jsonNode.get('fontstyle');
-    if (fst !== undefined) {
-      const lower = fst.toLowerCase();
-      jsonOverride.nodeFontBold = lower.includes('bold');
-      jsonOverride.nodeFontItalic = lower.includes('italic');
-      hasJsonOverride = true;
-    }
-    const fw = jsonNode.get('fontweight');
-    if (fw !== undefined) {
-      jsonOverride.nodeFontBold = fw.toLowerCase().includes('bold');
-      hasJsonOverride = true;
-    }
-    const nls = jsonNode.get('linestyle');
-    if (nls !== undefined) {
-      jsonOverride.nodeLineDasharray = nls.replace(/[-;]/g, ' ');
-      hasJsonOverride = true;
-    }
-  }
-
-  // jsonDiagram { arrow { … } } — selector key "jsondiagram.arrow"
-  const jsonArrow = styleMap.get('jsondiagram.arrow');
-  if (jsonArrow !== undefined) {
-    const lc = jsonArrow.get('linecolor');
-    if (lc !== undefined) { jsonOverride.arrowColor = resolveColor(lc); hasJsonOverride = true; }
-    const lt = jsonArrow.get('linethickness');
-    if (lt !== undefined) {
-      const parsed = parseFloat(lt);
-      if (!isNaN(parsed)) { jsonOverride.arrowThickness = parsed; hasJsonOverride = true; }
-    }
-    const ls = jsonArrow.get('linestyle');
-    if (ls !== undefined) { jsonOverride.arrowDasharray = ls.replace(/[-;]/g, ' '); hasJsonOverride = true; }
-  }
-
-  // jsonDiagram { node { separator { … } } }
-  const jsonSep = styleMap.get('jsondiagram.node.separator');
-  if (jsonSep !== undefined) {
-    const sc = jsonSep.get('linecolor');
-    if (sc !== undefined) { jsonOverride.separatorColor = resolveColor(sc); hasJsonOverride = true; }
-    const st = jsonSep.get('linethickness');
-    if (st !== undefined) {
-      const parsed = parseFloat(st);
-      if (!isNaN(parsed)) { jsonOverride.separatorThickness = parsed; hasJsonOverride = true; }
-    }
-    const sls = jsonSep.get('linestyle');
-    if (sls !== undefined) { jsonOverride.separatorDasharray = sls.replace(/[-;]/g, ' '); hasJsonOverride = true; }
-  }
-
-  // jsonDiagram { node { highlight { … } } }
-  const jsonHl = styleMap.get('jsondiagram.node.highlight');
-  if (jsonHl !== undefined) {
-    const hlbg = jsonHl.get('backgroundcolor');
-    if (hlbg !== undefined) { jsonOverride.highlightBackground = resolveColor(hlbg); hasJsonOverride = true; }
-    const hlfc = jsonHl.get('fontcolor');
-    if (hlfc !== undefined) { jsonOverride.highlightFontColor = resolveColor(hlfc); hasJsonOverride = true; }
-    const hlfs = jsonHl.get('fontstyle');
-    if (hlfs !== undefined) {
-      const lower = hlfs.toLowerCase();
-      jsonOverride.highlightFontBold = lower.includes('bold');
-      jsonOverride.highlightFontItalic = lower.includes('italic');
-      hasJsonOverride = true;
-    }
-  }
-
-  // yamlDiagram { element { … } } — selector key "yamldiagram.element"
-  // "element" in YAML context refers to the key column (header), not the whole node.
-  // Empirically: upstream shows yellow key column + white value column for element { backgroundColor yellow }.
-  const yamlElem = styleMap.get('yamldiagram.element');
-  if (yamlElem !== undefined) {
-    const bg = yamlElem.get('backgroundcolor');
-    if (bg !== undefined) { jsonOverride.headerBackground = resolveColor(bg); hasJsonOverride = true; }
-  }
-
-  // yamlDiagram { node { … } } — selector key "yamldiagram.node"
-  // Same theme fields as jsondiagram.node (whole node background, borders, fonts).
-  const yamlNode = styleMap.get('yamldiagram.node');
-  if (yamlNode !== undefined) {
-    const bg = yamlNode.get('backgroundcolor');
-    if (bg !== undefined) { jsonOverride.background = resolveColor(bg); hasJsonOverride = true; }
-    const lc = yamlNode.get('linecolor');
-    if (lc !== undefined) {
-      jsonOverride.border = resolveColor(lc);
-      jsonOverride.arrowColor = resolveColor(lc);
-      hasJsonOverride = true;
-    }
-    const lt = yamlNode.get('linethickness');
-    if (lt !== undefined) {
-      const parsed = parseFloat(lt);
-      if (!isNaN(parsed)) { jsonOverride.nodeLineThickness = parsed; hasJsonOverride = true; }
-    }
-    const rc = yamlNode.get('roundcorner');
-    if (rc !== undefined) {
-      const parsed = parseFloat(rc);
-      if (!isNaN(parsed)) { jsonOverride.roundCorner = parsed; hasJsonOverride = true; }
-    }
-    const mw = yamlNode.get('maximumwidth');
-    if (mw !== undefined) {
-      const parsed = parseFloat(mw);
-      if (!isNaN(parsed)) { jsonOverride.maximumWidth = parsed; hasJsonOverride = true; }
-    }
-    const ha = yamlNode.get('horizontalalignment');
-    if (ha !== undefined) {
-      const lower = ha.toLowerCase();
-      if (lower === 'center' || lower === 'left' || lower === 'right') {
-        jsonOverride.textAlign = lower;
-        hasJsonOverride = true;
-      }
-    }
-    const fc = yamlNode.get('fontcolor');
-    if (fc !== undefined) { jsonOverride.nodeFontColor = resolveColor(fc); hasJsonOverride = true; }
-    const fsz = yamlNode.get('fontsize');
-    if (fsz !== undefined) {
-      const parsed = parseFloat(fsz);
-      if (!isNaN(parsed)) { jsonOverride.nodeFontSize = parsed; hasJsonOverride = true; }
-    }
-    const fn_ = yamlNode.get('fontname');
-    if (fn_ !== undefined) { jsonOverride.nodeFontFamily = fn_; hasJsonOverride = true; }
-    const fst = yamlNode.get('fontstyle');
-    if (fst !== undefined) {
-      const lower = fst.toLowerCase();
-      jsonOverride.nodeFontBold = lower.includes('bold');
-      jsonOverride.nodeFontItalic = lower.includes('italic');
-      hasJsonOverride = true;
-    }
-    const fw = yamlNode.get('fontweight');
-    if (fw !== undefined) {
-      jsonOverride.nodeFontBold = fw.toLowerCase().includes('bold');
-      hasJsonOverride = true;
-    }
-    const nls = yamlNode.get('linestyle');
-    if (nls !== undefined) {
-      jsonOverride.nodeLineDasharray = nls.replace(/[-;]/g, ' ');
-      hasJsonOverride = true;
-    }
-  }
-
-  // yamlDiagram { arrow { … } } — selector key "yamldiagram.arrow"
-  const yamlArrow = styleMap.get('yamldiagram.arrow');
-  if (yamlArrow !== undefined) {
-    const lc = yamlArrow.get('linecolor');
-    if (lc !== undefined) { jsonOverride.arrowColor = resolveColor(lc); hasJsonOverride = true; }
-    const lt = yamlArrow.get('linethickness');
-    if (lt !== undefined) {
-      const parsed = parseFloat(lt);
-      if (!isNaN(parsed)) { jsonOverride.arrowThickness = parsed; hasJsonOverride = true; }
-    }
-    const ls = yamlArrow.get('linestyle');
-    if (ls !== undefined) { jsonOverride.arrowDasharray = ls.replace(/[-;]/g, ' '); hasJsonOverride = true; }
-  }
-
-  // yamlDiagram { node { separator { … } } }
-  const yamlSep = styleMap.get('yamldiagram.node.separator');
-  if (yamlSep !== undefined) {
-    const sc = yamlSep.get('linecolor');
-    if (sc !== undefined) { jsonOverride.separatorColor = resolveColor(sc); hasJsonOverride = true; }
-    const st = yamlSep.get('linethickness');
-    if (st !== undefined) {
-      const parsed = parseFloat(st);
-      if (!isNaN(parsed)) { jsonOverride.separatorThickness = parsed; hasJsonOverride = true; }
-    }
-    const sls = yamlSep.get('linestyle');
-    if (sls !== undefined) { jsonOverride.separatorDasharray = sls.replace(/[-;]/g, ' '); hasJsonOverride = true; }
-  }
-
-  // yamlDiagram { node { highlight { … } } }
-  const yamlHl = styleMap.get('yamldiagram.node.highlight');
-  if (yamlHl !== undefined) {
-    const hlbg = yamlHl.get('backgroundcolor');
-    if (hlbg !== undefined) { jsonOverride.highlightBackground = resolveColor(hlbg); hasJsonOverride = true; }
-    const hlfc = yamlHl.get('fontcolor');
-    if (hlfc !== undefined) { jsonOverride.highlightFontColor = resolveColor(hlfc); hasJsonOverride = true; }
-    const hlfs = yamlHl.get('fontstyle');
-    if (hlfs !== undefined) {
-      const lower = hlfs.toLowerCase();
-      jsonOverride.highlightFontBold = lower.includes('bold');
-      jsonOverride.highlightFontItalic = lower.includes('italic');
-      hasJsonOverride = true;
-    }
-  }
-
-  // hclDiagram { element { … } } — selector key "hcldiagram.element"
-  const hclElem = styleMap.get('hcldiagram.element');
-  if (hclElem !== undefined) {
-    const bg = hclElem.get('backgroundcolor');
-    if (bg !== undefined) { jsonOverride.headerBackground = resolveColor(bg); hasJsonOverride = true; }
-  }
-
-  // hclDiagram { node { … } } — selector key "hcldiagram.node"
-  const hclNode = styleMap.get('hcldiagram.node');
-  if (hclNode !== undefined) {
-    const bg = hclNode.get('backgroundcolor');
-    if (bg !== undefined) { jsonOverride.background = resolveColor(bg); hasJsonOverride = true; }
-    const lc = hclNode.get('linecolor');
-    if (lc !== undefined) {
-      jsonOverride.border = resolveColor(lc);
-      jsonOverride.arrowColor = resolveColor(lc);
-      hasJsonOverride = true;
-    }
-    const lt = hclNode.get('linethickness');
-    if (lt !== undefined) {
-      const parsed = parseFloat(lt);
-      if (!isNaN(parsed)) { jsonOverride.nodeLineThickness = parsed; hasJsonOverride = true; }
-    }
-    const rc = hclNode.get('roundcorner');
-    if (rc !== undefined) {
-      const parsed = parseFloat(rc);
-      if (!isNaN(parsed)) { jsonOverride.roundCorner = parsed; hasJsonOverride = true; }
-    }
-    const mw = hclNode.get('maximumwidth');
-    if (mw !== undefined) {
-      const parsed = parseFloat(mw);
-      if (!isNaN(parsed)) { jsonOverride.maximumWidth = parsed; hasJsonOverride = true; }
-    }
-    const ha = hclNode.get('horizontalalignment');
-    if (ha !== undefined) {
-      const lower = ha.toLowerCase();
-      if (lower === 'center' || lower === 'left' || lower === 'right') {
-        jsonOverride.textAlign = lower;
-        hasJsonOverride = true;
-      }
-    }
-    const fc = hclNode.get('fontcolor');
-    if (fc !== undefined) { jsonOverride.nodeFontColor = resolveColor(fc); hasJsonOverride = true; }
-    const fsz = hclNode.get('fontsize');
-    if (fsz !== undefined) {
-      const parsed = parseFloat(fsz);
-      if (!isNaN(parsed)) { jsonOverride.nodeFontSize = parsed; hasJsonOverride = true; }
-    }
-    const fn_ = hclNode.get('fontname');
-    if (fn_ !== undefined) { jsonOverride.nodeFontFamily = fn_; hasJsonOverride = true; }
-    const fst = hclNode.get('fontstyle');
-    if (fst !== undefined) {
-      const lower = fst.toLowerCase();
-      jsonOverride.nodeFontBold = lower.includes('bold');
-      jsonOverride.nodeFontItalic = lower.includes('italic');
-      hasJsonOverride = true;
-    }
-    const fw = hclNode.get('fontweight');
-    if (fw !== undefined) {
-      jsonOverride.nodeFontBold = fw.toLowerCase().includes('bold');
-      hasJsonOverride = true;
-    }
-    const nls = hclNode.get('linestyle');
-    if (nls !== undefined) {
-      jsonOverride.nodeLineDasharray = nls.replace(/[-;]/g, ' ');
-      hasJsonOverride = true;
-    }
-  }
-
-  // hclDiagram { arrow { … } } — selector key "hcldiagram.arrow"
-  const hclArrow = styleMap.get('hcldiagram.arrow');
-  if (hclArrow !== undefined) {
-    const lc = hclArrow.get('linecolor');
-    if (lc !== undefined) { jsonOverride.arrowColor = resolveColor(lc); hasJsonOverride = true; }
-    const lt = hclArrow.get('linethickness');
-    if (lt !== undefined) {
-      const parsed = parseFloat(lt);
-      if (!isNaN(parsed)) { jsonOverride.arrowThickness = parsed; hasJsonOverride = true; }
-    }
-    const ls = hclArrow.get('linestyle');
-    if (ls !== undefined) { jsonOverride.arrowDasharray = ls.replace(/[-;]/g, ' '); hasJsonOverride = true; }
-  }
-
-  // hclDiagram { node { separator { … } } }
-  const hclSep = styleMap.get('hcldiagram.node.separator');
-  if (hclSep !== undefined) {
-    const sc = hclSep.get('linecolor');
-    if (sc !== undefined) { jsonOverride.separatorColor = resolveColor(sc); hasJsonOverride = true; }
-    const st = hclSep.get('linethickness');
-    if (st !== undefined) {
-      const parsed = parseFloat(st);
-      if (!isNaN(parsed)) { jsonOverride.separatorThickness = parsed; hasJsonOverride = true; }
-    }
-    const sls = hclSep.get('linestyle');
-    if (sls !== undefined) { jsonOverride.separatorDasharray = sls.replace(/[-;]/g, ' '); hasJsonOverride = true; }
-  }
-
-  // hclDiagram { node { highlight { … } } }
-  const hclHl = styleMap.get('hcldiagram.node.highlight');
-  if (hclHl !== undefined) {
-    const hlbg = hclHl.get('backgroundcolor');
-    if (hlbg !== undefined) { jsonOverride.highlightBackground = resolveColor(hlbg); hasJsonOverride = true; }
-    const hlfc = hclHl.get('fontcolor');
-    if (hlfc !== undefined) { jsonOverride.highlightFontColor = resolveColor(hlfc); hasJsonOverride = true; }
-    const hlfs = hclHl.get('fontstyle');
-    if (hlfs !== undefined) {
-      const lower = hlfs.toLowerCase();
-      jsonOverride.highlightFontBold = lower.includes('bold');
-      jsonOverride.highlightFontItalic = lower.includes('italic');
-      hasJsonOverride = true;
-    }
-  }
-
-  // Style classes (.h1, .h2 etc.) → per-class highlight color overrides.
-  // These are used by #highlight <<h1>> directives to color individual rows.
-  const highlightClasses: NonNullable<NonNullable<Theme['colors']['graph']['json']>['highlightClasses']> = {};
-  for (const [selector, props] of styleMap.entries()) {
-    if (!selector.startsWith('.')) continue;
-    const className = selector.slice(1);
-    const classEntry: { background?: string; fontColor?: string; fontBold?: boolean; fontItalic?: boolean } = {};
-    const bg = props.get('backgroundcolor');
-    if (bg !== undefined) classEntry.background = resolveColor(bg);
-    const fc = props.get('fontcolor');
-    if (fc !== undefined) classEntry.fontColor = resolveColor(fc);
-    const fs = props.get('fontstyle');
-    if (fs !== undefined) {
-      const lower = fs.toLowerCase();
-      classEntry.fontBold = lower.includes('bold');
-      classEntry.fontItalic = lower.includes('italic');
-    }
-    if (Object.keys(classEntry).length > 0) {
-      highlightClasses[className] = classEntry;
-      hasJsonOverride = true;
-    }
-  }
-  if (Object.keys(highlightClasses).length > 0) {
-    jsonOverride.highlightClasses = highlightClasses;
-  }
-
-  if (hasJsonOverride) {
-    graphOverride.json = { ...jsonBase, ...jsonOverride };
-  }
-
-  // G2 N36: classDiagram/root/nested-class-selector ancestor cascade
-  // (box background/border/font, badge root-fallback, edge stroke) --
-  // merged into graphOverride BEFORE the early-return check below so a
-  // fixture with ONLY a cascade-shaped <style> block (no bare `class {}`/
-  // `database {}` selector) still produces a non-base Theme.
-  Object.assign(graphOverride, computeClassStyleCascadeOverrides(styleMap));
-
-  // document { BackgroundColor } canvas bg; database { … } → per-element buckets (D4).
-  const documentBg = resolveDocumentBackground(styleMap);
-  const elements = collectElementStyleBuckets(styleMap);
-  const hasElements = Object.keys(elements).length > 0;
-  // G2 N37: `.tagname` `<style>` cascade for the note bucket -- see
-  // `style-map-element.ts#computeNoteStyleTagCascade`'s own doc comment.
-  const noteTagCascade = computeNoteStyleTagCascade(styleMap);
-  const hasNoteTagCascade = Object.keys(noteTagCascade).length > 0;
-  // mission skin-file-loading Batch 1 (D3): see `style-map-element.ts
-  // #resolveGlobalShadowing`'s own doc comment for the bare root/element
-  // selector precedence this resolves.
-  const shadowing = resolveGlobalShadowing(styleMap);
-  // Same bare root/element cascade, applied to BackgroundColor (a
-  // dedicated `rootElementBackground` field -- see its own doc comment
-  // for why it is NOT `theme.colors.background`) and LineColor (feeds
-  // `theme.colors.border` directly -- no overload conflict).
-  const rootElementBackground = resolveGlobalBackground(styleMap);
-  const rootElementBorderRaw = resolveGlobalBorder(styleMap);
-  if (rootElementBackground !== undefined) graphOverride.rootElementBackground = rootElementBackground;
-  if (
-    Object.keys(graphOverride).length === 0 &&
-    documentBg === undefined &&
-    !hasElements &&
-    !hasNoteTagCascade &&
-    shadowing === undefined &&
-    rootElementBorderRaw === undefined
-  ) {
-    return base;
-  }
-  const partial: Partial<Theme> = {
-    ...(shadowing !== undefined ? { shadowing } : {}),
-    colors: {
-      ...base.colors,
-      ...(documentBg !== undefined ? { background: documentBg } : {}),
-      ...(rootElementBorderRaw !== undefined ? { border: resolveColor(rootElementBorderRaw) } : {}),
-      ...(hasElements ? { elements } : {}),
-      ...(hasNoteTagCascade ? { noteTagCascade } : {}),
-      graph: { ...base.colors.graph, ...graphOverride },
-    },
-  };
-  // #lizard forgives — faithful port; see the head note on this function.
-  return deepMergeTheme(base, partial);
+  const graphOverride = computeGraphOverride(styleMap, base);
+  const extras = computeStyleMapExtras(styleMap);
+  if (styleMapHasNoOverrides(graphOverride, extras)) return base;
+  return deepMergeTheme(base, buildStyleMapPartialTheme(base, graphOverride, extras));
 }
