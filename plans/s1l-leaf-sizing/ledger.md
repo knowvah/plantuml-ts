@@ -152,6 +152,45 @@ L2) surfaced through `EntityImageDescriptionSupport.ts#buildLine` /
 closing it requires porting `<code>` (a separate deferred feature), not a
 quoted-title change.
 
+## S1L-b-unicode T3 — lurupu-11 documented residual (diagnosed, pinned)
+
+`lurupu-11-fubo915` sits at delta **2.045912in** (unchanged by T1). Diagnosed
+(port-vs-oracle per-node dims + sizer/renderer visible-text probes); pinned at
+its true delta. The driver is **NOT emoji glyph width** (ADR-3's premise) — it
+is a **sizer↔renderer creole-lexer divergence** on one node.
+
+- **Emoji width is already correct.** Two of the three usecase nodes match the
+  oracle EXACTLY: `Implement` (`<U+1F601>`😁 `<U+1F680>`🚀) 185.8×42.0px ==
+  oracle, and `foo` (`&#8734;`∞) 102.8×25.8px == oracle. `WidthTableMeasurer
+  .charWidth` already returns the jar-verified fixed 16-pt fallback for astral
+  code points (`cp >= 0xFFFF`, `measurer.ts:180`) — so a decoded emoji measures
+  at the deterministic oracle's own width. No measurer change is warranted.
+
+- **Driver — node `bar` sizer over-measures unstripped creole tags.**
+  `bar` = `"<b>this is also <U+221E> <font Segoe UI Emoji><U+1F680><U+263A>
+  </font> long"`. The RENDERER (`buildStripeAtoms`, E2r StripeSimple) strips
+  the UNCLOSED `<b>` and the space-form `<font Segoe UI Emoji>`/`</font>` →
+  visible `"this is also ∞ 🚀☺ long"` (22 cps) → ~147px, matching the oracle
+  (2.042in). The SIZER (`leaf-sizing.ts#maxLineWidth` → `creoleVisibleText` →
+  `parseCreole`, `src/core/creole.ts`) strips NEITHER (`parseCreole` leaves an
+  unclosed `<b>` and any `<font Name>` tag literal — verified) → 53 cps →
+  ~333px box. The DOT box is sizer-driven, so it is oversized by the literal
+  tag text the renderer never draws.
+
+- **Ruled out:** emoji/astral width (Implement + foo match exactly); codepoint
+  decode (T1 correct — the `<U+…>` decode identically in both paths). The gap
+  is purely the two creole lexers disagreeing on unclosed-`<b>` and
+  space-form-`<font>`.
+
+Origin: `src/core/creole.ts#parseCreole` (the sizer's lexer) lags the
+renderer's `src/core/klimt/creole/legacy/StripeSimple.ts#buildStripeAtoms` for
+unclosed `<b>` and `<font Name>`. **Out of T3 scope** (the fix is a
+sizer↔renderer creole-lexer sync in `leaf-sizing.ts`/`creole.ts`, not an
+emoji-width measurer change) and **high blast radius** (routing the sizer's
+visible-text through `buildStripeAtoms` would re-measure every description leaf
+— it must be measured, not assumed). **Flagged as a scoped follow-on:
+"sizer↔renderer creole visible-text unification."** Kept pinned at 2.045912.
+
 ## Size backlog
 
 `oracle/goldens/description/size-backlog.json` — 120 shrink-only per-fixture
