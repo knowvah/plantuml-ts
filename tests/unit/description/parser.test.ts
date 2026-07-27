@@ -2213,9 +2213,11 @@ describe('parseDescription — CODE as wrapped-display', () => {
 });
 
 // ===========================================================================
-// -- I4c: text-escape resolution applied to a finalized display/stereotype
-//    (parse-helpers.ts#resolveTextEscapes / resolveNewlineEscapes) --
-//    textLength/x/y correctly derived for the WRONG string, ledger.md I4c.
+// -- I4c: text-escape resolution -- textLength/x/y correctly derived for the
+//    right string (ledger.md I4c). STEREOTYPES resolve at parse
+//    (parse-helpers.ts#resolveTextEscapes); DISPLAYS now PRESERVE the raw
+//    codepoint/entity token at parse and decode it per-line at measure/render
+//    time (S1L-b-unicode ADR-1) so `<U+000A>` is inline, not a line break.
 // ===========================================================================
 
 describe('parseDescription — I4c text-escape resolution', () => {
@@ -2224,14 +2226,20 @@ describe('parseDescription — I4c text-escape resolution', () => {
     expect(ast.nodes[0]!.stereotype).toEqual(['µService']);
   });
 
-  it('resolves a <U+XXXX> unicode-codepoint escape in a quoted display -- lurupu-11-fubo915', () => {
+  it('PRESERVES a <U+XXXX> codepoint escape in a quoted display (decoded per-line at measure time, S1L-b-unicode ADR-1) -- lurupu-11-fubo915', () => {
+    // ADR-1: codepoint/entity escapes are NOT decoded at parse time — upstream
+    // decodes them per text atom, AFTER the line-split (`AtomText
+    // .manageSpecialChars`), so `<U+000A>` stays inline. The raw token is kept
+    // on `node.display`; the sizer/renderer decode it per-line (see
+    // tests/unit/description/codepoint-display.test.ts). Stereotypes (above)
+    // are single-line and still decode at parse.
     const ast = parse('usecase "<U+1F601> <U+1F680> Implement the changes" as Implement');
-    expect(ast.nodes[0]!.display).toBe('\u{1F601} \u{1F680} Implement the changes');
+    expect(ast.nodes[0]!.display).toBe('<U+1F601> <U+1F680> Implement the changes');
   });
 
-  it('resolves an &#NNN; HTML numeric entity in a quoted display -- lurupu-11-fubo915', () => {
+  it('PRESERVES an &#NNN; HTML numeric entity in a quoted display (decoded per-line at measure time, S1L-b-unicode ADR-1) -- lurupu-11-fubo915', () => {
     const ast = parse('usecase foo as "this is &#8734; long"');
-    expect(ast.nodes[0]!.display).toBe('this is ∞ long');
+    expect(ast.nodes[0]!.display).toBe('this is &#8734; long');
   });
 
   it('converts literal two-character \\n escapes into real newlines -- mutere-78-geko363', () => {

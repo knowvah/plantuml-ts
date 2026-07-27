@@ -44,6 +44,7 @@ import type { AtomImageResolver } from '../../creole-atoms.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import { classifyStripeLine, type StripeClassification } from '../../klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import { buildStripeAtoms, buildLiteralAtoms, fontConfigurationForHeading } from '../../klimt/creole/legacy/StripeSimple.js';
+import { resolveTextEscapes } from '../../text-escapes.js';
 import { getSplitted } from '../../klimt/creole/Fission.js';
 import { renderLatexAsImage } from '../../latex.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
@@ -192,11 +193,18 @@ interface LineBuild {
 function buildLine(line: string, font: FontConfiguration): LineBuild {
   const classification = classifyStripeLine(line);
   if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
+  // Decode `<U+XXXX>`/`&#NNN;` per-line, AFTER stripe classification (so an
+  // HR is still classified on the raw line, in lock-step with the sizer's
+  // `isCreoleHrLine`) but BEFORE atoms are built — mirroring upstream's
+  // per-atom `AtomText.manageSpecialChars` (S1L-b-unicode ADR-1). The sizer
+  // (`leaf-sizing.ts#maxLineWidth`) decodes the same content, so glyph widths
+  // match (the sizer↔renderer sync invariant).
+  const content = resolveTextEscapes(classification.content);
   if (classification.type === 'LITERAL') {
-    return { classification, atoms: buildLiteralAtoms(classification.content, font), lineFont: font };
+    return { classification, atoms: buildLiteralAtoms(content, font), lineFont: font };
   }
   const lineFont = classification.type === 'HEADING' ? fontConfigurationForHeading(font, classification.order) : font;
-  return { classification, atoms: buildStripeAtoms(classification.content, lineFont), lineFont };
+  return { classification, atoms: buildStripeAtoms(content, lineFont), lineFont };
 }
 
 /** Sums each atom's own width (text run measured under ITS own

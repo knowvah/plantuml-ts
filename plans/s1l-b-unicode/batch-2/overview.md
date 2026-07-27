@@ -7,7 +7,7 @@ not "gafico conformant."
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T2 | Investigate quoted-title literalness; narrow fix OR document | debugger | per finding: parser/renderer + regression test — OR `plans/s1l-leaf-sizing/ledger.md` | T1 | ☐ |
+| T2 | Investigate quoted-title literalness; narrow fix OR document | debugger | per finding: parser/renderer + regression test — OR `plans/s1l-leaf-sizing/ledger.md` | T1 | ☑ documented residual |
 
 **Exit bar:** the mechanism is stated (file:line + causal chain, per
 `rules/diagnosis.md`); either gafico's quoted-title node matches the oracle with

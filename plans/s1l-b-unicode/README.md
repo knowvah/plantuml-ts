@@ -23,9 +23,9 @@ residuals"** mission, NOT "flip all 3 conformant" (see `decisions.md`).
 
 ## Status
 
-- [ ] Batch 1 — Decode-ordering: codepoint escapes decode per-line (T1)
-- [ ] Batch 2 — Quoted-title literalness: scoped fix or document (T2)
-- [ ] Batch 3 — Emoji width (T3) + accounting close (T4)
+- [x] Batch 1 — Decode-ordering: codepoint escapes decode per-line (T1)
+- [x] Batch 2 — Quoted-title literalness: scoped fix or document (T2) — documented residual; Rule 2 corrected (real driver = unported `<code>` block, node c)
+- [x] Batch 3 — Emoji width (T3, documented residual: creole-lexer gap, ADR-3 corrected) + accounting close (T4, 67.2%, all misses named, full gate green)
 
 ## Startup (read in this order)
 
@@ -100,3 +100,44 @@ scope); a purely-mechanical per-line decode refactor; choosing exact pin values.
 - Out of scope: S1L-e container/cluster, S1L-f sprite/stdlib-macro, LaTeX
   divergence, and the class-diagram note path (`class/note-layout-measure.ts`
   shares the same latent decode-before-split bug — a SEPARATE follow-on).
+
+## Mission summary (2026-07-27 — CLOSED)
+
+**Tasks completed: 4/4** (T1 code fix; T2/T3 diagnoses → documented residuals;
+T4 accounting). Branch `feat/s1l-b-unicode`, commits `acaa789`/`3d8a171`/
+`a1f743b`/`f9890fb`. **Full gate green** (measure exit 0 / zero widened,
+dot-sync 262/262+90/90, typecheck, 10368 tests, lint, build).
+
+**T1 (the clean fix) — landed.** `<U+…>`/`&#…;` decode per-line at measure/
+render time, AFTER the `\n` split (ADR-1). Output-neutral; heights de-inflated:
+gafico-37 5.68→3.75, nujito-06 3.35→3.12 (pins shrunk, shrink-only). `<U+000A>`
+inline, `\n` still splits, `<U+221E>` byte-identical. New unit test
+`codepoint-display.test.ts`; 2 obsolete I4c parser tests re-asserted to the
+new preserve-at-parse contract.
+
+**T2 + T3 — documented residuals; BOTH planning ADR premises were WRONG.**
+Diagnosis (instrumented, not guessed) found the two width residuals are NOT
+what planning assumed:
+- **gafico-37 + nujito-06 (3.75 / 3.12): unported `<code>` block** (node c,
+  `[<code>$var</code>]`), deferred E2r L2 — NOT quoted-title literalness.
+  **decisions.md Rule 2 CORRECTED:** the quoted `node "$var"` title is
+  creole-processed (blue/green runs, `<U+000A>` inline), not literal; the
+  7.857in literal `<text>` planning attributed to it is node c's `<code>`.
+- **lurupu-11 (2.05): sizer↔renderer creole-lexer divergence** on node `bar` —
+  the sizer's `parseCreole` leaves an unclosed `<b>` and `<font Name>` literal,
+  the renderer's `buildStripeAtoms` strips them. **ADR-3 CORRECTED:** emoji
+  width is already exact (16-pt astral fallback; Implement/foo nodes match).
+
+**Decisions requiring review:** 2 locked-premise corrections (Rule 2, ADR-3),
+journaled + ledgered.
+
+**Follow-ups surfaced (not in this mission's scope):**
+- Port the `<code>` creole block (E2r L2) — closes gafico/nujito width.
+- **"sizer↔renderer creole visible-text unification"** — route the sizer's
+  `creoleVisibleText` through the renderer's `buildStripeAtoms` so the DOT box
+  matches drawn ink (closes lurupu; a real, high-blast-radius sizer bug).
+- Class-diagram note path shares the same latent decode-before-split bug
+  (already noted out of scope above).
+
+**Branch ready to merge to `main`** (merge commit, per mission-branch policy) —
+held for maintainer review given the two ADR corrections.

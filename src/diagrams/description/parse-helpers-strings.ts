@@ -226,7 +226,18 @@ export function resolveNewlineEscapes(s: string): string {
  * where `id` keeps its literal `\n` but `display` does not).
  */
 export function finalizeDisplay(display: string): string {
-  return resolveTextEscapes(resolveNewlineEscapes(stripFullWrap(display)));
+  // Codepoint/entity escapes (`<U+XXXX>`/`&#NNN;`) are DELIBERATELY not
+  // decoded here: upstream decodes them per text atom at draw/measure time
+  // (`AtomText.manageSpecialChars`), AFTER `Display.getWithNewlines` has
+  // split the display into lines — so a `<U+000A>` is an INLINE control char
+  // within its line, never a line break (S1L-b-unicode ADR-1, decisions.md
+  // Rule 1). Decoding here (before the sizer/renderer split on `\n`) turned
+  // `<U+000A>` into a real newline and OVER-SPLIT the box. The raw token is
+  // preserved on `node.display`; the sizer (`leaf-sizing.ts#maxLineWidth`)
+  // and renderer (`EntityImageDescriptionSupport.ts#buildLine`) each decode
+  // it per-line, in lock-step (the sizer↔renderer sync invariant). Only
+  // `\n`/`\r`/`\l` still split, via `resolveNewlineEscapes`.
+  return resolveNewlineEscapes(stripFullWrap(display));
 }
 
 // ---------------------------------------------------------------------------

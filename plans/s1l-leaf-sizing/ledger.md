@@ -52,7 +52,7 @@ containers.)
 | sprite / stdlib-macro / icon | 11 | scaled sprite dims via `<$…>` or `!include <awslib\|c4\|…>` macros mis-sized (kofuca-08-pafi749 → 478in), unknown sprite/icon → 0 dims. e.g. kofuca-08-pafi749, vivido-49-nisu863, bivira-53-boja685 | **S1L-f** |
 | interface shield | 11 | shielded `interface` sized as a generic box, not the fixed 0.25in circle; `isInterfaceShielded` gate exists, sizing does not. e.g. turasu-73-zoni468, cojege-69-ruku138, cegale-42-loxa672 | **S1L-c** |
 | min-width floor | 1 | **S1L-b/S1L-g DONE.** `skinparam minClassWidth` (S1L-g) + the `[…]` HR-height fix (S1L-b) made dexigu/kenece/zifaji **conformant** (deleted). `zotiru-33`'s scoped `<style> package { MinimumWidth 300 }` is now wired (S1L-b T5, `resolveElementMinimumWidth`): its `not_nested` package is exact at 4.583in, delta 2.655→0.914. Its remaining 0.914 is the `nested` package **cluster** floor. | **S1L-e** (nested-cluster residual) |
-| display-text expansion | 4 | **Bracket-body + creole-`====` HR mechanism DONE (S1L-b):** `[ … ]` bodies now reach `measureLeafNode` as the display, creole HR renders (stencil interceptor) + sizes at 8px, and formatting tags contribute 0 width. The 4 fixtures still pinned here are NOT the simple bracket case — each carries another compounding factor (`$var`/`<U+…>`emoji expansion, or a large multi-line/container body): gafico-37-cuma657 (5.68), nujito-06-neca370 (3.35), lurupu-11-fubo915 (2.05), xufexu-38-fola855 (1.46, bracket-body). Residual routed to the `$var`/emoji expansion follow-on + container (S1L-e). | **S1L-b** ($var/emoji) / S1L-e |
+| display-text expansion | 4 | **Bracket-body + creole-`====` HR DONE (S1L-b); codepoint decode-ordering DONE (S1L-b-unicode T1).** `[ … ]` bodies reach `measureLeafNode`; creole HR renders + sizes at 8px; `<U+…>`/`&#…;` now decode per-line at measure time (AFTER the `\n` split), so codepoint newlines are inline — heights no longer over-split. The 4 pinned fixtures are now DIAGNOSED, NAMED residuals (not simple bracket cases): **gafico-37-cuma657 (5.68→3.75)** + **nujito-06-neca370 (3.35→3.12)** — both driven by node c's UNPORTED `<code>` block (S1L-b-unicode T2, deferred E2r L2), NOT quoted-title literalness (Rule 2 corrected); **lurupu-11-fubo915 (2.05, unchanged)** — a sizer↔renderer creole-lexer divergence on `<font Name>`/unclosed-`<b>` (S1L-b-unicode T3), NOT emoji width (emoji measures exactly); **xufexu-38-fola855 (1.46)** — bracket-body + container (S1L-e). See the three S1L-b-unicode sections below. | `<code>` (E2r L2) / creole-lexer sync / **S1L-e** |
 | package / folder tab (leaf) | 3 | form-dependent leaf tab geometry (`package "X"` no braces). e.g. codabo-50-mupa164, tajadu-40-juro990, cobuju-30-paxo591 | **S1L-a** |
 | latex (DIVERGENCE) | 2 | KaTeX ≠ JLaTeXMath — see below. gevozu-46-sasu860, sunuju-01-pote718 | DIVERGENCES |
 | wrapWidth | 1 | `skinparam wrapWidth` word-wrapping unimplemented. mejoxi-96-cegu294 | **S1L-d** |
@@ -98,6 +98,98 @@ weight-agnostic, `<b>arn</b>` measures exactly as `arn` (ADR-2); tab width —
 inflate our box; creole formatting tags — stripped by T3's `creoleVisibleText`.
 Origin: `src/diagrams/description/leaf-sizing.ts#maxLineWidth` (correct per
 table) + sprite sizing (`render-atoms.ts`, S1L-f). Kept pinned at 1.024479.
+
+## S1L-b-unicode T1 — codepoint decode-ordering (DONE)
+
+`<U+XXXX>`/`&#NNN;` escapes now decode per-line at measure/render time, AFTER
+the `\n` split (ADR-1), mirroring upstream `AtomText.manageSpecialChars`. A
+`<U+000A>` is inline, not a line break, so it no longer over-splits leaf boxes.
+Output-neutral (dot-sync 262/262 + 90/90 EQUAL, zero widened). HEIGHT residuals
+dropped: **gafico-37-cuma657 5.680208→3.752777**, **nujito-06-neca370
+3.350521→3.122049** (size-backlog re-pinned, shrink-only). lurupu-11-fubo915
+unchanged (its residual is emoji glyph width → T3).
+
+## S1L-b-unicode T2 — gafico-37 documented residual (diagnosed, pinned)
+
+`gafico-37-cuma657` sits at delta **3.752777in** after T1. Diagnosed (oracle
+SVG + DOT evidence, not guess); pinned at its true delta; **no in-scope fix
+exists**. The pin is driven by node **c** (`node c [ <code> $var </code> ]`) —
+NOT the quoted-title node a.
+
+- **Driver — unported `<code>` block (OUT OF SCOPE, E2r L2).** Upstream renders
+  `<code>…</code>` as ONE verbatim monospace line: content neither
+  creole-parsed nor codepoint-decoded (the oracle SVG shows
+  `aaa <U+000A> bbb <U+000A> <u:blue>ccc …` literal, `font-family="monospace"`,
+  `textLength=640.582`) → node c box **7.857×0.611in**. The port has not ported
+  the `<code>` creole command (no code-block command in
+  `src/core/klimt/creole/`; explicitly deferred —
+  `EntityImageDescriptionSupport.ts:393` NOT-in-E2r-scope list), so it treats
+  the three bracket lines `<code>` / `$var`(expanded) / `</code>` as three
+  ordinary lines, creole-stripping and codepoint-decoding the `$var` line →
+  **4.104×1.000in** (3 narrow lines). Width delta 3.753 (too narrow) is the max.
+
+- **Rule 2 CORRECTION — the quoted title is NOT rendered literally.**
+  `decisions.md` Rule 2 stated node a (`node "$var"`) renders as a single
+  literal 77-char `<text>` (7.857in). That is FALSE: the 7.857in literal
+  monospace `<text>` is node **c**'s `<code>` block (above), which planning
+  mis-attributed to node a. The oracle SVG for node a (y=47.77, one line)
+  CREOLE-PROCESSES it — three colored runs (`<u:blue>ccc` underlined blue,
+  `<color:green>ddd` green, `<U+000A>` decoded to inline whitespace) — box
+  **2.145×0.611in**, identical creole treatment to node b's first line. So
+  ADR-2's "scoped quoted-title literal fix" premise does not apply; there is no
+  literal-quoted-title behavior to reproduce.
+
+- **Ruled out:** node a and node b are secondary residuals (~1.96 / ~1.93in),
+  BELOW node c's 3.753 — a `$var`-content width matter shared by the bracket
+  body (the port measures the decoded one-line `$var` ~2× the oracle's run
+  layout), NOT quoted-title-specific and unable to move gafico's pin (node c
+  dominates the MAX). No cheap in-scope fix; even a perfect node-a fix leaves
+  the pin gated by the `<code>` node.
+
+Origin: unported `<code>` creole block (`src/core/klimt/creole/`, deferred E2r
+L2) surfaced through `EntityImageDescriptionSupport.ts#buildLine` /
+`leaf-sizing.ts` measuring the un-blocked content. Kept pinned at 3.752777;
+closing it requires porting `<code>` (a separate deferred feature), not a
+quoted-title change.
+
+## S1L-b-unicode T3 — lurupu-11 documented residual (diagnosed, pinned)
+
+`lurupu-11-fubo915` sits at delta **2.045912in** (unchanged by T1). Diagnosed
+(port-vs-oracle per-node dims + sizer/renderer visible-text probes); pinned at
+its true delta. The driver is **NOT emoji glyph width** (ADR-3's premise) — it
+is a **sizer↔renderer creole-lexer divergence** on one node.
+
+- **Emoji width is already correct.** Two of the three usecase nodes match the
+  oracle EXACTLY: `Implement` (`<U+1F601>`😁 `<U+1F680>`🚀) 185.8×42.0px ==
+  oracle, and `foo` (`&#8734;`∞) 102.8×25.8px == oracle. `WidthTableMeasurer
+  .charWidth` already returns the jar-verified fixed 16-pt fallback for astral
+  code points (`cp >= 0xFFFF`, `measurer.ts:180`) — so a decoded emoji measures
+  at the deterministic oracle's own width. No measurer change is warranted.
+
+- **Driver — node `bar` sizer over-measures unstripped creole tags.**
+  `bar` = `"<b>this is also <U+221E> <font Segoe UI Emoji><U+1F680><U+263A>
+  </font> long"`. The RENDERER (`buildStripeAtoms`, E2r StripeSimple) strips
+  the UNCLOSED `<b>` and the space-form `<font Segoe UI Emoji>`/`</font>` →
+  visible `"this is also ∞ 🚀☺ long"` (22 cps) → ~147px, matching the oracle
+  (2.042in). The SIZER (`leaf-sizing.ts#maxLineWidth` → `creoleVisibleText` →
+  `parseCreole`, `src/core/creole.ts`) strips NEITHER (`parseCreole` leaves an
+  unclosed `<b>` and any `<font Name>` tag literal — verified) → 53 cps →
+  ~333px box. The DOT box is sizer-driven, so it is oversized by the literal
+  tag text the renderer never draws.
+
+- **Ruled out:** emoji/astral width (Implement + foo match exactly); codepoint
+  decode (T1 correct — the `<U+…>` decode identically in both paths). The gap
+  is purely the two creole lexers disagreeing on unclosed-`<b>` and
+  space-form-`<font>`.
+
+Origin: `src/core/creole.ts#parseCreole` (the sizer's lexer) lags the
+renderer's `src/core/klimt/creole/legacy/StripeSimple.ts#buildStripeAtoms` for
+unclosed `<b>` and `<font Name>`. **Out of T3 scope** (the fix is a
+sizer↔renderer creole-lexer sync in `leaf-sizing.ts`/`creole.ts`, not an
+emoji-width measurer change) and **high blast radius** (routing the sizer's
+visible-text through `buildStripeAtoms` would re-measure every description leaf
+— it must be measured, not assumed). **Flagged as a scoped follow-on:
+"sizer↔renderer creole visible-text unification."** Kept pinned at 2.045912.
 
 ## Size backlog
 
