@@ -99,6 +99,59 @@ inflate our box; creole formatting tags — stripped by T3's `creoleVisibleText`
 Origin: `src/diagrams/description/leaf-sizing.ts#maxLineWidth` (correct per
 table) + sprite sizing (`render-atoms.ts`, S1L-f). Kept pinned at 1.024479.
 
+## S1L-b-unicode T1 — codepoint decode-ordering (DONE)
+
+`<U+XXXX>`/`&#NNN;` escapes now decode per-line at measure/render time, AFTER
+the `\n` split (ADR-1), mirroring upstream `AtomText.manageSpecialChars`. A
+`<U+000A>` is inline, not a line break, so it no longer over-splits leaf boxes.
+Output-neutral (dot-sync 262/262 + 90/90 EQUAL, zero widened). HEIGHT residuals
+dropped: **gafico-37-cuma657 5.680208→3.752777**, **nujito-06-neca370
+3.350521→3.122049** (size-backlog re-pinned, shrink-only). lurupu-11-fubo915
+unchanged (its residual is emoji glyph width → T3).
+
+## S1L-b-unicode T2 — gafico-37 documented residual (diagnosed, pinned)
+
+`gafico-37-cuma657` sits at delta **3.752777in** after T1. Diagnosed (oracle
+SVG + DOT evidence, not guess); pinned at its true delta; **no in-scope fix
+exists**. The pin is driven by node **c** (`node c [ <code> $var </code> ]`) —
+NOT the quoted-title node a.
+
+- **Driver — unported `<code>` block (OUT OF SCOPE, E2r L2).** Upstream renders
+  `<code>…</code>` as ONE verbatim monospace line: content neither
+  creole-parsed nor codepoint-decoded (the oracle SVG shows
+  `aaa <U+000A> bbb <U+000A> <u:blue>ccc …` literal, `font-family="monospace"`,
+  `textLength=640.582`) → node c box **7.857×0.611in**. The port has not ported
+  the `<code>` creole command (no code-block command in
+  `src/core/klimt/creole/`; explicitly deferred —
+  `EntityImageDescriptionSupport.ts:393` NOT-in-E2r-scope list), so it treats
+  the three bracket lines `<code>` / `$var`(expanded) / `</code>` as three
+  ordinary lines, creole-stripping and codepoint-decoding the `$var` line →
+  **4.104×1.000in** (3 narrow lines). Width delta 3.753 (too narrow) is the max.
+
+- **Rule 2 CORRECTION — the quoted title is NOT rendered literally.**
+  `decisions.md` Rule 2 stated node a (`node "$var"`) renders as a single
+  literal 77-char `<text>` (7.857in). That is FALSE: the 7.857in literal
+  monospace `<text>` is node **c**'s `<code>` block (above), which planning
+  mis-attributed to node a. The oracle SVG for node a (y=47.77, one line)
+  CREOLE-PROCESSES it — three colored runs (`<u:blue>ccc` underlined blue,
+  `<color:green>ddd` green, `<U+000A>` decoded to inline whitespace) — box
+  **2.145×0.611in**, identical creole treatment to node b's first line. So
+  ADR-2's "scoped quoted-title literal fix" premise does not apply; there is no
+  literal-quoted-title behavior to reproduce.
+
+- **Ruled out:** node a and node b are secondary residuals (~1.96 / ~1.93in),
+  BELOW node c's 3.753 — a `$var`-content width matter shared by the bracket
+  body (the port measures the decoded one-line `$var` ~2× the oracle's run
+  layout), NOT quoted-title-specific and unable to move gafico's pin (node c
+  dominates the MAX). No cheap in-scope fix; even a perfect node-a fix leaves
+  the pin gated by the `<code>` node.
+
+Origin: unported `<code>` creole block (`src/core/klimt/creole/`, deferred E2r
+L2) surfaced through `EntityImageDescriptionSupport.ts#buildLine` /
+`leaf-sizing.ts` measuring the un-blocked content. Kept pinned at 3.752777;
+closing it requires porting `<code>` (a separate deferred feature), not a
+quoted-title change.
+
 ## Size backlog
 
 `oracle/goldens/description/size-backlog.json` — 120 shrink-only per-fixture

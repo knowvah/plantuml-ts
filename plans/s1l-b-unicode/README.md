@@ -24,7 +24,7 @@ residuals"** mission, NOT "flip all 3 conformant" (see `decisions.md`).
 ## Status
 
 - [x] Batch 1 — Decode-ordering: codepoint escapes decode per-line (T1)
-- [ ] Batch 2 — Quoted-title literalness: scoped fix or document (T2)
+- [x] Batch 2 — Quoted-title literalness: scoped fix or document (T2) — documented residual; Rule 2 corrected (real driver = unported `<code>` block, node c)
 - [ ] Batch 3 — Emoji width (T3) + accounting close (T4)
 
 ## Startup (read in this order)
