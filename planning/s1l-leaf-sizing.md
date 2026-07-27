@@ -444,3 +444,39 @@ a truer "conformant-among-sizeable" number (~67%) before moving on.
 - `npx vitest run tests/oracle/description-parity.ratchet.test.ts` — stays green
   (ratchet is structural; re-pin only if a golden's structure changed, which it
   must not).
+
+## Fifteenth pass (2026-07-27) — CLOSED: honest-accounting close
+
+Maintainer-selected close (the plateau was real; per-leaf-shape grinding is
+done). Rather than chase the number, S1L now makes description sizes
+**measurable, asserted, and regression-proof**, reports the honest number, and
+carries every miss by a named entry — satisfying the 2026-07-14 "100% minus
+known divergences" rule (which supersedes the original ≥90% raw bar).
+
+Delivered:
+- `sizeConformantOk` (≤0.01in) added to `compareStructural`
+  (`tests/oracle/svek-dot.ts`) — parallel to `structurallyEqual`, never folded
+  into it (structure stays a 100% gate).
+- `scripts/measure-description-size-deltas.ts` — mirrors
+  `measure-state-size-deltas.ts`; measures all 351 goldens, reports
+  conformant-among-EQUAL % + per-cause buckets, exits 2 on any widening.
+- `oracle/goldens/description/size-backlog.json` — 120 shrink-only per-fixture
+  pins (the complete named miss-list).
+- Per-fixture size assertion added to `description-parity.ratchet.test.ts`
+  (absent slug ⇒ ≤0.01in; backlog entries ratchet down only).
+
+**Measured: 231/351 = 65.8% conformant** (66.2% excluding the LaTeX
+divergence) — confirming the ~62–67% plateau estimate empirically. The
+diagnostic finding that only **LaTeX** is inherent-tolerance (sprites,
+OpenIconic, `<style>` are ported subsystems, i.e. gaps not divergences)
+corrected pass 14's "tolerance-exclusion ~67%" framing: the number is not
+reached by excluding portable gaps.
+
+The 120 misses are routed in `plans/s1l-leaf-sizing/ledger.md` → sub-missions
+**S1L-a** (package/folder tabs, 20), **S1L-b** (display-text expansion, 18),
+**S1L-c** (interface shield, 17), **S1L-d** (wrapWidth, 1), **S1L-e**
+(container/cluster, 30), **S1L-f** (sprite/stdlib-macro/icon, 13), plus 19
+uncategorized folded in during those missions' re-runs. LaTeX (2) → permanent
+DIVERGENCES exclusion. Each sub-mission flips its fixtures to
+asserted-`conformant` by driving their backlog entries to ≤0.01 and deleting
+them.

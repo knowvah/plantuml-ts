@@ -279,7 +279,14 @@ conformance is permanently out of scope for latex-bearing fixtures
 (`component/sunuju-01-pote718`, `component/vimulo-11-buni641` carry this
 entry in the census accounting).
 
-**Affects:** any diagram using `<latex>` (or `<math>`) creole tags.
+**Affects:** any diagram using `<latex>` (or `<math>`) creole tags. This is
+also the one exclusion from the S1L description size-`conformant` denominator:
+`gevozu-46-sasu860` and `sunuju-01-pote718` carry a ~4.67in node-size delta
+because the math label is sized by KaTeX, not JLaTeXMath. They remain pinned
+(shrink-only) in `oracle/goldens/description/size-backlog.json` for
+non-regression but are excluded from the reported conformant percentage
+(`plans/s1l-leaf-sizing/ledger.md`). Every other non-conformant description
+fixture is a portable gap tracked by a sub-mission, not a divergence.
 
 ---
 
