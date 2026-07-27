@@ -194,6 +194,13 @@ const sortedClusterSizes = (g: StructuralGraph): number[] =>
 /** Epsilon for numeric graph-attr comparisons: both sides print 6-decimal inches. */
 const NUM_ATTR_EPSILON = 1e-6;
 
+/** Node width/height are `conformant` when every dimension is within this many
+ *  inches of the oracle (the graded `conformant` bar from planning/
+ *  conformance.md). Reported as `sizeConformantOk`; deliberately NOT folded
+ *  into `structurallyEqual`, which stays a structure-only gate (sizes are
+ *  ratcheted separately via oracle/goldens/<type>/size-backlog.json). */
+export const SIZE_CONFORMANCE_TOLERANCE_IN = 0.01;
+
 /** absent==absent equal; absent vs present mismatch; else numeric within epsilon. */
 function numAttrOk(a: number | undefined, b: number | undefined): boolean {
   if (a === undefined || b === undefined) return a === b;
@@ -223,6 +230,10 @@ export interface StructuralDiff {
   ranksepOk: boolean;
   /** All structural checks hold — the DOT-level parity bar (ids/colors/sizes excluded). */
   structurallyEqual: boolean;
+  /** Node width/height all within SIZE_CONFORMANCE_TOLERANCE_IN of the oracle
+   *  (the `conformant` size bar). Independent of `structurallyEqual` — a graph
+   *  can be structurally equal but size-non-conformant (the S1L tail). */
+  sizeConformantOk: boolean;
   oracle: { nodes: number; edges: number; degree: number[]; clusters: number };
   candidate: { nodes: number; edges: number; degree: number[]; clusters: number };
   /** Tolerant metric note: largest single node-dimension delta (inches). */
@@ -278,6 +289,7 @@ export function compareStructural(
   const rdOk = rankdirOk(oracle.rankdir, candidate.rankdir);
   const nsOk = numAttrOk(oracle.nodesep, candidate.nodesep);
   const rsOk = numAttrOk(oracle.ranksep, candidate.ranksep);
+  const maxDelta = maxSizeDelta(oracle, candidate);
 
   return {
     nodeCountOk,
@@ -301,6 +313,7 @@ export function compareStructural(
       rdOk &&
       nsOk &&
       rsOk,
+    sizeConformantOk: maxDelta <= SIZE_CONFORMANCE_TOLERANCE_IN,
     oracle: {
       nodes: oracle.nodes.length,
       edges: oracle.edges.length,
@@ -313,7 +326,7 @@ export function compareStructural(
       degree: cd,
       clusters: candidate.clusters.length,
     },
-    maxSizeDeltaIn: maxSizeDelta(oracle, candidate),
+    maxSizeDeltaIn: maxDelta,
     medianSizeDeltaIn: medianSizeDelta(oracle, candidate),
     attrs: {
       oracle: [oracle.nodesep, oracle.ranksep],
