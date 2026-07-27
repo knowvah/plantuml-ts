@@ -47,8 +47,10 @@ describe('detectCause', () => {
   it('detects each root-cause family, most-specific first', () => {
     expect(detectCause('a <latex>e=mc^2</latex> b')).toBe('latex');
     expect(detectCause('skinparam wrapWidth 200')).toBe('wrapWidth');
+    expect(detectCause('skinparam minClassWidth 200')).toBe('min-width');
     expect(detectCause('label <U+1F600> here')).toBe('emoji-unicode');
     expect(detectCause('component X <$awsIcon>')).toBe('sprite');
+    expect(detectCause('!include <awslib/AWSCommon>')).toBe('sprite');
     expect(detectCause('node <&heart> n')).toBe('icon');
     expect(detectCause('package "P"')).toBe('package-folder-tab');
     expect(detectCause('interface I')).toBe('interface-shield');
@@ -56,6 +58,12 @@ describe('detectCause', () => {
       'bracket-body',
     );
     expect(detectCause('component $myVar')).toBe('variable-display');
+  });
+
+  it('routes a container (keyword + { block) to cluster, not leaf tab', () => {
+    expect(detectCause('package P {\n  class A\n}')).toBe('container-cluster');
+    // a bracket body INSIDE a container block is cluster sizing, not display
+    expect(detectCause('rectangle R {\n  a [Line 1\\nLine 2]\n}')).toBe('container-cluster');
   });
 
   it('falls back to other when nothing matches', () => {
