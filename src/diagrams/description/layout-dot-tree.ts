@@ -170,7 +170,7 @@ export function buildDotNodes(
     const sizedNode = nodeWithVisibleStereotype(node, stereotypeRules);
     const dims = measureLeafNode(
       sizedNode, fontSpec, measurer,
-      { componentStyle: ctx.componentStyle, minimumWidth: ctx.minimumWidth },
+      { componentStyle: ctx.componentStyle, minimumWidth: ctx.minimumWidthFor(node.symbol) },
       ctx.sprites,
     );
     if (node.symbol === 'port') {

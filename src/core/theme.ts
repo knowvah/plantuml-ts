@@ -448,4 +448,5 @@ export {
   resolveElementFontSize,
   resolveElementShadowing,
   resolveElementLineThickness,
+  resolveElementMinimumWidth,
 } from './theme-element-resolve.js';

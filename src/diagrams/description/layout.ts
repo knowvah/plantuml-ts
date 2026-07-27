@@ -13,6 +13,7 @@
 
 import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
 import type { Theme } from '../../core/theme.js';
+import { resolveElementMinimumWidth } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type {
   DotInputEdge,
@@ -91,9 +92,12 @@ export interface ClassifyCtx {
   counter: { n: number };
   /** `skinparam componentStyle` — gates the UML2 component corner icon. */
   componentStyle: ComponentStyle | undefined;
-  /** `skinparam minClassWidth` / style `MinimumWidth` — leaf-box content width
-   *  floor (S1L-g). undefined ⇒ 0 (no floor). */
-  minimumWidth: number | undefined;
+  /** Per-element leaf-box content-width floor resolver: cascades a scoped
+   *  `<style> <sname> { MinimumWidth N }` over the global `skinparam
+   *  minClassWidth` (S1L-b T5 / S1L-g). Keyed by the node's USymbol so a
+   *  `<style> package { MinimumWidth 300 }` floors packages but not a sibling
+   *  `card` (ADR-3). `undefined` result ⇒ 0 (no floor). */
+  minimumWidthFor: (sname: string) => number | undefined;
   /** Container-scoped identity (mission I1b) — bare ids that are TRUE
    *  cross-scope collisions across the WHOLE diagram
    *  (namespace-groups.ts#findCollidingIds), read by `dotKeyFor` to decide
@@ -408,7 +412,7 @@ export function layoutDescription(
     leafIdSet: new Set(), containers: [],
     containerById: new Map(), astNodeById: new Map(), counter: { n: 0 },
     componentStyle: theme.componentStyle,
-    minimumWidth: theme.minimumWidth,
+    minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
     collidingIds, qualifiedPathToDotKey: new Map(),
     sprites: ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined,
   };
@@ -430,7 +434,9 @@ export function layoutDescription(
   const rawContainers = countRawContainers(ast.nodes);
   const degenerate = degenerateSingleLeaf(ast, rawContainers, fontSpec, measurer, {
     componentStyle: theme.componentStyle,
-    minimumWidth: theme.minimumWidth,
+    // Single-leaf diagram: resolve the floor for THAT leaf's own USymbol so a
+    // scoped `<style> <sname> { MinimumWidth }` applies (S1L-b T5).
+    minimumWidth: resolveElementMinimumWidth(theme, ast.nodes[0]?.symbol ?? ''),
   });
   if (degenerate !== undefined) {
     return {
