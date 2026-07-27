@@ -210,7 +210,7 @@ export function measureMapClassifier(classifier: Classifier, theme: Theme, measu
   // titleHeight + the raw (possibly zero, for an empty map body) fields height.
   const height = title.height + fieldsHeight;
 
-  const headerGeo = headerRows(classifier, theme, measurer, width, MAP_NAME_MARGIN);
+  const headerGeo = headerRows(classifier, theme, measurer, { boxWidth: width, namePadding: MAP_NAME_MARGIN });
   const baselineOffset = baselineOffsetFor(fontSpec, measurer);
   const { rows: rowGeo, dividerYs } = buildMapRowGeo(rows, metrics, title.height, {
     colAWidth: colA,
