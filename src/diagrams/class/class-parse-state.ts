@@ -4,9 +4,8 @@
  * `import { ..., type ParseState } from './parser.js'` site is unchanged.
  */
 
-import type { ClassDiagramAST, Classifier } from './ast.js';
+import type { ClassDiagramAST } from './ast.js';
 import type { PendingNote, TipGroupSeenSet } from './class-notes.js';
-import type { UmlSource } from '../../core/block-extractor.js';
 
 export interface ParseState {
   ast: ClassDiagramAST;

@@ -39,7 +39,6 @@ import type { Classifier, ClassDiagramAST, HideStereotypeDirective } from './ast
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import { javaRound4 } from '../../core/number-format.js';
-import { BADGE_LEFT_MARGIN, NAME_LEFT_MARGIN } from './class-badge.js';
 
 /** `FontParam.CLASS_STEREOTYPE`'s hardcoded DEFAULT size (12, italic) --
  *  independent of `theme.fontSize`/`AttributeFontSize` (a DIFFERENT
