@@ -168,7 +168,11 @@ export function buildDotNodes(
     // shallow clone; returns the SAME node reference when nothing changes
     // (`visibleStereotypeLabels`'s own doc comment).
     const sizedNode = nodeWithVisibleStereotype(node, stereotypeRules);
-    const dims = measureLeafNode(sizedNode, fontSpec, measurer, ctx.componentStyle, ctx.sprites);
+    const dims = measureLeafNode(
+      sizedNode, fontSpec, measurer,
+      { componentStyle: ctx.componentStyle, minimumWidth: ctx.minimumWidth },
+      ctx.sprites,
+    );
     if (node.symbol === 'port') {
       result.push(buildPortNode(id, node, dims, fontSpec, measurer));
       continue;

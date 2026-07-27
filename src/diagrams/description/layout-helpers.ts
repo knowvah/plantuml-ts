@@ -77,7 +77,7 @@ export {
 // lives in ./leaf-sizing.js; title-bar sizing (measureTitleLabel) lives in
 // ./title-label-sizing.js. Both are used internally here and by layout.ts;
 // re-exported so existing importers keep their `layout-helpers` import path.
-import { measureLeafNode, type ComponentStyle } from './leaf-sizing.js';
+import { measureLeafNode, type BoxSizingOpts } from './leaf-sizing.js';
 export {
   measureLeafNode,
   ACTOR_WIDTH,
@@ -189,7 +189,7 @@ export function degenerateSingleLeaf(
   containersCount: number,
   fontSpec: FontSpec,
   measurer: StringMeasurer,
-  componentStyle: ComponentStyle | undefined,
+  boxOpts: BoxSizingOpts | undefined,
 ): DescriptionGeometry | undefined {
   // #lizard forgives — pre-existing: CCN is a flat chain of early-return
   // guards (the upstream "does this qualify as a degenerate single leaf?"
@@ -217,7 +217,7 @@ export function degenerateSingleLeaf(
   const stereotypeRules = ast.stereotypeVisibilityRules ?? [];
   const visibleStereotype = visibleStereotypeLabels(node.stereotype, stereotypeRules);
   const visibleNode = nodeWithVisibleStereotype(node, stereotypeRules);
-  const dims = measureLeafNode(visibleNode, fontSpec, measurer, componentStyle, sprites);
+  const dims = measureLeafNode(visibleNode, fontSpec, measurer, boxOpts, sprites);
   const geo: DescriptionNodeGeo = {
     id: node.id,
     symbol: node.symbol,

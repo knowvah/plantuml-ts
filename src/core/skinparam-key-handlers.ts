@@ -130,6 +130,12 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
     const v = parseNonZeroInt(value);
     if (v !== undefined) acc.wrapWidth = v;
   }],
+  [['minclasswidth'], (acc, value) => {
+    // S1L-g: `SkinParam` maps `minClassWidth` to `PName.MinimumWidth`, the
+    // leaf-box content-width floor. Zero-is-unset (0 == no floor == default).
+    const v = parseNonZeroInt(value);
+    if (v !== undefined) acc.minimumWidth = v;
+  }],
   [['tabsize'], (acc, value) => {
     // G3/O4: `SkinParam#getTabSize()` -- `getAsInt("tabsize", 8)`, no
     // zero-is-unset convention (unlike nodesep/ranksep/wrapwidth) -- this

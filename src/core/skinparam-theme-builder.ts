@@ -37,6 +37,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['wrapWidth', (acc) => acc.wrapWidth],
   ['tabSize', (acc) => acc.tabSize],
   ['componentStyle', (acc) => acc.componentStyle],
+  ['minimumWidth', (acc) => acc.minimumWidth],
   ['strictUml', (acc) => acc.strictUml],
   ['monochrome', (acc) => acc.monochrome],
   ['packageStyle', (acc) => acc.packageStyle],

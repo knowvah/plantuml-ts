@@ -30,6 +30,9 @@ export interface Theme {
    *  Default `uml2` draws the corner component icon; `uml1`/`rectangle` render
    *  components as plain boxes (changes node sizing). Absent = uml2. */
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
+  /** `skinparam minClassWidth` (mapped to `PName.MinimumWidth`) — floors the
+   *  leaf-box text-block content width. Absent = 0 (no floor). */
+  minimumWidth?: number;
   /** G2 N18: `skinparam style strictuml` — a global sharp-corner style flag
    *  (`SkinParam.java`'s `getStyle() == UmlDiagramType.STRICT`... actually
    *  a bare boolean toggle checked by `USymbolFolder#drawFolder`'s
@@ -288,6 +291,7 @@ export type ThemeOverride = {
   linetype?: 'ortho' | 'polyline';
   fixCircleLabelOverlapping?: boolean;
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
+  minimumWidth?: number;
   strictUml?: boolean;
   monochrome?: 'true' | 'reverse';
   /** See `Theme.shadowing`'s own doc comment. */
@@ -353,6 +357,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'linetype',
   'fixCircleLabelOverlapping',
   'componentStyle',
+  'minimumWidth',
   'strictUml',
   'monochrome',
   'shadowing',
