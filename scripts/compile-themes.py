@@ -16,7 +16,14 @@ import os
 import sys
 
 THEMES_DIR = os.path.expanduser('~/git/plantuml/src/main/resources/themes/')
-OUT_FILE = os.path.join(os.path.dirname(__file__), '..', 'src', 'core', 'themes-builtin.ts')
+CORE_DIR = os.path.join(os.path.dirname(__file__), '..', 'src', 'core')
+OUT_FILE = os.path.join(CORE_DIR, 'themes-builtin.ts')
+# The theme data is split across two sibling modules so no single generated
+# file exceeds the repo's 500-line-per-file cap. themes-builtin.ts is a thin
+# barrel that re-assembles BUILTIN_THEMES from them in the original key order.
+OUT_FILE_A = os.path.join(CORE_DIR, 'themes-builtin-a-m.ts')
+OUT_FILE_B = os.path.join(CORE_DIR, 'themes-builtin-p-v.ts')
+FILE_LINE_CAP = 500
 
 # ---------------------------------------------------------------------------
 # Manual overrides for themes whose variables can't be easily auto-extracted.
@@ -100,31 +107,40 @@ def extract_vars(content: str) -> dict[str, str]:
     return vars
 
 
+def _resolve_var(val: str, vars: dict[str, str]) -> str:
+    """Resolve up to two levels of $VAR indirection."""
+    for _ in range(2):
+        if val.startswith('$'):
+            val = vars.get(val[1:], val)
+    return val
+
+
+def _match_root_prop(s: str, vars: dict[str, str]) -> tuple[str, str] | None:
+    """Match one `root { … }` property line, returning (key, resolved value)."""
+    for prop, key in [('BackgroundColor', 'bg'), ('FontColor', 'fg'),
+                      ('LineColor', 'lc'), ('FontName', 'fn')]:
+        if s.lower().startswith(prop.lower()):
+            return key, _resolve_var(s[len(prop):].strip().strip('"\''), vars)
+    return None
+
+
 def extract_root_style(content: str, vars: dict[str, str]) -> dict[str, str | None]:
     """Extract colors from <style> root { ... } block."""
     result: dict[str, str | None] = {'bg': None, 'fg': None, 'lc': None, 'fn': None}
     m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
     if not m:
         return result
-    style = m.group(1)
     in_root = False
-    for line in style.split('\n'):
+    for line in m.group(1).split('\n'):
         s = line.strip()
         if re.match(r'root\s*\{', s):
             in_root = True
         elif in_root and s == '}':
             break
         elif in_root:
-            for prop, key in [('BackgroundColor', 'bg'), ('FontColor', 'fg'),
-                               ('LineColor', 'lc'), ('FontName', 'fn')]:
-                if s.lower().startswith(prop.lower()):
-                    val = s[len(prop):].strip().strip('"\'')
-                    if val.startswith('$'):
-                        val = vars.get(val[1:], val)
-                    # Resolve one more level
-                    if val.startswith('$'):
-                        val = vars.get(val[1:], val)
-                    result[key] = val
+            match = _match_root_prop(s, vars)
+            if match:
+                result[match[0]] = match[1]
     return result
 
 
@@ -193,6 +209,40 @@ def ts_string(v: str | None) -> str:
     return f"'{v}'"
 
 
+def _color_lines(bg: str | None, fg: str | None, lc: str | None) -> list[str]:
+    """The `colors: { … }` scalar fields (background/text/border/arrow)."""
+    out: list[str] = []
+    if bg:
+        out.append(f"      background: '{bg}',")
+    if fg:
+        out.append(f"      text: '{fg}',")
+    # border and arrow both come from LineColor
+    if lc:
+        out.append(f"      border: '{lc}',")
+        out.append(f"      arrow: '{lc}',")
+    return out
+
+
+def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None) -> list[str]:
+    """
+    For themes with a solid (non-transparent) background, propagate the theme
+    colors into graph.json so JSON nodes inherit the theme instead of falling
+    back to defaultTheme's plantuml.skin json defaults. Empty otherwise.
+    """
+    if not bg or bg == 'transparent':
+        return []
+    out = [f"          background: '{bg}',"]
+    if lc:
+        out.append(f"          border: '{lc}',")
+        out.append(f"          arrowColor: '{lc}',")
+    if fg:
+        # Disable per-type value coloring for themed nodes — uniform text color.
+        for field in ('keyText', 'stringValue', 'numberValue',
+                      'booleanValue', 'nullValue'):
+            out.append(f"          {field}: '{fg}',")
+    return out
+
+
 def emit_theme_entry(name: str, props: dict) -> list[str]:
     """Emit a TypeScript object entry for one theme."""
     bg = normalize_color(props.get('bg'))
@@ -205,34 +255,9 @@ def emit_theme_entry(name: str, props: dict) -> list[str]:
     lines = [f"  '{name}': {{"]
     if fn:
         lines.append(f"    fontFamily: '{fn}',")
-    color_lines = []
-    if bg:
-        color_lines.append(f"      background: '{bg}',")
-    if fg:
-        color_lines.append(f"      text: '{fg}',")
-    # border and arrow both come from LineColor
-    if lc:
-        color_lines.append(f"      border: '{lc}',")
-        color_lines.append(f"      arrow: '{lc}',")
 
-    # For themes with a solid (non-transparent) background, propagate the theme
-    # colors into graph.json so JSON nodes inherit the theme instead of falling
-    # back to defaultTheme's plantuml.skin json defaults.
-    solid_bg = bg and bg != 'transparent'
-    json_lines = []
-    if solid_bg:
-        json_lines.append(f"          background: '{bg}',")
-        if lc:
-            json_lines.append(f"          border: '{lc}',")
-            json_lines.append(f"          arrowColor: '{lc}',")
-        if fg:
-            # Disable per-type value coloring for themed nodes — use uniform text color.
-            json_lines.append(f"          keyText: '{fg}',")
-            json_lines.append(f"          stringValue: '{fg}',")
-            json_lines.append(f"          numberValue: '{fg}',")
-            json_lines.append(f"          booleanValue: '{fg}',")
-            json_lines.append(f"          nullValue: '{fg}',")
-
+    color_lines = _color_lines(bg, fg, lc)
+    json_lines = _json_graph_lines(bg, fg, lc)
     if color_lines:
         lines.append("    colors: {")
         lines.extend(color_lines)
@@ -247,53 +272,107 @@ def emit_theme_entry(name: str, props: dict) -> list[str]:
     return lines
 
 
+def collect_entries() -> dict[str, list[str]]:
+    """Parse every theme .puml into its emitted TS entry lines, keyed by name."""
+    entries: dict[str, list[str]] = {}
+    for fname in sorted(os.listdir(THEMES_DIR)):
+        if not fname.endswith('.puml') or fname == 'puml-theme-_none_.puml':
+            continue
+        theme_name = fname.replace('puml-theme-', '').replace('.puml', '')
+        props = MANUAL.get(theme_name) \
+            or parse_theme(os.path.join(THEMES_DIR, fname))
+        entries[theme_name] = emit_theme_entry(theme_name, props)
+    return entries
+
+
+def emit_data_module(var_name: str, sibling: str, names: list[str],
+                     entries: dict[str, list[str]]) -> list[str]:
+    """Emit one data sibling exporting `var_name` for the themes in `names`."""
+    first, last = names[0], names[-1]
+    out = [
+        "/**",
+        f" * Built-in PlantUML theme definitions ({first} .. {last}).",
+        " * Auto-generated by scripts/compile-themes.py — do not edit by hand.",
+        " * Re-run the script when upstream themes change.",
+        " *",
+        f" * Split from themes-builtin.ts to stay under the {FILE_LINE_CAP}-line-per-file cap;",
+        " * themes-builtin.ts re-assembles BUILTIN_THEMES from this and its sibling",
+        f" * `{sibling}` in the original key order.",
+        " */",
+        "",
+        "import type { ThemeOverride } from './theme.js';",
+        "",
+        f"/** Partial Theme overrides for built-in PlantUML themes '{first}' through '{last}'. */",
+        f"export const {var_name}: Record<string, ThemeOverride> = {{",
+    ]
+    for name in names:
+        out.extend(entries[name])
+    out.append("};")
+    out.append("")
+    return out
+
+
+def emit_barrel(first_range: str, second_range: str) -> list[str]:
+    """Emit the themes-builtin.ts barrel that re-assembles BUILTIN_THEMES."""
+    return [
+        "/**",
+        " * Built-in PlantUML theme definitions.",
+        " * Auto-generated by scripts/compile-themes.py — do not edit by hand.",
+        " * Re-run the script when upstream themes change.",
+        " *",
+        f" * The theme data itself is split across `themes-builtin-a-m.ts` ({first_range})",
+        f" * and `themes-builtin-p-v.ts` ({second_range}) to stay under the",
+        f" * {FILE_LINE_CAP}-line-per-file cap. This module re-assembles BUILTIN_THEMES from those",
+        " * two siblings in the original key order and remains the sole import site",
+        " * used elsewhere in the codebase.",
+        " */",
+        "",
+        "import type { ThemeOverride } from './theme.js';",
+        "import { BUILTIN_THEMES_A_M } from './themes-builtin-a-m.js';",
+        "import { BUILTIN_THEMES_P_V } from './themes-builtin-p-v.js';",
+        "",
+        "/** Partial Theme overrides for each built-in PlantUML theme name. */",
+        "export const BUILTIN_THEMES: Record<string, ThemeOverride> = {",
+        "  ...BUILTIN_THEMES_A_M,",
+        "  ...BUILTIN_THEMES_P_V,",
+        "};",
+        "",
+    ]
+
+
+def write_ts(path: str, lines: list[str]) -> None:
+    """Write a generated TS file, warning if it breaches the line cap."""
+    if len(lines) > FILE_LINE_CAP:
+        print(f"WARNING: {os.path.basename(path)} is {len(lines)} lines "
+              f"(> {FILE_LINE_CAP} cap) — split the theme data across more files.",
+              file=sys.stderr)
+    with open(path, 'w') as f:
+        f.write('\n'.join(lines))
+
+
 def main() -> None:
     if not os.path.isdir(THEMES_DIR):
         print(f"ERROR: themes directory not found: {THEMES_DIR}", file=sys.stderr)
         sys.exit(1)
 
-    entries: dict[str, list[str]] = {}
+    entries = collect_entries()
+    names = list(entries.keys())
+    # Split the sorted theme list into two near-even halves so neither data
+    # module exceeds the line cap. `write_ts` warns if a half still does.
+    split = (len(names) + 1) // 2
+    first_half, second_half = names[:split], names[split:]
 
-    for fname in sorted(os.listdir(THEMES_DIR)):
-        if not fname.endswith('.puml') or fname == 'puml-theme-_none_.puml':
-            continue
-        theme_name = fname.replace('puml-theme-', '').replace('.puml', '')
-        fpath = os.path.join(THEMES_DIR, fname)
+    write_ts(OUT_FILE_A, emit_data_module(
+        'BUILTIN_THEMES_A_M', 'themes-builtin-p-v.ts', first_half, entries))
+    write_ts(OUT_FILE_B, emit_data_module(
+        'BUILTIN_THEMES_P_V', 'themes-builtin-a-m.ts', second_half, entries))
+    write_ts(OUT_FILE, emit_barrel(
+        f"{first_half[0]}..{first_half[-1]}", f"{second_half[0]}..{second_half[-1]}"))
 
-        if theme_name in MANUAL:
-            props = MANUAL[theme_name]
-        else:
-            props = parse_theme(fpath)
-
-        entry_lines = emit_theme_entry(theme_name, props)
-        entries[theme_name] = entry_lines
-
-    # Write TypeScript file
-    out = [
-        "/**",
-        " * Built-in PlantUML theme definitions.",
-        " * Auto-generated by scripts/compile-themes.py — do not edit by hand.",
-        " * Re-run the script when upstream themes change.",
-        " */",
-        "",
-        "import type { ThemeOverride } from './theme.js';",
-        "",
-        "/** Partial Theme overrides for each built-in PlantUML theme name. */",
-        "export const BUILTIN_THEMES: Record<string, ThemeOverride> = {",
-    ]
-
-    for name, lines in entries.items():
-        out.extend(lines)
-
-    out.append("};")
-    out.append("")
-
-    with open(OUT_FILE, 'w') as f:
-        f.write('\n'.join(out))
-
-    print(f"Written {len(entries)} themes to {OUT_FILE}")
-    for name in entries:
-        print(f"  {name}")
+    print(f"Written {len(entries)} themes across 3 files:")
+    print(f"  {OUT_FILE_A} ({first_half[0]}..{first_half[-1]}, {len(first_half)} themes)")
+    print(f"  {OUT_FILE_B} ({second_half[0]}..{second_half[-1]}, {len(second_half)} themes)")
+    print(f"  {OUT_FILE} (barrel)")
 
 
 if __name__ == '__main__':
