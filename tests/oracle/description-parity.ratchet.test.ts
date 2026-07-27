@@ -26,7 +26,12 @@ import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
 import { MapIncludeStore } from '../../src/core/tim/IncludeStore.js';
 import { withStdlib } from '../../src/core/tim/StdlibStore.js';
-import { parseSvekDot, dotInputToStructural, compareStructural } from './svek-dot.js';
+import {
+  parseSvekDot,
+  dotInputToStructural,
+  compareStructural,
+  SIZE_CONFORMANCE_TOLERANCE_IN,
+} from './svek-dot.js';
 import { expectNoErrorDiagram } from '../helpers/error-diagram.js';
 import { buildStdlibAssetsStore } from '../helpers/stdlib-assets-store.js';
 
@@ -34,6 +39,14 @@ const GOLDENS = join(
   dirname(fileURLToPath(import.meta.url)),
   '../../oracle/goldens/description',
 );
+
+/** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-conformant fixtures
+ *  (mission S1L). Absent slug ⇒ must be within the 0.01in `conformant` bar;
+ *  backlog entries ratchet downward only. See size-backlog.json's `_doc` and
+ *  plans/s1l-leaf-sizing/ledger.md for the per-fixture root-cause routing. */
+const sizeBacklog: Record<string, number> = existsSync(join(GOLDENS, 'size-backlog.json'))
+  ? (JSON.parse(readFileSync(join(GOLDENS, 'size-backlog.json'), 'utf8')) as Record<string, number>)
+  : {};
 
 const fixtures = existsSync(GOLDENS)
   ? readdirSync(GOLDENS, { withFileTypes: true })
@@ -86,6 +99,14 @@ describe.skipIf(fixtures.length === 0)('oracle DOT-parity ratchet — descriptio
           diff.structurallyEqual,
           `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
         ).toBe(true);
+        // S1L: node width/height pinned. Non-backlog fixtures must stay within
+        // the 0.01in `conformant` bar; backlog fixtures ratchet downward only
+        // (a sub-mission that drops one to ≤0.01 deletes its entry).
+        const allowed = sizeBacklog[name] ?? SIZE_CONFORMANCE_TOLERANCE_IN;
+        expect(
+          diff.maxSizeDeltaIn,
+          `${name}/${file}: node size drift — maxSizeDeltaIn=${diff.maxSizeDeltaIn} > allowed ${allowed}`,
+        ).toBeLessThanOrEqual(allowed + 1e-6);
       }
     });
   }

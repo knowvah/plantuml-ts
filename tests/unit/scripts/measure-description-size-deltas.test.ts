@@ -1,0 +1,99 @@
+/**
+ * Unit tests for `scripts/measure-description-size-deltas.ts`'s pure functions
+ * (mission S1L). Only `classifyDelta`/`detectCause`/`summarize` are exercised
+ * here — the fixture-rendering/comparison plumbing (renderSync,
+ * compareStructural) is exercised by the real harness run and the
+ * `description-parity.ratchet.test.ts` suite it reuses.
+ */
+import { describe, it, expect } from 'vitest';
+import {
+  classifyDelta,
+  detectCause,
+  summarize,
+  DELTA_EPSILON,
+  type DeltaResult,
+} from '../../../scripts/measure-description-size-deltas.js';
+
+describe('classifyDelta', () => {
+  it('classifies a larger delta than allowed as widened', () => {
+    expect(classifyDelta(0.1, 0.05, true)).toBe('widened');
+  });
+
+  it('classifies a backlog delta below allowed as improved', () => {
+    expect(classifyDelta(0.02, 0.05, true)).toBe('improved');
+  });
+
+  it('does NOT report improved for a non-backlog fixture below the ceiling', () => {
+    // A conformant non-backlog fixture (0.005 < 0.01 ceiling) is unchanged.
+    expect(classifyDelta(0.005, 0.01, false)).toBe('unchanged');
+  });
+
+  it('still widens a non-backlog fixture that exceeds the ceiling', () => {
+    expect(classifyDelta(0.05, 0.01, false)).toBe('widened');
+  });
+
+  it('treats a delta within ±epsilon of allowed as unchanged', () => {
+    expect(classifyDelta(0.05 + DELTA_EPSILON / 2, 0.05, true)).toBe('unchanged');
+    expect(classifyDelta(0.05 - DELTA_EPSILON / 2, 0.05, true)).toBe('unchanged');
+  });
+
+  it('classifies just past ±epsilon as widened / improved', () => {
+    expect(classifyDelta(0.05 + DELTA_EPSILON * 2, 0.05, true)).toBe('widened');
+    expect(classifyDelta(0.05 - DELTA_EPSILON * 2, 0.05, true)).toBe('improved');
+  });
+});
+
+describe('detectCause', () => {
+  it('detects each root-cause family, most-specific first', () => {
+    expect(detectCause('a <latex>e=mc^2</latex> b')).toBe('latex');
+    expect(detectCause('skinparam wrapWidth 200')).toBe('wrapWidth');
+    expect(detectCause('label <U+1F600> here')).toBe('emoji-unicode');
+    expect(detectCause('component X <$awsIcon>')).toBe('sprite');
+    expect(detectCause('node <&heart> n')).toBe('icon');
+    expect(detectCause('package "P"')).toBe('package-folder-tab');
+    expect(detectCause('interface I')).toBe('interface-shield');
+    expect(detectCause('component A [a very long bracketed description body here]')).toBe(
+      'bracket-body',
+    );
+    expect(detectCause('component $myVar')).toBe('variable-display');
+  });
+
+  it('falls back to other when nothing matches', () => {
+    expect(detectCause('component A')).toBe('other');
+  });
+
+  it('prefers latex over a co-occurring lower-priority signal', () => {
+    expect(detectCause('interface I with <latex>x</latex>')).toBe('latex');
+  });
+});
+
+describe('summarize', () => {
+  function r(over: Partial<DeltaResult>): DeltaResult {
+    return { slug: 's', delta: 0, allowed: 0, status: 'unchanged', conformant: true, ...over };
+  }
+
+  it('counts an empty result set as all zeros', () => {
+    expect(summarize([])).toEqual({
+      total: 0, conformant: 0, conformantPct: 0,
+      widened: 0, improved: 0, unchanged: 0, causes: {},
+    });
+  });
+
+  it('tallies status, conformant %, and per-cause buckets', () => {
+    const results = [
+      r({ slug: 'a', conformant: true, status: 'unchanged' }),
+      r({ slug: 'b', conformant: true, status: 'unchanged' }),
+      r({ slug: 'c', conformant: false, status: 'widened', cause: 'sprite' }),
+      r({ slug: 'd', conformant: false, status: 'unchanged', cause: 'sprite' }),
+      r({ slug: 'e', conformant: false, status: 'improved', cause: 'latex' }),
+    ];
+    const s = summarize(results);
+    expect(s.total).toBe(5);
+    expect(s.conformant).toBe(2);
+    expect(s.conformantPct).toBe(40);
+    expect(s.widened).toBe(1);
+    expect(s.improved).toBe(1);
+    expect(s.unchanged).toBe(3);
+    expect(s.causes).toEqual({ sprite: 2, latex: 1 });
+  });
+});
