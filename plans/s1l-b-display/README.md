@@ -18,7 +18,7 @@ exposes that creole horizontal rules (`====`/`----`) crash `LimitFinder`
 
 ## Status
 
-- [ ] Batch 1 — Core (render-HR wiring, parser body, sizer, backlog re-baseline)
+- [x] Batch 1 — Core (render-HR wiring, parser body, sizer, backlog re-baseline)
 - [ ] Batch 2 — Last fixtures (scoped-style MinimumWidth, fariba diagnosis)
 - [ ] Batch 3 — Close (re-measure, ledger, mission-index)
 
