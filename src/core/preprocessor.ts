@@ -115,8 +115,27 @@ const RE_SKIN_LINE = /^skin\s+([\w.]+)\s*$/i;
 const RE_SKINPARAM_BLOCK_OPEN = /^skinparam\s*\{$/;
 /** Selector-scoped block, e.g. `skinparam component {` -- inner entries are
  *  keyed `<selector><name>` (upstream sugar: `component { Style X }` is
- *  `skinparam componentStyle X`). */
-const RE_SKINPARAM_SELECTOR_BLOCK_OPEN = /^skinparam\s+(\w+)\s*\{$/;
+ *  `skinparam componentStyle X`).
+ *
+ *  The selector additionally accepts a directly-appended `<<stereotype>>`
+ *  suffix (`skinparam rectangle<<stereo>> {`), for the same reason
+ *  RE_SKINPARAM_LINE does: without it the line failed BOTH block-open forms
+ *  and fell through to RE_SKINPARAM_LINE, which happily read the key as
+ *  `rectangle<<stereo>>` and the VALUE as `{` -- precisely the failure the
+ *  `openSkinparam` ordering comment warns about, just never extended to the
+ *  scoped form. No block was opened, so the block's BODY leaked into the
+ *  diagram as content lines (`BackgroundColor #FFFFFF`, `BorderColor
+ *  #FF9900`, `}`). Every awslib/tupadr3 sprite include ends in an
+ *  `AWSEntityColoring(x)`-style `!definelong` that expands to exactly this
+ *  block, so a stdlib-using diagram accumulated ~3 orphan lines PER SPRITE
+ *  -- 53 of them ahead of the real content in kofuca-08-pafi749. That buried
+ *  the actual element declarations past `descriptive-keywords.ts`'s
+ *  SCAN_LINE_LIMIT, `hasDescriptiveElement` returned false, and
+ *  `dispatcher.ts#resolve` fell back to the block's own detected type --
+ *  handing an AWS deployment diagram to the CLASS engine, which then
+ *  measured each node's raw `<img data:image/png;base64,...>` markup as
+ *  label text (19214px wide vs the jar's 142px). Found closing S1L-f. */
+const RE_SKINPARAM_SELECTOR_BLOCK_OPEN = /^skinparam\s+(\w+)(<<[^<>]+>>)?\s*\{$/;
 const RE_SKINPARAM_BLOCK_ENTRY = /^\s*(\w+(?:<<[^<>]+>>)?)\s+(.+)$/;
 const RE_SKINPARAM_BLOCK_CLOSE = /^\s*\}\s*$/;
 
@@ -168,6 +187,15 @@ class StyleAndSkinparamCollector {
   private readonly styleBuffer: string[] = [];
   private inSkinparamBlock = false;
   private skinparamBlockSelector = '';
+  /** `<<stereotype>>` suffix of a scoped selector block (`skinparam
+   *  rectangle<<stereo>> {`), lowercased and kept SEPARATE from the selector
+   *  because upstream's stereotype-qualified key concatenation puts the
+   *  stereotype LAST -- `param.name() + suffix + stereotype.getLabel(...)`
+   *  (`SkinParam#getColor(ColorParam, Stereotype)`, java:914-915) -- so the
+   *  sugar `rectangle<<s>> { BackgroundColor X }` keys as
+   *  `rectanglebackgroundcolor<<s>>`, NOT `rectangle<<s>>backgroundcolor`.
+   *  Empty for an unscoped block. */
+  private skinparamBlockStereo = '';
 
   /** True when the line was consumed (nothing is emitted for it). `substitute`
    *  (macro/`$variable` substitution) is threaded to the skinparam-VALUE paths
@@ -220,14 +248,21 @@ class StyleAndSkinparamCollector {
     if (RE_SKINPARAM_BLOCK_CLOSE.test(trimmed)) {
       this.inSkinparamBlock = false;
       this.skinparamBlockSelector = '';
+      this.skinparamBlockStereo = '';
       return true;
     }
     const entry = RE_SKINPARAM_BLOCK_ENTRY.exec(trimmed);
-    if (entry !== null)
+    if (entry !== null) {
+      const name = entry[1]!.trim();
+      // The block's `<<stereotype>>` is appended AFTER the entry name (see
+      // `skinparamBlockStereo`). An entry carrying its own guillemet suffix
+      // keeps it and the block's is not doubled.
+      const stereo = name.includes('<<') ? '' : this.skinparamBlockStereo;
       this.skinparam.set(
-        (this.skinparamBlockSelector + entry[1]!.trim()).toLowerCase(),
+        (this.skinparamBlockSelector + name + stereo).toLowerCase(),
         substitute(entry[2]!).trim(),
       );
+    }
 
     return true;
   }
@@ -238,12 +273,14 @@ class StyleAndSkinparamCollector {
     if (RE_SKINPARAM_BLOCK_OPEN.test(trimmed)) {
       this.inSkinparamBlock = true;
       this.skinparamBlockSelector = '';
+      this.skinparamBlockStereo = '';
       return true;
     }
     const selectorBlock = RE_SKINPARAM_SELECTOR_BLOCK_OPEN.exec(trimmed);
     if (selectorBlock !== null) {
       this.inSkinparamBlock = true;
       this.skinparamBlockSelector = selectorBlock[1]!.trim().toLowerCase();
+      this.skinparamBlockStereo = (selectorBlock[2] ?? '').toLowerCase();
       return true;
     }
     const single = RE_SKINPARAM_LINE.exec(trimmed);
