@@ -65,6 +65,49 @@ uncategorized are small and pinned; each is attributed to one of S1L-a..h as
 those missions re-measure. Nothing here except LaTeX is excluded — all count
 against the bar until conformant.
 
+## S1L-k — sprite ink footprint in use-case ellipses (2026-07-28)
+
+**Mechanism.** A use-case ellipse is not fit to the text block's declared
+dimension. `TextBlockInEllipse`'s ctor takes only `alpha` from
+`text.calculateDimension(stringBounder)`, then calls
+`Footprint#getEllipse(text, alpha)` — which DRAWS the block onto a
+point-collecting `UGraphic`. A drawn path contributes just two points, its
+min/max corners (`Footprint.java:147-150`), and those come from
+`UPath#addInternal` (`UPath.java:82-94`), which records **only the endpoint**
+of a `SEG_ARCTO` and **every** coordinate pair — Bézier control points
+included — of everything else. The box is therefore the *control-polygon*
+box: a true-extrema box would be wrong, and no curve flattening is needed.
+
+**Why bi-globe ≠ bi-bootstrap-fill.** Both declare `<svg width="16"
+height="16">`. bi-globe's outer circle is an ARC, so it contributes only its
+endpoints and the sprite inks **16 × 13.846**; bi-bootstrap-fill inks the
+full **16 × 16**. At scale 2.5 that is 69.458×56.766 vs 74.957×61.165 — the
+exact jar numbers, from identical declarations. This is what S1L-f left open.
+
+**Port.** `core/klimt/sprite/svg-path-bbox.ts` implements the `UPath` rule
+(command coverage per `SvgPath#toUPath`, with `H`/`V` and the `S`/`T`
+reflections normalised inline); `SpriteSvg` carries `inkWidth`/`inkHeight`
+beside its declared box; `spriteInkDimsLookupFor` is the registry view the
+use-case footprint measures against, while `alpha` keeps using the declared
+dimension. Encoded sprites draw as a full image, so their ink IS their box
+and the view returns identical numbers — every non-SVG display measures
+byte-identically to before.
+
+**Result.** 5 of ruziru-69's 6 nodes are EXACT (b/c/d/e/f);
+ruziru-69-xixo434 + bootstrap-0 shrank 0.124042 → **0.069047**. 286/351
+(81.5%) holds, zero widened, class ratchet unmoved.
+
+**Residual — DIAGNOSED, NOT SOLVED.** Node `a` of both fixtures is a MIXED
+sprite+text display (`"<$bi-globe>\nbi-globe"`): ours 73.965×48.558 vs the
+jar's 66.026×43.587. A mixed block's footprint depends on where each shape is
+actually DRAWN — `Footprint#drawText` offsets its box by
+`dim.getHeight() - 1.5`, and a sprite's ink sits at an OFFSET inside its
+declared line box (bi-globe's ink starts 1.077 units down) — so a per-line
+max/sum model cannot express it. Back-solving the jar's numbers reconciled
+with neither candidate model, so this is left open rather than guessed:
+closing it means modelling `Footprint`'s point collection with real draw
+positions. Tracked as **S1L-k residual** on the S1L-k row.
+
 ## S1L-f — sprite sizing (parts 1, 2a, 2b — 2026-07-28)
 
 Three passes, each of which found the bucket's stated premise wrong.
