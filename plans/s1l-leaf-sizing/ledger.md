@@ -47,20 +47,162 @@ containers.)
 
 | Family | n | Root cause | Routed to |
 |---|---|---|---|
-| container / cluster | 47 | container box + child-cluster sizing (`computeContainerBbox` subsystem); not a leaf fix. e.g. fepuvo-06-rugi981, tuliba-37-liza126, berufi-69-dara369 | **S1L-e** |
-| uncategorized | 37 | small residuals (≤~0.9in) not yet attributed by the heuristic; per-fixture triage folds each into the family a sub-mission's re-run identifies. e.g. nixura-77-bina738, dopova-50-digo290, kokodo-61-dano461 | triage |
-| sprite / stdlib-macro / icon | 11 | scaled sprite dims via `<$…>` or `!include <awslib\|c4\|…>` macros mis-sized (kofuca-08-pafi749 → 478in), unknown sprite/icon → 0 dims. e.g. kofuca-08-pafi749, vivido-49-nisu863, bivira-53-boja685 | **S1L-f** |
-| interface shield | 11 | shielded `interface` sized as a generic box, not the fixed 0.25in circle; `isInterfaceShielded` gate exists, sizing does not. e.g. turasu-73-zoni468, cojege-69-ruku138, cegale-42-loxa672 | **S1L-c** |
+| container / cluster | 40 | container box + child-cluster sizing (`computeContainerBbox` subsystem); not a leaf fix. e.g. fepuvo-06-rugi981, tuliba-37-liza126, berufi-69-dara369 | **S1L-e** |
+| uncategorized | 16 | small residuals (≤~0.9in) not yet attributed by the heuristic; per-fixture triage folds each into the family a sub-mission's re-run identifies. e.g. nixura-77-bina738, dopova-50-digo290 | triage |
+| sprite / stdlib-macro / icon | 12 | scaled sprite dims via `<$…>` or `!include <awslib\|c4\|…>` macros mis-sized (kofuca-08-pafi749 → 478in), unknown sprite/icon → 0 dims. e.g. kofuca-08-pafi749, vivido-49-nisu863, bivira-53-boja685, turasu-73-zoni468 | **S1L-f** |
+| interface shield | 0 | **DONE (S1L-c, 2026-07-28)** — see the S1L-c section below. Bucket empty: 9 of the 11 flipped conformant, and the other 2 were misattributions the same mission corrected (turasu-73-zoni468 → sprite, cukafa-49-fona812 → element-font). | — |
+| element font (per-USymbol) | 2 | `skinparam <element>FontSize/FontName/FontStyle` never reaches `measureLeafNode`: `fontSpec` is a single diagram-wide value threaded down `layout-dot-tree.ts`, with no per-USymbol resolution (contrast `resolveElementMinimumWidth`, which S1L-g already threads per-element). cukafa-49-fona812 (components measure 117×44 vs the jar's 139×48 under `componentFontSize 18`), gogamo-72-pibo470 | **S1L-h** |
 | min-width floor | 1 | **S1L-b/S1L-g DONE.** `skinparam minClassWidth` (S1L-g) + the `[…]` HR-height fix (S1L-b) made dexigu/kenece/zifaji **conformant** (deleted). `zotiru-33`'s scoped `<style> package { MinimumWidth 300 }` is now wired (S1L-b T5, `resolveElementMinimumWidth`): its `not_nested` package is exact at 4.583in, delta 2.655→0.914. Its remaining 0.914 is the `nested` package **cluster** floor. | **S1L-e** (nested-cluster residual) |
 | display-text expansion | 4 | **Bracket-body + creole-`====` HR DONE (S1L-b); codepoint decode-ordering DONE (S1L-b-unicode T1).** `[ … ]` bodies reach `measureLeafNode`; creole HR renders + sizes at 8px; `<U+…>`/`&#…;` now decode per-line at measure time (AFTER the `\n` split), so codepoint newlines are inline — heights no longer over-split. The 4 pinned fixtures are now DIAGNOSED, NAMED residuals (not simple bracket cases): **gafico-37-cuma657 (5.68→3.75)** + **nujito-06-neca370 (3.35→3.12)** — both driven by node c's UNPORTED `<code>` block (S1L-b-unicode T2, deferred E2r L2), NOT quoted-title literalness (Rule 2 corrected); **lurupu-11-fubo915 (2.05→CONFORMANT)** — was a sizer↔renderer creole-lexer divergence on `<font Name>`/unclosed-`<b>` (S1L-b-unicode T3), RESOLVED by creole-lexer-unification (2026-07-27, below); **xufexu-38-fola855 (1.46→0.153)** — bracket-body + container (S1L-e). See the three S1L-b-unicode sections + the creole-lexer-unification section below. | `<code>` (E2r L2) / ~~creole-lexer sync~~ DONE / **S1L-e** |
-| package / folder tab (leaf) | 3 | form-dependent leaf tab geometry (`package "X"` no braces). e.g. codabo-50-mupa164, tajadu-40-juro990, cobuju-30-paxo591 | **S1L-a** |
+| package / folder tab (leaf) | 0 | **DONE (S1L-a, 2026-07-28)** — see the S1L-a section below. Bucket empty: cobuju-30-paxo591 flipped, and the other two were misattributions (a leading `artifact`/`package` keyword) that the same mission re-bucketed → creole-titled-separator / multiline-display. | — |
+| creole titled separator | 3 | `--title--` / `==title==` draw a rule CARRYING their title text, so the line contributes the TITLE's width, not the raw markup's (codabo-50-mupa164: `--title1--` measures 62.5px here vs the jar's `title1` 37.6px; every other node in that fixture is exact). | **S1L-i** |
+| multi-line quoted display | 2 | a quoted display left open at end of line — upstream's `CommandCreateElementMultilines` joins the continuation lines; we stop at the first, leaving the id literally `foo2 as "This artifact` (tajadu-40-juro990; its other three nodes are exact). | **S1L-j** |
 | latex (DIVERGENCE) | 2 | KaTeX ≠ JLaTeXMath — see below. gevozu-46-sasu860, sunuju-01-pote718 | DIVERGENCES |
-| wrapWidth | 1 | `skinparam wrapWidth` word-wrapping unimplemented. mejoxi-96-cegu294 | **S1L-d** |
+| wrapWidth | 0 | **DONE (S1L-a/S1L-d, 2026-07-28)** — `Fission` was already ported and already used by the RENDERER; only the sizer never called it. See the S1L-d section below. | — |
 
-Container/cluster (47) is the dominant description-sizing gap. The 37
-uncategorized are small and pinned; each is attributed to one of S1L-a..g as
+Container/cluster (40) is the dominant description-sizing gap. The 16
+uncategorized are small and pinned; each is attributed to one of S1L-a..h as
 those missions re-measure. Nothing here except LaTeX is excluded — all count
 against the bar until conformant.
+
+## S1L-d — `skinparam wrapWidth` in the sizer (DONE 2026-07-28)
+
+**Mechanism.** The Neutron word-wrap (`Fission#getSplitted`) was **already
+ported** (`src/core/klimt/creole/Fission.ts`) and **already wired into the leaf
+RENDERER** (`EntityImageDescriptionSupport.ts#buildWrappedLines`).
+`leaf-sizing.ts` simply never called it, so a diagram setting `wrapWidth`
+measured its boxes at the unwrapped single-line width while the renderer drew
+them wrapped — the same sizer↔renderer divergence family as
+creole-lexer-unification.
+
+**Fix.** `leaf-sizing-text.ts#measureTextBlock` reuses `getSplitted` (it never
+re-derives break positions — that shared call IS the lock-step invariant),
+threaded `theme.wrapWidth` → `ClassifyCtx.wrapWidth` → `BoxSizingOpts
+.wrapWidth`. `maxWidth === 0` — upstream's own default, it sets
+`PName.MaximumWidth` nowhere — delegates to the unwrapped helpers unchanged,
+so this is zero-diff for every diagram that does not set the skinparam.
+Applied to the entity DESC only, matching upstream (`BodyFactory.create3`
+passes the strategy to `desc`; `name`/`stereo` never receive it) and matching
+what the renderer already wraps.
+
+**A second bug the fix isolated.** Wiring wrap made mejoxi-96-cegu294's
+HEIGHTS exact immediately (58 / 72 — so the break positions were right), with
+widths still **4.9875** short on both nodes. That constant is one `"` glyph:
+the `["…"]` bracket shorthand was stripping quotes upstream KEEPS. Upstream's
+`eventuallyRemoveStartingAndEndingDoubleQuote` (java:311) sees the display
+with its **brackets still attached**, so the first char is `[`, the strip
+no-ops, and the bracket wrapper comes off afterwards — our
+`parseBracketDeclaration` passed the ALREADY-unbracketed body through
+`stripFullWrap`. Unwrapped, the gap was exactly twice 4.9875 (both quotes on
+one line); wrapped, one quote lands on each of the first and last lines, so
+the widest line gains only one. Jar-verified: `[plain]` draws `plain`,
+`["quoted"]` draws `"quoted"`, while `component "cq"` and `component cq2 as
+"dq"` do strip.
+
+**Result.** mejoxi-96 exact at 238.100×58 / 238.362×72. 279 → **280 / 351
+(79.5% → 79.8%)**, zero widened; `fariba-82-xolu802` also shrank 1.024479 →
+0.388889 (its jar `file`-body word-wrap half, diagnosed in S1L-b T6, is now
+closed — the residual is its awslib sprite, S1L-f). The wrapWidth bucket is
+EMPTY.
+
+## S1L-a — folder/package leaf tab geometry (DONE 2026-07-28)
+
+**Mechanism.** `folder` and `package` are the SAME class,
+`USymbolFolder(sname, showTitle)` (USymbols.java:79/86), whose `asSmall`
+dimension is
+
+    getMargin().addDimension(dimName.mergeTB(dimStereo, dimLabel))
+
+with `getMargin() = Margin(10, 10+10, 10+3, 10)` = `[30 h, 23 v]` and
+`dimName = showTitle ? title.calculateDimension() : XDimension2D(40, 15)`
+(USymbolFolder.java:146/172/177-183). `mergeTB` takes the MAX width and the
+SUM of heights — so the tab is a normal block, not a decoration.
+
+**Origin.** `leaf-sizing.ts` modelled both symbols through `measureBox` with
+`SYMBOL_ICON_ALLOWANCE.folder = [0, 15]`. A fixed icon allowance can add the
+tab's HEIGHT but cannot express its **width floor**, and it says nothing about
+the showTitle form at all. Fix: a dedicated `measureFolderLeaf`.
+
+- `folder` (showTitle=false): width = `max(40, labelW) + 30`. The 40 floor was
+  missing entirely — `folder b` measured 37.79 against the jar's 70.00. It
+  only bites on a SHORT name, which is why no corpus fixture caught it.
+- `package` (showTitle=true): the title is the element **CODE**, the label
+  carries the display only when the two differ, and the shown title
+  contributes a measured **+12px** (`FOLDER_SHOWN_TITLE_EXTRA_WIDTH`).
+
+Jar-verified on all five forms, all exact: `package "a b c d e f g"`
+91.787×37, `package pp as "Display Here"` 106.387×51, `package "Disp Two" as
+dd` 84.600×51, `folder "x"` 70.000×52, `folder ff as "Folder Display"`
+115.750×52.
+
+**Regression caught mid-mission.** The first `measureFolderLeaf` dropped
+`opts.minimumWidth`, which `measureBox` applies — that widened
+`zotiru-33-legi180` (S1L-g's `<style> package { MinimumWidth }` consumer) from
+conformant to 3.038715. The floor is threaded back in; keep it.
+
+**Result.** 272 → **279 / 351 (77.5% → 79.5%)**, zero widened, 7 pins deleted.
+Structure unmoved (component 262/262, usecase 90/90).
+
+**Bucket cleared, two re-bucketed.** `package-folder-tab` is now empty. Its
+other two fixtures were misattributions the heuristic made on a leading
+`artifact`/`package` keyword, and neither is tab geometry:
+codabo-50-mupa164 → **creole titled separators** (S1L-i) and
+tajadu-40-juro990 → **multi-line quoted display** (S1L-j). In both, every
+node OTHER than the affected one already measures exact.
+
+## S1L-c — interface `hideText` leaf sizing (DONE 2026-07-28)
+
+**Mechanism.** `EntityImageDescription.java:137` sets `hideText = symbol ==
+USymbols.INTERFACE`, and `:209-211` then builds `asSmall` from **empty**
+name/desc/stereo. `calculateDimensionSlow` returns that `asSmall` dimension, so
+an interface (or `circle` — `Entity.getUSymbol` maps `LeafType.CIRCLE` to
+`USymbols.INTERFACE` unconditionally) leaf measures the bare
+`CircleInterface2` square — `radius * 2 + 2 * margin` = `8*2 + 2*1` = **18px =
+0.25in** — *regardless of its label*. The label is drawn OUTSIDE the node;
+when the shield is not suppressed, `getShield` reserves room for it as
+HTML-table margins around that square (`SvekNode.appendLabelHtml`) rather than
+by growing the node. Our port sized these as generic text boxes.
+
+**Origin.** `src/diagrams/description/leaf-sizing.ts#measureLeafNode` — the
+symbol switch had no `interface`/`circle` case, so they fell to `measureBox`.
+Fix: `INTERFACE_CIRCLE_SIZE` case.
+
+**Ruled out.** The shield itself was NOT the defect: the oracle emits plain
+`shape=rect` for these nodes (e.g. cegale-42-loxa672's `sh0007`), i.e.
+`getShield` returned `Margins.NONE`, suppressed by a length-1 visible link.
+`isInterfaceShielded` already modelled that correctly and every structural
+check passed before and after — this was purely the `hideText` dimension.
+
+**Unmasked (and also fixed) — bare quoted alias mutes to ACTOR.** The sizing
+fix WIDENED `xacaxe-43-bupe002` 0.555556 → 1.295833, which the shrink-only
+ratchet forbids. Diagnosis: a bare quoted `"Display" as Alias` line with no
+type keyword is `CommandCreateElementFull`'s DISPLAY2/CODE2 branch with SYMBOL
+omitted, and `java:272-275` resolves that to `actorStyle().toUSymbol()` — an
+**actor**. That actor then makes `DescriptionDiagram.isUsecase()` true, so
+`makeDiagramReady` mutes every remaining `STILL_UNKNOWN` leaf to actor as well.
+`RE_BARE_QUOTED_DECL` admitted only the *no-alias* form, so all five of
+xacaxe-43's leaves fell through to `resolveStillUnknown`'s interface default —
+harmless while interfaces were sized as text boxes, glaring once they became
+18px circles. Extending the regex with the `as <plain-alias>` clause
+(`element-grammar.ts`) makes all five exact. Decorated aliases (`as (uc4)` /
+`as :a:` / `as [c]`) stay with rule 11b, which picks the symbol from the
+decoration per `executeArg`'s codeChar dispatch.
+
+**Result.** 239 → **272 / 351 (68.1% → 77.5%)** conformant, **zero widened**,
+33 backlog entries deleted, 2 shrank. DOT structure unmoved: component
+262/262, usecase 90/90. The +33 exceeds the 11-fixture bucket because
+interface leaves also sat inside fixtures bucketed container-cluster/other.
+
+**Measurement-instrument fixes (same mission).** Two `CAUSE_PATTERNS` bugs in
+`scripts/measure-description-size-deltas.ts`, both found because they had
+parked non-interface fixtures in this bucket:
+1. the sprite regex was `<\$[\w-]+>` — no `/` — so every stdlib
+   `<$bundle/name>` sprite fell through to the `\binterface\b` catch
+   (turasu-73-zoni468 is `rectangle … <<$archimate/interface>>`, a sprite
+   fixture with no `interface` keyword at all);
+2. no bucket existed for per-element font skinparams, so cukafa-49-fona812
+   landed here on its `skinparam interfaceFontSize` line while its actual
+   residual is its *components* (117×44 vs the jar's 139×48).
 
 ## Inherent-tolerance divergence (excluded from the conformant denominator)
 

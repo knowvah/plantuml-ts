@@ -98,6 +98,11 @@ export interface ClassifyCtx {
    *  `<style> package { MinimumWidth 300 }` floors packages but not a sibling
    *  `card` (ADR-3). `undefined` result ⇒ 0 (no floor). */
   minimumWidthFor: (sname: string) => number | undefined;
+  /** `skinparam wrapWidth` (`theme.wrapWidth`) — the entity DESC word-wrap
+   *  width the leaf RENDERER already applies via `Fission.ts#getSplitted`
+   *  (`EntityImageDescriptionSupport.ts#buildWrappedLines`). Threaded here so
+   *  the SIZER wraps at the same points; 0 = no wrapping (S1L-d). */
+  wrapWidth: number;
   /** Container-scoped identity (mission I1b) — bare ids that are TRUE
    *  cross-scope collisions across the WHOLE diagram
    *  (namespace-groups.ts#findCollidingIds), read by `dotKeyFor` to decide
@@ -413,6 +418,7 @@ export function layoutDescription(
     containerById: new Map(), astNodeById: new Map(), counter: { n: 0 },
     componentStyle: theme.componentStyle,
     minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
+    wrapWidth: theme.wrapWidth ?? 0,
     collidingIds, qualifiedPathToDotKey: new Map(),
     sprites: ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined,
   };

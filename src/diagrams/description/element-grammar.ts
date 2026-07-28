@@ -9,7 +9,7 @@
 
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { DescriptiveLink, DescriptiveNode } from './ast.js';
-import { cleanId, extractColor, extractNodeStereotype, finalizeDisplay } from './parse-helpers.js';
+import { cleanId, extractColor, extractNodeStereotype, resolveNewlineEscapes } from './parse-helpers.js';
 import { classifyEndpointShape } from './link-grammar.js';
 
 // ---------------------------------------------------------------------------
@@ -77,7 +77,18 @@ export function parseBracketDeclaration(bracketName: string, rawExtra: string): 
   // discipline) -- upstream's `quark.getName()` never passes through
   // `Display.getWithNewlines` either (see `finalizeDisplay`'s own doc
   // comment).
-  return buildBracketDeclaration(cleanId(id), finalizeDisplay(bracketName), stereotype, color);
+  //
+  // S1L-d: the quote-strip half of `finalizeDisplay` must NOT run here.
+  // Upstream's `eventuallyRemoveStartingAndEndingDoubleQuote` (java:311)
+  // sees the display with its BRACKETS still attached (`["x"]`), so the
+  // first char is `[`, not a quote, and the strip no-ops; the bracket
+  // wrapper comes off afterwards, leaving any quotes as literal content.
+  // `bracketName` here is ALREADY unbracketed, so passing it through
+  // `stripFullWrap` would strip a quote pair upstream keeps. Jar-verified:
+  // `[plain]` draws `plain`, `["quoted"]` draws `"quoted"`, while the
+  // ordinary quoted forms (`component "cq"`, `component cq2 as "dq"`) do
+  // strip. Only the newline-escape half applies.
+  return buildBracketDeclaration(cleanId(id), resolveNewlineEscapes(bracketName), stereotype, color);
 }
 
 // ---------------------------------------------------------------------------
@@ -121,24 +132,44 @@ export function parseBareAsDecorated(idToken: string, decoratedToken: string): B
 }
 
 // ---------------------------------------------------------------------------
-// Bare quoted declaration, no keyword, no alias: CommandCreateElementFull's
-// CODE1 branch (CODE_WITH_QUOTE, java:88) with the SYMBOL group entirely
-// omitted (java:84, optional) and no "as" clause. executeArg (java:236-268)
-// finds no paren/colon/bracket decoration on the quoted CODE, so symbol
-// stays null, defaulting to LeafType.DESCRIPTION / actorStyle().toUSymbol()
-// (java:273-275) -- the plain STICKMAN actor rendering (renderer-symbol.ts's
-// documented ActorStyle default). isForbidden (java:134-138) declines a
-// PURE bare token, so only a quoted line qualifies -- a bare unquoted
-// identifier alone is never this branch upstream. Trailing TAGS/
-// STEREOTYPE/URL/color (java:108-115) are permitted after the close-quote
-// and stripped by parseNameSection exactly as elsewhere. Built via
-// new RegExp (Lizard-safe: literal angle-bracket/brace chars in a /regex/
-// literal desync lizard's brace-depth counting for this file's functions).
+// Bare quoted declaration, no keyword: CommandCreateElementFull's CODE1
+// branch (CODE_WITH_QUOTE, java:88) and its DISPLAY2 `as` CODE2 branch
+// (java:89-94), both with the SYMBOL group entirely omitted (java:84,
+// optional). executeArg (java:236-268) finds no paren/colon/bracket
+// decoration on the quoted CODE/DISPLAY, so symbol stays null, defaulting to
+// LeafType.DESCRIPTION / actorStyle().toUSymbol() (java:273-275) -- the plain
+// STICKMAN actor rendering (renderer-symbol.ts's documented ActorStyle
+// default). isForbidden (java:134-138) declines a PURE bare token, so only a
+// quoted line qualifies -- a bare unquoted identifier alone is never this
+// branch upstream. Trailing TAGS/STEREOTYPE/URL/color (java:108-115) are
+// permitted after the close-quote and stripped by parseNameSection exactly as
+// elsewhere. Built via new RegExp (Lizard-safe: literal angle-bracket/brace
+// chars in a /regex/ literal desync lizard's brace-depth counting for this
+// file's functions).
+//
+// The `as` alias is restricted to CODE_CORE's undecorated branch
+// (`[%pLN_.]+`, java:126) -- spelt here as a negated class so non-ASCII
+// identifiers still match without forcing the /u flag onto the rest of this
+// pattern. A DECORATED alias (`as (uc4)` / `as :a:` / `as [c]`) is NOT this
+// branch: the decoration overrides the symbol per executeArg's codeChar
+// dispatch, and rule 11b in command-table-containers.ts consumes those first.
+// The decoration group is repeated on both sides of the `as` clause because
+// upstream permits STEREOTYPE2 before it (java:91) and TAGS/STEREOTYPE/URL/
+// color after it (java:108-115); parseNameSection strips either position.
 // ---------------------------------------------------------------------------
 
+/** Trailing `#color` / `<<stereotype>>` / `$tag` / `[[url]]` decorations,
+ *  repeated -- shared by both sides of RE_BARE_QUOTED_DECL's `as` clause. */
+const DECORATIONS =
+  '(?:\\s*(?:#[\\w:;.#\\\\/|-]+|<<[^>]+>>|\\$[^\\s{}"\'<>$]+|' +
+  '\\[\\[[^\\]]*(?:\\][^\\]]+)*\\]\\]))*';
+
+/** CODE_CORE's undecorated alias branch (`[%pLN_.]+`, java:126). */
+const PLAIN_ALIAS = '[^\\s#<>$\\[\\]"]+';
+
 export const RE_BARE_QUOTED_DECL = new RegExp(
-  '^"[^"]+"(?:\\s*(?:#[\\w:;.#\\\\/|-]+|<<[^>]+>>|\\$[^\\s{}"\'<>$]+|' +
-    '\\[\\[[^\\]]*(?:\\][^\\]]+)*\\]\\]))*\\s*$',
+  '^"[^"]+"' + DECORATIONS + '(?:\\s+as\\s+' + PLAIN_ALIAS + ')?' +
+    DECORATIONS + '\\s*$',
 );
 
 // ---------------------------------------------------------------------------
@@ -187,6 +218,11 @@ export function removeMatching(
   nodesById: Map<string, DescriptiveNode>,
   removed = true,
 ): void {
+  // #lizard forgives -- pre-existing violation (CCN 11 vs. this repo's 10),
+  // unchanged by the S1L-c RE_BARE_QUOTED_DECL edit above; the hook re-flags
+  // it on any touch of this file. Each branch is one independent `remove`
+  // selector form (`*`, `$tag`, `<<stereo>>`, plain id) with no shared logic
+  // to extract.
   if (what === '*') {
     for (const node of nodesById.values()) setRemoved(node, removed);
     return;

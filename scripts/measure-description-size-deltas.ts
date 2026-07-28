@@ -85,8 +85,26 @@ const CAUSE_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
   [/\b(?:minClassWidth|MinimumWidth)\b/i, 'min-width'],
   [new RegExp(`^\\s*(?:${CONTAINER_KW})\\b[^\\n{]*\\{|^\\s*\\{`, 'im'), 'container-cluster'],
   [/<U\+[0-9A-Fa-f]{2,6}>/, 'emoji-unicode'],
-  [/<\$[\w-]+>|!include\s*</, 'sprite'],
+  // Sprite names carry a bundle path (`<$archimate/interface>`), so the class
+  // must admit `/` -- without it every stdlib sprite fell through to the
+  // `\binterface\b` catch below and was mis-bucketed as interface-shield
+  // (turasu-73-zoni468, found closing S1L-c).
+  [/<\$[\w/-]+>|!include\s*</, 'sprite'],
   [/<&[\w-]+>|<:[^:>\n]+:>/, 'icon'],
+  // Per-element font skinparam (`componentFontSize`, `interfaceFontName`, …).
+  // `fontSpec` is one diagram-wide value at the sizing layer, so none of these
+  // reach measureLeafNode -- a distinct subsystem from the shield/tab buckets
+  // below, which is why it precedes them (cukafa-49-fona812).
+  [/\bskinparam\s+\w+Font(?:Size|Name|Style)\b/i, 'element-font'],
+  // A creole TITLED separator (`--title--` / `==title==`) draws a rule with
+  // its title text, so it contributes only the TITLE's width -- not the raw
+  // markup's (codabo-50-mupa164: our widest body line measures `--title1--`
+  // at 62.5px where the jar measures `title1` at 37.6px).
+  [/^\s*(?:-{2}[^-\n]+-{2}|={2}[^=\n]+={2})\s*$/m, 'creole-titled-separator'],
+  // A quoted display left OPEN at end of line -- upstream's
+  // `CommandCreateElementMultilines` joins the following source lines into
+  // one display (tajadu-40-juro990).
+  [/\bas\s+"[^"\n]*$/m, 'multiline-display'],
   [/^\s*(?:package|folder|artifact)\b/im, 'package-folder-tab'],
   [/\binterface\b/i, 'interface-shield'],
   [/\[[^\]]*(?:\\n|\n)[^\]]*\]|\[[^\]]{30,}\]/, 'bracket-body'],

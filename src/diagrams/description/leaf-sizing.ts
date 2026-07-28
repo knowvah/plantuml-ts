@@ -19,16 +19,14 @@ import type { DescriptiveNode } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureNodeLabel } from '../../core/latex.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
+import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import {
-  measureLineWithAtoms,
-  measureInlineAtom,
-  lineAtomHeightExcess,
-  type SpriteDimsLookup,
-} from '../../core/creole-atoms.js';
-import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
-import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
-import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
-import { JAR_DEFAULT_TEXT_COLOR } from './renderer-symbol.js';
+  lineCount,
+  textBlockHeight,
+  maxLineWidth,
+  atomHeightBonus,
+  measureTextBlock,
+} from './leaf-sizing-text.js';
 
 /** `skinparam componentStyle` — only `uml2` (the default) draws the corner
  *  component icon; `uml1` and `rectangle` render a plain box. */
@@ -42,6 +40,11 @@ export interface BoxSizingOpts {
   /** `skinparam minClassWidth` / style `MinimumWidth` (`PName.MinimumWidth`) —
    *  floors the text-block CONTENT width, before margin + icon. Default 0. */
   minimumWidth?: number | undefined;
+  /** `skinparam wrapWidth` / `style.wrapWidth()` (`PName.MaximumWidth`) —
+   *  word-wraps the entity's DESC text block, and only that one (upstream's
+   *  `BodyFactory.create3` passes the strategy to `desc`; `name`/`stereo`
+   *  never receive it). 0/absent = no wrapping, upstream's own default. */
+  wrapWidth?: number | undefined;
 }
 
 /** Legacy actor box constants (kept for the re-export; the DOT size now comes
@@ -130,15 +133,61 @@ const LINE_HEIGHT_FACTOR = 1.0;
 const SYMBOL_ICON_ALLOWANCE: Partial<Record<USymbol, readonly [number, number]>> = {
   component: [20, 10], // USymbolComponent1 UML2 corner icon
   cloud: [10, 10], //    cloud puffs (verified: cloud "L" 37.5×46.5 vs rect 27.5×36.5)
-  folder: [0, 15], //    folder tab height (verified deterministic 52px = 23+14+15)
-  // package intentionally NOT here: its geometry varies by braces vs leaf form
-  // (empty-braces `package X {}` = label+20; no-braces leaf = margin 30 + tab).
-  // Needs dedicated case analysis — see planning/s1l-leaf-sizing.md.
+  // folder/package are NOT here: both are USymbolFolder and route to
+  // `measureFolderLeaf`, never `measureBox`. It models the tab as the mergeTB
+  // block upstream makes it, so the tab FLOORS the width as well as adding
+  // height -- which a fixed icon allowance cannot express (S1L-a).
 };
 
 /** Fixed square a `port`/`portin`/`portout` leaf occupies
  *  (EntityPosition.RADIUS * 2, abel/EntityPosition.java:56). */
 export const PORT_SIZE = 12;
+
+/**
+ * `USymbolFolder(sname, showTitle)` — the ONE symbol class behind both
+ * `folder` (`showTitle=false`) and `package` (`showTitle=true`)
+ * (USymbols.java:79/86). Absence from this table means "not the folder
+ * family"; see `measureFolderLeaf` for why the two forms size differently.
+ * `artifact` is deliberately NOT here: it shares the folder MARGIN but is
+ * USymbolArtifact, and already measures exact.
+ */
+const FOLDER_FAMILY_SHOW_TITLE: Partial<Record<USymbol, boolean>> = {
+  folder: false,
+  package: true,
+};
+
+/** `USymbolFolder.getDimTitle` when `showTitle == false`: the tab is a FIXED
+ *  `XDimension2D(40, 15)` block, independent of any text
+ *  (USymbolFolder.java:172). It enters `mergeTB` as a normal block, so the 40
+ *  FLOORS the leaf's content width and the 15 adds to its height. */
+const FOLDER_TAB_WIDTH = 40;
+const FOLDER_TAB_HEIGHT = 15;
+
+/**
+ * Extra width a SHOWN folder title contributes beyond its own text
+ * (`package`). Measured exactly 12px against the deterministic oracle at
+ * three different title widths — `package a` 49.787496 vs our 37.7875,
+ * `package iiii` 54.599976 vs 42.6, `package WWWWWWWW` 147.700008 vs 135.7
+ * (deltas 11.999996 / 11.999976 / 12.000008, i.e. 12 within DOT's
+ * 6-decimal-inch rounding).
+ *
+ * NOT attributed to a single upstream expression: `USymbolFolder`'s own
+ * `calculateDimension` adds only `getMargin()` (= [30, 23]) to
+ * `dimName.mergeTB(...)`, so the 12 lives inside the title TextBlock itself.
+ * Nearby candidates that do NOT sum to it: `marginTitleX1 + marginTitleX2`
+ * = 6 (the drawn tab's own inset, USymbolFolder.java:60-61), `+ marginTitleX3`
+ * = 13 (the tab slant's right edge), and the title's `UTranslate(4, 3)` draw
+ * offset. Recorded as measured rather than guessed at; it applies ONLY to the
+ * showTitle slot — a `folder`'s label text takes no such allowance (verified:
+ * `folder WWWWWWWWW` is exact at labelW + 30).
+ */
+const FOLDER_SHOWN_TITLE_EXTRA_WIDTH = 12;
+
+/** Fixed square a `hideText` leaf (interface/circle) occupies:
+ *  `CircleInterface2.calculateDimension` = `radius * 2 + 2 * margin` with
+ *  `radius = 8`, `margin = 1` -> 18px = 0.25in exactly.
+ *  @see .../svek/CircleInterface2.java#calculateDimension */
+export const INTERFACE_CIRCLE_SIZE = 18;
 
 // EntityImageNote sizing. Notes use FontParam.NOTE — a fixed 13px font, not the
 // theme's default. Total horizontal margin (text padding + folded corner) and
@@ -177,6 +226,19 @@ export function measureLeafNode(
       // independent of the display text (the text drives the shape choice
       // instead — see isPortLabelWide/portTablePad in layout-helpers).
       return { width: PORT_SIZE, height: PORT_SIZE };
+    case 'interface':
+    case 'circle':
+      // EntityImageDescription.java:137 `hideText = symbol == USymbols
+      // .INTERFACE`, then :209-211 builds asSmall from EMPTY name/desc/
+      // stereo. calculateDimensionSlow returns that asSmall dimension, so a
+      // hideText leaf measures the bare CircleInterface2 square regardless of
+      // its label. The label is drawn OUTSIDE the node; when the shield is
+      // not suppressed, `getShield` reserves room for it as HTML-table
+      // margins around this square (see isInterfaceShielded) rather than by
+      // growing it. `circle` shares the mechanism -- Entity.getUSymbol maps
+      // LeafType.CIRCLE to USymbols.INTERFACE unconditionally (see
+      // layout-helpers-shape-endpoint.ts#shapeForNode).
+      return { width: INTERFACE_CIRCLE_SIZE, height: INTERFACE_CIRCLE_SIZE };
     case 'note':
       return measureNote(node.display, fontSpec, measurer, sprites);
     case 'actor':
@@ -186,7 +248,9 @@ export function measureLeafNode(
     case 'usecase-business':
       return measureUsecase(node.display, fontSpec, measurer, sprites, node.stereotype);
     default:
-      return measureBox(node, fontSpec, measurer, opts, sprites);
+      return FOLDER_FAMILY_SHOW_TITLE[node.symbol] === undefined
+        ? measureBox(node, fontSpec, measurer, opts, sprites)
+        : measureFolderLeaf(node, fontSpec, measurer, opts, sprites);
   }
 }
 
@@ -317,8 +381,12 @@ function measureBox(
   const [marginH, marginV] = SYMBOL_BOX_MARGIN[node.symbol] ?? DEFAULT_BOX_MARGIN;
   const [iconW, iconH] = boxIcon(node.symbol, opts?.componentStyle);
   const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
-  let contentW = maxLineWidth(node.display, fontSpec, measurer, sprites);
-  let contentH = textBlockHeight(node.display, lineH) + atomHeightBonus(node.display, fontSpec, sprites);
+  const block = measureTextBlock(node.display, fontSpec, measurer, sprites, {
+    lineH,
+    maxWidth: opts?.wrapWidth ?? 0,
+  });
+  let contentW = block.width;
+  let contentH = block.height;
   if (node.stereotype !== undefined && node.stereotype.length > 0) {
     // G1 I5b: one guillemet line per stereotype tag (Stereotype
     // #getMultipleLabels(), EntityImageDescription.java:200-201) -- width
@@ -338,126 +406,105 @@ function measureBox(
   };
 }
 
-/** Number of display lines (upstream text block splits on hard newlines). */
-function lineCount(display: string): number {
-  return display.split('\n').length;
-}
-
-/** A creole horizontal-rule line (`----`/`====`/`....`) renders as a thin
- *  separator, not a text line. Height verified 8px vs the deterministic oracle
- *  (`node [ foo1 ==== foo2 ]` = 14 + 8 + 14 + 30 margin = 66px); a fixed 8px
- *  across styles (S1L-b ADR-4 — no per-style split needed). */
-const CREOLE_HR_HEIGHT = 8;
-
-/** True when the display line draws as a horizontal rule rather than glyphs.
- *  Delegated to the render-side `classifyStripeLine` (the same classifier the
- *  leaf renderer uses) so the sizer measures EXACTLY what the renderer draws —
- *  e.g. `----`/`====`/`....` are rules, but `____` (underscores) is NOT a rule
- *  in this creole dialect and renders as literal text (S1L-b ADR-4 refinement,
- *  decision-journal). Keeping the two in lock-step avoids a size/ink mismatch. */
-function isCreoleHrLine(line: string): boolean {
-  return classifyStripeLine(line).type === 'HORIZONTAL_LINE';
-}
-
-/** Text-block height: each display line contributes one `lineH`, except creole
- *  horizontal rules which contribute the thinner `CREOLE_HR_HEIGHT` (S1L-b) —
- *  matching upstream's `UHorizontalLine`-carrying stripe, which draws a rule
- *  instead of a glyph line. */
-function textBlockHeight(display: string, lineH: number): number {
-  let h = 0;
-  for (const ln of display.split('\n')) {
-    h += isCreoleHrLine(ln) ? CREOLE_HR_HEIGHT : lineH;
-  }
-  return h;
-}
-
-/** Base `FontConfiguration` built from a `FontSpec` solely to drive
- *  `buildLineAtoms`' tag-stripping (creole-lexer-unification ADR-3): family
- *  + size carry over, styles start empty, color is the jar's default text
- *  fill. No font FIDELITY is needed here — width is font-agnostic in the
- *  deterministic width table (S1L-b ADR-2), so this shim only needs to be
- *  well-formed, not visually accurate. */
-function baseFontConfiguration(fontSpec: FontSpec): FontConfiguration {
-  return { family: fontSpec.family, size: fontSpec.size, color: JAR_DEFAULT_TEXT_COLOR, styles: new Set() };
-}
-
-/** Visible (glyph-bearing) text of a creole line: routes through the SAME
- *  shared "line -> visible atoms" lexer the renderer draws with
- *  (`StripeSimple.ts#buildLineAtoms`, creole-lexer-unification ADR-1) rather
- *  than the separate `parseCreole` lexer this sizer used to call — the two
- *  disagreed on unclosed/`:`-variant tags, sizing wider than the renderer's
- *  actual ink. Concatenating every `'text'`-kind atom's own text mirrors what
- *  the renderer actually draws as glyphs. `'inline'` (`<img>`/`<$sprite>`)
- *  and `'latex'` atoms are recognized (and consumed) by the same unified
- *  scan and so are NOT part of the returned text — their own width is
- *  restored separately by `inlineAtomWidth` below (D9 parity: the shared
- *  lexer's atom recognition must not silently drop an `<img>`/`<$sprite>`
- *  atom's width the way a plain text-only concatenation would). The
- *  deterministic `WidthTableMeasurer` is weight-agnostic (bold == normal
- *  advance widths), so summing plain text at the base font is exact against
- *  the oracle. */
-function creoleVisibleText(line: string, fontSpec: FontSpec): string {
-  const built = buildLineAtoms(line, baseFontConfiguration(fontSpec));
-  let text = '';
-  for (const atom of built.atoms) {
-    if (atom.kind === 'text') text += atom.text;
-  }
-  return text;
-}
-
-/** Sum of every `'inline'`-kind atom's own scaled width on one display line
- *  (D9) — the shared lexer (`buildLineAtoms`) recognizes `<img>`/`<$sprite>`
- *  markup and carves it OUT of `creoleVisibleText`'s returned text (unlike
- *  the pre-ADR-1 `parseCreole` output, whose untouched markup let
- *  `measureLineWithAtoms`'s own regex re-detect and add it), so this restores
- *  that width contribution directly from the already-parsed atom list, via
- *  the SAME `measureInlineAtom` (`creole-atoms.ts`) the renderer's own
- *  `measureAtomsWidthHeight` sums — drawn and measured width agree. Returns 0
- *  for any atom-free line (`built.atoms` then carries no `'inline'` entry). */
-function inlineAtomWidth(line: string, fontSpec: FontSpec, sprites: SpriteDimsLookup | undefined): number {
-  const built = buildLineAtoms(line, baseFontConfiguration(fontSpec));
-  let width = 0;
-  for (const atom of built.atoms) {
-    if (atom.kind === 'inline') width += measureInlineAtom(atom.atom, sprites, fontSpec.size).width;
-  }
-  return width;
-}
-
-/** Width of the widest display line, measured per line (not the whole
- *  string). Creole formatting tags are resolved away first (S1L-b ADR-2 —
- *  see `creoleVisibleText`); `<U+XXXX>`/`&#NNN;` escapes are ALSO already
- *  decoded by `creoleVisibleText` (it now shares the renderer's lexer,
- *  creole-lexer-unification ADR-1, which decodes internally per-line —
- *  no separate outer `resolveTextEscapes` pass needed here anymore, unlike
- *  pre-ADR-1). `measureLineWithAtoms` (`creole-atoms.ts`) still runs its own
- *  atom-aware scan over that (now atom-markup-free) text — a no-op scan, so
- *  it is a zero-diff drop-in for `measurer.measure(ln, fontSpec).width` —
- *  `inlineAtomWidth` (D9) adds back each line's own `<img>`/`<$sprite>`
- *  contribution the shared lexer already carved out of `ln`. */
-function maxLineWidth(
-  display: string,
+/**
+ * `folder` / `package` leaf — `USymbolFolder(sname, showTitle)`, the one
+ * symbol class behind both (USymbols.java:79/86). Its `asSmall`
+ * `calculateDimension` is
+ *
+ *   getMargin().addDimension(dimName.mergeTB(dimStereo, dimLabel))
+ *
+ * with `getMargin() = Margin(10, 10+10, 10+3, 10)` -> `[30 h, 23 v]` and
+ * `dimName = showTitle ? title.calculateDimension() : XDimension2D(40, 15)`
+ * (USymbolFolder.java:146/172/177-183). `mergeTB` stacks: width is the MAX of
+ * the three blocks, height their SUM. That single formula explains both
+ * forms, which is why they share this function:
+ *
+ * - `folder` (showTitle=false): the tab is the FIXED (40, 15) block, so 40
+ *   FLOORS the content width and 15 adds to the height, while the element's
+ *   text rides in the LABEL slot. The floor is the part this port was
+ *   missing (`folder b` measured 37.79 vs the jar's 70.00 = max(40, 7.79) +
+ *   30); it only ever bites on a short name, which is why no corpus fixture
+ *   caught it until now.
+ * - `package` (showTitle=true): `dimName` is the real title block, and the
+ *   title is the element's CODE while the LABEL carries its display when the
+ *   two differ. Verified against the jar across every form:
+ *   `package "a b c d e f g"` (code == display, so label empty) 91.787 =
+ *   49.7875 + 12 + 30 at height 37 = 14 + 23; `package pp as "Display Here"`
+ *   106.387 at height 51 = 14 + 14 + 23, the label winning the width max;
+ *   `package "Disp Two" as dd` 84.600 at height 51, likewise.
+ */
+function measureFolderLeaf(
+  node: DescriptiveNode,
   fontSpec: FontSpec,
   measurer: StringMeasurer,
-  sprites?: SpriteDimsLookup,
-): number {
-  let max = 0;
-  for (const raw of display.split('\n')) {
-    // Classification/HR detection (inside `creoleVisibleText`) still runs on
-    // the RAW, still-`<U+XXXX>`-encoded line, in lock-step with the sizer's
-    // own `isCreoleHrLine` and the renderer's `buildLine` — the sizer↔
-    // renderer sync invariant.
-    const ln = creoleVisibleText(raw, fontSpec);
-    const w = measureLineWithAtoms(ln, fontSpec, measurer, sprites).width + inlineAtomWidth(raw, fontSpec, sprites);
-    if (w > max) max = w;
-  }
-  return max;
+  opts: BoxSizingOpts | undefined,
+  sprites: SpriteDimsLookup | undefined,
+): Dim {
+  const symbol = node.symbol;
+  const [marginH, marginV] = SYMBOL_BOX_MARGIN[symbol] ?? DEFAULT_BOX_MARGIN;
+  const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
+  const showTitle = FOLDER_FAMILY_SHOW_TITLE[symbol] === true;
+  // showTitle puts the CODE in the title slot and the display in the label
+  // only when it differs; !showTitle leaves the title fixed (40, 15) and the
+  // display is the whole label.
+  const [titleW, titleH] = folderTitleBlock(node, fontSpec, measurer, showTitle);
+  const labelText = showTitle && node.display === node.id ? '' : node.display;
+  const [labelW, labelH] = folderTextBlock(labelText, fontSpec, measurer, sprites);
+  const [stereoW, stereoH] = folderStereoBlock(node, fontSpec, measurer, lineH);
+
+  // `MinimumWidth` floors the CONTENT width before margin, exactly as in
+  // `measureBox` — S1L-g wired `skinparam minClassWidth` / scoped `<style>
+  // <sname> { MinimumWidth }` through `ClassifyCtx#minimumWidthFor`, and
+  // `package` is one of its consumers (zotiru-33-legi180).
+  const minContentW = opts?.minimumWidth ?? BOX_MIN_WIDTH_DEFAULT;
+  return {
+    width: Math.max(minContentW, titleW, labelW, stereoW) + marginH,
+    height: titleH + labelH + stereoH + marginV,
+  };
 }
 
-/** Sum of `lineAtomHeightExcess` over every line of `display` — 0 for any
- *  atom-free display, so every caller above ADDS this to (never replaces)
- *  its existing `lineCount(display) * lineHeight` uniform-height formula. */
-function atomHeightBonus(display: string, fontSpec: FontSpec, sprites: SpriteDimsLookup | undefined): number {
-  let bonus = 0;
-  for (const ln of display.split('\n')) bonus += lineAtomHeightExcess(ln, fontSpec, sprites);
-  return bonus;
+/** `dimName` — the fixed (40, 15) tab when `showTitle` is false, else the
+ *  element CODE's own text block plus {@link FOLDER_SHOWN_TITLE_EXTRA_WIDTH}. */
+function folderTitleBlock(
+  node: DescriptiveNode,
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  showTitle: boolean,
+): readonly [number, number] {
+  if (!showTitle) return [FOLDER_TAB_WIDTH, FOLDER_TAB_HEIGHT];
+  const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
+  return [
+    maxLineWidth(node.id, fontSpec, measurer) + FOLDER_SHOWN_TITLE_EXTRA_WIDTH,
+    textBlockHeight(node.id, lineH),
+  ];
+}
+
+/** `dimLabel` — an EMPTY label contributes a zero block, not a blank line
+ *  (`''.split('\n')` would otherwise bill it one `lineH`). */
+function folderTextBlock(
+  text: string,
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  sprites: SpriteDimsLookup | undefined,
+): readonly [number, number] {
+  if (text === '') return [0, 0];
+  const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
+  return [
+    maxLineWidth(text, fontSpec, measurer, sprites),
+    textBlockHeight(text, lineH) + atomHeightBonus(text, fontSpec, sprites),
+  ];
+}
+
+/** `dimStereo` — the third mergeTB block: widest guillemet label, one line of
+ *  height per tag (the same rule `measureBox` applies). */
+function folderStereoBlock(
+  node: DescriptiveNode,
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  lineH: number,
+): readonly [number, number] {
+  const tags = node.stereotype;
+  if (tags === undefined || tags.length === 0) return [0, 0];
+  const widest = Math.max(...tags.map((s) => measurer.measure(`«${s}»`, fontSpec).width));
+  return [widest + STEREO_MARGIN, lineH * tags.length];
 }
