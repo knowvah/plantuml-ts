@@ -96,6 +96,15 @@ const CAUSE_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
   // reach measureLeafNode -- a distinct subsystem from the shield/tab buckets
   // below, which is why it precedes them (cukafa-49-fona812).
   [/\bskinparam\s+\w+Font(?:Size|Name|Style)\b/i, 'element-font'],
+  // A creole TITLED separator (`--title--` / `==title==`) draws a rule with
+  // its title text, so it contributes only the TITLE's width -- not the raw
+  // markup's (codabo-50-mupa164: our widest body line measures `--title1--`
+  // at 62.5px where the jar measures `title1` at 37.6px).
+  [/^\s*(?:-{2}[^-\n]+-{2}|={2}[^=\n]+={2})\s*$/m, 'creole-titled-separator'],
+  // A quoted display left OPEN at end of line -- upstream's
+  // `CommandCreateElementMultilines` joins the following source lines into
+  // one display (tajadu-40-juro990).
+  [/\bas\s+"[^"\n]*$/m, 'multiline-display'],
   [/^\s*(?:package|folder|artifact)\b/im, 'package-folder-tab'],
   [/\binterface\b/i, 'interface-shield'],
   [/\[[^\]]*(?:\\n|\n)[^\]]*\]|\[[^\]]{30,}\]/, 'bracket-body'],

@@ -54,7 +54,9 @@ containers.)
 | element font (per-USymbol) | 2 | `skinparam <element>FontSize/FontName/FontStyle` never reaches `measureLeafNode`: `fontSpec` is a single diagram-wide value threaded down `layout-dot-tree.ts`, with no per-USymbol resolution (contrast `resolveElementMinimumWidth`, which S1L-g already threads per-element). cukafa-49-fona812 (components measure 117×44 vs the jar's 139×48 under `componentFontSize 18`), gogamo-72-pibo470 | **S1L-h** |
 | min-width floor | 1 | **S1L-b/S1L-g DONE.** `skinparam minClassWidth` (S1L-g) + the `[…]` HR-height fix (S1L-b) made dexigu/kenece/zifaji **conformant** (deleted). `zotiru-33`'s scoped `<style> package { MinimumWidth 300 }` is now wired (S1L-b T5, `resolveElementMinimumWidth`): its `not_nested` package is exact at 4.583in, delta 2.655→0.914. Its remaining 0.914 is the `nested` package **cluster** floor. | **S1L-e** (nested-cluster residual) |
 | display-text expansion | 4 | **Bracket-body + creole-`====` HR DONE (S1L-b); codepoint decode-ordering DONE (S1L-b-unicode T1).** `[ … ]` bodies reach `measureLeafNode`; creole HR renders + sizes at 8px; `<U+…>`/`&#…;` now decode per-line at measure time (AFTER the `\n` split), so codepoint newlines are inline — heights no longer over-split. The 4 pinned fixtures are now DIAGNOSED, NAMED residuals (not simple bracket cases): **gafico-37-cuma657 (5.68→3.75)** + **nujito-06-neca370 (3.35→3.12)** — both driven by node c's UNPORTED `<code>` block (S1L-b-unicode T2, deferred E2r L2), NOT quoted-title literalness (Rule 2 corrected); **lurupu-11-fubo915 (2.05→CONFORMANT)** — was a sizer↔renderer creole-lexer divergence on `<font Name>`/unclosed-`<b>` (S1L-b-unicode T3), RESOLVED by creole-lexer-unification (2026-07-27, below); **xufexu-38-fola855 (1.46→0.153)** — bracket-body + container (S1L-e). See the three S1L-b-unicode sections + the creole-lexer-unification section below. | `<code>` (E2r L2) / ~~creole-lexer sync~~ DONE / **S1L-e** |
-| package / folder tab (leaf) | 3 | form-dependent leaf tab geometry (`package "X"` no braces). e.g. codabo-50-mupa164, tajadu-40-juro990, cobuju-30-paxo591 | **S1L-a** |
+| package / folder tab (leaf) | 0 | **DONE (S1L-a, 2026-07-28)** — see the S1L-a section below. Bucket empty: cobuju-30-paxo591 flipped, and the other two were misattributions (a leading `artifact`/`package` keyword) that the same mission re-bucketed → creole-titled-separator / multiline-display. | — |
+| creole titled separator | 3 | `--title--` / `==title==` draw a rule CARRYING their title text, so the line contributes the TITLE's width, not the raw markup's (codabo-50-mupa164: `--title1--` measures 62.5px here vs the jar's `title1` 37.6px; every other node in that fixture is exact). | **S1L-i** |
+| multi-line quoted display | 2 | a quoted display left open at end of line — upstream's `CommandCreateElementMultilines` joins the continuation lines; we stop at the first, leaving the id literally `foo2 as "This artifact` (tajadu-40-juro990; its other three nodes are exact). | **S1L-j** |
 | latex (DIVERGENCE) | 2 | KaTeX ≠ JLaTeXMath — see below. gevozu-46-sasu860, sunuju-01-pote718 | DIVERGENCES |
 | wrapWidth | 1 | `skinparam wrapWidth` word-wrapping unimplemented. mejoxi-96-cegu294 | **S1L-d** |
 
@@ -62,6 +64,51 @@ Container/cluster (40) is the dominant description-sizing gap. The 16
 uncategorized are small and pinned; each is attributed to one of S1L-a..h as
 those missions re-measure. Nothing here except LaTeX is excluded — all count
 against the bar until conformant.
+
+## S1L-a — folder/package leaf tab geometry (DONE 2026-07-28)
+
+**Mechanism.** `folder` and `package` are the SAME class,
+`USymbolFolder(sname, showTitle)` (USymbols.java:79/86), whose `asSmall`
+dimension is
+
+    getMargin().addDimension(dimName.mergeTB(dimStereo, dimLabel))
+
+with `getMargin() = Margin(10, 10+10, 10+3, 10)` = `[30 h, 23 v]` and
+`dimName = showTitle ? title.calculateDimension() : XDimension2D(40, 15)`
+(USymbolFolder.java:146/172/177-183). `mergeTB` takes the MAX width and the
+SUM of heights — so the tab is a normal block, not a decoration.
+
+**Origin.** `leaf-sizing.ts` modelled both symbols through `measureBox` with
+`SYMBOL_ICON_ALLOWANCE.folder = [0, 15]`. A fixed icon allowance can add the
+tab's HEIGHT but cannot express its **width floor**, and it says nothing about
+the showTitle form at all. Fix: a dedicated `measureFolderLeaf`.
+
+- `folder` (showTitle=false): width = `max(40, labelW) + 30`. The 40 floor was
+  missing entirely — `folder b` measured 37.79 against the jar's 70.00. It
+  only bites on a SHORT name, which is why no corpus fixture caught it.
+- `package` (showTitle=true): the title is the element **CODE**, the label
+  carries the display only when the two differ, and the shown title
+  contributes a measured **+12px** (`FOLDER_SHOWN_TITLE_EXTRA_WIDTH`).
+
+Jar-verified on all five forms, all exact: `package "a b c d e f g"`
+91.787×37, `package pp as "Display Here"` 106.387×51, `package "Disp Two" as
+dd` 84.600×51, `folder "x"` 70.000×52, `folder ff as "Folder Display"`
+115.750×52.
+
+**Regression caught mid-mission.** The first `measureFolderLeaf` dropped
+`opts.minimumWidth`, which `measureBox` applies — that widened
+`zotiru-33-legi180` (S1L-g's `<style> package { MinimumWidth }` consumer) from
+conformant to 3.038715. The floor is threaded back in; keep it.
+
+**Result.** 272 → **279 / 351 (77.5% → 79.5%)**, zero widened, 7 pins deleted.
+Structure unmoved (component 262/262, usecase 90/90).
+
+**Bucket cleared, two re-bucketed.** `package-folder-tab` is now empty. Its
+other two fixtures were misattributions the heuristic made on a leading
+`artifact`/`package` keyword, and neither is tab geometry:
+codabo-50-mupa164 → **creole titled separators** (S1L-i) and
+tajadu-40-juro990 → **multi-line quoted display** (S1L-j). In both, every
+node OTHER than the affected one already measures exact.
 
 ## S1L-c — interface `hideText` leaf sizing (DONE 2026-07-28)
 
