@@ -231,7 +231,7 @@ xufexu-38 1.458→0.153, nenedo-78 0.865→0.169.
 
 **Residuals still named (separate pre-existing gaps, NOT this mission's):**
 nobiza-91 (0.669) — its note cannot-decode text measures at NOTE font 13 vs the
-jar's 14 (note-font gap); gafico-37/nujito-06 — node c `<code>` block (deferred
+jar's 14 (note-font gap, **tracked: GH #23**); gafico-37/nujito-06 — node c `<code>` block (deferred
 E2r L2); per-atom font-SIZE width parity (ADR-2, `<size:N>`/`==` headings).
 
 ## Size backlog
