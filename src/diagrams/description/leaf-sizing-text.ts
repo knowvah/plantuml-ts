@@ -78,8 +78,13 @@ function lineTextMetrics(
   fontSpec: FontSpec,
   measurer: StringMeasurer,
   guillemet?: GuillemetPair,
+  defaultFont?: FontSpec,
 ): { width: number; height: number } {
-  const built = buildLineAtoms(manageGuillemet(line, guillemet), baseFontConfiguration(fontSpec));
+  const built = buildLineAtoms(
+    manageGuillemet(line, guillemet),
+    baseFontConfiguration(fontSpec),
+    defaultFont === undefined ? undefined : baseFontConfiguration(defaultFont),
+  );
   let width = 0;
   let height = 0;
   for (const atom of built.atoms) {
@@ -104,6 +109,7 @@ export function textBlockHeight(
   fontSpec?: FontSpec,
   measurer?: StringMeasurer,
   guillemet?: GuillemetPair,
+  defaultFont?: FontSpec,
 ): number {
   if (display === '') return 0; // see `lineCount` — an empty body has no lines
   let h = 0;
@@ -115,7 +121,7 @@ export function textBlockHeight(
     h +=
       fontSpec === undefined || measurer === undefined
         ? lineH
-        : lineTextMetrics(ln, fontSpec, measurer, guillemet).height;
+        : lineTextMetrics(ln, fontSpec, measurer, guillemet, defaultFont).height;
   }
   return h;
 }
@@ -189,6 +195,7 @@ export function maxLineWidth(
   measurer: StringMeasurer,
   sprites?: SpriteDimsLookup,
   guillemet?: GuillemetPair,
+  defaultFont?: FontSpec,
 ): number {
   let max = 0;
   for (const raw of display.split('\n')) {
@@ -196,7 +203,9 @@ export function maxLineWidth(
     // the RAW, still-`<U+XXXX>`-encoded line, in lock-step with the sizer's
     // own `isCreoleHrLine` and the renderer's `buildLine` — the sizer↔
     // renderer sync invariant.
-    const w = lineTextMetrics(raw, fontSpec, measurer, guillemet).width + inlineAtomWidth(raw, fontSpec, sprites);
+    const w =
+      lineTextMetrics(raw, fontSpec, measurer, guillemet, defaultFont).width +
+      inlineAtomWidth(raw, fontSpec, sprites);
     if (w > max) max = w;
   }
   return max;
@@ -255,14 +264,14 @@ export function measureTextBlock(
   fontSpec: FontSpec,
   measurer: StringMeasurer,
   sprites: SpriteDimsLookup | undefined,
-  opts: { lineH: number; maxWidth: number; guillemet?: GuillemetPair },
+  opts: { lineH: number; maxWidth: number; guillemet?: GuillemetPair; defaultFont?: FontSpec },
 ): { width: number; height: number } {
-  const { lineH, maxWidth, guillemet } = opts;
+  const { lineH, maxWidth, guillemet, defaultFont } = opts;
   if (maxWidth <= 0) {
     return {
-      width: maxLineWidth(display, fontSpec, measurer, sprites, guillemet),
+      width: maxLineWidth(display, fontSpec, measurer, sprites, guillemet, defaultFont),
       height:
-        textBlockHeight(display, lineH, fontSpec, measurer, guillemet) +
+        textBlockHeight(display, lineH, fontSpec, measurer, guillemet, defaultFont) +
         atomHeightBonus(display, fontSpec, sprites),
     };
   }
