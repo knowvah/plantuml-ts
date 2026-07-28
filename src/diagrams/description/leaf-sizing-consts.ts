@@ -130,6 +130,31 @@ export const SYMBOL_ICON_ALLOWANCE: Partial<Record<USymbol, readonly [number, nu
   // height -- which a fixed icon allowance cannot express (S1L-a).
 };
 
+/**
+ * `USymbolSimpleAbstract` symbols — the family whose `asSmall` stacks a fixed
+ * DRAWING above the label (`mergeLayoutT12B3(stereo, drawing, label)`) rather
+ * than wrapping text in a bordered box. Width is `max(drawing, label)`,
+ * height is `drawing + label` — exactly the shape `measureActor` already had.
+ *
+ * Dimensions are each drawing's own `calculateDimension`, all of the form
+ * `radius * 2 + 2 * margin` (margin 4, radius 12 for the robustness trio):
+ *   - `Control` 24 + 8 = 32 x 32 (svek/Control.java:51-53, :87-88)
+ *   - `EntityDomain` 32 x 32 (svek/EntityDomain.java:50-52, :75)
+ *   - `Boundary` 24 + left 17 + 8 = 49 wide x 32 (svek/Boundary.java:52-55, :98)
+ *
+ * `actor` keeps its own constants below (a stickman, not a radius+margin
+ * circle) and `interface`/`circle` are excluded entirely: they are the same
+ * family but `hideText` drops the label, so they size as the bare circle
+ * (see INTERFACE_CIRCLE_SIZE). Before this, control/boundary/entity fell to
+ * `measureBox`'s generic [20, 20] margin — `control "C"` measured 30x34
+ * against the jar's 32x46 (kizobu-64-rozo458 / tacixe-99-gesi489, S1L-e).
+ */
+export const SIMPLE_SYMBOL_DRAWING: Partial<Record<USymbol, readonly [number, number]>> = {
+  control: [32, 32],
+  entity: [32, 32],
+  boundary: [49, 32],
+};
+
 /** Fixed square a `port`/`portin`/`portout` leaf occupies
  *  (EntityPosition.RADIUS * 2, abel/EntityPosition.java:56). */
 export const PORT_SIZE = 12;
