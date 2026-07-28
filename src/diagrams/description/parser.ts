@@ -70,11 +70,16 @@ function pushElementBody(state: ParseState, content: string): void {
 
 /** Close the multi-line element block: the accumulated body IS the element's
  *  display/label (S1L-b — CommandCreateElementMultilines body, previously
- *  discarded when sizes were tolerant). Empty body ⇒ display stays the code. */
+ *  discarded when sizes were tolerant).
+ *
+ *  An EMPTY body still replaces it. `component A.6 [ ]` draws a box of pure
+ *  margin — 30px against our 44px while the code was left standing in as the
+ *  display (xocodo-09-nuxi647, S1L-e). Upstream sets the display from the
+ *  block unconditionally; there is no "fall back to the code" branch. */
 function finishElementBlock(state: ParseState): void {
   const node = state.elementBlockNode;
   const body = state.elementBlockBody;
-  if (node !== undefined && body !== undefined && body.length > 0) {
+  if (node !== undefined && body !== undefined) {
     node.display = body.join('\n');
   }
   state.inElementBlock = false;

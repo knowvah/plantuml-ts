@@ -45,9 +45,15 @@ describe('description parser — [ … ] element body as display (S1L-b T2)', ()
     expect(n?.display).toBe('first\nsecond');
   });
 
-  it('an empty body keeps the code as the display (no empty-string label)', () => {
+  // Corrected in S1L-e: this previously asserted the code stayed as the
+  // display ("no empty-string label"), which was an assumption, not jar
+  // behaviour. Jar-verified — `component c [ ]` draws NO text at all and
+  // boxes at 40x30 (pure margin + icon), while a plain `component d` is
+  // 47.787x44. Upstream sets the display from the block unconditionally;
+  // there is no fall-back-to-the-code branch.
+  it('an empty body REPLACES the display, leaving no label', () => {
     const ast = parse('component c [\n]');
     const c = nodeById(ast, 'c');
-    expect(c?.display).toBe('c');
+    expect(c?.display).toBe('');
   });
 });

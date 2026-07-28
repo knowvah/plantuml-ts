@@ -32,9 +32,13 @@ import { spriteScale } from '../../core/creole-atoms-measure.js';
 import type { InlineAtomToken } from '../../core/creole-atoms.js';
 import { textFootprintBox, type FootprintBox } from './usecase-footprint.js';
 
-/** Number of display lines (upstream text block splits on hard newlines). */
+/** Number of display lines (upstream text block splits on hard newlines).
+ *  An EMPTY display has NO lines, not one blank one: `node C [ ]` draws a box
+ *  of pure margin, 30px tall against our 44px when the empty body was billed
+ *  a 14px line (balomu-94-kegi822 / xocodo-09-nuxi647, S1L-e). A display of
+ *  one SPACE is still a line — only zero length is empty. */
 export function lineCount(display: string): number {
-  return display.split('\n').length;
+  return display === '' ? 0 : display.split('\n').length;
 }
 
 /** A creole horizontal-rule line (`----`/`====`/`....`) renders as a thin
@@ -101,6 +105,7 @@ export function textBlockHeight(
   measurer?: StringMeasurer,
   guillemet?: GuillemetPair,
 ): number {
+  if (display === '') return 0; // see `lineCount` — an empty body has no lines
   let h = 0;
   for (const ln of display.split('\n')) {
     if (isCreoleHrLine(ln)) {
