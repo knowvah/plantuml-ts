@@ -12,7 +12,12 @@
  * D3 (descriptive-signal guard, exclusions `interface`/`package`/`actor`).
  */
 
-import { isSpriteMultilineOpenLine, isSpriteMultilineCloseLine } from './sprite-commands.js';
+import {
+  isSpriteMultilineOpenLine,
+  isSpriteMultilineCloseLine,
+  isSvgSpriteOpenLine,
+  isSvgSpriteCloseLine,
+} from './sprite-commands.js';
 
 /**
  * Every shape in upstream `ALL_TYPES`, plus `note` — a leaf entity created by
@@ -303,10 +308,22 @@ export function stripLegendRegions(lines: readonly string[]): string[] {
 export function stripSpriteRegions(lines: readonly string[]): string[] {
   const out: string[] = [];
   let inSprite = false;
+  let inSvgSprite = false;
   for (const line of lines) {
     const t = line.trim();
     if (inSprite) {
       if (isSpriteMultilineCloseLine(t)) inSprite = false;
+      continue;
+    }
+    // S1L-f part 2b: the `sprite name <svg …>` form needs the same treatment
+    // — the bootstrap bundle is ~7200 lines of them, which buries the real
+    // diagram content far past SCAN_LINE_LIMIT.
+    if (inSvgSprite) {
+      if (isSvgSpriteCloseLine(t)) inSvgSprite = false;
+      continue;
+    }
+    if (isSvgSpriteOpenLine(t)) {
+      inSvgSprite = true;
       continue;
     }
     if (isSpriteMultilineOpenLine(t)) {

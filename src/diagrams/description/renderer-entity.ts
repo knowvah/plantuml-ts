@@ -15,6 +15,7 @@
  * exact chrome. Documented approximation, not a T17 acceptance blocker
  * (neither symbol appears in the T17 zero-diff conformance fixture).
  */
+import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
 import {
@@ -215,6 +216,10 @@ function buildEntityParams(
       titleAlignment: HorizontalAlignment.CENTER,
       stereotypeAlignment: HorizontalAlignment.CENTER,
       ...(theme.wrapWidth !== undefined ? { wrapWidth: theme.wrapWidth } : {}),
+      guillemet: {
+        start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
+        end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
+      },
     },
     links: [],
     fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
@@ -287,7 +292,10 @@ function drawNoteFallback(
   drawFallbackBox(ug, node, uid, theme.colors.noteBackground, theme.colors.border);
   const font = textFont(theme, 'note');
   const resolveAtomImage = makeAtomImageResolverFor(sprites)(font);
-  const block = buildTextBlock(node.display, font, HorizontalAlignment.LEFT, resolveAtomImage, theme.wrapWidth ?? 0);
+  const block = buildTextBlock(node.display, font, HorizontalAlignment.LEFT, resolveAtomImage, theme.wrapWidth ?? 0, {
+    start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
+    end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
+  });
   const dim = block.calculateDimension(ug.getStringBounder());
   // `UGraphicStencil.create` -- REQUIRED here, not optional plumbing: a
   // note body containing a bare creole separator line (`----`/`====`/

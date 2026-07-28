@@ -174,6 +174,7 @@ export function buildDotNodes(
         componentStyle: ctx.componentStyle,
         minimumWidth: ctx.minimumWidthFor(node.symbol),
         wrapWidth: ctx.wrapWidth,
+        guillemet: ctx.guillemet,
       },
       ctx.sprites,
     );

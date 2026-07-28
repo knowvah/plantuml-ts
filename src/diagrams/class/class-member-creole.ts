@@ -57,7 +57,14 @@ import {
   buildLiteralAtoms,
   fontConfigurationForHeading,
 } from '../../core/klimt/creole/legacy/StripeSimple.js';
-import { measureInlineAtom, type SpriteDimsLookup, type InlineAtomToken } from '../../core/creole-atoms.js';
+import {
+  type SpriteDimsLookup,
+  type InlineAtomToken,
+} from '../../core/creole-atoms.js';
+import {
+  measureInlineAtom,
+  spriteScale,
+} from '../../core/creole-atoms-measure.js';
 import { isKnownOpenIconicGlyph, openIconicDims, openIconicFactor } from '../../core/openiconic-glyphs.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { getSpriteMonochrome, spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
@@ -241,12 +248,14 @@ function resolveInlineAtom(
   if (sprites === undefined) return undefined;
   const sprite = getSpriteMonochrome(sprites, atom.name);
   if (sprite === undefined) return undefined; // unknown name -- contributes nothing.
-  const dims = measureInlineAtom(atom, spriteDims);
+  // `baseFont.size` threads CommandCreoleSprite's `fc.getSize2D() / 13.0`
+  // factor -- same call the sizer makes (S1L-f).
+  const dims = measureInlineAtom(atom, spriteDims, baseFont.size);
   const png = spriteToPngDataUri(
     spriteMonochromeAsLike(sprite),
     baseFont.color ?? undefined,
     atom.forcedColor,
-    atom.scale,
+    spriteScale(atom.scale, baseFont.size),
   );
   return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
 }

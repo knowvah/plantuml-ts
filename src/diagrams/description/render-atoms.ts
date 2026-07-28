@@ -44,9 +44,13 @@
  */
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup } from '../../core/creole-atoms.js';
-import { measureInlineAtom } from '../../core/creole-atoms.js';
+import {
+  measureInlineAtom,
+  spriteScale,
+} from '../../core/creole-atoms-measure.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
-import { getSpriteMonochrome, spriteDimsLookupFor } from '../../core/sprite-commands.js';
+import { getSpriteMonochrome, getSpriteSvg, spriteDimsLookupFor } from '../../core/sprite-commands.js';
+import { toBase64 } from '../../core/klimt/sprite/png-encoder.js';
 import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
 
 type ResolvedAtomImage = { readonly href: string; readonly width: number; readonly height: number } | undefined;
@@ -62,10 +66,28 @@ function resolveSpriteAtom(
   spriteDims: SpriteDimsLookup,
   font: FontConfiguration,
 ): ResolvedAtomImage {
+  // An SVG sprite is re-emitted verbatim as an `image/svg+xml` data URI --
+  // there is no grey grid to tint, so `forcedColor`/font colour do not apply
+  // (upstream's SpriteSvg likewise ignores both in `asTextBlock`). Dims come
+  // from the SAME measureInlineAtom the sizer used (S1L-f part 2b).
+  const svgSprite = getSpriteSvg(registry, atom.name);
+  if (svgSprite !== undefined) {
+    const dims = measureInlineAtom(atom, spriteDims, font.size);
+    const href = `data:image/svg+xml;base64,${toBase64(new TextEncoder().encode(svgSprite.svg))}`;
+    return { href, width: dims.width, height: dims.height };
+  }
   const sprite = getSpriteMonochrome(registry, atom.name);
   if (sprite === undefined) return undefined; // unknown name -- StripeSimple.addSprite: skip.
-  const dims = measureInlineAtom(atom, spriteDims);
-  const png = spriteToPngDataUri(spriteMonochromeAsLike(sprite), font.color ?? undefined, atom.forcedColor, atom.scale);
+  // `font.size` is threaded so the sprite picks up `CommandCreoleSprite`'s
+  // `fc.getSize2D() / 13.0` factor -- the SAME call the sizer makes, so drawn
+  // and measured sprite geometry cannot drift (S1L-f).
+  const dims = measureInlineAtom(atom, spriteDims, font.size);
+  const png = spriteToPngDataUri(
+    spriteMonochromeAsLike(sprite),
+    font.color ?? undefined,
+    atom.forcedColor,
+    spriteScale(atom.scale, font.size),
+  );
   return { href: png.dataUri, width: dims.width, height: dims.height };
 }
 

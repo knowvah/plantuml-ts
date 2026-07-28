@@ -82,6 +82,7 @@ import type { UStroke } from '../../klimt/UStroke.js';
 import { UGraphicStencil } from '../../klimt/drawing/UGraphicStencil.js';
 import type { FontConfiguration } from '../../klimt/shape/UText.js';
 import type { AtomImageResolver } from '../../creole-atoms.js';
+import type { GuillemetPair } from '../../text/Guillemet.js';
 import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import { textBlockMagneticBorder } from '../../klimt/shape/TextBlock.js';
 import { TextBlockUtils } from '../../klimt/shape/TextBlockUtils.js';
@@ -173,6 +174,10 @@ export interface EntityImageDescriptionPaint {
    *  (`Fission.ts#getSplitted`). Absent/0 = disabled (this port's default,
    *  matching upstream's own unset `PName.MaximumWidth`). */
   readonly wrapWidth?: number;
+  /** `skinparam guillemet` pair applied to DISPLAY text before it is
+   *  classified/measured (`Guillemet.ts#manageGuillemet`, S1L-f) — the SAME
+   *  transform the sizer applies, so box and ink agree. Absent = `«`/`»`. */
+  readonly guillemet?: GuillemetPair;
 }
 
 /** One `Link` from upstream's `Collection<Link> links` ctor param,

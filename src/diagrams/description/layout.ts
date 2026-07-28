@@ -45,6 +45,7 @@ import type { ComponentStyle } from './leaf-sizing.js';
 import { computeGraphSpacing } from './link-edge-attrs.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
+import { GUILLEMET_DEFAULT, type GuillemetPair } from '../../core/text/Guillemet.js';
 import { buildMagmaEdges, magmaGroups } from './magma.js';
 import { effectiveRemovedIds, effectiveHiddenIds } from './element-grammar.js';
 import {
@@ -103,6 +104,8 @@ export interface ClassifyCtx {
    *  (`EntityImageDescriptionSupport.ts#buildWrappedLines`). Threaded here so
    *  the SIZER wraps at the same points; 0 = no wrapping (S1L-d). */
   wrapWidth: number;
+  /** `skinparam guillemet` pair for DISPLAY text (`manageGuillemet`), S1L-f. */
+  guillemet: GuillemetPair;
   /** Container-scoped identity (mission I1b) — bare ids that are TRUE
    *  cross-scope collisions across the WHOLE diagram
    *  (namespace-groups.ts#findCollidingIds), read by `dotKeyFor` to decide
@@ -419,6 +422,10 @@ export function layoutDescription(
     componentStyle: theme.componentStyle,
     minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
     wrapWidth: theme.wrapWidth ?? 0,
+    guillemet: {
+      start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
+      end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
+    },
     collidingIds, qualifiedPathToDotKey: new Map(),
     sprites: ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined,
   };
