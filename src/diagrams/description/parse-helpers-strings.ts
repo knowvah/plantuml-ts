@@ -279,11 +279,52 @@ export function extractNodeStereotype(rest: string): StereotypeResult | undefine
   return { stereotypes, remainder };
 }
 
-/** Strip a `[[url]]` / `[[url label]]` hyperlink token (UrlBuilder.OPTIONAL
- *  in CommandCreateElementFull) — it annotates the element but adds no DOT
- *  structure. Returns the remainder with the URL removed. */
+/** `[[url]]` / `[[url label]]` hyperlink token (UrlBuilder.OPTIONAL). */
+const RE_URL_TOKEN_G = /\[\[[^\]]*(?:\][^\]]+)*\]\]/g;
+
+/**
+ * Strip an element's `[[url]]` / `[[url label]]` hyperlink token — it
+ * annotates the element but adds no DOT structure.
+ *
+ * A token INSIDE a quoted display is NOT the element's URL: upstream's
+ * `UrlBuilder.OPTIONAL` group is anchored after the CODE/DISPLAY
+ * alternatives in `CommandCreateElementFull`'s concat, so it can only match
+ * outside the quotes — inside, `[[…]]` is ordinary Creole link content that
+ * the label renders and measures. Stripping it there dropped real display
+ * text (bivira-53-boja685's `usecase (map) as "You can click\n[[http://…]]
+ * <$maxime>"` lost the whole URL, and its sibling lost a sprite nested in
+ * one), the same class of over-reach `parseNameSection` had for stereotypes
+ * (S1L-f) — just reached through a different path, since here the line does
+ * not START with the quote.
+ */
 export function stripUrl(rest: string): string {
-  return rest.replace(/\[\[[^\]]*(?:\][^\]]+)*\]\]/g, '').replace(/\s+/g, ' ').trim();
+  let out = '';
+  let i = 0;
+  let quote: string | undefined;
+  while (i < rest.length) {
+    const ch = rest[i]!;
+    if (quote !== undefined) {
+      out += ch;
+      if (ch === quote) quote = undefined;
+      i += 1;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      out += ch;
+      i += 1;
+      continue;
+    }
+    RE_URL_TOKEN_G.lastIndex = i;
+    const m = RE_URL_TOKEN_G.exec(rest);
+    if (m !== null && m.index === i) {
+      i += m[0].length;
+      continue;
+    }
+    out += ch;
+    i += 1;
+  }
+  return out.replace(/\s+/g, ' ').trim();
 }
 
 /**

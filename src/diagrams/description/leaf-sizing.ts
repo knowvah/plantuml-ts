@@ -25,7 +25,9 @@ import {
   maxLineWidth,
   atomHeightBonus,
   measureTextBlock,
+  footprintBoxes,
 } from './leaf-sizing-text.js';
+import { boxPoints, containingEllipse } from './usecase-footprint.js';
 import { measureFolderLeaf } from './leaf-sizing-folder.js';
 import {
   type BoxSizingOpts,
@@ -110,7 +112,7 @@ export function measureLeafNode(
       return measureActor(node.display, fontSpec, measurer, sprites);
     case 'usecase':
     case 'usecase-business':
-      return measureUsecase(node.display, fontSpec, measurer, sprites, node.stereotype, opts?.inkSprites);
+      return measureUsecase(node.display, fontSpec, measurer, sprites, node.stereotype);
     default:
       return FOLDER_FAMILY_SHOW_TITLE[node.symbol] === undefined
         ? measureBox(node, fontSpec, measurer, opts, sprites)
@@ -185,7 +187,6 @@ export function measureUsecase(
   measurer: StringMeasurer,
   sprites?: SpriteDimsLookup,
   stereotype?: readonly string[],
-  inkSprites?: SpriteDimsLookup,
 ): Dim {
   if (display.includes('<latex>')) {
     return measureNodeLabel(display, measurer, fontSpec);
@@ -216,45 +217,38 @@ export function measureUsecase(
   }
   // `alpha` comes from the text block's DECLARED dimension
   // (`TextBlockInEllipse`'s ctor: `text.calculateDimension(stringBounder)`),
-  // but the ellipse itself is fit to `Footprint`'s collected INK points --
-  // for a drawn path, its min/max corners. The two differ only for an SVG
-  // sprite whose paths do not fill their declared box (S1L-k); `inkSprites`
-  // is that same lookup reporting ink extents, so every other display
-  // measures byte-identically to before.
+  // but the ellipse itself is fit to `Footprint`'s collected POINTS, via the
+  // smallest enclosing circle of `ContainingEllipse`. The old closed form
+  // (`diag = sqrt(W² + (H/alpha)²)` over the bounding box) is exactly right
+  // for two opposite corners or a rectangle's four, which covered every
+  // text-only and sprite-only display — but not a MIXED one, where the fit
+  // becomes order-dependent (S1L-k). See `usecase-footprint.ts`.
   let alpha = textH / textW;
   if (alpha < USECASE_ALPHA_MIN) alpha = USECASE_ALPHA_MIN;
   else if (alpha > USECASE_ALPHA_MAX) alpha = USECASE_ALPHA_MAX;
-  const ink = inkSprites === undefined ? { width: textW, height: textH } : inkFootprint(
-    display, fontSpec, measurer, inkSprites, textW, textH, stereotype);
-  const diag = Math.sqrt(ink.width * ink.width + (ink.height / alpha) * (ink.height / alpha));
+  // The stereotype block is merged ABOVE the label before the ellipse is fit
+  // (EntityImageUseCase.java:96-109), so its lines are drawn too and must
+  // contribute footprint points — mopimi-10-jaco443 is entirely stereotyped
+  // use-cases.
+  const stereoLines = (stereotype ?? []).map((tag) => `«${tag}»`);
+  const footprintDisplay = [...stereoLines, ...display.split('\n')].join('\n');
+  const boxes = footprintBoxes(footprintDisplay, fontSpec, measurer, sprites, textW);
+  const points = boxes.flatMap(boxPoints);
+  const fitted = containingEllipse(points, alpha);
+  if (fitted !== undefined) {
+    return {
+      width: fitted.width + USECASE_ELLIPSE_BIGGER,
+      height: fitted.height + USECASE_ELLIPSE_BIGGER,
+    };
+  }
+  // No drawn ink at all (an empty display) — fall back to the closed form.
+  const diag = Math.sqrt(textW * textW + (textH / alpha) * (textH / alpha));
   return {
     width: diag + USECASE_ELLIPSE_BIGGER,
     height: alpha * diag + USECASE_ELLIPSE_BIGGER,
   };
 }
 
-/** The use-case ellipse's footprint measured against INK sprite extents.
- *  Mirrors the declared-dimension arithmetic above exactly, so a display with
- *  no SVG sprite returns the same numbers it was given. */
-function inkFootprint(
-  display: string,
-  fontSpec: FontSpec,
-  measurer: StringMeasurer,
-  inkSprites: SpriteDimsLookup,
-  declaredW: number,
-  declaredH: number,
-  stereotype?: readonly string[],
-): Dim {
-  let width = maxLineWidth(display, fontSpec, measurer, inkSprites);
-  let height =
-    lineCount(display) * fontSpec.size * LINE_HEIGHT_FACTOR + atomHeightBonus(display, fontSpec, inkSprites);
-  if (stereotype !== undefined && stereotype.length > 0) {
-    const stereoWidth = Math.max(...stereotype.map((s) => measurer.measure(`«${s}»`, fontSpec).width));
-    width = Math.max(width, stereoWidth + STEREO_MARGIN);
-    height += stereotype.length * fontSpec.size * LINE_HEIGHT_FACTOR;
-  }
-  return width === 0 || height === 0 ? { width: declaredW, height: declaredH } : { width, height };
-}
 
 /** Decoration allowance `[w, h]` for a box symbol. Only the default `uml2`
  *  component draws the corner icon; `uml1`/`rectangle` render a plain box

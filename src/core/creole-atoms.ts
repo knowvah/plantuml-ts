@@ -133,8 +133,21 @@ export type AtomImageResolver = (
  * `get()` return type is structurally assignable here once T4 lands (it
  * should be -- `Sprite` is exactly `{width, height}` today).
  */
+/** A sprite's declared box, plus its drawn-INK box when the two differ (only
+ *  an SVG sprite can). Ink is reported in the SAME unscaled units as
+ *  `width`/`height`; callers apply the creole scale to both. */
+export interface SpriteDims {
+  width: number;
+  height: number;
+  /** Ink offset inside the declared box; 0 when ink === box. */
+  inkX?: number;
+  inkY?: number;
+  inkWidth?: number;
+  inkHeight?: number;
+}
+
 export interface SpriteDimsLookup {
-  get(name: string): { width: number; height: number } | undefined;
+  get(name: string): SpriteDims | undefined;
 }
 
 // ---------------------------------------------------------------------------
