@@ -132,6 +132,25 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       const symbol = KEYWORD_TO_SYMBOL.get(kw);
       if (symbol === undefined) return;
       if (symbol === 'port' && state.containerStack.length === 0) return;
+      // CommandCreateElementFull's CODE-can-be-`[bracket]` alternative
+      // (getRegexConcat CODE1, codeChar `[`): a keyword-prefixed bracket
+      // declaration whose alias follows the bracket -- `component [Disp] as Id`
+      // -- must strip the `[...]`/`as` wrapper into display/id via the SAME
+      // `parseBracketDeclaration` the bare `[Name] as Alias` shorthand uses
+      // (rule 10 above), routing the keyword's own USymbol. Without this the
+      // whole `[Disp] as Id` string leaked into `parseNameSection`'s
+      // fallthrough as BOTH id and display (pebace-74: the box was measured
+      // and the label drawn as the literal `[Application1 ...] as A1`). Only
+      // the bracket-PLUS-`as` form leaked; a bracket with no alias (`[Disp]`,
+      // `[Disp] #color`) already resolves through the normal parseNameSection
+      // path (verified: cegale-42/detona-13/dodeni-90/mobugi-89 parse clean),
+      // so it is intentionally NOT intercepted here.
+      const bracketAs = /^\[([^\]]*)\]\s+(as\s+.+)$/i.exec(match[2]!.trim());
+      if (bracketAs !== null) {
+        const bdecl = parseBracketDeclaration(bracketAs[1]!.trim(), bracketAs[2]!);
+        emitNode(state, makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color));
+        return;
+      }
       const { id, display, stereotype, color, tags } = parseNameSection(match[2]!);
       // CommandCreateElementFull.java:317-318: `display = quark.getName()`
       // when no explicit alias/display was given — the LEAF segment only,

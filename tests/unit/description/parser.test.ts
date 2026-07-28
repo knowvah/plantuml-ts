@@ -141,6 +141,47 @@ describe('[Name] bracket shorthand', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// KEYWORD-prefixed bracket declaration: `component [Display] as Alias`
+// ---------------------------------------------------------------------------
+
+// CommandCreateElementFull's CODE alternative allows a `[bracket]` in the
+// CODE slot AFTER a leading SYMBOL keyword (`component`/`node`/... `[Disp]`).
+// Before creole-lexer-unification the keyword+bracket+`as` form fell through
+// `parseNameSection`'s bare-id fallback, leaking the WHOLE `[Disp] as Id`
+// string into BOTH id and display (pebace-74-cuca176: box sized and label
+// drawn as the literal `[Application1 ...] as A1`). KEYWORD_RE now routes a
+// leading `[...] as ...` through the same parseBracketDeclaration the bare
+// shorthand uses. Only the bracket-PLUS-`as` form was broken; `component
+// [Disp]` / `component [Disp] #color` already resolved correctly.
+describe('keyword-prefixed bracket declaration (component [Display] as Alias)', () => {
+  it('strips the [ ] / as wrapper: id=alias, display=bracket body', () => {
+    const node = firstNode('component [Application1] as A1');
+    expect(node.symbol).toBe('component');
+    expect(node.id).toBe('A1');
+    expect(node.display).toBe('Application1');
+  });
+
+  it('keeps a multi-word bracket body as the display', () => {
+    const node = firstNode('component [Not Our System] as sys');
+    expect(node.id).toBe('sys');
+    expect(node.display).toBe('Not Our System');
+  });
+
+  it('an aliased keyword+bracket resolves link references to the SAME entity (no phantom)', () => {
+    // Pre-fix, the real node got id `[Foo] as B`, so `A --> B` auto-created a
+    // phantom `B` -> an extra node. The alias must now resolve directly.
+    const ast = parse('component [Foo] as B\ncomponent A\nA --> B');
+    expect(ast.nodes.map((n) => n.id).sort()).toEqual(['A', 'B']);
+  });
+
+  it('a keyword bracket WITHOUT `as` is unaffected (display=id=body)', () => {
+    const node = firstNode('component [Plain Body]');
+    expect(node.id).toBe('Plain Body');
+    expect(node.display).toBe('Plain Body');
+  });
+});
+
 // CommandCreateElementFull.java's single `StereotypePattern.optional
 // ("STEREOTYPE")` (:110) captures ANY run of consecutive `<<..>>` blocks
 // via regex backtracking against the line-end anchor (RegexLeaf.end():115)

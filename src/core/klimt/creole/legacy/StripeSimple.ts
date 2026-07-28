@@ -56,6 +56,8 @@ import type { CreoleAtom, CreoleAtomUrl } from '../atom/Atom.js';
 import type { Command, StripeBuilder } from '../command/Command.js';
 import { CREOLE_COMMANDS } from './CommandCreoleBuilder.js';
 import { scanLineForAtoms, matchAtomAt } from '../../../creole-atoms.js';
+import { classifyStripeLine, type StripeClassification } from './CreoleStripeSimpleParser.js';
+import { resolveTextEscapes } from '../../../text-escapes.js';
 
 /** Upstream: `StripeSimple#searchCommand`. `line.length > pos + 2` (not
  *  `>=`) is upstream's own bound — ported verbatim, including its edge
@@ -220,4 +222,52 @@ export function buildLiteralAtoms(line: string, font: FontConfiguration): readon
     else atoms.push({ kind: 'inline', atom: seg.atom, ambientFont: font });
   }
   return atoms.length === 0 ? [{ kind: 'text', text: ' ', font }] : atoms;
+}
+
+/**
+ * LineBuildAtoms — one already-classified display line's classification
+ * plus its built atom sequence: `atoms` is empty for a `HORIZONTAL_LINE`
+ * line (nothing to measure/draw as text — the caller handles the separator
+ * directly), `lineFont` is the BASE font for `NORMAL`/`LITERAL`, or the
+ * heading-cascaded font (`fontConfigurationForHeading`) for `HEADING` — the
+ * font every atom on this line's OWN style flags/color start from before any
+ * nested `<b>`/`**`/etc. run adds more.
+ *
+ * ADR-1 (`plans/creole-lexer-unification/decisions.md`): the shared shape
+ * BOTH `EntityImageDescriptionSupport.ts#buildLine` (renderer, a thin
+ * delegate to {@link buildLineAtoms} below) and `leaf-sizing.ts
+ * #creoleVisibleText` (sizer) consume — eliminating the two-lexer drift
+ * that let the sizer's `parseCreole` disagree with the renderer's
+ * `buildStripeAtoms`/`buildLiteralAtoms` on unclosed/`:`-variant tags.
+ */
+export interface LineBuildAtoms {
+  readonly classification: StripeClassification;
+  readonly atoms: readonly CreoleAtom[];
+  readonly lineFont: FontConfiguration;
+}
+
+/**
+ * Builds one RAW display line's classification + flat atom sequence — the
+ * single shared "line -> visible atoms" lexer (ADR-1). Classifies the raw
+ * line first (`classifyStripeLine`, so an HR is recognized before any
+ * escape-decoding); a `HORIZONTAL_LINE` line carries no atoms. Otherwise
+ * decodes `<U+XXXX>`/`&#NNN;` escapes (`resolveTextEscapes`, mirroring
+ * upstream's per-atom `AtomText.manageSpecialChars` — S1L-b-unicode ADR-1)
+ * BEFORE atoms are built, then dispatches: `LITERAL` -> `buildLiteralAtoms`
+ * (no style-command engine — see that function's doc comment for why);
+ * `HEADING`/`NORMAL` -> `buildStripeAtoms`, under the heading-cascaded font
+ * (`fontConfigurationForHeading`) when `HEADING`, else the base font
+ * unchanged. Upstream has no single method matching this exactly — it is
+ * this port's own extraction of `EntityImageDescriptionSupport.ts#buildLine`
+ * (pre-ADR-1)'s classification-dispatch branches into one shared helper.
+ */
+export function buildLineAtoms(line: string, font: FontConfiguration): LineBuildAtoms {
+  const classification = classifyStripeLine(line);
+  if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
+  const content = resolveTextEscapes(classification.content);
+  if (classification.type === 'LITERAL') {
+    return { classification, atoms: buildLiteralAtoms(content, font), lineFont: font };
+  }
+  const lineFont = classification.type === 'HEADING' ? fontConfigurationForHeading(font, classification.order) : font;
+  return { classification, atoms: buildStripeAtoms(content, lineFont), lineFont };
 }

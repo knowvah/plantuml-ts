@@ -19,20 +19,30 @@ prove the corpus is net-positive before editing production, then re-baseline.
 - RENDERER: `EntityImageDescriptionSupport.ts#buildLine` → `buildStripeAtoms`
   (E2r `StripeSimple`) — **strips** them.
 - Result on node `bar` of lurupu-11: sizer measures 53 codepoints (~333px),
-  renderer draws 22 (~147px == oracle). Same root drives gafico/nujito nodes a+b.
+  renderer draws 22 (~147px == oracle). (Original brief claimed the same root
+  drives gafico/nujito nodes a+b — T1 DISPROVED this; see Realistic outcome.)
 
-## Realistic outcome (agreed at planning)
+## Realistic outcome (REVISED after T1 spike — 2026-07-27)
 
-- lurupu-11 (node bar) and gafico/nujito nodes a+b should **shrink** toward the
-  oracle. gafico/nujito stay non-conformant (their node `c` `<code>` residual is
-  a SEPARATE, deferred mission), but their pins drop further.
-- Some non-target fixtures may shift; **net-positive is required** (Task 1 gate).
+- lurupu-11 (node bar) **shrinks** −197px toward the oracle — the confirmed win.
+- **gafico-37 / nujito-06 are OUT of scope for this mission** (re-scoped after
+  T1). The spike proved they measure NEUTRAL under the lexer switch: their
+  `<color:green>`/`<u:blue>` tags sit adjacent to a decoded `<U+000A>`/`\n`
+  where `buildStripeAtoms`'s command scanner ALSO leaves them literal — both
+  lexers AGREE, so the two-lexer-disagreement fix does not touch them. Their
+  real divergence (a newline-adjacency command-scan gap and the node-`c`
+  `<code>` residual) is a SEPARATE, deferred mission. The brief's original
+  premise "same root drives gafico/nujito nodes a+b" was wrong.
+- Some non-target fixtures may shift; **net-positive is required** (Task 1 gate,
+  now passed: 28 shrink / 319 neutral / 1 widen). The one widen
+  (`fepuvo-06-rugi981`, +0.258in, already pinned 2.889in) is verified against
+  its oracle pin in Batch 3 — re-STOP only if it exceeds the pin.
 
 ## Status
 
-- [ ] Batch 1 — Spike: measure corpus impact of the lexer switch (T1, GATE)
-- [ ] Batch 2 — Unify: shared visible-atoms helper; rewire sizer + renderer (T2)
-- [ ] Batch 3 — Re-baseline backlog + ledger + mission-index; full gate (T3)
+- [x] Batch 1 — Spike: measure corpus impact of the lexer switch (T1, GATE) — DONE; gate = STOP-and-ask (2 deviations, see decision-journal)
+- [x] Batch 2 — Unify: shared visible-atoms helper; rewire sizer + renderer (T2) — DONE; lurupu-11 conformant, renderer byte-identical
+- [x] Batch 3 — Re-baseline + accounting (T3), SCOPE-EXPANDED (user): faithful URL cannot-decode text (creole-atoms) + fixed pre-existing `component [body] as alias` parser leak; pebace-74 + togeke-15 now conformant. 236→239/351 (68.1%), zero widened, 262/262+90/90
 
 ## Startup (read in this order)
 
@@ -109,3 +119,26 @@ pin values.
   "sizer calls the renderer's `buildTextBlock.calculateDimension` wholesale"
   width+height unification; per-atom font-SIZE width parity (`<size:N>`,
   `==` heading runs).
+
+## Mission summary (closed 2026-07-27)
+
+**All 3 tasks complete.** Commits (on `feature/creole-lexer-unification`, ready
+to merge — mission-branch merge-commit convention): T1 `7ffdd84`, T2 `d8975e1`,
+T3 `7ea6e1f`.
+
+- **T1 (spike/GATE):** disproved the brief's premise that gafico-37/nujito-06
+  would shrink (both lexers agree on their newline-adjacent tags) → those two
+  re-scoped OUT with user approval.
+- **T2 (unify):** one shared `StripeSimple#buildLineAtoms`; renderer
+  byte-identical; sizer dropped `parseCreole`. lurupu-11 → conformant.
+- **T3 (scope-expanded ×2, user-approved):** faithful URL cannot-decode text
+  (`creole-atoms.ts`) + fixed a pre-existing `component [body] as alias`
+  parser-leak (`command-table-containers.ts`). pebace-74 + togeke-15 →
+  conformant.
+
+**Result:** conformant 236 → **239/351 (68.1%)**, zero widened, dot-sync
+262/262 + 90/90, all tests green (10380), typecheck/lint/build green. Two
+decision-checkpoints surfaced to the human (T1 gate, T2/T3 residuals); 3
+scope-expansion decisions taken with approval. **Residuals filed:** nobiza-91
+note cannot-decode font 13-vs-14; gafico-37/nujito-06 node-c `<code>` block
+(deferred). See `decision-journal.md`.

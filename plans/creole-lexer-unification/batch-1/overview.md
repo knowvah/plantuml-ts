@@ -7,7 +7,7 @@ from `parseCreole` to the renderer's stripe engine. This decides go/no-go
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | Spike script: current vs stripe-based sizer width, per fixture | typescript-pro | `scripts/measure-creole-lexer-delta.ts` | — | ☐ |
+| T1 | Spike script: current vs stripe-based sizer width, per fixture | typescript-pro | `scripts/measure-creole-lexer-delta.ts` | — | ☑ |
 
 **Exit bar:** the script runs (exit 0) and prints, across all 351 goldens: count
 of fixtures whose max node width would widen / shrink / stay neutral, with the

@@ -172,13 +172,38 @@ const DOUBLE_QUOTE_CHARS: ReadonlySet<string> = new Set(['\x22', '“', '”', '
 
 const SRC_PREFIX = 'src=';
 
-/** Text substituted for a `<img>` atom whose bytes fail to decode --
- *  AtomImg.buildRasterFromData's fallback is `AtomTextUtils.createLegacy
- *  ('(Cannot decode: ' + source + ')', fc)`; this port uses the fixed
- *  string (per this task's scope -- the full upstream message embeds the
- *  entire, potentially megabyte-long, data URI, which is not useful
- *  rendered text). Divergence, documented per this task's instructions. */
+/** Short cannot-decode text — used for the `<img>` src forms where upstream
+ *  ALSO emits no source string: a file src that doesn't resolve under a
+ *  non-INSECURE security profile (`AtomImg.java:176,190`), and — as a
+ *  DELIBERATE, retained divergence — a data-URI whose bytes fail to decode.
+ *  Upstream's `buildRasterFromData` embeds the FULL source there
+ *  (`'(Cannot decode: ' + source + ')'`, `AtomImg.java:206`), but that source
+ *  is the entire, potentially megabyte-long data URI (e.g. `fajira-11`'s
+ *  inline data-SVG), which is not useful rendered text; this browser-safe
+ *  port keeps the short form for the data-URI/file cases only. The URL cases
+ *  are ported faithfully — see `cannotDecodeText` (creole-lexer-unification:
+ *  the URL branch is what closed `nobiza-91`/`pebace-74`/`togeke-15`). */
 const CANNOT_DECODE_TEXT = '(Cannot decode)';
+
+/** Faithful port of `AtomImg.create`'s cannot-decode text for a `<img>` src
+ *  this synchronous, browser-safe renderer cannot fetch or decode. Upstream
+ *  routes an `http:`/`https:` src (which this port never fetches, so it
+ *  ALWAYS lands on the fetch-failed branch) through `buildRasterFromUrl` /
+ *  `buildSvgFromUrl`, both of which embed the FULL url in the fallback text:
+ *  `(Cannot decode: <url>)` for a raster URL (`AtomImg.java:214,218`) and
+ *  `(Cannot decode SVG: <url>)` for a `.svg` URL (`AtomImg.java:226,230`).
+ *  A URL is bounded (unlike a data URI), so embedding it verbatim reproduces
+ *  the jar's measured node width exactly (verified: `nobiza-91`'s image node
+ *  = 9.66in, the long-form URL text — NOT the tiny short-form box). Scheme /
+ *  `.svg` checks are case-sensitive, mirroring upstream's own `src.startsWith
+ *  ("http:")` / `src.endsWith(".svg")`. Every other src form (data URI, file
+ *  path) keeps the short `CANNOT_DECODE_TEXT`. */
+function cannotDecodeText(src: string): string {
+  if (src.startsWith('http:') || src.startsWith('https:')) {
+    return src.endsWith('.svg') ? `(Cannot decode SVG: ${src})` : `(Cannot decode: ${src})`;
+  }
+  return CANNOT_DECODE_TEXT;
+}
 
 // ---------------------------------------------------------------------------
 // Scale / color extraction (Parser.java ports)
@@ -223,20 +248,22 @@ export interface AtomSpan {
   fallbackText?: string;
 }
 
-/** AtomImg.create's `data:image/png;base64,` branch only (java :123-131) --
- *  http/file/svg/other src forms are out of scope (D7/mission scope) and
- *  fall back to the same `(Cannot decode)` text as a malformed PNG,
- *  matching upstream's shape (an unresolvable image degrades to a text
- *  atom) without requiring the file/network I/O this browser-safe,
- *  synchronous renderer cannot perform (project CLAUDE.md Architecture
- *  Notes: no blocking I/O in `src/`). */
+/** AtomImg.create's `data:image/png;base64,` branch renders the image (java
+ *  :123-131); every other src form degrades to a cannot-decode text atom
+ *  (an unresolvable image → text, matching upstream's shape) without the
+ *  file/network I/O this browser-safe, synchronous renderer cannot perform
+ *  (project CLAUDE.md Architecture Notes: no blocking I/O in `src/`). The
+ *  fallback TEXT now mirrors upstream's per-src-form branching via
+ *  `cannotDecodeText`: an `http:`/`https:` URL embeds the full url
+ *  (`(Cannot decode[ SVG]: <url>)`), while data-URI/file forms keep the short
+ *  `(Cannot decode)` — see each function's own doc comment. */
 function buildImgSpan(m: RegExpExecArray): AtomSpan {
   const start = m.index;
   const end = m.index + m[0].length;
   const src = stripImgSrc(m[1]!);
   const scale = parseScale(m[2], 1);
   const ihdr = parsePngIhdrFromDataUri(src);
-  if (ihdr === undefined) return { start, end, fallbackText: CANNOT_DECODE_TEXT };
+  if (ihdr === undefined) return { start, end, fallbackText: cannotDecodeText(src) };
   return { start, end, atom: { kind: 'img', dataUri: src, scale, width: ihdr.width, height: ihdr.height } };
 }
 

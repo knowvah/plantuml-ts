@@ -170,6 +170,46 @@ describe('scanLineForAtoms — Cannot-decode fallback', () => {
     expect(atoms).toHaveLength(0);
     expect(textWithoutAtoms).toBe('(Cannot decode)');
   });
+
+  // AtomImg.create's URL branch (java :164-169 -> buildRasterFromUrl/
+  // buildSvgFromUrl): this synchronous, browser-safe renderer never fetches,
+  // so an http/https src ALWAYS fails and embeds the FULL url in the fallback
+  // text -- `(Cannot decode: <url>)` for a raster URL (java :214,218) and
+  // `(Cannot decode SVG: <url>)` for a `.svg` URL (java :226,230). A URL is
+  // bounded (unlike a data URI), so it is embedded verbatim; this is what
+  // makes nobiza-91/pebace-74/togeke-15's DOT node widths match the jar
+  // (creole-lexer-unification, scope-expanded decode-text fix).
+  it('an http raster URL embeds the full url: (Cannot decode: <url>)', () => {
+    const url = 'http://www.eclipse.org/tptp/images/ico_home.gif';
+    const { atoms, textWithoutAtoms } = scanLineForAtoms(`<img:${url}>`);
+    expect(atoms).toHaveLength(0);
+    expect(textWithoutAtoms).toBe(`(Cannot decode: ${url})`);
+  });
+
+  it('an https raster URL (query string preserved) embeds the full url', () => {
+    const url = 'https://chart.googleapis.com/chart?cht=p3&chd=t:60,40&chl=Hello%7CWorld';
+    const { textWithoutAtoms } = scanLineForAtoms(`<img:${url}>`);
+    expect(textWithoutAtoms).toBe(`(Cannot decode: ${url})`);
+  });
+
+  it('the <img src="..."> HTML form is handled identically to the colon form', () => {
+    const url = 'http://www.eclipse.org/tptp/images/ico_play.gif';
+    const { textWithoutAtoms } = scanLineForAtoms(`<img src="${url}">`);
+    expect(textWithoutAtoms).toBe(`(Cannot decode: ${url})`);
+  });
+
+  it('a .svg URL uses the SVG-specific message: (Cannot decode SVG: <url>)', () => {
+    const url = 'https://upload.wikimedia.org/wikipedia/commons/8/8c/SVG_logo_h.svg';
+    const { textWithoutAtoms } = scanLineForAtoms(`<img:${url}>`);
+    expect(textWithoutAtoms).toBe(`(Cannot decode SVG: ${url})`);
+  });
+
+  it('the URL scheme check is case-sensitive (mirrors upstream), so HTTP:// stays short', () => {
+    // upstream `src.startsWith("http:")` is case-sensitive; a non-lowercase
+    // scheme is treated as a (non-URL) file path -> short fallback.
+    const { textWithoutAtoms } = scanLineForAtoms('<img:HTTP://x.example/a.gif>');
+    expect(textWithoutAtoms).toBe('(Cannot decode)');
+  });
 });
 
 // ---------------------------------------------------------------------------
