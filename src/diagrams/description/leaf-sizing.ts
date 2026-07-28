@@ -140,6 +140,12 @@ const SYMBOL_ICON_ALLOWANCE: Partial<Record<USymbol, readonly [number, number]>>
  *  (EntityPosition.RADIUS * 2, abel/EntityPosition.java:56). */
 export const PORT_SIZE = 12;
 
+/** Fixed square a `hideText` leaf (interface/circle) occupies:
+ *  `CircleInterface2.calculateDimension` = `radius * 2 + 2 * margin` with
+ *  `radius = 8`, `margin = 1` -> 18px = 0.25in exactly.
+ *  @see .../svek/CircleInterface2.java#calculateDimension */
+export const INTERFACE_CIRCLE_SIZE = 18;
+
 // EntityImageNote sizing. Notes use FontParam.NOTE — a fixed 13px font, not the
 // theme's default. Total horizontal margin (text padding + folded corner) and
 // vertical margin measured exactly against the deterministic oracle.
@@ -177,6 +183,19 @@ export function measureLeafNode(
       // independent of the display text (the text drives the shape choice
       // instead — see isPortLabelWide/portTablePad in layout-helpers).
       return { width: PORT_SIZE, height: PORT_SIZE };
+    case 'interface':
+    case 'circle':
+      // EntityImageDescription.java:137 `hideText = symbol == USymbols
+      // .INTERFACE`, then :209-211 builds asSmall from EMPTY name/desc/
+      // stereo. calculateDimensionSlow returns that asSmall dimension, so a
+      // hideText leaf measures the bare CircleInterface2 square regardless of
+      // its label. The label is drawn OUTSIDE the node; when the shield is
+      // not suppressed, `getShield` reserves room for it as HTML-table
+      // margins around this square (see isInterfaceShielded) rather than by
+      // growing it. `circle` shares the mechanism -- Entity.getUSymbol maps
+      // LeafType.CIRCLE to USymbols.INTERFACE unconditionally (see
+      // layout-helpers-shape-endpoint.ts#shapeForNode).
+      return { width: INTERFACE_CIRCLE_SIZE, height: INTERFACE_CIRCLE_SIZE };
     case 'note':
       return measureNote(node.display, fontSpec, measurer, sprites);
     case 'actor':
