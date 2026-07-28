@@ -23,6 +23,7 @@
  */
 
 import type { Sprite } from './Sprite.js';
+import { pathBBox } from './svg-path-bbox.js';
 
 /** `viewBox[= "']+(n)[\s,]+(n)[\s,]+(n)[\s,]+(n)` (UImageSvg.java:114-115). */
 const VIEWBOX_RE = new RegExp('viewBox[= "\']+([0-9.]+)[\\s,]+([0-9.]+)[\\s,]+([0-9.]+)[\\s,]+([0-9.]+)');
@@ -49,6 +50,45 @@ export function svgDimension(svg: string, name: 'width' | 'height'): number | un
   return attributeDim(svg, name);
 }
 
+/** Every `<path d="…">` in the element, in document order. */
+const PATH_D_RE = /<path[^>]*\sd="([^"]+)"/gi;
+
+/**
+ * The union of every path's `UPath`-rule box — the INK extent, as opposed to
+ * the declared `width`/`height`/viewBox box.
+ *
+ * The two differ, and both are load-bearing: `TextBlockInEllipse`'s ctor takes
+ * `alpha` from `text.calculateDimension()` (the DECLARED box) but fits the
+ * ellipse to `Footprint`'s collected points, which for a drawn path are its
+ * min/max corners (svek/image/Footprint.java:147-150). Jar-measured on the
+ * bootstrap bundle: `bi-globe` declares 16×16 but inks 16×13.846 — its outer
+ * circle is an ARC, and an arc contributes only its endpoint — so at scale 2.5
+ * its use-case ellipse is 69.458×56.766, while `bi-bootstrap-fill` (which inks
+ * the full 16×16) gives 74.957×61.165 from an identical declaration.
+ *
+ * `undefined` when the element draws no `<path>` at all; the caller then falls
+ * back to the declared box.
+ */
+export function svgInkBox(svg: string): { width: number; height: number } | undefined {
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+  let found = false;
+  PATH_D_RE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = PATH_D_RE.exec(svg)) !== null) {
+    const box = pathBBox(m[1]!);
+    if (box === undefined) continue;
+    found = true;
+    minX = Math.min(minX, box.minX);
+    minY = Math.min(minY, box.minY);
+    maxX = Math.max(maxX, box.maxX);
+    maxY = Math.max(maxY, box.maxY);
+  }
+  return found ? { width: maxX - minX, height: maxY - minY } : undefined;
+}
+
 /** A registry entry backed by an inline SVG element. `svg` is the verbatim
  *  source, re-emitted at render time; `kind` discriminates it from
  *  `SpriteMonochrome`, whose grey-grid accessors it does NOT have. */
@@ -56,14 +96,21 @@ export class SpriteSvg implements Sprite {
   readonly kind = 'svg';
   readonly width: number;
   readonly height: number;
+  /** Drawn-ink extent (see `svgInkBox`) — what the use-case ellipse footprint
+   *  is fit to. Falls back to the declared box when no `<path>` is drawn. */
+  readonly inkWidth: number;
+  readonly inkHeight: number;
 
   constructor(
     readonly svg: string,
     width: number,
     height: number,
+    ink?: { width: number; height: number },
   ) {
     this.width = width;
     this.height = height;
+    this.inkWidth = ink?.width ?? width;
+    this.inkHeight = ink?.height ?? height;
   }
 
   /** Builds one from raw SVG source, or `undefined` when neither a viewBox
@@ -72,7 +119,7 @@ export class SpriteSvg implements Sprite {
     const width = svgDimension(svg, 'width');
     const height = svgDimension(svg, 'height');
     if (width === undefined || height === undefined) return undefined;
-    return new SpriteSvg(svg, width, height);
+    return new SpriteSvg(svg, width, height, svgInkBox(svg));
   }
 }
 

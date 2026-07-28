@@ -100,6 +100,25 @@ export function spriteDimsLookupFor(registry: SpriteRegistry): SpriteDimsLookup 
   };
 }
 
+/**
+ * The same lookup reporting each sprite's INK extent instead of its declared
+ * box — what a use-case ellipse's footprint is fit to (`Footprint#drawPath`
+ * collects a drawn path's min/max corners, not the sprite's declared size).
+ * Only `SpriteSvg` distinguishes the two; an encoded sprite draws as a full
+ * image, so its ink IS its box and this view returns the same numbers.
+ * @see SpriteSvg.ts#svgInkBox for the jar measurements behind this.
+ */
+export function spriteInkDimsLookupFor(registry: SpriteRegistry): SpriteDimsLookup {
+  return {
+    get(name: string): { width: number; height: number } | undefined {
+      const sprite = getSprite(registry, name);
+      if (sprite === undefined) return undefined;
+      if (isSpriteSvg(sprite)) return { width: sprite.inkWidth, height: sprite.inkHeight };
+      return { width: sprite.width, height: sprite.height };
+    },
+  };
+}
+
 /** Render-time seam (T7): resolves a sprite by name as the concrete
  *  `SpriteMonochrome` every `sprite ... { }`/`sprite ... DATA` definition
  *  this registry stores actually is (`buildAndRegister`, above, only ever
