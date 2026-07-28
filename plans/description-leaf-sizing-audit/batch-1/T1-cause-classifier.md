@@ -9,7 +9,8 @@ route work. It misled EVERY bucket opened last session:
 - the sprite pattern was `<\$[\w-]+>` — no `/` — so every stdlib
   `<$bundle/name>` fell through to a `\binterface\b` catch and was
   labelled interface-shield (turasu-73-zoni468 is a *sprite* fixture with
-  no `interface` keyword at all);
+  no `interface` keyword at all). **ALREADY FIXED by S1L-f — verified at
+  execution time; this bullet was stale when written. No action taken.**;
 - `container-cluster` (any container keyword opening `{`) swallowed
   note-newline, endpoint-newline, empty-`[ ]`-body and element-font bugs —
   six fixes in a row, none of them cluster geometry;
@@ -62,3 +63,18 @@ Reversible — labels only, no geometry. No pin changes.
 
 All four gates. `widened` must remain 0 and conformant must remain 311/351
 — a change in either means you altered sizing, which is out of scope here.
+
+## Outcome — DONE 2026-07-28
+
+`causes` labels only: container-cluster 12→11, other 10→7, element-font
+1→5; total 40, conformant 311/351, widened 0, all gates green.
+
+The element-font miss was TWO bugs, and the brief named only one: the
+regex required `skinparam` adjacent to the Font-word (missing block form
+and `<style>` selectors), AND `container-cluster` was tested first, so a
+selector for a container keyword — byte-identical to a cluster opener —
+shadowed the font signal unconditionally. Ordering, not just pattern.
+
+Seven `other` fixtures deliberately left as `other`: no ledger root cause,
+no regex-detectable signal. Inventing a pattern to empty the bucket is the
+failure mode this task exists to end.

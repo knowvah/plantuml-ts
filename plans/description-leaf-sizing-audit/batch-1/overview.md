@@ -12,6 +12,6 @@ STOP condition.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | Repair `CAUSE_PATTERNS` | typescript-pro | `scripts/measure-description-size-deltas.ts`, its unit test | — | [ ] |
-| T2 | USymbol composition audit | general-purpose | `planning/usymbol-composition.md` | — | [ ] |
-| T3 | Renderer↔sizer parity audit | general-purpose | `planning/sizer-renderer-parity.md` | — | [ ] |
+| T1 | Repair `CAUSE_PATTERNS` | typescript-pro | `scripts/measure-description-size-deltas.ts`, its unit test | — | [x] |
+| T2 | USymbol composition audit | general-purpose | `planning/usymbol-composition.md` | — | [x] |
+| T3 | Renderer↔sizer parity audit | general-purpose | `planning/sizer-renderer-parity.md` | — | [x] |
