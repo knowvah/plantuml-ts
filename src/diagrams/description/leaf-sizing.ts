@@ -46,6 +46,7 @@ import {
   PORT_SIZE,
   STEREO_MARGIN,
   SYMBOL_BOX_MARGIN,
+  SIMPLE_SYMBOL_DRAWING,
   SYMBOL_ICON_ALLOWANCE,
   USECASE_ALPHA_MAX,
   USECASE_ALPHA_MIN,
@@ -110,6 +111,10 @@ export function measureLeafNode(
     case 'actor':
     case 'actor-business':
       return measureActor(node.display, fontSpec, measurer, sprites);
+    case 'control':
+    case 'entity':
+    case 'boundary':
+      return measureSimpleSymbol(node, fontSpec, measurer, sprites);
     case 'usecase':
     case 'usecase-business':
       return measureUsecase(node.display, fontSpec, measurer, sprites, node.stereotype);
@@ -144,6 +149,25 @@ function measureNote(
  * label. Exact against the deterministic oracle ("Bob" 27x74, "A Long Actor
  * Name" 110.51x74). actor-business shares the same bounding box.
  */
+/** `USymbolSimpleAbstract` leaf whose drawing is a fixed box (control /
+ *  entity / boundary): the drawing stacked above the label, same composition
+ *  `measureActor` uses for the stickman. */
+function measureSimpleSymbol(
+  node: DescriptiveNode,
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  sprites?: SpriteDimsLookup,
+): Dim {
+  const [drawW, drawH] = SIMPLE_SYMBOL_DRAWING[node.symbol] ?? [0, 0];
+  return {
+    width: Math.max(drawW, maxLineWidth(node.display, fontSpec, measurer, sprites)),
+    height:
+      drawH +
+      lineCount(node.display) * fontSpec.size * LINE_HEIGHT_FACTOR +
+      atomHeightBonus(node.display, fontSpec, sprites),
+  };
+}
+
 export function measureActor(
   display: string,
   fontSpec: FontSpec,
