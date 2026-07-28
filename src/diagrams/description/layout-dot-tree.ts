@@ -176,6 +176,7 @@ export function buildDotNodes(
         wrapWidth: ctx.wrapWidth,
         guillemet: ctx.guillemet,
         inkSprites: ctx.inkSprites,
+        fontSize: ctx.fontSizeFor(node.symbol),
       },
       ctx.sprites,
     );

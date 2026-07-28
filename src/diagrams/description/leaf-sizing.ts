@@ -82,11 +82,14 @@ export {
  */
 export function measureLeafNode(
   node: DescriptiveNode,
-  fontSpec: FontSpec,
+  baseFont: FontSpec,
   measurer: StringMeasurer,
   opts?: BoxSizingOpts,
   sprites?: SpriteDimsLookup,
 ): Dim {
+  // A per-element `FontSize` override applies to every symbol's measurement,
+  // so it is resolved once here rather than in each per-symbol rule (S1L-h).
+  const fontSpec = opts?.fontSize === undefined ? baseFont : { ...baseFont, size: opts.fontSize };
   switch (node.symbol) {
     case 'port':
       // EntityImagePort.calculateDimensionSlow: fixed RADIUS*2 square,
@@ -120,7 +123,7 @@ export function measureLeafNode(
       return measureUsecase(node.display, fontSpec, measurer, sprites, node.stereotype);
     default:
       return FOLDER_FAMILY_SHOW_TITLE[node.symbol] === undefined
-        ? measureBox(node, fontSpec, measurer, opts, sprites)
+        ? measureBox(node, fontSpec, measurer, opts, sprites, baseFont)
         : measureFolderLeaf(node, fontSpec, measurer, opts, sprites);
   }
 }
@@ -300,6 +303,7 @@ function measureBox(
   measurer: StringMeasurer,
   opts: BoxSizingOpts | undefined,
   sprites?: SpriteDimsLookup,
+  defaultFont?: FontSpec,
 ): Dim {
   const [marginH, marginV] = SYMBOL_BOX_MARGIN[node.symbol] ?? DEFAULT_BOX_MARGIN;
   const [iconW, iconH] = boxIcon(node.symbol, opts?.componentStyle);
@@ -308,6 +312,10 @@ function measureBox(
     lineH,
     maxWidth: opts?.wrapWidth ?? 0,
     ...(opts?.guillemet !== undefined ? { guillemet: opts.guillemet } : {}),
+    // The DIAGRAM-default font, for an `<img>` cannot-decode fallback run —
+    // upstream builds that AtomText with the default, not the element's
+    // font (S1L-h; see StripeSimple.ts#imgFallbackFont).
+    ...(defaultFont !== undefined ? { defaultFont } : {}),
   });
   let contentW = block.width;
   let contentH = block.height;

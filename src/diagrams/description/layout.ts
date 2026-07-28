@@ -45,6 +45,7 @@ import type { ComponentStyle } from './leaf-sizing.js';
 import { computeGraphSpacing } from './link-edge-attrs.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { spriteDimsLookupFor, spriteInkDimsLookupFor } from '../../core/sprite-commands.js';
+import { resolveElementFontSize } from '../../core/theme.js';
 import { GUILLEMET_DEFAULT, type GuillemetPair } from '../../core/text/Guillemet.js';
 import { buildMagmaEdges, magmaGroups } from './magma.js';
 import { effectiveRemovedIds, effectiveHiddenIds } from './element-grammar.js';
@@ -99,6 +100,10 @@ export interface ClassifyCtx {
    *  `<style> package { MinimumWidth 300 }` floors packages but not a sibling
    *  `card` (ADR-3). `undefined` result ⇒ 0 (no floor). */
   minimumWidthFor: (sname: string) => number | undefined;
+  /** Per-element `FontSize` override for one USymbol — the same
+   *  `resolveElementFontSize(theme, sname, 'title')` the RENDERER already
+   *  calls, threaded so the sizer measures the same font (S1L-h). */
+  fontSizeFor: (sname: string) => number | undefined;
   /** `skinparam wrapWidth` (`theme.wrapWidth`) — the entity DESC word-wrap
    *  width the leaf RENDERER already applies via `Fission.ts#getSplitted`
    *  (`EntityImageDescriptionSupport.ts#buildWrappedLines`). Threaded here so
@@ -424,6 +429,7 @@ export function layoutDescription(
     containerById: new Map(), astNodeById: new Map(), counter: { n: 0 },
     componentStyle: theme.componentStyle,
     minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
+    fontSizeFor: (sname) => resolveElementFontSize(theme, sname, 'title'),
     wrapWidth: theme.wrapWidth ?? 0,
     guillemet: {
       start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,

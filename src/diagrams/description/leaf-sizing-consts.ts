@@ -36,6 +36,14 @@ export interface BoxSizingOpts {
   /** Registry view reporting sprite INK extents — the use-case ellipse
    *  footprint is fit to drawn-path bounds, not declared boxes (S1L-k). */
   inkSprites?: SpriteDimsLookup | undefined;
+  /** Per-element font SIZE override (`skinparam <sname>FontSize N` /
+   *  `<style> <sname> { FontSize N }`), already resolved for this node's
+   *  USymbol by `resolveElementFontSize(theme, sname, 'title')` — the SAME
+   *  call `renderer-symbol.ts#textFont` makes, so box and ink agree. Only
+   *  the SIZE is threaded: `glyphWidth` ignores the family (`_fontName`),
+   *  so `FontName`/`FontStyle` are width-neutral under the deterministic
+   *  width table. Absent = the diagram-wide font size (S1L-h). */
+  fontSize?: number | undefined;
 }
 
 /** Legacy actor box constants (kept for the re-export; the DOT size now comes

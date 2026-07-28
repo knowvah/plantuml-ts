@@ -101,7 +101,16 @@ class StripeAtomBuilder implements StripeBuilder {
   // the url command's captured label is never mistakenly tagged.
   private activeUrl: CreoleAtomUrl | undefined;
 
-  constructor(initialFont: FontConfiguration) {
+  /** Font for an `<img>` cannot-decode fallback run. Upstream builds that
+   *  fallback `AtomText` with the DIAGRAM-DEFAULT font, not the creole
+   *  context's — jar-verified: `<img:x/y.svg>` alone measures 100.362x14
+   *  identically with and without `skinparam rectangleFontSize 10`, and
+   *  100.362 is exactly `(Cannot decode)` at size 14. Defaults to the line
+   *  font, so a caller that does not thread one is byte-unchanged (S1L-h). */
+  private readonly imgFallbackFont: FontConfiguration;
+
+  constructor(initialFont: FontConfiguration, imgFallbackFont?: FontConfiguration) {
+    this.imgFallbackFont = imgFallbackFont ?? initialFont;
     this.font = initialFont;
   }
 
@@ -155,7 +164,10 @@ class StripeAtomBuilder implements StripeBuilder {
           // zero-behavior-change addition for img/sprite.
           this.built.push({ kind: 'inline', atom: atomMatch.atom, ambientFont: this.font });
         } else if (atomMatch.fallbackText !== undefined) {
-          pending += atomMatch.fallbackText;
+          // Its own run at the diagram-default font — see `imgFallbackFont`.
+          this.flushPending(pending);
+          pending = '';
+          this.built.push({ kind: 'text', text: atomMatch.fallbackText, font: this.imgFallbackFont });
         }
         pos += atomMatch.length;
         continue;
@@ -196,8 +208,8 @@ class StripeAtomBuilder implements StripeBuilder {
  * `font` via `fontConfigurationForHeading` when the line classified as
  * HEADING — see `legacy/CreoleStripeSimpleParser.ts`'s `classifyStripeLine`.
  */
-export function buildStripeAtoms(line: string, font: FontConfiguration): readonly CreoleAtom[] {
-  const builder = new StripeAtomBuilder(font);
+export function buildStripeAtoms(line: string, font: FontConfiguration, imgFallbackFont?: FontConfiguration): readonly CreoleAtom[] {
+  const builder = new StripeAtomBuilder(font, imgFallbackFont);
   builder.analyzeAndAddInline(line);
   return builder.finish();
 }
@@ -261,7 +273,11 @@ export interface LineBuildAtoms {
  * this port's own extraction of `EntityImageDescriptionSupport.ts#buildLine`
  * (pre-ADR-1)'s classification-dispatch branches into one shared helper.
  */
-export function buildLineAtoms(line: string, font: FontConfiguration): LineBuildAtoms {
+export function buildLineAtoms(
+  line: string,
+  font: FontConfiguration,
+  imgFallbackFont?: FontConfiguration,
+): LineBuildAtoms {
   const classification = classifyStripeLine(line);
   if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
   const content = resolveTextEscapes(classification.content);
@@ -269,5 +285,5 @@ export function buildLineAtoms(line: string, font: FontConfiguration): LineBuild
     return { classification, atoms: buildLiteralAtoms(content, font), lineFont: font };
   }
   const lineFont = classification.type === 'HEADING' ? fontConfigurationForHeading(font, classification.order) : font;
-  return { classification, atoms: buildStripeAtoms(content, lineFont), lineFont };
+  return { classification, atoms: buildStripeAtoms(content, lineFont, imgFallbackFont), lineFont };
 }
