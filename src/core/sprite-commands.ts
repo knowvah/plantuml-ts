@@ -40,6 +40,7 @@
 import { SpriteGrayLevel } from './klimt/sprite/SpriteGrayLevel.js';
 import type { Sprite } from './klimt/sprite/Sprite.js';
 import type { SpriteMonochrome } from './klimt/sprite/SpriteMonochrome.js';
+import { SpriteSvg, isSpriteSvg } from './klimt/sprite/SpriteSvg.js';
 import type { SpriteDimsLookup } from './creole-atoms.js';
 
 // ---------------------------------------------------------------------------
@@ -108,7 +109,18 @@ export function spriteDimsLookupFor(registry: SpriteRegistry): SpriteDimsLookup 
  *  `grayLevel`/`getGray` too (seam (a), that file's `spriteMonochromeAsLike`
  *  adapter). */
 export function getSpriteMonochrome(registry: SpriteRegistry, name: string): SpriteMonochrome | undefined {
-  return getSprite(registry, name) as SpriteMonochrome | undefined;
+  const sprite = getSprite(registry, name);
+  // An SVG sprite has no grey grid — the monochrome/PNG tint path must skip
+  // it rather than cast blindly (S1L-f part 2b).
+  if (isSpriteSvg(sprite)) return undefined;
+  return sprite as SpriteMonochrome | undefined;
+}
+
+/** The SVG-backed registry entry for `name`, or `undefined` when the name is
+ *  unknown or is an encoded (monochrome) sprite instead. */
+export function getSpriteSvg(registry: SpriteRegistry, name: string): SpriteSvg | undefined {
+  const sprite = getSprite(registry, name);
+  return isSpriteSvg(sprite) ? sprite : undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -147,6 +159,48 @@ export function isSpriteMultilineOpenLine(trimmed: string): boolean {
 /** True when `trimmed` closes a `sprite { ... }` multiline block. */
 export function isSpriteMultilineCloseLine(trimmed: string): boolean {
   return END_RE.test(trimmed);
+}
+
+/**
+ * `CommandSpriteSvg` (java:58-65) — the WHOLE `<svg …>…</svg>` on one line.
+ * `CommandSpriteSvgMultiline` (java:66-74) opens with `<svg …` and runs to a
+ * line ENDING in `</svg>` (its own END pattern, `(.*\</svg\>)$`); unlike the
+ * encoded `{ … }` block, the opening line already carries SVG content and the
+ * closing line is part of the data, so both are kept.
+ */
+const SVG_SINGLE_LINE_RE = new RegExp('^sprite\\s+' + NAME + '\\s+(<svg\\b.*</svg>)$', 'i');
+const SVG_MULTILINE_START_RE = new RegExp('^sprite\\s+' + NAME + '\\s+(<svg\\b.*)$', 'i');
+const SVG_END_RE = new RegExp('</svg>\\s*$', 'i');
+
+/** True when `trimmed` opens a multi-line `sprite name <svg …` definition —
+ *  the SVG counterpart to `isSpriteMultilineOpenLine`. A vendored SVG bundle
+ *  (bootstrap is ~7200 lines) otherwise pushes the real diagram content past
+ *  `descriptive-keywords.ts`'s scan window, exactly as the encoded form did
+ *  before `stripSpriteRegions` existed. */
+export function isSvgSpriteOpenLine(trimmed: string): boolean {
+  return SVG_MULTILINE_START_RE.test(trimmed) && !SVG_SINGLE_LINE_RE.test(trimmed);
+}
+
+/** True when `trimmed` closes a multi-line `<svg …` sprite definition. */
+export function isSvgSpriteCloseLine(trimmed: string): boolean {
+  return SVG_END_RE.test(trimmed);
+}
+
+/** Scans a multi-line SVG sprite from its opening line, returning the joined
+ *  element source. The opening line's own `<svg …` fragment IS part of the
+ *  data (java:96-101), as is the closing `</svg>` line. */
+function scanSvgSpriteBlock(
+  lines: readonly string[],
+  i: number,
+  head: string,
+): { svg: string; consumed: number } | null {
+  const parts = [head];
+  for (let j = i + 1; j < lines.length; j++) {
+    const line = lines[j] ?? '';
+    parts.push(line);
+    if (SVG_END_RE.test(line.trim())) return { svg: parts.join('\n'), consumed: j - i + 1 };
+  }
+  return null;
 }
 
 const SINGLE_LINE_RE = new RegExp(
@@ -278,6 +332,20 @@ function scanSpriteBlock(lines: readonly string[], i: number): SpriteBlock | nul
   return null;
 }
 
+/** Registers an SVG sprite, or records it as unsupported when neither a
+ *  viewBox nor width/height attributes yield dimensions (upstream throws;
+ *  this port declines, so the name simply "contributes nothing"). */
+function registerSvg(registry: SpriteRegistry, name: string, svg: string): void {
+  const sprite = SpriteSvg.from(svg);
+  if (sprite === undefined) {
+    // Same shelf the 4096-colour form uses: the definition is fully consumed
+    // (never leaks into diagram content), only registration is skipped.
+    registry.skippedColorSprites.push(name);
+    return;
+  }
+  addSprite(registry, name, sprite);
+}
+
 // ---------------------------------------------------------------------------
 // Public entry point
 // ---------------------------------------------------------------------------
@@ -295,6 +363,22 @@ export function matchSpriteCommand(
   registry: SpriteRegistry,
 ): { consumed: number } | null {
   const trimmed = (lines[i] ?? '').trim();
+
+  // SVG forms first: their DATA token (`<svg …`) can never match the encoded
+  // grammars' `[-_A-Za-z0-9]+`, but trying them first keeps the dispatch
+  // order upstream's own command list uses (CommonCommands.java:82/85).
+  const svgSingle = SVG_SINGLE_LINE_RE.exec(trimmed);
+  if (svgSingle !== null) {
+    registerSvg(registry, svgSingle[1]!, svgSingle[2]!);
+    return { consumed: 1 };
+  }
+  const svgMulti = SVG_MULTILINE_START_RE.exec(trimmed);
+  if (svgMulti !== null) {
+    const block = scanSvgSpriteBlock(lines, i, svgMulti[2]!);
+    if (block === null) return null;
+    registerSvg(registry, svgMulti[1]!, block.svg);
+    return { consumed: block.consumed };
+  }
 
   const multi = MULTILINE_START_RE.exec(trimmed);
   if (multi !== null) {

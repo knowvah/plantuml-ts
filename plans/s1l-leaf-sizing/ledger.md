@@ -49,7 +49,7 @@ containers.)
 |---|---|---|---|
 | container / cluster | 40 | container box + child-cluster sizing (`computeContainerBbox` subsystem); not a leaf fix. e.g. fepuvo-06-rugi981, tuliba-37-liza126, berufi-69-dara369 | **S1L-e** |
 | uncategorized | 16 | small residuals (≤~0.9in) not yet attributed by the heuristic; per-fixture triage folds each into the family a sub-mission's re-run identifies. e.g. nixura-77-bina738, dopova-50-digo290 | triage |
-| sprite / stdlib-macro / icon | 12 | scaled sprite dims via `<$…>` or `!include <awslib\|c4\|…>` macros mis-sized (kofuca-08-pafi749 → 478in), unknown sprite/icon → 0 dims. e.g. kofuca-08-pafi749, vivido-49-nisu863, bivira-53-boja685, turasu-73-zoni468 | **S1L-f** |
+| sprite / stdlib-macro / icon | 10 | **Largely DONE (S1L-f, 2026-07-28)** — see the S1L-f sections below. The bucket's premise was wrong three times over: kofuca-08's 478in was ENGINE MISROUTING, the shared residual was a missing `fontSize/13` scale on EVERY sprite kind, and the bundles are SVG-sprite based (a form the grammar did not parse at all). Remaining: the use-case ink-bounds question (ruziru-69/bootstrap-0, **S1L-k**) plus openiconic/`<img>` residuals. | **S1L-k** + triage |
 | interface shield | 0 | **DONE (S1L-c, 2026-07-28)** — see the S1L-c section below. Bucket empty: 9 of the 11 flipped conformant, and the other 2 were misattributions the same mission corrected (turasu-73-zoni468 → sprite, cukafa-49-fona812 → element-font). | — |
 | element font (per-USymbol) | 2 | `skinparam <element>FontSize/FontName/FontStyle` never reaches `measureLeafNode`: `fontSpec` is a single diagram-wide value threaded down `layout-dot-tree.ts`, with no per-USymbol resolution (contrast `resolveElementMinimumWidth`, which S1L-g already threads per-element). cukafa-49-fona812 (components measure 117×44 vs the jar's 139×48 under `componentFontSize 18`), gogamo-72-pibo470 | **S1L-h** |
 | min-width floor | 1 | **S1L-b/S1L-g DONE.** `skinparam minClassWidth` (S1L-g) + the `[…]` HR-height fix (S1L-b) made dexigu/kenece/zifaji **conformant** (deleted). `zotiru-33`'s scoped `<style> package { MinimumWidth 300 }` is now wired (S1L-b T5, `resolveElementMinimumWidth`): its `not_nested` package is exact at 4.583in, delta 2.655→0.914. Its remaining 0.914 is the `nested` package **cluster** floor. | **S1L-e** (nested-cluster residual) |
@@ -64,6 +64,59 @@ Container/cluster (40) is the dominant description-sizing gap. The 16
 uncategorized are small and pinned; each is attributed to one of S1L-a..h as
 those missions re-measure. Nothing here except LaTeX is excluded — all count
 against the bar until conformant.
+
+## S1L-f — sprite sizing (parts 1, 2a, 2b — 2026-07-28)
+
+Three passes, each of which found the bucket's stated premise wrong.
+
+**Part 1 — engine misrouting, not sprite sizing.** kofuca-08-pafi749's 478in
+was a `skinparam <selector><<stereo>> {` block leaking its body (that line
+matched neither block-open regex and fell through to the single-line form,
+which read the VALUE as `{`). Every awslib/tupadr3 include ends in an
+`AWSEntityColoring(x)`-style `!definelong` expanding to exactly that block,
+so 53 orphan lines buried the element declarations past
+`descriptive-keywords.ts`'s `SCAN_LINE_LIMIT`; `accepts()` declined and
+`dispatcher.ts#resolve` handed an AWS deployment diagram to the CLASS
+engine, which measured the raw `<img data:…base64…>` markup as label text.
+478.94 → 0.306in.
+
+**Part 2a — the `fontSize/13` scale, and three fixes it unmasked.**
+`CommandCreoleSprite.java:82` scales a creole `<$name>` by
+`Parser.getScale(...) * fc.getSize2D() / 13.0`. The factor lives in the
+creole COMMAND, so it applies to every sprite kind; this port used raw dims
+× requested scale, i.e. assumed font 13. Jar-verified at two font sizes and
+two sprite kinds. Fixing it exposed, in order: per-atom font sizes (the
+sizer measured whole lines at the base font, wrong for `==heading` and
+`<size:N>`), a stereotype extracted from INSIDE a quoted display (+lineH
++STEREO_MARGIN), and `<<x>>` → `«x»` display-text guillemets
+(`CreoleParser.java:175`). 280 → 284/351.
+
+**Part 2b — SVG-form sprites.** `sprite N <svg …>` was not in the grammar at
+all, and bootstrap AND archimate are both SVG-sprite bundles, so every
+`<$name>` from them measured 0. Ported `CommandSpriteSvg` +
+`CommandSpriteSvgMultiline` and `UImageSvg#getData`'s dimension rule: a
+**viewBox wins outright** (3rd/4th numbers, `Math.ceil`'d), else the
+`width=`/`height=` attribute. That precedence is why archimate's
+`width="19.995mm"` never needs unit handling. `getSpriteMonochrome` now
+declines an SVG sprite (it was an unchecked cast); the renderer re-emits the
+element as an `image/svg+xml` data URI, untinted, matching upstream's
+`SpriteSvg`. `stripSpriteRegions` learned the SVG form too — bootstrap is
+~7200 lines of sprites, the same burial the encoded form already needed
+stripping for. Also closed the gap `measureUsecase`'s doc comment had
+flagged: the ellipse footprint now includes `atomHeightBonus` on the HEIGHT
+axis. 284 → **286/351 (81.5%)**; tatori-66-kaci883 and
+sprite-SVG-fill-management-3 conformant; ruziru-69/bootstrap-0 shrank
+0.682747 → 0.124042.
+
+**Open, precisely characterised → S1L-k.** A sprite's USE-CASE footprint is
+not always its declared box. Jar-measured: `bi-globe` at scale 2.5 is
+**43.077 inside a rectangle but 39.642 inside a usecase**, while
+`bi-bootstrap-fill` is 43.077 in BOTH — identical `<svg width="16"
+height="16">` declarations, identical scale, and both scale syntaxes
+(`,scale=` / `{scale=}`) agree. So the ellipse path uses something
+content-dependent, most plausibly `SvgNanoParser`'s drawn-ink bounds rather
+than the declared box. That is an SVG path-bbox subsystem and gets its own
+mission — it is a GAP, not a divergence.
 
 ## S1L-d — `skinparam wrapWidth` in the sizer (DONE 2026-07-28)
 
