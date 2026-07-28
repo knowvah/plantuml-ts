@@ -25,6 +25,7 @@ import {
   textBlockHeight,
   maxLineWidth,
   atomHeightBonus,
+  measureTextBlock,
 } from './leaf-sizing-text.js';
 
 /** `skinparam componentStyle` — only `uml2` (the default) draws the corner
@@ -39,6 +40,11 @@ export interface BoxSizingOpts {
   /** `skinparam minClassWidth` / style `MinimumWidth` (`PName.MinimumWidth`) —
    *  floors the text-block CONTENT width, before margin + icon. Default 0. */
   minimumWidth?: number | undefined;
+  /** `skinparam wrapWidth` / `style.wrapWidth()` (`PName.MaximumWidth`) —
+   *  word-wraps the entity's DESC text block, and only that one (upstream's
+   *  `BodyFactory.create3` passes the strategy to `desc`; `name`/`stereo`
+   *  never receive it). 0/absent = no wrapping, upstream's own default. */
+  wrapWidth?: number | undefined;
 }
 
 /** Legacy actor box constants (kept for the re-export; the DOT size now comes
@@ -375,8 +381,12 @@ function measureBox(
   const [marginH, marginV] = SYMBOL_BOX_MARGIN[node.symbol] ?? DEFAULT_BOX_MARGIN;
   const [iconW, iconH] = boxIcon(node.symbol, opts?.componentStyle);
   const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
-  let contentW = maxLineWidth(node.display, fontSpec, measurer, sprites);
-  let contentH = textBlockHeight(node.display, lineH) + atomHeightBonus(node.display, fontSpec, sprites);
+  const block = measureTextBlock(node.display, fontSpec, measurer, sprites, {
+    lineH,
+    maxWidth: opts?.wrapWidth ?? 0,
+  });
+  let contentW = block.width;
+  let contentH = block.height;
   if (node.stereotype !== undefined && node.stereotype.length > 0) {
     // G1 I5b: one guillemet line per stereotype tag (Stereotype
     // #getMultipleLabels(), EntityImageDescription.java:200-201) -- width

@@ -9,7 +9,7 @@
 
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { DescriptiveLink, DescriptiveNode } from './ast.js';
-import { cleanId, extractColor, extractNodeStereotype, finalizeDisplay } from './parse-helpers.js';
+import { cleanId, extractColor, extractNodeStereotype, resolveNewlineEscapes } from './parse-helpers.js';
 import { classifyEndpointShape } from './link-grammar.js';
 
 // ---------------------------------------------------------------------------
@@ -77,7 +77,18 @@ export function parseBracketDeclaration(bracketName: string, rawExtra: string): 
   // discipline) -- upstream's `quark.getName()` never passes through
   // `Display.getWithNewlines` either (see `finalizeDisplay`'s own doc
   // comment).
-  return buildBracketDeclaration(cleanId(id), finalizeDisplay(bracketName), stereotype, color);
+  //
+  // S1L-d: the quote-strip half of `finalizeDisplay` must NOT run here.
+  // Upstream's `eventuallyRemoveStartingAndEndingDoubleQuote` (java:311)
+  // sees the display with its BRACKETS still attached (`["x"]`), so the
+  // first char is `[`, not a quote, and the strip no-ops; the bracket
+  // wrapper comes off afterwards, leaving any quotes as literal content.
+  // `bracketName` here is ALREADY unbracketed, so passing it through
+  // `stripFullWrap` would strip a quote pair upstream keeps. Jar-verified:
+  // `[plain]` draws `plain`, `["quoted"]` draws `"quoted"`, while the
+  // ordinary quoted forms (`component "cq"`, `component cq2 as "dq"`) do
+  // strip. Only the newline-escape half applies.
+  return buildBracketDeclaration(cleanId(id), resolveNewlineEscapes(bracketName), stereotype, color);
 }
 
 // ---------------------------------------------------------------------------

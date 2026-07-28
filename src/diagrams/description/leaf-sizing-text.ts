@@ -25,6 +25,7 @@ import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeS
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { JAR_DEFAULT_TEXT_COLOR } from './renderer-symbol.js';
+import { getSplitted } from '../../core/klimt/creole/Fission.js';
 
 /** Number of display lines (upstream text block splits on hard newlines). */
 export function lineCount(display: string): number {
@@ -148,4 +149,77 @@ export function atomHeightBonus(display: string, fontSpec: FontSpec, sprites: Sp
   let bonus = 0;
   for (const ln of display.split('\n')) bonus += lineAtomHeightExcess(ln, fontSpec, sprites);
   return bonus;
+}
+/** Per-atom width for `getSplitted`'s `measureAtomWidth` callback — the
+ *  sizer's mirror of the renderer's `measureSingleAtomWidth`
+ *  (`EntityImageDescriptionSupport.ts`), so the two agree on every break
+ *  position. `latex` atoms return 0 here for the same reason
+ *  `creoleVisibleText` drops them: this sizer measures LaTeX through
+ *  `measureNodeLabel`, not the atom stream (it is a named inherent-tolerance
+ *  DIVERGENCE either way). */
+function atomWidth(
+  atom: { kind: string; text?: string; atom?: never },
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  sprites: SpriteDimsLookup | undefined,
+): number {
+  const a = atom as unknown as { kind: string; text: string; atom: Parameters<typeof measureInlineAtom>[0] };
+  if (a.kind === 'text') return measurer.measure(a.text, fontSpec).width;
+  if (a.kind === 'inline') return measureInlineAtom(a.atom, sprites, fontSpec.size).width;
+  return 0;
+}
+
+/**
+ * Width + height of a display text block, word-wrapped at `maxWidth` when
+ * that is > 0 (`skinparam wrapWidth`).
+ *
+ * Wrapping routes through the SAME `Fission.ts#getSplitted` the leaf
+ * RENDERER already used (`EntityImageDescriptionSupport.ts
+ * #buildWrappedLines`) — this sizer simply never called it, so a wrapped
+ * diagram measured its boxes at the unwrapped single-line width while the
+ * renderer drew them wrapped. Reusing the one implementation (rather than
+ * re-deriving the break positions here) is what keeps the two in lock-step,
+ * the same invariant `creoleVisibleText` maintains for the lexer.
+ *
+ * A `HORIZONTAL_LINE` line is never wrapped, matching `buildWrappedLines`
+ * (upstream's `CreoleHorizontalLine` stripe carries no text atoms for
+ * `Fission` to split).
+ *
+ * `maxWidth === 0` (the default — upstream sets no `PName.MaximumWidth`
+ * anywhere) delegates to the pre-existing unwrapped helpers unchanged, so
+ * this is a zero-diff drop-in for every diagram that does not set the
+ * skinparam.
+ */
+export function measureTextBlock(
+  display: string,
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  sprites: SpriteDimsLookup | undefined,
+  opts: { lineH: number; maxWidth: number },
+): { width: number; height: number } {
+  const { lineH, maxWidth } = opts;
+  if (maxWidth <= 0) {
+    return {
+      width: maxLineWidth(display, fontSpec, measurer, sprites),
+      height: textBlockHeight(display, lineH) + atomHeightBonus(display, fontSpec, sprites),
+    };
+  }
+  let width = 0;
+  let height = 0;
+  for (const raw of display.split('\n')) {
+    if (isCreoleHrLine(raw)) {
+      height += CREOLE_HR_HEIGHT;
+      continue;
+    }
+    const built = buildLineAtoms(raw, baseFontConfiguration(fontSpec));
+    const subs = getSplitted(built.atoms, maxWidth, (a) => atomWidth(a as never, fontSpec, measurer, sprites));
+    for (const sub of subs) {
+      let w = 0;
+      for (const a of sub) w += atomWidth(a as never, fontSpec, measurer, sprites);
+      if (w > width) width = w;
+      height += lineH;
+    }
+    height += atomHeightBonus(raw, fontSpec, sprites);
+  }
+  return { width, height };
 }
