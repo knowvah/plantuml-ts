@@ -11,7 +11,7 @@ import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import { scopedKey } from './namespace-groups.js';
 import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './ast.js';
-import { makeNode } from './parse-helpers.js';
+import { makeNode, resolveNewlineEscapes } from './parse-helpers.js';
 import type { EndpointShape } from './link-grammar.js';
 import {
   noteAttachment,
@@ -153,7 +153,14 @@ export function emitNode(state: ParseState, node: DescriptiveNode): void {
  */
 export function ensureEndpoint(state: ParseState, ep: EndpointShape): void {
   if (state.nodesById.has(ep.id) || state.qualifiedNodesById.has(ep.id)) return;
-  const node = makeNode(ep.id, ep.id, ep.symbol);
+  // The DISPLAY resolves `\n`/`\r`/`\l` escapes (`Display.getWithNewlines`,
+  // which `getDummy` routes the display through) while the ID stays raw —
+  // the same split `finalizeDisplay`'s own doc records, since `quark
+  // .getName()` never passes through getWithNewlines. Without this a
+  // multi-line endpoint like `(Transport der Sendung\nEP: …)` measured as
+  // ONE line, 6.27in wide against the jar's 2.89in (fepuvo-06-rugi981,
+  // S1L-e).
+  const node = makeNode(ep.id, resolveNewlineEscapes(ep.id), ep.symbol);
   if (ep.stillUnknown === true) node.stillUnknown = true;
   emitNode(state, node);
 }
@@ -253,7 +260,12 @@ export function startNewPage(state: ParseState): void {
  *  already updates `lastEntityId` since a note node never sets
  *  `declaredAsGroup`. */
 function emitNoteLeaf(state: ParseState, id: string, text: string): void {
-  emitNode(state, makeNode(id, text, 'note'));
+  // A note's text is a Display like any other, so `\n`/`\r`/`\l` escapes
+  // split it into lines (`Display.getWithNewlines`, which every note command
+  // routes its text through). Without this a `note left: a\nb\nc` measured
+  // as ONE very wide line — berufi-69-dara369's note came out 447.24×23
+  // against the jar's 194.39×49 (S1L-e).
+  emitNode(state, makeNode(id, resolveNewlineEscapes(text), 'note'));
 }
 
 /**

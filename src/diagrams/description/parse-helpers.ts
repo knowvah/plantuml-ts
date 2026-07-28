@@ -325,7 +325,13 @@ export const KEYWORD_RE = new RegExp(`^(${ALL_KW_ALT})\\s+(.+)$`, 'i');
  *  description text is label content (tolerant metric), not DOT structure. */
 export const ELEMENT_MULTILINE_OPEN_RE = new RegExp(
   `^(${ALL_KW_ALT})\\s+([\\p{L}\\p{N}_.]+)` +
-    '(?:\\s*(?:<<[^>]+>>|\\[\\[[^\\]]*\\]\\]|#\\w+))*' +
+    // The colour alternative must accept the FULL colour/style spec, not
+    // just `#word`: `node B #red|green;line.dashed;line:blue [` otherwise
+    // failed this pattern entirely and fell through to KEYWORD_RE, which
+    // swallowed the spec AND the trailing `[` into the element's name
+    // (titona-45-jile471 measured 3.50in against the jar's 0.82in, S1L-e).
+    // Same character class `RE_COLOR` uses in parse-helpers-strings.ts.
+    '(?:\\s*(?:<<[^>]+>>|\\[\\[[^\\]]*\\]\\]|#[\\w:;.#\\\\/|-]+))*' +
     '\\s*\\[[^\\[]*$',
   'iu',
 );
