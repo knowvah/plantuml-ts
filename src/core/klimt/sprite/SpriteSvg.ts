@@ -69,7 +69,7 @@ const PATH_D_RE = /<path[^>]*\sd="([^"]+)"/gi;
  * `undefined` when the element draws no `<path>` at all; the caller then falls
  * back to the declared box.
  */
-export function svgInkBox(svg: string): { width: number; height: number } | undefined {
+export function svgInkBox(svg: string): { x: number; y: number; width: number; height: number } | undefined {
   let minX = Number.POSITIVE_INFINITY;
   let minY = Number.POSITIVE_INFINITY;
   let maxX = Number.NEGATIVE_INFINITY;
@@ -86,7 +86,10 @@ export function svgInkBox(svg: string): { width: number; height: number } | unde
     maxX = Math.max(maxX, box.maxX);
     maxY = Math.max(maxY, box.maxY);
   }
-  return found ? { width: maxX - minX, height: maxY - minY } : undefined;
+  // The OFFSET matters as much as the size: `Footprint#drawPath` records
+  // `(x + path.getMinX(), y + path.getMinY())`, so where the ink sits inside
+  // the declared box decides how it stacks against neighbouring lines.
+  return found ? { x: minX, y: minY, width: maxX - minX, height: maxY - minY } : undefined;
 }
 
 /** A registry entry backed by an inline SVG element. `svg` is the verbatim
@@ -96,8 +99,11 @@ export class SpriteSvg implements Sprite {
   readonly kind = 'svg';
   readonly width: number;
   readonly height: number;
-  /** Drawn-ink extent (see `svgInkBox`) — what the use-case ellipse footprint
-   *  is fit to. Falls back to the declared box when no `<path>` is drawn. */
+  /** Drawn-ink box (see `svgInkBox`) — position AND size, both of which the
+   *  use-case footprint needs. Falls back to the declared box when no
+   *  `<path>` is drawn. */
+  readonly inkX: number;
+  readonly inkY: number;
   readonly inkWidth: number;
   readonly inkHeight: number;
 
@@ -105,10 +111,12 @@ export class SpriteSvg implements Sprite {
     readonly svg: string,
     width: number,
     height: number,
-    ink?: { width: number; height: number },
+    ink?: { x: number; y: number; width: number; height: number },
   ) {
     this.width = width;
     this.height = height;
+    this.inkX = ink?.x ?? 0;
+    this.inkY = ink?.y ?? 0;
     this.inkWidth = ink?.width ?? width;
     this.inkHeight = ink?.height ?? height;
   }

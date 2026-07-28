@@ -97,16 +97,47 @@ byte-identically to before.
 ruziru-69-xixo434 + bootstrap-0 shrank 0.124042 → **0.069047**. 286/351
 (81.5%) holds, zero widened, class ratchet unmoved.
 
-**Residual — DIAGNOSED, NOT SOLVED.** Node `a` of both fixtures is a MIXED
-sprite+text display (`"<$bi-globe>\nbi-globe"`): ours 73.965×48.558 vs the
-jar's 66.026×43.587. A mixed block's footprint depends on where each shape is
-actually DRAWN — `Footprint#drawText` offsets its box by
-`dim.getHeight() - 1.5`, and a sprite's ink sits at an OFFSET inside its
-declared line box (bi-globe's ink starts 1.077 units down) — so a per-line
-max/sum model cannot express it. Back-solving the jar's numbers reconciled
-with neither candidate model, so this is left open rather than guessed:
-closing it means modelling `Footprint`'s point collection with real draw
-positions. Tracked as **S1L-k residual** on the S1L-k row.
+**Residual — CLOSED (2026-07-28), by porting the real fit.** The mixed case
+could not be expressed as a bounding box because the ellipse is not fit to
+one: `ContainingEllipse` maps `y → y/alpha` and takes the SMALLEST ENCLOSING
+CIRCLE of the collected points (`width = 2r`, `height = 2r·alpha`). The old
+closed form is exactly right for two opposite corners or a rectangle's four
+— hence every text-only and sprite-only fixture matching it — but wrong for a
+mixed block, where the fit also becomes ORDER-DEPENDENT (jar:
+`"<$bi-globe>\nbi-globe"` = 66.026×43.587 vs `"bi-globe\n<$bi-globe>"` =
+69.791×45.945, same lines swapped).
+
+Two positional details were **derived, not fitted**:
+
+- a TEXT run's box is `[y + ypos − h + 1.5, y + ypos + 1.5]`, where
+  `Footprint#drawText` applies the `−(h − 1.5)` shift and `AtomText#drawU`
+  draws at `ypos = height − descent`, with `StringBounder#getDescent`
+  defaulting to `size / 4.5`. At size 14 that is 10.888…, so the box starts
+  **1.611 above** its line's top — and that asymmetry is exactly what makes
+  line order matter. (A numeric scan independently landed on 10.9 before the
+  `/4.5` constant was found, which is what confirmed it.)
+- a SPRITE contributes its INK box at its own OFFSET inside the declared line
+  box, not the declared box.
+
+Stereotype lines are merged ABOVE the label before the fit
+(`EntityImageUseCase.java:96-109`), so they contribute points too —
+mopimi-10-jaco443 / lunexo-59-fupo775 are entirely stereotyped use-cases and
+were the proof.
+
+Verified against the jar on SEVEN shapes (sprite; text; text×2; sprite+text;
+text+sprite; sprite+text×2; sprite×2) to within **5e-4 px**.
+
+**One more over-reach fixed en route** — same class as S1L-f's
+stereotype-in-a-quoted-display bug, reached through a different path:
+`stripUrl` removed a `[[url]]` from INSIDE a quoted display. Upstream's
+`UrlBuilder.OPTIONAL` is anchored AFTER the CODE/DISPLAY alternatives, so
+inside the quotes `[[…]]` is ordinary Creole link content. Stripping it
+dropped real display text — bivira-53 lost a whole URL, and its sibling lost
+a sprite NESTED in one. `stripUrl` is now quote-aware.
+
+**Result.** 286 → **291/351 (81.5% → 82.9%)**, zero widened.
+ruziru-69-xixo434 + bootstrap-0 (the S1L-k targets) CONFORMANT, along with
+mopimi-10, lunexo-59, fosito-02; bivira-53 shrank 1.884532 → 0.073842.
 
 ## S1L-f — sprite sizing (parts 1, 2a, 2b — 2026-07-28)
 

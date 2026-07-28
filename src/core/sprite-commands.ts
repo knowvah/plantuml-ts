@@ -93,9 +93,19 @@ export function getSprite(registry: SpriteRegistry, name: string): Sprite | unde
  *  bridge the batch-2 journal flagged for this task. */
 export function spriteDimsLookupFor(registry: SpriteRegistry): SpriteDimsLookup {
   return {
-    get(name: string): { width: number; height: number } | undefined {
+    get(name: string) {
       const sprite = getSprite(registry, name);
-      return sprite === undefined ? undefined : { width: sprite.width, height: sprite.height };
+      if (sprite === undefined) return undefined;
+      if (isSpriteSvg(sprite))
+        return {
+          width: sprite.width,
+          height: sprite.height,
+          inkX: sprite.inkX,
+          inkY: sprite.inkY,
+          inkWidth: sprite.inkWidth,
+          inkHeight: sprite.inkHeight,
+        };
+      return { width: sprite.width, height: sprite.height };
     },
   };
 }
