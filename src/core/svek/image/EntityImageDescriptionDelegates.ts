@@ -43,7 +43,14 @@ export function buildDesc(
     return TextBlockUtils.empty(paint.minimumWidth ?? 0, 0);
   }
   const font = displayEqualsCode ? paint.fontTitle : (paint.fontBody ?? paint.fontTitle);
-  return buildTextBlock(labels.displayText, font, paint.titleAlignment, atomImageResolverFor?.(font), paint.wrapWidth ?? 0);
+  return buildTextBlock(
+    labels.displayText,
+    font,
+    paint.titleAlignment,
+    atomImageResolverFor?.(font),
+    paint.wrapWidth ?? 0,
+    paint.guillemet,
+  );
 }
 
 /** Upstream: the `stereo` local-variable if/else-if/else chain, minus

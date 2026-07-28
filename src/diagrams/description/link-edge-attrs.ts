@@ -17,7 +17,12 @@ import type { DescriptiveLink } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import { resolveInlineLinks } from './parse-helpers.js';
-import { measureLineWithAtoms, type SpriteDimsLookup } from '../../core/creole-atoms.js';
+import {
+  type SpriteDimsLookup,
+} from '../../core/creole-atoms.js';
+import {
+  measureLineWithAtoms,
+} from '../../core/creole-atoms-measure.js';
 
 // ---------------------------------------------------------------------------
 // Graph spacing (nodesep / ranksep) — DotStringFactory.createDotString +

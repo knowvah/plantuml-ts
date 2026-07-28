@@ -39,7 +39,7 @@ import { withStdlib } from '../src/core/tim/StdlibStore.js';
 import { buildStdlibAssetsStore } from '../tests/helpers/stdlib-assets-store.js';
 import { WidthTableMeasurer } from '../src/core/measurer.js';
 import type { FontSpec, StringMeasurer } from '../src/core/measurer.js';
-import { measureLineWithAtoms } from '../src/core/creole-atoms.js';
+import { measureLineWithAtoms } from '../src/core/creole-atoms-measure.js';
 import { parseCreole } from '../src/core/creole.js';
 import { resolveTextEscapes } from '../src/core/text-escapes.js';
 import { classifyStripeLine } from '../src/core/klimt/creole/legacy/CreoleStripeSimpleParser.js';

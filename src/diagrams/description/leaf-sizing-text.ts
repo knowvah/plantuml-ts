@@ -16,16 +16,18 @@
 
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import {
-  measureLineWithAtoms,
-  measureInlineAtom,
-  lineAtomHeightExcess,
   type SpriteDimsLookup,
 } from '../../core/creole-atoms.js';
+import {
+  measureInlineAtom,
+  lineAtomHeightExcess,
+} from '../../core/creole-atoms-measure.js';
 import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { JAR_DEFAULT_TEXT_COLOR } from './renderer-symbol.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
+import { manageGuillemet, type GuillemetPair } from '../../core/text/Guillemet.js';
 
 /** Number of display lines (upstream text block splits on hard newlines). */
 export function lineCount(display: string): number {
@@ -48,14 +50,64 @@ export function isCreoleHrLine(line: string): boolean {
   return classifyStripeLine(line).type === 'HORIZONTAL_LINE';
 }
 
-/** Text-block height: each display line contributes one `lineH`, except creole
- *  horizontal rules which contribute the thinner `CREOLE_HR_HEIGHT` (S1L-b) —
- *  matching upstream's `UHorizontalLine`-carrying stripe, which draws a rule
- *  instead of a glyph line. */
-export function textBlockHeight(display: string, lineH: number): number {
+/**
+ * Per-line text metrics, measured atom-by-atom at each atom's OWN font — the
+ * same fonts the leaf renderer draws with, because both come from the one
+ * shared `buildLineAtoms` lexer (creole-lexer-unification ADR-1). That lexer
+ * already bakes in BOTH font cascades: a `==heading` line's
+ * `fontConfigurationForHeading` (order 0 -> +4, 1 -> +2, 2 -> +1,
+ * `StripeSimple.ts`:271) and any inline `<size:N>` command.
+ *
+ * The sizer previously concatenated every text atom and measured the result
+ * at the BASE font. That is exact only while every atom shares the base size
+ * — true for plain lines, wrong for a heading or a `<size:N>` run, which the
+ * renderer drew bigger/smaller than the box reserved. Same sizer<->renderer
+ * divergence family as the creole lexer and wrapWidth (S1L-f:
+ * nenedo-78-fiva569 needs 16px for `==label` and 12px for
+ * `//<size:12>[technology]</size>//`).
+ */
+function lineTextMetrics(
+  line: string,
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  guillemet?: GuillemetPair,
+): { width: number; height: number } {
+  const built = buildLineAtoms(manageGuillemet(line, guillemet), baseFontConfiguration(fontSpec));
+  let width = 0;
+  let height = 0;
+  for (const atom of built.atoms) {
+    if (atom.kind !== 'text') continue;
+    const size = atom.font.size;
+    width += measurer.measure(atom.text, { ...fontSpec, size }).width;
+    if (size > height) height = size;
+  }
+  return { width, height: height === 0 ? built.lineFont.size : height };
+}
+
+/** Text-block height: each display line contributes its own tallest text-atom
+ *  font (headings and `<size:N>` runs differ from the base — see
+ *  `lineTextMetrics`), except creole horizontal rules which contribute the
+ *  thinner `CREOLE_HR_HEIGHT` (S1L-b), matching upstream's
+ *  `UHorizontalLine`-carrying stripe. `fontSpec`/`measurer` are optional so
+ *  the pre-existing uniform-`lineH` callers keep their exact behavior when
+ *  they have no font in scope. */
+export function textBlockHeight(
+  display: string,
+  lineH: number,
+  fontSpec?: FontSpec,
+  measurer?: StringMeasurer,
+  guillemet?: GuillemetPair,
+): number {
   let h = 0;
   for (const ln of display.split('\n')) {
-    h += isCreoleHrLine(ln) ? CREOLE_HR_HEIGHT : lineH;
+    if (isCreoleHrLine(ln)) {
+      h += CREOLE_HR_HEIGHT;
+      continue;
+    }
+    h +=
+      fontSpec === undefined || measurer === undefined
+        ? lineH
+        : lineTextMetrics(ln, fontSpec, measurer, guillemet).height;
   }
   return h;
 }
@@ -128,6 +180,7 @@ export function maxLineWidth(
   fontSpec: FontSpec,
   measurer: StringMeasurer,
   sprites?: SpriteDimsLookup,
+  guillemet?: GuillemetPair,
 ): number {
   let max = 0;
   for (const raw of display.split('\n')) {
@@ -135,8 +188,7 @@ export function maxLineWidth(
     // the RAW, still-`<U+XXXX>`-encoded line, in lock-step with the sizer's
     // own `isCreoleHrLine` and the renderer's `buildLine` — the sizer↔
     // renderer sync invariant.
-    const ln = creoleVisibleText(raw, fontSpec);
-    const w = measureLineWithAtoms(ln, fontSpec, measurer, sprites).width + inlineAtomWidth(raw, fontSpec, sprites);
+    const w = lineTextMetrics(raw, fontSpec, measurer, guillemet).width + inlineAtomWidth(raw, fontSpec, sprites);
     if (w > max) max = w;
   }
   return max;
@@ -195,13 +247,15 @@ export function measureTextBlock(
   fontSpec: FontSpec,
   measurer: StringMeasurer,
   sprites: SpriteDimsLookup | undefined,
-  opts: { lineH: number; maxWidth: number },
+  opts: { lineH: number; maxWidth: number; guillemet?: GuillemetPair },
 ): { width: number; height: number } {
-  const { lineH, maxWidth } = opts;
+  const { lineH, maxWidth, guillemet } = opts;
   if (maxWidth <= 0) {
     return {
-      width: maxLineWidth(display, fontSpec, measurer, sprites),
-      height: textBlockHeight(display, lineH) + atomHeightBonus(display, fontSpec, sprites),
+      width: maxLineWidth(display, fontSpec, measurer, sprites, guillemet),
+      height:
+        textBlockHeight(display, lineH, fontSpec, measurer, guillemet) +
+        atomHeightBonus(display, fontSpec, sprites),
     };
   }
   let width = 0;
@@ -211,7 +265,7 @@ export function measureTextBlock(
       height += CREOLE_HR_HEIGHT;
       continue;
     }
-    const built = buildLineAtoms(raw, baseFontConfiguration(fontSpec));
+    const built = buildLineAtoms(manageGuillemet(raw, guillemet), baseFontConfiguration(fontSpec));
     const subs = getSplitted(built.atoms, maxWidth, (a) => atomWidth(a as never, fontSpec, measurer, sprites));
     for (const sub of subs) {
       let w = 0;

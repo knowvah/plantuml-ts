@@ -51,7 +51,13 @@ describe('leaf-sizing — shared sizer/renderer creole lexer (creole-lexer-unifi
 
     const sizerWidth = boxWidth(display, measurer);
     const groundTruthWidth = boxWidth(strippedDecoded, measurer);
-    expect(sizerWidth).toBe(groundTruthWidth);
+    // toBeCloseTo, not toBe: the sizer now measures each creole atom under
+    // ITS OWN font and SUMS (matching the renderer's `measureAtomsWidthHeight`
+    // and so picking up `==heading`/`<size:N>` cascades, S1L-f), so the tagged
+    // form accumulates across several atoms while the plain form is one
+    // `measure` call -- a ~1e-14 floating-point association difference, not a
+    // behavioural one.
+    expect(sizerWidth).toBeCloseTo(groundTruthWidth, 10);
 
     // Had the sizer left the tags/escapes literal (the pre-fix `parseCreole`
     // behavior), the box would measure at least the RAW literal text's own

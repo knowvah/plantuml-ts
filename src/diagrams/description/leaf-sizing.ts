@@ -20,6 +20,7 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureNodeLabel } from '../../core/latex.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
+import type { GuillemetPair } from '../../core/text/Guillemet.js';
 import {
   lineCount,
   textBlockHeight,
@@ -45,6 +46,11 @@ export interface BoxSizingOpts {
    *  `BodyFactory.create3` passes the strategy to `desc`; `name`/`stereo`
    *  never receive it). 0/absent = no wrapping, upstream's own default. */
   wrapWidth?: number | undefined;
+  /** `skinparam guillemet` (`theme.guillemetStart`/`End`) — the pair a
+   *  `<<…>>` run in the DISPLAY is rewritten to. Threaded so the sizer
+   *  measures what `manageGuillemet` will actually render (S1L-f); absent =
+   *  upstream's `«`/`»` default. */
+  guillemet?: GuillemetPair | undefined;
 }
 
 /** Legacy actor box constants (kept for the re-export; the DOT size now comes
@@ -384,6 +390,7 @@ function measureBox(
   const block = measureTextBlock(node.display, fontSpec, measurer, sprites, {
     lineH,
     maxWidth: opts?.wrapWidth ?? 0,
+    ...(opts?.guillemet !== undefined ? { guillemet: opts.guillemet } : {}),
   });
   let contentW = block.width;
   let contentH = block.height;

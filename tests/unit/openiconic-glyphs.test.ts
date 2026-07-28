@@ -16,7 +16,8 @@ import {
   openIconicFactor,
   openIconicOriginY,
 } from '../../src/core/openiconic-glyphs.js';
-import { scanLineForAtoms, matchAtomAt, measureInlineAtom } from '../../src/core/creole-atoms.js';
+import { scanLineForAtoms, matchAtomAt } from '../../src/core/creole-atoms.js';
+import { measureInlineAtom } from '../../src/core/creole-atoms-measure.js';
 
 describe('isKnownOpenIconicGlyph', () => {
   it('recognizes all 6 corpus-reach glyph names', () => {

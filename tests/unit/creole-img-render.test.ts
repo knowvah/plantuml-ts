@@ -34,11 +34,8 @@
  * tints — D7's documented, deliberate divergence, DIVERGENCES.md).
  */
 import { describe, expect, test } from 'vitest';
-import {
-  scanLineForAtoms,
-  measureInlineAtom,
-  type InlineAtomToken,
-} from '../../src/core/creole-atoms.js';
+import { scanLineForAtoms, type InlineAtomToken } from '../../src/core/creole-atoms.js';
+import { measureInlineAtom, spriteScale } from '../../src/core/creole-atoms-measure.js';
 import { createSpriteRegistry, addSprite } from '../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../src/core/klimt/sprite/SpriteMonochrome.js';
 import { spriteMonochromeAsLike, spriteToPngDataUri } from '../../src/core/klimt/sprite/sprite-raster.js';
@@ -153,10 +150,17 @@ describe('makeAtomImageResolverFor', () => {
     // the resolver's width/height must equal measureInlineAtom's own
     // numbers — the SAME ones leaf-sizing.ts used to size the label box
     // during layout.
-    const dims = measureInlineAtom(atom, { get: (name) => (name === 'foo' ? { width: 4, height: 4 } : undefined) });
+    // The resolver threads its own FONT.size, so the cross-check must too --
+    // `CommandCreoleSprite.java:82` scales a creole sprite by the ambient
+    // font size over a 13px reference (S1L-f, jar-verified).
+    const dims = measureInlineAtom(
+      atom,
+      { get: (name) => (name === 'foo' ? { width: 4, height: 4 } : undefined) },
+      FONT.size,
+    );
     expect(result!.width).toBe(dims.width);
     expect(result!.height).toBe(dims.height);
-    expect(result!.width).toBe(8); // 4 * scale(2)
+    expect(result!.width).toBeCloseTo(4 * 2 * (14 / 13), 10); // 4 * scale(2) * size/13
   });
 
   test('unknown sprite name resolves to undefined -- skip, matching StripeSimple.addSprite (never added)', () => {
@@ -183,7 +187,13 @@ describe('makeAtomImageResolverFor', () => {
     // the tint's dark end (AtomSprite: `forcedColor == null ? fontColor : forcedColor`).
     const sprite = new SpriteMonochrome(4, 4, 16);
     for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) sprite.setGray(x, y, (x + y) % 16);
-    const direct = spriteToPngDataUri(spriteMonochromeAsLike(sprite), '#FF0000', undefined, 1);
+    // Same scale the resolver now passes: requested 1 * FONT.size / 13.
+    const direct = spriteToPngDataUri(
+      spriteMonochromeAsLike(sprite),
+      '#FF0000',
+      undefined,
+      spriteScale(1, FONT.size),
+    );
     expect(result!.width).toBe(direct.width);
     expect(result!.height).toBe(direct.height);
   });

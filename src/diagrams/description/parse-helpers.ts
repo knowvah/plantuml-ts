@@ -204,7 +204,16 @@ function buildNameSection(
 export function parseNameSection(rest: string): NameSection {
   const trimmedRest = rest.trim();
   const leading = splitLeadingQuote(trimmedRest);
-  let remainder = leading === undefined ? stripUrl(trimmedRest) : leading.quoted + stripTrailingUrl(leading.tail);
+  // Decoration is scanned only OUTSIDE a leading quoted display. Guillemets
+  // INSIDE the quotes are literal display text, not a stereotype: upstream's
+  // STEREOTYPE group sits after the CODE/DISPLAY alternatives in
+  // `CommandCreateElementFull`'s concat, so it can only match what follows
+  // the closing quote. Scanning the rejoined string extracted the guillemets
+  // AND left them in the display, so the box reserved one extra stereotype
+  // line (+lineH) plus STEREO_MARGIN (+2) that upstream never reserves --
+  // the exact +14/+2 signature on nenedo-78-fiva569's
+  // `rectangle "<<something>>\n==label\n..."` node (S1L-f).
+  let remainder = leading === undefined ? stripUrl(trimmedRest) : stripTrailingUrl(leading.tail);
   let stereotype: readonly string[] | undefined;
   let color: string | undefined;
 
@@ -217,6 +226,17 @@ export function parseNameSection(rest: string): NameSection {
 
   const cr = extractColor(remainder);
   if (cr !== undefined) { color = cr.color; remainder = cr.remainder.trim(); }
+
+  // Re-attach the quoted display the extractors were kept away from. The
+  // separator space must survive: `stripTrailingUrl` deliberately preserves
+  // the tail's LEADING space (see its doc — `RE_SQ_AS_ALIAS` requires `\s+`
+  // before `as` for the single-quote forms), but every extractor above
+  // `.trim()`s what it returns, which would re-glue `'Complex Name'` to `as`
+  // and break the alias match.
+  if (leading !== undefined) {
+    const gap = /^\s/.test(stripTrailingUrl(leading.tail)) && remainder !== '' ? ' ' : '';
+    remainder = leading.quoted + gap + remainder;
+  }
 
   const aliases = parseAliasForms(remainder);
   if (aliases !== undefined) {

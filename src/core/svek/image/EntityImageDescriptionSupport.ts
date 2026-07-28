@@ -44,6 +44,7 @@ import type { AtomImageResolver } from '../../creole-atoms.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import { buildLineAtoms, type LineBuildAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
 import { getSplitted } from '../../klimt/creole/Fission.js';
+import { manageGuillemet, type GuillemetPair } from '../../text/Guillemet.js';
 import { renderLatexAsImage } from '../../latex.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
 import { USymbols, componentStyleToUSymbol } from '../../decoration/symbol/USymbols.js';
@@ -399,8 +400,15 @@ export function buildTextBlock(
   align: HorizontalAlignment,
   resolveAtomImage?: AtomImageResolver,
   maxWidth = 0,
+  guillemet?: GuillemetPair,
 ): TextBlock {
-  const lines = text.length === 0 ? [] : text.split('\n');
+  // `<<x>>` -> `«x»` before anything is classified or measured, mirroring
+  // `CreoleParser.java:175`'s `skinParam.guillemet().manageGuillemet(...)`
+  // ahead of `createStripes`. The SIZER applies the same transform at the
+  // same point (`leaf-sizing-text.ts#lineTextMetrics`), so box and ink agree
+  // (S1L-f).
+  const managed = manageGuillemet(text, guillemet);
+  const lines = managed.length === 0 ? [] : managed.split('\n');
 
   function calculateDimension(stringBounder: StringBounder): XDimension2D {
     const built = buildWrappedLines(lines, font, resolveAtomImage, stringBounder, maxWidth);

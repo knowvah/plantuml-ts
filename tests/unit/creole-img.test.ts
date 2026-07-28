@@ -8,14 +8,8 @@
  * decisions.md D7/D9.
  */
 import { describe, it, expect } from 'vitest';
-import {
-  scanLineForAtoms,
-  measureInlineAtom,
-  measureLineWithAtoms,
-  lineAtomHeightExcess,
-  type SpriteDimsLookup,
-  type InlineAtomToken,
-} from '../../src/core/creole-atoms.js';
+import { scanLineForAtoms, type SpriteDimsLookup, type InlineAtomToken } from '../../src/core/creole-atoms.js';
+import { measureInlineAtom, measureLineWithAtoms, lineAtomHeightExcess } from '../../src/core/creole-atoms-measure.js';
 import { parsePngIhdrFromDataUri } from '../../src/core/klimt/sprite/png-ihdr.js';
 import { buildLinkEdgeAttributes } from '../../src/diagrams/description/link-edge-attrs.js';
 import type { DescriptiveLink } from '../../src/diagrams/description/ast.js';
@@ -322,7 +316,10 @@ describe('measureLineWithAtoms', () => {
     const withSprite = 'Label <$Foo{scale=2}>';
     const baseline = measureLineWithAtoms(withoutSprite, fontSpec, stubMeasurer, sprites);
     const withAtom = measureLineWithAtoms(withSprite, fontSpec, stubMeasurer, sprites);
-    expect(withAtom.width).toBe(baseline.width + 80); // 40 * scale 2
+    // 40 * scale 2 * (fontSpec.size 12 / 13) -- `CommandCreoleSprite.java:82`
+    // scales a creole sprite by the ambient font size over a 13px reference
+    // (S1L-f, jar-verified). This expectation previously omitted that factor.
+    expect(withAtom.width).toBeCloseTo(baseline.width + 40 * 2 * (12 / 13), 10);
   });
 });
 

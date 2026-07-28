@@ -308,7 +308,16 @@ describe('description engine — T7 sprite/img inline-atom rendering', () => {
 
     const imageMatches = svg.match(/<image[^>]*>/g) ?? [];
     expect(imageMatches).toHaveLength(1);
-    expect(svg).toMatch(/<image[^>]*width="4"[^>]*height="4"[^>]*xlink:href="data:image\/png;base64,[^"]+"/);
+    // 4 * scale(1) * (default font 14 / 13) -- `CommandCreoleSprite.java:82`
+    // scales a creole sprite by the ambient font size over a 13px reference
+    // (S1L-f, jar-verified); this used to assert the unscaled 4.
+    const spriteSide = (4 * 14) / 13;
+    expect(svg).toMatch(
+      new RegExp(
+        `<image[^>]*width="${spriteSide.toFixed(4)}[^"]*"[^>]*height="${spriteSide.toFixed(4)}[^"]*"` +
+          '[^>]*xlink:href="data:image/png;base64,[^"]+"',
+      ),
+    );
     // The label text still renders alongside the atom.
     expect(svg).toContain('Icon');
   });
