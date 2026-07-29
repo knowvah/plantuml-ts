@@ -111,6 +111,15 @@ skill's gitignore instruction. `.claude/` is ignored.
 - **Verify a load-bearing claim before repeating it.** Eight were corrected
   against the code last mission — including T6's "no defaultFont seam",
   which ADR-3 corrects: the seam EXISTS and is simply never passed.
+- **"Not ported yet" is NEVER "unreachable"** (ADR-8 corollary). This port
+  is porting every PlantUML diagram type, so "its only caller is a diagram
+  type we have not built" does not justify dropping a member — nor does "no
+  caller today". Port it, or STOP and report. T7 dropped
+  `XRectangle2D#intersect` on exactly this reasoning and had to be reversed.
+- **A scoped substitute may already exist — check before proposing one.**
+  T2b offered the maintainer a choice between porting a foundation and
+  "deciding to build a scoped substitute" that was already built and
+  self-documented (`EntityImageDescriptionSupport.ts#buildTextBlock`).
 - **Jar probe**, and its two traps:
   ```sh
   java -DPLANTUML_DETERMINISTIC_TEXT=true -DPLANTUML_DUMP_DOT=<dir> \

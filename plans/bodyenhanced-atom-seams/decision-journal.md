@@ -308,3 +308,40 @@ implements `Ports`/`WithPorts`, which T2a already dropped from
 `TextBlockLineBefore` as unreachable. T8 must decide once, explicitly, and
 record it. Two reflexive drops of the same interface would be an invisible
 divergence.
+
+### T7 landed, then T7b reversed one of its decisions
+
+T7 ported `Sheet`, `CreoleMode`, `CreoleContext`, `LineBreakStrategy`,
+`XRectangle2D`. Gates verified by the orchestrator: 409 files / 10506
+tests, 317/351 w0, 219/708 w0, 262/90/708 EQUAL. `XRectangle2D` correctly
+judged to have no pre-existing equivalent — `URectangle` ports a drawable
+shape, `MinMax` is a bounding-box accumulator with a different Java origin.
+
+**The orchestrator accepted a bad argument and the maintainer caught it.**
+T7 dropped `XRectangle2D#intersect(XLine2D)` because its only upstream
+callers are in `wbs/WBSLink.java` and WBS is "a diagram type this port has
+not built." I verified the call sites, confirmed WBS was absent from
+`src/diagrams/`, and signed it off as "proven unreachability."
+
+That was wrong. **This port is porting every PlantUML diagram type.** WBS
+is live upstream (`DiagramType.java:46`, `:206`, `:257`; 15-file package)
+and `'wbs'` is ALREADY in this port's own `DiagramType` union at
+`.claude/catalog.md:56`. The method is unreached, not unreachable. I
+checked the wrong question — "is WBS built today" instead of "will WBS ever
+be built" — and the second is the one that decides whether code may be
+dropped.
+
+Also answered, since it was asked: this is not pre-June residue.
+`XRectangle2D.ts` was authored by T7 today. The abandoned pre-June effort
+was the in-house graphviz/dot hand-port replaced by `@knowvah/dot-engine`
+(`src/core/dot/`), an unrelated subsystem.
+
+**Audited for recurrence:** grepped `.agent-notes/` and `DIVERGENCES.md`
+for drops justified by an unported diagram type. Exactly ONE hit — T7's own
+note. Not systemic.
+
+**Reversed by T7b** (ports `XLine2D`, reinstates `intersect`, rewrites T7's
+note so it stops teaching the wrong lesson), and the rule is now encoded as
+the **ADR-8 corollary** in `decisions.md` plus a bullet in the README's
+method constraints, so it binds every remaining task rather than living in
+this journal entry.

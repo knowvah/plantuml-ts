@@ -186,6 +186,31 @@ deliberately dropped them from `TextBlockLineBefore` as unreachable. Batch
 3a must decide once, explicitly, and record it — not drop them a second
 time by reflex.
 
+### ADR-8 corollary — "not ported yet" is NEVER "unreachable"
+
+**Added 2026-07-29 after T7 got this wrong and the maintainer caught it.**
+
+T7 dropped `XRectangle2D#intersect(XLine2D)` because its only upstream
+callers live in `wbs/WBSLink.java` and WBS "is a diagram type this port has
+not built." The orchestrator accepted that reasoning. Both were wrong.
+
+**This port is porting every PlantUML diagram type.** WBS is live upstream
+(`DiagramType.java:46` enum member, `:206` parses `@startwbs`, `:257` maps
+`SName.wbsDiagram`, 15-file package) and `'wbs'` is ALREADY in this port's
+own `DiagramType` union at `.claude/catalog.md:56`. The method is not
+unreachable; it is unreached. Only the first justifies dropping code.
+
+**The rule, binding on every remaining task:** a member may be dropped only
+if it is *genuinely* unreachable — the code path cannot exist in this port
+even once the roadmap is complete. "Its caller is a diagram type we have
+not ported yet", "no caller today", and "the current mission does not need
+it" are all **invalid** justifications. When the dependency is merely
+unported, port it or STOP and report; do not drop.
+
+Reversed by T7b, which ports `XLine2D` and reinstates `intersect`. Audited
+at the same time: this was the ONLY instance of the pattern in the repo
+(one hit across `.agent-notes/` and `DIVERGENCES.md`).
+
 ## Accepted loosening (maintainer-approved)
 
 **SVG drift in T4 is acceptable IF jar-verified.** Drift that matches the
