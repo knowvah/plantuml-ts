@@ -207,9 +207,26 @@ not ported yet", "no caller today", and "the current mission does not need
 it" are all **invalid** justifications. When the dependency is merely
 unported, port it or STOP and report; do not drop.
 
-Reversed by T7b, which ports `XLine2D` and reinstates `intersect`. Audited
-at the same time: this was the ONLY instance of the pattern in the repo
-(one hit across `.agent-notes/` and `DIVERGENCES.md`).
+Reversed by T7b, which ports `XLine2D` and reinstates `intersect`.
+
+**The first audit was too narrow and missed one.** It grepped only for
+drops justified by an *unported diagram type* and found a single hit. But
+the corollary also invalidates "no caller today" — and **T2a stripped
+`getPorts`/`WithPorts` (and check `getInnerPosition`) from
+`TextBlockLineBefore.ts`** on exactly that reasoning plus "`Ports`/
+`WithPorts` don't exist in this port." `src/core/svek/` is substantial here
+and svek is plainly in scope, so that is a gap to close, not a licence to
+skip. Upstream, `WithPorts` is implemented by `TextBlockLineBefore`,
+`SheetBlock2`, `BodyEnhanced1`, `MethodsOrFieldsArea`, `Body3`,
+`TextBlockMap`, `TextBlockCucaJSon`, `TextBlockVertical`, `TextBlockMarged`
+— it is load-bearing across the exact classes this mission ports.
+
+T8 ports `Ports`/`WithPorts` and reinstates them on `TextBlockLineBefore`.
+
+**Lesson for future audits:** grep for the *justification shape*, not one
+example of it. "No caller", "not needed yet", "doesn't exist in this port",
+and "its caller is an unported X" are all the same defect wearing different
+clothes.
 
 ## Accepted loosening (maintainer-approved)
 
