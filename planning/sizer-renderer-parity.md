@@ -48,10 +48,10 @@ justification a future reader needs, not as a label.
 | setting | resolver / source | renderer call site | sizer call site | verdict |
 |---|---|---|---|---|
 | `skinparam wrapWidth` | `theme.wrapWidth` — `src/core/theme.ts:112` | `renderer-entity.ts:218` (all symbols) → `EntityImageDescriptionDelegates.ts:51` → `buildWrappedLines`; note path `renderer-entity.ts:295` | `layout.ts:433` → `layout-dot-tree.ts:176` → `BoxSizingOpts.wrapWidth` → `leaf-sizing.ts:313` — **`measureBox` ONLY** | `GAP` — partially threaded; jar-proven size-affecting on the 5 sizing paths that never receive it (see Proofs) |
-| `skinparam guillemet` | `theme.colors.graph.guillemetStart/End` | `renderer-entity.ts:219-222`, `renderer-entity.ts:296-297`; applied `EntityImageDescriptionSupport.ts:410` (`manageGuillemet`) | `layout.ts:434-437` → `layout-dot-tree.ts:177` → `BoxSizingOpts.guillemet` → `leaf-sizing.ts:314` — **`measureBox` ONLY** | `GAP` — partially threaded; same 5 sizing paths as `wrapWidth`, same mechanism (`maxLineWidth`'s `guillemet` param at `leaf-sizing-text.ts:197` is left `undefined` by every non-`measureBox` caller). Inferred from the shared code path, not separately probed. |
+| `skinparam guillemet` | `theme.colors.graph.guillemetStart/End` | `renderer-entity.ts:219-222`, `renderer-entity.ts:296-297`; applied `EntityImageDescriptionSupport.ts:410` (`manageGuillemet`) | `layout.ts:434-437` → `layout-dot-tree.ts:177` → `BoxSizingOpts.guillemet` → `leaf-sizing.ts:314` — **`measureBox` ONLY** | `GAP` — partially threaded; same 5 sizing paths as `wrapWidth`, same mechanism (`maxLineWidth`'s `guillemet` param at `leaf-sizing-text.ts:197` is left `undefined` by every non-`measureBox` caller). **T4: no longer inferred — jar- AND port-probed, both sides measured** (see Proofs). `entity` is invariant at 0.843403in across `guillemet` on/off while the jar moves 0.843403 → 1.084028 (+17.325px); `component` tracks the jar exactly in both states. |
 | `skinparam componentStyle` | `theme.componentStyle` — `theme.ts:32` | `renderer-entity.ts:192` (`mapComponentStyle`), `renderer-symbol.ts:80` | `layout.ts:430` → `layout-dot-tree.ts:174` → `BoxSizingOpts.componentStyle` → `leaf-sizing.ts:309` (`boxIcon`) | `threaded` |
 | sprite registry (declared dims) | `ast.sprites` → `spriteDimsLookupFor`, `layout.ts:439` | `renderer-entity.ts:226` (`makeAtomImageResolverFor`) | `layout-dot-tree.ts:181` → `measureLeafNode`'s 5th param → `maxLineWidth` / `atomHeightBonus` / `footprintBoxes` | `threaded` |
-| sprite registry (INK extents) | `spriteInkDimsLookupFor`, `layout.ts:440` | none (renderer draws the declared box) | `layout-dot-tree.ts:178` → `BoxSizingOpts.inkSprites` — **declared and assigned, never read** | `GAP` — dead thread; `measureUsecase` (`leaf-sizing.ts:262`) fits its footprint with the DECLARED-dims `sprites`, so S1L-k's stated intent ("fit to drawn-path bounds, not declared sprite boxes") is not realized |
+| sprite registry (INK extents) | `spriteInkDimsLookupFor`, `layout.ts:440` | none (renderer draws the declared box) | `layout-dot-tree.ts:178` → `BoxSizingOpts.inkSprites` — **declared and assigned, never read** | **`size-neutral` (dead DUPLICATE channel — verdict CHANGED by T4, was `GAP`).** The field is genuinely unread, but the FEATURE it was meant to deliver is already delivered through the other channel: `spriteDimsLookupFor` (`sprite-commands.ts:99-106`) returns `inkX/inkY/inkWidth/inkHeight` alongside the declared box for every `SpriteSvg`, and `inlineFootprintBox` (`leaf-sizing-text.ts:355-370`) reads exactly those. So `measureUsecase`'s footprint IS ink-fit. Port-measured identical to the jar on an ink≠declared sprite (see Proofs). Batch-4 disposition is a **delete-the-dead-thread chore**, not a sizing fix. |
 | `skinparam tabSize` | `theme.tabSize` — `theme.ts:117` | none in this engine (class engine only: `src/diagrams/class/class-object-map-sizing.ts:153`) | none | `size-neutral (jar-probed on this engine: a real TAB in a component display measures identically at tabSize default/4/1 — the description leaf path does not expand tabs at all. It IS size-affecting in the CLASS engine, so this reason is scoped to the description engine and must not be generalized.)` |
 
 ### Additional settings surveyed (not required by the contract, same schema)
@@ -60,11 +60,19 @@ justification a future reader needs, not as a label.
 |---|---|---|---|---|
 | diagram-wide `Shadowing` (`root`/`element`) | `theme.shadowing` — `theme.ts:83`, second tier of `resolveElementShadowing` | same as `resolveElementShadowing` | none | `GAP` — same mechanism and same Batch-4 fix as the per-element tier; jar-proven via bare `root { Shadowing 6 }` |
 | `skinparam fixCircleLabelOverlapping` | `theme.fixCircleLabelOverlapping` | `renderer-entity.ts:225` | `layout.ts:473` (into `runLayout`, not `BoxSizingOpts`) | `threaded` (via a second channel — worth knowing that `BoxSizingOpts` is not the only route) |
-| `skinparam actorStyle` | no `Theme` field exists | hardcoded `ActorStyle.STICKMAN`, `renderer-symbol.ts:26` | hardcoded stickman constants, `leaf-sizing-consts.ts:55,58` | `size-neutral (both paths hardcode STICKMAN identically, so they cannot drift. This is an unimplemented FEATURE — hollow/awesome would change the drawing's size on both sides — not a parity defect. Do not allow-list it as "settled".)` |
+| `skinparam actorStyle` | no `Theme` field exists | hardcoded `ActorStyle.STICKMAN`, `renderer-symbol.ts:26` | hardcoded stickman constants, `leaf-sizing-consts.ts:55,58` | **`GAP` (FIDELITY, not parity — verdict CHANGED by T4, was `size-neutral`).** The parity reasoning still holds — both paths hardcode STICKMAN identically and cannot drift — but the premise that made it `size-neutral` (that nothing observable depends on the setting) is false: **the jar honours `skinparam actorStyle` and its node dimensions change.** Measured awesome `0.763889×1.041667`, hollow `0.444792×0.652778`, stickman `0.444792×1.027778`; our port returns the stickman value for all three (see Proofs). Recording this as `size-neutral` would have allow-listed a 22.98px width / 27px height error. |
 | `skinparam roundCorner` | parsed into the accumulator (`skinparam-accumulator.ts:102`) but no `Theme` field | hardcoded `ENTITY_ROUND_CORNER = 5.0`, `renderer-entity.ts:63`; `NON_FOLDER_ROUND_CORNER`, `renderer-cluster.ts:129` | none | `size-neutral (corner radius is drawn INSIDE the rect's own bounds — a rounded corner never changes the bounding box. Unreachable anyway: parsed but never surfaced on Theme.)` |
 
 **Counts:** 20 rows — 5 `threaded`, 6 `GAP`, 9 `size-neutral`.
-Contract-required subset (16 rows): 4 `threaded`, 5 `GAP`, 7 `size-neutral`.
+Contract-required subset (16 rows): 4 `threaded`, 4 `GAP`, 8 `size-neutral`.
+
+**T4 amended the MEMBERSHIP without changing the totals.** Two verdicts swapped
+places: `inkSprites` `GAP` → `size-neutral`, `skinparam actorStyle`
+`size-neutral` → `GAP`. The totals are coincidentally unchanged; the required-16
+subset moved 5/7 → 4/8 because `inkSprites` is required and `actorStyle` is not.
+Read the membership, not the totals. The current `GAP` set is: per-element
+`Shadowing`, per-element `LineThickness`, diagram-wide `Shadowing`,
+`skinparam wrapWidth`, `skinparam guillemet`, `skinparam actorStyle`.
 
 ## Proofs
 
@@ -128,17 +136,158 @@ leaf shapes measure unwrapped and render wrapped.
 
 `guillemet` rides the identical seam: `maxLineWidth`'s `guillemet` parameter
 (`leaf-sizing-text.ts:197`) is supplied only from `measureTextBlock`. Same fix,
-same five call sites; recorded as inferred rather than probed.
+same five call sites. T3 recorded this as inferred; T4 probed it — see below.
 
-### `inkSprites` — GAP, by inspection
+### `guillemet` — GAP, proven (T4; was inferred)
 
-`grep -rn inkSprites src/` returns exactly four hits: the `ClassifyCtx` field
-declaration (`layout.ts:127`), its construction (`layout.ts:440`), the
-`BoxSizingOpts` field declaration (`leaf-sizing-consts.ts:38`), and the
-assignment (`layout-dot-tree.ts:178`). **No read.** `measureUsecase` passes
-`measureLeafNode`'s 5th parameter — the declared-dims `sprites` — into
-`footprintBoxes` (`leaf-sizing.ts:262`). Whatever S1L-k intended, the ink lookup
-is currently inert.
+`skinparam guillemet` rewrites `<<x>>` → `«x»` in DISPLAY TEXT, not only in
+stereotypes (`CreoleParser.java:175`; ported at `src/core/text/Guillemet.ts`),
+so it is a plain text-width lever. Probe: display `"aa <<zz>> bb"` on one
+gapped leaf (`entity` → `measureSimpleSymbol`) and one threaded leaf
+(`component` → `measureBox`), each with a throwaway `rectangle "qq"`.
+
+```sh
+java -DPLANTUML_DETERMINISTIC_TEXT=true -DPLANTUML_DUMP_DOT=<d> \
+     -jar oracle/dist/plantuml-oracle.jar -tsvg -o <d> g-ent-{on,off}.puml
+# "off" adds `skinparam guillemet false` as the first line.
+```
+
+Port side measured through the same deterministic metrics
+(`WidthTableMeasurer` + `setLayoutInputObserver`, the harness
+`scripts/visual-qa-dot.ts:26-30` uses), so the two columns are comparable.
+
+| leaf | sizer path | jar, guillemet on | jar, off | ours, on | ours, off |
+|---|---|---|---|---|---|
+| `entity` | `measureSimpleSymbol` | 0.843403 | **1.084028** | 0.843403 | **0.843403** |
+| `component` | `measureBox` | 1.398958 | 1.639583 | 1.398958 | 1.639583 |
+
+Widths in DOT inches; heights were unchanged everywhere (`entity` 0.638889,
+`component` 0.611111). The jar moves **+0.240625in = +17.325px** (`«zz»` 4
+chars → `<<zz>>` 6 chars) on BOTH leaves. `component` tracks it exactly.
+`entity` does not move at all — it measures the guillemet form unconditionally,
+so it is correct only at the default and wrong by 17.325px whenever a user sets
+`guillemet false`. **Verdict `GAP` upheld, and the same 5 paths as `wrapWidth`
+are implicated by the same one-caller mechanism.**
+
+### `inkSprites` — verdict CHANGED to size-neutral (T4)
+
+T3's grep finding stands — `grep -rn inkSprites src/` is four hits (declaration
+`layout.ts:127`, construction `layout.ts:440`, `BoxSizingOpts` declaration
+`leaf-sizing-consts.ts:38`, assignment `layout-dot-tree.ts:178`) and **no
+read**. T3's *consequence* does not: "S1L-k's stated intent is not realized" is
+false. The ink reaches the footprint through the OTHER lookup.
+
+`measureUsecase` passes `measureLeafNode`'s 5th parameter — `ctx.sprites`, the
+`spriteDimsLookupFor` view — into `footprintBoxes` (`leaf-sizing.ts:262`), and
+that view already carries the ink fields for an SVG sprite
+(`sprite-commands.ts:99-106`: `inkX`, `inkY`, `inkWidth`, `inkHeight` beside
+`width`/`height`). `inlineFootprintBox` (`leaf-sizing-text.ts:355-370`) reads
+them and falls back to the declared box only when they are absent.
+`spriteInkDimsLookupFor` / `ctx.inkSprites` is therefore a superseded parallel
+channel, not a missing feature.
+
+Measured, on two SVG sprites with IDENTICAL declared boxes and deliberately
+different ink (`bar` inks 40×10 of its 40×40 declaration; `full` inks the whole
+40×40):
+
+```
+sprite $bar  <svg width="40" height="40"><path d="M0 0 L40 0 L40 10 L0 10 Z"/></svg>
+sprite $full <svg width="40" height="40"><path d="M0 0 L40 0 L40 40 L0 40 Z"/></svg>
+usecase "<$bar>" as N1     (then: full; then the same two as `rectangle`)
+rectangle "qq" as Z9
+N1 --> Z9
+```
+
+| leaf | sprite | jar w×h | ours w×h |
+|---|---|---|---|
+| `usecase` | bar (ink 40×10) | 0.710157 × 0.584792 | **0.710157 × 0.584792** |
+| `usecase` | full (ink 40×40) | 1.041066 × 0.849519 | **1.041066 × 0.849519** |
+| `rectangle` | bar | 0.876068 × 0.876068 | 0.876068 × 0.876068 |
+| `rectangle` | full | 0.876068 × 0.876068 | 0.876068 × 0.876068 |
+
+Two facts at once. (1) The ink distinction is REAL and large: the same declared
+box yields use-case dims 0.330909in (23.83px) apart in width and 0.264727in
+(19.06px) in height, while the `rectangle` path — which correctly uses the
+declared box — cannot tell the sprites apart. (2) **Our port reproduces every
+one of the four jar numbers exactly.** There is nothing for Batch 4 to fix here
+beyond deleting the unread field.
+
+### `skinparam actorStyle` — verdict CHANGED to GAP (T4)
+
+T3 assigned `size-neutral` on the reasoning that both paths hardcode STICKMAN
+and so cannot drift. The parity half of that is right; the size half is wrong,
+because the jar honours the setting:
+
+```sh
+# a-{stickman,awesome,hollow}.puml: `skinparam actorStyle <s>` + actor "Hello"
+#   + throwaway `rectangle "qq"` + one edge. a-none.puml omits the skinparam.
+java -DPLANTUML_DETERMINISTIC_TEXT=true -DPLANTUML_DUMP_DOT=<d> \
+     -jar oracle/dist/plantuml-oracle.jar -tsvg -o <d> a-awesome.puml
+```
+
+| `actorStyle` | jar w×h (in) | jar w×h (px) | ours w×h (in) | our error |
+|---|---|---|---|---|
+| *(unset)* | 0.444792 × 1.027778 | 32.025 × 74.0 | 0.444792 × 1.027778 | — |
+| `stickman` | 0.444792 × 1.027778 | 32.025 × 74.0 | 0.444792 × 1.027778 | — |
+| `awesome` | 0.763889 × 1.041667 | 55.0 × 75.0 | 0.444792 × 1.027778 | **−22.975 w, −1.0 h** |
+| `hollow` | 0.444792 × 0.652778 | 32.025 × 47.0 | 0.444792 × 1.027778 | **+27.0 h** |
+
+These reproduce T2's independently-obtained numbers exactly (`ACTOR_AWESOME`
+55×61 and `ACTOR_HOLLOW` 26×33 drawings under K2 composition,
+`J/skin/ActorAwesome.java:98-104`, `J/skin/ActorHollow.java:105-111`) — the two
+Batch-1 findings are the same defect seen from the resolver side and the symbol
+side. Note `hollow`'s width is unchanged only because the 32.025px label is
+wider than its 26px drawing; a shorter label would expose a width error too.
+
+**Batch 4: this is TWO pieces of work, not one wire-up.** "Wire `actorStyle` →
+the existing ported classes" is not available, because the classes do not
+exist: `src/core/skin/` holds only `ActorStickMan.ts` and `ActorStyle.ts`, and
+`actorStyleGetTextBlock` throws for `AWESOME`/`HOLLOW` by deliberate deferral
+(`ActorStyle.ts:21-24` says so in its own doc comment). So (a) port
+`ActorAwesome.ts` + `ActorHollow.ts` with their `getPreferredWidth/Height`
+geometry, then (b) add the `skinparam actorStyle` accessor + `Theme` field
+(none exists today — `grep -rni actorstyle src/` finds only doc comments) and
+consume it from BOTH `renderer-symbol.ts:26` and `leaf-sizing-consts.ts:55,58`.
+Doing (b) alone changes nothing; doing (a) alone is unreachable.
+
+### `Footprint` and the USECASE_BUSINESS pad — T2's open question, answered
+
+T2 asked whether the closed form it verified by hand (`+19.8`, not `+14`, from
+`withMargin(tmp, 7, 0)` refitting `alpha`) transfers to our port, which fits
+REAL points via `footprintBoxes` rather than a bounding box.
+
+**It transfers, but NOT for the reason the question assumed, and not for free.**
+The pad is not "collected as ink" — no glyph or path is drawn in it. It reaches
+the point set as a **`UEmpty` shape**: `TextBlockMarged.drawU`
+(`J/klimt/shape/TextBlockMarged.java:80-88`) draws `UEmpty.create(dim)` at the
+FULL marged dimension before translating the inner block, and
+`Footprint$MyUGraphic.drawEmpty` (`J/svek/image/Footprint.java:163-166`)
+collects its two opposite corners like any other shape. `drawText`
+(`Footprint.java:131-139`) contributes only the UText's own string width, so
+without the `UEmpty` the pad would be invisible to the fit.
+
+Our `footprintBoxes` (`leaf-sizing-text.ts:308-345`) emits a box for text runs
+and inline atoms only. **It has no `UEmpty` concept at all.** Measured by
+driving our own `footprintBoxes` + `containingEllipse` directly:
+
+| point set fed to `containingEllipse` | result w×h (px) | vs jar |
+|---|---|---|
+| A — today (`textW` 32.025, α 0.437) | 51.290 × 25.799 | = jar PLAIN (0.712364 × 0.358319) ✓ |
+| B — widen `textW` to 46.025 only (α 0.304) | **62.071 × 23.056** | jar BUSINESS is 71.089 × 25.799 ✗ |
+| C — widen `textW` **and** push the block box `(0,0,46.025×14)` | **71.089 × 25.799** | = jar BUSINESS (0.987350 × 0.358319) ✓ |
+
+Jar confirmation of the two targets, same probe form (`usecase "Hello"` vs
+`usecase/ "Hello"` + throwaway rectangle): plain `0.712364 × 0.358319`,
+business `0.987350 × 0.358319`; our port returns the plain value for both, i.e.
+business is short by 0.274986in = 19.80px.
+
+**Consequence for Batch 4:** a fix that only widens the business use-case's
+`textW` by `2 × 7` lands on row B — wrong by 9.0px in width and 2.7px in height,
+and wrong in a way that would look like a fitted-constant problem rather than a
+missing shape. The fix must also make `footprintBoxes` emit the marged block's
+own box. That is the general `UEmpty` rule, not a use-case special case, so it
+will also matter for the `withMargin(…,1,0)` stereotype block
+(`EntityImageDescription.java:198-201`) — check that case before closing.
 
 ## What the ADR-3 fitness function cannot catch
 
