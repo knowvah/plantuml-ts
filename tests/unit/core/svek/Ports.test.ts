@@ -1,13 +1,11 @@
 /**
- * Ports.test.ts — T8: unit coverage for `Ports` (svek/Ports.java) and its
- * private MD5 hex-digest helper (`Ports.ts`'s own doc comment explains why
- * a minimal MD5 is embedded here rather than porting `SignatureUtils.java`
- * wholesale).
- *
- * The MD5 test vectors below are the standard RFC 1321 §A.5 vectors —
- * verifying `encodePortNameToId`'s digest is byte-correct, not just
- * "some hex string", since Java's `MessageDigest.getInstance("MD5")`
- * output is what this method must match to be a faithful port.
+ * Ports.test.ts — T8: unit coverage for `Ports` (svek/Ports.java).
+ * `encodePortNameToId`'s MD5 digest is now provided by
+ * `SignatureUtils.getMD5Hex` (T8b relocated the digest implementation out
+ * of `Ports.ts`; see `tests/unit/core/utils/SignatureUtils.test.ts` for its
+ * own RFC 1321 test vectors). The vectors kept here are unchanged from T8:
+ * they prove the RELOCATION was byte-identical, not just that some hex
+ * string comes back.
  */
 import { describe, expect, it } from 'vitest';
 import { Ports } from '../../../../src/core/svek/Ports.js';
