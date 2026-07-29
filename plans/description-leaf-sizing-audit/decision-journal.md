@@ -275,3 +275,65 @@ unmet ledger criterion:
 
 Single agent, as the batch overview already required: all five items
 contend for `planning/sizer-renderer-parity.md`.
+
+## T4 complete — 2026-07-28
+
+Both inferred verdicts are now measured, and TWO changed. Totals coincide
+(5 threaded / 6 GAP / 9 size-neutral) but membership swapped; the required-16
+subset moved 5/7 → 4/8. T4 stated that in the Counts block so nobody reads
+the unchanged totals as "nothing happened".
+
+**`guillemet` — GAP upheld, promoted inferred → measured on both sides.**
+Jar moves +0.240625in (+17.325px) for `«zz»` → `<<zz>>`. `component`
+(via `measureBox`) tracks exactly; `entity` (via `measureSimpleSymbol`) is
+flat. Exactly the five-path split T3 predicted, now with numbers.
+
+**`inkSprites` — verdict CHANGED, GAP → size-neutral. This corrects T3's
+consequence, and the summary I gave the user.** T3's grep was right that
+the `inkSprites` FIELD is unread; its inference that S1L-k's ink-bounds
+intent is therefore inert was wrong. Orchestrator-verified: sprite ink IS
+consumed by the sizer — `inlineFootprintBox` (`leaf-sizing-text.ts:355-370`)
+reads `inkX/inkY/inkWidth/inkHeight` off the `sprites` lookup built by
+`spriteDimsLookupFor` (`sprite-commands.ts:94`). Probed with two sprites of
+identical 40×40 declaration and ink 40×10 vs 40×40: jar and port agree
+exactly on both usecase and rectangle. So the Batch-4 item is DELETE THE
+DEAD FIELD, not fix a sizing gap.
+
+Generalizable: "field X is unread" and "feature X is unimplemented" are
+different claims, and the second does not follow from the first when a
+second channel already carries the value.
+
+**`actorStyle` — verdict CHANGED, size-neutral → GAP (fidelity), and it is
+TWO fixes, not one.** Jar: awesome 0.763889×1.041667, hollow
+0.444792×0.652778, against our stickman 0.444792×1.027778 for all three —
+reproducing T2's ACTOR_AWESOME/ACTOR_HOLLOW numbers exactly, so the two
+Batch-1 findings are one defect seen from two directions. The hoped-for
+cheap fix ("wire `actorStyle` to the ported classes") is unavailable:
+`src/core/skin/` holds only `ActorStickMan.ts`/`ActorStyle.ts`, and
+`actorStyleGetTextBlock` throws for AWESOME/HOLLOW by deferral. So Batch 4
+needs (a) port `ActorAwesome`/`ActorHollow` geometry AND (b) add the
+`Theme`/skinparam accessor that does not exist. (b) alone changes nothing;
+(a) alone is unreachable. Sequenced, not parallel.
+
+**USECASE_BUSINESS — the closed form transfers, but not for free.** The pad
+is NOT ink: `TextBlockMarged.drawU` (`TextBlockMarged.java:80-88`) draws
+`UEmpty.create(dim)` at the full marged dimension and
+`Footprint$MyUGraphic.drawEmpty` (`Footprint.java:163-166`) collects its
+corners, while `drawText` contributes only the UText's own width. Our
+`footprintBoxes` has NO `UEmpty` concept. Driven directly: widening the text
+width alone gives 62.071×23.056 (wrong); adding the marged block's own box
+gives 71.089×25.799 = the jar exactly. **Batch 4 must emit the marged
+block's box or it lands 9.0px w / 2.7px h off** — precisely the
+plausible-but-wrong outcome T2's open question was raised to prevent.
+
+**Open, and worth probing before that Batch-4 row closes:** the same
+`UEmpty` rule should apply to the stereotype block's `withMargin(…,1,0)`
+(`EntityImageDescription.java:198-201`), but that is reasoned, not measured.
+mopimi-10 and lunexo-59 are conformant today, so either the +2 does not
+dominate the fit or it is masked. Probe a stereotyped use-case with a SHORT
+label, where 2px would bite.
+
+Ledger: 12 numbered lines (6 GAPs + 6 MISMATCHes) under a new
+`## description-leaf-sizing-audit — carried findings (T4)` section, plus the
+two corrected verdicts and the M-note-1 carry, so all of it survives the
+mission.
