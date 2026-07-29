@@ -24,3 +24,104 @@ falsified during planning, before any task was written:
 - **Risk found at Phase 2:** only 4 `svg-description` goldens vs 352 size
   goldens, while ADR-1 is renderer-wide. Maintainer approved ADR-5 (goldens
   first) and extended its scope to existing separator-bearing fixtures.
+
+## Execution — 2026-07-29
+
+### Batch 1 startup — the "4 goldens" figure is STALE (does not change scope)
+
+`oracle/goldens/svg-description/ratchet.json` pins **48** fixtures today —
+32 component, 16 usecase, last added 2026-07-15 — not the 4 that both
+ADR-5 and `batch-1/T1-svg-goldens.md` state. The 4 was accurate at T18
+only. Corrected before dispatch per the mission's own "verify a
+load-bearing claim before repeating it" constraint; the ninth agent-era
+claim corrected against the code across this mission line.
+
+**Scope is unchanged.** None of T1's targets is among the 48: all eight
+folder/package slugs, `bootstrap-0`, `ruziru-69-xixo434`,
+`jecici-56-bimu826`, and `codabo-50-mupa164` are unpinned (checked by
+slug-prefix match against the manifest). ADR-5's *conclusion* stands even
+though its stated premise was overstated — the affected fixtures are
+genuinely unwatched.
+
+### Batch 1 — two T1 targets are AC3-INELIGIBLE
+
+`tests/oracle/svg-conformance/parity.json` reports `dotEqual=false` for
+`usecase/bootstrap-0` and `usecase/ruziru-69-xixo434`. The ratchet's AC3
+block enforces DOT-EQUAL as an admission gate, so these two cannot be
+pinned without weakening it — which the mission forbids. Decision: leave
+AC3 intact and accept that T6 narrowing #2's two fixtures land with no SVG
+gate. T1 is instructed to report them as uncovered rather than route
+around the gate. Logged because a reasonable developer might instead have
+argued for a second, DOT-inequality-tolerant golden class; that would be a
+second channel for one fact, the shape ADR-2 explicitly rejects.
+
+### Batch 1 — expected partial coverage of group 1
+
+`oracle/goldens/svg-description/README.md` § "Known gap" records that as of
+T19 no package/cluster fixture reached zero-diff under
+`DeterministicMeasurer`. Eight of T1's eleven group-1 targets are
+folder/package. The gate may therefore cover materially less of the blast
+radius than ADR-5 assumes. T1 is instructed to report the true coverage
+plainly rather than pin our own output to close the gap. If coverage comes
+back thin, that is a maintainer decision point before batch 4 (T4) lands,
+not a reason to proceed quietly.
+
+### STOP 1 — ADR-5's gate cannot be built: 0 of 22 fixtures are conformant
+
+T1 returned **zero** pinnable goldens. Verified independently by the
+orchestrator rather than taken on report, per the mission's own
+verify-before-repeating constraint:
+
+- `npx tsx scripts/svg-conformance-census.ts component usecase` →
+  **57** zero-diff fixtures across the two types (component alone: 39 of
+  265). **Not one of T1's 22 candidates appears in that list.**
+- Harness-wide breakage RULED OUT: the 48 already-pinned goldens still
+  pass through the same `render-fixture.ts` path (`npm test` green at
+  400 files / 10419 tests).
+- Mechanism for group 2+3 confirmed by reading: `src/diagrams/description/`
+  has no creole block-separator support at all. Every `separator` hit in
+  that directory is `set separator` / `namespaceseparator`
+  (`command-table-directives.ts:30`, `ast.ts:299`) — the namespace
+  qualifier, an unrelated feature. So a separator line's width is never
+  contributed to body sizing and the entity box undersizes globally.
+- Mechanism for group 1 is the package/cluster `[childCount]` gap the
+  goldens README already documents as open since T19.
+
+**This is not a T1 failure — T1 executed its spec correctly and refused to
+pin our own wrong output, which is the behaviour the mission demands.** It
+is ADR-5 resting on a false premise: the decision assumed a conformant
+population existed to freeze, and none does inside the blast radius. A
+"golden that must not drift" gate is unbuildable when nothing is correct
+yet.
+
+Escalated rather than reshaped unilaterally: ADR-5 is LOCKED, batch 1 is
+GATING, and its Done criterion cannot be met as written.
+
+### STOP 2 — T2a is mis-scoped: `TextBlockLineBefore` arithmetic IS ported
+
+T2a states "`TextBlockLineBefore` does NOT exist in this port and must be
+ported with it." **False in substance.** Found by reading, not grepping:
+
+- `src/diagrams/class/class-body-enhanced-layout.ts` (347 lines) carries
+  `@see BodyEnhancedAbstract.java#decorate`, `TextBlockLineBefore.java`,
+  and `UHorizontalLine.java`, and states every offset formula is
+  jar-verified byte-exact against `fecolo-08-gepu579`,
+  `jajebo-21-dada557`, and `pacagu-24-nune023` (mission G2 N42; derivation
+  in `plans/g2-class-svg/ledger.md` N42). It already encodes `decorate`'s
+  bottom-margin `4` and the titled/untitled branch split.
+- `src/diagrams/class/renderer-body-enhanced.ts` (139 lines) reproduces
+  `TextBlockLineBefore#drawU`'s title!=null draw order — content first,
+  then divider+label — explicitly noting it is the OPPOSITE of a Y-sort.
+
+What is genuinely missing is a `src/core/`-level reusable TextBlock the
+description side can share. So T2a's *work* exists; its *premise* about
+prior art does not. Porting fresh into `src/core/klimt/shape/` as written
+would create a SECOND independent encoding of jar-verified arithmetic —
+precisely the "two builders" divergence ADR-1 exists to prevent and the
+second-channel shape ADR-2 rejects (the `inkSprites` mistake).
+
+Two project laws collide here and the tie is the maintainer's to break:
+"upstream architecture is authoritative, rewrites are allowed" argues for
+one `src/core/` owner consumed by both engines; "do not refactor while
+porting" argues against touching a jar-verified working class path.
+Not decided autonomously.

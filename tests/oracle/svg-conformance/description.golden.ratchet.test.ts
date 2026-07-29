@@ -95,6 +95,25 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
 }
 
 // ---------------------------------------------------------------------------
+// bodyenhanced-atom-seams T1 (2026-07-29): 22 candidate fixtures were
+// evaluated ahead of ADR-1/ADR-4's `decorate`/`BodyFactory` port — the 11
+// known-affected folder/package/widened fixtures (bozana-38-xufi750,
+// bozoju-49-kufo528, gucefa-91-pume734, kanute-77-lacu414, lotofa-28-rudo664,
+// sevage-80-seva382, texacu-57-daci050, cobuju-30-paxo591, bootstrap-0,
+// ruziru-69-xixo434, jecici-56-bimu826) plus 11 separator-bearing fixtures
+// found by scanning `test-results/dot-cache/{component,usecase}` for creole
+// block-separator lines (codabo-50-mupa164, xufexu-38-fola855,
+// fepuvo-06-rugi981, nixura-77-bina738 titled; babafi-51-dixi026,
+// butebe-90-dozo380, dexigu-24-deru622, kenece-24-juku624, tajadu-40-juro990,
+// zifaji-87-raki559, pivudu-29-pele178 bare). ZERO of the 22 reached
+// zero-diff — none were pinned. See `oracle/goldens/svg-description/
+// README.md`'s "Known gap #2" and `.agent-notes/T1-svg-goldens.md` for the
+// full per-fixture diff data and mechanism. Re-run this same candidate list
+// once the `decorate` port lands; that is the population expected to go
+// green next.
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
 // AC1 — every locked fixture stays conformant.
 // ---------------------------------------------------------------------------
 

@@ -91,3 +91,38 @@ creole) are tracked as F2/F5+; named-CSS-color-to-hex normalization
 `src/core/theme.ts`-level fix, out of the description-engine write-set). Do
 not force-add a non-conformant fixture to close either gap; widen coverage
 only once a fixture in one of these categories actually reaches zero-diff.
+
+## Known gap #2 (`bodyenhanced-atom-seams` T1 finding, 2026-07-29)
+
+T1 enumerated 22 candidate fixtures ahead of the `decorate`/`BodyFactory`
+port (ADR-1/ADR-4 of the `bodyenhanced-atom-seams` mission): the 11
+known-affected folder/package + widened fixtures, plus 11 separator-bearing
+fixtures found by scanning `test-results/dot-cache/{component,usecase}`
+for creole block-separator lines (`--`/`==`/`..`/`__`, both titled and
+bare — see `BodyEnhancedAbstract#isBlockSeparator`). **Zero of the 22 reach
+zero-diff under `DeterministicMeasurer` today.** None were pinned.
+
+- **Folder/package fixtures (8 of 11 group-1 targets)** fail with a
+  `[childCount]` structural bail inside the package/folder cluster's own
+  `<g>` — the same pre-existing gap this section already documents above
+  (no conformant package/cluster fixture yet).
+- **Separator-bearing fixtures (all 11 titled + bare)** fail because
+  `src/diagrams/description/` has no `decorate`/`TextBlockLineBefore`
+  equivalent at all (grep-verified: that logic exists only under
+  `src/diagrams/class/`). The separator line's width is never contributed
+  to the body's sizing, so the whole entity box comes out undersized and
+  every downstream child position cascades (diffs from 3 to 388 per
+  fixture, first divergence typically `svg/@height` or a rect/text `@x`).
+- `usecase/bootstrap-0` and `usecase/ruziru-69-xixo434` additionally error
+  in this harness independent of conformance: `render-fixture.ts` (unlike
+  `scripts/svg-conformance-census.ts`) wires no stdlib `includeStore`, so
+  `!include <bootstrap/bootstrap>` cannot resolve. Moot for pinning either
+  way — both are `dotEqual=false` in `parity.json`, AC3-ineligible.
+- `usecase/fepuvo-06-rugi981` (titled separator) additionally has a
+  malformed-XML jar golden (`comment is not well-formed`) and is also
+  `dotEqual=false` — ineligible regardless.
+
+Full per-fixture list, diff counts, and the exact grep methodology are in
+`.agent-notes/T1-svg-goldens.md`. Batch 2+ of `bodyenhanced-atom-seams`
+should re-run this same 22-fixture check after the `decorate` port lands —
+that is the population expected to start going green.
