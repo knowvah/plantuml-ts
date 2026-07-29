@@ -480,3 +480,43 @@ never in a port task, per ADR-6.
 `getPragma()` a seam on Monday's reasoning and T10a needed it immediately.
 Fourth instance of the pattern the ADR-8 corollary exists to stop, and the
 fastest one to bite yet.
+
+### Orchestrator error — T10b and T10c were NOT disjoint
+
+I parallelised T10b (`AtomTable`/`StripeTable`) and T10c (`AtomTree`/
+`StripeTree`) on the grounds that their write-sets do not overlap. They
+don't — but their **call graphs** do: `StripeTree.analyzeAndAdd` needs
+`StripeTable.getWithNewlinesInternal`/`asAtom`, so T10c had to leave a
+cited seam pointing at a sibling that was still running.
+
+Same shallow-audit mistake as the batch-3a dependency table, in a new
+costume: I checked file ownership instead of tracing what the code calls.
+**Disjoint write-sets are necessary but not sufficient for parallelism —
+the call graph has to be disjoint too.**
+
+Consequence is contained (a cited seam, resolvable in T10g) but the
+sequencing should have been T10b → T10c.
+
+### Cross-task breakage — `getPragma()` widened a shared interface
+
+T10b added `getPragma()` to `ISkinSimple` as a REQUIRED member, per the
+ADR-8 corollary. Correct, and it broke four test doubles that predate it:
+`ISkinSimple.test.ts`, `CreoleParser.test.ts` (T9a's),
+`CreoleHorizontalLine.test.ts` (T10a's), `StripeTree.test.ts` (T10c's).
+No running agent may legally fix them — each is outside every current
+write-set — so the orchestrator resolves this in a consolidation pass.
+
+This is the structural cost of widening a shared interface mid-batch. It
+was still the right call: re-seaming `getPragma()` to keep the fakes
+compiling would have been the fifth instance of the very defect the
+corollary exists to stop.
+
+### T10c cross-check — second clean independent derivation
+
+T10c's fresh `AtomTree`/`Skeleton2` port agreed with
+`src/diagrams/class/class-body-tree.ts`'s jar-verified G2 N42 constants on
+**all seven** formulas: indent step 8, `xStartForLevel`, `xEndForLevel`,
+bullet rect origin `(xStart+7, midY-1)` 2×2, hline endpoints, the
+mother/sister backward scan, and `CELL_TEXT_MARGIN` 2. Zero disagreements,
+matching T2a's earlier result. Two independent ports, two clean agreements
+with the jar-derived class side.
