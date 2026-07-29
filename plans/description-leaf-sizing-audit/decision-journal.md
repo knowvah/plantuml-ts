@@ -435,3 +435,54 @@ box. Batch 5's ADR-2 gate is half-met — T2 counted 6 composition kinds
 (≥4 ✓); the second condition, Batch 4 adding ≥2 new symbol tables, cannot be
 evaluated until Batch 4 runs, and may be mooted if Batch 4 routes
 `measureLeafNode` through the ported `decoration/symbol/` classes instead.
+
+## T6 complete — 2026-07-28. ADR-6 half falsified; conformance 90.0%.
+
+**311 → 316/351 (90.0%), widened 0, 5 pins deleted.** Orchestrator-verified
+independently: 399 files / 10393 tests, typecheck + lint + build clean, DOT
+262/90/708 EQUAL, class 219/708 widened 0. The IDE reported two type errors
+in the new files; `npm run typecheck` is clean, so they were stale — the
+standing rule that IDE diagnostics here are noise held again.
+
+**The gain is real but it is not the predicted gain.** Two of six expected
+wins closed: PERSON (jar-verified) and the `wrapWidth`/`guillemet` per-path
+uniformity, which is where most of it came from — five of the five deleted
+pins. HEXAGON, USECASE_BUSINESS, Shadowing and LineThickness are NOT
+verified closed; no corpus fixture isolates them, so per ADR-4 they stay
+filed with their probes rather than claimed. Resisting the claim matters more
+than the number: four unverified wins reported as closed would have been a
+plausible-but-wrong result that the next mission inherits.
+
+**ADR-6's premise was half wrong, and this is the session's most useful
+finding.** The two models are not faithful-vs-lossy; they are faithful in
+DIFFERENT PLACES. Verified at `EntityImageDescription.ts:43`, which states
+none of `BodyFactory`/`BodyEnhanced*` are ported — so the ported path has no
+folder title margin, and T2 had already traced our flat table's +12 to
+`BodyEnhanced1.getMarginX()`=6. Routing folder/package widened 8 fixtures.
+Same shape for sprite ink offsets (no field on `AtomImageResolver`), the
+`<img>` cannot-decode default font (no seam on `buildLine`), and our
+deliberate `<latex>` divergence (the shared pipeline really renders KaTeX).
+
+The ported classes hold SYMBOL-COMPOSITION facts read from Java; the flat
+tables hold TEXT-BLOCK facts learned from fixtures — precisely the accreted
+long tail `CLAUDE.md` names as the deliverable. Neither dominates, and
+deleting either loses behaviour.
+
+T6 narrowed the routing four times rather than forcing it, diagnosing each to
+a mechanism at a `file:line` first and resolving it by NOT routing that case —
+never by a fitted constant. That is the behaviour the brief asked for under
+"if a pin widens": it found what the tables encoded and kept it.
+
+**Plan changes recorded in the batch-4 overview:** T9's premise is void and it
+is rescoped to delete only what T6 actually superseded plus the dead
+`inkSprites` field; ADR-2 is live again rather than moot; and a new follow-on
+is identified — port `BodyFactory`/`BodyEnhanced*` and add ink-offset and
+default-font seams to the shared atom pipeline. That is the real ceiling on
+widening the routing, and it is substantial and separable, so it becomes a
+tracked mission rather than a Batch-4 patch. T7 and T8 are unaffected.
+
+**Accepted write-set deviation:** `leaf-sizing-legacy-fallback.ts` is new and
+undeclared. The 500-line cap made keeping the latex/img fallback beside the
+routing impossible; it is a mechanical relocation of pre-existing
+`measureBox`/`boxIcon` math. Flagged by the agent rather than absorbed
+silently, which is the correct handling.
