@@ -128,3 +128,56 @@ protects FAITHFULLY-ported behaviour from loss — does not apply.
   else in the commit, and by the shrink-only ratchet, which STOPS the batch
   rather than absorbing a regression.
 - Reversible: revert the commit and the flat tables return.
+
+### ADR-6 AMENDMENT — the premise was half right (T6 outcome, 2026-07-28)
+
+**What ADR-6 claimed.** The ported `decoration/symbol/` path is faithful and
+`measureLeafNode` is a lossy reimplementation, so routing should close six
+findings at once.
+
+**What T6 measured.** 311 → **316/351 (90.0%)**, zero widened — a real gain,
+but NOT the predicted one, and the routing had to be NARROWED four times.
+
+Of the six expected wins, two are confirmed (PERSON, jar-verified via
+mutere-78; and the `wrapWidth`/`guillemet` per-path uniformity, which drove
+five fixtures conformant and is where most of the gain came from). Four —
+HEXAGON, USECASE_BUSINESS, Shadowing, LineThickness — are NOT verified
+closed: no corpus fixture isolates them. Per ADR-4 they stay filed with their
+jar probes rather than being claimed.
+
+**The correction that matters.** The two models are not "faithful vs lossy."
+They are **faithful in different places**, and routing wholesale LOSES the
+other half:
+
+| the ported path is missing | evidence | cost of routing anyway |
+|---|---|---|
+| the folder/package title margin (T2 traced +12 to `BodyEnhanced1.getMarginX()`=6) | `EntityImageDescription.ts:43` states none of `BodyFactory`/`BodyEnhanced*` are ported | widened 8 fixtures |
+| sprite ink offsets in the use-case fit | the shared `AtomImageResolver` has NO ink-offset field | widened bootstrap-0, ruziru-69 |
+| the `<img>` cannot-decode fallback at the DIAGRAM-default font (S1L-h) | shared `buildLine` has no `defaultFont` seam | widened jecici-56 |
+| our deliberate "`<latex>` contributes 0 width" divergence | shared pipeline does a real KaTeX render | worse on the 2 permanently-divergent LaTeX fixtures |
+
+The ported classes encode SYMBOL-COMPOSITION facts read from Java. The flat
+tables encode TEXT-BLOCK facts learned from fixtures — the accreted long tail
+`CLAUDE.md` calls the deliverable. Deleting either loses real behaviour.
+
+**Consequences — these change the remaining plan.**
+- **T9 must NOT delete the tables wholesale.** Its premise is void. Rescope it
+  to deleting only what T6 actually superseded, and to the dead `inkSprites`
+  field.
+- **ADR-2 is NOT moot after all.** The five tables survive, so the descriptor
+  refactor it proposes is live again. Re-evaluate its gate honestly rather
+  than retiring it as ADR-6 predicted.
+- The real remaining work is upstream of the symbol layer: port
+  `BodyFactory`/`BodyEnhanced*`, and add ink-offset and default-font seams to
+  the shared atom pipeline. That is what would let the routing widen. It is
+  substantial and separable — a tracked follow-on, not a Batch-4 patch.
+- T6's narrowing was the right call and is preserved: each of the four cases
+  was diagnosed to a mechanism at a `file:line` per `diagnosis.md` and
+  resolved by NOT routing that case, never by a fitted constant.
+
+**Accepted deviation.** T6 created `leaf-sizing-legacy-fallback.ts`, outside
+its declared write-set. The 500-line pre-commit cap made it impossible to keep
+the latex/img fallback in `leaf-sizing.ts` beside the routing. It is a
+mechanical relocation of pre-existing `measureBox`/`boxIcon` math, not new
+scope, and it was flagged rather than absorbed silently — the correct
+handling.
