@@ -345,3 +345,56 @@ note so it stops teaching the wrong lesson), and the rule is now encoded as
 the **ADR-8 corollary** in `decisions.md` plus a bullet in the README's
 method constraints, so it binds every remaining task rather than living in
 this journal entry.
+
+### Orchestrator error — a commit landed in the WRONG REPOSITORY
+
+The T7 commit was reported as `ab83d66f5b6` and then could not be found.
+Cause: an earlier `cd ~/git/plantuml` (reading `BodyEnhanced1.getArea`)
+persisted across Bash calls, and `git add -A && git commit` ran in the
+**PlantUML Java reference repo**, not this one. It swept up a pre-existing
+uncommitted `.gitignore` edit there (`.serena/cache/`, `.claude/`) under a
+wrong commit message.
+
+Repaired with `git reset --mixed HEAD~1` in `~/git/plantuml`: HEAD restored
+to the maintainer's `de1f986f092`, the `.gitignore` edit preserved unstaged
+exactly as found, both local oracle commits untouched. T7's real work was
+never committed at the time; it was re-verified and landed here as
+`5202a23`.
+
+**Standing correction: every git invocation is now prefixed with an
+absolute `cd /Users/scottseely/git/plantuml-ts`.** Bash cwd persists
+between calls in this harness, and a reference repo sitting one `cd` away
+makes an unqualified `git add -A` genuinely dangerous.
+
+### T8 — SheetBlocks, and the audit that was too shallow
+
+Landed with all gates green (416 files / 10599 tests) and every ratchet and
+golden set unmoved. `SheetBlock1` is the real algorithm — `Fission` for
+word-wrap plus a line-by-line `Sea`/`Position` port for altitude stacking —
+not an approximation.
+
+**T8 exceeded its write-set** rather than stopping as instructed, creating
+`PortGeometry.ts`, `Sea.ts`, `Position.ts`. Accepted: they are genuine
+prerequisites of `SheetBlock1` and porting them is what ADR-8 requires.
+
+**The batch-3a dependency audit was mine and it was wrong.** It asked "does
+a file of this name exist here?" instead of tracing the method bodies
+`SheetBlock1` actually calls, so it missed `Sea` and `Position` entirely and
+declared the batch smaller than it was. Future dependency audits for this
+mission must read the call graph, not the filenames.
+
+### T8b — MD5 in the wrong module
+
+T8 reimplemented MD5 inline in `Ports.ts`; upstream routes it through
+`SignatureUtils.getMD5Hex` (`Ports.java:53-55`). `SignatureUtils` is 275
+lines used by 10 upstream files including `UImageSvg` and `UmlSource`, both
+in this port's roadmap, so an inline copy guarantees either duplication or
+a later refactor of `svek/Ports`. T8b relocates it to
+`src/core/utils/SignatureUtils.ts`.
+
+T8b also draws a distinction worth keeping: the filesystem-dependent
+methods (`getSignatureSha512(SFile)`, `getSignature(SFile)`, the
+`InputStream` overload) are **BLOCKED ON THE FILE SEAM**, not dropped.
+"Cannot exist in a browser-safe `src/`" is an architectural boundary this
+project already chose; "no caller yet" is not. Only the first is a valid
+reason to omit code, and the JSDoc at each site must say which it is.
