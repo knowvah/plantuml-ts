@@ -398,3 +398,51 @@ methods (`getSignatureSha512(SFile)`, `getSignature(SFile)`, the
 "Cannot exist in a browser-safe `src/`" is an architectural boundary this
 project already chose; "no caller yet" is not. Only the first is a valid
 reason to omit code, and the JSDoc at each site must say which it is.
+
+**T8b pushed back on the orchestrator, correctly.** Its prompt told it to
+document `salting()` under the file-seam rationale. It refused: `salting`
+takes no file argument and is blocked on an unported PBKDF2WithHmacSHA1
+primitive whose only upstream caller is the license/keygen path. Applying
+the instructed wording would have recorded a false cause in the source.
+This is the inverse of the T7/T2a failure mode and the behaviour to want.
+
+### THE STYLE SUBSYSTEM IS THE NEXT WALL — three independent hits
+
+Three separate tasks in batch 3a, working on unrelated classes, each
+stopped at the same missing prerequisite:
+
+| Task | Where it hit | What was blocked |
+|---|---|---|
+| T7 | `ClockwiseTopRightBottomLeft` | style-driven padding |
+| T8 | `SheetBlock1`'s 4th constructor overload | the `Style`-based ctor |
+| T9b | `Stereotype#getStyles` (`Stereotype.java:185-193`) | `Style`/`StyleBuilder`/`PName`/`SName` |
+
+`Style`, `StyleBuilder`, `PName` and `SName` are absent from `src/`
+entirely. Upstream this is the whole `style/` + `skin/` + `theme/`
+resolution cascade. Three independent hits in one batch is structural, not
+incidental — it is very likely the next prerequisite mission after this
+one, in the same way `Display`/`Sheet` became batch 3a.
+
+**Not escalated as a blocker yet**, because nothing in batch 3a's remaining
+scope requires it: each site has a dependency-light half that was ported in
+full (`getStyleNames()` for `Stereotype`, three of four ctor overloads for
+`SheetBlock1`). Flagged here so T9c and T2b recognise it on sight instead of
+each re-deriving it — and so the maintainer sees the shape before it
+arrives.
+
+### T9b — a second stereotype representation, tracked as debt
+
+T9b **added** `src/core/stereo/Stereotype.ts` (+ `StereotypeDecoration.ts`)
+rather than adapting `src/diagrams/class/class-stereotype.ts`, and gave the
+reasoning: the existing file models a classifier's stereotype as a raw
+`string` plus free functions scoped to class-header layout, whereas
+upstream's `Stereotype` is a general `CharSequence` any diagram's `Display`
+list can hold. Genuinely different shapes — one a layout helper, one a
+domain value type — so this is not the duplicate-encoding mistake ADR-7
+consolidated.
+
+It is still two things named "stereotype" in one codebase. **Recorded as
+tracked debt**, not waved through: revisit consolidation once T9c gives the
+class side a real `Display`-shaped caller. The ratchets and all 472 SVG
+golden tests were unmoved, which is the evidence that nothing shifted
+underneath the addition.
