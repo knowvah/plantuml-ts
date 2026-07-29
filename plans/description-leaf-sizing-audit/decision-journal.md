@@ -585,3 +585,56 @@ substantive claims stood: geometry is byte-identical, and upstream's own
 **Batch 4 status: T6/T7/T8 done, T9 remains** (rescoped — delete only what
 T6 superseded plus the dead `inkSprites` field; NOT the tables, per the
 ADR-6 amendment).
+
+## T9 complete + BATCH 5 SKIPPED — 2026-07-29. Mission done.
+
+**T9 was verified before it was executed, and that changed it.** Its original
+scope ("delete the superseded tables") was already voided by the ADR-6
+amendment, but rather than trust that, the orchestrator scanned every export
+in `leaf-sizing-consts.ts` for references. **All 24 are still live** — T6's
+routing covered only the box family, so folder, usecase, actor and note
+still read the tables. Nothing there was superseded. (The first scan reported
+every symbol dead; the glob had failed silently in zsh. Caught because
+`LINE_HEIGHT_FACTOR` was visibly in use — a broken measurement that would
+have deleted 24 live constants had it been trusted.)
+
+So T9 collapsed to one genuinely dead chain: `inkSprites` on both structs,
+its assignment, and `spriteInkDimsLookupFor` — whose only caller was that
+dead assignment, and which is neither public API nor referenced by any test.
+Small enough to do directly rather than delegate.
+
+Safe to delete rather than wire up because T4 had already proved the feature
+is delivered by a different channel: `inlineFootprintBox` reads the ink
+fields off the `sprites` lookup. Deleting the redundant thread loses nothing.
+
+### Batch 5 — SKIPPED, and by ADR-2's own terms rather than by default
+
+ADR-2 gated its descriptor refactor on TWO conditions:
+
+1. T2 finds ≥4 composition kinds — **MET** (6).
+2. Batch 4 adds ≥2 new symbol tables — **NOT MET.** Batch 4 added **zero**
+   and REMOVED one: `SIMPLE_SYMBOL_DRAWING` is gone, absorbed by T6's
+   routing when control/entity/boundary moved to `measureEntityLeaf`. Net
+   5 → 4 tables.
+
+The pressure ADR-2 was written to relieve — tables proliferating as each new
+MISMATCH got its own — never materialised, because routing reduced them
+instead. **ADR-2 did its job by preventing a refactor, not by producing
+one.** Designing the descriptor shape before counting the cases would have
+been the error; the count came back saying don't.
+
+This is recorded as a decision, not an omission. If a future task adds two
+more per-symbol tables, ADR-2's gate reopens on its original terms.
+
+### Mission close
+
+All five batches resolved: 1–3 done, 4 done (T6–T9), 5 skipped on a met
+gate condition. Description size-conformance **239/351 (68.1%) → 317/351
+(90.3%)** across this session, zero widened at every step.
+
+**The follow-on is the real ceiling and is NOT part of this mission:** port
+`BodyFactory`/`BodyEnhanced*` and add ink-offset + default-font seams to the
+shared atom pipeline. Until that lands, the routing cannot widen past the box
+family — folder/package, use-case-with-sprites, and `<img>`/`<latex>` displays
+all stay on their pre-T6 paths for reasons diagnosed and recorded, not
+guessed.
