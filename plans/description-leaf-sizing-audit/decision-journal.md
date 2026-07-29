@@ -229,3 +229,49 @@ which is direct input to **A2s** (class record-node sizing, 489
 non-conformant). Nobody planned this; it is a consequence of the two scripts
 sharing one classifier. Worth remembering: repairing shared instrumentation
 pays out in every engine that imports it.
+
+## Batch 2 — T4 RESCOPED before dispatch, 2026-07-28
+
+T3 overtook most of T4, and one of T4's three premises was mine and wrong.
+Verified against the code before rescoping rather than dispatching an agent
+to rediscover it.
+
+- Groups 1 and 2 (`resolveElementShadowing`, `resolveElementLineThickness`)
+  are DONE — T3 jar-proved both, numbers in the Proofs section. Re-probing
+  would have burned an agent to confirm what is already written down.
+- Group 3's premise is FALSE. The brief said `HeaderFont`,
+  `HeaderBackground`, `Background` and `BucketSelector` are "referenced by
+  NO module at all," so each must be dead code or an unwired feature. All
+  four are live with real call sites — `renderer-classifier-rows.ts:149`,
+  `renderer-classifier-box.ts:257`, `renderer-classifier-colors.ts:124`,
+  `style-map-element.ts:96`. They read 0/0 during planning because that
+  grep was scoped to DESCRIPTION modules; these are CLASS-engine resolvers.
+  The disposition T4 was written to make does not exist. T3 had already
+  classified all four `size-neutral` with written reasons.
+
+**That is the second mission-authored premise falsified by execution** (the
+first was T1's sprite regex). Both came from greps scoped narrowly during
+planning. Recording the pattern, not just the instances: a grep used to
+SIZE work must be scoped to the whole tree, or its zero results will be
+mistaken for absence. CLAUDE.md already warns about this for
+`net/sourceforge/plantuml/` vs `net/`; it applies to our own tree too.
+
+Rescoped T4 to what is genuinely unanswered — the two verdicts T3 marked
+inferred rather than proven, plus two collisions between the tables and the
+unmet ledger criterion:
+
+1. `guillemet` — GAP by inference only; prove or disprove by probe.
+2. `inkSprites` — dead by grep, not by dimension; show the ink-vs-declared
+   difference is real, using `<$bi-globe>` (inks 16×13.846 from a declared
+   16×16).
+3. `skinparam actorStyle` — T3 found no `Theme` field and both paths
+   hardcoding STICKMAN; T2 independently found ACTOR_AWESOME/ACTOR_HOLLOW
+   MISMATCHes. Same feature from two directions. Batch 4 needs to know
+   whether it is one fix or two.
+4. T2's open question — whether `Footprint` collects the marged block's
+   right-hand padding for USECASE_BUSINESS. Blocks a Batch-4 row: T2's
+   closed form matched to 0.01px, but our port fits REAL points.
+5. The ledger entry, an unmet T4 acceptance criterion.
+
+Single agent, as the batch overview already required: all five items
+contend for `planning/sizer-renderer-parity.md`.
