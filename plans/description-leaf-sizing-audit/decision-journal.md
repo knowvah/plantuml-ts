@@ -486,3 +486,38 @@ undeclared. The 500-line cap made keeping the latex/img fallback beside the
 routing impossible; it is a mechanical relocation of pre-existing
 `measureBox`/`boxIcon` math. Flagged by the agent rather than absorbed
 silently, which is the correct handling.
+
+## T7 + T8 launched in parallel — 2026-07-28
+
+Specs written at dispatch time (neither existed; only T6 was pre-specified,
+since batch 4 was a template whose rows the audits had to determine first).
+Disjoint write-sets, no dependency between them: T7 owns `src/core/skin/*`,
+`theme.ts`, `skinparam.ts`, `leaf-sizing-consts.ts`, `renderer-symbol.ts`;
+T8 owns `descriptive-keywords.ts`, `parser.ts`, and the ledger. Each prompt
+names the other's files as off-limits, since they share one worktree.
+
+**T7 preconditions verified before dispatch**, not assumed: `src/core/skin/`
+holds only `ActorStickMan.ts` and `ActorStyle.ts`; `ActorStyle.ts:53` throws
+for AWESOME/HOLLOW with a comment recording the deferral and its reason ("no
+`actorStyle()` accessor at all… no caller anywhere"); all four upstream
+`Actor*.java` sources exist. So the sequencing T4 derived holds — accessor
+alone selects nothing, geometry alone is unreachable — and both halves ship
+in one commit.
+
+**T8 is bigger than its one-line title, and the spec says so.** Upstream has
+THREE commands — `CommandArchimate`, `CommandArchimateMultilines`,
+`CommandArchimatePackage`. The task implements the single-line form and is
+instructed to FILE the others with a jar probe rather than half-implement
+them (ADR-4). A half-implemented grammar is a silent divergence; a filed one
+is a tracked finding.
+
+Two criteria are flagged in the prompts as the ones most likely to catch a
+mistake, so they are checked early rather than at the end: for T8, DOT
+structure must stay 262/90/708 — a new keyword that moves existing structure
+means the grammar is too greedy. For T7, both paths must read the SAME
+accessor; a second independent read would recreate the exact
+renderer/sizer divergence this mission exists to end.
+
+Both prompts carry the upstream-grep warning (`net/`, not
+`net/sourceforge/plantuml/`) — that scoping error has now falsified two
+planning premises in this mission alone.
