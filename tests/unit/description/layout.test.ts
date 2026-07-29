@@ -1237,14 +1237,18 @@ describe('layoutDescription — latex label sizing', () => {
     expect(ucGeo.height).toBe(expected.height);
   });
 
-  it('actor is sized by the stickman + label stack (latex label not special-cased)', () => {
-    // Actor sizing is stickman (27×60) + label; unlike usecase it does not
-    // special-case a LaTeX display (rare — ledgered). Height is stickman + one
-    // label line regardless; width tracks the (literal) label extent.
-    const ast = makeAst([node('a', 'actor', '<latex>x^2</latex>')], []);
+  it('actor is sized by the stickman + latex label stack (T6/ADR-6: routed through EntityImageDescription, so a `<latex>` label is measured uniformly with usecase, not raw text)', () => {
+    // Actor sizing is stickman (27×60) + label; the label's `<latex>` atom is
+    // measured via the SAME shared creole/latex pipeline `measureLatex` uses
+    // (EntityImageDescription.calculateDimensionSlow -> USymbolSimpleAbstract
+    // .asSmall's mergeLayoutT12B3), so width is max(stickman, label) and
+    // height is stickman + the label's real (non-text-line) height.
+    const display = '<latex>x^2</latex>';
+    const expectedLabel = measureLatex(display);
+    const ast = makeAst([node('a', 'actor', display)], []);
     const actorGeo = layoutDescription(ast, defaultTheme, measurer).nodes.find((n) => n.id === 'a')!;
-    expect(actorGeo.width).toBeGreaterThanOrEqual(27);
-    expect(actorGeo.height).toBe(60 + defaultTheme.fontSize);
+    expect(actorGeo.width).toBe(Math.max(27, expectedLabel.width));
+    expect(actorGeo.height).toBe(60 + expectedLabel.height);
   });
 
   it('plain usecase is sized by the containing-ellipse formula (TextBlockInEllipse)', () => {

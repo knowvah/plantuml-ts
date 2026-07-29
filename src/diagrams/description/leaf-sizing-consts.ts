@@ -75,9 +75,37 @@ export const USECASE_ALPHA_MAX = 0.8;
 export const BOX_MIN_WIDTH_DEFAULT = 0;
 
 /**
+ * Sizing-only default stroke thickness (T6, description-leaf-sizing-audit
+ * ADR-6): `renderer-entity.ts`'s own `ENTITY_STROKE_WIDTH` (jar-verified
+ * default entity border, `test-results/dot-cache/component/
+ * sacuso-94-gugi476/in.svg`: `stroke-width:0.5;`) — NOT `SymbolContext`'s own
+ * bare-constructor default (`UStroke.simple()`, thickness 1.0). Matters
+ * because `ActorStickMan#getPreferredWidth/Height`
+ * (`src/core/skin/ActorStickMan.ts`) is the one `USymbol#asSmall
+ * .calculateDimension` in this codebase that reads `symbolContext
+ * .getStroke().getThickness()` — the sizer must supply the SAME 0.5 default
+ * the renderer does, or an actor's routed DOT-node width/height would widen
+ * relative to today's `ACTOR_STICKMAN_WIDTH`/`ACTOR_STICKMAN_HEIGHT`
+ * constants below (both of which already assume this exact default, per
+ * their own doc comments: "default thickness 0.5"). No per-element
+ * `LineThickness`/`Shadowing` override reaches the sizer yet (that
+ * plumbing lives in `ClassifyCtx`, built from `Theme` in `layout.ts` —
+ * T9's write-set, not T6's); this constant is the DEFAULT-only half of
+ * that gap, closing the common case without the override case.
+ */
+export const DEFAULT_SIZING_STROKE_THICKNESS = 0.5;
+
+/**
  * Per-USymbol box margin `[horizontal (x1+x2), vertical (y1+y2)]` in px,
  * transcribed verbatim from upstream `decoration/symbol/USymbol*.java`
  * `getMargin()`. Symbols not listed use DEFAULT_BOX_MARGIN.
+ *
+ * Retained for `leaf-sizing-folder.ts`'s own `measureFolderLeaf` (a
+ * separate, still-real code path this task does not call into or modify —
+ * see that file's own doc comment); `leaf-sizing.ts` no longer reads this
+ * table itself (T6, ADR-6: box-family geometry now comes from
+ * `EntityImageDescription.calculateDimensionSlow`, i.e. each `USymbol*`
+ * class's own `getMargin()`, not this parallel transcription).
  */
 export const SYMBOL_BOX_MARGIN: Partial<Record<USymbol, readonly [number, number]>> = {
   component: [20, 20], // USymbolComponent1 (uml2/default) Margin(10,10,10,10)
@@ -105,6 +133,27 @@ export const SYMBOL_BOX_MARGIN: Partial<Record<USymbol, readonly [number, number
 /** Margin for any box symbol not in SYMBOL_BOX_MARGIN (upstream default). */
 export const DEFAULT_BOX_MARGIN: readonly [number, number] = [20, 20];
 
+/**
+ * Fixed pixel allowance `[width, height]` a USymbol's decoration adds on top of
+ * its text box, independent of the font. UML2 `component` reserves space for
+ * the corner component icon (measured `+20w, +10h` vs a plain rectangle in the
+ * deterministic oracle). Symbols with no decoration add nothing.
+ *
+ * Retained (T6, ADR-6) ONLY for `leaf-sizing.ts`'s own `<latex>` box-family
+ * fallback (`EntityImageDescriptionSupport.ts`'s `buildTextBlock` measures a
+ * `<latex>` atom via `renderLatexAsImage`, a real, non-zero-width KaTeX
+ * render — this port's `leaf-sizing-text.ts#lineTextMetrics` instead treats
+ * it as contributing NO width at all, the pre-existing, jar-verified-CLOSER
+ * approximation for the two permanently-divergent LaTeX box fixtures,
+ * `gevozu-46-sasu860`/`sunuju-01-pote718`, DIVERGENCES.md). Every OTHER box
+ * symbol now sizes via `EntityImageDescription.calculateDimensionSlow`
+ * instead, which reads each `USymbol*` class's OWN `getMargin()` directly.
+ */
+export const SYMBOL_ICON_ALLOWANCE: Partial<Record<USymbol, readonly [number, number]>> = {
+  component: [20, 10], // USymbolComponent1 UML2 corner icon
+  cloud: [10, 10], //    cloud puffs (verified: cloud "L" 37.5×46.5 vs rect 27.5×36.5)
+};
+
 /** Stereotype line horizontal margin — `TextBlockUtils.withMargin(stereo, 1, 0)`
  *  in EntityImageDescription adds 1px each side (+2 total width, +0 height). */
 export const STEREO_MARGIN = 2;
@@ -122,46 +171,6 @@ export const STEREO_MARGIN = 2;
  * height 44px = 20 margin + 14 line + 10 icon confirms line = size = 14.)
  */
 export const LINE_HEIGHT_FACTOR = 1.0;
-
-/**
- * Fixed pixel allowance `[width, height]` a USymbol's decoration adds on top of
- * its text box, independent of the font. UML2 `component` reserves space for
- * the corner component icon (measured `+20w, +10h` vs a plain rectangle in the
- * deterministic oracle). Symbols with no decoration add nothing.
- */
-export const SYMBOL_ICON_ALLOWANCE: Partial<Record<USymbol, readonly [number, number]>> = {
-  component: [20, 10], // USymbolComponent1 UML2 corner icon
-  cloud: [10, 10], //    cloud puffs (verified: cloud "L" 37.5×46.5 vs rect 27.5×36.5)
-  // folder/package are NOT here: both are USymbolFolder and route to
-  // `measureFolderLeaf`, never `measureBox`. It models the tab as the mergeTB
-  // block upstream makes it, so the tab FLOORS the width as well as adding
-  // height -- which a fixed icon allowance cannot express (S1L-a).
-};
-
-/**
- * `USymbolSimpleAbstract` symbols — the family whose `asSmall` stacks a fixed
- * DRAWING above the label (`mergeLayoutT12B3(stereo, drawing, label)`) rather
- * than wrapping text in a bordered box. Width is `max(drawing, label)`,
- * height is `drawing + label` — exactly the shape `measureActor` already had.
- *
- * Dimensions are each drawing's own `calculateDimension`, all of the form
- * `radius * 2 + 2 * margin` (margin 4, radius 12 for the robustness trio):
- *   - `Control` 24 + 8 = 32 x 32 (svek/Control.java:51-53, :87-88)
- *   - `EntityDomain` 32 x 32 (svek/EntityDomain.java:50-52, :75)
- *   - `Boundary` 24 + left 17 + 8 = 49 wide x 32 (svek/Boundary.java:52-55, :98)
- *
- * `actor` keeps its own constants below (a stickman, not a radius+margin
- * circle) and `interface`/`circle` are excluded entirely: they are the same
- * family but `hideText` drops the label, so they size as the bare circle
- * (see INTERFACE_CIRCLE_SIZE). Before this, control/boundary/entity fell to
- * `measureBox`'s generic [20, 20] margin — `control "C"` measured 30x34
- * against the jar's 32x46 (kizobu-64-rozo458 / tacixe-99-gesi489, S1L-e).
- */
-export const SIMPLE_SYMBOL_DRAWING: Partial<Record<USymbol, readonly [number, number]>> = {
-  control: [32, 32],
-  entity: [32, 32],
-  boundary: [49, 32],
-};
 
 /** Fixed square a `port`/`portin`/`portout` leaf occupies
  *  (EntityPosition.RADIUS * 2, abel/EntityPosition.java:56). */

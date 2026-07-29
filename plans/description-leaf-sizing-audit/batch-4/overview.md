@@ -15,10 +15,10 @@ candidate cause. T9 is cleanup and depends on T6.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T6 | Route `measureLeafNode` → `EntityImageDescription` | typescript-pro | `src/core/measurer-bounder.ts` (new), `src/diagrams/description/leaf-sizing.ts`, `leaf-sizing-consts.ts`, `layout-dot-tree.ts` | — | [ ] |
+| T6 | Route `measureLeafNode` → `EntityImageDescription` | typescript-pro | `src/core/measurer-bounder.ts` (new), `src/diagrams/description/leaf-sizing.ts`, `leaf-sizing-consts.ts`, `layout-dot-tree.ts` | — | [x] |
 | T7 | Port `ActorAwesome` / `ActorHollow` + the `actorStyle` accessor | typescript-pro | `src/core/skin/ActorAwesome.ts`, `ActorHollow.ts` (new), `ActorStyle.ts`, `src/core/theme.ts`, `skinparam.ts` | T6 | [ ] |
 | T8 | Wire `archimate` as a description keyword | typescript-pro | `src/core/descriptive-keywords.ts`, `src/diagrams/description/parser.ts` | T6 | [ ] |
-| T9 | Delete the superseded tables and the dead `inkSprites` field | refactoring-specialist | `src/diagrams/description/leaf-sizing-consts.ts`, `layout.ts`, `layout-dot-tree.ts` | T6, T7, T8 | [ ] |
+| T9 | **RESCOPED** — delete ONLY what T6 superseded + the dead `inkSprites` field | refactoring-specialist | `src/diagrams/description/leaf-sizing-consts.ts`, `layout.ts`, `layout-dot-tree.ts` | T6, T7, T8 | [ ] |
 
 ## What T6 is expected to close, and what it is not
 
@@ -61,3 +61,25 @@ NOT closed by routing — these are T7/T8/T9:
 ADR-6 expects ADR-2 to be MOOT — the descriptor refactor exists to unify the
 five flat tables, and T6/T9 delete them instead. After T9, confirm and
 retire ADR-2 in the journal rather than executing Batch 5 out of habit.
+
+
+## STATUS after T6 — read the ADR-6 AMENDMENT before continuing
+
+T6 landed at **316/351 (90.0%)**, zero widened, but it FALSIFIED half of
+ADR-6 and that changes what is left:
+
+- **T9's premise is VOID.** The flat tables are not superseded — the ported
+  path lacks the folder title margin, sprite ink offsets, the `<img>`
+  default-font seam and our deliberate `<latex>` divergence. T9 now deletes
+  ONLY what T6 actually replaced, plus the dead `inkSprites` field. Deleting
+  the tables wholesale would lose real behaviour.
+- **ADR-2 is live again**, not moot. The five tables survive, so the
+  descriptor refactor it proposes still has a subject. Re-evaluate its gate
+  honestly.
+- **A new follow-on exists, and it is the real ceiling.** Widening the
+  routing requires porting `BodyFactory`/`BodyEnhanced*` and adding
+  ink-offset and default-font seams to the shared atom pipeline. Substantial
+  and separable — a tracked mission, not a Batch-4 patch.
+
+T7 (ActorAwesome/ActorHollow + the `actorStyle` accessor) and T8 (`archimate`
+keyword) are UNAFFECTED by the amendment and remain as specified.
