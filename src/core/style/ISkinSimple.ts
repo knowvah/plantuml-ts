@@ -60,22 +60,29 @@
  * Pragma.java` is now ported (T10b, `skin/Pragma.ts`) and `getPragma()`
  * is added below.
  *
- * Added as `getPragma?(): Pragma` — OPTIONAL, not required — to stay a
- * PURE addition: four pre-existing `ISkinSimple`-shaped test doubles
- * (`tests/unit/core/klimt/creole/CreoleHorizontalLine.test.ts`,
- * `legacy/CreoleParser.test.ts`, `core/style/ISkinSimple.test.ts`, and
- * `legacy/StripeTree.test.ts` — the last one a SIBLING task's own
- * in-flight file, out of this task's write-set entirely) build object
- * literals that satisfy every OTHER member but do not (and, for the
- * sibling file, cannot safely be made to) implement `getPragma`. Making
- * it required would break all four with no path to fix the sibling's
- * file myself. Mirrors this codebase's own established pattern for
- * exactly this shape — `shape/TextBlock.ts`'s `getMagneticBorder?()` —
- * where a required-upstream member becomes optional here specifically so
- * existing implementors stay valid; a future real caller resolves the
- * default itself (`Pragma.createEmpty()`) rather than via a shared
- * `textBlockMagneticBorder`-style free function, since no caller in this
- * task's own write-set needs one yet.
+ * `getPragma()` is REQUIRED here, matching `ISkinSimple.java:75`
+ * (`public Pragma getPragma();` — a Java interface member, so required by
+ * construction).
+ *
+ * T10b first added it as `getPragma?()`, OPTIONAL, because making it
+ * required broke four pre-existing `ISkinSimple`-shaped test doubles —
+ * one of which (`legacy/StripeTree.test.ts`) belonged to a sibling task
+ * running concurrently and was therefore untouchable from inside that
+ * task. That was a sound call under the constraint and a divergence from
+ * upstream's contract regardless: optional-vs-required changes what
+ * implementors must provide, and a caller that must guard `getPragma?.()`
+ * is a different program from one that may simply call it.
+ *
+ * The orchestrator made it required once the tree settled and no sibling
+ * was in flight, updating all four doubles. Recorded because "a faithful
+ * port overrides a short-term patch" is this mission's standing guidance,
+ * and weakening an interface to keep test fixtures compiling is precisely
+ * the short-term patch it rules out.
+ *
+ * Note the tempting-but-wrong precedent: `shape/TextBlock.ts`'s
+ * `getMagneticBorder?()` IS optional here. That one is a genuine scope
+ * reduction with a documented default resolver; this one had no caller
+ * needing a default — only fixtures needing an edit.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinSimple.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/SpriteContainer.java
@@ -107,7 +114,7 @@ export interface ISkinSimple {
   getTabSize(): number;
   getDpi(): number;
   copyAllFrom(other: ReadonlyMap<string, string>): void;
-  getPragma?(): Pragma;
+  getPragma(): Pragma;
 
   sheet(
     fontConfiguration: FontConfiguration,

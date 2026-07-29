@@ -18,6 +18,7 @@ import type { UChange } from '../../../../../src/core/klimt/UChange.js';
 import type { UGraphic } from '../../../../../src/core/klimt/UGraphic.js';
 import type { StringBounder } from '../../../../../src/core/klimt/font/StringBounder.js';
 import type { FontConfiguration } from '../../../../../src/core/klimt/shape/UText.js';
+import { Pragma } from '../../../../../src/core/skin/Pragma.js';
 
 const FONT: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set() };
 
@@ -44,6 +45,7 @@ function fakeSkin(): ISkinSimple {
     getTabSize: () => 8,
     getDpi: () => 96,
     copyAllFrom: () => undefined,
+    getPragma: () => Pragma.createEmpty(),
     sheet: () => {
       throw new Error('not exercised in this test — getTitle() throws before reaching skinParam.sheet()');
     },

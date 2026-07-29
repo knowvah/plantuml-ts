@@ -14,6 +14,7 @@ import { StripeTree, computeLevel } from '../../../../../../src/core/klimt/creol
 import type { ISkinSimple } from '../../../../../../src/core/style/ISkinSimple.js';
 import type { FontConfiguration } from '../../../../../../src/core/klimt/shape/UText.js';
 import type { SheetBuilder } from '../../../../../../src/core/klimt/creole/SheetBuilder.js';
+import { Pragma } from '../../../../../../src/core/skin/Pragma.js';
 
 const FONT: FontConfiguration = { family: 'sans-serif', size: 12, color: '#000000', styles: new Set() };
 
@@ -34,6 +35,7 @@ function fakeSkinParam(): ISkinSimple {
     getTabSize: notNeeded,
     getDpi: notNeeded,
     copyAllFrom: () => undefined,
+    getPragma: () => Pragma.createEmpty(),
     sheet: (...args: unknown[]): SheetBuilder => notNeeded(...(args as [])),
   };
 }

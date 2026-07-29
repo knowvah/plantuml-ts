@@ -31,6 +31,7 @@ function fakeSkinSimple(): ISkinSimple {
     getMonospacedFamily: () => 'monospaced',
     getTabSize: () => 8,
     getDpi: () => 96,
+    getPragma: () => Pragma.createEmpty(),
     copyAllFrom: (other) => {
       for (const [k, v] of other) values.set(k, v);
     },
@@ -72,16 +73,28 @@ describe('ISkinSimple conformance', () => {
   });
 });
 
-describe('ISkinSimple.getPragma (T10b addition — OPTIONAL, see this file\'s own doc comment)', () => {
-  it('a fake that DOES implement getPragma returns a real Pragma', () => {
+// `getPragma()` is REQUIRED, matching `ISkinSimple.java:75`
+// (`public Pragma getPragma();` — a Java interface member).
+//
+// T10b originally added it as optional so that pre-existing test doubles
+// kept compiling, and asserted that optionality here. The orchestrator
+// made it required once no sibling task was in flight and updated every
+// double. These assertions were rewritten rather than deleted: a test
+// that pins a divergence keeps the divergence alive, and this mission's
+// standing guidance is that a faithful port overrides a short-term patch.
+describe('ISkinSimple.getPragma (REQUIRED — mirrors ISkinSimple.java:75)', () => {
+  it('returns the Pragma the implementor supplies', () => {
     const pragma = Pragma.createEmpty();
     pragma.define('ratio', '1.5');
     const skin: ISkinSimple = { ...fakeSkinSimple(), getPragma: () => pragma };
-    expect(skin.getPragma?.()?.getValue(PragmaKey.RATIO)).toBe('1.5');
+    expect(skin.getPragma().getValue(PragmaKey.RATIO)).toBe('1.5');
   });
 
-  it('a fake that does NOT implement getPragma stays a valid ISkinSimple (optional member)', () => {
+  it('is callable without a guard on every conforming implementor', () => {
     const skin = fakeSkinSimple();
-    expect(typeof skin.getPragma).toBe('undefined');
+    expect(typeof skin.getPragma).toBe('function');
+    // The point of requiring it: callers reach a real Pragma with no
+    // `?.` guard and no undefined branch to handle.
+    expect(skin.getPragma().getValue(PragmaKey.RATIO)).toBeNull();
   });
 });
