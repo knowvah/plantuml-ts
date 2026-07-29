@@ -130,8 +130,8 @@ here verifies against the jar, and the template did not allow it.
 | 1 | Instrument + audit (parallel) | T1, T2, T3 | [x] |
 | 2 | Resolver disposition | T4 | [x] |
 | 3 | Prevention — fitness function | T5 | [x] |
-| 4 | Close the gaps (template, one task per row) | derived | [ ] |
-| 5 | Conditional composition refactor (ADR-2) | T_last | [ ] |
+| 4 | Close the gaps (T6 route, T7 actorStyle, T8 archimate, T9 cleanup) | T6–T9 | [x] |
+| 5 | Conditional composition refactor (ADR-2) | — | SKIPPED (gate not met) |
 
 ## Index
 

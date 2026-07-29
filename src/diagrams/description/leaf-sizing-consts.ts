@@ -9,7 +9,6 @@
 
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { GuillemetPair } from '../../core/text/Guillemet.js';
-import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import type { ActorStyle } from '../../core/skin/ActorStyle.js';
 
 /** `skinparam componentStyle` — only `uml2` (the default) draws the corner
@@ -40,9 +39,6 @@ export interface BoxSizingOpts {
    *  measures what `manageGuillemet` will actually render (S1L-f); absent =
    *  upstream's `«`/`»` default. */
   guillemet?: GuillemetPair | undefined;
-  /** Registry view reporting sprite INK extents — the use-case ellipse
-   *  footprint is fit to drawn-path bounds, not declared boxes (S1L-k). */
-  inkSprites?: SpriteDimsLookup | undefined;
   /** Per-element font SIZE override (`skinparam <sname>FontSize N` /
    *  `<style> <sname> { FontSize N }`), already resolved for this node's
    *  USymbol by `resolveElementFontSize(theme, sname, 'title')` — the SAME

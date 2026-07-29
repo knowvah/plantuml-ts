@@ -176,7 +176,6 @@ export function buildDotNodes(
         minimumWidth: ctx.minimumWidthFor(node.symbol),
         wrapWidth: ctx.wrapWidth,
         guillemet: ctx.guillemet,
-        inkSprites: ctx.inkSprites,
         fontSize: ctx.fontSizeFor(node.symbol),
       },
       ctx.sprites,
