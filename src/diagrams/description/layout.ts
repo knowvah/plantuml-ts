@@ -45,7 +45,7 @@ import type { ComponentStyle } from './leaf-sizing.js';
 import type { ActorStyle } from '../../core/skin/ActorStyle.js';
 import { computeGraphSpacing } from './link-edge-attrs.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
-import { spriteDimsLookupFor, spriteInkDimsLookupFor } from '../../core/sprite-commands.js';
+import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { resolveElementFontSize } from '../../core/theme.js';
 import { GUILLEMET_DEFAULT, type GuillemetPair } from '../../core/text/Guillemet.js';
 import { buildMagmaEdges, magmaGroups } from './magma.js';
@@ -128,9 +128,6 @@ export interface ClassifyCtx {
    *  `<$sprite>` atom in a leaf's display text actually widens/heightens
    *  its DOT node size, per the batch-2 decision-journal's flagged gap. */
   sprites: SpriteDimsLookup | undefined;
-  /** The same registry reporting INK extents — the use-case ellipse footprint
-   *  is fit to drawn-path bounds, not declared sprite boxes (S1L-k). */
-  inkSprites: SpriteDimsLookup | undefined;
   /** Every node's ALWAYS-fully-qualified path (ancestor chain + own id,
    *  regardless of collision) mapped to whatever canonical key
    *  `classifyAst` actually assigned it — lets `resolveEndpoint`
@@ -444,7 +441,6 @@ export function layoutDescription(
     },
     collidingIds, qualifiedPathToDotKey: new Map(),
     sprites: ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined,
-    inkSprites: ast.sprites !== undefined ? spriteInkDimsLookupFor(ast.sprites) : undefined,
   };
   const removed = effectiveRemovedIds(ast.nodes, ast.links, ast.removeUnlinked === true);
   // Phantom `set separator`-derived package nesting (namespace-groups.ts) is
