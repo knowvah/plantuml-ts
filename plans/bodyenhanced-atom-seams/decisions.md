@@ -278,3 +278,52 @@ this port's. Each adapted class must carry a JSDoc `@see` to its Java
 origin AND a note naming the adaptation, so the divergence is visible at
 the site rather than inferred. If the maintainer prefers the verbatim OOP
 hierarchy, this ADR is the thing to reverse.
+
+## ADR-10 — Split T2b; `create2`/`BodyEnhanced1` moves to SI1
+
+**Maintainer decision, 2026-07-29, after the cascade was re-measured.**
+
+**Context.** `Display` (T9c) unblocks `BodyEnhanced2`, but not
+`BodyEnhanced1`, whose `buildTextBlock` constructs `MethodsOrFieldsArea`
+(442). The orchestrator first sized that cascade at ~3,931 lines and the
+maintainer approved porting it. **Tracing the second level showed that
+figure was wrong by roughly 3×:**
+
+| Level | Java |
+|---|---|
+| First (MethodsOrFieldsArea + direct deps: `Entity` 775, `StringUtils` 588, `VisibilityModifier` 355, `Style`/`StyleBuilder`/`PName`/`SName` 808, `ISkinParam` 205, `Url`+`CharHidder` 258, `PlacementStrategy`×5 + `ULayoutGroup` + `TextBlockWithUrl` 500) | ≈3,931 |
+| Second (`net/atmp/CucaDiagram` 953, the 40-file `skin/` package 5,232, `Quark`/`Kal`/`USymbols`/`USymbol`/`Margins`/`Stereostyles`/`Stereotag`/`IEntityImage`/`Bodier` 1,980) | ≈8,165 |
+| **Running total, still not closed** | **≈12,100** |
+
+**Two problems beyond size.** `abel/Entity` imports `net.atmp.CucaDiagram`
+— which `CLAUDE.md` calls "the single most load-bearing class outside the
+table above, and the target of mission SI1" — and `cucadiagram.Bodier`,
+which this mission's own README places out of scope AS SI1's work. So
+porting the cascade would absorb mission SI1 entirely, from inside a
+mission scoped to description-leaf sizing. Separately, `ISkinParam` is an
+interface over the whole 40-file `skin/` package, the subsystem that has
+now produced five independent hits (T7, T8, T9a, T9b, T10e).
+
+**Decision.** Split T2b:
+- **T2b-1 (this mission):** `BodyEnhanced2` + `BodyFactory.create3`
+- **T2b-2 (mission SI1):** `BodyEnhanced1` + `BodyFactory.create2`, together
+  with `MethodsOrFieldsArea`, `CucaDiagram`, `Entity`, `Bodier` and the
+  skin/style subsystem — ported ONCE, in a mission planned for it
+
+**Consequences.** This mission delivers T6 narrowings **#2 and #3** (already
+landed in T3 — the ink seam and `imgFallbackFont`) plus the entire creole
+`Display`/`Sheet`/stripe layer. **Narrowing #1 — folder/package, 8 fixtures,
+the mission's headline win — is deferred to SI1**, because `name` routes
+`create2` → `BodyEnhanced1`. `decorate`'s margin arithmetic is already
+ported (T2a), so SI1 inherits a working separator/margin layer rather than
+starting cold.
+
+Rejected: porting the cascade here (a mandate given for ~3,900 lines does
+not extend to ~12,100 that crosses into another mission); and pausing to
+re-plan everything (the split lets a green, mergeable branch close now).
+
+**Note the pattern.** This is the second time a scope figure the maintainer
+ruled on was later found materially wrong — ~1,100→~2,300 for the stripe
+classes, ~3,900→~12,100 here. Both were caught by tracing the call graph
+one level deeper than the estimate. **Size a cascade by tracing two levels,
+not one, before asking for a ruling on it.**
