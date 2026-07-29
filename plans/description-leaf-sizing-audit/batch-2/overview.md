@@ -7,4 +7,4 @@ sizer-renderer-parity.md`) and the same threading sites, so
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T4 | Probe + dispose of the open resolvers | general-purpose | `planning/sizer-renderer-parity.md` | T3 | [ ] |
+| T4 | Probe + dispose of the open resolvers | general-purpose | `planning/sizer-renderer-parity.md` | T3 | [x] |

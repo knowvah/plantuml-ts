@@ -511,3 +511,92 @@ excluded from the reported denominator; 115 → 112 after creole-lexer-unificati
 deleted lurupu-11/pebace-74/zotiru-33). Its `_doc` records the capture
 provenance. Re-measure with `npx tsx scripts/measure-description-size-deltas.ts`
 (exit 0 iff zero widened).
+
+## description-leaf-sizing-audit — carried findings (T4, 2026-07-28)
+
+Audit-only mission (ADR-4: findings are FILED, not fixed). Twelve open items,
+each one line pointing at the table row that holds its evidence — so they
+outlive the mission that found them. Neither table is a golden or a ratchet;
+if they are ever deleted, these lines are the surviving record.
+
+**Six sizer↔renderer GAPs** — `planning/sizer-renderer-parity.md`, "The table"
++ "Proofs". A `GAP` = a setting the RENDERER honours (or the jar does) that
+never reaches `measureLeafNode`, so the box and the ink disagree.
+
+1. **per-element `Shadowing`** — `resolveElementShadowing` reaches the renderer
+   (`renderer-entity.ts:212`) and nothing in the sizer. Actor family only:
+   `actor { Shadowing 6 }` 1.027778 → 1.111111in (74→80px), width unchanged;
+   size-neutral on component/usecase/control/entity. Row: per-element resolvers,
+   `element Shadowing`. Proof: "`Shadowing` — GAP, proven".
+2. **diagram-wide `Shadowing`** — same mechanism, second tier
+   (`theme.shadowing`, `theme.ts:83`); bare `root { Shadowing 6 }` gives the
+   identical 1.111111in. One Batch-4 fix covers both tiers. Row: additional
+   settings, `diagram-wide Shadowing`.
+3. **per-element `LineThickness`** — `resolveElementLineThickness` →
+   `renderer-entity.ts:213` only. `actor { LineThickness 6 }`
+   0.498264×1.027778 → 0.527778×1.180556in, i.e. `ActorStickMan`'s `+2×t` term
+   (38 = 26+2×6, 85 = 59+2×6+14). Row: per-element resolvers. Proof:
+   "`LineThickness` — GAP, proven".
+4. **`skinparam wrapWidth`** — threaded into `BoxSizingOpts` but read by
+   `measureBox` ALONE; 6 of 7 leaf shapes (folder, package, note, actor,
+   entity, usecase) measure unwrapped and render wrapped. Per-shape before/after
+   dims in the row. Proof: "`wrapWidth` — GAP, proven".
+5. **`skinparam guillemet`** — same one-caller seam (`maxLineWidth`'s
+   `guillemet` param, `leaf-sizing-text.ts:197`). T4 upgraded this from INFERRED
+   to measured on both sides: jar `entity` 0.843403 → 1.084028in under
+   `guillemet false`, ours 0.843403 in both. Proof: "`guillemet` — GAP, proven
+   (T4; was inferred)".
+6. **`skinparam actorStyle`** — a FIDELITY gap, not a parity drift: both paths
+   hardcode STICKMAN identically, but the jar honours the setting (awesome
+   0.763889×1.041667, hollow 0.444792×0.652778 vs our 0.444792×1.027778 for
+   all). Needs the missing `ActorAwesome`/`ActorHollow` ports FIRST, then a
+   `Theme` field both paths read. Proof: "`skinparam actorStyle` — verdict
+   CHANGED to GAP (T4)".
+
+**Six USymbol composition MISMATCHes** — `planning/usymbol-composition.md`,
+"The table" + "MISMATCH detail — evidence". All six are one root divergence:
+`src/core/decoration/symbol/` holds a faithful per-class port that the RENDERER
+imports and the leaf SIZER does not, re-deriving the same geometry as flat
+tables.
+
+7. **HEXAGON** — composition K5 `width × 2` (`USymbolHexagon.java:79`), not a
+   margin: jar 64.05×24.0, ours 52.025×34; the width error grows linearly with
+   the label. Row: HEXAGON. Evidence §1.
+8. **PERSON** — composition K6, head height `sqrt(w·h) × .42`
+   (`USymbolPerson.java:70-73,:101`): jar 52.025×51.664, ours 52.025×34 —
+   short by 17.66, scaling with `sqrt(area)`. Row: PERSON. Evidence §2.
+9. **USECASE_BUSINESS** — `withMargin(tmp, 7, 0)` before the ellipse fit
+   (`USymbolUsecase.java:100`) refits `alpha`, so the error is +19.80px, not
+   +14: jar 0.987350in vs our 0.712364in. Row: USECASE_BUSINESS. Evidence §3.
+   **T4 addendum (blocks the Batch-4 row):** the pad reaches the fit as a
+   `UEmpty` shape (`TextBlockMarged.java:80-88` → `Footprint.java:163-166`),
+   NOT as ink, and our `footprintBoxes` has no `UEmpty` concept — widening
+   `textW` alone yields 62.071×23.056, not 71.089×25.799. See
+   `sizer-renderer-parity.md` Proofs, "`Footprint` and the USECASE_BUSINESS
+   pad".
+10. **ACTOR_AWESOME** — `ActorAwesome` drawing 55×61
+    (`J/skin/ActorAwesome.java:98-104`) under K2; ours hardcodes stickman
+    27×60. Same defect as GAP 6 seen from the symbol side. Row: ACTOR_AWESOME.
+    Evidence §4-5.
+11. **ACTOR_HOLLOW** — `ActorHollow` drawing 26×33
+    (`J/skin/ActorHollow.java:105-111`); ours 27×60, i.e. 27px too tall. Row:
+    ACTOR_HOLLOW. Evidence §4-5.
+12. **ARCHIMATE** — not a sizing bug: the keyword is absent from
+    `KEYWORD_SYMBOL_ENTRIES` (`descriptive-keywords.ts:71-103`), so the line
+    never becomes a description leaf at all. Sizing is already correct once the
+    keyword exists (plain `USymbolRectangle` `[20,20]`, jar 52.025×34). Needs a
+    `CommandArchimate` port; `leaf-sizing*.ts` needs nothing. Row: ARCHIMATE.
+    Evidence §6.
+
+**Two verdicts T4 CORRECTED, recorded so they are not re-litigated:**
+`BoxSizingOpts.inkSprites` is a dead DUPLICATE channel, not a gap — the
+use-case footprint is already ink-fit through `spriteDimsLookupFor`'s
+`inkWidth`/`inkHeight` (S1L-k, above, is genuinely closed; our port matches the
+jar exactly on an ink≠declared sprite, 0.710157×0.584792 vs 1.041066×0.849519
+for identical 40×40 declarations). And `skinparam actorStyle` is NOT
+size-neutral (item 6). Both corrections carry their measurements in the Proofs
+section.
+
+**Also filed, not `MISMATCH` (no output differs today):** `component` and
+`cloud` measure right for the wrong reason — a fitted "icon allowance" standing
+in for upstream's own `getMargin()` (`usymbol-composition.md`, M-note 1).

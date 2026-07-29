@@ -229,3 +229,111 @@ which is direct input to **A2s** (class record-node sizing, 489
 non-conformant). Nobody planned this; it is a consequence of the two scripts
 sharing one classifier. Worth remembering: repairing shared instrumentation
 pays out in every engine that imports it.
+
+## Batch 2 — T4 RESCOPED before dispatch, 2026-07-28
+
+T3 overtook most of T4, and one of T4's three premises was mine and wrong.
+Verified against the code before rescoping rather than dispatching an agent
+to rediscover it.
+
+- Groups 1 and 2 (`resolveElementShadowing`, `resolveElementLineThickness`)
+  are DONE — T3 jar-proved both, numbers in the Proofs section. Re-probing
+  would have burned an agent to confirm what is already written down.
+- Group 3's premise is FALSE. The brief said `HeaderFont`,
+  `HeaderBackground`, `Background` and `BucketSelector` are "referenced by
+  NO module at all," so each must be dead code or an unwired feature. All
+  four are live with real call sites — `renderer-classifier-rows.ts:149`,
+  `renderer-classifier-box.ts:257`, `renderer-classifier-colors.ts:124`,
+  `style-map-element.ts:96`. They read 0/0 during planning because that
+  grep was scoped to DESCRIPTION modules; these are CLASS-engine resolvers.
+  The disposition T4 was written to make does not exist. T3 had already
+  classified all four `size-neutral` with written reasons.
+
+**That is the second mission-authored premise falsified by execution** (the
+first was T1's sprite regex). Both came from greps scoped narrowly during
+planning. Recording the pattern, not just the instances: a grep used to
+SIZE work must be scoped to the whole tree, or its zero results will be
+mistaken for absence. CLAUDE.md already warns about this for
+`net/sourceforge/plantuml/` vs `net/`; it applies to our own tree too.
+
+Rescoped T4 to what is genuinely unanswered — the two verdicts T3 marked
+inferred rather than proven, plus two collisions between the tables and the
+unmet ledger criterion:
+
+1. `guillemet` — GAP by inference only; prove or disprove by probe.
+2. `inkSprites` — dead by grep, not by dimension; show the ink-vs-declared
+   difference is real, using `<$bi-globe>` (inks 16×13.846 from a declared
+   16×16).
+3. `skinparam actorStyle` — T3 found no `Theme` field and both paths
+   hardcoding STICKMAN; T2 independently found ACTOR_AWESOME/ACTOR_HOLLOW
+   MISMATCHes. Same feature from two directions. Batch 4 needs to know
+   whether it is one fix or two.
+4. T2's open question — whether `Footprint` collects the marged block's
+   right-hand padding for USECASE_BUSINESS. Blocks a Batch-4 row: T2's
+   closed form matched to 0.01px, but our port fits REAL points.
+5. The ledger entry, an unmet T4 acceptance criterion.
+
+Single agent, as the batch overview already required: all five items
+contend for `planning/sizer-renderer-parity.md`.
+
+## T4 complete — 2026-07-28
+
+Both inferred verdicts are now measured, and TWO changed. Totals coincide
+(5 threaded / 6 GAP / 9 size-neutral) but membership swapped; the required-16
+subset moved 5/7 → 4/8. T4 stated that in the Counts block so nobody reads
+the unchanged totals as "nothing happened".
+
+**`guillemet` — GAP upheld, promoted inferred → measured on both sides.**
+Jar moves +0.240625in (+17.325px) for `«zz»` → `<<zz>>`. `component`
+(via `measureBox`) tracks exactly; `entity` (via `measureSimpleSymbol`) is
+flat. Exactly the five-path split T3 predicted, now with numbers.
+
+**`inkSprites` — verdict CHANGED, GAP → size-neutral. This corrects T3's
+consequence, and the summary I gave the user.** T3's grep was right that
+the `inkSprites` FIELD is unread; its inference that S1L-k's ink-bounds
+intent is therefore inert was wrong. Orchestrator-verified: sprite ink IS
+consumed by the sizer — `inlineFootprintBox` (`leaf-sizing-text.ts:355-370`)
+reads `inkX/inkY/inkWidth/inkHeight` off the `sprites` lookup built by
+`spriteDimsLookupFor` (`sprite-commands.ts:94`). Probed with two sprites of
+identical 40×40 declaration and ink 40×10 vs 40×40: jar and port agree
+exactly on both usecase and rectangle. So the Batch-4 item is DELETE THE
+DEAD FIELD, not fix a sizing gap.
+
+Generalizable: "field X is unread" and "feature X is unimplemented" are
+different claims, and the second does not follow from the first when a
+second channel already carries the value.
+
+**`actorStyle` — verdict CHANGED, size-neutral → GAP (fidelity), and it is
+TWO fixes, not one.** Jar: awesome 0.763889×1.041667, hollow
+0.444792×0.652778, against our stickman 0.444792×1.027778 for all three —
+reproducing T2's ACTOR_AWESOME/ACTOR_HOLLOW numbers exactly, so the two
+Batch-1 findings are one defect seen from two directions. The hoped-for
+cheap fix ("wire `actorStyle` to the ported classes") is unavailable:
+`src/core/skin/` holds only `ActorStickMan.ts`/`ActorStyle.ts`, and
+`actorStyleGetTextBlock` throws for AWESOME/HOLLOW by deferral. So Batch 4
+needs (a) port `ActorAwesome`/`ActorHollow` geometry AND (b) add the
+`Theme`/skinparam accessor that does not exist. (b) alone changes nothing;
+(a) alone is unreachable. Sequenced, not parallel.
+
+**USECASE_BUSINESS — the closed form transfers, but not for free.** The pad
+is NOT ink: `TextBlockMarged.drawU` (`TextBlockMarged.java:80-88`) draws
+`UEmpty.create(dim)` at the full marged dimension and
+`Footprint$MyUGraphic.drawEmpty` (`Footprint.java:163-166`) collects its
+corners, while `drawText` contributes only the UText's own width. Our
+`footprintBoxes` has NO `UEmpty` concept. Driven directly: widening the text
+width alone gives 62.071×23.056 (wrong); adding the marged block's own box
+gives 71.089×25.799 = the jar exactly. **Batch 4 must emit the marged
+block's box or it lands 9.0px w / 2.7px h off** — precisely the
+plausible-but-wrong outcome T2's open question was raised to prevent.
+
+**Open, and worth probing before that Batch-4 row closes:** the same
+`UEmpty` rule should apply to the stereotype block's `withMargin(…,1,0)`
+(`EntityImageDescription.java:198-201`), but that is reasoned, not measured.
+mopimi-10 and lunexo-59 are conformant today, so either the +2 does not
+dominate the fit or it is masked. Probe a stereotyped use-case with a SHORT
+label, where 2px would bite.
+
+Ledger: 12 numbered lines (6 GAPs + 6 MISMATCHes) under a new
+`## description-leaf-sizing-audit — carried findings (T4)` section, plus the
+two corrected verdicts and the M-note-1 carry, so all of it survives the
+mission.
