@@ -85,13 +85,13 @@ Tracing dependencies put the true size at **≈2,300** lines (see ADR-9).
 
 | ID | Scope | Java lines | Depends |
 |----|-------|-----------|---------|
-| T10a | `AbstractAtom`, `AtomWithMargin`, `StripeStyle`, `CreoleHorizontalLine`, `StripeRaw` | 355 | T9a |
-| T10b | `AtomTable`, `StripeTable`, `Pragma`, `BackSlash` | 717 | T10a |
-| T10c | `AtomTree`, `StripeTree` | 214 | T10a |
-| T10d | `Neutron`, `StripeCode` | 252 | T10a |
-| T10e | `AtomMath`, `StripeLatex`, `ScientificEquationSafe` | 396 | T10a |
-| T10f | `EmbeddedDiagram.createAndSkip` | 368 | T10a |
-| T10g | Remove every seam from `CreoleParser`; reinstate the `lastStripe` continuation checks | — | T10b–f |
+| T10a | `AbstractAtom`, `AtomWithMargin`, `StripeStyle`, `CreoleHorizontalLine`, `StripeRaw` | 355 | T9a | [x] |
+| T10b | `AtomTable`, `StripeTable`, `Pragma`, `BackSlash` | 717 | T10a | [x] |
+| T10c | `AtomTree`, `StripeTree` | 214 | T10a | [x] |
+| T10d | `Neutron`, `StripeCode` | 252 | T10a | [x] |
+| T10e | `AtomMath`, `StripeLatex`, `ScientificEquationSafe` | 396 | T10a | [x] |
+| T10f | `EmbeddedDiagram.createAndSkip` | 368 | T10a | [x] |
+| T10g | Remove every seam from `CreoleParser`; reinstate the `lastStripe` continuation checks; widen `Stripe` | — | T10b–f | [x] |
 
 T10a lands the shared primitives first. T10b–T10f then run in parallel
 (disjoint write-sets). T10g is last and is the ONLY task permitted to touch
