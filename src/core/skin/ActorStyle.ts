@@ -1,6 +1,8 @@
 import type { TextBlock } from '../klimt/shape/TextBlock.js';
 import type { SymbolContext } from '../decoration/symbol/SymbolContext.js';
 import { ActorStickMan } from './ActorStickMan.js';
+import { ActorAwesome } from './ActorAwesome.js';
+import { ActorHollow } from './ActorHollow.js';
 
 /**
  * ActorStyle — the actor-drawing-style selector `USymbolActor`'s
@@ -19,14 +21,13 @@ import { ActorStickMan } from './ActorStickMan.js';
  * 165` and this port's `skinparam.ts`): `actor`'s USymbol resolves via
  * `skinParam.actorStyle().toUSymbol()`, defaulting to `ActorStyle
  * .STICKMAN` — `HOLLOW`/`AWESOME` are reachable ONLY when a user sets
- * `skinparam actorStyle Hollow|Awesome`. This port's `skinparam.ts` has
- * no `actorStyle()` accessor at all (grepped: no match), so `HOLLOW`/
- * `AWESOME` have no caller anywhere in this codebase — `getTextBlock`
- * for those two branches is therefore intentionally NOT ported (throws
- * with a clear deferral message) rather than guessed at from
- * `ActorHollow.java`/`ActorAwesome.java`, which this task did not port.
- * `STICKMAN`/`STICKMAN_BUSINESS` (both reachable — the latter via the
- * `actor/` keyword spelling, `USymbols.java:162`) are ported in full.
+ * `skinparam actorStyle Hollow|Awesome`. T7 (description-leaf-sizing-audit)
+ * ported `ActorHollow.ts`/`ActorAwesome.ts` and wired the `skinparam
+ * actorStyle`/`Theme.actorStyle` accessor (`SkinParam.java:1209-1218`'s
+ * `getValue("actorstyle")` case-insensitive `awesome`/`hollow`, else
+ * `STICKMAN` — this port's `theme.ts`/`skinparam-key-handlers.ts`), so all
+ * four `ActorStyle` values are now reachable and `getTextBlock` below
+ * dispatches to all four without throwing.
  *
  * `toUSymbol()` (deferred, reported): requires the `USymbols` registry
  * class, which is not part of this port (no `USymbols.ts` file exists —
@@ -50,8 +51,7 @@ export type ActorStyle = (typeof ActorStyle)[keyof typeof ActorStyle];
 export function actorStyleGetTextBlock(style: ActorStyle, symbolContext: SymbolContext): TextBlock {
   if (style === ActorStyle.STICKMAN) return new ActorStickMan(symbolContext, false);
   if (style === ActorStyle.STICKMAN_BUSINESS) return new ActorStickMan(symbolContext, true);
-  throw new Error(
-    `ActorStyle.getTextBlock: ${style} not ported — ActorHollow/ActorAwesome have no caller in this ` +
-      'codebase (no skinparam actorStyle wiring exists yet); see this module\'s doc comment',
-  );
+  if (style === ActorStyle.AWESOME) return new ActorAwesome(symbolContext);
+  if (style === ActorStyle.HOLLOW) return new ActorHollow(symbolContext);
+  throw new Error(`ActorStyle.getTextBlock: unhandled ActorStyle ${style as string}`);
 }

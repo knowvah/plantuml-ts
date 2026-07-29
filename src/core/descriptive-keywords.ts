@@ -90,6 +90,28 @@ const KEYWORD_SYMBOL_ENTRIES: readonly (readonly [string, USymbol])[] = [
   ['stack', 'stack'],
   ['storage', 'storage'],
   ['agent', 'agent'],
+  // `archimate` is NOT part of upstream `CommandCreateElementFull.ALL_TYPES`
+  // -- it is its own dedicated command (`descdiagram/command/
+  // CommandArchimate.java`, mandatory `#color` token then CODE/DISPLAY,
+  // `as <alias>` supported) registered separately in the diagram factory.
+  // T8 (description-leaf-sizing-audit) wires only its single-line leaf
+  // form here; `CommandArchimateMultilines` (`[ … ]` body) and
+  // `CommandArchimatePackage` (`{ … }` group) are filed, not implemented
+  // (plans/s1l-leaf-sizing/ledger.md).
+  //
+  // Mapped to the EXISTING 'rectangle' USymbol, not a new 'archimate' tag:
+  // upstream's `USymbols.ARCHIMATE = new USymbolRectangle(SName.archimate)`
+  // is the SAME `USymbolRectangle` class `USymbols.RECTANGLE` uses, just
+  // parameterized with a different `SName` -- and `SName` is read ONLY by
+  // `getSNames()` (CSS/stereotype class naming during `drawU`), never by
+  // `asSmall`/`asBig`'s `calculateDimension` (verified: `USymbolRectangle
+  // .ts` never reads `this.sname` in either). Sizing is therefore
+  // byte-identical to plain `rectangle`. Reaching the TRUE `USymbols
+  // .ARCHIMATE` singleton (for its distinct CSS class) would require a new
+  // `fromStringWithSkinParam` branch in `core/svek/image/
+  // EntityImageDescriptionSupport.ts` -- out of this task's write-set;
+  // filed in the ledger as a rendering-fidelity follow-up, not a sizing gap.
+  ['archimate', 'rectangle'],
   ['usecase/', 'usecase-business'],
   ['usecase', 'usecase'],
   ['component', 'component'],

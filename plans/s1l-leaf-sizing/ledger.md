@@ -600,3 +600,97 @@ section.
 **Also filed, not `MISMATCH` (no output differs today):** `component` and
 `cloud` measure right for the wrong reason — a fitted "icon allowance" standing
 in for upstream's own `getMargin()` (`usymbol-composition.md`, M-note 1).
+
+## T8 — `archimate` keyword wired (DONE 2026-07-29, batch-4)
+
+**Closes item 12 above.** `archimate` is now in `KEYWORD_SYMBOL_ENTRIES`
+(`descriptive-keywords.ts`), so the line becomes a leaf. Maps to the
+EXISTING `'rectangle'` USymbol, not a new `'archimate'` tag: upstream's
+`USymbols.ARCHIMATE = new USymbolRectangle(SName.archimate)` is the SAME
+`USymbolRectangle` class `USymbols.RECTANGLE` uses, differing only in the
+`SName` `getSNames()` reads for CSS/stereotype class naming during
+`drawU` — verified `USymbolRectangle.ts`'s `asSmall`/`asBig`
+`calculateDimension` never reads `this.sname`, so sizing is byte-identical.
+Reaching the true `USymbols.ARCHIMATE` singleton (for its distinct CSS
+class) needs a new branch in `core/svek/image/
+EntityImageDescriptionSupport.ts#fromStringWithSkinParam` — out of T8's
+write-set (only `descriptive-keywords.ts`/`parser.ts`); **filed here as a
+rendering-fidelity follow-up, not a sizing gap** (mirrors upstream's own
+`fromString(String, ISkinParam)`, which also never resolves `archimate` —
+`CommandArchimate.java` never calls it, it passes `USymbols.ARCHIMATE`
+directly at leaf-creation time; this port's renderer/sizer instead
+re-derive the shape from the keyword string at draw/measure time, so the
+two architectures need a branch ours doesn't have yet).
+
+**Grammar gap found and fixed (not pre-existing):** `archimate`'s mandatory
+`#color` token PRECEDES CODE/DISPLAY — the only `KEYWORD_TO_SYMBOL` keyword
+where color is required and leads rather than optional-and-trailing. Feeding
+that straight through the generic rule-14 dispatch (`command-table-
+containers.ts`) defeated `parseNameSection`'s `splitLeadingQuote` guard
+(remainder starts with `#`, not `"`, so the "guillemets inside a quoted
+display are literal text" protection never engages) — the exact bug class
+the mission brief warned about, reproduced first, then fixed via a
+dedicated `tryArchimate` phase in `parser.ts` (runs before the COMMANDS
+table) that strips the color token first, so `parseNameSection` always
+sees a remainder starting at the quote. Verified against
+`archimate #Business "<<inside>> Hello"` (co-located test) and against
+jar probes (`archimate #Business "Hello"` → 52.025×34; alias forms;
+scratchpad captures, not committed).
+
+**Filed, not implemented (ADR-4) — the other two upstream commands:**
+
+- **`CommandArchimateMultilines`** (`archimate #color CODE [ … ]` body
+  block) — jar probe (`archimate #Business Elem1 [` / `desc line one` /
+  `]`, plus a throwaway second element): **94.8125×34**. Notably, upstream
+  itself creates this leaf with `USymbols.RECTANGLE`, not
+  `USymbols.ARCHIMATE` (`CommandArchimateMultilines.java`'s
+  `executeNow`) — a real upstream inconsistency between its two archimate
+  leaf commands, confirmed by reading the Java, not assumed.
+- **`CommandArchimatePackage`** (`archimate #color Name { … }` group) —
+  jar probe (`archimate #Business "GroupA" as GA {` / `component Inner` /
+  `}`, plus a throwaway sibling): a `GroupType.PACKAGE` cluster,
+  `fill="#FFFFCC"` (`#Business` = `0xFFFFCC`, `ColorTrieNode.ts:200`),
+  `rx="2.5"` — the SAME `USymbols.ARCHIMATE` shape as the single-line
+  leaf form, applied to a container. Neither form is reachable through
+  this port's parser today (an `archimate … {` line falls through to the
+  generic rule-14 keyword dispatch, same fate as any other non-container
+  keyword followed by a stray `{` — not a new failure mode this task
+  introduced).
+
+**Result.** `archimate` reachable, single-line form only.
+`measure-description-size-deltas.ts`: 316 → 317/351 conformant (+1 from a
+concurrent T7 fix, unrelated to this task; archimate itself has no corpus
+fixture), zero widened. DOT parity unchanged: component 262/262, usecase
+90/90, class 708/708. `measure-class-size-deltas.ts` unchanged: 219/708,
+zero widened.
+
+### T8 follow-up — ORCHESTRATOR CORRECTION to the SName characterization
+
+T8 filed the `'rectangle'`-not-`'archimate'` SName mapping as "a
+rendering-fidelity follow-up, **not a sizing gap**." That is too narrow, and
+the distinction matters because it is the exact path S1L-h fixed.
+
+Traced: `layout-dot-tree.ts:180` passes `ctx.fontSizeFor(node.symbol)`, and
+`layout.ts:439` resolves that as `resolveElementFontSize(theme, sname,
+'title')`. The `sname` IS the USymbol tag from `KEYWORD_SYMBOL_ENTRIES`. So
+an archimate element tagged `'rectangle'` resolves a `<style> rectangle { … }`
+bucket, while the jar — which passes `USymbols.ARCHIMATE`, whose `SName` is
+`archimate` — resolves `<style> archimate { … }`.
+
+Consequence: `<style> archimate { FontSize 20 }` (or the `skinparam
+archimateFontSize` spelling) changes the node's measured SIZE in the jar and
+does nothing here. Every per-element resolver keyed on `sname` is affected
+the same way, not only fonts.
+
+Unmeasured — no corpus fixture exercises it, and T8's own probes used the
+default style — so it stays FILED per ADR-4 rather than claimed or fixed.
+But it is filed as a **sizing** gap, not a cosmetic one. Whoever adds the
+`fromStringWithSkinParam` branch should probe `<style> archimate { FontSize
+N }` against the jar first and record the numbers.
+
+T8's substantive findings stand and are not affected by this correction: the
+geometry really is byte-identical (`USymbolRectangle`'s `calculateDimension`
+never reads `this.sname` — verified), and upstream's own `fromString(String,
+ISkinParam)` really does not resolve `archimate` either, because
+`CommandArchimate.java` passes the singleton directly at leaf-creation time
+rather than re-deriving the shape from the keyword string as this port does.

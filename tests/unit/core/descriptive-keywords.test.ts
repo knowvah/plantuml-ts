@@ -14,8 +14,15 @@ import { descriptionPlugin } from '../../../src/diagrams/description/index.js';
 import { sequencePlugin } from '../../../src/diagrams/sequence/index.js';
 
 describe('descriptive-keywords — ALL_TYPES / KEYWORD_TO_SYMBOL', () => {
-  it('covers the full upstream ALL_TYPES keyword set', () => {
-    // Upstream CommandCreateElementFull.ALL_TYPES, in declaration order.
+  it('covers the full upstream ALL_TYPES keyword set, plus `archimate` (T8)', () => {
+    // Upstream CommandCreateElementFull.ALL_TYPES, in declaration order --
+    // plus `archimate` (CommandArchimate.java, its own dedicated command,
+    // never part of ALL_TYPES upstream), deliberately folded into this
+    // port's single keyword-dispatch table so it gets the SAME
+    // hasDescriptiveSignal/hasDescriptiveElement/KEYWORD_RE machinery every
+    // other descriptive-only keyword uses -- see descriptive-keywords.ts's
+    // KEYWORD_SYMBOL_ENTRIES comment for why it maps to 'rectangle', not a
+    // new USymbol tag.
     expect(ALL_TYPES).toEqual([
       'person',
       'artifact',
@@ -38,6 +45,7 @@ describe('descriptive-keywords — ALL_TYPES / KEYWORD_TO_SYMBOL', () => {
       'stack',
       'storage',
       'agent',
+      'archimate',
       'usecase/',
       'usecase',
       'component',
@@ -111,7 +119,7 @@ describe('descriptive-keywords — hasDescriptiveSignal', () => {
     expect(hasDescriptiveSignal(['() Foo'])).toBe(true);
   });
 
-  it.each(['node Server', 'cloud "AWS"', 'usecase UC1', 'rectangle r', 'actor/ Biz'])(
+  it.each(['node Server', 'cloud "AWS"', 'usecase UC1', 'rectangle r', 'actor/ Biz', 'archimate #Business "Hello"'])(
     'fires on descriptive-only keyword line: %s',
     (line) => {
       expect(hasDescriptiveSignal([line])).toBe(true);

@@ -17,13 +17,24 @@ import type { USymbol as UpstreamUSymbol } from '../../core/decoration/symbol/US
 import type { USymbol } from '../../core/descriptive-keywords.js';
 
 /**
- * Upstream `ActorStyle` default (`SkinParam.actorStyle()`'s own default,
- * `STICKMAN` — T9 finding: no accessor exists for the `HOLLOW`/`AWESOME`
- * skinparam value anywhere in this codebase yet, so this is the only
- * reachable value). No `Theme.actorStyle` field exists (grep-verified) —
- * a documented gap, not fixed here (out of write-set: `theme.ts`).
+ * `SkinParam.actorStyle()` (`SkinParam.java:1209-1218`) — resolves
+ * `Theme.actorStyle`/`BoxSizingOpts.actorStyle` (both `ActorStyle |
+ * undefined`, populated from `skinparam actorStyle` by
+ * `skinparam-key-handlers.ts`) to a concrete `ActorStyle`, defaulting to
+ * `STICKMAN` when unset — upstream's own default.
+ *
+ * T7 (description-leaf-sizing-audit): the ONE shared accessor both the
+ * RENDERER (`resolveSymbol` below, `renderer-entity.ts#buildEntityParams`)
+ * and the SIZER (`leaf-sizing.ts#buildSizingEntityParams`) call — before
+ * this function existed, both independently hardcoded `ActorStyle
+ * .STICKMAN`, silently ignoring `skinparam actorStyle awesome|hollow`
+ * (the defect this task closes). A second, independently-written resolver
+ * at either call site would recreate that exact divergence, so both MUST
+ * call this one.
  */
-const DEFAULT_ACTOR_STYLE = ActorStyle.STICKMAN;
+export function resolveActorStyle(actorStyle: ActorStyle | undefined): ActorStyle {
+  return actorStyle ?? ActorStyle.STICKMAN;
+}
 
 /** Jar default entity/cluster text-fill (`HtmlColorUtils.BLACK`,
  *  `SkinParameter`'s `FontColor` default) — distinct from `theme.colors
@@ -77,7 +88,11 @@ export function mapComponentStyle(style: Theme['componentStyle']): ComponentStyl
  *  unported draw class; same fallback path). */
 export function resolveSymbol(symbol: USymbol, theme: Theme): UpstreamUSymbol | null {
   if (symbol === 'port' || symbol === 'note') return null;
-  return resolveDescriptionUSymbol(upstreamKeyword(symbol), DEFAULT_ACTOR_STYLE, mapComponentStyle(theme.componentStyle));
+  return resolveDescriptionUSymbol(
+    upstreamKeyword(symbol),
+    resolveActorStyle(theme.actorStyle),
+    mapComponentStyle(theme.componentStyle),
+  );
 }
 
 /** Title/body text color: an explicit per-element skinparam/style override

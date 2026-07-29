@@ -454,6 +454,27 @@ describe('resolveSkinparam — direct key matches', () => {
     // the minimal scope named in this case's own doc comment.
     expect(unknown).toEqual([]);
   });
+
+  // T7 (description-leaf-sizing-audit): `SkinParam.java:1209-1218`
+  // `actorStyle()` -- case-insensitive "awesome"/"hollow", else STICKMAN
+  // (verbatim, including the "anything else falls to STICKMAN" catch-all).
+  it.each([
+    ['awesome', 'AWESOME'],
+    ['Awesome', 'AWESOME'],
+    ['hollow', 'HOLLOW'],
+    ['HOLLOW', 'HOLLOW'],
+    ['stickman', 'STICKMAN'],
+    ['bogus', 'STICKMAN'],
+  ] as const)('maps "skinparam actorStyle %s" to theme.actorStyle %s', (value, expected) => {
+    const { theme, unknown } = resolveSkinparam(new Map([['actorstyle', value]]), defaultTheme);
+    expect(theme.actorStyle).toBe(expected);
+    expect(unknown).toEqual([]);
+  });
+
+  it('leaves theme.actorStyle unset when no actorStyle skinparam is given', () => {
+    const { theme } = resolveSkinparam(new Map(), defaultTheme);
+    expect(theme.actorStyle).toBeUndefined();
+  });
 });
 
 // ---------------------------------------------------------------------------

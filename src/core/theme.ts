@@ -11,6 +11,7 @@ import { BUILTIN_THEMES } from './themes-builtin.js';
 // theme-graph-colors.ts (re-exported below) to keep this file under the
 // project's 500-line file-size cap — see that module's own doc comment.
 import type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
+import type { ActorStyle } from './skin/ActorStyle.js';
 
 export type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
 
@@ -30,6 +31,19 @@ export interface Theme {
    *  Default `uml2` draws the corner component icon; `uml1`/`rectangle` render
    *  components as plain boxes (changes node sizing). Absent = uml2. */
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
+  /** `skinparam actorStyle awesome|hollow|stickman` (`SkinParam.java:1209-
+   *  1218`'s `actorStyle()`: case-insensitive `getValue("actorstyle")`,
+   *  `"awesome"` → `ActorStyle.AWESOME`, `"hollow"` → `ActorStyle.HOLLOW`,
+   *  anything else (including absent/unrecognized) → `ActorStyle.STICKMAN`.
+   *  Consumed by both the leaf RENDERER (`renderer-entity.ts#buildEntityParams`)
+   *  and the SIZER (`leaf-sizing.ts#buildSizingEntityParams`, threaded via
+   *  `ClassifyCtx.actorStyle`/`BoxSizingOpts.actorStyle`) — the single shared
+   *  read this field exists to provide (T7, description-leaf-sizing-audit:
+   *  before this field existed, both call sites independently hardcoded
+   *  `ActorStyle.STICKMAN`, the defect this field closes). `STICKMAN_BUSINESS`
+   *  is never resolved from this field — it is reachable only via the
+   *  `actor/` keyword spelling (`USymbols.java:162`). */
+  actorStyle?: ActorStyle;
   /** `skinparam minClassWidth` (mapped to `PName.MinimumWidth`) — floors the
    *  leaf-box text-block content width. Absent = 0 (no floor). */
   minimumWidth?: number;
@@ -291,6 +305,7 @@ export type ThemeOverride = {
   linetype?: 'ortho' | 'polyline';
   fixCircleLabelOverlapping?: boolean;
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
+  actorStyle?: ActorStyle;
   minimumWidth?: number;
   strictUml?: boolean;
   monochrome?: 'true' | 'reverse';
@@ -357,6 +372,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'linetype',
   'fixCircleLabelOverlapping',
   'componentStyle',
+  'actorStyle',
   'minimumWidth',
   'strictUml',
   'monochrome',

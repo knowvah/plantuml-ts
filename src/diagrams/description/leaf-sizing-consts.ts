@@ -10,6 +10,7 @@
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { GuillemetPair } from '../../core/text/Guillemet.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
+import type { ActorStyle } from '../../core/skin/ActorStyle.js';
 
 /** `skinparam componentStyle` — only `uml2` (the default) draws the corner
  *  component icon; `uml1` and `rectangle` render a plain box. */
@@ -20,6 +21,12 @@ export type ComponentStyle = 'uml2' | 'uml1' | 'rectangle';
  *  sizing signatures within the argument-count budget. */
 export interface BoxSizingOpts {
   componentStyle?: ComponentStyle | undefined;
+  /** `skinparam actorStyle` / `Theme.actorStyle` (T7, description-leaf-
+   *  sizing-audit) — the SAME field the RENDERER reads
+   *  (`renderer-entity.ts#buildEntityParams`) so an `actor`/`actor-business`
+   *  leaf's stickman/awesome/hollow drawing sizes to match what gets drawn.
+   *  Absent = upstream's own default, `ActorStyle.STICKMAN`. */
+  actorStyle?: ActorStyle | undefined;
   /** `skinparam minClassWidth` / style `MinimumWidth` (`PName.MinimumWidth`) —
    *  floors the text-block CONTENT width, before margin + icon. Default 0. */
   minimumWidth?: number | undefined;

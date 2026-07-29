@@ -231,6 +231,42 @@ const JAR_ACTOR_BUSINESS_LINE =
   '<line x1="11.5562" y1="16.2603" x2="21.2603" y2="6.5562" style="stroke:#181818;stroke-width:0.5;"/>';
 const JAR_ACTOR_BUSINESS_FOO = JAR_ACTOR_ELLIPSE + JAR_ACTOR_BUSINESS_LINE + JAR_ACTOR_PATH + JAR_ACTOR_TEXT;
 
+// Source (T7, description-leaf-sizing-audit): `skinparam actorStyle
+// awesome\nactor Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: raw ellipse
+// cx="33" cy="22" rx="16" ry="16"; path "M33,42 C37,42 40,42 44,38 C52,38
+// 60,46 60,54 L60,58 C60,62 56,66 52,66 L14,66 C10,66 6,62 6,58 L6,54 C6,46
+// 14,38 22,38 C26,42 29,42 33,42"; text x="20.6475" y="80.0352". Offset
+// (5.5, 5.5), cross-checked against `ActorAwesome.java`'s own math
+// (getPreferredWidth=55, centerX=27.5, headDiam=32 -- head center
+// (27.5,16.5)) AND the label's own math (labelX=(55-24.7051)/2=15.14745,
+// labelY=getPreferredHeight()=61 + baseline 13.5352=74.5352) -- both agree
+// on the SAME (5.5, 5.5) constant.
+const JAR_ACTOR_AWESOME_ELLIPSE = '<ellipse cx="27.5" cy="16.5" rx="16" ry="16" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
+const JAR_ACTOR_AWESOME_PATH =
+  '<path d="M27.5,36.5 C31.5,36.5 34.5,36.5 38.5,32.5 C46.5,32.5 54.5,40.5 54.5,48.5 L54.5,52.5 C54.5,56.5 50.5,60.5 46.5,60.5 L8.5,60.5 C4.5,60.5 0.5,56.5 0.5,52.5 L0.5,48.5 C0.5,40.5 8.5,32.5 16.5,32.5 C20.5,36.5 23.5,36.5 27.5,36.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>';
+const JAR_ACTOR_AWESOME_TEXT =
+  '<text x="15.1475" y="74.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+const JAR_ACTOR_AWESOME_FOO = JAR_ACTOR_AWESOME_ELLIPSE + JAR_ACTOR_AWESOME_PATH + JAR_ACTOR_AWESOME_TEXT;
+
+// Source (T7): `skinparam actorStyle hollow\nactor Foo\nusecase Bar\nFoo
+// --> Bar` -- entity Foo: raw ellipse cx="24.21" cy="10.5" rx="4.5"
+// ry="4.5"; path "M11.71,17 L11.71,22 L21.21,22 L21.21,24.2574 L11.71,
+// 33.7574 L15.9526,38 L24.21,29.7426 L32.4674,38 L36.71,33.7574 L27.21,
+// 24.2574 L27.21,22 L36.71,22 L36.71,17 L11.71,17"; text x="11.8575"
+// y="52.0352". Offset (11.21, 5.5) -- NOT the uniform-in-x-and-y (5.5,5.5)
+// ActorAwesome/ActorStickMan(-ish) fixtures happen to show; cross-checked
+// against `ActorHollow.java`'s own math (getPreferredWidth=26, centerX=13,
+// headDiam=9 -- head center (13,5)) AND the label's own math
+// (labelX=(26-24.7051)/2=0.64745, labelY=getPreferredHeight()=33 +
+// baseline 13.5352=46.5352) -- both agree on the SAME (11.21, 5.5)
+// constant.
+const JAR_ACTOR_HOLLOW_ELLIPSE = '<ellipse cx="13" cy="5" rx="4.5" ry="4.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
+const JAR_ACTOR_HOLLOW_PATH =
+  '<path d="M0.5,11.5 L0.5,16.5 L10,16.5 L10,18.7574 L0.5,28.2574 L4.7426,32.5 L13,24.2426 L21.2574,32.5 L25.5,28.2574 L16,18.7574 L16,16.5 L25.5,16.5 L25.5,11.5 L0.5,11.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>';
+const JAR_ACTOR_HOLLOW_TEXT =
+  '<text x="0.6475" y="46.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+const JAR_ACTOR_HOLLOW_FOO = JAR_ACTOR_HOLLOW_ELLIPSE + JAR_ACTOR_HOLLOW_PATH + JAR_ACTOR_HOLLOW_TEXT;
+
 // Source: `person Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: raw
 // ellipse cx="29.3525" cy="14.4815" rx="8.4815" ry="8.4815"; rect
 // x="7" y="22.9631" w="44.7051" h="36.4883" rx/ry="8.4815"; text
@@ -335,12 +371,18 @@ describe('USymbolActor (T9, AC1) -- stick-figure stickman', () => {
     expect(new USymbolActor(ActorStyle.STICKMAN).getSNames()).toEqual(['actor']);
   });
 
-  test('ActorStyle.HOLLOW/AWESOME are deferred (unreachable, documented)', () => {
+  test('asSmall renders conformant vs. the jar fragment (actor Foo, actorStyle awesome)', () => {
+    const symbol = new USymbolActor(ActorStyle.AWESOME);
+    const ctx = fooSymbolContext();
+    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    expectConformant(render(asSmall), JAR_ACTOR_AWESOME_FOO);
+  });
+
+  test('asSmall renders conformant vs. the jar fragment (actor Foo, actorStyle hollow)', () => {
     const symbol = new USymbolActor(ActorStyle.HOLLOW);
     const ctx = fooSymbolContext();
-    expect(() => symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER)).toThrow(
-      /ActorHollow\/ActorAwesome/,
-    );
+    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    expectConformant(render(asSmall), JAR_ACTOR_HOLLOW_FOO);
   });
 });
 

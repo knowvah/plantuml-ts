@@ -26,6 +26,7 @@ import type {
 } from '../../../src/diagrams/description/layout.js';
 import type { DescriptionNodeGeo } from '../../../src/diagrams/description/layout-helpers.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
+import { ActorStyle } from '../../../src/core/skin/ActorStyle.js';
 
 // ---------------------------------------------------------------------------
 // Geometry builder helpers
@@ -527,6 +528,41 @@ describe('renderDescription — node symbol dispatch', () => {
     const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'hexagon', display: 'MyHex' })] }), defaultTheme);
     expect(svg.trimStart()).toMatch(/^<svg/);
     expect(svg).toContain('MyHex');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T7 (description-leaf-sizing-audit) -- `skinparam actorStyle` now reaches
+// the renderer via `Theme.actorStyle`/`resolveActorStyle` (was hardcoded to
+// STICKMAN). Each style draws a head <ellipse> of a distinct radius
+// (STICKMAN headDiam=16 -> rx=8, AWESOME headDiam=32 -> rx=16, HOLLOW
+// headDiam=9 -> rx=4.5), the cheapest render-visible fingerprint of which
+// class actually drew.
+// ---------------------------------------------------------------------------
+
+describe('renderDescription — actor node reads Theme.actorStyle (T7)', () => {
+  it('unset actorStyle draws ActorStickMan (head rx="8")', () => {
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'Foo', width: 50, height: 70 })] }), defaultTheme);
+    expect(svg).toContain('rx="8"');
+  });
+
+  it('actorStyle AWESOME draws ActorAwesome (head rx="16")', () => {
+    const theme = deepMergeTheme(defaultTheme, { actorStyle: ActorStyle.AWESOME });
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'Foo', width: 55, height: 75 })] }), theme);
+    expect(svg).toContain('rx="16"');
+  });
+
+  it('actorStyle HOLLOW draws ActorHollow (head rx="4.5")', () => {
+    const theme = deepMergeTheme(defaultTheme, { actorStyle: ActorStyle.HOLLOW });
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'Foo', width: 26, height: 33 })] }), theme);
+    expect(svg).toContain('rx="4.5"');
+  });
+
+  it('actor-business ignores actorStyle -- always draws ActorStickMan (head rx="8"), never AWESOME/HOLLOW', () => {
+    const theme = deepMergeTheme(defaultTheme, { actorStyle: ActorStyle.AWESOME });
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor-business', display: 'Foo', width: 50, height: 70 })] }), theme);
+    expect(svg).toContain('rx="8"');
+    expect(svg).not.toContain('rx="16"');
   });
 });
 

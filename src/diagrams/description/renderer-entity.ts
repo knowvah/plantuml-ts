@@ -44,8 +44,7 @@ import {
   type EntityDecorationInfo,
   type UGraphicWithGroups,
 } from '../../core/svek/DecorateEntityImage.js';
-import { upstreamKeyword, mapComponentStyle, textFont } from './renderer-symbol.js';
-import { ActorStyle } from '../../core/skin/ActorStyle.js';
+import { upstreamKeyword, mapComponentStyle, textFont, resolveActorStyle } from './renderer-symbol.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { makeAtomImageResolverFor } from './render-atoms.js';
 
@@ -188,7 +187,7 @@ function buildEntityParams(
     entity: { name: node.id, uid: '', qualifiedName: node.id, location: null, url: null },
     symbol: {
       keyword: upstreamKeyword(node.symbol),
-      actorStyle: ActorStyle.STICKMAN,
+      actorStyle: resolveActorStyle(theme.actorStyle),
       componentStyle: mapComponentStyle(theme.componentStyle),
     },
     labels: { codeName: node.display, displayText: node.display, stereotypeLabels },

@@ -486,3 +486,102 @@ undeclared. The 500-line cap made keeping the latex/img fallback beside the
 routing impossible; it is a mechanical relocation of pre-existing
 `measureBox`/`boxIcon` math. Flagged by the agent rather than absorbed
 silently, which is the correct handling.
+
+## T7 + T8 launched in parallel — 2026-07-28
+
+Specs written at dispatch time (neither existed; only T6 was pre-specified,
+since batch 4 was a template whose rows the audits had to determine first).
+Disjoint write-sets, no dependency between them: T7 owns `src/core/skin/*`,
+`theme.ts`, `skinparam.ts`, `leaf-sizing-consts.ts`, `renderer-symbol.ts`;
+T8 owns `descriptive-keywords.ts`, `parser.ts`, and the ledger. Each prompt
+names the other's files as off-limits, since they share one worktree.
+
+**T7 preconditions verified before dispatch**, not assumed: `src/core/skin/`
+holds only `ActorStickMan.ts` and `ActorStyle.ts`; `ActorStyle.ts:53` throws
+for AWESOME/HOLLOW with a comment recording the deferral and its reason ("no
+`actorStyle()` accessor at all… no caller anywhere"); all four upstream
+`Actor*.java` sources exist. So the sequencing T4 derived holds — accessor
+alone selects nothing, geometry alone is unreachable — and both halves ship
+in one commit.
+
+**T8 is bigger than its one-line title, and the spec says so.** Upstream has
+THREE commands — `CommandArchimate`, `CommandArchimateMultilines`,
+`CommandArchimatePackage`. The task implements the single-line form and is
+instructed to FILE the others with a jar probe rather than half-implement
+them (ADR-4). A half-implemented grammar is a silent divergence; a filed one
+is a tracked finding.
+
+Two criteria are flagged in the prompts as the ones most likely to catch a
+mistake, so they are checked early rather than at the end: for T8, DOT
+structure must stay 262/90/708 — a new keyword that moves existing structure
+means the grammar is too greedy. For T7, both paths must read the SAME
+accessor; a second independent read would recreate the exact
+renderer/sizer divergence this mission exists to end.
+
+Both prompts carry the upstream-grep warning (`net/`, not
+`net/sourceforge/plantuml/`) — that scoping error has now falsified two
+planning premises in this mission alone.
+
+## T7 + T8 complete — 2026-07-29. Batch 4 at 317/351 (90.3%).
+
+Orchestrator-verified independently: 400 files / 10419 tests, typecheck +
+lint + build clean, description 317/351 widened 0 (improved 1), class
+219/708 widened 0, DOT 262/90/708 EQUAL, resolver-reachability guard 9/9.
+
+**T7 — actorStyle, and the single-accessor requirement held.** Geometry
+verbatim from `ActorAwesome.java:50-55` and `ActorHollow.java:51-58`, the
+default chain from `SkinParam.java:1209-1218`; jar-verified on all three
+styles. Verified by the orchestrator rather than taken on report:
+`resolveActorStyle` is defined once (`renderer-symbol.ts:35`) and consumed
+at exactly three sites; the only remaining `STICKMAN` literal is the
+default inside the accessor itself. Also confirmed the description actor
+case routes to `measureEntityLeaf` (so the new geometry is actually
+reached) and that `measureActor` survives only as the CLASS engine's
+import — a legacy export, correctly documented as such.
+
+It closed what T6 diagnosed: T6's own note had named mutere-78's residual
+as "the unported ActorAwesome". That is the audit working as intended — a
+filed, evidenced residual picked up by the next task instead of
+rediscovered.
+
+**T7 scope deviation, accepted.** The brief named `leaf-sizing-consts.ts`
+and `renderer-symbol.ts` as "the hardcodes"; reading the code showed the
+literal lines were in `leaf-sizing.ts:438` and `renderer-entity.ts:191`,
+and closing the defect also needed the threading chain and the skinparam
+accumulator/key-handler/theme-builder trio behind the `skinparam.ts`
+facade. Deviation was reported, not absorbed. The brief's write-set was
+wrong, not the agent — a write-set written from a grep rather than from
+reading, which is the same root as this mission's two falsified premises.
+
+It also declined to tighten revusu-28's pin, which shrank as a side effect
+but stays non-conformant: tightening a still-failing pin is outside a
+deletion-only write-set. Correct restraint.
+
+**T8 — reproduced a bug before fixing it, which is why it found the real
+one.** `archimate`'s mandatory `#color` PRECEDES code/display — the only
+keyword where colour is required and leads. Routed through the generic
+dispatch, that defeats `parseNameSection`'s `splitLeadingQuote` guard
+(remainder starts `#`, not `"`), so a guillemet inside a quoted display is
+read as a stereotype. **Fourth instance of the
+decoration-extracted-from-inside-a-quoted-display class, via a fourth
+distinct path.** Worth promoting from anecdote to expectation: any new
+grammar whose prefix is not the quote must be checked against this.
+
+Also found a genuine upstream inconsistency while reading the Java:
+`CommandArchimateMultilines` creates its leaf with `USymbols.RECTANGLE`,
+not `ARCHIMATE`, unlike its sibling command.
+
+**Orchestrator correction to T8's ledger entry.** It filed the
+`'rectangle'`-not-`'archimate'` SName mapping as "rendering-fidelity, not a
+sizing gap." Traced and corrected: `layout-dot-tree.ts:180` passes
+`ctx.fontSizeFor(node.symbol)` and `layout.ts:439` resolves that via
+`resolveElementFontSize(theme, sname, …)`, so the sname IS the style bucket
+— `<style> archimate { FontSize 20 }` moves the node in the jar and does
+nothing here, and every sname-keyed resolver is affected, not just fonts.
+Unmeasured, so still FILED per ADR-4 — but filed as a SIZING gap. T8's
+substantive claims stood: geometry is byte-identical, and upstream's own
+`fromString` genuinely does not resolve `archimate` either.
+
+**Batch 4 status: T6/T7/T8 done, T9 remains** (rescoped — delete only what
+T6 superseded plus the dead `inkSprites` field; NOT the tables, per the
+ADR-6 amendment).

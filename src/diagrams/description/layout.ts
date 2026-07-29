@@ -42,6 +42,7 @@ import {
 import { computeInkShift } from './layout-ink-shift.js';
 import type { PortClusterInfo, ClusterSpacing } from './frontier-cluster-bbox.js';
 import type { ComponentStyle } from './leaf-sizing.js';
+import type { ActorStyle } from '../../core/skin/ActorStyle.js';
 import { computeGraphSpacing } from './link-edge-attrs.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { spriteDimsLookupFor, spriteInkDimsLookupFor } from '../../core/sprite-commands.js';
@@ -94,6 +95,11 @@ export interface ClassifyCtx {
   counter: { n: number };
   /** `skinparam componentStyle` — gates the UML2 component corner icon. */
   componentStyle: ComponentStyle | undefined;
+  /** `skinparam actorStyle` / `Theme.actorStyle` (T7, description-leaf-
+   *  sizing-audit) — threaded into `BoxSizingOpts.actorStyle` so the SIZER
+   *  reads the SAME value the RENDERER does (`renderer-entity.ts
+   *  #buildEntityParams`); see that field's own doc comment. */
+  actorStyle: ActorStyle | undefined;
   /** Per-element leaf-box content-width floor resolver: cascades a scoped
    *  `<style> <sname> { MinimumWidth N }` over the global `skinparam
    *  minClassWidth` (S1L-b T5 / S1L-g). Keyed by the node's USymbol so a
@@ -428,6 +434,7 @@ export function layoutDescription(
     leafIdSet: new Set(), containers: [],
     containerById: new Map(), astNodeById: new Map(), counter: { n: 0 },
     componentStyle: theme.componentStyle,
+    actorStyle: theme.actorStyle,
     minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
     fontSizeFor: (sname) => resolveElementFontSize(theme, sname, 'title'),
     wrapWidth: theme.wrapWidth ?? 0,
@@ -457,6 +464,7 @@ export function layoutDescription(
   const rawContainers = countRawContainers(ast.nodes);
   const degenerate = degenerateSingleLeaf(ast, rawContainers, fontSpec, measurer, {
     componentStyle: theme.componentStyle,
+    actorStyle: theme.actorStyle,
     // Single-leaf diagram: resolve the floor for THAT leaf's own USymbol so a
     // scoped `<style> <sname> { MinimumWidth }` applies (S1L-b T5).
     minimumWidth: resolveElementMinimumWidth(theme, ast.nodes[0]?.symbol ?? ''),

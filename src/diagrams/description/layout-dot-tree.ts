@@ -172,6 +172,7 @@ export function buildDotNodes(
       sizedNode, fontSpec, measurer,
       {
         componentStyle: ctx.componentStyle,
+        actorStyle: ctx.actorStyle,
         minimumWidth: ctx.minimumWidthFor(node.symbol),
         wrapWidth: ctx.wrapWidth,
         guillemet: ctx.guillemet,
