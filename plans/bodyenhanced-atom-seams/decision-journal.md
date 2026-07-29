@@ -125,3 +125,30 @@ Two project laws collide here and the tie is the maintainer's to break:
 one `src/core/` owner consumed by both engines; "do not refactor while
 porting" argues against touching a jar-verified working class path.
 Not decided autonomously.
+
+### Maintainer rulings — 2026-07-29
+
+Both stops resolved by the maintainer; recorded as ADR-5 AMENDMENT and
+ADR-7 in `decisions.md`.
+
+**STOP 1 → diff-count baseline ratchet.** Batch 1 stays gating and gains
+**T1b**, which pins each of the 22 fixtures' current diff count, fails on a
+rise, and reports a fixture reaching 0 as ready for promotion into
+`ratchet.json`. Rejected alternatives are recorded in the AMENDMENT.
+
+**STOP 2 → one owner, now.** `TextBlockLineBefore` is ported into
+`src/core/klimt/shape/` from the Java AND the class path is rewired onto it
+inside T2a. The maintainer accepted the larger blast radius over time-boxed
+duplication.
+
+**Consequence T2a's own file did not state: object diagrams are now in
+scope.** Found by reading the consumers rather than assuming the write-set:
+`measureEnhancedBody` is called from `class-layout-generic-classifier.ts:119`
+AND `class-object-map-sizing.ts:417`; `renderEnhancedBody` from
+`renderer-classifier-box.ts:344`. So T2a's gates grow from the three sizing
+ratchets to include the pinned SVG goldens **svg-class 310** and
+**svg-object 22** (plus svg-description 48, svg-state 57 for completeness).
+T2a's "N/A — pure addition, no caller" rollback line is now void and was
+rewritten; the task must land as exactly one commit so `git revert` is a
+real rollback. Batch-2 parallelism is unaffected — T2a's and T3's
+write-sets remain disjoint.

@@ -76,6 +76,67 @@ not move at all), then widen separately (batch 5).
 cause. Costs one extra batch boundary; buys a clean bisect on the riskiest
 change in the mission.
 
+## ADR-5 AMENDMENT — the gate is a diff-count baseline, not a byte-freeze
+
+**Maintainer decision, 2026-07-29, after T1 measured the population.**
+
+**Context.** ADR-5 assumed a conformant population existed inside the blast
+radius to freeze. T1 measured it: **0 of 22** candidates reach zero-diff
+under `DeterministicMeasurer`. Verified independently — the census reports
+57 zero-diff component+usecase fixtures and none is a candidate, while the
+48 already-pinned goldens still pass, ruling out harness breakage. Group 1
+fails on the package/cluster `[childCount]` gap open since T19; groups 2-3
+fail because `src/diagrams/description/` has no creole block-separator
+support at all.
+
+There was also a flaw in the original shape: it would have byte-frozen the
+very fixtures ADR-1 is *supposed to change*, so T4 would have had to
+re-baseline them. The freeze value was always in the UNAFFECTED fixtures —
+and those are the 48 goldens already pinned, which do watch general
+description rendering.
+
+**Decision.** Replace the freeze with a **monotone-improvement ratchet**:
+pin each of the 22 fixtures' CURRENT diff count; a rise is a failure; a
+fixture reaching 0 is promoted into `ratchet.json` as a real byte-exact
+golden.
+
+**Consequences.** ADR-5's intent — watch the renderer through ADR-1 — is
+served by the population that actually exists, and T4's riskiest change
+becomes measurable instead of invisible. Costs one new ratchet shape.
+Rejected: proceeding on the 48 goldens alone (leaves the blast radius
+unwatched); and blocking on the package/cluster gap first (converts an
+open follow-on of unknown size into a prerequisite).
+
+## ADR-7 — `TextBlockLineBefore` gets ONE owner in `src/core/`, now
+
+**Maintainer decision, 2026-07-29, correcting T2a's premise.**
+
+**Context.** T2a states `TextBlockLineBefore` "does NOT exist in this port."
+False in substance. `src/diagrams/class/class-body-enhanced-layout.ts` (347
+lines) cites `BodyEnhancedAbstract#decorate`, `TextBlockLineBefore.java`,
+and `UHorizontalLine.java`, and records its offsets as jar-verified
+byte-exact against `fecolo-08-gepu579`, `jajebo-21-dada557`, and
+`pacagu-24-nune023` (G2 N42; derivation in `plans/g2-class-svg/ledger.md`).
+`renderer-body-enhanced.ts` reproduces `drawU`'s title!=null draw order.
+The arithmetic is ported — in class-body-geometry shape, with no `src/core/`
+owner the description engine can share.
+
+**Decision.** Port `TextBlockLineBefore` into `src/core/klimt/shape/` from
+the Java as the single canonical owner, **and rewire `src/diagrams/class/`
+to consume it in this mission.** One owner immediately.
+
+**Consequences.** Closest to "upstream architecture is authoritative — and
+rewrites are allowed": a structural divergence is itself the bug, and two
+independent encodings of the same jar-verified arithmetic is that
+divergence. Accepts real risk — this puts the class ratchets (219/708
+sizing, 708 DOT-EQUAL) and the class SVG goldens in the blast radius of a
+mission scoped to description, so **the class ratchets become STOP
+conditions for T2a exactly as the description ones are.** Rejected:
+time-boxed duplication with a tracked follow-on (defers the divergence and
+history says the follow-on is what slips); and extracting the class-side
+code instead of re-porting (it carries class-body assumptions — rows,
+trees, dividers — that a general `TextBlock` must not inherit).
+
 ## Accepted loosening (maintainer-approved)
 
 **SVG drift in T4 is acceptable IF jar-verified.** Drift that matches the

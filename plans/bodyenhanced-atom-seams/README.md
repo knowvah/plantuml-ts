@@ -81,7 +81,7 @@ skill's gitignore instruction. `.claude/` is ignored.
 
 | # | Focus | Tasks | Status |
 |---|---|---|---|
-| 1 | SVG goldens — GATING (ADR-5) | T1 | [ ] |
+| 1 | Renderer gate — GATING (ADR-5 + AMENDMENT) | T1 [x], T1b | [ ] |
 | 2 | Port base + seams (parallel) | T2a, T3 | [ ] |
 | 3 | Port the Body classes | T2b | [ ] |
 | 4 | Wire it in — the risky one | T4 | [ ] |
@@ -89,7 +89,7 @@ skill's gitignore instruction. `.claude/` is ignored.
 
 ## Index
 
-- [decisions.md](decisions.md) — ADR-1..6
+- [decisions.md](decisions.md) — ADR-1..7, incl. the ADR-5 AMENDMENT
 - [batch-1/overview.md](batch-1/overview.md) … [batch-5/overview.md](batch-5/overview.md)
 - [diagrams/component-map.md](diagrams/component-map.md)
 - [diagrams/data-flow.md](diagrams/data-flow.md)
