@@ -1,71 +1,63 @@
-# Batch 4 — Close the gaps (TEMPLATE)
+# Batch 4 — Route the sizer through upstream's own boundary (ADR-6)
 
-**This batch has no fixed task list.** Its tasks are derived from the
-`MISMATCH` rows of `planning/usymbol-composition.md` (T2) and the `GAP`
-rows of `planning/sizer-renderer-parity.md` (T3/T4). A survey cannot name
-its findings in advance; inventing task names here would be fiction.
+The template that stood here assumed ~12 independent table patches. ADR-6
+replaces it: `measureLeafNode` is a parallel reimplementation of
+`EntityImageDescription.calculateDimensionSlow`, which is already faithful
+and which the RENDERER already uses. Read ADR-6 before starting.
 
-## How to build this batch
+## Sequencing — T6 runs ALONE
 
-1. After Batch 2, list every `MISMATCH` and `GAP` row.
-2. Sort by evidence: rows with a FAILING FIXTURE first (ADR-4 — those are
-   proven), then rows backed only by a jar probe.
-3. Group rows that share a write-set into ONE task (`parallelism.md`: two
-   tasks must never write the same file). `leaf-sizing-consts.ts` and
-   `layout.ts`/`layout-dot-tree.ts` are the usual contention points.
-4. Write one `TN-[name].md` per task from the template below.
-5. Order tiers by identical-delta clusters — see below.
-
-## Start every tier from identical-delta clusters
-
-An IDENTICAL delta across fixtures is a reliable tell for ONE shared
-cause, and it held every time last session: four fixtures at 3.1839 fell
-to one note fix; kizobu-64/tacixe-99 at 0.1667 to one symbol-family fix;
-kovaxi-11/zidebi-71 at 0.7720 to one (unimplemented) cause. Cluster the
-backlog by delta before picking what to work on — it collapses N problems
-into one.
-
-## Task template
-
-```
-# TN — <gap name>
-
-## Context
-<the row, verbatim, plus the upstream file:line it cites>
-
-## Write-set
-<from the row — no two tasks in this batch may share a file>
-
-## Read-set
-<upstream Java for the mechanism; our current dispatch>
-
-## Acceptance criteria
-- Given <fixture or probe>, when measured, then <exact oracle numbers>
-- Given the suite, then `widened` is 0 and conformant did not drop
-- Given a fixture that flips, then its backlog pin is deleted in THIS commit
-- Given a constant, then it is DERIVED from upstream, never fitted
-
-## Observability / Rollback
-N/A — no new observable operations. Reversible (code + pins revert together).
-
-## Quality bar
-All four gates + the three ratchets.
-```
-
-## Hard rules for every task in this batch
-
-- **Never ship a fitted constant.** If you have a number that works but
-  cannot point at the upstream expression it comes from, you have not
-  found the mechanism. `size/4.5` was the answer the scan's 10.9 was
-  approximating.
-- **A pin deletion belongs in the same commit as its fix**, so code and
-  ratchet data revert together.
-- **Out of scope, do not start:** S1L-i (titled separators), S1L-j
-  (multiline display), the sprite tail, the container remainder, the
-  creole `{{ }}` embedded sub-diagram (UNIMPLEMENTED), the 2 LaTeX
-  fixtures (permanent DIVERGENCE). Reclassifying which family a fixture
-  belongs to is fine; fixing those families here is not.
+T6 is the rewrite. It must be the only change in its commit: it has a large
+blast radius, and if the ratchet moves, nothing else may be in the diff to
+confound the bisect. T7 and T8 are independent of it and of each other, but
+they are held until T6 lands so that a ratchet movement has exactly one
+candidate cause. T9 is cleanup and depends on T6.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| — | derived from T2/T3/T4 tables | — | — | T2, T3, T4 | [ ] |
+| T6 | Route `measureLeafNode` → `EntityImageDescription` | typescript-pro | `src/core/measurer-bounder.ts` (new), `src/diagrams/description/leaf-sizing.ts`, `leaf-sizing-consts.ts`, `layout-dot-tree.ts` | — | [ ] |
+| T7 | Port `ActorAwesome` / `ActorHollow` + the `actorStyle` accessor | typescript-pro | `src/core/skin/ActorAwesome.ts`, `ActorHollow.ts` (new), `ActorStyle.ts`, `src/core/theme.ts`, `skinparam.ts` | T6 | [ ] |
+| T8 | Wire `archimate` as a description keyword | typescript-pro | `src/core/descriptive-keywords.ts`, `src/diagrams/description/parser.ts` | T6 | [ ] |
+| T9 | Delete the superseded tables and the dead `inkSprites` field | refactoring-specialist | `src/diagrams/description/leaf-sizing-consts.ts`, `layout.ts`, `layout-dot-tree.ts` | T6, T7, T8 | [ ] |
+
+## What T6 is expected to close, and what it is not
+
+Expected to fall out of the routing, because the ported path already carries
+them:
+
+| finding | why routing closes it |
+|---|---|
+| HEXAGON (width doubles) | `USymbolHexagon.ts:102` has the `* 2` |
+| PERSON (`sqrt(surface)*0.42`) | `USymbolPerson.ts:51` |
+| USECASE_BUSINESS | `USymbolUsecase.ts` has `withMargin(7,7,0,0)`; `Footprint.ts:134` has the `UEmpty` rule our `footprintBoxes` lacks |
+| Shadowing GAP (both tiers) | constructor's `.withShadow(paint.deltaShadow)` |
+| LineThickness GAP | constructor's `.withStroke(paint.stroke)` |
+| `wrapWidth` / `guillemet` per-path gaps | `buildDesc` builds the block ONCE, so every leaf shape inherits it instead of only `measureBox` |
+
+NOT closed by routing — these are T7/T8/T9:
+
+| finding | why |
+|---|---|
+| ACTOR_AWESOME, ACTOR_HOLLOW | geometry absent from the port; `actorStyleGetTextBlock` throws for both by deferral |
+| ARCHIMATE | `archimate` is missing from `KEYWORD_SYMBOL_ENTRIES`, so the line never becomes a leaf — a parser gap, not a sizing one |
+| `inkSprites` | threaded and unread; its feature is already delivered via `sprites` → `inlineFootprintBox`. DELETE the field; this is not a sizing fix |
+
+## Hard rules
+
+- **The ratchet is shrink-only and it STOPS this batch.** If T6 widens any
+  pin, that is not a re-baseline: diagnose the mechanism first
+  (`diagnosis.md`). A widened pin means the routing lost a behaviour the
+  flat tables encoded, and that behaviour must be found before proceeding.
+- **A pin deletion belongs in the same commit as the fix that flips it.**
+- **Never ship a fitted constant.** If a residual needs a number you cannot
+  trace to an upstream expression, the mechanism is not found yet.
+- **Out of scope, do not start:** S1L-i (titled separators), S1L-j
+  (multiline display), the sprite tail, the container remainder, the creole
+  `{{ }}` sub-diagram (UNIMPLEMENTED), the 2 LaTeX fixtures (permanent
+  DIVERGENCE).
+
+## Batch 5
+
+ADR-6 expects ADR-2 to be MOOT — the descriptor refactor exists to unify the
+five flat tables, and T6/T9 delete them instead. After T9, confirm and
+retire ADR-2 in the journal rather than executing Batch 5 out of habit.
