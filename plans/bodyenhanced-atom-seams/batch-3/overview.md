@@ -6,7 +6,7 @@ agents writing the same conceptual unit.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T2b-1 | Port `BodyEnhanced2` + `BodyFactory.create3` | typescript-pro | `src/core/cucadiagram/BodyEnhanced2.ts`, `BodyFactory.ts` | T9c | [ ] |
+| T2b-1 | Port `BodyEnhanced2` + `BodyFactory.create3` | typescript-pro | `src/core/cucadiagram/BodyEnhanced2.ts`, `BodyFactory.ts` | T9c | [x] |
 | ~~T2b-2~~ | ~~`BodyEnhanced1` + `create2`~~ — **MOVED TO MISSION SI1 (ADR-10)** | — | — | — | n/a |
 
 Still not wired in. Ratchets must remain EXACTLY unchanged after this

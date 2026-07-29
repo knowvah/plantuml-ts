@@ -91,7 +91,7 @@ skill's gitignore instruction. `.claude/` is ignored.
 | 1 | Renderer gate — GATING (ADR-5 + AMENDMENT) | T1 [x], T1b [x] | [x] |
 | 2 | Port base + seams (parallel) | T2a [x], T3 [x] | [x] |
 | 3a | Creole Display/Sheet layer — GATING (ADR-8) | T7–T10g, T9c [x] | [x] |
-| 3 | Port the Body classes | T2b-1 (T2b-2 → SI1, ADR-10) | [ ] |
+| 3 | Port the Body classes | T2b-1 [x] (T2b-2 → SI1, ADR-10) | [x] |
 | 4 | Wire it in — the risky one | T4 | [ ] |
 | 5 | Widen the routing (ADR-6) + close | T5, T6 | [ ] |
 
