@@ -16,8 +16,8 @@ candidate cause. T9 is cleanup and depends on T6.
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
 | T6 | Route `measureLeafNode` → `EntityImageDescription` | typescript-pro | `src/core/measurer-bounder.ts` (new), `src/diagrams/description/leaf-sizing.ts`, `leaf-sizing-consts.ts`, `layout-dot-tree.ts` | — | [x] |
-| T7 | Port `ActorAwesome` / `ActorHollow` + the `actorStyle` accessor | typescript-pro | `src/core/skin/ActorAwesome.ts`, `ActorHollow.ts` (new), `ActorStyle.ts`, `src/core/theme.ts`, `skinparam.ts` | T6 | [ ] |
-| T8 | Wire `archimate` as a description keyword | typescript-pro | `src/core/descriptive-keywords.ts`, `src/diagrams/description/parser.ts` | T6 | [ ] |
+| T7 | Port `ActorAwesome` / `ActorHollow` + the `actorStyle` accessor | typescript-pro | `src/core/skin/ActorAwesome.ts`, `ActorHollow.ts` (new), `ActorStyle.ts`, `src/core/theme.ts`, `skinparam.ts` | T6 | [x] |
+| T8 | Wire `archimate` as a description keyword | typescript-pro | `src/core/descriptive-keywords.ts`, `src/diagrams/description/parser.ts` | T6 | [x] |
 | T9 | **RESCOPED** — delete ONLY what T6 superseded + the dead `inkSprites` field | refactoring-specialist | `src/diagrams/description/leaf-sizing-consts.ts`, `layout.ts`, `layout-dot-tree.ts` | T6, T7, T8 | [ ] |
 
 ## What T6 is expected to close, and what it is not
