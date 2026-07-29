@@ -11,8 +11,8 @@ batch lands the real layer before T2b resumes.
 | T7b | `XLine2D` + reinstate `XRectangle2D#intersect` | typescript-pro | `src/core/klimt/geom/{XLine2D,XRectangle2D}.ts` | T7 | [x] |
 | T8 | `SheetBlock1`/`2`, `Ports`/`WithPorts`, `Sea`, `Position` | typescript-pro | `src/core/klimt/creole/{SheetBlock1,SheetBlock2,Sea,Position}.ts`, `src/core/svek/{Ports,WithPorts,PortGeometry}.ts`, `src/core/klimt/shape/TextBlockLineBefore.ts` | T7b | [x] |
 | T8b | Relocate MD5 into `SignatureUtils` | typescript-pro | `src/core/utils/SignatureUtils.ts`, `src/core/svek/Ports.ts` | T8 | [x] |
-| T9a | `SheetBuilder` + `CreoleParser` (+ the `ISkinSimple.sheet` seam) | typescript-pro | `src/core/klimt/creole/SheetBuilder.ts`, `src/core/klimt/creole/legacy/CreoleParser.ts`, `src/core/style/ISkinSimple.ts` | T8b | [ ] |
-| T9b | `Stereotype` + `MessageNumber` | typescript-pro | `src/core/stereo/Stereotype.ts`, `src/core/sequencediagram/MessageNumber.ts` | T8b | [ ] |
+| T9a | `SheetBuilder` + `CreoleParser` + `Parser` (+ the `ISkinSimple.sheet` seam) | typescript-pro | `src/core/klimt/creole/{SheetBuilder,Parser}.ts`, `src/core/klimt/creole/legacy/CreoleParser.ts`, `src/core/style/ISkinSimple.ts` | T8b | [x] |
+| T9b | `Stereotype` + `StereotypeDecoration` + `MessageNumber` | typescript-pro | `src/core/stereo/{Stereotype,StereotypeDecoration}.ts`, `src/core/sequencediagram/MessageNumber.ts` | T8b | [x] |
 | T9c | `Display` | typescript-pro | `src/core/klimt/creole/Display.ts` (+ splits) | T10g | [ ] |
 
 T9a and T9b have disjoint write-sets and no dependency on each other — run
