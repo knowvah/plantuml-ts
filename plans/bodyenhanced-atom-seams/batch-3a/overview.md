@@ -13,7 +13,7 @@ batch lands the real layer before T2b resumes.
 | T8b | Relocate MD5 into `SignatureUtils` | typescript-pro | `src/core/utils/SignatureUtils.ts`, `src/core/svek/Ports.ts` | T8 | [x] |
 | T9a | `SheetBuilder` + `CreoleParser` + `Parser` (+ the `ISkinSimple.sheet` seam) | typescript-pro | `src/core/klimt/creole/{SheetBuilder,Parser}.ts`, `src/core/klimt/creole/legacy/CreoleParser.ts`, `src/core/style/ISkinSimple.ts` | T8b | [x] |
 | T9b | `Stereotype` + `StereotypeDecoration` + `MessageNumber` | typescript-pro | `src/core/stereo/{Stereotype,StereotypeDecoration}.ts`, `src/core/sequencediagram/MessageNumber.ts` | T8b | [x] |
-| T9c | `Display` | typescript-pro | `src/core/klimt/creole/Display.ts` (+ splits) | T10g | [ ] |
+| T9c | `Display` (+ closes `CreoleHorizontalLine.getTitle`) | typescript-pro | `src/core/klimt/creole/{Display,DisplayCreole,DisplayEquality,DisplayNewlines,DisplayText}.ts`, `src/core/klimt/shape/TextBlockSprited.ts`, `CreoleHorizontalLine.ts` | T10g | [x] |
 
 T9a and T9b have disjoint write-sets and no dependency on each other — run
 them in parallel. T9c needs both.
@@ -111,3 +111,34 @@ under "Out of scope"; the port-them-all ruling supersedes that for
 PARSING. The `<latex>` **sizing** divergence — our deliberate 0-width
 approximation, which the README calls better than upstream's real KaTeX
 render — is a separate decision and stays preserved.
+
+## Batch 3a CLOSED — 2026-07-29
+
+Fourteen tasks, all landed, every ratchet exactly where it started at
+`7267187`: description **317/351 w0**, class **219/708 w0**, DOT
+**262/90/708 EQUAL**. Final suite: **447 files / 11005 tests**.
+
+Ported: `Sheet`, `CreoleMode`, `CreoleContext`, `LineBreakStrategy`,
+`XLine2D`, `XRectangle2D`, `SheetBlock1`, `SheetBlock2`, `Sea`, `Position`,
+`Ports`, `WithPorts`, `PortGeometry`, `SignatureUtils`, `SheetBuilder`,
+`CreoleParser`, `Parser`, `ISkinSimple`, `Stereotype`,
+`StereotypeDecoration`, `MessageNumber`, `AbstractAtom`, `AtomWithMargin`,
+`AtomTable`, `AtomTree`, `AtomMath`, `Skeleton2`, `StripeStyle`,
+`CreoleHorizontalLine`, `StripeRaw`, `StripeTable`, `StripeTree`,
+`StripeCode`, `StripeLatex`, `Pragma`, `PragmaKey`, `BackSlash`,
+`Warning`, `WarningHandler`, `ScientificEquationSafe`, `EmbeddedDiagram`,
+and `Display` across six modules — plus `Stripe`/`Sheet`/`SheetBuilder`
+made generic and every `CreoleParser` seam removed.
+
+**Deliberately NOT ported, each labelled at its site by its real cause:**
+`Neutron` (`Fission.ts` already carries it), the OOP `Atom` hierarchy
+(ADR-9), `ScientificEquationSafe`'s rasterization and `AtomMath`'s
+`PortableImage` path (this port emits MathML), `Pragma.getLatexEngine`
+(spawns a native process), `SignatureUtils`' filesystem methods,
+`fromAsciiMath` (needs `ASCIIMathTeXImg`, 1032 lines),
+`Stereotype#getStyles` (the style subsystem, five independent hits).
+
+**One behaviour change deliberately withheld:**
+`CreoleStripeSimpleParser.ts:95`'s `LITERAL` stand-in — S1L-i's root cause.
+Flipping it changes live rendering, so per ADR-6 it belongs in a later gated
+change, never in a port task.
