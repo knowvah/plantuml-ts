@@ -520,3 +520,35 @@ bullet rect origin `(xStart+7, midY-1)` 2×2, hline endpoints, the
 mother/sister backward scan, and `CELL_TEXT_MARGIN` 2. Zero disagreements,
 matching T2a's earlier result. Two independent ports, two clean agreements
 with the jar-derived class side.
+
+### Orchestration hazard — parallel agents contend on `coverage/.tmp/`
+
+T10e's `npm test` exited 1 with `ENOENT coverage/.tmp/coverage-*.json` while
+sibling T10f was running its own `vitest`. Not a real failure: T10e
+confirmed a second vitest pid was live and re-ran its three files' coverage
+in isolation at 100%.
+
+**Consequence for how this mission is run:** a parallel agent's `npm test`
+result is not trustworthy on its own — not only because file/test COUNTS
+include the sibling's additions (already known), but because the coverage
+run itself can fail spuriously. The orchestrator's post-settle verification
+is the authoritative gate. Every parallel dispatch already says to judge on
+pass/fail and the ratchets rather than totals; it should now also say that
+a coverage-tmp ENOENT during concurrent runs is sibling contention, not a
+defect.
+
+### T10e — one KaTeX path, found by checking first
+
+`AtomMath` binds to `core/latex.ts#measureLatex` / `renderLatexAsImage` —
+the SAME pair `EntityImageDescriptionSupport.ts`'s pre-existing
+`atom.kind === 'latex'` branch already calls for the data-oriented
+`CreoleAtom` variant. Reused, not duplicated, so there is one KaTeX
+encoding rather than two.
+
+Boundaries labelled precisely rather than by reused phrase, per the
+standard T8b set: `getSvg`/`getImage`/`export` are an **architectural**
+boundary (this port emits inline MathML, never a rasterized
+`PortableImage`) and `fromAsciiMath` is a **large separable follow-on**
+(its two upstream callers are unported, and reaching it needs
+`AsciiMath.java` 79 + `ASCIIMathTeXImg.java` 1032). Neither is filed as
+"no caller today", which the corollary forbids.
