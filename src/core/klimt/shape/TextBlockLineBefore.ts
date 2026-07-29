@@ -2,8 +2,11 @@ import type { TextBlock } from './TextBlock.js';
 import type { UGraphic } from '../UGraphic.js';
 import type { StringBounder } from '../font/StringBounder.js';
 import type { XDimension2D } from '../geom/XDimension2D.js';
+import type { XRectangle2D } from '../geom/XRectangle2D.js';
+import type { WithPorts } from '../../svek/WithPorts.js';
 import { UHorizontalLine } from './UHorizontalLine.js';
 import { Fore } from '../Fore.js';
+import { Ports } from '../../svek/Ports.js';
 
 /**
  * TextBlockLineBefore — wraps a `TextBlock` with an infinite horizontal
@@ -42,12 +45,27 @@ import { Fore } from '../Fore.js';
  * two-way branch collapses to a single unconditional `ug.apply(new
  * Fore(color))`.
  *
- * NOT ported (reported, "no caller in this port's `TextBlock`/svek
- * seam" — same rationale `TextBlockMarged.ts`/`TextBlockVertical.ts`
- * document for the identical members): `getInnerPosition` (not part of
- * this port's `TextBlock` interface, `TextBlock.ts`'s own doc comment);
- * `getPorts`/`WithPorts` (a separate, unported `svek` port-routing
- * subsystem — no `Ports.ts`/`WithPorts.ts` exists in this port at all).
+ * `getInnerPosition`/`getPorts` (ADR-7's "note on Ports/WithPorts",
+ * `plans/bodyenhanced-atom-seams/decisions.md`): T2a originally dropped
+ * both, reasoning "no caller"/"`Ports`/`WithPorts` don't exist in this
+ * port" — an invalid justification under this mission's ADR-8 corollary
+ * ("not ported yet" is never "unreachable"). T8 reinstates both, faithful
+ * to `TextBlockLineBefore.java:97-107`:
+ * - `getInnerPosition(member, stringBounder)`: delegates to
+ *   `this.textBlock.getInnerPosition(member, stringBounder)` if present.
+ *   `TextBlock.ts`'s own interface does not declare this member (a T3
+ *   scope reduction, same "add it the day a ported class needs to
+ *   override one" rationale as `getMagneticBorder` — today is that day
+ *   for `SheetBlock1`/`SheetBlock2`, `klimt/creole/SheetBlock{1,2}.ts`).
+ *   Rather than widen `TextBlock.ts` (outside this task's write-set), the
+ *   delegation below duck-types the optional capability directly, exactly
+ *   as `getMagneticBorder` already established as this port's idiom for
+ *   an upstream `TextBlock` default member with no universal caller.
+ * - `getPorts(stringBounder)`: upstream's `textBlock instanceof
+ *   WithPorts` becomes a duck-typed `typeof
+ *   (textBlock as Partial<WithPorts>).getPorts === 'function'` check (TS
+ *   interfaces carry no runtime tag to `instanceof` against) — same
+ *   fallback (`new Ports()`) when absent.
  */
 export class TextBlockLineBefore implements TextBlock {
   private readonly textBlock: TextBlock;
@@ -81,5 +99,18 @@ export class TextBlockLineBefore implements TextBlock {
     if (this.title !== undefined) {
       UHorizontalLine.infinite(this.defaultThickness, 1, 1, this.separator, this.title).drawMe(ugColored);
     }
+  }
+
+  getInnerPosition(member: string, stringBounder: StringBounder): XRectangle2D | undefined {
+    const candidate = this.textBlock as Partial<{
+      getInnerPosition(m: string, sb: StringBounder): XRectangle2D | undefined;
+    }>;
+    return candidate.getInnerPosition?.(member, stringBounder);
+  }
+
+  getPorts(stringBounder: StringBounder): Ports {
+    const candidate = this.textBlock as Partial<WithPorts>;
+    if (typeof candidate.getPorts === 'function') return candidate.getPorts(stringBounder);
+    return new Ports();
   }
 }

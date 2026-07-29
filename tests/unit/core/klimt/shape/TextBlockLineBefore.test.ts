@@ -19,10 +19,13 @@ import type { UParam } from '../../../../../src/core/klimt/UParam.js';
 import type { StringBounder } from '../../../../../src/core/klimt/font/StringBounder.js';
 import type { Paint } from '../../../../../src/core/paint.js';
 import { XDimension2D } from '../../../../../src/core/klimt/geom/XDimension2D.js';
+import { XRectangle2D } from '../../../../../src/core/klimt/geom/XRectangle2D.js';
 import { UTranslate } from '../../../../../src/core/klimt/UTranslate.js';
 import { Fore } from '../../../../../src/core/klimt/Fore.js';
 import { UHorizontalLine } from '../../../../../src/core/klimt/shape/UHorizontalLine.js';
 import { TextBlockLineBefore } from '../../../../../src/core/klimt/shape/TextBlockLineBefore.js';
+import type { WithPorts } from '../../../../../src/core/svek/WithPorts.js';
+import { Ports } from '../../../../../src/core/svek/Ports.js';
 
 const stubStringBounder: StringBounder = { calculateDimension: () => new XDimension2D(0, 0) };
 
@@ -152,5 +155,44 @@ describe('TextBlockLineBefore.drawU — draw order (Java:81-95)', () => {
     };
     tb.drawU(ug);
     expect(drawnShape).toBeInstanceOf(UHorizontalLine);
+  });
+});
+
+describe('TextBlockLineBefore.getInnerPosition (T8, reinstated -- Java:97-100)', () => {
+  it('delegates to the wrapped textBlock when it carries getInnerPosition', () => {
+    const rect = new XRectangle2D(1, 2, 3, 4);
+    const block: TextBlock & { getInnerPosition(m: string, sb: StringBounder): XRectangle2D | undefined } = {
+      calculateDimension: () => new XDimension2D(10, 5),
+      drawU: (): void => undefined,
+      getInnerPosition: () => rect,
+    };
+    const tb = new TextBlockLineBefore(0.5, block, '-');
+    expect(tb.getInnerPosition('member', stubStringBounder)).toBe(rect);
+  });
+
+  it('returns undefined when the wrapped textBlock has no getInnerPosition capability', () => {
+    const block = recordingBlock(10, 5, 'content', []);
+    const tb = new TextBlockLineBefore(0.5, block, '-');
+    expect(tb.getInnerPosition('member', stubStringBounder)).toBeUndefined();
+  });
+});
+
+describe('TextBlockLineBefore.getPorts (T8, reinstated -- Java:102-107)', () => {
+  it('delegates to the wrapped textBlock when it implements WithPorts', () => {
+    const ports = new Ports();
+    ports.add('p1', 1, 10, 5);
+    const block: TextBlock & WithPorts = {
+      calculateDimension: () => new XDimension2D(10, 5),
+      drawU: (): void => undefined,
+      getPorts: () => ports,
+    };
+    const tb = new TextBlockLineBefore(0.5, block, '-');
+    expect(tb.getPorts(stubStringBounder)).toBe(ports);
+  });
+
+  it('returns a fresh, empty Ports when the wrapped textBlock does not implement WithPorts', () => {
+    const block = recordingBlock(10, 5, 'content', []);
+    const tb = new TextBlockLineBefore(0.5, block, '-');
+    expect(tb.getPorts(stubStringBounder).getAllPortGeometry()).toEqual([]);
   });
 });
