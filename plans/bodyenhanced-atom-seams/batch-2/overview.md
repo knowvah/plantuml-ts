@@ -6,8 +6,8 @@ started. That is the point — ADR-6 keeps behaviour change out of the port.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T2a | Port `BodyEnhancedAbstract` + `TextBlockLineBefore`, and rewire the class path onto it (ADR-7) | typescript-pro | `src/core/cucadiagram/BodyEnhancedAbstract.ts`, `src/core/klimt/shape/TextBlockLineBefore.ts`, `src/diagrams/class/class-body-enhanced-layout.ts`, `src/diagrams/class/renderer-body-enhanced.ts` | T1b | [ ] |
-| T3 | Both seams — ink fields + `imgFallbackFont` threading | typescript-pro | `src/core/creole-atoms.ts`, `src/core/svek/image/EntityImageDescriptionSupport.ts`, `src/diagrams/description/leaf-sizing-text.ts` | T1b | [ ] |
+| T2a | Port `BodyEnhancedAbstract` + `TextBlockLineBefore`, and rewire the class path onto it (ADR-7) | typescript-pro | `src/core/cucadiagram/BodyEnhancedAbstract.ts`, `src/core/klimt/shape/TextBlockLineBefore.ts`, `src/diagrams/class/class-body-enhanced-layout.ts`, `src/diagrams/class/class-body-enhanced-geometry.ts` | T1b | [x] |
+| T3 | Both seams — ink fields + `imgFallbackFont` threading | typescript-pro | `src/core/creole-atoms.ts`, `src/core/svek/image/EntityImageDescriptionSupport.ts` | T1b | [x] |
 
 Write-sets remain disjoint, so the two still run in parallel. Both agents
 share one worktree: forbid state-mutating git in both prompts; the

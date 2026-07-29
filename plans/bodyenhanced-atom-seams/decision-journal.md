@@ -179,3 +179,75 @@ fixture is `dotEqual=false` so it was AC3-ineligible anyway. Filed here
 because it is a real emission bug in our own output, not merely a bad
 oracle: revisit once separator support lands, since that is the code path
 implicated.
+
+## Batch 2 — 2026-07-29
+
+Gates re-run by the orchestrator on the combined tree AFTER both agents
+finished, because each agent measured a worktree containing the other's
+in-flight edits and neither number was trustworthy: **405 files / 10481
+tests**, typecheck + lint + build clean, description **317/351 w0**, class
+**219/708 w0**, DOT **262 / 90 / 708** all 100% EQUAL. Every ratchet
+exactly unmoved, which is what ADR-6 demands of the port batches.
+
+### T3 — both seams, no behaviour change
+
+ADR-2 and ADR-3 both honoured literally. Seam A is four optional fields on
+`AtomImageResolver` mirroring `SpriteSvg`'s names; seam B threads
+`defaultFont` from `buildTextBlock` into `buildLineAtoms`' PRE-EXISTING
+`imgFallbackFont` with `StripeSimple.ts` untouched, so no new font seam was
+created. Jar-checked end-to-end: `<img:x/y.svg>` measures 100.3625 against
+the jar's 100.362 with the font omitted and the `(Cannot decode)` run at
+`font-size="14"`; a size-8 default shifts both.
+
+**T3 misattributed a discrepancy and was wrong.** It read the golden
+ratchets' TEST counts (51 / 312 / 24 / 59) as golden counts and concluded
+its sibling was authoring goldens. Those are 48+3, 310+2, 22+2, 57+2 —
+harness tests, not fixtures. No golden moved in batch 2. Recorded because
+the reflex to explain away an unexpected number by inventing a cause is
+exactly what this mission's method constraints exist to catch.
+
+### T2a — the ADR-7 rewire, and the cross-check came back clean
+
+The port cross-checked against the class side's jar-verified constants with
+**zero disagreements** across six formulas — `getMarginX`=6, the +2×6=12
+width contribution, plain-divider and titled offsets, the `+8` title-width
+floor, and `getDefaultThickness`=0.5. This was the mission's most likely
+surprise and it did not fire; the G2 N42 derivation and a fresh port from
+the Java agree.
+
+**ADR-7 verified satisfied by reading, not by report:**
+`class-body-enhanced-geometry.ts:25` imports `BodyEnhancedAbstract` from
+`src/core/cucadiagram/`, and the class file's own
+`PLAIN_DIVIDER_MARGIN_TOP` / `BLOCK_MARGIN_BOTTOM` constants are gone. One
+owner, as ruled.
+
+**Write-set expansion, accepted.** T2a created a new
+`src/diagrams/class/class-body-enhanced-geometry.ts` (213 lines) that its
+task file did not list. Justified: `class-body-enhanced-layout.ts` is 361
+lines and the combined module would have been ~560 against a hard 500-line
+cap. T2a's stop-condition was editing a CONSUMER, which it did not do —
+`renderer-body-enhanced.ts` needed no change at all and is byte-unchanged.
+Accepted as a reasonable judgment call rather than scope creep.
+
+**Two residual notes, neither a blocker.**
+
+1. The class path consumes the port through a *probe* — `deriveHeightOffsets`
+   runs the ported `decorate()` through a minimal draw-order UGraphic and
+   reads offsets back, rather than composing `TextBlock`s directly. It
+   satisfies ADR-7's one-owner intent (the constants live only in core now),
+   but the probe is the coupling point: if `decorate`'s shape changes, that
+   is where it bites. Flagged for T2b/T4.
+2. `class-body-enhanced-geometry.ts` sits at 75% FUNCTION coverage against
+   the 90/90/90 target — 5 unreachable interface-contract stubs on the probe
+   UGraphic, mirroring the existing `UGraphicNo.ts` / `Footprint.ts`
+   precedent. Aggregate thresholds still pass. A known local deviation, not
+   a silent one.
+
+**Forward finding for T2b:** `BodyEnhanced2.getMarginX()`=0 makes the
+titled-branch inner margin asymmetric (L=0, R=6). Unexercised territory.
+
+**Landmine for any future `withMargin` audit:** Java's 2-arg
+`withMargin(tb, X, Y)` means L/R=X, T/B=Y, which this port's positional
+defaults do NOT reproduce if called with two arguments. T2a wrote both
+2-arg Java sites as explicit 4-arg calls, matching existing precedent at
+`USymbolUsecase.ts:97-110` and `state-sizing.ts:152-165`.
