@@ -13,7 +13,7 @@ batch lands the real layer before T2b resumes.
 | T8b | Relocate MD5 into `SignatureUtils` | typescript-pro | `src/core/utils/SignatureUtils.ts`, `src/core/svek/Ports.ts` | T8 | [x] |
 | T9a | `SheetBuilder` + `CreoleParser` (+ the `ISkinSimple.sheet` seam) | typescript-pro | `src/core/klimt/creole/SheetBuilder.ts`, `src/core/klimt/creole/legacy/CreoleParser.ts`, `src/core/style/ISkinSimple.ts` | T8b | [ ] |
 | T9b | `Stereotype` + `MessageNumber` | typescript-pro | `src/core/stereo/Stereotype.ts`, `src/core/sequencediagram/MessageNumber.ts` | T8b | [ ] |
-| T9c | `Display` | typescript-pro | `src/core/klimt/creole/Display.ts` (+ splits) | T9a, T9b | [ ] |
+| T9c | `Display` | typescript-pro | `src/core/klimt/creole/Display.ts` (+ splits) | T10g | [ ] |
 
 T9a and T9b have disjoint write-sets and no dependency on each other — run
 them in parallel. T9c needs both.
