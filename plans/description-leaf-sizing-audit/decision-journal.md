@@ -383,3 +383,55 @@ seen to fail is not known to work.
 Routing: Sonnet (`typescript-pro`). One test file, an exactly-specified
 contract, no upstream Java reading — the judgement was spent on the design
 above, which is now written down rather than delegated.
+
+## T5 complete — 2026-07-28. Mission's specified batches are done.
+
+`tests/architecture/sizer-renderer-parity.test.ts`, 9 tests. Suite 398 →
+399 files, 10384 → 10393 tests. All four gates green; all three ratchets
+unmoved (description 311/351 widened 0, class 219/708 widened 0, DOT
+262/90/708 EQUAL).
+
+Classification came out smaller than expected and that is correct:
+`SIZE_NEUTRAL` holds only `resolveElementPaint`, `KNOWN_GAPS` holds
+`resolveElementShadowing` (covering both cascade tiers — one Batch-4 fix)
+and `resolveElementLineThickness`. The other resolvers need no entry:
+`resolveElementFontSize` is genuinely threaded via `layout.ts:432`,
+`resolveElementMinimumWidth` is never renderer-referenced by design, and the
+class-family resolvers are deliberately outside both globs.
+
+**Red phase was exercised against the REAL gaps, not a synthetic dummy** —
+stronger evidence than the spec asked for. Independently re-verified by the
+orchestrator: removing `resolveElementShadowing` from `KNOWN_GAPS`
+(syntactically cleanly — a first attempt by crude line-deletion produced a
+transform error, which is a broken file, NOT a guard failure, and was
+discarded as invalid evidence) makes the guard fail with
+
+> resolver-reachability guard: resolveElementShadowing reaches a description
+> renderer module and no description sizer module … only ONE (per-element
+> FontSize) was resolver-shaped … Green here is not proof of parity. …
+> NEVER move a KNOWN_GAPS entry into SIZE_NEUTRAL to quiet this failure.
+
+The 1-of-4 figure and the forbidden move are in the ASSERTION, not just the
+doc comment, as required.
+
+**A false positive was fixed by tightening, not loosening** — the required
+direction. A sizer glob of `leaf-sizing*.ts` alone flagged
+`resolveElementFontSize` and `resolveElementMinimumWidth`, because their
+call sites are in `layout.ts` (`ClassifyCtx.fontSizeFor`/`.minimumWidthFor`)
+and `leaf-sizing.ts` only reads the derived `BoxSizingOpts` field. The glob
+gained `layout.ts` rather than the pass condition being relaxed.
+
+**Four things the guard cannot catch, stated in its own header** so green is
+never mistaken for proof: non-resolver-shaped drift (3 of the 4 historical
+instances); per-shape coverage inside an already-threaded resolver (the
+`wrapWidth`/`guillemet` shape — threaded, but read by 1 of 6 paths); other
+engines; and reachability vs actual use (the `inkSprites` precedent).
+
+Batches 4 and 5 remain TEMPLATES by design and are unstarted. Batch 4's rows
+are now fully determined: 6 MISMATCH + 6 GAP, minus `inkSprites` (dead-field
+deletion, not a sizing fix), with `actorStyle` sequenced as two dependent
+fixes and USECASE_BUSINESS blocked on emitting the marged block's `UEmpty`
+box. Batch 5's ADR-2 gate is half-met — T2 counted 6 composition kinds
+(≥4 ✓); the second condition, Batch 4 adding ≥2 new symbol tables, cannot be
+evaluated until Batch 4 runs, and may be mooted if Batch 4 routes
+`measureLeafNode` through the ported `decoration/symbol/` classes instead.

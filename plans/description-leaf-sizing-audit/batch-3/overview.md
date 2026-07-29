@@ -5,4 +5,4 @@ dispositions because the `size-neutral` verdicts ARE the allow-list.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T5 | Parity fitness function | typescript-pro | `tests/architecture/sizer-renderer-parity.test.ts` | T4 | [ ] |
+| T5 | Parity fitness function | typescript-pro | `tests/architecture/sizer-renderer-parity.test.ts` | T4 | [x] |
