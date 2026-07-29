@@ -13,6 +13,8 @@ import { ClockwiseTopRightBottomLeft } from '../../../../src/core/klimt/geom/Clo
 import type { FontConfiguration } from '../../../../src/core/klimt/shape/UText.js';
 import type { Sheet } from '../../../../src/core/klimt/creole/Sheet.js';
 import type { SheetBuilder } from '../../../../src/core/klimt/creole/SheetBuilder.js';
+import { Pragma } from '../../../../src/core/skin/Pragma.js';
+import { PragmaKey } from '../../../../src/core/skin/PragmaKey.js';
 
 const FONT: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set() };
 
@@ -67,5 +69,19 @@ describe('ISkinSimple conformance', () => {
     const b4 = skin.sheet(FONT, HorizontalAlignment.LEFT, CreoleMode.FULL, FONT);
     expect(typeof b3.createSheet).toBe('function');
     expect(typeof b4.createSheet).toBe('function');
+  });
+});
+
+describe('ISkinSimple.getPragma (T10b addition — OPTIONAL, see this file\'s own doc comment)', () => {
+  it('a fake that DOES implement getPragma returns a real Pragma', () => {
+    const pragma = Pragma.createEmpty();
+    pragma.define('ratio', '1.5');
+    const skin: ISkinSimple = { ...fakeSkinSimple(), getPragma: () => pragma };
+    expect(skin.getPragma?.()?.getValue(PragmaKey.RATIO)).toBe('1.5');
+  });
+
+  it('a fake that does NOT implement getPragma stays a valid ISkinSimple (optional member)', () => {
+    const skin = fakeSkinSimple();
+    expect(typeof skin.getPragma).toBe('undefined');
   });
 });
