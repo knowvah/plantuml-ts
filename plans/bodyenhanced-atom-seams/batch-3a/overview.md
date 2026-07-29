@@ -76,3 +76,38 @@ filenames.**
 `TextBlockLineBefore` as unreachable. **T8 must make a deliberate, recorded
 decision** rather than dropping them a second time by reflex — two reflexive
 drops become an invisible divergence.
+
+## T10 — the stripe classes (maintainer ruling: port them all)
+
+T9a left ~1,100 lines of stripe classes as **throwing, cited seams** in
+`CreoleParser.createStripes`. The maintainer ruled they all be ported.
+Tracing dependencies put the true size at **≈2,300** lines (see ADR-9).
+
+| ID | Scope | Java lines | Depends |
+|----|-------|-----------|---------|
+| T10a | `AbstractAtom`, `AtomWithMargin`, `StripeStyle`, `CreoleHorizontalLine`, `StripeRaw` | 355 | T9a |
+| T10b | `AtomTable`, `StripeTable`, `Pragma`, `BackSlash` | 717 | T10a |
+| T10c | `AtomTree`, `StripeTree` | 214 | T10a |
+| T10d | `Neutron`, `StripeCode` | 252 | T10a |
+| T10e | `AtomMath`, `StripeLatex`, `ScientificEquationSafe` | 396 | T10a |
+| T10f | `EmbeddedDiagram.createAndSkip` | 368 | T10a |
+| T10g | Remove every seam from `CreoleParser`; reinstate the `lastStripe` continuation checks | — | T10b–f |
+
+T10a lands the shared primitives first. T10b–T10f then run in parallel
+(disjoint write-sets). T10g is last and is the ONLY task permitted to touch
+`CreoleParser.ts` — T9a omitted the three
+`lastStripe instanceof StripeRaw/Table/Tree` continuation checks
+(`CreoleParser.java:81-98`) as unreachable-by-construction while the seams
+throw, and they must return in the same task that removes the seams.
+
+**T10a is the one that matters to this mission's own goal.**
+`CreoleHorizontalLine` is the `--sep--` / `==title==` path — ADR-4 and
+S1L-i. Until it lands, the separator work this mission exists to do cannot
+be wired.
+
+**Two of these were README-out-of-scope and now are not.** `<latex>`
+(StripeLatex) and the `{{ }}` sub-diagram (EmbeddedDiagram) were listed
+under "Out of scope"; the port-them-all ruling supersedes that for
+PARSING. The `<latex>` **sizing** divergence — our deliberate 0-width
+approximation, which the README calls better than upstream's real KaTeX
+render — is a separate decision and stays preserved.
