@@ -83,14 +83,15 @@ skill's gitignore instruction. `.claude/` is ignored.
 |---|---|---|---|
 | 1 | Renderer gate — GATING (ADR-5 + AMENDMENT) | T1 [x], T1b [x] | [x] |
 | 2 | Port base + seams (parallel) | T2a [x], T3 [x] | [x] |
-| 3 | Port the Body classes | T2b | [ ] |
+| 3a | Creole Display/Sheet layer — GATING (ADR-8) | T7, T8, T9 | [ ] |
+| 3 | Port the Body classes | T2b (BLOCKED on 3a) | [ ] |
 | 4 | Wire it in — the risky one | T4 | [ ] |
 | 5 | Widen the routing (ADR-6) + close | T5, T6 | [ ] |
 
 ## Index
 
 - [decisions.md](decisions.md) — ADR-1..7, incl. the ADR-5 AMENDMENT
-- [batch-1/overview.md](batch-1/overview.md) … [batch-5/overview.md](batch-5/overview.md)
+- [batch-1/overview.md](batch-1/overview.md) … [batch-5/overview.md](batch-5/overview.md), plus [batch-3a/overview.md](batch-3a/overview.md)
 - [diagrams/component-map.md](diagrams/component-map.md)
 - [diagrams/data-flow.md](diagrams/data-flow.md)
 - [decision-journal.md](decision-journal.md)

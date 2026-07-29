@@ -137,6 +137,55 @@ history says the follow-on is what slips); and extracting the class-side
 code instead of re-porting (it carries class-body assumptions — rows,
 trees, dividers — that a general `TextBlock` must not inherit).
 
+## ADR-8 — Port the creole `Display`/`Sheet` layer as a prerequisite
+
+**Maintainer decision, 2026-07-29, after T2b stopped at the wall.**
+
+**Context.** T2b found that both concrete bodies bottom out in unported
+code, and stopped rather than guess. Verified against the Java:
+`BodyEnhanced1.buildTextBlock` constructs `MethodsOrFieldsArea`
+(`BodyEnhanced1.java`, private `buildTextBlock`); `BodyEnhanced2.getTextBlock`
+calls `display.create9(...)` → `create0` → `getCreole` → `SheetBlock1`.
+Sizes: `Display` 796, `SheetBlock1` 241, `SheetBlock2` 132, `Sheet` 82,
+`MethodsOrFieldsArea` 442.
+
+T2b's *reading* was right; its *conclusion* was not. It proposed either a
+foundational port or "an ADR-level decision to build a scoped substitute"
+— but that substitute already exists and is documented as such at its own
+definition: `EntityImageDescriptionSupport.ts#buildTextBlock`, "scoped
+substitute for `BodyFactory.create2`/`create3`" (mission E2r), already
+covering `\n`-split assembly, the creole stripe/atom pipeline, inline
+style runs, the `==` heading cascade, `<img>`/`<$sprite>` atoms, and
+word-wrap via `Fission`.
+
+**Decision.** Do NOT compose on the scoped substitute. **Port the real
+layer** — `Display`, `Sheet`, `SheetBlock1`, `SheetBlock2` — as a
+prerequisite, then resume T2b on it. Maintainer guidance, standing for the
+rest of this mission: **a faithful port overrides a short-term patch.**
+
+**Consequences.** This mission stalls at batch 3 while a new gating batch
+(3a) lands a cross-cutting layer that sequence, class, and note paths will
+also eventually use — so the cost is front-loaded, not wasted. Rejected:
+composing on the substitute (cheaper and bounded, but permanently encodes
+a divergence at the exact seam this mission line exists to make faithful);
+and porting a narrow description-only text path (a THIRD encoding of the
+text-block layer, the second-builder shape ADR-1, ADR-2 and ADR-7 all
+reject).
+
+**Smaller than its raw line count.** The lower creole layer is already
+ported — `Fission` (275), `Stripe`, `Stencil`, `StripeStyleType`,
+`atom/Atom`, the full `command/` chain, `StripeSimple` (289),
+`CreoleStripeSimpleParser`. Verified present for the dependency set:
+`TextBlockMemoized`, `MinMax`, `ClockwiseTopRightBottomLeft`,
+`UGraphicStencil`, `TextBlock`. Verified MISSING and in scope:
+`LineBreakStrategy`, `CreoleMode`, `CreoleContext`, `XRectangle2D`,
+`Ports`/`WithPorts`.
+
+**Note on `Ports`/`WithPorts`.** `SheetBlock2` implements them. T2a
+deliberately dropped them from `TextBlockLineBefore` as unreachable. Batch
+3a must decide once, explicitly, and record it — not drop them a second
+time by reflex.
+
 ## Accepted loosening (maintainer-approved)
 
 **SVG drift in T4 is acceptable IF jar-verified.** Drift that matches the

@@ -251,3 +251,60 @@ titled-branch inner margin asymmetric (L=0, R=6). Unexercised territory.
 defaults do NOT reproduce if called with two arguments. T2a wrote both
 2-arg Java sites as explicit 4-arg calls, matching existing precedent at
 `USymbolUsecase.ts:97-110` and `state-sizing.ts:152-165`.
+
+## Batch 3 — STOPPED, and batch 3a inserted (ADR-8)
+
+### T2b stopped correctly, but reasoned to the wrong conclusion
+
+T2b wrote no production code. It hit an undeclared dependency chain and
+escalated instead of guessing — the right call, and worth saying plainly.
+
+Its Java reading **verified correct** by the orchestrator:
+`BodyEnhanced1`'s private `buildTextBlock` constructs `MethodsOrFieldsArea`
+(442 lines, unported); `BodyEnhanced2.getTextBlock` calls
+`display.create9(...)` → `create0` → `getCreole` → `SheetBlock1`. `Display`
+796, `SheetBlock1` 241, `SheetBlock2` 132, `Sheet` 82 — none ported.
+
+Its conclusion was **wrong**, and `CLAUDE.md` names this exact failure
+mode: "the port has no support for X" is a hypothesis to check, not a
+finding to relay. T2b framed the options as (a) port the foundation or (b)
+take "an ADR-level decision to build a scoped substitute" — not knowing
+that (b) already exists and is documented at its own definition.
+`EntityImageDescriptionSupport.ts#buildTextBlock`'s doc comment names
+itself the "scoped substitute for `BodyFactory.create2`/`create3`" (mission
+E2r) and already covers `\n`-split assembly, the stripe/atom pipeline,
+inline style runs, the `==` heading cascade, `<img>`/`<$sprite>` atoms, and
+`Fission` word-wrap. Had that been relayed unchecked, the mission would
+have been presented with a false choice.
+
+Confirmed independently of the blocker: **`create1`/`Body3` are NOT
+required.** `BodyFactory.BODY3` is a dead `false` flag
+(`BodyFactory.java:56`) read only by `BodierLikeClassOrObject.java:212`
+(SI1-excluded); `create1`'s only callers are the SI1-excluded Bodier
+classes. Permanently out of scope.
+
+### Maintainer ruling — port the real layer (ADR-8)
+
+Presented with the verified sizing, the maintainer chose the faithful port
+over composing on the substitute, and stated the standing rule: **a
+faithful port overrides a short-term patch.** Recorded as ADR-8 and applied
+to the remainder of this mission wherever a substitute would be the cheaper
+path.
+
+New GATING batch **3a** (T7 → T8 → T9, serial) lands `Display`, `Sheet`,
+`SheetBlock1`, `SheetBlock2`. Batch 3 (T2b) is BLOCKED on it and resumes
+afterwards on the real layer.
+
+**The work is smaller than 1,251 raw Java lines.** Dependency audit run
+before decomposing: PRESENT — `Fission` (275), `Stripe`, `Stencil`,
+`StripeStyleType`, `atom/Atom`, the full `command/` chain, `StripeSimple`
+(289), `CreoleStripeSimpleParser`, `TextBlockMemoized`, `MinMax`,
+`ClockwiseTopRightBottomLeft`, `UGraphicStencil`, `TextBlock`. MISSING and
+now in scope — `LineBreakStrategy`, `CreoleMode`, `CreoleContext`,
+`XRectangle2D`, `Ports`/`WithPorts`.
+
+**Flagged for T8, so it is not dropped twice by reflex:** `SheetBlock2`
+implements `Ports`/`WithPorts`, which T2a already dropped from
+`TextBlockLineBefore` as unreachable. T8 must decide once, explicitly, and
+record it. Two reflexive drops of the same interface would be an invisible
+divergence.
