@@ -233,3 +233,48 @@ clothes.
 **SVG drift in T4 is acceptable IF jar-verified.** Drift that matches the
 jar is the port working; unverified drift is a regression. Freezing today's
 SVG entirely would block the port from ever becoming faithful.
+
+## ADR-9 — Stripe classes adapt to the data-oriented atom model
+
+**Orchestrator decision, 2026-07-29, applying ADR-1/2/7 rather than making
+a new call. Flagged to the maintainer for override.**
+
+**Context.** The maintainer ruled that all remaining stripe classes be
+ported. Tracing their dependencies revealed the true size is ~2,300 Java
+lines, not the ~1,100 quoted at decision time:
+
+| Layer | Lines |
+|---|---|
+| Stripe classes (7 seams) | 1,099 |
+| Atom layer: `AtomTable` 285, `AtomTree` 103, `AtomMath` 107, `AtomWithMargin` 69, `AbstractAtom` 50 | 614 |
+| `Neutron` 128, `StripeStyle` 77, `Pragma` 109, `BackSlash` 104, `ScientificEquationSafe` 171 | 589 |
+
+It also revealed a fork the decision did not anticipate. Upstream's
+`AtomTable`/`AtomTree`/`AtomMath`/`AtomWithMargin` are subclasses of an OOP
+`Atom` hierarchy. **This port deliberately replaced that hierarchy** with a
+data-oriented `CreoleAtom` + `buildLineAtoms` pipeline (E2r/L1), and
+`src/core/klimt/creole/atom/Atom.ts` is that data interface, not upstream's
+class.
+
+**Decision.** Port the stripe classes' ALGORITHMS faithfully, but bind them
+to the existing data-oriented atom model through injected operation
+bundles — **not** by porting a parallel OOP `Atom` hierarchy.
+
+**Why this is not a new decision.** It is what the locked ADRs already
+require, and the pattern is established twice inside this very batch:
+- T8 ported `Sea`/`Position` generic over `CreoleAtom` via an injected
+  `AtomOps` bundle
+- T9a bound `createStripes` to `buildLineAtoms` rather than a second OOP
+  `StripeSimple`
+- ADR-1, ADR-2 and ADR-7 each reject a second encoding of one fact; ADR-7
+  spent an entire task consolidating exactly this shape
+
+Porting the OOP hierarchy alongside the data-oriented one would leave two
+atom models in one codebase — the precise defect this mission line exists
+to remove.
+
+**Consequences.** Algorithms stay faithful; the object model stays
+this port's. Each adapted class must carry a JSDoc `@see` to its Java
+origin AND a note naming the adaptation, so the divergence is visible at
+the site rather than inferred. If the maintainer prefers the verbatim OOP
+hierarchy, this ADR is the thing to reverse.
