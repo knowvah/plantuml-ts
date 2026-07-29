@@ -34,7 +34,7 @@
  * tints — D7's documented, deliberate divergence, DIVERGENCES.md).
  */
 import { describe, expect, test } from 'vitest';
-import { scanLineForAtoms, type InlineAtomToken } from '../../src/core/creole-atoms.js';
+import { scanLineForAtoms, type AtomImageResolver, type InlineAtomToken } from '../../src/core/creole-atoms.js';
 import { measureInlineAtom, spriteScale } from '../../src/core/creole-atoms-measure.js';
 import { createSpriteRegistry, addSprite } from '../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../src/core/klimt/sprite/SpriteMonochrome.js';
@@ -48,6 +48,7 @@ import { UGraphicSvg } from '../../src/core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../src/core/klimt/drawing/svg/svg-graphics.js';
 import type { StringBounder as DriverStringBounder } from '../../src/core/klimt/drawing/svg/driver-text-svg.js';
 import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
+import { MeasurerStringBounder } from '../../src/core/measurer-bounder.js';
 
 const FONT: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set() };
 
@@ -268,5 +269,120 @@ describe('buildTextBlock — atom-aware SVG emission', () => {
     expect(imageMatches).toHaveLength(2);
     const xs = imageMatches.map((tag) => Number(/x="([0-9.]+)"/.exec(tag)![1]));
     expect(xs[1]).toBeGreaterThan(xs[0]!); // second atom sits to the right of the first
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AtomImageResolver — optional ink fields (T3-seams, ADR-2)
+// ---------------------------------------------------------------------------
+
+describe('AtomImageResolver — optional ink fields (T3-seams, ADR-2)', () => {
+  test('a resolver may report ink offsets distinct from the declared box', () => {
+    const resolve: AtomImageResolver = (atom) => {
+      if (atom.kind !== 'sprite') return undefined;
+      return { href: 'data:x', width: 16, height: 16, inkX: 1, inkY: 2, inkWidth: 12, inkHeight: 10 };
+    };
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'bi-globe', scale: 1 };
+    expect(resolve(atom)).toEqual({ href: 'data:x', width: 16, height: 16, inkX: 1, inkY: 2, inkWidth: 12, inkHeight: 10 });
+  });
+
+  test('omitting the ink fields is still a valid AtomImageResolver return -- ADR-2 additive shape', () => {
+    const resolve: AtomImageResolver = () => ({ href: 'data:x', width: 16, height: 16 });
+    const atom: InlineAtomToken = { kind: 'img', dataUri: TINY_PNG_URI, scale: 1, width: 2, height: 2 };
+    expect(resolve(atom)).toEqual({ href: 'data:x', width: 16, height: 16 });
+  });
+
+  test('the real render-time resolver (makeAtomImageResolverFor) still omits ink keys entirely -- byte-identical to pre-T3', () => {
+    const resolve = makeAtomImageResolverFor(undefined)(FONT);
+    const atom: InlineAtomToken = { kind: 'img', dataUri: TINY_PNG_URI, scale: 1, width: 2, height: 2 };
+    const result = resolve(atom);
+    expect(result).toEqual({ href: TINY_PNG_URI, width: 2, height: 2 });
+    expect(Object.keys(result!).sort()).toEqual(['height', 'href', 'width']);
+  });
+
+  test('ink fields on a resolved atom change NEITHER the rendered SVG NOR the measured dimension -- nothing consumes them yet', () => {
+    const withoutInk: AtomImageResolver = () => ({ href: TINY_PNG_URI, width: 10, height: 10 });
+    const withInk: AtomImageResolver = () => ({
+      href: TINY_PNG_URI,
+      width: 10,
+      height: 10,
+      inkX: 3,
+      inkY: 3,
+      inkWidth: 4,
+      inkHeight: 4,
+    });
+    const display = `Icon <img:${TINY_PNG_URI}>`;
+
+    const ugA = newGraphic();
+    buildTextBlock(display, FONT, HorizontalAlignment.LEFT, withoutInk).drawU(ugA);
+    const ugB = newGraphic();
+    buildTextBlock(display, FONT, HorizontalAlignment.LEFT, withInk).drawU(ugB);
+    expect(ugB.getSvgString()).toBe(ugA.getSvgString());
+
+    const bounder = new MeasurerStringBounder(measurer);
+    const dimA = buildTextBlock(display, FONT, HorizontalAlignment.LEFT, withoutInk).calculateDimension(bounder);
+    const dimB = buildTextBlock(display, FONT, HorizontalAlignment.LEFT, withInk).calculateDimension(bounder);
+    expect(dimB).toEqual(dimA);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildTextBlock — defaultFont threads to the cannot-decode fallback
+// (T3-seams, ADR-3: `imgFallbackFont` already existed end-to-end inside
+// StripeSimple.ts; this wires a caller that never passed it)
+// ---------------------------------------------------------------------------
+
+describe('buildTextBlock — defaultFont threads to the <img> cannot-decode fallback (T3-seams, ADR-3)', () => {
+  // `<img:x/y.svg>` is the mission brief's own jar-verified fixture: neither
+  // a data URI nor an http(s) URL, so `buildImgSpan` degrades it to the
+  // short `(Cannot decode)` fallback text -- CANNOT_DECODE_TEXT, `creole-
+  // atoms.ts`.
+  const MALFORMED_IMG = '<img:x/y.svg>';
+  const SMALL_DEFAULT: FontConfiguration = { family: 'sans-serif', size: 8, color: '#000000', styles: new Set() };
+
+  test('omitted defaultFont: fallback measures/draws at the ELEMENT font -- today\'s behaviour, unchanged', () => {
+    const dim = buildTextBlock(MALFORMED_IMG, FONT, HorizontalAlignment.LEFT).calculateDimension(
+      new MeasurerStringBounder(measurer),
+    );
+    // Jar-verified fact (mission brief): "(Cannot decode)" at size 14 = 100.362.
+    expect(dim.getWidth()).toBeCloseTo(measurer.measure('(Cannot decode)', FONT).width, 4);
+    expect(dim.getWidth()).toBeCloseTo(100.3625, 4);
+
+    const ug = newGraphic();
+    buildTextBlock(MALFORMED_IMG, FONT, HorizontalAlignment.LEFT).drawU(ug);
+    expect(ug.getSvgString()).toContain('font-size="14"');
+  });
+
+  test('threaded defaultFont: fallback measures/draws at the DIAGRAM DEFAULT font, not the element font', () => {
+    const dim = buildTextBlock(
+      MALFORMED_IMG,
+      FONT,
+      HorizontalAlignment.LEFT,
+      undefined,
+      0,
+      undefined,
+      SMALL_DEFAULT,
+    ).calculateDimension(new MeasurerStringBounder(measurer));
+    const atDefault = measurer.measure('(Cannot decode)', SMALL_DEFAULT).width;
+    const atElementFont = measurer.measure('(Cannot decode)', FONT).width;
+    expect(dim.getWidth()).toBeCloseTo(atDefault, 4);
+    expect(dim.getWidth()).not.toBeCloseTo(atElementFont, 4);
+
+    const ug = newGraphic();
+    buildTextBlock(MALFORMED_IMG, FONT, HorizontalAlignment.LEFT, undefined, 0, undefined, SMALL_DEFAULT).drawU(ug);
+    const svg = ug.getSvgString();
+    expect(svg).toContain('(Cannot decode)');
+    expect(svg).toContain('font-size="8"');
+    expect(svg).not.toContain('font-size="14"');
+  });
+
+  test('a decodable <img> is unaffected by defaultFont -- only the cannot-decode fallback text run reads it', () => {
+    const ugNoDefault = newGraphic();
+    buildTextBlock(`Icon <img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT).drawU(ugNoDefault);
+    const ugWithDefault = newGraphic();
+    buildTextBlock(`Icon <img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT, undefined, 0, undefined, SMALL_DEFAULT).drawU(
+      ugWithDefault,
+    );
+    expect(ugWithDefault.getSvgString()).toBe(ugNoDefault.getSvgString());
   });
 });
