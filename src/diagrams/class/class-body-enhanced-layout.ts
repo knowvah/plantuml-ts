@@ -30,6 +30,12 @@ import { formatMemberText } from './class-layout-helpers.js';
 import { sectionWidth, ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
 import { splitEnhancedBlocks, type EnhancedBodyBlock, type BlockSeparatorSpec } from './class-body-enhanced.js';
 import { measureTreeCells, computeTreeConnectors, type TreeConnector } from './class-body-tree.js';
+import {
+  ClassifierBodyGeometry,
+  ELEMENT_DEFAULT_LINE_THICKNESS,
+  BODY_ENHANCED_MARGIN_X,
+  memberLineCount,
+} from './class-body-enhanced-geometry.js';
 
 const ROW_ICON_ZONE_WIDTH = 14;
 const ROW_INDENT_WITH_ICON = ROW_TEXT_LEFT_MARGIN + ROW_ICON_ZONE_WIDTH;
@@ -37,12 +43,12 @@ const ROW_INDENT_WITH_ICON = ROW_TEXT_LEFT_MARGIN + ROW_ICON_ZONE_WIDTH;
  *  the WHOLE tree block (distinct from `AtomTree`'s own internal
  *  `CELL_TEXT_MARGIN`, see `class-body-tree.ts`'s module doc comment). */
 const TREE_BLOCK_MARGIN = 2;
-/** `decorate()`'s bottom-margin constant (`4`, both the title and no-title
- *  branches). */
-const BLOCK_MARGIN_BOTTOM = 4;
-/** `decorate()`'s no-title branch: `withMargin(block, marginX, 4)` (top AND
- *  bottom both 4). */
-const PLAIN_DIVIDER_MARGIN_TOP = 4;
+/** ADR-7: the ONE `src/core/` owner this file's plain/titled divider
+ *  branches consume for their Y-axis geometry — see `class-body-enhanced-
+ *  geometry.ts`'s own module doc comment. A single shared instance is
+ *  safe: both constructor args are fixed constants for this diagram
+ *  family, and `deriveHeightOffsets` carries no mutable state across calls. */
+const CLASS_BODY_GEOMETRY = new ClassifierBodyGeometry(ELEMENT_DEFAULT_LINE_THICKNESS, BODY_ENHANCED_MARGIN_X);
 
 /** Shared, per-classifier layout inputs -- bundled to stay inside this
  *  project's per-function param-count cap (mirrors `class-member-rows.ts
@@ -121,7 +127,7 @@ export interface EnhancedBodyGeo {
  *  zero corpus reach in this iteration's newly-reached fixtures -- named,
  *  NOT ported (unchanged from N42's original scoping). */
 function separatorStrokeWidth(char: string): number {
-  return char === '-' || char === '=' || char === '.' ? 1 : 0.5;
+  return char === '-' || char === '=' || char === '.' ? 1 : ELEMENT_DEFAULT_LINE_THICKNESS;
 }
 
 function separatorStrokeDasharray(char: string): string | undefined {
@@ -197,18 +203,21 @@ function layoutUndividedRows(
   return { cursor: cursor + contentHeight, width };
 }
 
-/** `decorate()`'s no-title branch: divider FIRST (its own local y = block
- *  start), then content at `+PLAIN_DIVIDER_MARGIN_TOP`, then
- *  `+BLOCK_MARGIN_BOTTOM`. */
+/** `decorate()`'s no-title branch — divider/content Y offsets and the
+ *  advanced cursor come from `CLASS_BODY_GEOMETRY` (ADR-7: the ONE
+ *  `src/core/` owner of this arithmetic; see `class-body-enhanced-
+ *  geometry.ts`'s own module doc comment), not a local re-derivation. */
 function layoutPlainDividerRows(
   lines: readonly string[],
   char: string,
   ctx: EnhancedLayoutCtx,
   cursor: number,
 ): { rows: EnhancedBodyPart[]; result: BlockLayoutResult } {
-  const dividerY = cursor;
-  const contentTop = cursor + PLAIN_DIVIDER_MARGIN_TOP;
-  const { rows, width, contentHeight } = buildRowsBlockRows(lines, ctx, contentTop);
+  const contentHeight = memberLineCount(lines) * ctx.fontSpec.size;
+  const offsets = CLASS_BODY_GEOMETRY.deriveHeightOffsets(contentHeight, char);
+  const dividerY = cursor + offsets.dividerY;
+  const contentTop = cursor + offsets.contentTop;
+  const { rows, width } = buildRowsBlockRows(lines, ctx, contentTop);
   const dasharrayField = separatorStrokeDasharray(char);
   const partsOut: EnhancedBodyPart[] = [
     {
@@ -220,14 +229,19 @@ function layoutPlainDividerRows(
   ];
   return {
     rows: partsOut,
-    result: { cursor: contentTop + contentHeight + BLOCK_MARGIN_BOTTOM, width: rowsBlockWidth(width, undefined) },
+    result: { cursor: cursor + offsets.totalHeight, width: rowsBlockWidth(width, undefined) },
   };
 }
 
 /** `decorate()`'s title branch: content draws FIRST (at local top =
  *  `dimTitleHeight`, both the outer AND inner top margins stacking to
  *  exactly one title-height), THEN the divider+label AFTER (jar-verified
- *  DOM order — see this file's own module doc comment). */
+ *  DOM order — see this file's own module doc comment). Y offsets and the
+ *  advanced cursor come from `CLASS_BODY_GEOMETRY` (ADR-7), not a local
+ *  re-derivation — only the title's own baseline (`UHorizontalLine
+ *  #drawTitleInternal`'s formula, a DIFFERENT, already-ported class outside
+ *  this task's write-set) is applied analytically, per `class-body-
+ *  enhanced-geometry.ts#ClassifierBodyGeometry`'s own doc comment. */
 function layoutTitledDividerRows(
   lines: readonly string[],
   separator: BlockSeparatorSpec,
@@ -237,11 +251,11 @@ function layoutTitledDividerRows(
   const { fontSpec, measurer, sprites, baselineOffset } = ctx;
   const titleBuild = buildMemberRow(separator.title!, {}, fontSpec, measurer, sprites);
   const dimTitleHeight = fontSpec.size; // a title is always a single creole line
-  const contentTop = cursor + dimTitleHeight;
-  const { rows, width, contentHeight } = buildRowsBlockRows(lines, ctx, contentTop);
-  const innerHeight = contentHeight + dimTitleHeight / 2 + BLOCK_MARGIN_BOTTOM;
-  const rawHeight = Math.max(innerHeight, dimTitleHeight); // TextBlockLineBefore's atLeast height floor
-  const dividerY = cursor + dimTitleHeight / 2;
+  const contentHeight = memberLineCount(lines) * fontSpec.size;
+  const offsets = CLASS_BODY_GEOMETRY.deriveHeightOffsets(contentHeight, separator.char, dimTitleHeight);
+  const contentTop = cursor + offsets.contentTop;
+  const { rows, width } = buildRowsBlockRows(lines, ctx, contentTop);
+  const dividerY = cursor + offsets.dividerY;
   const titleBaselineY = dividerY - dimTitleHeight / 2 - 0.5 + baselineOffset;
   const titledDasharrayField = separatorStrokeDasharray(separator.char);
   const partsOut: EnhancedBodyPart[] = [
@@ -257,7 +271,7 @@ function layoutTitledDividerRows(
   ];
   return {
     rows: partsOut,
-    result: { cursor: cursor + dimTitleHeight / 2 + rawHeight, width: rowsBlockWidth(width, titleBuild.width) },
+    result: { cursor: cursor + offsets.totalHeight, width: rowsBlockWidth(width, titleBuild.width) },
   };
 }
 
