@@ -11,33 +11,27 @@
  * length===0 fast path: `new XDimension2D(10, 10)`), `getStartingAltitude`
  * (always 0).
  *
- * ## `getTitle()`'s non-empty-line branch is a cited, throwing seam
+ * ## T9c: `getTitle()`'s non-empty-line seam closed
  *
- * `getTitle()`'s `line.length() > 0` branch needs `Display.getWithNewlines
- * (skinParam.getPragma(), line)`. `Display` (klimt/creole/Display.java,
- * 796 lines) is `SheetBuilder.ts`'s own documented seam — "T9c's own
- * target, gated on this file" — still unported as of this task. Reaching
- * it also needs `skinParam.getPragma()`, which `ISkinSimple.ts` (T9a)
- * deliberately omits ("zero callers reachable from this task" — this task
- * is the first real caller, but widening `ISkinSimple.ts` is outside this
- * task's write-set, so it stays cited rather than silently added). Per
- * the ADR-8 corollary this is a genuinely large, separable follow-on, not
- * a silent drop: the length===0 fast path — the ONLY shape
- * `CreoleStripeSimpleParser.ts#classifyStripeLine` can produce today (a
- * non-empty capture classifies as `LITERAL`, not `HORIZONTAL_LINE` — see
- * that file's own doc comment) — is fully faithful and reachable; the
- * labelled-separator branch throws a cited error instead of silently
- * returning wrong output or being stubbed away. Nothing in this port
- * constructs a `CreoleHorizontalLine` with a non-empty `line` yet, so
- * this is a build/test-time signal only.
+ * T10a's own seam needed exactly two things: `Display.getWithNewlines`
+ * (T9c's own target) and `ISkinSimple.getPragma()` (landed alongside
+ * T10b, required per that file's own doc comment). Both now exist, so
+ * `getTitle()`'s `line.length() > 0` branch constructs the real
+ * `SheetBuilder`/`Sheet`/`SheetBlock1` chain
+ * (`skinParam.sheet(fontConfiguration, HorizontalAlignment.LEFT,
+ * CreoleMode.FULL).createSheet(Display.getWithNewlines(skinParam
+ * .getPragma(), line))`) exactly like upstream. The constructor gains an
+ * EXTRA, LAST-positioned `atomOps: AtomOps` parameter (`SheetBlock1.ts`'s
+ * own established precedent).
  *
- * Whoever de-seams this (after `Display` lands) will also need to thread
- * an `AtomOps` bundle (`Sea.ts`) into this class's constructor as an
- * EXTRA, LAST-positioned parameter, matching `SheetBlock1.ts`'s own
- * precedent — the real `getTitle()` body constructs `new SheetBlock1
- * (sheet, LineBreakStrategy.NONE, atomOps, skinParam.getPadding())`, and
- * this port's `SheetBlock1` requires that bundle where upstream's virtual
- * `Atom` dispatch needed none.
+ * This branch stays UNREACHABLE IN PRACTICE (a pure addition):
+ * `CreoleStripeSimpleParser.ts#classifyStripeLine` only ever produces
+ * `HORIZONTAL_LINE` for an EMPTY captured label — a non-empty capture
+ * classifies as `LITERAL` instead (that file's own doc comment, a
+ * jar-verified, deliberate divergence). Flipping that classification is
+ * S1L-i's root cause and is explicitly OFF-LIMITS to this task (it would
+ * alter live rendering in `EntityImageDescriptionSupport.ts`, ADR-6). So
+ * closing this seam here is real, tested code that nothing yet calls.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/CreoleHorizontalLine.java
  */
@@ -46,77 +40,65 @@ import { UHorizontalLine } from '../shape/UHorizontalLine.js';
 import { TextBlockUtils } from '../shape/TextBlockUtils.js';
 import { UTranslate } from '../UTranslate.js';
 import { XDimension2D } from '../geom/XDimension2D.js';
+import { HorizontalAlignment } from '../geom/HorizontalAlignment.js';
+import { CreoleMode } from './CreoleMode.js';
+import { Display } from './Display.js';
+import { SheetBlock1 } from './SheetBlock1.js';
+import { LineBreakStrategy } from '../LineBreakStrategy.js';
 import type { TextBlock } from '../shape/TextBlock.js';
 import type { UGraphic } from '../UGraphic.js';
 import type { StringBounder } from '../font/StringBounder.js';
 import type { FontConfiguration } from '../shape/UText.js';
 import type { ISkinSimple } from '../../style/ISkinSimple.js';
 import type { Atom } from './SheetBlock1.js';
+import type { AtomOps } from './Sea.js';
+import type { Sheet } from './Sheet.js';
+import type { CreoleAtom } from './atom/Atom.js';
 
 const DEFAULT_THICKNESS = 1;
-
-/** One labelled, cited "blocked on the unported Display layer" seam —
- *  thrown, never silently dropped or stubbed to wrong output (ADR-8
- *  corollary). Mirrors `legacy/CreoleParser.ts`'s own `blockedOnSibling`
- *  helper (private to that module, not reused across files). */
-function blockedOnDisplay(line: string, fontConfiguration: FontConfiguration): Error {
-  return new Error(
-    `CreoleHorizontalLine.getTitle: a labelled separator (line="${line}", ` +
-      `font=${fontConfiguration.family}/${fontConfiguration.size}) needs ` +
-      `Display.getWithNewlines(...) -- klimt/creole/Display.java (796 lines) ` +
-      `is not yet ported (SheetBuilder.ts's own documented seam, T9c's ` +
-      `target -- batch-3a/T10a, ADR-8 corollary: flagged as a genuinely ` +
-      `large, separable follow-on, not silently dropped or stubbed -- see ` +
-      `.agent-notes/T10a-separator-primitives.md). Nothing in this port ` +
-      `constructs a CreoleHorizontalLine with a non-empty line yet -- ` +
-      `CreoleStripeSimpleParser.ts's classifyStripeLine only produces ` +
-      `HORIZONTAL_LINE for an EMPTY captured label; a non-empty one ` +
-      `classifies as LITERAL instead (see that file's own doc comment).`,
-  );
-}
 
 export class CreoleHorizontalLine extends AbstractAtom implements Atom {
   private readonly fontConfiguration: FontConfiguration;
   private readonly line: string;
   private readonly style: string;
   private readonly skinParam: ISkinSimple;
+  private readonly atomOps: AtomOps;
 
   static create(
     fontConfiguration: FontConfiguration,
     line: string,
     style: string,
     skinParam: ISkinSimple,
+    atomOps: AtomOps,
   ): CreoleHorizontalLine {
-    return new CreoleHorizontalLine(fontConfiguration, line, style, skinParam);
+    return new CreoleHorizontalLine(fontConfiguration, line, style, skinParam, atomOps);
   }
 
-  private constructor(fontConfiguration: FontConfiguration, line: string, style: string, skinParam: ISkinSimple) {
+  private constructor(fontConfiguration: FontConfiguration, line: string, style: string, skinParam: ISkinSimple, atomOps: AtomOps) {
     super();
     this.fontConfiguration = fontConfiguration;
     this.line = line;
     this.style = style;
     this.skinParam = skinParam;
+    this.atomOps = atomOps;
   }
 
   private getHorizontalLine(): UHorizontalLine {
     if (this.line.length === 0) return UHorizontalLine.infinite(DEFAULT_THICKNESS, 0, 0, this.style);
 
-    // Coverage note: this branch is unreachable by construction TODAY, not
-    // untested -- `drawU` always calls `calculateDimension` (line 116)
-    // BEFORE reaching `getHorizontalLine`, and `calculateDimensionSlow`
-    // reaches this SAME `getTitle()` seam first for any non-empty line, so
-    // execution always throws before this line runs. It becomes reachable
-    // (and testable) the moment `getTitle()`'s Display seam above is
-    // unblocked.
     const tb = this.getTitle();
     return UHorizontalLine.infinite(DEFAULT_THICKNESS, 0, 0, this.style, tb);
   }
 
+  /** java:78-83 -- both branches now real (T9c). The `Sheet<StripeAtom> ->
+   *  Sheet<CreoleAtom>` cast mirrors `DisplayCreole.ts#getCreole`'s own
+   *  documented, pre-existing `SheetBlock1.ts`/`CreoleParser.ts` type gap
+   *  (see that file's own comment) -- not introduced here. */
   private getTitle(): TextBlock {
     if (this.line.length === 0) return TextBlockUtils.empty(0, 0);
-    // this.skinParam would build the real Sheet here once Display lands --
-    // see the class doc comment for the exact call shape.
-    throw blockedOnDisplay(this.line, this.fontConfiguration);
+    const parser = this.skinParam.sheet(this.fontConfiguration, HorizontalAlignment.LEFT, CreoleMode.FULL);
+    const sheet = parser.createSheet(Display.getWithNewlines(this.skinParam.getPragma(), this.line)) as unknown as Sheet<CreoleAtom>;
+    return new SheetBlock1(sheet, LineBreakStrategy.NONE, this.atomOps, this.skinParam.getPadding());
   }
 
   drawU(ug: UGraphic): void {

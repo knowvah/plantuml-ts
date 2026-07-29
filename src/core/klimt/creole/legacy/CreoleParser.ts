@@ -391,7 +391,7 @@ export class CreoleParser implements SheetBuilder {
     const align = isSimpleStripe(lastStripe) ? lastStripe.cellAlignment : this.horizontalAlignment;
     const build = buildLineAtoms(line, fontConfiguration);
     if (build.classification.type === 'HORIZONTAL_LINE') {
-      const atom = CreoleHorizontalLine.create(fontConfiguration, '', build.classification.style, this.skinParam);
+      const atom = CreoleHorizontalLine.create(fontConfiguration, '', build.classification.style, this.skinParam, this.atomOps);
       return [createSimpleStripe([atom], align, context)];
     }
     return [createSimpleStripe(build.atoms, align, context)];
