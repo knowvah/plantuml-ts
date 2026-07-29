@@ -13,6 +13,9 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseDescription } from '../../../src/diagrams/description/parser.js';
+import { measureLeafNode } from '../../../src/diagrams/description/leaf-sizing.js';
+import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import type { FontSpec } from '../../../src/core/measurer.js';
 import { effectiveRemovedIds } from '../../../src/diagrams/description/element-grammar.js';
 import { scopedKey } from '../../../src/diagrams/description/namespace-groups.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -298,6 +301,77 @@ describe('explicit component keyword', () => {
   it('component with stereotype', () => {
     const node = firstNode('component Foo << myStereotype >>');
     expect(node.stereotype).toEqual(['myStereotype']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// `archimate` keyword (T8, description-leaf-sizing-audit) — CommandArchimate
+// .java's single-line form only; the mandatory `#color` token precedes
+// CODE/DISPLAY (unlike every other ALL_TYPES keyword, where color is
+// optional and position-independent). Maps to the 'rectangle' USymbol —
+// see descriptive-keywords.ts's KEYWORD_SYMBOL_ENTRIES comment for why.
+// ---------------------------------------------------------------------------
+
+describe('archimate keyword (CommandArchimate single-line form)', () => {
+  it('a bare quoted CODE1 form: id and display both come from the quoted text', () => {
+    const node = firstNode('archimate #Business "Hello"');
+    expect(node.symbol).toBe('rectangle');
+    expect(node.id).toBe('Hello');
+    expect(node.display).toBe('Hello');
+    expect(node.color).toBe('#Business');
+  });
+
+  it('measures 52.025x34 -- jar-verified (USymbolRectangle plain [20,20] box)', () => {
+    // `java -DPLANTUML_DETERMINISTIC_TEXT=true -DPLANTUML_DUMP_DOT=. -jar
+    // oracle/dist/plantuml-oracle.jar -tsvg archimate #Business "Hello"`:
+    // <rect width="52.025" height="34"/>.
+    const node = firstNode('archimate #Business "Hello"');
+    const font: FontSpec = { family: 'sans-serif', size: 14 };
+    const dim = measureLeafNode(node, font, new WidthTableMeasurer());
+    expect(dim.width).toBeCloseTo(52.025, 3);
+    expect(dim.height).toBeCloseTo(34, 3);
+  });
+
+  it('DISPLAY2 "as" CODE2: alias becomes the id, quoted text stays the display', () => {
+    const node = firstNode('archimate #Business "Hello" as H1');
+    expect(node.id).toBe('H1');
+    expect(node.display).toBe('Hello');
+    expect(node.color).toBe('#Business');
+  });
+
+  it('CODE3 "as" DISPLAY3: bare id, quoted alias becomes the display', () => {
+    const node = firstNode('archimate #Business H1 as "Hello"');
+    expect(node.id).toBe('H1');
+    expect(node.display).toBe('Hello');
+  });
+
+  it('a <<stereotype>> inside the quoted display is display content, not markup', () => {
+    // Same bug class the acceptance criteria calls out: STEREOTYPE is
+    // anchored AFTER the CODE/DISPLAY alternative upstream, so guillemets
+    // inside the quotes never get stripped out as decoration.
+    const node = firstNode('archimate #Business "<<inside>> Hello"');
+    expect(node.display).toBe('<<inside>> Hello');
+    expect(node.stereotype).toBeUndefined();
+  });
+
+  it('a <<stereotype>> outside the quotes, before "as", is still extracted', () => {
+    const node = firstNode('archimate #Business "Hello" <<icon>> as H1');
+    expect(node.id).toBe('H1');
+    expect(node.display).toBe('Hello');
+    expect(node.stereotype).toEqual(['icon']);
+  });
+
+  it('the color token is mandatory grammar but this port does not enforce it '
+    + '(absent-color input degrades gracefully rather than erroring)', () => {
+    // CommandArchimate's regex requires #color; a real PlantUML source
+    // omitting it simply fails to match CommandArchimate at all (upstream
+    // reports no command matched). This port's generic KEYWORD_RE has no
+    // such requirement -- documented, not fixed (out of write-set: a
+    // missing-required-token diagnostic is a parser-wide concern, not
+    // specific to archimate).
+    const node = firstNode('archimate "Hello"');
+    expect(node.id).toBe('Hello');
+    expect(node.color).toBeUndefined();
   });
 });
 

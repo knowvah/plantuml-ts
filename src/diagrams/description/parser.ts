@@ -18,7 +18,12 @@ import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import type { DescriptionDiagramAST } from './ast.js';
-import { ELEMENT_MULTILINE_OPEN_RE, finalizeDisplay, makeNode } from './parse-helpers.js';
+import {
+  ELEMENT_MULTILINE_OPEN_RE,
+  finalizeDisplay,
+  makeNode,
+  parseNameSection,
+} from './parse-helpers.js';
 import { classifyNoteOpen, isNoteTerminator } from './note-grammar.js';
 import {
   closePendingNote,
@@ -29,6 +34,7 @@ import {
   type ParseState,
 } from './parse-state.js';
 import { COMMANDS } from './command-table.js';
+import { leafDisplayName } from './namespace-groups.js';
 
 export { CONTAINER_SYMBOLS } from './parse-helpers.js';
 
@@ -138,6 +144,45 @@ function tryNoteHandling(state: ParseState, line: string): LineOutcome {
 }
 
 /**
+ * `archimate #color (CODE | DISPLAY "as" CODE | CODE "as" DISPLAY) STEREOTYPE?`
+ * — `CommandArchimate.java`'s single-line leaf form (T8,
+ * description-leaf-sizing-audit). The mandatory `#color` token PRECEDES
+ * CODE/DISPLAY here — the only `KEYWORD_TO_SYMBOL` keyword where color is
+ * required and leads, rather than optional and trailing. Every other
+ * keyword's grammar leaves `parseNameSection`'s `remainder` starting at the
+ * quote (if any), so its `splitLeadingQuote` quote-protection (guillemets
+ * INSIDE a quoted display are literal text, never STEREOTYPE) engages
+ * correctly; feeding it `#color "..."` unstripped defeats that check
+ * entirely (the remainder starts with `#`, not `"`), letting
+ * `extractNodeStereotype` reach inside the quotes. Stripping the color
+ * HERE, before `parseNameSection` ever sees the rest, keeps that guard
+ * intact — verified against `archimate #Business "<<inside>> Hello"`
+ * (co-located test).
+ *
+ * `CommandArchimateMultilines` (`[ … ]` body) and `CommandArchimatePackage`
+ * (`{ … }` group) are filed, not implemented — see
+ * plans/s1l-leaf-sizing/ledger.md. A line missing the color token (upstream:
+ * no command matches, no entity created) falls through to the generic
+ * `KEYWORD_TO_SYMBOL` dispatch (`command-table-containers.ts` rule 14)
+ * instead, which has no color requirement — more lenient than upstream on
+ * that one malformed-input edge, documented in the co-located test.
+ */
+const ARCHIMATE_RE = /^archimate\s+(#\S+)\s+(.+)$/i;
+
+function tryArchimate(state: ParseState, line: string): LineOutcome {
+  const m = ARCHIMATE_RE.exec(line);
+  if (m === null) return null;
+  const symbol = KEYWORD_TO_SYMBOL.get('archimate');
+  if (symbol === undefined) return null;
+  const color = m[1]!;
+  const { id, display, stereotype, tags } = parseNameSection(m[2]!);
+  const finalDisplay =
+    display === id ? leafDisplayName(id, state.namespaceSeparator) : display;
+  emitNode(state, makeNode(id, finalDisplay, symbol, stereotype, color, tags));
+  return 1;
+}
+
+/**
  * title/caption/legend/header/footer/mainframe (mission G0b/T6,
  * decisions.md D3), then the ordinary COMMANDS table. The annotation
  * matcher is tried FIRST — mirroring upstream CommonCommands
@@ -186,7 +231,10 @@ function dispatchCommand(
  * returns the number of lines consumed (>= 1) — greater than 1 only when
  * the shared annotation/sprite matchers consumed a multi-line block (see
  * `dispatchCommand`). Phases run in upstream-priority order: element
- * block, pending/open note, then title/caption/legend/…/sprite and the
+ * block, pending/open note, `archimate` (T8 — must run before the ordinary
+ * command table so its own color-first grammar is parsed before the
+ * generic `KEYWORD_TO_SYMBOL` dispatch would misparse it, see
+ * `tryArchimate`'s doc), then title/caption/legend/…/sprite and the
  * ordinary command table (sprite defs are tried LAST, inside
  * `dispatchCommand`, so a sprite-shaped line inside a note body is never
  * stolen from note accumulation -- see `dispatchCommand`'s doc).
@@ -200,6 +248,9 @@ function processLine(state: ParseState, lines: readonly string[], i: number): nu
 
   const noteResult = tryNoteHandling(state, line);
   if (noteResult !== null) return noteResult;
+
+  const archimateResult = tryArchimate(state, line);
+  if (archimateResult !== null) return archimateResult;
 
   return dispatchCommand(state, lines, i, line);
 }
