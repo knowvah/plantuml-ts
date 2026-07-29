@@ -41,3 +41,191 @@ same error as trusting a bucket label.
 from the plan-mission skill's instruction to gitignore it. This repo tracks
 mission briefs deliberately — ledgers and decision journals are cited from
 commit messages, and `planning/mission-index.md` links them.
+
+## Batch 1 launched — 2026-07-28
+
+Branch `feat/description-leaf-sizing-audit` cut from `main` @ `a7191a6`
+(brief pushed). T1/T2/T3 dispatched in parallel — disjoint write-sets
+(`scripts/measure-description-size-deltas.ts` + its test /
+`planning/usymbol-composition.md` / `planning/sizer-renderer-parity.md`),
+no inter-task dependencies.
+
+**Model routing.** T1 → Sonnet (`typescript-pro`): mechanical regex-table
+repair with an exact acceptance oracle. T2/T3 → inherited model
+(`general-purpose`): reading upstream Java correctly IS the mission, and a
+misread row would propagate into every Batch-4 task derived from it. Per
+`parallelism.md` the default is Sonnet for implementation; the exception is
+taken deliberately for the two audits, not by omission.
+
+**All three prompts forbid state-mutating git.** The three agents share one
+worktree; the orchestrator commits after the batch. This is a standing
+hazard in this repo, not a per-task precaution.
+
+**ADR-5's `planning/mission-guide.md` pointer is the ORCHESTRATOR's, not a
+task's.** Both audits would otherwise want to write it — one shared file
+between two parallel agents is precisely the write-conflict
+`parallelism.md` forbids. It lands with the batch commit, once the tables
+exist and the pointer can name what is actually in them.
+
+## T1 complete — 2026-07-28
+
+`causes` 40 → 40 (labels only, as required): container-cluster 12→11,
+other 10→7, **element-font 1→5**. `conformant` 311/351 and `widened` 0
+both unmoved, re-verified by the orchestrator rather than taken from the
+agent's report. All four gates green (10384 tests, +4).
+
+Two structural changes, not four cosmetic ones:
+
+1. The `element-font` regex required `skinparam` ADJACENT to the Font-word,
+   so it matched exactly one of the three spellings that occur in the
+   fixtures. Block form (`skinparam node { StereotypeFontSize 20 }`) and
+   `<style>` selectors (`component { FontSize 19 }`) both missed.
+2. `element-font` now runs BEFORE `container-cluster`. A `<style>`/skinparam
+   selector for a container keyword is byte-identical to a real cluster
+   opener, so the font signal was unconditionally shadowed. This is the
+   mechanism behind the S1L-h bucket reading 2 when it was 9 — it was an
+   ORDERING bug, not only a pattern bug, which the brief did not identify.
+
+Reclassified, each verified by the orchestrator against the fixture source:
+loroto-06 (nested `<style> node { stereotype { FontSize 20 } }`) from
+container-cluster; revusu-28, tijexo-10, toxine-81 from `other` (they
+previously matched nothing at all).
+
+**The brief carried one stale premise, and T1 was right to reject it.**
+Its context listed the sprite regex's missing `/` as a defect to repair;
+`git show HEAD:scripts/measure-description-size-deltas.ts` shows the
+pattern already reads `<\$[\w/-]+>` with a comment stating why it must.
+S1L-f fixed it last session. Verified before accepting the correction —
+`<$archimate/interface>` → `sprite` today. No action; recording it because
+the brief is a durable artifact and the claim was mine.
+
+The 7 residual `other` fixtures were left labelled `other` deliberately:
+no ledger root cause and no regex-detectable signal. Inventing a pattern to
+make the bucket look resolved is the exact failure T1 exists to fix.
+
+## T3 complete — 2026-07-28
+
+`planning/sizer-renderer-parity.md`: 20 rows — 5 `threaded` / 6 `GAP` /
+9 `size-neutral`. Four verdicts jar-proven, not inferred.
+
+**The audit found a variant the mission's own framing missed.** The brief
+described the class as "the setting never REACHES the sizer." Two of the
+six GAPs are the opposite: the setting reaches `BoxSizingOpts` and is then
+never USED.
+
+- `wrapWidth` and `guillemet` are threaded, but `measureTextBlock` has
+  exactly ONE caller — `leaf-sizing.ts:311`, inside `measureBox`.
+  `measureNote`, `measureSimpleSymbol`, `measureActor`, `measureUsecase`
+  and `measureFolderLeaf` never route through it. Orchestrator-verified by
+  grep + function-boundary check. So S1L-d fixed the generic box path and
+  left five sibling paths measuring unwrapped text; the renderer applies
+  `wrapWidth` symbol-agnostically at `renderer-entity.ts:218`.
+- `inkSprites` is threaded through `ClassifyCtx` → `BoxSizingOpts` and read
+  NOWHERE. Four grep hits in `src/`, all declaration or assignment
+  (orchestrator-verified). `measureUsecase` fits its footprint from
+  declared-dimension `sprites`, so S1L-k's ink-bounds intent is inert on
+  that path.
+
+This matters beyond bookkeeping: **a reachability guard cannot see either
+of them.** It sharpens ADR-3's known limit rather than contradicting it.
+
+**ADR-3's limit is now quantified: 1 of 4.** Only per-element `FontSize`
+was resolver-shaped; `wrapWidth` was a plain field read, and the creole
+lexer and use-case fit were algorithm divergences with no setting at all.
+T3 recommends naming T5's guard "resolver-reachability" and putting the
+1-of-4 figure in its assertion message. Accepted — a guard advertised as
+proof of parity would be worse than no guard.
+
+**`BoxSizingOpts` is NOT the only sizer channel.** `fixCircleLabelOverlapping`
+reaches the sizer via `runLayout` (`layout.ts:473`). T5 must not assume one
+channel or it will emit false positives.
+
+Unknown unknowns worth keeping (none change a verdict):
+`src/core/usymbol-shapes.ts:73-156` holds 10 more `resolveElementPaint`
+call sites outside every read-set glob — colour-only, but a renderer
+surface this audit's scope did not name. `skinparam actorStyle` has NO
+`Theme` field; both paths independently hardcode `STICKMAN`, so they cannot
+drift — an unimplemented feature, not a parity defect, and flagged so T5
+does not allow-list it as settled. `skinparam roundCorner` is parsed into
+the accumulator but never surfaced; size-neutral since the radius is drawn
+inside the bbox.
+
+## T2 complete — 2026-07-28
+
+`planning/usymbol-composition.md`: 36 rows — 28 `match`, 6 `MISMATCH`,
+2 `untested` (GROUP/PARTITION are `USymbolFrame` variants built only by
+`CommandPartition3`, never a description leaf).
+
+MISMATCHes: HEXAGON (width DOUBLES — `full.width * 2`), PERSON (head is
+`sqrt(surface)*0.42`, area-derived), USECASE_BUSINESS (`withMargin(tmp,7,0)`
+BEFORE the fit, so it changes alpha and refits — +19.8, not +14),
+ACTOR_AWESOME (55×61) and ACTOR_HOLLOW (26×33) vs our hardcoded stickman
+27×60, ARCHIMATE (absent from `KEYWORD_SYMBOL_ENTRIES`, so the line never
+becomes a leaf at all). Each carries a jar probe.
+
+**6 composition kinds counted — ADR-2's Batch-5 gate (≥4) is MET on the
+first condition.** K5 (width-doubling) and K6 (area-derived head) are
+structurally inexpressible as a `(marginH, marginV)` pair, the same class of
+error as folder's width floor.
+
+**T2's headline claim was WRONG and is corrected in the artifact.** It
+reported "nothing outside `src/core/decoration/symbol/` imports any of it."
+`grep -rn "^import.*decoration/symbol" src` refutes that: the RENDERER
+imports the ported classes throughout — `EntityImageDescription.ts:90-93`,
+`EntityImageDescriptionSupport.ts:49-51`, `PackageStyle.ts:25-32`,
+`ClusterDecoration.ts:29-30`, `Cluster.ts:115`, `renderer-symbol.ts:14,16`,
+plus the svek shapes.
+
+The correction makes the finding STRONGER, not weaker. What is true is that
+`leaf-sizing{,-consts,-text,-folder}.ts` import ZERO of it — they cite the
+classes in JSDoc and re-derive the geometry as flat tables. So this is the
+same lock-step gap T3 documents for individual settings, at the scale of the
+whole symbol model — which is why it yielded six MISMATCHes at once rather
+than one. Spot-verified that the port really does carry the missing
+mechanisms: `USymbolHexagon.ts:102` has the `* 2`, `USymbolPerson.ts:51` has
+`Math.sqrt(surface) * 0.42`.
+
+**Consequence for Batch 4 — flagged, not decided.** Routing `measureLeafNode`
+through the ported classes is upstream's own boundary
+(`EntityImageDescription` → `symbol.asSmall(...)`) and would close all six
+at once, versus patching three more table entries. CLAUDE.md's "upstream
+architecture is authoritative" points the same way. Blocker to size first:
+the measurer seam — the ported classes take a `StringBounder`, the sizer a
+`StringMeasurer`. This also overlaps ADR-2's Batch 5; if the routing lands,
+Batch 5's descriptor refactor may be moot. Decide when Batch 4 is built.
+
+**Also resolved by T2, no longer a residual:** `FOLDER_SHOWN_TITLE_EXTRA_WIDTH
+= 12` was shipped last session as "measured, documented as such." It is
+`BodyEnhanced1.getMarginX()` = 6 applied via
+`BodyEnhancedAbstract.decorate`'s `withMargin(block, 6, 0)` = +12 width. It
+hits `name` only because `name` alone routes `create2`→`BodyEnhanced1`, while
+`desc` routes `create3`→`BodyEnhanced2` whose `getMarginX()` is 0 — which is
+exactly why a `folder` label takes no allowance and a `package` title does.
+An untraced constant is now traced; comment chore for Batch 4.
+
+**Open probe for Batch 4:** whether `Footprint` collects the marged block's
+right-hand padding as ink for usecase-business. The closed form matched the
+probe to 0.01px, but our port fits REAL points via `footprintBoxes`, so
+confirm the padded box reaches the point set before assuming the closed form
+transfers.
+
+## Batch 1 closed — orchestrator actions
+
+`planning/mission-guide.md` gained the ADR-5 pointer to both tables, framing
+its own 14pt/12pt files-diagram bug as an instance of the class rather than a
+one-off. Held back from both tasks deliberately: one shared file between two
+parallel agents is the write-conflict `parallelism.md` forbids.
+
+### Unplanned dividend — T1 also repaired CLASS triage
+
+`scripts/measure-class-size-deltas.ts:33,37` imports `detectCause` from the
+description script, so the pattern repair applied to the class ratchet at no
+extra cost. Class buckets: element-font **10 → 32**, container-cluster
+92 → 81, other 323 → 314, interface-shield 33 → 31. `conformant` stays
+219/708 and `widened` stays 0 — labels only, as required.
+
+That is 22 additional class fixtures now identified as per-element font,
+which is direct input to **A2s** (class record-node sizing, 489
+non-conformant). Nobody planned this; it is a consequence of the two scripts
+sharing one classifier. Worth remembering: repairing shared instrumentation
+pays out in every engine that imports it.

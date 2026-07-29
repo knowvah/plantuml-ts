@@ -127,7 +127,7 @@ here verifies against the jar, and the template did not allow it.
 
 | # | Focus | Tasks | Status |
 |---|---|---|---|
-| 1 | Instrument + audit (parallel) | T1, T2, T3 | [ ] |
+| 1 | Instrument + audit (parallel) | T1, T2, T3 | [x] |
 | 2 | Resolver disposition | T4 | [ ] |
 | 3 | Prevention — fitness function | T5 | [ ] |
 | 4 | Close the gaps (template, one task per row) | derived | [ ] |

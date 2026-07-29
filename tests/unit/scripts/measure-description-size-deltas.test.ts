@@ -73,6 +73,34 @@ describe('detectCause', () => {
   it('prefers latex over a co-occurring lower-priority signal', () => {
     expect(detectCause('interface I with <latex>x</latex>')).toBe('latex');
   });
+
+  it('detects a sprite bundle path (turasu-73-zoni468 misattribution)', () => {
+    // Without '/' in the character class this fell through to the
+    // \binterface\b catch and was mis-bucketed as interface-shield.
+    expect(detectCause('<$archimate/interface>')).toBe('sprite');
+  });
+
+  it('detects a <style> selector FontSize as element-font, not container-cluster', () => {
+    // component is a container keyword, so `component {` alone reads as a
+    // cluster opener to that regex -- element-font must win first.
+    const src = '@startuml\n<style>\ncomponent {\n  FontSize 19\n}\n</style>\n@enduml';
+    expect(detectCause(src)).toBe('element-font');
+  });
+
+  it('detects a block-form skinparam per-element font (toxine-81-xofo986)', () => {
+    const src = 'skinparam node {\n  StereotypeFontSize 20\n}';
+    expect(detectCause(src)).toBe('element-font');
+  });
+
+  it('prefers element-font over a co-occurring container block, ordering documented', () => {
+    // loroto-06-fano471: a real container keyword AND a per-element font
+    // declaration in the same source -- the more specific cause (font) wins
+    // because element-font is tested before container-cluster.
+    const src =
+      '@startuml\n<style>\nnode {\n  stereotype {\n    FontSize 20\n    .bar {\n' +
+      '      FontSize 10\n    }\n  }\n}\n</style>\nnode nodefoo <<foo>>\n@enduml';
+    expect(detectCause(src)).toBe('element-font');
+  });
 });
 
 describe('summarize', () => {

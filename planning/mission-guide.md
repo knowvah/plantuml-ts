@@ -46,6 +46,23 @@ Two bugs confirmed in `src/diagrams/files/`:
   by `StringMeasurer` depending on the canvas implementation. Add a fixed
   `ICON_WIDTH = 20` constant and use it instead of measuring the emoji.
 
+> **The 14pt/12pt bug above is an INSTANCE of a recurring class, not a
+> one-off.** A feature reaches the renderer and the sizer keeps measuring
+> something else. It recurred four times in description alone before anyone
+> named it. Two reusable audits now exist — read them before hunting a
+> sizing bug in ANY engine:
+>
+> - [`sizer-renderer-parity.md`](sizer-renderer-parity.md) — every theme
+>   resolver and per-diagram setting vs. what actually reaches the sizer.
+>   Each has a "reuse for another engine" section. Note its two variants:
+>   the setting never reaches the sizer, **and** the setting reaches it and
+>   is never read (description had both).
+> - [`usymbol-composition.md`](usymbol-composition.md) — all 36 USymbols:
+>   upstream class, `asSmall` composition, drawing `calculateDimension`, our
+>   dispatch. Description's renderer imports the faithful ported classes
+>   while its sizer re-derives them as flat tables; check whether your
+>   engine does the same before adding a constant.
+
 ---
 
 ## Shared Infrastructure Work Tracks

@@ -20,6 +20,14 @@
  * Also reports the conformant-among-EQUAL percentage and a per-cause bucket
  * breakdown of the non-conformant tail (drives the S1L ledger).
  *
+ * IMPORTANT: `causes` bucket labels are HYPOTHESES TO VERIFY, never
+ * findings. `detectCause` is a first-match regex heuristic over raw source
+ * text, not a parser -- it tells you where to start looking, not what is
+ * actually wrong. Every bucket opened against this classifier in mission
+ * S1L was misattributed at least once before a human/agent read the actual
+ * fixture (see CAUSE_PATTERNS comments for three confirmed examples). Read
+ * the fixture before routing work off a bucket count.
+ *
  * Usage: `npx tsx scripts/measure-description-size-deltas.ts`
  * Output: one JSON line per fixture, then a summary line (with % + buckets),
  * then exits 0 iff zero fixtures are `widened` (2 otherwise) — a genuine gate.
@@ -74,15 +82,43 @@ const CONTAINER_KW =
   'package|node|rectangle|folder|frame|cloud|database|artifact|card|component|' +
   'together|storage|queue|stack|agent|collections|file|person|hexagon|label';
 
-/** (regex, cause) table for `detectCause`, most-specific first. Container
- *  detection (a container keyword opening a `{` block, or a bare `{` line)
- *  precedes the leaf package/interface/bracket checks — a `package X { … }` is
- *  a cluster (S1L-e), not a leaf tab; likewise a bracket body inside a `{}`
- *  block is cluster sizing, not display expansion. */
+/** (regex, cause) table for `detectCause`, most-specific first. Ordering is
+ *  the entire mechanism of this classifier (first array match wins,
+ *  regardless of where in the source each pattern's own hit sits), so every
+ *  entry below documents WHY it sits where it does -- read the comments
+ *  before reordering.
+ *
+ *  Two structural notes that drove the current order:
+ *  - `element-font` precedes `container-cluster`. A `<style>` or block-form
+ *    `skinparam` selector for a container keyword (`component {`, `node {`)
+ *    is syntactically IDENTICAL to a real cluster opener to the
+ *    container-cluster regex -- it can't tell "this brace opens a diagram
+ *    cluster" from "this brace opens a style selector". Testing the font
+ *    signal first is the only way to keep a per-element font declaration
+ *    (S1L-h) from being silently swallowed by the cluster bucket, which is
+ *    exactly what happened to loroto-06-fano471 (`node { stereotype {
+ *    FontSize 20 } }`) and undercounted S1L-h at 2 fixtures instead of 9.
+ *  - Container detection itself (a container keyword opening a `{` block, or
+ *    a bare `{` line) precedes the leaf package/interface/bracket checks — a
+ *    `package X { … }` is a cluster (S1L-e), not a leaf tab; likewise a
+ *    bracket body inside a `{}` block is cluster sizing, not display
+ *    expansion. */
 const CAUSE_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
   [/<\/?(?:latex|math)>/i, 'latex'],
   [/\bwrapWidth\b/i, 'wrapWidth'],
   [/\b(?:minClassWidth|MinimumWidth)\b/i, 'min-width'],
+  // Per-element font declaration, any spelling: inline skinparam
+  // (`skinparam componentFontSize 18`), skinparam BLOCK form (`skinparam
+  // node { StereotypeFontSize 20 }`), or a <style> selector (`<style>
+  // component { FontSize 19 } </style>`). `[A-Za-z]*` (not `\bskinparam\s+`)
+  // is deliberate -- it is what lets one pattern cover all three spellings,
+  // since "FontSize" appears concatenated onto its element/property name
+  // (`componentFontSize`, `StereotypeFontSize`) as often as standalone
+  // inside a style block. `fontSpec` is one diagram-wide value at the
+  // sizing layer (S1L-h), so none of these reach measureLeafNode -- a
+  // distinct subsystem from the shield/tab/cluster buckets below. MUST
+  // precede container-cluster -- see the ordering note above the table.
+  [/[A-Za-z]*Font(?:Size|Name|Style)\b/, 'element-font'],
   [new RegExp(`^\\s*(?:${CONTAINER_KW})\\b[^\\n{]*\\{|^\\s*\\{`, 'im'), 'container-cluster'],
   [/<U\+[0-9A-Fa-f]{2,6}>/, 'emoji-unicode'],
   // Sprite names carry a bundle path (`<$archimate/interface>`), so the class
@@ -91,11 +127,6 @@ const CAUSE_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
   // (turasu-73-zoni468, found closing S1L-c).
   [/<\$[\w/-]+>|!include\s*</, 'sprite'],
   [/<&[\w-]+>|<:[^:>\n]+:>/, 'icon'],
-  // Per-element font skinparam (`componentFontSize`, `interfaceFontName`, …).
-  // `fontSpec` is one diagram-wide value at the sizing layer, so none of these
-  // reach measureLeafNode -- a distinct subsystem from the shield/tab buckets
-  // below, which is why it precedes them (cukafa-49-fona812).
-  [/\bskinparam\s+\w+Font(?:Size|Name|Style)\b/i, 'element-font'],
   // A creole TITLED separator (`--title--` / `==title==`) draws a rule with
   // its title text, so it contributes only the TITLE's width -- not the raw
   // markup's (codabo-50-mupa164: our widest body line measures `--title1--`
