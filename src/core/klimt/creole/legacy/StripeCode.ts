@@ -27,30 +27,22 @@
  *    this method).
  *  - `getNeutrons` (java:119-122) — see the `Neutron` verdict below.
  *
- * ## `getAtoms()` return type: this port's OOP `Atom`, NOT `Stripe.ts`'s
- * `CreoleAtom` — `implements Stripe`/`StripeRaw` deliberately NOT declared
+ * ## `implements StripeRaw` (batch-3a/T10g)
  *
- * Same fork `StripeTree.ts` (T10c, concurrent sibling) already hit and
- * documented for the identical reason: upstream's real `Stripe#getAtoms()`
- * is `List<Atom>` (the general OOP interface any concrete atom — including
- * a "compound" atom that IS the whole stripe, `Collections
- * .singletonList(this)` here) satisfies; `../Stripe.ts` narrows that to
- * `readonly CreoleAtom[]` — faithful only for `StripeSimple`'s flat
- * text/inline/latex runs (`legacy/StripeSimple.ts#buildLineAtoms`'s own
- * output shape). A multi-line monospaced code block has no `CreoleAtom`
- * representation (it is a measured/drawn sub-block, not a text/inline/
- * latex token), so `StripeCode` cannot honestly satisfy `../Stripe.ts`'s
- * CURRENT signature. `../Stripe.ts` is shared, cross-cutting
- * infrastructure also needed, identically, by T10b's concurrent
- * `StripeTable` and T10c's `StripeTree` — widening it is outside this
- * task's write-set and is flagged here for T10g (the task that reinstates
- * every `lastStripe instanceof Stripe*` seam together), not patched
- * unilaterally. `getAtoms()`/`getLHeader()` below are typed against the
- * REAL upstream contract (`Atom` from `../SheetBlock1.js`) so the gap is
- * visible at the type level, not silently cast away. Unlike `StripeTree`,
- * `StripeCode` has NO other blocked member — every method below is fully
- * reachable and tested today (nothing about `StripeCode` itself depends
- * on a concurrent sibling or an unported class).
+ * Upstream's real `Stripe#getAtoms()` is `List<Atom>` (the general OOP
+ * interface any concrete atom — including a "compound" atom that IS the
+ * whole stripe, `Collections.singletonList(this)` here — satisfies);
+ * `../Stripe.ts` was originally non-generic, narrowing that to `readonly
+ * CreoleAtom[]` — faithful only for `StripeSimple`'s flat text/inline/latex
+ * runs — so `StripeCode` could not honestly satisfy it (T10d's own finding,
+ * `.agent-notes/T10d-code.md`, the same fork `StripeTree.ts`/T10c hit
+ * first). T10g made `Stripe<A>` generic over its atom type (bare `Stripe`
+ * still defaults to `CreoleAtom`, so every OTHER file's usage is unchanged
+ * — see `../Stripe.ts`'s own doc comment), so this class now declares
+ * `implements StripeRaw` (matching upstream's `implements StripeRaw`
+ * exactly, since `StripeRaw extends Stripe<Atom>, Atom`) instead of merely
+ * `implements Atom`, and `getAtoms()`/`getLHeader()` below return
+ * `Atom`/`Atom | null` directly.
  *
  * ## `adjustColorForBackground` — a pre-existing gap (`HColor`), not a new
  * one this task introduces
@@ -98,11 +90,9 @@
  * `StripeCode.getNeutrons()` would produce is already the exact shape
  * `Fission.ts` returns for any non-text atom today. `getNeutrons()`
  * throws below (matching `AbstractAtom.ts`/`SheetBlock1.ts`/
- * `SheetBlock2.ts`'s established precedent) because nothing in this port
- * can construct a `CreoleAtom` variant representing "this whole
- * `StripeCode` block, opaquely" (the same `getAtoms()` gap documented
- * above) for `Fission.ts` to actually consume — not because the
- * algorithm is missing.
+ * `SheetBlock2.ts`'s established precedent) because `Fission.ts` is bound
+ * to `CreoleAtom`, not this port's OOP `Atom` — nothing feeds a `StripeCode`
+ * through it today — not because the algorithm is missing.
  *
  * ## `getDescent`/`calculateDimension` are computed via `StringBounder`
  * directly, not `UText#getDescent`/`#calculateDimension`
@@ -124,10 +114,11 @@ import { UTranslate } from '../../UTranslate.js';
 import { XDimension2D } from '../../geom/XDimension2D.js';
 import type { UGraphic } from '../../UGraphic.js';
 import type { StringBounder } from '../../font/StringBounder.js';
-import type { Atom } from '../SheetBlock1.js';
 import { isCodeEnd } from '../Parser.js';
+import type { StripeRaw } from './StripeRaw.js';
+import type { Atom } from '../SheetBlock1.js';
 
-export class StripeCode extends TextBlockMemoized implements Atom {
+export class StripeCode extends TextBlockMemoized implements StripeRaw {
   private readonly fontConfiguration: FontConfiguration;
   private readonly raw: string[] = [];
   private terminated = false;
@@ -137,17 +128,12 @@ export class StripeCode extends TextBlockMemoized implements Atom {
     this.fontConfiguration = fontConfiguration;
   }
 
-  /** Upstream's real return type (`List<Atom>`) — see this file's own
-   *  module doc comment for why `../Stripe.ts`'s `CreoleAtom[]`-shaped
-   *  `getAtoms()` is not implemented against here. `this` satisfies `Atom`
-   *  (this class implements it below), matching upstream's
-   *  `Collections.<Atom>singletonList(this)` exactly. */
+  /** Matches upstream's `Collections.<Atom>singletonList(this)` exactly. */
   getAtoms(): readonly Atom[] {
     return [this];
   }
 
-  /** Always `null` (java:69-71) — also happens to satisfy `../Stripe.ts`'s
-   *  `CreoleAtom | null` signature, since `null` is assignable to both. */
+  /** Always `null` (java:69-71). */
   getLHeader(): Atom | null {
     return null;
   }

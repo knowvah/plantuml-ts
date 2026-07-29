@@ -1,30 +1,40 @@
 /**
- * StripeRaw.test.ts — T10a: structural coverage for `StripeRaw`
- * (klimt/creole/legacy/StripeRaw.java): a marker interface (`Stripe` +
- * `Atom` + two continuation methods) with no concrete implementor in
- * this port yet (`StripeCode`/`StripeLatex` are T10c/T10e). Coverage
- * here exercises a minimal conforming implementation to pin the exact
- * shape `legacy/CreoleParser.ts`'s future `lastStripe instanceof
- * StripeRaw` duck-type check (T10g) will rely on.
+ * StripeRaw.test.ts — T10a/T10g: structural coverage for `StripeRaw`
+ * (klimt/creole/legacy/StripeRaw.java): a marker interface (`Stripe<Atom>` +
+ * `Atom` + two continuation methods). `StripeCode`/`StripeLatex` (T10d/T10e)
+ * are its real implementors (batch-3a/T10g: both now declare `implements
+ * StripeRaw`) — coverage here exercises a minimal, independently-built
+ * conforming implementation to pin the exact shape `legacy/CreoleParser.ts`'s
+ * `isStripeRaw` duck-type check relies on.
  */
 import { describe, expect, it } from 'vitest';
 import type { StripeRaw } from '../../../../../../src/core/klimt/creole/legacy/StripeRaw.js';
 import { XDimension2D } from '../../../../../../src/core/klimt/geom/XDimension2D.js';
-import type { CreoleAtom } from '../../../../../../src/core/klimt/creole/atom/Atom.js';
+import type { Atom } from '../../../../../../src/core/klimt/creole/SheetBlock1.js';
 import type { StringBounder } from '../../../../../../src/core/klimt/font/StringBounder.js';
-import type { FontConfiguration } from '../../../../../../src/core/klimt/shape/UText.js';
 
-const FONT: FontConfiguration = { family: 'sans-serif', size: 12, color: '#000000', styles: new Set() };
+/** A minimal `Atom` stub — one per accumulated raw line, each measuring a
+ *  fixed 10x12 (this file only asserts on COUNT/shape, not real geometry). */
+function makeAtom(): Atom {
+  return {
+    calculateDimension: (): XDimension2D => new XDimension2D(10, 12),
+    getStartingAltitude: (): number => 0,
+    getNeutrons: (): never => {
+      throw new Error('UnsupportedOperationException');
+    },
+    drawU: (): void => undefined,
+  };
+}
 
 /** A minimal, self-contained `StripeRaw`: accumulates raw lines until it
  *  sees a line equal to "END", faithfully exercising every member the
- *  interface declares (own + inherited from `Stripe`/`Atom`). */
+ *  interface declares (own + inherited from `Stripe<Atom>`/`Atom`). */
 function makeStripeRaw(): StripeRaw {
   const lines: string[] = [];
   let terminated = false;
   return {
-    getLHeader: (): CreoleAtom | null => null,
-    getAtoms: (): readonly CreoleAtom[] => lines.map((text) => ({ kind: 'text', text, font: FONT })),
+    getLHeader: (): Atom | null => null,
+    getAtoms: (): readonly Atom[] => lines.map(() => makeAtom()),
     addAndCheckTermination: (line: string): boolean => {
       if (terminated) return false;
       if (line === 'END') {

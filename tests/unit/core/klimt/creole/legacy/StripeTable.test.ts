@@ -25,6 +25,7 @@ import type { StringBounder } from '../../../../../../src/core/klimt/font/String
 import type { ISkinSimple } from '../../../../../../src/core/style/ISkinSimple.js';
 import { GUILLEMET_DEFAULT } from '../../../../../../src/core/text/Guillemet.js';
 import type { Sheet } from '../../../../../../src/core/klimt/creole/Sheet.js';
+import type { StripeAtom } from '../../../../../../src/core/klimt/creole/Stripe.js';
 import type { SheetBuilder } from '../../../../../../src/core/klimt/creole/SheetBuilder.js';
 import { Pragma } from '../../../../../../src/core/skin/Pragma.js';
 
@@ -72,7 +73,7 @@ function fakeSkinSimple(padding: ClockwiseTopRightBottomLeft = ClockwiseTopRight
       for (const [k, v] of other) values.set(k, v);
     },
     sheet: (): SheetBuilder => ({
-      createSheet: (): Sheet => {
+      createSheet: (): Sheet<StripeAtom> => {
         throw new Error('not needed for this test');
       },
     }),

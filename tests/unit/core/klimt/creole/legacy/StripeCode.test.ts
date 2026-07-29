@@ -188,7 +188,7 @@ describe('StripeCode.drawU (java:104-117)', () => {
   });
 });
 
-describe('StripeCode.getAtoms / getLHeader (java:65-71) — Atom-typed, not Stripe.ts\'s CreoleAtom', () => {
+describe('StripeCode.getAtoms / getLHeader (java:65-71) — implements StripeRaw (T10g)', () => {
   it('getAtoms returns a single-element list containing itself, matching Collections.singletonList(this)', () => {
     const code = new StripeCode(FONT);
     expect(code.getAtoms()).toEqual([code]);

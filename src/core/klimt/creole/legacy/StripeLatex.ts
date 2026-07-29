@@ -40,27 +40,20 @@
  * `AtomMath.ts`'s own doc comment), so `getAtom()` always builds/returns a
  * real `AtomMath`.
  *
- * ## `getAtoms()`/`getLHeader()` return type: this port's OOP `Atom`, NOT
- * `Stripe.ts`'s `CreoleAtom` — `implements Stripe`/`StripeRaw` deliberately
- * NOT declared
+ * ## `implements StripeRaw` (batch-3a/T10g)
  *
- * Same fork `StripeTree.ts` (T10c) and `StripeCode.ts` (T10d, concurrent
- * siblings) already hit and documented: upstream's real `Stripe#
- * getAtoms()` is `List<Atom>` (any concrete atom, including a "compound"
- * atom that IS the whole stripe — `Collections.singletonList(this)` here,
- * java:66); `../Stripe.ts` narrows that to `readonly CreoleAtom[]`,
- * faithful only for `StripeSimple`'s flat text/inline/latex runs. A
- * `<latex>...</latex>` fenced block has no `CreoleAtom` representation
- * (it is a measured/drawn sub-block, not a text/inline/latex token), so
- * `StripeLatex` cannot honestly satisfy `../Stripe.ts`'s CURRENT
- * signature. Widening `../Stripe.ts` is shared, cross-cutting
- * infrastructure outside this task's write-set, flagged (again) for T10g
- * (the task that reinstates every `lastStripe instanceof Stripe*` seam
- * together), not patched unilaterally. `getAtoms()`/`getLHeader()` below
- * are typed against the REAL upstream contract (`Atom` from
- * `../SheetBlock1.js`) so the gap is visible at the type level. Unlike
- * `StripeTree`, `StripeLatex` has NO other blocked member — every method
- * below is fully reachable and tested today.
+ * Same fork `StripeTree.ts` (T10c) and `StripeCode.ts` (T10d) already hit
+ * and documented: upstream's real `Stripe#getAtoms()` is `List<Atom>` (any
+ * concrete atom, including a "compound" atom that IS the whole stripe —
+ * `Collections.singletonList(this)` here, java:66); `../Stripe.ts` was
+ * originally non-generic, narrowing that to `readonly CreoleAtom[]`,
+ * faithful only for `StripeSimple`'s flat text/inline/latex runs, so
+ * `StripeLatex` could not honestly satisfy it. T10g made `Stripe<A>`
+ * generic over its atom type (bare `Stripe` still defaults to `CreoleAtom`
+ * — see `../Stripe.ts`'s own doc comment), so this class now declares
+ * `implements StripeRaw` (matching upstream's `implements StripeRaw`
+ * exactly, since `StripeRaw extends Stripe<Atom>, Atom`), and
+ * `getAtoms()`/`getLHeader()` below return `Atom`/`Atom | null` directly.
  *
  * ## `getNeutrons` — ADR-9 verdict: NOT ported, matches `StripeCode.ts`'s
  * own `Neutron` verdict exactly
@@ -80,9 +73,8 @@
  * duplicate that logic — the exact shape ADR-9/ADR-1/ADR-2/ADR-7 all
  * reject. `getNeutrons()` throws below, matching `AbstractAtom.ts`/
  * `StripeCode.ts`/`StripeTree.ts`'s established precedent, because
- * nothing in this port can construct a `CreoleAtom` variant representing
- * "this whole `StripeLatex` block, opaquely" for `Fission.ts` to consume
- * — not because the algorithm is missing.
+ * `Fission.ts` is bound to `CreoleAtom`, not this port's OOP `Atom` — not
+ * because the algorithm is missing.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/legacy/StripeLatex.java
  */
@@ -94,8 +86,9 @@ import type { UGraphic } from '../../UGraphic.js';
 import type { StringBounder } from '../../font/StringBounder.js';
 import type { XDimension2D } from '../../geom/XDimension2D.js';
 import type { Atom } from '../SheetBlock1.js';
+import type { StripeRaw } from './StripeRaw.js';
 
-export class StripeLatex implements Atom {
+export class StripeLatex implements StripeRaw {
   private readonly fontConfiguration: FontConfiguration;
   private formula = '';
   private atom: Atom | undefined;
@@ -105,17 +98,12 @@ export class StripeLatex implements Atom {
     this.fontConfiguration = fontConfiguration;
   }
 
-  /** Upstream's real return type (`List<Atom>`) — see this file's own
-   *  module doc comment for why `../Stripe.ts`'s `CreoleAtom[]`-shaped
-   *  `getAtoms()` is not implemented against here. `this` satisfies `Atom`
-   *  (this class implements it below), matching upstream's
-   *  `Collections.<Atom>singletonList(this)` exactly. */
+  /** Matches upstream's `Collections.<Atom>singletonList(this)` exactly. */
   getAtoms(): readonly Atom[] {
     return [this];
   }
 
-  /** Always `null` (java:69-71) — also happens to satisfy `../Stripe.ts`'s
-   *  `CreoleAtom | null` signature, since `null` is assignable to both. */
+  /** Always `null` (java:69-71). */
   getLHeader(): Atom | null {
     return null;
   }

@@ -9,36 +9,22 @@
  * `AtomWithMargin` construction order, `getAtoms`, `getLHeader` (always
  * `null` — bullet-list-style headers are TREE-irrelevant, matching
  * `StripeStyle.ts`'s own `NORMAL`/`HEADING`/`HORIZONTAL_LINE`/`TREE`
- * fallthrough), and `computeLevel` (exported standalone, see below).
+ * fallthrough), `computeLevel` (exported standalone, see below), and (T10g)
+ * `analyzeAndAdd`'s real per-line tree-cell construction (java:80-90).
  *
- * ## `getAtoms()` return type: this port's OOP `Atom`, NOT `Stripe.ts`'s
- * `CreoleAtom` — `implements Stripe` is deliberately NOT declared today
+ * ## `implements Stripe<Atom>` (batch-3a/T10g)
  *
  * Upstream's real `klimt/creole/Stripe.java` interface is `List<Atom>
- * getAtoms()` where `Atom` is the general OOP interface (any concrete
- * `AtomText`/`AtomImg`/`AtomTable`/`AtomTree`/...). This port's
- * `../Stripe.ts` instead declares `getAtoms(): readonly CreoleAtom[]` — a
- * narrowing that is faithful ONLY for `StripeSimple` (`legacy/
- * StripeSimple.ts`'s `buildLineAtoms`), whose real atoms genuinely are a
- * flat run of `CreoleAtom`-shaped text/inline/latex tokens. `StripeTree`'s
- * real upstream return value — `Collections.singletonList(marged)`, a
- * SINGLE nested `AtomWithMargin<AtomTree>` — has no representation in the
- * `CreoleAtom` data union (it is a measured/drawn sub-block, not text), so
- * this class cannot honestly satisfy `../Stripe.ts`'s current signature.
- * `T9a` already found the identical shape for `StripeTable`
- * (`.agent-notes/T9a-creoleparser.md`: "several (`StripeTable`,
- * `EmbeddedDiagram`) pulling in the OOP `Atom`/`AtomTable`/`HColor`
- * machinery `atom/Atom.ts`'s own doc comment documents as deliberately
- * NOT re-ported") but that finding stopped at "seam the whole branch,
- * never construct anything" — this file is the first to actually WRITE a
- * `getAtoms()` body and hit the type mismatch concretely. `../Stripe.ts`
- * is shared, cross-cutting infrastructure (also needed, identically, by
- * T10b's concurrent `StripeTable`) and outside this task's write-set —
- * widening it is flagged here for T10g (the task that reinstates every
- * `lastStripe instanceof Stripe*` seam together) rather than patched
- * unilaterally. `getAtoms()` below is typed against the REAL upstream
- * contract (`readonly Atom[]`, `Atom` from `../SheetBlock1.js`) so the
- * gap is visible at the type level, not silently cast away.
+ * getAtoms()` where `Atom` is the general OOP interface. This port's
+ * `../Stripe.ts` was originally non-generic, declaring `getAtoms(): readonly
+ * CreoleAtom[]` — a narrowing faithful only for `StripeSimple`'s flat text/
+ * inline/latex run — so `StripeTree` could not honestly satisfy it (T10c's
+ * own finding, `.agent-notes/T10c-tree.md`). T10g made `Stripe<A>` generic
+ * over its atom type (bare `Stripe` still defaults to `CreoleAtom`, so every
+ * OTHER file's usage is unchanged — see `../Stripe.ts`'s own doc comment for
+ * the full rationale), so this class now declares `implements Stripe<Atom>`
+ * and `getAtoms()`/`getLHeader()` below return `Atom`/`Atom | null` directly,
+ * matching upstream's real contract exactly.
  *
  * ## `HColor` -> `Paint` (established T2 substitution — see `AtomTree.ts`'s
  * identical note): `fontConfiguration.getColor()` (java:66, an `HColor`)
@@ -48,30 +34,34 @@
  * constant, redeclared here per this port's per-file convention — neither
  * file exports it) before reaching `AtomTree`'s `Paint`-typed constructor.
  *
- * ## `analyzeAndAdd` — blocked on the CONCURRENT sibling `StripeTable`, not
- * an unported dependency (ADR-8 corollary does not forbid this)
+ * ## `analyzeAndAdd` (T10g): the per-cell "`StripeSimple`" build is
+ * `buildStripeAtoms`, not a real `StripeSimple` instance
  *
- * `analyzeAndAdd`'s very first statement (java:80,
- * `StripeTable.getWithNewlinesInternal(line)`) and its per-line atom build
- * (java:87-88, `StripeTable.asAtom(...)`) both call STATIC helpers on
- * `StripeTable` — batch-3a/T10b's own write-set, running CONCURRENTLY with
- * this task in the same batch (not "not ported yet" in the ADR-8
- * corollary's forbidden sense: it is being ported, by a named sibling,
- * right now). Since the very first line blocks every subsequent line,
- * there is no faithful partial execution to perform before the throw
- * (contrast `StripeStyle.ts#getHeader`'s `LIST_WITH_NUMBER` branch, whose
- * counter side effect is independently reachable and IS executed before
- * ITS seam throw) — the entire method body throws immediately, mirroring
- * `CreoleHorizontalLine.ts#getTitle()`'s non-empty-line branch. The
- * constructor calls `analyzeAndAdd` unconditionally (java:68, no branch),
- * so EVERY construction attempt throws — `getAtoms`/`getLHeader` are
- * therefore unreachable BY CONSTRUCTION today (no completed `StripeTree`
- * instance can ever exist), the identical shape T10a's
- * `CreoleHorizontalLine.ts#getHorizontalLine()` already documents in-line
- * rather than forcing artificial coverage. `CreoleParser.ts`'s own "a tree
- * line" seam already throws before ever reaching this constructor, so
- * this is a build/test-time signal only, not a runtime one in any shipped
- * path.
+ * Upstream's real body (java:80-90) constructs `new StripeSimple
+ * (fontConfiguration, stripeStyle, new CreoleContext(), skinParam,
+ * CreoleMode.FULL)` per `\n`-split sub-line, then calls its
+ * `analyzeAndAdd(text)`. `StripeSimple#analyzeAndAdd` dispatches on
+ * `style.getType()` (java:143-152 of `StripeSimple.java`): for `TREE`
+ * (neither `HEADING` nor `HORIZONTAL_LINE`), that is the plain
+ * `modifyStripe(line)` branch — the IDENTICAL algorithm this port's
+ * `legacy/StripeSimple.ts#buildStripeAtoms` already implements (ADR-9: bind
+ * to the existing data-oriented pipeline rather than port a parallel OOP
+ * `StripeSimple`). `stripeStyle.getHeader(fontConfiguration, context)`
+ * (upstream's own `StripeSimple` constructor, before `analyzeAndAdd` is
+ * even called) is UNCONDITIONALLY `null` with NO side effect for
+ * `StripeStyleType.TREE` (`StripeStyle.ts#getHeader`'s own fallthrough,
+ * verified directly against that file) — so the header-atom step
+ * (`if (this.header != null) this.atoms.add(this.header);`) never fires for
+ * a tree cell and is not built here. `manageCellAlignment`/`CharHidder.hide`
+ * (upstream's `analyzeAndAdd` calls both before dispatch) are the SAME
+ * already-accepted gap `StripeTable.ts`'s own doc comment documents (no
+ * `<left>`/`<center>`/`<right>` markup or hidden-newline-sentinel handling
+ * reaches a tree cell in this port) — not a new omission.
+ *
+ * `this.atomOps` (an extra, LAST-positioned constructor parameter, ADR-9's
+ * established `SheetBlock1.ts`/`StripeTable.ts` precedent) threads through
+ * to `StripeTable.asAtom`, which wraps each cell's one-line `Sheet` in a
+ * `SheetBlock1`.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/legacy/StripeTree.java
  */
@@ -83,29 +73,21 @@ import { StripeStyle } from '../StripeStyle.js';
 import { StripeStyleType } from '../StripeStyleType.js';
 import type { Atom } from '../SheetBlock1.js';
 import type { Paint } from '../../../paint.js';
+import type { Stripe } from '../Stripe.js';
+import type { AtomOps } from '../Sea.js';
+import { StripeTable } from './StripeTable.js';
+import { buildStripeAtoms } from './StripeSimple.js';
+import { ClockwiseTopRightBottomLeft } from '../../geom/ClockwiseTopRightBottomLeft.js';
 
 /** Upstream `HColors.none()` stand-in for a resolved-`Paint` "no color"
  *  sentinel — see this file's own module doc comment. */
 const NONE_PAINT: Paint = 'none';
 
-/** One labelled, cited "blocked on the concurrent-sibling `StripeTable`"
- *  seam — thrown, never silently dropped or stubbed to wrong output
- *  (ADR-8 corollary). Mirrors `CreoleParser.ts`'s own `blockedOnSibling`/
- *  `StripeStyle.ts`'s own `blockedOnAtomLayer` shape (no shared helper is
- *  exported anywhere in this batch — each file declares its own).
- *  `javaPath` is relative to `net/sourceforge/plantuml/` in
- *  `~/git/plantuml`. */
-function blockedOnStripeTable(what: string, javaPath: string, javaLines: number): Error {
-  return new Error(
-    `StripeTree: ${what} needs ${javaPath} (${javaLines} lines) -- its ` +
-      `"getWithNewlinesInternal" and "asAtom" static helpers are batch-3a/` +
-      `T10b's own write-set, running CONCURRENTLY with this file (T10c) in ` +
-      `the same batch, not landed at the time this file was written (see ` +
-      `.agent-notes/T10c-tree.md). Nothing in this port calls StripeTree ` +
-      `yet -- CreoleParser.ts's own "a tree line" seam throws before ever ` +
-      `constructing one -- so reaching this is a build/test-time signal only.`,
-  );
-}
+/** Upstream: `s.replaceFirst("^\\s*\\|_", "")` (java:84) — strips ONE
+ *  leading `|_` tree marker (with any preceding whitespace); `^` anchors to
+ *  the start, so there is at most one match regardless of engine, matching
+ *  Java's `replaceFirst` semantics exactly for this pattern. */
+const TREE_MARKER_PATTERN = /^\s*\|_/;
 
 /**
  * `StripeTree#computeLevel` (`@JawsStrange` upstream — the annotation
@@ -142,46 +124,49 @@ export function computeLevel(s: string): number {
   }
 }
 
-export class StripeTree {
+export class StripeTree implements Stripe<Atom> {
   private readonly fontConfiguration: FontConfiguration;
   private readonly skinParam: ISkinSimple;
   private readonly tree: AtomTree;
   private readonly marged: Atom;
+  private readonly atomOps: AtomOps;
   private readonly stripeStyle = new StripeStyle(StripeStyleType.TREE, 0, '\0');
 
-  constructor(fontConfiguration: FontConfiguration, skinParam: ISkinSimple, line: string) {
+  constructor(fontConfiguration: FontConfiguration, skinParam: ISkinSimple, line: string, atomOps: AtomOps) {
     this.fontConfiguration = fontConfiguration;
     this.skinParam = skinParam;
+    this.atomOps = atomOps;
     this.tree = new AtomTree(fontConfiguration.color === null ? NONE_PAINT : fontConfiguration.color);
     this.marged = new AtomWithMargin(this.tree, 2, 2);
     this.analyzeAndAdd(line);
   }
 
-  /** Upstream's real return type (`List<Atom>`) — see this file's own
-   *  module doc comment for why `../Stripe.ts`'s `CreoleAtom[]`-shaped
-   *  `getAtoms()` is not implemented against here. Unreachable by
-   *  construction today (see module doc comment). */
   getAtoms(): readonly Atom[] {
     return [this.marged];
   }
 
-  /** Unreachable by construction today (see module doc comment). */
   getLHeader(): Atom | null {
     return null;
   }
 
-  analyzeAndAdd(_line: string): void {
-    // this.fontConfiguration / this.skinParam / this.stripeStyle are all
-    // consumed by the real per-line StripeSimple-cell construction this
-    // seam blocks -- referenced here so TS doesn't (rightly) flag them as
-    // write-only until the seam is lifted (T10g).
-    void this.fontConfiguration;
+  /** java:80-90. See the module doc comment's own "`analyzeAndAdd`"
+   *  section for the per-cell build's exact mapping onto this port's
+   *  data-oriented `buildStripeAtoms` pipeline. `this.skinParam` is stored
+   *  (matching upstream's field) but not read here — upstream's own
+   *  `StripeSimple.analyzeAndAdd` only reaches it via image/sprite creole
+   *  commands, which this port's `buildStripeAtoms` does not yet thread a
+   *  skin-param-resolving path for (a pre-existing gap, not new here — see
+   *  `legacy/StripeSimple.ts`'s own doc comment). */
+  analyzeAndAdd(line: string): void {
     void this.skinParam;
     void this.stripeStyle;
-    throw blockedOnStripeTable(
-      'the per-line tree cell construction ("analyzeAndAdd")',
-      'klimt/creole/legacy/StripeTable.java',
-      219,
-    );
+    const lines = StripeTable.getWithNewlinesInternal(line);
+    for (const s of lines) {
+      const text = s.replace(TREE_MARKER_PATTERN, '');
+      const level = computeLevel(s);
+      const atoms = buildStripeAtoms(text, this.fontConfiguration);
+      const cell: Stripe = { getLHeader: () => null, getAtoms: () => atoms };
+      this.tree.addCell(StripeTable.asAtom([cell], ClockwiseTopRightBottomLeft.none(), this.atomOps), level);
+    }
   }
 }

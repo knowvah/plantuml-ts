@@ -28,33 +28,22 @@
  * vice versa; a future task resumes the wiring exactly as ADR-8 already
  * describes for `EntityImageDescriptionSupport.ts#buildTextBlock`.
  *
- * ## ADR-9 adaptation: the OUTER `Stripe` contract is `Atom`-valued, not
- * `CreoleAtom`-valued — this class does NOT `implements Stripe` from
- * `Stripe.ts`
+ * ## `implements Stripe<Atom>` (batch-3a/T10g)
  *
  * Upstream's `klimt/creole/Stripe.java` interface is `{ Atom getLHeader();
  * List<Atom> getAtoms(); }` using the OOP `klimt.creole.atom.Atom`
  * (`SheetBlock1.ts`'s `Atom`, NOT `atom/Atom.ts`'s `CreoleAtom`). This
- * port's OWN `Stripe.ts` TS interface was written for a NARROWER case —
- * `legacy/CreoleParser.ts`'s plain-text (NORMAL/HEADING/LITERAL) path,
- * whose `getAtoms()` is always a flat `CreoleAtom[]` — and cannot
- * represent a genuinely COMPOSITE cell atom (a whole nested table/tree/
- * code-block `Atom`, `SheetBlock1`-shaped, not text). `StripeTable`
- * (this file), `StripeTree` (T10c), `StripeCode` (T10d), and `StripeLatex`
- * (T10e) ALL hit this same shape upstream: each is a `Stripe` whose
- * `getAtoms()` returns a SINGLETON `List<Atom>` wrapping one opaque
- * composite `Atom`. Rather than widen `Stripe.ts` (out of this task's
- * write-set, and two sibling tasks — T10c/T10d — independently discover
- * the identical gap this same batch), this class exposes `getAtoms()`/
- * `getLHeader()` returning `Atom` (not `CreoleAtom`) directly, matching
- * upstream's REAL `Stripe.java` contract exactly, and does not declare
- * `implements Stripe`. Reconciling the two `Stripe` shapes (e.g. a
- * `Stripe.ts` generic over its atom type, or a `CreoleAtom` variant that
- * wraps an opaque `Atom`) is a genuine, separable follow-on for whoever
- * wires `Sheet`/`CreoleParser.ts` to construct real
- * `StripeTable`/`StripeTree`/`StripeCode`/`StripeLatex` instances
- * (T10g's own reinstatement task, or later) — flagged here, not silently
- * decided.
+ * port's OWN `Stripe.ts` TS interface was originally non-generic, written
+ * for a NARROWER case — `legacy/CreoleParser.ts`'s plain-text (NORMAL/
+ * HEADING/LITERAL) path, whose `getAtoms()` is always a flat
+ * `CreoleAtom[]` — and (until T10g) could not represent a genuinely
+ * COMPOSITE cell atom (a whole nested table `Atom`, `SheetBlock1`-shaped,
+ * not text). T10g made `Stripe<A>` generic over its atom type (bare
+ * `Stripe` still defaults to `CreoleAtom`, so every OTHER file's usage is
+ * unchanged — see `../Stripe.ts`'s own doc comment for why this shape, not
+ * a `CreoleAtom` union member, was the fix), so this class now declares
+ * `implements Stripe<Atom>` and `getAtoms()`/`getLHeader()` below return
+ * `Atom`/`Atom | null` directly, matching upstream's real contract exactly.
  *
  * The CELL level is the opposite case: each cell's OWN content is flat
  * creole text, exactly what `Stripe.ts` (`CreoleAtom`-flavored) already
@@ -183,7 +172,7 @@ class TableCellStripe implements Stripe {
   }
 }
 
-export class StripeTable {
+export class StripeTable implements Stripe<Atom> {
   private readonly fontConfiguration: FontConfiguration;
   private readonly skinParam: ISkinSimple;
   private readonly table: AtomTable;

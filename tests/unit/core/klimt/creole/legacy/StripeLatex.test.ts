@@ -169,7 +169,7 @@ describe('StripeLatex.drawU (java:109-111) — delegates to the lazily-built Ato
   });
 });
 
-describe('StripeLatex.getAtoms / getLHeader (java:65-71) — Atom-typed, not Stripe.ts\'s CreoleAtom', () => {
+describe('StripeLatex.getAtoms / getLHeader (java:65-71) — implements StripeRaw (T10g)', () => {
   it('getAtoms returns a single-element list containing itself, matching Collections.singletonList(this)', () => {
     const stripe = new StripeLatex(FONT);
     expect(stripe.getAtoms()).toEqual([stripe]);
