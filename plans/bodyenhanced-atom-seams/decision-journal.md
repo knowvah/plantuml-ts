@@ -446,3 +446,37 @@ tracked debt**, not waved through: revisit consolidation once T9c gives the
 class side a real `Display`-shaped caller. The ratchets and all 472 SVG
 golden tests were unmoved, which is the evidence that nothing shifted
 underneath the addition.
+
+### S1L-i's root cause is now traced end to end (T10a)
+
+The mission's own separator goal has a diagnosed mechanism, stated in this
+port's own source rather than inferred:
+
+**`src/core/klimt/creole/legacy/CreoleStripeSimpleParser.ts:95`**
+```ts
+return captured === '' ? { type: 'HORIZONTAL_LINE', style } : { type: 'LITERAL', content: fullLine };
+```
+Its own doc comment (lines 90-92) records that **upstream classifies BOTH
+empty and non-empty captures as `HORIZONTAL_LINE`**, and that `LITERAL` is
+"this port's own scoped stand-in". So `--title1--` is measured as raw
+markup — 62.5px — where the jar measures the title text `title1` at
+37.6px. That is exactly the delta `plans/s1l-leaf-sizing/ledger.md` line 58
+recorded for `codabo-50-mupa164`.
+
+**Closing S1L-i needs three things, all now known:**
+1. `CreoleHorizontalLine.getTitle()`'s non-empty branch — blocked on
+   `Display.getWithNewlines` (T9c) and `ISkinSimple.getPragma()`
+2. `Pragma` (109 lines, T10b) plus widening `ISkinSimple.ts` to expose
+   `getPragma()` — **T9a omitted that member as having "zero callers", and
+   T10a is now its caller.** The ADR-8 corollary applies: T10b must port it,
+   not re-seam it
+3. Flipping line 95 so a non-empty capture classifies `HORIZONTAL_LINE`,
+   retiring the `LITERAL` stand-in
+
+Step 3 is a behaviour change and therefore belongs with T10g or later —
+never in a port task, per ADR-6.
+
+**The "zero callers" seam grew a caller within one task.** T9a labelled
+`getPragma()` a seam on Monday's reasoning and T10a needed it immediately.
+Fourth instance of the pattern the ADR-8 corollary exists to stop, and the
+fastest one to bite yet.
