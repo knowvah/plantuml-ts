@@ -81,7 +81,7 @@ skill's gitignore instruction. `.claude/` is ignored.
 
 | # | Focus | Tasks | Status |
 |---|---|---|---|
-| 1 | Renderer gate — GATING (ADR-5 + AMENDMENT) | T1 [x], T1b | [ ] |
+| 1 | Renderer gate — GATING (ADR-5 + AMENDMENT) | T1 [x], T1b [x] | [x] |
 | 2 | Port base + seams (parallel) | T2a, T3 | [ ] |
 | 3 | Port the Body classes | T2b | [ ] |
 | 4 | Wire it in — the risky one | T4 | [ ] |

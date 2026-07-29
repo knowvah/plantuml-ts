@@ -152,3 +152,30 @@ T2a's "N/A — pure addition, no caller" rollback line is now void and was
 rewritten; the task must land as exactly one commit so `git revert` is a
 real rollback. Batch-2 parallelism is unaffected — T2a's and T3's
 write-sets remain disjoint.
+
+### Batch 1 CLOSED — the gate exists in its amended shape
+
+T1b landed the 22-fixture diff-count ratchet: 19 numeric baselines, 3
+`status: "error"` entries carrying a reason and `diffCount: null` so an
+error can never read as "reached 0". Provenance (`measuredAt`,
+`measuredAgainstCommit`) sits beside every count so a hand-edited baseline
+is visible in review. Verified by the orchestrator, not taken on report:
+401 files / 10443 tests green, typecheck + lint + build clean, working tree
+limited to the three write-set files, description ratchet still 317/351
+with 0 widened.
+
+**Corroboration worth recording:** T1b recomputed all 22 counts
+independently and every one matched T1's separately-derived number. Two
+agents, two harness paths, same values — the baseline is trustworthy.
+
+**New finding — `fepuvo-06-rugi981` is malformed XML on BOTH sides.** T1
+found the jar golden malformed; T1b found OUR render output independently
+malformed too, at a different byte offset, isolated via direct
+`normalizeSvg` calls on each side. Probable mechanism: literal
+`<include>`/`<extend>` edge labels plus raw `--`/`__`/`==` separator runs
+landing inside an emitted SVG `<!-- -->` comment, and XML forbids `--`
+inside comments. Not fixed — T1b was a test/manifest-only task — and the
+fixture is `dotEqual=false` so it was AC3-ineligible anyway. Filed here
+because it is a real emission bug in our own output, not merely a bad
+oracle: revisit once separator support lands, since that is the code path
+implicated.

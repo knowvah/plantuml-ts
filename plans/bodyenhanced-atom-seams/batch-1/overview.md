@@ -8,7 +8,7 @@ Without this batch the riskiest change in the mission would be unwatched.
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
 | T1 | Author SVG goldens + wire their ratchet | general-purpose | `oracle/goldens/svg-description/*`, `tests/oracle/svg-conformance/description.golden.ratchet.test.ts` | — | [x] |
-| T1b | Diff-count baseline ratchet for the 22 (ADR-5 AMENDMENT) | general-purpose | `oracle/goldens/svg-description/diff-baseline.json`, `tests/oracle/svg-conformance/description.diff-baseline.ratchet.test.ts` | T1 | [ ] |
+| T1b | Diff-count baseline ratchet for the 22 (ADR-5 AMENDMENT) | general-purpose | `oracle/goldens/svg-description/diff-baseline.json`, `tests/oracle/svg-conformance/description.diff-baseline.ratchet.test.ts` | T1 | [x] |
 
 **This batch must change no behaviour.** All goldens must pass against
 today's code. A golden that does not is either mis-generated or has found
