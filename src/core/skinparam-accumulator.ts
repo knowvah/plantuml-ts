@@ -11,6 +11,7 @@
  */
 
 import type { ElementColors } from './theme.js';
+import type { ActorStyle } from './skin/ActorStyle.js';
 
 export interface SkinparamAccumulator {
   fontFamily: string | undefined;
@@ -22,6 +23,7 @@ export interface SkinparamAccumulator {
   tabSize: number | undefined;
   roundCorner: number | undefined;
   componentStyle: 'uml2' | 'uml1' | 'rectangle' | undefined;
+  actorStyle: ActorStyle | undefined;
   minimumWidth: number | undefined;
   strictUml: boolean | undefined;
   monochrome: 'true' | 'reverse' | undefined;
@@ -99,7 +101,7 @@ export interface SkinparamAccumulator {
  */
 const SCALAR_FIELD_NAMES = [
   'fontFamily', 'fontSize', 'linetype', 'nodeSep', 'rankSep', 'wrapWidth',
-  'tabSize', 'roundCorner', 'componentStyle', 'minimumWidth', 'strictUml', 'monochrome',
+  'tabSize', 'roundCorner', 'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
   'packageStyle', 'fixCircleLabelOverlapping', 'shadowing', 'background',
   'border', 'text', 'arrow', 'noteBackground', 'classBackground',
   'interfaceBackground', 'enumBackground', 'actorStroke', 'packageBackground',

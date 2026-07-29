@@ -11,6 +11,7 @@
  */
 
 import { parseColor } from './paint.js';
+import { ActorStyle } from './skin/ActorStyle.js';
 import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import {
   matchElementColorKey,
@@ -153,6 +154,15 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
   [['componentstyle'], (acc, value) => {
     const v = value.trim().toLowerCase();
     if (v === 'uml2' || v === 'uml1' || v === 'rectangle') acc.componentStyle = v;
+  }],
+  // SkinParam.java:1209-1218 `actorStyle()`: case-insensitive
+  // `"awesome"`/`"hollow"`, else STICKMAN (verbatim -- an unrecognized value
+  // falls through to STICKMAN, it is not rejected/unknown).
+  [['actorstyle'], (acc, value) => {
+    const v = value.trim().toLowerCase();
+    if (v === 'awesome') acc.actorStyle = ActorStyle.AWESOME;
+    else if (v === 'hollow') acc.actorStyle = ActorStyle.HOLLOW;
+    else acc.actorStyle = ActorStyle.STICKMAN;
   }],
   [['packagestyle'], (acc, value) => {
     const v = value.trim().toLowerCase();

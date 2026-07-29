@@ -33,9 +33,8 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { FontStyle } from '../../core/klimt/shape/UText.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
-import { ActorStyle } from '../../core/skin/ActorStyle.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
-import { upstreamKeyword, mapComponentStyle } from './renderer-symbol.js';
+import { upstreamKeyword, mapComponentStyle, resolveActorStyle } from './renderer-symbol.js';
 import {
   lineCount,
   maxLineWidth,
@@ -420,10 +419,18 @@ function sizingPaint(font: FontConfiguration, opts: BoxSizingOpts | undefined): 
  * `diagonalCorner`, `deltaShadow`/`stroke` per-element overrides
  * (`resolveElementShadowing`/`LineThickness` need `Theme` in `layout.ts`'s
  * `ClassifyCtx` -- T9's write-set; the DEFAULT stroke IS supplied, see
- * `DEFAULT_SIZING_STROKE_THICKNESS`), `actorStyle` (always `STICKMAN` --
- * `ActorAwesome`/`Hollow` are T7's), `links`/`hexagonPolygon`, and
+ * `DEFAULT_SIZING_STROKE_THICKNESS`), `links`/`hexagonPolygon`, and
  * `fixCircleLabelOverlapping` (only feeds `resolveShapeType`, never
- * `calculateDimensionSlow`).
+ * `calculateDimensionSlow`). `actorStyle` IS threaded (T7, see below) --
+ * no longer a hardcode.
+ *
+ * `actorStyle` (T7, description-leaf-sizing-audit): `ctx.opts?.actorStyle`
+ * (`BoxSizingOpts.actorStyle`, threaded from `Theme.actorStyle` by
+ * `layout.ts`/`layout-dot-tree.ts`) — the SAME accessor the RENDERER reads
+ * (`renderer-entity.ts#buildEntityParams`), so an actor sizes to whichever
+ * of stickman/awesome/hollow it will actually be drawn as. Falls back to
+ * `ActorStyle.STICKMAN`, upstream's own default (`SkinParam.java:1217`),
+ * when no `skinparam actorStyle` was set.
  */
 function buildSizingEntityParams(
   node: DescriptiveNode,
@@ -435,7 +442,7 @@ function buildSizingEntityParams(
     entity: { name: node.id, uid: '', qualifiedName: node.id, location: null, url: null },
     symbol: {
       keyword: upstreamKeyword(node.symbol),
-      actorStyle: ActorStyle.STICKMAN,
+      actorStyle: resolveActorStyle(ctx.opts?.actorStyle),
       componentStyle: mapComponentStyle(ctx.opts?.componentStyle),
     },
     labels: {
