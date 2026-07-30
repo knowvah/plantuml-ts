@@ -353,6 +353,10 @@ function drawAtoms(
     }
     const resolved = resolveAtomImage?.(atom.atom);
     if (resolved === undefined) continue;
+    // T4 (ADR-2): only the `image` variant carries an href. The `drawable`
+    // variant is not emitted by any producer until T9 -- T7 replaces this
+    // block with the primitive-drawing path that consumes it.
+    if (resolved.kind !== 'image') continue;
     ug.apply(new UTranslate(x, origin.y)).draw(UImage.build(resolved.width, resolved.height, resolved.href));
     x += resolved.width;
   }

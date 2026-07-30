@@ -39,6 +39,7 @@
 
 import { parsePngIhdrFromDataUri } from './klimt/sprite/png-ihdr.js';
 import { scanOpenIconSpans, matchOpenIconAt } from './creole-atoms-openicon.js';
+import type { UPath } from './klimt/shape/UPath.js';
 
 // ---------------------------------------------------------------------------
 // Token model
@@ -106,35 +107,58 @@ export interface LineAtomScan {
 
 /**
  * Resolves one atom to its drawable image geometry at RENDER time (T7):
- * `href` is the `<image>` element's `xlink:href` (verbatim `dataUri` for an
- * `img` atom per D7; a tinted PNG data URI for a `sprite` atom, built via
- * `sprite-raster.ts#spriteToPngDataUri`); `width`/`height` are the SAME
- * scaled pixel dims `measureInlineAtom` already contributes to label
- * measurement (D9) -- so drawing and measuring agree by construction (this
- * task's own charter). Returns `undefined` to mean "render nothing" --
- * matches `StripeSimple.addSprite`'s unknown-sprite-name behavior (java
- * :228-236): the atom never becomes a drawable element at all, not a
- * zero-size one. See `src/diagrams/description/render-atoms.ts` for the
- * concrete builder.
+ * a two-channel discriminated union (svg-sprite-nanoparser ADR-2), mirroring
+ * upstream's own structural split between the DECLARED box and the DRAWN
+ * ink -- two different objects, two different method calls, not one value
+ * with an optional extra field:
+ *
+ * - `kind: 'image'` -- `href` is the `<image>` element's `xlink:href`
+ *   (verbatim `dataUri` for an `img` atom per D7; a tinted PNG data URI for
+ *   a `sprite` atom, built via `sprite-raster.ts#spriteToPngDataUri`).
+ * - `kind: 'drawable'` -- `primitives` are the per-`<path>` `UPath`
+ *   decomposition `SvgNanoParser.drawU` emits for an SVG sprite (T9); ink
+ *   lives ONLY here, never on `width`/`height`.
+ *
+ * `width`/`height` are the DECLARED box in BOTH variants -- the SAME scaled
+ * pixel dims `measureInlineAtom` already contributes to label measurement
+ * (D9), mirroring upstream's `AtomSprite.calculateDimensionSlow` (declared)
+ * versus `Footprint.drawPath` (observed): so drawing and measuring agree by
+ * construction on the declared box regardless of which variant is drawn.
+ * Returns `undefined` to mean "render nothing" -- matches
+ * `StripeSimple.addSprite`'s unknown-sprite-name behavior (java :228-236):
+ * the atom never becomes a drawable element at all, not a zero-size one.
+ * See `src/diagrams/description/render-atoms.ts` for the concrete builder.
+ *
+ * Nothing produces `kind: 'drawable'` yet -- svg-sprite-nanoparser T9 is the
+ * first producer; this task (T4) only widens the type so T9 has somewhere
+ * to put primitives. Every current producer (`render-atoms.ts`,
+ * `leaf-sizing.ts`) still emits only `kind: 'image'`.
  *
  * sizer-footprint-parity T2 (ADR-2): this type previously carried optional
  * `inkX`/`inkY`/`inkWidth`/`inkHeight` fields (bodyenhanced-atom-seams'
- * ADR-2). Removed here -- confirmed zero consumers anywhere in the
- * codebase (`EntityImageDescriptionDelegates.ts#dimensionOf` destructures
- * only `{ width, height }` off a resolver's return value; `render-atoms.ts`'s
- * own `ResolvedAtomImage` type never populated them either). Ink now flows
- * through the SEPARATE `SpriteDims.inkWidth`/`inkHeight` channel
- * (unchanged by this task -- still consumed by
- * `leaf-sizing.ts#sizingAtomImageResolverFor`'s `fitToInk` branch and
- * `leaf-sizing-text.ts#inlineFootprintBox`; see `.agent-notes/
- * T2-footprint-sizer.md` for why `usecase-footprint.ts`/`footprintBoxes`
- * themselves could NOT be retired in this task).
+ * ADR-2). Removed there -- confirmed zero consumers anywhere in the
+ * codebase. svg-sprite-nanoparser ADR-2 (this task) is a DIFFERENT, later
+ * decision and explicitly does NOT reintroduce that shape: `primitives`
+ * below are DRAW-TIME geometry, not a measurement side channel. Ink from
+ * measurement (unrelated to this type) still flows through the SEPARATE
+ * `SpriteDims.inkWidth`/`inkHeight` channel (unchanged by this task --
+ * still consumed by `leaf-sizing.ts#sizingAtomImageResolverFor`'s
+ * `fitToInk` branch and `leaf-sizing-text.ts#inlineFootprintBox`; see
+ * `.agent-notes/T2-footprint-sizer.md` for why `usecase-footprint.ts`/
+ * `footprintBoxes` themselves could NOT be retired in that task).
  */
 export type AtomImageResolver = (
   atom: InlineAtomToken,
 ) =>
   | {
+      readonly kind: 'image';
       readonly href: string;
+      readonly width: number;
+      readonly height: number;
+    }
+  | {
+      readonly kind: 'drawable';
+      readonly primitives: UPath[];
       readonly width: number;
       readonly height: number;
     }

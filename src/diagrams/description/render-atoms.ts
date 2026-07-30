@@ -53,11 +53,13 @@ import { getSpriteMonochrome, getSpriteSvg, spriteDimsLookupFor } from '../../co
 import { toBase64 } from '../../core/klimt/sprite/png-encoder.js';
 import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
 
-type ResolvedAtomImage = { readonly href: string; readonly width: number; readonly height: number } | undefined;
+type ResolvedAtomImage =
+  | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
+  | undefined;
 
 function resolveImgAtom(atom: Extract<InlineAtomToken, { kind: 'img' }>): ResolvedAtomImage {
   const dims = measureInlineAtom(atom);
-  return { href: atom.dataUri, width: dims.width, height: dims.height };
+  return { kind: 'image', href: atom.dataUri, width: dims.width, height: dims.height };
 }
 
 function resolveSpriteAtom(
@@ -74,7 +76,7 @@ function resolveSpriteAtom(
   if (svgSprite !== undefined) {
     const dims = measureInlineAtom(atom, spriteDims, font.size);
     const href = `data:image/svg+xml;base64,${toBase64(new TextEncoder().encode(svgSprite.svg))}`;
-    return { href, width: dims.width, height: dims.height };
+    return { kind: 'image', href, width: dims.width, height: dims.height };
   }
   const sprite = getSpriteMonochrome(registry, atom.name);
   if (sprite === undefined) return undefined; // unknown name -- StripeSimple.addSprite: skip.
@@ -88,7 +90,7 @@ function resolveSpriteAtom(
     atom.forcedColor,
     spriteScale(atom.scale, font.size),
   );
-  return { href: png.dataUri, width: dims.width, height: dims.height };
+  return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
 }
 
 /**

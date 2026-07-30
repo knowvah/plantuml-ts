@@ -125,18 +125,19 @@ describe('makeAtomImageResolverFor', () => {
     const resolve = makeAtomImageResolverFor(undefined)(FONT);
     const atom: InlineAtomToken = { kind: 'img', dataUri: TINY_PNG_URI, scale: 2, width: 2, height: 2 };
     const result = resolve(atom);
-    expect(result).toBeDefined();
+    expect(result?.kind).toBe('image');
+    if (result?.kind !== 'image') throw new Error('expected the image variant');
     // The output href string EQUALS the input dataUri (assertion the
     // mission brief calls out explicitly).
-    expect(result!.href).toBe(TINY_PNG_URI);
-    expect(result!.width).toBe(4); // 2 * scale(2)
-    expect(result!.height).toBe(4);
+    expect(result.href).toBe(TINY_PNG_URI);
+    expect(result.width).toBe(4); // 2 * scale(2)
+    expect(result.height).toBe(4);
   });
 
   test('img atom resolves even with no sprite registry at all', () => {
     const resolve = makeAtomImageResolverFor(undefined)(FONT);
     const atom: InlineAtomToken = { kind: 'img', dataUri: TINY_PNG_URI, scale: 1, width: 2, height: 2 };
-    expect(resolve(atom)).toEqual({ href: TINY_PNG_URI, width: 2, height: 2 });
+    expect(resolve(atom)).toEqual({ kind: 'image', href: TINY_PNG_URI, width: 2, height: 2 });
   });
 
   test('sprite atom: resolves via the registry to a tinted PNG data URI, dims agree with measureInlineAtom (D9)', () => {
@@ -144,8 +145,9 @@ describe('makeAtomImageResolverFor', () => {
     const resolve = makeAtomImageResolverFor(registry)(FONT);
     const atom: InlineAtomToken = { kind: 'sprite', name: 'foo', scale: 2 };
     const result = resolve(atom);
-    expect(result).toBeDefined();
-    expect(result!.href.startsWith('data:image/png;base64,')).toBe(true);
+    expect(result?.kind).toBe('image');
+    if (result?.kind !== 'image') throw new Error('expected the image variant');
+    expect(result.href.startsWith('data:image/png;base64,')).toBe(true);
 
     // "Drawing and measuring agree by construction" (this task's charter):
     // the resolver's width/height must equal measureInlineAtom's own
@@ -159,9 +161,9 @@ describe('makeAtomImageResolverFor', () => {
       { get: (name) => (name === 'foo' ? { width: 4, height: 4 } : undefined) },
       FONT.size,
     );
-    expect(result!.width).toBe(dims.width);
-    expect(result!.height).toBe(dims.height);
-    expect(result!.width).toBeCloseTo(4 * 2 * (14 / 13), 10); // 4 * scale(2) * size/13
+    expect(result.width).toBe(dims.width);
+    expect(result.height).toBe(dims.height);
+    expect(result.width).toBeCloseTo(4 * 2 * (14 / 13), 10); // 4 * scale(2) * size/13
   });
 
   test('unknown sprite name resolves to undefined -- skip, matching StripeSimple.addSprite (never added)', () => {
@@ -280,29 +282,30 @@ describe('AtomImageResolver — optional ink fields (T3-seams, ADR-2)', () => {
   test('a resolver may report ink offsets distinct from the declared box', () => {
     const resolve: AtomImageResolver = (atom) => {
       if (atom.kind !== 'sprite') return undefined;
-      return { href: 'data:x', width: 16, height: 16, inkX: 1, inkY: 2, inkWidth: 12, inkHeight: 10 };
+      return { kind: 'image', href: 'data:x', width: 16, height: 16, inkX: 1, inkY: 2, inkWidth: 12, inkHeight: 10 };
     };
     const atom: InlineAtomToken = { kind: 'sprite', name: 'bi-globe', scale: 1 };
-    expect(resolve(atom)).toEqual({ href: 'data:x', width: 16, height: 16, inkX: 1, inkY: 2, inkWidth: 12, inkHeight: 10 });
+    expect(resolve(atom)).toEqual({ kind: 'image', href: 'data:x', width: 16, height: 16, inkX: 1, inkY: 2, inkWidth: 12, inkHeight: 10 });
   });
 
   test('omitting the ink fields is still a valid AtomImageResolver return -- ADR-2 additive shape', () => {
-    const resolve: AtomImageResolver = () => ({ href: 'data:x', width: 16, height: 16 });
+    const resolve: AtomImageResolver = () => ({ kind: 'image', href: 'data:x', width: 16, height: 16 });
     const atom: InlineAtomToken = { kind: 'img', dataUri: TINY_PNG_URI, scale: 1, width: 2, height: 2 };
-    expect(resolve(atom)).toEqual({ href: 'data:x', width: 16, height: 16 });
+    expect(resolve(atom)).toEqual({ kind: 'image', href: 'data:x', width: 16, height: 16 });
   });
 
   test('the real render-time resolver (makeAtomImageResolverFor) still omits ink keys entirely -- byte-identical to pre-T3', () => {
     const resolve = makeAtomImageResolverFor(undefined)(FONT);
     const atom: InlineAtomToken = { kind: 'img', dataUri: TINY_PNG_URI, scale: 1, width: 2, height: 2 };
     const result = resolve(atom);
-    expect(result).toEqual({ href: TINY_PNG_URI, width: 2, height: 2 });
-    expect(Object.keys(result!).sort()).toEqual(['height', 'href', 'width']);
+    expect(result).toEqual({ kind: 'image', href: TINY_PNG_URI, width: 2, height: 2 });
+    expect(Object.keys(result!).sort()).toEqual(['height', 'href', 'kind', 'width']);
   });
 
   test('ink fields on a resolved atom change NEITHER the rendered SVG NOR the measured dimension -- nothing consumes them yet', () => {
-    const withoutInk: AtomImageResolver = () => ({ href: TINY_PNG_URI, width: 10, height: 10 });
+    const withoutInk: AtomImageResolver = () => ({ kind: 'image', href: TINY_PNG_URI, width: 10, height: 10 });
     const withInk: AtomImageResolver = () => ({
+      kind: 'image',
       href: TINY_PNG_URI,
       width: 10,
       height: 10,

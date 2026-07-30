@@ -161,6 +161,9 @@ function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
       }
       const resolved = resolveAtomImage?.(atom.atom);
       if (resolved === undefined) return;
+      // T4 (ADR-2): only the `image` variant carries an href. No producer
+      // emits `drawable` until T9.
+      if (resolved.kind !== 'image') return;
       ug.draw(UImage.build(resolved.width, resolved.height, resolved.href));
     },
   };

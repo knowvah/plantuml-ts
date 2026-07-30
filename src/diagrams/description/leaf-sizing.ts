@@ -367,10 +367,10 @@ function sizingAtomImageResolverFor(
       const reg = sprites?.get(atom.name);
       if (reg?.inkWidth !== undefined && reg.inkHeight !== undefined) {
         const s = spriteScale(atom.scale, font.size);
-        return { href: '', width: reg.inkWidth * s, height: reg.inkHeight * s };
+        return { kind: 'image', href: '', width: reg.inkWidth * s, height: reg.inkHeight * s };
       }
     }
-    return { href: '', width: dims.width, height: dims.height };
+    return { kind: 'image', href: '', width: dims.width, height: dims.height };
   };
 }
 
