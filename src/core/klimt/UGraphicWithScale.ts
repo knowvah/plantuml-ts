@@ -2,6 +2,7 @@ import type { UChange } from './UChange.js';
 import type { UShape } from './UShape.js';
 import type { UGraphic } from './UGraphic.js';
 import type { Paint } from '../paint.js';
+import type { Point2D } from './UTranslate.js';
 import { Fore } from './Fore.js';
 import { Back } from './Back.js';
 
@@ -37,12 +38,15 @@ import { Back } from './Back.js';
  * `scale`/`translate`/`rotate`/`concatenate` operations, `getScaleX`/
  * `getScaleY`/`getTranslateX`/`getTranslateY`, and `toString` (all real
  * upstream members, needed here so tests can assert on the composed
- * matrix without inventing a non-upstream accessor). `getRotateInstance`/
- * `getTranslateInstance`/`transform(XPoint2D)`/`toAffineTransform()` have
- * no caller in `UGraphicWithScale.java` and are left for whichever later
- * task (T6/T8's `SvgNanoParser` port) first needs them — this class has
- * no standalone file yet in the port; extend it here rather than
- * duplicating a second copy elsewhere.
+ * matrix without inventing a non-upstream accessor).
+ *
+ * `getRotateInstance` and `transform(XPoint2D)` (here: `transform(Point2D)`
+ * — this port's `{x,y}` stand-in, `UTranslate.ts`'s own `Point2D`, not a
+ * separately-ported `XPoint2D` class) were added in T13
+ * (`plans/svg-sprite-nanoparser/batch-2/T13-affine-transform-threading.md`)
+ * to back `USegment.rotate`/`affine` (`src/core/klimt/shape/UPath.ts`).
+ * `getTranslateInstance`/`toAffineTransform()` still have no caller
+ * anywhere in this port and remain unported.
  *
  * NOTE on mutability: unlike this port's `UTranslate` (immutable, returns
  * new instances), `scale`/`translate`/`rotate`/`concatenate` mutate
@@ -91,6 +95,17 @@ export class XAffineTransform {
     return new XAffineTransform(sx, 0, 0, sy, 0, 0);
   }
 
+  /**
+   * Added in T13 to back `USegment.rotate` (`XPoint2D#transform` there
+   * calls `XAffineTransform.getRotateInstance(theta)` directly — see
+   * this file's module doc comment). @see XAffineTransform.java#getRotateInstance
+   */
+  static getRotateInstance(thetaRadians: number): XAffineTransform {
+    const cos = Math.cos(thetaRadians);
+    const sin = Math.sin(thetaRadians);
+    return new XAffineTransform(cos, sin, -sin, cos, 0, 0);
+  }
+
   /** Mutates `this` in place. @see XAffineTransform.java#scale */
   scale(sx: number, sy: number): void {
     this.m00 *= sx;
@@ -121,6 +136,20 @@ export class XAffineTransform {
     this.m10 = n10;
     this.m11 = n11;
     this.translate(-anchorX, -anchorY);
+  }
+
+  /**
+   * Does NOT mutate `this` — returns a new point, mirroring
+   * `XPoint2D#transform(XAffineTransform)` -> `XAffineTransform#transform
+   * (XPoint2D)` (the two upstream methods collapse to this one, since
+   * this port's `Point2D` is a plain `{x,y}` shape with no methods of its
+   * own — see `UTranslate.ts`'s own `Point2D` doc comment). Added in T13
+   * to back `USegment.rotate`/`affine`. @see XAffineTransform.java#transform
+   */
+  transform(src: Point2D): Point2D {
+    const x = this.m00 * src.x + this.m01 * src.y + this.m02;
+    const y = this.m10 * src.x + this.m11 * src.y + this.m12;
+    return { x, y };
   }
 
   /** Mutates `this` in place: `this = this * other`. @see XAffineTransform.java#concatenate */

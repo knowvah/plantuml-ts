@@ -6,6 +6,7 @@ import { parseSvgPath } from '../../../../../src/core/klimt/sprite/SvgPath.js';
 import { pathBBox } from '../../../../../src/core/klimt/sprite/svg-path-bbox.js';
 import { UTranslate } from '../../../../../src/core/klimt/UTranslate.js';
 import { USegmentType } from '../../../../../src/core/klimt/shape/UPath.js';
+import { XAffineTransform } from '../../../../../src/core/klimt/UGraphicWithScale.js';
 
 const NONE = UTranslate.none();
 
@@ -207,5 +208,67 @@ describe('parseSvgPath -- implicit repeated coordinate pairs after M', () => {
       [1, 1],
       [3, 3],
     ]);
+  });
+});
+
+describe('parseSvgPath -- optional `at: XAffineTransform` (T13)', () => {
+  it('omitting `at` is byte-identical to an explicit identity transform', () => {
+    const d = 'M0 0 L5 5 C1 1 2 2 3 3';
+    const withoutAt = parseSvgPath(d, NONE);
+    const identity = new XAffineTransform(1, 0, 0, 1, 0, 0);
+    const withIdentity = parseSvgPath(d, NONE, identity);
+
+    expect(Array.from(withIdentity.iterator()).map((s) => s.coord)).toEqual(
+      Array.from(withoutAt.iterator()).map((s) => s.coord),
+    );
+  });
+
+  it('offsets every point by exactly (4,2) -- acceptance criterion 1', () => {
+    const at = new XAffineTransform(1, 0, 0, 1, 4, 2);
+    const path = parseSvgPath('M0 0 L5 5', NONE, at);
+    const segs = Array.from(path.iterator());
+    expect(segs.map((s) => s.coord)).toEqual([
+      [4, 2],
+      [9, 7],
+    ]);
+  });
+
+  it('doubles every coordinate -- acceptance criterion 2', () => {
+    const at = new XAffineTransform(2, 0, 0, 2, 0, 0);
+    const path = parseSvgPath('M1 1 L3 4', NONE, at);
+    const segs = Array.from(path.iterator());
+    expect(segs.map((s) => s.coord)).toEqual([
+      [2, 2],
+      [6, 8],
+    ]);
+  });
+
+  it('scales an arc radius by getScaleX/getScaleY and transforms only its endpoint', () => {
+    const at = new XAffineTransform(2, 0, 0, 2, 1, 1);
+    const path = parseSvgPath('M0 0 A5 5 0 0 1 10 0', NONE, at);
+    const segs = Array.from(path.iterator());
+    // M0,0 -> (0*2+1, 0*2+1) = (1,1).
+    expect(segs[0]!.coord).toEqual([1, 1]);
+    // arc: rx=5*2=10, ry=5*2=10, endpoint (10,0) -> (10*2+1, 0*2+1) = (21,1).
+    expect(segs[1]!.coord).toEqual([10, 10, 0, 0, 1, 21, 1]);
+  });
+
+  it('composes nested transforms in upstream concatenation order -- acceptance criterion 3', () => {
+    // Outer <g transform="scale(2)">, inner <g transform="translate(1,1)">.
+    const at = new XAffineTransform(2, 0, 0, 2, 0, 0);
+    at.concatenate(new XAffineTransform(1, 0, 0, 1, 1, 1));
+    const path = parseSvgPath('M1 1', NONE, at);
+    const segs = Array.from(path.iterator());
+    // (1,1) -> translate(1,1) (inner, applied first) -> (2,2) -> scale(2) (outer) -> (4,4).
+    expect(segs[0]!.coord).toEqual([4, 4]);
+  });
+
+  it('scales the UTranslate translate argument by getScaleX/getScaleY, not just the path points', () => {
+    const at = new XAffineTransform(2, 0, 0, 2, 0, 0);
+    const path = parseSvgPath('M0 0', new UTranslate(3, 4), at);
+    const segs = Array.from(path.iterator());
+    // Point (0,0) -> (0,0) under `at`, then UPath#translate adds
+    // (3*2, 4*2) = (6,8) per `translate.getDx() * at.getScaleX()`.
+    expect(segs[0]!.coord).toEqual([6, 8]);
   });
 });

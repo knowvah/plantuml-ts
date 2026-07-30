@@ -177,6 +177,47 @@ describe('SvgNanoParser#drawU -- drawPath (acceptance criteria 3 and 4)', () => 
   });
 });
 
+describe('SvgNanoParser#drawU -- drawPath now bakes ugs.getAffineTransform() into the path (T13)', () => {
+  it('scales the emitted path box by the `scale` drawU was called with', () => {
+    // Regression test for the KNOWN GAP this file used to document above
+    // drawPath: before T13, drawPath called
+    // `parseSvgPath(tmp, UTranslate.none())` unconditionally -- the scale
+    // baked into `ugs` at `UGraphicWithScale.create(ug, resolver, scale)`
+    // never reached the emitted path. A real `AtomSprite` draw at
+    // scale=2.5 (this file's own former doc comment example) exercises
+    // exactly this path.
+    const scale = 2.5;
+    const parserAtScale = new SvgNanoParser(BI_GLOBE_SVG);
+    const ugScaled = new FakeUGraphic();
+    parserAtScale.drawU(ugScaled, scale, undefined, undefined);
+
+    const parserUnscaled = new SvgNanoParser(BI_GLOBE_SVG);
+    const ugUnscaled = new FakeUGraphic();
+    parserUnscaled.drawU(ugUnscaled, 1, undefined, undefined);
+
+    const scaledPath = ugScaled.drawn[0] as UPath;
+    const unscaledPath = ugUnscaled.drawn[0] as UPath;
+
+    expect(scaledPath.getMinX()).toBeCloseTo(unscaledPath.getMinX() * scale, 9);
+    expect(scaledPath.getMaxX()).toBeCloseTo(unscaledPath.getMaxX() * scale, 9);
+    expect(scaledPath.getMinY()).toBeCloseTo(unscaledPath.getMinY() * scale, 9);
+    expect(scaledPath.getMaxY()).toBeCloseTo(unscaledPath.getMaxY() * scale, 9);
+  });
+
+  it('scale=1 (identity) reproduces the pre-T13 unscaled box exactly, matching pathBBox', () => {
+    const parser = new SvgNanoParser(BI_GLOBE_SVG);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const path = ug.drawn[0] as UPath;
+    const box = pathBBox(BI_GLOBE_D)!;
+    expect(path.getMinX()).toBeCloseTo(box.minX, 9);
+    expect(path.getMaxX()).toBeCloseTo(box.maxX, 9);
+    expect(path.getMinY()).toBeCloseTo(box.minY, 9);
+    expect(path.getMaxY()).toBeCloseTo(box.maxY, 9);
+  });
+});
+
 describe('SvgNanoParser#drawU -- <g> push/pop stack discipline (acceptance criterion 2)', () => {
   it('draws sibling paths before/after a <g transform=...>...</g> in exact document order, without corrupting the stack', () => {
     // Real bootstrap path bodies either side of a real archimate <g transform>

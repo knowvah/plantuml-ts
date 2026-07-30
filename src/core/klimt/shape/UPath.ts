@@ -1,5 +1,6 @@
 import type { UShape } from '../UShape.js';
 import type { Point2D } from '../UTranslate.js';
+import { XAffineTransform } from '../UGraphicWithScale.js';
 
 /**
  * USegmentType — the six path-op kinds a `UPath` records.
@@ -27,10 +28,12 @@ export type USegmentType = (typeof USegmentType)[keyof typeof USegmentType];
  * (interpretation depends on `segmentType`, exactly as upstream's
  * `double[] coord`) plus the op kind.
  *
- * Upstream: klimt/geom/USegment.java. Ported: the two accessors and
- * `translate`. NOT ported: `rotate`/`affine` — both require
- * `XAffineTransform`, out of scope per this task's geometry-type
- * adaptation (see `UPath` doc comment).
+ * Upstream: klimt/geom/USegment.java. Ported: the two accessors,
+ * `translate`, and (since T13,
+ * `plans/svg-sprite-nanoparser/batch-2/T13-affine-transform-threading.md`)
+ * `rotate`/`affine` — see `UPath` doc comment for the history (both were
+ * deferred by an earlier mission for lack of an `XAffineTransform` type;
+ * `UGraphicWithScale.ts` now carries one).
  */
 export interface USegment {
   readonly coord: readonly number[];
@@ -53,6 +56,49 @@ function translateSegment(seg: USegment, dx: number, dy: number): USegment {
   }
   if (c.length !== 2) throw new Error('translateSegment: unsupported coord length');
   return { coord: [c[0]! + dx, c[1]! + dy], segmentType: seg.segmentType };
+}
+
+/**
+ * @see USegment.java#rotate
+ *
+ * Unlike `affineSegment` below, upstream's `rotate` has NO `SEG_ARCTO`
+ * special case — any segment with `coord.length !== 2` (arcs, cubics)
+ * throws. Preserved verbatim; not "fixed" to match `affine`'s leniency.
+ */
+function rotateSegment(seg: USegment, theta: number): USegment {
+  const c = seg.coord;
+  if (c.length !== 2) throw new Error('rotateSegment: unsupported coord length');
+  const rotate = XAffineTransform.getRotateInstance(theta);
+  const p1 = rotate.transform({ x: c[0]!, y: c[1]! });
+  return { coord: [p1.x, p1.y], segmentType: seg.segmentType };
+}
+
+/**
+ * @see USegment.java#affine
+ *
+ * LOAD-BEARING restriction, preserved verbatim (CLAUDE.md: do not
+ * "generalise" while porting; T13 task spec: this is exactly why
+ * `SvgPath.ts#toUPath` bakes the transform in at PARSE time rather than
+ * calling `affine` after the fact) -- any non-`SEG_ARCTO` segment whose
+ * `coord.length !== 2` (i.e. a `SEG_CUBICTO`) throws. Cubic segments
+ * cannot be affine-transformed upstream; this is not a bug to work
+ * around.
+ */
+function affineSegment(seg: USegment, transform: XAffineTransform, angle: number, scale: number): USegment {
+  const c = seg.coord;
+  if (seg.segmentType === USegmentType.SEG_ARCTO) {
+    const p1 = transform.transform({ x: c[5]!, y: c[6]! });
+    const largeArcFlag = c[3]!;
+    const sweepFlag = c[4]!;
+    return {
+      coord: [c[0]! * scale, c[1]! * scale, c[2]! + angle, largeArcFlag, sweepFlag, p1.x, p1.y],
+      segmentType: seg.segmentType,
+    };
+  }
+
+  if (c.length !== 2) throw new Error('affineSegment: unsupported coord length');
+  const p1 = transform.transform({ x: c[0]!, y: c[1]! });
+  return { coord: [p1.x, p1.y], segmentType: seg.segmentType };
 }
 
 interface MinMaxState {
@@ -82,14 +128,20 @@ function addPoint(mm: MinMaxState, x: number, y: number): MinMaxState {
  *
  * Upstream: klimt/UPath.java. Ported: the full op-recording surface
  * (`add`, `moveTo`, `lineTo`, `cubicTo`, `quadTo`, `arcTo`, `closePath`),
- * `isEmpty`/`size`/`isInvisible`/`translate`, the min/max bounds
- * accessors, `iterator`/`getComment`/`getCodeLine`, and `deltaShadow`
- * (upstream inherits this from `AbstractShadowable` — see the
- * mechanical adaptation note below).
+ * `isEmpty`/`size`/`isInvisible`/`translate`, `rotate`/`affine`, the
+ * min/max bounds accessors, `iterator`/`getComment`/`getCodeLine`, and
+ * `deltaShadow` (upstream inherits this from `AbstractShadowable` — see
+ * the mechanical adaptation note below).
+ *
+ * `rotate`/`affine` were originally deferred ("out of D3' scope") because
+ * no `XAffineTransform` type existed in this port yet. That blocker went
+ * stale once `UGraphicWithScale.ts` grew one; T13
+ * (`plans/svg-sprite-nanoparser/batch-2/T13-affine-transform-threading.md`)
+ * ported both, plus the two `XAffineTransform` members they needed
+ * (`getRotateInstance`, the point-transform) that upstream's own
+ * `UGraphicWithScale.java` never itself called.
  *
  * Deferred (out of D3' scope, reported):
- * - `rotate(theta)` / `affine(transform, angle, scale)` — both require
- *   `XAffineTransform`, not part of this port's geometry surface.
  * - `setIgnoreForCompressionOnX/Y` / `isIgnoreForCompressionOn` /
  *   `drawWhenCompressed` — require `CompressionMode` (compression
  *   subsystem), not built yet.
@@ -161,6 +213,20 @@ export class UPath implements UShape {
     if (dx === 0 && dy === 0) return this;
     const result = new UPath(this.comment, this.codeLine);
     for (const seg of this.segments) result.addInternal(translateSegment(seg, dx, dy));
+    return result;
+  }
+
+  /** @see UPath.java#rotate */
+  rotate(theta: number): UPath {
+    const result = new UPath(this.comment, this.codeLine);
+    for (const seg of this.segments) result.addInternal(rotateSegment(seg, theta));
+    return result;
+  }
+
+  /** @see UPath.java#affine */
+  affine(transform: XAffineTransform, angle: number, scale: number): UPath {
+    const result = new UPath(this.comment, this.codeLine);
+    for (const seg of this.segments) result.addInternal(affineSegment(seg, transform, angle, scale));
     return result;
   }
 

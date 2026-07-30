@@ -247,30 +247,16 @@ export class SvgNanoParser implements GrayLevelRange {
    * @see SvgNanoParser.java#drawPath -- delegates to T1's `SvgPath.ts`
    * (`parseSvgPath`), per ADR-1: no second `d` -> `UPath` parser here.
    *
-   * KNOWN GAP, inherited from T1's documented scope (not introduced by
-   * this task, and not fixable within this task's write-set):
-   * `parseSvgPath` only applies its `translate` argument -- it does not
-   * bake in scale/rotation from an `XAffineTransform`
-   * (`src/core/klimt/sprite/SvgPath.ts`'s own doc comment: "identical
-   * scale (no `XAffineTransform` type exists in this port yet)").
-   * Upstream's real call, `svgPath.drawMe(ug, at)`, bakes the FULL
-   * `ugs.getAffineTransform()` (accumulated `<g transform=...>` /
-   * `scale` parameter) into the emitted path's coordinates via
-   * `SvgPath#toUPath(XAffineTransform)`. This port instead calls
-   * `parseSvgPath(tmp, UTranslate.none())` -- matching upstream's
-   * literal `new SvgPath(tmp, UTranslate.none())` constructor call
-   * exactly -- and draws the result UNSCALED. For every fixture this
-   * task's acceptance criteria exercise (scale=1, no enclosing `<g
-   * transform=...>`), `ugs.getAffineTransform()` is the identity matrix,
-   * so this gap is invisible. It is NOT invisible for a real,
-   * non-identity-scaled sprite draw (e.g. `AtomSprite` rendering at
-   * `scale=2.5`) -- closing it needs `UPath.affine`/`rotate`
-   * (`src/core/klimt/shape/UPath.ts`, itself already flagged there as
-   * "Deferred (out of D3' scope, reported)" by an EARLIER mission, and
-   * outside every task's write-set in THIS mission too). Flagged here
-   * for the mission orchestrator: T8's `drawEllipse` calls the
-   * equivalent `path.affine(ugs.getAffineTransform(), ugs.getAngle(),
-   * ugs.getInitialScale())` and will hit the identical gap.
+   * GAP CLOSED by T13
+   * (`plans/svg-sprite-nanoparser/batch-2/T13-affine-transform-threading.md`):
+   * `parseSvgPath` now takes the accumulated `applied.getAffineTransform()`
+   * as its third, optional argument, mirroring upstream's real call --
+   * `svgPath.drawMe(ug, at)` -> `SvgPath#toUPath(XAffineTransform)` --
+   * exactly. `applyFillAndStroke`/`applyTransform` are still T8 stubs (no
+   * `<g transform=...>` string parsing yet), so today `applied`'s affine
+   * transform is whatever `ugs` already carried in (in practice, the
+   * `scale` `drawU` was called with); T8 wires the rest without needing
+   * to touch this method again.
    */
   private drawPath(ugs: UGraphicWithScale, s: string, stackG: readonly string[]): void {
     // `id="` -> `ID="` avoids `indexOf('d="')` below false-matching the
@@ -285,7 +271,7 @@ export class SvgNanoParser implements GrayLevelRange {
     const x2 = withId.indexOf('"', x1 + 3);
     const tmp = withId.slice(x1 + 3, x2);
 
-    const path = parseSvgPath(tmp, UTranslate.none());
+    const path = parseSvgPath(tmp, UTranslate.none(), applied.getAffineTransform());
     applied.draw(path);
   }
 

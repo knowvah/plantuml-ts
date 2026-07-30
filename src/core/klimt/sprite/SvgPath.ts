@@ -1,6 +1,7 @@
 import { UPath } from '../shape/UPath.js';
 import type { Point2D } from '../UTranslate.js';
 import type { UTranslate } from '../UTranslate.js';
+import { XAffineTransform } from '../UGraphicWithScale.js';
 
 /**
  * SvgPath -- the single `d` -> `UPath` parser for this port
@@ -30,9 +31,18 @@ import type { UTranslate } from '../UTranslate.js';
  * OTHER overload, `drawMe(ug, at)` -> `toUPath(XAffineTransform)`, which
  * correctly tracks `previous` and is what this task's acceptance criteria
  * (T reflects the previous control point into the box) require. This
- * module ports that overload's control flow with an identity scale (no
- * `XAffineTransform` type exists in this port yet) instead of reproducing
- * the double-factor overload's dead branch.
+ * module ports that overload's control flow.
+ *
+ * T13 (`plans/svg-sprite-nanoparser/batch-2/T13-affine-transform-threading.md`)
+ * closed the remaining gap: `parseSvgPath` now takes an OPTIONAL third
+ * `at: XAffineTransform` parameter (mirroring `toUPath(XAffineTransform)`
+ * exactly -- every point goes through `at.transform(...)`, and the final
+ * translate is scaled by `at.getScaleX()`/`getScaleY()`, per
+ * `SvgPath.java#toUPath(XAffineTransform)` lines 192-242) defaulting to
+ * an identity transform when omitted. Identity reproduces the prior
+ * (pre-T13) two-argument behaviour exactly -- `svg-path-bbox.ts`'s
+ * two-argument call site is therefore untouched and its 46 tests stay
+ * green (ADR-1's equivalence proof, README stop condition 7).
  */
 
 // ---------------------------------------------------------------------------
@@ -309,9 +319,18 @@ function buildAbsoluteMovements(rawMovements: readonly RawMovement[]): AbsMoveme
 // Emission -- SvgPath#toUPath.
 // ---------------------------------------------------------------------------
 
+/**
+ * Identity `XAffineTransform` -- the default when `parseSvgPath`'s `at`
+ * parameter is omitted. Shared module-level instance: `toUPath` only ever
+ * calls `.transform(...)`/`.getScaleX()`/`.getScaleY()` on `at`, none of
+ * which mutate the receiver, so reuse across calls is safe.
+ */
+const IDENTITY_TRANSFORM = new XAffineTransform(1, 0, 0, 1, 0, 0);
+
 /** @see SvgPath.java#toUPath(XAffineTransform) -- see module doc comment for
- *  why this overload (not the double-factor one) is the port target. */
-function toUPath(movements: readonly AbsMovement[], translate: UTranslate): UPath {
+ *  why this overload (not the double-factor one) is the port target, and
+ *  for the T13 history of the `at` parameter. */
+function toUPath(movements: readonly AbsMovement[], translate: UTranslate, at: XAffineTransform): UPath {
   // #lizard forgives -- a fixed command-letter dispatch (SvgPath#toUPath
   // port), not real branching complexity; see the module doc comment.
   const result = UPath.none();
@@ -319,16 +338,16 @@ function toUPath(movements: readonly AbsMovement[], translate: UTranslate): UPat
   for (const move of movements) {
     const letter = move.letter;
     if (letter === 'M') {
-      const p = lastPositionOf(move)!;
+      const p = at.transform(lastPositionOf(move)!);
       result.moveTo(p.x, p.y);
     } else if (letter === 'C') {
-      const ctl1 = getSvgPosition(move, 0);
-      const ctl2 = getSvgPosition(move, 2);
-      const p = lastPositionOf(move)!;
+      const ctl1 = at.transform(getSvgPosition(move, 0));
+      const ctl2 = at.transform(getSvgPosition(move, 2));
+      const p = at.transform(lastPositionOf(move)!);
       result.cubicTo(ctl1.x, ctl1.y, ctl2.x, ctl2.y, p.x, p.y);
     } else if (letter === 'Q') {
-      const ctl = getSvgPosition(move, 0);
-      const p = lastPositionOf(move)!;
+      const ctl = at.transform(getSvgPosition(move, 0));
+      const p = at.transform(lastPositionOf(move)!);
       result.cubicTo(ctl.x, ctl.y, ctl.x, ctl.y, p.x, p.y);
     } else if (letter === 'T') {
       if (previous === null || (previous.letter !== 'Q' && previous.letter !== 'T'))
@@ -337,15 +356,23 @@ function toUPath(movements: readonly AbsMovement[], translate: UTranslate): UPat
         );
       const lastCtl = getSvgPosition(previous, 0);
       const lastP = lastPositionOf(previous)!;
-      const ctl = mirrorPoint(lastP, lastCtl);
-      const p = lastPositionOf(move)!;
+      const ctl = at.transform(mirrorPoint(lastP, lastCtl));
+      const p = at.transform(lastPositionOf(move)!);
       result.cubicTo(ctl.x, ctl.y, ctl.x, ctl.y, p.x, p.y);
     } else if (letter === 'L') {
-      const p = lastPositionOf(move)!;
+      const p = at.transform(lastPositionOf(move)!);
       result.lineTo(p.x, p.y);
     } else if (letter === 'A') {
-      const p = lastPositionOf(move)!;
-      result.arcTo(move.args[0]!, move.args[1]!, move.args[2]!, move.args[3]!, move.args[4]!, p.x, p.y);
+      const p = at.transform(lastPositionOf(move)!);
+      result.arcTo(
+        move.args[0]! * at.getScaleX(),
+        move.args[1]! * at.getScaleY(),
+        move.args[2]!,
+        move.args[3]!,
+        move.args[4]!,
+        p.x,
+        p.y,
+      );
     } else if (letter === 'Z') {
       result.closePath();
     } else {
@@ -356,7 +383,7 @@ function toUPath(movements: readonly AbsMovement[], translate: UTranslate): UPat
     }
     previous = move;
   }
-  return result.translate(translate.getDx(), translate.getDy());
+  return result.translate(translate.getDx() * at.getScaleX(), translate.getDy() * at.getScaleY());
 }
 
 // ---------------------------------------------------------------------------
@@ -366,15 +393,20 @@ function toUPath(movements: readonly AbsMovement[], translate: UTranslate): UPat
 /**
  * Parses an SVG path `d` attribute into a `UPath`, mirroring
  * `SvgNanoParser.drawPath`'s `new SvgPath(d, translate)` +
- * `svgPath.drawMe(ug, at)` pipeline with an identity scale/rotation --
- * only the translate component is modeled (see the module doc comment for
- * why, and for the two-overload ambiguity this resolves).
+ * `svgPath.drawMe(ug, at)` pipeline (see the module doc comment for the
+ * two-overload ambiguity this resolves, and for the T13 history of the
+ * `at` parameter).
+ *
+ * `at` is OPTIONAL and defaults to an identity transform -- omitting it
+ * reproduces the pre-T13, translate-only behaviour exactly, so
+ * `svg-path-bbox.ts`'s two-argument call site keeps compiling and its
+ * tests keep passing untouched.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svg/parser/SvgNanoParser.java#drawPath
  */
-export function parseSvgPath(d: string, translate: UTranslate): UPath {
+export function parseSvgPath(d: string, translate: UTranslate, at?: XAffineTransform): UPath {
   const tokens = decipher(d);
   const rawMovements = groupMovements(tokens);
   const movements = buildAbsoluteMovements(rawMovements);
-  return toUPath(movements, translate);
+  return toUPath(movements, translate, at ?? IDENTITY_TRANSFORM);
 }
