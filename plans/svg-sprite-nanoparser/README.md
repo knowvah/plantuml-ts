@@ -54,6 +54,7 @@ expected churn.
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1–T4 | Foundations: SvgPath, ColorResolver, UGraphicWithScale, resolver union | [x] |
 | [2](batch-2/overview.md) | T5–T7 | Parser core + renderer seam | [x] |
+| [2.5](batch-2/T13-affine-transform-threading.md) | T13 | Port `UPath.affine`/`rotate`; thread the transform (inserted 2026-07-30) | [x] |
 | [3](batch-3/overview.md) | T8 | NanoParser shapes + text | [ ] |
 | [4](batch-4/overview.md) | T9 | Sprite resolution returns primitives | [ ] |
 | [5](batch-5/overview.md) | T10–T12 | Retire `fitToInk`; pin the two channels; measure sprite goldens | [ ] |

@@ -32,7 +32,8 @@ typecheck/lint/build exit 0, size-deltas **320/351, widened 0** — unchanged,
 so "still no rendered output change" holds. ADR-1's equivalence proof came
 back clean: 46/46 `pathBBox`-covering tests pass unmodified.
 
-**Batch 3 is BLOCKED pending a maintainer ruling.** T6 accumulates the `<g
-transform>` stack, but nothing applies it to path geometry, and T8's
-`drawEllipse` needs `UPath.affine`. See the decision journal's final row for
-the mechanism, the ~40-line sizing, and the corpus reach.
+**T13 was inserted here and has landed** (`ff50f844`), unblocking batch 3.
+T6 accumulated the `<g transform>` stack while nothing applied it to path
+geometry; `UPath.affine`/`rotate` were unported on a rationale T3 had
+already invalidated. See [`T13-affine-transform-threading.md`](T13-affine-transform-threading.md)
+and the decision journal. Batch 3 is now unblocked.
