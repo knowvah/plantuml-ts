@@ -312,16 +312,15 @@ function lineCursorAdvance(isHorizontalLine: boolean, m: LineMetrics): number {
 
 /**
  * Draws one line's already-built atom sequence (E2r/L1): each atom draws as
- * its OWN `UText` (a text run) or `UImage` (a resolved inline atom), left
- * to right, x-advancing by each segment's own measured width — the SAME
- * math `measureAtomsWidthHeight` (above) already summed, so drawing and
- * measuring agree by construction. Atoms sit at the line's TOP (`origin.y`,
- * no baseline offset), matching `AtomImg`/`AtomSprite
- * .getStartingAltitude() === 0`; text keeps its normal baseline
- * (`origin.y + baselineDy`) even when a taller atom on the same line grows
- * `m.height` beyond any one text run's own height. This produces ONE
- * `<text>` SVG element per styled run — the jar's own element structure —
- * rather than the pre-E2r single-`UText`-per-line path.
+ * its OWN `UText` (a text run) or `UImage`/`UPath[]` (a resolved inline atom,
+ * T7 ADR-2), left to right, x-advancing by each segment's own DECLARED width
+ * — the SAME math `measureAtomsWidthHeight` (above) already summed, so
+ * drawing and measuring agree by construction. Atoms sit at the line's TOP
+ * (`origin.y`, no baseline offset), matching `AtomImg`/`AtomSprite.getStartingAltitude() === 0`;
+ * text keeps its normal baseline (`origin.y + baselineDy`) even when a
+ * taller atom on the same line grows `m.height` beyond any one text run's
+ * own height. This produces ONE `<text>` SVG element per styled run — the
+ * jar's own element structure — rather than the pre-E2r single-`UText`-per-line path.
  *
  * `origin` bundles x/y into a single param to stay under this project's
  * 5-param complexity-hook ceiling; `stringBounder` comes off
@@ -351,15 +350,17 @@ function drawAtoms(
       x += resolved.width;
       continue;
     }
-    const resolved = resolveAtomImage?.(atom.atom);
+    const resolved = resolveAtomImage?.(atom.atom); // ADR-2: cursor advances by DECLARED width, never ink
     if (resolved === undefined) continue;
-    // T4 (ADR-2): only the `image` variant carries an href. The `drawable`
-    // variant is not emitted by any producer until T9 -- T7 replaces this
-    // block with the primitive-drawing path that consumes it.
-    if (resolved.kind !== 'image') continue;
-    ug.apply(new UTranslate(x, origin.y)).draw(UImage.build(resolved.width, resolved.height, resolved.href));
+    if (resolved.kind === 'image') {
+      ug.apply(new UTranslate(x, origin.y)).draw(UImage.build(resolved.width, resolved.height, resolved.href));
+    } else {
+      const translated = ug.apply(new UTranslate(x, origin.y)); // @see SvgNanoParser.java#drawU
+      for (const primitive of resolved.primitives) translated.draw(primitive);
+    }
     x += resolved.width;
   }
+  // #lizard forgives -- ADR-2's two-variant branch pushed NLOC over 30 (T7).
 }
 
 /**
