@@ -67,6 +67,10 @@ port closes is allowed; moving one to `SIZE_NEUTRAL` never is.
 
 Baseline: main @ `7267187`, **317/351 (90.3%)**, 34 pins, zero widened.
 
+**CLOSED 2026-07-30 at 320/351 (91.2%), widened 0.** See
+`decision-journal.md`'s T6 entry and `planning/mission-index.md` for the
+outcome, including what was NOT achieved.
+
 ### Pre-flight — verified 2026-07-29
 
 | Check | Result |
@@ -92,8 +96,8 @@ skill's gitignore instruction. `.claude/` is ignored.
 | 2 | Port base + seams (parallel) | T2a [x], T3 [x] | [x] |
 | 3a | Creole Display/Sheet layer — GATING (ADR-8) | T7–T10g, T9c [x] | [x] |
 | 3 | Port the Body classes | T2b-1 [x] (T2b-2 → SI1, ADR-10) | [x] |
-| 4 | Wire it in — the risky one | T4 | [ ] |
-| 5 | Widen the routing (ADR-6) + close | T5, T6 | [ ] |
+| 4 | Wire it in — the risky one | T4 [x] | [x] |
+| 5 | Widen the routing (ADR-6) + close | T5 [x], T6 [x] | [x] |
 
 ## Index
 

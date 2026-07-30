@@ -6,8 +6,8 @@ made "port or widening?" unanswerable without re-running.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T5 | Remove TWO narrowing guards (ADR-10); delete flipped pins | typescript-pro | `src/diagrams/description/leaf-sizing.ts`, `leaf-sizing-legacy-fallback.ts`, `oracle/goldens/description/size-backlog.json` | T4 | [ ] |
-| T6 | Perf check + mission close | orchestrator | `plans/*`, `planning/mission-index.md`, `plans/s1l-leaf-sizing/ledger.md` | T5 | [ ] |
+| T5 [x] | Remove TWO narrowing guards (ADR-10); delete flipped pins | typescript-pro | `src/diagrams/description/leaf-sizing.ts`, `leaf-sizing-legacy-fallback.ts`, `oracle/goldens/description/size-backlog.json` | T4 | [ ] |
+| T6 [x] | Perf check + mission close | orchestrator | `plans/*`, `planning/mission-index.md`, `plans/s1l-leaf-sizing/ledger.md` | T5 | [ ] |
 
 ## T5 shrank from three guards to two — ADR-10
 
