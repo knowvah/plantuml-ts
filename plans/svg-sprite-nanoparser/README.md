@@ -52,7 +52,7 @@ expected churn.
 
 | Batch | Tasks | Theme | Done |
 |---|---|---|---|
-| [1](batch-1/overview.md) | T1–T4 | Foundations: SvgPath, ColorResolver, UGraphicWithScale, resolver union | [ ] |
+| [1](batch-1/overview.md) | T1–T4 | Foundations: SvgPath, ColorResolver, UGraphicWithScale, resolver union | [x] |
 | [2](batch-2/overview.md) | T5–T7 | Parser core + renderer seam | [ ] |
 | [3](batch-3/overview.md) | T8 | NanoParser shapes + text | [ ] |
 | [4](batch-4/overview.md) | T9 | Sprite resolution returns primitives | [ ] |
