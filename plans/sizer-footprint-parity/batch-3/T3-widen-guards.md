@@ -17,9 +17,31 @@ survive untouched; it is the faithful flat encoding of `getMarginX()`=6.
 
 ## Task
 
-Remove the two guards. Delete any `size-backlog.json` pin whose fixture
-flips — **deletion is the only permitted direction**. Then run the perf
-check.
+**T3 ABSORBED T2's routing half — orchestration correction.**
+`usecase-footprint.ts`'s `boxPoints`/`containingEllipse` and
+`leaf-sizing-text.ts#footprintBoxes` have exactly ONE consumer:
+`measureUsecase` in `leaf-sizing.ts:255-325`, called at `:134` — the guarded
+path itself. Splitting "retire the substitute" from "remove the guards"
+across a write-set boundary was wrong; the call graph makes them one unit.
+
+So this task, in order:
+
+1. Remove the two guards. Every usecase display then routes through
+   `measureEntityLeaf` → `EntityImageDescription.calculateDimensionSlow`,
+   which is ALREADY the faithful `TextBlockInEllipse`/`Footprint` path (see
+   that file's own module doc).
+2. `measureUsecase`, `footprintBoxes`, `boxPoints` and `containingEllipse`
+   then become genuinely dead. **Delete them and `usecase-footprint.ts`.**
+   Verify death by READING each caller, not by grepping — a prior mission
+   reported 24 live constants as dead on a silently-failing glob.
+3. Remove the last `imgFallbackFont` reference (T1 left it here deliberately).
+4. Delete any `size-backlog.json` pin whose fixture flips — **deletion is
+   the only permitted direction**.
+5. Run the perf check.
+
+If the substitute turns out NOT to be dead after the guards are removed,
+**STOP and report** — that means the routing does not in fact reach
+`Footprint`, and ADR-2's premise is wrong.
 
 `imgFallbackFont`'s last reference lives here (T1 left it deliberately);
 remove it with the guard.
@@ -27,6 +49,8 @@ remove it with the guard.
 ## Write-set
 
 - `src/diagrams/description/leaf-sizing.ts`
+- `src/diagrams/description/usecase-footprint.ts` (DELETE the file)
+- `src/diagrams/description/leaf-sizing-text.ts` — remove `footprintBoxes` and `inlineFootprintBox` if dead
 - `oracle/goldens/description/size-backlog.json` — deletions only
 - co-located tests
 
