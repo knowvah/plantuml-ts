@@ -618,3 +618,90 @@ re-open a third time.**
 against the commit that introduced the fix.** Three separate premises in
 this mission were stale in exactly this way: ADR-5's golden count, T5's
 guard count, and T3's narrowing-#3 credit.
+
+## T6 — Mission close (2026-07-30)
+
+### Perf check — no regression
+
+| | fixture | median | min | max |
+|---|---|---|---|---|
+| **before** (main @ `7267187`) | `gutute-00-gaki684` | **17.39 ms** | 16.51 | 18.66 |
+| **after** (branch tip) | `gutute-00-gaki684` | **17.42 ms** | 16.25 | 19.32 |
+
+**+0.17%** — inside run-to-run noise and far below the 10% flag threshold.
+15 iterations after 3 warm-ups, `DeterministicMeasurer`, measured through
+each tree's own pipeline. `gutute-00-gaki684` is 71,961 bytes, roughly 18×
+the next-largest corpus fixture. Baseline measured in a detached worktree so
+the branch was never disturbed; worktree removed afterwards.
+
+The Phase-4 worry — that `BodyEnhanced*.getArea` rebuilding text blocks
+would cost per node — did not materialise on this fixture.
+
+### S1L-i — PARTIALLY closed, with evidence, not retired
+
+ADR-4 predicted S1L-i would close as a consequence of porting `decorate`
+faithfully. **One of its three fixtures closed.**
+
+| fixture | before | now |
+|---|---|---|
+| `codabo-50-mupa164` (the ledger's named exemplar) | non-conformant | **delta 0, conformant, status "improved"** |
+| `nixura-77-bina738` | non-conformant | still non-conformant, delta 1.273091 |
+| `xufexu-38-fola855` | non-conformant | still non-conformant, delta 0.152778 |
+
+The `creole-titled-separator` cause count fell 3 → 2. `xufexu-38-fola855`
+is a mixed-cause fixture — the ledger also files it under display-text
+expansion as an S1L-e container residual — so it was never S1L-i's alone.
+
+**S1L-i stays OPEN.** The remaining blocker is known and deliberately
+withheld: `CreoleStripeSimpleParser.ts:95`'s `LITERAL` stand-in
+(`captured === '' ? HORIZONTAL_LINE : LITERAL`) where upstream classifies
+both cases as `HORIZONTAL_LINE`. Flipping it changes live rendering, so
+ADR-6 puts it in a separately gated commit — not in a port task.
+
+### `archimate` sname gap — STILL FILED, not folded in
+
+The README said to fold it in "only if T4 makes it trivial." It did not:
+T4's scope was `desc` → `create3`, whereas the gap is in
+`layout-dot-tree.ts:180`'s `ctx.fontSizeFor(node.symbol)` resolving
+`archimate` to the `'rectangle'` sname bucket. `git diff 7267187..HEAD`
+shows that file untouched. Still unmeasured (no fixture). Remains in
+`plans/s1l-leaf-sizing/ledger.md` as a SIZING gap.
+
+### Mission outcome — what was and was NOT achieved
+
+**Final state:** 449 files / 11023 tests, typecheck + lint + build clean.
+Description **320/351 (91.2%)**, up from 317/351 (90.3%), **widened 0**.
+Class **219/708 w0** and DOT **262/90/708 EQUAL**, both untouched all
+mission. 44 commits.
+
+**Achieved:**
+- The whole creole `Display`/`Sheet`/stripe layer ported — ~2,300 Java lines
+  across batch 3a's 14 tasks, none of it in the original plan
+- `BodyEnhancedAbstract`, `TextBlockLineBefore`, `BodyEnhanced2`,
+  `BodyFactory.create3`, and `desc` routed through the real pipeline
+- The class path consolidated onto one `TextBlockLineBefore` owner (ADR-7)
+- Both pipeline seams opened (ADR-2 ink fields, ADR-3 `imgFallbackFont`)
+- A renderer gate that did not exist before: 22 diff-count baselines, three
+  of which fell (`codabo-50-mupa164` 388→11)
+- `codabo-50-mupa164` reached delta 0
+
+**NOT achieved, stated as plainly:**
+- **Narrowing #1 (folder/package, 8 fixtures)** — moved to SI1 (ADR-10).
+  Needs `create2`/`BodyEnhanced1`, whose cascade measures ≈12,100 Java lines
+- **Narrowing #3 (box + `<img>`)** — believed delivered by T3 for most of
+  this mission; T5 proved otherwise. T4 routed `desc` past the function T3
+  fixed, and `descAtomOps#dimensionOf` has no diagram-default-font path
+- **Narrowing #2 (usecase + sprite)** — only PARTIAL. Single-line routes;
+  multi-line stays guarded on a sub-case T5 discovered
+- **S1L-i** — 1 of 3 fixtures
+- Conformance rose by 3 fixtures, all from T4. T5's routing widening was
+  numerically neutral
+
+**The finding worth carrying forward.** Three separate premises in this
+mission were stale — ADR-5's golden count, T5's guard count, and T3's
+narrowing-#3 credit — and each was believed until something checked it
+against the current code. Two were repeated to the maintainer by the
+orchestrator before being caught. The rule earned: **verify an
+"already fixed" claim against the CURRENT call graph, not against the
+commit that introduced the fix.** A fix can be correct on landing and dead
+by the next task.
