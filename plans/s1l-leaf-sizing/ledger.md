@@ -55,7 +55,7 @@ containers.)
 | min-width floor | 1 | **S1L-b/S1L-g DONE.** `skinparam minClassWidth` (S1L-g) + the `[…]` HR-height fix (S1L-b) made dexigu/kenece/zifaji **conformant** (deleted). `zotiru-33`'s scoped `<style> package { MinimumWidth 300 }` is now wired (S1L-b T5, `resolveElementMinimumWidth`): its `not_nested` package is exact at 4.583in, delta 2.655→0.914. Its remaining 0.914 is the `nested` package **cluster** floor. | **S1L-e** (nested-cluster residual) |
 | display-text expansion | 4 | **Bracket-body + creole-`====` HR DONE (S1L-b); codepoint decode-ordering DONE (S1L-b-unicode T1).** `[ … ]` bodies reach `measureLeafNode`; creole HR renders + sizes at 8px; `<U+…>`/`&#…;` now decode per-line at measure time (AFTER the `\n` split), so codepoint newlines are inline — heights no longer over-split. The 4 pinned fixtures are now DIAGNOSED, NAMED residuals (not simple bracket cases): **gafico-37-cuma657 (5.68→3.75)** + **nujito-06-neca370 (3.35→3.12)** — both driven by node c's UNPORTED `<code>` block (S1L-b-unicode T2, deferred E2r L2), NOT quoted-title literalness (Rule 2 corrected); **lurupu-11-fubo915 (2.05→CONFORMANT)** — was a sizer↔renderer creole-lexer divergence on `<font Name>`/unclosed-`<b>` (S1L-b-unicode T3), RESOLVED by creole-lexer-unification (2026-07-27, below); **xufexu-38-fola855 (1.46→0.153)** — bracket-body + container (S1L-e). See the three S1L-b-unicode sections + the creole-lexer-unification section below. | `<code>` (E2r L2) / ~~creole-lexer sync~~ DONE / **S1L-e** |
 | package / folder tab (leaf) | 0 | **DONE (S1L-a, 2026-07-28)** — see the S1L-a section below. Bucket empty: cobuju-30-paxo591 flipped, and the other two were misattributions (a leading `artifact`/`package` keyword) that the same mission re-bucketed → creole-titled-separator / multiline-display. | — |
-| creole titled separator | 3 | `--title--` / `==title==` draw a rule CARRYING their title text, so the line contributes the TITLE's width, not the raw markup's (codabo-50-mupa164: `--title1--` measures 62.5px here vs the jar's `title1` 37.6px; every other node in that fixture is exact). | **S1L-i** |
+| creole titled separator | 2 | **PARTIAL — bodyenhanced-atom-seams, 2026-07-30.** `--title--` / `==title==` draw a rule CARRYING their title text, so the line contributes the TITLE's width, not the raw markup's. **codabo-50-mupa164 is now delta 0 / conformant** (ADR-4's `decorate` + `TextBlockLineBefore` port, then T4 routing `desc` through `BodyFactory.create3`; its svg diff-count also fell 388→11). Remaining: `nixura-77-bina738` (1.273091) and `xufexu-38-fola855` (0.152778 — mixed-cause, also this ledger's S1L-e container residual). **Blocker is known and deliberately withheld:** `CreoleStripeSimpleParser.ts:95` classifies a non-empty separator capture as `LITERAL` where upstream classifies BOTH empty and non-empty as `HORIZONTAL_LINE` (`BodyEnhancedAbstract.isBlockSeparator`, java:67-82). Flipping it changes LIVE rendering, so ADR-6 requires a separately gated commit. | **S1L-i** (still open) |
 | multi-line quoted display | 2 | a quoted display left open at end of line — upstream's `CommandCreateElementMultilines` joins the continuation lines; we stop at the first, leaving the id literally `foo2 as "This artifact` (tajadu-40-juro990; its other three nodes are exact). | **S1L-j** |
 | latex (DIVERGENCE) | 2 | KaTeX ≠ JLaTeXMath — see below. gevozu-46-sasu860, sunuju-01-pote718 | DIVERGENCES |
 | wrapWidth | 0 | **DONE (S1L-a/S1L-d, 2026-07-28)** — `Fission` was already ported and already used by the RENDERER; only the sizer never called it. See the S1L-d section below. | — |
@@ -694,3 +694,32 @@ never reads `this.sname` — verified), and upstream's own `fromString(String,
 ISkinParam)` really does not resolve `archimate` either, because
 `CommandArchimate.java` passes the singleton directly at leaf-creation time
 rather than re-deriving the shape from the keyword string as this port does.
+
+
+## Residual filed by mission `bodyenhanced-atom-seams` (2026-07-30)
+
+### The `Sea`/`SheetBlock1` single-resolved-value gap — SIZING, blocks 2 narrowings
+
+The faithful `create3` → `Sea` → `SheetBlock1` pipeline carries **exactly one
+resolved value per atom**, reused for width, line-stacking height, and
+footprint fitting alike. It has **no declared-vs-ink channel and no
+per-element-vs-diagram-default channel anywhere**.
+
+Two of the previous mission's four narrowings sit on this one hole:
+
+| narrowing | needs | measured cost of routing anyway |
+|---|---|---|
+| box + `<img>` | the diagram-default font for the cannot-decode fallback | `jecici-56-bimu826` widens 0 → **0.398264in** |
+| usecase + sprite, MULTI-LINE | ink height distinct from stacking height | `bootstrap-0` / `ruziru-69-xixo434` widen 0 → **0.029321in** |
+
+Both numbers are from T5 removing the guard for real and reverting, not from
+inspection.
+
+**Note the shape.** ADR-2 (ink fields on `AtomImageResolver`) and ADR-3
+(`imgFallbackFont` threading) each added exactly such a side channel to the
+OLD pipeline. Routing to the faithful pipeline discarded both — T3's fix was
+correct on landing and dead once T4 bypassed `buildTextBlock`. **Whoever
+takes this must add the channels to `Sea`/`SheetBlock1`/`descAtomOps`, or
+these same two narrowings re-open a third time.**
+
+Owner: **SI1** (it already owns `create2`/`MethodsOrFieldsArea`).

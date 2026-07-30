@@ -76,8 +76,254 @@ not move at all), then widen separately (batch 5).
 cause. Costs one extra batch boundary; buys a clean bisect on the riskiest
 change in the mission.
 
+## ADR-5 AMENDMENT — the gate is a diff-count baseline, not a byte-freeze
+
+**Maintainer decision, 2026-07-29, after T1 measured the population.**
+
+**Context.** ADR-5 assumed a conformant population existed inside the blast
+radius to freeze. T1 measured it: **0 of 22** candidates reach zero-diff
+under `DeterministicMeasurer`. Verified independently — the census reports
+57 zero-diff component+usecase fixtures and none is a candidate, while the
+48 already-pinned goldens still pass, ruling out harness breakage. Group 1
+fails on the package/cluster `[childCount]` gap open since T19; groups 2-3
+fail because `src/diagrams/description/` has no creole block-separator
+support at all.
+
+There was also a flaw in the original shape: it would have byte-frozen the
+very fixtures ADR-1 is *supposed to change*, so T4 would have had to
+re-baseline them. The freeze value was always in the UNAFFECTED fixtures —
+and those are the 48 goldens already pinned, which do watch general
+description rendering.
+
+**Decision.** Replace the freeze with a **monotone-improvement ratchet**:
+pin each of the 22 fixtures' CURRENT diff count; a rise is a failure; a
+fixture reaching 0 is promoted into `ratchet.json` as a real byte-exact
+golden.
+
+**Consequences.** ADR-5's intent — watch the renderer through ADR-1 — is
+served by the population that actually exists, and T4's riskiest change
+becomes measurable instead of invisible. Costs one new ratchet shape.
+Rejected: proceeding on the 48 goldens alone (leaves the blast radius
+unwatched); and blocking on the package/cluster gap first (converts an
+open follow-on of unknown size into a prerequisite).
+
+## ADR-7 — `TextBlockLineBefore` gets ONE owner in `src/core/`, now
+
+**Maintainer decision, 2026-07-29, correcting T2a's premise.**
+
+**Context.** T2a states `TextBlockLineBefore` "does NOT exist in this port."
+False in substance. `src/diagrams/class/class-body-enhanced-layout.ts` (347
+lines) cites `BodyEnhancedAbstract#decorate`, `TextBlockLineBefore.java`,
+and `UHorizontalLine.java`, and records its offsets as jar-verified
+byte-exact against `fecolo-08-gepu579`, `jajebo-21-dada557`, and
+`pacagu-24-nune023` (G2 N42; derivation in `plans/g2-class-svg/ledger.md`).
+`renderer-body-enhanced.ts` reproduces `drawU`'s title!=null draw order.
+The arithmetic is ported — in class-body-geometry shape, with no `src/core/`
+owner the description engine can share.
+
+**Decision.** Port `TextBlockLineBefore` into `src/core/klimt/shape/` from
+the Java as the single canonical owner, **and rewire `src/diagrams/class/`
+to consume it in this mission.** One owner immediately.
+
+**Consequences.** Closest to "upstream architecture is authoritative — and
+rewrites are allowed": a structural divergence is itself the bug, and two
+independent encodings of the same jar-verified arithmetic is that
+divergence. Accepts real risk — this puts the class ratchets (219/708
+sizing, 708 DOT-EQUAL) and the class SVG goldens in the blast radius of a
+mission scoped to description, so **the class ratchets become STOP
+conditions for T2a exactly as the description ones are.** Rejected:
+time-boxed duplication with a tracked follow-on (defers the divergence and
+history says the follow-on is what slips); and extracting the class-side
+code instead of re-porting (it carries class-body assumptions — rows,
+trees, dividers — that a general `TextBlock` must not inherit).
+
+## ADR-8 — Port the creole `Display`/`Sheet` layer as a prerequisite
+
+**Maintainer decision, 2026-07-29, after T2b stopped at the wall.**
+
+**Context.** T2b found that both concrete bodies bottom out in unported
+code, and stopped rather than guess. Verified against the Java:
+`BodyEnhanced1.buildTextBlock` constructs `MethodsOrFieldsArea`
+(`BodyEnhanced1.java`, private `buildTextBlock`); `BodyEnhanced2.getTextBlock`
+calls `display.create9(...)` → `create0` → `getCreole` → `SheetBlock1`.
+Sizes: `Display` 796, `SheetBlock1` 241, `SheetBlock2` 132, `Sheet` 82,
+`MethodsOrFieldsArea` 442.
+
+T2b's *reading* was right; its *conclusion* was not. It proposed either a
+foundational port or "an ADR-level decision to build a scoped substitute"
+— but that substitute already exists and is documented as such at its own
+definition: `EntityImageDescriptionSupport.ts#buildTextBlock`, "scoped
+substitute for `BodyFactory.create2`/`create3`" (mission E2r), already
+covering `\n`-split assembly, the creole stripe/atom pipeline, inline
+style runs, the `==` heading cascade, `<img>`/`<$sprite>` atoms, and
+word-wrap via `Fission`.
+
+**Decision.** Do NOT compose on the scoped substitute. **Port the real
+layer** — `Display`, `Sheet`, `SheetBlock1`, `SheetBlock2` — as a
+prerequisite, then resume T2b on it. Maintainer guidance, standing for the
+rest of this mission: **a faithful port overrides a short-term patch.**
+
+**Consequences.** This mission stalls at batch 3 while a new gating batch
+(3a) lands a cross-cutting layer that sequence, class, and note paths will
+also eventually use — so the cost is front-loaded, not wasted. Rejected:
+composing on the substitute (cheaper and bounded, but permanently encodes
+a divergence at the exact seam this mission line exists to make faithful);
+and porting a narrow description-only text path (a THIRD encoding of the
+text-block layer, the second-builder shape ADR-1, ADR-2 and ADR-7 all
+reject).
+
+**Smaller than its raw line count.** The lower creole layer is already
+ported — `Fission` (275), `Stripe`, `Stencil`, `StripeStyleType`,
+`atom/Atom`, the full `command/` chain, `StripeSimple` (289),
+`CreoleStripeSimpleParser`. Verified present for the dependency set:
+`TextBlockMemoized`, `MinMax`, `ClockwiseTopRightBottomLeft`,
+`UGraphicStencil`, `TextBlock`. Verified MISSING and in scope:
+`LineBreakStrategy`, `CreoleMode`, `CreoleContext`, `XRectangle2D`,
+`Ports`/`WithPorts`.
+
+**Note on `Ports`/`WithPorts`.** `SheetBlock2` implements them. T2a
+deliberately dropped them from `TextBlockLineBefore` as unreachable. Batch
+3a must decide once, explicitly, and record it — not drop them a second
+time by reflex.
+
+### ADR-8 corollary — "not ported yet" is NEVER "unreachable"
+
+**Added 2026-07-29 after T7 got this wrong and the maintainer caught it.**
+
+T7 dropped `XRectangle2D#intersect(XLine2D)` because its only upstream
+callers live in `wbs/WBSLink.java` and WBS "is a diagram type this port has
+not built." The orchestrator accepted that reasoning. Both were wrong.
+
+**This port is porting every PlantUML diagram type.** WBS is live upstream
+(`DiagramType.java:46` enum member, `:206` parses `@startwbs`, `:257` maps
+`SName.wbsDiagram`, 15-file package) and `'wbs'` is ALREADY in this port's
+own `DiagramType` union at `.claude/catalog.md:56`. The method is not
+unreachable; it is unreached. Only the first justifies dropping code.
+
+**The rule, binding on every remaining task:** a member may be dropped only
+if it is *genuinely* unreachable — the code path cannot exist in this port
+even once the roadmap is complete. "Its caller is a diagram type we have
+not ported yet", "no caller today", and "the current mission does not need
+it" are all **invalid** justifications. When the dependency is merely
+unported, port it or STOP and report; do not drop.
+
+Reversed by T7b, which ports `XLine2D` and reinstates `intersect`.
+
+**The first audit was too narrow and missed one.** It grepped only for
+drops justified by an *unported diagram type* and found a single hit. But
+the corollary also invalidates "no caller today" — and **T2a stripped
+`getPorts`/`WithPorts` (and check `getInnerPosition`) from
+`TextBlockLineBefore.ts`** on exactly that reasoning plus "`Ports`/
+`WithPorts` don't exist in this port." `src/core/svek/` is substantial here
+and svek is plainly in scope, so that is a gap to close, not a licence to
+skip. Upstream, `WithPorts` is implemented by `TextBlockLineBefore`,
+`SheetBlock2`, `BodyEnhanced1`, `MethodsOrFieldsArea`, `Body3`,
+`TextBlockMap`, `TextBlockCucaJSon`, `TextBlockVertical`, `TextBlockMarged`
+— it is load-bearing across the exact classes this mission ports.
+
+T8 ports `Ports`/`WithPorts` and reinstates them on `TextBlockLineBefore`.
+
+**Lesson for future audits:** grep for the *justification shape*, not one
+example of it. "No caller", "not needed yet", "doesn't exist in this port",
+and "its caller is an unported X" are all the same defect wearing different
+clothes.
+
 ## Accepted loosening (maintainer-approved)
 
 **SVG drift in T4 is acceptable IF jar-verified.** Drift that matches the
 jar is the port working; unverified drift is a regression. Freezing today's
 SVG entirely would block the port from ever becoming faithful.
+
+## ADR-9 — Stripe classes adapt to the data-oriented atom model
+
+**Orchestrator decision, 2026-07-29, applying ADR-1/2/7 rather than making
+a new call. Flagged to the maintainer for override.**
+
+**Context.** The maintainer ruled that all remaining stripe classes be
+ported. Tracing their dependencies revealed the true size is ~2,300 Java
+lines, not the ~1,100 quoted at decision time:
+
+| Layer | Lines |
+|---|---|
+| Stripe classes (7 seams) | 1,099 |
+| Atom layer: `AtomTable` 285, `AtomTree` 103, `AtomMath` 107, `AtomWithMargin` 69, `AbstractAtom` 50 | 614 |
+| `Neutron` 128, `StripeStyle` 77, `Pragma` 109, `BackSlash` 104, `ScientificEquationSafe` 171 | 589 |
+
+It also revealed a fork the decision did not anticipate. Upstream's
+`AtomTable`/`AtomTree`/`AtomMath`/`AtomWithMargin` are subclasses of an OOP
+`Atom` hierarchy. **This port deliberately replaced that hierarchy** with a
+data-oriented `CreoleAtom` + `buildLineAtoms` pipeline (E2r/L1), and
+`src/core/klimt/creole/atom/Atom.ts` is that data interface, not upstream's
+class.
+
+**Decision.** Port the stripe classes' ALGORITHMS faithfully, but bind them
+to the existing data-oriented atom model through injected operation
+bundles — **not** by porting a parallel OOP `Atom` hierarchy.
+
+**Why this is not a new decision.** It is what the locked ADRs already
+require, and the pattern is established twice inside this very batch:
+- T8 ported `Sea`/`Position` generic over `CreoleAtom` via an injected
+  `AtomOps` bundle
+- T9a bound `createStripes` to `buildLineAtoms` rather than a second OOP
+  `StripeSimple`
+- ADR-1, ADR-2 and ADR-7 each reject a second encoding of one fact; ADR-7
+  spent an entire task consolidating exactly this shape
+
+Porting the OOP hierarchy alongside the data-oriented one would leave two
+atom models in one codebase — the precise defect this mission line exists
+to remove.
+
+**Consequences.** Algorithms stay faithful; the object model stays
+this port's. Each adapted class must carry a JSDoc `@see` to its Java
+origin AND a note naming the adaptation, so the divergence is visible at
+the site rather than inferred. If the maintainer prefers the verbatim OOP
+hierarchy, this ADR is the thing to reverse.
+
+## ADR-10 — Split T2b; `create2`/`BodyEnhanced1` moves to SI1
+
+**Maintainer decision, 2026-07-29, after the cascade was re-measured.**
+
+**Context.** `Display` (T9c) unblocks `BodyEnhanced2`, but not
+`BodyEnhanced1`, whose `buildTextBlock` constructs `MethodsOrFieldsArea`
+(442). The orchestrator first sized that cascade at ~3,931 lines and the
+maintainer approved porting it. **Tracing the second level showed that
+figure was wrong by roughly 3×:**
+
+| Level | Java |
+|---|---|
+| First (MethodsOrFieldsArea + direct deps: `Entity` 775, `StringUtils` 588, `VisibilityModifier` 355, `Style`/`StyleBuilder`/`PName`/`SName` 808, `ISkinParam` 205, `Url`+`CharHidder` 258, `PlacementStrategy`×5 + `ULayoutGroup` + `TextBlockWithUrl` 500) | ≈3,931 |
+| Second (`net/atmp/CucaDiagram` 953, the 40-file `skin/` package 5,232, `Quark`/`Kal`/`USymbols`/`USymbol`/`Margins`/`Stereostyles`/`Stereotag`/`IEntityImage`/`Bodier` 1,980) | ≈8,165 |
+| **Running total, still not closed** | **≈12,100** |
+
+**Two problems beyond size.** `abel/Entity` imports `net.atmp.CucaDiagram`
+— which `CLAUDE.md` calls "the single most load-bearing class outside the
+table above, and the target of mission SI1" — and `cucadiagram.Bodier`,
+which this mission's own README places out of scope AS SI1's work. So
+porting the cascade would absorb mission SI1 entirely, from inside a
+mission scoped to description-leaf sizing. Separately, `ISkinParam` is an
+interface over the whole 40-file `skin/` package, the subsystem that has
+now produced five independent hits (T7, T8, T9a, T9b, T10e).
+
+**Decision.** Split T2b:
+- **T2b-1 (this mission):** `BodyEnhanced2` + `BodyFactory.create3`
+- **T2b-2 (mission SI1):** `BodyEnhanced1` + `BodyFactory.create2`, together
+  with `MethodsOrFieldsArea`, `CucaDiagram`, `Entity`, `Bodier` and the
+  skin/style subsystem — ported ONCE, in a mission planned for it
+
+**Consequences.** This mission delivers T6 narrowings **#2 and #3** (already
+landed in T3 — the ink seam and `imgFallbackFont`) plus the entire creole
+`Display`/`Sheet`/stripe layer. **Narrowing #1 — folder/package, 8 fixtures,
+the mission's headline win — is deferred to SI1**, because `name` routes
+`create2` → `BodyEnhanced1`. `decorate`'s margin arithmetic is already
+ported (T2a), so SI1 inherits a working separator/margin layer rather than
+starting cold.
+
+Rejected: porting the cascade here (a mandate given for ~3,900 lines does
+not extend to ~12,100 that crosses into another mission); and pausing to
+re-plan everything (the split lets a green, mergeable branch close now).
+
+**Note the pattern.** This is the second time a scope figure the maintainer
+ruled on was later found materially wrong — ~1,100→~2,300 for the stripe
+classes, ~3,900→~12,100 here. Both were caught by tracing the call graph
+one level deeper than the estimate. **Size a cascade by tracing two levels,
+not one, before asking for a ruling on it.**

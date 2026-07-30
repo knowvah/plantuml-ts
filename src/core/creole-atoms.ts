@@ -116,10 +116,30 @@ export interface LineAtomScan {
  * :228-236): the atom never becomes a drawable element at all, not a
  * zero-size one. See `src/diagrams/description/render-atoms.ts` for the
  * concrete builder.
+ *
+ * `inkX`/`inkY`/`inkWidth`/`inkHeight` (T3-seams, ADR-2): OPTIONAL --
+ * mirrors `klimt/sprite/SpriteSvg.ts`'s own `inkX/inkY/inkWidth/inkHeight`
+ * fields exactly, the SAME shape `SpriteDims` (below) already carries for
+ * the sizer's parallel `SpriteDimsLookup` path (`leaf-sizing-text.ts
+ * #inlineFootprintBox`). A resolver that omits them means ink === the
+ * declared `width`/`height` box -- today's behaviour, byte for byte; no
+ * caller reads these fields yet (routing lands in a later batch). Rejected:
+ * a second, parallel resolver/channel for this same fact -- the
+ * `inkSprites` mistake a prior mission already deleted.
  */
 export type AtomImageResolver = (
   atom: InlineAtomToken,
-) => { readonly href: string; readonly width: number; readonly height: number } | undefined;
+) =>
+  | {
+      readonly href: string;
+      readonly width: number;
+      readonly height: number;
+      readonly inkX?: number;
+      readonly inkY?: number;
+      readonly inkWidth?: number;
+      readonly inkHeight?: number;
+    }
+  | undefined;
 
 /**
  * Minimal structural view of T4's per-diagram sprite registry (batch-2

@@ -11,6 +11,13 @@ routed `measureLeafNode` through `EntityImageDescription
 only route the **box family**, and had to narrow four times. **This mission
 removes the reason for three of those four narrowings.**
 
+**Revised 2026-07-29 (ADR-10): this mission delivers narrowings #2 and #3.**
+Narrowing #1 moved to mission SI1 — `name` routes `create2` →
+`BodyEnhanced1`, which needs `MethodsOrFieldsArea` and a ≈12,100-line
+cascade through `CucaDiagram`/`Entity`/`Bodier` and the 40-file `skin/`
+package. That is SI1's scope by `CLAUDE.md` and by this README's own
+out-of-scope list.
+
 The ADR-6 AMENDMENT in `plans/description-leaf-sizing-audit/decisions.md`
 is the authoritative statement of why, and it is required reading: the
 ported `decoration/symbol/` classes and our flat sizing tables are faithful
@@ -60,6 +67,10 @@ port closes is allowed; moving one to `SIZE_NEUTRAL` never is.
 
 Baseline: main @ `7267187`, **317/351 (90.3%)**, 34 pins, zero widened.
 
+**CLOSED 2026-07-30 at 320/351 (91.2%), widened 0.** See
+`decision-journal.md`'s T6 entry and `planning/mission-index.md` for the
+outcome, including what was NOT achieved.
+
 ### Pre-flight — verified 2026-07-29
 
 | Check | Result |
@@ -81,16 +92,17 @@ skill's gitignore instruction. `.claude/` is ignored.
 
 | # | Focus | Tasks | Status |
 |---|---|---|---|
-| 1 | SVG goldens — GATING (ADR-5) | T1 | [ ] |
-| 2 | Port base + seams (parallel) | T2a, T3 | [ ] |
-| 3 | Port the Body classes | T2b | [ ] |
-| 4 | Wire it in — the risky one | T4 | [ ] |
-| 5 | Widen the routing (ADR-6) + close | T5, T6 | [ ] |
+| 1 | Renderer gate — GATING (ADR-5 + AMENDMENT) | T1 [x], T1b [x] | [x] |
+| 2 | Port base + seams (parallel) | T2a [x], T3 [x] | [x] |
+| 3a | Creole Display/Sheet layer — GATING (ADR-8) | T7–T10g, T9c [x] | [x] |
+| 3 | Port the Body classes | T2b-1 [x] (T2b-2 → SI1, ADR-10) | [x] |
+| 4 | Wire it in — the risky one | T4 [x] | [x] |
+| 5 | Widen the routing (ADR-6) + close | T5 [x], T6 [x] | [x] |
 
 ## Index
 
-- [decisions.md](decisions.md) — ADR-1..6
-- [batch-1/overview.md](batch-1/overview.md) … [batch-5/overview.md](batch-5/overview.md)
+- [decisions.md](decisions.md) — ADR-1..10, incl. the ADR-5 AMENDMENT and ADR-8's corollary
+- [batch-1/overview.md](batch-1/overview.md) … [batch-5/overview.md](batch-5/overview.md), plus [batch-3a/overview.md](batch-3a/overview.md)
 - [diagrams/component-map.md](diagrams/component-map.md)
 - [diagrams/data-flow.md](diagrams/data-flow.md)
 - [decision-journal.md](decision-journal.md)
@@ -110,6 +122,15 @@ skill's gitignore instruction. `.claude/` is ignored.
 - **Verify a load-bearing claim before repeating it.** Eight were corrected
   against the code last mission — including T6's "no defaultFont seam",
   which ADR-3 corrects: the seam EXISTS and is simply never passed.
+- **"Not ported yet" is NEVER "unreachable"** (ADR-8 corollary). This port
+  is porting every PlantUML diagram type, so "its only caller is a diagram
+  type we have not built" does not justify dropping a member — nor does "no
+  caller today". Port it, or STOP and report. T7 dropped
+  `XRectangle2D#intersect` on exactly this reasoning and had to be reversed.
+- **A scoped substitute may already exist — check before proposing one.**
+  T2b offered the maintainer a choice between porting a foundation and
+  "deciding to build a scoped substitute" that was already built and
+  self-documented (`EntityImageDescriptionSupport.ts#buildTextBlock`).
 - **Jar probe**, and its two traps:
   ```sh
   java -DPLANTUML_DETERMINISTIC_TEXT=true -DPLANTUML_DUMP_DOT=<dir> \
@@ -124,9 +145,18 @@ skill's gitignore instruction. `.claude/` is ignored.
 
 ## Out of scope
 
-The `<latex>` divergence (above); `BodierSimple`/`BodierLikeClassOrObject`
-and `BodyFactory.createLeaf`/`createGroup` (mission SI1); S1L-j multiline
-quoted display; the creole `{{ }}` sub-diagram (UNIMPLEMENTED, A3); A2s.
+The `<latex>` **sizing** divergence (above — the 0-width approximation
+stays; `StripeLatex` PARSING was ported by T10e); `BodierSimple`/
+`BodierLikeClassOrObject` and `BodyFactory.createLeaf`/`createGroup`
+(mission SI1); S1L-j multiline quoted display; A2s.
+
+**Moved to SI1 during execution (ADR-10):** `BodyEnhanced1`,
+`BodyFactory.create2`, `MethodsOrFieldsArea`, `CucaDiagram`, `Entity` and
+the skin/style subsystem — and with them T6 narrowing #1.
+
+**No longer out of scope:** the creole `{{ }}` sub-diagram was listed as
+UNIMPLEMENTED (A3); T10f ported `EmbeddedDiagram` including
+`createAndSkip`, with nested rendering behind an injected seam.
 
 **S1L-i (creole titled separators) IS IN SCOPE** — maintainer decision.
 `decorate` carries the separator machinery, so porting it faithfully closes

@@ -91,3 +91,74 @@ creole) are tracked as F2/F5+; named-CSS-color-to-hex normalization
 `src/core/theme.ts`-level fix, out of the description-engine write-set). Do
 not force-add a non-conformant fixture to close either gap; widen coverage
 only once a fixture in one of these categories actually reaches zero-diff.
+
+## Known gap #2 (`bodyenhanced-atom-seams` T1 finding, 2026-07-29)
+
+T1 enumerated 22 candidate fixtures ahead of the `decorate`/`BodyFactory`
+port (ADR-1/ADR-4 of the `bodyenhanced-atom-seams` mission): the 11
+known-affected folder/package + widened fixtures, plus 11 separator-bearing
+fixtures found by scanning `test-results/dot-cache/{component,usecase}`
+for creole block-separator lines (`--`/`==`/`..`/`__`, both titled and
+bare — see `BodyEnhancedAbstract#isBlockSeparator`). **Zero of the 22 reach
+zero-diff under `DeterministicMeasurer` today.** None were pinned.
+
+- **Folder/package fixtures (8 of 11 group-1 targets)** fail with a
+  `[childCount]` structural bail inside the package/folder cluster's own
+  `<g>` — the same pre-existing gap this section already documents above
+  (no conformant package/cluster fixture yet).
+- **Separator-bearing fixtures (all 11 titled + bare)** fail because
+  `src/diagrams/description/` has no `decorate`/`TextBlockLineBefore`
+  equivalent at all (grep-verified: that logic exists only under
+  `src/diagrams/class/`). The separator line's width is never contributed
+  to the body's sizing, so the whole entity box comes out undersized and
+  every downstream child position cascades (diffs from 3 to 388 per
+  fixture, first divergence typically `svg/@height` or a rect/text `@x`).
+- `usecase/bootstrap-0` and `usecase/ruziru-69-xixo434` additionally error
+  in this harness independent of conformance: `render-fixture.ts` (unlike
+  `scripts/svg-conformance-census.ts`) wires no stdlib `includeStore`, so
+  `!include <bootstrap/bootstrap>` cannot resolve. Moot for pinning either
+  way — both are `dotEqual=false` in `parity.json`, AC3-ineligible.
+- `usecase/fepuvo-06-rugi981` (titled separator) additionally has a
+  malformed-XML jar golden (`comment is not well-formed`) and is also
+  `dotEqual=false` — ineligible regardless.
+
+Full per-fixture list, diff counts, and the exact grep methodology are in
+`.agent-notes/T1-svg-goldens.md`. Batch 2+ of `bodyenhanced-atom-seams`
+should re-run this same 22-fixture check after the `decorate` port lands —
+that is the population expected to start going green.
+
+## Diff-count ratchet (T1b, `diff-baseline.json`)
+
+The byte-exact `ratchet.json` above only ever pins fixtures that are
+**already conformant**. The 22 fixtures in "Known gap #2" are, today, the
+opposite: a population we *know* is wrong, and whose wrongness the
+`decorate`/`BodyFactory` port (ADR-1/ADR-4) is expected to fix. ADR-5's
+original plan was to byte-freeze them ahead of that port; T1 proved that
+gate unbuildable (0 of 22 reach zero-diff), so the maintainer amended ADR-5
+(see `plans/bodyenhanced-atom-seams/decisions.md`, "ADR-5 AMENDMENT") to a
+**monotone-improvement ratchet** instead, implemented in
+`oracle/goldens/svg-description/diff-baseline.json` +
+`tests/oracle/svg-conformance/description.diff-baseline.ratchet.test.ts`.
+
+**A `diffCount` in `diff-baseline.json` is NOT a golden.** It is a record of
+how wrong our SVG emission is *today* against the jar oracle, under
+`DeterministicMeasurer`, for one fixture. Pinning a wrong value is not
+correctness — it is a floor: any rise above the recorded count fails the
+suite, any fall passes, and a fixture that reaches 0 becomes eligible (never
+automatic) for promotion into `ratchet.json` above, following the same "Add
+rule" this file already documents.
+
+Each manifest entry also carries `measuredAt` and `measuredAgainstCommit`
+provenance, precisely so a diffCount change is never a silent one-line edit:
+a reviewer sees the count move alongside the date/commit it was re-measured
+against, and can ask "why did this change and what was re-run to produce
+it?" A `status: "error"` entry (three of the 22 — see "Known gap #2") always
+carries a `reason` and `diffCount: null`; it is asserted as a distinct state
+from a numeric baseline so an error can never be silently read as "0
+diffs" (an error->measurable transition is its own reportable event, not a
+free pass to fill in a fresh baseline unnoticed).
+
+Unlike the byte-exact ratchet above, the diff-count ratchet is **not fully
+offline** — it reads `test-results/dot-cache/<type>/<slug>/{in.puml,in.svg}`
+directly at test time rather than committed copies, and skips gracefully
+(not a failure) when that gitignored, regenerable tree is absent locally.

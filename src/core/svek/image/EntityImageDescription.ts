@@ -38,13 +38,25 @@
  * (T12, the sibling svek drawing-half port) established for the
  * identical `Entity`/`Style`/`ClusterHeader` gap.
  *
- * Text-construction seam: upstream builds `name`/`desc` via
- * `BodyFactory.create2`/`create3` (full Creole + word-wrap) and `stereo`
- * via `Display.create(...)`; none of `BodyFactory`/`BodyEnhanced*`/
- * `Display` exist here. `buildTextBlock` (support file) is a scoped
- * substitute — `\n`-split multi-line text, now (E2r/L1) running each line
- * through the ported `klimt/creole` stripe/atom pipeline (nested inline
- * style runs, `==` heading cascade) but still no word-wrap. Dimension
+ * Text-construction seam (T4, `plans/bodyenhanced-atom-seams/`): upstream
+ * builds `desc` via `BodyFactory.create3` (java:188-191) and `name` via
+ * `BodyFactory.create2` (java:198-199). `BodyFactory`/`BodyEnhanced2`/
+ * `Display` now exist (T2b-1/T9c) — `desc` is wired to the REAL
+ * `create3` (`EntityImageDescriptionDelegates.ts#buildDesc`), constructing
+ * a real `ISkinSimple`/`AtomOps`/`Display` locally (see that file's doc
+ * comment for the full derivation). `create2` is NOT wired: it routes to
+ * `BodyEnhanced1` -> `MethodsOrFieldsArea` -> `CucaDiagram`/`Bodier`/the
+ * 40-file `skin/` package, an ≈12,100-line cascade split to mission SI1
+ * (ADR-10) — `name` still uses `buildTextBlock` (support file), the
+ * pre-T4 scoped substitute, UNCHANGED. `stereo` also still uses
+ * `buildTextBlock` (upstream: `Display.create(...)`, same substitute,
+ * also unchanged by this task).
+ *
+ * `buildTextBlock` (support file, `name`/`stereo` only after T4) — `\n`-
+ * split multi-line text, running each line through the ported `klimt/
+ * creole` stripe/atom pipeline (nested inline style runs, `==` heading
+ * cascade) but still no real Sea/altitude layout (E2r/L1's naive width-
+ * sum/height-max approximation, not upstream's real algorithm). Dimension
  * math uses `jarMeasurer` directly (D12, byte-verified vs the real AWT
  * jar) rather than `ug.getStringBounder()`, because this port's injected
  * klimt `StringBounder` is width-only today (T5: "real height must come
@@ -165,9 +177,25 @@ export interface EntityImageDescriptionPaint {
   readonly fontBody?: FontConfiguration;
   readonly titleAlignment: HorizontalAlignment;
   readonly stereotypeAlignment: HorizontalAlignment;
-  /** `style.value(PName.MinimumWidth).asDouble()`, read only on the
-   *  "empty desc" branch. Defaults to upstream's own default, 0. */
+  /** `style.value(PName.MinimumWidth).asDouble()`, read on the "empty desc"
+   *  branch AND (T4) forwarded to `BodyFactory.create3`'s `getArea()` width
+   *  floor (`BodyEnhanced2.java:114-116`). No `plantuml.skin` selector sets
+   *  `MinClassWidth`/`MinimumWidth` for any description-family classifier
+   *  (grep-verified), so 0 is upstream's own real default, not a fitted
+   *  constant. */
   readonly minimumWidth?: number;
+  /** T4: `style.value(PName.LineThickness).asDouble()`, forwarded to
+   *  `BodyFactory.create3`'s `BodyEnhanced2StyleValues.defaultThickness`
+   *  (`BodyEnhancedAbstract#getDefaultThickness`, java, via `super()`) --
+   *  only read if `desc`'s text contains a block separator (`--`/`==`/`..`).
+   *  No `plantuml.skin` selector overrides `LineThickness` for ANY
+   *  description-family classifier (`component`/`usecase`/`rectangle`/
+   *  `interface`/`folder`/`package`/`note`/`AbstractTextualComponent`'s own
+   *  callers, grep-verified against `~/git/plantuml/.../skin/plantuml.skin`)
+   *  -- every one of them falls through to `root`'s own default (line 15,
+   *  `LineThickness 1.0`), so 1.0 here is that traced default, not a guess.
+   *  Absent = 1.0. */
+  readonly defaultThickness?: number;
   /** `style.wrapWidth()`, applied ONLY to `desc` (upstream: `BodyFactory
    *  .create3`'s `lineBreakStrategy` param — `name`/`stereo` never receive
    *  it, per `EntityImageDescription.java`'s own ctor). E2r/L3, word-wrap

@@ -116,7 +116,7 @@ export interface HexagonPolygon extends UShape {
  *  (`FormulaMeasurer`/`WidthTableMeasurer`/`CanvasMeasurer`/
  *  `FixedMeasurer`, `measurer.ts`) keeps behavior sane for any caller not
  *  wired through the updated `UGraphicSvg`. */
-function measureLine(
+export function measureLine(
   stringBounder: StringBounder,
   line: string,
   font: FontConfiguration,
@@ -188,12 +188,10 @@ const SEPARATOR_DEFAULT_THICKNESS = 1;
  *  `leaf-sizing.ts#creoleVisibleText` (the sizer) now consume. */
 type LineBuild = LineBuildAtoms;
 
-/** Thin delegate to the shared "line -> visible atoms" lexer
- *  (`StripeSimple.ts#buildLineAtoms`, ADR-1) — this renderer's own
- *  classification-dispatch logic MOVED there verbatim; this function's
- *  output (and therefore every downstream draw) is byte-unchanged. */
-function buildLine(line: string, font: FontConfiguration): LineBuild {
-  return buildLineAtoms(line, font);
+/** Delegates to the shared lexer (`buildLineAtoms`, ADR-1). `defaultFont`
+ *  (ADR-3) threads to its PRE-EXISTING `imgFallbackFont`; omitted = today. */
+function buildLine(line: string, font: FontConfiguration, defaultFont?: FontConfiguration): LineBuild {
+  return buildLineAtoms(line, font, defaultFont);
 }
 
 /** Sums each atom's own width (text run measured under ITS own
@@ -260,6 +258,12 @@ function measureSingleAtomWidth(
   return resolved === undefined ? 0 : resolved.width;
 }
 
+/** Bundles `buildWrappedLines`' 2 atom inputs (5-param ceiling). */
+interface AtomResolutionCtx {
+  readonly resolveAtomImage: AtomImageResolver | undefined;
+  readonly defaultFont: FontConfiguration | undefined;
+}
+
 /**
  * Builds every `\n`-split raw line's `LineBuild` (E2r/L1, `buildLine`),
  * then word-wraps it (E2r/L3, `Fission.ts#getSplitted`) when `maxWidth > 0`
@@ -274,13 +278,14 @@ function measureSingleAtomWidth(
 function buildWrappedLines(
   rawLines: readonly string[],
   font: FontConfiguration,
-  resolveAtomImage: AtomImageResolver | undefined,
+  atomCtx: AtomResolutionCtx,
   stringBounder: StringBounder,
   maxWidth: number,
 ): readonly LineBuild[] {
+  const { resolveAtomImage, defaultFont } = atomCtx;
   const result: LineBuild[] = [];
   for (const raw of rawLines) {
-    const built = buildLine(raw, font);
+    const built = buildLine(raw, font, defaultFont);
     if (built.classification.type === 'HORIZONTAL_LINE' || maxWidth === 0) {
       result.push(built);
       continue;
@@ -393,7 +398,10 @@ function drawAtoms(
  * (`klimt/creole/command/`) is built to accept more `Command` registrations
  * for these without changing `StripeSimple`'s dispatch loop — see
  * `legacy/CommandCreoleBuilder.ts`'s doc comment.
- */
+ *
+ * `defaultFont` (ADR-3, additive 7th param): threads to `buildLineAtoms`'s
+ * PRE-EXISTING `imgFallbackFont` -- cannot-decode `<img>` fallback then
+ * draws at the diagram default, not `font` (jar: 100.362x14 either way). */
 export function buildTextBlock(
   text: string,
   font: FontConfiguration,
@@ -401,17 +409,16 @@ export function buildTextBlock(
   resolveAtomImage?: AtomImageResolver,
   maxWidth = 0,
   guillemet?: GuillemetPair,
+  defaultFont?: FontConfiguration,
 ): TextBlock {
-  // `<<x>>` -> `«x»` before anything is classified or measured, mirroring
-  // `CreoleParser.java:175`'s `skinParam.guillemet().manageGuillemet(...)`
-  // ahead of `createStripes`. The SIZER applies the same transform at the
-  // same point (`leaf-sizing-text.ts#lineTextMetrics`), so box and ink agree
-  // (S1L-f).
+  // `<<x>>` -> `«x»` before classify/measure, mirroring `CreoleParser.java:175`
+  // (SIZER applies the same transform at the same point, S1L-f).
   const managed = manageGuillemet(text, guillemet);
   const lines = managed.length === 0 ? [] : managed.split('\n');
+  const atomCtx: AtomResolutionCtx = { resolveAtomImage, defaultFont };
 
   function calculateDimension(stringBounder: StringBounder): XDimension2D {
-    const built = buildWrappedLines(lines, font, resolveAtomImage, stringBounder, maxWidth);
+    const built = buildWrappedLines(lines, font, atomCtx, stringBounder, maxWidth);
     let width = 0;
     let height = 0;
     for (const b of built) {
@@ -426,7 +433,7 @@ export function buildTextBlock(
     calculateDimension,
     drawU(ug: UGraphic): void {
       const stringBounder = ug.getStringBounder();
-      const built = buildWrappedLines(lines, font, resolveAtomImage, stringBounder, maxWidth);
+      const built = buildWrappedLines(lines, font, atomCtx, stringBounder, maxWidth);
       const dim = calculateDimension(stringBounder);
       let y = 0;
       for (const b of built) {
@@ -441,6 +448,9 @@ export function buildTextBlock(
       }
     },
   };
+  // #lizard forgives -- pre-existing 7-PARAM violation (defaultFont, ADR-3).
+  // Placed here, not after the signature: a nested fn's own end-of-function
+  // resets lizard's forgive flag before this fn's own end-of-function fires.
 }
 
 // ---------------------------------------------------------------------------

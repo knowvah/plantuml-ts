@@ -295,3 +295,60 @@ reach graphviz. These are independent SVG-assembly bugs.
   TIM-json ledger entry. Brief via `/plan-mission` from
   `planning/s4-stdlib-audit.md` Finding 3. SI5b needs a maintainer licensing
   ruling; SI1 should land before Phase D.
+
+
+## `bodyenhanced-atom-seams` — CLOSED 2026-07-30, **320/351 (91.2%)**
+
+Branch `feat/bodyenhanced-atom-seams`, 46 commits. Gates at close: 449 files
+/ 11023 tests, typecheck + lint + build clean. Description **320/351, widened
+0** (from 317/351). Class **219/708 w0** and DOT **262/90/708 EQUAL** —
+neither moved all mission. Perf: `gutute-00-gaki684` 17.39ms → 17.42ms
+(+0.17%, inside noise).
+
+**Delivered**
+- The whole creole `Display`/`Sheet`/stripe layer — ~2,300 Java lines over
+  batch 3a's 14 tasks (`Sheet`, `SheetBlock1/2`, `Sea`, `Position`,
+  `CreoleParser`, `Display`, every `Stripe*`/`Atom*`, `EmbeddedDiagram`,
+  `Ports`/`WithPorts`, `SignatureUtils`, `Stereotype`, `Pragma`, …). **None
+  of this was in the original plan** — T2b hit it as a wall and the
+  maintainer ruled a faithful port over a scoped substitute
+- `BodyEnhancedAbstract`, `TextBlockLineBefore`, `BodyEnhanced2`,
+  `BodyFactory.create3`; `desc` routed through the real pipeline (ADR-1)
+- The class path consolidated onto ONE `TextBlockLineBefore` owner (ADR-7)
+- Both pipeline seams (ADR-2 ink fields, ADR-3 `imgFallbackFont`)
+- A renderer gate that did not exist: 22 diff-count baselines (ADR-5
+  AMENDMENT), three of which fell — `codabo-50-mupa164` 388 → 11
+
+**NOT delivered — stated as plainly**
+- **Narrowing #1 (folder/package, 8 fixtures)** → **SI1** (ADR-10). Needs
+  `create2`/`BodyEnhanced1` → `MethodsOrFieldsArea`, a ≈12,100-line cascade
+  through `CucaDiagram`/`Entity`/`Bodier` and the 40-file `skin/` package
+- **Narrowing #3 (box + `<img>`)** → **re-opened.** Believed closed by T3 for
+  most of the mission; T5 proved T4 routed `desc` past the function T3 fixed
+- **Narrowing #2 (usecase + sprite)** → PARTIAL. Single-line routes;
+  multi-line guarded on a sub-case T5 found
+- **S1L-i** → 1 of 3 fixtures. Blocker named and deliberately withheld:
+  `CreoleStripeSimpleParser.ts:95` (a live-rendering change, so ADR-6 wants
+  its own gated commit)
+- The whole +3 conformance came from T4; T5's widening was numerically
+  neutral because its target fixtures were already conformant via the
+  guarded path
+
+**Handed to SI1, in `plans/s1l-leaf-sizing/ledger.md`:** `create2` /
+`BodyEnhanced1` / `MethodsOrFieldsArea` / `CucaDiagram` / `Entity` / the
+skin-style subsystem, **plus the `Sea`/`SheetBlock1` single-resolved-value
+gap** that blocks narrowings #2 and #3 (measured: 0.398264in and
+0.029321in). ADR-2 and ADR-3 added exactly those side channels to the OLD
+pipeline; routing discarded them, so SI1 must re-add them at the new layer.
+
+**Method lesson, earned three times.** ADR-5's golden count (4 vs 48), T5's
+guard count (three vs two), and T3's narrowing-#3 credit were all stale, and
+two were repeated to the maintainer before being checked. **Verify an
+"already fixed" claim against the CURRENT call graph, not the commit that
+introduced the fix.** Also: size a dependency cascade by tracing TWO levels
+before asking for a ruling — the stripe estimate moved 1,100 → 2,300 and the
+`MethodsOrFieldsArea` estimate 3,900 → 12,100 on the second level.
+
+**SI1's scope grew accordingly** — it now owns `create2` and the
+entity/skin/style cascade on top of its original `Bodier` scope. Still
+should land before Phase D.

@@ -1,0 +1,206 @@
+{
+  "$comment": "NOT a golden manifest. Each diffCount below is a record of how WRONG our description-engine SVG emission is today against the jar oracle under DeterministicMeasurer -- see ADR-5 AMENDMENT (plans/bodyenhanced-atom-seams/decisions.md) and README.md's 'Diff-count ratchet' section. A rise vs the recorded diffCount is a regression; a fall is progress; reaching 0 makes the fixture eligible for promotion into ratchet.json as a real byte-exact golden (never automatic -- see README). Do not hand-edit a diffCount to make the suite pass: change measuredAt/measuredAgainstCommit/note together, and the value must be produced by actually re-running the measurement (see description.diff-baseline.ratchet.test.ts's header comment for the exact command).",
+  "fixtures": [
+    {
+      "type": "component",
+      "slug": "bozana-38-xufi750",
+      "group": 1,
+      "status": "baseline",
+      "diffCount": 4,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "bozoju-49-kufo528",
+      "group": 1,
+      "status": "baseline",
+      "diffCount": 55,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "gucefa-91-pume734",
+      "group": 1,
+      "status": "baseline",
+      "diffCount": 80,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "kanute-77-lacu414",
+      "group": 1,
+      "status": "baseline",
+      "diffCount": 78,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "lotofa-28-rudo664",
+      "group": 1,
+      "status": "baseline",
+      "diffCount": 77,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "sevage-80-seva382",
+      "group": 1,
+      "status": "baseline",
+      "diffCount": 79,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "texacu-57-daci050",
+      "group": 1,
+      "status": "baseline",
+      "diffCount": 312,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "usecase",
+      "slug": "cobuju-30-paxo591",
+      "group": 1,
+      "status": "baseline",
+      "diffCount": 32,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "usecase",
+      "slug": "bootstrap-0",
+      "group": 1,
+      "status": "error",
+      "diffCount": null,
+      "reason": "render-fixture.ts wires no stdlib includeStore (unlike scripts/svg-conformance-census.ts), so !include <bootstrap/bootstrap> cannot resolve and rendering throws before any comparison runs. Moot for the ratchet either way: parity.json records dotEqual=false for this fixture, so it could never be promoted regardless of this harness gap.",
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "usecase",
+      "slug": "ruziru-69-xixo434",
+      "group": 1,
+      "status": "error",
+      "diffCount": null,
+      "reason": "Same mechanism as usecase/bootstrap-0: render-fixture.ts has no stdlib includeStore, so !include <bootstrap/bootstrap> cannot resolve. Also dotEqual=false in parity.json -- ineligible regardless.",
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "usecase",
+      "slug": "jecici-56-bimu826",
+      "group": 1,
+      "status": "baseline",
+      "diffCount": 143,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "codabo-50-mupa164",
+      "group": 2,
+      "status": "baseline",
+      "diffCount": 11,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "17a534cc"
+    },
+    {
+      "type": "component",
+      "slug": "xufexu-38-fola855",
+      "group": 2,
+      "status": "baseline",
+      "diffCount": 3,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "usecase",
+      "slug": "fepuvo-06-rugi981",
+      "group": 2,
+      "status": "error",
+      "diffCount": null,
+      "reason": "compareSvg throws before producing a diff count: the jar golden's own SVG is malformed XML (xmldom: 'comment is not well-formed', an illegal '--' inside an XML comment) AND, independently, OUR render output under render-fixture.ts (no stdlib includeStore) is ALSO malformed XML for the same reason at a different byte offset -- the source markup carries a literal `: <include>` edge label plus creole separator lines containing raw '--'/'__'/'==' runs, and at least one of those sequences is landing inside an emitted SVG <!-- --> comment on our side too. This second half (our own output being malformed) is a new observation beyond T1's notes, which only recorded the golden's malformity; already dotEqual=false in parity.json so ineligible for promotion regardless of which side's malformity is fixed first.",
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "usecase",
+      "slug": "nixura-77-bina738",
+      "group": 2,
+      "status": "baseline",
+      "diffCount": 57,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "babafi-51-dixi026",
+      "group": 3,
+      "status": "baseline",
+      "diffCount": 24,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "17a534cc"
+    },
+    {
+      "type": "component",
+      "slug": "butebe-90-dozo380",
+      "group": 3,
+      "status": "baseline",
+      "diffCount": 7,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "17a534cc"
+    },
+    {
+      "type": "component",
+      "slug": "dexigu-24-deru622",
+      "group": 3,
+      "status": "baseline",
+      "diffCount": 35,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "kenece-24-juku624",
+      "group": 3,
+      "status": "baseline",
+      "diffCount": 35,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "tajadu-40-juro990",
+      "group": 3,
+      "status": "baseline",
+      "diffCount": 24,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "component",
+      "slug": "zifaji-87-raki559",
+      "group": 3,
+      "status": "baseline",
+      "diffCount": 31,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    },
+    {
+      "type": "usecase",
+      "slug": "pivudu-29-pele178",
+      "group": 3,
+      "status": "baseline",
+      "diffCount": 5,
+      "measuredAt": "2026-07-29",
+      "measuredAgainstCommit": "28d1688"
+    }
+  ]
+}
