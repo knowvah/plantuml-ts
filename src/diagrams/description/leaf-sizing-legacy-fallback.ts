@@ -10,20 +10,22 @@
  *   `sunuju-01-pote718`, `DIVERGENCES.md`). This port's OWN
  *   `leaf-sizing-text.ts#lineTextMetrics` instead treats a `<latex>` atom as
  *   contributing NO width at all — the pre-existing, jar-verified-CLOSER
- *   approximation for those two fixtures.
- * - an `<img>` tag that fails to decode: the shared lexer's "(Cannot
- *   decode)" text fallback (`creole-atoms.ts`) measures at whatever font
- *   `buildLine` was given — the PER-ELEMENT font, since
- *   `EntityImageDescriptionSupport.ts#buildLine` has no `defaultFont` seam
- *   at all (S1L-h: upstream builds that fallback `AtomText` with the
- *   DIAGRAM-default font, not the element's own — jar-verified via
- *   `jecici-56-bimu826`, which sets `skinparam rectangleFontSize 10`).
- *
- * Both are gaps in `EntityImageDescriptionSupport.ts`/`Delegates.ts`
- * (svek/, out of T6's write-set to change) discovered by this task's
- * shrink-only ratchet (widened-pin diagnosis) — not upstream divergences
- * this port invented. Every OTHER box-family display routes through
- * `EntityImageDescription.calculateDimensionSlow` instead.
+ *   approximation for those two fixtures. Permanent -- see `DIVERGENCES.md`.
+ * - an `<img>` tag that fails to decode: STILL open (T5, re-diagnosed).
+ *   T3/ADR-3 threaded `imgFallbackFont` through `buildTextBlock`/`buildLine`
+ *   (`EntityImageDescriptionSupport.ts`), but `buildDesc`'s MAIN desc
+ *   content (T4/ADR-1, `EntityImageDescriptionDelegates.ts:237`) now builds
+ *   via `BodyFactory.create3` instead -- `buildTextBlock` is reachable only
+ *   from `buildStereo` (stereotype text, `Delegates.ts:254`) since T4
+ *   landed. `create3`'s own atom pipeline (`descAtomOps#dimensionOf`,
+ *   `Delegates.ts:127-133`) measures its "(Cannot decode)" fallback text at
+ *   the per-atom cascaded font with no diagram-default substitution at all
+ *   -- the ORIGINAL S1L-h bug, unfixed on this path. Verified:
+ *   `jecici-56-bimu826` (which sets `skinparam rectangleFontSize 10`)
+ *   WIDENED 0 -> 0.398264in when this guard was removed. Both files are
+ *   off-limits (`EntityImageDescription*.ts`) -- fixing this needs an
+ *   equivalent seam threaded through `descAtomOps`/`CreoleParser`, out of
+ *   this task's write-set.
  *
  * Split out of `leaf-sizing.ts` purely to stay under this project's
  * 500-line file cap (this project's established "500-line splits"
@@ -47,7 +49,9 @@ import {
 } from './leaf-sizing-consts.js';
 
 /** True when `display` carries markup this task's routing does not yet
- *  reproduce byte-exact for a box-family symbol — see module doc comment. */
+ *  reproduce byte-exact for a box-family symbol — see module doc comment.
+ *  T5: re-diagnosed `<img>` as STILL open (T3/ADR-3's fix landed on a path
+ *  `buildDesc` no longer uses) -- kept guarded alongside `<latex>`. */
 export function hasUnroutedBoxMarkup(display: string): boolean {
   return display.includes('<latex>') || display.includes('<img');
 }

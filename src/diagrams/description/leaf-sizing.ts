@@ -3,29 +3,31 @@
  *
  * T6 (description-leaf-sizing-audit, ADR-6): `measureLeafNode` routes most
  * USymbols through the SAME faithful path the renderer already uses --
- * `EntityImageDescription.calculateDimensionSlow` = `symbol.asSmall(name,
- * desc, stereo, ctx, align).calculateDimension`, upstream's own sizing entry
- * point (`svek/image/EntityImageDescription.java`) -- superseding the flat
- * per-symbol tables that used to re-derive this geometry independently. See
- * `measureLeafNode`'s own doc comment for the per-case dispatch, including
- * the widened-pin diagnoses (folder/package, usecase+atom markup, box+atom
- * markup) that keep three families off this routing.
+ * `EntityImageDescription.calculateDimensionSlow` -- superseding the flat
+ * per-symbol tables that used to re-derive this geometry independently.
+ *
+ * T5 (bodyenhanced-atom-seams): of T6's four original narrowings, this task
+ * closed ONE -- `usecase`+`<$sprite>` on a single-line display (T3/ADR-2).
+ * box+`<img>` was RE-DIAGNOSED, not closed: T3/ADR-3's `imgFallbackFont` fix
+ * landed on `buildTextBlock`, a path `buildDesc` no longer uses since T4
+ * routed `desc` through `BodyFactory.create3` -- see `leaf-sizing-legacy-
+ * fallback.ts`'s module doc. `folder`/`package` (needs `create2`/
+ * `BodyEnhanced1`, moved to SI1, ADR-10) and `<latex>` (a permanent
+ * divergence, DIVERGENCES.md) stay pre-T6 too. See `measureLeafNode`'s own
+ * doc comment for the per-case dispatch.
  *
  * `measureActor`/`measureUsecase` (exported below) are UNCHANGED: `src/
- * diagrams/class/class-layout-leaf-shapes.ts` imports both directly for the
- * class-diagram engine's own actor/use-case classifier shapes (a SEPARATE
- * ratchet, `measure-class-size-deltas.ts`, required to stay ZERO-DIFF) --
- * routing them would risk a ratchet this task does not own.
+ * diagrams/class/class-layout-leaf-shapes.ts` imports both for the
+ * class-diagram engine's own shapes (a SEPARATE ratchet, zero-diff).
  *
- * See `planning/s1l-leaf-sizing.md`, `planning/usymbol-composition.md`,
- * `planning/sizer-renderer-parity.md`, and `plans/description-leaf-sizing-audit
- * /decisions.md` (ADR-6) for the full investigation this rewrite is based on.
+ * See `plans/description-leaf-sizing-audit/decisions.md` (ADR-6) and
+ * `plans/bodyenhanced-atom-seams/decisions.md` (ADR-2, ADR-3, ADR-10).
  */
 
 import type { DescriptiveNode } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureNodeLabel } from '../../core/latex.js';
-import { measureInlineAtom } from '../../core/creole-atoms-measure.js';
+import { measureInlineAtom, spriteScale } from '../../core/creole-atoms-measure.js';
 import type { SpriteDimsLookup, AtomImageResolver } from '../../core/creole-atoms.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import { EntityImageDescription, type EntityImageDescriptionParams } from '../../core/svek/image/EntityImageDescription.js';
@@ -74,7 +76,6 @@ export {
   USECASE_HEIGHT,
 } from './leaf-sizing-consts.js';
 
-
 /**
  * Measure a leaf node's bounding box, dispatching by USymbol: port/note stay
  * on their unported fixed/text draw classes; interface/circle stay a fixed,
@@ -119,25 +120,16 @@ export function measureLeafNode(
       return measureNote(node.display, fontSpec, measurer, sprites);
     case 'folder':
     case 'package':
-      // Widened-pin diagnosis (this task): routing drops
-      // `FOLDER_SHOWN_TITLE_EXTRA_WIDTH` (12px), a jar-verified residual
-      // this port's `USymbolFolder`/`buildTextBlock` title measurement
-      // (svek/, out of write-set) does not reproduce -- 8 corpus fixtures
-      // flip to size-widened (bozana-38-xufi750, bozoju-49-kufo528,
-      // gucefa-91-pume734, kanute-77-lacu414, lotofa-28-rudo664,
-      // sevage-80-seva382, texacu-57-daci050, cobuju-30-paxo591). Kept on
-      // the pre-existing `measureFolderLeaf` path -- never one of ADR-6's
-      // six expected findings, so a scope narrowing, not a lost win.
+      // STILL NARROWED (T5/ADR-10, was ADR-6): routing drops
+      // `FOLDER_SHOWN_TITLE_EXTRA_WIDTH` (12px) -- `getMarginX()`=6 needs
+      // `create2`/`BodyEnhanced1`, moved to mission SI1. Kept on the
+      // pre-existing `measureFolderLeaf` path -- never touch
+      // `FOLDER_SHOWN_TITLE_EXTRA_WIDTH` here.
       return measureFolderLeaf(node, fontSpec, measurer, opts, sprites);
     case 'usecase':
     case 'usecase-business':
-      // Widened-pin diagnosis (this task): `<latex>` measures as a real,
-      // non-zero-width KaTeX render via the shared svek/ pipeline -- worse
-      // against the 2 permanently-divergent LaTeX fixtures (DIVERGENCES.md).
-      // `<$sprite>` loses `inlineFootprintBox`'s ink-extent fit (the shared
-      // `AtomImageResolver` has no ink-offset field) -- bootstrap-0,
-      // ruziru-69-xixo434. Both are svek/ gaps (out of write-set);
-      // `measureUsecase` (kept, unchanged) already handles both correctly.
+      // T5: `<$sprite>` CLOSED for a SINGLE-LINE display (T3/ADR-2) -- see
+      // `hasUnroutedUsecaseMarkup`'s comment for the multi-line exception.
       return hasUnroutedUsecaseMarkup(node.display)
         ? measureUsecase(node.display, fontSpec, measurer, sprites, node.stereotype)
         : measureEntityLeaf(node, fontSpec, { opts, sprites, measurer }, false);
@@ -148,19 +140,14 @@ export function measureLeafNode(
     case 'boundary':
       // `USymbolSimpleAbstract` family (stickman/fixed-drawing + label
       // stack) -- never went through `measureBox`'s box-margin math even
-      // pre-T6 (a DIFFERENT composition, `mergeLayoutT12B3`), so the
-      // box-family `<latex>`/`<img>` fallback below does not apply here.
+      // pre-T6 (a DIFFERENT composition, `mergeLayoutT12B3`).
       return measureEntityLeaf(node, fontSpec, { opts, sprites, measurer }, false);
     default:
-      // Every other (true) box symbol (component, rectangle, node, frame,
-      // artifact, card, cloud, database, storage, file, person, hexagon,
-      // label, collections, queue, stack, action, process, agent) routes
-      // through the same faithful call -- except a `<latex>`/`<img>`-bearing
-      // display, which falls back to the pre-T6 math for the SAME class of
-      // reason as usecase's own guard above (see `leaf-sizing-legacy-
-      // fallback.ts`'s module doc comment for the exact mechanism --
-      // jecici-56-bimu826). Only the generic box family floors content
-      // width against `opts.minimumWidth` (S1L-g).
+      // Every other (true) box symbol routes through the same faithful
+      // call -- except a `<latex>`/`<img>`-bearing display (T5: `<img>`
+      // RE-DIAGNOSED, still guarded; see `leaf-sizing-legacy-fallback.ts`'s
+      // module doc for both mechanisms). Only the generic box family
+      // floors width against `opts.minimumWidth` (S1L-g).
       if (hasUnroutedBoxMarkup(node.display)) {
         return measureLegacyBoxFallback(node, fontSpec, { measurer, opts, sprites, defaultFont: baseFont });
       }
@@ -174,11 +161,25 @@ export function measureLeafNode(
   // are 1-4 lines each, none independently over any threshold.
 }
 
-/** `<latex>`/`<$sprite>`/`<img>` markup a use-case display embeds that this
- *  task's routing does not yet reproduce byte-exact -- see the dispatch's
- *  own doc comment for the mechanism each guards against. */
+/** `<latex>`/`<img>` markup a use-case display: unverified either way (no
+ *  corpus fixture), kept guarded as the conservative default.
+ *
+ *  A `<$sprite>` atom on a MULTI-LINE display (T5, diagnosed): `desc` now
+ *  builds via `BodyFactory.create3`'s real `Sea`/`SheetBlock1` pipeline
+ *  (T4/ADR-1), and `SheetBlock1.ts` (`y += sea.getHeight()`, out of
+ *  write-set) stacks lines using the SAME resolved `calculateDimension`
+ *  height this resolver returns for footprint/ellipse fitting -- upstream
+ *  keeps line-stacking on the DECLARED box, but this resolver must return
+ *  the INK box for the ellipse fit (ADR-2), so a multi-line display mixing
+ *  a sprite line with any other line under-stacks by declared-minus-ink
+ *  height (0.029in widened, bootstrap-0/ruziru-69-xixo434, verified).
+ *  Fixing line-stacking needs `SheetBlock1.ts`, out of this task's
+ *  write-set. A SINGLE-LINE sprite display has no next line to
+ *  under-stack, so the ink-fit resolver below is exact for it (verified:
+ *  both fixtures' other 5 single-line sprite nodes conform). */
 function hasUnroutedUsecaseMarkup(display: string): boolean {
-  return display.includes('<latex>') || display.includes('<$') || display.includes('<img');
+  if (display.includes('<latex>') || display.includes('<img')) return true;
+  return display.includes('<$') && display.includes('\n');
 }
 
 /** EntityImageNote: multi-line body, folded top-right corner. Notes measure at
@@ -327,68 +328,69 @@ export function measureUsecase(
 // T6 (ADR-6): route through EntityImageDescription
 // ---------------------------------------------------------------------------
 
-/** No style flags — every sizing-only `FontConfiguration` below carries this
- *  (styles never reach `StringBounder.calculateDimension`, whose font
- *  parameter is narrowed to `family`/`size` only — see that interface's own
- *  doc comment). */
+/** No style flags — styles never reach `StringBounder.calculateDimension`,
+ *  whose font parameter is narrowed to `family`/`size` only. */
 const SIZING_FONT_STYLES: ReadonlySet<FontStyle> = new Set();
 
-/** `EntityImageDescription#calculateDimensionSlow` never reads
- *  forecolor/backcolor: `SymbolContext#getBackColor`/`getForeColor` are
- *  consumed only by `apply`/`applyColors`, both DRAW-time methods (verified
- *  across `USymbolRectangle`/`Database`/`Hexagon`/`Folder`/`Person`'s own
- *  `asSmall` `calculateDimension` closures — none touch the ambient
- *  `symbolContext`'s colors at all). Any string satisfies the `Paint` type
- *  the params object requires; this documents intent rather than being a
- *  real color. */
+/** `calculateDimensionSlow` never reads forecolor/backcolor (consumed only
+ *  by DRAW-time `apply`/`applyColors`, verified across every `asSmall`
+ *  closure) -- any string satisfies `Paint`; documents intent, not a real
+ *  color. */
 const SIZING_PLACEHOLDER_COLOR = '#000000';
 
 /**
  * Sizing-only `AtomImageResolver` factory: resolves a creole `<img>`/
  * `<$sprite>`/openiconic atom to its SCALED pixel dims via the SAME
- * `measureInlineAtom` the pre-T6 sizer used (`leaf-sizing-text.ts`'s
- * `maxLineWidth`/`atomHeightBonus`), against the dims-only `SpriteDimsLookup`
- * this engine already threads (`BoxSizingOpts`/`measureLeafNode`'s own
- * `sprites` param) — no `SpriteRegistry` (real pixel/tint data, render-only)
- * is available or needed here, since `calculateDimension` never reads
- * `href`. An unresolved sprite name (`sprites?.get` returns `undefined`)
- * measures as a 0×0 atom via `measureInlineAtom`'s own fallback — numerically
- * equivalent to `render-atoms.ts`'s "contributes nothing" (`undefined`)
- * convention for `calculateDimension` purposes (both add 0 to the running
- * width/height sum), so no divergence from the render path's own resolver.
+ * `measureInlineAtom` the pre-T6 sizer used, against the dims-only
+ * `SpriteDimsLookup` this engine already threads. An unresolved name
+ * measures 0×0, matching `render-atoms.ts`'s "contributes nothing".
+ *
+ * `fitToInk` (T5/ADR-2, usecase only): an SVG sprite's `width`/`height`
+ * become its INK box when the registry has one -- the shared `drawAtoms`
+ * (off-limits) builds the drawn `UImage` straight from this box, and
+ * `Footprint#drawImage` fits the usecase ellipse to it, so shrinking here
+ * is the only lever this write-set has (mirrors `leaf-sizing-text.ts
+ * #inlineFootprintBox`). MUST be usecase-only: every other symbol's
+ * `asSmall` sizes declared content width directly (no `Footprint`) --
+ * unconditional shrinking under-measures line advance (verified: widened
+ * `card`s `sprite-SVG-fill-management-3`/`tatori-66-kaci883`). Position is
+ * untouched -- exact for a single-atom node (translation invariant); a
+ * MIXED node's ink OFFSET stays an open residual, same as pre-T5.
  */
-function sizingAtomImageResolverFor(sprites: SpriteDimsLookup | undefined): (font: FontConfiguration) => AtomImageResolver {
+function sizingAtomImageResolverFor(
+  sprites: SpriteDimsLookup | undefined,
+  fitToInk: boolean,
+): (font: FontConfiguration) => AtomImageResolver {
   return (font) => (atom) => {
     const dims = measureInlineAtom(atom, sprites, font.size);
+    if (fitToInk && atom.kind === 'sprite') {
+      const reg = sprites?.get(atom.name);
+      if (reg?.inkWidth !== undefined && reg.inkHeight !== undefined) {
+        const s = spriteScale(atom.scale, font.size);
+        return { href: '', width: reg.inkWidth * s, height: reg.inkHeight * s };
+      }
+    }
     return { href: '', width: dims.width, height: dims.height };
   };
 }
 
-/** Bundles the three per-diagram inputs `measureEntityLeaf`/
- *  `buildSizingEntityParams` need alongside a `node`/`fontSpec` pair, so
- *  neither function's own parameter count grows with this task's added
- *  routing plumbing (this project's 5-param complexity-hook ceiling). */
+/** Bundles the per-diagram inputs `measureEntityLeaf`/
+ *  `buildSizingEntityParams` need, keeping both under the 5-param ceiling. */
 interface EntityLeafCtx {
   readonly opts: BoxSizingOpts | undefined;
   readonly sprites: SpriteDimsLookup | undefined;
   readonly measurer: StringMeasurer;
 }
 
-/** `paint.fontTitle`/`fontStereo` (T6, ADR-6): the SAME `fontSpec` for both
- *  slots, matching the pre-routing sizer's own convention (`measureBox`'s
- *  stereotype width read `fontSpec` directly, never a separate stereotype
- *  size) -- `resolveElementFontSize(theme, sname, 'stereotype')`'s distinct
- *  per-element override is a SEPARATE, unlisted gap this task does not
- *  introduce or fix (out of ADR-6's six expected findings). */
+/** `paint.fontTitle`/`fontStereo`: the SAME `fontSpec` for both slots
+ *  (pre-routing sizer's own convention) -- per-element stereotype font
+ *  override is a separate, unlisted gap this task does not fix. */
 function sizingFontConfig(fontSpec: FontSpec): FontConfiguration {
   return { family: fontSpec.family, size: fontSpec.size, color: null, styles: SIZING_FONT_STYLES };
 }
 
-/** `EntityImageDescriptionPaint` assembly, split out of `buildSizingEntityParams`
- *  purely to keep that function under this project's complexity-hook NLOC/CCN
- *  ceiling -- see this module's "Deliberately NOT threaded" doc comment
- *  (below, on `buildSizingEntityParams`) for why each field takes the value
- *  it does. */
+/** `EntityImageDescriptionPaint` assembly, split out to keep
+ *  `buildSizingEntityParams` under the NLOC/CCN ceiling. */
 function sizingPaint(font: FontConfiguration, opts: BoxSizingOpts | undefined): EntityImageDescriptionParams['paint'] {
   return {
     forecolor: SIZING_PLACEHOLDER_COLOR,
@@ -410,27 +412,21 @@ function sizingPaint(font: FontConfiguration, opts: BoxSizingOpts | undefined): 
 /**
  * Assembles `EntityImageDescriptionParams` for ONE leaf, from exactly what
  * `BoxSizingOpts`/`DescriptiveNode` already carry — mirrors
- * `renderer-entity.ts#buildEntityParams`'s field-for-field shape (private to
- * the renderer, so this is a parallel assembly of the SAME params, not a
- * call to it).
+ * `renderer-entity.ts#buildEntityParams`'s field-for-field shape (a parallel
+ * assembly of the SAME params, not a call to it).
  *
  * Deliberately NOT threaded (verified draw-only, or out of write-set):
  * `forecolor`/`backcolor` (`SIZING_PLACEHOLDER_COLOR`), `roundCorner`/
- * `diagonalCorner`, `deltaShadow`/`stroke` per-element overrides
- * (`resolveElementShadowing`/`LineThickness` need `Theme` in `layout.ts`'s
- * `ClassifyCtx` -- T9's write-set; the DEFAULT stroke IS supplied, see
- * `DEFAULT_SIZING_STROKE_THICKNESS`), `links`/`hexagonPolygon`, and
+ * `diagonalCorner`, `deltaShadow`/`stroke` per-element overrides (need
+ * `Theme` in `layout.ts`'s `ClassifyCtx` -- T9's write-set; the DEFAULT
+ * stroke IS supplied), `links`/`hexagonPolygon`, and
  * `fixCircleLabelOverlapping` (only feeds `resolveShapeType`, never
- * `calculateDimensionSlow`). `actorStyle` IS threaded (T7, see below) --
- * no longer a hardcode.
+ * `calculateDimensionSlow`).
  *
- * `actorStyle` (T7, description-leaf-sizing-audit): `ctx.opts?.actorStyle`
- * (`BoxSizingOpts.actorStyle`, threaded from `Theme.actorStyle` by
- * `layout.ts`/`layout-dot-tree.ts`) — the SAME accessor the RENDERER reads
- * (`renderer-entity.ts#buildEntityParams`), so an actor sizes to whichever
+ * `actorStyle` (T7): `ctx.opts?.actorStyle`, threaded from `Theme.actorStyle`
+ * -- the SAME accessor the renderer reads, so an actor sizes to whichever
  * of stickman/awesome/hollow it will actually be drawn as. Falls back to
- * `ActorStyle.STICKMAN`, upstream's own default (`SkinParam.java:1217`),
- * when no `skinparam actorStyle` was set.
+ * `ActorStyle.STICKMAN`, upstream's own default, when unset.
  */
 function buildSizingEntityParams(
   node: DescriptiveNode,
@@ -453,15 +449,16 @@ function buildSizingEntityParams(
     paint: sizingPaint(font, ctx.opts),
     links: [],
     fixCircleLabelOverlapping: false,
-    atomImageResolverFor: sizingAtomImageResolverFor(ctx.sprites),
+    atomImageResolverFor: sizingAtomImageResolverFor(
+      ctx.sprites,
+      node.symbol === 'usecase' || node.symbol === 'usecase-business',
+    ),
   };
 }
 
 /** The margin+icon-only baseline `measureEntityLeaf`'s `MinimumWidth` floor
- *  needs: the SAME symbol, constructed with zero content/stereotype/
- *  minimumWidth, so its `calculateDimensionSlow` width is exactly the fixed
- *  additive allowance the real (non-empty) measurement already carries on
- *  top of its content -- see `measureEntityLeaf`'s own doc comment. */
+ *  needs: the SAME symbol at zero content/stereotype/minimumWidth, so its
+ *  width is exactly the fixed allowance real content adds on top. */
 function minWidthFloorBaseline(node: DescriptiveNode, fontSpec: FontSpec, ctx: EntityLeafCtx, bounder: MeasurerStringBounder): number {
   // `stereotype` omitted, not set to `undefined` (`exactOptionalPropertyTypes`).
   const { stereotype: _dropped, ...rest } = node;
@@ -476,15 +473,12 @@ function minWidthFloorBaseline(node: DescriptiveNode, fontSpec: FontSpec, ctx: E
  * upstream's own sizing entry point, ALREADY used by the renderer (ADR-6).
  *
  * `applyMinWidthFloor` (box family only): `buildDesc` (svek/, out of
- * write-set) reads `paint.minimumWidth` ONLY on its "empty desc" branch --
- * already correct for `package` (`displayText === codeName` always holds
- * here, so its desc always takes that branch), but silently skipped for
- * non-blank box text (jar-verified: `component/dexigu-24-deru622`,
- * `minClassWidth 200; component foo` -> 240 = max(24,200)+40, not 24+40).
- * Reproduced as a POST-STEP via `minWidthFloorBaseline` (a synthetic
- * zero-content construction of the same params, not a re-derived formula):
- * `Math.max(real, minimumWidth + baseline)` -- can only WIDEN, never shrink
- * below upstream's own margin+icon, and is skipped when no floor is set.
+ * write-set) reads `paint.minimumWidth` ONLY on its "empty desc" branch,
+ * silently skipped for non-blank box text (jar-verified:
+ * `component/dexigu-24-deru622`). Reproduced as a POST-STEP via
+ * `minWidthFloorBaseline` (a synthetic zero-content construction of the
+ * same params): `Math.max(real, minimumWidth + baseline)` -- can only
+ * WIDEN, never shrink below upstream's own margin+icon, skipped when unset.
  */
 function measureEntityLeaf(
   node: DescriptiveNode,
