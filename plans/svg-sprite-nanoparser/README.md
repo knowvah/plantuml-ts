@@ -42,10 +42,10 @@ All four must pass before any commit lands (CLAUDE.md):
 | `npx tsx scripts/measure-description-size-deltas.ts` | exit 0 (zero widened) | stop |
 | `git diff --name-only` vs declared write-set | matches only | stop |
 
-**Every batch additionally re-runs the SVG golden guard: 310 svg-class / 23
+**Every batch additionally re-runs the SVG golden guard: 310 svg-class / 22
 svg-object / 57 svg-state must stay byte-identical.** `drawAtoms` is the
 shared renderer across description, class, object and state — none of those
-390 goldens contains a sprite, so any diff is collateral damage, never
+389 goldens contains a sprite, so any diff is collateral damage, never
 expected churn.
 
 ## Batches
@@ -56,7 +56,7 @@ expected churn.
 | [2](batch-2/overview.md) | T5–T7 | Parser core + renderer seam | [ ] |
 | [3](batch-3/overview.md) | T8 | NanoParser shapes + text | [ ] |
 | [4](batch-4/overview.md) | T9 | Sprite resolution returns primitives | [ ] |
-| [5](batch-5/overview.md) | T10–T11 | Retire `fitToInk`; pin the two channels | [ ] |
+| [5](batch-5/overview.md) | T10–T12 | Retire `fitToInk`; pin the two channels; measure sprite goldens | [ ] |
 
 ## Documents
 
@@ -73,7 +73,7 @@ expected churn.
    other task's write-set).
 2. Two consecutive gate failures on the same check, or the same location
    changed 3× without resolving it.
-3. **Any SVG golden diffs** (310/23/57). Highest-signal tripwire in the
+3. **Any SVG golden diffs** (310/22/57). Highest-signal tripwire in the
    mission. Deliberately strict — see `decisions.md#adr-5`.
 4. A task proposes putting measurement ink back on `AtomImageResolver` —
    contradicts [ADR-2](decisions.md#adr-2)'s stated non-goal.
@@ -123,9 +123,22 @@ file and apply to your own plan, not just to what you read.
 
 Do not re-derive these; do not trust older statements that contradict them.
 
-- Guard counts are **310 / 23 / 57**, not 310/22/57.
-- **Zero** of the 390 SVG goldens use a sprite (every `in.puml` checked for
-  `<$`). Regression guard, not churn set.
+- Guard counts are **310 / 22 / 57** — count `ratchet.json` entries, NOT
+  directories. Every suite now satisfies `dirs == ratcheted` (svg-class
+  310/310, svg-object 22/22, svg-state 57/57, svg-description 48/48), but
+  that only became true on 2026-07-30: three empty, untracked directories
+  with space-joined names (an unquoted shell variable, e.g.
+  `nufoju-44-dabi767 soxufi-98-nita528 …`) were sitting in the golden trees
+  and inflated a `find`-based count to 23. They were local litter — git does
+  not track empty directories, so a fresh clone always counted 22. **A
+  planning pass mistook one for a fixture and "corrected" the true figure
+  from 22 to 23**; the litter has since been deleted. If a directory count
+  ever disagrees with `ratchet.json` again, the ratchet is right.
+- **Zero** of the 389 svg-class/object/state goldens use a sprite (every
+  `in.puml` checked for `<$`). Regression guard, not churn set — that is why
+  a diff there is a STOP. The ONLY sprite goldens anywhere are the three
+  authored for this mission under `svg-description/usecase/`, and those are
+  deliberately un-ratcheted (see [ADR-5](decisions.md#adr-5) and T12).
 - `UPath.ts` is at `src/core/klimt/shape/UPath.ts` — note the `shape/`.
 - `SvgNanoParser.java` is under `svg/parser/`, and `UGraphicWithScale` /
   `ColorResolver` under `emoji/` — **not** `klimt/sprite/`. Reading

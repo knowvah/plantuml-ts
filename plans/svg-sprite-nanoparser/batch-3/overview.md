@@ -10,7 +10,7 @@ batch rather than parallelism with T6.
 ## Batch exit criteria
 
 - All four quality gates green
-- SVG goldens 310 / 23 / 57 byte-identical
+- SVG goldens 310 / 22 / 57 byte-identical
 - `npx tsx scripts/measure-description-size-deltas.ts` exits 0
 - Still no rendered output change — nothing consumes the parser until T9
 

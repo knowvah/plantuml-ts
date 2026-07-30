@@ -70,7 +70,7 @@ Consumes T4's union. Produces no new type.
    `width` — never by ink extent. Assert this directly; it is the defect.
 3. Given an `image` atom (monochrome sprite, `<img>`, LaTeX), when drawn,
    then behavior is byte-identical to before this task.
-4. Given the 390 SVG goldens, then byte-identical — nothing emits `drawable`
+4. Given the 389 SVG goldens, then byte-identical — nothing emits `drawable`
    until T9, so this batch must change no output.
 5. Given a two-line display containing a `drawable` atom, when laid out, then
    line 2's y-offset derives from the declared height (unit test — no fixture
@@ -78,7 +78,7 @@ Consumes T4's union. Produces no new type.
 
 ## Quality bar
 
-All four gates exit 0. SVG goldens 310/23/57 byte-identical.
+All four gates exit 0. SVG goldens 310/22/57 byte-identical.
 `npx tsx scripts/measure-description-size-deltas.ts` exits 0.
 
 **Note:** the new branch is unreachable from production paths this batch —
@@ -111,7 +111,7 @@ what it receives.
    `EntityImageDescription.ts:287`, `EntityImageDescriptionDelegates.ts:254`,
    `renderer-entity.ts:294,351`, `renderer-cluster.ts:92,99`. This is the
    SHARED renderer across description/class/object/state — which is why the
-   390 goldens guard it.
+   389 goldens guard it.
 2. **Verify any "already fixed" claim against the CURRENT call graph.**
 
 ## Commit

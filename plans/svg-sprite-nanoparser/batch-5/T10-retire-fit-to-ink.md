@@ -80,7 +80,7 @@ needs it. Verify before removing — see method rule 2.
 4. Given `sprite-SVG-fill-management-3` and `tatori-66-kaci883` (the `card`
    fixtures the original `fitToInk` doc names as having widened when
    shrinking was applied unconditionally), then neither regresses.
-5. Given the 390 SVG goldens, then byte-identical.
+5. Given the 389 SVG goldens, then byte-identical.
 
 ## Quality bar
 

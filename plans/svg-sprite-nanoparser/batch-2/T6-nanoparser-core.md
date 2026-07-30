@@ -99,7 +99,7 @@ draws). **Prefer reusing that idiom over inventing a parallel collector.**
 
 ## Quality bar
 
-All four gates exit 0. SVG goldens 310/23/57 byte-identical (nothing consumes
+All four gates exit 0. SVG goldens 310/22/57 byte-identical (nothing consumes
 this class yet). TDD, coverage 90/90/90.
 
 ## Observability

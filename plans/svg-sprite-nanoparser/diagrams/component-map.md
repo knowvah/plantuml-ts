@@ -60,7 +60,7 @@ graph TD
     style CLASS fill:#e8e8e8
 ```
 
-## Blast radius — why 390 goldens guard a description fix
+## Blast radius — why 389 goldens guard a description fix
 
 `drawAtoms` is private to `EntityImageDescriptionSupport.ts` and called only
 from `buildTextBlock#drawU` — but `buildTextBlock` is the SHARED creole
@@ -77,10 +77,10 @@ graph LR
     BTB --> COM["class-object-map-sizing.ts"]
 
     CM --> G1["svg-class: 310 goldens"]
-    COM --> G2["svg-object: 23 goldens"]
+    COM --> G2["svg-object: 22 goldens"]
     RE --> G3["svg-state: 57 goldens"]
 ```
 
-None of those 390 goldens contains a sprite, so they cannot churn — any diff
+None of those 389 goldens contains a sprite, so they cannot churn — any diff
 is collateral damage in the shared renderer. That is why a diff is a STOP
 rather than an expected update.

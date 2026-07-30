@@ -125,13 +125,35 @@ The group + transform stack is core, not optional — that is why
 contains a sprite**. So the `<image>` → `<path>` output change ships with zero
 golden coverage.
 
-**Decision.** No golden suite. Instead a unit test (T11) asserting `bi-globe`'s
-decomposed primitives reproduce `getMinX`/`getMaxX` = the jar's `rx=34.729`,
-and that `bi-bootstrap-fill` — identical declared 16×16 — differs at
-`rx=37.4784`. Two inputs, because one input cannot distinguish "correct" from
-"channels still collapsed".
+**Decision.** A unit test (T11) asserting `bi-globe`'s decomposed primitives
+reproduce `getMinX`/`getMaxX` = the jar's `rx=34.729`, and that
+`bi-bootstrap-fill` — identical declared 16×16 — differs at `rx=37.4784`. Two
+inputs, because one input cannot distinguish "correct" from "channels still
+collapsed".
 
-**Consequence, accepted deliberately.** The 390 SVG goldens are held
+**Amended 2026-07-30 (maintainer approved).** Three sprite fixtures were also
+authored, with jar-generated goldens, and sit at
+`oracle/goldens/svg-description/usecase/sprite-svg-{bootstrap,archimate,multiline}-0`.
+The unit test pins geometry we compute ourselves; it cannot tell us whether we
+emit upstream's ELEMENT STRUCTURE. The goldens can — measured at authoring,
+ours emits 0 `<path>` and 4/2/3 base64 `<image>`, the jar emits 6/2/4 `<path>`
+and 0 `<image>`. A genuine red→green oracle for the mission's central change.
+
+They are deliberately **absent from `ratchet.json`** (the ratchet test iterates
+that file, never the directory listing, so an unlisted fixture is inert), and
+T12 measures them at mission end. **They are diagnostic, not an acceptance
+criterion** — byte-exact SVG equality is a stricter bar than the two-channel
+architecture fix promises, so "none ratcheted in, here are the diffs" is an
+acceptable close. Making them a gate would block the mission on something it
+never promised. DOT parity remains the gate.
+
+Their sprite declarations are INLINED rather than `!include`d: a stdlib bundle
+is itself just a `.puml` of `sprite <name> <svg …>` lines, so inlining is the
+identical parse path (verified — both forms give byte-identical jar output),
+and `renderFixture` runs the preprocessor with no include resolver. No other
+golden in any suite uses `!include`.
+
+**Consequence, accepted deliberately.** The 389 SVG goldens are held
 byte-identical (stop condition 3), strict enough that even a legitimate
 tidying of emitted `<path>` output trips it. Under a DOT-only gate they are
 the only thing standing between this mission and an unnoticed regression in

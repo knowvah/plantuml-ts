@@ -84,7 +84,7 @@ No new public surface — fills T6's stubs. `drawU`'s signature is unchanged.
 
 ## Quality bar
 
-All four gates exit 0. SVG goldens 310/23/57 byte-identical.
+All four gates exit 0. SVG goldens 310/22/57 byte-identical.
 `npx tsx scripts/measure-description-size-deltas.ts` exits 0. TDD, 90/90/90.
 
 If the file approaches 500 lines, split per CLAUDE.md/complexity-hook

@@ -63,14 +63,14 @@ export function pathBBox(d: string): PathBox | undefined;
    to the pre-change implementation (capture before/after in the journal).
 3. Given `SpriteSvg.ts#svgInkBox`, when unchanged, then it still compiles and
    produces identical ink boxes.
-4. Given the 390 SVG goldens and the description size-delta script, then
+4. Given the 389 SVG goldens and the description size-delta script, then
    byte-identical and zero widened respectively.
 5. Given a path with no drawable commands, then `undefined` — the existing
    contract.
 
 ## Quality bar
 
-All four gates exit 0. SVG goldens 310/23/57 byte-identical.
+All four gates exit 0. SVG goldens 310/22/57 byte-identical.
 `npx tsx scripts/measure-description-size-deltas.ts` exits 0.
 
 ## Observability

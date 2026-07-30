@@ -15,7 +15,7 @@ additive-only. All existing behavior must be byte-identical after this batch.
 
 - All four quality gates green
 - `npx tsx scripts/measure-description-size-deltas.ts` exits 0
-- SVG goldens 310 / 23 / 57 byte-identical
+- SVG goldens 310 / 22 / 57 byte-identical
 - **No rendered output changed** — this batch is purely additive
 
 ## Note on T4

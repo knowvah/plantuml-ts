@@ -9,7 +9,7 @@ One task. This is the batch where rendered output changes for the first time.
 ## Batch exit criteria
 
 - All four quality gates green
-- SVG goldens 310 / 23 / 57 **byte-identical** — none contains a sprite, so
+- SVG goldens 310 / 22 / 57 **byte-identical** — none contains a sprite, so
   any diff here is collateral damage in the shared renderer, never expected
   churn. **A diff is a STOP.**
 - `npx tsx scripts/measure-description-size-deltas.ts` exits 0

@@ -78,12 +78,12 @@ change — that is the design, not a coincidence.
    unchanged.
 3. Given the existing `image` producers (`render-atoms.ts`,
    `leaf-sizing.ts`), when unchanged, then they still satisfy the type.
-4. Given the full test suite and the 390 SVG goldens, when run, then output
+4. Given the full test suite and the 389 SVG goldens, when run, then output
    is byte-identical — this task changes no behavior.
 
 ## Quality bar
 
-All four gates exit 0. SVG goldens 310/23/57 byte-identical.
+All four gates exit 0. SVG goldens 310/22/57 byte-identical.
 
 ## Observability
 

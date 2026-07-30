@@ -76,7 +76,7 @@ drift (S1L-f).
    behavior to before.
 3. Given an unknown sprite name, then `undefined` — the existing
    "contributes nothing" rule (`StripeSimple.addSprite`) is unchanged.
-4. Given the 390 SVG goldens, then **byte-identical**. None contains a
+4. Given the 389 SVG goldens, then **byte-identical**. None contains a
    sprite; any diff is collateral damage → STOP.
 5. Given `bootstrap-0`, when rendered, then the emitted SVG contains `<path>`
    elements for the sprite and no `image/svg+xml` data URI. Record
@@ -84,7 +84,7 @@ drift (S1L-f).
 
 ## Quality bar
 
-All four gates exit 0. SVG goldens 310/23/57 byte-identical.
+All four gates exit 0. SVG goldens 310/22/57 byte-identical.
 `npx tsx scripts/measure-description-size-deltas.ts` exits 0.
 
 **Expected non-closure:** the 0.029321in widening does NOT close here —

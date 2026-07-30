@@ -13,7 +13,7 @@ Batch 1.
 
 - All four quality gates green
 - `npx tsx scripts/measure-description-size-deltas.ts` exits 0
-- SVG goldens 310 / 23 / 57 byte-identical
+- SVG goldens 310 / 22 / 57 byte-identical
 - **Still no rendered output change** — nothing emits `drawable` until T9, so
   T7's new branch is unreachable in production paths this batch. That is
   expected, and it is why T7 ships with its own unit tests rather than

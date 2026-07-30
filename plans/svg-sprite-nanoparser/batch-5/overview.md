@@ -6,6 +6,7 @@ Two tasks, parallel: distinct write-sets, both depend only on prior batches.
 |---|---|---|---|---|---|
 | T10 | Retire `fitToInk`'s substitution | typescript-pro | `src/diagrams/description/leaf-sizing.ts` | T7, T9 | [ ] |
 | T11 | Two-channel independence test (ADR-5) | typescript-pro | `src/core/klimt/sprite/SvgNanoParser.two-channel.test.ts` | T9 | [ ] |
+| T12 | Measure the authored sprite goldens; ratchet in what passes | typescript-pro | `oracle/goldens/svg-description/ratchet.json` | T9, T10 | [ ] |
 
 ## Batch exit criteria — this is the mission's acceptance gate
 
@@ -13,7 +14,7 @@ Two tasks, parallel: distinct write-sets, both depend only on prior batches.
 - **`npx tsx scripts/measure-description-size-deltas.ts` exits 0 with
   `bootstrap-0` and `ruziru-69-xixo434` at widened 0** — this is the mission
   objective, measured
-- SVG goldens 310 / 23 / 57 byte-identical
+- SVG goldens 310 / 22 / 57 byte-identical
 - DOT parity clean (`oracle/goldens/description/*/svek-1.dot`)
 
 ## Closing the mission
