@@ -207,12 +207,6 @@ describe('buildLineAtoms — <img> cannot-decode fallback is a hardcoded monospa
     expect(fontOf(withPlain)).toEqual({ family: 'monospaced', size: 14, color: '#000000', styles: new Set() });
   });
 
-  test('a legacy 3rd-argument caller (leaf-sizing-text.ts, compile-compat only) still gets the hardcoded font, never its own argument', () => {
-    const withoutArg = buildLineAtoms(MALFORMED_IMG, PLAIN).atoms;
-    const withIgnoredArg = buildLineAtoms(MALFORMED_IMG, PLAIN, OTHER_ELEMENT_FONT).atoms;
-    expect(withIgnoredArg).toEqual(withoutArg);
-  });
-
   test('a decodable <img> atom is unaffected -- only the cannot-decode text run reads the hardcoded font', () => {
     const tinyPngUri = toBase64DataUri(encodePng(new Uint8Array(2 * 2 * 4).fill(0xff), 2, 2));
     const { atoms } = buildLineAtoms(`<img:${tinyPngUri}>`, PLAIN);

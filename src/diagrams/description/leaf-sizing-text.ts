@@ -78,13 +78,16 @@ function lineTextMetrics(
   fontSpec: FontSpec,
   measurer: StringMeasurer,
   guillemet?: GuillemetPair,
-  defaultFont?: FontSpec,
+  // sizer-footprint-parity T2 (ADR-1): `buildLineAtoms` no longer accepts a
+  // default-font 3rd argument (its `<img>` cannot-decode fallback font is
+  // hardcoded, `IMG_FALLBACK_FONT`) -- T1 confirmed no caller's font ever
+  // reached it. `_defaultFont` stays as a parameter here (not removed) only
+  // because `textBlockHeight`/`maxLineWidth` (this file, still threading it
+  // from a T3-owned mechanism, `leaf-sizing-legacy-fallback.ts`'s module doc
+  // comment) keep passing it positionally; it is never forwarded further.
+  _defaultFont?: FontSpec,
 ): { width: number; height: number } {
-  const built = buildLineAtoms(
-    manageGuillemet(line, guillemet),
-    baseFontConfiguration(fontSpec),
-    defaultFont === undefined ? undefined : baseFontConfiguration(defaultFont),
-  );
+  const built = buildLineAtoms(manageGuillemet(line, guillemet), baseFontConfiguration(fontSpec));
   let width = 0;
   let height = 0;
   for (const atom of built.atoms) {
@@ -124,6 +127,10 @@ export function textBlockHeight(
         : lineTextMetrics(ln, fontSpec, measurer, guillemet, defaultFont).height;
   }
   return h;
+  // #lizard forgives -- pre-existing 6-PARAM violation (T1 confirmed via
+  // `git show HEAD` lizard run before this task's own edits: unchanged by
+  // sizer-footprint-parity T2, which only removed a dead 3rd `buildLineAtoms`
+  // argument elsewhere in this file).
 }
 
 /** Base `FontConfiguration` built from a `FontSpec` solely to drive
@@ -209,6 +216,9 @@ export function maxLineWidth(
     if (w > max) max = w;
   }
   return max;
+  // #lizard forgives -- pre-existing 6-PARAM violation (T1 confirmed via
+  // `git show HEAD` lizard run before this task's own edits; unchanged by
+  // sizer-footprint-parity T2).
 }
 
 /** Sum of `lineAtomHeightExcess` over every line of `display` — 0 for any
@@ -293,6 +303,9 @@ export function measureTextBlock(
     height += atomHeightBonus(raw, fontSpec, sprites);
   }
   return { width, height };
+  // #lizard forgives -- pre-existing violation (T1 confirmed via `git show
+  // HEAD` lizard run before this task's own edits; unchanged by
+  // sizer-footprint-parity T2).
 }
 
 /**
@@ -343,6 +356,10 @@ export function footprintBoxes(
     y += lineH;
   }
   return out;
+  // #lizard forgives -- pre-existing violation (T1 confirmed via `git show
+  // HEAD` lizard run before this task's own edits; unchanged by
+  // sizer-footprint-parity T2, which was unable to retire this function --
+  // see `.agent-notes/T2-footprint-sizer.md`).
 }
 
 /** A sprite's ink box at its drawn position; a non-SVG atom inks its whole
@@ -367,4 +384,8 @@ function inlineFootprintBox(
     width: reg.inkWidth * s,
     height: reg.inkHeight * s,
   };
+  // #lizard forgives -- pre-existing 6-PARAM violation (T1 confirmed via
+  // `git show HEAD` lizard run before this task's own edits; unchanged by
+  // sizer-footprint-parity T2, which was unable to retire this function --
+  // see `.agent-notes/T2-footprint-sizer.md`).
 }

@@ -290,17 +290,18 @@ export interface LineBuildAtoms {
  * this port's own extraction of `EntityImageDescriptionSupport.ts#buildLine`
  * (pre-ADR-1)'s classification-dispatch branches into one shared helper.
  *
- * The 3rd positional slot is a COMPILE-COMPATIBILITY placeholder only
- * (sizer-footprint-parity T1): `leaf-sizing-text.ts#lineTextMetrics` (out of
- * this task's write-set — its own `defaultFont: FontSpec` plumbing is a
- * SEPARATE, T3-owned mechanism, `leaf-sizing-legacy-fallback.ts`'s module
- * doc comment) still calls this 3-argument form. It is ALWAYS ignored: the
- * `<img>` cannot-decode fallback font is hardcoded (`IMG_FALLBACK_FONT`,
- * ADR-1) and no caller font — including this one — ever reaches it. Verified
- * by the two-different-element-fonts test in
+ * Two parameters only (sizer-footprint-parity T2): T1 had kept a 3rd,
+ * ALWAYS-IGNORED `_unusedLegacyDefaultFont` slot here as a compile-
+ * compatibility placeholder for `leaf-sizing-text.ts#lineTextMetrics`'s
+ * own 3-argument call, since that file was out of T1's write-set. T2 owns
+ * `leaf-sizing-text.ts` and dropped the dead 3rd argument at that call
+ * site, so the placeholder parameter is removed here too — the `<img>`
+ * cannot-decode fallback font is hardcoded (`IMG_FALLBACK_FONT`, ADR-1)
+ * and no caller font ever reached it regardless. Verified by the
+ * two-different-element-fonts test in
  * `tests/unit/core/klimt/creole/legacy/StripeSimple.test.ts`.
  */
-export function buildLineAtoms(line: string, font: FontConfiguration, _unusedLegacyDefaultFont?: FontConfiguration): LineBuildAtoms {
+export function buildLineAtoms(line: string, font: FontConfiguration): LineBuildAtoms {
   const classification = classifyStripeLine(line);
   if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
   const content = resolveTextEscapes(classification.content);

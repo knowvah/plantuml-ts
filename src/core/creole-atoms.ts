@@ -117,15 +117,18 @@ export interface LineAtomScan {
  * zero-size one. See `src/diagrams/description/render-atoms.ts` for the
  * concrete builder.
  *
- * `inkX`/`inkY`/`inkWidth`/`inkHeight` (T3-seams, ADR-2): OPTIONAL --
- * mirrors `klimt/sprite/SpriteSvg.ts`'s own `inkX/inkY/inkWidth/inkHeight`
- * fields exactly, the SAME shape `SpriteDims` (below) already carries for
- * the sizer's parallel `SpriteDimsLookup` path (`leaf-sizing-text.ts
- * #inlineFootprintBox`). A resolver that omits them means ink === the
- * declared `width`/`height` box -- today's behaviour, byte for byte; no
- * caller reads these fields yet (routing lands in a later batch). Rejected:
- * a second, parallel resolver/channel for this same fact -- the
- * `inkSprites` mistake a prior mission already deleted.
+ * sizer-footprint-parity T2 (ADR-2): this type previously carried optional
+ * `inkX`/`inkY`/`inkWidth`/`inkHeight` fields (bodyenhanced-atom-seams'
+ * ADR-2). Removed here -- confirmed zero consumers anywhere in the
+ * codebase (`EntityImageDescriptionDelegates.ts#dimensionOf` destructures
+ * only `{ width, height }` off a resolver's return value; `render-atoms.ts`'s
+ * own `ResolvedAtomImage` type never populated them either). Ink now flows
+ * through the SEPARATE `SpriteDims.inkWidth`/`inkHeight` channel
+ * (unchanged by this task -- still consumed by
+ * `leaf-sizing.ts#sizingAtomImageResolverFor`'s `fitToInk` branch and
+ * `leaf-sizing-text.ts#inlineFootprintBox`; see `.agent-notes/
+ * T2-footprint-sizer.md` for why `usecase-footprint.ts`/`footprintBoxes`
+ * themselves could NOT be retired in this task).
  */
 export type AtomImageResolver = (
   atom: InlineAtomToken,
@@ -134,10 +137,6 @@ export type AtomImageResolver = (
       readonly href: string;
       readonly width: number;
       readonly height: number;
-      readonly inkX?: number;
-      readonly inkY?: number;
-      readonly inkWidth?: number;
-      readonly inkHeight?: number;
     }
   | undefined;
 
