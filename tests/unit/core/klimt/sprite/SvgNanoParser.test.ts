@@ -1,10 +1,15 @@
 /**
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svg/parser/SvgNanoParser.java
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { SvgNanoParser } from '../../../../../src/core/klimt/sprite/SvgNanoParser.js';
 import { pathBBox } from '../../../../../src/core/klimt/sprite/svg-path-bbox.js';
 import { UPath } from '../../../../../src/core/klimt/shape/UPath.js';
+import { UEllipse } from '../../../../../src/core/klimt/shape/UEllipse.js';
+import { UText } from '../../../../../src/core/klimt/shape/UText.js';
+import { UStroke } from '../../../../../src/core/klimt/UStroke.js';
+import { Fore } from '../../../../../src/core/klimt/Fore.js';
+import { Back } from '../../../../../src/core/klimt/Back.js';
 import type { UChange } from '../../../../../src/core/klimt/UChange.js';
 import type { UShape } from '../../../../../src/core/klimt/UShape.js';
 import type { UGraphic } from '../../../../../src/core/klimt/UGraphic.js';
@@ -35,21 +40,33 @@ const DUMMY_BOUNDER: StringBounder = {
  * `UGraphicWithScale.test.ts`'s own `FakeUGraphic`), and `draw` records
  * every drawn shape in order onto a SHARED array so a test can inspect
  * what `drawU` produced regardless of how many `apply`-derived instances
- * were involved along the way.
+ * were involved along the way. `drawnChanges[i]` is the `applied` log in
+ * effect when `drawn[i]` was drawn (T8: lets tests assert exactly which
+ * `Fore`/`Back`/`UStroke`/`UTranslate` changes `applyFillAndStroke`/
+ * `applyTransform`/`drawCircle` applied, not just the shape geometry).
  */
 class FakeUGraphic implements UGraphic {
   readonly drawn: UShape[];
+  readonly drawnChanges: (readonly UChange[])[];
+  readonly applied: readonly UChange[];
 
-  constructor(drawn: UShape[] = []) {
+  constructor(
+    drawn: UShape[] = [],
+    drawnChanges: (readonly UChange[])[] = [],
+    applied: readonly UChange[] = [],
+  ) {
     this.drawn = drawn;
+    this.drawnChanges = drawnChanges;
+    this.applied = applied;
   }
 
-  apply(_change: UChange): UGraphic {
-    return new FakeUGraphic(this.drawn);
+  apply(change: UChange): UGraphic {
+    return new FakeUGraphic(this.drawn, this.drawnChanges, [...this.applied, change]);
   }
 
   draw(shape: UShape): void {
     this.drawn.push(shape);
+    this.drawnChanges.push(this.applied);
   }
 
   getParam(): UParam {
@@ -117,7 +134,7 @@ describe('SvgNanoParser#getData (acceptance criterion 1)', () => {
     expect(ug.drawn[0]).toBeInstanceOf(UPath);
   });
 
-  it('produces a UPath whose minmax equals pathBBox of the archimate path d (transform stub is identity)', () => {
+  it('produces a UPath whose minmax reflects the archimate <g transform> (T8: transform no longer a stub)', () => {
     const parser = new SvgNanoParser(ARCHIMATE_SVG);
     const ug = new FakeUGraphic();
     parser.drawU(ug, 1, undefined, undefined);
@@ -125,10 +142,14 @@ describe('SvgNanoParser#getData (acceptance criterion 1)', () => {
     const box = pathBBox(ARCHIMATE_PATH_D);
     expect(box).toBeDefined();
     const path = ug.drawn[0] as UPath;
-    expect(path.getMinX()).toBeCloseTo(box!.minX, 9);
-    expect(path.getMaxX()).toBeCloseTo(box!.maxX, 9);
-    expect(path.getMinY()).toBeCloseTo(box!.minY, 9);
-    expect(path.getMaxY()).toBeCloseTo(box!.maxY, 9);
+    // Since T8, applyTransform is real: the archimate <g transform=
+    // "translate(-19.992 -120.11)"> now shifts the path by that exact
+    // delta rather than leaving it at the untranslated pathBBox value
+    // (the pre-T8 identity-stub behaviour this test used to pin).
+    expect(path.getMinX()).toBeCloseTo(box!.minX - 19.992, 9);
+    expect(path.getMaxX()).toBeCloseTo(box!.maxX - 19.992, 9);
+    expect(path.getMinY()).toBeCloseTo(box!.minY - 120.11, 9);
+    expect(path.getMaxY()).toBeCloseTo(box!.maxY - 120.11, 9);
   });
 });
 
@@ -177,15 +198,8 @@ describe('SvgNanoParser#drawU -- drawPath (acceptance criteria 3 and 4)', () => 
   });
 });
 
-describe('SvgNanoParser#drawU -- drawPath now bakes ugs.getAffineTransform() into the path (T13)', () => {
+describe('SvgNanoParser#drawU -- drawPath bakes ugs.getAffineTransform() into the path (T13)', () => {
   it('scales the emitted path box by the `scale` drawU was called with', () => {
-    // Regression test for the KNOWN GAP this file used to document above
-    // drawPath: before T13, drawPath called
-    // `parseSvgPath(tmp, UTranslate.none())` unconditionally -- the scale
-    // baked into `ugs` at `UGraphicWithScale.create(ug, resolver, scale)`
-    // never reached the emitted path. A real `AtomSprite` draw at
-    // scale=2.5 (this file's own former doc comment example) exercises
-    // exactly this path.
     const scale = 2.5;
     const parserAtScale = new SvgNanoParser(BI_GLOBE_SVG);
     const ugScaled = new FakeUGraphic();
@@ -220,9 +234,6 @@ describe('SvgNanoParser#drawU -- drawPath now bakes ugs.getAffineTransform() int
 
 describe('SvgNanoParser#drawU -- <g> push/pop stack discipline (acceptance criterion 2)', () => {
   it('draws sibling paths before/after a <g transform=...>...</g> in exact document order, without corrupting the stack', () => {
-    // Real bootstrap path bodies either side of a real archimate <g transform>
-    // wrapper (per this task's boundary: use real stdlib bodies as test
-    // input, not invented synthetic SVG).
     const svg =
       `<svg width="16" height="16">\n` +
       `  <path d="${BI_BOOTSTRAP_FILL_D1}"/>\n` +
@@ -236,10 +247,6 @@ describe('SvgNanoParser#drawU -- <g> push/pop stack discipline (acceptance crite
     const ug = new FakeUGraphic();
     parser.drawU(ug, 1, undefined, undefined);
 
-    // Exactly 3 paths, in document order -- proves push (<g transform=...>)
-    // and pop (</g>) neither dropped nor duplicated the sibling paths
-    // surrounding the group, and left the dispatch loop free to continue
-    // walking getData() correctly afterward.
     expect(ug.drawn).toHaveLength(3);
     ug.drawn.forEach((shape) => expect(shape).toBeInstanceOf(UPath));
 
@@ -248,12 +255,14 @@ describe('SvgNanoParser#drawU -- <g> push/pop stack discipline (acceptance crite
     const boxInner = pathBBox(ARCHIMATE_PATH_D)!;
     const box2 = pathBBox(BI_BOOTSTRAP_FILL_D2)!;
 
+    // Sibling paths OUTSIDE the <g transform=...> are unaffected by it.
     expect(outer1.getMinX()).toBeCloseTo(box1.minX, 9);
     expect(outer1.getMaxX()).toBeCloseTo(box1.maxX, 9);
-    expect(inner.getMinX()).toBeCloseTo(boxInner.minX, 9);
-    expect(inner.getMaxX()).toBeCloseTo(boxInner.maxX, 9);
     expect(outer2.getMinX()).toBeCloseTo(box2.minX, 9);
     expect(outer2.getMaxX()).toBeCloseTo(box2.maxX, 9);
+    // The path INSIDE the group picks up its translate (T8: no longer stubbed).
+    expect(inner.getMinX()).toBeCloseTo(boxInner.minX - 19.992, 9);
+    expect(inner.getMaxX()).toBeCloseTo(boxInner.maxX - 19.992, 9);
   });
 
   it('handles a plain <g> (no attributes) push/pop identically to <g transform=...>', () => {
@@ -288,12 +297,6 @@ describe('SvgNanoParser -- unrecognised elements are ignored, not thrown (accept
   });
 
   it('ignores a stray closing tag with no matching opener (getData\'s "ignored2" branch)', () => {
-    // A real `<title>...</title>` child (common in hand-authored SVG): the
-    // opening `<title>` never matches P_TEXT_OR_DRAW's tag-name alternation
-    // (svg|path|g|circle|ellipse), but the closing `</title>` DOES match
-    // the unrestricted "any closing tag" alternative -- exercising getData's
-    // final "recognised as SOME tag, but not svg/path/g/circle/ellipse/text,
-    // and not <svg>/</svg> either" branch.
     const svg =
       `<svg width="16" height="16">\n` +
       `  <title>bi-globe</title>\n` +
@@ -307,13 +310,74 @@ describe('SvgNanoParser -- unrecognised elements are ignored, not thrown (accept
   });
 });
 
-describe('SvgNanoParser -- <circle>/<ellipse>/<text> dispatch (T8 stubs wired, not yet implemented)', () => {
-  it('dispatches <g fill="..."> wrapping <circle>/<ellipse> without drawing or throwing', () => {
-    // Verbatim structure from assets/stdlib/edgy/edgy.puml `sprite $bIdentityLogo`
-    // (the <g fill="#00ea4e"><circle/><circle/></g> portion), with one
-    // <circle> swapped for a <ellipse> (0 real stdlib occurrences per the
-    // mission's own census -- ADR-4 still requires exercising it, unit-test
-    // only, "by design").
+describe('SvgNanoParser#drawCircle (T8, acceptance criterion 1)', () => {
+  it('emits a UEllipse whose bounds match upstream\'s own circle formula (edgy bIdentityLogo)', () => {
+    // Verbatim structure from assets/stdlib/edgy/edgy.puml `sprite $bIdentityLogo`:
+    // <g fill="#00ea4e"><circle cx="17" cy="14" r="10"/>...</g>.
+    const svg =
+      `<svg viewBox="0 0 32 32">\n` +
+      `  <g fill="#00ea4e">\n` +
+      `    <circle cx="17" cy="14" r="10"/>\n` +
+      `  </g>\n` +
+      `</svg>`;
+
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    expect(ug.drawn).toHaveLength(1);
+    const ellipse = ug.drawn[0] as UEllipse;
+    expect(ellipse).toBeInstanceOf(UEllipse);
+    // Upstream: rx = ry = r*scale = 10; width/height = 2*rx = 2*ry = 20;
+    // drawn via UTranslate(deltax + cx - rx, deltay + cy - ry) applied to
+    // ugs -- the box upstream itself draws is [cx-rx, cx+rx] x [cy-ry, cy+ry]
+    // = [7, 27] x [4, 24].
+    expect(ellipse.getWidth()).toBeCloseTo(20, 9);
+    expect(ellipse.getHeight()).toBeCloseTo(20, 9);
+    const translate = ug.drawnChanges[0]!.at(-1) as UTranslate;
+    expect(translate.getDx()).toBeCloseTo(7, 9);
+    expect(translate.getDy()).toBeCloseTo(4, 9);
+
+    // The circle inherits the ancestor <g fill="#00ea4e">'s color, not the
+    // BLACK default -- same ancestor-lookup mechanism acceptance criterion 2
+    // requires for <path>. The LAST Fore applied is the one active when the
+    // shape is actually drawn (later apply() calls override earlier ones).
+    const fore = ug.drawnChanges[0]!.filter((c): c is Fore => c instanceof Fore).at(-1);
+    expect(fore?.getColor()).toBe('#00EA4E');
+  });
+});
+
+describe('SvgNanoParser#drawEllipse (T8, acceptance criterion 5 -- 0 corpus reach, unit test only "by design")', () => {
+  it('produces the exact upstream ellipse-arc-path bounding box for a minimal synthetic <ellipse> (no bundle uses one)', () => {
+    // Authored per this task's own instruction: no stdlib sprite anywhere
+    // uses <ellipse> (ADR-4's census: 0 occurrences), so this exercises the
+    // real upstream code path with a minimal hand-authored fixture instead
+    // of a corpus body.
+    const svg = `<svg width="20" height="10">\n  <ellipse cx="10" cy="5" rx="4" ry="2"/>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    expect(ug.drawn).toHaveLength(1);
+    const path = ug.drawn[0] as UPath;
+    expect(path).toBeInstanceOf(UPath);
+
+    // Identity transform (no <g>, no scale beyond 1): the decomposed
+    // 4-arc ellipse path's bounding box is exactly the ellipse's own
+    // [cx-rx, cx+rx] x [cy-ry, cy+ry] box, since every SEG_ARCTO segment
+    // contributes only its endpoint to minmax (UPath#addInternal).
+    expect(path.getMinX()).toBeCloseTo(6, 9);
+    expect(path.getMaxX()).toBeCloseTo(14, 9);
+    expect(path.getMinY()).toBeCloseTo(3, 9);
+    expect(path.getMaxY()).toBeCloseTo(7, 9);
+  });
+});
+
+describe('SvgNanoParser -- <circle>/<ellipse> together under one ancestor <g fill> (dispatch order)', () => {
+  it('draws the circle then the ellipse, in document order, both under the shared ancestor fill', () => {
+    // Verbatim edgy structure with one <circle> swapped for an <ellipse>
+    // (0 real stdlib occurrences per the mission's own census -- ADR-4
+    // still requires exercising it, unit-test only, "by design").
     const svg =
       `<svg viewBox="0 0 32 32">\n` +
       `  <g fill="#00ea4e">\n` +
@@ -325,29 +389,273 @@ describe('SvgNanoParser -- <circle>/<ellipse>/<text> dispatch (T8 stubs wired, n
     const parser = new SvgNanoParser(svg);
     const ug = new FakeUGraphic();
     expect(() => parser.drawU(ug, 1, undefined, undefined)).not.toThrow();
-    // Stubs draw nothing yet -- T8 fills these bodies.
-    expect(ug.drawn).toHaveLength(0);
+
+    expect(ug.drawn).toHaveLength(2);
+    expect(ug.drawn[0]).toBeInstanceOf(UEllipse);
+    const ellipsePath = ug.drawn[1] as UPath;
+    expect(ellipsePath).toBeInstanceOf(UPath);
+    expect(ellipsePath.getMinX()).toBeCloseTo(5, 9);
+    expect(ellipsePath.getMaxX()).toBeCloseTo(10, 9);
+    expect(ellipsePath.getMinY()).toBeCloseTo(23, 9);
+    expect(ellipsePath.getMaxY()).toBeCloseTo(28, 9);
+  });
+});
+
+describe('SvgNanoParser#drawText (T8, acceptance criterion 6)', () => {
+  it('emits a UText through the existing text driver with the resolved font/colour (edgy2 pattern)', () => {
+    // Verbatim from assets/stdlib/edgy/edgy2.puml.
+    const svg = `<svg viewBox="0 0 32 32">\n  <text x="17" y="10" font-size="10" fill="#262626">People</text>\n</svg>`;
+
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    expect(ug.drawn).toHaveLength(1);
+    const utext = ug.drawn[0] as UText;
+    expect(utext).toBeInstanceOf(UText);
+    expect(utext.getText()).toBe('People');
+    const fc = utext.getFontConfiguration();
+    expect(fc.family).toBe('SansSerif');
+    expect(fc.size).toBe(10);
+    expect(fc.color).toBe('#262626');
+
+    // x/y were applied via ug.apply(new UTranslate(x, y)) directly on the
+    // raw UGraphic (NOT ugs.draw) -- the last change in the log is that
+    // translate, at (17, 10) (scalex/scaley/deltax/deltay all identity here).
+    const translate = ug.drawnChanges[0]!.at(-1) as UTranslate;
+    expect(translate.getDx()).toBeCloseTo(17, 9);
+    expect(translate.getDy()).toBeCloseTo(10, 9);
   });
 
-  it('dispatches <text> without drawing or throwing', () => {
-    // Verbatim from assets/stdlib/edgy/edgy2.puml.
+  it('falls back to "SansSerif" and inherits font-family from an ancestor <g> (getTextFontFamily stackG walk)', () => {
     const svg =
       `<svg viewBox="0 0 32 32">\n` +
-      `  <text x="17" y="10" font-size="10" fill="#262626">People</text>\n` +
+      `  <g font-family="Georgia">\n` +
+      `    <text x="0" y="0" font-size="10" fill="#000000">Hi</text>\n` +
+      `  </g>\n` +
       `</svg>`;
 
     const parser = new SvgNanoParser(svg);
     const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const utext = ug.drawn[0] as UText;
+    expect(utext.getFontConfiguration().family).toBe('Georgia');
+  });
+
+  it('reads font-size from a style="font-size:12pt;" attribute, stripping the unit suffix', () => {
+    const svg = `<svg viewBox="0 0 32 32">\n  <text x="0" y="0" style="font-size:12pt;" fill="#000000">Hi</text>\n</svg>`;
+
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const utext = ug.drawn[0] as UText;
+    expect(utext.getFontConfiguration().size).toBe(12);
+  });
+
+  it('defaults font-size to 14 when neither font-size= nor style="font-size:..." is present', () => {
+    const svg = `<svg viewBox="0 0 32 32">\n  <text x="0" y="0" fill="#000000">Hi</text>\n</svg>`;
+
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const utext = ug.drawn[0] as UText;
+    expect(utext.getFontConfiguration().size).toBe(14);
+  });
+
+  it('falls back to white when no fill= is present anywhere (getColorOrWhite\'s undefined-code branch)', () => {
+    const svg = `<svg viewBox="0 0 32 32">\n  <text x="0" y="0" font-size="10">NoFill</text>\n</svg>`;
+
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const utext = ug.drawn[0] as UText;
+    expect(utext.getFontConfiguration().color).toBe('#FFFFFF');
+  });
+});
+
+describe('SvgNanoParser#applyFillAndStroke (T8, acceptance criteria 2 and 3)', () => {
+  it('a <path> with no own fill inherits the ancestor <g fill="...">\'s colour, not a default', () => {
+    const svg =
+      `<svg width="16" height="16">\n` +
+      `  <g fill="#123456">\n` +
+      `    <path d="${BI_GLOBE_D}"/>\n` +
+      `  </g>\n` +
+      `</svg>`;
+
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    expect(ug.drawn).toHaveLength(1);
+    const changes = ug.drawnChanges[0]!;
+    // LAST Fore/Back applied is what's active when the <path> is actually
+    // drawn -- both the <g fill="#123456"> tag itself and the child <path>
+    // (via its own ancestor-lookup) apply this same colour along the way.
+    const fore = changes.filter((c): c is Fore => c instanceof Fore).at(-1);
+    const back = changes.filter((c): c is Back => c instanceof Back).at(-1);
+    expect(fore?.getColor()).toBe('#123456');
+    expect(back?.getBackColor()).toBe('#123456');
+  });
+
+  it('multiplies stroke-width by getInitialScale() exactly (acceptance criterion 3)', () => {
+    const svg = `<svg width="16" height="16">\n  <path stroke-width="2" d="${BI_GLOBE_D}"/>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 3, undefined, undefined);
+
+    const changes = ug.drawnChanges[0]!;
+    const stroke = changes.find((c): c is UStroke => c instanceof UStroke);
+    expect(stroke).toBeDefined();
+    expect(stroke!.getThickness()).toBeCloseTo(6, 9);
+  });
+
+  it('a stroke with no own fill applies ONLY the stroke foreground + default background (early-return quirk)', () => {
+    const svg = `<svg width="16" height="16">\n  <path stroke="#ff0000" d="${BI_GLOBE_D}"/>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const changes = ug.drawnChanges[0]!;
+    const fores = changes.filter((c): c is Fore => c instanceof Fore);
+    const backs = changes.filter((c): c is Back => c instanceof Back);
+    // The initial drawU-start default-color Fore/Back, then the stroke's
+    // own Fore, then the early-return default-color Back -- no SECOND
+    // Fore/Back pair from the fill branch, since the method returns before
+    // reaching it.
+    expect(fores).toHaveLength(2);
+    expect(fores[1]!.getColor()).toBe('#FF0000');
+    expect(backs).toHaveLength(2);
+    expect(backs[1]!.getBackColor()).toBe('#000000');
+  });
+
+  it('fill="none" applies ONLY a background of the "none" sentinel, no foreground change', () => {
+    const svg = `<svg width="16" height="16">\n  <path fill="none" d="${BI_GLOBE_D}"/>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const changes = ug.drawnChanges[0]!;
+    const fores = changes.filter((c): c is Fore => c instanceof Fore);
+    const backs = changes.filter((c): c is Back => c instanceof Back);
+    // Only the drawU-start default Fore -- none from applyFillAndStroke's
+    // "none" branch (it applies Back only).
+    expect(fores).toHaveLength(1);
+    expect(backs).toHaveLength(2);
+    expect(backs[1]!.getBackColor()).toBe('none');
+  });
+});
+
+describe('SvgNanoParser#applyTransform (T8, acceptance criterion 4)', () => {
+  it('composes nested <g transform="translate(...)"> then <g transform="scale(...)"> in upstream\'s document order', () => {
+    const svg =
+      `<svg width="16" height="16">\n` +
+      `  <g transform="translate(10 20)">\n` +
+      `    <g transform="scale(2)">\n` +
+      `      <path d="${BI_GLOBE_D}"/>\n` +
+      `    </g>\n` +
+      `  </g>\n` +
+      `</svg>`;
+
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const path = ug.drawn[0] as UPath;
+    const box = pathBBox(BI_GLOBE_D)!;
+    // Outer translate(10,20) composes BEFORE inner scale(2) (each <g> post-
+    // multiplies onto the accumulated matrix in document order), so the
+    // final affine is [2,0,0,2,20,40]: (x,y) -> (2x+20, 2y+40).
+    expect(path.getMinX()).toBeCloseTo(2 * box.minX + 10 * 2, 9);
+    expect(path.getMaxX()).toBeCloseTo(2 * box.maxX + 10 * 2, 9);
+    expect(path.getMinY()).toBeCloseTo(2 * box.minY + 20 * 2, 9);
+    expect(path.getMaxY()).toBeCloseTo(2 * box.maxY + 20 * 2, 9);
+  });
+
+  it('handles the single-argument translate(x) and two-argument scale(x,y) forms', () => {
+    // scale(2,2) (equal args) rather than scale(2,3): UGraphicWithScale
+    // .applyScale throws for non-uniform scale (a separate, already-ported
+    // upstream invariant -- not this task's concern), so a UNIFORM
+    // two-argument value is what proves P_SCALE2 (not P_SCALE1) matched.
+    const svg = `<svg width="10" height="10">\n  <g transform="translate(5) scale(2,2)">\n    <path d="M0 0 L1 1"/>\n  </g>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const path = ug.drawn[0] as UPath;
+    // translate(5) -- single-arg form sets BOTH dx and dy to 5
+    // (P_TRANSLATE2, upstream's own quirk, preserved verbatim) -- then
+    // scale(2,2) -- two-argument form (P_SCALE2). Composed: at=[1,0,0,1,5,5]
+    // after translate, then scale(2,2) multiplies rows -> at=[2,0,0,2,10,10]:
+    // (x,y) -> (2x+10, 2y+10). (0,0)->(10,10); (1,1)->(12,12).
+    expect(path.getMinX()).toBeCloseTo(10, 9);
+    expect(path.getMaxX()).toBeCloseTo(12, 9);
+    expect(path.getMinY()).toBeCloseTo(10, 9);
+    expect(path.getMaxY()).toBeCloseTo(12, 9);
+  });
+
+  it('applies a well-formed rotate(angle, x, y) transform (rotate(90, 0, 0) maps (x,y) -> (-y, x))', () => {
+    const svg = `<svg width="10" height="10">\n  <g transform="rotate(90, 0, 0)">\n    <path d="M4 0 L0 0"/>\n  </g>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const path = ug.drawn[0] as UPath;
+    // Raw points (4,0) and (0,0) rotate to (0,4) and (0,0).
+    expect(path.getMinX()).toBeCloseTo(0, 9);
+    expect(path.getMaxX()).toBeCloseTo(0, 9);
+    expect(path.getMinY()).toBeCloseTo(0, 9);
+    expect(path.getMaxY()).toBeCloseTo(4, 9);
+  });
+
+  it('applies a well-formed matrix(...) transform', () => {
+    const svg = `<svg width="10" height="10">\n  <g transform="matrix(1 0 0 1 5 5)">\n    <path d="M0 0 L1 1"/>\n  </g>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const path = ug.drawn[0] as UPath;
+    // matrix(1,0,0,1,5,5) is a pure translate(5,5): (0,0)->(5,5), (1,1)->(6,6).
+    expect(path.getMinX()).toBeCloseTo(5, 9);
+    expect(path.getMaxX()).toBeCloseTo(6, 9);
+    expect(path.getMinY()).toBeCloseTo(5, 9);
+    expect(path.getMaxY()).toBeCloseTo(6, 9);
+  });
+
+  it('warns and leaves the transform unchanged for a malformed rotate(...) (upstream\'s WARNING branch)', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const svg = `<svg width="10" height="10">\n  <g transform="rotate(bogus)">\n    <path d="${BI_GLOBE_D}"/>\n  </g>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
     expect(() => parser.drawU(ug, 1, undefined, undefined)).not.toThrow();
-    expect(ug.drawn).toHaveLength(0);
+
+    const path = ug.drawn[0] as UPath;
+    const box = pathBBox(BI_GLOBE_D)!;
+    expect(path.getMinX()).toBeCloseTo(box.minX, 9);
+    expect(warnSpy).toHaveBeenCalledWith('WARNING: rotate(bogus)');
+    warnSpy.mockRestore();
+  });
+
+  it('warns and leaves the transform unchanged for a malformed matrix(...) (upstream\'s WARNING branch)', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const svg = `<svg width="10" height="10">\n  <g transform="matrix(bogus)">\n    <path d="${BI_GLOBE_D}"/>\n  </g>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    expect(() => parser.drawU(ug, 1, undefined, undefined)).not.toThrow();
+
+    const path = ug.drawn[0] as UPath;
+    const box = pathBBox(BI_GLOBE_D)!;
+    expect(path.getMinX()).toBeCloseTo(box.minX, 9);
+    expect(warnSpy).toHaveBeenCalledWith('WARNING: matrix(bogus)');
+    warnSpy.mockRestore();
   });
 });
 
 describe('SvgNanoParser -- GrayLevelRange (constructor/minGray/maxGray fields)', () => {
   it('returns the default 999/-1-derived min/max gray level for a sprite with no fill/stroke colour', () => {
-    // bi-globe has neither `fill=` nor `stroke=` on its single <path>, so
-    // computeMinMaxGray's updateMinMax is never invoked -- min/max stay at
-    // their initial sentinel values (999 / -1), matching upstream exactly.
     const parser = new SvgNanoParser(BI_GLOBE_SVG);
     expect(parser.getMinGrayLevel()).toBe(999);
     expect(parser.getMaxGrayLevel()).toBe(-1);
@@ -356,7 +664,6 @@ describe('SvgNanoParser -- GrayLevelRange (constructor/minGray/maxGray fields)',
   it('computes min/max gray level from a <path fill="..."> attribute', () => {
     const svg = `<svg width="16" height="16">\n  <path fill="#000000" d="${BI_GLOBE_D}"/>\n</svg>`;
     const parser = new SvgNanoParser(svg);
-    // Black -> gray level 0 for both min and max (only one colour present).
     expect(parser.getMinGrayLevel()).toBe(0);
     expect(parser.getMaxGrayLevel()).toBe(0);
   });
@@ -371,7 +678,6 @@ describe('SvgNanoParser -- GrayLevelRange (constructor/minGray/maxGray fields)',
   it('reads fill from a style="fill:..." attribute when no plain fill= is present', () => {
     const svg = `<svg width="16" height="16">\n  <path style="fill:#123456;" d="${BI_GLOBE_D}"/>\n</svg>`;
     const parser = new SvgNanoParser(svg);
-    // gray(#123456) = trunc((0x12*299 + 0x34*587 + 0x56*114) / 1000) = 45.
     expect(parser.getMinGrayLevel()).toBe(45);
     expect(parser.getMaxGrayLevel()).toBe(45);
   });
@@ -379,7 +685,6 @@ describe('SvgNanoParser -- GrayLevelRange (constructor/minGray/maxGray fields)',
   it('falls back to white for an unparseable fill colour token', () => {
     const svg = `<svg width="16" height="16">\n  <path fill="not-a-real-color-xyz" d="${BI_GLOBE_D}"/>\n</svg>`;
     const parser = new SvgNanoParser(svg);
-    // getColorOrWhite semantics: an unparseable token resolves to white (255).
     expect(parser.getMinGrayLevel()).toBe(255);
     expect(parser.getMaxGrayLevel()).toBe(255);
   });
@@ -393,8 +698,6 @@ describe('SvgNanoParser -- GrayLevelRange (constructor/minGray/maxGray fields)',
       `  </g>\n` +
       `</svg>`;
     const parser = new SvgNanoParser(svg);
-    // min = gray(#000000) = 0 (from <g fill=...>); max = gray(#ffffff) = 255
-    // (from <circle fill=...>); gray(#808080) = 128 sits strictly between.
     expect(parser.getMinGrayLevel()).toBe(0);
     expect(parser.getMaxGrayLevel()).toBe(255);
   });

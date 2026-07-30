@@ -9,6 +9,8 @@ import { parseSimpleColor } from '../color/HColorSet.js';
 import { grayScale } from '../../tim/builtin/color-utils.js';
 import { parseSvgPath } from './SvgPath.js';
 import { UTranslate } from '../UTranslate.js';
+import { extract, applyTransformAttribute } from './svg-nanoparser-transform.js';
+import { applyFillAndStroke, getFillString, drawCircle, drawEllipse, drawText, DATA_STROKE } from './svg-nanoparser-shapes.js';
 
 /**
  * SvgNanoParser -- draw-time decomposition of a `<$sprite>`'s raw SVG body
@@ -22,26 +24,32 @@ import { UTranslate } from '../UTranslate.js';
  *
  * This file is split across two tasks porting the SAME 522-line upstream
  * class:
- *  - **T6 (this file's initial landing):** `getData`, the `drawU` dispatch
- *    loop, the `<g>` push/pop stack discipline, `drawPath` (delegates to
- *    T1's `SvgPath.ts` per ADR-1 -- no second `d` -> `UPath` parser here),
- *    the constructor, `minGray`/`maxGray` fields, and the `extract()`
- *    helper.
- *  - **T8 (later, same file):** fills the `drawCircle`/`drawEllipse`/
- *    `drawText`/`applyFillAndStroke`/`applyTransform` STUBS below -- their
- *    dispatch branches are wired now so T8 only supplies bodies.
+ *  - **T6:** `getData`, the `drawU` dispatch loop, the `<g>` push/pop stack
+ *    discipline, `drawPath` (delegates to T1's `SvgPath.ts` per ADR-1 -- no
+ *    second `d` -> `UPath` parser here), the constructor, `minGray`/
+ *    `maxGray` fields, and the `extract()` helper.
+ *  - **T8:** fills the `drawCircle`/`drawEllipse`/`drawText`/
+ *    `applyFillAndStroke`/`applyTransform` bodies. Their actual
+ *    implementations live in two sibling modules, split out per this
+ *    task's own complexity-hook budget (the single-file port exceeded the
+ *    500-line threshold): `svg-nanoparser-transform.ts` (`<g
+ *    transform=...>` attribute parsing) and `svg-nanoparser-shapes.ts`
+ *    (`<circle>`/`<ellipse>`/`<text>` emission plus `applyFillAndStroke`/
+ *    `getFillString`). Neither of those functions reads this class's own
+ *    instance state, so they extract cleanly as free functions; this
+ *    class's own methods are thin delegates that preserve the original
+ *    upstream method names and dispatch shape as documented in the class's
+ *    own doc comment history.
  *
- * Beyond the task's literal list, this file ALSO ports `getFillString`,
- * `computeMinMaxGray`, `updateMinMax`, `getMinGrayLevel`, and
- * `getMaxGrayLevel` (upstream `:309-342`, `:482-520`) -- NOT because the T6
- * task text names them, but because `drawU`'s first line
- * (`new ColorResolver(fontColor, forcedColor, this)`, upstream `:136`) is
- * itself T6 scope and requires `this` to satisfy T2's `GrayLevelRange`
- * interface. `computeMinMaxGray` only ever calls `getFillString(s, null)`
- * (upstream `:485`), so porting `getFillString` in full costs nothing here
- * and saves T8 from having to add it later -- T8's `applyFillAndStroke`/
- * `drawText` (which call `getFillString(s, stackG)` with the REAL ancestor
- * stack) can reuse this file's existing implementation unchanged.
+ * Beyond the task's literal list, this file ALSO ports `computeMinMaxGray`,
+ * `updateMinMax`, `getMinGrayLevel`, and `getMaxGrayLevel` (upstream
+ * `:482-520`) -- NOT because the T6 task text names them, but because
+ * `drawU`'s first line (`new ColorResolver(fontColor, forcedColor, this)`,
+ * upstream `:136`) is itself T6 scope and requires `this` to satisfy T2's
+ * `GrayLevelRange` interface. `computeMinMaxGray` calls
+ * `svg-nanoparser-shapes.ts#getFillString(s, null)` (upstream `:485`)
+ * directly -- the SAME function `applyFillAndStroke`/`drawText` call with a
+ * REAL `stackG`.
  *
  * ---------------------------------------------------------------------
  * KNOWN SEAM MISMATCH, resolved here (batch-1 finding, this task's job to
@@ -106,25 +114,6 @@ const WHITE: ResolvedColor = { r: 255, g: 255, b: 255, a: 255 };
  */
 const P_TEXT_OR_DRAW = /(<text .*?<\/text>)|(<(?:svg|path|g|circle|ellipse)[^<>]*>)|(<\/[^<>]*>)/g;
 
-/** `equals_something = "=\"([^\"]+)\""`. */
-const EQUALS_SOMETHING = '="([^"]+)"';
-const DATA_FILL = new RegExp('fill' + EQUALS_SOMETHING);
-const DATA_STROKE = new RegExp('stroke' + EQUALS_SOMETHING);
-const DATA_STYLE = new RegExp('style' + EQUALS_SOMETHING);
-
-/** `colon_something = ":([^;\"]+)"`. */
-const COLON_SOMETHING = ':([^;"]+)';
-/** `Pattern.quote("fill") + colon_something` -- `Pattern.quote` is a no-op
- *  here since "fill" contains no regex metacharacters, so the literal
- *  string is used directly rather than adding an escaping helper. */
-const STYLE_FILL = new RegExp('fill' + COLON_SOMETHING);
-
-/** @see SvgNanoParser.java#extract */
-function extract(p: RegExp, s: string): string | undefined {
-  const m = p.exec(s);
-  return m === null ? undefined : m[1];
-}
-
 /**
  * Adapter reconciling T2's `ColorResolver` (returns `ResolvedColor`) with
  * `UGraphicWithScale.ts`'s local `ColorResolver` contract (returns
@@ -139,11 +128,6 @@ class PaintColorResolver implements UGraphicWithScaleColorResolver {
     return colorResolverToSvgHex(this.inner.getDefaultColor());
   }
 
-  /* v8 ignore next 3 -- unreachable via this task's own call graph: the
-   * only caller would be `applyFillAndStroke`'s `ugs.getTrueColor(...)`
-   * call (SvgNanoParser.java:198), and that method is a T6 STUB (see its
-   * own doc comment above) that never calls `ugs.getTrueColor`. Provably
-   * dead until T8 fills that stub in; T8's own test suite exercises this. */
   getTrueColor(code: string): Paint {
     return colorResolverToSvgHex(this.inner.getTrueColor(code));
   }
@@ -187,14 +171,14 @@ export class SvgNanoParser implements GrayLevelRange {
       } else if (s.startsWith('<g ')) {
         stack.unshift(ugs);
         stackG.unshift(s);
-        ugs = this.applyFillAndStroke(ugs, s, stackG);
-        ugs = this.applyTransform(ugs, s);
+        ugs = applyFillAndStroke(ugs, s, stackG);
+        ugs = applyTransformAttribute(ugs, s);
       } else if (s.startsWith('<circle ')) {
-        this.drawCircle(ugs, s, stackG);
+        drawCircle(ugs, s, stackG);
       } else if (s.startsWith('<ellipse ')) {
-        this.drawEllipse(ugs, s, stackG);
+        drawEllipse(ugs, s, stackG);
       } else if (s.startsWith('<text ')) {
-        this.drawText(ugs, s, stackG);
+        drawText(ugs, s, stackG);
       } else {
         // TRACE-only in upstream ("ignored1") -- not reproduced (no
         // TRACE flag/console output exists in this port).
@@ -252,11 +236,10 @@ export class SvgNanoParser implements GrayLevelRange {
    * `parseSvgPath` now takes the accumulated `applied.getAffineTransform()`
    * as its third, optional argument, mirroring upstream's real call --
    * `svgPath.drawMe(ug, at)` -> `SvgPath#toUPath(XAffineTransform)` --
-   * exactly. `applyFillAndStroke`/`applyTransform` are still T8 stubs (no
-   * `<g transform=...>` string parsing yet), so today `applied`'s affine
-   * transform is whatever `ugs` already carried in (in practice, the
-   * `scale` `drawU` was called with); T8 wires the rest without needing
-   * to touch this method again.
+   * exactly. Since T8, `applyFillAndStroke`/`applyTransform` are real (no
+   * longer stubs), so `applied`'s affine transform reflects the full
+   * accumulated `<g transform=...>` stack plus this element's own
+   * `transform=`, not just the `scale` `drawU` was called with.
    */
   private drawPath(ugs: UGraphicWithScale, s: string, stackG: readonly string[]): void {
     // `id="` -> `ID="` avoids `indexOf('d="')` below false-matching the
@@ -264,8 +247,8 @@ export class SvgNanoParser implements GrayLevelRange {
     // verbatim -- `String#replace(CharSequence, CharSequence)` replaces
     // EVERY occurrence, hence `replaceAll` here, not a single replace).
     const withId = s.replaceAll('id="', 'ID="');
-    let applied = this.applyFillAndStroke(ugs, withId, stackG);
-    applied = this.applyTransform(applied, withId);
+    let applied = applyFillAndStroke(ugs, withId, stackG);
+    applied = applyTransformAttribute(applied, withId);
 
     const x1 = withId.indexOf('d="');
     const x2 = withId.indexOf('"', x1 + 3);
@@ -275,79 +258,11 @@ export class SvgNanoParser implements GrayLevelRange {
     applied.draw(path);
   }
 
-  /**
-   * STUB for T8 (`plans/svg-sprite-nanoparser/batch-3/T8-nanoparser-shapes-text.md`).
-   * Dispatch is wired above (the `<g ...>` branch and `drawPath`) so T8
-   * only needs to fill this body. Currently a no-op: `ugs` is returned
-   * unchanged, so no fill/stroke/stroke-width is applied yet.
-   * @see SvgNanoParser.java#applyFillAndStroke
-   */
-  private applyFillAndStroke(ugs: UGraphicWithScale, _s: string, _stackG: readonly string[]): UGraphicWithScale {
-    return ugs;
-  }
-
-  /**
-   * STUB for T8. Dispatch is wired above (the `<g ...>` branch and
-   * `drawPath`) so T8 only needs to fill this body. Currently a no-op:
-   * `ugs` is returned unchanged, so no `transform=` (rotate/matrix/
-   * scale/translate) is applied yet.
-   * @see SvgNanoParser.java#applyTransform
-   */
-  private applyTransform(ugs: UGraphicWithScale, _s: string): UGraphicWithScale {
-    return ugs;
-  }
-
-  /** STUB for T8 -- dispatch wired in `drawU` above. @see SvgNanoParser.java#drawCircle */
-  private drawCircle(_ugs: UGraphicWithScale, _s: string, _stackG: readonly string[]): void {
-    // Intentionally empty pending T8.
-  }
-
-  /** STUB for T8 -- dispatch wired in `drawU` above. @see SvgNanoParser.java#drawEllipse */
-  private drawEllipse(_ugs: UGraphicWithScale, _s: string, _stackG: readonly string[]): void {
-    // Intentionally empty pending T8.
-  }
-
-  /** STUB for T8 -- dispatch wired in `drawU` above. @see SvgNanoParser.java#drawText */
-  private drawText(_ugs: UGraphicWithScale, _s: string, _stackG: readonly string[]): void {
-    // Intentionally empty pending T8.
-  }
-
-  /**
-   * @see SvgNanoParser.java#getFillString
-   *
-   * Ported in full here (not just the non-recursive core `computeMinMaxGray`
-   * needs) so T8's `applyFillAndStroke`/`drawText` can call this UNCHANGED
-   * with a real `stackG` -- see this file's module doc comment.
-   */
-  private getFillString(s: string, stackG: readonly string[] | null): string | undefined {
-    let color = extract(DATA_FILL, s);
-    if (color === undefined) {
-      const style = extract(DATA_STYLE, s);
-      if (style !== undefined) color = extract(STYLE_FILL, style);
-    }
-
-    /* v8 ignore start -- unreachable via this task's own call graph: the
-     * only caller of `getFillString` today is `computeMinMaxGray`, which
-     * always passes `null` (SvgNanoParser.java:485 does the same). This
-     * ancestor-group walk only fires once T8's `applyFillAndStroke`/
-     * `drawText` pass a REAL `stackG` -- ported in full now (not stubbed)
-     * so T8 can reuse it unchanged; T8's own test suite exercises it. */
-    if (color === undefined && stackG !== null) {
-      for (const g of stackG) {
-        color = this.getFillString(g, null);
-        if (color !== undefined) return color;
-      }
-    }
-    /* v8 ignore stop */
-
-    return color;
-  }
-
   /** @see SvgNanoParser.java#computeMinMaxGray */
   private computeMinMaxGray(): void {
     for (const s of this.getData()) {
       if (s.includes('<path ') || s.includes('<g ') || s.includes('<circle ') || s.includes('<ellipse ')) {
-        const fillString = this.getFillString(s, null);
+        const fillString = getFillString(s, null);
         const strokeString = extract(DATA_STROKE, s);
 
         this.updateMinMax(strokeString);
