@@ -107,9 +107,9 @@
       "slug": "codabo-50-mupa164",
       "group": 2,
       "status": "baseline",
-      "diffCount": 388,
+      "diffCount": 11,
       "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "measuredAgainstCommit": "b90edb94+T4"
     },
     {
       "type": "component",
@@ -144,18 +144,18 @@
       "slug": "babafi-51-dixi026",
       "group": 3,
       "status": "baseline",
-      "diffCount": 30,
+      "diffCount": 24,
       "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "measuredAgainstCommit": "b90edb94+T4"
     },
     {
       "type": "component",
       "slug": "butebe-90-dozo380",
       "group": 3,
       "status": "baseline",
-      "diffCount": 9,
+      "diffCount": 7,
       "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "measuredAgainstCommit": "b90edb94+T4"
     },
     {
       "type": "component",

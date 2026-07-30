@@ -47,10 +47,39 @@ describe('leaf-sizing — creole-aware width + HR height (S1L-b T3)', () => {
     expect(size('a\n----\nb').height).toBe(size('a\n====\nb').height);
   });
 
-  it('`____` (underscores) is NOT a rule — it sizes as a normal text line', () => {
-    // The renderer draws `____` as literal text; the sizer must agree (ADR-4
-    // refinement). So an `____` body sizes the same as any 4-char text line.
-    expect(size('a\n____\nb').height).toBe(size('a\nWXYZ\nb').height);
+  it('`____` (underscores) IS a rule — it does NOT size as a normal text line', () => {
+    // CORRECTED by T4 (bodyenhanced-atom-seams). This pin previously asserted
+    // the opposite — that `____` sizes as literal text — and that was wrong
+    // against upstream.
+    //
+    // `BodyEnhancedAbstract.isBlockSeparator` (java:67-82) returns true for
+    // `s.startsWith("__") && s.endsWith("__")`, with no "no inner delimiter"
+    // constraint, so `____` is a block separator. Jar-probed directly rather
+    // than argued from the source:
+    //
+    //   component "line1\n____\nline2" as c1
+    //   component second
+    //   c1 --> second
+    //
+    //   java -DPLANTUML_DETERMINISTIC_TEXT=true \
+    //        -jar oracle/dist/plantuml-oracle.jar -tsvg -o <dir> <puml>
+    //
+    // gives data-diagram-type="DESCRIPTION" and emits
+    //   <line x1="15.74" y1="41" x2="83.4025" y2="41"
+    //         style="stroke:#181818;stroke-width:0.5;"/>
+    // while the literal string `____` appears ZERO times in the SVG. The jar
+    // draws a rule, not text. (The 0.5 thickness independently corroborates
+    // T2a's `getDefaultThickness` finding.)
+    //
+    // Why the old pin looked right: the pre-T4 sizer used
+    // `CreoleStripeSimpleParser.classifyStripeLine`, whose patterns are
+    // anchored regexes (`^--([^-]*)--$` and friends) and are therefore
+    // STRICTER than upstream's startsWith/endsWith test. T4 routed `desc`
+    // through `BodyFactory.create3`, so upstream's own predicate now governs.
+    expect(size('a\n____\nb').height).not.toBe(size('a\nWXYZ\nb').height);
+    // A rule is shorter than a text line: 66 vs 72 for this body.
+    expect(size('a\n____\nb').height).toBe(66);
+    expect(size('a\nWXYZ\nb').height).toBe(72);
   });
 
   it('`<b>…</b>` formatting tags contribute zero width', () => {

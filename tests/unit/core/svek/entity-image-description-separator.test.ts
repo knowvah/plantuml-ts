@@ -27,10 +27,26 @@
  * E2r/L1 update (2026-07-15): `classifySeparatorLine` was SUBSUMED by
  * `klimt/creole/legacy/CreoleStripeSimpleParser.ts#classifyStripeLine`,
  * which also now runs NORMAL lines through the ported style-command
- * engine — see the "run of 5 dashes" test below for a jar-verified
- * correction this uncovered, and `CreoleStripeSimpleParser.ts`'s own doc
- * comment for the "--Header--" embedded-label finding (still deferred,
- * this suite's own pin unchanged).
+ * engine.
+ *
+ * T4 update (2026-07-29, `plans/bodyenhanced-atom-seams/`): `desc` now
+ * routes through the REAL `BodyFactory.create3`/`BodyEnhanced2`, whose OWN
+ * `isBlockSeparator` (java:67-82, an EARLIER, coarser check than the
+ * Creole lexer's line classifier) treats ANY "--Header--"/"-----"-shaped
+ * line as a TITLED block separator, regardless of captured content —
+ * superseding the "--Header--"/"5 dashes" tests' PRE-T4 pins (both
+ * literal-text/struck-text expectations from when `desc` had no
+ * `BodyEnhanced2` separator layer to reach). Diagnosed 2026-07-29: the
+ * OLD "5 dashes" pin's own "jar-verified 2026-07-15" oracle used `queue
+ * "..." as x` WITHOUT a `component`/`database` keyword present, which the
+ * real jar's diagram-type dispatch resolves to a SEQUENCE diagram — a
+ * DIFFERENT upstream drawing class (`data-diagram-type="SEQUENCE"`,
+ * confirmed) than `svek/image/EntityImageDescription.java`, which this
+ * class actually models. Re-verified against `component component1 /
+ * queue "queue1\n-----\ntoto" as queue3` (matching G1 ledger.md I9b's own
+ * `component/butebe-90-dozo380` fixture shape) — the REAL component-
+ * diagram jar output matches this port's NEW titled-separator output
+ * byte-for-byte (see the two updated tests' own citations).
  */
 import { describe, expect, test } from 'vitest';
 import { XDimension2D } from '../../../../src/core/klimt/geom/XDimension2D.js';
@@ -169,37 +185,37 @@ describe('EntityImageDescription — bare Creole horizontal-line separator (G1 I
     expect(dim.getHeight()).toBeCloseTo(46, 3);
   });
 
-  test('a non-empty "--Header--" line is UNCHANGED (still literal text) -- deferred embedded-label horizontal-line mechanism (jar-verified: real jar draws it as TWO short <line> elements flanking a plain "Header" <text>, not literal text OR struck-through -- CreoleHorizontalLine\'s label branch is a separate, still-unported mechanism this port intentionally leaves as its pre-existing literal-text fallback rather than half-building)', () => {
+  test('a non-empty "--Header--" line is a TITLED block separator (T4, `plans/bodyenhanced-atom-seams/`: ADR-4/S1L-i closes as a consequence of wiring `desc` through the real `BodyFactory.create3`/`BodyEnhanced2` -- `BodyEnhancedAbstract.isBlockSeparator` (java:67-82) matches ANY line starting+ending with "--", regardless of captured content, and `getTitle` builds "Header" as a real title `TextBlock`; superseded the OLD "still literal text" pin (BodyEnhanced2 did not exist to reach it). Jar-verified 2026-07-29 against `component component1 / queue "queue1\\n--Header--\\ntoto" as queue3` -- the OLD test\'s own oracle used a SEQUENCE-diagram `queue` participant, a different upstream drawing class than `svek/image/EntityImageDescription.java`, which is why it disagreed)', () => {
     const withHeader = baseParams({
+      paint: { ...baseParams({}).paint, titleAlignment: HorizontalAlignment.LEFT },
       labels: { codeName: 'queue3', displayText: 'queue1\n--Header--\ntoto', stereotypeLabels: [] },
     });
     const svg = render(new EntityImageDescription(withHeader));
-    expect(svg).toContain('--Header--');
-    expect(svg).not.toContain('<line');
+    expect(svg).not.toContain('--Header--');
+    expect(svg).toContain('<text x="5" y="15.8889"'); // queue1, flush left (jar-verified)
+    expect(svg).toContain('<text x="5" y="43.8889"'); // toto, flush left (jar-verified)
+    const lines = [...svg.matchAll(/<line ([^/]*)\/>/g)].map((m) => m[1] ?? '');
+    expect(lines).toHaveLength(2); // TWO short flanking lines, not one full-width separator
+    expect(lines[0]).toContain('x1="1"');
+    expect(lines[0]).toContain('x2="9.1786"');
+    expect(lines[1]).toContain('x1="55.1161"');
+    expect(lines[1]).toContain('x2="63.2946"');
+    expect(svg).toContain('<text x="9.1786" y="29.3889"');
+    expect(svg).toContain('>Header</text>');
   });
 
-  test('a run of 5 dashes ("-----") is NOT a separator (upstream capture excludes the delimiter char) -- reaches the creole style engine as NORMAL text, where the STRIKE syntax ("--...--") partially matches', () => {
-    // E2r/L1 correction (diagnosis.md precedent -- "fix the mechanism, update
-    // tests that pinned the old wrong behavior"): this assertion originally
-    // pinned "-----" as untouched literal text, written before any creole
-    // engine existed in this port (G1 I9b had no style-command chain to
-    // reach at all). Jar-verified 2026-07-15 (-DPLANTUML_DETERMINISTIC_TEXT=
-    // true, `queue "queue1\n-----\ntoto" as queue3`): the REAL jar renders a
-    // single struck-through "-" `<text text-decoration="line-through">`
-    // element, textLength 4.6375 -- "-----" is NOT a separator (confirmed,
-    // the original assertion's premise), but it DOES reach StripeSimple's
-    // ordinary NORMAL-line style-command scan, where the creole STRIKE
-    // syntax (`--...--`, non-greedy) matches "--" + "-" + "--" and strikes
-    // the single sandwiched dash. This port's new stripe/atom pipeline
-    // reproduces that exact jar structure.
+  test('a run of 5 dashes ("-----") IS a titled block separator with title "-" (T4: same `isBlockSeparator` mechanism as "--Header--" above -- "-----" both starts AND ends with "--", so `getTitle` captures the single sandwiched dash as its title. Supersedes the OLD "reaches the creole style engine as NORMAL text" pin, which was jar-verified 2026-07-15 against a SEQUENCE-diagram `queue` participant -- a different upstream drawing class; re-verified 2026-07-29 against the descriptive/component `EntityImageDescription.java` path this class actually models, via `component component1 / queue "queue1\\n-----\\ntoto" as queue3`)', () => {
     const withFiveDashes = baseParams({
+      paint: { ...baseParams({}).paint, titleAlignment: HorizontalAlignment.LEFT },
       labels: { codeName: 'queue3', displayText: 'queue1\n-----\ntoto', stereotypeLabels: [] },
     });
     const svg = render(new EntityImageDescription(withFiveDashes));
     expect(svg).not.toContain('-----');
-    expect(svg).not.toContain('<line');
-    const struckText = /<text[^>]*text-decoration="line-through"[^>]*>(-)<\/text>/.exec(svg);
-    expect(struckText?.[1]).toBe('-');
+    expect(svg).not.toContain('text-decoration="line-through"');
+    const lines = [...svg.matchAll(/<line ([^/]*)\/>/g)].map((m) => m[1] ?? '');
+    expect(lines).toHaveLength(2);
+    const titleText = /<text x="([\d.]+)" y="29.3889"[^>]*>(-)<\/text>/.exec(svg);
+    expect(titleText?.[2]).toBe('-');
   });
 
   test('a bare "====" line draws TWO parallel <line> elements (double-line style)', () => {

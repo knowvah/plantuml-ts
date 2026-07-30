@@ -116,7 +116,7 @@ export interface HexagonPolygon extends UShape {
  *  (`FormulaMeasurer`/`WidthTableMeasurer`/`CanvasMeasurer`/
  *  `FixedMeasurer`, `measurer.ts`) keeps behavior sane for any caller not
  *  wired through the updated `UGraphicSvg`. */
-function measureLine(
+export function measureLine(
   stringBounder: StringBounder,
   line: string,
   font: FontConfiguration,
@@ -411,12 +411,8 @@ export function buildTextBlock(
   guillemet?: GuillemetPair,
   defaultFont?: FontConfiguration,
 ): TextBlock {
-  // #lizard forgives -- pre-existing 6-PARAM violation; defaultFont is additive.
-  // `<<x>>` -> `«x»` before anything is classified or measured, mirroring
-  // `CreoleParser.java:175`'s `skinParam.guillemet().manageGuillemet(...)`
-  // ahead of `createStripes`. The SIZER applies the same transform at the
-  // same point (`leaf-sizing-text.ts#lineTextMetrics`), so box and ink agree
-  // (S1L-f).
+  // `<<x>>` -> `«x»` before classify/measure, mirroring `CreoleParser.java:175`
+  // (SIZER applies the same transform at the same point, S1L-f).
   const managed = manageGuillemet(text, guillemet);
   const lines = managed.length === 0 ? [] : managed.split('\n');
   const atomCtx: AtomResolutionCtx = { resolveAtomImage, defaultFont };
@@ -452,6 +448,9 @@ export function buildTextBlock(
       }
     },
   };
+  // #lizard forgives -- pre-existing 7-PARAM violation (defaultFont, ADR-3).
+  // Placed here, not after the signature: a nested fn's own end-of-function
+  // resets lizard's forgive flag before this fn's own end-of-function fires.
 }
 
 // ---------------------------------------------------------------------------
