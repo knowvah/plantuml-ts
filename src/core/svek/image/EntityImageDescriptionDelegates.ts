@@ -161,10 +161,44 @@ function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
       }
       const resolved = resolveAtomImage?.(atom.atom);
       if (resolved === undefined) return;
-      // T4 (ADR-2): only the `image` variant carries an href. No producer
-      // emits `drawable` until T9.
-      if (resolved.kind !== 'image') return;
-      ug.draw(UImage.build(resolved.width, resolved.height, resolved.href));
+      // svg-sprite-nanoparser T9 fix (was: `if (resolved.kind !== 'image')
+      // return;`, T4's placeholder guard -- silently dropped every SVG
+      // sprite once T9 started emitting `drawable`, a REAL regression
+      // caught by the orchestrator jar-verifying T9's own report).
+      //
+      // CORRECTED BLAST RADIUS (T9's own two-level trace, preserved here so
+      // it is not re-derived expensively): the brief that commissioned T9
+      // claimed class/object/state sprite atoms reach this call site. They
+      // do NOT -- `EntityImageDescription` (whose `desc`/`stereo` TextBlocks
+      // call `descAtomOps`, hence this `drawU`) is constructed ONLY in
+      // `src/diagrams/description/{leaf-sizing.ts,renderer-entity.ts}`
+      // (grep-verified), and class diagrams' OWN sprite pipeline
+      // (`class-member-creole.ts`) calls only `getSpriteMonochrome`, never
+      // `getSpriteSvg` -- zero reach into an SVG-sprite `drawable` result.
+      // The REAL affected path is narrower and more central: the
+      // DESCRIPTION engine's own MAIN entity label (`buildDesc` ->
+      // `BodyFactory.create3` -> here), a DIFFERENT draw site from
+      // `EntityImageDescriptionSupport.ts#drawAtoms` (T7's `buildTextBlock`,
+      // used only by stereotype labels and notes) -- which is why T7 landing
+      // did not also fix this one.
+      //
+      // Mirrors `drawAtoms`'s own `drawable` branch (see that function's doc
+      // comment, T7/T9 ADR-2): the only structural difference is that THIS
+      // `ug` is already positioned at the atom's origin by
+      // `SheetBlock1.ts#drawU`'s `position.translate(target)` before calling
+      // `AtomOps.drawU` (Sea/SheetBlock1's own per-atom positioning), so no
+      // extra `ug.apply(new UTranslate(x, origin.y))` wrapper is needed here
+      // the way `drawAtoms`'s manual x-cursor requires one.
+      if (resolved.kind === 'image') {
+        ug.draw(UImage.build(resolved.width, resolved.height, resolved.href));
+      } else {
+        // Each primitive re-applies its OWN translate on top of the atom's
+        // position `ug` already carries (`DrawablePrimitive`,
+        // creole-atoms.ts) -- `UPath`'s is always `(0,0)` (its geometry is
+        // already absolute), but `UEllipse`/`UText` carry no position of
+        // their own and need this to land correctly. @see SvgNanoParser.java#drawU
+        for (const primitive of resolved.primitives) ug.apply(primitive.translate).draw(primitive.shape);
+      }
     },
   };
 }

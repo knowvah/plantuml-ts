@@ -16,10 +16,12 @@
  */
 import { describe, expect, test } from 'vitest';
 import { buildTextBlock } from '../../../../../src/core/svek/image/EntityImageDescriptionSupport.js';
-import type { AtomImageResolver, InlineAtomToken } from '../../../../../src/core/creole-atoms.js';
+import type { AtomImageResolver, DrawablePrimitive, InlineAtomToken } from '../../../../../src/core/creole-atoms.js';
 import { HorizontalAlignment } from '../../../../../src/core/klimt/geom/HorizontalAlignment.js';
 import type { FontConfiguration } from '../../../../../src/core/klimt/shape/UText.js';
 import { UPath } from '../../../../../src/core/klimt/shape/UPath.js';
+import { UEllipse } from '../../../../../src/core/klimt/shape/UEllipse.js';
+import { UTranslate } from '../../../../../src/core/klimt/UTranslate.js';
 import { UGraphicSvg } from '../../../../../src/core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../../../../src/core/klimt/drawing/svg/svg-graphics.js';
 import type { StringBounder as DriverStringBounder } from '../../../../../src/core/klimt/drawing/svg/driver-text-svg.js';
@@ -68,7 +70,30 @@ function inkDotPath(): UPath {
   return p;
 }
 
+/** Wraps bare `UPath`s as untranslated `DrawablePrimitive`s (T9 widening,
+ *  svg-sprite-nanoparser) -- every pre-widening test fixture here builds its
+ *  own ink geometry directly into the path's segments (`inkSquarePath`/
+ *  `inkDotPath`), matching how `drawPath` itself always hands the collector
+ *  an ALREADY-positioned `UPath` (`UTranslate.none()` -- see
+ *  `SpritePrimitiveCollector`'s doc comment, `render-atoms.ts`). */
+function untranslated(shapes: readonly UPath[]): DrawablePrimitive[] {
+  return shapes.map((shape) => ({ shape, translate: UTranslate.none() }));
+}
+
 function drawableResolver(primitives: UPath[]): AtomImageResolver {
+  return (_atom: InlineAtomToken) => ({
+    kind: 'drawable',
+    primitives: untranslated(primitives),
+    width: DECLARED_WIDTH,
+    height: DECLARED_HEIGHT,
+  });
+}
+
+/** A `DrawablePrimitive` resolver built directly from already-paired
+ *  shape/translate entries -- used by the `UEllipse`-positioning test,
+ *  which needs a shape that does NOT carry its own position (unlike
+ *  `UPath`, see `untranslated`'s doc comment). */
+function drawablePrimitivesResolver(primitives: DrawablePrimitive[]): AtomImageResolver {
   return (_atom: InlineAtomToken) => ({
     kind: 'drawable',
     primitives,
@@ -169,5 +194,25 @@ describe('drawAtoms — the `drawable` variant (T7, ADR-2)', () => {
     expect(pathDs(svg)).toHaveLength(0);
     // "X" (the trailing text run) is translated past the declared width.
     expect(svg).toContain(`x="${DECLARED_WIDTH}"`);
+  });
+
+  test('a UEllipse primitive (a decomposed <circle>) draws at ITS OWN recorded translate, not the origin -- T9 positioning fix', () => {
+    const ug = newGraphic();
+    // UEllipse carries no position of its own (unlike UPath, whose segment
+    // coordinates ARE its position) -- SvgNanoParser's drawCircle positions
+    // it via a live `ugs.apply(translate).draw(ellipse)` call
+    // (SvgNanoParser.java:172-175), which `DrawablePrimitive.translate`
+    // reproduces here. A LOCAL (3,4) offset, layered on top of the atom's
+    // own (0,0) origin (single atom, LEFT-aligned, first line).
+    const primitives: DrawablePrimitive[] = [{ shape: UEllipse.build(6, 6), translate: new UTranslate(3, 4) }];
+    const resolve = drawablePrimitivesResolver(primitives);
+    buildTextBlock(`<img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT, resolve).drawU(ug);
+    const svg = ug.getSvgString();
+
+    const ellipse = /<ellipse[^>]*>/.exec(svg);
+    expect(ellipse).not.toBeNull();
+    // cx/cy = translate + half the ellipse's own width/height (3+3, 4+3).
+    expect(ellipse![0]).toContain('cx="6"');
+    expect(ellipse![0]).toContain('cy="7"');
   });
 });

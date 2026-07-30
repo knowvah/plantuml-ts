@@ -8,16 +8,22 @@
  *   off `measureInlineAtom` (T6) — the SAME numbers `leaf-sizing.ts`
  *   already used to size the label during layout (D9) — and `href` is the
  *   atom's own `dataUri`, passed through VERBATIM (D7 — licensing).
- * - `sprite` atoms: resolved against the per-diagram `SpriteRegistry` (T4,
- *   `core/sprite-commands.ts`) via `getSpriteMonochrome` (seam (b)
- *   bridge). An unresolved name returns `undefined` — matches
- *   `StripeSimple.addSprite` (upstream java :228-236): the atom
- *   contributes NOTHING, not a blank image. A resolved sprite is tinted +
- *   rasterized to a PNG data URI via T5's `spriteToPngDataUri`, through
- *   the seam (a) adapter (`spriteMonochromeAsLike`) that bridges T4's
- *   concrete `SpriteMonochrome` to T5's `SpriteLike` (see
- *   `sprite-raster.ts`'s file-header note — the one-line adapter that file
- *   anticipated once T4 landed).
+ * - `sprite` atoms with a MONOCHROME registry entry: resolved against the
+ *   per-diagram `SpriteRegistry` (T4, `core/sprite-commands.ts`) via
+ *   `getSpriteMonochrome` (seam (b) bridge). An unresolved name returns
+ *   `undefined` — matches `StripeSimple.addSprite` (upstream java
+ *   :228-236): the atom contributes NOTHING, not a blank image. A resolved
+ *   sprite is tinted + rasterized to a PNG data URI via T5's
+ *   `spriteToPngDataUri`, through the seam (a) adapter
+ *   (`spriteMonochromeAsLike`) that bridges T4's concrete
+ *   `SpriteMonochrome` to T5's `SpriteLike` (see `sprite-raster.ts`'s
+ *   file-header note — the one-line adapter that file anticipated once T4
+ *   landed).
+ * - `sprite` atoms with an SVG registry entry (`getSpriteSvg`): decomposed
+ *   into `UPath` DRAW-TIME primitives via `SvgNanoParser.drawU`
+ *   (svg-sprite-nanoparser T9, ADR-2) rather than re-emitted as an opaque
+ *   `<image href="data:image/svg+xml;base64,...">`. See
+ *   `resolveSvgSpriteAtom`'s own doc comment.
  *
  * Width/height are ALWAYS taken from `measureInlineAtom`, never from
  * `spriteToPngDataUri`'s own returned `width`/`height` (the two are
@@ -50,16 +56,150 @@ import {
 } from '../../core/creole-atoms-measure.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { getSpriteMonochrome, getSpriteSvg, spriteDimsLookupFor } from '../../core/sprite-commands.js';
-import { toBase64 } from '../../core/klimt/sprite/png-encoder.js';
 import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
+import { SvgNanoParser } from '../../core/klimt/sprite/SvgNanoParser.js';
+import type { DrawablePrimitive } from '../../core/creole-atoms.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import type { UChange } from '../../core/klimt/UChange.js';
+import type { UShape } from '../../core/klimt/UShape.js';
+import type { UParam } from '../../core/klimt/UParam.js';
+import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { Back } from '../../core/klimt/Back.js';
+import type { ResolvedColor } from '../../core/klimt/color/HColorSet.js';
+import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 
 type ResolvedAtomImage =
   | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
+  | {
+      readonly kind: 'drawable';
+      readonly primitives: readonly DrawablePrimitive[];
+      readonly width: number;
+      readonly height: number;
+    }
   | undefined;
+
+/** `parseSimpleColor`, tolerant of `null`/`undefined` (font color/forced
+ *  color are both optional at this seam) -- an unresolvable token collapses
+ *  to `undefined`, the SAME fallback `ColorResolver`'s own constructor
+ *  already treats as "use the BLACK default" (`ColorResolver.ts#getDefaultColor`). */
+function resolveOptionalColor(color: string | null | undefined): ResolvedColor | undefined {
+  if (color === null || color === undefined) return undefined;
+  return parseSimpleColor(color);
+}
+
+/**
+ * Collects the `UShape` primitives `SvgNanoParser.drawU` would otherwise
+ * draw, instead of drawing them -- the "collect what would have been drawn"
+ * idiom this port's `LimitFinder` (`core/klimt/drawing/LimitFinder.ts`)
+ * already uses for `MinMax`, applied here per `SvgNanoParser.ts`'s own
+ * module doc comment ("T9 should follow that same idiom... small `UGraphic`
+ * implementation whose `draw(shape)` pushes `UPath`/other shapes onto an
+ * array instead of drawing them").
+ *
+ * Records EVERY shape `drawU` draws, not just `UPath` (maintainer-approved
+ * amendment to ADR-2 once `<circle>`/`<text>`-bearing sprites were found
+ * to be silently dropped): `drawCircle` draws a `UEllipse`, `drawText` a
+ * `UText`, `drawPath`/`drawEllipse` a `UPath` (`SvgNanoParser.java:172-264`).
+ *
+ * Each collected shape is paired with the translate `this.translate` held
+ * at the moment `draw` was called ({@link DrawablePrimitive}), rather than
+ * baking it into the shape's own geometry: only `UPath` supports that
+ * (`.translate(dx,dy)`, and even then it is a no-op here -- `drawPath`
+ * bakes its OWN affine transform into the path's segments at parse time
+ * and never wraps it in a raw `ug.apply(translate)` call, so this
+ * collector's `translate` is always `(0,0)` when a `<path>`/`<ellipse>`-
+ * sourced `UPath` is drawn). `UEllipse`/`UText` carry no position of their
+ * own; upstream draws them via a live `ugs.apply(translate).draw(shape)`
+ * pair (`drawCircle`/`drawText`), which THIS translate composition
+ * (`apply(UTranslate)` below) already reproduces exactly -- the collector
+ * just records the pairing instead of forwarding it to a real backend.
+ * Draw sites re-apply it: `ug.apply(primitive.translate).draw(primitive.shape)`
+ * (`EntityImageDescriptionSupport.ts#drawAtoms`,
+ * `EntityImageDescriptionDelegates.ts#descAtomOps`).
+ */
+class SpritePrimitiveCollector implements UGraphic {
+  private constructor(
+    private readonly translate: UTranslate,
+    private readonly primitives: DrawablePrimitive[],
+  ) {}
+
+  static create(): SpritePrimitiveCollector {
+    return new SpritePrimitiveCollector(UTranslate.none(), []);
+  }
+
+  apply(change: UChange): UGraphic {
+    const supported =
+      change instanceof UStroke || change instanceof UTranslate || change instanceof Fore || change instanceof Back;
+    if (!supported) {
+      throw new Error(`SpritePrimitiveCollector.apply: unsupported UChange ${change.constructor.name}`);
+    }
+    const translate = change instanceof UTranslate ? this.translate.compose(change) : this.translate;
+    return new SpritePrimitiveCollector(translate, this.primitives);
+  }
+
+  draw(shape: UShape): void {
+    this.primitives.push({ shape, translate: this.translate });
+  }
+
+  getParam(): UParam {
+    return {
+      getStroke: () => UStroke.simple(),
+      getColor: () => 'black',
+      getBackcolor: () => 'black',
+      getTranslate: () => this.translate,
+    };
+  }
+
+  getTranslate(): UTranslate {
+    return this.translate;
+  }
+
+  getStringBounder(): StringBounder {
+    // SvgNanoParser.drawU never calls getStringBounder() on its `ug` --
+    // matches AbstractCommonUGraphic.ts's identical "not supported by this
+    // backend" convention for a seam this collector never exercises.
+    throw new Error('SpritePrimitiveCollector.getStringBounder: not supported');
+  }
+
+  collected(): readonly DrawablePrimitive[] {
+    return this.primitives;
+  }
+}
 
 function resolveImgAtom(atom: Extract<InlineAtomToken, { kind: 'img' }>): ResolvedAtomImage {
   const dims = measureInlineAtom(atom);
   return { kind: 'image', href: atom.dataUri, width: dims.width, height: dims.height };
+}
+
+/**
+ * An SVG sprite decomposes into per-`<path>` `UPath` primitives via
+ * `SvgNanoParser.drawU` (T9, svg-sprite-nanoparser ADR-2/ADR-4) -- the SAME
+ * decomposition upstream's `AtomSprite`/`SpriteSvg` draws, rather than an
+ * opaque `<image>` re-embedding the whole SVG source. `width`/`height` stay
+ * the DECLARED (scaled) box from `measureInlineAtom`, exactly as before this
+ * task -- ink lives ONLY inside `primitives` (ADR-2's explicit non-goal:
+ * this is NOT the ink/measurement side channel `sizer-footprint-parity` T2
+ * deleted). `spriteScale` is the SAME `CommandCreoleSprite`
+ * `fc.getSize2D() / 13.0` factor applied to both the declared box and the
+ * decomposition, so drawn and measured sprite geometry cannot drift (S1L-f).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/AtomSprite.java#calculateDimensionSlow
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svg/parser/SvgNanoParser.java#drawU
+ */
+function resolveSvgSpriteAtom(
+  atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
+  svg: string,
+  spriteDims: SpriteDimsLookup,
+  font: FontConfiguration,
+): ResolvedAtomImage {
+  const dims = measureInlineAtom(atom, spriteDims, font.size);
+  const scale = spriteScale(atom.scale, font.size);
+  const collector = SpritePrimitiveCollector.create();
+  new SvgNanoParser(svg).drawU(collector, scale, resolveOptionalColor(font.color), resolveOptionalColor(atom.forcedColor));
+  return { kind: 'drawable', primitives: [...collector.collected()], width: dims.width, height: dims.height };
 }
 
 function resolveSpriteAtom(
@@ -68,16 +208,8 @@ function resolveSpriteAtom(
   spriteDims: SpriteDimsLookup,
   font: FontConfiguration,
 ): ResolvedAtomImage {
-  // An SVG sprite is re-emitted verbatim as an `image/svg+xml` data URI --
-  // there is no grey grid to tint, so `forcedColor`/font colour do not apply
-  // (upstream's SpriteSvg likewise ignores both in `asTextBlock`). Dims come
-  // from the SAME measureInlineAtom the sizer used (S1L-f part 2b).
   const svgSprite = getSpriteSvg(registry, atom.name);
-  if (svgSprite !== undefined) {
-    const dims = measureInlineAtom(atom, spriteDims, font.size);
-    const href = `data:image/svg+xml;base64,${toBase64(new TextEncoder().encode(svgSprite.svg))}`;
-    return { kind: 'image', href, width: dims.width, height: dims.height };
-  }
+  if (svgSprite !== undefined) return resolveSvgSpriteAtom(atom, svgSprite.svg, spriteDims, font);
   const sprite = getSpriteMonochrome(registry, atom.name);
   if (sprite === undefined) return undefined; // unknown name -- StripeSimple.addSprite: skip.
   // `font.size` is threaded so the sprite picks up `CommandCreoleSprite`'s

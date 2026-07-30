@@ -33,13 +33,20 @@
  * passes `img` hrefs through verbatim and stored-block-encodes sprite
  * tints — D7's documented, deliberate divergence, DIVERGENCES.md).
  */
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { join, dirname } from 'node:path';
 import { describe, expect, test } from 'vitest';
-import { scanLineForAtoms, type AtomImageResolver, type InlineAtomToken } from '../../src/core/creole-atoms.js';
+import { scanLineForAtoms, type AtomImageResolver, type DrawablePrimitive, type InlineAtomToken } from '../../src/core/creole-atoms.js';
 import { measureInlineAtom, spriteScale } from '../../src/core/creole-atoms-measure.js';
 import { createSpriteRegistry, addSprite } from '../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../src/core/klimt/sprite/SpriteMonochrome.js';
+import { SpriteSvg } from '../../src/core/klimt/sprite/SpriteSvg.js';
 import { spriteMonochromeAsLike, spriteToPngDataUri } from '../../src/core/klimt/sprite/sprite-raster.js';
 import { encodePng, toBase64DataUri } from '../../src/core/klimt/sprite/png-encoder.js';
+import { pathBBox } from '../../src/core/klimt/sprite/svg-path-bbox.js';
+import { UPath } from '../../src/core/klimt/shape/UPath.js';
+import { UEllipse } from '../../src/core/klimt/shape/UEllipse.js';
 import { makeAtomImageResolverFor } from '../../src/diagrams/description/render-atoms.js';
 import { buildTextBlock } from '../../src/core/svek/image/EntityImageDescriptionSupport.js';
 import { HorizontalAlignment } from '../../src/core/klimt/geom/HorizontalAlignment.js';
@@ -86,6 +93,236 @@ function buildSpriteRegistryWithFoo(): ReturnType<typeof createSpriteRegistry> {
   addSprite(registry, 'foo', sprite);
   return registry;
 }
+
+/** A minimal SVG sprite whose one `<path>` traces the declared box's own
+ *  four corners exactly -- so the primitives' collective bbox equals the
+ *  declared box, isolating the SCALE-threading assertion (T9's interface
+ *  contract: `spriteScale` applies identically to both channels) from the
+ *  separate declared-vs-ink assertion `bi-globe` (below) covers. */
+const SQUARE_SVG = '<svg width="10" height="10"><path d="M0 0L10 0L10 10L0 10Z"/></svg>';
+
+/** `bi-globe`, copied VERBATIM from `oracle/goldens/svg-description/usecase/
+ *  sprite-svg-bootstrap-0/in.puml` -- the mission's own jar-verified case for
+ *  ADR-2's central claim (decisions.md ADR-5): a declared 16x16 box whose
+ *  outer circle is drawn as an ARC, so `UPath.addInternal` records only the
+ *  arc's ENDPOINT (ADR-1) and the primitives' true ink is 16x13.846, NOT the
+ *  declared 16x16 -- the exact declared/ink split this task exists to keep
+ *  in two channels rather than collapsing into one (see file's SvgNanoParser
+ *  import for why `pathBBox`, the SAME `UPath` minmax rule via ADR-1's proven
+ *  equivalence, is the oracle for "what SHOULD the primitives' bbox be"). */
+const BI_GLOBE_D =
+  'M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7.5-6.923c-.67.204-1.335.82-1.887 1.855A8 8 0 0 0 5.145 4H7.5zM4.09 4a9.3 9.3 0 0 1 .64-1.539 7 7 0 0 1 .597-.933A7.03 7.03 0 0 0 2.255 4zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a7 7 0 0 0-.656 2.5zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5zM8.5 5v2.5h2.99a12.5 12.5 0 0 0-.337-2.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5zM5.145 12q.208.58.468 1.068c.552 1.035 1.218 1.65 1.887 1.855V12zm.182 2.472a7 7 0 0 1-.597-.933A9.3 9.3 0 0 1 4.09 12H2.255a7 7 0 0 0 3.072 2.472M3.82 11a13.7 13.7 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5zm6.853 3.472A7 7 0 0 0 13.745 12H11.91a9.3 9.3 0 0 1-.64 1.539 7 7 0 0 1-.597.933M8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855q.26-.487.468-1.068zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.7 13.7 0 0 1-.312 2.5m2.802-3.5a7 7 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7 7 0 0 0-3.072-2.472c.218.284.418.598.597.933M10.855 4a8 8 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4z';
+const BI_GLOBE_SVG = `<svg width="16" height="16"><path d="${BI_GLOBE_D}"/></svg>`;
+
+function buildSpriteRegistryWithSvg(name: string, svg: string): ReturnType<typeof createSpriteRegistry> {
+  const registry = createSpriteRegistry();
+  const sprite = SpriteSvg.from(svg);
+  if (sprite === undefined) throw new Error(`test fixture SVG for '${name}' has no width/height`);
+  addSprite(registry, name, sprite);
+  return registry;
+}
+
+/** Overall bbox across every collected `UPath` primitive (a `DrawablePrimitive`
+ *  whose `shape` is NOT a `UPath` -- e.g. a decomposed `<circle>`'s `UEllipse`
+ *  -- is skipped here; `ellipseInkBox` below covers that case) -- ADR-1's
+ *  proven `pathBBox`/`UPath` minmax equivalence means this is directly
+ *  comparable to `pathBBox(d)`'s own numbers for a single-path sprite.
+ *  `primitive.translate` is folded in (T9's positioning fix): a `UPath`'s own
+ *  is always `(0,0)` (see `SpritePrimitiveCollector`'s doc comment), but
+ *  asserting the fold here rather than assuming it keeps this helper honest. */
+function primitivesBBox(primitives: readonly DrawablePrimitive[]): { minX: number; minY: number; maxX: number; maxY: number } {
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+  for (const { shape, translate } of primitives) {
+    if (!(shape instanceof UPath)) continue;
+    const dx = translate.getDx();
+    const dy = translate.getDy();
+    minX = Math.min(minX, shape.getMinX() + dx);
+    minY = Math.min(minY, shape.getMinY() + dy);
+    maxX = Math.max(maxX, shape.getMaxX() + dx);
+    maxY = Math.max(maxY, shape.getMaxY() + dy);
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+/** True when at least one collected primitive is a `UEllipse` (a decomposed
+ *  `<circle>`) or `UText` (a decomposed `<text>`) -- the two element kinds
+ *  the T9 positioning fix restores (previously silently dropped). */
+function hasNonPathPrimitive(primitives: readonly DrawablePrimitive[]): boolean {
+  return primitives.some(({ shape }) => !(shape instanceof UPath));
+}
+
+// ---------------------------------------------------------------------------
+// makeAtomImageResolverFor — SVG sprites decompose to `drawable` primitives
+// (svg-sprite-nanoparser T9, ADR-2): width/height stay the DECLARED box,
+// ink lives ONLY inside `primitives` -- never collapsed into one channel.
+// ---------------------------------------------------------------------------
+
+describe('makeAtomImageResolverFor — SVG sprite atoms resolve to kind: "drawable" (T9)', () => {
+  test('an SVG sprite resolves to kind: "drawable" with UPath primitives, not an image data URI', () => {
+    const registry = buildSpriteRegistryWithSvg('sq', SQUARE_SVG);
+    const resolve = makeAtomImageResolverFor(registry)(FONT);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'sq', scale: 1 };
+    const result = resolve(atom);
+    expect(result?.kind).toBe('drawable');
+    if (result?.kind !== 'drawable') throw new Error('expected the drawable variant');
+    expect(result.primitives).toHaveLength(1);
+    expect(result.primitives[0]!.shape).toBeInstanceOf(UPath);
+  });
+
+  test('width/height are the DECLARED (scaled) box -- IDENTICAL to measureInlineAtom, same as the image variant', () => {
+    const registry = buildSpriteRegistryWithSvg('sq', SQUARE_SVG);
+    const resolve = makeAtomImageResolverFor(registry)(FONT);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'sq', scale: 1 };
+    const result = resolve(atom);
+    if (result?.kind !== 'drawable') throw new Error('expected the drawable variant');
+
+    const dims = measureInlineAtom(atom, { get: (name) => (name === 'sq' ? { width: 10, height: 10 } : undefined) }, FONT.size);
+    expect(result.width).toBe(dims.width);
+    expect(result.height).toBe(dims.height);
+    expect(result.width).toBeCloseTo(10 * (14 / 13), 10); // 10 * scale(1) * size/13, S1L-f
+  });
+
+  test('spriteScale applies to the decomposition IDENTICALLY to the declared box (S1L-f, interface contract)', () => {
+    const registry = buildSpriteRegistryWithSvg('sq', SQUARE_SVG);
+    // FONT.size (14) cancels spriteScale's ambient-size factor down to just
+    // atom.scale when paired with a 13px font -- use a 13px font here so the
+    // resulting numbers are exact integers, not floating approximations.
+    const font13: FontConfiguration = { ...FONT, size: 13 };
+    const resolve = makeAtomImageResolverFor(registry)(font13);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'sq', scale: 2.5 };
+    const result = resolve(atom);
+    if (result?.kind !== 'drawable') throw new Error('expected the drawable variant');
+
+    expect(spriteScale(2.5, 13)).toBe(2.5);
+    expect(result.width).toBe(25); // declared 10 * scale 2.5
+    expect(result.height).toBe(25);
+    // SQUARE_SVG's path traces the declared box's own corners exactly, so at
+    // an IDENTITY-cancelling font size the primitives' bbox equals the SAME
+    // 25x25 the declared box reports -- proves the scale factor threads to
+    // the decomposition, not just to measureInlineAtom's own formula.
+    const bbox = primitivesBBox(result.primitives);
+    expect(bbox).toEqual({ minX: 0, minY: 0, maxX: 25, maxY: 25 });
+  });
+
+  test('declared box and drawn ink are STRUCTURALLY SEPARATE channels (ADR-2 central claim): bi-globe declares 16x16 but its arc-drawn primitives ink a smaller box', () => {
+    const registry = buildSpriteRegistryWithSvg('bi-globe', BI_GLOBE_SVG);
+    const font13: FontConfiguration = { ...FONT, size: 13 };
+    const resolve = makeAtomImageResolverFor(registry)(font13);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'bi-globe', scale: 1 };
+    const result = resolve(atom);
+    if (result?.kind !== 'drawable') throw new Error('expected the drawable variant');
+
+    // width/height: the DECLARED box, unaffected by ink -- ADR-2's non-goal
+    // (this is NOT the deleted inkX/inkY/inkWidth/inkHeight measurement
+    // channel; nothing here computes an "ink box" and assigns it to width/
+    // height).
+    expect(result.width).toBe(16);
+    expect(result.height).toBe(16);
+
+    // The drawn primitives' own bbox is jar-verified SMALLER than the
+    // declared box (ADR-1's proven UPath/pathBBox minmax equivalence is the
+    // oracle here, not a hand-computed number): the outer circle is an ARC,
+    // and UPath.addInternal (ADR-1) records only an arc's endpoint.
+    const expectedInk = pathBBox(BI_GLOBE_D)!;
+    const bbox = primitivesBBox(result.primitives);
+    expect(bbox.minX).toBeCloseTo(expectedInk.minX, 10);
+    expect(bbox.minY).toBeCloseTo(expectedInk.minY, 10);
+    expect(bbox.maxX).toBeCloseTo(expectedInk.maxX, 10);
+    expect(bbox.maxY).toBeCloseTo(expectedInk.maxY, 10);
+    // The declared box (16 tall) genuinely differs from the ink box --
+    // proves this is a real narrowing, not a no-op assertion.
+    expect(bbox.maxY - bbox.minY).toBeLessThan(result.height);
+  });
+
+  test('a <circle>-bearing REAL stdlib body (edgy bIdentityLogo) contributes UEllipse ink -- T9 positioning fix (maintainer-required)', () => {
+    // Loaded verbatim from the vendored stdlib bundle, not hand-authored --
+    // `assets/stdlib/edgy/edgy.puml`'s `$bIdentityLogo` is the ONE bundled
+    // sprite the maintainer named as exercising `<circle>` (two, inside a
+    // `<g fill="#00ea4e">`), the exact element kind `drawCircle` decomposes
+    // to a `UEllipse` -- previously silently dropped by the collector
+    // (ADR-2's original `UPath[]`-only shape), now widened to `UShape[]`.
+    const edgyPuml = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), '../../assets/stdlib/edgy/edgy.puml'),
+      'utf8',
+    );
+    const svgMatch = /sprite \$bIdentityLogo (<svg[\s\S]*?<\/svg>)/.exec(edgyPuml);
+    if (svgMatch === null) throw new Error('bIdentityLogo sprite not found in assets/stdlib/edgy/edgy.puml');
+    const registry = buildSpriteRegistryWithSvg('bIdentityLogo', svgMatch[1]!);
+    // A 13px font makes spriteScale(1, 13) === 1 (identity) -- exact integer
+    // assertions below, not floating approximations (same convention the
+    // scale-threading test above uses).
+    const font13: FontConfiguration = { ...FONT, size: 13 };
+    const resolve = makeAtomImageResolverFor(registry)(font13);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'bIdentityLogo', scale: 1 };
+    const result = resolve(atom);
+    if (result?.kind !== 'drawable') throw new Error('expected the drawable variant');
+
+    // Declared box: the sprite's `viewBox="0 0 32 32"` (no width/height
+    // attributes) -- unaffected by ink, same as every other assertion here.
+    expect(result.width).toBe(32);
+    expect(result.height).toBe(32);
+
+    // The fix under test: at least one collected primitive is a UEllipse
+    // (the two <circle>s), not silently dropped.
+    expect(hasNonPathPrimitive(result.primitives)).toBe(true);
+    const ellipses = result.primitives.filter((p) => p.shape instanceof UEllipse);
+    expect(ellipses).toHaveLength(2);
+    // Each carries a REAL position (not the origin -- `cx="17" cy="14"
+    // r="10"` and `cx="7.5" cy="25.5" r="2.5"` in the source): a dropped
+    // translate would silently zero these out.
+    const translates = ellipses.map((p) => ({ dx: p.translate.getDx(), dy: p.translate.getDy() }));
+    expect(translates).toEqual(
+      expect.arrayContaining([
+        { dx: 7, dy: 4 }, // cx-rx, cy-ry for the r=10 circle
+        { dx: 5, dy: 23 }, // cx-rx, cy-ry for the r=2.5 circle
+      ]),
+    );
+
+    // Draw-time proof: buildTextBlock actually emits two <ellipse> elements
+    // at their real (translated) positions, not the atom's origin -- the
+    // atom is the line's ONLY content (LEFT align => origin (0,0)), and
+    // scale 1 round-trips the translate exactly back to the source's OWN
+    // cx/cy (7+10=17, 4+10=14).
+    const ug = newGraphic();
+    buildTextBlock('<$bIdentityLogo>', font13, HorizontalAlignment.LEFT, resolve).drawU(ug);
+    const svg = ug.getSvgString();
+    const ellipseTags = svg.match(/<ellipse[^>]*>/g) ?? [];
+    expect(ellipseTags).toHaveLength(2);
+    expect(svg).toContain('cx="17"');
+    expect(svg).toContain('cy="14"');
+  });
+
+  test('an unknown SVG sprite name still resolves to undefined -- StripeSimple.addSprite parity holds for both sprite kinds', () => {
+    const registry = buildSpriteRegistryWithSvg('sq', SQUARE_SVG);
+    const resolve = makeAtomImageResolverFor(registry)(FONT);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'does-not-exist', scale: 1 };
+    expect(resolve(atom)).toBeUndefined();
+  });
+
+  test('a monochrome sprite in the SAME registry still resolves to kind: "image" -- only SVG-form sprites decompose', () => {
+    const registry = buildSpriteRegistryWithSvg('sq', SQUARE_SVG);
+    const mono = new SpriteMonochrome(4, 4, 16);
+    for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) mono.setGray(x, y, (x + y) % 16);
+    addSprite(registry, 'foo', mono);
+    const resolve = makeAtomImageResolverFor(registry)(FONT);
+    expect(resolve({ kind: 'sprite', name: 'foo', scale: 1 })?.kind).toBe('image');
+    expect(resolve({ kind: 'sprite', name: 'sq', scale: 1 })?.kind).toBe('drawable');
+  });
+
+  test('buildTextBlock draws the SVG sprite\'s decomposed primitives as <path> elements, not <image>', () => {
+    const registry = buildSpriteRegistryWithSvg('sq', SQUARE_SVG);
+    const ug = newGraphic();
+    const resolve = makeAtomImageResolverFor(registry)(FONT);
+    buildTextBlock('Icon <$sq>', FONT, HorizontalAlignment.LEFT, resolve).drawU(ug);
+    const svg = ug.getSvgString();
+
+    expect(svg).toContain('<path');
+    expect(svg).not.toContain('<image');
+  });
+});
 
 // ---------------------------------------------------------------------------
 // scanLineForAtoms — ordered render segments (T7's own render-side addition)

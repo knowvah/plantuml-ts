@@ -39,7 +39,8 @@
 
 import { parsePngIhdrFromDataUri } from './klimt/sprite/png-ihdr.js';
 import { scanOpenIconSpans, matchOpenIconAt } from './creole-atoms-openicon.js';
-import type { UPath } from './klimt/shape/UPath.js';
+import type { UShape } from './klimt/UShape.js';
+import type { UTranslate } from './klimt/UTranslate.js';
 
 // ---------------------------------------------------------------------------
 // Token model
@@ -106,6 +107,32 @@ export interface LineAtomScan {
 }
 
 /**
+ * One decomposed `UShape` primitive plus the translate it must be drawn
+ * under (svg-sprite-nanoparser T9 amendment to ADR-2, maintainer-approved
+ * widening from `UPath[]` to a heterogeneous shape set once T8's
+ * `drawCircle`/`drawText` were found to also reach a `drawable` sprite --
+ * see `render-atoms.ts`'s `SpritePrimitiveCollector` doc comment for the
+ * full mechanism).
+ *
+ * A wrapper is required, not a bare `UShape[]`, because only `UPath`
+ * carries its own ABSOLUTE position (its segments' own coordinates,
+ * `SvgNanoParser#drawPath` bakes the accumulated affine transform in at
+ * PARSE time -- `translate` is `UTranslate.none()` for these). `UEllipse`/
+ * `UText` carry no position of their own; upstream's `drawCircle`/
+ * `drawText` instead position them via a live `UGraphic.apply(translate)
+ * .draw(shape)` call pair (`SvgNanoParser.java:172-175,257`), which a
+ * COLLECTING `UGraphic` (T9, not a live drawing backend) cannot bake into
+ * the shape itself the way `UPath.translate` can -- so the collector
+ * records the translate ALONGSIDE the shape instead, and every draw site
+ * re-applies it: `ug.apply(translate).draw(shape)`, the SAME call shape
+ * `SvgNanoParser.drawU` itself uses.
+ */
+export interface DrawablePrimitive {
+  readonly shape: UShape;
+  readonly translate: UTranslate;
+}
+
+/**
  * Resolves one atom to its drawable image geometry at RENDER time (T7):
  * a two-channel discriminated union (svg-sprite-nanoparser ADR-2), mirroring
  * upstream's own structural split between the DECLARED box and the DRAWN
@@ -115,9 +142,10 @@ export interface LineAtomScan {
  * - `kind: 'image'` -- `href` is the `<image>` element's `xlink:href`
  *   (verbatim `dataUri` for an `img` atom per D7; a tinted PNG data URI for
  *   a `sprite` atom, built via `sprite-raster.ts#spriteToPngDataUri`).
- * - `kind: 'drawable'` -- `primitives` are the per-`<path>` `UPath`
- *   decomposition `SvgNanoParser.drawU` emits for an SVG sprite (T9); ink
- *   lives ONLY here, never on `width`/`height`.
+ * - `kind: 'drawable'` -- `primitives` are the `UPath`/`UEllipse`/`UText`
+ *   decomposition `SvgNanoParser.drawU` emits for an SVG sprite (T9), each
+ *   paired with its own draw-time translate ({@link DrawablePrimitive});
+ *   ink lives ONLY here, never on `width`/`height`.
  *
  * `width`/`height` are the DECLARED box in BOTH variants -- the SAME scaled
  * pixel dims `measureInlineAtom` already contributes to label measurement
@@ -129,10 +157,9 @@ export interface LineAtomScan {
  * the atom never becomes a drawable element at all, not a zero-size one.
  * See `src/diagrams/description/render-atoms.ts` for the concrete builder.
  *
- * Nothing produces `kind: 'drawable'` yet -- svg-sprite-nanoparser T9 is the
- * first producer; this task (T4) only widens the type so T9 has somewhere
- * to put primitives. Every current producer (`render-atoms.ts`,
- * `leaf-sizing.ts`) still emits only `kind: 'image'`.
+ * `kind: 'drawable'` is produced by svg-sprite-nanoparser T9
+ * (`render-atoms.ts#resolveSvgSpriteAtom`); every other producer
+ * (`leaf-sizing.ts`) still emits only `kind: 'image'`.
  *
  * sizer-footprint-parity T2 (ADR-2): this type previously carried optional
  * `inkX`/`inkY`/`inkWidth`/`inkHeight` fields (bodyenhanced-atom-seams'
@@ -158,7 +185,7 @@ export type AtomImageResolver = (
     }
   | {
       readonly kind: 'drawable';
-      readonly primitives: UPath[];
+      readonly primitives: readonly DrawablePrimitive[];
       readonly width: number;
       readonly height: number;
     }
