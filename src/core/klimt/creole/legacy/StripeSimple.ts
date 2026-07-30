@@ -58,6 +58,32 @@ import { CREOLE_COMMANDS } from './CommandCreoleBuilder.js';
 import { scanLineForAtoms, matchAtomAt } from '../../../creole-atoms.js';
 import { classifyStripeLine, type StripeClassification } from './CreoleStripeSimpleParser.js';
 import { resolveTextEscapes } from '../../../text-escapes.js';
+import { MONOSPACED } from '../Parser.js';
+
+/** Font for an `<img>` cannot-decode/error fallback text run —
+ *  `AtomImg.create` (`AtomImg.java:106-107`) hardcodes
+ *  `UFontFactory.monospace(14)` + `FontConfiguration.blackBlueTrue(font)` for
+ *  EVERY such path (`(Cannot decode)`, `(File not found: …)`, `ERROR …`),
+ *  unconditionally — not the creole context's font, not the diagram
+ *  default. `blackBlueTrue`'s hyperlink-color/underline-stroke fields have
+ *  no counterpart in this port's minimal `FontConfiguration` (`UText.ts`'s
+ *  own doc comment — full class deferred); only `family`/`size`/`color`/
+ *  `styles` carry over, which is everything `blackBlueTrue`'s foreground
+ *  color (`HColors.BLACK`) and `UFontFace.normal()` (non-bold, non-italic)
+ *  actually contribute to this port's rendering surface.
+ *
+ *  ADR-1 (`plans/sizer-footprint-parity/decisions.md`): a PREVIOUS mission
+ *  threaded a caller-supplied fallback font here instead, believing the
+ *  fallback should draw at the diagram-default font — wrong: the jar's
+ *  100.362×14 measurement for `<img:x/y.svg>` is this hardcoded constant,
+ *  identically with or without a `skinparam …FontSize` override. That
+ *  threaded-font seam is deleted; no font is threaded from any caller. */
+const IMG_FALLBACK_FONT: FontConfiguration = {
+  family: MONOSPACED,
+  size: 14,
+  color: '#000000',
+  styles: new Set(),
+};
 
 /** Upstream: `StripeSimple#searchCommand`. `line.length > pos + 2` (not
  *  `>=`) is upstream's own bound — ported verbatim, including its edge
@@ -101,16 +127,7 @@ class StripeAtomBuilder implements StripeBuilder {
   // the url command's captured label is never mistakenly tagged.
   private activeUrl: CreoleAtomUrl | undefined;
 
-  /** Font for an `<img>` cannot-decode fallback run. Upstream builds that
-   *  fallback `AtomText` with the DIAGRAM-DEFAULT font, not the creole
-   *  context's — jar-verified: `<img:x/y.svg>` alone measures 100.362x14
-   *  identically with and without `skinparam rectangleFontSize 10`, and
-   *  100.362 is exactly `(Cannot decode)` at size 14. Defaults to the line
-   *  font, so a caller that does not thread one is byte-unchanged (S1L-h). */
-  private readonly imgFallbackFont: FontConfiguration;
-
-  constructor(initialFont: FontConfiguration, imgFallbackFont?: FontConfiguration) {
-    this.imgFallbackFont = imgFallbackFont ?? initialFont;
+  constructor(initialFont: FontConfiguration) {
     this.font = initialFont;
   }
 
@@ -164,10 +181,10 @@ class StripeAtomBuilder implements StripeBuilder {
           // zero-behavior-change addition for img/sprite.
           this.built.push({ kind: 'inline', atom: atomMatch.atom, ambientFont: this.font });
         } else if (atomMatch.fallbackText !== undefined) {
-          // Its own run at the diagram-default font — see `imgFallbackFont`.
+          // Its own run at the hardcoded fallback font — see `IMG_FALLBACK_FONT`.
           this.flushPending(pending);
           pending = '';
-          this.built.push({ kind: 'text', text: atomMatch.fallbackText, font: this.imgFallbackFont });
+          this.built.push({ kind: 'text', text: atomMatch.fallbackText, font: IMG_FALLBACK_FONT });
         }
         pos += atomMatch.length;
         continue;
@@ -208,8 +225,8 @@ class StripeAtomBuilder implements StripeBuilder {
  * `font` via `fontConfigurationForHeading` when the line classified as
  * HEADING — see `legacy/CreoleStripeSimpleParser.ts`'s `classifyStripeLine`.
  */
-export function buildStripeAtoms(line: string, font: FontConfiguration, imgFallbackFont?: FontConfiguration): readonly CreoleAtom[] {
-  const builder = new StripeAtomBuilder(font, imgFallbackFont);
+export function buildStripeAtoms(line: string, font: FontConfiguration): readonly CreoleAtom[] {
+  const builder = new StripeAtomBuilder(font);
   builder.analyzeAndAddInline(line);
   return builder.finish();
 }
@@ -272,12 +289,18 @@ export interface LineBuildAtoms {
  * unchanged. Upstream has no single method matching this exactly — it is
  * this port's own extraction of `EntityImageDescriptionSupport.ts#buildLine`
  * (pre-ADR-1)'s classification-dispatch branches into one shared helper.
+ *
+ * The 3rd positional slot is a COMPILE-COMPATIBILITY placeholder only
+ * (sizer-footprint-parity T1): `leaf-sizing-text.ts#lineTextMetrics` (out of
+ * this task's write-set — its own `defaultFont: FontSpec` plumbing is a
+ * SEPARATE, T3-owned mechanism, `leaf-sizing-legacy-fallback.ts`'s module
+ * doc comment) still calls this 3-argument form. It is ALWAYS ignored: the
+ * `<img>` cannot-decode fallback font is hardcoded (`IMG_FALLBACK_FONT`,
+ * ADR-1) and no caller font — including this one — ever reaches it. Verified
+ * by the two-different-element-fonts test in
+ * `tests/unit/core/klimt/creole/legacy/StripeSimple.test.ts`.
  */
-export function buildLineAtoms(
-  line: string,
-  font: FontConfiguration,
-  imgFallbackFont?: FontConfiguration,
-): LineBuildAtoms {
+export function buildLineAtoms(line: string, font: FontConfiguration, _unusedLegacyDefaultFont?: FontConfiguration): LineBuildAtoms {
   const classification = classifyStripeLine(line);
   if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
   const content = resolveTextEscapes(classification.content);
@@ -285,5 +308,5 @@ export function buildLineAtoms(
     return { classification, atoms: buildLiteralAtoms(content, font), lineFont: font };
   }
   const lineFont = classification.type === 'HEADING' ? fontConfigurationForHeading(font, classification.order) : font;
-  return { classification, atoms: buildStripeAtoms(content, lineFont, imgFallbackFont), lineFont };
+  return { classification, atoms: buildStripeAtoms(content, lineFont), lineFont };
 }

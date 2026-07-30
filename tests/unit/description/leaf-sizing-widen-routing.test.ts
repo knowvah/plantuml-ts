@@ -14,10 +14,12 @@
  *   too, which under-stacks a multi-line block — see `leaf-sizing.ts
  *   #hasUnroutedUsecaseMarkup`'s own doc comment).
  * - box+`<img>` stays guarded (RE-DIAGNOSED, not closed: T3/ADR-3's
- *   `imgFallbackFont` fix landed on a text-block builder `buildDesc` no
- *   longer calls for the main desc content since T4 routed it through
- *   `BodyFactory.create3` — see `leaf-sizing-legacy-fallback.ts`'s module
- *   doc comment).
+ *   caller-threaded fallback-font fix landed on a text-block builder
+ *   `buildDesc` no longer calls for the main desc content since T4 routed
+ *   it through `BodyFactory.create3` — since superseded by
+ *   `sizer-footprint-parity` ADR-1 (the fallback font is now hardcoded, not
+ *   threaded at all) — see `leaf-sizing-legacy-fallback.ts`'s module doc
+ *   comment).
  */
 import { describe, it, expect } from 'vitest';
 import { measureLeafNode, measureUsecase } from '../../../src/diagrams/description/leaf-sizing.js';

@@ -11,18 +11,30 @@
  *   `leaf-sizing-text.ts#lineTextMetrics` instead treats a `<latex>` atom as
  *   contributing NO width at all — the pre-existing, jar-verified-CLOSER
  *   approximation for those two fixtures. Permanent -- see `DIVERGENCES.md`.
- * - an `<img>` tag that fails to decode: STILL open (T5, re-diagnosed).
- *   T3/ADR-3 threaded `imgFallbackFont` through `buildTextBlock`/`buildLine`
- *   (`EntityImageDescriptionSupport.ts`), but `buildDesc`'s MAIN desc
- *   content (T4/ADR-1, `EntityImageDescriptionDelegates.ts:237`) now builds
- *   via `BodyFactory.create3` instead -- `buildTextBlock` is reachable only
- *   from `buildStereo` (stereotype text, `Delegates.ts:254`) since T4
- *   landed. `create3`'s own atom pipeline (`descAtomOps#dimensionOf`,
- *   `Delegates.ts:127-133`) measures its "(Cannot decode)" fallback text at
- *   the per-atom cascaded font with no diagram-default substitution at all
- *   -- the ORIGINAL S1L-h bug, unfixed on this path. Verified:
- *   `jecici-56-bimu826` (which sets `skinparam rectangleFontSize 10`)
- *   WIDENED 0 -> 0.398264in when this guard was removed. Both files are
+ * - an `<img>` tag that fails to decode: T5 re-diagnosed the S1L-h finding
+ *   as a caller-supplied fallback-font/`defaultFont` seam
+ *   (`buildTextBlock`/`buildLine`, `EntityImageDescriptionSupport.ts`)
+ *   threaded from the diagram default; `sizer-footprint-parity` ADR-1
+ *   overturned that: `AtomImg.create` (`AtomImg.java:106-107`) hardcodes the
+ *   cannot-decode fallback to `monospace(14)`/`blackBlueTrue` regardless of
+ *   caller, so `StripeSimple.ts`'s `buildLineAtoms` no longer accepts (or
+ *   needs) a threaded font at all -- see that function's own doc comment.
+ *   This file's `LegacyBoxFallbackCtx.defaultFont` field is UNCHANGED and
+ *   still flows to `measureTextBlock` (`leaf-sizing-text.ts`, out of this
+ *   task's write-set) for `leaf-sizing.ts`'s own sizing composition -- it no
+ *   longer reaches the `<img>` fallback font (now hardcoded), but width is
+ *   font-agnostic in the deterministic table there
+ *   (`baseFontConfiguration`'s own doc comment) and PlantUML's diagram
+ *   default is itself size 14, so this is measurement-neutral.
+ *   `buildDesc`'s MAIN desc content (T4/ADR-1,
+ *   `EntityImageDescriptionDelegates.ts:237`) builds via `BodyFactory.create3`
+ *   instead -- `buildTextBlock` is reachable only from `buildStereo`
+ *   (stereotype text, `Delegates.ts:254`) since T4 landed. `create3`'s own
+ *   atom pipeline (`descAtomOps#dimensionOf`, `Delegates.ts:127-133`)
+ *   measures its "(Cannot decode)" fallback text at the per-atom cascaded
+ *   font with no substitution at all -- STILL open, unfixed on this path.
+ *   Verified: `jecici-56-bimu826` (which sets `skinparam rectangleFontSize
+ *   10`) WIDENED 0 -> 0.398264in when this guard was removed. Both files are
  *   off-limits (`EntityImageDescription*.ts`) -- fixing this needs an
  *   equivalent seam threaded through `descAtomOps`/`CreoleParser`, out of
  *   this task's write-set.

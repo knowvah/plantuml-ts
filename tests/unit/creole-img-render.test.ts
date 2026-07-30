@@ -327,62 +327,64 @@ describe('AtomImageResolver — optional ink fields (T3-seams, ADR-2)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildTextBlock — defaultFont threads to the cannot-decode fallback
-// (T3-seams, ADR-3: `imgFallbackFont` already existed end-to-end inside
-// StripeSimple.ts; this wires a caller that never passed it)
+// buildTextBlock — the <img> cannot-decode fallback is hardcoded to
+// `AtomImg.java:106-107`'s `monospace(14)`/`blackBlueTrue`, never the
+// per-element font (sizer-footprint-parity ADR-1). A PREVIOUS mission
+// (T3-seams, ADR-3) threaded a `defaultFont` param here instead, believing
+// the fallback should draw at the diagram default -- deleted; `buildTextBlock`
+// no longer accepts that 7th parameter at all.
 // ---------------------------------------------------------------------------
 
-describe('buildTextBlock — defaultFont threads to the <img> cannot-decode fallback (T3-seams, ADR-3)', () => {
+describe('buildTextBlock — the <img> cannot-decode fallback is hardcoded (ADR-1), not threaded', () => {
   // `<img:x/y.svg>` is the mission brief's own jar-verified fixture: neither
   // a data URI nor an http(s) URL, so `buildImgSpan` degrades it to the
   // short `(Cannot decode)` fallback text -- CANNOT_DECODE_TEXT, `creole-
   // atoms.ts`.
   const MALFORMED_IMG = '<img:x/y.svg>';
-  const SMALL_DEFAULT: FontConfiguration = { family: 'sans-serif', size: 8, color: '#000000', styles: new Set() };
+  // A second, DIFFERENT element font (serif, size 8, not 14) -- proves the
+  // fallback ignores whatever reaches it via `font`.
+  const OTHER_ELEMENT_FONT: FontConfiguration = { family: 'serif', size: 8, color: '#ff0000', styles: new Set() };
+  const FALLBACK_TEXT_WIDTH = 100.3625; // jar-verified: "(Cannot decode)" at monospace 14.
 
-  test('omitted defaultFont: fallback measures/draws at the ELEMENT font -- today\'s behaviour, unchanged', () => {
+  test('fallback measures at the hardcoded monospace(14) font, not the element font', () => {
     const dim = buildTextBlock(MALFORMED_IMG, FONT, HorizontalAlignment.LEFT).calculateDimension(
       new MeasurerStringBounder(measurer),
     );
-    // Jar-verified fact (mission brief): "(Cannot decode)" at size 14 = 100.362.
-    expect(dim.getWidth()).toBeCloseTo(measurer.measure('(Cannot decode)', FONT).width, 4);
-    expect(dim.getWidth()).toBeCloseTo(100.3625, 4);
+    expect(dim.getWidth()).toBeCloseTo(FALLBACK_TEXT_WIDTH, 4);
 
     const ug = newGraphic();
     buildTextBlock(MALFORMED_IMG, FONT, HorizontalAlignment.LEFT).drawU(ug);
-    expect(ug.getSvgString()).toContain('font-size="14"');
-  });
-
-  test('threaded defaultFont: fallback measures/draws at the DIAGRAM DEFAULT font, not the element font', () => {
-    const dim = buildTextBlock(
-      MALFORMED_IMG,
-      FONT,
-      HorizontalAlignment.LEFT,
-      undefined,
-      0,
-      undefined,
-      SMALL_DEFAULT,
-    ).calculateDimension(new MeasurerStringBounder(measurer));
-    const atDefault = measurer.measure('(Cannot decode)', SMALL_DEFAULT).width;
-    const atElementFont = measurer.measure('(Cannot decode)', FONT).width;
-    expect(dim.getWidth()).toBeCloseTo(atDefault, 4);
-    expect(dim.getWidth()).not.toBeCloseTo(atElementFont, 4);
-
-    const ug = newGraphic();
-    buildTextBlock(MALFORMED_IMG, FONT, HorizontalAlignment.LEFT, undefined, 0, undefined, SMALL_DEFAULT).drawU(ug);
     const svg = ug.getSvgString();
-    expect(svg).toContain('(Cannot decode)');
-    expect(svg).toContain('font-size="8"');
-    expect(svg).not.toContain('font-size="14"');
+    expect(svg).toContain('font-size="14"');
+    expect(svg).toContain('font-family="monospace"');
   });
 
-  test('a decodable <img> is unaffected by defaultFont -- only the cannot-decode fallback text run reads it', () => {
-    const ugNoDefault = newGraphic();
-    buildTextBlock(`Icon <img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT).drawU(ugNoDefault);
-    const ugWithDefault = newGraphic();
-    buildTextBlock(`Icon <img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT, undefined, 0, undefined, SMALL_DEFAULT).drawU(
-      ugWithDefault,
+  test('two DIFFERENT element fonts produce the IDENTICAL fallback measurement -- the element font never reaches it', () => {
+    const dimSans = buildTextBlock(MALFORMED_IMG, FONT, HorizontalAlignment.LEFT).calculateDimension(
+      new MeasurerStringBounder(measurer),
     );
-    expect(ugWithDefault.getSvgString()).toBe(ugNoDefault.getSvgString());
+    const dimSerif = buildTextBlock(MALFORMED_IMG, OTHER_ELEMENT_FONT, HorizontalAlignment.LEFT).calculateDimension(
+      new MeasurerStringBounder(measurer),
+    );
+    expect(dimSans.getWidth()).toBe(dimSerif.getWidth());
+    expect(dimSans.getWidth()).toBeCloseTo(FALLBACK_TEXT_WIDTH, 4);
+
+    const ugSans = newGraphic();
+    buildTextBlock(MALFORMED_IMG, FONT, HorizontalAlignment.LEFT).drawU(ugSans);
+    const ugSerif = newGraphic();
+    buildTextBlock(MALFORMED_IMG, OTHER_ELEMENT_FONT, HorizontalAlignment.LEFT).drawU(ugSerif);
+    // Same fallback glyph run in both cases -- font-size/font-family are the
+    // hardcoded constant, not `FONT`'s 'sans-serif' or the other font's
+    // 'serif'/red color.
+    expect(ugSans.getSvgString()).toContain('font-size="14"');
+    expect(ugSerif.getSvgString()).toContain('font-size="14"');
+    expect(ugSans.getSvgString()).not.toContain('font-family="serif"');
+    expect(ugSerif.getSvgString()).not.toContain('font-family="serif"');
+  });
+
+  test('a decodable <img> is unaffected -- only the cannot-decode fallback text run uses the hardcoded font', () => {
+    const ug = newGraphic();
+    buildTextBlock(`Icon <img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT).drawU(ug);
+    expect(ug.getSvgString()).not.toContain('font-family="monospace"');
   });
 });

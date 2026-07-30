@@ -9,8 +9,10 @@ import { FontStyle, type FontConfiguration } from '../../../../../../src/core/kl
 import {
   buildStripeAtoms,
   buildLiteralAtoms,
+  buildLineAtoms,
   fontConfigurationForHeading,
 } from '../../../../../../src/core/klimt/creole/legacy/StripeSimple.js';
+import { encodePng, toBase64DataUri } from '../../../../../../src/core/klimt/sprite/png-encoder.js';
 
 const PLAIN: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set() };
 
@@ -169,5 +171,52 @@ describe('buildLiteralAtoms — LITERAL classification bypass (no style-command 
 
   test('an empty literal line falls back to a single space atom', () => {
     expect(textAtoms(buildLiteralAtoms('', PLAIN))).toEqual([{ text: ' ', styles: [] }]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// `<img>` cannot-decode fallback font — sizer-footprint-parity T1/ADR-1.
+// `AtomImg.create` (`AtomImg.java:106-107`) hardcodes `UFontFactory
+// .monospace(14)` + `FontConfiguration.blackBlueTrue(font)` for EVERY
+// cannot-decode/error path, unconditionally. A PREVIOUS mission threaded a
+// caller-supplied fallback font instead (T3/ADR-3, deleted here) -- these
+// tests pin the CORRECT, constant behavior.
+// ---------------------------------------------------------------------------
+describe('buildLineAtoms — <img> cannot-decode fallback is a hardcoded monospace(14) font (ADR-1)', () => {
+  const MALFORMED_IMG = '<img:x/y.svg>';
+  const OTHER_ELEMENT_FONT: FontConfiguration = { family: 'serif', size: 8, color: '#ff0000', styles: new Set([FontStyle.BOLD]) };
+
+  test('the fallback text run is "(Cannot decode)" at monospace/14/black, regardless of the line font', () => {
+    const { atoms } = buildLineAtoms(MALFORMED_IMG, PLAIN);
+    expect(atoms).toHaveLength(1);
+    const [atom] = atoms;
+    if (atom?.kind !== 'text') throw new Error('expected a text atom');
+    expect(atom.text).toBe('(Cannot decode)');
+    expect(atom.font).toEqual({ family: 'monospaced', size: 14, color: '#000000', styles: new Set() });
+  });
+
+  test('two DIFFERENT element fonts produce the IDENTICAL fallback font — the element font never reaches it', () => {
+    const withPlain = buildLineAtoms(MALFORMED_IMG, PLAIN).atoms;
+    const withOther = buildLineAtoms(MALFORMED_IMG, OTHER_ELEMENT_FONT).atoms;
+    const fontOf = (built: typeof withPlain): FontConfiguration => {
+      const [atom] = built;
+      if (atom?.kind !== 'text') throw new Error('expected a text atom');
+      return atom.font;
+    };
+    expect(fontOf(withPlain)).toEqual(fontOf(withOther));
+    expect(fontOf(withPlain)).toEqual({ family: 'monospaced', size: 14, color: '#000000', styles: new Set() });
+  });
+
+  test('a legacy 3rd-argument caller (leaf-sizing-text.ts, compile-compat only) still gets the hardcoded font, never its own argument', () => {
+    const withoutArg = buildLineAtoms(MALFORMED_IMG, PLAIN).atoms;
+    const withIgnoredArg = buildLineAtoms(MALFORMED_IMG, PLAIN, OTHER_ELEMENT_FONT).atoms;
+    expect(withIgnoredArg).toEqual(withoutArg);
+  });
+
+  test('a decodable <img> atom is unaffected -- only the cannot-decode text run reads the hardcoded font', () => {
+    const tinyPngUri = toBase64DataUri(encodePng(new Uint8Array(2 * 2 * 4).fill(0xff), 2, 2));
+    const { atoms } = buildLineAtoms(`<img:${tinyPngUri}>`, PLAIN);
+    expect(atoms).toHaveLength(1);
+    expect(atoms[0]?.kind).toBe('inline');
   });
 });
