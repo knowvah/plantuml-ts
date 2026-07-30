@@ -552,3 +552,69 @@ boundary (this port emits inline MathML, never a rasterized
 (its two upstream callers are unported, and reaching it needs
 `AsciiMath.java` 79 + `ASCIIMathTeXImg.java` 1032). Neither is filed as
 "no caller today", which the corollary forbids.
+
+## Batch 5 — T5, and a correction to the mission's own scorecard
+
+### A fix can be correct on landing and dead by the next task
+
+T5's headline finding, and the most important one of the mission.
+
+The brief's premise — narrowings #2 and #3 both closed by T3 — was **wrong
+for #3**, and the orchestrator repeated it to the maintainer several times
+before T5 checked it. Mechanism, verified by reading and then by experiment:
+
+- T3/ADR-3 threaded `imgFallbackFont` into
+  `EntityImageDescriptionSupport.ts#buildTextBlock`. Correct when it landed.
+- T4/ADR-1 then routed `desc` through `BodyFactory.create3`, so the desc
+  content no longer passes through `buildTextBlock` at all
+  (`EntityImageDescriptionDelegates.ts:237`).
+- `descAtomOps#dimensionOf` (`Delegates.ts:127-133`) has **no**
+  diagram-default-font path: text atoms use `atom.font`, images fall through
+  to `resolveAtomImage`. The cannot-decode fallback font cannot reach it.
+- Proven, not asserted: removing the guard widened `jecici-56-bimu826`
+  from 0 to **0.398264in**. T5 then reverted.
+
+`buildTextBlock` survives for `name`/`stereo`, so T3's work is still live —
+just not on the path narrowing #3 is about.
+
+**Corrected scorecard for this mission:**
+
+| T6 narrowing | Real status |
+|---|---|
+| #2 usecase + sprite | **PARTIAL** — single-line routes (T5); multi-line still guarded, a new sub-case T5 found |
+| #3 box + `<img>` | **OPEN** — T4 obsoleted T3's fix for this path |
+| #1 folder/package | Moved to SI1 (ADR-10) |
+| #4 box + `<latex>` | Preserved divergence, as always intended |
+
+### Conformance is FLAT at 320/351, and that is the honest number
+
+A full A/B diff over all 351 fixtures found zero changes to
+`(conformant, delta, status)`. `bootstrap-0`, `ruziru-69-xixo434` and
+`jecici-56-bimu826` were already conformant via the guarded path, from
+earlier unrelated S1L-k work. So the brief's "expect a ~3-fixture rise"
+criterion — which the orchestrator wrote into T5's prompt from the mission's
+own table — was itself built on a stale premise. T5 reported flat rather
+than hunting for a number, which is the behaviour the ratchet discipline is
+supposed to produce.
+
+### The two remaining gaps are ONE architectural hole
+
+Both the box+`<img>` fallback font and the usecase multi-line ink-stacking
+reduce to the same thing: the real `create3`/`Sea`/`SheetBlock1` pipeline
+carries **exactly one resolved value per atom**, used interchangeably for
+width, line-stacking height, and footprint fitting. There is no
+declared-vs-ink and no per-element-vs-diagram-default side channel anywhere
+in it. That is a `Sea`/`SheetBlock1`/`descAtomOps` gap, not a
+`leaf-sizing.ts` one, and it is outside every current write-set.
+
+Note the shape: ADR-2 and ADR-3 each added exactly such a side channel to
+the OLD pipeline. Routing to the faithful pipeline discarded both. **SI1
+must add them to `Sea`/`SheetBlock1` — or the same two narrowings will
+re-open a third time.**
+
+### Method note for whoever plans SI1
+
+**Verify every "already fixed" claim against the CURRENT call graph, not
+against the commit that introduced the fix.** Three separate premises in
+this mission were stale in exactly this way: ADR-5's golden count, T5's
+guard count, and T3's narrowing-#3 credit.
