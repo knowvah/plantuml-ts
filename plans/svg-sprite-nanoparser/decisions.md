@@ -149,9 +149,31 @@ never promised. DOT parity remains the gate.
 
 Their sprite declarations are INLINED rather than `!include`d: a stdlib bundle
 is itself just a `.puml` of `sprite <name> <svg …>` lines, so inlining is the
-identical parse path (verified — both forms give byte-identical jar output),
-and `renderFixture` runs the preprocessor with no include resolver. No other
-golden in any suite uses `!include`.
+identical parse path (verified — both forms give byte-identical jar output).
+
+**Corrected 2026-07-30 — the reason for inlining, as first written here, was
+wrong.** This section said `renderFixture` "runs the preprocessor with no
+include resolver", which reads as though the port could not resolve
+`!include <bootstrap/bootstrap>`. **It can, and has since SI5b closed
+2026-07-14.** `stdlibStore(...bundles)` / `withStdlib(base, stdlib)` are
+exported from `src/index.ts:53`, all 34 bundles are vendored under
+`assets/stdlib/`, and four scripts already wire them — including
+`scripts/measure-description-size-deltas.ts`, **this mission's own acceptance
+gate**.
+
+The real constraint is narrower and is a harness bug, not a missing feature:
+`tests/oracle/svg-conformance/render-fixture.ts` calls `buildBlockUmls(markup)`
+with no second argument, so no `includeStore` reaches the preprocessor — even
+though its own doc comment claims it "Mirrors
+`scripts/svg-conformance-census.ts#renderFixture` … exactly", and the census
+does build one (`svg-conformance-census.ts:148-155`). Inlining is the right
+call **for this mission** — wiring the harness is outside every task's
+write-set, and the fixtures test sprite decomposition, not include resolution.
+Filed as `planning/mission-index.md` § SI8, which owns reverting these three
+fixtures to the `!include` form users actually write.
+
+No other golden in any suite uses `!include` — a consequence of the same
+harness gap, not evidence that `!include` is unsupported.
 
 **Consequence, accepted deliberately.** The 389 SVG goldens are held
 byte-identical (stop condition 3), strict enough that even a legitimate
