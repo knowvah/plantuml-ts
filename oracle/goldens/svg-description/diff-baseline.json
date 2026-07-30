@@ -109,7 +109,7 @@
       "status": "baseline",
       "diffCount": 11,
       "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "b90edb94+T4"
+      "measuredAgainstCommit": "17a534cc"
     },
     {
       "type": "component",
@@ -146,7 +146,7 @@
       "status": "baseline",
       "diffCount": 24,
       "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "b90edb94+T4"
+      "measuredAgainstCommit": "17a534cc"
     },
     {
       "type": "component",
@@ -155,7 +155,7 @@
       "status": "baseline",
       "diffCount": 7,
       "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "b90edb94+T4"
+      "measuredAgainstCommit": "17a534cc"
     },
     {
       "type": "component",
