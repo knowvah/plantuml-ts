@@ -162,3 +162,44 @@ Unlike the byte-exact ratchet above, the diff-count ratchet is **not fully
 offline** — it reads `test-results/dot-cache/<type>/<slug>/{in.puml,in.svg}`
 directly at test time rather than committed copies, and skips gracefully
 (not a failure) when that gitignored, regenerable tree is absent locally.
+
+## Authored sprite fixtures — INTENTIONALLY NOT RATCHETED
+
+`usecase/sprite-svg-bootstrap-0`, `usecase/sprite-svg-archimate-0` and
+`usecase/sprite-svg-multiline-0` were authored on 2026-07-30 for mission
+`svg-sprite-nanoparser` (`plans/svg-sprite-nanoparser/`). They are **absent
+from `ratchet.json` on purpose** — they do not pass today, and the ratchet
+test iterates `ratchet.json`, never the directory listing, so an unlisted
+fixture is inert.
+
+They exist because **no other golden in any suite contains a sprite**, so the
+mission's central output change — SVG sprites emitting `<path>` elements
+instead of one base64 `<image>`, mirroring upstream's `SvgNanoParser`
+decomposition — would otherwise ship with zero golden coverage.
+
+State at authoring (measured, not assumed):
+
+| fixture | ours | jar |
+|---|---|---|
+| `sprite-svg-bootstrap-0` | 0 `<path>`, 4 data-URI `<image>` | 6 `<path>`, 0 `<image>` |
+| `sprite-svg-archimate-0` | 0 `<path>`, 2 data-URI `<image>` | 2 `<path>`, 0 `<image>` |
+| `sprite-svg-multiline-0` | 0 `<path>`, 3 data-URI `<image>` | 4 `<path>`, 0 `<image>` |
+
+`sprite-svg-bootstrap-0` independently reproduces the jar figures the S1L
+ledger records for the declared-vs-ink split: two sprites with an identical
+declared 16×16 give `rx=34.729` (`bi-globe`, whose outer circle is an arc, so
+`UPath.addInternal` records only the endpoint) versus `rx=37.4784`
+(`bi-bootstrap-fill`, which inks the full box) at scale 2.5.
+
+**Ratcheting them in is a stretch goal, not a mission acceptance criterion.**
+DOT parity is the mission gate. Byte-exact SVG equality is a stricter bar than
+the two-channel architecture fix promises, so these may stay un-ratcheted at
+mission close; they then stand as measured, documented gaps rather than a
+permanently-red gate. Ratchet one in only when it renders byte-identical.
+
+**Sprite declarations are inlined, not `!include`d.** A stdlib bundle is
+itself just a `.puml` of `sprite <name> <svg …>` lines, so an inline
+declaration is the identical parse path — verified: the `!include` and
+inlined forms produce byte-identical jar output. Inlining is required because
+`renderFixture` runs the preprocessor with no include resolver, and no other
+golden in any suite uses `!include`.
