@@ -698,45 +698,63 @@ rather than re-deriving the shape from the keyword string as this port does.
 
 ## Residual filed by mission `bodyenhanced-atom-seams` (2026-07-30)
 
-### ~~The `Sea`/`SheetBlock1` single-resolved-value gap~~ — **CORRECTED TWICE**
+### The SVG-sprite ink gap — **CORRECTED THREE TIMES; this version is jar-verified**
 
-**Do not act on the original text of this entry.** It prescribed adding
-declared-vs-ink and per-element-vs-default side channels to
-`Sea`/`SheetBlock1`. Mission `sizer-footprint-parity` proved that wrong, and
-then proved its own replacement half-wrong too.
+Two earlier versions of this entry were wrong, and the second was wrong in a
+way that reversed the first. Do not act on either. The mechanism below was
+established by a dedicated diagnosis task with jar probes.
 
-**Correction 1 — the `<img>` half is CLOSED, and needed no channel.**
-`AtomImg.create` hardcodes `UFontFactory.monospace(14)` + `blackBlueTrue`
-(`AtomImg.java:106-107`). The jar's 100.362×**14** was that constant, not
-the diagram default — the 14 coinciding is what made the original diagnosis
-look confirmed for a whole mission. `jecici-56-bimu826` widened
-**0.398264in** unguarded before, **0** after.
+**What is actually true.** Upstream DOES narrow an SVG sprite to its ink for
+the usecase ellipse — but nothing computes an "ink box". It is emergent.
+Stdlib icon libraries (`!include <bootstrap/bootstrap>` and friends) load via
+`Stdlib.readSvgSprite` → `SvgSpriteParserFactory` → **`SvgNanoParser`**, whose
+`drawU` (`SvgNanoParser.java:135-166`) walks the raw SVG and draws each
+`<path>`/`<circle>`/`<ellipse>` as its own primitive. `Footprint.drawPath`
+(`Footprint.java:148-151`) records real per-path corners. Meanwhile
+`AtomSprite.calculateDimensionSlow` (`AtomSprite.java:65-67`) always returns
+the DECLARED box. **Upstream therefore has two structurally independent
+channels** — declared for layout, observed-ink for the footprint — because
+they are different method calls on different objects.
 
-**Correction 2 — the usecase multi-line half is STILL OPEN, cause is neither
-previously filed one.** Not a missing `Sea`/`SheetBlock1` channel (upstream
-has none), and not solved by routing through `Footprint` (tested: dropping
-the guard reproduced 0.029321in on `bootstrap-0`/`ruziru-69-xixo434`
-verbatim).
+**Why the earlier corrections were wrong.** The second version concluded
+"upstream has no ink concept" from reading
+`klimt/sprite/SpriteSvg.java`. That is the WRONG SPRITE PATH — it serves
+inline `sprite $name {...}` blocks, and these fixtures never touch it.
+Generalising from it inverted the truth.
 
-**Real mechanism, traced by reading:** `sizingAtomImageResolverFor`'s
-`fitToInk` branch (`src/diagrams/description/leaf-sizing.ts` ~366) returns a
-sprite's **INK box as its whole resolved dimension**, and
-`descAtomOps#dimensionOf` (`EntityImageDescriptionDelegates.ts:128-133`)
-feeds that one number BOTH to `SheetBlock1.ts:180-182`'s line-stacking
-cursor AND to the position `Footprint` observes via
-`TextBlockInEllipse.calculateDimension`. **Upstream never puts ink into an
-atom's dimension** — ink narrowing is a draw-time `Footprint#drawPath`
-artifact. The faithful fix is to REMOVE `fitToInk`'s substitution and let
-`Footprint` narrow at draw time. Single-line displays are unaffected: one
-line has no stacking cursor to poison.
+**Jar evidence** (`java -DPLANTUML_DETERMINISTIC_TEXT=true -jar
+oracle/dist/plantuml-oracle.jar -tsvg …` on `bootstrap-0`), same declared
+16×16 sprite, different ink:
 
-Owner: whichever mission next touches that resolver. Small and local, but a
-behaviour change — own gated commit, with `bootstrap-0`/`ruziru-69-xixo434`
-at widened 0 as the test.
+| entity | sprite | scale | ellipse |
+|---|---|---|---|
+| `b` | `bi-globe` | 2.5 | `rx=34.729  ry=28.3832` |
+| `e` | `bi-bootstrap-fill` | 2.5 | `rx=37.4784 ry=30.5827` |
+
+Real narrowing, and the port's `svgInkBox` reproduces `b`'s figure exactly.
+
+**The port's actual defect is architectural, not arithmetic.**
+`drawAtoms` (`EntityImageDescriptionSupport.ts:356`) draws a sprite as ONE
+opaque `UImage`, so the port has a single dimension channel. The
+jar-verified `svgInkBox` precomputation (`SpriteSvg.ts:72-93`) has nowhere to
+go but that channel — which `SheetBlock1.ts:180-182` also reads to advance
+the line-stacking cursor. One line: only the ellipse consumes it, correct.
+Two lines: line 2 stacks on ink height instead of declared height. That is
+the **0.029321in** widening on `bootstrap-0`/`ruziru-69-xixo434`.
+
+So `svgInkBox` is faithful to upstream's OUTPUT and divergent from its
+ARCHITECTURE, and the architecture gap is the bug.
+
+**Fix chosen by the maintainer 2026-07-30: mirror `SvgNanoParser`** —
+decompose SVG sprites into real drawable primitives at draw time, restoring
+upstream's two independent channels. Rejected: bolting a second channel onto
+`Sea`/`SheetBlock1`, which would match the numbers while preserving the
+structural divergence `CLAUDE.md` calls the bug itself.
 
 **Blocked separately: the analytic substitute cannot be retired yet.**
 `usecase-footprint.ts` → `footprintBoxes` → `measureUsecase` does not end
 there: `src/diagrams/class/class-layout-leaf-shapes.ts:14,27` calls
 `measureUsecase` unconditionally from the CLASS engine, predating the guard
 mechanism. Retiring it is class-engine work.
+
 

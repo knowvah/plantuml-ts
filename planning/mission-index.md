@@ -371,13 +371,16 @@ all gates clean. Perf **improved**: `gutute-00-gaki684` 17.42 → 16.79ms.
   three unrelated stale pins cleaned.
 
 **NOT delivered**
-- **Narrowing #2 multi-line** — still guarded. Routing through `Footprint`
-  does NOT dissolve it: `fitToInk` substitutes a sprite's ink box for its
-  whole resolved dimension, and that one number feeds both `SheetBlock1`'s
-  stacking cursor and the position `Footprint` observes. Upstream never puts
-  ink in an atom's dimension — it narrows at draw time. **Fix named in the
-  ledger: remove `fitToInk`'s substitution.** Small, local, wants its own
-  gated commit.
+- **Narrowing #2 multi-line** — still guarded. **The fix named here on
+  2026-07-30 was WRONG and is corrected in the ledger (3rd version).**
+  "Remove `fitToInk`'s substitution" rested on "upstream never puts ink in an
+  atom's dimension", which came from reading `klimt/sprite/SpriteSvg.java` —
+  the wrong sprite path. Stdlib icon sprites route through `SvgNanoParser`,
+  which decomposes into per-`<path>` draws, giving `Footprint` a genuine
+  independent ink signal (jar-confirmed: same declared 16×16, `bi-globe`
+  `rx=34.729` vs `bi-bootstrap-fill` `rx=37.4784`). The port's real defect is
+  that `drawAtoms` emits ONE opaque `UImage`, so ink and layout share a
+  channel. **Fix: mirror `SvgNanoParser`'s draw-time decomposition.**
 - The analytic substitute could not be retired: `measureUsecase` is called
   unconditionally from the CLASS engine
   (`class-layout-leaf-shapes.ts:14,27`), predating the guard mechanism.
