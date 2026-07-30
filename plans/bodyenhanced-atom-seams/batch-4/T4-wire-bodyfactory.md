@@ -17,6 +17,36 @@ this is where the two converge — and because the SIZER routes through
 **This is the mission's risk concentration.** It changes rendered output
 for every description diagram.
 
+## SCOPE NARROWED — only `desc`/`create3` is wireable (ADR-10)
+
+`create2` and `BodyEnhanced1` moved to mission SI1: `BodyEnhanced1
+.buildTextBlock` constructs `MethodsOrFieldsArea`, whose cascade measures
+≈12,100 Java lines through `net/atmp/CucaDiagram`, `abel/Entity`,
+`cucadiagram/Bodier` and the 40-file `skin/` package. `BodyFactory.ts`
+therefore exposes **`create3` only**.
+
+**So this task wires `desc` through `create3` and LEAVES `name` alone.**
+`name` keeps its current local construction and its flat
+`FOLDER_SHOWN_TITLE_EXTRA_WIDTH = 12`, which is exactly right: that
+constant traces to `BodyEnhanced1.getMarginX()`=6 applied left and right by
+`decorate`, and until `create2` exists the flat table is the faithful
+encoding of that fact. Do not delete it, do not reroute `name`, and do not
+substitute `create3` for `create2` — `getMarginX` is 6 vs 0, so that swap
+would silently change every folder/package title width.
+
+If wiring `desc` turns out to require `create2`, **STOP and report** — that
+is the ADR-10 boundary, not a gap to close.
+
+## Wiring prerequisite T2b-1 flagged
+
+`ISkinSimple.sheet(...)` must be backed by a real `SheetBuilder` /
+`CreoleParser` at the wiring point — **today only test doubles exist.**
+`create3` needs `{defaultThickness, minimumWidth}` resolved from
+`resolveSkinparam`'s `LineThickness` / `MinClassWidth` equivalents, because
+no `Style`/`PName` cascade exists here to do it automatically
+(`FromSkinparamToStyle.java:241` is the trace). And `atomOps` must be a real
+`AtomOps` bundle — `Sea.ts` holds the contract — never a stub.
+
 ## The gate is the diff-count ratchet, NOT "T1's goldens" (ADR-5 AMENDMENT)
 
 This file used to say "T1's goldens are the gate." **T1 pinned zero
@@ -68,8 +98,12 @@ Deliberately NOT in scope: `leaf-sizing.ts`, `leaf-sizing-legacy-fallback
 
 ## Acceptance criteria
 
-- Given a folder/package leaf, then its title margin comes from
-  `BodyEnhanced1.getMarginX()`, not `FOLDER_SHOWN_TITLE_EXTRA_WIDTH`
+- Given a `desc` block, then it is built by `BodyFactory.create3`, and the
+  local helper it replaces is gone or documented as still serving `name`
+- Given `name`, then it is UNCHANGED and `FOLDER_SHOWN_TITLE_EXTRA_WIDTH`
+  survives — `create2` is SI1's (ADR-10). The original criterion here
+  ("title margin comes from `BodyEnhanced1.getMarginX()`") is **void for
+  this mission** and is SI1's acceptance test instead
 - Given the 48 pre-existing `svg-description` goldens, then they pass — OR
   a drift is jar-verified and the golden updated to the JAR's bytes, with
   the probe recorded
@@ -95,9 +129,16 @@ tables encoded and kept it.
 
 ## Observability / Rollback
 
-N/A. Reversible — and cleanly so ONLY because routing is not in this
-commit. Keep it that way.
+Reversible ONLY because the routing widening is not in this commit (ADR-6)
+— keep it that way. Land as exactly ONE commit so `git revert` is a real
+rollback.
 
 ## Quality bar
 
-All four gates + all three ratchets + T1's golden ratchet.
+All four gates, all three ratchets, the 22-fixture diff-count baseline, and
+all four SVG golden sets (svg-description 48, svg-class 310, svg-object 22,
+svg-state 57).
+
+**Note on gate runtime:** `npm run lint` alone now takes several minutes on
+this codebase. Run it separately rather than chained with test and build, or
+it will look like a hang.
