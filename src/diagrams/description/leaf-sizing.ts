@@ -6,22 +6,22 @@
  * `EntityImageDescription.calculateDimensionSlow` -- superseding the flat
  * per-symbol tables that used to re-derive this geometry independently.
  *
- * T5 (bodyenhanced-atom-seams): of T6's four original narrowings, this task
- * closed ONE -- `usecase`+`<$sprite>` on a single-line display (T3/ADR-2).
- * box+`<img>` was RE-DIAGNOSED, not closed: T3/ADR-3's `imgFallbackFont` fix
- * landed on `buildTextBlock`, a path `buildDesc` no longer uses since T4
- * routed `desc` through `BodyFactory.create3` -- see `leaf-sizing-legacy-
- * fallback.ts`'s module doc. `folder`/`package` (needs `create2`/
- * `BodyEnhanced1`, moved to SI1, ADR-10) and `<latex>` (a permanent
- * divergence, DIVERGENCES.md) stay pre-T6 too. See `measureLeafNode`'s own
- * doc comment for the per-case dispatch.
+ * sizer-footprint-parity T3 (ADR-1/ADR-2) closed box+`<img>` fully (the
+ * cannot-decode fallback font is hardcoded at its draw site now, ADR-1) and
+ * usecase+`<$sprite>` PARTIALLY: a single-line sprite display routes
+ * through `measureEntityLeaf`, but a MULTI-LINE one stays on the analytic
+ * substitute -- ADR-2's "dissolves" premise was tested and found FALSE for
+ * this port's architecture; see `hasUnroutedUsecaseMarkup`'s own doc for
+ * the traced mechanism. `folder`/`package` (SI1/ADR-10) and `<latex>` (a
+ * permanent divergence) are the two narrowings still fully open.
  *
- * `measureActor`/`measureUsecase` (exported below) are UNCHANGED: `src/
- * diagrams/class/class-layout-leaf-shapes.ts` imports both for the
- * class-diagram engine's own shapes (a SEPARATE ratchet, zero-diff).
+ * `measureActor`/`measureUsecase` (exported below) are NOT dead regardless:
+ * `class-layout-leaf-shapes.ts` (off-limits) imports both unconditionally
+ * for the class-diagram engine's own shapes -- why `usecase-footprint.ts`/
+ * `footprintBoxes` survive too.
  *
  * See `plans/description-leaf-sizing-audit/decisions.md` (ADR-6) and
- * `plans/bodyenhanced-atom-seams/decisions.md` (ADR-2, ADR-3, ADR-10).
+ * `plans/sizer-footprint-parity/decisions.md` (ADR-1, ADR-2, ADR-4).
  */
 
 import type { DescriptiveNode } from './ast.js';
@@ -45,7 +45,7 @@ import {
 } from './leaf-sizing-text.js';
 import { boxPoints, containingEllipse } from './usecase-footprint.js';
 import { measureFolderLeaf } from './leaf-sizing-folder.js';
-import { hasUnroutedBoxMarkup, measureLegacyBoxFallback } from './leaf-sizing-legacy-fallback.js';
+import { measureLegacyBoxFallback } from './leaf-sizing-legacy-fallback.js';
 import {
   type BoxSizingOpts,
   type Dim,
@@ -128,8 +128,12 @@ export function measureLeafNode(
       return measureFolderLeaf(node, fontSpec, measurer, opts, sprites);
     case 'usecase':
     case 'usecase-business':
-      // T5: `<$sprite>` CLOSED for a SINGLE-LINE display (T3/ADR-2) -- see
-      // `hasUnroutedUsecaseMarkup`'s comment for the multi-line exception.
+      // sizer-footprint-parity T3/ADR-2: the `<img` guard is GONE -- a
+      // single-line `<img>`/`<$sprite>` display now routes through
+      // `measureEntityLeaf` unconditionally. `<latex>` and a MULTI-LINE
+      // `<$sprite>` display STAY guarded -- see `hasUnroutedUsecaseMarkup`'s
+      // doc comment for the STOP-diagnosed reason the multi-line case does
+      // NOT dissolve the way ADR-2 predicted.
       return hasUnroutedUsecaseMarkup(node.display)
         ? measureUsecase(node.display, fontSpec, measurer, sprites, node.stereotype)
         : measureEntityLeaf(node, fontSpec, { opts, sprites, measurer }, false);
@@ -143,12 +147,12 @@ export function measureLeafNode(
       // pre-T6 (a DIFFERENT composition, `mergeLayoutT12B3`).
       return measureEntityLeaf(node, fontSpec, { opts, sprites, measurer }, false);
     default:
-      // Every other (true) box symbol routes through the same faithful
-      // call -- except a `<latex>`/`<img>`-bearing display (T5: `<img>`
-      // RE-DIAGNOSED, still guarded; see `leaf-sizing-legacy-fallback.ts`'s
-      // module doc for both mechanisms). Only the generic box family
-      // floors width against `opts.minimumWidth` (S1L-g).
-      if (hasUnroutedBoxMarkup(node.display)) {
+      // Every other (true) box symbol routes through the same faithful call
+      // -- except a `<latex>`-bearing display, the ONLY box guard left (T3/
+      // ADR-1: `<img>`'s fallback font is hardcoded at its draw site now).
+      // Only the generic box family floors width against `opts.minimumWidth`
+      // (S1L-g).
+      if (node.display.includes('<latex>')) {
         return measureLegacyBoxFallback(node, fontSpec, { measurer, opts, sprites, defaultFont: baseFont });
       }
       return measureEntityLeaf(
@@ -161,24 +165,22 @@ export function measureLeafNode(
   // are 1-4 lines each, none independently over any threshold.
 }
 
-/** `<latex>`/`<img>` markup a use-case display: unverified either way (no
- *  corpus fixture), kept guarded as the conservative default.
+/** `<latex>` markup, or a `<$sprite>` atom on a MULTI-LINE display, still
+ *  route through `measureUsecase`'s analytic substitute. `<img>`/a
+ *  SINGLE-LINE `<$sprite>` display do NOT (sizer-footprint-parity T3/ADR-2).
  *
- *  A `<$sprite>` atom on a MULTI-LINE display (T5, diagnosed): `desc` now
- *  builds via `BodyFactory.create3`'s real `Sea`/`SheetBlock1` pipeline
- *  (T4/ADR-1), and `SheetBlock1.ts` (`y += sea.getHeight()`, out of
- *  write-set) stacks lines using the SAME resolved `calculateDimension`
- *  height this resolver returns for footprint/ellipse fitting -- upstream
- *  keeps line-stacking on the DECLARED box, but this resolver must return
- *  the INK box for the ellipse fit (ADR-2), so a multi-line display mixing
- *  a sprite line with any other line under-stacks by declared-minus-ink
- *  height (0.029in widened, bootstrap-0/ruziru-69-xixo434, verified).
- *  Fixing line-stacking needs `SheetBlock1.ts`, out of this task's
- *  write-set. A SINGLE-LINE sprite display has no next line to
- *  under-stack, so the ink-fit resolver below is exact for it (verified:
- *  both fixtures' other 5 single-line sprite nodes conform). */
+ *  DIAGNOSIS (STOP condition, ADR-4; full trace in `.agent-notes/T3-widen-
+ *  guards.md`): dropping this guard widened `bootstrap-0`/`ruziru-69-
+ *  xixo434` by exactly 0.029321in -- ADR-2's "dissolves" premise is FALSE
+ *  here. `sizingAtomImageResolverFor`'s `fitToInk` branch (~line 366) feeds
+ *  a sprite's INK box, as its WHOLE dimension, to BOTH `SheetBlock1
+ *  .ts:180-182`'s cursor advance AND its `Footprint`-observed drawn
+ *  position -- upstream keeps those separate (`AtomSprite.calculateDimension`
+ *  always DECLARED; ink narrowing is `Footprint#drawPath`-only). Fixing it
+ *  needs a `SheetBlock1.ts` layout/ink split -- the side channel ADR-3
+ *  forbids, in a file off-limits regardless. Kept guarded. */
 function hasUnroutedUsecaseMarkup(display: string): boolean {
-  if (display.includes('<latex>') || display.includes('<img')) return true;
+  if (display.includes('<latex>')) return true;
   return display.includes('<$') && display.includes('\n');
 }
 
@@ -235,10 +237,10 @@ export function measureActor(
  * Exact against the deterministic oracle (footprint = text bounding box):
  * "L" 25.15×21.32, "Hello World" 103.0×25.8.
  *
- * UNCHANGED by T6 -- kept for `class-layout-leaf-shapes.ts`'s import AND as
- * the sizer's own atom/latex-markup fallback (see module doc comment); the
- * default (no atom markup) dispatch instead routes through
- * `measureEntityLeaf` (`EntityImageDescription.calculateDimensionSlow`, the
+ * NOT dead (module doc comment): two LIVE callers remain --
+ * `class-layout-leaf-shapes.ts`'s unconditional import (out of write-set)
+ * and this file's own `<latex>`/multi-line-`<$sprite>` fallback. Every
+ * other usecase display routes through `measureEntityLeaf` instead (the
  * SAME `TextBlockInEllipse`/`Footprint` classes, faithfully).
  *
  * `sprites` widens the footprint (via `maxLineWidth`) when the display
@@ -318,10 +320,8 @@ export function measureUsecase(
     width: diag + USECASE_ELLIPSE_BIGGER,
     height: alpha * diag + USECASE_ELLIPSE_BIGGER,
   };
-  // #lizard forgives -- pre-existing, kept VERBATIM (this file's module doc
-  // comment: UNCHANGED by T6/ADR-6, retained only for `class-layout-leaf-
-  // shapes.ts`'s own import). Not refactored here per this project's porting
-  // discipline (do not restructure code while unrelated work is in flight).
+  // #lizard forgives -- pre-existing, kept VERBATIM; still has two live
+  // callers (module doc comment). Not refactored per porting discipline.
 }
 
 // ---------------------------------------------------------------------------

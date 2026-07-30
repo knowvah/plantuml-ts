@@ -50,6 +50,10 @@ svg-state 57) and the 22-fixture diff-count baseline (no rise).
 
 Baseline: main @ `e7ad87ab`, **320/351 (91.2%)**, zero widened.
 
+**CLOSED 2026-07-30.** Narrowing #3 closed; narrowing #2 single-line closed,
+multi-line still guarded with a corrected diagnosis. See
+`decision-journal.md` and `plans/s1l-leaf-sizing/ledger.md`.
+
 ## Success is already measured
 
 T5 measured the cost of unguarding by experiment, then reverted. Those
@@ -66,9 +70,9 @@ Done = all three route unguarded at **widened 0**.
 
 | # | Focus | Tasks | Status |
 |---|---|---|---|
-| 1 | `<img>` fallback constant + delete the font seam | T1 | [ ] |
-| 2 | Route the usecase sizer through `Footprint` | T2 | [ ] |
-| 3 | Widen the guards, perf, close | T3, T4 | [ ] |
+| 1 | `<img>` fallback constant + delete the font seam | T1 [x] | [x] |
+| 2 | Delete the resolver ink fields (routing half → T3) | T2 [x] | [x] |
+| 3 | Widen the guards, perf, close | T3 [x], T4 [x] | [x] |
 
 Sequential. T1 and T2 have disjoint write-sets but **overlapping call
 graphs** (both alter atom resolution), and that is not enough for

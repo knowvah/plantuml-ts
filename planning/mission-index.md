@@ -336,9 +336,10 @@ neither moved all mission. Perf: `gutute-00-gaki684` 17.39ms → 17.42ms
 
 **Handed to SI1, in `plans/s1l-leaf-sizing/ledger.md`:** `create2` /
 `BodyEnhanced1` / `MethodsOrFieldsArea` / `CucaDiagram` / `Entity` / the
-skin-style subsystem, **plus the `Sea`/`SheetBlock1` single-resolved-value
-gap** that blocks narrowings #2 and #3 (measured: 0.398264in and
-0.029321in). ADR-2 and ADR-3 added exactly those side channels to the OLD
+skin-style subsystem, ~~plus the `Sea`/`SheetBlock1` single-resolved-value gap~~ — **RETIRED
+2026-07-30 by `sizer-footprint-parity`: no such channel exists upstream.
+Narrowing #3 is closed; #2's residue is a one-line `fitToInk` correction,
+not a channel. See that mission's entry and the S1L ledger.** ADR-2 and ADR-3 added exactly those side channels to the OLD
 pipeline; routing discarded them, so SI1 must re-add them at the new layer.
 
 **Method lesson, earned three times.** ADR-5's golden count (4 vs 48), T5's
@@ -352,3 +353,44 @@ before asking for a ruling — the stripe estimate moved 1,100 → 2,300 and the
 **SI1's scope grew accordingly** — it now owns `create2` and the
 entity/skin/style cascade on top of its original `Bodier` scope. Still
 should land before Phase D.
+
+## `sizer-footprint-parity` — CLOSED 2026-07-30, **320/351 (91.2%)** flat
+
+Branch `feat/sizer-footprint-parity`, 5 commits. 449 files / 11029 tests,
+all gates clean. Perf **improved**: `gutute-00-gaki684` 17.42 → 16.79ms.
+
+**Delivered**
+- **T6 narrowing #3 (box + `<img>`) CLOSED.** `jecici-56-bimu826` widened
+  0.398264in unguarded before, **0** now; diff count 143 → 133. Cause was
+  never a missing font seam: `AtomImg.create` hardcodes
+  `UFontFactory.monospace(14)` (`AtomImg.java:106-107`), and the jar's
+  100.362×**14** was that constant. The 14 coinciding with the diagram
+  default is what let the wrong diagnosis survive an entire mission.
+- **Narrowing #2 single-line** routes.
+- Two dead seams deleted (`imgFallbackFont`, `AtomImageResolver` ink fields);
+  three unrelated stale pins cleaned.
+
+**NOT delivered**
+- **Narrowing #2 multi-line** — still guarded. Routing through `Footprint`
+  does NOT dissolve it: `fitToInk` substitutes a sprite's ink box for its
+  whole resolved dimension, and that one number feeds both `SheetBlock1`'s
+  stacking cursor and the position `Footprint` observes. Upstream never puts
+  ink in an atom's dimension — it narrows at draw time. **Fix named in the
+  ledger: remove `fitToInk`'s substitution.** Small, local, wants its own
+  gated commit.
+- The analytic substitute could not be retired: `measureUsecase` is called
+  unconditionally from the CLASS engine
+  (`class-layout-leaf-shapes.ts:14,27`), predating the guard mechanism.
+
+**SI1's inheritance changes shape, it does not disappear.** The
+`Sea`/`SheetBlock1` side-channel gap SI1 inherited **does not exist** —
+upstream has no such channel and ADR-3 stands. What SI1 (or whoever touches
+`leaf-sizing.ts`'s resolver) inherits instead is the one-line `fitToInk`
+correction above, plus the class-engine coupling that blocks retiring the
+substitute.
+
+**Method note.** Three premises in this mission line have now gone stale the
+same way, and the third was mine after I wrote the rule: I traced
+`usecase-footprint.ts`'s consumers ONE level and missed that
+`measureUsecase` has a class-engine caller. **Trace two levels — including
+in your own plan.**

@@ -698,28 +698,45 @@ rather than re-deriving the shape from the keyword string as this port does.
 
 ## Residual filed by mission `bodyenhanced-atom-seams` (2026-07-30)
 
-### The `Sea`/`SheetBlock1` single-resolved-value gap — SIZING, blocks 2 narrowings
+### ~~The `Sea`/`SheetBlock1` single-resolved-value gap~~ — **CORRECTED TWICE**
 
-The faithful `create3` → `Sea` → `SheetBlock1` pipeline carries **exactly one
-resolved value per atom**, reused for width, line-stacking height, and
-footprint fitting alike. It has **no declared-vs-ink channel and no
-per-element-vs-diagram-default channel anywhere**.
+**Do not act on the original text of this entry.** It prescribed adding
+declared-vs-ink and per-element-vs-default side channels to
+`Sea`/`SheetBlock1`. Mission `sizer-footprint-parity` proved that wrong, and
+then proved its own replacement half-wrong too.
 
-Two of the previous mission's four narrowings sit on this one hole:
+**Correction 1 — the `<img>` half is CLOSED, and needed no channel.**
+`AtomImg.create` hardcodes `UFontFactory.monospace(14)` + `blackBlueTrue`
+(`AtomImg.java:106-107`). The jar's 100.362×**14** was that constant, not
+the diagram default — the 14 coinciding is what made the original diagnosis
+look confirmed for a whole mission. `jecici-56-bimu826` widened
+**0.398264in** unguarded before, **0** after.
 
-| narrowing | needs | measured cost of routing anyway |
-|---|---|---|
-| box + `<img>` | the diagram-default font for the cannot-decode fallback | `jecici-56-bimu826` widens 0 → **0.398264in** |
-| usecase + sprite, MULTI-LINE | ink height distinct from stacking height | `bootstrap-0` / `ruziru-69-xixo434` widen 0 → **0.029321in** |
+**Correction 2 — the usecase multi-line half is STILL OPEN, cause is neither
+previously filed one.** Not a missing `Sea`/`SheetBlock1` channel (upstream
+has none), and not solved by routing through `Footprint` (tested: dropping
+the guard reproduced 0.029321in on `bootstrap-0`/`ruziru-69-xixo434`
+verbatim).
 
-Both numbers are from T5 removing the guard for real and reverting, not from
-inspection.
+**Real mechanism, traced by reading:** `sizingAtomImageResolverFor`'s
+`fitToInk` branch (`src/diagrams/description/leaf-sizing.ts` ~366) returns a
+sprite's **INK box as its whole resolved dimension**, and
+`descAtomOps#dimensionOf` (`EntityImageDescriptionDelegates.ts:128-133`)
+feeds that one number BOTH to `SheetBlock1.ts:180-182`'s line-stacking
+cursor AND to the position `Footprint` observes via
+`TextBlockInEllipse.calculateDimension`. **Upstream never puts ink into an
+atom's dimension** — ink narrowing is a draw-time `Footprint#drawPath`
+artifact. The faithful fix is to REMOVE `fitToInk`'s substitution and let
+`Footprint` narrow at draw time. Single-line displays are unaffected: one
+line has no stacking cursor to poison.
 
-**Note the shape.** ADR-2 (ink fields on `AtomImageResolver`) and ADR-3
-(`imgFallbackFont` threading) each added exactly such a side channel to the
-OLD pipeline. Routing to the faithful pipeline discarded both — T3's fix was
-correct on landing and dead once T4 bypassed `buildTextBlock`. **Whoever
-takes this must add the channels to `Sea`/`SheetBlock1`/`descAtomOps`, or
-these same two narrowings re-open a third time.**
+Owner: whichever mission next touches that resolver. Small and local, but a
+behaviour change — own gated commit, with `bootstrap-0`/`ruziru-69-xixo434`
+at widened 0 as the test.
 
-Owner: **SI1** (it already owns `create2`/`MethodsOrFieldsArea`).
+**Blocked separately: the analytic substitute cannot be retired yet.**
+`usecase-footprint.ts` → `footprintBoxes` → `measureUsecase` does not end
+there: `src/diagrams/class/class-layout-leaf-shapes.ts:14,27` calls
+`measureUsecase` unconditionally from the CLASS engine, predating the guard
+mechanism. Retiring it is class-engine work.
+
