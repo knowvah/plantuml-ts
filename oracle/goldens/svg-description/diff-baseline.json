@@ -77,21 +77,21 @@
       "type": "usecase",
       "slug": "bootstrap-0",
       "group": 1,
-      "status": "error",
-      "diffCount": null,
-      "reason": "render-fixture.ts wires no stdlib includeStore (unlike scripts/svg-conformance-census.ts), so !include <bootstrap/bootstrap> cannot resolve and rendering throws before any comparison runs. Moot for the ratchet either way: parity.json records dotEqual=false for this fixture, so it could never be promoted regardless of this harness gap.",
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "status": "baseline",
+      "diffCount": 0,
+      "reason": "si8 T5 wired the stdlib includeStore into render-fixture.ts, closing the exact gap this entry recorded on 2026-07-29 ('render-fixture.ts wires no stdlib includeStore ... so !include <bootstrap/bootstrap> cannot resolve'). The fixture now renders and measures ZERO diffs against the jar oracle. Still NOT promotable to ratchet.json: parity.json records dotEqual=false, which the original entry already anticipated.",
+      "measuredAt": "2026-07-31",
+      "measuredAgainstCommit": "a7b6c73"
     },
     {
       "type": "usecase",
       "slug": "ruziru-69-xixo434",
       "group": 1,
-      "status": "error",
-      "diffCount": null,
-      "reason": "Same mechanism as usecase/bootstrap-0: render-fixture.ts has no stdlib includeStore, so !include <bootstrap/bootstrap> cannot resolve. Also dotEqual=false in parity.json -- ineligible regardless.",
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "status": "baseline",
+      "diffCount": 0,
+      "reason": "Same mechanism and same resolution as usecase/bootstrap-0: si8 T5 wired the stdlib includeStore into render-fixture.ts, so !include <bootstrap/bootstrap> now resolves and this fixture measures ZERO diffs against the jar oracle. Still dotEqual=false in parity.json -- ineligible for ratchet.json regardless.",
+      "measuredAt": "2026-07-31",
+      "measuredAgainstCommit": "a7b6c73"
     },
     {
       "type": "usecase",
