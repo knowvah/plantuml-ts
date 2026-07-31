@@ -246,8 +246,9 @@ const IMG_PATTERN_SOURCE = '<img[\\s:]+([^>{}]+)(\\{scale=[0-9.]+\\})?>';
 /** Splitter.spritePattern, java Splitter.java:74 (`SpriteUtils.SPRITE_NAME`
  *  = `[-\p{L}0-9_/]+`). Group 1: forced-color prefix `#RRGGBB` (incl. the
  *  `#`), or undefined. Group 2: sprite name. Group 3: the optional
- *  `{scale=N,color=X}`-shaped block. */
-const SPRITE_PATTERN_SOURCE =
+ *  `{scale=N,color=X}`-shaped block.
+ *  Exported for `sprite-prefetch.ts#scanSpriteNames` reuse (si11b ADR-4). */
+export const SPRITE_PATTERN_SOURCE =
   '<(#[A-Za-z0-9_]+)?\\$([-\\p{L}0-9_/]+)' +
   '((?:[{,]?(?:(?:scale=|\\*)[0-9.]+)?(?:,?color[= :](?:#[0-9a-fA-F]{1,8}|[A-Za-z0-9_]+))?\\}?)?)>';
 
