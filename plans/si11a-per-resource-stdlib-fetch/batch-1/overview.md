@@ -5,8 +5,14 @@ other's output.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | `StdlibRemote.ts` — manifest type, `remoteStdlib()`, per-resource fetch + cache | typescript-pro | `src/core/tim/StdlibRemote.ts`, `tests/unit/stdlib-remote.test.ts` | — | [ ] |
-| T5 | Generator emits a remote-manifest module per bundle | typescript-pro | `scripts/build-stdlib-packages/emit-remote-manifest.ts`, `scripts/build-stdlib-packages/types.ts`, `scripts/build-stdlib-packages/package-specs.ts`, `tests/unit/stdlib-packages.test.ts` | — | [ ] |
+| T1 | `StdlibRemote.ts` — manifest type, `remoteStdlib()`, per-resource fetch + cache | typescript-pro | `src/core/tim/StdlibRemote.ts`, `tests/unit/stdlib-remote.test.ts` | — | [x] |
+| T5 | Generator emits a remote-manifest module per bundle | typescript-pro | `scripts/build-stdlib-packages/emit-remote-manifest.ts`, `scripts/build-stdlib-packages/types.ts`, `scripts/build-stdlib-packages/package-specs.ts`, `tests/unit/stdlib-packages.test.ts` | — | [x] |
+
+**T5 landed with a known gap:** `buildStdlibPackages()` never reads
+`spec.remoteModules`, so the emitters are unreferenced and `npm run build:stdlib`
+emits no manifest. The wiring lives in `scripts/build-stdlib-packages.ts`, which
+is outside every task's write-set — stop condition 12, escalated to the
+maintainer. **T6 is blocked on that ruling; T2 and T7 are not.**
 
 ## Why these two are independent
 
