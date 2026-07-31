@@ -37,7 +37,11 @@
  * @see ../../src/core/tim/stdlib-path.ts -- `splitStdlibPath`
  */
 import { describe, expect, it, vi } from 'vitest';
-import { prefetchIncludes, CircularIncludeError } from '../../src/core/include-resolver.js';
+import {
+  prefetchIncludes,
+  CircularIncludeError,
+  type IncludeFetcher,
+} from '../../src/core/include-resolver.js';
 import { StdlibNotBundledError } from '../../src/core/tim/IncludeStore.js';
 import { stdlibRegistry, type StdlibRegistry } from '../../src/core/tim/StdlibRegistry.js';
 import { remoteStdlib, type StdlibRemoteManifest } from '../../src/core/tim/StdlibRemote.js';
@@ -48,6 +52,36 @@ const noFetch = (url: string): Promise<string> =>
 
 function uml(...lines: readonly string[]): string {
   return ['@startuml', ...lines, '@enduml'].join('\n');
+}
+
+/**
+ * si11a T4 -- a fetcher that records every URL the moment it is CALLED (not
+ * when it resolves) and stays pending until `release` is invoked for that
+ * URL. This is the structural proof criterion 1 requires: because
+ * `prefetchInner`'s synchronous prefix issues every target's `fetcher(url)`
+ * call before the enclosing `Promise.all` is even awaited (see
+ * `include-resolver.ts`'s `dedupeInFlight` doc), `started` already holds
+ * every target synchronously after calling `prefetchIncludes` -- no
+ * `setTimeout`, no timing heuristic.
+ */
+function blockingFetcher(): {
+  fetcher: IncludeFetcher;
+  started: string[];
+  release: (url: string, content: string) => void;
+} {
+  const resolvers = new Map<string, (content: string) => void>();
+  const started: string[] = [];
+  const fetcher: IncludeFetcher = (url: string) =>
+    new Promise<string>((resolve) => {
+      started.push(url);
+      resolvers.set(url, resolve);
+    });
+  const release = (url: string, content: string): void => {
+    const resolve = resolvers.get(url);
+    if (resolve === undefined) throw new Error(`fetch for '${url}' was never started`);
+    resolve(content);
+  };
+  return { fetcher, started, release };
 }
 
 /** Register one remote bundle under `name`, pre-wrapped via `remoteStdlib` (T2's finding). */
@@ -203,6 +237,122 @@ describe('remote registry in the prefetch walk -- cycle guard (criterion 6)', ()
 
     await expect(
       prefetchIncludes(uml('!include <loop/a>'), noFetch, undefined, registry),
+    ).rejects.toBeInstanceOf(CircularIncludeError);
+  });
+});
+
+/**
+ * si11a T4 -- concurrent fetch and in-flight dedup in `prefetchInner`.
+ * Pins the five acceptance criteria from `T4-concurrent-fetch.md`:
+ *   1. 20 distinct targets are all in flight before any resolves.
+ *   2. The same target named twice in one source is fetched exactly once.
+ *   3. One target's rejection surfaces and names that target.
+ *   4. Store contents are identical regardless of completion order.
+ *   5. The cycle guard still fires when the cycling target has a concurrent
+ *      sibling (criterion 5's own regression guard,
+ *      `stdlib-registry-prefetch.test.ts`, is untouched and still green --
+ *      verified separately, not duplicated here).
+ */
+describe('concurrent fetch -- all targets in flight before any resolves (criterion 1)', () => {
+  it('issues all 20 fetches before any of them settle, proven structurally', async () => {
+    const urls = Array.from(
+      { length: 20 },
+      (_, i) => `https://cdn.example.com/icon${i}.puml`,
+    );
+    const { fetcher, started, release } = blockingFetcher();
+
+    // No `await` yet: prefetchIncludes's synchronous prefix runs the whole
+    // `targets.map()` pass before returning control here (see
+    // blockingFetcher's doc comment for the mechanism).
+    const promise = prefetchIncludes(uml(...urls.map((u) => `!include ${u}`)), fetcher);
+
+    expect(started).toHaveLength(20);
+    expect(new Set(started)).toEqual(new Set(urls));
+
+    for (const url of urls) release(url, `content:${url}`);
+    const store = await promise;
+    for (const url of urls) expect(store.get(url)).toBe(`content:${url}`);
+  });
+});
+
+describe('concurrent fetch -- in-flight dedup (criterion 2)', () => {
+  it('the same target named twice in one source is fetched exactly once', async () => {
+    const url = 'https://cdn.example.com/shared.puml';
+    const fetcher: IncludeFetcher = vi.fn(() => Promise.resolve('shared content'));
+
+    const store = await prefetchIncludes(uml(`!include ${url}`, `!include ${url}`), fetcher);
+
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(store.get(url)).toBe('shared content');
+  });
+});
+
+describe('concurrent fetch -- error propagation names the failing target (criterion 3)', () => {
+  it('one rejecting target surfaces its own error while siblings keep resolving', async () => {
+    const ok1 = 'https://cdn.example.com/ok1.puml';
+    const bad = 'https://cdn.example.com/bad.puml';
+    const ok2 = 'https://cdn.example.com/ok2.puml';
+    const fetcher: IncludeFetcher = (url) => {
+      if (url === bad) return Promise.reject(new Error(`boom: ${url}`));
+      return Promise.resolve(`content:${url}`);
+    };
+
+    const err = await prefetchIncludes(
+      uml(`!include ${ok1}`, `!include ${bad}`, `!include ${ok2}`),
+      fetcher,
+    ).then(
+      () => undefined,
+      (e: unknown) => e as Error,
+    );
+
+    expect(err?.message).toBe(`boom: ${bad}`);
+  });
+});
+
+describe('concurrent fetch -- determinism regardless of completion order (criterion 4)', () => {
+  it('store contents are identical whether targets resolve forward or reversed', async () => {
+    const urls = [
+      'https://cdn.example.com/a.puml',
+      'https://cdn.example.com/b.puml',
+      'https://cdn.example.com/c.puml',
+    ] as const;
+    const contentFor = (url: string): string => `content:${url}`;
+
+    async function runReleasingIn(order: readonly string[]): Promise<Record<string, string | undefined>> {
+      const { fetcher, started, release } = blockingFetcher();
+      const promise = prefetchIncludes(uml(...urls.map((u) => `!include ${u}`)), fetcher);
+      expect(started).toHaveLength(urls.length);
+
+      for (const url of order) release(url, contentFor(url));
+      const store = await promise;
+      return Object.fromEntries(urls.map((u) => [u, store.get(u)]));
+    }
+
+    const forward = await runReleasingIn(urls);
+    const reversed = await runReleasingIn([...urls].reverse());
+
+    expect(forward).toEqual(reversed);
+    expect(forward).toEqual({
+      [urls[0]]: contentFor(urls[0]),
+      [urls[1]]: contentFor(urls[1]),
+      [urls[2]]: contentFor(urls[2]),
+    });
+  });
+});
+
+describe('concurrent fetch -- cycle guard holds among concurrent siblings (criterion 5)', () => {
+  it('a cycling sibling still raises CircularIncludeError while another sibling resolves fine', async () => {
+    const manifest: StdlibRemoteManifest = {
+      name: 'loop',
+      files: { a: 'a.puml', ok: 'ok.puml' },
+    };
+    const remoteFetcher = vi.fn(async (url: string) =>
+      Promise.resolve(url.endsWith('ok.puml') ? 'class Fine' : '!include <loop/a>'),
+    );
+    const registry = registryWithRemote('loop', manifest, 'https://cdn.example.com/loop', remoteFetcher);
+
+    await expect(
+      prefetchIncludes(uml('!include <loop/a>', '!include <loop/ok>'), noFetch, undefined, registry),
     ).rejects.toBeInstanceOf(CircularIncludeError);
   });
 });

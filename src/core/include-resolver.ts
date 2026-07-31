@@ -323,83 +323,83 @@ async function stdlibContentFor(
   return registry.resolveResource(target.name, split.key);
 }
 
-/**
- * The state that stays CONSTANT across the whole transitive walk, as opposed to
- * `source` / `visited` / `chain`, which change per recursion. Grouped so the
- * recursive call stays readable (and under this repo's parameter cap).
- */
+/** State constant across the walk; `source`/`visited`/`chain` change per recursion. */
 interface PrefetchWalk {
   readonly fetcher: IncludeFetcher;
   readonly store: BackedIncludeStore;
   /** si8 ADR-4: absent for every caller that supplies no registry. */
   readonly registry: StdlibRegistry | undefined;
+  /** si11a T4: WALK-layer in-flight dedup, keyed by include target. */
+  readonly inFlight: Map<string, Promise<void>>;
 }
 
+// si11a T4: run `work` for `url` once per walk (no `await` before the
+// check-then-set, so concurrent callers can't race past each other).
+// Dropped on rejection so a failure is not cached forever.
+function dedupeInFlight(
+  inFlight: Map<string, Promise<void>>,
+  url: string,
+  work: () => Promise<void>,
+): Promise<void> {
+  const existing = inFlight.get(url);
+  if (existing !== undefined) return existing;
+  const pending = work().catch((err: unknown): never => {
+    inFlight.delete(url);
+    throw err;
+  });
+  inFlight.set(url, pending);
+  return pending;
+}
+
+// si11a T4: targets in `source` run CONCURRENTLY (was: one line at a time);
+// `dedupeInFlight` stops siblings naming the same target from fetching it
+// twice. Unbounded: measured 2026-07-31, widest vendored stdlib fan-out is
+// 38 nested includes (k8s/OSS/all.puml) -- well under the ~100 threshold.
 async function prefetchInner(
   walk: PrefetchWalk,
   source: string,
   visited: ReadonlySet<string>,
   chain: string[],
 ): Promise<void> {
-  const { fetcher, store, registry } = walk;
+  const { fetcher, store, registry, inFlight } = walk;
+  const targets = source
+    .split('\n')
+    .map((line) => targetOf(line))
+    .filter((url): url is string => url !== undefined);
 
-  for (const line of source.split('\n')) {
-    const url = targetOf(line);
-    if (url === undefined) continue;
-
-    if (visited.has(url)) throw new CircularIncludeError(url, chain);
-
-    const stdlib = stdlibPathOf(url);
-    if (stdlib !== undefined) {
-      // The bundled-stdlib form. plantuml-ts vendors no stdlib (mission SI5b), and
-      // a bundle is not something to go fetch over the network — a host supplies it
-      // through the store. Present? Nothing to do. Absent? Say so, loudly: silently
-      // dropping the line (what resolveIncludes did) left every macro the bundle
-      // defines unexpanded and rendered a quietly wrong diagram.
-      //
-      // TWO channels resolve this form, and they must be consulted in the same
-      // order `IncludeExecutor#load` uses, or prefetch rejects a target the
-      // interpreter would have served: the exact key first (a host keying
-      // `'<c4/c4.puml>'` directly is supported), then the `getPumlResource`
-      // stdlib seam (`StdlibStore.ts#withStdlib`). Gating on `has()` alone made
-      // the ASYNC API unusable with every `withStdlib` store — `withStdlib`
-      // delegates `get`/`has` to a base that carries no bundle keys at all
-      // (si8 ADR-1).
-      if (store.has(url)) continue;
-      if (store.getPumlResource(stdlib) !== undefined) continue;
-
-      // THIRD channel (si8 ADR-4): a lazily-registered bundle. Only reached once
-      // both eager channels miss, so supplying a registry never changes what an
-      // already-resolvable target does.
-      const bundled =
-        registry === undefined ? undefined : await stdlibContentFor(registry, stdlib);
-      if (bundled === undefined) {
-        throw new StdlibNotBundledError(url, stdlib, registry !== undefined);
+  await Promise.all(
+    targets.map(async (url) => {
+      if (visited.has(url)) throw new CircularIncludeError(url, chain);
+      const stdlib = stdlibPathOf(url);
+      if (stdlib !== undefined) {
+        // Bundled-stdlib form: a host supplies it (SI5b). TWO channels,
+        // checked in `IncludeExecutor#load`'s order: exact key, then the
+        // `getPumlResource` seam (`StdlibStore.ts#withStdlib`).
+        if (store.has(url)) return;
+        if (store.getPumlResource(stdlib) !== undefined) return;
+        // THIRD channel (si8 ADR-4), reached only once both eager ones miss.
+        await dedupeInFlight(inFlight, url, async () => {
+          const bundled =
+            registry === undefined ? undefined : await stdlibContentFor(registry, stdlib);
+          if (bundled === undefined) {
+            throw new StdlibNotBundledError(url, stdlib, registry !== undefined);
+          }
+          // Folded in under the EXACT key `load` tries first (asserted in
+          // stdlib-registry-prefetch.test.ts).
+          store.set(url, bundled);
+          // ADR-4: bundle text may itself `!include <…>`; re-enter the walk.
+          await prefetchInner(walk, bundled, new Set([...visited, url]), [...chain, url]);
+        });
+        return;
       }
-
-      // Fold it in under the EXACT include key, which is the first thing
-      // `IncludeExecutor#load` tries (`this.store.get(what)`) — deliberately
-      // chosen over teaching `getPumlResource` about it, because that seam is
-      // the LAST thing `load` consults and this store's copy must win over a
-      // base that may resolve the same name differently. A bundle folded in so
-      // that neither channel sees it is the silent-failure shape si8 exists to
-      // remove, so this is asserted in `stdlib-registry-prefetch.test.ts`.
-      store.set(url, bundled);
-
-      // ADR-4's whole point: bundle text contains further `!include <…>` --
-      // `assets/stdlib/c4/C4_Context.puml` opens with `!include <C4/C4>`. The
-      // resolved text re-enters THIS walk, so nested targets are prefetched by
-      // the same pass, with the same cycle guard and the same over-fetch policy.
-      await prefetchInner(walk, bundled, new Set([...visited, url]), [...chain, url]);
-      continue;
-    }
-
-    if (store.has(url)) continue; // already fetched (diamond include), or host-supplied
-
-    const content = await fetcher(url);
-    store.set(url, content);
-    await prefetchInner(walk, content, new Set([...visited, url]), [...chain, url]);
-  }
+      if (store.has(url)) return; // already fetched (diamond include), or host-supplied
+      await dedupeInFlight(inFlight, url, async () => {
+        const content = await fetcher(url);
+        store.set(url, content);
+        await prefetchInner(walk, content, new Set([...visited, url]), [...chain, url]);
+      });
+    }),
+  );
 }
 
 /**
@@ -415,13 +415,11 @@ async function prefetchInner(
  * @param source   Raw PlantUML source (may contain include directives).
  * @param fetcher  Async function resolving a target to its content.
  *                 Defaults to the built-in {@link fetchInclude}.
- * @param base     Content the caller already has (stdlib bundles, in-memory
- *                 files). Never fetched, never mutated — copied into the result.
- * @param registry Lazily-loaded stdlib bundles (si8 ADR-3/ADR-4). Consulted
- *                 ONLY after both `base` channels miss, so passing one cannot
- *                 change the result for a target that already resolved. Its
- *                 resolved text re-enters this walk, so a bundle's own
- *                 `!include <…>` lines are prefetched too.
+ * @param base     Content the caller already has; never fetched, never
+ *                 mutated — copied into the result.
+ * @param registry Lazily-loaded stdlib bundles (si8 ADR-3/ADR-4), consulted
+ *                 only after `base` misses. Its resolved text re-enters this
+ *                 walk, so a bundle's own `!include <…>` lines are prefetched too.
  * @throws StdlibChunkLoadError a registered bundle's chunk failed to load —
  *         deliberately distinct from `StdlibNotBundledError` (ADR-5).
  */
@@ -432,7 +430,8 @@ export async function prefetchIncludes(
   registry?: StdlibRegistry,
 ): Promise<IncludeStore> {
   const store = new BackedIncludeStore(base);
-  await prefetchInner({ fetcher, store, registry }, source, new Set<string>(), []);
+  const inFlight = new Map<string, Promise<void>>();
+  await prefetchInner({ fetcher, store, registry, inFlight }, source, new Set<string>(), []);
   return store;
 }
 
