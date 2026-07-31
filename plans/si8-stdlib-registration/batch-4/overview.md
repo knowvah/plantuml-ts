@@ -5,7 +5,7 @@ wrong once a registry exists.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4 | Async warm-up for `renderSync` callers; export the registry; rewrite errors | typescript-pro | `src/index.ts`, `src/core/tim/IncludeStore.ts`, `tests/unit/stdlib-registry.test.ts` | T3 | [ ] |
+| T4 | Async warm-up for `renderSync` callers; export the registry; rewrite errors | typescript-pro | `src/index.ts`, `src/core/tim/IncludeStore.ts`, `tests/unit/stdlib-registry.test.ts` | T3 | [x] |
 
 ## Batch exit criteria
 
