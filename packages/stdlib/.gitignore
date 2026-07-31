@@ -1,0 +1,6 @@
+# Derived bootstrap1.13.1 sprite fragments + sprites.json manifest
+# (scripts/build-stdlib-packages.ts#buildSpriteSplits, si11b T1/ADR-1).
+# Regenerable output of assets/stdlib/bootstrap1.13.1/bootstrap.puml --
+# mirrors the root .gitignore's treatment of generated/ and the
+# stdlib-aws / stdlib-tupadr3 packages' own assets/ ignores.
+assets/
