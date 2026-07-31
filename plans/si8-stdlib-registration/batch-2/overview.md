@@ -5,8 +5,8 @@ other's output.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Registry of dynamic-`import()` thunks + chunk-load error | typescript-pro | `src/core/tim/StdlibRegistry.ts`, `tests/unit/stdlib-registry.test.ts` | — | [ ] |
-| T5 | `render-fixture.ts` wires an `includeStore` | typescript-pro | `tests/oracle/svg-conformance/render-fixture.ts` | — | [ ] |
+| T2 | Registry of dynamic-`import()` thunks + chunk-load error | typescript-pro | `src/core/tim/StdlibRegistry.ts`, `tests/unit/stdlib-registry.test.ts` | — | [x] |
+| T5 | `render-fixture.ts` wires an `includeStore` | typescript-pro | `tests/oracle/svg-conformance/render-fixture.ts` | — | [x] |
 
 ## Why these two are independent
 
