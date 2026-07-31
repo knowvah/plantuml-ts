@@ -21,3 +21,71 @@ with its full output.
 | 2026-07-31 | T1 | Measurement — usecase corpus 90 → 93, still 100% EQUAL | `npx tsx scripts/dot-sync-report.ts usecase`: `93 DESCRIPTION fixtures`, `structurally EQUAL 93 (100%)`, no-candidate 0, oracle-blind 0, count-mismatch 0. Skip report: `enumerated 354, analysed 93, skipped 261 (0 with no canonical SVG, 261 canonical but not tagged DESCRIPTION)` — the actionable bucket is empty, which is the point of splitting it out. Collision report: 16 authored `usecase` goldens already in the manifest, manifest markup wins (all 16 are dot-cache-sourced goldens, so this is expected, not drift) |
 | 2026-07-31 | T1 | Cache contract for T2 satisfied | `test-results/dot-cache/usecase/` now holds 93 directories; each of `sprite-svg-{bootstrap,archimate,multiline}-0` has `.done`, `in.puml`, `in.svg`, `svek-1.dot` |
 | 2026-07-31 | T1 | Quality gates — all green | `npm test` exit 0 (457 files, 11173 tests); `npm run typecheck` exit 0; `npm run lint` exit 0; `npm run build` exit 0; `measure-description-size-deltas.ts` → `total 351, conformant 320, widened 0`; `git status` shows only the two new files and `dot-sync-report.ts` — no golden touched, so the 389 svg-class/object/state goldens are byte-identical |
+| 2026-07-31 | T2 | Ran the survey to a temp `--out`, not over `parity.json` | `svg-parity-survey.ts#main` writes `{generatedAt, fixtures}` built **only from the types it surveyed**. Running it as `svg-parity-survey.ts usecase` over the real path would have truncated the file from 355 rows to 93, deleting all 265 committed `component` rows. ADR-3's "regenerate usecase only" is therefore not expressible as a single in-place run; the survey went to `--out <scratch>` and the diff was taken against the committed file |
+| 2026-07-31 | T2 | First run's 6 `timeout` rows were measurement noise — diagnosed, not reported as drift | Run 1 (concurrency 6, 10 s cap) returned `verdict: "timeout"`, `dotEqual: false` for `baxodi-80-doto381`, `berufi-69-dara369`, `bivira-53-boja685`, `bixofa-44-siso224`, `bobije-35-nigi914`, `bootstrap-0` — a `dotEqual` true→false flip is an eligibility loss, so this needed a mechanism before it could be called drift. Timed each in isolation via the survey's own `--render-one`: **all six render in 0.9–1.0 s against a 10 s cap.** Cause is process contention during the concurrency-6 pool, not the fixtures. Re-ran at `SVG_PARITY_CONCURRENCY=2 SVG_PARITY_TIMEOUT_MS=60000`: **0 timeouts.** Only the clean run is reported below |
+| 2026-07-31 | T2 | Measurement is deterministic — verified, not assumed | Comparing run 1 against the clean run across the 87 rows that were never timeouts: **0 differences.** So every row reported below moved because the *baseline* is old, not because the survey is unstable |
+| 2026-07-31 | T2 | **STOP — stop condition 5 / T2 AC4.** 47 pre-existing rows moved for a reason unrelated to this mission | The committed `parity.json` carries `generatedAt: 2026-07-15T13:49:47.894Z` (commit `37d77976`). **137 commits have landed in `src/` since.** The regenerated rows are that accumulated work, not SI9's: of the 47 changed rows, `maxDelta` **shrank in 33**, grew in 8, and was unchanged in 6 (only `firstDiff`/`maxDeltaPath` moved). The brief forbids absorbing this into SI9's diff, so the regenerated file is **NOT committed**. Full before/after table below |
+| 2026-07-31 | T2 | Integrity properties of the drift — the reason it is benign | **0 `dotEqual` flips** across all 90 pre-existing rows. **0 verdict transitions** (89 `diverged`→`diverged`, 1 `oracle-error`→`oracle-error`). Every change is confined to the numeric detail fields `maxDelta` / `firstDiff` / `maxDeltaPath`. Consequence: no ratcheted fixture loses eligibility and none gains it falsely — checked directly, all **16** ratcheted `usecase` slugs are `dotEqual: true` in the fresh run, as they are in the committed one |
+| 2026-07-31 | T2 | The three new rows, measured (AC1) | `sprite-svg-bootstrap-0` → `{dotEqual: true, verdict: "conformant"}`; `sprite-svg-archimate-0` → `{dotEqual: true, verdict: "conformant"}`; `sprite-svg-multiline-0` → `{dotEqual: true, verdict: "diverged", maxDelta: 8, firstDiff: "svg/g[1]/g[1]/text[1]/@textLength", maxDeltaPath: "svg/@viewBox[2]"}`. All three `dotEqual: true`, which is what AC3 requires. Two are `conformant` even through the survey's `renderSync` + `WidthTableMeasurer` path; multiline-0's `@textLength` divergence there is the documented D12 measurer gap, not a sprite defect — it is zero-diff under the ratchet's own path (see the T3 measurement row) |
+| 2026-07-31 | T2 | Level-two trace of `parity.json` consumers | Level 1 — `description.golden.ratchet.test.ts` (AC3 eligibility), `scripts/svg-overlay-report.ts` (`--from-parity` selects `diverged` rows), `scripts/svg-parity-dashboard.ts`, and `description.diff-baseline.ratchet.test.ts` (message text only). Level 2 — the dashboard writes the **committed** `tests/oracle/svg-conformance/PARITY-SVG.md`, which no test asserts in sync; regenerating parity would leave it 3 rows stale. It is outside every task's write-set, so it is **reported, not silently updated** — a follow-up for whoever lands the parity refresh |
+| 2026-07-31 | T3 | Pre-measured the three fixtures on current code (AC1) — **all three zero-diff** | Rendered via `renderFixture(markup, new DeterministicMeasurer())` and compared with `compareSvg(ours, golden, 'deterministic')` — the ratchet's own path, not `renderSync` and not `===`. `sprite-svg-bootstrap-0`: pass, 0 diffs, 6 `<path>` / 0 `<image>` vs jar 6/0. `sprite-svg-archimate-0`: pass, 0 diffs, 2/0 vs 2/0. `sprite-svg-multiline-0`: pass, 0 diffs, 4/0 vs 4/0. This re-measures rather than cites the brief's 2026-07-31 figures (method rule 2), and the `<path>` counts now match the jar exactly where the README's authoring-time table recorded 0 `<path>` and 4/2/3 base64 `<image>` |
+
+### T2 drift report — 47 changed pre-existing `usecase` rows
+
+Baseline: committed `parity.json`, `generatedAt 2026-07-15`. Fresh: clean run
+2026-07-31 (`SVG_PARITY_CONCURRENCY=2`, `SVG_PARITY_TIMEOUT_MS=60000`),
+preserved at `test-results/si9-parity-usecase-clean.json` (gitignored) so the
+maintainer need not re-run the ~10 min survey to act on this.
+
+`dotEqual` and `verdict` are unchanged on **every** row below; only the three
+numeric detail fields move.
+
+| slug | maxDelta before | after | firstDiff before | after | maxDeltaPath before | after |
+|---|---:|---:|---|---|---|---|
+| `baxodi-80-doto381` | 7.3214 | 7.3214 | `svg/g[1]/g[1]/path[1]/@fill` | `svg/g[1]/g[1]/text[1]/@fill` | `svg/g[1]/g[1]/path[1]/@d[28]` | `svg/g[1]/g[1]/path[1]/@d[28]` |
+| `berufi-69-dara369` | 238 | 151 | `svg/g[1][childCount]` | `svg/g[1][childCount]` | `svg/@viewBox[2]` | `svg/@height` |
+| `bivira-53-boja685` | 117.366 | 56.004 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[3]/text[1]/@x` | `svg/g[1]/g[2]/image[1]/@x` |
+| `cevuji-49-bile305` | 29.212 | 28.963 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[12]/text[1]/@x` | `svg/g[1]/g[12]/text[1]/@x` |
+| `cobuju-30-paxo591` | 29.999 | 9.991 | `svg/g[1]/g[1]/path[1]/@fill` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[6]/text[1]/@x` | `svg/g[1]/g[3]/path[1]/@d[13]` |
+| `cuzuci-92-dugi933` | 120 | 105.603 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/g[1]/g[1]/text[4]/@x` |
+| `dijico-15-cabu824` | 6.1168 | 6.1168 | `svg/g[1]/g[1]/rect[1]/@fill` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/rect[1]/@width` | `svg/g[1]/g[1]/rect[1]/@width` |
+| `dopova-50-digo290` | 147.74 | 146 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@x` | `svg/@viewBox[2]` |
+| `fajira-11-xada239` | 25418 | 281 | `svg/g[1]/g[1]/text[1]` | `svg/g[1]/g[1]/text[1]` | `svg/g[1]/g[1]/rect[1]/@width` | `svg/@height` |
+| `fogiku-22-gone205` | 15.25 | 26 | `svg/g[1]/g[3][childCount]` | `svg/g[1]/g[3][childCount]` | `svg/g[1]/g[1]/ellipse[1]/@cy` | `svg/g[1]/g[2]/ellipse[1]/@cx` |
+| `fubaje-48-xaje065` | 4 | 4 | `svg/g[1]/g[1]/ellipse[1]/@fill` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `fuvosu-10-lixu251` | 153.478 | 66.7082 | `svg/g[1]/g[1]/text[1]/@font-style` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/rect[1]/@width` | `svg/g[1]/g[1]/text[5]/@x` |
+| `gigofe-94-zepe032` | 12 | 12 | `svg[childCount]` | `svg/g[1]/g[2]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `gogamo-72-pibo470` | 515.7933 | 401.315 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[4]/ellipse[1]/@cx` | `svg/g[1]/g[3]/ellipse[1]/@cx` |
+| `jafuke-47-xepe403` | 15.25 | 26 | `svg/g[1]/g[3][childCount]` | `svg/g[1]/g[3][childCount]` | `svg/g[1]/g[1]/ellipse[1]/@cy` | `svg/g[1]/g[2]/ellipse[1]/@cx` |
+| `jecici-56-bimu826` | 643 | 646 | `svg/@height` | `svg/@height` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `kijufe-84-colu239` | 132 | 66.7082 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/g[1]/g[1]/text[4]/@x` |
+| `kolibo-58-rata251` | 97 | 0 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1][childCount]` | `svg/@viewBox[2]` | `—` |
+| `kovaxi-11-reti348` | 981 | 973 | `svg/g[1][childCount]` | `svg/g[1][childCount]` | `svg/@height` | `svg/@height` |
+| `lirebi-26-voka556` | 241.341 | 167.341 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[3]/ellipse[1]/@cy` | `svg/g[1]/g[3]/ellipse[1]/@cy` |
+| `lizutu-99-mapa855` | 24 | 29.57 | `svg[childCount]` | `svg/g[1]/g[3][childCount]` | `svg/@viewBox[2]` | `svg/g[1]/g[1]/text[1]/@x` |
+| `lunexo-59-fupo775` | 21.25 | 6.1624 | `svg/g[1]/g[1]/text[1]/@fill` | `svg/g[1]/g[1]/text[1]/@fill` | `svg/g[1]/g[2]/polygon[1]/@points[2]` | `svg/g[1]/g[1]/text[2]/@y` |
+| `mofuba-79-came821` | 7 | 7 | `svg/g[1]/g[1]/ellipse[1]/@fill` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `mogidu-85-roxe269` | 34 | 20 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `mopimi-10-jaco443` | 15 | 7 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/@height` |
+| `mutere-78-geko363` | 33.112 | 30.591 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[4]/rect[1]/@width` | `svg/g[1]/g[4]/rect[1]/@width` |
+| `nenedo-78-fiva569` | 370 | 68.926 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/g[1]/g[8]/text[6]/@x` |
+| `nipapu-74-roro938` | 99 | 99 | `svg[childCount]` | `svg/g[1]/g[1]/text[1]` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `nobiza-91-fimo741` | 75 | 23 | `svg/g[1][childCount]` | `svg/g[1][childCount]` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `pivudu-29-pele178` | 23 | 9 | `svg[childCount]` | `svg/g[1][childCount]` | `svg/@height` | `svg/@height` |
+| `ridola-99-jija391` | 98 | 13 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1][childCount]` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `robiga-73-tedi466` | 283.21 | 22 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[5]/text[1]/@x` | `svg/@viewBox[2]` |
+| `rokipo-88-sece008` | 407.4192 | 9.809 | `svg/g[1]/g[1]/path[1]/@fill` | `svg/g[1]/g[1]/path[1]/@fill` | `svg/g[1]/g[1]/path[1]/@d[2]` | `svg/g[1]/g[6]/ellipse[1]/@cx` |
+| `seline-83-vifi756` | 238 | 151 | `svg/g[1][childCount]` | `svg/g[1][childCount]` | `svg/@viewBox[2]` | `svg/@height` |
+| `seneso-72-cuje674` | 137.459 | 66.7082 | `svg/g[1]/g[1]/text[1]/@font-style` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[7]/@x` | `svg/g[1]/g[1]/text[5]/@x` |
+| `sprite-SVG-fill-management-3` | 78 | 83 | `svg[childCount]` | `svg/g[1]/g[2]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `sumata-59-zavu229` | 51 | 22 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1][childCount]` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `tanuna-53-neko979` | 125 | 66.7082 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/g[1]/g[1]/text[4]/@x` |
+| `tatori-66-kaci883` | 78 | 83 | `svg[childCount]` | `svg/g[1]/g[2]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `togeke-15-zala124` | 31 | 79.3 | `svg/g[1]/g[1]/text[1]/@font-family` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/@viewBox[2]` | `svg/g[1]/g[1]/rect[1]/@width` |
+| `vibunu-17-guso486` | 25.913 | 11.746 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[6]/text[1]/@x` | `svg/g[1]/g[7]/text[1]/@x` |
+| `xacaxe-43-bupe002` | 739.529 | 523.958 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[10]/path[1]/@d[0]` | `svg/g[1]/g[10]/text[1]/@x` |
+| `xixaca-96-nene831` | 51 | 22 | `svg/g[1]/g[1][childCount]` | `svg/g[1]/g[1][childCount]` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
+| `xozabi-42-pixa842` | 18.2529 | 20.7529 | `svg/g[1]/g[1]/ellipse[1]/@fill` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[5]/text[1]/@x` | `svg/g[1]/g[5]/text[1]/@x` |
+| `zidebi-71-nocu387` | 981 | 973 | `svg/g[1][childCount]` | `svg/g[1][childCount]` | `svg/@height` | `svg/@height` |
+| `zilisi-99-rate911` | 143.0054 | 143 | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@textLength` | `svg/g[1]/g[1]/text[1]/@x` | `svg/@viewBox[2]` |
+| `zotiru-33-legi180` | 391 | 207 | `svg/g[1][childCount]` | `svg/g[1][childCount]` | `svg/@viewBox[2]` | `svg/@viewBox[2]` |
