@@ -70,7 +70,7 @@ task's output. There is no parallelism to exploit and none is manufactured.
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 | `dot-sync-report` sees authored fixtures | [x] |
 | [2](batch-2/overview.md) | T2 | Regenerate `usecase` parity; inspect drift | [x] |
-| [3](batch-3/overview.md) | T3 | Ratchet in; correct the now-false docs | [ ] |
+| [3](batch-3/overview.md) | T3 | Ratchet in; correct the now-false docs | [x] |
 
 ## Documents
 

@@ -4,7 +4,7 @@ One task. This is the mission's acceptance gate.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Ratchet the three fixtures in; rewrite the documentation they falsify | typescript-pro | `oracle/goldens/svg-description/ratchet.json`, `oracle/goldens/svg-description/README.md`, `plans/svg-sprite-nanoparser/decisions.md` | T2 | [ ] |
+| T3 | Ratchet the three fixtures in; rewrite the documentation they falsify | typescript-pro | `oracle/goldens/svg-description/ratchet.json`, `oracle/goldens/svg-description/README.md`, `plans/svg-sprite-nanoparser/decisions.md` | T2 | [x] |
 
 ## Batch exit criteria — this is the mission's acceptance gate
 

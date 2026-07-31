@@ -287,6 +287,24 @@
       "type": "usecase",
       "addedAt": "2026-07-15",
       "source": "dot-cache"
+    },
+    {
+      "slug": "sprite-svg-bootstrap-0",
+      "type": "usecase",
+      "addedAt": "2026-07-31",
+      "source": "authored"
+    },
+    {
+      "slug": "sprite-svg-archimate-0",
+      "type": "usecase",
+      "addedAt": "2026-07-31",
+      "source": "authored"
+    },
+    {
+      "slug": "sprite-svg-multiline-0",
+      "type": "usecase",
+      "addedAt": "2026-07-31",
+      "source": "authored"
     }
   ]
 }

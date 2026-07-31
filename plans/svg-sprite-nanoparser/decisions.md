@@ -175,6 +175,41 @@ fixtures to the `!include` form users actually write.
 No other golden in any suite uses `!include` — a consequence of the same
 harness gap, not evidence that `!include` is unsupported.
 
+**Amended 2026-07-31 (mission `si9-authored-fixture-registration`) — the three
+fixtures are now RATCHETED.** The text above stands as the record of what was
+true at this mission's close; it is no longer the current state.
+
+"Deliberately absent from `ratchet.json`" was accurate but incomplete. T12
+measured all three at zero diffs, and they still could not be ratcheted —
+the ratchet's AC3 eligibility test requires a `dotEqual: true` row in
+`tests/oracle/svg-conformance/parity.json`, and that file is generated from a
+cache that `scripts/dot-sync-report.ts` built **only** from
+`tests/visual/data/<type>.json`. A fixture authored directly under
+`oracle/goldens/` never entered that pipeline, so no row could exist, so AC3
+blocked it permanently. That was a structural hole in CLAUDE.md's own "author
+fixtures to cover gaps" doctrine, raised as `planning/mission-index.md` § SI9.
+
+SI9 closed it: `enumerateFixtures` merges the golden directory with the
+manifest, and the canonical-cache freshness check became per-slug (without
+which the newly-enumerated fixtures would have been silently dropped by
+`buildAgg`). Re-measured on 2026-07-31 and pinned with `source: "authored"`:
+
+| fixture | diffs | ours | jar |
+|---|---|---|---|
+| `sprite-svg-bootstrap-0` | 0 | 6 `<path>`, 0 `<image>` | 6 / 0 |
+| `sprite-svg-archimate-0` | 0 | 2 `<path>`, 0 `<image>` | 2 / 0 |
+| `sprite-svg-multiline-0` | 0 | 4 `<path>`, 0 `<image>` | 4 / 0 |
+
+So the sprite corpus now has the regression guard this ADR's "Consequence,
+accepted deliberately" paragraph identified as missing. What that paragraph
+called an accepted consequence turned out to be a tooling gap, not an
+inherent one — and the cost it predicted was real: this mission's own T9
+shipped sprites rendering as nothing with `npm test`, all 389 goldens and the
+size-delta script green.
+
+The inlining constraint is unchanged; SI8 still owns reverting these three to
+the `!include` form.
+
 **Consequence, accepted deliberately.** The 389 SVG goldens are held
 byte-identical (stop condition 3), strict enough that even a legitimate
 tidying of emitted `<path>` output trips it. Under a DOT-only gate they are
