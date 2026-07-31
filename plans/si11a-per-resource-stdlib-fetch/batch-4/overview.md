@@ -4,7 +4,7 @@ One task, in its own batch because it rewrites the file T3 just changed.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4 | Fetch the walk's targets concurrently; dedup in-flight requests | typescript-pro | `src/core/include-resolver.ts`, `tests/unit/stdlib-remote-prefetch.test.ts` | T3 | [ ] |
+| T4 | Fetch the walk's targets concurrently; dedup in-flight requests | typescript-pro | `src/core/include-resolver.ts`, `tests/unit/stdlib-remote-prefetch.test.ts` | T3 | [x] |
 
 ## Why this is separate from T3
 

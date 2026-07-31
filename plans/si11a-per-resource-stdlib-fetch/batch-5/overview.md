@@ -4,7 +4,7 @@ One task. Everything before this proved a piece; this proves the mission.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T8 | End-to-end against the REAL regenerated packages; record the measured payload | typescript-pro | `tests/integration/stdlib-remote-e2e.test.ts` | T4, T6 | [ ] |
+| T8 | End-to-end against the REAL regenerated packages; record the measured payload | typescript-pro | `tests/integration/stdlib-remote-e2e.test.ts` | T4, T6 | [x] |
 
 ## Batch exit criteria
 

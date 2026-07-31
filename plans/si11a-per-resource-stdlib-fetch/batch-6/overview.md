@@ -5,7 +5,7 @@ actually look.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T9 | Flip SI11a to done; register SI11b; write the mission summary | typescript-pro | `planning/mission-index.md`, `plans/si11a-per-resource-stdlib-fetch/README.md` | T8 | [ ] |
+| T9 | Flip SI11a to done; register SI11b; write the mission summary | typescript-pro | `planning/mission-index.md`, `plans/si11a-per-resource-stdlib-fetch/README.md` | T8 | [x] |
 
 ## Batch exit criteria
 
