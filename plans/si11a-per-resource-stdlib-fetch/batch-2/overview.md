@@ -4,9 +4,16 @@ Three tasks, all parallel. Disjoint write-sets, no shared output.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Registry gains `resolveResource`; recognises remote modules | typescript-pro | `src/core/tim/StdlibRegistry.ts`, `tests/unit/stdlib-registry.test.ts` | T1 | [ ] |
-| T6 | Regenerate the two packages; add the packaging gate | typescript-pro | `packages/stdlib-aws/**`, `packages/stdlib-tupadr3/**`, `tests/unit/stdlib-package-files.test.ts` | T5 | [ ] |
-| T7 | Public exports + consumer recipe | typescript-pro | `src/index.ts`, `docs/stdlib-remote.md` | T1 | [ ] |
+| T2 | Registry gains `resolveResource`; recognises remote modules | typescript-pro | `src/core/tim/StdlibRegistry.ts`, `tests/unit/stdlib-registry.test.ts` | T1 | [x] |
+| T6 | Regenerate the two packages; add the packaging gate | typescript-pro | `packages/stdlib-aws/**`, `packages/stdlib-tupadr3/**`, `tests/unit/stdlib-package-files.test.ts` | T5 | [x] |
+| T7 | Public exports + consumer recipe | typescript-pro | `src/index.ts`, `docs/stdlib-remote.md` | T1 | [x] |
+
+**Two follow-ups landed after the batch.** T6 needed `PACK_CEILINGS` raised
+(18 MB / 45 MB) and the pack tests' timeout raised (30 s → 120 s) in
+`tests/unit/stdlib-packages.test.ts` — T5's write-set, so no escalation was
+required. T7's docs then needed `fix(T7)`: they imported from a package name
+that does not exist (`@plantuml-ts/core`) and showed a registry literal that
+T2's new required `resolveResource` member had invalidated.
 
 ## Why these three are independent
 

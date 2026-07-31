@@ -5,7 +5,12 @@ bundle can fetch a resource but nothing asks it to.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Route `<bundle/thing>` to per-resource resolution inside the walk | typescript-pro | `src/core/include-resolver.ts`, `tests/unit/stdlib-remote-prefetch.test.ts` | T1, T2 | [ ] |
+| T3 | Route `<bundle/thing>` to per-resource resolution inside the walk | typescript-pro | `src/core/include-resolver.ts`, `tests/unit/stdlib-remote-prefetch.test.ts` | T1, T2 | [x] |
+
+**Required a scope escalation.** The `Stdlib.java` key transform was private to
+`StdlibStore.ts`, a file in no task's write-set. Resolved by maintainer ruling:
+`src/core/tim/stdlib-path.ts` now holds it, with `StdlibStore` and
+`include-resolver` as its two callers. Landed as `fix(T3)` before T3 itself.
 
 ## Batch exit criteria
 

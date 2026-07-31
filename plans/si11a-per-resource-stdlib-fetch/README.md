@@ -58,8 +58,8 @@ that proves stop condition 5 has not been violated.
 | Batch | Tasks | Theme | Done |
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 ∥ T5 | Remote source module; generator emits manifests | [x] |
-| [2](batch-2/overview.md) | T2 ∥ T6 ∥ T7 | Registry resource path; regenerate packages; exports | [ ] |
-| [3](batch-3/overview.md) | T3 | Per-resource routing into the prefetch walk | [ ] |
+| [2](batch-2/overview.md) | T2 ∥ T6 ∥ T7 | Registry resource path; regenerate packages; exports | [x] |
+| [3](batch-3/overview.md) | T3 | Per-resource routing into the prefetch walk | [x] |
 | [4](batch-4/overview.md) | T4 | Concurrent fetch + in-flight dedup | [ ] |
 | [5](batch-5/overview.md) | T8 | End-to-end verification; measure the win | [ ] |
 | [6](batch-6/overview.md) | T9 | Close the mission | [ ] |
