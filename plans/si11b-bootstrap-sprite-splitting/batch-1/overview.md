@@ -5,9 +5,9 @@ another's output within this batch.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Sprite splitter, MIT allowlist, and its generator wiring | typescript-pro | `scripts/split-sprite-bundle/split.ts`, `scripts/split-sprite-bundle/allowlist.ts`, `scripts/build-stdlib-packages/package-specs.ts`, `scripts/build-stdlib-packages.ts`, `tests/unit/split-sprite-bundle.test.ts` | — | [ ] |
-| T2 | `<$name>` scan over source | typescript-pro | `src/core/sprite-prefetch.ts`, `src/core/creole-atoms.ts` (export only), `tests/unit/sprite-prefetch.test.ts` | — | [ ] |
-| T3 | Collision warning + the two new `RenderOptions` fields | typescript-pro | `src/core/sprite-commands.ts`, `src/index.ts`, `tests/unit/sprite-commands.test.ts` | — | [ ] |
+| T1 | Sprite splitter, MIT allowlist, and its generator wiring | typescript-pro | `scripts/split-sprite-bundle/split.ts`, `scripts/split-sprite-bundle/allowlist.ts`, `scripts/build-stdlib-packages/package-specs.ts`, `scripts/build-stdlib-packages.ts`, `tests/unit/split-sprite-bundle.test.ts` | — | [x] |
+| T2 | `<$name>` scan over source | typescript-pro | `src/core/sprite-prefetch.ts`, `src/core/creole-atoms.ts` (export only), `tests/unit/sprite-prefetch.test.ts` | — | [x] |
+| T3 | Collision warning + the two new `RenderOptions` fields | typescript-pro | `src/core/sprite-commands.ts`, `src/index.ts`, `tests/unit/sprite-commands.test.ts` | — | [x] |
 
 ## Why these three are independent
 
