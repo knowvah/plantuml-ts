@@ -3,12 +3,13 @@
  * (`src/core/sprite-commands.ts`) and the `Sprite`/`SpriteGrayLevel`/
  * `SpriteMonochrome` primitives it dispatches to.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   matchSpriteCommand,
   createSpriteRegistry,
   addSprite,
   getSprite,
+  surfaceSpriteWarnings,
   type SpriteRegistry,
 } from '../../src/core/sprite-commands.js';
 import { SpriteGrayLevel } from '../../src/core/klimt/sprite/SpriteGrayLevel.js';
@@ -277,5 +278,80 @@ describe('matchSpriteCommand -- non-matches and safety', () => {
     addSprite(registry, 'direct', sprite);
     expect(getSprite(registry, 'direct')).toBe(sprite);
     expect(getSprite(registry, 'missing')).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// si11b T3 -- collision collection (`SpriteRegistry.collisions`) and its
+// surfacing seam (`surfaceSpriteWarnings`, the function `index.ts` wires to
+// `RenderOptions.onWarning` after `plugin.parse()`). ADR-7: `addSprite`'s
+// last-write-wins semantics are UNCHANGED -- these tests only assert the new
+// diagnostic is collected/surfaced, never that registration behaves any
+// differently.
+// ---------------------------------------------------------------------------
+
+describe('addSprite -- collision collection (si11b ADR-7)', () => {
+  it('a single sprite per name never records a collision', () => {
+    const registry = createSpriteRegistry();
+    addSprite(registry, 'solo', new SpriteMonochrome(2, 2, 16));
+    expect(registry.collisions).toEqual([]);
+  });
+
+  it('two sprites under one name record exactly one collision naming the sprite and both origins', () => {
+    const registry = createSpriteRegistry();
+    const first = new SpriteMonochrome(4, 4, 16);
+    const second = new SpriteMonochrome(8, 8, 16);
+    addSprite(registry, 'star', first);
+    addSprite(registry, 'star', second);
+    expect(registry.collisions).toHaveLength(1);
+    const [message] = registry.collisions;
+    expect(message).toContain('star');
+    expect(message).toContain('4x4');
+    expect(message).toContain('8x8');
+    // Last-write-wins is unchanged: the second definition is the one left registered.
+    expect(getSprite(registry, 'star')).toBe(second);
+  });
+
+  it('a third registration under the same name records a second collision', () => {
+    const registry = createSpriteRegistry();
+    addSprite(registry, 'dup', new SpriteMonochrome(1, 1, 16));
+    addSprite(registry, 'dup', new SpriteMonochrome(2, 2, 16));
+    addSprite(registry, 'dup', new SpriteMonochrome(3, 3, 16));
+    expect(registry.collisions).toHaveLength(2);
+  });
+});
+
+describe('surfaceSpriteWarnings -- the only channel to RenderOptions.onWarning (si11b ADR-7)', () => {
+  it('calls onWarning exactly once per collision, with the recorded message', () => {
+    const registry = createSpriteRegistry();
+    addSprite(registry, 'star', new SpriteMonochrome(4, 4, 16));
+    addSprite(registry, 'star', new SpriteMonochrome(8, 8, 16));
+    const onWarning = vi.fn();
+    surfaceSpriteWarnings({ sprites: registry }, onWarning);
+    expect(onWarning).toHaveBeenCalledTimes(1);
+    expect(onWarning).toHaveBeenCalledWith(registry.collisions[0]);
+  });
+
+  it('never calls onWarning when there is no collision', () => {
+    const registry = createSpriteRegistry();
+    addSprite(registry, 'solo', new SpriteMonochrome(2, 2, 16));
+    const onWarning = vi.fn();
+    surfaceSpriteWarnings({ sprites: registry }, onWarning);
+    expect(onWarning).not.toHaveBeenCalled();
+  });
+
+  it('is a no-op when onWarning is omitted, even with a real collision -- the regression guard', () => {
+    const registry = createSpriteRegistry();
+    addSprite(registry, 'star', new SpriteMonochrome(4, 4, 16));
+    addSprite(registry, 'star', new SpriteMonochrome(8, 8, 16));
+    expect(() => surfaceSpriteWarnings({ sprites: registry }, undefined)).not.toThrow();
+  });
+
+  it('is a no-op for an AST with no `sprites` field, or a non-object AST', () => {
+    const onWarning = vi.fn();
+    surfaceSpriteWarnings({}, onWarning);
+    surfaceSpriteWarnings(null, onWarning);
+    surfaceSpriteWarnings('not an ast', onWarning);
+    expect(onWarning).not.toHaveBeenCalled();
   });
 });

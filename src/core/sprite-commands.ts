@@ -61,15 +61,69 @@ export interface SpriteRegistry {
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/SpriteColorBuilder4096.java
    */
   readonly skippedColorSprites: string[];
+  /**
+   * One ready-to-surface message per name a LATER `sprite $name` definition
+   * silently overwrote (si11b ADR-7) -- the namespace is flat and global per
+   * diagram (`addSprite` is `byName.set`, last-write-wins, upstream
+   * `SkinParam.sprites` behavior, kept unchanged). Each message names BOTH
+   * the discarded and the winning definition, since "which one won" is the
+   * only actionable part of an otherwise-silent collision. Collected here
+   * unconditionally; surfaced only if a consumer opts into
+   * `RenderOptions.onWarning` via `surfaceSpriteWarnings`, below.
+   */
+  readonly collisions: string[];
 }
 
 export function createSpriteRegistry(): SpriteRegistry {
-  return { byName: new Map(), skippedColorSprites: [] };
+  return { byName: new Map(), skippedColorSprites: [], collisions: [] };
+}
+
+/** `sprite $name`'s kind + pixel size -- the only identifying data an
+ *  `addSprite` call site carries (no source file/line reaches this layer),
+ *  so it is what a collision message uses to distinguish the two origins. */
+function describeSprite(sprite: Sprite): string {
+  return `${isSpriteSvg(sprite) ? 'SVG' : 'encoded'} ${sprite.width}x${sprite.height}`;
 }
 
 /** @see WithSprite.java#addSprite / SkinParam.java:791-793 */
 export function addSprite(registry: SpriteRegistry, name: string, sprite: Sprite): void {
+  const existing = registry.byName.get(name);
+  if (existing !== undefined) {
+    registry.collisions.push(
+      `sprite $${name} redefined: ${describeSprite(existing)} replaced by ` +
+        `${describeSprite(sprite)} (last definition wins)`,
+    );
+  }
   registry.byName.set(name, sprite);
+}
+
+/**
+ * The render pipeline's ONLY channel for `SpriteRegistry.collisions` (si11b
+ * ADR-7): `renderSync()`/`render()` call this once per parsed AST, right
+ * after `plugin.parse()`, so a consumer's `RenderOptions.onWarning` learns
+ * about an otherwise-silent sprite-name overwrite. `ast` is `unknown` --
+ * every diagram plugin's own AST type is erased by the dispatch registry --
+ * but each one optionally carries its own `sprites?: SpriteRegistry`
+ * (`createSpriteRegistry()`), so a structural check is the right tool here,
+ * not a validation boundary: this is the pipeline's own trusted output, not
+ * data crossing into the process (`~/.claude/rules/security.md`).
+ *
+ * A no-op when `onWarning` is omitted -- the eager (no-callback) path is
+ * therefore unaffected bit-for-bit, and no Node global or `console.*` is
+ * ever touched (the callback is the ONLY channel, per ADR-7). Reusable
+ * later for `skippedColorSprites` and ADR-5(a)'s macro-miss reporting,
+ * neither of which has a surfacing channel today.
+ */
+export function surfaceSpriteWarnings(
+  ast: unknown,
+  onWarning: ((message: string) => void) | undefined,
+): void {
+  if (onWarning === undefined) return;
+  if (typeof ast !== 'object' || ast === null || !('sprites' in ast)) return;
+  // Wrapped in a lambda, not passed directly: `Array#forEach`'s callback
+  // signature is `(value, index, array)`, and passing `onWarning` itself
+  // would leak those extra positional args into every consumer's callback.
+  (ast as { sprites?: SpriteRegistry }).sprites?.collisions.forEach((message) => onWarning(message));
 }
 
 /** @see SkinParam.java:795-800 (internal-sprite fallback NOT ported --

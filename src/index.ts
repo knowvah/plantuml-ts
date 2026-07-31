@@ -33,6 +33,7 @@ import type { StyleMap } from './core/skinparam.js';
 import type { StringMeasurer } from './core/measurer.js';
 import type { DiagramType, UmlSource } from './core/block-extractor.js';
 import { prepareIncludeStore, type IncludeFetcher, type IncludeStore } from './core/include-resolver.js';
+import { surfaceSpriteWarnings } from './core/sprite-commands.js';
 import type { StdlibRegistry } from './core/tim/StdlibRegistry.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
 import { ErrorUml } from './core/error/ErrorUml.js';
@@ -88,18 +89,15 @@ export interface RenderOptions {
   theme?: 'default' | 'dark' | 'sketchy' | 'monochrome' | Partial<Theme>;
   measurer?: StringMeasurer;
   maxWidth?: number;
-  /** Async include fetcher used by `render()` / `renderAll()` to PREFILL the
-   *  include store. Ignored by `renderSync` (which cannot await). */
+  /** Async include fetcher used by `render()` / `renderAll()` to PREFILL the include store. Ignored by `renderSync` (which cannot await). */
   fetcher?: IncludeFetcher;
   /**
    * Pre-populated include content: `path -> source`, read SYNCHRONOUSLY by the
    * TIM interpreter wherever upstream would open a file (`src/core/tim/
    * IncludeStore.ts`). Two reasons to pass one:
-   *
    *  - `renderSync` cannot fetch. A store is the ONLY way it resolves includes.
    *  - Stdlib bundles. `!include <c4/C4_Context.puml>` resolves from the store
    *    and nowhere else — this port vendors no stdlib asset (mission SI5b).
-   *
    * `render()` treats it as a base: it fetches the rest on top, and never
    * mutates it. An include that neither the store nor the fetcher can serve is a
    * typed error naming the path, never a silent skip.
@@ -110,13 +108,15 @@ export interface RenderOptions {
    * `stdlibRegistry()` (`core/tim/StdlibRegistry.ts`): each bundle's payload
    * loads on first use rather than up front, which matters at these sizes
    * (`tupadr3` alone is 19.54 MB).
-   *
    * Consulted ONLY after `includeStore` misses on both channels, so passing one
    * never changes the outcome for a target that already resolved. `render()` /
    * `renderAll()` only — `renderSync` cannot await a dynamic `import()`; sync
    * callers await `prepareIncludeStore` and pass its result as `includeStore`.
    */
   stdlibRegistry?: StdlibRegistry;
+  /** si11b sprite diagnostics (`surfaceSpriteWarnings`, `core/sprite-commands.js`): `onWarning` fires once per name collision found during parse (ADR-7; free when omitted); `sprites` is the escape hatch for macro-produced `<$name>` refs a source scan can't see (ADR-5b), consumed by the per-sprite prefetch scan. */
+  onWarning?: ((message: string) => void) | undefined;
+  sprites?: readonly string[] | undefined;
 }
 
 function getDefaultMeasurer(): StringMeasurer {
@@ -333,6 +333,7 @@ export function renderSync(source: string, options?: RenderOptions): string {
 
     const measurer = resolveMeasurer(plugin.type, options);
     const ast = plugin.parse(umlSource);
+    surfaceSpriteWarnings(ast, options?.onWarning);
     const geo = plugin.layoutSync(ast, theme, measurer);
     const fragment = plugin.render(geo, theme);
     const chromed = applyAnnotationChrome(
@@ -394,6 +395,7 @@ async function renderBlock(block: BlockUml, options?: RenderOptions): Promise<st
     const plugin = registry.resolve(umlSource);
     const measurer = resolveMeasurer(plugin.type, options);
     const ast = plugin.parse(umlSource);
+    surfaceSpriteWarnings(ast, options?.onWarning);
     const geo =
       'layoutSync' in plugin
         ? plugin.layoutSync(ast, theme, measurer)
@@ -476,9 +478,7 @@ function welcomeSvg(options?: RenderOptions): string {
  * error, and `PSystemErrorUtils#merge` keeps the first of the equal-scoring
  * ones) -- jar-verified, `Empty description (Assumed diagram type: sequence)`.
  * For a typed block (`@startjson`, ...) it is that block's own type.
- *
  * The listing is the `@start` line alone, waved, which is what the jar draws.
- *
  * @see ~/git/plantuml/.../command/PSystemAbstractFactory.java#buildEmptyError
  */
 function emptySvg(block: BlockUmlOk, options?: RenderOptions): string {
