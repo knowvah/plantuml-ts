@@ -188,8 +188,16 @@ function resolveImgAtom(atom: Extract<InlineAtomToken, { kind: 'img' }>): Resolv
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/AtomSprite.java#calculateDimensionSlow
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svg/parser/SvgNanoParser.java#drawU
+ *
+ * Exported (T10, ADR-3): `leaf-sizing.ts#sizingAtomImageResolverFor` calls
+ * this SAME function at SIZING time (via `SpriteDims.svg`, T10) so `Footprint`
+ * observes the sprite's REAL drawn geometry instead of an approximation --
+ * the ONE piece of `makeAtomImageResolverFor` sizing and rendering share.
+ * Monochrome rasterization (`resolveSpriteAtom`, below) stays render-only:
+ * it changes only `href`, never geometry, so sizing has no reason to pay for
+ * it.
  */
-function resolveSvgSpriteAtom(
+export function resolveSvgSpriteAtom(
   atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
   svg: string,
   spriteDims: SpriteDimsLookup,

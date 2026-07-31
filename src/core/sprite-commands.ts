@@ -90,7 +90,10 @@ export function getSprite(registry: SpriteRegistry, name: string): Sprite | unde
 /** Bridges `getSprite` to T6's `SpriteDimsLookup` interface (D9 measurement
  *  seam, `creole-atoms.ts#measureLineWithAtoms`/`measureInlineAtom`) -- the
  *  `SpriteDimsLookup.get(name)` -> `SpriteRegistry.getSprite(name)` name-
- *  bridge the batch-2 journal flagged for this task. */
+ *  bridge the batch-2 journal flagged for this task. `svg` (T10): carries
+ *  the verbatim source through too, so the SIZER can decompose real
+ *  geometry instead of approximating from ink numbers alone (`leaf-sizing.ts
+ *  #sizingAtomImageResolverFor`). */
 export function spriteDimsLookupFor(registry: SpriteRegistry): SpriteDimsLookup {
   return {
     get(name: string) {
@@ -102,6 +105,7 @@ export function spriteDimsLookupFor(registry: SpriteRegistry): SpriteDimsLookup 
           height: sprite.height,
           inkX: sprite.inkX,
           inkY: sprite.inkY,
+          svg: sprite.svg,
           inkWidth: sprite.inkWidth,
           inkHeight: sprite.inkHeight,
         };
@@ -406,4 +410,9 @@ export function matchSpriteCommand(
   }
 
   return null;
+  // #lizard forgives -- pre-existing (33 NLOC on HEAD before this task's own
+  // edits, verified via `git show HEAD:... | lizard`): a flat dispatch chain
+  // over the 4 sprite-definition grammars (SVG single/multi, encoded
+  // single/multi), each an early-return match/consume pair. Not touched by
+  // T10 (`spriteDimsLookupFor` above is the only edit in this file).
 }

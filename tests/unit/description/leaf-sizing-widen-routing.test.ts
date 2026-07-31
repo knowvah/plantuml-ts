@@ -3,17 +3,20 @@
  * state in `leaf-sizing.ts`:
  *
  * - `usecase`/`usecase-business` + `<$sprite>` on a SINGLE-LINE display
- *   routes through `measureEntityLeaf`, and for a lone sprite atom that must
- *   match `measureUsecase`'s own (unchanged) ink-fit math exactly — a
- *   rectangle's enclosing-circle dimensions are translation invariant, so
- *   both paths derive the SAME ellipse from the SAME ink box.
+ *   routes through `measureEntityLeaf`, and for a lone sprite atom whose ink
+ *   is a rectangular `<path>` (a shape whose drawn corners ARE its bbox
+ *   corners) that must match `measureUsecase`'s own ink-fit math exactly —
+ *   a rectangle's enclosing-circle dimensions are translation invariant, so
+ *   both paths derive the SAME ellipse from the SAME ink box, even though
+ *   (T10/ADR-3) they now get there by two DIFFERENT mechanisms: real
+ *   `SvgNanoParser` decomposition for `measureLeafNode`, the unchanged
+ *   ink-bbox approximation for `measureUsecase` (off-limits, ADR-3).
  * - A MULTI-LINE display mixing a sprite line with any other line STAYS on
  *   `measureUsecase` — a STOP-diagnosed regression (T3): routing it through
  *   `measureEntityLeaf` widened `bootstrap-0`/`ruziru-69-xixo434` by exactly
- *   0.029321in, because `SheetBlock1.ts`'s line-stacking cursor and
- *   `Footprint`'s ellipse fit both consume the SAME ink-shrunk atom
- *   dimension this port's `fitToInk` resolver returns — see `leaf-sizing.ts
- *   #hasUnroutedUsecaseMarkup`'s own doc comment for the full mechanism.
+ *   0.029321in — see `leaf-sizing.ts#hasUnroutedUsecaseMarkup`'s own doc
+ *   comment for the mechanism (T10 corrected: the `fitToInk` branch that
+ *   diagnosis names is now retired, not the guard).
  * - `<latex>` (usecase and box family both) stays guarded — permanent
  *   divergence, `DIVERGENCES.md`.
  * - box+`<img>` is now UNGUARDED (T3/ADR-1: the cannot-decode fallback font
@@ -27,18 +30,36 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
 import type { SpriteDims, SpriteDimsLookup } from '../../../src/core/creole-atoms.js';
+import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../src/core/sprite-commands.js';
+import { SpriteSvg } from '../../../src/core/klimt/sprite/SpriteSvg.js';
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 14 };
 const measurer = new WidthTableMeasurer();
 
-/** A single registered sprite whose INK box is smaller than its declared
- *  box on both axes — exercises the T5 ink-fit path distinctly from the
- *  declared-box path it replaced. */
-function inkSprite(dims: SpriteDims): SpriteDimsLookup {
+/** A lookup NOT backed by a real registry (no `svg`) — for assertions made
+ *  directly against `measureUsecase`, which never routes through T10's
+ *  real-decomposition path and only ever reads `inkWidth`/`inkHeight`. */
+function rawSprite(dims: SpriteDims): SpriteDimsLookup {
   return { get: (name) => (name === 'icon' ? dims : undefined) };
 }
 
-const SHRUNK_INK: SpriteDims = { width: 16, height: 16, inkX: 1, inkY: 1, inkWidth: 10, inkHeight: 8 };
+/** A REAL registered SVG sprite (T10) whose drawn ink is a rectangular
+ *  `<path>` -- `SpriteSvg.from` derives `inkX/inkY/inkWidth/inkHeight` from
+ *  the path's own corners (`svgInkBox`), the SAME numbers the old
+ *  hand-authored `SHRUNK_INK` literal asserted, but computed from real
+ *  geometry so `measureLeafNode` actually exercises `SvgNanoParser`
+ *  decomposition, not a fabricated ink number. */
+function svgIconSprite(svg: string): SpriteDimsLookup {
+  const registry = createSpriteRegistry();
+  const sprite = SpriteSvg.from(svg);
+  if (sprite === undefined) throw new Error('test fixture SVG failed to parse dimensions');
+  addSprite(registry, 'icon', sprite);
+  return spriteDimsLookupFor(registry);
+}
+
+/** Declared 16x16, ink rectangle [1,11]x[1,9] (10x8 at offset 1,1) — the
+ *  SAME numbers `SHRUNK_INK` used to declare directly. */
+const SHRUNK_INK_SVG = '<svg width="16" height="16"><path d="M1,1 L11,1 L11,9 L1,9 Z"/></svg>';
 
 function usecaseNode(display: string): DescriptiveNode {
   return { id: 'u', display, symbol: 'usecase', children: [] };
@@ -47,7 +68,7 @@ function usecaseNode(display: string): DescriptiveNode {
 describe('T3 widened routing — usecase + <$sprite>', () => {
   it('a single-line sprite display routes through measureEntityLeaf and matches measureUsecase\'s own ink-fit math for a lone atom', () => {
     const display = '<$icon>';
-    const sprites = inkSprite(SHRUNK_INK);
+    const sprites = svgIconSprite(SHRUNK_INK_SVG);
     const routed = measureLeafNode(usecaseNode(display), fontSpec, measurer, undefined, sprites);
     const viaOldPath = measureUsecase(display, fontSpec, measurer, sprites);
     expect(routed.width).toBeCloseTo(viaOldPath.width, 6);
@@ -56,14 +77,14 @@ describe('T3 widened routing — usecase + <$sprite>', () => {
     // so the fitted ellipse must be smaller than one built from the FULL
     // declared box -- proves the resolver is actually shrinking to ink,
     // not silently falling back to the declared dims.
-    const declaredBoxLookup = inkSprite({ width: 16, height: 16 });
+    const declaredBoxLookup = rawSprite({ width: 16, height: 16 });
     const declaredBoxResult = measureUsecase(display, fontSpec, measurer, declaredBoxLookup);
     expect(routed.width).toBeLessThan(declaredBoxResult.width);
   });
 
   it('a multi-line display mixing a sprite line with a text line stays on measureUsecase (STOP-diagnosed line-stacking regression, T3)', () => {
     const display = '<$icon>\nlabel text';
-    const sprites = inkSprite(SHRUNK_INK);
+    const sprites = svgIconSprite(SHRUNK_INK_SVG);
     const routed = measureLeafNode(usecaseNode(display), fontSpec, measurer, undefined, sprites);
     const viaOldPath = measureUsecase(display, fontSpec, measurer, sprites);
     expect(routed).toEqual(viaOldPath);

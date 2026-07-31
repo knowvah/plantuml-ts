@@ -168,11 +168,12 @@ export interface DrawablePrimitive {
  * decision and explicitly does NOT reintroduce that shape: `primitives`
  * below are DRAW-TIME geometry, not a measurement side channel. Ink from
  * measurement (unrelated to this type) still flows through the SEPARATE
- * `SpriteDims.inkWidth`/`inkHeight` channel (unchanged by this task --
- * still consumed by `leaf-sizing.ts#sizingAtomImageResolverFor`'s
- * `fitToInk` branch and `leaf-sizing-text.ts#inlineFootprintBox`; see
- * `.agent-notes/T2-footprint-sizer.md` for why `usecase-footprint.ts`/
- * `footprintBoxes` themselves could NOT be retired in that task).
+ * `SpriteDims.inkWidth`/`inkHeight` channel, consumed by `leaf-sizing-text.ts
+ * #inlineFootprintBox`. T10 (ADR-3) additionally gave `SpriteDims` an
+ * optional `svg` field so `leaf-sizing.ts#sizingAtomImageResolverFor` can
+ * call this file's OWN `render-atoms.ts#resolveSvgSpriteAtom` at SIZING
+ * time too, producing REAL `kind: 'drawable'` primitives instead of a
+ * synthesized ink box -- see that function's doc comment.
  */
 export type AtomImageResolver = (
   atom: InlineAtomToken,
@@ -214,6 +215,10 @@ export interface SpriteDims {
   inkY?: number;
   inkWidth?: number;
   inkHeight?: number;
+  /** Verbatim source, SVG-backed sprites only (T10) -- lets the SIZER
+   *  decompose real geometry via `resolveSvgSpriteAtom`, the SAME function
+   *  the renderer calls, rather than approximating from ink numbers alone. */
+  svg?: string;
 }
 
 export interface SpriteDimsLookup {

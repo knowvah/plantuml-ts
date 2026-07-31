@@ -6,36 +6,37 @@
  * `EntityImageDescription.calculateDimensionSlow` -- superseding the flat
  * per-symbol tables that used to re-derive this geometry independently.
  *
- * sizer-footprint-parity T3 (ADR-1/ADR-2) closed box+`<img>` fully (the
- * cannot-decode fallback font is hardcoded at its draw site now, ADR-1) and
- * usecase+`<$sprite>` PARTIALLY: a single-line sprite display routes
- * through `measureEntityLeaf`, but a MULTI-LINE one stays on the analytic
- * substitute -- ADR-2's "dissolves" premise was tested and found FALSE for
- * this port's architecture; see `hasUnroutedUsecaseMarkup`'s own doc for
- * the traced mechanism. `folder`/`package` (SI1/ADR-10) and `<latex>` (a
- * permanent divergence) are the two narrowings still fully open.
+ * sizer-footprint-parity T3 (ADR-1/ADR-2) closed box+`<img>` fully and
+ * usecase+`<$sprite>` PARTIALLY: single-line routes through
+ * `measureEntityLeaf`; MULTI-LINE stays on the analytic substitute --
+ * ADR-2's "dissolves" premise tested FALSE for this port; see
+ * `hasUnroutedUsecaseMarkup`'s doc. `folder`/`package` (SI1/ADR-10) and
+ * `<latex>` (a permanent divergence) are the two narrowings still open.
+ * T10/ADR-3 retired the sizer's `fitToInk` ink substitution -- see
+ * `sizingAtomImageResolverFor`'s own doc.
  *
- * `measureActor`/`measureUsecase` (exported below) are NOT dead regardless:
- * `class-layout-leaf-shapes.ts` (off-limits) imports both unconditionally
- * for the class-diagram engine's own shapes -- why `usecase-footprint.ts`/
+ * `measureActor`/`measureUsecase` (exported below) are NOT dead: off-limits
+ * `class-layout-leaf-shapes.ts` imports both unconditionally for the
+ * class-diagram engine's own shapes -- why `usecase-footprint.ts`/
  * `footprintBoxes` survive too.
  *
- * See `plans/description-leaf-sizing-audit/decisions.md` (ADR-6) and
- * `plans/sizer-footprint-parity/decisions.md` (ADR-1, ADR-2, ADR-4).
+ * See `plans/description-leaf-sizing-audit/decisions.md` (ADR-6),
+ * `plans/sizer-footprint-parity/decisions.md` (ADR-1/2/4), and
+ * `plans/svg-sprite-nanoparser/decisions.md` (ADR-3).
  */
 
 import type { DescriptiveNode } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureNodeLabel } from '../../core/latex.js';
-import { measureInlineAtom, spriteScale } from '../../core/creole-atoms-measure.js';
+import { measureInlineAtom } from '../../core/creole-atoms-measure.js';
 import type { SpriteDimsLookup, AtomImageResolver } from '../../core/creole-atoms.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import { EntityImageDescription, type EntityImageDescriptionParams } from '../../core/svek/image/EntityImageDescription.js';
-import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
-import type { FontStyle } from '../../core/klimt/shape/UText.js';
+import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
+import { resolveSvgSpriteAtom } from './render-atoms.js';
 import { upstreamKeyword, mapComponentStyle, resolveActorStyle } from './renderer-symbol.js';
 import {
   lineCount,
@@ -172,13 +173,10 @@ export function measureLeafNode(
  *  DIAGNOSIS (STOP condition, ADR-4; full trace in `.agent-notes/T3-widen-
  *  guards.md`): dropping this guard widened `bootstrap-0`/`ruziru-69-
  *  xixo434` by exactly 0.029321in -- ADR-2's "dissolves" premise is FALSE
- *  here. `sizingAtomImageResolverFor`'s `fitToInk` branch (~line 366) feeds
- *  a sprite's INK box, as its WHOLE dimension, to BOTH `SheetBlock1
- *  .ts:180-182`'s cursor advance AND its `Footprint`-observed drawn
- *  position -- upstream keeps those separate (`AtomSprite.calculateDimension`
- *  always DECLARED; ink narrowing is `Footprint#drawPath`-only). Fixing it
- *  needs a `SheetBlock1.ts` layout/ink split -- the side channel ADR-3
- *  forbids, in a file off-limits regardless. Kept guarded. */
+ *  here. T10/ADR-3 retired `fitToInk` (see `sizingAtomImageResolverFor`'s
+ *  doc) but this guard is UNRELATED to that branch and stays as-is --
+ *  re-measured after T10 at widened 0, not re-tested for dissolution
+ *  (`measureUsecase` is a separate mission's STOP, ADR-3). Kept guarded. */
 function hasUnroutedUsecaseMarkup(display: string): boolean {
   if (display.includes('<latex>')) return true;
   return display.includes('<$') && display.includes('\n');
@@ -328,8 +326,7 @@ export function measureUsecase(
 // T6 (ADR-6): route through EntityImageDescription
 // ---------------------------------------------------------------------------
 
-/** No style flags — styles never reach `StringBounder.calculateDimension`,
- *  whose font parameter is narrowed to `family`/`size` only. */
+/** No style flags -- `StringBounder.calculateDimension`'s font param is narrowed to `family`/`size` only. */
 const SIZING_FONT_STYLES: ReadonlySet<FontStyle> = new Set();
 
 /** `calculateDimensionSlow` never reads forecolor/backcolor (consumed only
@@ -339,36 +336,36 @@ const SIZING_FONT_STYLES: ReadonlySet<FontStyle> = new Set();
 const SIZING_PLACEHOLDER_COLOR = '#000000';
 
 /**
- * Sizing-only `AtomImageResolver` factory: resolves a creole `<img>`/
- * `<$sprite>`/openiconic atom to its SCALED pixel dims via the SAME
- * `measureInlineAtom` the pre-T6 sizer used, against the dims-only
- * `SpriteDimsLookup` this engine already threads. An unresolved name
- * measures 0×0, matching `render-atoms.ts`'s "contributes nothing".
+ * Sizing-only `AtomImageResolver` factory. `width`/`height` are ALWAYS the
+ * DECLARED box (T10/ADR-3: `fitToInk` retired -- fed one narrowed number to
+ * both cursor advance and `Footprint`'s size). Unresolved -> 0x0.
  *
- * `fitToInk` (T5/ADR-2, usecase only): an SVG sprite's `width`/`height`
- * become its INK box when the registry has one -- the shared `drawAtoms`
- * (off-limits) builds the drawn `UImage` straight from this box, and
- * `Footprint#drawImage` fits the usecase ellipse to it, so shrinking here
- * is the only lever this write-set has (mirrors `leaf-sizing-text.ts
- * #inlineFootprintBox`). MUST be usecase-only: every other symbol's
- * `asSmall` sizes declared content width directly (no `Footprint`) --
- * unconditional shrinking under-measures line advance (verified: widened
- * `card`s `sprite-SVG-fill-management-3`/`tatori-66-kaci883`). Position is
- * untouched -- exact for a single-atom node (translation invariant); a
- * MIXED node's ink OFFSET stays an open residual, same as pre-T5.
- */
+ * Dropping `fitToInk` outright widened `bootstrap-0`/`ruziru-69-xixo434`
+ * (0.076372in): `Footprint` runs eagerly inside `TextBlockInEllipse`'s ctor
+ * at SIZING time, and a plain `kind: 'image'` collects the FULL declared
+ * box (`Footprint.ts#MyUGraphic.drawImage`), not the ink. A synthesized
+ * ink-sized `URectangle` fixed the number but was measurement ink wearing a
+ * draw-time costume -- rejected on review (this mission's own thesis is
+ * that the divergence is architectural, not arithmetic).
+ *
+ * Real fix: for an SVG-backed sprite, call `render-atoms.ts
+ * #resolveSvgSpriteAtom` -- the SAME `SvgNanoParser` decomposition the
+ * RENDERER uses -- so `Footprint` observes actual per-shape corners, not an
+ * approximation. `SpriteDims.svg` (T10) threads the raw source through the
+ * EXISTING `SpriteDimsLookup` channel, so no caller signature changes.
+ * Deliberately NOT sharing `makeAtomImageResolverFor` wholesale: its
+ * monochrome branch rasterizes a PNG, work sizing has no use for (`href` is
+ * never read for a `kind: 'image'` box) and would only cost CPU during
+ * every sizing pass -- so monochrome/unresolved sprites keep today's
+ * `href: ''` declared-box fallback. Verified back to widened 0. */
 function sizingAtomImageResolverFor(
   sprites: SpriteDimsLookup | undefined,
-  fitToInk: boolean,
 ): (font: FontConfiguration) => AtomImageResolver {
   return (font) => (atom) => {
     const dims = measureInlineAtom(atom, sprites, font.size);
-    if (fitToInk && atom.kind === 'sprite') {
+    if (atom.kind === 'sprite') {
       const reg = sprites?.get(atom.name);
-      if (reg?.inkWidth !== undefined && reg.inkHeight !== undefined) {
-        const s = spriteScale(atom.scale, font.size);
-        return { kind: 'image', href: '', width: reg.inkWidth * s, height: reg.inkHeight * s };
-      }
+      if (reg?.svg !== undefined) return resolveSvgSpriteAtom(atom, reg.svg, sprites!, font);
     }
     return { kind: 'image', href: '', width: dims.width, height: dims.height };
   };
@@ -449,10 +446,7 @@ function buildSizingEntityParams(
     paint: sizingPaint(font, ctx.opts),
     links: [],
     fixCircleLabelOverlapping: false,
-    atomImageResolverFor: sizingAtomImageResolverFor(
-      ctx.sprites,
-      node.symbol === 'usecase' || node.symbol === 'usecase-business',
-    ),
+    atomImageResolverFor: sizingAtomImageResolverFor(ctx.sprites),
   };
 }
 
