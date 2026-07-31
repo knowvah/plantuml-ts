@@ -57,6 +57,9 @@ export { stdlibRegistry, StdlibChunkLoadError } from './core/tim/StdlibRegistry.
 export { prepareIncludeStore } from './core/include-resolver.js';
 export type { StdlibRegistry } from './core/tim/StdlibRegistry.js';
 export type { IncludeWarmupOptions } from './core/include-resolver.js';
+// SI11a per-RESOURCE fetch (vs. si8's per-BUNDLE chunk above); see StdlibRemote.ts's doc comment.
+export { remoteStdlib, StdlibResourceFetchError } from './core/tim/StdlibRemote.js';
+export type { StdlibRemoteManifest, RemoteBundle } from './core/tim/StdlibRemote.js';
 
 // Register plugins in specificity order — most specific first, sequence last.
 // Sequence plugin uses broad arrow heuristics (-->) that overlap with graph
@@ -182,7 +185,6 @@ export function assembleSvg(fragment: AssembledSvg): string {
   return svgRoot(fragment.width, fragment.height, [fragment.body], fragment.background, fragment.extraDefs);
 }
 
-
 /**
  * The block's preprocessed interior, carrying the `<style>` blocks the
  * interpreter pulled out of THAT block (upstream keeps them inside it).
@@ -293,10 +295,8 @@ function applyAnnotationChrome(
 
   const unwrapped = unwrapKlimtSvg(fragment.completeSvg, theme.colors.background);
   // #lizard forgives -- pre-existing violation (23 NLOC/7 PARAM vs. this
-  // repo's 30/5 caps -- 7 params, not NLOC, is the actual trip), unrelated
-  // to skin-reddress-variants; only surfaced now because buildTheme's move
-  // out of this file dropped index.ts under the 500-line gate that
-  // previously short-circuited this per-function check.
+  // repo's 30/5 caps; 7 params, not NLOC, is the actual trip -- unrelated
+  // to skin-reddress-variants, just no longer shielded by file size.
   return { completeSvg: assembleSvg(applyChrome(unwrapped, annotations, styles, measurer)) };
 }
 
