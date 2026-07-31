@@ -24,12 +24,11 @@ import {
   readFileSync,
   writeFileSync,
   mkdirSync,
-  rmSync,
   existsSync,
   readdirSync,
 } from 'node:fs';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { homedir } from 'node:os';
 
@@ -47,20 +46,23 @@ import {
   type StructuralDiff,
 } from '../tests/oracle/svek-dot.js';
 import { CHECKS, drillDownGraph, stripLayoutPragma } from './dot-sync-drilldown.js';
+import {
+  DATA_DIR,
+  CANON_DIR,
+  ensureCanonical,
+  enumerateFixtures,
+  findFixture,
+  reportSkips,
+  taggedSlugs,
+  type Fixture,
+} from './dot-sync-fixtures.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
-/** execFileSync stdout cap for jar batch runs (256 MiB). */
-const MAX_JAR_BUFFER_BYTES = 2 ** 28;
 /** Lizard-safe (no regex literals): matches svek-<N>.dot dump files. */
 const SVEK_DOT_RE = new RegExp('^svek-([0-9]+)\\.dot$');
-const DATA_DIR = join(REPO, 'tests', 'visual', 'data');
-const CANON_DIR = join(REPO, 'test-results', 'visual-qa-svg', 'canonical');
-const CANON_PUML_DIR = join(REPO, 'test-results', 'visual-qa-svg', 'puml');
 const CACHE = join(REPO, 'test-results', 'dot-cache');
 const PROBE_OUT = join(REPO, 'plans', 'dot-oracle-sync', 'phase-5-json-dot', 'probe.md');
 const EQUAL_LIST_DIR = join(REPO, 'test-results', 'dot-sync-equal');
-
-interface Fixture { slug: string; markup: string }
 
 /** Expected PlantUML data-diagram-type per corpus bucket we know how to classify. Override with --type-tag. */
 const EXPECTED_TAG: Record<string, string> = {
@@ -89,66 +91,6 @@ function resolveJar(): string {
   const resolved = join(libs, jar);
   console.error(`[dot-sync] oracle jar: ${resolved}`);
   return resolved;
-}
-
-function loadFixtures(type: string): Fixture[] | undefined {
-  const p = join(DATA_DIR, type + '.json');
-  if (!existsSync(p)) return undefined;
-  return JSON.parse(readFileSync(p, 'utf-8')) as Fixture[];
-}
-
-function findFixture(type: string, slug: string): Fixture {
-  const fixtures = loadFixtures(type);
-  if (fixtures === undefined) {
-    throw new Error('No fixture manifest for "' + type + '" at tests/visual/data/' + type + '.json');
-  }
-  const f = fixtures.find((x) => x.slug === slug);
-  if (f === undefined) throw new Error('Slug "' + slug + '" not found in ' + type + '.json');
-  return f;
-}
-
-/** Slugs whose cached canonical SVG carries data-diagram-type="<tag>". */
-function taggedSlugs(type: string, tag: string): Set<string> {
-  const dir = join(CANON_DIR, type);
-  const out = new Set<string>();
-  if (!existsSync(dir)) return out;
-  for (const f of readdirSync(dir)) {
-    if (!f.endsWith('.svg')) continue;
-    if (readFileSync(join(dir, f), 'utf-8').includes('data-diagram-type="' + tag + '"')) {
-      out.add(f.replace(/\.svg$/, ''));
-    }
-  }
-  return out;
-}
-
-function freshDir(path: string): string {
-  rmSync(path, { recursive: true, force: true });
-  mkdirSync(path, { recursive: true });
-  return path;
-}
-
-/** Batch-renders canonical SVGs for a type via the oracle jar. */
-function generateCanonical(jar: string, type: string, fixtures: Fixture[]): void {
-  const pumlDir = freshDir(join(CANON_PUML_DIR, type));
-  const svgDir = freshDir(join(CANON_DIR, type));
-  for (const f of fixtures) writeFileSync(join(pumlDir, f.slug + '.puml'), stripLayoutPragma(f.markup), 'utf-8');
-  try {
-    execFileSync('java', ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', jar, '-tsvg', '-nometadata', '-o', svgDir, pumlDir], {
-      stdio: ['ignore', 'ignore', 'inherit'],
-      maxBuffer: MAX_JAR_BUFFER_BYTES,
-    });
-  } catch {
-    /* partial batch — valid SVGs are on disk */
-  }
-}
-
-/** Ensures test-results/visual-qa-svg/canonical/<type>/ is populated,
- *  building it via the oracle jar if missing. */
-function ensureCanonical(jar: string, type: string, fixtures: Fixture[]): void {
-  const dir = join(CANON_DIR, type);
-  if (existsSync(dir) && readdirSync(dir).some((f) => f.endsWith('.svg'))) return;
-  console.error('No canonical SVG cache for "' + type + '" — generating via oracle jar…');
-  generateCanonical(jar, type, fixtures);
 }
 
 const svekDotIndex = (f: string): number => Number(SVEK_DOT_RE.exec(f)?.[1] ?? 0);
@@ -316,18 +258,20 @@ function writeEqualList(type: string, a: Agg): void {
 function buildAgg(jar: string, type: string, fixtures: Fixture[], tag: string, rebuild: boolean): Agg {
   const slugs = taggedSlugs(type, tag);
   const a = newAgg();
+  const skipped: string[] = [];
   let done = 0;
   for (const f of fixtures) {
-    if (!slugs.has(f.slug)) continue;
+    if (!slugs.has(f.slug)) { skipped.push(f.slug); continue; }
     if (/!pragma\s+layout\s+elk/i.test(f.markup)) { a.oracleBlind++; continue; }
     analyzeFixture(a, f.slug, plantumlDots(jar, type, f, rebuild), ourInputs(type, f.markup));
     if (++done % 50 === 0) console.error('  ' + type + ': ' + done + '/' + slugs.size);
   }
+  reportSkips(type, tag, fixtures.length, a.total + a.oracleBlind, skipped);
   return a;
 }
 
 function runType(jar: string, type: string, rebuild: boolean, tagOverride: string | undefined, equalList: boolean): void {
-  const fixtures = loadFixtures(type);
+  const fixtures = enumerateFixtures(type);
   if (fixtures === undefined) {
     console.error(
       'No fixture manifest for "' + type + '" at tests/visual/data/' + type + '.json. ' +
@@ -361,7 +305,7 @@ function manifestTypes(): string[] {
 function markdownRowForType(jar: string, type: string): TypeRow {
   const cacheDir = join(CACHE, type);
   if (!existsSync(cacheDir) || readdirSync(cacheDir).length === 0) return NOT_MEASURED(type, 'not yet measured');
-  const fixtures = loadFixtures(type);
+  const fixtures = enumerateFixtures(type);
   if (fixtures === undefined) return NOT_MEASURED(type, 'not yet measured');
   const tag = EXPECTED_TAG[type];
   const canonDir = join(CANON_DIR, type);
@@ -415,7 +359,7 @@ function drillDownSlug(jar: string, type: string, slug: string, rebuild: boolean
 interface ProbeResult { anyDots: boolean; evidence: string[] }
 
 function probeType(jar: string, type: string): ProbeResult | undefined {
-  const fixtures = loadFixtures(type);
+  const fixtures = enumerateFixtures(type);
   if (fixtures === undefined) return undefined;
   const sample = [...fixtures].sort((a, b) => a.slug.localeCompare(b.slug)).slice(0, 5);
   const evidence: string[] = [];
@@ -523,4 +467,10 @@ function main(): void {
   for (const t of types) runType(jar, t, opts.rebuild, opts.typeTag, opts.equalList);
 }
 
-main();
+/* v8 ignore start -- CLI entry point; the report is exercised by real runs, not
+ * the unit-test suite (matches scripts/svg-parity-survey.ts's CLI block). The
+ * guard exists so tests can import this module without launching a jar run. */
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+  main();
+}
+/* v8 ignore stop */

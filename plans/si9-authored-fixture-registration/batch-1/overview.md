@@ -5,7 +5,7 @@ generated data and documentation.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | `loadFixtures` merges authored fixtures; `ensureCanonical` becomes per-slug; skips become loud | typescript-pro | `scripts/dot-sync-report.ts`, `tests/unit/scripts/dot-sync-fixtures.test.ts` | — | [ ] |
+| T1 | `loadFixtures` merges authored fixtures; `ensureCanonical` becomes per-slug; skips become loud | typescript-pro | `scripts/dot-sync-report.ts`, `scripts/dot-sync-fixtures.ts` (500-line split), `tests/unit/scripts/dot-sync-fixtures.test.ts` | — | [x] |
 
 ## Batch exit criteria
 
