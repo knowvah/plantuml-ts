@@ -1,0 +1,285 @@
+/**
+ * si11b T4 -- per-sprite stdlib bundle registration, and the prefetch-side
+ * assembly it enables.
+ *
+ * T1 (`scripts/split-sprite-bundle/split.ts`) derives one fragment per sprite
+ * under `packages/<pkg>/assets/<bundle>/sprites/<name>.puml` plus a sorted
+ * name-list manifest (ADR-3). This module is what makes a bundle build that
+ * way FETCHABLE: it expands the name list into an ordinary
+ * {@link StdlibRemoteManifest} (`sprites/<name>.puml` per name, ADR-3's
+ * convention) and hands it to `remoteStdlib` (si11a) unchanged -- no second
+ * cache, no second concurrency primitive, exactly `remoteStdlib`'s existing
+ * per-key promise memoization.
+ *
+ * A bundle registered this way carries an EXPLICIT marker
+ * ({@link spriteSplitNamesOf}) so {@link stdlibContentFor} can tell "this
+ * `<bundle/thing>` target is sprite-split" from "this is an ordinary
+ * per-resource remote bundle that happens to resolve `files: {}`" -- both
+ * shapes exist and are NOT distinguishable by emptiness alone (`RemoteBundle
+ * #asBundleData` always reports `files: {}}`; see its doc comment). Detection
+ * never depends on which key was requested or on a lookup miss.
+ *
+ * REGISTRATION RECIPE -- how a consumer opts a bundle into per-sprite loading:
+ *
+ *   import { spriteSplitStdlib } from 'plantuml-ts/core/sprite-split-stdlib.js';
+ *   import { stdlibRegistry } from 'plantuml-ts/core/tim/StdlibRegistry.js';
+ *   import manifest from './bootstrap1.13.1/sprites.json' with { type: 'json' };
+ *
+ *   const registry = stdlibRegistry({
+ *     'bootstrap1.13.1': () =>
+ *       Promise.resolve(
+ *         spriteSplitStdlib({
+ *           manifest, // { name: 'bootstrap1.13.1', sprites: [...] }
+ *           baseUrl: 'https://cdn.example.com/bootstrap1.13.1',
+ *         }),
+ *       ),
+ *   });
+ *
+ * A registrant that ALSO needs the `bootstrap` -> `bootstrap1.13.1` alias
+ * registers it the ordinary way (an eager `BundleData` stub with `aliasOf`,
+ * or another `remoteStdlib`/`spriteSplitStdlib` thunk under the `bootstrap`
+ * key) -- alias resolution is unchanged ({@link bundlesFor}).
+ *
+ * Once registered, `!include <bootstrap/bootstrap>` no longer fetches the
+ * 1,085,342 B source file: the prefetch walk scans the diagram for `<$name>`
+ * references (`sprite-prefetch.ts#scanSpriteNames`), unions them with
+ * `RenderOptions.sprites` (ADR-5b, threaded through the walk as a
+ * `PrefetchWalk`-constant, exactly like `registry` -- see
+ * `include-resolver.ts#PrefetchWalk`), and fetches only those fragments.
+ *
+ * `stdlibContentFor`/`bundlesFor` (si11a T3) live here rather than in
+ * `include-resolver.ts` -- that file is at its hook-enforced 500-line cap,
+ * and si11b T4's own pre-authorization is to grow THIS module instead.
+ *
+ * @see ./sprite-prefetch.ts -- the `<$name>` scan this reuses (ADR-4)
+ * @see ./tim/StdlibRemote.ts -- `remoteStdlib`, `StdlibRemoteManifest`, `RemoteBundle`
+ * @see ./tim/StdlibRegistry.ts -- `StdlibRegistry`, `resolveResource`
+ * @see ./include-resolver.ts -- the prefetch walk this wires into
+ */
+
+import type { IncludeFetcher } from './include-resolver.js';
+import { scanSpriteNames } from './sprite-prefetch.js';
+import { remoteStdlib, type RemoteBundle, type StdlibRemoteManifest } from './tim/StdlibRemote.js';
+import type { BundleData } from './tim/StdlibStore.js';
+import { splitStdlibPath } from './tim/stdlib-path.js';
+import type { StdlibRegistry } from './tim/StdlibRegistry.js';
+
+/**
+ * T1's manifest shape (`scripts/split-sprite-bundle/split.ts#SpriteSplitManifest`),
+ * re-declared here because `src/` may not import from `scripts/` (CLAUDE.md).
+ * Both describe the exact same JSON emitted to `sprites.json`.
+ */
+export interface SpriteSplitManifest {
+  /** `BundleData.name` / vendored folder name, e.g. `'bootstrap1.13.1'`. */
+  readonly name: string;
+  /** Sorted, lowercase sprite names. Fragment path is `sprites/<name>.puml`
+   *  by convention (ADR-3) -- not carried here. */
+  readonly sprites: readonly string[];
+}
+
+/**
+ * Thrown when a `<$name>` reference (or a `RenderOptions.sprites` entry) names
+ * a sprite that is NOT part of the bundle's manifest (ADR-5a). Distinct from a
+ * network failure (`StdlibResourceFetchError`): this is a bad reference, and
+ * no request is ever made for it -- fetching stops before any fragment for the
+ * OFFENDING name (or any name sorted after it) is requested.
+ */
+export class SpriteNotBundledError extends Error {
+  /** The bundle the sprite was expected to come from. */
+  readonly bundle: string;
+  /** The unresolvable sprite name, as scanned/supplied (lowercased). */
+  readonly sprite: string;
+
+  constructor(bundle: string, sprite: string) {
+    super(
+      `Sprite '${sprite}' is not part of the '${bundle}' stdlib bundle's sprite-split ` +
+        `manifest.\nCheck the spelling, or pass 'RenderOptions.sprites' with the exact name ` +
+        `if a macro produces it (ADR-5b) -- but a name absent from the manifest itself is a ` +
+        `typo or an out-of-date bundle version, not a scan limitation.`,
+    );
+    this.name = 'SpriteNotBundledError';
+    this.bundle = bundle;
+    this.sprite = sprite;
+  }
+}
+
+/** Unique property key marking a {@link BundleData} as sprite-split. Never
+ *  serialized, never collides with a real bundle field. */
+const SPRITE_SPLIT_NAMES = Symbol('plantuml-ts:sprite-split-names');
+
+interface SpriteSplitBundleData extends BundleData {
+  readonly [SPRITE_SPLIT_NAMES]: readonly string[];
+}
+
+function markSpriteSplit(data: BundleData, sprites: readonly string[]): BundleData {
+  return { ...data, [SPRITE_SPLIT_NAMES]: sprites } as SpriteSplitBundleData;
+}
+
+/**
+ * The sprite name list on `data`, IF it was produced by
+ * {@link spriteSplitStdlib}'s `asBundleData()` -- `undefined` for an ordinary
+ * bundle. This is the EXPLICIT marker {@link stdlibContentFor} checks:
+ * detection never infers sprite-split-ness from an empty `files` map, which
+ * an ordinary remote bundle's `asBundleData()` also reports.
+ */
+export function spriteSplitNamesOf(data: BundleData): readonly string[] | undefined {
+  return (data as Partial<SpriteSplitBundleData>)[SPRITE_SPLIT_NAMES];
+}
+
+/**
+ * Build a {@link RemoteBundle} from a {@link SpriteSplitManifest} -- the
+ * registration recipe in this module's doc comment. Internally expands the
+ * name list into a `sprites/<name>.puml`-per-name {@link StdlibRemoteManifest}
+ * (ADR-3's convention) and delegates fetching/caching to `remoteStdlib`
+ * (si11a) entirely -- this function adds no cache and no concurrency
+ * primitive of its own, only the marker `asBundleData()` carries.
+ */
+export function spriteSplitStdlib(options: {
+  readonly manifest: SpriteSplitManifest;
+  readonly baseUrl: string;
+  readonly fetcher?: IncludeFetcher | undefined;
+}): RemoteBundle {
+  const { manifest, baseUrl, fetcher } = options;
+
+  const files: Record<string, string> = {};
+  for (const name of manifest.sprites) files[name] = `sprites/${name}.puml`;
+  const expanded: StdlibRemoteManifest = { name: manifest.name, files };
+
+  const base = remoteStdlib({ manifest: expanded, baseUrl, fetcher });
+  return {
+    ...base,
+    asBundleData: (): BundleData => markSpriteSplit(base.asBundleData(), manifest.sprites),
+  };
+}
+
+/**
+ * The names one prefetch-walk level must fetch from a sprite-split bundle:
+ * `source`'s `<$name>` scan (ADR-4) unioned with `extraSpriteNames` -- the
+ * WALK-GLOBAL `RenderOptions.sprites` escape hatch (ADR-5b), lowercased and
+ * applied at EVERY recursion level, not just the top one. A sprite-split
+ * `!include` reached through a diagram author's own shared header (a nested
+ * fetched include, not the top-level source) must see the same option-named
+ * sprites the top level does, or ADR-5a's "never a silently missing icon"
+ * guarantee breaks inside the very escape hatch meant to prevent it.
+ */
+function referencedSpriteNames(source: string, extraSpriteNames: readonly string[] | undefined): readonly string[] {
+  const referenced = new Set<string>(scanSpriteNames(source));
+  for (const name of extraSpriteNames ?? []) referenced.add(name.toLowerCase());
+  return [...referenced].sort();
+}
+
+/**
+ * Fetch and assemble ONLY the sprites `source`/`extraSpriteNames` reference,
+ * in sorted name order (ADR-4/ADR-5b/criterion 5). Sorting BEFORE any fetch
+ * starts is what makes the payload independent of fetch completion order
+ * (`Promise.all` preserves input-array position regardless of settle order).
+ * Reuses `registry.resolveResource` -- the SAME per-key promise memoization
+ * `remoteStdlib` already provides -- so two overlapping prefetch levels
+ * naming the same sprite still issue one request.
+ *
+ * @throws SpriteNotBundledError a referenced name is not in `manifestNames`.
+ *         Validated BEFORE any fragment is fetched (criterion 3): a bad name
+ *         costs zero network requests, for itself or for its siblings.
+ */
+export async function assembleSpriteSplitContent(
+  registry: StdlibRegistry,
+  bundleName: string,
+  manifestNames: readonly string[],
+  source: string,
+  extraSpriteNames: readonly string[] | undefined,
+): Promise<string> {
+  const manifestSet = new Set(manifestNames);
+  const sortedNames = referencedSpriteNames(source, extraSpriteNames);
+
+  for (const name of sortedNames) {
+    if (!manifestSet.has(name)) throw new SpriteNotBundledError(bundleName, name);
+  }
+
+  const fragments = await Promise.all(
+    sortedNames.map((name) => registry.resolveResource(bundleName, name)),
+  );
+  // Cannot be `undefined`: every `name` above was just checked against
+  // `manifestSet`, which mirrors the exact keys `spriteSplitStdlib` used to
+  // build the `RemoteBundle`'s `files` map.
+  return fragments.map((fragment) => fragment!).join('');
+}
+
+/**
+ * The tail of {@link stdlibContentFor}: given the walked alias chain's
+ * terminus, decide whether it is sprite-split (explicit marker, never
+ * inferred) and either assemble the `<$name>` payload or fall back to the
+ * ordinary per-resource lookup, unchanged from si11a.
+ */
+async function resolveBundleContent(
+  registry: StdlibRegistry,
+  bundles: readonly BundleData[],
+  key: string,
+  source: string,
+  extraSpriteNames: readonly string[] | undefined,
+): Promise<string | undefined> {
+  const target = bundles[bundles.length - 1]!;
+  if (target.aliasOf !== undefined) return undefined;
+
+  const spriteNames = spriteSplitNamesOf(target);
+  if (spriteNames !== undefined) {
+    return assembleSpriteSplitContent(registry, target.name, spriteNames, source, extraSpriteNames);
+  }
+
+  return registry.resolveResource(target.name, key);
+}
+
+/**
+ * Every `BundleData` needed to walk one `<bundle/thing>` lookup's alias
+ * chain; the LAST element is the terminus (see {@link stdlibContentFor}).
+ * Alias semantics stay in `StdlibStore.ts#resolveBundle`, the key transform
+ * in `stdlib-path.ts#splitStdlibPath` -- this only walks `registry.resolve`
+ * one link at a time (a bundle name is addressable only once its chunk has
+ * loaded: `bootstrap`'s chunk is what reveals `bootstrap1.13.1`, so the
+ * second `resolve` is a cache hit, not a second `import()`).
+ * A cycle stops collection with the last `aliasOf` still set;
+ * `stdlibContentFor` treats that as a miss (upstream has no such guard and
+ * would infinite-loop the JVM -- see `StdlibStore.ts`'s divergence note).
+ */
+async function bundlesFor(registry: StdlibRegistry, bundleName: string): Promise<readonly BundleData[]> {
+  const collected: BundleData[] = [];
+  const visited = new Set<string>();
+
+  let current = bundleName.toLowerCase();
+  for (;;) {
+    if (visited.has(current)) return collected;
+    visited.add(current);
+
+    const data = await registry.resolve(current);
+    if (data === undefined) return collected;
+
+    collected.push(data);
+    if (data.aliasOf === undefined) return collected;
+
+    current = data.aliasOf.toLowerCase();
+  }
+}
+
+/**
+ * A registered bundle's content for `stdlibPath`, or `undefined` if nothing
+ * serves it. si11a T3: asks for exactly ONE resource (ADR-2/ADR-6) instead of
+ * materialising every `BundleData` in the chain -- ~2.9 KB vs 18.93 MB for
+ * `tupadr3`. `resolveResource` is uniform across eager/remote (T2). si11b T4:
+ * `extraSpriteNames` is the walk-global ADR-5b set, passed through unchanged
+ * to `resolveBundleContent` for the sprite-split case; ignored otherwise.
+ */
+export async function stdlibContentFor(
+  registry: StdlibRegistry,
+  stdlibPath: string,
+  source: string,
+  extraSpriteNames: readonly string[] | undefined,
+): Promise<string | undefined> {
+  // No `/` resolves to nothing upstream (Stdlib.java:101-102) -- checked
+  // before any chunk load, so a malformed target costs nothing.
+  const split = splitStdlibPath(stdlibPath);
+  if (split === undefined) return undefined;
+
+  const bundles = await bundlesFor(registry, split.bundle);
+  if (bundles.length === 0) return undefined;
+
+  return resolveBundleContent(registry, bundles, split.key, source, extraSpriteNames);
+}

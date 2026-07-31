@@ -43,8 +43,7 @@ import {
   stdlibPathOf,
   type IncludeStore,
 } from './tim/IncludeStore.js';
-import type { BundleData } from './tim/StdlibStore.js';
-import { splitStdlibPath } from './tim/stdlib-path.js';
+import { stdlibContentFor } from './sprite-split-stdlib.js';
 import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 
 export {
@@ -263,66 +262,6 @@ function targetOf(line: string): string | undefined {
   return idx === -1 ? undefined : what.substring(0, idx);
 }
 
-/**
- * Every `BundleData` needed to walk one `<bundle/thing>` lookup's alias
- * chain; the LAST element is the terminus (see {@link stdlibContentFor}).
- * Alias semantics stay in `StdlibStore.ts#resolveBundle`, the key transform
- * in `stdlib-path.ts#splitStdlibPath` — this only walks `registry.resolve`
- * one link at a time (a bundle name is addressable only once its chunk has
- * loaded: `bootstrap`'s chunk is what reveals `bootstrap1.13.1`, so the
- * second `resolve` is a cache hit, not a second `import()`).
- * A cycle stops collection with the last `aliasOf` still set;
- * `stdlibContentFor` treats that as a miss (upstream has no such guard and
- * would infinite-loop the JVM — see `StdlibStore.ts`'s divergence note).
- */
-async function bundlesFor(
-  registry: StdlibRegistry,
-  bundleName: string,
-): Promise<readonly BundleData[]> {
-  const collected: BundleData[] = [];
-  const visited = new Set<string>();
-
-  let current = bundleName.toLowerCase();
-  for (;;) {
-    if (visited.has(current)) return collected;
-    visited.add(current);
-
-    const data = await registry.resolve(current);
-    if (data === undefined) return collected;
-
-    collected.push(data);
-    if (data.aliasOf === undefined) return collected;
-
-    current = data.aliasOf.toLowerCase();
-  }
-}
-
-/**
- * A registered bundle's content for `stdlibPath`, or `undefined` if nothing
- * serves it. si11a T3: asks for exactly ONE resource (ADR-2/ADR-6) instead of
- * materialising every `BundleData` in the chain — ~2.9 KB vs 18.93 MB for
- * `tupadr3`. `resolveResource` is uniform across eager/remote (T2).
- */
-async function stdlibContentFor(
-  registry: StdlibRegistry,
-  stdlibPath: string,
-): Promise<string | undefined> {
-  // No `/` resolves to nothing upstream (Stdlib.java:101-102) — checked
-  // before any chunk load, so a malformed target costs nothing.
-  const split = splitStdlibPath(stdlibPath);
-  if (split === undefined) return undefined;
-
-  const bundles = await bundlesFor(registry, split.bundle);
-  if (bundles.length === 0) return undefined;
-
-  // A defined `aliasOf` here means `bundlesFor` stopped mid-chain (cycle, or
-  // a dangling `link:` target) — a miss, not a bundle to ask for content.
-  const target = bundles[bundles.length - 1]!;
-  if (target.aliasOf !== undefined) return undefined;
-
-  return registry.resolveResource(target.name, split.key);
-}
-
 /** State constant across the walk; `source`/`visited`/`chain` change per recursion. */
 interface PrefetchWalk {
   readonly fetcher: IncludeFetcher;
@@ -331,6 +270,9 @@ interface PrefetchWalk {
   readonly registry: StdlibRegistry | undefined;
   /** si11a T4: WALK-layer in-flight dedup, keyed by include target. */
   readonly inFlight: Map<string, Promise<void>>;
+  /** si11b ADR-5b: `RenderOptions.sprites`, applied at EVERY recursion level
+   *  (`sprite-split-stdlib.ts#stdlibContentFor`), not just the top one. */
+  readonly extraSpriteNames: readonly string[] | undefined;
 }
 
 // si11a T4: run `work` for `url` once per walk (no `await` before the
@@ -361,7 +303,7 @@ async function prefetchInner(
   visited: ReadonlySet<string>,
   chain: string[],
 ): Promise<void> {
-  const { fetcher, store, registry, inFlight } = walk;
+  const { fetcher, store, registry, inFlight, extraSpriteNames } = walk;
   const targets = source
     .split('\n')
     .map((line) => targetOf(line))
@@ -379,8 +321,9 @@ async function prefetchInner(
         if (store.getPumlResource(stdlib) !== undefined) return;
         // THIRD channel (si8 ADR-4), reached only once both eager ones miss.
         await dedupeInFlight(inFlight, url, async () => {
-          const bundled =
-            registry === undefined ? undefined : await stdlibContentFor(registry, stdlib);
+          const bundled = registry === undefined
+            ? undefined
+            : await stdlibContentFor(registry, stdlib, source, extraSpriteNames);
           if (bundled === undefined) {
             throw new StdlibNotBundledError(url, stdlib, registry !== undefined);
           }
@@ -400,6 +343,23 @@ async function prefetchInner(
       });
     }),
   );
+}
+
+/** Shared by {@link prefetchIncludes} and {@link prepareIncludeStore} so
+ *  ADR-5b's `extraSpriteNames` reaches the walk without adding a parameter
+ *  to `prefetchIncludes`'s public signature. */
+async function startPrefetchWalk(
+  source: string,
+  fetcher: IncludeFetcher,
+  base: IncludeStore | undefined,
+  registry: StdlibRegistry | undefined,
+  extraSpriteNames: readonly string[] | undefined,
+): Promise<IncludeStore> {
+  const store = new BackedIncludeStore(base);
+  const inFlight = new Map<string, Promise<void>>();
+  const walk: PrefetchWalk = { fetcher, store, registry, inFlight, extraSpriteNames };
+  await prefetchInner(walk, source, new Set<string>(), []);
+  return store;
 }
 
 /**
@@ -429,10 +389,7 @@ export async function prefetchIncludes(
   base?: IncludeStore,
   registry?: StdlibRegistry,
 ): Promise<IncludeStore> {
-  const store = new BackedIncludeStore(base);
-  const inFlight = new Map<string, Promise<void>>();
-  await prefetchInner({ fetcher, store, registry, inFlight }, source, new Set<string>(), []);
-  return store;
+  return startPrefetchWalk(source, fetcher, base, registry, undefined);
 }
 
 /** Options for {@link prepareIncludeStore}. A `RenderOptions` satisfies this. */
@@ -440,6 +397,8 @@ export interface IncludeWarmupOptions {
   readonly fetcher?: IncludeFetcher | undefined;
   readonly includeStore?: IncludeStore | undefined;
   readonly stdlibRegistry?: StdlibRegistry | undefined;
+  /** si11b ADR-5b escape hatch, applied at every walk level (`PrefetchWalk`). */
+  readonly sprites?: readonly string[] | undefined;
 }
 
 /**
@@ -463,7 +422,13 @@ export async function prepareIncludeStore(
   source: string,
   options?: IncludeWarmupOptions,
 ): Promise<IncludeStore> {
-  return prefetchIncludes(source, options?.fetcher, options?.includeStore, options?.stdlibRegistry);
+  return startPrefetchWalk(
+    source,
+    options?.fetcher ?? fetchInclude,
+    options?.includeStore,
+    options?.stdlibRegistry,
+    options?.sprites,
+  );
 }
 
 /** A {@link MapIncludeStore} that falls back to a read-only base store on a miss. */
