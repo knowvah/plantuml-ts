@@ -26,7 +26,6 @@ import { gzipSync } from 'node:zlib';
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { buildStdlibPackages } from '../../scripts/build-stdlib-packages.js';
 import { emitRemoteManifestJs } from '../../scripts/build-stdlib-packages/emit-remote-manifest.js';
 import { PACKAGE_SPECS } from '../../scripts/build-stdlib-packages/package-specs.js';
 import type { GeneratedModule } from '../../scripts/build-stdlib-packages/types.js';
@@ -67,9 +66,12 @@ let awslib14: BundleData;
 let awslib: BundleData;
 let tupadr3: BundleData;
 
+// `packages/*/generated/` is built ONCE by vitest's globalSetup
+// (`tests/helpers/build-stdlib-globalsetup.ts`), not here. Rebuilding it in a
+// per-file `beforeAll` raced with the other test files reading the same tree,
+// because the build `rmSync`s it first and vitest runs files in parallel
+// workers (si11a T8).
 beforeAll(async () => {
-  buildStdlibPackages();
-
   const stdlibC4 = await importGenerated<{ c4: BundleData }>('stdlib', 'c4.js');
   c4 = stdlibC4.c4;
   const stdlibArchimate = await importGenerated<{ archimate: BundleData }>('stdlib', 'archimate.js');
@@ -145,10 +147,12 @@ describe('VERBATIM round-trip: generated BundleData.files === vendored asset byt
 });
 
 // ---------------------------------------------------------------------------
-// 1b. Remote manifest emission (SI11a T5) -- emit-remote-manifest.ts is not
-// wired into `buildStdlibPackages()` yet (that is T6's regeneration step),
-// so these tests invoke the emitter directly and dynamic-import the result
-// from a throwaway tmpdir, mirroring `importGenerated`'s pattern above.
+// 1b. Remote manifest emission (SI11a T5). These tests invoke the emitter
+// DIRECTLY and dynamic-import the result from a throwaway tmpdir, rather than
+// reading `packages/*/generated/*.remote.js`, so they pin the emitter's own
+// output independently of whether the generator happens to have run.
+// (`buildStdlibPackages()` does call these emitters -- wired in `fix(T5)` --
+// and `stdlib-package-files.test.ts` covers the generated artifacts.)
 //
 // The tmpdir MUST live under `REPO_ROOT` (not `os.tmpdir()`): Vite's dev
 // server denies module loads outside its `fs.allow` root, which defaults to
@@ -323,29 +327,20 @@ interface PackCeiling {
 }
 
 /**
- * si11a T6 RAISED the two per-resource packages' ceilings, and the reason is
- * a deliberate consequence of two approved decisions rather than bloat:
- * ADR-1 keeps the EAGER module (every resource's content inlined as JS
- * strings) byte-identical for offline consumers, while ADR-4 additionally
- * ships the raw `.puml` assets in the package because there is no
- * plantuml-ts CDN and a self-hosting consumer needs files to serve. Each
- * bundle's content therefore exists twice, in two encodings, on purpose.
+ * Only `stdlib` is packed HERE. The two asset-bearing packages
+ * (`stdlib-aws`, `stdlib-tupadr3`) moved their ceiling + LICENSE assertions
+ * to `stdlib-package-files.test.ts`, which already packs them for the
+ * manifest-path check.
  *
- * Measured 2026-07-31 after T6: stdlib-aws 16,665,500 B (was ~8.3 MB),
- * stdlib-tupadr3 40,780,091 B (was ~20.5 MB). The ceilings below keep
- * roughly 2 MB / 6 MB of headroom over those figures -- enough to absorb
- * ordinary vendored-asset drift, tight enough to still catch an accidental
- * third copy.
- *
- * `stdlib` is unchanged at 8 MB: it ships no assets and no manifests
- * (si11a T6 is scoped to the two giants; SI8's per-bundle laziness already
- * covers the rest).
+ * That split is a correctness requirement, not tidiness. si11a T6 gave those
+ * two packages a `prepack` hook (`copy-assets.mjs`) that rebuilds their
+ * `assets/` tree, and vitest runs test files in parallel workers -- so two
+ * files packing the same package had one enumerating `assets/` while the
+ * other rebuilt it, surfacing as `ENOENT: lstat .../address_card_o.puml` and
+ * npm's "tarball data seems to be corrupted" warning. `stdlib` has no
+ * `prepack` and no assets, so it cannot race and stays here.
  */
-const PACK_CEILINGS: readonly PackCeiling[] = [
-  { packageDir: 'stdlib', ceilingMb: 8 },
-  { packageDir: 'stdlib-aws', ceilingMb: 18 },
-  { packageDir: 'stdlib-tupadr3', ceilingMb: 45 },
-];
+const PACK_CEILINGS: readonly PackCeiling[] = [{ packageDir: 'stdlib', ceilingMb: 8 }];
 
 describe('npm pack --dry-run: tarball ceilings + LICENSE presence', () => {
   it.each(PACK_CEILINGS)(

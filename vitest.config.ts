@@ -4,6 +4,12 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['tests/**/*.test.ts'],
+    // Generates `packages/*/generated/` once, before any worker starts.
+    // Three test files read that tree and each used to rebuild it in its own
+    // `beforeAll`; since the build `rmSync`s the directory first, parallel
+    // workers raced and the suite passed only ~every other run. See the
+    // module's own comment for the failure signature (si11a T8).
+    globalSetup: ['tests/helpers/build-stdlib-globalsetup.ts'],
     exclude: ['tests/e2e/**'],
     passWithNoTests: true,
     coverage: {

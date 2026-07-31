@@ -21,12 +21,14 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { buildStdlibPackages } from '../../scripts/build-stdlib-packages.js';
+import { emitModuleJs } from '../../scripts/build-stdlib-packages/emit-module.js';
+import { PACKAGE_SPECS } from '../../scripts/build-stdlib-packages/package-specs.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
+const ASSETS_STDLIB_DIR = join(REPO_ROOT, 'assets', 'stdlib');
 
 interface RemoteManifestLike {
   readonly name: string;
@@ -78,10 +80,6 @@ function sha256Hex(bytes: Buffer): string {
   return createHash('sha256').update(bytes).digest('hex');
 }
 
-beforeAll(() => {
-  buildStdlibPackages();
-}, 30_000);
-
 // ---------------------------------------------------------------------------
 // Acceptance 1: exports carries the remote subpath, files carries `assets`.
 // ---------------------------------------------------------------------------
@@ -123,7 +121,30 @@ interface ManifestPackagingCase {
   readonly manifestModuleFile: string;
   readonly manifestExportName: string;
   readonly assetFolder: string;
+  /**
+   * Unpacked-size ceiling, asserted HERE rather than in
+   * `stdlib-packages.test.ts`, so that exactly ONE test file ever runs
+   * `npm pack` against an asset-bearing package.
+   *
+   * That is a correctness requirement, not tidiness. `npm pack` triggers
+   * each package's `prepack` -> `copy-assets.mjs`, and vitest runs test
+   * files in parallel workers: two files packing the same package had one
+   * enumerating `assets/` while the other rebuilt it, surfacing as
+   * `ENOENT: lstat .../assets/tupadr3/font-awesome/address_card_o.puml`
+   * plus npm's "tarball data seems to be corrupted" warning. The
+   * `isUpToDate` guard in `copy-assets.mjs` closes the window; keeping the
+   * packs in one file removes the contention that opened it.
+   *
+   * The packages roughly DOUBLED in si11a: ADR-1 keeps the eager inlined
+   * module byte-identical for offline consumers while ADR-4 additionally
+   * ships the raw `.puml` files, so each bundle's content exists twice, in
+   * two encodings, deliberately. Measured 2026-07-31: stdlib-aws
+   * 16,665,500 B, stdlib-tupadr3 40,780,091 B.
+   */
+  readonly ceilingMb: number;
 }
+
+const BYTES_PER_MB = 1024 * 1024;
 
 const MANIFEST_PACKAGING_CASES: readonly ManifestPackagingCase[] = [
   {
@@ -132,6 +153,7 @@ const MANIFEST_PACKAGING_CASES: readonly ManifestPackagingCase[] = [
     manifestModuleFile: 'awslib14.remote.js',
     manifestExportName: 'awslib14Remote',
     assetFolder: 'awslib14',
+    ceilingMb: 18,
   },
   {
     label: 'stdlib-tupadr3/tupadr3',
@@ -139,13 +161,14 @@ const MANIFEST_PACKAGING_CASES: readonly ManifestPackagingCase[] = [
     manifestModuleFile: 'tupadr3.remote.js',
     manifestExportName: 'tupadr3Remote',
     assetFolder: 'tupadr3',
+    ceilingMb: 45,
   },
 ];
 
 describe('acceptance 2: every emitted manifest path is inside the resolved package contents', () => {
   it.each(MANIFEST_PACKAGING_CASES)(
     '$label',
-    async ({ packageDir, manifestModuleFile, manifestExportName, assetFolder }) => {
+    async ({ packageDir, manifestModuleFile, manifestExportName, assetFolder, ceilingMb }) => {
       const manifestModule = await importGenerated<Record<string, RemoteManifestLike>>(
         packageDir,
         manifestModuleFile,
@@ -163,8 +186,16 @@ describe('acceptance 2: every emitted manifest path is inside the resolved packa
         const expectedPackedPath = `assets/${assetFolder}/${relPath}`;
         expect(packedPaths.has(expectedPackedPath)).toBe(true);
       }
+
+      // Folded in from `stdlib-packages.test.ts` so only one test file packs
+      // this package -- see `ceilingMb`'s comment for the race that motivated
+      // it. Reuses the pack result already computed above rather than
+      // invoking `npm pack` a second time.
+      expect(packed.unpackedSize).toBeLessThan(ceilingMb * BYTES_PER_MB);
+      expect(packedPaths.has('LICENSE')).toBe(true);
+      expect(packedPaths.has('LICENSES.md')).toBe(true);
     },
-    60_000,
+    120_000,
   );
 });
 
@@ -175,19 +206,45 @@ describe('acceptance 2: every emitted manifest path is inside the resolved packa
 // vitest run started after the task lands cannot see pre-task bytes).
 // ---------------------------------------------------------------------------
 
+interface EagerModuleCase {
+  readonly label: string;
+  readonly packageDir: string;
+  readonly fileBaseName: string;
+}
+
+const EAGER_MODULE_CASES: readonly EagerModuleCase[] = [
+  { label: 'stdlib-aws/awslib14.js', packageDir: 'stdlib-aws', fileBaseName: 'awslib14' },
+  { label: 'stdlib-aws/awslib.js', packageDir: 'stdlib-aws', fileBaseName: 'awslib' },
+  { label: 'stdlib-tupadr3/tupadr3.js', packageDir: 'stdlib-tupadr3', fileBaseName: 'tupadr3' },
+];
+
+/**
+ * Re-emits each eager module through the SAME pure emitter the build uses and
+ * compares bytes, rather than calling `buildStdlibPackages()` again.
+ *
+ * The rebuild-and-compare version of this test was itself a race: it is a
+ * WRITER of `packages/*&#47;generated/`, and vitest runs test files in parallel
+ * workers, so it deleted and rewrote the tree while other files were
+ * `import()`ing out of it (`Failed to load url .../awslib14.remote.js`).
+ * `emitModuleJs` is a pure function of the spec plus the vendored assets, so
+ * re-emitting proves the same property -- regeneration yields byte-identical
+ * eager modules -- with no filesystem mutation at all.
+ *
+ * The before/after sha256 comparison against PRE-task bytes is recorded in
+ * si11a T6's return report and the decision journal; a vitest run starting
+ * after the task landed cannot observe those bytes.
+ */
 describe('acceptance 3: eager modules are unaffected by asset packaging', () => {
-  it('awslib14.js, awslib.js, tupadr3.js are byte-identical across repeated regeneration', () => {
-    const files = [
-      join(PACKAGES_DIR, 'stdlib-aws', 'generated', 'awslib14.js'),
-      join(PACKAGES_DIR, 'stdlib-aws', 'generated', 'awslib.js'),
-      join(PACKAGES_DIR, 'stdlib-tupadr3', 'generated', 'tupadr3.js'),
-    ];
-    const before = files.map((f) => sha256Hex(readFileSync(f)));
+  it.each(EAGER_MODULE_CASES)('$label is byte-identical to a fresh emit', ({ packageDir, fileBaseName }) => {
+    const spec = PACKAGE_SPECS.find((s) => s.packageDir === packageDir);
+    expect(spec).toBeDefined();
+    const mod = spec?.modules.find((m) => m.fileBaseName === fileBaseName);
+    expect(mod).toBeDefined();
 
-    buildStdlibPackages();
+    const onDisk = readFileSync(join(PACKAGES_DIR, packageDir, 'generated', `${fileBaseName}.js`));
+    const freshlyEmitted = Buffer.from(emitModuleJs(mod!, ASSETS_STDLIB_DIR), 'utf8');
 
-    const after = files.map((f) => sha256Hex(readFileSync(f)));
-    expect(after).toEqual(before);
+    expect(sha256Hex(onDisk)).toBe(sha256Hex(freshlyEmitted));
   });
 });
 
