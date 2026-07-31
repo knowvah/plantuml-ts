@@ -4,8 +4,8 @@ Two tasks, parallel. Disjoint write-sets and no shared output.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Wire the registry into the transitive prefetch walk | typescript-pro | `src/core/include-resolver.ts`, `src/index.ts`, `tests/unit/stdlib-registry-prefetch.test.ts` | T1, T2 | [ ] |
-| T6 | Revert the three sprite fixtures to `!include`; re-capture goldens | typescript-pro | `oracle/goldens/svg-description/usecase/sprite-svg-*/{in.puml,golden.svg}` | T5 | [ ] |
+| T3 | Wire the registry into the transitive prefetch walk | typescript-pro | `src/core/include-resolver.ts`, `src/index.ts`, `tests/unit/stdlib-registry-prefetch.test.ts` | T1, T2 | [x] |
+| T6 | Revert the three sprite fixtures to `!include`; re-capture goldens | typescript-pro | `oracle/goldens/svg-description/usecase/sprite-svg-*/{in.puml,golden.svg}` | T5 | [x] |
 
 ## Batch exit criteria
 
