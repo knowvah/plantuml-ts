@@ -19,32 +19,41 @@ assets are served from and wire it into `RenderOptions` yourself.
 
 ## Recipe: self-hosted assets
 
-Copy the bundle's `.puml` assets (from the `@plantuml-ts/stdlib-*` package,
-or your own icon set) into a static directory your app already serves, and
-point `baseUrl` at it:
+Each `@plantuml-ts/stdlib-*` package ships its raw `.puml` assets under
+`assets/<bundleFolder>/` (e.g. `assets/tupadr3/`) — copy that directory into
+a static directory your app already serves, and point `baseUrl` at it. Wrap
+the manifest with `remoteStdlib()` and register the result as a
+`stdlibRegistry()` thunk — never register a bare manifest directly (a
+manifest is structurally identical to a `BundleData` at runtime, so the
+registry would serve file PATHS as file CONTENT; the wrap is what supplies
+`baseUrl` and turns it into a real `RemoteBundle`):
 
 ```ts
-import { remoteStdlib, render } from '@plantuml-ts/core';
-import type { StdlibRemoteManifest } from '@plantuml-ts/core';
+import { remoteStdlib, stdlibRegistry, render } from 'plantuml-ts';
+import { tupadr3Remote } from '@plantuml-ts/stdlib-tupadr3/tupadr3.remote';
 
-// The manifest ships alongside the vendored assets today as
-// assets/manifests/<bundle>.json — copy it and the referenced .puml files
-// into your static dir together; there is no generated `.../remote`
-// package subpath to import yet (see "What doesn't exist yet" below).
-import manifest from './static/plantuml-stdlib/tupadr3.json' with { type: 'json' };
-
-const tupadr3 = remoteStdlib({
-  manifest: manifest as StdlibRemoteManifest,
-  baseUrl: 'https://static.example.com/plantuml-stdlib/tupadr3/',
+const registry = stdlibRegistry({
+  tupadr3: () =>
+    Promise.resolve(
+      remoteStdlib({
+        manifest: tupadr3Remote,
+        baseUrl: 'https://static.example.com/plantuml-stdlib/tupadr3/',
+      }),
+    ),
 });
 
-await render(source, {
-  stdlibRegistry: {
-    resolve: async (bundle) =>
-      bundle.toLowerCase() === 'tupadr3' ? tupadr3.asBundleData() : undefined,
-  },
-});
+await render(source, { stdlibRegistry: registry });
 ```
+
+`stdlibRegistry` and `render` are both exported from `plantuml-ts`, and
+`stdlibRegistry`'s result is a valid `RenderOptions.stdlibRegistry`.
+
+**Publish status:** the `.remote` subpaths above exist in-repo today but
+`npm publish` for the `@plantuml-ts/stdlib-*` packages is a separate,
+maintainer-gated step (mission SI5b) that has not happened yet — you cannot
+`npm install` them from the registry today. Until they're published, build
+against the in-repo package source, or use the "hand-built manifest" recipe
+below with your own copy of the manifest JSON.
 
 This keeps the library's "offline unless you opt in" guarantee literally
 true: no request leaves the process until you configure a `baseUrl` you
@@ -57,8 +66,8 @@ You may point `baseUrl` at a third-party CDN (jsDelivr, unpkg) yourself,
 
 ```ts
 const tupadr3 = remoteStdlib({
-  manifest,
-  baseUrl: 'https://cdn.jsdelivr.net/npm/@plantuml-ts/stdlib-tupadr3@1.4.0/assets/',
+  manifest: tupadr3Remote,
+  baseUrl: 'https://cdn.jsdelivr.net/npm/@plantuml-ts/stdlib-tupadr3@1.4.0/assets/tupadr3/',
 });
 ```
 
@@ -76,8 +85,8 @@ not gated behind the generator. A third party hosting their own icon set
 writes one directly, with zero `@plantuml-ts` dependency:
 
 ```ts
-import { remoteStdlib } from '@plantuml-ts/core';
-import type { StdlibRemoteManifest } from '@plantuml-ts/core';
+import { remoteStdlib } from 'plantuml-ts';
+import type { StdlibRemoteManifest } from 'plantuml-ts';
 
 const myIcons: StdlibRemoteManifest = {
   name: 'my-icons',
@@ -144,13 +153,15 @@ What to watch, since there is no runbook — there is no service:
 
 ## What this does not solve (ADR-6, measured)
 
-- **The manifest is a floor.** The generated `tupadr3` manifest gzips to
-  **50.9 KiB (52,118 bytes)**, measured 2026-07-31 against the current
-  vendored assets — a consumer pays that before a single icon resource
-  loads. (ADR-6's original 49.6 KB figure was a pre-measurement projection;
-  this is the re-measured number.) `awslib14`'s manifest was projected at
-  8.3 KB gzip but has not been re-measured against current assets — treat
-  that figure as unverified, not confirmed.
+- **The manifest is a floor.** Measured against the real emitted package
+  output: the `tupadr3` manifest is **433,420 B raw / 51,803 B gzip
+  (~51.8 KB)** against a 20,488,276 B (~20.5 MB) eager module, and the
+  `awslib14` manifest is **71,848 B raw / 11,116 B gzip (~11.1 KB)** against
+  an 8,319,265 B (~8.3 MB) eager module — a consumer pays the gzip figure
+  before a single icon resource loads. (ADR-6's original projections — 49.6
+  KB for tupadr3, 8.3 KB for awslib14 — are both superseded by these
+  measurements; awslib14 in particular measures noticeably higher than
+  projected.)
 - **Request count scales with icon count.** A diagram using 50 icons makes
   ~51 requests (1 manifest fetch's worth of setup plus one per icon).
   HTTP/2 multiplexing mitigates the latency cost of many small requests; it
@@ -165,14 +176,20 @@ What to watch, since there is no runbook — there is no service:
   no-op there because there is only one resource to split. Per-sprite
   splitting for bootstrap is a separate, deferred mission (SI11b).
 
-## What doesn't exist yet
+## Package subpaths and publish status
 
-The generator (`buildStdlibPackages()`) does not currently read
-`spec.remoteModules` or emit a manifest module into the `@plantuml-ts/
-stdlib-*` packages, and no package subpath is wired up to serve one. There
-is **no `@plantuml-ts/stdlib-tupadr3/.../remote` import you can use today.**
-The recipes above work now because they hand you (or you hand-construct)
-a plain `StdlibRemoteManifest` object — that is the only consumer-facing
-path that currently exists. A generated-package import path is coming with
-the generated packages, once that generator work lands, and this document
-will be updated at that point.
+The generator now emits a `.remote` manifest module per bundle, and each
+package ships its raw `.puml` assets alongside it under `assets/
+<bundleFolder>/`:
+
+- `@plantuml-ts/stdlib-tupadr3/tupadr3.remote` → exports `tupadr3Remote`
+- `@plantuml-ts/stdlib-aws/awslib14.remote` → exports `awslib14Remote`
+- `@plantuml-ts/stdlib-aws/awslib.remote` → exports `awslibRemote` (the
+  `link:` alias to `awslib14` — `aliasOf: 'awslib14'`, empty `files`)
+
+**These subpaths exist in-repo but are not yet installable.** `npm publish`
+for the `@plantuml-ts/stdlib-*` packages remains a separate, maintainer-gated
+step (mission SI5b) that has not run — the packages are not currently on the
+npm registry. Until they are published, either build against the in-repo
+package source directly, or use the hand-built-manifest recipe above with
+your own copy of a manifest.
