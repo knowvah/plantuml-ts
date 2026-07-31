@@ -322,10 +322,29 @@ interface PackCeiling {
   readonly ceilingMb: number;
 }
 
+/**
+ * si11a T6 RAISED the two per-resource packages' ceilings, and the reason is
+ * a deliberate consequence of two approved decisions rather than bloat:
+ * ADR-1 keeps the EAGER module (every resource's content inlined as JS
+ * strings) byte-identical for offline consumers, while ADR-4 additionally
+ * ships the raw `.puml` assets in the package because there is no
+ * plantuml-ts CDN and a self-hosting consumer needs files to serve. Each
+ * bundle's content therefore exists twice, in two encodings, on purpose.
+ *
+ * Measured 2026-07-31 after T6: stdlib-aws 16,665,500 B (was ~8.3 MB),
+ * stdlib-tupadr3 40,780,091 B (was ~20.5 MB). The ceilings below keep
+ * roughly 2 MB / 6 MB of headroom over those figures -- enough to absorb
+ * ordinary vendored-asset drift, tight enough to still catch an accidental
+ * third copy.
+ *
+ * `stdlib` is unchanged at 8 MB: it ships no assets and no manifests
+ * (si11a T6 is scoped to the two giants; SI8's per-bundle laziness already
+ * covers the rest).
+ */
 const PACK_CEILINGS: readonly PackCeiling[] = [
   { packageDir: 'stdlib', ceilingMb: 8 },
-  { packageDir: 'stdlib-aws', ceilingMb: 15 },
-  { packageDir: 'stdlib-tupadr3', ceilingMb: 35 },
+  { packageDir: 'stdlib-aws', ceilingMb: 18 },
+  { packageDir: 'stdlib-tupadr3', ceilingMb: 45 },
 ];
 
 describe('npm pack --dry-run: tarball ceilings + LICENSE presence', () => {
@@ -338,7 +357,15 @@ describe('npm pack --dry-run: tarball ceilings + LICENSE presence', () => {
       expect(result.files.some((f) => f.path === 'LICENSE')).toBe(true);
       expect(result.files.some((f) => f.path === 'LICENSES.md')).toBe(true);
     },
-    30_000,
+    // si11a T6 made `npm pack` genuinely slower: each of these packages now
+    // runs a `prepack` hook that byte-copies its vendored `.puml` assets
+    // (6,849 files for tupadr3) before packing. Measured standalone at 12.1 s
+    // for stdlib-tupadr3; under the full suite's parallel worker load that
+    // overran the previous 30 s budget and surfaced as a bare
+    // 'Command failed: npm pack --dry-run --json' -- a TIMEOUT wearing the
+    // costume of a packaging failure. The ceiling assertion itself passes
+    // (40,780,091 B < 45 MB). Raised with headroom for a loaded machine.
+    120_000,
   );
 
   it('packages/stdlib-all ships a LICENSE and no vendored data of its own', () => {

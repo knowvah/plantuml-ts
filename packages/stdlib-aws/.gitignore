@@ -1,0 +1,4 @@
+# Copied vendored .puml assets (scripts/copy-assets.mjs, run as `prepack`).
+# Regenerable, byte-verbatim copy of ../../assets/stdlib/awslib14/ --
+# mirrors the root .gitignore's treatment of generated/.
+assets/

@@ -11,10 +11,13 @@
     "directory": "packages/stdlib-aws"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "copy-assets": "node scripts/copy-assets.mjs",
+    "prepack": "npm run copy-assets"
   },
   "files": [
     "generated",
+    "assets",
     "licenses",
     "LICENSE",
     "LICENSE-CODE",
@@ -35,6 +38,14 @@
     "./awslib": {
       "types": "./generated/awslib.d.ts",
       "import": "./generated/awslib.js"
+    },
+    "./awslib14.remote": {
+      "types": "./generated/awslib14.remote.d.ts",
+      "import": "./generated/awslib14.remote.js"
+    },
+    "./awslib.remote": {
+      "types": "./generated/awslib.remote.d.ts",
+      "import": "./generated/awslib.remote.js"
     },
     "./package.json": "./package.json"
   },

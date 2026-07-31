@@ -11,10 +11,13 @@
     "directory": "packages/stdlib-tupadr3"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "copy-assets": "node scripts/copy-assets.mjs",
+    "prepack": "npm run copy-assets"
   },
   "files": [
     "generated",
+    "assets",
     "licenses",
     "LICENSE",
     "LICENSES.md",
@@ -26,6 +29,10 @@
     ".": {
       "types": "./generated/index.d.ts",
       "import": "./generated/index.js"
+    },
+    "./tupadr3.remote": {
+      "types": "./generated/tupadr3.remote.d.ts",
+      "import": "./generated/tupadr3.remote.js"
     },
     "./package.json": "./package.json"
   },
