@@ -54,13 +54,13 @@ import type { StringLocated } from './core/tim/StringLocated.js';
 // registry and warm-up are published here too, not just from their modules.
 export { stdlibStore, withStdlib } from './core/tim/StdlibStore.js';
 export type { BundleData, StdlibStore } from './core/tim/StdlibStore.js';
-export { stdlibRegistry, StdlibChunkLoadError } from './core/tim/StdlibRegistry.js';
-export { prepareIncludeStore } from './core/include-resolver.js';
-export type { StdlibRegistry } from './core/tim/StdlibRegistry.js';
-export type { IncludeWarmupOptions } from './core/include-resolver.js';
+export { stdlibRegistry, StdlibChunkLoadError, type StdlibRegistry } from './core/tim/StdlibRegistry.js';
+export { prepareIncludeStore, type IncludeWarmupOptions } from './core/include-resolver.js';
 // SI11a per-RESOURCE fetch (vs. si8's per-BUNDLE chunk above); see StdlibRemote.ts's doc comment.
-export { remoteStdlib, StdlibResourceFetchError } from './core/tim/StdlibRemote.js';
-export type { StdlibRemoteManifest, RemoteBundle } from './core/tim/StdlibRemote.js';
+// si11b's `spriteSplitStdlib` is one level finer again: a bootstrap diagram pays for the sprites
+// it names, not the 1.06 MB bundle holding all 2,078 of them.
+export { remoteStdlib, StdlibResourceFetchError, type StdlibRemoteManifest, type RemoteBundle } from './core/tim/StdlibRemote.js';
+export { spriteSplitStdlib, SpriteNotBundledError, type SpriteSplitManifest } from './core/sprite-split-stdlib.js';
 
 // Register plugins in specificity order — most specific first, sequence last.
 // Sequence plugin uses broad arrow heuristics (-->) that overlap with graph

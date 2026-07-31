@@ -21,8 +21,11 @@
  *
  * REGISTRATION RECIPE -- how a consumer opts a bundle into per-sprite loading:
  *
- *   import { spriteSplitStdlib } from 'plantuml-ts/core/sprite-split-stdlib.js';
- *   import { stdlibRegistry } from 'plantuml-ts/core/tim/StdlibRegistry.js';
+ *   // Both come from the package root: `package.json`'s "exports" map has a
+ *   // single "." entry, so `src/index.ts` is the ONLY surface a consumer of
+ *   // the built library can import from -- a deep path into `core/` is not
+ *   // reachable, however tidy it looks.
+ *   import { spriteSplitStdlib, stdlibRegistry } from 'plantuml-ts';
  *   import manifest from './bootstrap1.13.1/sprites.json' with { type: 'json' };
  *
  *   const registry = stdlibRegistry({

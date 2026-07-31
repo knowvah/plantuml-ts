@@ -305,3 +305,22 @@ describe('sprite-split prefetch -- registration against a REAL emitted fragment 
     expect(sprite?.height).toBe(16);
   });
 });
+
+/**
+ * Orchestrator review finding: si11a re-exports `remoteStdlib` from
+ * `src/index.ts` because `package.json`'s "exports" map has a single "."
+ * entry -- that file is the ONLY surface a consumer of the built library can
+ * import from. si11b's registration helper first shipped without that
+ * re-export, so the feature was unreachable from the public API while every
+ * unit test (importing by relative path) passed. This pins the fix.
+ */
+describe('si11b public surface', () => {
+  it('reaches the per-sprite registration helper from the package entry point', async () => {
+    const entry = await import('../../src/index.js');
+
+    expect(typeof entry.spriteSplitStdlib).toBe('function');
+    expect(typeof entry.SpriteNotBundledError).toBe('function');
+    // The si11a helper it sits beside, as the shape being matched.
+    expect(typeof entry.remoteStdlib).toBe('function');
+  });
+});
