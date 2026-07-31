@@ -88,3 +88,36 @@ export const PACKAGE_SPECS: readonly PackageSpec[] = [
   STDLIB_AWS_PACKAGE,
   STDLIB_TUPADR3_PACKAGE,
 ];
+
+/**
+ * si11b T1 -- the ONE bundle that additionally gets a per-sprite fragment
+ * split (`plans/si11b-bootstrap-sprite-splitting/decisions.md` ADR-1/
+ * ADR-3): `bootstrap1.13.1` is a single 1.06 MB `.puml` file whose content
+ * is 99.6% `sprite` blocks, so the eager module above and SI11a's
+ * `remoteModules` (per-RESOURCE granularity) cannot help -- it is one
+ * resource.
+ *
+ * Declared as a standalone constant, not a new `PackageSpec` field: that
+ * keeps this task's write-set from needing to touch `types.ts`, which
+ * already fully describes `stdlib`'s eager module above.
+ * `scripts/build-stdlib-packages.ts` reads this directly, alongside the
+ * `PACKAGE_SPECS` loop.
+ */
+export interface SpriteSplitBundleSpec {
+  /** Directory name under `packages/` this bundle's fragments ship in. */
+  readonly packageDir: string;
+  /** `BundleData.name` / vendored folder name, e.g. `'bootstrap1.13.1'`. */
+  readonly bundleName: string;
+  /** Vendored source file, relative to `assets/stdlib/<bundleName>/`. */
+  readonly sourceFile: string;
+  /** `assets/stdlib.manifest.json`'s per-bundle `license` field -- the
+   *  ADR-2 allowlist gate's input. */
+  readonly license: string | undefined;
+}
+
+export const BOOTSTRAP_SPRITE_SPLIT: SpriteSplitBundleSpec = {
+  packageDir: 'stdlib',
+  bundleName: 'bootstrap1.13.1',
+  sourceFile: 'bootstrap.puml',
+  license: 'MIT License',
+};

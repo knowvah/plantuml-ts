@@ -30,8 +30,9 @@ import {
   emitRemoteManifestDts,
   emitRemoteManifestJs,
 } from './build-stdlib-packages/emit-remote-manifest.js';
-import { PACKAGE_SPECS } from './build-stdlib-packages/package-specs.js';
+import { BOOTSTRAP_SPRITE_SPLIT, PACKAGE_SPECS } from './build-stdlib-packages/package-specs.js';
 import type { PackageSpec } from './build-stdlib-packages/types.js';
+import { splitSpriteBundle } from './split-sprite-bundle/split.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
@@ -74,6 +75,29 @@ function buildAllPackage(): void {
   writeFileSync(join(generatedDir, 'index.d.ts'), emitAllIndexDts(), 'utf8');
 }
 
+/**
+ * si11b T1: derives `bootstrap1.13.1`'s per-sprite fragments (ADR-1) into
+ * `packages/<packageDir>/assets/<bundleName>/sprites/<name>.puml`, plus a
+ * sibling `sprites.json` carrying the returned `SpriteSplitManifest` --
+ * `JSON.stringify` on the whole object, matching `emit-module.ts`'s
+ * VERBATIM escaping discipline. This is the wiring SI11a's equivalent task
+ * skipped (T5 shipped an emitter nothing called): `buildStdlibPackages`
+ * calls it directly, so `npm run build:stdlib` actually emits.
+ */
+function buildSpriteSplits(): void {
+  const spec = BOOTSTRAP_SPRITE_SPLIT;
+  const bundleAssetsDir = join(PACKAGES_DIR, spec.packageDir, 'assets', spec.bundleName);
+
+  const manifest = splitSpriteBundle({
+    sourcePumlPath: join(ASSETS_STDLIB_DIR, spec.bundleName, spec.sourceFile),
+    outDir: join(bundleAssetsDir, 'sprites'),
+    bundleName: spec.bundleName,
+    license: spec.license,
+  });
+
+  writeFileSync(join(bundleAssetsDir, 'sprites.json'), JSON.stringify(manifest), 'utf8');
+}
+
 /** Generates every `@plantuml-ts/stdlib*` package's `generated/` tree from
  * `assets/stdlib/`. Exported so `tests/unit/stdlib-packages.test.ts` can
  * invoke it directly rather than shelling out. */
@@ -89,6 +113,7 @@ export function buildStdlibPackages(): void {
     buildPackage(spec);
   }
   buildAllPackage();
+  buildSpriteSplits();
 }
 
 const isMain = process.argv[1] !== undefined && import.meta.url === `file://${process.argv[1]}`;
