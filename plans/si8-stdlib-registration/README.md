@@ -66,7 +66,7 @@ sprite fixtures are now pinned. See [ADR-6](decisions.md#adr-6).
 
 | Batch | Tasks | Theme | Done |
 |---|---|---|---|
-| [1](batch-1/overview.md) | T1 | Prefetch consults the stdlib seam | [ ] |
+| [1](batch-1/overview.md) | T1 | Prefetch consults the stdlib seam | [x] |
 | [2](batch-2/overview.md) | T2 ∥ T5 | Registry module; golden harness wiring | [ ] |
 | [3](batch-3/overview.md) | T3 ∥ T6 | Registry into the walk; sprite revert | [ ] |
 | [4](batch-4/overview.md) | T4 | Sync warm-up + error rewrite | [ ] |

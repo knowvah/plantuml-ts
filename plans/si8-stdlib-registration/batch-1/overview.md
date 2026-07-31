@@ -6,7 +6,7 @@ repairs.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | `prefetchInner` consults `getPumlResource` before throwing | typescript-pro | `src/core/include-resolver.ts`, `tests/unit/stdlib-resolution.test.ts` | — | [ ] |
+| T1 | `prefetchInner` consults `getPumlResource` before throwing | typescript-pro | `src/core/include-resolver.ts`, `tests/unit/stdlib-resolution.test.ts` | — | [x] |
 
 ## Batch exit criteria
 
