@@ -196,6 +196,43 @@ declared 16×16 give `rx=34.729` (`bi-globe`, whose outer circle is an arc, so
 `UPath.addInternal` records only the endpoint) versus `rx=37.4784`
 (`bi-bootstrap-fill`, which inks the full box) at scale 2.5.
 
+### Amendment 2026-07-31 (si8) — the declarations are no longer inlined
+
+The section above described these fixtures as inlining their `sprite <name>
+<svg …>` declarations, and gave the reason: `renderFixture` wired no include
+store, so no golden in any suite could use `!include`. Mission
+`si8-stdlib-registration` (`plans/si8-stdlib-registration/`) falsified both
+halves, in that order:
+
+- **T5** gave `render-fixture.ts` an include store built the way
+  `svg-conformance-census.ts` builds one — the harness gap is closed.
+- **T6** replaced the inline declarations with the include a user actually
+  writes: `!include <bootstrap/bootstrap>` for `sprite-svg-bootstrap-0` and
+  `sprite-svg-multiline-0`, and `!include <archimate/ArchimateSprites>` for
+  `sprite-svg-archimate-0` — **not** `<archimate/archimate>`, which is
+  `Archimate.puml` and declares no sprites at all; they live in that sibling
+  file (61 of them).
+
+All three returned to **zero diffs**, re-measured on the same path
+(`renderFixture` + `DeterministicMeasurer` + `compareSvg(…, 'deterministic')`),
+reproducing the table above exactly: 6 / 2 / 4 `<path>`, 0 `<image>`. None had
+to stay inlined.
+
+Each `golden.svg` was re-captured from the pinned oracle jar because its input
+legitimately changed — distinct from editing a golden to close a diff, which is
+forbidden. The capture command was validated first by reproducing all three
+*existing* goldens byte-for-byte from their unmodified inputs:
+
+```
+java -DPLANTUML_DETERMINISTIC_TEXT=true -jar oracle/dist/plantuml-oracle.jar \
+     -tsvg -o <dir> <in.puml>
+```
+
+Do **not** add `-nometadata`: these goldens carry the `<?plantuml-src …?>`
+processing instruction, which that flag strips. Each new golden is identical to
+its predecessor apart from that PI and a shifted `data-source-line` (the single
+include replaces eight inline lines); the comparator strips `data-*`.
+
 ### How an authored fixture reaches the parity corpus
 
 The "Add rule" above requires a `dotEqual: true` row in

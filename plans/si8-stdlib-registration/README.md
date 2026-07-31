@@ -1,6 +1,6 @@
 # Mission: si8-stdlib-registration
 
-**Status:** ready to execute · **Branch:** `main` (maintainer practice)
+**Status:** DONE 2026-07-31 · **Branch:** `main` (maintainer practice)
 **Created:** 2026-07-31 · **Predecessor:** `si9-authored-fixture-registration` (closed)
 
 ## Objective
@@ -70,7 +70,7 @@ sprite fixtures are now pinned. See [ADR-6](decisions.md#adr-6).
 | [2](batch-2/overview.md) | T2 ∥ T5 | Registry module; golden harness wiring | [x] |
 | [3](batch-3/overview.md) | T3 ∥ T6 | Registry into the walk; sprite revert | [x] |
 | [4](batch-4/overview.md) | T4 | Sync warm-up + error rewrite | [x] |
-| [5](batch-5/overview.md) | T7 | Close the mission | [ ] |
+| [5](batch-5/overview.md) | T7 | Close the mission | [x] |
 
 Batches 2 and 3 contain genuinely independent pairs — the golden harness runs
 in Node under vitest and can use the existing `buildStdlibAssetsStore()`, so
@@ -136,3 +136,85 @@ instance of the second.
 `plans/` is **tracked** in this project, not gitignored. The predecessor's
 brief is on `main` and `planning/mission-index.md` links into it. Established
 practice wins.
+
+---
+
+# Mission summary — DONE 2026-07-31
+
+**7 of 7 tasks completed across 5 batches.** 10 commits on `main`.
+
+## What shipped
+
+| Task | Outcome |
+|---|---|
+| T1 | `prefetchInner` consults `getPumlResource`; **a shipped defect fixed** |
+| T2 | `stdlibRegistry()` — per-bundle lazy registration via `import()` thunks |
+| T5 | `render-fixture.ts` wires an include store; goldens can use `!include` |
+| T3 | Registry wired into the transitive prefetch walk, resolved text recurses |
+| T6 | All three sprite fixtures reverted to `!include`, **all zero-diff** |
+| T4 | `prepareIncludeStore()` warm-up, public exports, error rewrite |
+| T7 | This close-out |
+
+## Gate results (final)
+
+| Gate | Result |
+|---|---|
+| `npm test` | **459 files / 11,219 tests** pass (was 457 / 11,180) |
+| `npm run typecheck` | exit 0 |
+| `npm run lint` | exit 0 |
+| `npm run build` | exit 0; all four new symbols in `dist/plantuml-ts.d.ts` |
+| `measure-description-size-deltas` | **320/351 (91.2%), widened 0** — unmoved |
+| 389 svg-class/object/state goldens | byte-identical |
+| svg-description ratchet (54) | all zero-diff, three sprite fixtures still pinned |
+
+## Decisions flagged for review
+
+1. **One STOP was raised and resolved by maintainer ruling** (T5). Two fixtures
+   recorded `status: "error"` in `oracle/goldens/svg-description/diff-baseline.json`
+   began rendering — at **0 diffs** — because T5 closed the exact harness gap
+   their `reason` fields named. That manifest sits outside every task's
+   write-set (stop condition 7). Approved and moved to `status: "baseline"`.
+   Neither is ratchet-promotable (`parity.json` `dotEqual: false`).
+2. **Two brief citations were wrong and were corrected by following the code**,
+   both in T6, both caught before anything was written:
+   - `<archimate/archimate>` declares **no sprites** (they are in
+     `ArchimateSprites.puml`, 61 of them).
+   - The capture command must **not** pass `-nometadata` — it strips the
+     `<?plantuml-src?>` PI the goldens carry. Caught by validating the command
+     against the existing goldens first.
+3. **T2's module-unwrap contract did not survive the real packages.** The
+   declared `resolve()` signature is unchanged, but "the export named after the
+   bundle" yields an empty alias stub for `bootstrap`. See the journal.
+4. **T4 edited two files outside its declared write-set**, both inside other
+   tasks' write-sets (not a stop condition): `include-resolver.ts` (T1/T3) and
+   `stdlib-resolution.test.ts` (T1, which pins the error text byte-for-byte).
+
+## Known issues and follow-ups
+
+- **Per-resource splitting did not ship**, deliberately and on measurement
+  (ADR-2). Now tracked as **SI11** in `planning/mission-index.md` with the
+  numbers and the two undecided options. A `tupadr3` consumer still pays
+  19.54 MB on first use — opt-in now, rather than always.
+- **The census still seeds from directive-stripped `block.lines`** while
+  `render-fixture.ts` seeds from raw source. `render-fixture.ts` is the correct
+  one; correcting `scripts/svg-conformance-census.ts` was outside every
+  write-set here. Stated in `render-fixture.ts`'s doc comment rather than left
+  as a false parity claim.
+- `usecase/fepuvo-06-rugi981` still errors, on its unrelated malformed-XML
+  mechanism — unchanged and correctly still recorded as an error.
+- **SI10** (class-engine `measureUsecase` coupling) is untouched and open.
+
+## Deviations from the brief
+
+- **T1 needed a second half the brief did not name.** Accepting the target in
+  `prefetchInner` alone fixes nothing observable: `BackedIncludeStore` — the
+  store `render()` hands the interpreter — did not forward `getPumlResource`,
+  so the identical error simply moved one layer later. Found by tracing
+  callers two levels, which is the brief's own method rule 1.
+- **`PrefetchWalk` and `prepareIncludeStore`'s placement were driven by the
+  complexity gates**, not by taste: the registry would have made
+  `prefetchInner` a 6-parameter function, and both `src/index.ts` and
+  `include-resolver.ts` sat at the 500-line cap. Neither required splitting a
+  module outside a write-set.
+- No ADR was contradicted. `renderSync` remains synchronous with an unchanged
+  signature; no Node built-in reached `src/`.
