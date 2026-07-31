@@ -32,8 +32,7 @@ import type { Theme } from './core/theme.js';
 import type { StyleMap } from './core/skinparam.js';
 import type { StringMeasurer } from './core/measurer.js';
 import type { DiagramType, UmlSource } from './core/block-extractor.js';
-import type { IncludeFetcher, IncludeStore } from './core/include-resolver.js';
-import { prefetchIncludes } from './core/include-resolver.js';
+import { prepareIncludeStore, type IncludeFetcher, type IncludeStore } from './core/include-resolver.js';
 import type { StdlibRegistry } from './core/tim/StdlibRegistry.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
 import { ErrorUml } from './core/error/ErrorUml.js';
@@ -49,10 +48,15 @@ import type { StringLocated } from './core/tim/StringLocated.js';
 // Re-exported so downstream stdlib packages (SI5b `@plantuml-ts/stdlib*`,
 // plans/si5b-stdlib/decisions.md D2) can build an `options.includeStore`
 // carrying vendored bundles. Required here specifically: `package.json`'s
-// "exports" map has a single "." entry (no subpath exports), so this file
-// is the only reachable surface for a package consuming the built library.
+// "exports" map has a single "." entry (no subpath exports), so this file is
+// the only reachable surface for a consumer of the built library — hence si8's
+// registry and warm-up are published here too, not just from their modules.
 export { stdlibStore, withStdlib } from './core/tim/StdlibStore.js';
 export type { BundleData, StdlibStore } from './core/tim/StdlibStore.js';
+export { stdlibRegistry, StdlibChunkLoadError } from './core/tim/StdlibRegistry.js';
+export { prepareIncludeStore } from './core/include-resolver.js';
+export type { StdlibRegistry } from './core/tim/StdlibRegistry.js';
+export type { IncludeWarmupOptions } from './core/include-resolver.js';
 
 // Register plugins in specificity order — most specific first, sequence last.
 // Sequence plugin uses broad arrow heuristics (-->) that overlap with graph
@@ -101,13 +105,13 @@ export interface RenderOptions {
   /**
    * Lazily-loaded stdlib bundles for `!include <bundle/thing>`, built with
    * `stdlibRegistry()` (`core/tim/StdlibRegistry.ts`): each bundle's payload
-   * loads on first use rather than up front, which matters at the sizes
-   * involved (`tupadr3` alone is 19.54 MB).
+   * loads on first use rather than up front, which matters at these sizes
+   * (`tupadr3` alone is 19.54 MB).
    *
-   * Consulted ONLY after `includeStore` misses on both its channels, so passing
-   * one never changes the outcome for a target that already resolved.
-   * `render()` / `renderAll()` only — `renderSync` cannot await a dynamic
-   * `import()`; sync callers resolve bundles first and pass `includeStore`.
+   * Consulted ONLY after `includeStore` misses on both channels, so passing one
+   * never changes the outcome for a target that already resolved. `render()` /
+   * `renderAll()` only — `renderSync` cannot await a dynamic `import()`; sync
+   * callers await `prepareIncludeStore` and pass its result as `includeStore`.
    */
   stdlibRegistry?: StdlibRegistry;
 }
@@ -344,16 +348,12 @@ export function renderSync(source: string, options?: RenderOptions): string {
   }
 }
 
-/** The async include pass, wired identically for `render` and `renderAll`. */
-async function prefetchFor(source: string, opts?: RenderOptions): Promise<IncludeStore> {
-  return prefetchIncludes(source, opts?.fetcher, opts?.includeStore, opts?.stdlibRegistry);
-}
 export async function render(
   source: string,
   options?: RenderOptions,
 ): Promise<string> {
   try {
-    const includeStore = await prefetchFor(source, options);
+    const includeStore = await prepareIncludeStore(source, options);
     const blocks = buildBlockUmls(source, { includeStore });
     if (blocks.length === 0) return welcomeSvg(options);
 
@@ -368,7 +368,7 @@ export async function renderAll(
   options?: RenderOptions,
 ): Promise<string[]> {
   try {
-    const includeStore = await prefetchFor(source, options);
+    const includeStore = await prepareIncludeStore(source, options);
     const blocks = buildBlockUmls(source, { includeStore });
     return await Promise.all(blocks.map(async (block) => renderBlock(block, options)));
   } catch (err) {

@@ -169,12 +169,21 @@ describe('withStdlib() wiring -- IncludeExecutor consults the store before throw
         return e as StdlibNotBundledError;
       }
     })();
+    // si8 T4/ADR-5 rewrote this text. The old wording advised
+    // "pass options.includeStore" unconditionally, which became actively
+    // misleading once a registry existed -- and it never mentioned the sync
+    // warm-up, which is the actual fix for a `renderSync` caller.
     expect(err).toBeInstanceOf(StdlibNotBundledError);
+    expect(err?.registrySupplied).toBe(false);
     expect(err?.message).toBe(
-      'Cannot resolve !include <fake/thing>: plantuml-ts bundles no PlantUML stdlib, ' +
-        "so the 'fake' bundle is not available.\n" +
-        'Supply it through the include seam: pass options.includeStore with an entry keyed ' +
-        "'<fake/thing>' (or 'fake/thing') whose value is the content of that stdlib file.",
+      "Cannot resolve !include <fake/thing>: no stdlib bundle named 'fake' is available.\n" +
+        'plantuml-ts vendors no PlantUML stdlib, so a host must supply the bundle. Either:\n' +
+        '  - render(): pass options.stdlibRegistry --\n' +
+        "      stdlibRegistry({ 'fake': () => import('@plantuml-ts/stdlib/fake') })\n" +
+        '  - renderSync(): it cannot await, so warm the store up first --\n' +
+        '      const includeStore = await prepareIncludeStore(source, { stdlibRegistry });\n' +
+        "  - or pass options.includeStore with an entry keyed '<fake/thing>' (or " +
+        "'fake/thing') whose value is the content of that stdlib file.",
     );
   });
 
@@ -255,7 +264,7 @@ describe('render() end-to-end with a host-supplied stdlib bundle', () => {
 
     expect(svg).toMatch(/>\s*Included\s*</);
     expect(svg).toMatch(/>\s*Root\s*</);
-    expect(svg).not.toContain('bundles no PlantUML stdlib');
+    expect(svg).not.toContain('no stdlib bundle named');
   });
 
   it('produces byte-identical output to renderSync for the same store and source', async () => {
@@ -279,7 +288,7 @@ describe('render() end-to-end with a host-supplied stdlib bundle', () => {
     const svg = await render(ASYNC_SOURCE, { includeStore: store, measurer: measurer() });
 
     expect(svg).toMatch(/>\s*Included\s*</);
-    expect(svg).not.toContain('bundles no PlantUML stdlib');
+    expect(svg).not.toContain('no stdlib bundle named');
   });
 
   it('a bundle neither channel resolves still reaches errorSvg as StdlibNotBundledError', async () => {
@@ -292,7 +301,9 @@ describe('render() end-to-end with a host-supplied stdlib bundle', () => {
     });
 
     expect(svg).toContain(
-      "plantuml-ts bundles no PlantUML stdlib, so the 'other' bundle is not available.",
+      // The target itself is XML-escaped in the card (`&lt;other/thing&gt;`),
+      // so assert on the part of the message that carries no angle brackets.
+      "no stdlib bundle named 'other' is available.",
     );
   });
 });

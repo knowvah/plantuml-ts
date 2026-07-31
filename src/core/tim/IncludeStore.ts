@@ -161,17 +161,51 @@ export class IncludeNotFoundError extends IncludeError {
 export class StdlibNotBundledError extends IncludeError {
   /** The bundle a host would have to supply -- `aws` from `<aws/common>`. */
   readonly bundle: string;
+  /** Whether a `stdlibRegistry` was in play; it changes the remedy entirely. */
+  readonly registrySupplied: boolean;
 
-  constructor(what: string, stdlibPath: string) {
+  /**
+   * @param registrySupplied A registry WAS supplied and had no entry for this
+   *        bundle. Optional and defaulting to `false` so the synchronous
+   *        `IncludeExecutor#load` -- which never has a registry -- keeps
+   *        constructing this unchanged.
+   */
+  constructor(what: string, stdlibPath: string, registrySupplied = false) {
     const bundle = stdlibBundleOf(stdlibPath);
     super(
-      `Cannot resolve !include ${what}: plantuml-ts bundles no PlantUML stdlib, ` +
-        `so the '${bundle}' bundle is not available.\n` +
-        `Supply it through the include seam: pass options.includeStore with an entry keyed ` +
-        `'${what}' (or '${stdlibPath}') whose value is the content of that stdlib file.`,
+      `Cannot resolve !include ${what}: no stdlib bundle named '${bundle}' is available.\n` +
+        remedyFor(what, stdlibPath, bundle, registrySupplied),
       stdlibPath,
       'StdlibNotBundledError',
     );
     this.bundle = bundle;
+    this.registrySupplied = registrySupplied;
   }
+}
+
+/**
+ * The actionable half of {@link StdlibNotBundledError}.
+ *
+ * The message this replaced said "pass options.includeStore" unconditionally.
+ * That became actively misleading once a registry existed (si8 ADR-5): it is
+ * the wrong advice for a `render()` caller who has a registry and merely
+ * forgot an entry, and it is not the shortest fix for anyone else either.
+ */
+function remedyFor(what: string, stdlibPath: string, bundle: string, registrySupplied: boolean): string {
+  const thunk = `stdlibRegistry({ '${bundle}': () => import('@plantuml-ts/stdlib/${bundle}') })`;
+  if (registrySupplied) {
+    return (
+      `A stdlibRegistry WAS supplied, but it has no entry for '${bundle}' -- ` +
+      `this is a missing registration, not a failed chunk load (which throws ` +
+      `StdlibChunkLoadError instead). Add one:\n  ${thunk}`
+    );
+  }
+  return (
+    `plantuml-ts vendors no PlantUML stdlib, so a host must supply the bundle. Either:\n` +
+    `  - render(): pass options.stdlibRegistry --\n      ${thunk}\n` +
+    `  - renderSync(): it cannot await, so warm the store up first --\n` +
+    `      const includeStore = await prepareIncludeStore(source, { stdlibRegistry });\n` +
+    `  - or pass options.includeStore with an entry keyed '${what}' (or ` +
+    `'${stdlibPath}') whose value is the content of that stdlib file.`
+  );
 }

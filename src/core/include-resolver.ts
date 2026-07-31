@@ -372,7 +372,9 @@ async function prefetchInner(
       // already-resolvable target does.
       const bundled =
         registry === undefined ? undefined : await stdlibContentFor(registry, stdlib);
-      if (bundled === undefined) throw new StdlibNotBundledError(url, stdlib);
+      if (bundled === undefined) {
+        throw new StdlibNotBundledError(url, stdlib, registry !== undefined);
+      }
 
       // Fold it in under the EXACT include key, which is the first thing
       // `IncludeExecutor#load` tries (`this.store.get(what)`) — deliberately
@@ -431,6 +433,37 @@ export async function prefetchIncludes(
   const store = new BackedIncludeStore(base);
   await prefetchInner({ fetcher, store, registry }, source, new Set<string>(), []);
   return store;
+}
+
+/** Options for {@link prepareIncludeStore}. A `RenderOptions` satisfies this. */
+export interface IncludeWarmupOptions {
+  readonly fetcher?: IncludeFetcher | undefined;
+  readonly includeStore?: IncludeStore | undefined;
+  readonly stdlibRegistry?: StdlibRegistry | undefined;
+}
+
+/**
+ * Resolve everything `source` includes and hand back a ready
+ * {@link IncludeStore} — the ASYNC half of `render()`, published so a
+ * SYNCHRONOUS caller can do the same two steps by hand:
+ * `const includeStore = await prepareIncludeStore(source, { stdlibRegistry });`
+ * then `renderSync(source, { includeStore })`.
+ *
+ * `renderSync` cannot await a dynamic `import()` and stays synchronous — public
+ * API, and a hard constraint of this port — so lazy registration is
+ * `render()`-only and this is the sync path's equivalent (si8 ADR-5).
+ *
+ * Three failure modes, each with a DIFFERENT fix, deliberately not collapsed
+ * into one error: `StdlibNotBundledError` (no bundle of that name is
+ * registered — add a thunk for it); `StdlibChunkLoadError` (it IS registered,
+ * its chunk failed to load — fix the bundler/CDN, not a plantuml-ts bug);
+ * `CircularIncludeError` (the `!include` chain loops — break it in the source).
+ */
+export async function prepareIncludeStore(
+  source: string,
+  options?: IncludeWarmupOptions,
+): Promise<IncludeStore> {
+  return prefetchIncludes(source, options?.fetcher, options?.includeStore, options?.stdlibRegistry);
 }
 
 /** A {@link MapIncludeStore} that falls back to a read-only base store on a miss. */

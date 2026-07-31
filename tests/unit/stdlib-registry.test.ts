@@ -19,6 +19,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { StdlibChunkLoadError, stdlibRegistry } from '../../src/core/tim/StdlibRegistry.js';
 import { stdlibStore, type BundleData } from '../../src/core/tim/StdlibStore.js';
+import * as publicApi from '../../src/index.js';
+import { prepareIncludeStore, renderSync } from '../../src/index.js';
+import { FormulaMeasurer } from '../../src/core/measurer.js';
+import { StdlibNotBundledError } from '../../src/core/tim/IncludeStore.js';
 
 const C4: BundleData = { name: 'c4', files: { c4_context: 'class C4Context' } };
 
@@ -196,5 +200,117 @@ describe('stdlibRegistry -- module shapes the generators really emit', () => {
       c4: async () => Promise.resolve({ version: '1.0', helper: () => 0, c4: C4 }),
     });
     expect(await registry.resolve('c4')).toBe(C4);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// si8 T4 -- the sync warm-up, the public surface, and the rewritten error.
+//
+// `renderSync` cannot await a dynamic import() and stays synchronous (public
+// API, hard constraint), so lazy registration is `render()`-only and sync
+// callers do the two steps by hand. ADR-5.
+// ---------------------------------------------------------------------------
+
+const measurer = (): FormulaMeasurer => new FormulaMeasurer();
+const SOURCE = ['@startuml', '!include <c4/c4>', 'class Root', '@enduml'].join('\n');
+const C4_DOC: BundleData = { name: 'c4', files: { c4: 'class Included' } };
+
+describe('prepareIncludeStore -- the renderSync warm-up (ADR-5)', () => {
+  it('warms a store that renderSync then renders the bundle content from', async () => {
+    const includeStore = await prepareIncludeStore(SOURCE, {
+      stdlibRegistry: stdlibRegistry({ c4: async () => Promise.resolve({ c4: C4_DOC }) }),
+    });
+
+    const svg = renderSync(SOURCE, { includeStore, measurer: measurer() });
+
+    expect(svg).toMatch(/>\s*Included\s*</);
+    expect(svg).toMatch(/>\s*Root\s*</);
+  });
+
+  it('leaves renderSync synchronous -- the warm-up is a separate, prior step', () => {
+    // If this ever returns a Promise, `renderSync` has become async and that is
+    // a hard STOP for this mission, not a test to update.
+    const svg = renderSync(['@startuml', 'class Solo', '@enduml'].join('\n'), {
+      measurer: measurer(),
+    });
+    expect(typeof svg).toBe('string');
+  });
+
+  it('a chunk failure during warm-up throws StdlibChunkLoadError, not the not-registered error', async () => {
+    const cause = new Error('Failed to fetch dynamically imported module');
+    const registry = stdlibRegistry({ c4: async () => Promise.reject(cause) });
+
+    const err = await prepareIncludeStore(SOURCE, { stdlibRegistry: registry }).then(
+      () => undefined,
+      (e: unknown) => e as StdlibChunkLoadError,
+    );
+
+    expect(err).toBeInstanceOf(StdlibChunkLoadError);
+    expect(err).not.toBeInstanceOf(StdlibNotBundledError);
+    expect(err?.cause).toBe(cause);
+  });
+
+  it('an unregistered bundle during warm-up throws StdlibNotBundledError', async () => {
+    const registry = stdlibRegistry({ other: async () => Promise.resolve({}) });
+
+    const err = await prepareIncludeStore(SOURCE, { stdlibRegistry: registry }).then(
+      () => undefined,
+      (e: unknown) => e as StdlibNotBundledError,
+    );
+
+    expect(err).toBeInstanceOf(StdlibNotBundledError);
+    expect(err?.bundle).toBe('c4');
+  });
+});
+
+describe('StdlibNotBundledError -- the rewritten remedy (ADR-5)', () => {
+  it('with a registry supplied, it says the entry is MISSING and never mentions includeStore', () => {
+    const err = new StdlibNotBundledError('<aws/common>', 'aws/common', true);
+
+    expect(err.registrySupplied).toBe(true);
+    expect(err.bundle).toBe('aws');
+    expect(err.message).toContain('<aws/common>');
+    expect(err.message).toContain("has no entry for 'aws'");
+    // The old text advised this unconditionally, which is the wrong fix for a
+    // caller who supplied a registry and merely forgot one entry.
+    expect(err.message).not.toContain('options.includeStore');
+    // Must not read like the chunk-load failure, which has a different fix.
+    expect(err.message).toContain('not a failed chunk load');
+  });
+
+  it('with no registry, it offers the render(), renderSync() and includeStore routes', () => {
+    const err = new StdlibNotBundledError('<aws/common>', 'aws/common');
+
+    expect(err.registrySupplied).toBe(false);
+    expect(err.message).toContain('options.stdlibRegistry');
+    expect(err.message).toContain('prepareIncludeStore');
+    expect(err.message).toContain('options.includeStore');
+  });
+
+  it('defaults registrySupplied to false, so the sync IncludeExecutor path is unchanged', () => {
+    // `IncludeExecutor#load` never has a registry and still constructs this with
+    // two arguments; the third is optional precisely so that call site is untouched.
+    expect(new StdlibNotBundledError('<c4/c4>', 'c4/c4').registrySupplied).toBe(false);
+  });
+});
+
+describe('public surface (criterion 5)', () => {
+  it('exports the registry API and the warm-up from the package entry point', () => {
+    // package.json's "exports" has a single "." entry, so index.ts is the only
+    // surface a consumer of the built library can reach.
+    expect(typeof publicApi.stdlibRegistry).toBe('function');
+    expect(typeof publicApi.prepareIncludeStore).toBe('function');
+    expect(typeof publicApi.StdlibChunkLoadError).toBe('function');
+  });
+
+  it('keeps the SI5b eager API exported and unchanged (ADR-3: the registry is additive)', () => {
+    expect(typeof publicApi.stdlibStore).toBe('function');
+    expect(typeof publicApi.withStdlib).toBe('function');
+
+    const store = publicApi.withStdlib(
+      { get: () => undefined, has: () => false },
+      publicApi.stdlibStore(C4_DOC),
+    );
+    expect(store.getPumlResource?.('c4/c4')).toBe('class Included');
   });
 });
