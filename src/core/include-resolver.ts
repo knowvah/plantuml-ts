@@ -40,11 +40,11 @@
 import {
   MapIncludeStore,
   StdlibNotBundledError,
-  stdlibBundleOf,
   stdlibPathOf,
   type IncludeStore,
 } from './tim/IncludeStore.js';
-import { stdlibStore, type BundleData } from './tim/StdlibStore.js';
+import type { BundleData } from './tim/StdlibStore.js';
+import { splitStdlibPath } from './tim/stdlib-path.js';
 import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 
 export {
@@ -264,24 +264,16 @@ function targetOf(line: string): string | undefined {
 }
 
 /**
- * Every `BundleData` needed to answer one `<bundle/thing>` lookup: the named
- * bundle, plus whatever its `aliasOf` chain leads to.
- *
- * The registry deliberately knows nothing about aliases (`StdlibRegistry.ts`),
- * and this function deliberately does not re-implement their SEMANTICS —
- * `stdlibStore` owns the lowercase/strip/split/alias/lookup pipeline that
- * mirrors `Stdlib.java#getPumlResource`, and having two answers to that
- * question is how the port would drift from the jar. All this does is COLLECT
- * the records so `stdlibStore` has them in hand.
- *
- * The chain must be walked one link at a time because a bundle name is only
- * addressable once its chunk has loaded: `bootstrap`'s chunk is what reveals
- * that `bootstrap1.13.1` exists (both live in it, so the second `resolve` is a
- * cache hit, not a second `import()`).
- *
- * A cycle stops collection and yields whatever was gathered; `stdlibStore`'s
- * own `resolveBundle` guard then reports the miss. Upstream has no such guard
- * and would infinite-loop the JVM — see `StdlibStore.ts`'s divergence note.
+ * Every `BundleData` needed to walk one `<bundle/thing>` lookup's alias
+ * chain; the LAST element is the terminus (see {@link stdlibContentFor}).
+ * Alias semantics stay in `StdlibStore.ts#resolveBundle`, the key transform
+ * in `stdlib-path.ts#splitStdlibPath` — this only walks `registry.resolve`
+ * one link at a time (a bundle name is addressable only once its chunk has
+ * loaded: `bootstrap`'s chunk is what reveals `bootstrap1.13.1`, so the
+ * second `resolve` is a cache hit, not a second `import()`).
+ * A cycle stops collection with the last `aliasOf` still set;
+ * `stdlibContentFor` treats that as a miss (upstream has no such guard and
+ * would infinite-loop the JVM — see `StdlibStore.ts`'s divergence note).
  */
 async function bundlesFor(
   registry: StdlibRegistry,
@@ -305,21 +297,30 @@ async function bundlesFor(
   }
 }
 
-/** A registered bundle's content for `stdlibPath`, or `undefined` if nothing serves it. */
+/**
+ * A registered bundle's content for `stdlibPath`, or `undefined` if nothing
+ * serves it. si11a T3: asks for exactly ONE resource (ADR-2/ADR-6) instead of
+ * materialising every `BundleData` in the chain — ~2.9 KB vs 18.93 MB for
+ * `tupadr3`. `resolveResource` is uniform across eager/remote (T2).
+ */
 async function stdlibContentFor(
   registry: StdlibRegistry,
   stdlibPath: string,
 ): Promise<string | undefined> {
-  // `<bundle>` with no `/` resolves to nothing upstream (Stdlib.java:101-102
-  // returns before ever calling `retrieve`). Checked HERE as well as inside
-  // `stdlibStore` so a malformed target cannot trigger a pointless chunk load —
-  // at 19.54 MB for tupadr3, a wasted `import()` is not a rounding error.
-  if (!stdlibPath.includes('/')) return undefined;
+  // No `/` resolves to nothing upstream (Stdlib.java:101-102) — checked
+  // before any chunk load, so a malformed target costs nothing.
+  const split = splitStdlibPath(stdlibPath);
+  if (split === undefined) return undefined;
 
-  const bundles = await bundlesFor(registry, stdlibBundleOf(stdlibPath));
+  const bundles = await bundlesFor(registry, split.bundle);
   if (bundles.length === 0) return undefined;
 
-  return stdlibStore(...bundles).getPumlResource(stdlibPath);
+  // A defined `aliasOf` here means `bundlesFor` stopped mid-chain (cycle, or
+  // a dangling `link:` target) — a miss, not a bundle to ask for content.
+  const target = bundles[bundles.length - 1]!;
+  if (target.aliasOf !== undefined) return undefined;
+
+  return registry.resolveResource(target.name, split.key);
 }
 
 /**
