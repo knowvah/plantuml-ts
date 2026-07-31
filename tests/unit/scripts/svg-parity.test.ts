@@ -227,7 +227,7 @@ describe('svg-parity-dashboard pure functions', () => {
 
   it('buildMarkdown includes every required section header with correct counts', () => {
     const md = buildMarkdown(sampleReport);
-    expect(md).toContain('# SVG parity dashboard (pre-cutover baseline)');
+    expect(md).toContain('# SVG parity dashboard');
     expect(md).toContain('## Summary');
     expect(md).toContain('## Per-family');
     expect(md).toContain('## conformant (1)');
