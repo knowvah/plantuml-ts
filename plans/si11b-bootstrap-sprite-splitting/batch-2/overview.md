@@ -4,8 +4,8 @@ Two tasks, parallel. Disjoint write-sets; neither consumes the other.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4 | Route the `<$name>` scan into the prefetch walk | typescript-pro | `src/core/include-resolver.ts`, `tests/unit/sprite-split-prefetch.test.ts` | T2, T3 | [ ] |
-| T5 | Ship fragments + the split subpath in `@plantuml-ts/stdlib` | typescript-pro | `packages/stdlib/**`, `tests/unit/sprite-package-files.test.ts` | T1 | [ ] |
+| T4 | Route the `<$name>` scan into the prefetch walk | typescript-pro | `src/core/include-resolver.ts`, `tests/unit/sprite-split-prefetch.test.ts` | T2, T3 | [x] |
+| T5 | Ship fragments + the split subpath in `@plantuml-ts/stdlib` | typescript-pro | `packages/stdlib/**`, `tests/unit/sprite-package-files.test.ts` | T1 | [x] |
 
 ## Where the mission's value lands
 
