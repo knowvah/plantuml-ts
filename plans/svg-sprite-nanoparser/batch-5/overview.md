@@ -6,7 +6,7 @@ Two tasks, parallel: distinct write-sets, both depend only on prior batches.
 |---|---|---|---|---|---|
 | T10 | Retire `fitToInk`'s substitution | typescript-pro | `leaf-sizing.ts`, `render-atoms.ts`, `sprite-commands.ts`, `creole-atoms.ts` | T7, T9 | [x] |
 | T11 | Two-channel independence test (ADR-5) | typescript-pro | `tests/unit/core/klimt/sprite/SvgNanoParser.two-channel.test.ts` | T9 | [x] |
-| T12 | Measure the authored sprite goldens; ratchet in what passes | typescript-pro | `oracle/goldens/svg-description/ratchet.json` | T9, T10 | [ ] |
+| T12 | Measure the authored sprite goldens; ratchet in what passes | orchestrator | (no change — see below) | T9, T10 | [x] |
 
 ## Batch exit criteria — this is the mission's acceptance gate
 
