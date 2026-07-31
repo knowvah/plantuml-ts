@@ -19,6 +19,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { StdlibChunkLoadError, stdlibRegistry } from '../../src/core/tim/StdlibRegistry.js';
 import { stdlibStore, type BundleData } from '../../src/core/tim/StdlibStore.js';
+import { remoteStdlib, StdlibResourceFetchError } from '../../src/core/tim/StdlibRemote.js';
 import * as publicApi from '../../src/index.js';
 import { prepareIncludeStore, renderSync } from '../../src/index.js';
 import { FormulaMeasurer } from '../../src/core/measurer.js';
@@ -291,6 +292,143 @@ describe('StdlibNotBundledError -- the rewritten remedy (ADR-5)', () => {
     // `IncludeExecutor#load` never has a registry and still constructs this with
     // two arguments; the third is optional precisely so that call site is untouched.
     expect(new StdlibNotBundledError('<c4/c4>', 'c4/c4').registrySupplied).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// si11a T2 -- `resolveResource`, the per-resource counterpart to `resolve`.
+//
+// Eager `BundleData` and fetch-backed `RemoteBundle` (StdlibRemote.ts) share
+// ONE code path through this method (ADR-2); these tests exercise both kinds
+// through the SAME registry to prove no remote-vs-eager branch is needed.
+// ---------------------------------------------------------------------------
+
+describe('stdlibRegistry -- resolveResource (si11a T2)', () => {
+  it('an eager BundleData resolves a resource by reading files[key] directly (AC2)', async () => {
+    const registry = stdlibRegistry({ c4: async () => Promise.resolve({ c4: C4 }) });
+    expect(await registry.resolveResource('c4', 'c4_context')).toBe('class C4Context');
+  });
+
+  it('a registered remote bundle resolves a resource through RemoteBundle#fetch (AC1)', async () => {
+    const fetcher = vi.fn(async (url: string) => Promise.resolve(`content-of:${url}`));
+    const remote = remoteStdlib({
+      manifest: { name: 'tupadr3', files: { 'font-awesome-5/ban': 'font-awesome-5/ban.puml' } },
+      baseUrl: 'https://cdn.example.com/tupadr3',
+      fetcher,
+    });
+    const registry = stdlibRegistry({ tupadr3: async () => Promise.resolve(remote) });
+
+    const content = await registry.resolveResource('tupadr3', 'font-awesome-5/ban');
+
+    expect(content).toBe('content-of:https://cdn.example.com/tupadr3/font-awesome-5/ban.puml');
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it('a RemoteBundle resolved directly (not wrapped in a namespace) still harvests by its name', async () => {
+    // The `() => import(manifestModule).then((m) => remoteStdlib({...}))` idiom
+    // resolves the thunk to ONE RemoteBundle, not `{ tupadr3: RemoteBundle }` --
+    // harvest must check the top-level resolved value too, not just its exports.
+    const remote = remoteStdlib({
+      manifest: { name: 'tupadr3', files: { ban: 'ban.puml' } },
+      baseUrl: 'https://cdn.example.com/tupadr3',
+      fetcher: async () => Promise.resolve('SPRITE'),
+    });
+    const registry = stdlibRegistry({ tupadr3: async () => Promise.resolve(remote) });
+
+    expect(await registry.resolveResource('tupadr3', 'ban')).toBe('SPRITE');
+  });
+
+  it('resolveResource returns undefined for an unregistered bundle, same as resolve', async () => {
+    const registry = stdlibRegistry({ c4: async () => Promise.resolve({ c4: C4 }) });
+    expect(await registry.resolveResource('tupadr3', 'anything')).toBeUndefined();
+  });
+
+  it('resolveResource returns undefined for a key absent from an eager bundle', async () => {
+    const registry = stdlibRegistry({ c4: async () => Promise.resolve({ c4: C4 }) });
+    expect(await registry.resolveResource('c4', 'missing')).toBeUndefined();
+  });
+
+  it('resolveResource returns undefined for a key absent from a remote bundle, with no fetch attempted', async () => {
+    const fetcher = vi.fn(async () => Promise.resolve('unused'));
+    const remote = remoteStdlib({
+      manifest: { name: 'tupadr3', files: { ban: 'ban.puml' } },
+      baseUrl: 'https://cdn.example.com/tupadr3',
+      fetcher,
+    });
+    const registry = stdlibRegistry({ tupadr3: async () => Promise.resolve(remote) });
+
+    expect(await registry.resolveResource('tupadr3', 'missing')).toBeUndefined();
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('a rejecting thunk throws StdlibChunkLoadError, not StdlibResourceFetchError (AC4)', async () => {
+    const cause = new Error('Failed to fetch dynamically imported module');
+    const registry = stdlibRegistry({ tupadr3: async () => Promise.reject(cause) });
+
+    const err = await registry.resolveResource('tupadr3', 'font-awesome-5/ban').then(
+      () => undefined,
+      (e: unknown) => e,
+    );
+
+    expect(err).toBeInstanceOf(StdlibChunkLoadError);
+    expect(err).not.toBeInstanceOf(StdlibResourceFetchError);
+    expect((err as StdlibChunkLoadError).bundle).toBe('tupadr3');
+  });
+
+  it('a remote fetch that rejects throws StdlibResourceFetchError, not StdlibChunkLoadError (AC4)', async () => {
+    const cause = new Error('404');
+    const remote = remoteStdlib({
+      manifest: { name: 'tupadr3', files: { ban: 'ban.puml' } },
+      baseUrl: 'https://cdn.example.com/tupadr3',
+      fetcher: async () => Promise.reject(cause),
+    });
+    const registry = stdlibRegistry({ tupadr3: async () => Promise.resolve(remote) });
+
+    const err = await registry.resolveResource('tupadr3', 'ban').then(
+      () => undefined,
+      (e: unknown) => e,
+    );
+
+    expect(err).toBeInstanceOf(StdlibResourceFetchError);
+    expect(err).not.toBeInstanceOf(StdlibChunkLoadError);
+    expect((err as StdlibResourceFetchError).bundle).toBe('tupadr3');
+    expect((err as StdlibResourceFetchError).key).toBe('ban');
+  });
+
+  it('resolve() on a remote bundle returns a content-free BundleData with correct name/aliasOf (AC3)', async () => {
+    const remote = remoteStdlib({
+      manifest: { name: 'awslib14', files: { 'compute/ec2': 'Compute/EC2.puml' } },
+      baseUrl: 'https://cdn.example.com/awslib14',
+    });
+    const registry = stdlibRegistry({ awslib14: async () => Promise.resolve(remote) });
+
+    expect(await registry.resolve('awslib14')).toEqual({
+      name: 'awslib14',
+      aliasOf: undefined,
+      files: {},
+    });
+  });
+
+  it('a remote alias chains to an eager target through the EXISTING bundlesFor, unmodified (AC3)', async () => {
+    // bundlesFor/stdlibContentFor are private to include-resolver.ts, so this
+    // exercises them through the public render pipeline -- per si11a's method
+    // rule 2, verifying against the CURRENT walk rather than reading it.
+    const remoteAlias = remoteStdlib({
+      manifest: { name: 'awslib', aliasOf: 'awslib14', files: {} },
+      baseUrl: 'https://cdn.example.com/awslib',
+    });
+    const target: BundleData = { name: 'awslib14', files: { ec2: 'class EC2' } };
+    const registry = stdlibRegistry({
+      awslib: async () => Promise.resolve(remoteAlias),
+      awslib14: async () => Promise.resolve(target),
+    });
+
+    const source = ['@startuml', '!include <awslib/ec2>', 'class Root', '@enduml'].join('\n');
+    const includeStore = await prepareIncludeStore(source, { stdlibRegistry: registry });
+    const svg = renderSync(source, { includeStore, measurer: measurer() });
+
+    expect(svg).toMatch(/>\s*EC2\s*</);
+    expect(svg).toMatch(/>\s*Root\s*</);
   });
 });
 
