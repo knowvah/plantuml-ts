@@ -40,9 +40,12 @@
 import {
   MapIncludeStore,
   StdlibNotBundledError,
+  stdlibBundleOf,
   stdlibPathOf,
   type IncludeStore,
 } from './tim/IncludeStore.js';
+import { stdlibStore, type BundleData } from './tim/StdlibStore.js';
+import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 
 export {
   MapIncludeStore,
@@ -260,13 +263,85 @@ function targetOf(line: string): string | undefined {
   return idx === -1 ? undefined : what.substring(0, idx);
 }
 
+/**
+ * Every `BundleData` needed to answer one `<bundle/thing>` lookup: the named
+ * bundle, plus whatever its `aliasOf` chain leads to.
+ *
+ * The registry deliberately knows nothing about aliases (`StdlibRegistry.ts`),
+ * and this function deliberately does not re-implement their SEMANTICS —
+ * `stdlibStore` owns the lowercase/strip/split/alias/lookup pipeline that
+ * mirrors `Stdlib.java#getPumlResource`, and having two answers to that
+ * question is how the port would drift from the jar. All this does is COLLECT
+ * the records so `stdlibStore` has them in hand.
+ *
+ * The chain must be walked one link at a time because a bundle name is only
+ * addressable once its chunk has loaded: `bootstrap`'s chunk is what reveals
+ * that `bootstrap1.13.1` exists (both live in it, so the second `resolve` is a
+ * cache hit, not a second `import()`).
+ *
+ * A cycle stops collection and yields whatever was gathered; `stdlibStore`'s
+ * own `resolveBundle` guard then reports the miss. Upstream has no such guard
+ * and would infinite-loop the JVM — see `StdlibStore.ts`'s divergence note.
+ */
+async function bundlesFor(
+  registry: StdlibRegistry,
+  bundleName: string,
+): Promise<readonly BundleData[]> {
+  const collected: BundleData[] = [];
+  const visited = new Set<string>();
+
+  let current = bundleName.toLowerCase();
+  for (;;) {
+    if (visited.has(current)) return collected;
+    visited.add(current);
+
+    const data = await registry.resolve(current);
+    if (data === undefined) return collected;
+
+    collected.push(data);
+    if (data.aliasOf === undefined) return collected;
+
+    current = data.aliasOf.toLowerCase();
+  }
+}
+
+/** A registered bundle's content for `stdlibPath`, or `undefined` if nothing serves it. */
+async function stdlibContentFor(
+  registry: StdlibRegistry,
+  stdlibPath: string,
+): Promise<string | undefined> {
+  // `<bundle>` with no `/` resolves to nothing upstream (Stdlib.java:101-102
+  // returns before ever calling `retrieve`). Checked HERE as well as inside
+  // `stdlibStore` so a malformed target cannot trigger a pointless chunk load —
+  // at 19.54 MB for tupadr3, a wasted `import()` is not a rounding error.
+  if (!stdlibPath.includes('/')) return undefined;
+
+  const bundles = await bundlesFor(registry, stdlibBundleOf(stdlibPath));
+  if (bundles.length === 0) return undefined;
+
+  return stdlibStore(...bundles).getPumlResource(stdlibPath);
+}
+
+/**
+ * The state that stays CONSTANT across the whole transitive walk, as opposed to
+ * `source` / `visited` / `chain`, which change per recursion. Grouped so the
+ * recursive call stays readable (and under this repo's parameter cap).
+ */
+interface PrefetchWalk {
+  readonly fetcher: IncludeFetcher;
+  readonly store: BackedIncludeStore;
+  /** si8 ADR-4: absent for every caller that supplies no registry. */
+  readonly registry: StdlibRegistry | undefined;
+}
+
 async function prefetchInner(
+  walk: PrefetchWalk,
   source: string,
-  fetcher: IncludeFetcher,
-  store: BackedIncludeStore,
   visited: ReadonlySet<string>,
   chain: string[],
 ): Promise<void> {
+  const { fetcher, store, registry } = walk;
+
   for (const line of source.split('\n')) {
     const url = targetOf(line);
     if (url === undefined) continue;
@@ -292,14 +367,35 @@ async function prefetchInner(
       if (store.has(url)) continue;
       if (store.getPumlResource(stdlib) !== undefined) continue;
 
-      throw new StdlibNotBundledError(url, stdlib);
+      // THIRD channel (si8 ADR-4): a lazily-registered bundle. Only reached once
+      // both eager channels miss, so supplying a registry never changes what an
+      // already-resolvable target does.
+      const bundled =
+        registry === undefined ? undefined : await stdlibContentFor(registry, stdlib);
+      if (bundled === undefined) throw new StdlibNotBundledError(url, stdlib);
+
+      // Fold it in under the EXACT include key, which is the first thing
+      // `IncludeExecutor#load` tries (`this.store.get(what)`) — deliberately
+      // chosen over teaching `getPumlResource` about it, because that seam is
+      // the LAST thing `load` consults and this store's copy must win over a
+      // base that may resolve the same name differently. A bundle folded in so
+      // that neither channel sees it is the silent-failure shape si8 exists to
+      // remove, so this is asserted in `stdlib-registry-prefetch.test.ts`.
+      store.set(url, bundled);
+
+      // ADR-4's whole point: bundle text contains further `!include <…>` --
+      // `assets/stdlib/c4/C4_Context.puml` opens with `!include <C4/C4>`. The
+      // resolved text re-enters THIS walk, so nested targets are prefetched by
+      // the same pass, with the same cycle guard and the same over-fetch policy.
+      await prefetchInner(walk, bundled, new Set([...visited, url]), [...chain, url]);
+      continue;
     }
 
     if (store.has(url)) continue; // already fetched (diamond include), or host-supplied
 
     const content = await fetcher(url);
     store.set(url, content);
-    await prefetchInner(content, fetcher, store, new Set([...visited, url]), [...chain, url]);
+    await prefetchInner(walk, content, new Set([...visited, url]), [...chain, url]);
   }
 }
 
@@ -309,23 +405,31 @@ async function prefetchInner(
  * resolve them (see the module header, and `tim/IncludeStore.ts`).
  *
  * Circular includes (direct or transitive) throw {@link CircularIncludeError}.
- * A `<bundle/thing>` target that `base` resolves through NEITHER an exact key
- * nor its `getPumlResource` stdlib seam throws {@link StdlibNotBundledError} —
- * this port vendors no stdlib.
+ * A `<bundle/thing>` target resolved by NONE of the three channels — an exact
+ * key in `base`, `base`'s `getPumlResource` stdlib seam, or `registry` — throws
+ * {@link StdlibNotBundledError}; this port vendors no stdlib.
  *
- * @param source  Raw PlantUML source (may contain include directives).
- * @param fetcher Async function resolving a target to its content.
- *                Defaults to the built-in {@link fetchInclude}.
- * @param base    Content the caller already has (stdlib bundles, in-memory
- *                files). Never fetched, never mutated — copied into the result.
+ * @param source   Raw PlantUML source (may contain include directives).
+ * @param fetcher  Async function resolving a target to its content.
+ *                 Defaults to the built-in {@link fetchInclude}.
+ * @param base     Content the caller already has (stdlib bundles, in-memory
+ *                 files). Never fetched, never mutated — copied into the result.
+ * @param registry Lazily-loaded stdlib bundles (si8 ADR-3/ADR-4). Consulted
+ *                 ONLY after both `base` channels miss, so passing one cannot
+ *                 change the result for a target that already resolved. Its
+ *                 resolved text re-enters this walk, so a bundle's own
+ *                 `!include <…>` lines are prefetched too.
+ * @throws StdlibChunkLoadError a registered bundle's chunk failed to load —
+ *         deliberately distinct from `StdlibNotBundledError` (ADR-5).
  */
 export async function prefetchIncludes(
   source: string,
   fetcher: IncludeFetcher = fetchInclude,
   base?: IncludeStore,
+  registry?: StdlibRegistry,
 ): Promise<IncludeStore> {
   const store = new BackedIncludeStore(base);
-  await prefetchInner(source, fetcher, store, new Set<string>(), []);
+  await prefetchInner({ fetcher, store, registry }, source, new Set<string>(), []);
   return store;
 }
 

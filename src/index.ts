@@ -34,6 +34,7 @@ import type { StringMeasurer } from './core/measurer.js';
 import type { DiagramType, UmlSource } from './core/block-extractor.js';
 import type { IncludeFetcher, IncludeStore } from './core/include-resolver.js';
 import { prefetchIncludes } from './core/include-resolver.js';
+import type { StdlibRegistry } from './core/tim/StdlibRegistry.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
 import { ErrorUml } from './core/error/ErrorUml.js';
 import { PSystemErrorEmpty } from './core/error/PSystemErrorEmpty.js';
@@ -97,6 +98,18 @@ export interface RenderOptions {
    * typed error naming the path, never a silent skip.
    */
   includeStore?: IncludeStore;
+  /**
+   * Lazily-loaded stdlib bundles for `!include <bundle/thing>`, built with
+   * `stdlibRegistry()` (`core/tim/StdlibRegistry.ts`): each bundle's payload
+   * loads on first use rather than up front, which matters at the sizes
+   * involved (`tupadr3` alone is 19.54 MB).
+   *
+   * Consulted ONLY after `includeStore` misses on both its channels, so passing
+   * one never changes the outcome for a target that already resolved.
+   * `render()` / `renderAll()` only — `renderSync` cannot await a dynamic
+   * `import()`; sync callers resolve bundles first and pass `includeStore`.
+   */
+  stdlibRegistry?: StdlibRegistry;
 }
 
 function getDefaultMeasurer(): StringMeasurer {
@@ -331,12 +344,16 @@ export function renderSync(source: string, options?: RenderOptions): string {
   }
 }
 
+/** The async include pass, wired identically for `render` and `renderAll`. */
+async function prefetchFor(source: string, opts?: RenderOptions): Promise<IncludeStore> {
+  return prefetchIncludes(source, opts?.fetcher, opts?.includeStore, opts?.stdlibRegistry);
+}
 export async function render(
   source: string,
   options?: RenderOptions,
 ): Promise<string> {
   try {
-    const includeStore = await prefetchIncludes(source, options?.fetcher, options?.includeStore);
+    const includeStore = await prefetchFor(source, options);
     const blocks = buildBlockUmls(source, { includeStore });
     if (blocks.length === 0) return welcomeSvg(options);
 
@@ -351,7 +368,7 @@ export async function renderAll(
   options?: RenderOptions,
 ): Promise<string[]> {
   try {
-    const includeStore = await prefetchIncludes(source, options?.fetcher, options?.includeStore);
+    const includeStore = await prefetchFor(source, options);
     const blocks = buildBlockUmls(source, { includeStore });
     return await Promise.all(blocks.map(async (block) => renderBlock(block, options)));
   } catch (err) {
