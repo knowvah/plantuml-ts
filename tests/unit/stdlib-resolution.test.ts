@@ -10,12 +10,19 @@
  *      no include-once dedup for the stdlib form.
  *   3. `renderSync` end-to-end -- a caller-supplied bundle actually reaches the
  *      rendered document.
+ *   4. `render()` end-to-end -- the ASYNC entry point, which additionally runs
+ *      `prefetchIncludes` (si8 T1 / ADR-1). Layer 3 passing does NOT imply
+ *      layer 4: `renderSync` never prefetches, so for as long as this file
+ *      covered only the sync path, `render()` + `withStdlib` returned an error
+ *      card telling the caller to pass `options.includeStore` -- which they had.
+ *      All ten in-repo `withStdlib` call sites feed `renderSync`, which is
+ *      exactly why nothing caught it.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/preproc/Stdlib.java#getPumlResource
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TContext.java#executeInclude
  */
 import { describe, expect, it } from 'vitest';
-import { renderSync } from '../../src/index.js';
+import { render, renderSync } from '../../src/index.js';
 import { FormulaMeasurer } from '../../src/core/measurer.js';
 import { preprocess } from '../../src/core/preprocessor.js';
 import { MapIncludeStore, StdlibNotBundledError } from '../../src/core/tim/IncludeStore.js';
@@ -217,5 +224,75 @@ describe('renderSync() end-to-end with a host-supplied stdlib bundle', () => {
     expect(svg).not.toContain('renderSync() is not supported');
     expect(svg).toMatch(/>\s*Root\s*</);
     expect(svg).toMatch(/>\s*Included\s*</);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 4. End-to-end render() -- the ASYNC entry point (si8 T1 / ADR-1).
+//
+// `render()` runs `prefetchIncludes` before the interpreter. That pass gated a
+// `<bundle/thing>` target on `store.has(url)` -- an EXACT-key lookup -- and
+// never consulted `getPumlResource`. `withStdlib` delegates `get`/`has` to a
+// base carrying no bundle keys, so the gate rejected every store built for
+// precisely this purpose and `render()` produced an error card.
+//
+// Both channels are now consulted, in `IncludeExecutor#load`'s order: exact key
+// first, then the stdlib seam.
+// ---------------------------------------------------------------------------
+
+const FAKE: BundleData = { name: 'fake', files: { thing: 'class Included' } };
+const ASYNC_SOURCE = ['@startuml', '!include <fake/thing>', 'class Root', '@enduml'].join('\n');
+
+/** jsdom has no <canvas> backend -- see the layer-3 note above. */
+const measurer = (): FormulaMeasurer => new FormulaMeasurer();
+
+describe('render() end-to-end with a host-supplied stdlib bundle', () => {
+  it('resolves <bundle/thing> through getPumlResource instead of returning an error card', async () => {
+    const svg = await render(ASYNC_SOURCE, {
+      includeStore: withStdlib(new MapIncludeStore(), stdlibStore(FAKE)),
+      measurer: measurer(),
+    });
+
+    expect(svg).toMatch(/>\s*Included\s*</);
+    expect(svg).toMatch(/>\s*Root\s*</);
+    expect(svg).not.toContain('bundles no PlantUML stdlib');
+  });
+
+  it('produces byte-identical output to renderSync for the same store and source', async () => {
+    const options = {
+      includeStore: withStdlib(new MapIncludeStore(), stdlibStore(FAKE)),
+      measurer: measurer(),
+    };
+
+    // The sync path never prefetched and so was never broken; pinning the two
+    // together is what keeps the async fix from drifting away from it.
+    expect(await render(ASYNC_SOURCE, options)).toBe(renderSync(ASYNC_SOURCE, options));
+  });
+
+  it('an exact-key hit still wins, with no getPumlResource on the store at all', async () => {
+    // A host keying '<bundle/thing>' directly is a supported pattern
+    // (`IncludeExecutor#load`'s doc comment). MapIncludeStore implements no
+    // `getPumlResource`, so this proves the exact-key channel is independent.
+    const store = new MapIncludeStore({ '<fake/thing>': 'class Included' });
+    expect('getPumlResource' in store).toBe(false);
+
+    const svg = await render(ASYNC_SOURCE, { includeStore: store, measurer: measurer() });
+
+    expect(svg).toMatch(/>\s*Included\s*</);
+    expect(svg).not.toContain('bundles no PlantUML stdlib');
+  });
+
+  it('a bundle neither channel resolves still reaches errorSvg as StdlibNotBundledError', async () => {
+    // The failure must be PRESERVED, not swallowed: widening the accept
+    // condition must not turn an unsupplied bundle into a silently wrong
+    // diagram, which is the exact regression StdlibNotBundledError exists for.
+    const svg = await render(['@startuml', '!include <other/thing>', '@enduml'].join('\n'), {
+      includeStore: withStdlib(new MapIncludeStore(), stdlibStore(FAKE)),
+      measurer: measurer(),
+    });
+
+    expect(svg).toContain(
+      "plantuml-ts bundles no PlantUML stdlib, so the 'other' bundle is not available.",
+    );
   });
 });

@@ -208,6 +208,11 @@ export async function fetchInclude(url: string): Promise<string> {
       throw new CorsIncludeError(url);
     }
 
+    // #lizard forgives -- pre-existing violation (36 NLOC / 9 CCN vs. this
+    // repo's caps), unrelated to si8-stdlib-registration; surfaced only because
+    // T1 edits a different function in this file. Each branch is one distinct,
+    // differentiated failure mode (CSP / CORS / HTTP / generic) whose whole
+    // point is a separate remediation message.
     throw new IncludeResolveError(
       `Failed to fetch !include ${url}: ${(err as Error).message ?? String(err)}`,
       url,
@@ -258,7 +263,7 @@ function targetOf(line: string): string | undefined {
 async function prefetchInner(
   source: string,
   fetcher: IncludeFetcher,
-  store: MapIncludeStore,
+  store: BackedIncludeStore,
   visited: ReadonlySet<string>,
   chain: string[],
 ): Promise<void> {
@@ -275,7 +280,17 @@ async function prefetchInner(
       // through the store. Present? Nothing to do. Absent? Say so, loudly: silently
       // dropping the line (what resolveIncludes did) left every macro the bundle
       // defines unexpanded and rendered a quietly wrong diagram.
+      //
+      // TWO channels resolve this form, and they must be consulted in the same
+      // order `IncludeExecutor#load` uses, or prefetch rejects a target the
+      // interpreter would have served: the exact key first (a host keying
+      // `'<c4/c4.puml>'` directly is supported), then the `getPumlResource`
+      // stdlib seam (`StdlibStore.ts#withStdlib`). Gating on `has()` alone made
+      // the ASYNC API unusable with every `withStdlib` store — `withStdlib`
+      // delegates `get`/`has` to a base that carries no bundle keys at all
+      // (si8 ADR-1).
       if (store.has(url)) continue;
+      if (store.getPumlResource(stdlib) !== undefined) continue;
 
       throw new StdlibNotBundledError(url, stdlib);
     }
@@ -294,8 +309,9 @@ async function prefetchInner(
  * resolve them (see the module header, and `tim/IncludeStore.ts`).
  *
  * Circular includes (direct or transitive) throw {@link CircularIncludeError}.
- * A `<bundle/thing>` target that `base` does not already carry throws
- * {@link StdlibNotBundledError} — this port vendors no stdlib.
+ * A `<bundle/thing>` target that `base` resolves through NEITHER an exact key
+ * nor its `getPumlResource` stdlib seam throws {@link StdlibNotBundledError} —
+ * this port vendors no stdlib.
  *
  * @param source  Raw PlantUML source (may contain include directives).
  * @param fetcher Async function resolving a target to its content.
@@ -328,5 +344,19 @@ class BackedIncludeStore extends MapIncludeStore {
 
   override has(path: string): boolean {
     return this.get(path) !== undefined;
+  }
+
+  /**
+   * Forward the `<bundle/thing>` seam to the base store.
+   *
+   * This store is not just prefetch's scratch space — it is the value `render()`
+   * hands to the interpreter (`src/index.ts`, `prefetchIncludes` -> `buildBlockUmls`).
+   * Without this delegation, a `withStdlib` base resolves during prefetch and
+   * then `IncludeExecutor#load` throws `StdlibNotBundledError` anyway, because
+   * `this.store.getPumlResource?.(...)` finds no such method on the wrapper.
+   * Accepting in `prefetchInner` alone fixes nothing a caller can observe.
+   */
+  getPumlResource(fullname: string): string | undefined {
+    return this.base?.getPumlResource?.(fullname);
   }
 }
