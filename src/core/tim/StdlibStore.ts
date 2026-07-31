@@ -30,6 +30,7 @@
  */
 
 import type { IncludeStore } from './IncludeStore.js';
+import { splitStdlibPath } from './stdlib-path.js';
 
 /**
  * One vendored stdlib bundle (a folder under `~/git/plantuml-stdlib/stdlib/`,
@@ -95,18 +96,16 @@ export function withStdlib(base: IncludeStore, stdlib: StdlibStore): IncludeStor
 
 /** @see Stdlib.java#getPumlResource (the lowercase/strip/split/alias/lookup pipeline) */
 function resolvePumlResource(byName: ReadonlyMap<string, BundleData>, fullname: string): string | undefined {
-  // Java: `fullname.toLowerCase().replace(".puml", "")` -- String#replace(CharSequence,
-  // CharSequence) removes EVERY occurrence of the literal substring, not just a
-  // trailing one; `.split('.puml').join('')` reproduces that exactly (`split` on
-  // a plain string, not a regex, so the '.' is literal -- no RegExp.escape needed).
-  const cleaned = fullname.toLowerCase().split('.puml').join('');
-  const slash = cleaned.indexOf('/');
-  if (slash === -1) return undefined;
+  // The lowercase/strip/split half lives in `stdlib-path.ts` -- si11a's
+  // per-RESOURCE path needs the identical key and a second copy is how this
+  // port drifts from the jar. Alias resolution and the file lookup stay here.
+  const split = splitStdlibPath(fullname);
+  if (split === undefined) return undefined;
 
-  const bundle = resolveBundle(byName, cleaned.substring(0, slash));
+  const bundle = resolveBundle(byName, split.bundle);
   if (bundle === undefined) return undefined;
 
-  return bundle.files[cleaned.substring(slash + 1)];
+  return bundle.files[split.key];
 }
 
 /** Follows `aliasOf` (`Stdlib#retrieve`'s `link:` redirect), guarding against cycles. */
