@@ -19,13 +19,17 @@
  */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { gzipSync } from 'node:zlib';
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { buildStdlibPackages } from '../../scripts/build-stdlib-packages.js';
+import { emitRemoteManifestJs } from '../../scripts/build-stdlib-packages/emit-remote-manifest.js';
+import { PACKAGE_SPECS } from '../../scripts/build-stdlib-packages/package-specs.js';
+import type { GeneratedModule } from '../../scripts/build-stdlib-packages/types.js';
 import { FormulaMeasurer } from '../../src/core/measurer.js';
 import { MapIncludeStore } from '../../src/core/tim/IncludeStore.js';
 import { stdlibStore, withStdlib, type BundleData } from '../../src/core/tim/StdlibStore.js';
@@ -137,6 +141,114 @@ describe('VERBATIM round-trip: generated BundleData.files === vendored asset byt
     expect(Buffer.compare(runtimeBytes, diskBytes)).toBe(0);
     expect(sha256Hex(runtimeBytes)).toBe(sha256Hex(diskBytes));
     expect('sha256:' + sha256Hex(runtimeBytes)).toBe(manifestHash);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 1b. Remote manifest emission (SI11a T5) -- emit-remote-manifest.ts is not
+// wired into `buildStdlibPackages()` yet (that is T6's regeneration step),
+// so these tests invoke the emitter directly and dynamic-import the result
+// from a throwaway tmpdir, mirroring `importGenerated`'s pattern above.
+//
+// The tmpdir MUST live under `REPO_ROOT` (not `os.tmpdir()`): Vite's dev
+// server denies module loads outside its `fs.allow` root, which defaults to
+// the workspace root -- an `os.tmpdir()` path (`/private/var/folders/...`
+// on macOS) is outside it and every dynamic `import()` 404s.
+// ---------------------------------------------------------------------------
+
+const REMOTE_MANIFEST_TMP_ROOT = join(REPO_ROOT, 'node_modules', '.tmp-stdlib-remote-manifest-test');
+
+/** Loose shape of an emitted remote export -- deliberately NOT importing
+ * T1's `StdlibRemoteManifest` (parallel task, `src/`-side; this suite stays
+ * in `scripts/`/`tests/` and has no runtime dependency on it per T5's
+ * interface contract). */
+interface RemoteManifestLike {
+  readonly name: string;
+  readonly aliasOf?: string;
+  readonly files: Record<string, string>;
+}
+
+function findRemoteModule(packageDir: string, fileBaseName: string): GeneratedModule {
+  const spec = PACKAGE_SPECS.find((s) => s.packageDir === packageDir);
+  if (spec?.remoteModules === undefined) {
+    throw new Error(`packages/${packageDir} declares no remoteModules`);
+  }
+  const mod = spec.remoteModules.find((m) => m.fileBaseName === fileBaseName);
+  if (mod === undefined) {
+    throw new Error(`packages/${packageDir} has no remote module '${fileBaseName}'`);
+  }
+  return mod;
+}
+
+async function loadRemoteManifest(mod: GeneratedModule): Promise<Record<string, RemoteManifestLike>> {
+  const js = emitRemoteManifestJs(mod, ASSETS_STDLIB_DIR);
+  mkdirSync(REMOTE_MANIFEST_TMP_ROOT, { recursive: true });
+  const tmpDir = mkdtempSync(join(REMOTE_MANIFEST_TMP_ROOT, 'run-'));
+  const tmpFile = join(tmpDir, `${mod.fileBaseName}.remote.mjs`);
+  writeFileSync(tmpFile, js, 'utf8');
+  try {
+    return (await import(pathToFileURL(tmpFile).href)) as Record<string, RemoteManifestLike>;
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+describe('remote manifest emission (SI11a T5)', () => {
+  it('acceptance 1: awslib14 keys map to their real, case-preserved relative path', async () => {
+    const mod = findRemoteModule('stdlib-aws', 'awslib14');
+    const manifest = await loadRemoteManifest(mod);
+    const awslib14Remote = manifest.awslib14Remote;
+
+    expect(awslib14Remote).toBeDefined();
+    expect(awslib14Remote?.name).toBe('awslib14');
+    expect(awslib14Remote?.files['storage/simplestorageservice']).toBe('Storage/SimpleStorageService.puml');
+  });
+
+  it('acceptance 2: the tupadr3 remote manifest module gzips to <= 60 KB', () => {
+    const mod = findRemoteModule('stdlib-tupadr3', 'tupadr3');
+    const js = emitRemoteManifestJs(mod, ASSETS_STDLIB_DIR);
+    const gzipBytes = gzipSync(Buffer.from(js, 'utf8')).length;
+
+    // Measured (not cited from the brief, per T5's method rule 2) against
+    // the CURRENT assets/stdlib/tupadr3 tree.
+    console.log(`tupadr3 remote manifest: ${js.length} raw bytes, ${gzipBytes} gzip bytes`);
+    expect(gzipBytes).toBeLessThanOrEqual(60 * 1024);
+  });
+
+  it('acceptance 3: every emitted awslib14 path resolves to a real vendored file', async () => {
+    const mod = findRemoteModule('stdlib-aws', 'awslib14');
+    const manifest = await loadRemoteManifest(mod);
+    const files = manifest.awslib14Remote?.files ?? {};
+    const keys = Object.keys(files);
+
+    expect(keys.length).toBeGreaterThan(0);
+    for (const key of keys) {
+      const relPath = files[key];
+      expect(existsSync(join(ASSETS_STDLIB_DIR, 'awslib14', relPath as string))).toBe(true);
+    }
+  });
+
+  it('acceptance 3: every emitted tupadr3 path resolves to a real vendored file', async () => {
+    const mod = findRemoteModule('stdlib-tupadr3', 'tupadr3');
+    const manifest = await loadRemoteManifest(mod);
+    const files = manifest.tupadr3Remote?.files ?? {};
+    const keys = Object.keys(files);
+
+    expect(keys.length).toBeGreaterThan(0);
+    for (const key of keys) {
+      const relPath = files[key];
+      expect(existsSync(join(ASSETS_STDLIB_DIR, 'tupadr3', relPath as string))).toBe(true);
+    }
+  });
+
+  it('acceptance 4: the awslib alias remote manifest carries aliasOf and empty files', async () => {
+    const mod = findRemoteModule('stdlib-aws', 'awslib');
+    const manifest = await loadRemoteManifest(mod);
+    const awslibRemote = manifest.awslibRemote;
+
+    expect(awslibRemote).toBeDefined();
+    expect(awslibRemote?.aliasOf).toBe('awslib14');
+    expect(Object.keys(awslibRemote?.files ?? { placeholder: '' })).toHaveLength(0);
   });
 });
 

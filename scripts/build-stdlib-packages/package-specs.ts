@@ -6,7 +6,7 @@
  * its own, only a re-export index (`emit-all-index.ts`).
  */
 
-import type { PackageSpec } from './types.js';
+import type { GeneratedModule, PackageSpec } from './types.js';
 
 const STDLIB_PACKAGE: PackageSpec = {
   packageDir: 'stdlib',
@@ -52,32 +52,35 @@ const STDLIB_PACKAGE: PackageSpec = {
   ],
 };
 
+// Extracted (rather than inlined per-package) so `remoteModules` below can
+// reuse the exact same `GeneratedModule` objects as `modules` -- SI11a's
+// remote manifest is a pure function of this same metadata, just without
+// inlined `.puml` content (`emit-remote-manifest.ts`).
+const AWSLIB14_MODULE: GeneratedModule = {
+  fileBaseName: 'awslib14',
+  exports: [{ kind: 'concrete', exportName: 'awslib14', bundleName: 'awslib14', assetFolder: 'awslib14' }],
+};
+
+const AWSLIB_ALIAS_MODULE: GeneratedModule = {
+  fileBaseName: 'awslib',
+  exports: [{ kind: 'alias', exportName: 'awslib', bundleName: 'awslib', aliasOf: 'awslib14' }],
+};
+
 const STDLIB_AWS_PACKAGE: PackageSpec = {
   packageDir: 'stdlib-aws',
-  modules: [
-    {
-      fileBaseName: 'awslib14',
-      exports: [
-        { kind: 'concrete', exportName: 'awslib14', bundleName: 'awslib14', assetFolder: 'awslib14' },
-      ],
-    },
-    {
-      fileBaseName: 'awslib',
-      exports: [{ kind: 'alias', exportName: 'awslib', bundleName: 'awslib', aliasOf: 'awslib14' }],
-    },
-  ],
+  modules: [AWSLIB14_MODULE, AWSLIB_ALIAS_MODULE],
+  remoteModules: [AWSLIB14_MODULE, AWSLIB_ALIAS_MODULE],
+};
+
+const TUPADR3_MODULE: GeneratedModule = {
+  fileBaseName: 'tupadr3',
+  exports: [{ kind: 'concrete', exportName: 'tupadr3', bundleName: 'tupadr3', assetFolder: 'tupadr3' }],
 };
 
 const STDLIB_TUPADR3_PACKAGE: PackageSpec = {
   packageDir: 'stdlib-tupadr3',
-  modules: [
-    {
-      fileBaseName: 'tupadr3',
-      exports: [
-        { kind: 'concrete', exportName: 'tupadr3', bundleName: 'tupadr3', assetFolder: 'tupadr3' },
-      ],
-    },
-  ],
+  modules: [TUPADR3_MODULE],
+  remoteModules: [TUPADR3_MODULE],
 };
 
 export const PACKAGE_SPECS: readonly PackageSpec[] = [

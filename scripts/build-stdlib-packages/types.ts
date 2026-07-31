@@ -45,4 +45,18 @@ export interface PackageSpec {
   /** Directory name under `packages/`. */
   readonly packageDir: string;
   readonly modules: readonly GeneratedModule[];
+  /**
+   * Remote (key -> path manifest, no content) siblings of a subset of
+   * `modules`, emitted by `emit-remote-manifest.ts` -- SI11a ADR-1
+   * (`plans/si11a-per-resource-stdlib-fetch/decisions.md`). Each entry
+   * reuses the exact `GeneratedModule` its eager counterpart uses: the
+   * manifest is a pure function of the same `bundleName`/`assetFolder`/
+   * `aliasOf` metadata, just without inlined `.puml` content.
+   *
+   * Optional: a package with no remote assets to ship omits it entirely
+   * (currently `stdlib` -- SI11a's T6 scopes remote packaging to
+   * `stdlib-aws` and `stdlib-tupadr3` only, since SI8's per-bundle
+   * laziness already solves `stdlib`'s much smaller 1.8 MB / 5 bundles).
+   */
+  readonly remoteModules?: readonly GeneratedModule[];
 }
