@@ -26,6 +26,10 @@ import { fileURLToPath } from 'node:url';
 import { emitAllIndexDts, emitAllIndexJs } from './build-stdlib-packages/emit-all-index.js';
 import { emitIndexDts, emitIndexJs } from './build-stdlib-packages/emit-index.js';
 import { emitModuleDts, emitModuleJs } from './build-stdlib-packages/emit-module.js';
+import {
+  emitRemoteManifestDts,
+  emitRemoteManifestJs,
+} from './build-stdlib-packages/emit-remote-manifest.js';
 import { PACKAGE_SPECS } from './build-stdlib-packages/package-specs.js';
 import type { PackageSpec } from './build-stdlib-packages/types.js';
 
@@ -47,6 +51,17 @@ function buildPackage(spec: PackageSpec): void {
   for (const mod of spec.modules) {
     writeFileSync(join(generatedDir, `${mod.fileBaseName}.js`), emitModuleJs(mod, ASSETS_STDLIB_DIR), 'utf8');
     writeFileSync(join(generatedDir, `${mod.fileBaseName}.d.ts`), emitModuleDts(mod), 'utf8');
+  }
+
+  // The si11a per-RESOURCE manifests, emitted ALONGSIDE the eager modules
+  // above rather than instead of them (si11a ADR-1): the eager module stays
+  // byte-identical for offline consumers, and a `.remote` sibling describes
+  // the same bundle as key -> relative path with no content. Packages with
+  // no `remoteModules` (stdlib, stdlib-all) are unaffected.
+  for (const mod of spec.remoteModules ?? []) {
+    const js = emitRemoteManifestJs(mod, ASSETS_STDLIB_DIR);
+    writeFileSync(join(generatedDir, `${mod.fileBaseName}.remote.js`), js, 'utf8');
+    writeFileSync(join(generatedDir, `${mod.fileBaseName}.remote.d.ts`), emitRemoteManifestDts(mod), 'utf8');
   }
 
   writeFileSync(join(generatedDir, 'index.js'), emitIndexJs(spec), 'utf8');
