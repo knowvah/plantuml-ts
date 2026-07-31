@@ -1,6 +1,6 @@
 # Mission: svg-sprite-nanoparser
 
-**Status:** ready to execute · **Branch:** `feat/svg-sprite-nanoparser`
+**Status:** CLOSED 2026-07-31 · **Branch:** `main` (maintainer directed)
 **Created:** 2026-07-30 · **Predecessor:** `sizer-footprint-parity` (closed)
 
 ## Objective
@@ -148,3 +148,82 @@ Do not re-derive these; do not trust older statements that contradict them.
   blocks these fixtures never touch.
 - `AtomImageResolver` is NOT public API (`src/index.ts` exports 9 symbols,
   none of them it, `SpriteSvg`, or `UPath`). No semver break.
+
+
+---
+
+# Mission summary — CLOSED 2026-07-31
+
+**13 tasks across 5 batches**, all landed. Commits `6a5d3e7d` … `bfb876bf`.
+T13 was inserted mid-mission on a maintainer ruling and is not in the
+original plan.
+
+## Final gates
+
+| Gate | Result |
+|---|---|
+| `npm test` | 456 files / **11,152 tests** (from 449 / 11,029) |
+| `typecheck` · `lint` · `build` | exit 0 |
+| `measure-description-size-deltas.ts` | **320/351 (91.2%), widened 0** |
+| SVG goldens 310 / 22 / 57 | byte-identical throughout |
+| Three authored sprite fixtures | **zero diffs vs the jar**, and DOT-equal |
+
+## What was achieved
+
+Upstream's two channels are restored **structurally**. `SvgNanoParser`,
+`SvgPath`, `ColorResolver` and `UGraphicWithScale` are ported in full (982
+Java lines). `AtomImageResolver` carries a `drawable` variant whose
+primitives hold draw-time shape, translate and paint; `width`/`height`
+remain the declared box in both variants. `fitToInk` is retired, and the
+sizer runs the same decomposition the renderer does, so `Footprint` observes
+real per-path corners rather than a substituted box.
+
+## What was NOT achieved — read this before judging the numbers
+
+1. **The conformant count did not move, and never could.** `bootstrap-0` and
+   `ruziru-69-xixo434` were verified against `HEAD` to be ALREADY conformant
+   at delta 0 before T10 ran — `fitToInk` itself made them so. The mission's
+   headline 0.029321in had already been closed by the hack this mission
+   retired. **The value delivered is architectural, not numeric.**
+2. **The three sprite fixtures are not ratcheted in** — a registration gap
+   (SI9), not a quality one.
+3. **The class-engine coupling is untouched** (SI10), as ADR-3 scoped.
+4. **`<circle>`/`<text>` sprite ink survives by two late corrections**, not
+   by design: ADR-2's original `UPath[]` discarded it, and the collector
+   then dropped its paint.
+
+## The finding worth carrying forward
+
+**No quality gate could see this mission's worst regression.** When T9 first
+emitted `drawable`, sprites rendered as *nothing* — and `npm test`, all 389
+SVG goldens and the size-delta script all stayed green. Sizing was
+unaffected and no ratcheted golden contains a sprite. It was caught only by
+manually measuring the three diagnostic fixtures.
+
+Until SI9 lands, **the sprite corpus has no regression guard.**
+
+## Corrections this mission made to its own inputs
+
+- ADR-5's stated reason for inlining sprite declarations was wrong: the port
+  HAS resolved `!include <bundle/…>` since SI5b (2026-07-14). Two stale
+  `.claude/catalog.md` entries fixed; SI8 filed.
+- The brief's blast radius was wrong — class/object/state never reach
+  `EntityImageDescriptionDelegates`.
+- T4's acceptance criteria were impossible against ADR-2's own shape.
+- The test write-sets pointed at `src/`, where `vitest.config.ts` cannot see
+  them; 54 tests would have silently never run.
+- `UPath.affine`/`rotate`'s deferral note named a blocker that a sibling task
+  had already removed (T13).
+- **My own T12 measurement was wrong**: I used raw string equality where the
+  ratchet normalizes `data-*` and rounds numerics, and reported three
+  blockers that did not exist.
+
+## ADR amendments
+
+ADR-2 was amended **three times** — `UPath[]` → any `UShape` → plus paint.
+Each amendment recovered work an earlier lock had silently discarded. ADR-5
+was amended once (authored fixtures). ADR-1, ADR-3 and ADR-4 held as written.
+
+## @knowvah/dot-engine findings
+
+**None surfaced.** No `docs/graphviz-issues/` entry is owed.
