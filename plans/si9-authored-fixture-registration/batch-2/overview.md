@@ -5,7 +5,7 @@ review of it.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Rebuild the `usecase` cache, regenerate `parity.json`, report every changed row | typescript-pro | `tests/oracle/svg-conformance/parity.json` | T1 | [ ] |
+| T2 | Rebuild the `usecase` cache, regenerate `parity.json`, report every changed row | typescript-pro | `tests/oracle/svg-conformance/parity.json` | T1 | [x] |
 
 ## Batch exit criteria
 
