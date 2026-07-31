@@ -1,10 +1,10 @@
 @startuml
 ' Authored fixture (svg-sprite-nanoparser, 2026-07-30).
-' Sprite declarations are copied VERBATIM from assets/stdlib -- a stdlib
-' bundle is itself just a .puml of `sprite <name> <svg ...>` lines, so an
-' inline declaration is the identical parse path. Inlined rather than
-' !include'd because the golden harness (renderFixture) runs the
-' preprocessor with no include resolver; no other golden uses !include.
+' Sprites come from the stdlib bundle via !include -- the form a user
+' actually writes (si8 T6). This fixture previously inlined the `sprite
+' <name> <svg ...>` declarations because the golden harness (renderFixture)
+' ran the preprocessor with NO include resolver; si8 T5 wired one in, so
+' that workaround is gone.
 ' The MULTI-LINE case, which is the actual defect. A single-line sprite
 ' display is already correct (only the ellipse consumes the dimension); with
 ' two or more lines the stacking cursor advances by whatever the atom
@@ -12,13 +12,7 @@
 ' 0.029321in widening on bootstrap-0 / ruziru-69-xixo434.
 skinparam UsecaseBackgroundColor white
 
-sprite bi-globe <svg width="16" height="16">
-  <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7.5-6.923c-.67.204-1.335.82-1.887 1.855A8 8 0 0 0 5.145 4H7.5zM4.09 4a9.3 9.3 0 0 1 .64-1.539 7 7 0 0 1 .597-.933A7.03 7.03 0 0 0 2.255 4zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a7 7 0 0 0-.656 2.5zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5zM8.5 5v2.5h2.99a12.5 12.5 0 0 0-.337-2.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5zM5.145 12q.208.58.468 1.068c.552 1.035 1.218 1.65 1.887 1.855V12zm.182 2.472a7 7 0 0 1-.597-.933A9.3 9.3 0 0 1 4.09 12H2.255a7 7 0 0 0 3.072 2.472M3.82 11a13.7 13.7 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5zm6.853 3.472A7 7 0 0 0 13.745 12H11.91a9.3 9.3 0 0 1-.64 1.539 7 7 0 0 1-.597.933M8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855q.26-.487.468-1.068zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.7 13.7 0 0 1-.312 2.5m2.802-3.5a7 7 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7 7 0 0 0-3.072-2.472c.218.284.418.598.597.933M10.855 4a8 8 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4z"/>
-</svg>
-sprite bi-bootstrap-fill <svg width="16" height="16">
-  <path d="M6.375 7.125V4.658h1.78c.973 0 1.542.457 1.542 1.237 0 .802-.604 1.23-1.764 1.23zm0 3.762h1.898c1.184 0 1.81-.48 1.81-1.377 0-.885-.65-1.348-1.886-1.348H6.375z"/>
-  <path d="M4.002 0a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4V4a4 4 0 0 0-4-4zm1.06 12V3.545h3.399c1.587 0 2.543.809 2.543 2.11 0 .884-.65 1.675-1.483 1.816v.1c1.143.117 1.904.931 1.904 2.033 0 1.488-1.084 2.396-2.888 2.396z"/>
-</svg>
+!include <bootstrap/bootstrap>
 
 usecase a as "<$bi-globe>\nbi-globe"
 usecase b as "<$bi-bootstrap-fill,scale=2.5>\nline two\nline three"
