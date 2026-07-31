@@ -70,6 +70,7 @@ import { Fore } from '../../core/klimt/Fore.js';
 import { Back } from '../../core/klimt/Back.js';
 import type { ResolvedColor } from '../../core/klimt/color/HColorSet.js';
 import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
+import type { Paint } from '../../core/paint.js';
 
 type ResolvedAtomImage =
   | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
@@ -104,30 +105,46 @@ function resolveOptionalColor(color: string | null | undefined): ResolvedColor |
  * to be silently dropped): `drawCircle` draws a `UEllipse`, `drawText` a
  * `UText`, `drawPath`/`drawEllipse` a `UPath` (`SvgNanoParser.java:172-264`).
  *
- * Each collected shape is paired with the translate `this.translate` held
- * at the moment `draw` was called ({@link DrawablePrimitive}), rather than
- * baking it into the shape's own geometry: only `UPath` supports that
- * (`.translate(dx,dy)`, and even then it is a no-op here -- `drawPath`
- * bakes its OWN affine transform into the path's segments at parse time
- * and never wraps it in a raw `ug.apply(translate)` call, so this
- * collector's `translate` is always `(0,0)` when a `<path>`/`<ellipse>`-
- * sourced `UPath` is drawn). `UEllipse`/`UText` carry no position of their
- * own; upstream draws them via a live `ugs.apply(translate).draw(shape)`
- * pair (`drawCircle`/`drawText`), which THIS translate composition
- * (`apply(UTranslate)` below) already reproduces exactly -- the collector
- * just records the pairing instead of forwarding it to a real backend.
- * Draw sites re-apply it: `ug.apply(primitive.translate).draw(primitive.shape)`
- * (`EntityImageDescriptionSupport.ts#drawAtoms`,
- * `EntityImageDescriptionDelegates.ts#descAtomOps`).
+ * Each collected shape is paired with the translate/fore/back/stroke this
+ * collector held at the moment `draw` was called ({@link DrawablePrimitive},
+ * a SECOND maintainer-approved amendment), rather than baking that state
+ * into the shape or forwarding it to a real backend -- a collecting
+ * `UGraphic` has no real backend to forward to. `SvgNanoParser` itself sets
+ * this state correctly via ordinary `ug.apply(new Fore(...)).apply(new
+ * Back(...))` calls (`applyFillAndStroke`, `ColorResolver`); the FIRST cut
+ * of this collector accepted those `apply()` calls (needed just to not
+ * throw) but silently dropped the resulting paint, so every primitive drew
+ * with the ENTITY's ambient color instead of its own -- caught by the jar
+ * comparator (18/6/12 fill+stroke diffs on the three sprite fixtures, ZERO
+ * geometry diffs). `translate` is a no-op bake for a `<path>`/`<ellipse>`-
+ * sourced `UPath` (its own segments are already absolute -- `drawPath`
+ * bakes the affine transform in at parse time, never via a raw
+ * `ug.apply(translate)` call) but load-bearing for `UEllipse`/`UText`,
+ * which carry no position of their own. Draw sites re-apply everything:
+ * `ug.apply(primitive.translate).apply(new Fore(primitive.fore))
+ * .apply(new Back(primitive.back)).apply(primitive.stroke)
+ * .draw(primitive.shape)` (`EntityImageDescriptionSupport.ts#drawAtoms`,
+ * `EntityImageDescriptionDelegates.ts#descAtomOps`) -- the REAL
+ * `DriverPathSvg` then collapses `fore === back` to a strokeless flat fill
+ * on its own, so an absent `stroke=` reproduces without this file (or the
+ * draw sites) special-casing "no stroke" at all.
  */
 class SpritePrimitiveCollector implements UGraphic {
   private constructor(
     private readonly translate: UTranslate,
+    private readonly fore: Paint,
+    private readonly back: Paint,
+    private readonly stroke: UStroke,
     private readonly primitives: DrawablePrimitive[],
   ) {}
 
   static create(): SpritePrimitiveCollector {
-    return new SpritePrimitiveCollector(UTranslate.none(), []);
+    // Defaults are inert: `SvgNanoParser.drawU`'s FIRST act is always
+    // `updateColor` (`ug.apply(new Fore(...)).apply(new Back(...))`,
+    // `UGraphicWithScale.create`), so every real `draw()` call sees an
+    // explicitly-applied fore/back, never these fallbacks -- matching
+    // `UGraphicNo.getParam()`'s identical all-black/simple-stroke defaults.
+    return new SpritePrimitiveCollector(UTranslate.none(), 'black', 'black', UStroke.simple(), []);
   }
 
   apply(change: UChange): UGraphic {
@@ -137,18 +154,21 @@ class SpritePrimitiveCollector implements UGraphic {
       throw new Error(`SpritePrimitiveCollector.apply: unsupported UChange ${change.constructor.name}`);
     }
     const translate = change instanceof UTranslate ? this.translate.compose(change) : this.translate;
-    return new SpritePrimitiveCollector(translate, this.primitives);
+    const fore = change instanceof Fore ? change.getColor() : this.fore;
+    const back = change instanceof Back ? change.getBackColor() : this.back;
+    const stroke = change instanceof UStroke ? change : this.stroke;
+    return new SpritePrimitiveCollector(translate, fore, back, stroke, this.primitives);
   }
 
   draw(shape: UShape): void {
-    this.primitives.push({ shape, translate: this.translate });
+    this.primitives.push({ shape, translate: this.translate, fore: this.fore, back: this.back, stroke: this.stroke });
   }
 
   getParam(): UParam {
     return {
-      getStroke: () => UStroke.simple(),
-      getColor: () => 'black',
-      getBackcolor: () => 'black',
+      getStroke: () => this.stroke,
+      getColor: () => this.fore,
+      getBackcolor: () => this.back,
       getTranslate: () => this.translate,
     };
   }

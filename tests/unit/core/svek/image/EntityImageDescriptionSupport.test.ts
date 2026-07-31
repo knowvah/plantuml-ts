@@ -22,6 +22,7 @@ import type { FontConfiguration } from '../../../../../src/core/klimt/shape/UTex
 import { UPath } from '../../../../../src/core/klimt/shape/UPath.js';
 import { UEllipse } from '../../../../../src/core/klimt/shape/UEllipse.js';
 import { UTranslate } from '../../../../../src/core/klimt/UTranslate.js';
+import { UStroke } from '../../../../../src/core/klimt/UStroke.js';
 import { UGraphicSvg } from '../../../../../src/core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../../../../src/core/klimt/drawing/svg/svg-graphics.js';
 import type { StringBounder as DriverStringBounder } from '../../../../../src/core/klimt/drawing/svg/driver-text-svg.js';
@@ -70,6 +71,15 @@ function inkDotPath(): UPath {
   return p;
 }
 
+/** A flat black fill with no stroke (`fore === back` -- `DriverPathSvg`'s own
+ *  fast path, T9 amendment 2) -- the paint-neutral default every test in
+ *  this file that only cares about geometry (`d=`/`cx=`/`cy=`) uses. */
+const BLACK_FLAT: Pick<DrawablePrimitive, 'fore' | 'back' | 'stroke'> = {
+  fore: 'black',
+  back: 'black',
+  stroke: UStroke.simple(),
+};
+
 /** Wraps bare `UPath`s as untranslated `DrawablePrimitive`s (T9 widening,
  *  svg-sprite-nanoparser) -- every pre-widening test fixture here builds its
  *  own ink geometry directly into the path's segments (`inkSquarePath`/
@@ -77,7 +87,7 @@ function inkDotPath(): UPath {
  *  an ALREADY-positioned `UPath` (`UTranslate.none()` -- see
  *  `SpritePrimitiveCollector`'s doc comment, `render-atoms.ts`). */
 function untranslated(shapes: readonly UPath[]): DrawablePrimitive[] {
-  return shapes.map((shape) => ({ shape, translate: UTranslate.none() }));
+  return shapes.map((shape) => ({ shape, translate: UTranslate.none(), ...BLACK_FLAT }));
 }
 
 function drawableResolver(primitives: UPath[]): AtomImageResolver {
@@ -204,7 +214,9 @@ describe('drawAtoms — the `drawable` variant (T7, ADR-2)', () => {
     // (SvgNanoParser.java:172-175), which `DrawablePrimitive.translate`
     // reproduces here. A LOCAL (3,4) offset, layered on top of the atom's
     // own (0,0) origin (single atom, LEFT-aligned, first line).
-    const primitives: DrawablePrimitive[] = [{ shape: UEllipse.build(6, 6), translate: new UTranslate(3, 4) }];
+    const primitives: DrawablePrimitive[] = [
+      { shape: UEllipse.build(6, 6), translate: new UTranslate(3, 4), ...BLACK_FLAT },
+    ];
     const resolve = drawablePrimitivesResolver(primitives);
     buildTextBlock(`<img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT, resolve).drawU(ug);
     const svg = ug.getSvgString();

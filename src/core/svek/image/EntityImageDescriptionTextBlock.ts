@@ -22,6 +22,8 @@ import type { StringBounder } from '../../klimt/font/StringBounder.js';
 import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
 import { HorizontalAlignment } from '../../klimt/geom/HorizontalAlignment.js';
 import { UTranslate } from '../../klimt/UTranslate.js';
+import { Fore } from '../../klimt/Fore.js';
+import { Back } from '../../klimt/Back.js';
 import { UText } from '../../klimt/shape/UText.js';
 import type { FontConfiguration } from '../../klimt/shape/UText.js';
 import { UImage } from '../../klimt/shape/UImage.js';
@@ -292,11 +294,22 @@ function drawAtoms(
       ug.apply(new UTranslate(x, origin.y)).draw(UImage.build(resolved.width, resolved.height, resolved.href));
     } else {
       const translated = ug.apply(new UTranslate(x, origin.y)); // @see SvgNanoParser.java#drawU
-      // Each primitive re-applies its OWN translate on top of the atom's
-      // origin (`DrawablePrimitive`, creole-atoms.ts) -- `UPath`'s is always
-      // `(0,0)` (its geometry is already absolute), but `UEllipse`/`UText`
-      // carry no position of their own and need this to land correctly.
-      for (const primitive of resolved.primitives) translated.apply(primitive.translate).draw(primitive.shape);
+      // Each primitive re-applies its OWN translate+paint on top of the
+      // atom's origin (`DrawablePrimitive`, creole-atoms.ts): `UPath`'s
+      // translate is always `(0,0)` (its geometry is already absolute), but
+      // `UEllipse`/`UText` carry no position of their own; fore/back/stroke
+      // are the SAME `SvgNanoParser` paint state, snapshotted rather than
+      // forwarded when it was resolved (T9 amendment 2) -- `DriverPathSvg`
+      // collapses `fore === back` to a strokeless flat fill on its own, so
+      // an absent jar stroke reproduces without special-casing it here.
+      for (const primitive of resolved.primitives) {
+        translated
+          .apply(primitive.translate)
+          .apply(new Fore(primitive.fore))
+          .apply(new Back(primitive.back))
+          .apply(primitive.stroke)
+          .draw(primitive.shape);
+      }
     }
     x += resolved.width;
   }

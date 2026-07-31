@@ -41,6 +41,8 @@ import { parsePngIhdrFromDataUri } from './klimt/sprite/png-ihdr.js';
 import { scanOpenIconSpans, matchOpenIconAt } from './creole-atoms-openicon.js';
 import type { UShape } from './klimt/UShape.js';
 import type { UTranslate } from './klimt/UTranslate.js';
+import type { UStroke } from './klimt/UStroke.js';
+import type { Paint } from './paint.js';
 
 // ---------------------------------------------------------------------------
 // Token model
@@ -107,29 +109,33 @@ export interface LineAtomScan {
 }
 
 /**
- * One decomposed `UShape` primitive plus the translate it must be drawn
- * under (svg-sprite-nanoparser T9 amendment to ADR-2, maintainer-approved
- * widening from `UPath[]` to a heterogeneous shape set once T8's
- * `drawCircle`/`drawText` were found to also reach a `drawable` sprite --
- * see `render-atoms.ts`'s `SpritePrimitiveCollector` doc comment for the
- * full mechanism).
+ * One decomposed `UShape` primitive plus the translate AND paint it must
+ * draw under (svg-sprite-nanoparser T9/ADR-2, amended twice: `UPath[]` ->
+ * `UShape[]`+translate once `drawCircle`/`drawText` were found to also
+ * reach a sprite, then again for `fore`/`back`/`stroke` once every
+ * decomposed path was found drawing with the ENTITY's ambient paint --
+ * full mechanism in `render-atoms.ts`'s `SpritePrimitiveCollector`).
  *
- * A wrapper is required, not a bare `UShape[]`, because only `UPath`
- * carries its own ABSOLUTE position (its segments' own coordinates,
- * `SvgNanoParser#drawPath` bakes the accumulated affine transform in at
- * PARSE time -- `translate` is `UTranslate.none()` for these). `UEllipse`/
- * `UText` carry no position of their own; upstream's `drawCircle`/
- * `drawText` instead position them via a live `UGraphic.apply(translate)
- * .draw(shape)` call pair (`SvgNanoParser.java:172-175,257`), which a
- * COLLECTING `UGraphic` (T9, not a live drawing backend) cannot bake into
- * the shape itself the way `UPath.translate` can -- so the collector
- * records the translate ALONGSIDE the shape instead, and every draw site
- * re-applies it: `ug.apply(translate).draw(shape)`, the SAME call shape
- * `SvgNanoParser.drawU` itself uses.
+ * A wrapper, not a bare `UShape[]`: only `UPath` carries its own ABSOLUTE
+ * position (`SvgNanoParser#drawPath` bakes the affine transform into its
+ * segments at PARSE time -- `translate` is `UTranslate.none()` there).
+ * `UEllipse`/`UText` carry no position of their own -- upstream positions
+ * them via a live `ug.apply(translate).draw(shape)` pair
+ * (`drawCircle`/`drawText`) a COLLECTING `UGraphic` cannot forward to a
+ * real backend, so it records the pairing instead; every draw site
+ * re-applies it. Same reasoning for `fore`/`back`/`stroke`: the SAME live
+ * state `applyFillAndStroke`/`ColorResolver` already resolve correctly via
+ * `ug.apply(...)`, just snapshotted instead of forwarded.
+ * `DriverPathSvg.draw` already collapses `fore === back` to a strokeless
+ * flat fill -- that existing fast path, not anything here, is what
+ * reproduces the jar's absent `stroke=` correctly.
  */
 export interface DrawablePrimitive {
   readonly shape: UShape;
   readonly translate: UTranslate;
+  readonly fore: Paint;
+  readonly back: Paint;
+  readonly stroke: UStroke;
 }
 
 /**
