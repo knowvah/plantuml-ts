@@ -33,7 +33,7 @@
  * never a bare manifest object (which `stdlibRegistry` would harvest as if
  * its `files` held content instead of paths).
  *
- * @see ../../src/core/include-resolver.ts -- `stdlibContentFor`
+ * @see ../../src/core/stdlib-content.ts -- `stdlibContentFor`
  * @see ../../src/core/tim/stdlib-path.ts -- `splitStdlibPath`
  */
 import { describe, expect, it, vi } from 'vitest';

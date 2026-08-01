@@ -26,7 +26,8 @@
  * `bootstrap` alias stub and the concrete `bootstrap1.13.1` sprite-split
  * bundle, exactly as `packages/stdlib/generated/bootstrap.js` ships them.
  *
- * @see ../../src/core/sprite-split-stdlib.ts -- `stdlibContentFor`, `PrefetchWalk`
+ * @see ../../src/core/stdlib-content.ts -- `stdlibContentFor`
+ * @see ../../src/core/include-resolver.ts -- `PrefetchWalk`
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';

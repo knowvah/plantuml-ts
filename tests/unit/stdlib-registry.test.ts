@@ -410,7 +410,7 @@ describe('stdlibRegistry -- resolveResource (si11a T2)', () => {
   });
 
   it('a remote alias chains to an eager target through the EXISTING bundlesFor, unmodified (AC3)', async () => {
-    // bundlesFor/stdlibContentFor are private to include-resolver.ts, so this
+    // bundlesFor/stdlibContentFor are private to stdlib-content.ts, so this
     // exercises them through the public render pipeline -- per si11a's method
     // rule 2, verifying against the CURRENT walk rather than reading it.
     const remoteAlias = remoteStdlib({

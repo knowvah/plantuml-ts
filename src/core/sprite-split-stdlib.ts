@@ -12,7 +12,7 @@
  * per-key promise memoization.
  *
  * A bundle registered this way carries an EXPLICIT marker
- * ({@link spriteSplitNamesOf}) so {@link stdlibContentFor} can tell "this
+ * ({@link spriteSplitNamesOf}) so `stdlib-content.ts#stdlibContentFor` can tell "this
  * `<bundle/thing>` target is sprite-split" from "this is an ordinary
  * per-resource remote bundle that happens to resolve `files: {}`" -- both
  * shapes exist and are NOT distinguishable by emptiness alone (`RemoteBundle
@@ -41,7 +41,7 @@
  * A registrant that ALSO needs the `bootstrap` -> `bootstrap1.13.1` alias
  * registers it the ordinary way (an eager `BundleData` stub with `aliasOf`,
  * or another `remoteStdlib`/`spriteSplitStdlib` thunk under the `bootstrap`
- * key) -- alias resolution is unchanged ({@link bundlesFor}).
+ * key) -- alias resolution is unchanged (`stdlib-content.ts#bundlesFor`).
  *
  * Once registered, `!include <bootstrap/bootstrap>` no longer fetches the
  * 1,085,342 B source file: the prefetch walk scans the diagram for `<$name>`
@@ -50,10 +50,12 @@
  * `PrefetchWalk`-constant, exactly like `registry` -- see
  * `include-resolver.ts#PrefetchWalk`), and fetches only those fragments.
  *
- * `stdlibContentFor`/`bundlesFor` (si11a T3) live here rather than in
- * `include-resolver.ts` -- that file is at its hook-enforced 500-line cap,
- * and si11b T4's own pre-authorization is to grow THIS module instead.
+ * The alias walk and the resource/sprite dispatch that consumes the marker
+ * live in `stdlib-content.ts`, which is where the prefetch walk calls in.
+ * They passed through this module briefly (si11b T4 parked them here for
+ * `include-resolver.ts`'s 500-line cap) but they are not sprite-specific.
  *
+ * @see ./stdlib-content.ts -- `stdlibContentFor`, the caller of everything here
  * @see ./sprite-prefetch.ts -- the `<$name>` scan this reuses (ADR-4)
  * @see ./tim/StdlibRemote.ts -- `remoteStdlib`, `StdlibRemoteManifest`, `RemoteBundle`
  * @see ./tim/StdlibRegistry.ts -- `StdlibRegistry`, `resolveResource`
@@ -64,7 +66,6 @@ import type { IncludeFetcher } from './include-resolver.js';
 import { scanSpriteNames } from './sprite-prefetch.js';
 import { remoteStdlib, type RemoteBundle, type StdlibRemoteManifest } from './tim/StdlibRemote.js';
 import type { BundleData } from './tim/StdlibStore.js';
-import { splitStdlibPath } from './tim/stdlib-path.js';
 import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 
 /**
@@ -121,7 +122,7 @@ function markSpriteSplit(data: BundleData, sprites: readonly string[]): BundleDa
 /**
  * The sprite name list on `data`, IF it was produced by
  * {@link spriteSplitStdlib}'s `asBundleData()` -- `undefined` for an ordinary
- * bundle. This is the EXPLICIT marker {@link stdlibContentFor} checks:
+ * bundle. This is the EXPLICIT marker `stdlib-content.ts` checks:
  * detection never infers sprite-split-ness from an empty `files` map, which
  * an ordinary remote bundle's `asBundleData()` also reports.
  */
@@ -205,84 +206,4 @@ export async function assembleSpriteSplitContent(
   // `manifestSet`, which mirrors the exact keys `spriteSplitStdlib` used to
   // build the `RemoteBundle`'s `files` map.
   return fragments.map((fragment) => fragment!).join('');
-}
-
-/**
- * The tail of {@link stdlibContentFor}: given the walked alias chain's
- * terminus, decide whether it is sprite-split (explicit marker, never
- * inferred) and either assemble the `<$name>` payload or fall back to the
- * ordinary per-resource lookup, unchanged from si11a.
- */
-async function resolveBundleContent(
-  registry: StdlibRegistry,
-  bundles: readonly BundleData[],
-  key: string,
-  source: string,
-  extraSpriteNames: readonly string[] | undefined,
-): Promise<string | undefined> {
-  const target = bundles[bundles.length - 1]!;
-  if (target.aliasOf !== undefined) return undefined;
-
-  const spriteNames = spriteSplitNamesOf(target);
-  if (spriteNames !== undefined) {
-    return assembleSpriteSplitContent(registry, target.name, spriteNames, source, extraSpriteNames);
-  }
-
-  return registry.resolveResource(target.name, key);
-}
-
-/**
- * Every `BundleData` needed to walk one `<bundle/thing>` lookup's alias
- * chain; the LAST element is the terminus (see {@link stdlibContentFor}).
- * Alias semantics stay in `StdlibStore.ts#resolveBundle`, the key transform
- * in `stdlib-path.ts#splitStdlibPath` -- this only walks `registry.resolve`
- * one link at a time (a bundle name is addressable only once its chunk has
- * loaded: `bootstrap`'s chunk is what reveals `bootstrap1.13.1`, so the
- * second `resolve` is a cache hit, not a second `import()`).
- * A cycle stops collection with the last `aliasOf` still set;
- * `stdlibContentFor` treats that as a miss (upstream has no such guard and
- * would infinite-loop the JVM -- see `StdlibStore.ts`'s divergence note).
- */
-async function bundlesFor(registry: StdlibRegistry, bundleName: string): Promise<readonly BundleData[]> {
-  const collected: BundleData[] = [];
-  const visited = new Set<string>();
-
-  let current = bundleName.toLowerCase();
-  for (;;) {
-    if (visited.has(current)) return collected;
-    visited.add(current);
-
-    const data = await registry.resolve(current);
-    if (data === undefined) return collected;
-
-    collected.push(data);
-    if (data.aliasOf === undefined) return collected;
-
-    current = data.aliasOf.toLowerCase();
-  }
-}
-
-/**
- * A registered bundle's content for `stdlibPath`, or `undefined` if nothing
- * serves it. si11a T3: asks for exactly ONE resource (ADR-2/ADR-6) instead of
- * materialising every `BundleData` in the chain -- ~2.9 KB vs 18.93 MB for
- * `tupadr3`. `resolveResource` is uniform across eager/remote (T2). si11b T4:
- * `extraSpriteNames` is the walk-global ADR-5b set, passed through unchanged
- * to `resolveBundleContent` for the sprite-split case; ignored otherwise.
- */
-export async function stdlibContentFor(
-  registry: StdlibRegistry,
-  stdlibPath: string,
-  source: string,
-  extraSpriteNames: readonly string[] | undefined,
-): Promise<string | undefined> {
-  // No `/` resolves to nothing upstream (Stdlib.java:101-102) -- checked
-  // before any chunk load, so a malformed target costs nothing.
-  const split = splitStdlibPath(stdlibPath);
-  if (split === undefined) return undefined;
-
-  const bundles = await bundlesFor(registry, split.bundle);
-  if (bundles.length === 0) return undefined;
-
-  return resolveBundleContent(registry, bundles, split.key, source, extraSpriteNames);
 }

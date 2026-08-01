@@ -43,7 +43,7 @@ import {
   stdlibPathOf,
   type IncludeStore,
 } from './tim/IncludeStore.js';
-import { stdlibContentFor } from './sprite-split-stdlib.js';
+import { stdlibContentFor } from './stdlib-content.js';
 import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 
 export {
@@ -271,7 +271,7 @@ interface PrefetchWalk {
   /** si11a T4: WALK-layer in-flight dedup, keyed by include target. */
   readonly inFlight: Map<string, Promise<void>>;
   /** si11b ADR-5b: `RenderOptions.sprites`, applied at EVERY recursion level
-   *  (`sprite-split-stdlib.ts#stdlibContentFor`), not just the top one. */
+   *  (`stdlib-content.ts#stdlibContentFor`), not just the top one. */
   readonly extraSpriteNames: readonly string[] | undefined;
 }
 
