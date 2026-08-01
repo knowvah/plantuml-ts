@@ -4,7 +4,7 @@ One task, deliberately alone.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Generator omits eager modules for aws + tupadr3 | typescript-pro | `scripts/build-stdlib-packages/types.ts`, `scripts/build-stdlib-packages/package-specs.ts`, `scripts/build-stdlib-packages.ts`, `scripts/build-stdlib-packages/emit-index.ts`, `tests/unit/stdlib-eager-omission.test.ts` | — | [ ] |
+| T1 | Generator omits eager modules for aws + tupadr3 | typescript-pro | `scripts/build-stdlib-packages/types.ts`, `scripts/build-stdlib-packages/package-specs.ts`, `scripts/build-stdlib-packages.ts`, `scripts/build-stdlib-packages/emit-index.ts`, `tests/unit/stdlib-eager-omission.test.ts` | — | [x] |
 
 ## Why this task runs alone
 

@@ -29,6 +29,12 @@ vacuously at half the size.
 
 - `tests/unit/stdlib-packages.test.ts` (modify)
 - `tests/unit/stdlib-package-files.test.ts` (modify)
+- `tests/unit/sprite-package-files.test.ts` (modify) — **added mid-mission**,
+  maintainer-approved 2026-08-01 under stop condition 1. This SI11b test does
+  `spec.modules.map(...)` at ~line 179 and stops typechecking now that ADR-2
+  made `modules` optional; it is the identical narrowing error this task
+  already fixes in `stdlib-package-files.test.ts`. Fix the narrowing only —
+  nothing else in that file is in scope.
 
 `packages/**` is T3's. Do not "fix" a failing export assertion by editing the
 package — if the two disagree, the contract in

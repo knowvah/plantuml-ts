@@ -44,7 +44,14 @@ export interface GeneratedModule {
 export interface PackageSpec {
   /** Directory name under `packages/`. */
   readonly packageDir: string;
-  readonly modules: readonly GeneratedModule[];
+  /**
+   * Optional: a package with no eager `BundleData` module to ship omits it
+   * entirely (`stdlib-aws`, `stdlib-tupadr3` -- SI12 ADR-2). Absent means no
+   * eager `generated/<fileBaseName>.{js,d.ts}` pair is emitted for this
+   * package, and `emit-index.ts` builds `generated/index.{js,d.ts}` from
+   * `remoteModules` instead (SI12 ADR-1).
+   */
+  readonly modules?: readonly GeneratedModule[];
   /**
    * Remote (key -> path manifest, no content) siblings of a subset of
    * `modules`, emitted by `emit-remote-manifest.ts` -- SI11a ADR-1

@@ -49,7 +49,10 @@ function freshGeneratedDir(packageDir: string): string {
 function buildPackage(spec: PackageSpec): void {
   const generatedDir = freshGeneratedDir(spec.packageDir);
 
-  for (const mod of spec.modules) {
+  // SI12 ADR-2/ADR-5: `modules` is optional -- a spec that omits it (e.g.
+  // stdlib-aws, stdlib-tupadr3) gets no eager module emitted at all, matching
+  // the existing `spec.remoteModules ?? []` idiom below.
+  for (const mod of spec.modules ?? []) {
     writeFileSync(join(generatedDir, `${mod.fileBaseName}.js`), emitModuleJs(mod, ASSETS_STDLIB_DIR), 'utf8');
     writeFileSync(join(generatedDir, `${mod.fileBaseName}.d.ts`), emitModuleDts(mod), 'utf8');
   }

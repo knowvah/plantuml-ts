@@ -53,9 +53,9 @@ const STDLIB_PACKAGE: PackageSpec = {
 };
 
 // Extracted (rather than inlined per-package) so `remoteModules` below can
-// reuse the exact same `GeneratedModule` objects as `modules` -- SI11a's
-// remote manifest is a pure function of this same metadata, just without
-// inlined `.puml` content (`emit-remote-manifest.ts`).
+// reuse the same `GeneratedModule` object SI12's removed eager `modules` used
+// to -- the remote manifest is a pure function of this same metadata, just
+// without inlined `.puml` content (`emit-remote-manifest.ts`).
 const AWSLIB14_MODULE: GeneratedModule = {
   fileBaseName: 'awslib14',
   exports: [{ kind: 'concrete', exportName: 'awslib14', bundleName: 'awslib14', assetFolder: 'awslib14' }],
@@ -68,7 +68,9 @@ const AWSLIB_ALIAS_MODULE: GeneratedModule = {
 
 const STDLIB_AWS_PACKAGE: PackageSpec = {
   packageDir: 'stdlib-aws',
-  modules: [AWSLIB14_MODULE, AWSLIB_ALIAS_MODULE],
+  // No eager `modules` -- SI12 ADR-2/ADR-5. `remoteModules` is the only
+  // encoding this package ships; `generated/index.js` re-exports it instead
+  // (`emit-index.ts`, SI12 ADR-1).
   remoteModules: [AWSLIB14_MODULE, AWSLIB_ALIAS_MODULE],
 };
 
@@ -79,7 +81,7 @@ const TUPADR3_MODULE: GeneratedModule = {
 
 const STDLIB_TUPADR3_PACKAGE: PackageSpec = {
   packageDir: 'stdlib-tupadr3',
-  modules: [TUPADR3_MODULE],
+  // No eager `modules` -- SI12 ADR-2/ADR-5. See STDLIB_AWS_PACKAGE above.
   remoteModules: [TUPADR3_MODULE],
 };
 

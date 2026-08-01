@@ -50,7 +50,7 @@ silently fetches an unpinned copy. CI uses `jiti` and so should you.
 
 | Batch | Tasks | Theme | Done |
 |---|---|---|---|
-| [1](batch-1/overview.md) | T1 | Generator stops emitting eager modules | [ ] |
+| [1](batch-1/overview.md) | T1 | Generator stops emitting eager modules | [x] |
 | [2](batch-2/overview.md) | T2 ∥ T3 ∥ T4 ∥ T5 | Consumers: stdlib-all, manifests, tests, measurement | [ ] |
 | [3](batch-3/overview.md) | T6 | Docs | [ ] |
 | [4](batch-4/overview.md) | T7 | Close the mission | [ ] |
