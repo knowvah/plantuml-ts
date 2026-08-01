@@ -30,7 +30,7 @@
  * @see ../../src/core/tim/StdlibRemote.ts -- `remoteStdlib`, `RemoteBundle`
  * @see ../unit/stdlib-remote-prefetch.test.ts -- T3/T4's per-layer pins
  */
-import { readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -47,7 +47,6 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
 const TUPADR3_REMOTE_MODULE = join(PACKAGES_DIR, 'stdlib-tupadr3', 'generated', 'tupadr3.remote.js');
-const TUPADR3_EAGER_MODULE = join(PACKAGES_DIR, 'stdlib-tupadr3', 'generated', 'tupadr3.js');
 const TUPADR3_ASSETS_DIR = join(PACKAGES_DIR, 'stdlib-tupadr3', 'assets', 'tupadr3');
 const AWSLIB14_REMOTE_MODULE = join(PACKAGES_DIR, 'stdlib-aws', 'generated', 'awslib14.remote.js');
 const AWSLIB14_ASSETS_DIR = join(PACKAGES_DIR, 'stdlib-aws', 'assets', 'awslib14');
@@ -78,6 +77,24 @@ function diskFetcher(assetsDir: string, baseUrl: string, fetched: Map<string, nu
 /** A fetcher that must never run -- proves a given path makes zero requests. */
 const noFetch: IncludeFetcher = (url: string): Promise<string> =>
   Promise.reject(new Error(`unexpected fetch: ${url}`));
+
+/**
+ * Sum of every regular file's raw byte size under `root`, recursive -- the
+ * "what a consumer actually installs" baseline now that the eager
+ * `tupadr3.js` bundle (si12 T1) no longer exists to `statSync` directly.
+ * ADR-3: read from disk, never hardcode; re-measured on every run rather
+ * than frozen as a constant.
+ */
+function sumDirectoryBytes(root: string): number {
+  let total = 0;
+  for (const entry of readdirSync(root, { recursive: true, withFileTypes: true })) {
+    if (!entry.isFile()) {
+      continue;
+    }
+    total += statSync(join(entry.parentPath, entry.name)).size;
+  }
+  return total;
+}
 
 // `packages/*/generated/` is built ONCE by vitest's globalSetup
 // (`tests/helpers/build-stdlib-globalsetup.ts`). Building it here instead --
@@ -129,11 +146,16 @@ describe('tupadr3 -- real manifest, real assets, real render (criteria 1-2)', ()
     expect(svg).toContain('xlink:href="data:image/png;base64,');
 
     // --- THE MEASUREMENT ---------------------------------------------
+    // si12 T5 (ADR-3): the eager `tupadr3.js` bundle si11a measured against
+    // no longer exists (si12 T1 stopped emitting it) -- the baseline is now
+    // the sum of the bundle's ASSET bytes, read from disk, re-measured on
+    // every run. Never a hardcoded constant, never SI11a's number carried
+    // forward.
     const manifestGzipBytes = gzipSync(readFileSync(TUPADR3_REMOTE_MODULE), { level: 9 }).length;
     const resourceBytes = [...fetched.values()].reduce((sum, n) => sum + n, 0);
     const totalBytes = manifestGzipBytes + resourceBytes;
-    const eagerBytes = statSync(TUPADR3_EAGER_MODULE).size;
-    const reductionPct = ((eagerBytes - totalBytes) / eagerBytes) * 100;
+    const assetTreeBytes = sumDirectoryBytes(TUPADR3_ASSETS_DIR);
+    const reductionPct = ((assetTreeBytes - totalBytes) / assetTreeBytes) * 100;
 
     // Criterion 2: this IS the mission's headline evidence; it must be easy
     // to read and quote, not buried in an assertion message (T8 spec,
@@ -141,11 +163,14 @@ describe('tupadr3 -- real manifest, real assets, real render (criteria 1-2)', ()
     console.log(
       [
         '',
-        '=== si11a T8 measurement -- tupadr3, 3-icon diagram ==================',
+        '=== si12 T5 measurement -- tupadr3, 3-icon diagram ====================',
+        '(denominator re-based: the eager tupadr3.js module si11a measured no',
+        ' longer exists -- si12 dropped it. Baseline below is the sum of every',
+        ' file under assets/tupadr3/, read from disk, not a carried-over number.)',
         `manifest (tupadr3.remote.js, gzip -9): ${manifestGzipBytes.toLocaleString()} B`,
         `resources actually fetched (4 files):  ${resourceBytes.toLocaleString()} B`,
         `TOTAL over the wire:                   ${totalBytes.toLocaleString()} B`,
-        `eager tupadr3.js baseline:              ${eagerBytes.toLocaleString()} B`,
+        `asset tree baseline (assets/tupadr3/): ${assetTreeBytes.toLocaleString()} B`,
         `reduction:                              ${reductionPct.toFixed(3)}%`,
         '========================================================================',
         '',
@@ -153,9 +178,10 @@ describe('tupadr3 -- real manifest, real assets, real render (criteria 1-2)', ()
     );
 
     // Regression tripwire, not a rounded-up claim (stop condition 15): the
-    // real measured reduction is ~99.7%, comfortably clearing the >=99% bar
-    // this batch's stop condition names. If a future change to the manifest
-    // or asset set drops below 99%, this must fail, not be relaxed.
+    // real measured reduction against the asset-tree baseline is still
+    // comfortably above 99%, the bar this batch's stop condition names. If a
+    // future change to the manifest or asset set drops below 99%, this must
+    // fail, not be relaxed.
     expect(reductionPct).toBeGreaterThan(99);
   });
 });
