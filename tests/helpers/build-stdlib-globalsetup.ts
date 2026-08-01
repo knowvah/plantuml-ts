@@ -49,6 +49,7 @@
  * @see ../../packages/stdlib-aws/scripts/copy-assets.mjs
  */
 import { execFileSync } from 'node:child_process';
+import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -56,16 +57,29 @@ import { buildStdlibPackages } from '../../scripts/build-stdlib-packages.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
+const COPY_ASSETS_SCRIPT = join('scripts', 'copy-assets.mjs');
 
-/** The two packages whose `generated/` output has no eager module (SI12
- * ADR-2/ADR-5), so their tests instead read a shipped `assets/` copy --
- * mirrors `STDLIB_AWS_PACKAGE`/`STDLIB_TUPADR3_PACKAGE` in
- * `scripts/build-stdlib-packages/package-specs.ts`. */
-const ASSET_BEARING_PACKAGES: readonly string[] = ['stdlib-aws', 'stdlib-tupadr3'];
+/**
+ * Every package that ships a raw `assets/` copy, DISCOVERED rather than
+ * listed: owning a `scripts/copy-assets.mjs` (wired as that package's
+ * `prepack`) is exactly the property this function acts on, so a package
+ * added later is picked up without editing this file. Today that is
+ * `stdlib-aws` and `stdlib-tupadr3` -- the two whose `generated/` output has
+ * no eager module (SI12 ADR-2/ADR-5), so their tests read the shipped
+ * `assets/` copy instead. Sorted, because emission order must not depend on
+ * `readdirSync`.
+ */
+function assetBearingPackages(): string[] {
+  return readdirSync(PACKAGES_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter((name) => existsSync(join(PACKAGES_DIR, name, COPY_ASSETS_SCRIPT)))
+    .sort();
+}
 
 function populateAssets(): void {
-  for (const packageDir of ASSET_BEARING_PACKAGES) {
-    execFileSync('node', [join(PACKAGES_DIR, packageDir, 'scripts', 'copy-assets.mjs')]);
+  for (const packageDir of assetBearingPackages()) {
+    execFileSync('node', [join(PACKAGES_DIR, packageDir, COPY_ASSETS_SCRIPT)]);
   }
 }
 
