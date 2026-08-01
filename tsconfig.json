@@ -12,7 +12,17 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // `demo/` imports the library by its PUBLIC name, the way a consumer does.
+    // Without this, that name resolves through node_modules/@knowvah/plantuml-ts
+    // (the workspace self-link) to the root manifest's "types", i.e. to
+    // dist/plantuml-ts.d.ts -- so `npm run typecheck` only passed when a BUILD
+    // had already run. On a clean clone it failed, which is how CI first found
+    // it. Mapping the name to source makes the typecheck hermetic, and mirrors
+    // the alias demo/vite.config.ts already sets for the bundler.
+    "paths": {
+      "@knowvah/plantuml-ts": ["./src/index.ts"]
+    }
   },
   "include": ["src", "tests", "demo"]
 }
