@@ -23,7 +23,10 @@ import { parseState } from '../../src/diagrams/state/parser.js';
 import { parseSequence } from '../../src/diagrams/sequence/parser.js';
 import { isEmpty, isDisplayPositionedNull } from '../../src/core/annotations/index.js';
 
-const CORPUS = join(dirname(fileURLToPath(import.meta.url)), '../corpus');
+// Pinned copies, not the gitignored tests/corpus tree — see
+// tests/fixtures/corpus/README.md. Reading the regenerable tree made these
+// tests pass only on a machine that had built it.
+const CORPUS = join(dirname(fileURLToPath(import.meta.url)), '../fixtures/corpus');
 
 /** Split markup into trimmed, non-empty content lines (as `UmlSource.lines`
  *  / `parseSequence`'s raw-line contract expect). */

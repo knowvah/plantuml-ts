@@ -298,7 +298,7 @@ describe('newpage layout -- corpus fixture sadamo-18-siva346', () => {
   it('produces one geometry with all non-degenerate pages laid out', () => {
     const corpusPath = join(
       dirname(fileURLToPath(import.meta.url)),
-      '../../corpus/class/sadamo-18-siva346.puml',
+      '../../fixtures/corpus/class/sadamo-18-siva346.puml',
     );
     if (!existsSync(corpusPath)) {
       console.warn(`skip: corpus fixture not found at ${corpusPath}`);

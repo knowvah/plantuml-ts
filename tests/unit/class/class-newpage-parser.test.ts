@@ -203,7 +203,7 @@ describe('newpage — three pages', () => {
 describe('newpage — corpus fixture sadamo-18-siva346', () => {
   const corpusPath = join(
     dirname(fileURLToPath(import.meta.url)),
-    '../../corpus/class/sadamo-18-siva346.puml',
+    '../../fixtures/corpus/class/sadamo-18-siva346.puml',
   );
 
   it('splits into one page per newpage boundary (51 pages, 50 newpages)', () => {

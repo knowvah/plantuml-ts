@@ -157,7 +157,7 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
 
   it("buveco-86-tibo673: TIM cascade collapsing to a bare 'title Test SVG' line renders a CLASS-typed diagram containing the title", () => {
     const source = readFileSync(
-      join(REPO_ROOT, 'tests/corpus/sequence/buveco-86-tibo673.puml'),
+      join(REPO_ROOT, 'tests/fixtures/corpus/sequence/buveco-86-tibo673.puml'),
       'utf-8',
     );
 
@@ -311,7 +311,7 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
     // defaults CENTER, both resolved from `styles.header`/`styles.footer`
     // at draw time, not stored on the parsed DisplayPositioned), plus a
     // `<style>` block giving each element its own BackGroundColor.
-    const source = readFileSync(join(REPO_ROOT, 'tests/corpus/class/A0005_Test.puml'), 'utf-8');
+    const source = readFileSync(join(REPO_ROOT, 'tests/fixtures/corpus/class/A0005_Test.puml'), 'utf-8');
 
     // Byte-stability control: this fixture legitimately carries chrome
     // (title/legend/footer/header/caption all present) -- its output is
