@@ -20,8 +20,8 @@ jobs:
     name: gates
     runs-on: ubuntu-latest
     # Hard backstop for a hang, not a performance budget — that is the soft
-    # check at the end of the job. Measured baseline (run 30702971624, cold
-    # cache): 4.0 min total, of which test is 2.5. 20 is 5x that.
+    # check at the end of the job. Observed 4.0-5.8 min total across runs
+    # 30702971624 and 30703745724; 20 is ~3.5x the slow end.
     timeout-minutes: 20
 
     steps:
@@ -75,7 +75,7 @@ jobs:
 
       - name: restore vendored stdlib
         id: stdlib-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: assets/stdlib
           # Keyed on the pin: a re-pin is a different key and re-vendors.
@@ -112,7 +112,7 @@ jobs:
 
       # Includes the 90/90/90 coverage thresholds, the 389 svg goldens and the
       # 54-fixture description ratchet — all enforced inside vitest.
-      # Baseline 2.5 min; 12 catches a hung worker without hiding creep.
+      # Observed 2.45-3.88 min; 12 catches a hung worker without hiding creep.
       - name: test
         timeout-minutes: 12
         run: npm test
@@ -134,20 +134,26 @@ jobs:
       # — a slow green build is still green, and a gate that cries wolf on
       # runner variance gets ignored.
       #
-      # Budget is 2x the measured 4.0 min baseline (run 30702971624). Runner
-      # speed alone varies well under that. Cold vs warm cache is NOT split:
-      # vendoring the 285 MB tree measured 0.18 min, far too small to matter.
+      # Budget is ~2x the SLOW end of the observed range, not 2x the fastest
+      # run. Measured: 4.0 min cold (30702971624, test 2.45) and 5.8 min warm
+      # (30703745724, test 3.88) — the warm run was slower, so that 45% spread
+      # is runner variance, not caching. Sizing off the 4.0 sample alone would
+      # have fired on an ordinary slow runner, which is how a soft check earns
+      # its way into being ignored.
+      #
+      # Cold vs warm is NOT split: vendoring the 285 MB tree measured 0.18 min,
+      # an order of magnitude below the variance it would be trying to explain.
       # ----------------------------------------------------------------------
       - name: flag a slow run
         if: always()
         env:
-          BUDGET_MIN: 8
+          BUDGET_MIN: 10
         run: |
           set -euo pipefail
           elapsed=$(( $(date +%s) - ${{ steps.timer.outputs.start }} ))
           mins=$(awk "BEGIN {printf \"%.1f\", $elapsed/60}")
-          echo "CI wall clock: **${mins} min** (budget ${BUDGET_MIN} min, baseline 4.0)" \
+          echo "CI wall clock: **${mins} min** (budget ${BUDGET_MIN} min, observed 4.0-5.8)" \
             >> "$GITHUB_STEP_SUMMARY"
           if [ "$elapsed" -gt $(( BUDGET_MIN * 60 )) ]; then
-            echo "::warning title=Slow CI run::${mins} min, over the ${BUDGET_MIN} min soft budget (baseline 4.0 min). Check the step timings before raising the budget — the usual causes are a growing suite or a cache that stopped hitting."
+            echo "::warning title=Slow CI run::${mins} min, over the ${BUDGET_MIN} min soft budget (observed range 4.0-5.8 min). Check the step timings before raising the budget — the usual causes are a growing suite or a cache that stopped hitting."
           fi
