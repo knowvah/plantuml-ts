@@ -226,24 +226,28 @@ than "assert on the build output".
 
 ## Known issues and follow-ups
 
-**Needs a maintainer decision — outside every task's write-set, so escalated
-rather than self-approved (stop condition 12):**
+**All three follow-ups CLOSED on maintainer instruction, 2026-07-31** (3
+commits after the mission's 12; full gate set re-run green on each):
 
-- **`docs/stdlib-remote.md:174-177` is now wrong.** It tells readers
-  "Bootstrap gets nothing from this… per-sprite splitting for bootstrap is a
-  separate, deferred mission (SI11b)." True when written, false now. This is
-  consumer-facing documentation actively pointing away from a shipped
-  feature — the highest-value item in this list.
+- ~~`docs/stdlib-remote.md:174-177` is now wrong~~ — **done** (`715fccb9`).
+  It told readers "Bootstrap gets nothing from this… per-sprite splitting for
+  bootstrap is a separate, deferred mission (SI11b)": consumer-facing docs
+  pointing away from a shipped feature. Replaced with the `spriteSplitStdlib`
+  recipe, the measured 99.128%, ADR-6's two stated limits, the `sprites.json`
+  subpath, and `onWarning`.
+- ~~`tests/unit/stdlib-packages.test.ts`'s stale reason~~ — **done**
+  (`27ec6021`). The conclusion held, the reason did not: it is the absence of
+  a `prepack` that makes packing read-only, not the absence of assets. The
+  comment now says which half load-bears and what would invalidate it.
+- ~~`sprite-split-stdlib.ts` under-described by its name~~ — **done**
+  (`6cce051f`). `bundlesFor` / `stdlibContentFor` / the content dispatch moved
+  to a new `src/core/stdlib-content.ts`; pure relocation, no behavior change.
+  `sprite-split-stdlib.ts` keeps registration, manifest expansion and the
+  marker. Final: `stdlib-content.ts` 116, `sprite-split-stdlib.ts` 209,
+  `include-resolver.ts` 464.
 
-**Lower priority:**
+**Still open:**
 
-- `tests/unit/stdlib-packages.test.ts`'s comment that `packages/stdlib` "has
-  no prepack and no assets, so it cannot race" is half stale: the conclusion
-  still holds (no prepack ⇒ `npm pack --dry-run` mutates nothing), the
-  stated reason no longer does.
-- `src/core/sprite-split-stdlib.ts` also holds the general
-  `bundlesFor`/`stdlibContentFor` alias walk, moved there for line budget, so
-  its name under-describes its contents.
 - **`npm publish` is maintainer-gated and was not part of this mission.**
   The fragments are in `files` and the packaging gate resolves them against
   a real `npm pack --dry-run --json`, but nothing has been published.
