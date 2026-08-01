@@ -5,7 +5,13 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "types": [],
-    "skipLibCheck": true,
+    // MUST stay false. Each package's `include` is `generated/**/*.d.ts` --
+    // every file it checks IS a declaration file, so `skipLibCheck: true`
+    // made this whole project check NOTHING, and an unresolvable
+    // `import type { BundleData } from 'plantuml-ts'` shipped in every
+    // generated `.d.ts` for as long as the @knowvah scope rename (9f189912)
+    // had been in place. Costs ~0.26s per package.
+    "skipLibCheck": false,
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,

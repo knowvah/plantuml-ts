@@ -30,7 +30,7 @@ npm install plantuml-ts @knowvah/plantuml-stdlib-all
 Eager bundles register the same way they always have:
 
 ```ts
-import { renderSync, stdlibStore, withStdlib, MapIncludeStore } from 'plantuml-ts';
+import { renderSync, stdlibStore, withStdlib, MapIncludeStore } from '@knowvah/plantuml-ts';
 import { c4, archimate, cloudinsight, cloudogu, bootstrap, bootstrap1_13_1 } from '@knowvah/plantuml-stdlib-all';
 
 const includeStore = withStdlib(

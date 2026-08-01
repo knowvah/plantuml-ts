@@ -17,7 +17,7 @@ renderer.
 ## Usage
 
 ```ts
-import { renderSync, stdlibStore, withStdlib, MapIncludeStore } from 'plantuml-ts';
+import { renderSync, stdlibStore, withStdlib, MapIncludeStore } from '@knowvah/plantuml-ts';
 import { c4, archimate, cloudinsight, cloudogu, bootstrap } from '@knowvah/plantuml-stdlib';
 
 const includeStore = withStdlib(

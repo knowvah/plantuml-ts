@@ -41,7 +41,7 @@ recipes, plus the full `baseUrl` contract, are documented once in
 assets" and "Recipe: pinned CDN" — and are not duplicated here.
 
 ```ts
-import { renderSync, remoteStdlib, stdlibRegistry } from 'plantuml-ts';
+import { renderSync, remoteStdlib, stdlibRegistry } from '@knowvah/plantuml-ts';
 import { tupadr3Remote } from '@knowvah/plantuml-stdlib-tupadr3/tupadr3.remote';
 
 const registry = stdlibRegistry({

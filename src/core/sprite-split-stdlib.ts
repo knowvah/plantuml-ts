@@ -25,7 +25,7 @@
  *   // single "." entry, so `src/index.ts` is the ONLY surface a consumer of
  *   // the built library can import from -- a deep path into `core/` is not
  *   // reachable, however tidy it looks.
- *   import { spriteSplitStdlib, stdlibRegistry } from 'plantuml-ts';
+ *   import { spriteSplitStdlib, stdlibRegistry } from '@knowvah/plantuml-ts';
  *   import manifest from './bootstrap1.13.1/sprites.json' with { type: 'json' };
  *
  *   const registry = stdlibRegistry({
