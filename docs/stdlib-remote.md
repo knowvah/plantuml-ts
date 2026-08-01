@@ -17,6 +17,11 @@ This is **not enabled by default** and ships with **no default `baseUrl`**
 (ADR-4). `remoteStdlib` is a building block; you decide where the `.puml`
 assets are served from and wire it into `RenderOptions` yourself.
 
+The `bootstrap` sprite bundle is one 1.06 MB file, so per-resource
+granularity cannot help it. It has its own, finer mechanism —
+[per-sprite loading](#bootstrap-per-sprite-loading-si11b) via
+`spriteSplitStdlib()`.
+
 ## Recipe: self-hosted assets
 
 Each `@plantuml-ts/stdlib-*` package ships its raw `.puml` assets under
@@ -171,10 +176,64 @@ What to watch, since there is no runbook — there is no service:
   <awslib14/Compute/all>` still fetches the full 445 KB file — far better
   than the 7.93 MB eager bundle, but not small. Per-resource splitting only
   helps when a diagram includes individual icons, not aggregator files.
-- **Bootstrap gets nothing from this.** The `bootstrap` sprite bundle is
-  1.06 MB in ONE file carrying 2,078 sprites; per-resource splitting is a
-  no-op there because there is only one resource to split. Per-sprite
-  splitting for bootstrap is a separate, deferred mission (SI11b).
+- **Bootstrap gets nothing from *this* mechanism** — it has its own, see
+  below. The `bootstrap` sprite bundle is 1.06 MB in ONE file carrying 2,078
+  sprites, so per-resource splitting is a no-op there: there is only one
+  resource to split.
+
+## Bootstrap: per-*sprite* loading (SI11b)
+
+Per-sprite splitting shipped 2026-07-31 as a separate mechanism, one level
+finer than the per-resource fetching described above. A `bootstrap` diagram
+pays for the sprites it names rather than the file holding all 2,078 of
+them.
+
+Register it with `spriteSplitStdlib` instead of `remoteStdlib`. It takes the
+generated name manifest (`@plantuml-ts/stdlib/bootstrap1.13.1/sprites.json`)
+and derives each fragment's path by convention as `sprites/<name>.puml`:
+
+```ts
+import { spriteSplitStdlib, stdlibRegistry, render } from 'plantuml-ts';
+import manifest from '@plantuml-ts/stdlib/bootstrap1.13.1/sprites.json' with { type: 'json' };
+
+const registry = stdlibRegistry({
+  'bootstrap1.13.1': () =>
+    Promise.resolve(
+      spriteSplitStdlib({ manifest, baseUrl: 'https://cdn.example.com/bootstrap1.13.1' }),
+    ),
+});
+```
+
+The prefetch walk then scans the diagram for `<$name>` references and
+fetches only those fragments. **Measured end to end** on a 3-sprite diagram:
+7,402 B manifest gzip + 2,066 B of fragments = **9,468 B against the
+1,085,342 B whole-file path — a 99.128% reduction** on 3 fetches.
+
+Two limits, stated rather than asserted away:
+
+- **The manifest floor dominates at small N.** 7,402 B of gzip buys nothing
+  by itself; at one sprite you pay all of it for ~431 B of content. This is
+  the inverse of the per-resource case above, where bytes dominate — here
+  **request count is the ceiling**, and a 20-sprite diagram makes ~21
+  requests.
+- **A `<$name>` produced by a macro is invisible to a source scan.** The
+  prefetch sees raw source plus fetched include text, never macro-expanded
+  text. Such a reference raises a named error rather than silently dropping
+  an icon, and `RenderOptions.sprites` is the escape hatch for naming what
+  the scan cannot see:
+
+  ```ts
+  await render(source, { stdlibRegistry: registry, sprites: ['bi-heart'] });
+  ```
+
+Sprite **names** are a flat, global, last-write-wins namespace per diagram —
+two collections both defining `$star` collide, which is upstream
+`SkinParam.sprites` behavior and is preserved. Pass
+`RenderOptions.onWarning` to hear about it:
+
+```ts
+await render(source, { stdlibRegistry: registry, onWarning: (m) => console.warn(m) });
+```
 
 ## Package subpaths and publish status
 
@@ -186,6 +245,9 @@ package ships its raw `.puml` assets alongside it under `assets/
 - `@plantuml-ts/stdlib-aws/awslib14.remote` → exports `awslib14Remote`
 - `@plantuml-ts/stdlib-aws/awslib.remote` → exports `awslibRemote` (the
   `link:` alias to `awslib14` — `aliasOf: 'awslib14'`, empty `files`)
+- `@plantuml-ts/stdlib/bootstrap1.13.1/sprites.json` → the per-sprite name
+  manifest (SI11b), served alongside the 2,078 `sprites/<name>.puml`
+  fragments in the same package
 
 **These subpaths exist in-repo but are not yet installable.** `npm publish`
 for the `@plantuml-ts/stdlib-*` packages remains a separate, maintainer-gated
