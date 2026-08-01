@@ -19,12 +19,18 @@ jobs:
   gates:
     name: gates
     runs-on: ubuntu-latest
-    # The suite is ~11.3k tests over 468 files plus a 285 MB vendored tree on a
-    # cold cache. Locally the full set runs in ~6 min; this is headroom, not a
-    # target.
-    timeout-minutes: 45
+    # Hard backstop for a hang, not a performance budget — that is the soft
+    # check at the end of the job. Measured baseline (run 30702971624, cold
+    # cache): 4.0 min total, of which test is 2.5. 20 is 5x that.
+    timeout-minutes: 20
 
     steps:
+      # Wall-clock for the soft budget below. First step, so it covers
+      # everything including checkout.
+      - name: start the clock
+        id: timer
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v7.0.0
 
       - uses: actions/setup-node@v6
@@ -106,7 +112,9 @@ jobs:
 
       # Includes the 90/90/90 coverage thresholds, the 389 svg goldens and the
       # 54-fixture description ratchet — all enforced inside vitest.
+      # Baseline 2.5 min; 12 catches a hung worker without hiding creep.
       - name: test
+        timeout-minutes: 12
         run: npm test
 
       # Shrink-only conformance ratchet, separate from vitest. Exits 2 if any
@@ -118,3 +126,28 @@ jobs:
       # devDependency and is already what `npm run build:stdlib` uses.
       - name: description size deltas
         run: npx jiti scripts/measure-description-size-deltas.ts
+
+      # ----------------------------------------------------------------------
+      # Soft performance budget. A hard timeout only fires once things are
+      # already broken; this reports every run's wall clock and warns while a
+      # slowdown is still a trend rather than a failure. Never fails the build
+      # — a slow green build is still green, and a gate that cries wolf on
+      # runner variance gets ignored.
+      #
+      # Budget is 2x the measured 4.0 min baseline (run 30702971624). Runner
+      # speed alone varies well under that. Cold vs warm cache is NOT split:
+      # vendoring the 285 MB tree measured 0.18 min, far too small to matter.
+      # ----------------------------------------------------------------------
+      - name: flag a slow run
+        if: always()
+        env:
+          BUDGET_MIN: 8
+        run: |
+          set -euo pipefail
+          elapsed=$(( $(date +%s) - ${{ steps.timer.outputs.start }} ))
+          mins=$(awk "BEGIN {printf \"%.1f\", $elapsed/60}")
+          echo "CI wall clock: **${mins} min** (budget ${BUDGET_MIN} min, baseline 4.0)" \
+            >> "$GITHUB_STEP_SUMMARY"
+          if [ "$elapsed" -gt $(( BUDGET_MIN * 60 )) ]; then
+            echo "::warning title=Slow CI run::${mins} min, over the ${BUDGET_MIN} min soft budget (baseline 4.0 min). Check the step timings before raising the budget — the usual causes are a growing suite or a cache that stopped hitting."
+          fi
