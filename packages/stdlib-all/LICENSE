@@ -3,7 +3,8 @@ MIT License
 Copyright (c) 2026 Scott Seely
 
 This package is a meta-package: it depends on and re-exports
-@plantuml-ts/stdlib, @plantuml-ts/stdlib-aws, and @plantuml-ts/stdlib-tupadr3.
+@knowvah/plantuml-stdlib, @knowvah/plantuml-stdlib-aws, and
+@knowvah/plantuml-stdlib-tupadr3.
 It contains no vendored third-party content of its own — see LICENSES.md and
 each dependency's own LICENSE / LICENSES.md for the licenses that actually
 govern the re-exported bundle data.
