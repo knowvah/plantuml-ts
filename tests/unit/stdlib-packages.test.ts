@@ -338,7 +338,17 @@ interface PackCeiling {
  * files packing the same package had one enumerating `assets/` while the
  * other rebuilt it, surfacing as `ENOENT: lstat .../address_card_o.puml` and
  * npm's "tarball data seems to be corrupted" warning. `stdlib` has no
- * `prepack` and no assets, so it cannot race and stays here.
+ * `prepack`, so nothing mutates the tree during a pack: it cannot race and
+ * stays here, even though `sprite-package-files.test.ts` also packs it.
+ *
+ * si11b UPDATE: `stdlib` DOES have assets now -- 2,078 derived bootstrap
+ * sprite fragments under `assets/bootstrap1.13.1/` (T1/T5). The conclusion
+ * above is unchanged, but the reason narrowed: it is the ABSENCE OF A
+ * PREPACK that makes packing read-only here, not the absence of assets.
+ * Those fragments are written once by the root generator
+ * (`build-stdlib-packages.ts#buildSpriteSplits`) via vitest `globalSetup`,
+ * so no per-package copy step re-creates them mid-run. Give `stdlib` a
+ * `prepack` and this file must consolidate with the other two again.
  */
 const PACK_CEILINGS: readonly PackCeiling[] = [{ packageDir: 'stdlib', ceilingMb: 8 }];
 
