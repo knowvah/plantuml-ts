@@ -1,0 +1,12 @@
+@startuml
+!procedure $arrow($text)
+<font:monospaced.bold>$text</font> => {{%breakline()left to right direction%breakline()label " " as A%breakline()label " " as B%breakline()A $text B%breakline()}}
+!endprocedure
+
+map "Arrows legend " as arrows {
+$arrow("-->")
+$arrow("-[dashed]->")
+$arrow("-[dotted]->")
+}
+
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+
+state ParentMode {
+  state ChildMode1 {
+    A :
+  }
+
+  state ChildMode2 {
+    C --> ChildMode1.A
+
+    D --> ChildMode1
+  }
+}
+
+@enduml

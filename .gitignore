@@ -10,7 +10,13 @@ coverage/
 .claude/
 .agent-notes/
 .mcp.json
-test-results/
+# Run artifacts are throwaway, with ONE exception: dot-cache holds jar-derived
+# DOT/SVG oracle output that 15 test files read directly, so a clean checkout
+# (i.e. CI) cannot run them without it. Same category as oracle/goldens, which
+# is committed for the same reason. Regenerating it needs Java, the pinned
+# oracle jar and the pdiff corpus — none of which exist on a CI runner.
+test-results/*
+!test-results/dot-cache/
 *.debug.ts
 inspect-*.ts
 sequence-*.png

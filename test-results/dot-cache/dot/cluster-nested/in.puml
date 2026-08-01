@@ -1,0 +1,13 @@
+@startdot
+digraph G {
+  subgraph cluster_outer {
+    label=Outer
+    subgraph cluster_inner {
+      label=Inner
+      a -> b
+    }
+    c -> a
+  }
+  d -> c
+}
+@enddot

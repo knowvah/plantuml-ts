@@ -1,0 +1,10 @@
+@startjson
+{
+    "a": true,
+    "allOf": [
+        "{ ... }",
+        "{ ... }",
+        "{ ... }"
+    ]
+}
+@endjson

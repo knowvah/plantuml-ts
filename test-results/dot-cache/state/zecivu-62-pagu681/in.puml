@@ -1,0 +1,8 @@
+@startuml
+XA13 --> Y1
+state XA6 {
+	XA6 --> XA1
+	--
+	state XA13
+}
+@enduml

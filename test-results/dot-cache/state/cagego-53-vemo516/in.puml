@@ -1,0 +1,10 @@
+@startuml
+state S {
+  state a
+--
+  state b {
+    state c
+  }
+  c -> d
+}
+@enduml
