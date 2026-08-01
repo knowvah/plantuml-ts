@@ -10,6 +10,16 @@ flips it to `done`, and repeats.
 This is the whole-port analog of `plans/dot-oracle-sync/loop-protocol.md`:
 that file loops *within* one mission; this file loops *across* missions.
 
+> **Package rename, 2026-08-01.** Every published package moved to the
+> `@knowvah` scope, which already hosts `@knowvah/dot-engine`: the library is
+> `@knowvah/plantuml-ts`, and the four stdlib packages are
+> `@knowvah/plantuml-stdlib{,-aws,-tupadr3,-all}`. **Rows below still name
+> them `plantuml-ts` and `@plantuml-ts/*` and are left that way on purpose** —
+> they record what was true when written, per this file's own convention of
+> amending rather than rewriting dated entries. Read any `@plantuml-ts/x` in
+> a historical row as today's `@knowvah/plantuml-x`. Nothing is published:
+> the names are not reserved on the registry.
+
 ## Grind protocol (meta-loop)
 
 1. **Pick.** Lowest-ID mission with `status: todo` and every `blocked-by`

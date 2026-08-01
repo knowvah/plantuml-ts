@@ -1,7 +1,27 @@
 {
-  "name": "plantuml-ts",
+  "name": "@knowvah/plantuml-ts",
   "version": "0.1.0",
+  "description": "A TypeScript port of PlantUML: parse PlantUML source and render SVG synchronously, in the browser or Node, with no server and no Java",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sseely/plantuml-ts.git"
+  },
+  "keywords": [
+    "plantuml",
+    "uml",
+    "diagram",
+    "svg",
+    "renderer",
+    "graphviz",
+    "dot",
+    "class-diagram",
+    "sequence-diagram",
+    "typescript"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/plantuml-ts.cjs",
   "module": "./dist/plantuml-ts.js",

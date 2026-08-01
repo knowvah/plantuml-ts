@@ -1,4 +1,4 @@
-# @plantuml-ts/stdlib-aws
+# @knowvah/plantuml-stdlib-aws
 
 Vendored AWS Architecture Icons for PlantUML (`awslib14`, plus the `awslib`
 alias) — packaged as [plantuml-ts](https://github.com/plantuml/plantuml-ts)
@@ -32,7 +32,7 @@ see [`LICENSE-CODE`](./LICENSE-CODE), matching upstream's own split between
 ## Install
 
 ```sh
-npm install plantuml-ts @plantuml-ts/stdlib-aws
+npm install plantuml-ts @knowvah/plantuml-stdlib-aws
 ```
 
 `plantuml-ts` is a peer dependency — this package supplies data, not the
@@ -42,7 +42,7 @@ renderer.
 
 ```ts
 import { renderSync, stdlibStore, withStdlib, MapIncludeStore } from 'plantuml-ts';
-import { awslib14 } from '@plantuml-ts/stdlib-aws';
+import { awslib14 } from '@knowvah/plantuml-stdlib-aws';
 
 const includeStore = withStdlib(new MapIncludeStore(), stdlibStore(awslib14));
 
@@ -56,6 +56,6 @@ const svg = renderSync(
 release) is also exported and resolves through to `awslib14`:
 
 ```ts
-import { awslib, awslib14 } from '@plantuml-ts/stdlib-aws';
+import { awslib, awslib14 } from '@knowvah/plantuml-stdlib-aws';
 // stdlibStore(awslib, awslib14) resolves `<awslib/...>` via the `awslib14` files.
 ```

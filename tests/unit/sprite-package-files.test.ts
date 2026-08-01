@@ -1,5 +1,5 @@
 /**
- * si11b T5 -- the packaging gate for `@plantuml-ts/stdlib`'s per-sprite
+ * si11b T5 -- the packaging gate for `@knowvah/plantuml-stdlib`'s per-sprite
  * bootstrap1.13.1 fragments (`plans/si11b-bootstrap-sprite-splitting/
  * batch-2/T5-package-fragments.md`).
  *

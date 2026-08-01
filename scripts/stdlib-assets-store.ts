@@ -3,7 +3,7 @@
  * `assets/stdlib/` — the SI5b T1 vendor pipeline's gitignored output.
  *
  * This deliberately covers EVERY vendored bundle, not just the audited
- * subset the four `@plantuml-ts/stdlib*` packages publish
+ * subset the four `@knowvah/plantuml-stdlib*` packages publish
  * (`plans/si5b-stdlib/decisions.md` D2 scopes publication, not measurement).
  * The DOT-sync harness (`scripts/dot-sync-report.ts`) and the oracle parity
  * suites need whatever bundle a fixture's `!include <bundle/thing>`

@@ -1,4 +1,4 @@
-# @plantuml-ts/stdlib
+# @knowvah/plantuml-stdlib
 
 Vendored PlantUML stdlib bundles — C4, Archimate, Cloudinsight, Cloudogu, and
 Bootstrap Icons — packaged as [plantuml-ts](https://github.com/plantuml/plantuml-ts)
@@ -8,7 +8,7 @@ Bootstrap Icons — packaged as [plantuml-ts](https://github.com/plantuml/plantu
 ## Install
 
 ```sh
-npm install plantuml-ts @plantuml-ts/stdlib
+npm install plantuml-ts @knowvah/plantuml-stdlib
 ```
 
 `plantuml-ts` is a peer dependency — this package supplies data, not the
@@ -18,7 +18,7 @@ renderer.
 
 ```ts
 import { renderSync, stdlibStore, withStdlib, MapIncludeStore } from 'plantuml-ts';
-import { c4, archimate, cloudinsight, cloudogu, bootstrap } from '@plantuml-ts/stdlib';
+import { c4, archimate, cloudinsight, cloudogu, bootstrap } from '@knowvah/plantuml-stdlib';
 
 const includeStore = withStdlib(
   new MapIncludeStore(),
@@ -34,7 +34,7 @@ const svg = renderSync(
 Import only what you need via subpath exports to keep bundle size down:
 
 ```ts
-import { c4 } from '@plantuml-ts/stdlib/c4';
+import { c4 } from '@knowvah/plantuml-stdlib/c4';
 ```
 
 ## Licensing

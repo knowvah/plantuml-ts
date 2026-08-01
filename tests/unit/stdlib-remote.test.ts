@@ -10,7 +10,7 @@
  *   4. A rejecting fetcher throws `StdlibResourceFetchError` naming the
  *      bundle/key/URL and preserving `cause`; a retry after rejection is a
  *      fresh attempt, not a replayed rejection.
- *   5. A hand-built manifest (no generator, no `@plantuml-ts` package)
+ *   5. A hand-built manifest (no generator, no `@knowvah/plantuml-stdlib*` package)
  *      behaves identically to a generated one (ADR-7).
  *   6. `baseUrl` with and without a trailing slash resolves to the same URL.
  *
@@ -131,7 +131,7 @@ describe('remoteStdlib -- fetch failure (criterion 4)', () => {
 
 describe('remoteStdlib -- hand-built manifest, no generator (criterion 5, ADR-7)', () => {
   it('resolves per-resource identically for a manifest written by hand', async () => {
-    // No `@plantuml-ts` package involved -- a third party's own object literal.
+    // No `@knowvah/plantuml-stdlib*` package involved -- a third party's own object literal.
     const thirdPartyManifest: StdlibRemoteManifest = {
       name: 'my-icons',
       files: { star: 'star.puml', heart: 'icons/heart.puml' },

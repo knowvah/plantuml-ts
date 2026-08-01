@@ -1,5 +1,5 @@
 {
-  "name": "@plantuml-ts/stdlib-all",
+  "name": "@knowvah/plantuml-stdlib-all",
   "version": "0.1.0",
   "description": "Meta-package: every non-GPL plantuml-ts stdlib package, re-exported",
   "license": "MIT",
@@ -29,15 +29,15 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@plantuml-ts/stdlib": "^0.1.0",
-    "@plantuml-ts/stdlib-aws": "^0.1.0",
-    "@plantuml-ts/stdlib-tupadr3": "^0.1.0"
+    "@knowvah/plantuml-stdlib": "^0.1.0",
+    "@knowvah/plantuml-stdlib-aws": "^0.1.0",
+    "@knowvah/plantuml-stdlib-tupadr3": "^0.1.0"
   },
   "peerDependencies": {
-    "plantuml-ts": "^0.1.0"
+    "@knowvah/plantuml-ts": "^0.1.0"
   },
   "devDependencies": {
-    "plantuml-ts": "file:../.."
+    "@knowvah/plantuml-ts": "file:../.."
   },
   "publishConfig": {
     "access": "public"

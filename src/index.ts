@@ -46,7 +46,7 @@ import { renderPSystemError, renderPSystemWelcome } from './core/error/error-ren
 import { readLines } from './core/tim/ReadLineReader.js';
 import type { StringLocated } from './core/tim/StringLocated.js';
 
-// Re-exported so downstream stdlib packages (SI5b `@plantuml-ts/stdlib*`,
+// Re-exported so downstream stdlib packages (SI5b `@knowvah/plantuml-stdlib*`,
 // plans/si5b-stdlib/decisions.md D2) can build an `options.includeStore`
 // carrying vendored bundles. Required here specifically: `package.json`'s
 // "exports" map has a single "." entry (no subpath exports), so this file is

@@ -1,5 +1,5 @@
 {
-  "name": "@plantuml-ts/stdlib",
+  "name": "@knowvah/plantuml-stdlib",
   "version": "0.1.0",
   "description": "Vendored PlantUML stdlib bundles (C4, Archimate, Cloudinsight, Cloudogu, Bootstrap Icons) for plantuml-ts",
   "license": "MIT",
@@ -52,10 +52,10 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "plantuml-ts": "^0.1.0"
+    "@knowvah/plantuml-ts": "^0.1.0"
   },
   "devDependencies": {
-    "plantuml-ts": "file:../.."
+    "@knowvah/plantuml-ts": "file:../.."
   },
   "publishConfig": {
     "access": "public"

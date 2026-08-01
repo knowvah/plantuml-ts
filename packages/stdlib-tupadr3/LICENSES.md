@@ -1,4 +1,4 @@
-# Licenses — @plantuml-ts/stdlib-tupadr3
+# Licenses — @knowvah/plantuml-stdlib-tupadr3
 
 `tupadr3`'s own glue code (the `.puml` macro/sprite-wrapper definitions,
 `common.puml`) is **MIT**, copyright tupadr3 — see [`LICENSE`](./LICENSE)

@@ -192,7 +192,7 @@ export class StdlibNotBundledError extends IncludeError {
  * forgot an entry, and it is not the shortest fix for anyone else either.
  */
 function remedyFor(what: string, stdlibPath: string, bundle: string, registrySupplied: boolean): string {
-  const thunk = `stdlibRegistry({ '${bundle}': () => import('@plantuml-ts/stdlib/${bundle}') })`;
+  const thunk = `stdlibRegistry({ '${bundle}': () => import('@knowvah/plantuml-stdlib/${bundle}') })`;
   if (registrySupplied) {
     return (
       `A stdlibRegistry WAS supplied, but it has no entry for '${bundle}' -- ` +

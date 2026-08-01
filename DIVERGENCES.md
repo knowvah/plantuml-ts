@@ -345,7 +345,7 @@ anyway, a variable-built include path (`!include $path`) was inexpressible, and
 (`c4`, `tupadr3`, `awslib`, `bootstrap`, …), which ships inside the jar.
 
 **This port (updated 2026-07-14, mission SI5b):** the stdlib is now vendored
-verbatim and shipped as opt-in packages (`@plantuml-ts/stdlib`, `-aws`,
+verbatim and shipped as opt-in packages (`@knowvah/plantuml-stdlib`, `-aws`,
 `-tupadr3`, `-all`); a caller registers bundles via `stdlibStore(...)` /
 `withStdlib(...)` on `options.includeStore` and the form resolves with
 upstream Stdlib.java key semantics. With NO store supplied, the core package

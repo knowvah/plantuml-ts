@@ -9,7 +9,7 @@
  * `<tupadr3/font-awesome-5/ban>` costs ~2.9 KB, not 19.54 MB.
  *
  * `StdlibRemoteManifest` is deliberately PUBLIC and hand-constructible
- * (si11a ADR-7) -- it is not gated behind the `@plantuml-ts` generator. A
+ * (si11a ADR-7) -- it is not gated behind the `@knowvah/plantuml-stdlib*` generator. A
  * third party hosting their own icon set writes one by hand:
  *
  *   const manifest: StdlibRemoteManifest = {
@@ -19,7 +19,7 @@
  *   const bundle = remoteStdlib({ manifest, baseUrl: 'https://example.com/icons/' });
  *
  * and gets exactly what a generator-emitted `tupadr3` manifest gets: no
- * generator, no `@plantuml-ts` package, no special-casing anywhere in `src/`.
+ * generator, no `@knowvah/plantuml-stdlib*` package, no special-casing anywhere in `src/`.
  *
  * The manifest carries a key -> path MAP, never a key -> path CONVENTION
  * (si11a ADR-3): measured 2026-07-31, 890 of 891 `awslib14` paths contain
@@ -84,7 +84,7 @@ import type { BundleData } from './StdlibStore.js';
  * resource lives relative to `baseUrl` (si11a ADR-3).
  *
  * **Public and hand-constructible (si11a ADR-7).** Nothing in `remoteStdlib`
- * requires this to come from the `@plantuml-ts` generator -- any object
+ * requires this to come from the `@knowvah/plantuml-stdlib*` generator -- any object
  * satisfying this shape, written by hand or produced by a third party's own
  * tooling, works identically to a generated one.
  */

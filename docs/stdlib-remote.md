@@ -24,7 +24,7 @@ granularity cannot help it. It has its own, finer mechanism —
 
 ## Recipe: self-hosted assets
 
-Each `@plantuml-ts/stdlib-*` package ships its raw `.puml` assets under
+Each `@knowvah/plantuml-stdlib-*` package ships its raw `.puml` assets under
 `assets/<bundleFolder>/` (e.g. `assets/tupadr3/`) — copy that directory into
 a static directory your app already serves, and point `baseUrl` at it. Wrap
 the manifest with `remoteStdlib()` and register the result as a
@@ -34,8 +34,8 @@ registry would serve file PATHS as file CONTENT; the wrap is what supplies
 `baseUrl` and turns it into a real `RemoteBundle`):
 
 ```ts
-import { remoteStdlib, stdlibRegistry, render } from 'plantuml-ts';
-import { tupadr3Remote } from '@plantuml-ts/stdlib-tupadr3/tupadr3.remote';
+import { remoteStdlib, stdlibRegistry, render } from '@knowvah/plantuml-ts';
+import { tupadr3Remote } from '@knowvah/plantuml-stdlib-tupadr3/tupadr3.remote';
 
 const registry = stdlibRegistry({
   tupadr3: () =>
@@ -54,7 +54,7 @@ await render(source, { stdlibRegistry: registry });
 `stdlibRegistry`'s result is a valid `RenderOptions.stdlibRegistry`.
 
 **Publish status:** the `.remote` subpaths above exist in-repo today but
-`npm publish` for the `@plantuml-ts/stdlib-*` packages is a separate,
+`npm publish` for the `@knowvah/plantuml-stdlib-*` packages is a separate,
 maintainer-gated step (mission SI5b) that has not happened yet — you cannot
 `npm install` them from the registry today. Until they're published, build
 against the in-repo package source, or use the "hand-built manifest" recipe
@@ -72,7 +72,7 @@ You may point `baseUrl` at a third-party CDN (jsDelivr, unpkg) yourself,
 ```ts
 const tupadr3 = remoteStdlib({
   manifest: tupadr3Remote,
-  baseUrl: 'https://cdn.jsdelivr.net/npm/@plantuml-ts/stdlib-tupadr3@1.4.0/assets/tupadr3/',
+  baseUrl: 'https://cdn.jsdelivr.net/npm/@knowvah/plantuml-stdlib-tupadr3@1.4.0/assets/tupadr3/',
 });
 ```
 
@@ -83,15 +83,15 @@ returns `undefined`, exactly as if the bundle were absent). Pin the version
 in the URL; an unpinned `@latest`-style URL means your rendered output can
 silently change out from under you when the upstream package publishes.
 
-## Recipe: hand-built manifest (no `@plantuml-ts` package)
+## Recipe: hand-built manifest (no `@knowvah/plantuml-stdlib*` package)
 
 `StdlibRemoteManifest` is a public, hand-constructible type (ADR-7) — it is
 not gated behind the generator. A third party hosting their own icon set
-writes one directly, with zero `@plantuml-ts` dependency:
+writes one directly, with zero `@knowvah/plantuml-stdlib*` dependency:
 
 ```ts
-import { remoteStdlib } from 'plantuml-ts';
-import type { StdlibRemoteManifest } from 'plantuml-ts';
+import { remoteStdlib } from '@knowvah/plantuml-ts';
+import type { StdlibRemoteManifest } from '@knowvah/plantuml-ts';
 
 const myIcons: StdlibRemoteManifest = {
   name: 'my-icons',
@@ -108,7 +108,7 @@ const bundle = remoteStdlib({
 ```
 
 `bundle` resolves per-resource exactly like a generator-emitted `tupadr3`
-manifest would — nothing in `src/` special-cases the `@plantuml-ts` package
+manifest would — nothing in `src/` special-cases the `@knowvah/plantuml-stdlib*` package
 name or closes the bundle namespace.
 
 ## Failure modes
@@ -189,12 +189,12 @@ pays for the sprites it names rather than the file holding all 2,078 of
 them.
 
 Register it with `spriteSplitStdlib` instead of `remoteStdlib`. It takes the
-generated name manifest (`@plantuml-ts/stdlib/bootstrap1.13.1/sprites.json`)
+generated name manifest (`@knowvah/plantuml-stdlib/bootstrap1.13.1/sprites.json`)
 and derives each fragment's path by convention as `sprites/<name>.puml`:
 
 ```ts
-import { spriteSplitStdlib, stdlibRegistry, render } from 'plantuml-ts';
-import manifest from '@plantuml-ts/stdlib/bootstrap1.13.1/sprites.json' with { type: 'json' };
+import { spriteSplitStdlib, stdlibRegistry, render } from '@knowvah/plantuml-ts';
+import manifest from '@knowvah/plantuml-stdlib/bootstrap1.13.1/sprites.json' with { type: 'json' };
 
 const registry = stdlibRegistry({
   'bootstrap1.13.1': () =>
@@ -241,16 +241,16 @@ The generator now emits a `.remote` manifest module per bundle, and each
 package ships its raw `.puml` assets alongside it under `assets/
 <bundleFolder>/`:
 
-- `@plantuml-ts/stdlib-tupadr3/tupadr3.remote` → exports `tupadr3Remote`
-- `@plantuml-ts/stdlib-aws/awslib14.remote` → exports `awslib14Remote`
-- `@plantuml-ts/stdlib-aws/awslib.remote` → exports `awslibRemote` (the
+- `@knowvah/plantuml-stdlib-tupadr3/tupadr3.remote` → exports `tupadr3Remote`
+- `@knowvah/plantuml-stdlib-aws/awslib14.remote` → exports `awslib14Remote`
+- `@knowvah/plantuml-stdlib-aws/awslib.remote` → exports `awslibRemote` (the
   `link:` alias to `awslib14` — `aliasOf: 'awslib14'`, empty `files`)
-- `@plantuml-ts/stdlib/bootstrap1.13.1/sprites.json` → the per-sprite name
+- `@knowvah/plantuml-stdlib/bootstrap1.13.1/sprites.json` → the per-sprite name
   manifest (SI11b), served alongside the 2,078 `sprites/<name>.puml`
   fragments in the same package
 
 **These subpaths exist in-repo but are not yet installable.** `npm publish`
-for the `@plantuml-ts/stdlib-*` packages remains a separate, maintainer-gated
+for the `@knowvah/plantuml-stdlib-*` packages remains a separate, maintainer-gated
 step (mission SI5b) that has not run — the packages are not currently on the
 npm registry. Until they are published, either build against the in-repo
 package source directly, or use the hand-built-manifest recipe above with

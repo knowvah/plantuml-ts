@@ -3,7 +3,7 @@
 import { ref, onMounted, watch } from 'vue';
 // Aliased in .vitepress/config.ts to the real library source (src/index.ts,
 // D2), so the playground always runs exactly what ships.
-import { renderSync } from 'plantuml-ts';
+import { renderSync } from '@knowvah/plantuml-ts';
 
 const DEFAULT_SOURCE = `@startuml
 class Animal {

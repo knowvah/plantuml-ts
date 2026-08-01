@@ -179,7 +179,7 @@ describe('withStdlib() wiring -- IncludeExecutor consults the store before throw
       "Cannot resolve !include <fake/thing>: no stdlib bundle named 'fake' is available.\n" +
         'plantuml-ts vendors no PlantUML stdlib, so a host must supply the bundle. Either:\n' +
         '  - render(): pass options.stdlibRegistry --\n' +
-        "      stdlibRegistry({ 'fake': () => import('@plantuml-ts/stdlib/fake') })\n" +
+        "      stdlibRegistry({ 'fake': () => import('@knowvah/plantuml-stdlib/fake') })\n" +
         '  - renderSync(): it cannot await, so warm the store up first --\n' +
         '      const includeStore = await prepareIncludeStore(source, { stdlibRegistry });\n' +
         "  - or pass options.includeStore with an entry keyed '<fake/thing>' (or " +

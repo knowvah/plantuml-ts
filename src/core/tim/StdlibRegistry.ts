@@ -11,12 +11,12 @@
  * Registration is an EXPLICIT map of dynamic-`import()` thunks (si8 ADR-3):
  *
  *   stdlibRegistry({
- *     c4:        () => import('@plantuml-ts/stdlib/c4'),
- *     bootstrap: () => import('@plantuml-ts/stdlib/bootstrap'),
+ *     c4:        () => import('@knowvah/plantuml-stdlib/c4'),
+ *     bootstrap: () => import('@knowvah/plantuml-stdlib/bootstrap'),
  *   })
  *
  * The specifiers are STATIC on purpose. A computed one --
- * `` import(`@plantuml-ts/stdlib/${name}`) `` -- is unanalyzable by Vite and
+ * `` import(`@knowvah/plantuml-stdlib/${name}`) `` -- is unanalyzable by Vite and
  * webpack, so they stop code-splitting and inline every bundle into the main
  * chunk. That silently destroys the entire feature, which is why ADR-3 rejects
  * it. It also matters at this scale: `tupadr3.js` alone is 19.54 MB.
@@ -200,7 +200,7 @@ function harvestOne(value: unknown, into: Map<string, BundleData | RemoteBundle>
  * not survive contact with the generated packages (verified against
  * `packages/*` 2026-07-31, si8 T2):
  *
- *   - `@plantuml-ts/stdlib/bootstrap` exports TWO bundles: `bootstrap`
+ *   - `@knowvah/plantuml-stdlib/bootstrap` exports TWO bundles: `bootstrap`
  *     (`aliasOf: 'bootstrap1.13.1'`, `files: {}`) and `bootstrap1_13_1` (the
  *     concrete payload). Taking only the export named `bootstrap` yields an
  *     alias stub with no files, and `<bootstrap/bi-globe>` resolves to nothing.

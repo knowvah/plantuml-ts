@@ -1,5 +1,5 @@
 /**
- * The four `@plantuml-ts/stdlib*` packages' bundle composition
+ * The four `@knowvah/plantuml-stdlib*` packages' bundle composition
  * (`plans/si5b-stdlib/decisions.md` D2, `batch-3/overview.md` T8).
  *
  * `packages/stdlib-all` is not listed here -- it has no vendored assets of

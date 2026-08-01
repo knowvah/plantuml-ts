@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generator for the four `@plantuml-ts/stdlib*` npm packages (mission SI5b
+ * Generator for the four `@knowvah/plantuml-stdlib*` npm packages (mission SI5b
  * batch-3, T8): reads `assets/stdlib/` (the SI5b T1 vendor pipeline's
  * output) and writes a gitignored `generated/` tree into each of
  * `packages/{stdlib,stdlib-aws,stdlib-tupadr3,stdlib-all}/` containing
@@ -98,7 +98,7 @@ function buildSpriteSplits(): void {
   writeFileSync(join(bundleAssetsDir, 'sprites.json'), JSON.stringify(manifest), 'utf8');
 }
 
-/** Generates every `@plantuml-ts/stdlib*` package's `generated/` tree from
+/** Generates every `@knowvah/plantuml-stdlib*` package's `generated/` tree from
  * `assets/stdlib/`. Exported so `tests/unit/stdlib-packages.test.ts` can
  * invoke it directly rather than shelling out. */
 export function buildStdlibPackages(): void {

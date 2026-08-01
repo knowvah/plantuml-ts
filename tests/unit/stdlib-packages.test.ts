@@ -1,5 +1,5 @@
 /**
- * SI5b batch-3 T8 -- the four `@plantuml-ts/stdlib*` npm packages.
+ * SI5b batch-3 T8 -- the four `@knowvah/plantuml-stdlib*` npm packages.
  *
  * Runs the generator (`scripts/build-stdlib-packages.ts`) directly (no
  * shelling out), then proves:
@@ -260,7 +260,7 @@ describe('remote manifest emission (SI11a T5)', () => {
 // 2. Alias resolution: stdlibStore(awslib, awslib14) resolves <awslib/...>.
 // ---------------------------------------------------------------------------
 
-describe('alias resolution -- @plantuml-ts/stdlib-aws', () => {
+describe('alias resolution -- @knowvah/plantuml-stdlib-aws', () => {
   it('resolves <awslib/General/User> through the awslib14 target bundle', () => {
     const store = stdlibStore(awslib, awslib14);
     const resolved = store.getPumlResource('awslib/General/User');

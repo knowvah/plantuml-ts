@@ -1,4 +1,4 @@
-# @plantuml-ts/stdlib-tupadr3
+# @knowvah/plantuml-stdlib-tupadr3
 
 The `tupadr3` PlantUML stdlib bundle (Font Awesome 4/5/6, Devicons,
 Devicons2, Material, Weather, Govicons — ~6,850 icon-font sprites) —
@@ -18,7 +18,7 @@ sprite keys from the single `files` map at the object-property level.
 ## Install
 
 ```sh
-npm install plantuml-ts @plantuml-ts/stdlib-tupadr3
+npm install plantuml-ts @knowvah/plantuml-stdlib-tupadr3
 ```
 
 `plantuml-ts` is a peer dependency — this package supplies data, not the
@@ -28,7 +28,7 @@ renderer.
 
 ```ts
 import { renderSync, stdlibStore, withStdlib, MapIncludeStore } from 'plantuml-ts';
-import { tupadr3 } from '@plantuml-ts/stdlib-tupadr3';
+import { tupadr3 } from '@knowvah/plantuml-stdlib-tupadr3';
 
 const includeStore = withStdlib(new MapIncludeStore(), stdlibStore(tupadr3));
 

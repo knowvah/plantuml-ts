@@ -5,7 +5,7 @@
  * method declared in `IncludeStore.ts`) only once a plain `get()` key lookup
  * has already missed for a `<bundle/thing>` target -- this module is what
  * builds that optional method faithfully, from the vendored bundle data the
- * SI5b `@plantuml-ts/stdlib*` packages carry.
+ * SI5b `@knowvah/plantuml-stdlib*` packages carry.
  *
  * Mirrors `Stdlib.getPumlResource` (Stdlib.java:98-114) EXACTLY: lowercase the
  * full request, strip every `.puml` occurrence (Java's `String#replace`

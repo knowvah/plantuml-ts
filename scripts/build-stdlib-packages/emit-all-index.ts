@@ -1,6 +1,6 @@
 /**
  * Renders `packages/stdlib-all/generated/index.{js,d.ts}` -- a re-export of
- * every non-GPL `@plantuml-ts/stdlib*` package (`decisions.md` D2: `adaml`
+ * every non-GPL `@knowvah/plantuml-stdlib*` package (`decisions.md` D2: `adaml`
  * is GPL and is never included here).
  */
 
@@ -9,9 +9,9 @@ const GENERATED_HEADER =
   '// Regenerate with: npm run build:stdlib\n';
 
 const ALL_DEPENDENCIES: readonly string[] = [
-  '@plantuml-ts/stdlib',
-  '@plantuml-ts/stdlib-aws',
-  '@plantuml-ts/stdlib-tupadr3',
+  '@knowvah/plantuml-stdlib',
+  '@knowvah/plantuml-stdlib-aws',
+  '@knowvah/plantuml-stdlib-tupadr3',
 ];
 
 function reExportAllLines(): string {

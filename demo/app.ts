@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
-import { render } from 'plantuml-ts';
-import type { RenderOptions } from 'plantuml-ts';
+import { render } from '@knowvah/plantuml-ts';
+import type { RenderOptions } from '@knowvah/plantuml-ts';
 
 // Load example files
 const examples = import.meta.glob('./examples/**/*.puml', {

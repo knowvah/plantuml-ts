@@ -1,5 +1,5 @@
 {
-  "name": "@plantuml-ts/stdlib-tupadr3",
+  "name": "@knowvah/plantuml-stdlib-tupadr3",
   "version": "0.1.0",
   "description": "Vendored tupadr3 PlantUML icon-font sprite bundle for plantuml-ts",
   "license": "MIT",
@@ -37,10 +37,10 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "plantuml-ts": "^0.1.0"
+    "@knowvah/plantuml-ts": "^0.1.0"
   },
   "devDependencies": {
-    "plantuml-ts": "file:../.."
+    "@knowvah/plantuml-ts": "file:../.."
   },
   "publishConfig": {
     "access": "public"

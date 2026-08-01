@@ -1,4 +1,4 @@
-# Licenses — @plantuml-ts/stdlib-aws
+# Licenses — @knowvah/plantuml-stdlib-aws
 
 | Component | License | File |
 |---|---|---|
@@ -12,7 +12,7 @@ resolves to `awslib14` and carries no separate license — see
 mechanism shared across every packaged bundle.
 
 Both license files are also kept per-bundle under `licenses/awslib14/` for
-consistency with the other `@plantuml-ts/stdlib*` packages' provenance
+consistency with the other `@knowvah/plantuml-stdlib*` packages' provenance
 layout.
 
 Source: https://github.com/awslabs/aws-icons-for-plantuml (vendored via

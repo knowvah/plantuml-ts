@@ -88,7 +88,7 @@ export default defineConfig({
       alias: {
         // The playground imports the *real* engine source (D2), so docs
         // stay in lockstep with the library rather than a copied bundle.
-        'plantuml-ts': fileURLToPath(
+        '@knowvah/plantuml-ts': fileURLToPath(
           new URL('../../src/index.ts', import.meta.url),
         ),
       },

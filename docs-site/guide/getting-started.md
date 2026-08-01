@@ -23,7 +23,7 @@ declarations (`dist/plantuml-ts.d.ts`), wired through `package.json`'s
 ## Render a diagram
 
 ```ts
-import { renderSync } from 'plantuml-ts';
+import { renderSync } from '@knowvah/plantuml-ts';
 
 const source = `
 @startuml
