@@ -22,6 +22,53 @@ granularity cannot help it. It has its own, finer mechanism —
 [per-sprite loading](#bootstrap-per-sprite-loading-si11b) via
 `spriteSplitStdlib()`.
 
+## Which bundles support eager registration (SI12)
+
+As of mission SI12 (2026-08-01), eager registration — importing a bundle as a
+plain `BundleData` value and registering it directly, no `baseUrl`, no
+network round-trip — exists for exactly one package:
+
+| Package | Eager bindings | Remote-only bindings |
+| --- | --- | --- |
+| `@knowvah/plantuml-stdlib` | `c4`, `archimate`, `cloudinsight`, `cloudogu`, `bootstrap`, `bootstrap1_13_1` | — |
+| `@knowvah/plantuml-stdlib-aws` | — (removed SI12) | `awslib14Remote`, `awslibRemote` |
+| `@knowvah/plantuml-stdlib-tupadr3` | — (removed SI12) | `tupadr3Remote` |
+| `@knowvah/plantuml-stdlib-all` | re-exports `stdlib`'s six eager bindings above | re-exports the three remote manifests above |
+
+**Why:** `-aws` and `-tupadr3` used to ship each bundle's content **twice** —
+an eager inlined `BundleData` module carrying every `.puml` file's text, AND
+the raw `.puml` assets the remote manifest already resolves against — and no
+consumer used both halves. `plantuml-stdlib` measures 2.9 MB unpacked and
+keeps eager registration; it also carries the bundles most likely to be
+wanted offline (C4, ArchiMate, Bootstrap). `-tupadr3` measured far larger: a
+remote-only consumer was installing 40.8 MB (20.49 MB eager module + 19.9 MB
+assets + 0.43 MB manifest) to use a 0.43 MB manifest and then fetch content
+from a CDN (`plans/si12-eager-module-removal/decision-journal.md`, planning
+row, 2026-08-01) — so the eager half was dropped, for `-aws` and `-tupadr3`
+only.
+
+Measured unpacked size after the removal (`npm pack --dry-run --json`,
+`plans/si12-eager-module-removal/decision-journal.md`, T3, 2026-08-01):
+
+- `@knowvah/plantuml-stdlib-aws` — **8,346,761 B** (904 files); the package
+  measured 16.7 MB unpacked before this mission
+  (`plans/si12-eager-module-removal/README.md`'s measured table, same date).
+- `@knowvah/plantuml-stdlib-tupadr3` — **20,292,674 B** (6,858 files); down
+  from the 40.8 MB figure above.
+
+`assets/` still ships in **every** `@knowvah/plantuml-stdlib*` package — that
+does not change. The pinned-CDN recipe below resolves `baseUrl` against the
+published tarball's `assets/` directory, and SI11b's per-sprite loading reads
+the same tree.
+
+`awslib14Remote`, `awslibRemote`, and `tupadr3Remote` are **manifests**, not
+bundles — `{ key: path }` maps with no `.puml` content. Registering a bare
+manifest does nothing useful; each one needs a `baseUrl` (wrapped with
+`remoteStdlib()`, see the recipes below) before it resolves anything.
+`@knowvah/plantuml-stdlib-all`'s "one call registers everything" claim is
+therefore **conditional**: the six `stdlib` bindings register directly, the
+three remote manifests do not.
+
 ## Recipe: self-hosted assets
 
 Each `@knowvah/plantuml-stdlib-*` package ships its raw `.puml` assets under
@@ -63,6 +110,79 @@ below with your own copy of the manifest JSON.
 This keeps the library's "offline unless you opt in" guarantee literally
 true: no request leaves the process until you configure a `baseUrl` you
 control.
+
+## Recipe: offline (Node filesystem, no HTTP)
+
+`-aws` and `-tupadr3` have no eager `BundleData` export (see above), so an
+offline Node consumer — a build step, an SSR render, a CLI — reads the same
+`assets/` directory the two HTTP recipes point at, but off `node:fs` instead
+of a server. `remoteStdlib()` only ever sees the `fetcher` you give it, and
+`baseUrl` doesn't have to be a real URL — it only has to be a stable prefix
+your fetcher can strip back off:
+
+```ts
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+import {
+  prepareIncludeStore,
+  remoteStdlib,
+  renderSync,
+  stdlibRegistry,
+} from '@knowvah/plantuml-ts';
+import { tupadr3Remote } from '@knowvah/plantuml-stdlib-tupadr3/tupadr3.remote';
+
+// Resolve the installed package's assets/tupadr3/ directory rather than
+// hardcoding a node_modules path -- `./package.json` is a real export of
+// @knowvah/plantuml-stdlib-tupadr3, so `require.resolve` finds it under any
+// package manager's layout.
+const require = createRequire(import.meta.url);
+const ASSETS_DIR = join(
+  dirname(require.resolve('@knowvah/plantuml-stdlib-tupadr3/package.json')),
+  'assets',
+  'tupadr3',
+);
+const BASE_URL = 'local://tupadr3'; // never dialed -- the fetcher strips it back off
+
+const fsFetcher = (url: string): Promise<string> => {
+  const relPath = url.slice(BASE_URL.length + 1);
+  return Promise.resolve(readFileSync(join(ASSETS_DIR, relPath), 'utf8'));
+};
+
+const registry = stdlibRegistry({
+  tupadr3: () =>
+    Promise.resolve(
+      remoteStdlib({ manifest: tupadr3Remote, baseUrl: BASE_URL, fetcher: fsFetcher }),
+    ),
+});
+
+const source = ['@startuml', '!include <tupadr3/font-awesome-5/ban>', '@enduml'].join('\n');
+
+// prepareIncludeStore is the async half: it walks the diagram, resolves
+// every !include through the registry above, and hands back a populated
+// IncludeStore. renderSync then draws synchronously from that store -- it
+// cannot fetch anything itself (RenderOptions.fetcher is ignored by
+// renderSync for exactly that reason).
+const includeStore = await prepareIncludeStore(source, { stdlibRegistry: registry });
+const svg = renderSync(source, { includeStore });
+```
+
+The same pattern covers `awslib14Remote` / `awslibRemote` from
+`@knowvah/plantuml-stdlib-aws` — swap the manifest import, the package name
+in `require.resolve`, and the `assets/awslib14/` path.
+
+This never opens a socket: `fsFetcher` reads `node:fs` off the package's
+vendored `assets/` directory, and the fake `local://` `baseUrl` is only ever
+passed to that fetcher, never to a network client. It only works where
+`node:fs` is available; `plantuml-ts` itself stays browser-safe (no `fs`, no
+DOM) regardless of how a consumer configures the fetcher — the filesystem
+access lives entirely in `fsFetcher`, outside the library.
+
+**Publish status:** as above, these packages are not yet on the npm registry
+(SI5b), so `require.resolve` against a real `node_modules` install doesn't
+work today either — build against the in-repo package source
+(`packages/stdlib-tupadr3/generated/`, `packages/stdlib-tupadr3/assets/tupadr3/`)
+until they're published.
 
 ## Recipe: pinned CDN
 
@@ -180,6 +300,19 @@ What to watch, since there is no runbook — there is no service:
   below. The `bootstrap` sprite bundle is 1.06 MB in ONE file carrying 2,078
   sprites, so per-resource splitting is a no-op there: there is only one
   resource to split.
+- **SI12 re-measured the reduction end to end (2026-08-01), against the
+  asset tree rather than the eager module**
+  (`plans/si12-eager-module-removal/decision-journal.md`, T5). The eager
+  `tupadr3.js` module the two bullets above compare against no longer
+  exists — SI12 stopped emitting it for `-tupadr3` — so the denominator
+  moved to "every byte under `assets/tupadr3/`". Measured on a real 3-icon
+  diagram (`common` plus 3 devicons, fetched through the actual `render()`
+  pipeline, not a synthetic manifest): asset-tree baseline **19,850,300 B**
+  (6,849 files), manifest gzip-9 **51,415 B**, 4 resources fetched
+  **9,564 B**, **60,979 B total over the wire — a 99.693% reduction.** An
+  earlier mission (SI11a) reported 99.702% against the eager module's byte
+  count; that figure is superseded and describes a module that no longer
+  ships — quote **99.693%**, not 99.702%.
 
 ## Bootstrap: per-*sprite* loading (SI11b)
 
@@ -248,6 +381,12 @@ package ships its raw `.puml` assets alongside it under `assets/
 - `@knowvah/plantuml-stdlib/bootstrap1.13.1/sprites.json` → the per-sprite name
   manifest (SI11b), served alongside the 2,078 `sprites/<name>.puml`
   fragments in the same package
+
+Neither `@knowvah/plantuml-stdlib-aws` nor `@knowvah/plantuml-stdlib-tupadr3`
+exports an eager `BundleData` module any more (mission SI12, 2026-08-01) —
+the `.` entry point and the old `./awslib14`/`./awslib` subpaths that used to
+carry one are gone; only the `.remote` manifest subpaths above remain. See
+"Which bundles support eager registration" at the top of this document.
 
 **These subpaths exist in-repo but are not yet installable.** `npm publish`
 for the `@knowvah/plantuml-stdlib-*` packages remains a separate, maintainer-gated

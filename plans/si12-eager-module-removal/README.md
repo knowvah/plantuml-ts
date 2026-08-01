@@ -52,8 +52,8 @@ silently fetches an unpinned copy. CI uses `jiti` and so should you.
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 | Generator stops emitting eager modules | [x] |
 | [2](batch-2/overview.md) | T2 ∥ T3 ∥ T4 ∥ T5 | Consumers: stdlib-all, manifests, tests, measurement | [x] |
-| [5](batch-5/overview.md) | T8 | Close the cold-tree asset race (added mid-mission) | [ ] |
-| [3](batch-3/overview.md) | T6 | Docs | [ ] |
+| [5](batch-5/overview.md) | T8 | Close the cold-tree asset race (added mid-mission) | [x] |
+| [3](batch-3/overview.md) | T6 | Docs | [x] |
 | [4](batch-4/overview.md) | T7 | Close the mission | [ ] |
 
 **Batch 5 runs before batch 3.** It was added mid-mission after batch 2's

@@ -6,7 +6,7 @@ figure and that figure is only trustworthy once this lands.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T8 | `globalSetup` populates `packages/*/assets/` | typescript-pro | `tests/helpers/build-stdlib-globalsetup.ts`, `tests/unit/stdlib-packages.test.ts` | T4, T5 | [ ] |
+| T8 | `globalSetup` populates `packages/*/assets/` | typescript-pro | `tests/helpers/build-stdlib-globalsetup.ts`, `tests/unit/stdlib-packages.test.ts` | T4, T5 | [x] |
 
 ## Why this exists
 
