@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push supersedes an in-flight PR run; main runs are never cancelled,
+# because main's result is the record of whether that commit was green.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  gates:
+    name: gates
+    runs-on: ubuntu-latest
+    # The suite is ~11.3k tests over 468 files plus a 285 MB vendored tree on a
+    # cold cache. Locally the full set runs in ~6 min; this is headroom, not a
+    # target.
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '26'
+          cache: npm
+
+      - run: npm ci
+
+      # ----------------------------------------------------------------------
+      # Cheap gates first. None of them need the vendored stdlib, so a type
+      # error or a lint failure costs ~1 min instead of a 285 MB download.
+      # ----------------------------------------------------------------------
+
+      - name: typecheck
+        run: npm run typecheck
+
+      - name: lint
+        run: npm run lint
+
+      - name: build
+        run: npm run build
+
+      # ----------------------------------------------------------------------
+      # The vendored stdlib payload (`assets/stdlib/`, 34,587 files / 285 MB) is
+      # gitignored — regenerable, so it is deliberately not committed. But
+      # vitest's globalSetup builds every package's generated tree from it
+      # before any worker starts, so WITHOUT it the whole suite fails at setup,
+      # not in one test. CI has to materialise it.
+      #
+      # `scripts/vendor-stdlib.ts` copies from a local clone at
+      # ~/git/plantuml-stdlib, so that clone is what we reconstruct — pinned to
+      # the exact sha recorded in the committed manifest, never to a moving
+      # branch head. GitHub allows fetching an arbitrary sha directly
+      # (uploadpack.allowAnySHA1InWant), which is what makes the pin exact.
+      # ----------------------------------------------------------------------
+
+      - name: read the vendored stdlib pin
+        id: pin
+        run: |
+          echo "sha=$(node -p "require('./assets/stdlib.manifest.json').sourceSha")" >> "$GITHUB_OUTPUT"
+
+      - name: restore vendored stdlib
+        id: stdlib-cache
+        uses: actions/cache@v4
+        with:
+          path: assets/stdlib
+          # Keyed on the pin: a re-pin is a different key and re-vendors.
+          key: stdlib-${{ steps.pin.outputs.sha }}
+
+      - name: vendor stdlib from the pinned source
+        if: steps.stdlib-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          SRC="$HOME/git/plantuml-stdlib"
+          git init -q "$SRC"
+          git -C "$SRC" remote add origin https://github.com/plantuml/plantuml-stdlib.git
+          git -C "$SRC" fetch -q --depth 1 origin "${{ steps.pin.outputs.sha }}"
+          git -C "$SRC" checkout -q FETCH_HEAD
+          npx jiti scripts/vendor-stdlib.ts
+
+      # Every one of the 34,587 files must hash to what the committed manifest
+      # says. On a cache hit this is the integrity check on the restored tree;
+      # on a miss it proves the pinned source still reproduces byte-for-byte.
+      - name: verify vendored stdlib is verbatim
+        run: npx jiti scripts/vendor-stdlib.ts --verify
+
+      # Re-vendoring rewrites the committed manifests. Identical input must
+      # produce identical manifests, so any diff here means the pin no longer
+      # reproduces — a real finding, not noise. Skipped on a cache hit, where
+      # nothing regenerated them.
+      - name: the pin reproduces the committed manifests
+        if: steps.stdlib-cache.outputs.cache-hit != 'true'
+        run: git diff --exit-code -- assets/stdlib.manifest.json assets/manifests
+
+      # ----------------------------------------------------------------------
+      # Full suite + the oracle gates.
+      # ----------------------------------------------------------------------
+
+      # Includes the 90/90/90 coverage thresholds, the 389 svg goldens and the
+      # 54-fixture description ratchet — all enforced inside vitest.
+      - name: test
+        run: npm test
+
+      # Shrink-only conformance ratchet, separate from vitest. Exits 2 if any
+      # fixture widened; reads only committed goldens, so it needs no oracle
+      # jar and no local cache.
+      #
+      # jiti, not tsx: tsx is not a dependency of this repo, so `npx tsx` would
+      # silently fetch an unpinned version on every run. jiti is a pinned
+      # devDependency and is already what `npm run build:stdlib` uses.
+      - name: description size deltas
+        run: npx jiti scripts/measure-description-size-deltas.ts
