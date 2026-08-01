@@ -5,10 +5,10 @@ output within this batch. All four depend on T1's generated tree.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | `stdlib-all` re-exports eager + manifests | typescript-pro | `scripts/build-stdlib-packages/emit-all-index.ts`, `packages/stdlib-all/package.json`, `packages/stdlib-all/README.md`, `tests/unit/stdlib-all-exports.test.ts` | T1 | [ ] |
-| T3 | The two packages' manifests + READMEs | typescript-pro | `packages/stdlib-aws/package.json`, `packages/stdlib-aws/README.md`, `packages/stdlib-tupadr3/package.json`, `packages/stdlib-tupadr3/README.md` | T1 | [ ] |
-| T4 | Tests move off the eager modules | typescript-pro | `tests/unit/stdlib-packages.test.ts`, `tests/unit/stdlib-package-files.test.ts`, `tests/unit/sprite-package-files.test.ts` | T1 | [ ] |
-| T5 | Re-base the measurement | typescript-pro | `tests/integration/stdlib-remote-e2e.test.ts` | T1 | [ ] |
+| T2 | `stdlib-all` re-exports eager + manifests | typescript-pro | `scripts/build-stdlib-packages/emit-all-index.ts`, `packages/stdlib-all/package.json`, `packages/stdlib-all/README.md`, `tests/unit/stdlib-all-exports.test.ts` | T1 | [x] |
+| T3 | The two packages' manifests + READMEs | typescript-pro | `packages/stdlib-aws/package.json`, `packages/stdlib-aws/README.md`, `packages/stdlib-tupadr3/package.json`, `packages/stdlib-tupadr3/README.md` | T1 | [x] |
+| T4 | Tests move off the eager modules | typescript-pro | `tests/unit/stdlib-packages.test.ts`, `tests/unit/stdlib-package-files.test.ts`, `tests/unit/sprite-package-files.test.ts` | T1 | [x] |
+| T5 | Re-base the measurement | typescript-pro | `tests/integration/stdlib-remote-e2e.test.ts` | T1 | [x] |
 
 ## The export map all four agree on
 

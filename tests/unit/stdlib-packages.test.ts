@@ -63,11 +63,13 @@ async function importGenerated<T>(packageDir: string, moduleFile: string): Promi
 let c4: BundleData;
 let archimate: BundleData;
 
-// `packages/*/generated/` is built ONCE by vitest's globalSetup
-// (`tests/helpers/build-stdlib-globalsetup.ts`), not here. Rebuilding it in a
-// per-file `beforeAll` raced with the other test files reading the same tree,
-// because the build `rmSync`s it first and vitest runs files in parallel
-// workers (si11a T8).
+// `packages/*/generated/` and the two asset-bearing packages'
+// `packages/{stdlib-aws,stdlib-tupadr3}/assets/` are both built ONCE by
+// vitest's globalSetup (`tests/helpers/build-stdlib-globalsetup.ts`), not
+// here. Rebuilding either in a per-file `beforeAll` raced with the other
+// test files reading the same tree, because both builds `rmSync` their
+// target first and vitest runs files in parallel workers (si11a T8 for
+// `generated/`; SI12 T8 for `assets/`).
 beforeAll(async () => {
   const stdlibC4 = await importGenerated<{ c4: BundleData }>('stdlib', 'c4.js');
   c4 = stdlibC4.c4;
@@ -76,15 +78,8 @@ beforeAll(async () => {
 
   // awslib14/awslib/tupadr3 no longer have an eager `generated/*.js` module
   // (SI12 ADR-2/ADR-5) -- their VERBATIM round-trip and alias-resolution
-  // cases below read the shipped `packages/*/assets/` copy instead.
-  // Populate it directly via each package's own `copy-assets.mjs`, NOT
-  // `npm pack` (that stays reserved to `stdlib-package-files.test.ts`, one
-  // invocation per package) and NOT a rebuild of `generated/`. The script's
-  // own `isUpToDate()` guard makes this safe even if another test file's
-  // `npm pack` triggers the same `prepack` step concurrently in a parallel
-  // vitest worker.
-  execFileSync('node', [join(PACKAGES_DIR, 'stdlib-aws', 'scripts', 'copy-assets.mjs')]);
-  execFileSync('node', [join(PACKAGES_DIR, 'stdlib-tupadr3', 'scripts', 'copy-assets.mjs')]);
+  // cases below read the shipped `packages/*/assets/` copy instead, already
+  // populated by globalSetup above.
 }, 30_000);
 
 // ---------------------------------------------------------------------------

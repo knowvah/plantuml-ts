@@ -51,9 +51,14 @@ silently fetches an unpinned copy. CI uses `jiti` and so should you.
 | Batch | Tasks | Theme | Done |
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 | Generator stops emitting eager modules | [x] |
-| [2](batch-2/overview.md) | T2 ∥ T3 ∥ T4 ∥ T5 | Consumers: stdlib-all, manifests, tests, measurement | [ ] |
+| [2](batch-2/overview.md) | T2 ∥ T3 ∥ T4 ∥ T5 | Consumers: stdlib-all, manifests, tests, measurement | [x] |
+| [5](batch-5/overview.md) | T8 | Close the cold-tree asset race (added mid-mission) | [ ] |
 | [3](batch-3/overview.md) | T6 | Docs | [ ] |
 | [4](batch-4/overview.md) | T7 | Close the mission | [ ] |
+
+**Batch 5 runs before batch 3.** It was added mid-mission after batch 2's
+warm-tree gates missed a cold-tree race that corrupts T5's measured figure —
+the figure T6 and T7 quote. See [`batch-5/overview.md`](batch-5/overview.md).
 
 **T1 runs alone.** The generated tree is built ONCE in vitest `globalSetup`,
 so the moment the generator stops emitting eager modules every test reading
