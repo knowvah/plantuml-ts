@@ -172,8 +172,8 @@ describe('acceptance 2: every sprite name in the real manifest is inside the res
 
 describe('acceptance 3: eager bundle modules are unaffected by the sprite-split packaging', () => {
   const spec = PACKAGE_SPECS.find((s) => s.packageDir === PACKAGE_DIR);
-  if (spec === undefined) {
-    throw new Error(`No PackageSpec found for packageDir '${PACKAGE_DIR}'`);
+  if (spec?.modules === undefined) {
+    throw new Error(`No PackageSpec (with eager modules) found for packageDir '${PACKAGE_DIR}'`);
   }
 
   it.each(spec.modules.map((mod) => ({ label: `${mod.fileBaseName}.js`, mod })))(

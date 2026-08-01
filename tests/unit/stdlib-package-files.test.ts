@@ -16,19 +16,14 @@
  * for real publication, not just runnable by hand.
  */
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { emitModuleJs } from '../../scripts/build-stdlib-packages/emit-module.js';
-import { PACKAGE_SPECS } from '../../scripts/build-stdlib-packages/package-specs.js';
-
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
-const ASSETS_STDLIB_DIR = join(REPO_ROOT, 'assets', 'stdlib');
 
 interface RemoteManifestLike {
   readonly name: string;
@@ -76,10 +71,6 @@ async function importGenerated<T>(packageDir: string, moduleFile: string): Promi
   return (await import(pathToFileURL(path).href)) as T;
 }
 
-function sha256Hex(bytes: Buffer): string {
-  return createHash('sha256').update(bytes).digest('hex');
-}
-
 // ---------------------------------------------------------------------------
 // Acceptance 1: exports carries the remote subpath, files carries `assets`.
 // ---------------------------------------------------------------------------
@@ -103,8 +94,9 @@ describe('acceptance 1: package.json carries the remote subpath and ships assets
       expect(Object.keys(pkg.exports)).toContain(subpath);
     }
     expect(pkg.files).toContain('assets');
-    // ADR-1: the eager subpaths and `generated` must still be present --
-    // additive only, never removed or renamed.
+    // `generated` must still be present -- SI12 ADR-1 kept it (the index
+    // re-exports the remote manifests now, not an eager module), additive
+    // only, never removed or renamed.
     expect(pkg.files).toContain('generated');
   });
 });
@@ -135,11 +127,24 @@ interface ManifestPackagingCase {
    * `isUpToDate` guard in `copy-assets.mjs` closes the window; keeping the
    * packs in one file removes the contention that opened it.
    *
-   * The packages roughly DOUBLED in si11a: ADR-1 keeps the eager inlined
+   * si11a roughly DOUBLED these packages: ADR-1 kept the eager inlined
    * module byte-identical for offline consumers while ADR-4 additionally
-   * ships the raw `.puml` files, so each bundle's content exists twice, in
-   * two encodings, deliberately. Measured 2026-07-31: stdlib-aws
-   * 16,665,500 B, stdlib-tupadr3 40,780,091 B.
+   * shipped the raw `.puml` files, so each bundle's content existed twice,
+   * in two encodings, deliberately. SI12 ADR-2/ADR-5 stopped generating the
+   * eager module for these two packages entirely -- `assets/` is now the
+   * ONLY encoding they ship, so the ceiling drops back toward roughly half
+   * of si11a's value. This is the mission's one automated regression
+   * signal (`plans/si12-eager-module-removal/batch-2/overview.md`): if the
+   * eager module ever comes back, or `assets/` stops shipping, this
+   * ceiling (or acceptance 1's `exports`/`files` assertions) is what
+   * notices.
+   *
+   * Measured 2026-08-01 via `npm pack --dry-run --json` in each package
+   * directory (this task, T4): stdlib-aws unpackedSize 8,346,761 B
+   * (~7.96 MiB), stdlib-tupadr3 unpackedSize 20,292,598 B (~19.35 MiB) --
+   * both roughly HALVED from si11a's 16,665,500 B / 40,780,091 B, consistent
+   * with dropping exactly one of the two encodings. Ceilings below add
+   * ~25-26% headroom over the measured figure, not si11a's stale value.
    */
   readonly ceilingMb: number;
 }
@@ -153,7 +158,8 @@ const MANIFEST_PACKAGING_CASES: readonly ManifestPackagingCase[] = [
     manifestModuleFile: 'awslib14.remote.js',
     manifestExportName: 'awslib14Remote',
     assetFolder: 'awslib14',
-    ceilingMb: 18,
+    // Measured 8,346,761 B (~7.96 MiB unpacked) -- ~26% headroom.
+    ceilingMb: 10,
   },
   {
     label: 'stdlib-tupadr3/tupadr3',
@@ -161,7 +167,8 @@ const MANIFEST_PACKAGING_CASES: readonly ManifestPackagingCase[] = [
     manifestModuleFile: 'tupadr3.remote.js',
     manifestExportName: 'tupadr3Remote',
     assetFolder: 'tupadr3',
-    ceilingMb: 45,
+    // Measured 20,292,598 B (~19.35 MiB unpacked) -- ~24% headroom.
+    ceilingMb: 24,
   },
 ];
 
@@ -197,55 +204,6 @@ describe('acceptance 2: every emitted manifest path is inside the resolved packa
     },
     120_000,
   );
-});
-
-// ---------------------------------------------------------------------------
-// Acceptance 3: the eager modules are byte-identical across regenerations
-// (regression guard -- the manual before/after sha256 comparison for THIS
-// task's own change is documented in the task's return report, since a
-// vitest run started after the task lands cannot see pre-task bytes).
-// ---------------------------------------------------------------------------
-
-interface EagerModuleCase {
-  readonly label: string;
-  readonly packageDir: string;
-  readonly fileBaseName: string;
-}
-
-const EAGER_MODULE_CASES: readonly EagerModuleCase[] = [
-  { label: 'stdlib-aws/awslib14.js', packageDir: 'stdlib-aws', fileBaseName: 'awslib14' },
-  { label: 'stdlib-aws/awslib.js', packageDir: 'stdlib-aws', fileBaseName: 'awslib' },
-  { label: 'stdlib-tupadr3/tupadr3.js', packageDir: 'stdlib-tupadr3', fileBaseName: 'tupadr3' },
-];
-
-/**
- * Re-emits each eager module through the SAME pure emitter the build uses and
- * compares bytes, rather than calling `buildStdlibPackages()` again.
- *
- * The rebuild-and-compare version of this test was itself a race: it is a
- * WRITER of `packages/*&#47;generated/`, and vitest runs test files in parallel
- * workers, so it deleted and rewrote the tree while other files were
- * `import()`ing out of it (`Failed to load url .../awslib14.remote.js`).
- * `emitModuleJs` is a pure function of the spec plus the vendored assets, so
- * re-emitting proves the same property -- regeneration yields byte-identical
- * eager modules -- with no filesystem mutation at all.
- *
- * The before/after sha256 comparison against PRE-task bytes is recorded in
- * si11a T6's return report and the decision journal; a vitest run starting
- * after the task landed cannot observe those bytes.
- */
-describe('acceptance 3: eager modules are unaffected by asset packaging', () => {
-  it.each(EAGER_MODULE_CASES)('$label is byte-identical to a fresh emit', ({ packageDir, fileBaseName }) => {
-    const spec = PACKAGE_SPECS.find((s) => s.packageDir === packageDir);
-    expect(spec).toBeDefined();
-    const mod = spec?.modules.find((m) => m.fileBaseName === fileBaseName);
-    expect(mod).toBeDefined();
-
-    const onDisk = readFileSync(join(PACKAGES_DIR, packageDir, 'generated', `${fileBaseName}.js`));
-    const freshlyEmitted = Buffer.from(emitModuleJs(mod!, ASSETS_STDLIB_DIR), 'utf8');
-
-    expect(sha256Hex(onDisk)).toBe(sha256Hex(freshlyEmitted));
-  });
 });
 
 // ---------------------------------------------------------------------------

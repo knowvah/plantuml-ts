@@ -62,9 +62,6 @@ async function importGenerated<T>(packageDir: string, moduleFile: string): Promi
 
 let c4: BundleData;
 let archimate: BundleData;
-let awslib14: BundleData;
-let awslib: BundleData;
-let tupadr3: BundleData;
 
 // `packages/*/generated/` is built ONCE by vitest's globalSetup
 // (`tests/helpers/build-stdlib-globalsetup.ts`), not here. Rebuilding it in a
@@ -76,12 +73,18 @@ beforeAll(async () => {
   c4 = stdlibC4.c4;
   const stdlibArchimate = await importGenerated<{ archimate: BundleData }>('stdlib', 'archimate.js');
   archimate = stdlibArchimate.archimate;
-  const awsAwslib14 = await importGenerated<{ awslib14: BundleData }>('stdlib-aws', 'awslib14.js');
-  awslib14 = awsAwslib14.awslib14;
-  const awsAwslib = await importGenerated<{ awslib: BundleData }>('stdlib-aws', 'awslib.js');
-  awslib = awsAwslib.awslib;
-  const tupadr3Mod = await importGenerated<{ tupadr3: BundleData }>('stdlib-tupadr3', 'tupadr3.js');
-  tupadr3 = tupadr3Mod.tupadr3;
+
+  // awslib14/awslib/tupadr3 no longer have an eager `generated/*.js` module
+  // (SI12 ADR-2/ADR-5) -- their VERBATIM round-trip and alias-resolution
+  // cases below read the shipped `packages/*/assets/` copy instead.
+  // Populate it directly via each package's own `copy-assets.mjs`, NOT
+  // `npm pack` (that stays reserved to `stdlib-package-files.test.ts`, one
+  // invocation per package) and NOT a rebuild of `generated/`. The script's
+  // own `isUpToDate()` guard makes this safe even if another test file's
+  // `npm pack` triggers the same `prepack` step concurrently in a parallel
+  // vitest worker.
+  execFileSync('node', [join(PACKAGES_DIR, 'stdlib-aws', 'scripts', 'copy-assets.mjs')]);
+  execFileSync('node', [join(PACKAGES_DIR, 'stdlib-tupadr3', 'scripts', 'copy-assets.mjs')]);
 }, 30_000);
 
 // ---------------------------------------------------------------------------
@@ -90,59 +93,78 @@ beforeAll(async () => {
 
 interface RoundTripCase {
   readonly label: string;
-  readonly bundle: () => BundleData;
   readonly bundleFolder: string;
-  readonly bundleKey: string;
   readonly manifestFile: string;
+  /**
+   * Runtime bytes source. `stdlib`'s c4/archimate still generate an eager
+   * `BundleData.files` string; awslib14/tupadr3 no longer do (SI12
+   * ADR-2/ADR-5), so their bytes come from the package's shipped `assets/`
+   * copy instead -- the same bytes `npm pack` publishes.
+   */
+  readonly runtimeBytes: () => Buffer;
+}
+
+function eagerBundleBytes(bundle: () => BundleData, bundleKey: string): () => Buffer {
+  return () => {
+    const content = bundle().files[bundleKey];
+    expect(content).toBeDefined();
+    return Buffer.from(content as string, 'utf8');
+  };
+}
+
+function shippedAssetBytes(packageDir: string, assetFolder: string, relPath: string): () => Buffer {
+  return () => readFileSync(join(PACKAGES_DIR, packageDir, 'assets', assetFolder, relPath));
 }
 
 const ROUND_TRIP_CASES: readonly RoundTripCase[] = [
-  { label: 'c4/c4', bundle: () => c4, bundleFolder: 'C4', bundleKey: 'c4', manifestFile: 'C4.puml' },
+  {
+    label: 'c4/c4',
+    bundleFolder: 'C4',
+    manifestFile: 'C4.puml',
+    runtimeBytes: eagerBundleBytes(() => c4, 'c4'),
+  },
   {
     label: 'c4/c4_context',
-    bundle: () => c4,
     bundleFolder: 'C4',
-    bundleKey: 'c4_context',
     manifestFile: 'C4_Context.puml',
+    runtimeBytes: eagerBundleBytes(() => c4, 'c4_context'),
   },
   {
     label: 'archimate/archimate',
-    bundle: () => archimate,
     bundleFolder: 'archimate',
-    bundleKey: 'archimate',
     manifestFile: 'Archimate.puml',
+    runtimeBytes: eagerBundleBytes(() => archimate, 'archimate'),
   },
   {
     // PNG-bearing: an `!function`-embedded `<img data:image/png;base64,...>`.
+    // Read from the shipped `assets/` copy -- awslib14 has no eager module
+    // (SI12 ADR-5).
     label: 'awslib14/analytics/analytics (PNG-bearing)',
-    bundle: () => awslib14,
     bundleFolder: 'awslib14',
-    bundleKey: 'analytics/analytics',
     manifestFile: 'Analytics/Analytics.puml',
+    runtimeBytes: shippedAssetBytes('stdlib-aws', 'awslib14', 'Analytics/Analytics.puml'),
   },
   {
+    // Read from the shipped `assets/` copy -- tupadr3 has no eager module
+    // (SI12 ADR-5).
     label: 'tupadr3/font-awesome-5/ban',
-    bundle: () => tupadr3,
     bundleFolder: 'tupadr3',
-    bundleKey: 'font-awesome-5/ban',
     manifestFile: 'font-awesome-5/ban.puml',
+    runtimeBytes: shippedAssetBytes('stdlib-tupadr3', 'tupadr3', 'font-awesome-5/ban.puml'),
   },
 ];
 
 describe('VERBATIM round-trip: generated BundleData.files === vendored asset bytes', () => {
-  it.each(ROUND_TRIP_CASES)('$label', ({ bundle, bundleFolder, bundleKey, manifestFile }) => {
-    const content = bundle().files[bundleKey];
-    expect(content).toBeDefined();
-
-    const runtimeBytes = Buffer.from(content as string, 'utf8');
+  it.each(ROUND_TRIP_CASES)('$label', ({ bundleFolder, manifestFile, runtimeBytes }) => {
+    const runtime = runtimeBytes();
     const diskBytes = readFileSync(join(ASSETS_STDLIB_DIR, bundleFolder, manifestFile));
     const manifest = readManifest(bundleFolder);
     const manifestHash = manifest.files[manifestFile];
     expect(manifestHash).toBeDefined();
 
-    expect(Buffer.compare(runtimeBytes, diskBytes)).toBe(0);
-    expect(sha256Hex(runtimeBytes)).toBe(sha256Hex(diskBytes));
-    expect('sha256:' + sha256Hex(runtimeBytes)).toBe(manifestHash);
+    expect(Buffer.compare(runtime, diskBytes)).toBe(0);
+    expect(sha256Hex(runtime)).toBe(sha256Hex(diskBytes));
+    expect('sha256:' + sha256Hex(runtime)).toBe(manifestHash);
   });
 });
 
@@ -261,18 +283,26 @@ describe('remote manifest emission (SI11a T5)', () => {
 // ---------------------------------------------------------------------------
 
 describe('alias resolution -- @knowvah/plantuml-stdlib-aws', () => {
-  it('resolves <awslib/General/User> through the awslib14 target bundle', () => {
-    const store = stdlibStore(awslib, awslib14);
+  it('resolves <awslib/General/User> through the awslib14 target bundle (real shipped bytes)', () => {
+    // awslib14 has no eager `BundleData` module (SI12 ADR-2/ADR-5); build one
+    // from the same shipped `assets/` bytes the round-trip cases above use,
+    // so this still proves `stdlibStore`'s alias chain against real vendored
+    // content -- the generic alias-chain mechanism (synthetic fixtures) is
+    // already covered by `stdlib-resolution.test.ts`, and the alias
+    // metadata itself (`aliasOf`, empty `files`) by this file's "remote
+    // manifest emission" acceptance 4 below.
+    const userPuml = readFileSync(
+      join(PACKAGES_DIR, 'stdlib-aws', 'assets', 'awslib14', 'General', 'User.puml'),
+      'utf8',
+    );
+    const awslib14Bundle: BundleData = { name: 'awslib14', files: { 'general/user': userPuml } };
+    const awslibAlias: BundleData = { name: 'awslib', aliasOf: 'awslib14', files: {} };
+
+    const store = stdlibStore(awslibAlias, awslib14Bundle);
     const resolved = store.getPumlResource('awslib/General/User');
-    const direct = awslib14.files['general/user'];
 
     expect(resolved).toBeDefined();
-    expect(resolved).toBe(direct);
-  });
-
-  it('the awslib alias itself carries no files (aliasOf is authoritative)', () => {
-    expect(awslib.aliasOf).toBe('awslib14');
-    expect(Object.keys(awslib.files)).toHaveLength(0);
+    expect(resolved).toBe(userPuml);
   });
 });
 
