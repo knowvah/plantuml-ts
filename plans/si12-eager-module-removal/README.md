@@ -237,6 +237,40 @@ contradicted or amended. Beyond the ADRs, the decision journal records:
   five push-forward conditions in this README were exercised or held exactly
   as written; none was contradicted.
 
+### Post-mission addendum (2026-08-01, same day)
+
+Follow-ups 2 and 3 above were worked immediately after the mission closed and
+are **resolved**; the entries stay as written because they were true when
+recorded.
+
+- **Follow-up 2 was materially worse than "cosmetic."** Chasing it found the
+  unscoped specifier baked into `emit-module.ts`/`emit-remote-manifest.ts`'s
+  `DTS_IMPORT`, so **every generated `.d.ts` in all four packages** imported
+  from `'plantuml-ts'` while every package declares
+  `@knowvah/plantuml-ts` as its peer dependency — a consumer could not
+  resolve `BundleData` or `StdlibRemoteManifest` from any of them. Introduced
+  by `9f189912`'s scope rename. **No gate caught it because the gate was
+  vacuous:** each package's tsconfig includes only `generated/**/*.d.ts`, and
+  `skipLibCheck: true` skips declaration files, so
+  `npm run typecheck --workspaces` checked nothing — contradicting
+  `build-stdlib-packages.ts`'s own header claim. Fixed in `ab1ab342`:
+  specifier corrected, `skipLibCheck` set to `false` (~0.26s per package,
+  measured), and `tests/unit/stdlib-dts-import-specifier.test.ts` added as a
+  guard that runs in `npm test` — which `build:stdlib` is not part of.
+  Verified in both directions. Same class as SI11b's `spriteSplitStdlib`
+  shipping unreachable: works in-repo, broken for a consumer.
+- **Follow-up 3** resolved in `b4034c2e`: the asset-bearing package list is
+  now discovered by the presence of `scripts/copy-assets.mjs` rather than
+  hardcoded, so it cannot drift.
+- **Follow-up 4** (the 389 → 395 golden-count drift) is left as recorded — it
+  is a stale figure in this brief, not a defect in the repo.
+
+The two guards these left behind are the durable record:
+`tests/unit/stdlib-dts-import-specifier.test.ts` (why the specifier must
+match the declared dependency) and `packages/tsconfig.base.json`'s comment on
+`skipLibCheck` (why it must stay `false`). Fuller working notes are in this
+checkout's gitignored `.agent-notes/si12-stdlib-packaging.md`.
+
 ### SI10 — unchanged, still open
 
 This mission does not touch `SI10` (retire `measureUsecase`'s class-engine
