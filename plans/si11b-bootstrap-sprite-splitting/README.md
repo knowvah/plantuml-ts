@@ -64,7 +64,7 @@ Baseline at mission start: **463 test files / 11,266 tests**.
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 ∥ T2 ∥ T3 | Splitter+wiring; `<$name>` scan; collision warning | [x] |
 | [2](batch-2/overview.md) | T4 ∥ T5 | Route the scan into prefetch; ship fragments | [x] |
-| [3](batch-3/overview.md) | T6 | End-to-end; measure the win | [ ] |
+| [3](batch-3/overview.md) | T6 | End-to-end; measure the win | [x] |
 | [4](batch-4/overview.md) | T7 | Close the mission | [ ] |
 
 ## Documents

@@ -5,7 +5,7 @@ this one runs the whole path and produces the number the mission is judged on.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T6 | End-to-end against the REAL fragments; record the measured payload | typescript-pro | `tests/integration/sprite-split-e2e.test.ts` | T4, T5 | [ ] |
+| T6 | End-to-end against the REAL fragments; record the measured payload | typescript-pro | `tests/integration/sprite-split-e2e.test.ts` | T4, T5 | [x] |
 
 ## Batch exit criteria
 
