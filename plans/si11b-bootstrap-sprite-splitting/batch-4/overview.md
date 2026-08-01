@@ -4,7 +4,7 @@ One task.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T7 | Flip SI11b to done; write the mission summary | typescript-pro | `planning/mission-index.md`, `plans/si11b-bootstrap-sprite-splitting/README.md` | T6 | [ ] |
+| T7 | Flip SI11b to done; write the mission summary | typescript-pro | `planning/mission-index.md`, `plans/si11b-bootstrap-sprite-splitting/README.md` | T6 | [x] |
 
 ## Batch exit criteria
 
