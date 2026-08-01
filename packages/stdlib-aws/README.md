@@ -2,8 +2,9 @@
 
 Vendored AWS Architecture Icons for PlantUML (`awslib14`, plus the `awslib`
 alias) — packaged as [plantuml-ts](https://github.com/plantuml/plantuml-ts)
-`BundleData` values, for use with `plantuml-ts`'s `stdlibStore()` /
-`withStdlib()` include seam.
+`StdlibRemoteManifest` values plus the raw `.puml` assets they describe, for
+use with `plantuml-ts`'s `remoteStdlib()` / `stdlibRegistry()` include seam.
+There is no eager `BundleData` export — see "Usage" below.
 
 ## Attribution and license
 
@@ -40,22 +41,47 @@ renderer.
 
 ## Usage
 
-```ts
-import { renderSync, stdlibStore, withStdlib, MapIncludeStore } from 'plantuml-ts';
-import { awslib14 } from '@knowvah/plantuml-stdlib-aws';
+**Eager registration is unavailable for this bundle.** `awslib14` is an
+8.3 MB `BundleData` value; shipping it as an importable module (and
+generating it on every build) was the exact cost mission SI12 removes. The
+`.` entry point and the `./awslib14`/`./awslib` subpaths that used to export
+the eager `BundleData` are gone — only the manifest-based `.remote` exports
+remain.
 
-const includeStore = withStdlib(new MapIncludeStore(), stdlibStore(awslib14));
+Register the bundle through `remoteStdlib()` instead, pointed at this
+package's `assets/` directory (self-hosted) or a pinned CDN URL. Both
+recipes, plus the full `baseUrl` contract, are documented once in
+[`docs/stdlib-remote.md`](../../docs/stdlib-remote.md) — "Recipe: self-hosted
+assets" and "Recipe: pinned CDN" — and are not duplicated here.
+
+```ts
+import { renderSync, remoteStdlib, stdlibRegistry } from 'plantuml-ts';
+import { awslib14Remote } from '@knowvah/plantuml-stdlib-aws/awslib14.remote';
+
+const registry = stdlibRegistry({
+  awslib14: () =>
+    Promise.resolve(
+      remoteStdlib({
+        manifest: awslib14Remote,
+        baseUrl: 'https://static.example.com/plantuml-stdlib/awslib14/',
+      }),
+    ),
+});
 
 const svg = renderSync(
   ['@startuml', '!include <awslib14/General/User>', '@enduml'].join('\n'),
-  { includeStore },
+  { stdlibRegistry: registry },
 );
 ```
 
 `awslib` (the alias `link:` target upstream registers for the "current"
-release) is also exported and resolves through to `awslib14`:
+release) is also exported as a manifest, `awslibRemote` — an alias of
+`awslib14` with an empty `files` map (`aliasOf: 'awslib14'`) — from
+`@knowvah/plantuml-stdlib-aws/awslib.remote`, and resolves through to the
+same `awslib14` assets:
 
 ```ts
-import { awslib, awslib14 } from '@knowvah/plantuml-stdlib-aws';
-// stdlibStore(awslib, awslib14) resolves `<awslib/...>` via the `awslib14` files.
+import { awslibRemote } from '@knowvah/plantuml-stdlib-aws/awslib.remote';
+// registry entry for 'awslib' using awslibRemote resolves `<awslib/...>`
+// against the same assets/awslib14/ files.
 ```

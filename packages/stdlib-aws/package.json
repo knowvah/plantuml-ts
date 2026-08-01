@@ -31,14 +31,6 @@
       "types": "./generated/index.d.ts",
       "import": "./generated/index.js"
     },
-    "./awslib14": {
-      "types": "./generated/awslib14.d.ts",
-      "import": "./generated/awslib14.js"
-    },
-    "./awslib": {
-      "types": "./generated/awslib.d.ts",
-      "import": "./generated/awslib.js"
-    },
     "./awslib14.remote": {
       "types": "./generated/awslib14.remote.d.ts",
       "import": "./generated/awslib14.remote.js"
