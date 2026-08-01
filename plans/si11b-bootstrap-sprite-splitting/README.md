@@ -146,3 +146,114 @@ All three were earned at cost on this mission line.
 `plans/` is **tracked** in this project, not gitignored — established
 practice, and `planning/mission-index.md` links into it. `.claude/` IS
 gitignored, as the template expects.
+
+---
+
+# Mission summary (2026-07-31)
+
+**Status: complete.** 7 of 7 tasks, 4 of 4 batches, 11 commits on `main`.
+
+## The measured result
+
+| quantity | measured |
+|---|---|
+| manifest (`sprites.json`, gzip) | 7,402 B |
+| 3 fragments actually fetched | 2,066 B |
+| **total over the wire** | **9,468 B** |
+| whole-file baseline (read from disk) | 1,085,342 B |
+| **reduction** | **99.128%** on 3 fetches |
+
+Ahead of this brief's ~98.7% projection, so stop condition 15 never fired.
+T7 quotes this figure, not the projection.
+
+## Tasks completed vs planned
+
+All seven as scoped, in the planned batches. Two additions the plan did not
+name: a `fix(T4)` commit for a public-surface defect (below), and one
+pre-authorized write-set expansion — `src/core/sprite-split-stdlib.ts`,
+created because `include-resolver.ts` was at the hook-enforced 500-line cap.
+
+## Gate results (final, batch 3)
+
+`npm test` **468 files / 11,317 tests** (baseline 463 / 11,266) · typecheck,
+lint, build exit 0 · `vendor-stdlib --verify` **34,587 files verbatim** ·
+size deltas **320/351, widened 0** · 389 goldens byte-identical ·
+54-fixture description ratchet zero-diff. Every batch gated clean; no gate
+was run twice on the same failure.
+
+## Decisions flagged for review
+
+1. **ADR-1 overturned the mission's founding premise, and it held.** SI11b
+   was recorded as requiring a vendored-file transform and an SI5b carve-out.
+   It required neither. `vendor-stdlib --verify` was never touched.
+   **SI11a's row in `planning/mission-index.md` still carries the superseded
+   claim** — left unedited on purpose (T7 criterion 4: dated rows stay as
+   taken); the correction lives in the SI11b row.
+2. **T5 deliberately did NOT add a `copy-assets.mjs`/`prepack`,** unlike
+   `stdlib-aws`/`stdlib-tupadr3`. The root generator already writes this
+   package's `assets/` directly, so a per-package copy would make a second
+   writer of one directory — the shape of the race that cost SI11a a stop.
+3. **T3 held `src/index.ts` at exactly 500 lines** by reflowing blank spacer
+   lines inside three pre-existing JSDoc blocks; `fix(T4)` later held the
+   same cap by folding four type-only re-exports into their value exports.
+   No wording was cut, but both are formatting edits to code neither task
+   otherwise touched.
+4. **T6 substituted criterion 1's `<image>` / `data:image` assertion.** That
+   wording was inherited from SI11a's PNG-form tupadr3 test; bootstrap's
+   sprites are SVG-form and render as inline `<path>`. Verified against the
+   real golden — zero `<image>` tags. A stronger check replaced it, not a
+   weaker one.
+
+## Two defects caught in review — both the same shape
+
+Code that worked in-repo and would have failed a consumer. Worth naming
+together, because a third of this shape will look just as harmless:
+
+1. **The ADR-5b escape hatch applied at one recursion level only.** Names
+   were spliced into the top-level source, so a sprite-split `!include`
+   reached through an author's own shared header dropped an option-named
+   sprite **silently** — the outcome ADR-5a forbids, inside the valve
+   ADR-5b exists to provide. Fixed by making the names walk-constant.
+2. **`spriteSplitStdlib` shipped unreachable from the public API.**
+   `package.json`'s `exports` has a single `"."` entry, so `src/index.ts` is
+   the only importable surface; the helper was not re-exported, and its own
+   doc comment advertised a deep `core/` path no export map serves. Every
+   unit test passed, importing by relative path.
+
+Both were found by asking what a CONSUMER sees, not what the tests see.
+T1's criterion 4 encodes the same lesson from SI11a; it generalizes further
+than "assert on the build output".
+
+## Known issues and follow-ups
+
+**Needs a maintainer decision — outside every task's write-set, so escalated
+rather than self-approved (stop condition 12):**
+
+- **`docs/stdlib-remote.md:174-177` is now wrong.** It tells readers
+  "Bootstrap gets nothing from this… per-sprite splitting for bootstrap is a
+  separate, deferred mission (SI11b)." True when written, false now. This is
+  consumer-facing documentation actively pointing away from a shipped
+  feature — the highest-value item in this list.
+
+**Lower priority:**
+
+- `tests/unit/stdlib-packages.test.ts`'s comment that `packages/stdlib` "has
+  no prepack and no assets, so it cannot race" is half stale: the conclusion
+  still holds (no prepack ⇒ `npm pack --dry-run` mutates nothing), the
+  stated reason no longer does.
+- `src/core/sprite-split-stdlib.ts` also holds the general
+  `bundlesFor`/`stdlibContentFor` alias walk, moved there for line budget, so
+  its name under-describes its contents.
+- **`npm publish` is maintainer-gated and was not part of this mission.**
+  The fragments are in `files` and the packaging gate resolves them against
+  a real `npm pack --dry-run --json`, but nothing has been published.
+
+## Deviations from the brief
+
+- Manifest is `{name, sprites}` per the batch-1 contract, not a bare array,
+  so it measures 7,402 B gzip against ADR-3's 7,289 B for a bare list —
+  ~113 B for the declared shape, well under criterion 1's 8 KB bound.
+- Line-number corrections in `T1`, `T2` and `T6` (paths and cited ranges had
+  drifted); each is recorded in the decision journal. T6's manifest path was
+  the substantive one: `packages/stdlib/assets/…/sprites.json`, not
+  `packages/stdlib/generated/…`.
