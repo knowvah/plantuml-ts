@@ -124,29 +124,40 @@ describe('class-allowmixing-usecase-mix (allowmixing + usecase + class)', () => 
 describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside class)', () => {
   const slug = 'class-actor-bare-no-allowmixing';
 
-  it('routes to the CLASS engine even without allowmixing (actor is excluded from the descriptive-signal decline set, D3)', () => {
-    assertRoutesToClassEngine(readSource(slug));
+  /**
+   * The divergence this fixture originally measured is now FIXED. T3 recorded
+   * that upstream REFUSES this input -- `CommandCreateElementFull2.java:197-198`
+   * (`Mode.NORMAL_KEYWORD`) requires `diagram.isAllowMixing() == true` and
+   * errors otherwise -- while this port rendered a diagram. The gate now
+   * exists (`class-descriptive-leaf-command.ts#adjudicateAllowMixing`), so the
+   * user-visible result is a refusal carrying upstream's own wording.
+   */
+  it('is REFUSED, as upstream refuses it, with upstream\'s own message', () => {
+    const svg = renderSync(readSource(slug));
+    expect(svg).toContain('Class diagram error:');
+    expect(svg).toContain(
+      "Use 'allowmixing' if you want to mix classes and other UML elements.",
+    );
+    // The element the jar rejects must NOT be drawn.
+    expect(svg).not.toMatch(/>Bob</);
+  });
+
+  it('renders normally once `allowmixing` is present', () => {
+    const withMixing = readSource(slug).replace('@startuml', '@startuml\nallowmixing');
+    const svg = renderSync(withMixing);
+    expect(svg).not.toContain('Class diagram error:');
+    expect(svg).toMatch(/>Bob</);
   });
 
   /**
-   * KNOWN, LARGE, PRE-EXISTING DIVERGENCE (not T1/T2, not this mission's
-   * scope): the jar's `golden.svg` here is upstream's own ERROR rendering,
-   * not a real diagram. `CommandCreateElementFull2.java:197-198`
-   * (`Mode.NORMAL_KEYWORD`) requires `diagram.isAllowMixing() == true` before
-   * accepting an `actor`/`usecase`/`database`/... leaf inside a class
-   * diagram, and errors otherwise ("Use 'allowmixing' if you want to mix
-   * classes and other UML elements."). This port's class engine has NO
-   * equivalent gate (`class-descriptive-leaf-command.ts`'s
-   * `DESCRIPTIVE_LEAF_COMMANDS` registers unconditionally), so it renders a
-   * real diagram where upstream errors -- confirmed by both sides agreeing
-   * on ROUTING ("Assumed diagram type: class" in the jar's error text,
-   * `data-diagram-type` absent on its error SVG only because upstream never
-   * reaches its own class-shell assembly for an error page) while disagreeing
-   * on ACCEPTANCE. This is a real, measured finding surfaced BY this fixture
-   * -- flagged here for a follow-up mission, deliberately NOT fixed in T3
-   * (write-set is fixtures + this test only).
+   * Still pinned, but note WHICH layer it measures: `renderFixtureClass` drives
+   * the class engine's low-level pipeline (parseClass -> layoutClass ->
+   * renderClass) directly, BYPASSING the plugin wrapper where the refusal is
+   * emitted. So this measures the renderer's raw output against the jar's
+   * error page and stays a characterisation guard on the underlying geometry.
+   * The user-visible behaviour is asserted by the two tests above.
    */
-  it('measures a KNOWN, pinned diff against the jar golden (jar ERRORS without allowmixing; this port does not gate it)', () => {
+  it('the raw class pipeline (bypassing the plugin gate) keeps its pinned diff', () => {
     const golden = readGolden(slug);
     const ours = renderFixtureClass(readSource(slug), new DeterministicMeasurer());
     const { pass, diffs } = compareSvg(ours, golden, 'deterministic');

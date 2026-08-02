@@ -25,11 +25,81 @@ interface Command {
   execute(state: ParseState, match: RegExpExecArray): void;
 }
 
+/** Upstream's own wording, verbatim —
+ *  `CommandCreateElementFull2#executeArg` line 198. */
+export const ALLOW_MIXING_ERROR =
+  "Use 'allowmixing' if you want to mix classes and other UML elements.";
+
+/**
+ * A CONTAINER opener, which upstream claims with `CommandPackage` /
+ * `CommandPackageWithUSymbol` (`ClassDiagramFactory` lines 127-130) BEFORE
+ * the gated `CommandCreateElementFull2` on line 133 — so it is never gated.
+ *
+ * Jar-verified 2026-08-02: `package foo {`, `package foo {}`, `state A {`,
+ * `rectangle R {` and the long-description `package Application [` all render
+ * without `allowmixing`, while the LEAF form of every one of the 29
+ * descriptive keywords is refused without it.
+ */
+const CONTAINER_OPENER = /[{[]\s*\}?\s*$/;
+
+/** `mix_` = Mode.WITH_MIX_PREFIX, registered UNGATED on line 134. */
+const MIX_PREFIX = /^\s*mix_/i;
+
+/**
+ * Native class-diagram constructs. Upstream's `ClassDiagramFactory` only owns
+ * a block containing one of these, and `CommandCreateElementFull2`'s
+ * `allowmixing` gate is only reachable once that factory owns the block.
+ */
+const NATIVE_CLASS_KINDS: ReadonlySet<string> = new Set([
+  'class',
+  'abstract',
+  'interface',
+  'enum',
+  'annotation',
+]);
+
+/**
+ * Promote a recorded gate violation to a diagram error, at end of parse.
+ *
+ * The native-construct condition is load-bearing, not defensive: this port's
+ * dispatcher is more eager than upstream's factory selection, so a C4 diagram
+ * — macro-expanded descriptive leaves with no class construct anywhere —
+ * arrives at the class engine, where upstream would have routed it to
+ * `DescriptionDiagramFactory` and never gated it. Conditioning on the same
+ * signal upstream's factory turns on keeps those rendering while still
+ * refusing a genuine class+leaf mix.
+ */
+export function adjudicateAllowMixing(state: ParseState): void {
+  if (!state.gatedLeafSeen) return;
+  if (!state.ast.classifiers.some((c) => NATIVE_CLASS_KINDS.has(c.kind))) return;
+  (state.ast.errors ??= []).push(ALLOW_MIXING_ERROR);
+}
+
 export const DESCRIPTIVE_LEAF_COMMANDS: readonly Command[] = [
   {
     pattern: new RegExp('^(?:mix_)?(?:' + ALL_DESCRIPTIVE_LEAF + ')\\s+\\S', 'i'),
     execute(state, match) {
-      const decl = parseClassifierDecl(match.input);
+      const line = match.input;
+      // `CommandCreateElementFull2#executeArg`:
+      //   if (mode == Mode.NORMAL_KEYWORD && diagram.isAllowMixing() == false)
+      //     return CommandExecutionResult.error(...)
+      //
+      // Only RECORDED here, adjudicated in `finalizeParse` — see
+      // `gatedLeafSeen`'s doc on ParseState. The declaration is still applied,
+      // because whether this is an error depends on the whole block: upstream
+      // reaches this command only when `ClassDiagramFactory` owned the block
+      // in the first place, and this port's dispatcher is more eager than that
+      // factory (a C4 diagram, which has no class construct at all, arrives
+      // here). Deciding at the end keeps a macro-expanded descriptive diagram
+      // rendering while still refusing a genuine class+leaf mix.
+      if (
+        !state.allowMixing &&
+        !MIX_PREFIX.test(line) &&
+        !CONTAINER_OPENER.test(line.trim())
+      ) {
+        state.gatedLeafSeen = true;
+      }
+      const decl = parseClassifierDecl(line);
       if (decl !== null) applyClassifierDecl(state, decl, false);
     },
   },

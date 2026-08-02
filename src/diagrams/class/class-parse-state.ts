@@ -32,6 +32,26 @@ export interface ParseState {
    */
   activeNamespace: string | null;
   /**
+   * `allowmixing` / `allow_mixing` seen in this block. Upstream's
+   * `CommandAllowMixing` flips exactly this flag on `ClassDiagram`, and
+   * `CommandCreateElementFull2` refuses a descriptive LEAF declaration
+   * without it (`Mode.NORMAL_KEYWORD`, `ClassDiagramFactory` line 133) --
+   * the `mix_` prefixed registration on line 134 is ungated.
+   *
+   * @see ~/git/plantuml/.../classdiagram/ClassDiagram.java#setAllowMixing
+   */
+  allowMixing: boolean;
+  /**
+   * A descriptive LEAF was declared without `allowmixing` and without the
+   * `mix_` prefix. Recorded rather than erroring on the spot, because
+   * upstream only reaches that gate when `ClassDiagramFactory` owned the
+   * block — and this port's dispatcher is more eager than that factory.
+   * `finalizeParse` promotes this to an error ONLY when the block also holds
+   * a native class construct, which is the signal upstream's factory
+   * selection actually turns on.
+   */
+  gatedLeafSeen: boolean;
+  /**
    * When non-null we are inside a multi-line note block (attached or
    * freestanding). Lines accumulate as note text until `end note`.
    */

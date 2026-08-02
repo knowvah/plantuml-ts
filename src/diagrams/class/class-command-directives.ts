@@ -38,12 +38,16 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
     execute() { /* no-op */ },
   },
 
-  // 2a. allow_mixing / allowmixing — upstream CommandAllowMixing flips a flag;
-  //     here a no-op directive (the class parser renders descriptive elements
-  //     unconditionally). Consume so it is not a stray declaration.
+  // 2a. allow_mixing / allowmixing — upstream `CommandAllowMixing` flips a
+  //     flag on the diagram, and `CommandCreateElementFull2`'s
+  //     Mode.NORMAL_KEYWORD registration REFUSES a descriptive leaf without
+  //     it. This used to be a no-op ("the class parser renders descriptive
+  //     elements unconditionally"), which is exactly the permissiveness
+  //     divergence SI10's T3 measured: the jar returns an error page for
+  //     `class Foo` + `actor Bob`, this port rendered a diagram.
   {
     pattern: /^allow_?mixing\s*$/i,
-    execute() { /* no-op */ },
+    execute(state) { state.allowMixing = true; },
   },
 
   // 2b. Namespace separator directive: `set namespaceSeparator ::`,

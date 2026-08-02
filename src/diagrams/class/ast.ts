@@ -272,6 +272,19 @@ export interface ClassDiagramAST {
   namespaces: Namespace[];
   directives: HideShowDirective[];
   /**
+   * Command-execution errors that make the whole diagram unrenderable, in
+   * source order — upstream's `CommandExecutionResult.error(...)`, which
+   * aborts the diagram and draws an error page instead. Currently only the
+   * `allowmixing` gate populates this.
+   *
+   * Additive/optional for the same reason as `removeDirectives` below:
+   * absent is equivalent to `[]` for every reader, so existing AST literal
+   * constructors (object-diagram reuse, unit-test fixtures) are unaffected.
+   * Mirrors the chart engine's own `errors`-on-geo precedent
+   * (`src/diagrams/chart/renderer.ts#renderErrorDiagram`).
+   */
+  errors?: string[];
+  /**
    * Additive (optional, unlike `directives` above) so existing AST literal
    * constructors elsewhere (object-diagram parser reuse, unit-test fixtures)
    * are unaffected — absent is equivalent to `[]` everywhere this is read
