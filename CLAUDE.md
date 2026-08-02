@@ -302,6 +302,33 @@ npm run build         # vite library build
 
 All four must pass before any commit lands on main.
 
+## Diagrams — PlantUML, not Mermaid
+
+**Every diagram in this repo is PlantUML in a ` ```plantuml ` fence.** This
+overrides any skill, template or tool default that says Mermaid — including
+`/plan-mission`'s `diagrams/` step, which still says "use mermaid fenced
+blocks". When a generated artifact hands you Mermaid, convert it before the
+file lands.
+
+We are the PlantUML renderer. Authoring the project's own diagrams in
+Mermaid says the tool is not good enough for its own documentation. It is
+also free test material: every brief diagram is a real fixture-shaped input.
+
+No general Markdown viewer renders ` ```plantuml ` today. That is expected —
+the fence is the commitment, and making it render is work we intend to do.
+Until then the source is the artifact, so it must be *correct PlantUML*,
+not merely plausible: if you cannot say it parses, render it and check.
+
+**Two syntax traps when a diagram's SUBJECT is PlantUML markup** — both bite
+in this repo specifically, because our diagrams describe our own parser:
+
+- `<$name>` is sprite syntax. Writing `<$sprite>` in a label makes the
+  renderer look for a sprite named `sprite`.
+- `<latex>` is a creole tag and will be typeset, not printed.
+
+Inside a diagram, say "sprite atom" or "latex branch" in prose and keep the
+literal markup in the surrounding Markdown, where it is inert.
+
 ## Architecture Notes
 
 - Pure SVG renderer — no DOM, no async, no canvas. This library must run in a
