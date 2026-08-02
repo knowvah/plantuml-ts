@@ -84,7 +84,7 @@ survey; that reference is stale, use `npm run svg:survey`'s `jiti` form.
 | Batch | Tasks | Theme | Done |
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 | Description engine: faithful entry point + drop the inert guard | [x] |
-| [2](batch-2/overview.md) | T2 | Class engine routes to it, with sprites threaded | [ ] |
+| [2](batch-2/overview.md) | T2 | Class engine routes to it, with sprites threaded | [x] |
 | [3](batch-3/overview.md) | T3 | Author the missing fixtures and MEASURE the gap | [ ] |
 | [4](batch-4/overview.md) | T4 | Close the mission; register the SI9-extension follow-up | [ ] |
 

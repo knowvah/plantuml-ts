@@ -4,7 +4,7 @@ One task. Depends on T1's exported entry point.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Route class-engine usecase/actor to the faithful entry point; thread `sprites` | typescript-pro | `src/diagrams/class/class-layout-leaf-shapes.ts`, `src/diagrams/class/class-layout-helpers.ts`, `tests/unit/class/class-usecase-actor-routing.test.ts` | T1 | [ ] |
+| T2 | Route class-engine usecase/actor to the faithful entry point; thread `sprites` | typescript-pro | `src/diagrams/class/class-layout-leaf-shapes.ts`, `src/diagrams/class/class-layout-helpers.ts`, `tests/unit/class/class-usecase-actor-routing.test.ts` | T1 | [x] |
 
 ## The two changes, and why the second is not scope creep
 

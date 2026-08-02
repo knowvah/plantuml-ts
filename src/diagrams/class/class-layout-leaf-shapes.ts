@@ -11,21 +11,39 @@
 
 import type { Classifier } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { measureActor, measureUsecase } from '../description/leaf-sizing.js';
+import { measureUsecaseOrActorLeaf } from '../description/leaf-sizing.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE } from './class-lollipop.js';
 import { javaRound4 } from '../../core/number-format.js';
+import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 
-/** Measure the usecase/actor USymbol box — the two allowmixing kinds whose
- *  svek box is NOT the generic name+members rect (see measureClassifier). */
+/**
+ * Measure the usecase/actor USymbol box — the two allowmixing kinds whose
+ * svek box is NOT the generic name+members rect (see measureClassifier).
+ *
+ * SI10/ADR-2: routes through the description engine's
+ * `measureUsecaseOrActorLeaf` (the SAME faithful `EntityImageDescription`
+ * path the description diagram engine uses for these two USymbols) rather
+ * than the class engine's own analytic substitute. This function still
+ * builds its own `MeasuredClassifier` shape (`rows`/`dividerYs`) — that
+ * composition is class-specific and unaffected by where `dim` comes from.
+ *
+ * `sprites` (SI10 scope item 3): threaded from
+ * `class-layout-helpers.ts#tryMeasureNonGenericClassifier`, already in
+ * scope there for the `measureObjectClassifier` call one line above this
+ * branch's dispatch — previously NOT forwarded here, so a class-diagram
+ * usecase/actor with a `<$sprite>` display measured with no sprite
+ * awareness at all.
+ */
 export function measureUsecaseOrActor(
   classifier: Classifier,
   fontSpec: { family: string; size: number },
   measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
 ): MeasuredClassifier {
-  const dim = classifier.kind === 'usecase'
-    ? measureUsecase(classifier.display, fontSpec, measurer)
-    : measureActor(classifier.display, fontSpec, measurer);
+  const symbol = classifier.kind === 'usecase' ? 'usecase' : 'actor';
+  const spriteDims = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
+  const dim = measureUsecaseOrActorLeaf(classifier.display, symbol, fontSpec, measurer, spriteDims);
   const row = { text: classifier.display, y: dim.height / 2, indent: 0, italic: false };
   return { width: dim.width, height: dim.height, rows: [row], dividerYs: [] };
 }

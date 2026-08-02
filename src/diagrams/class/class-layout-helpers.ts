@@ -283,7 +283,7 @@ function tryMeasureNonGenericClassifier(
   // description engine's leaf-sizing.ts. Every other descriptive leaf
   // (database/component/rectangle) keeps the generic box below unchanged.
   if (classifier.kind === 'usecase' || (classifier.kind === 'descriptive' && classifier.usymbol === 'actor')) {
-    return measureUsecaseOrActor(classifier, fontSpec, measurer);
+    return measureUsecaseOrActor(classifier, fontSpec, measurer, sprites);
   }
   // G2 N20: the lollipop interface's own small circle+label -- NOT the
   // generic name+members box (see measureLollipop's own doc comment).
