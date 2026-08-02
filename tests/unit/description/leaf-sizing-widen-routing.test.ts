@@ -1,6 +1,6 @@
 /**
- * sizer-footprint-parity T3 (ADR-1/ADR-2) — pins the CURRENT widened-routing
- * state in `leaf-sizing.ts`:
+ * sizer-footprint-parity T3 (ADR-1/ADR-2), re-measured by SI10 (ADR-1/ADR-2)
+ * — pins the CURRENT widened-routing state in `leaf-sizing.ts`:
  *
  * - `usecase`/`usecase-business` + `<$sprite>` on a SINGLE-LINE display
  *   routes through `measureEntityLeaf`, and for a lone sprite atom whose ink
@@ -11,12 +11,15 @@
  *   (T10/ADR-3) they now get there by two DIFFERENT mechanisms: real
  *   `SvgNanoParser` decomposition for `measureLeafNode`, the unchanged
  *   ink-bbox approximation for `measureUsecase` (off-limits, ADR-3).
- * - A MULTI-LINE display mixing a sprite line with any other line STAYS on
- *   `measureUsecase` — a STOP-diagnosed regression (T3): routing it through
- *   `measureEntityLeaf` widened `bootstrap-0`/`ruziru-69-xixo434` by exactly
- *   0.029321in — see `leaf-sizing.ts#hasUnroutedUsecaseMarkup`'s own doc
- *   comment for the mechanism (T10 corrected: the `fitToInk` branch that
- *   diagnosis names is now retired, not the guard).
+ * - A MULTI-LINE display mixing a sprite line with any other line ALSO now
+ *   routes through `measureEntityLeaf` (SI10/ADR-1/ADR-2): the T3-era guard
+ *   that kept this on `measureUsecase` was re-measured INERT (`widened 0`,
+ *   IDENTICAL cause histogram, both named fixtures `delta 0, conformant
+ *   true` with and without it) — see `leaf-sizing.ts#hasUnroutedUsecaseMarkup`'s
+ *   own doc comment for the full measurement. This case therefore asserts
+ *   LITERAL dimensions captured from a real run, not a tautological
+ *   `toEqual` against the old path (ADR-3: that comparison was true BY
+ *   CONSTRUCTION while the guard existed and is retired along with it).
  * - `<latex>` (usecase and box family both) stays guarded — permanent
  *   divergence, `DIVERGENCES.md`.
  * - box+`<img>` is now UNGUARDED (T3/ADR-1: the cannot-decode fallback font
@@ -25,7 +28,7 @@
  *   produces the IDENTICAL dimension the legacy fallback used to.
  */
 import { describe, it, expect } from 'vitest';
-import { measureLeafNode, measureUsecase } from '../../../src/diagrams/description/leaf-sizing.js';
+import { measureLeafNode, measureUsecase, measureUsecaseOrActorLeaf } from '../../../src/diagrams/description/leaf-sizing.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
@@ -82,12 +85,22 @@ describe('T3 widened routing — usecase + <$sprite>', () => {
     expect(routed.width).toBeLessThan(declaredBoxResult.width);
   });
 
-  it('a multi-line display mixing a sprite line with a text line stays on measureUsecase (STOP-diagnosed line-stacking regression, T3)', () => {
+  it('a multi-line display mixing a sprite line with a text line now routes through measureEntityLeaf too (SI10: the T3 guard measured INERT)', () => {
     const display = '<$icon>\nlabel text';
     const sprites = svgIconSprite(SHRUNK_INK_SVG);
     const routed = measureLeafNode(usecaseNode(display), fontSpec, measurer, undefined, sprites);
+    // Literal dimensions captured from a real run (jiti probe, 2026-08-02) —
+    // NOT derived from `measureUsecase` at test time (ADR-3: that comparison
+    // was tautological while the guard existed; asserting literals here
+    // means the test actually fails if the faithful path's geometry moves).
+    expect(routed).toEqual({ width: 68.5778265682734, height: 43.47562148642083 });
+    // Sanity: the OLD analytic path lands within floating-point noise of the
+    // SAME numbers for this fixture -- proof the guard's removal is size-
+    // neutral here, not proof the two paths are the same mechanism (T10/
+    // ADR-3: they reach this point via different ink-decomposition code).
     const viaOldPath = measureUsecase(display, fontSpec, measurer, sprites);
-    expect(routed).toEqual(viaOldPath);
+    expect(routed.width).toBeCloseTo(viaOldPath.width, 6);
+    expect(routed.height).toBeCloseTo(viaOldPath.height, 6);
   });
 
   it('a <latex> use-case display still stays on measureUsecase', () => {
@@ -95,6 +108,27 @@ describe('T3 widened routing — usecase + <$sprite>', () => {
     const routed = measureLeafNode(usecaseNode(display), fontSpec, measurer);
     const viaOldPath = measureUsecase(display, fontSpec, measurer);
     expect(routed).toEqual(viaOldPath);
+  });
+});
+
+describe('SI10 — measureUsecaseOrActorLeaf matches the description engine\'s own faithful path (ADR-2)', () => {
+  it('usecase: the exported entry point returns the same Dim as measureLeafNode for an equivalent node', () => {
+    const display = 'Hello World';
+    const sprites = svgIconSprite(SHRUNK_INK_SVG);
+    const viaEntryPoint = measureUsecaseOrActorLeaf(display, 'usecase', fontSpec, measurer, sprites);
+    const viaFaithfulPath = measureLeafNode(usecaseNode(display), fontSpec, measurer, undefined, sprites);
+    expect(viaEntryPoint).toEqual({ width: 103.01505037879433, height: 25.79898987322333 });
+    expect(viaEntryPoint).toEqual(viaFaithfulPath);
+  });
+
+  it('actor: the exported entry point returns the same Dim as measureLeafNode for an equivalent node', () => {
+    const display = 'Bob';
+    const sprites = svgIconSprite(SHRUNK_INK_SVG);
+    const actorNode: DescriptiveNode = { id: 'a', display, symbol: 'actor', children: [] };
+    const viaEntryPoint = measureUsecaseOrActorLeaf(display, 'actor', fontSpec, measurer, sprites);
+    const viaFaithfulPath = measureLeafNode(actorNode, fontSpec, measurer, undefined, sprites);
+    expect(viaEntryPoint).toEqual({ width: 27, height: 74 });
+    expect(viaEntryPoint).toEqual(viaFaithfulPath);
   });
 });
 

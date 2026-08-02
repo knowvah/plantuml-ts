@@ -8,36 +8,32 @@
  *
  * sizer-footprint-parity T3 (ADR-1/ADR-2) closed box+`<img>` fully and
  * usecase+`<$sprite>` PARTIALLY: single-line routes through
- * `measureEntityLeaf`; MULTI-LINE stays on the analytic substitute --
- * ADR-2's "dissolves" premise tested FALSE for this port; see
- * `hasUnroutedUsecaseMarkup`'s doc. `folder`/`package` (SI1/ADR-10) and
- * `<latex>` (a permanent divergence) are the two narrowings still open.
- * T10/ADR-3 retired the sizer's `fitToInk` ink substitution -- see
- * `sizingAtomImageResolverFor`'s own doc.
+ * `measureEntityLeaf`; MULTI-LINE stayed on the analytic substitute for a
+ * time, but SI10 (ADR-1/ADR-2) re-measured that branch INERT and removed
+ * it -- see `hasUnroutedUsecaseMarkup`'s doc. `<latex>` is the one narrowing
+ * still open, a permanent divergence; `folder`/`package` (SI1/ADR-10) is a
+ * separate, unrelated narrowing. T10/ADR-3 retired the sizer's `fitToInk`
+ * ink substitution -- see `sizingAtomImageResolverFor`'s own doc.
  *
  * `measureActor`/`measureUsecase` (exported below) are NOT dead: off-limits
  * `class-layout-leaf-shapes.ts` imports both unconditionally for the
  * class-diagram engine's own shapes -- why `usecase-footprint.ts`/
- * `footprintBoxes` survive too.
+ * `footprintBoxes` survive too. SI10/ADR-2 additionally exports
+ * `measureUsecaseOrActorLeaf` below, a purpose-built entry point routing
+ * usecase/actor leaf sizing through the SAME faithful `measureEntityLeaf`
+ * call this file already uses, so the class engine can call in instead of
+ * reimplementing the routing decision.
  *
  * See `plans/description-leaf-sizing-audit/decisions.md` (ADR-6),
- * `plans/sizer-footprint-parity/decisions.md` (ADR-1/2/4), and
- * `plans/svg-sprite-nanoparser/decisions.md` (ADR-3).
+ * `plans/sizer-footprint-parity/decisions.md` (ADR-1/2/4),
+ * `plans/svg-sprite-nanoparser/decisions.md` (ADR-3), and
+ * `plans/si10-usecase-actor-routing/decisions.md` (ADR-1/2).
  */
 
 import type { DescriptiveNode } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureNodeLabel } from '../../core/latex.js';
-import { measureInlineAtom } from '../../core/creole-atoms-measure.js';
-import type { SpriteDimsLookup, AtomImageResolver } from '../../core/creole-atoms.js';
-import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
-import { EntityImageDescription, type EntityImageDescriptionParams } from '../../core/svek/image/EntityImageDescription.js';
-import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.js';
-import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { UStroke } from '../../core/klimt/UStroke.js';
-import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
-import { resolveSvgSpriteAtom } from './render-atoms.js';
-import { upstreamKeyword, mapComponentStyle, resolveActorStyle } from './renderer-symbol.js';
+import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import {
   lineCount,
   maxLineWidth,
@@ -47,12 +43,12 @@ import {
 import { boxPoints, containingEllipse } from './usecase-footprint.js';
 import { measureFolderLeaf } from './leaf-sizing-folder.js';
 import { measureLegacyBoxFallback } from './leaf-sizing-legacy-fallback.js';
+import { measureEntityLeaf } from './leaf-sizing-entity.js';
 import {
   type BoxSizingOpts,
   type Dim,
   ACTOR_STICKMAN_HEIGHT,
   ACTOR_STICKMAN_WIDTH,
-  DEFAULT_SIZING_STROKE_THICKNESS,
   FOLDER_FAMILY_SHOW_TITLE,
   INTERFACE_CIRCLE_SIZE,
   LINE_HEIGHT_FACTOR,
@@ -76,6 +72,12 @@ export {
   PORT_SIZE,
   USECASE_HEIGHT,
 } from './leaf-sizing-consts.js';
+
+/** SI10/ADR-2: the class engine's usecase/actor entry point, defined in
+ *  `leaf-sizing-entity.ts` (a same-mission split, see that file's doc) and
+ *  re-exported here so `leaf-sizing.ts` remains the ONE module that exports
+ *  usecase/actor leaf sizing, per ADR-2. */
+export { measureUsecaseOrActorLeaf } from './leaf-sizing-entity.js';
 
 /**
  * Measure a leaf node's bounding box, dispatching by USymbol: port/note stay
@@ -129,12 +131,12 @@ export function measureLeafNode(
       return measureFolderLeaf(node, fontSpec, measurer, opts, sprites);
     case 'usecase':
     case 'usecase-business':
-      // sizer-footprint-parity T3/ADR-2: the `<img` guard is GONE -- a
-      // single-line `<img>`/`<$sprite>` display now routes through
-      // `measureEntityLeaf` unconditionally. `<latex>` and a MULTI-LINE
-      // `<$sprite>` display STAY guarded -- see `hasUnroutedUsecaseMarkup`'s
-      // doc comment for the STOP-diagnosed reason the multi-line case does
-      // NOT dissolve the way ADR-2 predicted.
+      // sizer-footprint-parity T3/ADR-2 dropped the `<img` guard -- a
+      // single-line `<img>`/`<$sprite>` display routes through
+      // `measureEntityLeaf` unconditionally. SI10/ADR-1/ADR-2 additionally
+      // dropped the multi-line-`<$sprite>` guard (re-measured INERT); only
+      // `<latex>` STAYS guarded now -- see `hasUnroutedUsecaseMarkup`'s doc
+      // comment for the measurement.
       return hasUnroutedUsecaseMarkup(node.display)
         ? measureUsecase(node.display, fontSpec, measurer, sprites, node.stereotype)
         : measureEntityLeaf(node, fontSpec, { opts, sprites, measurer }, false);
@@ -166,20 +168,26 @@ export function measureLeafNode(
   // are 1-4 lines each, none independently over any threshold.
 }
 
-/** `<latex>` markup, or a `<$sprite>` atom on a MULTI-LINE display, still
- *  route through `measureUsecase`'s analytic substitute. `<img>`/a
- *  SINGLE-LINE `<$sprite>` display do NOT (sizer-footprint-parity T3/ADR-2).
+/** ONLY `<latex>` markup still routes through `measureUsecase`'s analytic
+ *  substitute. `<img>`/`<$sprite>` -- single-line OR multi-line -- do NOT
+ *  (sizer-footprint-parity T3/ADR-2 dropped single-line; SI10/ADR-1/ADR-2
+ *  dropped multi-line).
  *
- *  DIAGNOSIS (STOP condition, ADR-4; full trace in `.agent-notes/T3-widen-
- *  guards.md`): dropping this guard widened `bootstrap-0`/`ruziru-69-
- *  xixo434` by exactly 0.029321in -- ADR-2's "dissolves" premise is FALSE
- *  here. T10/ADR-3 retired `fitToInk` (see `sizingAtomImageResolverFor`'s
- *  doc) but this guard is UNRELATED to that branch and stays as-is --
- *  re-measured after T10 at widened 0, not re-tested for dissolution
- *  (`measureUsecase` is a separate mission's STOP, ADR-3). Kept guarded. */
+ *  DIAGNOSIS (re-measured 2026-08-01, `plans/si10-usecase-actor-routing/
+ *  README.md`'s probe table -- supersedes the multi-line finding
+ *  sizer-footprint-parity T3 recorded below): disabling the multi-line
+ *  branch ALONE now measures `widened 0` against `measure-description-
+ *  size-deltas.ts`, with a cause histogram IDENTICAL to baseline; both
+ *  named fixtures the old guard cited (`bootstrap-0`, `ruziru-69-xixo434`)
+ *  report `delta 0, conformant true` with and without the branch. The
+ *  0.029321in widening T3's diagnosis originally found no longer
+ *  reproduces -- `svg-sprite-nanoparser`'s two-channel sprite architecture
+ *  (a later, unrelated mission) closed the gap that guard existed to paper
+ *  over. Disabling `<latex>` TOO (both branches at once) measures
+ *  `widened 2`, so `<latex>` alone remains genuinely load-bearing and
+ *  stays guarded -- ADR-1. */
 function hasUnroutedUsecaseMarkup(display: string): boolean {
-  if (display.includes('<latex>')) return true;
-  return display.includes('<$') && display.includes('\n');
+  return display.includes('<latex>');
 }
 
 /** EntityImageNote: multi-line body, folded top-right corner. Notes measure at
@@ -236,10 +244,13 @@ export function measureActor(
  * "L" 25.15×21.32, "Hello World" 103.0×25.8.
  *
  * NOT dead (module doc comment): two LIVE callers remain --
- * `class-layout-leaf-shapes.ts`'s unconditional import (out of write-set)
- * and this file's own `<latex>`/multi-line-`<$sprite>` fallback. Every
- * other usecase display routes through `measureEntityLeaf` instead (the
- * SAME `TextBlockInEllipse`/`Footprint` classes, faithfully).
+ * `class-layout-leaf-shapes.ts`'s unconditional import (out of write-set;
+ * SI10's T2 is closing this one to route through `measureUsecaseOrActorLeaf`
+ * instead) and this file's own `<latex>` fallback (SI10/ADR-1: the
+ * multi-line-`<$sprite>` fallback this comment used to cite is gone --
+ * re-measured INERT, see `hasUnroutedUsecaseMarkup`'s doc). Every other
+ * usecase display routes through `measureEntityLeaf` instead (the SAME
+ * `TextBlockInEllipse`/`Footprint` classes, faithfully).
  *
  * `sprites` widens the footprint (via `maxLineWidth`) when the display
  * embeds an img/sprite atom; the ellipse's height side of the footprint
@@ -323,172 +334,5 @@ export function measureUsecase(
 }
 
 // ---------------------------------------------------------------------------
-// T6 (ADR-6): route through EntityImageDescription
+// T6 (ADR-6): route through EntityImageDescription -- see leaf-sizing-entity.ts
 // ---------------------------------------------------------------------------
-
-/** No style flags -- `StringBounder.calculateDimension`'s font param is narrowed to `family`/`size` only. */
-const SIZING_FONT_STYLES: ReadonlySet<FontStyle> = new Set();
-
-/** `calculateDimensionSlow` never reads forecolor/backcolor (consumed only
- *  by DRAW-time `apply`/`applyColors`, verified across every `asSmall`
- *  closure) -- any string satisfies `Paint`; documents intent, not a real
- *  color. */
-const SIZING_PLACEHOLDER_COLOR = '#000000';
-
-/**
- * Sizing-only `AtomImageResolver` factory. `width`/`height` are ALWAYS the
- * DECLARED box (T10/ADR-3: `fitToInk` retired -- fed one narrowed number to
- * both cursor advance and `Footprint`'s size). Unresolved -> 0x0.
- *
- * Dropping `fitToInk` outright widened `bootstrap-0`/`ruziru-69-xixo434`
- * (0.076372in): `Footprint` runs eagerly inside `TextBlockInEllipse`'s ctor
- * at SIZING time, and a plain `kind: 'image'` collects the FULL declared
- * box (`Footprint.ts#MyUGraphic.drawImage`), not the ink. A synthesized
- * ink-sized `URectangle` fixed the number but was measurement ink wearing a
- * draw-time costume -- rejected on review (this mission's own thesis is
- * that the divergence is architectural, not arithmetic).
- *
- * Real fix: for an SVG-backed sprite, call `render-atoms.ts
- * #resolveSvgSpriteAtom` -- the SAME `SvgNanoParser` decomposition the
- * RENDERER uses -- so `Footprint` observes actual per-shape corners, not an
- * approximation. `SpriteDims.svg` (T10) threads the raw source through the
- * EXISTING `SpriteDimsLookup` channel, so no caller signature changes.
- * Deliberately NOT sharing `makeAtomImageResolverFor` wholesale: its
- * monochrome branch rasterizes a PNG, work sizing has no use for (`href` is
- * never read for a `kind: 'image'` box) and would only cost CPU during
- * every sizing pass -- so monochrome/unresolved sprites keep today's
- * `href: ''` declared-box fallback. Verified back to widened 0. */
-function sizingAtomImageResolverFor(
-  sprites: SpriteDimsLookup | undefined,
-): (font: FontConfiguration) => AtomImageResolver {
-  return (font) => (atom) => {
-    const dims = measureInlineAtom(atom, sprites, font.size);
-    if (atom.kind === 'sprite') {
-      const reg = sprites?.get(atom.name);
-      if (reg?.svg !== undefined) return resolveSvgSpriteAtom(atom, reg.svg, sprites!, font);
-    }
-    return { kind: 'image', href: '', width: dims.width, height: dims.height };
-  };
-}
-
-/** Bundles the per-diagram inputs `measureEntityLeaf`/
- *  `buildSizingEntityParams` need, keeping both under the 5-param ceiling. */
-interface EntityLeafCtx {
-  readonly opts: BoxSizingOpts | undefined;
-  readonly sprites: SpriteDimsLookup | undefined;
-  readonly measurer: StringMeasurer;
-}
-
-/** `paint.fontTitle`/`fontStereo`: the SAME `fontSpec` for both slots
- *  (pre-routing sizer's own convention) -- per-element stereotype font
- *  override is a separate, unlisted gap this task does not fix. */
-function sizingFontConfig(fontSpec: FontSpec): FontConfiguration {
-  return { family: fontSpec.family, size: fontSpec.size, color: null, styles: SIZING_FONT_STYLES };
-}
-
-/** `EntityImageDescriptionPaint` assembly, split out to keep
- *  `buildSizingEntityParams` under the NLOC/CCN ceiling. */
-function sizingPaint(font: FontConfiguration, opts: BoxSizingOpts | undefined): EntityImageDescriptionParams['paint'] {
-  return {
-    forecolor: SIZING_PLACEHOLDER_COLOR,
-    backcolor: SIZING_PLACEHOLDER_COLOR,
-    roundCorner: 0,
-    diagonalCorner: 0,
-    deltaShadow: 0,
-    stroke: UStroke.withThickness(DEFAULT_SIZING_STROKE_THICKNESS),
-    fontTitle: font,
-    fontStereo: font,
-    titleAlignment: HorizontalAlignment.CENTER,
-    stereotypeAlignment: HorizontalAlignment.CENTER,
-    minimumWidth: opts?.minimumWidth ?? 0,
-    wrapWidth: opts?.wrapWidth ?? 0,
-    guillemet: opts?.guillemet ?? GUILLEMET_DEFAULT,
-  };
-}
-
-/**
- * Assembles `EntityImageDescriptionParams` for ONE leaf, from exactly what
- * `BoxSizingOpts`/`DescriptiveNode` already carry — mirrors
- * `renderer-entity.ts#buildEntityParams`'s field-for-field shape (a parallel
- * assembly of the SAME params, not a call to it).
- *
- * Deliberately NOT threaded (verified draw-only, or out of write-set):
- * `forecolor`/`backcolor` (`SIZING_PLACEHOLDER_COLOR`), `roundCorner`/
- * `diagonalCorner`, `deltaShadow`/`stroke` per-element overrides (need
- * `Theme` in `layout.ts`'s `ClassifyCtx` -- T9's write-set; the DEFAULT
- * stroke IS supplied), `links`/`hexagonPolygon`, and
- * `fixCircleLabelOverlapping` (only feeds `resolveShapeType`, never
- * `calculateDimensionSlow`).
- *
- * `actorStyle` (T7): `ctx.opts?.actorStyle`, threaded from `Theme.actorStyle`
- * -- the SAME accessor the renderer reads, so an actor sizes to whichever
- * of stickman/awesome/hollow it will actually be drawn as. Falls back to
- * `ActorStyle.STICKMAN`, upstream's own default, when unset.
- */
-function buildSizingEntityParams(
-  node: DescriptiveNode,
-  fontSpec: FontSpec,
-  ctx: EntityLeafCtx,
-): EntityImageDescriptionParams {
-  const font = sizingFontConfig(fontSpec);
-  return {
-    entity: { name: node.id, uid: '', qualifiedName: node.id, location: null, url: null },
-    symbol: {
-      keyword: upstreamKeyword(node.symbol),
-      actorStyle: resolveActorStyle(ctx.opts?.actorStyle),
-      componentStyle: mapComponentStyle(ctx.opts?.componentStyle),
-    },
-    labels: {
-      codeName: node.display,
-      displayText: node.display,
-      stereotypeLabels: node.stereotype ?? [],
-    },
-    paint: sizingPaint(font, ctx.opts),
-    links: [],
-    fixCircleLabelOverlapping: false,
-    atomImageResolverFor: sizingAtomImageResolverFor(ctx.sprites),
-  };
-}
-
-/** The margin+icon-only baseline `measureEntityLeaf`'s `MinimumWidth` floor
- *  needs: the SAME symbol at zero content/stereotype/minimumWidth, so its
- *  width is exactly the fixed allowance real content adds on top. */
-function minWidthFloorBaseline(node: DescriptiveNode, fontSpec: FontSpec, ctx: EntityLeafCtx, bounder: MeasurerStringBounder): number {
-  // `stereotype` omitted, not set to `undefined` (`exactOptionalPropertyTypes`).
-  const { stereotype: _dropped, ...rest } = node;
-  const baselineNode: DescriptiveNode = { ...rest, display: '' };
-  const baselineCtx: EntityLeafCtx = { ...ctx, opts: ctx.opts === undefined ? undefined : { ...ctx.opts, minimumWidth: 0 } };
-  const params = buildSizingEntityParams(baselineNode, fontSpec, baselineCtx);
-  return new EntityImageDescription(params).calculateDimensionSlow(bounder).getWidth();
-}
-
-/**
- * Routes one leaf through `EntityImageDescription.calculateDimensionSlow` --
- * upstream's own sizing entry point, ALREADY used by the renderer (ADR-6).
- *
- * `applyMinWidthFloor` (box family only): `buildDesc` (svek/, out of
- * write-set) reads `paint.minimumWidth` ONLY on its "empty desc" branch,
- * silently skipped for non-blank box text (jar-verified:
- * `component/dexigu-24-deru622`). Reproduced as a POST-STEP via
- * `minWidthFloorBaseline` (a synthetic zero-content construction of the
- * same params): `Math.max(real, minimumWidth + baseline)` -- can only
- * WIDEN, never shrink below upstream's own margin+icon, skipped when unset.
- */
-function measureEntityLeaf(
-  node: DescriptiveNode,
-  fontSpec: FontSpec,
-  ctx: EntityLeafCtx,
-  applyMinWidthFloor: boolean,
-): Dim {
-  const bounder = new MeasurerStringBounder(ctx.measurer);
-  const params = buildSizingEntityParams(node, fontSpec, ctx);
-  const dim = new EntityImageDescription(params).calculateDimensionSlow(bounder);
-  const width = dim.getWidth();
-  const height = dim.getHeight();
-
-  const minContentW = applyMinWidthFloor ? (ctx.opts?.minimumWidth ?? 0) : 0;
-  if (minContentW <= 0) return { width, height };
-
-  const baselineWidth = minWidthFloorBaseline(node, fontSpec, ctx, bounder);
-  return { width: Math.max(width, minContentW + baselineWidth), height };
-}

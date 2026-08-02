@@ -4,7 +4,7 @@ One task, alone. T2 cannot start until the entry point exists.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Export the faithful usecase/actor entry point; drop the inert `<$sprite>` guard branch | typescript-pro | `src/diagrams/description/leaf-sizing.ts`, `tests/unit/description/leaf-sizing-widen-routing.test.ts` | — | [ ] |
+| T1 | Export the faithful usecase/actor entry point; drop the inert `<$sprite>` guard branch | typescript-pro | `src/diagrams/description/leaf-sizing.ts`, `tests/unit/description/leaf-sizing-widen-routing.test.ts` | — | [x] |
 
 ## Interface contract (consumed by T2)
 
