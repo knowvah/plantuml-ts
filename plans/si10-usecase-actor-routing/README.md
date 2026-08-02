@@ -1,6 +1,6 @@
 # Mission: si10-usecase-actor-routing
 
-**Status:** ready to execute · **Branch:** `main` (maintainer practice)
+**Status:** DONE 2026-08-02 · **Branch:** `main` (maintainer practice)
 **Created:** 2026-08-01 · **Predecessors:** svg-sprite-nanoparser (closed), SI9 (closed)
 
 ## Objective
@@ -86,7 +86,7 @@ survey; that reference is stale, use `npm run svg:survey`'s `jiti` form.
 | [1](batch-1/overview.md) | T1 | Description engine: faithful entry point + drop the inert guard | [x] |
 | [2](batch-2/overview.md) | T2 | Class engine routes to it, with sprites threaded | [x] |
 | [3](batch-3/overview.md) | T3 | Author the missing fixtures and MEASURE the gap | [x] |
-| [4](batch-4/overview.md) | T4 | Close the mission; register the SI9-extension follow-up | [ ] |
+| [4](batch-4/overview.md) | T4 | Close the mission; register the SI9-extension follow-up | [x] |
 
 **Every batch is sequential, and batch 4 is one task, not two.** T2 needs
 T1's exported entry point; T3 can only measure once T2's routing exists; and
@@ -159,3 +159,78 @@ shared-worktree hazard entirely.
 `plans/` is **tracked** in this project, not gitignored — established
 practice, and `planning/mission-index.md` links into it. `.claude/` IS
 gitignored, as the template expects.
+
+---
+
+## Mission summary (T4, 2026-08-02)
+
+### Tasks completed vs planned
+
+Planned as four sequential batches / four tasks (T1–T4). **Executed exactly as
+planned** — no batch added, no task split. All four are `[x]`:
+
+- **Batch 1 — T1** `4f25be0d` (entry point + inert guard removed)
+- **Batch 2 — T2** `f34790d6` (class engine routed, sprites threaded)
+- **Batch 3 — T3** `6bee402a` (fixtures authored, gap measured)
+- **Batch 4 — T4** (this task: close the mission)
+
+### Decisions, and what is flagged for review
+
+All four ADRs applied as written; none contradicted. Beyond them:
+
+- **T1 crossed its write-set** to add `src/diagrams/description/leaf-sizing-entity.ts`.
+  **Authorized, not a stop:** adding the entry point pushed `leaf-sizing.ts`
+  to 526 lines, over the repo's 500-line hook cap, and this README's
+  push-forward conditions name "a ~500-line split" explicitly. Verified a
+  **pure move** — `measureEntityLeaf`, `buildSizingEntityParams` and
+  `minWidthFloorBaseline` are byte-identical to the bodies that left.
+  The agent flagged it rather than proceeding silently, which is the
+  required behaviour.
+- **Flagged for review, deliberately NOT fixed** (both pre-existing, both
+  outside every task's write-set — registered in the SI10 row):
+  1. This port is **more permissive than upstream** for `actor` in a class
+     diagram — upstream errors without `allowmixing`
+     (`CommandCreateElementFull2.java:197-198`), this port renders. Dates
+     from mission A3.
+  2. **Sizing is sprite-aware, rendering is not** — scope item 3 threaded
+     sprites into the sizer only; the class renderer still emits literal
+     escaped text instead of resolving the sprite.
+
+### Gate results (from `decision-journal.md`, all orchestrator-verified)
+
+| Batch | `npm test` | typecheck | lint | size-deltas | goldens |
+|---|---|---|---|---|---|
+| 1 (T1) | 472 files / 11,372 | 0 | 0 | 320/351, **widened 0** | — |
+| 2 (T2) | 473 files / 11,376 | 0 | 0 | 320/351, **widened 0** | **312 class byte-identical**; 449 golden+ratchet green |
+| 3 (T3) | 474 files / 11,382 | 0 | 0 | unaffected (no `src/` change) | `ratchet.json` + `parity-class.json` UNCHANGED |
+| 4 (T4) | see below | — | — | — | — |
+
+`widened` stayed at **0** with an identical cause histogram at every step —
+the mission's primary signal, and its whole premise was size-neutrality.
+
+### Known issues and follow-ups
+
+1. **The retirement clause is re-scoped, not achieved.** `measureUsecase`,
+   `measureActor`, `usecase-footprint.ts` and `footprintBoxes` survive,
+   reachable via `<latex>`. Probe B (`widened 2` with both arms disabled) is
+   the evidence that route is load-bearing rather than permanent-by-policy.
+   Full retirement needs a home for latex-bearing usecases — its own mission.
+2. **SI13 registered** — authored CLASS fixtures cannot be ratcheted because
+   `dot-sync-fixtures.ts`'s `GOLDEN_DIR` is description-only. T3's three
+   fixtures are guarded by a dedicated pinned-diff test instead.
+3. **The two permissiveness/rendering findings above**, neither actioned.
+4. None of T3's three fixtures is zero-diff (9/6/3). They are characterisation
+   guards against known gaps, labelled as such — not conformance claims.
+
+### Deviations from the brief
+
+- **The brief's stated baseline was stale.** It records 471 files / 11,358
+  tests; the true pre-T1 baseline was **472 / 11,370**, because an unrelated
+  sequence-diagram fix landed between planning and execution. Noted in the
+  journal at batch 1 rather than silently absorbed.
+- The brief's reachability table recorded `class C` + `actor a1` as simply
+  "reached". True for this port — but T3 found upstream REFUSES that input.
+  The table was not wrong about our routing; it never asked the upstream
+  question. Corrected in the SI10 row.
+- No other deviation. All four ADRs, all twelve stop conditions and the
+  push-forward conditions held as written.

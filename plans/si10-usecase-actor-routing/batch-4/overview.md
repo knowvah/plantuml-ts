@@ -5,7 +5,7 @@ One task, not two: closing SI10 and registering the follow-up BOTH write
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4 | Flip SI10 to done, re-scope its "retired" clause, register the SI9-extension follow-up, write the summary | technical-writer | `planning/mission-index.md`, `plans/si10-usecase-actor-routing/README.md` | T1, T2, T3 | [ ] |
+| T4 | Flip SI10 to done, re-scope its "retired" clause, register the SI9-extension follow-up, write the summary | technical-writer | `planning/mission-index.md`, `plans/si10-usecase-actor-routing/README.md` | T1, T2, T3 | [x] |
 
 ## Batch exit criteria
 
