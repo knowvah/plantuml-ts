@@ -1,0 +1,24 @@
+# Decision Journal — si10-usecase-actor-routing
+
+Append one row per non-trivial judgment call. "Non-trivial" means: a
+reasonable developer might have chosen differently.
+
+Also log here: quality-gate results per batch, any brief line-number
+correction, every measurement the brief asks you to record, and every STOP
+with its full output.
+
+**T1 must record the FINAL exported entry-point signature — T2 codes against
+that, not against the sketch in `batch-1/overview.md`.**
+**T3 must record the per-fixture measured delta — T4 quotes those numbers.**
+
+| Date | Task | Decision | Rationale |
+|---|---|---|---|
+| 2026-08-01 | planning | Scope set to class-engine routing + the inert sprite guard; full retirement declined | Offered the maintainer four options; option B chosen. Probe B (`widened 2` with both guard branches disabled) shows the `<latex>` route is load-bearing, so retirement needs a home for latex-bearing usecases — its own mission |
+| 2026-08-01 | planning | **Probe A: the multi-line `<$sprite>` guard is INERT.** Disabled → `widened 0`, conformant 320/351, cause histogram identical to baseline; `bootstrap-0` and `ruziru-69-xixo434` both `delta 0, conformant true` with AND without it | The 0.029321in widening its doc comment cites no longer reproduces — `svg-sprite-nanoparser`'s two-channel architecture closed it. The guard's own comment records it was "not re-tested for dissolution" after that mission, because `measureUsecase` was then another mission's STOP. This is that re-test |
+| 2026-08-01 | planning | Probe A verified NON-VACUOUS before being trusted | Instrumenting the predicate showed it fires on 4 real displays: `"<$bi-globe>\nbi-globe"` (both named fixtures) and two `<$maxime>` link displays. A no-op probe would have produced the same `widened 0` for the wrong reason |
+| 2026-08-01 | planning | **Probe B: `<latex>` is load-bearing** — both branches disabled → `widened 2` | Distinguishes "permanent by policy" from "measurably required". This is why ADR-1 keeps `measureUsecase` alive rather than retiring it |
+| 2026-08-01 | planning | `sprites` threading added to scope (item 3), maintainer-approved | It is already in scope at `class-layout-helpers.ts:286` — the line above passes it to `measureObjectClassifier` — and simply is not forwarded, so class-diagram usecases are sized with no sprite awareness. Zero class goldens contain a sprite, so it cannot move an existing golden; T3 authors the fixture that covers it |
+| 2026-08-01 | planning | Class-engine reachability instrumented rather than assumed | `class C` + `usecase` (no `allowmixing`) does NOT reach `measureUsecaseOrActor` — it routes to the description engine, byte-identical to a pure usecase. Only `actor` (any class diagram) and `allowmixing` (both kinds) reach it. Fixtures must use one of those two or they silently test the wrong engine |
+| 2026-08-01 | planning | T3 measures the jar gap rather than assuming zero-diff (ADR-4) | Class conformance is low (census `0/718 → 29/718`) and zero of 310 class goldens carry a usecase, so a new fixture arriving zero-diff is optimistic. Forcing a conformance claim would be the "fabricated oracle data" failure SI9's row already names |
+| 2026-08-01 | planning | Authored class fixtures are NOT ratchetable, and the fix is a follow-up not scope | `dot-sync-fixtures.ts`'s `GOLDEN_DIR` is hardcoded to `oracle/goldens/svg-description` and `authoredFixtures` expects `<type>/<slug>/`; class goldens are `oracle/goldens/svg-class/<slug>/`. So no `parity-class.json` entry can exist and the ratchet's eligibility rule cannot be met. Extending it is SI9-shaped work in another subsystem — registered by T4 |
+| 2026-08-01 | planning | Batches serialised rather than parallelised | T2 needs T1's export; T3 can only measure after T2; T4's two halves both write `planning/mission-index.md`. The mission is small enough that serialising costs little and removes the shared-worktree hazard entirely |
