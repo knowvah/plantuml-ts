@@ -5,7 +5,7 @@ has changed.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Author class usecase/actor fixtures, capture jar oracles, MEASURE the delta | typescript-pro | `oracle/goldens/svg-class/<new-slugs>/**`, `tests/oracle/svg-conformance/class-usecase-actor.test.ts` | T2 | [ ] |
+| T3 | Author class usecase/actor fixtures, capture jar oracles, MEASURE the delta | typescript-pro | `oracle/goldens/svg-class/<new-slugs>/**`, `tests/oracle/svg-conformance/class-usecase-actor.test.ts` | T2 | [x] |
 
 ## Why this batch exists
 

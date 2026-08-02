@@ -1,0 +1,14 @@
+@startuml
+' Authored fixture (SI10/T3, not a hashed corpus import). Covers: a bare
+' `actor` in a class diagram, reachable WITHOUT `allowmixing` -- `actor` is
+' excluded from the descriptive-signal decline set (D3), so a lone `class`
+' keyword is enough to keep the block routed to the class engine.
+' Routing verified: classAccepts(lines) === true AND renderSync's root
+' <svg data-diagram-type="CLASS"> (not "DESCRIPTION") -- see the mission
+' decision journal for the exact verification transcript.
+class Foo {
+  +bar(): void
+}
+
+actor Bob
+@enduml
