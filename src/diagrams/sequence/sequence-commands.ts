@@ -225,18 +225,23 @@ export const COMMANDS: readonly Command[] = [
         frameType,
         label,
         branches: [[]],
+        branchLabels: [label],
       };
       state.frameStack.push(frame);
     },
   },
 
-  // 11. else — adds a new branch to the current alt/par frame
+  // 11. else — adds a new branch to the current alt/par frame.
+  // The condition was captured but DISCARDED before SI-alt: `execute(state)`
+  // ignored `match`, so `else other case` lost "other case" at parse time and
+  // no downstream stage could draw it.
   {
     pattern: /^else(?:\s+(.+))?\s*$/i,
-    execute(state) {
+    execute(state, match) {
       const top = state.frameStack[state.frameStack.length - 1];
       if (top !== undefined) {
         top.branches.push([]);
+        top.branchLabels.push(match[1]?.trim() ?? '');
       }
     },
   },

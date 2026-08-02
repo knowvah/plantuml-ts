@@ -238,6 +238,10 @@ function handleDeactivateEvent(
   cursor.lastMessageY = undefined;
 }
 
+/** Vertical room an `else` separator line plus its bracketed condition
+ *  occupies before the branch's own first event. */
+const SEPARATOR_HEIGHT = 20;
+
 function handleFrameEvent(
   event: FrameEvent,
   cursor: EventCursor,
@@ -247,10 +251,19 @@ function handleFrameEvent(
   const frameHeaderHeight = 30;
   cursor.y += frameHeaderHeight;
 
-  // Process each branch in sequence (alt frames have multiple branches)
-  for (const branch of event.branches) {
+  // Process each branch in sequence (alt frames have multiple branches).
+  // Every branch after the first opens with an `else`, which upstream draws
+  // as a dashed separator carrying that branch's own bracketed condition --
+  // record the y it falls at, before the branch's own events advance the
+  // cursor past it.
+  const branchSeparators: { y: number; label: string }[] = [];
+  event.branches.forEach((branch, i) => {
+    if (i > 0) {
+      branchSeparators.push({ y: cursor.y, label: event.branchLabels[i] ?? '' });
+      cursor.y += SEPARATOR_HEIGHT;
+    }
     cursor.y = processEvents(branch, cursor.y, ctx);
-  }
+  });
 
   const frameEndY = cursor.y;
   const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
@@ -263,6 +276,7 @@ function handleFrameEvent(
     y: frameStartY,
     width: maxCx - minCx + 40,
     height: frameEndY - frameStartY,
+    branchSeparators,
   };
   ctx.eventGeos.push(frameGeo);
   cursor.y = frameEndY + ctx.theme.sequence.messageSpacing;

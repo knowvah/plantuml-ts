@@ -196,6 +196,7 @@ describe('layoutSequence — frame (AC 5)', () => {
             msg('Bob', 'Alice', 'pong'),
           ],
         ],
+        branchLabels: ['10 times'],
       } satisfies SequenceEvent,
     ]);
     const geo = layoutSequence(ast, defaultTheme, measurer);
@@ -221,6 +222,7 @@ describe('layoutSequence — frame (AC 5)', () => {
           [msg('Alice', 'Bob', 'yes')],
           [msg('Bob', 'Alice', 'no')],
         ],
+        branchLabels: ['condition'],
       } satisfies SequenceEvent,
     ]);
     const geo = layoutSequence(ast, defaultTheme, measurer);
@@ -500,6 +502,7 @@ describe('layoutSequence — frame x/width', () => {
         frameType: 'loop',
         label: 'forever',
         branches: [[msg('Alice', 'Bob', 'tick')]],
+        branchLabels: ['forever'],
       } satisfies SequenceEvent,
     ]);
     const geo = layoutSequence(ast, defaultTheme, measurer);

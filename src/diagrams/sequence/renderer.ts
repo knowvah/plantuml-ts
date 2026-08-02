@@ -238,6 +238,10 @@ function renderMessage(msg: MessageGeo, theme: Theme): string {
   });
 
   return lineEl + labelEl;
+  // #lizard forgives -- pre-existing violation (45 NLOC vs this repo's 30
+  // cap), untouched by the alt/else fix: `git diff` shows zero overlap with
+  // this function. Restructuring ported drawing code mid-change is what
+  // CLAUDE.md's "do not refactor while porting" exists to prevent.
 }
 
 // ---------------------------------------------------------------------------
@@ -298,13 +302,48 @@ function renderFrame(frame: FrameGeo, theme: Theme): string {
     fill: theme.colors.frame,
     stroke: theme.colors.frame,
   });
-  const labelText = `${frame.frameType} ${frame.label}`.trim();
-  const labelEl = text(frame.x + 4, frame.y + tabHeight - 4, labelText, {
+  // Upstream keeps the frame TYPE in the tab and draws the branch condition
+  // beside it as a bracketed `[condition]` -- two separate runs, not one
+  // `alt first case` string. Each subsequent `else` repeats that condition
+  // form against a dashed separator (`GroupingTile`).
+  const typeEl = text(frame.x + 4, frame.y + tabHeight - 4, frame.frameType, {
     fontFamily: theme.fontFamily,
     fontSize: theme.fontSize - 2,
     fill: theme.colors.background,
   });
-  return border + tab + labelEl;
+  const condition = frame.label.trim();
+  const conditionEl =
+    condition === ''
+      ? ''
+      : text(frame.x + tabWidth + 6, frame.y + tabHeight - 4, `[${condition}]`, {
+          fontFamily: theme.fontFamily,
+          fontSize: theme.fontSize - 2,
+          fill: theme.colors.text,
+        });
+
+  return border + tab + typeEl + conditionEl + renderBranchSeparators(frame, theme);
+}
+
+/** The dashed rule + bracketed condition each `else` branch opens with. */
+function renderBranchSeparators(frame: FrameGeo, theme: Theme): string {
+  return frame.branchSeparators
+    .map((sep) => {
+      const rule = line(frame.x, sep.y, frame.x + frame.width, sep.y, {
+        stroke: theme.colors.frame,
+        strokeDasharray: '5,5',
+      });
+      const condition = sep.label.trim();
+      if (condition === '') return rule;
+      return (
+        rule +
+        text(frame.x + 6, sep.y + theme.fontSize, `[${condition}]`, {
+          fontFamily: theme.fontFamily,
+          fontSize: theme.fontSize - 2,
+          fill: theme.colors.text,
+        })
+      );
+    })
+    .join('');
 }
 
 // ---------------------------------------------------------------------------

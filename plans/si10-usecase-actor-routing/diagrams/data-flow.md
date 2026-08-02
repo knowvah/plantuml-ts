@@ -23,14 +23,6 @@ CLS --> CH : MeasuredClassifier { rows, dividerYs }
 @enduml
 ```
 
-> **Authoring note.** This diagram deliberately avoids `alt`/`else`. Every
-> sequence-diagram grouping construct (`alt`, `opt`, `loop`, `group`)
-> currently renders the ENTIRE diagram empty in plantuml-ts — silently, with
-> no error card — while the pinned oracle jar renders the same source
-> correctly. Found by dogfooding this brief; see
-> `.agent-notes/plantuml-sequence-group-empty.md`. Restore the `alt`/`else`
-> form once that is fixed.
-
 ```plantuml
 @startuml
 title DESCRIPTION engine — guarded
@@ -41,12 +33,14 @@ participant "measureEntityLeaf" as MEL
 participant "EntityImageDescription" as EID
 
 MLN -> G : display?
-G --> MLN : TRUE — latex branch only
-note right of G : the multi-line sprite arm\nwas removed by T1 (measured inert)
-MLN -> SUB : analytic substitute
-G --> MLN : FALSE — everything else
-MLN -> MEL : faithful path
-MEL -> EID : calculateDimensionSlow
+alt latex branch only — the multi-line sprite arm was removed by T1
+  G --> MLN : true
+  MLN -> SUB : analytic substitute
+else everything else
+  G --> MLN : false
+  MLN -> MEL : faithful path
+  MEL -> EID : calculateDimensionSlow
+end
 @enduml
 ```
 

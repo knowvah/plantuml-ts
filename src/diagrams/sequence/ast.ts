@@ -68,6 +68,15 @@ export interface FrameEvent {
     | 'group';
   label: string;
   branches: SequenceEvent[][]; // alt has multiple; others have one
+  /**
+   * Condition text per branch, index-aligned with `branches`.
+   * `branchLabels[0]` is the frame's own `label`; entries 1..n are the
+   * `else <condition>` labels. Upstream draws each as a bracketed
+   * `[condition]`, the first beside the frame's type tab and the rest beside
+   * a dashed separator (`Displayable`/`GroupingTile`), which is why they must
+   * survive parsing rather than collapse into `label`.
+   */
+  branchLabels: string[];
 }
 
 export interface ActivationEvent {
@@ -195,6 +204,10 @@ export interface FrameGeo {
   y: number;
   width: number;
   height: number;
+  /** `else` branch boundaries: the y of each dashed separator and the
+   *  bracketed condition drawn beside it. Empty for single-branch frames
+   *  (`loop`, `opt`, `group`, …). */
+  branchSeparators: { y: number; label: string }[];
 }
 
 export interface DividerGeo {
