@@ -42,17 +42,16 @@ I -> I : extractResult → DotLayoutResult
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: loop for each edge with span > 1 ; loop for each labeled edge
 participant "class2.ts" as C2
 participant "DotWorkingGraph" as G
-C2 -> G : move edge to longEdges[]
-note over C2 : LOOP: for each edge with span > 1
-C2 -> G : create N-1 virtual nodes at intermediate ranks
-C2 -> G : add N unit-length chain edges to edges[]
-C2 -> G : create labelNode (virtual, width=nodeSep+labelWidth)
-note over C2 : LOOP: for each labeled edge
-C2 -> G : set edge.labelNode
+loop for each edge with span > 1
+  C2 -> G : move edge to longEdges[]
+  C2 -> G : create N-1 virtual nodes at intermediate ranks
+  C2 -> G : add N unit-length chain edges to edges[]
+end
+loop for each labeled edge
+  C2 -> G : create labelNode (virtual, width=nodeSep+labelWidth)
+  C2 -> G : set edge.labelNode
+end
 @enduml
 ```

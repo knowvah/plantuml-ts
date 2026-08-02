@@ -4,9 +4,6 @@
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: loop per entity ; loop per edge
 participant "plugin.render()" as P
 participant "renderDescription (rewritten)" as R
 participant "EntityImageDescription / Cluster / SvekEdge" as E
@@ -15,17 +12,19 @@ participant "UGraphicSvg (klimt)" as U
 participant "SvgGraphics" as G
 P -> R : DescriptionGeometry + Theme
 R -> U : UGraphicSvg.build(seed, option, version, jarMeasurer)
-R -> E : drawU(ug) — entity wrapper
-note over R : LOOP: per entity
-E -> U : startGroup({class:'entity', data-qualified-name})
-E -> U : draw(UComment('entity X'))
-E -> S : symbol.asBig(...).drawU(ug)
-S -> U : apply(translate/stroke/color).draw(URectangle/UPath/…)
-U -> G : svgRectangle / svgPath / text …
-E -> U : closeGroup()
-R -> E : SvekEdge.drawU(ug)
-note over R : LOOP: per edge
-E -> U : draw(DotPath spline) + draw(UPolygon arrowhead)
+loop per entity
+  R -> E : drawU(ug) — entity wrapper
+  E -> U : startGroup({class:'entity', data-qualified-name})
+  E -> U : draw(UComment('entity X'))
+  E -> S : symbol.asBig(...).drawU(ug)
+  S -> U : apply(translate/stroke/color).draw(URectangle/UPath/…)
+  U -> G : svgRectangle / svgPath / text …
+  E -> U : closeGroup()
+end
+loop per edge
+  R -> E : SvekEdge.drawU(ug)
+  E -> U : draw(DotPath spline) + draw(UPolygon arrowhead)
+end
 R -> U : getSvgString()
 U --> P : conformant SVG document
 @enduml

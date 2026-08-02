@@ -8,9 +8,6 @@ emergent.
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: loop each path / circle / ellipse
 participant "SheetBlock1" as Sheet
 participant "AtomSprite" as Atom
 participant "SvgNanoParser" as Nano
@@ -20,9 +17,10 @@ Sheet -> Atom : calculateDimensionSlow()
 Atom --> Sheet : DECLARED box (16x16)
 note over Nano,FP : INK channel
 Nano -> Nano : drawU() walks raw SVG
-Nano -> FP : drawPath(primitive)
-note over Nano : LOOP: each path / circle / ellipse
-FP -> FP : record real min/max corners
+loop each path / circle / ellipse
+  Nano -> FP : drawPath(primitive)
+  FP -> FP : record real min/max corners
+end
 FP --> FP : ellipse fits OBSERVED ink
 @enduml
 ```
@@ -55,9 +53,6 @@ inside `primitives`, layout only in `width`/`height`.
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: loop each primitive
 participant "resolveSpriteAtom (T9)" as Res
 participant "SvgNanoParser (T6/T8)" as Nano
 participant "drawAtoms (T7)" as Draw
@@ -69,8 +64,9 @@ Res --> Draw : {kind:'drawable', primitives, width=DECLARED, height=DECLARED}
 note over Draw,Sheet : LAYOUT channel
 Draw -> Sheet : cursor advances by DECLARED width
 note over Draw,FP : INK channel
-Draw -> FP : draw UPath
-note over Draw : LOOP: each primitive
-FP -> FP : record real min/max corners
+loop each primitive
+  Draw -> FP : draw UPath
+  FP -> FP : record real min/max corners
+end
 @enduml
 ```

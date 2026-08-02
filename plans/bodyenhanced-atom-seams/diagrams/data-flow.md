@@ -34,9 +34,6 @@ F ..> W : worse
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: par port, nothing wired ; and
 participant "T1 goldens" as T1
 participant "T2a base" as T2a
 participant "T3 seams" as T3
@@ -44,10 +41,11 @@ participant "T2b bodies" as T2b
 participant "T4 wire" as T4
 participant "T5 widen" as T5
 T1 -> T1 : build the SVG gate FIRST (4 goldens is not a gate)
-T2a -> T2a : BodyEnhancedAbstract + TextBlockLineBefore
-note over T2a : PAR: port, nothing wired
-T3 -> T3 : ink fields; thread the existing imgFallbackFont
-note over T3 : AND
+par port, nothing wired
+  T2a -> T2a : BodyEnhancedAbstract + TextBlockLineBefore
+else
+  T3 -> T3 : ink fields; thread the existing imgFallbackFont
+end
 T2a -> T2b : base ready
 T2b -> T2b : BodyEnhanced1 (marginX 6) / 2 (marginX 0) + factory
 note over T2a,T2b : ratchets must NOT move — nothing calls it yet

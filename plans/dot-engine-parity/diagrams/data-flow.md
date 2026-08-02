@@ -39,9 +39,6 @@ IDX --> Caller : DotLayoutResult
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: loop per edge
 participant "routeEdges()" as RE
 participant "buildObstaclePolygons()" as OBS
 participant "computeSpreadPoints()" as SP
@@ -52,14 +49,15 @@ RE -> OBS : nodes[]
 OBS --> RE : ObstaclePolygon[]
 RE -> SP : shortEdges, longEdges, rankDir
 SP --> RE : MapDotEdge, {start, end}
-RE -> RT : start, end, obstacles
-note over RE : LOOP: per edge
-RT --> RE : Point[] (polyline through free space)
-RE -> BZ : polyline
-BZ --> RE : Point[] (Bezier control points)
-RE -> ADJ : points, from-node, to-node, rankDir
-ADJ --> RE : Point[] (endpoints on node boundary)
+loop per edge
+  RE -> RT : start, end, obstacles
+  RT --> RE : Point[] (polyline through free space)
+  RE -> BZ : polyline
+  BZ --> RE : Point[] (Bezier control points)
+  RE -> ADJ : points, from-node, to-node, rankDir
+  ADJ --> RE : Point[] (endpoints on node boundary)
 note over RE : edge.points = adjusted points
+end
 @enduml
 ```
 

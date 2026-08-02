@@ -2,9 +2,6 @@
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: loop each classifier
 participant ".puml source" as Src
 participant "block-extractor" as BE
 participant "class parser" as P
@@ -17,10 +14,11 @@ Src -> BE : extract block(s)
 note over BE : T6: split on `newpage` → N pages
 BE -> P : UmlSource (per page)
 P -> L : ClassDiagramAST (classifiers, relationships, qualifiers T7)
-L -> H : buildClassHtmlLabel(classifier)
-note over L : LOOP: each classifier
-H --> L : {label,w,h} | null
+loop each classifier
+  L -> H : buildClassHtmlLabel(classifier)
+  H --> L : {label,w,h} | null
 note over L : T4: non-null→plaintext, null→rect
+end
 note over L : T5: relationship→edge topology\nT7: qualifier→PORT edge
 L -> E : DotInputGraph (shape + label per node)
 E -> C : our svek DOT (per graph)

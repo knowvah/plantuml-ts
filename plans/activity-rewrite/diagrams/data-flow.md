@@ -4,9 +4,6 @@
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: loop for each AST node ; loop for each connection between tiles
 participant Caller
 participant "tile-layout.ts" as tile-layout
 participant "tileNode dispatcher" as tileNode
@@ -17,16 +14,18 @@ participant "renderer.ts" as renderer
 Caller -> tile-layout : layoutActivity(ast, theme, measurer)
 tile-layout -> tile-layout : adapt measurer → StringBounder
 tile-layout -> tileNode : tileNodes(ast.nodes, bounder, theme)
-tileNode -> Tiles : new GtileXxx(node, bounder, theme)
-note over tileNode : LOOP: for each AST node
-Tiles --> tileNode : Tile (width, height, getCoord)
+loop for each AST node
+  tileNode -> Tiles : new GtileXxx(node, bounder, theme)
+  Tiles --> tileNode : Tile (width, height, getCoord)
+end
 tileNode --> tile-layout : root Tile (GtileTopDown)
 tile-layout -> coords : assignCoordinates(root, ast, baseX, baseY, bounder, theme)
 coords -> coords : recursive tile walk → canvas (x,y) per tile
-coords -> GConn : getPoints(fromHook, toHook)
-note over coords : LOOP: for each connection between tiles
-GConn --> coords : GPoint[] waypoints
-coords -> coords : emit ActivityEdgeGeo
+loop for each connection between tiles
+  coords -> GConn : getPoints(fromHook, toHook)
+  GConn --> coords : GPoint[] waypoints
+  coords -> coords : emit ActivityEdgeGeo
+end
 coords -> coords : compute totalWidth, totalHeight
 coords --> tile-layout : ActivityGeometry
 tile-layout --> Caller : ActivityGeometry

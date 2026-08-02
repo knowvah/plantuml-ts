@@ -4,9 +4,6 @@
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: alt has node/cloud/usecase/[..]/(..) ; else pure interface / actor+messages
 participant "block" as B
 participant "dispatcher.resolve" as R
 participant "class.accepts" as C
@@ -15,14 +12,15 @@ participant "description.accepts" as D
 B -> R : UmlSource (type unknown)
 R -> C : accepts(lines)?
 C -> C : hasDescriptiveSignal(lines)?
-C --> R : false (guard)
-note over C : ALT: has node/cloud/usecase/[..]/(..)
-R -> S : accepts(lines)?
-S --> R : false (guard)
-R -> D : accepts(lines)?
-D --> R : true
-C --> R : true (class) or S true (sequence)
-note over C : ELSE: pure interface / actor+messages
+alt has node/cloud/usecase/[..]/(..)
+  C --> R : false (guard)
+  R -> S : accepts(lines)?
+  S --> R : false (guard)
+  R -> D : accepts(lines)?
+  D --> R : true
+else pure interface / actor+messages
+  C --> R : true (class) or S true (sequence)
+end
 @enduml
 ```
 

@@ -57,9 +57,6 @@ WASM/worker engine) is `await`ed here.
 
 ```plantuml
 @startuml
-' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
-' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
-' Original nesting: loop each !include URL ; alt CSP connect-src violation ; else CORS failure ; else ok ; alt plugin has layoutSync ; else async plugin
 autonumber
 participant "Consumer" as App
 participant "index.ts render (async)" as API
@@ -69,21 +66,24 @@ participant "preprocess → extract → dispatch → parse" as Pipe
 participant "diagram plugin" as Plg
 App -> API : await render(source, {fetcher})
 API -> Inc : await resolveIncludes(source, fetcher)
-Inc -> Fetch : fetch(url)
-note over Inc : LOOP: each !include URL
-Fetch --> Inc : throw CspIncludeError
-note over Fetch : ALT: CSP connect-src violation
-Fetch --> Inc : throw CorsIncludeError
-note over Fetch : ELSE: CORS failure
-Fetch --> Inc : included text
-note over Fetch : ELSE: ok
+loop each !include URL
+  Inc -> Fetch : fetch(url)
+  alt CSP connect-src violation
+    Fetch --> Inc : throw CspIncludeError
+  else CORS failure
+    Fetch --> Inc : throw CorsIncludeError
+  else ok
+    Fetch --> Inc : included text
+  end
+end
 Inc --> API : fully-resolved source
 API -> Pipe : same pipeline as renderSync
 Pipe -> Plg : parse → layout
-API -> Plg : layoutSync(...)
-note over API : ALT: plugin has layoutSync
-API -> Plg : await layout(...)
-note over API : ELSE: async plugin
+alt plugin has layoutSync
+  API -> Plg : layoutSync(...)
+else async plugin
+  API -> Plg : await layout(...)
+end
 Plg --> API : Geo
 API --> App : PromiseSVG string
 note over API,App : errors (including include errors) → errorSvg
