@@ -1,17 +1,34 @@
 # Component Map — Files Diagram
 
-```mermaid
-graph TD
-    BE[block-extractor.ts<br/>DiagramType + START_SUFFIX_MAP] --> IDX[src/index.ts<br/>registry.register]
-    IDX --> PLUG[files/index.ts<br/>filesPlugin: SyncPlugin]
-    PLUG --> PARSE[files/parser.ts<br/>parseFiles]
-    PLUG --> LAY[files/layout.ts<br/>layoutFiles]
-    PLUG --> REND[files/renderer.ts<br/>renderFiles]
-    PARSE --> AST[files/ast.ts<br/>FilesDiagramAST / FileEntry]
-    LAY --> AST
-    LAY --> MEAS[core/measurer.ts<br/>StringMeasurer]
-    REND --> GEO[files/ast.ts<br/>FilesGeometry / EntryGeometry]
-    REND --> SVG[core/svg.ts<br/>rect / text / svgRoot]
-    REND --> THEME[core/theme.ts<br/>Theme]
-    BP[scripts/build-pages.ts<br/>IMPLEMENTED_TYPES] --> PLUG
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[block-extractor.ts\nDiagramType + START_SUFFIX_MAP] as BE
+[src/index.ts\nregistry.register] as IDX
+[files/index.ts\nfilesPlugin: SyncPlugin] as PLUG
+[files/parser.ts\nparseFiles] as PARSE
+[files/layout.ts\nlayoutFiles] as LAY
+[files/renderer.ts\nrenderFiles] as REND
+[files/ast.ts\nFilesDiagramAST / FileEntry] as AST
+[core/measurer.ts\nStringMeasurer] as MEAS
+[files/ast.ts\nFilesGeometry / EntryGeometry] as GEO
+[core/svg.ts\nrect / text / svgRoot] as SVG
+[core/theme.ts\nTheme] as THEME
+[scripts/build-pages.ts\nIMPLEMENTED_TYPES] as BP
+
+BE --> IDX
+IDX --> PLUG
+PLUG --> PARSE
+PLUG --> LAY
+PLUG --> REND
+PARSE --> AST
+LAY --> AST
+LAY --> MEAS
+REND --> GEO
+REND --> SVG
+REND --> THEME
+BP --> PLUG
+@enduml
 ```

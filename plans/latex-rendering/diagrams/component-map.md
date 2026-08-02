@@ -1,15 +1,27 @@
-```mermaid
-graph TD
-    PKG[package.json] -->|katex dep| LATEX
-    LATEX[src/core/latex.ts<br/>NEW] -->|foreignObject| SVG[src/core/svg.ts<br/>+foreignObject]
-    LATEX -->|measureLatex| LAYOUT[src/diagrams/usecase/layout.ts]
-    LATEX -->|renderLatexMathML<br/>parseLatexLabel| RENDERER[src/diagrams/usecase/renderer.ts]
-    SVG --> RENDERER
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    LAYOUT -.->|unchanged interface| GEO[UCNodeGeo.display: string]
-    GEO --> RENDERER
+[package.json] as PKG
+[src/core/latex.ts\nNEW] as LATEX
+[src/core/svg.ts\n+foreignObject] as SVG
+[src/diagrams/usecase/layout.ts] as LAYOUT
+[src/diagrams/usecase/renderer.ts] as RENDERER
+[UCNodeGeo.display: string] as GEO
+[tests/unit/latex.test.ts NEW] as T1_TEST
+[tests/unit/usecase/layout.test.ts] as T2_TEST
+[tests/unit/usecase/renderer.test.ts] as T3_TEST
 
-    LATEX --- T1_TEST[tests/unit/latex.test.ts NEW]
-    LAYOUT --- T2_TEST[tests/unit/usecase/layout.test.ts]
-    RENDERER --- T3_TEST[tests/unit/usecase/renderer.test.ts]
+PKG --> LATEX : katex dep
+LATEX --> SVG : foreignObject
+LATEX --> LAYOUT : measureLatex
+LATEX --> RENDERER : renderLatexMathML\nparseLatexLabel
+SVG --> RENDERER
+LAYOUT ..> GEO : unchanged interface
+GEO --> RENDERER
+LATEX --> T1_TEST
+LAYOUT --> T2_TEST
+RENDERER --> T3_TEST
+@enduml
 ```

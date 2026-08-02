@@ -1,31 +1,41 @@
 # Component map — Mission A2
 
-```mermaid
-graph TD
-  subgraph shared[core / shared infra]
-    BE[block-extractor.ts<br/>T6: newpage split]
-    IDX[index.ts<br/>T6: multi-page path]
-    EMIT[svek-dot-emit.ts<br/>shape=plaintext + HTML labels<br/>ALREADY SUPPORTS]
-    MEAS[measurer.ts<br/>WidthTableMeasurer]
-  end
-  subgraph class[src/diagrams/class]
-    AST[ast.ts<br/>T7: qualifier fields]
-    PARSE[parser.ts<br/>T7: parse Qualifier]
-    LAYOUT[layout.ts<br/>T4 shapes / T5 edges / T7 ports]
-    HTML[class-html-label.ts<br/>T3: compartment table NEW]
-  end
-  subgraph harness[oracle harness]
-    REPORT[dot-sync-report.ts class]
-    CMP[svek-dot.ts compareStructural]
-    RATCHET[class-dot-parity.test.ts<br/>T2 pin / T8 rebaseline]
-    GOLD[(oracle/goldens/class)]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  PARSE --> AST --> LAYOUT
-  HTML --> LAYOUT
-  MEAS --> HTML
-  LAYOUT --> EMIT
-  BE --> IDX --> LAYOUT
-  EMIT --> CMP
-  REPORT --> CMP --> RATCHET --> GOLD
+package "core / shared infra" {
+  [block-extractor.ts\nT6: newpage split] as BE
+  [index.ts\nT6: multi-page path] as IDX
+  [svek-dot-emit.ts\nshape=plaintext + HTML labels\nALREADY SUPPORTS] as EMIT
+  [measurer.ts\nWidthTableMeasurer] as MEAS
+}
+
+package "src/diagrams/class" {
+  [ast.ts\nT7: qualifier fields] as AST
+  [parser.ts\nT7: parse Qualifier] as PARSE
+  [layout.ts\nT4 shapes / T5 edges / T7 ports] as LAYOUT
+  [class-html-label.ts\nT3: compartment table NEW] as HTML
+}
+
+package "oracle harness" {
+  [dot-sync-report.ts class] as REPORT
+  [svek-dot.ts compareStructural] as CMP
+  [class-dot-parity.test.ts\nT2 pin / T8 rebaseline] as RATCHET
+  [oracle/goldens/class] as GOLD
+}
+
+PARSE --> AST
+AST --> LAYOUT
+HTML --> LAYOUT
+MEAS --> HTML
+LAYOUT --> EMIT
+BE --> IDX
+IDX --> LAYOUT
+EMIT --> CMP
+REPORT --> CMP
+CMP --> RATCHET
+RATCHET --> GOLD
+@enduml
 ```

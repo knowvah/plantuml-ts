@@ -6,64 +6,72 @@ upstream is summarized (reference-only, not built here).
 
 ## plantuml-ts
 
-```mermaid
-graph TD
-    subgraph entry["Entry — src/index.ts"]
-        R["render / renderSync / renderAll"]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph core["Core — src/core/"]
-        PRE["preprocessor.ts"]
-        BLK["block-extractor.ts"]
-        DISP["dispatcher.ts (registry)"]
-        THEME["theme.ts · themes-builtin.ts"]
-        SKIN["skinparam.ts · style-map-theme.ts"]
-        MEAS["measurer.ts · measurer-width-table.data.ts"]
-        CREOLE["creole.ts (markup)"]
-        DESCKW["descriptive-keywords.ts"]
-        GL["graph-layout.ts (+ .types)"]
-        SVEK["svek-dot-emit.ts"]
-        SVG["svg.ts · svg-sanitize.ts"]
-        LATEX["latex.ts (KaTeX)"]
-        INC["include-resolver.ts (+ -node)"]
-        COMMON["core/common/*"]
-    end
+package "Entry — src/index.ts" {
+  [render / renderSync / renderAll] as R
+}
 
-    subgraph diag["Diagram plugins — src/diagrams/*"]
-        direction LR
-        SEQ["sequence"]
-        CLS["class"]
-        STA["state"]
-        DESC["description"]
-        ACT["activity"]
-        OBJ["object"]
-        JSON["json"]
-        YAML["yaml"]
-        HCL["hcl"]
-        DOT["dot"]
-        MISC["board · chronology · files ·<br/>packetdiag · chart"]
-    end
+package "Core — src/core/" {
+  [preprocessor.ts] as PRE
+  [block-extractor.ts] as BLK
+  [dispatcher.ts (registry)] as DISP
+  [theme.ts · themes-builtin.ts] as THEME
+  [skinparam.ts · style-map-theme.ts] as SKIN
+  [measurer.ts · measurer-width-table.data.ts] as MEAS
+  [creole.ts (markup)] as CREOLE
+  [descriptive-keywords.ts] as DESCKW
+  [graph-layout.ts (+ .types)] as GL
+  [svek-dot-emit.ts] as SVEK
+  [svg.ts · svg-sanitize.ts] as SVG
+  [latex.ts (KaTeX)] as LATEX
+  [include-resolver.ts (+ -node)] as INC
+  [core/common/*] as COMMON
+}
 
-    R --> PRE --> BLK --> DISP
-    R --> THEME --> SKIN
-    R --> INC
-    DISP --> diag
-    diag --> MEAS
-    diag --> CREOLE
-    diag --> SVG
-    diag --> LATEX
-    CLS --> GL
-    STA --> GL
-    DESC --> GL
-    ACT --> GL
-    JSON --> GL
-    OBJ --> GL
-    DOT --> GL
-    GL --> SVEK
-    DESC --> DESCKW
+package "Diagram plugins — src/diagrams/*" {
+  [sequence] as SEQ
+  [class] as CLS
+  [state] as STA
+  [description] as DESC
+  [activity] as ACT
+  [object] as OBJ
+  [json] as JSON
+  [yaml] as YAML
+  [hcl] as HCL
+  [dot] as DOT
+  [board · chronology · files ·\npacketdiag · chart] as MISC
+}
 
-    GL ==>|"graphviz-ts"| EXT["graphviz-ts engines"]
-    DOT ==>|"parse()"| EXT
+[diag] as diag
+[graphviz-ts engines] as EXT
+
+R --> PRE
+PRE --> BLK
+BLK --> DISP
+R --> THEME
+THEME --> SKIN
+R --> INC
+DISP --> diag
+diag --> MEAS
+diag --> CREOLE
+diag --> SVG
+diag --> LATEX
+CLS --> GL
+STA --> GL
+DESC --> GL
+ACT --> GL
+JSON --> GL
+OBJ --> GL
+DOT --> GL
+GL --> SVEK
+DESC --> DESCKW
+GL ==> EXT : graphviz-ts
+DOT ==> EXT : parse()
+@enduml
 ```
 
 **Plugin contract** (`dispatcher.ts`): every plugin implements
@@ -87,44 +95,61 @@ future WASM/worker engine. Each plugin directory typically contains
 
 Faithful port of Graphviz 2.38's C modules, consumed by plantuml-ts.
 
-```mermaid
-graph TD
-    subgraph api["Public — src/index.ts, src/api"]
-        RS["renderSvg / tryRenderSvg"]
-        PARSE["parse (DOT)"]
-        CTX["GvcContext"]
-    end
-    subgraph front["Front end"]
-        PARSER["parser/ (Peggy DOT grammar)"]
-        MODEL["model/ (Graph/Node/Edge)"]
-        BUILDER["api/builder (GvGraphBuilder)"]
-    end
-    subgraph layout["Layout — src/layout (dotgen)"]
-        RANK["rank (network simplex)"]
-        MINCROSS["mincross (crossing min)"]
-        POS["position (x/y coords)"]
-        SPLINE["splines / edge routing"]
-    end
-    subgraph support["Support modules"]
-        CDT["cdt/ (splay, hash)"]
-        RB["rbtree/"]
-        VPSC["vpsc/ · ortho/ · pathplan/"]
-        LABEL["label/"]
-        COMMON["common/ (arrows, color,<br/>htmltable, textmeasure)"]
-    end
-    subgraph back["Back end"]
-        GVC["gvc/ (context, device, usershape)"]
-        RENDER["render/ · xdot/"]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    RS --> PARSER --> MODEL --> layout
-    CTX --> GVC
-    BUILDER --> MODEL
-    layout --> RANK --> MINCROSS --> POS --> SPLINE
-    layout --> support
-    layout --> back
-    back --> RENDER
-    RENDER -->|"SVG string"| RS
+package "Public — src/index.ts, src/api" {
+  [renderSvg / tryRenderSvg] as RS
+  [parse (DOT)] as PARSE
+  [GvcContext] as CTX
+}
+
+package "Front end" {
+  [parser/ (Peggy DOT grammar)] as PARSER
+  [model/ (Graph/Node/Edge)] as MODEL
+  [api/builder (GvGraphBuilder)] as BUILDER
+}
+
+package "Layout — src/layout (dotgen)" {
+  [rank (network simplex)] as RANK
+  [mincross (crossing min)] as MINCROSS
+  [position (x/y coords)] as POS
+  [splines / edge routing] as SPLINE
+}
+
+package "Support modules" {
+  [cdt/ (splay, hash)] as CDT
+  [rbtree/] as RB
+  [vpsc/ · ortho/ · pathplan/] as VPSC
+  [label/] as LABEL
+  [common/ (arrows, color,\nhtmltable, textmeasure)] as COMMON
+}
+
+package "Back end" {
+  [gvc/ (context, device, usershape)] as GVC
+  [render/ · xdot/] as RENDER
+}
+
+[layout] as layout
+[support] as support
+[back] as back
+
+RS --> PARSER
+PARSER --> MODEL
+MODEL --> layout
+CTX --> GVC
+BUILDER --> MODEL
+layout --> RANK
+RANK --> MINCROSS
+MINCROSS --> POS
+POS --> SPLINE
+layout --> support
+layout --> back
+back --> RENDER
+RENDER --> RS : SVG string
+@enduml
 ```
 
 Notable: **zero runtime dependencies**; text measurement is injectable

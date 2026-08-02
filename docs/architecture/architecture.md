@@ -5,77 +5,82 @@ and the upstream reference. Communication is **in-process, synchronous
 function calls** unless labeled otherwise — there are no network hops,
 services, or databases in the runtime path.
 
-```mermaid
-graph TD
-    subgraph client["Consumer (browser or Node)"]
-        APP["Application code"]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph plantumlts["plantuml-ts (this repo)"]
-        API["src/index.ts<br/>render / renderSync / renderAll"]
+package "Consumer (browser or Node)" {
+  [Application code] as APP
+}
 
-        subgraph core["src/core/"]
-            PRE["preprocessor.ts<br/>!define / !ifdef / macros"]
-            INC["include-resolver.ts<br/>!include (async only)"]
-            BLK["block-extractor.ts<br/>split @start…@end + type detect"]
-            THEME["theme.ts / skinparam.ts<br/>style-map-theme.ts"]
-            DISP["dispatcher.ts<br/>plugin registry + accepts()"]
-            MEAS["measurer.ts<br/>deterministic text width LUT"]
-            GL["graph-layout.ts<br/>graphviz-ts adapter seam"]
-            SVG["svg.ts / svg-sanitize.ts<br/>SVG assembly + defs"]
-            LATEX["latex.ts → KaTeX"]
-        end
+package "plantuml-ts (this repo)" {
+  [src/index.ts\nrender / renderSync / renderAll] as API
+}
 
-        subgraph plugins["src/diagrams/* (15 plugins)"]
-            SEQ["sequence"]
-            CLS["class"]
-            STA["state"]
-            DESC["description / deployment"]
-            ACT["activity"]
-            DOTP["dot"]
-            OTHER["object · json · yaml · hcl ·<br/>board · chronology · files ·<br/>packetdiag · chart"]
-        end
-    end
+package "src/core/" {
+  [preprocessor.ts\n!define / !ifdef / macros] as PRE
+  [include-resolver.ts\n!include (async only)] as INC
+  [block-extractor.ts\nsplit @start…@end + type detect] as BLK
+  [theme.ts / skinparam.ts\nstyle-map-theme.ts] as THEME
+  [dispatcher.ts\nplugin registry + accepts()] as DISP
+  [measurer.ts\ndeterministic text width LUT] as MEAS
+  [graph-layout.ts\ngraphviz-ts adapter seam] as GL
+  [svg.ts / svg-sanitize.ts\nSVG assembly + defs] as SVG
+  [latex.ts → KaTeX] as LATEX
+}
 
-    subgraph deps["Dependencies"]
-        GVTS["graphviz-ts<br/>(pinned .tgz)<br/>DOT layout engines"]
-        KATEX["katex 0.16"]
-        JSONC["jsonc-parser"]
-    end
+package "src/diagrams/* (15 plugins)" {
+  [sequence] as SEQ
+  [class] as CLS
+  [state] as STA
+  [description / deployment] as DESC
+  [activity] as ACT
+  [dot] as DOTP
+  [object · json · yaml · hcl ·\nboard · chronology · files ·\npacketdiag · chart] as OTHER
+}
 
-    subgraph refs["Upstream references (not shipped, not in-process)"]
-        PUML["plantuml (Java)<br/>parser/AST + render spec"]
-        GVC["graphviz (C)<br/>algorithm spec"]
-        PDIFF["pdiff corpus<br/>5600 .puml fixtures"]
-    end
+package "Dependencies" {
+  [graphviz-ts\n(pinned .tgz)\nDOT layout engines] as GVTS
+  [katex 0.16] as KATEX
+  [jsonc-parser] as JSONC
+}
 
-    APP -->|"render(source)"| API
-    API --> PRE --> BLK --> DISP
-    PRE -. "async path" .-> INC
-    API --> THEME
-    DISP -->|"resolve → parse → layoutSync → render"| plugins
+package "Upstream references (not shipped, not in-process)" {
+  [plantuml (Java)\nparser/AST + render spec] as PUML
+  [graphviz (C)\nalgorithm spec] as GVC
+  [pdiff corpus\n5600 .puml fixtures] as PDIFF
+}
 
-    plugins --> MEAS
-    SEQ -->|"own layout"| SVG
-    CLS --> GL
-    STA --> GL
-    DESC --> GL
-    ACT --> GL
-    DOTP --> GL
-    GL -->|"serialize DOT graph<br/>+ read geometry snapshot"| GVTS
-    LATEX --> KATEX
-    DOTP -.->|"parse DOT"| GVTS
-    plugins --> SVG
-    SVG -->|"SVG string"| API
+[plugins] as plugins
+[plantumlts] as plantumlts
+[deps] as deps
 
-    PUML -.->|"ports behavior/AST"| plugins
-    GVC -.->|"ports algorithms"| GVTS
-    PDIFF -.->|"work queue / test corpus"| plantumlts
-    KATEX -. "runtime" .- deps
-    JSONC -.->|"parses JSON/YAML diagrams"| OTHER
-
-    classDef ref fill:#eee,stroke:#999,stroke-dasharray:4 3,color:#333;
-    class PUML,GVC,PDIFF ref;
+APP --> API : render(source)
+API --> PRE
+PRE --> BLK
+BLK --> DISP
+PRE ..> INC : async path
+API --> THEME
+DISP --> plugins : resolve → parse → layoutSync → render
+plugins --> MEAS
+SEQ --> SVG : own layout
+CLS --> GL
+STA --> GL
+DESC --> GL
+ACT --> GL
+DOTP --> GL
+GL --> GVTS : serialize DOT graph\n+ read geometry snapshot
+LATEX --> KATEX
+DOTP ..> GVTS : parse DOT
+plugins --> SVG
+SVG --> API : SVG string
+PUML ..> plugins : ports behavior/AST
+GVC ..> GVTS : ports algorithms
+PDIFF ..> plantumlts : work queue / test corpus
+KATEX ..> deps : runtime
+JSONC ..> OTHER : parses JSON/YAML diagrams
+@enduml
 ```
 
 ## Communication model

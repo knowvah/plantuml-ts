@@ -1,36 +1,39 @@
 # Component Map
 
-```mermaid
-graph LR
-  subgraph core
-    BE[block-extractor.ts\nDiagramType + START_SUFFIX_MAP]
-    TH[theme.ts\ncolors.graph.json.*]
-    DOT[dot/index.ts\nrunDot — LR layout]
-    SVG[svg.ts\nrect/text/path/svgRoot]
-    DISP[dispatcher.ts\nSyncPlugin interface]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph json [src/diagrams/json]
-    AST[ast.ts\nJsonDiagramAST]
-    PARSER[parser.ts\nparseJson]
-    LAYOUT[layout.ts\nlayoutJson → JsonGeometry]
-    RENDERER[renderer.ts\nrenderJson]
-    PLUGIN[index.ts\njsonPlugin]
-  end
+package "core" {
+  [block-extractor.ts\nDiagramType + START_SUFFIX_MAP] as BE
+  [theme.ts\ncolors.graph.json.*] as TH
+  [dot/index.ts\nrunDot — LR layout] as DOT
+  [svg.ts\nrect/text/path/svgRoot] as SVG
+  [dispatcher.ts\nSyncPlugin interface] as DISP
+}
 
-  IDX[src/index.ts\nregistry.register]
+package "src/diagrams/json" {
+  [ast.ts\nJsonDiagramAST] as AST
+  [parser.ts\nparseJson] as PARSER
+  [layout.ts\nlayoutJson → JsonGeometry] as LAYOUT
+  [renderer.ts\nrenderJson] as RENDERER
+  [index.ts\njsonPlugin] as PLUGIN
+}
 
-  BE -->|'json' type| PLUGIN
-  TH -->|json color keys| LAYOUT
-  TH -->|json color keys| RENDERER
-  DOT -->|node positions + splines| LAYOUT
-  SVG -->|primitives| RENDERER
+[src/index.ts\nregistry.register] as IDX
 
-  PARSER -->|JsonDiagramAST| LAYOUT
-  LAYOUT -->|JsonGeometry| RENDERER
-  PLUGIN -->|wires| PARSER
-  PLUGIN -->|wires| LAYOUT
-  PLUGIN -->|wires| RENDERER
-  IDX -->|registers| PLUGIN
-  DISP -->|SyncPlugin| PLUGIN
+BE --> PLUGIN : 'json' type
+TH --> LAYOUT : json color keys
+TH --> RENDERER : json color keys
+DOT --> LAYOUT : node positions + splines
+SVG --> RENDERER : primitives
+PARSER --> LAYOUT : JsonDiagramAST
+LAYOUT --> RENDERER : JsonGeometry
+PLUGIN --> PARSER : wires
+PLUGIN --> LAYOUT : wires
+PLUGIN --> RENDERER : wires
+IDX --> PLUGIN : registers
+DISP --> PLUGIN : SyncPlugin
+@enduml
 ```

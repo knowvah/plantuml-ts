@@ -1,76 +1,91 @@
 # Component Map — dot-pipeline
 
-```mermaid
-graph TD
-    subgraph "src/core/dot/ — existing (modified)"
-        IDX[index.ts]
-        RNK[rank.ts]
-        MC[mincross.ts]
-        POS[position.ts]
-        SPL[splines.ts]
-        ACY[acyclic.ts]
-        TYP[types.ts]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph "src/core/dot/ — new"
-        FASTGR[fastgr.ts]
-        DECOMP[decomp.ts]
-        C1[class1.ts]
-        C2[class2.ts]
-        FLAT[flat.ts]
-        CLUST[cluster.ts]
-        COMP[compound.ts]
-        SMPRT[sameport.ts]
-        CONC[conc.ts]
-        ASP[aspect.ts]
-    end
+package "src/core/dot/ — existing (modified)" {
+  [index.ts] as IDX
+  [rank.ts] as RNK
+  [mincross.ts] as MC
+  [position.ts] as POS
+  [splines.ts] as SPL
+  [acyclic.ts] as ACY
+  [types.ts] as TYP
+}
 
-    subgraph "src/core/pathplan/ — new"
-        PP[pathplan/index.ts]
-    end
+package "src/core/dot/ — new" {
+  [fastgr.ts] as FASTGR
+  [decomp.ts] as DECOMP
+  [class1.ts] as C1
+  [class2.ts] as C2
+  [flat.ts] as FLAT
+  [cluster.ts] as CLUST
+  [compound.ts] as COMP
+  [sameport.ts] as SMPRT
+  [conc.ts] as CONC
+  [aspect.ts] as ASP
+}
 
-    subgraph "src/core/common/ — new"
-        SHP[shapes.ts]
-        RSPL[routespl.ts]
-    end
+package "src/core/pathplan/ — new" {
+  [pathplan/index.ts] as PP
+}
 
-    subgraph "src/core/pack/ — new"
-        PCK[pack/index.ts]
-    end
+package "src/core/common/ — new" {
+  [shapes.ts] as SHP
+  [routespl.ts] as RSPL
+}
 
-    subgraph "src/core/label/ — new"
-        LBL[label/index.ts]
-    end
+package "src/core/pack/ — new" {
+  [pack/index.ts] as PCK
+}
 
-    IDX --> ACY
-    IDX --> DECOMP
-    IDX --> CLUST
-    IDX --> COMP
-    IDX --> RNK
-    IDX --> C2
-    IDX --> MC
-    IDX --> POS
-    IDX --> ASP
-    IDX --> SPL
-    IDX --> LBL
+package "src/core/label/ — new" {
+  [label/index.ts] as LBL
+}
 
-    RNK --> C1
-    RNK --> CONC
-    MC --> FLAT
-    SPL --> PP
-    SPL --> RSPL
-    SPL --> SHP
-    SMPRT --> SPL
+IDX --> ACY
+IDX --> DECOMP
+IDX --> CLUST
+IDX --> COMP
+IDX --> RNK
+IDX --> C2
+IDX --> MC
+IDX --> POS
+IDX --> ASP
+IDX --> SPL
+IDX --> LBL
+RNK --> C1
+RNK --> CONC
+MC --> FLAT
+SPL --> PP
+SPL --> RSPL
+SPL --> SHP
+SMPRT --> SPL
+@enduml
 ```
 
 ## Batch dependency order
 
-```mermaid
-graph LR
-    A["Batch A\nfastgr, decomp"] --> B["Batch B\nclass1, class2"]
-    B --> C["Batch C\nrank refactor\nmincross+flat\nindex cleanup"]
-    C --> D["Batch D\ncluster, compound\nintegration"]
-    D --> E["Batch E\nsameport, conc, aspect"]
-    E --> FA["Batch F-A\npathplan, shapes\npack, label"]
-    FA --> FB["Batch F-B\nsplines+pathplan\nxlabel wiring"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[Batch A\nfastgr, decomp] as A
+[Batch B\nclass1, class2] as B
+[Batch C\nrank refactor\nmincross+flat\nindex cleanup] as C
+[Batch D\ncluster, compound\nintegration] as D
+[Batch E\nsameport, conc, aspect] as E
+[Batch F-A\npathplan, shapes\npack, label] as FA
+[Batch F-B\nsplines+pathplan\nxlabel wiring] as FB
+
+A --> B
+B --> C
+C --> D
+D --> E
+E --> FA
+FA --> FB
+@enduml
 ```

@@ -4,36 +4,44 @@ The mission's whole subject is the **left/right split** below: two paths
 that must agree on geometry but are wired independently. Every instance of
 the recurring bug is a setting that reached the right path and not the left.
 
-```mermaid
-graph TD
-  THEME["theme / skinparam<br/>theme-element-resolve.ts<br/>10 x resolveElement*"]
-  CTX["ClassifyCtx<br/>layout.ts"]
-  OPTS["BoxSizingOpts<br/>layout-dot-tree.ts"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph SIZER["SIZER — decides the box"]
-    MLN["measureLeafNode<br/>leaf-sizing.ts"]
-    CONSTS["leaf-sizing-consts.ts<br/>5 parallel symbol tables"]
-    TEXT["leaf-sizing-text.ts<br/>per-line metrics"]
-    FOLDER["leaf-sizing-folder.ts"]
-    ELLIPSE["usecase-footprint.ts<br/>Footprint + SEC"]
-  end
+package "SIZER — decides the box" {
+  [measureLeafNode\nleaf-sizing.ts] as MLN
+  [leaf-sizing-consts.ts\n5 parallel symbol tables] as CONSTS
+  [leaf-sizing-text.ts\nper-line metrics] as TEXT
+  [leaf-sizing-folder.ts] as FOLDER
+  [usecase-footprint.ts\nFootprint + SEC] as ELLIPSE
+}
 
-  subgraph RENDERER["RENDERER — draws the ink"]
-    RSYM["renderer-symbol.ts<br/>textFont"]
-    RENT["renderer-entity.ts"]
-    EID["EntityImageDescription*.ts<br/>buildTextBlock / buildWrappedLines"]
-  end
+package "RENDERER — draws the ink" {
+  [renderer-symbol.ts\ntextFont] as RSYM
+  [renderer-entity.ts] as RENT
+  [EntityImageDescription*.ts\nbuildTextBlock / buildWrappedLines] as EID
+}
 
-  LEX["SHARED creole lexer<br/>StripeSimple.buildLineAtoms"]
+[theme / skinparam\ntheme-element-resolve.ts\n10 x resolveElement*] as THEME
+[ClassifyCtx\nlayout.ts] as CTX
+[BoxSizingOpts\nlayout-dot-tree.ts] as OPTS
+[SHARED creole lexer\nStripeSimple.buildLineAtoms] as LEX
 
-  THEME --> CTX --> OPTS --> MLN
-  THEME -.->|"consulted directly"| RSYM
-  MLN --> CONSTS & TEXT & FOLDER & ELLIPSE
-  TEXT --> LEX
-  EID --> LEX
-  RSYM --> RENT --> EID
-
-  MLN -->|"must agree"| EID
+THEME --> CTX
+CTX --> OPTS
+OPTS --> MLN
+THEME ..> RSYM : consulted directly
+MLN --> CONSTS
+MLN --> TEXT
+MLN --> FOLDER
+MLN --> ELLIPSE
+TEXT --> LEX
+EID --> LEX
+RSYM --> RENT
+RENT --> EID
+MLN --> EID : must agree
+@enduml
 ```
 
 ## Reading it

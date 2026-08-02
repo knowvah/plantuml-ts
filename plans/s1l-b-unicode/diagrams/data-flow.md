@@ -2,48 +2,89 @@
 
 ## The bug (today): decode before split → over-split
 
-```mermaid
-flowchart LR
-  raw["raw display<br/>aaa &lt;U+000A&gt; bbb"] --> fd["finalizeDisplay:<br/>resolveNewlineEscapes<br/>then resolveTextEscapes"]
-  fd --> dec["&lt;U+000A&gt; decoded to '\n'<br/>BEFORE split"]
-  dec --> disp["node.display =<br/>'aaa \n bbb'"]
-  disp --> split["sizer/renderer<br/>split on '\n'"]
-  split --> bad["2 lines ❌<br/>(oracle: 1 line)"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[raw display\naaa] as raw
+[finalizeDisplay:\nresolveNewlineEscapes\nthen resolveTextEscapes] as fd
+[U+000A decoded to '\n'\nBEFORE split] as dec
+[node.display =\n'aaa \n bbb'] as disp
+[sizer/renderer\nsplit on '\n'] as split
+[2 lines ❌\n(oracle: 1 line)] as bad
+
+raw --> fd
+fd --> dec
+dec --> disp
+disp --> split
+split --> bad
+@enduml
 ```
 
 ## The fix (T1, ADR-1): split first, decode per-line → inline
 
-```mermaid
-flowchart LR
-  raw["raw display<br/>aaa &lt;U+000A&gt; bbb"] --> fd["finalizeDisplay:<br/>resolveNewlineEscapes ONLY<br/>(no codepoint decode)"]
-  fd --> disp["node.display =<br/>'aaa &lt;U+000A&gt; bbb'<br/>(raw token kept)"]
-  disp --> split["sizer/renderer<br/>split on '\n' (none here)"]
-  split --> line["1 line:<br/>'aaa &lt;U+000A&gt; bbb'"]
-  line --> perline["per-line decode<br/>(resolveTextEscapes)"]
-  perline --> good["'aaa \n bbb' measured<br/>as 1 line ✅<br/>(inline '\n' ~0 width)"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[raw display\naaa] as raw
+[finalizeDisplay:\nresolveNewlineEscapes ONLY\n(no codepoint decode)] as fd
+[node.display =\n'aaa] as disp
+[sizer/renderer\nsplit on '\n' (none here)] as split
+[1 line:\n'aaa] as line
+[per-line decode\n(resolveTextEscapes)] as perline
+['aaa \n bbb' measured\nas 1 line ✅\n(inline '\n' ~0 width)] as good
+
+raw --> fd
+fd --> disp
+disp --> split
+split --> line
+line --> perline
+perline --> good
+@enduml
 ```
 
 ## Split rule (Rule 1, confirmed)
 
-```mermaid
-flowchart TD
-  d["display line"] -->|"backslash \n / \r / \l<br/>%newline()"| brk["LINE BREAK<br/>(Display.getWithNewlines)"]
-  d -->|"&lt;U+XXXX&gt; / &amp;#NNN;"| inl["INLINE char<br/>(AtomText.manageSpecialChars,<br/>per-atom, post-split)"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[display line] as d
+[LINE BREAK\n(Display.getWithNewlines)] as brk
+[INLINE char\n(AtomText.manageSpecialChars,\nper-atom, post-split)] as inl
+
+d --> brk : backslash \n / \r / \l\n%newline()
+d --> inl : U+XXXX / &#NNN;
+@enduml
 ```
 
 ## Component map (files touched)
 
-```mermaid
-flowchart LR
-  subgraph T1["Batch 1 — decode-ordering"]
-    phs["parse-helpers-strings.ts<br/>finalizeDisplay"] --> ls["leaf-sizing.ts<br/>maxLineWidth/textBlockHeight"]
-    phs --> btb["EntityImageDescriptionSupport.ts<br/>buildTextBlock"]
-  end
-  subgraph T2["Batch 2 — quoted-title"]
-    parser["parser.ts / EntityImageDescription.ts<br/>(per finding) OR ledger"]
-  end
-  subgraph T3["Batch 3 — emoji width"]
-    meas["measurer.ts (per finding)<br/>OR ledger"]
-  end
-  ls -. sync invariant .- btb
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "Batch 1 — decode-ordering" {
+  [parse-helpers-strings.ts\nfinalizeDisplay] as phs
+  [leaf-sizing.ts\nmaxLineWidth/textBlockHeight] as ls
+  [EntityImageDescriptionSupport.ts\nbuildTextBlock] as btb
+}
+
+package "Batch 2 — quoted-title" {
+  [parser.ts / EntityImageDescription.ts\n(per finding) OR ledger] as parser
+}
+
+package "Batch 3 — emoji width" {
+  [measurer.ts (per finding)\nOR ledger] as meas
+}
+
+phs --> ls
+phs --> btb
+ls ..> btb : sync invariant
+@enduml
 ```

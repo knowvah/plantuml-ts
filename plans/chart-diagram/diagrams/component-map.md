@@ -1,46 +1,51 @@
-```mermaid
-graph TD
-  subgraph Core
-    BE[block-extractor.ts]
-    SVG[svg.ts]
-    THEME[theme.ts]
-    MEAS[measurer.ts]
-    CREOLE[creole.ts]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph chart
-    AST[ast.ts]
-    PARSER[parser.ts]
-    LAYOUT[layout.ts]
-    subgraph renderers
-      BAR[renderers/bar.ts]
-      LINE[renderers/line.ts]
-      AREA[renderers/area.ts]
-      SCAT[renderers/scatter.ts]
-    end
-    RENDER[renderer.ts]
-    INDEX[index.ts]
-  end
+package "Core" {
+  [block-extractor.ts] as BE
+  [svg.ts] as SVG
+  [theme.ts] as THEME
+  [measurer.ts] as MEAS
+  [creole.ts] as CREOLE
+}
 
-  IDX[src/index.ts]
+package "chart" {
+  [ast.ts] as AST
+  [parser.ts] as PARSER
+  [layout.ts] as LAYOUT
+  [renderer.ts] as RENDER
+  [index.ts] as INDEX
+}
 
-  BE -->|DiagramType 'chart'| PARSER
-  PARSER -->|ChartDiagramAST| LAYOUT
-  LAYOUT -->|ChartGeometry| RENDER
-  LAYOUT -->|BarSeriesGeo| BAR
-  LAYOUT -->|LineSeriesGeo| LINE
-  LAYOUT -->|AreaSeriesGeo| AREA
-  LAYOUT -->|ScatterSeriesGeo| SCAT
-  BAR --> RENDER
-  LINE --> RENDER
-  AREA --> RENDER
-  SCAT --> RENDER
-  SVG --> RENDER
-  THEME --> LAYOUT
-  THEME --> RENDER
-  MEAS --> LAYOUT
-  INDEX --> IDX
-  PARSER --> INDEX
-  LAYOUT --> INDEX
-  RENDER --> INDEX
+package "renderers" {
+  [renderers/bar.ts] as BAR
+  [renderers/line.ts] as LINE
+  [renderers/area.ts] as AREA
+  [renderers/scatter.ts] as SCAT
+}
+
+[src/index.ts] as IDX
+
+BE --> PARSER : DiagramType 'chart'
+PARSER --> LAYOUT : ChartDiagramAST
+LAYOUT --> RENDER : ChartGeometry
+LAYOUT --> BAR : BarSeriesGeo
+LAYOUT --> LINE : LineSeriesGeo
+LAYOUT --> AREA : AreaSeriesGeo
+LAYOUT --> SCAT : ScatterSeriesGeo
+BAR --> RENDER
+LINE --> RENDER
+AREA --> RENDER
+SCAT --> RENDER
+SVG --> RENDER
+THEME --> LAYOUT
+THEME --> RENDER
+MEAS --> LAYOUT
+INDEX --> IDX
+PARSER --> INDEX
+LAYOUT --> INDEX
+RENDER --> INDEX
+@enduml
 ```

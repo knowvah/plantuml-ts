@@ -2,44 +2,45 @@
 
 What this mission touches, and the sizer↔renderer split it closes.
 
-```mermaid
-graph TD
-  subgraph upstream["upstream (the spec)"]
-    AI["AtomImg.create<br/>java:106-107<br/>HARDCODES monospace(14)"]
-    TBIE_J["TextBlockInEllipse.java:60"]
-    FP_J["Footprint<br/>point-collecting UGraphic"]
-    TBIE_J --> FP_J
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph renderer["our RENDERER — already faithful"]
-    USU["USymbolUsecase.ts:14"]
-    TBIE["TextBlockInEllipse.ts:37-38"]
-    FP["Footprint.ts"]
-    USU --> TBIE --> FP
-  end
+package "upstream (the spec)" {
+  [AtomImg.create\njava:106-107\nHARDCODES monospace(14)] as AI
+  [TextBlockInEllipse.java:60] as TBIE_J
+  [Footprint\npoint-collecting UGraphic] as FP_J
+}
 
-  subgraph sizer["our SIZER — the divergence"]
-    LS["leaf-sizing.ts<br/>(two guards, T3)"]
-    LST["leaf-sizing-text.ts<br/>footprintBoxes"]
-    UFP["usecase-footprint.ts<br/>152-line SUBSTITUTE<br/>DELETED by T2"]
-    LS --> LST --> UFP
-  end
+package "our RENDERER — already faithful" {
+  [USymbolUsecase.ts:14] as USU
+  [TextBlockInEllipse.ts:37-38] as TBIE
+  [Footprint.ts] as FP
+}
 
-  subgraph seams["dead seams — DELETED"]
-    IFF["imgFallbackFont<br/>StripeSimple + Support<br/>DELETED by T1"]
-    INK["AtomImageResolver<br/>ink fields<br/>DELETED by T2"]
-  end
+package "our SIZER — the divergence" {
+  [leaf-sizing.ts\n(two guards, T3)] as LS
+  [leaf-sizing-text.ts\nfootprintBoxes] as LST
+  [usecase-footprint.ts\n152-line SUBSTITUTE\nDELETED by T2] as UFP
+}
 
-  AI -.->|T1 reproduces| IFF
-  FP_J -.->|T2 routes sizer to| FP
-  LST -.->|T2 re-points| TBIE
+package "dead seams — DELETED" {
+  [imgFallbackFont\nStripeSimple + Support\nDELETED by T1] as IFF
+  [AtomImageResolver\nink fields\nDELETED by T2] as INK
+}
 
-  UNTOUCHED["Sea / SheetBlock1 / AtomOps<br/>ADR-3: one value per atom is FAITHFUL<br/>NOT TOUCHED"]
+[Sea / SheetBlock1 / AtomOps\nADR-3: one value per atom is FAITHFUL\nNOT TOUCHED] as UNTOUCHED
 
-  style UFP fill:#fdd,stroke:#900
-  style IFF fill:#fdd,stroke:#900
-  style INK fill:#fdd,stroke:#900
-  style UNTOUCHED fill:#dfd,stroke:#090
+TBIE_J --> FP_J
+USU --> TBIE
+TBIE --> FP
+LS --> LST
+LST --> UFP
+AI ..> IFF : T1 reproduces
+FP_J ..> FP : T2 routes sizer to
+LST ..> TBIE : T2 re-points
+@enduml
 ```
 
 **The shape of the bug:** the renderer already reaches upstream's real

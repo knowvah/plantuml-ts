@@ -1,38 +1,50 @@
 # G0b component map
 
-```mermaid
-graph TD
-    subgraph new["src/core/annotations/ (NEW — port of upstream chrome)"]
-        model["model.ts<br/>DisplayPositioned, DiagramAnnotations (T1)"]
-        commands["commands.ts<br/>11 Command* regexes (T1)"]
-        style["style.ts<br/>plantuml.skin defaults (T2)"]
-        chrome["chrome.ts / blocks.ts<br/>DecorateEntityImage math,<br/>bordered blocks, applyChrome (T4, T9)"]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph parsers["engine parsers (T5/T6)"]
-        p1["class / state / sequence"]
-        p2["description / activity / small engines"]
-        p3["json / dot / chart (title migrates in T8)"]
-    end
+package "src/core/annotations/ (NEW — port of upstream chrome)" {
+  [model.ts\nDisplayPositioned, DiagramAnnotations (T1)] as model
+  [commands.ts\n11 Command* regexes (T1)] as commands
+  [chrome.ts / blocks.ts\nDecorateEntityImage math,\nbordered blocks, applyChrome (T4, T9)] as chrome
+}
 
-    subgraph pipeline["src/index.ts (T3, T7)"]
-        renderSeam["plugin.render → RenderFragment (T3)"]
-        apply["applyChrome(fragment, ast.annotations,<br/>styles, measurer) (T7)"]
-        assemble["assembleSvg → svgRoot (T3)"]
-    end
+package "engine parsers (T5/T6)" {
+  [class / state / sequence] as p1
+  [description / activity / small engines] as p2
+  [json / dot / chart (title migrates in T8)] as p3
+}
 
-    commands --> model
-    p1 & p2 & p3 -- "matchAnnotationCommand" --> commands
-    p1 & p2 & p3 -- "ast.annotations" --> apply
-    style --> chrome
-    model --> chrome
-    chrome --> apply
-    renderSeam --> apply --> assemble
+package "src/index.ts (T3, T7)" {
+  [plugin.render → RenderFragment (T3)] as renderSeam
+  [applyChrome(fragment, ast.annotations,\nstyles, measurer) (T7)] as apply
+  [assembleSvg → svgRoot (T3)] as assemble
+}
 
-    skin["src/core/skinparam.ts +<br/>style-map-theme.ts (T2 extends)"] --> style
-    measurer["StringMeasurer seam<br/>(deterministic / jar)"] --> chrome
-    klimt["src/core/klimt/<br/>(TextBlockMarged, +TextBlockBordered)"] --> chrome
-    desc["description klimt renderer<br/>(T7: same chrome, klimt adapter)"] --> apply
+[src/core/skinparam.ts +\nstyle-map-theme.ts (T2 extends)] as skin
+[style] as style
+[StringMeasurer seam\n(deterministic / jar)] as measurer
+[src/core/klimt/\n(TextBlockMarged, +TextBlockBordered)] as klimt
+[description klimt renderer\n(T7: same chrome, klimt adapter)] as desc
+
+commands --> model
+p1 --> commands : matchAnnotationCommand
+p2 --> commands : matchAnnotationCommand
+p3 --> commands : matchAnnotationCommand
+p1 --> apply : ast.annotations
+p2 --> apply : ast.annotations
+p3 --> apply : ast.annotations
+model --> chrome
+chrome --> apply
+renderSeam --> apply
+apply --> assemble
+skin --> style
+measurer --> chrome
+klimt --> chrome
+desc --> apply
+@enduml
 ```
 
 Upstream mirror: `TitledDiagram` fields → `DiagramAnnotations`;

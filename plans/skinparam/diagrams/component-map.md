@@ -1,39 +1,41 @@
 # Component Map — Skinparam
 
-```mermaid
-graph TD
-    subgraph "Public API (src/index.ts)"
-        render["render()"]
-        renderAll["renderAll()"]
-        renderSync["renderSync()"]
-        buildTheme["buildTheme(preprocessed, options)\n(module-private helper)"]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph "preprocessor.ts (modified)"
-        preprocess["preprocess(source)"]
-        PreprocessorResult["PreprocessorResult\n+ skinparam: ReadonlyMap&lt;string,string&gt; (new)"]
-    end
+package "Public API (src/index.ts)" {
+  [render()] as render
+  [renderAll()] as renderAll
+  [renderSync()] as renderSync
+  [buildTheme(preprocessed, options)\n(module-private helper)] as buildTheme
+}
 
-    subgraph "theme.ts (modified)"
-        resolveTheme["resolveTheme(name) — unchanged"]
-        deepMergeTheme["deepMergeTheme(base, partial) (new export)"]
-    end
+package "preprocessor.ts (modified)" {
+  [preprocess(source)] as preprocess
+  [PreprocessorResult\n+ skinparam: ReadonlyMapstring,string (new)] as PreprocessorResult
+}
 
-    subgraph "skinparam.ts (new file)"
-        resolveSkinparam["resolveSkinparam(skinparams, base)\n→ { theme, unknown[] }"]
-        parseStyleBlock["parseStyleBlock(raw)\n→ Map&lt;string,string&gt;"]
-    end
+package "theme.ts (modified)" {
+  [resolveTheme(name) — unchanged] as resolveTheme
+  [deepMergeTheme(base, partial) (new export)] as deepMergeTheme
+}
 
-    render --> buildTheme
-    renderAll --> buildTheme
-    renderSync --> buildTheme
+package "skinparam.ts (new file)" {
+  [resolveSkinparam(skinparams, base)\n→ { theme, unknown[] }] as resolveSkinparam
+  [parseStyleBlock(raw)\n→ Mapstring,string] as parseStyleBlock
+}
 
-    buildTheme --> preprocess
-    preprocess --> PreprocessorResult
-    buildTheme --> resolveTheme
-    buildTheme --> resolveSkinparam
-    buildTheme --> parseStyleBlock
-    buildTheme --> deepMergeTheme
-
-    resolveSkinparam --> deepMergeTheme
+render --> buildTheme
+renderAll --> buildTheme
+renderSync --> buildTheme
+buildTheme --> preprocess
+preprocess --> PreprocessorResult
+buildTheme --> resolveTheme
+buildTheme --> resolveSkinparam
+buildTheme --> parseStyleBlock
+buildTheme --> deepMergeTheme
+resolveSkinparam --> deepMergeTheme
+@enduml
 ```

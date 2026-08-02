@@ -2,36 +2,40 @@
 
 Affected components and how they relate before/after the merge.
 
-```mermaid
-graph TD
-  subgraph core[src/core]
-    DISP[dispatcher.ts resolve]
-    BE[block-extractor.ts DiagramType]
-    KW[descriptive-keywords.ts NEW]
-    SEAM[graph-layout.ts seam]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph before[Before - diverged]
-    COMP[diagrams/component/*]
-    UC[diagrams/usecase/*]
-    CLS[diagrams/class/index accepts]
-    SEQ[diagrams/sequence/index accepts]
-  end
+package "src/core" {
+  [dispatcher.ts resolve] as DISP
+  [block-extractor.ts DiagramType] as BE
+  [descriptive-keywords.ts NEW] as KW
+  [graph-layout.ts seam] as SEAM
+}
 
-  subgraph after[After - one engine]
-    DESC[diagrams/description/*]
-  end
+package "Before - diverged" {
+  [diagrams/component/*] as COMP
+  [diagrams/usecase/*] as UC
+  [diagrams/class/index accepts] as CLS
+  [diagrams/sequence/index accepts] as SEQ
+}
 
-  KW -->|hasDescriptiveSignal| CLS
-  KW -->|hasDescriptiveSignal| SEQ
-  KW -->|USymbol + KEYWORD_TO_SYMBOL| DESC
-  DISP --> CLS
-  DISP --> SEQ
-  DISP --> DESC
-  DESC --> SEAM
-  BE -.->|type description| DISP
-  COMP -.->|deleted batch-8| DESC
-  UC -.->|deleted batch-8| DESC
+package "After - one engine" {
+  [diagrams/description/*] as DESC
+}
+
+KW --> CLS : hasDescriptiveSignal
+KW --> SEQ : hasDescriptiveSignal
+KW --> DESC : USymbol + KEYWORD_TO_SYMBOL
+DISP --> CLS
+DISP --> SEQ
+DISP --> DESC
+DESC --> SEAM
+BE ..> DISP : type description
+COMP ..> DESC : deleted batch-8
+UC ..> DESC : deleted batch-8
+@enduml
 ```
 
 - `descriptive-keywords.ts` is the single source consumed by both the Phase-1

@@ -1,32 +1,39 @@
 # Component map — what this mission adds and rewires
 
-```mermaid
-graph TD
-  subgraph NEW["NEW — ported this mission"]
-    BF["BodyFactory<br/>create2 / create3"]
-    BEA["BodyEnhancedAbstract<br/>decorate + getMarginX"]
-    BE1["BodyEnhanced1<br/>getMarginX = 6"]
-    BE2["BodyEnhanced2<br/>getMarginX = 0"]
-    TBLB["TextBlockLineBefore<br/>separator rule"]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph SHARED["SHARED pipeline — seams wired"]
-    AIR["AtomImageResolver<br/>+ ink fields (T3)"]
-    BLA["buildLineAtoms<br/>imgFallbackFont ALREADY exists,<br/>never passed (T3)"]
-  end
+package "NEW — ported this mission" {
+  [BodyFactory\ncreate2 / create3] as BF
+  [BodyEnhancedAbstract\ndecorate + getMarginX] as BEA
+  [BodyEnhanced1\ngetMarginX = 6] as BE1
+  [BodyEnhanced2\ngetMarginX = 0] as BE2
+  [TextBlockLineBefore\nseparator rule] as TBLB
+}
 
-  EID["EntityImageDescription<br/>name = create2, desc = create3"]
-  SUP["EntityImageDescriptionSupport<br/>buildTextBlock / buildDesc"]
-  SIZ["measureLeafNode<br/>routes here since T6"]
-  REN["renderer-entity / renderer-symbol"]
+package "SHARED pipeline — seams wired" {
+  [AtomImageResolver\n+ ink fields (T3)] as AIR
+  [buildLineAtoms\nimgFallbackFont ALREADY exists,\nnever passed (T3)] as BLA
+}
 
-  BF --> BE1 & BE2
-  BE1 & BE2 --> BEA --> TBLB
-  BF --> EID
-  SUP -.->|"superseded by T4"| EID
-  AIR --> SUP
-  BLA --> SUP
-  EID --> SIZ & REN
+[EntityImageDescription\nname = create2, desc = create3] as EID
+[EntityImageDescriptionSupport\nbuildTextBlock / buildDesc] as SUP
+[measureLeafNode\nroutes here since T6] as SIZ
+[renderer-entity / renderer-symbol] as REN
+
+BF --> BE1
+BF --> BE2
+BE1 --> TBLB : BEA
+BE2 --> TBLB : BEA
+BF --> EID
+SUP ..> EID : superseded by T4
+AIR --> SUP
+BLA --> SUP
+EID --> SIZ
+EID --> REN
+@enduml
 ```
 
 ## Reading it

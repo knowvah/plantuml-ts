@@ -1,19 +1,37 @@
 # G7 component map
 
-```mermaid
-graph TD
-  subgraph plantuml-ts
-    SCC[state-composite-cluster.ts<br/>gate + titleTableHeight + O-O fix] --> GLB[graph-layout-build.ts<br/>addClusters: ee/i/rank branch]
-    GLT[graph-layout.types.ts<br/>DotInputCluster seam] --> GLB
-    GLB --> GVTS[(graphviz-ts .tgz<br/>READ-ONLY, pinned)]
-    GVTS --> GEO[state-composite-geo.ts<br/>materializeCluster]
-    FC[state-composite-frontier.ts<br/>FrontierCalculator - committed, unwired] --> GEO
-    GEO --> REN[renderer-composite-box.ts<br/>unchanged]
-  end
-  subgraph oracles
-    JAR[jar cached svek DOT + SVG] -.spec.-> GLB
-    DOT[real dot 15.1.0] -.ground truth.-> M[T1 isolation matrix]
-  end
-  M -.adjudicates.-> GVTS
-  ISS9[docs/graphviz-issues/09<br/>library path only] -.external fix.-> GVTS
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "plantuml-ts" {
+  [state-composite-cluster.ts\ngate + titleTableHeight + O-O fix] as SCC
+  [graph-layout-build.ts\naddClusters: ee/i/rank branch] as GLB
+  [graph-layout.types.ts\nDotInputCluster seam] as GLT
+  [graphviz-ts .tgz\nREAD-ONLY, pinned] as GVTS
+  [state-composite-geo.ts\nmaterializeCluster] as GEO
+  [state-composite-frontier.ts\nFrontierCalculator - committed, unwired] as FC
+  [renderer-composite-box.ts\nunchanged] as REN
+}
+
+package "oracles" {
+  [jar cached svek DOT + SVG] as JAR
+  [real dot 15.1.0] as DOT
+  [T1 isolation matrix] as M
+}
+
+[docs/graphviz-issues/09\nlibrary path only] as ISS9
+
+SCC --> GLB
+GLT --> GLB
+GLB --> GVTS
+GVTS --> GEO
+FC --> GEO
+GEO --> REN
+JAR ..> GLB : spec
+DOT ..> M : ground truth
+M ..> GVTS : adjudicates
+ISS9 ..> GVTS : external fix
+@enduml
 ```

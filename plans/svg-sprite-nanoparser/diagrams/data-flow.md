@@ -6,24 +6,25 @@ Two channels, structurally independent because they are different method
 calls on different objects. Nothing computes an "ink box" — the narrowing is
 emergent.
 
-```mermaid
-sequenceDiagram
-    participant Sheet as SheetBlock1
-    participant Atom as AtomSprite
-    participant Nano as SvgNanoParser
-    participant FP as Footprint
-
-    Note over Sheet,Atom: LAYOUT channel
-    Sheet->>Atom: calculateDimensionSlow()
-    Atom-->>Sheet: DECLARED box (16x16)
-
-    Note over Nano,FP: INK channel
-    Nano->>Nano: drawU() walks raw SVG
-    loop each path / circle / ellipse
-        Nano->>FP: drawPath(primitive)
-        FP->>FP: record real min/max corners
-    end
-    FP-->>FP: ellipse fits OBSERVED ink
+```plantuml
+@startuml
+' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
+' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
+' Original nesting: loop each path / circle / ellipse
+participant "SheetBlock1" as Sheet
+participant "AtomSprite" as Atom
+participant "SvgNanoParser" as Nano
+participant "Footprint" as FP
+note over Sheet,Atom : LAYOUT channel
+Sheet -> Atom : calculateDimensionSlow()
+Atom --> Sheet : DECLARED box (16x16)
+note over Nano,FP : INK channel
+Nano -> Nano : drawU() walks raw SVG
+Nano -> FP : drawPath(primitive)
+note over Nano : LOOP: each path / circle / ellipse
+FP -> FP : record real min/max corners
+FP --> FP : ellipse fits OBSERVED ink
+@enduml
 ```
 
 ## This port, before the mission (the bug)
@@ -32,19 +33,19 @@ One channel. `drawAtoms` emits a single opaque `UImage`, so the jar-verified
 `svgInkBox` precomputation has nowhere to go but the field `SheetBlock1` also
 reads for line stacking.
 
-```mermaid
-sequenceDiagram
-    participant Leaf as leaf-sizing#fitToInk
-    participant Res as AtomImageResolver
-    participant Draw as drawAtoms
-    participant Sheet as SheetBlock1
-
-    Leaf->>Res: substitute INK box as the resolved dimension
-    Res-->>Draw: {href, width=INK, height=INK}
-    Draw->>Draw: one opaque UImage
-    Draw->>Sheet: cursor advances by INK width
-    Note over Sheet: line 1 correct (only the ellipse reads it)
-    Note over Sheet: line 2 stacks on INK height -> 0.029321in widening
+```plantuml
+@startuml
+participant "leaf-sizing#fitToInk" as Leaf
+participant "AtomImageResolver" as Res
+participant "drawAtoms" as Draw
+participant "SheetBlock1" as Sheet
+Leaf -> Res : substitute INK box as the resolved dimension
+Res --> Draw : {href, width=INK, height=INK}
+Draw -> Draw : one opaque UImage
+Draw -> Sheet : cursor advances by INK width
+note over Sheet : line 1 correct (only the ellipse reads it)
+note over Sheet : line 2 stacks on INK height -> 0.029321in widening
+@enduml
 ```
 
 ## This port, after the mission
@@ -52,24 +53,24 @@ sequenceDiagram
 Two channels again, and structurally unable to recollapse: ink exists only
 inside `primitives`, layout only in `width`/`height`.
 
-```mermaid
-sequenceDiagram
-    participant Res as resolveSpriteAtom (T9)
-    participant Nano as SvgNanoParser (T6/T8)
-    participant Draw as drawAtoms (T7)
-    participant Sheet as SheetBlock1
-    participant FP as Footprint
-
-    Res->>Nano: decompose sprite SVG
-    Nano-->>Res: UPath[] primitives
-    Res-->>Draw: {kind:'drawable', primitives, width=DECLARED, height=DECLARED}
-
-    Note over Draw,Sheet: LAYOUT channel
-    Draw->>Sheet: cursor advances by DECLARED width
-
-    Note over Draw,FP: INK channel
-    loop each primitive
-        Draw->>FP: draw UPath
-        FP->>FP: record real min/max corners
-    end
+```plantuml
+@startuml
+' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
+' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
+' Original nesting: loop each primitive
+participant "resolveSpriteAtom (T9)" as Res
+participant "SvgNanoParser (T6/T8)" as Nano
+participant "drawAtoms (T7)" as Draw
+participant "SheetBlock1" as Sheet
+participant "Footprint" as FP
+Res -> Nano : decompose sprite SVG
+Nano --> Res : UPath[] primitives
+Res --> Draw : {kind:'drawable', primitives, width=DECLARED, height=DECLARED}
+note over Draw,Sheet : LAYOUT channel
+Draw -> Sheet : cursor advances by DECLARED width
+note over Draw,FP : INK channel
+Draw -> FP : draw UPath
+note over Draw : LOOP: each primitive
+FP -> FP : record real min/max corners
+@enduml
 ```

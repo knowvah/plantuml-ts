@@ -1,26 +1,53 @@
 # Component Map
 
-```mermaid
-graph TD
-    A[src/index.ts] -->|registers| B[chronologyPlugin]
-    B --> C[src/diagrams/chronology/index.ts]
-    C --> D[parser.ts]
-    C --> E[layout.ts]
-    C --> F[renderer.ts]
-    D --> G[ast.ts]
-    E --> G
-    F --> G
-    F --> H[src/core/svg.ts\ndiamond, line, text, svgRoot]
-    I[src/core/block-extractor.ts] -->|routes 'chronology'| B
-    J[src/core/dispatcher.ts] -->|SyncPlugin interface| C
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[src/index.ts] as A
+[chronologyPlugin] as B
+[src/diagrams/chronology/index.ts] as C
+[parser.ts] as D
+[layout.ts] as E
+[renderer.ts] as F
+[ast.ts] as G
+[src/core/svg.ts\ndiamond, line, text, svgRoot] as H
+[src/core/block-extractor.ts] as I
+[src/core/dispatcher.ts] as J
+
+A --> B : registers
+B --> C
+C --> D
+C --> E
+C --> F
+D --> G
+E --> G
+F --> G
+F --> H
+I --> B : routes 'chronology'
+J --> C : SyncPlugin interface
+@enduml
 ```
 
-```mermaid
-graph LR
-    SRC["@startchronology source"] --> P[parseChronology]
-    P --> AST[ChronologyDiagramAST\nevents: ChronologyEvent\{\}]
-    AST --> L[layoutChronology]
-    L --> GEO[ChronologyGeometry\nevents x/labelAbove\ndayTicks x/label\ndimensions]
-    GEO --> R[renderChronology]
-    R --> SVG["SVG string"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[@startchronology source] as SRC
+[parseChronology] as P
+[ChronologyDiagramAST\nevents: ChronologyEvent\{\}] as AST
+[layoutChronology] as L
+[ChronologyGeometry\nevents x/labelAbove\ndayTicks x/label\ndimensions] as GEO
+[renderChronology] as R
+[SVG string] as SVG
+
+SRC --> P
+P --> AST
+AST --> L
+L --> GEO
+GEO --> R
+R --> SVG
+@enduml
 ```

@@ -2,23 +2,37 @@
 
 ## Today: authored fixtures cannot reach the ratchet
 
-```mermaid
-flowchart TD
-  M["tests/visual/data/&lt;type&gt;.json<br/>committed · 351 usecase"] --> LF["loadFixtures(type)"]
-  A["oracle/goldens/svg-description/&lt;type&gt;/&lt;slug&gt;/<br/>in.puml + golden.svg"] -. "never enters" .-> LF
-  LF --> CAN["ensureCanonical → generateCanonical<br/>test-results/visual-qa-svg/canonical/"]
-  CAN --> TAG["taggedSlugs(type, tag)"]
-  LF --> BA["buildAgg"]
-  TAG --> BA
-  BA -->|"!slugs.has(slug) → continue<br/><b>silently</b>"| DROP(["dropped"])
-  BA --> CACHE["test-results/dot-cache/&lt;type&gt;/&lt;slug&gt;/<br/>.done · in.puml · in.svg · svek-N.dot"]
-  CACHE --> SUR["svg-parity-survey.ts"]
-  SUR --> PJ["parity.json<br/>committed · 355 rows"]
-  PJ --> AC3{"ratchet AC3<br/>dotEqual === true?"}
-  AC3 -->|"no row exists"| BLOCK(["BLOCKED forever"])
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  style DROP fill:#fdd,stroke:#c00
-  style BLOCK fill:#fdd,stroke:#c00
+[tests/visual/data/] as M
+[loadFixtures(type)] as LF
+[oracle/goldens/svg-description/type/slug/\nin.puml + golden.svg] as A
+[ensureCanonical → generateCanonical\ntest-results/visual-qa-svg/canonical/] as CAN
+[taggedSlugs(type, tag)] as TAG
+[buildAgg] as BA
+[['dropped']] as DROP
+[test-results/dot-cache/] as CACHE
+[svg-parity-survey.ts] as SUR
+[parity.json\ncommitted · 355 rows] as PJ
+[ratchet AC3\ndotEqual === true?] as AC3
+[['BLOCKED forever']] as BLOCK
+
+M --> LF
+A ..> LF : never enters
+LF --> CAN
+CAN --> TAG
+LF --> BA
+TAG --> BA
+BA --> DROP : !slugs.has(slug) → continue\nbsilently/b
+BA --> CACHE
+CACHE --> SUR
+SUR --> PJ
+PJ --> AC3
+AC3 --> BLOCK : no row exists
+@enduml
 ```
 
 Two independent failures, and the second is the reason this mission is not a
@@ -32,36 +46,60 @@ one-line change:
 
 ## After: enumeration plus per-slug canonical freshness
 
-```mermaid
-flowchart TD
-  M["tests/visual/data/&lt;type&gt;.json"] --> LF["loadFixtures(type)<br/><b>T1: merge + dedup by slug</b>"]
-  A["oracle/goldens/svg-description/&lt;type&gt;/*/in.puml<br/><b>single source of truth</b>"] --> LF
-  LF --> CAN["ensureCanonical<br/><b>T1: regenerate if ANY fixture<br/>lacks a canonical</b>"]
-  CAN --> TAG["taggedSlugs(type, tag)<br/>usecase → DESCRIPTION"]
-  LF --> BA["buildAgg<br/><b>T1: skips reported on stderr</b>"]
-  TAG --> BA
-  BA --> CACHE["dot-cache gains<br/>sprite-svg-{bootstrap,archimate,multiline}-0"]
-  CACHE --> SUR["svg-parity-survey.ts<br/><b>T2: usecase only</b>"]
-  SUR --> PJ["parity.json<br/><b>+3 rows, dotEqual: true</b>"]
-  PJ --> AC3{"ratchet AC3"}
-  AC3 -->|"eligible"| RJ["<b>T3: ratchet.json</b><br/>measured, then pinned"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  style RJ fill:#dfd,stroke:#0a0
+[tests/visual/data/] as M
+[loadFixtures(type)\nbT1: merge + dedup by slug/b] as LF
+[oracle/goldens/svg-description/] as A
+[ensureCanonical\nbT1: regenerate if ANY fixture\nlacks a canonical/b] as CAN
+[taggedSlugs(type, tag)\nusecase → DESCRIPTION] as TAG
+[buildAgg\nbT1: skips reported on stderr/b] as BA
+[dot-cache gains\nsprite-svg-{bootstrap,archimate,multiline}-0] as CACHE
+[svg-parity-survey.ts\nbT2: usecase only/b] as SUR
+[parity.json\nb+3 rows, dotEqual: true/b] as PJ
+[ratchet AC3] as AC3
+[bT3: ratchet.json/b\nmeasured, then pinned] as RJ
+
+M --> LF
+A --> LF
+LF --> CAN
+CAN --> TAG
+LF --> BA
+TAG --> BA
+BA --> CACHE
+CACHE --> SUR
+SUR --> PJ
+PJ --> AC3
+AC3 --> RJ : eligible
+@enduml
 ```
 
 ## The measurement contract — read this before comparing anything
 
 The ratchet does **not** compare raw bytes.
 
-```mermaid
-flowchart LR
-  O["ours (renderFixture<br/>+ DeterministicMeasurer)"] --> N1["normalizeSvg"]
-  J["jar golden.svg"] --> N2["normalizeSvg"]
-  N1 --> C["compareSvg(…, 'deterministic')<br/>tolerance 0.01"]
-  N2 --> C
-  C --> V{"diffs.length === 0"}
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  N1 -. "strips every data-* attribute<br/>rounds numerics" .-> N1
+[ours (renderFixture\n+ DeterministicMeasurer)] as O
+[normalizeSvg] as N1
+[jar golden.svg] as J
+[normalizeSvg] as N2
+[compareSvg(…, 'deterministic')\ntolerance 0.01] as C
+[diffs.length === 0] as V
+
+O --> N1
+J --> N2
+N1 --> C
+N2 --> C
+C --> V
+N1 ..> N1 : strips every data-* attribute\nrounds numerics
+@enduml
 ```
 
 Measuring with `===` reports differences the gate does not care about —

@@ -1,58 +1,56 @@
 # Component map — what this mission touches
 
-```mermaid
-graph TD
-    subgraph vendored["assets/stdlib/ — READ ONLY (ADR-1)"]
-        BP["bootstrap1.13.1/bootstrap.puml<br/>1,085,342 B · 2,078 sprites"]
-        MAN["stdlib.manifest.json<br/>license field — ADR-2 keys on this"]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph scripts["scripts/ — Node OK"]
-        SPLIT["split-sprite-bundle/split.ts<br/>T1 CREATE"]
-        ALLOW["split-sprite-bundle/allowlist.ts<br/>T1 CREATE · fail-closed"]
-        SPECS["build-stdlib-packages/package-specs.ts<br/>T1 MODIFY"]
-        BUILD["build-stdlib-packages.ts<br/>T1 MODIFY — the wiring"]
-    end
+package "assets/stdlib/ — READ ONLY (ADR-1)" {
+  [bootstrap1.13.1/bootstrap.puml\n1,085,342 B · 2,078 sprites] as BP
+  [stdlib.manifest.json\nlicense field — ADR-2 keys on this] as MAN
+}
 
-    subgraph pkg["packages/stdlib/ — derived output"]
-        FRAG["assets/bootstrap1.13.1/sprites/*.puml<br/>2,078 fragments · T1 emits, T5 ships"]
-        SMAN["generated/*.split.js<br/>name list · 7,289 B gzip"]
-    end
+package "scripts/ — Node OK" {
+  [split-sprite-bundle/split.ts\nT1 CREATE] as SPLIT
+  [split-sprite-bundle/allowlist.ts\nT1 CREATE · fail-closed] as ALLOW
+  [build-stdlib-packages/package-specs.ts\nT1 MODIFY] as SPECS
+  [build-stdlib-packages.ts\nT1 MODIFY — the wiring] as BUILD
+}
 
-    subgraph src["src/ — browser-safe, NO Node built-ins"]
-        SCAN["core/sprite-prefetch.ts<br/>T2 CREATE"]
-        CREOLE["core/creole-atoms.ts<br/>T2 export only"]
-        RESOLVER["core/include-resolver.ts<br/>T4 MODIFY · AT 500-line cap"]
-        SPRITES["core/sprite-commands.ts<br/>T3 MODIFY · collisions[]"]
-        INDEX["index.ts<br/>T3 MODIFY · AT 500-line cap"]
-    end
+package "packages/stdlib/ — derived output" {
+  [assets/bootstrap1.13.1/sprites/*.puml\n2,078 fragments · T1 emits, T5 ships] as FRAG
+  [generated/*.split.js\nname list · 7,289 B gzip] as SMAN
+}
 
-    subgraph reuse["SI11a — reused UNCHANGED"]
-        REMOTE["tim/StdlibRemote.ts"]
-        REG["tim/StdlibRegistry.ts"]
-    end
+package "src/ — browser-safe, NO Node built-ins" {
+  [core/sprite-prefetch.ts\nT2 CREATE] as SCAN
+  [core/creole-atoms.ts\nT2 export only] as CREOLE
+  [core/include-resolver.ts\nT4 MODIFY · AT 500-line cap] as RESOLVER
+  [core/sprite-commands.ts\nT3 MODIFY · collisions[]] as SPRITES
+  [index.ts\nT3 MODIFY · AT 500-line cap] as INDEX
+}
 
-    BP -->|read| SPLIT
-    MAN -->|license| ALLOW
-    ALLOW --> SPLIT
-    SPLIT --> FRAG
-    SPLIT --> SMAN
-    SPECS --> BUILD
-    BUILD --> SPLIT
+package "SI11a — reused UNCHANGED" {
+  [tim/StdlibRemote.ts] as REMOTE
+  [tim/StdlibRegistry.ts] as REG
+}
 
-    CREOLE -->|SPRITE_PATTERN| SCAN
-    SCAN --> RESOLVER
-    INDEX -->|onWarning, sprites| RESOLVER
-    SPRITES -->|collisions| INDEX
-    SMAN --> RESOLVER
-    FRAG --> RESOLVER
-    REMOTE --> RESOLVER
-    REG --> RESOLVER
-
-    style BP fill:#2d3748,stroke:#e53e3e,color:#fff
-    style MAN fill:#2d3748,stroke:#e53e3e,color:#fff
-    style RESOLVER fill:#2c5282,stroke:#63b3ed,color:#fff
-    style INDEX fill:#2c5282,stroke:#63b3ed,color:#fff
+BP --> SPLIT : read
+MAN --> ALLOW : license
+ALLOW --> SPLIT
+SPLIT --> FRAG
+SPLIT --> SMAN
+SPECS --> BUILD
+BUILD --> SPLIT
+CREOLE --> SCAN : SPRITE_PATTERN
+SCAN --> RESOLVER
+INDEX --> RESOLVER : onWarning, sprites
+SPRITES --> INDEX : collisions
+SMAN --> RESOLVER
+FRAG --> RESOLVER
+REMOTE --> RESOLVER
+REG --> RESOLVER
+@enduml
 ```
 
 **Red** = read-only vendored input; writing there is stop condition 5.

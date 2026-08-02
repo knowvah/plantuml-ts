@@ -2,55 +2,81 @@
 
 ## 1. Where T6 stopped
 
-```mermaid
-graph LR
-  A["measureLeafNode"] -->|"box family"| B["EntityImageDescription<br/>calculateDimensionSlow ✓"]
-  A -->|"folder / package"| C["measureFolderLeaf<br/>(flat table +12)"]
-  A -->|"usecase + sprite"| D["measureUsecase<br/>(ink via sprites lookup)"]
-  A -->|"box + img"| E["legacy fallback<br/>(diagram-default font)"]
-  A -->|"box + latex"| F["legacy fallback<br/>(0-width divergence)"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  C -.->|"routing WIDENED 8"| X["no title margin<br/>upstream"]
-  D -.->|"widened 2"| Y["AtomImageResolver<br/>has no ink"]
-  E -.->|"widened 1"| Z["imgFallbackFont<br/>never passed"]
-  F -.->|"worse"| W["real KaTeX render<br/>— KEEP THE DIVERGENCE"]
+[measureLeafNode] as A
+[EntityImageDescription\ncalculateDimensionSlow ✓] as B
+[measureFolderLeaf\n(flat table +12)] as C
+[measureUsecase\n(ink via sprites lookup)] as D
+[legacy fallback\n(diagram-default font)] as E
+[legacy fallback\n(0-width divergence)] as F
+[no title margin\nupstream] as X
+[AtomImageResolver\nhas no ink] as Y
+[imgFallbackFont\nnever passed] as Z
+[real KaTeX render\n— KEEP THE DIVERGENCE] as W
+
+A --> B : box family
+A --> C : folder / package
+A --> D : usecase + sprite
+A --> E : box + img
+A --> F : box + latex
+C ..> X : routing WIDENED 8
+D ..> Y : widened 2
+E ..> Z : widened 1
+F ..> W : worse
+@enduml
 ```
 
 ## 2. What each batch removes
 
-```mermaid
-sequenceDiagram
-    participant T1 as T1 goldens
-    participant T2a as T2a base
-    participant T3 as T3 seams
-    participant T2b as T2b bodies
-    participant T4 as T4 wire
-    participant T5 as T5 widen
-
-    T1->>T1: build the SVG gate FIRST (4 goldens is not a gate)
-    par port, nothing wired
-        T2a->>T2a: BodyEnhancedAbstract + TextBlockLineBefore
-    and
-        T3->>T3: ink fields; thread the existing imgFallbackFont
-    end
-    T2a->>T2b: base ready
-    T2b->>T2b: BodyEnhanced1 (marginX 6) / 2 (marginX 0) + factory
-    Note over T2a,T2b: ratchets must NOT move — nothing calls it yet
-    T2b->>T4: factory ready
-    T3->>T4: seams ready
-    T4->>T4: EntityImageDescription uses create2/create3
-    Note over T4: ONLY task that changes rendered output — T1 watches it
-    T4->>T5: causes removed
-    T5->>T5: delete 3 guards; latex guard STAYS
-    Note over T5: conformance moves HERE, alone, so a bisect has one cause
+```plantuml
+@startuml
+' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
+' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
+' Original nesting: par port, nothing wired ; and
+participant "T1 goldens" as T1
+participant "T2a base" as T2a
+participant "T3 seams" as T3
+participant "T2b bodies" as T2b
+participant "T4 wire" as T4
+participant "T5 widen" as T5
+T1 -> T1 : build the SVG gate FIRST (4 goldens is not a gate)
+T2a -> T2a : BodyEnhancedAbstract + TextBlockLineBefore
+note over T2a : PAR: port, nothing wired
+T3 -> T3 : ink fields; thread the existing imgFallbackFont
+note over T3 : AND
+T2a -> T2b : base ready
+T2b -> T2b : BodyEnhanced1 (marginX 6) / 2 (marginX 0) + factory
+note over T2a,T2b : ratchets must NOT move — nothing calls it yet
+T2b -> T4 : factory ready
+T3 -> T4 : seams ready
+T4 -> T4 : EntityImageDescription uses create2/create3
+note over T4 : ONLY task that changes rendered output — T1 watches it
+T4 -> T5 : causes removed
+T5 -> T5 : delete 3 guards; latex guard STAYS
+note over T5 : conformance moves HERE, alone, so a bisect has one cause
+@enduml
 ```
 
 ## 3. The rule that governs every batch
 
-```mermaid
-graph LR
-  A["a pin widens"] --> B{"diagnose to a<br/>file:line first"}
-  B -->|"mechanism found"| C["carry the behaviour across"]
-  B -->|"not found"| D["STOP and report"]
-  A -.->|"NEVER"| E["re-baseline the pin"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[a pin widens] as A
+[diagnose to a\nfile:line first] as B
+[carry the behaviour across] as C
+[STOP and report] as D
+[re-baseline the pin] as E
+
+A --> B
+B --> C : mechanism found
+B --> D : not found
+A ..> E : NEVER
+@enduml
 ```

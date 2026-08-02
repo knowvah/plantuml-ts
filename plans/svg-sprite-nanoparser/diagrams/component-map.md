@@ -3,61 +3,50 @@
 Green = created, amber = modified, grey = read-only context.
 Task IDs in brackets.
 
-```mermaid
-graph TD
-    subgraph new["New ports (982 Java lines)"]
-        SP["SvgPath.ts<br/>[T1] &larr; openiconic/SvgPath.java 255"]
-        CR["ColorResolver.ts<br/>[T2] &larr; emoji/ColorResolver.java 77"]
-        UGS["UGraphicWithScale.ts<br/>[T3] &larr; emoji/UGraphicWithScale.java 128"]
-        NANO["SvgNanoParser.ts<br/>[T6 core, T8 shapes]<br/>&larr; svg/parser/ 522"]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph mod["Modified"]
-        BBOX["svg-path-bbox.ts [T5]"]
-        ATOMS["creole-atoms.ts [T4]<br/>AtomImageResolver union"]
-        DRAW["EntityImageDescriptionSupport.ts [T7]<br/>drawAtoms"]
-        RENDER["render-atoms.ts [T9]<br/>resolveSpriteAtom"]
-        LEAF["leaf-sizing.ts [T10]<br/>retire fitToInk"]
-    end
+package "New ports (982 Java lines)" {
+  [SvgPath.ts\n[T1] &larr; openiconic/SvgPath.java 255] as SP
+  [ColorResolver.ts\n[T2] &larr; emoji/ColorResolver.java 77] as CR
+  [UGraphicWithScale.ts\n[T3] &larr; emoji/UGraphicWithScale.java 128] as UGS
+  [SvgNanoParser.ts\n[T6 core, T8 shapes]\n&larr; svg/parser/ 522] as NANO
+}
 
-    subgraph ro["Read-only context"]
-        UPATH["klimt/shape/UPath.ts<br/>minmax rule + getters"]
-        SHEET["SheetBlock1.ts:180-182<br/>line-stacking cursor"]
-        DRIVER["driver-path-svg.ts<br/>UPath to SVG path"]
-        OIC["openiconic-glyphs.ts<br/>STOP if touched"]
-        CLASS["class-layout-leaf-shapes.ts<br/>STOP if touched"]
-    end
+package "Modified" {
+  [svg-path-bbox.ts [T5]] as BBOX
+  [creole-atoms.ts [T4]\nAtomImageResolver union] as ATOMS
+  [EntityImageDescriptionSupport.ts [T7]\ndrawAtoms] as DRAW
+  [render-atoms.ts [T9]\nresolveSpriteAtom] as RENDER
+  [leaf-sizing.ts [T10]\nretire fitToInk] as LEAF
+}
 
-    SP --> NANO
-    CR --> NANO
-    UGS --> NANO
-    SP --> BBOX
-    UPATH -.-> SP
-    UPATH -.-> BBOX
-    NANO --> RENDER
-    ATOMS --> DRAW
-    ATOMS --> RENDER
-    DRAW --> LEAF
-    RENDER --> LEAF
-    DRIVER -.-> DRAW
-    SHEET -.-> DRAW
-    OIC -.->|rejected ADR-1 C| SP
-    CLASS -.->|blocks retiring<br/>the substitute| LEAF
+package "Read-only context" {
+  [klimt/shape/UPath.ts\nminmax rule + getters] as UPATH
+  [SheetBlock1.ts:180-182\nline-stacking cursor] as SHEET
+  [driver-path-svg.ts\nUPath to SVG path] as DRIVER
+  [openiconic-glyphs.ts\nSTOP if touched] as OIC
+  [class-layout-leaf-shapes.ts\nSTOP if touched] as CLASS
+}
 
-    style SP fill:#d4f7d4
-    style CR fill:#d4f7d4
-    style UGS fill:#d4f7d4
-    style NANO fill:#d4f7d4
-    style BBOX fill:#ffe8b3
-    style ATOMS fill:#ffe8b3
-    style DRAW fill:#ffe8b3
-    style RENDER fill:#ffe8b3
-    style LEAF fill:#ffe8b3
-    style UPATH fill:#e8e8e8
-    style SHEET fill:#e8e8e8
-    style DRIVER fill:#e8e8e8
-    style OIC fill:#e8e8e8
-    style CLASS fill:#e8e8e8
+SP --> NANO
+CR --> NANO
+UGS --> NANO
+SP --> BBOX
+UPATH ..> SP
+UPATH ..> BBOX
+NANO --> RENDER
+ATOMS --> DRAW
+ATOMS --> RENDER
+DRAW --> LEAF
+RENDER --> LEAF
+DRIVER ..> DRAW
+SHEET ..> DRAW
+OIC ..> SP : rejected ADR-1 C
+CLASS ..> LEAF : blocks retiring\nthe substitute
+@enduml
 ```
 
 ## Blast radius — why 389 goldens guard a description fix
@@ -66,19 +55,34 @@ graph TD
 from `buildTextBlock#drawU` — but `buildTextBlock` is the SHARED creole
 renderer:
 
-```mermaid
-graph LR
-    DRAW["drawAtoms [T7]"] --> BTB["buildTextBlock#drawU"]
-    BTB --> EID["EntityImageDescription.ts:287"]
-    BTB --> DEL["EntityImageDescriptionDelegates.ts:254"]
-    BTB --> RE["renderer-entity.ts:294,351"]
-    BTB --> RC["renderer-cluster.ts:92,99"]
-    BTB --> CM["class-member-creole.ts"]
-    BTB --> COM["class-object-map-sizing.ts"]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    CM --> G1["svg-class: 310 goldens"]
-    COM --> G2["svg-object: 22 goldens"]
-    RE --> G3["svg-state: 57 goldens"]
+[drawAtoms [T7]] as DRAW
+[buildTextBlock#drawU] as BTB
+[EntityImageDescription.ts:287] as EID
+[EntityImageDescriptionDelegates.ts:254] as DEL
+[renderer-entity.ts:294,351] as RE
+[renderer-cluster.ts:92,99] as RC
+[class-member-creole.ts] as CM
+[class-object-map-sizing.ts] as COM
+[svg-class: 310 goldens] as G1
+[svg-object: 22 goldens] as G2
+[svg-state: 57 goldens] as G3
+
+DRAW --> BTB
+BTB --> EID
+BTB --> DEL
+BTB --> RE
+BTB --> RC
+BTB --> CM
+BTB --> COM
+CM --> G1
+COM --> G2
+RE --> G3
+@enduml
 ```
 
 None of those 389 goldens contains a sprite, so they cannot churn — any diff

@@ -1,31 +1,43 @@
 # Component map — what this mission touches
 
-```mermaid
-graph TD
-  subgraph class engine [src/diagrams/class — primary write-set]
-    P[parser.ts] --> CC[class-commands.ts<br/>T1 new, T6 newpage]
-    P --> AST[ast.ts<br/>T6 pages]
-    L[layout.ts<br/>T5 T7] --> CDG[class-dot-graph.ts<br/>T2 new, T5 T8]
-    L --> R[renderer.ts<br/>T7 stacked pages]
-    HLX[class-html-label.ts]:::dead
-  end
-  subgraph shared [src/core — additive only, D3]
-    GLT[graph-layout.types.ts]
-    EMIT[svek-dot-emit.ts]
-  end
-  subgraph harness [parity harness]
-    RPT[scripts/dot-sync-report.ts<br/>T4 jar unification]
-    CMP[tests/oracle/svek-dot.ts<br/>read-only comparator]
-    RAT[tests/oracle/class-dot-parity.test.ts<br/>T9 ratchet]
-    GOLD[(oracle/goldens/class/**)]
-  end
-  CDG --> GLT
-  GLT --> EMIT
-  EMIT --> CMP
-  RPT --> CMP
-  RAT --> GOLD
-  RAT --> CMP
-  classDef dead stroke-dasharray: 5 5
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "class engine [src/diagrams/class — primary write-set]" {
+  [parser.ts] as P
+  [class-commands.ts\nT1 new, T6 newpage] as CC
+  [ast.ts\nT6 pages] as AST
+  [layout.ts\nT5 T7] as L
+  [class-dot-graph.ts\nT2 new, T5 T8] as CDG
+  [renderer.ts\nT7 stacked pages] as R
+  [class-html-label.ts]:::dead] as HLX
+}
+
+package "src/core — additive only, D3" {
+  [graph-layout.types.ts] as GLT
+  [svek-dot-emit.ts] as EMIT
+}
+
+package "parity harness" {
+  [scripts/dot-sync-report.ts\nT4 jar unification] as RPT
+  [tests/oracle/svek-dot.ts\nread-only comparator] as CMP
+  [tests/oracle/class-dot-parity.test.ts\nT9 ratchet] as RAT
+  [oracle/goldens/class/**] as GOLD
+}
+
+P --> CC
+P --> AST
+L --> CDG
+L --> R
+CDG --> GLT
+GLT --> EMIT
+EMIT --> CMP
+RPT --> CMP
+RAT --> GOLD
+RAT --> CMP
+@enduml
 ```
 
 `class-html-label.ts` (dashed) is deleted in T3. The description engine's

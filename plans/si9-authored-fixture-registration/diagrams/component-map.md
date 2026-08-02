@@ -1,42 +1,43 @@
 # Component map — what this mission touches
 
-```mermaid
-flowchart TB
-  subgraph T1["T1 — code (batch 1)"]
-    DSR["scripts/dot-sync-report.ts<br/>loadFixtures · ensureCanonical · buildAgg"]
-    DSRT["tests/unit/scripts/<br/>dot-sync-fixtures.test.ts <i>(new)</i>"]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph T2["T2 — generated data (batch 2)"]
-    PJ["tests/oracle/svg-conformance/parity.json<br/><i>regenerated, never hand-edited</i>"]
-  end
+package "T1 — code (batch 1)" {
+  [scripts/dot-sync-report.ts\nloadFixtures · ensureCanonical · buildAgg] as DSR
+  [tests/unit/scripts/\ndot-sync-fixtures.test.ts i(new)/i] as DSRT
+}
 
-  subgraph T3["T3 — pin + docs (batch 3)"]
-    RJ["oracle/goldens/svg-description/ratchet.json"]
-    RM["oracle/goldens/svg-description/README.md"]
-    PD["plans/svg-sprite-nanoparser/decisions.md<br/><i>append amendment only</i>"]
-  end
+package "T2 — generated data (batch 2)" {
+  [tests/oracle/svg-conformance/parity.json\niregenerated, never hand-edited/i] as PJ
+}
 
-  subgraph RO["read-only — reused, never reimplemented"]
-    SUR["scripts/svg-parity-survey.ts<br/>computeDotEqual · listFixtureDirs"]
-    CMP["tests/oracle/svg-conformance/<br/>compare.ts · normalize.ts"]
-    RF["tests/oracle/svg-conformance/<br/>render-fixture.ts"]
-  end
+package "T3 — pin + docs (batch 3)" {
+  [oracle/goldens/svg-description/ratchet.json] as RJ
+  [oracle/goldens/svg-description/README.md] as RM
+  [plans/svg-sprite-nanoparser/decisions.md\niappend amendment only/i] as PD
+}
 
-  subgraph OFF["OFF LIMITS — STOP if reached"]
-    VD["tests/visual/data/*.json<br/>6 other consumers · ADR-1 rejected"]
-    CLS["src/diagrams/class/ · measureUsecase<br/>SI10"]
-    GS["any golden.svg · size-backlog.json"]
-  end
+package "read-only — reused, never reimplemented" {
+  [scripts/svg-parity-survey.ts\ncomputeDotEqual · listFixtureDirs] as SUR
+  [tests/oracle/svg-conformance/\ncompare.ts · normalize.ts] as CMP
+  [tests/oracle/svg-conformance/\nrender-fixture.ts] as RF
+}
 
-  DSR --> PJ
-  PJ --> RJ
-  SUR -.reads.-> PJ
-  CMP -.used by.-> RJ
-  RF -.used by.-> RJ
+package "OFF LIMITS — STOP if reached" {
+  [tests/visual/data/*.json\n6 other consumers · ADR-1 rejected] as VD
+  [src/diagrams/class/ · measureUsecase\nSI10] as CLS
+  [any golden.svg · size-backlog.json] as GS
+}
 
-  style OFF fill:#fdd,stroke:#c00
-  style RO fill:#eef
+DSR --> PJ
+PJ --> RJ
+SUR ..> PJ : reads
+CMP ..> RJ : used by
+RF ..> RJ : used by
+@enduml
 ```
 
 ## Blast radius by layer

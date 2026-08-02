@@ -1,14 +1,28 @@
 # Component Map
 
-```mermaid
-graph TD
-    BE[src/core/block-extractor.ts<br/>DiagramType + START_SUFFIX_MAP] -->|type 'hcl'| DISP[src/core/dispatcher.ts]
-    IDX[src/index.ts<br/>register + applyStyleMap] -->|registers| PLUG[src/diagrams/hcl/index.ts<br/>hclPlugin]
-    PLUG -->|parse| PARSE[src/diagrams/hcl/parser.ts<br/>parseHcl]
-    PLUG -->|layoutSync| LAYOUT[src/diagrams/json/layout.ts<br/>layoutJson — unchanged]
-    PLUG -->|render| RENDER[src/diagrams/json/renderer.ts<br/>renderJson — unchanged]
-    PARSE -->|produces| AST[src/diagrams/json/ast.ts<br/>JsonDiagramAST]
-    IDX -->|hcldiagram.* selectors| THEME[src/core/theme.ts<br/>Theme]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[src/core/block-extractor.ts\nDiagramType + START_SUFFIX_MAP] as BE
+[src/core/dispatcher.ts] as DISP
+[src/index.ts\nregister + applyStyleMap] as IDX
+[src/diagrams/hcl/index.ts\nhclPlugin] as PLUG
+[src/diagrams/hcl/parser.ts\nparseHcl] as PARSE
+[src/diagrams/json/layout.ts\nlayoutJson — unchanged] as LAYOUT
+[src/diagrams/json/renderer.ts\nrenderJson — unchanged] as RENDER
+[src/diagrams/json/ast.ts\nJsonDiagramAST] as AST
+[src/core/theme.ts\nTheme] as THEME
+
+BE --> DISP : type 'hcl'
+IDX --> PLUG : registers
+PLUG --> PARSE : parse
+PLUG --> LAYOUT : layoutSync
+PLUG --> RENDER : render
+PARSE --> AST : produces
+IDX --> THEME : hcldiagram.* selectors
+@enduml
 ```
 
 ## Write-set by batch

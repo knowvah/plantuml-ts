@@ -1,34 +1,38 @@
 # Component Map — Files Touched
 
-```mermaid
-graph LR
-    subgraph "Write targets"
-        MC[mincross.ts<br/>M-2 · M-5 · M-6]
-        RK[rank.ts<br/>R-3]
-        SP[splines.ts<br/>S-4 delete]
-        TMC[mincross.test.ts]
-        TRK[rank.test.ts]
-        TSP[splines.test.ts]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph "Read-only context"
-        TY[types.ts]
-        IX[index.ts]
-        PO[position.ts]
-    end
+package "Write targets" {
+  [mincross.ts\nM-2 · M-5 · M-6] as MC
+  [rank.ts\nR-3] as RK
+  [splines.ts\nS-4 delete] as SP
+  [mincross.test.ts] as TMC
+  [rank.test.ts] as TRK
+  [splines.test.ts] as TSP
+}
 
-    subgraph "Reference"
-        AU[planning/graphviz-audit.md]
-        DD[planning/dot-layout-deepdive.md]
-    end
+package "Read-only context" {
+  [types.ts] as TY
+  [index.ts] as IX
+  [position.ts] as PO
+}
 
-    MC -->|imports| TY
-    RK -->|imports| TY
-    SP -->|imports| TY
-    IX -->|calls| MC
-    IX -->|calls| RK
-    IX -->|calls| SP
-    TMC -->|tests| MC
-    TRK -->|tests| RK
-    TSP -->|tests| SP
+package "Reference" {
+  [planning/graphviz-audit.md] as AU
+  [planning/dot-layout-deepdive.md] as DD
+}
+
+MC --> TY : imports
+RK --> TY : imports
+SP --> TY : imports
+IX --> MC : calls
+IX --> RK : calls
+IX --> SP : calls
+TMC --> MC : tests
+TRK --> RK : tests
+TSP --> SP : tests
+@enduml
 ```

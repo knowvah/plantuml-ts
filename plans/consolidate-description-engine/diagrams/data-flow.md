@@ -2,41 +2,45 @@
 
 ## Dispatch (Phase 1 guard)
 
-```mermaid
-sequenceDiagram
-  participant B as block
-  participant R as dispatcher.resolve
-  participant C as class.accepts
-  participant S as sequence.accepts
-  participant D as description.accepts
-  B->>R: UmlSource (type unknown)
-  R->>C: accepts(lines)?
-  C->>C: hasDescriptiveSignal(lines)?
-  alt has node/cloud/usecase/[..]/(..)
-    C-->>R: false (guard)
-    R->>S: accepts(lines)?
-    S-->>R: false (guard)
-    R->>D: accepts(lines)?
-    D-->>R: true
-  else pure interface / actor+messages
-    C-->>R: true (class) or S true (sequence)
-  end
+```plantuml
+@startuml
+' NOTE: mermaid grouping flattened -- alt/opt/loop/group render the whole
+' diagram EMPTY in plantuml-ts today (.agent-notes/plantuml-sequence-group-empty.md).
+' Original nesting: alt has node/cloud/usecase/[..]/(..) ; else pure interface / actor+messages
+participant "block" as B
+participant "dispatcher.resolve" as R
+participant "class.accepts" as C
+participant "sequence.accepts" as S
+participant "description.accepts" as D
+B -> R : UmlSource (type unknown)
+R -> C : accepts(lines)?
+C -> C : hasDescriptiveSignal(lines)?
+C --> R : false (guard)
+note over C : ALT: has node/cloud/usecase/[..]/(..)
+R -> S : accepts(lines)?
+S --> R : false (guard)
+R -> D : accepts(lines)?
+D --> R : true
+C --> R : true (class) or S true (sequence)
+note over C : ELSE: pure interface / actor+messages
+@enduml
 ```
 
 ## Engine pipeline (Phase 2)
 
-```mermaid
-sequenceDiagram
-  participant P as parseDescription
-  participant L as layoutDescription
-  participant Rn as renderDescription
-  participant G as graph-layout seam
-  P->>P: keyword -> USymbol (KEYWORD_TO_SYMBOL)
-  P-->>L: DescriptionDiagramAST {nodes[symbol], links}
-  L->>L: size per symbol (actor/ellipse/box/...)
-  L->>G: layoutGraph(DotInputGraph)
-  G-->>L: positions + routed edges
-  L-->>Rn: DescriptionGeometry
-  Rn->>Rn: switch(symbol) -> shape | rect fallback
-  Rn-->>P: SVG string
+```plantuml
+@startuml
+participant "parseDescription" as P
+participant "layoutDescription" as L
+participant "renderDescription" as Rn
+participant "graph-layout seam" as G
+P -> P : keyword -> USymbol (KEYWORD_TO_SYMBOL)
+P --> L : DescriptionDiagramAST {nodes[symbol], links}
+L -> L : size per symbol (actor/ellipse/box/...)
+L -> G : layoutGraph(DotInputGraph)
+G --> L : positions + routed edges
+L --> Rn : DescriptionGeometry
+Rn -> Rn : switch(symbol) -> shape | rect fallback
+Rn --> P : SVG string
+@enduml
 ```

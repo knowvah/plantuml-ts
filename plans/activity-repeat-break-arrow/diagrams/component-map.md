@@ -1,51 +1,51 @@
 # Component Map — repeat/break/arrow-label
 
-```mermaid
-graph TD
-  subgraph AST["ast.ts (T1 read-only, T2+T3 write)"]
-    AN[ActivityNode union]
-    AB[ActivityBreak]
-    AAL[ActivityArrowLabel]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph Parser["parser.ts (T1+T2+T3 write)"]
-    RE_RW[RE_REPEATWHILE]
-    SK[stop keywords]
-    BR[break rule]
-    ALR[arrow-label rule]
-  end
+package "ast.ts (T1 read-only, T2+T3 write)" {
+  [ActivityNode union] as AN
+  [ActivityBreak] as AB
+  [ActivityArrowLabel] as AAL
+}
 
-  subgraph Layout["layout.ts (T2+T3 write)"]
-    BR_INT[BranchResult]
-    LS[layoutSequence]
-    LB[layoutBreak]
-    LR[layoutRepeat]
-    LI[layoutIf]
-    PL[pendingLabel]
-  end
+package "parser.ts (T1+T2+T3 write)" {
+  [RE_REPEATWHILE] as RE_RW
+  [stop keywords] as SK
+  [break rule] as BR
+  [arrow-label rule] as ALR
+}
 
-  subgraph Renderer["renderer.ts (T1+T3 write)"]
-    RN[renderNode]
-    RD[renderDiamond]
-    RE[renderEdge]
-    PILL[pill: rect+text]
-  end
+package "layout.ts (T2+T3 write)" {
+  [BranchResult] as BR_INT
+  [layoutSequence] as LS
+  [layoutBreak] as LB
+  [layoutRepeat] as LR
+  [layoutIf] as LI
+  [pendingLabel] as PL
+}
 
-  AN --> AB
-  AN --> AAL
+package "renderer.ts (T1+T3 write)" {
+  [renderNode] as RN
+  [renderDiamond] as RD
+  [renderEdge] as RE
+  [pill: rect+text] as PILL
+}
 
-  RE_RW -->|fixes T1| SK
-  BR -->|T2| AN
-  ALR -->|T3| AN
-
-  LB -->|T2 new| BR_INT
-  LS -->|accumulates| BR_INT
-  LI -->|propagates| BR_INT
-  LR -->|drains breakGeos| BR_INT
-
-  PL -->|T3| LS
-  PL -->|T3| RE
-
-  RN -->|T1 fix| RD
-  RE -->|T3| PILL
+AN --> AB
+AN --> AAL
+RE_RW --> SK : fixes T1
+BR --> AN : T2
+ALR --> AN : T3
+LB --> BR_INT : T2 new
+LS --> BR_INT : accumulates
+LI --> BR_INT : propagates
+LR --> BR_INT : drains breakGeos
+PL --> LS : T3
+PL --> RE : T3
+RN --> RD : T1 fix
+RE --> PILL : T3
+@enduml
 ```

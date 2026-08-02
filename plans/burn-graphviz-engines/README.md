@@ -22,16 +22,30 @@ until the follow-on adapter mission wires `graphviz-ts`.
 All graph layout flows through one new module — `src/core/graph-layout.ts`
 (`layoutGraph()`), the single seam consumer. See `decisions.md`.
 
-```mermaid
-graph LR
-  C[class] --> GL[core/graph-layout.ts]
-  CO[component] --> GL
-  S[state] --> GL
-  U[usecase] --> GL
-  D[dot] --> GL
-  J[json] --> GL
-  GL -->|"this mission: throws<br/>PendingGraphvizError"| X[(stub)]
-  GL -.->|"adapter mission"| GV[graphviz-ts.getLayout]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[class] as C
+[core/graph-layout.ts] as GL
+[component] as CO
+[state] as S
+[usecase] as U
+[dot] as D
+[json] as J
+[stub] as X
+[graphviz-ts.getLayout] as GV
+
+C --> GL
+CO --> GL
+S --> GL
+U --> GL
+D --> GL
+J --> GL
+GL --> X : this mission: throws\nPendingGraphvizError
+GL ..> GV : adapter mission
+@enduml
 ```
 
 ## Constraints

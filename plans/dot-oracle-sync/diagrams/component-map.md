@@ -1,28 +1,32 @@
 # Component map — what this mission touches
 
-```mermaid
-graph LR
-  subgraph harness["Batch 1 (harness)"]
-    SD["tests/oracle/svek-dot.ts (T1)"]
-    RP["scripts/dot-sync-report.ts (T2)"]
-    RT["tests/oracle/*-parity.ratchet.test.ts (T3)"]
-    GO["oracle/goldens/&lt;type&gt;/ (T3, grows each iteration)"]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph loops["Phases 2–5 (fix targets, per diagnosis)"]
-    DP["diagrams/description/{parser,layout,ast}"]
-    CP["diagrams/class/layout.ts (+model)"]
-    SP["diagrams/state/layout.ts (+model)"]
-    EM["core/svek-dot-emit.ts"]
-    GT["core/graph-layout.types.ts (additive attrs only)"]
-  end
+package "Batch 1 (harness)" {
+  [tests/oracle/svek-dot.ts (T1)] as SD
+  [scripts/dot-sync-report.ts (T2)] as RP
+  [tests/oracle/*-parity.ratchet.test.ts (T3)] as RT
+  [oracle/goldens/type/ (T3, grows each iteration)] as GO
+}
 
-  RO["READ-ONLY: core/graph-layout.ts seam,<br/>~/git/plantuml Java, graphviz-ts"]
+package "Phases 2–5 (fix targets, per diagnosis)" {
+  [diagrams/description/{parser,layout,ast}] as DP
+  [diagrams/class/layout.ts (+model)] as CP
+  [diagrams/state/layout.ts (+model)] as SP
+  [core/svek-dot-emit.ts] as EM
+  [core/graph-layout.types.ts (additive attrs only)] as GT
+}
 
-  DP --> RT
-  CP --> RT
-  SP --> RT
-  EM --> SD
+[READ-ONLY: core/graph-layout.ts seam,\n~/git/plantuml Java, graphviz-ts] as RO
+
+DP --> RT
+CP --> RT
+SP --> RT
+EM --> SD
+@enduml
 ```
 
 Not touched: renderers (geometry consumption unchanged), graphviz-ts,

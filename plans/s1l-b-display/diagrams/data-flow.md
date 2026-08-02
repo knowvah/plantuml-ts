@@ -3,25 +3,35 @@
 How a multi-line element body travels from source to sized+rendered box, and
 where each task acts.
 
-```mermaid
-flowchart TD
-  SRC["node n [ foo1 / ==== / foo2 ]<br/>(.puml source)"]
-  SRC --> P["parser.ts tryElementBlock<br/><b>T2</b>: accumulate body →<br/>node.display = 'foo1\n====\nfoo2'"]
-  P --> AST["DescriptiveNode.display"]
-  AST --> SIZE["leaf-sizing.ts measureBox<br/><b>T3</b>: creole-lexer width<br/>(strip &lt;b&gt; via spans) +<br/>HR line = 8px height"]
-  AST --> REND["renderer-cluster.ts<br/>leaf label creole draw"]
-  SIZE --> DOT["DOT node width/height<br/>(gated by size-backlog + parity)"]
-  REND --> HR{"body has<br/>==== / ---- ?"}
-  HR -- yes --> WRAP["<b>T1</b>: AbstractUGraphicHorizontalLine<br/>+ UGraphicStencil interception<br/>→ draws rule w/ box x-extent"]
-  HR -- no --> DRAW["normal creole text draw"]
-  WRAP --> SVG["SVG (no error diagram)"]
-  DRAW --> SVG
-  STYLE["&lt;style&gt; package { MinimumWidth 300 }"] -. "<b>T5</b>: per-element floor" .-> SIZE
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  classDef done fill:#e8f5e9,stroke:#43a047;
-  classDef crux fill:#fff3e0,stroke:#fb8c00;
-  class P,SIZE done
-  class WRAP crux
+[node n [ foo1 / ==== / foo2 ]\n(.puml source)] as SRC
+[parser.ts tryElementBlock\nbT2/b: accumulate body →\nnode.display = 'foo1\n====\nfoo2'] as P
+[DescriptiveNode.display] as AST
+[leaf-sizing.ts measureBox\nbT3/b: creole-lexer width\n(strip] as SIZE
+[renderer-cluster.ts\nleaf label creole draw] as REND
+[DOT node width/height\n(gated by size-backlog + parity)] as DOT
+[body has\n==== / ---- ?] as HR
+[bT1/b: AbstractUGraphicHorizontalLine\n+ UGraphicStencil interception\n→ draws rule w/ box x-extent] as WRAP
+[normal creole text draw] as DRAW
+[SVG (no error diagram)] as SVG
+[style package { MinimumWidth 300 }] as STYLE
+
+SRC --> P
+P --> AST
+AST --> SIZE
+AST --> REND
+SIZE --> DOT
+REND --> HR
+HR --> WRAP : yes
+HR --> DRAW : no
+WRAP --> SVG
+DRAW --> SVG
+STYLE ..> SIZE : bT5/b: per-element floor
+@enduml
 ```
 
 - **T1** (crux, orange): wire the already-ported HR interceptor into the render

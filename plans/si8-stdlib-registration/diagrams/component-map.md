@@ -1,53 +1,50 @@
 # Component map — what this mission touches
 
-```mermaid
-graph TD
-    subgraph src["src/ — browser-safe, no Node built-ins"]
-        IDX["index.ts<br/>T3: RenderOptions · T4: exports"]
-        IR["core/include-resolver.ts<br/>T1: getPumlResource · T3: registry + recurse"]
-        IS["core/tim/IncludeStore.ts<br/>T4: error rewrite"]
-        SS["core/tim/StdlibStore.ts<br/>UNCHANGED — ADR-3"]
-        SR["core/tim/StdlibRegistry.ts<br/>T2: NEW"]
-        IE["core/tim/IncludeExecutor.ts<br/>UNCHANGED — sync read-back"]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph tests["tests/ — Node built-ins allowed"]
-        RF["oracle/svg-conformance/render-fixture.ts<br/>T5: wire includeStore"]
-        RT["oracle/svg-conformance/<br/>description.golden.ratchet.test.ts<br/>54 pinned fixtures"]
-    end
+package "src/ — browser-safe, no Node built-ins" {
+  [index.ts\nT3: RenderOptions · T4: exports] as IDX
+  [core/include-resolver.ts\nT1: getPumlResource · T3: registry + recurse] as IR
+  [core/tim/IncludeStore.ts\nT4: error rewrite] as IS
+  [core/tim/StdlibStore.ts\nUNCHANGED — ADR-3] as SS
+  [core/tim/StdlibRegistry.ts\nT2: NEW] as SR
+  [core/tim/IncludeExecutor.ts\nUNCHANGED — sync read-back] as IE
+}
 
-    subgraph goldens["oracle/goldens/svg-description/"]
-        FX["usecase/sprite-svg-*<br/>T6: in.puml + golden.svg"]
-        RJ["ratchet.json<br/>UNCHANGED — stays pinned"]
-    end
+package "tests/ — Node built-ins allowed" {
+  [oracle/svg-conformance/render-fixture.ts\nT5: wire includeStore] as RF
+  [oracle/svg-conformance/\ndescription.golden.ratchet.test.ts\n54 pinned fixtures] as RT
+}
 
-    subgraph pkg["packages/ — UNCHANGED this mission (ADR-2)"]
-        P1["@plantuml-ts/stdlib<br/>1.8 MB · bootstrap.js 1.06 MB"]
-        P2["-aws · awslib14.js 7.93 MB"]
-        P3["-tupadr3 · tupadr3.js 19.54 MB"]
-    end
+package "oracle/goldens/svg-description/" {
+  [usecase/sprite-svg-*\nT6: in.puml + golden.svg] as FX
+  [ratchet.json\nUNCHANGED — stays pinned] as RJ
+}
 
-    SA["scripts/stdlib-assets-store.ts<br/>node:fs — script/test only"]
+package "packages/ — UNCHANGED this mission (ADR-2)" {
+  [@plantuml-ts/stdlib\n1.8 MB · bootstrap.js 1.06 MB] as P1
+  [-aws · awslib14.js 7.93 MB] as P2
+  [-tupadr3 · tupadr3.js 19.54 MB] as P3
+}
 
-    IDX --> IR
-    IR --> IS
-    IR --> SR
-    SR -.->|"dynamic import()"| P1
-    SR -.-> P2
-    SR -.-> P3
-    SS --> IS
-    IE --> IS
-    RF --> SA
-    RF --> RT
-    RT --> FX
-    RT --> RJ
+[scripts/stdlib-assets-store.ts\nnode:fs — script/test only] as SA
 
-    classDef changed fill:#2d6a4f,stroke:#95d5b2,color:#fff
-    classDef untouched fill:#3d3d3d,stroke:#888,color:#ddd
-    classDef risk fill:#7f1d1d,stroke:#fca5a5,color:#fff
-    class IDX,IR,IS,SR,RF changed
-    class SS,IE,RJ,P1,P2,P3,SA untouched
-    class FX,RT risk
+IDX --> IR
+IR --> IS
+IR --> SR
+SR ..> P1 : dynamic import()
+SR ..> P2
+SR ..> P3
+SS --> IS
+IE --> IS
+RF --> SA
+RF --> RT
+RT --> FX
+RT --> RJ
+@enduml
 ```
 
 **Green** — modified or created. **Red** — the ratchet gate this mission can

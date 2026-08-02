@@ -1,41 +1,45 @@
 # Component map — Brief 2 module graph
 
-```mermaid
-graph TD
-  subgraph existing["Existing (Brief 1 + core)"]
-    klimt["src/core/klimt/**<br/>UGraphic model + shapes + SvgGraphics + drivers"]
-    harness["tests/oracle/svg-conformance/<br/>normalizeSvg / compareSvg"]
-    measurer["src/core/measurer.ts<br/>StringMeasurer DI"]
-    layout["src/diagrams/description/layout*.ts<br/>(NOT touched)"]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph new["New in Brief 2"]
-    seed["T1 bigint seed<br/>(svg-graphics-core.ts)"]
-    metrics["T2/T4 jar metrics<br/>measurer-jar.data.ts + measurer-jar.ts"]
-    symbols["T3,T5–T10 src/core/decoration/symbol/<br/>USymbol* complete set + registry"]
-    svek["T11–T13 src/core/svek/<br/>DecorateEntityImage, Cluster, SvekEdge draw + extremities"]
-    eid["T14 src/core/svek/image/<br/>EntityImageDescription"]
-    renderer["T17 src/diagrams/description/renderer*.ts<br/>(rewritten: klimt draw sequences)"]
-    ratchet["T18/T19 oracle/goldens/svg-description/<br/>ratchet.json + goldens + ratchet test"]
-    tooling["T15/T16 scripts/<br/>svg-parity-survey, dashboard, overlay"]
-  end
+package "Existing (Brief 1 + core)" {
+  [src/core/klimt/**\nUGraphic model + shapes + SvgGraphics + drivers] as klimt
+  [tests/oracle/svg-conformance/\nnormalizeSvg / compareSvg] as harness
+  [src/core/measurer.ts\nStringMeasurer DI] as measurer
+  [src/diagrams/description/layout*.ts\n(NOT touched)] as layout
+}
 
-  seed --> klimt
-  metrics --> measurer
-  symbols --> klimt
-  svek --> klimt
-  svek --> symbols
-  eid --> symbols
-  eid --> svek
-  renderer --> eid
-  renderer --> svek
-  renderer --> klimt
-  renderer --> metrics
-  layout --> renderer
-  ratchet --> harness
-  ratchet --> renderer
-  tooling --> harness
-  tooling --> renderer
+package "New in Brief 2" {
+  [T1 bigint seed\n(svg-graphics-core.ts)] as seed
+  [T2/T4 jar metrics\nmeasurer-jar.data.ts + measurer-jar.ts] as metrics
+  [T3,T5–T10 src/core/decoration/symbol/\nUSymbol* complete set + registry] as symbols
+  [T11–T13 src/core/svek/\nDecorateEntityImage, Cluster, SvekEdge draw + extremities] as svek
+  [T14 src/core/svek/image/\nEntityImageDescription] as eid
+  [T17 src/diagrams/description/renderer*.ts\n(rewritten: klimt draw sequences)] as renderer
+  [T18/T19 oracle/goldens/svg-description/\nratchet.json + goldens + ratchet test] as ratchet
+  [T15/T16 scripts/\nsvg-parity-survey, dashboard, overlay] as tooling
+}
+
+seed --> klimt
+metrics --> measurer
+symbols --> klimt
+svek --> klimt
+svek --> symbols
+eid --> symbols
+eid --> svek
+renderer --> eid
+renderer --> svek
+renderer --> klimt
+renderer --> metrics
+layout --> renderer
+ratchet --> harness
+ratchet --> renderer
+tooling --> harness
+tooling --> renderer
+@enduml
 ```
 
 Retired at the end (T20): `tests/visual/{compare.spec.ts,

@@ -1,21 +1,35 @@
 # Component Map
 
-```mermaid
-graph TD
-    BE[block-extractor.ts<br/>add 'dot' type] --> IDX[src/index.ts<br/>register dotPlugin]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    AST[dot/ast.ts<br/>DotDiagramAST, DotGeometry] --> PAR[dot/parser.ts]
-    AST --> LAY[dot/layout.ts]
-    AST --> REN[dot/renderer.ts]
+[block-extractor.ts\nadd 'dot' type] as BE
+[src/index.ts\nregister dotPlugin] as IDX
+[dot/ast.ts\nDotDiagramAST, DotGeometry] as AST
+[dot/parser.ts] as PAR
+[dot/layout.ts] as LAY
+[dot/renderer.ts] as REN
+[dot/index.ts\nSyncPlugin] as PLUG
+[src/core/dot/\nSugiyama layout engine] as CORE_DOT
+[src/core/svg.ts] as SVG
+[src/core/theme.ts] as THEME
+[src/core/measurer.ts] as MEAS
+[src/core/skinparam.ts] as SKIN
 
-    PAR --> LAY
-    LAY --> REN
-    REN --> PLUG[dot/index.ts<br/>SyncPlugin]
-    PLUG --> IDX
-
-    CORE_DOT[src/core/dot/<br/>Sugiyama layout engine] --> LAY
-    SVG[src/core/svg.ts] --> REN
-    THEME[src/core/theme.ts] --> REN
-    MEAS[src/core/measurer.ts] --> LAY
-    SKIN[src/core/skinparam.ts] --> REN
+BE --> IDX
+AST --> PAR
+AST --> LAY
+AST --> REN
+PAR --> LAY
+LAY --> REN
+REN --> PLUG
+PLUG --> IDX
+CORE_DOT --> LAY
+SVG --> REN
+THEME --> REN
+MEAS --> LAY
+SKIN --> REN
+@enduml
 ```

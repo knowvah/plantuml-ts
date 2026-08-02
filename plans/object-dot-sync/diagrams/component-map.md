@@ -1,22 +1,40 @@
 # Engine boundary — before / after
 
-```mermaid
-graph LR
-  subgraph before [Before — diverged]
-    dispA[dispatcher] -->|"accepts: object …"| objP[objectPlugin<br/>own 272-line parser]
-    dispA -->|"accepts: class …"| clsA[class engine<br/>43-command mirror]
-    objP -->|reuses| layA[class layout+renderer]
-    clsA --> layA
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "Before — diverged" {
+  [dispatcher] as dispA
+  [objectPlugin\nown 272-line parser] as objP
+  [class engine\n43-command mirror] as clsA
+  [class layout+renderer] as layA
+}
+
+dispA --> objP : accepts: object …
+dispA --> clsA : accepts: class …
+objP --> layA : reuses
+clsA --> layA
+@enduml
 ```
 
-```mermaid
-graph LR
-  subgraph after [After — mirrors ClassDiagramFactory]
-    dispB[dispatcher] -->|"accepts: class object map …"| clsB[class engine<br/>+ CommandCreateEntityObject<br/>+ …Multilines + AddData<br/>+ CommandCreateMap]
-    clsB --> layB[class layout+renderer<br/>+ object/map sizing & render]
-    layB --> dotB[class-dot-graph → graphviz-ts]
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "After — mirrors ClassDiagramFactory" {
+  [dispatcher] as dispB
+  [class engine\n+ CommandCreateEntityObject\n+ …Multilines + AddData\n+ CommandCreateMap] as clsB
+  [class layout+renderer\n+ object/map sizing] as layB
+  [class-dot-graph → graphviz-ts] as dotB
+}
+
+dispB --> clsB : accepts: class object map …
+clsB --> layB
+layB --> dotB
+@enduml
 ```
 
 Upstream reference: `ClassDiagramFactory.java:81-85,116-117` registers

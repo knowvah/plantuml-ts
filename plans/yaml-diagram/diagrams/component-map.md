@@ -1,27 +1,42 @@
 # Component Map
 
-```mermaid
-graph TD
-    A[src/index.ts] -->|registers| B[yaml/index.ts yamlPlugin]
-    A -->|resolveThemeWithStyles| C[yamlDiagram selectors NEW]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    B -->|parse| D[yaml/parser.ts parseYaml]
-    B -->|layoutSync| E[json/layout.ts layoutJson]
-    B -->|render| F[json/renderer.ts renderJson]
+[src/index.ts] as A
+[yaml/index.ts yamlPlugin] as B
+[yamlDiagram selectors NEW] as C
+[yaml/parser.ts parseYaml] as D
+[json/layout.ts layoutJson] as E
+[json/renderer.ts renderJson] as F
+[yaml/yaml-parser.ts parseYamlLines] as G
+[yaml/monomorph.ts monomorphToJson] as H
+[JsonDiagramAST shared with JSON] as I
+[yaml/yaml-line.ts YamlLine.build] as J
+[yaml/yaml-builder.ts YamlBuilder] as K
+[yaml/monomorph.ts Monomorph] as L
+[wildcard * ** support NEW] as M
+[jsondiagram.* handlers existing] as N
+[src/core/block-extractor.ts] as O
+[DiagramType union] as P
 
-    D -->|uses| G[yaml/yaml-parser.ts parseYamlLines]
-    D -->|uses| H[yaml/monomorph.ts monomorphToJson]
-    D -->|produces| I[JsonDiagramAST shared with JSON]
-
-    G -->|uses| J[yaml/yaml-line.ts YamlLine.build]
-    G -->|uses| K[yaml/yaml-builder.ts YamlBuilder]
-    K -->|uses| L[yaml/monomorph.ts Monomorph]
-    H -->|converts| L
-
-    E -->|buildHighlightMap EXTENDED| M[wildcard * ** support NEW]
-    E -->|reads| I
-
-    C -->|aliases to| N[jsondiagram.* handlers existing]
-
-    O[src/core/block-extractor.ts] -->|type yaml ADDED| P[DiagramType union]
+A --> B : registers
+A --> C : resolveThemeWithStyles
+B --> D : parse
+B --> E : layoutSync
+B --> F : render
+D --> G : uses
+D --> H : uses
+D --> I : produces
+G --> J : uses
+G --> K : uses
+K --> L : uses
+H --> L : converts
+E --> M : buildHighlightMap EXTENDED
+E --> I : reads
+C --> N : aliases to
+O --> P : type yaml ADDED
+@enduml
 ```

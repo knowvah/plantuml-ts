@@ -1,19 +1,22 @@
 # Component Map
 
-```mermaid
-graph TD
-    IF[StringMeasurer interface<br/>+measure()<br/>+getDescent()]
-    FM[FormulaMeasurer<br/>WIDTH table port<br/>height=size<br/>getDescent=size/4.5]
-    CM[CanvasMeasurer<br/>Canvas API<br/>LRU cache 8192<br/>getDescent=size/4.5]
-    FX[FixedMeasurer<br/>deterministic tests<br/>getDescent=lineHeight/4.5]
-    W[WIDTH: readonly number[]<br/>96 values, raw px @ 12px<br/>from StringBounderFixed.java]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    IF --> FM
-    IF --> CM
-    IF --> FX
-    FM --> W
-    CM -->|fallback| FM
+[StringMeasurer interface\n+measure()\n+getDescent(] as IF
+[FormulaMeasurer\nWIDTH table port\nheight=size\ngetDescent=size/4.5] as FM
+[CanvasMeasurer\nCanvas API\nLRU cache 8192\ngetDescent=size/4.5] as CM
+[FixedMeasurer\ndeterministic tests\ngetDescent=lineHeight/4.5] as FX
+[WIDTH: readonly number[]\n96 values, raw px @ 12px\nfrom StringBounderFixed.java] as W
+[diagram layouts\nsequence / class / activity\nstate / usecase / component] as DL
 
-    DL[diagram layouts<br/>sequence / class / activity<br/>state / usecase / component]
-    DL -->|inject| IF
+IF --> FM
+IF --> CM
+IF --> FX
+FM --> W
+CM --> FM : fallback
+DL --> IF : inject
+@enduml
 ```

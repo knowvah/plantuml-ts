@@ -1,35 +1,43 @@
 # Component Map — Phase 1 Dependencies
 
-```mermaid
-graph TD
-    API[src/index.ts] --> Pre[core/preprocessor.ts]
-    API --> Ext[core/block-extractor.ts]
-    API --> Dis[core/dispatcher.ts]
-    API --> Seq[diagrams/sequence/index.ts]
-    API --> Theme[core/theme.ts]
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    Dis --> Seq
+[src/index.ts] as API
+[core/preprocessor.ts] as Pre
+[core/block-extractor.ts] as Ext
+[core/dispatcher.ts] as Dis
+[diagrams/sequence/index.ts] as Seq
+[core/theme.ts] as Theme
+[sequence/parser.ts] as Par
+[sequence/layout.ts] as Lay
+[sequence/renderer.ts] as Ren
+[sequence/ast.ts] as AST
+[core/measurer.ts] as Meas
+[core/svg.ts] as SVG
+[core/creole.ts] as Cre
 
-    Seq --> Par[sequence/parser.ts]
-    Seq --> Lay[sequence/layout.ts]
-    Seq --> Ren[sequence/renderer.ts]
-
-    Par --> AST[sequence/ast.ts]
-    Lay --> AST
-    Lay --> Meas[core/measurer.ts]
-    Lay --> Theme
-    Ren --> AST
-    Ren --> SVG[core/svg.ts]
-    Ren --> Cre[core/creole.ts]
-    Ren --> Theme
-
-    Ext --> Pre
-
-    style API fill:#f9f,stroke:#333
-    style Seq fill:#bbf,stroke:#333
-    style Par fill:#dfd,stroke:#333
-    style Lay fill:#dfd,stroke:#333
-    style Ren fill:#dfd,stroke:#333
+API --> Pre
+API --> Ext
+API --> Dis
+API --> Seq
+API --> Theme
+Dis --> Seq
+Seq --> Par
+Seq --> Lay
+Seq --> Ren
+Par --> AST
+Lay --> AST
+Lay --> Meas
+Lay --> Theme
+Ren --> AST
+Ren --> SVG
+Ren --> Cre
+Ren --> Theme
+Ext --> Pre
+@enduml
 ```
 
 ## Module responsibilities

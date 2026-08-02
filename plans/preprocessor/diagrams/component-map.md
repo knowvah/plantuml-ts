@@ -1,48 +1,49 @@
 # Component Map — Preprocessor
 
-```mermaid
-graph TD
-    subgraph "Public API (src/index.ts)"
-        render["render(source, options?)"]
-        renderAll["renderAll(source, options?)"]
-        renderSync["renderSync(source, options?)"]
-        RenderOptions["RenderOptions\n+ fetcher?: IncludeFetcher"]
-    end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-    subgraph "include-resolver.ts (modified)"
-        resolveIncludes["resolveIncludes(source, fetcher?)"]
-        resolveIncludesInner["resolveIncludesInner(..., visited, chain)\n(new internal helper)"]
-        CircularIncludeError["CircularIncludeError (new)"]
-        IncludeResolveError["IncludeResolveError (existing)"]
-        IncludeFetcher["IncludeFetcher type"]
-    end
+package "Public API (src/index.ts)" {
+  [render(source, options?)] as render
+  [renderAll(source, options?)] as renderAll
+  [renderSync(source, options?)] as renderSync
+  [RenderOptions\n+ fetcher?: IncludeFetcher] as RenderOptions
+}
 
-    subgraph "include-resolver-node.ts (new file)"
-        makeNodeFsFetcher["makeNodeFsFetcher(basePath)"]
-    end
+package "include-resolver.ts (modified)" {
+  [resolveIncludes(source, fetcher?)] as resolveIncludes
+  [resolveIncludesInner(..., visited, chain)\n(new internal helper)] as resolveIncludesInner
+  [CircularIncludeError (new)] as CircularIncludeError
+  [IncludeResolveError (existing)] as IncludeResolveError
+  [IncludeFetcher type] as IncludeFetcher
+}
 
-    subgraph "preprocessor.ts (modified)"
-        preprocess["preprocess(source)"]
-        PreprocessorResult["PreprocessorResult\n+ styles: readonly string[] (new)"]
-        applyDefines["applyDefines(line)"]
-        Define["Define = SimpleDef | ParamDef (new union)"]
-    end
+package "include-resolver-node.ts (new file)" {
+  [makeNodeFsFetcher(basePath)] as makeNodeFsFetcher
+}
 
-    render --> resolveIncludes
-    renderAll --> resolveIncludes
-    renderSync -. "throws if !include found" .-> renderSync
-    render --> preprocess
-    renderAll --> preprocess
-    renderSync --> preprocess
+package "preprocessor.ts (modified)" {
+  [preprocess(source)] as preprocess
+  [PreprocessorResult\n+ styles: readonly string[] (new)] as PreprocessorResult
+  [applyDefines(line)] as applyDefines
+  [Define = SimpleDef | ParamDef (new union)] as Define
+}
 
-    resolveIncludes --> resolveIncludesInner
-    resolveIncludesInner --> CircularIncludeError
-    resolveIncludesInner --> IncludeResolveError
-
-    makeNodeFsFetcher --> IncludeFetcher
-    makeNodeFsFetcher --> IncludeResolveError
-
-    RenderOptions --> IncludeFetcher
-    preprocess --> PreprocessorResult
-    applyDefines --> Define
+render --> resolveIncludes
+renderAll --> resolveIncludes
+renderSync ..> renderSync : throws if !include found
+render --> preprocess
+renderAll --> preprocess
+renderSync --> preprocess
+resolveIncludes --> resolveIncludesInner
+resolveIncludesInner --> CircularIncludeError
+resolveIncludesInner --> IncludeResolveError
+makeNodeFsFetcher --> IncludeFetcher
+makeNodeFsFetcher --> IncludeResolveError
+RenderOptions --> IncludeFetcher
+preprocess --> PreprocessorResult
+applyDefines --> Define
+@enduml
 ```

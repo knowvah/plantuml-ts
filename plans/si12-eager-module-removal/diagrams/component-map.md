@@ -1,61 +1,56 @@
 # Component map — what SI12 touches
 
-```mermaid
-graph TD
-  subgraph gen["scripts/build-stdlib-packages/ (T1, T2)"]
-    types["types.ts<br/>modules? optional"]:::t1
-    specs["package-specs.ts<br/>aws/tupadr3 drop modules"]:::t1
-    build["build-stdlib-packages.ts<br/>skip eager emit"]:::t1
-    idx["emit-index.ts<br/>index from remoteModules"]:::t1
-    allidx["emit-all-index.ts<br/>eager + manifests"]:::t2
-    remote["emit-remote-manifest.ts<br/>UNCHANGED"]:::keep
-  end
+```plantuml
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-  subgraph pkgs["packages/ (T2, T3)"]
-    pstd["stdlib<br/>UNCHANGED, byte-identical"]:::keep
-    paws["stdlib-aws<br/>16.7 → 8.3 MB"]:::t3
-    ptup["stdlib-tupadr3<br/>40.8 → 20.3 MB"]:::t3
-    pall["stdlib-all<br/>re-export both kinds"]:::t2
-  end
+package "scripts/build-stdlib-packages/ (T1, T2)" {
+  [types.ts\nmodules? optional']:::t1] as types
+  [package-specs.ts\naws/tupadr3 drop modules']:::t1] as specs
+  [build-stdlib-packages.ts\nskip eager emit']:::t1] as build
+  [emit-index.ts\nindex from remoteModules']:::t1] as idx
+  [emit-all-index.ts\neager + manifests']:::t2] as allidx
+  [emit-remote-manifest.ts\nUNCHANGED']:::keep] as remote
+}
 
-  subgraph tests["tests/ (T1, T2, T4, T5)"]
-    tomit["stdlib-eager-omission<br/>NEW"]:::t1
-    tall["stdlib-all-exports<br/>NEW"]:::t2
-    tpkg["stdlib-packages<br/>round-trip → assets"]:::t4
-    tfiles["stdlib-package-files<br/>LOWER the ceilings"]:::t4
-    te2e["stdlib-remote-e2e<br/>re-base the baseline"]:::t5
-  end
+package "packages/ (T2, T3)" {
+  [stdlib\nUNCHANGED, byte-identical']:::keep] as pstd
+  [stdlib-aws\n16.7 → 8.3 MB']:::t3] as paws
+  [stdlib-tupadr3\n40.8 → 20.3 MB']:::t3] as ptup
+  [stdlib-all\nre-export both kinds']:::t2] as pall
+}
 
-  docs["docs/stdlib-remote.md"]:::t6
-  index["planning/mission-index.md"]:::t7
+package "tests/ (T1, T2, T4, T5)" {
+  [stdlib-eager-omission\nNEW']:::t1] as tomit
+  [stdlib-all-exports\nNEW']:::t2] as tall
+  [stdlib-packages\nround-trip → assets']:::t4] as tpkg
+  [stdlib-package-files\nLOWER the ceilings']:::t4] as tfiles
+  [stdlib-remote-e2e\nre-base the baseline']:::t5] as te2e
+}
 
-  types --> build
-  specs --> build
-  build --> idx
-  build --> remote
-  build --> allidx
-  build --> paws
-  build --> ptup
-  build --> pstd
-  allidx --> pall
-  paws --> tfiles
-  ptup --> tfiles
-  ptup --> te2e
-  paws --> tpkg
-  pall --> tall
-  build --> tomit
-  te2e --> docs
-  paws --> docs
-  docs --> index
+[docs/stdlib-remote.md']:::t6] as docs
+[planning/mission-index.md']:::t7] as index
 
-  classDef t1 fill:#e8f0ff,stroke:#3366cc
-  classDef t2 fill:#eaf7ea,stroke:#339933
-  classDef t3 fill:#fff3e0,stroke:#cc7a00
-  classDef t4 fill:#fdeaea,stroke:#cc3333
-  classDef t5 fill:#f3e8ff,stroke:#8833cc
-  classDef t6 fill:#f0f0f0,stroke:#666
-  classDef t7 fill:#f0f0f0,stroke:#666
-  classDef keep fill:#fafafa,stroke:#bbb,stroke-dasharray: 4 3
+types --> build
+specs --> build
+build --> idx
+build --> remote
+build --> allidx
+build --> paws
+build --> ptup
+build --> pstd
+allidx --> pall
+paws --> tfiles
+ptup --> tfiles
+ptup --> te2e
+paws --> tpkg
+pall --> tall
+build --> tomit
+te2e --> docs
+paws --> docs
+docs --> index
+@enduml
 ```
 
 `assets/` is emitted unchanged for all three packages — it is what the CDN
