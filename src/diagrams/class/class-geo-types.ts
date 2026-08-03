@@ -71,6 +71,16 @@ export interface ClassifierGeo {
      */
     atoms?: readonly MemberRenderAtom[];
     /**
+     * SI10 follow-up: the summed width of {@link atoms}, carried only on a
+     * USymbol label row (usecase/actor) whose display holds a `<$sprite>` or
+     * `<img>` atom. Member rows do not need it -- they draw left-aligned from
+     * `indent`, whereas a USymbol label is CENTRED, so the drawer needs the
+     * total width to find its start-x. Set by
+     * `class-layout-leaf-shapes.ts#measureUsecaseOrActor`, read by
+     * `renderer.ts#tryRenderUSymbol`.
+     */
+    atomsWidth?: number;
+    /**
      * G2 N23: the header row's own kind-badge `<ellipse>` cx position,
      * relative to `geo.x` -- `HeaderLayout#drawU`'s `xCircle = h1` term
      * (`h1`/`h2` derived in `class-layout-helpers.ts#buildHeaderRow`'s doc

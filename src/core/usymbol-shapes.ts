@@ -25,6 +25,15 @@ export interface IconGeo {
   width: number;
   height: number;
   display: string;
+  /**
+   * Draws the label instead of the default `renderNodeLabel(display, …)`,
+   * given the centre-x and baseline-y this icon would have used. Supplied by
+   * a caller whose label needs more than a single `<text>` -- e.g. a display
+   * carrying a `<$sprite>` atom, which must emit an `<image>` plus the
+   * remaining text runs. Kept as a callback so this module stays free of any
+   * one engine's atom types; `src/core` must not depend on `src/diagrams`.
+   */
+  renderLabel?: ((cx: number, baselineY: number) => string) | undefined;
 }
 
 /**
@@ -139,7 +148,7 @@ export function renderActorIcon(node: IconGeo, theme: Theme): string {
     arms +
     leftLeg +
     rightLeg +
-    renderNodeLabel(display, cx, bodyTop + 42 + theme.fontSize, theme)
+    drawLabel(node, display, cx, bodyTop + 42 + theme.fontSize, theme)
   );
 }
 
@@ -155,7 +164,21 @@ export function renderUseCaseIcon(node: IconGeo, theme: Theme): string {
     fill: resolveElementPaint(theme, 'usecase', 'background'),
     stroke: resolveElementPaint(theme, 'usecase', 'border'),
   });
-  return oval + renderNodeLabel(node.display, cx, cy - 2 + theme.fontSize / 3, theme);
+  return oval + drawLabel(node, node.display, cx, cy - 2 + theme.fontSize / 3, theme);
+}
+
+/** The caller's own label drawing when it supplied one, else the default
+ *  single-`<text>` path. */
+function drawLabel(
+  node: IconGeo,
+  display: string,
+  cx: number,
+  baselineY: number,
+  theme: Theme,
+): string {
+  return node.renderLabel !== undefined
+    ? node.renderLabel(cx, baselineY)
+    : renderNodeLabel(display, cx, baselineY, theme);
 }
 
 type IconRenderer = (node: IconGeo, theme: Theme) => string;

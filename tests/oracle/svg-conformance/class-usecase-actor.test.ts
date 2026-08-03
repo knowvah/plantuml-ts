@@ -186,27 +186,51 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
   });
 
   /**
-   * KNOWN GAP (measured, not fixed here): T2 threaded `sprites` into
-   * `measureUsecaseOrActor`'s WIDTH calculation
-   * (`class-layout-leaf-shapes.ts`), but nothing threads the `<$sprite>` atom
-   * into the class engine's RENDER path for a usecase/actor leaf -- our
-   * output's usecase-entity `<g>` has 2 children (ellipse + one text row
-   * containing the LITERAL, un-resolved `<$Gear>` text), where the jar's has
-   * 3 (ellipse + an `<image>` for the sprite + a separate "Configure" text
-   * row). The structural childCount mismatch short-circuits `compareSvg`'s
-   * recursion into that `<g>` (see `compare.ts#compareNodes`'s "structural
-   * mismatch -- stop recursing" rule), so only the top-two `childCount`/
-   * size diffs surface here rather than a longer list of attribute diffs.
+   * The rendering half of this gap is now CLOSED. T2 threaded `sprites` into
+   * `measureUsecaseOrActor`'s sizing; the render path then still drew the
+   * LITERAL `&lt;$Gear&gt; Configure` markup as one `<text>`, so our
+   * usecase-entity `<g>` had 2 children where the jar's has 3 (ellipse +
+   * `<image>` + a separate "Configure" text row). That structural
+   * childCount mismatch short-circuited `compareSvg`'s recursion, which is
+   * why only 3 diffs surfaced.
+   *
+   * The label's atoms are now resolved at LAYOUT time (the renderer receives
+   * no sprite registry) and drawn by the class engine's own
+   * `renderRowAtoms`, so the `<image>` is emitted and the structure matches.
+   * The diff LIST is longer (12) precisely because the structures now agree
+   * and `compareSvg` recurses into the `<g>` for the first time -- read it as
+   * "same shape, imprecise numbers", not as a regression from 3.
+   *
+   * REMAINING GAP, measured: the sprite is ~7.7% oversized (3.23x2.15 vs
+   * 3x2) and sits 12.45px too high (`image/@y` 29.78 vs 42.23), with a
+   * ~2px horizontal offset shared by the image, text and ellipse. The
+   * fixture's sprite is a degenerate 3x2 monochrome grid, so these are
+   * placement/scale mathematics for a centred USymbol label, not a
+   * structural miss. `ellipse/@stroke-width` absent is the same pre-existing
+   * gap the sibling fixture pins.
    */
-  it('measures a KNOWN, pinned diff against the jar golden (sprite atom sized but not rendered)', () => {
+  it('draws the sprite atom; pinned diffs are placement/scale, not structure', () => {
     const golden = readGolden(slug);
     const ours = renderFixtureClass(readSource(slug), new DeterministicMeasurer());
     const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
     expect(pass).toBe(false);
+    // The structural childCount diff is GONE -- that is the fix.
+    expect(diffs.map((d) => d.path)).not.toContain('svg/g[1]/g[2][childCount]');
+    // And the `<image>` the jar draws is now actually emitted.
+    expect(ours).toMatch(/<image/);
     const expected: Diff[] = [
       { path: 'svg/@viewBox[2]', actual: '243', expected: '238', delta: 5, tolerance: 0.01 },
       { path: 'svg/@width', actual: '243', expected: '238', delta: 5, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2][childCount]', actual: '2', expected: '3', tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@cx', actual: '177.531', expected: '175.528', delta: 2.0030000000000143, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@rx', actual: '50.8964', expected: '48.968', delta: 1.9283999999999963, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@ry', actual: '13.4846', expected: '13.0625', delta: 0.42210000000000036, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@stroke-width', actual: '', expected: '0.5', tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@height', actual: '2.15385', expected: '2', delta: 0.15384999999999982, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@width', actual: '3.23077', expected: '3', delta: 0.23077000000000014, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '145.553', expected: '143.55', delta: 2.002999999999986, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '29.7778', expected: '42.2311', delta: 12.453299999999999, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '148.784', expected: '146.781', delta: 2.002999999999986, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/text[1]/@y', actual: '40.6667', expected: '41.2738', delta: 0.6071000000000026, tolerance: 0.01 },
     ];
     expect(diffs).toEqual(expected);
   });
