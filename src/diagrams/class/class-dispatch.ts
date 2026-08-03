@@ -56,6 +56,20 @@ import { REL_DISPATCH_RE } from './class-relationship-parser.js';
  * Patterns that appear in class diagrams. Tested against the first
  * {@link SCAN_LINE_LIMIT} lines of a block (the block extractor's probe window).
  */
+/**
+ * The subset of {@link CLASS_ACCEPTS_PATTERNS} that ONLY a class diagram can
+ * carry — used to claim a block before the descriptive decline, mirroring
+ * upstream's factory order. `interface`/`entity`/`circle` are excluded because
+ * they belong to both grammars; a class-only relationship arrow is excluded
+ * because it can appear inside an embedded `{{ }}` sub-diagram.
+ */
+const UNAMBIGUOUS_CLASS_DECL: readonly RegExp[] = [
+  /^class\s/i,
+  /^abstract\s+class\s/i,
+  /^enum\s/i,
+  /^annotation\s/i,
+];
+
 const CLASS_ACCEPTS_PATTERNS: readonly RegExp[] = [
   /^class\s/i,
   /^abstract\s+class\s/i,
@@ -249,6 +263,25 @@ export function classAccepts(lines: readonly string[]): boolean {
     if (allowMixing && DESCRIPTIVE_LEAF_DECL_RE.test(t)) return false;
     return true;
   });
+  // Upstream tries `ClassDiagramFactory` BEFORE `DescriptionDiagramFactory`,
+  // so a block carrying an UNAMBIGUOUS class construct is a class diagram even
+  // when it also names descriptive elements. The descriptive leaf is then
+  // refused by the `allowmixing` gate
+  // (`class-descriptive-leaf-command.ts#adjudicateAllowMixing`) rather than the
+  // whole block being re-routed to a factory upstream never reached — which is
+  // how `class Foo` + `usecase U1` used to render here while the jar refuses it.
+  //
+  // Deliberately narrower than {@link CLASS_ACCEPTS_PATTERNS}: `interface`,
+  // `entity` and `circle` are in BOTH grammars (see the descriptive-leaf
+  // keyword table's own note), so `interface I` inside a `component { }` is a
+  // component diagram and must keep declining to description.
+  if (
+    noLegend
+      .slice(0, SCAN_LINE_LIMIT)
+      .some((l) => UNAMBIGUOUS_CLASS_DECL.some((p) => p.test(l.trim())))
+  ) {
+    return true;
+  }
   if (hasDescriptiveSignal(declLines)) return false;
   if (declLines.some((l) => STATE_SIGNAL_RE.test(l.trim()))) return false;
   // Trimmed before testing (mirrors the rest of classAccepts, above): an

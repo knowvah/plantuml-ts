@@ -28,9 +28,11 @@ describe('classAccepts — class/description routing (Batch 1: Δ2 note-body)', 
   it('keeps an inline single-line note from being treated as a block note', () => {
     // `note left of C : text` is inline (has ` : `), no body to strip; a later
     // descriptive shorthand line is still seen as descriptive.
+    // Claimed by class (unambiguous `class C`), then refused by the
+    // allowmixing gate -- which is what the jar does with this input.
     expect(
       classAccepts(L('class C\nnote left of C : a note\ncomponent X')),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('is not tripped by a class NAMED like a descriptive keyword in a relationship', () => {
@@ -93,9 +95,14 @@ describe('classAccepts — database leaf under allow_mixing (Tier 3)', () => {
     expect(classAccepts(L('allow_mixing\nclass A\ndatabase B'))).toBe(true);
   });
 
-  it('leaves class + database WITHOUT allow_mixing to description', () => {
-    // upstream errors on a bare `database` leaf without allowmixing
-    expect(classAccepts(L('class A\ndatabase B'))).toBe(false);
+  it('CLAIMS class + database without allow_mixing, so the gate can refuse it', () => {
+    // Upstream errors on a bare `database` leaf without allowmixing
+    // (jar-verified 2026-08-02). It reaches that error by having
+    // ClassDiagramFactory OWN the block first -- so this port must claim it
+    // too, and refuse it via `adjudicateAllowMixing`, rather than re-routing
+    // to a factory upstream never reached. Routing away was the A3-era
+    // workaround for a port that could not yet error.
+    expect(classAccepts(L('class A\ndatabase B'))).toBe(true);
   });
 });
 

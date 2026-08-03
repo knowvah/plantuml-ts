@@ -41,6 +41,18 @@ describe('a descriptive LEAF in a class diagram is refused without allowmixing',
     ['actor with alias', 'class Foo\nactor "Long name" as A1'],
     ['bare package', 'class Foo\npackage com.example.thing'],
     ['package with stereotype', 'class Foo\npackage foo <<Node>>'],
+    // These five reached the DESCRIPTION/STATE engines before the routing fix
+    // and so escaped the gate entirely, even though the jar refuses every one
+    // of them. `classAccepts` now claims a block carrying an unambiguous class
+    // construct, mirroring upstream trying ClassDiagramFactory first.
+    ['usecase leaf', 'class Foo\nusecase "Do it" as UC1'],
+    ['state leaf', 'class Foo\nstate AA2'],
+    ['card with stereotype', 'class Foo\ncard focus <<action>>'],
+    ['database leaf', 'class Foo\ndatabase DB1'],
+    ['portin leaf', 'class Foo\nportin image as Foo.image'],
+    // Same shape, reached via the note/legend paths the dispatch tests cover.
+    ['component after an inline note', 'class C\nnote left of C : a note\ncomponent X'],
+    ['node after a legend', 'class foo\nlegend\n[ok]\nendlegend\nnode Server'],
   ];
 
   it.each(GATED)('%s', (_label, body) => {

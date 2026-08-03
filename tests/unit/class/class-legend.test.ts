@@ -87,8 +87,12 @@ describe('classAccepts — legend-region exclusion (iter 23b)', () => {
 
   it('a descriptive keyword AFTER endlegend is still seen (stripping does not overrun the closer)', () => {
     const lines = ['class foo', 'legend', '[ok]', 'endlegend', 'node Server'];
-    // `node` outside the legend is a genuine descriptive signal -> declined.
-    expect(classAccepts(L(lines.join('\n')))).toBe(false);
+    // `node` outside the legend IS still seen -- the stripping does not overrun
+    // the closer, which is what this test guards. What changed is the verdict:
+    // an unambiguous `class foo` means the block is claimed by class and the
+    // `node` leaf is refused by the allowmixing gate (jar-verified), instead of
+    // the whole block being re-routed to description.
+    expect(classAccepts(L(lines.join('\n')))).toBe(true);
   });
 
   it('the description engine does not steal a class+legend block (registration order)', () => {
