@@ -286,17 +286,37 @@ export function renderRowAtoms(
       x += atom.width;
       continue;
     }
-    // 'image': jar's `AtomImg`/`AtomSprite` sit at the line's TOP (altitude
-    // 0), not the text baseline -- mirrors `EntityImageDescriptionSupport
-    // .ts#drawAtoms`'s identical `origin.y` (no `baselineDy`) placement for
-    // an inline atom. `theme.fontSize/4.5` is this codebase's own
-    // content-independent descent formula (`measurer.ts`'s every
-    // `getDescent` implementation, `class-layout-helpers.ts#
-    // measureGenericClassifier`'s `baselineOffset` derivation) -- reused
-    // here without a `StringMeasurer` (the renderer has none) since it
-    // depends only on `theme.fontSize`, matching that shared precedent.
-    const lineTopY = y - (theme.fontSize - theme.fontSize / 4.5);
-    out += image(x, lineTopY, atom.width, atom.height, atom.href);
+    // 'image': an inline atom is BOTTOM-aligned to the line -- its bottom
+    // edge sits on the line's bottom, i.e. `baseline + descent`. Jar-verified
+    // 2026-08-03 by varying a sprite's grid height (1/2/4/8/16 rows) and
+    // solving for the offset: `imgY + rawHeight - baseline` is a constant
+    // 2.9531 at font 14 in EVERY case, in a usecase label AND in a class
+    // member row.
+    //
+    // This previously read `y - (fontSize - fontSize/4.5)`, i.e. the line
+    // TOP. That is the same point only when the image is exactly line-height
+    // tall -- the common case for a sprite sized to the font, which is why it
+    // held up -- and diverges by the height shortfall otherwise. A 2px sprite
+    // on a 14px line was ~12.45px too high.
+    //
+    // Positioning and x-advance use the RAW height/width; only the emitted
+    // box rounds (si5b `decisions.md` D9, Amendment 1). The jar does exactly
+    // this: it advances the following text by the raw 3.2308 while emitting
+    // `width="3"`.
+    //
+    // `theme.fontSize/4.5` remains this codebase's content-independent
+    // descent formula (`measurer.ts`'s every `getDescent`). It is an
+    // APPROXIMATION of the jar's real metric (3.1111 vs 2.9531 at font 14),
+    // so a 0.158 residual remains here -- shared with every text baseline in
+    // the port, not specific to atoms.
+    const lineBottomY = y + theme.fontSize / 4.5;
+    out += image(
+      x,
+      lineBottomY - atom.height,
+      Math.round(atom.width),
+      Math.round(atom.height),
+      atom.href,
+    );
     x += atom.width;
   }
   return out;

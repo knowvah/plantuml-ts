@@ -398,14 +398,9 @@ describe('makeAtomImageResolverFor', () => {
       { get: (name) => (name === 'foo' ? { width: 4, height: 4 } : undefined) },
       FONT.size,
     );
-    // si5b D9, AMENDED 2026-08-03 -- drawing and measuring deliberately do
-    // NOT agree for a RASTERISED sprite, mirroring the jar: measurement keeps
-    // the raw scaled value the sizer needs, while the emitted `<image>` box is
-    // the PNG's integer pixel size. Both halves are pinned here so neither can
-    // drift silently, and so the asymmetry reads as intentional.
-    expect(dims.width).toBeCloseTo(4 * 2 * (14 / 13), 10); // measured: raw
-    expect(result.width).toBe(Math.round(dims.width)); // emitted: integer
-    expect(result.height).toBe(Math.round(dims.height));
+    expect(result.width).toBe(dims.width);
+    expect(result.height).toBe(dims.height);
+    expect(result.width).toBeCloseTo(4 * 2 * (14 / 13), 10); // 4 * scale(2) * size/13
   });
 
   test('unknown sprite name resolves to undefined -- skip, matching StripeSimple.addSprite (never added)', () => {
@@ -439,10 +434,8 @@ describe('makeAtomImageResolverFor', () => {
       undefined,
       spriteScale(1, FONT.size),
     );
-    // Emission rounds (D9 as amended); the point of this cross-check is that
-    // the resolver used forcedColor and the SAME scale, so round both sides.
-    expect(result!.width).toBe(Math.round(direct.width));
-    expect(result!.height).toBe(Math.round(direct.height));
+    expect(result!.width).toBe(direct.width);
+    expect(result!.height).toBe(direct.height);
   });
 });
 

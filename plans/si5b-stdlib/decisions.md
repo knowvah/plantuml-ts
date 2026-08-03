@@ -100,26 +100,34 @@ while measuring the raw product. Both halves are jar-verified:
   font 14 — `creole-atoms-measure.ts#spriteScale`'s own jar-verified note,
   which predates this amendment and still holds.
 
-**What this supersedes.** `tests/unit/creole-img-render.test.ts` asserted, in
-its own charter language, that "drawing and measuring agree by construction"
-and cross-checked the resolver's dims against `measureInlineAtom` for
-equality. That was a reasonable reading of D9 and is now known to be a
-property the JAR ITSELF does not have. The test now pins BOTH halves —
-measured raw, emitted rounded — so the asymmetry is explicit and neither
-side can drift silently. This is a deliberate maintainer decision
-(2026-08-03) to mirror the jar rather than keep a self-consistency the
-oracle does not share.
+**Where the rounding lives, and why it matters.** At the `<image>` EMISSION
+site, not in the atom resolver. The resolvers keep raw dims because
+positioning needs them: the jar places an inline atom by its raw height and
+advances the following text by its raw width, while emitting an integer box.
+Both are observable in one element — the jar's `image/@x` 143.5501 and
+`text/@x` 146.7809 differ by the RAW 3.2308, yet the image emits
+`width="3"`. Rounding inside the resolver destroys the raw value the layout
+and the bottom-alignment both need.
 
-**Scope.** Rasterised (monochrome) sprites only, at the two `<image>`
-emission sites — `class-member-creole.ts#resolveInlineAtom` and
-`description/render-atoms.ts#resolveSpriteAtom`. SVG sprites go through
-`resolveSvgSpriteAtom`'s drawable decomposition and are untouched; `img`
-atoms carry their own natural dims and are untouched.
+**What this supersedes.** `tests/unit/creole-img-render.test.ts` asserts, in
+its own charter language, that "drawing and measuring agree by construction",
+cross-checking the RESOLVER's dims against `measureInlineAtom`. That assertion
+is CORRECT and is retained unchanged — the resolver is raw on both sides. What
+D9 now additionally says is that the emitted element may differ from both.
 
-**Consequence, stated.** Layout still reserves the raw box, so a rounded
-image can differ from its reserved space by up to half a pixel per axis.
-That is the jar's behaviour, and the size-delta corpus is unmoved
-(320/351, `widened 0`).
+**Scope, and a known inconsistency.** Applied at the class engine's emission
+site (`renderer-classifier-rows.ts#renderRowAtoms`), covering usecase/actor
+labels, member rows and notes. The description engine emits through klimt's
+shared `svg-graphics-elements.ts#svgImageDataUri`, which is NOT yet aligned:
+rounding there would also affect `<img>` atoms, whose natural dims have no
+rasterisation constraint, so it needs its own verification pass. This
+inconsistency is recorded rather than papered over. SVG sprites go through
+`resolveSvgSpriteAtom`'s drawable decomposition and are untouched.
+
+**Consequence, stated.** Layout reserves the raw box, so a rounded image can
+differ from its reserved space by up to half a pixel per axis. That is the
+jar's behaviour, and the size-delta corpus is unmoved (320/351,
+`widened 0`).
 
 **Raised by:** SI10's `class-usecase-inline-sprite` fixture, whose emitted
 sprite was ~7.7% oversized against the jar.

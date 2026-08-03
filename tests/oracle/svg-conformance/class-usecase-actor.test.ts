@@ -201,18 +201,23 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
    * and `compareSvg` recurses into the `<g>` for the first time -- read it as
    * "same shape, imprecise numbers", not as a regression from 3.
    *
-   * SCALE is now exact too: the emitted `<image>` is the jar's 3x2, after
-   * si5b D9 was amended (2026-08-03) to mirror the jar's measure-raw /
-   * emit-integer asymmetry for a rasterised sprite.
+   * SCALE and VERTICAL PLACEMENT are now exact relative to our own baseline:
+   * the emitted `<image>` is the jar's 3x2 (si5b D9 Amendment 1's
+   * measure-raw / emit-integer rule), and `renderRowAtoms` bottom-aligns an
+   * inline atom to the line instead of top-aligning it, closing `image/@y`
+   * from 12.45 to 0.607.
    *
-   * REMAINING GAP, measured: the sprite sits 12.45px too high (`image/@y`
-   * 29.78 vs 42.23) with a ~2px horizontal offset shared by image, text and
-   * ellipse, and the ellipse itself is ~1.9 wider. Those are TWO separate
-   * mechanisms, neither in this path: `renderRowAtoms` places an inline atom
-   * at the LINE TOP, which is jar-verified for member rows -- a CENTRED
-   * USymbol label needs its own vertical rule -- and the ellipse dimensions
-   * come from the sizer upstream of any drawing. `ellipse/@stroke-width`
-   * absent is the same pre-existing gap the sibling fixture pins.
+   * REMAINING GAP, and note its SHAPE: every surviving delta is now a SHARED
+   * offset, not an atom-specific error. `image/@y` 0.6072 and `text/@y`
+   * 0.6071 are the same number -- our label baseline sits 0.607 above the
+   * jar's, carrying both children with it -- and `image/@x` and `text/@x`
+   * likewise share 2.003. Those trace to two things upstream of any atom
+   * drawing: this codebase's `fontSize/4.5` descent APPROXIMATION (3.1111 vs
+   * the jar's real 2.9531 at font 14, a 0.158 difference that also shifts
+   * every text baseline in the port), and the sizer's ellipse dimensions
+   * (`ellipse/@rx` ~1.9 wide), which set the centring the label is drawn
+   * against. `ellipse/@stroke-width` absent is the same pre-existing gap the
+   * sibling fixture pins.
    */
   it('draws the sprite atom; pinned diffs are placement/scale, not structure', () => {
     const golden = readGolden(slug);
@@ -230,9 +235,9 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
       { path: 'svg/g[1]/g[2]/ellipse[1]/@rx', actual: '50.8964', expected: '48.968', delta: 1.9283999999999963, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/ellipse[1]/@ry', actual: '13.4846', expected: '13.0625', delta: 0.42210000000000036, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/ellipse[1]/@stroke-width', actual: '', expected: '0.5', tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '145.669', expected: '143.55', delta: 2.1189999999999998, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '29.7778', expected: '42.2311', delta: 12.453299999999999, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '148.669', expected: '146.781', delta: 1.8880000000000052, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '145.553', expected: '143.55', delta: 2.002999999999986, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '41.6239', expected: '42.2311', delta: 0.6071999999999989, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '148.784', expected: '146.781', delta: 2.002999999999986, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/text[1]/@y', actual: '40.6667', expected: '41.2738', delta: 0.6071000000000026, tolerance: 0.01 },
     ];
     expect(diffs).toEqual(expected);
