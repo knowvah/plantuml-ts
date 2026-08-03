@@ -15,7 +15,15 @@
  * @see ~/git/plantuml/.../klimt/drawing/svg/SvgGraphicsCore.java (getRootNode, getG, createXml)
  * @see plans/g1-description-svg/decision-journal.md (I1)
  * @see plans/g2-class-svg/ledger.md (N1)
+ * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-2, T1)
  */
+
+import { UGraphicSvg } from './drawing/svg/u-graphic-svg.js';
+import { basicSvgOption } from './drawing/svg/svg-graphics.js';
+import { seedOf } from './drawing/svg/svg-seed.js';
+import type { StringBounder as DriverStringBounder } from './drawing/svg/driver-text-svg.js';
+import type { UDrawable } from './shape/UDrawable.js';
+import type { StringMeasurer } from '../measurer.js';
 
 /**
  * A literal double-quote, via unicode escape so this file contains zero raw
@@ -207,4 +215,174 @@ export function extractFlatContent(svg: string): { body: string; extraDefs: stri
   const { withoutDefs, extraDefs } = extractDefs(svg);
   const body = unwrapContentG(extractBody(withoutDefs));
   return { body, extraDefs };
+}
+
+// ---------------------------------------------------------------------------
+// SI14 T1 -- per-drawable klimt fragment emission (decisions.md ADR-2)
+// ---------------------------------------------------------------------------
+
+/** {@link renderDrawableToFragment}'s options. `uid` is the ONLY id-collision
+ *  control: it seeds the per-fragment `UGraphicSvg` document (via
+ *  {@link seedOf}, the same string->bigint hash `UmlSource#seed()` uses),
+ *  which is what `SvgGraphicsCore`'s constructor derives `gradientId`/
+ *  `shadowId`/`filterUid` from (`svg-graphics-core.ts:173-175`) -- two
+ *  fragments built with two different `uid`s get two different id
+ *  namespaces. Callers MUST pass a `uid` that is unique per drawable within
+ *  a diagram (mirroring `renderer-uid.ts`'s per-node uid plan for the
+ *  description engine) for {@link renderDrawableToFragment}'s own
+ *  determinism guarantee to translate into cross-fragment non-collision. */
+export interface RenderDrawableToFragmentOptions {
+  /** Floor dimensions for the fragment's own `UGraphicSvg` document --
+   *  `SvgOption#minDim`, matching `basicSvgOption`'s own floor-not-final
+   *  semantics (see `renderer.ts`'s doc comment: real drawn ink can exceed
+   *  this via `ensureVisible`). */
+  readonly width: number;
+  readonly height: number;
+  /** The SAME `StringMeasurer` the caller used to size `drawable` during
+   *  layout -- threaded to BOTH `UGraphicSvg.build`'s `stringBounder`
+   *  (draw-time `textLength`) and its `measurer` param (draw-time
+   *  `getStringBounder()` width/height/descent), matching
+   *  `renderDescription`'s own single-measurer-two-seams pattern
+   *  (`renderer.ts`'s module doc comment). */
+  readonly measurer: StringMeasurer;
+  /** Per-drawable id-namespace seed -- see this interface's own doc
+   *  comment above for the exact mechanism. */
+  readonly uid: string;
+}
+
+/** {@link renderDrawableToFragment}'s return shape -- the exact contract
+ *  batch 3 (T4) consumes. `extraDefs` is OMITTED (not empty-string) when
+ *  there are none, matching `unwrapKlimtSvg`'s own convention
+ *  (`description/renderer.ts:271`). */
+export interface DrawableFragment {
+  readonly body: string;
+  readonly extraDefs?: string;
+  readonly width: number;
+  readonly height: number;
+}
+
+/** Local adapter from this task's `StringMeasurer` to `UGraphicSvg.build`'s
+ *  `DriverStringBounder` param -- the width-only half of the SAME
+ *  dual-measurer wiring `renderer-ink-extent.ts#driverBounderFor`
+ *  (description engine) and every klimt conformance test independently
+ *  define for the identical reason (that module's own doc comment: "Local
+ *  adapter, not a new shared module"). Kept local here rather than
+ *  imported from `renderer-ink-extent.ts` because that module lives under
+ *  `diagrams/description/` -- importing a diagram-engine-scoped module
+ *  from this shared `core/klimt/` seam would invert the dependency
+ *  direction every other diagram engine (class, state, ...) relies on. */
+function driverBounderFor(measurer: StringMeasurer): DriverStringBounder {
+  return {
+    calculateDimension(font, text) {
+      return { width: measurer.measure(text, font).width };
+    },
+  };
+}
+
+/**
+ * Draws a single `UDrawable` into its own per-drawable `UGraphicSvg`
+ * document and unwraps it to a `DrawableFragment` -- ADR-2's sanctioned
+ * mechanism for giving klimt a fragment-emission seam without touching
+ * `SvgGraphicsCore`'s own document-rooting behavior (stop condition 5;
+ * see this module's own doc comment and `description/renderer.ts
+ * #unwrapKlimtSvg`'s doc comment for the full rationale klimt has no
+ * "emit body without document" mode to call instead).
+ *
+ * Reuses {@link extractViewBoxDims} + {@link extractFlatContent} -- the
+ * SAME extraction `unwrapKlimtSvg` itself calls -- rather than a third,
+ * divergent unwrap implementation.
+ *
+ * Pure and deterministic (T1 AC3): every id `SvgGraphicsCore` emits is
+ * derived from `seedOf(opts.uid)` (a pure string hash, `svg-seed.ts`) --
+ * no `Date.now()`, no `Math.random()`, matching this library's
+ * project-wide no-DOM/no-async/no-wall-clock rendering-path constraint.
+ *
+ * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-2)
+ */
+export function renderDrawableToFragment(
+  drawable: UDrawable,
+  opts: RenderDrawableToFragmentOptions,
+): DrawableFragment {
+  const seed = seedOf(opts.uid);
+  const option = basicSvgOption({ minDim: { width: opts.width, height: opts.height } });
+  const stringBounder = driverBounderFor(opts.measurer);
+  const ug = UGraphicSvg.build(seed, option, VERSION_PLACEHOLDER, stringBounder, opts.measurer);
+
+  drawable.drawU(ug);
+
+  const svg = ug.getSvgString();
+  const { width, height } = extractViewBoxDims(svg);
+  const { body, extraDefs } = extractFlatContent(svg);
+  return extraDefs.length > 0 ? { body, extraDefs, width, height } : { body, width, height };
+}
+
+/**
+ * Splits a concatenated `<defs>` payload (as produced by
+ * {@link extractFlatContent}'s `extraDefs`) into its top-level sibling
+ * elements (`<linearGradient>...</linearGradient>`, `<filter>...
+ * </filter>`, ...), using open/close-tag depth tracking rather than a
+ * full XML parser -- scoped exactly to the shape `SvgGraphicsCore`'s own
+ * `XmlWriter` is known to emit (real `"`-quoted attributes, no literal
+ * `>` inside an attribute value -- the SAME producer-shape assumption
+ * {@link extractViewBoxDims}'s doc comment already documents for this
+ * module), never a general-purpose XML fragment.
+ */
+function splitTopLevelElements(xml: string): string[] {
+  const tagPattern = /<\/?[^>]+>/g;
+  const elements: string[] = [];
+  let depth = 0;
+  let start = 0;
+  let match: RegExpExecArray | null;
+  while ((match = tagPattern.exec(xml)) !== null) {
+    const tag = match[0];
+    if (tag.startsWith('</')) depth--;
+    else if (!tag.endsWith('/>')) depth++;
+    if (depth === 0) {
+      elements.push(xml.slice(start, tagPattern.lastIndex));
+      start = tagPattern.lastIndex;
+    }
+  }
+  return elements;
+}
+
+/** First `id="..."` attribute value on a top-level defs element, or
+ *  `undefined` if it carries none (e.g. a `<style>` block). */
+function extractIdAttribute(element: string): string | undefined {
+  return /\bid="([^"]*)"/.exec(element)?.[1];
+}
+
+/**
+ * Merges the `extraDefs` of N {@link DrawableFragment}s (or any object
+ * carrying an optional `extraDefs` string) into one `<defs>` payload with
+ * each distinct def appearing exactly once -- the counterpart to
+ * {@link renderDrawableToFragment} a caller drawing N nodes needs: every
+ * node's own per-fragment `UGraphicSvg` document independently de-dups
+ * REPEATED defs within itself (`SvgGraphicsCore#createSvgGradient`'s own
+ * `gradients` cache), but has no way to know about a SIBLING fragment's
+ * defs -- this function is that missing cross-fragment de-dup step.
+ *
+ * De-dup key is the def's own `id` attribute when present (the common
+ * case -- every `<linearGradient>`/`<filter>` def `SvgGraphicsCore` emits
+ * carries one); a def with no `id` (there are none today, but nothing
+ * upstream guarantees this stays true) falls back to its full markup, so
+ * two textually-identical id-less defs still collapse to one and two
+ * different id-less defs both survive.
+ *
+ * Returns `undefined` (not `''`) when no fragment carries any defs,
+ * matching {@link renderDrawableToFragment}'s own `extraDefs`-omission
+ * convention (T1 interface contract).
+ */
+export function mergeFragmentDefs(
+  fragments: readonly { readonly extraDefs?: string }[],
+): string | undefined {
+  const merged = new Map<string, string>();
+  for (const fragment of fragments) {
+    const defs = fragment.extraDefs;
+    if (defs === undefined || defs.length === 0) continue;
+    for (const element of splitTopLevelElements(defs)) {
+      const key = extractIdAttribute(element) ?? element;
+      if (!merged.has(key)) merged.set(key, element);
+    }
+  }
+  return merged.size > 0 ? [...merged.values()].join('') : undefined;
 }
