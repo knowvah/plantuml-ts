@@ -4,8 +4,8 @@ Two tasks, disjoint write-sets, both depend on T4 being green.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T5 | remove the now-dead atom pre-resolution | typescript-pro | `src/diagrams/class/class-layout-leaf-shapes.ts`, `src/diagrams/class/class-geo-types.ts` | T4 | [ ] |
-| T6 | diagnose the ellipse `ry` delta — **diagnosis only** | debugger | `.agent-notes/si14-ry-delta.md` | T4 | [ ] |
+| T5 | remove the now-dead atom pre-resolution | typescript-pro | `src/diagrams/class/class-layout-leaf-shapes.ts`, `src/diagrams/class/class-geo-types.ts` | T4 | [x] |
+| T6 | diagnose the ellipse `ry` delta — **diagnosis only** | debugger | `.agent-notes/si14-ry-delta.md` | T4 | [x] |
 
 ## Why T6 runs last
 

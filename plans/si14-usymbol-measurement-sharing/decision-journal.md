@@ -27,6 +27,35 @@ construction — all 449 goldens must stay byte-identical.
 
 | 2026-08-03 | T3 | `measurer` landed **optional** (`measurer?: StringMeasurer`), not required as the interface contract sketched. Making it required broke typecheck in `layout.ts` + `class-geo-builders.ts` (outside the write-set) and two test files that hand-build `ClassGeometry` literals. Rather than widen the write-set, the agent matched the type's established convention (nearly every field optional; the real `layoutSync` path always sets it). **T4 must treat `geo.measurer` as possibly absent** — fall back to the pre-T4 constant-offset path or assert, T4's choice to justify. | Escalating to widen a write-set for a type-strictness preference would have been disproportionate; convention-matching is the smaller change. Criterion 1 still holds on every real diagram. | Yes |
 
+| 2026-08-03 | T5 | `atomsWidth` kept as a documented-dead field rather than deleted: its one remaining reader is `tryRenderUSymbol`'s pre-T4 fallback branch in `renderer.ts` (outside T5's write-set). Deleting field + dead fallback branch together is named follow-up work in the field's doc comment. `atoms` (shared member-row carrier) untouched; member-row path verified via `cuzoga-39-tufu259` ratchet fixture + layout unit tests. | Escalating a write-set widening to delete dead code was disproportionate; the field is inert (nothing populates it). | Yes |
+| 2026-08-03 | T6 | Root cause of the `ry`/`rx` residual: `UImage.ts:34-40` returns declared/scaled dims where upstream's `UImage.java:87-92` returns raster pixel count − 1. Substituting upstream's numbers through unmodified fit code reproduces jar `rx`/`ry` to 5 decimals; 9 hypotheses ruled out with evidence. Classified plantuml-ts defect → **filed as GitHub issue #26** and added to `planning/mission-index.md` as tracked mission SI15 (fix separately scoped, per the brief). `cx`/`text-x` family likely same root, medium confidence — re-measure when the fix lands. Full artifact: `.agent-notes/si14-ry-delta.md` (gitignored, session-local by repo convention; durable record = issue #26 + this journal). | T6 was diagnosis-only by design (stop condition 7). | n/a |
+
+## Batch 4 gate results (2026-08-03, settled tree after T5 `1b73fd5c` + T6)
+
+| Gate | Result |
+|---|---|
+| `npm test` (T5, warm) | 477 files / 11,432 tests exit 0 (includes T6's transient probe files, since removed) |
+| cold-tree double run (T5) | `rm -rf packages/*/assets && npm test` ×2 — both green |
+| cold-tree final run (orchestrator, settled tree) | 476 files / 11,428 tests exit 0 |
+| `npm run typecheck` / `lint` / `build` | exit 0 |
+| `vendor-stdlib --verify` | 34,587 files verbatim |
+| size-deltas | 320/351, widened 0, histogram identical to baseline |
+| write-set check | T5: exactly its two files; T6: no source file touched, probes cleaned |
+| commits | `1b73fd5c` (T5); T6's tracked footprint in the docs commit (its write-set file is gitignored) |
+
+## Batch 4 execution plan (2026-08-03)
+
+T5 (typescript-pro) and T6 (debugger) in parallel — disjoint write-sets
+(T5: `class-layout-leaf-shapes.ts` + `class-geo-types.ts`; T6:
+`.agent-notes/si14-ry-delta.md` only, no code). Both prompts carry T4's
+as-built facts. T6 additionally gets two orchestrator-injected findings:
+(a) T4 measured `text/@x`'s surviving 2.003 as the same fit mechanism
+(`rx` delta ≈ `x` delta) — the diagnosis should account for the whole
+cx/rx/ry/text-x family, not `ry` alone; (b) T2 observed a ~0.9 px
+mechanism divergence for ink-offset sprites in `text+sprite` ordering —
+evidence bearing on the sprite-ink hypothesis. Cold-tree double test run
+happens in this batch (T5 is the last code-changing task).
+
 ## Batch 3 execution plan (2026-08-03)
 
 Single task T4, single typescript-pro agent. Prompt injects the as-built
