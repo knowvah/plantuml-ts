@@ -34,7 +34,7 @@ throughout the journal).
 
 | Batch | Tasks | Status |
 |---|---|---|
-| [batch-1](./batch-1/overview.md) | T1 fragment-emission seam · T2 retire `usecase-footprint.ts` | [ ] |
+| [batch-1](./batch-1/overview.md) | T1 fragment-emission seam · T2 retire `usecase-footprint.ts` | [x] |
 | [batch-2](./batch-2/overview.md) | T3 carry measurer on class geo | [ ] |
 | [batch-3](./batch-3/overview.md) | T4 draw usecase/actor via `drawU` | [ ] |
 | [batch-4](./batch-4/overview.md) | T5 remove atom pre-resolution · T6 diagnose `ry` | [ ] |

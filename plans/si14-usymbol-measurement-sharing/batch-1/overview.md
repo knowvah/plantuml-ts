@@ -5,8 +5,8 @@ in parallel. Neither touches the class engine.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | klimt fragment-emission seam (ADR-2) | typescript-pro | `src/core/klimt/document-shell.ts`, `tests/unit/core/klimt/fragment-emission.test.ts` | — | [ ] |
-| T2 | retire `usecase-footprint.ts`; delete `measureActor` (ADR-3, ADR-4) | typescript-pro | `src/diagrams/description/leaf-sizing.ts`, `src/diagrams/description/leaf-sizing-text.ts`, `src/diagrams/description/usecase-footprint.ts` (delete), `tests/unit/description/footprint-parity.test.ts` | — | [ ] |
+| T1 | klimt fragment-emission seam (ADR-2) | typescript-pro | `src/core/klimt/document-shell.ts`, `tests/unit/core/klimt/fragment-emission.test.ts` | — | [x] |
+| T2 | retire `usecase-footprint.ts`; delete `measureActor` (ADR-3, ADR-4) | typescript-pro | `src/diagrams/description/leaf-sizing.ts`, `src/diagrams/description/leaf-sizing-text.ts`, `src/diagrams/description/usecase-footprint.ts` (delete), `tests/unit/description/footprint-parity.test.ts` | — | [x] |
 
 ## Why these two are independent
 
