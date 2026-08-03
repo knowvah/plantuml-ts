@@ -16,6 +16,9 @@
  * catches it. Same failure shape as si11b's sprites-render-as-nothing
  * regression, which stayed green through the whole suite.
  *
+ * Full write-up, including why no sequence oracle corpus exists to have
+ * caught this: https://github.com/sseely/plantuml-ts/issues/25
+ *
  * Second defect pinned here: `else <condition>` captured its label and threw
  * it away (`sequence-commands.ts`'s handler took `(state)` and ignored
  * `match`), so `[other case]` could never be drawn. The jar renders
