@@ -6,7 +6,7 @@ batch 3's drawing code consumes, and both would otherwise write
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T3 | carry `StringMeasurer` + `SpriteRegistry` on `ClassGeometry` (ADR-1) | typescript-pro | `src/diagrams/class/class-geo-types.ts`, `src/diagrams/class/index.ts` | T1 | [ ] |
+| T3 | carry `StringMeasurer` + `SpriteRegistry` on `ClassGeometry` (ADR-1) | typescript-pro | `src/diagrams/class/class-geo-types.ts`, `src/diagrams/class/index.ts` | T1 | [x] |
 
 ## Why it depends on T1
 

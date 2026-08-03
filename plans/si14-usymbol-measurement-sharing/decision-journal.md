@@ -18,6 +18,25 @@ Also record, per `~/.claude/rules/autonomous-execution.md`:
 | 2026-08-03 | T2 | Finding worth carrying: a synthetic sprite (declared 16×16 with ink-offset rectangle) shows a genuine ~0.9 px divergence between the two fit mechanisms for the `text+sprite` ordering specifically. Not one of the seven jar-verified header shapes; real stdlib sprites reproduce the jar numbers exactly. Filed here rather than actioned — out of T2's scope. | Journal is the tracking surface for sub-issue findings. | n/a |
 | 2026-08-03 | T1 | T1's acceptance criterion 4 (diff lists only its two files) could not be checked mid-batch on the shared worktree (T2's concurrent edits visible). Verified by the orchestrator at commit time instead: `d4f49ebd` touches exactly `document-shell.ts` + `fragment-emission.test.ts`, additive only. | Shared-worktree parallelism makes per-agent diff checks meaningful only at commit. | n/a |
 
+## Batch 2 execution plan (2026-08-03)
+
+Single task T3, single typescript-pro agent, no parallelism (nothing to
+parallelise). T1 is green so the batch-2 gate condition (ADR-2 survived) holds.
+Write-set: `class-geo-types.ts` + `class/index.ts`; behaviour-neutral by
+construction — all 449 goldens must stay byte-identical.
+
+| 2026-08-03 | T3 | `measurer` landed **optional** (`measurer?: StringMeasurer`), not required as the interface contract sketched. Making it required broke typecheck in `layout.ts` + `class-geo-builders.ts` (outside the write-set) and two test files that hand-build `ClassGeometry` literals. Rather than widen the write-set, the agent matched the type's established convention (nearly every field optional; the real `layoutSync` path always sets it). **T4 must treat `geo.measurer` as possibly absent** — fall back to the pre-T4 constant-offset path or assert, T4's choice to justify. | Escalating to widen a write-set for a type-strictness preference would have been disproportionate; convention-matching is the smaller change. Criterion 1 still holds on every real diagram. | Yes |
+
+## Batch 2 gate results (2026-08-03, tree at `73234529`)
+
+| Gate | Result |
+|---|---|
+| `npm test` | exit 0 — 476 files / 11,428 tests; 449 goldens byte-identical |
+| `npm run typecheck` / `lint` / `build` | exit 0 |
+| size-deltas | 320/351, widened 0 |
+| write-set check | exactly `class-geo-types.ts` + `class/index.ts`; `dispatcher.ts` unchanged |
+| commits | `73234529` (T3) |
+
 ## Batch 1 gate results (2026-08-03, tree at `9b4debf1`)
 
 | Gate | Result |
