@@ -24,6 +24,8 @@ import { renderClassifierBox, renderRow } from './renderer-classifier-box.js';
 import { renderNamespaceFolder, renderNamespaceRect, renderEmptyPackageIcon } from './class-namespace-shape.js';
 import {} from './class-layout-helpers.js';
 import { buildClassShadowFilterDef } from './class-shadow.js';
+import { renderUsecaseOrActorEntity } from './renderer-usymbol-entity.js';
+import { mergeFragmentDefs, type DrawableFragment } from '../../core/klimt/document-shell.js';
 
 // ---------------------------------------------------------------------------
 // Association-class-couple "point" entity (`(A,B) .. C`)
@@ -226,6 +228,12 @@ import { renderEdge } from './renderer-edge.js';
  *              `assembleClassShell`, never the generic `svgRoot`).
  */
 export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
+  // #lizard forgives(nloc, cyclomatic_complexity) -- pre-existing (verified
+  // via `git show HEAD`, unchanged by T4's diff): one orchestrator
+  // dispatching every drawn-element kind. Metric-specific form + placed
+  // FIRST (not "near fn end"): plain `forgives` gets reset by this
+  // function's own nested closures before its `end_of_function()` fires
+  // -- see `.agent-notes/N16-lizard-forgive-nested-closures.md`.
   // G2 N61: `skinparam monochrome true|reverse` applies to the document
   // background too (jar's `ColorMapper` is universal, not scoped to
   // entity/link colors) -- transformed HERE so every downstream reader of
@@ -240,6 +248,9 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       : resolvedBackground;
   const children: string[] = [];
   let extraDefs = '';
+  // SI14 T4: per-node fragments (ADR-2) -- collected so their OWN
+  // `extraDefs` de-dup ACROSS fragments via `mergeFragmentDefs` (T1).
+  const usymbolEntityFragments: DrawableFragment[] = [];
 
   // G2 N40: `skinparam pathHoverColor <color>` -- a global CSS hover rule,
   // the SAME `<style type="text/css"><![CDATA[path:hover{...}]]></style>`
@@ -368,6 +379,23 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       renderHostedNotes(classifier.id);
       continue;
     }
+    // SI14 T4 (ADR-1/ADR-2): usecase/actor draws via the SAME faithful
+    // `EntityImageDescription.drawU` path description uses, when a real
+    // `StringMeasurer` reached this geo (absent only for hand-built test
+    // fixtures -- `class-geo-types.ts#ClassGeometry.measurer`). The
+    // fragment's `body` carries EntityImageDescription's OWN `<!--entity
+    // NAME-->` wrap (`renderer-usymbol-entity.ts`) -- push UNWRAPPED,
+    // never through `wrapEntity` (wrong `<!--class NAME-->` comment).
+    const isUsecaseOrActor =
+      classifier.kind === 'usecase' || (classifier.kind === 'descriptive' && classifier.usymbol === 'actor');
+    if (isUsecaseOrActor && geo.measurer !== undefined) {
+      const entityUid = uidPlan.classifierUid.get(classifier.id) ?? '';
+      const fragment = renderUsecaseOrActorEntity(classifier, theme, geo.measurer, geo.sprites, entityUid);
+      usymbolEntityFragments.push(fragment);
+      children.push(fragment.body);
+      renderHostedNotes(classifier.id);
+      continue;
+    }
     const uid = uidPlan.classifierUid.get(classifier.id) ?? '';
     children.push(wrapEntity(leafPortion(classifier.id), uid, classifier.id, true, renderClassifier(classifier, theme)));
     renderHostedNotes(classifier.id);
@@ -426,6 +454,11 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     if (hostedNoteIds.has(note.id)) continue;
     children.push(...renderOneNote(note, uidPlan, theme));
   }
+
+  // SI14 T4 (ADR-2): de-dup usecase/actor fragment defs (e.g. gradients)
+  // across nodes before folding into the diagram-wide defs string.
+  const mergedUsymbolDefs = mergeFragmentDefs(usymbolEntityFragments);
+  if (mergedUsymbolDefs !== undefined) extraDefs += mergedUsymbolDefs;
 
   return {
     // G2 N61: the single monochrome choke point -- see `class-monochrome.ts`'s
