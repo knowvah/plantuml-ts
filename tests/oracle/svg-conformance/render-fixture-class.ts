@@ -123,7 +123,16 @@ export function renderFixtureClass(
   const fullAst = parseClass(block);
   // G2 N28: page-1-only view -- see this function's own doc comment.
   const { pages: _pages, ...firstPageAst } = fullAst;
-  const geo = layoutClass(firstPageAst, theme, measurer);
+  // SI14 T3/T4: mirrors `class/index.ts#classPlugin.layoutSync`'s own
+  // post-layout `measurer`/`sprites` passthrough exactly -- `layoutClass`
+  // itself does not set either field (T3's `SyncPlugin.render(geo, theme)`
+  // dispatcher contract note: only `layoutSync` sees the measurer). Without
+  // this, `geo.measurer` stays `undefined` here and `renderClass`'s T4
+  // usecase/actor draw path silently falls back to the pre-T4 renderer for
+  // EVERY fixture this harness runs, never exercising the code this task
+  // adds. Reproduces production's exact behavior, not new test-only logic.
+  const spritesField = firstPageAst.sprites !== undefined ? { sprites: firstPageAst.sprites } : {};
+  const geo = { ...layoutClass(firstPageAst, theme, measurer), measurer, ...spritesField };
   const fragment = renderClass(geo, theme);
 
   const annotations = firstPageAst.annotations;

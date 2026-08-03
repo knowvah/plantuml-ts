@@ -14,11 +14,6 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { measureUsecaseOrActorLeaf } from '../description/leaf-sizing.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE } from './class-lollipop.js';
-import {
-  buildMemberAtoms,
-  memberBaseFont,
-  resolveMemberAtoms,
-} from './class-member-creole.js';
 import { javaRound4 } from '../../core/number-format.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 
@@ -50,35 +45,21 @@ export function measureUsecaseOrActor(
   const spriteDims = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
   const dim = measureUsecaseOrActorLeaf(classifier.display, symbol, fontSpec, measurer, spriteDims);
 
-  // The label's creole atoms, resolved HERE rather than at draw time because
-  // `renderClass(geo, theme)` receives no sprite registry -- this engine bakes
-  // everything the renderer needs into the geometry (see the class golden
-  // README's note on `renderClass` taking no measurer of its own). Without
-  // this the sizing was sprite-aware (SI10 scope item 3) while the drawing
-  // emitted the literal `&lt;$Gear&gt; Configure` markup as text.
-  //
-  // Reuses the class engine's OWN member-row atom pipeline, which already
-  // does exactly this for member lines and notes -- `rows[].atoms` is the
-  // established carrier (`class-geo-types.ts`, G2 N22) and
-  // `renderer-classifier-rows.ts#renderRowAtoms` the established drawer.
-  const baseFont = memberBaseFont(fontSpec, {});
-  const built = resolveMemberAtoms(
-    buildMemberAtoms(classifier.display, baseFont),
-    baseFont,
-    measurer,
-    sprites,
-  );
-  const hasAtomImage = built.atoms.some((a: { kind: string }) => a.kind !== 'text');
-
+  // SI14 T5: no longer pre-resolves the label's creole atoms here. That
+  // existed only because `renderClass(geo, theme)` received no sprite
+  // registry -- since SI14 T3/T4 it does (`ClassGeometry.measurer`/
+  // `.sprites`), and `renderer-usymbol-entity.ts` draws this row through the
+  // SAME `EntityImageDescription.drawU` faithful path the description engine
+  // uses, which measures and draws atoms itself at draw time. This row now
+  // only carries plain `text` -- the established `rows[].atoms` carrier
+  // (`class-geo-types.ts` G2 N22) remains populated for member rows and
+  // notes (`class-member-rows.ts`, `class-body-enhanced-layout.ts`,
+  // `note-layout-measure.ts`), which this change does not touch.
   const row = {
     text: classifier.display,
     y: dim.height / 2,
     indent: 0,
     italic: false,
-    // Only carried when there is something a plain `<text>` cannot draw. A
-    // pure-text label keeps the existing single-`<text>` path, so no existing
-    // class golden can move.
-    ...(hasAtomImage ? { atoms: built.atoms, atomsWidth: built.width } : {}),
   };
   return { width: dim.width, height: dim.height, rows: [row], dividerYs: [] };
 }

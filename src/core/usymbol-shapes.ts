@@ -125,6 +125,15 @@ export function renderComponentIcon(node: IconGeo, theme: Theme): string {
  * USymbol: actor → stick figure. Faithful port of ActorStickMan.java:51-96 —
  * head Ø16 (centre y=8); body translated to (cx, 16): spine (0,0)→(0,27),
  * arms (-13,8)→(13,8), legs (0,27)→(∓13,42).
+ *
+ * SI14 T4: the class engine's production path (a real `StringMeasurer` on
+ * `ClassGeometry`) no longer calls this for an actor leaf -- it draws
+ * through the faithful `EntityImageDescription.drawU` instead
+ * (`renderer-usymbol-entity.ts`). This remains the FALLBACK for hand-built
+ * `ClassifierGeo` test fixtures that bypass `layoutClass` (no measurer to
+ * reconstruct with) -- see `class-geo-types.ts#ClassGeometry.measurer`'s
+ * own doc comment. The label placement below is this fallback's own plain
+ * approximation, not a jar-fidelity claim.
  */
 export function renderActorIcon(node: IconGeo, theme: Theme): string {
   const { x, y, width: w, display } = node;
@@ -154,8 +163,24 @@ export function renderActorIcon(node: IconGeo, theme: Theme): string {
 
 /**
  * USymbol: usecase → horizontal ellipse (sized to the node box, which layout
- * sized to the text footprint `.bigger(6)`) with a centred label
- * (TextBlockInEllipse dy-2).
+ * sized to the text footprint `.bigger(6)`) with a centred label.
+ *
+ * SI14 T4: the label baseline here is a PLAIN vertical-centring formula
+ * (`cy + fontSize/3`, the same convention {@link renderDatabaseIcon}/
+ * {@link renderComponentIcon} already use for their own labels) -- it no
+ * longer carries the `cy - 2 + fontSize/3` constant a prior iteration tuned
+ * to approximate `TextBlockInEllipse`'s real behavior. That approximation
+ * was content-independent (a fixed constant) where the jar's own offset is
+ * content-dependent (the fitted ellipse's OWN stored centre, `dy - 2`) --
+ * an approximation this function cannot faithfully reproduce without the
+ * real fit, which is exactly why T4 gives the MEASURED path (a real
+ * `StringMeasurer` on `ClassGeometry`) its own faithful draw via
+ * `EntityImageDescription.drawU` instead (`renderer-usymbol-entity.ts`).
+ * This function remains ONLY the fallback for hand-built `ClassifierGeo`
+ * test fixtures with no measurer to reconstruct with -- see `class-geo-
+ * types.ts#ClassGeometry.measurer`'s own doc comment -- so simplifying its
+ * label offset to the same plain convention every other fallback icon here
+ * already uses is strictly a clarity change, not a fidelity regression.
  */
 export function renderUseCaseIcon(node: IconGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
@@ -164,7 +189,7 @@ export function renderUseCaseIcon(node: IconGeo, theme: Theme): string {
     fill: resolveElementPaint(theme, 'usecase', 'background'),
     stroke: resolveElementPaint(theme, 'usecase', 'border'),
   });
-  return oval + drawLabel(node, node.display, cx, cy - 2 + theme.fontSize / 3, theme);
+  return oval + drawLabel(node, node.display, cx, cy + theme.fontSize / 3, theme);
 }
 
 /** The caller's own label drawing when it supplied one, else the default

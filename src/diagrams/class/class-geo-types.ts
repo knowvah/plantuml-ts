@@ -12,6 +12,8 @@ import type { GenericTagGeo } from './class-stereotype.js';
 import type { EmptyPackageLeafDim } from './class-namespace-shape.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
+import type { StringMeasurer } from '../../core/measurer.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 
 export interface ClassifierGeo {
   id: string;
@@ -71,13 +73,22 @@ export interface ClassifierGeo {
      */
     atoms?: readonly MemberRenderAtom[];
     /**
-     * SI10 follow-up: the summed width of {@link atoms}, carried only on a
-     * USymbol label row (usecase/actor) whose display holds a `<$sprite>` or
-     * `<img>` atom. Member rows do not need it -- they draw left-aligned from
-     * `indent`, whereas a USymbol label is CENTRED, so the drawer needs the
-     * total width to find its start-x. Set by
-     * `class-layout-leaf-shapes.ts#measureUsecaseOrActor`, read by
-     * `renderer.ts#tryRenderUSymbol`.
+     * SI10 follow-up, retired by SI14 T5: was the summed width of {@link
+     * atoms} on a USymbol label row (usecase/actor) whose display held a
+     * `<$sprite>` or `<img>` atom, letting `renderer.ts#tryRenderUSymbol`
+     * centre a hand-drawn atom run. SI14 T4 moved usecase/actor drawing onto
+     * the faithful `EntityImageDescription.drawU` path
+     * (`renderer-usymbol-entity.ts`), which measures and centres atoms
+     * itself at draw time, so T5 removed the ONLY populator
+     * (`class-layout-leaf-shapes.ts#measureUsecaseOrActor`). No code path
+     * sets this field anymore -- it has no member-row use (member rows draw
+     * left-aligned from `indent` and never needed a summed width). Kept
+     * (not deleted) only because `renderer.ts#tryRenderUSymbol`'s
+     * pre-T4 fallback -- reachable solely for hand-built `ClassGeometry`
+     * fixtures that omit {@link ClassGeometry.measurer} -- still reads it
+     * as an always-`undefined` optional; renderer.ts is outside SI14 T5's
+     * write-set. A future task may remove both the field and that dead
+     * fallback branch together.
      */
     atomsWidth?: number;
     /**
@@ -407,4 +418,29 @@ export interface ClassGeometry {
   edges: EdgeGeo[];
   namespaces: NamespaceGeo[];
   notes: NoteGeo[];
+  /**
+   * SI14 T3: the SAME `StringMeasurer` instance `SyncPlugin.layoutSync`
+   * received, carried onto the geometry for the same reason `errors` above
+   * `index.ts#classPlugin.layoutSync` is: `SyncPlugin.render(geo, theme)`
+   * (`dispatcher.ts`) only receives the geo, not the measurer, so a
+   * draw-time consumer that needs to measure text (T4: USymbol label
+   * placement via the faithful `TextBlock` tree, mirroring the description
+   * engine's `EntityImageDescriptionSupport.ts#buildTextBlock` precedent)
+   * has nowhere else to get one. Set unconditionally by `index.ts`'s
+   * `layoutSync` on every real `parseClass()`-driven diagram; optional only
+   * so pre-existing hand-built `ClassGeometry` test fixtures that bypass
+   * `layoutClass`/`layoutSync` entirely (unit tests constructing a geo
+   * literal directly) compile unchanged.
+   */
+  measurer?: StringMeasurer;
+  /**
+   * SI14 T3: this diagram's `sprite $name { ... }` definitions, copied
+   * unchanged from `ClassDiagramAST.sprites` (`ast.ts`'s doc comment) by
+   * the same `layoutSync` spread as {@link measurer} above -- mirrors the
+   * description engine's identical `ast.sprites` -> geo `sprites`
+   * passthrough (`description/layout.ts:487`). Omitted (not merely
+   * `undefined`) when the diagram declares no sprites, matching every
+   * other optional field in this file.
+   */
+  sprites?: SpriteRegistry;
 }

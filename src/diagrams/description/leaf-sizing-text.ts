@@ -28,9 +28,6 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { JAR_DEFAULT_TEXT_COLOR } from './renderer-symbol.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
 import { manageGuillemet, type GuillemetPair } from '../../core/text/Guillemet.js';
-import { spriteScale } from '../../core/creole-atoms-measure.js';
-import type { InlineAtomToken } from '../../core/creole-atoms.js';
-import { textFootprintBox, type FootprintBox } from './usecase-footprint.js';
 
 /** Number of display lines (upstream text block splits on hard newlines).
  *  An EMPTY display has NO lines, not one blank one: `node C [ ]` draws a box
@@ -308,84 +305,3 @@ export function measureTextBlock(
   // sizer-footprint-parity T2).
 }
 
-/**
- * The `Footprint` boxes a display contributes, in block coordinates — the
- * input to `usecase-footprint.ts#containingEllipse`.
- *
- * Lines stack by their DECLARED heights and are centred horizontally within
- * the block (`HorizontalAlignment.CENTER`), matching how the block draws.
- * Within a line, atoms advance left to right; a text run records the
- * baseline-shifted box `Footprint#drawText` computes, while a sprite records
- * its INK box at its own offset inside the declared advance (`drawPath`).
- */
-export function footprintBoxes(
-  display: string,
-  fontSpec: FontSpec,
-  measurer: StringMeasurer,
-  sprites: SpriteDimsLookup | undefined,
-  blockWidth: number,
-): FootprintBox[] {
-  const out: FootprintBox[] = [];
-  let y = 0;
-  for (const raw of display.split('\n')) {
-    if (isCreoleHrLine(raw)) {
-      y += CREOLE_HR_HEIGHT;
-      continue;
-    }
-    const built = buildLineAtoms(raw, baseFontConfiguration(fontSpec));
-    const lineW = lineTextMetrics(raw, fontSpec, measurer).width + inlineAtomWidth(raw, fontSpec, sprites);
-    const lineH = Math.max(
-      lineTextMetrics(raw, fontSpec, measurer).height,
-      ...built.atoms.map((a) =>
-        a.kind === 'inline' ? measureInlineAtom(a.atom, sprites, fontSpec.size).height : 0,
-      ),
-    );
-    let x = (blockWidth - lineW) / 2;
-    for (const atom of built.atoms) {
-      if (atom.kind === 'text') {
-        const w = measurer.measure(atom.text, { ...fontSpec, size: atom.font.size }).width;
-        out.push(textFootprintBox(x, y, w, atom.font.size));
-        x += w;
-        continue;
-      }
-      if (atom.kind !== 'inline') continue;
-      const dims = measureInlineAtom(atom.atom, sprites, fontSpec.size);
-      out.push(inlineFootprintBox(atom.atom, dims, sprites, fontSpec.size, x, y));
-      x += dims.width;
-    }
-    y += lineH;
-  }
-  return out;
-  // #lizard forgives -- pre-existing violation (T1 confirmed via `git show
-  // HEAD` lizard run before this task's own edits; unchanged by
-  // sizer-footprint-parity T2, which was unable to retire this function --
-  // see `.agent-notes/T2-footprint-sizer.md`).
-}
-
-/** A sprite's ink box at its drawn position; a non-SVG atom inks its whole
- *  declared box (it draws as one image, `Footprint#drawImage`). */
-function inlineFootprintBox(
-  atom: InlineAtomToken,
-  dims: { width: number; height: number },
-  sprites: SpriteDimsLookup | undefined,
-  ambientFontSize: number,
-  x: number,
-  y: number,
-): FootprintBox {
-  if (atom.kind !== 'sprite') return { x, y, width: dims.width, height: dims.height };
-  const reg = sprites?.get(atom.name);
-  if (reg?.inkWidth === undefined || reg.inkHeight === undefined) {
-    return { x, y, width: dims.width, height: dims.height };
-  }
-  const s = spriteScale(atom.scale, ambientFontSize);
-  return {
-    x: x + (reg.inkX ?? 0) * s,
-    y: y + (reg.inkY ?? 0) * s,
-    width: reg.inkWidth * s,
-    height: reg.inkHeight * s,
-  };
-  // #lizard forgives -- pre-existing 6-PARAM violation (T1 confirmed via
-  // `git show HEAD` lizard run before this task's own edits; unchanged by
-  // sizer-footprint-parity T2, which was unable to retire this function --
-  // see `.agent-notes/T2-footprint-sizer.md`).
-}
