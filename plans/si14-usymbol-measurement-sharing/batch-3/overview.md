@@ -4,7 +4,7 @@ One task, and the point of the mission.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T4 | draw usecase/actor via `EntityImageDescription.drawU` | typescript-pro | `src/diagrams/class/renderer.ts`, `src/core/usymbol-shapes.ts`, `tests/oracle/svg-conformance/class-usecase-actor.test.ts` | T1, T3 | [ ] |
+| T4 | draw usecase/actor via `EntityImageDescription.drawU` | typescript-pro | `src/diagrams/class/renderer.ts`, `src/core/usymbol-shapes.ts`, `tests/oracle/svg-conformance/class-usecase-actor.test.ts` | T1, T3 | [x] |
 
 ## The one-line summary
 

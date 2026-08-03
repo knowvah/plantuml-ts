@@ -27,6 +27,16 @@ construction — all 449 goldens must stay byte-identical.
 
 | 2026-08-03 | T3 | `measurer` landed **optional** (`measurer?: StringMeasurer`), not required as the interface contract sketched. Making it required broke typecheck in `layout.ts` + `class-geo-builders.ts` (outside the write-set) and two test files that hand-build `ClassGeometry` literals. Rather than widen the write-set, the agent matched the type's established convention (nearly every field optional; the real `layoutSync` path always sets it). **T4 must treat `geo.measurer` as possibly absent** — fall back to the pre-T4 constant-offset path or assert, T4's choice to justify. | Escalating to widen a write-set for a type-strictness preference would have been disproportionate; convention-matching is the smaller change. Criterion 1 still holds on every real diagram. | Yes |
 
+## Batch 3 execution plan (2026-08-03)
+
+Single task T4, single typescript-pro agent. Prompt injects the as-built
+contracts: T1's `renderDrawableToFragment`/`mergeFragmentDefs` exports and
+T3's `measurer?`/`sprites?` being OPTIONAL on the geo (T4 must handle
+absence — hand-built fixtures omit them; the real path always sets them).
+Expected movement: ONLY the three authored usecase/actor fixtures re-pin
+smaller; the `ry` 13.4846-vs-13.0625 residual is expected to survive (T6's
+subject). Movement in any of the 449 goldens = stop.
+
 ## Batch 2 gate results (2026-08-03, tree at `73234529`)
 
 | Gate | Result |
@@ -70,4 +80,32 @@ at `01315734` (brief commit; code identical to `main`@`1406e139`).
 
 | Date | Condition | What happened | Resolution |
 |------|-----------|---------------|------------|
-| | | | |
+| 2026-08-03 | #8 — file outside every task's write-set | T4 edited `tests/oracle/svg-conformance/render-fixture-class.ts` (+10/−1): mirrors `classPlugin.layoutSync`'s `measurer`/`sprites` passthrough onto the harness's `layoutClass` result. Without it `geo.measurer` is `undefined` in the harness and every conformance fixture silently exercises the pre-T4 fallback — the re-pinned test in T4's own write-set would be pinning the wrong path. The file is in no task's write-set. Agent flagged it; orchestrator verified the diff is a mechanical mirror of production with no new logic, and that all gates pass with it (476 files / 11,428 tests; 449 goldens byte-identical; deltas 320/351 widened 0). | **Maintainer approved 2026-08-03** (with the pending items below). T4 committed with the harness change included. |
+
+### Pending with the same escalation (context for the decision)
+
+1. **New file `src/diagrams/class/renderer-usymbol-entity.ts`** (153 lines, not
+   in the declared write-set). Orchestrator ruling: covered by the brief's
+   push-forward provisions ("file organisation within a declared write-set" +
+   the complexity hook's 500-line cap — `renderer.ts` was at 465 lines and the
+   params builder must live in `diagrams/class/` because `src/core` cannot
+   import `src/diagrams/description`). Ruled push-forward, not escalated, but
+   listed here for visibility.
+2. **AC1 partial.** `image/@x` reached 0; `text/@x` stayed at 2.003. Measured
+   cause: same out-of-scope ellipse-fit mechanism as the `ry` delta (`rx`
+   delta ≈ `x` delta) — T6's diagnosis subject, strengthened by this finding.
+   Not an independent centring bug.
+3. **AC4 partial.** `class-allowmixing-usecase-mix` 9 → 2 pinned diffs (all
+   actor-specific deltas closed); `class-usecase-inline-sprite` 10 → 11 — a NEW
+   residual appeared because the faithful path is now reachable:
+   `image/@width`/`@height` 3.2308×2.1538 vs jar 3×2, tracing to
+   `EntityImageDescriptionTextBlock.ts#drawAtoms`'s unrounded sprite dims,
+   which commit `1406e139` (pre-mission) already flagged as needing its own
+   pass. Correct fix is rounding at the `<image>` emission site only (rounding
+   the resolver would corrupt cursor advance) — file outside every write-set,
+   so it is follow-up work either way.
+4. **Batch-3 "success signal" partially met**: label baselines are now
+   content-dependent (constant `cy + 2.6667` retired — the mission's core
+   objective) and stroke-width/text-anchor/textLength/y-family deltas closed,
+   but the overview's "both `text/@x` and `image/@x` reach delta 0" held only
+   for `image/@x`.
