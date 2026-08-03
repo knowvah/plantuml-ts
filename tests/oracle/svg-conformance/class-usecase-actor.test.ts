@@ -201,13 +201,18 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
    * and `compareSvg` recurses into the `<g>` for the first time -- read it as
    * "same shape, imprecise numbers", not as a regression from 3.
    *
-   * REMAINING GAP, measured: the sprite is ~7.7% oversized (3.23x2.15 vs
-   * 3x2) and sits 12.45px too high (`image/@y` 29.78 vs 42.23), with a
-   * ~2px horizontal offset shared by the image, text and ellipse. The
-   * fixture's sprite is a degenerate 3x2 monochrome grid, so these are
-   * placement/scale mathematics for a centred USymbol label, not a
-   * structural miss. `ellipse/@stroke-width` absent is the same pre-existing
-   * gap the sibling fixture pins.
+   * SCALE is now exact too: the emitted `<image>` is the jar's 3x2, after
+   * si5b D9 was amended (2026-08-03) to mirror the jar's measure-raw /
+   * emit-integer asymmetry for a rasterised sprite.
+   *
+   * REMAINING GAP, measured: the sprite sits 12.45px too high (`image/@y`
+   * 29.78 vs 42.23) with a ~2px horizontal offset shared by image, text and
+   * ellipse, and the ellipse itself is ~1.9 wider. Those are TWO separate
+   * mechanisms, neither in this path: `renderRowAtoms` places an inline atom
+   * at the LINE TOP, which is jar-verified for member rows -- a CENTRED
+   * USymbol label needs its own vertical rule -- and the ellipse dimensions
+   * come from the sizer upstream of any drawing. `ellipse/@stroke-width`
+   * absent is the same pre-existing gap the sibling fixture pins.
    */
   it('draws the sprite atom; pinned diffs are placement/scale, not structure', () => {
     const golden = readGolden(slug);
@@ -225,11 +230,9 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
       { path: 'svg/g[1]/g[2]/ellipse[1]/@rx', actual: '50.8964', expected: '48.968', delta: 1.9283999999999963, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/ellipse[1]/@ry', actual: '13.4846', expected: '13.0625', delta: 0.42210000000000036, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/ellipse[1]/@stroke-width', actual: '', expected: '0.5', tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/image[1]/@height', actual: '2.15385', expected: '2', delta: 0.15384999999999982, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/image[1]/@width', actual: '3.23077', expected: '3', delta: 0.23077000000000014, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '145.553', expected: '143.55', delta: 2.002999999999986, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '145.669', expected: '143.55', delta: 2.1189999999999998, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '29.7778', expected: '42.2311', delta: 12.453299999999999, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '148.784', expected: '146.781', delta: 2.002999999999986, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '148.669', expected: '146.781', delta: 1.8880000000000052, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/text[1]/@y', actual: '40.6667', expected: '41.2738', delta: 0.6071000000000026, tolerance: 0.01 },
     ];
     expect(diffs).toEqual(expected);

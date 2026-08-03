@@ -82,6 +82,48 @@ Sprite/img atoms contribute their (scaled) pixel dims to label
 measurement — this is what moves the 6 fixtures' DOT. The measurement path
 must use IHDR/sprite dims, not text heuristics.
 
+### Amendment 1 (2026-08-03) — measurement and emission deliberately differ for a RASTERISED sprite
+
+The rule above is unchanged: measurement still uses real sprite dims, raw
+and unrounded. What is added is that the **emitted `<image>` box does not
+have to equal the measured box** — and for a monochrome sprite it must not.
+
+**Why.** A monochrome sprite is rasterised to a PNG, whose pixel dimensions
+are necessarily integers, so the jar emits `Math.round(natural * scale)`
+while measuring the raw product. Both halves are jar-verified:
+
+- **Emission rounds.** Over 8 samples at font sizes 13–39, every emitted
+  `<image>` is the rounded scaled size: raw `3.2308×2.1538` → `3×2`,
+  `3.6923×2.4615` → `4×2`, `4.6154×3.0769` → `5×3`, `5.7692×3.8462` → `6×4`,
+  `6.9231×4.6154` → `7×5`, and a 16×4 grid's `17.2308×4.3077` → `17×4`.
+- **Measurement does not.** A 48×48 encoded sprite MEASURES `51.6923` at
+  font 14 — `creole-atoms-measure.ts#spriteScale`'s own jar-verified note,
+  which predates this amendment and still holds.
+
+**What this supersedes.** `tests/unit/creole-img-render.test.ts` asserted, in
+its own charter language, that "drawing and measuring agree by construction"
+and cross-checked the resolver's dims against `measureInlineAtom` for
+equality. That was a reasonable reading of D9 and is now known to be a
+property the JAR ITSELF does not have. The test now pins BOTH halves —
+measured raw, emitted rounded — so the asymmetry is explicit and neither
+side can drift silently. This is a deliberate maintainer decision
+(2026-08-03) to mirror the jar rather than keep a self-consistency the
+oracle does not share.
+
+**Scope.** Rasterised (monochrome) sprites only, at the two `<image>`
+emission sites — `class-member-creole.ts#resolveInlineAtom` and
+`description/render-atoms.ts#resolveSpriteAtom`. SVG sprites go through
+`resolveSvgSpriteAtom`'s drawable decomposition and are untouched; `img`
+atoms carry their own natural dims and are untouched.
+
+**Consequence, stated.** Layout still reserves the raw box, so a rounded
+image can differ from its reserved space by up to half a pixel per axis.
+That is the jar's behaviour, and the size-delta corpus is unmoved
+(320/351, `widened 0`).
+
+**Raised by:** SI10's `class-usecase-inline-sprite` fixture, whose emitted
+sprite was ~7.7% oversized against the jar.
+
 ## Operational readiness
 
 Library + build tooling: observability N/A (gates are the instruments);

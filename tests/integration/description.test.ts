@@ -308,13 +308,14 @@ describe('description engine — T7 sprite/img inline-atom rendering', () => {
 
     const imageMatches = svg.match(/<image[^>]*>/g) ?? [];
     expect(imageMatches).toHaveLength(1);
-    // 4 * scale(1) * (default font 14 / 13) -- `CommandCreoleSprite.java:82`
-    // scales a creole sprite by the ambient font size over a 13px reference
-    // (S1L-f, jar-verified); this used to assert the unscaled 4.
-    const spriteSide = (4 * 14) / 13;
+    // 4 * scale(1) * (default font 14 / 13) = 4.3077 MEASURED, emitted as the
+    // PNG's integer pixel size 4 -- si5b D9 as amended 2026-08-03 mirrors the
+    // jar's own measure-raw / emit-integer asymmetry for a rasterised sprite
+    // (jar-verified: raw 4.3077 -> 4, and 17.2308 -> 17 for a 16-wide grid).
+    const spriteSide = Math.round((4 * 14) / 13);
     expect(svg).toMatch(
       new RegExp(
-        `<image[^>]*width="${spriteSide.toFixed(4)}[^"]*"[^>]*height="${spriteSide.toFixed(4)}[^"]*"` +
+        `<image[^>]*width="${spriteSide}"[^>]*height="${spriteSide}"` +
           '[^>]*xlink:href="data:image/png;base64,[^"]+"',
       ),
     );

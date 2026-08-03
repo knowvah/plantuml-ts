@@ -257,7 +257,22 @@ function resolveInlineAtom(
     atom.forcedColor,
     spriteScale(atom.scale, baseFont.size),
   );
-  return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
+  // A monochrome sprite is RASTERISED to a PNG, whose pixel dimensions are
+  // necessarily integers -- so the emitted `<image>` box is the ROUNDED
+  // scaled size, while `measureInlineAtom` keeps the raw value the sizer
+  // needs. That asymmetry is the JAR'S OWN and is mirrored deliberately
+  // (si5b `decisions.md` D9, Amendment 1, 2026-08-03): a 48x48 encoded sprite MEASURES 51.6923
+  // at font 14 (`spriteScale`'s jar-verified note) while a rasterised
+  // monochrome grid EMITS integers. Jar-verified over 8 samples at font
+  // sizes 13-39 -- raw 3.2308x2.1538 -> 3x2, 3.6923x2.4615 -> 4x2,
+  // 4.6154x3.0769 -> 5x3, 5.7692x3.8462 -> 6x4, 6.9231x4.6154 -> 7x5, and a
+  // 16x4 grid's 17.2308x4.3077 -> 17x4: plain Math.round every time.
+  return {
+    kind: 'image',
+    href: png.dataUri,
+    width: Math.round(dims.width),
+    height: Math.round(dims.height),
+  };
 }
 
 /**
