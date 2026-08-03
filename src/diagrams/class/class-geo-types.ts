@@ -12,6 +12,8 @@ import type { GenericTagGeo } from './class-stereotype.js';
 import type { EmptyPackageLeafDim } from './class-namespace-shape.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
+import type { StringMeasurer } from '../../core/measurer.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 
 export interface ClassifierGeo {
   id: string;
@@ -407,4 +409,29 @@ export interface ClassGeometry {
   edges: EdgeGeo[];
   namespaces: NamespaceGeo[];
   notes: NoteGeo[];
+  /**
+   * SI14 T3: the SAME `StringMeasurer` instance `SyncPlugin.layoutSync`
+   * received, carried onto the geometry for the same reason `errors` above
+   * `index.ts#classPlugin.layoutSync` is: `SyncPlugin.render(geo, theme)`
+   * (`dispatcher.ts`) only receives the geo, not the measurer, so a
+   * draw-time consumer that needs to measure text (T4: USymbol label
+   * placement via the faithful `TextBlock` tree, mirroring the description
+   * engine's `EntityImageDescriptionSupport.ts#buildTextBlock` precedent)
+   * has nowhere else to get one. Set unconditionally by `index.ts`'s
+   * `layoutSync` on every real `parseClass()`-driven diagram; optional only
+   * so pre-existing hand-built `ClassGeometry` test fixtures that bypass
+   * `layoutClass`/`layoutSync` entirely (unit tests constructing a geo
+   * literal directly) compile unchanged.
+   */
+  measurer?: StringMeasurer;
+  /**
+   * SI14 T3: this diagram's `sprite $name { ... }` definitions, copied
+   * unchanged from `ClassDiagramAST.sprites` (`ast.ts`'s doc comment) by
+   * the same `layoutSync` spread as {@link measurer} above -- mirrors the
+   * description engine's identical `ast.sprites` -> geo `sprites`
+   * passthrough (`description/layout.ts:487`). Omitted (not merely
+   * `undefined`) when the diagram declares no sprites, matching every
+   * other optional field in this file.
+   */
+  sprites?: SpriteRegistry;
 }

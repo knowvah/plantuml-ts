@@ -69,10 +69,19 @@ export const classPlugin: SyncPlugin<ClassDiagramAST, ClassGeometry> = {
   // onto the geometry here and drawn by `render` below. Mirrors the chart
   // engine's identical geo-side `errors` thread (`chart/index.ts`), which
   // exists for the same reason: `SyncPlugin.render()` only receives the geo.
+  //
+  // SI14 T3: the same reasoning applies to `measurer` (and `sprites`, copied
+  // unchanged from `ast.sprites`) -- a draw-time consumer (T4: USymbol label
+  // placement) needs the measurer that produced this layout, and `render()`
+  // has no other seam to get one, so it too is carried from here onto the
+  // geometry rather than threaded through the `SyncPlugin` contract (ADR-1,
+  // `plans/si14-usymbol-measurement-sharing/decisions.md`).
   layoutSync(ast, theme, measurer) {
     const geo = layoutClass(ast, theme, measurer);
     const errors = ast.errors ?? [];
-    return errors.length > 0 ? { ...geo, errors } : geo;
+    const spritesField = ast.sprites !== undefined ? { sprites: ast.sprites } : {};
+    const errorsField = errors.length > 0 ? { errors } : {};
+    return { ...geo, measurer, ...spritesField, ...errorsField };
   },
 
   render(geo, theme) {
