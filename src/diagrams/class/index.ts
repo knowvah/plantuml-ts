@@ -54,7 +54,10 @@ export const classPlugin: SyncPlugin<ClassDiagramAST, ClassGeometry> = {
   // Class-vs-description routing mirrors upstream's factory-selection outcome
   // (ClassDiagramFactory is tried before DescriptionDiagramFactory; the class
   // factory owns mixed class+descriptive blocks under `allowmixing` and any
-  // block of native class constructs). See class-dispatch.ts (mission A3 ADR-2).
+  // block of native class constructs). See class-dispatch.ts (mission A3
+  // ADR-2, as amended 2026-08-03: a block carrying an unambiguous class
+  // construct is CLAIMED even when it also names descriptive elements, so
+  // the allowmixing gate can refuse the leaf the way upstream does).
   accepts: classAccepts,
 
   parse(block) {

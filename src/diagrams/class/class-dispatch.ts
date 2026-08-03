@@ -1,5 +1,7 @@
 /**
- * Class-vs-description routing discriminator (mission A3).
+ * Class-vs-description routing discriminator (mission A3; ADR-2 amended
+ * 2026-08-03 -- the decline-on-descriptive-signal half is superseded, see
+ * `planning/mission-a3-class-superset/decisions.md`).
  *
  * Mission A3 makes the class engine own the descriptive elements upstream's
  * `ClassDiagramFactory` owns. Per the mission's "route + render each tier
@@ -9,9 +11,13 @@
  *
  * The base behaviour mirrors upstream's factory-selection outcome: the class
  * factory (tried before the description factory) claims a block of native class
- * constructs, and the description factory claims a pure descriptive block. Our
- * `accepts()` approximates this by declining any block carrying a descriptive
- * signal that the class factory would not parse.
+ * constructs, and the description factory claims a pure descriptive block.
+ * `accepts()` implements that order directly: a block carrying an UNAMBIGUOUS
+ * class construct is claimed outright, and only a block WITHOUT one declines on
+ * a descriptive signal. Before the 2026-08-03 amendment it declined on the
+ * signal unconditionally -- a keyword-presence approximation this ADR's own
+ * Context warned against, adopted because the engine had no way to REFUSE a
+ * line. It does now (`class-descriptive-leaf-command.ts`'s allowmixing gate).
  *
  * Implemented as class-local logic. Per ADR-1 this must NOT mutate the shared
  * `descriptive-keywords.ts` (the sequence and description guards also consume
@@ -53,10 +59,6 @@ import {
 import { REL_DISPATCH_RE } from './class-relationship-parser.js';
 
 /**
- * Patterns that appear in class diagrams. Tested against the first
- * {@link SCAN_LINE_LIMIT} lines of a block (the block extractor's probe window).
- */
-/**
  * The subset of {@link CLASS_ACCEPTS_PATTERNS} that ONLY a class diagram can
  * carry — used to claim a block before the descriptive decline, mirroring
  * upstream's factory order. `interface`/`entity`/`circle` are excluded because
@@ -70,6 +72,10 @@ const UNAMBIGUOUS_CLASS_DECL: readonly RegExp[] = [
   /^annotation\s/i,
 ];
 
+/**
+ * Patterns that appear in class diagrams. Tested against the first
+ * {@link SCAN_LINE_LIMIT} lines of a block (the block extractor's probe window).
+ */
 const CLASS_ACCEPTS_PATTERNS: readonly RegExp[] = [
   /^class\s/i,
   /^abstract\s+class\s/i,

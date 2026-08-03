@@ -34,7 +34,13 @@ attempt the cucadiagram rebuild here.
 ## ADR-2: The class/description routing discriminator (the load-bearing design)
 
 ### Status
-**ACCEPTED (2026-07-07, Batch 0).** Finalized against `~/git/plantuml`
+**ACCEPTED (2026-07-07, Batch 0)** · **AMENDED 2026-08-03** — the decline-on-
+descriptive-signal half is superseded; see
+[Amendment 1](#amendment-1-2026-08-03--decline-on-descriptive-signal-superseded)
+at the end of this ADR. Everything else below stands as written and the
+corpus-safety evidence is unchanged.
+
+Finalized against `~/git/plantuml`
 (`PSystemBuilder.java` trial-parse order + `CommandCreateElementFull2` allowmixing gate +
 `CommandCreateClass`/`CommandPackageWithUSymbol` native command sets) and corpus-safety
 probed over 314 oracle-having DESCRIPTION fixtures. See `decision-journal.md` T0.3 for the
@@ -80,12 +86,63 @@ the sequence/description guards also use).
   description corpus → STOP and escalate; the routing may require the cucadiagram
   unification (ADR-1's deferred track) to be correct.
 
+### Amendment 1 (2026-08-03) — decline-on-descriptive-signal superseded
+
+**What changed.** A block carrying an UNAMBIGUOUS class construct (`class`,
+`abstract class`, `enum`, `annotation`) is now claimed by the class engine
+BEFORE the `hasDescriptiveSignal` decline, rather than being re-routed to
+description. The Δ2–Δ4b filtering, the `allow_mixing`→class rule (Δ1) and the
+native-class accept signal are all unchanged.
+
+**Why the original was right at the time, and why it no longer is.** This
+ADR's own Context already named the target — *"Upstream resolves this by
+factory trial order + which commands parse the whole block — NOT by keyword
+presence"* — and the Decision aimed at *"class wins iff the class factory
+parses every line."* The implementation could only approximate that by
+declining on keyword presence, because the port had **no way to refuse a
+line**: upstream reaches `class Foo` + `usecase U1` by having
+`ClassDiagramFactory` OWN the block and then returning
+`CommandExecutionResult.error("Use 'allowmixing' …")`. With no error path,
+routing away was the only alternative to rendering something upstream
+rejects. That capability now exists
+(`class-descriptive-leaf-command.ts#adjudicateAllowMixing`, 2026-08-02), so
+the approximation can be replaced by the thing it approximated.
+
+**Deliberately narrower than the accept list.** `interface`, `entity` and
+`circle` belong to BOTH grammars, so they are excluded from the early claim —
+`interface I` inside a `component { }` is a component diagram and still
+declines to description. This ADR's own candidate discriminator anticipated
+that distinction by qualifying `interface` with "-with-members".
+
+**Evidence.** All 16 jar-verified `allowmixing` cases now match upstream, up
+from 11; the five that previously escaped (`usecase`, `state`, `card`,
+`database`, `portin`) did so because they never reached the class engine at
+all. ADR-3's gate re-run and satisfied — see its own Amendment 1. Blast radius
+was measured three times before the change: an initial scan claimed 57
+affected blocks, but counted `interface` inside component containers and
+`file f` inside embedded `{{ }}` sub-diagrams; real corpus impact is nil, with
+no committed golden moving engines.
+
+**Tests updated, not weakened.** Three dispatch/legend tests asserted the old
+routing (`class A\ndatabase B` → description, and two of the same shape). Each
+was jar-verified as REFUSED upstream before being changed, and one already
+carried the comment *"upstream errors on a bare `database` leaf without
+allowmixing"* while asserting this port route away from that error.
+
+**Superseded by:** commit `181637df`. **Raised by:** SI10's T3 fixtures, which
+measured the permissiveness this ADR's routing was masking.
+
 ---
 
 ## ADR-3: Dual-corpus regression gate — DESCRIPTION corpus is now the at-risk side
 
 ### Status
-Accepted (carried from `mission-desc-routed` ADR-3, inverted).
+Accepted (carried from `mission-desc-routed` ADR-3, inverted) · **IN FORCE,
+re-affirmed 2026-08-03** — exercised by the first change since A3 to actually
+narrow the description engine's remit; see
+[Amendment 1](#amendment-1-2026-08-03--gate-exercised-and-held) below. The gate
+is unchanged; only its cheapest sufficient form for a ROUTING change is now
+recorded.
 
 ### Context
 desc-routed worried about the description engine breaking while chasing class.
@@ -100,6 +157,41 @@ policy the description corpus must not drop at all.
 
 ### Consequences
 Doubles measurement cost per task. Non-negotiable given the blast radius.
+
+### Amendment 1 (2026-08-03) — gate exercised, and held
+
+The `allowmixing` routing change (ADR-2 Amendment 1, commit `181637df`) is the
+first change since A3 to actually do the thing this ADR exists to guard: it
+**removes blocks from the description engine's remit**. So the gate was run
+rather than assumed.
+
+**Result — nothing was stolen:**
+
+| corpus | fixtures | now claimed by class |
+|---|---|---|
+| `oracle/goldens/description/` (all oracle-having) | 351 | **0** |
+| `oracle/goldens/svg-description/` | 51 | **0** |
+
+Corroborating: the 54-fixture description ratchet zero-diff, 1,066 dot-parity
+tests green, description size-deltas unchanged at 320/351 with `widened 0` and
+an identical cause histogram, and all 312 class goldens byte-identical.
+
+**Refinement, not relaxation.** This ADR mandates "a before/after EQUAL-set
+diff on BOTH corpora" for every code-touching task. For a change that alters
+ROUTING only, the decisive question is narrower and cheaper to answer
+exactly: *does any description-corpus fixture now satisfy `classAccepts`?* A
+fixture that keeps its engine cannot change its EQUAL status by a routing
+edit, so the table above is sufficient **for routing changes specifically**,
+run alongside the standing ratchets. Any change touching layout or rendering
+still owes the full before/after EQUAL-set diff — that half is untouched.
+
+This refinement was written after noticing the gate had been satisfied by
+ratchets rather than by its own stated procedure; the procedure was then run,
+and is recorded here so the next routing change starts from the exact check
+rather than re-deriving it.
+
+**Verified by:** `classAccepts` evaluated over every fixture in both corpora
+via `buildBlockUmls` (the same block shape production uses), 2026-08-03.
 
 ---
 
