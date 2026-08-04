@@ -191,58 +191,35 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
   });
 
   /**
-   * SI14 T4: the usecase now draws via `EntityImageDescription.drawU`
-   * (`renderer-usymbol-entity.ts`), replacing the hand-rolled
-   * `renderUseCaseIcon`/`renderRowAtoms` pair the pre-T4 pin above measured.
-   * `ellipse/@stroke-width` (absent pre-T4) is now emitted and exact -- the
-   * new path threads a real `UStroke` through `EntityImageDescriptionPaint`,
-   * where the old hand-rolled ellipse never set one.
+   * SI15 T1 (ADR-1): `UImage` now carries the sprite's native raster grid
+   * dims (`resolveSpriteAtom`, 3x2 for this fixture) so `Footprint
+   * .MyUGraphic.drawImage` fits the ellipse against `raster - 1` (W=2,H=1)
+   * instead of the declared/scaled placement box, matching upstream
+   * `UImage.java:87-92`.
    *
-   * `ellipse/@cx`/`@rx`/`@ry` are UNCHANGED and expected to survive this
-   * task -- per T4's own "Explicitly out of scope" note, this is the fitted
-   * ellipse's OWN dimensions (the sizer's `measureUsecaseOrActor`, T6's
-   * job), a mechanism upstream of and independent from centring.
+   * `ellipse/@rx`/`@ry` CLEAR entirely (AC1: `rx=48.968`, `ry=13.0625` to 5
+   * decimals, within the comparator's 0.01 tolerance) -- the diagnosis
+   * note's (`.agent-notes/si14-ry-delta.md`) HIGH-confidence leg, confirmed.
    *
-   * `image/@x`/`text/@x` are ALSO UNCHANGED (2.003, not the 0 the task's own
-   * acceptance criterion 1 predicted). Measured, not assumed: both trace to
-   * the SAME out-of-scope ellipse-fit mechanism above -- the fitted
-   * ellipse's cx/rx set the dx the label draws against, so an off-by-~1.93
-   * `rx` propagates directly into an off-by-~2.00 label x. AC1's prediction
-   * that x would independently reach 0 did not hold once measured; this is
-   * the honest residual, not a rounding slip.
+   * `cx`/`image/@x`/`text/@x` did NOT clear to zero -- the diagnosis note's
+   * own MEDIUM-confidence leg, reported honestly: they SHRANK by ~96%
+   * (delta 2.003 -> 0.075, well outside the 0.01 tolerance) but a small
+   * residual survives. A NEW `ellipse/@cy` diff (delta 0.4246, absent
+   * before this task) appears, and `image/@y`/`text/@y` (the pre-existing
+   * descent-approximation residual) shift from delta 0.5794 to the SAME
+   * 0.4246 as the new `cy` diff -- consistent with one shared remaining
+   * mechanism (likely `alpha`/circle-fit rounding at the new, smaller
+   * W=2,H=1 corner points, or a second minor centring effect this task did
+   * not chase) rather than two independent causes; not diagnosed further
+   * here -- out of T1's write-set (ellipse-fit geometry belongs to the
+   * sizer, `measureUsecaseOrActor`, not `Footprint`).
    *
-   * `image/@y`/`text/@y` IMPROVED (0.6072/0.6071 -> 0.5794/0.5794, still
-   * non-zero, still a SHARED offset -- both numbers equal, confirming a
-   * single upstream cause, not two independent errors): the description
-   * engine's own `fontSize/4.5` descent approximation (recorded pre-T4,
-   * unchanged by this task).
+   * `image/@width`/`@height` are UNCHANGED (2.1538/3.2308 vs 2/3) -- the
+   * emission-rounding gap this task explicitly does not touch (T3's job,
+   * ADR-2).
    *
-   * `image/@width`/`@height` are a NEW residual T4 exposes (2 entries,
-   * absent pre-T4): commit 1406e139 (landed immediately before this task)
-   * moved D9 Amendment 1's raw-measure/integer-emit rounding to the
-   * CLASS-engine-only `<image>` emission site (`renderer-classifier-
-   * rows.ts`), explicitly flagging in its own commit message that "the
-   * description engine emits via klimt's shared `svgImageDataUri`, which is
-   * not aligned -- rounding there would also affect `<img>` atoms... [and]
-   * needs its own verification pass." T4 routes usecase/actor through
-   * EXACTLY that unrounded description-engine path
-   * (`EntityImageDescriptionTextBlock.ts#drawAtoms`), so this pre-flagged,
-   * pre-existing gap becomes reachable here for the first time. Rounding it
-   * at THIS task's own resolver seam would corrupt the cursor-advance width
-   * `drawAtoms` reuses for the FOLLOWING text run (the same reason the
-   * class-engine fix rounds only at the emission site, not the resolver) --
-   * fixing it correctly requires editing `EntityImageDescriptionTextBlock
-   * .ts`, outside this task's write-set and already named as its own
-   * follow-up by the commit that surfaced it. NOT chased here, mirroring
-   * how T4 does not chase the ellipse-fit residual above.
-   *
-   * NET COUNT: 11 entries, not smaller than the pre-T4 pin (10) -- honest
-   * report, not the strict "smaller" the task predicted: one entry
-   * resolved (`stroke-width`) while two NEW ones surface (`image/@width`,
-   * `@height`) for the reason above. Every actor-only diff on the SIBLING
-   * fixture above closed to zero; this fixture's residual count grows by
-   * exactly the pre-flagged rounding gap this task's own routing change
-   * newly reaches.
+   * NET COUNT: 10 entries (was 11) -- `rx`/`ry` cleared (-2), `cy` newly
+   * crosses tolerance (+1).
    */
   it('draws the sprite atom; pinned diffs are placement/scale, not structure', () => {
     const golden = readGolden(slug);
@@ -256,20 +233,19 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
     const expected: Diff[] = [
       { path: 'svg/@viewBox[2]', actual: '243', expected: '238', delta: 5, tolerance: 0.01 },
       { path: 'svg/@width', actual: '243', expected: '238', delta: 5, tolerance: 0.01 },
-      // Ellipse fit itself -- T6's job, out of scope (task's own note).
-      { path: 'svg/g[1]/g[2]/ellipse[1]/@cx', actual: '177.531', expected: '175.528', delta: 2.0030000000000143, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/ellipse[1]/@rx', actual: '50.8964', expected: '48.968', delta: 1.9283999999999963, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/ellipse[1]/@ry', actual: '13.4846', expected: '13.0625', delta: 0.42210000000000036, tolerance: 0.01 },
-      // NEW residual: description-engine `<image>` emission does not round
-      // (pre-flagged gap, commit 1406e139) -- see doc comment above.
+      // Residual centring shift -- see doc comment above (MEDIUM-confidence
+      // leg, shrank but did not clear).
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@cx', actual: '175.603', expected: '175.528', delta: 0.07500000000001705, tolerance: 0.01 },
+      // NEW: see doc comment above.
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@cy', actual: '37.5779', expected: '38.0025', delta: 0.4245999999999981, tolerance: 0.01 },
+      // Emission-rounding gap -- T3's job (ADR-2), untouched by this task.
       { path: 'svg/g[1]/g[2]/image[1]/@height', actual: '2.1538', expected: '2', delta: 0.15379999999999994, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/image[1]/@width', actual: '3.2308', expected: '3', delta: 0.2307999999999999, tolerance: 0.01 },
-      // Ellipse-fit dx propagation -- same mechanism as cx/rx above.
-      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '145.553', expected: '143.55', delta: 2.002999999999986, tolerance: 0.01 },
-      // Descent approximation (pre-existing, unchanged mechanism).
-      { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '41.6517', expected: '42.2311', delta: 0.5793999999999997, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '148.784', expected: '146.781', delta: 2.002999999999986, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/text[1]/@y', actual: '40.6944', expected: '41.2738', delta: 0.5793999999999997, tolerance: 0.01 },
+      // Ellipse-fit dx propagation -- same mechanism as cx above.
+      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '143.625', expected: '143.55', delta: 0.07499999999998863, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '41.8065', expected: '42.2311', delta: 0.4245999999999981, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '146.856', expected: '146.781', delta: 0.07499999999998863, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/text[1]/@y', actual: '40.8492', expected: '41.2738', delta: 0.4245999999999981, tolerance: 0.01 },
     ];
     expect(diffs).toEqual(expected);
   });

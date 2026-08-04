@@ -48,6 +48,23 @@ import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import type { Atom } from '../../klimt/creole/SheetBlock1.js';
 import type { NestedDiagramRenderer } from '../../EmbeddedDiagram.js';
 
+/**
+ * SI15 T1 (ADR-1): widens `AtomImageResolver`'s `image` variant with the
+ * optional raster-pixel fields `render-atoms.ts`'s producers
+ * (`resolveSpriteAtom`/`resolveImgAtom`) now populate. Declared locally
+ * rather than widening `AtomImageResolver` itself in `creole-atoms.ts` --
+ * that module sits at this project's 500-line file cap; the resolver's
+ * runtime shape already carries these fields (`render-atoms.ts`'s own
+ * `ResolvedAtomImage`), only the shared static type doesn't expose them.
+ * Mirrors `EntityImageDescriptionTextBlock.ts`'s identical local type.
+ */
+type ResolvedAtomImageWithRaster =
+  | (Extract<ReturnType<AtomImageResolver>, { readonly kind: 'image' }> & {
+      readonly rasterWidth?: number;
+      readonly rasterHeight?: number;
+    })
+  | Exclude<ReturnType<AtomImageResolver>, { readonly kind: 'image' }>;
+
 // ---------------------------------------------------------------------------
 // T4 (`plans/bodyenhanced-atom-seams/`) -- `desc` wired through the REAL
 // `BodyFactory.create3` (`EntityImageDescription.java:188-191`). `name`/
@@ -161,7 +178,7 @@ function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
         ug.draw(UImage.build(r.width, r.height, r.href));
         return;
       }
-      const resolved = resolveAtomImage?.(atom.atom);
+      const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom);
       if (resolved === undefined) return;
       // svg-sprite-nanoparser T9 fix (was: `if (resolved.kind !== 'image')
       // return;`, T4's placeholder guard -- silently dropped every SVG
@@ -192,7 +209,15 @@ function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
       // extra `ug.apply(new UTranslate(x, origin.y))` wrapper is needed here
       // the way `drawAtoms`'s manual x-cursor requires one.
       if (resolved.kind === 'image') {
-        ug.draw(UImage.build(resolved.width, resolved.height, resolved.href));
+        // SI15 T1 (ADR-1): mirrors `drawAtoms`'s identical guarded fallback
+        // (`EntityImageDescriptionTextBlock.ts`, this file's own doc
+        // comment above) -- raster dims present only for a real
+        // raster-backed atom (sprite/img).
+        const rasterDims =
+          resolved.rasterWidth !== undefined && resolved.rasterHeight !== undefined
+            ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
+            : undefined;
+        ug.draw(UImage.build(resolved.width, resolved.height, resolved.href, rasterDims));
       } else {
         // Each primitive re-applies its OWN translate+paint on top of the
         // atom's position `ug` already carries (`DrawablePrimitive`,

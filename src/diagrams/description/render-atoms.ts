@@ -73,7 +73,19 @@ import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 import type { Paint } from '../../core/paint.js';
 
 type ResolvedAtomImage =
-  | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
+  | {
+      readonly kind: 'image';
+      readonly href: string;
+      readonly width: number;
+      readonly height: number;
+      /** SI15 T1 (ADR-1): native raster pixel dims, present only when a
+       *  real raster backs this atom (monochrome sprite grid dims, or the
+       *  `<img>` data URI's IHDR dims) — threaded to `UImage.build` so
+       *  `Footprint.MyUGraphic.drawImage` can use `raster − 1` for the
+       *  ellipse-fit corner points, matching upstream `UImage.java:87-92`. */
+      readonly rasterWidth?: number;
+      readonly rasterHeight?: number;
+    }
   | {
       readonly kind: 'drawable';
       readonly primitives: readonly DrawablePrimitive[];
@@ -191,7 +203,17 @@ class SpritePrimitiveCollector implements UGraphic {
 
 function resolveImgAtom(atom: Extract<InlineAtomToken, { kind: 'img' }>): ResolvedAtomImage {
   const dims = measureInlineAtom(atom);
-  return { kind: 'image', href: atom.dataUri, width: dims.width, height: dims.height };
+  // SI15 T1 (ADR-1): `atom.width`/`atom.height` are the raw IHDR pixel
+  // dims (`buildImgSpan`, creole-atoms.ts) -- the data URI's native raster,
+  // already parsed, unscaled by `dims`'s declared/scaled placement size.
+  return {
+    kind: 'image',
+    href: atom.dataUri,
+    width: dims.width,
+    height: dims.height,
+    rasterWidth: atom.width,
+    rasterHeight: atom.height,
+  };
 }
 
 /**
@@ -250,7 +272,19 @@ function resolveSpriteAtom(
     atom.forcedColor,
     spriteScale(atom.scale, font.size),
   );
-  return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
+  // SI15 T1 (ADR-1): the PNG raster is one pixel per sprite GRID cell --
+  // `spriteScale` only stretches the SVG `<image width=height=>`
+  // placement attrs, it does not enlarge the rasterized PNG itself -- so
+  // `sprite.width`/`sprite.height` (the registry's native grid dims) ARE
+  // the raster pixel count `Footprint.drawImage` needs.
+  return {
+    kind: 'image',
+    href: png.dataUri,
+    width: dims.width,
+    height: dims.height,
+    rasterWidth: sprite.width,
+    rasterHeight: sprite.height,
+  };
 }
 
 /**

@@ -36,6 +36,22 @@ import { getSplitted } from '../../klimt/creole/Fission.js';
 import { manageGuillemet, type GuillemetPair } from '../../text/Guillemet.js';
 import { renderLatexAsImage } from '../../latex.js';
 
+/**
+ * SI15 T1 (ADR-1): widens `AtomImageResolver`'s `image` variant with the
+ * optional raster-pixel fields `render-atoms.ts`'s producers
+ * (`resolveSpriteAtom`/`resolveImgAtom`) now populate. Declared locally
+ * rather than widening `AtomImageResolver` itself in `creole-atoms.ts` —
+ * that module sits at this project's 500-line file cap; the resolver's
+ * runtime shape already carries these fields (`render-atoms.ts`'s own
+ * `ResolvedAtomImage`), only the shared static type doesn't expose them.
+ */
+type ResolvedAtomImageWithRaster =
+  | (Extract<ReturnType<AtomImageResolver>, { readonly kind: 'image' }> & {
+      readonly rasterWidth?: number;
+      readonly rasterHeight?: number;
+    })
+  | Exclude<ReturnType<AtomImageResolver>, { readonly kind: 'image' }>;
+
 // ---------------------------------------------------------------------------
 // Text construction seam — see EntityImageDescription.ts's doc comment
 // ("Text-construction seam")
@@ -288,10 +304,21 @@ function drawAtoms(
       x += resolved.width;
       continue;
     }
-    const resolved = resolveAtomImage?.(atom.atom); // ADR-2: cursor advances by DECLARED width, never ink
+    // ADR-2: cursor advances by DECLARED width, never ink.
+    const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom);
     if (resolved === undefined) continue;
     if (resolved.kind === 'image') {
-      ug.apply(new UTranslate(x, origin.y)).draw(UImage.build(resolved.width, resolved.height, resolved.href));
+      // SI15 T1 (ADR-1): raster dims present only for a real raster-backed
+      // atom (sprite/img) -- guarded fallback keeps `UImage.build`'s 4th
+      // arg `undefined` otherwise, so `Footprint.drawImage` falls back to
+      // the declared dims exactly as before this task.
+      const rasterDims =
+        resolved.rasterWidth !== undefined && resolved.rasterHeight !== undefined
+          ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
+          : undefined;
+      ug
+        .apply(new UTranslate(x, origin.y))
+        .draw(UImage.build(resolved.width, resolved.height, resolved.href, rasterDims));
     } else {
       const translated = ug.apply(new UTranslate(x, origin.y)); // @see SvgNanoParser.java#drawU
       // Each primitive re-applies its OWN translate+paint on top of the
