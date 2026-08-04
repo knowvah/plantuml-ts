@@ -351,4 +351,12 @@ export interface ThemeGraphColorsA {
    *  scoped out deliberately rather than guessed. */
   classCascadeMaximumWidth?: number;
   classCascadeHeaderMaximumWidth?: number;
+  /** A2s A9: `<style> classDiagram { class { header { FontSize N } } }` --
+   *  `EntityImageClassHeader.java:80-82` resolves the header style signature
+   *  (`HEADER_SNAMES`) and builds the name's FontConfiguration from it
+   *  (`:100`); a header-scoped FontSize therefore sizes the classifier NAME
+   *  independently of `classFontSize` (momaku-69-duxe918: `o1` header at
+   *  20pt, delta = w('o1'@20) - w('o1'@14) = 6.675px jar-exact). Consumed by
+   *  `class-layout-helpers.ts#resolveHeaderFont`. */
+  classCascadeHeaderFontSize?: number;
 }

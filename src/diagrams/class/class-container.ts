@@ -33,7 +33,7 @@ import {
   collapseEmptyNamespace,
   qualifiedId,
 } from './class-namespace.js';
-import { NOTE_STEREO, NOTE_URL, NOTE_COLOR } from './class-notes.js';
+import { NOTE_URL, NOTE_COLOR } from './class-notes.js';
 import { stripQuotes } from './class-relationship-parser.js';
 
 /**
@@ -126,6 +126,9 @@ export function openNamespaceBlock(
     }
     ns.push({ id: effectiveId, display, classifiers: [], creationIndex });
   }
+  // #lizard forgives -- pre-existing 32 NLOC / 7 CCN (unchanged by A2s F-G;
+  // the branch structure ports CucaDiagram#quarkInContextSafe + G2 N8's
+  // creationIndex reuse and must not be refactored mid-port).
   return effectiveId;
 }
 
@@ -196,6 +199,65 @@ interface Command {
 }
 
 /**
+ * The `USymbols` registry names (`all` map keys, recorded UPPERCASE), for
+ * the `USymbols.fromString` lookup below. The bracket-including special
+ * cases at the top of `fromString` (`s.equalsIgnoreCase("package")` etc.)
+ * can never match a `<<...>>`-delimited stereotype string, so only this
+ * registry lookup is live on the package/namespace-header path.
+ * @see ~/git/plantuml/.../decoration/symbol/USymbols.java:60-95 (record calls)
+ * @see ~/git/plantuml/.../decoration/symbol/USymbols.java:98-120 (fromString)
+ */
+const USYMBOL_NAMES: ReadonlySet<string> = new Set([
+  'ACTION', 'ACTOR_AWESOME', 'ACTOR_HOLLOW', 'ACTOR_STICKMAN',
+  'ACTOR_STICKMAN_BUSINESS', 'AGENT', 'ARCHIMATE', 'ARTIFACT', 'BOUNDARY',
+  'CARD', 'CLOUD', 'COLLECTIONS', 'COMPONENT_RECTANGLE', 'COMPONENT1',
+  'COMPONENT2', 'CONTROL', 'DATABASE', 'ENTITY_DOMAIN', 'FILE', 'FOLDER',
+  'FRAME', 'GROUP', 'HEXAGON', 'INTERFACE', 'LABEL', 'NODE', 'PACKAGE',
+  'PARTITION', 'PERSON', 'PROCESS', 'QUEUE', 'RECTANGLE', 'STACK', 'STORAGE',
+  'USECASE', 'USECASE_BUSINESS',
+]);
+
+/**
+ * A2s F-G mechanism A8: capturing variant of `NOTE_STEREO` for the
+ * package/namespace header commands -- `StereotypePattern.mandatory`'s own
+ * `(\<\<.+?\>\>)` (non-greedy), wrapped optional like
+ * `StereotypePattern.optional`.
+ * @see ~/git/plantuml/.../stereo/StereotypePattern.java:66-68
+ */
+export const HEADER_STEREO_CAPTURE = '(?:\\s*(<<.+?>>))?';
+
+/**
+ * Store a `package`/`namespace` header's `<<stereotype>>` on its Namespace
+ * (A2s F-G mechanism A8; consumed by `collapseEmptyNamespace`,
+ * class-namespace.ts, when the group ends EMPTY). `stereoRaw` is the full
+ * `<<...>>` capture (undefined when the header has none). When `gated`, a
+ * stereotype naming a USymbol selects the package SHAPE upstream instead of
+ * being displayed (`if (stereotype != null && usymbol == null)
+ * p.setStereotype(...)`) -- mirror `USymbols.fromString`'s
+ * `goUpperCase(s.replaceAll("\\W", ""))` registry lookup and skip the store.
+ * `CommandNamespace2` (quoted `"Display" as alias` form) passes
+ * `gated: false`: upstream sets its stereotype unconditionally.
+ * Stored as the inner text (`<<`/`>>` stripped, trimmed) -- the same
+ * convention as `Classifier.stereotype` (class-declaration-extractors.ts).
+ * @see ~/git/plantuml/.../command/CommandPackage.java:178-191
+ * @see ~/git/plantuml/.../command/CommandNamespace.java:113-124
+ * @see ~/git/plantuml/.../command/CommandNamespace2.java:122-124
+ */
+export function setNamespaceStereotype(
+  state: ParseState,
+  nsId: string,
+  stereoRaw: string | undefined,
+  gated: boolean,
+): void {
+  if (stereoRaw === undefined) return;
+  if (gated && USYMBOL_NAMES.has(stereoRaw.replace(/\W/g, '').toUpperCase())) return;
+  const inner = /<<\s*(.+)\s*>>/.exec(stereoRaw)?.[1]?.trim();
+  if (inner === undefined || inner.length === 0) return;
+  const ns = state.ast.namespaces.find((n) => n.id === nsId);
+  if (ns !== undefined) ns.stereotype = inner;
+}
+
+/**
  * Namespace-block command pair, moved out of class-commands.ts (line cap):
  * CommandNamespace2 (`namespace "Display" as alias {`, tried first) and
  * CommandNamespace (`namespace NAME {`). Spread into `COMMANDS` in place —
@@ -211,7 +273,7 @@ export const NAMESPACE_COMMANDS: readonly Command[] = [
   {
     pattern: new RegExp(
       '^namespace\\s+"([^"]+)"\\s+as\\s+(\\S+)' +
-        NOTE_STEREO +
+        HEADER_STEREO_CAPTURE +
         NOTE_URL +
         NOTE_COLOR +
         '\\s*\\{(\\s*\\})?\\s*$',
@@ -221,11 +283,16 @@ export const NAMESPACE_COMMANDS: readonly Command[] = [
       const display = match[1]!;
       const nsId = match[2]!;
       const effectiveId = openNamespaceBlock(state, nsId, display);
+      // A2s F-G mechanism A8: stereo capture (group 3) -- UNGATED,
+      // CommandNamespace2.java:122-124 calls setStereotype without any
+      // `USymbols.fromString` check (unlike CommandNamespace/CommandPackage).
+      setNamespaceStereotype(state, effectiveId, match[3], false);
       // G2 N34: NOTE_COLOR is capturing; G2 N70: NOTE_URL is now capturing
-      // too (it precedes COLOR here) -- the same-line-brace group shifted
-      // from match[4] to match[5]. This command does not consume a
-      // namespace's own URL (no render path for it yet).
-      if (match[5] !== undefined) {
+      // too (it precedes COLOR here); A8: the stereo group above shifted
+      // url/color/brace by one more -- the same-line-brace group is now
+      // match[6]. This command does not consume a namespace's own URL (no
+      // render path for it yet).
+      if (match[6] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
           state.classifierIndex,
@@ -244,7 +311,7 @@ export const NAMESPACE_COMMANDS: readonly Command[] = [
   {
     pattern: new RegExp(
       '^namespace\\s+("[^"]*"|[^\\s#<{]+)' +
-        NOTE_STEREO +
+        HEADER_STEREO_CAPTURE +
         NOTE_URL +
         NOTE_COLOR +
         '\\s*\\{(\\s*\\})?\\s*$',
@@ -253,11 +320,16 @@ export const NAMESPACE_COMMANDS: readonly Command[] = [
     execute(state, match) {
       const nsId = stripQuotes(match[1]!);
       const effectiveId = openNamespaceBlock(state, nsId, nsId);
+      // A2s F-G mechanism A8: stereo capture (group 2) -- GATED, a
+      // USymbol-naming stereotype selects the shape instead
+      // (CommandNamespace.java:113-124).
+      setNamespaceStereotype(state, effectiveId, match[2], true);
       // G2 N34: NOTE_COLOR is capturing; G2 N70: NOTE_URL is now capturing
-      // too (it precedes COLOR here) -- the same-line-brace group shifted
-      // from match[3] to match[4]. This command does not consume a
-      // namespace's own URL (no render path for it yet).
-      if (match[4] !== undefined) {
+      // too (it precedes COLOR here); A8: the stereo group above shifted
+      // url/color/brace by one more -- the same-line-brace group is now
+      // match[5]. This command does not consume a namespace's own URL (no
+      // render path for it yet).
+      if (match[5] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
           state.classifierIndex,

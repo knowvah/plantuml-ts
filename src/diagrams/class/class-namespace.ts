@@ -102,6 +102,12 @@ export function collapseEmptyNamespace(
   // `xitobu-41-lame230`: `package package {}` before `class foo` in source
   // draws the folder icon FIRST).
   if (ns.creationIndex !== undefined) classifier.creationIndex = ns.creationIndex;
+  // A2s F-G mechanism A8: the group's stereotype survives the mute to
+  // EMPTY_PACKAGE -- upstream reads `entity.getStereotype()` off the SAME
+  // entity when building the leaf's stereo block, so the collapsed leaf
+  // inherits it verbatim (widens the node via `measureEmptyPackageLeafDim`).
+  // @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:126-137
+  if (ns.stereotype !== undefined) classifier.stereotype = ns.stereotype;
   classifierIndex.set(nsId, classifiers.length);
   classifiers.push(classifier);
   if (parentId !== null) {

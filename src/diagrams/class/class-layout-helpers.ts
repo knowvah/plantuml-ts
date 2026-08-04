@@ -22,7 +22,7 @@
  * ./class-layout-edge-labels.ts, same reason.
  */
 
-import type { Classifier, ClassDiagramAST } from './ast.js';
+import type { Classifier, ClassifierKind, ClassDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
@@ -38,11 +38,13 @@ import {
 import { resolveBadgeRadius } from './class-badge.js';
 import {
   resolveStyleStereotypeTags,
+  resolveVisibleStereotypeLabels,
   CLASS_STEREOTYPE_FONT_SIZE,
   type GuillemetPair,
   type GenericTagGeo,
 } from './class-stereotype.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import { resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
 import { ROW_TEXT_LEFT_MARGIN, isMethodMember } from './class-member-rows.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import {
@@ -53,7 +55,7 @@ import {
   type EdgeLabelAlign,
   type EdgeLabelLines,
 } from './class-layout-edge-labels.js';
-import { measureGenericClassifier } from './class-layout-generic-classifier.js';
+import { measureGenericClassifier, tryMeasureDescriptionLeaf } from './class-layout-generic-classifier.js';
 import { measureUsecaseOrActor, measureLollipop } from './class-layout-leaf-shapes.js';
 // Re-exported for existing external consumers (class-directives.ts, layout.ts,
 // note-layout.ts) -- G2/N14 moved the implementations to class-member-rows.ts
@@ -134,6 +136,7 @@ export function shieldedClassifierIds(ast: ClassDiagramAST): Map<string, { isPor
  */
 export function formatMemberText(member: {
   visibility: string;
+  visibilityExplicit?: boolean;
   name: string;
   type?: string;
   /** G2 N31: the raw separator between name/params and `type`, when the
@@ -142,7 +145,18 @@ export function formatMemberText(member: {
   typeSeparator?: string;
   params?: string[];
   rawDisplay?: string;
-}): string {
+}, keepVisibilityChar = false): string {
+  // A13 (`classAttributeIconSize 0`): `MethodsOrFieldsArea#createTextBlock`'s
+  // `withVisibilityChar` path (java:244-246) -- `m.getDisplay(true)`
+  // re-prepends the member's OWN explicit char (Member.java:161-178;
+  // modifier-less members get none). Upstream tilde-escapes a leading '#'
+  // (CharHidder.java:41-43) only to shield it from ITS creole layer (net
+  // result: one literal '#' glyph); this port's member creole has no
+  // '~'-escape pass and '#' is not markup there, so the plain char IS the
+  // same observable.
+  if (keepVisibilityChar && member.visibilityExplicit === true) {
+    return member.visibility + formatMemberText(member);
+  }
   // G2 N12: a raw-fallback member (class-member-parser.ts's non-canonical-
   // syntax branch) carries its ENTIRE display text verbatim in `rawDisplay`
   // -- `name` duplicates it only so callers that key on `.name` still see
@@ -254,8 +268,14 @@ function tryMeasureNonGenericClassifier(
   // name+members box -- must be checked before every other branch below
   // since `isCollapsedGroup` classifiers carry `kind: 'descriptive'` with
   // no `usymbol` (would otherwise fall through to the generic box).
+  // A2s F-D mechanism A8: the leaf's `<<stereotype>>` block merges into the
+  // dim (EntityImageEmptyPackage.java:126-145) -- labels currently reach
+  // this classifier only for hand-built ASTs; the parser drops a package's
+  // stereotype before collapse (plumbing gap, see the F-D report).
   if (isCollapsedGroup(classifier)) {
-    const dim = measureEmptyPackageLeafDim(measurer, theme, classifier.display);
+    const dim = measureEmptyPackageLeafDim(
+      measurer, theme, classifier.display, resolveVisibleStereotypeLabels(classifier),
+    );
     // `rows[0].text` carries the label for `renderer.ts#renderEmptyPackageLeaf`
     // (mirrors `tryRenderUSymbol`'s identical `rows[0]?.text ?? id` convention)
     // -- no `y`/`indent` meaning here since this leaf never draws through the
@@ -285,6 +305,14 @@ function tryMeasureNonGenericClassifier(
   if (classifier.kind === 'usecase' || (classifier.kind === 'descriptive' && classifier.usymbol === 'actor')) {
     return measureUsecaseOrActor(classifier, fontSpec, measurer, sprites);
   }
+  // A2s F-D mechanism A2: every OTHER USymbol-bearing descriptive leaf
+  // (allowmixing `database`/`component`/`rectangle`/... and an empty
+  // brace-group that kept its usymbol) routes to the description engine's
+  // faithful EntityImageDescription sizing too -- see
+  // `tryMeasureDescriptionLeaf`'s own doc comment (class-layout-generic-
+  // classifier.ts) for the upstream cite and the deliberate exclusions.
+  const descLeaf = tryMeasureDescriptionLeaf(classifier, theme, measurer, sprites);
+  if (descLeaf !== undefined) return descLeaf;
   // G2 N20: the lollipop interface's own small circle+label -- NOT the
   // generic name+members box (see measureLollipop's own doc comment).
   if (classifier.kind === 'lollipop') return measureLollipop(classifier, fontSpec, measurer);
@@ -349,7 +377,21 @@ function resolveHeaderFont(
 ) {
   return {
     family: theme.colors.graph.classFontFamily ?? attributeFont.family,
-    size: theme.colors.graph.classFontSize ?? attributeFont.size,
+    // A2s F-D mechanism A9: `<style> classDiagram { class { header {
+    // FontSize } } }` -- `EntityImageClassHeader`'s styleHeader signature is
+    // `element.classDiagram.class.header` (EntityImageClassHeader.java:80-82,
+    // name TextBlock at :100), a MORE specific selector than the bare class
+    // bucket, so it wins over `skinparam classFontSize` (which
+    // FromSkinparamToStyle maps to the same header bucket; Stage-3 <style>
+    // application order also puts it on top). Read from the
+    // `classCascadeHeaderFontSize` cascade field (populated by
+    // `style-cascade-class.ts`'s HEADER_SNAMES fontsize lookup — A2s A9);
+    // the element bucket stays as a secondary source for skin files. Jar
+    // evidence: momaku-69-duxe918 `o1` header at 20pt (delta =
+    // w('o1'@20) - w('o1'@14) = 6.675px exact).
+    size: theme.colors.graph.classCascadeHeaderFontSize
+      ?? theme.colors.elements?.['class']?.headerFontSize
+      ?? theme.colors.graph.classFontSize ?? attributeFont.size,
     bold: resolveCascadedFontFlag(tagCascadeEntry?.fontBold, theme.colors.graph.classFontBold, attributeFont.bold),
     italic: resolveCascadedFontFlag(tagCascadeEntry?.fontItalic, theme.colors.graph.classFontItalic, attributeFont.italic),
   };
@@ -410,19 +452,49 @@ export function measureClassifier(
   // -- resolved ONCE here (theme is only available at this level) and
   // threaded through as a plain number, matching `tagCascadeEntry`'s own
   // "resolve once, pass down" precedent above.
-  const badgeRadius = resolveBadgeRadius(
-    theme.colors.graph.circledCharacterFontSize,
-    theme.colors.graph.circledCharacterRadius,
-  );
+  const badgeRadius = resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius);
   const stereoFont = resolveStereoFont(theme, headerFont);
-  // G2 N65 item 35: resolved ONCE here (theme is only available at this
-  // level), matching `badgeRadius`/`stereoFont`'s own "resolve once, pass
-  // down" precedent above -- see `theme.ts#classCascadeMaximumWidth`'s doc
-  // comment for the header-vs-member split.
-  const headerMaxWidth = theme.colors.graph.classCascadeHeaderMaximumWidth ?? 0;
-  const memberMaxWidth = theme.colors.graph.classCascadeMaximumWidth ?? 0;
+  // G2 N65 item 35: headerMaxWidth/memberMaxWidth resolved ONCE here (theme
+  // is only available at this level), matching `badgeRadius`/`stereoFont`'s
+  // own "resolve once, pass down" precedent above -- see
+  // `theme.ts#classCascadeMaximumWidth`'s doc comment.
   return measureGenericClassifier(
     classifier, { header: headerFont, attribute: attributeFont }, measurer, suppress,
-    { sprites, guillemet, badgeRadius, stereoFont, strictUml: theme.strictUml === true, headerMaxWidth, memberMaxWidth },
+    {
+      sprites, guillemet, badgeRadius, stereoFont, strictUml: theme.strictUml === true,
+      headerMaxWidth: theme.colors.graph.classCascadeHeaderMaximumWidth ?? 0,
+      memberMaxWidth: theme.colors.graph.classCascadeMaximumWidth ?? 0,
+      minClassWidth: resolveMinClassWidth(theme, classifier.kind),
+      classAttributeIconSize: theme.classAttributeIconSize,
+    },
   );
 }
+
+/**
+ * A2s F-D mechanism A7: `skinparam minClassWidth` / `<style> MinimumWidth`
+ * floors the box width -- EntityImageClass.java:104-106. Like-class kinds
+ * only (`EntityImageClass` is only built for `LeafType#isLikeClass` leaves,
+ * GeneralImageBuilder.java:110-116), never the state/circle/association
+ * leaves that share the generic formula. Resolver: S1L-b T5's
+ * `resolveElementMinimumWidth` (element bucket over bare
+ * `theme.minimumWidth`, theme-element-resolve.ts:104).
+ */
+function resolveMinClassWidth(theme: Theme, kind: ClassifierKind): number {
+  return LIKE_CLASS_KINDS.has(kind) ? resolveElementMinimumWidth(theme, 'class') ?? 0 : 0;
+}
+
+/**
+ * The `ClassifierKind`s upstream's `LeafType#isLikeClass` covers
+ * (LeafType.java:85-96: ANNOTATION, ABSTRACT_CLASS, CLASS, INTERFACE, ENUM,
+ * ENTITY, PROTOCOL, STRUCT, EXCEPTION, METACLASS, STEREOTYPE, DATACLASS,
+ * RECORD -- this port folds the last seven into the five base kinds via the
+ * declaration keyword's badge, so the set here is the kinds that exist).
+ * Gates `EntityImageClass`-only behavior: the `minClassWidth` /
+ * `sameClassWidth` width floors (EntityImageClass.java:104-110) and the
+ * groupInheritance `EntityImageProtected` wrap (GeneralImageBuilder
+ * .java:110-116).
+ */
+export const LIKE_CLASS_KINDS: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>([
+  'class', 'abstract', 'interface', 'enum', 'annotation', 'entity',
+]);
+

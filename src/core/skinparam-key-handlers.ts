@@ -131,6 +131,27 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
     const v = parseNonZeroInt(value);
     if (v !== undefined) acc.wrapWidth = v;
   }],
+  [['sameclasswidth'], (acc, value) => {
+    // A2s B7: `SkinParam#sameClassWidth()` (SkinParam.java:994) — boolean
+    // valueOf; only an explicit true/false is meaningful.
+    if (value === 'true') acc.sameClassWidth = true;
+    else if (value === 'false') acc.sameClassWidth = false;
+  }],
+  [['classattributeiconsize'], (acc, value) => {
+    // A2s F-G A13: `SkinParam#classAttributeIconSize()` --
+    // `getAsInt("classAttributeIconSize", 10)` (SkinParam.java:554-556).
+    // 0 IS meaningful (icons off, `MethodsOrFieldsArea#hasSmallIcon`
+    // java:125-127), so the zero-rejecting parser is wrong here --
+    // parseFiniteInt, mirroring tabsize's own no-zero-is-unset precedent.
+    const v = parseFiniteInt(value);
+    if (v !== undefined) acc.classAttributeIconSize = v;
+  }],
+  [['groupinheritance'], (acc, value) => {
+    // A2s A10/B3: `DotData.java:136-151` — values <= 1 mean "never group",
+    // handled by the consumer; store the parsed int as-is.
+    const v = parseNonZeroInt(value);
+    if (v !== undefined) acc.groupInheritance = v;
+  }],
   [['minclasswidth'], (acc, value) => {
     // S1L-g: `SkinParam` maps `minClassWidth` to `PName.MinimumWidth`, the
     // leaf-box content-width floor. Zero-is-unset (0 == no floor == default).
