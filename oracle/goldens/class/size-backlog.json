@@ -1,5 +1,5 @@
 {
- "_doc": "Per-fixture DOT node-size ratchet for the class DOT-parity RATCHET suite. Same convention as oracle/goldens/state|object|description/size-backlog.json: structurally EQUAL fixtures whose maxSizeDeltaIn (inches, max across their svek-N graphs) exceeds the 0.01in conformant bar; the test asserts delta <= pinned + 1e-6 per fixture, so pins only shrink. Absent slug => conformant required. Recaptured 2026-08-04 (mission A2s ADR-5) after regenerating all class golden svek DOTs with -DPLANTUML_DETERMINISTIC_TEXT=true: the previous 489 entries were AWT-vs-width-table oracle pollution, not sizing bugs. 25 entries / 711 RATCHET goldens => 686 (96.5%) conformant. Remaining entries are GENUINE residuals vs the deterministic oracle, queued for A2s round 2 (batch-3/mechanisms.md B8 survey + partials); fix round 1 closed 48 more (2026-08-04); some pins remain LARGER than their polluted predecessors (sanctioned re-pin, plans/a2s-class-record-sizing/decisions.md ADR-5). No inherent-tolerance exclusions for class.",
+ "_doc": "Per-fixture DOT node-size ratchet for the class DOT-parity RATCHET suite. Same convention as oracle/goldens/state|object|description/size-backlog.json: structurally EQUAL fixtures whose maxSizeDeltaIn (inches, max across their svek-N graphs) exceeds the 0.01in conformant bar; the test asserts delta <= pinned + 1e-6 per fixture, so pins only shrink. Absent slug => conformant required. Recaptured 2026-08-04 (mission A2s ADR-5) after regenerating all class golden svek DOTs with -DPLANTUML_DETERMINISTIC_TEXT=true: the previous 489 entries were AWT-vs-width-table oracle pollution, not sizing bugs. 24 entries / 711 RATCHET goldens => 687 (96.6%) conformant. Remaining entries are GENUINE residuals vs the deterministic oracle, queued for A2s round 2 (batch-3/mechanisms.md B8 survey + partials); fix round 1 closed 48 more (2026-08-04); some pins remain LARGER than their polluted predecessors (sanctioned re-pin, plans/a2s-class-record-sizing/decisions.md ADR-5). No inherent-tolerance exclusions for class.",
  "cukaze-78-zija070": 0.527778,
  "curupe-50-kibu120": 0.9296869999999999,
  "daxeno-00-kasu166": 2.142535,
@@ -12,7 +12,7 @@
  "mizupo-59-zala765": 0.4421870000000001,
  "pasova-33-toze386": 0.11111199999999999,
  "pejone-71-tige404": 0.1203120000000002,
- "ponono-25-fevo574": 0.18055500000000002,
+ "ponono-25-fevo574": 0.06658000000000008,
  "puvono-84-doro361": 0.04166700000000012,
  "rakuci-96-tuti371": 0.12882000000000005,
  "roputo-88-fuxo199": 2.79184,
@@ -21,8 +21,7 @@
  "rulite-35-muno361": 1.1197910000000002,
  "sekame-22-meze147": 0.04166700000000012,
  "sovuxo-25-tepi226": 0.389236,
- "sumocu-27-vubo674": 0.18055500000000002,
- "vivifa-42-mire839": 0.166667,
+ "sumocu-27-vubo674": 0.06658000000000008,
  "xadado-92-lazo250": 2.200521,
  "xonamo-50-podo529": 0.1203120000000002
 }
