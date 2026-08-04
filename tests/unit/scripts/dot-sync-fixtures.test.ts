@@ -24,6 +24,7 @@ import {
   reportSkips,
   DATA_DIR,
   GOLDEN_DIR,
+  CLASS_GOLDEN_DIR,
   type Fixture,
 } from '../../../scripts/dot-sync-fixtures.js';
 
@@ -33,6 +34,16 @@ const AUTHORED_USECASE_SLUGS = [
   'sprite-svg-archimate-0',
   'sprite-svg-bootstrap-0',
   'sprite-svg-multiline-0',
+];
+
+/** The five fixtures authored under `oracle/goldens/svg-class/` (SI13), in
+ *  the sorted order `authoredFixtures` returns them. */
+const AUTHORED_CLASS_SLUGS = [
+  'class-actor-bare-no-allowmixing',
+  'class-allowmixing-usecase-mix',
+  'class-missing-label-URL-SVG-0',
+  'class-usecase-inline-img',
+  'class-usecase-inline-sprite',
 ];
 
 let tmp: string;
@@ -86,6 +97,46 @@ describe('authoredFixtures', () => {
   it('returns an empty list when the type has no golden directory', () => {
     expect(authoredFixtures(join(tmp, 'authored-basic'), 'state')).toEqual([]);
   });
+
+  // -------------------------------------------------------------------------
+  // Flat layout for "class" — SI13 ADR-1
+  // -------------------------------------------------------------------------
+
+  it('reads slugs directly under goldenDir for type "class" (flat layout, no <type> level)', () => {
+    const golden = join(tmp, 'authored-class-flat');
+    mkdirSync(join(golden, 'bravo'), { recursive: true });
+    writeFileSync(join(golden, 'bravo', 'in.puml'), '@startuml\nB\n@enduml\n', 'utf-8');
+    mkdirSync(join(golden, 'alpha'), { recursive: true });
+    writeFileSync(join(golden, 'alpha', 'in.puml'), '@startuml\nA\n@enduml\n', 'utf-8');
+
+    // Uses `golden` itself as the slug root — NOT `golden/class/` — proving
+    // the flat resolution, without depending on the live golden set growing.
+    expect(authoredFixtures(golden, 'class')).toEqual([
+      { slug: 'alpha', markup: '@startuml\nA\n@enduml\n' },
+      { slug: 'bravo', markup: '@startuml\nB\n@enduml\n' },
+    ]);
+  });
+
+  it('skips the flat root\'s non-fixture entries (README.md, ratchet.json)', () => {
+    const golden = join(tmp, 'authored-class-flat-noise');
+    mkdirSync(join(golden, 'real'), { recursive: true });
+    writeFileSync(join(golden, 'real', 'in.puml'), '@startuml\nR\n@enduml\n', 'utf-8');
+    writeFileSync(join(golden, 'README.md'), '# notes\n', 'utf-8');
+    writeFileSync(join(golden, 'ratchet.json'), '[]', 'utf-8');
+
+    expect(authoredFixtures(golden, 'class').map((f) => f.slug)).toEqual(['real']);
+  });
+
+  it('keeps the <goldenDir>/<type>/ shape for every type other than "class" (regression guard)', () => {
+    const golden = join(tmp, 'authored-shape-guard');
+    makeGoldens(golden, 'usecase', { u1: 'U1' });
+    // Would only be picked up if the "class" flat-resolution branch leaked
+    // into other types — proves it does not.
+    mkdirSync(join(golden, 'u1-flat-decoy'), { recursive: true });
+    writeFileSync(join(golden, 'u1-flat-decoy', 'in.puml'), 'DECOY', 'utf-8');
+
+    expect(authoredFixtures(golden, 'usecase')).toEqual([{ slug: 'u1', markup: 'U1' }]);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -119,6 +170,35 @@ describe('mergeFixtures', () => {
       expect(msg).toContain('usecase');
       expect(msg).toContain('manifest markup wins');
       expect(msg).toContain('dup');
+    } finally {
+      err.mockRestore();
+    }
+  });
+
+  it('counts identical-markup collisions but names only DIFFERING-markup ones (SI13: class collides 310x by design)', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      mergeFixtures(
+        'class',
+        [
+          { slug: 'same1', markup: 'X' },
+          { slug: 'same2', markup: 'Y' },
+          { slug: 'drift', markup: 'MANIFEST-SIDE' },
+        ],
+        [
+          { slug: 'same1', markup: 'X' },
+          { slug: 'same2', markup: 'Y' },
+          { slug: 'drift', markup: 'GOLDEN-SIDE' },
+        ],
+      );
+      expect(err).toHaveBeenCalledTimes(1);
+      const msg = err.mock.calls[0]![0] as string;
+      expect(msg).toContain('manifest markup wins');
+      expect(msg).toContain('2 identical-markup');
+      expect(msg).toContain('1 DIFFERING-markup slug(s): drift');
+      // Identical collisions are counted, never named.
+      expect(msg).not.toContain('same1');
+      expect(msg).not.toContain('same2');
     } finally {
       err.mockRestore();
     }
@@ -220,6 +300,72 @@ describe('enumerateFixtures over the committed corpus', () => {
     } finally {
       err.mockRestore();
     }
+  });
+
+  // ---------------------------------------------------------------------------
+  // enumerateFixtures('class') — flat golden root — SI13 ADR-1
+  //
+  // `tests/visual/data/class.json` exists (768 entries, corpus-classified) —
+  // ADR-1's "class has no manifest" premise does not hold on disk, so this
+  // takes `mergeFixtures`' manifest branch, not the authored-only branch.
+  // 309 of the 314 flat-root slugs are corpus-derived and already present in
+  // the manifest by slug; of the five hand-authored `class-*` fixtures, one
+  // (`class-missing-label-URL-SVG-0`) also collides (byte-identical markup on
+  // both sides) and four are genuinely new. The flat-layout mechanism under
+  // test — `enumerateFixtures('class')` reading `CLASS_GOLDEN_DIR` flat — is
+  // unaffected either way; only which merge branch fires differs from ADR-1's
+  // stated assumption.
+  // ---------------------------------------------------------------------------
+
+  it('keeps the class.json manifest unchanged, then appends the 4 authored fixtures new to it', () => {
+    const manifest = JSON.parse(readFileSync(join(DATA_DIR, 'class.json'), 'utf-8')) as Fixture[];
+    expect(manifest).toHaveLength(768);
+
+    const enumerated = enumerateFixtures('class');
+    expect(enumerated).toBeDefined();
+    expect(enumerated!.slice(0, 768)).toEqual(manifest);
+    expect(enumerated!.slice(768).map((f) => f.slug)).toEqual([
+      'class-actor-bare-no-allowmixing',
+      'class-allowmixing-usecase-mix',
+      'class-usecase-inline-img',
+      'class-usecase-inline-sprite',
+    ]);
+  });
+
+  it('reads every one of the five authored class goldens\' markup from their in.puml', () => {
+    const enumerated = enumerateFixtures('class')!;
+    for (const slug of AUTHORED_CLASS_SLUGS) {
+      const onDisk = readFileSync(join(CLASS_GOLDEN_DIR, slug, 'in.puml'), 'utf-8');
+      expect(enumerated.find((f) => f.slug === slug)?.markup).toBe(onDisk);
+    }
+  });
+
+  it('reports collisions with identical markup as a count only; identical slugs are never named (manifest wins)', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      const enumerated = enumerateFixtures('class')!;
+      // The colliding authored golden dedupes to exactly one entry.
+      expect(enumerated.filter((f) => f.slug === 'class-missing-label-URL-SVG-0')).toHaveLength(1);
+      const msg = err.mock.calls.map((c) => c[0] as string).find((m) => m.startsWith('[dot-sync] class:'));
+      expect(msg).toContain('manifest markup wins');
+      // 310 corpus goldens collide by design (SI13) — identical-markup
+      // collisions are counted, not named, so the message stays readable
+      // and the DIFFERING list (the dangerous kind) stays visible.
+      expect(msg).toContain('identical-markup');
+      expect(msg).not.toContain('class-missing-label-URL-SVG-0');
+      // The 8 known pragma-only drifts ARE named (see mergeFixtures' doc
+      // comment; journal 2026-08-04).
+      expect(msg).toContain('DIFFERING-markup');
+      expect(msg).toContain('bemuvo-33-jofa419');
+    } finally {
+      err.mockRestore();
+    }
+  });
+
+  it('skips the flat class root\'s README.md and ratchet.json entries', () => {
+    const slugs = new Set(enumerateFixtures('class')!.map((f) => f.slug));
+    expect(slugs.has('README.md')).toBe(false);
+    expect(slugs.has('ratchet.json')).toBe(false);
   });
 });
 

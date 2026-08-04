@@ -1,0 +1,22 @@
+@startuml
+' Authored fixture (SI10/T3, not a hashed corpus import). Covers: a
+' `usecase` whose display carries an inline `<$sprite>` atom -- the T2
+' `sprites` threading case (class-layout-leaf-shapes.ts#measureUsecaseOrActor)
+' that nothing else in the corpus exercises. Sprite defined inline
+' (`sprite $Gear { ... }`) so the fixture works fully offline.
+' Routing verified: classAccepts(lines) === true AND renderSync's root
+' <svg data-diagram-type="CLASS"> (not "DESCRIPTION") -- see the mission
+' decision journal for the exact verification transcript.
+allowmixing
+
+sprite $Gear {
+0F0
+00A
+}
+
+class Foo {
+  +bar(): void
+}
+
+usecase "<$Gear> Configure" as UC1
+@enduml
