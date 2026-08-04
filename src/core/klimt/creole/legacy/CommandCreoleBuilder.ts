@@ -16,13 +16,15 @@
  * same map; this file's `addCommand`/`buildMap` shape does not need to
  * change to accommodate them, only the registration list below grows.
  *
+ * A2s/B6 adds `FontStyle.BACKCOLOR` (`<back:color>...</back>`, legacy +
+ * legacyEol only — java :96-97) in upstream's ctor position: after the
+ * five style triplets, before the size/color commands.
+ *
  * Not ported (journaled, deferred to L2/never):
  * - `FontStyle.PLAIN` (`<plain>...</plain>`, `<plain>...` EOL): not in
  *   L1's "bold/italic/underline/wave/strikeout" set; its `AddStyle`
  *   application also has a "clear all styles" special case
  *   (`AddStyle.ts`'s doc comment) not yet ported.
- * - `FontStyle.BACKCOLOR` (`<back:color>...</back>`): explicitly out of
- *   scope (mission brief NOT-in-scope list).
  * - The `CreoleMode.FULL`-only exclusion of the creole-pure `__` underline
  *   command upstream's `OTHER` builder applies: this port has only ONE map
  *   (always FULL), since every L1 call site (`EntityImageDescriptionSupport
@@ -33,7 +35,7 @@
  */
 import { FontStyle } from '../../shape/UText.js';
 import type { Command } from '../command/Command.js';
-import { createStyleCommands } from '../command/CommandCreoleStyle.js';
+import { createStyleCommands, createBackcolorCommands } from '../command/CommandCreoleStyle.js';
 import { createSizeChangeCommands } from '../command/CommandCreoleSizeChange.js';
 import { createColorChangeCommands } from '../command/CommandCreoleColorChange.js';
 import { createColorAndSizeChangeCommands } from '../command/CommandCreoleColorAndSizeChange.js';
@@ -77,6 +79,10 @@ function buildCommandMap(): Map<string, Command[]> {
   for (const style of L1_STYLES) {
     for (const cmd of createStyleCommands(style)) addCommand(map, cmd);
   }
+  // Upstream ctor position (java :96-97): BACKCOLOR legacy + legacyEol,
+  // after the style triplets, before the size/color commands. Ordering
+  // matters for the shared `<b` starter: BOLD's commands stay first.
+  for (const cmd of createBackcolorCommands()) addCommand(map, cmd);
   for (const cmd of createSizeChangeCommands()) addCommand(map, cmd);
   for (const cmd of createColorChangeCommands()) addCommand(map, cmd);
   for (const cmd of createColorAndSizeChangeCommands()) addCommand(map, cmd);

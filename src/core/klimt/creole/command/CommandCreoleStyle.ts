@@ -39,12 +39,28 @@
  * cost/simplicity trade-off for what are always short (one display line)
  * strings.
  *
- * L1 does not model the `<u:color>`/`<w:color>`/`<s:color>`/`<strike:color>`
- * colon-suffixed EXTENDED-COLOR activation variant (mission brief NOT-in-
- * scope list's `<u:>` entry) — `ACTIVATION_SOURCE`/`DEACTIVATION_SOURCE`
- * below match ONLY the bare `<u>`/`<w>`/`<s>` forms, so a colon-suffixed tag
- * falls through unrecognized (unchanged from pre-L1 behavior — no
- * regression, no new partial support of an explicitly out-of-scope tag).
+ * A2s/B6 adds the colon-suffixed EXTENDED-COLOR activation arm for the
+ * styles upstream allows it on (`FontStyle#canHaveExtendedColor`:
+ * UNDERLINE, WAVE, STRIKE, BACKCOLOR) plus the BACKCOLOR command itself
+ * (`<back:red>...</back>`, registered legacy+legacyEol only — no
+ * creole-pure form; `CommandCreoleBuilder.java`:96-97). The color grammar
+ * follows the UBREX activation patterns (`FontStyle#getUbrexActivationPattern`,
+ * java :113-139) — the form `CommandCreoleStyle.java`'s ctor actually
+ * compiles — NOT `getRegexActivationPattern` (:88-111, consumed only by
+ * `Splitter.java`). The two disagree on BACKCOLOR: regex allows `#?\w+`
+ * halves; ubrex allows `#hex6|\w+` first and `hex6|\w+` (no `#`) second.
+ * Jar probe 2026-08-04 (mission A2s F-F): `<back:red-green>` consumed,
+ * `<back:#FF0000-#00FF00>` / `<back:#red>` / `<b:#FF0000>` all raw —
+ * ubrex wins, and that is what `ACTIVATION_SOURCE` below encodes.
+ *
+ * The captured color VALUE is consumed but not yet applied: upstream's
+ * `AddStyle(style, extendedColor)` also calls
+ * `FontConfiguration#changeExtendedColor`, but this port's
+ * `FontConfiguration` (`shape/UText.ts`) has no extendedColor field yet —
+ * a driver-side rendering concern (`DriverTextSvg`), deliberately deferred
+ * per `UText.ts`'s own doc comment. Sizing (the B6 deliverable) is
+ * unaffected: colors never change text metrics; what matters is that the
+ * tag characters are consumed and the content measured plain.
  */
 import { FontStyle, type FontConfiguration } from '../../shape/UText.js';
 import type { Command, StripeBuilder } from './Command.js';
@@ -109,15 +125,23 @@ const CREOLE_SYNTAX: Partial<Record<FontStyle, string>> = {
 };
 
 /** Upstream: `FontStyle#getUbrexActivationPattern`/`getUbrexDeactivationPattern`
- *  (bare-tag branches only — no extended-color suffix, see module doc
- *  comment). Regex SOURCE strings (not literals) per this project's
- *  complexity-hook workaround for `<`/`>` in a pattern. */
+ *  (java :113-164). The `canHaveExtendedColor` styles (java :191-205:
+ *  UNDERLINE, WAVE, STRIKE, BACKCOLOR) carry the optional `:color` arm —
+ *  ubrex `〇?〘:〶$XC=【#〇{6}hex┇〇+〴w】〙` = `(?::(?:#hex6|\w+))?`; BACKCOLOR
+ *  additionally allows a gradient second half `〇?〘「-\|/」【〇{6}hex┇〇+〴w】〙`
+ *  = `(?:[-\\|/](?:hex6|\w+))?` — NO leading `#` on the second half (see
+ *  module doc comment's jar probe). Regex SOURCE strings (not literals) per
+ *  this project's complexity-hook workaround for `<`/`>` in a pattern. */
+const EXTENDED_COLOR_ARM = '(?::(?:#[0-9a-fA-F]{6}|\\w+))?';
+
 const ACTIVATION_SOURCE: Record<string, string> = {
   [FontStyle.BOLD]: '^<[bB]>',
   [FontStyle.ITALIC]: '^<[iI]>',
-  [FontStyle.UNDERLINE]: '^<[uU]>',
-  [FontStyle.STRIKE]: '^<(?:strike|STRIKE|s|S|del|DEL)>',
-  [FontStyle.WAVE]: '^<[wW]>',
+  [FontStyle.UNDERLINE]: `^<[uU]${EXTENDED_COLOR_ARM}>`,
+  [FontStyle.STRIKE]: `^<(?:strike|STRIKE|s|S|del|DEL)${EXTENDED_COLOR_ARM}>`,
+  [FontStyle.WAVE]: `^<[wW]${EXTENDED_COLOR_ARM}>`,
+  [FontStyle.BACKCOLOR]:
+    '^<[bB][aA][cC][kK](?::(?:#[0-9a-fA-F]{6}|\\w+)(?:[-\\\\|/](?:[0-9a-fA-F]{6}|\\w+))?)?>',
 };
 
 const DEACTIVATION_SOURCE: Record<string, string> = {
@@ -126,6 +150,7 @@ const DEACTIVATION_SOURCE: Record<string, string> = {
   [FontStyle.UNDERLINE]: '^</[uU]>',
   [FontStyle.STRIKE]: '^</(?:strike|STRIKE|s|S|del|DEL)>',
   [FontStyle.WAVE]: '^</[wW]>',
+  [FontStyle.BACKCOLOR]: '^</[bB][aA][cC][kK]>',
 };
 
 /** Upstream: `FontStyle#starters(isCreolePure)`, the `false` (legacy)
@@ -140,6 +165,7 @@ const LEGACY_STARTERS: Record<string, readonly string[]> = {
   [FontStyle.UNDERLINE]: ['<u', '<U'],
   [FontStyle.STRIKE]: ['<s', '<S', '<d', '<D'],
   [FontStyle.WAVE]: ['<w'],
+  [FontStyle.BACKCOLOR]: ['<b', '<B'],
 };
 
 function createCreoleForm(style: FontStyle): Command {
@@ -202,4 +228,15 @@ function createLegacyEolForm(style: FontStyle): Command {
  *  sharing a 2-char starter — see `legacy/StripeSimple.ts`). */
 export function createStyleCommands(style: FontStyle): readonly Command[] {
   return [createCreoleForm(style), createLegacyForm(style), createLegacyEolForm(style)];
+}
+
+/** Upstream: `CommandCreoleBuilder`'s BACKCOLOR pair (java :96-97) —
+ *  `createLegacy` + `createLegacyEol` ONLY, no creole-pure form
+ *  (`FontStyle#getUbrexCreoleSyntax` throws for BACKCOLOR). Registered
+ *  AFTER the five style triplets, so `<b>`/`<B>` bold — which shares the
+ *  `<b` starter (`FontStyle#starters`, java :69-70) — is tried first and
+ *  `<back...>` falls through to these via `searchCommand`'s
+ *  first-non-zero-`matchingSize` scan. */
+export function createBackcolorCommands(): readonly Command[] {
+  return [createLegacyForm(FontStyle.BACKCOLOR), createLegacyEolForm(FontStyle.BACKCOLOR)];
 }
