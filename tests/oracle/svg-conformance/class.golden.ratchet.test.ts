@@ -69,11 +69,19 @@ const manifest = JSON.parse(
 
 // Source of DOT-EQUAL truth for eligibility (AC3) — mirrors description's
 // own `parity.json`, but class-scoped (see `render-fixture-class.ts`'s doc
-// comment and `oracle/goldens/svg-class/README.md`'s "Add rule"). Currently
-// an unsurveyed placeholder (`fixtures: []`) — no candidate needs it yet
-// because AC1 has nothing pinned; regenerate via `svg-parity-survey.ts
-// --out ... class` once N1's shell-mechanism fix produces a real
-// zero-diff candidate.
+// comment and `oracle/goldens/svg-class/README.md`'s "Add rule"). Surveyed:
+// 721 rows as of SI13 (2026-08-04), including AUTHORED fixtures — SI13
+// taught `dot-sync-fixtures.ts` the flat `svg-class/<slug>/` layout, so an
+// authored golden flows dot-cache → survey → a real row here and its
+// ratchet eligibility turns solely on AC1's zero-diff, exactly as SI9
+// arranged for description. Regenerate with
+// `SVG_PARITY_CONCURRENCY=2 npx jiti scripts/svg-parity-survey.ts
+// --out tests/oracle/svg-conformance/parity-class.json class`
+// (single-type `--out` only — a shared-file write TRUNCATES other types).
+// NOTE the survey's verdict comes from a different render path
+// (`renderSync` + `WidthTableMeasurer`) than this suite's
+// (`renderFixtureClass` + `DeterministicMeasurer`) — a `conformant`
+// verdict is a candidate signal, not the AC1 measurement itself.
 const parity = JSON.parse(
   readFileSync(
     join(dirname(fileURLToPath(import.meta.url)), 'parity-class.json'),

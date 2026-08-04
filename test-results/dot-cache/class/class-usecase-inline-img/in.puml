@@ -1,0 +1,18 @@
+@startuml
+' Authored fixture (SI15/T3). Covers: a `usecase` whose display carries an
+' inline `<img:...>` data-URI atom -- the jar-verification input for
+' ADR-2 (plans/si15-uimage-raster-dims/decisions.md), mirroring
+' class-usecase-inline-sprite's shape/storage but with an `<img>` atom
+' instead of `<$sprite>` so both exercise the SAME shared emission site
+' (klimt's driver-image-svg.ts, reached via EntityImageDescription's
+' usecase/actor label path, SI14 T4). `{scale=1.3}` against a 5x3 PNG
+' produces non-integer scaled dims on BOTH axes (6.5 x 3.9), straddling a
+' .5 boundary to disambiguate round-half-up from floor.
+allowmixing
+
+class Foo {
+  +bar(): void
+}
+
+usecase "<img:data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAADCAYAAABbNsX4AAAASklEQVR4AQE/AMD/AMwiIv/MIiL/zCIi/8wiIv/MIiL/AMwiIv/MIiL/zCIi/8wiIv/MIiL/AMwiIv/MIiL/zCIi/8wiIv/MIiL/yKAe4gxRrG4AAAAASUVORK5CYII={scale=1.3}> Configure" as UC1
+@enduml

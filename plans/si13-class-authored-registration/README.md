@@ -16,7 +16,7 @@ actually ratchets in is measured, not assumed (none is zero-diff today).
 
 | Batch | Tasks | Status |
 |-------|-------|--------|
-| [batch-1](batch-1/overview.md) | [ ] T1 class golden layout in `dot-sync-fixtures.ts` | pending |
+| [batch-1](batch-1/overview.md) | [x] T1 class golden layout in `dot-sync-fixtures.ts` | done (f3bf0a12) |
 | [batch-2](batch-2/overview.md) | [ ] T2 pipeline run, parity regen, drift report, eligibility | pending |
 | [batch-3](batch-3/overview.md) | [ ] T3 docs + close-out | pending |
 
