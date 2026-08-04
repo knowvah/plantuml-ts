@@ -73,7 +73,24 @@ import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 import type { Paint } from '../../core/paint.js';
 
 type ResolvedAtomImage =
-  | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
+  | {
+      readonly kind: 'image';
+      readonly href: string;
+      readonly width: number;
+      readonly height: number;
+      /** SI15 T1 (ADR-1)/T6: native raster pixel dims, present only when a
+       *  real raster backs this atom — threaded to `UImage.build` so
+       *  `Footprint.MyUGraphic.drawImage` can use `raster − 1` for the
+       *  ellipse-fit corner points, matching upstream `UImage.java:87-92`.
+       *  T6: `Math.round(declared)`, not the raw grid/IHDR dims — upstream's
+       *  actual emitted PNG raster is `Math.round(native × scale)`, proven
+       *  by IHDR-decoding the jar's own emitted `<image>` for a 16×16 grid
+       *  sprite at scale 14/13 → 17px, and by a controlled monkey-patch
+       *  experiment reproducing the jar to ~1e-3px on both label orderings
+       *  (`.agent-notes/si15-ink-offset.md`). */
+      readonly rasterWidth?: number;
+      readonly rasterHeight?: number;
+    }
   | {
       readonly kind: 'drawable';
       readonly primitives: readonly DrawablePrimitive[];
@@ -191,7 +208,18 @@ class SpritePrimitiveCollector implements UGraphic {
 
 function resolveImgAtom(atom: Extract<InlineAtomToken, { kind: 'img' }>): ResolvedAtomImage {
   const dims = measureInlineAtom(atom);
-  return { kind: 'image', href: atom.dataUri, width: dims.width, height: dims.height };
+  // SI15 T6: raster = `Math.round(declared)`, not the raw IHDR pixel dims
+  // (`atom.width`/`atom.height`) -- `dims.width`/`dims.height` are already
+  // IHDR x scale (T1's formula rounded the wrong operand; see the doc
+  // comment on `ResolvedAtomImage.rasterWidth` above).
+  return {
+    kind: 'image',
+    href: atom.dataUri,
+    width: dims.width,
+    height: dims.height,
+    rasterWidth: Math.round(dims.width),
+    rasterHeight: Math.round(dims.height),
+  };
 }
 
 /**
@@ -250,7 +278,23 @@ function resolveSpriteAtom(
     atom.forcedColor,
     spriteScale(atom.scale, font.size),
   );
-  return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
+  // SI15 T6: raster = `Math.round(declared)`, not the registry's native
+  // grid dims (`sprite.width`/`sprite.height`, T1's formula). Upstream
+  // resamples its emitted PNG to `round(grid × scale)` via an AWT bilinear
+  // filter -- this port's own `spriteToPngDataUri` still emits the PNG at
+  // native grid size (a separate, pre-existing, already-documented
+  // divergence, `sprite-raster.ts`'s doc comment), but the RASTER-DIMS
+  // NUMBER fed to `Footprint` must match the jar's actual rasterized size
+  // for the ellipse fit to agree -- IHDR-decode + monkey-patch evidence in
+  // `.agent-notes/si15-ink-offset.md`.
+  return {
+    kind: 'image',
+    href: png.dataUri,
+    width: dims.width,
+    height: dims.height,
+    rasterWidth: Math.round(dims.width),
+    rasterHeight: Math.round(dims.height),
+  };
 }
 
 /**

@@ -57,7 +57,17 @@ const SIZING_PLACEHOLDER_COLOR = '#000000';
  * monochrome branch rasterizes a PNG, work sizing has no use for (`href` is
  * never read for a `kind: 'image'` box) and would only cost CPU during
  * every sizing pass -- so monochrome/unresolved sprites keep today's
- * `href: ''` declared-box fallback. Verified back to widened 0. */
+ * `href: ''` declared-box fallback. Verified back to widened 0.
+ *
+ * SI15 T6: that fallback DOES now carry `rasterWidth`/`rasterHeight` --
+ * `Math.round(dims.width)`/`Math.round(dims.height)`, a cheap arithmetic
+ * derivation of the already-computed declared dims, not a rasterization --
+ * so `Footprint.drawImage`'s `raster − 1` corner-point branch (ADR-1) is
+ * reachable from this sizing path too. `.agent-notes/si15-ink-offset.md`
+ * diagnosed the prior gap: this fallback's `href: ''`-only shape left
+ * `rasterWidth`/`rasterHeight` `undefined`, so the ellipse fit silently
+ * used the full declared box for every monochrome-sprite label whose
+ * extremal corner happened to be size-sensitive. */
 function sizingAtomImageResolverFor(
   sprites: SpriteDimsLookup | undefined,
 ): (font: FontConfiguration) => AtomImageResolver {
@@ -67,7 +77,38 @@ function sizingAtomImageResolverFor(
       const reg = sprites?.get(atom.name);
       if (reg?.svg !== undefined) return resolveSvgSpriteAtom(atom, reg.svg, sprites!, font);
     }
-    return { kind: 'image', href: '', width: dims.width, height: dims.height };
+    // SI15 T6: raster dims now reach the sizing path too -- a monochrome
+    // sprite's `Footprint`-driven ellipse fit needs `rasterWidth`/
+    // `rasterHeight` on this fallback for the SAME reason `render-atoms.ts`
+    // needs them at render time (the raster-dims gap `.agent-notes/
+    // si15-ink-offset.md` diagnosed: `Footprint.drawImage`'s `raster − 1`
+    // branch was unreachable from this sizing path). `Math.round(dims.width)`/
+    // `Math.round(dims.height)` -- a cheap grid-derived number, NOT a PNG
+    // rasterization -- matches `render-atoms.ts#resolveSpriteAtom`'s formula
+    // exactly, so sizing and rendering agree bit-for-bit. `href: ''` is
+    // unchanged (never read for a `kind: 'image'` box, D9's sizer/renderer
+    // split).
+    //
+    // Gated on a REAL raster backing (ADR-1's own wording): an unresolvable
+    // sprite name measures 0x0, and attaching raster dims there would make
+    // `Footprint` fit against `round(0) - 1 = -1` -- a negative-extent
+    // corner upstream can never produce (`StripeSimple.addSprite` skips
+    // unknown names entirely, so no upstream `UImage` ever wraps a 0-size
+    // raster). The render-time resolver has the same guard structurally:
+    // `resolveSpriteAtom` returns `undefined` for an unknown name.
+    const rasterBacked =
+      ((atom.kind === 'sprite' && sprites?.get(atom.name) !== undefined) || atom.kind === 'img') &&
+      dims.width > 0 &&
+      dims.height > 0;
+    if (!rasterBacked) return { kind: 'image', href: '', width: dims.width, height: dims.height };
+    return {
+      kind: 'image',
+      href: '',
+      width: dims.width,
+      height: dims.height,
+      rasterWidth: Math.round(dims.width),
+      rasterHeight: Math.round(dims.height),
+    };
   };
 }
 

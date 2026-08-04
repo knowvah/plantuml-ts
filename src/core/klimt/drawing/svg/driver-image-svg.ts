@@ -20,6 +20,23 @@ export class DriverImageSvg implements UDriver<UImage> {
   draw(image: UImage, param: UParam): void {
     const x = param.getTranslate().getDx();
     const y = param.getTranslate().getDy();
-    this.svg.svgImageDataUri(x, y, image.getWidth(), image.getHeight(), image.getHref());
+    // SI15 T3 (ADR-2, si5b decisions.md D9 Amendment 1): the jar MEASURES
+    // raw scaled dims but EMITS `Math.round(natural * scale)` on the
+    // `<image>` element -- jar-verified for BOTH atom origins that carry a
+    // real raster: a monochrome `<$sprite>` (class-usecase-inline-sprite,
+    // 3.2308x2.1538 -> 3x2) and an `<img:...>` data URI
+    // (class-usecase-inline-img, 6.5x3.9 -> 7x4, straddling a .5 boundary
+    // to confirm round-half-up, not floor). `rasterWidth`/`rasterHeight`
+    // (ADR-1) is the "a real raster backs this image" signal for BOTH atom
+    // kinds, so one gate covers both -- no per-origin flag needed. Rounding
+    // applies ONLY to the emitted width/height, never x/y and never the
+    // `UImage`'s own declared dims: layout/cursor-advance must keep the raw
+    // value (D9 Amendment 1). A rasterless `UImage` (e.g. the latex/KaTeX
+    // path) has no raster dims, so it emits its declared dims unrounded,
+    // byte-identical to pre-change output.
+    const raster = image.getRasterWidth() !== undefined && image.getRasterHeight() !== undefined;
+    const width = raster ? Math.round(image.getWidth()) : image.getWidth();
+    const height = raster ? Math.round(image.getHeight()) : image.getHeight();
+    this.svg.svgImageDataUri(x, y, width, height, image.getHref());
   }
 }

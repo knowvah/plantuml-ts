@@ -12,7 +12,6 @@ import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { ellipse, linkWrap } from '../../core/svg.js';
 import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
-import { renderRowAtoms } from './renderer-classifier-rows.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { applyMonochromeHex, applyMonochromeToFragment } from './class-monochrome.js';
 import { decorName } from './renderer-arrowhead.js';
@@ -94,19 +93,7 @@ function tryRenderUSymbol(geo: ClassifierGeo, theme: Theme): string | undefined 
   const usymbol = geo.kind === 'usecase' ? 'usecase' : geo.usymbol;
   if (usymbol === undefined) return undefined;
   const display = geo.rows[0]?.text ?? geo.id;
-  // A label carrying a `<$sprite>` (or `<img>`) atom cannot be drawn as one
-  // `<text>`. `measureUsecaseOrActor` resolved those atoms at LAYOUT time --
-  // the renderer gets no sprite registry -- so draw them here, centred on the
-  // same point the icon would have centred its text. Pure-text labels leave
-  // `atoms` unset and keep the default path untouched.
-  const atoms = geo.rows[0]?.atoms;
-  const atomsWidth = geo.rows[0]?.atomsWidth;
-  const renderLabel =
-    atoms !== undefined && atomsWidth !== undefined
-      ? (cx: number, baselineY: number): string =>
-          renderRowAtoms(atoms, cx - atomsWidth / 2, baselineY, theme)
-      : undefined;
-  return renderUSymbolIcon(usymbol, { ...geo, display, renderLabel }, theme);
+  return renderUSymbolIcon(usymbol, { ...geo, display }, theme);
 }
 
 

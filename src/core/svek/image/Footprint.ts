@@ -103,12 +103,27 @@ class MyUGraphic implements UGraphic {
     this.addPoint(x + dim.getWidth(), yy + dim.getHeight());
   }
 
-  /** @see Footprint.java's inner `MyUGraphic#drawImage`. */
+  /**
+   * SI15 T1 (ADR-1, guarded fallback): when `image` carries raster dims
+   * (a real PNG/sprite raster backs it), the corner points use
+   * `raster − 1` — upstream `UImage.java:87-92`'s
+   * `image.getImage().getWidth() - 1` / `getHeight() - 1`. Otherwise
+   * (rasterless — e.g. latex/KaTeX) the declared dims are used EXACTLY as
+   * before this task; a blanket `− 1` was explicitly rejected (ADR-1) as
+   * an unmeasured behaviour change to the rasterless path.
+   *
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Footprint.java:141-146
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/shape/UImage.java:87-92
+   */
   private drawImage(x: number, y: number, image: UImage): void {
+    const rasterWidth = image.getRasterWidth();
+    const rasterHeight = image.getRasterHeight();
+    const width = rasterWidth !== undefined ? rasterWidth - 1 : image.getWidth();
+    const height = rasterHeight !== undefined ? rasterHeight - 1 : image.getHeight();
     this.addPoint(x, y);
-    this.addPoint(x, y + image.getHeight());
-    this.addPoint(x + image.getWidth(), y);
-    this.addPoint(x + image.getWidth(), y + image.getHeight());
+    this.addPoint(x, y + height);
+    this.addPoint(x + width, y);
+    this.addPoint(x + width, y + height);
   }
 
   private drawPath(x: number, y: number, shape: UPath): void {

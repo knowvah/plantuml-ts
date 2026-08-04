@@ -374,7 +374,9 @@ describe('makeAtomImageResolverFor', () => {
   test('img atom resolves even with no sprite registry at all', () => {
     const resolve = makeAtomImageResolverFor(undefined)(FONT);
     const atom: InlineAtomToken = { kind: 'img', dataUri: TINY_PNG_URI, scale: 1, width: 2, height: 2 };
-    expect(resolve(atom)).toEqual({ kind: 'image', href: TINY_PNG_URI, width: 2, height: 2 });
+    // SI15 T1 (ADR-1): img atoms now also carry their native IHDR raster
+    // dims (here 2x2 -- scale 1, so raster == declared).
+    expect(resolve(atom)).toEqual({ kind: 'image', href: TINY_PNG_URI, width: 2, height: 2, rasterWidth: 2, rasterHeight: 2 });
   });
 
   test('sprite atom: resolves via the registry to a tinted PNG data URI, dims agree with measureInlineAtom (D9)', () => {
@@ -531,12 +533,15 @@ describe('AtomImageResolver — optional ink fields (T3-seams, ADR-2)', () => {
     expect(resolve(atom)).toEqual({ kind: 'image', href: 'data:x', width: 16, height: 16 });
   });
 
-  test('the real render-time resolver (makeAtomImageResolverFor) still omits ink keys entirely -- byte-identical to pre-T3', () => {
+  test('the real render-time resolver (makeAtomImageResolverFor) still omits ink keys entirely', () => {
     const resolve = makeAtomImageResolverFor(undefined)(FONT);
     const atom: InlineAtomToken = { kind: 'img', dataUri: TINY_PNG_URI, scale: 1, width: 2, height: 2 };
     const result = resolve(atom);
-    expect(result).toEqual({ kind: 'image', href: TINY_PNG_URI, width: 2, height: 2 });
-    expect(Object.keys(result!).sort()).toEqual(['height', 'href', 'kind', 'width']);
+    // SI15 T1 (ADR-1) added rasterWidth/rasterHeight (native IHDR dims) --
+    // NOT ink keys; the ink side-channel this test guards against is still
+    // absent, which the exact key list below keeps proving.
+    expect(result).toEqual({ kind: 'image', href: TINY_PNG_URI, width: 2, height: 2, rasterWidth: 2, rasterHeight: 2 });
+    expect(Object.keys(result!).sort()).toEqual(['height', 'href', 'kind', 'rasterHeight', 'rasterWidth', 'width']);
   });
 
   test('ink fields on a resolved atom change NEITHER the rendered SVG NOR the measured dimension -- nothing consumes them yet', () => {
