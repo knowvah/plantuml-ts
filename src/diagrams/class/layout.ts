@@ -97,6 +97,14 @@ function preMeasureClassifiers(
   const hideEmptyMembers = effectiveActions.get('empty members') === 'hide';
   const hideEmptyFields  = effectiveActions.get('empty fields')  === 'hide';
   const hideEmptyMethods = effectiveActions.get('empty methods') === 'hide';
+  // A2s F-A / A5: global `hide fields`/`hide methods` (G2 N27) suppress the
+  // WHOLE compartment, not just its rows -- upstream's `getBody` returns the
+  // fields-only / methods-only / empty block with NO `MethodsOrFieldsArea`
+  // at all for the hidden portion (jar-verified `vegubu-29-bomu147`: `hide
+  // methods` box is 40px, not 40px + the empty-compartment chrome).
+  // @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:240-244
+  const hideFields       = effectiveActions.get('fields')        === 'hide';
+  const hideMethods      = effectiveActions.get('methods')       === 'hide';
 
   const measuredMap = new Map<string, MeasuredClassifier>();
   for (const classifier of ast.classifiers) {
@@ -114,10 +122,10 @@ function preMeasureClassifiers(
     // stamped these two flags directly onto the classifier post-parse --
     // OR'd in alongside the diagram-global targets above.
     const suppressFields  =
-      hideMembers || ((hideEmptyMembers || hideEmptyFields)  && fieldsEmpty) ||
+      hideMembers || hideFields  || ((hideEmptyMembers || hideEmptyFields)  && fieldsEmpty) ||
       classifier.suppressFields === true;
     const suppressMethods =
-      hideMembers || ((hideEmptyMembers || hideEmptyMethods) && methodsEmpty) ||
+      hideMembers || hideMethods || ((hideEmptyMembers || hideEmptyMethods) && methodsEmpty) ||
       classifier.suppressMethods === true;
     measuredMap.set(
       classifier.id,

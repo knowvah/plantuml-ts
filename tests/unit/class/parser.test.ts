@@ -1463,3 +1463,135 @@ describe('ensureClassifier -- styleGeneration stamp', () => {
     expect(ast.classifiers[0]?.styleGeneration).toBe(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// A2s F-A / A3 — interior blank lines survive into note blocks + brace bodies
+// (upstream keeps them: CommandFactoryNoteOnEntity.java:236-238 subExtract(1,1)
+// removes only the opener/closer; CommandCreateClassMultilines.java:291,303-307
+// feeds EVERY interior line — empty included — to addFieldOrMethod).
+// ---------------------------------------------------------------------------
+
+/** parser.test.ts's own `parse` helper filters blank lines before the parser
+ *  ever sees them — these tests need the blanks delivered verbatim. */
+function parseKeepBlanks(source: string): ReturnType<typeof parseClass> {
+  const lines = source.split('\n').map((l) => l.trim());
+  const block: UmlSource = { lines, type: 'class' };
+  return parseClass(block);
+}
+
+describe('A3 — interior blank lines in multiline constructs', () => {
+  it('keeps an interior blank line inside a multiline note (vivifa-42 shape)', () => {
+    const ast = parseKeepBlanks(
+      'class foo\nnote top of foo\nsome\n\nnotes\nend note',
+    );
+    expect(ast.notes).toHaveLength(1);
+    expect(ast.notes[0]!.text).toBe('some\n\nnotes');
+  });
+
+  it('a blank between two field lines displays as one empty FIELD row', () => {
+    const ast = parseKeepBlanks('class D {\n+String a\n\n+String b\n}');
+    const members = ast.classifiers[0]!.members;
+    expect(members).toHaveLength(3);
+    expect(members[1]!.name).toBe('');
+    expect(members[1]!.params).toBeUndefined();
+    expect(ast.classifiers[0]!.rawBodyLines).toEqual(['+String a', '', '+String b']);
+  });
+
+  it('a blank between two method lines is an empty METHOD row (sandwich rule)', () => {
+    const ast = parseKeepBlanks('class D {\n+a()\n\n+b()\n}');
+    const members = ast.classifiers[0]!.members;
+    expect(members).toHaveLength(3);
+    expect(members[1]!.name).toBe('');
+    expect(members[1]!.params).toEqual([]);
+  });
+
+  it('a blank between the methods and fields runs displays NO row (leading-empty skip, jijovu-48 shape)', () => {
+    const ast = parseKeepBlanks('class Dummy1 {\n+methodA()\n\n+String a1\n}');
+    expect(ast.classifiers[0]!.members).toHaveLength(2);
+    // ...but rawBody keeps the blank verbatim (enhanced-body path input).
+    expect(ast.classifiers[0]!.rawBodyLines).toEqual(['+methodA()', '', '+String a1']);
+  });
+
+  it('a blank immediately before the closing brace is dropped (removeFinalEmptyMembers)', () => {
+    const ast = parseKeepBlanks('class C {\n+x()\n\n}');
+    expect(ast.classifiers[0]!.members).toHaveLength(1);
+  });
+
+  it('still merges a standalone `{` across preceding blank lines', () => {
+    const ast = parseKeepBlanks('class Foo\n\n{\n+a\n}');
+    expect(ast.classifiers[0]!.members).toHaveLength(1);
+    expect(ast.classifiers[0]!.members[0]!.name).toBe('a');
+  });
+
+  it('blank lines outside any open note/body are still skipped', () => {
+    const ast = parseKeepBlanks('class A\n\nclass B');
+    expect(ast.classifiers).toHaveLength(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A2s F-A / A6 — singular/alias global hide targets (upstream PORTION grammar
+// "(members?|attributes?|fields?|methods?|circles?|circled?|stereotypes?)",
+// CommandHideShowByGender.java:82).
+// ---------------------------------------------------------------------------
+
+describe('A6 — singular/alias global hide targets', () => {
+  it('parses `hide method` as the global methods target (zofabi-70 shape)', () => {
+    const ast = parse('class M {\nfoo()\n}\nhide method');
+    expect(ast.directives).toEqual([{ kind: 'hideshow', action: 'hide', target: 'methods' }]);
+  });
+
+  it('parses `hide field` / `hide attribute` / `hide attributes` as the fields target', () => {
+    for (const line of ['hide field', 'hide attribute', 'hide attributes']) {
+      const ast = parse(`class M\n${line}`);
+      expect(ast.directives).toEqual([{ kind: 'hideshow', action: 'hide', target: 'fields' }]);
+    }
+  });
+
+  it('parses `hide circled` / `hide circles` as the circle target', () => {
+    for (const line of ['hide circled', 'hide circles']) {
+      const ast = parse(`class M\n${line}`);
+      expect(ast.directives).toEqual([{ kind: 'hideshow', action: 'hide', target: 'circle' }]);
+    }
+  });
+
+  it('parses `hide member` and `hide empty method` via the same aliases', () => {
+    expect(parse('class M\nhide member').directives)
+      .toEqual([{ kind: 'hideshow', action: 'hide', target: 'members' }]);
+    expect(parse('class M\nhide empty method').directives)
+      .toEqual([{ kind: 'hideshow', action: 'hide', target: 'empty methods' }]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A2s F-A / B2 — `hide <<stereotype>> methods` GENDER form parses into the
+// entity-directive list and applies by stereotype label (upstream
+// CommandHideShowByGender.java:76 GENDER `\<\<.*\>\>` alternative →
+// EntityGenderUtils.byStereotype, abel/EntityGenderUtils.java:68-82).
+// ---------------------------------------------------------------------------
+
+describe('B2 — stereotype-gender hide/show through the full parse', () => {
+  const source = `class Dummy1 {
++m()
+}
+class Dummy2 <<even>> {
++m()
+}
+hide class circled
+show <<even>> circled
+hide <<even>> methods`;
+
+  it('suppresses methods only on stereotype-matching classifiers (jijovu-48 shape)', () => {
+    const ast = parse(source);
+    const byId = new Map(ast.classifiers.map((c) => [c.id, c]));
+    expect(byId.get('Dummy2')!.suppressMethods).toBe(true);
+    expect(byId.get('Dummy1')!.suppressMethods).toBeUndefined();
+  });
+
+  it('`show <<even>> circled` overrides the earlier `hide class circled` for matching classifiers (xofumu-51 shape)', () => {
+    const ast = parse(source);
+    const byId = new Map(ast.classifiers.map((c) => [c.id, c]));
+    expect(byId.get('Dummy1')!.hideCircle).toBe(true);
+    expect(byId.get('Dummy2')!.hideCircle).toBe(false);
+  });
+});

@@ -21,12 +21,14 @@ import {
   resolveReference,
 } from './class-namespace.js';
 import { parseMemberLine } from './class-member-parser.js';
+import { isMethodMember } from './class-layout-helpers.js';
 import { parseObjectField } from './class-object-commands.js';
 import { applyMapBodyLine } from './class-map-commands.js';
 import { finalizeJsonBody } from './class-json-commands.js';
 import { dedentRawLines } from './class-body-enhanced.js';
 import { stripQuotes } from './class-relationship-parser.js';
 import { COMMANDS } from './class-commands.js';
+import { mergeStandaloneBraces } from './class-line-merge.js';
 
 // ---------------------------------------------------------------------------
 // Mutable parse state (local to each parseClass call)
@@ -150,8 +152,10 @@ export function startNewPage(state: ParseState): void {
   // diagram (ClassDiagram.java:74-82) — a page is a finished diagram.
   normalizeSameConnectionLengths(state.ast.relationships);
   applyDirectives(state.ast);
-  applyHideShowEntityDirectives(state.ast);
+  // A2s F-A / B2: kind BEFORE entity/stereotype -- see finalizeParse's
+  // identical ordering note.
   applyHideShowKindDirectives(state.ast);
+  applyHideShowEntityDirectives(state.ast);
   applyVisibilityHideShow(state.ast);
   applyStereotypeHideShow(state.ast);
   state.pages.push(state.ast);
@@ -242,11 +246,64 @@ function dedentPendingRawBodyLines(state: ParseState): void {
  * definition until `}` closes it. Returns true when the line was consumed
  * (i.e. a body was open).
  */
+/** True for an A3 blank-line placeholder member (real members never parse to
+ *  an empty name -- `parseMemberLine` returns null for a blank/empty line). */
+function isBlankMember(m: { name: string; type?: string; rawDisplay?: string }): boolean {
+  return m.name === '' && m.type === undefined && m.rawDisplay === undefined;
+}
+
+/**
+ * A2s F-A / A3: upstream's empty-row display filters for a just-closed
+ * classic body (`BodierLikeClassOrObject`, java:114-172): a blank strictly
+ * BETWEEN two method lines is a METHOD row (sandwich rule, java:136-142);
+ * each compartment skips empties before its first real member (java:122,152)
+ * and drops trailing empties (`removeFinalEmptyMembers`, java:166-170); a
+ * blank surviving both (e.g. between two field rows) displays as one empty
+ * row. Neighborhood = the MEMBERS array (classic bodies: every line is a
+ * member, i.e. upstream's rawBody order). jar-verified: jijovu-48-gole133's
+ * blank between methods and fields displays NO row, delta 0.
+ */
+function filterBodyBlankMembers(members: Classifier['members']): void {
+  for (let i = 1; i < members.length - 1; i++) {
+    const m = members[i]!;
+    if (isBlankMember(m) && isMethodMember(members[i - 1]!) && isMethodMember(members[i + 1]!)) {
+      m.params = []; // sandwich rule: empty METHOD row
+    }
+  }
+  stripCompartmentEdgeBlanks(members, false);
+  stripCompartmentEdgeBlanks(members, true);
+}
+
+/** Leading-empty skip + `removeFinalEmptyMembers` for ONE compartment
+ *  subsequence (entries outside [first real, last real] are blanks by
+ *  construction -- see {@link filterBodyBlankMembers}). */
+function stripCompartmentEdgeBlanks(members: Classifier['members'], wantMethod: boolean): void {
+  const seq = members.filter((m) => isMethodMember(m) === wantMethod);
+  let firstReal = seq.findIndex((m) => !isBlankMember(m));
+  if (firstReal === -1) firstReal = seq.length;
+  let lastReal = seq.length - 1;
+  while (lastReal >= 0 && isBlankMember(seq[lastReal]!)) lastReal--;
+  for (let i = 0; i < seq.length; i++) {
+    if (i < firstReal || i > lastReal) members.splice(members.indexOf(seq[i]!), 1);
+  }
+}
+
+/** Close-time A3 hook: runs {@link filterBodyBlankMembers} for the classic
+ *  member path only (object/map/json bodies keep their own semantics). */
+function filterPendingBodyBlanks(state: ParseState): void {
+  const idx = state.pendingBodyId !== null ? state.classifierIndex.get(state.pendingBodyId) : undefined;
+  const classifier = idx !== undefined ? state.ast.classifiers[idx] : undefined;
+  if (classifier === undefined) return;
+  if (classifier.kind === 'object' || classifier.kind === 'map' || classifier.kind === 'json') return;
+  filterBodyBlankMembers(classifier.members);
+}
+
 function handlePendingBodyLine(state: ParseState, line: string): boolean {
   if (state.pendingBodyId === null) return false;
   if (/^\}\s*$/.test(line)) {
     closeJsonBodyIfPending(state);
     dedentPendingRawBodyLines(state);
+    filterPendingBodyBlanks(state);
     state.pendingBodyId = null;
     return true;
   }
@@ -273,6 +330,16 @@ function handlePendingBodyLine(state: ParseState, line: string): boolean {
           classifier.kind === 'object' ? parseObjectField(line) : parseMemberLine(line);
         if (member !== null) {
           classifier.members.push(member);
+        } else if (line === '' && classifier.kind !== 'object') {
+          // A2s F-A / A3: an interior blank body line enters `rawBody` as
+          // an empty `Member` candidate (`addFieldOrMethod` takes every
+          // interior line, empty included) -- which rows actually DISPLAY
+          // is decided at body close by `filterBodyBlankMembers` below,
+          // mirroring `getFieldsToDisplay`/`getMethodsToDisplay`'s empties
+          // filtering. `parseMemberLine('')` returns null, so build the
+          // placeholder here.
+          // @see ~/git/plantuml/.../classdiagram/command/CommandCreateClassMultilines.java:303-307
+          classifier.members.push({ visibility: '+', name: '', isStatic: false, isAbstract: false });
         }
         // G2 N42, G3/O4 (correction): parallel raw-line capture for
         // class/interface/enum/... AND object bodies alike -- upstream's
@@ -316,68 +383,6 @@ function dispatchCommand(state: ParseState, line: string): boolean {
     }
   }
   return false;
-}
-
-/**
- * Merge a standalone `{` line into the immediately preceding non-blank line
- * (dropping blank lines, which the main parse loop below skips anyway).
- *
- * Upstream's `class`/`package`/`namespace`/`interface`/… body-openers
- * (`CommandCreateClassMultilines`, `CommandPackage`, …) all declare
- * `syntaxWithFinalBracket() == true` (SingleLineCommand2.java:65-67):
- * when such a command's own line doesn't end in `{`, the framework peeks at
- * the NEXT line, and if it is EXACTLY `{`, merges the two into one logical
- * line before regex matching (`SingleLineCommand2.java:83-100`). So
- * `package foo <<Node>>` / `{` on its own next line is equivalent to
- * `package foo <<Node>> {` on one line — not a variant syntax our regexes
- * need to special-case individually, but a line-merge that applies before
- * ANY command dispatch (verified against dativu-93-pona469: without the
- * merge, `package foo <<Node>>` fails every command pattern and is
- * silently dropped, so `class A`/`class B` parse with no active namespace
- * and land outside any cluster).
- */
-interface MergedLines {
-  readonly lines: string[];
-  /** G2 N9: parallel to `lines` -- the ORIGINAL (pre-merge) position of
-   *  each surviving entry, so `state.currentLine` stays accurate after
-   *  blank-line dropping/brace-merging shrinks the array. A merged `{`
-   *  line keeps the position of the line it merged INTO (the opener),
-   *  matching upstream's own "peek at the next line" merge (the logical
-   *  line's source position is the opener's, per `SingleLineCommand2
-   *  .java:83-100`). */
-  readonly positions: (number | undefined)[];
-  /** G2 N42: parallel to `lines` -- the SAME line with ONLY trailing
-   *  whitespace stripped (`trimEnd`, not `trim`) -- `lines` itself is
-   *  FULLY trimmed (`raw.trim()` below), which destroys the leading
-   *  indentation `class-body-enhanced.ts`'s `|_` tree-list level
-   *  computation needs (`Classifier.rawBodyLines`'s own doc comment).
-   *  Every OTHER consumer of `lines` keeps using the fully-trimmed value
-   *  unchanged -- this is an ADDITIVE side channel, read only by
-   *  `handlePendingBodyLine`'s `rawBodyLines` capture below. */
-  readonly rawLines: string[];
-}
-
-function mergeStandaloneBraces(
-  lines: readonly string[],
-  positions: readonly (number | undefined)[] = [],
-): MergedLines {
-  const merged: string[] = [];
-  const mergedPositions: (number | undefined)[] = [];
-  const mergedRaw: string[] = [];
-  for (let idx = 0; idx < lines.length; idx++) {
-    const raw = lines[idx]!;
-    const trimmed = raw.trim();
-    if (trimmed === '') continue;
-    if (trimmed === '{' && merged.length > 0 && !merged[merged.length - 1]!.endsWith('{')) {
-      merged[merged.length - 1] += ' {';
-      mergedRaw[mergedRaw.length - 1] += ' {';
-      continue;
-    }
-    merged.push(trimmed);
-    mergedPositions.push(positions[idx]);
-    mergedRaw.push(raw.trimEnd());
-  }
-  return { lines: merged, positions: mergedPositions, rawLines: mergedRaw };
 }
 
 export function parseClass(block: UmlSource): ClassDiagramAST {
@@ -433,6 +438,11 @@ export function parseClass(block: UmlSource): ClassDiagramAST {
     state.currentRawLine = merged.rawLines[i];
     if (handlePendingNoteLine(state, line)) continue;
     if (handlePendingBodyLine(state, line)) continue;
+    // A2s F-A / A3: blank lines now SURVIVE mergeStandaloneBraces (so open
+    // note/brace bodies above receive them as content); one no open
+    // construct claims is skipped here, exactly as when the pre-pass
+    // dropped them all -- command dispatch never sees a blank line.
+    if (line === '') continue;
     if (dispatchCommand(state, line)) continue;
     // makeDefaultAST() always sets annotations; the field is optional on
     // ClassDiagramAST only so hand-authored literal fixtures elsewhere need
@@ -468,8 +478,12 @@ function finalizeParse(state: ParseState): ClassDiagramAST {
 
   normalizeSameConnectionLengths(state.ast.relationships);
   applyDirectives(state.ast);
-  applyHideShowEntityDirectives(state.ast);
+  // A2s F-A / B2: kind BEFORE entity/stereotype -- entity `show` now clears
+  // flags (CucaDiagram#showPortion's last-matching-rule fold), so the more-
+  // specific entity/`<<stereotype>>` pass must run after the type-keyword
+  // pass (`hide class circled` + `show <<even>> circled`, xofumu-51-jozi528).
   applyHideShowKindDirectives(state.ast);
+  applyHideShowEntityDirectives(state.ast);
   applyVisibilityHideShow(state.ast);
   applyStereotypeHideShow(state.ast);
 

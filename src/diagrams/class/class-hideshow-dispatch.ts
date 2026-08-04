@@ -84,13 +84,14 @@ const HIDE_SHOW_RESOLVERS: readonly HideShowResolver[] = [
 
 /**
  * hide/show directives, tried in order: (a) global targets (empty
- * members/members/circle/empty fields/empty methods), (b) entity-selector
+ * members/members/circle/empty fields/empty methods, singular/alias
+ * spellings included -- A2s F-A/A6), (b) entity-selector
  * forms (`hide $tag`/`*`/name/<<stereotype>>/@unlinked, upstream
  * hideOrShow2 -> hides2, G2 N7), (c) entity-QUALIFIED compound forms
  * (`hide C2 circle`/`hide X members`/`hide Dummy2 methods`, upstream
- * CommandHideShowByGender, entity-id GENDER only, G2 N26 -- the type-
- * keyword/`<<stereotype>>` GENDER forms remain unported, see
- * `parseHideShowEntityDirective`'s doc comment), (d) visibility-qualified
+ * CommandHideShowByGender, G2 N26 -- entity-id AND `<<stereotype>>` GENDERs,
+ * the latter A2s F-A/B2; the type-keyword GENDER form is the kind parser
+ * below, G3/O3), (d) visibility-qualified
  * member forms (`hide private members`/`hide public fields`, upstream
  * CommandHideShowByVisibility, G2 N12). All four only ever gate SVG drawing,
  * never the svek DOT export — a hidden entity/member still occupies its
