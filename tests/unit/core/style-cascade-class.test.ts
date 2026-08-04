@@ -370,3 +370,52 @@ describe('computeClassTagCascadeGenerations (G2 N39)', () => {
     expect(generations![2]?.['b']?.background).toBe('#FFFF00');
   });
 });
+// ---------------------------------------------------------------------------
+// B4 (mission A2s): `skinparam wrapWidth` bridged into the MaximumWidth
+// cascade DEFAULTS -- upstream `FromSkinparamToStyle.java:250` converts the
+// skinparam into a `PName.MaximumWidth` declaration on `SName.element`,
+// which is a member of ALL THREE style signatures this module resolves
+// (`CLASS_SNAMES`/`HEADER_SNAMES`/`NOTE_SNAMES` each contain `element`) --
+// so a bare `skinparam wrapWidth N` behaves exactly like `<style> element {
+// MaximumWidth N }` (rubecu-40-cixu870 jar-verified shape), EXCEPT that an
+// explicit `<style>` MaximumWidth declaration always wins over the
+// skinparam default (locked requirement, task F-E).
+// ---------------------------------------------------------------------------
+describe('computeClassStyleCascadeOverrides -- skinparam wrapWidth default (A2s B4)', () => {
+  it('sets all three MaximumWidth fields when no <style> declares MaximumWidth (ponono-25/sumocu-27 shape)', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({}), 300);
+    expect(override.classCascadeMaximumWidth).toBe(300);
+    expect(override.classCascadeHeaderMaximumWidth).toBe(300);
+    expect(override.noteCascadeMaximumWidth).toBe(300);
+  });
+
+  it('a <style> class { MaximumWidth } overrides the skinparam for class/header but the note still gets the skinparam default', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ class: { maximumwidth: '150' } }), 300);
+    expect(override.classCascadeMaximumWidth).toBe(150);
+    expect(override.classCascadeHeaderMaximumWidth).toBe(150);
+    expect(override.noteCascadeMaximumWidth).toBe(300);
+  });
+
+  it('a <style> element { MaximumWidth } overrides the skinparam for all three fields', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ element: { maximumwidth: '100' } }), 300);
+    expect(override.classCascadeMaximumWidth).toBe(100);
+    expect(override.classCascadeHeaderMaximumWidth).toBe(100);
+    expect(override.noteCascadeMaximumWidth).toBe(100);
+  });
+
+  it('no skinparam wrapWidth (undefined) leaves all fields absent -- byte-identical to the pre-B4 call shape', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({}));
+    expect(override.classCascadeMaximumWidth).toBeUndefined();
+    expect(override.classCascadeHeaderMaximumWidth).toBeUndefined();
+    expect(override.noteCascadeMaximumWidth).toBeUndefined();
+  });
+
+  it('does not leak the wrapWidth default into any non-MaximumWidth field', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({}), 300);
+    expect(Object.keys(override).sort()).toEqual([
+      'classCascadeHeaderMaximumWidth',
+      'classCascadeMaximumWidth',
+      'noteCascadeMaximumWidth',
+    ]);
+  });
+});
