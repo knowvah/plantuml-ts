@@ -214,12 +214,17 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
    * here -- out of T1's write-set (ellipse-fit geometry belongs to the
    * sizer, `measureUsecaseOrActor`, not `Footprint`).
    *
-   * `image/@width`/`@height` are UNCHANGED (2.1538/3.2308 vs 2/3) -- the
-   * emission-rounding gap this task explicitly does not touch (T3's job,
-   * ADR-2).
+   * `image/@width`/`@height` CLEAR entirely (SI15 T3, ADR-2): the shared
+   * `driver-image-svg.ts` now rounds the emitted `<image>` box to
+   * `Math.round(width)`/`Math.round(height)` whenever the `UImage` carries
+   * raster dims (2.1538/3.2308 -> 2/3, matching the jar exactly), the same
+   * rule commit `1406e139` gave the class engine's OWN emission site
+   * (`renderer-classifier-rows.ts`) -- jar-verified for `<img>` atoms too
+   * (`class-usecase-inline-img`, this file, below): 6.5x3.9 -> 7x4,
+   * confirming round-half-up over floor.
    *
-   * NET COUNT: 10 entries (was 11) -- `rx`/`ry` cleared (-2), `cy` newly
-   * crosses tolerance (+1).
+   * NET COUNT: 8 entries (was 10) -- `rx`/`ry` were already cleared;
+   * `image/@width`/`@height` clear now too (-2).
    */
   it('draws the sprite atom; pinned diffs are placement/scale, not structure', () => {
     const golden = readGolden(slug);
@@ -238,14 +243,61 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
       { path: 'svg/g[1]/g[2]/ellipse[1]/@cx', actual: '175.603', expected: '175.528', delta: 0.07500000000001705, tolerance: 0.01 },
       // NEW: see doc comment above.
       { path: 'svg/g[1]/g[2]/ellipse[1]/@cy', actual: '37.5779', expected: '38.0025', delta: 0.4245999999999981, tolerance: 0.01 },
-      // Emission-rounding gap -- T3's job (ADR-2), untouched by this task.
-      { path: 'svg/g[1]/g[2]/image[1]/@height', actual: '2.1538', expected: '2', delta: 0.15379999999999994, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/image[1]/@width', actual: '3.2308', expected: '3', delta: 0.2307999999999999, tolerance: 0.01 },
       // Ellipse-fit dx propagation -- same mechanism as cx above.
       { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '143.625', expected: '143.55', delta: 0.07499999999998863, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '41.8065', expected: '42.2311', delta: 0.4245999999999981, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '146.856', expected: '146.781', delta: 0.07499999999998863, tolerance: 0.01 },
       { path: 'svg/g[1]/g[2]/text[1]/@y', actual: '40.8492', expected: '41.2738', delta: 0.4245999999999981, tolerance: 0.01 },
+    ];
+    expect(diffs).toEqual(expected);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Fixture 4 -- usecase display carrying an inline `<img:...>` data-URI atom
+// (SI15 T3, jar-verification input for ADR-2).
+// ---------------------------------------------------------------------------
+
+describe('class-usecase-inline-img (usecase display with an inline <img:...> atom)', () => {
+  const slug = 'class-usecase-inline-img';
+
+  it('routes to the CLASS engine (allowmixing short-circuits classAccepts)', () => {
+    assertRoutesToClassEngine(readSource(slug));
+  });
+
+  /**
+   * Jar-verified (SI15 T3, ADR-2): a 5x3 PNG at `{scale=1.3}` scales to
+   * 6.5x3.9 -- straddling a `.5` boundary on the width axis specifically to
+   * disambiguate round-half-up from floor. The jar emits `width="7"
+   * height="4"`, i.e. standard `Math.round`, the SAME shape D9 Amendment 1
+   * jar-verified for monochrome sprites. `image/@width`/`@height` therefore
+   * clear entirely here too, confirming the single raster-backed gate in
+   * `driver-image-svg.ts` covers both atom origins -- no per-origin flag
+   * needed (ADR-2's fallback path was not taken).
+   *
+   * The surviving diffs (ellipse `rx`/`ry`/`cx`/`cy`, `image`/`text`
+   * `x`/`y`, the 4px width gap) are the SAME ellipse-fit / IHDR-sizing
+   * residual class as `class-usecase-inline-sprite` above -- out of T3's
+   * write-set (emission rounding only), unrelated to `<image>` width/height.
+   */
+  it('measures a KNOWN, pinned diff against the jar golden (image/@width and @height clear)', () => {
+    const golden = readGolden(slug);
+    const ours = renderFixtureClass(readSource(slug), new DeterministicMeasurer());
+    const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
+    expect(pass).toBe(false);
+    expect(diffs.map((d) => d.path)).not.toContain('svg/g[1]/g[2]/image[1]/@width');
+    expect(diffs.map((d) => d.path)).not.toContain('svg/g[1]/g[2]/image[1]/@height');
+    const expected: Diff[] = [
+      { path: 'svg/@viewBox[2]', actual: '248', expected: '244', delta: 4, tolerance: 0.01 },
+      { path: 'svg/@width', actual: '248', expected: '244', delta: 4, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@cx', actual: '177.244', expected: '178.527', delta: 1.282999999999987, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@cy', actual: '37.3154', expected: '38.004', delta: 0.688600000000001, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@rx', actual: '50.0574', expected: '51.7574', delta: 1.6999999999999957, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/ellipse[1]/@ry', actual: '12.8', expected: '13.154', delta: 0.3539999999999992, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '142.952', expected: '144.915', delta: 1.9629999999999939, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '40.0265', expected: '40.3596', delta: 0.33310000000000173, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '149.452', expected: '151.415', delta: 1.9629999999999939, tolerance: 0.01 },
+      { path: 'svg/g[1]/g[2]/text[1]/@y', actual: '40.8154', expected: '41.1485', delta: 0.33310000000000173, tolerance: 0.01 },
     ];
     expect(diffs).toEqual(expected);
   });

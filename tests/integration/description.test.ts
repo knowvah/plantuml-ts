@@ -310,11 +310,14 @@ describe('description engine — T7 sprite/img inline-atom rendering', () => {
     expect(imageMatches).toHaveLength(1);
     // 4 * scale(1) * (default font 14 / 13) -- `CommandCreoleSprite.java:82`
     // scales a creole sprite by the ambient font size over a 13px reference
-    // (S1L-f, jar-verified); this used to assert the unscaled 4.
-    const spriteSide = (4 * 14) / 13;
+    // (S1L-f, jar-verified); this used to assert the unscaled 4. SI15 T3
+    // (D9 Amendment 1): raster-backed <image> EMISSION rounds to integers
+    // (the jar emits Math.round(natural * scale)), so the emitted side is
+    // round(4.3077) = 4 while measurement keeps the raw value.
+    const spriteSide = Math.round((4 * 14) / 13);
     expect(svg).toMatch(
       new RegExp(
-        `<image[^>]*width="${spriteSide.toFixed(4)}[^"]*"[^>]*height="${spriteSide.toFixed(4)}[^"]*"` +
+        `<image[^>]*width="${spriteSide}[^"]*"[^>]*height="${spriteSide}[^"]*"` +
           '[^>]*xlink:href="data:image/png;base64,[^"]+"',
       ),
     );
