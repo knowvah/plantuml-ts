@@ -2,12 +2,39 @@
  * Note text measurement — a clean leaf of the note-layout module family. No
  * dependency on grouping or tip/geo resolution; those modules import
  * `NoteMeasurement`/`measureNote` from here.
+ *
+ * A2s F-C: a note's text block is upstream `BodyFactory.create3` ->
+ * `BodyEnhanced2` (`EntityImageNote.java:117`, `EntityImageTips.java:185`) —
+ * NOT a bare creole sheet. That layer splits the display at `--`/`==`/`..`/
+ * `__` block-separator lines (`BodyEnhancedAbstract#isBlockSeparator`) and
+ * decorates each following block with `withMargin(block, 0, 4)` (untitled,
+ * +8 height) or the titled `withMargin(block, 0, 6, titleH/2, 4)` +
+ * `TextBlockLineBefore.atLeast(titleW+8, titleH)` + outer `titleH/2` dance
+ * (`BodyEnhancedAbstract.java:107-121`, `TextBlockLineBefore.java:71-80`).
+ * Within a block, creole FULL mode applies: `*`-bullet lines carry a
+ * `Bullet` header atom (`Bullet.java:72-76`) and consecutive `|...|` lines
+ * form one `StripeTable`/`AtomTable` grid (`StripeTable.java`,
+ * `AtomTable.java`). The single-line note form additionally splits on
+ * literal `\n` via `Display.getWithNewlines` (`CommandFactoryNote.java:124`);
+ * the block form (`lines.toDisplay()`, java:159) keeps `\n` literal — see
+ * `splitNoteDisplayLines`'s own doc comment for the origin discriminator.
+ *
+ * All formulas here were probe-verified <0.01px against the jar
+ * (`oracle/goldens/class/a2s-note-hline-{1,2,3}/` + scratchpad probes
+ * bsplit/btitled/table, 2026-08-04).
  */
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { javaRound4 } from '../../core/number-format.js';
 import { resolveTextEscapes } from '../../core/text-escapes.js';
+import { Pragma } from '../../core/skin/Pragma.js';
+import { parseWithNewlines } from '../../core/klimt/creole/DisplayNewlines.js';
+import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
+import {
+  ClassifierBodyGeometry,
+  ELEMENT_DEFAULT_LINE_THICKNESS,
+} from './class-body-enhanced-geometry.js';
 import {
   buildMemberAtoms,
   resolveMemberAtoms,
@@ -31,6 +58,35 @@ const NOTE_FONT_SIZE = 13;
 const NOTE_MARGIN_X1 = 6;
 const NOTE_MARGIN_X2 = 15;
 const NOTE_MARGIN_Y = 5;
+/** `Bullet.java:73-75` — order 0 is an ellipse cell 12 wide; order n>=1 a
+ *  rectangle cell `8 + 8*order` wide. */
+const BULLET_ORDER0_WIDTH = 12;
+const BULLET_NESTED_WIDTH_BASE = 8;
+/** `BodyEnhancedAbstract.java:117` — titled separator: the following block
+ *  is `withMargin(block, getMarginX()==0, 6, titleH/2, 4)` (X2 = 6). */
+const TITLED_SEPARATOR_MARGIN_X2 = 6;
+/** `TextBlockLineBefore.java:77` — `dim.atLeast(dimTitle.getWidth() + 8,
+ *  ...)`: a titled separator floors its block's width at titleW + 8. */
+const TITLED_SEPARATOR_TITLE_PAD = 8;
+/** `StripeTable.java:85` — `new AtomWithMargin(table, 2, 2)`: the whole
+ *  table grid carries a 2px top + 2px bottom margin. */
+const TABLE_MARGIN_Y = 2;
+/** `StringUtils.PRIVATE_BLOCK` (`StripeTable.java:128`) — escaped `\|`
+ *  cells hide the bar behind this sentinel during tokenization. */
+const HIDDEN_BAR = '';
+
+/** `CreoleStripeSimpleParser.java:69-70` — the two FULL-mode bullet-list
+ *  patterns (`ASTERISK_PREFIXED_LINE_PATTERN`, `ASTERISK_HEADER_LINE_
+ *  PATTERN`, `[%s]` == whitespace). Both yield `StripeStyleType.LIST_
+ *  WITHOUT_NUMBER` with `order = stars - 1` and `line = trin(group(2))`. */
+const ASTERISK_PREFIXED_LINE_PATTERN = /^(\*+)([^*]+(?:[^*]|\*\*[^*]+\*\*)*)$/;
+const ASTERISK_HEADER_LINE_PATTERN = /^(\*+)(\s.+)$/;
+
+/** ADR-7 "one owner" of `decorate()`'s Y-axis arithmetic — the same probe
+ *  `class-body-enhanced-layout.ts` uses. `marginX = 0` per `BodyEnhanced2
+ *  #getMarginX` (java:76-78); thickness is height-inert (the divider line
+ *  adds no height), passed only to satisfy the ctor. */
+const NOTE_BODY_GEOMETRY = new ClassifierBodyGeometry(ELEMENT_DEFAULT_LINE_THICKNESS, 0);
 
 export interface NoteMeasurement {
   width: number;
@@ -39,7 +95,9 @@ export interface NoteMeasurement {
   lineWidths: number[];
   /** G2 N55: see `NoteGeo.lineAtoms`'s own doc comment -- ALWAYS populated
    *  here (this is the one production builder, unlike the geo's own optional
-   *  field which also serves hand-built test literals). */
+   *  field which also serves hand-built test literals). A block-separator
+   *  or table row carries `[]` (nothing to draw at the row's own x/y; the
+   *  divider/grid strokes are a renderer follow-up, journaled). */
   lineAtoms: readonly (readonly MemberRenderAtom[])[];
   /** G2 N56: see `NoteGeo.lineHeights`'s own doc comment -- ALWAYS populated
    *  here, same "production builder always sets it" contract as `lineAtoms`
@@ -47,38 +105,152 @@ export interface NoteMeasurement {
   lineHeights: readonly number[];
 }
 
+/** One assembled render row (post block/table/bullet resolution). */
+interface NoteRow {
+  text: string;
+  width: number;
+  atoms: readonly MemberRenderAtom[];
+  height: number;
+}
+
 /**
- * G2/N13: corrected to the real `Opale.java` formula — `getWidth`/
- * `getHeight` (`textWidth + marginX1 + marginX2`, `textBlockHeight +
- * 2*marginY`) at the note-specific font size 13, one line == `NOTE_FONT_
- * SIZE` tall (mirrors `class-layout-helpers.ts`'s own "row height ==
- * fontSize, not `*1.4`" convention, G2 N4). Jar-verified byte-exact against
- * `cajicu-52-cego765` (single line: width 7.2313+21=28.2313, height
- * 13+10=23) and `tenobo-24-liga464` (multi-line notes, same per-line
- * height). The PREVIOUS formula (`fontSize*1.4` line height, `+16+10`
- * margin, at the diagram's normal font size) was never jar-verified — no
- * fixture reached zero-diff through it (see ledger.md N6-N12's own
- * "diagnosed, not fixed" note-connector entries).
+ * G2/N13: `Opale.java` formula — `getWidth`/`getHeight` (`textWidth +
+ * marginX1 + marginX2`, `textBlockHeight + 2*marginY`) at note font size 13
+ * (jar-verified byte-exact, `cajicu-52-cego765`/`tenobo-24-liga464`). The
+ * text block itself is the `BodyEnhanced2` assembly (module doc comment):
+ * display-line split -> block-separator walk -> per-block creole rows.
  */
 export function measureNote(text: string, theme: Theme, measurer: StringMeasurer): NoteMeasurement {
-  // G2/N21: `<U+XXXX>` unicode-codepoint / `&#NNN;` HTML entity escapes,
-  // resolved BEFORE measuring/splitting -- shared with description's
-  // identical AtomText-derived mechanism (`core/text-escapes.ts`),
-  // jar-verified against `pacuve-18-gaso238`'s `<U+005C>` (a literal `\`).
-  const rawLines = resolveTextEscapes(text).split('\n');
-  const { fontSize, fontSpec, font, maxWidth } = resolveNoteFontContext(theme);
-  const { lines, lineWidths, lineAtoms } = buildNoteLineRuns(rawLines, { font, fontSpec, measurer, maxWidth });
-  // G2 N56: per-line height, see `NoteGeo.lineHeights`'s own doc comment.
-  const lineHeights = lineAtoms.map((atoms) => noteLineHeight(atoms, fontSize));
-  const maxW = Math.max(...lineWidths);
-  return {
-    lines,
-    lineWidths,
-    lineAtoms,
-    lineHeights,
-    width: maxW + NOTE_MARGIN_X1 + NOTE_MARGIN_X2,
-    height: lineHeights.reduce((sum, h) => sum + h, 0) + NOTE_MARGIN_Y * 2,
+  const ctx = resolveNoteFontContext(theme);
+  const buildCtx: NoteLineBuildContext = { ...ctx, measurer };
+  const displayLines = splitNoteDisplayLines(text);
+  const out: { rows: NoteRow[]; blockWidths: number[] } = { rows: [], blockWidths: [] };
+  let pendingSeparator: string | undefined;
+  let blockLines: string[] = [];
+  const flushBlock = (): void => {
+    appendDecoratedBlock(out, buildBlockRows(blockLines, buildCtx), pendingSeparator, buildCtx);
+    blockLines = [];
   };
+  for (const line of displayLines) {
+    if (isNoteBlockSeparator(line)) {
+      flushBlock();
+      pendingSeparator = line;
+    } else {
+      blockLines.push(line);
+    }
+  }
+  flushBlock();
+  const { rows, blockWidths } = out;
+  const maxW = blockWidths.length === 0 ? 0 : Math.max(...blockWidths);
+  return {
+    lines: rows.map((r) => r.text),
+    lineWidths: rows.map((r) => r.width),
+    lineAtoms: rows.map((r) => r.atoms),
+    lineHeights: rows.map((r) => r.height),
+    width: maxW + NOTE_MARGIN_X1 + NOTE_MARGIN_X2,
+    height: rows.reduce((sum, r) => sum + r.height, 0) + NOTE_MARGIN_Y * 2,
+  };
+}
+
+/** A `\n`/`\r`/`\l` two-char break sequence — the trigger for routing a
+ *  single-physical-line note text through the `getWithNewlines` scanner. */
+const BACKSLASH_BREAK = /\\[nrl]/;
+
+/**
+ * B5-note: split the stored note text into upstream `Display` lines. A text
+ * with REAL newlines is a block-form note (`lines.toDisplay()`, no literal-
+ * `\n` split — jar-probe `bsplit`); a single physical line CONTAINING a
+ * `\n`/`\r`/`\l` break sequence is (with near-certainty) the single-line
+ * note form, split via the REAL ported `Display#getWithNewlines` scanner
+ * (`DisplayNewlines.ts#parseWithNewlines` — `\n`/`\r`/`\l` break, `\t` tab,
+ * `\\` literal backslash, raw-mode spans preserved). A single physical line
+ * with NO break sequence stays literal — this deliberately narrower gate
+ * keeps a one-line BLOCK note's `\\`/`\t` escapes literal exactly as the
+ * jar does (`bopusi-74-bifa012`'s `Note \\ (foo...)`, which a broader
+ * "always scan one-liners" rule regressed by 3.575px during F-C). Known
+ * remainder, journaled: a single-line-FORM note whose only escapes are
+ * `\\`/`\t` (no break) keeps them literal (pre-F-C behavior, zero known
+ * corpus reach), as does a one-line BLOCK note containing a literal `\n`
+ * (ambiguous without origin info this module cannot see).
+ */
+function splitNoteDisplayLines(text: string): string[] {
+  if (text.includes('\n')) return text.split('\n');
+  if (!BACKSLASH_BREAK.test(text)) return [text];
+  const parsed = parseWithNewlines(Pragma.createEmpty(), text);
+  return parsed === null ? [text] : [...parsed.lines];
+}
+
+/** `BodyEnhancedAbstract#isBlockSeparator` (java:68-83) — verbatim, RAW
+ *  line (no trim; this port's note parser already dedents body lines, the
+ *  same precondition upstream's `BlocLines` trims establish). */
+function isNoteBlockSeparator(s: string): boolean {
+  if (s.startsWith('--') && s.endsWith('--')) return true;
+  if (s.startsWith('==') && s.endsWith('==')) return true;
+  if (s.startsWith('..') && s.endsWith('..') && s !== '...') return true;
+  if (s.startsWith('__') && s.endsWith('__')) return true;
+  return false;
+}
+
+/** `StringUtils.trin` (java:502-530) — strips chars `<= ' '` from both
+ *  ends (narrower than JS `trim()`, which also eats NBSP etc.). */
+function trin(s: string): string {
+  return s.replace(/^[\u0000-\u0020]+/, '').replace(/[\u0000-\u0020]+$/, '');
+}
+
+/** `BodyEnhancedAbstract#getTitle` (java:94-100): `undefined` (no title)
+ *  for a bare separator of <= 4 chars; else the trimmed middle. */
+function separatorTitleText(s: string): string | undefined {
+  if (s.length <= 4) return undefined;
+  return trin(s.slice(2, -2));
+}
+
+/** A titled separator's own measured label (`BodyEnhancedAbstract#getTitle`
+ *  routes it through `Display.getWithNewlines` + the same creole engine).
+ *  `undefined` for a bare `--`/`----` separator (java:94-96). */
+function measureSeparatorTitle(
+  separator: string,
+  ctx: NoteLineBuildContext,
+): { width: number; height: number } | undefined {
+  const titleText = separatorTitleText(separator);
+  if (titleText === undefined) return undefined;
+  const titleRows = buildBlockRows(splitNoteDisplayLines(titleText), ctx);
+  return {
+    width: titleRows.reduce((max, r) => Math.max(max, r.width), 0),
+    height: titleRows.reduce((sum, r) => sum + r.height, 0),
+  };
+}
+
+/**
+ * A11: append one block's rows, decorated per `BodyEnhancedAbstract
+ * #decorate` (java:107-121). The separator's own row height is derived by
+ * running the REAL ported `decorate()` through `ClassifierBodyGeometry`
+ * (ADR-7: one owner — untitled reduces to `innerH + 8`; titled to
+ * `max(titleH/2 + innerH + 4, titleH) + titleH/2`, probe `btitled`).
+ * Width: untitled adds nothing; titled is `max(innerW + 6, titleW + 8)`
+ * (`withMargin` X2 + `TextBlockLineBefore.atLeast`, probe-verified).
+ */
+function appendDecoratedBlock(
+  out: { rows: NoteRow[]; blockWidths: number[] },
+  blockRows: NoteRow[],
+  separator: string | undefined,
+  ctx: NoteLineBuildContext,
+): void {
+  const innerH = blockRows.reduce((sum, r) => sum + r.height, 0);
+  const innerW = blockRows.reduce((max, r) => Math.max(max, r.width), 0);
+  if (separator === undefined) {
+    // First block: decorate()'s `separator == 0` branch — identity margins.
+    out.blockWidths.push(innerW);
+    out.rows.push(...blockRows);
+    return;
+  }
+  const title = measureSeparatorTitle(separator, ctx);
+  const decorated = NOTE_BODY_GEOMETRY.deriveHeightOffsets(innerH, separator.charAt(0), title?.height);
+  const sepWidth = title === undefined ? 0 : title.width + TITLED_SEPARATOR_TITLE_PAD;
+  out.rows.push({ text: separator, width: sepWidth, atoms: [], height: decorated.totalHeight - innerH });
+  out.blockWidths.push(
+    title === undefined ? innerW : Math.max(innerW + TITLED_SEPARATOR_MARGIN_X2, sepWidth),
+  );
+  out.rows.push(...blockRows);
 }
 
 /**
@@ -96,17 +268,10 @@ export function measureNote(text: string, theme: Theme, measurer: StringMeasurer
  * `{family, size, color: null, styles: new Set()}` base font, whose
  * `atomFontSpec` projection is BYTE-IDENTICAL to the pre-cutover `fontSpec`
  * (no `weight`/`style` keys) -- this is the mission's own
- * measurement-identity proof: for a line with NO creole markup,
- * `buildStripeAtoms` returns EXACTLY one `{kind:'text', text: line, font}`
- * atom (`StripeSimple.ts`'s own doc comment guarantee) and
- * `resolveMemberAtoms` measures it via `measurer.measure(line,
- * atomFontSpec(font))` -- the SAME call, SAME arguments, as the removed
- * direct `measurer.measure(ln, fontSpec).width` call this replaces (see
- * `class-member-creole.test.ts`'s identical proof for member rows, N22's
- * own precedent). G2 N66 (item 35's own named remainder, N65): `maxWidth`
- * -- `<style> note { MaximumWidth N } }` / `element { MaximumWidth N } }`
- * word-wrap (`EntityImageNote`'s OWN style signature,
- * `theme.ts#noteCascadeMaximumWidth`'s own doc comment); `maxWidth<=0` (the
+ * measurement-identity proof (see `class-member-creole.test.ts`'s identical
+ * proof for member rows, N22's own precedent). G2 N66: `maxWidth` --
+ * `<style> note/element { MaximumWidth N }` word-wrap (`theme.ts
+ * #noteCascadeMaximumWidth`'s own doc comment); `maxWidth<=0` (the
  * overwhelming majority of notes) short-circuits every line to the SAME
  * single-build result the pre-N66 direct call produced, byte-identical.
  */
@@ -120,9 +285,9 @@ function resolveNoteFontContext(
   return { fontSize, fontSpec, font, maxWidth };
 }
 
-/** Per-line build inputs `buildNoteLineRuns` needs -- bundled into one
- *  parameter (complexity-hook param cap). */
+/** Per-line build inputs the row builders need (one bundled param). */
 interface NoteLineBuildContext {
+  fontSize: number;
   font: FontConfiguration;
   fontSpec: { readonly family: string; readonly size: number };
   measurer: StringMeasurer;
@@ -130,37 +295,173 @@ interface NoteLineBuildContext {
 }
 
 /**
- * Build each raw (already `\n`-split) source line's own render row(s) --
- * one row per line normally, 2+ when `ctx.maxWidth` wraps it (G2 N66). See
- * `measureNote`'s own doc comment for the creole-atom-engine rationale and
- * the wrapped-vs-single `lines` text-rebuild convention.
+ * Build one block's render rows: consecutive `|...|` table lines collapse
+ * into ONE grid row (A12), `*`-bullet lines carry a `Bullet` header (A4),
+ * anything else is a plain creole line (word-wrapped when `ctx.maxWidth`
+ * binds, G2 N66). Classification runs on the RAW line; `<U+XXXX>`/`&#N;`
+ * escapes resolve at atom-build time (upstream substitutes them inside
+ * `AtomText`, AFTER stripe classification — G2/N21's `pacuve-18` mechanism,
+ * order now made explicit).
  */
-function buildNoteLineRuns(
-  rawLines: string[],
-  ctx: NoteLineBuildContext,
-): { lines: string[]; lineWidths: number[]; lineAtoms: (readonly MemberRenderAtom[])[] } {
-  const { font, fontSpec, measurer, maxWidth } = ctx;
-  const lines: string[] = [];
-  const lineWidths: number[] = [];
-  const lineAtoms: (readonly MemberRenderAtom[])[] = [];
-  for (const ln of rawLines) {
-    const builds = maxWidth > 0
-      ? buildWrappedMemberRows(ln, {}, fontSpec, measurer, maxWidth)
-      : [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer)];
-    // G2 N66: mirrors `buildWrappedSectionRowBuilds`'s own convention --
-    // the SINGLE-row case (the overwhelming majority) keeps the source
-    // line's ORIGINAL text verbatim; only a GENUINELY wrapped (2+ row)
-    // line rebuilds each row's own text from its wrapped atoms
-    // (`atomsToPlainText`, `class-member-rows.ts#buildWrappedSectionRowBuilds`'s
-    // own doc comment for why `row.text` is otherwise unconsumed whenever
-    // `row.atoms`/`lineAtoms` is set).
-    for (const build of builds) {
-      lines.push(builds.length === 1 ? ln : atomsToPlainText(build.atoms));
-      lineWidths.push(javaRound4(build.width));
-      lineAtoms.push(build.atoms);
+function buildBlockRows(blockLines: readonly string[], ctx: NoteLineBuildContext): NoteRow[] {
+  const rows: NoteRow[] = [];
+  for (let i = 0; i < blockLines.length; i++) {
+    const ln = blockLines[i]!;
+    if (CreoleParser.isTableLine(ln)) {
+      const run: string[] = [ln];
+      while (i + 1 < blockLines.length && CreoleParser.isTableLine(blockLines[i + 1]!)) {
+        run.push(blockLines[++i]!);
+      }
+      rows.push(buildTableRow(run, ctx));
+      continue;
+    }
+    const bullet = matchBulletLine(ln);
+    if (bullet !== undefined) {
+      rows.push(...buildBulletRows(bullet, ctx));
+      continue;
+    }
+    rows.push(...buildPlainRows(ln, ctx));
+  }
+  return rows;
+}
+
+/** A4: `CreoleStripeSimpleParser.java:119-137` — FULL-mode bullet match.
+ *  `order = group(1).length - 1`, `text = trin(group(2))`. */
+function matchBulletLine(ln: string): { order: number; text: string } | undefined {
+  const m = ASTERISK_PREFIXED_LINE_PATTERN.exec(ln) ?? ASTERISK_HEADER_LINE_PATTERN.exec(ln);
+  if (m === null) return undefined;
+  return { order: m[1]!.length - 1, text: trin(m[2]!) };
+}
+
+/**
+ * A4: one bullet row — a zero-text spacer atom carrying the `Bullet`
+ * header's fixed width (`Bullet#calculateDimensionSlow`, java:72-76: 12 for
+ * order 0, `8 + 8*order` nested) followed by the trimmed text's own creole
+ * atoms. Height stays the text row's own (the bullet glyph's 5px/3px cell
+ * never exceeds a >=10px text row — `Sea#doAlign` places it inside the text
+ * span). Jar-verified: temise-16/pejone-71 note widths == `12 + w(text) +
+ * 21` exactly. Word-wrap (`ctx.maxWidth > 0`): the text wraps as usual and
+ * the bullet indents the FIRST row only (approximation of Fission wrapping
+ * the whole stripe with its header atom; ponono-25/sumocu-27's B4 reach,
+ * re-measured when the wrapWidth bridge lands).
+ */
+function buildBulletRows(bullet: { order: number; text: string }, ctx: NoteLineBuildContext): NoteRow[] {
+  const bulletWidth =
+    bullet.order === 0 ? BULLET_ORDER0_WIDTH : BULLET_NESTED_WIDTH_BASE + BULLET_NESTED_WIDTH_BASE * bullet.order;
+  const [first, ...rest] = buildPlainRows(bullet.text, ctx);
+  const spacer: MemberRenderAtom = { kind: 'text', text: '', font: ctx.font, width: bulletWidth };
+  return [
+    {
+      text: first!.text,
+      width: javaRound4(bulletWidth + first!.width),
+      atoms: [spacer, ...first!.atoms],
+      height: first!.height,
+    },
+    ...rest,
+  ];
+}
+
+/**
+ * Plain creole line -> one row normally, 2+ when `ctx.maxWidth` wraps it
+ * (G2 N66, mirrors `buildWrappedSectionRowBuilds`'s convention: single-row
+ * keeps the source text verbatim; wrapped rows rebuild from their atoms).
+ */
+function buildPlainRows(rawLine: string, ctx: NoteLineBuildContext): NoteRow[] {
+  const { font, fontSpec, measurer, maxWidth, fontSize } = ctx;
+  const ln = resolveTextEscapes(rawLine);
+  const builds = maxWidth > 0
+    ? buildWrappedMemberRows(ln, {}, fontSpec, measurer, maxWidth)
+    : [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer)];
+  return builds.map((build) => ({
+    text: builds.length === 1 ? ln : atomsToPlainText(build.atoms),
+    width: javaRound4(build.width),
+    atoms: build.atoms,
+    height: noteLineHeight(build.atoms, fontSize),
+  }));
+}
+
+/**
+ * A12: one creole-table grid row — the flat measurement-side port of
+ * `StripeTable#analyzeAndAddInternal` (java:130-163) + `AtomTable
+ * #calculateDimensionSlow` (java:91-96: width = sum of per-column max cell
+ * widths, height = sum of per-row max cell heights) + the grid's own
+ * `AtomWithMargin(table, 2, 2)` (java:85). NOT wired through the klimt
+ * `StripeTable`/`SheetBlock1` object model: this file is class's flat
+ * `MemberRenderAtom` adapter over the SAME shared creole primitives
+ * (`class-member-creole.ts`'s own module doc comment precedent — a second,
+ * structurally different adapter, not a re-port). Jar-verified against
+ * `jovigo-38-tuni063` + F-C probe `table` (<0.01px). Cell text is NOT
+ * trimmed (upstream tokenizes raw between `|`s), `=`-prefixed cells are
+ * bold headers, `\|` escapes hide behind `StringUtils.PRIVATE_BLOCK`, and
+ * `<#color>` prefixes strip through the first `>` (size-inert).
+ */
+function buildTableRow(runLines: readonly string[], ctx: NoteLineBuildContext): NoteRow {
+  const cellDims: { w: number; h: number }[][] = runLines.map((line) => tableRowCellDims(line, ctx));
+  const nbCols = cellDims.reduce((max, row) => Math.max(max, row.length), 0);
+  let width = 0;
+  for (let c = 0; c < nbCols; c++) {
+    width += cellDims.reduce((max, row) => Math.max(max, row[c]?.w ?? 0), 0);
+  }
+  const height = cellDims.reduce((sum, row) => sum + row.reduce((max, cell) => Math.max(max, cell.h), 0), 0);
+  return {
+    text: runLines.join('\n'),
+    width: javaRound4(width),
+    atoms: [],
+    height: height + TABLE_MARGIN_Y * 2,
+  };
+}
+
+/** One table line's cell dims — `StripeTable#analyzeAndAddInternal`'s
+ *  tokenizer (`StringTokenizer(line, "|")` skips empty tokens) with the
+ *  `\|`-hiding, line/cell `<#color>` strips, `=` header detection, and
+ *  per-cell literal-`\n` split (`getWithNewlinesInternal`, java:166-197). */
+function tableRowCellDims(line: string, ctx: NoteLineBuildContext): { w: number; h: number }[] {
+  let l = line.split('\\|').join(HIDDEN_BAR);
+  if (CreoleParser.doesStartByColor(l)) l = l.slice(l.indexOf('>') + 1);
+  const tokens = l.split('|').filter((t) => t !== '');
+  return tokens.map((token) => {
+    let v = token.split(HIDDEN_BAR).join('|');
+    const header = v.startsWith('=');
+    if (header) v = v.slice(1);
+    if (CreoleParser.doesStartByColor(v)) v = v.slice(v.indexOf('>') + 1);
+    const cellFont = header ? memberBaseFont({ ...ctx.fontSpec, bold: true }, {}) : ctx.font;
+    let w = 0;
+    let h = 0;
+    for (let s of splitTableCellLines(v)) {
+      if (s.startsWith('<r>')) s = s.slice('<r>'.length);
+      const build = resolveMemberAtoms(buildMemberAtoms(resolveTextEscapes(s), cellFont), cellFont, ctx.measurer);
+      w = Math.max(w, build.width);
+      h += noteLineHeight(build.atoms, ctx.fontSize);
+    }
+    return { w, h };
+  });
+}
+
+/** `StripeTable#getWithNewlinesInternal` (java:166-197, legacy branch):
+ *  `\n` breaks the cell into sub-lines, `\\` is a literal backslash, any
+ *  other `\x` keeps both chars. */
+function splitTableCellLines(s: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charAt(i);
+    if (c === '\\' && i < s.length - 1) {
+      const c2 = s.charAt(i + 1);
+      i++;
+      if (c2 === 'n') {
+        result.push(current);
+        current = '';
+      } else if (c2 === '\\') {
+        current += c2;
+      } else {
+        current += c + c2;
+      }
+    } else {
+      current += c;
     }
   }
-  return { lines, lineWidths, lineAtoms };
+  result.push(current);
+  return result;
 }
 
 /**
