@@ -30,6 +30,7 @@ import {
   edgeLabelAttrs,
   packageEndpointAnchors,
   shieldedClassifierIds,
+  LIKE_CLASS_KINDS,
   type MeasuredClassifier,
 } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
@@ -230,12 +231,111 @@ function shouldMarkPort(shape: DotInputNode['shape'] | undefined, isShieldedPort
   return shape === 'plaintext' && isShieldedPort && kind !== 'map' && kind !== 'json';
 }
 
+/** `EntityImageProtected`'s border -- GeneralImageBuilder.java:113 wraps a
+ *  neighborhood-bearing `EntityImageClass` in `new EntityImageProtected(
+ *  entityImageClass, 20, ...)`; `calculateDimension` returns
+ *  `orig.calculateDimension(...).delta(2 * border)` (EntityImageProtected
+ *  .java:77-79) -- +40px on BOTH axes. */
+const PROTECTED_BORDER = 20;
+
+/** A2s F-D pending theme-plumbing seam (see the F-D report): `skinparam
+ *  groupInheritance N` is not yet parsed into `Theme`, so this field is
+ *  read structurally and the mechanism is inert in production until the
+ *  skinparam pipeline populates it. */
+export interface ThemeGroupInheritance { groupInheritance?: number }
+
+/** Same pending-plumbing seam as {@link ThemeGroupInheritance}, for
+ *  `skinparam sameClassWidth true|false` (SkinParam.java:994). */
+export interface ThemeSameClassWidth { sameClassWidth?: boolean }
+
+/**
+ * A2s F-D mechanism B7: `skinparam sameClassWidth true` floors EVERY
+ * like-class box width to the widest like-class box --
+ * `GraphvizImageBuilder#printEntityInternal` computes `getMaxWidth()` over
+ * all `isLikeClass` leaves and stashes it on the skinparam
+ * (GraphvizImageBuilder.java:366-375); `EntityImageClass
+ * #calculateDimensionSlow` then floors each box to it (EntityImageClass
+ * .java:108-110). Jar evidence: dorafa-63-soba922 emits BOTH nodes at
+ * 1.623264in. Mutates the shared `MeasuredClassifier.width` in place so the
+ * DOT node builder AND the renderer geos (built after `buildDotGraph`) agree
+ * on the floored width. Header-row indents are NOT re-centered against the
+ * widened box (bounded SVG-cosmetic gap, F-D report). Inert in production
+ * until the {@link ThemeSameClassWidth} plumbing lands.
+ */
+export function applySameClassWidthFloor(
+  classifiers: readonly Classifier[],
+  measuredMap: ReadonlyMap<string, MeasuredClassifier>,
+  theme: Theme,
+): void {
+  if ((theme as Theme & ThemeSameClassWidth).sameClassWidth !== true) return;
+  const max = maxLikeClassWidth(classifiers, measuredMap);
+  for (const c of classifiers) {
+    if (!LIKE_CLASS_KINDS.has(c.kind)) continue;
+    const m = measuredMap.get(c.id);
+    if (m !== undefined && m.width < max) m.width = max;
+  }
+}
+
+/** `GraphvizImageBuilder#getMaxWidth` (GraphvizImageBuilder.java:385-395):
+ *  the widest `isLikeClass` box, measured WITHOUT the sameClassWidth floor
+ *  itself (upstream stashes the max before any floor applies). */
+function maxLikeClassWidth(
+  classifiers: readonly Classifier[],
+  measuredMap: ReadonlyMap<string, MeasuredClassifier>,
+): number {
+  let max = 0;
+  for (const c of classifiers) {
+    if (LIKE_CLASS_KINDS.has(c.kind)) max = Math.max(max, measuredMap.get(c.id)?.width ?? 0);
+  }
+  return max;
+}
+
+/**
+ * A2s F-D mechanism A10/B3: `DotData#removeIrrelevantSametail`
+ * (dot/DotData.java:122-151) -- every link whose ENTITY1-side decor is
+ * extends-like (`link.getType().getDecor2().isExtendsLike()`, LinkDecor
+ * .java:164-166: EXTENDS/REDEFINES/DEFINEDBY, all folded into this port's
+ * `'triangle'` decor) sets `sametail = entity1.uid`; a tail counted >=
+ * `skinParam.groupInheritance()` times gets a `Neighborhood`, which
+ * `createEntityImageBlockInternal` wraps in `EntityImageProtected(_, 20, ..)`
+ * (GeneralImageBuilder.java:110-116). `Relationship.idEntity1FullId`/
+ * `.idEntity1Decor` ARE Java's `getEntity1()`/decor-at-entity1 (G2 N9) --
+ * note `B --|> A` genuinely does NOT count upstream (decor2 at B is NONE),
+ * and this port preserves that. Limit semantics: `getAsInt(
+ * "groupinheritance", MAX)`, `value <= 1 -> MAX` (SkinParam.java:1041-1044).
+ * Jar evidence: mefike-75-vova900 `A3` +0.555555in BOTH dims; jakapi-64
+ * `Group` +40px each axis (hidden PLACEHOLDER's link still counts).
+ */
+function computeGroupInheritanceProtectedIds(ast: ClassDiagramAST, theme: Theme): ReadonlySet<string> {
+  const raw = (theme as Theme & ThemeGroupInheritance).groupInheritance;
+  if (raw === undefined || raw <= 1) return new Set();
+  const counts = new Map<string, number>();
+  for (const rel of ast.relationships) {
+    if (rel.idEntity1Decor !== 'triangle' || rel.idEntity1FullId === undefined) continue;
+    counts.set(rel.idEntity1FullId, (counts.get(rel.idEntity1FullId) ?? 0) + 1);
+  }
+  const ids = new Set<string>();
+  for (const [id, n] of counts) if (n >= raw) ids.add(id);
+  return ids;
+}
+
+/** A2s F-D mechanism A10/B3: the `EntityImageProtected` +2*20px inflation on
+ *  BOTH axes -- sizing only; upstream ALSO draws the neighborhood brackets
+ *  (`EntityImageProtected#drawUntranslated` -> `Neighborhood#drawU`), a
+ *  renderer-side gap filed in the F-D report. `EntityImageProtected` only
+ *  ever wraps `EntityImageClass`, hence the isLikeClass gate. */
+function protectedPad(classifier: Classifier, protectedIds: ReadonlySet<string>): number {
+  return protectedIds.has(classifier.id) && LIKE_CLASS_KINDS.has(classifier.kind)
+    ? 2 * PROTECTED_BORDER : 0;
+}
+
 /** Build one dot node for a single classifier — split out of buildDotNodes
  *  purely to keep that function's own NLOC/CCN under the project caps. */
 function buildOneDotNode(
   classifier: Classifier,
   measuredMap: Map<string, MeasuredClassifier>,
   shielded: Map<string, { isPort: boolean }>,
+  protectedIds: ReadonlySet<string>,
 ): DotInputNode {
   const measured = measuredMap.get(classifier.id)!;
   // A lollipop circle is a fixed 10x10 (upstream `EntityImageLollipopInterface
@@ -246,10 +346,11 @@ function buildOneDotNode(
   // (upstream `EntityImageAssociationPoint.SIZE`), same "never text-measured,
   // generic width/height discarded" shape as the lollipop case above.
   const isAssocPoint = classifier.kind === 'assoc-circle';
+  const pad = protectedPad(classifier, protectedIds);
   const node: DotInputNode = {
     id: classifier.id,
-    width: isLollipop ? LOLLIPOP_SIZE : isAssocPoint ? ASSOC_POINT_SIZE : measured.width,
-    height: isLollipop ? LOLLIPOP_SIZE : isAssocPoint ? ASSOC_POINT_SIZE : measured.height,
+    width: isLollipop ? LOLLIPOP_SIZE : isAssocPoint ? ASSOC_POINT_SIZE : measured.width + pad,
+    height: isLollipop ? LOLLIPOP_SIZE : isAssocPoint ? ASSOC_POINT_SIZE : measured.height + pad,
   };
   const shield = shielded.get(classifier.id);
   const shape = KIND_SHAPE[classifier.kind] ?? (shield !== undefined ? 'plaintext' : undefined);
@@ -268,11 +369,12 @@ function buildDotNodes(
   ast: ClassDiagramAST,
   measuredMap: Map<string, MeasuredClassifier>,
   anchors: Map<string, string>,
+  protectedIds: ReadonlySet<string>,
 ): DotInputNode[] {
   const shielded = shieldedClassifierIds(ast);
   const nodes = ast.classifiers
     .filter((classifier) => !anchors.has(classifier.id))
-    .map((classifier) => buildOneDotNode(classifier, measuredMap, shielded));
+    .map((classifier) => buildOneDotNode(classifier, measuredMap, shielded, protectedIds));
   for (const anchorId of anchors.values()) {
     // Width/height are ignored by the point emitter (hardcoded .01in).
     nodes.push({ id: anchorId, width: 1, height: 1, shape: 'point' });
@@ -305,8 +407,14 @@ export function buildDotGraph(
   theme: Theme,
   measurer: StringMeasurer,
 ): DotGraphParts {
+  // A2s F-D mechanism B7: cross-class width floor, applied at the
+  // pre-DOT aggregation point (mirrors `GraphvizImageBuilder
+  // #printEntityInternal`'s "set paramSameClassWidth before building
+  // entity images" sequencing) -- mutates the shared MeasuredClassifier
+  // objects so the renderer geos built after this call agree.
+  applySameClassWidthFloor(ast.classifiers, measuredMap, theme);
   const anchors = packageEndpointAnchors(ast, nonEmptyNamespaceIds(ast));
-  const dotNodes: DotInputNode[] = buildDotNodes(ast, measuredMap, anchors);
+  const dotNodes: DotInputNode[] = buildDotNodes(ast, measuredMap, anchors, computeGroupInheritanceProtectedIds(ast, theme));
 
   const labelFont = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
   // Magma standalone-chaining edges appended after the real relationship edges.

@@ -33,6 +33,30 @@ describe('measureEmptyPackageLeafDim', () => {
     expect(dim.wtitle).toBeCloseTo(25.425, 3);
     expect(dim.htitle).toBe(20);
   });
+
+  // A2s F-D mechanism A8 -- EntityImageEmptyPackage.java:126-145: the
+  // stereotype block (PACKAGE_STEREOTYPE 14pt, withMargin(_, 1, 0)) merges
+  // into the dim: width = max(descW, stereoW+2)+20, height = max(descH +
+  // stereoH, 2*descH)+20. Jar: dojanu-92-vizo468 p3 `package p3 <<Dummy>>`
+  // emits 1.191493x0.666667in = 85.7875x48px.
+  it('merges the <<stereotype>> block (dojanu-92-vizo468 p3: 85.7875x48)', () => {
+    const dim = measureEmptyPackageLeafDim(measurer, defaultTheme, 'p3', ['Dummy']);
+    expect(dim.width).toBeCloseTo(85.7875, 3);
+    expect(dim.height).toBe(48);
+  });
+
+  it('stereo height only exceeds the atLeast(2*descH) clamp with 2+ labels', () => {
+    // One 14pt label: descH + stereoH == 2*descH -> height unchanged (48).
+    // Two labels: 14*3 + 20 = 62.
+    const two = measureEmptyPackageLeafDim(measurer, defaultTheme, 'p3', ['A', 'B']);
+    expect(two.height).toBe(62);
+  });
+
+  it('is byte-identical to the pre-A8 formula when there is no stereotype', () => {
+    const bare = measureEmptyPackageLeafDim(measurer, defaultTheme, 'foo');
+    const explicit = measureEmptyPackageLeafDim(measurer, defaultTheme, 'foo', []);
+    expect(explicit).toEqual(bare);
+  });
 });
 
 describe('renderEmptyPackageIcon', () => {

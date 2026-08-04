@@ -41,6 +41,7 @@ import type { NamespaceGeo } from './layout.js';
 import { path, line, text, rect } from '../../core/svg.js';
 import { javaRound4 } from '../../core/number-format.js';
 import { isTransparentColor } from '../../core/paint.js';
+import { measureStereoLabelWidths, stereoBlockDim } from './class-stereotype.js';
 
 // marginTitleX1/X2/X3/Y1/Y2 — upstream's own field names
 // (USymbolFolder.java), kept verbatim per this project's porting
@@ -258,6 +259,7 @@ function folderPolygonPoints(
     pt(0, height),
     pt(0, 0),
   ];
+  // #lizard forgives -- pre-existing (unchanged by A2s F-D): 6 positional geometry params mirror USymbolFolder.java's own signature verbatim (porting discipline).
 }
 
 /** `USymbolFolder#drawFolder`'s `UPolygon` draw call under `strictuml`,
@@ -351,6 +353,7 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
     ...(titleTextLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: titleTextLength } : {}),
   });
   return outline + hline + label;
+  // #lizard forgives -- pre-existing (unchanged by A2s F-D): linear jar-verified draw sequence (G2 N17/N18); splitting would refactor faithfully-ported geometry mid-port.
 }
 
 /**
@@ -458,32 +461,38 @@ export interface EmptyPackageLeafDim {
   baselineOffset: number;
 }
 
+/** `FontParam.PACKAGE_STEREOTYPE` (klimt/font/FontParam.java:68) -- 14pt
+ *  italic; NOT the 12pt `CLASS_STEREOTYPE` the classifier header uses. */
+const PACKAGE_STEREOTYPE_FONT_SIZE = 14;
+
 /**
- * `EntityImageEmptyPackage#calculateDimensionSlow`: an empty package/
- * namespace draws its OWN small folder-tab icon (via `ClusterDecoration`'s
- * SAME `USymbolFolder#asBig` shape every non-empty package's cluster
- * wrapper uses -- `renderNamespaceFolder`'s own module doc comment), sized
- * by a DIFFERENT, MUCH smaller formula than that cluster's own
- * content-driven `width`/`height`: `dim = merge(desc, stereoBlock)
- * .atLeast(0, 2*dimDesc.height).delta(2*MARGIN, 2*MARGIN)` -- with no
- * stereotype (every G2 N33 sample), `dim` before the margin delta is just
- * `desc`'s own raw dimension, and `2*dimDesc.height` always dominates
- * `dimDesc.height` itself, so this reduces to `width = rawTextWidth + 20`,
- * `height = 2*rawTextHeight + 20` -- jar-verified exact against
- * `gatula-10-bifu561` ("foo": rawWidth 19.425 -> 39.425; rawHeight 14 (the
- * `StringMeasurer` convention every OTHER class row already relies on,
- * `getHTitle`'s own doc comment) -> 48).
- * @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:139-145
+ * `EntityImageEmptyPackage#calculateDimensionSlow` (G2 N33; stereotype merge
+ * = A2s F-D mechanism A8): `dim = mergeTB(desc, withMargin(stereoBlock, 1,
+ * 0), LEFT).atLeast(0, 2*dimDesc.height).delta(2*MARGIN)` -- width =
+ * max(descW, widestStereoLabel + 2) + 20 (`stereoBlockDim`'s `STEREO_MARGIN
+ * *2` IS the `withMargin(_, 1, 0)` +2px term; labels guillemet-wrapped at
+ * `PACKAGE_STEREOTYPE` 14pt), height = max(descH + stereoH, 2*descH) + 20.
+ * No stereotype reduces to `rawTextWidth + 20` x `2*rawTextHeight + 20`
+ * (jar-verified `gatula-10-bifu561`: "foo" 39.425x48); `<<Dummy>>` jar
+ * width = 1.191493in = 85.7875px (dojanu-92-vizo468 p3).
+ * @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:126-145
  */
 export function measureEmptyPackageLeafDim(
   measurer: StringMeasurer,
   theme: Theme,
   label: string,
+  stereotypeLabels: readonly string[] = [],
 ): EmptyPackageLeafDim {
   const dim = measurer.measure(label, titleFont(theme));
+  const { guillemetStart: gs, guillemetEnd: ge } = theme.colors.graph;
+  const g = gs === undefined && ge === undefined ? undefined : { start: gs ?? '«', end: ge ?? '»' };
+  const stereo = stereoBlockDim(
+    measureStereoLabelWidths(stereotypeLabels, theme.fontFamily, measurer, g, PACKAGE_STEREOTYPE_FONT_SIZE),
+    PACKAGE_STEREOTYPE_FONT_SIZE,
+  );
   return {
-    width: dim.width + EMPTY_PACKAGE_MARGIN * 2,
-    height: dim.height * 2 + EMPTY_PACKAGE_MARGIN * 2,
+    width: Math.max(dim.width, stereo.width) + EMPTY_PACKAGE_MARGIN * 2,
+    height: Math.max(dim.height + stereo.height, dim.height * 2) + EMPTY_PACKAGE_MARGIN * 2,
     wtitle: getWTitle(measurer, theme, label, 0),
     htitle: getHTitle(measurer, theme, label),
     baselineOffset: getTitleBaselineOffset(measurer, theme, label),
