@@ -73,3 +73,28 @@ and svg-class README five-step path.
   9/6/3-diff pins) and `parity-class.json` will drift TOWARD the oracle.
   Upgrades proceed journaled with the full breakdown; any dotEqual flip or
   verdict downgrade is a STOP (SI13 ADR-2 mechanical rule).
+
+## ADR-5: Root cause is oracle pollution — regenerate the class goldens (AMENDMENT, 2026-08-04)
+
+**Status:** Accepted (maintainer-approved 2026-08-04)
+
+**Context:** Batch-1 diagnosis (D1, orchestrator-verified 3 ways) proved all
+489 deltas are AWT-vs-width-table glyph metrics baked into
+`oracle/goldens/class/*/svek-*.dot`: `scripts/oracle-corpus.ts#runOracle`
+omits `-DPLANTUML_DETERMINISTIC_TEXT=true`, and the non-deterministic warm
+cache was promoted into the goldens. Deterministic regen matches our
+pipeline byte-exact on samples from every cluster; description goldens are
+clean; DOT structure is regen-invariant.
+
+**Decision:** Replace Batches 2–3 with: **G1** — add the flag to
+`runOracle`, regenerate all class golden svek DOTs (inputs untouched),
+re-measure, delete closed backlog pins; **G2** — run the original D→F
+machinery on genuine residuals only (first known: nadono-22-gidu983).
+Close-out additionally regenerates `test-results/dot-cache/class/` and the
+class parity survey (same pollution).
+
+**Consequences:** The class sizing pipeline was already correct — the
+mission's deliverable becomes a corrected oracle + a truthful ratchet. Pins
+whose delta GROWS under the corrected oracle are re-pinned with a journal
+entry each (the old pin measured a wrong oracle — this is the one sanctioned
+exception to never-re-baseline, per this approval).

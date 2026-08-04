@@ -61,12 +61,25 @@ function svekCount(dir: string): number {
   return readdirSync(dir).filter((f) => /^svek-\d+\.dot$/.test(f)).length;
 }
 
-/** Run the oracle on one fixture; return the number of svek-*.dot it emitted. */
+/** Run the oracle on one fixture; return the number of svek-*.dot it emitted.
+ *  PLANTUML_DETERMINISTIC_TEXT is mandatory: without it the jar measures with
+ *  real AWT font metrics, which poisons every width in the dumped DOT — the
+ *  ratchets compare against WidthTableMeasurer output (A2s ADR-5; the class
+ *  goldens captured without the flag carried 489 phantom size deltas). */
 function runOracle(pumlPath: string, outDir: string): number {
   try {
     execFileSync(
       'java',
-      ['-DPLANTUML_DUMP_DOT=' + outDir, '-jar', JAR, '-tsvg', '-o', outDir, pumlPath],
+      [
+        '-DPLANTUML_DETERMINISTIC_TEXT=true',
+        '-DPLANTUML_DUMP_DOT=' + outDir,
+        '-jar',
+        JAR,
+        '-tsvg',
+        '-o',
+        outDir,
+        pumlPath,
+      ],
       { stdio: 'ignore', timeout: 20_000 },
     );
   } catch {

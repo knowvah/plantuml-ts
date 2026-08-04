@@ -81,9 +81,9 @@ npx vitest run tests/architecture/sizer-renderer-parity.test.ts  # green
 
 | # | Focus | Tasks | Status |
 |---|-------|-------|--------|
-| 1 | Diagnose the identical-delta clusters (parallel, read-only + probes) | D1, D2, D3, D4 | [ ] |
-| 2 | Fix per mechanism, grouped by file ownership | F1, F2, F3, F4 (instantiated from Batch-1 outputs) | [ ] |
-| 3 | Residual round: re-measure, re-cluster, repeat D→F on remainder | R1 (+ instantiated follow-ons) | [ ] |
+| 1 | Diagnose the identical-delta clusters (parallel, read-only + probes) | D1 [x] (root cause; D2-D4 stopped — ADR-5) | [x] |
+| 2 | G1: fix runOracle flag + regenerate class goldens + re-measure + prune backlog (ADR-5) | G1 | [ ] |
+| 3 | G2: diagnose GENUINE residuals vs the corrected oracle (D→F machinery; first: nadono-22-gidu983) | G2 | [ ] |
 | 4 | Close-out: cold gates, parity-survey regen, ledger, index | C1 | [ ] |
 
 ## Index
