@@ -19,6 +19,11 @@
  * from the golden directory rather than pasting markup into the manifest,
  * which six unrelated consumers read) and ADR-2 (per-slug canonical freshness,
  * without which `buildAgg` silently drops every newly-enumerated fixture).
+ *
+ * `class` has its own golden root, `oracle/goldens/svg-class/<slug>/in.puml`,
+ * flat with no `<type>` level (`oracle/goldens/svg-class/README.md`) and no
+ * manifest at all — see `plans/si13-class-authored-registration/decisions.md`
+ * ADR-1.
  */
 import {
   readFileSync,
@@ -41,6 +46,9 @@ const MAX_JAR_BUFFER_BYTES = 2 ** 28;
 export const DATA_DIR = join(REPO, 'tests', 'visual', 'data');
 export const CANON_DIR = join(REPO, 'test-results', 'visual-qa-svg', 'canonical');
 export const GOLDEN_DIR = join(REPO, 'oracle', 'goldens', 'svg-description');
+/** Class goldens' root (SI13 ADR-1) — flat, no `<type>` level, unlike
+ *  `GOLDEN_DIR`'s `<type>/<slug>/` shape (`oracle/goldens/svg-class/README.md`). */
+export const CLASS_GOLDEN_DIR = join(REPO, 'oracle', 'goldens', 'svg-class');
 const CANON_PUML_DIR = join(REPO, 'test-results', 'visual-qa-svg', 'puml');
 
 export interface Fixture { slug: string; markup: string }
@@ -57,9 +65,14 @@ function manifestFixtures(dataDir: string, type: string): Fixture[] | undefined 
 }
 
 /** Fixtures authored under `<goldenDir>/<type>/<slug>/in.puml`, slug-sorted.
- *  The golden directory is the single source of truth for their markup. */
+ *  The golden directory is the single source of truth for their markup.
+ *
+ *  Per-type golden layout (SI13 ADR-1): `class` has no `<type>` level — its
+ *  goldens are flat, `<goldenDir>/<slug>/in.puml` — so `goldenDir` itself is
+ *  taken as the slug root instead of being joined with `type`. Every other
+ *  type keeps the description shape untouched. */
 export function authoredFixtures(goldenDir: string, type: string): Fixture[] {
-  const dir = join(goldenDir, type);
+  const dir = type === 'class' ? goldenDir : join(goldenDir, type);
   if (!existsSync(dir)) return [];
   const out: Fixture[] = [];
   for (const slug of [...readdirSync(dir)].sort()) {
@@ -74,30 +87,51 @@ export function authoredFixtures(goldenDir: string, type: string): Fixture[] {
  *  On a slug collision the manifest entry wins — its markup is what every
  *  other consumer of `tests/visual/data/*.json` measures — and the collision
  *  is reported, because silently preferring either side is how a fixture ends
- *  up measured against the wrong source. */
+ *  up measured against the wrong source.
+ *
+ *  SI13: for `class`, collision is the NORM, not the anomaly — the flat
+ *  golden root holds the ratchet's 310 corpus goldens alongside the
+ *  authored ones, and all 310 collide with `tests/visual/data/class.json`.
+ *  Naming every one would bury the only collision that is actually
+ *  dangerous, so identical-markup collisions report as a count and only
+ *  DIFFERING-markup collisions are named. (Measured 2026-08-04: 302 of the
+ *  310 are byte-identical; 8 differ by exactly the manifest's
+ *  `!pragma layout smetana` line — each pipeline is internally consistent,
+ *  see the SI13 decision journal.) */
 export function mergeFixtures(type: string, manifest: Fixture[], authored: Fixture[]): Fixture[] {
-  const known = new Set(manifest.map((f) => f.slug));
-  const collisions: string[] = [];
+  const manifestMarkup = new Map(manifest.map((f) => [f.slug, f.markup]));
+  const identical: string[] = [];
+  const differing: string[] = [];
   const merged = [...manifest];
   for (const f of authored) {
-    if (known.has(f.slug)) collisions.push(f.slug);
-    else merged.push(f);
+    const m = manifestMarkup.get(f.slug);
+    if (m === undefined) merged.push(f);
+    else (m === f.markup ? identical : differing).push(f.slug);
   }
-  if (collisions.length > 0) {
-    console.error(
-      '[dot-sync] ' + type + ': ' + collisions.length + ' authored fixture(s) also in the ' +
-      'manifest — manifest markup wins: ' + collisions.join(', '),
-    );
+  if (identical.length > 0 || differing.length > 0) {
+    const parts = ['[dot-sync] ' + type + ': manifest markup wins for'];
+    if (identical.length > 0) parts.push(identical.length + ' identical-markup authored slug(s)');
+    if (differing.length > 0) {
+      if (identical.length > 0) parts.push('and');
+      parts.push(differing.length + ' DIFFERING-markup slug(s): ' + differing.join(', '));
+    }
+    console.error(parts.join(' '));
   }
   return merged;
 }
 
 /** Every fixture for `type`: the committed manifest plus authored goldens.
- *  undefined only when the type has neither. */
+ *  undefined only when the type has neither. `goldenDir` defaults to
+ *  `CLASS_GOLDEN_DIR` for `class` (SI13 ADR-1) and `GOLDEN_DIR` otherwise.
+ *  Class DOES have a manifest (`tests/visual/data/class.json`, 768 corpus
+ *  entries — ADR-1's drafted premise said otherwise and was corrected at
+ *  execution), so class flows through `mergeFixtures`: the ratchet's 310
+ *  corpus goldens collide (manifest wins) and only genuinely new authored
+ *  slugs append. */
 export function enumerateFixtures(
   type: string,
   dataDir: string = DATA_DIR,
-  goldenDir: string = GOLDEN_DIR,
+  goldenDir: string = type === 'class' ? CLASS_GOLDEN_DIR : GOLDEN_DIR,
 ): Fixture[] | undefined {
   const manifest = manifestFixtures(dataDir, type);
   const authored = authoredFixtures(goldenDir, type);

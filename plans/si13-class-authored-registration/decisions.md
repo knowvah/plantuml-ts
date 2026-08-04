@@ -13,11 +13,23 @@ resolves to root `oracle/goldens/svg-class` with slug dirs directly under
 it; every other type keeps the existing description root/shape untouched.
 The existing `in.puml`-presence filter already skips the flat root's
 `README.md`/`ratchet.json` entries. `mergeFixtures`' manifest-wins +
-reported-collision semantics are reused as-is (for class there is no
-`tests/visual/data/class.json` manifest, so `enumerateFixtures` takes its
-existing authored-only branch). SI9 ADR-1's containment argument carries
-over verbatim: never push markup into `tests/visual/data/*` (six other
-consumers); the golden directory is the single source of truth.
+reported-collision semantics are reused. SI9 ADR-1's containment argument
+carries over verbatim: never push markup into `tests/visual/data/*` (six
+other consumers); the golden directory is the single source of truth for
+AUTHORED fixtures.
+
+**Amendment (2026-08-04, execution finding).** The drafted premise "class
+has no `tests/visual/data/class.json` manifest" was FALSE — it exists
+(768 corpus entries, commit `1a926743`), so class flows through
+`mergeFixtures`, not the authored-only branch. Measured consequences: 310
+of the 314 flat-root slugs collide with the manifest (the ratchet's corpus
+goldens live in the same flat root); 302 collide byte-identical; 8 differ
+by exactly the manifest's `!pragma layout smetana` line (each pipeline is
+internally consistent — the survey/dot-cache always measured manifest
+markup WITH the pragma, the ratchet renders golden markup without it;
+benign, journaled). The collision warning was therefore refined: identical-
+markup collisions report as a count, only DIFFERING-markup collisions are
+named. The four genuinely new authored fixtures append after the manifest.
 
 **Consequences.** `dot-sync-report.ts class` and everything downstream
 (cache → survey → parity → ratchet eligibility) sees authored class
