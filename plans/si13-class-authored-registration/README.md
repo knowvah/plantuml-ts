@@ -17,8 +17,8 @@ actually ratchets in is measured, not assumed (none is zero-diff today).
 | Batch | Tasks | Status |
 |-------|-------|--------|
 | [batch-1](batch-1/overview.md) | [x] T1 class golden layout in `dot-sync-fixtures.ts` | done (f3bf0a12) |
-| [batch-2](batch-2/overview.md) | [ ] T2 pipeline run, parity regen, drift report, eligibility | pending |
-| [batch-3](batch-3/overview.md) | [ ] T3 docs + close-out | pending |
+| [batch-2](batch-2/overview.md) | [x] T2 pipeline run, parity regen, drift report, eligibility | done (4c3ceb9b) |
+| [batch-3](batch-3/overview.md) | [x] T3 docs + close-out | done (orchestrator-inline) |
 
 ## Docs
 
@@ -73,3 +73,32 @@ Cold-tree double run before final close per `verify-gates-on-a-cold-tree`.
 session scratchpad, never `tests/`; Serena MCP tools for navigation;
 `npm run typecheck` is the type authority. Long jar/survey runs happen in
 batch 2 under the orchestrator with `SVG_PARITY_CONCURRENCY=2`.
+
+## Mission summary (2026-08-04)
+
+**Tasks: 3/3.** The registration path exists end-to-end and was proven
+live: authored class goldens flow enumeration → dot-cache (committed) →
+survey → `parity-class.json` → AC3 eligibility, exactly as SI9 arranged
+for description. The five-step path is documented in
+`oracle/goldens/svg-class/README.md`.
+
+**Two drafted premises falsified at execution** (both amended in
+decisions.md/journal): `tests/visual/data/class.json` exists, so class
+merges (310/314 flat-root slugs collide by design — warning refined to
+count identical-markup and name only the 8 pragma-only DIFFERING slugs);
+and `test-results/dot-cache/` is committed oracle data, not a local cache.
+
+**Parity regeneration (ADR-2):** 718 → 721 rows; ZERO dotEqual flips,
+ZERO verdict downgrades; conformant 271 → 308, diverged 384 → 325, 77
+deltas shrank, 16 grew within already-diverged fixtures (A2s-relevant,
+journaled).
+
+**Eligibility (ADR-3): zero ratchet additions, as expected and measured.**
+`class-missing-label-URL-SVG-0` was already ratcheted (2026-07-16); the
+three usecase fixtures are dotEqual TRUE and fail only AC1's zero-diff
+(the shared 1px viewBox/width gap); `class-actor-bare-no-allowmixing` can
+never obtain a parity row (jar refuses the input) and keeps its dedicated
+pinned-test guard by design.
+
+**Gates at close:** cold tree ×2 green, vendor 34,587 verbatim,
+size-deltas 320/351 widened 0.
