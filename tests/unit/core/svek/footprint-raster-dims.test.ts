@@ -21,7 +21,9 @@ import type { UGraphic } from '../../../../src/core/klimt/UGraphic.js';
 import type { UDrawable } from '../../../../src/core/klimt/shape/UDrawable.js';
 import type { StringBounder } from '../../../../src/core/klimt/font/StringBounder.js';
 import { makeAtomImageResolverFor } from '../../../../src/diagrams/description/render-atoms.js';
-import { createSpriteRegistry, addSprite } from '../../../../src/core/sprite-commands.js';
+import { measureUsecaseOrActorLeaf } from '../../../../src/diagrams/description/leaf-sizing.js';
+import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../../src/core/klimt/sprite/SpriteMonochrome.js';
 import type { FontConfiguration } from '../../../../src/core/klimt/shape/UText.js';
 import type { AtomImageResolver, InlineAtomToken } from '../../../../src/core/creole-atoms.js';
@@ -94,11 +96,9 @@ describe('Footprint.MyUGraphic#drawImage — SI15 T1 (ADR-1) guarded raster fall
   });
 });
 
-describe('render-atoms.ts resolvers — SI15 T1 (ADR-1) raster-dims producers', () => {
-  it('(c) resolveSpriteAtom (monochrome branch) carries the sprite grid dims as raster dims', () => {
+describe('render-atoms.ts resolvers — SI15 T1/T6 raster-dims producers', () => {
+  it('(c) resolveSpriteAtom (monochrome branch): raster = Math.round(declared), not the raw grid', () => {
     const registry = createSpriteRegistry();
-    // A 4x3 grid, one pixel per cell -- the PNG raster this sprite
-    // rasterizes to (`resolveSpriteAtom`'s own doc comment, render-atoms.ts).
     addSprite(registry, 'gear', new SpriteMonochrome(4, 3, 8));
     const font: FontConfiguration = { family: 'Helvetica', size: 26, color: '#000000', styles: new Set() };
     const resolve = makeAtomImageResolverFor(registry)(font);
@@ -106,28 +106,92 @@ describe('render-atoms.ts resolvers — SI15 T1 (ADR-1) raster-dims producers', 
     const resolved: ResolvedAtomImageWithRaster | undefined = resolve(atom);
     expect(resolved).toBeDefined();
     if (resolved === undefined || resolved.kind !== 'image') throw new Error('expected an image resolution');
-    // spriteScale(1, 26) = 1 * 26/13 = 2 -- declared dims are SCALED, raster
-    // dims are the RAW grid (unscaled), exactly the two-notion split.
-    expect(resolved.rasterWidth).toBe(4);
-    expect(resolved.rasterHeight).toBe(3);
+    // spriteScale(1, 26) = 1 * 26/13 = 2 -- declared dims are grid x 2, and
+    // SI15 T6's raster formula is round(declared): upstream's actual PNG
+    // raster is the AWT-resampled round(grid x scale), NOT the raw grid
+    // (jar-proven via IHDR decode, `.agent-notes/si15-ink-offset.md`).
+    expect(resolved.rasterWidth).toBe(8);
+    expect(resolved.rasterHeight).toBe(6);
     expect(resolved.width).toBe(8);
     expect(resolved.height).toBe(6);
   });
 
-  it('(c) resolveImgAtom carries the data URI IHDR dims as raster dims', () => {
+  it('(c) resolveSpriteAtom at a rounding boundary: grid 16 at font 14 -> raster 17 (the jar-decoded case)', () => {
+    const registry = createSpriteRegistry();
+    addSprite(registry, 'inkbox', new SpriteMonochrome(16, 16, 16));
+    const font: FontConfiguration = { family: 'Helvetica', size: 14, color: '#000000', styles: new Set() };
+    const resolve = makeAtomImageResolverFor(registry)(font);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'inkbox', scale: 1 };
+    const resolved: ResolvedAtomImageWithRaster | undefined = resolve(atom);
+    if (resolved === undefined || resolved.kind !== 'image') throw new Error('expected an image resolution');
+    // 16 * 14/13 = 17.230769... -> the jar's emitted PNG is 17x17
+    // (IHDR-decoded from the oracle's own output, si15-ink-offset.md) --
+    // the exact case that falsified T1's raw-grid formula (grid says 16).
+    expect(resolved.width).toBeCloseTo(17.230769, 5);
+    expect(resolved.rasterWidth).toBe(17);
+    expect(resolved.rasterHeight).toBe(17);
+  });
+
+  it('(c) resolveImgAtom: raster = Math.round(IHDR x scale), not the raw IHDR dims', () => {
     const font: FontConfiguration = { family: 'Helvetica', size: 12, color: '#000000', styles: new Set() };
     const resolve = makeAtomImageResolverFor(undefined)(font);
-    // `width`/`height` on an `ImgAtomToken` are ALREADY the raw IHDR pixel
-    // dims (`buildImgSpan`, creole-atoms.ts) -- constructed directly here
-    // rather than round-tripped through the scanner/a real PNG, since
-    // `resolveImgAtom` only reads `atom.width`/`atom.height`/`atom.scale`.
+    // `width`/`height` on an `ImgAtomToken` are the raw IHDR pixel dims
+    // (`buildImgSpan`, creole-atoms.ts); declared = IHDR x scale, raster =
+    // round(declared) per SI15 T6 (upstream resamples the drawn raster).
     const atom: InlineAtomToken = { kind: 'img', dataUri: 'data:image/png;base64,x', scale: 2, width: 5, height: 7 };
     const resolved: ResolvedAtomImageWithRaster | undefined = resolve(atom);
     expect(resolved).toBeDefined();
     if (resolved === undefined || resolved.kind !== 'image') throw new Error('expected an image resolution');
-    expect(resolved.rasterWidth).toBe(5);
-    expect(resolved.rasterHeight).toBe(7);
+    expect(resolved.rasterWidth).toBe(10);
+    expect(resolved.rasterHeight).toBe(14);
     expect(resolved.width).toBe(10);
     expect(resolved.height).toBe(14);
+  });
+
+  it('(d) Footprint corners at the boundary case use raster - 1 = 16, not the declared 17.23 box', () => {
+    const image = UImage.build(17.230769, 17.230769, 'data:image/png;base64,x', {
+      rasterWidth: 17,
+      rasterHeight: 17,
+    });
+    const footprint = new Footprint(UNUSED_STRING_BOUNDER);
+    const ellipse = footprint.getEllipse(imageDrawable(image), 1);
+    const expectedDiagonal = Math.hypot(16, 16); // raster - 1
+    expect(ellipse.getWidth()).toBeCloseTo(expectedDiagonal, 9);
+  });
+});
+
+describe('sizing-path reachability — SI15 T6 (`.agent-notes/si15-ink-offset.md`)', () => {
+  /**
+   * T4's jar-verified probe, reproduced as a permanent guard: a 16x16
+   * monochrome sprite (the ink content is irrelevant to BOTH fits -- ours
+   * and the jar's use only declared/raster dims, never pixel data) on a
+   * usecase label in both orderings, font 14. Jar numbers from a fresh
+   * deterministic oracle run recorded in the diagnosis note:
+   * sprite+text 2rx/2ry = 56.2184/44.7130, text+sprite = 58.132/46.1882.
+   * Pre-T6, text+sprite measured 59.3506/47.1275 (delta 1.22/0.94px)
+   * because `sizingAtomImageResolverFor`'s monochrome fallback carried no
+   * raster dims, leaving `Footprint.drawImage`'s raster branch unreachable
+   * from `measureUsecaseOrActorLeaf` -- this test fails if that fallback
+   * ever loses them again.
+   */
+  const JAR_TOLERANCE_PX = 1e-2;
+  const fontSpec = { family: 'Helvetica', size: 14 } as const;
+
+  function inkboxSprites() {
+    const registry = createSpriteRegistry();
+    addSprite(registry, 'inkbox', new SpriteMonochrome(16, 16, 16));
+    return spriteDimsLookupFor(registry);
+  }
+
+  it('sprite+text ordering matches the jar (was already exact -- size-insensitive diameter pair)', () => {
+    const dim = measureUsecaseOrActorLeaf('<$inkbox>\ninkbox', 'usecase', fontSpec, new WidthTableMeasurer(), inkboxSprites());
+    expect(Math.abs(dim.width - 56.2184)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);
+    expect(Math.abs(dim.height - 44.713)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);
+  });
+
+  it('text+sprite ordering matches the jar (the T4-diagnosed size-sensitive case)', () => {
+    const dim = measureUsecaseOrActorLeaf('inkbox\n<$inkbox>', 'usecase', fontSpec, new WidthTableMeasurer(), inkboxSprites());
+    expect(Math.abs(dim.width - 58.132)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);
+    expect(Math.abs(dim.height - 46.1882)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);
   });
 });

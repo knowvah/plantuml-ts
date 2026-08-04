@@ -201,19 +201,6 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
    * decimals, within the comparator's 0.01 tolerance) -- the diagnosis
    * note's (`.agent-notes/si14-ry-delta.md`) HIGH-confidence leg, confirmed.
    *
-   * `cx`/`image/@x`/`text/@x` did NOT clear to zero -- the diagnosis note's
-   * own MEDIUM-confidence leg, reported honestly: they SHRANK by ~96%
-   * (delta 2.003 -> 0.075, well outside the 0.01 tolerance) but a small
-   * residual survives. A NEW `ellipse/@cy` diff (delta 0.4246, absent
-   * before this task) appears, and `image/@y`/`text/@y` (the pre-existing
-   * descent-approximation residual) shift from delta 0.5794 to the SAME
-   * 0.4246 as the new `cy` diff -- consistent with one shared remaining
-   * mechanism (likely `alpha`/circle-fit rounding at the new, smaller
-   * W=2,H=1 corner points, or a second minor centring effect this task did
-   * not chase) rather than two independent causes; not diagnosed further
-   * here -- out of T1's write-set (ellipse-fit geometry belongs to the
-   * sizer, `measureUsecaseOrActor`, not `Footprint`).
-   *
    * `image/@width`/`@height` CLEAR entirely (SI15 T3, ADR-2): the shared
    * `driver-image-svg.ts` now rounds the emitted `<image>` box to
    * `Math.round(width)`/`Math.round(height)` whenever the `UImage` carries
@@ -223,8 +210,21 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
    * (`class-usecase-inline-img`, this file, below): 6.5x3.9 -> 7x4,
    * confirming round-half-up over floor.
    *
-   * NET COUNT: 8 entries (was 10) -- `rx`/`ry` were already cleared;
-   * `image/@width`/`@height` clear now too (-2).
+   * SI15 T6 closed the WHOLE remaining ellipse-fit family: the interim
+   * cx/cy/x/y residuals T1 pinned (delta 0.075 / 0.4246) were the SIZING
+   * path still measuring the declared box -- `sizingAtomImageResolverFor`
+   * (`leaf-sizing-entity.ts`) never carried raster dims, so
+   * `Footprint.drawImage`'s `raster - 1` branch was unreachable from
+   * `measureUsecaseOrActorLeaf` (`.agent-notes/si15-ink-offset.md`). With
+   * raster dims on the sizing fallback (and the formula corrected to
+   * `Math.round(declared)` at every producer), every ellipse/image/text
+   * attribute on this fixture matches the jar within tolerance.
+   *
+   * NET COUNT: 2 entries (was 8) -- ONLY the diagram's pre-existing 1px
+   * width/viewBox rounding gap survives, the SAME class of diff
+   * `class-allowmixing-usecase-mix` pins above (256 vs 255 there); it
+   * even shrank 5 -> 1 as the now-correct (smaller) ellipse narrowed the
+   * diagram.
    */
   it('draws the sprite atom; pinned diffs are placement/scale, not structure', () => {
     const golden = readGolden(slug);
@@ -236,18 +236,9 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
     // And the `<image>` the jar draws is now actually emitted.
     expect(ours).toMatch(/<image/);
     const expected: Diff[] = [
-      { path: 'svg/@viewBox[2]', actual: '243', expected: '238', delta: 5, tolerance: 0.01 },
-      { path: 'svg/@width', actual: '243', expected: '238', delta: 5, tolerance: 0.01 },
-      // Residual centring shift -- see doc comment above (MEDIUM-confidence
-      // leg, shrank but did not clear).
-      { path: 'svg/g[1]/g[2]/ellipse[1]/@cx', actual: '175.603', expected: '175.528', delta: 0.07500000000001705, tolerance: 0.01 },
-      // NEW: see doc comment above.
-      { path: 'svg/g[1]/g[2]/ellipse[1]/@cy', actual: '37.5779', expected: '38.0025', delta: 0.4245999999999981, tolerance: 0.01 },
-      // Ellipse-fit dx propagation -- same mechanism as cx above.
-      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '143.625', expected: '143.55', delta: 0.07499999999998863, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '41.8065', expected: '42.2311', delta: 0.4245999999999981, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '146.856', expected: '146.781', delta: 0.07499999999998863, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/text[1]/@y', actual: '40.8492', expected: '41.2738', delta: 0.4245999999999981, tolerance: 0.01 },
+      // Pre-existing 1px width/viewBox rounding gap -- see doc comment.
+      { path: 'svg/@viewBox[2]', actual: '239', expected: '238', delta: 1, tolerance: 0.01 },
+      { path: 'svg/@width', actual: '239', expected: '238', delta: 1, tolerance: 0.01 },
     ];
     expect(diffs).toEqual(expected);
   });
@@ -275,10 +266,14 @@ describe('class-usecase-inline-img (usecase display with an inline <img:...> ato
    * `driver-image-svg.ts` covers both atom origins -- no per-origin flag
    * needed (ADR-2's fallback path was not taken).
    *
-   * The surviving diffs (ellipse `rx`/`ry`/`cx`/`cy`, `image`/`text`
-   * `x`/`y`, the 4px width gap) are the SAME ellipse-fit / IHDR-sizing
-   * residual class as `class-usecase-inline-sprite` above -- out of T3's
-   * write-set (emission rounding only), unrelated to `<image>` width/height.
+   * SI15 T6: the ellipse-fit family this fixture originally pinned
+   * (`rx`/`ry`/`cx`/`cy`, `image`/`text` `x`/`y`) CLEARED entirely once
+   * (a) raster dims reached the sizing path and (b) the raster formula
+   * became `Math.round(declared)` -- for this 5x3 PNG at scale 1.3 that is
+   * round(6.5)x round(3.9) = 7x4, so `Footprint` fits against 6x3
+   * (raster - 1), reproducing the jar's fit exactly. Only the same
+   * pre-existing 1px width/viewBox rounding gap as the sibling fixtures
+   * survives (shrank 4 -> 1 with the corrected, smaller ellipse).
    */
   it('measures a KNOWN, pinned diff against the jar golden (image/@width and @height clear)', () => {
     const golden = readGolden(slug);
@@ -288,16 +283,9 @@ describe('class-usecase-inline-img (usecase display with an inline <img:...> ato
     expect(diffs.map((d) => d.path)).not.toContain('svg/g[1]/g[2]/image[1]/@width');
     expect(diffs.map((d) => d.path)).not.toContain('svg/g[1]/g[2]/image[1]/@height');
     const expected: Diff[] = [
-      { path: 'svg/@viewBox[2]', actual: '248', expected: '244', delta: 4, tolerance: 0.01 },
-      { path: 'svg/@width', actual: '248', expected: '244', delta: 4, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/ellipse[1]/@cx', actual: '177.244', expected: '178.527', delta: 1.282999999999987, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/ellipse[1]/@cy', actual: '37.3154', expected: '38.004', delta: 0.688600000000001, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/ellipse[1]/@rx', actual: '50.0574', expected: '51.7574', delta: 1.6999999999999957, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/ellipse[1]/@ry', actual: '12.8', expected: '13.154', delta: 0.3539999999999992, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/image[1]/@x', actual: '142.952', expected: '144.915', delta: 1.9629999999999939, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/image[1]/@y', actual: '40.0265', expected: '40.3596', delta: 0.33310000000000173, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/text[1]/@x', actual: '149.452', expected: '151.415', delta: 1.9629999999999939, tolerance: 0.01 },
-      { path: 'svg/g[1]/g[2]/text[1]/@y', actual: '40.8154', expected: '41.1485', delta: 0.33310000000000173, tolerance: 0.01 },
+      // Pre-existing 1px width/viewBox rounding gap -- see doc comment.
+      { path: 'svg/@viewBox[2]', actual: '245', expected: '244', delta: 1, tolerance: 0.01 },
+      { path: 'svg/@width', actual: '245', expected: '244', delta: 1, tolerance: 0.01 },
     ];
     expect(diffs).toEqual(expected);
   });
