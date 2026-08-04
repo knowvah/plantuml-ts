@@ -19,7 +19,8 @@ Final fix commit closing the issue says `Closes #26`.
 | Batch | Tasks | Status |
 |-------|-------|--------|
 | [batch-1](batch-1/overview.md) | [x] T1 raster-dims core fix · [x] T2 atomsWidth/fallback sweep | done (56fd6318, b277c2ed) |
-| [batch-2](batch-2/overview.md) | [ ] T3 `<image>` emission rounding · [ ] T4 ink-offset diagnosis | pending |
+| [batch-2](batch-2/overview.md) | [x] T3 `<image>` emission rounding · [x] T4 ink-offset diagnosis | done (4061a9b7; T4 no-commit) |
+| [batch-2b](batch-2b/overview.md) | [ ] T6 sizing reachability + raster formula (amendment from T4's diagnosis) | pending |
 | [batch-3](batch-3/overview.md) | [ ] T5 re-measure, re-pin, backlog, close-out | pending |
 
 ## Docs
