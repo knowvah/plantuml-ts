@@ -73,25 +73,6 @@ export interface ClassifierGeo {
      */
     atoms?: readonly MemberRenderAtom[];
     /**
-     * SI10 follow-up, retired by SI14 T5: was the summed width of {@link
-     * atoms} on a USymbol label row (usecase/actor) whose display held a
-     * `<$sprite>` or `<img>` atom, letting `renderer.ts#tryRenderUSymbol`
-     * centre a hand-drawn atom run. SI14 T4 moved usecase/actor drawing onto
-     * the faithful `EntityImageDescription.drawU` path
-     * (`renderer-usymbol-entity.ts`), which measures and centres atoms
-     * itself at draw time, so T5 removed the ONLY populator
-     * (`class-layout-leaf-shapes.ts#measureUsecaseOrActor`). No code path
-     * sets this field anymore -- it has no member-row use (member rows draw
-     * left-aligned from `indent` and never needed a summed width). Kept
-     * (not deleted) only because `renderer.ts#tryRenderUSymbol`'s
-     * pre-T4 fallback -- reachable solely for hand-built `ClassGeometry`
-     * fixtures that omit {@link ClassGeometry.measurer} -- still reads it
-     * as an always-`undefined` optional; renderer.ts is outside SI14 T5's
-     * write-set. A future task may remove both the field and that dead
-     * fallback branch together.
-     */
-    atomsWidth?: number;
-    /**
      * G2 N23: the header row's own kind-badge `<ellipse>` cx position,
      * relative to `geo.x` -- `HeaderLayout#drawU`'s `xCircle = h1` term
      * (`h1`/`h2` derived in `class-layout-helpers.ts#buildHeaderRow`'s doc
