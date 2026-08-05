@@ -136,3 +136,12 @@ withMargin(4,0,5,5), radius = FontSize(CIRCLED_CHARACTER)/3 + 6.
   (SVG-QA-visible, sizing done); A8 stereo TEXT rendering on collapsed
   empty packages (size-only today); descriptive-keywords.ts pre-existing
   524-line cap violation (needs split, .agent-notes).
+
+## Round-2 addendum (close-out 2026-08-05)
+
+**709/711 (99.7%), widened 0.** 22 of the 24 ledger rows closed by
+R2a-R2j (batch-5/overview.md). Remainder: gujigi-63 (SI1) + rotisi-30
+(fingerprinted). Description ratchet IMPROVED to 321/351 w0 (emoji atom
+consumers). New capabilities landed en route: creole emoji + monospace
+atoms, header creole routing (FULL_BUT_UNDERSCORE), package-scoped hide
+directives, association diamonds, defaultFontSize/stereo-font tiers.
