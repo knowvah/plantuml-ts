@@ -8,6 +8,7 @@ import type { ClassNote, NotePosition } from './ast.js';
 import type { DotInputNode, DotInputEdge } from '../../core/graph-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { measureNote, type NoteMeasurement } from './note-layout-measure.js';
 
 /** `EntityImageTips.java`'s `ySpacing` — vertical gap between stacked
@@ -162,6 +163,7 @@ export function buildNoteGraphParts(
   theme: Theme,
   measurer: StringMeasurer,
   anchors: ReadonlyMap<string, string>,
+  sprites?: SpriteRegistry,
 ): {
   nodes: DotInputNode[];
   edges: DotInputEdge[];
@@ -169,7 +171,9 @@ export function buildNoteGraphParts(
   groups: NoteGroup[];
 } {
   const measurements = new Map<string, NoteMeasurement>();
-  for (const note of notes) measurements.set(note.id, measureNote(note.text, theme, measurer));
+  // A2s R2h: `sprites` threads the diagram's registry into the note creole
+  // path so a `<$name>` note atom resolves like a member-row one (rotisi-30).
+  for (const note of notes) measurements.set(note.id, measureNote(note.text, theme, measurer, sprites));
 
   const groups = groupNotes(notes);
   const nodes: DotInputNode[] = groups.map((group) => ({

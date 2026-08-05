@@ -43,6 +43,15 @@ import {
   atomsToPlainText,
   type MemberRenderAtom,
 } from './class-member-creole.js';
+import { getEmbeddedType } from '../../core/EmbeddedDiagram.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import {
+  type NoteRow,
+  type NoteLineBuildContext,
+  noteLineHeight,
+  buildTableRow,
+  consumeEmbeddedRow,
+} from './note-layout-measure-rows.js';
 
 /** `plantuml.skin`'s `note { FontSize 13 }` default — one point smaller
  *  than the diagram's normal text. G2 N39: the DEFAULT only -- a `<style>
@@ -68,12 +77,6 @@ const TITLED_SEPARATOR_MARGIN_X2 = 6;
 /** `TextBlockLineBefore.java:77` — `dim.atLeast(dimTitle.getWidth() + 8,
  *  ...)`: a titled separator floors its block's width at titleW + 8. */
 const TITLED_SEPARATOR_TITLE_PAD = 8;
-/** `StripeTable.java:85` — `new AtomWithMargin(table, 2, 2)`: the whole
- *  table grid carries a 2px top + 2px bottom margin. */
-const TABLE_MARGIN_Y = 2;
-/** `StringUtils.PRIVATE_BLOCK` (`StripeTable.java:128`) — escaped `\|`
- *  cells hide the bar behind this sentinel during tokenization. */
-const HIDDEN_BAR = '';
 
 /** `CreoleStripeSimpleParser.java:69-70` — the two FULL-mode bullet-list
  *  patterns (`ASTERISK_PREFIXED_LINE_PATTERN`, `ASTERISK_HEADER_LINE_
@@ -105,14 +108,6 @@ export interface NoteMeasurement {
   lineHeights: readonly number[];
 }
 
-/** One assembled render row (post block/table/bullet resolution). */
-interface NoteRow {
-  text: string;
-  width: number;
-  atoms: readonly MemberRenderAtom[];
-  height: number;
-}
-
 /**
  * G2/N13: `Opale.java` formula — `getWidth`/`getHeight` (`textWidth +
  * marginX1 + marginX2`, `textBlockHeight + 2*marginY`) at note font size 13
@@ -120,9 +115,9 @@ interface NoteRow {
  * text block itself is the `BodyEnhanced2` assembly (module doc comment):
  * display-line split -> block-separator walk -> per-block creole rows.
  */
-export function measureNote(text: string, theme: Theme, measurer: StringMeasurer): NoteMeasurement {
+export function measureNote(text: string, theme: Theme, measurer: StringMeasurer, sprites?: SpriteRegistry): NoteMeasurement {
   const ctx = resolveNoteFontContext(theme);
-  const buildCtx: NoteLineBuildContext = { ...ctx, measurer };
+  const buildCtx: NoteLineBuildContext = { ...ctx, measurer, sprites };
   const displayLines = splitNoteDisplayLines(text);
   const out: { rows: NoteRow[]; blockWidths: number[] } = { rows: [], blockWidths: [] };
   let pendingSeparator: string | undefined;
@@ -156,6 +151,17 @@ export function measureNote(text: string, theme: Theme, measurer: StringMeasurer
  *  single-physical-line note text through the `getWithNewlines` scanner. */
 const BACKSLASH_BREAK = /\\[nrl]/;
 
+/** R2b: the six `jaws/Jaws.java:47-53` private-use sentinels TIM builtins
+ *  can leave in a line — `%retrieve_procedure`'s multi-line capture joins
+ *  with `BLOCK_E1_NEWLINE` (`TContext#extractFromResultList`), and
+ *  `%n()`/`%newline()`/`%breakline()`/`%left_align()`/`%right_align()`/
+ *  `%backslash()`/`%tab()` return one directly (`tim/builtin/`,
+ *  `JawsFlags.USE_BLOCK_E1_IN_NEWLINE_FUNCTION == true`). Any of them
+ *  proves the text passed through the TIM interpreter on ONE physical
+ *  line, so the single-line-form `getWithNewlines` scan (which decodes
+ *  every one of them, `Display.java:315-339`) is the correct decoder. */
+const BLOCK_E1_SENTINEL = /[\u{e100}-\u{e103}\u{e110}\u{e111}]/u;
+
 /**
  * B5-note: split the stored note text into upstream `Display` lines. A text
  * with REAL newlines is a block-form note (`lines.toDisplay()`, no literal-
@@ -175,7 +181,7 @@ const BACKSLASH_BREAK = /\\[nrl]/;
  */
 function splitNoteDisplayLines(text: string): string[] {
   if (text.includes('\n')) return text.split('\n');
-  if (!BACKSLASH_BREAK.test(text)) return [text];
+  if (!BACKSLASH_BREAK.test(text) && !BLOCK_E1_SENTINEL.test(text)) return [text];
   const parsed = parseWithNewlines(Pragma.createEmpty(), text);
   return parsed === null ? [text] : [...parsed.lines];
 }
@@ -285,15 +291,6 @@ function resolveNoteFontContext(
   return { fontSize, fontSpec, font, maxWidth };
 }
 
-/** Per-line build inputs the row builders need (one bundled param). */
-interface NoteLineBuildContext {
-  fontSize: number;
-  font: FontConfiguration;
-  fontSpec: { readonly family: string; readonly size: number };
-  measurer: StringMeasurer;
-  maxWidth: number;
-}
-
 /**
  * Build one block's render rows: consecutive `|...|` table lines collapse
  * into ONE grid row (A12), `*`-bullet lines carry a `Bullet` header (A4),
@@ -307,6 +304,17 @@ function buildBlockRows(blockLines: readonly string[], ctx: NoteLineBuildContext
   const rows: NoteRow[] = [];
   for (let i = 0; i < blockLines.length; i++) {
     const ln = blockLines[i]!;
+    // R2b: a line opening a `{{ ... }}` embedded-diagram region collapses,
+    // with everything through its matching `}}`, into ONE row
+    // (`EmbeddedDiagram.getEmbeddedType` gate, java:257-366; region walk +
+    // 42x42 dimension in `note-layout-measure-rows.ts#consumeEmbeddedRow`).
+    const embeddedType = getEmbeddedType(ln);
+    if (embeddedType !== null) {
+      const consumed = consumeEmbeddedRow(blockLines, i, embeddedType, ctx);
+      rows.push(consumed.row);
+      i = consumed.nextIndex;
+      continue;
+    }
     if (CreoleParser.isTableLine(ln)) {
       const run: string[] = [ln];
       while (i + 1 < blockLines.length && CreoleParser.isTableLine(blockLines[i + 1]!)) {
@@ -340,25 +348,27 @@ function matchBulletLine(ln: string): { order: number; text: string } | undefine
  * atoms. Height stays the text row's own (the bullet glyph's 5px/3px cell
  * never exceeds a >=10px text row — `Sea#doAlign` places it inside the text
  * span). Jar-verified: temise-16/pejone-71 note widths == `12 + w(text) +
- * 21` exactly. Word-wrap (`ctx.maxWidth > 0`): the text wraps as usual and
- * the bullet indents the FIRST row only (approximation of Fission wrapping
- * the whole stripe with its header atom; ponono-25/sumocu-27's B4 reach,
- * re-measured when the wrapWidth bridge lands).
+ * 21` exactly. Word-wrap (`ctx.maxWidth > 0`, A2s R2h): `Fission` seeds the
+ * FIRST wrapped stripe with the real header atom and every continuation
+ * with `blank(header)` (same width), and breaks when the stripe width
+ * INCLUDING the header exceeds `valueMaxWidth` (Fission.java:69-92,120-125)
+ * — so the text budget is `maxWidth - bulletWidth` for ALL rows and every
+ * row is indented by the header width (jar-verified ponono-25/sumocu-27:
+ * max row 12 + 287.7062 at WrapWidth 300). A nested bullet wider than
+ * `maxWidth` itself (budget <= 0, zero corpus reach) falls back to the
+ * unwrapped single-row build; upstream would instead break at every word.
  */
 function buildBulletRows(bullet: { order: number; text: string }, ctx: NoteLineBuildContext): NoteRow[] {
   const bulletWidth =
     bullet.order === 0 ? BULLET_ORDER0_WIDTH : BULLET_NESTED_WIDTH_BASE + BULLET_NESTED_WIDTH_BASE * bullet.order;
-  const [first, ...rest] = buildPlainRows(bullet.text, ctx);
+  const textCtx = ctx.maxWidth > 0 ? { ...ctx, maxWidth: ctx.maxWidth - bulletWidth } : ctx;
   const spacer: MemberRenderAtom = { kind: 'text', text: '', font: ctx.font, width: bulletWidth };
-  return [
-    {
-      text: first!.text,
-      width: javaRound4(bulletWidth + first!.width),
-      atoms: [spacer, ...first!.atoms],
-      height: first!.height,
-    },
-    ...rest,
-  ];
+  return buildPlainRows(bullet.text, textCtx).map((row) => ({
+    text: row.text,
+    width: javaRound4(bulletWidth + row.width),
+    atoms: [spacer, ...row.atoms],
+    height: row.height,
+  }));
 }
 
 /**
@@ -367,11 +377,11 @@ function buildBulletRows(bullet: { order: number; text: string }, ctx: NoteLineB
  * keeps the source text verbatim; wrapped rows rebuild from their atoms).
  */
 function buildPlainRows(rawLine: string, ctx: NoteLineBuildContext): NoteRow[] {
-  const { font, fontSpec, measurer, maxWidth, fontSize } = ctx;
+  const { font, fontSpec, measurer, maxWidth, fontSize, sprites } = ctx;
   const ln = resolveTextEscapes(rawLine);
   const builds = maxWidth > 0
-    ? buildWrappedMemberRows(ln, {}, fontSpec, measurer, maxWidth)
-    : [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer)];
+    ? buildWrappedMemberRows(ln, {}, fontSpec, measurer, maxWidth, sprites)
+    : [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer, sprites)];
   return builds.map((build) => ({
     text: builds.length === 1 ? ln : atomsToPlainText(build.atoms),
     width: javaRound4(build.width),
@@ -380,121 +390,3 @@ function buildPlainRows(rawLine: string, ctx: NoteLineBuildContext): NoteRow[] {
   }));
 }
 
-/**
- * A12: one creole-table grid row — the flat measurement-side port of
- * `StripeTable#analyzeAndAddInternal` (java:130-163) + `AtomTable
- * #calculateDimensionSlow` (java:91-96: width = sum of per-column max cell
- * widths, height = sum of per-row max cell heights) + the grid's own
- * `AtomWithMargin(table, 2, 2)` (java:85). NOT wired through the klimt
- * `StripeTable`/`SheetBlock1` object model: this file is class's flat
- * `MemberRenderAtom` adapter over the SAME shared creole primitives
- * (`class-member-creole.ts`'s own module doc comment precedent — a second,
- * structurally different adapter, not a re-port). Jar-verified against
- * `jovigo-38-tuni063` + F-C probe `table` (<0.01px). Cell text is NOT
- * trimmed (upstream tokenizes raw between `|`s), `=`-prefixed cells are
- * bold headers, `\|` escapes hide behind `StringUtils.PRIVATE_BLOCK`, and
- * `<#color>` prefixes strip through the first `>` (size-inert).
- */
-function buildTableRow(runLines: readonly string[], ctx: NoteLineBuildContext): NoteRow {
-  const cellDims: { w: number; h: number }[][] = runLines.map((line) => tableRowCellDims(line, ctx));
-  const nbCols = cellDims.reduce((max, row) => Math.max(max, row.length), 0);
-  let width = 0;
-  for (let c = 0; c < nbCols; c++) {
-    width += cellDims.reduce((max, row) => Math.max(max, row[c]?.w ?? 0), 0);
-  }
-  const height = cellDims.reduce((sum, row) => sum + row.reduce((max, cell) => Math.max(max, cell.h), 0), 0);
-  return {
-    text: runLines.join('\n'),
-    width: javaRound4(width),
-    atoms: [],
-    height: height + TABLE_MARGIN_Y * 2,
-  };
-}
-
-/** One table line's cell dims — `StripeTable#analyzeAndAddInternal`'s
- *  tokenizer (`StringTokenizer(line, "|")` skips empty tokens) with the
- *  `\|`-hiding, line/cell `<#color>` strips, `=` header detection, and
- *  per-cell literal-`\n` split (`getWithNewlinesInternal`, java:166-197). */
-function tableRowCellDims(line: string, ctx: NoteLineBuildContext): { w: number; h: number }[] {
-  let l = line.split('\\|').join(HIDDEN_BAR);
-  if (CreoleParser.doesStartByColor(l)) l = l.slice(l.indexOf('>') + 1);
-  const tokens = l.split('|').filter((t) => t !== '');
-  return tokens.map((token) => {
-    let v = token.split(HIDDEN_BAR).join('|');
-    const header = v.startsWith('=');
-    if (header) v = v.slice(1);
-    if (CreoleParser.doesStartByColor(v)) v = v.slice(v.indexOf('>') + 1);
-    const cellFont = header ? memberBaseFont({ ...ctx.fontSpec, bold: true }, {}) : ctx.font;
-    let w = 0;
-    let h = 0;
-    for (let s of splitTableCellLines(v)) {
-      if (s.startsWith('<r>')) s = s.slice('<r>'.length);
-      const build = resolveMemberAtoms(buildMemberAtoms(resolveTextEscapes(s), cellFont), cellFont, ctx.measurer);
-      w = Math.max(w, build.width);
-      h += noteLineHeight(build.atoms, ctx.fontSize);
-    }
-    return { w, h };
-  });
-}
-
-/** `StripeTable#getWithNewlinesInternal` (java:166-197, legacy branch):
- *  `\n` breaks the cell into sub-lines, `\\` is a literal backslash, any
- *  other `\x` keeps both chars. */
-function splitTableCellLines(s: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  for (let i = 0; i < s.length; i++) {
-    const c = s.charAt(i);
-    if (c === '\\' && i < s.length - 1) {
-      const c2 = s.charAt(i + 1);
-      i++;
-      if (c2 === 'n') {
-        result.push(current);
-        current = '';
-      } else if (c2 === '\\') {
-        current += c2;
-      } else {
-        current += c + c2;
-      }
-    } else {
-      current += c;
-    }
-  }
-  result.push(current);
-  return result;
-}
-
-/**
- * G2 N56: one note line's own height -- jar's real `Sea`/`Position` math
- * (`SheetBlock1#initMap`'s `sea.doAlign()` + `getHeight() == getMaxY() -
- * getMinY()`) reduces, for every NORMAL (non-superscript/subscript,
- * `FontPosition.getSpace() == 0`) atom, to a flat MAX over each atom's OWN
- * `AtomText#calculateDimensionSlow` height (`stringBounder.calculateDimension
- * (...).getHeight()`, floored at 10) -- NOT an ascent/descent-weighted SUM
- * (confirmed algebraically: every atom's measured-rect BOTTOM edge aligns to
- * the SAME shared y=0, so the stripe's total span is exactly the tallest
- * atom's own height; re-derivation cross-checked against `fogexa-30-
- * zupo141`'s real per-run baselines -- "In java," @ y=26.1111 (13pt),
- * "every" @ y=25 (18pt, `<size:18>`) on the SAME physical line, delta
- * 1.1111 == the two sizes' own `size/4.5` descent difference, and the NEXT
- * line's baseline sits EXACTLY 18 (not 13) below this line's own top,
- * proving the cumulative stack advances by each line's own MAX height).
- * Scoped to 'text' atoms only -- an 'image'/'vector' atom's own height
- * contribution is UNCONFIRMED by any corpus fixture (`AtomOpenIconic`'s own
- * `getStartingAltitude` is `-3*factor`, NOT the 0 every 'text'/'image' atom
- * uses, so the same "align bottoms to 0" derivation would need independent
- * verification before extending to it -- deliberately NOT guessed here, see
- * `renderer-note.ts#renderNoteLineAtoms`'s matching scope note). A line with
- * no 'text' atom at all (an image-only line, zero corpus reach) falls back
- * to `fallbackFontSize`, matching this function's pre-N56 flat behavior for
- * that unconfirmed case.
- */
-function noteLineHeight(atoms: readonly MemberRenderAtom[], fallbackFontSize: number): number {
-  let max = -Infinity;
-  for (const atom of atoms) {
-    if (atom.kind !== 'text') continue;
-    const h = Math.max(atom.font.size, 10);
-    if (h > max) max = h;
-  }
-  return max === -Infinity ? Math.max(fallbackFontSize, 10) : max;
-}

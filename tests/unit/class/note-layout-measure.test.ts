@@ -187,6 +187,77 @@ describe('A12 — creole tables in notes (StripeTable/AtomTable geometry)', () =
   });
 });
 
+describe('R2b — TIM BLOCK_E1 sentinels in single-line notes', () => {
+  // Jaws.BLOCK_E1_NEWLINE ('', jaws/Jaws.java:47) reaches a note's
+  // stored text two ways: `%retrieve_procedure`'s multi-line capture joins
+  // with it (TContext#extractFromResultList), and `%n()`/`%newline()` return
+  // it inline (tim/builtin/Newline.java + JawsFlags.java:40,
+  // USE_BLOCK_E1_IN_NEWLINE_FUNCTION == true). Either way the single-line
+  // note form decodes it as a line break via Display#getWithNewlines
+  // (Display.java:330-332). Golden targets below are the pinned jar DOT
+  // node sizes (deterministic-text oracle).
+  const E1 = '\u{e100}';
+
+  it('splits at BLOCK_E1_NEWLINE (roputo-88-fuxo199 golden 1.535243x0.861111)', () => {
+    const m = note(`foo class Object {${E1}name : token${E1}name : flag${E1}} dummy`);
+    expect(m.lines).toEqual(['foo class Object {', 'name : token', 'name : flag', '} dummy']);
+    expect(m.width / 72).toBeCloseTo(1.535243, 4);
+    expect(m.height / 72).toBeCloseTo(0.861111, 4);
+  });
+
+  it('%n()-produced sentinels match rozudo-79-zavu288 golden 0.732899x0.680556', () => {
+    const m = note(`some${E1}${E1}notes`);
+    expect(m.lines).toEqual(['some', '', 'notes']);
+    expect(m.width / 72).toBeCloseTo(0.732899, 4);
+    expect(m.height / 72).toBeCloseTo(0.680556, 4);
+  });
+
+  it('matches xadado-92 note1 (quoted retrieve_procedure note, 1.284722x0.861111)', () => {
+    const m = note(`class Object {${E1}  name : token${E1}  name : flag${E1}}`);
+    expect(m.lines).toEqual(['class Object {', '  name : token', '  name : flag', '}']);
+    expect(m.width / 72).toBeCloseTo(1.284722, 4);
+    expect(m.height / 72).toBeCloseTo(0.861111, 4);
+  });
+});
+
+describe('R2b — {{...}} embedded diagram regions in notes', () => {
+  // EmbeddedDiagram.calculateDimensionSlow (EmbeddedDiagram.java:125-151):
+  // the whole {{ ... }} region is ONE atom; with no working nested-diagram
+  // raster/renderer the catch path returns `new XDimension2D(42, 42)`
+  // (java:150). Jar-probe 2026-08-05: the oracle jar NPEs on the nested
+  // raster in the deterministic DOT-dump environment and takes exactly this
+  // path — probe DOT byte-identical to the pinned xadado-92-lazo250 golden.
+  // Note dims: 42+6+15 = 63px = 0.875in; 42 + 13 (trailing '' line) + 2*5
+  // = 65px = 0.902778in.
+  it('collapses a class-flavored {{...}} to the 42x42 fallback (xadado detailsNote2)', () => {
+    const m = note('{{\\nclass Object {\\n name : token\\n name : flag\\n}\\n}}\\n');
+    expect(m.width / 72).toBeCloseTo(0.875, 4);
+    expect(m.height / 72).toBeCloseTo(0.902778, 4);
+    expect(m.lineHeights).toEqual([42, 13]);
+    expect(m.lineAtoms[0]).toEqual([]);
+  });
+
+  it('collapses a sequence-flavored {{...}} identically (xadado detailsNote1)', () => {
+    const m = note('{{\\nparticipant MyA as A\\nA->>B: prepare\\n}}\\n');
+    expect(m.width / 72).toBeCloseTo(0.875, 4);
+    expect(m.height / 72).toBeCloseTo(0.902778, 4);
+  });
+
+  it('keeps text after the closing }} as ordinary rows', () => {
+    const m = note('{{\\nA->>B: x\\n}}\\ntail');
+    expect(m.lineHeights).toEqual([42, 13]);
+    expect(m.lines[1]).toBe('tail');
+    expect(m.width).toBeCloseTo(Math.max(42, w('tail')) + MX, 4);
+  });
+
+  it('does not treat a mid-line {{ as an embedded region', () => {
+    // getEmbeddedType (java:257-366) requires the trimmed line to START
+    // with '{{'; 'x {{ y' is a plain text row.
+    const m = note('x {{ y');
+    expect(m.height).toBe(13 + MY);
+  });
+});
+
 describe('existing behavior preserved', () => {
   it('single plain line — cajicu-52 byte-exact formula unchanged', () => {
     const m = note('hi');
