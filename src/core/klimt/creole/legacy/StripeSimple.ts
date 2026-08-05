@@ -54,11 +54,15 @@ import type { FontConfiguration } from '../../shape/UText.js';
 import { FontStyle } from '../../shape/UText.js';
 import type { CreoleAtom, CreoleAtomUrl } from '../atom/Atom.js';
 import type { Command, StripeBuilder } from '../command/Command.js';
-import { CREOLE_COMMANDS } from './CommandCreoleBuilder.js';
+import { CREOLE_COMMANDS, CREOLE_COMMANDS_OTHER } from './CommandCreoleBuilder.js';
+import { CreoleMode } from '../CreoleMode.js';
 import { scanLineForAtoms, matchAtomAt } from '../../../creole-atoms.js';
 import { classifyStripeLine, type StripeClassification } from './CreoleStripeSimpleParser.js';
 import { resolveTextEscapes } from '../../../text-escapes.js';
 import { MONOSPACED } from '../Parser.js';
+import { retrieveEmoji } from '../Emoji.js';
+import { emojiFactor } from '../atom/AtomEmoji.js';
+import { resolveColorToSvgHex } from '../../color/HColorSet.js';
 
 /** Font for an `<img>` cannot-decode/error fallback text run —
  *  `AtomImg.create` (`AtomImg.java:106-107`) hardcodes
@@ -89,10 +93,16 @@ const IMG_FALLBACK_FONT: FontConfiguration = {
  *  `>=`) is upstream's own bound — ported verbatim, including its edge
  *  case (a 2-char starter with zero content chars remaining never looks
  *  itself up; every L1/L2 command needs >=1 content char anyway, per each
- *  form's own minimum-match rule, so this never rejects a real match). */
-function searchCommand(line: string, pos: number): Command | null {
+ *  form's own minimum-match rule, so this never rejects a real match).
+ *  A2s R2a: `commands` is now the per-stripe map (`StripeSimple.java`'s
+ *  own `this.commands` field, set FULL-vs-OTHER in its ctor java:112-115). */
+function searchCommand(
+  line: string,
+  pos: number,
+  commands: ReadonlyMap<string, readonly Command[]>,
+): Command | null {
   if (line.length <= pos + 2) return null;
-  const candidates = CREOLE_COMMANDS.get(line.slice(pos, pos + 2));
+  const candidates = commands.get(line.slice(pos, pos + 2));
   if (candidates === undefined) return null;
   for (const cmd of candidates) {
     if (cmd.matchingSize(line, pos) !== 0) return cmd;
@@ -120,6 +130,10 @@ function addStyleAndBigger(font: FontConfiguration, delta: number): FontConfigur
 class StripeAtomBuilder implements StripeBuilder {
   private readonly built: CreoleAtom[] = [];
   private font: FontConfiguration;
+  // A2s R2a: the FULL-vs-OTHER command map this stripe scans against —
+  // upstream `StripeSimple.java`'s own `this.commands` field (ctor
+  // java:112-115: FULL mode -> FULL map, every other mode -> OTHER map).
+  private readonly commands: ReadonlyMap<string, readonly Command[]>;
   // G2 N40: the `[[url]]` command's active href/tooltip, set for the
   // duration of `analyzeAndAddInlineWithUrl`'s recursive call -- every
   // `'text'` atom `flushPending` produces while set gets tagged with it
@@ -127,8 +141,9 @@ class StripeAtomBuilder implements StripeBuilder {
   // the url command's captured label is never mistakenly tagged.
   private activeUrl: CreoleAtomUrl | undefined;
 
-  constructor(initialFont: FontConfiguration) {
+  constructor(initialFont: FontConfiguration, mode: CreoleMode = CreoleMode.FULL) {
     this.font = initialFont;
+    this.commands = mode === CreoleMode.FULL ? CREOLE_COMMANDS : CREOLE_COMMANDS_OTHER;
   }
 
   getActualFontConfiguration(): FontConfiguration {
@@ -154,6 +169,30 @@ class StripeAtomBuilder implements StripeBuilder {
     this.built.push({ kind: 'latex', expr, color: this.font.color });
   }
 
+  /** Upstream: `StripeSimple#addEmoji` (java:245-266) — unknown name ->
+   *  the `¿name?` error run in RED (`AtomTextUtils.create(...,
+   *  changeColor(HColors.RED))`); known name -> an `'emoji'` atom whose
+   *  `factor` is `AtomEmoji`'s ctor `scale * getSize2D() / 24` and whose
+   *  tint follows the `#0`/`#000`/`#black` -> ambient-font-color rule. */
+  addEmoji(name: string, scale: number, forcedColor: string | null): void {
+    const emoji = retrieveEmoji(name);
+    if (emoji === undefined) {
+      this.built.push({ kind: 'text', text: `¿${name}?`, font: { ...this.font, color: '#FF0000' } });
+      return;
+    }
+    let col: string | null = null;
+    if (forcedColor === null) col = null;
+    else if (forcedColor === '#0' || forcedColor === '#000' || forcedColor === '#black') col = this.font.color;
+    else col = resolveColorToSvgHex(forcedColor);
+    this.built.push({
+      kind: 'emoji',
+      name,
+      unicode: emoji.unicode,
+      factor: emojiFactor(scale, this.font.size),
+      color: col,
+    });
+  }
+
   /** Upstream: `StripeSimple#modifyStripe`, extended (E2r/L2, see module doc
    *  comment) to also recognize `<img>`/`<$sprite>` atoms at each position
    *  it does not recognize a creole command — the single unified scan
@@ -162,7 +201,7 @@ class StripeAtomBuilder implements StripeBuilder {
     let pending = '';
     let pos = 0;
     while (pos < line.length) {
-      const cmd = searchCommand(line, pos);
+      const cmd = searchCommand(line, pos, this.commands);
       if (cmd !== null) {
         this.flushPending(pending);
         pending = '';
@@ -225,8 +264,12 @@ class StripeAtomBuilder implements StripeBuilder {
  * `font` via `fontConfigurationForHeading` when the line classified as
  * HEADING — see `legacy/CreoleStripeSimpleParser.ts`'s `classifyStripeLine`.
  */
-export function buildStripeAtoms(line: string, font: FontConfiguration): readonly CreoleAtom[] {
-  const builder = new StripeAtomBuilder(font);
+export function buildStripeAtoms(
+  line: string,
+  font: FontConfiguration,
+  mode: CreoleMode = CreoleMode.FULL,
+): readonly CreoleAtom[] {
+  const builder = new StripeAtomBuilder(font, mode);
   builder.analyzeAndAddInline(line);
   return builder.finish();
 }
@@ -301,7 +344,11 @@ export interface LineBuildAtoms {
  * two-different-element-fonts test in
  * `tests/unit/core/klimt/creole/legacy/StripeSimple.test.ts`.
  */
-export function buildLineAtoms(line: string, font: FontConfiguration): LineBuildAtoms {
+export function buildLineAtoms(
+  line: string,
+  font: FontConfiguration,
+  mode: CreoleMode = CreoleMode.FULL,
+): LineBuildAtoms {
   const classification = classifyStripeLine(line);
   if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
   const content = resolveTextEscapes(classification.content);
@@ -309,5 +356,5 @@ export function buildLineAtoms(line: string, font: FontConfiguration): LineBuild
     return { classification, atoms: buildLiteralAtoms(content, font), lineFont: font };
   }
   const lineFont = classification.type === 'HEADING' ? fontConfigurationForHeading(font, classification.order) : font;
-  return { classification, atoms: buildStripeAtoms(content, lineFont), lineFont };
+  return { classification, atoms: buildStripeAtoms(content, lineFont, mode), lineFont };
 }

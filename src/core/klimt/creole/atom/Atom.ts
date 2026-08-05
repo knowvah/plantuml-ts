@@ -67,4 +67,21 @@ export type CreoleAtom =
        */
       readonly ambientFont?: FontConfiguration;
     }
-  | { readonly kind: 'latex'; readonly expr: string; readonly color: string | null };
+  | { readonly kind: 'latex'; readonly expr: string; readonly color: string | null }
+  /** A2s R2i: a `<:name:>` emoji (upstream `CommandCreoleEmoji` ->
+   *  `StripeSimple#addEmoji` -> `AtomEmoji`). `name` is the RESOLVED
+   *  registry name (`Emoji.ts#retrieveEmoji` already succeeded — an unknown
+   *  name never becomes this atom; `addEmoji` pushes the `¿name?` red text
+   *  run instead, java:246-250); `unicode` is the registry entry's hex
+   *  codepoint (for platform-glyph text rendering); `factor` is
+   *  `AtomEmoji`'s ctor `scale * size2D / 24` (`atom/AtomEmoji.ts`);
+   *  `color` is the already-resolved forced tint per `addEmoji`'s own
+   *  rules (`#0`/`#000`/`#black` -> the ambient font color; another value
+   *  -> that color; none -> `null`, java:252-262). */
+  | {
+      readonly kind: 'emoji';
+      readonly name: string;
+      readonly unicode: string;
+      readonly factor: number;
+      readonly color: string | null;
+    };

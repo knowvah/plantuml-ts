@@ -230,6 +230,14 @@ export function createStyleCommands(style: FontStyle): readonly Command[] {
   return [createCreoleForm(style), createLegacyForm(style), createLegacyEolForm(style)];
 }
 
+/** A2s R2a: the OTHER-map UNDERLINE registration (CommandCreoleBuilder
+ *  java:85-89) — the creole-pure `__` form is gated `if (modeSimpleLine ==
+ *  CreoleMode.FULL)`; every non-FULL map registers the legacy pair only,
+ *  in the same relative order. */
+export function createStyleCommandsWithoutCreoleForm(style: FontStyle): readonly Command[] {
+  return [createLegacyForm(style), createLegacyEolForm(style)];
+}
+
 /** Upstream: `CommandCreoleBuilder`'s BACKCOLOR pair (java :96-97) —
  *  `createLegacy` + `createLegacyEol` ONLY, no creole-pure form
  *  (`FontStyle#getUbrexCreoleSyntax` throws for BACKCOLOR). Registered

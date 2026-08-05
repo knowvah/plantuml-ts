@@ -28,6 +28,7 @@ import type { AtomImageResolver } from '../../creole-atoms.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
 import type { UGraphicWithGroups } from '../DecorateEntityImage.js';
 import { Margins, buildTextBlock, measureLine } from './EntityImageDescriptionSupport.js';
+import { emojiBoxDim, emojiRenderRun } from '../../klimt/creole/atom/AtomEmoji.js';
 import type {
   EntityImageDescriptionLabels,
   EntityImageDescriptionPaint,
@@ -147,6 +148,11 @@ function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
   function dimensionOf(atom: CreoleAtom, stringBounder: StringBounder): { width: number; height: number } {
     if (atom.kind === 'text') return measureLine(stringBounder, atom.text, atom.font);
     if (atom.kind === 'latex') return renderLatexAsImage(atom.expr, atom.color ?? '#000000');
+    // A2s R2i: a `<:name:>` emoji sizes as `AtomEmoji`'s exact contract
+    // (36*factor box, 39*factor line height -- `klimt/creole/atom/
+    // AtomEmoji.ts`); description previously measured the raw markup as
+    // literal text (murava-69-tago286's backlog pin).
+    if (atom.kind === 'emoji') return emojiBoxDim(atom.factor);
     const resolved = resolveAtomImage?.(atom.atom);
     return resolved === undefined ? { width: 0, height: 0 } : resolved;
   }
@@ -176,6 +182,15 @@ function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
       if (atom.kind === 'latex') {
         const r = renderLatexAsImage(atom.expr, atom.color ?? '#000000');
         ug.draw(UImage.build(r.width, r.height, r.href));
+        return;
+      }
+      // A2s R2i: an emoji draws as its platform-glyph text run (`atom/
+      // AtomEmoji.ts#emojiRenderRun` -- sizing stays `emojiBoxDim`, never
+      // this glyph's own measure), baseline-shifted like the text branch.
+      if (atom.kind === 'emoji') {
+        const run = emojiRenderRun(atom);
+        const m = measureLine(ug.getStringBounder(), run.text, run.font);
+        ug.apply(new UTranslate(0, m.height - m.descent)).draw(UText.build(run.text, run.font));
         return;
       }
       const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom);

@@ -35,6 +35,11 @@ export interface StripeBuilder {
    *  variant doc comment for why color (not the other font attributes)
    *  is the one piece of state a latex atom needs. */
   pushLatexAtom(expr: string): void;
+  /** A2s R2i: pushes a `<:name:>` emoji atom (upstream:
+   *  `stripe.addEmoji(emoji, scale, colorName)`, StripeSimple.java:245-266)
+   *  under the CURRENT font (factor + `#black`-family color fallback both
+   *  read it) — or the `¿name?` red error text run for an unknown name. */
+  addEmoji(name: string, scale: number, forcedColor: string | null): void;
   /** G2 N40: recursion entry for a `[[url]]` command's captured LABEL text
    *  -- the SAME recursive engine as {@link analyzeAndAddInline}, but every
    *  `'text'`-kind atom produced during this call is additionally tagged
