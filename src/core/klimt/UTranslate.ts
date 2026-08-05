@@ -1,4 +1,6 @@
 import type { UChange } from './UChange.js';
+import type { XPoint2D } from './geom/XPoint2D.js';
+import { XRectangle2D } from './geom/XRectangle2D.js';
 
 /**
  * A 2D point, local to this module. Upstream's `getTranslated` takes/
@@ -21,11 +23,15 @@ export interface Point2D {
  * Upstream: klimt/UTranslate.java. Ported members: the constructor,
  * `none`/`dx`/`dy` factories, `getDx`/`getDy`, `isAlmostSame`,
  * `getTranslated`, `scaled`, `compose`, `reverse`, `multiplyBy`, `sym`,
- * `getPosition`. NOT ported: the `point(XPoint2D)` factory, `apply
- * (XRectangle2D)`, and `rotate(double)` — each depends on geometry
- * classes (`XPoint2D`, `XRectangle2D`, `XAffineTransform`) that are not
- * yet part of this port; adding them here would silently expand T2's
- * write-set. Re-add when those geometry types land.
+ * `getPosition`. T2 deferred the `point(XPoint2D)` factory, `apply
+ * (XRectangle2D)`, and `rotate(double)` — each depended on geometry
+ * classes not yet ported, with "Re-add when those geometry types land"
+ * as the trigger. SI1/T4 (`ULayoutGroup.ts`) is that trigger for
+ * `point` and `apply(XRectangle2D)`: `XPoint2D`/`XRectangle2D` have
+ * since landed in `geom/`, and `ULayoutGroup#drawU`/`#tryOne` call
+ * both members verbatim (UTranslate.java:68-70, :103-105). Still NOT
+ * ported: `rotate(double)` — `XAffineTransform` has no port and no
+ * caller.
  */
 export class UTranslate implements UChange {
   private readonly dx: number;
@@ -46,6 +52,11 @@ export class UTranslate implements UChange {
 
   static dy(dy: number): UTranslate {
     return new UTranslate(0, dy);
+  }
+
+  /** @see klimt/UTranslate.java#point */
+  static point(p: XPoint2D): UTranslate {
+    return new UTranslate(p.getX(), p.getY());
   }
 
   getDx(): number {
@@ -75,6 +86,11 @@ export class UTranslate implements UChange {
 
   reverse(): UTranslate {
     return new UTranslate(-this.dx, -this.dy);
+  }
+
+  /** @see klimt/UTranslate.java#apply(XRectangle2D) */
+  apply(rect: XRectangle2D): XRectangle2D {
+    return new XRectangle2D(rect.getX() + this.dx, rect.getY() + this.dy, rect.getWidth(), rect.getHeight());
   }
 
   multiplyBy(v: number): UTranslate {
