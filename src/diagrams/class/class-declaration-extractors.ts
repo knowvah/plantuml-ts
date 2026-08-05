@@ -249,7 +249,18 @@ export function parseIdDisplay(rest: string): {
   typeParams: string[];
   typeParamsRawText?: string;
 } {
-  const quotedAlias = /^"([^"]+)"\s+as\s+(\S+)$/.exec(rest);
+  // A2s R2i (curupe-50-kibu120): upstream's DISPLAY_WITH_GENERIC is a LAZY
+  // any-char capture (`[%g](.+?)...[%g]`, NameAndCodeParser.java:48), so a
+  // display may itself CONTAIN quotes: `class ""Test"" as foo4` -> display
+  // `"Test"` (regex backtracks to the LAST quote whose remainder still
+  // matches ` as CODE$`), and `class "REST resource\n""url""" as foo6` ->
+  // display `REST resource\n""url""` + id foo6 (golden: foo6's node width
+  // 3.324653in equals foo3's mono-url line exactly). The previous `[^"]+`
+  // content class rejected any inner quote, falling through to the bareword
+  // branch which kept the raw quotes in the display. CODE is upstream's own
+  // `[^\s{}%g<>]+` (NameAndCodeParser.java:49), not `\S+` -- a quoted
+  // alias (`a as "b"`) must fall through to the CODE-as-DISPLAY branch.
+  const quotedAlias = /^"(.+?)"\s+as\s+([^\s{}"<>]+)$/.exec(rest);
   if (quotedAlias !== null) {
     const { display, typeParams, typeParamsRawText } = extractGenericFromDisplay(quotedAlias[1]!);
     return {

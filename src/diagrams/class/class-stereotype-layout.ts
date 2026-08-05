@@ -10,6 +10,22 @@ import type { ClassifierGeo } from './layout.js';
 import { javaRound4 } from '../../core/number-format.js';
 import { BADGE_LEFT_MARGIN, NAME_LEFT_MARGIN } from './class-badge.js';
 import { CLASS_STEREOTYPE_FONT_SIZE } from './class-stereotype.js';
+import { splitEdgeLabelLines } from './class-layout-edge-labels.js';
+
+/** Every creole text atom's line height floors at 10px --
+ *  `AtomText#calculateDimensionSlow`'s `if (h < 10) h = 10;`. Observable
+ *  whenever a class font is set below 10pt (R2c jar probes:
+ *  `classAttributeFontSize 6|8|10` member rows all advance 10px;
+ *  `classFontSize 6` header lines 10px; `classStereotypeFontSize 6`
+ *  generic-tag lines 10px).
+ *  @see ~/git/plantuml/.../klimt/creole/legacy/AtomText.java:179-181 */
+const ATOM_TEXT_MIN_LINE_HEIGHT = 10;
+
+/** One creole text line's height contribution: the font size, floored at
+ *  {@link ATOM_TEXT_MIN_LINE_HEIGHT} (AtomText.java:179-181). */
+export function atomTextLineHeight(fontSize: number): number {
+  return Math.max(fontSize, ATOM_TEXT_MIN_LINE_HEIGHT);
+}
 
 export interface HeaderInfo {
   headerText: string;
@@ -261,12 +277,22 @@ export function measureGenericTagDim(
 ): GenericTagDim | undefined {
   if (typeParams.length === 0) return undefined;
   const text = rawText ?? typeParams.join(', ');
-  const rawTextWidth = javaRound4(
-    measurer.measure(text, { family: fontFamily, size: fontSize }).width,
+  // R2c (julixi-10/rulite-35): a generic clause extracted from a QUOTED
+  // display can itself carry `\n` line-break escapes -- upstream builds the
+  // tag block via the SAME `Display.getWithNewlines` split every other
+  // display string uses (`EntityImageClassHeader.java:146`
+  // `Display.getWithNewlines(pragma, generic).create(...)`), so the block
+  // is the WIDEST line by `lines * atomLineHeight` (jar probe `ps/g4`:
+  // 4-line generic at 12pt -> 4*12+4 = 52px tall; `ps/g4f`: at 6pt ->
+  // 4*10+4 = 44, the AtomText 10px line floor). Single-line input reduces
+  // to the pre-existing `fontSize + 4` byte-identically at >=10pt.
+  const lines = splitEdgeLabelLines(text).lines;
+  const rawTextWidth = Math.max(
+    ...lines.map((l) => javaRound4(measurer.measure(l, { family: fontFamily, size: fontSize }).width)),
   );
   return {
     width: rawTextWidth + GENERIC_TAG_MARGIN,
-    height: fontSize + GENERIC_TAG_MARGIN,
+    height: lines.length * atomTextLineHeight(fontSize) + GENERIC_TAG_MARGIN,
     rawTextWidth,
   };
 }
