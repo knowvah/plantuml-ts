@@ -41,7 +41,7 @@ describe('Entity (hierarchy half)', () => {
     const group = makeGroup(world, 'P');
     const a = makeLeaf(world, 'A', LeafType.CLASS, group.getQuark());
     expect(group.isEmpty()).toBe(false);
-    world.diagram.removed.add(a);
+    world.diagram.removedEntities.add(a);
     expect(group.isEmpty()).toBe(true);
   });
 
@@ -56,7 +56,7 @@ describe('Entity (hierarchy half)', () => {
     expect(leaf.isHidden()).toBe(true); // inherited from parent
 
     expect(leaf.isRemoved()).toBe(false);
-    world.diagram.removed.add(leaf);
+    world.diagram.removedEntities.add(leaf);
     expect(leaf.isRemoved()).toBe(true);
   });
 
@@ -66,7 +66,7 @@ describe('Entity (hierarchy half)', () => {
     const b = makeLeaf(world, 'B');
     const c = makeLeaf(world, 'C');
     expect(a.isAloneAndUnlinked()).toBe(true);
-    world.diagram.links.push(new MockLink(a, b));
+    world.diagram.addLink(new MockLink(a, b));
     expect(a.isAloneAndUnlinked()).toBe(false);
     expect(c.isAloneAndUnlinked()).toBe(true);
     // removed-ignore-unlinked other neutralizes the link
@@ -81,10 +81,10 @@ describe('Entity (hierarchy half)', () => {
     const b = makeLeaf(world, 'B');
     const invisible = new MockLink(a, b);
     const invisibleType = invisible.getType().getInvisible();
-    world.diagram.links.push(new MockLink(a, b, invisibleType));
+    world.diagram.addLink(new MockLink(a, b, invisibleType));
     expect(a.isAloneAndUnlinked()).toBe(true);
     expect(group.isAloneAndUnlinked()).toBe(true);
-    world.diagram.links.push(new MockLink(a, b));
+    world.diagram.addLink(new MockLink(a, b));
     expect(group.isAloneAndUnlinked()).toBe(false);
   });
 
@@ -102,7 +102,7 @@ describe('Entity (hierarchy half)', () => {
     const outside = makeLeaf(world, 'O');
     expect(state.isAutarkic()).toBe(true);
     // a link crossing the boundary is not a pure inner link 3
-    world.diagram.links.push(new MockLink(a, outside));
+    world.diagram.addLink(new MockLink(a, outside));
     expect(state.isAutarkic()).toBe(false);
   });
 
@@ -136,14 +136,15 @@ describe('Entity (hierarchy half)', () => {
     const outside = makeLeaf(world, 'O');
     const inner = new MockLink(a, b);
     const crossing = new MockLink(a, outside);
-    world.diagram.links.push(inner, crossing);
+    world.diagram.addLink(inner);
+    world.diagram.addLink(crossing);
 
     const img = {};
     group.overrideImage(img, LeafType.EMPTY_PACKAGE);
     expect(group.isGroup()).toBe(false);
     expect(group.getLeafType()).toBe(LeafType.EMPTY_PACKAGE);
     expect(group.getSvekImage()).toBe(img);
-    expect(world.diagram.links).toEqual([crossing]);
+    expect(world.diagram.getLinks()).toEqual([crossing]);
   });
 
   it('legend and package style are group-only', () => {
@@ -194,7 +195,7 @@ describe('Entity (hierarchy half)', () => {
     world.diagram.skinParam = skinParam;
     const leaf = makeLeaf(world, 'A');
     expect(leaf.getCurrentStyleBuilder()).not.toBe(skinParam.styleBuilder);
-    world.diagram.skinParamUsed = true;
+    world.diagram.setSkinParamUsed(true);
     expect(leaf.getCurrentStyleBuilder()).toBe(skinParam.styleBuilder);
     expect(leaf.getSkinParam()).toBe(skinParam);
   });

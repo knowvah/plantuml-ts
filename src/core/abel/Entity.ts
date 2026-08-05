@@ -13,7 +13,7 @@ import type { IEntityImage } from './IEntityImage.js';
 import { SingleStrategy } from './SingleStrategy.js';
 import type { Together } from './Together.js';
 import type { DisplayPositioned } from './DisplayPositioned.js';
-import type { CucaDiagram, DiagramType } from './CucaDiagram.js';
+import type { CucaDiagram, DiagramType } from '../cucadiagram/CucaDiagram.js';
 import { FontParam, type ISkinParam, type StyleBuilder } from './ISkinParam.js';
 import { FontConfiguration } from './FontConfiguration.js';
 import { EntityImageStateCommon } from './EntityImageStateCommon.js';
@@ -344,8 +344,10 @@ export class Entity
     );
   }
 
-  /** @see abel/Entity.java:635-637 */
-  setTogether(together: Together): void {
+  /** Parameter widened to `| undefined` by T10: Java's is nullable and
+   * `CucaDiagram#reallyCreateLeaf` passes `currentTogether()` (null
+   * outside a `together` block). @see abel/Entity.java:635-637 */
+  setTogether(together: Together | undefined): void {
     this.together = together;
   }
 

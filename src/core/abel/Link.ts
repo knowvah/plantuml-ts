@@ -2,7 +2,7 @@ import type { CucaNote } from './CucaNote.js';
 import type { Entity } from './Entity.js';
 import type { LeafType } from './LeafType.js';
 import type { NoteLinkStrategy } from './NoteLinkStrategy.js';
-import type { LinkConstraint } from './LinkConstraint.js';
+import type { LinkConstraint } from '../cucadiagram/LinkConstraint.js';
 import type { UFont } from './ISkinParam.js';
 import { reverse, type LinkArrow } from './LinkArrow.js';
 import { EntityPosition } from './EntityPosition.js';

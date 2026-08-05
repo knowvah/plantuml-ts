@@ -17,6 +17,7 @@ import { LinkMiddleDecor } from '../../../../src/core/decoration/LinkMiddleDecor
 import { LinkStyle } from '../../../../src/core/decoration/LinkStyle.js';
 import { Display } from '../../../../src/core/klimt/creole/Display.js';
 import { Ports } from '../../../../src/core/svek/Ports.js';
+import { LinkConstraint } from '../../../../src/core/cucadiagram/LinkConstraint.js';
 import { Stereotype } from '../../../../src/core/stereo/Stereotype.js';
 import { Url } from '../../../../src/core/url/Url.js';
 import type { LineLocation } from '../../../../src/core/tim/LineLocation.js';
@@ -279,9 +280,9 @@ describe('Link hidden/removed/url state', () => {
     const b = makeLeaf(world, 'b');
     const link = makeLink(world, a, b);
     expect(link.isRemoved()).toBe(false);
-    world.diagram.removed.add(b);
+    world.diagram.removedEntities.add(b);
     expect(link.isRemoved()).toBe(true);
-    world.diagram.removed.delete(b);
+    world.diagram.removedEntities.delete(b);
     const st = Stereotype.build('<<gone>>')!;
     link.setStereotype(st);
     expect(link.isRemoved()).toBe(false);
@@ -430,7 +431,8 @@ describe('Link notes, arrows and remaining accessors', () => {
     link.setHorizontalSolitary(true);
     expect(link.isHorizontalSolitary()).toBe(true);
     expect(link.getLinkConstraint()).toBeUndefined();
-    const lc = {};
+    // T10: LinkConstraint became the real class (was an opaque brand `{}`).
+    const lc = new LinkConstraint(link, link, Display.empty());
     link.setLinkConstraint(lc);
     expect(link.getLinkConstraint()).toBe(lc);
   });

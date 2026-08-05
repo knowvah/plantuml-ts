@@ -1,4 +1,4 @@
-import type { CucaDiagram } from './CucaDiagram.js';
+import type { CucaDiagram } from '../cucadiagram/CucaDiagram.js';
 import type { Entity } from './Entity.js';
 import type { LinkArg } from './LinkArg.js';
 import type { CucaNote } from './CucaNote.js';

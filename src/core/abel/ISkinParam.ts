@@ -100,4 +100,17 @@ export interface ISkinParam {
    * `BodyFactory.create1`.
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinParam.java:92 */
   getDefaultTextAlignment(defaultValue: HorizontalAlignment): HorizontalAlignment;
+
+  /** Consumed-slice growth (SI1/T10): `CucaDiagram#showPortion` reads
+   * `getSkinParam().strictUmlStyle()` before the per-portion fold.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinParam.java (strictUmlStyle) */
+  strictUmlStyle(): boolean;
+
+  /** Consumed-slice growth (SI1/T10): `TitledDiagram#getWarningOrError`
+   * reads the raw `"widthwarning"` skinparam value. `string | null`
+   * (not `undefined`) to stay identical to the `ISkinSimple.getValue`
+   * this member shadows upstream (`MethodsOrFieldsAreaSkinParam`
+   * extends both).
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinParam.java (getValue) */
+  getValue(key: string): string | null;
 }

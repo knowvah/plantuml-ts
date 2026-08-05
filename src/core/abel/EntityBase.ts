@@ -16,7 +16,7 @@ import type { Neighborhood } from './Neighborhood.js';
 import type { IEntityImage } from './IEntityImage.js';
 import type { Together } from './Together.js';
 import type { DisplayPositioned } from './DisplayPositioned.js';
-import type { CucaDiagram } from './CucaDiagram.js';
+import type { CucaDiagram } from '../cucadiagram/CucaDiagram.js';
 import type { StyleBuilder } from './ISkinParam.js';
 import type { Bodier } from '../cucadiagram/Bodier.js';
 import type { USymbol } from '../decoration/symbol/USymbol.js';

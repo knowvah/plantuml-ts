@@ -1,7 +1,7 @@
-import { Plasma } from '../../../../src/core/plasma/Plasma.js';
+import type { Plasma } from '../../../../src/core/plasma/Plasma.js';
 import type { Quark } from '../../../../src/core/plasma/Quark.js';
 import { Entity } from '../../../../src/core/abel/Entity.js';
-import type { CucaDiagram, DiagramType } from '../../../../src/core/abel/CucaDiagram.js';
+import { CucaDiagram } from '../../../../src/core/cucadiagram/CucaDiagram.js';
 import { Link } from '../../../../src/core/abel/Link.js';
 import { LinkArg } from '../../../../src/core/abel/LinkArg.js';
 import type { ISkinParam, StyleBuilder, UFont, FontParam } from '../../../../src/core/abel/ISkinParam.js';
@@ -16,61 +16,53 @@ import { LinkType } from '../../../../src/core/decoration/LinkType.js';
 import { LinkDecor } from '../../../../src/core/decoration/LinkDecor.js';
 import { UStroke } from '../../../../src/core/klimt/UStroke.js';
 import { Pragma } from '../../../../src/core/skin/Pragma.js';
+import { PreprocessingArtifact } from '../../../../src/core/tim/PreprocessingArtifact.js';
 
-/** Mock of T10's CucaDiagram consumed interface. */
-export class MockDiagram implements CucaDiagram {
-  private seq = 0;
-  readonly links: Link[] = [];
+/** T10: the CucaDiagram consumed-interface stub became the real
+ * (abstract) class, whose private state a hand-rolled structural mock
+ * can no longer satisfy — MockDiagram is now a thin real-CucaDiagram
+ * subclass (T6's MockLink precedent). Quark/link/uid machinery is the
+ * REAL base implementation; the set-backed overrides below keep the old
+ * mock's direct-manipulation test surface (`hidden`, `removedEntities`,
+ * `removedIgnoreUnlinked`, `stereotypeRemoved`, `pragma`, `skinParam`).
+ * `removed` was renamed `removedEntities`: the base class holds a
+ * private `removed` field (HideOrShow list) TS forbids shadowing. */
+export class MockDiagram extends CucaDiagram {
   readonly hidden = new Set<Entity>();
-  readonly removed = new Set<Entity>();
+  readonly removedEntities = new Set<Entity>();
   readonly removedIgnoreUnlinked = new Set<Entity>();
   skinParam: ISkinParam | undefined;
-  diagramType: DiagramType = 'CLASS';
-  skinParamUsed = false;
 
   pragma: Pragma = Pragma.createEmpty();
   readonly stereotypeRemoved = new Set<Stereotype>();
 
-  getUniqueSequenceValue(): number {
-    this.seq += 1;
-    return this.seq;
+  constructor() {
+    super({}, 'CLASS', undefined, new PreprocessingArtifact());
   }
-  /** Same counter as getUniqueSequenceValue — upstream's shared `cpt1`. */
-  getUniqueSequence(prefix: string): string {
-    this.seq += 1;
-    return prefix + String(this.seq);
+
+  protected getDotStrings(): readonly string[] {
+    return [];
   }
-  getPragma(): Pragma {
-    return this.pragma;
-  }
-  isStereotypeRemoved(stereotype: Stereotype): boolean {
-    return this.stereotypeRemoved.has(stereotype);
-  }
-  getLinks(): readonly Link[] {
-    return this.links;
-  }
-  removeLink(link: Link): void {
-    const idx = this.links.indexOf(link);
-    if (idx !== -1) this.links.splice(idx, 1);
-  }
-  isHidden(leaf: Entity): boolean {
-    return this.hidden.has(leaf);
-  }
-  isRemoved(leaf: Entity): boolean {
-    return this.removed.has(leaf);
-  }
-  isRemovedIgnoreUnlinked(leaf: Entity): boolean {
-    return this.removedIgnoreUnlinked.has(leaf);
-  }
+
   getSkinParam(): ISkinParam {
     if (this.skinParam === undefined) throw new Error('MockDiagram: no skinParam configured');
     return this.skinParam;
   }
-  getDiagramType(): DiagramType {
-    return this.diagramType;
+
+  override getPragma(): Pragma {
+    return this.pragma;
   }
-  isSkinParamUsed(): boolean {
-    return this.skinParamUsed;
+  override isStereotypeRemoved(stereotype: Stereotype): boolean {
+    return this.stereotypeRemoved.has(stereotype);
+  }
+  override isHidden(leaf: Entity): boolean {
+    return this.hidden.has(leaf);
+  }
+  override isRemoved(leaf: Entity): boolean {
+    return this.removedEntities.has(leaf);
+  }
+  override isRemovedIgnoreUnlinked(leaf: Entity): boolean {
+    return this.removedIgnoreUnlinked.has(leaf);
   }
 }
 
@@ -158,6 +150,16 @@ export class MockSkinParam implements ISkinParam {
   getDefaultTextAlignment(defaultValue: HorizontalAlignment): HorizontalAlignment {
     return defaultValue;
   }
+  /** SI1/T10 consumed-slice growth (`CucaDiagram#showPortion`) — the
+   * upstream default (no `skinparam style strictuml`). */
+  strictUmlStyle(): boolean {
+    return false;
+  }
+  /** SI1/T10 consumed-slice growth (`TitledDiagram#getWarningOrError`) —
+   * no raw skinparam values configured. */
+  getValue(_key: string): string | null {
+    return null;
+  }
 }
 
 export interface World {
@@ -166,12 +168,15 @@ export interface World {
   root: Entity;
 }
 
-/** Builds a diagram world with the ROOT group entity on the plasma root
- * (what upstream `EntityFactory`'s constructor does). */
+/** Builds a diagram world rooted on the REAL CucaDiagram machinery: the
+ * diagram's own constructor creates the ROOT group entity on its plasma
+ * root (what upstream `EntityFactory`'s constructor does); `plasma` and
+ * `root` are that diagram's own namespace and root entity (T10 — the
+ * old mock built a parallel plasma). */
 export function makeWorld(): World {
   const diagram = new MockDiagram();
-  const plasma = new Plasma<Entity>();
-  const root = new Entity({}, undefined, plasma.root(), diagram, new MockBodier(), undefined, GroupType.ROOT, 0);
+  const root = diagram.getRootGroup();
+  const plasma = root.getQuark().getPlasma();
   return { diagram, plasma, root };
 }
 
