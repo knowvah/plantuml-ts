@@ -1,6 +1,8 @@
 import type { Entity } from './Entity.js';
 import type { Link } from './Link.js';
 import type { ISkinParam } from './ISkinParam.js';
+import type { Pragma } from '../skin/Pragma.js';
+import type { Stereotype } from '../stereo/Stereotype.js';
 
 /**
  * DiagramType — the 39-value diagram-kind selector
@@ -94,4 +96,18 @@ export interface CucaDiagram {
    * `Entity#getCurrentStyleBuilder`.
    * @see ~/git/plantuml/src/main/java/net/atmp/CucaDiagram.java (isSkinParamUsed) */
   isSkinParamUsed(): boolean;
+
+  /** Feeds `Link`'s uid (`getUniqueSequence("lnk")`) — same `cpt1`
+   * counter as `getUniqueSequenceValue`. Added by T6 (Link's ctor).
+   * @see ~/git/plantuml/src/main/java/net/atmp/CucaDiagram.java:745-747 (getUniqueSequence) */
+  getUniqueSequence(prefix: string): string;
+
+  /** The KERMOR pragma probe in `Link`'s constructor. Added by T6.
+   * Declared upstream on `TitledDiagram` (CucaDiagram's base).
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:316-318 (getPragma) */
+  getPragma(): Pragma;
+
+  /** Read by `Link#isRemoved`. Added by T6.
+   * @see ~/git/plantuml/src/main/java/net/atmp/CucaDiagram.java:755-761 (isStereotypeRemoved) */
+  isStereotypeRemoved(stereotype: Stereotype): boolean;
 }

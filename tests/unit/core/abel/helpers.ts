@@ -2,9 +2,11 @@ import { Plasma } from '../../../../src/core/plasma/Plasma.js';
 import type { Quark } from '../../../../src/core/plasma/Quark.js';
 import { Entity } from '../../../../src/core/abel/Entity.js';
 import type { CucaDiagram, DiagramType } from '../../../../src/core/abel/CucaDiagram.js';
-import type { Link } from '../../../../src/core/abel/Link.js';
+import { Link } from '../../../../src/core/abel/Link.js';
+import { LinkArg } from '../../../../src/core/abel/LinkArg.js';
 import type { ISkinParam, StyleBuilder, UFont, FontParam } from '../../../../src/core/abel/ISkinParam.js';
 import type { HColor } from '../../../../src/core/abel/Colors.js';
+import type { HorizontalAlignment } from '../../../../src/core/klimt/geom/HorizontalAlignment.js';
 import type { Bodier } from '../../../../src/core/cucadiagram/Bodier.js';
 import type { Stereotype } from '../../../../src/core/stereo/Stereotype.js';
 import { LeafType } from '../../../../src/core/abel/LeafType.js';
@@ -26,9 +28,23 @@ export class MockDiagram implements CucaDiagram {
   diagramType: DiagramType = 'CLASS';
   skinParamUsed = false;
 
+  pragma: Pragma = Pragma.createEmpty();
+  readonly stereotypeRemoved = new Set<Stereotype>();
+
   getUniqueSequenceValue(): number {
     this.seq += 1;
     return this.seq;
+  }
+  /** Same counter as getUniqueSequenceValue — upstream's shared `cpt1`. */
+  getUniqueSequence(prefix: string): string {
+    this.seq += 1;
+    return prefix + String(this.seq);
+  }
+  getPragma(): Pragma {
+    return this.pragma;
+  }
+  isStereotypeRemoved(stereotype: Stereotype): boolean {
+    return this.stereotypeRemoved.has(stereotype);
   }
   getLinks(): readonly Link[] {
     return this.links;
@@ -93,30 +109,14 @@ export class MockBodier implements Bodier {
   }
 }
 
-/** Mock of T6's Link forward interface. */
-export class MockLink implements Link {
-  constructor(
-    private readonly e1: Entity,
-    private readonly e2: Entity,
-    private readonly type: LinkType = new LinkType(LinkDecor.NONE, LinkDecor.NONE),
-  ) {}
-
-  getEntity1(): Entity {
-    return this.e1;
-  }
-  getEntity2(): Entity {
-    return this.e2;
-  }
-  contains(entity: Entity): boolean {
-    return this.e1 === entity || this.e2 === entity;
-  }
-  getOther(entity: Entity): Entity {
-    if (this.e1 === entity) return this.e2;
-    if (this.e2 === entity) return this.e1;
-    throw new Error('IllegalArgumentException');
-  }
-  getType(): LinkType {
-    return this.type;
+/** T6: the Link forward interface became the real class, whose private
+ * state a hand-rolled mock can no longer satisfy — MockLink is now a
+ * thin real-Link subclass keeping the old (e1, e2, type?) call sites
+ * compiling. Its diagram is a throwaway MockDiagram (uid sequence per
+ * link), matching the old mock's isolation. */
+export class MockLink extends Link {
+  constructor(e1: Entity, e2: Entity, type: LinkType = new LinkType(LinkDecor.NONE, LinkDecor.NONE)) {
+    super(undefined, new MockDiagram(), { mock: 'styleBuilder' }, e1, e2, type, LinkArg.noDisplay(1));
   }
 }
 
@@ -152,6 +152,11 @@ export class MockSkinParam implements ISkinParam {
   }
   getPragma(): Pragma {
     return Pragma.createEmpty();
+  }
+  /** SI1/T7 consumed-slice growth — the mock echoes the default, matching
+   * upstream `SkinParam`'s behavior when no skinparam sets an alignment. */
+  getDefaultTextAlignment(defaultValue: HorizontalAlignment): HorizontalAlignment {
+    return defaultValue;
   }
 }
 
