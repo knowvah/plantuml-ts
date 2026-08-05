@@ -39,6 +39,8 @@ import type { Classifier, ClassDiagramAST, HideStereotypeDirective } from './ast
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import { javaRound4 } from '../../core/number-format.js';
+import { getScale } from '../../core/klimt/creole/Parser.js';
+import { SPRITE_NAME_PATTERN_SOURCE } from '../../core/creole-atoms.js';
 
 /** `FontParam.CLASS_STEREOTYPE`'s hardcoded DEFAULT size (12, italic) --
  *  independent of `theme.fontSize`/`AttributeFontSize` (a DIFFERENT
@@ -93,8 +95,34 @@ function wrapGuillemet(label: string, guillemet: GuillemetPair = DEFAULT_GUILLEM
  * function's scope -- this only prevents the paren-decoration syntax
  * itself from being drawn as garbage literal text.
  */
+// String-built (not a regex literal) purely so the complexity hook's lizard
+// parser doesn't mis-tokenize the literal and swallow the rest of the file
+// (see .agent-notes / memory: complexity-hook workarounds). Same pattern.
+const STRIP_CIRCLED_CHAR_RE = new RegExp(
+  String.raw`^\(\s*\S\s*(?:,\s*(?:#[0-9a-fA-F]{6}|\w+)\s*)?\)\s*,?\s*(.*)$`,
+);
+
+/** A2s R2i (rotisi-30-loge424): `StereotypeDecoration`'s `circleSprite`
+ *  sub-pattern (java:76-92), applied to one trimmed `<<...>>` chunk's inner
+ *  text: `\(?\$(NAME)(SCALE)?[\s]*(,COLOR)?[\s]*([),]LABEL)?` where NAME is
+ *  `SpriteUtils.SPRITE_NAME` (reused via `creole-atoms.ts#
+ *  SPRITE_NAME_PATTERN_SOURCE` -- the single sprite-name char class under
+ *  src/, si11b ADR-4/AC4) and SCALE is `(?:\{scale=|\*)[0-9.]+\}?` -- the
+ *  SPRITE-badge twin of {@link CIRCLE_CHAR_RE}'s char form. Groups: 1=name,
+ *  2=raw scale text (fed to `getScale`), 3=color, 4=residual label. */
+const CIRCLE_SPRITE_RE = new RegExp(
+  String.raw`^\(?\$(` + SPRITE_NAME_PATTERN_SOURCE + String.raw`)((?:\{scale=|\*)[0-9.]+\}?)?` +
+    String.raw`\s*(?:,\s*(#[0-9a-fA-F]{6}|\w+))?\s*(?:[),](.*))?$`,
+  'u',
+);
+
 function stripCircledCharDecoration(label: string): string {
-  const m = /^\(\s*\S\s*(?:,\s*(?:#[0-9a-fA-F]{6}|\w+)\s*)?\)\s*,?\s*(.*)$/.exec(label);
+  // Sprite form first -- `buildComplex` tries `mCircleSprite` before
+  // `mCircleChar` (StereotypeDecoration.java:190-206); its visible residue
+  // is the LABEL group after the closing `)`/`,`.
+  const sm = CIRCLE_SPRITE_RE.exec(label);
+  if (sm !== null) return (sm[4] ?? '').trim();
+  const m = STRIP_CIRCLED_CHAR_RE.exec(label);
   return m === null ? label : m[1]!.trim();
 }
 
@@ -203,6 +231,40 @@ export function parseCircledCharDecoration(
   return result;
 }
 
+/** A2s R2i (rotisi-30-loge424): the `<<($sprite[,color])>>` SPRITE badge
+ *  override -- `StereotypeDecoration#buildComplex`'s `mCircleSprite` branch
+ *  (java:190-201): `spriteName`/`spriteScale` reassigned unconditionally on
+ *  each matching chunk (last wins, mirroring {@link
+ *  parseCircledCharDecoration}); `scale` via `Parser.getScale(SCALE, 1)`.
+ *  The badge box the header sizes from is the sprite's own dims * scale
+ *  (`Stereotype#getSprite` -> `tmp.asTextBlock(..., decoration.spriteScale,
+ *  null)`, Stereotype.java:108-117 -- NOT font-relative) wrapped in the
+ *  SAME `withMargin(4, 0, 5, 5)` every circled-character badge gets
+ *  (EntityImageClassHeader.java:158-159); the dims lookup itself lives with
+ *  the caller (`class-layout-header-geo.ts`), which has the registry. */
+export interface CircledSpriteDecoration {
+  name: string;
+  scale: number;
+  color?: string;
+}
+
+export function parseCircledSpriteDecoration(
+  stereotype: string | undefined,
+): CircledSpriteDecoration | undefined {
+  if (stereotype === undefined) return undefined;
+  const reconstructed = `<<${stereotype}>>`;
+  const re = /<{2,3}(.*?)>{2,3}/g;
+  let result: CircledSpriteDecoration | undefined;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(reconstructed)) !== null) {
+    const sm = CIRCLE_SPRITE_RE.exec(m[1]!.trim());
+    if (sm === null) continue;
+    const color = sm[3];
+    result = { name: sm[1]!, scale: getScale(sm[2], 1), ...(color !== undefined ? { color } : {}) };
+  }
+  return result;
+}
+
 /** Per-label raw (unmargined) text widths, `javaRound4`'d to match jar's
  *  `SvgGraphics#format` rounding (same convention as `measureGenericClassifier
  *  `'s `headerTextWidth`). Empty when the classifier has no stereotype.
@@ -225,12 +287,24 @@ export function measureStereoLabelWidths(
 
 interface Dim { width: number; height: number; }
 
+/** A2s R2f (puvono-84-doro361 / sekame-22-meze147): every text line's
+ *  height is floored at 10 — `AtomText#calculateDimensionSlow`'s
+ *  `if (h < 10) h = 10` — so `skinparam ClassStereotypeFontSize 7` still
+ *  stacks 10px per stereotype label, not 7 (hand-derived post-fix:
+ *  Oscillator 1.583333x1.083333in == golden exact).
+ * @see ~/git/plantuml/.../klimt/creole/legacy/AtomText.java:179-181
+ */
+function stereoLineHeight(fontSize: number): number {
+  return Math.max(fontSize, 10);
+}
+
 /** `stereoDim` — the whole (margined) stereotype block's dimension: width =
  *  widest individual label + 2*margin, height = sum of each label's own
  *  line height (this codebase's measurer models line height == font size
  *  exactly — the same `nameDim.height ~= fontSize` convention
  *  `class-layout-helpers.ts#buildHeaderRow`'s own doc comment already
- *  relies on for the no-stereotype case). Zero when there is no stereotype.
+ *  relies on for the no-stereotype case — FLOORED at 10, {@link
+ *  stereoLineHeight}). Zero when there is no stereotype.
  *  `fontSize` defaults to `CLASS_STEREOTYPE_FONT_SIZE` -- see that
  *  constant's own doc comment (G2 N39). */
 export function stereoBlockDim(
@@ -240,7 +314,7 @@ export function stereoBlockDim(
   if (labelWidths.length === 0) return { width: 0, height: 0 };
   return {
     width: Math.max(...labelWidths) + STEREO_MARGIN * 2,
-    height: labelWidths.length * fontSize,
+    height: labelWidths.length * stereoLineHeight(fontSize),
   };
 }
 
@@ -298,10 +372,13 @@ export function buildStereoRows(
 
   const blockX = circleWidth + (widthStereoAndName - blockDim.width) / 2 + h1 + h2 + STEREO_MARGIN;
   const rawBlockWidth = Math.max(...labelWidths);
+  // A2s R2f: rows step by the FLOORED line height ({@link stereoLineHeight})
+  // so stacking matches `stereoBlockDim`'s reserved block height.
+  const lineHeight = stereoLineHeight(fontSize);
   const rows: ClassifierGeo['rows'] = labels.map((label, i) => {
     const rawWidth = labelWidths[i]!;
     const indent = blockX + (rawBlockWidth - rawWidth) / 2;
-    const top = diffHeight / 2 + i * fontSize;
+    const top = diffHeight / 2 + i * lineHeight;
     return {
       text: wrapGuillemet(label, guillemet),
       y: top + stereoBaselineOffset,

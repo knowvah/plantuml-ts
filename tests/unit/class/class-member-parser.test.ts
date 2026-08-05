@@ -263,6 +263,9 @@ describe('parseMemberLine — B1 {method}/{field}/{static}/{classifier}/{abstrac
       isStatic: false,
       isAbstract: false,
       visibilityExplicit: true,
+      // A2s R2f (pasova-33-toze386): the tag now also FORCES the bucket
+      // (BodierLikeClassOrObject.java:102-111).
+      forcedBucket: 'method',
     });
   });
 
@@ -274,6 +277,7 @@ describe('parseMemberLine — B1 {method}/{field}/{static}/{classifier}/{abstrac
       isStatic: false,
       isAbstract: false,
       visibilityExplicit: true,
+      forcedBucket: 'method', // A2s R2f (pasova-33-toze386)
     });
   });
 
@@ -285,6 +289,7 @@ describe('parseMemberLine — B1 {method}/{field}/{static}/{classifier}/{abstrac
       isStatic: false,
       isAbstract: false,
       visibilityExplicit: true,
+      forcedBucket: 'field', // A2s R2f (pasova-33-toze386)
     });
   });
 
@@ -361,6 +366,7 @@ describe('parseMemberLine — B1 {method}/{field}/{static}/{classifier}/{abstrac
       visibility: '+',
       name: ' ',
       rawDisplay: ' ',
+      forcedBucket: 'method', // A2s R2f (pasova-33-toze386)
       isStatic: false,
       isAbstract: false,
     });

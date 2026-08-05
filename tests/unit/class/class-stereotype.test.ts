@@ -266,6 +266,44 @@ describe('buildStereoRows', () => {
   });
 });
 
+// A2s R2f puvono-84-doro361 / sekame-22-meze147 (height half): every text
+// line's height is floored at 10 — `AtomText#calculateDimensionSlow`'s
+// `if (h < 10) h = 10` — so `skinparam ClassStereotypeFontSize 7` still
+// stacks 10px per label, not 7.
+// @see ~/git/plantuml/.../klimt/creole/legacy/AtomText.java:179-181
+describe('stereoBlockDim / buildStereoRows — 10px line-height floor (AtomText.java:179-181)', () => {
+  it('stereoBlockDim floors each label line at 10 for fontSize 7', () => {
+    const dim = stereoBlockDim([10, 30], 7);
+    expect(dim.height).toBe(2 * 10);
+  });
+
+  it('stereoBlockDim keeps fontSize-tall lines when fontSize >= 10', () => {
+    expect(stereoBlockDim([10], 12).height).toBe(12);
+    expect(stereoBlockDim([10], 10).height).toBe(10);
+  });
+
+  it('buildStereoRows steps stacked rows by the floored line height', () => {
+    const result = buildStereoRows({
+      labels: ['A', 'BB'],
+      labelWidths: [10, 20],
+      fontFamily: 'Helvetica',
+      circleWidth: 26,
+      widthStereoAndName: 70,
+      blockDim: { width: 22, height: 2 * 10 },
+      h1: 0,
+      h2: 0,
+      headerRowHeight: 24 + 2 * 10,
+      nameLineHeight: 14,
+      stereoBaselineOffset: 11,
+      fontSize: 7,
+      italic: false,
+    });
+    expect(result.rows[1]!.y - result.rows[0]!.y).toBe(10);
+    // nameTop stacks after the whole (floored) block
+    expect(result.nameTop).toBe(result.rows[0]!.y - 11 + 2 * 10);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // parseHideStereotypeDirective
 // ---------------------------------------------------------------------------

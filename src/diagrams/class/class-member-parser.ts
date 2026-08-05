@@ -85,6 +85,23 @@ function stripUrlSuffix(line: string): { line: string; ownUrl: UrlInfo | undefin
  */
 const REMOVE_TAG_PATTERN = /\{(method|field)\}\s*/gi;
 
+/** A2s R2f (pasova-33-toze386): the tag also FORCES the member's
+ *  compartment bucket — upstream's `isMethod` checks the raw line for
+ *  `{method}` first, then `{field}`, before the paren scan. Detection is
+ *  CASE-SENSITIVE (`String#contains`), unlike the `(?i)` display strip
+ *  above — `{METHOD}` vanishes from the display but does NOT force the
+ *  bucket. Upstream runs the check on the URL-purged raw line; this port
+ *  detects on the raw trimmed line instead (its tag strip runs BEFORE the
+ *  url strip, `parseMemberLine`'s ordering note) — a URL whose text
+ *  contains a literal `{method}` is the only divergence, zero corpus reach.
+ * @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:102-111 (isMethod)
+ */
+function detectForcedBucket(rawLine: string): 'method' | 'field' | undefined {
+  if (rawLine.includes('{method}')) return 'method';
+  if (rawLine.includes('{field}')) return 'field';
+  return undefined;
+}
+
 /** A2s F-B B1: `{static}`/`{classifier}`/`{abstract}` removed ANYWHERE in
  *  the line, case-insensitive, each with trailing whitespace -- the removal
  *  half of {@link stripModifiers}.
@@ -253,6 +270,7 @@ export function parseMemberLine(rawLine: string): Member | null {
   // static/classifier/abstract detection + removal (:121-128), then the
   // visibility char (:133-140). The previous order (modifiers before url,
   // leading-only) missed every non-leading tag.
+  const forcedBucket = detectForcedBucket(trimmed);
   const afterTags = trimmed.replace(REMOVE_TAG_PATTERN, '');
   const { line: afterUrl, ownUrl } = stripUrlSuffix(afterTags);
   const { line: afterModifiers, isStatic, isAbstract } = stripModifiers(afterUrl);
@@ -265,5 +283,9 @@ export function parseMemberLine(rawLine: string): Member | null {
 
   const base: MemberBase = { visibility, isStatic, isAbstract, ownUrl };
   const shape = tryParseMethod(line, base) ?? tryParseAttribute(line, base) ?? rawDisplayFallback(line, base);
-  return withVisibilityFlag(shape, visibilityExplicit);
+  // A2s R2f: `forcedBucket` attached only when a tag was present (missing
+  // key for the untagged common case -- same `toEqual` compatibility
+  // rationale as `withVisibilityFlag`'s own doc comment).
+  const bucketed = forcedBucket !== undefined ? { ...shape, forcedBucket } : shape;
+  return withVisibilityFlag(bucketed, visibilityExplicit);
 }

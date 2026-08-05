@@ -44,6 +44,20 @@ export interface Member {
   params?: string[];
   isStatic: boolean;
   isAbstract: boolean;
+  /**
+   * A2s R2f (pasova-33-toze386): the `{method}`/`{field}` documentation tag
+   * FORCES this member's compartment bucket, overriding the paren scan —
+   * upstream's `isMethod` checks the raw line for the tags first:
+   * `{method}` present → method; else `{field}` present → field; else the
+   * paren scan decides. Recorded at the tag-strip site
+   * (`class-member-parser.ts#parseMemberLine`) since the tags vanish from
+   * the display; consulted FIRST by `class-member-rows.ts#isMethodMember`.
+   * Absent for every untagged line (the overwhelming common case — keeps
+   * pre-existing `toEqual` member-literal assertions passing, same
+   * convention as {@link visibilityExplicit}).
+   * @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:102-111 (isMethod)
+   */
+  forcedBucket?: 'method' | 'field';
   /** Set to true by hide/show post-processing when this member should not be rendered. */
   hidden?: boolean;
   /**
