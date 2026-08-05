@@ -93,4 +93,11 @@ export interface ISkinParam {
    * interface doc comment.
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinSimple.java (getPragma) */
   getPragma(): Pragma;
+
+  /** Consumed-slice growth (SI1/T7): `BodierSimple#getBody`/
+   * `BodierLikeClassOrObject#getBody` pass
+   * `skinParam.getDefaultTextAlignment(HorizontalAlignment.LEFT)` to
+   * `BodyFactory.create1`.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinParam.java:92 */
+  getDefaultTextAlignment(defaultValue: HorizontalAlignment): HorizontalAlignment;
 }

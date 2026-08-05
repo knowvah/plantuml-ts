@@ -47,7 +47,7 @@ import { isStereotype } from '../../stereo/Stereotype.js';
 import { Pragma } from '../../skin/Pragma.js';
 import type { StringLocated } from '../../tim/StringLocated.js';
 import { EmbeddedDiagram } from '../../EmbeddedDiagram.js';
-import type { DisplayLike, DisplayLine } from './SheetBuilder.js';
+import type { DisplayLike, DisplayLine, MemberLike } from './SheetBuilder.js';
 import { parseWithNewlines, getWithNewlines3 as parseWithNewlines3, hasSeveralGuideLinesOfString } from './DisplayNewlines.js';
 import { displayEquals, displayHashCode } from './DisplayEquality.js';
 import {
@@ -75,10 +75,10 @@ import { LineBreakStrategy } from '../LineBreakStrategy.js';
 import type { MessageNumber as MessageNumberLike } from '../../sequencediagram/MessageNumber.js';
 
 /** One element of `Display#displayData` (upstream: `List<CharSequence>`).
- *  `Stereotype`/`MessageNumber` are the only non-`String` kinds upstream
- *  ever places there (`create0`'s own `instanceof` dispatch, T9a/T9b's
- *  established naming — see `.agent-notes/T9a-creoleparser.md`). */
-export type DisplayElement = string | Stereotype | MessageNumberLike;
+ *  `Stereotype`/`MessageNumber`/`Member` are the only non-`String` kinds
+ *  upstream ever places there (`create0`'s `instanceof` dispatch, T9a/T9b;
+ *  `Member` added SI1/T7 as `SheetBuilder.ts`'s duck-typed `MemberLike`). */
+export type DisplayElement = string | Stereotype | MessageNumberLike | MemberLike;
 
 /** `Display`'s private field bag — a single object rather than 5 loose
  *  private fields, matching `UHorizontalLine.ts`/`URectangle.ts`'s own

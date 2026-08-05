@@ -475,8 +475,11 @@ export class Entity
     return this.currentStyleBuilder;
   }
 
-  /** @see abel/Entity.java:770-773 */
-  getBestMatch(candidate: string): string {
+  /** Return widened to `string | undefined` with the `Bodier` interface's
+   * T7 correction (upstream returns `null` when the body is empty —
+   * BodierAbstract.java:68-86).
+   * @see abel/Entity.java:770-773 */
+  getBestMatch(candidate: string): string | undefined {
     return this.bodier.getBestMatch(candidate);
   }
 }

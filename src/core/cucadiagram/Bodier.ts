@@ -37,7 +37,11 @@ export interface Bodier {
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/Bodier.java:57 */
   addFieldOrMethod(s: string): boolean;
 
-  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/Bodier.java:59-60 */
+  /** T7 correction: Java's `TextBlock` return is implicitly nullable and
+   * `BodierLikeClassOrObject#getBody` really returns `null`
+   * (BodierLikeClassOrObject.java:220, the enhanced-body
+   * no-methods-no-fields branch) — widened to `TextBlock | null`.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/Bodier.java:59-60 */
   getBody(
     skinParam: ISkinParam,
     showMethods: boolean,
@@ -45,7 +49,7 @@ export interface Bodier {
     stereotype: Stereotype | undefined,
     style: Style,
     fontConfiguration: FontConfiguration,
-  ): TextBlock;
+  ): TextBlock | null;
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/Bodier.java:62 */
   getRawBody(): readonly string[];
@@ -56,6 +60,9 @@ export interface Bodier {
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/Bodier.java:66 */
   hasUrl(): boolean;
 
-  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/Bodier.java:68 */
-  getBestMatch(candidate: string): string;
+  /** T7 correction: `BodierAbstract#getBestMatch` returns `null` when
+   * `rawBody` is empty (BodierAbstract.java:68-86, no line ever beats the
+   * `Long.MAX_VALUE` starting score) — widened to `string | undefined`.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/Bodier.java:68 */
+  getBestMatch(candidate: string): string | undefined;
 }
