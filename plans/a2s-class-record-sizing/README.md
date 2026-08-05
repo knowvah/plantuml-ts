@@ -114,3 +114,25 @@ max(stereo, name) + generic; height = max(circle, stereo+name+10, generic).
 margin (6,4); visibility icon = circledCharacterRadius+3.
 `EntityImageClassHeader` — name withMargin(3,3,0,0); circled char
 withMargin(4,0,5,5), radius = FontSize(CIRCLED_CHARACTER)/3 + 6.
+
+## Mission summary (close-out 2026-08-05, round 1)
+
+- **Result: 687/711 size-conformant (96.6%), widened 0** (from 219/708 =
+  30.9%). Backlog 489 → 24; remaining rows all mechanism-named in
+  [ledger.md](ledger.md) (the round-2 queue). Structure held 710/710 EQUAL
+  throughout; description ratchet 320/351 w0; parity guard green.
+- **Root cause (ADR-5):** the 489-entry backlog was oracle pollution
+  (runOracle lacked the deterministic-text flag). 442 deltas closed by
+  regenerating the goldens; 542 golden dirs + all 721 dot-cache dirs +
+  the class parity survey regenerated deterministically.
+- **Tasks:** planned D1-D4 → executed D1 (root cause) + G2a/G2b (20
+  mechanisms) + F-A..F-G fix round + orchestrator plumbing/flatten fix.
+  Batches 2-3 as-planned were replaced by ADR-5's G1/G2 (journaled).
+- **Decisions flagged for review:** oracle regen approval (executed),
+  B6 latex re-pin ruling (executed), 38 sanctioned re-pins vs polluted
+  predecessors (ADR-5).
+- **Known issues / follow-ups:** round-2 queue (24, ledger.md);
+  groupInheritance renderer-side brackets + DOT `sametail` emission
+  (SVG-QA-visible, sizing done); A8 stereo TEXT rendering on collapsed
+  empty packages (size-only today); descriptive-keywords.ts pre-existing
+  524-line cap violation (needs split, .agent-notes).
