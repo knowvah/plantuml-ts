@@ -8,7 +8,6 @@
 
 import type {
   ClassDiagramAST,
-  ClassifierKind,
   HideShowDirective,
   HideShowEntityDirective,
   HideShowKindDirective,
@@ -18,6 +17,7 @@ import type {
 } from './ast.js';
 import { isMethodMember } from './class-layout-helpers.js';
 import { parseMemberLine } from './class-member-parser.js';
+import { directiveAppliesTo } from './class-directives-removal.js';
 export { parseHideStereotypeDirective, applyStereotypeHideShow } from './class-stereotype.js';
 
 /**
@@ -247,17 +247,16 @@ export function applyHideShowEntityDirectives(ast: ClassDiagramAST): void {
   const directives = ast.hideEntityDirectives;
   if (directives === undefined || directives.length === 0) return;
 
-  const effective = new Map<string, 'hide' | 'show'>();
+  // A2s R2g: scope keys the fold (scoped vs unscoped stay independent rules).
+  const effective = new Map<string, HideShowEntityDirective>();
   for (const d of directives) {
-    effective.set(`${d.entityId}\u0000${d.target}`, d.action);
+    effective.set(`${d.entityId}\u0000${d.target}\u0000${d.scopeNsId ?? ''}`, d);
   }
 
   const byId = new Map(ast.classifiers.map((c) => [c.id, c] as const));
-  for (const [key, action] of effective) {
-    const hide = action === 'hide';
-    const sep = key.indexOf('\u0000');
-    const entityId = key.slice(0, sep);
-    const target = key.slice(sep + 1) as HideShowEntityDirective['target'];
+  for (const d of effective.values()) {
+    const hide = d.action === 'hide';
+    const { entityId, target } = d;
     // A2s F-A / B2: a `<<...>>` entityId is upstream's STEREOTYPE gender
     // (`EntityGenderUtils#byStereotype`) -- matches every classifier carrying
     // that exact stereotype label, not a single id. `show` EXPLICITLY sets
@@ -271,10 +270,12 @@ export function applyHideShowEntityDirectives(ast: ClassDiagramAST): void {
     // lists -- a `show <<x>> p` line written BEFORE a `hide class p` line
     // would upstream re-hide; that ordering has zero corpus reach and is
     // the known limit of the split-list structure.
-    const matched =
+    // A2s R2g: group-scope gate (directiveAppliesTo) on every gender form.
+    const matched = (
       entityId.startsWith('<<') && entityId.endsWith('>>')
         ? ast.classifiers.filter((c) => stereotypeGenderMatches(c.stereotype, entityId))
-        : [byId.get(entityId)].filter((c) => c !== undefined);
+        : [byId.get(entityId)].filter((c) => c !== undefined)
+    ).filter((c) => directiveAppliesTo(d, c));
     for (const classifier of matched) {
       if (target === 'circle') { classifier.hideCircle = hide; continue; }
       if (target === 'stereotype') { classifier.hideStereotype = hide; continue; }
@@ -322,18 +323,17 @@ export function applyHideShowKindDirectives(ast: ClassDiagramAST): void {
   const directives = ast.hideKindDirectives;
   if (directives === undefined || directives.length === 0) return;
 
-  const effective = new Map<string, 'hide' | 'show'>();
+  const effective = new Map<string, HideShowKindDirective>();
   for (const d of directives) {
-    effective.set(`${d.classifierKind}\u0000${d.target}`, d.action);
+    effective.set(`${d.classifierKind}\u0000${d.target}\u0000${d.scopeNsId ?? ''}`, d);
   }
 
-  for (const [key, action] of effective) {
-    if (action !== 'hide') continue;
-    const sep = key.indexOf('\u0000');
-    const classifierKind = key.slice(0, sep) as ClassifierKind;
-    const target = key.slice(sep + 1) as HideShowEntityDirective['target'];
+  for (const d of effective.values()) {
+    if (d.action !== 'hide') continue;
+    const { classifierKind, target } = d;
     for (const classifier of ast.classifiers) {
       if (classifier.kind !== classifierKind) continue;
+      if (!directiveAppliesTo(d, classifier)) continue; // A2s R2g scope gate
       if (target === 'circle') { classifier.hideCircle = true; continue; }
       if (target === 'stereotype') { classifier.hideStereotype = true; continue; }
       if (target === 'members') { classifier.suppressFields = true; classifier.suppressMethods = true; continue; }

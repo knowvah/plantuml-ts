@@ -127,6 +127,18 @@ export interface HideShowDirective {
   kind: 'hideshow';
   action: 'hide' | 'show';
   target: HideTarget;
+  /**
+   * A2s R2g: the enclosing package/namespace id when the directive line was
+   * parsed INSIDE a non-root group — upstream `CommandHideShowByGender
+   * #executeArg` ANDs the gender with `byPackage(getCurrentGroup())`
+   * whenever the current group is non-root (classdiagram/command/
+   * CommandHideShowByGender.java:272-273), and `byPackage.contains` is
+   * DIRECT parent-container equality only (abel/EntityGenderUtils.java:
+   * 91-104) — an entity in a nested subpackage does NOT match. Absent for a
+   * root-level directive (applies to every classifier, the pre-R2g
+   * behavior). Consumed via `class-directives.ts#directiveAppliesTo`.
+   */
+  scopeNsId?: string;
 }
 
 /**
@@ -226,6 +238,11 @@ export interface HideShowEntityDirective {
   action: 'hide' | 'show';
   entityId: string;
   target: 'circle' | 'members' | 'fields' | 'methods' | 'stereotype';
+  /** Same command-level group scoping as {@link HideShowDirective.scopeNsId}
+   *  (CommandHideShowByGender.java:272-273 ANDs `byPackage` onto EVERY
+   *  gender alternative of the command, the entity-id/`<<stereotype>>`
+   *  genders included). */
+  scopeNsId?: string;
 }
 
 /**
@@ -251,6 +268,12 @@ export interface HideShowKindDirective {
   action: 'hide' | 'show';
   classifierKind: 'class' | 'abstract' | 'interface' | 'enum' | 'annotation' | 'object';
   target: 'circle' | 'members' | 'fields' | 'methods' | 'stereotype';
+  /** Same command-level group scoping as {@link HideShowDirective.scopeNsId}
+   *  (CommandHideShowByGender.java:272-273 ANDs `byPackage` onto EVERY
+   *  gender alternative of the command, the type-keyword genders included --
+   *  jecopa-66-vepe168's in-package `hide enum fields` leaves the root-level
+   *  enum's fields shown). */
+  scopeNsId?: string;
 }
 
 /**
