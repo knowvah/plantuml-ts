@@ -486,12 +486,13 @@ describe('linePositions — G2 N9 line-tracking plumbing', () => {
     expect(result.linePositions).toEqual([0, 1, 2, 3]);
   });
 
-  it('drops the position of a blank line along with the blank line itself', () => {
+  it('keeps a blank line AND its position (A2s: blanks are content downstream)', () => {
     const result = preprocess('@startuml\nclass A\n\nclass B\n@enduml');
-    // line 2 (0-indexed) is the blank line -- both the string AND its
-    // position are absent from the output, not just skipped-over.
-    expect(result.lines).toEqual(['@startuml', 'class A', 'class B', '@enduml']);
-    expect(result.linePositions).toEqual([0, 1, 3, 4]);
+    // A2s flatten change: upstream keeps blank lines and the command layer
+    // decides per-construct (a blank in a note/class body is CONTENT --
+    // CommandFactoryNoteOnEntity.java:236-238); position tracking follows.
+    expect(result.lines).toEqual(['@startuml', 'class A', '', 'class B', '@enduml']);
+    expect(result.linePositions).toEqual([0, 1, 2, 3, 4]);
   });
 
   it('is empty for empty source', () => {

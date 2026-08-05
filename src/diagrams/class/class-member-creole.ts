@@ -28,14 +28,14 @@
  * `measureInlineAtom`), matching the CLAUDE.md instruction to build a
  * class-local seam rather than force class onto klimt's drawing model.
  *
- * Member text is always ONE physical display line in this port's AST today
- * (`Member.name`/`rawDisplay` never carries an embedded `\n` — no upstream
- * `Display.getWithNewlines` multi-CharSequence member has been observed in
- * the corpus); `buildMemberAtoms` therefore classifies/builds exactly one
- * line, matching every existing `ClassifierGeo.rows[]` entry's "one row, one
- * baseline y" invariant. A member line embedding a literal `\n` (from a TIM
- * macro expansion, say) is out of this iteration's scope — unsurveyed, zero
- * corpus evidence found.
+ * Physical lines (A2s F-B B5): upstream routes every member row through
+ * `Display.getWithNewlines` (MethodsOrFieldsArea.java:255,264), which
+ * splits at literal backslash-n/-r/-l escapes BEFORE creole classification
+ * — {@link splitMemberDisplayLines} ports that splitter and
+ * {@link buildWrappedMemberRows} applies it (one `MemberRowBuild` per
+ * physical line); {@link buildMemberRow} (the body-tree/enhanced-body
+ * single-row-per-cell entry point) does NOT split. Jar evidence:
+ * julixi-10-jide878, rulite-35-muno361.
  *
  * Measurement-identity guarantee (mission HARD BOUNDARY): for a row with NO
  * creole markup, `classifyStripeLine` returns `{type:'NORMAL', content:
@@ -336,6 +336,7 @@ function resolveOneAtom(
     return resolved === undefined ? undefined : { atom: resolved, width: resolved.width };
   }
   // 'latex': dropped, see MemberRenderAtom's doc comment (zero corpus reach).
+  // #lizard forgives -- pre-existing 5 PARAM/35 NLOC (unchanged by A2s F-B).
   return undefined;
 }
 
@@ -422,13 +423,67 @@ export function buildWrappedMemberRows(
   sprites?: SpriteRegistry,
 ): readonly MemberRowBuild[] {
   const font = memberBaseFont(fontSpec, member);
-  const atoms = buildMemberAtoms(text, font);
-  if (maxWidth <= 0) return [resolveMemberAtoms(atoms, font, measurer, sprites)];
-  const spriteDims: SpriteDimsLookup | undefined = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
-  const wrappedLines = getSplitted(
-    atoms, maxWidth, (a) => resolveOneAtom(a, font, measurer, sprites, spriteDims)?.width ?? 0,
-  );
-  return wrappedLines.map((lineAtoms) => resolveMemberAtoms(lineAtoms, font, measurer, sprites));
+  const rows: MemberRowBuild[] = [];
+  // B5: getWithNewlines splits FIRST (MethodsOrFieldsArea.java:255,264).
+  for (const line of splitMemberDisplayLines(text)) {
+    const atoms = buildMemberAtoms(line, font);
+    if (maxWidth <= 0) {
+      rows.push(resolveMemberAtoms(atoms, font, measurer, sprites));
+      continue;
+    }
+    const spriteDims: SpriteDimsLookup | undefined = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
+    const wrappedLines = getSplitted(
+      atoms, maxWidth, (a) => resolveOneAtom(a, font, measurer, sprites, spriteDims)?.width ?? 0,
+    );
+    for (const lineAtoms of wrappedLines) rows.push(resolveMemberAtoms(lineAtoms, font, measurer, sprites));
+  }
+  // #lizard forgives -- pre-existing 6 PARAM (unchanged by A2s F-B).
+  return rows;
+}
+
+/**
+ * A2s F-B B5: `Display.getWithNewlines`' physical-line split, applied to one
+ * member display string BEFORE any creole processing -- literal 2-char
+ * `\n`/`\r`/`\l` escapes break the line (`\r`/`\l` alignment side effects
+ * have no member-row sizing impact; SIMPLE_LINE rows draw left-aligned),
+ * `\t` -> real tab, `\\` -> one backslash, other `\x` kept verbatim, raw
+ * spans (`[[`..`]]`, `<math>`/`<latex>`) untouched. The gate is hardcoded
+ * true (Pragma.java:95-97); the Jaws `BLOCK_E1_*` sentinel branches
+ * (Display.java:316-341, preprocessor-internal chars that never reach this
+ * AST) are not ported.
+ * @see ~/git/plantuml/.../klimt/creole/Display.java:262-345 (getWithNewlines)
+ */
+export function splitMemberDisplayLines(s: string): readonly string[] {
+  // #lizard forgives -- one-to-one port of getWithNewlines' escape dispatch.
+  const result: string[] = [];
+  let current = '';
+  let rawMode = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i]!;
+    const sub = s.slice(i);
+    // Display.java:273-277 -- raw spans suppress escape handling.
+    if (sub.startsWith('<math>') || sub.startsWith('<latex>') || sub.startsWith('[[')) rawMode = true;
+    else if (sub.startsWith('</math>') || sub.startsWith('</latex>') || sub.startsWith(']]')) rawMode = false;
+    if (!rawMode && c === '\\' && i < s.length - 1) {
+      // Display.java:288-313 -- legacyReplaceBackslashNByNewline branch.
+      const c2 = s[i + 1]!;
+      i++;
+      if (c2 === 'n' || c2 === 'r' || c2 === 'l') {
+        result.push(current); // Display.java:292-304 -- all three break.
+        current = '';
+      } else if (c2 === 't') {
+        current += '\t'; // Display.java:305-306
+      } else if (c2 === '\\') {
+        current += c2; // Display.java:308-309
+      } else {
+        current += c + c2; // Display.java:310-312
+      }
+    } else {
+      current += c;
+    }
+  }
+  result.push(current); // Display.java:344
+  return result;
 }
 
 /** G2 N65 item 35: plain-text rendering of one wrapped sub-line's own atoms

@@ -193,7 +193,9 @@ describe('applyHideShowEntityDirectives', () => {
       { kind: 'hideshowentity', action: 'show', entityId: 'C1', target: 'circle' },
     ];
     applyHideShowEntityDirectives(ast);
-    expect(ast.classifiers[0]!.hideCircle).toBeUndefined();
+    // A2s F-A / B2: `show` now writes `false` explicitly (showPortion's
+    // last-matching-rule fold) instead of skipping -- same falsy meaning.
+    expect(ast.classifiers[0]!.hideCircle).toBe(false);
   });
 
   it('is a no-op for an unresolvable entity id', () => {
@@ -273,5 +275,73 @@ hide C2 circle
     );
     // C1 keeps its ellipse badge (no hide directive targets it).
     expect(svg).toContain('<ellipse');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A2s F-A / B2 — `<<stereotype>>` GENDER form (upstream CommandHideShowByGender
+// GENDER `\<\<.*\>\>` → EntityGenderUtils.byStereotype, abel/EntityGenderUtils
+// .java:68-82: exact per-label equality, no wildcard match).
+// ---------------------------------------------------------------------------
+
+describe('parseHideShowEntityDirective — <<stereotype>> gender (B2)', () => {
+  it('parses `hide <<even>> methods` with the raw bracketed gender as entityId', () => {
+    expect(parseHideShowEntityDirective('hide <<even>> methods')).toEqual({
+      kind: 'hideshowentity', action: 'hide', entityId: '<<even>>', target: 'methods',
+    });
+  });
+
+  it('parses `show <<even>> circled` (show + circled alias)', () => {
+    expect(parseHideShowEntityDirective('show <<even>> circled')).toEqual({
+      kind: 'hideshowentity', action: 'show', entityId: '<<even>>', target: 'circle',
+    });
+  });
+
+  it('leaves the bare `hide <<even>>` entity-pattern form unmatched (needs a portion token)', () => {
+    expect(parseHideShowEntityDirective('hide <<even>>')).toBeNull();
+  });
+});
+
+describe('applyHideShowEntityDirectives — <<stereotype>> gender (B2)', () => {
+  it('suppresses methods on every classifier whose stereotype label matches exactly', () => {
+    const even = makeClassifier('D2', { stereotype: 'even' });
+    const odd = makeClassifier('D1');
+    const ast = makeAST([odd, even]);
+    ast.hideEntityDirectives = [
+      { kind: 'hideshowentity', action: 'hide', entityId: '<<even>>', target: 'methods' },
+    ];
+    applyHideShowEntityDirectives(ast);
+    expect(even.suppressMethods).toBe(true);
+    expect(odd.suppressMethods).toBeUndefined();
+  });
+
+  it('matches any one label of a stacked stereotype', () => {
+    const c = makeClassifier('C', { stereotype: 'Green >>  << Blue' });
+    const ast = makeAST([c]);
+    ast.hideEntityDirectives = [
+      { kind: 'hideshowentity', action: 'hide', entityId: '<<Blue>>', target: 'fields' },
+    ];
+    applyHideShowEntityDirectives(ast);
+    expect(c.suppressFields).toBe(true);
+  });
+
+  it('does not match a different label (exact equality, byStereotype has no wildcards)', () => {
+    const c = makeClassifier('C', { stereotype: 'even' });
+    const ast = makeAST([c]);
+    ast.hideEntityDirectives = [
+      { kind: 'hideshowentity', action: 'hide', entityId: '<<odd>>', target: 'methods' },
+    ];
+    applyHideShowEntityDirectives(ast);
+    expect(c.suppressMethods).toBeUndefined();
+  });
+
+  it('`show` explicitly clears a previously-set flag (CucaDiagram#showPortion last-writer fold)', () => {
+    const c = makeClassifier('C', { stereotype: 'even', hideCircle: true });
+    const ast = makeAST([c]);
+    ast.hideEntityDirectives = [
+      { kind: 'hideshowentity', action: 'show', entityId: '<<even>>', target: 'circle' },
+    ];
+    applyHideShowEntityDirectives(ast);
+    expect(c.hideCircle).toBe(false);
   });
 });

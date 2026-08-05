@@ -314,8 +314,11 @@ class StyleAndSkinparamCollector {
  *    alias (pinned by `tests/unit/preprocessor.test.ts`) reaches this far, and
  *    it is split here.
  *
- * Then: right-trim each line, drop blanks. That tail is unchanged from the
- * pre-TIM loop.
+ * Then: right-trim each line. Blank lines are KEPT (A2s): upstream emits
+ * blank lines and the command layer decides per-construct — a blank in a
+ * `note`/class body is CONTENT (`CommandFactoryNoteOnEntity.java:236-238`;
+ * `BodierLikeClassOrObject.java:114-172`). Dropping them here silently
+ * deleted note/body lines before any parser ran (vivifa-42-mire839).
  */
 function flatten(
   resultList: readonly StringLocated[],
@@ -326,10 +329,8 @@ function flatten(
     const position = located.getLocation()?.getPosition();
     for (const segment of located.getString().split(RE_NEWLINE_CALL_ANY_CASE)) {
       const finalLine = segment.trimEnd();
-      if (finalLine.length > 0) {
-        lines.push(finalLine);
-        positions.push(position);
-      }
+      lines.push(finalLine);
+      positions.push(position);
     }
   }
   return { lines, positions };

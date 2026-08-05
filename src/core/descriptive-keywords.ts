@@ -357,10 +357,13 @@ export function stripSpriteRegions(lines: readonly string[]): string[] {
   return out;
 }
 
-/** Shared pre-scan filter: strip both legend and sprite regions before any
- *  keyword-scan window applies (`hasDescriptiveSignal`/`hasDescriptiveElement`). */
+/** Shared pre-scan filter: strip legend/sprite regions AND blank lines
+ *  before the keyword-scan window. Blanks are dropped in the SCAN only
+ *  (they stay in the real line stream — A2s preprocessor change): bootstrap
+ *  has one blank per ~1600 sprite defs, which would push real content past
+ *  SCAN_LINE_LIMIT exactly as un-stripped sprite bodies did (vivido-49). */
 function stripNonContentRegions(lines: readonly string[]): string[] {
-  return stripSpriteRegions(stripLegendRegions(lines));
+  return stripSpriteRegions(stripLegendRegions(lines)).filter((l) => l.trim() !== '');
 }
 
 /**

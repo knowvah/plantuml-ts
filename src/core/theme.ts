@@ -124,6 +124,27 @@ export interface Theme {
    *  `Fission.ts`'s doc comment) — word-wrap is a no-op unless a diagram
    *  explicitly sets this skinparam. */
   wrapWidth?: number;
+  /** `skinparam sameClassWidth true` — floors every class-like node's width
+   *  to the widest one's (`SkinParam.java:994` sameClassWidth();
+   *  `GraphvizImageBuilder.java:371-375` setParamSameClassWidth;
+   *  `EntityImageClass.java:108-110`). A2s B7; consumed by
+   *  `class-dot-graph.ts#applySameClassWidthFloor`. */
+  sameClassWidth?: boolean;
+  /** `skinparam classAttributeIconSize N` — `SkinParam#classAttributeIconSize()`
+   *  (`getAsInt("classAttributeIconSize", 10)`, SkinParam.java:554-556).
+   *  `0` IS meaningful (icons OFF, visibility char kept in the member text —
+   *  `MethodsOrFieldsArea#hasSmallIcon` java:125-127 / `#createTextBlock`
+   *  java:244-246); absent = upstream default 10 (icons on). A2s F-G A13;
+   *  consumed by `class-layout-helpers.ts#measureClassifier` →
+   *  `class-layout-generic-classifier.ts#computeMemberSectionsGeo`. */
+  classAttributeIconSize?: number;
+  /** `skinparam groupInheritance N` — a class that is the shared tail of
+   *  >= N triangle-decor links gets `EntityImageProtected(border=20)`
+   *  (`DotData.java:136-151`; `getAsInt("groupInheritance", ...)`). A2s
+   *  A10/B3; consumed by
+   *  `class-dot-graph.ts#computeGroupInheritanceProtectedIds` (values <= 1
+   *  are treated as unset there). */
+  groupInheritance?: number;
   /** `skinparam tabSize N` -- `SkinParam#getTabSize()` (default 8, no style
    *  cascade). Threaded to object-field text runs containing a literal
    *  `\t` (`AtomText#getTabSize`/`drawU`'s tab-stop expansion) -- G3/O4.
@@ -315,6 +336,9 @@ export type ThemeOverride = {
   nodeSep?: number;
   rankSep?: number;
   wrapWidth?: number;
+  sameClassWidth?: boolean;
+  classAttributeIconSize?: number;
+  groupInheritance?: number;
   tabSize?: number;
   colors?: {
     background?: string;
@@ -381,6 +405,9 @@ const OPTIONAL_SCALAR_KEYS = [
   'nodeSep',
   'rankSep',
   'wrapWidth',
+  'sameClassWidth',
+  'classAttributeIconSize',
+  'groupInheritance',
   'tabSize',
 ] as const;
 

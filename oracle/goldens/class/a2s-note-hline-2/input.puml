@@ -1,0 +1,12 @@
+@startuml
+class Dummy
+class Other
+Dummy -- Other
+note right of Dummy
+alpha
+--
+beta
+----
+gamma
+end note
+@enduml

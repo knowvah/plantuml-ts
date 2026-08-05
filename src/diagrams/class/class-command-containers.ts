@@ -18,6 +18,7 @@ import {
   closeBraceScope,
   openNamespaceBlock,
   openTogetherBlock,
+  setNamespaceStereotype,
   NAMESPACE_COMMANDS,
 } from './class-container.js';
 import { collapseEmptyNamespace } from './class-namespace.js';
@@ -49,15 +50,20 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   ...NAMESPACE_COMMANDS,
 
   // 5b. Package block. Upstream routes package through the same PACKAGE group
-  //     as namespace, so it clusters alike. Trailing `(\s*\})?` (group 4)
+  //     as namespace, so it clusters alike. Trailing `(\s*\})?` (group 5)
   //     captures same-line 'X {}' (CommandPackageEmpty) for immediate collapse.
   //     `$tag` tokens after the name (CommandPackage's Stereotag.pattern()
-  //     TAGS slot — `package p1 $txn {`) are accepted and discarded: group
-  //     removal/tag-selection on packages is not implemented, and `hide $tag`
-  //     never affects the DOT export (see rule 3).
+  //     TAGS1/TAGS2 slots — `package p1 $txn {`, one run each side of the
+  //     stereotype, mirroring CommandPackage.java:88-90) are accepted and
+  //     discarded: group removal/tag-selection on packages is not
+  //     implemented, and `hide $tag` never affects the DOT export (see rule
+  //     3). A2s F-G mechanism A8: the `<<stereotype>>` (group 4, between the
+  //     TAGS runs like upstream's STEREOTYPE slot) is stored on the
+  //     Namespace via `setNamespaceStereotype` (gated: a USymbol-naming
+  //     stereotype selects the shape instead, CommandPackage.java:178-191).
   {
     pattern:
-      /^package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{(\s*\})?\s*$/i,
+      /^package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*(<<.+?>>))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{(\s*\})?\s*$/i,
     execute(state, match) {
       const name = match[1] ?? match[2];
       let effectiveId: string;
@@ -67,7 +73,8 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
         const id = '__pkg' + String(state.ast.namespaces.length);
         effectiveId = openNamespaceBlock(state, id, '');
       }
-      if (match[4] !== undefined) {
+      setNamespaceStereotype(state, effectiveId, match[4], true);
+      if (match[5] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
           state.classifierIndex,

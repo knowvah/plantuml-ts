@@ -16,11 +16,19 @@
  */
 
 import type { Classifier } from './ast.js';
+import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ClassifierGeo } from './layout.js';
 import { formatMemberText, type MeasuredClassifier, type MemberSuppression } from './class-layout-helpers.js';
-import type { GuillemetPair } from './class-stereotype.js';
+import { resolveVisibleStereotypeLabels, type GuillemetPair } from './class-stereotype.js';
+import { measureLeafNode } from '../description/leaf-sizing.js';
+import type { DescriptiveNode } from '../description/ast.js';
+import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
+import {
+  resolveElementFontSize,
+  resolveElementMinimumWidth,
+} from '../../core/theme-element-resolve.js';
 import {
   isMethodMember,
   sectionHeight,
@@ -43,12 +51,83 @@ import type { ClassFontSpecs } from './class-layout-generic-classifier-types.js'
 
 export type { ClassFontSpecs };
 
+/**
+ * A2s F-D mechanism A2: upstream routes EVERY `LeafType.DESCRIPTION` leaf
+ * and every `LeafType.EMPTY_PACKAGE` leaf with `getUSymbol() != null` to
+ * `EntityImageDescription` (GeneralImageBuilder.java:158-166 DESCRIPTION,
+ * :200-202 EMPTY_PACKAGE-with-USymbol) -- never to `EntityImageClass`'s
+ * generic name+members box. This port previously sized such leaves
+ * (allowmixing `database`/`component`/`rectangle`/... and empty brace-groups
+ * that kept their usymbol) as the generic box: jar delta e.g.
+ * givofi-11-xumu978's `database dummy2` 1.022743x0.597222in vs our old
+ * 1.189410x0.666667in. Routes through the SAME `measureLeafNode` entry the
+ * description engine's own DOT builder uses (`layout-dot-tree.ts:171`),
+ * with the SAME per-element opts resolution. Dispatched from
+ * `class-layout-helpers.ts#tryMeasureNonGenericClassifier` (usecase/actor
+ * keep their earlier `measureUsecaseOrActor` branch).
+ *
+ * Deliberate exclusions (named remainder, F-D report):
+ * - `package`/`folder`: `measureFolderLeaf` is itself SI1-narrowed
+ *   (`FOLDER_SHOWN_TITLE_EXTRA_WIDTH` +12 dropped; height off) -- routing
+ *   gujigi-63-roki030's `package` leaf would WIDEN its pinned delta
+ *   (0.152778in -> 0.194445in). Stays on its current path until SI1.
+ * - a leaf with visible members: `measureLeafNode` sizes the display only;
+ *   upstream folds the body block into `EntityImageDescription`'s desc.
+ */
+export function tryMeasureDescriptionLeaf(
+  classifier: Classifier,
+  theme: Theme,
+  measurer: StringMeasurer,
+  sprites: SpriteRegistry | undefined,
+): MeasuredClassifier | undefined {
+  if (classifier.kind !== 'descriptive' || classifier.usymbol === undefined) return undefined;
+  const symbol = KEYWORD_TO_SYMBOL.get(classifier.usymbol);
+  if (symbol === undefined || symbol === 'actor' || symbol === 'package' || symbol === 'folder') return undefined;
+  if (classifier.members.some((m) => m.hidden !== true)) return undefined;
+  const stereotype = resolveVisibleStereotypeLabels(classifier);
+  const node: DescriptiveNode = {
+    id: classifier.id, display: classifier.display, symbol, children: [],
+    ...(stereotype.length > 0 ? { stereotype } : {}),
+  };
+  const dim = measureLeafNode(
+    node, { family: theme.fontFamily, size: theme.fontSize }, measurer,
+    buildDescriptionLeafOpts(theme, symbol),
+    sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined,
+  );
+  // Same single-row composition as `measureUsecaseOrActor` -- the renderer's
+  // `tryRenderUSymbol` path reads `rows[0].text` for the drawn label.
+  return {
+    width: dim.width, height: dim.height, dividerYs: [],
+    rows: [{ text: classifier.display, y: dim.height / 2, indent: 0, italic: false }],
+  };
+}
+
+/** The SAME per-element `BoxSizingOpts` resolution the description engine's
+ *  own DOT builder performs (`layout-dot-tree.ts:171-181` via `ClassifyCtx
+ *  .minimumWidthFor`/`.fontSizeFor`, `layout.ts:435-441`) -- split out of
+ *  {@link tryMeasureDescriptionLeaf} purely for the per-function CCN cap. */
+function buildDescriptionLeafOpts(theme: Theme, symbol: DescriptiveNode['symbol']) {
+  return {
+    componentStyle: theme.componentStyle,
+    actorStyle: theme.actorStyle,
+    minimumWidth: resolveElementMinimumWidth(theme, symbol),
+    wrapWidth: theme.wrapWidth ?? 0,
+    guillemet: {
+      start: theme.colors.graph.guillemetStart ?? '«',
+      end: theme.colors.graph.guillemetEnd ?? '»',
+    },
+    fontSize: resolveElementFontSize(theme, symbol, 'title'),
+  };
+}
+
 /** Params bundle for {@link computeMemberSectionsGeo} -- kept under the
  *  project's per-function param cap. */
 interface MemberSectionsOptions {
   suppress: MemberSuppression;
   memberMaxWidth: number;
   sprites: SpriteRegistry | undefined;
+  /** A13 -- see {@link MeasureGenericClassifierOptions.classAttributeIconSize}. */
+  classAttributeIconSize?: number | undefined;
 }
 
 /**
@@ -67,22 +146,29 @@ function computeMemberSectionsGeo(
   options: MemberSectionsOptions,
 ) {
   const { suppress, memberMaxWidth, sprites } = options;
+  // A2s F-G mechanism A13: `classAttributeIconSize 0` --
+  // `MethodsOrFieldsArea#hasSmallIcon()` (java:125-127) returns false
+  // before scanning any member, and `#createTextBlock` (java:244-246)
+  // keeps the visibility char in the member text instead.
+  const noIcon = options.classAttributeIconSize === 0;
   // Only include visible (non-hidden) members in layout; split into the two
   // upstream compartments (fields first, then methods — declaration order
   // preserved within each).
   const visibleMembers = classifier.members.filter((m) => m.hidden !== true);
   const fields = visibleMembers.filter((m) => !isMethodMember(m));
   const methods = visibleMembers.filter(isMethodMember);
-  const fieldTexts = fields.map(formatMemberText);
-  const methodTexts = methods.map(formatMemberText);
+  const fieldTexts = fields.map((m) => formatMemberText(m, noIcon));
+  const methodTexts = methods.map((m) => formatMemberText(m, noIcon));
   // G2 N22/N65 item 35: each member's creole build is computed ONCE here and
   // reused for BOTH the section max-width scan and the stored row, and now
   // also word-wraps each member into 1+ rows when `memberMaxWidth` is set.
   const fieldFlat = buildWrappedSectionRowBuilds(fields, fieldTexts, fontSpec, measurer, memberMaxWidth, sprites);
   const methodFlat = buildWrappedSectionRowBuilds(methods, methodTexts, fontSpec, measurer, memberMaxWidth, sprites);
   // G2 N14: hasIcon is a per-SECTION scan, fields and methods independent.
-  const fieldsHasIcon = fields.some((m) => m.visibilityExplicit === true);
-  const methodsHasIcon = methods.some((m) => m.visibilityExplicit === true);
+  // A13: `hasSmallIcon`'s `classAttributeIconSize() == 0` early-false wins
+  // over any explicit member.
+  const fieldsHasIcon = !noIcon && fields.some((m) => m.visibilityExplicit === true);
+  const methodsHasIcon = !noIcon && methods.some((m) => m.visibilityExplicit === true);
   // G2 N26: a SUPPRESSED compartment must not contribute to the box width
   // either -- jar-verified `nujiga-81-peno983`.
   const sectionsWidth = Math.max(
@@ -144,6 +230,26 @@ export interface MeasureGenericClassifierOptions {
    *  down" precedent above. `0` = no wrap. */
   headerMaxWidth: number;
   memberMaxWidth: number;
+  /** A2s F-D mechanism A7: `skinparam minClassWidth` / `<style> MinimumWidth`
+   *  (`PName.MinimumWidth`) -- pre-resolved by the caller
+   *  (`measureClassifier`, via `resolveElementMinimumWidth(theme, 'class')`),
+   *  mirroring `badgeRadius`'s "resolve once, pass down" precedent. Floors
+   *  the box width AFTER `max(header, body)`, BEFORE the header rows are
+   *  placed (upstream `HeaderLayout#drawU` centers against the FINAL width).
+   *  Optional; absent/0 = no floor (upstream's own default).
+   *  @see ~/git/plantuml/.../svek/image/EntityImageClass.java:104-106 */
+  minClassWidth?: number;
+  /** A2s F-G mechanism A13: `skinparam classAttributeIconSize`
+   *  (`SkinParam#classAttributeIconSize()` = `getAsInt(..., 10)`,
+   *  SkinParam.java:554-556) -- pre-resolved by the caller
+   *  (`measureClassifier`, from `theme.classAttributeIconSize`), mirroring
+   *  `badgeRadius`'s precedent. ONLY the value `0` changes behavior
+   *  (`MethodsOrFieldsArea#hasSmallIcon` java:125-127 returns false
+   *  outright; `#createTextBlock` java:244-246 keeps the visibility char in
+   *  the member text instead). Absent = upstream default 10 = icons on.
+   *  `| undefined` for exactOptionalPropertyTypes: the caller passes
+   *  `theme.classAttributeIconSize` through unconditionally. */
+  classAttributeIconSize?: number | undefined;
 }
 
 /** Every piece `measureGenericClassifier` needs to assemble its 3 possible
@@ -172,6 +278,7 @@ function computeClassifierGeoPipeline(
   options: MeasureGenericClassifierOptions,
 ): ClassifierGeoPipelineResult {
   const { sprites, guillemet, badgeRadius, stereoFont, strictUml, headerMaxWidth, memberMaxWidth } = options;
+  const minClassWidth = options.minClassWidth ?? 0;
   // G2 N32: `fontSpec` is the ATTRIBUTE/member-row font; `headerFont` is the
   // classifier HEADER's own, independently-overridable font -- see
   // `theme.ts#classFontSize`'s doc comment for the jar-verified cascade.
@@ -184,10 +291,18 @@ function computeClassifierGeoPipeline(
   const memberSections = enhancedBody !== undefined
     ? undefined
     : computeMemberSectionsGeo(
-        classifier, fontSpec, measurer, headerNameGeo.memberRowHeight, { suppress, memberMaxWidth, sprites },
+        classifier, fontSpec, measurer, headerNameGeo.memberRowHeight,
+        { suppress, memberMaxWidth, sprites, classAttributeIconSize: options.classAttributeIconSize },
       );
   const memberAreaWidth = enhancedBody !== undefined ? enhancedBody.width : memberSections!.sectionsWidth;
-  const width = Math.max(stereoGeo.headerWidth, memberAreaWidth);
+  // A2s F-D mechanism A7: `EntityImageClass#calculateDimensionSlow`'s
+  // `if (width < minClassWidth) width = minClassWidth` floor (EntityImageClass
+  // .java:104-106), applied to `max(header, body)` BEFORE `computeHeaderRowsGeo`
+  // so the header rows center against the floored width -- exactly
+  // `HeaderLayout#drawU`'s own `width` parameter (the final box width).
+  // Jar-verified: novaro-13-socu897 (`skinparam minClassWidth 70` -> `class a`
+  // emits width 0.972222in = 70px exactly).
+  const width = Math.max(Math.max(stereoGeo.headerWidth, memberAreaWidth), minClassWidth);
   const headerRowsGeo = computeHeaderRowsGeo(
     classifier, fonts, { headerNameGeo, stereoGeo }, width, { guillemet, badgeRadius, stereoFont },
   );

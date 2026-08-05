@@ -74,7 +74,9 @@ function computeGraphOverride(styleMap: StyleMap, base: Theme): Partial<GraphCol
   // into graphOverride BEFORE the early-return check below so a fixture
   // with ONLY a cascade-shaped <style> block (no bare `class {}`/
   // `database {}` selector) still produces a non-base Theme.
-  Object.assign(graphOverride, computeClassStyleCascadeOverrides(styleMap));
+  // B4 (A2s): `skinparam wrapWidth` seeds the MaximumWidth cascade defaults;
+  // an explicit <style> MaximumWidth still wins (per-field ??= inside).
+  Object.assign(graphOverride, computeClassStyleCascadeOverrides(styleMap, base.wrapWidth));
   // mission skin-file-loading Batch 1 (D3): see `style-map-element.ts
   // #resolveGlobalBackground`'s own doc comment for the bare root/element
   // selector precedence this resolves.

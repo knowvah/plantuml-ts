@@ -127,6 +127,11 @@ export function buildSectionRows(
   sectionHasIcon: boolean,
   ctx: SectionRowContext,
 ): ClassifierGeo['rows'] {
+  // #lizard forgives(parameter_count) -- pre-existing 6 PARAM shape
+  // (unchanged by A2s F-G). NOTE: the metric-specific form is REQUIRED
+  // here: the bare `#lizard forgive` flag is reset by every nested-context
+  // pop, and the spread-ternary object literals below stack contexts that
+  // pop at function end, eating the flag (lizard.py#end_of_function).
   const { memberRowHeight, baselineOffset } = ctx;
   const rows: ClassifierGeo['rows'] = [];
   const indent = sectionHasIcon ? ROW_INDENT_WITH_ICON : ROW_TEXT_LEFT_MARGIN;
@@ -143,7 +148,14 @@ export function buildSectionRows(
     // identical to the pre-item-35 `member.visibilityExplicit === true`
     // gate for every classifier where no member ever repeats (the
     // overwhelming common case).
-    const showIcon = member.visibilityExplicit === true && members[i - 1] !== member;
+    // A2s F-G mechanism A13: additionally gated on `sectionHasIcon` -- when
+    // `classAttributeIconSize` is 0 the caller passes hasIcon=false for an
+    // explicit-visibility section (`MethodsOrFieldsArea#hasSmallIcon`'s
+    // `== 0` early-false, java:125-127) and NO glyph may draw (the char is
+    // already in the row text instead). Byte-identical otherwise: with a
+    // non-zero icon size, sectionHasIcon true iff ANY member is explicit,
+    // so a row with `visibilityExplicit` implies sectionHasIcon.
+    const showIcon = sectionHasIcon && member.visibilityExplicit === true && members[i - 1] !== member;
     const y = sectionTop + SECTION_MARGIN_TOP + i * memberRowHeight + baselineOffset;
     rows.push({
       text,
@@ -225,6 +237,9 @@ export function buildWrappedSectionRowBuilds(
   maxWidth: number,
   sprites: SpriteRegistry | undefined,
 ): FlatMemberRows {
+  // #lizard forgives(parameter_count) -- pre-existing 6 PARAM shape
+  // (untouched by A2s F-G; flagged only because the hook re-scans the whole
+  // file on edit). Same metric-specific form as `buildSectionRows` above.
   const flatMembers: Classifier['members'] = [];
   const flatTexts: string[] = [];
   const flatBuilds: MemberRowBuild[] = [];

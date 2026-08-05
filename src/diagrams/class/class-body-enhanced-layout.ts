@@ -153,7 +153,9 @@ interface RowsBlockResult {
 function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, contentTop: number): RowsBlockResult {
   const { fontSpec, measurer, sprites, baselineOffset } = ctx;
   const members = lines.map(parseMemberLine).filter((m) => m !== null);
-  const texts = members.map(formatMemberText);
+  // NOT point-free: `formatMemberText` has an optional 2nd param (A13
+  // `keepVisibilityChar`) that `.map`'s index argument would silently fill.
+  const texts = members.map((m) => formatMemberText(m));
   const builds: MemberRowBuild[] = members.map((m, i) => buildMemberRow(texts[i]!, m, fontSpec, measurer, sprites));
   const hasIcon = members.some((m) => m.visibilityExplicit === true);
   const indent = hasIcon ? ROW_INDENT_WITH_ICON : ROW_TEXT_LEFT_MARGIN;

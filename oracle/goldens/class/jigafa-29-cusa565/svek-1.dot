@@ -6,11 +6,11 @@ searchsize=500;
 sh0006->sh0007[arrowtail=none,arrowhead=none,minlen=0,color="#00000B",style=invis];
 sh0007->sh0008[arrowtail=none,arrowhead=none,minlen=0,color="#00000F",style=invis];
 sh0009->sh0010[arrowtail=none,arrowhead=none,minlen=0,color="#000017",style=invis];
-sh0006 [shape=rect,label="",width=0.877767,height=0.666667,color="#000006"];
-sh0007 [shape=rect,label="",width=1.935845,height=0.786404,color="#000007"];
-sh0008 [shape=rect,label="",width=0.877767,height=0.666667,color="#000008"];
-sh0009 [shape=rect,label="",width=0.877767,height=0.666667,color="#000009"];
-sh0010 [shape=rect,label="",width=1.019830,height=0.786404,color="#00000A"];
+sh0006 [shape=rect,label="",width=0.822396,height=0.666667,color="#000006"];
+sh0007 [shape=rect,label="",width=1.723264,height=0.722222,color="#000007"];
+sh0008 [shape=rect,label="",width=0.822396,height=0.666667,color="#000008"];
+sh0009 [shape=rect,label="",width=0.822396,height=0.666667,color="#000009"];
+sh0010 [shape=rect,label="",width=0.989931,height=0.722222,color="#00000A"];
 sh0006->sh0009[arrowtail=none,arrowhead=none,minlen=1,color="#000013",style=invis];
 
 }

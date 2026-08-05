@@ -73,23 +73,41 @@ function stripUrlSuffix(line: string): { line: string; ownUrl: UrlInfo | undefin
   return { line: line.replace(TRAILING_URL_RE, ''), ownUrl };
 }
 
-/** Strips leading `{static}`/`{abstract}` modifier prefixes (repeatable, any
- *  order) -- split out of `parseMemberLine` (G2 N16) to keep that function's
- *  own CCN under the project's complexity cap after adding url PARSING
- *  (was presence-detection only, N15); pure move, no behavior change. */
+/** A2s F-B B1: `{method}`/`{field}` documentation tags removed ANYWHERE in
+ *  the line (not just leading), case-insensitive, each with its own trailing
+ *  whitespace -- applied BEFORE the url decomposition and before any other
+ *  display processing, first statement of upstream's constructor. The tag
+ *  never sets a modifier flag; it only vanishes from the display (jar:
+ *  `{method} + execute` measures identical to `+ execute`,
+ *  filoxo-23-fafi328).
+ * @see ~/git/plantuml/.../cucadiagram/Member.java:95 (REMOVE_TAG_PATTERN "(?i)\\{(method|field)\\}\\s*")
+ * @see ~/git/plantuml/.../cucadiagram/Member.java:103 (applied first, before URL matching)
+ */
+const REMOVE_TAG_PATTERN = /\{(method|field)\}\s*/gi;
+
+/** A2s F-B B1: `{static}`/`{classifier}`/`{abstract}` removed ANYWHERE in
+ *  the line, case-insensitive, each with trailing whitespace -- the removal
+ *  half of {@link stripModifiers}.
+ * @see ~/git/plantuml/.../cucadiagram/Member.java:97-98 (REMOVE_STATIC_CLASSIFIER_ABSTRACT_PATTERN)
+ */
+const REMOVE_STATIC_CLASSIFIER_ABSTRACT_PATTERN = /\{(static|classifier|abstract)\}\s*/gi;
+
+/** Detects + strips the `{static}`/`{classifier}`/`{abstract}` modifier tags
+ *  ANYWHERE in the line (A2s F-B B1 -- previously leading-only, which missed
+ *  every trailing/mid-line tag and never recognized `{classifier}` at all).
+ *  Detection runs on the LOWERCASED line via `contains` (so any casing
+ *  counts), removal via the case-insensitive pattern, then a full trim --
+ *  each step mirroring one upstream statement:
+ * @see ~/git/plantuml/.../cucadiagram/Member.java:121 (goLowerCase)
+ * @see ~/git/plantuml/.../cucadiagram/Member.java:124 (staticModifier = contains("{static}") || contains("{classifier}"))
+ * @see ~/git/plantuml/.../cucadiagram/Member.java:125 (abstractModifier = contains("{abstract}"))
+ * @see ~/git/plantuml/.../cucadiagram/Member.java:127-128 (replaceAll("").trim())
+ */
 function stripModifiers(rawLine: string): { line: string; isStatic: boolean; isAbstract: boolean } {
-  let line = rawLine;
-  let isStatic = false;
-  let isAbstract = false;
-  const modifierRe = /^\{(static|abstract)\}\s*/i;
-  let modMatch = modifierRe.exec(line);
-  while (modMatch !== null) {
-    const mod = modMatch[1]!.toLowerCase();
-    if (mod === 'static') isStatic = true;
-    if (mod === 'abstract') isAbstract = true;
-    line = line.slice(modMatch[0].length);
-    modMatch = modifierRe.exec(line);
-  }
+  const lower = rawLine.toLowerCase();
+  const isStatic = lower.includes('{static}') || lower.includes('{classifier}');
+  const isAbstract = lower.includes('{abstract}');
+  const line = rawLine.replace(REMOVE_STATIC_CLASSIFIER_ABSTRACT_PATTERN, '').trim();
   return { line, isStatic, isAbstract };
 }
 
@@ -230,9 +248,19 @@ export function parseMemberLine(rawLine: string): Member | null {
   const trimmed = rawLine.trim();
   if (trimmed === '') return null;
 
-  const { line: afterModifiers, isStatic, isAbstract } = stripModifiers(trimmed);
-  const { line: afterUrl, ownUrl } = stripUrlSuffix(afterModifiers);
-  const { line, visibility, visibilityExplicit } = stripVisibility(afterUrl);
+  // A2s F-B B1 -- upstream's exact processing order: {method}/{field} tag
+  // removal FIRST (Member.java:103), then url decomposition (:106-116), then
+  // static/classifier/abstract detection + removal (:121-128), then the
+  // visibility char (:133-140). The previous order (modifiers before url,
+  // leading-only) missed every non-leading tag.
+  const afterTags = trimmed.replace(REMOVE_TAG_PATTERN, '');
+  const { line: afterUrl, ownUrl } = stripUrlSuffix(afterTags);
+  const { line: afterModifiers, isStatic, isAbstract } = stripModifiers(afterUrl);
+  // Member.java:130-131 -- a display emptied by tag/modifier removal still
+  // renders as ONE blank row (" "), never dropped (`trimmed` was non-empty
+  // here, so an empty `afterModifiers` means tags/urls consumed everything).
+  const blankFallback = afterModifiers === '' ? ' ' : afterModifiers;
+  const { line, visibility, visibilityExplicit } = stripVisibility(blankFallback);
   if (line === '') return null;
 
   const base: MemberBase = { visibility, isStatic, isAbstract, ownUrl };

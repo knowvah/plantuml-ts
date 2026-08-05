@@ -3,10 +3,10 @@ nodesep=0.486111;
 ranksep=0.833333;
 remincross=true;
 searchsize=500;
-sh0006 [shape=rect,label="",width=3.359972,height=0.786404,color="#000006"];
-sh0007 [shape=rect,label="",width=1.175415,height=0.666667,color="#000007"];
-sh0008 [shape=rect,label="",width=1.870063,height=0.666667,color="#000008"];
-sh0009 [shape=rect,label="",width=1.331258,height=0.895671,color="#000009"];
+sh0006 [shape=rect,label="",width=3.095486,height=0.722222,color="#000006"];
+sh0007 [shape=rect,label="",width=1.114063,height=0.666667,color="#000007"];
+sh0008 [shape=rect,label="",width=1.742535,height=0.666667,color="#000008"];
+sh0009 [shape=rect,label="",width=1.244271,height=0.861111,color="#000009"];
 sh0007->sh0006[arrowtail=none,arrowhead=none,minlen=1,color="#00000A"];
 
 }

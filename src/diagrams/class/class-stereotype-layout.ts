@@ -16,13 +16,20 @@ export interface HeaderInfo {
   headerItalic: boolean;
 }
 
-/** Build the header display string and kind-derived flags for a classifier. */
+/** Build the header display string and kind-derived flags for a classifier.
+ *
+ * A2s F-D mechanism A1: the name is ALWAYS the unmodified display -- upstream
+ * never prepends a literal `@` for `annotation`. `EntityImageClassHeader`
+ * builds the name TextBlock straight from `entity.getDisplay()`
+ * (@see ~/git/plantuml/.../svek/image/EntityImageClassHeader.java:105-110);
+ * the `@` appears ONLY as the circled badge character
+ * (`getCircledChar(LeafType.ANNOTATION)` returns `'@'`,
+ * @see EntityImageClassHeader.java:231), which this port already draws via
+ * `class-badge.ts#badgeChar` ('annotation' -> '@'). The old prefix widened
+ * every annotation header by exactly w('@'@14pt) = 14.2625px (jar-measured
+ * identical delta on 7 fixtures, e.g. gojatu-01-jibo986). */
 export function computeHeaderInfo(classifier: Classifier): HeaderInfo {
-  // Just the name (kind shown via badge + italic) — annotations get an `@` prefix.
-  const headerText =
-    classifier.kind === 'annotation'
-      ? `@${classifier.display}`
-      : classifier.display;
+  const headerText = classifier.display;
   const headerItalic =
     classifier.kind === 'interface' || classifier.kind === 'abstract';
   return { headerText, headerItalic };
@@ -313,8 +320,9 @@ export function buildGenericTagGeo(
 ): GenericTagGeo {
   const rectX = boxWidth - dim.width + GENERIC_TAG_MARGIN + 1;
   const rectY = -GENERIC_TAG_MARGIN + 1;
+  const text = rawText ?? typeParams.join(', ');
   return {
-    text: rawText ?? typeParams.join(', '),
+    text,
     rectX,
     rectY,
     rectWidth: dim.width - 2,
@@ -327,6 +335,11 @@ export function buildGenericTagGeo(
     ...(bold ? { bold: true as const } : {}),
     italic,
   };
+  // #lizard forgives -- pre-existing (unchanged by A2s F-D): the 9-param
+  // surface accreted one optional trailing override at a time (G2 N39
+  // fontSize/bold/italic, G2 N49 rawText), each deliberately positional so
+  // every earlier call site stayed byte-identical; bundling them now would
+  // be a mid-port refactor of faithfully-verified geometry plumbing.
 }
 
 // ---------------------------------------------------------------------------

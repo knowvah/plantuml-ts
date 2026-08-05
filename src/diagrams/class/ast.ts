@@ -91,6 +91,20 @@ export interface Namespace {
    * same exact/fallback gate).
    */
   creationIndex?: number;
+  /**
+   * A2s F-G mechanism A8: the `<<stereotype>>` off a `package`/`namespace`
+   * header (inner text, `<<`/`>>` stripped -- same storage convention as
+   * {@link Classifier.stereotype}). Upstream stores it on the group entity
+   * (`p.setStereotype(Stereotype.build(stereotype))`,
+   * CommandPackage.java:190-191 / CommandNamespace.java:123-124 /
+   * CommandNamespace2.java:122-124); its only size-bearing consumer is the
+   * collapsed-EMPTY-package rect leaf (`EntityImageEmptyPackage.java:126-137`
+   * stereo block), threaded by `collapseEmptyNamespace`
+   * (class-namespace.ts) onto the synthesized classifier. A NON-empty
+   * package keeps it here unconsumed (cluster-title stereotype display is
+   * not wired -- out of A8 scope).
+   */
+  stereotype?: string;
 }
 
 // ---------------------------------------------------------------------------

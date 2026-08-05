@@ -760,14 +760,14 @@ describe('layoutClass — classifier kind field and header italic', () => {
     expect(result.classifiers[0]!.kind).toBe('enum');
   });
 
-  it('annotation classifier has @ prefix in row text', () => {
+  it('annotation classifier header text carries NO @ literal (A2s F-D/A1: upstream shows the circled char only)', () => {
     const ast = makeAST({
       classifiers: [
         { id: 'Override', display: 'Override', kind: 'annotation', typeParams: [], members: [] },
       ],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
-    expect(result.classifiers[0]!.rows[0]!.text).toContain('@Override');
+    expect(result.classifiers[0]!.rows[0]!.text).toBe('Override');
   });
 });
 
@@ -1737,5 +1737,79 @@ describe('layoutClass — freestanding note + relationship (G2/N16 Kind B)', () 
     const note = result.notes[0]!;
     expect(note.opale).toBeUndefined();
     expect(result.edges).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A2s F-A / A5 — global `hide fields`/`hide methods` suppress the WHOLE
+// compartment (divider + margins), not just the rows: upstream getBody returns
+// the fields-only / methods-only / empty block with NO MethodsOrFieldsArea for
+// the hidden portion (cucadiagram/BodierLikeClassOrObject.java:240-244).
+// ---------------------------------------------------------------------------
+
+describe('layoutClass — global hide fields/methods compartment suppression (A5)', () => {
+  const field = { visibility: '+' as const, name: 'a', type: 'int', isStatic: false, isAbstract: false };
+  const method = {
+    visibility: '+' as const, name: 'm', params: [] as string[], isStatic: false, isAbstract: false,
+  };
+
+  it('`hide methods` suppresses the compartment exactly like the jar-verified entity-scoped flag (vegubu-29 shape)', () => {
+    const withGlobal = makeAST({
+      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [field, { ...method, hidden: true }] }],
+      directives: [{ kind: 'hideshow', action: 'hide', target: 'methods' }],
+    });
+    // Entity-scoped suppression (G2 N26, jar-verified nirija-04-veti140)
+    // already drops the whole compartment -- the global form must match it,
+    // and both must be SHORTER than the row-hidden-only rendering.
+    const withFlag = makeAST({
+      classifiers: [{
+        id: 'C', display: 'C', kind: 'class', typeParams: [],
+        members: [field, { ...method, hidden: true }], suppressMethods: true,
+      }],
+    });
+    const rowsOnly = makeAST({
+      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [field, { ...method, hidden: true }] }],
+    });
+    const a = layoutClass(withGlobal, defaultTheme, measurer).classifiers[0]!;
+    const b = layoutClass(withFlag, defaultTheme, measurer).classifiers[0]!;
+    const c = layoutClass(rowsOnly, defaultTheme, measurer).classifiers[0]!;
+    expect(a.height).toBe(b.height);
+    expect(a.height).toBeLessThan(c.height);
+  });
+
+  it('`hide fields` + `hide methods` collapses to the header-only box (gabejo-44 shape)', () => {
+    const bothHidden = makeAST({
+      classifiers: [{
+        id: 'C', display: 'C', kind: 'class', typeParams: [],
+        members: [{ ...field, hidden: true }, { ...method, hidden: true }],
+      }],
+      directives: [
+        { kind: 'hideshow', action: 'hide', target: 'fields' },
+        { kind: 'hideshow', action: 'hide', target: 'methods' },
+      ],
+    });
+    const bare = makeAST({
+      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [] }],
+      directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
+    });
+    const a = layoutClass(bothHidden, defaultTheme, measurer).classifiers[0]!;
+    const b = layoutClass(bare, defaultTheme, measurer).classifiers[0]!;
+    expect(a.height).toBe(b.height);
+  });
+
+  it('`show methods` (last writer) restores the compartment', () => {
+    const ast = makeAST({
+      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [field, method] }],
+      directives: [
+        { kind: 'hideshow', action: 'hide', target: 'methods' },
+        { kind: 'hideshow', action: 'show', target: 'methods' },
+      ],
+    });
+    const plain = makeAST({
+      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [field, method] }],
+    });
+    const a = layoutClass(ast, defaultTheme, measurer).classifiers[0]!;
+    const b = layoutClass(plain, defaultTheme, measurer).classifiers[0]!;
+    expect(a.height).toBe(b.height);
   });
 });

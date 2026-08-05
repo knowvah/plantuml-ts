@@ -246,6 +246,128 @@ describe('parseMemberLine — G2 N16 ownUrl parsing', () => {
 });
 
 // ---------------------------------------------------------------------------
+// A2s F-B B1 (Member.java:95-128): `{method}`/`{field}` documentation tags
+// are removed ANYWHERE in the line (case-insensitive, each with trailing
+// whitespace, REMOVE_TAG_PATTERN "(?i)\\{(method|field)\\}\\s*"), and
+// `{static}`/`{classifier}`/`{abstract}` are detected + removed ANYWHERE
+// (REMOVE_STATIC_CLASSIFIER_ABSTRACT_PATTERN), not only as leading
+// prefixes. Jar evidence: `{method} + execute` measures identical to
+// `+ execute` (filoxo-23-fafi328).
+// ---------------------------------------------------------------------------
+
+describe('parseMemberLine — B1 {method}/{field}/{static}/{classifier}/{abstract} tags anywhere', () => {
+  it('strips a leading {method} tag before the visibility char (filoxo-23 shape)', () => {
+    expect(parseMemberLine('{method} + execute')).toEqual({
+      visibility: '+',
+      name: 'execute',
+      isStatic: false,
+      isAbstract: false,
+      visibilityExplicit: true,
+    });
+  });
+
+  it('strips a trailing {method} tag from a method line', () => {
+    expect(parseMemberLine('+ run() {method}')).toEqual({
+      visibility: '+',
+      name: 'run',
+      params: [],
+      isStatic: false,
+      isAbstract: false,
+      visibilityExplicit: true,
+    });
+  });
+
+  it('strips a mid-line {field} tag', () => {
+    expect(parseMemberLine('+{field} count: int')).toEqual({
+      visibility: '+',
+      name: 'count',
+      type: 'int',
+      isStatic: false,
+      isAbstract: false,
+      visibilityExplicit: true,
+    });
+  });
+
+  it('strips {method}/{field} case-insensitively', () => {
+    expect(parseMemberLine('{METHOD} foo')).toEqual({
+      visibility: '+',
+      name: 'foo',
+      isStatic: false,
+      isAbstract: false,
+    });
+    expect(parseMemberLine('{Field} bar: int')).toMatchObject({ name: 'bar', type: 'int' });
+  });
+
+  it('{method}/{field} tags never set the static/abstract modifiers', () => {
+    expect(parseMemberLine('{method} foo')).toMatchObject({ isStatic: false, isAbstract: false });
+  });
+
+  it('detects + strips a NON-leading {static} tag', () => {
+    expect(parseMemberLine('count: int {static}')).toEqual({
+      visibility: '+',
+      name: 'count',
+      type: 'int',
+      isStatic: true,
+      isAbstract: false,
+    });
+  });
+
+  it('detects + strips {static} after the visibility char', () => {
+    expect(parseMemberLine('+ {static} count: int')).toEqual({
+      visibility: '+',
+      name: 'count',
+      type: 'int',
+      isStatic: true,
+      isAbstract: false,
+      visibilityExplicit: true,
+    });
+  });
+
+  it('detects + strips a trailing {abstract} tag on a method', () => {
+    expect(parseMemberLine('+ compute() {abstract}')).toEqual({
+      visibility: '+',
+      name: 'compute',
+      params: [],
+      isStatic: false,
+      isAbstract: true,
+      visibilityExplicit: true,
+    });
+  });
+
+  it('{classifier} is a synonym of {static} (Member.java:121)', () => {
+    expect(parseMemberLine('{classifier} instances: int')).toEqual({
+      visibility: '+',
+      name: 'instances',
+      type: 'int',
+      isStatic: true,
+      isAbstract: false,
+    });
+  });
+
+  it('detects {static}/{abstract} case-insensitively (lowercased contains, Member.java:117-122)', () => {
+    expect(parseMemberLine('{STATIC} count')).toMatchObject({ isStatic: true });
+    expect(parseMemberLine('{Abstract} run()')).toMatchObject({ isAbstract: true });
+  });
+
+  it('a line that is ONLY tags renders as one blank " " row, never dropped (Member.java:127-128)', () => {
+    expect(parseMemberLine('{static}')).toEqual({
+      visibility: '+',
+      name: ' ',
+      rawDisplay: ' ',
+      isStatic: true,
+      isAbstract: false,
+    });
+    expect(parseMemberLine('{method}')).toEqual({
+      visibility: '+',
+      name: ' ',
+      rawDisplay: ' ',
+      isStatic: false,
+      isAbstract: false,
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
 // G2 N42: stripVisibility's same-2nd-char guard (VisibilityModifier
 // .isVisibilityCharacter requires char[0] != char[1]) -- a `**bold**`
 // creole run must not lose its own leading `*` to a spurious visibility

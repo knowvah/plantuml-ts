@@ -56,6 +56,7 @@ type GraphCascadeOverride = Pick<
   | 'classCascadeRoundCorner'
   | 'classCascadeMaximumWidth'
   | 'classCascadeHeaderMaximumWidth'
+  | 'classCascadeHeaderFontSize'
   | 'noteCascadeMaximumWidth'
   | 'noteCascadeFontColor'
   | 'classTagCascade'
@@ -179,22 +180,144 @@ function classTagCascadeEntry(
 }
 
 /**
+ * B4 (mission A2s): `skinparam wrapWidth` bridged into the MaximumWidth
+ * cascade DEFAULTS. Upstream `FromSkinparamToStyle.java:250` converts the
+ * skinparam into a `PName.MaximumWidth` declaration on `SName.element` --
+ * a member of ALL THREE signatures this module resolves for MaximumWidth
+ * (`CLASS_SNAMES`/`HEADER_SNAMES`/`NOTE_SNAMES` each contain `element`),
+ * consumed by `MethodsOrFieldsArea.java:256,265` (member rows),
+ * `EntityImageClassHeader.java:108` (name), and `EntityImageNote.java:118`
+ * (note body). So a bare `skinparam wrapWidth N` behaves exactly like
+ * `<style> element { MaximumWidth N }` (rubecu-40-cixu870's jar-verified
+ * reach), EXCEPT that an explicit `<style>` MaximumWidth declaration always
+ * wins over the skinparam default (locked task requirement) -- hence
+ * per-field fallback (only a field the style cascade left unset receives
+ * the skinparam value), not a synthetic styleMap declaration.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:250
+ */
+function applyWrapWidthDefaults(
+  override: Partial<GraphCascadeOverride>,
+  skinparamWrapWidth: number | undefined,
+): void {
+  if (skinparamWrapWidth === undefined) return;
+  override.classCascadeMaximumWidth ??= skinparamWrapWidth;
+  override.classCascadeHeaderMaximumWidth ??= skinparamWrapWidth;
+  override.noteCascadeMaximumWidth ??= skinparamWrapWidth;
+}
+
+/**
+ * The three MaximumWidth cascade lookups (mechanically extracted from
+ * `computeClassStyleCascadeOverrides` to keep that function under the
+ * project's per-function NLOC/CCN caps when B4's wrap-width default tier
+ * was added -- a pure move, each lookup byte-identical to its previous
+ * inline form; the original per-field provenance comments moved with it):
+ *
+ * - G2 N65 item 35: ancestor-only (non-tag) `classCascadeMaximumWidth` /
+ *   `classCascadeHeaderMaximumWidth` word-wrap cascade -- see `theme.ts
+ *   #classCascadeMaximumWidth`'s own doc comment for the CLASS_SNAMES-vs-
+ *   HEADER_SNAMES split.
+ * - G2 N66: `EntityImageNote`'s OWN `noteCascadeMaximumWidth` cascade --
+ *   see `theme.ts#noteCascadeMaximumWidth`'s own doc comment (`NOTE_SNAMES`,
+ *   distinct from CLASS_SNAMES/HEADER_SNAMES only in its trailing token).
+ * - B4: `skinparam wrapWidth` fills any field the `<style>` cascade left
+ *   unset ({@link applyWrapWidthDefaults}).
+ */
+function applyMaximumWidthOverrides(
+  styleMap: StyleMap,
+  override: Partial<GraphCascadeOverride>,
+  skinparamWrapWidth: number | undefined,
+): void {
+  const maxWidthRaw = resolveStyleCascade(styleMap, CLASS_SNAMES, 'maximumwidth');
+  if (maxWidthRaw !== undefined) {
+    const n = Number(maxWidthRaw);
+    if (Number.isFinite(n)) override.classCascadeMaximumWidth = n;
+  }
+  const headerMaxWidthRaw = resolveStyleCascade(styleMap, HEADER_SNAMES, 'maximumwidth');
+  if (headerMaxWidthRaw !== undefined) {
+    const n = Number(headerMaxWidthRaw);
+    if (Number.isFinite(n)) override.classCascadeHeaderMaximumWidth = n;
+  }
+  const noteMaxWidthRaw = resolveStyleCascade(styleMap, NOTE_SNAMES, 'maximumwidth');
+  if (noteMaxWidthRaw !== undefined) {
+    const n = Number(noteMaxWidthRaw);
+    if (Number.isFinite(n)) override.noteCascadeMaximumWidth = n;
+  }
+  // A2s A9: header-scoped FontSize (`EntityImageClassHeader.java:80-82,:100`
+  // via HEADER_SNAMES) -- see `theme-graph-colors-a.ts
+  // #classCascadeHeaderFontSize`'s own doc comment.
+  const headerFontSizeRaw = resolveStyleCascade(styleMap, HEADER_SNAMES, 'fontsize');
+  if (headerFontSizeRaw !== undefined) {
+    const n = Number(headerFontSizeRaw);
+    if (Number.isFinite(n) && n > 0) override.classCascadeHeaderFontSize = n;
+  }
+  applyWrapWidthDefaults(override, skinparamWrapWidth);
+}
+
+/**
  * Compute every class-cascade Theme field from a raw StyleMap. Returns an
  * object with only the DEFINED fields set (spread directly into
  * `applyStyleMap`'s `graphOverride`) -- a fixture with no `<style>` block
  * (or one that sets none of these properties) contributes nothing.
+ *
+ * `skinparamWrapWidth` (B4, optional): the already-resolved `skinparam
+ * wrapWidth` value (`theme.wrapWidth`, `skinparam-key-handlers.ts`'s
+ * `wrapwidth` handler) -- the DEFAULT tier below any `<style>` MaximumWidth
+ * declaration; see {@link applyWrapWidthDefaults}. Callers with no skinparam
+ * context (e.g. `computeClassTagCascadeGenerations`, which only consumes
+ * `classTagCascade`) omit it -- byte-identical to the pre-B4 shape.
  */
 export function computeClassStyleCascadeOverrides(
   styleMap: StyleMap,
+  skinparamWrapWidth?: number,
 ): Partial<GraphCascadeOverride> {
   const override: Partial<GraphCascadeOverride> = {};
+  applyColorCascadeOverrides(styleMap, override);
+  // G2 N37: ancestor-only (non-tag) RoundCorner -- see `theme.ts
+  // #classCascadeRoundCorner`'s own doc comment.
+  const roundCornerRaw = resolveStyleCascade(styleMap, CLASS_SNAMES, 'roundcorner');
+  if (roundCornerRaw !== undefined) {
+    const n = Number(roundCornerRaw);
+    if (Number.isFinite(n)) override.classCascadeRoundCorner = n;
+  }
+  // MaximumWidth word-wrap cascade (G2 N65 item 35 / G2 N66) + B4's
+  // skinparam wrapWidth default tier -- see `applyMaximumWidthOverrides`'s
+  // own doc comment.
+  applyMaximumWidthOverrides(styleMap, override, skinparamWrapWidth);
+  // G2 N37: per-tag `.tagname` cascade -- see `theme.ts#classTagCascade`'s
+  // own doc comment.
+  const tagCascade: Record<string, NonNullable<GraphCascadeOverride['classTagCascade']>[string]> = {};
+  for (const tag of collectStyleTagNames(styleMap)) {
+    const entry = classTagCascadeEntry(styleMap, tag);
+    if (entry !== undefined) tagCascade[cleanStereotypeToken(tag)] = entry;
+  }
+  if (Object.keys(tagCascade).length > 0) override.classTagCascade = tagCascade;
+  return override;
+}
+
+/**
+ * Every COLOR cascade lookup (class box, header, arrow, spot badge, note
+ * FontColor) -- mechanically extracted from `computeClassStyleCascadeOverrides`
+ * to keep that function under the project's per-function NLOC/CCN caps when
+ * B4's wrap-width default tier was added; a pure move, each lookup
+ * byte-identical to its previous inline form (original provenance comments
+ * moved with it):
+ *
+ * - G2 N48 (item 29): local paint background for a `#?` FontColor is the
+ *   classifier's OWN resolved fill -- the explicit override computed here,
+ *   else the Style-system default (`DEFAULT_CLASS_BACKGROUND`).
+ * - G2 N67 item 49: `EntityImageNote`'s OWN FontColor cascade -- see
+ *   `theme.ts#noteCascadeFontColor`'s own doc comment (`NOTE_SNAMES`
+ *   signature, reusing `cascadeFontColorHex` -- the class side's own
+ *   FontColor helper -- against the note's own default background estimate).
+ */
+function applyColorCascadeOverrides(
+  styleMap: StyleMap,
+  override: Partial<GraphCascadeOverride>,
+): void {
   const background = cascadeHex(styleMap, CLASS_SNAMES, 'backgroundcolor');
   if (background !== undefined) override.classCascadeBackground = background;
   const border = cascadeHex(styleMap, CLASS_SNAMES, 'linecolor');
   if (border !== undefined) override.classCascadeBorder = border;
-  // G2 N48 (item 29): local paint background for a `#?` FontColor is the
-  // classifier's OWN resolved fill -- the explicit override just computed
-  // above, else the Style-system default (`DEFAULT_CLASS_BACKGROUND`).
   const localBg = background ?? DEFAULT_CLASS_BACKGROUND;
   const fontColor = cascadeFontColorHex(styleMap, CLASS_SNAMES, localBg);
   if (fontColor !== undefined) override.classCascadeFontColor = fontColor;
@@ -208,50 +331,11 @@ export function computeClassStyleCascadeOverrides(
   if (spotBorder !== undefined) override.spotCascadeBorder = spotBorder;
   const spotFont = cascadeHex(styleMap, SPOT_SNAMES, 'fontcolor');
   if (spotFont !== undefined) override.spotCascadeFont = spotFont;
-  // G2 N37: ancestor-only (non-tag) RoundCorner -- see `theme.ts
-  // #classCascadeRoundCorner`'s own doc comment.
-  const roundCornerRaw = resolveStyleCascade(styleMap, CLASS_SNAMES, 'roundcorner');
-  if (roundCornerRaw !== undefined) {
-    const n = Number(roundCornerRaw);
-    if (Number.isFinite(n)) override.classCascadeRoundCorner = n;
-  }
-  // G2 N65 item 35: ancestor-only (non-tag) MaximumWidth word-wrap cascade
-  // -- see `theme.ts#classCascadeMaximumWidth`'s own doc comment for the
-  // CLASS_SNAMES-vs-HEADER_SNAMES split.
-  const maxWidthRaw = resolveStyleCascade(styleMap, CLASS_SNAMES, 'maximumwidth');
-  if (maxWidthRaw !== undefined) {
-    const n = Number(maxWidthRaw);
-    if (Number.isFinite(n)) override.classCascadeMaximumWidth = n;
-  }
-  const headerMaxWidthRaw = resolveStyleCascade(styleMap, HEADER_SNAMES, 'maximumwidth');
-  if (headerMaxWidthRaw !== undefined) {
-    const n = Number(headerMaxWidthRaw);
-    if (Number.isFinite(n)) override.classCascadeHeaderMaximumWidth = n;
-  }
-  // G2 N66: `EntityImageNote`'s OWN MaximumWidth word-wrap cascade -- see
-  // `theme.ts#noteCascadeMaximumWidth`'s own doc comment (`NOTE_SNAMES`,
-  // distinct from CLASS_SNAMES/HEADER_SNAMES only in its trailing token).
-  const noteMaxWidthRaw = resolveStyleCascade(styleMap, NOTE_SNAMES, 'maximumwidth');
-  if (noteMaxWidthRaw !== undefined) {
-    const n = Number(noteMaxWidthRaw);
-    if (Number.isFinite(n)) override.noteCascadeMaximumWidth = n;
-  }
-  // G2 N67 item 49: `EntityImageNote`'s OWN FontColor cascade -- see
-  // `theme.ts#noteCascadeFontColor`'s own doc comment (SAME `NOTE_SNAMES`
-  // signature the MaximumWidth cascade just above already established,
-  // reusing `cascadeFontColorHex` -- the class side's own FontColor helper
-  // -- against the note's own default background estimate).
   const noteFontColor = cascadeFontColorHex(styleMap, NOTE_SNAMES, DEFAULT_NOTE_BACKGROUND);
   if (noteFontColor !== undefined) override.noteCascadeFontColor = noteFontColor;
-  // G2 N37: per-tag `.tagname` cascade -- see `theme.ts#classTagCascade`'s
-  // own doc comment.
-  const tagCascade: Record<string, NonNullable<GraphCascadeOverride['classTagCascade']>[string]> = {};
-  for (const tag of collectStyleTagNames(styleMap)) {
-    const entry = classTagCascadeEntry(styleMap, tag);
-    if (entry !== undefined) tagCascade[cleanStereotypeToken(tag)] = entry;
-  }
-  if (Object.keys(tagCascade).length > 0) override.classTagCascade = tagCascade;
-  return override;
+  // #lizard forgives -- straight-line field-by-field cascade table (one
+  // independent lookup+guard per Theme field, no interacting branches);
+  // mechanically moved out of computeClassStyleCascadeOverrides.
 }
 
 /**

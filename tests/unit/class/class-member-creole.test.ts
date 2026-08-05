@@ -15,6 +15,7 @@ import {
   buildMemberRow,
   buildWrappedMemberRows,
   atomsToPlainText,
+  splitMemberDisplayLines,
 } from '../../../src/diagrams/class/class-member-creole.js';
 import { FontStyle } from '../../../src/core/klimt/shape/UText.js';
 import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
@@ -355,6 +356,106 @@ describe('buildWrappedMemberRows (G2 N65 item 35 -- MaximumWidth word-wrap)', ()
     );
     expect(boldAtom).toBeDefined();
     expect(boldAtom!.font.styles.has(FontStyle.BOLD)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A2s F-B B5-member: literal `\n` (and `\r`/`\l`) escapes inside a member
+// row split it into MULTIPLE physical rows — upstream routes every member
+// row through `Display.getWithNewlines` (MethodsOrFieldsArea.java:255,264;
+// Display.java:262-345, legacyReplaceBackslashNByNewline hardcoded true,
+// Pragma.java:95-97). Jar evidence: julixi-10-jide878's
+// `#LazyCopyPtr\n<MapOrderContent\n<two_dims_td> > map` member measures
+// 3.277778x1.416667in (3 rows), not one 7.69in-wide line.
+// ---------------------------------------------------------------------------
+
+describe('splitMemberDisplayLines (B5 — Display.getWithNewlines escape handling)', () => {
+  test('plain text with no escapes: one untouched line', () => {
+    expect(splitMemberDisplayLines('+name: String')).toEqual(['+name: String']);
+  });
+
+  test('literal \\n splits into two lines', () => {
+    expect(splitMemberDisplayLines('first\\nsecond')).toEqual(['first', 'second']);
+  });
+
+  test('\\r and \\l also break the line (alignment escapes, Display.java:292-303)', () => {
+    expect(splitMemberDisplayLines('a\\rb')).toEqual(['a', 'b']);
+    expect(splitMemberDisplayLines('a\\lb')).toEqual(['a', 'b']);
+  });
+
+  test('julixi-10 member shape: two \\n escapes yield three lines', () => {
+    expect(splitMemberDisplayLines('#LazyCopyPtr\\n<MapOrderContent\\n<two_dims_td> > map')).toEqual([
+      '#LazyCopyPtr',
+      '<MapOrderContent',
+      '<two_dims_td> > map',
+    ]);
+  });
+
+  test('\\t becomes a real tab character (Display.java:305-306)', () => {
+    expect(splitMemberDisplayLines('a\\tb')).toEqual(['a\tb']);
+  });
+
+  test('\\\\ becomes one literal backslash (Display.java:308-309)', () => {
+    expect(splitMemberDisplayLines('a\\\\b')).toEqual(['a\\b']);
+  });
+
+  test('an unknown escape is kept verbatim, both chars (Display.java:310-312)', () => {
+    expect(splitMemberDisplayLines('a\\xb')).toEqual(['a\\xb']);
+  });
+
+  test('a trailing lone backslash is kept (i == length-1 guard, Display.java:288-289)', () => {
+    expect(splitMemberDisplayLines('a\\')).toEqual(['a\\']);
+  });
+
+  test('no split inside a [[url]] raw span (Display.java:273-276 rawMode)', () => {
+    expect(splitMemberDisplayLines('go [[http://x\\ny]] end')).toEqual(['go [[http://x\\ny]] end']);
+  });
+
+  test('no split inside a <latex> raw span', () => {
+    expect(splitMemberDisplayLines('<latex>a\\nb</latex>')).toEqual(['<latex>a\\nb</latex>']);
+  });
+
+  test('a \\n AFTER a closed raw span splits again', () => {
+    expect(splitMemberDisplayLines('[[http://x]]\\ntail')).toEqual(['[[http://x]]', 'tail']);
+  });
+});
+
+describe('buildWrappedMemberRows — B5 literal \\n member rows', () => {
+  test('maxWidth<=0: a \\n member yields one MemberRowBuild per physical line', () => {
+    const rows = buildWrappedMemberRows('aaaa\\nbb', {}, FONT_SPEC, measurer, 0);
+    expect(rows).toHaveLength(2);
+    expect(atomsToPlainText(rows[0]!.atoms)).toBe('aaaa');
+    expect(atomsToPlainText(rows[1]!.atoms)).toBe('bb');
+  });
+
+  test('each split row measures exactly as that line built standalone', () => {
+    const rows = buildWrappedMemberRows('aaaa\\nbb', {}, FONT_SPEC, measurer, 0);
+    expect(rows[0]!.width).toBe(buildMemberRow('aaaa', {}, FONT_SPEC, measurer).width);
+    expect(rows[1]!.width).toBe(buildMemberRow('bb', {}, FONT_SPEC, measurer).width);
+  });
+
+  test('the julixi-10 member splits into 3 rows, widest row far narrower than the joined line', () => {
+    const text = '#LazyCopyPtr\\n<MapOrderContent\\n<two_dims_td> > map';
+    const rows = buildWrappedMemberRows(text, {}, FONT_SPEC, measurer, 0);
+    expect(rows).toHaveLength(3);
+    const widest = Math.max(...rows.map((r) => r.width));
+    const joined = buildMemberRow(text.split('\\n').join(''), {}, FONT_SPEC, measurer).width;
+    expect(widest).toBeLessThan(joined);
+  });
+
+  test('with maxWidth in effect, each physical line wraps independently', () => {
+    const text = 'alpha beta gamma delta\\nshort';
+    const rows = buildWrappedMemberRows(text, {}, FONT_SPEC, measurer, 60);
+    // first physical line wraps into 2+ rows; second stays one row
+    expect(rows.length).toBeGreaterThanOrEqual(3);
+    expect(atomsToPlainText(rows[rows.length - 1]!.atoms)).toBe('short');
+    for (const row of rows) expect(row.width).toBeLessThanOrEqual(60);
+  });
+
+  test('no \\n: byte-identical single row to buildMemberRow (zero behavior change)', () => {
+    const wrapped = buildWrappedMemberRows('+name: String', {}, FONT_SPEC, measurer, 0);
+    expect(wrapped).toHaveLength(1);
+    expect(wrapped[0]).toEqual(buildMemberRow('+name: String', {}, FONT_SPEC, measurer));
   });
 });
 

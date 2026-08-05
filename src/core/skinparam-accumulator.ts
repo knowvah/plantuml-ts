@@ -20,6 +20,9 @@ export interface SkinparamAccumulator {
   nodeSep: number | undefined;
   rankSep: number | undefined;
   wrapWidth: number | undefined;
+  sameClassWidth: boolean | undefined;
+  classAttributeIconSize: number | undefined;
+  groupInheritance: number | undefined;
   tabSize: number | undefined;
   roundCorner: number | undefined;
   componentStyle: 'uml2' | 'uml1' | 'rectangle' | undefined;
@@ -101,7 +104,7 @@ export interface SkinparamAccumulator {
  */
 const SCALAR_FIELD_NAMES = [
   'fontFamily', 'fontSize', 'linetype', 'nodeSep', 'rankSep', 'wrapWidth',
-  'tabSize', 'roundCorner', 'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
+  'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize', 'roundCorner', 'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
   'packageStyle', 'fixCircleLabelOverlapping', 'shadowing', 'background',
   'border', 'text', 'arrow', 'noteBackground', 'classBackground',
   'interfaceBackground', 'enumBackground', 'actorStroke', 'packageBackground',
