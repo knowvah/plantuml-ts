@@ -10,12 +10,34 @@ import type { ClassDiagramAST, ClassNote, HideTarget } from './ast.js';
 import { isMethodMember } from './class-layout-helpers.js';
 
 /**
+ * A2s R2g: does this hide/show directive reach this classifier? Upstream
+ * `CommandHideShowByGender#executeArg` ANDs every gender with
+ * `byPackage(getCurrentGroup())` when the directive line sits inside a
+ * non-root group (classdiagram/command/CommandHideShowByGender.java:272-273),
+ * and `byPackage.contains` is DIRECT parent-container equality only
+ * (`group == test.getParentContainer()`, abel/EntityGenderUtils.java:91-104)
+ * — a nested subpackage's entity does NOT match, and a root entity never
+ * matches a scoped directive (jar-probe h1, jecopa-66-vepe168). An unscoped
+ * (root-level) directive reaches everything.
+ */
+export function directiveAppliesTo(
+  directive: { scopeNsId?: string },
+  classifier: { namespace?: string },
+): boolean {
+  return directive.scopeNsId === undefined || classifier.namespace === directive.scopeNsId;
+}
+
+/**
  * Apply the accumulated hide/show directives to classifiers and their members.
  * Later directives (higher index in the array) override earlier ones because
  * show/hide are additive and last-writer-wins per target.
  *
- * Effective state is determined by scanning directives in order; for each
- * target the last action seen wins.
+ * A2s R2g: the fold is PER ENTITY — each classifier folds only the
+ * directives that reach it ({@link directiveAppliesTo}: a directive parsed
+ * inside a `package { }` block applies to that package's direct children
+ * only), then the last applicable action per target wins. This mirrors
+ * upstream's ordered `hideOrShow` rule list, where each entity asks
+ * `gender.contains(this)` per rule (net/atmp/CucaDiagram.java#hideOrShow).
  *
  * Note on hide empty fields / hide empty methods:
  *   These directives affect the divider/section visibility, which is computed in
@@ -25,12 +47,36 @@ import { isMethodMember } from './class-layout-helpers.js';
 export function applyDirectives(ast: ClassDiagramAST): void {
   if (ast.directives.length === 0) return;
 
-  // Resolve the final effective action for each target (last wins).
+  for (const classifier of ast.classifiers) {
+    applyDirectivesToClassifier(classifier, foldEffectiveActions(ast.directives, classifier));
+  }
+}
+
+/**
+ * Resolve the final effective action per target for ONE classifier — folds
+ * only the directives that reach it ({@link directiveAppliesTo}), last
+ * applicable writer wins per target. Shared with `layout.ts`'s
+ * pre-measurement fold (the `empty members`/`empty fields`/`empty methods`
+ * consumers) so both sides gate group scope identically.
+ */
+export function foldEffectiveActions(
+  directives: ClassDiagramAST['directives'],
+  classifier: { namespace?: string },
+): Map<HideTarget, 'hide' | 'show'> {
   const effectiveAction = new Map<HideTarget, 'hide' | 'show'>();
-  for (const directive of ast.directives) {
+  for (const directive of directives) {
+    if (!directiveAppliesTo(directive, classifier)) continue;
     effectiveAction.set(directive.target, directive.action);
   }
+  return effectiveAction;
+}
 
+/** One classifier's share of {@link applyDirectives} (split for the
+ *  complexity cap; body unchanged from the pre-R2g global version). */
+function applyDirectivesToClassifier(
+  classifier: ClassDiagramAST['classifiers'][number],
+  effectiveAction: ReadonlyMap<HideTarget, 'hide' | 'show'>,
+): void {
   const hideMembers = effectiveAction.get('members') === 'hide';
   const hideCircle  = effectiveAction.get('circle')  === 'hide';
   // G2 N27: bare `hide fields`/`hide methods` -- unconditional (no
@@ -40,30 +86,32 @@ export function applyDirectives(ast: ClassDiagramAST): void {
   const hideFields  = effectiveAction.get('fields')  === 'hide';
   const hideMethods = effectiveAction.get('methods') === 'hide';
 
-  for (const classifier of ast.classifiers) {
-    // hide circle — suppress the C/I/A/E badge in the renderer
-    if (hideCircle) {
-      classifier.hideCircle = true;
-    }
+  // hide circle — suppress the C/I/A/E badge in the renderer
+  if (hideCircle) {
+    classifier.hideCircle = true;
+  }
 
-    // hide members — mark every member as hidden regardless of type
-    if (hideMembers) {
-      for (const member of classifier.members) {
-        member.hidden = true;
-      }
-    }
-
-    if (hideFields) {
-      for (const member of classifier.members) {
-        if (!isMethodMember(member)) member.hidden = true;
-      }
-    }
-    if (hideMethods) {
-      for (const member of classifier.members) {
-        if (isMethodMember(member)) member.hidden = true;
-      }
+  // hide members — mark every member as hidden regardless of type
+  if (hideMembers) {
+    for (const member of classifier.members) {
+      member.hidden = true;
     }
   }
+
+  if (hideFields) {
+    for (const member of classifier.members) {
+      if (!isMethodMember(member)) member.hidden = true;
+    }
+  }
+  if (hideMethods) {
+    for (const member of classifier.members) {
+      if (isMethodMember(member)) member.hidden = true;
+    }
+  }
+  // #lizard forgives -- faithfully-ported directive marking (4 independent
+  // target flags, one loop each), moved verbatim out of the pre-R2g
+  // applyDirectives; porting discipline forbids restructuring it further
+  // (CLAUDE.md "do not refactor while porting").
 }
 
 // ---------------------------------------------------------------------------

@@ -32,13 +32,19 @@ import {
   buildStereoRows,
   buildHeaderRows,
   computeHeaderInfo,
-  parseCircledCharDecoration,
   measureGenericTagDim,
   buildGenericTagGeo,
   type GuillemetPair,
   type GenericTagDim,
 } from './class-stereotype.js';
+import {
+  buildBadgeCharFields,
+  buildHeaderLineMetrics,
+  computeBadgeSpriteBox,
+} from './class-layout-header-creole.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { javaRound4 } from '../../core/number-format.js';
+import { atomTextLineHeight } from './class-stereotype-layout.js';
 import type { ClassFontSpecs } from './class-layout-generic-classifier-types.js';
 
 export type { ClassFontSpecs };
@@ -53,6 +59,12 @@ export type CommonHeaderFields = Partial<
 interface HeaderGeoOptions {
   strictUml: boolean;
   headerMaxWidth: number;
+  /** A2s R2i: the diagram's sprite registry (`ast.sprites`) -- header NAME
+   *  lines route through the creole pipeline (item 1) so a `<$sprite>` atom
+   *  in a name resolves to its real dims, and the `<<($sprite)>>` badge
+   *  override (item 5) sizes its spot box off the registry. `undefined` for
+   *  a diagram with no `sprite` definitions. */
+  sprites: SpriteRegistry | undefined;
 }
 
 /** Resolved-once options for the stereotype/generic-tag/header-row geometry
@@ -78,17 +90,19 @@ export function computeHeaderNameGeo(
   measurer: StringMeasurer,
   options: HeaderGeoOptions,
 ) {
-  const { strictUml, headerMaxWidth } = options;
+  const { strictUml, headerMaxWidth, sprites } = options;
   const badgeShown = hasBadge(classifier.kind) && classifier.hideCircle !== true && !strictUml;
-  const memberRowHeight = fontSpec.size;
+  // R2c (sovuxo-25 dummy): each member row advances by its creole line
+  // height, floored at 10px (`AtomText.java:179-181` via `MethodsOrFields
+  // Area#calculateDimensionOnlyMembers`'s `y += dim.getHeight()`) --
+  // jar-verified `classAttributeFontSize 6|8|10` all advance 10px/row.
+  const memberRowHeight = atomTextLineHeight(fontSpec.size);
   const header = computeHeaderInfo(classifier);
   // G2 N26: `class Foo << (F,orange) >>`'s badge-customization override --
   // computed once here so BOTH `buildClassifierGeos` and
   // `degenerateSingleClassifier` (class-geo-builders.ts) can copy it
   // straight off the SAME `MeasuredClassifier`.
-  const circledChar = parseCircledCharDecoration(classifier.stereotype);
-  const badgeCharField: CommonHeaderFields = circledChar !== undefined ? { badgeChar: circledChar.char } : {};
-  const badgeColorField: CommonHeaderFields = circledChar?.color !== undefined ? { badgeColor: circledChar.color } : {};
+  const { badgeCharField, badgeColorField } = buildBadgeCharFields(classifier);
   // G2 N64 item 45: a classifier display name can itself carry `\n`/`\l`/
   // `\r` line-break escapes -- jar routes it through the SAME
   // `Display.getWithNewlines` state machine a relationship label uses, so
@@ -101,16 +115,20 @@ export function computeHeaderNameGeo(
     ? rawHeaderSplit.lines.flatMap((l) => wrapPlainTextLine(l, headerFont, headerMaxWidth, measurer))
     : rawHeaderSplit.lines;
   const headerAlign = rawHeaderSplit.align;
-  const headerLineWidths = headerLines.map((l) => javaRound4(measurer.measure(l, headerFont).width));
+  const { headerLineWidths, headerDisplayLines, nameBlockHeight } =
+    buildHeaderLineMetrics(headerLines, headerFont, measurer, sprites);
   const headerTextWidth = Math.max(...headerLineWidths);
   const nameWidth = headerTextWidth + NAME_MARGIN_TOTAL;
+  // A2s R2i (item 5): the `<<($sprite)>>` badge override's spot-box dims.
+  const badgeSpriteBox = computeBadgeSpriteBox(classifier, sprites);
   // G2 N64 (item 45 corollary): a trailing `\n` split can produce a BLANK
   // final line -- pre-measure the NBSP substitution glyph's own width ONCE
   // here (the only place with a `measurer` reference at this layer).
   const blankLineRenderWidth = javaRound4(measurer.measure('\u00A0', headerFont).width);
   return {
     badgeShown, memberRowHeight, header, badgeCharField, badgeColorField,
-    headerLines, headerAlign, headerLineWidths, headerTextWidth, nameWidth, blankLineRenderWidth,
+    headerLines, headerDisplayLines, nameBlockHeight, badgeSpriteBox,
+    headerAlign, headerLineWidths, headerTextWidth, nameWidth, blankLineRenderWidth,
   };
 }
 
@@ -121,6 +139,9 @@ interface StereoBlockOptions {
   badgeShown: boolean;
   badgeRadius: number;
   nameWidth: number;
+  /** A2s R2i (item 5): the `<<($sprite)>>` badge override's spot-box dims
+   *  ({@link computeBadgeSpriteBox}); absent -> the circled-character box. */
+  badgeSpriteBox?: { width: number; height: number } | undefined;
 }
 
 /**
@@ -144,7 +165,10 @@ function computeStereoBlockGeo(
     stereoLabels, stereoFont.family, measurer, guillemet, stereoFont.size,
   );
   const blockDim = stereoBlockDim(stereoLabelWidths, stereoFont.size);
-  const circleWidth = badgeShown ? badgeBoxWidth(badgeRadius) : 0;
+  // A2s R2i (item 5): a `<<($sprite)>>` badge's spot box replaces the
+  // circled-character box wholesale (`getCircledCharacter` returns the
+  // sprite TextBlock FIRST, EntityImageClassHeader.java:166-169).
+  const circleWidth = badgeShown ? (options.badgeSpriteBox?.width ?? badgeBoxWidth(badgeRadius)) : 0;
   const widthStereoAndName = Math.max(blockDim.width, nameWidth);
   return { stereoLabels, stereoLabelWidths, blockDim, circleWidth, widthStereoAndName };
 }
@@ -154,8 +178,13 @@ function computeStereoBlockGeo(
 interface HeaderDimsOptions {
   badgeShown: boolean;
   badgeRadius: number;
-  headerLinesCount: number;
+  /** A2s R2i: the name block's own summed per-line height (replaces the
+   *  pre-R2i `headerLinesCount * atomTextLineHeight` product -- identical
+   *  for every atom-free header; an emoji line contributes 39*factor). */
+  nameBlockHeight: number;
   stereoFont: { family: string; size: number };
+  /** A2s R2i (item 5) -- see {@link StereoBlockOptions.badgeSpriteBox}. */
+  badgeSpriteBox?: { width: number; height: number } | undefined;
 }
 
 /**
@@ -173,7 +202,7 @@ function computeHeaderDimsGeo(
   stereoBlockGeo: ReturnType<typeof computeStereoBlockGeo>,
   options: HeaderDimsOptions,
 ) {
-  const { badgeShown, badgeRadius, headerLinesCount, stereoFont } = options;
+  const { badgeShown, badgeRadius, nameBlockHeight, stereoFont } = options;
   const { header: headerFont, attribute: fontSpec } = fonts;
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box -- widens/
   // heightens the header exactly like the stereotype block. G2 N39: SAME
@@ -183,12 +212,14 @@ function computeHeaderDimsGeo(
     classifier.typeParams ?? [], stereoFont.family, measurer, stereoFont.size,
     classifier.typeParamsRawText,
   );
-  // G2 N64 item 45: `headerLinesCount * headerFont.size` generalizes the
-  // pre-existing single-line `headerFont.size` term -- every same-size line
-  // reduces to `N * font.size`.
+  // G2 N64 item 45 / A2s R2i: the name term is the summed per-line height
+  // (`nameBlockHeight` -- reduces to `N * atomTextLineHeight(size)` for
+  // every atom-free header; R2c's 10px-per-line floor lives inside each
+  // line's own height now). Badge term: a `<<($sprite)>>` box replaces the
+  // circled-character box wholesale (item 5).
   const headerRowHeight = Math.max(
-    badgeShown ? badgeBoxHeight(badgeRadius) : 0,
-    stereoBlockGeo.blockDim.height + headerLinesCount * headerFont.size + 10,
+    badgeShown ? (options.badgeSpriteBox?.height ?? badgeBoxHeight(badgeRadius)) : 0,
+    stereoBlockGeo.blockDim.height + nameBlockHeight + 10,
     genericDim?.height ?? 0,
   );
   const headerWidth = stereoBlockGeo.circleWidth + stereoBlockGeo.widthStereoAndName + (genericDim?.width ?? 0);
@@ -234,12 +265,13 @@ export function computeStereoAndTagGeo(
   options: StereoGeoOptions,
 ): StereoAndTagGeo {
   const { guillemet, badgeRadius, stereoFont } = options;
-  const { badgeShown, headerLines, nameWidth } = headerNameGeo;
+  const { badgeShown, nameWidth, nameBlockHeight, badgeSpriteBox } = headerNameGeo;
   const stereoBlockGeo = computeStereoBlockGeo(
-    classifier, stereoFont, measurer, { guillemet, badgeShown, badgeRadius, nameWidth },
+    classifier, stereoFont, measurer, { guillemet, badgeShown, badgeRadius, nameWidth, badgeSpriteBox },
   );
   const headerDimsGeo = computeHeaderDimsGeo(
-    classifier, fonts, measurer, stereoBlockGeo, { badgeShown, badgeRadius, headerLinesCount: headerLines.length, stereoFont },
+    classifier, fonts, measurer, stereoBlockGeo,
+    { badgeShown, badgeRadius, nameBlockHeight, stereoFont, badgeSpriteBox },
   );
   return { ...stereoBlockGeo, ...headerDimsGeo };
 }
@@ -289,7 +321,6 @@ function buildStereoRowsGeo(
   options: StereoGeoOptions,
 ) {
   const { guillemet, stereoFont } = options;
-  const { header: headerFont } = fonts;
   const { headerNameGeo, stereoGeo } = headerGeo;
   const { h1, h2 } = slack;
   return buildStereoRows({
@@ -302,7 +333,10 @@ function buildStereoRowsGeo(
     h1,
     h2,
     headerRowHeight: stereoGeo.headerRowHeight,
-    nameLineHeight: headerNameGeo.headerLines.length * headerFont.size,
+    // R2c/A2s R2i: the SAME summed per-line name-block height
+    // `computeHeaderDimsGeo`'s headerRowHeight term uses -- keeps the
+    // stereo/name vertical split consistent with the row height.
+    nameLineHeight: headerNameGeo.nameBlockHeight,
     stereoBaselineOffset: stereoGeo.stereoBaselineOffset,
     guillemet,
     fontSize: stereoFont.size,
@@ -332,8 +366,12 @@ function buildHeaderNameRowsGeo(
   // (not just stacked stereotype rows) -- `nameRowCount` tells
   // `renderer-classifier-box.ts#buildHeaderPrimitive` how many of the
   // TRAILING header rows are name lines.
+  // A2s R2i: rows carry the DISPLAY text (markup consumed, escapes/emoji
+  // decoded -- `atomsToPlainText` of each line's resolved atoms); widths
+  // stay the atom-measured values above, so a mono/emoji header renders
+  // sensible text at the correct measured width.
   return buildHeaderRows({
-    header: headerNameGeo.header, lines: headerNameGeo.headerLines, lineWidths: headerNameGeo.headerLineWidths,
+    header: headerNameGeo.header, lines: headerNameGeo.headerDisplayLines, lineWidths: headerNameGeo.headerLineWidths,
     align: headerNameGeo.headerAlign, circleWidth: stereoGeo.circleWidth, widthStereoAndName: stereoGeo.widthStereoAndName,
     nameWidth: headerNameGeo.nameWidth, h1, h2, nameTop,
     baselineOffset: stereoGeo.headerBaselineOffset, fontSpec: headerFont,

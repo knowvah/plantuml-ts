@@ -69,15 +69,42 @@ const SECTION_MARGIN_TOP = 4;
  * path was the one dispatch branch that never got the same treatment).
  */
 export const ROW_TEXT_LEFT_MARGIN = 6;
-/** Icon zone reserved (once per section) when any row in it has an explicit
- *  visibility char -- `getCircledCharacterRadius()+3` (17/3+6=11, +3=14, see
- *  `class-object-map-sizing.ts#OBJECT_SMALL_ICON`'s identical derivation). */
+/** DEFAULT-radius icon zone -- `getCircledCharacterRadius()+3` with the
+ *  default radius (17/3+6=11, +3=14, see `class-object-map-sizing.ts#
+ *  OBJECT_SMALL_ICON`'s identical derivation). A2s R2f: kept ONLY as the
+ *  default for callers not yet threaded through the resolved radius
+ *  (`class-body-enhanced-layout.ts`); the generic-classifier path passes
+ *  {@link rowIconZoneWidth} of the RESOLVED radius instead
+ *  (puvono-84-doro361: `skinparam CircledCharacterRadius 8` -> zone 11). */
 const ROW_ICON_ZONE_WIDTH = 14;
-const ROW_INDENT_WITH_ICON = ROW_TEXT_LEFT_MARGIN + ROW_ICON_ZONE_WIDTH;
 
-/** One fields-or-methods compartment's total height (margin-only floor when empty). */
-export function sectionHeight(count: number, memberRowHeight: number): number {
-  return count === 0 ? EMPTY_SECTION_HEIGHT : EMPTY_SECTION_HEIGHT + count * memberRowHeight;
+/** The per-section visibility-icon zone for a RESOLVED badge radius --
+ *  upstream computes `smallIcon = skinParam.getCircledCharacterRadius() + 3`
+ *  for BOTH the width term and the text-column x position, so the zone
+ *  follows `skinparam circledCharacterRadius`/`circledCharacterFontSize`
+ *  (`class-badge.ts#resolveBadgeRadius`), never a fixed 14.
+ * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:155-157 (calculateDimensionOnlyMembers)
+ * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:386-388 (getInnerPosition)
+ * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:397-399 (PlacementStrategyVisibility col2)
+ */
+export function rowIconZoneWidth(badgeRadius: number): number {
+  return badgeRadius + 3;
+}
+
+/** One fields-or-methods compartment's total height (margin-only floor when
+ *  empty). A2s R2i (lozego-15-coci435): sums each row's OWN height
+ *  (`MemberRowBuild.height` -- max of its atoms' line contributions, so a
+ *  100px sprite row contributes 100*scale, not the uniform text row height)
+ *  -- upstream `MethodsOrFieldsArea#calculateDimensionOnlyMembers` advances
+ *  `y += dim.getHeight()` PER member TextBlock (java:161-166). Identical to
+ *  the previous `count * memberRowHeight` for atom-free rows (each plain
+ *  row's height IS `atomTextLineHeight(fontSize)` == `memberRowHeight`).
+ * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:161-166 */
+export function sectionHeight(rowBuilds: readonly MemberRowBuild[]): number {
+  if (rowBuilds.length === 0) return EMPTY_SECTION_HEIGHT;
+  let total = EMPTY_SECTION_HEIGHT;
+  for (const b of rowBuilds) total += b.height;
+  return total;
 }
 
 /**
@@ -93,6 +120,11 @@ export function sectionHeight(count: number, memberRowHeight: number): number {
  * however malformed).
  */
 export function isMethodMember(m: Classifier['members'][number]): boolean {
+  // A2s R2f (pasova-33-toze386): a `{method}`/`{field}` tag forces the
+  // bucket BEFORE any paren scan -- upstream's `isMethod` checks the raw
+  // line for the tags first (see `Member.forcedBucket`'s own doc comment).
+  // @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:102-111
+  if (m.forcedBucket !== undefined) return m.forcedBucket === 'method';
   if (m.rawDisplay !== undefined) return m.rawDisplay.includes('(') || m.rawDisplay.includes(')');
   return m.params !== undefined;
 }
@@ -106,8 +138,14 @@ export function isMethodMember(m: Classifier['members'][number]): boolean {
  *  `measureGenericClassifier` and reused for BOTH the section max-width
  *  scan and the stored row -- see `sectionWidth`'s own doc comment). */
 export interface SectionRowContext {
-  memberRowHeight: number;
+  // A2s R2i: `memberRowHeight` dropped -- rows advance by each build's OWN
+  // height (`MemberRowBuild.height`), see `buildSectionRows`/`sectionHeight`.
   baselineOffset: number;
+  /** A2s R2f: the section's resolved icon-zone width ({@link
+   *  rowIconZoneWidth} of the resolved badge radius) -- feeds the
+   *  icon-section indent, matching `sectionWidth`'s width reserve
+   *  (upstream uses the SAME `radius + 3` for both). */
+  iconZoneWidth: number;
 }
 
 /**
@@ -132,9 +170,13 @@ export function buildSectionRows(
   // here: the bare `#lizard forgive` flag is reset by every nested-context
   // pop, and the spread-ternary object literals below stack contexts that
   // pop at function end, eating the flag (lizard.py#end_of_function).
-  const { memberRowHeight, baselineOffset } = ctx;
+  const { baselineOffset } = ctx;
   const rows: ClassifierGeo['rows'] = [];
-  const indent = sectionHasIcon ? ROW_INDENT_WITH_ICON : ROW_TEXT_LEFT_MARGIN;
+  const indent = sectionHasIcon ? ROW_TEXT_LEFT_MARGIN + ctx.iconZoneWidth : ROW_TEXT_LEFT_MARGIN;
+  // A2s R2i: rows advance by each PRIOR row's own height (see
+  // `sectionHeight`'s doc comment) -- identical to the previous
+  // `i * memberRowHeight` whenever every row is atom-free.
+  let rowTop = 0;
   for (let i = 0; i < members.length; i++) {
     const text = texts[i]!;
     const member = members[i]!;
@@ -156,7 +198,8 @@ export function buildSectionRows(
     // non-zero icon size, sectionHasIcon true iff ANY member is explicit,
     // so a row with `visibilityExplicit` implies sectionHasIcon.
     const showIcon = sectionHasIcon && member.visibilityExplicit === true && members[i - 1] !== member;
-    const y = sectionTop + SECTION_MARGIN_TOP + i * memberRowHeight + baselineOffset;
+    const y = sectionTop + SECTION_MARGIN_TOP + rowTop + baselineOffset;
+    rowTop += build.height;
     rows.push({
       text,
       y,
@@ -193,8 +236,13 @@ export function buildSectionRows(
 export function sectionWidth(
   rowBuilds: readonly MemberRowBuild[],
   hasIcon: boolean,
+  // A2s R2f: the resolved icon zone ({@link rowIconZoneWidth}); defaults to
+  // the default-radius value for the one caller not yet threaded
+  // (`class-body-enhanced-layout.ts` -- zero corpus fixture combines an
+  // enhanced body with a circledCharacterRadius override).
+  iconZoneWidth: number = ROW_ICON_ZONE_WIDTH,
 ): number {
-  const iconReserve = hasIcon ? ROW_ICON_ZONE_WIDTH : 0;
+  const iconReserve = hasIcon ? iconZoneWidth : 0;
   let widest = 0;
   for (const b of rowBuilds) {
     const w = b.width + iconReserve;

@@ -39,8 +39,6 @@ import { resolveBadgeRadius } from './class-badge.js';
 import {
   resolveStyleStereotypeTags,
   resolveVisibleStereotypeLabels,
-  CLASS_STEREOTYPE_FONT_SIZE,
-  type GuillemetPair,
   type GenericTagGeo,
 } from './class-stereotype.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
@@ -56,7 +54,16 @@ import {
   type EdgeLabelLines,
 } from './class-layout-edge-labels.js';
 import { measureGenericClassifier, tryMeasureDescriptionLeaf } from './class-layout-generic-classifier.js';
-import { measureUsecaseOrActor, measureLollipop } from './class-layout-leaf-shapes.js';
+// R2j: the attribute/header/stereotype font + guillemet resolvers moved to
+// class-layout-fonts.ts (this file was at the 500-line cap) -- see that
+// module's own doc comment for the two R2j mechanism additions.
+import {
+  resolveAttributeFont,
+  resolveHeaderFont,
+  resolveGuillemetOption,
+  resolveStereoFont,
+} from './class-layout-fonts.js';
+import { measureUsecaseOrActor, measureLollipop, measureAssociationDiamond } from './class-layout-leaf-shapes.js';
 // Re-exported for existing external consumers (class-directives.ts, layout.ts,
 // note-layout.ts) -- G2/N14 moved the implementations to class-member-rows.ts
 // to keep this file under the 500-line cap; the public import path is unchanged.
@@ -241,14 +248,12 @@ export interface MemberSuppression {
 /**
  * Compute the pre-measured dimensions and row/divider layout for a classifier.
  * Members with hidden=true are excluded from height calculations and row output.
- *
  * @param suppress - Per-compartment suppression (see `MemberSuppression`). A
  *   suppressed compartment omits its divider + rows + height entirely,
  *   independent of the other compartment (G2 N10 — was previously a single
  *   boolean that suppressed BOTH or neither, wrong per
  *   `CommandHideShowByGender.java`'s per-portion `emptyMembers` expansion).
- */
-/**
+ *
  * The dispatch branch of `measureClassifier` for every classifier kind
  * whose svek box is NOT the generic name+members rect (collapsed-empty
  * package/namespace, object/map/json leaves, usecase/actor, lollipop).
@@ -313,118 +318,34 @@ function tryMeasureNonGenericClassifier(
   // classifier.ts) for the upstream cite and the deliberate exclusions.
   const descLeaf = tryMeasureDescriptionLeaf(classifier, theme, measurer, sprites);
   if (descLeaf !== undefined) return descLeaf;
-  // G2 N20: the lollipop interface's own small circle+label -- NOT the
-  // generic name+members box (see measureLollipop's own doc comment).
+  // G2 N20 lollipop / A2s R2h association diamond -- see each helper's doc.
   if (classifier.kind === 'lollipop') return measureLollipop(classifier, fontSpec, measurer);
+  if (classifier.kind === 'association') return measureAssociationDiamond();
+  // #lizard forgives -- kind-dispatch table (one branch per non-generic
+  // svek EntityImage kind, mirroring upstream's own dispatch; R2h +1).
   return undefined;
 }
 
 /**
- * G2 N37: `.tagname` `<style>` cascade FontStyle wins over the more general
- * `skinparam`-resolved style value when set (more specific), which in turn
- * wins over `fallback`. Shared by both the attribute and header font
- * resolvers below -- factored out purely to keep each under the project's
- * per-function CCN cap (a bare `a ?? b ?? c` chain, repeated 4x across the
- * two callers, was the CCN driver).
+ * Resolve the attribute/header fonts + the `.tagname` cascade entry for one
+ * classifier -- extracted from {@link measureClassifier} purely for the
+ * per-function NLOC cap (R2j). G2 N37: resolved ONCE per classifier (not
+ * per-render) since a classifier's OWN stereotype never changes between
+ * layout and render -- see `style-cascade-class.ts
+ * #resolveClassTagCascadeEntry`'s own doc comment. R2j: the SAME resolved
+ * tag list also keys the `classAttributeFontSize<<X>>` direct-value lookup
+ * (`class-layout-fonts.ts#resolveAttributeFont`).
  */
-function resolveCascadedFontFlag(
-  tagCascadeValue: boolean | undefined,
-  styleValue: boolean | undefined,
-  fallback: boolean,
-): boolean {
-  return tagCascadeValue ?? styleValue ?? fallback;
-}
-
-/**
- * G2 N23/N32: `skinparam class { AttributeFontSize/AttributeFontName/
- * AttributeFontStyle }` (`FontParam.CLASS_ATTRIBUTE`) overrides the generic
- * classifier box's ATTRIBUTE (member-row) font -- style-mapped by
- * `FromSkinparamToStyle.java:190-193` to the `element.class` selector. G2
- * N37: `.tagname` `<style>` cascade FontStyle wins over the ancestor
- * `classAttributeFontBold`/`Italic` value when set (more specific).
- * Split out of `measureClassifier` purely to keep that function's CCN
- * under the project's per-function cap.
- */
-function resolveAttributeFont(
-  theme: Theme,
-  fontSpec: { family: string; size: number },
-  tagCascadeEntry: ReturnType<typeof resolveClassTagCascadeEntry> | undefined,
-) {
-  return {
-    family: theme.colors.graph.classAttributeFontFamily ?? fontSpec.family,
-    size: theme.colors.graph.classAttributeFontSize ?? fontSpec.size,
-    bold: resolveCascadedFontFlag(tagCascadeEntry?.fontBold, theme.colors.graph.classAttributeFontBold, false),
-    italic: resolveCascadedFontFlag(tagCascadeEntry?.fontItalic, theme.colors.graph.classAttributeFontItalic, false),
-  };
-}
-
-/**
- * `skinparam classFontSize/classFontName/classFontStyle`
- * (`FromSkinparamToStyle.java:185-188`, `element.class.header`) is the
- * classifier HEADER's own, independently-overridable font, which CASCADES
- * from the attribute-level values when unset (CSS-selector-specificity
- * semantics) -- jar-verified two ways: `jisanu-32-gado231` (attribute-only
- * override) shows the header ALSO adopting the overridden size/family;
- * `xabije-20-xusi569` (BOTH set, to DIFFERENT values) shows the header
- * using its OWN `classFont*` values instead. Split out of
- * `measureClassifier` purely to keep that function's CCN under the
- * project's per-function cap.
- */
-function resolveHeaderFont(
-  theme: Theme,
-  attributeFont: ReturnType<typeof resolveAttributeFont>,
-  tagCascadeEntry: ReturnType<typeof resolveClassTagCascadeEntry> | undefined,
-) {
-  return {
-    family: theme.colors.graph.classFontFamily ?? attributeFont.family,
-    // A2s F-D mechanism A9: `<style> classDiagram { class { header {
-    // FontSize } } }` -- `EntityImageClassHeader`'s styleHeader signature is
-    // `element.classDiagram.class.header` (EntityImageClassHeader.java:80-82,
-    // name TextBlock at :100), a MORE specific selector than the bare class
-    // bucket, so it wins over `skinparam classFontSize` (which
-    // FromSkinparamToStyle maps to the same header bucket; Stage-3 <style>
-    // application order also puts it on top). Read from the
-    // `classCascadeHeaderFontSize` cascade field (populated by
-    // `style-cascade-class.ts`'s HEADER_SNAMES fontsize lookup — A2s A9);
-    // the element bucket stays as a secondary source for skin files. Jar
-    // evidence: momaku-69-duxe918 `o1` header at 20pt (delta =
-    // w('o1'@20) - w('o1'@14) = 6.675px exact).
-    size: theme.colors.graph.classCascadeHeaderFontSize
-      ?? theme.colors.elements?.['class']?.headerFontSize
-      ?? theme.colors.graph.classFontSize ?? attributeFont.size,
-    bold: resolveCascadedFontFlag(tagCascadeEntry?.fontBold, theme.colors.graph.classFontBold, attributeFont.bold),
-    italic: resolveCascadedFontFlag(tagCascadeEntry?.fontItalic, theme.colors.graph.classFontItalic, attributeFont.italic),
-  };
-}
-
-/**
- * G2 N27: `skinparam guillemet <value>` -- both fields undefined means the
- * default `«`/`»` wrapper (`measureGenericClassifier`'s own `guillemet`
- * param default), so this is safe to pass through unconditionally rather
- * than gating on presence. Split out of `measureClassifier` purely to keep
- * that function's CCN under the project's per-function cap.
- */
-function resolveGuillemetOption(theme: Theme): GuillemetPair | undefined {
-  return theme.colors.graph.guillemetStart !== undefined || theme.colors.graph.guillemetEnd !== undefined
-    ? { start: theme.colors.graph.guillemetStart ?? '«', end: theme.colors.graph.guillemetEnd ?? '»' }
+function resolveMeasureFonts(classifier: Classifier, theme: Theme) {
+  const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
+  const styleTags = classifier.stereotype !== undefined
+    ? resolveStyleStereotypeTags(classifier) : undefined;
+  const tagCascadeEntry = styleTags !== undefined
+    ? resolveClassTagCascadeEntry(theme, styleTags, classifier.styleGeneration)
     : undefined;
-}
-
-/**
- * G2 N39: `skinparam classStereotypeFontSize`/`FontName`/`FontStyle` --
- * `italic` has NO `false` fallback -- `FontParam.CLASS_STEREOTYPE`'s own
- * default face IS italic (see `theme.ts#classStereotypeFontSize`'s doc
- * comment), unlike every OTHER class font param. Split out of
- * `measureClassifier` purely to keep that function's CCN under the
- * project's per-function cap.
- */
-function resolveStereoFont(theme: Theme, headerFont: ReturnType<typeof resolveHeaderFont>) {
-  return {
-    family: theme.colors.graph.classStereotypeFontFamily ?? headerFont.family,
-    size: theme.colors.graph.classStereotypeFontSize ?? CLASS_STEREOTYPE_FONT_SIZE,
-    bold: theme.colors.graph.classStereotypeFontBold ?? false,
-    italic: theme.colors.graph.classStereotypeFontItalic ?? true,
-  };
+  const attributeFont = resolveAttributeFont(theme, fontSpec, tagCascadeEntry, styleTags);
+  const headerFont = resolveHeaderFont(theme, attributeFont, tagCascadeEntry);
+  return { attributeFont, headerFont };
 }
 
 export function measureClassifier(
@@ -437,22 +358,20 @@ export function measureClassifier(
   const nonGeneric = tryMeasureNonGenericClassifier(classifier, theme, measurer, suppress, sprites);
   if (nonGeneric !== undefined) return nonGeneric;
 
-  const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
-  // G2 N37: resolved ONCE here (not per-render) since a classifier's OWN
-  // stereotype never changes between layout and render -- see
-  // `style-cascade-class.ts#resolveClassTagCascadeEntry`'s own doc comment
-  // for why this is render-only and carries no DOT-gate width risk.
-  const tagCascadeEntry = classifier.stereotype !== undefined
-    ? resolveClassTagCascadeEntry(theme, resolveStyleStereotypeTags(classifier), classifier.styleGeneration)
-    : undefined;
-  const attributeFont = resolveAttributeFont(theme, fontSpec, tagCascadeEntry);
-  const headerFont = resolveHeaderFont(theme, attributeFont, tagCascadeEntry);
+  const { attributeFont, headerFont } = resolveMeasureFonts(classifier, theme);
   const guillemet = resolveGuillemetOption(theme);
   // G2 N38: `skinparam circledCharacterFontSize`/`circledCharacterRadius`
   // -- resolved ONCE here (theme is only available at this level) and
   // threaded through as a plain number, matching `tagCascadeEntry`'s own
-  // "resolve once, pass down" precedent above.
-  const badgeRadius = resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius);
+  // "resolve once, pass down" precedent above. R2j (mizupo-59): an EXPLICIT
+  // `skinparam defaultFontSize` is `SkinParam#getFontSize`'s middle tier
+  // (SkinParam.java:441-448) feeding `getCircledCharacterRadius()`
+  // (:548-551), BELOW the per-param circledCharacterFontSize and ABOVE
+  // `FontParam.CIRCLED_CHARACTER`'s own default 17.
+  const badgeRadius = resolveBadgeRadius(
+    theme.colors.graph.circledCharacterFontSize ?? theme.defaultFontSize,
+    theme.colors.graph.circledCharacterRadius,
+  );
   const stereoFont = resolveStereoFont(theme, headerFont);
   // G2 N65 item 35: headerMaxWidth/memberMaxWidth resolved ONCE here (theme
   // is only available at this level), matching `badgeRadius`/`stereoFont`'s

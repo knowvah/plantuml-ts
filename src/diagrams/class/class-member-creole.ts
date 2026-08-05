@@ -50,6 +50,14 @@
  */
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
+import { atomTextLineHeight } from './class-stereotype-layout.js';
+import { splitMemberDisplayLines } from './class-member-display.js';
+import {
+  resolveEmojiAtom,
+  resolveInlineAtom,
+  resolveOpenIconicAtom,
+  type ResolvedMemberAtom,
+} from './class-member-atom-resolve.js';
 import type { CreoleAtom, CreoleAtomUrl } from '../../core/klimt/creole/atom/Atom.js';
 import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import {
@@ -57,18 +65,8 @@ import {
   buildLiteralAtoms,
   fontConfigurationForHeading,
 } from '../../core/klimt/creole/legacy/StripeSimple.js';
-import {
-  type SpriteDimsLookup,
-  type InlineAtomToken,
-} from '../../core/creole-atoms.js';
-import {
-  measureInlineAtom,
-  spriteScale,
-} from '../../core/creole-atoms-measure.js';
-import { isKnownOpenIconicGlyph, openIconicDims, openIconicFactor } from '../../core/openiconic-glyphs.js';
-import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { getSpriteMonochrome, spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
-import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
+import { type SpriteDimsLookup } from '../../core/creole-atoms.js';
+import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
 
@@ -147,6 +145,20 @@ export interface MemberRowBuild {
    *  `buildSectionRows`'s stored `row.width` stays rounded -- see each
    *  call site). */
   readonly width: number;
+  /** A2s R2i (lozego-15-coci435): this row's own line height -- the MAX of
+   *  every atom's line contribution (text -> `atomTextLineHeight(font.size)`
+   *  i.e. font size floored 10, AtomText.java:179-181; img/sprite/vector ->
+   *  the atom's scaled pixel height; emoji -> `39*factor`,
+   *  `atom/AtomEmoji.ts`). Upstream: `MethodsOrFieldsArea#
+   *  calculateDimensionOnlyMembers` advances `y += dim.getHeight()` PER
+   *  MEMBER (java:161-166) where `dim` is that member's own TextBlock
+   *  dimension -- a 100px sprite row advances 100*scale, not the uniform
+   *  text row height (jar: lozego's `<$test>` field row = 100*14/13 =
+   *  107.6923px; node 2.162393in golden-exact). Identical to the uniform
+   *  `memberRowHeight` for every atom-free row (the overwhelming common
+   *  case): a plain row's lone text atom contributes exactly
+   *  `atomTextLineHeight(fontSpec.size)`. */
+  readonly height: number;
 }
 
 /**
@@ -215,51 +227,6 @@ function atomFontSpec(font: FontConfiguration): FontSpec {
   };
 }
 
-/** Resolves one `'inline'` `CreoleAtom` (an `InlineAtomToken`, img or
- *  sprite) to a drawable `<image>` -- the class-local mirror of `diagrams/
- *  description/render-atoms.ts#resolveImgAtom`/`resolveSpriteAtom` (that
- *  file lives under `description/` but is otherwise diagram-agnostic; not
- *  imported directly here to avoid a cross-diagram-type dependency on a
- *  file the description mission owns -- see this module's own doc comment
- *  for why a second small adapter is the right shape, not a re-port: the
- *  underlying `spriteToPngDataUri`/`getSpriteMonochrome` calls are
- *  IDENTICAL, only the caller-side glue differs). `baseFont` is the ROW's
- *  own base font (NOT a per-atom font -- `CreoleAtom`'s `'inline'` variant
- *  carries no font of its own; the shared engine's own `StripeAtomBuilder
- *  .modifyStripe` never captures one either, description's `render-atoms.ts`
- *  doc comment already documents this as an approximation, "the CURRENT
- *  textblock's own resolved font color" -- reused verbatim here, same
- *  precedent, not a new gap this file introduces) used as the sprite tint's
- *  fallback color when the atom carries no `forcedColor` of its own.
- *  `undefined` registry/spriteDims (no `sprite` definitions on this
- *  diagram) resolves an `img` atom fine (it needs no registry) but always
- *  skips a `sprite` atom, matching `StripeSimple.addSprite`'s "unknown name
- *  contributes nothing" rule. */
-function resolveInlineAtom(
-  atom: Extract<CreoleAtom, { kind: 'inline' }>['atom'],
-  baseFont: FontConfiguration,
-  sprites: SpriteRegistry | undefined,
-  spriteDims: SpriteDimsLookup | undefined,
-): MemberRenderAtom | undefined {
-  if (atom.kind === 'img') {
-    const dims = measureInlineAtom(atom);
-    return { kind: 'image', href: atom.dataUri, width: dims.width, height: dims.height };
-  }
-  if (sprites === undefined) return undefined;
-  const sprite = getSpriteMonochrome(sprites, atom.name);
-  if (sprite === undefined) return undefined; // unknown name -- contributes nothing.
-  // `baseFont.size` threads CommandCreoleSprite's `fc.getSize2D() / 13.0`
-  // factor -- same call the sizer makes (S1L-f).
-  const dims = measureInlineAtom(atom, spriteDims, baseFont.size);
-  const png = spriteToPngDataUri(
-    spriteMonochromeAsLike(sprite),
-    baseFont.color ?? undefined,
-    atom.forcedColor,
-    spriteScale(atom.scale, baseFont.size),
-  );
-  return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
-}
-
 /**
  * Resolves a raw `CreoleAtom[]` (from `buildMemberAtoms`) into render-ready
  * `MemberRenderAtom[]` + their summed width -- text atoms measure via the
@@ -278,13 +245,20 @@ export function resolveMemberAtoms(
   const spriteDims: SpriteDimsLookup | undefined = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
   const rendered: MemberRenderAtom[] = [];
   let width = 0;
+  // A2s R2i: the row's own line height -- MAX over atom contributions (see
+  // `MemberRowBuild.height`'s doc comment). Seeded 0: `buildStripeAtoms`
+  // never returns an empty atom list (its empty-stripe fallback is one
+  // space atom, which contributes the plain text line height), so a
+  // measurable row always ends > 0.
+  let height = 0;
   for (const atom of atoms) {
     const resolved = resolveOneAtom(atom, baseFont, measurer, sprites, spriteDims);
     if (resolved === undefined) continue;
     rendered.push(resolved.atom);
     width += resolved.width;
+    if (resolved.lineHeight > height) height = resolved.lineHeight;
   }
-  return { atoms: rendered, width };
+  return { atoms: rendered, width, height };
 }
 
 /** One loop-body iteration of {@link resolveMemberAtoms} -- factored out to
@@ -297,7 +271,8 @@ function resolveOneAtom(
   measurer: StringMeasurer,
   sprites: SpriteRegistry | undefined,
   spriteDims: SpriteDimsLookup | undefined,
-): { readonly atom: MemberRenderAtom; readonly width: number } | undefined {
+): ResolvedMemberAtom | undefined {
+  if (atom.kind === 'emoji') return resolveEmojiAtom(atom);
   if (atom.kind === 'text') {
     const width = measurer.measure(atom.text, atomFontSpec(atom.font)).width;
     // G2 N57 item 38: `DriverTextSvg.java`'s `text.matches("^\\s*$")`
@@ -325,49 +300,24 @@ function resolveOneAtom(
         ...(atom.url !== undefined ? { url: atom.url } : {}),
       },
       width,
+      lineHeight: atomTextLineHeight(atom.font.size),
     };
   }
   if (atom.kind === 'inline') {
     if (atom.atom.kind === 'openiconic') {
       const resolved = resolveOpenIconicAtom(atom.atom, atom.ambientFont, baseFont);
-      return resolved === undefined ? undefined : { atom: resolved, width: resolved.width };
+      return resolved === undefined
+        ? undefined
+        : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
     }
     const resolved = resolveInlineAtom(atom.atom, baseFont, sprites, spriteDims);
-    return resolved === undefined ? undefined : { atom: resolved, width: resolved.width };
+    return resolved === undefined
+      ? undefined
+      : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
   }
   // 'latex': dropped, see MemberRenderAtom's doc comment (zero corpus reach).
   // #lizard forgives -- pre-existing 5 PARAM/35 NLOC (unchanged by A2s F-B).
   return undefined;
-}
-
-/**
- * G2 N41: resolves an OpenIconic `<&glyph>` atom -- `undefined` for an
- * unrecognized glyph name (should not occur: `creole-atoms-openicon.ts
- * #buildOpenIconSpan` already filters unknown names before an atom is ever
- * built, but this stays defensive rather than assuming that invariant holds
- * forever). `factor = openIconicFactor(atom.scale, ambientFontSize)` --
- * `ambientFontSize` comes from `ambientFont` (the font active AT THE POINT
- * the markup was recognized, `Atom.ts`'s own field doc comment), falling
- * back to `baseFont.size` (the ROW's own base font) when unset (the
- * `buildLiteralAtoms` path, which always threads `ambientFont`, so this
- * fallback is defensive only). Color precedence (`AtomOpenIconic` ctor):
- * forced `color=`/`#RRGGBB` override wins; else the ambient font's own
- * color; else the row's base font color; else hardcoded black.
- */
-function resolveOpenIconicAtom(
-  atom: Extract<InlineAtomToken, { kind: 'openiconic' }>,
-  ambientFont: FontConfiguration | undefined,
-  baseFont: FontConfiguration,
-): MemberRenderAtom | undefined {
-  if (!isKnownOpenIconicGlyph(atom.name)) return undefined;
-  const fontSize = ambientFont?.size ?? baseFont.size;
-  const factor = openIconicFactor(atom.scale, fontSize);
-  const fill =
-    atom.forcedColor !== undefined
-      ? resolveColorToSvgHex(atom.forcedColor)
-      : (ambientFont?.color ?? baseFont.color ?? '#000000');
-  const dims = openIconicDims(factor);
-  return { kind: 'vector', name: atom.name, factor, fill, width: dims.width, height: dims.height };
 }
 
 /** One-stop build for a member row: classify + build + resolve + measure --
@@ -441,60 +391,7 @@ export function buildWrappedMemberRows(
   return rows;
 }
 
-/**
- * A2s F-B B5: `Display.getWithNewlines`' physical-line split, applied to one
- * member display string BEFORE any creole processing -- literal 2-char
- * `\n`/`\r`/`\l` escapes break the line (`\r`/`\l` alignment side effects
- * have no member-row sizing impact; SIMPLE_LINE rows draw left-aligned),
- * `\t` -> real tab, `\\` -> one backslash, other `\x` kept verbatim, raw
- * spans (`[[`..`]]`, `<math>`/`<latex>`) untouched. The gate is hardcoded
- * true (Pragma.java:95-97); the Jaws `BLOCK_E1_*` sentinel branches
- * (Display.java:316-341, preprocessor-internal chars that never reach this
- * AST) are not ported.
- * @see ~/git/plantuml/.../klimt/creole/Display.java:262-345 (getWithNewlines)
- */
-export function splitMemberDisplayLines(s: string): readonly string[] {
-  // #lizard forgives -- one-to-one port of getWithNewlines' escape dispatch.
-  const result: string[] = [];
-  let current = '';
-  let rawMode = false;
-  for (let i = 0; i < s.length; i++) {
-    const c = s[i]!;
-    const sub = s.slice(i);
-    // Display.java:273-277 -- raw spans suppress escape handling.
-    if (sub.startsWith('<math>') || sub.startsWith('<latex>') || sub.startsWith('[[')) rawMode = true;
-    else if (sub.startsWith('</math>') || sub.startsWith('</latex>') || sub.startsWith(']]')) rawMode = false;
-    if (!rawMode && c === '\\' && i < s.length - 1) {
-      // Display.java:288-313 -- legacyReplaceBackslashNByNewline branch.
-      const c2 = s[i + 1]!;
-      i++;
-      if (c2 === 'n' || c2 === 'r' || c2 === 'l') {
-        result.push(current); // Display.java:292-304 -- all three break.
-        current = '';
-      } else if (c2 === 't') {
-        current += '\t'; // Display.java:305-306
-      } else if (c2 === '\\') {
-        current += c2; // Display.java:308-309
-      } else {
-        current += c + c2; // Display.java:310-312
-      }
-    } else {
-      current += c;
-    }
-  }
-  result.push(current); // Display.java:344
-  return result;
-}
-
-/** G2 N65 item 35: plain-text rendering of one wrapped sub-line's own atoms
- *  (non-text atoms contribute nothing -- a member row's own `ClassifierGeo
- *  .rows[].text` field is UNCONSUMED by production rendering whenever
- *  `row.atoms` is set, `renderer-classifier-box.ts#renderRowText`'s own
- *  `row.atoms !== undefined` early branch; this exists only to keep that
- *  field non-empty/informative for a wrapped continuation row, matching the
- *  pre-existing single-row convention of storing the member's own display
- *  text there). */
-export function atomsToPlainText(atoms: readonly MemberRenderAtom[]): string {
-  return atoms.filter((a): a is Extract<MemberRenderAtom, { kind: 'text' }> => a.kind === 'text')
-    .map((a) => a.text).join('');
-}
+// A2s R2i: `splitMemberDisplayLines`/`atomsToPlainText` moved to
+// ./class-member-display.ts (500-line cap) -- re-exported so every
+// pre-existing import site keeps working unchanged.
+export { splitMemberDisplayLines, atomsToPlainText } from './class-member-display.js';

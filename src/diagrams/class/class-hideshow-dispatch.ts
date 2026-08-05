@@ -23,6 +23,23 @@ import {
  *  `if (x !== null) { push; return; }` branches, same order. */
 type HideShowResolver = (state: ParseState, input: string) => boolean;
 
+/**
+ * A2s R2g: record the enclosing package/namespace onto a just-parsed
+ * `CommandHideShowByGender`-family directive — upstream ANDs the gender with
+ * `byPackage(getCurrentGroup())` whenever the current group is non-root
+ * (classdiagram/command/CommandHideShowByGender.java:272-273; the apply-side
+ * gate is `class-directives-removal.ts#directiveAppliesTo`). Only the THREE
+ * gender-command forms are stamped (global-portion, entity-qualified,
+ * type-keyword): `CommandHideShow2`'s pattern form and
+ * `CommandHideShowByVisibility` have no such AND upstream, and the
+ * `hide [<<pattern>>] stereotype(s)` label form's applier lives in
+ * `class-stereotype.ts` (unscoped today — no corpus reach, out of R2g's
+ * write-set).
+ */
+function stampGroupScope(state: ParseState, directive: { scopeNsId?: string }): void {
+  if (state.activeNamespace !== null) directive.scopeNsId = state.activeNamespace;
+}
+
 const HIDE_SHOW_RESOLVERS: readonly HideShowResolver[] = [
   // G2 N24: `hide [<<pattern>>] stereotype(s)` — tried BEFORE the entity-
   // pattern parser below: that parser's own `\S+` alternative ambiguously
@@ -34,6 +51,7 @@ const HIDE_SHOW_RESOLVERS: readonly HideShowResolver[] = [
   (state, input) => {
     const directive = parseHideShowDirective(input);
     if (directive === null) return false;
+    stampGroupScope(state, directive);
     state.ast.directives.push(directive);
     return true;
   },
@@ -52,6 +70,7 @@ const HIDE_SHOW_RESOLVERS: readonly HideShowResolver[] = [
   (state, input) => {
     const entity = parseHideShowEntityDirective(input);
     if (entity === null) return false;
+    stampGroupScope(state, entity);
     (state.ast.hideEntityDirectives ??= []).push(entity);
     return true;
   },
@@ -63,6 +82,7 @@ const HIDE_SHOW_RESOLVERS: readonly HideShowResolver[] = [
   (state, input) => {
     const kindDirective = parseHideShowKindDirective(input);
     if (kindDirective === null) return false;
+    stampGroupScope(state, kindDirective);
     (state.ast.hideKindDirectives ??= []).push(kindDirective);
     return true;
   },

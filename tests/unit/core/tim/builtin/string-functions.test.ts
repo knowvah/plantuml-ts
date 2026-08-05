@@ -88,24 +88,27 @@ describe('Sentinel-returning literals', () => {
       new Tabulation().executeReturnFunction(fakeContext(), NO_MEMORY, LOC, [], NO_NAMED).toString().codePointAt(0),
     ).toBe(0xe111);
   });
-  // Batch SI5a-4: `%newline` / `%n` / `%breakline` take upstream's OTHER branch
-  // -- `JawsFlags.USE_BLOCK_E1_IN_NEWLINE_FUNCTION` is `false` in this port, so
-  // they return a real newline instead of a BLOCK_E1 sentinel. See
-  // `jaws-constants.ts` for why (no Jaws/Creole decoder downstream: a sentinel
-  // would reach the SVG as an invisible private-use character, where the
-  // newline is split into real lines by `TContext#applyFunctionsAndVariables
-  // Internal`, preserving the pre-TIM `%n()` behavior `tests/unit/preprocessor
-  // .test.ts` pins). The other four sentinels below are unaffected.
-  it('%newline returns a real newline (USE_BLOCK_E1_IN_NEWLINE_FUNCTION is false)', () => {
-    expect(new Newline().executeReturnFunction(fakeContext(), NO_MEMORY, LOC, [], NO_NAMED).toString()).toBe('\n');
+  // Mission A2s R2b: `%newline` / `%n` / `%breakline` take upstream's REAL
+  // branch -- `JawsFlags.USE_BLOCK_E1_IN_NEWLINE_FUNCTION` is `true`
+  // (jaws/JawsFlags.java:40), so they return the inline BLOCK_E1 sentinel,
+  // decoded as a line break by the Display layer (`DisplayNewlines.ts#
+  // parseWithNewlines`), NOT a real newline that splits the source line.
+  // See `jaws-constants.ts` for the flip rationale (rozudo-79-zavu288:
+  // the legacy `"\n"` branch truncated `note ... : some%n()%n()notes`).
+  it('%newline returns the BLOCK_E1_NEWLINE code point (USE_BLOCK_E1_IN_NEWLINE_FUNCTION is true)', () => {
+    expect(
+      new Newline().executeReturnFunction(fakeContext(), NO_MEMORY, LOC, [], NO_NAMED).toString().codePointAt(0),
+    ).toBe(0xe100);
   });
   it('%n is an alias for %newline', () => {
     expect(new NewlineShort().executeReturnFunction(fakeContext(), NO_MEMORY, LOC, [], NO_NAMED).toString()).toBe(
       new Newline().executeReturnFunction(fakeContext(), NO_MEMORY, LOC, [], NO_NAMED).toString(),
     );
   });
-  it('%breakline returns a real newline (same JawsFlags branch as %newline)', () => {
-    expect(new Breakline().executeReturnFunction(fakeContext(), NO_MEMORY, LOC, [], NO_NAMED).toString()).toBe('\n');
+  it('%breakline returns the BLOCK_E1_BREAKLINE code point (same JawsFlags branch)', () => {
+    expect(
+      new Breakline().executeReturnFunction(fakeContext(), NO_MEMORY, LOC, [], NO_NAMED).toString().codePointAt(0),
+    ).toBe(0xe103);
   });
 });
 

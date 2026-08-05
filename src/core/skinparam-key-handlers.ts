@@ -114,7 +114,17 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
   [['iconpublicbackgroundcolor'], (acc, _v, color) => { acc.iconPublicBackgroundColor = color; }],
   // not colors — raw values
   [['fontname', 'defaultfontname'], (acc, value) => { acc.fontFamily = value; }],
-  [['fontsize', 'defaultfontsize'], (acc, value) => { acc.fontSize = Number(value); }],
+  [['fontsize'], (acc, value) => { acc.fontSize = Number(value); }],
+  [['defaultfontsize'], (acc, value) => {
+    // R2j mizupo-59: an EXPLICIT defaultFontSize is a DISTINCT tier of
+    // SkinParam#getFontSize (SkinParam.java:441-448), between per-param
+    // skinparams and each FontParam's own default -- record the explicit-set
+    // marker (theme.ts#defaultFontSize) alongside the ambient fontSize. The
+    // finite guard mirrors upstream's isDigits check (a garbage value falls
+    // through to the FontParam default, it does not poison the tier).
+    acc.fontSize = Number(value);
+    acc.defaultFontSize = parseFiniteNumber(value);
+  }],
   [['linetype'], (acc, value) => {
     const v = value.trim().toLowerCase();
     if (v === 'ortho' || v === 'polyline') acc.linetype = v;

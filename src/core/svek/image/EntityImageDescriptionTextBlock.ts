@@ -35,6 +35,7 @@ import { buildLineAtoms, type LineBuildAtoms } from '../../klimt/creole/legacy/S
 import { getSplitted } from '../../klimt/creole/Fission.js';
 import { manageGuillemet, type GuillemetPair } from '../../text/Guillemet.js';
 import { renderLatexAsImage } from '../../latex.js';
+import { emojiBoxDim, emojiRenderRun } from '../../klimt/creole/atom/AtomEmoji.js';
 
 /**
  * SI15 T1 (ADR-1): widens `AtomImageResolver`'s `image` variant with the
@@ -163,6 +164,9 @@ function measureAtomsWidthHeight(
   atoms: readonly CreoleAtom[],
   resolveAtomImage: AtomImageResolver | undefined,
 ): { width: number; height: number } {
+  // #lizard forgives(cyclomatic_complexity, nloc) -- one flat per-atom-kind
+  // dispatch loop (R2i adds the emoji width/height branch to a pre-existing
+  // at-cap shape).
   let width = 0;
   let height = 0;
   for (const atom of atoms) {
@@ -176,6 +180,15 @@ function measureAtomsWidthHeight(
       const resolved = renderLatexAsImage(atom.expr, atom.color ?? '#000000');
       width += resolved.width;
       if (resolved.height > height) height = resolved.height;
+      continue;
+    }
+    // A2s R2i: a `<:name:>` emoji sizes as `AtomEmoji`'s exact contract --
+    // 36*factor box width, 39*factor line height (`klimt/creole/atom/
+    // AtomEmoji.ts#emojiBoxDim`; murava-69-tago286).
+    if (atom.kind === 'emoji') {
+      const dim = emojiBoxDim(atom.factor);
+      width += dim.width;
+      if (dim.height > height) height = dim.height;
       continue;
     }
     const resolved = resolveAtomImage?.(atom.atom);
@@ -210,6 +223,8 @@ function measureSingleAtomWidth(
 ): number {
   if (atom.kind === 'text') return measureLine(stringBounder, atom.text, atom.font).width;
   if (atom.kind === 'latex') return renderLatexAsImage(atom.expr, atom.color ?? '#000000').width;
+  // A2s R2i: emoji x-advance is the 36*factor box (see measureAtomsWidthHeight).
+  if (atom.kind === 'emoji') return emojiBoxDim(atom.factor).width;
   const resolved = resolveAtomImage?.(atom.atom);
   return resolved === undefined ? 0 : resolved.width;
 }
@@ -302,6 +317,15 @@ function drawAtoms(
       const resolved = renderLatexAsImage(atom.expr, atom.color ?? '#000000');
       ug.apply(new UTranslate(x, origin.y)).draw(UImage.build(resolved.width, resolved.height, resolved.href));
       x += resolved.width;
+      continue;
+    }
+    // A2s R2i: an emoji draws as its platform-glyph text run
+    // (`atom/AtomEmoji.ts#emojiRenderRun`); x-advance stays the DECLARED
+    // 36*factor box (ADR-2), never this glyph's own measure.
+    if (atom.kind === 'emoji') {
+      const run = emojiRenderRun(atom);
+      ug.apply(new UTranslate(x, origin.y + baselineDy)).draw(UText.build(run.text, run.font));
+      x += emojiBoxDim(atom.factor).width;
       continue;
     }
     // ADR-2: cursor advances by DECLARED width, never ink.

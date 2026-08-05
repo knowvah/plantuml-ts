@@ -447,24 +447,28 @@ describe('preprocessor', () => {
 });
 
 describe('%n() and %newline() built-in expansion', () => {
-  it('%n() in a content line splits into two output lines', () => {
+  // Mission A2s R2b: `JawsFlags.USE_BLOCK_E1_IN_NEWLINE_FUNCTION` is `true`
+  // (upstream jaws/JawsFlags.java:40) -- `%n()`/`%newline()` now return the
+  // inline `Jaws.BLOCK_E1_NEWLINE` sentinel (''), which stays IN the
+  // source line; the Display layer (`DisplayNewlines.ts#parseWithNewlines`,
+  // the port of `Display#getWithNewlines`'s BLOCK_E1 branches) decodes it
+  // as a line break. The old `false`-branch behavior (a real newline, split
+  // into separate source lines) destroyed single-line commands whose TEXT
+  // used `%n()`: rozudo-79-zavu288's `note top of foo : some%n()%n()notes`
+  // truncated to "some", where the jar keeps ONE note with 3 display lines.
+  it('%n() in a content line stays inline as the BLOCK_E1_NEWLINE sentinel', () => {
     const { lines } = preprocess('@startuml\n:hello %n() world;\n@enduml');
-    // trimEnd() strips the trailing space from the first segment
-    expect(lines).toContain(':hello');
-    expect(lines).toContain(' world;');
+    expect(lines).toContain(':hello  world;');
   });
 
   it('%newline() behaves identically to %n()', () => {
     const { lines } = preprocess('@startuml\n:a %newline() b;\n@enduml');
-    expect(lines).toContain(':a');
-    expect(lines).toContain(' b;');
+    expect(lines).toContain(':a  b;');
   });
 
-  it('multiple %n() calls produce multiple splits', () => {
+  it('multiple %n() calls produce multiple sentinels on one line', () => {
     const { lines } = preprocess('@startuml\n:x %n() y %n() z;\n@enduml');
-    expect(lines).toContain(':x');
-    expect(lines).toContain(' y');
-    expect(lines).toContain(' z;');
+    expect(lines).toContain(':x  y  z;');
   });
 
   it('line without %n() is emitted unchanged', () => {
@@ -472,7 +476,11 @@ describe('%n() and %newline() built-in expansion', () => {
     expect(lines).toContain(':hello;');
   });
 
-  it('%n() is case-insensitive', () => {
+  it('case-folded %N() is not a TIM function; flatten still splits it', () => {
+    // TIM function names are case-sensitive (upstream TimLoader): `%N()`
+    // survives the interpreter as literal text and is split into source
+    // lines by `flatten`'s `RE_NEWLINE_CALL_ANY_CASE` (pre-existing,
+    // port-specific accommodation -- unchanged by the R2b flag flip).
     const { lines } = preprocess('@startuml\n:a %N() b;\n@enduml');
     expect(lines).toContain(':a');
     expect(lines).toContain(' b;');

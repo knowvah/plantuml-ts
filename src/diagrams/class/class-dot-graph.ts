@@ -429,7 +429,7 @@ export function buildDotGraph(
   // Notes lay out as their own nodes + connector edges (Svek note-on-entity).
   // `anchors` also routes a `note <pos> of <package>` target to that
   // package's `zaent-*` point anchor (packageEndpointAnchors scans notes too).
-  const noteParts = buildNoteGraphParts(ast.notes, theme, measurer, anchors);
+  const noteParts = buildNoteGraphParts(ast.notes, theme, measurer, anchors, ast.sprites);
   dotNodes.push(...noteParts.nodes);
   dotEdges.push(...noteParts.edges);
 

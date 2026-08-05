@@ -35,12 +35,18 @@
  */
 import { FontStyle } from '../../shape/UText.js';
 import type { Command } from '../command/Command.js';
-import { createStyleCommands, createBackcolorCommands } from '../command/CommandCreoleStyle.js';
+import {
+  createStyleCommands,
+  createStyleCommandsWithoutCreoleForm,
+  createBackcolorCommands,
+} from '../command/CommandCreoleStyle.js';
 import { createSizeChangeCommands } from '../command/CommandCreoleSizeChange.js';
 import { createColorChangeCommands } from '../command/CommandCreoleColorChange.js';
 import { createColorAndSizeChangeCommands } from '../command/CommandCreoleColorAndSizeChange.js';
 import { createFontFamilyChangeCommands } from '../command/CommandCreoleFontFamilyChange.js';
+import { createEmojiCommand } from '../command/CommandCreoleEmoji.js';
 import { createLatexCommand } from '../command/CommandCreoleLatex.js';
+import { createMonospacedCommand } from '../command/CommandCreoleMonospaced.js';
 import { createUrlCommand } from '../command/CommandCreoleUrl.js';
 
 /** Upstream: `CommandCreoleBuilder#addCommand` — fans one Command's
@@ -74,10 +80,19 @@ const L1_STYLES: readonly FontStyle[] = [
  *  be tried first -- its pattern requires a `size=`/`color=` attr, so a
  *  bare `<font:Name>` correctly falls through to `CommandCreoleFontFamily
  *  Change` only when the stricter pattern fails to match). */
-function buildCommandMap(): Map<string, Command[]> {
+function buildCommandMap(mode: 'FULL' | 'OTHER'): Map<string, Command[]> {
   const map = new Map<string, Command[]>();
   for (const style of L1_STYLES) {
-    for (const cmd of createStyleCommands(style)) addCommand(map, cmd);
+    // A2s R2a: the creole-pure `__` UNDERLINE command is FULL-gated
+    // upstream (`if (modeSimpleLine == CreoleMode.FULL)`, java :85-86) —
+    // the ONLY difference between the FULL and OTHER maps. Jar reach:
+    // class NAME headers (`CreoleMode.FULL_BUT_UNDERSCORE`,
+    // EntityImageClassHeader.java:107-108) measure `__Test__` raw
+    // (curupe-50-kibu120 golden).
+    const cmds = style === FontStyle.UNDERLINE && mode === 'OTHER'
+      ? createStyleCommandsWithoutCreoleForm(style)
+      : createStyleCommands(style);
+    for (const cmd of cmds) addCommand(map, cmd);
   }
   // Upstream ctor position (java :96-97): BACKCOLOR legacy + legacyEol,
   // after the style triplets, before the size/color commands. Ordering
@@ -86,13 +101,28 @@ function buildCommandMap(): Map<string, Command[]> {
   for (const cmd of createSizeChangeCommands()) addCommand(map, cmd);
   for (const cmd of createColorChangeCommands()) addCommand(map, cmd);
   for (const cmd of createColorAndSizeChangeCommands()) addCommand(map, cmd);
+  // A2s R2i: upstream ctor position (java :109) — after the color commands
+  // (relative order preserved: color/colorAndSize claim their starters
+  // first), before math/latex. Registered in BOTH maps (no mode gate), so
+  // member rows (SIMPLE_LINE) and headers (FULL_BUT_UNDERSCORE) parse it.
+  addCommand(map, createEmojiCommand());
   addCommand(map, createLatexCommand());
   for (const cmd of createFontFamilyChangeCommands()) addCommand(map, cmd);
+  // A2s R2a: upstream ctor position (java :118) — after the font-family
+  // pair, before url. `""` is a starter no other command claims.
+  addCommand(map, createMonospacedCommand());
   addCommand(map, createUrlCommand());
   return map;
 }
 
-/** Upstream: `CommandCreoleBuilder.FULL` — built once, reused for every
- *  line (upstream caches per-mode singletons; this port has exactly one
- *  mode, so exactly one singleton). */
-export const CREOLE_COMMANDS: ReadonlyMap<string, readonly Command[]> = buildCommandMap();
+/** Upstream: `CommandCreoleBuilder.FULL` (java :69) — built once, reused
+ *  for every line. */
+export const CREOLE_COMMANDS: ReadonlyMap<string, readonly Command[]> = buildCommandMap('FULL');
+
+/** Upstream: `CommandCreoleBuilder.OTHER` (java :70) — the map every
+ *  non-FULL `CreoleMode` selects (StripeSimple.java:112-115), differing
+ *  from FULL only by the creole-pure `__` underline command (see
+ *  {@link buildCommandMap}). A2s R2a: added for the class-name header's
+ *  `FULL_BUT_UNDERSCORE` reach; `legacy/StripeSimple.ts#buildStripeAtoms`
+ *  selects it via its optional `mode` parameter. */
+export const CREOLE_COMMANDS_OTHER: ReadonlyMap<string, readonly Command[]> = buildCommandMap('OTHER');

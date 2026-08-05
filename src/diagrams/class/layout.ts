@@ -27,11 +27,12 @@
  * this file under the 500-line cap after adding shadow support.
  */
 
-import type { ClassDiagramAST, HideTarget } from './ast.js';
+import type { ClassDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as layout } from '../../core/graph-layout.js';
 import { filterRemovedEntities, computeHiddenIds } from './class-directives.js';
+import { foldEffectiveActions } from './class-directives-removal.js';
 import { collapseEmptyNamespacesFinal } from './class-namespace.js';
 import { mapNoteGeos, type NoteGeo } from './note-layout.js';
 import { findFreestandingNoteConnectors } from './note-freestanding.js';
@@ -58,20 +59,6 @@ export type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry } from './clas
 // ---------------------------------------------------------------------------
 
 /**
- * Resolve the final effective action for each hide/show target.
- * Later directives in the array override earlier ones (last writer wins).
- */
-function resolveEffectiveActions(
-  ast: ClassDiagramAST,
-): Map<HideTarget, 'hide' | 'show'> {
-  const effectiveAction = new Map<HideTarget, 'hide' | 'show'>();
-  for (const directive of ast.directives) {
-    effectiveAction.set(directive.target, directive.action);
-  }
-  return effectiveAction;
-}
-
-/**
  * Pre-measure every classifier, honoring "hide members" / "hide empty
  * members" / "hide empty fields" / "hide empty methods".
  *
@@ -91,23 +78,26 @@ function preMeasureClassifiers(
   ast: ClassDiagramAST,
   theme: Theme,
   measurer: StringMeasurer,
-  effectiveActions: Map<HideTarget, 'hide' | 'show'>,
 ): Map<string, MeasuredClassifier> {
-  const hideMembers      = effectiveActions.get('members')       === 'hide';
-  const hideEmptyMembers = effectiveActions.get('empty members') === 'hide';
-  const hideEmptyFields  = effectiveActions.get('empty fields')  === 'hide';
-  const hideEmptyMethods = effectiveActions.get('empty methods') === 'hide';
-  // A2s F-A / A5: global `hide fields`/`hide methods` (G2 N27) suppress the
-  // WHOLE compartment, not just its rows -- upstream's `getBody` returns the
-  // fields-only / methods-only / empty block with NO `MethodsOrFieldsArea`
-  // at all for the hidden portion (jar-verified `vegubu-29-bomu147`: `hide
-  // methods` box is 40px, not 40px + the empty-compartment chrome).
-  // @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:240-244
-  const hideFields       = effectiveActions.get('fields')        === 'hide';
-  const hideMethods      = effectiveActions.get('methods')       === 'hide';
-
   const measuredMap = new Map<string, MeasuredClassifier>();
   for (const classifier of ast.classifiers) {
+    // A2s R2g: the directive fold is PER CLASSIFIER — a directive parsed
+    // inside a `package { }` reaches only that package's direct children
+    // (CommandHideShowByGender.java:272-273's byPackage AND; see
+    // class-directives-removal.ts#directiveAppliesTo).
+    const effectiveActions = foldEffectiveActions(ast.directives, classifier);
+    const hideMembers      = effectiveActions.get('members')       === 'hide';
+    const hideEmptyMembers = effectiveActions.get('empty members') === 'hide';
+    const hideEmptyFields  = effectiveActions.get('empty fields')  === 'hide';
+    const hideEmptyMethods = effectiveActions.get('empty methods') === 'hide';
+    // A2s F-A / A5: global `hide fields`/`hide methods` (G2 N27) suppress the
+    // WHOLE compartment, not just its rows -- upstream's `getBody` returns the
+    // fields-only / methods-only / empty block with NO `MethodsOrFieldsArea`
+    // at all for the hidden portion (jar-verified `vegubu-29-bomu147`: `hide
+    // methods` box is 40px, not 40px + the empty-compartment chrome).
+    // @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:240-244
+    const hideFields       = effectiveActions.get('fields')        === 'hide';
+    const hideMethods      = effectiveActions.get('methods')       === 'hide';
     const visibleMembers = classifier.members.filter((m) => m.hidden !== true);
     // Object leaves route EVERY member into "fields" regardless of
     // method-like syntax (`BodierLikeClassOrObject#getFieldsToDisplay`'s
@@ -235,10 +225,9 @@ function layoutSinglePage(
   // class-namespace.ts#collapseEmptyNamespacesFinal). Before measuring.
   const collapsedAst = collapseEmptyNamespacesFinal(ast);
 
-  // Resolve effective hide/show directive actions (last writer wins per target)
-  const effectiveActions = resolveEffectiveActions(collapsedAst);
-  // Pre-measure all classifiers
-  const measuredMap = preMeasureClassifiers(collapsedAst, theme, measurer, effectiveActions);
+  // Pre-measure all classifiers (the hide/show directive fold is per
+  // classifier inside — last applicable writer wins per target, A2s R2g)
+  const measuredMap = preMeasureClassifiers(collapsedAst, theme, measurer);
 
   // Degenerate diagram (0-1 entities, no relationships) — skip graphviz
   // entirely, mirroring GraphvizImageBuilder.buildImage:211-223. Checked on

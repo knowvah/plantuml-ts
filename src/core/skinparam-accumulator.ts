@@ -16,6 +16,9 @@ import type { ActorStyle } from './skin/ActorStyle.js';
 export interface SkinparamAccumulator {
   fontFamily: string | undefined;
   fontSize: number | undefined;
+  /** R2j: EXPLICIT `skinparam defaultFontSize` marker — see
+   *  `theme.ts#defaultFontSize`'s own doc comment. */
+  defaultFontSize: number | undefined;
   linetype: 'ortho' | 'polyline' | undefined;
   nodeSep: number | undefined;
   rankSep: number | undefined;
@@ -48,6 +51,9 @@ export interface SkinparamAccumulator {
   classBorder: string | undefined;
   classBorderThickness: number | undefined;
   classBorderThicknessByStereo: Record<string, number> | undefined;
+  /** R2j: `skinparam classAttributeFontSize<<Stereo>>` — see
+   *  `theme-graph-colors-a.ts#classAttributeFontSizeByStereo`. */
+  classAttributeFontSizeByStereo: Record<string, number> | undefined;
   stateBorderColorByStereo: Record<string, string> | undefined;
   stateBackgroundColorByStereo: Record<string, string> | undefined;
   stateFontColorByStereo: Record<string, string> | undefined;
@@ -103,13 +109,14 @@ export interface SkinparamAccumulator {
  * cap.
  */
 const SCALAR_FIELD_NAMES = [
-  'fontFamily', 'fontSize', 'linetype', 'nodeSep', 'rankSep', 'wrapWidth',
+  'fontFamily', 'fontSize', 'defaultFontSize', 'linetype', 'nodeSep', 'rankSep', 'wrapWidth',
   'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize', 'roundCorner', 'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
   'packageStyle', 'fixCircleLabelOverlapping', 'shadowing', 'background',
   'border', 'text', 'arrow', 'noteBackground', 'classBackground',
   'interfaceBackground', 'enumBackground', 'actorStroke', 'packageBackground',
   'packageBorder', 'packageBorderThickness', 'classBorder',
   'classBorderThickness', 'classBorderThicknessByStereo',
+  'classAttributeFontSizeByStereo',
   'stateBorderColorByStereo', 'stateBackgroundColorByStereo',
   'stateFontColorByStereo', 'stateFontSizeByStereo', 'arrowThickness',
   'classAttributeFontSize', 'classAttributeFontFamily',

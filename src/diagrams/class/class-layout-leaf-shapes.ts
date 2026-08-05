@@ -99,3 +99,25 @@ export function measureLollipop(
   };
   return { width: LOLLIPOP_SIZE, height: LOLLIPOP_SIZE, rows: [row], dividerYs: [] };
 }
+
+/** `EntityImageAssociation.SIZE` (java:54) -- the `<> name` association
+ *  diamond's half-extent on BOTH axes. */
+const ASSOCIATION_DIAMOND_SIZE = 12;
+
+/**
+ * A2s R2h (cukaze-78-zija070): the `<> name` association diamond
+ * (`CommandDiamondAssociation` -> `LeafType.ASSOCIATION`) is a fixed
+ * `(SIZE*2, SIZE*2)` image -- `EntityImageAssociation#calculateDimensionSlow`
+ * ignores the declared name entirely (never measured, and `drawU` paints
+ * only the `UPolygon` diamond, never a label), so no text row is emitted.
+ * Jar golden: cukaze-78's diamond node is 0.333333x0.333333in (24x24px).
+ * @see ~/git/plantuml/.../svek/image/EntityImageAssociation.java:54,60-62
+ */
+export function measureAssociationDiamond(): MeasuredClassifier {
+  return {
+    width: ASSOCIATION_DIAMOND_SIZE * 2,
+    height: ASSOCIATION_DIAMOND_SIZE * 2,
+    rows: [],
+    dividerYs: [],
+  };
+}
