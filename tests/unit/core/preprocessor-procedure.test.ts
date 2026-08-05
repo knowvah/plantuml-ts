@@ -81,7 +81,13 @@ describe('preprocessor: TIM !procedure family', () => {
       'init_class("foo2")',
       'msg("foo1", "foo2")',
     ]);
+    // A2s: blank SOURCE lines between directive blocks now survive the
+    // preprocessor (flatten keeps blanks -- faithful to the jar's line
+    // stream); expectations updated from the old drop-blanks semantics.
     expect(result).toEqual([
+      '',
+      '',
+      '',
       'class foo1 {',
       '  toString()',
       '  hashCode()',
@@ -149,6 +155,8 @@ describe('preprocessor: TIM !procedure family', () => {
       'SALT(choose)',
     ]);
     expect(result).toEqual([
+      '',
+      '',
       '{{salt',
       '{+',
       '<b>an example',
@@ -173,7 +181,7 @@ describe('preprocessor: TIM !procedure family', () => {
       '',
       'addNote(%retrieve_procedure("greeting"), note1)',
     ]);
-    expect(result).toEqual(['    note "hello world" as note1']);
+    expect(result).toEqual(['', '', '    note "hello world" as note1']);
   });
 
   it('%retrieve_procedure joins a multi-line body with newlines (xadado-92-lazo250)', () => {
@@ -209,6 +217,8 @@ describe('preprocessor: TIM !procedure family', () => {
       'addNote(%retrieve_procedure("$OBJ"), note1)',
     ]);
     expect(result).toEqual([
+      '',
+      '',
       `    note "class Object {${BLOCK_E1_NEWLINE}  name : token${BLOCK_E1_NEWLINE}  name : flag${BLOCK_E1_NEWLINE}}" as note1`,
     ]);
   });
