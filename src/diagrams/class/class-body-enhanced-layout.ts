@@ -24,6 +24,7 @@
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ClassifierGeo } from './layout.js';
+import type { Member } from './ast.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { buildMemberRow, type MemberRowBuild } from './class-member-creole.js';
 import { formatMemberText } from './class-layout-helpers.js';
@@ -34,7 +35,6 @@ import {
   ClassifierBodyGeometry,
   ELEMENT_DEFAULT_LINE_THICKNESS,
   BODY_ENHANCED_MARGIN_X,
-  memberLineCount,
 } from './class-body-enhanced-geometry.js';
 
 const ROW_ICON_ZONE_WIDTH = 14;
@@ -152,26 +152,49 @@ interface RowsBlockResult {
  *  `contentTop`. */
 function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, contentTop: number): RowsBlockResult {
   const { fontSpec, measurer, sprites, baselineOffset } = ctx;
-  const members = lines.map(parseMemberLine).filter((m) => m !== null);
+  // A2s R2d (pejone-71-tige404/xonamo-50-podo529): a null parse is a blank
+  // (or blank-equivalent) line, and upstream's enhanced path KEEPS it as one
+  // empty row -- `rawBodyWithoutHidden()` wraps every raw line in a Member
+  // (BodierLikeClassOrObject.java:191-205), `BodyEnhanced1#getArea` adds
+  // each non-separator line to its block's display (BodyEnhanced1.java:
+  // 159-166), and `MethodsOrFieldsArea#calculateDimensionOnlyMembers` sums
+  // one row height per display line (MethodsOrFieldsArea.java:161-166). The
+  // classic-body empties filtering (getFieldsToDisplay/getMethodsToDisplay,
+  // java:114-172) never runs on this path. jar-verified: one 14px row per
+  // blank, zero width contribution (scratch R2d probes p1/p3).
+  const members = lines.map(
+    (line): Member => parseMemberLine(line) ?? { visibility: '+', name: '', isStatic: false, isAbstract: false },
+  );
   // NOT point-free: `formatMemberText` has an optional 2nd param (A13
   // `keepVisibilityChar`) that `.map`'s index argument would silently fill.
   const texts = members.map((m) => formatMemberText(m));
   const builds: MemberRowBuild[] = members.map((m, i) => buildMemberRow(texts[i]!, m, fontSpec, measurer, sprites));
   const hasIcon = members.some((m) => m.visibilityExplicit === true);
   const indent = hasIcon ? ROW_INDENT_WITH_ICON : ROW_TEXT_LEFT_MARGIN;
-  const rowHeight = fontSpec.size;
-  const rows: ClassifierGeo['rows'] = members.map((m, i) => ({
-    text: texts[i]!,
-    y: contentTop + i * rowHeight + baselineOffset,
-    indent,
-    width: builds[i]!.width,
-    atoms: builds[i]!.atoms,
-    ...(m.visibilityExplicit === true
-      ? { visibilityIcon: m.visibility, visibilityIsField: m.params === undefined }
-      : {}),
-    ...(m.ownUrl !== undefined ? { url: m.ownUrl } : {}),
-  }));
-  return { rows, width: sectionWidth(builds, hasIcon), contentHeight: members.length * rowHeight };
+  // A2s R2i follow-up (rotisi-30-loge424 Toto): per-row heights come from
+  // the atom-aware `MemberRowBuild.height` (sprite/img/emoji rows are taller
+  // than the font size), summed row-by-row exactly like the classic path --
+  // `MethodsOrFieldsArea#calculateDimensionOnlyMembers` sums per-member
+  // TextBlock heights (@see MethodsOrFieldsArea.java:161-166); a plain text
+  // row's build height equals the font size, so text-only bodies are
+  // byte-identical to the previous flat `fontSpec.size` stepping.
+  let rowTop = contentTop;
+  const rows: ClassifierGeo['rows'] = members.map((m, i) => {
+    const y = rowTop + baselineOffset;
+    rowTop += builds[i]!.height;
+    return {
+      text: texts[i]!,
+      y,
+      indent,
+      width: builds[i]!.width,
+      atoms: builds[i]!.atoms,
+      ...(m.visibilityExplicit === true
+        ? { visibilityIcon: m.visibility, visibilityIsField: m.params === undefined }
+        : {}),
+      ...(m.ownUrl !== undefined ? { url: m.ownUrl } : {}),
+    };
+  });
+  return { rows, width: sectionWidth(builds, hasIcon), contentHeight: rowTop - contentTop };
 }
 
 /**
@@ -215,7 +238,10 @@ function layoutPlainDividerRows(
   ctx: EnhancedLayoutCtx,
   cursor: number,
 ): { rows: EnhancedBodyPart[]; result: BlockLayoutResult } {
-  const contentHeight = memberLineCount(lines) * ctx.fontSpec.size;
+  // A2s R2d: EVERY line in a rows-block is one row now (blanks included --
+  // see buildRowsBlockRows), so the row count is simply `lines.length`; the
+  // former `memberLineCount` null-parse filter would undercount blank rows.
+  const contentHeight = lines.length * ctx.fontSpec.size;
   const offsets = CLASS_BODY_GEOMETRY.deriveHeightOffsets(contentHeight, char);
   const dividerY = cursor + offsets.dividerY;
   const contentTop = cursor + offsets.contentTop;
@@ -253,7 +279,8 @@ function layoutTitledDividerRows(
   const { fontSpec, measurer, sprites, baselineOffset } = ctx;
   const titleBuild = buildMemberRow(separator.title!, {}, fontSpec, measurer, sprites);
   const dimTitleHeight = fontSpec.size; // a title is always a single creole line
-  const contentHeight = memberLineCount(lines) * fontSpec.size;
+  // A2s R2d: `lines.length`, not `memberLineCount` -- see layoutPlainDividerRows.
+  const contentHeight = lines.length * fontSpec.size;
   const offsets = CLASS_BODY_GEOMETRY.deriveHeightOffsets(contentHeight, separator.char, dimTitleHeight);
   const contentTop = cursor + offsets.contentTop;
   const { rows, width } = buildRowsBlockRows(lines, ctx, contentTop);

@@ -35,6 +35,8 @@ import {
 } from './class-namespace.js';
 import { NOTE_URL, NOTE_COLOR } from './class-notes.js';
 import { stripQuotes } from './class-relationship-parser.js';
+import { parseWithNewlines } from '../../core/klimt/creole/DisplayNewlines.js';
+import { Pragma } from '../../core/skin/Pragma.js';
 
 /**
  * Quark collision: a `package`/`namespace` block reuses the SAME name as an
@@ -106,7 +108,23 @@ export function openNamespaceBlock(
 
   const segments = splitOnSeparator(effectiveId, state.namespaceSeparator);
   if (segments !== null) {
+    // A2s R2d (rakuci-96-tuti371): a nested container's id qualifies to a
+    // dotted path, and `ensureNamespaceChain` creates each level with
+    // `display: seg` -- losing an explicit quoted display (`rectangle " YY "
+    // as YYY {`). Upstream threads the DISPLAY capture verbatim into
+    // `gotoGroup`, which sets it on the NEWLY-created group only (an
+    // existing group keeps its display -- `setDisplay` runs under
+    // `quark.getData() == null`). Mirror both halves: override the chain
+    // leaf's display iff the caller passed a display distinct from the id
+    // (a bare/dotted name keeps segment semantics) AND this call created it.
+    // @see ~/git/plantuml/.../descdiagram/command/CommandPackageWithUSymbol.java:182-198
+    // @see ~/git/plantuml/src/main/java/net/atmp/CucaDiagram.java:349-355
+    const existedBefore = ns.some((n) => n.id === effectiveId);
     state.activeNamespace = ensureNamespaceChain(ns, sep, segments, state.creationCounter, reuseCreationIndex);
+    if (!existedBefore && display !== id) {
+      const leaf = ns.find((n) => n.id === state.activeNamespace);
+      if (leaf !== undefined) leaf.display = display;
+    }
     return state.activeNamespace;
   }
   state.activeNamespace = effectiveId;
@@ -190,7 +208,21 @@ export function closeContainer(state: ParseState, nsId: string): void {
     nsId,
   );
   const idx = state.classifierIndex.get(nsId);
-  if (idx !== undefined) state.ast.classifiers[idx]!.usymbol = usymbol;
+  if (idx !== undefined) {
+    const leaf = state.ast.classifiers[idx]!;
+    leaf.usymbol = usymbol;
+    // A2s R2h (daxeno-00): upstream routes EVERY package/container display
+    // through `Display.getWithNewlines` when the group is created
+    // (CommandPackage.java:182-183's gotoGroup call), so a literal `\n`
+    // break sequence in the header title is already split into real lines
+    // by the time `EntityImageDescription` measures the collapsed leaf.
+    // Mirror it here, where the USymbol leaf materializes -- the ported
+    // scanner (`DisplayNewlines.ts#parseWithNewlines`) is the same one the
+    // note pipeline uses. Verified: with real newlines the description
+    // sizing reproduces daxeno's golden node byte-exact (1.575694x0.847222).
+    const parsed = parseWithNewlines(Pragma.createEmpty(), leaf.display);
+    if (parsed !== null) leaf.display = parsed.lines.join('\n');
+  }
 }
 
 interface Command {
@@ -227,6 +259,36 @@ const USYMBOL_NAMES: ReadonlySet<string> = new Set([
 export const HEADER_STEREO_CAPTURE = '(?:\\s*(<<.+?>>))?';
 
 /**
+ * `USymbols` registry name -> this port's descriptive-leaf keyword (the
+ * `Classifier.usymbol` / `descriptiveContainers` value vocabulary,
+ * `core/descriptive-keywords.ts#KEYWORD_TO_SYMBOL`'s key set). Style
+ * variants collapse onto their base keyword exactly as upstream's keyword
+ * grammar does (`COMPONENT1`/`COMPONENT2`/`COMPONENT_RECTANGLE` are all
+ * spelled `component`, with `skinparam componentStyle` picking the face;
+ * likewise the three plain-actor registry entries -> `actor` +
+ * `actorStyle`). `GROUP`/`PARTITION` have NO leaf keyword in upstream's
+ * `ALL_TYPES` grammar either (they are group-only USymbols) -- absent here,
+ * so a `<<Group>>` package header stays consumed-but-unmapped (the
+ * pre-R2h behavior for the whole gated set).
+ * @see ~/git/plantuml/.../decoration/symbol/USymbols.java:60-95
+ */
+const USYMBOL_REGISTRY_TO_KEYWORD: ReadonlyMap<string, string> = new Map([
+  ['ACTION', 'action'], ['ACTOR_AWESOME', 'actor'], ['ACTOR_HOLLOW', 'actor'],
+  ['ACTOR_STICKMAN', 'actor'], ['ACTOR_STICKMAN_BUSINESS', 'actor/'],
+  ['AGENT', 'agent'], ['ARCHIMATE', 'archimate'], ['ARTIFACT', 'artifact'],
+  ['BOUNDARY', 'boundary'], ['CARD', 'card'], ['CLOUD', 'cloud'],
+  ['COLLECTIONS', 'collections'], ['COMPONENT_RECTANGLE', 'component'],
+  ['COMPONENT1', 'component'], ['COMPONENT2', 'component'],
+  ['CONTROL', 'control'], ['DATABASE', 'database'],
+  ['ENTITY_DOMAIN', 'entity'], ['FILE', 'file'], ['FOLDER', 'folder'],
+  ['FRAME', 'frame'], ['HEXAGON', 'hexagon'], ['INTERFACE', 'interface'],
+  ['LABEL', 'label'], ['NODE', 'node'], ['PACKAGE', 'package'],
+  ['PERSON', 'person'], ['PROCESS', 'process'], ['QUEUE', 'queue'],
+  ['RECTANGLE', 'rectangle'], ['STACK', 'stack'], ['STORAGE', 'storage'],
+  ['USECASE', 'usecase'], ['USECASE_BUSINESS', 'usecase/'],
+]);
+
+/**
  * Store a `package`/`namespace` header's `<<stereotype>>` on its Namespace
  * (A2s F-G mechanism A8; consumed by `collapseEmptyNamespace`,
  * class-namespace.ts, when the group ends EMPTY). `stereoRaw` is the full
@@ -234,7 +296,13 @@ export const HEADER_STEREO_CAPTURE = '(?:\\s*(<<.+?>>))?';
  * stereotype naming a USymbol selects the package SHAPE upstream instead of
  * being displayed (`if (stereotype != null && usymbol == null)
  * p.setStereotype(...)`) -- mirror `USymbols.fromString`'s
- * `goUpperCase(s.replaceAll("\\W", ""))` registry lookup and skip the store.
+ * `goUpperCase(s.replaceAll("\\W", ""))` registry lookup and, instead of
+ * displaying it, record the mapped descriptive keyword in
+ * `state.descriptiveContainers` (A2s R2h, daxeno-00): upstream passes the
+ * `USymbols.fromString` hit to `gotoGroup` as the group's OWN USymbol
+ * (CommandPackage.java:179-183), and the existing `closeContainer` collapse
+ * then attaches it to the collapsed-empty leaf, routing sizing through
+ * `tryMeasureDescriptionLeaf` -> `measureLeafNode`.
  * `CommandNamespace2` (quoted `"Display" as alias` form) passes
  * `gated: false`: upstream sets its stereotype unconditionally.
  * Stored as the inner text (`<<`/`>>` stripped, trimmed) -- the same
@@ -250,7 +318,12 @@ export function setNamespaceStereotype(
   gated: boolean,
 ): void {
   if (stereoRaw === undefined) return;
-  if (gated && USYMBOL_NAMES.has(stereoRaw.replace(/\W/g, '').toUpperCase())) return;
+  const registryName = stereoRaw.replace(/\W/g, '').toUpperCase();
+  if (gated && USYMBOL_NAMES.has(registryName)) {
+    const keyword = USYMBOL_REGISTRY_TO_KEYWORD.get(registryName);
+    if (keyword !== undefined) state.descriptiveContainers.set(nsId, keyword);
+    return;
+  }
   const inner = /<<\s*(.+)\s*>>/.exec(stereoRaw)?.[1]?.trim();
   if (inner === undefined || inner.length === 0) return;
   const ns = state.ast.namespaces.find((n) => n.id === nsId);

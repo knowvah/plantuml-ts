@@ -33,8 +33,16 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
   // 6-pre. Standalone member (dotted ids allowed) — BEFORE relationship
   //    dispatch: CommandAddMethod runs before CommandLinkClass upstream; a
   //    bare `.` is a valid bodyless REL_ARROW (vuresa-33-kumu160).
+  //    A2s R2f (dibinu-95-kavo178): upstream's NAME group is
+  //    `([%pLN_.]+|[%g][^%g]+[%g])` (`%g` = double quote) — the quoted
+  //    alternative was missing here, silently dropping
+  //    `"this is my class" : dummy() ...` member-add lines.
+  //    `ensureClassifier` already strips surrounding quotes (parser.ts,
+  //    `stripQuotes(rawName)`), so the quoted form resolves to the SAME
+  //    classifier a quoted declaration/relationship endpoint created.
+  //    @see ~/git/plantuml/.../classdiagram/command/CommandAddMethod.java:63
   {
-    pattern: /^(\.?\w+(?:\.\w+)*)\s*:(?!:)\s*(.+)$/,
+    pattern: /^("[^"]+"|\.?\w+(?:\.\w+)*)\s*:(?!:)\s*(.+)$/,
     execute(state, match) {
       const classId = match[1]!;
       const memberStr = match[2]!.trim();

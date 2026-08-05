@@ -129,7 +129,11 @@ describe('multi-line empty package/namespace collapse', () => {
     expect(ast.namespaces).toHaveLength(0);
     expect(ast.classifiers).toHaveLength(1);
     expect(ast.classifiers[0]!.kind).toBe('descriptive');
-    expect(ast.classifiers[0]!.display).toBe('<size:18>styled</size>\\nshould be styled');
+    // A2s R2h: the collapse now routes the display through the ported
+    // Display.getWithNewlines (CommandPackage.java:182-183 at gotoGroup),
+    // so the `\n` escape becomes a REAL newline before the leaf is sized --
+    // jar-verified byte-exact on daxeno-00 (1.575694x0.847222in).
+    expect(ast.classifiers[0]!.display).toBe('<size:18>styled</size>\nshould be styled');
   });
 
   // daxeno-00-kasu166: a SECOND, non-empty stereotyped package whose id also
