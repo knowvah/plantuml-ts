@@ -238,6 +238,20 @@ export interface ThemeGraphColorsA {
    *  `skinparam class { AttributeFontSize N }` parsing already produces
    *  (`preprocessor.ts`'s `SkinLoader`-mirroring collector). */
   classAttributeFontSize?: number;
+  /** A2s R2j: `skinparam classAttributeFontSize<<stereo>> N` -- the
+   *  STEREOTYPE-QUALIFIED tier of the SAME `SkinParam#getFontSize` lookup
+   *  as `classAttributeFontSize` above: `getFirstValueNonNullWithSuffix
+   *  ("fontsize" + stereotype.getLabel(...), param)` is consulted BEFORE
+   *  the plain per-param value (SkinParam.java:433-443), so a matching
+   *  stereotype's entry here WINS over `classAttributeFontSize`. A direct
+   *  VALUE lookup, not the `<style>`/`.tagname` cascade -- mirrors
+   *  `classBorderThicknessByStereo` above (same key shape, same
+   *  LOWERCASED-stereotype-label keying, `skinparam-stereo-keys.ts`).
+   *  Read by `class-layout-fonts.ts#resolveAttributeFont`; the header
+   *  font CASCADES from the resolved attribute size exactly as for the
+   *  plain value (jar-verified R2c probes ps/p1 ≡ ps/p4 for the matching
+   *  class; ps/p1's non-stereotyped class ≡ ps/p3's -- untouched). */
+  classAttributeFontSizeByStereo?: Readonly<Record<string, number>>;
   /** Same mechanism, `FontParam.CLASS_ATTRIBUTE`'s font-family override
    *  (`skinparam class { AttributeFontName X }` / `classAttributeFontName
    *  X`). */

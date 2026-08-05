@@ -31,6 +31,7 @@ function applyDefinedFields(
 const ROOT_SCALAR_FIELDS: FieldTable = [
   ['fontFamily', (acc) => acc.fontFamily],
   ['fontSize', (acc) => acc.fontSize],
+  ['defaultFontSize', (acc) => acc.defaultFontSize],
   ['linetype', (acc) => acc.linetype],
   ['nodeSep', (acc) => acc.nodeSep],
   ['rankSep', (acc) => acc.rankSep],
@@ -74,6 +75,7 @@ const GRAPH_OVERRIDE_FIELDS: FieldTable = [
   ['classBorder', (acc) => acc.classBorder],
   ['classBorderThickness', (acc) => acc.classBorderThickness],
   ['classBorderThicknessByStereo', (acc) => acc.classBorderThicknessByStereo],
+  ['classAttributeFontSizeByStereo', (acc) => acc.classAttributeFontSizeByStereo],
   ['stateBorderColorByStereo', (acc) => acc.stateBorderColorByStereo],
   ['stateBackgroundColorByStereo', (acc) => acc.stateBackgroundColorByStereo],
   ['stateFontColorByStereo', (acc) => acc.stateFontColorByStereo],

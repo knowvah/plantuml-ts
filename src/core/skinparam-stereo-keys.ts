@@ -59,6 +59,17 @@ const STATE_FONT_COLOR_STEREO_RE = new RegExp('^statefontcolor<<(.+)>>$');
 // render-time `font-size` emission from this ONE parsed value.
 const STATE_FONT_SIZE_STEREO_RE = new RegExp('^statefontsize<<(.+)>>$');
 
+// A2s R2j: `skinparam classAttributeFontSize<<stereo>> N` -- the class-
+// diagram FontSize analog of `classBorderThickness<<X>>` above:
+// `SkinParam#getFontSize(stereotype, FontParam...)`'s
+// `getFirstValueNonNullWithSuffix("fontsize" + stereotype.getLabel(...))`
+// tier, a DIRECT stereotype-qualified VALUE lookup ABOVE the plain
+// per-param value (SkinParam.java:433-448) -- see `theme-graph-colors-a.ts
+// #classAttributeFontSizeByStereo`'s own doc comment. Jar-verified
+// `sovuxo-25-tepi226` (R2c probes ps/p1|p3|p4: stereotyped ≡ plain value
+// for matching classes; non-matching classes untouched).
+const CLASS_ATTRIBUTE_FONT_SIZE_STEREO_RE = new RegExp('^classattributefontsize<<(.+)>>$');
+
 type StereoHandler = (
   acc: SkinparamAccumulator,
   stereo: string,
@@ -67,7 +78,7 @@ type StereoHandler = (
 
 /**
  * Regex → handler table for stereotype-qualified keys, tried in order
- * (first match wins). The five patterns are mutually exclusive by
+ * (first match wins). The six patterns are mutually exclusive by
  * construction (each requires a distinct literal prefix), so trying them in
  * table order is behaviorally identical to the original if/else-if chain.
  */
@@ -110,6 +121,16 @@ const STEREO_KEY_MATCHERS: ReadonlyArray<readonly [RegExp, StereoHandler]> = [
       if (Number.isFinite(v)) {
         acc.stateFontSizeByStereo ??= {};
         acc.stateFontSizeByStereo[stereo] = v;
+      }
+    },
+  ],
+  [
+    CLASS_ATTRIBUTE_FONT_SIZE_STEREO_RE,
+    (acc, stereo, value) => {
+      const v = Number(value.trim());
+      if (Number.isFinite(v)) {
+        acc.classAttributeFontSizeByStereo ??= {};
+        acc.classAttributeFontSizeByStereo[stereo] = v;
       }
     },
   ],

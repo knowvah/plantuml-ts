@@ -34,11 +34,29 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
     },
   },
   'aws-orange': {
+    // R2j (mizupo-59): the upstream theme file sets `skinparam
+    // defaultFontName "Verdana"` + `skinparam defaultFontSize 12`
+    // (puml-theme-aws-orange.puml:195-196). compile-themes.py has no
+    // FontSize extraction at all, so the two size fields are hand-carried
+    // here until the script learns them (defaultFontSize doubles as the
+    // explicit-set marker, see theme.ts#defaultFontSize).
+    fontFamily: 'Verdana',
+    fontSize: 12,
+    defaultFontSize: 12,
     colors: {
       background: 'transparent',
       text: '#232F3E',
       border: '#FF9900',
       arrow: '#FF9900',
+      graph: {
+        // R2j: `skinparam class { AttributeFontSize 11 }`
+        // (puml-theme-aws-orange.puml:446) -- member rows at 11pt, and the
+        // class HEADER cascades to 11 too (no ClassFontSize in the theme;
+        // the N32 attribute->header cascade, `theme-graph-colors-a.ts
+        // #classAttributeFontSize`). Jar-verified via mizupo-59-zala765's
+        // own golden: bare-class width = widthTable(name)@11 + 30.
+        classAttributeFontSize: 11,
+      },
     },
   },
   'black-knight': {

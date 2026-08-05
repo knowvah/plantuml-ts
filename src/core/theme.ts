@@ -18,6 +18,12 @@ export type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
 export interface Theme {
   fontFamily: string;
   fontSize: number;
+  /** R2j: EXPLICIT `skinparam defaultFontSize` marker (set only when the key
+   *  was seen) — `SkinParam#getFontSize`'s middle tier between per-param
+   *  skinparams and each FontParam's own default (SkinParam.java:441-448),
+   *  so explicit 14 != unset (CIRCLED_CHARACTER 17->14: radius 11->10,
+   *  jar-verified R2c pm14/). Unlike the ambient {@link fontSize}. */
+  defaultFontSize?: number;
   /** `skinparam linetype ortho|polyline` — svek routes edge labels through
    *  xlabel and emits splines=ortho under ortho (SvekEdge.java:434-441,
    *  DotStringFactory.java:160-168). Absent = default splines. */
@@ -323,6 +329,8 @@ export const monochromeTheme: Theme = {
 export type ThemeOverride = {
   fontFamily?: string;
   fontSize?: number;
+  /** See `Theme.defaultFontSize`'s own doc comment (R2j). */
+  defaultFontSize?: number;
   linetype?: 'ortho' | 'polyline';
   fixCircleLabelOverlapping?: boolean;
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
@@ -393,22 +401,10 @@ function mergeGraphColors(
 
 /** Top-level optional scalar fields copied verbatim during a merge. */
 const OPTIONAL_SCALAR_KEYS = [
-  'linetype',
-  'fixCircleLabelOverlapping',
-  'componentStyle',
-  'actorStyle',
-  'minimumWidth',
-  'strictUml',
-  'monochrome',
-  'shadowing',
-  'packageStyle',
-  'nodeSep',
-  'rankSep',
-  'wrapWidth',
-  'sameClassWidth',
-  'classAttributeIconSize',
-  'groupInheritance',
-  'tabSize',
+  'defaultFontSize', 'linetype', 'fixCircleLabelOverlapping',
+  'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
+  'shadowing', 'packageStyle', 'nodeSep', 'rankSep', 'wrapWidth',
+  'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize',
 ] as const;
 
 /** Copy the top-level optional scalars, preferring `partial` then `base`. */
