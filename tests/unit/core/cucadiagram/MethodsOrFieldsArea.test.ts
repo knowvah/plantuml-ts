@@ -118,6 +118,8 @@ function fakeSkin(options: SkinOptions = {}): MethodsOrFieldsAreaSkinParam {
     },
     getCurrentStyleBuilder: () => ({}),
     getDefaultTextAlignment: (defaultValue) => defaultValue,
+    // --- T10 consumed-slice growth (CucaDiagram#showPortion) ---
+    strictUmlStyle: () => false,
     // --- style/ISkinSimple.ts ---
     getSprite: () => null,
     guillemet: () => {

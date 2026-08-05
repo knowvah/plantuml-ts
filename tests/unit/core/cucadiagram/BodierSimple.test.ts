@@ -9,8 +9,10 @@ import { BodierAbstract } from '../../../../src/core/cucadiagram/BodierAbstract.
 import { BodierSimple } from '../../../../src/core/cucadiagram/BodierSimple.js';
 import type { FontConfiguration } from '../../../../src/core/abel/FontConfiguration.js';
 import type { Style } from '../../../../src/core/abel/ISkinParam.js';
+import { LeafType } from '../../../../src/core/abel/LeafType.js';
 import { HorizontalAlignment } from '../../../../src/core/klimt/geom/HorizontalAlignment.js';
 import { MockSkinParam } from '../abel/helpers.js';
+import { fakeLeaf, fakeSkin, makeBodyStyle, sb } from './helpers.js';
 
 const style: Style = { getHorizontalAlignment: () => HorizontalAlignment.LEFT };
 const fontConfiguration = undefined as unknown as FontConfiguration;
@@ -45,13 +47,27 @@ describe('BodierSimple (BodierSimple.java)', () => {
     expect(bodier.hasUrl()).toBe(false);
   });
 
-  it('getBody delegates to BodyFactory.create1 — the SI1 batch-4/T9 throws-deferred hook (java:83-88)', () => {
-    // Pinned deferred throw (T5 precedent) — flips to a real TextBlock
-    // when T9 lands BodyEnhanced1 and fills the hook.
+  it('getBody delegates to BodyFactory.create1 → a real BodyEnhanced1 (java:83-88; T9 hook filled)', () => {
+    // T7 pinned the throws-deferred hook here; T9 flipped it. With the
+    // resolved ADR-9 seam inputs (helpers.ts) the body is the List-ctor
+    // BodyEnhanced1: 'line' (4 chars × 2) + marginX 12; lineFirst '_'
+    // separator adds +8 height (hand-derived, BodyEnhancedAbstract
+    // decorate — the a2s-note-hline-pinned geometry).
     const bodier = new BodierSimple(new MockSkinParam());
+    bodier.setLeaf(fakeLeaf(LeafType.USECASE));
     bodier.addFieldOrMethod('line');
-    expect(() => bodier.getBody(new MockSkinParam(), true, true, undefined, style, fontConfiguration)).toThrow(
-      /create1: deferred to SI1 batch-4\/T9/,
+    const block = bodier.getBody(fakeSkin(), true, true, undefined, makeBodyStyle(), fontConfiguration);
+    const dim = block!.calculateDimension(sb);
+    expect(dim.getWidth()).toBe(4 * 2 + 12);
+    expect(dim.getHeight()).toBe(10 + 8);
+  });
+
+  it('getBody still surfaces the ADR-2 deferral when the style input lacks the resolved seam values', () => {
+    const bodier = new BodierSimple(new MockSkinParam());
+    bodier.setLeaf(fakeLeaf(LeafType.USECASE));
+    bodier.addFieldOrMethod('line');
+    expect(() => bodier.getBody(fakeSkin(), true, true, undefined, style, fontConfiguration)).toThrow(
+      /deferred per SI1\/ADR-2: .*BodyEnhanced1Style/,
     );
   });
 });

@@ -17,10 +17,13 @@ import { HorizontalAlignment } from '../../../../src/core/klimt/geom/HorizontalA
 import type { StringBounder } from '../../../../src/core/klimt/font/StringBounder.js';
 import { VisibilityModifier } from '../../../../src/core/skin/VisibilityModifier.js';
 import { MockSkinParam } from '../abel/helpers.js';
+import { fakeLeaf as makeSeamLeaf, fakeSkin, makeBodyStyle, sb } from './helpers.js';
 
 const style: Style = { getHorizontalAlignment: () => HorizontalAlignment.LEFT };
 const fontConfiguration = undefined as unknown as FontConfiguration;
 const fakeLeaf = {} as Entity;
+/** A leaf carrying the surface the T9-filled body path reaches. */
+const seamLeaf = makeSeamLeaf(LeafType.CLASS);
 
 function displays(bodier: BodierLikeClassOrObject, kind: 'fields' | 'methods'): string[] {
   const display = kind === 'fields' ? bodier.getFieldsToDisplay() : bodier.getMethodsToDisplay();
@@ -172,12 +175,23 @@ describe('getBody dispatch (java:208-250)', () => {
     expect(bodier.getBody(new MockSkinParam(), false, false, undefined, style, fontConfiguration)).toBeNull();
   });
 
-  it('enhanced body with members shown routes to BodyFactory.create1 (deferred T9 hook pinned)', () => {
+  it('enhanced body with members shown routes to BodyFactory.create1 → a real BodyEnhanced1 (T9 hook filled)', () => {
+    // T7 pinned the throws-deferred hook; T9 flipped it. Hand-derived:
+    // rawBodyWithoutHidden wraps '--sep--' in a Member whose toString is
+    // the raw line, so the separator loop still splits on it. Blocks:
+    // [1] lineFirst '_' over an EMPTY compartment: withMargin(0+12, 0+8)
+    //     = (12,8);
+    // [2] titled '-' separator, title 'sep' = (6,10): inner
+    //     withMargin(0+12, 0+5+4) = (12,9); LineBefore atLeast(6+8, 10)
+    //     -> (14,10); outer +5 top -> (14,15).
+    // Vertical: (14, 8+15) = (14,23).
     const bodier = new BodierLikeClassOrObject(LeafType.CLASS, emptyHide);
+    bodier.setLeaf(seamLeaf);
     bodier.addFieldOrMethod('--sep--');
-    expect(() => bodier.getBody(new MockSkinParam(), true, true, undefined, style, fontConfiguration)).toThrow(
-      /create1: deferred to SI1 batch-4\/T9/,
-    );
+    const block = bodier.getBody(fakeSkin(), true, true, undefined, makeBodyStyle(), fontConfiguration);
+    const dim = block!.calculateDimension(sb);
+    expect(dim.getWidth()).toBe(14);
+    expect(dim.getHeight()).toBe(23);
   });
 
   it('throws IllegalStateException when no leaf was set (java:222-223)', () => {
@@ -198,24 +212,51 @@ describe('getBody dispatch (java:208-250)', () => {
     expect(dim?.getHeight()).toBe(0);
   });
 
-  it('OBJECT with showFields=true routes to BodyFactory.create1 (deferred T9 hook pinned)', () => {
+  it('OBJECT with showFields=true routes to BodyFactory.create1 → a real body (T9 hook filled)', () => {
+    // 'f : int' (7 chars × 2) + marginX 12; lineFirst '_' adds +8.
     const bodier = new BodierLikeClassOrObject(LeafType.OBJECT, emptyHide);
-    bodier.setLeaf(fakeLeaf);
+    bodier.setLeaf(seamLeaf);
     bodier.addFieldOrMethod('f : int');
-    expect(() => bodier.getBody(new MockSkinParam(), false, true, undefined, style, fontConfiguration)).toThrow(
-      /create1: deferred to SI1 batch-4\/T9/,
-    );
+    const block = bodier.getBody(fakeSkin(), false, true, undefined, makeBodyStyle(), fontConfiguration);
+    const dim = block!.calculateDimension(sb);
+    expect(dim.getWidth()).toBe(7 * 2 + 12);
+    expect(dim.getHeight()).toBe(10 + 8);
   });
 
-  it('the class MethodsOrFieldsArea path is the deferred T9 wiring hook (java:237-249; pinned)', () => {
-    // Upstream constructs BOTH areas before branching on show flags, so
-    // even (false,false) reaches the construction — once T9 bridges
-    // T8's MethodsOrFieldsAreaConfig seam, this pin flips to real blocks.
+  it('the class MethodsOrFieldsArea path builds both compartments and merges them (java:237-249; T9 bridge filled)', () => {
+    // fields 'f : int' asBlockMemberImpl: (14+12, 10+8); methods 'run()':
+    // (10+12, 10+8); mergeTB stacks them (hand-derived from
+    // MethodsOrFieldsArea.java:83-86's (6,4) margins).
     const bodier = new BodierLikeClassOrObject(LeafType.CLASS, emptyHide);
-    bodier.setLeaf(fakeLeaf);
+    bodier.setLeaf(seamLeaf);
+    bodier.addFieldOrMethod('f : int');
+    bodier.addFieldOrMethod('run()');
+    const both = bodier.getBody(fakeSkin(), true, true, undefined, makeBodyStyle(), fontConfiguration);
+    const dimBoth = both!.calculateDimension(sb);
+    expect(dimBoth.getWidth()).toBe(26);
+    expect(dimBoth.getHeight()).toBe(36);
+
+    const fieldsOnly = bodier.getBody(fakeSkin(), false, true, undefined, makeBodyStyle(), fontConfiguration);
+    expect(fieldsOnly!.calculateDimension(sb).getWidth()).toBe(26);
+    expect(fieldsOnly!.calculateDimension(sb).getHeight()).toBe(18);
+  });
+
+  it('(false,false) on a plain class constructs both areas THEN returns the 0x0 empty block (upstream order preserved)', () => {
+    const bodier = new BodierLikeClassOrObject(LeafType.CLASS, emptyHide);
+    bodier.setLeaf(seamLeaf);
+    bodier.addFieldOrMethod('f : int');
+    const block = bodier.getBody(fakeSkin(), false, false, undefined, makeBodyStyle(), fontConfiguration);
+    const dim = block!.calculateDimension(sb);
+    expect(dim.getWidth()).toBe(0);
+    expect(dim.getHeight()).toBe(0);
+  });
+
+  it('the bridge still surfaces the ADR-2 deferral for a bare skinParam/style pair', () => {
+    const bodier = new BodierLikeClassOrObject(LeafType.CLASS, emptyHide);
+    bodier.setLeaf(seamLeaf);
     bodier.addFieldOrMethod('f : int');
     expect(() => bodier.getBody(new MockSkinParam(), true, true, undefined, style, fontConfiguration)).toThrow(
-      /deferred to SI1 batch-4\/T9 \(MethodsOrFieldsArea/,
+      /deferred per SI1\/ADR-2/,
     );
   });
 });

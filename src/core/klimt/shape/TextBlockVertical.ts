@@ -3,7 +3,10 @@ import type { UGraphic } from '../UGraphic.js';
 import { UTranslate } from '../UTranslate.js';
 import type { StringBounder } from '../font/StringBounder.js';
 import type { XDimension2D } from '../geom/XDimension2D.js';
+import type { XRectangle2D } from '../geom/XRectangle2D.js';
 import { HorizontalAlignment } from '../geom/HorizontalAlignment.js';
+import { Ports } from '../../svek/Ports.js';
+import type { WithPorts } from '../../svek/WithPorts.js';
 import { TextBlockMemoized } from './TextBlockMemoized.js';
 
 /**
@@ -21,11 +24,17 @@ import { TextBlockMemoized } from './TextBlockMemoized.js';
  * documented before this task): `getBackcolor`-driven background-color
  * band in `drawU` — this port's `TextBlock` (T3) carries no
  * `getBackcolor()` member at all, so no caller anywhere in this port can
- * ever pass a colored block here; `getPorts`/`WithPorts` — a separate,
- * unported `svek` port-routing subsystem; `getInnerPosition` — not part
- * of this port's `TextBlock` interface either (same "no caller in
- * scope" reasoning `TextBlock.ts`'s own doc comment states for these
- * three members).
+ * ever pass a colored block here.
+ *
+ * `getPorts` + `getInnerPosition` ARE now ported (SI1/T9 closure pull —
+ * `BodyEnhanced1`'s multi-compartment area is a `TextBlockVertical` and
+ * its `getPorts`/`getInnerPosition` delegate here; the earlier "no
+ * caller in scope" reasoning ended with that caller). `getPorts`'s
+ * upstream per-block cast is UNCONDITIONAL (`((WithPorts) block)
+ * .getPorts` — a `ClassCastException` on a non-`WithPorts` block); the
+ * equivalent here is the runtime `TypeError` when the member is absent
+ * (`MethodsOrFieldsArea.ts#contains`'s documented CCE-equivalent
+ * convention).
  */
 export class TextBlockVertical extends TextBlockMemoized {
   private readonly blocks: readonly TextBlock[];
@@ -65,5 +74,41 @@ export class TextBlockVertical extends TextBlockMemoized {
       block.drawU(ug.apply(new UTranslate(dx, y)));
       y += dimb.getHeight();
     }
+  }
+
+  /** Each block's ports translated by the running y offset, merged via
+   *  the score-gated `Ports#addThis`.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/shape/TextBlockVertical.java:105-117 */
+  getPorts(stringBounder: StringBounder): Ports {
+    let y = 0;
+    const result = new Ports();
+    for (const block of this.blocks) {
+      const dimb = block.calculateDimension(stringBounder);
+      const tmp = (block as unknown as WithPorts).getPorts(stringBounder).translateY(y);
+      result.addThis(tmp);
+      y += dimb.getHeight();
+    }
+    return result;
+  }
+
+  /** First block that reports the member wins, its rectangle translated
+   *  by the running y offset; `getInnerPosition` is not on this port's
+   *  `TextBlock` interface, so the per-block lookup is duck-typed
+   *  (`TextBlockLineBefore.ts`'s documented convention — the absent case
+   *  mirrors upstream's `null` return).
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/shape/TextBlockVertical.java:119-131 */
+  getInnerPosition(member: string, stringBounder: StringBounder): XRectangle2D | undefined {
+    let y = 0;
+    for (const block of this.blocks) {
+      const dimb = block.calculateDimension(stringBounder);
+      const candidate = block as Partial<{
+        getInnerPosition(m: string, sb: StringBounder): XRectangle2D | undefined;
+      }>;
+      const result = candidate.getInnerPosition?.(member, stringBounder);
+      if (result !== undefined) return UTranslate.dy(y).apply(result);
+
+      y += dimb.getHeight();
+    }
+    return undefined;
   }
 }

@@ -14,8 +14,10 @@ import type { Stereotype } from '../stereo/Stereotype.js';
 import { getRegexp } from '../url/UrlBuilder.js';
 import { BodierAbstract } from './BodierAbstract.js';
 import { BodyEnhancedAbstract } from './BodyEnhancedAbstract.js';
+import { requireBodyEnhanced1SkinParam, requireBodyEnhanced1Style } from './BodyEnhanced1Config.js';
 import { BodyFactory } from './BodyFactory.js';
 import { Member } from './Member.js';
+import { MethodsOrFieldsArea } from './MethodsOrFieldsArea.js';
 
 /**
  * BodierLikeClassOrObject — the `Bodier` carrying the class/object
@@ -72,26 +74,41 @@ function setContains(set: ReadonlySet<VisibilityModifier>, vm: VisibilityModifie
   return vm !== null && set.has(vm);
 }
 
-/** The `new MethodsOrFieldsArea(members, skinParam, leaf, style)` +
- *  `asBlockMemberImpl()` seam of `getBody` (java:237-249) — a TYPED
- *  THROWS-DEFERRED HOOK. T8's landed `MethodsOrFieldsArea.ts` takes the
- *  ADR-9 `MethodsOrFieldsAreaConfig` seam (resolved `memberFontConfig`
- *  instead of upstream's `Style`), so bridging `(skinParam, leaf, style)`
- *  → config is the style-resolution work of the SI1 batch-4/T9 assembly,
- *  which replaces this function body with the real construction.
- *  Journaled (SI1 decision journal, T7 — deferred-throw per T5's
- *  precedent). */
-interface MethodsOrFieldsAreaLike {
-  asBlockMemberImpl(): TextBlock;
-}
+/** The `new MethodsOrFieldsArea(members, skinParam, leaf, style)` seam
+ *  of `getBody` (java:237-249) — upstream's 4-arg overload (align
+ *  defaults to `HorizontalAlignment.LEFT`, reproduced by omitting
+ *  `config.align`). Filled by SI1 batch-4/T9 (previously T7's typed
+ *  throws-deferred hook): the upstream-shaped `(skinParam, style)`
+ *  inputs are narrowed to the resolved ADR-9 seam surfaces
+ *  (`BodyEnhanced1Config.ts`'s guards). `config.memberFontConfig`
+ *  substitutes exactly `FontConfiguration.create(skinParam, style,
+ *  leaf.getColors())` (MethodsOrFieldsArea.java:240; klimt/font/
+ *  FontConfiguration.java:213's 3-arg overload) and
+ *  `styleValues.lineThickness`/`wrapWidth` the `style.value(PName
+ *  .LineThickness)`/`style.wrapWidth()` reads (java:84/256/265 there) —
+ *  see `BodyEnhanced1Config.ts` for the member-by-member mapping. */
 function newMethodsOrFieldsArea(
-  _members: Display,
-  _skinParam: ISkinParam,
-  _leaf: Entity,
-  _style: Style,
-): MethodsOrFieldsAreaLike {
-  throw new Error(
-    'BodierLikeClassOrObject.getBody: deferred to SI1 batch-4/T9 (MethodsOrFieldsArea wiring not yet landed)',
+  members: Display,
+  skinParam: ISkinParam,
+  leaf: Entity,
+  style: Style,
+): MethodsOrFieldsArea {
+  const seamSkinParam = requireBodyEnhanced1SkinParam(skinParam);
+  const seamStyle = requireBodyEnhanced1Style(style);
+  return new MethodsOrFieldsArea(
+    members,
+    {
+      skinParam: seamSkinParam,
+      memberFontConfig: seamStyle.memberFontConfig,
+      ...(seamStyle.nestedDiagramRenderer !== undefined && { nestedDiagramRenderer: seamStyle.nestedDiagramRenderer }),
+    },
+    leaf,
+    {
+      lineThickness: seamStyle.lineThickness,
+      wrapWidth: seamStyle.wrapWidth,
+      ...(seamStyle.resolveVisibilityStyle !== undefined && { resolveVisibilityStyle: seamStyle.resolveVisibilityStyle }),
+    },
+    seamStyle.atomOps,
   );
 }
 
@@ -259,8 +276,8 @@ export class BodierLikeClassOrObject extends BodierAbstract {
   }
 
   /** The `BodyFactory.BODY3` branch (java:212-213) is omitted (dead flag,
-   *  see module doc); `create1` and the `MethodsOrFieldsArea` seam are
-   *  the two SI1 batch-4/T9 throws-deferred hooks.
+   *  see module doc); `create1` and the `MethodsOrFieldsArea` seam
+   *  (T7's two throws-deferred hooks) are filled as of SI1 batch-4/T9.
    *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/BodierLikeClassOrObject.java:208-250 */
   getBody(
     skinParam: ISkinParam,
