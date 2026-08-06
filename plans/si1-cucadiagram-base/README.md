@@ -75,12 +75,12 @@ wiring sites; deleting pins T12 improves.
 
 | # | Focus | Tasks | Status |
 |---|-------|-------|--------|
-| 1 | Leaf foundations (parallel) | T1 Quark/Plasma · T2 abel enums · T3 VisibilityModifier/CharHidder/Url · T4 PlacementStrategy family | [ ] |
-| 2 | Entity | T5 Entity + Together + EntityUtils/Gender | [ ] |
-| 3 | Link + body interfaces (parallel) | T6 Link/LinkArg · T7 Bodier family · T8 TextBlockLineBefore + MethodsOrFieldsArea | [ ] |
-| 4 | Assembly (parallel) | T9 BodyEnhanced1 + BodyFactory create1/create2/createLeaf/createGroup · T10 CucaDiagram | [ ] |
-| 5 | Wirings (parallel) | T11 shared `-[single]->` dedup (3 parsers + authored fixtures) · T12 folder un-narrowing (gujigi) | [ ] |
-| 6 | Contract + close | T13 Track SI-1 contract doc + guard · C1 close-out | [ ] |
+| 1 | Leaf foundations (parallel) | T1 Quark/Plasma · T2 abel enums · T3 VisibilityModifier/CharHidder/Url · T4 PlacementStrategy family | [x] |
+| 2 | Entity | T5 Entity + Together + EntityUtils/Gender | [x] |
+| 3 | Link + body interfaces (parallel) | T6 Link/LinkArg · T7 Bodier family · T8 TextBlockLineBefore + MethodsOrFieldsArea | [x] |
+| 4 | Assembly (parallel) | T9 BodyEnhanced1 + BodyFactory create1/create2/createLeaf/createGroup · T10 CucaDiagram | [x] |
+| 5 | Wirings (parallel) | T11 shared `-[single]->` dedup (3 parsers + authored fixtures) · T12 folder un-narrowing (gujigi) | [x] |
+| 6 | Contract + close | T13 Track SI-1 contract doc + guard · C1 close-out | [x] |
 
 ## Index
 
