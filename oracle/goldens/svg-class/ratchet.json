@@ -1549,6 +1549,21 @@
       "slug": "danozo-79-nunu375",
       "addedAt": "2026-07-26",
       "source": "dot-cache"
+    },
+    {
+      "slug": "class-allowmixing-usecase-mix",
+      "addedAt": "2026-08-06",
+      "source": "authored"
+    },
+    {
+      "slug": "class-usecase-inline-sprite",
+      "addedAt": "2026-08-06",
+      "source": "authored"
+    },
+    {
+      "slug": "class-usecase-inline-img",
+      "addedAt": "2026-08-06",
+      "source": "authored"
     }
   ]
 }

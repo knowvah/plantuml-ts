@@ -10,23 +10,32 @@
  * description engine's `measureUsecaseOrActorLeaf`, ADR-2) with NO regression
  * guard on that path at all. This file is that guard.
  *
- * IMPORTANT — this is NOT `class.golden.ratchet.test.ts`'s zero-diff ratchet.
- * None of the three fixtures below measured zero-diff against their jar
- * `golden.svg` (class conformance is low corpus-wide: `0/718 -> 29/718` per
- * `oracle/goldens/svg-class/README.md`, so a brand-new fixture landing
- * zero-diff was never assumable — ADR-4). Each fixture's diffs are pinned
- * EXACTLY (full array, every `path`/`actual`/`expected`/`delta`), so ANY
- * change to our rendering of this path — regression OR improvement — fails
- * this test and must be re-measured deliberately, rather than drifting
- * silently. Per ADR-4, none of these three are eligible for
- * `oracle/goldens/svg-class/ratchet.json`: that manifest's DOT-EQUAL
- * eligibility rule is enforced via `parity-class.json`, which
- * `scripts/dot-sync-fixtures.ts` populates only for `oracle/goldens/
- * svg-description/<type>/<slug>/`-shaped entries — authored class fixtures
- * (`svg-class/<slug>/`, no `<type>` level) cannot obtain an entry there, so
- * they structurally cannot satisfy the ratchet's eligibility gate. This is a
- * characterisation guard, not a ratchet; do NOT add these slugs to
- * `ratchet.json`.
+ * IMPORTANT — this is a characterisation guard that runs ALONGSIDE
+ * `class.golden.ratchet.test.ts`, not a substitute for it. Each fixture's
+ * diffs are pinned EXACTLY, so ANY change to our rendering of this path —
+ * regression OR improvement — fails this test and must be re-measured
+ * deliberately, rather than drifting silently.
+ *
+ * HISTORY (both original caveats are now RESOLVED — do not re-apply them):
+ *   1. When written (SI10, ADR-4), none of the three measured zero-diff, and
+ *      class conformance was low corpus-wide (`0/718 -> 29/718`), so a
+ *      brand-new fixture landing zero-diff was not assumable. SI14/SI15 then
+ *      closed every ellipse/image/text family, leaving one shared 1px
+ *      width/viewBox gap; the usecase-ellipse ink fix (2026-08-06,
+ *      `class-ink-box.ts#addEllipseInk`) closed that. **All three are now
+ *      zero-diff**, and their pins above are empty arrays.
+ *   2. ADR-4 also recorded them as structurally INELIGIBLE for
+ *      `oracle/goldens/svg-class/ratchet.json`, because that manifest's
+ *      DOT-EQUAL rule reads `parity-class.json`, which
+ *      `scripts/dot-sync-fixtures.ts` then populated only for
+ *      `svg-description/<type>/<slug>/`-shaped entries. **SI13 removed that
+ *      restriction** (per-type golden layout; class → flat `svg-class/<slug>/`
+ *      root), and all three now carry `dotEqual: true` parity rows. They ARE
+ *      ratcheted as of 2026-08-06.
+ *
+ * `class-actor-bare-no-allowmixing` remains the one exception: the jar
+ * refuses its input (error-page canonical, no CLASS tag), so it can never
+ * obtain a parity row and stays guarded here only.
  *
  * Renders via `renderFixtureClass` + `DeterministicMeasurer` (NOT production
  * `renderSync`, which hardcodes `jarMeasurer`/AWT — see `oracle/goldens/
@@ -107,18 +116,18 @@ describe('class-allowmixing-usecase-mix (allowmixing + usecase + class)', () => 
    * viewBox rounding gap -- unrelated to actor rendering, verified present
    * in the ORIGINAL 9-entry pin above (first two entries) before this task
    * touched anything.
+   *
+   * CLOSED 2026-08-06 (usecase-ellipse ink): that last 1px was this
+   * diagram's own usecase leaf being ink-walked as a RECT (`x + w`) instead
+   * of the `<ellipse>` it actually draws (`LimitFinder#drawEllipse` --
+   * `x + w - 1`). See `class-ink-box.ts#addEllipseInk`. **ZERO diffs.**
    */
-  it('measures a KNOWN, pinned diff against the jar golden (T4: only the pre-existing 1px width gap survives)', () => {
+  it('is byte-exact against the jar golden (usecase-ellipse ink closed the last 1px)', () => {
     const golden = readGolden(slug);
     const ours = renderFixtureClass(readSource(slug), new DeterministicMeasurer());
     const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
-    expect(pass).toBe(false);
-    const expected: Diff[] = [
-      // Pre-existing, unrelated to actor rendering (present pre-T4 too).
-      { path: 'svg/@viewBox[2]', actual: '256', expected: '255', delta: 1, tolerance: 0.01 },
-      { path: 'svg/@width', actual: '256', expected: '255', delta: 1, tolerance: 0.01 },
-    ];
-    expect(diffs).toEqual(expected);
+    expect(diffs).toEqual([]);
+    expect(pass).toBe(true);
   });
 });
 
@@ -225,22 +234,21 @@ describe('class-usecase-inline-sprite (usecase display with an inline <$sprite> 
    * `class-allowmixing-usecase-mix` pins above (256 vs 255 there); it
    * even shrank 5 -> 1 as the now-correct (smaller) ellipse narrowed the
    * diagram.
+   *
+   * CLOSED 2026-08-06 (usecase-ellipse ink): the surviving 1px was the
+   * usecase leaf being ink-walked as a RECT rather than the `<ellipse>` it
+   * draws -- see `class-ink-box.ts#addEllipseInk`. **ZERO diffs.**
    */
-  it('draws the sprite atom; pinned diffs are placement/scale, not structure', () => {
+  it('draws the sprite atom and is byte-exact against the jar golden', () => {
     const golden = readGolden(slug);
     const ours = renderFixtureClass(readSource(slug), new DeterministicMeasurer());
     const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
-    expect(pass).toBe(false);
     // The structural childCount diff is GONE -- that is the fix.
     expect(diffs.map((d) => d.path)).not.toContain('svg/g[1]/g[2][childCount]');
     // And the `<image>` the jar draws is now actually emitted.
     expect(ours).toMatch(/<image/);
-    const expected: Diff[] = [
-      // Pre-existing 1px width/viewBox rounding gap -- see doc comment.
-      { path: 'svg/@viewBox[2]', actual: '239', expected: '238', delta: 1, tolerance: 0.01 },
-      { path: 'svg/@width', actual: '239', expected: '238', delta: 1, tolerance: 0.01 },
-    ];
-    expect(diffs).toEqual(expected);
+    expect(diffs).toEqual([]);
+    expect(pass).toBe(true);
   });
 });
 
@@ -274,19 +282,18 @@ describe('class-usecase-inline-img (usecase display with an inline <img:...> ato
    * (raster - 1), reproducing the jar's fit exactly. Only the same
    * pre-existing 1px width/viewBox rounding gap as the sibling fixtures
    * survives (shrank 4 -> 1 with the corrected, smaller ellipse).
+   *
+   * CLOSED 2026-08-06 (usecase-ellipse ink): that last 1px was the usecase
+   * leaf being ink-walked as a RECT rather than the `<ellipse>` it draws --
+   * see `class-ink-box.ts#addEllipseInk`. **ZERO diffs.**
    */
-  it('measures a KNOWN, pinned diff against the jar golden (image/@width and @height clear)', () => {
+  it('is byte-exact against the jar golden (image/@width and @height clear)', () => {
     const golden = readGolden(slug);
     const ours = renderFixtureClass(readSource(slug), new DeterministicMeasurer());
     const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
-    expect(pass).toBe(false);
     expect(diffs.map((d) => d.path)).not.toContain('svg/g[1]/g[2]/image[1]/@width');
     expect(diffs.map((d) => d.path)).not.toContain('svg/g[1]/g[2]/image[1]/@height');
-    const expected: Diff[] = [
-      // Pre-existing 1px width/viewBox rounding gap -- see doc comment.
-      { path: 'svg/@viewBox[2]', actual: '245', expected: '244', delta: 1, tolerance: 0.01 },
-      { path: 'svg/@width', actual: '245', expected: '244', delta: 1, tolerance: 0.01 },
-    ];
-    expect(diffs).toEqual(expected);
+    expect(diffs).toEqual([]);
+    expect(pass).toBe(true);
   });
 });

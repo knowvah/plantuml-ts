@@ -6314,3 +6314,64 @@ checked before and after both mechanisms landed.
     ActivityBarColor<<X>>/`.tagname` cascade/`||` separator — each
     named precisely in the S16 attribution table above, none independently
     bounded/cheap this iteration).
+
+---
+
+## Post-mission close-out (2026-08-06) — `addStateBoxInk` 1px asymmetry: ONE of the three landed, and the other two are a DIFFERENT mechanism
+
+The S6 queue item "addStateBoxInk max-corner asymmetry (`bilare`'s 1px
+rounding), 3 known fixtures, algebraically-derived 1-char fix, deliberately
+not landed (blast-radius-unverified)" was picked up and **measured**. Two
+corrections to the record:
+
+**1. The derived 1-char fix would have been WRONG.** S6's algebra
+(`x + w` → `x + w - 1`, unconditionally, matching `addBarInk`) reproduces
+jar's width on `bilare` — but applied universally it regresses
+`jocela-05-niba392`, an already-ratcheted golden. Both prior records were
+half-right, and upstream reconciles them:
+
+```java
+drawRectangle: addPoint(x-1, y-1); addPoint(x+w-1+2*shadow, y+h-1+2*shadow);
+drawULine:     addPoint(x, y);     addPoint(x+dx, y+dy);   // NO -1
+```
+
+`LimitFinder` walks BOTH shapes a described state box draws. The uninset
+`x + w` max-X is the **divider `<line>`'s** ink, not the rect's — so it is
+correct exactly when the box actually draws a divider. S4's jar-verification
+sampled only divider-drawing boxes; S6's algebra sampled only a divider-less
+one. Jar-verified both directions:
+
+- `jocela-05-niba392` — `<line x2="65.0625">` == rect `x+width` exactly →
+  needs `x + w`. Still 0 diffs after the fix.
+- `bilare-19-fufe539` — `hide empty description` routes every state to
+  `EntityImageStateEmptyDescription.drawU` ("rect ONLY, no divider"); the
+  jar's own SVG contains **ZERO** `<line>` elements → needs `x + w - 1`,
+  giving jar's document width 361 exactly (was 362).
+
+Landed as a precondition (`rendersDivider`) mirroring
+`renderer-box.ts#renderNormal`'s own two early-return branches
+(`headerLines === undefined`, `emptyDescription === true`) — sizer and
+renderer read the same predicate deliberately. The composite call site
+(`children.length > 0`) is left at `hasDivider: true` unchanged: that reuse
+is flagged NOT-jar-verified in the module doc comment and flipping it is a
+separate, separately-evidenced change.
+
+**2. `jelusa-98-nexa591` and `lavera-29-vuka790` are NOT this mechanism.**
+Both DO draw dividers reaching `x + w`, so the fix correctly leaves them
+untouched. Their +1 is a **sub-tolerance coordinate drift landing on a floor
+boundary**: `lavera`'s State2 sits at our `x=175.575` vs jar's `175.57`. The
+0.005 delta is inside `compare`'s 0.01 numeric tolerance so it never surfaces
+as a coordinate diff, but `computeStateDocumentDims`' truncating
+`Math.floor(finalWidth + 1)` turns it into a whole pixel:
+`floor(235.995 - 6 + 21) = 250` (jar) vs `floor(236.0 - 6 + 21) = 251` (ours).
+
+**Re-file these two** under a new item: *state leaf x-position sub-tolerance
+drift* — a layout-coordinate question (where the 0.005 originates), not an
+ink-rule one. Chasing it inside the ink formula cannot succeed.
+
+**Blast radius, measured (the verification S6 lacked):** state census
+zero-diff **57 → 58**, exactly `bilare` gained, **zero lost**; state DOT
+size-deltas 148 pins unchanged/widened 0 (this is document ink, not node
+size); full suite 545 files / 12,259 tests green on a cold tree ×2;
+typecheck/lint/build 0. `bilare-19-fufe539` added to
+`oracle/goldens/svg-state/ratchet.json` (57 → 58 fixtures).
