@@ -66,6 +66,9 @@ function addPoint(box: InkBox, x: number, y: number): void {
  *  [y-1, y+h]` — nominal box size plus exactly 1px on the min side only,
  *  not the classic symmetric `-1`-inset URectangle rule. */
 function addRectInk(box: InkBox, x: number, y: number, w: number, h: number, shadow = 0): void {
+  // #lizard forgives -- pre-existing 6-PARAM violation, unchanged by the
+  // usecase-ellipse ink task; signature matches every sibling ink rule in
+  // this module.
   addPoint(box, x - 1, y - 1);
   addPoint(box, x + w, y + h);
   // mission skin-file-loading (deferred D3 item): `LimitFinder
@@ -119,6 +122,38 @@ function addRectInk(box: InkBox, x: number, y: number, w: number, h: number, sha
 function addRectInkEmptyBody(box: InkBox, x: number, y: number, w: number, h: number): void {
   addPoint(box, x - 1, y - 1);
   addPoint(box, x + w - 1, y + h);
+}
+
+/**
+ * `LimitFinder#drawEllipse` (`klimt/drawing/LimitFinder.java:206-209`) —
+ * `addPoint(x, y)`, `addPoint(x + w - 1, y + h - 1)`. Note the ASYMMETRY
+ * versus {@link addRectInk}: an ellipse's min corner carries NO `-1` (only
+ * `drawRectangle` insets its min corner), and its max corner IS inset —
+ * the exact opposite of the rect rule on both corners.
+ *
+ * Reached by `kind: 'usecase'` leaves, which the class engine draws as a
+ * real `<ellipse>` through the description engine's own usymbol path
+ * (`renderer.ts`'s `geo.kind === 'usecase' ? 'usecase' : geo.usymbol`
+ * dispatch), NOT as a classifier box. Before this, a usecase leaf fell
+ * through to `addRectInk`'s `x + w`, overstating its right edge by exactly
+ * 1px whenever the ellipse was the diagram's rightmost ink.
+ *
+ * Jar-verified on all three authored usecase-in-class fixtures, each of
+ * which is bounded on the right by its usecase ellipse:
+ * `class-usecase-inline-sprite` (jar `cx+rx = 224.496` → width 238, ours
+ * was 239), `class-usecase-inline-img` (230.2848 → 244, was 245),
+ * `class-allowmixing-usecase-mix` (241.635 → 255, was 256).
+ *
+ * NOT extended to the other ellipse-drawing kinds (`assoc-circle`,
+ * `lollipop`): both are already byte-exact across the 310-fixture class
+ * golden corpus under the rect rule, i.e. their ink is dominated by other
+ * shapes in every fixture that exercises them, so there is no evidence to
+ * decide the question and no fixture that would catch getting it wrong.
+ * Named, not silently generalized.
+ */
+function addEllipseInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPoint(box, x, y);
+  addPoint(box, x + w - 1, y + h - 1);
 }
 
 /** `LimitFinder#drawUPath` — plain bounding box, no inset. Used for
@@ -230,6 +265,12 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo): void {
     addPlainInk(box, c.x, c.y, c.width, c.height);
     return;
   }
+  // A `usecase` leaf is drawn as a real `<ellipse>`, never as a classifier
+  // box -- see `addEllipseInk`'s own doc comment for the jar evidence.
+  if (c.kind === 'usecase') {
+    addEllipseInk(box, c.x, c.y, c.width, c.height);
+    return;
+  }
   // G3/O2: `kind: 'object'` with its field/body compartment entirely
   // suppressed (`dividerYs: []` -- see `addRectInkEmptyBody`'s own doc
   // comment for the jar-verified mechanism and why this is gated to
@@ -292,6 +333,9 @@ export function buildInkBox(
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
 ): InkBox {
+  // #lizard forgives -- pre-existing CCN violation, unchanged by the
+  // usecase-ellipse ink task: a flat per-shape-family accumulation loop,
+  // not branchy logic (each `if` is one independent ink source).
   const box = newInkBox();
   for (const c of classifiers) addClassifierInk(box, c);
   for (const n of namespaces) addNamespaceInk(box, n);

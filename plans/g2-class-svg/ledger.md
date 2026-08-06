@@ -20014,3 +20014,53 @@ tests updated in the prior N69 commit are unaffected. Gates: typecheck / lint /
 forgives` suppresses CCN but NOT the PARAM warning, so the file was added to
 `~/.claude/hooks/complexity-ignore` by maintainer decision (2026-07-26) rather
 than refactoring the faithful-port signatures.
+
+---
+
+## Post-mission close-out (2026-08-06) — usecase leaves were ink-walked as RECTS
+
+The "shared pre-existing 1px viewBox/width gap" that SI10/SI13/SI14/SI15 each
+measured, named, and correctly declined to chase (it was never their
+mechanism) is closed. It was never a rounding gap at all.
+
+`class-ink-box.ts#addClassifierInk` had no ellipse branch, so a
+`kind: 'usecase'` leaf fell through to `addRectInk` — but the class engine
+draws a usecase as a real `<ellipse>` via the description engine's usymbol
+path (`renderer.ts`: `geo.kind === 'usecase' ? 'usecase' : geo.usymbol`).
+Upstream's two rules differ on BOTH corners, in opposite directions:
+
+```java
+drawRectangle: addPoint(x-1, y-1);  addPoint(x+w-1+2*shadow, y+h-1+2*shadow);
+drawEllipse:   addPoint(x,   y);    addPoint(x+w-1+2*shadow, y+h-1+2*shadow);
+```
+
+A rect insets its MIN corner and an ellipse does not; both inset the max
+corner — and it was that max-corner `-1` the rect path was not applying,
+overstating the right edge by exactly 1px whenever the usecase ellipse was
+the diagram's rightmost ink. All three authored fixtures are bounded on the
+right by their usecase ellipse, which is why all three carried the identical
++1 (`CLAUDE.md`: an identical delta across fixtures = ONE shared cause —
+held again).
+
+Ported as `addEllipseInk` (`LimitFinder#drawEllipse`), dispatched on
+`kind === 'usecase'` only. NOT extended to the other ellipse-drawing kinds
+(`assoc-circle`, `lollipop`): both are already byte-exact across the
+310-fixture golden corpus under the rect rule, i.e. dominated by other
+shapes in every fixture that exercises them — no evidence to decide the
+question, and no fixture that would catch getting it wrong. Named, not
+silently generalized.
+
+**Measured.** All three authored fixtures 2 diffs → **0**, so their pinned
+arrays in `class-usecase-actor.test.ts` are now empty and all three are
+**ratcheted** (`svg-class/ratchet.json` 310 → 313) — SI13 removed the
+structural ineligibility, and this closed the AC1 zero-diff condition SI13
+predicted would be the last one standing. Corpus reach is 3 further fixtures
+(SI10's "ZERO of the 310 contain usecase" was about the ratcheted goldens,
+not the corpus): `cacoma-43-poxu615` and `gujigi-63-roki030` byte-identical
+before/after, `cezaka-60-jado323` IMPROVED (maxDelta 2.0 → 1.5026). Class
+census zero-diff 333/721; class DOT size-deltas 711/712 conformant, widened
+0; cold tree ×2 545 files / 12,262 tests; typecheck/lint/build 0.
+
+**Named remainder (unrelated, do not fold in):** 333 fixtures measure
+zero-diff but only 313 are ratcheted — a ~20-fixture backfill gap that
+predates this change and needs its own `dotEqual` eligibility pass.
