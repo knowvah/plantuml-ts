@@ -110,3 +110,26 @@ Wiring sites (verified): `src/diagrams/description/leaf-sizing.ts:128-135`
 (folder narrowing), `src/diagrams/class/class-layout-generic-classifier.ts:70-86`
 (gujigi exclusion), `src/diagrams/description/parse-state.ts:168-183`
 (inline dedup to swap), class/state parsers (no dedup — grep-verified).
+
+## Mission summary (close-out 2026-08-06)
+
+- **Base ported in full** (T1-T10, ~5.4k Java lines of model/diagram/body
+  classes + closures; skin/ remainder and export pipeline deferred as
+  typed throws). All members ported incl. callerless (ADR-1); upstream
+  names + @see provenance throughout; import-hygiene guarded.
+- **Payoff 1:** shared `-[single]->` dedup live in all three parsers;
+  latent class/state bug fixed and jar-oracle-gated (T11).
+- **Payoff 2:** folder/package titles measure through the real
+  create2→BodyEnhanced1; the 12px flat constant deleted (= getMarginX 6+6);
+  **gujigi-63 closed → class 711/712 (99.9%) w0**; eight description pins
+  shrank (T12).
+- **Contract:** planning/cucadiagram-contract.md (Track SI-1 deliverable).
+- **Gates at close:** cold suite ×2 rc=0, tsc/lint/build 0, class 711/712
+  w0, description 321/351 w0, state 147 w0, DOT-sync 710/262/93 EQUAL,
+  parity guard green, base-imports guard green.
+- **Agent notes:** T12 stalled twice at its tail; orchestrator finished
+  the bounded remainder inline (resume-once rule).
+- **Follow-ons:** engine migrations onto the base (per-engine missions);
+  skin/ subsystem port; svek DotData consumption; retire
+  EntityImageDescriptionTextBlock substitute once BodyEnhanced1 parity is
+  corpus-proven (ADR-4 note); rotisi-30 fingerprint probe (A2s ledger).
