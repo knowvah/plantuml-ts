@@ -256,6 +256,7 @@ interface OptionalRelFields {
   lineStyleOverride?: Relationship['lineStyleOverride'];
   thicknessOverride?: number | undefined;
   colorOverride?: string | undefined;
+  single?: true | undefined;
   swapDirection?: boolean | undefined;
 }
 
@@ -431,6 +432,10 @@ export function parseRelationshipLine(line: string, nsSep: string | null = null,
       lineStyleOverride: styleOverrides.lineStyle,
       thicknessOverride: styleOverrides.thickness,
       colorOverride: styleOverrides.color,
+      // SI1/T11: `single` add-time dedup flag (WithLinkType.goSingle) --
+      // consumed at the relationship-push site, see
+      // `Relationship.single`'s doc comment (class-relationship-ast.ts).
+      single: styleOverrides.single,
       // G2 N59: `ArrowInfo.swapDirection` itself (NOT `upOrLeft`, which
       // `idEntity1FullId`/`idEntity2FullId` already carry) -- the ONE swap
       // that reorders `left.id`/`right.id` (pure source-text left-to-right

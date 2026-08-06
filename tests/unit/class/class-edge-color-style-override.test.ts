@@ -63,12 +63,18 @@ describe('parseArrowStyleOverrides', () => {
     });
   });
 
-  it('ignores hidden/norank/single/plain/node — never misclassified as color', () => {
+  it('ignores hidden/norank/plain/node — never misclassified as color', () => {
     expect(parseArrowStyleOverrides('-[hidden]->')).toEqual({});
     expect(parseArrowStyleOverrides('-[norank]->')).toEqual({});
-    expect(parseArrowStyleOverrides('-[single]->')).toEqual({});
     expect(parseArrowStyleOverrides('-[plain]->')).toEqual({});
     expect(parseArrowStyleOverrides('-[node]->')).toEqual({});
+  });
+
+  it('single is carried as the add-time dedup flag (SI1/T11), never a color', () => {
+    // WithLinkType.goSingle/isSingle (decoration/WithLinkType.java:110-116)
+    // -- consumed by the relationship-push dedup, not by rendering.
+    expect(parseArrowStyleOverrides('-[single]->')).toEqual({ single: true });
+    expect(parseArrowStyleOverrides('-[SINGLE]->')).toEqual({ single: true });
   });
 });
 

@@ -8,6 +8,7 @@
  */
 
 import { createAnnotations } from '../../core/annotations/index.js';
+import { dropsAsSingleDuplicate } from '../../core/cucadiagram/linkDedup.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import { scopedKey } from './namespace-groups.js';
 import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './ast.js';
@@ -165,22 +166,26 @@ export function ensureEndpoint(state: ParseState, ep: EndpointShape): void {
   emitNode(state, node);
 }
 
-/** Link.sameConnections: same endpoint pair, either direction — identity
- *  only, ignoring style/type/label. */
-function sameConnections(a: DescriptiveLink, b: DescriptiveLink): boolean {
-  return (a.from === b.from && a.to === b.to) || (a.from === b.to && a.to === b.from);
-}
+/** `DescriptiveLink` → its two connection identities, for the shared
+ *  dedup's `Link.sameConnections` comparison (resolved canonical ids —
+ *  both endpoints are namespace-resolved before `addLink` runs). */
+const descriptiveLinkConnection = (l: DescriptiveLink): readonly [string, string] => [l.from, l.to];
 
 /**
- * `CucaDiagram.addLink` (net.atmp.CucaDiagram.java:880-893): a `single` link
+ * `CucaDiagram.addLink` (net.atmp.CucaDiagram.java:896-901): a `single` link
  * is silently dropped — not appended — when the diagram already holds any
  * OTHER link connecting the same two entities, regardless of that other
  * link's own style/type. Non-`single` links always append (upstream never
  * dedups them). Endpoints are still auto-created by the caller either way —
- * only the link record itself is skipped.
+ * only the link record itself is skipped. SI1/T11: the formerly-inline
+ * dedup now routes through the shared semantic hook (ADR-3) — identical
+ * behavior, one implementation for all three cuca-family parsers.
+ * @see src/core/cucadiagram/linkDedup.ts
  */
 export function addLink(state: ParseState, link: DescriptiveLink): void {
-  if (link.single === true && state.ast.links.some((other) => sameConnections(other, link))) {
+  if (
+    dropsAsSingleDuplicate(link.single === true, state.ast.links, link, descriptiveLinkConnection)
+  ) {
     return;
   }
   state.ast.links.push(link);

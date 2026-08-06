@@ -211,6 +211,23 @@ export interface ParseState {
    */
   scopeByOwner: Map<State, Scope>;
   /**
+   * SI1/T11: flat, diagram-wide mirror of every KEPT transition's resolved
+   * connection pair, in add order — this port's stand-in for upstream's
+   * ONE flat `CucaDiagram.links` list (transitions here are stored
+   * per-scope, so no single array exists to scan). Consumed exclusively by
+   * `emitTransition`'s `-[single]->` add-time dedup
+   * (`net.atmp.CucaDiagram#addLink:896-901` via
+   * `core/cucadiagram/linkDedup.ts`, ADR-3). A `[*]` endpoint resolves to
+   * a per-scope-and-region pseudo key (`pseudoTickKey(noteScopeId(ps),
+   * 'start'|'end')`) because upstream's `getStart()`/`getEnd()` are
+   * DISTINCT per-group entities — a bare id compare would wrongly conflate
+   * `[*] --> A` with `A --> [*]` (start ≠ final) and starts of different
+   * composites. Dropped duplicates are NOT recorded (upstream never adds
+   * them to `links`). Persistent across passes (transitions only run on
+   * pass TWO).
+   */
+  linkConnections: (readonly [string, string])[];
+  /**
    * Active namespace separator (`quarkInContextSafe`'s `sep`) — `'.'` by
    * default (`StateDiagram.java:62`), `null` after `set separator
    * none`/`null` (`CommandNamespaceSeparator.java`). Persistent across both
@@ -377,16 +394,9 @@ export function scopeOf(ps: ParseState, owner: State): Scope {
   return scope;
 }
 
-/** Emit a transition into the current scope -- stamps `t.creationIndex`
- *  (mission G4 S7) at the SINGLE true creation chokepoint, mirroring
- *  upstream `Link`'s own ctor tick (`Link.java:135`), which always fires
- *  AFTER both endpoints are already resolved/auto-created (callers
- *  `ensureState` both endpoints before calling this — see `Transition
- *  .creationIndex`'s own doc comment, ast.ts). */
-export function emitTransition(ps: ParseState, t: Transition): void {
-  t.creationIndex = nextCreationIndex(ps);
-  currentScope(ps).transitions.push(t);
-}
+// `emitTransition` (the creation-tick + `-[single]->` add-time dedup
+// chokepoint) moved to ./state-link-add.ts (SI1/T11) — 500-line file-cap
+// split; that file's doc has the upstream mechanism.
 
 /**
  * Append a description/body line to a state — mirrors

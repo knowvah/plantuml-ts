@@ -238,6 +238,7 @@ export function parseState(block: UmlSource): StateDiagramAST {
     lastEntity: null,
     globalByName: new Map(),
     scopeByOwner: new Map(),
+    linkConnections: [],
     separator: DEFAULT_SEPARATOR,
     creationCounter: 0,
     pseudoCreationIndex: new Map(),
@@ -270,5 +271,8 @@ export function parseState(block: UmlSource): StateDiagramAST {
   // translation map (see `StateDiagramAST.concurrentGlobalIds`'s own doc
   // comment, ast.ts) -- mirrors the `pseudoCreationIndex` handoff above.
   ast.concurrentGlobalIds = ps.concurrentGlobalIds;
+  // #lizard forgives -- straight-line ParseState literal + two-pass driver
+  // (1 CCN); SI1/T11's one-line `linkConnections: []` init nudged the
+  // length over the cap, no branching added.
   return ast;
 }

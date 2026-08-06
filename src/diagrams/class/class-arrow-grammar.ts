@@ -415,21 +415,30 @@ export interface ArrowStyleOverrides {
   lineStyle?: 'solid' | 'dashed' | 'dotted' | 'bold';
   thickness?: number;
   color?: string;
+  /** `single` ARROW_STYLE token (`WithLinkType.goSingle`, applyOneStyle's
+   *  `equalsIgnoreCase("single")` branch) -- the link-ADD-time dedup flag
+   *  (`net.atmp.CucaDiagram#addLink:896-901` gates on `isSingle()`), not a
+   *  render style. SI1/T11: carried (no longer discarded) so the
+   *  relationship-push site can apply the shared dedup
+   *  (`src/core/cucadiagram/linkDedup.ts`).
+   *  @see ~/git/plantuml/.../decoration/WithLinkType.java:110-116,150-151 */
+  single?: true;
 }
 
 const CLASS_THICKNESS_TOKEN_RE = /^thickness=(\d+)$/i;
 
 /**
  * Bracket keywords with no render effect via this function -- `hidden`/
- * `norank`/`single` are DOT-graph-affecting flags already matched-and-
- * discarded by the surrounding grammar (`class-relationship-parser.ts`'s
- * own `ARROW_STYLE` doc comment: consumed so the arrow still matches, never
+ * `norank` are DOT-graph-affecting flags already matched-and-discarded by
+ * the surrounding grammar (`class-relationship-parser.ts`'s own
+ * `ARROW_STYLE` doc comment: consumed so the arrow still matches, never
  * carried on `Relationship`); `plain`/`node` are upstream no-ops
  * (`WithLinkType.applyOneStyle`'s own "Do nothing"/no reachable svek/abel
- * consumer). Recognized here ONLY so none of the five is ever
- * misclassified as a color token.
+ * consumer). Recognized here ONLY so none of the four is ever
+ * misclassified as a color token. (`single` was in this set until SI1/T11
+ * -- it now has its own branch, see `ArrowStyleOverrides.single`.)
  */
-const NON_COLOR_KEYWORDS = new Set(['hidden', 'norank', 'single', 'plain', 'node']);
+const NON_COLOR_KEYWORDS = new Set(['hidden', 'norank', 'plain', 'node']);
 
 /**
  * `WithLinkType.applyStyle`/`applyOneStyle` (`decoration/WithLinkType.java:
@@ -458,6 +467,7 @@ export function parseArrowStyleOverrides(rawArrow: string): ArrowStyleOverrides 
       if (lower === 'dashed') { result.lineStyle = 'dashed'; delete result.thickness; }
       else if (lower === 'dotted') { result.lineStyle = 'dotted'; delete result.thickness; }
       else if (lower === 'bold') { result.lineStyle = 'bold'; delete result.thickness; }
+      else if (lower === 'single') { result.single = true; } // goSingle() -- add-time dedup flag
       else if (NON_COLOR_KEYWORDS.has(lower)) { /* upstream no-op / DOT-only, see doc comment */ }
       else {
         const m = CLASS_THICKNESS_TOKEN_RE.exec(lower);

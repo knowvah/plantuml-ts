@@ -20,13 +20,13 @@ import {
   type ParseState,
   type Pass,
   currentScope,
-  emitTransition,
   addDescriptionLine,
   popScope,
   nextCreationIndex,
   nextConcurrentGlobalId,
   concurrentRegionScopeId,
 } from './state-parse-state.js';
+import { emitTransition } from './state-link-add.js';
 import { ensureState, resolveDescriptionTarget } from './state-parse-resolve.js';
 import { parseLabel } from './state-parse-helpers.js';
 import { parseTransitionLine } from './state-transitions.js';
