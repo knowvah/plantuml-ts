@@ -80,9 +80,25 @@ describe('A2 — USymbol descriptive leaves route to EntityImageDescription sizi
     expect(m.dividerYs).toEqual([]);
   });
 
-  it('does NOT route package/folder (SI1-narrowed measureFolderLeaf), actor, or member-bearing leaves', () => {
-    expect(tryMeasureDescriptionLeaf(classifier('p', 'descriptive', 'package'), defaultTheme, measurer, undefined)).toBeUndefined();
-    expect(tryMeasureDescriptionLeaf(classifier('f', 'descriptive', 'folder'), defaultTheme, measurer, undefined)).toBeUndefined();
+  it('routes package/folder (SI1 T12 un-narrowing — gujigi-63-roki030 jar: 2.388021x0.513889in = 171.9375x37px)', () => {
+    const p = tryMeasureDescriptionLeaf(
+      classifier('Elektronisk dokument', 'descriptive', 'package'), defaultTheme, measurer, undefined,
+    );
+    // title = create2/BodyEnhanced1 (129.9375 text + getMarginX()=6 both
+    // sides) + USymbolFolder margin [30, 23]; label slot empty (id==display,
+    // upstream's empty-desc package branch).
+    expect(p).toBeDefined();
+    expect(p!.width).toBeCloseTo(171.9375, 3);
+    expect(p!.height).toBeCloseTo(37, 3);
+    // folder fb jar probe (SI1 T12): fixed 40x15 tab floors a short label —
+    // 70x52px = max(40, 11.6375) + 30, 15 + 14 + 23.
+    const f = tryMeasureDescriptionLeaf(classifier('fb', 'descriptive', 'folder'), defaultTheme, measurer, undefined);
+    expect(f).toBeDefined();
+    expect(f!.width).toBeCloseTo(70, 3);
+    expect(f!.height).toBeCloseTo(52, 3);
+  });
+
+  it('does NOT route actor or member-bearing leaves', () => {
     expect(tryMeasureDescriptionLeaf(classifier('a', 'descriptive', 'actor'), defaultTheme, measurer, undefined)).toBeUndefined();
     const withMember: Classifier = {
       ...classifier('d', 'descriptive', 'database'),

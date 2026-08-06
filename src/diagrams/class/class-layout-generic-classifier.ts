@@ -68,12 +68,17 @@ export type { ClassFontSpecs };
  * keep their earlier `measureUsecaseOrActor` branch).
  *
  * Deliberate exclusions (named remainder, F-D report):
- * - `package`/`folder`: `measureFolderLeaf` is itself SI1-narrowed
- *   (`FOLDER_SHOWN_TITLE_EXTRA_WIDTH` +12 dropped; height off) -- routing
- *   gujigi-63-roki030's `package` leaf would WIDEN its pinned delta
- *   (0.152778in -> 0.194445in). Stays on its current path until SI1.
  * - a leaf with visible members: `measureLeafNode` sizes the display only;
  *   upstream folds the body block into `EntityImageDescription`'s desc.
+ *
+ * `package`/`folder` WERE excluded here (the F-D report's other named
+ * remainder) while the description engine's folder-title path was
+ * SI1-narrowed; SI1 T12 un-narrowed it (the shown title now measures
+ * through the real `BodyFactory.create2`→`BodyEnhanced1` route,
+ * `leaf-sizing-folder-title.ts`), so both now route like every other
+ * description-shaped leaf -- closing gujigi-63-roki030 (`package
+ * "Elektronisk dokument"`, jar 171.9375x37px, previously pinned at
+ * 0.152778in).
  */
 export function tryMeasureDescriptionLeaf(
   classifier: Classifier,
@@ -83,7 +88,7 @@ export function tryMeasureDescriptionLeaf(
 ): MeasuredClassifier | undefined {
   if (classifier.kind !== 'descriptive' || classifier.usymbol === undefined) return undefined;
   const symbol = KEYWORD_TO_SYMBOL.get(classifier.usymbol);
-  if (symbol === undefined || symbol === 'actor' || symbol === 'package' || symbol === 'folder') return undefined;
+  if (symbol === undefined || symbol === 'actor') return undefined;
   if (classifier.members.some((m) => m.hidden !== true)) return undefined;
   const stereotype = resolveVisibleStereotypeLabels(classifier);
   const node: DescriptiveNode = {

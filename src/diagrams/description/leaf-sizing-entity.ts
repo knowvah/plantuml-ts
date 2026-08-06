@@ -67,8 +67,13 @@ const SIZING_PLACEHOLDER_COLOR = '#000000';
  * diagnosed the prior gap: this fallback's `href: ''`-only shape left
  * `rasterWidth`/`rasterHeight` `undefined`, so the ellipse fit silently
  * used the full declared box for every monochrome-sprite label whose
- * extremal corner happened to be size-sensitive. */
-function sizingAtomImageResolverFor(
+ * extremal corner happened to be size-sensitive.
+ *
+ * Exported (SI1 T12) for `leaf-sizing-folder-title.ts`'s
+ * `create2`→`BodyEnhanced1` title route — the SAME sizing resolver, one
+ * construction, so a sprite/img atom in a `package` title sizes exactly
+ * like one in any other routed leaf. */
+export function sizingAtomImageResolverFor(
   sprites: SpriteDimsLookup | undefined,
 ): (font: FontConfiguration) => AtomImageResolver {
   return (font) => (atom) => {

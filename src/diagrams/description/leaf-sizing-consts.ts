@@ -199,25 +199,12 @@ export const FOLDER_FAMILY_SHOW_TITLE: Partial<Record<USymbol, boolean>> = {
 export const FOLDER_TAB_WIDTH = 40;
 export const FOLDER_TAB_HEIGHT = 15;
 
-/**
- * Extra width a SHOWN folder title contributes beyond its own text
- * (`package`). Measured exactly 12px against the deterministic oracle at
- * three different title widths — `package a` 49.787496 vs our 37.7875,
- * `package iiii` 54.599976 vs 42.6, `package WWWWWWWW` 147.700008 vs 135.7
- * (deltas 11.999996 / 11.999976 / 12.000008, i.e. 12 within DOT's
- * 6-decimal-inch rounding).
- *
- * NOT attributed to a single upstream expression: `USymbolFolder`'s own
- * `calculateDimension` adds only `getMargin()` (= [30, 23]) to
- * `dimName.mergeTB(...)`, so the 12 lives inside the title TextBlock itself.
- * Nearby candidates that do NOT sum to it: `marginTitleX1 + marginTitleX2`
- * = 6 (the drawn tab's own inset, USymbolFolder.java:60-61), `+ marginTitleX3`
- * = 13 (the tab slant's right edge), and the title's `UTranslate(4, 3)` draw
- * offset. Recorded as measured rather than guessed at; it applies ONLY to the
- * showTitle slot — a `folder`'s label text takes no such allowance (verified:
- * `folder WWWWWWWWW` is exact at labelW + 30).
- */
-export const FOLDER_SHOWN_TITLE_EXTRA_WIDTH = 12;
+// SI1 T12 (ADR-4): `FOLDER_SHOWN_TITLE_EXTRA_WIDTH = 12` (the shown folder
+// title's measured-but-untraced extra width) is DELETED — the mechanism is
+// `BodyEnhanced1`'s separator-free `decorate` margin (`getMarginX()=6` both
+// sides, BodyEnhancedAbstract.java:107-109), and the title now measures
+// through the faithful `BodyFactory.create2`→`BodyEnhanced1` route in
+// `leaf-sizing-folder-title.ts`.
 
 /** Fixed square a `hideText` leaf (interface/circle) occupies:
  *  `CircleInterface2.calculateDimension` = `radius * 2 + 2 * margin` with
