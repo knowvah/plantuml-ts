@@ -162,12 +162,35 @@ function addPoint(box: InkBox, x: number, y: number): void {
  *  numeric value) via `RoundedContainer.java`/`EntityImageStateCommon
  *  .java#getShape`, both of which set `deltaShadow` on the SAME outline
  *  rect this function's own unshadowed half already models. */
-function addStateBoxInk(box: InkBox, x: number, y: number, w: number, h: number, shadow = 0): void {
+function addStateBoxInk(box: InkBox, node: StateNodeGeo, hasDivider: boolean): void {
+  const { x, y, width: w, height: h } = node;
+  const shadow = node.shadowing ?? 0;
   addPoint(box, x - 1, y - 1);
-  addPoint(box, x + w, y + h - 1);
+  // mission tail-1px: the uninset `x + w` max-X above is the DIVIDER LINE's
+  // own ink (`LimitFinder#drawULine` — `addPoint(x + dx, y + dy)`, no `-1`),
+  // NOT the rect's. A box that draws no divider contributes only the rect's
+  // own `LimitFinder#drawRectangle` corner (`x + w - 1`). Jar-verified both
+  // ways: `jocela-05-niba392` (divider present, `<line x2="65.0625">` ==
+  // rect `x+w` exactly) needs `x + w`; `bilare-19-fufe539` (`hide empty
+  // description` => `EntityImageStateEmptyDescription.drawU` draws "rect
+  // ONLY, no divider", ZERO `<line>` elements in the jar's own SVG) needs
+  // `x + w - 1` and yields the jar's own document width 361 exactly.
+  addPoint(box, hasDivider ? x + w : x + w - 1, y + h - 1);
   if (shadow > 0) {
     addPoint(box, x + w - 1 + 2 * shadow, y + h - 1 + 2 * shadow);
   }
+}
+
+/** Does this leaf box's renderer actually draw the horizontal divider line
+ *  whose ink {@link addStateBoxInk}'s uninset max-X models? Mirrors
+ *  `renderer-box.ts#renderNormal`'s OWN two early-return branches exactly —
+ *  `headerLines === undefined` (unmeasured fallback: box + centred text) and
+ *  `emptyDescription === true` (`renderEmptyDescription`: box + header only)
+ *  both return before the `line(...)` call. Keeping the predicate identical
+ *  to the renderer's is the point: sizer and renderer must agree on which
+ *  shapes exist. */
+function rendersDivider(node: StateNodeGeo): boolean {
+  return node.headerLines !== undefined && node.emptyDescription !== true;
 }
 
 /** `fork`/`join`/`syncBar` bar — `LimitFinder#drawRectangle`'s real rule,
@@ -224,7 +247,11 @@ function addNoteInk(box: InkBox, x: number, y: number, w: number, h: number): vo
  *  array by the caller). */
 function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolean, labelInk: boolean): void {
   if (node.children.length > 0) {
-    addStateBoxInk(box, node.x, node.y, node.width, node.height, node.shadowing ?? 0);
+    // A composite's own outer box draws no divider line, but this call is
+    // deliberately left at the pre-existing `hasDivider: true` ink: the
+    // composite reuse is flagged NOT-jar-verified in this module's own doc
+    // comment, and flipping it is a separate, separately-evidenced change.
+    addStateBoxInk(box, node, true);
     for (const child of node.children) addNodeInk(box, child, includeArrowheadInk, labelInk);
     for (const t of node.transitions) addTransitionInk(box, t, includeArrowheadInk, labelInk);
     return;
@@ -250,7 +277,7 @@ function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolea
     }
     case 'normal':
     case 'json':
-      addStateBoxInk(box, node.x, node.y, node.width, node.height, node.shadowing ?? 0);
+      addStateBoxInk(box, node, rendersDivider(node));
       return;
     case 'note':
       addNoteInk(box, node.x, node.y, node.width, node.height);
