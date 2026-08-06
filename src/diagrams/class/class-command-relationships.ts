@@ -6,6 +6,7 @@
  * class-commands.ts to stay under the line cap; order preserved (spread
  * third in COMMANDS, right after the container group).
  */
+import { dropsAsSingleDuplicate } from '../../core/cucadiagram/linkDedup.js';
 import { isNoteId } from './class-notes.js';
 import { applyLollipop, LOLLIPOP_RE } from './class-lollipop.js';
 import { parseMemberLine } from './class-member-parser.js';
@@ -25,6 +26,20 @@ import { ensureClassifier, type ParseState } from './parser.js';
 function resolveRelationshipEndpoint(state: ParseState, id: string): string {
   return isNoteId(state.ast, id) ? id : ensureClassifier(state, id, undefined, undefined, true).id;
 }
+
+/** A `Relationship` reduced to its two connection identities for the shared
+ *  `-[single]->` dedup (`Link.sameConnections` compares `Entity`
+ *  references; `rel.from`/`rel.to` are the resolved fully-qualified ids at
+ *  the push point, carrying the same identity contract). Scanning
+ *  `ast.relationships` mirrors upstream's flat `CucaDiagram.links` for
+ *  every pair a `single` class link can form: lollipop/assoc-couple edges
+ *  live in the SAME array, and note-attachment edges (kept separately)
+ *  always involve a note entity no classifier pair can equal.
+ *  @see src/core/cucadiagram/linkDedup.ts */
+const relationshipConnection = (r: { from: string; to: string }): readonly [string, string] => [
+  r.from,
+  r.to,
+];
 
 /**
  * Order matters: patterns are tested top-to-bottom; first match wins.
@@ -106,6 +121,23 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
       // G2 N9: `<path codeLine="...">` -- see ast.ts#Relationship.sourceLine's
       // doc comment.
       if (state.currentLine !== undefined) rel.sourceLine = state.currentLine;
+      // SI1/T11: `CucaDiagram.addLink`'s `-[single]->` add-time dedup
+      // (net.atmp.CucaDiagram.java:896-901) via the shared hook (ADR-3).
+      // Placed AFTER the creationIndex stamp: upstream constructs the
+      // `Link` (burning its `lnk` uid tick, abel/Link.java:135) before
+      // `addLink`'s dedup ever runs, so a dropped duplicate still burns
+      // its tick and both endpoints stay auto-created -- only the
+      // relationship record itself is skipped.
+      if (
+        dropsAsSingleDuplicate(
+          rel.single === true,
+          state.ast.relationships,
+          rel,
+          relationshipConnection,
+        )
+      ) {
+        return;
+      }
       state.ast.relationships.push(rel);
     },
   },

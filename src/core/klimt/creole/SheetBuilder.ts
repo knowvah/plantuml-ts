@@ -90,6 +90,25 @@ export interface StereotypeLike {
   toString(): string;
 }
 
+/**
+ * `cucadiagram/Member` — the third non-`String` `CharSequence` upstream
+ * places in a `Display`: `BodierLikeClassOrObject#getFieldsToDisplay`/
+ * `#getMethodsToDisplay` return `Display.create(List<Member>)`
+ * (BodierLikeClassOrObject.java:133/:163) and `MethodsOrFieldsArea`
+ * recovers the members via `instanceof Member`. Duck-typed here beside
+ * {@link StereotypeLike} (same rationale) so klimt/ takes no
+ * cucadiagram/ import; generic `Display` paths read a `Member` through
+ * `String(e)`/`toString()` exactly as upstream's generic `CharSequence`
+ * handling does. SI1/T7.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/Member.java:49-63
+ */
+export interface MemberLike {
+  getDisplay(withVisibilityChar: boolean): string;
+  hasUrl(): boolean;
+  toString(): string;
+}
+
 /** One element of `Display#displayData` — upstream's `CharSequence`,
  *  narrowed to the two concrete kinds that actually appear there (see
  *  module doc comment). */

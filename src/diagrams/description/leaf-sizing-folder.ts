@@ -10,12 +10,12 @@ import type { DescriptiveNode } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { textBlockHeight, maxLineWidth, atomHeightBonus } from './leaf-sizing-text.js';
+import { measureShownFolderTitle } from './leaf-sizing-folder-title.js';
 import {
   type BoxSizingOpts,
   BOX_MIN_WIDTH_DEFAULT,
   DEFAULT_BOX_MARGIN,
   FOLDER_FAMILY_SHOW_TITLE,
-  FOLDER_SHOWN_TITLE_EXTRA_WIDTH,
   FOLDER_TAB_HEIGHT,
   FOLDER_TAB_WIDTH,
   LINE_HEIGHT_FACTOR,
@@ -50,6 +50,13 @@ import {
  *   49.7875 + 12 + 30 at height 37 = 14 + 23; `package pp as "Display Here"`
  *   106.387 at height 51 = 14 + 14 + 23, the label winning the width max;
  *   `package "Disp Two" as dd` 84.600 at height 51, likewise.
+ *
+ * SI1 T12 (ADR-4): the shown title block is now the FAITHFUL
+ * `BodyFactory.create2` → `BodyEnhanced1` route
+ * (`leaf-sizing-folder-title.ts`) — the `+ 12` in the verified numbers
+ * above is `BodyEnhanced1`'s `getMarginX()=6` both sides
+ * (BodyEnhancedAbstract.java:107-109), no longer the measured-but-untraced
+ * `FOLDER_SHOWN_TITLE_EXTRA_WIDTH` flat constant (deleted).
  */
 export function measureFolderLeaf(
   node: DescriptiveNode,
@@ -64,8 +71,13 @@ export function measureFolderLeaf(
   const showTitle = FOLDER_FAMILY_SHOW_TITLE[symbol] === true;
   // showTitle puts the CODE in the title slot and the display in the label
   // only when it differs; !showTitle leaves the title fixed (40, 15) and the
-  // display is the whole label.
-  const [titleW, titleH] = folderTitleBlock(node, fontSpec, measurer, showTitle);
+  // display is the whole label. The shown title is the faithful
+  // `BodyFactory.create2`→`BodyEnhanced1` block (SI1 T12/ADR-4 — see
+  // `leaf-sizing-folder-title.ts`; upstream `getDimTitle` never measures
+  // `title` when `showTitle` is false, USymbolFolder.java:172).
+  const [titleW, titleH] = showTitle
+    ? measureShownFolderTitle(node.id, fontSpec, measurer, opts, sprites)
+    : [FOLDER_TAB_WIDTH, FOLDER_TAB_HEIGHT];
   const labelText = showTitle && node.display === node.id ? '' : node.display;
   const [labelW, labelH] = folderTextBlock(labelText, fontSpec, measurer, sprites);
   const [stereoW, stereoH] = folderStereoBlock(node, fontSpec, measurer, lineH);
@@ -79,22 +91,6 @@ export function measureFolderLeaf(
     width: Math.max(minContentW, titleW, labelW, stereoW) + marginH,
     height: titleH + labelH + stereoH + marginV,
   };
-}
-
-/** `dimName` — the fixed (40, 15) tab when `showTitle` is false, else the
- *  element CODE's own text block plus {@link FOLDER_SHOWN_TITLE_EXTRA_WIDTH}. */
-function folderTitleBlock(
-  node: DescriptiveNode,
-  fontSpec: FontSpec,
-  measurer: StringMeasurer,
-  showTitle: boolean,
-): readonly [number, number] {
-  if (!showTitle) return [FOLDER_TAB_WIDTH, FOLDER_TAB_HEIGHT];
-  const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
-  return [
-    maxLineWidth(node.id, fontSpec, measurer) + FOLDER_SHOWN_TITLE_EXTRA_WIDTH,
-    textBlockHeight(node.id, lineH),
-  ];
 }
 
 /** `dimLabel` — an EMPTY label contributes a zero block, not a blank line

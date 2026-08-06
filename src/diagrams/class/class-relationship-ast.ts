@@ -286,6 +286,19 @@ export interface Relationship {
    */
   colorOverride?: string;
   /**
+   * SI1/T11: the `single` ARROW_STYLE token (`WithLinkType.goSingle`/
+   * `isSingle`, `decoration/WithLinkType.java:110-116`) -- a link-ADD-time
+   * dedup flag, not a render style: `net.atmp.CucaDiagram#addLink:896-901`
+   * silently drops a `single` link when the diagram already holds ANY other
+   * link connecting the same two entities (`Link.sameConnections`,
+   * `abel/Link.java:462-470` -- endpoint identity, either direction).
+   * Parsed by `class-arrow-grammar.ts#parseArrowStyleOverrides`; consumed
+   * by the relationship-push site (`class-command-relationships.ts`) via
+   * the shared dedup hook (`src/core/cucadiagram/linkDedup.ts`, ADR-3).
+   * Same field/semantics as description's `DescriptiveLink.single`.
+   */
+  single?: true;
+  /**
    * G2 N59: `ArrowInfo.swapDirection` ("the left operand is semantically
    * `to`", `class-arrow-grammar.ts`'s own doc comment) -- `true` only when
    * the arrowhead/`LinkType` swapped `from`/`to` relative to pure

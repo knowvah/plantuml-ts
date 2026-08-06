@@ -11,8 +11,10 @@
  * `measureEntityLeaf`; MULTI-LINE stayed on the analytic substitute for a
  * time, but SI10 (ADR-1/ADR-2) re-measured that branch INERT and removed
  * it -- see `hasUnroutedUsecaseMarkup`'s doc. `<latex>` is the one narrowing
- * still open, a permanent divergence; `folder`/`package` (SI1/ADR-10) is a
- * separate, unrelated narrowing. T10/ADR-3 retired the sizer's `fitToInk`
+ * still open, a permanent divergence; `folder`/`package`'s title narrowing
+ * (was SI1/ADR-10) is CLOSED -- SI1 T12 routed the shown title through the
+ * real `create2`/`BodyEnhanced1` (see the folder/package `case` below).
+ * T10/ADR-3 retired the sizer's `fitToInk`
  * ink substitution -- see `sizingAtomImageResolverFor`'s own doc.
  *
  * `measureUsecase` (exported below) is NOT dead: it is `<latex>` usecase
@@ -127,11 +129,17 @@ export function measureLeafNode(
       return measureNote(node.display, fontSpec, measurer, sprites);
     case 'folder':
     case 'package':
-      // STILL NARROWED (T5/ADR-10, was ADR-6): routing drops
-      // `FOLDER_SHOWN_TITLE_EXTRA_WIDTH` (12px) -- `getMarginX()`=6 needs
-      // `create2`/`BodyEnhanced1`, moved to mission SI1. Kept on the
-      // pre-existing `measureFolderLeaf` path -- never touch
-      // `FOLDER_SHOWN_TITLE_EXTRA_WIDTH` here.
+      // UN-NARROWED (SI1 T12, ADR-4 -- was T5/ADR-10's narrowing #1): the
+      // shown title now measures through the REAL `BodyFactory.create2` ->
+      // `BodyEnhanced1` route (`leaf-sizing-folder-title.ts`, upstream
+      // `EntityImageDescription.java:198-199`'s construction); the flat
+      // `FOLDER_SHOWN_TITLE_EXTRA_WIDTH` constant is deleted -- the 12 was
+      // `getMarginX()=6` both sides. `measureFolderLeaf` stays the entry
+      // point: its `mergeTB`+`getMargin()` composition is the jar-verified
+      // transcription of `USymbolFolder.asSmall.calculateDimension`, and
+      // the `measureEntityLeaf` route cannot serve this family until the
+      // core `EntityImageDescription` `name` substitute itself adopts
+      // `create2` (ADR-4 scopes that follow-on out of T12).
       return measureFolderLeaf(node, fontSpec, measurer, opts, sprites);
     case 'usecase':
     case 'usecase-business':
