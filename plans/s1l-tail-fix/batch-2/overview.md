@@ -5,9 +5,9 @@ Three parallel tasks, disjoint write-sets. Closes G6 + G3-M1 + G7 + G10.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [F2-a](F2-a-command-table.md) | Command-table gaps (G6): unquoted-CODE + `<<st>>`, and `CODE as "quoted DISPLAY"` role flip | typescript-pro | `element-grammar.ts`, `command-table-containers.ts`, `command-table-shorthand.ts`, `parse-state.ts` | F1-b (`parse-state.ts` + `stillUnknown` contract) | [ ] |
-| [F2-b](F2-b-stereotype-extraction.md) | Stereotype extraction owns G3-M1 + G7: `<`/`>`-excluding regex, `buildStereo`'s sprite + empty-label branches | typescript-pro | `parse-helpers-strings.ts`, `EntityImageDescriptionDelegates.ts`, `ast.ts`, `leaf-sizing-entity.ts` | Batch 1 (no specific task) | [ ] |
-| [F2-c](F2-c-url-label-sprite.md) | Url-label sprite scale (G10): drop `fontSize/13` inside `[[url label]]` | typescript-pro | `StripeSimple.ts`, `creole-atoms.ts`, `creole-atoms-measure.ts`, `render-atoms.ts` | Batch 1 (no specific task) | [ ] |
+| [F2-a](F2-a-command-table.md) | Command-table gaps (G6): unquoted-CODE + `<<st>>`, and `CODE as "quoted DISPLAY"` role flip | typescript-pro | `element-grammar.ts`, `command-table-containers.ts`, `command-table-shorthand.ts`, `parse-state.ts` | F1-b (`parse-state.ts` + `stillUnknown` contract) | [x] |
+| [F2-b](F2-b-stereotype-extraction.md) | Stereotype extraction owns G3-M1 + G7: `<`/`>`-excluding regex, `buildStereo`'s sprite + empty-label branches | typescript-pro | `parse-helpers-strings.ts`, `EntityImageDescriptionDelegates.ts`, `ast.ts`, `leaf-sizing-entity.ts` | Batch 1 (no specific task) | [x] |
+| [F2-c](F2-c-url-label-sprite.md) | Url-label sprite scale (G10): drop `fontSize/13` inside `[[url label]]` | typescript-pro | `StripeSimple.ts`, `creole-atoms.ts`, `creole-atoms-measure.ts`, `render-atoms.ts` | Batch 1 (no specific task) | [x] |
 
 ## Fixtures closed
 

@@ -29,7 +29,7 @@ The inputs are on disk and are authoritative:
 ## Batches
 
 - [x] [Batch 1](batch-1/overview.md) — F1-a/b/c, 3 parallel · **+9 → 330**
-- [ ] [Batch 2](batch-2/overview.md) — F2-a/b/c, 3 parallel · **+6 → 336**
+- [x] [Batch 2](batch-2/overview.md) — F2-a/b/c, 3 parallel · **+6 → 336**
 - [ ] [Batch 3](batch-3/overview.md) — F3-fix + seam + 2 non-code, 4 parallel · **+4 → 340**
 - [ ] [Batch 4](batch-4/overview.md) — F4-a/b/c/d, 4 parallel · **+6 → 346**
 - [ ] [Batch 5](batch-5/overview.md) — F5-a goldens sweep · **+1 → 347**
