@@ -48,8 +48,12 @@ feature port, not a sizing defect; stays pinned).
 
 ## Batches
 
-- [ ] [Batch 1](batch-1/overview.md) — T1–T7, seven diagnosis tasks, fully
-      parallel (each writes exactly one findings file; zero write conflicts)
+- [x] [Batch 1](batch-1/overview.md) — T1–T7, seven diagnosis tasks, fully
+      parallel (each writes exactly one findings file; zero write conflicts).
+      **Complete 2026-08-06: 26/26 fixtures diagnosed, 0 unresolved.** Gates
+      green; `src/` byte-identical to `main`; measurement diff-identical to the
+      pre-batch baseline. Two items await a maintainer ruling — see
+      [decision-journal.md](decision-journal.md).
 - [ ] [Batch 2](batch-2/overview.md) — T8 synthesis: re-partition all 26 by
       true mechanism across bucket boundaries
 
