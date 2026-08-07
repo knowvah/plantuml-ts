@@ -1,0 +1,5 @@
+@startuml
+:A: as "Actor name"
+(Use)
+A --> (Use)
+@enduml

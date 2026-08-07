@@ -20,7 +20,11 @@ import {
   parseInlineBody,
   parseNameSection,
 } from './parse-helpers.js';
-import { RE_BARE_QUOTED_DECL, parseBracketDeclaration } from './element-grammar.js';
+import { parseBracketDeclaration } from './element-grammar.js';
+import {
+  RE_BARE_DECORATED_DECL,
+  RE_BARE_QUOTED_DECL,
+} from './element-grammar-nosymbol.js';
 import { emitNode, nextCreationIndex } from './parse-state.js';
 import { leafDisplayName } from './namespace-groups.js';
 
@@ -160,6 +164,26 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       const decl = makeNode(id, finalDisplay, symbol, stereotype, color, tags);
       if (symbol === 'port') decl.position = kw === 'portout' ? 'portout' : 'portin';
       emitNode(state, decl);
+    },
+  },
+
+  // 14b. Bare UNQUOTED declaration, no keyword: `User << Human >>` —
+  //      CommandCreateElementFull's CODE1 branch on CODE_CORE's plain
+  //      `[%pLN_.]+` alternative (java:126,:128), SYMBOL omitted (java:84).
+  //      `isForbidden` (java:134-138) tests the WHOLE line, so a decoration
+  //      is REQUIRED: a pure `User` line declares nothing and must keep
+  //      falling through. Same `symbol == null` → plain actor resolution as
+  //      rule 15 (java:271-274), not a STILL_UNKNOWN leaf.
+  //
+  //      Ordered after rule 14 so a single-keyword line carrying only a
+  //      decoration (`card <<x>>`) keeps its existing KEYWORD_RE reading,
+  //      and disjoint from rule 15 by construction (that one is anchored on
+  //      a leading quote, this one on a leading identifier char).
+  {
+    pattern: RE_BARE_DECORATED_DECL,
+    execute(state, match) {
+      const { id, display, stereotype, color, tags } = parseNameSection(match[0]);
+      emitNode(state, makeNode(id, display, 'actor', stereotype, color, tags));
     },
   },
 
