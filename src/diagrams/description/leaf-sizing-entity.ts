@@ -17,7 +17,12 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureInlineAtom } from '../../core/creole-atoms-measure.js';
 import type { SpriteDimsLookup, AtomImageResolver } from '../../core/creole-atoms.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
-import { EntityImageDescription, type EntityImageDescriptionParams } from '../../core/svek/image/EntityImageDescription.js';
+import {
+  EntityImageDescription,
+  type EntityImageDescriptionParams,
+  type EntityImageDescriptionStereotypeSprite,
+} from '../../core/svek/image/EntityImageDescription.js';
+import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
@@ -185,6 +190,18 @@ function sizingPaint(
  * of stickman/awesome/hollow it will actually be drawn as. Falls back to
  * `ActorStyle.STICKMAN`, upstream's own default, when unset.
  */
+/** The `labels.stereotypeSprite` slot — present only when the node names a
+ *  sprite AND that name resolves. Shared shape with `renderer-entity.ts`'s
+ *  own call so the sizer and renderer cannot resolve one name to two boxes
+ *  (`planning/sizer-renderer-parity.md`). */
+function spriteLabel(
+  node: DescriptiveNode,
+  sprites: SpriteDimsLookup | undefined,
+): { stereotypeSprite?: EntityImageDescriptionStereotypeSprite } {
+  const resolved = resolveStereotypeSprite(node.stereotypeSprite, sprites);
+  return resolved === undefined ? {} : { stereotypeSprite: resolved };
+}
+
 function buildSizingEntityParams(
   node: DescriptiveNode,
   fontSpec: FontSpec,
@@ -210,6 +227,13 @@ function buildSizingEntityParams(
       codeName: node.display,
       displayText: node.display,
       stereotypeLabels: node.stereotype ?? [],
+      // `Stereotype#getSprite` (java:110-118). Without this the `<<$name>>`
+      // run falls through to `stereotypeLabels` and is measured as guillemet
+      // TEXT -- one font-size line -- instead of the sprite's declared box.
+      // `resolveStereotypeSprite` returns undefined on a miss, which IS
+      // upstream's null return, so an unknown sprite still degrades to its
+      // `«label»` block.
+      ...spriteLabel(node, ctx.sprites),
     },
     paint: sizingPaint(font, sizingFontConfig(fontSpec, fontStereoSize), ctx.opts),
     links: [],

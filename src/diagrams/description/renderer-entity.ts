@@ -39,6 +39,7 @@ import type { DescriptionNodeGeo } from './layout-helpers.js';
 import {
   EntityImageDescription,
   type EntityImageDescriptionParams,
+  type EntityImageDescriptionStereotypeSprite,
 } from '../../core/svek/image/EntityImageDescription.js';
 import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
 import { UGraphicStencil } from '../../core/klimt/drawing/UGraphicStencil.js';
@@ -48,7 +49,8 @@ import {
   type UGraphicWithGroups,
 } from '../../core/svek/DecorateEntityImage.js';
 import { upstreamKeyword, mapComponentStyle, textFont, resolveActorStyle } from './renderer-symbol.js';
-import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import { type SpriteRegistry, spriteDimsLookupFor } from '../../core/sprite-commands.js';
+import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import { makeAtomImageResolverFor } from './render-atoms.js';
 import { buildNoteBody } from './leaf-sizing.js';
 import { NOTE_FONT_SIZE } from './leaf-sizing-consts.js';
@@ -179,6 +181,18 @@ function overrideStroke(
   return UStroke.withThickness(defaultThickness);
 }
 
+/** Renderer-side twin of `leaf-sizing-entity.ts#spriteLabel` — the registry is
+ *  narrowed through `spriteDimsLookupFor` so both producers ask the SAME
+ *  lookup (`planning/sizer-renderer-parity.md`). */
+function spriteLabel(
+  node: DescriptionNodeGeo,
+  sprites: SpriteRegistry | undefined,
+): { stereotypeSprite?: EntityImageDescriptionStereotypeSprite } {
+  const lookup = sprites === undefined ? undefined : spriteDimsLookupFor(sprites);
+  const resolved = resolveStereotypeSprite(node.stereotypeSprite, lookup);
+  return resolved === undefined ? {} : { stereotypeSprite: resolved };
+}
+
 function buildEntityParams(
   node: DescriptionNodeGeo,
   theme: Theme,
@@ -195,7 +209,15 @@ function buildEntityParams(
       actorStyle: resolveActorStyle(theme.actorStyle),
       componentStyle: mapComponentStyle(theme.componentStyle),
     },
-    labels: { codeName: node.display, displayText: node.display, stereotypeLabels },
+    labels: {
+      codeName: node.display,
+      displayText: node.display,
+      stereotypeLabels,
+      // Same resolution the sizer performed (`leaf-sizing-entity.ts
+      // #spriteLabel`), through the SAME `SpriteDimsLookup` narrowing, so the
+      // drawn sprite cannot differ from the measured one.
+      ...spriteLabel(node, sprites),
+    },
     paint: {
       forecolor: override.line ?? resolveElementPaint(theme, node.symbol, 'border'),
       backcolor:
