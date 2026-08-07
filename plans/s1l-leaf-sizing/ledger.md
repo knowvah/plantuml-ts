@@ -804,3 +804,73 @@ there: `src/diagrams/class/class-layout-leaf-shapes.ts:14,27` calls
 mechanism. Retiring it is class-engine work.
 
 
+
+---
+
+# Close-out — S1L tail diagnosis (appended 2026-08-06, mission `plans/s1l-tail-diagnosis/`)
+
+The 26 remaining non-conformant description fixtures are now each diagnosed to
+a `file:line` mechanism and re-partitioned by TRUE shared cause. Full record:
+`plans/s1l-tail-diagnosis/findings/SYNTHESIS.md` (13 groups) plus the seven
+per-bucket findings files beside it. **No `src/` change was made** (ADR-2).
+
+## Corrections to entries recorded above (ADR-4 re-verification)
+
+Four mechanisms recorded earlier in this ledger were re-confirmed against
+current code and current measured numbers. Three did not survive as written.
+The originals are left intact above; these are the corrections.
+
+- **`fariba-82-xolu802`** — "NOT a leaf-width bug" **CONFIRMED**: both node
+  widths are bit-identical to the oracle. The residual is two 14px text rows —
+  a dropped stereotype on the `keyword code <<st>> [` open form
+  (`parser.ts:111`) plus a missing creole tab-stop advance. A separate +2px
+  sprite/label-stack residual on node `sh0006` remains **undiagnosed** and will
+  become the fixture's headline once those two land.
+- **`gogamo-72-pibo470`** — filed above under "element font (per-USymbol)".
+  **REFUTED.** It is a parser gap: the no-SYMBOL/unquoted-CODE branch of
+  `CommandCreateElementFull` is unported (`element-grammar.ts:170`), so the
+  declaration line is dropped entirely. No font mechanism is involved; the
+  sizer reproduces the jar exactly when given the stereotype.
+- **S1L-i (`--title--`/`==title==` titled separators)** — **STALE.** The
+  recorded 62.5px-vs-37.6px divergence no longer reproduces; the leaf sizer
+  already measures the title with upstream's `+8`
+  (`TextBlockLineBefore.java:72-79`). Its named blocker
+  (`CreoleStripeSimpleParser.ts:95`) is **not on the path** for either fixture,
+  and flipping it would move neither delta by a pixel. Description bodies split
+  on `BodyEnhancedAbstract.isBlockSeparator`, a looser test than
+  `classifyStripeLine`, and that one is already ported verbatim.
+- **S1L-j (multiline display)** — **CONFIRMED verbatim**, including the literal
+  broken id, but **incomplete twice over**: the bucket is 3 fixtures, not 2
+  (`nixura-77-bina738` is the same mechanism, whole), and the delta is
+  *entirely* parse-side — given a correct display, the sizer already reproduces
+  the jar exactly on every node of all three. No `leaf-sizing*.ts` edit is
+  warranted for it.
+
+## Standing findings for whoever picks up the fix mission
+
+- **`measureNote` (`leaf-sizing.ts:215-226`) is the highest-value site in the
+  tail**: 12 lines, four distinct causes, 5 fixtures outright and a 6th
+  partially. It models a note body as flat `lineCount × 13` where upstream uses
+  `BodyFactory.create3`→`BodyEnhanced2` — all of which is already ported and
+  already wired for entity `desc`.
+- **`leaf-sizing-entity.ts` is a write-set hub** (4 of 13 groups), alongside
+  `size-backlog.json` (all 13). Batch on those two or agents will collide.
+- **`maxSizeDeltaIn` is an order statistic, not a per-node error.**
+  `tests/oracle/svek-dot.ts:251-253` sorts each side's widths+heights into one
+  multiset and pairs by index, discarding node identity. It **deflates** rather
+  than inflates (it is the minimum-cost 1-D matching), so the live risk is
+  **false conformance among the 321 passing fixtures**, not inflated pins: a
+  permutation of correct values reports delta 0. A by-node-id paired metric is
+  recommended before the numbers below are trusted as targets.
+- **The recorded S1L "container-cluster" family is a classifier artifact.**
+  `computeContainerBbox` / `frontier-cluster-bbox.ts` is implicated by **zero**
+  of the 26 fixtures.
+
+## Projected close-out
+
+The fix-mission batch plan in `SYNTHESIS.md` §8 takes description size
+conformance from **321/351 (91.5%) to 347/351 (98.9%)**. The remaining 4 are
+exactly the deliberately excluded set — 2 LaTeX (permanent divergence,
+`DIVERGENCES.md`) and 2 GH #24 `<code>` monospace. **This tail closes
+completely**; no fixture in it is a proposed divergence, and none is
+unresolved.

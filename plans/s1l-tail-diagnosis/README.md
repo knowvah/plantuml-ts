@@ -54,8 +54,16 @@ feature port, not a sizing defect; stays pinned).
       green; `src/` byte-identical to `main`; measurement diff-identical to the
       pre-batch baseline. Two items await a maintainer ruling — see
       [decision-journal.md](decision-journal.md).
-- [ ] [Batch 2](batch-2/overview.md) — T8 synthesis: re-partition all 26 by
-      true mechanism across bucket boundaries
+- [x] [Batch 2](batch-2/overview.md) — T8 synthesis: re-partition all 26 by
+      true mechanism across bucket boundaries.
+      **Complete 2026-08-06:** [findings/SYNTHESIS.md](findings/SYNTHESIS.md).
+      26 fixtures → **13 mechanism groups**; 0 unresolved, 0 proposed
+      divergences. Seven buckets scattered into thirteen groups with only one
+      surviving as a partition (ADR-3 vindicated). The `xufexu-38`/`pivudu-29`
+      cross-task contradiction is ruled ONE mechanism on source evidence
+      (`BodyEnhancedAbstract.ts:84-90`), not on either record's assertion.
+      Fix-mission batch plan closes the tail to **347/351 = 98.9%**, leaving
+      only the 4 deliberately excluded fixtures.
 
 ## Quality gates
 
