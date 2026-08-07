@@ -17,9 +17,13 @@ import type { UmlSource } from '../../core/block-extractor.js';
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
-import type { DescriptionDiagramAST } from './ast.js';
+import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
 import {
+  ELEMENT_MULTILINE_END0_RE,
   ELEMENT_MULTILINE_OPEN_RE,
+  ELEMENT_MULTILINE_OPEN_TYPE0_RE,
+  extractColor,
+  extractNodeStereotype,
   finalizeDisplay,
   makeNode,
   parseNameSection,
@@ -31,7 +35,9 @@ import {
   executeNoteOpen,
   makeDefaultAST,
   resolveStillUnknown,
+  type ElementBlockTerminator,
   type ParseState,
+  type PendingElementState,
 } from './parse-state.js';
 import { COMMANDS } from './command-table.js';
 import { leafDisplayName } from './namespace-groups.js';
@@ -45,7 +51,7 @@ export { CONTAINER_SYMBOLS } from './parse-helpers.js';
 function makeInitialState(): ParseState {
   return {
     inSpriteBlock: false,
-    inElementBlock: false,
+    pendingElement: undefined,
     ast: makeDefaultAST(),
     containerStack: [],
     nodesById: new Map(),
@@ -65,13 +71,58 @@ function makeInitialState(): ParseState {
  *  dispatch phase should be tried. */
 type LineOutcome = number | null;
 
-/** Push one `[ … ]` body content line (trimmed; the closing `]` already
- *  stripped) if it carries text — blank body lines add no label content. */
-function pushElementBody(state: ParseState, content: string): void {
-  // Body lines are label content — finalize each (resolve `\t`/escape
-  // sequences and newline literals) exactly like the single-line display path.
-  const t = finalizeDisplay(content.trim());
-  if (t !== '') state.elementBlockBody!.push(t);
+/** `BlocLines#nbStartingSpace` (utils/BlocLines.java:318-324) — spaces AND
+ *  tabs both count, since `StripeTree#computeLevel` treats a tab as a
+ *  nesting step exactly like a 2-space group. */
+function nbStartingSpace(s: string): number {
+  let nb = 0;
+  while (nb < s.length && (s[nb] === ' ' || s[nb] === '\t')) nb++;
+  return nb;
+}
+
+/** `BlocLines#removeStartingSpaces` (utils/BlocLines.java:330-343): strips AT
+ *  MOST `nb` leading space/tab characters, so a line indented LESS than the
+ *  reference line keeps whatever it has instead of borrowing a column from
+ *  its text. */
+function removeStartingSpaces(s: string, nb: number): string {
+  let i = 0;
+  while (i < nb && i < s.length && (s[i] === ' ' || s[i] === '\t')) i++;
+  return i === 0 ? s : s.slice(i);
+}
+
+/** A display row that comes from the OPENER's own `DESC` tail or from the
+ *  closing line's pre-terminator prefix — `display.addFirst(descStart)` /
+ *  `display.add(lineLast.get(0))`, each applied only when non-empty
+ *  (CommandCreateElementMultilines.java:191-199). Both are read off an
+ *  already-trimmed line, so neither participates in `trimSmart`'s indent. */
+function pushElementEdgeText(pending: PendingElementState, text: string): void {
+  const t = pending.terminator === 'quote' ? text : finalizeDisplay(text.trim());
+  if (t.trim() !== '') pending.lines.push(t);
+}
+
+/**
+ * Push one body line of an open element block, RAW.
+ *
+ * `BlocLines#trimSmart(1)` (utils/BlocLines.java:305-316) removes the leading
+ * whitespace run of the block's FIRST BODY LINE — its *reference* line — from
+ * that line and every line after it. It is deliberately NOT a minimum over
+ * the block: a body is indented relative to its own first line. Before this,
+ * `processLine`'s blanket `.trim()` flattened every body line, so
+ * `StripeTree#computeLevel` scored each `|_` row at level 1 and
+ * `AtomTree#calculateDimensionSlow`'s `getXEndForLevel` never grew past 18px
+ * — vixeni-34-nici683's node B came out 16px (2 levels × `Skeleton2.SIZE_X`)
+ * narrow (S1L tail, G8).
+ *
+ * TYPE0 is `expandsNewline(false)` (CommandCreateElementMultilines.java:169;
+ * jar-verified — a literal `\n` inside a TYPE0 body is NOT a line break), so
+ * its rows are joined raw and must NOT route through `finalizeDisplay`, which
+ * resolves `\n` escapes. TYPE1 keeps the established finalize pass.
+ */
+function pushElementBody(pending: PendingElementState, raw: string): void {
+  if (pending.baseIndent === undefined) pending.baseIndent = nbStartingSpace(raw);
+  const dedented = removeStartingSpaces(raw, pending.baseIndent);
+  const t = pending.terminator === 'quote' ? dedented : finalizeDisplay(dedented);
+  if (t.trim() !== '') pending.lines.push(t);
 }
 
 /** Close the multi-line element block: the accumulated body IS the element's
@@ -83,43 +134,137 @@ function pushElementBody(state: ParseState, content: string): void {
  *  display (xocodo-09-nuxi647, S1L-e). Upstream sets the display from the
  *  block unconditionally; there is no "fall back to the code" branch. */
 function finishElementBlock(state: ParseState): void {
-  const node = state.elementBlockNode;
-  const body = state.elementBlockBody;
-  if (node !== undefined && body !== undefined) {
-    node.display = body.join('\n');
-  }
-  state.inElementBlock = false;
-  state.elementBlockNode = undefined;
-  state.elementBlockBody = undefined;
+  const pending = state.pendingElement;
+  if (pending !== undefined) pending.node.display = pending.lines.join('\n');
+  state.pendingElement = undefined;
 }
 
-/** `<keyword> <code> [ … ]` multi-line element description
- *  (CommandCreateElementMultilines TYPE1) — the `[ … ]` body is the element's
- *  label; accumulate it until a line ends with `]`. */
-function tryElementBlock(state: ParseState, line: string): LineOutcome {
-  if (state.inElementBlock) {
-    const closes = /\]\s*$/.test(line);
-    pushElementBody(state, closes ? line.replace(/\]\s*$/, '') : line);
-    if (closes) finishElementBlock(state);
+/** Consume one line of an already-open block. TYPE1 closes on a line ending
+ *  `]`, TYPE0 on a line ending in a quote character — both tested against the
+ *  `Trim.BOTH`-trimmed line, both contributing that line's prefix as a
+ *  display row when it is non-empty. Non-closing lines keep their raw
+ *  indentation (see {@link pushElementBody}). */
+function continueElementBlock(
+  state: ParseState,
+  pending: PendingElementState,
+  raw: string,
+  trimmed: string,
+): LineOutcome {
+  const end =
+    pending.terminator === 'quote'
+      ? ELEMENT_MULTILINE_END0_RE.exec(trimmed)
+      : /^(.*)\]$/.exec(trimmed);
+  if (end === null) {
+    pushElementBody(pending, raw);
     return 1;
   }
-  const elemOpen = ELEMENT_MULTILINE_OPEN_RE.exec(line);
-  if (elemOpen === null) return null;
-  const symbol = KEYWORD_TO_SYMBOL.get(elemOpen[1]!.toLowerCase());
-  if (symbol === undefined) return null;
-  const code = elemOpen[2]!;
-  const node = makeNode(code, code, symbol);
-  emitNode(state, node);
-  state.elementBlockNode = node;
-  state.elementBlockBody = [];
-  // Inline body on the open line: everything after the first `[` (a one-line
-  // `component c [ desc ]` also closes here).
-  const closes = /\]\s*$/.test(line);
-  const inline = line.slice(line.indexOf('[') + 1);
-  pushElementBody(state, closes ? inline.replace(/\]\s*$/, '') : inline);
-  if (closes) finishElementBlock(state);
-  else state.inElementBlock = true;
+  pushElementEdgeText(pending, end[1]!);
+  finishElementBlock(state);
   return 1;
+}
+
+/** Apply the opener's captured STEREO/COLOR run (`ELEMENT_DECORATION_RUN`)
+ *  through the same extractors the single-line path uses. `withColor` is
+ *  TYPE0-only: TYPE0's colour slot sits before `as` and has no single-line
+ *  equivalent, whereas TYPE1's colour is a separate, unmeasured gap (see this
+ *  task's decision-journal row). */
+function applyElementDecorations(
+  node: DescriptiveNode,
+  run: string,
+  withColor: boolean,
+): void {
+  if (run.trim() === '') return;
+  const sr = extractNodeStereotype(run);
+  if (sr !== undefined) node.stereotype = sr.stereotypes;
+  if (!withColor) return;
+  const cr = extractColor(sr === undefined ? run : sr.remainder);
+  if (cr !== undefined) node.color = cr.color;
+}
+
+/** Create the block's leaf and open its pending record. `null` when the
+ *  keyword is not a known USymbol (the line then falls through to the next
+ *  dispatch phase, as it did before the block phase existed). */
+function openElementBlock(
+  state: ParseState,
+  open: RegExpExecArray,
+  terminator: ElementBlockTerminator,
+): PendingElementState | null {
+  const symbol = KEYWORD_TO_SYMBOL.get(open[1]!.toLowerCase());
+  if (symbol === undefined) return null;
+  const code = open[2]!;
+  const node = makeNode(code, code, symbol);
+  applyElementDecorations(node, open[3]!, terminator === 'quote');
+  emitNode(state, node);
+  const pending: PendingElementState = {
+    terminator,
+    node,
+    lines: [],
+    baseIndent: undefined,
+  };
+  state.pendingElement = pending;
+  return pending;
+}
+
+/** `<keyword> <code> [ … ]` (CommandCreateElementMultilines TYPE1). The
+ *  opener's own tail after `[` is the display's first row; a one-line
+ *  `component c [ desc ]` closes immediately. */
+function tryElementBlockType1(state: ParseState, line: string): LineOutcome {
+  const open = ELEMENT_MULTILINE_OPEN_RE.exec(line);
+  if (open === null) return null;
+  const pending = openElementBlock(state, open, 'bracket');
+  if (pending === null) return null;
+  const desc = open[4]!;
+  const closes = /\]\s*$/.test(desc);
+  pushElementEdgeText(pending, closes ? desc.replace(/\]\s*$/, '') : desc);
+  if (closes) finishElementBlock(state);
+  return 1;
+}
+
+/**
+ * `<keyword> <code> [#color] as "text` (CommandCreateElementMultilines
+ * TYPE0). Accumulates with NO line cap until a line ends in a quote
+ * character — the `nb` cap in `PSystemCommandFactory.isMultilineCommandOk`
+ * applies only to `CommandDecoratorMultine`.
+ *
+ * The lookahead reproduces upstream's EOF behaviour exactly: when no closing
+ * line exists, `isMultilineCommandOk` returns `null` and the factory
+ * `continue`s to the next command, so the opener must fall through to the
+ * single-line rule rather than swallow the rest of the diagram.
+ */
+function tryElementBlockType0(
+  state: ParseState,
+  lines: readonly string[],
+  i: number,
+  line: string,
+): LineOutcome {
+  const open = ELEMENT_MULTILINE_OPEN_TYPE0_RE.exec(line);
+  if (open === null) return null;
+  let closerFound = false;
+  for (let j = i + 1; j < lines.length && !closerFound; j++) {
+    closerFound = ELEMENT_MULTILINE_END0_RE.test(lines[j]!.trim());
+  }
+  if (!closerFound) return null;
+  const pending = openElementBlock(state, open, 'quote');
+  if (pending === null) return null;
+  pushElementEdgeText(pending, open[4]!);
+  return 1;
+}
+
+/** The `CommandCreateElementMultilines` phase — an open block owns the line
+ *  outright, else TYPE1 then TYPE0 are offered it (upstream registers TYPE0
+ *  at `DescriptionDiagramFactory.java:122` and TYPE1 at `:123`; the two
+ *  openers are mutually exclusive, so order is immaterial). */
+function tryElementBlock(
+  state: ParseState,
+  lines: readonly string[],
+  i: number,
+  line: string,
+): LineOutcome {
+  const pending = state.pendingElement;
+  if (pending !== undefined) return continueElementBlock(state, pending, lines[i]!, line);
+  const type1 = tryElementBlockType1(state, line);
+  if (type1 !== null) return type1;
+  return tryElementBlockType0(state, lines, i, line);
 }
 
 /** A note-command multi-line body owns every line until its terminator
@@ -243,7 +388,7 @@ function processLine(state: ParseState, lines: readonly string[], i: number): nu
   const line = lines[i]!.trim();
   if (/^!exit\b/i.test(line)) return false;
 
-  const elementResult = tryElementBlock(state, line);
+  const elementResult = tryElementBlock(state, lines, i, line);
   if (elementResult !== null) return elementResult;
 
   const noteResult = tryNoteHandling(state, line);

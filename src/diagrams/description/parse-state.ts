@@ -34,15 +34,12 @@ export interface ParseState {
    *  consumed verbatim (base64 pixel data would otherwise misparse as link
    *  lines: bivira-53's `...b1t-R3xpD...` matched the arrow grammar). */
   inSpriteBlock: boolean;
-  /** Inside a `<keyword> <code> [ … ]` multi-line description block
-   *  (CommandCreateElementMultilines TYPE1) — body lines are consumed until
-   *  one ends with `]`. */
-  inElementBlock: boolean;
-  /** The node whose `[ … ]` body is being accumulated (S1L-b) — the body is
-   *  the element's display/label, set when the block closes. */
-  elementBlockNode?: DescriptiveNode | undefined;
-  /** Accumulated `[ … ]` body content lines for `elementBlockNode`. */
-  elementBlockBody?: string[] | undefined;
+  /** In-progress `CommandCreateElementMultilines` block — TYPE1 (`[ … ]`) or
+   *  TYPE0 (`as "…`). `undefined` when no block is open. Replaces the former
+   *  `inElementBlock`/`elementBlockNode`/`elementBlockBody` trio (S1L tail
+   *  F1-b), which could not express WHICH terminator the open block is
+   *  waiting for. Read and written only by `parser.ts`. */
+  pendingElement: PendingElementState | undefined;
   /** Stack of open container nodes (package, node, folder, etc.). */
   containerStack: DescriptiveNode[];
   /** Every node created so far, by id — lets the link grammar auto-create
@@ -101,6 +98,39 @@ export interface ParseState {
    *  comment). Starts at 0, matching `new AtomicInteger(0)`; the first
    *  `nextCreationIndex` call returns 1, matching `cpt1.addAndGet(1)`. */
   uidCounter: number;
+}
+
+/**
+ * Which line closes an open `CommandCreateElementMultilines` block —
+ * `'bracket'` is TYPE1's `END1 = ^([^\[\]]*)\]$`, `'quote'` is TYPE0's
+ * `END0 = ^(.*)[%g]$` (CommandCreateElementMultilines.java:80-81), both
+ * applied to the `Trim.BOTH`-trimmed last line.
+ */
+export type ElementBlockTerminator = 'bracket' | 'quote';
+
+/**
+ * In-progress multi-line element block; see `ParseState.pendingElement`.
+ * Mirrors `PendingNoteState` below — one record carrying its own terminator
+ * discriminant, so the parser loop never has to re-derive which phase opened
+ * it. Deliberately NOT a two-variant union keyed by a separate `kind`: here
+ * `kind` and `terminator` would be 1:1, and a redundant tag is a state the
+ * two writers can disagree about.
+ */
+export interface PendingElementState {
+  /** Which end pattern closes this block (TYPE1 `]` vs TYPE0 quote). */
+  terminator: ElementBlockTerminator;
+  /** The node whose body is being accumulated — the body IS the element's
+   *  display/label, assigned when the block closes (S1L-b). */
+  node: DescriptiveNode;
+  /** Display rows accumulated so far, in upstream's assembly order: the
+   *  opener's `DESC` tail (when non-empty), then each body line, then the
+   *  closing line's pre-terminator prefix (when non-empty)
+   *  — `CommandCreateElementMultilines.java:191-199`. */
+  lines: string[];
+  /** `BlocLines#trimSmart(1)`'s reference indent: the leading space/tab run
+   *  of the block's FIRST BODY LINE, stripped from that line and every line
+   *  after it. `undefined` until that line arrives. */
+  baseIndent: number | undefined;
 }
 
 /** Discriminated multi-line note block in progress; see `ParseState.pendingNote`. */
@@ -241,7 +271,7 @@ export function startNewPage(state: ParseState): void {
   state.pages.push(state.ast);
   state.ast = makeDefaultAST();
   state.inSpriteBlock = false;
-  state.inElementBlock = false;
+  state.pendingElement = undefined;
   state.containerStack = [];
   state.nodesById = new Map();
   state.parentArrayById = new Map();

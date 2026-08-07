@@ -318,20 +318,73 @@ export const CONTAINER_OPEN_RE = new RegExp(
 /** Any keyword followed by at least one space and a name rest. */
 export const KEYWORD_RE = new RegExp(`^(${ALL_KW_ALT})\\s+(.+)$`, 'i');
 
+/**
+ * `StereotypePattern.optional("STEREO")` + `UrlBuilder.OPTIONAL` +
+ * `ColorParser.exp1()` — the decoration run both
+ * `CommandCreateElementMultilines` phases place between CODE and their own
+ * opener token (`CommandCreateElementMultilines.java:99-102, :111-114`).
+ *
+ * The colour alternative must accept the FULL colour/style spec, not just
+ * `#word`: `node B #red|green;line.dashed;line:blue [` otherwise failed this
+ * pattern entirely and fell through to KEYWORD_RE, which swallowed the spec
+ * AND the trailing `[` into the element's name (titona-45-jile471 measured
+ * 3.50in against the jar's 0.82in, S1L-e). Same character class `RE_COLOR`
+ * uses in parse-helpers-strings.ts.
+ *
+ * CAPTURING (S1L tail G9-E1): the run used to be `(?:…)*`, so a
+ * `file policy <<policy>> [` open form matched — and then dropped the
+ * stereotype on the floor, leaving `node.stereotype` unset and the `«policy»`
+ * row unmeasured (fariba-82-xolu802). Callers split the captured run with
+ * the same `extractNodeStereotype`/`extractColor` the single-line path uses.
+ */
+const ELEMENT_DECORATION_RUN =
+  '((?:\\s*(?:<<[^>]+>>|\\[\\[[^\\]]*\\]\\]|#[\\w:;.#\\\\/|-]+))*)';
+
+/** `%g` — the four characters upstream treats as a double quote: ASCII `"`,
+ *  the two typographic quotes, and `Jaws.BLOCK_E1_INVISIBLE_QUOTE`.
+ *  @see ~/git/plantuml/.../regex/Pattern2.java:59 */
+const QUOTE_CHARS = '"\\u201c\\u201d\\ue121';
+
 /** CommandCreateElementMultilines TYPE1: `<keyword> <code> [stereo][url]
  *  [#color] [` opening a multi-line `[ … ]` description block. The line ends
  *  with `[` and (crucially) no matching `]`; the body is closed by a line
- *  ending in `]`. Captures the keyword and the bare code only — the
- *  description text is label content (tolerant metric), not DOT structure. */
+ *  ending in `]`. Groups: 1 TYPE, 2 CODE, 3 decoration run, 4 the opener's
+ *  own `DESC` tail (everything after the `[`).
+ *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:110-122 */
 export const ELEMENT_MULTILINE_OPEN_RE = new RegExp(
   `^(${ALL_KW_ALT})\\s+([\\p{L}\\p{N}_.]+)` +
-    // The colour alternative must accept the FULL colour/style spec, not
-    // just `#word`: `node B #red|green;line.dashed;line:blue [` otherwise
-    // failed this pattern entirely and fell through to KEYWORD_RE, which
-    // swallowed the spec AND the trailing `[` into the element's name
-    // (titona-45-jile471 measured 3.50in against the jar's 0.82in, S1L-e).
-    // Same character class `RE_COLOR` uses in parse-helpers-strings.ts.
-    '(?:\\s*(?:<<[^>]+>>|\\[\\[[^\\]]*\\]\\]|#[\\w:;.#\\\\/|-]+))*' +
-    '\\s*\\[[^\\[]*$',
+    ELEMENT_DECORATION_RUN +
+    '\\s*\\[([^\\[]*)$',
   'iu',
 );
+
+/**
+ * CommandCreateElementMultilines **TYPE0**: `<keyword> <code> [stereo][url]
+ * [#color] as "text` — the open-quote form, closed by a later line ENDING in
+ * a quote character. Groups: 1 TYPE, 2 CODE, 3 decoration run, 4 `DESC`
+ * (the opener's own text tail).
+ *
+ * Two properties are load-bearing and neither is shared with the single-line
+ * `CommandCreateElementFull` grammar:
+ *
+ * - COLOUR sits **before** `as`. On one line that ordering is a jar syntax
+ *   error, so the single-line path's post-`as` colour slot cannot be reused
+ *   (`pecupa-75-zote612`'s `usecase UC5 #red as "…`).
+ * - DESC is `([^%g]*)` anchored at `$`, so an opener may not contain a
+ *   closing quote at all. That is what keeps an already-closed single-line
+ *   `usecase UC4 as "My usecase4"` out of this phase.
+ *
+ * @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:96-108
+ */
+export const ELEMENT_MULTILINE_OPEN_TYPE0_RE = new RegExp(
+  `^(${ALL_KW_ALT})\\s+([\\p{L}\\p{N}_.]+)` +
+    ELEMENT_DECORATION_RUN +
+    `\\s*as\\s*[${QUOTE_CHARS}]([^${QUOTE_CHARS}]*)$`,
+  'iu',
+);
+
+/** TYPE0's `END0 = ^(.*)[%g]$`, applied to the `Trim.BOTH`-trimmed last
+ *  line: the block closes on the first line ENDING with a quote character,
+ *  and group 1 is that line's pre-quote prefix.
+ *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:80-81 */
+export const ELEMENT_MULTILINE_END0_RE = new RegExp(`^(.*)[${QUOTE_CHARS}]$`, 'u');
