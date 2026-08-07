@@ -12,6 +12,9 @@
  */
 
 import { resolveTextEscapes } from '../../core/text-escapes.js';
+import { Stereotype } from '../../core/stereo/Stereotype.js';
+import { GUILLEMET_NONE } from '../../core/stereo/StereotypeDecoration.js';
+import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 
 // ---------------------------------------------------------------------------
 // Named return-type interfaces (prevent Lizard brace-counting confusion)
@@ -19,7 +22,11 @@ import { resolveTextEscapes } from '../../core/text-escapes.js';
 
 export interface StereotypeResult {
   /** ALL consecutive `<<tag>>` labels, in source order (see
-   *  `DescriptiveNode.stereotype`'s doc comment for the upstream rationale). */
+   *  `DescriptiveNode.stereotype`'s doc comment for the upstream rationale).
+   *  MAY be empty even though a `<<...>>` run WAS matched and consumed into
+   *  `remainder` — upstream's `Stereotype#getLabels` drops `<<<...>>>` runs
+   *  and rewrites a sprite-only `<<$name>>` to no label at all (see
+   *  {@link extractNodeStereotype}). */
   stereotypes: readonly string[];
   remainder: string;
 }
@@ -260,16 +267,49 @@ export function finalizeDisplay(display: string): string {
  * auto-created a phantom entity instead (mamase-39-buto560). ALL tags in
  * the run are returned, in source order; the WHOLE run is consumed from
  * the remainder regardless of tag count.
+ *
+ * The run/CONSUMPTION pattern above is upstream's own `StereotypePattern
+ * .mandatory` (`stereo/StereotypePattern.java:69`, `(\<\<.+?\>\>)`) — a
+ * permissive `.+?` that swallows `<`/`>` freely. LABEL extraction is a
+ * SEPARATE, much stricter pass upstream, and this function now delegates
+ * it wholesale rather than re-deriving it: `Stereotype.build(...)` ->
+ * `StereotypeDecoration#buildComplex` -> `Stereotype#getLabels`, which is
+ * the exact chain `CucaDiagram#getVisibleStereotypeLabels` (`net/atmp/
+ * CucaDiagram.java:590-602`) feeds `EntityImageDescription`'s `stereo`
+ * block from. Three upstream behaviors come with it that the previous
+ * hand-written `/<<\s*(.+?)\s*>>/g` could not express (S1L-tail G7 +
+ * G3-M1):
+ *
+ * 1. `cutLabels` (`StereotypeDecoration.java:185-196`) DROPS any run that
+ *    opens `<<<` — so a preprocessor expansion like `MICRO()Service` ->
+ *    `<U+00B5>Service` yields the token `<<<U+00B5>Service>>`, which
+ *    contributes NO label at all upstream. The old regex captured
+ *    `<U+00B5>Service` and measured a whole extra `«µService»` row
+ *    (junoxu-15-gori632).
+ * 2. `buildComplex`'s `circleSprite` branch (java:156-160) rewrites a
+ *    sprite-only stereotype's label to `""`, so `<<$Net>>` contributes
+ *    NOTHING — not a literal `«$Net»` text row (nobiza-91-fimo741). When
+ *    the sprite IS resolvable upstream substitutes the sprite's own
+ *    TextBlock; that branch is NOT reachable from here (it lives in
+ *    `EntityImageDescriptionDelegates.ts#buildStereo` and needs a
+ *    render-time `SpriteRegistry`) — see that function's doc comment.
+ * 3. `Stereotype#getLabel`'s archimate special case (java:167-175) maps
+ *    `<<$archimate/interface>>` to the bare `interface`.
+ *
+ * `getLabels(GUILLEMET_NONE)` is used rather than upstream's
+ * `Guillemet.DOUBLE_COMPARATOR` purely because this port's downstream
+ * contract (`DescriptiveNode.stereotype`) carries the labels WITHOUT
+ * their brackets — `buildStereo` re-adds the guillemets itself. Same
+ * `cutLabels` call, same list, one bracket-strip earlier.
+ *
+ * NOTE: `stereotypes` may now legitimately be EMPTY while a run WAS
+ * matched and consumed (cases 1 and 2) — see `DescriptiveNode.stereotype`.
  */
 export function extractNodeStereotype(rest: string): StereotypeResult | undefined {
   const run = /(?:<<\s*.+?\s*>>\s*)+/.exec(rest);
   if (run === null) return undefined;
-  const stereotypes: string[] = [];
-  const tagRe = /<<\s*(.+?)\s*>>/g;
-  let tagMatch: RegExpExecArray | null;
-  while ((tagMatch = tagRe.exec(run[0])) !== null) {
-    stereotypes.push(resolveTextEscapes(tagMatch[1]!));
-  }
+  const stereotype = Stereotype.build(run[0].trimEnd(), 0, undefined, parseSimpleColor);
+  const stereotypes = stereotype.getLabels(GUILLEMET_NONE).map((label) => resolveTextEscapes(label));
   const before = rest.slice(0, run.index).trimEnd();
   const after = rest.slice(run.index + run[0].length).trimStart();
   // A bare concatenation would fuse adjacent tokens when both sides are

@@ -59,9 +59,23 @@ export interface DescriptiveNode {
   /** ALL consecutive `<<tag>>` stereotype labels on the declaration, in
    *  source order (upstream `Stereotype#getMultipleLabels()` -- one
    *  guillemet line drawn per entry, `EntityImageDescription.java:200-201`/
-   *  `ClusterHeader.java:206-207`, `Display.create(labels)`). Never an empty
-   *  array -- `extractNodeStereotype` only returns a result when at least
-   *  one `<<...>>` token matched; absent means no stereotype at all. */
+   *  `ClusterHeader.java:206-207`, `Display.create(labels)`).
+   *
+   *  Absent means no `<<...>>` token was present on the declaration at all.
+   *  An EMPTY array means a run WAS present and consumed but contributed no
+   *  visible label — upstream's own outcome for a `<<<...>>>` triple-bracket
+   *  run and for a sprite-only `<<$name>>` (`StereotypeDecoration#cutLabels`
+   *  / `#buildComplex`'s `circleSprite` label rewrite; see
+   *  `parse-helpers-strings.ts#extractNodeStereotype`). Both render/measure
+   *  as `TextBlockUtils.empty(0, 0)`, matching
+   *  `EntityImageDescription.java:196-197`'s `stereotypeLabels.isEmpty()`
+   *  branch, so every consumer that guards on `length > 0` is already
+   *  correct; the distinction is preserved rather than collapsed because
+   *  `hide`/`remove`/style-cascade lookups read the array itself.
+   *
+   *  S1L-tail F2-b widened this from the former "never an empty array"
+   *  invariant, which predated routing this field through the real
+   *  `Stereotype`/`StereotypeDecoration` port. */
   stereotype?: readonly string[];
   color?: string;
   /** `Stereotag` names (net.sourceforge.plantuml.stereo.Stereotag), attached
