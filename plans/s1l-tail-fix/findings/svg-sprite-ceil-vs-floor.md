@@ -1,7 +1,40 @@
-# SVG sprite dims — the pinned oracle jar is STALE vs its own pinned source
+# SVG sprite dims — the PORT is ahead of the pinned oracle (pin drift)
 
 **status:** diagnosed, verified at bytecode level. **BLOCKED — needs a
 maintainer ruling** (stop conditions 7 and 9). Not self-approved.
+
+> ## CORRECTION (2026-08-07, same day)
+>
+> An earlier revision of this document concluded "the pinned oracle jar is
+> STALE against its own pinned SHA." **That was wrong, and the direction is
+> reversed.** It compared the ceil commit against the local checkout's `HEAD`
+> instead of against `pin.json`'s `upstreamSha`.
+>
+> | fact | value |
+> |---|---|
+> | `pin.json` `upstreamSha` | `59ddb531`, **2026-06-26** |
+> | ceil commit `1449909d6d6` | **2026-07-04** — AFTER the pin |
+> | `git merge-base --is-ancestor ceil pin` | **NO** |
+> | `dot-output` pristine base (`dot-output~2`) | `ebbacfefebe`, **2026-07-26** |
+> | commits `pin..base` | **59** |
+>
+> So **the jar is CORRECT for its pin** — the pinned upstream truncates. What
+> drifted is the local reference checkout, rebased onto 2026-07-26 master. This
+> port then ported `Math.ceil` from that drifted source, so **the port is ahead
+> of its own oracle.**
+>
+> All the EVIDENCE below still stands (bytecode, byte-identical assets, the
+> scale-dependent gap, the synthetic-viewBox test). Only the attribution
+> changed: not a stale build, but **pin drift**.
+>
+> `build-oracle.sh` builds from `dot-output`, i.e. from the DRIFTED base — so
+> "rebuild the jar" silently advances the oracle 59 upstream commits.
+> `pin.json`'s own note ("Re-baseline DOT/SVG goldens whenever upstreamSha
+> changes") makes that a full re-baseline, not a four-golden regeneration.
+> `build-oracle.sh` even warns on this, though its check is off by one: it
+> tests `dot-output~1`, which is the FIRST of two seam commits, not the
+> pristine base.
+
 **found:** 2026-08-07, closing F4-f's archimate residual
 **blocks:** `turasu-73-zoni468`, `tuliba-37-liza126`, `lesori-32-zeve057`,
 `ravodu-50-siso430` — all four at an identical **0.013889in (1.0px)** residual
@@ -14,16 +47,16 @@ disagree about how:
 | | rule | `19.928` → | `40.9` → |
 |---|---|---|---|
 | **Pinned oracle jar** (`oracle/dist/plantuml-oracle.jar`) | `(int)` cast — **truncates** | 19 | 40 |
-| **Upstream source at the pinned SHA** | `(int) Math.ceil(...)` | 20 | 41 |
-| **This port** | `Math.ceil` — faithful to source | 20 | 41 |
+| **Upstream at the PINNED sha** (2026-06-26) | `(int)` cast — **truncates** | 19 | 40 |
+| **Upstream at the DRIFTED checkout** (2026-07-26) | `(int) Math.ceil(...)` | 20 | 41 |
+| **This port** | `Math.ceil` — ported from the DRIFTED source | 20 | 41 |
 
 Upstream changed truncation → ceil in **`1449909d6d6`** (2026-07-04), citing
 **issue #2735**: a floor "understates the declared box, and that undersized box
 is later reused as a hard viewport … clipping up to 1 unit of real content."
 
-The jar was built **2026-07-05 20:58**, and the repo HEAD it is pinned to
-(`de1f986f092`, 2026-07-05) *contains* that commit — yet the jar does not.
-The build is stale with respect to its own source.
+The jar was built **2026-07-05 20:58**, from the pin-era tree, before the
+`dot-output` branch was rebased onto 2026-07-26 master. It matches its pin.
 
 ### Bytecode proof (not inference)
 
@@ -66,26 +99,31 @@ the gap is exactly −10 on both axes (−1 per unit scale); at `{scale=2}`, −
 
 Three options, none self-approvable:
 
-1. **Make the port truncate.** Closes all four pins immediately — by
-   deliberately porting a bug upstream has already fixed, one that issue #2735
-   says clips real content. Would need a `DIVERGENCES.md` entry
-   (**stop condition 9**).
-2. **Rebuild the oracle jar from the pinned SHA, regenerate the four goldens.**
-   Correct in principle — the jar should *be* its pinned SHA. But it changes
-   the oracle and regenerates existing goldens (**stop condition 7**,
-   maintainer territory, the A2s ADR-5 precedent). Note this is the same
-   *class* of defect as G13/`kokebo-27`, which Batch 5 (F5-a) already exists to
-   sweep: a bad capture, not a port defect. Here the capture is bad because the
-   *jar* is.
-3. **Leave the four open** as a documented oracle-skew gap. Mission lands at
-   346, not 350.
+1. **Hold the port at the pin — make `SpriteSvg` truncate.** Closes all four
+   pins immediately and restores port/oracle consistency at the pinned
+   revision. It is *faithful*, not a self-approved bug: the pinned upstream
+   genuinely truncates. It flips back naturally when the pin advances. Small,
+   reversible, and needs a one-line note rather than a divergence.
+2. **Advance the pin** to the current base (`ebbacfefebe`), rebuild the jar,
+   and re-baseline **all** goldens — description (356) plus class, state,
+   object and the svg-* suites. This is what `pin.json`'s own note demands and
+   is its own mission, not a four-file edit.
+3. **Leave the four open** as a documented pin-drift gap. Mission lands at 346.
 
-**Recommended: (2).** The port is right and the oracle is wrong; changing
-correct code to match a stale binary is the one option that makes the codebase
-worse. It also likely affects every fractional-viewBox SVG sprite in the
-corpus, not just these four — integer-viewBox sprites (`tatori-66-kaci883`,
+**Recommended: (1) now, (2) as a tracked follow-up.** The gate is the pinned
+jar, so implementing post-pin behaviour guarantees a permanent 1px miss on
+every fractional-viewBox sprite. Integer-viewBox sprites (`tatori-66-kaci883`,
 `sprite-SVG-fill-management-3`) are unaffected, which is why this never
 surfaced before.
+
+## The systemic finding (bigger than these four)
+
+The reference checkout is **59 commits ahead of `pin.json`**, and at least one
+port task has already read post-pin behaviour from it and implemented it
+against a pre-pin oracle. `Math.ceil` is the confirmed instance; it is not
+necessarily the only one. Any port work done after the 2026-07-26 rebase that
+consulted `~/git/plantuml` is in scope for an audit. Worth its own tracked
+issue regardless of which option above is chosen.
 
 ## What DID land (independent, committed)
 
