@@ -195,7 +195,13 @@ byte level, not merely by filename.
   the *reported* delta; node `sh0006` carries a reproduced, **undiagnosed**
   +2px that becomes the headline once they land. It is the only group whose
   gain is not guaranteed by its own fix — sub-diagnose it *before* F4-c.
-- The harness metric audit (item 1 above) is **not yet done** and gates the
-  trustworthiness of every target number in `SYNTHESIS.md`.
+- ~~The harness metric audit (item 1 above) gates the trustworthiness of every
+  target number in `SYNTHESIS.md`.~~ **DONE 2026-08-07 —
+  [findings/METRIC-AUDIT.md](findings/METRIC-AUDIT.md).** Result: **zero false
+  conformance**; the 321 are genuinely conformant under an exact bottleneck
+  matching, so `321/351` is trustworthy and the fix mission is unblocked. But
+  **8 of the diagnosed 26 are understated** and their pins must not be used as
+  fix targets — worst is `nixura-77` at 1.5403 against a reported 1.2731. Any
+  residual permutation blind spot is bounded at 2× tolerance (0.02in).
 - Two defects were found that **no golden covers** (emoji-only line height;
   three further NO-MATCH declaration shapes) — corpus gaps, not regressions.
