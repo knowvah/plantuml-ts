@@ -177,6 +177,13 @@ export function buildDotNodes(
         wrapWidth: ctx.wrapWidth,
         guillemet: ctx.guillemet,
         fontSize: ctx.fontSizeFor(node.symbol),
+        // S1L-tail G4: keyed off the FILTERED (`sizedNode`) stereotype list,
+        // not `node.stereotype` -- a `hide stereotype`d label reserves no
+        // block, so a name-scoped `<<tag>> { FontSize }` for a hidden label
+        // must not resize anything either. Same reasoning as `sizedNode`
+        // itself (see the comment above it).
+        stereotypeFontSize: ctx.stereotypeFontSizeFor(node.symbol, sizedNode.stereotype),
+        lineThickness: ctx.lineThicknessFor(node.symbol),
       },
       ctx.sprites,
     );

@@ -13,7 +13,7 @@
 
 import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import { resolveElementMinimumWidth } from '../../core/theme.js';
+import { resolveElementFontSize, resolveElementLineThickness, resolveElementMinimumWidth } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type {
   DotInputEdge,
@@ -46,7 +46,6 @@ import type { ActorStyle } from '../../core/skin/ActorStyle.js';
 import { computeGraphSpacing } from './link-edge-attrs.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
-import { resolveElementFontSize } from '../../core/theme.js';
 import { GUILLEMET_DEFAULT, type GuillemetPair } from '../../core/text/Guillemet.js';
 import { buildMagmaEdges, magmaGroups } from './magma.js';
 import { effectiveRemovedIds, effectiveHiddenIds } from './element-grammar.js';
@@ -110,6 +109,9 @@ export interface ClassifyCtx {
    *  `resolveElementFontSize(theme, sname, 'title')` the RENDERER already
    *  calls, threaded so the sizer measures the same font (S1L-h). */
   fontSizeFor: (sname: string) => number | undefined;
+  /** S1L-tail G4/G5 — full rationale on the two `BoxSizingOpts` fields these feed. */
+  stereotypeFontSizeFor: (sname: string, stereo: readonly string[] | undefined) => number | undefined;
+  lineThicknessFor: (sname: string) => number | undefined;
   /** `skinparam wrapWidth` (`theme.wrapWidth`) — the entity DESC word-wrap
    *  width the leaf RENDERER already applies via `Fission.ts#getSplitted`
    *  (`EntityImageDescriptionSupport.ts#buildWrappedLines`). Threaded here so
@@ -434,6 +436,8 @@ export function layoutDescription(
     actorStyle: theme.actorStyle,
     minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
     fontSizeFor: (sname) => resolveElementFontSize(theme, sname, 'title'),
+    stereotypeFontSizeFor: (sname, stereo) => resolveElementFontSize(theme, sname, 'stereotype', stereo),
+    lineThicknessFor: (sname) => resolveElementLineThickness(theme, sname),
     wrapWidth: theme.wrapWidth ?? 0,
     guillemet: {
       start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,

@@ -47,6 +47,30 @@ export interface BoxSizingOpts {
    *  so `FontName`/`FontStyle` are width-neutral under the deterministic
    *  width table. Absent = the diagram-wide font size (S1L-h). */
   fontSize?: number | undefined;
+  /** Per-element STEREOTYPE font SIZE override, resolved the SAME way
+   *  {@link BoxSizingOpts.fontSize} resolves the title size —
+   *  `resolveElementFontSize(theme, sname, 'stereotype', node.stereotype)`,
+   *  including the per-stereotype-NAME (`<<bar>>` / `.bar`) cascade tier.
+   *  A SECOND slot, not a repointing of `fontSize`: upstream sizes the
+   *  stereotype block and the label block from two independent
+   *  `FontConfiguration`s (`EntityImageDescription.java:184-201`), and
+   *  collapsing them onto one measured `nodefoo`/`nodebar` at 112.250×70 /
+   *  113.375×70 — WORSE than the un-threaded state on both dimensions,
+   *  because the single slot then also inflates the label
+   *  (`plans/s1l-tail-diagnosis/findings/element-font.md`, `loroto-06`'s
+   *  `ruledOut`). Absent = fall through to the already-resolved title font
+   *  size, which is current behavior (S1L-tail G4). */
+  stereotypeFontSize?: number | undefined;
+  /** Per-element `LineThickness` override (`<style> <sname> { LineThickness
+   *  N }`), resolved by `resolveElementLineThickness` — the SAME call
+   *  `renderer-entity.ts#buildEntityParams` already makes for its own
+   *  `paint.stroke`. Size-affecting on the `USymbolSimpleAbstract` family,
+   *  whose drawings fold `+ 2×thickness` into `getPreferredWidth/Height`
+   *  (`ActorAwesome.ts:113-119`, jar-proven in
+   *  `planning/sizer-renderer-parity.md`'s `LineThickness` GAP row). Absent =
+   *  {@link DEFAULT_SIZING_STROKE_THICKNESS}, current behavior (S1L-tail
+   *  G5). */
+  lineThickness?: number | undefined;
 }
 
 /** Legacy actor box constants (kept for the re-export; the DOT size now comes

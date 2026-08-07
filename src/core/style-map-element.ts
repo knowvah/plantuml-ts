@@ -13,10 +13,17 @@ import { resolveColor, ELEMENT_BUCKET_SNAMES } from './skinparam.js';
 import { parseColor } from './paint.js';
 
 /** `<sname>.stereotype` selector suffix (`<style> <sname> { stereotype {
- *  FontSize N } } }`) — G1 I4b. A per-stereotype-NAME sub-selector
- *  (`.bar { FontSize N }` nested one level deeper) is a separate, deferred
- *  mechanism — see `ledger.md` I4b, not handled here. */
+ *  FontSize N } } }`) — G1 I4b. The per-stereotype-NAME sub-selector nested
+ *  one level deeper is {@link STEREOTYPE_TAG_SELECTOR_INFIX} — no longer
+ *  deferred (S1L-tail G4 tier 2, `loroto-06-fano471`). */
 const STEREOTYPE_SELECTOR_SUFFIX = '.stereotype';
+
+/** `<sname>.stereotype..<tag>` (`<style> <sname> { stereotype { .bar {
+ *  FontSize N } } } }`) — S1L-tail G4 tier 2. `parseStyleBlock` keeps a
+ *  dot-led token's leading dot, so the flattened key carries a DOUBLE dot
+ *  before the tag ({@link parseTagSelector}'s own shape). Feeds
+ *  `ElementColors.stereotypeFontSizeByStereo`. */
+const STEREOTYPE_TAG_SELECTOR_INFIX = `${STEREOTYPE_SELECTOR_SUFFIX}..`;
 
 /** `<sname>.header` selector suffix (`<style> <sname> { header {
  *  BackgroundColor/FontColor/FontSize } } }`) -- G3/O4, `EntityImage
@@ -78,6 +85,30 @@ function resolveElementBucketSelector(selector: string): string | undefined {
 }
 
 /**
+ * S1L-tail G4 tier 2: the `<sname> { stereotype { .tag { FontSize N } } }`
+ * per-stereotype-NAME font size, merged into `elements[sname]
+ * .stereotypeFontSizeByStereo` under its CLEANED tag token. Returns whether
+ * `selector` was this shape (so the caller can skip its other branches).
+ * Split out rather than inlined as {@link collectElementStyleBuckets}'s
+ * fourth branch — that function already carries a `#lizard forgives`. */
+function collectStereotypeTagFontSize(
+  selector: string,
+  props: ReadonlyMap<string, string>,
+  elements: Record<string, ElementColors>,
+): boolean {
+  const idx = selector.indexOf(STEREOTYPE_TAG_SELECTOR_INFIX);
+  if (idx === -1) return false;
+  const sname = selector.slice(0, idx);
+  const tag = cleanStereotypeToken(selector.slice(idx + STEREOTYPE_TAG_SELECTOR_INFIX.length));
+  const raw = props.get('fontsize');
+  const size = raw === undefined ? Number.NaN : Number(raw);
+  if (!ELEMENT_BUCKET_SNAMES.has(sname) || tag === '' || !Number.isFinite(size)) return true;
+  const prev = elements[sname]?.stereotypeFontSizeByStereo;
+  elements[sname] = { ...elements[sname], stereotypeFontSizeByStereo: { ...prev, [tag]: size } };
+  return true;
+}
+
+/**
  * Collect per-element (SName) color/font-size buckets from element-scoped
  * style blocks (e.g. `database { BackgroundColor X }`, G1 I4b: `component {
  * FontSize N }` / `component { stereotype { FontSize N } }`). Color values
@@ -93,6 +124,7 @@ export function collectElementStyleBuckets(
 ): Record<string, ElementColors> {
   const elements: Record<string, ElementColors> = {};
   for (const [selector, props] of styleMap.entries()) {
+    if (collectStereotypeTagFontSize(selector, props, elements)) continue;
     const bucketName = resolveElementBucketSelector(selector);
     if (bucketName !== undefined) {
       const bucket: ElementColors = {};

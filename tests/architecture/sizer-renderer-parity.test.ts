@@ -167,11 +167,13 @@ const KNOWN_GAPS: Record<string, string> = {
     'Shadowing, same resolver\'s second tier, one Batch-4 fix covers both): ' +
     'actor { Shadowing 6 } 1.027778 -> 1.111111in, reaches ' +
     'renderer-entity.ts:212 / renderer-cluster.ts:119, no sizer reference.',
-  resolveElementLineThickness:
-    `${LEDGER_PATH} — "description-leaf-sizing-audit — carried findings ` +
-    '(T4, 2026-07-28)", item 3 (per-element LineThickness): ' +
-    'actor { LineThickness 6 } 0.498264x1.027778 -> 0.527778x1.180556in, ' +
-    'reaches renderer-entity.ts:213 only, no sizer reference.',
+  // `resolveElementLineThickness` was item 3 here until S1L-tail F3-fix (G5)
+  // threaded it: `layout.ts#ClassifyCtx.lineThicknessFor` ->
+  // `BoxSizingOpts.lineThickness` -> `leaf-sizing-entity.ts#sizingPaint`'s
+  // `UStroke.withThickness(...)`. Deleted in the SAME commit as the fix, as
+  // this ratchet's own shrink-only rule requires. Verified on
+  // `revusu-28-pexi248` (`<style> actor { LineThickness 4 }`): 55x76 ->
+  // 62x83px, the jar's exact numbers.
 };
 
 describe('resolver-reachability guard (description engine)', () => {

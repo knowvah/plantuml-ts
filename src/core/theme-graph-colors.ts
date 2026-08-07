@@ -41,6 +41,29 @@ export interface ElementColors {
    *  most defensible reading of the style system's own architecture, not a
    *  guess from nothing. */
   stereotypeFontSize?: number;
+  /** Per-stereotype-NAME tier of {@link ElementColors.stereotypeFontSize} --
+   *  `skinparam <sname>StereotypeFontSize<<label>> N` (flat or block form) /
+   *  `<style> <sname> { stereotype { .label { FontSize N } } } }`. Consulted
+   *  BEFORE the flat `stereotypeFontSize` above, which is itself consulted
+   *  before `fontSize`, completing the three-tier cascade that field's own
+   *  doc comment describes -- upstream registers the name-scoped rule as a
+   *  MORE-SPECIFIC `StyleSignatureBasic` (the `<style>` front-end, an extra
+   *  stereotype token on the signature) or as a stereotype-suffixed direct
+   *  VALUE lookup (`SkinParam#getFontSize(stereotype, FontParam...)`'s
+   *  `getFirstValueNonNullWithSuffix("fontsize" + stereotype.getLabel(...))`,
+   *  the skinparam front-end), and both beat the un-scoped rule.
+   *
+   *  Keys are CLEANED stereotype tokens (`StyleSignatureBasic#clean`:
+   *  lowercased, `_` and `.` dropped), so the two front-ends converge on one
+   *  map: `parseStyleBlock` lowercases a `.label` selector and
+   *  `style-map-element.ts#cleanStereotypeToken` drops the rest, while
+   *  `skinparam-key-normalize.ts#normaliseKey` applies the SAME lowercase +
+   *  `[_.]`-strip to the whole `<sname>stereotypefontsize<<label>>` key
+   *  before `applyStereoOverride` splits the label out. Jar-verified as one
+   *  behaviour by `loroto-06-fano471` (`<style>` spelling) and
+   *  `toxine-81-xofo986` (`skinparam` spelling) producing byte-identical
+   *  oracle DOT. Absent = no name-scoped override (the common case). */
+  stereotypeFontSizeByStereo?: Record<string, number>;
   /** `<style> <sname> { header { BackgroundColor/FontColor/FontSize } } }`
    *  -- G3/O4, `EntityImageObject`/`Map`/`Json`'s own `getStyleHeader()`
    *  nested `header` sub-selector (`StyleSignatureBasic.of(root, element,

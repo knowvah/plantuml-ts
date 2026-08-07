@@ -43,22 +43,61 @@ export function resolveElementPaint(
 }
 
 /**
+ * `StyleSignatureBasic#clean` (java) — lowercase every char, DROPPING `_` and
+ * `.` entirely. Duplicated from `style-map-element.ts#cleanStereotypeToken`
+ * rather than imported: that module reaches this one through
+ * `skinparam.ts` → `theme.ts` (which re-exports every `resolveElement*` here),
+ * so importing it back would close an ESM import cycle. Six lines, one
+ * upstream rule, and the two copies are named for each other.
+ */
+function cleanStereoKey(name: string): string {
+  let out = '';
+  for (const ch of name) {
+    if (ch !== '_' && ch !== '.') out += ch.toLowerCase();
+  }
+  return out;
+}
+
+/**
  * Resolve the entity/cluster text FONT SIZE override for one element's
- * `sname` and text role, cascading STEREOTYPE-specific → the element's own
- * plain override → `undefined` (caller applies its own `theme.fontSize +
- * sizeDelta` default — G1 I4b, `renderer-symbol.ts#textFont`). Mirrors
- * `resolveElementPaint`'s cascade shape but returns `undefined` rather than
- * a hard default, since the numeric default varies by caller (title vs
- * stereotype vs a role-specific `sizeDelta`).
+ * `sname` and text role, cascading per-stereotype-NAME → STEREOTYPE-specific
+ * → the element's own plain override → `undefined` (caller applies its own
+ * `theme.fontSize + sizeDelta` default — G1 I4b,
+ * `renderer-symbol.ts#textFont`). Mirrors `resolveElementPaint`'s cascade
+ * shape but returns `undefined` rather than a hard default, since the numeric
+ * default varies by caller (title vs stereotype vs a role-specific
+ * `sizeDelta`).
+ *
+ * `stereotypes` (S1L-tail G4 tier 2): the element's OWN stereotype label(s),
+ * raw as parsed. Supplied ONLY by callers that have them in scope; when
+ * omitted the name-scoped tier is skipped and the cascade is exactly what it
+ * was before that tier existed. See
+ * {@link import('./theme-graph-colors.js').ElementColors.stereotypeFontSizeByStereo}
+ * for why one CLEANED map serves both the `<style>` and `skinparam`
+ * front-ends.
  */
 export function resolveElementFontSize(
   theme: Theme,
   sname: string,
   role: 'title' | 'stereotype',
+  stereotypes?: readonly string[],
 ): number | undefined {
   const bucket = theme.colors.elements?.[sname];
   if (bucket === undefined) return undefined;
-  if (role === 'stereotype' && bucket.stereotypeFontSize !== undefined) return bucket.stereotypeFontSize;
+  if (role === 'stereotype') {
+    const byStereo = bucket.stereotypeFontSizeByStereo;
+    if (byStereo !== undefined && stereotypes !== undefined) {
+      // First matching label wins, in source order -- upstream builds the
+      // element's style signature one label at a time (`withTOBECHANGED`),
+      // so a diagram declaring two labels that BOTH carry a name-scoped
+      // FontSize is already ambiguous upstream; no corpus fixture does.
+      for (const label of stereotypes) {
+        const scoped = byStereo[cleanStereoKey(label)];
+        if (scoped !== undefined) return scoped;
+      }
+    }
+    if (bucket.stereotypeFontSize !== undefined) return bucket.stereotypeFontSize;
+  }
   return bucket.fontSize;
 }
 
