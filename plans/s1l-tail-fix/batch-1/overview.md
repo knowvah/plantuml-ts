@@ -5,9 +5,9 @@ Three fully parallel tasks, disjoint write-sets. Closes 9 fixtures outright
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [F1-a](F1-a-measurenote-rebuild.md) | G2 `measureNote` rebuild — route the note body through `BodyFactory.create3`→`BodyEnhanced2` | typescript-pro | `src/diagrams/description/leaf-sizing.ts`, `src/diagrams/description/renderer-entity.ts`, `src/core/klimt/creole/legacy/CreoleParser.ts` | — | [ ] |
-| [F1-b](F1-b-parser-openers.md) | G1 + G8 + G9-E1 parser — TYPE0 open-quote opener, body-line trim, multiline-open stereotype capture | typescript-pro | `src/diagrams/description/parser.ts`, `src/diagrams/description/parse-helpers.ts`, `src/diagrams/description/parse-state.ts` | — | [ ] |
-| [F1-c](F1-c-openiconic-table.md) | G11 OpenIconic glyph table — extend `RAW_GLYPHS` toward upstream's full set | typescript-pro | `src/core/openiconic-glyphs.ts`, `src/core/creole-atoms-openicon.ts` | — | [ ] |
+| [F1-a](F1-a-measurenote-rebuild.md) | G2 `measureNote` rebuild — route the note body through `BodyFactory.create3`→`BodyEnhanced2` | typescript-pro | `src/diagrams/description/leaf-sizing.ts`, `src/diagrams/description/renderer-entity.ts`, `src/core/klimt/creole/legacy/CreoleParser.ts` | — | [x] |
+| [F1-b](F1-b-parser-openers.md) | G1 + G8 + G9-E1 parser — TYPE0 open-quote opener, body-line trim, multiline-open stereotype capture | typescript-pro | `src/diagrams/description/parser.ts`, `src/diagrams/description/parse-helpers.ts`, `src/diagrams/description/parse-state.ts` | — | [x] |
+| [F1-c](F1-c-openiconic-table.md) | G11 OpenIconic glyph table — extend `RAW_GLYPHS` toward upstream's full set | typescript-pro | `src/core/openiconic-glyphs.ts`, `src/core/creole-atoms-openicon.ts` | — | [x] |
 
 ## Fixtures closed this batch
 
