@@ -126,3 +126,76 @@ STOP and wait for a human when:
 `planning/usymbol-composition.md` and `planning/sizer-renderer-parity.md` —
 `CLAUDE.md` marks both "READ BEFORE ANY SIZING BUG, ANY ENGINE". Every task's
 read-set includes them.
+
+---
+
+## Mission summary — complete 2026-08-06
+
+**Tasks:** 8 planned, 8 completed (T1–T7 parallel, T8 synthesis).
+**Fixtures:** 26 planned, 26 diagnosed to a `file:line` mechanism.
+**0 unresolved. 0 fabricated. 0 proposed divergences.**
+
+### Result
+
+26 fixtures → **13 mechanism groups**. Seven classifier buckets scattered;
+only `multiline-display` survived as a partition, and it was short one member.
+`computeContainerBbox` — the site the largest bucket is *named after* — is
+implicated by **zero** of the 26. ADR-3 was not a precaution; it was load-
+bearing. Fix plan projects **321/351 → 347/351 (98.9%)**, leaving exactly the
+four deliberately excluded fixtures.
+
+### What ADR-4 caught
+
+Five inherited mechanisms were re-verified; **three did not survive**, and at
+least two would have sent the fix mission to edit a line that changes nothing:
+
+- **S1L-i** — recorded blocker `CreoleStripeSimpleParser.ts:95` is *not on the
+  path* for either fixture; its 62.5-vs-37.6px figure no longer reproduces.
+- **`gogamo-72`** — filed as element-font; it is a **parser** gap. The sizer
+  reproduces the jar exactly once given the stereotype.
+- **`vivido-49`** — its historical cause is credited to a subsystem the fixture
+  does not even exercise (it contains no `<img>` markup).
+- **S1L-j** — confirmed verbatim but incomplete twice: 3 fixtures not 2, and
+  entirely parse-side, so no `leaf-sizing*.ts` edit is warranted.
+
+### Findings that outrank any single mechanism
+
+1. **`maxSizeDeltaIn` discards node identity** (`tests/oracle/svek-dot.ts:251-253`)
+   — sorts each side's dimensions into one multiset and pairs by index. It is
+   the minimum-cost 1-D matching, so it **deflates**. The exposure is therefore
+   **false conformance among the 321 PASSING fixtures**: a permutation of
+   correct values reports delta 0 with every node wrong. **Recommend a
+   by-node-id metric + re-measure of all 351 before these numbers are used as
+   fix targets — it may change what "321/351" means.**
+2. **`measureNote` (`leaf-sizing.ts:215-226`) is the highest-value site in the
+   tail** — 12 lines, four distinct causes, 5 fixtures outright. Everything it
+   needs (`BodyFactory.create3`→`BodyEnhanced2`) is already ported and already
+   wired for entity `desc`.
+3. **`kokebo-27` is not a port defect** — its golden was captured without
+   `PLANTUML_DETERMINISTIC_TEXT`.
+
+### Maintainer rulings issued during execution
+
+| Item | Ruling |
+|---|---|
+| `kokebo-27` stale golden | **Sweep all 351** goldens, as its own task with its own gates |
+| `kovaxi-11`/`zidebi-71` `EmbeddedDiagram` 42×42 fallback | **Reproduce faithfully.** No divergence declared |
+| T8's out-of-write-set ledger correction | **Keep** — corrections belong where the stale claims live |
+
+### Quality gates (final, all green)
+
+`npm test` 545 files / 12,262 tests · `typecheck` · `lint` · `build` all exit 0.
+`measure-description-size-deltas` 321/351, widened 0, **diff-identical to the
+pre-mission baseline**. `git diff main -- src/` **empty** — ADR-2 satisfied at
+byte level, not merely by filename.
+
+### Known issues / follow-ups
+
+- **`fariba-82`** is recorded `resolved`, but its two mechanisms explain only
+  the *reported* delta; node `sh0006` carries a reproduced, **undiagnosed**
+  +2px that becomes the headline once they land. It is the only group whose
+  gain is not guaranteed by its own fix — sub-diagnose it *before* F4-c.
+- The harness metric audit (item 1 above) is **not yet done** and gates the
+  trustworthiness of every target number in `SYNTHESIS.md`.
+- Two defects were found that **no golden covers** (emoji-only line height;
+  three further NO-MATCH declaration shapes) — corpus gaps, not regressions.
