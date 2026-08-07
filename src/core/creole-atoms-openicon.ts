@@ -28,14 +28,20 @@ const OPENICON_PATTERN_SOURCE =
   '((?:[{,]?(?:(?:scale=|\\*)[0-9.]+)?(?:,?color[= :](?:#[0-9a-fA-F]{1,8}|[A-Za-z0-9_]+))?\\}?)?)>';
 
 /** G2 N41: `CommandCreoleOpenIcon.executeAndAdvance` -- an UNRECOGNIZED
- *  glyph name (not one of `openiconic-glyphs.ts`'s 6 captured names) is
- *  dropped entirely (no atom, no fallback text), matching `OpenIconic
+ *  glyph name (not one of `openiconic-glyphs.ts`'s `RAW_GLYPHS` table --
+ *  F1-c/G11 extended that table from an initial 6-glyph survey sample to
+ *  upstream's full ~223-icon OpenIconic set, so in practice almost every
+ *  real icon name now resolves; this branch still exists for whatever
+ *  string a caller passes that ISN'T one of upstream's own resource names)
+ *  is dropped entirely (no atom, no fallback text), matching `OpenIconic
  *  .retrieve`'s null-on-missing-resource -> `addOpenIcon`'s "no atom
  *  added" behavior -- the SAME "unknown name contributes nothing" rule
  *  `creole-atoms.ts#buildSpriteSpan`'s own doc comment documents for
  *  `<$sprite>` (narrower than `<img>`'s own "malformed -> visible fallback
  *  text" rule, since an unresolved sprite/glyph name is a per-diagram/
- *  per-build data question, not a malformed-markup one). */
+ *  per-build data question, not a malformed-markup one). This policy is
+ *  UNCHANGED by the table extension -- only verified against a larger
+ *  table, never modified. */
 function buildOpenIconSpan(m: RegExpExecArray): AtomSpan {
   const start = m.index;
   const end = m.index + m[0].length;

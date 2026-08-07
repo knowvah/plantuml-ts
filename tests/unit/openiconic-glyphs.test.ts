@@ -16,8 +16,12 @@ import {
   openIconicFactor,
   openIconicOriginY,
 } from '../../src/core/openiconic-glyphs.js';
+import { RAW_GLYPHS } from '../../src/core/openiconic-glyphs-data.js';
 import { scanLineForAtoms, matchAtomAt } from '../../src/core/creole-atoms.js';
 import { measureInlineAtom } from '../../src/core/creole-atoms-measure.js';
+import { measureLeafNode } from '../../src/diagrams/description/leaf-sizing.js';
+import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import type { DescriptiveNode } from '../../src/diagrams/description/ast.js';
 
 describe('isKnownOpenIconicGlyph', () => {
   it('recognizes all 6 corpus-reach glyph names', () => {
@@ -27,7 +31,13 @@ describe('isKnownOpenIconicGlyph', () => {
   });
 
   it('rejects an unrecognized name', () => {
-    expect(isKnownOpenIconicGlyph('pencil')).toBe(false);
+    // F1-c extended `RAW_GLYPHS` to upstream's full ~223-icon set, so
+    // 'pencil' -- the ORIGINAL fixture's placeholder for an unrecognized
+    // name -- is now itself a real, resolvable glyph; a genuinely fake name
+    // is required to exercise this branch (AC4: "unknown -> no atom" must
+    // stay provably true for whatever names remain absent, not merely
+    // assumed unchanged).
+    expect(isKnownOpenIconicGlyph('not-a-real-icon')).toBe(false);
     expect(isKnownOpenIconicGlyph('')).toBe(false);
   });
 });
@@ -123,7 +133,104 @@ describe('buildOpenIconicPathD -- byte-exact against jar-cached fixtures', () =>
   });
 
   it('returns undefined for an unrecognized glyph name', () => {
-    expect(buildOpenIconicPathD('pencil', 1, 0, 0)).toBeUndefined();
+    expect(buildOpenIconicPathD('not-a-real-icon', 1, 0, 0)).toBeUndefined();
+  });
+});
+
+describe('buildOpenIconicPathD -- F1-c full-set extension, byte-exact against 7 new jar-cached spot-checks', () => {
+  // Every fixture below is the same isolated single-icon probe
+  // (`rectangle "aa<&NAME>"`, factor = 14/12 default font, no DOT since a
+  // single-entity diagram emits none -- `plans/s1l-tail-diagnosis/findings/
+  // sprite.md`'s `vivido-49-nisu863` isolation) -- oracle-generated 2026-08-07
+  // (`java -DPLANTUML_DETERMINISTIC_TEXT=true -jar oracle/dist/plantuml-
+  // oracle.jar -tsvg`). `originX`/`originY` are derived from each probe's own
+  // jar SVG (`text x="17" textLength="15.575"` -> `originX = 17+15.575+1`;
+  // `text y="27.8889"` -> `originY = openIconicOriginY(27.8889, 14, factor)`),
+  // never hand-rounded -- rounding `originY` by hand (as an earlier draft of
+  // this verification did) drifts the LAST digit of some ops by 0.0001
+  // against the jar, a test-harness artifact, not a `buildOpenIconicPathD`
+  // defect; routing through the real `openIconicOriginY` avoids it entirely.
+  const factor = openIconicFactor(1, 14);
+  const originX = 33.575;
+  const originY = openIconicOriginY(27.8889, 14, factor);
+
+  it('cloud glyph, Y-only translate (transform="translate(0 1)") -- the vivido-49-nisu863 node-2 glyph', () => {
+    expect(buildOpenIconicPathD('cloud', factor, originX, originY)).toBe(
+      'M38.825,19.3333 C37.4133,19.3333 36.1767,20.3367 35.9083,21.6667 C34.625,21.6667 33.575,22.7167 33.575,24 ' +
+        'C33.575,25.2833 34.625,26.3333 35.9083,26.3333 L41.1583,26.3333 C42.1267,26.3333 42.9083,25.5517 42.9083,' +
+        '24.5833 C42.9083,23.825 42.4183,23.0783 41.7417,22.8333 L41.7417,22.25 C41.7417,20.64 40.435,19.3333 ' +
+        '38.825,19.3333',
+    );
+  });
+
+  it('euro glyph -- reproduces the upstream regex bug: source declares transform="translate(-1)" but the jar' +
+    ' drops it (no translateX applied)', () => {
+    expect(buildOpenIconicPathD('euro', factor, originX, originY)).toBe(
+      'M40.575,18.1667 C38.405,18.1667 36.6083,19.66 36.095,21.6667 L33.8667,21.6667 L33.575,22.8333 L35.92,22.8333 ' +
+        'C35.92,23.2417 36.0017,23.6267 36.1067,24 L33.8083,24 L33.5867,25.1667 L36.5733,25.1667 C37.39,26.555 ' +
+        '38.8717,27.5 40.5867,27.5 C41.4383,27.5 42.2317,27.255 42.92,26.8467 L42.92,25.4233 C42.3017,25.9833 ' +
+        '41.4967,26.3333 40.5867,26.3333 C39.5483,26.3333 38.6383,25.8783 37.9967,25.1667 L40.5867,25.1667 ' +
+        'L40.7733,24 L37.3083,24 C37.18,23.6267 37.0867,23.2533 37.0867,22.8333 L40.9833,22.8333 L41.17,21.6667 ' +
+        'L37.3083,21.6667 C37.7867,20.3133 39.07,19.3333 40.5867,19.3333 C41.3567,19.3333 42.0567,19.5783 ' +
+        '42.6283,19.9867 L42.815,18.75 C42.15,18.3883 41.4033,18.1667 40.5867,18.1667',
+    );
+  });
+
+  it('media-play glyph, both X and Y translate (transform="translate(1 1)")', () => {
+    expect(buildOpenIconicPathD('media-play', factor, originX, originY)).toBe(
+      'M34.7417,19.3333 L34.7417,26.3333 L41.7417,22.8333 L34.7417,19.3333',
+    );
+  });
+
+  it('loop-circular glyph, Y-only translate, C-curve heavy two-subpath path', () => {
+    expect(buildOpenIconicPathD('loop-circular', factor, originX, originY)).toBe(
+      'M38.2417,19.3333 C36.3167,19.3333 34.7417,20.9083 34.7417,22.8333 L33.575,22.8333 L35.325,25.1667 ' +
+        'L37.075,22.8333 L35.9083,22.8333 C35.9083,21.5383 36.9467,20.5 38.2417,20.5 L38.2417,19.3333 ' +
+        'M41.1583,20.5 L39.4083,22.8333 L40.575,22.8333 C40.575,24.1283 39.5367,25.1667 38.2417,25.1667 ' +
+        'L38.2417,26.3333 C40.1667,26.3333 41.7417,24.7583 41.7417,22.8333 L42.9083,22.8333 L41.1583,20.5',
+    );
+  });
+
+  it('account-login glyph, no transform at all', () => {
+    expect(buildOpenIconicPathD('account-login', factor, originX, originY)).toBe(
+      'M37.075,18.1667 L37.075,19.3333 L41.7417,19.3333 L41.7417,25.1667 L37.075,25.1667 L37.075,26.3333 ' +
+        'L42.9083,26.3333 L42.9083,18.1667 L37.075,18.1667 M38.2417,20.5 L38.2417,21.6667 L33.575,21.6667 ' +
+        'L33.575,22.8333 L38.2417,22.8333 L38.2417,24 L40.575,22.25 L38.2417,20.5',
+    );
+  });
+
+  it('cart glyph, arc commands + Y-only translate', () => {
+    expect(buildOpenIconicPathD('cart', factor, originX, originY)).toBe(
+      'M33.9717,19.3333 A0.5833,0.5833 0 0 0 34.1583,20.5 L35.9083,20.5 L36.0133,20.7917 L36.4917,22.25 ' +
+        'L36.97,23.7083 C37.0167,23.86 37.215,24 37.3667,24 L41.45,24 C41.6133,24 41.8,23.86 41.8467,23.7083 ' +
+        'L42.7917,20.7917 C42.8383,20.64 42.7683,20.5 42.605,20.5 L37.425,20.5 L36.9817,19.66 ' +
+        'A0.5833,0.5833 0 0 0 36.4683,19.3333 L34.135,19.3333 A0.5833,0.5833 0 0 0 34.03,19.3333 ' +
+        'A0.5833,0.5833 0 0 0 33.96,19.3333 M37.6583,25.1667 C37.3317,25.1667 37.075,25.4233 37.075,25.75 ' +
+        'C37.075,26.0767 37.3317,26.3333 37.6583,26.3333 C37.985,26.3333 38.2417,26.0767 38.2417,25.75 ' +
+        'C38.2417,25.4233 37.985,25.1667 37.6583,25.1667 M41.1583,25.1667 C40.8317,25.1667 40.575,25.4233 ' +
+        '40.575,25.75 C40.575,26.0767 40.8317,26.3333 41.1583,26.3333 C41.485,26.3333 41.7417,26.0767 ' +
+        '41.7417,25.75 C41.7417,25.4233 41.485,25.1667 41.1583,25.1667',
+    );
+  });
+
+  it('browser glyph, arc commands, no transform', () => {
+    expect(buildOpenIconicPathD('browser', factor, originX, originY)).toBe(
+      'M33.9717,18.1667 A0.5833,0.5833 0 0 0 33.575,18.75 L33.575,26.9167 A0.5833,0.5833 0 0 0 34.1583,27.5 ' +
+        'L42.325,27.5 A0.5833,0.5833 0 0 0 42.9083,26.9167 L42.9083,18.75 A0.5833,0.5833 0 0 0 42.325,18.1667 ' +
+        'L34.1583,18.1667 A0.5833,0.5833 0 0 0 34.0533,18.1667 A0.5833,0.5833 0 0 0 33.9833,18.1667 ' +
+        'M35.325,19.3333 C35.6517,19.3333 35.9083,19.59 35.9083,19.9167 C35.9083,20.2433 35.6517,20.5 ' +
+        '35.325,20.5 C34.9983,20.5 34.7417,20.2433 34.7417,19.9167 C34.7417,19.59 34.9983,19.3333 ' +
+        '35.325,19.3333 M37.6583,19.3333 L41.1583,19.3333 C41.485,19.3333 41.7417,19.59 41.7417,19.9167 ' +
+        'C41.7417,20.2433 41.485,20.5 41.1583,20.5 L37.6583,20.5 C37.3317,20.5 37.075,20.2433 37.075,19.9167 ' +
+        'C37.075,19.59 37.3317,19.3333 37.6583,19.3333 M34.7417,21.6667 L41.7417,21.6667 L41.7417,26.3333 ' +
+        'L34.7417,26.3333 L34.7417,21.6667',
+    );
+  });
+
+  it('total glyph count is upstream\'s full 223-icon OpenIconic resource set', () => {
+    // `~/git/plantuml/src/main/resources/openiconic/*.svg` -- 223 files;
+    // `all.txt` (the directory's only other entry) is not an icon.
+    expect(Object.keys(RAW_GLYPHS).length).toBe(223);
   });
 });
 
@@ -153,7 +260,9 @@ describe('scanLineForAtoms / matchAtomAt -- <&glyph> recognition', () => {
   });
 
   it('an unrecognized glyph name contributes nothing (no atom, no fallback text)', () => {
-    const scan = scanLineForAtoms('<&pencil> rest');
+    // 'not-a-real-icon' -- see the `isKnownOpenIconicGlyph` describe block
+    // above for why 'pencil' no longer serves as the unrecognized-name case.
+    const scan = scanLineForAtoms('<&not-a-real-icon> rest');
     expect(scan.atoms).toEqual([]);
     expect(scan.textWithoutAtoms).toBe(' rest');
   });
@@ -187,5 +296,36 @@ describe('measureInlineAtom -- openiconic branch (D9)', () => {
   it('defaults ambientFontSize to 12 (factor === scale) when no ambient context is supplied', () => {
     const dims = measureInlineAtom({ kind: 'openiconic', name: 'x', scale: 1 });
     expect(dims).toEqual({ width: 10, height: 8 });
+  });
+});
+
+describe('<&cloud> -- F1-c AC1/AC2, the vivido-49-nisu863 node-2 isolation (G11)', () => {
+  it('scanLineForAtoms returns an openiconic atom for <&cloud> (AC1: not an empty span)', () => {
+    const scan = scanLineForAtoms('aa<&cloud>');
+    expect(scan.atoms).toEqual([{ kind: 'openiconic', name: 'cloud', scale: 1 }]);
+    expect(scan.textWithoutAtoms).toBe('aa');
+  });
+
+  it('measureInlineAtom("cloud") at font 14 reproduces openIconicDims(openIconicFactor(1,14)) = 11.3333px advance (AC1)', () => {
+    const dims = measureInlineAtom({ kind: 'openiconic', name: 'cloud', scale: 1 }, undefined, 14);
+    expect(dims).toEqual(openIconicDims(openIconicFactor(1, 14)));
+    expect(dims.width).toBeCloseTo(11.3333, 4);
+  });
+
+  it('measureLeafNode("aa<&cloud>") matches the jar isolation exactly: 46.9083 x 34 (AC1/AC2)', () => {
+    // `plans/s1l-tail-diagnosis/findings/sprite.md`'s `vivido-49-nisu863`
+    // isolation: `rectangle "aa<&cloud>"` -> jar 0.651505in x 0.472222in
+    // (46.9083 x 34px = 20 + 15.575 + 11.3333 wide, 20 + 14 tall). Node 2's
+    // own reported delta (-11.333px width) came entirely from this glyph
+    // never resolving (M4); AC2 requires verifying node 2's width error
+    // drops to 0px IN ISOLATION from nodes 0/1's unrelated M3 (url-label
+    // sprite factor, closed in F2-c) -- this probe has no link/url markup
+    // at all, so it isolates M4 alone, matching the finding's own
+    // `rectangle "aa<&cloud>"` minimal repro (not the link-wrapped fixture
+    // node, which also carries M3).
+    const node: DescriptiveNode = { id: 'x', display: 'aa<&cloud>', symbol: 'rectangle', children: [] };
+    const dim = measureLeafNode(node, { family: 'sans-serif', size: 14 }, new WidthTableMeasurer());
+    expect(dim.width).toBeCloseTo(46.9083, 3);
+    expect(dim.height).toBe(34);
   });
 });

@@ -35,9 +35,13 @@ describe('renderOpenIconicAtom', () => {
 
   it('returns an empty string for an unrecognized glyph name (defensive -- should not occur in practice)', () => {
     const theme = { ...defaultTheme, fontSize: 14 };
+    // F1-c (S1L tail-fix G11) extended the OpenIconic glyph table to
+    // upstream's full ~223-icon set, so 'pencil' -- this test's original
+    // placeholder -- is now itself a real, resolvable glyph; a genuinely
+    // fake name is required to keep this "unrecognized name" case honest.
     const atom: Extract<MemberRenderAtom, { kind: 'vector' }> = {
       kind: 'vector',
-      name: 'pencil',
+      name: 'not-a-real-icon',
       factor: 1,
       fill: '#000000',
       width: 10,
