@@ -48,7 +48,7 @@ export function measureInlineAtom(
   }
   const dims = sprites?.get(atom.name);
   if (dims === undefined) return { width: 0, height: 0 };
-  const scale = spriteScale(atom.scale, ambientFontSize);
+  const scale = spriteAtomScale(atom, ambientFontSize);
   return { width: dims.width * scale, height: dims.height * scale };
 }
 
@@ -75,6 +75,49 @@ const SPRITE_FONT_REFERENCE_SIZE = 13;
  */
 export function spriteScale(requestedScale: number, ambientFontSize?: number): number {
   return requestedScale * ((ambientFontSize ?? SPRITE_FONT_REFERENCE_SIZE) / SPRITE_FONT_REFERENCE_SIZE);
+}
+
+/**
+ * Effective scale of ONE `<$name>` sprite ATOM — {@link spriteScale} on the
+ * ordinary inline path, but the atom's RAW `scale` when it was recognized
+ * inside a `[[url label]]` link (`SpriteAtomToken.insideUrl`, set by
+ * `klimt/creole/legacy/StripeSimple.ts#modifyStripe`).
+ *
+ * Upstream builds a url-label sprite through a SECOND, separate constructor:
+ * `AtomTextUtils#createAtomTextForUrl` (`java:119-127`) hands
+ * `Parser.getScale(m.group(6), 1)` to `AtomSprite` unmodified, deliberately
+ * omitting the `* fc.getSize2D() / 13.0` factor
+ * `CommandCreoleSprite#executeAndAdvance` (`java:82`) applies everywhere
+ * else. (Upstream's own comment on that branch: "sprites are probably not
+ * working in URL".) Jar-verified against the deterministic oracle
+ * (`bivira-53-boja685`, `vivido-49-nisu863`): a `[48x48/16z]` sprite at the
+ * default font 14 measures `48 × 14/13 = 51.6923` OUTSIDE a link and flat
+ * `48` INSIDE one — a 3.6923px difference on BOTH axes, reproduced
+ * independently by `vivido-49`'s unrelated `[48x48/16]` `$database` sprite.
+ *
+ * Sprite-only by construction, not by omission: upstream's url branch also
+ * passes a raw scale for `AtomOpenIconic` (`java:116`) and `AtomImg`
+ * (`java:129`), but those two are ALREADY raw on the ordinary path
+ * (`CommandCreoleOpenIcon`/`CommandCreoleImg` never multiply by the font
+ * ratio), so the sprite kind is the only one that diverges.
+ *
+ * This is the SINGLE site both the sizer (`measureInlineAtom` above,
+ * reached via `leaf-sizing-entity.ts#sizingAtomImageResolverFor`) and the
+ * renderer (`diagrams/description/render-atoms.ts#resolveSpriteAtom` /
+ * `#resolveSvgSpriteAtom`) scale a sprite through, so the two cannot drift
+ * — the lockstep requirement in `planning/sizer-renderer-parity.md`.
+ * {@link spriteScale}'s own signature is deliberately unchanged: the bypass
+ * is a per-ATOM decision, not a new parameter every other caller must reason
+ * about.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/legacy/AtomTextUtils.java#createAtomTextForUrl
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/command/CommandCreoleSprite.java#executeAndAdvance
+ */
+export function spriteAtomScale(
+  atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
+  ambientFontSize?: number,
+): number {
+  return atom.insideUrl === true ? atom.scale : spriteScale(atom.scale, ambientFontSize);
 }
 
 /**

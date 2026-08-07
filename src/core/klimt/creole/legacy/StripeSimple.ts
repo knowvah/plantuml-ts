@@ -56,7 +56,7 @@ import type { CreoleAtom, CreoleAtomUrl } from '../atom/Atom.js';
 import type { Command, StripeBuilder } from '../command/Command.js';
 import { CREOLE_COMMANDS, CREOLE_COMMANDS_OTHER } from './CommandCreoleBuilder.js';
 import { CreoleMode } from '../CreoleMode.js';
-import { scanLineForAtoms, matchAtomAt } from '../../../creole-atoms.js';
+import { scanLineForAtoms, matchAtomAt, type InlineAtomToken } from '../../../creole-atoms.js';
 import { classifyStripeLine, type StripeClassification } from './CreoleStripeSimpleParser.js';
 import { resolveTextEscapes } from '../../../text-escapes.js';
 import { MONOSPACED } from '../Parser.js';
@@ -218,7 +218,7 @@ class StripeAtomBuilder implements StripeBuilder {
           // consumed by an OpenIconic glyph atom (`Atom.ts`'s own field
           // doc comment); every other atom kind ignores it, so this is a
           // zero-behavior-change addition for img/sprite.
-          this.built.push({ kind: 'inline', atom: atomMatch.atom, ambientFont: this.font });
+          this.built.push({ kind: 'inline', atom: this.markUrlProvenance(atomMatch.atom), ambientFont: this.font });
         } else if (atomMatch.fallbackText !== undefined) {
           // Its own run at the hardcoded fallback font — see `IMG_FALLBACK_FONT`.
           this.flushPending(pending);
@@ -232,6 +232,22 @@ class StripeAtomBuilder implements StripeBuilder {
       pos += 1;
     }
     this.flushPending(pending);
+  }
+
+  /** G10: tags a `<$sprite>` atom recognized while a `[[url ...]]` command's
+   *  captured label is being scanned (`activeUrl !== undefined`), the same
+   *  provenance `flushPending` below already attaches to a text run. It is
+   *  what lets `creole-atoms-measure.ts#spriteAtomScale` reproduce upstream's
+   *  SECOND, url-only sprite constructor (`AtomTextUtils
+   *  #createAtomTextForUrl`, `java:119-127`), which passes the RAW parsed
+   *  scale and so skips `CommandCreoleSprite`'s `* fc.getSize2D() / 13.0`
+   *  (`java:82`) — jar-verified 3.6923px per axis on a 48x48 sprite at font
+   *  14 (`bivira-53-boja685`). Sprite-only: upstream's url branch passes a
+   *  raw scale for openiconic/img too, but those are already raw on the
+   *  ordinary path, so only the sprite kind diverges. */
+  private markUrlProvenance(atom: InlineAtomToken): InlineAtomToken {
+    if (this.activeUrl === undefined || atom.kind !== 'sprite') return atom;
+    return { ...atom, insideUrl: true };
   }
 
   /** Upstream: `StripeSimple#addPending` (`AtomTextUtils.createLegacy`). */
