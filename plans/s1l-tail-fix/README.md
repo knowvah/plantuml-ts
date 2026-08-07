@@ -31,8 +31,33 @@ The inputs are on disk and are authoritative:
 - [x] [Batch 1](batch-1/overview.md) — F1-a/b/c, 3 parallel · **+9 → 330**
 - [x] [Batch 2](batch-2/overview.md) — F2-a/b/c, 3 parallel · **+6 → 336**
 - [x] [Batch 3](batch-3/overview.md) — F3-fix + seam + 2 non-code, 4 parallel · **+4 → 340**
-- [ ] [Batch 4](batch-4/overview.md) — F4-a/b/c/d, 4 parallel · **+6 → 346**
+- [x] [Batch 4](batch-4/overview.md) — F4-a/b/c/d + F4-e/F4-f (mid-mission),
+      6 tasks · **landed 343 → 346/356 (97.2%)**, widened 0
 - [ ] [Batch 5](batch-5/overview.md) — F5-a goldens sweep · **+1 → 347**
+
+> **Batch 4 reached 346 by a different route than the ledger predicted.** The
+> planned `+6` was 4 archimate pins + `murava-69` + `fariba-82`. What actually
+> landed: `fariba-82` closed (+1) and two NEW authored fixtures landed
+> conformant (+2, and total 354 → 356). The other five did **not** close —
+> they improved but stayed above the 0.01in bar. Do not read "346" as "the
+> ledger held"; see the open-work table below.
+
+### Open after Batch 4 — 10 non-conformant, 6 of them closeable
+
+| Fixture | Delta | Pin | Owner |
+|---|---|---|---|
+| `turasu-73-zoni468` | 0.210069 (was 1.224826) | 1.224826 | F4-f residual |
+| `tuliba-37-liza126` | 0.263889 (was 0.521007) | 0.521007 | F4-f residual |
+| `lesori-32-zeve057` | 0.069444 (was 0.242882) | 0.242882 | F4-f residual |
+| `ravodu-50-siso430` | 0.069444 (was 0.242882) | 0.242882 | F4-f residual |
+| `murava-69-tago286` | 0.181655 | 0.181655 | wave 3 (Twemoji artwork) |
+| `kokebo-27-vafi688` | 0.034560 | 0.034560 | Batch 5 (F5-a) |
+| `gafico-37`, `nujito-06` | 1.200694 / 2.183854 | pinned | **excluded** — GH #24 `<code>` |
+| `gevozu-46`, `sunuju-01` | 1.263889 each | pinned | **excluded** — LaTeX divergence |
+
+Ceiling is **352/356 (98.9%)** — the four excluded fixtures are permanent.
+Pins for the four improved archimate fixtures were **not** re-based (ADR-8 /
+stop condition 6); they remain shrink-only at their old values.
 
 `F1-c` books **zero** gain on its own — its fixture (`vivido-49`) closes in
 F2-c. `F4-c`'s +1 is **conditional** on F3-diag resolving the `fariba-82`

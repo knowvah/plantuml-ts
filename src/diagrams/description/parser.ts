@@ -16,6 +16,7 @@
 import type { UmlSource } from '../../core/block-extractor.js';
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
+import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
 import {
@@ -48,11 +49,11 @@ export { CONTAINER_SYMBOLS } from './parse-helpers.js';
 // Main entry point
 // ---------------------------------------------------------------------------
 
-function makeInitialState(): ParseState {
+function makeInitialState(internal?: InternalSpriteStore): ParseState {
   return {
     inSpriteBlock: false,
     pendingElement: undefined,
-    ast: makeDefaultAST(),
+    ast: makeDefaultAST(internal),
     containerStack: [],
     nodesById: new Map(),
     parentArrayById: new Map(),
@@ -175,7 +176,10 @@ function applyElementDecorations(
 ): void {
   if (run.trim() === '') return;
   const sr = extractNodeStereotype(run);
-  if (sr !== undefined) node.stereotype = sr.stereotypes;
+  if (sr !== undefined) {
+    node.stereotype = sr.stereotypes;
+    if (sr.sprite !== undefined) node.stereotypeSprite = sr.sprite;
+  }
   if (!withColor) return;
   const cr = extractColor(sr === undefined ? run : sr.remainder);
   if (cr !== undefined) node.color = cr.color;
@@ -320,10 +324,10 @@ function tryArchimate(state: ParseState, line: string): LineOutcome {
   const symbol = KEYWORD_TO_SYMBOL.get('archimate');
   if (symbol === undefined) return null;
   const color = m[1]!;
-  const { id, display, stereotype, tags } = parseNameSection(m[2]!);
+  const { id, display, stereotype, tags, stereotypeSprite } = parseNameSection(m[2]!);
   const finalDisplay =
     display === id ? leafDisplayName(id, state.namespaceSeparator) : display;
-  emitNode(state, makeNode(id, finalDisplay, symbol, stereotype, color, tags));
+  emitNode(state, makeNode(id, finalDisplay, symbol, stereotype, color, tags, stereotypeSprite));
   return 1;
 }
 
@@ -404,8 +408,11 @@ function processLine(state: ParseState, lines: readonly string[], i: number): nu
  * Parse a UmlSource block for a descriptive diagram (component / use-case /
  * deployment) into a DescriptionDiagramAST.
  */
-export function parseDescription(block: UmlSource): DescriptionDiagramAST {
-  const state = makeInitialState();
+export function parseDescription(
+  block: UmlSource,
+  internalSprites?: InternalSpriteStore,
+): DescriptionDiagramAST {
+  const state = makeInitialState(internalSprites);
   const lines = block.lines;
 
   for (let i = 0; i < lines.length; ) {

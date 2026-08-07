@@ -34,6 +34,7 @@ import {
 } from './svek-dot.js';
 import { expectNoErrorDiagram } from '../helpers/error-diagram.js';
 import { buildStdlibAssetsStore } from '../helpers/stdlib-assets-store.js';
+import { buildSpriteAssetsStore } from '../helpers/sprite-assets-store.js';
 
 const GOLDENS = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -80,6 +81,12 @@ describe.skipIf(fixtures.length === 0)('oracle DOT-parity ratchet — descriptio
         // see stdlib-assets-store.ts) rather than special-casing which ones
         // need it.
         includeStore: withStdlib(new MapIncludeStore(), buildStdlibAssetsStore()),
+        // F4-f piece 1: same render-input wiring as
+        // `scripts/measure-description-size-deltas.ts` (ADR-2). The jar has
+        // its `/sprites/**` classpath bundle unconditionally; without this
+        // the ratchet measures a diagram the oracle never rendered. Gate
+        // logic below is untouched.
+        assetStore: buildSpriteAssetsStore(),
       });
       expectNoErrorDiagram(svg, `${name}: render produced a PlantUML error`);
       expect(

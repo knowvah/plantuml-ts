@@ -1,0 +1,7 @@
+@startuml
+rectangle "<:rocket:>" as R1
+rectangle "<:rocket:> qq" as R2
+usecase "qq" as U1
+R1 --> U1
+R2 --> U1
+@enduml

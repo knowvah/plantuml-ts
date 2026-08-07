@@ -24,10 +24,10 @@ export function shorthandNode(
   symbol: DescriptiveNode['symbol'],
   trailer: string | undefined,
 ): void {
-  const { id, display, stereotype, color, tags } = parseNameSection(
+  const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(
     name + ' ' + (trailer ?? '').trim(),
   );
-  emitNode(state, makeNode(id, display, symbol, stereotype, color, tags));
+  emitNode(state, makeNode(id, display, symbol, stereotype, color, tags, stereotypeSprite));
 }
 
 /**

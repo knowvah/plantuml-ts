@@ -8,6 +8,7 @@
 
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { SyncPlugin, CompleteSvg } from '../../core/dispatcher.js';
+import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
 import type { DescriptionDiagramAST } from './ast.js';
 import type { DescriptionGeometry } from './layout.js';
 import { hasDescriptiveElement } from '../../core/descriptive-keywords.js';
@@ -57,8 +58,18 @@ export const descriptionPlugin: SyncPlugin<
     return hasDescriptiveElement(lines);
   },
 
-  parse(block) {
-    const ast = parseDescription(block);
+  parse(block, options) {
+    // F4-f piece 1: ADR-2's asset channel reaches the parser here and
+    // nowhere else. `SkinParam#getSprite` (java:801-807) consults the
+    // per-diagram registry FIRST and `SpriteImage.fromInternal`'s
+    // classpath bundle second, so the internal store must be attached at
+    // registry-construction time -- `sprite $N jar:<path>` resolves while
+    // the command executes (`CommandSpriteFile.java:108-112`), i.e. during
+    // this call, not later at layout/render time.
+    const ast = parseDescription(
+      block,
+      options?.assetStore === undefined ? undefined : internalSpriteStoreFrom(options.assetStore),
+    );
     // T17 seed thread (see ast.ts's `DescriptionDiagramAST.seed` doc
     // comment) — computed once here, at the only point the raw source text
     // is available anywhere in the plugin pipeline.

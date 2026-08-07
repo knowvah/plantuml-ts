@@ -49,6 +49,7 @@ import {
   SIZE_CONFORMANCE_TOLERANCE_IN,
 } from '../tests/oracle/svek-dot.js';
 import { buildStdlibAssetsStore } from '../tests/helpers/stdlib-assets-store.js';
+import { buildSpriteAssetsStore } from '../tests/helpers/sprite-assets-store.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GOLDENS = join(REPO, 'oracle', 'goldens', 'description');
@@ -179,6 +180,15 @@ function captureGraphs(markup: string): DotInputGraph[] {
     renderSync(markup, {
       measurer: new WidthTableMeasurer(),
       includeStore: withStdlib(new MapIncludeStore(), buildStdlibAssetsStore()),
+      // F4-f piece 1 (ADR-2: "the harness measures the same code path users
+      // get"). The jar resolves `<<$archimate/x>>` and `sprite $N jar:…` off
+      // its own classpath unconditionally; a browser-safe port needs the
+      // bytes handed in, so a harness that omits this measures a DIFFERENT
+      // diagram than the jar did. Wired for every fixture, not just the four
+      // that name a sprite — `buildSpriteAssetsStore` memoizes, exactly as
+      // the stdlib store above does. This is RENDER INPUT only; the gate
+      // (`compareStructural`/`maxSizeDeltaIn`) is untouched.
+      assetStore: buildSpriteAssetsStore(),
     });
   } finally {
     setLayoutInputObserver(undefined);

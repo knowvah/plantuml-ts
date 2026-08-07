@@ -13,6 +13,29 @@ import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
+import type { ResolvedColor } from '../../core/klimt/color/HColorSet.js';
+
+/**
+ * The sprite half of a parsed `<<...>>` run: `StereotypeDecoration
+ * .spriteName` / `.spriteScale` / `.htmlColor`.
+ *
+ * Upstream keeps the whole `Stereotype` on the `Entity` and asks it for
+ * `getSprite(getSkinParam())` at draw time
+ * (`EntityImageDescription.java:193-194`). This port's `SpriteRegistry` is
+ * not in scope while parsing, so the three fields that lookup needs travel
+ * on the node instead — see `Stereotype#getSpriteName`'s doc comment for
+ * why the accessor exists at all.
+ */
+export interface StereotypeSpriteRef {
+  readonly name: string;
+  /** `Parser.getScale(...)`, defaulting to 1 (java:167). */
+  readonly scale: number;
+  /** `Stereotype#getHtmlColor()` — `HColors.BLACK` whenever a sprite run
+   *  matched and declared no explicit colour (java:164), so normally set.
+   *  Handed to `SvgNanoParser#drawU` as its `fontColor`, exactly as
+   *  `Stereotype#getSprite` hands it to `asTextBlock`. */
+  readonly color?: ResolvedColor | undefined;
+}
 
 // ---------------------------------------------------------------------------
 // Node
@@ -77,6 +100,22 @@ export interface DescriptiveNode {
    *  invariant, which predated routing this field through the real
    *  `Stereotype`/`StereotypeDecoration` port. */
   stereotype?: readonly string[];
+  /**
+   * The sprite half of the same `<<...>>` run (`StereotypeDecoration
+   * .spriteName`/`spriteScale`/`htmlColor`). Present ONLY when the run named
+   * a sprite; the labels above stay whatever `Stereotype#getLabels` produced
+   * for it.
+   *
+   * `EntityImageDescription.java:193-194` tests the sprite FIRST and, when it
+   * resolves, uses it INSTEAD of the label block — so a resolvable sprite
+   * suppresses the `«...»` lines entirely, and an unresolvable one falls
+   * through to them. That decision cannot be made at parse time (the
+   * registry's internal-bundle tier is only complete once the whole block is
+   * parsed), so the reference travels and the lookup happens in the sizer and
+   * the renderer, symmetrically — see `EntityImageDescriptionDelegates.ts
+   * #resolveStereotypeSprite` and `planning/sizer-renderer-parity.md`.
+   */
+  stereotypeSprite?: StereotypeSpriteRef;
   color?: string;
   /** `Stereotag` names (net.sourceforge.plantuml.stereo.Stereotag), attached
    *  via `$tag` tokens on the declaration line (CommandCreateElementFull's

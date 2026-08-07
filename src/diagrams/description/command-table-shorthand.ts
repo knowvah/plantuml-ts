@@ -109,7 +109,7 @@ export const SHORTHAND_COMMANDS: readonly Command[] = [
       const deco = parseNameSection((match[2] ?? '') + (match[4] ?? ''));
       emitNode(
         state,
-        makeNode(decl.id, decl.display, decl.symbol, deco.stereotype, deco.color, deco.tags),
+        makeNode(decl.id, decl.display, decl.symbol, deco.stereotype, deco.color, deco.tags, deco.stereotypeSprite),
       );
     },
   },

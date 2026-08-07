@@ -37,7 +37,7 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
     pattern: /^\[([^\]]+)\](.*)?$/,
     execute(state, match) {
       const decl = parseBracketDeclaration(match[1]!.trim(), match[2] ?? '');
-      emitNode(state, makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color));
+      emitNode(state, makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color, undefined, decl.stereotypeSprite));
     },
   },
 
@@ -76,8 +76,8 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
     execute(state, match) {
       const kw = match[1]!.toLowerCase();
       const symbol = KEYWORD_TO_SYMBOL.get(kw) ?? 'node';
-      const { id, display, stereotype, color, tags } = parseNameSection(match[2]!.trim());
-      const container = makeNode(id, display, symbol, stereotype, color, tags);
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[2]!.trim());
+      const container = makeNode(id, display, symbol, stereotype, color, tags, stereotypeSprite);
       container.declaredAsGroup = true;
       for (const child of parseInlineBody(match[3]!)) {
         container.children.push(child);
@@ -103,13 +103,13 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
     execute(state, match) {
       const kw = match[1]!.toLowerCase();
       const symbol = KEYWORD_TO_SYMBOL.get(kw) ?? 'node';
-      const { id, display, stereotype, color, tags } = parseNameSection(match[2]!.trim());
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[2]!.trim());
       const existing = state.nodesById.get(id);
       if (existing !== undefined && existing.declaredAsGroup === true) {
         state.containerStack.push(existing);
         return;
       }
-      const container = makeNode(id, display, symbol, stereotype, color, tags);
+      const container = makeNode(id, display, symbol, stereotype, color, tags, stereotypeSprite);
       container.declaredAsGroup = true;
       // CommandPackageWithUSymbol.java:178-180: an anonymous container (no
       // CODE) burns ONE extra shared-counter value generating its internal
@@ -152,16 +152,16 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       const bracketAs = /^\[([^\]]*)\]\s+(as\s+.+)$/i.exec(match[2]!.trim());
       if (bracketAs !== null) {
         const bdecl = parseBracketDeclaration(bracketAs[1]!.trim(), bracketAs[2]!);
-        emitNode(state, makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color));
+        emitNode(state, makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color, undefined, bdecl.stereotypeSprite));
         return;
       }
-      const { id, display, stereotype, color, tags } = parseNameSection(match[2]!);
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[2]!);
       // CommandCreateElementFull.java:317-318: `display = quark.getName()`
       // when no explicit alias/display was given — the LEAF segment only,
       // not the full dotted path, once `set separator` is active.
       const finalDisplay =
         display === id ? leafDisplayName(id, state.namespaceSeparator) : display;
-      const decl = makeNode(id, finalDisplay, symbol, stereotype, color, tags);
+      const decl = makeNode(id, finalDisplay, symbol, stereotype, color, tags, stereotypeSprite);
       if (symbol === 'port') decl.position = kw === 'portout' ? 'portout' : 'portin';
       emitNode(state, decl);
     },
@@ -182,8 +182,8 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   {
     pattern: RE_BARE_DECORATED_DECL,
     execute(state, match) {
-      const { id, display, stereotype, color, tags } = parseNameSection(match[0]);
-      emitNode(state, makeNode(id, display, 'actor', stereotype, color, tags));
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[0]);
+      emitNode(state, makeNode(id, display, 'actor', stereotype, color, tags, stereotypeSprite));
     },
   },
 
@@ -197,8 +197,8 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   {
     pattern: RE_BARE_QUOTED_DECL,
     execute(state, match) {
-      const { id, display, stereotype, color, tags } = parseNameSection(match[0]);
-      emitNode(state, makeNode(id, display, 'actor', stereotype, color, tags));
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[0]);
+      emitNode(state, makeNode(id, display, 'actor', stereotype, color, tags, stereotypeSprite));
     },
   },
 ];

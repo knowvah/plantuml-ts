@@ -15,11 +15,13 @@ import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { Stereotype } from '../../core/stereo/Stereotype.js';
 import { GUILLEMET_NONE } from '../../core/stereo/StereotypeDecoration.js';
 import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
+import type { StereotypeSpriteRef } from './ast.js';
 
 // ---------------------------------------------------------------------------
 // Named return-type interfaces (prevent Lizard brace-counting confusion)
 // ---------------------------------------------------------------------------
 
+export type { StereotypeSpriteRef };
 export interface StereotypeResult {
   /** ALL consecutive `<<tag>>` labels, in source order (see
    *  `DescriptiveNode.stereotype`'s doc comment for the upstream rationale).
@@ -28,6 +30,8 @@ export interface StereotypeResult {
    *  and rewrites a sprite-only `<<$name>>` to no label at all (see
    *  {@link extractNodeStereotype}). */
   stereotypes: readonly string[];
+  /** Sprite half of the same run — see `DescriptiveNode.stereotypeSprite`. */
+  sprite?: StereotypeSpriteRef;
   remainder: string;
 }
 
@@ -231,6 +235,16 @@ export function resolveNewlineEscapes(s: string): string {
  * passes through `Display.getWithNewlines` — see
  * tests/unit/description/parse-helpers.test.ts's vivido-49-nisu863 case,
  * where `id` keeps its literal `\n` but `display` does not).
+ *
+ * **Call with the display STILL WRAPPED in its own delimiters.** Upstream
+ * applies `eventuallyRemoveStartingAndEndingDoubleQuote` exactly once, to a
+ * `displayRaw` that still carries them, and that chain is first-match-wins
+ * (StringUtils.java:63-81) — so one strip removes the quotes and STOPS. A
+ * caller that already unwrapped in its own regex makes this a SECOND strip,
+ * which eats a bracket pair off a `[[url label]]` display and destroys the
+ * creole link (F4-d; see `RE_DQ_AS_ALIAS` in `parse-helpers.ts`). The
+ * quoted-ONLY `CODE1` form is the one place upstream really does strip twice
+ * (once in `cleanId`, once here on the name-derived display) — preserved.
  */
 export function finalizeDisplay(display: string): string {
   // Codepoint/entity escapes (`<U+XXXX>`/`&#NNN;`) are DELIBERATELY not
@@ -310,13 +324,19 @@ export function extractNodeStereotype(rest: string): StereotypeResult | undefine
   if (run === null) return undefined;
   const stereotype = Stereotype.build(run[0].trimEnd(), 0, undefined, parseSimpleColor);
   const stereotypes = stereotype.getLabels(GUILLEMET_NONE).map((label) => resolveTextEscapes(label));
+  // `getSprite(...)` (java:193) beats the label block, so the name travels.
+  const spriteName = stereotype.getSpriteName();
   const before = rest.slice(0, run.index).trimEnd();
   const after = rest.slice(run.index + run[0].length).trimStart();
   // A bare concatenation would fuse adjacent tokens when both sides are
   // non-empty (e.g. a trailing `$tag` after the stereotype getting glued to
   // a leading `#color` before it) — join with a single space in that case.
   const remainder = before.length > 0 && after.length > 0 ? `${before} ${after}` : before + after;
-  return { stereotypes, remainder };
+  if (spriteName === undefined) return { stereotypes, remainder };
+  const color = stereotype.getHtmlColor();
+  const base = { name: spriteName, scale: stereotype.getSpriteScale() };
+  const sprite: StereotypeSpriteRef = color === undefined ? base : { ...base, color };
+  return { stereotypes, sprite, remainder };
 }
 
 /** `[[url]]` / `[[url label]]` hyperlink token (UrlBuilder.OPTIONAL). */

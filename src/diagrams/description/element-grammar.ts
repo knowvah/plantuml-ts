@@ -19,6 +19,7 @@ import {
   extractNodeStereotype,
   resolveNewlineEscapes,
 } from './parse-helpers.js';
+import type { StereotypeSpriteRef } from './parse-helpers.js';
 
 // ---------------------------------------------------------------------------
 // Bracket shorthand: [Name] [as Alias] [<<stereotype>>] [#color]
@@ -31,6 +32,8 @@ export interface BracketDeclaration {
   id: string;
   display: string;
   stereotype?: readonly string[];
+  /** `StereotypeResult.sprite` — see `DescriptiveNode.stereotypeSprite`. */
+  stereotypeSprite?: StereotypeSpriteRef;
   color?: string;
 }
 
@@ -40,11 +43,12 @@ export interface BracketDeclaration {
 function buildBracketDeclaration(
   id: string,
   display: string,
-  stereotype: readonly string[] | undefined,
+  stereo: { stereotype?: readonly string[] | undefined; sprite?: StereotypeSpriteRef | undefined },
   color: string | undefined,
 ): BracketDeclaration {
   const decl: BracketDeclaration = { id, display };
-  if (stereotype !== undefined) decl.stereotype = stereotype;
+  if (stereo.stereotype !== undefined) decl.stereotype = stereo.stereotype;
+  if (stereo.sprite !== undefined) decl.stereotypeSprite = stereo.sprite;
   if (color !== undefined) decl.color = color;
   return decl;
 }
@@ -67,10 +71,10 @@ function buildBracketDeclaration(
  */
 export function parseBracketDeclaration(bracketName: string, rawExtra: string): BracketDeclaration {
   let extra = rawExtra.trim();
-  let stereotype: readonly string[] | undefined;
+  const stereo: { stereotype?: readonly string[] | undefined; sprite?: StereotypeSpriteRef | undefined } = {};
   let color: string | undefined;
   const sr = extractNodeStereotype(extra);
-  if (sr !== undefined) { stereotype = sr.stereotypes; extra = sr.remainder.trim(); }
+  if (sr !== undefined) { stereo.stereotype = sr.stereotypes; stereo.sprite = sr.sprite; extra = sr.remainder.trim(); }
   const cr = extractColor(extra);
   if (cr !== undefined) { color = cr.color; extra = cr.remainder.trim(); }
   let id = bracketName;
@@ -96,7 +100,7 @@ export function parseBracketDeclaration(bracketName: string, rawExtra: string): 
   // `[plain]` draws `plain`, `["quoted"]` draws `"quoted"`, while the
   // ordinary quoted forms (`component "cq"`, `component cq2 as "dq"`) do
   // strip. Only the newline-escape half applies.
-  return buildBracketDeclaration(cleanId(id), resolveNewlineEscapes(bracketName), stereotype, color);
+  return buildBracketDeclaration(cleanId(id), resolveNewlineEscapes(bracketName), stereo, color);
 }
 
 // ---------------------------------------------------------------------------

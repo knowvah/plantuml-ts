@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseStyleBlock } from '../../src/core/skinparam.js';
 import { applyStyleMap } from '../../src/core/style-map-theme.js';
+import type { Theme } from '../../src/core/theme.js';
 import { defaultTheme } from '../../src/core/theme.js';
 
 /**
@@ -81,5 +82,69 @@ describe('applyStyleMap -- root/element universal-selector cascade (D3)', () => 
     expect(theme.shadowing).toBeUndefined();
     expect(theme.colors.graph.rootElementBackground).toBeUndefined();
     expect(theme.colors.border).toBe(defaultTheme.colors.border);
+  });
+});
+
+/**
+ * S1L-tail F4-e (M1, `plans/s1l-tail-fix/findings/fariba-82-residual.md`):
+ * `applyStyleMap`'s element buckets must merge per SName, mirroring
+ * `StyleBuilder#muteStyle` (`~/git/plantuml/src/main/java/net/sourceforge/
+ * plantuml/style/StyleBuilder.java:86-104`): the incoming styles are merged
+ * into a COPY of the existing storage, one `StyleSignatureBasic` at a time
+ * (`orig.mergeWith(modifiedStyle, MergeStrategy.OVERWRITE_EXISTING_VALUE)`),
+ * so a `file` signature can never evict a `rectangle` signature. Before this
+ * fix `buildStyleMapPartialTheme` replaced `colors.elements` wholesale, so
+ * ANY element-scoped `<style>` selector deleted every skinparam-derived
+ * bucket -- the second of the two defects behind `fariba-82-xolu802`'s
+ * 0.027778in `sh0006` residual.
+ */
+describe('applyStyleMap -- per-signature element-bucket merge (F4-e / M1)', () => {
+  const withElements = (elements: NonNullable<Theme['colors']['elements']>): Theme => ({
+    ...defaultTheme,
+    colors: { ...defaultTheme.colors, elements },
+  });
+
+  it('a <style> selector for one sname does not evict another sname bucket', () => {
+    // The `fariba-82-xolu802` shape: `skinparam rectangle {
+    // StereotypeFontSize 12 }` built the base bucket, then the fixture's
+    // `<style> file { … }` block arrives.
+    const base = withElements({ rectangle: { stereotypeFontSize: 12 } });
+    const styleMap = parseStyleBlock('file {\n  FontColor blue\n}');
+    const theme = applyStyleMap(styleMap, base);
+    expect(theme.colors.elements?.rectangle?.stereotypeFontSize).toBe(12);
+    expect(theme.colors.elements?.file?.font).toBe('blue');
+  });
+
+  it('within one sname the <style> value overwrites the base value', () => {
+    // OVERWRITE_EXISTING_VALUE: this is a merge fix, not a
+    // "last writer loses" inversion.
+    const base = withElements({ rectangle: { fontSize: 20, background: 'red' } });
+    const styleMap = parseStyleBlock('rectangle {\n  FontSize 12\n}');
+    const theme = applyStyleMap(styleMap, base);
+    expect(theme.colors.elements?.rectangle?.fontSize).toBe(12);
+  });
+
+  it('within one sname the base fields the <style> block omits survive', () => {
+    const base = withElements({ rectangle: { fontSize: 20, background: 'red' } });
+    const styleMap = parseStyleBlock('rectangle {\n  FontSize 12\n}');
+    const theme = applyStyleMap(styleMap, base);
+    expect(theme.colors.elements?.rectangle?.background).toBe('red');
+  });
+
+  it('a per-stereotype-name rule does not evict a base rule for a different tag', () => {
+    // `stereotypeFontSizeByStereo`'s keys are separate (more specific)
+    // signatures upstream, so the same per-signature rule applies one
+    // level deeper.
+    const base = withElements({ rectangle: { stereotypeFontSizeByStereo: { alpha: 9 } } });
+    const styleMap = parseStyleBlock('rectangle {\n  stereotype {\n    .beta {\n      FontSize 11\n    }\n  }\n}');
+    const theme = applyStyleMap(styleMap, base);
+    expect(theme.colors.elements?.rectangle?.stereotypeFontSizeByStereo).toEqual({ alpha: 9, beta: 11 });
+  });
+
+  it('leaves base buckets untouched when the StyleMap has no element selector', () => {
+    const base = withElements({ rectangle: { stereotypeFontSize: 12 } });
+    const styleMap = parseStyleBlock('root {\n  Shadowing 4.0\n}');
+    const theme = applyStyleMap(styleMap, base);
+    expect(theme.colors.elements?.rectangle?.stereotypeFontSize).toBe(12);
   });
 });

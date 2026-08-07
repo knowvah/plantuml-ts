@@ -1,0 +1,580 @@
+{
+  "sourceRepo": "https://github.com/plantuml/plantuml",
+  "sourceSha": "de1f986f09253edb9bf6351808e1cdba99ec9e74",
+  "sourcePath": "src/main/resources/sprites",
+  "generatedBy": "scripts/vendor-sprites.ts",
+  "licenses": "assets/sprites/LICENSES.md",
+  "licenceReview": "plans/s1l-tail-fix/findings/sprite-licence-review.md",
+  "attribution": "Archimate sprites are from Archi: http://www.archimatetool.com",
+  "trademark": "ArchiMate is a registered trademark of The Open Group.",
+  "sets": {
+    "archimate": {
+      "license": "MIT",
+      "fileCount": 139,
+      "svgCount": 116,
+      "pngCount": 23,
+      "lineage": {
+        "svg": "Original Inkscape drawings contributed to plantuml/plantuml by Jean-Marc van Leerdam (PRs #2316, #2327); MIT via upstream LICENSES.md / plantuml-mit.",
+        "png": "Derived from the Archi modelling tool (com.archimatetool.editor/img/archimate), imported 2016-01-09 (703a77ee1c3); MIT, (c) 2013-2015 Phillip Beauvoir, and today Phillip Beauvoir, Jean-Baptiste Sarrodie, The Open Group."
+      }
+    }
+  },
+  "files": {
+    "archimate/access.png": {
+      "bytes": 210,
+      "sha256": "7490de3266ea81ea9486d9e3c72ca646b1d451710748708dfe6e0a4bd075f5c5"
+    },
+    "archimate/activity.png": {
+      "bytes": 214,
+      "sha256": "4091b667d1027952ace299593ff18dce4bc0533d6cc9bc1da8822ad19579accf"
+    },
+    "archimate/actor.svg": {
+      "bytes": 1300,
+      "sha256": "987fb8e391ae157b2842646ec85dd240a322e898ea2b58bfb3529795f9ce4025"
+    },
+    "archimate/aggregation.png": {
+      "bytes": 224,
+      "sha256": "67ef3295f29c92e6698a5b6ffd74ab8da81d99fd24b2c55940c5b120abe9a580"
+    },
+    "archimate/application-collaboration.svg": {
+      "bytes": 1743,
+      "sha256": "18c18aec9a76888e9dc4d4811cc70e15677501d5cd7603c233ce7afbb3cb6064"
+    },
+    "archimate/application-component.svg": {
+      "bytes": 1231,
+      "sha256": "331b8b69b1f04bd6356189d81fff44fa5f6014fb98ab663ccd2bbdfa769af787"
+    },
+    "archimate/application-data-object.svg": {
+      "bytes": 710,
+      "sha256": "7dd5a8b7c2caaaaf6262d0794571dd01d02ce1ac29590ae552db8f2aa3a91c54"
+    },
+    "archimate/application-dataobject.svg": {
+      "bytes": 710,
+      "sha256": "7dd5a8b7c2caaaaf6262d0794571dd01d02ce1ac29590ae552db8f2aa3a91c54"
+    },
+    "archimate/application-event.svg": {
+      "bytes": 1889,
+      "sha256": "e2d23727d978f3daf1f13fc8e60c98e050e2877e07b6896e668fa5e9e9fb813b"
+    },
+    "archimate/application-function.svg": {
+      "bytes": 811,
+      "sha256": "175349908b10caadaaca4d3a827264d9f71de7028c34a9638bad136025b875b3"
+    },
+    "archimate/application-interaction.svg": {
+      "bytes": 1278,
+      "sha256": "6b0b074ebed4d39ae34070c639adc20a4efefdfad9a1243622e5914d9d844363"
+    },
+    "archimate/application-interface.svg": {
+      "bytes": 990,
+      "sha256": "fa83c5e7dc5312495d51a2c0fc11bd83c165e06b5a3d48f6b059fd02b1b768dd"
+    },
+    "archimate/application-process.svg": {
+      "bytes": 917,
+      "sha256": "294bcbdbc4a21e56e96a92619637e0dcf42ab9fc4d0c81b6668b91b831e9c46f"
+    },
+    "archimate/application-service.svg": {
+      "bytes": 924,
+      "sha256": "b42ad8ada50dfe791c3dcbb51aa0570587bdacd01dbaa52c2a6085a4fe89488e"
+    },
+    "archimate/assessment-filled.svg": {
+      "bytes": 1166,
+      "sha256": "4078b8b67060d3abd08e8aede8a7b26070f0051cecdefd23a3b478a89f0054dc"
+    },
+    "archimate/assessment.svg": {
+      "bytes": 1166,
+      "sha256": "4078b8b67060d3abd08e8aede8a7b26070f0051cecdefd23a3b478a89f0054dc"
+    },
+    "archimate/assignment.png": {
+      "bytes": 130,
+      "sha256": "475c968956fa31af85c804f994379d39721c73ac6e0baca8e412b7b0eae1573b"
+    },
+    "archimate/association-unidirect.png": {
+      "bytes": 127,
+      "sha256": "751d3eac40d68e1fdf15558d6d056d1588950234b6da596ee5f60617f984d02a"
+    },
+    "archimate/association.png": {
+      "bytes": 191,
+      "sha256": "af3ebab3d60a3bb11ba759ba6cc724dfb2ba1d4f215ed82038b9fa7d4b8aa4e8"
+    },
+    "archimate/business-activity.png": {
+      "bytes": 243,
+      "sha256": "493c39ead044c1be974bc8f4e222648e941b7c418914d8ab597067dc9a561b2d"
+    },
+    "archimate/business-actor.svg": {
+      "bytes": 1300,
+      "sha256": "987fb8e391ae157b2842646ec85dd240a322e898ea2b58bfb3529795f9ce4025"
+    },
+    "archimate/business-collaboration.svg": {
+      "bytes": 1743,
+      "sha256": "18c18aec9a76888e9dc4d4811cc70e15677501d5cd7603c233ce7afbb3cb6064"
+    },
+    "archimate/business-contract.svg": {
+      "bytes": 751,
+      "sha256": "fcbeb359e1ff9c42dafb4978cc53b788152a67e58c2d5fc4038b70476d9fa055"
+    },
+    "archimate/business-event.svg": {
+      "bytes": 1889,
+      "sha256": "e2d23727d978f3daf1f13fc8e60c98e050e2877e07b6896e668fa5e9e9fb813b"
+    },
+    "archimate/business-function.svg": {
+      "bytes": 811,
+      "sha256": "175349908b10caadaaca4d3a827264d9f71de7028c34a9638bad136025b875b3"
+    },
+    "archimate/business-interaction.svg": {
+      "bytes": 1278,
+      "sha256": "6b0b074ebed4d39ae34070c639adc20a4efefdfad9a1243622e5914d9d844363"
+    },
+    "archimate/business-interface.svg": {
+      "bytes": 990,
+      "sha256": "fa83c5e7dc5312495d51a2c0fc11bd83c165e06b5a3d48f6b059fd02b1b768dd"
+    },
+    "archimate/business-location.svg": {
+      "bytes": 1064,
+      "sha256": "5ae818d0875255521c2446a944e1d2ccda3d828259eeac63c7defacfb8418df0"
+    },
+    "archimate/business-meaning.png": {
+      "bytes": 279,
+      "sha256": "397e8f643c71eb2a630d70958e209869d68916b3a28d1fb6b2cff260f8dca399"
+    },
+    "archimate/business-object.svg": {
+      "bytes": 710,
+      "sha256": "7dd5a8b7c2caaaaf6262d0794571dd01d02ce1ac29590ae552db8f2aa3a91c54"
+    },
+    "archimate/business-process.svg": {
+      "bytes": 917,
+      "sha256": "294bcbdbc4a21e56e96a92619637e0dcf42ab9fc4d0c81b6668b91b831e9c46f"
+    },
+    "archimate/business-product.svg": {
+      "bytes": 761,
+      "sha256": "f2d7f508af31a7db1f992c72c690528d25a9ee1c62060dd8e7eb176d327f7506"
+    },
+    "archimate/business-representation.svg": {
+      "bytes": 1281,
+      "sha256": "af12e01d12715bd825ac5a6ca238d36bd51a02eee44ba7cb9c8ee5614bd337fd"
+    },
+    "archimate/business-role.svg": {
+      "bytes": 1823,
+      "sha256": "d9d7214fb55c1e97c70086e3c9e80c2adb82c093b202dd9924b46a9cc1e96740"
+    },
+    "archimate/business-service.svg": {
+      "bytes": 924,
+      "sha256": "b42ad8ada50dfe791c3dcbb51aa0570587bdacd01dbaa52c2a6085a4fe89488e"
+    },
+    "archimate/business-value.png": {
+      "bytes": 254,
+      "sha256": "3871051c4fbb7637da754475a1ec098dfd9744087f801533b25ec9ab14200c6a"
+    },
+    "archimate/collaboration.svg": {
+      "bytes": 1743,
+      "sha256": "18c18aec9a76888e9dc4d4811cc70e15677501d5cd7603c233ce7afbb3cb6064"
+    },
+    "archimate/communication-path.svg": {
+      "bytes": 1208,
+      "sha256": "4ee33c411ae69cd3d4226559b60286e51faca6ba8dda2e5417e2d713848c1ad0"
+    },
+    "archimate/component.svg": {
+      "bytes": 1231,
+      "sha256": "331b8b69b1f04bd6356189d81fff44fa5f6014fb98ab663ccd2bbdfa769af787"
+    },
+    "archimate/composition.png": {
+      "bytes": 216,
+      "sha256": "aab0b7e97d8ca8bfa468389b5ff14c67d504262317faa4d7788e2a1eb96b95cc"
+    },
+    "archimate/constraint-filled.svg": {
+      "bytes": 844,
+      "sha256": "e3ca9a666d0a609436ebef771216c4b45a2f01fdd974fb4827519b75ffda9b9a"
+    },
+    "archimate/constraint.svg": {
+      "bytes": 844,
+      "sha256": "e3ca9a666d0a609436ebef771216c4b45a2f01fdd974fb4827519b75ffda9b9a"
+    },
+    "archimate/contract.svg": {
+      "bytes": 751,
+      "sha256": "fcbeb359e1ff9c42dafb4978cc53b788152a67e58c2d5fc4038b70476d9fa055"
+    },
+    "archimate/deliverable-filled.svg": {
+      "bytes": 1158,
+      "sha256": "ac723ef0b2dd51b2dd36edf7399a90841e34cf2379980460330c8fed26c9ce41"
+    },
+    "archimate/deliverable.svg": {
+      "bytes": 1158,
+      "sha256": "ac723ef0b2dd51b2dd36edf7399a90841e34cf2379980460330c8fed26c9ce41"
+    },
+    "archimate/device.svg": {
+      "bytes": 838,
+      "sha256": "c59c52dbe2552c9a961a483189b6ca5b6c5d4e7a8ca678e1cb9a571aa468d385"
+    },
+    "archimate/driver-filled.svg": {
+      "bytes": 2453,
+      "sha256": "68a67ec70a1a19172dd7ad8620724a66a94d01602f9f543ace578dbf8ea6f23e"
+    },
+    "archimate/driver.svg": {
+      "bytes": 2453,
+      "sha256": "68a67ec70a1a19172dd7ad8620724a66a94d01602f9f543ace578dbf8ea6f23e"
+    },
+    "archimate/equipment.svg": {
+      "bytes": 13592,
+      "sha256": "4ede4942bf55f42d15ef0a2246d812df9c44820a71f7633662b039c7c9721624"
+    },
+    "archimate/event.svg": {
+      "bytes": 1889,
+      "sha256": "e2d23727d978f3daf1f13fc8e60c98e050e2877e07b6896e668fa5e9e9fb813b"
+    },
+    "archimate/facility.svg": {
+      "bytes": 988,
+      "sha256": "59e5a8e2d01ac7caa5510ae9acd1ef82086e9be41bad526125d5d7e57c542b61"
+    },
+    "archimate/flow.png": {
+      "bytes": 192,
+      "sha256": "f8e12e2018ae10b35498a63ce8785759e0138e701ba32204c52c40eb05df18ca"
+    },
+    "archimate/function.svg": {
+      "bytes": 811,
+      "sha256": "175349908b10caadaaca4d3a827264d9f71de7028c34a9638bad136025b875b3"
+    },
+    "archimate/gap-filled.svg": {
+      "bytes": 1737,
+      "sha256": "5b0f41407294a6fa524c916bdf97820d9885325bdb57e65f1104695fe7e72a30"
+    },
+    "archimate/gap.svg": {
+      "bytes": 1737,
+      "sha256": "5b0f41407294a6fa524c916bdf97820d9885325bdb57e65f1104695fe7e72a30"
+    },
+    "archimate/goal-filled.svg": {
+      "bytes": 1698,
+      "sha256": "cb25318d1d9ee48ea2c2d1dce482039148c85dab26b6d1510fa2de088141af32"
+    },
+    "archimate/goal.svg": {
+      "bytes": 1698,
+      "sha256": "cb25318d1d9ee48ea2c2d1dce482039148c85dab26b6d1510fa2de088141af32"
+    },
+    "archimate/implementation-deliverable.svg": {
+      "bytes": 1158,
+      "sha256": "ac723ef0b2dd51b2dd36edf7399a90841e34cf2379980460330c8fed26c9ce41"
+    },
+    "archimate/implementation-event.svg": {
+      "bytes": 1889,
+      "sha256": "e2d23727d978f3daf1f13fc8e60c98e050e2877e07b6896e668fa5e9e9fb813b"
+    },
+    "archimate/implementation-gap.svg": {
+      "bytes": 1737,
+      "sha256": "5b0f41407294a6fa524c916bdf97820d9885325bdb57e65f1104695fe7e72a30"
+    },
+    "archimate/implementation-plateau.svg": {
+      "bytes": 540,
+      "sha256": "835a96c17b6ff250ea7115d357cf7c410aa2a47c8e09c068e461881f5a24841c"
+    },
+    "archimate/implementation-workpackage.svg": {
+      "bytes": 1300,
+      "sha256": "3804d60b39cfe2835b3975da0ae8487a75d575c124e00138e5e7c6f20131f2d4"
+    },
+    "archimate/influence.png": {
+      "bytes": 182,
+      "sha256": "5a91694971b6da158babca397f5a24bda9f87646b4ebaefc88283b58acfda9da"
+    },
+    "archimate/interaction.svg": {
+      "bytes": 1278,
+      "sha256": "6b0b074ebed4d39ae34070c639adc20a4efefdfad9a1243622e5914d9d844363"
+    },
+    "archimate/interface-required.png": {
+      "bytes": 217,
+      "sha256": "b4d478e796671ef223e7b984edab935111a7c69b61274fceffb76347bf487e28"
+    },
+    "archimate/interface-symmetric.png": {
+      "bytes": 220,
+      "sha256": "5c91af0edd091de15faeb8ac329d1a97e781650c65d15a4b781fab4656018b1f"
+    },
+    "archimate/interface.svg": {
+      "bytes": 990,
+      "sha256": "fa83c5e7dc5312495d51a2c0fc11bd83c165e06b5a3d48f6b059fd02b1b768dd"
+    },
+    "archimate/junction-and.png": {
+      "bytes": 235,
+      "sha256": "b282ef77f70d43741d70e46836696f8c8de45a687af762b4646f293934d4fe4c"
+    },
+    "archimate/junction-or.png": {
+      "bytes": 242,
+      "sha256": "ff457f587fb94b18398f0565bf6bddbf6f62ec16c1ebba094686cc73cb43da1b"
+    },
+    "archimate/junction.png": {
+      "bytes": 236,
+      "sha256": "ef56b3f7dcc3f3c07a4626a93bf09c0798f00ccdc202140e9203a73fb4075a04"
+    },
+    "archimate/location.svg": {
+      "bytes": 1064,
+      "sha256": "5ae818d0875255521c2446a944e1d2ccda3d828259eeac63c7defacfb8418df0"
+    },
+    "archimate/material.svg": {
+      "bytes": 3083,
+      "sha256": "0795c9ba526029629a5150ef9f866d22fc30dc69aef7f494ba35f1df6c8f259b"
+    },
+    "archimate/meaning.svg": {
+      "bytes": 4560,
+      "sha256": "0c7f7535809a0852158f7d480f9412b3f2859caafcf9a15d39b44a9c72068847"
+    },
+    "archimate/motivation-assessment.svg": {
+      "bytes": 1166,
+      "sha256": "4078b8b67060d3abd08e8aede8a7b26070f0051cecdefd23a3b478a89f0054dc"
+    },
+    "archimate/motivation-constraint.svg": {
+      "bytes": 844,
+      "sha256": "e3ca9a666d0a609436ebef771216c4b45a2f01fdd974fb4827519b75ffda9b9a"
+    },
+    "archimate/motivation-driver.svg": {
+      "bytes": 2453,
+      "sha256": "68a67ec70a1a19172dd7ad8620724a66a94d01602f9f543ace578dbf8ea6f23e"
+    },
+    "archimate/motivation-goal.svg": {
+      "bytes": 1698,
+      "sha256": "cb25318d1d9ee48ea2c2d1dce482039148c85dab26b6d1510fa2de088141af32"
+    },
+    "archimate/motivation-meaning.svg": {
+      "bytes": 4560,
+      "sha256": "0c7f7535809a0852158f7d480f9412b3f2859caafcf9a15d39b44a9c72068847"
+    },
+    "archimate/motivation-outcome.svg": {
+      "bytes": 2198,
+      "sha256": "4cbd7a76bf46195d1661dabb572123e6910c583516a35cfbffc2b2bc49bac97d"
+    },
+    "archimate/motivation-principle.svg": {
+      "bytes": 3114,
+      "sha256": "31e6ba5c51d3c850a350e0e32ca242c4a88f29d613d7372504397d82bf9ac504"
+    },
+    "archimate/motivation-requirement.svg": {
+      "bytes": 768,
+      "sha256": "f2b458f2dbb8bc592973122983bb16f52b3d8dba13ffd6147abf40e9e05b11ae"
+    },
+    "archimate/motivation-stakeholder.svg": {
+      "bytes": 1823,
+      "sha256": "d9d7214fb55c1e97c70086e3c9e80c2adb82c093b202dd9924b46a9cc1e96740"
+    },
+    "archimate/motivation-value.svg": {
+      "bytes": 1265,
+      "sha256": "3b1aa1868971ddd1d0ec2df6e0a6f57716366ae9a2449f91fb8a34f67d752ac5"
+    },
+    "archimate/network.svg": {
+      "bytes": 2063,
+      "sha256": "87b4c5890d71e439cb9f93c1219bc1a1c1f45e734d536a24409cac38d9c0597d"
+    },
+    "archimate/node.svg": {
+      "bytes": 902,
+      "sha256": "51ae4c3e5b4c531d23af28111203e83896633dcb2e9ed584fe9b3571d8cf5ea2"
+    },
+    "archimate/object.svg": {
+      "bytes": 710,
+      "sha256": "7dd5a8b7c2caaaaf6262d0794571dd01d02ce1ac29590ae552db8f2aa3a91c54"
+    },
+    "archimate/other-grouping.svg": {
+      "bytes": 3991,
+      "sha256": "f040112901781e6d8d0c6e8f206e671dcfd53df802b26ac2c76489c41606b7d6"
+    },
+    "archimate/other-location.svg": {
+      "bytes": 1064,
+      "sha256": "5ae818d0875255521c2446a944e1d2ccda3d828259eeac63c7defacfb8418df0"
+    },
+    "archimate/physical-equipment.svg": {
+      "bytes": 13592,
+      "sha256": "4ede4942bf55f42d15ef0a2246d812df9c44820a71f7633662b039c7c9721624"
+    },
+    "archimate/physical-facility.svg": {
+      "bytes": 988,
+      "sha256": "59e5a8e2d01ac7caa5510ae9acd1ef82086e9be41bad526125d5d7e57c542b61"
+    },
+    "archimate/physical-material.svg": {
+      "bytes": 3083,
+      "sha256": "0795c9ba526029629a5150ef9f866d22fc30dc69aef7f494ba35f1df6c8f259b"
+    },
+    "archimate/plateau.svg": {
+      "bytes": 540,
+      "sha256": "835a96c17b6ff250ea7115d357cf7c410aa2a47c8e09c068e461881f5a24841c"
+    },
+    "archimate/principle-filled.svg": {
+      "bytes": 3114,
+      "sha256": "31e6ba5c51d3c850a350e0e32ca242c4a88f29d613d7372504397d82bf9ac504"
+    },
+    "archimate/principle.svg": {
+      "bytes": 3114,
+      "sha256": "31e6ba5c51d3c850a350e0e32ca242c4a88f29d613d7372504397d82bf9ac504"
+    },
+    "archimate/process.svg": {
+      "bytes": 917,
+      "sha256": "294bcbdbc4a21e56e96a92619637e0dcf42ab9fc4d0c81b6668b91b831e9c46f"
+    },
+    "archimate/product.svg": {
+      "bytes": 761,
+      "sha256": "f2d7f508af31a7db1f992c72c690528d25a9ee1c62060dd8e7eb176d327f7506"
+    },
+    "archimate/realisation.png": {
+      "bytes": 173,
+      "sha256": "8e696e5804c837fd71ccef8c5f15a379e0ddd2b7587808b7fc9078e913735415"
+    },
+    "archimate/representation.svg": {
+      "bytes": 1281,
+      "sha256": "af12e01d12715bd825ac5a6ca238d36bd51a02eee44ba7cb9c8ee5614bd337fd"
+    },
+    "archimate/requirement-filled.svg": {
+      "bytes": 768,
+      "sha256": "f2b458f2dbb8bc592973122983bb16f52b3d8dba13ffd6147abf40e9e05b11ae"
+    },
+    "archimate/requirement.svg": {
+      "bytes": 768,
+      "sha256": "f2b458f2dbb8bc592973122983bb16f52b3d8dba13ffd6147abf40e9e05b11ae"
+    },
+    "archimate/role.svg": {
+      "bytes": 1823,
+      "sha256": "d9d7214fb55c1e97c70086e3c9e80c2adb82c093b202dd9924b46a9cc1e96740"
+    },
+    "archimate/service.svg": {
+      "bytes": 924,
+      "sha256": "b42ad8ada50dfe791c3dcbb51aa0570587bdacd01dbaa52c2a6085a4fe89488e"
+    },
+    "archimate/serving.png": {
+      "bytes": 215,
+      "sha256": "ebd922b2fb9a27a22b9a5579efdc0d4709a989af0935e6a8840e036fa85b2135"
+    },
+    "archimate/specialisation.png": {
+      "bytes": 225,
+      "sha256": "3e9e81dd5c762cf2cac4af33a4ede86eae4d3dc3b63f3871e6445e1418e3fa04"
+    },
+    "archimate/specialization.png": {
+      "bytes": 225,
+      "sha256": "3e9e81dd5c762cf2cac4af33a4ede86eae4d3dc3b63f3871e6445e1418e3fa04"
+    },
+    "archimate/stakeholder-filled.svg": {
+      "bytes": 1823,
+      "sha256": "d9d7214fb55c1e97c70086e3c9e80c2adb82c093b202dd9924b46a9cc1e96740"
+    },
+    "archimate/stakeholder.svg": {
+      "bytes": 1823,
+      "sha256": "d9d7214fb55c1e97c70086e3c9e80c2adb82c093b202dd9924b46a9cc1e96740"
+    },
+    "archimate/strategy-capability.svg": {
+      "bytes": 987,
+      "sha256": "49ebf2a3d080ef38a58be0b6dc66b859c44a257e085228622b543b988bcfffbe"
+    },
+    "archimate/strategy-course-of-action.svg": {
+      "bytes": 3153,
+      "sha256": "7baff0f434ffe624a856d5e994e28c5eb6875aace68c265e960917a80e364510"
+    },
+    "archimate/strategy-courseofaction.svg": {
+      "bytes": 3153,
+      "sha256": "7baff0f434ffe624a856d5e994e28c5eb6875aace68c265e960917a80e364510"
+    },
+    "archimate/strategy-resource.svg": {
+      "bytes": 1483,
+      "sha256": "b32ff84afa63214d6466b5b5f00ce6e188bc4e30a80fd42953efff5d96355a04"
+    },
+    "archimate/strategy-valuestream.svg": {
+      "bytes": 824,
+      "sha256": "daa2818b279ca780c9888bd9de7b9376b6fe2f1e8c023c48c6ec31c1329e66e1"
+    },
+    "archimate/system-software.svg": {
+      "bytes": 1344,
+      "sha256": "adaa07876ac7438a245c1293f023fb5c0a5d8afa6c9a045a3b1b5f9519ddaa10"
+    },
+    "archimate/technology-artifact.svg": {
+      "bytes": 811,
+      "sha256": "e391d7ebc0e786795a0735b509e1f3af7e22bd6aa3f743f03a6be5e396eef1cc"
+    },
+    "archimate/technology-collaboration.svg": {
+      "bytes": 1743,
+      "sha256": "18c18aec9a76888e9dc4d4811cc70e15677501d5cd7603c233ce7afbb3cb6064"
+    },
+    "archimate/technology-communication-network.svg": {
+      "bytes": 2063,
+      "sha256": "87b4c5890d71e439cb9f93c1219bc1a1c1f45e734d536a24409cac38d9c0597d"
+    },
+    "archimate/technology-communication-path.svg": {
+      "bytes": 1208,
+      "sha256": "4ee33c411ae69cd3d4226559b60286e51faca6ba8dda2e5417e2d713848c1ad0"
+    },
+    "archimate/technology-communicationnetwork.svg": {
+      "bytes": 2063,
+      "sha256": "87b4c5890d71e439cb9f93c1219bc1a1c1f45e734d536a24409cac38d9c0597d"
+    },
+    "archimate/technology-device.svg": {
+      "bytes": 838,
+      "sha256": "c59c52dbe2552c9a961a483189b6ca5b6c5d4e7a8ca678e1cb9a571aa468d385"
+    },
+    "archimate/technology-distribution-network.svg": {
+      "bytes": 1006,
+      "sha256": "b6e4624ee9647aee5db1d20be846242ffefea833f7fd05043c020fe06faf1a5c"
+    },
+    "archimate/technology-distributionnetwork.svg": {
+      "bytes": 1006,
+      "sha256": "b6e4624ee9647aee5db1d20be846242ffefea833f7fd05043c020fe06faf1a5c"
+    },
+    "archimate/technology-equipment.svg": {
+      "bytes": 13592,
+      "sha256": "4ede4942bf55f42d15ef0a2246d812df9c44820a71f7633662b039c7c9721624"
+    },
+    "archimate/technology-event.svg": {
+      "bytes": 1889,
+      "sha256": "e2d23727d978f3daf1f13fc8e60c98e050e2877e07b6896e668fa5e9e9fb813b"
+    },
+    "archimate/technology-facility.svg": {
+      "bytes": 988,
+      "sha256": "59e5a8e2d01ac7caa5510ae9acd1ef82086e9be41bad526125d5d7e57c542b61"
+    },
+    "archimate/technology-function.svg": {
+      "bytes": 811,
+      "sha256": "175349908b10caadaaca4d3a827264d9f71de7028c34a9638bad136025b875b3"
+    },
+    "archimate/technology-interaction.svg": {
+      "bytes": 1278,
+      "sha256": "6b0b074ebed4d39ae34070c639adc20a4efefdfad9a1243622e5914d9d844363"
+    },
+    "archimate/technology-interface.svg": {
+      "bytes": 990,
+      "sha256": "fa83c5e7dc5312495d51a2c0fc11bd83c165e06b5a3d48f6b059fd02b1b768dd"
+    },
+    "archimate/technology-material.svg": {
+      "bytes": 3083,
+      "sha256": "0795c9ba526029629a5150ef9f866d22fc30dc69aef7f494ba35f1df6c8f259b"
+    },
+    "archimate/technology-node.svg": {
+      "bytes": 902,
+      "sha256": "51ae4c3e5b4c531d23af28111203e83896633dcb2e9ed584fe9b3571d8cf5ea2"
+    },
+    "archimate/technology-path.svg": {
+      "bytes": 1208,
+      "sha256": "4ee33c411ae69cd3d4226559b60286e51faca6ba8dda2e5417e2d713848c1ad0"
+    },
+    "archimate/technology-process.svg": {
+      "bytes": 917,
+      "sha256": "294bcbdbc4a21e56e96a92619637e0dcf42ab9fc4d0c81b6668b91b831e9c46f"
+    },
+    "archimate/technology-service.svg": {
+      "bytes": 924,
+      "sha256": "b42ad8ada50dfe791c3dcbb51aa0570587bdacd01dbaa52c2a6085a4fe89488e"
+    },
+    "archimate/technology-system-software.svg": {
+      "bytes": 1344,
+      "sha256": "adaa07876ac7438a245c1293f023fb5c0a5d8afa6c9a045a3b1b5f9519ddaa10"
+    },
+    "archimate/technology-systemsoftware.svg": {
+      "bytes": 1344,
+      "sha256": "adaa07876ac7438a245c1293f023fb5c0a5d8afa6c9a045a3b1b5f9519ddaa10"
+    },
+    "archimate/triggering.png": {
+      "bytes": 217,
+      "sha256": "b748af241dca7d6449b70662ff39a306063507dc0d0bec46180aa29602153ae3"
+    },
+    "archimate/used-by.png": {
+      "bytes": 215,
+      "sha256": "ebd922b2fb9a27a22b9a5579efdc0d4709a989af0935e6a8840e036fa85b2135"
+    },
+    "archimate/value.svg": {
+      "bytes": 1265,
+      "sha256": "3b1aa1868971ddd1d0ec2df6e0a6f57716366ae9a2449f91fb8a34f67d752ac5"
+    },
+    "archimate/workpackage-filled.svg": {
+      "bytes": 1300,
+      "sha256": "3804d60b39cfe2835b3975da0ae8487a75d575c124e00138e5e7c6f20131f2d4"
+    },
+    "archimate/workpackage.svg": {
+      "bytes": 1300,
+      "sha256": "3804d60b39cfe2835b3975da0ae8487a75d575c124e00138e5e7c6f20131f2d4"
+    }
+  }
+}

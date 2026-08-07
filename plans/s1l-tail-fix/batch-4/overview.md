@@ -6,10 +6,10 @@ conditional; see below).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| F4-a | G3b internal sprite bundle (`getSprite` internal fallback + `jar:` sprite form) | typescript-pro | `src/core/sprite-commands.ts`, NEW `assets/sprites/**` package + manifest + loader seam | F3-lic (BLOCKING), F2-b (semantic) | [ ] |
-| F4-b | G12 Twemoji artwork for `<:name:>` emoji atoms | typescript-pro | `src/core/klimt/creole/atom/AtomEmoji.ts`, `src/core/klimt/creole/Emoji.ts`, `src/core/svek/image/EntityImageDescriptionTextBlock.ts`, `src/core/svek/image/EntityImageDescriptionDelegates.ts`, `src/diagrams/class/class-member-atom-resolve.ts`, NEW lazy emoji-artwork asset channel | F3-seam, F2-b | [ ] |
-| F4-c | G9-E2 tab-stop advance (`AtomText`) | typescript-pro | `src/core/klimt/creole/legacy/StripeSimple.ts`, NEW `src/core/klimt/creole/legacy/AtomText.ts` | F2-c, F3-diag | [ ] |
-| F4-d | Uncovered url-label first-line defect | typescript-pro | `src/diagrams/description/parse-helpers-strings.ts` | F2-b | [ ] |
+| F4-a | G3b internal sprite bundle (`getSprite` internal fallback + `jar:` sprite form) | typescript-pro | `src/core/sprite-commands.ts`, NEW `assets/sprites/**` package + manifest + loader seam | F3-lic (BLOCKING), F2-b (semantic) | [x] |
+| F4-b | G12 Twemoji artwork for `<:name:>` emoji atoms | typescript-pro | `src/core/klimt/creole/atom/AtomEmoji.ts`, `src/core/klimt/creole/Emoji.ts`, `src/core/svek/image/EntityImageDescriptionTextBlock.ts`, `src/core/svek/image/EntityImageDescriptionDelegates.ts`, `src/diagrams/class/class-member-atom-resolve.ts`, NEW lazy emoji-artwork asset channel | F3-seam, F2-b | [x] |
+| F4-c | G9-E2 tab-stop advance (`AtomText`) | typescript-pro | `src/core/klimt/creole/legacy/StripeSimple.ts`, NEW `src/core/klimt/creole/legacy/AtomText.ts` | F2-c, F3-diag | [x] |
+| F4-d | Uncovered url-label first-line defect | typescript-pro | `src/diagrams/description/parse-helpers-strings.ts` | F2-b | [x] |
 
 ## Fixture ledger for this batch
 
@@ -19,6 +19,22 @@ conditional; see below).
 | F4-b | G12 | `murava-69-tago286` | +1 | 345 |
 | F4-c | G9-E2 | `fariba-82-xolu802` — **conditional** on F3-diag's residual verdict | +1 or +0 | 346 or 345 |
 | F4-d | none (uncovered, ADR-7) | authored fixture only — no pinned fixture closes | +0 | unchanged |
+
+### Actual outcome (orchestrator, batch close)
+
+The table above is the **plan**. What landed:
+
+| Task | Planned | Actual |
+|---|---|---|
+| F4-a | +4 (4 archimate pins) | **+0** — bundle + licence obligations landed; pins need the consumer wiring, folded to F4-f |
+| F4-b | +1 (`murava-69`) | **+0** — STOPPED on write-set boundary; emoji-only-line half landed with a NEW conformant fixture. Artwork → wave 3 (maintainer-approved) |
+| F4-c | +1 or +0 | **+1** — `fariba-82-xolu802` closed, delta 0 |
+| F4-d | +0 | **+0 pins, +1 fixture** — authored `f4d-url-label-first-line`, landed conformant |
+| F4-e / F4-f | (created mid-mission) | M1 + `assetStore` threading landed; four archimate fixtures **improved but not conformant** |
+
+**343 → 346/356 (97.2%), widened 0, improved 5.** Two of the three gained
+points are new authored fixtures, not closed pins — one pin was deleted this
+batch (`fariba-82-xolu802`), leaving 10.
 
 If F3-diag reports `unresolved`, F4-c still lands its own E2 mechanism
 correctly but `fariba-82` does not close, and the mission's batch total is

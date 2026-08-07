@@ -8,6 +8,31 @@
 import type { DiagramType, UmlSource } from './block-extractor.js';
 import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
+import type { AssetStore } from './asset-store.js';
+
+/**
+ * The per-render inputs a plugin's `parse()` may need beyond the source
+ * text itself. Optional at every level: a plugin that ignores it declares
+ * `parse(source)` and stays assignable, and `renderSync`/`render` pass one
+ * unconditionally.
+ *
+ * Today it carries exactly one thing — ADR-2's synchronous asset channel
+ * (`plans/s1l-tail-fix/decisions.md`). `SkinParam#getSprite` falls back to
+ * `SpriteImage.fromInternal`'s jar-resident `/sprites/**` classpath bundle
+ * (`core/internal-sprite-store.ts`), and BOTH halves of that lookup happen
+ * during parsing: `sprite $N jar:<path>` resolves at command-execution time
+ * (`CommandSpriteFile.java:108-112`), and a `<<$archimate/x>>` stereotype
+ * resolves off the same registry later. A browser-safe port has no
+ * classpath, so the bytes have to arrive here.
+ *
+ * Deliberately NOT `RenderOptions` itself: a plugin has no business reading
+ * `theme`, `maxWidth` or the async fetcher, and widening the parse contract
+ * to the whole option bag would invite exactly that.
+ */
+export interface ParseOptions {
+  /** `RenderOptions.assetStore`, forwarded verbatim. */
+  readonly assetStore?: AssetStore | undefined;
+}
 
 // ---------------------------------------------------------------------------
 // SyncPlugin / AsyncPlugin / DiagramPlugin union
@@ -148,7 +173,7 @@ export type AssembledSvg = RenderFragment | CompleteSvg;
 export interface SyncPlugin<AST = unknown, Geo = unknown> {
   readonly type: DiagramType;
   accepts(lines: readonly string[]): boolean;
-  parse(source: UmlSource): AST;
+  parse(source: UmlSource, options?: ParseOptions): AST;
   layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer): Geo;
   render(geo: Geo, theme: Theme): AssembledSvg;
 }
@@ -161,7 +186,7 @@ export interface SyncPlugin<AST = unknown, Geo = unknown> {
 export interface AsyncPlugin<AST = unknown, Geo = unknown> {
   readonly type: DiagramType;
   accepts(lines: readonly string[]): boolean;
-  parse(source: UmlSource): AST;
+  parse(source: UmlSource, options?: ParseOptions): AST;
   layout(ast: AST, theme: Theme, measurer: StringMeasurer): Promise<Geo>;
   render(geo: Geo, theme: Theme): AssembledSvg;
 }

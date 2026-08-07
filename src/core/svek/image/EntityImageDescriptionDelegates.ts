@@ -24,15 +24,18 @@ import { UText } from '../../klimt/shape/UText.js';
 import { UImage } from '../../klimt/shape/UImage.js';
 import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import { TextBlockUtils } from '../../klimt/shape/TextBlockUtils.js';
-import type { AtomImageResolver } from '../../creole-atoms.js';
+import type { AtomImageResolver, SpriteDimsLookup } from '../../creole-atoms.js';
+import type { ResolvedColor } from '../../klimt/color/HColorSet.js';
+import { SvgNanoParser } from '../../klimt/sprite/SvgNanoParser.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
 import type { UGraphicWithGroups } from '../DecorateEntityImage.js';
 import { Margins, buildTextBlock, measureLine } from './EntityImageDescriptionSupport.js';
-import { emojiBoxDim, emojiRenderRun } from '../../klimt/creole/atom/AtomEmoji.js';
+import { emojiRenderRun, emojiSquareDim, emojiStartingAltitude } from '../../klimt/creole/atom/AtomEmoji.js';
 import type {
   EntityImageDescriptionLabels,
   EntityImageDescriptionPaint,
   EntityImageDescriptionLinkInfo,
+  EntityImageDescriptionStereotypeSprite,
 } from './EntityImageDescription.js';
 import { BodyFactory } from '../../cucadiagram/BodyFactory.js';
 import { Display } from '../../klimt/creole/Display.js';
@@ -149,10 +152,18 @@ function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
     if (atom.kind === 'text') return measureLine(stringBounder, atom.text, atom.font);
     if (atom.kind === 'latex') return renderLatexAsImage(atom.expr, atom.color ?? '#000000');
     // A2s R2i: a `<:name:>` emoji sizes as `AtomEmoji`'s exact contract
-    // (36*factor box, 39*factor line height -- `klimt/creole/atom/
-    // AtomEmoji.ts`); description previously measured the raw markup as
-    // literal text (murava-69-tago286's backlog pin).
-    if (atom.kind === 'emoji') return emojiBoxDim(atom.factor);
+    // (`klimt/creole/atom/AtomEmoji.ts`); description previously measured
+    // the raw markup as literal text (murava-69-tago286's backlog pin).
+    //
+    // F4-b: `calculateDimensionSlow` VERBATIM -- the 36*factor SQUARE, not
+    // `emojiBoxDim`'s pre-combined 39*factor line height. THIS ops bundle
+    // drives the real `Sea` (`getStartingAltitude` below returns the atom's
+    // own -3*factor), so `Sea#doAlign`/`getHeight` derive the line height
+    // themselves, exactly as upstream does: 39*factor when a text atom
+    // shares the line, 36*factor when the emoji is alone on it. Folding the
+    // hang into the DIMENSION double-counted it for an emoji-only line
+    // (+3*factor = +1.75px at font 14 -- `emoji-only-line-height-0`).
+    if (atom.kind === 'emoji') return emojiSquareDim(atom.factor);
     const resolved = resolveAtomImage?.(atom.atom);
     return resolved === undefined ? { width: 0, height: 0 } : resolved;
   }
@@ -166,6 +177,15 @@ function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
     getStartingAltitude(creoleAtom: CreoleAtom, stringBounder: StringBounder): number {
       const atom = creoleAtom as CreoleAtom | Atom;
       if (!isCreoleAtomData(atom)) return atom.getStartingAltitude(stringBounder);
+      // F4-b: `AtomEmoji#getStartingAltitude` is the ONE `CreoleAtom` kind
+      // whose altitude is NOT 0 upstream (`AtomEmoji.java:62-64`,
+      // `-3 * factor`) -- the doc comment above enumerates `AtomImg`/
+      // `AtomSprite`/`AtomMath` as `return 0` and `AtomText` as
+      // `getSpace()` (0 for `NORMAL`, this port's only reachable state),
+      // but predates the emoji atom kind. Reporting it here is what lets
+      // `Sea#doAlign` derive the mixed (39*factor) and emoji-only
+      // (36*factor) line heights instead of a baked-in constant.
+      if (atom.kind === 'emoji') return emojiStartingAltitude(atom.factor);
       return 0;
     },
     drawU(creoleAtom: CreoleAtom, ug: UGraphic): void {
@@ -332,13 +352,74 @@ export function buildDesc(
   );
 }
 
-/** Upstream: the `stereo` local-variable if/else-if/else chain, minus
- *  the sprite branch (EntityImageDescription.ts's doc comment). */
+/**
+ * `SkinParam#getSprite`'s two tiers narrowed to the ONE shape
+ * `EntityImageDescriptionLabels.stereotypeSprite` carries — the single
+ * conversion both producers call, so the sizer
+ * (`leaf-sizing-entity.ts#buildSizingEntityParams`, holding a
+ * `SpriteDimsLookup`) and the renderer
+ * (`renderer-entity.ts#buildEntityParams`, holding a `SpriteRegistry`
+ * narrowed through `spriteDimsLookupFor`) cannot resolve the same name to
+ * two different boxes. `planning/sizer-renderer-parity.md` exists because
+ * that is exactly how this bug class recurs.
+ *
+ * `undefined` in / miss out — a stereotype naming an unknown sprite falls
+ * back to its `«label»` block, which is `Stereotype#getSprite`'s own null
+ * return (java:112-114), not a fallback invented here.
+ */
+export function resolveStereotypeSprite(
+  ref: { readonly name: string; readonly scale: number; readonly color?: ResolvedColor | undefined } | undefined,
+  sprites: SpriteDimsLookup | undefined,
+): EntityImageDescriptionStereotypeSprite | undefined {
+  if (ref === undefined) return undefined;
+  const dims = sprites?.get(ref.name);
+  if (dims === undefined) return undefined;
+  return {
+    width: dims.width,
+    height: dims.height,
+    scale: ref.scale,
+    ...(dims.svg === undefined ? {} : { svg: dims.svg }),
+    ...(ref.color === undefined ? {} : { color: ref.color }),
+  };
+}
+
+/**
+ * `ISvgSpriteParser#asTextBlock`'s anonymous `TextBlock`
+ * (`svg/parser/SvgNanoParser.java:458-479`, byte-identical in
+ * `SvgSaxParser.java:125-144`): the DECLARED box times `scale`, drawn by
+ * replaying the sprite's own primitives at that scale.
+ *
+ * `backColor` is never passed by `Stereotype#getSprite` (java:116 hands it
+ * `null`), so upstream's optional backing `URectangle` is unreachable from
+ * this call site and is deliberately not ported here.
+ */
+class StereotypeSpriteBlock implements TextBlock {
+  constructor(private readonly sprite: EntityImageDescriptionStereotypeSprite) {}
+
+  calculateDimension(_stringBounder: StringBounder): XDimension2D {
+    return new XDimension2D(this.sprite.width * this.sprite.scale, this.sprite.height * this.sprite.scale);
+  }
+
+  drawU(ug: UGraphic): void {
+    // A PNG-backed internal sprite has no draw path in this port (see
+    // `EntityImageDescriptionStereotypeSprite.svg`) -- it still measures.
+    if (this.sprite.svg === undefined) return;
+    new SvgNanoParser(this.sprite.svg).drawU(ug, this.sprite.scale, this.sprite.color, undefined);
+  }
+}
+
+/** Upstream: the `stereo` local-variable if/else-if/else chain
+ *  (`EntityImageDescription.java:192-201`), sprite branch included. */
 export function buildStereo(
   stereotypeLabels: readonly string[],
   fontStereo: FontConfiguration,
   resolveAtomImage?: AtomImageResolver,
+  sprite?: EntityImageDescriptionStereotypeSprite,
 ): TextBlock {
+  // java:193-194 -- tested FIRST and unconditionally: a resolvable sprite
+  // replaces the label block, and `TextBlockUtils.withMargin`'s 1px side
+  // padding is NOT applied to it (that is the label branch's own call).
+  if (sprite !== undefined) return new StereotypeSpriteBlock(sprite);
   if (stereotypeLabels.length === 0) return TextBlockUtils.empty(0, 0);
   const text = stereotypeLabels.map((label) => `«${label}»`).join('\n');
   const block = buildTextBlock(text, fontStereo, HorizontalAlignment.CENTER, resolveAtomImage);

@@ -104,3 +104,83 @@ describe('parseNameSection -- quote-aware URL stripping', () => {
   });
 });
 
+/**
+ * F4-d. `StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote`
+ * (StringUtils.java:63-81) is a FIRST-MATCH-WINS chain: the quote branch
+ * (:67-69) returns before the `[`/`]` branch (:74-75) is ever consulted.
+ * Upstream applies it exactly once, to a `displayRaw` that still CARRIES its
+ * quotes -- `DISPLAY_CORE`'s `[%g].+?[%g]` (CommandCreateElementFull.java:128)
+ * spans the delimiters. So for a DISPLAY-group form the one strip removes the
+ * QUOTES and stops, leaving a `[[url label]]` display intact for creole.
+ *
+ * Jar-verified discriminator (pinned oracle, `-DPLANTUML_DETERMINISTIC_TEXT`):
+ *
+ * | source | route | jar width |
+ * |---|---|---|
+ * | `rectangle "[[http://www.google.com abc]]"` | CODE1 (no DISPLAY group) | 2.663368 |
+ * | `rectangle "[[http://www.google.com abc]]" as A` | DISPLAY2 | 0.591319 |
+ * | `rectangle A as "[[http://www.google.com abc]]"` | DISPLAY3 | 0.591319 |
+ *
+ * The CODE1 form genuinely strips TWICE upstream (once in `cleanId`, once on
+ * the name-derived display) -- that asymmetry is upstream behavior and is
+ * preserved here, not "fixed".
+ */
+describe('parseNameSection -- a quoted DISPLAY group is unwrapped exactly once (F4-d)', () => {
+  const URL_LABEL = '[[http://www.google.com abc]]';
+
+  it('keeps `[[url label]]` intact as the display of a `"X" as CODE` form (DISPLAY2)', () => {
+    const section = parseNameSection(`"${URL_LABEL}" as URLLABEL`);
+    expect(section.id).toBe('URLLABEL');
+    expect(section.display).toBe(URL_LABEL);
+  });
+
+  it('keeps `[[url]]` (no label) intact as the display of a `"X" as CODE` form', () => {
+    const section = parseNameSection('"[[http://www.google.com]]" as URLONLY');
+    expect(section.id).toBe('URLONLY');
+    expect(section.display).toBe('[[http://www.google.com]]');
+  });
+
+  it('keeps a sprite-labelled `[[url <$s>]]` intact for a `"X" as CODE` form', () => {
+    const section = parseNameSection('"[[http://www.google.com <$maxime>]]" as URLSPRITE');
+    expect(section.id).toBe('URLSPRITE');
+    expect(section.display).toBe('[[http://www.google.com <$maxime>]]');
+  });
+
+  it('keeps `[[url label]]` intact as the display of a `CODE as "X"` form (DISPLAY3)', () => {
+    const section = parseNameSection(`A4 as "${URL_LABEL}"`);
+    expect(section.id).toBe('A4');
+    expect(section.display).toBe(URL_LABEL);
+  });
+
+  it('keeps `[[url label]]` intact for a `"X" as (wrapped)` form (DISPLAY2 + wrapped CODE2)', () => {
+    const section = parseNameSection(`"${URL_LABEL}" as (uc1)`);
+    expect(section.id).toBe('uc1');
+    expect(section.display).toBe(URL_LABEL);
+  });
+
+  it('still strips TWICE for the quoted-ONLY CODE1 form -- upstream asymmetry, jar 2.663368', () => {
+    const section = parseNameSection(`"${URL_LABEL}"`);
+    expect(section.id).toBe(URL_LABEL);
+    expect(section.display).toBe('[http://www.google.com abc]');
+  });
+
+  it('leaves a NON-first-line `[[url label]]` untouched (URLSECONDLINE regression guard)', () => {
+    const section = parseNameSection('"You can click\\n[[http://www.google.com <$maxime>]]" as URLSECONDLINE');
+    expect(section.id).toBe('URLSECONDLINE');
+    expect(section.display).toBe('You can click\n[[http://www.google.com <$maxime>]]');
+  });
+
+  it('unwraps a parenthesised display of a `"X" as CODE` form exactly once', () => {
+    // `"(x)"` -> strip quotes -> `(x)`; upstream never reaches the `(` branch.
+    const section = parseNameSection('"(x)" as PAREN');
+    expect(section.id).toBe('PAREN');
+    expect(section.display).toBe('(x)');
+  });
+
+  it('leaves an ordinary quoted display unchanged (no behavioral drift)', () => {
+    const section = parseNameSection('"Hello World" as HW');
+    expect(section.id).toBe('HW');
+    expect(section.display).toBe('Hello World');
+  });
+});
+

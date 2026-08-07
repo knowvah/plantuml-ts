@@ -25,7 +25,9 @@ If the fix makes it conformant outright, no pin is needed.
 
 | directory | authored by | defect | fixed by |
 |---|---|---|---|
-| `f4d-url-label-first-line` | F2-c | a display whose FIRST line is entirely `[[url label]]` measures the url text as well as the label | F4-d (batch 4) |
+| ~~`f4d-url-label-first-line`~~ | F2-c | a display whose FIRST line is entirely `[[url label]]` measures the url text as well as the label | **PROMOTED** by F4-d to `oracle/goldens/description/f4d-url-label-first-line/` — fully conformant (delta 0 on all four rows), no `size-backlog.json` pin needed. Oracle bytes unchanged (never regenerated). |
+
+No directory is currently staged here.
 
 ## `f4d-url-label-first-line`
 

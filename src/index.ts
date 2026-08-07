@@ -332,7 +332,7 @@ export function renderSync(source: string, options?: RenderOptions): string {
       throw new Error('renderSync() is not supported for this diagram type — use render()');
 
     const measurer = resolveMeasurer(plugin.type, options);
-    const ast = plugin.parse(umlSource);
+    const ast = plugin.parse(umlSource, { assetStore: options?.assetStore });
     surfaceSpriteWarnings(ast, options?.onWarning);
     const geo = plugin.layoutSync(ast, theme, measurer);
     const fragment = plugin.render(geo, theme);
@@ -394,7 +394,7 @@ async function renderBlock(block: BlockUml, options?: RenderOptions): Promise<st
     );
     const plugin = registry.resolve(umlSource);
     const measurer = resolveMeasurer(plugin.type, options);
-    const ast = plugin.parse(umlSource);
+    const ast = plugin.parse(umlSource, { assetStore: options?.assetStore });
     surfaceSpriteWarnings(ast, options?.onWarning);
     const geo =
       'layoutSync' in plugin

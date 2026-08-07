@@ -10,6 +10,7 @@
 import { createAnnotations } from '../../core/annotations/index.js';
 import { dropsAsSingleDuplicate } from '../../core/cucadiagram/linkDedup.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
+import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
 import { scopedKey } from './namespace-groups.js';
 import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './ast.js';
 import { makeNode, resolveNewlineEscapes } from './parse-helpers.js';
@@ -145,8 +146,12 @@ export type PendingNoteState =
       targetId: string | undefined;
     };
 
-export function makeDefaultAST(): DescriptionDiagramAST {
-  return { nodes: [], links: [], annotations: createAnnotations(), sprites: createSpriteRegistry() };
+/** `internal` (F4-f piece 1): `SpriteImage.fromInternal`'s classpath bundle,
+ *  reached through ADR-2's `RenderOptions.assetStore`. Threaded into the
+ *  registry at CONSTRUCTION time because `SkinParam#getSprite`'s fallback
+ *  tier is a property of the registry, not of any one lookup. */
+export function makeDefaultAST(internal?: InternalSpriteStore): DescriptionDiagramAST {
+  return { nodes: [], links: [], annotations: createAnnotations(), sprites: createSpriteRegistry(internal) };
 }
 
 /** `CucaDiagram#cpt1.addAndGet(1)` -- see `ParseState.uidCounter`'s doc
@@ -269,7 +274,9 @@ export function resolveStillUnknown(nodes: DescriptiveNode[]): void {
 export function startNewPage(state: ParseState): void {
   resolveStillUnknown(state.ast.nodes);
   state.pages.push(state.ast);
-  state.ast = makeDefaultAST();
+  // A `newpage` starts an independent diagram, but the classpath bundle is
+  // process-wide upstream — carry it across the page boundary.
+  state.ast = makeDefaultAST(state.ast.sprites?.internal);
   state.inSpriteBlock = false;
   state.pendingElement = undefined;
   state.containerStack = [];
