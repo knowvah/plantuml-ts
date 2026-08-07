@@ -230,12 +230,30 @@ read these numbers as targets.
   and the delta is 0"; `vixeni-34`: same). Those two predictions happen to be
   sound because the nodes also become correct — but the metric would report 0
   either way, so it cannot be the thing that confirms them.
-- **Recommended (own task, before or alongside the fix mission):** add a
+- ~~**Recommended (own task, before or alongside the fix mission):** add a
   by-node-id paired metric beside the order statistic. DOT node ids (`sh0006`…)
-  are stable and present in both graphs, and 5 of the 26 records already did
-  this pairing by hand. Then re-measure all 351 to find fixtures currently
-  passing on a permutation. This is an audit of the *gate*, not of the port,
-  and its result may change what "321/351" means.
+  are stable and present in both graphs.~~
+
+> **AUDIT DONE 2026-08-07 — [METRIC-AUDIT.md](METRIC-AUDIT.md). Read that
+> instead of acting on the paragraph above; two of its claims are wrong.**
+>
+> 1. **There is NO false conformance.** All 321 passing fixtures stay
+>    conformant under an exact bottleneck assignment (a constructive bijection
+>    witness per fixture). `321/351` is trustworthy and the fix mission is
+>    unblocked. The permutation risk was real in principle and is empty in fact.
+> 2. **A by-node-id metric does not work.** DOT ids are NOT stable across the
+>    two sides — only **34 of 351** fixtures have aligned id sets (the jar
+>    numbers from `sh0006` with gaps and emits `zaent…` ids; ours run
+>    sequentially from `sh0002`), and emission order differs too. Identity-free
+>    matching is required, not optional.
+> 3. **The deflation is confirmed, and 8 fixtures' pins understate the work** —
+>    `nixura-77` is 1.5403 against its reported 1.2731. Use METRIC-AUDIT.md's
+>    corrected table as fix targets, not the pins.
+> 4. Residual permutation masking is **bounded at 2× tolerance (0.02in)**, and
+>    158 conformant fixtures are provably free of it.
+>
+> The stronger metric is NOT adopted as the gate: switching re-bases every pin
+> in `size-backlog.json`. That stays a maintainer decision (see F5).
 
 ## 7. Provenance — bucket label → mechanism group (the ADR-3 verdict)
 
@@ -317,5 +335,3 @@ Two files serialize nearly everything and should be treated as ownership hubs:
 - **Cross-engine blast radius:** G10 and G4's tier 2 touch `creole-atoms*` and
   the theme/skinparam layer, shared with class/state/object. Those two tasks
   re-run all four size ratchets; every other task is description-only.
-</content>
-</invoke>
