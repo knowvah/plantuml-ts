@@ -56,6 +56,7 @@ import {
   type StructuralNode,
 } from '../tests/oracle/svek-dot.js';
 import { buildStdlibAssetsStore } from '../tests/helpers/stdlib-assets-store.js';
+import { buildSpriteAssetsStore } from '../tests/helpers/sprite-assets-store.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GOLDENS = join(REPO, 'oracle', 'goldens', 'description');
@@ -270,6 +271,12 @@ function captureGraphs(markup: string): DotInputGraph[] {
     renderSync(markup, {
       measurer: new WidthTableMeasurer(),
       includeStore: withStdlib(new MapIncludeStore(), buildStdlibAssetsStore()),
+      // Must match `measure-description-size-deltas.ts#captureGraphs` exactly.
+      // Without this the audit renders internal sprites as their `«name»` text
+      // fallback and reports a DIFFERENT diagram than the ratchet it is
+      // auditing -- it read 4 fewer conformant than the measure until this was
+      // added (ADR-2: "the harness measures the same code path users get").
+      assetStore: buildSpriteAssetsStore(),
     });
   } finally {
     setLayoutInputObserver(undefined);
@@ -329,23 +336,27 @@ function aggregatePasses(
   return { sortedMax, pairMax, idsAligned, structurallyEqual, unambiguous };
 }
 
+/** A fixture whose captured pass count does not match its golden's — nothing
+ *  downstream can be compared, so every metric reports zero. */
+function unequalPassCount(slug: string, captured: number, expected: number): AuditResult {
+  return {
+    slug,
+    verdict: 'structurally-unequal',
+    sortedMax: 0,
+    pairMax: 0,
+    hidden: 0,
+    idsAligned: false,
+    unambiguous: false,
+    detail: `captured ${captured} graph(s), expected ${expected}`,
+  };
+}
+
 function auditFixture(slug: string): AuditResult {
   const dir = join(GOLDENS, slug);
   const files = svekFiles(dir);
   const captured = captureGraphs(readFileSync(join(dir, 'input.puml'), 'utf8'));
 
-  if (captured.length !== files.length) {
-    return {
-      slug,
-      verdict: 'structurally-unequal',
-      sortedMax: 0,
-      pairMax: 0,
-      hidden: 0,
-      idsAligned: false,
-      unambiguous: false,
-      detail: `captured ${captured.length} graph(s), expected ${files.length}`,
-    };
-  }
+  if (captured.length !== files.length) return unequalPassCount(slug, captured.length, files.length);
 
   const { sortedMax, pairMax, idsAligned, structurallyEqual, unambiguous } = aggregatePasses(
     dir,
@@ -395,9 +406,10 @@ export interface AuditSummary {
   maxHidden: number;
 }
 
-export function summarizeAudit(results: readonly AuditResult[]): AuditSummary {
-  const s: AuditSummary = {
-    total: results.length,
+/** Zeroed counters for `total` fixtures — every field but `total` accumulates. */
+function emptySummary(total: number): AuditSummary {
+  return {
+    total,
     agree: 0,
     falseConformant: 0,
     understated: 0,
@@ -409,6 +421,10 @@ export function summarizeAudit(results: readonly AuditResult[]): AuditSummary {
     conformantPairMatched: 0,
     maxHidden: 0,
   };
+}
+
+export function summarizeAudit(results: readonly AuditResult[]): AuditSummary {
+  const s = emptySummary(results.length);
   const bar = SIZE_CONFORMANCE_TOLERANCE_IN + EPSILON;
   for (const r of results) {
     if (r.verdict === 'agree') s.agree += 1;
