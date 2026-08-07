@@ -45,22 +45,23 @@ import { umlSourceOf } from './core/error/UmlSource.js';
 import { renderPSystemError, renderPSystemWelcome } from './core/error/error-renderer.js';
 import { readLines } from './core/tim/ReadLineReader.js';
 import type { StringLocated } from './core/tim/StringLocated.js';
+import type { AssetStore } from './core/asset-store.js';
 
-// Re-exported so downstream stdlib packages (SI5b `@knowvah/plantuml-stdlib*`,
-// plans/si5b-stdlib/decisions.md D2) can build an `options.includeStore`
-// carrying vendored bundles. Required here specifically: `package.json`'s
-// "exports" map has a single "." entry (no subpath exports), so this file is
-// the only reachable surface for a consumer of the built library — hence si8's
-// registry and warm-up are published here too, not just from their modules.
+// Re-exported so downstream stdlib packages (SI5b `@knowvah/plantuml-stdlib*`, plans/si5b-stdlib/decisions.md
+// D2) can build an `options.includeStore` carrying vendored bundles. Required here specifically:
+// `package.json`'s "exports" map has a single "." entry (no subpath exports), so this file is the only
+// reachable surface for a consumer of the built library — hence si8's registry and warm-up are published
+// here too, not just from their modules.
 export { stdlibStore, withStdlib } from './core/tim/StdlibStore.js';
 export type { BundleData, StdlibStore } from './core/tim/StdlibStore.js';
 export { stdlibRegistry, StdlibChunkLoadError, type StdlibRegistry } from './core/tim/StdlibRegistry.js';
 export { prepareIncludeStore, type IncludeWarmupOptions } from './core/include-resolver.js';
-// SI11a per-RESOURCE fetch (vs. si8's per-BUNDLE chunk above); see StdlibRemote.ts's doc comment.
-// si11b's `spriteSplitStdlib` is one level finer again: a bootstrap diagram pays for the sprites
-// it names, not the 1.06 MB bundle holding all 2,078 of them.
+// SI11a per-RESOURCE fetch (vs. si8's per-BUNDLE chunk above); see StdlibRemote.ts's doc comment. si11b's
+// `spriteSplitStdlib` is one level finer again: a bootstrap diagram pays for the sprites it names, not the 1.06 MB bundle holding all 2,078 of them.
 export { remoteStdlib, StdlibResourceFetchError, type StdlibRemoteManifest, type RemoteBundle } from './core/tim/StdlibRemote.js';
 export { spriteSplitStdlib, SpriteNotBundledError, type SpriteSplitManifest } from './core/sprite-split-stdlib.js';
+// ADR-2 (plans/s1l-tail-fix/decisions.md): the sync-fillable asset seam F4-a/F4-b both consume via options.assetStore.
+export { combineAssetStores, type AssetPayload, type AssetStore } from './core/asset-store.js';
 
 // Register plugins in specificity order — most specific first, sequence last.
 // Sequence plugin uses broad arrow heuristics (-->) that overlap with graph
@@ -92,9 +93,8 @@ export interface RenderOptions {
   /** Async include fetcher used by `render()` / `renderAll()` to PREFILL the include store. Ignored by `renderSync` (which cannot await). */
   fetcher?: IncludeFetcher;
   /**
-   * Pre-populated include content: `path -> source`, read SYNCHRONOUSLY by the
-   * TIM interpreter wherever upstream would open a file (`src/core/tim/
-   * IncludeStore.ts`). Two reasons to pass one:
+   * Pre-populated include content: `path -> source`, read SYNCHRONOUSLY by the TIM interpreter wherever
+   * upstream would open a file (`src/core/tim/IncludeStore.ts`). Two reasons to pass one:
    *  - `renderSync` cannot fetch. A store is the ONLY way it resolves includes.
    *  - Stdlib bundles. `!include <c4/C4_Context.puml>` resolves from the store
    *    and nowhere else — this port vendors no stdlib asset (mission SI5b).
@@ -106,17 +106,17 @@ export interface RenderOptions {
   /**
    * Lazily-loaded stdlib bundles for `!include <bundle/thing>`, built with
    * `stdlibRegistry()` (`core/tim/StdlibRegistry.ts`): each bundle's payload
-   * loads on first use rather than up front, which matters at these sizes
-   * (`tupadr3` alone is 19.54 MB).
+   * loads on first use rather than up front, which matters at these sizes (`tupadr3` alone is 19.54 MB).
    * Consulted ONLY after `includeStore` misses on both channels, so passing one
-   * never changes the outcome for a target that already resolved. `render()` /
-   * `renderAll()` only — `renderSync` cannot await a dynamic `import()`; sync
-   * callers await `prepareIncludeStore` and pass its result as `includeStore`.
+   * never changes the outcome for a target that already resolved. `render()` / `renderAll()` only —
+   * `renderSync` cannot await a dynamic `import()`; sync callers await `prepareIncludeStore` and pass its result as `includeStore`.
    */
   stdlibRegistry?: StdlibRegistry;
   /** si11b sprite diagnostics (`surfaceSpriteWarnings`, `core/sprite-commands.js`): `onWarning` fires once per name collision found during parse (ADR-7; free when omitted); `sprites` is the escape hatch for macro-produced `<$name>` refs a source scan can't see (ADR-5b), consumed by the per-sprite prefetch scan. */
   onWarning?: ((message: string) => void) | undefined;
   sprites?: readonly string[] | undefined;
+  /** ADR-2 (plans/s1l-tail-fix): pre-populated vendored asset store (jar `/sprites/**`, F4-a; Twemoji artwork, F4-b), read SYNCHRONOUSLY like `includeStore` — `renderSync` can't await `import()`. A miss (`undefined`) makes the caller degrade to its existing fallback, never throw. */
+  assetStore?: AssetStore | undefined;
 }
 
 function getDefaultMeasurer(): StringMeasurer {
