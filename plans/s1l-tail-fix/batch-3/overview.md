@@ -14,10 +14,10 @@ three at all.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|------------|------|
-| F3-fix | G4 + G5 `BoxSizingOpts` thread — per-element stereotype font size + line thickness, tiers 1 and 2 together (ADR-5) | typescript-pro | `src/diagrams/description/{layout,layout-dot-tree,leaf-sizing-consts,leaf-sizing-entity,leaf-sizing}.ts`; `src/core/{preprocessor,skinparam-stereo-keys,style-map-element,theme-graph-colors,theme-element-resolve}.ts`; `src/diagrams/description/renderer-symbol.ts` | F1-a, F2-b | [ ] |
-| F3-seam | ADR-2 asset store seam — sync-fillable channel for vendored sprite/emoji assets | typescript-pro | `src/index.ts`, NEW `src/core/asset-store.ts` | — | [ ] |
-| F3-diag | `fariba-82` residual sub-diagnosis — the +2px `sh0006` (`$User`) gap E1+E2 don't explain | debugger | `plans/s1l-tail-fix/findings/fariba-82-residual.md` (new dir) | — | [ ] |
-| F3-lic | Sprite licence review — provenance/verdict per vendored icon set, gates F4-a | legal-advisor | `plans/s1l-tail-fix/findings/sprite-licence-review.md` (new dir) | — | [ ] |
+| F3-fix | G4 + G5 `BoxSizingOpts` thread — per-element stereotype font size + line thickness, tiers 1 and 2 together (ADR-5) | typescript-pro | `src/diagrams/description/{layout,layout-dot-tree,leaf-sizing-consts,leaf-sizing-entity,leaf-sizing}.ts`; `src/core/{preprocessor,skinparam-stereo-keys,style-map-element,theme-graph-colors,theme-element-resolve}.ts`; `src/diagrams/description/renderer-symbol.ts` | F1-a, F2-b | [x] |
+| F3-seam | ADR-2 asset store seam — sync-fillable channel for vendored sprite/emoji assets | typescript-pro | `src/index.ts`, NEW `src/core/asset-store.ts` | — | [x] |
+| F3-diag | `fariba-82` residual sub-diagnosis — the +2px `sh0006` (`$User`) gap E1+E2 don't explain | debugger | `plans/s1l-tail-fix/findings/fariba-82-residual.md` (new dir) | — | [x] |
+| F3-lic | Sprite licence review — provenance/verdict per vendored icon set, gates F4-a | legal-advisor | `plans/s1l-tail-fix/findings/sprite-licence-review.md` (new dir) | — | [x] |
 
 ## Why F3-fix depends on F1-a and F2-b
 
