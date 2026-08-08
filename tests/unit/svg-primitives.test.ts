@@ -12,6 +12,11 @@ import {
   ellipse,
   diamond,
   linkWrap,
+  attrs,
+  attrsFromRecord,
+  noteBox,
+  polygon,
+  foreignObject,
 } from '../../src/core/svg.js';
 import type { LineStyle, TextStyle, ArrowType } from '../../src/core/svg.js';
 
@@ -26,10 +31,11 @@ describe('rect', () => {
 
   it('includes fill and stroke from style', () => {
     // G1c: plain-string Paint values are resolved to their canonical jar
-    // hex via paintToSvg (white -> #FFFFFF, black -> #000000).
+    // hex via paintToSvg (white -> #FFFFFF, black -> #000000), then
+    // shortened to the #RGB form at emission (rule 2).
     const result = rect(0, 0, 100, 50, { fill: 'white', stroke: 'black' });
-    expect(result).toContain('fill="#FFFFFF"');
-    expect(result).toContain('stroke="#000000"');
+    expect(result).toContain('fill="#FFF"');
+    expect(result).toContain('stroke="#000"');
   });
 
   it('includes strokeWidth when provided', () => {
@@ -87,9 +93,10 @@ describe('line', () => {
 
   it('includes stroke from style', () => {
     // G1c: a 3-digit hex expands to the canonical 6-digit form (HColorSet
-    // parseSimpleColor's 3-digit branch, java:134-143).
+    // parseSimpleColor's 3-digit branch, java:134-143) — which rule 2 then
+    // shortens straight back for emission.
     const result = line(0, 0, 100, 0, { stroke: '#333' });
-    expect(result).toContain('stroke="#333333"');
+    expect(result).toContain('stroke="#333"');
   });
 
   it('includes strokeWidth when provided', () => {
@@ -181,9 +188,10 @@ describe('text', () => {
   });
 
   it('includes fill from style', () => {
-    // G1c: named colors resolve to their canonical jar hex.
+    // G1c: named colors resolve to their canonical jar hex; rule 2 then
+    // shortens #FF0000 to #F00.
     const result = text(0, 0, 'hi', { fill: 'red' });
-    expect(result).toContain('fill="#FF0000"');
+    expect(result).toContain('fill="#F00"');
   });
 
   it('includes textAnchor from style', () => {
@@ -223,9 +231,9 @@ describe('path', () => {
   });
 
   it('includes stroke from style', () => {
-    // G1c: named colors resolve to their canonical jar hex.
+    // G1c: named colors resolve to their canonical jar hex; rule 2 shortens.
     const result = path('M 0 0', { stroke: 'blue' });
-    expect(result).toContain('stroke="#0000FF"');
+    expect(result).toContain('stroke="#00F"');
   });
 
   it('includes strokeDasharray when provided', () => {
@@ -261,7 +269,7 @@ describe('path', () => {
 
   it('resolves a named fill color to its canonical jar hex, same as stroke', () => {
     const result = path('M 0 0', { fill: 'blue' });
-    expect(result).toContain('fill="#0000FF"');
+    expect(result).toContain('fill="#00F"');
   });
 });
 
@@ -531,7 +539,7 @@ describe('svgRoot', () => {
 
   it('emits a background fill rect for the default white bgColor', () => {
     const result = svgRoot(400, 300, []);
-    expect(result).toContain('<rect width="400" height="300" fill="#FFFFFF"/>');
+    expect(result).toContain('<rect width="400" height="300" fill="#FFF"/>');
   });
 
   it('does not emit a background rect for transparent bgColor', () => {
@@ -712,7 +720,7 @@ describe('Paint gradient support', () => {
 
   it('rect with a plain string fill resolves to canonical hex (G1c; AC2 pre-G1c was raw pass-through)', () => {
     expect(rect(0, 0, 100, 50, { fill: 'white', stroke: 'black' })).toBe(
-      '<rect x="0" y="0" width="100" height="50" fill="#FFFFFF" stroke="#000000"/>',
+      '<rect x="0" y="0" width="100" height="50" fill="#FFF" stroke="#000"/>',
     );
     // No gradient machinery leaks in for string input.
     expect(rect(0, 0, 100, 50, { fill: 'white' })).not.toContain('linearGradient');
@@ -750,5 +758,180 @@ describe('Paint gradient support', () => {
     // '<line ' (trailing space) avoids matching the '<linearGradient' prefix.
     expect(out.indexOf('<linearGradient')).toBeLessThan(out.indexOf('<line '));
     expect(out).toMatch(/stroke="url\(#g[0-9a-z]+\)"/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Upstream's "reduce SVG output size" rules, applied at emission
+// (mission svg-output-size-reduction, T5; the six rules are recorded in
+// `.agent-notes/svg-output-size-reduction-measured.md`)
+// ---------------------------------------------------------------------------
+
+describe('rule 1 — decimal formatting at emission (ADR-1)', () => {
+  it('rounds a numeric attribute value to 3 decimals, HALF_UP', () => {
+    expect(attrs([['x', 77.8125]])).toBe(' x="77.813"');
+    expect(attrsFromRecord({ x: 77.8125 })).toBe(' x="77.813"');
+  });
+
+  it('formats a raw un-pre-rounded float (the G2 N35 case) with no caller-side rounding', () => {
+    // 19.418750000000003 reached the output verbatim before ADR-1; callers
+    // compensated with javaRound4, which is exactly the double-rounding
+    // this change removes.
+    expect(attrs([['y', 19.418750000000003]])).toBe(' y="19.419"');
+    expect(attrsFromRecord({ y: 19.418750000000003 })).toBe(' y="19.419"');
+  });
+
+  it('rounds on the shortest round-trip decimal, as Java %.3f does', () => {
+    // 28.4805 -> 28.481 (not 28.48): the 4th decimal is a literal 5, so
+    // HALF_UP rounds up. See svg-format.ts#javaFixedN.
+    expect(attrs([['x', 28.4805]])).toBe(' x="28.481"');
+  });
+
+  it('trims trailing zeros and short-circuits zero', () => {
+    expect(attrs([['x', 10], ['y', 10.5], ['width', 0]])).toBe(' x="10" y="10.5" width="0"');
+  });
+
+  it('passes string values through untouched', () => {
+    expect(attrs([['d', 'M 0 0 L 1.23456 2']])).toBe(' d="M 0 0 L 1.23456 2"');
+    expect(attrsFromRecord({ transform: 'translate(1.23456,2)' })).toBe(
+      ' transform="translate(1.23456,2)"',
+    );
+  });
+
+  it('honours an explicit decimals argument (ADR-2: threaded, not hardcoded)', () => {
+    expect(attrs([['x', 1.23456]], 4)).toBe(' x="1.2346"');
+    expect(attrsFromRecord({ x: 1.23456 }, 1)).toBe(' x="1.2"');
+  });
+
+  it('still omits undefined values', () => {
+    expect(attrs([['x', undefined]])).toBe('');
+    expect(attrsFromRecord({ x: undefined })).toBe('');
+  });
+
+  it('formats geometry the shape emitters interpolate directly', () => {
+    expect(polygon([{ x: 1.23456, y: 2 }])).toContain('points="1.235,2"');
+    expect(diamond(1.00005, 0, 0)).toContain('points="1,0 1,0 1,0 1,0"');
+    expect(foreignObject(1.23456, 0, 2.0004, 3, '')).toContain(
+      '<foreignObject x="1.235" y="0" width="2" height="3">',
+    );
+    expect(noteBox(0.12345, 0, 10, 10)).toContain('d="M0.123,0');
+  });
+});
+
+describe('rule 2 — #RRGGBB shortened to #RGB', () => {
+  it('shortens fill and stroke', () => {
+    expect(rect(0, 0, 1, 1, { fill: '#FF0000', stroke: '#FFFFFF' })).toContain('fill="#F00"');
+    expect(rect(0, 0, 1, 1, { fill: '#FF0000', stroke: '#FFFFFF' })).toContain('stroke="#FFF"');
+  });
+
+  it('leaves a non-shortenable color, a named color and a url() alone', () => {
+    expect(rect(0, 0, 1, 1, { fill: '#FEFECE' })).toContain('fill="#FEFECE"');
+    expect(ellipse(0, 0, 1, 1, { fill: 'gold' })).toContain('fill="gold"');
+    expect(rect(0, 0, 1, 1, { fill: { color1: '#FF0000', color2: '#00FF00', policy: '-' } })).toMatch(
+      /fill="url\(#g[0-9a-z]+\)"/,
+    );
+  });
+
+  it('shortens both gradient stop colors', () => {
+    const out = rect(0, 0, 1, 1, {
+      fill: { color1: '#FFFFFF', color2: '#000000', policy: '-' },
+    });
+    expect(out).toContain('<stop offset="0%" stop-color="#FFF"/>');
+    expect(out).toContain('<stop offset="100%" stop-color="#000"/>');
+  });
+
+  it('shortens a color-valued entry of a free-form attribute bag, but not other attrs', () => {
+    const out = ellipse(0, 0, 1, 1, { fill: '#112233', stroke: '#AABBCC', id: '#abcdef' });
+    expect(out).toContain('fill="#123"');
+    expect(out).toContain('stroke="#ABC"');
+    expect(out).toContain('id="#abcdef"');
+  });
+
+  it('shortens the background rect and the note-box colors', () => {
+    expect(svgRoot(1, 1, [], '#FFFFFF')).toContain('fill="#FFF"');
+    expect(noteBox(0, 0, 10, 10, { fill: '#FFFFFF', stroke: '#000000' })).toContain('fill="#FFF"');
+    expect(noteBox(0, 0, 10, 10, { fill: '#FFFFFF', stroke: '#000000' })).toContain('stroke="#000"');
+  });
+});
+
+describe('rule 3 — font-family/lengthAdjust hoisted to the root', () => {
+  it('puts both on the svg root element', () => {
+    const out = svgRoot(10, 10, []);
+    expect(out).toContain('font-family="sans-serif"');
+    expect(out).toContain('lengthAdjust="spacing"');
+  });
+
+  it('emits neither on a text element in the default family', () => {
+    const out = text(0, 0, 'hello', { fontFamily: 'sans-serif', lengthAdjust: 'spacing' });
+    expect(out).not.toContain('font-family');
+    expect(out).not.toContain('lengthAdjust');
+  });
+
+  it('compares the family case-insensitively, as upstream does', () => {
+    expect(text(0, 0, 'hello', { fontFamily: 'Sans-Serif' })).not.toContain('font-family');
+  });
+
+  it('still emits a font-family that differs from the root', () => {
+    expect(text(0, 0, 'hello', { fontFamily: 'Courier' })).toContain('font-family="Courier"');
+  });
+
+  it('never emits lengthAdjust per element, even for a non-default family', () => {
+    expect(text(0, 0, 'hello', { fontFamily: 'Courier', lengthAdjust: 'spacingAndGlyphs' })).not.toContain(
+      'lengthAdjust',
+    );
+  });
+});
+
+describe('rule 4 — stroke:none suppresses stroke-width and stroke-dasharray', () => {
+  it('suppresses both on rect, line, path and polygon', () => {
+    const style = { stroke: 'none', strokeWidth: 1.5, strokeDasharray: '5,3' } as const;
+    for (const out of [
+      rect(0, 0, 1, 1, style),
+      line(0, 0, 1, 1, style),
+      path('M 0 0', style),
+      polygon([{ x: 0, y: 0 }], style),
+    ]) {
+      expect(out).toContain('stroke="none"');
+      expect(out).not.toContain('stroke-width');
+      expect(out).not.toContain('stroke-dasharray');
+    }
+  });
+
+  it('suppresses stroke-width on the note box', () => {
+    const out = noteBox(0, 0, 10, 10, { stroke: 'none', strokeWidth: 2 });
+    expect(out).toContain('stroke="none"');
+    expect(out).not.toContain('stroke-width');
+  });
+
+  it('keeps both for a painted stroke', () => {
+    const out = rect(0, 0, 1, 1, { stroke: '#181818', strokeWidth: 1.5, strokeDasharray: '5,3' });
+    expect(out).toContain('stroke-width="1.5"');
+    expect(out).toContain('stroke-dasharray="5,3"');
+  });
+});
+
+describe('rule 5 — no textLength on single-glyph text', () => {
+  it('omits textLength for a one-character label', () => {
+    expect(text(0, 0, 'A', { textLength: 12.5 })).toBe('<text x="0" y="0">A</text>');
+  });
+
+  it('omits textLength for empty text', () => {
+    expect(text(0, 0, '', { textLength: 12.5 })).not.toContain('textLength');
+  });
+
+  it('keeps textLength for two or more characters', () => {
+    expect(text(0, 0, 'AB', { textLength: 12.5 })).toContain('textLength="12.5"');
+  });
+});
+
+describe('rule 6 — opacity formatting', () => {
+  it('formats opacity at max(decimals, 2) places with trailing zeros trimmed', () => {
+    expect(rect(0, 0, 1, 1, { opacity: 0.5 })).toContain('opacity="0.5"');
+    expect(rect(0, 0, 1, 1, { opacity: 0.333333 })).toContain('opacity="0.333"');
+  });
+
+  it('short-circuits the out-of-range ends to 0 and 1', () => {
+    expect(rect(0, 0, 1, 1, { opacity: 0 })).toContain('opacity="0"');
+    expect(rect(0, 0, 1, 1, { opacity: 1 })).toContain('opacity="1"');
   });
 });

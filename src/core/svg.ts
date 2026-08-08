@@ -3,11 +3,24 @@
  *
  * All SVG markup in plantuml-ts flows through these functions.
  * Callers compose the returned strings; nothing here touches document or DOM.
+ *
+ * Numeric precision is applied HERE, at emission (ADR-1,
+ * `plans/svg-output-size-reduction/decisions.md`), mirroring upstream's
+ * `SvgGraphics#format`: every numeric attribute value goes through
+ * `svg-format.ts#formatDecimal` on its way out, so callers must NOT
+ * pre-round geometry (`javaRound4`/`javaFixed4`) — doing both double-rounds
+ * (`1.2345 -> 1.2345 -> 1.235` where direct-to-3dp is `1.234`).
+ * @see ~/git/plantuml/.../klimt/drawing/svg/SvgGraphics.java
  */
 
 import { paintToSvg } from './paint.js';
 import type { Paint } from './paint.js';
 import { arrowHead, ALL_ARROW_TYPES } from './svg-markers.js';
+import {
+  DEFAULT_SVG_DECIMALS,
+  formatDecimal,
+  shortenColor,
+} from './svg-format.js';
 
 // Arrow-marker builders live in ./svg-markers (no Paint involvement); re-export
 // them here so existing importers of `core/svg.js` are unaffected by the split.
@@ -89,9 +102,10 @@ export interface TextStyle {
    */
   textLength?: number;
   /** Always `'spacing'` in this codebase's own usage (matches klimt's own
-   *  `LengthAdjust.SPACING` default) -- kept as a real field, not a hardcoded
-   *  literal in `text()`, so a future `spacingAndGlyphs` caller does not need
-   *  a signature change. */
+   *  `LengthAdjust.SPACING` default). NO LONGER EMITTED per `<text>` (rule 3):
+   *  the value is hoisted onto the document root by {@link svgRoot} and
+   *  inherited. Kept as a field so the many callers that set it need no
+   *  change, and so a future per-element override has somewhere to live. */
   lengthAdjust?: 'spacing' | 'spacingAndGlyphs';
 }
 
@@ -125,16 +139,30 @@ export function escapeXml(s: string): string {
 }
 
 /**
+ * The one place a value becomes attribute text (ADR-1): a `number` is
+ * rounded to `decimals` places the way Java's `%.<n>f` does it and stripped
+ * of trailing zeros; a `string` passes through verbatim (already-formatted
+ * values, ids, transforms, path data).
+ */
+function formatAttrValue(value: string | number, decimals: number): string {
+  return typeof value === 'number' ? formatDecimal(value, decimals) : value;
+}
+
+/**
  * Build a flat attribute string from an object.
  * Only includes entries where the value is not undefined.
+ *
+ * `decimals` mirrors upstream's `SvgOption.decimal` (ADR-2) — threaded, not
+ * hardcoded, even though production has exactly one value today.
  */
 export function attrs(
   entries: ReadonlyArray<readonly [string, string | number | undefined]>,
+  decimals = DEFAULT_SVG_DECIMALS,
 ): string {
   const parts: string[] = [];
   for (const [name, value] of entries) {
     if (value !== undefined) {
-      parts.push(`${name}="${String(value)}"`);
+      parts.push(`${name}="${formatAttrValue(value, decimals)}"`);
     }
   }
   return parts.length > 0 ? ' ' + parts.join(' ') : '';
@@ -143,12 +171,13 @@ export function attrs(
 /**
  * Build a flat attribute string from a SvgAttrs record.
  * Only includes entries where the value is not undefined.
+ * `decimals` as in {@link attrs}.
  */
-export function attrsFromRecord(record: SvgAttrs): string {
+export function attrsFromRecord(record: SvgAttrs, decimals = DEFAULT_SVG_DECIMALS): string {
   const parts: string[] = [];
   for (const [name, value] of Object.entries(record)) {
     if (value !== undefined) {
-      parts.push(`${name}="${String(value)}"`);
+      parts.push(`${name}="${formatAttrValue(value, decimals)}"`);
     }
   }
   return parts.length > 0 ? ' ' + parts.join(' ') : '';
@@ -173,13 +202,46 @@ export function resolvePaint(p: Paint | undefined): {
 } {
   if (p === undefined) return { value: undefined, def: '' };
   const resolved = paintToSvg(p);
-  return { value: resolved.fill, def: resolved.def ?? '' };
+  return {
+    value: shortenColor(resolved.fill),
+    def: shortenStopColors(resolved.def ?? ''),
+  };
+}
+
+/** Attribute names whose value is a color, and so is subject to rule 2's
+ *  `#RRGGBB` -> `#RGB` shortening. Free-form attribute bags
+ *  ({@link SvgAttrsPaint}) carry non-color values too (`transform`, ids),
+ *  which must never be rewritten. */
+const COLOR_ATTRS: ReadonlySet<string> = new Set([
+  'fill',
+  'stroke',
+  'stop-color',
+  'color',
+]);
+
+// One `<stop stop-color="…">` value inside a `paint.ts#paintToSvg` gradient
+// def. Built from a string (not a regex literal) — the complexity checker
+// miscounts regex literals containing `<`/`>` (same workaround as paint.ts).
+const STOP_COLOR_RE = new RegExp('stop-color="([^"]*)"', 'g');
+
+/**
+ * Rule 2 at the gradient stops (upstream shortens both `stop-color`s in
+ * `createSvgGradient`). The def is built by `paint.ts#paintToSvg`, whose
+ * `<stop>` writer is the natural home for this; applied here instead so the
+ * rule lands with the rest of the emitter's rule-2 sites, and scoped exactly
+ * to that one producer's shape — a resolved color never contains a `"`.
+ * @see .../klimt/drawing/svg/SvgGraphics.java#createSvgGradient
+ */
+function shortenStopColors(def: string): string {
+  if (def === '') return '';
+  return def.replace(STOP_COLOR_RE, (_m, color: string) => `stop-color="${shortenColor(color)}"`);
 }
 
 /**
  * Resolve every {@link Paint} in a free-form {@link SvgAttrsPaint} record to a
  * plain {@link SvgAttrs}, collecting the `<linearGradient>` defs those gradients
- * need. Non-Paint entries pass through unchanged.
+ * need. A non-Paint entry passes through unchanged unless its key names a
+ * color ({@link COLOR_ATTRS}), which rule 2 shortens.
  */
 export function resolvePaintAttrs(record: SvgAttrsPaint): {
   plain: SvgAttrs;
@@ -189,9 +251,11 @@ export function resolvePaintAttrs(record: SvgAttrsPaint): {
   let def = '';
   for (const [key, value] of Object.entries(record)) {
     if (value !== null && typeof value === 'object') {
-      const resolved = paintToSvg(value);
-      plain[key] = resolved.fill;
-      def += resolved.def ?? '';
+      const resolved = resolvePaint(value);
+      plain[key] = resolved.value;
+      def += resolved.def;
+    } else if (typeof value === 'string' && COLOR_ATTRS.has(key)) {
+      plain[key] = shortenColor(value);
     } else {
       plain[key] = value;
     }
@@ -200,12 +264,55 @@ export function resolvePaintAttrs(record: SvgAttrsPaint): {
 }
 
 // ---------------------------------------------------------------------------
+// Emission rules shared with the shape emitters (./svg-shapes)
+// ---------------------------------------------------------------------------
+
+/** The `stroke`/`fill` value meaning "do not paint this". */
+export const PAINT_NONE = 'none';
+
+/** Hoisted onto the document root and inherited by every `<text>`, so a
+ *  `<text>` in this family emits no `font-family` of its own (rule 3).
+ *  @see .../klimt/drawing/svg/SvgGraphics.java (gRoot's `font-family`) */
+export const ROOT_FONT_FAMILY = 'sans-serif';
+
+/** Hoisted onto the document root the same way (rule 3). Upstream takes it
+ *  from `SvgOption.getLengthAdjust()`; every text emitter in this codebase
+ *  uses `spacing` (klimt's own `LengthAdjust.SPACING` default). */
+const ROOT_LENGTH_ADJUST = 'spacing';
+
+/**
+ * Rule 4 — `stroke:none` suppresses BOTH `stroke-width` and
+ * `stroke-dasharray`: with nothing painted, neither has any effect, and
+ * upstream drops both under one `if ("none".equals(stroke) == false)` guard.
+ * @see .../klimt/drawing/svg/SvgGraphics.java (the style builder)
+ */
+export function strokeDecorationOf(
+  stroke: string | undefined,
+  strokeWidth: number | undefined,
+  strokeDasharray: string | undefined,
+): { strokeWidth: number | undefined; strokeDasharray: string | undefined } {
+  if (stroke === PAINT_NONE) return { strokeWidth: undefined, strokeDasharray: undefined };
+  return { strokeWidth, strokeDasharray };
+}
+
+/** {@link formatDecimal} at the default precision — for the handful of
+ *  numeric values this module interpolates into markup directly rather than
+ *  passing through {@link attrs} (which threads `decimals` per ADR-2; these
+ *  sites have no options object to thread it from). */
+function fmt(x: number): string {
+  return formatDecimal(x, DEFAULT_SVG_DECIMALS);
+}
+
+// ---------------------------------------------------------------------------
 // Primitive builders
 // ---------------------------------------------------------------------------
 
 
-// Shape emitters moved to a sibling module (line cap); re-exported.
-export { rect, line, text, image, path, ellipse, diamond, polygon } from './svg-shapes.js';
+// Shape emitters moved to a sibling module (line cap); re-exported. `noteBox`
+// joined them for the same reason when the emission rules below grew this
+// file past the cap.
+export { rect, line, text, image, path, ellipse, diamond, polygon, noteBox } from './svg-shapes.js';
+export type { NoteBoxStyle } from './svg-shapes.js';
 
 /**
  * `<g>` group element — two overloads:
@@ -295,7 +402,7 @@ export function foreignObject(
   content: string,
 ): string {
   return (
-    `<foreignObject x="${x}" y="${y}" width="${w}" height="${h}">` +
+    `<foreignObject x="${fmt(x)}" y="${fmt(y)}" width="${fmt(w)}" height="${fmt(h)}">` +
     content +
     `</foreignObject>`
   );
@@ -304,52 +411,6 @@ export function foreignObject(
 // ---------------------------------------------------------------------------
 // SVG root
 // ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Note box (sticky-note shape with dog-ear fold)
-// ---------------------------------------------------------------------------
-
-export interface NoteBoxStyle {
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  dogEar?: number;
-}
-
-/**
- * Renders a sticky-note shape: a rectangle with the top-right corner
- * replaced by a folded dog-ear, plus two crease lines that show the fold.
- *
- * Returns only the shape SVG — callers render text on top.
- *
- * @param dogEar - Size of the folded corner in px (default 10).
- */
-export function noteBox(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  style: NoteBoxStyle = {},
-): string {
-  const {
-    fill = '#FEFECE',
-    stroke = '#AAAAAA',
-    strokeWidth = 1,
-    dogEar = 10,
-  } = style;
-  const sw = strokeWidth;
-  const d = dogEar;
-  // Pentagon: top-left → fold-point on top edge → dog-ear corner → bottom-right → bottom-left
-  const body =
-    `<path d="M${x},${y} L${x + w - d},${y} L${x + w},${y + d} ` +
-    `L${x + w},${y + h} L${x},${y + h} Z" ` +
-    `fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
-  // Two crease lines: vertical drop from fold-point, then horizontal to right edge
-  const crease =
-    `<line x1="${x + w - d}" y1="${y}" x2="${x + w - d}" y2="${y + d}" stroke="${stroke}" stroke-width="${sw}"/>` +
-    `<line x1="${x + w - d}" y1="${y + d}" x2="${x + w}" y2="${y + d}" stroke="${stroke}" stroke-width="${sw}"/>`;
-  return body + crease;
-}
 
 /**
  * Builds the outer `<svg>` wrapper.
@@ -399,15 +460,18 @@ export function svgRoot(
 ): string {
   const markers = ALL_ARROW_TYPES.map((t) => arrowHead(t, bgColor));
   const defsBlock = defs([...markers, extraDefs]);
-  const isSolid = bgColor !== 'transparent' && bgColor !== 'none';
+  const isSolid = bgColor !== 'transparent' && bgColor !== PAINT_NONE;
   const bgRect = isSolid
-    ? `<rect width="${width}" height="${height}" fill="${bgColor}"/>`
+    ? `<rect width="${fmt(width)}" height="${fmt(height)}" fill="${shortenColor(bgColor)}"/>`
     : '';
   const body = dedupeGradientDefs(defsBlock + bgRect + children.join(''));
+  // Rule 3: `font-family`/`lengthAdjust` are hoisted here and inherited, so
+  // no `<text>` below repeats them (see `svg-shapes.ts#text`).
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" ` +
-    `width="${width}" height="${height}" ` +
-    `viewBox="0 0 ${width} ${height}">` +
+    `width="${fmt(width)}" height="${fmt(height)}" ` +
+    `viewBox="0 0 ${fmt(width)} ${fmt(height)}" ` +
+    `font-family="${ROOT_FONT_FAMILY}" lengthAdjust="${ROOT_LENGTH_ADJUST}">` +
     body +
     `</svg>`
   );
