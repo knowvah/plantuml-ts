@@ -38,8 +38,21 @@ describe('SvgGraphics — document preamble (D4′, AC1)', () => {
         ' version="1.1" data-diagram-type="DESCRIPTION"' +
         ' style="width:79px;height:301px;background:#FFFFFF;" width="79px" height="301px"' +
         ' viewBox="0 0 79 301" zoomAndPan="magnify" preserveAspectRatio="none"' +
-        ' contentStyleType="text/css"><?plantuml $version$?><defs/><g/></svg>',
+        ' contentStyleType="text/css"><?plantuml $version$?><defs/>' +
+        '<g font-family="sans-serif" lengthAdjust="spacing"/></svg>',
     );
+  });
+
+  // Rule 3, root half: `font-family`/`lengthAdjust` hoisted onto the root
+  // `<g>` unconditionally (per-`<text>` suppression is T4's job).
+  it('root <g> always carries font-family="sans-serif" regardless of lengthAdjust', () => {
+    const svg = new SvgGraphics(0, basicSvgOption({ lengthAdjust: LengthAdjust.NONE }), 'v');
+    expect(svg.createXml()).toContain('<g font-family="sans-serif"/>');
+  });
+
+  it('root <g> carries lengthAdjust="spacingAndGlyphs" for that option value', () => {
+    const svg = new SvgGraphics(0, basicSvgOption({ lengthAdjust: LengthAdjust.SPACING_AND_GLYPHS }), 'v');
+    expect(svg.createXml()).toContain('<g font-family="sans-serif" lengthAdjust="spacingAndGlyphs"/>');
   });
 
   it('emits a <style> hover rule into <defs> when option.hover is set', () => {
@@ -76,7 +89,7 @@ describe('SvgGraphics — document preamble (D4′, AC1)', () => {
     );
     const xml = svg.createXml();
     expect(xml).toContain('<linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="g00">');
-    expect(xml).toContain('<rect x="0" y="0" width="10" height="10" fill="url(#g00)" style="stroke:none;stroke-width:1;"/>');
+    expect(xml).toContain('<rect x="0" y="0" width="10" height="10" fill="url(#g00)" style="stroke:none;"/>');
     expect(xml).not.toContain('background:');
   });
 
@@ -116,30 +129,36 @@ describe('SvgGraphics — document preamble (D4′, AC1)', () => {
   });
 });
 
-describe('SvgGraphics — number formatting (D4′, AC2)', () => {
-  it('formats fractional ellipse coordinates matching the jar (cited: test-results/dot-cache/component/babafi-51-dixi026/in.svg — <ellipse cx="32.4688" cy="14" rx="8" ry="8" .../>)', () => {
+describe('SvgGraphics — number formatting (D4′, AC2, rule 1: decimal option default 3)', () => {
+  it('formats fractional ellipse coordinates at the default 3-decimal precision (rule 1: SvgOption.decimal default 3, ADR-2)', () => {
     const svg = new SvgGraphics(1, basicSvgOption(), 'v');
     svg.svgEllipse(32.4688, 14, 8, 8, 0);
     expect(svg.createXml()).toContain(
-      '<ellipse cx="32.4688" cy="14" rx="8" ry="8" fill="black" style="stroke:black;stroke-width:1;"/>',
+      '<ellipse cx="32.469" cy="14" rx="8" ry="8" fill="black" style="stroke:black;stroke-width:1;"/>',
     );
   });
 
-  it('drops a trailing .0000 to a bare integer, and trims trailing zeros otherwise', () => {
+  it('drops a trailing .000 to a bare integer, and trims trailing zeros otherwise', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.svgEllipse(10, 10.5, 3.14159, 3, 0);
-    expect(svg.createXml()).toContain('cx="10" cy="10.5" rx="3.1416" ry="3"');
+    expect(svg.createXml()).toContain('cx="10" cy="10.5" rx="3.142" ry="3"');
   });
 
-  it("rounds HALF_UP off the shortest round-trip decimal, not the double's raw binary value (Java %.4f semantics -- jar: java.util.Formatter's FloatingDecimal-based conversion; component/luniju-97-tuja870 pins textLength=\"8.6938\" for a value whose true binary double is 8.6937499999999996, which naive toFixed(4) rounds DOWN to \"8.6937\")", () => {
+  // HALF_UP-off-shortest-round-trip-decimal semantics (not the double's raw
+  // binary value) are exhaustively covered at the pure-function level in
+  // `tests/unit/core/svg-format.test.ts` (T1, incl. this exact 3-decimal
+  // boundary: `formatDecimal(77.8125, 3) === '77.813'`). This test only pins
+  // that `format()` threads `option.decimal` through to `formatDecimal`.
+  it('threads option.decimal through to formatDecimal at the SvgGraphics integration layer', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
-    // 10.7 * 0.8125 === 8.69375 as a JS literal, but its exact IEEE754
-    // double value is 8.6937499999999996447... -- toFixed(4) rounds off
-    // that exact binary value (giving "8.6937"), while Java's %.4f rounds
-    // off the value's shortest round-trip decimal string "8.69375"
-    // (giving "8.6938"). This test pins the jar-matching behavior.
-    svg.svgEllipse(8.69375, 10, 3, 3, 0);
-    expect(svg.createXml()).toContain('cx="8.6938"');
+    svg.svgEllipse(77.8125, 10, 3, 3, 0);
+    expect(svg.createXml()).toContain('cx="77.813"');
+  });
+
+  it('a non-default option.decimal changes coordinate precision (ADR-2: threaded, not a constant)', () => {
+    const svg = new SvgGraphics(0, basicSvgOption({ decimal: 1 }), 'v');
+    svg.svgEllipse(32.4688, 10, 3, 3, 0);
+    expect(svg.createXml()).toContain('cx="32.5"');
   });
 });
 
@@ -175,21 +194,22 @@ describe('SvgGraphics — gradients (D2′, AC3)', () => {
     expect(svg.createXml()).toContain('x1="0%" y1="0%" x2="100%" y2="100%"');
   });
 
-  it('emits two <stop> children (0%/100% offsets) per gradient', () => {
+  it('emits two <stop> children (0%/100% offsets) per gradient, shortened (rule 2)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.createSvgGradient('#AAAAAA', '#BBBBBB', '/');
     const xml = svg.createXml();
-    expect(xml).toContain('<stop stop-color="#AAAAAA" offset="0%"/>');
-    expect(xml).toContain('<stop stop-color="#BBBBBB" offset="100%"/>');
+    expect(xml).toContain('<stop stop-color="#AAA" offset="0%"/>');
+    expect(xml).toContain('<stop stop-color="#BBB" offset="100%"/>');
   });
 
-  it('resolves named/bare-hex gradient stop colors to their jar hex (G1 I10 gradient-stop finding)', () => {
-    // component/raxata-43-buni314: `#yellow\\FFFFFF` -- stop-color="#FFFF00"/"#FFFFFF".
+  it('resolves named/bare-hex gradient stop colors to their jar hex, then shortens (G1 I10, rule 2)', () => {
+    // component/raxata-43-buni314: `#yellow\\FFFFFF` -- stop-color="#FFFF00"/"#FFFFFF"
+    // pre-shortenColor; both pair-collapse to `#FF0`/`#FFF`.
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.createSvgGradient('yellow', 'FFFFFF', '\\');
     const xml = svg.createXml();
-    expect(xml).toContain('<stop stop-color="#FFFF00" offset="0%"/>');
-    expect(xml).toContain('<stop stop-color="#FFFFFF" offset="100%"/>');
+    expect(xml).toContain('<stop stop-color="#FF0" offset="0%"/>');
+    expect(xml).toContain('<stop stop-color="#FFF" offset="100%"/>');
   });
 
   it('dedups a differently-spelled but equal-color gradient to the SAME id (resolved-value key, G1c)', () => {
@@ -288,11 +308,13 @@ describe('SvgGraphics — groups & comments (AC4)', () => {
 });
 
 describe('SvgGraphics — fill/stroke state', () => {
-  it('splits an 8-hex fill into fill + fill-opacity (fillMe alpha branch)', () => {
+  it('splits an 8-hex fill into fill + fill-opacity, both shortened/reformatted (fillMe alpha branch, rules 2+6)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.setFillColor('#11223380');
     svg.svgRectangle({ x: 0, y: 0, width: 5, height: 5, rx: 0, ry: 0 }, 0);
-    expect(svg.createXml()).toContain('fill="#112233" fill-opacity="0.50196"');
+    // fill: shortenColor('#112233') -> '#123'. opacity: 0x80/255 -> formatOpacity
+    // at max(decimal, 2)=3 places -> '0.502' (not the old literal '.toFixed(5)').
+    expect(svg.createXml()).toContain('fill="#123" fill-opacity="0.502"');
   });
 
   it('WITH_FILL_NONE converts "#00000000" to fill="none"', () => {
@@ -302,11 +324,13 @@ describe('SvgGraphics — fill/stroke state', () => {
     expect(svg.createXml()).toContain('fill="none"');
   });
 
-  it('WITH_FILL_OPACITY preserves "#00000000" for fillMe to split into fill+fill-opacity', () => {
+  it('WITH_FILL_OPACITY preserves "#00000000" for fillMe to split into fill+fill-opacity (rules 2+6)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.setFillColor('#00000000', TransparentFillBehavior.WITH_FILL_OPACITY);
     svg.svgRectangle({ x: 0, y: 0, width: 5, height: 5, rx: 0, ry: 0 }, 0);
-    expect(svg.createXml()).toContain('fill="#000000" fill-opacity="0.00000"');
+    // fill: shortenColor('#000000') -> '#000'. opacity 0 -> formatOpacity's
+    // `<= 0` short-circuit -> '0' (not '0.00000').
+    expect(svg.createXml()).toContain('fill="#000" fill-opacity="0"');
   });
 
   it('WITH_FILL_OPACITY falls back to fixColor(null) when fill is null', () => {
@@ -316,11 +340,11 @@ describe('SvgGraphics — fill/stroke state', () => {
     expect(svg.createXml()).toContain('fill="none"');
   });
 
-  it('setStrokeColor(null) maps to stroke:none', () => {
+  it('setStrokeColor(null) maps to stroke:none, suppressing stroke-width/stroke-dasharray (rule 4)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.setStrokeColor(null);
     svg.svgLine(0, 0, 5, 5, 0);
-    expect(svg.createXml()).toContain('style="stroke:none;stroke-width:1;"');
+    expect(svg.createXml()).toContain('style="stroke:none;"');
   });
 
   // G1c: fixColor is the choke point resolving named colors/bare hex to
@@ -342,11 +366,11 @@ describe('SvgGraphics — fill/stroke state', () => {
     expect(svg.createXml()).toContain('stroke:#FFA500;');
   });
 
-  it('canonicalizes a bare (no leading #) hex fill (G1 I10 bare-hex finding)', () => {
+  it('canonicalizes a bare (no leading #) hex fill, then shortens (G1 I10 bare-hex finding, rule 2)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.setFillColor('0000ff');
     svg.svgRectangle({ x: 0, y: 0, width: 5, height: 5, rx: 0, ry: 0 }, 0);
-    expect(svg.createXml()).toContain('fill="#0000FF"');
+    expect(svg.createXml()).toContain('fill="#00F"');
   });
 
   it('collapses a named "transparent"/"background" fill to fill="none" (G1 I5d, generalized beyond backcolor)', () => {
