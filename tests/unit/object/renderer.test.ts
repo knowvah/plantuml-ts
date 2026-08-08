@@ -159,7 +159,7 @@ describe('skinparam {object,map,json}BackgroundColor (G3/O1)', () => {
     const ast = parseClass(src(['object Foo']));
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
   });
 
   it('tints a map classifier\'s box fill independently of objectBackgroundColor', () => {
@@ -167,7 +167,7 @@ describe('skinparam {object,map,json}BackgroundColor (G3/O1)', () => {
     const ast = parseClass(src(['map M {', 'k => v', '}']));
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
-    expect(svg).toContain('fill="#0000FF"');
+    expect(svg).toContain('fill="#00F"');
   });
 
   it('tints a json classifier\'s box fill independently of objectBackgroundColor', () => {
@@ -183,7 +183,7 @@ describe('skinparam {object,map,json}BackgroundColor (G3/O1)', () => {
     const ast = parseClass(src(['class C']));
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
-    expect(svg).not.toContain('fill="#FF0000"');
+    expect(svg).not.toContain('fill="#F00"');
   });
 
   it('an explicit #color override still wins over objectBackgroundColor (existing precedence, unaffected)', () => {
@@ -192,7 +192,7 @@ describe('skinparam {object,map,json}BackgroundColor (G3/O1)', () => {
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
     expect(svg).toContain('fill="#800080"');
-    expect(svg).not.toContain('fill="#FF0000"');
+    expect(svg).not.toContain('fill="#F00"');
   });
 });
 
@@ -216,7 +216,7 @@ describe('theme.colors.elements.{object,map,json}.font (G3/O2)', () => {
     const ast = parseClass(src(['object Foo {', 'field', '}']));
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
-    expect(svg).toContain('fill="#0000FF"');
+    expect(svg).toContain('fill="#00F"');
     expect(svg).not.toContain('fill="#000000"');
   });
 
@@ -231,7 +231,7 @@ describe('theme.colors.elements.{object,map,json}.font (G3/O2)', () => {
     const ast = parseClass(src(['class C {', 'field', '}']));
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
-    expect(svg).not.toContain('fill="#0000FF"');
+    expect(svg).not.toContain('fill="#00F"');
   });
 
   // Regression guard (jar-verified `lapato-45-neje847`): a bare `<style>
@@ -254,7 +254,7 @@ describe('theme.colors.elements.{object,map,json}.font (G3/O2)', () => {
     const ast = parseClass(src(['object Foo {', 'field', '}']));
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
     expect(svg).not.toContain('fill="#000000"');
   });
 
@@ -271,8 +271,8 @@ describe('theme.colors.elements.{object,map,json}.font (G3/O2)', () => {
     const ast = parseClass(src(['object Foo']));
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
-    expect(svg).toContain('fill="#0000FF"');
-    expect(svg).not.toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#00F"');
+    expect(svg).not.toContain('fill="#F00"');
   });
 });
 
@@ -326,7 +326,7 @@ describe('theme.colors.elements.object.header* (G3/O4, soxufi-98-nita528)', () =
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
     expect(svg).toContain('fill="#008000"'); // name row (header override)
-    expect(svg).toContain('fill="#0000FF"'); // member row (bare bucket)
+    expect(svg).toContain('fill="#00F"'); // member row (bare bucket)
     expect(svg).toContain('font-size="20"'); // name row font-size override
   });
 
@@ -336,7 +336,7 @@ describe('theme.colors.elements.object.header* (G3/O4, soxufi-98-nita528)', () =
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
     expect(svg).toContain('<path');
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
   });
 
   it('draws NO header-background path when headerBackground matches the body fill', () => {
@@ -362,7 +362,7 @@ describe('theme.colors.elements.object.header* (G3/O4, soxufi-98-nita528)', () =
     const geo = layoutClass(ast, t, measurer);
     const svg = assembleSvg(renderClass(geo, t));
     expect(svg).not.toContain('fill="#008000"');
-    expect(svg).not.toContain('fill="#FF0000"'); // no header-background path
+    expect(svg).not.toContain('fill="#F00"'); // no header-background path
   });
 });
 

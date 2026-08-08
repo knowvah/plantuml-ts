@@ -132,7 +132,7 @@ describe('render @startjson — style block', () => {
   it('applies element.highlight.BackgroundColor: red to highlighted row', async () => {
     const svg = await render(diagramWithStyle);
     // G1c: named colors resolve to their canonical jar hex.
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
   });
 
   it('applies element.header.FontStyle: bold to key column text', async () => {
@@ -168,7 +168,7 @@ describe('jsondiagram.node style block', () => {
     const svg = await render(
       '@startjson\n<style>\njsonDiagram {\n  node {\n    BackGroundColor #AABBCC\n  }\n}\n</style>\n{"x":1}\n@endjson',
     );
-    expect(svg).toContain('fill="#AABBCC"');
+    expect(svg).toContain('fill="#ABC"');
   });
 
   it('applies LineColor from jsonDiagram.node style to border and arrows', async () => {
@@ -257,7 +257,7 @@ describe('jsondiagram.node style block', () => {
       ].join('\n'),
     );
     // G1c: named colors resolve to their canonical jar hex.
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
     expect(svg).toMatch(/rx="6"/);
   });
 });

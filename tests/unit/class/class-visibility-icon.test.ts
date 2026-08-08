@@ -40,7 +40,7 @@ describe('renderVisibilityIcon — field (stroke-only) vs method (filled)', () =
     const svg = renderVisibilityIcon('+', true, 13, 102.5);
     expect(svg).toBe(
       '<g data-visibility-modifier="PUBLIC_FIELD">' +
-        '<ellipse cx="18" cy="107.5" rx="3" ry="3" fill="none" stroke="#038048" stroke-width="1"/></g>',
+        '<ellipse cx="18" cy="107.5" rx="3" ry="3" fill="none" style="stroke:#038048;stroke-width:1;"/></g>',
     );
   });
 
@@ -48,14 +48,14 @@ describe('renderVisibilityIcon — field (stroke-only) vs method (filled)', () =
     const svg = renderVisibilityIcon('+', false, 13, 102.5);
     expect(svg).toBe(
       '<g data-visibility-modifier="PUBLIC_METHOD">' +
-        '<ellipse cx="18" cy="107.5" rx="3" ry="3" fill="#84BE84" stroke="#038048" stroke-width="1"/></g>',
+        '<ellipse cx="18" cy="107.5" rx="3" ry="3" fill="#84BE84" style="stroke:#038048;stroke-width:1;"/></g>',
     );
   });
 
   it('IE_MANDATORY is always filled, even on a field row', () => {
     const svg = renderVisibilityIcon('*', true, 13, 102.5);
     expect(svg).toContain('data-visibility-modifier="IE_MANDATORY"');
-    expect(svg).toContain('fill="#000000" stroke="#000000"');
+    expect(svg).toContain('fill="#000" style="stroke:#000;');
   });
 });
 
@@ -64,7 +64,7 @@ describe('renderVisibilityIcon — shape geometry (jar-verified, lufide-34-cexu0
     // jar field1: originX=13,originY=46.5 -> rect x=15 y=48.5 w=h=6.
     const svg = renderVisibilityIcon('-', true, 13, 46.5);
     expect(svg).toContain(
-      '<rect x="15" y="48.5" width="6" height="6" fill="none" stroke="#C82930" stroke-width="1"/>',
+      '<rect x="15" y="48.5" width="6" height="6" fill="none" style="stroke:#C82930;stroke-width:1;"/>',
     );
   });
 
@@ -72,15 +72,15 @@ describe('renderVisibilityIcon — shape geometry (jar-verified, lufide-34-cexu0
     // jar field2: originX=13,originY=60.5 -> points 18,61.5,14,67.5,22,67.5.
     const svg = renderVisibilityIcon('~', true, 13, 60.5);
     expect(svg).toContain('points="18,61.5,14,67.5,22,67.5"');
-    expect(svg).toContain('stroke="#1963A0"');
-    expect(svg).toContain('stroke-linejoin="miter" stroke-miterlimit="10"');
+    expect(svg).toContain('stroke:#1963A0;');
+    expect(svg).toContain('stroke-linejoin:miter;stroke-miterlimit:10;');
   });
 
   it('protected: diamond polygon, translate(x+1,y)', () => {
     // jar field4: originX=13,originY=88.5 -> points 18,88.5,22,92.5,18,96.5,14,92.5.
     const svg = renderVisibilityIcon('#', true, 13, 88.5);
     expect(svg).toContain('points="18,88.5,22,92.5,18,96.5,14,92.5"');
-    expect(svg).toContain('stroke="#B38D22"');
+    expect(svg).toContain('stroke:#B38D22;');
   });
 
   it('filled package method uses the BackgroundColor fill', () => {
@@ -98,7 +98,7 @@ describe('renderVisibilityIcon — shape geometry (jar-verified, lufide-34-cexu0
     expect(points[3]).toBeCloseTo(145.5, 2);
     expect(points[4]).toBeCloseTo(22, 2);
     expect(points[5]).toBeCloseTo(145.5, 2);
-    expect(svg).toContain('fill="#4177AF" stroke="#1963A0"');
+    expect(svg).toContain('fill="#4177AF" style="stroke:#1963A0;');
   });
 });
 
@@ -114,7 +114,7 @@ describe('renderVisibilityIcon — url param (G2 N21)', () => {
       '<g data-visibility-modifier="PUBLIC_FIELD">' +
         '<a target="_top" href="http://x.com" xlink:href="http://x.com" xlink:type="simple" ' +
         'xlink:actuate="onRequest" xlink:show="new" title="http://x.com" xlink:title="http://x.com">' +
-        '<ellipse cx="18" cy="107.5" rx="3" ry="3" fill="none" stroke="#038048" stroke-width="1"/>' +
+        '<ellipse cx="18" cy="107.5" rx="3" ry="3" fill="none" style="stroke:#038048;stroke-width:1;"/>' +
         '</a></g>',
     );
   });
@@ -166,26 +166,26 @@ describe('renderVisibilityIcon — theme icon-color overrides (G2 N54)', () => {
 
   it('protected method background diverges from the hardcoded default when overridden', () => {
     const svg = renderVisibilityIcon('#', false, 13, 88.5, undefined, themeWithOverride);
-    expect(svg).toContain('fill="#FECF6C" stroke="#B38D22"');
+    expect(svg).toContain('fill="#FECF6C" style="stroke:#B38D22;');
   });
 
   it('no theme param -- falls back to the hardcoded default (unchanged behavior)', () => {
     const svg = renderVisibilityIcon('#', false, 13, 88.5);
-    expect(svg).toContain('fill="#FFFF44" stroke="#B38D22"');
+    expect(svg).toContain('fill="#FF4" style="stroke:#B38D22;');
   });
 
   it('theme with no graph override set -- falls back to the hardcoded default', () => {
     const svg = renderVisibilityIcon('#', false, 13, 88.5, undefined, defaultTheme);
-    expect(svg).toContain('fill="#FFFF44" stroke="#B38D22"');
+    expect(svg).toContain('fill="#FF4" style="stroke:#B38D22;');
   });
 
   it('IE_MANDATORY ignores the theme entirely -- no skinparam override path upstream', () => {
     const svg = renderVisibilityIcon('*', true, 13, 102.5, undefined, themeWithOverride);
-    expect(svg).toContain('fill="#000000" stroke="#000000"');
+    expect(svg).toContain('fill="#000" style="stroke:#000;');
   });
 
   it('public field: unfilled, LineColor override applies to stroke only', () => {
     const svg = renderVisibilityIcon('+', true, 13, 102.5, undefined, themeWithOverride);
-    expect(svg).toContain('fill="none" stroke="#038048"');
+    expect(svg).toContain('fill="none" style="stroke:#038048;');
   });
 });

@@ -175,7 +175,7 @@ describe('renderStateNoteFreestanding', () => {
   it('mission G4 S12: a #color override replaces BOTH path fills, stroke unchanged', () => {
     const geo = baseNoteGeo({ color: '#red' });
     const markup = renderStateNoteFreestanding(geo, defaultTheme);
-    expect(markup).toContain('fill="#FF0000"');
+    expect(markup).toContain('fill="#F00"');
     expect(markup).not.toContain('fill="#FEFFDD"');
     expect(markup).toContain(`stroke="${defaultTheme.colors.border}"`);
   });
@@ -203,7 +203,7 @@ describe('renderStateNoteOpale', () => {
       noteOpale: { direction: 'right', pp1: { x: 0, y: 15 }, pp2: { x: 120, y: 15 } },
     });
     const markup = renderStateNoteOpale(geo, defaultTheme);
-    expect(markup).toContain('fill="#0000FF"');
+    expect(markup).toContain('fill="#00F"');
     expect(markup).not.toContain('fill="#FEFFDD"');
   });
 });

@@ -113,7 +113,7 @@ function wrapDocument(rootAttrs: string, body: string): string {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ${rootAttrs}` +
     ` zoomAndPan="magnify" preserveAspectRatio="none" contentStyleType="text/css">` +
-    `<?plantuml $version$?><defs/><g>${body}</g></svg>`
+    `<?plantuml $version$?><defs/><g font-family="sans-serif" lengthAdjust="spacing">${body}</g></svg>`
   );
 }
 
@@ -339,7 +339,7 @@ describe('USymbolCollections', () => {
     // filter's <defs> registration precedes both rects in document
     // order, so scope the check to the <g>...</g> body, not the whole
     // document.
-    const bodyStart = svg.indexOf('<g>');
+    const bodyStart = svg.search(/<g[ >]/);
     const firstRectClose = svg.indexOf('/>', bodyStart);
     expect(svg.slice(bodyStart, firstRectClose)).toContain('filter=');
     expect(svg.slice(firstRectClose)).not.toContain('filter=');

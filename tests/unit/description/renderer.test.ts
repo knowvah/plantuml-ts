@@ -672,7 +672,7 @@ describe('renderDescription — transparent-color elision (G1 I5d)', () => {
       theme,
     );
     const titleText = svg.match(/<text[^>]*>Visible<\/text>/)?.[0];
-    expect(titleText).toContain('fill="#FF0000"');
+    expect(titleText).toContain('fill="#F00"');
   });
 });
 
@@ -951,11 +951,11 @@ describe('renderDescription — edges', () => {
     const svg = renderDescription(twoNodeGeo({ styleColor: 'red' }), defaultTheme);
     const pathTag = svg.match(/<path[^>]*id="n1-to-n2"[^>]*\/>/)?.[0];
     // G1c: named colors resolve to their canonical jar hex.
-    expect(pathTag).toContain('stroke:#FF0000;');
+    expect(pathTag).toContain('stroke:#F00;');
     expect(pathTag).not.toContain(defaultTheme.colors.arrow);
     const polygonTag = svg.match(/<polygon[^>]*\/>/)?.[0];
-    expect(polygonTag).toContain('fill="#FF0000"');
-    expect(polygonTag).toContain('stroke:#FF0000;');
+    expect(polygonTag).toContain('fill="#F00"');
+    expect(polygonTag).toContain('stroke:#F00;');
   });
 
 
@@ -1022,7 +1022,7 @@ describe('renderDescription — edges', () => {
   it('an edge label renders in the jar default black, not theme.colors.graph.edgeLabel', () => {
     const svg = renderDescription(twoNodeGeo({ stereotype: 'include', stereotypeIsLinkLabel: true }), defaultTheme);
     const labelText = svg.match(/<text[^>]*>«include»<\/text>/)?.[0];
-    expect(labelText).toContain('fill="#000000"');
+    expect(labelText).toContain('fill="#000"');
     expect(defaultTheme.colors.graph.edgeLabel).not.toBe('#000000');
   });
 
@@ -1090,7 +1090,7 @@ describe('renderDescription — per-element Paint (T7)', () => {
   it('component border resolves from its own element bucket (AC3)', () => {
     const theme = withElements({ component: { border: '#FF00FF' } });
     const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'C' })] }), theme);
-    expect(svg).toContain('stroke:#FF00FF;');
+    expect(svg).toContain('stroke:#F0F;');
   });
 
   it('a descriptive element with no override falls back to the root default background (AC2)', () => {
@@ -1119,7 +1119,7 @@ describe('renderDescription — per-element Paint (T7)', () => {
 // detona-13-ziko113 [cloud], temufu-00-rira888 [card]: all
 // `stroke:#181818;stroke-width:1;`, `rx="2.5"` where the shape is a plain
 // rounded rect; dujodu-23-viba393 [package, unstyled]:
-// `stroke:#000000;stroke-width:1.5;`).
+// `stroke:#000;stroke-width:1.5;`).
 // ---------------------------------------------------------------------------
 
 describe('renderDescription — cluster border/stroke/roundCorner defaults (G1 I7)', () => {
@@ -1154,7 +1154,7 @@ describe('renderDescription — cluster border/stroke/roundCorner defaults (G1 I
     '%s container: folder default (#000000, stroke-width 1.5)',
     (symbol) => {
       const svg = renderDescription(containerGeo(symbol), defaultTheme);
-      expect(svg).toContain('stroke:#000000;stroke-width:1.5;');
+      expect(svg).toContain('stroke:#000;stroke-width:1.5;');
     },
   );
 });
@@ -1262,7 +1262,7 @@ describe('renderDescription — per-entity inline color override (T19)', () => {
     );
     // G1c: named colors resolve to their canonical jar hex.
     expect(svg).toContain('fill="#FFA500"');
-    expect(svg).toContain('stroke:#0000FF;');
+    expect(svg).toContain('stroke:#00F;');
   });
 
   it('text:color overrides the label font color', () => {

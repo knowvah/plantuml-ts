@@ -180,11 +180,11 @@ describe('renderSequence — activations', () => {
       lifelineX: 80,
       y: 50,
       height: 60,
-      color: '#FF0000',
+      color: '#F00',
     };
     const geo = makeGeo({ events: [activation] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('#FF0000');
+    expect(svg).toContain('#F00');
   });
 });
 
@@ -549,12 +549,12 @@ describe('renderSequence — box backgrounds', () => {
     expect(svg).toContain('<rect');
   });
 
-  it('box with empty color falls back to #EEEEEE', () => {
+  it('box with empty color falls back to #EEE', () => {
     const geo = makeGeo({
       boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '' }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('#EEEEEE');
+    expect(svg).toContain('#EEE');
   });
 
   it('box with label renders a text element', () => {

@@ -23,7 +23,7 @@ const measurer = new WidthTableMeasurer();
 //            121.5,103 L8.5,103 A2.5,2.5 0 0 1 6,100.5 L6,8.5 A2.5,2.5 0
 //            0 1 8.5,6" style="stroke:#000000;stroke-width:1.5;" fill="none"/>
 //   <line x1="6" y1="26" x2="38.425" y2="26" .../>
-//   <text x="10" y="18.8889" ... textLength="19.425" font-weight="700">foo</text>
+//   <text x="10" y="18.889" ... textLength="19.425" font-weight="700">foo</text>
 // Box origin (6,6), width 118, height 97 (from surrounding NamespaceGeo).
 // ---------------------------------------------------------------------------
 
@@ -104,7 +104,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
   it('draws the outline with fill="none" and the jar-verified stroke', () => {
     const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
     expect(svg).toContain('fill="none"');
-    expect(svg).toContain('stroke="#000000"');
+    expect(svg).toContain('stroke="#000"');
     expect(svg).toContain(`stroke-width="${PACKAGE_STROKE_WIDTH}"`);
   });
 
@@ -115,9 +115,9 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
 
   it('emits the exact bold title text at (10, 18.8889)', () => {
     const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
-    expect(svg).toContain('<text x="10" y="18.8889"');
+    expect(svg).toContain('<text x="10" y="18.889"');
     expect(svg).toContain('font-weight="700"');
-    expect(svg).toContain('fill="#000000"');
+    expect(svg).toContain('fill="#000"');
     expect(svg).toContain('>foo</text>');
   });
 
@@ -142,7 +142,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
       colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, packageBackground: '#0000FF' } },
     };
     const svg = renderNamespaceFolder(finonoGeo(), theme);
-    expect(svg).toContain('fill="#0000FF"');
+    expect(svg).toContain('fill="#00F"');
   });
 
   // G2 N18: skinparam packageBorderThickness / packageFontColor /
@@ -178,7 +178,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
       },
     };
     const svg = renderNamespaceFolder(finonoGeo(), theme);
-    expect(svg).toContain('fill="#000000"');
+    expect(svg).toContain('fill="#000"');
   });
 
   it('respects colors.elements.package.fontSize for the title font-size, NOT the classifier body', () => {

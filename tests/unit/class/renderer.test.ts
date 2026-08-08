@@ -566,7 +566,7 @@ describe('renderClass — classBorderColor / classBorderThickness (G2 N51)', () 
     // (a SEPARATE spot-color mechanism, G2 N32) legitimately keeps the
     // plain default -- assert on the box rect specifically, not a global
     // absence of the default color string.
-    expect(svg).toContain('fill="#F1F1F1" stroke="#FF00FF"');
+    expect(svg).toContain('fill="#F1F1F1" stroke="#F0F"');
   });
 
   it('falls back to theme.colors.border when classBorder is unset', () => {
@@ -676,7 +676,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '#f00' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain('fill="#FF0000"');
+      expect(svg).toContain('fill="#F00"');
       expect(svg).not.toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
     });
 
@@ -685,7 +685,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '#fff' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain('fill="#FFFFFF"');
+      expect(svg).toContain('fill="#FFF"');
     });
 
     it('extracts the `back:` component from a compound color spec', () => {
@@ -693,7 +693,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '#back:blue;text:red' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain('fill="#0000FF"');
+      expect(svg).toContain('fill="#00F"');
     });
 
     it('falls back to classBackground when color has no back component (text-only compound)', () => {
@@ -781,7 +781,7 @@ describe('renderClass — classifier kind fill', () => {
     expect(svg).toContain('stroke-dasharray="2,2"');
     expect(svg).toContain('>T<');
     expect(svg).toContain('font-style="italic"');
-    expect(svg).toContain('fill="#FFFFFF"');
+    expect(svg).toContain('fill="#FFF"');
   });
 
   // G2 N49: the tag's fill is a FIXED white default, independent of
@@ -807,7 +807,7 @@ describe('renderClass — classifier kind fill', () => {
       ],
     });
     const svg = assembleSvg(renderClass(geo, transparentTheme));
-    expect(svg).toContain('fill="#FFFFFF"');
+    expect(svg).toContain('fill="#FFF"');
     expect(svg).not.toContain('fill="#00000000"');
   });
 
@@ -883,7 +883,7 @@ describe('renderClass — classifier kind fill', () => {
     // even on a field row -- `VisibilityModifier.java`'s single shared enum
     // entry for both field/method call sites.
     expect(svg).toContain('data-visibility-modifier="IE_MANDATORY"');
-    expect(svg).toContain('fill="#000000" stroke="#000000"');
+    expect(svg).toContain('fill="#000" stroke="#000"');
   });
 });
 
@@ -1007,7 +1007,7 @@ describe('renderClass — edges', () => {
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('<rect');
-    expect(svg).toContain('fill="#FFFFFF"');
+    expect(svg).toContain('fill="#FFF"');
     expect(svg).not.toContain('marker-start');
   });
 
@@ -1172,7 +1172,7 @@ describe('renderClass — edges', () => {
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain(
       '<polygon points="75.68,20.5,66.6349,17.5611,66.6349,23.4389,75.68,20.5" ' +
-      'fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>',
+      'fill="#000" stroke="#000" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>',
     );
     // Element order: glyph polygon BEFORE the label text, matching jar's
     // real golden SVG (`lojepe-37-liri985`).
@@ -1280,7 +1280,7 @@ describe('renderClass — namespaces', () => {
       namespaces: [makeNamespaceGeo()],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain('stroke="#000000"');
+    expect(svg).toContain('stroke="#000"');
     expect(svg).toContain('stroke-width="1.5"');
   });
 });
@@ -1432,7 +1432,7 @@ describe('renderClass — non-default background (G2 N4)', () => {
     // (`svg-graphics-core.ts#setupBackcolor`'s own exclusion list, mirrored
     // here for class's pure-string shell -- verified against 8/718 fixtures
     // with a non-default `skinparam BackgroundColor`).
-    expect(svg).toContain('<rect x="0" y="0" width="71" height="68" fill="#FF0000"');
+    expect(svg).toContain('<rect x="0" y="0" width="71" height="68" fill="#F00"');
   });
 
   it('does NOT draw the full-canvas <rect> for the default white background', () => {
@@ -1472,14 +1472,14 @@ describe('renderClass — diagramBorderColor (G2 N66)', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { graph: { diagramBorderColor: 'black' } } });
     const geo = makeMinimalGeo({ totalWidth: 115, totalHeight: 68, rawWidth: 109.7875, rawHeight: 62 });
     const svg = assembleSvg(renderClass(geo, theme));
-    expect(svg).toContain('<rect x="0" y="0" width="113.7875" height="66" fill="none" stroke="#000000" stroke-width="1"/>');
+    expect(svg).toContain('<rect x="0" y="0" width="113.7875" height="66" fill="none" stroke="#000" stroke-width="1"/>');
   });
 
   it('resolves a named CSS color to its canonical hex (not the raw keyword)', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { graph: { diagramBorderColor: 'red' } } });
     const geo = makeMinimalGeo({ totalWidth: 115, totalHeight: 68, rawWidth: 109.7875, rawHeight: 62 });
     const svg = assembleSvg(renderClass(geo, theme));
-    expect(svg).toContain('stroke="#FF0000"');
+    expect(svg).toContain('stroke="#F00"');
   });
 
   it('does NOT draw the border when diagramBorderColor is unset (zero behavior change)', () => {

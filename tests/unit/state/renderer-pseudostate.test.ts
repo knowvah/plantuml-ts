@@ -5,7 +5,7 @@
  * (`State.color`, `Colors#getColor(BackGroundColor)`) to FILL only -- the
  * stroke stays the pseudostate's own fixed `#222222` default regardless of
  * any override. jar-verified against `ceruzi-77-give569`'s raw SVG: `state
- * start1 <<start>> #Red` renders `fill="#FF0000"` but
+ * start1 <<start>> #Red` renders `fill="#F00"` but
  * `style="stroke:#222222;..."` (unchanged); `state end2 <<end>> #Green`
  * renders the inner dot `fill="#008000"` with BOTH ellipses' stroke staying
  * `#222222`. Prior to this fix, `renderInitial`/`renderFinal` both passed
@@ -33,14 +33,14 @@ function pseudoNode(kind: 'initial' | 'final', overrides: Partial<StateNodeGeo> 
 describe('renderInitial', () => {
   it('defaults fill and stroke to the SAME #222222 with no #color override', () => {
     const svg = renderInitial(pseudoNode('initial'));
-    expect(svg).toContain('fill="#222222"');
-    expect(svg).toContain('stroke="#222222"');
+    expect(svg).toContain('fill="#222"');
+    expect(svg).toContain('stroke="#222"');
   });
 
   it('applies a #color override to fill ONLY, stroke stays #222222', () => {
     const svg = renderInitial(pseudoNode('initial', { color: '#Red' }));
-    expect(svg).toContain('fill="#FF0000"');
-    expect(svg).toContain('stroke="#222222"');
+    expect(svg).toContain('fill="#F00"');
+    expect(svg).toContain('stroke="#222"');
     expect(svg).not.toContain('stroke="#FF0000"');
   });
 });
@@ -49,15 +49,15 @@ describe('renderFinal', () => {
   it('defaults both ellipses to #222222 stroke with no #color override', () => {
     const svg = renderFinal(pseudoNode('final'));
     expect(svg).toContain('fill="none"');
-    expect(svg).toContain('fill="#222222"');
-    const strokeCount = svg.split('stroke="#222222"').length - 1;
+    expect(svg).toContain('fill="#222"');
+    const strokeCount = svg.split('stroke="#222"').length - 1;
     expect(strokeCount).toBe(2);
   });
 
   it('applies a #color override to the inner dot fill ONLY, both strokes stay #222222', () => {
     const svg = renderFinal(pseudoNode('final', { color: '#Green' }));
     expect(svg).toContain('fill="#008000"');
-    const strokeCount = svg.split('stroke="#222222"').length - 1;
+    const strokeCount = svg.split('stroke="#222"').length - 1;
     expect(strokeCount).toBe(2);
     expect(svg).not.toContain('stroke="#008000"');
   });

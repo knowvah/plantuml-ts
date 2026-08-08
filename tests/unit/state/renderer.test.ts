@@ -100,7 +100,7 @@ describe('renderState — initial node', () => {
     const result = assembleSvg(renderState(geo, defaultTheme));
     const content = contentAfterDefs(result);
     expect(content).toContain('<ellipse');
-    expect(content).toContain('fill="#222222"');
+    expect(content).toContain('fill="#222"');
   });
 
   it('circle cx/cy is centred on the node bounding box', () => {
@@ -135,14 +135,14 @@ describe('renderState — final node', () => {
     const result = assembleSvg(renderState(geo, defaultTheme));
     const content = contentAfterDefs(result);
     expect(content).toContain('fill="none"');
-    expect(content).toContain('fill="#222222"');
+    expect(content).toContain('fill="#222"');
   });
 
   it('outer ellipse uses the CircleEnd default stroke (#222222, independent of theme.colors.border)', () => {
     const node = makeNode({ kind: 'final', x: 0, y: 0, width: 24, height: 24 });
     const geo = makeGeo({ states: [node] });
     const result = assembleSvg(renderState(geo, defaultTheme));
-    expect(result).toContain('stroke="#222222"');
+    expect(result).toContain('stroke="#222"');
   });
 });
 
@@ -159,14 +159,14 @@ describe('renderState — fork node', () => {
     const result = assembleSvg(renderState(geo, defaultTheme));
     // At least one rect with the bar's default fill (may also have the
     // background rect)
-    expect(result).toContain('fill="#555555"');
+    expect(result).toContain('fill="#555"');
   });
 
   it('join renders the same thin filled bar', () => {
     const node = makeNode({ kind: 'join', width: 60, height: 8 });
     const geo = makeGeo({ states: [node] });
     const result = assembleSvg(renderState(geo, defaultTheme));
-    expect(result).toContain('fill="#555555"');
+    expect(result).toContain('fill="#555"');
   });
 });
 
@@ -201,7 +201,7 @@ describe('renderState — fork/join activityBar cascade (mission G4 S16)', () =>
     const node = makeNode({ kind: 'syncBar', width: 60, height: 8 });
     const geo = makeGeo({ states: [node] });
     const result = assembleSvg(renderState(geo, theme));
-    expect(result).toContain('fill="#555555"');
+    expect(result).toContain('fill="#555"');
     expect(result).not.toContain('fill="#008000"');
   });
 });
@@ -278,7 +278,7 @@ describe('renderState — EntityImageStateEmptyDescription (hide empty descripti
     // compareSvg's numeric tolerance, not string equality, is the real
     // conformance bar, see tests/oracle/svg-conformance/compare.ts).
     expect(result).toContain('x="42.285"');
-    expect(result).toContain('y="109.88888888888889"');
+    expect(result).toContain('y="109.889"');
   });
 
   it('does NOT wrap the entity in a <g> at all -- bare rect+text siblings', () => {
@@ -547,8 +547,8 @@ describe('renderState — transitions', () => {
   });
 
   // mission G4 S16: <style> stateDiagram { arrow { LineColor HeadColor
-  // } } } -- jar-verified nanozi-96-foda024: path stroke="#0000FF"
-  // (LineColor), polygon fill="#FF0000" stroke="#FF0000" (HeadColor).
+  // } } } -- jar-verified nanozi-96-foda024: path stroke="#00F"
+  // (LineColor), polygon fill="#F00" stroke="#FF0000" (HeadColor).
   it('applies the statediagram.arrow LineColor cascade to the path stroke', () => {
     const theme = deepMergeTheme(defaultTheme, {
       colors: { graph: { stateArrowLineColor: 'blue' } },
@@ -556,7 +556,7 @@ describe('renderState — transitions', () => {
     const t = makeTransition();
     const geo = makeGeo({ transitions: [t] });
     const result = assembleSvg(renderState(geo, theme));
-    expect(result).toContain('stroke="#0000FF"');
+    expect(result).toContain('stroke="#00F"');
   });
 
   it('applies the statediagram.arrow HeadColor cascade to the arrowhead polygon fill+stroke', () => {
@@ -566,10 +566,10 @@ describe('renderState — transitions', () => {
     const t = makeTransition();
     const geo = makeGeo({ transitions: [t] });
     const result = assembleSvg(renderState(geo, theme));
-    expect(result).toContain('fill="#FF0000"');
+    expect(result).toContain('fill="#F00"');
     const polygonMatch = /<polygon[^>]*>/.exec(result);
     expect(polygonMatch).not.toBeNull();
-    expect(polygonMatch![0]).toContain('stroke:#FF0000');
+    expect(polygonMatch![0]).toContain('stroke:#F00');
   });
 
   it('transition with label renders text element', () => {

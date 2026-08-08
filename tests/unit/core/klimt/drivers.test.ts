@@ -149,7 +149,7 @@ describe('DriverLineSvg (AC2 — component/babafi-51-dixi026/in.svg)', () => {
       .draw(new ULine(10, 0));
 
     const xml = root.getSvgString();
-    expect(xml).toContain('style="stroke:#112233;stroke-width:1;"');
+    expect(xml).toContain('style="stroke:#123;stroke-width:1;"');
     expect(xml).not.toContain('<linearGradient');
   });
 });

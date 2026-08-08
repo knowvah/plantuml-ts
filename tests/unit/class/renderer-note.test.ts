@@ -101,7 +101,7 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
       lineAtoms: [[{ kind: 'text', text: 'warning', font: { ...plainFont, color: '#FF0000' }, width: 40 }]],
     };
     const svg = renderNote(coloredNote, defaultTheme);
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
   });
 
   it('a hand-built NoteGeo with NO lineAtoms falls back to the pre-cutover single-<text>-per-line path unchanged', () => {
@@ -118,7 +118,7 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
 // .noteCascadeFontColor` (`style-cascade-class.ts`, `NOTE_SNAMES`) sits
 // BELOW an atom's own explicit `<color>` run (unchanged precedence, G2 N55)
 // but ABOVE the hardcoded black default -- jar-verified `nufini-44-jofo787`
-// (`<style> note { Fontcolor red } }`, every note text run `fill="#FF0000"`).
+// (`<style> note { Fontcolor red } }`, every note text run `fill="#F00"`).
 describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
   it('the per-atom creole path (lineAtoms) uses the cascade when the atom has no OWN color (nufini-44-jofo787 shape)', () => {
     const themed = {
@@ -133,7 +133,7 @@ describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
       lineAtoms: [[{ kind: 'text', text: 'red note', font: plainFont, width: 40 } satisfies MemberRenderAtom]],
     };
     const svg = renderNote(note, themed);
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
   });
 
   it("an atom's OWN explicit color still wins over the cascade", () => {
@@ -149,8 +149,8 @@ describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
       lineAtoms: [[{ kind: 'text', text: 'blue run', font: plainFont, width: 40 } satisfies MemberRenderAtom]],
     };
     const svg = renderNote(note, themed);
-    expect(svg).toContain('fill="#0000FF"');
-    expect(svg).not.toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#00F"');
+    expect(svg).not.toContain('fill="#F00"');
   });
 
   it('the pre-cutover fallback path (no lineAtoms) ALSO uses the cascade', () => {

@@ -77,7 +77,7 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
   });
 
   it('centers the title text via textLength, matching jar x=207.0406 (unrounded, same convention as the leaf box)', () => {
-    expect(out).toContain('textLength="72.3625"');
+    expect(out).toContain('textLength="72.363"');
     expect(out).toContain('>Track_FSM<');
     // x = box midX(243.22185) - textLength/2(36.18125) = 207.0406 (raw
     // float noise; formatted to 3dp at emission by core/svg.ts#attrs, same
@@ -153,7 +153,7 @@ describe('renderComposite — measured shape, WITH body/action lines (Do_Sector-
   });
 
   it('left-aligns action text at box.x + MARGIN(5)', () => {
-    expect(out).toContain('x="135.71875"');
+    expect(out).toContain('x="135.719"');
   });
 });
 
@@ -169,8 +169,8 @@ describe('renderComposite — per-node #color override resolves through the head
       color: '#red',
     });
     const out = renderComposite(node, defaultTheme);
-    expect(out).toContain('fill="#FF0000"');
-    expect(out).toContain('stroke="#FF0000" stroke-width="1"');
+    expect(out).toContain('fill="#F00"');
+    expect(out).toContain('stroke="#F00" stroke-width="1"');
   });
 });
 

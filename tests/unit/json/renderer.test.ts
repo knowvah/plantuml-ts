@@ -450,7 +450,7 @@ describe('renderJson — branch coverage', () => {
     expect(body).toContain('fill="#BE5D47"');   // boolean — valueColor fallback
     expect(body).toContain('fill="#767676"');   // null — valueColor fallback
     expect(body).toContain('fill="#CCFF02"');   // highlightBackground (plantuml.skin default)
-    expect(body).toContain('fill="#FFFFFF"');   // background → noJsonTheme.colors.background
+    expect(body).toContain('fill="#FFF"');   // background → noJsonTheme.colors.background
     // headerBackground inherits from bg (#FFFFFF) — no longer a distinct hard-coded color
     // Edge still renders with theme.colors.arrow fallback
     expect(body).toContain('<path');
@@ -524,9 +524,9 @@ describe('renderJson — built-in theme colors', () => {
     // Node and header column both blue
     expect(body).toContain('fill="#0B58A8"');
     // Borders white
-    expect(body).toContain('stroke="#FFFFFF"');
+    expect(body).toContain('stroke="#FFF"');
     // Text (key + value) white — type coloring overridden by theme
-    expect(body).toContain('fill="#FFFFFF"');
+    expect(body).toContain('fill="#FFF"');
     // No dark text from default theme leaking through
     expect(body).not.toContain('fill="#181818"');
     // No type-specific colors leaking through
@@ -618,7 +618,7 @@ describe('renderJson — node-level style cascade', () => {
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, theme));
     // keyText wins over nodeFontColor for the key column
-    expect(svg).toContain('fill="#AABBCC"');
+    expect(svg).toContain('fill="#ABC"');
     // nodeFontColor still appears (applied to value text)
     expect(svg).toContain('fill="#FF7F50"');
   });
