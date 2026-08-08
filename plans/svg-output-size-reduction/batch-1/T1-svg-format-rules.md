@@ -85,7 +85,14 @@ to (ADR-2), not a value this module applies implicitly.
    (`toFixed(4)` would give `8.6937`). This proves the generalization did
    not lose the existing algorithm.
 4. Given `0` then `"0"`; given `77.8125` and decimals 3 then `77.813`;
-   given `28.4805` and decimals 3 then `28.48` (trailing zero trimmed).
+   given `28.4805` and decimals 3 then `28.481`.
+
+   > **Corrected 2026-08-08 (T1 execution).** This criterion originally
+   > read `28.48`. That was a transcription error: `28.4805`'s shortest
+   > round-trip decimal is `28.4805`, so HALF_UP on the 4th decimal rounds
+   > **up**. Verified on a live JVM —
+   > `String.format(Locale.US, "%.3f", 28.4805)` → `28.481`. The Java is
+   > the spec (CLAUDE.md); the implementation follows it.
 5. Given opacity `0`, `1`, `0.5` with decimals 3, when `formatOpacity`,
    then `"0"`, `"1"`, `"0.5"`.
 
