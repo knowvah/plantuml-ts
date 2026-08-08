@@ -18,7 +18,6 @@ import {} from './renderer-url.js';
 import {} from '../../core/svg.js';
 import {} from '../../core/klimt/shape/UText.js';
 import type {} from './class-member-creole.js';
-import {} from '../../core/number-format.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import {} from './renderer-openiconic.js';
 import {} from './renderer-body-enhanced.js';

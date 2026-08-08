@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { buildNoteGraphParts, mapNoteGeos } from '../../../src/diagrams/class/note-layout.js';
-import { javaRound4 } from '../../../src/core/number-format.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
@@ -77,7 +76,9 @@ describe('buildNoteGraphParts — seam node + connector edge', () => {
     const { measurements } = buildNoteGraphParts([n], defaultTheme, measurer, noAnchors);
     const m = measurements.get('__note_0')!;
     const fontSpec = { family: defaultTheme.fontFamily, size: 13 };
-    const expected = m.lines.map((ln) => javaRound4(measurer.measure(ln, fontSpec).width));
+    // T8: layout arithmetic is unrounded (ADR-1) -- rounding happens once,
+    // at SVG emission -- so the expected value is the raw measured width.
+    const expected = m.lines.map((ln) => measurer.measure(ln, fontSpec).width);
     expect(m.lineWidths).toEqual(expected);
     // Genuinely different per line (not a degenerate all-equal fixture) --
     // proves the box's own `width` (== the LONGEST line, via NoteMeasurement
@@ -102,7 +103,7 @@ describe('buildNoteGraphParts — seam node + connector edge', () => {
     const m = measurements.get('__note_0')!;
     expect(m.height).toBe(2 * 10 + 5 * 2);
     const fontSpec = { family: theme.fontFamily, size: 10 };
-    expect(m.lineWidths).toEqual(m.lines.map((ln) => javaRound4(measurer.measure(ln, fontSpec).width)));
+    expect(m.lineWidths).toEqual(m.lines.map((ln) => measurer.measure(ln, fontSpec).width));
   });
 
   it('falls back to the hardcoded default 13 when no note fontSize override is set', () => {
@@ -136,7 +137,7 @@ describe('buildNoteGraphParts — note-creole-markup cutover (G2 N55)', () => {
     const m = measurements.get('__note_0')!;
     const fontSpec = { family: defaultTheme.fontFamily, size: 13 };
     for (const [i, ln] of m.lines.entries()) {
-      const direct = javaRound4(measurer.measure(ln, fontSpec).width);
+      const direct = measurer.measure(ln, fontSpec).width;
       expect(m.lineWidths[i]).toBe(direct);
     }
   });

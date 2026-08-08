@@ -74,7 +74,6 @@ import { shiftFragmentBody } from './coord-shift.js';
 import type { BoxStyle } from '../svg.js';
 import { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { resolveColorToSvgHex } from '../klimt/color/HColorSet.js';
-import { javaRound4 } from '../number-format.js';
 
 /** The fragment shape {@link buildAnnotationBlock} returns — width/height
  *  are the block's OWN reported dimension (post padding/border/+1/margin),
@@ -314,10 +313,12 @@ function spanTextDecoration(span: CreoleSpan): string | undefined {
 
 /** One sibling `<text>` per Creole run, x-advanced by each run's OWN
  *  (unrounded) measured width — mirrors `renderRowAtoms`'s identical
- *  "drawing and measuring agree by construction" shape. `textLength` is
- *  `javaRound4`'d per run (jar's own per-`<text>`-element `SvgGraphics
- *  #format` rounding), `x` stays unrounded like every other coordinate in
- *  this codebase (`renderRowAtoms`'s own doc comment). */
+ *  "drawing and measuring agree by construction" shape. `textLength` stays
+ *  unrounded here too: `core/svg.ts#text` -> `attrs` applies the jar's
+ *  `%.<n>f` rounding at emission (ADR-1), so pre-rounding here would
+ *  double-round (`svg.ts`'s own module doc comment). `x` stays unrounded
+ *  like every other coordinate in this codebase (`renderRowAtoms`'s own
+ *  doc comment). */
 function drawLine(measured: MeasuredLine, x0: number, baseline: number, style: AnnotationBoxStyle): string {
   let x = x0;
   let out = '';
@@ -328,7 +329,7 @@ function drawLine(measured: MeasuredLine, x0: number, baseline: number, style: A
       fontSize: style.fontSize,
       fill: span.color ?? style.fontColor,
       lengthAdjust: 'spacing',
-      textLength: javaRound4(width),
+      textLength: width,
       ...(spanIsBold(style.fontStyle, span) ? { fontWeight: '700' as const } : {}),
       ...(spanIsItalic(style.fontStyle, span) ? { fontStyle: 'italic' as const } : {}),
       ...(decoration !== undefined ? { textDecoration: decoration } : {}),

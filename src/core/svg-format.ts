@@ -7,13 +7,14 @@
  * Precision (`decimals`) is always threaded in by the caller (ADR-2) — this
  * module never applies a default or a scale factor itself.
  *
- * A leaf module: no imports from klimt or any diagram engine, same
- * discipline as `number-format.ts`. It reuses `number-format.ts`'s
- * `trimTrailingZeros` rather than re-implementing zero-trimming.
+ * A leaf module: no imports from klimt or any diagram engine. T8 collapsed
+ * `number-format.ts`'s duplicate `javaFixed4`/`trimTrailingZeros` rounding
+ * into this module (ADR-3, single shared rules module) — `number-format.ts`
+ * is now a thin re-export shim over this file, kept only for its handful of
+ * pre-existing bare-side-effect importers.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java
  */
-import { trimTrailingZeros } from './number-format.js';
 
 /** Upstream's `SvgOption.decimal` default (`SvgOption` constructor). */
 export const DEFAULT_SVG_DECIMALS = 3;
@@ -32,15 +33,14 @@ export const DEFAULT_SVG_DECIMALS = 3;
  * 8.6937499999999996447...), `toFixed(4)` rounds DOWN ("8.6937") while
  * Java's `%.4f` rounds UP ("8.6938"): the last-decimal-digit divergence
  * jar-verified against `component/luniju-97-tuja870`'s `text/@textLength`
- * (mission G1/I4, see `number-format.ts#javaFixed4`).
+ * (mission G1/I4, originally isolated in the now-retired `number-format.ts
+ * #javaFixed4`, T8 folded its 4-decimal-only predecessor into this
+ * generalized `N`-decimal version).
  * `Number.prototype.toString()` already implements the same "shortest
  * round-trip decimal" class of algorithm `Double.toString` does, so
  * reusing it here — rather than re-deriving digits from the binary
  * mantissa — reproduces Java's rounding INPUT faithfully without a second
  * bespoke float-to-decimal implementation.
- *
- * Generalizes `number-format.ts#javaFixed4` (fixed at 4 places) to an
- * arbitrary decimal count.
  */
 function javaFixedN(x: number, decimals: number): string {
   const neg = x < 0;
@@ -80,7 +80,12 @@ function javaFixedN(x: number, decimals: number): string {
  * @see .../klimt/drawing/svg/SvgGraphics.java#trimZeros
  */
 export function trimZeros(s: string): string {
-  return trimTrailingZeros(s);
+  const dot = s.indexOf('.');
+  if (dot < 0) return s;
+  let end = s.length - 1;
+  while (end > dot && s[end] === '0') end--;
+  if (end === dot) end--;
+  return s.slice(0, end + 1);
 }
 
 /**

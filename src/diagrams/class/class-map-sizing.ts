@@ -28,7 +28,6 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
-import { javaRound4 } from '../../core/number-format.js';
 import type { Dim } from './class-object-map-sizing.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-sizing.js';
 
@@ -53,24 +52,26 @@ interface MapRowMetrics {
    *  this AST's placeholder for TextBlockMap's Point sentinel (ast.ts
    *  MapRow doc). */
   isPoint: boolean;
-  /** javaRound4'd raw (unpadded) key text width — reused for BOTH the
-   *  key's own `textLength` AND its centering `indent` (G3/O1, same "round
-   *  once, reuse" precedent as headerRows' stereoWidth/nameWidth). */
+  /** Raw (unpadded) key text width, unrounded — reused for BOTH the key's
+   *  own `textLength` AND its centering `indent` (G3/O1, same "measure
+   *  once, reuse" precedent as headerRows' stereoWidth/nameWidth). Rounding
+   *  happens once, at SVG emission (`core/svg.ts#attrs`, ADR-1) — not here,
+   *  which would double-round (`svg.ts`'s own module doc comment). */
   rawKeyWidth: number;
-  /** javaRound4'd raw (unpadded) value text width, `0` (unused) for a
-   *  Point row -- jar never draws Point-row value text at all. */
+  /** Raw (unpadded) value text width, unrounded, `0` (unused) for a Point
+   *  row -- jar never draws Point-row value text at all. */
   rawValueWidth: number;
 }
 
 /** A cell's measured `TextBlockMap#getTextBlock` dimension: `raw` (unpadded,
- *  javaRound4'd, feeds `textLength`) alongside `dim` (padded 5,2, feeds the
+ *  unrounded, feeds `textLength`) alongside `dim` (padded 5,2, feeds the
  *  column width). Shared by both the key AND value cell of a row —
  *  `TextBlockMap`'s own `getTextBlock` applies the identical margin to
  *  both. */
 function measureMapCell(text: string, fontSpec: { family: string; size: number }, measurer: StringMeasurer): { raw: number; dim: Dim } {
   const m = measurer.measure(text, fontSpec);
   return {
-    raw: javaRound4(m.width),
+    raw: m.width,
     dim: { width: m.width + MAP_CELL_MARGIN_X * 2, height: m.height + MAP_CELL_MARGIN_Y * 2 },
   };
 }

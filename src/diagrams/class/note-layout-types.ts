@@ -17,12 +17,14 @@ export interface NoteGeo {
   height: number;
   /** Note body split into render lines. */
   lines: string[];
-  /** G2/N21: each line's OWN measured text width (`javaRound4`-rounded),
-   *  parallel to `lines` -- `renderer-note.ts#renderNoteText`'s per-row
-   *  `textLength` attribute must use the line's real width, not the note
-   *  box's shared (max-line-driven) width; jar-verified against
-   *  `sisolu-74-minu975`'s 3-line note (line 1 == box max width, lines 2-3
-   *  strictly narrower, each with its own distinct `textLength`).
+  /** G2/N21: each line's OWN measured text width (unrounded -- T8 removed
+   *  the pre-emission `javaRound4` rounding this used to carry; rounding
+   *  now happens once, at SVG emission, ADR-1), parallel to `lines` --
+   *  `renderer-note.ts#renderNoteText`'s per-row `textLength` attribute
+   *  must use the line's real width, not the note box's shared (max-line-
+   *  driven) width; jar-verified against `sisolu-74-minu975`'s 3-line note
+   *  (line 1 == box max width, lines 2-3 strictly narrower, each with its
+   *  own distinct `textLength`).
    */
   lineWidths: number[];
   /**
