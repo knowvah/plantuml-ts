@@ -29,6 +29,24 @@
 > diagnosis, un-pin the ratchet entry, or change the fixture — there is no
 > defect. Acceptance criteria 1–3 below are already satisfied by the note.
 > Expected disposition: `docs(T14)`, not `fix(T14)`.
+>
+> ## CLOSED 2026-08-08 — no defect, nothing to fix
+>
+> T9 re-captured this golden from the pinned jar like any other; it is now
+> the CURRENT error page (which has grown: height 162 → 288, childCount
+> 11 → 18). `scripts/rebaseline-svg-goldens.ts` reports
+> `SAME=0 CHANGED=446 FAILED=0` with `ERROR-DIAGRAM=1` naming exactly this
+> fixture — the guard added in T2 so an error-diagram capture can never
+> re-baseline silently.
+>
+> Its characterisation pin in `class-usecase-actor.test.ts` was re-measured
+> deliberately (6 pinned diffs → 5; the `svg/@background` diff disappeared
+> because the new error page's background matches what we emit). Our own
+> raw output is unchanged at 169×96 with 2 children.
+>
+> Acceptance criteria 1–3 are satisfied by
+> `.agent-notes/svg-rebaseline-error-diagram-fixture.md`. The fixture stays
+> pinned; nothing was un-pinned, deleted or loosened.
 
 ## Context (as originally written — superseded above)
 

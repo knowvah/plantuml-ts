@@ -4,8 +4,8 @@ Normal gate. Both tasks assume batch-2d is green.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T14 | Diagnose the no-SVG fixture | debugger | `.agent-notes/`, fixture/ratchet only if warranted | T9 | [ ] |
-| T15 | Docs + version (ADR-6) | technical-writer | `DIVERGENCES.md`, `CHANGELOG.md`, `package.json`, `oracle/pin.json` | T14 | [ ] |
+| T14 | Diagnose the no-SVG fixture | debugger | `.agent-notes/`, fixture/ratchet only if warranted | T9 | [x] |
+| T15 | Docs + version (ADR-6) | technical-writer | `DIVERGENCES.md`, `CHANGELOG.md`, `package.json`, `oracle/pin.json` | T14 | [x] |
 
 T15 follows T14 so the pin note can state the fixture's real disposition
 rather than "one unexplained failure".

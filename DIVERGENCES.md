@@ -290,6 +290,30 @@ fixture is a portable gap tracked by a sub-mission, not a divergence.
 
 ---
 
+## Output format
+
+### SVG emission tracks upstream's reduced form (0.2.0) — no longer a divergence
+
+**Status:** resolved — this entry exists so a reader of the old output does
+not assume it is still current.
+
+Before 0.2.0 this port emitted a more verbose SVG than upstream: 4-decimal
+coordinates, always-six-digit hex colors, `font-family` and `lengthAdjust`
+repeated on every `<text>`, `stroke-width` emitted even beside
+`stroke="none"`, and `textLength` on single-character text. That was not a
+deliberate choice — it predated upstream's two "⚗️ reduce SVG output size"
+commits (`ba68279df92`, `4f3a0dcc63b`), which this port had not yet taken.
+
+Those six rules are now ported into **both** of this port's SVG emitters,
+and the 450 conformance goldens are re-captured from the pinned jar.
+Emitted SVG shrank 7.4% across the pinned corpus (1,477,458 → 1,368,743
+bytes). **This direction is convergence, not divergence** — output now
+matches upstream more closely than it did.
+
+Consumer impact: no API change, but the bytes differ. Anyone
+byte-comparing or snapshotting this library's SVG must re-baseline. See
+`CHANGELOG.md` for the full rule list.
+
 ## Preprocessor (TIM)
 
 Recorded 2026-07-13 with mission SI5a, which replaced the flat line-loop

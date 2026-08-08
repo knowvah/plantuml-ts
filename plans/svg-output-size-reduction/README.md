@@ -54,11 +54,11 @@ structurally. Porting only the klimt emitter leaves 393 goldens red.
 | Batch | What | Tasks | Gate | Done |
 |---|---|---|---|---|
 | [batch-1](batch-1/overview.md) | Foundation — shared rules module, regeneration script | T1, T2 | normal | [x] |
-| [batch-2a](batch-2a/overview.md) | Port both emitters | T3, T4, T5 | **deferred** | [ ] |
-| [batch-2b](batch-2b/overview.md) | Remove class-engine pre-rounding | T6a–T6e | **deferred** | [ ] |
-| [batch-2c](batch-2c/overview.md) | State cleanup, formatter retirement, regenerate goldens | T7, T8, T9, T9b | **deferred** | [ ] |
-| [batch-2d](batch-2d/overview.md) | Test repair | T10–T13 | **FULL GATE HERE** | [ ] |
-| [batch-3](batch-3/overview.md) | No-SVG fixture, docs + version | T14, T15 | normal | [ ] |
+| [batch-2a](batch-2a/overview.md) | Port both emitters | T3, T4, T5 | **deferred** | [x] |
+| [batch-2b](batch-2b/overview.md) | Remove class-engine pre-rounding | T6a–T6e | **deferred** | [x] |
+| [batch-2c](batch-2c/overview.md) | State cleanup, formatter retirement, regenerate goldens | T7, T8, T9, T9b | **deferred** | [x] |
+| [batch-2d](batch-2d/overview.md) | Test repair | T10–T13 | **FULL GATE HERE** | [x] |
+| [batch-3](batch-3/overview.md) | No-SVG fixture, docs + version | T14, T15 | normal | [x] |
 
 **ADR-5 — the deferred gate.** Gates *cannot* be green between porting the
 rules and regenerating the goldens; the two are only consistent together.

@@ -10,11 +10,11 @@ file is shared between them, and none is shared with T7.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T6a | Classifier box, header, members, rows (7 files, 14 calls) | typescript-pro | see task file | T5 | [ ] |
-| T6b | Edges and stereotypes (3 files, 10 calls) | typescript-pro | see task file | T5 | [ ] |
-| T6c | Notes (4 files, 10 calls) | typescript-pro | see task file | T5 | [ ] |
-| T6d | JSON / map / object sizing (4 files, 17 calls) | typescript-pro | see task file | T5 | [ ] |
-| T6e | Namespace shape (1 file, 15 calls) | typescript-pro | see task file | T5 | [ ] |
+| T6a | Classifier box, header, members, rows (7 files, 14 calls) | typescript-pro | see task file | T5 | [x] |
+| T6b | Edges and stereotypes (3 files, 10 calls) | typescript-pro | see task file | T5 | [x] |
+| T6c | Notes (4 files, 10 calls) | typescript-pro | see task file | T5 | [x] |
+| T6d | JSON / map / object sizing (4 files, 17 calls) | typescript-pro | see task file | T5 | [x] |
+| T6e | Namespace shape (1 file, 15 calls) | typescript-pro | see task file | T5 | [x] |
 
 ## The shared rule
 

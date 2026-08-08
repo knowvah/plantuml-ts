@@ -11,10 +11,10 @@ disjoint directory ownership so they run in parallel.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T10 | Core / emitter unit tests | test-automator | `tests/unit/core/**` | T3–T9 | [ ] |
-| T11 | Class + object tests | test-automator | `tests/unit/class/**`, `tests/integration/class*`, object tests | T3–T9 | [ ] |
-| T12 | State, description, creole tests | test-automator | `tests/unit/state/**`, `tests/unit/description/**`, `tests/unit/creole/**` | T3–T9 | [ ] |
-| T13 | Oracle ratchets + conformance suites | test-automator | `tests/oracle/**` | T3–T9 | [ ] |
+| T10 | Core / emitter unit tests | test-automator | `tests/unit/core/**` | T3–T9 | [x] |
+| T11 | Class + object tests | test-automator | `tests/unit/class/**`, `tests/integration/class*`, object tests | T3–T9 | [x] |
+| T12 | State, description, creole tests | test-automator | `tests/unit/state/**`, `tests/unit/description/**`, `tests/unit/creole/**` | T3–T9 | [x] |
+| T13 | Oracle ratchets + conformance suites | test-automator | `tests/oracle/**` | T3–T9 | [x] |
 
 ## The distinction that matters
 

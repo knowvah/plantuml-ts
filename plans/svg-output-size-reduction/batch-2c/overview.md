@@ -4,10 +4,11 @@
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T7 | Remove state-engine pre-rounding | typescript-pro | `src/diagrams/state/**` (4 files) | T5 | [ ] |
-| T8 | Retire `number-format.ts`'s 4-decimal API | typescript-pro | `src/core/number-format.ts`, `src/core/openiconic-glyphs.ts` | T6a–T6e, T7 | [ ] |
-| T9 | Regenerate the 446 `in.puml` goldens | general-purpose | `oracle/goldens/svg-*/**/golden.svg` | T2 | [ ] |
-| T9b | Re-baseline the 4 `svg-conformance` goldens | typescript-pro | `oracle/goldens/svg-conformance/**` | T3, T4, T9 | [ ] |
+| T7 | Remove state-engine pre-rounding | typescript-pro | `src/diagrams/state/**` (4 files) | T5 | [x] |
+| T7b | Route hand-built markup through shared emitters | (inline) | `core/svg-path-builder.ts`, class/state renderers | T5, T6a–T6e | [x] |
+| T8 | Retire `number-format.ts`'s 4-decimal API | typescript-pro | `src/core/number-format.ts`, `src/core/openiconic-glyphs.ts` | T6a–T6e, T7 | [x] |
+| T9 | Regenerate the 446 `in.puml` goldens | general-purpose | `oracle/goldens/svg-*/**/golden.svg` | T2 | [x] |
+| T9b | Re-baseline the 4 `svg-conformance` goldens | typescript-pro | `oracle/goldens/svg-conformance/**` | T3, T4, T9 | [x] |
 
 **Parallelism.** T7 runs in parallel with all of batch-2b (disjoint files) —
 the executor may start it as soon as T5 lands rather than waiting for 2b to

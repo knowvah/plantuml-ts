@@ -1,6 +1,6 @@
 {
   "name": "@knowvah/plantuml-ts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A TypeScript port of PlantUML: parse PlantUML source and render SVG synchronously, in the browser or Node, with no server and no Java",
   "license": "MIT",
   "repository": {
