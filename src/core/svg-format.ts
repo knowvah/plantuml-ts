@@ -97,6 +97,24 @@ export function formatDecimal(x: number, decimals: number): string {
 }
 
 /**
+ * {@link formatDecimal} at the default precision — for the numeric values
+ * that get interpolated into markup directly rather than passed through
+ * `svg.ts#attrs` (which threads `decimals` per ADR-2; these sites have no
+ * options object to thread it from).
+ *
+ * Shared rather than redefined per module: upstream reaches SVG through a
+ * single `SvgGraphics.format(double)`, so one formatting entry point here
+ * is the faithful shape. Three byte-identical private copies of this
+ * function had accumulated (`svg.ts`, `svg-shapes.ts`,
+ * `class-visibility-icon.ts`) before it was hoisted.
+ *
+ * @see .../klimt/drawing/svg/SvgGraphics.java#format
+ */
+export function fmt(x: number): string {
+  return formatDecimal(x, DEFAULT_SVG_DECIMALS);
+}
+
+/**
  * Shortens `#RRGGBB` into `#RGB` when each pair has two identical digits.
  * Longer forms (`#RRGGBBAA`) and named/url colors pass through unchanged.
  * Null/undefined-safe (mirrors Java's `String` nullability).

@@ -33,6 +33,7 @@
  * @see ~/git/plantuml/.../svek/image/EntityImageState.java
  * @see ~/git/plantuml/.../svek/image/EntityImageStateCommon.java (MARGIN/MARGIN_LINE=5)
  */
+import { lineTo, moveTo } from '../../core/svg-path-builder.js';
 import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line, text, path } from '../../core/svg.js';
@@ -171,8 +172,12 @@ export function renderSdlReceive(node: StateNodeGeo, theme: Theme): string {
   const x0 = node.x;
   const y0 = node.y;
   const d =
-    `M${x0 + textWidth},${y0} L${x0 + textWidth},${y0 + textHeight - cornerSize} ` +
-    `L${x0 + textWidth - cornerSize},${y0 + textHeight} L${x0},${y0 + textHeight}`;
+    [
+      moveTo(x0 + textWidth, y0),
+      lineTo(x0 + textWidth, y0 + textHeight - cornerSize),
+      lineTo(x0 + textWidth - cornerSize, y0 + textHeight),
+      lineTo(x0, y0 + textHeight),
+    ].join(' ');
   const notch = path(d, { stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH });
 
   // mission G4 S16: `skinparam stateFontSize<<X>>` -- see

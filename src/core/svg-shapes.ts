@@ -7,7 +7,7 @@
 import {} from './paint.js';
 import type {} from './paint.js';
 import { attrs, escapeXml, resolvePaint, resolvePaintAttrs, attrsFromRecord, strokeDecorationOf, ROOT_FONT_FAMILY, PAINT_NONE, type BoxStyle, type LineStyle, type TextStyle, type SvgAttrsPaint } from './svg.js';
-import { DEFAULT_SVG_DECIMALS, formatDecimal, formatOpacity, shortenColor } from './svg-format.js';
+import { DEFAULT_SVG_DECIMALS, fmt, formatOpacity, shortenColor } from './svg-format.js';
 
 /**
  * `<rect>` element.
@@ -128,13 +128,6 @@ function textFontFamily(family: string | undefined): string | undefined {
  */
 function textLengthOf(content: string, textLength: number | undefined): number | undefined {
   return content.length > 1 ? textLength : undefined;
-}
-
-/** {@link formatDecimal} at the default precision, for the values this
- *  module interpolates into markup directly (`points`, path data) rather
- *  than passing through {@link attrs}. */
-function fmt(x: number): string {
-  return formatDecimal(x, DEFAULT_SVG_DECIMALS);
 }
 
 export function text(

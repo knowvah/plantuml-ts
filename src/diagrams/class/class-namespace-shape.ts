@@ -41,6 +41,7 @@ import type { NamespaceGeo } from './layout.js';
 import { path, line, text, rect } from '../../core/svg.js';
 import { isTransparentColor } from '../../core/paint.js';
 import { measureStereoLabelWidths, stereoBlockDim } from './class-stereotype.js';
+import { folderPathD, folderPolygonPoints, renderFolderPolygon } from './class-namespace-folder-outline.js';
 
 // marginTitleX1/X2/X3/Y1/Y2 — upstream's own field names
 // (USymbolFolder.java), kept verbatim per this project's porting
@@ -189,103 +190,9 @@ export const NAMESPACE_TOP_EXTRA = 13;
  *  g2-class-svg/ledger.md` N17. */
 export const NAMESPACE_SIDE_PADDING = 16;
 
-/**
- * `USymbolFolder#drawFolder`'s `UPath` branch (`roundCorner !== 0`): the
- * SVG path `d` for the folder-tab outline, in ABSOLUTE coordinates (every
- * point offset by the namespace box's own `(ox, oy)` origin up front —
- * matches `USymbolFolder#asBig` drawing under
- * `ug.apply(this.geometry.position)` without a separate translate pass).
- * Byte-verified against `finono-05-cuvu171`'s path (origin `(6, 6)`) —
- * every `L`/`A` endpoint matches exactly.
- */
-function folderPathD(
-  ox: number,
-  oy: number,
-  wtitle: number,
-  htitle: number,
-  width: number,
-  height: number,
-  roundCorner: number,
-): string {
-  const half = roundCorner / 2;
-  const tabRadius = half * 1.5;
-  const pt = (x: number, y: number): string => `${ox + x},${oy + y}`;
-  return (
-    `M${pt(half, 0)}` +
-    ` L${pt(wtitle - half, 0)}` +
-    ` A${tabRadius},${tabRadius} 0 0 1 ${pt(wtitle, half)}` +
-    ` L${pt(wtitle + MARGIN_TITLE_X3, htitle)}` +
-    ` L${pt(width - half, htitle)}` +
-    ` A${half},${half} 0 0 1 ${pt(width, htitle + half)}` +
-    ` L${pt(width, height - half)}` +
-    ` A${half},${half} 0 0 1 ${pt(width - half, height)}` +
-    ` L${pt(half, height)}` +
-    ` A${half},${half} 0 0 1 ${pt(0, height - half)}` +
-    ` L${pt(0, half)}` +
-    ` A${half},${half} 0 0 1 ${pt(half, 0)}`
-  );
-  // #lizard forgives -- flat sequence of 12 path-segment string pieces,
-  // one per USymbolFolder#drawFolder's own moveTo/lineTo/arcTo call
-  // (decoration/symbol/USymbolFolder.java) -- reducible only by splitting
-  // one upstream shape literal across functions, which would obscure the
-  // segment-by-segment jar citation in this module's own doc comment.
-}
-
-/**
- * `USymbolFolder#drawFolder`'s `UPolygon` branch (`roundCorner === 0`,
- * `skinparam style strictuml`) -- the SAME 7 corner points `folderPathD`
- * traces, but every `A` arc collapses to a single point at `roundCorner=0`
- * (`half=0`/`tabRadius=0`), so jar draws a plain sharp-cornered
- * `<polygon>` instead of a rounded-arc `<path>` -- byte-verified against
- * `jinibe-02-tebi269`'s own `points="16,6,29.7875,6,36.7875,26,64,26,64,95,
- * 16,95,16,6"` (7 unique points, closing back to the start).
- */
-function folderPolygonPoints(
-  ox: number,
-  oy: number,
-  wtitle: number,
-  htitle: number,
-  width: number,
-  height: number,
-): Array<[number, number]> {
-  const pt = (x: number, y: number): [number, number] => [ox + x, oy + y];
-  return [
-    pt(0, 0),
-    pt(wtitle, 0),
-    pt(wtitle + MARGIN_TITLE_X3, htitle),
-    pt(width, htitle),
-    pt(width, height),
-    pt(0, height),
-    pt(0, 0),
-  ];
-  // #lizard forgives -- pre-existing (unchanged by A2s F-D): 6 positional geometry params mirror USymbolFolder.java's own signature verbatim (porting discipline).
-}
-
-/** `USymbolFolder#drawFolder`'s `UPolygon` draw call under `strictuml`,
- *  matching `SvgGraphics`'s own `<polygon>` serialization for a klimt
- *  `UPolygon` (`svg-graphics-elements.ts:170-174`, comma-only point list,
- *  a `style="stroke:...;stroke-width:...;"` PLUS the fixed
- *  `stroke-linejoin:miter;stroke-miterlimit:10;` suffix every klimt
- *  polygon carries) -- class draws plain SVG strings (never through
- *  `UGraphic`, see this module's own header doc comment), so this mirrors
- *  `class-visibility-icon.ts#polygonTag`'s identical established
- *  hand-built-markup precedent rather than routing through `core/svg.ts
- *  #polygon()` (whose discrete `stroke`/`stroke-width` attributes, while
- *  semantically equivalent post-normalization, would still need
- *  `stroke-linejoin`/`stroke-miterlimit` support added for a single
- *  caller). */
-function renderFolderPolygon(
-  points: ReadonlyArray<[number, number]>,
-  stroke: string,
-  strokeWidth: number,
-  fill: string,
-): string {
-  const pts = points.map(([x, y]) => `${x},${y}`).join(',');
-  return (
-    `<polygon points="${pts}" fill="${fill}" ` +
-    `style="stroke:${stroke};stroke-width:${strokeWidth};stroke-linejoin:miter;stroke-miterlimit:10;"/>`
-  );
-}
+// folderPathD / folderPolygonPoints / renderFolderPolygon moved to
+// class-namespace-folder-outline.ts (T7b, file-length split -- see that
+// module's own doc comment).
 
 /**
  * Renders one namespace/package's folder-tab outline + title, matching

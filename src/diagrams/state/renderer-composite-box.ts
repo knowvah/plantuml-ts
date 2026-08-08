@@ -79,6 +79,7 @@
  *
  * @see ~/git/plantuml/.../svek/InnerStateAutonom.java
  */
+import { roundedBottomRectD, roundedTopRectD } from '../../core/svg-path-builder.js';
 import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line, text, path } from '../../core/svg.js';
@@ -105,8 +106,7 @@ function compositeHeaderPath(x0: number, y0: number, width: number, headerHeight
   const x1 = x0 + width;
   const y1 = y0 + headerHeight;
   const d =
-    `M${x0 + r},${y0} L${x1 - r},${y0} A${r},${r} 0 0 1 ${x1},${y0 + r} ` +
-    `L${x1},${y1} L${x0},${y1} L${x0},${y0 + r} A${r},${r} 0 0 1 ${x0 + r},${y0}`;
+    roundedTopRectD(x0, y0, x1, y1, r);
   return path(d, { fill });
 }
 
@@ -128,8 +128,7 @@ function compositeBodyPath(x0: number, y0: number, width: number, height: number
   const yTop = y0 + headerHeight;
   const y1 = y0 + height;
   const d =
-    `M${x0},${yTop} L${x1},${yTop} L${x1},${y1 - r} A${r},${r} 0 0 1 ${x1 - r},${y1} ` +
-    `L${x0 + r},${y1} A${r},${r} 0 0 1 ${x0},${y1 - r} L${x0},${yTop}`;
+    roundedBottomRectD(x0, yTop, x1, y1, r);
   return path(d, { fill });
 }
 

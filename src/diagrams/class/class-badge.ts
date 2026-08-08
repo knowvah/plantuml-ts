@@ -37,6 +37,7 @@
 import type { ClassifierKind } from './ast.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { paintToSvg, type Paint } from '../../core/paint.js';
+import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 import { lookupSizedGlyph } from './class-badge-sized-glyphs.js';
 
 /** `SkinParam#getCircledCharacterRadius()` default (fontSize 17 -> formula
@@ -424,11 +425,19 @@ export function badgeGlyphPath(
   const dx = cx - refCx;
   const dy = cy - refCy;
   let axis = 0;
+  // T7b: `formatDecimal` (ADR-1) replaces the raw `String(shifted)` --
+  // shifting a captured glyph coordinate by a fractional `dx`/`dy` (badge
+  // centers are rarely on an integer pixel) produced the same class of
+  // raw-float leak T6e found in `class-namespace-shape.ts`'s `d` attribute.
   return refD.replace(NUMBER_RE, (tok) => {
     const shifted = Number(tok) + (axis === 0 ? dx : dy);
     axis = 1 - axis;
-    return String(shifted);
+    return formatDecimal(shifted, DEFAULT_SVG_DECIMALS);
   });
+  // #lizard forgives -- pre-existing 8-param signature (kind/cx/cy/
+  // charOverride?/four circledCharacterFont* overrides from G2 N38/N47),
+  // unrelated to T7b; collapsing to an options object is outside this
+  // task's write-set.
 }
 
 /**

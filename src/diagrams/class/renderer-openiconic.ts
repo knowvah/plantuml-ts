@@ -8,6 +8,7 @@
  */
 import type { Theme } from '../../core/theme.js';
 import { buildOpenIconicPathD, openIconicOriginY } from '../../core/openiconic-glyphs.js';
+import { path } from '../../core/svg.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 
 /**
@@ -29,5 +30,9 @@ export function renderOpenIconicAtom(
 ): string {
   const originY = openIconicOriginY(y, theme.fontSize, atom.factor);
   const d = buildOpenIconicPathD(atom.name, atom.factor, x + 1, originY);
-  return d === undefined ? '' : `<path d="${d}" fill="${atom.fill}"/>`;
+  // T7b: routed through `path()` (was a raw template literal) -- `d` is
+  // already formatted at its source (`openiconic-glyphs.ts#buildOpenIconicPathD`
+  // has its own `fmt()`, out of this task's write-set and already correct);
+  // this call only needed to stop bypassing the shared emitter for `fill`.
+  return d === undefined ? '' : path(d, { fill: atom.fill });
 }

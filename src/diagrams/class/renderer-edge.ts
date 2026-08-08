@@ -4,12 +4,14 @@
  * entity renderers. renderEdge/linkIdForSvg/uniqLinkId consumed by renderClass.
  */
 
+import { splinePathD } from '../../core/svg-path-builder.js';
 import type { EdgeGeo } from './layout.js';
 import {} from './renderer-note.js';
 import type {} from './note-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import { text, path } from '../../core/svg.js';
+import { text, path, attrs } from '../../core/svg.js';
+import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 import {} from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import {} from './class-monochrome.js';
@@ -38,25 +40,7 @@ import {} from './class-shadow.js';
  * from.
  */
 function buildPathData(points: EdgeGeo['points']): string {
-  if (points.length === 0) return '';
-  const [first, ...rest] = points;
-  if (first === undefined) return '';
-  const start = `M${first.x},${first.y}`;
-
-  const isBezierSpline = points.length >= 4 && (points.length - 1) % 3 === 0;
-  if (isBezierSpline) {
-    const segments: string[] = [];
-    for (let i = 1; i < points.length; i += 3) {
-      const c1 = points[i]!;
-      const c2 = points[i + 1]!;
-      const end = points[i + 2]!;
-      segments.push(`C${c1.x},${c1.y} ${c2.x},${c2.y} ${end.x},${end.y}`);
-    }
-    return [start, ...segments].join(' ');
-  }
-
-  const segments = rest.map((p) => `L${p.x},${p.y}`);
-  return [start, ...segments].join(' ');
+  return splinePathD(points);
 }
 
 /**
@@ -131,6 +115,9 @@ export function linkIdForSvg(geo: EdgeGeo, ids: Set<string>, syntheticNames: Rea
   else if (looksLikeNoDecorAtAllSvg(decorAtEnt2, decorAtEnt1)) base = `${ent1}-${ent2}`;
   else base = `${ent1}-to-${ent2}`;
   return uniqLinkId(ids, base);
+  // #lizard forgives -- pre-existing (unrelated to T7b): three-way
+  // idEntity1/idEntity2-vs-from/to fallback chain mirrors Link
+  // #idCommentForSvg's own branching (module doc comment above).
 }
 
 /** Upstream: `SvekEdge#uniq` (SvekEdge.java:1093), verbatim -- same
@@ -233,10 +220,20 @@ export function renderEdge(
   if (geo.arrowGlyph !== undefined) {
     const [p0, p1, p2] = geo.arrowGlyph.points;
     if (p0 !== undefined && p1 !== undefined && p2 !== undefined) {
-      const pts = `${p0.x},${p0.y},${p1.x},${p1.y},${p2.x},${p2.y},${p0.x},${p0.y}`;
+      // T7b: routed through `attrs()` (was a raw template literal) --
+      // formats each coordinate (ADR-1) while preserving the discrete
+      // presentation-attribute shape the doc comment above already
+      // documents as a deliberate, tested-equivalent divergence from
+      // jar's combined `style=` (normalize.ts expands `style` before
+      // comparing, so the attribute SHAPE is unaffected; only the raw
+      // numeric formatting was the defect).
+      const fmt = (n: number): string => formatDecimal(n, DEFAULT_SVG_DECIMALS);
+      const pts = [p0, p1, p2, p0].map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(',');
       parts.push(
-        `<polygon points="${pts}" fill="#000000" stroke="#000000" ` +
-        'stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>',
+        `<polygon${attrs([
+          ['points', pts], ['fill', '#000000'], ['stroke', '#000000'],
+          ['stroke-width', 1], ['stroke-linejoin', 'miter'], ['stroke-miterlimit', 10],
+        ])}/>`,
       );
     }
   }

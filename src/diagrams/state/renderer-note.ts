@@ -51,6 +51,7 @@
  * calls into this module yet — every target fixture this iteration is
  * FLAT, `layout.ts#hasAnyComposite` false for all three).
  */
+import { lineTo, moveTo } from '../../core/svg-path-builder.js';
 import type { StateDiagramAST, StateNote } from './ast.js';
 import type { StateNodeGeo } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
@@ -209,8 +210,14 @@ export function renderStateNoteFreestanding(node: StateNodeGeo, theme: Theme): s
   const { x, y, width: w, height: h } = node;
   const c = NOTE_FOLD;
   const fill = resolveStateFill(node, NOTE_FILL);
-  const outline = `M${x},${y} L${x},${y + h} L${x + w},${y + h} L${x + w},${y + c} L${x + w - c},${y} L${x},${y}`;
-  const corner = `M${x + w - c},${y} L${x + w - c},${y + c} L${x + w},${y + c} L${x + w - c},${y}`;
+  const outline = [
+    moveTo(x, y), lineTo(x, y + h), lineTo(x + w, y + h),
+    lineTo(x + w, y + c), lineTo(x + w - c, y), lineTo(x, y),
+  ].join(' ');
+  const corner = [
+    moveTo(x + w - c, y), lineTo(x + w - c, y + c),
+    lineTo(x + w, y + c), lineTo(x + w - c, y),
+  ].join(' ');
   return (
     path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }) +
     path(corner, { fill, stroke: theme.colors.border, strokeWidth: NOTE_CORNER_DEFAULT_STROKE_WIDTH }) +

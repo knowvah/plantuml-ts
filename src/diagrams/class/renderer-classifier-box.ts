@@ -11,6 +11,7 @@
  * the original G2 split -- see `MAP_JSON_DIVIDER_STROKE_WIDTH`'s own doc
  * comment for the G3/O3 map/json divider fix, which DID change behavior).
  */
+import { roundedTopRectD } from '../../core/svg-path-builder.js';
 import type { ClassifierGeo } from './layout.js';
 import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
 import type { Theme } from '../../core/theme.js';
@@ -118,12 +119,18 @@ function renderBadge(geo: ClassifierGeo, theme: Theme): string {
     // G2 N26: `geo.badgeChar` -- the CHAR half of the same decoration,
     // see `badgeGlyphPath`/`resolveBadgeLetter`'s own doc comment for the
     // 5-known-letters limitation.
-    `<path d="${badgeGlyphPath(
-      geo.kind, badgeX, badgeY, geo.badgeChar, theme.colors.graph.circledCharacterFontSize,
-      theme.colors.graph.circledCharacterFontFamily, theme.colors.graph.circledCharacterFontBold,
-      theme.colors.graph.circledCharacterFontItalic,
-    )}" ` +
-    `fill="${resolveBadgeGlyphColor(spot?.font, theme.colors.graph.spotCascadeFont)}"/>`
+    // T7b: routed through `path()` (was a raw template literal) -- the
+    // `d` string itself is already formatted at its source
+    // (`class-badge.ts#badgeGlyphPath`'s own T7b fix), so this call only
+    // needed to stop bypassing the shared emitter for the `fill` attribute.
+    path(
+      badgeGlyphPath(
+        geo.kind, badgeX, badgeY, geo.badgeChar, theme.colors.graph.circledCharacterFontSize,
+        theme.colors.graph.circledCharacterFontFamily, theme.colors.graph.circledCharacterFontBold,
+        theme.colors.graph.circledCharacterFontItalic,
+      ),
+      { fill: resolveBadgeGlyphColor(spot?.font, theme.colors.graph.spotCascadeFont) },
+    )
   );
 }
 
@@ -222,9 +229,7 @@ function headerBackgroundPath(geo: ClassifierGeo, theme: Theme, roundCorner: num
   const y0 = geo.y;
   const x1 = geo.x + geo.width;
   const y1 = geo.y + headerHeight;
-  const d =
-    `M${x0 + r},${y0} L${x1 - r},${y0} A${r},${r} 0 0 1 ${x1},${y0 + r} ` +
-    `L${x1},${y1} L${x0},${y1} L${x0},${y0 + r} A${r},${r} 0 0 1 ${x0 + r},${y0}`;
+  const d = roundedTopRectD(x0, y0, x1, y1, r);
   return path(d, { fill, stroke: classBorder(geo, theme), strokeWidth: classBorderStrokeWidth(geo, theme) });
 }
 

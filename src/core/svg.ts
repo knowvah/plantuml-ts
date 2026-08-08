@@ -18,6 +18,7 @@ import type { Paint } from './paint.js';
 import { arrowHead, ALL_ARROW_TYPES } from './svg-markers.js';
 import {
   DEFAULT_SVG_DECIMALS,
+  fmt,
   formatDecimal,
   shortenColor,
 } from './svg-format.js';
@@ -310,14 +311,6 @@ export function strokeDecorationOf(
 ): { strokeWidth: number | undefined; strokeDasharray: string | undefined } {
   if (stroke === PAINT_NONE) return { strokeWidth: undefined, strokeDasharray: undefined };
   return { strokeWidth, strokeDasharray };
-}
-
-/** {@link formatDecimal} at the default precision — for the handful of
- *  numeric values this module interpolates into markup directly rather than
- *  passing through {@link attrs} (which threads `decimals` per ADR-2; these
- *  sites have no options object to thread it from). */
-function fmt(x: number): string {
-  return formatDecimal(x, DEFAULT_SVG_DECIMALS);
 }
 
 // ---------------------------------------------------------------------------
