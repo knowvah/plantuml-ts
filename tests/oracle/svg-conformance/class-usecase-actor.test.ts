@@ -176,13 +176,21 @@ describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside clas
     const ours = renderFixtureClass(readSource(slug), new DeterministicMeasurer());
     const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
     expect(pass).toBe(false);
+    // RE-MEASURED 2026-08-08 (mission svg-output-size-reduction, T9/T13).
+    // Every change here is on the GOLDEN's side, not ours: our raw output is
+    // still 169x96 with 2 children. T9 re-captured this golden from the
+    // pinned jar, whose error page has since grown -- height 162 -> 288,
+    // childCount 11 -> 18 -- and the `svg/@background` diff is GONE because
+    // the regenerated error page's background now matches what we emit.
+    // Six pinned diffs became five, i.e. this path got marginally MORE
+    // faithful, which this exact-pin guard is designed to surface rather
+    // than let drift (see the file header's HISTORY note).
     const expected: Diff[] = [
-      { path: 'svg/@background', actual: '#FFFFFF', expected: '#000000', tolerance: 0.01 },
-      { path: 'svg/@height', actual: '96', expected: '162', delta: 66, tolerance: 0.01 },
+      { path: 'svg/@height', actual: '96', expected: '288', delta: 192, tolerance: 0.01 },
       { path: 'svg/@viewBox[2]', actual: '169', expected: '579', delta: 410, tolerance: 0.01 },
-      { path: 'svg/@viewBox[3]', actual: '96', expected: '162', delta: 66, tolerance: 0.01 },
+      { path: 'svg/@viewBox[3]', actual: '96', expected: '288', delta: 192, tolerance: 0.01 },
       { path: 'svg/@width', actual: '169', expected: '579', delta: 410, tolerance: 0.01 },
-      { path: 'svg/g[1][childCount]', actual: '2', expected: '11', tolerance: 0.01 },
+      { path: 'svg/g[1][childCount]', actual: '2', expected: '18', tolerance: 0.01 },
     ];
     expect(diffs).toEqual(expected);
   });
