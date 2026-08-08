@@ -22,6 +22,7 @@ import {
   resolveElementPaint,
   resolveElementShadowing,
   resolveElementLineThickness,
+  resolveElementFontSize,
 } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
 import { parseColor } from '../../core/paint.js';
@@ -29,13 +30,16 @@ import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { URectangle } from '../../core/klimt/shape/URectangle.js';
+import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { Back } from '../../core/klimt/Back.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
 import {
   EntityImageDescription,
   type EntityImageDescriptionParams,
+  type EntityImageDescriptionStereotypeSprite,
 } from '../../core/svek/image/EntityImageDescription.js';
 import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
 import { UGraphicStencil } from '../../core/klimt/drawing/UGraphicStencil.js';
@@ -45,8 +49,11 @@ import {
   type UGraphicWithGroups,
 } from '../../core/svek/DecorateEntityImage.js';
 import { upstreamKeyword, mapComponentStyle, textFont, resolveActorStyle } from './renderer-symbol.js';
-import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import { type SpriteRegistry, spriteDimsLookupFor } from '../../core/sprite-commands.js';
+import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import { makeAtomImageResolverFor } from './render-atoms.js';
+import { buildNoteBody } from './leaf-sizing.js';
+import { NOTE_FONT_SIZE } from './leaf-sizing-consts.js';
 
 /** Jar-verified default entity corner radius / stroke width for the
  *  rectangle-family `USymbol`s (`test-results/dot-cache/component/
@@ -174,6 +181,18 @@ function overrideStroke(
   return UStroke.withThickness(defaultThickness);
 }
 
+/** Renderer-side twin of `leaf-sizing-entity.ts#spriteLabel` — the registry is
+ *  narrowed through `spriteDimsLookupFor` so both producers ask the SAME
+ *  lookup (`planning/sizer-renderer-parity.md`). */
+function spriteLabel(
+  node: DescriptionNodeGeo,
+  sprites: SpriteRegistry | undefined,
+): { stereotypeSprite?: EntityImageDescriptionStereotypeSprite } {
+  const lookup = sprites === undefined ? undefined : spriteDimsLookupFor(sprites);
+  const resolved = resolveStereotypeSprite(node.stereotypeSprite, lookup);
+  return resolved === undefined ? {} : { stereotypeSprite: resolved };
+}
+
 function buildEntityParams(
   node: DescriptionNodeGeo,
   theme: Theme,
@@ -190,7 +209,15 @@ function buildEntityParams(
       actorStyle: resolveActorStyle(theme.actorStyle),
       componentStyle: mapComponentStyle(theme.componentStyle),
     },
-    labels: { codeName: node.display, displayText: node.display, stereotypeLabels },
+    labels: {
+      codeName: node.display,
+      displayText: node.display,
+      stereotypeLabels,
+      // Same resolution the sizer performed (`leaf-sizing-entity.ts
+      // #spriteLabel`), through the SAME `SpriteDimsLookup` narrowing, so the
+      // drawn sprite cannot differ from the measured one.
+      ...spriteLabel(node, sprites),
+    },
     paint: {
       forecolor: override.line ?? resolveElementPaint(theme, node.symbol, 'border'),
       backcolor:
@@ -223,6 +250,12 @@ function buildEntityParams(
     links: [],
     fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
     atomImageResolverFor: makeAtomImageResolverFor(sprites),
+    // Same store the sizer measured through (`layout-helpers.ts`), off the
+    // same registry — a one-sided wiring would draw a glyph the ellipse was
+    // not fitted to (`planning/sizer-renderer-parity.md`).
+    ...(sprites?.emoji === undefined
+      ? {}
+      : { emojiArtwork: (unicode: string): string | undefined => sprites.emoji?.get(unicode) }),
     ...(node.symbol === 'hexagon' ? { hexagonPolygon: null } : {}),
   };
   // #lizard forgives -- pre-existing entity-params assembly (one object
@@ -267,20 +300,54 @@ function drawFallbackBox(ug: UGraphic, node: DescriptionNodeGeo, uid: string, fi
 const NOTE_MARGIN_X = 6;
 const NOTE_MARGIN_Y = 5;
 
-/** E2r/L3 (notes cutover): routes the note body through the SAME L1/L2
- *  creole stripe/atom pipeline (`buildTextBlock`) every other entity's
- *  text already uses — nested inline style runs, `==` headings, `<img>`/
- *  `<$sprite>`/`<latex>` atoms, and word-wrap (`wrapWidth`) all now apply
- *  to note bodies too, matching upstream's `EntityImageNote.java`'s own
- *  `BodyFactory.create3(strings, ..., style.wrapWidth(), style)` call
- *  (the SAME `BodyFactory.create3` `EntityImageDescription.java`'s `desc`
- *  uses). Previously this drew each `\n`-split line as ONE literal
- *  `UText` run with an approximated line-height offset (`theme.fontSize +
- *  4`, not the jar's real `marginY`/baseline math) — no creole markup was
- *  ever recognized inside a note. The note's own BOX shape (upstream:
- *  `Opale`'s folded-corner polygon) is unchanged/out of this cutover's
- *  scope — `drawFallbackBox` still draws a plain rect, a pre-existing,
- *  separately-ledgered divergence (G1 territory, not E2r). */
+/**
+ * The note body's own font (`EntityImageNote.java:111`'s `style
+ * .getFontConfiguration(...)`): family/colour/styles exactly as `textFont`
+ * resolves them, but the SIZE falls back to `NOTE_FONT_SIZE` (13,
+ * `plantuml.skin:312-313`'s `note { FontSize 13 }`) rather than to the
+ * diagram-wide `theme.fontSize` (14).
+ *
+ * That fallback is the RENDERER half of cause C3 (F1-a): `textFont`'s own
+ * default is the diagram font, so notes drew at 14 while the sizer measured
+ * at 13 — a permanent 1px-per-line box/ink disagreement, jar-refuted by
+ * every note-bearing golden (`xufexu-38-fola855`'s cached oracle SVG emits
+ * `font-size="13"` on every note line, `font-size="14"` on the use-case
+ * label beside it). `resolveElementFontSize(theme, 'note', 'title')` is the
+ * SAME call `layout.ts#ClassifyCtx.fontSizeFor` makes into
+ * `BoxSizingOpts.fontSize`, so a `<style> note { FontSize N }` override
+ * moves box and ink together.
+ */
+function noteFont(theme: Theme): FontConfiguration {
+  return { ...textFont(theme, 'note'), size: resolveElementFontSize(theme, 'note', 'title') ?? NOTE_FONT_SIZE };
+}
+
+/**
+ * `EntityImageNote.drawU` -> `drawNormal(ug2)` (`EntityImageNote.java:
+ * 207,239`): the body block, translated by `marginX1`/`marginY`, drawn
+ * inside a `UGraphicStencil` built over the note's OWN box.
+ *
+ * F1-a (mission `s1l-tail-fix`, group G2) replaced this function's
+ * `buildTextBlock` scoped substitute with `leaf-sizing.ts#buildNoteBody` —
+ * the real `BodyFactory.create3` -> `BodyEnhanced2` route
+ * (`EntityImageNote.java:116-117`), i.e. literally the same function the
+ * SIZER now calls. Before that they disagreed three ways: the sizer billed
+ * flat 13px lines, this drew `==toto==` as a creole heading plus literal
+ * `--` text, and upstream did neither (it removes each block-separator line
+ * and draws a `TextBlockLineBefore` rule carrying the title). Sizer and
+ * renderer must move together here or the ink stops fitting the box —
+ * `planning/sizer-renderer-parity.md`.
+ *
+ * The stencil is built on the UNTRANSLATED `ug` from the node's own box, not
+ * from the block's dimension: upstream's `UGraphicStencil.create(ug, this,
+ * UStroke.simple())` (`EntityImageNote.java:207`) stencils the whole note
+ * before `drawNormal` applies the margin translate, which is what makes a
+ * separator rule span the note's full width (jar: `x1="7" x2="90.4313"` on a
+ * box spanning 6..91.43) instead of stopping at the text.
+ *
+ * The note's own BOX shape (upstream: `Opale`'s folded-corner polygon) stays
+ * out of scope — `drawFallbackBox` still draws a plain rect, a pre-existing,
+ * separately-ledgered divergence.
+ */
 function drawNoteFallback(
   ug: UGraphic,
   node: DescriptionNodeGeo,
@@ -289,27 +356,23 @@ function drawNoteFallback(
   sprites: SpriteRegistry | undefined,
 ): void {
   drawFallbackBox(ug, node, uid, theme.colors.noteBackground, theme.colors.border);
-  const font = textFont(theme, 'note');
-  const resolveAtomImage = makeAtomImageResolverFor(sprites)(font);
-  const block = buildTextBlock(node.display, font, HorizontalAlignment.LEFT, resolveAtomImage, theme.wrapWidth ?? 0, {
-    start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
-    end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
+  const block = buildNoteBody(node.display, noteFont(theme), {
+    wrapWidth: theme.wrapWidth,
+    guillemet: {
+      start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
+      end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
+    },
+    atomImageResolverFor: makeAtomImageResolverFor(sprites),
   });
-  const dim = block.calculateDimension(ug.getStringBounder());
-  // `UGraphicStencil.create` -- REQUIRED here, not optional plumbing: a
-  // note body containing a bare creole separator line (`----`/`====`/
-  // `....`) now builds a `UHorizontalLine` atom (E2r/L3 cutover, same
-  // stripe/atom pipeline entity descriptions already use), and that shape
-  // is only ever intercepted by an `AbstractUGraphicHorizontalLine`
-  // wrapper (upstream: every `UHorizontalLine#drawMe` call REQUIRES one --
-  // `klimt/drawing/LimitFinder.java` itself has no `UHorizontalLine`
-  // branch either, jar-verified by inspection). Mirrors
-  // `EntityImageDescription.ts#drawU`'s own identical
-  // `UGraphicStencil.create(ugDesc, dimDesc)` wrap around its `desc`
-  // TextBlock draw (the same pattern this port already uses for entity
-  // description bodies -- notes had never needed it before this cutover).
-  const translated = ug.apply(new UTranslate(NOTE_MARGIN_X, NOTE_MARGIN_Y));
-  block.drawU(UGraphicStencil.create(translated, dim));
+  // `UGraphicStencil.create` -- REQUIRED here, not optional plumbing: a note
+  // body carrying a block separator (`--`/`==`/`..`/`__`) draws a
+  // `UHorizontalLine` through `TextBlockLineBefore`, and that shape is only
+  // ever intercepted by an `AbstractUGraphicHorizontalLine` wrapper
+  // (upstream: every `UHorizontalLine#drawMe` call REQUIRES one --
+  // `klimt/drawing/LimitFinder.java` has no `UHorizontalLine` branch
+  // either, jar-verified by inspection).
+  const stencilled = UGraphicStencil.create(ug, new XDimension2D(node.width, node.height));
+  block.drawU(stencilled.apply(new UTranslate(NOTE_MARGIN_X, NOTE_MARGIN_Y)));
 }
 
 /** Jar-verified port box border thickness (`EntityImagePort

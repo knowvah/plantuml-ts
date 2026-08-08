@@ -145,6 +145,19 @@ export function textFontColor(theme: Theme, symbol: string): string | null {
  * } }` for `'stereotype'` (falling back to the plain `FontSize` override,
  * then to `theme.fontSize + sizeDelta`). Callers building stereotype text
  * pass `role: 'stereotype'` alongside `FontStyle.ITALIC`.
+ *
+ * > **Open, escalated (S1L-tail G4 tier 2).** `resolveElementFontSize` now
+ * > carries a fourth `stereotypes` argument for the per-stereotype-NAME tier
+ * > (`skinparam <sname>StereotypeFontSize<<bar>> N` / `<style> <sname> {
+ * > stereotype { .bar { FontSize N } } }`), and the SIZER supplies it. This
+ * > function cannot: it has no access to the entity's own labels, and it is
+ * > already at the project's 5-parameter ceiling, so delivering them means
+ * > bundling `role`+`stereotypes` into one options argument and updating all
+ * > FIVE call sites — `renderer-entity.ts:189-190`,
+ * > `renderer-cluster.ts:92,101`, `class/renderer-usymbol-entity.ts:82-83` —
+ * > four of which sit outside F3-fix's declared write-set. Until then the INK
+ * > half of `loroto-06-fano471`/`toxine-81-xofo986` stays open (`«bar»` draws
+ * > at 20 where the jar draws 10); only the SIZE half closed.
  */
 export function textFont(
   theme: Theme,

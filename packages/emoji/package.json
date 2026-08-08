@@ -1,0 +1,46 @@
+{
+  "name": "@knowvah/plantuml-emoji",
+  "version": "0.1.0",
+  "description": "Vendored Twemoji artwork (CC-BY 4.0) for plantuml-ts <:emoji:> rendering",
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sseely/plantuml-ts.git",
+    "directory": "packages/emoji"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "copy-assets": "node scripts/copy-assets.mjs",
+    "prepack": "npm run copy-assets"
+  },
+  "files": [
+    "assets",
+    "index.js",
+    "index.d.ts",
+    "LICENSE",
+    "LICENSE-CODE",
+    "LICENSES.md",
+    "README.md"
+  ],
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./assets/*": "./assets/*",
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@knowvah/plantuml-ts": "^0.1.0"
+  },
+  "devDependencies": {
+    "@knowvah/plantuml-ts": "file:../.."
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

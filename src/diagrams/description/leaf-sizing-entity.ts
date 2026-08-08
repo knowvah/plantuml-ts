@@ -17,7 +17,12 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureInlineAtom } from '../../core/creole-atoms-measure.js';
 import type { SpriteDimsLookup, AtomImageResolver } from '../../core/creole-atoms.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
-import { EntityImageDescription, type EntityImageDescriptionParams } from '../../core/svek/image/EntityImageDescription.js';
+import {
+  EntityImageDescription,
+  type EntityImageDescriptionParams,
+  type EntityImageDescriptionStereotypeSprite,
+} from '../../core/svek/image/EntityImageDescription.js';
+import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
@@ -125,25 +130,35 @@ interface EntityLeafCtx {
   readonly measurer: StringMeasurer;
 }
 
-/** `paint.fontTitle`/`fontStereo`: the SAME `fontSpec` for both slots
- *  (pre-routing sizer's own convention) -- per-element stereotype font
- *  override is a separate, unlisted gap this task does not fix. */
-function sizingFontConfig(fontSpec: FontSpec): FontConfiguration {
-  return { family: fontSpec.family, size: fontSpec.size, color: null, styles: SIZING_FONT_STYLES };
+/** One `FontConfiguration` from a `FontSpec`, at an explicit SIZE. Callers
+ *  pass the title size for `paint.fontTitle` and the (separately resolved)
+ *  stereotype size for `paint.fontStereo` -- two independent slots, exactly
+ *  as upstream builds them (`EntityImageDescription.java:184-201`). */
+function sizingFontConfig(fontSpec: FontSpec, size: number): FontConfiguration {
+  return { family: fontSpec.family, size, color: null, styles: SIZING_FONT_STYLES };
 }
 
 /** `EntityImageDescriptionPaint` assembly, split out to keep
  *  `buildSizingEntityParams` under the NLOC/CCN ceiling. */
-function sizingPaint(font: FontConfiguration, opts: BoxSizingOpts | undefined): EntityImageDescriptionParams['paint'] {
+function sizingPaint(
+  font: FontConfiguration,
+  fontStereo: FontConfiguration,
+  opts: BoxSizingOpts | undefined,
+): EntityImageDescriptionParams['paint'] {
   return {
     forecolor: SIZING_PLACEHOLDER_COLOR,
     backcolor: SIZING_PLACEHOLDER_COLOR,
     roundCorner: 0,
     diagonalCorner: 0,
     deltaShadow: 0,
-    stroke: UStroke.withThickness(DEFAULT_SIZING_STROKE_THICKNESS),
+    // S1L-tail G5: `ActorAwesome`/`ActorHollow`/`ActorStickMan` fold
+    // `+ 2×thickness` into `getPreferredWidth/Height`, so a `<style> actor {
+    // LineThickness 4 }` moves the DOT box by `2 × (4 − 0.5)` in BOTH
+    // dimensions (`revusu-28-pexi248`). Absent = the traced default, which
+    // is what this slot hardcoded before the thread existed.
+    stroke: UStroke.withThickness(opts?.lineThickness ?? DEFAULT_SIZING_STROKE_THICKNESS),
     fontTitle: font,
-    fontStereo: font,
+    fontStereo,
     titleAlignment: HorizontalAlignment.CENTER,
     stereotypeAlignment: HorizontalAlignment.CENTER,
     minimumWidth: opts?.minimumWidth ?? 0,
@@ -160,23 +175,47 @@ function sizingPaint(font: FontConfiguration, opts: BoxSizingOpts | undefined): 
  *
  * Deliberately NOT threaded (verified draw-only, or out of write-set):
  * `forecolor`/`backcolor` (`SIZING_PLACEHOLDER_COLOR`), `roundCorner`/
- * `diagonalCorner`, `deltaShadow`/`stroke` per-element overrides (need
- * `Theme` in `layout.ts`'s `ClassifyCtx` -- T9's write-set; the DEFAULT
- * stroke IS supplied), `links`/`hexagonPolygon`, and
- * `fixCircleLabelOverlapping` (only feeds `resolveShapeType`, never
+ * `diagonalCorner`, the per-element `deltaShadow` override (still needs its
+ * own `ClassifyCtx` resolver and its own fixture -- `planning/
+ * sizer-renderer-parity.md`'s `Shadowing` GAP row), `links`/`hexagonPolygon`,
+ * and `fixCircleLabelOverlapping` (only feeds `resolveShapeType`, never
  * `calculateDimensionSlow`).
+ *
+ * `stroke` and `fontStereo` USED to sit in that list; both are threaded now
+ * (S1L-tail G4/G5) -- see `sizingPaint` and the `fontStereoSize` derivation
+ * below.
  *
  * `actorStyle` (T7): `ctx.opts?.actorStyle`, threaded from `Theme.actorStyle`
  * -- the SAME accessor the renderer reads, so an actor sizes to whichever
  * of stickman/awesome/hollow it will actually be drawn as. Falls back to
  * `ActorStyle.STICKMAN`, upstream's own default, when unset.
  */
+/** The `labels.stereotypeSprite` slot — present only when the node names a
+ *  sprite AND that name resolves. Shared shape with `renderer-entity.ts`'s
+ *  own call so the sizer and renderer cannot resolve one name to two boxes
+ *  (`planning/sizer-renderer-parity.md`). */
+function spriteLabel(
+  node: DescriptiveNode,
+  sprites: SpriteDimsLookup | undefined,
+): { stereotypeSprite?: EntityImageDescriptionStereotypeSprite } {
+  const resolved = resolveStereotypeSprite(node.stereotypeSprite, sprites);
+  return resolved === undefined ? {} : { stereotypeSprite: resolved };
+}
+
 function buildSizingEntityParams(
   node: DescriptiveNode,
   fontSpec: FontSpec,
   ctx: EntityLeafCtx,
 ): EntityImageDescriptionParams {
-  const font = sizingFontConfig(fontSpec);
+  const font = sizingFontConfig(fontSpec, fontSpec.size);
+  // S1L-tail G4. `fontSpec.size` is ALREADY the resolved title size
+  // (`measureLeafNode` collapsed `opts.fontSize` into it), so the `??` here
+  // reproduces upstream's own stereotype→title→diagram cascade tail while
+  // keeping "no stereotype override" byte-identical to the pre-thread
+  // behaviour -- the ADR-4 discipline, applied to a second slot rather than
+  // by repointing the first (`BoxSizingOpts.stereotypeFontSize`'s doc has
+  // the measured numbers for the repointing trap).
+  const fontStereoSize = ctx.opts?.stereotypeFontSize ?? fontSpec.size;
   return {
     entity: { name: node.id, uid: '', qualifiedName: node.id, location: null, url: null },
     symbol: {
@@ -188,11 +227,19 @@ function buildSizingEntityParams(
       codeName: node.display,
       displayText: node.display,
       stereotypeLabels: node.stereotype ?? [],
+      // `Stereotype#getSprite` (java:110-118). Without this the `<<$name>>`
+      // run falls through to `stereotypeLabels` and is measured as guillemet
+      // TEXT -- one font-size line -- instead of the sprite's declared box.
+      // `resolveStereotypeSprite` returns undefined on a miss, which IS
+      // upstream's null return, so an unknown sprite still degrades to its
+      // `«label»` block.
+      ...spriteLabel(node, ctx.sprites),
     },
-    paint: sizingPaint(font, ctx.opts),
+    paint: sizingPaint(font, sizingFontConfig(fontSpec, fontStereoSize), ctx.opts),
     links: [],
     fixCircleLabelOverlapping: false,
     atomImageResolverFor: sizingAtomImageResolverFor(ctx.sprites),
+    ...(ctx.opts?.emojiArtwork === undefined ? {} : { emojiArtwork: ctx.opts.emojiArtwork }),
   };
 }
 

@@ -6,13 +6,13 @@ parallel.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | container-cluster, 9 fixtures | debugger | `findings/container-cluster.md` | — | [ ] |
-| T2 | sprite, 5 fixtures | debugger | `findings/sprite.md` | — | [ ] |
-| T3 | element-font, 5 fixtures | debugger | `findings/element-font.md` | — | [ ] |
-| T4 | creole titled separators (S1L-i), 2 fixtures | debugger | `findings/creole-titled-separator.md` | — | [ ] |
-| T5 | multi-line quoted display (S1L-j), 2 fixtures | debugger | `findings/multiline-display.md` | — | [ ] |
-| T6 | other, 2 fixtures | debugger | `findings/other.md` | — | [ ] |
-| T7 | icon, 1 fixture | debugger | `findings/icon.md` | — | [ ] |
+| T1 | container-cluster, 9 fixtures | debugger | `findings/container-cluster.md` | — | [x] |
+| T2 | sprite, 5 fixtures | debugger | `findings/sprite.md` | — | [x] |
+| T3 | element-font, 5 fixtures | debugger | `findings/element-font.md` | — | [x] |
+| T4 | creole titled separators (S1L-i), 2 fixtures | debugger | `findings/creole-titled-separator.md` | — | [x] |
+| T5 | multi-line quoted display (S1L-j), 2 fixtures | debugger | `findings/multiline-display.md` | — | [x] |
+| T6 | other, 2 fixtures | debugger | `findings/other.md` | — | [x] |
+| T7 | icon, 1 fixture | debugger | `findings/icon.md` | — | [x] |
 
 ## Why the buckets are not re-cut for balance
 

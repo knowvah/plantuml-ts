@@ -16,6 +16,7 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { CONTAINER_SYMBOLS } from './parse-helpers.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
+import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
 import { visibleStereotypeLabels, nodeWithVisibleStereotype } from './element-grammar.js';
 
 // ---------------------------------------------------------------------------
@@ -204,6 +205,7 @@ export function degenerateSingleLeaf(
   // entirely, so it needs its OWN sprite-dims bridge for D9 measurement —
   // same one-liner `layout.ts#layoutDescription` builds for the normal path.
   const sprites = ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined;
+  const emojiArtwork = emojiArtworkResolverFor(ast.sprites?.emoji);
   // G1 I-hideshow: a single-root-leaf diagram can still carry `hide
   // stereotype`/`hide <<label>> stereotype` -- filter BEFORE sizing so a
   // hidden guillemet block reserves no footprint (EntityImageUseCase.java
@@ -217,7 +219,12 @@ export function degenerateSingleLeaf(
   const stereotypeRules = ast.stereotypeVisibilityRules ?? [];
   const visibleStereotype = visibleStereotypeLabels(node.stereotype, stereotypeRules);
   const visibleNode = nodeWithVisibleStereotype(node, stereotypeRules);
-  const dims = measureLeafNode(visibleNode, fontSpec, measurer, boxOpts, sprites);
+  // Emoji artwork rides into the sizer on `BoxSizingOpts` so the ellipse fit
+  // draws the real glyph — the RENDERER resolves the same store off the same
+  // registry (`renderer-entity.ts`), keeping the two in lock-step.
+  const sizingOpts =
+    emojiArtwork === undefined ? boxOpts : { ...(boxOpts ?? {}), emojiArtwork };
+  const dims = measureLeafNode(visibleNode, fontSpec, measurer, sizingOpts, sprites);
   const geo: DescriptionNodeGeo = {
     id: node.id,
     symbol: node.symbol,
@@ -229,6 +236,12 @@ export function degenerateSingleLeaf(
     children: [],
   };
   if (visibleStereotype !== undefined && visibleStereotype.length > 0) geo.stereotype = visibleStereotype;
+  // The `<<$name>>` half of the same stereotype run. Threaded so the RENDERER
+  // resolves the same sprite the sizer just measured — without it the sizer
+  // reserves the sprite box while the renderer draws `«name»` as text, the
+  // exact sizer/renderer split `planning/sizer-renderer-parity.md` exists to
+  // prevent.
+  if (node.stereotypeSprite !== undefined) geo.stereotypeSprite = node.stereotypeSprite;
   if (node.color !== undefined) geo.color = node.color;
   if (node.creationIndex !== undefined) geo.creationIndex = node.creationIndex;
   // Hoisted out of the `return` (was an inline `...(cond ? {…} : {})`

@@ -66,6 +66,9 @@ export interface SpriteAtomToken {
   name: string;
   scale: number;
   forcedColor?: string;
+  /** Sprite inside a `[[url label]]` label (`StripeSimple#modifyStripe`):
+   *  upstream skips the font-ratio factor -- see `spriteAtomScale`. */
+  insideUrl?: true;
 }
 
 /** G2 N41: an OpenIconic glyph token -- `name` resolves against the fixed
@@ -199,16 +202,13 @@ export type AtomImageResolver = (
   | undefined;
 
 /**
- * Minimal structural view of T4's per-diagram sprite registry (batch-2
- * write-set: `src/core/klimt/sprite/Sprite.ts` exposes `{width, height}`;
- * the registry itself -- `src/core/sprite-commands.ts` -- had not landed
- * when this file was written, per the mission prompt's concurrent-write-set
- * note). Only width/height are needed for D9 measurement; T4's `Sprite`
- * additionally carries tint/pixel-level accessors (`SpriteMonochrome
- * .grayLevel`/`getGray`) that T7's renderer will consume separately.
- * FLAG for orchestrator reconciliation: confirm the real registry's
- * `get()` return type is structurally assignable here once T4 lands (it
- * should be -- `Sprite` is exactly `{width, height}` today).
+ * Minimal structural view of T4's per-diagram sprite registry: only
+ * width/height are needed for D9 measurement; T4's `Sprite`
+ * (`src/core/klimt/sprite/Sprite.ts`) additionally carries tint/pixel-level
+ * accessors (`SpriteMonochrome.grayLevel`/`getGray`) that T7's renderer
+ * consumes separately. (T4's own "confirm the registry's `get()` return type
+ * is structurally assignable here once T4 lands" FLAG is resolved:
+ * `sprite-commands.ts#spriteDimsLookupFor` returns `SpriteDims` directly.)
  */
 /** A sprite's declared box, plus its drawn-INK box when the two differ (only
  *  an SVG sprite can). Ink is reported in the SAME unscaled units as

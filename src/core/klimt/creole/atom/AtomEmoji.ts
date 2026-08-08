@@ -32,10 +32,48 @@ export const EMOJI_MAGIC = 24;
 /** `calculateDimensionSlow`'s `36 * factor` square (java:57-59). */
 export const EMOJI_BOX_FACTOR = 36;
 
-/** The line height a lone emoji imposes: box height (36×factor) MINUS the
- *  negative starting altitude (`getStartingAltitude` = -3×factor,
- *  java:62-64) → 39×factor. See module doc comment for the jar probe. */
+/** `getStartingAltitude`'s `-3 * factor` (java:62-64) — how far the atom
+ *  hangs BELOW its baseline-anchored box. */
+export const EMOJI_ALTITUDE_FACTOR = -3;
+
+/** The line height an emoji imposes when a TEXT atom shares its line: box
+ *  height (36×factor) MINUS the negative starting altitude (-3×factor) →
+ *  39×factor. See module doc comment for the jar probe.
+ *
+ *  NOT unconditional — see {@link emojiLineHeightFactor}. */
 export const EMOJI_LINE_HEIGHT_FACTOR = 39;
+
+/**
+ * The line height factor an emoji atom imposes, per line CONTEXT.
+ *
+ * `39*factor` is not a property of `AtomEmoji` at all upstream — it is
+ * EMERGENT from `Sea#doAlign` + `Sea#getHeight` (`Sea.java:73-88`, ported
+ * verbatim in `creole/Sea.ts`). `doAlign` places every atom at
+ * `y = -height + startingAltitude`, and the stripe's height is
+ * `maxY - minY` across the line:
+ *
+ * - emoji: `minY = -36f + (-3f) = -39f`, `maxY = -3f`
+ * - text (altitude 0, height S): `minY = -S`, `maxY = 0`
+ *
+ * With a text atom on the line `maxY` is the text's `0` and `minY` is the
+ * emoji's `-39f` (at every font size this port reaches, `39f > S`), so the
+ * line is `39*factor` — the mixed case, jar-verified in the module doc
+ * comment. With NO text atom the emoji supplies BOTH bounds and the line
+ * is its own box, `36*factor`. Jar-probed: `rectangle "<:rocket:>"` is
+ * `41 x 41px` (36f + the 20px box margin), where the unconditional `39`
+ * gives `41 x 42.75px` — `3*factor` = 1.75px too tall at font 14
+ * (`oracle/goldens/description/emoji-only-line-height-0`).
+ *
+ * Callers driving the REAL `Sea` pipeline (`EntityImageDescription
+ * Delegates.ts#descAtomOps`, via `BodyFactory.create3`) must NOT use this:
+ * they report {@link emojiSquareDim} + {@link emojiStartingAltitude} and
+ * let `Sea` derive both cases itself. This helper exists only for
+ * `buildTextBlock`'s naive top-down height-summing SUBSTITUTE
+ * (`EntityImageDescriptionTextBlock.ts`), which has no altitude concept.
+ */
+export function emojiLineHeightFactor(hasTextSiblingOnLine: boolean): number {
+  return hasTextSiblingOnLine ? EMOJI_LINE_HEIGHT_FACTOR : EMOJI_BOX_FACTOR;
+}
 
 /** `AtomEmoji`'s ctor factor: `scale * size2D / MAGIC` (java:52). */
 export function emojiFactor(scale: number, fontSize: number): number {
@@ -50,6 +88,20 @@ export function emojiFactor(scale: number, fontSize: number): number {
  *  `core/svek/image/EntityImageDescription*`). */
 export function emojiBoxDim(factor: number): { width: number; height: number } {
   return { width: EMOJI_BOX_FACTOR * factor, height: EMOJI_LINE_HEIGHT_FACTOR * factor };
+}
+
+/** `AtomEmoji#calculateDimensionSlow` VERBATIM (java:57-59) — the
+ *  `36*factor` SQUARE, with no line-height hang folded in. The dimension a
+ *  caller driving the real `Sea` pipeline must report, paired with
+ *  {@link emojiStartingAltitude}; {@link emojiBoxDim} is the pre-combined
+ *  convenience for the naive substitute path and keeps its own contract. */
+export function emojiSquareDim(factor: number): { width: number; height: number } {
+  return { width: EMOJI_BOX_FACTOR * factor, height: EMOJI_BOX_FACTOR * factor };
+}
+
+/** `AtomEmoji#getStartingAltitude` VERBATIM (java:62-64) — `-3 * factor`. */
+export function emojiStartingAltitude(factor: number): number {
+  return EMOJI_ALTITUDE_FACTOR * factor;
 }
 
 /** The platform-glyph TEXT run an emoji atom renders as -- the emoji's own

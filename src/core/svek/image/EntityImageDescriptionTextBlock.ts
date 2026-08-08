@@ -33,9 +33,15 @@ import type { AtomImageResolver } from '../../creole-atoms.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import { buildLineAtoms, type LineBuildAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
 import { getSplitted } from '../../klimt/creole/Fission.js';
+import { atomTextWidth } from '../../klimt/creole/legacy/AtomText.js';
 import { manageGuillemet, type GuillemetPair } from '../../text/Guillemet.js';
 import { renderLatexAsImage } from '../../latex.js';
-import { emojiBoxDim, emojiRenderRun } from '../../klimt/creole/atom/AtomEmoji.js';
+import {
+  EMOJI_BOX_FACTOR,
+  emojiBoxDim,
+  emojiLineHeightFactor,
+  emojiRenderRun,
+} from '../../klimt/creole/atom/AtomEmoji.js';
 
 /**
  * SI15 T1 (ADR-1): widens `AtomImageResolver`'s `image` variant with the
@@ -76,8 +82,13 @@ export function measureLine(
   font: FontConfiguration,
 ): { width: number; height: number; descent: number } {
   const dim = stringBounder.calculateDimension(font, line);
+  // Upstream AtomText.java:183-184: a run containing a tabulation takes
+  // #getWidth's tab-stop tokenizer instead of the plain StringBounder width.
+  // Tab-free runs short-circuit to the identical single measurement, so this
+  // is a zero-diff change for every display without a tab.
+  const width = atomTextWidth(line, font.size, (t) => stringBounder.calculateDimension(font, t).getWidth());
   const descent = stringBounder.getDescent?.(font, line) ?? font.size / 4.5;
-  return { width: dim.getWidth(), height: dim.getHeight(), descent };
+  return { width, height: dim.getHeight(), descent };
 }
 
 /** A line's baseline descent, independent of its text content (every
@@ -159,6 +170,24 @@ function buildLine(line: string, font: FontConfiguration): LineBuild {
  *  to every styled text run too. An unresolved inline atom (`resolveAtomImage`
  *  returns `undefined`, or no resolver supplied at all) contributes
  *  nothing, matching `StripeSimple.addSprite`'s "never added" behavior. */
+/**
+ * F4-b: whether any atom on this line sits at starting altitude 0 — every
+ * `CreoleAtom` kind EXCEPT `emoji` (`AtomImg`/`AtomSprite`/`AtomMath` all
+ * `return 0` upstream; `AtomText` returns `getSpace()`, 0 for `NORMAL`,
+ * this port's only reachable position — see `descAtomOps`'s doc comment in
+ * `EntityImageDescriptionDelegates.ts`). Such an atom pins the line's
+ * `maxY` at 0 under `Sea#doAlign`, which is what makes a shared line
+ * `39*factor` tall and an emoji-only line `36*factor`
+ * ({@link emojiLineHeightFactor}).
+ *
+ * Named for the RULE (altitude), not for the common case (a text sibling),
+ * because a line of `<:rocket:><$sprite>` takes the shared-line height too
+ * — the sprite's altitude is 0 exactly like text's.
+ */
+function hasZeroAltitudeAtom(atoms: readonly CreoleAtom[]): boolean {
+  return atoms.some((atom) => atom.kind !== 'emoji');
+}
+
 function measureAtomsWidthHeight(
   stringBounder: StringBounder,
   atoms: readonly CreoleAtom[],
@@ -169,6 +198,7 @@ function measureAtomsWidthHeight(
   // at-cap shape).
   let width = 0;
   let height = 0;
+  const sharedLine = hasZeroAltitudeAtom(atoms);
   for (const atom of atoms) {
     if (atom.kind === 'text') {
       const m = measureLine(stringBounder, atom.text, atom.font);
@@ -183,12 +213,14 @@ function measureAtomsWidthHeight(
       continue;
     }
     // A2s R2i: a `<:name:>` emoji sizes as `AtomEmoji`'s exact contract --
-    // 36*factor box width, 39*factor line height (`klimt/creole/atom/
-    // AtomEmoji.ts#emojiBoxDim`; murava-69-tago286).
+    // 36*factor box width (`klimt/creole/atom/AtomEmoji.ts`;
+    // murava-69-tago286). F4-b: the LINE height is 39*factor only when a
+    // zero-altitude atom shares the line, 36*factor when the emoji is alone
+    // -- `emojiLineHeightFactor`, this file's `hasZeroAltitudeAtom`.
     if (atom.kind === 'emoji') {
-      const dim = emojiBoxDim(atom.factor);
-      width += dim.width;
-      if (dim.height > height) height = dim.height;
+      width += EMOJI_BOX_FACTOR * atom.factor;
+      const lineHeight = emojiLineHeightFactor(sharedLine) * atom.factor;
+      if (lineHeight > height) height = lineHeight;
       continue;
     }
     const resolved = resolveAtomImage?.(atom.atom);

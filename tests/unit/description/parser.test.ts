@@ -2336,9 +2336,31 @@ describe('parseDescription — CODE as wrapped-display', () => {
 // ===========================================================================
 
 describe('parseDescription — I4c text-escape resolution', () => {
-  it('resolves a <U+XXXX> unicode-codepoint escape in a stereotype -- junoxu-15-gori632', () => {
+  // S1L-tail F2-b (G7) CORRECTED this case. It previously asserted
+  // `['µService']`, which is what our old hand-written `/<<\s*(.+?)\s*>>/g`
+  // produced -- and it is NOT what the jar does. `<<` + `<U+00B5>...` forms
+  // the three-character opener `<<<`, and upstream's `StereotypeDecoration
+  // #cutLabels` (java:185-196) DROPS every `<<<...>>>` run outright, so
+  // `getLabels()` is empty and `EntityImageDescription.java:196-197` takes
+  // its `TextBlockUtils.empty(0, 0)` branch: no stereotype row is drawn or
+  // measured at all. Jar-verified on junoxu-15-gori632's node `sh0010`
+  // (oracle 1.312674 x 0.611111in -- ONE `<text>`, the label only); the old
+  // behavior measured an extra `«µService»` row and cost 17.8375px of width
+  // (0.247743in, the fixture's entire reported delta).
+  it('DROPS a stereotype whose <U+XXXX> escape makes it a <<<...>>> run -- junoxu-15-gori632', () => {
     const ast = parse('component uService as MS2 <<<U+00B5>Service>>');
-    expect(ast.nodes[0]!.stereotype).toEqual(['µService']);
+    expect(ast.nodes[0]!.stereotype).toEqual([]);
+    // The run is still CONSUMED -- it must not leak into the id or display.
+    expect(ast.nodes[0]!.id).toBe('MS2');
+    expect(ast.nodes[0]!.display).toBe('uService');
+  });
+
+  // The escape still decodes when it is NOT in leading position, i.e. when
+  // the token opens with a plain two-character `<<`: `cutLabels` keeps the
+  // run and `resolveTextEscapes` decodes its content, exactly as before.
+  it('still resolves a <U+XXXX> escape that does not open the stereotype', () => {
+    const ast = parse('component uService as MS2 <<Micro<U+00B5>Service>>');
+    expect(ast.nodes[0]!.stereotype).toEqual(['MicroµService']);
   });
 
   it('PRESERVES a <U+XXXX> codepoint escape in a quoted display (decoded per-line at measure time, S1L-b-unicode ADR-1) -- lurupu-11-fubo915', () => {
@@ -2792,5 +2814,182 @@ describe('`hide|show [<<label>>] stereotype` per-label visibility (CommandHideSh
       expect(ast.stereotypeVisibilityRules).toBeUndefined();
       expect(ast.hideShowRules).toBeUndefined();
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// G6 -- the two unported CommandCreateElementFull declaration alternatives
+// (S1L tail F2-a). Both are keyword-less forms: the SYMBOL group is optional
+// (CommandCreateElementFull.java:84), so a line with no leading
+// actor/component/usecase/... keyword is still a declaration.
+//
+//   (1) CODE1's BARE branch -- `User << Human >>`. CODE_WITH_QUOTE admits
+//       `[%pLN_.]+` (java:126,:128); `isForbidden` (java:134-138) refuses a
+//       line that is ENTIRELY a bare token, so at least one decoration must
+//       follow.
+//   (2) `CODE3 as DISPLAY3` (java:95-100) -- DISPLAY admits a quoted string
+//       (DISPLAY_CORE, java:130) but CODE does not (CODE_CORE, java:126), so
+//       a QUOTED right-hand side FLIPS the roles relative to the ordinary
+//       `DISPLAY2 as CODE2` alias form: the left token is the id, the quoted
+//       token is the display.
+//
+// Every expectation below is jar-probed with
+// `java -DPLANTUML_DETERMINISTIC_TEXT=true -jar oracle/dist/plantuml-oracle.jar
+// -tsvg <line>` -- see each case's comment.
+// ---------------------------------------------------------------------------
+
+describe('G6-a: no-SYMBOL bare CODE declaration (CommandCreateElementFull CODE1)', () => {
+  it('G6-a1: `User << Human >>` declares an entity carrying the stereotype', () => {
+    const node = firstNode('User << Human >>\n(Use)');
+    expect(node.id).toBe('User');
+    expect(node.display).toBe('User');
+    expect(node.stereotype).toEqual(['Human']);
+    expect(node.symbol).toBe('actor');
+  });
+
+  it('G6-a2: the same line with NO other usecase/actor leaf still resolves to actor', () => {
+    // Jar-probed (`@startuml / User << Human >> / @enduml`): the SVG draws a
+    // STICKMAN (`<ellipse .../><path .../>` head+limbs), not the INTERFACE
+    // circle. Upstream never makes this leaf STILL_UNKNOWN -- executeArg's
+    // `symbol == null` branch (java:271-274) assigns LeafType.DESCRIPTION +
+    // `actorStyle().toUSymbol()` directly, so `makeDiagramReady`'s
+    // actor-or-interface mute never sees it.
+    const node = firstNode('User << Human >>');
+    expect(node.symbol).toBe('actor');
+    expect(node.stillUnknown).toBeUndefined();
+  });
+
+  it('G6-a3: a PURE bare token declares nothing (isForbidden, java:134-138)', () => {
+    expect(parse('User').nodes).toHaveLength(0);
+  });
+
+  it('G6-a4: a bare CODE with only a #color decoration still declares (jar: 29.575x74 actor)', () => {
+    const node = firstNode('User #red');
+    expect(node.id).toBe('User');
+    expect(node.symbol).toBe('actor');
+    expect(node.color).toBe('#red');
+  });
+
+  it('G6-a5: gogamo-72-pibo470 actor measures 62.725x88 -- the jar figure', () => {
+    // K2 mergeLayoutT12B3(stereo, stickman, label) =
+    // max(«Human» 60.725 + 2, 27, "User" 29.575) x (14 + 60 + 14).
+    const node = firstNode('User << Human >>\n(Use)');
+    const font: FontSpec = { family: 'sans-serif', size: 14 };
+    const dim = measureLeafNode(node, font, new WidthTableMeasurer());
+    expect(dim.width).toBeCloseTo(62.725, 3);
+    expect(dim.height).toBeCloseTo(88, 3);
+  });
+
+  it('G6-a6: the bare rule never shadows a keyword declaration carrying a stereotype', () => {
+    const node = firstNode('component Foo <<bar>>');
+    expect(node.symbol).toBe('component');
+    expect(node.id).toBe('Foo');
+    expect(node.stereotype).toEqual(['bar']);
+  });
+});
+
+describe('G6-b: `CODE as "quoted DISPLAY"` role flip (CommandCreateElementFull CODE3/DISPLAY3)', () => {
+  it('G6-b1: `(Use) as "Use the application"` -- dopova-50-digo290 (jar id Use)', () => {
+    const node = firstNode('(Use) as "Use the application"');
+    expect(node.id).toBe('Use');
+    expect(node.display).toBe('Use the application');
+    expect(node.symbol).toBe('usecase');
+  });
+
+  it('G6-b2: `(Use) as UC1` is UNCHANGED -- unquoted RHS stays DISPLAY2 as CODE2', () => {
+    // The "do not naively widen" regression guard: an UNQUOTED alias is
+    // upstream's alternative 2, tried BEFORE alternative 3, so the alias is
+    // the CODE and the paren token is the DISPLAY.
+    const node = firstNode('(Use) as UC1');
+    expect(node.id).toBe('UC1');
+    expect(node.display).toBe('Use');
+    expect(node.symbol).toBe('usecase');
+  });
+
+  it('G6-b3: `Admin as "Main Admin"` -- bare CODE, one node, jar 70.088x74 actor', () => {
+    const ast = parse('Admin as "Main Admin"');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]).toMatchObject({
+      id: 'Admin',
+      display: 'Main Admin',
+      symbol: 'actor',
+    });
+  });
+
+  it('G6-b4: `:A: as "Actor name"` -- colon CODE, one node, jar 67.637x74 actor', () => {
+    const ast = parse(':A: as "Actor name"');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]).toMatchObject({ id: 'A', display: 'Actor name', symbol: 'actor' });
+  });
+
+  it('G6-b5: `[Comp] as "Big component"` -- ONE node, no spurious `"Big` sibling', () => {
+    // Before F2-a rule 10's greedy `(.*)` trailer took this line and its
+    // `as\s+(\S+)` alias grabbed `"Big`, yielding id `"Big`, display `Comp`.
+    const ast = parse('[Comp] as "Big component"');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]).toMatchObject({
+      id: 'Comp',
+      display: 'Big component',
+      symbol: 'component',
+    });
+  });
+
+  it('G6-b6: `() Foo as "Big name"` -- interface CODE keeps its `()` strip', () => {
+    const node = firstNode('() Foo as "Big name"');
+    expect(node.id).toBe('Foo');
+    expect(node.display).toBe('Big name');
+    expect(node.symbol).toBe('interface');
+  });
+
+  it('G6-b7: business variants keep their trailing slash semantics', () => {
+    const biz = firstNode('(Use)/ as "Biz case"');
+    expect(biz).toMatchObject({ id: 'Use', display: 'Biz case', symbol: 'usecase-business' });
+    const act = firstNode(':B:/ as "Biz actor"');
+    expect(act).toMatchObject({ id: 'B', display: 'Biz actor', symbol: 'actor-business' });
+  });
+
+  it('G6-b8: a STEREOTYPE3 between CODE and `as` is captured, not dropped', () => {
+    const node = firstNode('(Use2) <<st>> as "Stereo disp"');
+    expect(node.id).toBe('Use2');
+    expect(node.display).toBe('Stereo disp');
+    expect(node.stereotype).toEqual(['st']);
+  });
+
+  it('G6-b9: a trailing decoration run after the quoted DISPLAY still applies', () => {
+    const node = firstNode('(Use3) as "Disp" <<st>> #red $tg');
+    expect(node.id).toBe('Use3');
+    expect(node.display).toBe('Disp');
+    expect(node.stereotype).toEqual(['st']);
+    expect(node.color).toBe('#red');
+    expect(node.tags).toEqual(['tg']);
+  });
+});
+
+describe('G6-c: first-match ordering guards for rules 10 / 11 / 11b / 15', () => {
+  it('G6-c1: rule 10 -- `[Tomcat] as APP` (unquoted alias) is untouched', () => {
+    const ast = parse('[Tomcat] as APP');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]).toMatchObject({ id: 'APP', display: 'Tomcat', symbol: 'component' });
+  });
+
+  it('G6-c2: rule 11 -- `(another use case) as (uc1)` is untouched', () => {
+    const node = firstNode('(another use case) as (uc1)');
+    expect(node).toMatchObject({ id: 'uc1', display: 'another use case', symbol: 'usecase' });
+  });
+
+  it('G6-c3: rule 11b -- `"another use case" as (uc4)` keeps DISPLAY2 as CODE2', () => {
+    const node = firstNode('"another use case" as (uc4)');
+    expect(node).toMatchObject({ id: 'uc4', display: 'another use case', symbol: 'usecase' });
+  });
+
+  it('G6-c4: rule 15 -- a bare QUOTED declaration is untouched', () => {
+    const node = firstNode('"Just quoted"');
+    expect(node).toMatchObject({ id: 'Just quoted', display: 'Just quoted', symbol: 'actor' });
+  });
+
+  it('G6-c5: a quoted LHS with a quoted RHS matches NO alternative upstream', () => {
+    // CODE_CORE has no quoted branch, so alternative 3 cannot take `"a"` as
+    // its CODE; alternative 2/4 cannot take `"b"` as their CODE either.
+    expect(parse('"a" as "b"').nodes).toHaveLength(0);
   });
 });

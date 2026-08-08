@@ -151,6 +151,31 @@ export class Stereotype {
     return lookupSprite(registry, this.decoration.spriteName);
   }
 
+  /**
+   * `decoration.spriteName` / `decoration.spriteScale`, read directly.
+   *
+   * Upstream has no such accessor because it does not need one: everything
+   * that wants the sprite calls {@link getSprite}, handing it the ambient
+   * `SpriteContainer` (the classpath-backed `SkinParam`). This port's
+   * container is the per-diagram `SpriteRegistry`, which is built during
+   * PARSING and consumed during LAYOUT/RENDER — two different phases with
+   * two different views of it (`SpriteDimsLookup` for the sizer, the raw
+   * registry for the renderer). The stereotype is parsed in the first
+   * phase and resolved in the second, so the NAME has to survive the trip
+   * on its own. `EntityImageDescriptionDelegates.ts#resolveStereotypeSprite`
+   * is the single place that turns it back into a sprite, and it is the
+   * only reader of these two accessors.
+   */
+  getSpriteName(): string | undefined {
+    return this.decoration.spriteName;
+  }
+
+  /** `decoration.spriteScale` — see {@link getSpriteName}. `0` when the
+   *  stereotype names no sprite (upstream's own unset value). */
+  getSpriteScale(): number {
+    return this.decoration.spriteScale;
+  }
+
   /** java:119-121. */
   isWithOOSymbol(): boolean {
     return this.decoration.label.toLowerCase() === '<<o-o>>';

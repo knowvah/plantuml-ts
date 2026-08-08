@@ -20,7 +20,11 @@ import {
   parseInlineBody,
   parseNameSection,
 } from './parse-helpers.js';
-import { RE_BARE_QUOTED_DECL, parseBracketDeclaration } from './element-grammar.js';
+import { parseBracketDeclaration } from './element-grammar.js';
+import {
+  RE_BARE_DECORATED_DECL,
+  RE_BARE_QUOTED_DECL,
+} from './element-grammar-nosymbol.js';
 import { emitNode, nextCreationIndex } from './parse-state.js';
 import { leafDisplayName } from './namespace-groups.js';
 
@@ -33,7 +37,7 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
     pattern: /^\[([^\]]+)\](.*)?$/,
     execute(state, match) {
       const decl = parseBracketDeclaration(match[1]!.trim(), match[2] ?? '');
-      emitNode(state, makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color));
+      emitNode(state, makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color, undefined, decl.stereotypeSprite));
     },
   },
 
@@ -72,8 +76,8 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
     execute(state, match) {
       const kw = match[1]!.toLowerCase();
       const symbol = KEYWORD_TO_SYMBOL.get(kw) ?? 'node';
-      const { id, display, stereotype, color, tags } = parseNameSection(match[2]!.trim());
-      const container = makeNode(id, display, symbol, stereotype, color, tags);
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[2]!.trim());
+      const container = makeNode(id, display, symbol, stereotype, color, tags, stereotypeSprite);
       container.declaredAsGroup = true;
       for (const child of parseInlineBody(match[3]!)) {
         container.children.push(child);
@@ -99,13 +103,13 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
     execute(state, match) {
       const kw = match[1]!.toLowerCase();
       const symbol = KEYWORD_TO_SYMBOL.get(kw) ?? 'node';
-      const { id, display, stereotype, color, tags } = parseNameSection(match[2]!.trim());
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[2]!.trim());
       const existing = state.nodesById.get(id);
       if (existing !== undefined && existing.declaredAsGroup === true) {
         state.containerStack.push(existing);
         return;
       }
-      const container = makeNode(id, display, symbol, stereotype, color, tags);
+      const container = makeNode(id, display, symbol, stereotype, color, tags, stereotypeSprite);
       container.declaredAsGroup = true;
       // CommandPackageWithUSymbol.java:178-180: an anonymous container (no
       // CODE) burns ONE extra shared-counter value generating its internal
@@ -148,18 +152,38 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       const bracketAs = /^\[([^\]]*)\]\s+(as\s+.+)$/i.exec(match[2]!.trim());
       if (bracketAs !== null) {
         const bdecl = parseBracketDeclaration(bracketAs[1]!.trim(), bracketAs[2]!);
-        emitNode(state, makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color));
+        emitNode(state, makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color, undefined, bdecl.stereotypeSprite));
         return;
       }
-      const { id, display, stereotype, color, tags } = parseNameSection(match[2]!);
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[2]!);
       // CommandCreateElementFull.java:317-318: `display = quark.getName()`
       // when no explicit alias/display was given — the LEAF segment only,
       // not the full dotted path, once `set separator` is active.
       const finalDisplay =
         display === id ? leafDisplayName(id, state.namespaceSeparator) : display;
-      const decl = makeNode(id, finalDisplay, symbol, stereotype, color, tags);
+      const decl = makeNode(id, finalDisplay, symbol, stereotype, color, tags, stereotypeSprite);
       if (symbol === 'port') decl.position = kw === 'portout' ? 'portout' : 'portin';
       emitNode(state, decl);
+    },
+  },
+
+  // 14b. Bare UNQUOTED declaration, no keyword: `User << Human >>` —
+  //      CommandCreateElementFull's CODE1 branch on CODE_CORE's plain
+  //      `[%pLN_.]+` alternative (java:126,:128), SYMBOL omitted (java:84).
+  //      `isForbidden` (java:134-138) tests the WHOLE line, so a decoration
+  //      is REQUIRED: a pure `User` line declares nothing and must keep
+  //      falling through. Same `symbol == null` → plain actor resolution as
+  //      rule 15 (java:271-274), not a STILL_UNKNOWN leaf.
+  //
+  //      Ordered after rule 14 so a single-keyword line carrying only a
+  //      decoration (`card <<x>>`) keeps its existing KEYWORD_RE reading,
+  //      and disjoint from rule 15 by construction (that one is anchored on
+  //      a leading quote, this one on a leading identifier char).
+  {
+    pattern: RE_BARE_DECORATED_DECL,
+    execute(state, match) {
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[0]);
+      emitNode(state, makeNode(id, display, 'actor', stereotype, color, tags, stereotypeSprite));
     },
   },
 
@@ -173,8 +197,8 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   {
     pattern: RE_BARE_QUOTED_DECL,
     execute(state, match) {
-      const { id, display, stereotype, color, tags } = parseNameSection(match[0]);
-      emitNode(state, makeNode(id, display, 'actor', stereotype, color, tags));
+      const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[0]);
+      emitNode(state, makeNode(id, display, 'actor', stereotype, color, tags, stereotypeSprite));
     },
   },
 ];

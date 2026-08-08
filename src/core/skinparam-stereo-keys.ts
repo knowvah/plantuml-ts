@@ -15,6 +15,10 @@
 
 import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import { resolveColor } from './skinparam-key-normalize.js';
+// Imported from the leaf module, not the `skinparam.ts` barrel that
+// re-exports it -- that barrel imports THIS file, so the barrel spelling
+// would close an ESM import cycle.
+import { ELEMENT_BUCKET_SNAMES } from './skinparam-element-buckets.js';
 
 // G2 N51: `skinparam classBorderThickness<<X>>` -- the ONE stereotype-
 // qualified skinparam key this port models (see this module's own doc
@@ -69,6 +73,24 @@ const STATE_FONT_SIZE_STEREO_RE = new RegExp('^statefontsize<<(.+)>>$');
 // `sovuxo-25-tepi226` (R2c probes ps/p1|p3|p4: stereotyped ≡ plain value
 // for matching classes; non-matching classes untouched).
 const CLASS_ATTRIBUTE_FONT_SIZE_STEREO_RE = new RegExp('^classattributefontsize<<(.+)>>$');
+
+// S1L-tail G4 tier 2: `skinparam <sname>StereotypeFontSize<<label>> N` (flat
+// or `skinparam <sname> { StereotypeFontSize<<label>> N }` block form -- the
+// preprocessor normalizes both to this ONE key) -- the per-element analog of
+// `classAttributeFontSize<<X>>` above, and the SAME `SkinParam#getFontSize
+// (stereotype, FontParam...)` stereotype-suffixed VALUE lookup
+// (`getFirstValueNonNullWithSuffix("fontsize" + stereotype.getLabel(...))`,
+// SkinParam.java:433-448) sitting ABOVE the plain `<sname>StereotypeFontSize`
+// tier `skinparam-element-buckets.ts#matchElementFontSizeKey` already reads.
+// The captured label needs no cleaning here: `normaliseKey` has already
+// lowercased the whole key and stripped `[_.]` from it, which is exactly
+// `StyleSignatureBasic#clean` -- so this front-end and the `<style>` one
+// (`style-map-element.ts#collectStereotypeTagFontSize`) write the SAME
+// cleaned key into the SAME map. Jar-verified `toxine-81-xofo986`, whose
+// oracle DOT is byte-identical to `<style>`-spelled `loroto-06-fano471`.
+// Scoped to `ELEMENT_BUCKET_SNAMES` at the handler, mirroring every other
+// per-element matcher; a non-bucket sname falls through to `acc.unknown`.
+const ELEMENT_STEREOTYPE_FONT_SIZE_STEREO_RE = new RegExp('^(\\w+)stereotypefontsize<<(.+)>>$');
 
 type StereoHandler = (
   acc: SkinparamAccumulator,
@@ -137,6 +159,31 @@ const STEREO_KEY_MATCHERS: ReadonlyArray<readonly [RegExp, StereoHandler]> = [
 ];
 
 /**
+ * {@link ELEMENT_STEREOTYPE_FONT_SIZE_STEREO_RE}'s handler. Kept OUT of
+ * {@link STEREO_KEY_MATCHERS} because its regex captures TWO groups (sname
+ * AND label) while that table's {@link StereoHandler} contract passes only
+ * `m[1]` as the stereotype label — widening the contract would touch all six
+ * existing handlers for one addition. Returns whether it consumed `key`; an
+ * sname outside {@link ELEMENT_BUCKET_SNAMES} or a non-numeric value is NOT
+ * consumed, so it falls through to the table and then to `acc.unknown`,
+ * exactly as it did before this matcher existed.
+ */
+function applyElementStereotypeFontSize(
+  acc: SkinparamAccumulator,
+  key: string,
+  value: string,
+): boolean {
+  const m = ELEMENT_STEREOTYPE_FONT_SIZE_STEREO_RE.exec(key);
+  if (m === null) return false;
+  const sname = m[1]!;
+  const size = Number(value.trim());
+  if (!ELEMENT_BUCKET_SNAMES.has(sname) || !Number.isFinite(size)) return false;
+  const bucket = (acc.elements[sname] ??= {});
+  bucket.stereotypeFontSizeByStereo = { ...bucket.stereotypeFontSizeByStereo, [m[2]!.trim()]: size };
+  return true;
+}
+
+/**
  * Handles a normalized key already known to contain `<<...>>`. Tries each
  * {@link STEREO_KEY_MATCHERS} regex in order; the first match's handler runs
  * with the captured stereotype label (trimmed). No match falls through to
@@ -147,6 +194,7 @@ export function applyStereoOverride(
   key: string,
   value: string,
 ): void {
+  if (applyElementStereotypeFontSize(acc, key, value)) return;
   for (const [re, handler] of STEREO_KEY_MATCHERS) {
     const m = re.exec(key);
     if (m !== null) {

@@ -1,0 +1,46 @@
+{
+  "name": "@knowvah/plantuml-all",
+  "version": "0.1.0",
+  "description": "Meta-package: every plantuml-ts stdlib, sprite and emoji asset package. NOTE: includes CC-BY-4.0 artwork.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sseely/plantuml-ts.git",
+    "directory": "packages/all"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "LICENSE",
+    "LICENSES.md",
+    "README.md"
+  ],
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@knowvah/plantuml-stdlib-all": "^0.1.0",
+    "@knowvah/plantuml-sprites-archimate": "^0.1.0",
+    "@knowvah/plantuml-emoji": "^0.1.0"
+  },
+  "peerDependencies": {
+    "@knowvah/plantuml-ts": "^0.1.0"
+  },
+  "devDependencies": {
+    "@knowvah/plantuml-ts": "file:../.."
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

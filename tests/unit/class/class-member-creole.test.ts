@@ -229,7 +229,11 @@ describe('resolveMemberAtoms — inline OpenIconic <&glyph> atoms (G2 N41)', () 
   });
 
   test('an unrecognized glyph name contributes nothing (matches the unresolved-sprite-name precedent)', () => {
-    const atoms = buildMemberAtoms('<&pencil> field', BASE_FONT);
+    // F1-c (S1L tail-fix G11) extended the OpenIconic glyph table to
+    // upstream's full ~223-icon set, so 'pencil' -- this test's original
+    // placeholder -- is now itself a real, resolvable glyph; a genuinely
+    // fake name is required to keep this "unrecognized name" case honest.
+    const atoms = buildMemberAtoms('<&not-a-real-icon> field', BASE_FONT);
     const build = resolveMemberAtoms(atoms, BASE_FONT, measurer);
     expect(build.atoms).toHaveLength(1);
     expect(build.atoms[0]).toMatchObject({ kind: 'text', text: ' field' });

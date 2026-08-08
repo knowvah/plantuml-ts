@@ -1,0 +1,5 @@
+@startuml
+[Comp] as "Big component"
+(Use)
+Comp --> (Use)
+@enduml

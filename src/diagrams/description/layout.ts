@@ -13,10 +13,9 @@
 
 import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import { resolveElementMinimumWidth } from '../../core/theme.js';
+import { resolveElementFontSize, resolveElementLineThickness, resolveElementMinimumWidth } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type {
-  DotInputEdge,
   DotInputGraph,
   DotLayoutResult,
 } from '../../core/graph-layout.js';
@@ -27,7 +26,6 @@ import {
   isClusterNode,
   shiftGeo,
   buildNodeGeoIndex,
-  type EdgeContainerEndpoints,
   measureTitleLabel,
   measureShadowAnchorDims,
   type DescriptionEdgeGeo,
@@ -41,13 +39,10 @@ import {
 } from './layout-geo-post.js';
 import { computeInkShift } from './layout-ink-shift.js';
 import type { PortClusterInfo, ClusterSpacing } from './frontier-cluster-bbox.js';
-import type { ComponentStyle } from './leaf-sizing.js';
-import type { ActorStyle } from '../../core/skin/ActorStyle.js';
 import { computeGraphSpacing } from './link-edge-attrs.js';
-import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
-import { resolveElementFontSize } from '../../core/theme.js';
-import { GUILLEMET_DEFAULT, type GuillemetPair } from '../../core/text/Guillemet.js';
+import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
+import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import { buildMagmaEdges, magmaGroups } from './magma.js';
 import { effectiveRemovedIds, effectiveHiddenIds } from './element-grammar.js';
 import {
@@ -73,80 +68,10 @@ export type {
 
 // ── Public output types ──
 
-// ── Internal types ──
-
-interface ContainerDesc {
-  // "cluster0" etc — matches comparator's /^cluster\d+$/ (we re-prefix `cluster_` anyway).
-  clusterId: string;
-  astId: string;
-  symbol: USymbol;
-  display: string;
-  /** G1 I5b: ALL stereotype tags, in source order. */
-  stereotype?: readonly string[];
-  directLeafAstIds: string[];
-  parentAstId?: string;
-}
-
-export interface ClassifyCtx {
-  leafIdSet: Set<string>;
-  containers: ContainerDesc[];
-  containerById: Map<string, ContainerDesc>;
-  astNodeById: Map<string, DescriptiveNode>;
-  counter: { n: number };
-  /** `skinparam componentStyle` — gates the UML2 component corner icon. */
-  componentStyle: ComponentStyle | undefined;
-  /** `skinparam actorStyle` / `Theme.actorStyle` (T7, description-leaf-
-   *  sizing-audit) — threaded into `BoxSizingOpts.actorStyle` so the SIZER
-   *  reads the SAME value the RENDERER does (`renderer-entity.ts
-   *  #buildEntityParams`); see that field's own doc comment. */
-  actorStyle: ActorStyle | undefined;
-  /** Per-element leaf-box content-width floor resolver: cascades a scoped
-   *  `<style> <sname> { MinimumWidth N }` over the global `skinparam
-   *  minClassWidth` (S1L-b T5 / S1L-g). Keyed by the node's USymbol so a
-   *  `<style> package { MinimumWidth 300 }` floors packages but not a sibling
-   *  `card` (ADR-3). `undefined` result ⇒ 0 (no floor). */
-  minimumWidthFor: (sname: string) => number | undefined;
-  /** Per-element `FontSize` override for one USymbol — the same
-   *  `resolveElementFontSize(theme, sname, 'title')` the RENDERER already
-   *  calls, threaded so the sizer measures the same font (S1L-h). */
-  fontSizeFor: (sname: string) => number | undefined;
-  /** `skinparam wrapWidth` (`theme.wrapWidth`) — the entity DESC word-wrap
-   *  width the leaf RENDERER already applies via `Fission.ts#getSplitted`
-   *  (`EntityImageDescriptionSupport.ts#buildWrappedLines`). Threaded here so
-   *  the SIZER wraps at the same points; 0 = no wrapping (S1L-d). */
-  wrapWidth: number;
-  /** `skinparam guillemet` pair for DISPLAY text (`manageGuillemet`), S1L-f. */
-  guillemet: GuillemetPair;
-  /** Container-scoped identity (mission I1b) — bare ids that are TRUE
-   *  cross-scope collisions across the WHOLE diagram
-   *  (namespace-groups.ts#findCollidingIds), read by `dotKeyFor` to decide
-   *  whether a node needs disambiguation. */
-  collidingIds: ReadonlySet<string>;
-  /** SI5b+E2r T7 seam (c): bridges `ast.sprites` (T4's `SpriteRegistry`) to
-   *  T6's `SpriteDimsLookup` (seam (b), `sprite-commands.ts
-   *  #spriteDimsLookupFor`) — consulted by `measureLeafNode` (D9) so a
-   *  `<$sprite>` atom in a leaf's display text actually widens/heightens
-   *  its DOT node size, per the batch-2 decision-journal's flagged gap. */
-  sprites: SpriteDimsLookup | undefined;
-  /** Every node's ALWAYS-fully-qualified path (ancestor chain + own id,
-   *  regardless of collision) mapped to whatever canonical key
-   *  `classifyAst` actually assigned it — lets `resolveEndpoint`
-   *  (layout-helpers.ts) translate a namespace-qualified link reference
-   *  (`command-table.ts#resolveEndpointNamespace`) back to the right DOT
-   *  node id even when that node's bare id turned out not to need
-   *  disambiguation. See namespace-groups.ts's `dotKeyFor` doc + the
-   *  description-dot-100 decision journal (I1b). */
-  qualifiedPathToDotKey: Map<string, string>;
-}
-
-export interface EdgeDotBuildResult {
-  dotEdges: DotInputEdge[];
-  dotEdgeToLinkIdx: Map<string, number>;
-  edgeContainerEndpoints: Map<string, EdgeContainerEndpoints>;
-  /** Cluster ids referenced directly by an edge (isThereALinkFromOrToGroup);
-   *  each needs a shared group-anchor point node + cluster membership. */
-  groupAnchorClusterIds: Set<string>;
-}
+// ── Internal types ── (moved to `layout-types.ts`, 500-line split;
+// re-exported below so every existing `from './layout.js'` import works)
+import type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-types.js';
+export type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-types.js';
 
 /** `FontParam.ARROW(13, normal)` (klimt/font/FontParam.java:54) -- see
  *  `layoutDescription`'s `edgeFontSpec` construction for the full
@@ -434,6 +359,8 @@ export function layoutDescription(
     actorStyle: theme.actorStyle,
     minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
     fontSizeFor: (sname) => resolveElementFontSize(theme, sname, 'title'),
+    stereotypeFontSizeFor: (sname, stereo) => resolveElementFontSize(theme, sname, 'stereotype', stereo),
+    lineThicknessFor: (sname) => resolveElementLineThickness(theme, sname),
     wrapWidth: theme.wrapWidth ?? 0,
     guillemet: {
       start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
@@ -441,6 +368,10 @@ export function layoutDescription(
     },
     collidingIds, qualifiedPathToDotKey: new Map(),
     sprites: ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined,
+    // Separate channel from `sprites` above — `spriteDimsLookupFor` keeps only
+    // sprite DIMS and drops the registry's emoji store. See `ClassifyCtx
+    // .emojiArtwork` for why the SIZER needs it and not just the renderer.
+    emojiArtwork: emojiArtworkResolverFor(ast.sprites?.emoji),
   };
   const removed = effectiveRemovedIds(ast.nodes, ast.links, ast.removeUnlinked === true);
   // Phantom `set separator`-derived package nesting (namespace-groups.ts) is

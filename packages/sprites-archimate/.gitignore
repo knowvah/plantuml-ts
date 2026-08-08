@@ -1,0 +1,4 @@
+# Copied vendored ArchiMate sprite artwork (scripts/copy-assets.mjs, `prepack`).
+# Regenerable byte-verbatim copy of ../../assets/sprites/ — mirrors the root
+# .gitignore's treatment of packages/*/generated/ and stdlib-aws's assets/.
+assets/

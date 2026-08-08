@@ -20,6 +20,15 @@ import type {
   DotInputGraph,
   DotInputNode,
 } from './graph-layout.types.js';
+import {
+  assignSequence,
+  buildClusterTree,
+  type ClusterColors,
+  type ClusterTree,
+  type EdgeColors,
+  type NodeRec,
+  type SeqAssignment,
+} from './svek-dot-sequence.js';
 
 const PX_PER_INCH = 72;
 const MIN_NODESEP_PX = 35; // Svek getMinNodeSep() (non-activity)
@@ -33,26 +42,10 @@ const MIN_RANKSEP_PX_KERMOR = 40;
 const inches = (px: number): string => (px / PX_PER_INCH).toFixed(6);
 const hex = (n: number): string => '#' + (n & 0xffffff).toString(16).padStart(6, '0');
 const round = (v: number): string => String(Math.round(v));
-const shId = (n: number): string => 'sh' + String(n).padStart(4, '0');
 
 const labelTable = (w: number, h: number, color: number): string =>
   `<<TABLE BGCOLOR="${hex(color)}" FIXEDSIZE="TRUE" WIDTH="${round(w)}" HEIGHT="${round(h)}">` +
   `<TR><TD></TD></TR></TABLE>>`;
-
-/** Svek's ColorSequence: a counter whose value is both the `sh####` id suffix
- *  and the `color="#……"` back-reference tag (first value is 2). */
-class Seq {
-  private n = 1;
-  next(): number {
-    this.n += 1;
-    return this.n;
-  }
-}
-
-interface NodeRec {
-  sh: string;
-  color: number;
-}
 
 type EdgeAttrs = NonNullable<DotInputEdge['attributes']>;
 
@@ -176,54 +169,45 @@ function edgeRef(id: string, recs: Map<string, NodeRec>, nodeById: Map<string, D
   return (node?.shape ?? 'rect') === 'plaintext' ? `${rec.sh}:h` : rec.sh;
 }
 
-/** Optional edge label / taillabel / headlabel parts (Svek HTML tables). */
-function edgeLabelParts(a: EdgeAttrs, seq: Seq): string[] {
+/** Optional edge label / taillabel / headlabel parts (Svek HTML tables).
+ *
+ *  Colours come from the edge's four RESERVED values (SvekEdge.java:275-278),
+ *  not from a live counter: `label`/`xlabel` share `noteLabel` because they
+ *  are alternatives (ortho routes the label through xlabel), `taillabel` takes
+ *  `startTail` and `headlabel` takes `endHead`. Upstream reserves all four
+ *  whether or not it draws them, so an absent label no longer shifts the
+ *  numbering of anything downstream. */
+function edgeLabelParts(a: EdgeAttrs, c: EdgeColors): string[] {
   const parts: string[] = [];
   if (a.label !== undefined && a.labelWidth !== undefined && a.labelHeight !== undefined) {
-    parts.push(`label=${labelTable(a.labelWidth, a.labelHeight, seq.next())}`);
+    parts.push(`label=${labelTable(a.labelWidth, a.labelHeight, c.noteLabel)}`);
   }
   // linetype ortho routes the label through xlabel (SvekEdge.java:434-441).
   if (a.xlabel !== undefined && a.xlabelWidth !== undefined && a.xlabelHeight !== undefined) {
-    parts.push(`xlabel=${labelTable(a.xlabelWidth, a.xlabelHeight, seq.next())}`);
+    parts.push(`xlabel=${labelTable(a.xlabelWidth, a.xlabelHeight, c.noteLabel)}`);
   }
   if (a.tailLabelWidth !== undefined && a.tailLabelHeight !== undefined) {
-    parts.push(`taillabel=${labelTable(a.tailLabelWidth, a.tailLabelHeight, seq.next())}`);
+    parts.push(`taillabel=${labelTable(a.tailLabelWidth, a.tailLabelHeight, c.startTail)}`);
   }
   if (a.headLabelWidth !== undefined && a.headLabelHeight !== undefined) {
-    parts.push(`headlabel=${labelTable(a.headLabelWidth, a.headLabelHeight, seq.next())}`);
+    parts.push(`headlabel=${labelTable(a.headLabelWidth, a.headLabelHeight, c.endHead)}`);
   }
   // #lizard forgives — faithful port of SvekEdge's fixed label-attr order
   // (SvekEdge.java:391-483); each branch is one upstream attribute.
   return parts;
 }
 
-function edgeLine(edge: DotInputEdge, fromSh: string, toSh: string, seq: Seq): string {
+function edgeLine(edge: DotInputEdge, fromSh: string, toSh: string, c: EdgeColors): string {
   const a = edge.attributes ?? {};
   const parts = [
     'arrowtail=none',
     'arrowhead=none',
     `minlen=${a.minLen ?? 1}`,
-    `color="${hex(seq.next())}"`,
-    ...edgeLabelParts(a, seq),
+    `color="${hex(c.line)}"`,
+    ...edgeLabelParts(a, c),
   ];
   if (a.invis === true) parts.push('style=invis');
   return `${fromSh}->${toSh}[${parts.join(',')}];`;
-}
-
-interface ClusterTree {
-  clusteredIds: Set<string>;
-  childrenOf: Map<string | undefined, DotInputCluster[]>;
-}
-
-function buildClusterTree(clusters: DotInputCluster[]): ClusterTree {
-  const clusteredIds = new Set(clusters.flatMap((c) => c.nodeIds));
-  const childrenOf = new Map<string | undefined, DotInputCluster[]>();
-  for (const c of clusters) {
-    const arr = childrenOf.get(c.parentId) ?? [];
-    arr.push(c);
-    childrenOf.set(c.parentId, arr);
-  }
-  return { clusteredIds, childrenOf };
 }
 
 /** ClusterDotString.printRanks' port rank-chain: one `A->B->C
@@ -267,12 +251,13 @@ function portClusterBlock(
   childrenOf: ClusterTree['childrenOf'],
   recs: Map<string, NodeRec>,
   nodeById: Map<string, DotInputNode>,
-  seq: Seq,
+  colors: Map<string, ClusterColors>,
 ): string[] {
+  const cc = colors.get(cluster.id)!;
   const labelOnEe = cluster.portRanksLabelOnEe === true;
   const attrs = cluster.labelWidth !== undefined ? 'labeljust="c";' : '';
   const out = [
-    `subgraph ${cluster.id} {style=solid;color="${hex(seq.next())}";${attrs}` +
+    `subgraph ${cluster.id} {style=solid;color="${hex(cc.color)}";${attrs}` +
       portRankGroups(cluster, recs),
   ];
   const emitLine = (id: string): void => {
@@ -288,7 +273,7 @@ function portClusterBlock(
   if (!labelOnEe) out.push(...portChainLines(cluster, recs));
   const eeLabel =
     labelOnEe && cluster.labelWidth !== undefined && cluster.labelHeight !== undefined
-      ? `label=${labelTable(cluster.labelWidth, cluster.labelHeight, seq.next())};`
+      ? `label=${labelTable(cluster.labelWidth, cluster.labelHeight, cc.title)};`
       : 'label="";';
   out.push(`subgraph ${cluster.id}ee {${eeLabel}`);
   for (const id of cluster.nodeIds) if (!isPortId(id)) emitLine(id);
@@ -297,7 +282,7 @@ function portClusterBlock(
     // (clusterBlock dispatches to kermorClusterBlock first when kermor is
     // true, before this function can be reached) — `false` is not a stand-in
     // default, it is the only value this call site can ever mean.
-    out.push(...clusterBlock(child, childrenOf, recs, nodeById, seq, false));
+    out.push(...clusterBlock(child, childrenOf, recs, nodeById, colors, false));
   }
   out.push('}');
   out.push('}');
@@ -346,8 +331,9 @@ function kermorClusterBlock(
   childrenOf: ClusterTree['childrenOf'],
   recs: Map<string, NodeRec>,
   nodeById: Map<string, DotInputNode>,
-  seq: Seq,
+  colors: Map<string, ClusterColors>,
 ): string[] {
+  const cc = colors.get(cluster.id)!;
   const portIds = new Set((cluster.portRanks ?? []).flatMap((r) => r.nodeIds));
   const sourceRanks = (cluster.portRanks ?? []).filter((r) => r.rank === 'source');
   const sinkRanks = (cluster.portRanks ?? []).filter((r) => r.rank === 'sink');
@@ -357,9 +343,9 @@ function kermorClusterBlock(
 
   const label =
     cluster.labelWidth !== undefined && cluster.labelHeight !== undefined
-      ? `labeljust="c";label=${labelTable(cluster.labelWidth, cluster.labelHeight, seq.next())};`
+      ? `labeljust="c";label=${labelTable(cluster.labelWidth, cluster.labelHeight, cc.title)};`
       : 'label="";';
-  out.push(`subgraph ${cluster.id}gamma {style=solid;color="${hex(seq.next())}";${label}`);
+  out.push(`subgraph ${cluster.id}gamma {style=solid;color="${hex(cc.color)}";${label}`);
 
   if (normalIds.length === 0) {
     out.push(`${cluster.id}empty [shape=point,label=""];`);
@@ -371,7 +357,7 @@ function kermorClusterBlock(
     }
   }
   for (const child of childrenOf.get(cluster.id) ?? []) {
-    out.push(...kermorClusterBlock(child, childrenOf, recs, nodeById, seq));
+    out.push(...kermorClusterBlock(child, childrenOf, recs, nodeById, colors));
   }
   out.push(...kermorRankGroupLines(sinkRanks, recs, nodeById));
   out.push('}');
@@ -384,18 +370,19 @@ function clusterBlock(
   childrenOf: ClusterTree['childrenOf'],
   recs: Map<string, NodeRec>,
   nodeById: Map<string, DotInputNode>,
-  seq: Seq,
+  colors: Map<string, ClusterColors>,
   kermor: boolean,
 ): string[] {
-  if (kermor) return kermorClusterBlock(cluster, childrenOf, recs, nodeById, seq);
+  if (kermor) return kermorClusterBlock(cluster, childrenOf, recs, nodeById, colors);
   if (cluster.portRanks !== undefined && cluster.portRanks.length > 0) {
-    return portClusterBlock(cluster, childrenOf, recs, nodeById, seq);
+    return portClusterBlock(cluster, childrenOf, recs, nodeById, colors);
   }
+  const cc = colors.get(cluster.id)!;
   const label =
     cluster.labelWidth !== undefined && cluster.labelHeight !== undefined
-      ? `labeljust="c";label=${labelTable(cluster.labelWidth, cluster.labelHeight, seq.next())};`
+      ? `labeljust="c";label=${labelTable(cluster.labelWidth, cluster.labelHeight, cc.title)};`
       : 'label="";';
-  const out = [`subgraph ${cluster.id} {style=solid;color="${hex(seq.next())}";${label}`];
+  const out = [`subgraph ${cluster.id} {style=solid;color="${hex(cc.color)}";${label}`];
   for (const id of cluster.nodeIds) {
     const node = nodeById.get(id);
     const rec = recs.get(id);
@@ -403,7 +390,7 @@ function clusterBlock(
   }
   out.push(...portChainLines(cluster, recs));
   for (const child of childrenOf.get(cluster.id) ?? []) {
-    out.push(...clusterBlock(child, childrenOf, recs, nodeById, seq, kermor));
+    out.push(...clusterBlock(child, childrenOf, recs, nodeById, colors, kermor));
   }
   out.push('}');
   // #lizard forgives — faithful port of Cluster/ClusterDotString's nested
@@ -428,27 +415,8 @@ function rankLines(input: DotInputGraph, recs: Map<string, NodeRec>): string[] {
   return [...groups].map(([rank, shs]) => `{rank=${rank}; ${shs.join('; ')}}`);
 }
 
-function assignRecs(
-  input: DotInputGraph,
-  seq: Seq,
-): { recs: Map<string, NodeRec>; nodeById: Map<string, DotInputNode> } {
-  const recs = new Map<string, NodeRec>();
-  const nodeById = new Map<string, DotInputNode>();
-  for (const n of input.nodes) {
-    const color = seq.next();
-    recs.set(n.id, { sh: shId(color), color });
-    nodeById.set(n.id, n);
-  }
-  return { recs, nodeById };
-}
-
-function emitBody(
-  input: DotInputGraph,
-  recs: Map<string, NodeRec>,
-  nodeById: Map<string, DotInputNode>,
-  tree: ClusterTree,
-  seq: Seq,
-): string[] {
+function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree): string[] {
+  const { recs, nodeById, clusterColors, edgeColors } = seqs;
   const body = [...graphAttrLines(input)];
   const kermor = input.kermor === true;
   const unclustered = input.nodes.filter((n) => !tree.clusteredIds.has(n.id));
@@ -466,21 +434,20 @@ function emitBody(
     for (const n of unclustered) body.push(nodeLine(n, recs.get(n.id)!));
   }
   for (const top of tree.childrenOf.get(undefined) ?? []) {
-    body.push(...clusterBlock(top, tree.childrenOf, recs, nodeById, seq, kermor));
+    body.push(...clusterBlock(top, tree.childrenOf, recs, nodeById, clusterColors, kermor));
   }
   body.push(...rankLines(input, recs));
-  for (const e of input.edges) {
-    if (!recs.has(e.from) || !recs.has(e.to)) continue;
-    body.push(edgeLine(e, edgeRef(e.from, recs, nodeById), edgeRef(e.to, recs, nodeById), seq));
-  }
+  input.edges.forEach((e, i) => {
+    if (!recs.has(e.from) || !recs.has(e.to)) return;
+    const from = edgeRef(e.from, recs, nodeById);
+    body.push(edgeLine(e, from, edgeRef(e.to, recs, nodeById), edgeColors[i]!));
+  });
   return body;
 }
 
 /** Serialize a DotInputGraph to Svek-shaped DOT text. */
 export function toSvekDot(input: DotInputGraph): string {
-  const seq = new Seq();
-  const { recs, nodeById } = assignRecs(input, seq);
   const tree = buildClusterTree(input.clusters ?? []);
-  const body = emitBody(input, recs, nodeById, tree, seq);
+  const body = emitBody(input, assignSequence(input, tree), tree);
   return `digraph unix {\n${body.join('\n')}\n}\n`;
 }

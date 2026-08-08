@@ -52,7 +52,7 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup } from '../../core/creole-atoms.js';
 import {
   measureInlineAtom,
-  spriteScale,
+  spriteAtomScale,
 } from '../../core/creole-atoms-measure.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { getSpriteMonochrome, getSpriteSvg, spriteDimsLookupFor } from '../../core/sprite-commands.js';
@@ -252,7 +252,12 @@ export function resolveSvgSpriteAtom(
   font: FontConfiguration,
 ): ResolvedAtomImage {
   const dims = measureInlineAtom(atom, spriteDims, font.size);
-  const scale = spriteScale(atom.scale, font.size);
+  // G10: `spriteAtomScale`, not `spriteScale` — a sprite inside a `[[url
+  // label]]` takes its RAW parsed scale upstream (`AtomTextUtils
+  // #createAtomTextForUrl`). Both the declared box (`measureInlineAtom`,
+  // above) and this decomposition must read the SAME number or the sprite
+  // draws at a different size than it measures.
+  const scale = spriteAtomScale(atom, font.size);
   const collector = SpritePrimitiveCollector.create();
   new SvgNanoParser(svg).drawU(collector, scale, resolveOptionalColor(font.color), resolveOptionalColor(atom.forcedColor));
   return { kind: 'drawable', primitives: [...collector.collected()], width: dims.width, height: dims.height };
@@ -276,7 +281,9 @@ function resolveSpriteAtom(
     spriteMonochromeAsLike(sprite),
     font.color ?? undefined,
     atom.forcedColor,
-    spriteScale(atom.scale, font.size),
+    // G10: same url-label bypass as `resolveSvgSpriteAtom` above — the
+    // rasterized PNG's scale must track `measureInlineAtom`'s declared box.
+    spriteAtomScale(atom, font.size),
   );
   // SI15 T6: raster = `Math.round(declared)`, not the registry's native
   // grid dims (`sprite.width`/`sprite.height`, T1's formula). Upstream

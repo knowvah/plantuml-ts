@@ -9,7 +9,7 @@
  * importers keep their `./layout-helpers.js` import path unchanged.
  */
 
-import type { DescriptiveLinkStyle } from './ast.js';
+import type { DescriptiveLinkStyle, StereotypeSpriteRef } from './ast.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
@@ -31,6 +31,10 @@ export interface DescriptionNodeGeo {
   /** G1 I5b: ALL stereotype tags, in source order (see
    *  `DescriptiveNode.stereotype`'s doc comment). */
   stereotype?: readonly string[];
+  /** The `<<$name>>` sprite half of that same run, copied straight through
+   *  from `DescriptiveNode.stereotypeSprite` so the renderer can resolve the
+   *  SAME sprite the sizer measured (`planning/sizer-renderer-parity.md`). */
+  stereotypeSprite?: StereotypeSpriteRef;
   /** Raw inline color/style override string (`#orange;line:blue`,
    *  `#line.dashed`), verbatim from `DescriptiveNode.color` — parsed at
    *  render time by `renderer-entity.ts#parseColorOverride` (mirrors

@@ -1,0 +1,5 @@
+@startuml
+Admin as "Main Admin"
+(Use)
+Admin --> (Use)
+@enduml

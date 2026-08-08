@@ -25,6 +25,7 @@ import {
   stripTrailingUrl,
   stripUrl,
 } from './parse-helpers-strings.js';
+import type { StereotypeSpriteRef } from './parse-helpers-strings.js';
 
 export {
   stripFullWrap,
@@ -41,6 +42,7 @@ export {
 } from './parse-helpers-strings.js';
 export type {
   StereotypeResult,
+  StereotypeSpriteRef,
   ColorResult,
   LinkStereoResult,
   TagsResult,
@@ -80,6 +82,8 @@ export interface NameSection {
   id: string;
   display: string;
   stereotype?: readonly string[];
+  /** `StereotypeResult.sprite` — see `DescriptiveNode.stereotypeSprite`. */
+  stereotypeSprite?: StereotypeSpriteRef;
   color?: string;
   tags?: string[];
 }
@@ -101,12 +105,32 @@ interface IdDisplay {
 // DISPLAY2/CODE2): `new RegexLeaf("as")` has no leading spaceZeroOrMore —
 // zero space before "as" is legal (`"Long Name"as LN`), only
 // spaceOneOrMore AFTER "as" is required. \s* (not \s+) before "as" here.
-const RE_DQ_AS_ALIAS = /^"([^"]+)"\s*as\s+(\S+)$/;
+//
+// F4-d — the DOUBLE-QUOTED display groups capture their QUOTES, not just the
+// inner text. Upstream's `DISPLAY_CORE` alternative is `[%g].+?[%g]`
+// (CommandCreateElementFull.java:128) and `%g` is the double-quote class
+// (`Pattern2.java:59` — `"`, U+201C, U+201D), so group 1 SPANS the
+// delimiters; `executeArg:311` then unwraps it exactly ONCE via
+// `StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote`, a
+// first-match-wins chain (StringUtils.java:63-81) whose quote branch (:67-69)
+// returns before the `[`/`]` branch (:74-75) is ever consulted. Capturing the
+// inner here instead performed that unwrap in the regex and then let
+// `finalizeDisplay`'s `stripFullWrap` perform a SECOND one, so a display that
+// is itself bracket-wrapped — `[[url label]]` — lost one bracket pair and
+// stopped being a creole link (`rectangle "[[http://x abc]]" as A` measured
+// the whole url text, jar 0.591319 vs ours 2.663368; see
+// `oracle/goldens/description/f4d-url-label-first-line`).
+//
+// The SINGLE-quoted forms are deliberately NOT changed: `%g` excludes `'`, so
+// they have no upstream counterpart to be faithful to, and `stripFullWrap`
+// (mirroring `isDoubleQuote`, StringUtils.java:90-92) would not remove `'`
+// delimiters if they were captured.
+const RE_DQ_AS_ALIAS = /^("[^"]+")\s*as\s+(\S+)$/;
 const RE_SQ_AS_ALIAS = /^'([^']+)'\s+as\s+(\S+)$/;
-const RE_ID_AS_DQ   = /^(\S+)\s+as\s+"([^"]+)"$/;
+const RE_ID_AS_DQ   = /^(\S+)\s+as\s+("[^"]+")$/;
 const RE_ID_AS_SQ   = /^(\S+)\s+as\s+'([^']+)'$/;
 const RE_PAREN_ALIAS = /^\(([^)]+)\)\s+as\s+(\S+|\([^)]+\)|:[^:]+:)$/;
-const RE_DQ_AS_WRAPPED = /^"([^"]+)"\s*as\s+(\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
+const RE_DQ_AS_WRAPPED = /^("[^"]+")\s*as\s+(\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
 // CODE as :wrapped: — bare code, colon/paren/bracket-wrapped display
 // (`Admin as :Main Admin:`). Display keeps its notation stripped by cleanId.
 const RE_ID_AS_WRAPPED = /^(\S+)\s+as\s+(\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
@@ -128,11 +152,13 @@ export function makeNode(
   stereotype?: readonly string[],
   color?: string,
   tags?: string[],
+  stereotypeSprite?: StereotypeSpriteRef,
 ): DescriptiveNode {
   const node: DescriptiveNode = { id, display, symbol, children: [] };
   if (stereotype !== undefined) node.stereotype = stereotype;
   if (color !== undefined) node.color = color;
   if (tags !== undefined) node.tags = tags;
+  if (stereotypeSprite !== undefined) node.stereotypeSprite = stereotypeSprite;
   return node;
 }
 
@@ -180,15 +206,23 @@ function parseAliasForms(remainder: string): IdDisplay | undefined {
 function buildNameSection(
   id: string,
   display: string,
-  stereotype: readonly string[] | undefined,
+  decoration: NameDecoration,
   color: string | undefined,
   tags: string[] | undefined,
 ): NameSection {
   const section: NameSection = { id, display };
-  if (stereotype !== undefined) section.stereotype = stereotype;
+  if (decoration.stereotype !== undefined) section.stereotype = decoration.stereotype;
+  if (decoration.stereotypeSprite !== undefined) section.stereotypeSprite = decoration.stereotypeSprite;
   if (color !== undefined) section.color = color;
   if (tags !== undefined && tags.length > 0) section.tags = tags;
   return section;
+}
+
+/** The `<<...>>` half of a name section: labels plus the optional sprite
+ *  reference, bundled so `buildNameSection` stays at five parameters. */
+interface NameDecoration {
+  stereotype?: readonly string[] | undefined;
+  stereotypeSprite?: StereotypeSpriteRef | undefined;
 }
 
 /**
@@ -214,11 +248,15 @@ export function parseNameSection(rest: string): NameSection {
   // the exact +14/+2 signature on nenedo-78-fiva569's
   // `rectangle "<<something>>\n==label\n..."` node (S1L-f).
   let remainder = leading === undefined ? stripUrl(trimmedRest) : stripTrailingUrl(leading.tail);
-  let stereotype: readonly string[] | undefined;
+  const decoration: NameDecoration = {};
   let color: string | undefined;
 
   const sr = extractNodeStereotype(remainder);
-  if (sr !== undefined) { stereotype = sr.stereotypes; remainder = sr.remainder.trim(); }
+  if (sr !== undefined) {
+    decoration.stereotype = sr.stereotypes;
+    decoration.stereotypeSprite = sr.sprite;
+    remainder = sr.remainder.trim();
+  }
 
   const tr = extractTags(remainder);
   const tags = tr.tags.length > 0 ? tr.tags : undefined;
@@ -240,16 +278,16 @@ export function parseNameSection(rest: string): NameSection {
 
   const aliases = parseAliasForms(remainder);
   if (aliases !== undefined) {
-    return buildNameSection(cleanId(aliases.id), finalizeDisplay(aliases.display), stereotype, color, tags);
+    return buildNameSection(cleanId(aliases.id), finalizeDisplay(aliases.display), decoration, color, tags);
   }
 
   const mq = RE_DQ_ONLY.exec(remainder);
   if (mq !== null) {
-    return buildNameSection(mq[1]!, finalizeDisplay(mq[1]!), stereotype, color, tags);
+    return buildNameSection(mq[1]!, finalizeDisplay(mq[1]!), decoration, color, tags);
   }
 
   const id = cleanId(remainder.trim());
-  return buildNameSection(id, finalizeDisplay(id), stereotype, color, tags);
+  return buildNameSection(id, finalizeDisplay(id), decoration, color, tags);
 }
 
 // ---------------------------------------------------------------------------
@@ -318,20 +356,73 @@ export const CONTAINER_OPEN_RE = new RegExp(
 /** Any keyword followed by at least one space and a name rest. */
 export const KEYWORD_RE = new RegExp(`^(${ALL_KW_ALT})\\s+(.+)$`, 'i');
 
+/**
+ * `StereotypePattern.optional("STEREO")` + `UrlBuilder.OPTIONAL` +
+ * `ColorParser.exp1()` — the decoration run both
+ * `CommandCreateElementMultilines` phases place between CODE and their own
+ * opener token (`CommandCreateElementMultilines.java:99-102, :111-114`).
+ *
+ * The colour alternative must accept the FULL colour/style spec, not just
+ * `#word`: `node B #red|green;line.dashed;line:blue [` otherwise failed this
+ * pattern entirely and fell through to KEYWORD_RE, which swallowed the spec
+ * AND the trailing `[` into the element's name (titona-45-jile471 measured
+ * 3.50in against the jar's 0.82in, S1L-e). Same character class `RE_COLOR`
+ * uses in parse-helpers-strings.ts.
+ *
+ * CAPTURING (S1L tail G9-E1): the run used to be `(?:…)*`, so a
+ * `file policy <<policy>> [` open form matched — and then dropped the
+ * stereotype on the floor, leaving `node.stereotype` unset and the `«policy»`
+ * row unmeasured (fariba-82-xolu802). Callers split the captured run with
+ * the same `extractNodeStereotype`/`extractColor` the single-line path uses.
+ */
+const ELEMENT_DECORATION_RUN =
+  '((?:\\s*(?:<<[^>]+>>|\\[\\[[^\\]]*\\]\\]|#[\\w:;.#\\\\/|-]+))*)';
+
+/** `%g` — the four characters upstream treats as a double quote: ASCII `"`,
+ *  the two typographic quotes, and `Jaws.BLOCK_E1_INVISIBLE_QUOTE`.
+ *  @see ~/git/plantuml/.../regex/Pattern2.java:59 */
+const QUOTE_CHARS = '"\\u201c\\u201d\\ue121';
+
 /** CommandCreateElementMultilines TYPE1: `<keyword> <code> [stereo][url]
  *  [#color] [` opening a multi-line `[ … ]` description block. The line ends
  *  with `[` and (crucially) no matching `]`; the body is closed by a line
- *  ending in `]`. Captures the keyword and the bare code only — the
- *  description text is label content (tolerant metric), not DOT structure. */
+ *  ending in `]`. Groups: 1 TYPE, 2 CODE, 3 decoration run, 4 the opener's
+ *  own `DESC` tail (everything after the `[`).
+ *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:110-122 */
 export const ELEMENT_MULTILINE_OPEN_RE = new RegExp(
   `^(${ALL_KW_ALT})\\s+([\\p{L}\\p{N}_.]+)` +
-    // The colour alternative must accept the FULL colour/style spec, not
-    // just `#word`: `node B #red|green;line.dashed;line:blue [` otherwise
-    // failed this pattern entirely and fell through to KEYWORD_RE, which
-    // swallowed the spec AND the trailing `[` into the element's name
-    // (titona-45-jile471 measured 3.50in against the jar's 0.82in, S1L-e).
-    // Same character class `RE_COLOR` uses in parse-helpers-strings.ts.
-    '(?:\\s*(?:<<[^>]+>>|\\[\\[[^\\]]*\\]\\]|#[\\w:;.#\\\\/|-]+))*' +
-    '\\s*\\[[^\\[]*$',
+    ELEMENT_DECORATION_RUN +
+    '\\s*\\[([^\\[]*)$',
   'iu',
 );
+
+/**
+ * CommandCreateElementMultilines **TYPE0**: `<keyword> <code> [stereo][url]
+ * [#color] as "text` — the open-quote form, closed by a later line ENDING in
+ * a quote character. Groups: 1 TYPE, 2 CODE, 3 decoration run, 4 `DESC`
+ * (the opener's own text tail).
+ *
+ * Two properties are load-bearing and neither is shared with the single-line
+ * `CommandCreateElementFull` grammar:
+ *
+ * - COLOUR sits **before** `as`. On one line that ordering is a jar syntax
+ *   error, so the single-line path's post-`as` colour slot cannot be reused
+ *   (`pecupa-75-zote612`'s `usecase UC5 #red as "…`).
+ * - DESC is `([^%g]*)` anchored at `$`, so an opener may not contain a
+ *   closing quote at all. That is what keeps an already-closed single-line
+ *   `usecase UC4 as "My usecase4"` out of this phase.
+ *
+ * @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:96-108
+ */
+export const ELEMENT_MULTILINE_OPEN_TYPE0_RE = new RegExp(
+  `^(${ALL_KW_ALT})\\s+([\\p{L}\\p{N}_.]+)` +
+    ELEMENT_DECORATION_RUN +
+    `\\s*as\\s*[${QUOTE_CHARS}]([^${QUOTE_CHARS}]*)$`,
+  'iu',
+);
+
+/** TYPE0's `END0 = ^(.*)[%g]$`, applied to the `Trim.BOTH`-trimmed last
+ *  line: the block closes on the first line ENDING with a quote character,
+ *  and group 1 is that line's pre-quote prefix.
+ *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:80-81 */
+export const ELEMENT_MULTILINE_END0_RE = new RegExp(`^(.*)[${QUOTE_CHARS}]$`, 'u');

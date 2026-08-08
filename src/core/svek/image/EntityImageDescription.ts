@@ -99,6 +99,7 @@ import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import { textBlockMagneticBorder } from '../../klimt/shape/TextBlock.js';
 import { TextBlockUtils } from '../../klimt/shape/TextBlockUtils.js';
 import type { Paint } from '../../paint.js';
+import type { ResolvedColor } from '../../klimt/color/HColorSet.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
 import { SymbolContext } from '../../decoration/symbol/SymbolContext.js';
 import { USymbols } from '../../decoration/symbol/USymbols.js';
@@ -157,6 +158,42 @@ export interface EntityImageDescriptionLabels {
   readonly codeName: string;
   readonly displayText: string;
   readonly stereotypeLabels: readonly string[];
+  /**
+   * `stereotype.getSprite(getSkinParam())` (java:193-194), ALREADY resolved
+   * against the caller's own sprite view — the sizer holds a
+   * `SpriteDimsLookup`, the renderer a `SpriteRegistry`, and both narrow to
+   * this one shape via `EntityImageDescriptionDelegates
+   * #resolveStereotypeSprite` so the two paths cannot drift
+   * (`planning/sizer-renderer-parity.md`).
+   *
+   * Present ⇒ the sprite REPLACES the `«label»` block outright; absent ⇒ the
+   * label branch runs, exactly as upstream's three-way `stereo` chain does.
+   * A name that resolves to nothing is therefore indistinguishable from no
+   * sprite at all, which is upstream's behaviour too (`getSprite` returns
+   * null on a registry miss, java:112-114).
+   */
+  readonly stereotypeSprite?: EntityImageDescriptionStereotypeSprite | undefined;
+}
+
+/**
+ * One resolved stereotype sprite: the DECLARED box, the requested scale, and
+ * (SVG only) the source needed to draw it.
+ *
+ * `SvgNanoParser#asTextBlock` (`svg/parser/SvgNanoParser.java:458-479`)
+ * measures `new UImageSvg(svg, scale)`'s `getWidth()`/`getHeight()`, i.e.
+ * `declared × scale`, and draws through `SvgNanoParser#drawU(ug, scale, …)`.
+ * `svg` absent = a PNG-backed internal sprite: it MEASURES (the store reads
+ * its IHDR dims) but has no draw path in this port yet — `render-atoms.ts`
+ * handles SVG and monochrome grids only. That gap is F4-a's second recorded
+ * one; measuring it correctly while drawing nothing is strictly better than
+ * dropping it from both.
+ */
+export interface EntityImageDescriptionStereotypeSprite {
+  readonly width: number;
+  readonly height: number;
+  readonly scale: number;
+  readonly svg?: string | undefined;
+  readonly color?: ResolvedColor | undefined;
 }
 
 /** Upstream: the resolved `forecolor`/`backcolor`/`roundCorner`/
@@ -245,6 +282,13 @@ export interface EntityImageDescriptionParams {
    * Builder: `src/diagrams/description/render-atoms.ts`.
    */
   readonly atomImageResolverFor?: (font: FontConfiguration) => AtomImageResolver;
+  /** Twemoji artwork by codepoint (`core/internal-emoji-store.ts`). Absent =
+   *  no emoji asset store wired, and the emoji falls back to its
+   *  platform-glyph text run. Present on BOTH the sizer's and the renderer's
+   *  params or neither: a use-case ellipse is fitted to the points actually
+   *  drawn, so a one-sided wiring desynchronises measured from drawn size
+   *  (`planning/sizer-renderer-parity.md`). */
+  readonly emojiArtwork?: ((unicode: string) => string | undefined) | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -290,11 +334,18 @@ export class EntityImageDescription {
       params.paint.titleAlignment,
       params.atomImageResolverFor?.(params.paint.fontTitle),
     );
-    this.desc = buildDesc(this.symbol, params.labels, params.paint, params.atomImageResolverFor);
+    this.desc = buildDesc(
+      this.symbol,
+      params.labels,
+      params.paint,
+      params.atomImageResolverFor,
+      params.emojiArtwork,
+    );
     this.stereo = buildStereo(
       params.labels.stereotypeLabels,
       params.paint.fontStereo,
       params.atomImageResolverFor?.(params.paint.fontStereo),
+      params.labels.stereotypeSprite,
     );
 
     this.asSmall = this.hideText
