@@ -38,7 +38,6 @@ import type { Theme } from '../../core/theme.js';
 import { rect, line, text, path } from '../../core/svg.js';
 import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateFontSize, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
 import { stateShadowFilterUrl } from './state-shadow.js';
-import { javaRound4 } from '../../core/number-format.js';
 
 const STATE_BOX_RX = 12.5;
 const MARGIN = 5;
@@ -73,7 +72,7 @@ function renderTextLines(
       fontFamily: theme.fontFamily,
       fontSize,
       lengthAdjust: 'spacing',
-      textLength: javaRound4(ln.width),
+      textLength: ln.width,
     });
   });
   return out;
@@ -189,7 +188,7 @@ export function renderSdlReceive(node: StateNodeGeo, theme: Theme): string {
       fontFamily: theme.fontFamily,
       fontSize,
       lengthAdjust: 'spacing',
-      textLength: javaRound4(node.headerLines?.[0]?.width ?? 0),
+      textLength: node.headerLines?.[0]?.width ?? 0,
     },
   );
 

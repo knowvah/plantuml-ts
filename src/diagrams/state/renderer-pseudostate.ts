@@ -25,7 +25,6 @@ import {
   textAscent,
   textDescent,
 } from './state-render-colors.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { historyLabelText } from './state-sizing.js';
 
 /** `CircleStart`/`CircleEnd`'s own default fill+stroke — distinct from the
@@ -168,7 +167,7 @@ export function renderHistory(node: StateNodeGeo, theme: Theme): string {
     fontFamily: theme.fontFamily,
     fontSize: theme.fontSize,
     lengthAdjust: 'spacing',
-    textLength: javaRound4(label.width),
+    textLength: label.width,
   });
   return shape + labelMarkup;
 }

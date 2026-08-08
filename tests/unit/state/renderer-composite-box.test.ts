@@ -80,8 +80,9 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
     expect(out).toContain('textLength="72.3625"');
     expect(out).toContain('>Track_FSM<');
     // x = box midX(243.22185) - textLength/2(36.18125) = 207.0406 (raw
-    // float noise, unrounded -- ONLY textLength is javaRound4'd, matching
-    // renderer-box.ts's own identical x/y-unrounded convention).
+    // float noise; formatted to 3dp at emission by core/svg.ts#attrs, same
+    // as every other numeric attribute -- T7 dropped the state engine's own
+    // pre-rounding, matching renderer-box.ts's identical convention).
     const expectedX = 7 + 472.4437 / 2 - 72.3625 / 2;
     expect(out).toContain(`x="${expectedX}"`);
   });

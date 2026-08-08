@@ -57,7 +57,6 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotLayoutResult } from '../../core/graph-layout.types.js';
 import { path, text as svgText } from '../../core/svg.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { measureNote } from './state-note-layout.js';
 import { resolveStateFill, textAscent } from './state-render-colors.js';
 import {
@@ -194,7 +193,7 @@ function renderNoteTextLines(node: StateNodeGeo, theme: Theme): string {
         fontSize: NOTE_FONT_SIZE,
         fill: '#000000',
         lengthAdjust: 'spacing',
-        textLength: javaRound4(ln.width),
+        textLength: ln.width,
       }),
     );
     lineTop += NOTE_FONT_SIZE;

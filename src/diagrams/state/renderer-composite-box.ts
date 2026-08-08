@@ -84,7 +84,6 @@ import type { Theme } from '../../core/theme.js';
 import { rect, line, text, path } from '../../core/svg.js';
 import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
 import { stateShadowFilterUrl } from './state-shadow.js';
-import { javaRound4 } from '../../core/number-format.js';
 
 /** `URectangle.halfRounded`'s own `roundCorner/2` — SAME `rx`/`ry` value as
  *  a leaf box's own outline (`renderer-box.ts#STATE_BOX_RX`), duplicated
@@ -153,7 +152,7 @@ function renderCompositeTextLines(
       fontFamily: theme.fontFamily,
       fontSize: theme.fontSize,
       lengthAdjust: 'spacing',
-      textLength: javaRound4(ln.width),
+      textLength: ln.width,
     });
   });
   return out;
