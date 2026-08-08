@@ -187,8 +187,8 @@ describe('USymbolDatabase (AC1/AC2)', () => {
     const ug = newGraphic();
     tb.drawU(ug);
     const svg = ug.getSvgString();
-    expect(svg).toContain('fill="#FF0000"');
-    expect(svg).toContain('stroke:#0000FF');
+    expect(svg).toContain('fill="#F00"');
+    expect(svg).toContain('stroke:#00F');
   });
 
   it('asBig reports (width, height) and positions stereotype/title below the cap', () => {
@@ -247,7 +247,7 @@ describe('USymbolDatabase (AC1/AC2)', () => {
 const QUEUE_GOLDEN =
   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ' +
   'style="width:120px;height:39px;" width="120px" height="39px" viewBox="0 0 120 39" zoomAndPan="magnify" ' +
-  'preserveAspectRatio="none" contentStyleType="text/css"><?plantuml $version$?><defs/><g>' +
+  'preserveAspectRatio="none" contentStyleType="text/css"><?plantuml $version$?><defs/><g font-family="sans-serif" lengthAdjust="spacing">' +
   '<path d="M84.99,12 L114.7185,12 C119.7185,12 119.7185,25.2441 119.7185,25.2441 ' +
   'C119.7185,25.2441 119.7185,38.4883 114.7185,38.4883 L84.99,38.4883 C79.99,38.4883 79.99,25.2441 ' +
   '79.99,25.2441 C79.99,25.2441 79.99,12 84.99,12" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
@@ -320,7 +320,7 @@ describe('USymbolQueue (AC1)', () => {
 const STORAGE_GOLDEN =
   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ' +
   'style="width:44px;height:44px;" width="44px" height="44px" viewBox="0 0 44 44" zoomAndPan="magnify" ' +
-  'preserveAspectRatio="none" contentStyleType="text/css"><?plantuml $version$?><defs/><g>' +
+  'preserveAspectRatio="none" contentStyleType="text/css"><?plantuml $version$?><defs/><g font-family="sans-serif" lengthAdjust="spacing">' +
   '<rect x="7" y="7" width="36.3926" height="36.4883" fill="#F1F1F1" ' +
   'style="stroke:#181818;stroke-width:0.5;" rx="35" ry="35"/></g></svg>';
 
@@ -395,7 +395,7 @@ describe('USymbolStorage (AC1)', () => {
 const HEXAGON_GOLDEN =
   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ' +
   'style="width:93px;height:94px;" width="93px" height="94px" viewBox="0 0 93 94" zoomAndPan="magnify" ' +
-  'preserveAspectRatio="none" contentStyleType="text/css"><?plantuml $version$?><defs/><g>' +
+  'preserveAspectRatio="none" contentStyleType="text/css"><?plantuml $version$?><defs/><g font-family="sans-serif" lengthAdjust="spacing">' +
   '<path d="M6,49.745 L16.75,6 L81.25,6 L92,49.745 L81.25,93.49 L16.75,93.49 L6,49.745" ' +
   'style="stroke:#181818;stroke-width:1;" fill="none"/></g></svg>';
 
@@ -496,7 +496,7 @@ describe('USymbolHexagon (AC1)', () => {
 const PROCESS_GOLDEN =
   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ' +
   'style="width:64px;height:44px;" width="64px" height="44px" viewBox="0 0 64 44" zoomAndPan="magnify" ' +
-  'preserveAspectRatio="none" contentStyleType="text/css"><?plantuml $version$?><defs/><g>' +
+  'preserveAspectRatio="none" contentStyleType="text/css"><?plantuml $version$?><defs/><g font-family="sans-serif" lengthAdjust="spacing">' +
   '<polygon points="7,7,53.5908,7,63.5908,25.2441,53.5908,43.4882,7,43.4882,17,25.2441" fill="#F1F1F1" ' +
   'style="stroke:#181818;stroke-width:0.5;stroke-linejoin:miter;stroke-miterlimit:10;"/></g></svg>';
 

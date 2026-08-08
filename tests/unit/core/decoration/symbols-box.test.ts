@@ -4,7 +4,7 @@
  * `Stack`).
  *
  * Provenance for every real-jar fragment/number below:
- * `plantuml-1.2026.7beta3.jar -tsvg -pipe`, single-entity `.puml`
+ * `plantuml-1.203.7beta3.jar -tsvg -pipe`, single-entity `.puml`
  * sources (`rectangle Foo` / `agent Foo` / `card Foo` / `action Foo` /
  * `label Foo` — each byte-verified to render at absolute origin
  * `(7,7)`, PlantUML's fixed content padding for a single, unlinked
@@ -113,7 +113,7 @@ function wrapDocument(rootAttrs: string, body: string): string {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ${rootAttrs}` +
     ` zoomAndPan="magnify" preserveAspectRatio="none" contentStyleType="text/css">` +
-    `<?plantuml $version$?><defs/><g>${body}</g></svg>`
+    `<?plantuml $version$?><defs/><g font-family="sans-serif" lengthAdjust="spacing">${body}</g></svg>`
   );
 }
 
@@ -133,7 +133,7 @@ function defaultContext(): SymbolContext {
 describe('USymbolRectangle', () => {
   const GOLDEN = wrapDocument(
     'style="width:52px;height:44px;" width="52px" height="44px" viewBox="0 0 52 44"',
-    '<rect x="7" y="7" width="44.7051" height="36.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>',
+    '<rect x="7" y="7" width="44.705" height="36.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>',
   );
 
   test('asSmall (rectangle): conformant vs jar fragment (rectangle Foo)', () => {
@@ -176,7 +176,7 @@ describe('USymbolRectangle', () => {
   test('asSmall: diagonalCorner=10 draws a UPath outline, conformant vs jar fragment (skinparam rectangleDiagonalCorner 10)', () => {
     const GOLDEN_DIAGONAL = wrapDocument(
       'style="width:52px;height:44px;" width="52px" height="44px" viewBox="0 0 52 44"',
-      '<path d="M17,7 L41.7051,7 L51.7051,17 L51.7051,33.4883 L41.7051,43.4883 L17,43.4883 L7,33.4883 L7,17 L17,7" ' +
+      '<path d="M17,7 L41.705,7 L51.705,17 L51.705,33.488 L41.705,43.488 L17,43.488 L7,33.488 L7,17 L17,7" ' +
         'style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>',
     );
     const diagonalContext = new SymbolContext('#F1F1F1', '#181818', UStroke.withThickness(0.5), 0, 0, 10);
@@ -207,7 +207,7 @@ describe('USymbolRectangle', () => {
 describe('USymbolCard', () => {
   const GOLDEN = wrapDocument(
     'style="width:52px;height:30px;" width="52px" height="30px" viewBox="0 0 52 30"',
-    '<rect x="7" y="7" width="44.7051" height="22.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>',
+    '<rect x="7" y="7" width="44.705" height="22.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>',
   );
 
   test('asSmall: conformant vs jar fragment (card Foo) — no divider line (top=0)', () => {
@@ -237,7 +237,7 @@ describe('USymbolCard', () => {
 describe('USymbolAction', () => {
   const GOLDEN = wrapDocument(
     'style="width:62px;height:44px;" width="62px" height="44px" viewBox="0 0 62 44"',
-    '<polygon points="7,7,51.7051,7,61.7051,25.2441,51.7051,43.4883,7,43.4883" fill="#F1F1F1" ' +
+    '<polygon points="7,7,51.705,7,61.705,25.244,51.705,43.488,7,43.488" fill="#F1F1F1" ' +
       'style="stroke:#181818;stroke-width:0.5;stroke-linejoin:miter;stroke-miterlimit:10;"/>',
   );
 
@@ -272,7 +272,7 @@ describe('USymbolAction', () => {
       .asSmall(EMPTY_STEREOTYPE, spyLabel().tb, EMPTY_STEREOTYPE, noisyContext, HorizontalAlignment.CENTER)
       .drawU(root.apply(ORIGIN));
     const svg = root.getSvgString();
-    expect(svg).toContain('<polygon points="7,7,51.7051,7,61.7051,25.2441,51.7051,43.4883,7,43.4883"');
+    expect(svg).toContain('<polygon points="7,7,51.705,7,61.705,25.244,51.705,43.488,7,43.488"');
     expect(svg).not.toContain('filter=');
   });
 });
@@ -310,8 +310,8 @@ describe('USymbolLabel', () => {
 describe('USymbolCollections', () => {
   const GOLDEN = wrapDocument(
     'style="width:52px;height:44px;" width="52px" height="44px" viewBox="0 0 52 44"',
-    '<rect x="11" y="11" width="40.7051" height="32.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
-      '<rect x="7" y="7" width="40.7051" height="32.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>',
+    '<rect x="11" y="11" width="40.705" height="32.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
+      '<rect x="7" y="7" width="40.705" height="32.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>',
   );
 
   test('asSmall: conformant vs jar fragment (collections Foo) — back-then-front rect draw order', () => {
@@ -339,7 +339,7 @@ describe('USymbolCollections', () => {
     // filter's <defs> registration precedes both rects in document
     // order, so scope the check to the <g>...</g> body, not the whole
     // document.
-    const bodyStart = svg.indexOf('<g>');
+    const bodyStart = svg.search(/<g[ >]/);
     const firstRectClose = svg.indexOf('/>', bodyStart);
     expect(svg.slice(bodyStart, firstRectClose)).toContain('filter=');
     expect(svg.slice(firstRectClose)).not.toContain('filter=');
@@ -363,9 +363,9 @@ describe('USymbolCollections', () => {
 describe('USymbolStack', () => {
   const GOLDEN = wrapDocument(
     'style="width:82px;height:46px;" width="82px" height="46px" viewBox="0 0 82 46"',
-    '<rect x="22" y="7" width="44.7051" height="36.4883" fill="#F1F1F1" style="stroke:none;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
-      '<path d="M7,7 L19.5,7 A2.5,2.5 0 0 1 22,9.5 L22,40.9883 A2.5,2.5 0 0 0 24.5,43.4883 L64.2051,43.4883 ' +
-      'A2.5,2.5 0 0 0 66.7051,40.9883 L66.7051,9.5 A2.5,2.5 0 0 1 69.2051,7 L81.7051,7" style="stroke:#181818;stroke-width:0.5;" fill="none"/>',
+    '<rect x="22" y="7" width="44.705" height="36.488" fill="#F1F1F1" style="stroke:none;" rx="2.5" ry="2.5"/>' +
+      '<path d="M7,7 L19.5,7 A2.5,2.5 0 0 1 22,9.5 L22,40.988 A2.5,2.5 0 0 0 24.5,43.488 L64.205,43.488 ' +
+      'A2.5,2.5 0 0 0 66.705,40.988 L66.705,9.5 A2.5,2.5 0 0 1 69.205,7 L81.705,7" style="stroke:#181818;stroke-width:0.5;" fill="none"/>',
   );
 
   test('asSmall: conformant vs jar fragment (stack Foo, re-based to origin (7,7))', () => {

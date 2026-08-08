@@ -218,12 +218,12 @@ describe('theme variants', () => {
     expect(svg).toContainText('#1E1E1E');
   });
 
-  it('default theme — SVG contains white background fill #FFFFFF', () => {
+  it('default theme — SVG contains white background fill, shortened to #FFF (rule 2)', () => {
     const svg = renderSync(DARK_THEME_PUML, {
       measurer: testMeasurer,
       theme: 'default',
     });
-    expect(svg).toContainText('#FFFFFF');
+    expect(svg).toContainText('#FFF');
   });
 
   it('dark theme uses a different background than default', () => {
@@ -272,7 +272,7 @@ describe('theme variants', () => {
       },
     });
     expect(svg).toBeValidSvg();
-    expect(svg).toContainText('#FF0000');
+    expect(svg).toContainText('#F00');
   });
 
   // The `!theme` line sits INSIDE the block: `@start…@end` is split before the
@@ -296,7 +296,7 @@ Alice -> Bob: hi
       measurer: testMeasurer,
       theme: 'default',
     });
-    expect(svg).toContainText('#FFFFFF');
+    expect(svg).toContainText('#FFF');
   });
 });
 

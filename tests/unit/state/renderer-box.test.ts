@@ -55,7 +55,7 @@ describe('renderNormal — stateFontSize<<X>> (mission G4 S16)', () => {
     expect(svg).toContain('y1="47"');
   });
 
-  it('positions the header baseline using the OVERRIDDEN font size (jar-verified laferu-31-tice836: y=35.3333, javaRound4-formatted downstream by assembleSvg -- this direct renderNormal() call bypasses that pass, so assert the raw unrounded value)', () => {
+  it('positions the header baseline using the OVERRIDDEN font size (jar-verified laferu-31-tice836: y=35.3333, formatted to 3dp downstream by core/svg.ts#attrs -- T7 dropped the state engine\'s own pre-rounding, so assert the raw pre-emission value)', () => {
     const theme = deepMergeTheme(defaultTheme, {
       colors: { graph: { stateFontSizeByStereo: { foo: 30 } } },
     });

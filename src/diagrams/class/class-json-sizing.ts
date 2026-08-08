@@ -35,8 +35,8 @@
  * (possibly much taller) sub-table row, never its vertical center
  * (jar-verified: bepafe-03-teda035's "user" key row and its nested "age"
  * key/value share the exact same y, despite "user"'s row spanning the
- * height of TWO nested members). Every row also carries its OWN
- * `javaRound4`'d raw text width for `textLength`.
+ * height of TWO nested members). Every row also carries its OWN raw text
+ * width for `textLength` (rounded at emission, `core/svg.ts`).
  *
  * RENDERING SIMPLIFICATION (documented divergence, see this task's return):
  * upstream draws one horizontal `hline` per row (top-level AND nested, each
@@ -60,7 +60,6 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-sizing.js';
-import { javaRound4 } from '../../core/number-format.js';
 
 interface Dim {
   width: number;
@@ -128,7 +127,7 @@ function measureScalarNode(
 ): JsonDimNode {
   const text = scalarText(node);
   const dim = measureJsonCell(text, fontSpec, measurer);
-  const rawWidth = javaRound4(measurer.measure(text, fontSpec).width);
+  const rawWidth = measurer.measure(text, fontSpec).width;
   return { kind: 'scalar', text, width: dim.width, height: dim.height, rawWidth };
 }
 
@@ -156,7 +155,7 @@ function measureObjectNode(
   const members = node.entries.map((e) => ({
     key: e.key,
     keyDim: measureJsonCell(e.key, fontSpec, measurer),
-    keyRawWidth: javaRound4(measurer.measure(e.key, fontSpec).width),
+    keyRawWidth: measurer.measure(e.key, fontSpec).width,
     value: measureJsonNode(e.value, fontSpec, measurer),
   }));
   const width1 = members.length === 0 ? 0 : Math.max(...members.map((m) => m.keyDim.width));

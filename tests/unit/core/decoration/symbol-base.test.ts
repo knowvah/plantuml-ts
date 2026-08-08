@@ -75,7 +75,7 @@ describe('USymbol base + SymbolContext (T3, AC1)', () => {
     big.drawU(ug);
 
     expect(ug.getSvgString()).toContain(
-      '<rect x="0" y="0" width="40" height="20" fill="#FF0000" style="stroke:#0000FF;stroke-width:2;"/>',
+      '<rect x="0" y="0" width="40" height="20" fill="#F00" style="stroke:#00F;stroke-width:2;"/>',
     );
   });
 

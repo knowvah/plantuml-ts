@@ -18,7 +18,6 @@ import {} from './renderer-url.js';
 import { linkWrap } from '../../core/svg.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
 import {} from './renderer-body-enhanced.js';
@@ -218,20 +217,13 @@ export function memberAtomDecoration(styles: ReadonlySet<FontStyle>): string | u
  * construction" invariant -- `buildMemberRow`'s summed `MemberRowBuild
  * .width` is exactly the sum of these per-atom widths).
  *
- * `textLength` is `javaRound4`'d per atom (NOT reused from the row's own
- * already-rounded `row.width`, which is a rounded SUM across every atom in
- * a multi-atom row and only equals a single atom's own rounded width in the
- * common single-atom case) -- matches jar's real per-`<text>`-element
- * `SvgGraphics#format` rounding (`core/klimt/drawing/svg/svg-graphics-
- * elements.ts` applies this uniformly to EVERY klimt-emitted numeric
- * attribute; class's pure-string `core/svg.ts` builders round only where a
- * caller explicitly does, per this file's own `renderRowText` precedent for
- * the single-`<text>` legacy path). `x`/`y`/image width/height stay
- * UNROUNDED, matching this file's existing convention for every OTHER
- * coordinate (`geo.x`, `row.y`, `rect`'s own `geo.width`/`geo.height`) --
- * `textLength` is the one attribute `compareSvg` requires an EXACT string
- * match on (N4's own doc comment); coordinates are on its numeric-tolerance
- * allowlist.
+ * `textLength` is each atom's OWN measured width (NOT reused from the row's
+ * own `row.width`, which is a SUM across every atom in a multi-atom row and
+ * only equals a single atom's own width in the common single-atom case).
+ * ADR-1: `core/svg.ts#text()` now formats every numeric attribute --
+ * `textLength` included -- at emission, matching jar's real per-`<text>`-
+ * element `SvgGraphics#format` rounding; callers pass raw measured widths
+ * and no longer round before handing them to `core/svg.ts`.
  */
 export function renderRowAtoms(
   atoms: readonly MemberRenderAtom[],
@@ -266,7 +258,7 @@ export function renderRowAtoms(
         fontSize: atom.font.size,
         fill: atom.font.color ?? fallbackFontColor,
         lengthAdjust: 'spacing',
-        textLength: javaRound4(atom.renderWidth ?? atom.width),
+        textLength: atom.renderWidth ?? atom.width,
         ...(atom.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' as const } : {}),
         ...(atom.font.styles.has(FontStyle.ITALIC) ? { fontStyle: 'italic' as const } : {}),
         ...(decoration !== undefined ? { textDecoration: decoration } : {}),

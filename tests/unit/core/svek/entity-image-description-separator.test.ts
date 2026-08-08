@@ -98,7 +98,7 @@ function newGraphic(): UGraphicSvg {
 }
 
 function extractTopGroup(svg: string): string {
-  const match = /<g>([\s\S]*)<\/g><\/svg>$/.exec(svg);
+  const match = /<g[^>]*>([\s\S]*)<\/g><\/svg>$/.exec(svg);
   if (match === null) throw new Error('extractTopGroup: no top-level <g>...</g></svg> found');
   const inner = match[1];
   if (inner === undefined) throw new Error('extractTopGroup: capture group did not match');
@@ -170,7 +170,7 @@ describe('EntityImageDescription — bare Creole horizontal-line separator (G1 I
     // "queue1" (the widest line, drawn BEFORE the separator) keeps its
     // exact jar-measured position regardless of the separate, deferred
     // post-separator alignment gap.
-    expect(svg).toContain('<text x="5" y="15.8889"');
+    expect(svg).toContain('<text x="5" y="15.889"');
     // The outer cylinder shape (drawQueue -- untouched by this fix) is
     // unaffected: width/height still derive correctly from the 3-line
     // block's total measured height (14 + SEPARATOR_SIZE_HEIGHT[8] + 14 = 36
@@ -192,15 +192,15 @@ describe('EntityImageDescription — bare Creole horizontal-line separator (G1 I
     });
     const svg = render(new EntityImageDescription(withHeader));
     expect(svg).not.toContain('--Header--');
-    expect(svg).toContain('<text x="5" y="15.8889"'); // queue1, flush left (jar-verified)
-    expect(svg).toContain('<text x="5" y="43.8889"'); // toto, flush left (jar-verified)
+    expect(svg).toContain('<text x="5" y="15.889"'); // queue1, flush left (jar-verified)
+    expect(svg).toContain('<text x="5" y="43.889"'); // toto, flush left (jar-verified)
     const lines = [...svg.matchAll(/<line ([^/]*)\/>/g)].map((m) => m[1] ?? '');
     expect(lines).toHaveLength(2); // TWO short flanking lines, not one full-width separator
     expect(lines[0]).toContain('x1="1"');
-    expect(lines[0]).toContain('x2="9.1786"');
-    expect(lines[1]).toContain('x1="55.1161"');
-    expect(lines[1]).toContain('x2="63.2946"');
-    expect(svg).toContain('<text x="9.1786" y="29.3889"');
+    expect(lines[0]).toContain('x2="9.179"');
+    expect(lines[1]).toContain('x1="55.116"');
+    expect(lines[1]).toContain('x2="63.295"');
+    expect(svg).toContain('<text x="9.179" y="29.389"');
     expect(svg).toContain('>Header</text>');
   });
 
@@ -214,7 +214,7 @@ describe('EntityImageDescription — bare Creole horizontal-line separator (G1 I
     expect(svg).not.toContain('text-decoration="line-through"');
     const lines = [...svg.matchAll(/<line ([^/]*)\/>/g)].map((m) => m[1] ?? '');
     expect(lines).toHaveLength(2);
-    const titleText = /<text x="([\d.]+)" y="29.3889"[^>]*>(-)<\/text>/.exec(svg);
+    const titleText = /<text x="([\d.]+)" y="29.389"[^>]*>(-)<\/text>/.exec(svg);
     expect(titleText?.[2]).toBe('-');
   });
 

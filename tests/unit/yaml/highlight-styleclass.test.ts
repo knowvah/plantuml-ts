@@ -78,7 +78,7 @@ describe('parseJson — captures styleClass from <<stereotype>>', () => {
 describe('layoutJson — propagates styleClass to row.highlight', () => {
   it('row.highlight is "h1" when directive has styleClass "h1"', () => {
     const theme = deepMergeTheme(defaultTheme, {
-      colors: { graph: { json: { highlightClasses: { h1: { background: '#00FF00' } } } } },
+      colors: { graph: { json: { highlightClasses: { h1: { background: '#0F0' } } } } },
     });
     const ast: JsonDiagramAST = {
       root: { fruit: 'Apple', size: 'Large' },
@@ -149,7 +149,7 @@ describe('renderJson — uses highlightClasses background for named class', () =
 
   it('uses class fontColor for text when defined', () => {
     const theme = deepMergeTheme(defaultTheme, {
-      colors: { graph: { json: { highlightClasses: { h1: { background: '#ABCDEF', fontColor: '#FF0000' } } } } },
+      colors: { graph: { json: { highlightClasses: { h1: { background: '#ABCDEF', fontColor: '#F00' } } } } },
     });
     const ast: JsonDiagramAST = {
       root: { fruit: 'Apple' },
@@ -158,7 +158,7 @@ describe('renderJson — uses highlightClasses background for named class', () =
     };
     const geo = layoutJson(ast, theme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, theme));
-    expect(svg).toContain('#FF0000');
+    expect(svg).toContain('#F00');
   });
 });
 
@@ -169,7 +169,7 @@ describe('renderJson — uses highlightClasses background for named class', () =
 describe('end-to-end: YAML <<h1>> highlight class in SVG output', () => {
   it('full pipeline uses class background from theme', () => {
     const theme = deepMergeTheme(defaultTheme, {
-      colors: { graph: { json: { highlightClasses: { h1: { background: '#00FF00' } } } } },
+      colors: { graph: { json: { highlightClasses: { h1: { background: '#0F0' } } } } },
     });
     const ast = parseYaml(makeYamlSource([
       '#highlight "fruit" <<h1>>',
@@ -178,7 +178,7 @@ describe('end-to-end: YAML <<h1>> highlight class in SVG output', () => {
     ]));
     const geo = layoutJson(ast, theme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, theme));
-    expect(svg).toContain('#00FF00');
+    expect(svg).toContain('#0F0');
     expect(svg).not.toContain('#CCFF02');
   });
 
@@ -200,8 +200,8 @@ describe('end-to-end: YAML <<h1>> highlight class in SVG output', () => {
         graph: {
           json: {
             highlightClasses: {
-              h1: { background: '#FF0000' },
-              h2: { background: '#0000FF' },
+              h1: { background: '#F00' },
+              h2: { background: '#00F' },
             },
           },
         },
@@ -215,7 +215,7 @@ describe('end-to-end: YAML <<h1>> highlight class in SVG output', () => {
     ]));
     const geo = layoutJson(ast, theme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, theme));
-    expect(svg).toContain('#FF0000');
-    expect(svg).toContain('#0000FF');
+    expect(svg).toContain('#F00');
+    expect(svg).toContain('#00F');
   });
 });

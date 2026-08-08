@@ -76,7 +76,7 @@
  *   smooth-quadratic) never appear, so {@link absolutizeOne}'s existing
  *   command set needs no additions.
  */
-import { javaFixed4, trimTrailingZeros } from './number-format.js';
+import { fmt } from './svg-format.js';
 import { RAW_GLYPHS } from './openiconic-glyphs-data.js';
 
 /** Every OpenIconic glyph's native (unscaled) viewBox is `0 0 8 8`
@@ -401,10 +401,6 @@ export function openIconicDims(factor: number): { readonly width: number; readon
  */
 export function openIconicOriginY(rowBaselineY: number, rowFontSize: number, factor: number): number {
   return rowBaselineY + rowFontSize / 4.5 - 11 * factor;
-}
-
-function fmt(n: number): string {
-  return trimTrailingZeros(javaFixed4(n));
 }
 
 /**

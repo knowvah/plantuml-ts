@@ -93,7 +93,7 @@ describe('AC1 — polygon count matches event count', () => {
 describe('AC2 — baseline line is present', () => {
   it('contains a baseline line with stroke #333333', () => {
     const svg = assembleSvg(renderChronology(corpusGeo(), theme));
-    expect(svg).toContain('stroke="#333333"');
+    expect(svg).toContain('stroke="#333"');
   });
 
   it('baseline stroke-width is 1.5', () => {

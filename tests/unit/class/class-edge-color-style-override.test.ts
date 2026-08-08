@@ -139,7 +139,7 @@ Subscriber -[#blue]-> IpSession
 @enduml`,
       measurer,
     );
-    expect(svg).toContain('stroke="#0000FF" stroke-width="1"');
+    expect(svg).toContain('stroke="#00F" stroke-width="1"');
   });
 
   // pofebo-79-nape407/in.svg: thickness=N -> stroke-width:N verbatim
@@ -174,9 +174,9 @@ a <|-[#00FF00,plain]- c
 @enduml`,
       measurer,
     );
-    expect(svg).toContain('stroke="#FF0000" stroke-width="2"');
-    expect(svg).not.toMatch(/stroke="#FF0000" stroke-width="2" stroke-dasharray/);
-    expect(svg).toContain('stroke="#00FF00" stroke-width="1"');
+    expect(svg).toContain('stroke="#F00" stroke-width="2"');
+    expect(svg).not.toMatch(/stroke="#F00" stroke-width="2" stroke-dasharray/);
+    expect(svg).toContain('stroke="#0F0" stroke-width="1"');
   });
 
   // vufuko-05-lapu034/in.svg: lnk4 `stroke-width:1;stroke-dasharray:1,3;`

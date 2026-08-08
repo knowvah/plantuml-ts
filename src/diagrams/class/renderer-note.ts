@@ -10,6 +10,7 @@ import type { EdgeGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
 import { text, path, polygon, image, linkWrap } from '../../core/svg.js';
+import { moveTo, lineTo, cubicTo } from '../../core/svg-path-builder.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { resolveBareOrBackColor } from './class-color-override.js';
 import { splitStereotypeStyleTags } from './class-stereotype.js';
@@ -26,7 +27,6 @@ import {
 } from './note-opale.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
 
 /**
@@ -43,7 +43,9 @@ function buildConnectorPathData(points: EdgeGeo['points']): string {
   if (points.length === 0) return '';
   const [first, ...rest] = points;
   if (first === undefined) return '';
-  const start = `M${first.x},${first.y}`;
+  // T7b: routed through svg-path-builder.ts's moveTo/lineTo/cubicTo
+  // (formatDecimal, ADR-1) instead of raw template-literal interpolation.
+  const start = moveTo(first.x, first.y);
 
   const isBezierSpline = points.length >= 4 && (points.length - 1) % 3 === 0;
   if (isBezierSpline) {
@@ -52,12 +54,12 @@ function buildConnectorPathData(points: EdgeGeo['points']): string {
       const c1 = points[i]!;
       const c2 = points[i + 1]!;
       const end = points[i + 2]!;
-      segments.push(`C${c1.x},${c1.y} ${c2.x},${c2.y} ${end.x},${end.y}`);
+      segments.push(cubicTo(c1, c2, end));
     }
     return [start, ...segments].join(' ');
   }
 
-  const segments = rest.map((p) => `L${p.x},${p.y}`);
+  const segments = rest.map((p) => lineTo(p.x, p.y));
   return [start, ...segments].join(' ');
 }
 
@@ -158,9 +160,11 @@ function noteAtomDecoration(styles: ReadonlySet<FontStyle>): string | undefined 
 /**
  * G2 N55: draws ONE note line's per-atom creole content -- the note-local
  * mirror of `renderer-classifier-box.ts`'s private `renderRowAtoms` (same
- * per-atom-kind switch, same `javaRound4`-per-atom-`textLength`/unrounded-
- * x-advance convention, same doc-comment-cited rounding rule) -- duplicated
- * rather than imported since that function is private to a file this module
+ * per-atom-kind switch, same per-atom-`textLength`/unrounded-x-advance
+ * convention -- `textLength` rounds to 3dp at SVG emission (ADR-1,
+ * `core/svg.ts#attrs`), x-advance stays the exact unrounded `atom.width`)
+ * -- duplicated rather than imported since that function is private to a
+ * file this module
  * does not otherwise depend on (mirrors `buildConnectorPathData`'s own
  * "duplicated to avoid a needless cross-file dependency" precedent above).
  * G2 N67 item 49: an atom's OWN creole-resolved color (a `<color>` command)
@@ -217,7 +221,7 @@ function renderNoteLineAtoms(
         fontSize: atom.font.size,
         fill: atom.font.color ?? theme.colors.graph.noteCascadeFontColor ?? '#000000',
         lengthAdjust: 'spacing',
-        textLength: javaRound4(atom.renderWidth ?? atom.width),
+        textLength: atom.renderWidth ?? atom.width,
         ...(atom.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' as const } : {}),
         ...(atom.font.styles.has(FontStyle.ITALIC) ? { fontStyle: 'italic' as const } : {}),
         ...(decoration !== undefined ? { textDecoration: decoration } : {}),
@@ -237,6 +241,8 @@ function renderNoteLineAtoms(
     out += image(x, legacyY - baselineOffset, atom.width, atom.height, atom.href);
     x += atom.width;
   }
+  // #lizard forgives -- pre-existing per-atom-kind switch, unrelated to
+  // this task's `javaRound4` removal (T6c); size predates this edit.
   return out;
 }
 
@@ -341,7 +347,8 @@ export function renderNote(note: NoteGeo, theme: Theme): string {
       { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH },
     ),
   );
-  const fold = `M ${x + w - f},${y} L ${x + w - f},${y + f} L ${x + w},${y + f}`;
+  // T7b: routed through svg-path-builder.ts (was a raw template literal).
+  const fold = [moveTo(x + w - f, y), lineTo(x + w - f, y + f), lineTo(x + w, y + f)].join(' ');
   parts.push(path(fold, { stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }));
   parts.push(renderNoteText(note, theme));
 

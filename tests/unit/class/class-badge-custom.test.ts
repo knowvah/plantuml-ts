@@ -7,7 +7,7 @@
  * the 5 jar-captured glyphs) the vector letter.
  *
  * Jar-verified against `bejeli-39-sina124/in.svg`: `NamedStereotype`/
- * `ColoredCircle` (`<<(S,#FF7700)...>>`) both draw `fill="#FF7700"`;
+ * `ColoredCircle` (`<<(S,#FF7700)...>>`) both draw `fill="#F70"`;
  * `PlainCircle`/`PlainCircleStereotype` (`<<(S)...>>`, no COLOR group) both
  * fall back to the kind's own default `fill="#ADD1B2"` (spotClass).
  */
@@ -122,7 +122,7 @@ class NamedStereotype <<(S,#FF7700)Stereotype>>
 @enduml`,
       measurer,
     );
-    expect(svg).toContain('fill="#FF7700"');
+    expect(svg).toContain('fill="#F70"');
   });
 
   it('a bare (CHAR) badge (no COLOR) falls back to the kind default fill', () => {

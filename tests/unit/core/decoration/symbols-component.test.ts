@@ -14,7 +14,7 @@
  *
  * jarFragment provenance: every reference fragment below is extracted,
  * VERBATIM, from real jar output —
- *   `java -jar ~/git/plantuml/build/libs/plantuml-1.2026.7beta3.jar
+ *   `java -jar ~/git/plantuml/build/libs/plantuml-1.203.7beta3.jar
  *   -tsvg -pipe` on a minimal single-element `.puml` (`[Foo]` /
  *   `skinparam componentStyle uml1|uml2` / `node Foo` / `artifact Foo` /
  *   `file Foo` / `frame Foo`) — captured 2026-07-09. Each fragment is
@@ -46,7 +46,7 @@
  * own real-font-metrics text layout (a separate, unported subsystem).
  * `fooLabelTextBlock()`'s exact width/height/baseline values are
  * themselves real jar-measured facts (not invented): the real jar's
- * "Foo"@14pt sans-serif label reports `textLength="24.7051"` on its
+ * "Foo"@14pt sans-serif label reports `textLength="24.705"` on its
  * `<text>` element, and (independently derived from all six fixtures'
  * total entity dimensions minus each class's own `getMargin()`) a label
  * dimension of `(24.7051, 16.4883)` with the `<text>` baseline drawn at
@@ -54,6 +54,7 @@
  * across all six fixtures, confirming this is a font-metrics constant
  * independent of which `USymbol*` class draws around it.
  */
+import { fmt } from '../../../../src/core/svg-format.js';
 import { describe, expect, test } from 'vitest';
 import type { TextBlock } from '../../../../src/core/klimt/shape/TextBlock.js';
 import { XDimension2D } from '../../../../src/core/klimt/geom/XDimension2D.js';
@@ -153,7 +154,7 @@ function newGraphic(): UGraphicSvg {
  * classes calls `startGroup`, so no nested `<g>` exists to confuse a
  * non-greedy match). */
 function extractTopGroup(svg: string): string {
-  const match = /<g>([\s\S]*)<\/g><\/svg>$/.exec(svg);
+  const match = /<g[^>]*>([\s\S]*)<\/g><\/svg>$/.exec(svg);
   if (match === null) throw new Error('extractTopGroup: no top-level <g>...</g><\/svg> found');
   const inner = match[1];
   if (inner === undefined) throw new Error('extractTopGroup: capture group did not match');
@@ -184,44 +185,44 @@ function expectConformant(ours: string, jarFragment: string): void {
 // ---------------------------------------------------------------------------
 
 const JAR_COMPONENT1_FOO =
-  '<rect x="0" y="0" width="44.7051" height="36.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
+  '<rect x="0" y="0" width="44.705" height="36.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
   '<rect x="-5" y="5" width="10" height="5" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<rect x="-5" y="26.4883" width="10" height="5" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="10" y="23.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<rect x="-5" y="26.488" width="10" height="5" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<text x="10" y="23.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 const JAR_COMPONENT2_FOO =
-  '<rect x="0" y="0" width="64.7051" height="46.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
-  '<rect x="44.7051" y="5" width="15" height="10" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<rect x="42.7051" y="7" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<rect x="42.7051" y="11" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="15" y="33.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<rect x="0" y="0" width="64.705" height="46.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
+  '<rect x="44.705" y="5" width="15" height="10" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<rect x="42.705" y="7" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<rect x="42.705" y="11" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<text x="15" y="33.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 const JAR_NODE_FOO =
-  '<polygon points="0,10,10,0,64.7051,0,64.7051,36.4883,54.7051,46.4883,0,46.4883,0,10" ' +
+  '<polygon points="0,10,10,0,64.705,0,64.705,36.488,54.705,46.488,0,46.488,0,10" ' +
   'fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;stroke-linejoin:miter;stroke-miterlimit:10;"/>' +
-  '<line x1="54.7051" y1="10" x2="64.7051" y2="0" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<line x1="0" y1="10" x2="54.7051" y2="10" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<line x1="54.7051" y1="10" x2="54.7051" y2="46.4883" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="15" y="33.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<line x1="54.705" y1="10" x2="64.705" y2="0" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<line x1="0" y1="10" x2="54.705" y2="10" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<line x1="54.705" y1="10" x2="54.705" y2="46.488" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<text x="15" y="33.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 const JAR_ARTIFACT_FOO =
-  '<rect x="0" y="0" width="54.7051" height="39.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
-  '<polygon points="37.7051,5,37.7051,19,49.7051,19,49.7051,11,43.7051,5,37.7051,5" ' +
+  '<rect x="0" y="0" width="54.705" height="39.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
+  '<polygon points="37.705,5,37.705,19,49.705,19,49.705,11,43.705,5,37.705,5" ' +
   'fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;stroke-linejoin:miter;stroke-miterlimit:10;"/>' +
-  '<line x1="43.7051" y1="5" x2="43.7051" y2="11" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<line x1="49.7051" y1="11" x2="43.7051" y2="11" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="10" y="26.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<line x1="43.705" y1="5" x2="43.705" y2="11" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<line x1="49.705" y1="11" x2="43.705" y2="11" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<text x="10" y="26.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 const JAR_FILE_FOO =
-  '<path d="M0,2.5 L0,33.9883 A2.5,2.5 0 0 0 2.5,36.4883 L42.2051,36.4883 A2.5,2.5 0 0 0 44.7051,33.9883 ' +
-  'L44.7051,10 L34.7051,0 L2.5,0 A2.5,2.5 0 0 0 0,2.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
-  '<path d="M34.7051,0 L34.7051,7.5 A2.5,2.5 0 0 0 37.2051,10 L44.7051,10" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
-  '<text x="10" y="23.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<path d="M0,2.5 L0,33.988 A2.5,2.5 0 0 0 2.5,36.488 L42.205,36.488 A2.5,2.5 0 0 0 44.705,33.988 ' +
+  'L44.705,10 L34.705,0 L2.5,0 A2.5,2.5 0 0 0 0,2.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
+  '<path d="M34.705,0 L34.705,7.5 A2.5,2.5 0 0 0 37.205,10 L44.705,10" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
+  '<text x="10" y="23.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 const JAR_FRAME_FOO =
-  '<rect x="0" y="0" width="64.7051" height="46.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
-  '<path d="M21.5684,0 L21.5684,5 L14.5684,12 L0,12" style="stroke:#181818;stroke-width:0.5;" fill="none"/>' +
-  '<text x="15" y="33.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<rect x="0" y="0" width="64.705" height="46.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
+  '<path d="M21.568,0 L21.568,5 L14.568,12 L0,12" style="stroke:#181818;stroke-width:0.5;" fill="none"/>' +
+  '<text x="15" y="33.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 // ---------------------------------------------------------------------------
 // Conformance tests (AC1)
@@ -294,7 +295,9 @@ describe('USymbolNode (T6, AC1/AC3) — 3D-box notation', () => {
       [0, 46.4883],
       [0, 10],
     ];
-    const expected = points.map(([x, y]) => `${x},${y}`).join(',');
+    // Formatted through the emitter's own rule-1 formatter rather than
+    // hardcoded at 3 decimals: the array above stays the real jar geometry.
+    const expected = points.map(([x, y]) => `${fmt(x!)},${fmt(y!)}`).join(',');
     expect(JAR_NODE_FOO).toContain(`points="${expected}"`);
   });
 
@@ -514,10 +517,10 @@ describe('USymbolFile/asSmall — roundCorner=0 branch', () => {
     const svg = ug.getSvgString();
     // USymbolFile.java#drawFile, roundCorner===0 branch: a closed polygon
     // (0,0)-(0,h)-(w,h)-(w,10)-(w-10,0)-(0,0), no arc commands anywhere.
-    expect(svg).toContain('<polygon points="0,0,0,36.4883,44.7051,36.4883,44.7051,10,34.7051,0,0,0"');
+    expect(svg).toContain('<polygon points="0,0,0,36.488,44.705,36.488,44.705,10,34.705,0,0,0"');
     // The fold-line UPath's roundCorner===0 branch is a plain two-segment
     // line (no "A" arc command), unlike the roundCorner!==0 fixtures above.
-    expect(svg).toContain('<path d="M34.7051,0 L34.7051,10 L44.7051,10"');
+    expect(svg).toContain('<path d="M34.705,0 L34.705,10 L44.705,10"');
     expect(svg).not.toMatch(/<path d="[^"]*A/);
   });
 });

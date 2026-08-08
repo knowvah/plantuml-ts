@@ -131,7 +131,7 @@ function multiLineLabelTextBlock(): TextBlock {
 }
 
 /** The `package Foo` title block — real jar-measured facts: a bold
- * "Foo"@14pt reports `textLength="25.9219"` (wider than the plain
+ * "Foo"@14pt reports `textLength="25.922"` (wider than the plain
  * `FOO_LABEL_WIDTH` — bold glyphs are wider), and (independently
  * derived from the real jar's tab-notch geometry minus
  * `USymbolFolder`'s own `marginTitleX1/X2` constants) an overall title
@@ -199,7 +199,7 @@ const packageStringBounder: DriverStringBounder = {
 /** Extracts the content of this port's single top-level `<g>...</g>`
  * (see `symbols-component.test.ts`'s identical helper). */
 function extractTopGroup(svg: string): string {
-  const match = /<g>([\s\S]*)<\/g><\/svg>$/.exec(svg);
+  const match = /<g[^>]*>([\s\S]*)<\/g><\/svg>$/.exec(svg);
   if (match === null) throw new Error('extractTopGroup: no top-level <g>...</g><\/svg> found');
   const inner = match[1];
   if (inner === undefined) throw new Error('extractTopGroup: capture group did not match');
@@ -233,19 +233,19 @@ function expectConformant(ours: string, jarFragment: string): void {
 // false so the bump loop takes the SIMPLE (4-segment) branch — 8 cubic
 // segments total.
 const JAR_CLOUD_SMALL_FOO =
-  '<path d="M8.5008,8.0049 C13.7631,-1.6193 20.9788,-1.6251 28.0492,5.9498 C35.8647,-1.4782 43.0316,-1.8206 48.5216,8.6149 ' +
+  '<path d="M8.5008,8.005 C13.7631,-1.619 20.979,-1.625 28.049,5.95 C35.8647,-1.478 43.032,-1.821 48.522,8.615 ' +
   'C55.9845,12.3548 58.7586,16.5376 52.0101,23.5884 C59.1891,30.1228 55.3842,37.3486 47.493,39.6429 ' +
   'C44.9849,50.384 36.7968,55.2771 27.6578,46.3198 C19.4505,52.464 11.0003,47.972 9.4659,38.5308 ' +
   'C0.7217,36.8636 0.6224,31.7091 4.7332,25.4063 C-1.1939,18.8278 -0.3381,11.3864 8.5008,8.0049" ' +
   'style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
-  '<text x="15" y="28.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<text x="15" y="28.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 // `cloud "<6 lines>"` — width=507.5859, height=128.9298 (margin 15*4 +
 // the widest line 477.5859 x six stacked lines' 98.9298), both >100 so
 // the bump loop takes the COMPLEX (8-segment, corner-anchored) branch —
 // 36 cubic segments total (vs. the small fixture's 8).
 const JAR_CLOUD_BIG_FOO =
-  '<path d="M21.2423,8.5428 C33.1508,-4.0482 46.9384,-6.6854 54.6474,12.9025 C61.4579,-4.4493 73.56,-7.0817 85.3665,8.1994 ' +
+  '<path d="M21.2423,8.543 C33.1508,-4.048 46.938,-6.685 54.647,12.903 C61.4579,-4.449 73.56,-7.082 85.367,8.199 ' +
   'C94.7388,-6.0164 111.7706,-9.8683 120.9976,8.3591 C131.4126,-4.9464 143.9431,-4.2413 151.5799,11.3041 ' +
   'C161.9082,-9.1308 178.4684,-9.2008 189.6909,10.4541 C196.694,-5.2677 210.7018,-9.319 221.7445,6.3261 ' +
   'C234.3231,-8.497 249.6083,-9.5956 259.502,9.33 C268.9686,-5.3903 282.3279,-8.211 294.1658,6.541 ' +
@@ -264,33 +264,33 @@ const JAR_CLOUD_BIG_FOO =
   'C9.6262,113.2125 10.4115,113.9018 10.3288,115.5866 C-12.7047,102.4938 -11.7752,82.5916 7.1363,66.7565 ' +
   'C-19.1035,43.1252 -17.7869,23.7314 15,8 C16.9943,5.4219 19.7395,5.4682 21.2423,8.5428" ' +
   'style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
-  '<text x="15" y="28.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="477.5859" font-family="sans-serif">' +
+  '<text x="15" y="28.535" fill="#000" font-size="14" textLength="477.586">' +
   'This is quite a long cloud label to force width over one hundred pixels</text>' +
-  '<text x="15" y="45.0234" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="57.0527" font-family="sans-serif">Line two</text>' +
-  '<text x="15" y="61.5117" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="67.6826" font-family="sans-serif">Line three</text>' +
-  '<text x="15" y="78" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="60.5938" font-family="sans-serif">Line four</text>' +
-  '<text x="15" y="94.4883" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="56.6699" font-family="sans-serif">Line five</text>' +
-  '<text x="15" y="110.9766" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="52.1992" font-family="sans-serif">Line six</text>';
+  '<text x="15" y="45.023" fill="#000" font-size="14" textLength="57.053">Line two</text>' +
+  '<text x="15" y="61.512" fill="#000" font-size="14" textLength="67.683">Line three</text>' +
+  '<text x="15" y="78" fill="#000" font-size="14" textLength="60.594">Line four</text>' +
+  '<text x="15" y="94.488" fill="#000" font-size="14" textLength="56.67">Line five</text>' +
+  '<text x="15" y="110.977" fill="#000" font-size="14" textLength="52.199">Line six</text>';
 
 // `folder Foo` — USymbolFolder.java (showTitle=false): wtitle=46 (the
 // showTitle=false fallback (40,15) + marginTitleX1/X2), htitle=21,
 // width=70, height=54.4883, roundCorner=5 (half=2.5).
 const JAR_FOLDER_FOO =
-  '<path d="M2.5,0 L43.5,0 A3.75,3.75 0 0 1 46,2.5 L53,21 L67.5,21 A2.5,2.5 0 0 1 70,23.5 L70,51.9883 ' +
+  '<path d="M2.5,0 L43.5,0 A3.75,3.75 0 0 1 46,2.5 L53,21 L67.5,21 A2.5,2.5 0 0 1 70,23.5 L70,51.988 ' +
   'A2.5,2.5 0 0 1 67.5,54.4883 L2.5,54.4883 A2.5,2.5 0 0 1 0,51.9883 L0,2.5 A2.5,2.5 0 0 1 2.5,0" ' +
   'style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
   '<line x1="0" y1="21" x2="53" y2="21" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="10" y="41.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<text x="10" y="41.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 // `package Foo` — USymbolFolder.java (showTitle=true): wtitle=43.9219
 // (the REAL bold-"Foo" title dimension + marginTitleX1/X2),
 // htitle=22.4883, width=67.9219, height=39.4883, roundCorner=5.
 const JAR_PACKAGE_FOO =
-  '<path d="M2.5,0 L41.4219,0 A3.75,3.75 0 0 1 43.9219,2.5 L50.9219,22.4883 L65.4219,22.4883 A2.5,2.5 0 0 1 67.9219,24.9883 ' +
+  '<path d="M2.5,0 L41.4219,0 A3.75,3.75 0 0 1 43.922,2.5 L50.9219,22.488 L65.4219,22.488 A2.5,2.5 0 0 1 67.922,24.988 ' +
   'L67.9219,36.9883 A2.5,2.5 0 0 1 65.4219,39.4883 L2.5,39.4883 A2.5,2.5 0 0 1 0,36.9883 L0,2.5 A2.5,2.5 0 0 1 2.5,0" ' +
   'style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
-  '<line x1="0" y1="22.4883" x2="50.9219" y2="22.4883" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="10" y="16.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="25.9219" font-weight="700" font-family="sans-serif">Foo</text>';
+  '<line x1="0" y1="22.488" x2="50.922" y2="22.488" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<text x="10" y="16.535" fill="#000" font-size="14" textLength="25.922" font-weight="700">Foo</text>';
 
 // ---------------------------------------------------------------------------
 // Conformance tests (AC1/AC2)
@@ -386,7 +386,7 @@ describe('USymbolFolder/asSmall — roundCorner=0 branch (coverage)', () => {
     // polygon (0,0)-(wtitle,0)-(wtitle+7,htitle)-(width,htitle)-
     // (width,height)-(0,height)-(0,0); wtitle=46, htitle=21 (see the
     // dimension test above), width=70, height=54.4883.
-    expect(svg).toContain('<polygon points="0,0,46,0,53,21,70,21,70,54.4883,0,54.4883,0,0"');
+    expect(svg).toContain('<polygon points="0,0,46,0,53,21,70,21,70,54.488,0,54.488,0,0"');
     expect(svg).not.toMatch(/<path d="[^"]*A/);
   });
 });

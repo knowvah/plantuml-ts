@@ -84,9 +84,9 @@ describe('buildAnnotationBlock — legend defaults (jar fixture)', () => {
   });
 
   it('contains the background (#DDDDDD) and border (black) colors', () => {
-    expect(block.body).toMatch(/fill="#DDDDDD"/);
+    expect(block.body).toMatch(/fill="#DDD"/);
     // G1c: named colors resolve to their canonical jar hex (black -> #000000).
-    expect(block.body).toMatch(/stroke="#000000"/);
+    expect(block.body).toMatch(/stroke="#000"/);
   });
 
   it('rect dimension = pureText + padding, NO +1 (the +1 is block-outward only)', () => {
@@ -97,8 +97,8 @@ describe('buildAnnotationBlock — legend defaults (jar fixture)', () => {
     // shape (no `<g transform>` wrapper for margin, see blocks.ts).
     const rectMatch = /<rect x="12" y="12" width="([\d.]+)" height="([\d.]+)"/.exec(block.body);
     expect(rectMatch).not.toBeNull();
-    expect(Number(rectMatch![1])).toBeCloseTo(pureTextWidth + 10, 6);
-    expect(Number(rectMatch![2])).toBeCloseTo(pureTextHeight + 10, 6);
+    expect(Number(rectMatch![1])).toBeCloseTo(pureTextWidth + 10, 2);  // emitted attrs are 3-decimal (rule 1)
+    expect(Number(rectMatch![2])).toBeCloseTo(pureTextHeight + 10, 2);  // emitted attrs are 3-decimal (rule 1)
   });
 
   it('block-outward dimension = rect dimension + 1 + margin (12 each side)', () => {
@@ -128,7 +128,7 @@ describe('buildAnnotationBlock — legend defaults (jar fixture)', () => {
 
   it('first baseline = margin.top + padding.top + ascent (G2 N45: fontSize - getDescent)', () => {
     const first = /<text x="17" y="([\d.]+)"/.exec(block.body);
-    expect(Number(first![1])).toBeCloseTo(12 + 5 + ASCENT_14, 6);
+    expect(Number(first![1])).toBeCloseTo(12 + 5 + ASCENT_14, 2);  // emitted attrs are 3-decimal (rule 1)
   });
 });
 
@@ -136,7 +136,12 @@ describe('buildAnnotationBlock — legend defaults (jar fixture)', () => {
 // (`plans/g2-class-svg/ledger.md` N49's `bajula-59-puxi485`/
 // `mumefa-23-xoxe715` drill) -- jar's `TextBlockBordered#drawU` always
 // applies an explicit stroke (`stroke:none` when `lineColor` is `null`,
-// never an omitted attribute) with `stroke-width` set to the style's own
+// never an omitted attribute). RULE 4 (mission svg-output-size-reduction,
+// upstream "reduce SVG output size") then made `stroke-width` and
+// `stroke-dasharray` conditional: they are emitted only when the stroke is
+// NOT `none`. Verified against the regenerated goldens, which contain
+// `style="stroke:none;"` and never a `stroke-width` beside it. Where a
+// stroke IS set, `stroke-width` still carries the style's own
 // `lineThickness` (root default 1, overridable via `skinparam Legend/title
 // { BorderThickness N }` -- see the sibling describe block below), and a
 // `RoundRectangle2D` with `roundCorner === 0` degenerates to a plain
@@ -153,7 +158,7 @@ describe('buildAnnotationBlock — border rect stroke/rx defaults (G2 N50)', () 
     expect(block.body).toMatch(/stroke-width="1"/);
   });
 
-  it('roundCorner 0 + lineColor null (document-header shape): NO rx/ry, explicit stroke="none" + stroke-width="1"', () => {
+  it('roundCorner 0 + lineColor null (document-header shape): NO rx/ry, explicit stroke="none" and NO stroke-width (rule 4)', () => {
     const style = makeStyle({
       backgroundColor: '#D3D3D3',
       lineColor: null,
@@ -164,7 +169,8 @@ describe('buildAnnotationBlock — border rect stroke/rx defaults (G2 N50)', () 
     expect(block.body).not.toMatch(/rx=/);
     expect(block.body).not.toMatch(/ry=/);
     expect(block.body).toMatch(/stroke="none"/);
-    expect(block.body).toMatch(/stroke-width="1"/);
+    // Rule 4: suppressed because the stroke is none.
+    expect(block.body).not.toMatch(/stroke-width=/);
   });
 
   it('roundCorner 0 + lineColor set: stroke=color, stroke-width="1", still no rx/ry', () => {
@@ -177,7 +183,7 @@ describe('buildAnnotationBlock — border rect stroke/rx defaults (G2 N50)', () 
     const block = buildAnnotationBlock('footer', ['f'], style, measurer);
     expect(block.body).not.toMatch(/rx=/);
     expect(block.body).not.toMatch(/ry=/);
-    expect(block.body).toMatch(/stroke="#000000"/);
+    expect(block.body).toMatch(/stroke="#000"/);
     expect(block.body).toMatch(/stroke-width="1"/);
   });
 
@@ -216,7 +222,7 @@ describe('buildAnnotationBlock — redundant-fill collapse vs document backgroun
     });
     const block = buildAnnotationBlock('legend', ['x'], style, measurer);
     expect(block.body).toMatch(/<rect[^>]*fill="none"/);
-    expect(block.body).toMatch(/stroke="#000000"/);
+    expect(block.body).toMatch(/stroke="#000"/);
   });
 
   it('draws the rect fill normally when the resolved backgroundColor differs from the document background', () => {
@@ -321,7 +327,7 @@ describe('buildAnnotationBlock — Creole inline markup (G2 N45: one sibling <te
     // textLength/lengthAdjust present.
     expect(block.body).not.toMatch(/<tspan/);
     expect(block.body).toMatch(
-      /<text x="0" y="[\d.]+" font-family="sans-serif" font-size="14" font-weight="700" fill="#000000" lengthAdjust="spacing" textLength="40">bold<\/text>/,
+      /<text x="0" y="[\d.]+" font-size="14" font-weight="700" fill="#000" textLength="40">bold<\/text>/,
     );
     // plain text is "bold" (4 chars) -> width 40, not the 8-char raw source
     expect(block.width).toBeCloseTo(40 + 1, 6);

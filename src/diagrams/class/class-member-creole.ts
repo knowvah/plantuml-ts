@@ -139,11 +139,10 @@ export type MemberRenderAtom =
 /** One member row's fully built+measured creole content. */
 export interface MemberRowBuild {
   readonly atoms: readonly MemberRenderAtom[];
-  /** Sum of every atom's own measured width -- UNROUNDED (callers apply
-   *  `javaRound4` at their own existing call sites, matching the pre-cutover
-   *  rounding discipline: `sectionWidth`'s max-width scan stays unrounded,
-   *  `buildSectionRows`'s stored `row.width` stays rounded -- see each
-   *  call site). */
+  /** Sum of every atom's own measured width -- UNROUNDED (ADR-1: `core/
+   *  svg.ts` formats every numeric attribute at emission now, so nothing
+   *  upstream of that boundary pre-rounds; `sectionWidth`'s max-width scan
+   *  and `buildSectionRows`'s stored `row.width` both consume this raw). */
   readonly width: number;
   /** A2s R2i (lozego-15-coci435): this row's own line height -- the MAX of
    *  every atom's line contribution (text -> `atomTextLineHeight(font.size)`

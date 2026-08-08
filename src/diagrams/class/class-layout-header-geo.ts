@@ -43,7 +43,6 @@ import {
   computeBadgeSpriteBox,
 } from './class-layout-header-creole.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
 import type { ClassFontSpecs } from './class-layout-generic-classifier-types.js';
 
@@ -124,7 +123,7 @@ export function computeHeaderNameGeo(
   // G2 N64 (item 45 corollary): a trailing `\n` split can produce a BLANK
   // final line -- pre-measure the NBSP substitution glyph's own width ONCE
   // here (the only place with a `measurer` reference at this layer).
-  const blankLineRenderWidth = javaRound4(measurer.measure('\u00A0', headerFont).width);
+  const blankLineRenderWidth = measurer.measure('\u00A0', headerFont).width;
   return {
     badgeShown, memberRowHeight, header, badgeCharField, badgeColorField,
     headerLines, headerDisplayLines, nameBlockHeight, badgeSpriteBox,

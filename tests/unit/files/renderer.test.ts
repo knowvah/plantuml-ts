@@ -178,7 +178,7 @@ describe('renderFiles', () => {
       }),
     ]);
     const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('stroke="#AAAAAA"');
+    expect(svg).toContain('stroke="#AAA"');
     expect(svg).toContain('<polyline');
   });
 

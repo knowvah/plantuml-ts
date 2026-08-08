@@ -261,7 +261,7 @@ describe('R2b — {{...}} embedded diagram regions in notes', () => {
 describe('existing behavior preserved', () => {
   it('single plain line — cajicu-52 byte-exact formula unchanged', () => {
     const m = note('hi');
-    expect(m.width).toBeCloseTo(w('hi') + MX, 3); // row widths are javaRound4-ed
+    expect(m.width).toBeCloseTo(w('hi') + MX, 3); // row widths are unrounded (T8); rounding happens at SVG emission
     expect(m.height).toBe(13 + MY);
   });
 

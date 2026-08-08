@@ -5,6 +5,7 @@
  * 2 action lines) — see `src/diagrams/state/renderer-composite-box.ts`'s
  * own doc comment for the full anatomy this mirrors.
  */
+import { fmt } from '../../../src/core/svg-format.js';
 import { describe, it, expect } from 'vitest';
 import { renderComposite } from '../../../src/diagrams/state/renderer-composite-box.js';
 import type { StateNodeGeo } from '../../../src/diagrams/state/state-geo-types.js';
@@ -55,7 +56,7 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
   it('draws the half-rounded header path first, filled #F1F1F1, no stroke', () => {
     expect(out.indexOf('<path')).toBe(0);
     expect(out).toContain(
-      '<path d="M19.5,86 L466.9437,86 A12.5,12.5 0 0 1 479.4437,98.5 L479.4437,110 L7,110 L7,98.5 A12.5,12.5 0 0 1 19.5,86" fill="#F1F1F1"/>',
+      '<path d="M19.5,86 L466.944,86 A12.5,12.5 0 0 1 479.444,98.5 L479.444,110 L7,110 L7,98.5 A12.5,12.5 0 0 1 19.5,86" fill="#F1F1F1"/>',
     );
   });
 
@@ -65,7 +66,7 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
 
   it('draws a full, solid (never dashed) outline rect after the header path', () => {
     expect(out).toContain(
-      '<rect x="7" y="86" width="472.4437" height="398" fill="none" stroke="#181818" stroke-width="0.5" rx="12.5" ry="12.5"/>',
+      '<rect x="7" y="86" width="472.444" height="398" fill="none" stroke="#181818" stroke-width="0.5" rx="12.5" ry="12.5"/>',
     );
     expect(out).not.toContain('stroke-dasharray');
   });
@@ -73,17 +74,20 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
   it('draws exactly ONE divider line, at the header/body boundary y=110', () => {
     const dividerCount = (out.match(/<line/g) ?? []).length;
     expect(dividerCount).toBe(1);
-    expect(out).toContain('<line x1="7" y1="110" x2="479.4437" y2="110" stroke="#181818" stroke-width="0.5"/>');
+    expect(out).toContain('<line x1="7" y1="110" x2="479.444" y2="110" stroke="#181818" stroke-width="0.5"/>');
   });
 
   it('centers the title text via textLength, matching jar x=207.0406 (unrounded, same convention as the leaf box)', () => {
-    expect(out).toContain('textLength="72.3625"');
+    expect(out).toContain('textLength="72.363"');
     expect(out).toContain('>Track_FSM<');
     // x = box midX(243.22185) - textLength/2(36.18125) = 207.0406 (raw
-    // float noise, unrounded -- ONLY textLength is javaRound4'd, matching
-    // renderer-box.ts's own identical x/y-unrounded convention).
+    // float noise; formatted to 3dp at emission by core/svg.ts#attrs, same
+    // as every other numeric attribute -- T7 dropped the state engine's own
+    // pre-rounding, matching renderer-box.ts's identical convention).
+    // The raw jar convention is unchanged; only its EMITTED form is now
+    // rule-1 formatted, so compute it the way the emitter writes it.
     const expectedX = 7 + 472.4437 / 2 - 72.3625 / 2;
-    expect(out).toContain(`x="${expectedX}"`);
+    expect(out).toContain(`x="${fmt(expectedX)}"`);
   });
 
   it('draws NO action text (no body lines)', () => {
@@ -115,11 +119,11 @@ describe('renderComposite — measured shape, WITH body/action lines (Do_Sector-
 
   it('draws header path, action-zone bg, outline, divider1, divider2, title, action text in that order', () => {
     const order = [
-      '<path d="M143.21875,252',
-      '<rect x="130.71875" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>',
-      '<rect x="130.71875" y="252" width="242.5" height="129" fill="none"',
-      '<line x1="130.71875" y1="276" x2="373.21875" y2="276"',
-      '<line x1="130.71875" y1="309" x2="373.21875" y2="309"',
+      '<path d="M143.219,252',
+      '<rect x="130.719" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>',
+      '<rect x="130.719" y="252" width="242.5" height="129" fill="none"',
+      '<line x1="130.719" y1="276" x2="373.219" y2="276"',
+      '<line x1="130.719" y1="309" x2="373.219" y2="309"',
       '>Do_Sector<',
       '>entry / enter_do_sector();<',
       '>exit / exit_do_sector();<',
@@ -133,7 +137,7 @@ describe('renderComposite — measured shape, WITH body/action lines (Do_Sector-
   });
 
   it('draws the action-zone background with fill=stroke=the resolved fill color, stroke-width 1', () => {
-    expect(out).toContain('<rect x="130.71875" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>');
+    expect(out).toContain('<rect x="130.719" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>');
   });
 
   it('draws exactly TWO divider lines (header/body + action-zone bottom)', () => {
@@ -148,11 +152,11 @@ describe('renderComposite — measured shape, WITH body/action lines (Do_Sector-
     // own y="349.8889" (relative to its real y=315, not this test's y=252,
     // but the SAME dividerY1+ascent formula either way).
     const expectedY = 276 + (14 - 14 / 4.5);
-    expect(out).toContain(`y="${expectedY}"`);
+    expect(out).toContain(`y="${fmt(expectedY)}"`);
   });
 
   it('left-aligns action text at box.x + MARGIN(5)', () => {
-    expect(out).toContain('x="135.71875"');
+    expect(out).toContain('x="135.719"');
   });
 });
 
@@ -168,8 +172,8 @@ describe('renderComposite — per-node #color override resolves through the head
       color: '#red',
     });
     const out = renderComposite(node, defaultTheme);
-    expect(out).toContain('fill="#FF0000"');
-    expect(out).toContain('stroke="#FF0000" stroke-width="1"');
+    expect(out).toContain('fill="#F00"');
+    expect(out).toContain('stroke="#F00" stroke-width="1"');
   });
 });
 

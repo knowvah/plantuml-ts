@@ -28,7 +28,6 @@ import type { Theme } from '../../core/theme.js';
 import { rect, line } from '../../core/svg.js';
 import { text as svgText } from '../../core/svg.js';
 import { renderRow } from './renderer-classifier-box.js';
-import { javaRound4 } from '../../core/number-format.js';
 import type { EnhancedBodyGeo, EnhancedBodyPart } from './class-body-enhanced-layout.js';
 
 /** The classifier box's OWN divider stroke color (`class-border`'s own
@@ -68,7 +67,7 @@ function renderDividerPart(
     segment(fullStart, y, labelStart) +
     svgText(labelStart, geo.y + part.title.y, part.title.text, {
       fontFamily: theme.fontFamily, fontSize: theme.fontSize, fill: '#000000',
-      lengthAdjust: 'spacing', textLength: javaRound4(part.title.width),
+      lengthAdjust: 'spacing', textLength: part.title.width,
     }) +
     segment(labelEnd, y, fullEnd)
   );

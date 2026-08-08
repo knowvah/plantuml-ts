@@ -584,9 +584,9 @@ describe('tableTokenToSvg', () => {
     expect(svg).toContain('y="21"');
   });
 
-  it('each rect has stroke="#000000" stroke-width="1"', () => {
+  it('each rect has stroke="#000" stroke-width="1"', () => {
     const svg = tableTokenToSvg(twoByTwo, 0, 0, 14);
-    expect(svg).toContain('stroke="#000000"');
+    expect(svg).toContain('stroke="#000"');
     expect(svg).toContain('stroke-width="1"');
   });
 

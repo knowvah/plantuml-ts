@@ -83,6 +83,12 @@ To add a slug:
 Removal is **maintainer-only** — see `oracle/goldens/svg-description/
 README.md`'s identical rule; the same rationale applies verbatim.
 
+### Removed fixtures
+
+| slug | removed | why |
+|---|---|---|
+| `bipudo-23-xavu432` | 2026-08-08 | Un-pinned by maintainer decision during mission `svg-output-size-reduction`. Its edge-spline first control point is `75.1940275463084` where the jar's is `75.1843` — a **0.0097** gap that sat just inside the 0.01 conformance tolerance and passed, until 3-decimal emission rounding moved the two apart to `0.0100000000000051` and pushed it over. The gap is **pre-existing**, proven by rendering the fixture at pre-mission `1d913189`, and is NOT caused by the size-reduction port. Its `parity-class.json` row still reads `dotEqual: true` — our DOT input is byte-identical to the jar's — so the divergence arises after DOT, in spline computation or post-layout handling. Tracked as its own mission: `plans/class-edge-spline-conformance/`. **Re-pin it when that mission closes the gap** — this is a deferral, not an accepted divergence, and it is deliberately NOT in `oracle/accepted-divergences.json`. |
+
 ## How an AUTHORED fixture reaches the parity corpus (SI13, 2026-08-04)
 
 The Add rule's condition 2 requires a `dotEqual: true` row in

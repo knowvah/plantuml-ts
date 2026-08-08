@@ -55,10 +55,12 @@ describe('measureGenericTagDim with \\n line breaks (R2c item 1)', () => {
     const dim = measureGenericTagDim(['x'], 'sans-serif', measurer, undefined, raw);
     const w1 = measurer.measure('two_dims_td,', STEREO_FONT).width;
     const w2 = measurer.measure('LessY<Element<two_dims_td>>', STEREO_FONT).width;
-    // jar b-probe SVG: `textLength="172.95"` for the widest line (widths
-    // are javaRound4-rounded per line, matching the jar's 4-decimal SVG).
+    // jar b-probe SVG: `textLength="172.95"` for the widest line -- widths
+    // stay unrounded through layout post-ADR-1 (emission now rounds via
+    // `formatDecimal(value, 3)`, `core/svg.ts`), so the raw float carries
+    // its own float-addition noise here rather than a pre-rounded 4dp value.
     expect(dim?.rawTextWidth).toBeCloseTo(Math.max(w1, w2), 4);
-    expect(dim?.rawTextWidth).toBe(172.95);
+    expect(dim?.rawTextWidth).toBe(Math.max(w1, w2));
     expect(dim?.width).toBeCloseTo(Math.max(w1, w2) + 4, 4);
   });
 

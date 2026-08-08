@@ -307,7 +307,7 @@ describe('renderDot — cluster subgraphs', () => {
     const { geo } = buildGeo(source);
     const svg = assembleSvg(renderDot(geo, theme));
     // The cluster rect (stroke="#000000") must appear before any <ellipse> (node)
-    const clusterIdx = svg.indexOf('stroke="#000000"');
+    const clusterIdx = svg.indexOf('stroke="#000"');
     const ellipseIdx = svg.indexOf('<ellipse');
     expect(clusterIdx).toBeGreaterThanOrEqual(0);
     expect(ellipseIdx).toBeGreaterThan(clusterIdx);
@@ -400,9 +400,9 @@ describe('renderDot — cluster subgraphs', () => {
 
 describe('renderDot — node fillcolor and color', () => {
   it('fillcolor + style=filled renders the node with the specified fill color', () => {
-    const { geo } = buildGeo(`digraph { a [fillcolor="#FFCCCC", style=filled] }`);
+    const { geo } = buildGeo(`digraph { a [fillcolor="#FCC", style=filled] }`);
     const svg = assembleSvg(renderDot(geo, theme));
-    expect(svg).toContain('#FFCCCC');
+    expect(svg).toContain('#FCC');
   });
 
   it('style=filled without fillcolor uses lightgrey (C DEFAULT_FILL)', () => {
@@ -412,34 +412,34 @@ describe('renderDot — node fillcolor and color', () => {
   });
 
   it('color without style=filled sets border stroke only, not fill', () => {
-    const { geo } = buildGeo(`digraph { a [color="#CC0000"] }`);
+    const { geo } = buildGeo(`digraph { a [color="#C00"] }`);
     const svg = assembleSvg(renderDot(geo, theme));
-    expect(svg).toContain('#CC0000');
+    expect(svg).toContain('#C00');
     // The fill should remain the theme default, not the color value
-    expect(svg).not.toContain('fill="#CC0000"');
+    expect(svg).not.toContain('fill="#C00"');
   });
 
   it('color + style=filled uses color as fill when no fillcolor is set', () => {
-    const { geo } = buildGeo(`digraph { a [color="#CC0000", style=filled] }`);
+    const { geo } = buildGeo(`digraph { a [color="#C00", style=filled] }`);
     const svg = assembleSvg(renderDot(geo, theme));
     // C findFill(): fillcolor → color → DEFAULT_FILL
-    expect(svg).toContain('fill="#CC0000"');
+    expect(svg).toContain('fill="#C00"');
   });
 
   it('fillcolor takes precedence over color for fill when both are set', () => {
-    const { geo } = buildGeo(`digraph { a [color="#CC0000", fillcolor="#FFCCCC", style=filled] }`);
+    const { geo } = buildGeo(`digraph { a [color="#C00", fillcolor="#FCC", style=filled] }`);
     const svg = assembleSvg(renderDot(geo, theme));
-    expect(svg).toContain('fill="#FFCCCC"');
+    expect(svg).toContain('fill="#FCC"');
   });
 
   it('global node [fillcolor style=filled] defaults apply to all nodes', () => {
     // Statements must be separated so the parser sees them as distinct stmts.
     const { geo } = buildGeo(
-      `digraph {\n  node [fillcolor="#AABBCC", style=filled]\n  a -> b\n}`,
+      `digraph {\n  node [fillcolor="#ABC", style=filled]\n  a -> b\n}`,
     );
     const svg = assembleSvg(renderDot(geo, theme));
     // Both a and b should pick up the default fill
-    const fillMatches = (svg.match(/fill="#AABBCC"/g) ?? []).length;
+    const fillMatches = (svg.match(/fill="#ABC"/g) ?? []).length;
     expect(fillMatches).toBeGreaterThanOrEqual(2);
   });
 });

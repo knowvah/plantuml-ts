@@ -215,7 +215,7 @@ describe('PSystemErrorEmpty / PSystemErrorV2', () => {
 describe('the rendered SVG', () => {
   it('draws the message in red and the listing in the error-diagram green', () => {
     const svg = renderPSystemError(failing('@startuml\n!endif', 'boom'), measurer);
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
     expect(svg).toContain('fill="#33FF02"');
   });
 

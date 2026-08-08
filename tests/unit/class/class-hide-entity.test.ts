@@ -231,8 +231,8 @@ C1 "1" -- "1" C2
 @enduml`,
       measurer,
     );
-    expect(svg).toContain('width="49.9375" height="48"');
-    expect(svg).toContain('width="23.9375" height="40"');
+    expect(svg).toContain('width="49.938" height="48"');
+    expect(svg).toContain('width="23.938" height="40"');
   });
 
   // nirija-04-veti140/in.svg: `hide X members` / `hide Y members` fully
@@ -260,7 +260,7 @@ hide Y members
 @enduml`,
       measurer,
     );
-    expect(svg).toContain('width="41.3625" height="32"');
+    expect(svg).toContain('width="41.363" height="32"');
     expect(svg).not.toContain('<line');
   });
 

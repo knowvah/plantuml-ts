@@ -111,7 +111,7 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
   // only ever checked the BARE `<element>` key, never `document.<element>`.
   // Jar-verified against `tests/corpus/class/A0005_Test.puml`'s own
   // `document { title { BackGroundColor yellow } } }` block: the jar's SVG
-  // contains `fill="#FFFF00"` on the title rect -- so this is a real
+  // contains `fill="#FF0"` on the title rect -- so this is a real
   // pre-existing behavior gap, not a preference. Failing-test-first proof:
   // this test fails against the pre-fix `applyStyleOverrides` (bare-only)
   // and passes once it also checks `document.<element>`.
@@ -325,10 +325,10 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
       expect(svg).toContain(`class="${cls}"`);
     }
     // G1c: named colors resolve to their canonical jar hex.
-    expect(svg).toContain('fill="#FFFF00"'); // <style> title { BackGroundColor yellow }
+    expect(svg).toContain('fill="#FF0"'); // <style> title { BackGroundColor yellow }
     expect(svg).toContain('fill="#008000"'); // <style> legend { BackGroundColor green }
-    expect(svg).toContain('fill="#0000FF"'); // <style> footer { BackGroundColor blue }
-    expect(svg).toContain('fill="#FF0000"'); // <style> header { BackGroundColor red } (also footer FontColor red)
+    expect(svg).toContain('fill="#00F"'); // <style> footer { BackGroundColor blue }
+    expect(svg).toContain('fill="#F00"'); // <style> header { BackGroundColor red } (also footer FontColor red)
     expect(svg).toContain('fill="#800080"'); // <style> caption { BackGroundColor purple }
 
     // G2 N3: body width dropped 112 -> 79 -- EntityImageClass's own width

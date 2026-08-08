@@ -176,6 +176,13 @@ describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside clas
     const ours = renderFixtureClass(readSource(slug), new DeterministicMeasurer());
     const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
     expect(pass).toBe(false);
+    // UNCHANGED by the size-reduction mission, and that is the point: this
+    // pin was briefly "re-measured" to 5 diffs (height 288, childCount 18)
+    // against a golden T9 had written from an anomalous jar capture -- a
+    // 16031-byte error page carrying two embedded PlantUML banner PNGs that
+    // nine consecutive re-captures of the same invocation do not reproduce
+    // (they give 2147 bytes, deterministically). The golden is restored and
+    // this pin with it. The error page's own geometry never moved.
     const expected: Diff[] = [
       { path: 'svg/@background', actual: '#FFFFFF', expected: '#000000', tolerance: 0.01 },
       { path: 'svg/@height', actual: '96', expected: '162', delta: 66, tolerance: 0.01 },

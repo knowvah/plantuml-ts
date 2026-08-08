@@ -26,7 +26,6 @@
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { Pragma } from '../../core/skin/Pragma.js';
 import { parseWithNewlines } from '../../core/klimt/creole/DisplayNewlines.js';
@@ -365,7 +364,7 @@ function buildBulletRows(bullet: { order: number; text: string }, ctx: NoteLineB
   const spacer: MemberRenderAtom = { kind: 'text', text: '', font: ctx.font, width: bulletWidth };
   return buildPlainRows(bullet.text, textCtx).map((row) => ({
     text: row.text,
-    width: javaRound4(bulletWidth + row.width),
+    width: bulletWidth + row.width,
     atoms: [spacer, ...row.atoms],
     height: row.height,
   }));
@@ -384,7 +383,7 @@ function buildPlainRows(rawLine: string, ctx: NoteLineBuildContext): NoteRow[] {
     : [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer, sprites)];
   return builds.map((build) => ({
     text: builds.length === 1 ? ln : atomsToPlainText(build.atoms),
-    width: javaRound4(build.width),
+    width: build.width,
     atoms: build.atoms,
     height: noteLineHeight(build.atoms, fontSize),
   }));

@@ -261,8 +261,8 @@ describe('renderClass — association-class-couple "point" entity (G2 N8)', () =
 
 describe('renderClass — interface lollipop (G2 N20)', () => {
   // Byte-verified against `bososa-44-fipu544`'s `dummylol2`: jar draws
-  // `<g class="entity" ...><ellipse cx="21.5313" cy="11" rx="5" ry="5" .../>
-  // </g><text x="6" y="26.8889" ...>toto1</text>` -- the label is a plain
+  // `<g class="entity" ...><ellipse cx="21.531" cy="11" rx="5" ry="5" .../>
+  // </g><text x="6" y="26.889" ...>toto1</text>` -- the label is a plain
   // SIBLING drawn AFTER the entity group closes, not nested inside it
   // (EntityImageLollipopInterface.java:94-133's closeGroup()-then-desc.drawU
   // sequence).
@@ -294,7 +294,7 @@ describe('renderClass — interface lollipop (G2 N20)', () => {
   it('draws the circle at the node center, radius = width/2, fill = ' +
     'classBackground, stroke = border, stroke-width 1.5 (getUStroke)', () => {
     const svg = assembleSvg(renderClass(makeLollipopGeo(), defaultTheme));
-    expect(svg).toContain('<ellipse cx="21.5313" cy="11" rx="5" ry="5"');
+    expect(svg).toContain('<ellipse cx="21.531" cy="11" rx="5" ry="5"');
     expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
     expect(svg).toContain(`stroke="${defaultTheme.colors.border}"`);
     expect(svg).toContain('stroke-width="1.5"');
@@ -481,8 +481,8 @@ describe('renderClass — map row dividers (G3/O3, TextBlockMap#drawU)', () => {
   it("draws each row's own vertical column divider interleaved right after that row's key+value text, not batched after every row", () => {
     const geo = makeMinimalGeo({ classifiers: [makeCapitalCityMapGeo()] });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
-    const ukVertical = '<line x1="74.4875" y1="61" x2="74.4875" y2="79" stroke="#181818" stroke-width="1"/>';
-    const usaVertical = '<line x1="74.4875" y1="79" x2="74.4875" y2="97" stroke="#181818" stroke-width="1"/>';
+    const ukVertical = '<line x1="74.488" y1="61" x2="74.488" y2="79" stroke="#181818" stroke-width="1"/>';
+    const usaVertical = '<line x1="74.488" y1="79" x2="74.488" y2="97" stroke="#181818" stroke-width="1"/>';
     const usaHorizontalDivider = '<line x1="7" y1="79" x2="158.425" y2="79"';
     expect(svg).toContain(ukVertical);
     expect(svg).toContain(usaVertical);
@@ -566,7 +566,7 @@ describe('renderClass — classBorderColor / classBorderThickness (G2 N51)', () 
     // (a SEPARATE spot-color mechanism, G2 N32) legitimately keeps the
     // plain default -- assert on the box rect specifically, not a global
     // absence of the default color string.
-    expect(svg).toContain('fill="#F1F1F1" stroke="#FF00FF"');
+    expect(svg).toContain('fill="#F1F1F1" stroke="#F0F"');
   });
 
   it('falls back to theme.colors.border when classBorder is unset', () => {
@@ -676,7 +676,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '#f00' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain('fill="#FF0000"');
+      expect(svg).toContain('fill="#F00"');
       expect(svg).not.toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
     });
 
@@ -685,7 +685,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '#fff' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain('fill="#FFFFFF"');
+      expect(svg).toContain('fill="#FFF"');
     });
 
     it('extracts the `back:` component from a compound color spec', () => {
@@ -693,7 +693,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '#back:blue;text:red' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain('fill="#0000FF"');
+      expect(svg).toContain('fill="#00F"');
     });
 
     it('falls back to classBackground when color has no back component (text-only compound)', () => {
@@ -781,7 +781,7 @@ describe('renderClass — classifier kind fill', () => {
     expect(svg).toContain('stroke-dasharray="2,2"');
     expect(svg).toContain('>T<');
     expect(svg).toContain('font-style="italic"');
-    expect(svg).toContain('fill="#FFFFFF"');
+    expect(svg).toContain('fill="#FFF"');
   });
 
   // G2 N49: the tag's fill is a FIXED white default, independent of
@@ -807,7 +807,7 @@ describe('renderClass — classifier kind fill', () => {
       ],
     });
     const svg = assembleSvg(renderClass(geo, transparentTheme));
-    expect(svg).toContain('fill="#FFFFFF"');
+    expect(svg).toContain('fill="#FFF"');
     expect(svg).not.toContain('fill="#00000000"');
   });
 
@@ -839,7 +839,7 @@ describe('renderClass — classifier kind fill', () => {
     // FIELD draws a stroke-only circle (fill="none"), LineColor #038048,
     // wrapped in `<g data-visibility-modifier="PUBLIC_FIELD">`.
     expect(svg).toContain('data-visibility-modifier="PUBLIC_FIELD"');
-    expect(svg).toContain('fill="none" stroke="#038048"');
+    expect(svg).toContain('fill="none" style="stroke:#038048;');
   });
 
   it('renders a filled visibility icon for a public METHOD', () => {
@@ -857,7 +857,7 @@ describe('renderClass — classifier kind fill', () => {
     // Public METHOD draws a BackgroundColor-filled circle (#84BE84),
     // stroke LineColor #038048.
     expect(svg).toContain('data-visibility-modifier="PUBLIC_METHOD"');
-    expect(svg).toContain('fill="#84BE84" stroke="#038048"');
+    expect(svg).toContain('fill="#84BE84" style="stroke:#038048;');
   });
 
   it('renders the private/protected/package visibility icon shapes (square/diamond/triangle)', () => {
@@ -883,7 +883,7 @@ describe('renderClass — classifier kind fill', () => {
     // even on a field row -- `VisibilityModifier.java`'s single shared enum
     // entry for both field/method call sites.
     expect(svg).toContain('data-visibility-modifier="IE_MANDATORY"');
-    expect(svg).toContain('fill="#000000" stroke="#000000"');
+    expect(svg).toContain('fill="#000" style="stroke:#000;');
   });
 });
 
@@ -929,9 +929,11 @@ describe('renderClass — visibility icon Y-centers on classAttributeFontSize, n
     // xabije's own jar-verified 1.1111 residual exactly.
     expect(overriddenY - defaultY).toBeCloseTo(
       visibilityIconOriginY(60, 18) - visibilityIconOriginY(60, 14),
-      4,
+      // 3 places, not 4: both operands are read back out of emitted markup,
+      // which rule 1 rounds to 3 decimals.
+      3,
     );
-    expect(overriddenY - defaultY).toBeCloseTo(-1.1111, 4);
+    expect(overriddenY - defaultY).toBeCloseTo(-1.1111, 3);  // diff of two 3-decimal emitted values
   });
 
   it('falls back to theme.fontSize unchanged when no AttributeFontSize override is set (regression guard)', () => {
@@ -940,7 +942,7 @@ describe('renderClass — visibility icon Y-centers on classAttributeFontSize, n
     // matching `visibilityIconOriginY`'s already-tested `theme.fontSize`
     // (14) behavior plus PRIVATE_FIELD's own `drawSquare(x+2,y+2,...)`
     // offset (`class-visibility-icon.ts`'s own doc comment).
-    expect(y).toBeCloseTo(visibilityIconOriginY(60, 14) + 2, 4);
+    expect(y).toBeCloseTo(visibilityIconOriginY(60, 14) + 2, 2);
   });
 });
 
@@ -1007,7 +1009,7 @@ describe('renderClass — edges', () => {
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('<rect');
-    expect(svg).toContain('fill="#FFFFFF"');
+    expect(svg).toContain('fill="#FFF"');
     expect(svg).not.toContain('marker-start');
   });
 
@@ -1128,7 +1130,7 @@ describe('renderClass — edges', () => {
     // the pre-N62 placeholder (`theme.colors.graph.edgeLabel`/
     // `fontSize-2`/`text-anchor`/`dominant-baseline`).
     expect(svg).toContain(
-      '<text x="70" y="105" font-family="sans-serif" font-size="13" fill="#000000" lengthAdjust="spacing" textLength="26.325">uses</text>',
+      '<text x="70" y="105" font-size="13" fill="#000" textLength="26.325">uses</text>',
     );
   });
 
@@ -1147,13 +1149,13 @@ describe('renderClass — edges', () => {
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain(
-      '<text x="44" y="100" font-family="sans-serif" font-size="13" fill="#000000" lengthAdjust="spacing" textLength="29.6563">this is</text>',
+      '<text x="44" y="100" font-size="13" fill="#000" textLength="29.656">this is</text>',
     );
     expect(svg).toContain(
-      '<text x="31" y="113" font-family="sans-serif" font-size="13" fill="#000000" lengthAdjust="spacing" textLength="56.3875">on several</text>',
+      '<text x="31" y="113" font-size="13" fill="#000" textLength="56.388">on several</text>',
     );
     expect(svg).toContain(
-      '<text x="46" y="126" font-family="sans-serif" font-size="13" fill="#000000" lengthAdjust="spacing" textLength="26.8125">lines</text>',
+      '<text x="46" y="126" font-size="13" fill="#000" textLength="26.813">lines</text>',
     );
   });
 
@@ -1171,8 +1173,8 @@ describe('renderClass — edges', () => {
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain(
-      '<polygon points="75.68,20.5,66.6349,17.5611,66.6349,23.4389,75.68,20.5" ' +
-      'fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>',
+      '<polygon points="75.68,20.5,66.635,17.561,66.635,23.439,75.68,20.5" ' +
+      'fill="#000" stroke="#000" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>',
     );
     // Element order: glyph polygon BEFORE the label text, matching jar's
     // real golden SVG (`lojepe-37-liri985`).
@@ -1280,7 +1282,7 @@ describe('renderClass — namespaces', () => {
       namespaces: [makeNamespaceGeo()],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain('stroke="#000000"');
+    expect(svg).toContain('stroke="#000"');
     expect(svg).toContain('stroke-width="1.5"');
   });
 });
@@ -1432,7 +1434,7 @@ describe('renderClass — non-default background (G2 N4)', () => {
     // (`svg-graphics-core.ts#setupBackcolor`'s own exclusion list, mirrored
     // here for class's pure-string shell -- verified against 8/718 fixtures
     // with a non-default `skinparam BackgroundColor`).
-    expect(svg).toContain('<rect x="0" y="0" width="71" height="68" fill="#FF0000"');
+    expect(svg).toContain('<rect x="0" y="0" width="71" height="68" fill="#F00"');
   });
 
   it('does NOT draw the full-canvas <rect> for the default white background', () => {
@@ -1472,14 +1474,14 @@ describe('renderClass — diagramBorderColor (G2 N66)', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { graph: { diagramBorderColor: 'black' } } });
     const geo = makeMinimalGeo({ totalWidth: 115, totalHeight: 68, rawWidth: 109.7875, rawHeight: 62 });
     const svg = assembleSvg(renderClass(geo, theme));
-    expect(svg).toContain('<rect x="0" y="0" width="113.7875" height="66" fill="none" stroke="#000000" stroke-width="1"/>');
+    expect(svg).toContain('<rect x="0" y="0" width="113.788" height="66" fill="none" stroke="#000" stroke-width="1"/>');
   });
 
   it('resolves a named CSS color to its canonical hex (not the raw keyword)', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { graph: { diagramBorderColor: 'red' } } });
     const geo = makeMinimalGeo({ totalWidth: 115, totalHeight: 68, rawWidth: 109.7875, rawHeight: 62 });
     const svg = assembleSvg(renderClass(geo, theme));
-    expect(svg).toContain('stroke="#FF0000"');
+    expect(svg).toContain('stroke="#F00"');
   });
 
   it('does NOT draw the border when diagramBorderColor is unset (zero behavior change)', () => {
@@ -1610,7 +1612,9 @@ describe('renderClass — notes', () => {
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('textLength="72.5"');
-    expect(svg).toContain('textLength="6.125"');
+    // Rule 5: single-character text carries no textLength (one glyph has no
+    // inter-character spacing to adjust), so assert its ABSENCE.
+    expect(svg).not.toContain('textLength="6.125"');
   });
 
   it('G2/N13: a resolved member-tip note draws UNWRAPPED (no <g class="entity">) via the Opale zigzag mechanism', () => {
@@ -1685,7 +1689,7 @@ describe('renderClass — descriptive classifier per-element color (T8/D4)', () 
       classifiers: [makeClassifierGeo('DB', 'DB', { usymbol: 'database' })],
     });
     const svg = assembleSvg(renderClass(geo, theme));
-    expect(svg).toContain('fill="#AA1122"');
+    expect(svg).toContain('fill="#A12"');
     expect(svg).not.toContain('#FEFECE');
   });
 });

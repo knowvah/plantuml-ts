@@ -221,7 +221,7 @@ describe('drawBar — AC5: fill color', () => {
     const rectFragments = svg.match(/<rect[^/]*/g) ?? [];
     expect(rectFragments).toHaveLength(3);
     for (const fragment of rectFragments) {
-      expect(fragment.toLowerCase()).toContain('fill="#ff0000"');
+      expect(fragment.toLowerCase()).toContain('fill="#f00"');
     }
   });
 });

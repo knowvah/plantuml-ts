@@ -32,6 +32,7 @@
 import type { NoteGeo } from './note-layout.js';
 import type { UrlInfo } from './ast.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
+import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 
 export interface OpalePoint {
   x: number;
@@ -88,19 +89,21 @@ export function opalePolygonLeft(box: OpaleBox, connector: OpaleConnector): stri
   const c = OPALE_CORNER_SIZE;
   const ox = origin.x;
   const oy = origin.y;
+  // T7b: routed through svg-path-builder.ts's moveTo/lineTo/arcTo
+  // (formatDecimal, ADR-1) instead of raw template-literal interpolation.
   return [
-    `M${ox},${oy}`,
-    `L${ox},${oy + y1}`,
-    `L${ox + pp2.x},${oy + pp2.y}`,
-    `L${ox},${oy + y1 + 2 * OPALE_DELTA}`,
-    `L${ox},${oy + height}`,
-    `A0,0 0 0 0 ${ox},${oy + height}`,
-    `L${ox + width},${oy + height}`,
-    `A0,0 0 0 0 ${ox + width},${oy + height}`,
-    `L${ox + width},${oy + c}`,
-    `L${ox + width - c},${oy}`,
-    `L${ox},${oy}`,
-    `A0,0 0 0 0 ${ox},${oy}`,
+    moveTo(ox, oy),
+    lineTo(ox, oy + y1),
+    lineTo(ox + pp2.x, oy + pp2.y),
+    lineTo(ox, oy + y1 + 2 * OPALE_DELTA),
+    lineTo(ox, oy + height),
+    arcTo(ox, oy + height, 0, 0, 0),
+    lineTo(ox + width, oy + height),
+    arcTo(ox + width, oy + height, 0, 0, 0),
+    lineTo(ox + width, oy + c),
+    lineTo(ox + width - c, oy),
+    lineTo(ox, oy),
+    arcTo(ox, oy, 0, 0, 0),
   ].join(' ');
 }
 
@@ -119,18 +122,18 @@ export function opalePolygonRight(box: OpaleBox, connector: OpaleConnector): str
   const ox = origin.x;
   const oy = origin.y;
   return [
-    `M${ox},${oy}`,
-    `L${ox},${oy + height}`,
-    `A0,0 0 0 0 ${ox},${oy + height}`,
-    `L${ox + width},${oy + height}`,
-    `A0,0 0 0 0 ${ox + width},${oy + height}`,
-    `L${ox + width},${oy + y1 + 2 * OPALE_DELTA}`,
-    `L${ox + pp2.x},${oy + pp2.y}`,
-    `L${ox + width},${oy + y1}`,
-    `L${ox + width},${oy + c}`,
-    `L${ox + width - c},${oy}`,
-    `L${ox},${oy}`,
-    `A0,0 0 0 0 ${ox},${oy}`,
+    moveTo(ox, oy),
+    lineTo(ox, oy + height),
+    arcTo(ox, oy + height, 0, 0, 0),
+    lineTo(ox + width, oy + height),
+    arcTo(ox + width, oy + height, 0, 0, 0),
+    lineTo(ox + width, oy + y1 + 2 * OPALE_DELTA),
+    lineTo(ox + pp2.x, oy + pp2.y),
+    lineTo(ox + width, oy + y1),
+    lineTo(ox + width, oy + c),
+    lineTo(ox + width - c, oy),
+    lineTo(ox, oy),
+    arcTo(ox, oy, 0, 0, 0),
   ].join(' ');
 }
 
@@ -144,10 +147,10 @@ export function opaleCorner(origin: OpalePoint, width: number): string {
   const ox = origin.x;
   const oy = origin.y;
   return [
-    `M${ox + width - c},${oy}`,
-    `L${ox + width - c},${oy + c}`,
-    `L${ox + width},${oy + c}`,
-    `L${ox + width - c},${oy}`,
+    moveTo(ox + width - c, oy),
+    lineTo(ox + width - c, oy + c),
+    lineTo(ox + width, oy + c),
+    lineTo(ox + width - c, oy),
   ].join(' ');
 }
 
@@ -167,18 +170,18 @@ export function opalePolygonUp(box: OpaleBox, connector: OpaleConnector): string
   const ox = origin.x;
   const oy = origin.y;
   return [
-    `M${ox},${oy}`,
-    `L${ox},${oy + height}`,
-    `A0,0 0 0 0 ${ox},${oy + height}`,
-    `L${ox + width},${oy + height}`,
-    `A0,0 0 0 0 ${ox + width},${oy + height}`,
-    `L${ox + width},${oy + c}`,
-    `L${ox + width - c},${oy}`,
-    `L${ox + x1 + 2 * OPALE_DELTA},${oy}`,
-    `L${ox + pp2.x},${oy + pp2.y}`,
-    `L${ox + x1},${oy}`,
-    `L${ox},${oy}`,
-    `A0,0 0 0 0 ${ox},${oy}`,
+    moveTo(ox, oy),
+    lineTo(ox, oy + height),
+    arcTo(ox, oy + height, 0, 0, 0),
+    lineTo(ox + width, oy + height),
+    arcTo(ox + width, oy + height, 0, 0, 0),
+    lineTo(ox + width, oy + c),
+    lineTo(ox + width - c, oy),
+    lineTo(ox + x1 + 2 * OPALE_DELTA, oy),
+    lineTo(ox + pp2.x, oy + pp2.y),
+    lineTo(ox + x1, oy),
+    lineTo(ox, oy),
+    arcTo(ox, oy, 0, 0, 0),
   ].join(' ');
 }
 
@@ -197,18 +200,18 @@ export function opalePolygonDown(box: OpaleBox, connector: OpaleConnector): stri
   const ox = origin.x;
   const oy = origin.y;
   return [
-    `M${ox},${oy}`,
-    `L${ox},${oy + height}`,
-    `A0,0 0 0 0 ${ox},${oy + height}`,
-    `L${ox + x1},${oy + height}`,
-    `L${ox + pp2.x},${oy + pp2.y}`,
-    `L${ox + x1 + 2 * OPALE_DELTA},${oy + height}`,
-    `L${ox + width},${oy + height}`,
-    `A0,0 0 0 0 ${ox + width},${oy + height}`,
-    `L${ox + width},${oy + c}`,
-    `L${ox + width - c},${oy}`,
-    `L${ox},${oy}`,
-    `A0,0 0 0 0 ${ox},${oy}`,
+    moveTo(ox, oy),
+    lineTo(ox, oy + height),
+    arcTo(ox, oy + height, 0, 0, 0),
+    lineTo(ox + x1, oy + height),
+    lineTo(ox + pp2.x, oy + pp2.y),
+    lineTo(ox + x1 + 2 * OPALE_DELTA, oy + height),
+    lineTo(ox + width, oy + height),
+    arcTo(ox + width, oy + height, 0, 0, 0),
+    lineTo(ox + width, oy + c),
+    lineTo(ox + width - c, oy),
+    lineTo(ox, oy),
+    arcTo(ox, oy, 0, 0, 0),
   ].join(' ');
 }
 

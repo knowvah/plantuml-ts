@@ -10,7 +10,6 @@
  */
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
 import {
@@ -118,7 +117,7 @@ export function buildTableRow(runLines: readonly string[], ctx: NoteLineBuildCon
   const height = cellDims.reduce((sum, row) => sum + row.reduce((max, cell) => Math.max(max, cell.h), 0), 0);
   return {
     text: runLines.join('\n'),
-    width: javaRound4(width),
+    width,
     atoms: [],
     height: height + TABLE_MARGIN_Y * 2,
   };
@@ -248,7 +247,7 @@ export function consumeEmbeddedRow(
   return {
     row: {
       text: blockLines.slice(start, nextIndex + 1).join('\n'),
-      width: javaRound4(dim.getWidth()),
+      width: dim.getWidth(),
       atoms: [],
       height: dim.getHeight(),
     },

@@ -288,7 +288,7 @@ describe('description engine — jar SVG conformance (E2E)', () => {
  *  (probe run under `oracle/dist/plantuml-oracle.jar -tsvg -pipe`,
  *  2026-07, staged under `/private/tmp`): `component "Icon <$foo>" as C1`
  *  with this exact body renders
- *  `<image width="4" height="4" x="54.9219" y="39.1806"
+ *  `<image width="4" height="4" x="54.922" y="39.181"
  *   xlink:href="data:image/png;base64,...">` — confirming the RELATION
  *  (one `<image>`, natural 4x4 dims at scale=1, positioned right after the
  *  "Icon " text run) this suite pins; href bytes are NOT compared (D7 —

@@ -61,7 +61,8 @@
 import type { Visibility } from './ast.js';
 import type { UrlInfo } from './class-url.js';
 import type { Theme } from '../../core/theme.js';
-import { linkWrap } from '../../core/svg.js';
+import { linkWrap, attrs } from '../../core/svg.js';
+import { fmt, formatDecimal, shortenColor, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 
 /** `SkinParam#classAttributeIconSize()` default -- skinparam override not wired. */
 export const VISIBILITY_ICON_SIZE = 10;
@@ -133,30 +134,44 @@ function isFilled(icon: Visibility, memberIsField: boolean): boolean {
 
 const STROKE_WIDTH = 1;
 
+/** `stroke:X;stroke-width:Y;<suffix>` -- the ONE combined `style=` value
+ *  real `SvgGraphics#styleMe` emits for every shape (`rect`/`ellipse`/
+ *  `polygon`), confirmed byte-for-byte against `test-results/dot-cache/
+ *  class/lufide-34-cexu026/in.svg`'s eight visibility-icon shapes (T7b --
+ *  before this task these three builders emitted DISCRETE `stroke`/
+ *  `stroke-width` attributes, which jar never does). */
+/** Rule 2 applies inside a `style=` string exactly as it does to a `stroke=`
+ *  attribute -- the jar shortens both, and the conformance normalizer
+ *  resolves `style` declarations into attributes, so an unshortened color
+ *  here surfaces as an `@stroke` diff.
+ *  @see .../klimt/drawing/svg/SvgGraphics.java#styleMe */
+function styleAttr(stroke: string, strokeWidth: number, suffix = ''): string {
+  return `stroke:${shortenColor(stroke)};stroke-width:${formatDecimal(strokeWidth, DEFAULT_SVG_DECIMALS)};${suffix}`;
+}
+
+
 function polygonTag(points: ReadonlyArray<readonly [number, number]>, fill: string, stroke: string): string {
-  const pts = points.map(([x, y]) => `${x},${y}`).join(',');
-  return (
-    `<polygon points="${pts}" fill="${fill}" stroke="${stroke}" stroke-width="${STROKE_WIDTH}" ` +
-    `stroke-linejoin="miter" stroke-miterlimit="10"/>`
-  );
+  const pts = points.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(',');
+  const style = styleAttr(stroke, STROKE_WIDTH, 'stroke-linejoin:miter;stroke-miterlimit:10;');
+  return `<polygon${attrs([['points', pts], ['fill', fill], ['style', style]])}/>`;
 }
 
 /** `VisibilityModifier#drawSquare`: translate(x+2,y+2), size-4 square. */
 function drawSquare(x: number, y: number, fill: string, stroke: string): string {
   const s = VISIBILITY_ICON_SIZE - 4;
-  return (
-    `<rect x="${x + 2}" y="${y + 2}" width="${s}" height="${s}" ` +
-    `fill="${fill}" stroke="${stroke}" stroke-width="${STROKE_WIDTH}"/>`
-  );
+  return `<rect${attrs([
+    ['x', x + 2], ['y', y + 2], ['width', s], ['height', s],
+    ['fill', fill], ['style', styleAttr(stroke, STROKE_WIDTH)],
+  ])}/>`;
 }
 
 /** `VisibilityModifier#drawCircle`: translate(x+2,y+2), size-4 diameter. */
 function drawCircle(x: number, y: number, fill: string, stroke: string): string {
   const r = (VISIBILITY_ICON_SIZE - 4) / 2;
-  return (
-    `<ellipse cx="${x + 2 + r}" cy="${y + 2 + r}" rx="${r}" ry="${r}" ` +
-    `fill="${fill}" stroke="${stroke}" stroke-width="${STROKE_WIDTH}"/>`
-  );
+  return `<ellipse${attrs([
+    ['cx', x + 2 + r], ['cy', y + 2 + r], ['rx', r], ['ry', r],
+    ['fill', fill], ['style', styleAttr(stroke, STROKE_WIDTH)],
+  ])}/>`;
 }
 
 /** `VisibilityModifier#drawDiamond`: size-2 diamond, translate(x+1,y). */
@@ -218,6 +233,10 @@ export function renderVisibilityIcon(
   // + two icon-bearing member rows).
   const inner = url !== undefined ? linkWrap(shape, url) : shape;
   return `<g data-visibility-modifier="${visibilityModifierName(icon, isField)}">${inner}</g>`;
+  // #lizard forgives -- pre-existing 6-param signature (icon/isField/
+  // originX/originY/url?/theme?), unrelated to T7b; url/theme were added by
+  // earlier G2 N21/N54 work. Collapsing to an options object is a public-
+  // API change outside this task's write-set.
 }
 
 /**
@@ -256,9 +275,16 @@ export function renderVisibilityUrlBackground(
   fill: string,
   url: UrlInfo,
 ): string {
-  const shape =
-    `<rect x="${originX}" y="${originY}" width="${VISIBILITY_ICON_SIZE * 2}" ` +
-    `height="${VISIBILITY_ICON_SIZE}" fill="${fill}" stroke="none" stroke-width="1"/>`;
+  // T7b: routed through `attrs()` (was a raw template literal). Rule 4
+  // (`core/svg.ts#strokeDecorationOf`) drops `stroke-width` when
+  // `stroke="none"` -- matches upstream's own `if (!"none".equals(stroke))`
+  // guard, so the combined `style=` carries `stroke:none;` alone, not the
+  // pre-T7b literal's redundant `stroke-width="1"`.
+  const shape = `<rect${attrs([
+    ['x', originX], ['y', originY],
+    ['width', VISIBILITY_ICON_SIZE * 2], ['height', VISIBILITY_ICON_SIZE],
+    ['fill', fill], ['style', 'stroke:none;'],
+  ])}/>`;
   return linkWrap(shape, url);
 }
 

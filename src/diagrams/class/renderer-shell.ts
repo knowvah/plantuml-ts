@@ -46,14 +46,36 @@ const DIAGRAM_TYPE_CLASS = 'CLASS';
  *  (`theme.ts#diagramBorderColor`'s own doc comment). */
 const DIAGRAM_BORDER_THICKNESS = 1;
 
+/** The outer `<g>`'s open tag, bare (`<g>`) or attributed
+ *  (`core/svg.ts#ROOT_GROUP_OPEN`, which `document-shell.ts
+ *  #withRootGroupAttributes` upgrades it to further down the pipeline).
+ *  Matched structurally rather than against a literal so a splice cannot
+ *  start silently no-op'ing the day the root attribute list changes again
+ *  -- the exact trap the bare `'<g>'` literal here fell into. Built from a
+ *  string, not a regex literal (the complexity hook miscounts `<`/`>`). */
+const ROOT_G_OPEN_RE = new RegExp('^<g(?:\\s[^>]*)?>');
+
+/** Splices `child` in as the FIRST child of `body`'s outer `<g>` --
+ *  equivalent to, but avoiding re-parsing/re-serializing, a full XML
+ *  insert. THROWS rather than returning `body` unchanged when there is no
+ *  outer `<g>`: every caller here has already guaranteed one
+ *  ({@link assembleClassShell}'s `group(fragment.body)` or `chrome.ts
+ *  #applyChrome`'s own wrap), so a miss means the guarantee broke, and a
+ *  silently-dropped background/border rect is far harder to notice than a
+ *  thrown error. */
+function spliceAsFirstChild(body: string, child: string): string {
+  const openTag = ROOT_G_OPEN_RE.exec(body)?.[0];
+  if (openTag === undefined) {
+    throw new Error('assembleClassShell: fragment body is not wrapped in an outer <g> element');
+  }
+  return openTag + child + body.slice(openTag.length);
+}
+
 /**
  * G2 N48: `fragment.documentBackgroundRect`'s full-FINAL-canvas `<rect>`,
  * spliced in as the outer `<g>`'s FIRST child -- both `group(fragment.body)`
- * (no chrome) and `applyChrome`'s own bare wrap (`bodyWrapped: true`)
- * produce a body string starting with the literal, attribute-less `<g>`
- * (`chrome.ts#applyChrome`'s `group(block.body)` one-arg call) -- splicing
- * right after that fixed 3-character prefix is equivalent to, but avoids
- * re-parsing/re-serializing, a full XML insert. `width`/`height` are
+ * (no chrome) and `applyChrome`'s own wrap (`bodyWrapped: true`) produce a
+ * body string starting with that outer `<g>` open tag. `width`/`height` are
  * already the FINAL (post-chrome, post-document-margin) canvas dims by the
  * time this runs (`index.ts#assembleSvg` calls this AFTER
  * `applyAnnotationChrome`) -- jar-verified `xalaco-64-vuzu312`: the rect
@@ -65,9 +87,8 @@ function withDocumentBackgroundRect(
   width: number,
   height: number,
 ): string {
-  const marker = '<g>';
   const bgRect = rect(0, 0, width, height, { fill, stroke: 'none', strokeWidth: 1 });
-  return body.startsWith(marker) ? marker + bgRect + body.slice(marker.length) : body;
+  return spliceAsFirstChild(body, bgRect);
 }
 
 /**
@@ -104,11 +125,10 @@ function withDiagramBorderRect(body: string, fragment: RenderFragment, colorHex:
   const expectedFinal = applyClassDocumentMargin(rawDims);
   if (expectedFinal.width !== fragment.width || expectedFinal.height !== fragment.height) return body;
   const rectDims = computeClassBorderRectDims(rawDims, DIAGRAM_BORDER_THICKNESS);
-  const marker = '<g>';
   const borderRect = rect(0, 0, rectDims.width, rectDims.height, {
     fill: 'none', stroke: colorHex, strokeWidth: DIAGRAM_BORDER_THICKNESS,
   });
-  return body.startsWith(marker) ? marker + borderRect + body.slice(marker.length) : body;
+  return spliceAsFirstChild(body, borderRect);
 }
 
 export function assembleClassShell(fragment: RenderFragment): string {

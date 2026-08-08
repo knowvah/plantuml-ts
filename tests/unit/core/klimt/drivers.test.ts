@@ -58,8 +58,8 @@ describe('DriverRectangleSvg (AC1)', () => {
       .draw(URectangle.build(15, 10).rounded(5));
 
     expect(root.getSvgString()).toContain(
-      '<rect x="20" y="5" width="15" height="10" fill="#FF0000"' +
-        ' style="stroke:#000000;stroke-width:1.5;" rx="2.5" ry="2.5"/>',
+      '<rect x="20" y="5" width="15" height="10" fill="#F00"' +
+        ' style="stroke:#000;stroke-width:1.5;" rx="2.5" ry="2.5"/>',
     );
   });
 
@@ -99,7 +99,7 @@ describe('DriverEllipseSvg (AC2 — component/babafi-51-dixi026/in.svg)', () => 
       .draw(UEllipse.build(16, 16));
 
     expect(root.getSvgString()).toContain(
-      '<ellipse cx="32.4688" cy="14" rx="8" ry="8" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>',
+      '<ellipse cx="32.469" cy="14" rx="8" ry="8" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>',
     );
   });
 
@@ -137,7 +137,7 @@ describe('DriverLineSvg (AC2 — component/babafi-51-dixi026/in.svg)', () => {
       .draw(new ULine(246.0075 - 116.92, 0));
 
     expect(root.getSvgString()).toContain(
-      '<line x1="116.92" y1="54.5" x2="246.0075" y2="54.5" style="stroke:#181818;stroke-width:1;"/>',
+      '<line x1="116.92" y1="54.5" x2="246.008" y2="54.5" style="stroke:#181818;stroke-width:1;"/>',
     );
   });
 
@@ -149,7 +149,7 @@ describe('DriverLineSvg (AC2 — component/babafi-51-dixi026/in.svg)', () => {
       .draw(new ULine(10, 0));
 
     const xml = root.getSvgString();
-    expect(xml).toContain('style="stroke:#112233;stroke-width:1;"');
+    expect(xml).toContain('style="stroke:#123;stroke-width:1;"');
     expect(xml).not.toContain('<linearGradient');
   });
 });
@@ -198,7 +198,7 @@ describe('DriverPathSvg', () => {
 
     const xml = root.getSvgString();
     // strokeWidth becomes "0" -> styleMe short-circuits, no style attr at all.
-    expect(xml).toContain('<path d="M0,0 L10,0 L10,10" fill="#112233"/>');
+    expect(xml).toContain('<path d="M0,0 L10,0 L10,10" fill="#123"/>');
   });
 
   it('a Gradient color equal in value to a Gradient backcolor still takes the general branch (never the fast path)', () => {
@@ -251,8 +251,8 @@ describe('DriverTextSvg', () => {
     root.apply(new UTranslate(10, 95.3489)).draw(UText.build('Pack1', font));
 
     expect(root.getSvgString()).toContain(
-      '<text x="10" y="95.3489" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="38.9375"' +
-        ' font-weight="700" font-family="sans-serif">Pack1</text>',
+      '<text x="10" y="95.349" fill="#000" font-size="14" textLength="38.938"' +
+        ' font-weight="700">Pack1</text>',
     );
   });
 
@@ -356,8 +356,8 @@ describe('Gradient Paint fill (AC3)', () => {
     expect(defs).toHaveLength(1);
     const id = defs[0]![1];
     expect(xml).toContain(`fill="url(#${id})"`);
-    expect(xml).toContain('<stop stop-color="#FF0000" offset="0%"/>');
-    expect(xml).toContain('<stop stop-color="#FFFF00" offset="100%"/>');
+    expect(xml).toContain('<stop stop-color="#F00" offset="0%"/>');
+    expect(xml).toContain('<stop stop-color="#FF0" offset="100%"/>');
   });
 
   it('registering the same (color1, color2, policy) twice de-dups to one def', () => {

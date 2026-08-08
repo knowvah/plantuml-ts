@@ -60,7 +60,7 @@ import type { Paint } from '../../../paint.js';
 import { isTransparentColor } from '../../../paint.js';
 import { resolveColorToSvgHex } from '../../color/HColorSet.js';
 import type { Dimension2D } from '../../shape/UEllipse.js';
-import { javaFixed4, trimTrailingZeros } from '../../../number-format.js';
+import { DEFAULT_SVG_DECIMALS, formatDecimal, formatOpacity, shortenColor } from '../../../svg-format.js';
 
 /** Upstream: `style/LengthAdjust.java` (a 3-value enum), ported as an
  * as-const object — too small for its own file. */
@@ -91,6 +91,8 @@ export interface SvgOption {
   readonly title: string | null;
   readonly desc: string | null;
   readonly interactiveBaseFilename: string | null;
+  /** Upstream: `SvgOption.getDecimal()` (ADR-2: threaded, default `DEFAULT_SVG_DECIMALS`). */
+  readonly decimal: number;
 }
 
 /** Upstream: `SvgOption.basic()` — a `SvgOption` with upstream's
@@ -108,6 +110,7 @@ export function basicSvgOption(overrides: Partial<SvgOption> = {}): SvgOption {
     title: null,
     desc: null,
     interactiveBaseFilename: null,
+    decimal: DEFAULT_SVG_DECIMALS,
     ...overrides,
   };
 }
@@ -120,10 +123,11 @@ export { seedOf } from './svg-seed.js';
  *
  * NOT ported (whole class, reported once): the second
  * `createSvgGradient(HColorLinearGradient, ColorMapper)` overload,
- * `buildLinearGradientKey`, `formatPercent`, `formatOpacity` — all four
- * support multi-stop gradients off `HColorLinearGradient`, unrepresented
- * in this port's 2-stop-only `Paint` `Gradient`. `fillMe`'s opacity
- * formatting uses a literal `toFixed(5)`, bypassing `formatOpacity` too.
+ * `buildLinearGradientKey` — both support multi-stop gradients off
+ * `HColorLinearGradient`, unrepresented in this port's 2-stop-only `Paint`
+ * `Gradient`. Upstream's local `formatPercent`/`formatOpacity` live in
+ * `svg-format.ts` (T1, ADR-3) and are imported here; `fillMe`'s opacity now
+ * routes through `formatOpacity` instead of the old literal `toFixed(5)`.
  */
 export class SvgGraphicsCore {
   protected readonly document: XmlDocument;
@@ -169,6 +173,13 @@ export class SvgGraphicsCore {
     // linear gradient definitions.
     this.defs = this.simpleElement('defs');
     this.gRoot = this.simpleElement('g');
+    // Text attrs hoisted to root `<g>` (rule 3 root half; per-`<text>` suppression is T4's).
+    this.gRoot.setAttribute('font-family', 'sans-serif');
+    if (option.lengthAdjust === LengthAdjust.SPACING) {
+      this.gRoot.setAttribute('lengthAdjust', 'spacing');
+    } else if (option.lengthAdjust === LengthAdjust.SPACING_AND_GLYPHS) {
+      this.gRoot.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+    }
     this.strokeWidth = this.format(1);
     this.filterUid = 'b' + getSeed(seed);
     this.shadowId = 'f' + getSeed(seed);
@@ -309,23 +320,28 @@ export class SvgGraphicsCore {
     return elt;
   }
 
+  /** @see .../klimt/drawing/svg/SvgGraphics.java#styleMe */
   protected styleMe(elt: XmlNode, suppStyle: string | null): void {
     if (this.strokeWidth === '0') return;
 
-    let style = `stroke:${this.stroke};stroke-width:${this.strokeWidth};`;
-    if (this.strokeDasharray !== null) style += `stroke-dasharray:${this.strokeDasharray};`;
+    let style = `stroke:${shortenColor(this.stroke)};`;
+    if (this.stroke !== 'none') {
+      style += `stroke-width:${this.strokeWidth};`;
+      if (this.strokeDasharray !== null) style += `stroke-dasharray:${this.strokeDasharray};`;
+    }
     if (suppStyle !== null) style += suppStyle;
     elt.setAttribute('style', style);
   }
 
+  /** @see .../klimt/drawing/svg/SvgGraphics.java#fillMe */
   protected fillMe(elt: XmlNode): void {
     const alpha = /^#[0-9A-Fa-f]{8}$/.exec(this.fillColor);
     if (alpha !== null) {
-      elt.setAttribute('fill', this.fillColor.slice(0, 7));
+      elt.setAttribute('fill', shortenColor(this.fillColor.slice(0, 7)));
       const opacity = parseInt(this.fillColor.slice(7), 16) / 255;
-      elt.setAttribute('fill-opacity', opacity.toFixed(5));
+      elt.setAttribute('fill-opacity', formatOpacity(opacity, this.option.decimal));
     } else {
-      elt.setAttribute('fill', this.fillColor);
+      elt.setAttribute('fill', shortenColor(this.fillColor));
     }
   }
 
@@ -406,10 +422,10 @@ export class SvgGraphicsCore {
     elt.setAttribute('id', id);
 
     const stop1 = this.document.createElement('stop');
-    stop1.setAttribute('stop-color', color1);
+    stop1.setAttribute('stop-color', shortenColor(color1));
     stop1.setAttribute('offset', '0%');
     const stop2 = this.document.createElement('stop');
-    stop2.setAttribute('stop-color', color2);
+    stop2.setAttribute('stop-color', shortenColor(color2));
     stop2.setAttribute('offset', '100%');
 
     elt.appendChild(stop1);
@@ -419,17 +435,18 @@ export class SvgGraphicsCore {
   }
 
   /**
-   * format — the D4′ number-formatting rule: `%.4f` (`Locale.US`, HALF_UP
-   * on the shortest round-trip decimal — see `javaFixed4`'s doc comment),
-   * trailing zeros stripped, decimal point dropped if nothing follows
-   * (`10.5`->`"10.5"`; `10.0`->`"10"`). Verified against
-   * `test-results/dot-cache/component/sacuso-94-gugi476/in.svg`.
-   * `x === 0` short-circuits to `"0"` (true for `-0` too).
+   * format — the D4′ number-formatting rule: `%.<decimal>f` (`Locale.US`,
+   * HALF_UP on the shortest round-trip decimal — see `svg-format.ts`'s
+   * `formatDecimal` doc comment), trailing zeros stripped, decimal point
+   * dropped if nothing follows (`10.5`->`"10.5"`; `10.0`->`"10"`). Verified
+   * against `test-results/dot-cache/component/sacuso-94-gugi476/in.svg`.
+   * `x === 0` short-circuits to `"0"` (true for `-0` too). Scaling by
+   * `option.scale` happens here, not in `formatDecimal` — T1's shared
+   * module deliberately never applies a scale factor itself.
+   * @see .../klimt/drawing/svg/SvgGraphics.java#format
    */
   protected format(xx: number): string {
-    const x = xx * this.option.scale;
-    if (x === 0) return '0';
-    return trimTrailingZeros(javaFixed4(x));
+    return formatDecimal(xx * this.option.scale, this.option.decimal);
   }
 
   protected formatBoolean(x: number): string {

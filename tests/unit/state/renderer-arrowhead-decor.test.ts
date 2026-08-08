@@ -42,7 +42,7 @@ describe('buildCircleEndMarkup', () => {
     ]);
     const svg = buildCircleEndMarkup(t, ARROW_COLOR, BACKGROUND);
     expect(svg).toContain('cx="32"');
-    expect(svg).toContain('cy="85.51594541319542"');
+    expect(svg).toContain('cy="85.516"');
     expect(svg).toContain('rx="5"');
     expect(svg).toContain('ry="5"');
     expect(svg).toContain(`fill="${BACKGROUND}"`);
@@ -62,17 +62,17 @@ describe('buildCrossStartMarkup', () => {
       { x: 74.7734375, y: 90.056396484375 },
     ]);
     const svg = buildCrossStartMarkup(t, ARROW_COLOR, BACKGROUND);
-    expect(svg).toContain('cx="57.2777099609375"');
-    expect(svg).toContain('cy="94.927001953125"');
+    expect(svg).toContain('cx="57.278"');
+    expect(svg).toContain('cy="94.927"');
     expect(svg).toContain('rx="7"');
     expect(svg).toContain('ry="7"');
     expect(svg).toContain(`fill="${BACKGROUND}"`);
     // Two diagonal lines, stroke-width 1 (NOT the ellipse's own 1.5).
     expect((svg.match(/<line /g) ?? []).length).toBe(2);
-    expect(svg).toContain('x1="62.22745742924333"');
-    expect(svg).toContain('y1="99.87674942143083"');
-    expect(svg).toContain('x2="52.32796249263167"');
-    expect(svg).toContain('y2="89.97725448481917"');
+    expect(svg).toContain('x1="62.227"');
+    expect(svg).toContain('y1="99.877"');
+    expect(svg).toContain('x2="52.328"');
+    expect(svg).toContain('y2="89.977"');
     expect(svg).toContain('stroke-width="1"');
   });
 

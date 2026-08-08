@@ -4,6 +4,7 @@
  * out of `renderer.ts` (line cap); self-contained leaf consumed by renderer.
  */
 
+import { splinePathD } from '../../core/svg-path-builder.js';
 import type { TransitionGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
@@ -44,25 +45,7 @@ const ARROW_LABEL_FONT_SIZE = 13;
  * outside the real layout pipeline (unit tests).
  */
 export function buildPathD(points: ReadonlyArray<{ x: number; y: number }>): string {
-  if (points.length === 0) return '';
-  const [first, ...rest] = points;
-  if (first === undefined) return '';
-  const start = `M${first.x},${first.y}`;
-
-  const isBezierSpline = points.length >= 4 && (points.length - 1) % 3 === 0;
-  if (isBezierSpline) {
-    const segments: string[] = [];
-    for (let i = 1; i < points.length; i += 3) {
-      const c1 = points[i]!;
-      const c2 = points[i + 1]!;
-      const end = points[i + 2]!;
-      segments.push(`C${c1.x},${c1.y} ${c2.x},${c2.y} ${end.x},${end.y}`);
-    }
-    return [start, ...segments].join(' ');
-  }
-
-  const segments = rest.map((p) => `L${p.x},${p.y}`);
-  return [start, ...segments].join(' ');
+  return splinePathD(points);
 }
 
 /** `Link#idCommentForSvg`-ish `<path id="...">` value — jar names the

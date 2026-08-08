@@ -8,6 +8,46 @@ grouped by mission/PR until a first tagged release exists.
 
 ## [Unreleased]
 
+### Changed — SVG output is smaller, and its bytes differ (BREAKING for byte-comparers)
+
+**What changed:** every SVG this library emits is now smaller. Six emission
+rules were ported from upstream's two "⚗️ reduce SVG output size" commits
+(`ba68279df92`, `4f3a0dcc63b`):
+
+1. Coordinates carry **3 decimals**, not 4 (`77.8125` → `77.813`).
+2. Six-digit hex colors collapse to three when all pairs repeat
+   (`#FF0000` → `#F00`). `#181818` and `#ADD1B2` are unchanged.
+3. `font-family="sans-serif"` and `lengthAdjust` are hoisted onto the root
+   `<g>` and inherited; a `<text>` carries `font-family` only when it
+   differs, and no longer carries `lengthAdjust` at all.
+4. `stroke-width` and `stroke-dasharray` are omitted when `stroke` is
+   `none`.
+5. `textLength` is omitted for single-character text.
+6. Opacity and percentage values trim trailing zeros.
+
+Measured across the 446 pinned conformance fixtures: **1,477,458 →
+1,368,743 bytes, a 7.4% reduction.**
+
+**Why it is breaking:** no API changed — same functions, same signatures —
+but the bytes did. **If you byte-compare or snapshot this library's SVG
+output, re-baseline your snapshots.** Rendered appearance is unchanged; the
+output now tracks upstream's more closely than before.
+
+**Also fixed along the way**, each a case where our output disagreed with
+the jar for reasons the size-reduction work exposed:
+
+- Numeric formatting now happens once, at emission, instead of being
+  pre-rounded by 45 call sites in the class and state engines. That removes
+  a double-rounding class of bug where geometry rounded at 4 decimals then
+  again at 3 could land a digit off.
+- Colors are shortened at every emission site, including inline `style=`
+  strings, gradient `<stop>` values, arrow markers and visibility icons —
+  several of which previously emitted the long form while an identical
+  color two elements away emitted the short one.
+- `skinparam monochrome true|reverse` no longer skips shortened colors. Its
+  post-pass matched 6-digit hex only, so a `#FFF` kept its original color
+  while its neighbours inverted.
+
 ### Changed — pipeline order: `@start…@end` is split BEFORE the preprocessor (SI7)
 
 **What changed:** `render` / `renderSync` / `renderAll` now split the document

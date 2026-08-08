@@ -68,9 +68,9 @@ describe('dotPlugin.layoutSync() — <style> block overrides', () => {
   it('node BorderColor applies without error and produces SVG', () => {
     const svg = renderFull(makeSource(
       ['@startdot', 'digraph { a }', '@enddot'],
-      ['node { BorderColor: #CC0000 }'],
+      ['node { BorderColor: #C00 }'],
     ));
-    expect(svg).toContain('#CC0000');
+    expect(svg).toContain('#C00');
   });
 
   it('diagram BackgroundColor applies without error and produces SVG', () => {
@@ -85,27 +85,27 @@ describe('dotPlugin.layoutSync() — <style> block overrides', () => {
   it('edge LineColor applies without error and produces SVG', () => {
     const svg = renderFull(makeSource(
       ['@startdot', 'digraph { a -> b }', '@enddot'],
-      ['edge { LineColor: #00AA00 }'],
+      ['edge { LineColor: #0A0 }'],
     ));
     expect(svg).toContain('<svg');
-    expect(svg).toContain('#00AA00');
+    expect(svg).toContain('#0A0');
   });
 
   it('multiple style rules in one block all apply', () => {
     const svg = renderFull(makeSource(
       ['@startdot', 'digraph { a -> b }', '@enddot'],
-      ['node { BackgroundColor: #FFEECC }\nedge { LineColor: #0088FF }'],
+      ['node { BackgroundColor: #FEC }\nedge { LineColor: #08F }'],
     ));
-    expect(svg).toContain('#FFEECC');
-    expect(svg).toContain('#0088FF');
+    expect(svg).toContain('#FEC');
+    expect(svg).toContain('#08F');
   });
 
   it('diagram FontColor applies to SVG text', () => {
     const svg = renderFull(makeSource(
       ['@startdot', 'digraph { a }', '@enddot'],
-      ['diagram { FontColor: #AA00AA }'],
+      ['diagram { FontColor: #A0A }'],
     ));
-    expect(svg).toContain('#AA00AA');
+    expect(svg).toContain('#A0A');
   });
 
   it('diagram FontName applies without error', () => {
@@ -125,9 +125,9 @@ describe('dotPlugin.layoutSync() — <style> block overrides', () => {
   it('node FontColor applies to SVG text', () => {
     const svg = renderFull(makeSource(
       ['@startdot', 'digraph { a }', '@enddot'],
-      ['node { FontColor: #005500 }'],
+      ['node { FontColor: #050 }'],
     ));
-    expect(svg).toContain('#005500');
+    expect(svg).toContain('#050');
   });
 
   it('node FontSize and FontName apply without error', () => {

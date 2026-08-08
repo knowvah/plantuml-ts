@@ -256,7 +256,7 @@ describe('renderActivity — action node with custom color', () => {
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     // G1c: hex colors canonicalize to uppercase (HColorSet.java's %02X format).
-    expect(result).toContain('fill="#FF0000"');
+    expect(result).toContain('fill="#F00"');
   });
 });
 
@@ -403,7 +403,7 @@ describe('renderActivity — edge with colored label pill', () => {
     });
     const result = assembleSvg(renderActivity(geo, theme));
     // G1c: named colors resolve to their canonical jar hex.
-    expect(result).toContain('fill="#FF0000"');
+    expect(result).toContain('fill="#F00"');
     expect(result).toContain('<rect');
   });
 

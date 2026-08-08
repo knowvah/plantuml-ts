@@ -42,7 +42,6 @@ import type { Classifier } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { splitStereotypeLabels, measureStereoLabelWidths } from './class-stereotype.js';
 
 // ---------------------------------------------------------------------------
@@ -205,7 +204,7 @@ function buildUnderlinedNameRows(
     return [
       {
         text: display, y, indent,
-        width: javaRound4(measurer.measure(display, nameFontSpec).width),
+        width: measurer.measure(display, nameFontSpec).width,
         underline: true,
         ...fontSizeField,
       },
@@ -216,8 +215,8 @@ function buildUnderlinedNameRows(
   const nameRawWidth = measurer.measure(namePart, nameFontSpec).width;
   const typeRawWidth = measurer.measure(typePart, nameFontSpec).width;
   return [
-    { text: namePart, y, indent, width: javaRound4(nameRawWidth), underline: true, ...fontSizeField },
-    { text: typePart, y, indent: indent + nameRawWidth, width: javaRound4(typeRawWidth), ...fontSizeField },
+    { text: namePart, y, indent, width: nameRawWidth, underline: true, ...fontSizeField },
+    { text: typePart, y, indent: indent + nameRawWidth, width: typeRawWidth, ...fontSizeField },
   ];
 }
 
@@ -348,7 +347,7 @@ export function headerRows(
   const { boxWidth, namePadding, underlineName = false, nameFontSizeOverride } = options;
   const nameFontSpec = { family: theme.fontFamily, size: nameFontSizeOverride ?? theme.fontSize };
   const { rows, stereoHeight } = buildStereoHeaderRows(classifier, theme, measurer, boxWidth);
-  const nameWidth = javaRound4(measurer.measure(classifier.display, nameFontSpec).width);
+  const nameWidth = measurer.measure(classifier.display, nameFontSpec).width;
   const nameBaseline = nameFontSpec.size - measurer.getDescent(nameFontSpec, classifier.display);
   const nameY = stereoHeight + namePadding + nameBaseline;
   const nameIndent = (boxWidth - nameWidth) / 2;

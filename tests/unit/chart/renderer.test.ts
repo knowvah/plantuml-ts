@@ -318,8 +318,8 @@ describe('renderChart — plot area background', () => {
   it('renders a white plot area background rect', () => {
     const geo = makeMinimalGeo();
     const svg = assembleSvg(renderChart(geo, theme));
-    // Plot area background uses fill="#FFFFFF"
-    expect(svg).toContain('fill="#FFFFFF"');
+    // Plot area background uses fill="#FFF"
+    expect(svg).toContain('fill="#FFF"');
   });
 });
 

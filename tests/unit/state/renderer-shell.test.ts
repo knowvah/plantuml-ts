@@ -50,7 +50,7 @@ function makeGeo(overrides: Partial<StateGeometry> = {}): StateGeometry {
 }
 
 describe('renderState — explicit background rect for non-default background', () => {
-  it('draws NO explicit background <rect> for the default #FFFFFF background', () => {
+  it('draws NO explicit background <rect> for the default #FFF background', () => {
     const node = makeNode({ kind: 'normal', display: 'S' });
     const geo = makeGeo({ states: [node] });
     const svg = assembleSvg(renderState(geo, defaultTheme));
@@ -70,7 +70,7 @@ describe('renderState — explicit background rect for non-default background', 
     // renderer-shell.ts's own doc comment) makes both forms byte-equivalent
     // for the conformance comparator.
     expect(svg).toContain(
-      '<rect x="0" y="0" width="155" height="121" fill="#808080" stroke="none" stroke-width="1"/>',
+      '<rect x="0" y="0" width="155" height="121" fill="#808080" stroke="none"/>',
     );
   });
 

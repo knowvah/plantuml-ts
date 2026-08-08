@@ -22,7 +22,7 @@ const stubMeasurer: StringMeasurer = {
 };
 const stubFont: FontSpec = { family: 'sans-serif', size: 14 };
 const stubTheme = {
-  colors: { text: '#000000' },
+  colors: { text: '#000' },
   fontFamily: 'sans-serif',
   fontSize: 14,
 } as unknown as Theme;
@@ -182,31 +182,31 @@ describe('measureLatex', () => {
 
 describe('renderLatexMathML', () => {
   it('returns a string containing <foreignObject', () => {
-    const result = renderLatexMathML('x^2', 0, 0, 120, 40, '#000000');
+    const result = renderLatexMathML('x^2', 0, 0, 120, 40, '#000');
     expect(result).toContain('<foreignObject');
   });
 
   it('includes width and height attributes on the foreignObject', () => {
-    const result = renderLatexMathML('x^2', 10, 20, 150, 60, '#000000');
+    const result = renderLatexMathML('x^2', 10, 20, 150, 60, '#000');
     expect(result).toContain('width="150"');
     expect(result).toContain('height="60"');
   });
 
   it('includes x and y attributes on the foreignObject', () => {
-    const result = renderLatexMathML('x^2', 10, 20, 150, 60, '#000000');
+    const result = renderLatexMathML('x^2', 10, 20, 150, 60, '#000');
     expect(result).toContain('x="10"');
     expect(result).toContain('y="20"');
   });
 
   it('returns a string containing <math (KaTeX MathML output)', () => {
-    const result = renderLatexMathML('\\frac{a}{b}', 0, 0, 120, 60, '#000000');
+    const result = renderLatexMathML('\\frac{a}{b}', 0, 0, 120, 60, '#000');
     expect(result).toContain('<math');
   });
 
   it('does not throw for malformed LaTeX (throwOnError: false)', () => {
     // \badcommand is not a valid LaTeX command
     expect(() =>
-      renderLatexMathML('\\badcommand{x}', 0, 0, 120, 40, '#000000'),
+      renderLatexMathML('\\badcommand{x}', 0, 0, 120, 40, '#000'),
     ).not.toThrow();
   });
 
@@ -224,14 +224,14 @@ describe('renderLatexMathML', () => {
       0,
       120,
       40,
-      '#000000',
+      '#000',
     );
-    const plain = renderLatexMathML('x^2', 0, 0, 120, 40, '#000000');
+    const plain = renderLatexMathML('x^2', 0, 0, 120, 40, '#000');
     expect(wrapped).toBe(plain);
   });
 
   it('includes the XHTML namespace wrapper div', () => {
-    const result = renderLatexMathML('x', 0, 0, 120, 40, '#000000');
+    const result = renderLatexMathML('x', 0, 0, 120, 40, '#000');
     expect(result).toContain('xmlns="http://www.w3.org/1999/xhtml"');
   });
 });

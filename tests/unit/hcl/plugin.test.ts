@@ -52,7 +52,7 @@ describe('hclPlugin', () => {
     ].join('\n');
     const svg = renderSync(src);
     // G1c: hex colors canonicalize to uppercase.
-    expect(svg).toContain('#FFCC00');
+    expect(svg).toContain('#FC0');
   });
 
   it('applies hcldiagram.document background color', () => {
@@ -61,7 +61,7 @@ describe('hclPlugin', () => {
       '<style>',
       'hclDiagram {',
       '  document {',
-      '    BackgroundColor "#aabbcc"',
+      '    BackgroundColor "#abc"',
       '  }',
       '}',
       '</style>',
@@ -69,7 +69,7 @@ describe('hclPlugin', () => {
       '@endhcl',
     ].join('\n');
     const svg = renderSync(src);
-    expect(svg).toContain('#aabbcc');
+    expect(svg).toContain('#abc');
   });
 
   it('applies all hcldiagram.node style properties', () => {
@@ -78,7 +78,7 @@ describe('hclPlugin', () => {
       '<style>',
       'hclDiagram {',
       '  node {',
-      '    BackgroundColor "#aabbcc"',
+      '    BackgroundColor "#abc"',
       '    LineColor "#ff0000"',
       '    LineThickness 2',
       '    RoundCorner 5',
@@ -106,7 +106,7 @@ describe('hclPlugin', () => {
       '<style>',
       'hclDiagram {',
       '  element {',
-      '    BackgroundColor "#aabbcc"',
+      '    BackgroundColor "#abc"',
       '  }',
       '}',
       '</style>',
@@ -218,7 +218,7 @@ describe('hclPlugin', () => {
       'hclDiagram {',
       '  node {',
       '    highlight {',
-      '      BackgroundColor "#aabbcc"',
+      '      BackgroundColor "#abc"',
       '      FontColor "#123456"',
       '      FontStyle bold',
       '    }',

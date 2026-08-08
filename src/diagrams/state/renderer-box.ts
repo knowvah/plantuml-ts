@@ -33,12 +33,12 @@
  * @see ~/git/plantuml/.../svek/image/EntityImageState.java
  * @see ~/git/plantuml/.../svek/image/EntityImageStateCommon.java (MARGIN/MARGIN_LINE=5)
  */
+import { lineTo, moveTo } from '../../core/svg-path-builder.js';
 import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line, text, path } from '../../core/svg.js';
 import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateFontSize, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
 import { stateShadowFilterUrl } from './state-shadow.js';
-import { javaRound4 } from '../../core/number-format.js';
 
 const STATE_BOX_RX = 12.5;
 const MARGIN = 5;
@@ -73,7 +73,7 @@ function renderTextLines(
       fontFamily: theme.fontFamily,
       fontSize,
       lengthAdjust: 'spacing',
-      textLength: javaRound4(ln.width),
+      textLength: ln.width,
     });
   });
   return out;
@@ -172,8 +172,12 @@ export function renderSdlReceive(node: StateNodeGeo, theme: Theme): string {
   const x0 = node.x;
   const y0 = node.y;
   const d =
-    `M${x0 + textWidth},${y0} L${x0 + textWidth},${y0 + textHeight - cornerSize} ` +
-    `L${x0 + textWidth - cornerSize},${y0 + textHeight} L${x0},${y0 + textHeight}`;
+    [
+      moveTo(x0 + textWidth, y0),
+      lineTo(x0 + textWidth, y0 + textHeight - cornerSize),
+      lineTo(x0 + textWidth - cornerSize, y0 + textHeight),
+      lineTo(x0, y0 + textHeight),
+    ].join(' ');
   const notch = path(d, { stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH });
 
   // mission G4 S16: `skinparam stateFontSize<<X>>` -- see
@@ -189,7 +193,7 @@ export function renderSdlReceive(node: StateNodeGeo, theme: Theme): string {
       fontFamily: theme.fontFamily,
       fontSize,
       lengthAdjust: 'spacing',
-      textLength: javaRound4(node.headerLines?.[0]?.width ?? 0),
+      textLength: node.headerLines?.[0]?.width ?? 0,
     },
   );
 

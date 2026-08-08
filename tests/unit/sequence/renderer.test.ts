@@ -1,3 +1,4 @@
+import { shortenColor } from '../../../src/core/svg-format.js';
 import { describe, it, expect } from 'vitest';
 import type {
   SequenceGeometry,
@@ -61,7 +62,7 @@ describe('renderSequence — participant boxes', () => {
 
   it('uses theme background color for participant fill', () => {
     const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme));
-    expect(svg).toContain(`fill="${defaultTheme.colors.background}"`);
+    expect(svg).toContain(`fill="${shortenColor(defaultTheme.colors.background)}"`);
   });
 
   it('emits participant display text', () => {
@@ -180,11 +181,11 @@ describe('renderSequence — activations', () => {
       lifelineX: 80,
       y: 50,
       height: 60,
-      color: '#FF0000',
+      color: '#F00',
     };
     const geo = makeGeo({ events: [activation] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('#FF0000');
+    expect(svg).toContain('#F00');
   });
 });
 
@@ -304,8 +305,8 @@ describe('renderSequence — theme colors', () => {
     const svgDefault = assembleSvg(renderSequence(geo, defaultTheme));
     const svgDark = assembleSvg(renderSequence(geo, darkTheme));
     expect(defaultTheme.colors.background).not.toBe(darkTheme.colors.background);
-    expect(svgDefault).toContain(defaultTheme.colors.background);
-    expect(svgDark).toContain(darkTheme.colors.background);
+    expect(svgDefault).toContain(shortenColor(defaultTheme.colors.background));
+    expect(svgDark).toContain(shortenColor(darkTheme.colors.background));
   });
 });
 
@@ -549,12 +550,12 @@ describe('renderSequence — box backgrounds', () => {
     expect(svg).toContain('<rect');
   });
 
-  it('box with empty color falls back to #EEEEEE', () => {
+  it('box with empty color falls back to #EEE', () => {
     const geo = makeGeo({
       boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '' }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('#EEEEEE');
+    expect(svg).toContain('#EEE');
   });
 
   it('box with label renders a text element', () => {

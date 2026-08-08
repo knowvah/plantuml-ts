@@ -18,6 +18,7 @@
  * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-2, T1)
  */
 
+import { ROOT_GROUP_OPEN } from '../svg.js';
 import { UGraphicSvg } from './drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from './drawing/svg/svg-graphics.js';
 import { seedOf } from './drawing/svg/svg-seed.js';
@@ -57,6 +58,52 @@ export interface ShellFragment {
   readonly height: number;
   readonly background?: string;
   readonly extraDefs?: string;
+}
+
+/**
+ * The content `<g>`'s open tag, bare (`<g>`) OR carrying attributes
+ * (`<g font-family="sans-serif" lengthAdjust="spacing">`, which is what
+ * `SvgGraphicsCore#getG` emits since the SVG-size-reduction port hoisted
+ * rule 3's text attributes onto `gRoot`). Anchored at the start and
+ * requiring whitespace before any attribute list, so it still rejects
+ * everything that is NOT a `<g>` open tag — a `<rect .../>`, a stray text
+ * node, a `<g2>`-like element name, or a body that lost its wrapper
+ * entirely. Built from a string, not a regex literal: the complexity hook
+ * miscounts `<`/`>` inside literals (see `svg.ts#GRADIENT_DEF_RE`).
+ */
+const CONTENT_G_OPEN_RE = new RegExp('^<g(?:\\s[^>]*)?>');
+
+/** The matching close tag {@link unwrapContentG} strips. */
+const CONTENT_G_CLOSE = '</g>';
+
+/** The attribute-less `<g>` open tag `core/svg.ts#group` emits. */
+const BARE_G_OPEN = '<g>';
+
+/**
+ * Guarantees the single top-level `<g>` a document shell is handed carries
+ * the root text attributes the jar puts there — `core/svg.ts
+ * #ROOT_GROUP_OPEN`, THE one definition of that markup (see its own doc
+ * comment for the jar evidence).
+ *
+ * The three klimt-shaped shells (`class/renderer-shell.ts
+ * #assembleClassShell`, `state/renderer-shell.ts#assembleStateShell`,
+ * `description/renderer.ts#assembleKlimtShell`) all hand
+ * {@link assembleDocumentShell} a body wrapped by `core/svg.ts#group` —
+ * either their own `group(fragment.body)` or `annotations/chrome.ts
+ * #applyChrome`'s (`bodyWrapped: true`), both a bare `<g>`. Upgrading it
+ * HERE, once, is what keeps that markup from being restated per shell.
+ *
+ * An ALREADY-attributed root `<g>` is left as-is (its caller has said what
+ * it wants on the root group). A body with no `<g>` wrapper at all is also
+ * left as-is rather than rejected: that is the pre-existing annotated-but-
+ * not-decorated description case (`index.ts#applyAnnotationChrome` ->
+ * `applyChrome` returns the unwrapped fragment verbatim for a mainframe-
+ * only diagram, D9), whose missing wrapper predates this change.
+ */
+function withRootGroupAttributes(body: string): string {
+  const openTag = CONTENT_G_OPEN_RE.exec(body)?.[0];
+  if (openTag !== BARE_G_OPEN || !body.endsWith(CONTENT_G_CLOSE)) return body;
+  return ROOT_GROUP_OPEN + body.slice(openTag.length);
 }
 
 /**
@@ -110,7 +157,7 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType: stri
     '>' +
     '<?plantuml ' + VERSION_PLACEHOLDER + '?>' +
     `<defs>${extraDefs}</defs>` +
-    fragment.body +
+    withRootGroupAttributes(fragment.body) +
     '</svg>'
   );
 }
@@ -191,17 +238,24 @@ export function extractBody(svgWithoutDefs: string): string {
  * Strips klimt's own leading `<?plantuml ...?>` processing instruction
  * (`SvgGraphicsCore#getRootNode`, always the first child of `<svg>`) and
  * its single content `<g>...</g>` wrapper (`SvgGraphicsCore#getG`'s
- * `gRoot`, always the bare three-character open tag `<g>`), leaving JUST
- * the flat markup {@link extractBody} bracketed with them.
+ * `gRoot`), leaving JUST the flat markup {@link extractBody} bracketed
+ * with them.
+ *
+ * `gRoot`'s open tag carries rule 3's hoisted `font-family`/`lengthAdjust`
+ * since the SVG-size-reduction port, so this accepts an ATTRIBUTED open tag
+ * as well as a bare one ({@link CONTENT_G_OPEN_RE}) — but nothing looser:
+ * a body that is not `<g …>`-wrapped still throws, because a malformed
+ * klimt document that slips through here fails far downstream instead.
  *
  * @see svg-graphics-core.ts#getRootNode @see svg-graphics-core.ts#getG
  */
 export function unwrapContentG(bodyWithPiAndG: string): string {
   const withoutPi = bodyWithPiAndG.replace(/^<\?plantuml[^>]*\?>/, '');
-  if (!withoutPi.startsWith('<g>') || !withoutPi.endsWith('</g>')) {
-    throw new Error('unwrapContentG: malformed klimt SVG output (missing bare content <g> wrapper)');
+  const openTag = CONTENT_G_OPEN_RE.exec(withoutPi)?.[0];
+  if (openTag === undefined || !withoutPi.endsWith(CONTENT_G_CLOSE)) {
+    throw new Error('unwrapContentG: malformed klimt SVG output (missing content <g> wrapper)');
   }
-  return withoutPi.slice(3, -4);
+  return withoutPi.slice(openTag.length, -CONTENT_G_CLOSE.length);
 }
 
 /**

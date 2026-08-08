@@ -14,7 +14,6 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { measureUsecaseOrActorLeaf } from '../description/leaf-sizing.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE } from './class-lollipop.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 
 /**
@@ -89,7 +88,7 @@ export function measureLollipop(
   fontSpec: { family: string; size: number },
   measurer: StringMeasurer,
 ): MeasuredClassifier {
-  const textWidth = javaRound4(measurer.measure(classifier.display, fontSpec).width);
+  const textWidth = measurer.measure(classifier.display, fontSpec).width;
   const baselineOffset = fontSpec.size - measurer.getDescent(fontSpec, '');
   const row = {
     text: classifier.display,

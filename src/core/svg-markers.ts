@@ -8,6 +8,8 @@
  * `core/svg.js` are unaffected.
  */
 
+import { shortenColor } from './svg-format.js';
+
 // ---------------------------------------------------------------------------
 // Arrow type
 // ---------------------------------------------------------------------------
@@ -76,15 +78,15 @@ const MARKER_SPECS: Record<ArrowType, MarkerSpec> = {
   sync: { w: 10, h: 7, refX: 9, refY: 3.5, orient: 'auto', body: () => '<polygon points="0 0, 10 3.5, 0 7" fill="#000000"/>' },
   reply: { w: 10, h: 7, refX: 9, refY: 3.5, orient: 'auto', body: () => '<polygon points="0 0, 10 3.5, 0 7" fill="#000000"/>' },
   'sync-back': { w: 10, h: 7, refX: 9, refY: 3.5, orient: 'auto-start-reverse', body: () => '<polygon points="0 0, 10 3.5, 0 7" fill="#000000"/>' },
-  async: { w: 10, h: 7, refX: 9, refY: 3.5, orient: 'auto', body: () => '<polyline points="0 0, 9 3.5, 0 7" fill="none" stroke="#000000" stroke-width="1.5"/>' },
-  replyAsync: { w: 10, h: 7, refX: 9, refY: 3.5, orient: 'auto', body: () => '<polyline points="0 0, 9 3.5, 0 7" fill="none" stroke="#000000" stroke-width="1.5"/>' },
-  dependency: { w: 10, h: 7, refX: 9, refY: 3.5, orient: 'auto', body: () => '<polyline points="0 0, 9 3.5, 0 7" fill="none" stroke="#000000" stroke-width="1.5"/>' },
-  extension: { w: 12, h: 10, refX: 11, refY: 5, orient: 'auto', body: (bg) => `<polygon points="0 0, 11 5, 0 10" fill="${bg}" stroke="#000000" stroke-width="1.5"/>` },
-  implementation: { w: 12, h: 10, refX: 11, refY: 5, orient: 'auto', body: (bg) => `<polygon points="0 0, 11 5, 0 10" fill="${bg}" stroke="#000000" stroke-width="1.5"/>` },
+  async: { w: 10, h: 7, refX: 9, refY: 3.5, orient: 'auto', body: () => '<polyline points="0 0, 9 3.5, 0 7" fill="none" stroke="#000" stroke-width="1.5"/>' },
+  replyAsync: { w: 10, h: 7, refX: 9, refY: 3.5, orient: 'auto', body: () => '<polyline points="0 0, 9 3.5, 0 7" fill="none" stroke="#000" stroke-width="1.5"/>' },
+  dependency: { w: 10, h: 7, refX: 9, refY: 3.5, orient: 'auto', body: () => '<polyline points="0 0, 9 3.5, 0 7" fill="none" stroke="#000" stroke-width="1.5"/>' },
+  extension: { w: 12, h: 10, refX: 11, refY: 5, orient: 'auto', body: (bg) => `<polygon points="0 0, 11 5, 0 10" fill="${shortenColor(bg)}" stroke="#000" stroke-width="1.5"/>` },
+  implementation: { w: 12, h: 10, refX: 11, refY: 5, orient: 'auto', body: (bg) => `<polygon points="0 0, 11 5, 0 10" fill="${shortenColor(bg)}" stroke="#000" stroke-width="1.5"/>` },
   composition: { w: 12, h: 8, refX: 11, refY: 4, orient: 'auto', body: () => '<polygon points="0 4, 5 0, 11 4, 5 8" fill="#000000"/>' },
-  aggregation: { w: 12, h: 8, refX: 11, refY: 4, orient: 'auto', body: (bg) => `<polygon points="0 4, 5 0, 11 4, 5 8" fill="${bg}" stroke="#000000" stroke-width="1.5"/>` },
+  aggregation: { w: 12, h: 8, refX: 11, refY: 4, orient: 'auto', body: (bg) => `<polygon points="0 4, 5 0, 11 4, 5 8" fill="${shortenColor(bg)}" stroke="#000" stroke-width="1.5"/>` },
   lost: { w: 8, h: 8, refX: 4, refY: 4, orient: 'auto', body: () => '<circle cx="4" cy="4" r="3" fill="#000000"/>' },
-  found: { w: 8, h: 8, refX: 4, refY: 4, orient: 'auto', body: () => '<circle cx="4" cy="4" r="3" fill="none" stroke="#000000" stroke-width="1.5"/>' },
+  found: { w: 8, h: 8, refX: 4, refY: 4, orient: 'auto', body: () => '<circle cx="4" cy="4" r="3" fill="none" stroke="#000" stroke-width="1.5"/>' },
 };
 
 /**

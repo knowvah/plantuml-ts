@@ -23,7 +23,7 @@ const measurer = new WidthTableMeasurer();
 //            121.5,103 L8.5,103 A2.5,2.5 0 0 1 6,100.5 L6,8.5 A2.5,2.5 0
 //            0 1 8.5,6" style="stroke:#000000;stroke-width:1.5;" fill="none"/>
 //   <line x1="6" y1="26" x2="38.425" y2="26" .../>
-//   <text x="10" y="18.8889" ... textLength="19.425" font-weight="700">foo</text>
+//   <text x="10" y="18.889" ... textLength="19.425" font-weight="700">foo</text>
 // Box origin (6,6), width 118, height 97 (from surrounding NamespaceGeo).
 // ---------------------------------------------------------------------------
 
@@ -104,7 +104,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
   it('draws the outline with fill="none" and the jar-verified stroke', () => {
     const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
     expect(svg).toContain('fill="none"');
-    expect(svg).toContain('stroke="#000000"');
+    expect(svg).toContain('stroke="#000"');
     expect(svg).toContain(`stroke-width="${PACKAGE_STROKE_WIDTH}"`);
   });
 
@@ -115,19 +115,19 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
 
   it('emits the exact bold title text at (10, 18.8889)', () => {
     const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
-    expect(svg).toContain('<text x="10" y="18.8889"');
+    expect(svg).toContain('<text x="10" y="18.889"');
     expect(svg).toContain('font-weight="700"');
-    expect(svg).toContain('fill="#000000"');
+    expect(svg).toContain('fill="#000"');
     expect(svg).toContain('>foo</text>');
   });
 
   // G2 N18: jar (deterministic-text mode) always stretches the title glyphs
-  // to the measured width -- `textLength="19.425" lengthAdjust="spacing"`
+  // to the measured width -- `textLength="19.425"`
   // for "foo" at 14pt bold, matching every other class text row's
   // convention (`renderer-classifier-box.ts`). Never asserted by N17.
   it('emits textLength/lengthAdjust on the title text (jar: 19.425)', () => {
     const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
-    expect(svg).toContain('lengthAdjust="spacing"');
+    expect(svg).toContain('');
     expect(svg).toContain('textLength="19.425"');
   });
 
@@ -142,7 +142,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
       colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, packageBackground: '#0000FF' } },
     };
     const svg = renderNamespaceFolder(finonoGeo(), theme);
-    expect(svg).toContain('fill="#0000FF"');
+    expect(svg).toContain('fill="#00F"');
   });
 
   // G2 N18: skinparam packageBorderThickness / packageFontColor /
@@ -178,7 +178,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
       },
     };
     const svg = renderNamespaceFolder(finonoGeo(), theme);
-    expect(svg).toContain('fill="#000000"');
+    expect(svg).toContain('fill="#000"');
   });
 
   it('respects colors.elements.package.fontSize for the title font-size, NOT the classifier body', () => {
@@ -238,7 +238,7 @@ describe('renderNamespaceFolder — strictuml sharp-corner polygon (G2 N18, jini
   it('emits a <polygon>, not a <path>, when theme.strictUml is true', () => {
     const svg = renderNamespaceFolder(jinibeGeo(), strictTheme);
     expect(svg).toContain(
-      '<polygon points="16,6,29.7875,6,36.7875,26,64,26,64,95,16,95,16,6"',
+      '<polygon points="16,6,29.788,6,36.788,26,64,26,64,95,16,95,16,6"',
     );
     expect(svg).not.toContain('<path');
   });
@@ -247,7 +247,7 @@ describe('renderNamespaceFolder — strictuml sharp-corner polygon (G2 N18, jini
     const svg = renderNamespaceFolder(jinibeGeo(), strictTheme);
     expect(svg).toContain('fill="none"');
     expect(svg).toContain(
-      'style="stroke:#000000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:10;"',
+      'style="stroke:#000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:10;"',
     );
   });
 

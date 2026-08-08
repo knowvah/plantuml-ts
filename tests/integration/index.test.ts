@@ -257,49 +257,49 @@ describe('three-stage theme resolution', () => {
   it('applies skinparam classBackgroundColor to rendered SVG', async () => {
     const source = [
       '@startuml',
-      'skinparam classBackgroundColor #AABBCC',
+      'skinparam classBackgroundColor #ABC',
       'class Foo',
       '@enduml',
     ].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
-    expect(svg).toContain('#AABBCC');
+    expect(svg).toContain('#ABC');
   });
 
   // SI7: the `@start…@end` split runs BEFORE the preprocessor, on raw lines, so
   // a directive outside the block is never part of it and never executes —
   // upstream's `BlockUmlBuilder` collects nothing until a `@start` directive.
-  // Jar-verified: the same source renders with NO #AABBCC anywhere.
+  // Jar-verified: the same source renders with NO #ABC anywhere.
   it('ignores a skinparam placed OUTSIDE the block, as the jar does', async () => {
     const source = [
-      'skinparam classBackgroundColor #AABBCC',
+      'skinparam classBackgroundColor #ABC',
       '@startuml',
       'class Foo',
       '@enduml',
     ].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
-    expect(svg).not.toContain('#AABBCC');
+    expect(svg).not.toContain('#ABC');
   });
 
   it('skinparam backgroundColor overrides !theme dark background', async () => {
     const source = [
       '!theme dark',
-      'skinparam backgroundColor #FFFFFF',
+      'skinparam backgroundColor #FFF',
       '@startuml',
       'Alice -> Bob : hi',
       '@enduml',
     ].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
-    // The skinparam value (#FFFFFF) must win over dark theme default (#1E1E1E)
-    expect(svg).toContain('#FFFFFF');
+    // The skinparam value (#FFF) must win over dark theme default (#1E1E1E)
+    expect(svg).toContain('#FFF');
     expect(svg).not.toContain('#1E1E1E');
   });
 
   it('caller Partial<Theme> overrides skinparam backgroundColor', async () => {
     const source = [
-      'skinparam backgroundColor #AABBCC',
+      'skinparam backgroundColor #ABC',
       '@startuml',
       'Alice -> Bob : hi',
       '@enduml',
@@ -307,27 +307,27 @@ describe('three-stage theme resolution', () => {
     // Build a valid Partial<Theme> — colors must be the full colors shape.
     // Only `background` changes; everything else falls back to defaultTheme.
     const callerTheme = {
-      colors: { ...defaultTheme.colors, background: '#112233' },
+      colors: { ...defaultTheme.colors, background: '#123' },
     };
     const svg = await render(source, { theme: callerTheme });
     expectNoErrorDiagram(svg);
-    // Caller partial (#112233) wins over skinparam (#AABBCC)
-    expect(svg).toContain('#112233');
-    expect(svg).not.toContain('#AABBCC');
+    // Caller partial (#123) wins over skinparam (#ABC)
+    expect(svg).toContain('#123');
+    expect(svg).not.toContain('#ABC');
   });
 
   it('applies backgroundColor from <style> block', async () => {
     const source = [
       '@startuml',
       '<style>',
-      'backgroundcolor: #CCDDEE',
+      'backgroundcolor: #CDE',
       '</style>',
       'Alice -> Bob : hi',
       '@enduml',
     ].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
-    expect(svg).toContain('#CCDDEE');
+    expect(svg).toContain('#CDE');
   });
 
   it('output is unchanged when no skinparam or style blocks are present', async () => {
@@ -341,19 +341,19 @@ describe('three-stage theme resolution', () => {
   it('renderSync applies skinparam classBackgroundColor', () => {
     const source = [
       '@startuml',
-      'skinparam classBackgroundColor #AABBCC',
+      'skinparam classBackgroundColor #ABC',
       'class Foo',
       '@enduml',
     ].join('\n');
     const svg = renderSync(source);
     expectNoErrorDiagram(svg);
-    expect(svg).toContain('#AABBCC');
+    expect(svg).toContain('#ABC');
   });
 
   it('renderAll applies skinparam classBackgroundColor', async () => {
     const source = [
       '@startuml',
-      'skinparam classBackgroundColor #AABBCC',
+      'skinparam classBackgroundColor #ABC',
       'class Foo',
       '@enduml',
     ].join('\n');
@@ -361,7 +361,7 @@ describe('three-stage theme resolution', () => {
     expect(svgs).toHaveLength(1);
     const svg = svgs[0] ?? '';
     expectNoErrorDiagram(svg);
-    expect(svg).toContain('#AABBCC');
+    expect(svg).toContain('#ABC');
   });
 });
 
@@ -386,7 +386,7 @@ describe('element-scoped <style> block wired into buildTheme', () => {
     const svg = await render(source);
     expectNoErrorDiagram(svg);
     // G1c: named colors resolve to their canonical jar hex.
-    expect(svg).toContain('#0000FF');
+    expect(svg).toContain('#00F');
   });
 
   it('usecase { BackGroundColor } propagates to usecase ellipse fill', async () => {
@@ -423,7 +423,7 @@ describe('element-scoped <style> block wired into buildTheme', () => {
     const svg = await render(source);
     expectNoErrorDiagram(svg);
     // G1c: named colors resolve to their canonical jar hex.
-    expect(svg).toContain('#FF0000');
+    expect(svg).toContain('#F00');
   });
 
   it('class { BackGroundColor } propagates to class background in class diagram', async () => {
@@ -431,7 +431,7 @@ describe('element-scoped <style> block wired into buildTheme', () => {
       '@startuml',
       '<style>',
       'class {',
-      '  BackGroundColor: #AABBCC',
+      '  BackGroundColor: #ABC',
       '}',
       '</style>',
       'class Foo',
@@ -439,7 +439,7 @@ describe('element-scoped <style> block wired into buildTheme', () => {
     ].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
-    expect(svg).toContain('#AABBCC');
+    expect(svg).toContain('#ABC');
   });
 
   it('multiple selectors in one <style> block each apply independently', async () => {
@@ -447,10 +447,10 @@ describe('element-scoped <style> block wired into buildTheme', () => {
       '@startuml',
       '<style>',
       'actor {',
-      '  BackGroundColor: #FF0000',
+      '  BackGroundColor: #F00',
       '}',
       'usecase {',
-      '  BackGroundColor: #00FF00',
+      '  BackGroundColor: #0F0',
       '}',
       '</style>',
       ':Alice:',
@@ -460,8 +460,8 @@ describe('element-scoped <style> block wired into buildTheme', () => {
     ].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
-    expect(svg).toContain('#FF0000');
-    expect(svg).toContain('#00FF00');
+    expect(svg).toContain('#F00');
+    expect(svg).toContain('#0F0');
   });
 
   it('source with no <style> renders unchanged (regression)', async () => {
@@ -484,7 +484,7 @@ describe('element-scoped <style> block wired into buildTheme', () => {
       '}',
       'usecase {',
       '  business {',
-      '    BackGroundColor: #112233',
+      '    BackGroundColor: #123',
       '  }',
       '}',
       'package {',

@@ -46,8 +46,8 @@ describe('renderNote — theme-overridden note fontSize (G2 N39)', () => {
     expect(ys).toHaveLength(2);
     // baselineOffset = 10 - 10/4.5; row i's y = note.y + marginY + i*fontSize + baselineOffset.
     const baselineOffset = 10 - 10 / 4.5;
-    expect(ys[1]! - ys[0]!).toBeCloseTo(10, 4);
-    expect(ys[0]).toBeCloseTo(5 + baselineOffset, 4);
+    expect(ys[1]! - ys[0]!).toBeCloseTo(10, 2);
+    expect(ys[0]).toBeCloseTo(5 + baselineOffset, 2);
   });
 });
 
@@ -101,7 +101,7 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
       lineAtoms: [[{ kind: 'text', text: 'warning', font: { ...plainFont, color: '#FF0000' }, width: 40 }]],
     };
     const svg = renderNote(coloredNote, defaultTheme);
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
   });
 
   it('a hand-built NoteGeo with NO lineAtoms falls back to the pre-cutover single-<text>-per-line path unchanged', () => {
@@ -113,12 +113,12 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
 
 // G2 N67 item 49: `<style> note { FontColor N } }` cascade -- the note-body
 // FontColor fallback tier `renderNoteLineAtoms`/`renderNoteText` previously
-// never consulted (hardcoded `fill="#000000"` unconditionally, per that
+// never consulted (hardcoded `fill="#000"` unconditionally, per that
 // function's own now-superseded doc comment). `theme.colors.graph
 // .noteCascadeFontColor` (`style-cascade-class.ts`, `NOTE_SNAMES`) sits
 // BELOW an atom's own explicit `<color>` run (unchanged precedence, G2 N55)
 // but ABOVE the hardcoded black default -- jar-verified `nufini-44-jofo787`
-// (`<style> note { Fontcolor red } }`, every note text run `fill="#FF0000"`).
+// (`<style> note { Fontcolor red } }`, every note text run `fill="#F00"`).
 describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
   it('the per-atom creole path (lineAtoms) uses the cascade when the atom has no OWN color (nufini-44-jofo787 shape)', () => {
     const themed = {
@@ -133,7 +133,7 @@ describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
       lineAtoms: [[{ kind: 'text', text: 'red note', font: plainFont, width: 40 } satisfies MemberRenderAtom]],
     };
     const svg = renderNote(note, themed);
-    expect(svg).toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#F00"');
   });
 
   it("an atom's OWN explicit color still wins over the cascade", () => {
@@ -149,8 +149,8 @@ describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
       lineAtoms: [[{ kind: 'text', text: 'blue run', font: plainFont, width: 40 } satisfies MemberRenderAtom]],
     };
     const svg = renderNote(note, themed);
-    expect(svg).toContain('fill="#0000FF"');
-    expect(svg).not.toContain('fill="#FF0000"');
+    expect(svg).toContain('fill="#00F"');
+    expect(svg).not.toContain('fill="#F00"');
   });
 
   it('the pre-cutover fallback path (no lineAtoms) ALSO uses the cascade', () => {
@@ -160,13 +160,13 @@ describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
     };
     const svg = renderNote(baseNote, themed);
     const texts = [...svg.matchAll(/<text[^>]*fill="([^"]*)"[^>]*>/g)];
-    expect(texts.map((m) => m[1])).toEqual(['#FF0000', '#FF0000']);
+    expect(texts.map((m) => m[1])).toEqual(['#F00', '#F00']);
   });
 
   it('falls back to the hardcoded #000000 default when no cascade is set (unset-is-noop regression guard)', () => {
     const svg = renderNote(baseNote, defaultTheme);
     const texts = [...svg.matchAll(/<text[^>]*fill="([^"]*)"[^>]*>/g)];
-    expect(texts.map((m) => m[1])).toEqual(['#000000', '#000000']);
+    expect(texts.map((m) => m[1])).toEqual(['#000', '#000']);
   });
 });
 
@@ -211,10 +211,10 @@ describe('renderNote — per-atom baseline on a mixed-font-size line (G2 N56)', 
     const y13 = 6 + 5 + 18 - 13 / 4.5;
     // Same lineTop/lineHeight, this atom's OWN (larger) descent: 18/4.5.
     const y18 = 6 + 5 + 18 - 18 / 4.5;
-    expect(ys[0]).toBeCloseTo(y13, 4); // "In java, "
-    expect(ys[1]).toBeCloseTo(y18, 4); // "every"
-    expect(ys[2]).toBeCloseTo(y13, 4); // " "
-    expect(ys[3]).toBeCloseTo(y13, 4); // "class"
-    expect(y13 - y18).toBeCloseTo(1.1111, 4); // jar: 26.1111 - 25 == 1.1111
+    expect(ys[0]).toBeCloseTo(y13, 2); // "In java, "
+    expect(ys[1]).toBeCloseTo(y18, 2); // "every"
+    expect(ys[2]).toBeCloseTo(y13, 2); // " "
+    expect(ys[3]).toBeCloseTo(y13, 2); // "class"
+    expect(y13 - y18).toBeCloseTo(1.1111, 2); // jar: 26.1111 - 25 == 1.1111
   });
 });

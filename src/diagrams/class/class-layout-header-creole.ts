@@ -18,7 +18,6 @@ import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-comm
 import { BADGE_LEFT_MARGIN } from './class-badge.js';
 import { parseCircledCharDecoration, parseCircledSpriteDecoration } from './class-stereotype.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
-import { javaRound4 } from '../../core/number-format.js';
 import type { CommonHeaderFields } from './class-layout-header-geo.js';
 
 /** `TextBlockUtils.withMargin(circledCharacter, 4, 0, 5, 5)`'s top/bottom
@@ -114,7 +113,7 @@ export function buildHeaderLineMetrics(
   };
   const builds = headerLines.map((l) => buildHeaderLine(l, font, measurer, sprites));
   return {
-    headerLineWidths: builds.map((b) => javaRound4(b.width)),
+    headerLineWidths: builds.map((b) => b.width),
     headerDisplayLines: builds.map((b) => b.displayText),
     nameBlockHeight: builds.reduce((acc, b) => acc + b.height, 0),
   };
