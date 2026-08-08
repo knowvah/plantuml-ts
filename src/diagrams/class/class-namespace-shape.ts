@@ -39,7 +39,6 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { NamespaceGeo } from './layout.js';
 import { path, line, text, rect } from '../../core/svg.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { isTransparentColor } from '../../core/paint.js';
 import { measureStereoLabelWidths, stereoBlockDim } from './class-stereotype.js';
 
@@ -210,7 +209,7 @@ function folderPathD(
 ): string {
   const half = roundCorner / 2;
   const tabRadius = half * 1.5;
-  const pt = (x: number, y: number): string => `${javaRound4(ox + x)},${javaRound4(oy + y)}`;
+  const pt = (x: number, y: number): string => `${ox + x},${oy + y}`;
   return (
     `M${pt(half, 0)}` +
     ` L${pt(wtitle - half, 0)}` +
@@ -249,7 +248,7 @@ function folderPolygonPoints(
   width: number,
   height: number,
 ): Array<[number, number]> {
-  const pt = (x: number, y: number): [number, number] => [javaRound4(ox + x), javaRound4(oy + y)];
+  const pt = (x: number, y: number): [number, number] => [ox + x, oy + y];
   return [
     pt(0, 0),
     pt(wtitle, 0),
@@ -327,10 +326,10 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
         { stroke: theme.colors.graph.packageBorder, strokeWidth, fill },
       );
   const hline = line(
-    javaRound4(geo.x),
-    javaRound4(geo.y + geo.htitle),
-    javaRound4(geo.x + geo.wtitle + MARGIN_TITLE_X3),
-    javaRound4(geo.y + geo.htitle),
+    geo.x,
+    geo.y + geo.htitle,
+    geo.x + geo.wtitle + MARGIN_TITLE_X3,
+    geo.y + geo.htitle,
     { stroke: theme.colors.graph.packageBorder, strokeWidth },
   );
   // G2 N18: jar's deterministic-text mode always emits `textLength`/
@@ -344,8 +343,8 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
   // fallback branch (`max(30, width/4)`) has no real text to stretch, so
   // textLength is omitted then, matching every other row's `row.width ===
   // undefined` skip convention.
-  const titleTextLength = geo.label.length > 0 ? javaRound4(geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2) : undefined;
-  const label = text(javaRound4(geo.x + 4), javaRound4(geo.y + geo.baselineOffset), geo.label, {
+  const titleTextLength = geo.label.length > 0 ? geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2 : undefined;
+  const label = text(geo.x + 4, geo.y + geo.baselineOffset, geo.label, {
     fontFamily: theme.fontFamily,
     fontSize,
     fontWeight: '700',
@@ -389,13 +388,13 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme): string {
   if (geo.label.length === 0) return outline;
   const rawTextWidth = geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2;
   const posTitle = (geo.width - rawTextWidth) / 2;
-  const label = text(javaRound4(geo.x + posTitle), javaRound4(geo.y + geo.baselineOffset), geo.label, {
+  const label = text(geo.x + posTitle, geo.y + geo.baselineOffset, geo.label, {
     fontFamily: theme.fontFamily,
     fontSize,
     fontWeight: '700',
     fill: fontColor,
     lengthAdjust: 'spacing' as const,
-    textLength: javaRound4(rawTextWidth),
+    textLength: rawTextWidth,
   });
   return outline + label;
 }
@@ -433,12 +432,12 @@ export function renderEmptyPackageIcon(geo: NamespaceGeo, theme: Theme): string 
         { stroke: border, strokeWidth, fill },
       );
   const hline = line(
-    javaRound4(geo.x), javaRound4(geo.y + geo.htitle),
-    javaRound4(geo.x + geo.wtitle + MARGIN_TITLE_X3), javaRound4(geo.y + geo.htitle),
+    geo.x, geo.y + geo.htitle,
+    geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle,
     { stroke: border, strokeWidth },
   );
-  const titleTextLength = geo.label.length > 0 ? javaRound4(geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2) : undefined;
-  const label = text(javaRound4(geo.x + 4), javaRound4(geo.y + geo.baselineOffset), geo.label, {
+  const titleTextLength = geo.label.length > 0 ? geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2 : undefined;
+  const label = text(geo.x + 4, geo.y + geo.baselineOffset, geo.label, {
     fontFamily: theme.fontFamily, fontSize, fontWeight: '700', fill: fontColor,
     ...(titleTextLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: titleTextLength } : {}),
   });
