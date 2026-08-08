@@ -16,6 +16,7 @@
 
 import type { SpriteDimsLookup } from './creole-atoms.js';
 import type { InternalSpriteStore } from './internal-sprite-store.js';
+import type { InternalEmojiStore } from './internal-emoji-store.js';
 import type { Sprite } from './klimt/sprite/Sprite.js';
 import type { SpriteMonochrome } from './klimt/sprite/SpriteMonochrome.js';
 import { isSpriteSvg, type SpriteSvg } from './klimt/sprite/SpriteSvg.js';
@@ -56,10 +57,19 @@ export interface SpriteRegistry {
    *  {@link byName} misses. `undefined` on the default browser path — no
    *  vendored byte is loaded unless a host wires `RenderOptions.assetStore`. */
   readonly internal?: InternalSpriteStore | undefined;
+  /** Twemoji artwork store (`internal-emoji-store.ts`). Carried HERE, beside
+   *  the sprite store, purely because this registry is the one object that
+   *  already reaches BOTH the sizer (via `spriteDimsLookupFor`) and the
+   *  renderer — emoji and sprites stay separate concepts (different keys, no
+   *  shared probe), they just share a ride. */
+  readonly emoji?: InternalEmojiStore | undefined;
 }
 
-export function createSpriteRegistry(internal?: InternalSpriteStore): SpriteRegistry {
-  return { byName: new Map(), skippedColorSprites: [], collisions: [], unresolved: [], internal };
+export function createSpriteRegistry(
+  internal?: InternalSpriteStore,
+  emoji?: InternalEmojiStore,
+): SpriteRegistry {
+  return { byName: new Map(), skippedColorSprites: [], collisions: [], unresolved: [], internal, emoji };
 }
 
 /** `sprite $name`'s kind + pixel size -- the only identifying data an

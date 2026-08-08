@@ -11,6 +11,7 @@ import { createAnnotations } from '../../core/annotations/index.js';
 import { dropsAsSingleDuplicate } from '../../core/cucadiagram/linkDedup.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
+import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import { scopedKey } from './namespace-groups.js';
 import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './ast.js';
 import { makeNode, resolveNewlineEscapes } from './parse-helpers.js';
@@ -150,8 +151,16 @@ export type PendingNoteState =
  *  reached through ADR-2's `RenderOptions.assetStore`. Threaded into the
  *  registry at CONSTRUCTION time because `SkinParam#getSprite`'s fallback
  *  tier is a property of the registry, not of any one lookup. */
-export function makeDefaultAST(internal?: InternalSpriteStore): DescriptionDiagramAST {
-  return { nodes: [], links: [], annotations: createAnnotations(), sprites: createSpriteRegistry(internal) };
+export function makeDefaultAST(
+  internal?: InternalSpriteStore,
+  emoji?: InternalEmojiStore,
+): DescriptionDiagramAST {
+  return {
+    nodes: [],
+    links: [],
+    annotations: createAnnotations(),
+    sprites: createSpriteRegistry(internal, emoji),
+  };
 }
 
 /** `CucaDiagram#cpt1.addAndGet(1)` -- see `ParseState.uidCounter`'s doc

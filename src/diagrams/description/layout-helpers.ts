@@ -16,6 +16,7 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { CONTAINER_SYMBOLS } from './parse-helpers.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
+import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
 import { visibleStereotypeLabels, nodeWithVisibleStereotype } from './element-grammar.js';
 
 // ---------------------------------------------------------------------------
@@ -204,6 +205,7 @@ export function degenerateSingleLeaf(
   // entirely, so it needs its OWN sprite-dims bridge for D9 measurement —
   // same one-liner `layout.ts#layoutDescription` builds for the normal path.
   const sprites = ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined;
+  const emojiArtwork = emojiArtworkResolverFor(ast.sprites?.emoji);
   // G1 I-hideshow: a single-root-leaf diagram can still carry `hide
   // stereotype`/`hide <<label>> stereotype` -- filter BEFORE sizing so a
   // hidden guillemet block reserves no footprint (EntityImageUseCase.java
@@ -217,7 +219,12 @@ export function degenerateSingleLeaf(
   const stereotypeRules = ast.stereotypeVisibilityRules ?? [];
   const visibleStereotype = visibleStereotypeLabels(node.stereotype, stereotypeRules);
   const visibleNode = nodeWithVisibleStereotype(node, stereotypeRules);
-  const dims = measureLeafNode(visibleNode, fontSpec, measurer, boxOpts, sprites);
+  // Emoji artwork rides into the sizer on `BoxSizingOpts` so the ellipse fit
+  // draws the real glyph — the RENDERER resolves the same store off the same
+  // registry (`renderer-entity.ts`), keeping the two in lock-step.
+  const sizingOpts =
+    emojiArtwork === undefined ? boxOpts : { ...(boxOpts ?? {}), emojiArtwork };
+  const dims = measureLeafNode(visibleNode, fontSpec, measurer, sizingOpts, sprites);
   const geo: DescriptionNodeGeo = {
     id: node.id,
     symbol: node.symbol,

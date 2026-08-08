@@ -57,6 +57,8 @@ import {
 } from '../tests/oracle/svek-dot.js';
 import { buildStdlibAssetsStore } from '../tests/helpers/stdlib-assets-store.js';
 import { buildSpriteAssetsStore } from '../tests/helpers/sprite-assets-store.js';
+import { buildEmojiAssetsStore } from '../tests/helpers/emoji-assets-store.js';
+import { combineAssetStores } from '../src/core/asset-store.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GOLDENS = join(REPO, 'oracle', 'goldens', 'description');
@@ -276,7 +278,7 @@ function captureGraphs(markup: string): DotInputGraph[] {
       // fallback and reports a DIFFERENT diagram than the ratchet it is
       // auditing -- it read 4 fewer conformant than the measure until this was
       // added (ADR-2: "the harness measures the same code path users get").
-      assetStore: buildSpriteAssetsStore(),
+      assetStore: combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore()),
     });
   } finally {
     setLayoutInputObserver(undefined);

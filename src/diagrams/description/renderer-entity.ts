@@ -250,6 +250,12 @@ function buildEntityParams(
     links: [],
     fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
     atomImageResolverFor: makeAtomImageResolverFor(sprites),
+    // Same store the sizer measured through (`layout-helpers.ts`), off the
+    // same registry — a one-sided wiring would draw a glyph the ellipse was
+    // not fitted to (`planning/sizer-renderer-parity.md`).
+    ...(sprites?.emoji === undefined
+      ? {}
+      : { emojiArtwork: (unicode: string): string | undefined => sprites.emoji?.get(unicode) }),
     ...(node.symbol === 'hexagon' ? { hexagonPolygon: null } : {}),
   };
   // #lizard forgives -- pre-existing entity-params assembly (one object

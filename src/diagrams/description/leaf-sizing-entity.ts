@@ -239,6 +239,7 @@ function buildSizingEntityParams(
     links: [],
     fixCircleLabelOverlapping: false,
     atomImageResolverFor: sizingAtomImageResolverFor(ctx.sprites),
+    ...(ctx.opts?.emojiArtwork === undefined ? {} : { emojiArtwork: ctx.opts.emojiArtwork }),
   };
 }
 

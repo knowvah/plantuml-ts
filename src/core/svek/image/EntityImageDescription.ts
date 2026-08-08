@@ -282,6 +282,13 @@ export interface EntityImageDescriptionParams {
    * Builder: `src/diagrams/description/render-atoms.ts`.
    */
   readonly atomImageResolverFor?: (font: FontConfiguration) => AtomImageResolver;
+  /** Twemoji artwork by codepoint (`core/internal-emoji-store.ts`). Absent =
+   *  no emoji asset store wired, and the emoji falls back to its
+   *  platform-glyph text run. Present on BOTH the sizer's and the renderer's
+   *  params or neither: a use-case ellipse is fitted to the points actually
+   *  drawn, so a one-sided wiring desynchronises measured from drawn size
+   *  (`planning/sizer-renderer-parity.md`). */
+  readonly emojiArtwork?: ((unicode: string) => string | undefined) | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -327,7 +334,13 @@ export class EntityImageDescription {
       params.paint.titleAlignment,
       params.atomImageResolverFor?.(params.paint.fontTitle),
     );
-    this.desc = buildDesc(this.symbol, params.labels, params.paint, params.atomImageResolverFor);
+    this.desc = buildDesc(
+      this.symbol,
+      params.labels,
+      params.paint,
+      params.atomImageResolverFor,
+      params.emojiArtwork,
+    );
     this.stereo = buildStereo(
       params.labels.stereotypeLabels,
       params.paint.fontStereo,

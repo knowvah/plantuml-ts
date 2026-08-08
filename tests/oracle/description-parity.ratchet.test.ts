@@ -35,6 +35,8 @@ import {
 import { expectNoErrorDiagram } from '../helpers/error-diagram.js';
 import { buildStdlibAssetsStore } from '../helpers/stdlib-assets-store.js';
 import { buildSpriteAssetsStore } from '../helpers/sprite-assets-store.js';
+import { buildEmojiAssetsStore } from '../helpers/emoji-assets-store.js';
+import { combineAssetStores } from '../../src/core/asset-store.js';
 
 const GOLDENS = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -86,7 +88,15 @@ describe.skipIf(fixtures.length === 0)('oracle DOT-parity ratchet — descriptio
         // its `/sprites/**` classpath bundle unconditionally; without this
         // the ratchet measures a diagram the oracle never rendered. Gate
         // logic below is untouched.
-        assetStore: buildSpriteAssetsStore(),
+        //
+        // Wave 3 adds the emoji half for the SAME reason: the jar reads
+        // `emoji/data/<codepoint>.svg` off its own classpath unconditionally,
+        // so a ratchet without it measures the platform-glyph fallback
+        // (murava-69-tago286). All THREE size harnesses must wire the identical
+        // store or they silently measure different diagrams — the tell is a
+        // conformant count here that disagrees with
+        // `measure-description-size-deltas.ts`/`audit-size-metric-identity.ts`.
+        assetStore: combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore()),
       });
       expectNoErrorDiagram(svg, `${name}: render produced a PlantUML error`);
       expect(

@@ -19,6 +19,12 @@ export type ComponentStyle = 'uml2' | 'uml1' | 'rectangle';
  *  `measureLeafNode`. Bundled (rather than separate params) to keep the
  *  sizing signatures within the argument-count budget. */
 export interface BoxSizingOpts {
+  /** Twemoji artwork by codepoint (`core/internal-emoji-store.ts`), for the
+   *  emoji draw path the use-case ellipse fit runs through `Footprint`.
+   *  Absent = no emoji asset store wired; the emoji falls back to its
+   *  platform-glyph run. Must match what the RENDERER resolves
+   *  (`planning/sizer-renderer-parity.md`). */
+  readonly emojiArtwork?: ((unicode: string) => string | undefined) | undefined;
   componentStyle?: ComponentStyle | undefined;
   /** `skinparam actorStyle` / `Theme.actorStyle` (T7, description-leaf-
    *  sizing-audit) — the SAME field the RENDERER reads

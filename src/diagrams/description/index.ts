@@ -9,6 +9,7 @@
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { SyncPlugin, CompleteSvg } from '../../core/dispatcher.js';
 import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
+import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import type { DescriptionDiagramAST } from './ast.js';
 import type { DescriptionGeometry } from './layout.js';
 import { hasDescriptiveElement } from '../../core/descriptive-keywords.js';
@@ -69,6 +70,9 @@ export const descriptionPlugin: SyncPlugin<
     const ast = parseDescription(
       block,
       options?.assetStore === undefined ? undefined : internalSpriteStoreFrom(options.assetStore),
+      // Same channel, separate store: emoji artwork resolves by codepoint,
+      // sprites by bundle path, and only sprites have the .svg/.png probe.
+      options?.assetStore === undefined ? undefined : internalEmojiStoreFrom(options.assetStore),
     );
     // T17 seed thread (see ast.ts's `DescriptionDiagramAST.seed` doc
     // comment) — computed once here, at the only point the raw source text

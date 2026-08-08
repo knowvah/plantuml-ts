@@ -30,7 +30,8 @@ import { SvgNanoParser } from '../../klimt/sprite/SvgNanoParser.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
 import type { UGraphicWithGroups } from '../DecorateEntityImage.js';
 import { Margins, buildTextBlock, measureLine } from './EntityImageDescriptionSupport.js';
-import { emojiRenderRun, emojiSquareDim, emojiStartingAltitude } from '../../klimt/creole/atom/AtomEmoji.js';
+import { emojiSquareDim, emojiStartingAltitude } from '../../klimt/creole/atom/AtomEmoji.js';
+import { drawEmojiAtom, type EmojiArtworkResolver } from './EntityImageDescriptionEmoji.js';
 import type {
   EntityImageDescriptionLabels,
   EntityImageDescriptionPaint,
@@ -147,7 +148,10 @@ function isCreoleAtomData(x: CreoleAtom | Atom): x is CreoleAtom {
  * anywhere, so `NORMAL` (0) is the only reachable state, not a shortcut.
  * `drawU`'s per-atom baseline shift (`height - descent`, text only) mirrors
  * `AtomText.java`'s own `ypos = rect.getHeight() - descent` exactly. */
-function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
+function descAtomOps(
+  resolveAtomImage: AtomImageResolver | undefined,
+  resolveEmojiArtwork: EmojiArtworkResolver | undefined,
+): AtomOps {
   function dimensionOf(atom: CreoleAtom, stringBounder: StringBounder): { width: number; height: number } {
     if (atom.kind === 'text') return measureLine(stringBounder, atom.text, atom.font);
     if (atom.kind === 'latex') return renderLatexAsImage(atom.expr, atom.color ?? '#000000');
@@ -204,13 +208,12 @@ function descAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
         ug.draw(UImage.build(r.width, r.height, r.href));
         return;
       }
-      // A2s R2i: an emoji draws as its platform-glyph text run (`atom/
-      // AtomEmoji.ts#emojiRenderRun` -- sizing stays `emojiBoxDim`, never
-      // this glyph's own measure), baseline-shifted like the text branch.
+      // Artwork when the asset channel supplies it, platform-glyph text run
+      // otherwise — `EntityImageDescriptionEmoji.ts#drawEmojiAtom`. Which one
+      // runs changes LAYOUT, not just looks: `Footprint` collects the points
+      // actually drawn, so a use-case ellipse fits the glyph.
       if (atom.kind === 'emoji') {
-        const run = emojiRenderRun(atom);
-        const m = measureLine(ug.getStringBounder(), run.text, run.font);
-        ug.apply(new UTranslate(0, m.height - m.descent)).draw(UText.build(run.text, run.font));
+        drawEmojiAtom(ug, atom, resolveEmojiArtwork);
         return;
       }
       const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom);
@@ -318,6 +321,7 @@ export function buildDesc(
   labels: EntityImageDescriptionLabels,
   paint: EntityImageDescriptionPaint,
   atomImageResolverFor?: (font: FontConfiguration) => AtomImageResolver,
+  emojiArtwork?: EmojiArtworkResolver,
 ): TextBlock {
   const isPackageLeaf = symbol.getSNames()[0] === 'package_';
   const displayEqualsCode = labels.displayText === labels.codeName;
@@ -327,7 +331,7 @@ export function buildDesc(
   }
   const font = displayEqualsCode ? paint.fontTitle : (paint.fontBody ?? paint.fontTitle);
   const resolveAtomImage = atomImageResolverFor?.(font);
-  const atomOps = descAtomOps(resolveAtomImage);
+  const atomOps = descAtomOps(resolveAtomImage, emojiArtwork);
   const pragma = Pragma.createEmpty();
   const skinParam = buildLocalSkinSimple(paint.guillemet, atomOps, pragma);
   // `Display.create(...)`, NOT `getWithNewlines`: `labels.displayText` is

@@ -17,6 +17,7 @@ import type { UmlSource } from '../../core/block-extractor.js';
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
+import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
 import {
@@ -49,11 +50,11 @@ export { CONTAINER_SYMBOLS } from './parse-helpers.js';
 // Main entry point
 // ---------------------------------------------------------------------------
 
-function makeInitialState(internal?: InternalSpriteStore): ParseState {
+function makeInitialState(internal?: InternalSpriteStore, emoji?: InternalEmojiStore): ParseState {
   return {
     inSpriteBlock: false,
     pendingElement: undefined,
-    ast: makeDefaultAST(internal),
+    ast: makeDefaultAST(internal, emoji),
     containerStack: [],
     nodesById: new Map(),
     parentArrayById: new Map(),
@@ -411,8 +412,9 @@ function processLine(state: ParseState, lines: readonly string[], i: number): nu
 export function parseDescription(
   block: UmlSource,
   internalSprites?: InternalSpriteStore,
+  internalEmoji?: InternalEmojiStore,
 ): DescriptionDiagramAST {
-  const state = makeInitialState(internalSprites);
+  const state = makeInitialState(internalSprites, internalEmoji);
   const lines = block.lines;
 
   for (let i = 0; i < lines.length; ) {

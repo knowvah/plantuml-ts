@@ -184,6 +184,12 @@ export function buildDotNodes(
         // itself (see the comment above it).
         stereotypeFontSize: ctx.stereotypeFontSizeFor(node.symbol, sizedNode.stereotype),
         lineThickness: ctx.lineThicknessFor(node.symbol),
+        // Wave 3: without this the SIZER draws the platform-glyph fallback
+        // into `Footprint` while the RENDERER draws the real Twemoji artwork,
+        // so a `usecase "<:rocket:> ..."` ellipse is fitted to the wrong
+        // points (murava-69-tago286). `degenerateSingleLeaf` wires the same
+        // resolver for the no-link single-leaf path it owns.
+        emojiArtwork: ctx.emojiArtwork,
       },
       ctx.sprites,
     );
