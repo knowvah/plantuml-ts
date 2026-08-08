@@ -26,7 +26,6 @@ import {
 } from './note-opale.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
 
 /**
@@ -158,9 +157,11 @@ function noteAtomDecoration(styles: ReadonlySet<FontStyle>): string | undefined 
 /**
  * G2 N55: draws ONE note line's per-atom creole content -- the note-local
  * mirror of `renderer-classifier-box.ts`'s private `renderRowAtoms` (same
- * per-atom-kind switch, same `javaRound4`-per-atom-`textLength`/unrounded-
- * x-advance convention, same doc-comment-cited rounding rule) -- duplicated
- * rather than imported since that function is private to a file this module
+ * per-atom-kind switch, same per-atom-`textLength`/unrounded-x-advance
+ * convention -- `textLength` rounds to 3dp at SVG emission (ADR-1,
+ * `core/svg.ts#attrs`), x-advance stays the exact unrounded `atom.width`)
+ * -- duplicated rather than imported since that function is private to a
+ * file this module
  * does not otherwise depend on (mirrors `buildConnectorPathData`'s own
  * "duplicated to avoid a needless cross-file dependency" precedent above).
  * G2 N67 item 49: an atom's OWN creole-resolved color (a `<color>` command)
@@ -217,7 +218,7 @@ function renderNoteLineAtoms(
         fontSize: atom.font.size,
         fill: atom.font.color ?? theme.colors.graph.noteCascadeFontColor ?? '#000000',
         lengthAdjust: 'spacing',
-        textLength: javaRound4(atom.renderWidth ?? atom.width),
+        textLength: atom.renderWidth ?? atom.width,
         ...(atom.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' as const } : {}),
         ...(atom.font.styles.has(FontStyle.ITALIC) ? { fontStyle: 'italic' as const } : {}),
         ...(decoration !== undefined ? { textDecoration: decoration } : {}),
@@ -237,6 +238,8 @@ function renderNoteLineAtoms(
     out += image(x, legacyY - baselineOffset, atom.width, atom.height, atom.href);
     x += atom.width;
   }
+  // #lizard forgives -- pre-existing per-atom-kind switch, unrelated to
+  // this task's `javaRound4` removal (T6c); size predates this edit.
   return out;
 }
 
