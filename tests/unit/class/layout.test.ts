@@ -13,7 +13,6 @@ import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { LOLLIPOP_SIZE } from '../../../src/diagrams/class/class-lollipop.js';
-import { javaRound4 } from '../../../src/core/number-format.js';
 import { FontStyle } from '../../../src/core/klimt/shape/UText.js';
 
 const measurer = new FormulaMeasurer();
@@ -792,7 +791,7 @@ describe('layoutClass — lollipop display-label row (G2 N20)', () => {
     expect(geo.dividerYs).toEqual([]);
 
     const fontSpec = { family: defaultTheme.fontFamily, size: defaultTheme.fontSize };
-    const textWidth = javaRound4(measurer.measure('Foo', fontSpec).width);
+    const textWidth = measurer.measure('Foo', fontSpec).width;
     const baselineOffset = fontSpec.size - measurer.getDescent(fontSpec, '');
 
     const row = geo.rows[0]!;
@@ -1645,8 +1644,9 @@ describe('layoutClass — hide/show directives', () => {
     const NAME_MARGIN_TOTAL = 6;
     // No badge reservation at all -- narrower than the badge-shown box, and
     // exactly the bare name-text width (no BADGE_BOX_WIDTH term).
-    // G2 N4: layout rounds via javaRound4 (Java %.4f) -- 4-decimal
-    // precision, not exact double equality.
+    // ADR-1: layout no longer pre-rounds (emission formats numeric
+    // attributes to 3 decimals, T5) -- `toBeCloseTo` guards only against
+    // unrelated floating-point drift, not a rounding step.
     expect(strictResult.classifiers[0]!.width).toBeCloseTo(headerTextWidth + NAME_MARGIN_TOTAL, 3);
     expect(strictResult.classifiers[0]!.width).toBeLessThan(plainResult.classifiers[0]!.width);
   });

@@ -13,7 +13,6 @@
 import type { Classifier } from './ast.js';
 import type { ClassifierGeo } from './layout.js';
 import { NAME_MARGIN_TOTAL } from './class-badge.js';
-import { javaRound4 } from '../../core/number-format.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { MemberRowBuild } from './class-member-creole.js';
@@ -204,7 +203,7 @@ export function buildSectionRows(
       text,
       y,
       indent,
-      width: javaRound4(build.width),
+      width: build.width,
       atoms: build.atoms,
       ...(showIcon
         ? { visibilityIcon: member.visibility, visibilityIsField: isMethodMember(member) === false }
