@@ -12,7 +12,6 @@ import { EDGE_DECORATION_MAP } from './class-dot-graph.js';
 import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 import { CARDINALITY_FONT_SIZE, splitEdgeLabelLines } from './class-layout-helpers.js';
 import { ARROW_GLYPH_SIZE, parseMagicArrowLabel, magicArrowAngle, magicArrowGlyphPoints, type MagicArrowLabel } from './class-magic-arrow.js';
-import { javaRound4 } from '../../core/number-format.js';
 import type { EdgeGeo } from './layout.js';
 
 /**
@@ -118,7 +117,7 @@ function attachMagicArrow(
   const angle = magicArrowAngle(fromToPoints, magic.direction);
   const hasText = magic.text !== undefined && magic.text !== '';
   const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
-  const textWidth = hasText ? javaRound4(measurer.measure(magic.text!, font).width) : 0;
+  const textWidth = hasText ? measurer.measure(magic.text!, font).width : 0;
   const totalWidth = ARROW_GLYPH_SIZE + textWidth;
   const blockLeft = center.x - totalWidth / 2;
   edgeGeo.arrowGlyph = {
@@ -169,7 +168,7 @@ function multiLineLabelAnchor(
   fontFamily: string,
 ): Array<{ text: string; x: number; y: number; width: number }> {
   const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
-  const widths = lines.map((l) => javaRound4(measurer.measure(l, font).width));
+  const widths = lines.map((l) => measurer.measure(l, font).width);
   const maxWidth = Math.max(...widths);
   const blockLeft = center.x - maxWidth / 2;
   const firstLine = lines[0] ?? '';
@@ -209,14 +208,12 @@ function portLabelAnchor(
   const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
   const m = measurer.measure(text, font);
   const baselineOffset = CARDINALITY_FONT_SIZE - measurer.getDescent(font, text);
-  // G2 N35: `javaRound4` -- every OTHER measured width in this engine
-  // rounds through it (`class-layout-helpers.ts#measureClassifier`'s
-  // header/row widths, `note-layout.ts#measureNote`'s per-line widths);
-  // this was the one measured-width field left as a raw float, producing
-  // spurious `textLength` mismatches against jar's `%.4f`-formatted value
-  // (jar-verified `jaloja-18-tisu915`: `19.418750000000003` vs jar's
-  // `19.4188`).
-  const width = javaRound4(m.width);
+  // G2 N35 (superseded by ADR-1): the `19.418750000000003` vs jar's
+  // `19.4188` mismatch that once motivated pre-rounding this width is now
+  // resolved at emission -- `core/svg.ts` formats every numeric attribute
+  // through `formatDecimal(value, 3)` (T5), so this raw float reaches the
+  // same jar-matching output without a class-engine-local round-trip.
+  const width = m.width;
   return {
     text,
     x: center.x - width / 2,

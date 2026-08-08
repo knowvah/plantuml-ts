@@ -38,7 +38,6 @@
 import type { Classifier, ClassDiagramAST, HideStereotypeDirective } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { getScale } from '../../core/klimt/creole/Parser.js';
 import { SPRITE_NAME_PATTERN_SOURCE } from '../../core/creole-atoms.js';
 
@@ -265,12 +264,12 @@ export function parseCircledSpriteDecoration(
   return result;
 }
 
-/** Per-label raw (unmargined) text widths, `javaRound4`'d to match jar's
- *  `SvgGraphics#format` rounding (same convention as `measureGenericClassifier
- *  `'s `headerTextWidth`). Empty when the classifier has no stereotype.
- *  `fontSize` defaults to the hardcoded `CLASS_STEREOTYPE_FONT_SIZE` --
- *  G2 N39's `skinparam classStereotypeFontSize` override, see that
- *  constant's own doc comment. */
+/** Per-label raw (unmargined) text widths, matching jar's `SvgGraphics#format`
+ *  rounding at emission (`core/svg.ts`'s `formatDecimal(value, 3)`, ADR-1) --
+ *  this function itself returns unrounded floats. Empty when the classifier
+ *  has no stereotype. `fontSize` defaults to the hardcoded
+ *  `CLASS_STEREOTYPE_FONT_SIZE` -- G2 N39's `skinparam classStereotypeFontSize`
+ *  override, see that constant's own doc comment. */
 export function measureStereoLabelWidths(
   labels: readonly string[],
   fontFamily: string,
@@ -279,9 +278,7 @@ export function measureStereoLabelWidths(
   fontSize: number = CLASS_STEREOTYPE_FONT_SIZE,
 ): number[] {
   return labels.map((l) =>
-    javaRound4(
-      measurer.measure(wrapGuillemet(l, guillemet), { family: fontFamily, size: fontSize }).width,
-    ),
+    measurer.measure(wrapGuillemet(l, guillemet), { family: fontFamily, size: fontSize }).width,
   );
 }
 

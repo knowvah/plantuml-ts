@@ -7,7 +7,6 @@
 import type { Classifier } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { BADGE_LEFT_MARGIN, NAME_LEFT_MARGIN } from './class-badge.js';
 import { CLASS_STEREOTYPE_FONT_SIZE } from './class-stereotype.js';
 import { splitEdgeLabelLines } from './class-layout-edge-labels.js';
@@ -288,7 +287,7 @@ export function measureGenericTagDim(
   // to the pre-existing `fontSize + 4` byte-identically at >=10pt.
   const lines = splitEdgeLabelLines(text).lines;
   const rawTextWidth = Math.max(
-    ...lines.map((l) => javaRound4(measurer.measure(l, { family: fontFamily, size: fontSize }).width)),
+    ...lines.map((l) => measurer.measure(l, { family: fontFamily, size: fontSize }).width),
   );
   return {
     width: rawTextWidth + GENERIC_TAG_MARGIN,

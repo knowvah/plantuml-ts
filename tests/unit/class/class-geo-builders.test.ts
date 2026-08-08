@@ -13,7 +13,6 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { getHTitle } from '../../../src/diagrams/class/class-namespace-shape.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { javaRound4 } from '../../../src/core/number-format.js';
 
 const measurer = new WidthTableMeasurer();
 
@@ -109,17 +108,18 @@ describe('buildNamespaceGeos — inkShape resolution (G2 N60, item 42)', () => {
 });
 
 /**
- * G2 N35: `buildEdgeGeos#attachPortLabels`/`portLabelAnchor`'s tail/head
- * multiplicity-label width was the raw `measurer.measure(...).width` float,
- * never rounded through `javaRound4` (`core/number-format.ts`'s Java-`%.4f`
- * rounding, ALREADY applied to every other measured width in this engine —
- * `class-layout-helpers.ts#measureClassifier`'s header/row widths,
- * `note-layout.ts#measureNote`'s per-line widths) -- jar-verified via
- * `jaloja-18-tisu915`'s cardinality label: our raw float
- * `19.418750000000003` vs jar's `%.4f`-formatted `19.4188`.
+ * G2 N35 (superseded by ADR-1): `buildEdgeGeos#attachPortLabels`/
+ * `portLabelAnchor`'s tail/head multiplicity-label width was once
+ * pre-rounded through `javaRound4` to match jar's `%.4f`-formatted
+ * `19.4188` against our raw `19.418750000000003` (`jaloja-18-tisu915`'s
+ * cardinality label). T5 moved that formatting to emission
+ * (`core/svg.ts`'s `formatDecimal(value, 3)`), so this geometry now stays
+ * an unrounded float all the way through the layout stage — asserting the
+ * exact raw value, including its float-addition noise, is the correct
+ * behavior post-ADR-1.
  */
-describe('buildEdgeGeos — tail/head multiplicity-label width rounding (G2 N35)', () => {
-  it('rounds the tail/head label width through javaRound4, matching every other measured-width field', () => {
+describe('buildEdgeGeos — tail/head multiplicity-label width stays unrounded (G2 N35, ADR-1)', () => {
+  it('leaves the tail/head label width as the raw measured float', () => {
     const ast: ClassDiagramAST = {
       classifiers: [
         { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
@@ -136,8 +136,8 @@ describe('buildEdgeGeos — tail/head multiplicity-label width rounding (G2 N35)
     const edge = geo.edges[0]!;
     expect(edge.tailLabel).toBeDefined();
     expect(edge.headLabel).toBeDefined();
-    expect(edge.tailLabel!.width).toBe(javaRound4(edge.tailLabel!.width));
-    expect(edge.headLabel!.width).toBe(javaRound4(edge.headLabel!.width));
+    expect(edge.tailLabel!.width).toBe(7.23125);
+    expect(edge.headLabel!.width).toBe(19.418750000000003);
   });
 });
 
@@ -159,7 +159,7 @@ describe('buildEdgeGeos — tail/head multiplicity-label width rounding (G2 N35)
  * `getDefaultStyleDefinitionArrow` style signature).
  */
 describe('buildEdgeGeos — plain edge label position/width (G2 N62)', () => {
-  it('reuses the tail/head multiplicity-label font formula (size 13, javaRound4 width)', () => {
+  it('reuses the tail/head multiplicity-label font formula (size 13, unrounded width)', () => {
     const ast: ClassDiagramAST = {
       classifiers: [
         { id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [] },
@@ -183,7 +183,6 @@ describe('buildEdgeGeos — plain edge label position/width (G2 N62)', () => {
     // x/y (below) carry the SAME gvts-genuine placement residual `ledger
     // .md` N25 already named (structurally correct, not byte-exact).
     expect(edge.label!.width).toBe(32.5);
-    expect(edge.label!.width).toBe(javaRound4(edge.label!.width));
     // Position now comes from @knowvah/dot-engine's own native `label=` placement
     // (not the pre-N62 hand-rolled midpoint) -- merely asserts it is a
     // finite, distinct-from-origin value; byte-exact match is blocked by
