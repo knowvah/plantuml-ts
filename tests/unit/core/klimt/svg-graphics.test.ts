@@ -10,6 +10,15 @@ import { seedOf } from '../../../../src/core/klimt/drawing/svg/svg-graphics-core
 import { UGroupType } from '../../../../src/core/klimt/shape/UGroup.js';
 import { UPath, USegmentType } from '../../../../src/core/klimt/shape/UPath.js';
 
+// The root <g> always carries font-family="sans-serif" and lengthAdjust
+// (T3, hoisted). Tests asserting per-<text> attribute suppression must
+// scope to the <text ...> tag itself, not the whole document.
+function textTag(xml: string): string {
+  const match = /<text[^>]*>/.exec(xml);
+  if (match === null) throw new Error('no <text> element found in ' + xml);
+  return match[0];
+}
+
 const noText = {
   fontFamily: null,
   fontSize: 12,
@@ -483,6 +492,17 @@ describe('SvgGraphics — text()', () => {
     expect(xml).toContain('text-decoration="underline"');
   });
 
+  // Rule 3, per-element half: font-family is inherited from the root <g>
+  // ("sans-serif") and is only emitted per-<text> when it differs
+  // (case-insensitive).
+  it('omits font-family when the resolved family is sans-serif, any casing', () => {
+    for (const fontFamily of ['SansSerif', 'sans-serif', 'Sans-Serif']) {
+      const svg = new SvgGraphics(0, basicSvgOption(), 'v');
+      svg.text('a', 0, 0, { ...noText, fontFamily });
+      expect(textTag(svg.createXml())).not.toContain('font-family');
+    }
+  });
+
   it('lowercases "roboto" and injects the Google Fonts @import exactly once', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.text('a', 0, 0, { ...noText, fontFamily: 'Roboto' });
@@ -531,16 +551,40 @@ describe('SvgGraphics — text()', () => {
     expect(xml).toContain('viewBox="0 0 61 41"');
   });
 
-  it('lengthAdjust NONE emits no lengthAdjust/textLength attributes', () => {
-    const svg = new SvgGraphics(0, basicSvgOption({ lengthAdjust: LengthAdjust.NONE }), 'v');
-    svg.text('a', 0, 0, noText);
-    expect(svg.createXml()).not.toContain('lengthAdjust');
+  // Rule 3, per-element half: lengthAdjust is inherited from the root <g>
+  // (T3) and is never emitted on <text> itself, for any option value.
+  it('never emits a lengthAdjust attribute on <text>, for any option.lengthAdjust', () => {
+    for (const lengthAdjust of [LengthAdjust.NONE, LengthAdjust.SPACING, LengthAdjust.SPACING_AND_GLYPHS]) {
+      const svg = new SvgGraphics(0, basicSvgOption({ lengthAdjust }), 'v');
+      svg.text('ab', 0, 0, noText);
+      expect(textTag(svg.createXml())).not.toContain('lengthAdjust');
+    }
   });
 
-  it('lengthAdjust SPACING_AND_GLYPHS sets lengthAdjust="spacingAndGlyphs"', () => {
+  it('lengthAdjust NONE emits no textLength attribute', () => {
+    const svg = new SvgGraphics(0, basicSvgOption({ lengthAdjust: LengthAdjust.NONE }), 'v');
+    svg.text('ab', 0, 0, noText);
+    expect(textTag(svg.createXml())).not.toContain('textLength');
+  });
+
+  // Rule 5: single-character text never gets textLength, even when
+  // lengthAdjust would otherwise require it.
+  it('lengthAdjust SPACING_AND_GLYPHS omits textLength for single-character text', () => {
     const svg = new SvgGraphics(0, basicSvgOption({ lengthAdjust: LengthAdjust.SPACING_AND_GLYPHS }), 'v');
     svg.text('a', 0, 0, noText);
-    expect(svg.createXml()).toContain('lengthAdjust="spacingAndGlyphs"');
+    expect(svg.createXml()).not.toContain('textLength');
+  });
+
+  it('lengthAdjust SPACING_AND_GLYPHS sets a 3-decimal-formatted textLength for two-or-more-character text', () => {
+    const svg = new SvgGraphics(0, basicSvgOption({ lengthAdjust: LengthAdjust.SPACING_AND_GLYPHS }), 'v');
+    svg.text('ab', 0, 0, { ...noText, textLength: 28.4805 });
+    expect(svg.createXml()).toContain('textLength="28.481"');
+  });
+
+  it('lengthAdjust SPACING sets textLength for two-or-more-character text', () => {
+    const svg = new SvgGraphics(0, basicSvgOption({ lengthAdjust: LengthAdjust.SPACING }), 'v');
+    svg.text('ab', 0, 0, { ...noText, textLength: 28.4805 });
+    expect(svg.createXml()).toContain('textLength="28.481"');
   });
 });
 

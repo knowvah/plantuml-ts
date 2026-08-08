@@ -1331,15 +1331,27 @@ describe('unwrapKlimtSvg — klimtShell marker (G1 I1)', () => {
     expect(fragment.body).toBe('<!--entity a--><g class="entity"><rect x="1" y="2"/></g>');
   });
 
-  it('throws on a body missing the expected bare content <g> wrapper (defensive, narrow unwrap)', () => {
+  it('throws on a body missing the content <g> wrapper entirely (defensive, narrow unwrap)', () => {
     const klimtSvg =
       '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ' +
       'version="1.1" viewBox="0 0 10 10">' +
       '<?plantuml $version$?><defs/>' +
       '<rect x="1" y="2"/></svg>';
     expect(() => unwrapKlimtSvg(klimtSvg, '#FFFFFF')).toThrow(
-      /missing bare content <g> wrapper/,
+      /missing content <g> wrapper/,
     );
+  });
+
+  // T5b: klimt's `gRoot` carries rule 3's hoisted text attributes now, so
+  // the unwrap has to accept an ATTRIBUTED content `<g>` too -- it used to
+  // require the bare three-character tag and threw on this input.
+  it('accepts a content <g> carrying the hoisted root text attributes', () => {
+    const klimtSvg =
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ' +
+      'version="1.1" viewBox="0 0 10 10">' +
+      '<?plantuml $version$?><defs/>' +
+      '<g font-family="sans-serif" lengthAdjust="spacing"><rect x="1" y="2"/></g></svg>';
+    expect(unwrapKlimtSvg(klimtSvg, '#FFFFFF').body).toBe('<rect x="1" y="2"/>');
   });
 });
 

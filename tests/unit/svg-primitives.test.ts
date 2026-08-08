@@ -855,10 +855,21 @@ describe('rule 2 — #RRGGBB shortened to #RGB', () => {
 });
 
 describe('rule 3 — font-family/lengthAdjust hoisted to the root', () => {
-  it('puts both on the svg root element', () => {
+  // T5b: on the root `<g>`, NOT on `<svg>` -- that is where the jar puts
+  // them, and a byte comparison against a jar golden does not care that
+  // attribute inheritance makes the two equivalent.
+  it('puts both on the root <g>, not on the <svg> element', () => {
     const out = svgRoot(10, 10, []);
-    expect(out).toContain('font-family="sans-serif"');
-    expect(out).toContain('lengthAdjust="spacing"');
+    expect(out).toContain('<g font-family="sans-serif" lengthAdjust="spacing">');
+    const svgOpenTag = out.slice(0, out.indexOf('>') + 1);
+    expect(svgOpenTag).not.toContain('font-family');
+    expect(svgOpenTag).not.toContain('lengthAdjust');
+  });
+
+  it('opens that root <g> right after <defs> and closes it last', () => {
+    const out = svgRoot(10, 10, ['<text x="0" y="0">A</text>']);
+    expect(out).toContain('</defs><g font-family="sans-serif" lengthAdjust="spacing">');
+    expect(out.endsWith('</g></svg>')).toBe(true);
   });
 
   it('emits neither on a text element in the default family', () => {

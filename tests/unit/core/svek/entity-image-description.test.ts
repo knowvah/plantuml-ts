@@ -112,7 +112,7 @@ function newGraphic(): UGraphicSvg {
  *  group `UGraphicSvg.register()` always opens) — matches
  *  `symbols-component.test.ts`'s identical `extractTopGroup` helper. */
 function extractTopGroup(svg: string): string {
-  const match = /<g>([\s\S]*)<\/g><\/svg>$/.exec(svg);
+  const match = /<g[^>]*>([\s\S]*)<\/g><\/svg>$/.exec(svg);
   if (match === null) throw new Error('extractTopGroup: no top-level <g>...</g></svg> found');
   const inner = match[1];
   if (inner === undefined) throw new Error('extractTopGroup: capture group did not match');

@@ -281,6 +281,23 @@ export const ROOT_FONT_FAMILY = 'sans-serif';
 const ROOT_LENGTH_ADJUST = 'spacing';
 
 /**
+ * The document's root `<g>` open tag — rule 3's hoisted text attributes go
+ * HERE, on the root group, not on `<svg>`, because that is where the jar
+ * puts them (verified against the pinned jar for class/state/object/
+ * description). Inheritance makes the two equivalent to a renderer; byte
+ * comparison against a jar golden does not care. THE single definition of
+ * that markup: every `assembleSvg` path reaches the root `<g>` through this
+ * constant ({@link svgRoot} directly, the three klimt-shaped shells via
+ * `klimt/document-shell.ts#withRootGroupAttributes`), so they cannot drift.
+ * @see .../klimt/drawing/svg/SvgGraphicsCore.java (getG)
+ */
+export const ROOT_GROUP_OPEN =
+  `<g font-family="${ROOT_FONT_FAMILY}" lengthAdjust="${ROOT_LENGTH_ADJUST}">`;
+
+/** Closing tag of {@link ROOT_GROUP_OPEN}'s element. */
+export const ROOT_GROUP_CLOSE = '</g>';
+
+/**
  * Rule 4 — `stroke:none` suppresses BOTH `stroke-width` and
  * `stroke-dasharray`: with nothing painted, neither has any effect, and
  * upstream drops both under one `if ("none".equals(stroke) == false)` guard.
@@ -464,14 +481,18 @@ export function svgRoot(
   const bgRect = isSolid
     ? `<rect width="${fmt(width)}" height="${fmt(height)}" fill="${shortenColor(bgColor)}"/>`
     : '';
-  const body = dedupeGradientDefs(defsBlock + bgRect + children.join(''));
-  // Rule 3: `font-family`/`lengthAdjust` are hoisted here and inherited, so
-  // no `<text>` below repeats them (see `svg-shapes.ts#text`).
+  // Rule 3: `font-family`/`lengthAdjust` ride on the root `<g>` and are
+  // inherited, so no `<text>` below repeats them (`svg-shapes.ts#text`).
+  // `<defs>` stays OUTSIDE that group, matching the jar's `<defs/><g …>`
+  // child order. Gradient de-dup still spans the whole document, exactly
+  // as before — the `<g>` tags are inert to `GRADIENT_DEF_RE`.
+  const body = dedupeGradientDefs(
+    defsBlock + ROOT_GROUP_OPEN + bgRect + children.join('') + ROOT_GROUP_CLOSE,
+  );
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" ` +
     `width="${fmt(width)}" height="${fmt(height)}" ` +
-    `viewBox="0 0 ${fmt(width)} ${fmt(height)}" ` +
-    `font-family="${ROOT_FONT_FAMILY}" lengthAdjust="${ROOT_LENGTH_ADJUST}">` +
+    `viewBox="0 0 ${fmt(width)} ${fmt(height)}">` +
     body +
     `</svg>`
   );
