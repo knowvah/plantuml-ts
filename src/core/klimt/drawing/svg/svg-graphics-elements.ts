@@ -219,7 +219,7 @@ export class SvgGraphicsElements extends SvgGraphicsShadow {
     this.fillMe(elt);
     this.applyTextOrientation(elt, x, y, opts.orientation ?? 0);
     elt.setAttribute('font-size', this.format(opts.fontSize));
-    this.applyTextLengthAdjust(elt, opts.textLength);
+    this.applyTextLengthAdjust(elt, text, opts.textLength);
     if (opts.fontWeight !== null) elt.setAttribute('font-weight', opts.fontWeight);
     if (opts.fontStyle !== null) elt.setAttribute('font-style', opts.fontStyle);
     if (opts.textDecoration !== null) elt.setAttribute('text-decoration', opts.textDecoration);
@@ -239,12 +239,15 @@ export class SvgGraphicsElements extends SvgGraphicsShadow {
     else if (orientation === 270) elt.setAttribute('transform', `rotate(90 ${this.format(x)} ${this.format(y)})`);
   }
 
-  private applyTextLengthAdjust(elt: XmlNode, textLength: number): void {
-    if (this.option.lengthAdjust === LengthAdjust.SPACING) {
-      elt.setAttribute('lengthAdjust', 'spacing');
-      elt.setAttribute('textLength', this.format(textLength));
-    } else if (this.option.lengthAdjust === LengthAdjust.SPACING_AND_GLYPHS) {
-      elt.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+  // lengthAdjust is set once on the root <g> element (inherited here).
+  // Only textLength must be emitted per <text> since it is not inheritable.
+  // A single glyph has no inter-character spacing to adjust, so textLength
+  // would have no visible effect: skip it to reduce output size.
+  private applyTextLengthAdjust(elt: XmlNode, text: string, textLength: number): void {
+    if (
+      text.length > 1 &&
+      (this.option.lengthAdjust === LengthAdjust.SPACING || this.option.lengthAdjust === LengthAdjust.SPACING_AND_GLYPHS)
+    ) {
       elt.setAttribute('textLength', this.format(textLength));
     }
   }
@@ -258,9 +261,11 @@ export class SvgGraphicsElements extends SvgGraphicsShadow {
     if (svgFamily.toLowerCase() === 'roboto') this.addRoboto();
 
     const resolvedFamily = svgFamily.toLowerCase() === 'monospaced' ? 'monospace' : svgFamily;
-    elt.setAttribute('font-family', resolvedFamily);
-
     const lower = resolvedFamily.toLowerCase();
+    // font-family is inherited from the root <g> ("sans-serif"); only emit
+    // it per-<text> when it differs (case-insensitive).
+    if (lower !== 'sans-serif') elt.setAttribute('font-family', resolvedFamily);
+
     // Upstream: text.replace(' ', (char) 160) — regular spaces become
     // U+00A0 (non-breaking space) for monospace/courier fonts.
     if (lower === 'monospace' || lower === 'courier') return text.split(' ').join(' ');
