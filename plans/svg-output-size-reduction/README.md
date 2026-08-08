@@ -149,8 +149,11 @@ because the decomposition did not cover them:
   fixtures. The brief predicted 8.3%; the starting figure matches it
   exactly, so the gap is in the prediction, and four goldens were
   byte-verified against independent fresh jar captures.
-- `scripts/rebaseline-svg-goldens.ts`: `SAME=0 CHANGED=446 FAILED=0`,
-  `ERROR-DIAGRAM=1`.
+- `scripts/rebaseline-svg-goldens.ts`: **`SAME=447 CHANGED=0 FAILED=0`**,
+  `ERROR-DIAGRAM=1` — goldens and jar agree, independently of our renderer.
+- That script now runs in **10 seconds instead of ~35 minutes** (batched
+  into shared JVMs). Re-running it cheaply is what caught a corrupted
+  golden T9 had written.
 
 ## Corrections to the brief, each verified against the jar
 
