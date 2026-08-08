@@ -176,12 +176,13 @@ a color inside `applyMonochromeHex`, which also feeds a value the renderer
 
 ## Open, and deliberately not decided here
 
-1. **`class/bipudo-23-xavu432`** — a pre-existing 0.0097 edge-spline gap
-   that sat inside the 0.01 tolerance and that 3-decimal rounding pushed a
-   hair over. Proved pre-existing by rendering at pre-mission `1d913189`.
-   Needs a maintainer call: accept in `oracle/accepted-divergences.json`,
-   un-pin, or close the underlying gap. Both of the first two require
-   sign-off by the repo's own rules.
+1. ~~**`class/bipudo-23-xavu432`**~~ — **RESOLVED 2026-08-08 by maintainer
+   decision: un-pinned** from `oracle/goldens/svg-class/ratchet.json`
+   (313 → 312) and filed as its own mission,
+   `plans/class-edge-spline-conformance/`. Deliberately NOT an accepted
+   divergence — it is a deferral with an exit condition (re-pin the
+   fixture), not a won't-fix. The class ratchet and every oracle suite are
+   now green: **1969/1969**.
 2. **Realization-edge ranking** — `class-dot-graph.ts:63` treats `..|>` as
    hierarchical; the jar does not. Removing it takes the new fixture from
    427 diffs to 202 and its height error from 122px to 1px, but regresses

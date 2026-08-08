@@ -55,7 +55,9 @@
   one gap for four regressions.
 
   (`bipudo-23-xavu432` also appears in that list, but it fails before the
-  change too — see the separate spline-tolerance finding.)
+  change too — that is the separate spline gap, now un-pinned from the
+  ratchet and tracked as its own mission,
+  `plans/class-edge-spline-conformance/`.)
 
 - **Next step for whoever picks this up**: read the jar's DOT for those
   four fixtures and find what distinguishes their `..|>` edges from this
