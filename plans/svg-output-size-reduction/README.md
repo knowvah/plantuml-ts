@@ -123,3 +123,79 @@ npx tsx scripts/rebaseline-svg-goldens.ts      # report only, no --write
 - [`diagrams/component-map.md`](diagrams/component-map.md) — what touches what
 - [`diagrams/data-flow.md`](diagrams/data-flow.md) — where each rule applies
 - [`decision-journal.md`](decision-journal.md) — append during execution
+
+
+---
+
+# Mission summary — completed 2026-08-08
+
+## Tasks
+
+Planned 15 (T1–T15). Completed 15, plus **four added during execution**
+because the decomposition did not cover them:
+
+| added | why it existed |
+|---|---|
+| T5b | rule 3's root `<g>` attributes landed in the klimt emitter only, breaking `unwrapContentG` and silently disabling two class splice sites; ~394 goldens would have mismatched structurally |
+| T7b | hand-built markup in the class engine bypassed the emission choke point entirely, emitting raw floats once the compensating pre-rounding was removed |
+| T9b | the 4 `svg-conformance` goldens have no `in.puml`, so T9's script could never reach them, yet they drive the klimt emitter |
+| *(fixture)* | maintainer-supplied `class-inheritance-interface-assoc`, added with its jar oracle |
+
+## Result
+
+- **12605 / 12607 tests passing.** Two cold-tree runs agree exactly.
+- Oracle suites **1969 / 1970**.
+- Emitted SVG **1,477,458 → 1,368,743 bytes (7.4%)** across the 446 pinned
+  fixtures. The brief predicted 8.3%; the starting figure matches it
+  exactly, so the gap is in the prediction, and four goldens were
+  byte-verified against independent fresh jar captures.
+- `scripts/rebaseline-svg-goldens.ts`: `SAME=0 CHANGED=446 FAILED=0`,
+  `ERROR-DIAGRAM=1`.
+
+## Corrections to the brief, each verified against the jar
+
+1. `formatDecimal(28.4805, 3)` is `28.481`, not the `28.48` two task files
+   stated (live JVM).
+2. `class-actor-bare-no-allowmixing` does not fail to produce an SVG — it
+   produces an error diagram and exits 200. T14's premise was void; the
+   `FAILED` stop condition tightened from `>1` to `>0`.
+3. The predicted 8.3% size reduction measured 7.4%.
+
+## Defects found that the mission did not anticipate
+
+Seven, all caught by the regenerated goldens rather than by review:
+`attrs()` never applied `shortenColor` while `attrsFromRecord` did; two raw
+`style=` builders; the monochrome post-pass skipping every 3-digit color (a
+wrong picture, not a formatting nit); and four hand-built markup sites in
+`src/core/`. One was **self-inflicted and caught by fixtures** — shortening
+a color inside `applyMonochromeHex`, which also feeds a value the renderer
+*compares*, flipped a background-rect decision.
+
+## Open, and deliberately not decided here
+
+1. **`class/bipudo-23-xavu432`** — a pre-existing 0.0097 edge-spline gap
+   that sat inside the 0.01 tolerance and that 3-decimal rounding pushed a
+   hair over. Proved pre-existing by rendering at pre-mission `1d913189`.
+   Needs a maintainer call: accept in `oracle/accepted-divergences.json`,
+   un-pin, or close the underlying gap. Both of the first two require
+   sign-off by the repo's own rules.
+2. **Realization-edge ranking** — `class-dot-graph.ts:63` treats `..|>` as
+   hierarchical; the jar does not. Removing it takes the new fixture from
+   427 diffs to 202 and its height error from 122px to 1px, but regresses
+   four pinned goldens. `.agent-notes/class-realization-edge-rank-gap.md`.
+3. **45 hand-built markup sites** in activity/chart/json/sequence/dot —
+   latent, not new, none goldened.
+   `.agent-notes/handbuilt-svg-markup-audit.md`.
+4. **The two-emitter divergence** behind several of these tasks.
+   `.agent-notes/two-svg-emitters-divergence.md`.
+
+## Process notes
+
+- ADR-5's deferred gate worked: the red window stayed bounded and the full
+  gate at batch-2d surfaced seven real defects rather than churn.
+- One orchestrator error, corrected mid-mission: a "stop if the value feeds
+  arithmetic" instruction added to the T6 prompts contradicted ADR-1.
+  Upstream rounds decimals in exactly two places, never during layout, so
+  the pre-rounding had to go everywhere.
+- Interrupted agents twice left partially-applied edits; both times the
+  diff was preserved and the files reset to HEAD rather than built upon.
