@@ -8,7 +8,7 @@ which is why it does not exist yet.
 
 | ID | Description | Writes | Depends On | Done |
 |---|---|---|---|---|
-| T1 | Locate where our spline first departs from the jar's | investigation only — no source changes | — | [ ] |
+| T1 | Locate where our spline first departs from the jar's | investigation only — no source changes | — | [x] |
 
 ## Gate
 
