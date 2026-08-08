@@ -327,6 +327,7 @@ describe('enumerateFixtures over the committed corpus', () => {
     expect(enumerated!.slice(768).map((f) => f.slug)).toEqual([
       'class-actor-bare-no-allowmixing',
       'class-allowmixing-usecase-mix',
+      'class-inheritance-interface-assoc',
       'class-usecase-inline-img',
       'class-usecase-inline-sprite',
     ]);

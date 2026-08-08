@@ -37,7 +37,7 @@
  * parameters these classes never construct — supplied by the caller
  * (production: `EntityImageDescription`'s BodyFactory-built blocks;
  * here: `fooLabelTextBlock()`/`emptyTextBlock`, reusing T6's exact
- * jar-measured "Foo"@14pt constants — `textLength="24.7051"`, dimension
+ * jar-measured "Foo"@14pt constants — `textLength="24.705"`, dimension
  * `(24.7051, 16.4883)`, baseline `dy=13.5352`, identical across every
  * fixture in both suites, confirming it is a font-metrics constant
  * independent of which `USymbol*` class draws around it).
@@ -217,7 +217,7 @@ const JAR_ACTOR_ELLIPSE = '<ellipse cx="13.5" cy="8.5" rx="8" ry="8" fill="#F1F1
 const JAR_ACTOR_PATH =
   '<path d="M13.5,16.5 L13.5,43.5 M0.5,24.5 L26.5,24.5 M13.5,43.5 L0.5,58.5 M13.5,43.5 L26.5,58.5" style="stroke:#181818;stroke-width:0.5;" fill="none"/>';
 const JAR_ACTOR_TEXT =
-  '<text x="1.1475" y="73.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<text x="1.148" y="73.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 const JAR_ACTOR_FOO = JAR_ACTOR_ELLIPSE + JAR_ACTOR_PATH + JAR_ACTOR_TEXT;
 
 // Source: `actor/ Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: SAME
@@ -228,7 +228,7 @@ const JAR_ACTOR_FOO = JAR_ACTOR_ELLIPSE + JAR_ACTOR_PATH + JAR_ACTOR_TEXT;
 // body path) -- raw x1="22.2662" y1="21.7603" x2="31.9703" y2="12.0562",
 // rebased by the same (10.71,5.5).
 const JAR_ACTOR_BUSINESS_LINE =
-  '<line x1="11.5562" y1="16.2603" x2="21.2603" y2="6.5562" style="stroke:#181818;stroke-width:0.5;"/>';
+  '<line x1="11.556" y1="16.26" x2="21.26" y2="6.556" style="stroke:#181818;stroke-width:0.5;"/>';
 const JAR_ACTOR_BUSINESS_FOO = JAR_ACTOR_ELLIPSE + JAR_ACTOR_BUSINESS_LINE + JAR_ACTOR_PATH + JAR_ACTOR_TEXT;
 
 // Source (T7, description-leaf-sizing-audit): `skinparam actorStyle
@@ -245,7 +245,7 @@ const JAR_ACTOR_AWESOME_ELLIPSE = '<ellipse cx="27.5" cy="16.5" rx="16" ry="16" 
 const JAR_ACTOR_AWESOME_PATH =
   '<path d="M27.5,36.5 C31.5,36.5 34.5,36.5 38.5,32.5 C46.5,32.5 54.5,40.5 54.5,48.5 L54.5,52.5 C54.5,56.5 50.5,60.5 46.5,60.5 L8.5,60.5 C4.5,60.5 0.5,56.5 0.5,52.5 L0.5,48.5 C0.5,40.5 8.5,32.5 16.5,32.5 C20.5,36.5 23.5,36.5 27.5,36.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>';
 const JAR_ACTOR_AWESOME_TEXT =
-  '<text x="15.1475" y="74.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<text x="15.148" y="74.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 const JAR_ACTOR_AWESOME_FOO = JAR_ACTOR_AWESOME_ELLIPSE + JAR_ACTOR_AWESOME_PATH + JAR_ACTOR_AWESOME_TEXT;
 
 // Source (T7): `skinparam actorStyle hollow\nactor Foo\nusecase Bar\nFoo
@@ -262,9 +262,9 @@ const JAR_ACTOR_AWESOME_FOO = JAR_ACTOR_AWESOME_ELLIPSE + JAR_ACTOR_AWESOME_PATH
 // constant.
 const JAR_ACTOR_HOLLOW_ELLIPSE = '<ellipse cx="13" cy="5" rx="4.5" ry="4.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
 const JAR_ACTOR_HOLLOW_PATH =
-  '<path d="M0.5,11.5 L0.5,16.5 L10,16.5 L10,18.7574 L0.5,28.2574 L4.7426,32.5 L13,24.2426 L21.2574,32.5 L25.5,28.2574 L16,18.7574 L16,16.5 L25.5,16.5 L25.5,11.5 L0.5,11.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>';
+  '<path d="M0.5,11.5 L0.5,16.5 L10,16.5 L10,18.757 L0.5,28.257 L4.7426,32.5 L13,24.243 L21.2574,32.5 L25.5,28.257 L16,18.757 L16,16.5 L25.5,16.5 L25.5,11.5 L0.5,11.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>';
 const JAR_ACTOR_HOLLOW_TEXT =
-  '<text x="0.6475" y="46.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<text x="0.648" y="46.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 const JAR_ACTOR_HOLLOW_FOO = JAR_ACTOR_HOLLOW_ELLIPSE + JAR_ACTOR_HOLLOW_PATH + JAR_ACTOR_HOLLOW_TEXT;
 
 // Source: `person Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: raw
@@ -277,9 +277,9 @@ const JAR_ACTOR_HOLLOW_FOO = JAR_ACTOR_HOLLOW_ELLIPSE + JAR_ACTOR_HOLLOW_PATH + 
 // margin.getY1()+headSize=26.963 + baseline 13.5352 = 40.4982 -- both
 // agree on the SAME (7, 6) constant.
 const JAR_PERSON_FOO =
-  '<ellipse cx="22.3525" cy="8.4815" rx="8.4815" ry="8.4815" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<rect x="0" y="16.9631" width="44.7051" height="36.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="8.4815" ry="8.4815"/>' +
-  '<text x="10" y="40.4982" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<ellipse cx="22.353" cy="8.482" rx="8.482" ry="8.482" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<rect x="0" y="16.963" width="44.705" height="36.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="8.482" ry="8.482"/>' +
+  '<text x="10" y="40.498" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 // Source: `boundary Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: raw
 // path "M6,6 L6,30 M6,18 L23,18"; ellipse cx="35" cy="18" rx="12"
@@ -291,7 +291,7 @@ const JAR_PERSON_FOO =
 const JAR_BOUNDARY_FOO =
   '<path d="M4,4 L4,28 M4,16 L21,16" style="stroke:#181818;stroke-width:0.5;" fill="none"/>' +
   '<ellipse cx="33" cy="16" rx="12" ry="12" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="12.1475" y="45.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<text x="12.148" y="45.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 // Source: `control Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: raw
 // ellipse cx="24.21" cy="23" rx="12" ry="12"; polygon
@@ -304,7 +304,7 @@ const JAR_BOUNDARY_FOO =
 const JAR_CONTROL_FOO =
   '<ellipse cx="16" cy="16" rx="12" ry="12" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
   '<polygon points="12,4,18,-1,16,4,18,9,12,4" fill="#181818" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/>' +
-  '<text x="3.6475" y="45.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<text x="3.648" y="45.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 // Source: `entity Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: raw
 // ellipse cx="24.21" cy="18" rx="12" ry="12"; line x1="12.21" y1="32"
@@ -316,7 +316,7 @@ const JAR_CONTROL_FOO =
 const JAR_ENTITY_DOMAIN_FOO =
   '<ellipse cx="16" cy="16" rx="12" ry="12" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
   '<line x1="4" y1="30" x2="28" y2="30" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="3.6475" y="45.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<text x="3.648" y="45.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 // Source: `interface Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: raw
 // ellipse cx="24.21" cy="14" rx="8" ry="8" (this is the ONLY shape --
@@ -338,8 +338,8 @@ const JAR_INTERFACE_FOO = '<ellipse cx="9" cy="9" rx="8" ry="8" fill="#F1F1F1" s
 // (20.4691, 14.659) are the real, hard-to-hand-derive conformance fact
 // this fixture captures (T9 acceptance criterion 1).
 const JAR_USECASE_FOO =
-  '<ellipse cx="20.4691" cy="14.659" rx="20.4691" ry="14.659" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="8.1166" y="19.4031" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>';
+  '<ellipse cx="20.469" cy="14.659" rx="20.469" ry="14.659" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<text x="8.117" y="19.403" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 // Source: `usecase/ Foo\nactor Bar\nBar --> Foo` -- entity Foo: raw
 // ellipse cx="36.3686" cy="156.649" rx="30.3686" ry="14.659"; text
@@ -351,9 +351,9 @@ const JAR_USECASE_FOO =
 // in (see `USymbolUsecase.ts`'s own doc comment on the margin-call
 // porting-fidelity fix).
 const JAR_USECASE_BUSINESS_FOO =
-  '<ellipse cx="30.3686" cy="14.659" rx="30.3686" ry="14.659" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="18.0161" y="17.95" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="24.7051" font-family="sans-serif">Foo</text>' +
-  '<line x1="58.3167" y1="9.5489" x2="39.5881" y2="28.2775" style="stroke:#181818;stroke-width:0.5;"/>';
+  '<ellipse cx="30.369" cy="14.659" rx="30.369" ry="14.659" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<text x="18.016" y="17.95" fill="#000" font-size="14" textLength="24.705">Foo</text>' +
+  '<line x1="58.317" y1="9.549" x2="39.588" y2="28.278" style="stroke:#181818;stroke-width:0.5;"/>';
 
 // ---------------------------------------------------------------------------
 // Conformance tests (AC1)

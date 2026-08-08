@@ -113,7 +113,7 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
 
 // G2 N67 item 49: `<style> note { FontColor N } }` cascade -- the note-body
 // FontColor fallback tier `renderNoteLineAtoms`/`renderNoteText` previously
-// never consulted (hardcoded `fill="#000000"` unconditionally, per that
+// never consulted (hardcoded `fill="#000"` unconditionally, per that
 // function's own now-superseded doc comment). `theme.colors.graph
 // .noteCascadeFontColor` (`style-cascade-class.ts`, `NOTE_SNAMES`) sits
 // BELOW an atom's own explicit `<color>` run (unchanged precedence, G2 N55)

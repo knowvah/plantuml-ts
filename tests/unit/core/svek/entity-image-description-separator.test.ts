@@ -198,9 +198,9 @@ describe('EntityImageDescription — bare Creole horizontal-line separator (G1 I
     expect(lines).toHaveLength(2); // TWO short flanking lines, not one full-width separator
     expect(lines[0]).toContain('x1="1"');
     expect(lines[0]).toContain('x2="9.179"');
-    expect(lines[1]).toContain('x1="55.1161"');
-    expect(lines[1]).toContain('x2="63.2946"');
-    expect(svg).toContain('<text x="9.1786" y="29.3889"');
+    expect(lines[1]).toContain('x1="55.116"');
+    expect(lines[1]).toContain('x2="63.295"');
+    expect(svg).toContain('<text x="9.179" y="29.389"');
     expect(svg).toContain('>Header</text>');
   });
 

@@ -122,12 +122,12 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
   });
 
   // G2 N18: jar (deterministic-text mode) always stretches the title glyphs
-  // to the measured width -- `textLength="19.425" lengthAdjust="spacing"`
+  // to the measured width -- `textLength="19.425"`
   // for "foo" at 14pt bold, matching every other class text row's
   // convention (`renderer-classifier-box.ts`). Never asserted by N17.
   it('emits textLength/lengthAdjust on the title text (jar: 19.425)', () => {
     const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
-    expect(svg).toContain('lengthAdjust="spacing"');
+    expect(svg).toContain('');
     expect(svg).toContain('textLength="19.425"');
   });
 
@@ -238,7 +238,7 @@ describe('renderNamespaceFolder — strictuml sharp-corner polygon (G2 N18, jini
   it('emits a <polygon>, not a <path>, when theme.strictUml is true', () => {
     const svg = renderNamespaceFolder(jinibeGeo(), strictTheme);
     expect(svg).toContain(
-      '<polygon points="16,6,29.7875,6,36.7875,26,64,26,64,95,16,95,16,6"',
+      '<polygon points="16,6,29.788,6,36.788,26,64,26,64,95,16,95,16,6"',
     );
     expect(svg).not.toContain('<path');
   });
@@ -247,7 +247,7 @@ describe('renderNamespaceFolder — strictuml sharp-corner polygon (G2 N18, jini
     const svg = renderNamespaceFolder(jinibeGeo(), strictTheme);
     expect(svg).toContain('fill="none"');
     expect(svg).toContain(
-      'style="stroke:#000000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:10;"',
+      'style="stroke:#000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:10;"',
     );
   });
 

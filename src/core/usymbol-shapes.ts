@@ -14,8 +14,7 @@
 import type { Theme } from './theme.js';
 import { resolveElementPaint } from './theme.js';
 import type { Paint } from './paint.js';
-import { paintToSvg } from './paint.js';
-import { rect, text, ellipse, line, path } from './svg.js';
+import { rect, text, ellipse, line, path , attrs, resolvePaint} from './svg.js';
 import { renderNodeLabel } from './latex.js';
 
 /** The minimal node geometry a USymbol shape needs. */
@@ -42,11 +41,23 @@ export interface IconGeo {
  * `<linearGradient>` defs (deduped later by svgRoot).
  */
 function filledPath(d: string, fill: Paint, stroke: Paint): string {
-  const f = paintToSvg(fill);
-  const s = paintToSvg(stroke);
+  // resolvePaint, not paintToSvg: the former applies rule 2 to a gradient's
+  // <stop stop-color> values (svg.ts#shortenStopColors); the raw paintToSvg
+  // leaves them 6-digit, which the jar does not.
+  const f = resolvePaint(fill);
+  const s = resolvePaint(stroke);
+  // Through `attrs` rather than interpolated by hand: that is the one place
+  // rule 1 (decimal formatting) and rule 2 (`shortenColor`) are applied, and
+  // a `<path>` built by string concatenation reaches the output with neither
+  // -- this site emitted `fill="#AA1122"` where the jar emits `#A12`.
   return (
-    `${f.def ?? ''}${s.def ?? ''}` +
-    `<path d="${d}" fill="${f.fill}" stroke="${s.fill}" stroke-width="1"/>`
+    `${f.def}${s.def}` +
+    `<path${attrs([
+      ['d', d],
+      ['fill', f.value],
+      ['stroke', s.value],
+      ['stroke-width', 1],
+    ] as const)}/>`
   );
 }
 

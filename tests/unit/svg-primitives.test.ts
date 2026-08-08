@@ -591,7 +591,7 @@ describe('arrowHead', () => {
     expect(result).toContain('<marker');
     expect(result).toContain('<polygon');
     // Hollow: filled with background color (#FFFFFF default) to mask edge line inside shape
-    expect(result).toContain('fill="#FFFFFF"');
+    expect(result).toContain('fill="#FFF"');
   });
 
   it('extension marker respects custom bgColor', () => {
@@ -603,7 +603,7 @@ describe('arrowHead', () => {
     const result = arrowHead('implementation');
     expect(result).toContain('<marker');
     expect(result).toContain('<polygon');
-    expect(result).toContain('fill="#FFFFFF"');
+    expect(result).toContain('fill="#FFF"');
   });
 
   it('composition marker has filled diamond', () => {
@@ -618,7 +618,7 @@ describe('arrowHead', () => {
     expect(result).toContain('<marker');
     expect(result).toContain('<polygon');
     // Hollow: filled with background color to mask edge line inside shape
-    expect(result).toContain('fill="#FFFFFF"');
+    expect(result).toContain('fill="#FFF"');
   });
 
   it('dependency marker contains an arrowhead shape', () => {

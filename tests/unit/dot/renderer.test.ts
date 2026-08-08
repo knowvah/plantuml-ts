@@ -307,7 +307,7 @@ describe('renderDot — cluster subgraphs', () => {
     const { geo } = buildGeo(source);
     const svg = assembleSvg(renderDot(geo, theme));
     // The cluster rect (stroke="#000000") must appear before any <ellipse> (node)
-    const clusterIdx = svg.indexOf('stroke="#000000"');
+    const clusterIdx = svg.indexOf('stroke="#000"');
     const ellipseIdx = svg.indexOf('<ellipse');
     expect(clusterIdx).toBeGreaterThanOrEqual(0);
     expect(ellipseIdx).toBeGreaterThan(clusterIdx);
@@ -435,7 +435,7 @@ describe('renderDot — node fillcolor and color', () => {
   it('global node [fillcolor style=filled] defaults apply to all nodes', () => {
     // Statements must be separated so the parser sees them as distinct stmts.
     const { geo } = buildGeo(
-      `digraph {\n  node [fillcolor="#AABBCC", style=filled]\n  a -> b\n}`,
+      `digraph {\n  node [fillcolor="#ABC", style=filled]\n  a -> b\n}`,
     );
     const svg = assembleSvg(renderDot(geo, theme));
     // Both a and b should pick up the default fill

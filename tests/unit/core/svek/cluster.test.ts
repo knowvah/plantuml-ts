@@ -234,12 +234,12 @@ describe('Cluster (T12, AC1) — package container, real jar fragment', () => {
 
     const JAR_CLUSTER_FRAGMENT =
       '<g class="cluster" data-qualified-name="Configuration files" id="ent0001" data-source-line="9">' +
-      '<path d="M8.5,11.3889 L318.75,11.3889 A3.75,3.75 0 0 1 321.25,13.8889 L328.25,57.3889 L328.5,57.3889 ' +
+      '<path d="M8.5,11.389 L318.75,11.389 A3.75,3.75 0 0 1 321.25,13.889 L328.25,57.389 L328.5,57.389 ' +
       'A2.5,2.5 0 0 1 331,59.8889 L331,127.8889 A2.5,2.5 0 0 1 328.5,130.3889 L8.5,130.3889 A2.5,2.5 0 0 1 6,127.8889 ' +
-      'L6,13.8889 A2.5,2.5 0 0 1 8.5,11.3889" style="stroke:#FF0000;stroke-width:4;" fill="#0000FF"/>' +
-      '<line x1="6" y1="57.3889" x2="328.25" y2="57.3889" style="stroke:#FF0000;stroke-width:4;"/>' +
-      '<text x="10" y="44.5" fill="#008000" font-size="40" lengthAdjust="spacing" textLength="309.25" ' +
-      'font-weight="700" font-family="sans-serif">Configuration files</text>' +
+      'L6,13.889 A2.5,2.5 0 0 1 8.5,11.389" style="stroke:#F00;stroke-width:4;" fill="#00F"/>' +
+      '<line x1="6" y1="57.389" x2="328.25" y2="57.389" style="stroke:#F00;stroke-width:4;"/>' +
+      '<text x="10" y="44.5" fill="#008000" font-size="40" textLength="309.25" ' +
+      'font-weight="700">Configuration files</text>' +
       '</g>';
 
     expectConformant(svg, JAR_CLUSTER_FRAGMENT);
@@ -338,12 +338,12 @@ describe('Cluster (T12, AC2) — dashed-border container variant', () => {
 
     const JAR_DASHED_FRAGMENT =
       '<g class="cluster" data-qualified-name="Configuration files" id="ent0001" data-source-line="1">' +
-      '<path d="M8.5,6 L144.9951,6 A3.75,3.75 0 0 1 147.4951,8.5 L154.4951,28.4883 L154.5,28.4883 ' +
+      '<path d="M8.5,6 L144.9951,6 A3.75,3.75 0 0 1 147.495,8.5 L154.4951,28.488 L154.5,28.488 ' +
       'A2.5,2.5 0 0 1 157,30.9883 L157,100.99 A2.5,2.5 0 0 1 154.5,103.49 L8.5,103.49 A2.5,2.5 0 0 1 6,100.99 ' +
-      'L6,8.5 A2.5,2.5 0 0 1 8.5,6" style="stroke:#0000FF;stroke-width:1;stroke-dasharray:7,7;" fill="none"/>' +
-      '<line x1="6" y1="28.4883" x2="154.4951" y2="28.4883" style="stroke:#0000FF;stroke-width:1;stroke-dasharray:7,7;"/>' +
-      '<text x="10" y="21.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="135.4951" ' +
-      'font-weight="700" font-family="sans-serif">Configuration files</text>' +
+      'L6,8.5 A2.5,2.5 0 0 1 8.5,6" style="stroke:#00F;stroke-width:1;stroke-dasharray:7,7;" fill="none"/>' +
+      '<line x1="6" y1="28.488" x2="154.495" y2="28.488" style="stroke:#00F;stroke-width:1;stroke-dasharray:7,7;"/>' +
+      '<text x="10" y="21.535" fill="#000" font-size="14" textLength="135.495" ' +
+      'font-weight="700">Configuration files</text>' +
       '</g>';
 
     expectConformant(svg, JAR_DASHED_FRAGMENT);

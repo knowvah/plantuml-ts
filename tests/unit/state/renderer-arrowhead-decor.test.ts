@@ -70,9 +70,9 @@ describe('buildCrossStartMarkup', () => {
     // Two diagonal lines, stroke-width 1 (NOT the ellipse's own 1.5).
     expect((svg.match(/<line /g) ?? []).length).toBe(2);
     expect(svg).toContain('x1="62.227"');
-    expect(svg).toContain('y1="99.87674942143083"');
-    expect(svg).toContain('x2="52.32796249263167"');
-    expect(svg).toContain('y2="89.97725448481917"');
+    expect(svg).toContain('y1="99.877"');
+    expect(svg).toContain('x2="52.328"');
+    expect(svg).toContain('y2="89.977"');
     expect(svg).toContain('stroke-width="1"');
   });
 

@@ -75,7 +75,7 @@ const LABEL_FONT: FontConfiguration = {
 };
 
 /** Real-jar text width for the one labelled fixture (babafi-51's `use`
- *  at 13pt — `textLength="20.9625"` in the cached SVG). */
+ *  at 13pt — `textLength="20.963"` in the cached SVG). */
 const driverStringBounder: DriverStringBounder = {
   calculateDimension(font, text) {
     if (text === 'use' && font.size === 13) return { width: 20.9625 };
@@ -204,9 +204,9 @@ const GOLDENS: Record<string, DecorGolden> = {
   NOT_NAVIGABLE: { decor: 'NOT_NAVIGABLE', side: 'head', token: 'x', puml: '--x', frag:
     '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4" data-link-type="not_navigable"><path d="M21.41,43.58 C21.41,60.52 21.41,78.18 21.41,95.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><path d="M25.41,98.2 L17.41,90.2 M17.41,98.2 L25.41,90.2" style="stroke:#181818;stroke-width:1;" fill="none"/></g>' },
   REDEFINES: { decor: 'REDEFINES', side: 'head', token: '||>', puml: '--||>', frag:
-    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4" data-link-type="redefines"><path d="M23,43.58 C23,60.52 23,68.18 23,85.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><polygon points="23,103.2,16,84.2,30,84.2,23,103.2" fill="#FFFFFF" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="16" y1="80.4" x2="30" y2="80.4" style="stroke:#181818;stroke-width:2;"/></g>' },
+    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4" data-link-type="redefines"><path d="M23,43.58 C23,60.52 23,68.18 23,85.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><polygon points="23,103.2,16,84.2,30,84.2,23,103.2" fill="#FFF" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="16" y1="80.4" x2="30" y2="80.4" style="stroke:#181818;stroke-width:2;"/></g>' },
   DEFINEDBY: { decor: 'DEFINEDBY', side: 'head', token: ':|>', puml: '--:|>', frag:
-    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4" data-link-type="definedby"><path d="M23,43.58 C23,60.52 23,68.18 23,85.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><polygon points="23,103.2,16,84.2,30,84.2,23,103.2" fill="#FFFFFF" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/><ellipse cx="18" cy="78.5" rx="2" ry="2" fill="#181818" style="stroke:#181818;stroke-width:1;"/><ellipse cx="28" cy="78.5" rx="2" ry="2" fill="#181818" style="stroke:#181818;stroke-width:1;"/></g>' },
+    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4" data-link-type="definedby"><path d="M23,43.58 C23,60.52 23,68.18 23,85.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><polygon points="23,103.2,16,84.2,30,84.2,23,103.2" fill="#FFF" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/><ellipse cx="18" cy="78.5" rx="2" ry="2" fill="#181818" style="stroke:#181818;stroke-width:1;"/><ellipse cx="28" cy="78.5" rx="2" ry="2" fill="#181818" style="stroke:#181818;stroke-width:1;"/></g>' },
   CROWFOOT: { decor: 'CROWFOOT', side: 'head', token: '{', puml: '--{', frag:
     '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4" data-link-type="crowfoot"><path d="M21.41,43.58 C21.41,60.52 21.41,78.18 21.41,95.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><line x1="21.41" y1="95.2" x2="29.41" y2="103.2" style="stroke:#181818;stroke-width:1;"/><line x1="21.41" y1="95.2" x2="13.41" y2="103.2" style="stroke:#181818;stroke-width:1;"/><line x1="21.41" y1="95.2" x2="21.41" y2="103.2" style="stroke:#181818;stroke-width:1;"/></g>' },
   CIRCLE_CROWFOOT: { decor: 'CIRCLE_CROWFOOT', side: 'head', token: 'o{', puml: '--o{', frag:
@@ -222,17 +222,17 @@ const GOLDENS: Record<string, DecorGolden> = {
   ARROW_TRIANGLE: { decor: 'ARROW_TRIANGLE', side: 'head', token: '>>', puml: '-->>', frag:
     '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4" data-link-type="dependency"><path d="M21.41,43.58 C21.41,60.52 21.41,78.18 21.41,95.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><polygon points="21.41,103.2,24.41,95.2,18.41,95.2,21.41,103.2" fill="#181818" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/></g>' },
   CIRCLE: { decor: 'CIRCLE', side: 'head', token: '0', puml: '--0', frag:
-    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,74.18 21.41,91.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><ellipse cx="21.41" cy="97.2" rx="6" ry="6" fill="#FFFFFF" style="stroke:#181818;stroke-width:1.5;"/></g>' },
+    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,74.18 21.41,91.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><ellipse cx="21.41" cy="97.2" rx="6" ry="6" fill="#FFF" style="stroke:#181818;stroke-width:1.5;"/></g>' },
   CIRCLE_FILL: { decor: 'CIRCLE_FILL', side: 'head', token: '@', puml: '--@', frag:
     '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,74.18 21.41,91.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><ellipse cx="21.41" cy="97.2" rx="6" ry="6" fill="#181818" style="stroke:#181818;stroke-width:1.5;"/></g>' },
   CIRCLE_CONNECT: { decor: 'CIRCLE_CONNECT', side: 'head', token: '(0', puml: '--(0', frag:
-    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,76.18 21.41,93.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><ellipse cx="21.41" cy="103.2" rx="6" ry="6" fill="#FFFFFF" style="stroke:#181818;stroke-width:1.5;"/><path d="M28.4811,96.1289 A10,10 0 0 0 14.3389 96.1289" fill="#FFFFFF" style="stroke:#181818;stroke-width:1.5;"/></g>' },
+    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,76.18 21.41,93.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><ellipse cx="21.41" cy="103.2" rx="6" ry="6" fill="#FFF" style="stroke:#181818;stroke-width:1.5;"/><path d="M28.4811,96.129 A10,10 0 0 0 14.339 96.129" fill="#FFF" style="stroke:#181818;stroke-width:1.5;"/></g>' },
   PARENTHESIS: { decor: 'PARENTHESIS', side: 'head', token: '(', puml: '--(', frag:
-    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,76.18 21.41,93.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><path d="M29.8672,100.1218 A9,9 0 0 0 12.9528 100.1218" fill="none" style="stroke:#181818;stroke-width:1.5;"/></g>' },
+    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,76.18 21.41,93.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><path d="M29.8672,100.122 A9,9 0 0 0 12.953 100.122" fill="none" style="stroke:#181818;stroke-width:1.5;"/></g>' },
   SQUARE: { decor: 'SQUARE', side: 'head', token: '#', puml: '--#', frag:
-    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,81.18 21.41,98.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><rect x="16.41" y="98.2" width="10" height="10" fill="#FFFFFF" style="stroke:#181818;stroke-width:1.5;"/></g>' },
+    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,81.18 21.41,98.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><rect x="16.41" y="98.2" width="10" height="10" fill="#FFF" style="stroke:#181818;stroke-width:1.5;"/></g>' },
   PLUS: { decor: 'PLUS', side: 'head', token: '+', puml: '--+', frag:
-    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4" data-link-type="nested"><path d="M21.41,43.58 C21.41,60.52 21.41,70.18 21.41,87.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><ellipse cx="21.41" cy="95.2" rx="8" ry="8" fill="#FFFFFF" style="stroke:#181818;stroke-width:1;"/><line x1="21.41" y1="87.2" x2="21.41" y2="103.2" style="stroke:#181818;stroke-width:1;"/><line x1="29.41" y1="95.2" x2="13.41" y2="95.2" style="stroke:#181818;stroke-width:1;"/></g>' },
+    '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4" data-link-type="nested"><path d="M21.41,43.58 C21.41,60.52 21.41,70.18 21.41,87.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><ellipse cx="21.41" cy="95.2" rx="8" ry="8" fill="#FFF" style="stroke:#181818;stroke-width:1;"/><line x1="21.41" y1="87.2" x2="21.41" y2="103.2" style="stroke:#181818;stroke-width:1;"/><line x1="29.41" y1="95.2" x2="13.41" y2="95.2" style="stroke:#181818;stroke-width:1;"/></g>' },
   HALF_ARROW_UP: { decor: 'HALF_ARROW_UP', side: 'head', token: '\\\\', puml: '--\\\\', frag:
     '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="4"><path d="M21.41,43.58 C21.41,60.52 21.41,78.18 21.41,95.2" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/><line x1="21.41" y1="103.2" x2="25.41" y2="94.2" style="stroke:#181818;stroke-width:1;"/><line x1="21.41" y1="103.2" x2="21.41" y2="95.2" style="stroke:#181818;stroke-width:1;"/></g>' },
   HALF_ARROW_DOWN: { decor: 'HALF_ARROW_DOWN', side: 'head', token: '//', puml: '--//', frag:
@@ -289,7 +289,7 @@ const PLAIN_WITH_LABEL =
   '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="6" data-link-type="dependency">' +
   '<path d="M59.11,53.5 C74.93,53.5 90.74,53.5 110.71,53.5" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/>' +
   '<polygon points="115.71,53.5,106.71,49.5,110.71,53.5,106.71,57.5,115.71,53.5" fill="#181818" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/>' +
-  '<text x="77.43" y="46.6111" fill="#000000" font-size="13" lengthAdjust="spacing" textLength="20.9625" font-family="sans-serif">use</text></g>';
+  '<text x="77.43" y="46.611" fill="#000" font-size="13" textLength="20.963">use</text></g>';
 
 test('plain --> edge with label conformant vs cached jar fixture (AC1)', () => {
   const { svg, frag } = drawEdge({
@@ -605,7 +605,7 @@ describe('SvekEdgeInput.color (bracket #color override reaches both path and ext
     };
     const { frag } = drawEdge(input);
     // G1c: named colors resolve to their canonical jar hex (blue -> #0000FF).
-    expect(frag).toContain('style="stroke:#0000FF;stroke-width:1;" fill="none" id="a-to-b"');
-    expect(frag).toContain('fill="#0000FF" style="stroke:#0000FF;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"');
+    expect(frag).toContain('style="stroke:#00F;stroke-width:1;" fill="none" id="a-to-b"');
+    expect(frag).toContain('fill="#00F" style="stroke:#00F;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"');
   });
 });

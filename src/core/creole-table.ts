@@ -14,6 +14,8 @@
  * `parseCreoleTokens` and re-exports `measureTable`/`tableTokenToSvg`.
  */
 
+import { attrs } from './svg.js';
+
 // ---------------------------------------------------------------------------
 // Public types
 // ---------------------------------------------------------------------------
@@ -187,8 +189,17 @@ function renderRow(params: RenderRowParams): string {
 
     // Cell border rect
     parts.push(
-      `<rect x="${cellX}" y="${rowY}" width="${colW}" height="${rowHeight}" ` +
-      `fill="none" stroke="#000000" stroke-width="1"/>`,
+      // Through `attrs` -- see usymbol-shapes.ts#filledPath: hand-built
+      // markup bypasses rule 1/rule 2 entirely.
+      `<rect${attrs([
+        ['x', cellX],
+        ['y', rowY],
+        ['width', colW],
+        ['height', rowHeight],
+        ['fill', 'none'],
+        ['stroke', '#000000'],
+        ['stroke-width', 1],
+      ] as const)}/>`,
     );
 
     // Cell text — centered horizontally and vertically
@@ -196,8 +207,11 @@ function renderRow(params: RenderRowParams): string {
     const textY = rowY + rowHeight / 2;
     const weightAttr = isHeader ? ' font-weight="bold"' : '';
     parts.push(
-      `<text x="${textX}" y="${textY}" font-size="${fontSize}"` +
-      `${weightAttr} text-anchor="middle" dominant-baseline="central">` +
+      `<text${attrs([
+        ['x', textX],
+        ['y', textY],
+        ['font-size', fontSize],
+      ] as const)}${weightAttr} text-anchor="middle" dominant-baseline="central">` +
       `<tspan>${content}</tspan>` +
       `</text>`,
     );

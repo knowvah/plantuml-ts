@@ -55,7 +55,7 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
   it('draws the half-rounded header path first, filled #F1F1F1, no stroke', () => {
     expect(out.indexOf('<path')).toBe(0);
     expect(out).toContain(
-      '<path d="M19.5,86 L466.9437,86 A12.5,12.5 0 0 1 479.4437,98.5 L479.4437,110 L7,110 L7,98.5 A12.5,12.5 0 0 1 19.5,86" fill="#F1F1F1"/>',
+      '<path d="M19.5,86 L466.9437,86 A12.5,12.5 0 0 1 479.444,98.5 L479.4437,110 L7,110 L7,98.5 A12.5,12.5 0 0 1 19.5,86" fill="#F1F1F1"/>',
     );
   });
 
@@ -65,7 +65,7 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
 
   it('draws a full, solid (never dashed) outline rect after the header path', () => {
     expect(out).toContain(
-      '<rect x="7" y="86" width="472.4437" height="398" fill="none" stroke="#181818" stroke-width="0.5" rx="12.5" ry="12.5"/>',
+      '<rect x="7" y="86" width="472.444" height="398" fill="none" stroke="#181818" stroke-width="0.5" rx="12.5" ry="12.5"/>',
     );
     expect(out).not.toContain('stroke-dasharray');
   });
@@ -73,7 +73,7 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
   it('draws exactly ONE divider line, at the header/body boundary y=110', () => {
     const dividerCount = (out.match(/<line/g) ?? []).length;
     expect(dividerCount).toBe(1);
-    expect(out).toContain('<line x1="7" y1="110" x2="479.4437" y2="110" stroke="#181818" stroke-width="0.5"/>');
+    expect(out).toContain('<line x1="7" y1="110" x2="479.444" y2="110" stroke="#181818" stroke-width="0.5"/>');
   });
 
   it('centers the title text via textLength, matching jar x=207.0406 (unrounded, same convention as the leaf box)', () => {
@@ -117,10 +117,10 @@ describe('renderComposite — measured shape, WITH body/action lines (Do_Sector-
   it('draws header path, action-zone bg, outline, divider1, divider2, title, action text in that order', () => {
     const order = [
       '<path d="M143.21875,252',
-      '<rect x="130.71875" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>',
-      '<rect x="130.71875" y="252" width="242.5" height="129" fill="none"',
-      '<line x1="130.71875" y1="276" x2="373.21875" y2="276"',
-      '<line x1="130.71875" y1="309" x2="373.21875" y2="309"',
+      '<rect x="130.719" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>',
+      '<rect x="130.719" y="252" width="242.5" height="129" fill="none"',
+      '<line x1="130.719" y1="276" x2="373.219" y2="276"',
+      '<line x1="130.719" y1="309" x2="373.219" y2="309"',
       '>Do_Sector<',
       '>entry / enter_do_sector();<',
       '>exit / exit_do_sector();<',
@@ -134,7 +134,7 @@ describe('renderComposite — measured shape, WITH body/action lines (Do_Sector-
   });
 
   it('draws the action-zone background with fill=stroke=the resolved fill color, stroke-width 1', () => {
-    expect(out).toContain('<rect x="130.71875" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>');
+    expect(out).toContain('<rect x="130.719" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>');
   });
 
   it('draws exactly TWO divider lines (header/body + action-zone bottom)', () => {

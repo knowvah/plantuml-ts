@@ -285,15 +285,15 @@ describe('three-stage theme resolution', () => {
   it('skinparam backgroundColor overrides !theme dark background', async () => {
     const source = [
       '!theme dark',
-      'skinparam backgroundColor #FFFFFF',
+      'skinparam backgroundColor #FFF',
       '@startuml',
       'Alice -> Bob : hi',
       '@enduml',
     ].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
-    // The skinparam value (#FFFFFF) must win over dark theme default (#1E1E1E)
-    expect(svg).toContain('#FFFFFF');
+    // The skinparam value (#FFF) must win over dark theme default (#1E1E1E)
+    expect(svg).toContain('#FFF');
     expect(svg).not.toContain('#1E1E1E');
   });
 
@@ -307,12 +307,12 @@ describe('three-stage theme resolution', () => {
     // Build a valid Partial<Theme> — colors must be the full colors shape.
     // Only `background` changes; everything else falls back to defaultTheme.
     const callerTheme = {
-      colors: { ...defaultTheme.colors, background: '#112233' },
+      colors: { ...defaultTheme.colors, background: '#123' },
     };
     const svg = await render(source, { theme: callerTheme });
     expectNoErrorDiagram(svg);
-    // Caller partial (#112233) wins over skinparam (#ABC)
-    expect(svg).toContain('#112233');
+    // Caller partial (#123) wins over skinparam (#ABC)
+    expect(svg).toContain('#123');
     expect(svg).not.toContain('#ABC');
   });
 
@@ -320,14 +320,14 @@ describe('three-stage theme resolution', () => {
     const source = [
       '@startuml',
       '<style>',
-      'backgroundcolor: #CCDDEE',
+      'backgroundcolor: #CDE',
       '</style>',
       'Alice -> Bob : hi',
       '@enduml',
     ].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
-    expect(svg).toContain('#CCDDEE');
+    expect(svg).toContain('#CDE');
   });
 
   it('output is unchanged when no skinparam or style blocks are present', async () => {
@@ -484,7 +484,7 @@ describe('element-scoped <style> block wired into buildTheme', () => {
       '}',
       'usecase {',
       '  business {',
-      '    BackGroundColor: #112233',
+      '    BackGroundColor: #123',
       '  }',
       '}',
       'package {',

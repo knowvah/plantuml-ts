@@ -50,7 +50,7 @@ function makeGeo(overrides: Partial<StateGeometry> = {}): StateGeometry {
 }
 
 describe('renderState — explicit background rect for non-default background', () => {
-  it('draws NO explicit background <rect> for the default #FFFFFF background', () => {
+  it('draws NO explicit background <rect> for the default #FFF background', () => {
     const node = makeNode({ kind: 'normal', display: 'S' });
     const geo = makeGeo({ states: [node] });
     const svg = assembleSvg(renderState(geo, defaultTheme));

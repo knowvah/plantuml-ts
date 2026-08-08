@@ -19,7 +19,7 @@
  * conformance for reasons unrelated to this task's own code. Confirmed by
  * direct computation: `jarMeasurer.measure('Comp1', {family:'sans-serif',
  * size:14})` = `{width: 49.0205, height: 16.4883}`, matching this file's
- * fresh capture exactly (`textLength="49.0205"`, entity height
+ * fresh capture exactly (`textLength="49.021"`, entity height
  * `46.4883 = 30 (USymbolComponent2 margin) + 16.4883`).
  */
 import { describe, expect, test } from 'vitest';
@@ -170,11 +170,11 @@ function baseParams(overrides: Partial<EntityImageDescriptionParams>): EntityIma
 const JAR_COMP1 =
   '<!--entity Comp1-->' +
   '<g class="entity" data-qualified-name="Comp1" id="ent0001" data-source-line="1">' +
-  '<rect x="0" y="0" width="89.0205" height="46.4883" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
-  '<rect x="69.0205" y="5" width="15" height="10" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<rect x="67.0205" y="7" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<rect x="67.0205" y="11" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="15" y="33.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="49.0205" font-family="sans-serif">Comp1</text>' +
+  '<rect x="0" y="0" width="89.021" height="46.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
+  '<rect x="69.021" y="5" width="15" height="10" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<rect x="67.021" y="7" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<rect x="67.021" y="11" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<text x="15" y="33.535" fill="#000" font-size="14" textLength="49.021">Comp1</text>' +
   '</g>';
 
 describe('EntityImageDescription (T14, AC1) — component entity subtree', () => {
@@ -329,12 +329,12 @@ describe('EntityImageDescription — requireGroups guard', () => {
 const JAR_COMPONENT_STEREO =
   '<!--entity Component-->' +
   '<g class="entity" data-qualified-name="Component" id="ent0001" data-source-line="1">' +
-  '<rect x="0" y="0" width="119.1807" height="62.9766" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
-  '<rect x="99.1807" y="5" width="15" height="10" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<rect x="97.1807" y="7" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<rect x="97.1807" y="11" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
-  '<text x="36.0854" y="33.5352" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="37.0098" font-style="italic" font-family="sans-serif">«red»</text>' +
-  '<text x="15" y="50.0234" fill="#000000" font-size="14" lengthAdjust="spacing" textLength="79.1807" font-family="sans-serif">Component</text>' +
+  '<rect x="0" y="0" width="119.181" height="62.977" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
+  '<rect x="99.181" y="5" width="15" height="10" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<rect x="97.181" y="7" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<rect x="97.181" y="11" width="4" height="2" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>' +
+  '<text x="36.085" y="33.535" fill="#000" font-size="14" textLength="37.01" font-style="italic">«red»</text>' +
+  '<text x="15" y="50.023" fill="#000" font-size="14" textLength="79.181">Component</text>' +
   '</g>';
 
 describe('EntityImageDescription (T14, AC2) — stereotype guillemet block', () => {

@@ -65,7 +65,7 @@ describe('DriverImageSvg emission rounding (SI15 T3, ADR-2)', () => {
       .draw(UImage.build(3.2308, 2.1538, 'data:image/svg+xml;base64,AA=='));
 
     expect(root.getSvgString()).toContain(
-      '<image width="3.2308" height="2.1538" x="0" y="0" xlink:href="data:image/svg+xml;base64,AA=="/>',
+      '<image width="3.231" height="2.154" x="0" y="0" xlink:href="data:image/svg+xml;base64,AA=="/>',
     );
   });
 });
