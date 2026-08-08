@@ -1,3 +1,4 @@
+import { fmt } from '../../../src/core/svg-format.js';
 import { describe, it, expect } from 'vitest';
 import { parseState } from '../../../src/diagrams/state/parser.js';
 import { layoutState } from '../../../src/diagrams/state/layout.js';
@@ -58,8 +59,11 @@ describe('<<sdlreceive>> folded-frame shape (mission G4 S14)', () => {
     const y = Number(rectMatch![2]);
     const width = Number(rectMatch![3]);
     const textWidth = width / 3;
+    // Built through the emitter's own formatter: the `d` attribute is
+    // rule-1 formatted at emission, so a raw-float expectation cannot match.
     const expectedD =
-      `M${x + textWidth},${y} L${x + textWidth},${y + 5} ` + `L${x + textWidth - 7},${y + 12} L${x},${y + 12}`;
+      `M${fmt(x + textWidth)},${fmt(y)} L${fmt(x + textWidth)},${fmt(y + 5)} ` +
+      `L${fmt(x + textWidth - 7)},${fmt(y + 12)} L${fmt(x)},${fmt(y + 12)}`;
     expect(svg).toContain(`d="${expectedD}"`);
   });
 

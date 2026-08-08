@@ -1,3 +1,4 @@
+import { shortenColor } from '../../../src/core/svg-format.js';
 import { describe, it, expect } from 'vitest';
 import type {
   SequenceGeometry,
@@ -61,7 +62,7 @@ describe('renderSequence — participant boxes', () => {
 
   it('uses theme background color for participant fill', () => {
     const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme));
-    expect(svg).toContain(`fill="${defaultTheme.colors.background}"`);
+    expect(svg).toContain(`fill="${shortenColor(defaultTheme.colors.background)}"`);
   });
 
   it('emits participant display text', () => {
@@ -304,8 +305,8 @@ describe('renderSequence — theme colors', () => {
     const svgDefault = assembleSvg(renderSequence(geo, defaultTheme));
     const svgDark = assembleSvg(renderSequence(geo, darkTheme));
     expect(defaultTheme.colors.background).not.toBe(darkTheme.colors.background);
-    expect(svgDefault).toContain(defaultTheme.colors.background);
-    expect(svgDark).toContain(darkTheme.colors.background);
+    expect(svgDefault).toContain(shortenColor(defaultTheme.colors.background));
+    expect(svgDark).toContain(shortenColor(darkTheme.colors.background));
   });
 });
 

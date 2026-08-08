@@ -363,7 +363,7 @@ describe('USymbolCollections', () => {
 describe('USymbolStack', () => {
   const GOLDEN = wrapDocument(
     'style="width:82px;height:46px;" width="82px" height="46px" viewBox="0 0 82 46"',
-    '<rect x="22" y="7" width="44.705" height="36.488" fill="#F1F1F1" style="stroke:none;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
+    '<rect x="22" y="7" width="44.705" height="36.488" fill="#F1F1F1" style="stroke:none;" rx="2.5" ry="2.5"/>' +
       '<path d="M7,7 L19.5,7 A2.5,2.5 0 0 1 22,9.5 L22,40.988 A2.5,2.5 0 0 0 24.5,43.488 L64.205,43.488 ' +
       'A2.5,2.5 0 0 0 66.705,40.988 L66.705,9.5 A2.5,2.5 0 0 1 69.205,7 L81.705,7" style="stroke:#181818;stroke-width:0.5;" fill="none"/>',
   );

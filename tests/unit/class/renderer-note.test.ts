@@ -46,8 +46,8 @@ describe('renderNote — theme-overridden note fontSize (G2 N39)', () => {
     expect(ys).toHaveLength(2);
     // baselineOffset = 10 - 10/4.5; row i's y = note.y + marginY + i*fontSize + baselineOffset.
     const baselineOffset = 10 - 10 / 4.5;
-    expect(ys[1]! - ys[0]!).toBeCloseTo(10, 4);
-    expect(ys[0]).toBeCloseTo(5 + baselineOffset, 4);
+    expect(ys[1]! - ys[0]!).toBeCloseTo(10, 2);
+    expect(ys[0]).toBeCloseTo(5 + baselineOffset, 2);
   });
 });
 
@@ -160,13 +160,13 @@ describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
     };
     const svg = renderNote(baseNote, themed);
     const texts = [...svg.matchAll(/<text[^>]*fill="([^"]*)"[^>]*>/g)];
-    expect(texts.map((m) => m[1])).toEqual(['#FF0000', '#FF0000']);
+    expect(texts.map((m) => m[1])).toEqual(['#F00', '#F00']);
   });
 
   it('falls back to the hardcoded #000000 default when no cascade is set (unset-is-noop regression guard)', () => {
     const svg = renderNote(baseNote, defaultTheme);
     const texts = [...svg.matchAll(/<text[^>]*fill="([^"]*)"[^>]*>/g)];
-    expect(texts.map((m) => m[1])).toEqual(['#000000', '#000000']);
+    expect(texts.map((m) => m[1])).toEqual(['#000', '#000']);
   });
 });
 
@@ -211,10 +211,10 @@ describe('renderNote — per-atom baseline on a mixed-font-size line (G2 N56)', 
     const y13 = 6 + 5 + 18 - 13 / 4.5;
     // Same lineTop/lineHeight, this atom's OWN (larger) descent: 18/4.5.
     const y18 = 6 + 5 + 18 - 18 / 4.5;
-    expect(ys[0]).toBeCloseTo(y13, 4); // "In java, "
-    expect(ys[1]).toBeCloseTo(y18, 4); // "every"
-    expect(ys[2]).toBeCloseTo(y13, 4); // " "
-    expect(ys[3]).toBeCloseTo(y13, 4); // "class"
-    expect(y13 - y18).toBeCloseTo(1.1111, 4); // jar: 26.1111 - 25 == 1.1111
+    expect(ys[0]).toBeCloseTo(y13, 2); // "In java, "
+    expect(ys[1]).toBeCloseTo(y18, 2); // "every"
+    expect(ys[2]).toBeCloseTo(y13, 2); // " "
+    expect(ys[3]).toBeCloseTo(y13, 2); // "class"
+    expect(y13 - y18).toBeCloseTo(1.1111, 2); // jar: 26.1111 - 25 == 1.1111
   });
 });

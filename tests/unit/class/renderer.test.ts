@@ -839,7 +839,7 @@ describe('renderClass — classifier kind fill', () => {
     // FIELD draws a stroke-only circle (fill="none"), LineColor #038048,
     // wrapped in `<g data-visibility-modifier="PUBLIC_FIELD">`.
     expect(svg).toContain('data-visibility-modifier="PUBLIC_FIELD"');
-    expect(svg).toContain('fill="none" stroke="#038048"');
+    expect(svg).toContain('fill="none" style="stroke:#038048;');
   });
 
   it('renders a filled visibility icon for a public METHOD', () => {
@@ -857,7 +857,7 @@ describe('renderClass — classifier kind fill', () => {
     // Public METHOD draws a BackgroundColor-filled circle (#84BE84),
     // stroke LineColor #038048.
     expect(svg).toContain('data-visibility-modifier="PUBLIC_METHOD"');
-    expect(svg).toContain('fill="#84BE84" stroke="#038048"');
+    expect(svg).toContain('fill="#84BE84" style="stroke:#038048;');
   });
 
   it('renders the private/protected/package visibility icon shapes (square/diamond/triangle)', () => {
@@ -883,7 +883,7 @@ describe('renderClass — classifier kind fill', () => {
     // even on a field row -- `VisibilityModifier.java`'s single shared enum
     // entry for both field/method call sites.
     expect(svg).toContain('data-visibility-modifier="IE_MANDATORY"');
-    expect(svg).toContain('fill="#000" stroke="#000"');
+    expect(svg).toContain('fill="#000" style="stroke:#000;');
   });
 });
 
@@ -929,9 +929,11 @@ describe('renderClass — visibility icon Y-centers on classAttributeFontSize, n
     // xabije's own jar-verified 1.1111 residual exactly.
     expect(overriddenY - defaultY).toBeCloseTo(
       visibilityIconOriginY(60, 18) - visibilityIconOriginY(60, 14),
-      4,
+      // 3 places, not 4: both operands are read back out of emitted markup,
+      // which rule 1 rounds to 3 decimals.
+      3,
     );
-    expect(overriddenY - defaultY).toBeCloseTo(-1.1111, 4);
+    expect(overriddenY - defaultY).toBeCloseTo(-1.1111, 3);  // diff of two 3-decimal emitted values
   });
 
   it('falls back to theme.fontSize unchanged when no AttributeFontSize override is set (regression guard)', () => {
@@ -940,7 +942,7 @@ describe('renderClass — visibility icon Y-centers on classAttributeFontSize, n
     // matching `visibilityIconOriginY`'s already-tested `theme.fontSize`
     // (14) behavior plus PRIVATE_FIELD's own `drawSquare(x+2,y+2,...)`
     // offset (`class-visibility-icon.ts`'s own doc comment).
-    expect(y).toBeCloseTo(visibilityIconOriginY(60, 14) + 2, 4);
+    expect(y).toBeCloseTo(visibilityIconOriginY(60, 14) + 2, 2);
   });
 });
 
@@ -1610,7 +1612,9 @@ describe('renderClass — notes', () => {
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('textLength="72.5"');
-    expect(svg).toContain('textLength="6.125"');
+    // Rule 5: single-character text carries no textLength (one glyph has no
+    // inter-character spacing to adjust), so assert its ABSENCE.
+    expect(svg).not.toContain('textLength="6.125"');
   });
 
   it('G2/N13: a resolved member-tip note draws UNWRAPPED (no <g class="entity">) via the Opale zigzag mechanism', () => {

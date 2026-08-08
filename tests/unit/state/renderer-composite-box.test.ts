@@ -5,6 +5,7 @@
  * 2 action lines) — see `src/diagrams/state/renderer-composite-box.ts`'s
  * own doc comment for the full anatomy this mirrors.
  */
+import { fmt } from '../../../src/core/svg-format.js';
 import { describe, it, expect } from 'vitest';
 import { renderComposite } from '../../../src/diagrams/state/renderer-composite-box.js';
 import type { StateNodeGeo } from '../../../src/diagrams/state/state-geo-types.js';
@@ -83,8 +84,10 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
     // float noise; formatted to 3dp at emission by core/svg.ts#attrs, same
     // as every other numeric attribute -- T7 dropped the state engine's own
     // pre-rounding, matching renderer-box.ts's identical convention).
+    // The raw jar convention is unchanged; only its EMITTED form is now
+    // rule-1 formatted, so compute it the way the emitter writes it.
     const expectedX = 7 + 472.4437 / 2 - 72.3625 / 2;
-    expect(out).toContain(`x="${expectedX}"`);
+    expect(out).toContain(`x="${fmt(expectedX)}"`);
   });
 
   it('draws NO action text (no body lines)', () => {
@@ -149,7 +152,7 @@ describe('renderComposite — measured shape, WITH body/action lines (Do_Sector-
     // own y="349.8889" (relative to its real y=315, not this test's y=252,
     // but the SAME dividerY1+ascent formula either way).
     const expectedY = 276 + (14 - 14 / 4.5);
-    expect(out).toContain(`y="${expectedY}"`);
+    expect(out).toContain(`y="${fmt(expectedY)}"`);
   });
 
   it('left-aligns action text at box.x + MARGIN(5)', () => {

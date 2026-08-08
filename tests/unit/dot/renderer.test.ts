@@ -439,7 +439,7 @@ describe('renderDot — node fillcolor and color', () => {
     );
     const svg = assembleSvg(renderDot(geo, theme));
     // Both a and b should pick up the default fill
-    const fillMatches = (svg.match(/fill="#AABBCC"/g) ?? []).length;
+    const fillMatches = (svg.match(/fill="#ABC"/g) ?? []).length;
     expect(fillMatches).toBeGreaterThanOrEqual(2);
   });
 });

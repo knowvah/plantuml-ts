@@ -70,7 +70,7 @@ describe('renderState — explicit background rect for non-default background', 
     // renderer-shell.ts's own doc comment) makes both forms byte-equivalent
     // for the conformance comparator.
     expect(svg).toContain(
-      '<rect x="0" y="0" width="155" height="121" fill="#808080" stroke="none" stroke-width="1"/>',
+      '<rect x="0" y="0" width="155" height="121" fill="#808080" stroke="none"/>',
     );
   });
 

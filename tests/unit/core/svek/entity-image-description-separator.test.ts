@@ -214,7 +214,7 @@ describe('EntityImageDescription — bare Creole horizontal-line separator (G1 I
     expect(svg).not.toContain('text-decoration="line-through"');
     const lines = [...svg.matchAll(/<line ([^/]*)\/>/g)].map((m) => m[1] ?? '');
     expect(lines).toHaveLength(2);
-    const titleText = /<text x="([\d.]+)" y="29.3889"[^>]*>(-)<\/text>/.exec(svg);
+    const titleText = /<text x="([\d.]+)" y="29.389"[^>]*>(-)<\/text>/.exec(svg);
     expect(titleText?.[2]).toBe('-');
   });
 
