@@ -11,7 +11,7 @@
  */
 import { attrs } from '../../core/svg.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
-import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
+import { formatDecimal, DEFAULT_SVG_DECIMALS , shortenColor} from '../../core/svg-format.js';
 
 /**
  * `USymbolFolder#drawFolder`'s `UPath` branch (`roundCorner !== 0`): the
@@ -116,6 +116,6 @@ export function renderFolderPolygon(
 ): string {
   const d3 = DEFAULT_SVG_DECIMALS;
   const pts = points.map(([x, y]) => `${formatDecimal(x, d3)},${formatDecimal(y, d3)}`).join(',');
-  const style = `stroke:${stroke};stroke-width:${formatDecimal(strokeWidth, d3)};stroke-linejoin:miter;stroke-miterlimit:10;`;
+  const style = `stroke:${shortenColor(stroke)};stroke-width:${formatDecimal(strokeWidth, d3)};stroke-linejoin:miter;stroke-miterlimit:10;`;
   return `<polygon${attrs([['points', pts], ['fill', fill], ['style', style]])}/>`;
 }

@@ -33,6 +33,8 @@
  * skinparam).
  */
 
+import { shortenColor } from '../../core/svg-format.js';
+
 export type MonochromeMode = 'true' | 'reverse';
 
 /**
@@ -47,6 +49,21 @@ function grayscaleChannel(r: number, g: number, b: number, mode: MonochromeMode)
 }
 
 const HEX_COLOR_RE = /^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})?$/;
+
+/** The 3-digit `#RGB` short form rule 2 (`svg-format.ts#shortenColor`) now
+ *  emits wherever all three pairs repeat. Both this module's patterns must
+ *  see it: a `#FFF` the monochrome pass skips keeps its ORIGINAL color while
+ *  its neighbours get inverted, which is a wrong picture rather than a
+ *  formatting nit (jar-verified against `bedogi-86-kala547`,
+ *  `jecori-24-pona893` -- `skinparam monochrome reverse`). */
+const SHORT_HEX_COLOR_RE = /^#([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])$/;
+
+/** `#RGB` -> `#RRGGBB`, so the grayscale math below has full channels. */
+function expandShortHex(hex: string): string {
+  const m = SHORT_HEX_COLOR_RE.exec(hex);
+  if (m === null) return hex;
+  return `#${m[1]!}${m[1]!}${m[2]!}${m[2]!}${m[3]!}${m[3]!}`;
+}
 
 /** Fully-transparent alpha (`resolveColorToSvgHex`'s own `#00000000`
  *  "no paint" convention, `HColorSet.ts`) -- left unchanged in both modes: an
@@ -65,7 +82,7 @@ const FULLY_TRANSPARENT_ALPHA = '00';
  * mirrors `resolveColorToSvgHex`'s own "not recognized -> unchanged" contract.
  */
 export function applyMonochromeHex(hex: string, mode: MonochromeMode): string {
-  const m = HEX_COLOR_RE.exec(hex);
+  const m = HEX_COLOR_RE.exec(expandShortHex(hex));
   if (m === null) return hex;
   const [, rHex, gHex, bHex, alphaHex] = m as unknown as [string, string, string, string, string | undefined];
   if (alphaHex === FULLY_TRANSPARENT_ALPHA) return hex;
@@ -90,7 +107,7 @@ export function applyMonochromeHex(hex: string, mode: MonochromeMode): string {
  *  id/class-name conventions -- `ent0001`, `lnk3`, arrow marker ids -- never
  *  collide with this pattern, but scoping to known color properties is the
  *  defensive choice regardless). */
-const COLOR_PROPERTY_RE = /((?:fill|stroke|stop-color)(?:="|:\s*))#([0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?)/g;
+const COLOR_PROPERTY_RE = /((?:fill|stroke|stop-color)(?:="|:\s*))#([0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?|[0-9A-Fa-f]{3}(?![0-9A-Fa-f]))/g;
 
 /**
  * The single post-processing choke point: run once, over the WHOLE assembled
@@ -100,7 +117,12 @@ const COLOR_PROPERTY_RE = /((?:fill|stroke|stop-color)(?:="|:\s*))#([0-9A-Fa-f]{
  */
 export function applyMonochromeToFragment(svg: string, mode: MonochromeMode | undefined): string {
   if (mode === undefined) return svg;
+  // shortenColor is applied HERE and not in `applyMonochromeHex`: this is
+  // an emission site (rule 2's domain), whereas `applyMonochromeHex` is also
+  // called on `resolvedBackground`, a value the renderer then COMPARES.
+  // Shortening that one flipped a background-rect decision and changed the
+  // root `style="background:"` the jar emits in full 6-digit form.
   return svg.replace(COLOR_PROPERTY_RE, (_full, prefix: string, hex: string) => {
-    return `${prefix}${applyMonochromeHex(`#${hex}`, mode)}`;
+    return `${prefix}${shortenColor(applyMonochromeHex(`#${hex}`, mode))}`;
   });
 }

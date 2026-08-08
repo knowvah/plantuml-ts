@@ -62,7 +62,7 @@ import type { Visibility } from './ast.js';
 import type { UrlInfo } from './class-url.js';
 import type { Theme } from '../../core/theme.js';
 import { linkWrap, attrs } from '../../core/svg.js';
-import { fmt, formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
+import { fmt, formatDecimal, shortenColor, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 
 /** `SkinParam#classAttributeIconSize()` default -- skinparam override not wired. */
 export const VISIBILITY_ICON_SIZE = 10;
@@ -140,8 +140,13 @@ const STROKE_WIDTH = 1;
  *  class/lufide-34-cexu026/in.svg`'s eight visibility-icon shapes (T7b --
  *  before this task these three builders emitted DISCRETE `stroke`/
  *  `stroke-width` attributes, which jar never does). */
+/** Rule 2 applies inside a `style=` string exactly as it does to a `stroke=`
+ *  attribute -- the jar shortens both, and the conformance normalizer
+ *  resolves `style` declarations into attributes, so an unshortened color
+ *  here surfaces as an `@stroke` diff.
+ *  @see .../klimt/drawing/svg/SvgGraphics.java#styleMe */
 function styleAttr(stroke: string, strokeWidth: number, suffix = ''): string {
-  return `stroke:${stroke};stroke-width:${formatDecimal(strokeWidth, DEFAULT_SVG_DECIMALS)};${suffix}`;
+  return `stroke:${shortenColor(stroke)};stroke-width:${formatDecimal(strokeWidth, DEFAULT_SVG_DECIMALS)};${suffix}`;
 }
 
 

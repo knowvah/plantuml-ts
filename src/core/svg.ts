@@ -139,14 +139,15 @@ export function escapeXml(s: string): string {
   return s.replace(XML_RE, (ch) => XML_ENTITIES[ch] ?? ch);
 }
 
-/**
- * The one place a value becomes attribute text (ADR-1): a `number` is
- * rounded to `decimals` places the way Java's `%.<n>f` does it and stripped
- * of trailing zeros; a `string` passes through verbatim (already-formatted
- * values, ids, transforms, path data).
- */
-function formatAttrValue(value: string | number, decimals: number): string {
-  return typeof value === 'number' ? formatDecimal(value, decimals) : value;
+/** The single point where an attribute value becomes text: numbers take
+ *  rule 1's formatting, {@link COLOR_ATTRS} take rule 2's shortening (by
+ *  NAME, so a `#`-prefixed id/href survives). Applied here so `attrs` and
+ *  `attrsFromRecord` cannot disagree — they did, and visibility icons
+ *  emitted `fill="#FFFF44"` where the jar emits `#FF4`.
+ *  @see .../klimt/drawing/svg/SvgGraphics.java#shortenColor */
+function formatAttrValue(name: string, value: string | number, decimals: number): string {
+  if (typeof value === 'number') return formatDecimal(value, decimals);
+  return COLOR_ATTRS.has(name) ? shortenColor(value) : value;
 }
 
 /**
@@ -163,7 +164,7 @@ export function attrs(
   const parts: string[] = [];
   for (const [name, value] of entries) {
     if (value !== undefined) {
-      parts.push(`${name}="${formatAttrValue(value, decimals)}"`);
+      parts.push(`${name}="${formatAttrValue(name, value, decimals)}"`);
     }
   }
   return parts.length > 0 ? ' ' + parts.join(' ') : '';
@@ -178,7 +179,7 @@ export function attrsFromRecord(record: SvgAttrs, decimals = DEFAULT_SVG_DECIMAL
   const parts: string[] = [];
   for (const [name, value] of Object.entries(record)) {
     if (value !== undefined) {
-      parts.push(`${name}="${formatAttrValue(value, decimals)}"`);
+      parts.push(`${name}="${formatAttrValue(name, value, decimals)}"`);
     }
   }
   return parts.length > 0 ? ' ' + parts.join(' ') : '';
