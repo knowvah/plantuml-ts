@@ -53,7 +53,7 @@ structurally. Porting only the klimt emitter leaves 393 goldens red.
 
 | Batch | What | Tasks | Gate | Done |
 |---|---|---|---|---|
-| [batch-1](batch-1/overview.md) | Foundation — shared rules module, regeneration script | T1, T2 | normal | [ ] |
+| [batch-1](batch-1/overview.md) | Foundation — shared rules module, regeneration script | T1, T2 | normal | [x] |
 | [batch-2a](batch-2a/overview.md) | Port both emitters | T3, T4, T5 | **deferred** | [ ] |
 | [batch-2b](batch-2b/overview.md) | Remove class-engine pre-rounding | T6a–T6e | **deferred** | [ ] |
 | [batch-2c](batch-2c/overview.md) | State cleanup, formatter retirement, regenerate goldens | T7, T8, T9, T9b | **deferred** | [ ] |
