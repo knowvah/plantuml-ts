@@ -261,8 +261,8 @@ describe('renderClass — association-class-couple "point" entity (G2 N8)', () =
 
 describe('renderClass — interface lollipop (G2 N20)', () => {
   // Byte-verified against `bososa-44-fipu544`'s `dummylol2`: jar draws
-  // `<g class="entity" ...><ellipse cx="21.5313" cy="11" rx="5" ry="5" .../>
-  // </g><text x="6" y="26.8889" ...>toto1</text>` -- the label is a plain
+  // `<g class="entity" ...><ellipse cx="21.531" cy="11" rx="5" ry="5" .../>
+  // </g><text x="6" y="26.889" ...>toto1</text>` -- the label is a plain
   // SIBLING drawn AFTER the entity group closes, not nested inside it
   // (EntityImageLollipopInterface.java:94-133's closeGroup()-then-desc.drawU
   // sequence).

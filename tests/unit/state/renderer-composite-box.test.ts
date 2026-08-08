@@ -55,7 +55,7 @@ describe('renderComposite — measured shape, no body lines (Track_FSM-shape)', 
   it('draws the half-rounded header path first, filled #F1F1F1, no stroke', () => {
     expect(out.indexOf('<path')).toBe(0);
     expect(out).toContain(
-      '<path d="M19.5,86 L466.9437,86 A12.5,12.5 0 0 1 479.444,98.5 L479.4437,110 L7,110 L7,98.5 A12.5,12.5 0 0 1 19.5,86" fill="#F1F1F1"/>',
+      '<path d="M19.5,86 L466.944,86 A12.5,12.5 0 0 1 479.444,98.5 L479.444,110 L7,110 L7,98.5 A12.5,12.5 0 0 1 19.5,86" fill="#F1F1F1"/>',
     );
   });
 
@@ -116,7 +116,7 @@ describe('renderComposite — measured shape, WITH body/action lines (Do_Sector-
 
   it('draws header path, action-zone bg, outline, divider1, divider2, title, action text in that order', () => {
     const order = [
-      '<path d="M143.21875,252',
+      '<path d="M143.219,252',
       '<rect x="130.719" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>',
       '<rect x="130.719" y="252" width="242.5" height="129" fill="none"',
       '<line x1="130.719" y1="276" x2="373.219" y2="276"',

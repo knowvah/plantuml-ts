@@ -14,7 +14,7 @@
  *
  * jarFragment provenance: every reference fragment below is extracted,
  * VERBATIM, from real jar output —
- *   `java -jar ~/git/plantuml/build/libs/plantuml-1.2026.7beta3.jar
+ *   `java -jar ~/git/plantuml/build/libs/plantuml-1.203.7beta3.jar
  *   -tsvg -pipe` on a minimal single-element `.puml` (`[Foo]` /
  *   `skinparam componentStyle uml1|uml2` / `node Foo` / `artifact Foo` /
  *   `file Foo` / `frame Foo`) — captured 2026-07-09. Each fragment is
@@ -54,6 +54,7 @@
  * across all six fixtures, confirming this is a font-metrics constant
  * independent of which `USymbol*` class draws around it.
  */
+import { fmt } from '../../../../src/core/svg-format.js';
 import { describe, expect, test } from 'vitest';
 import type { TextBlock } from '../../../../src/core/klimt/shape/TextBlock.js';
 import { XDimension2D } from '../../../../src/core/klimt/geom/XDimension2D.js';
@@ -213,14 +214,14 @@ const JAR_ARTIFACT_FOO =
   '<text x="10" y="26.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 const JAR_FILE_FOO =
-  '<path d="M0,2.5 L0,33.988 A2.5,2.5 0 0 0 2.5,36.488 L42.2051,36.488 A2.5,2.5 0 0 0 44.705,33.988 ' +
-  'L44.7051,10 L34.7051,0 L2.5,0 A2.5,2.5 0 0 0 0,2.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
-  '<path d="M34.7051,0 L34.7051,7.5 A2.5,2.5 0 0 0 37.205,10 L44.7051,10" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
+  '<path d="M0,2.5 L0,33.988 A2.5,2.5 0 0 0 2.5,36.488 L42.205,36.488 A2.5,2.5 0 0 0 44.705,33.988 ' +
+  'L44.705,10 L34.705,0 L2.5,0 A2.5,2.5 0 0 0 0,2.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
+  '<path d="M34.705,0 L34.705,7.5 A2.5,2.5 0 0 0 37.205,10 L44.705,10" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
   '<text x="10" y="23.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 const JAR_FRAME_FOO =
   '<rect x="0" y="0" width="64.705" height="46.488" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
-  '<path d="M21.5684,0 L21.5684,5 L14.5684,12 L0,12" style="stroke:#181818;stroke-width:0.5;" fill="none"/>' +
+  '<path d="M21.568,0 L21.568,5 L14.568,12 L0,12" style="stroke:#181818;stroke-width:0.5;" fill="none"/>' +
   '<text x="15" y="33.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 
 // ---------------------------------------------------------------------------
@@ -294,7 +295,9 @@ describe('USymbolNode (T6, AC1/AC3) — 3D-box notation', () => {
       [0, 46.4883],
       [0, 10],
     ];
-    const expected = points.map(([x, y]) => `${x},${y}`).join(',');
+    // Formatted through the emitter's own rule-1 formatter rather than
+    // hardcoded at 3 decimals: the array above stays the real jar geometry.
+    const expected = points.map(([x, y]) => `${fmt(x!)},${fmt(y!)}`).join(',');
     expect(JAR_NODE_FOO).toContain(`points="${expected}"`);
   });
 
@@ -517,7 +520,7 @@ describe('USymbolFile/asSmall — roundCorner=0 branch', () => {
     expect(svg).toContain('<polygon points="0,0,0,36.488,44.705,36.488,44.705,10,34.705,0,0,0"');
     // The fold-line UPath's roundCorner===0 branch is a plain two-segment
     // line (no "A" arc command), unlike the roundCorner!==0 fixtures above.
-    expect(svg).toContain('<path d="M34.7051,0 L34.7051,10 L44.7051,10"');
+    expect(svg).toContain('<path d="M34.705,0 L34.705,10 L44.705,10"');
     expect(svg).not.toMatch(/<path d="[^"]*A/);
   });
 });
