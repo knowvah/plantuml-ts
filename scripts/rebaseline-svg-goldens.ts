@@ -212,32 +212,70 @@ export interface Capture {
   exitCode: number;
 }
 
-/** Runs the pinned jar on one fixture's `in.puml` (the exact deterministic-
- *  text invocation `oracle/capture.sh` uses) and returns the captured SVG
- *  bytes -- `undefined` if the jar produced none -- alongside its exit
- *  status. */
-function captureFixture(fixtureDir: string, scratchRoot: string, relPath: string): Capture {
-  const outDir = join(scratchRoot, relPath);
-  mkdirSync(outDir, { recursive: true });
-  const inPuml = join(fixtureDir, 'in.puml');
-  const proc = spawnSync(
-    'java',
-    ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', JAR_PATH, '-tsvg', '-o', outDir, inPuml],
-    { encoding: 'utf8' },
-  );
-  const svgs = existsSync(outDir) ? readdirSync(outDir).filter((f) => f.endsWith('.svg')) : [];
-  const bytes = svgs.length === 0 ? undefined : readFileSync(join(outDir, svgs[0]!));
-  return { bytes, exitCode: proc.status ?? -1 };
+/** Every fixture the jar reported a diagram error for, keyed by the input
+ *  path it printed. A BATCHED run returns a single process exit code, so
+ *  this is how per-fixture error status survives batching -- without it the
+ *  ERROR-DIAGRAM signal would be lost the moment more than one file shares
+ *  a JVM.
+ *
+ *  Format, verified against the pinned jar:
+ *  `Error line 13 in file: <path>` on stderr, one line per errored input. */
+export function parseErroredFiles(stderr: string): ReadonlySet<string> {
+  const out = new Set<string>();
+  for (const m of stderr.matchAll(/^Error line \d+ in file: (.+)$/gm)) {
+    out.add(m[1]!.trim());
+  }
+  return out;
 }
 
-function evaluateFixture(fixtureDir: string, scratchRoot: string, write: boolean): FixtureOutcome {
+/** How many `in.puml` paths to hand a single JVM. The win here is entirely
+ *  JVM STARTUP amortisation -- measured on this corpus, 60 fixtures take
+ *  ~2.3s in one JVM against ~120s one-JVM-per-file, a ~50x difference --
+ *  so the chunk exists only to keep the argv comfortably under ARG_MAX,
+ *  not to tune throughput. Output is byte-identical either way (verified
+ *  over 20 real fixtures).
+ *
+ *  `-nbthread` is deliberately NOT used: it buys about 10% on top of
+ *  batching and shares mutable id state across threads, which is not a
+ *  trade worth making for an oracle. */
+const BATCH_SIZE = 120;
+
+/** Captures a batch of fixtures in ONE jar invocation.
+ *
+ *  Each fixture's `in.puml` is mirrored into the scratch tree first, and
+ *  `-o` is passed RELATIVE (`cap`) so the jar writes beside each input
+ *  rather than into one shared directory -- with a shared `-o`, 446 files
+ *  all named `in.svg` would overwrite each other. */
+function captureBatch(fixtures: readonly { relPath: string; fixtureDir: string }[], scratchRoot: string): Map<string, Capture> {
+  for (const f of fixtures) {
+    mkdirSync(join(scratchRoot, f.relPath), { recursive: true });
+    copyFileSync(join(f.fixtureDir, 'in.puml'), join(scratchRoot, f.relPath, 'in.puml'));
+  }
+  const inputs = fixtures.map((f) => join(scratchRoot, f.relPath, 'in.puml'));
+  const proc = spawnSync(
+    'java',
+    ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', JAR_PATH, '-tsvg', '-o', 'cap', ...inputs],
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+  );
+  const errored = parseErroredFiles(proc.stderr ?? '');
+  const out = new Map<string, Capture>();
+  for (const f of fixtures) {
+    const outDir = join(scratchRoot, f.relPath, 'cap');
+    const svgs = existsSync(outDir) ? readdirSync(outDir).filter((n) => n.endsWith('.svg')) : [];
+    const bytes = svgs.length === 0 ? undefined : readFileSync(join(outDir, svgs[0]!));
+    const inPuml = join(scratchRoot, f.relPath, 'in.puml');
+    out.set(f.relPath, { bytes, exitCode: errored.has(inPuml) ? 200 : 0 });
+  }
+  return out;
+}
+
+function evaluateFixture(fixtureDir: string, scratchRoot: string, write: boolean, captured: Capture): FixtureOutcome {
   const relPath = relative(GOLDENS_ROOT, fixtureDir);
   const goldenPath = join(fixtureDir, 'golden.svg');
   if (!existsSync(goldenPath)) {
     return { relPath, status: 'FAILED', detail: 'missing golden.svg' };
   }
-  const capturedPath = join(scratchRoot, relPath);
-  const captured = captureFixture(fixtureDir, scratchRoot, relPath);
+  const capturedPath = join(scratchRoot, relPath, 'cap');
   const golden = readFileSync(goldenPath);
   const status = compareCapture(captured.bytes, golden);
   if (status === 'CHANGED' && write) {
@@ -273,12 +311,18 @@ function checkPreconditions(write: boolean): string | undefined {
  *  as it goes, and returns the full outcome list for the final summary. */
 function runFixtures(scratchRoot: string, write: boolean): FixtureOutcome[] {
   const fixtureDirs = findSvgGoldenTypeDirs().flatMap((typeDir) => findFixtureDirs(typeDir));
+  const all = fixtureDirs.map((d) => ({ fixtureDir: d, relPath: relative(GOLDENS_ROOT, d) }));
   const outcomes: FixtureOutcome[] = [];
-  for (const dir of fixtureDirs) {
-    const outcome = evaluateFixture(dir, scratchRoot, write);
-    outcomes.push(outcome);
-    const line = formatOutcomeLine(outcome);
-    if (line) process.stdout.write(`${line}\n`);
+  for (let i = 0; i < all.length; i += BATCH_SIZE) {
+    const batch = all.slice(i, i + BATCH_SIZE);
+    const captures = captureBatch(batch, scratchRoot);
+    for (const f of batch) {
+      const captured = captures.get(f.relPath) ?? { bytes: undefined, exitCode: -1 };
+      const outcome = evaluateFixture(f.fixtureDir, scratchRoot, write, captured);
+      outcomes.push(outcome);
+      const line = formatOutcomeLine(outcome);
+      if (line) process.stdout.write(`${line}\n`);
+    }
   }
   return outcomes;
 }

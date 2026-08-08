@@ -14,6 +14,7 @@ import {
   formatOutcomeLine,
   describeOutcome,
   evaluateDrift,
+  parseErroredFiles,
   type FixtureOutcome,
 } from '../../../scripts/rebaseline-svg-goldens.js';
 
@@ -125,6 +126,34 @@ describe('formatOutcomeLine — jar-error visibility', () => {
 
   it('still stays quiet about an ordinary SAME fixture', () => {
     expect(formatOutcomeLine({ relPath: 'svg-class/foo', status: 'SAME' })).toBeUndefined();
+  });
+});
+
+describe('parseErroredFiles', () => {
+  // A batched jar run returns ONE exit code, so per-fixture error status has
+  // to come from stderr. Without this the ERROR-DIAGRAM signal would vanish
+  // the moment more than one fixture shares a JVM.
+  it('attributes each error to the file the jar named', () => {
+    const stderr = [
+      'Error line 13 in file: /scratch/svg-class/a/in.puml',
+      'Some diagram description contains errors',
+      'Error line 4 in file: /scratch/svg-state/b/in.puml',
+    ].join('\n');
+    expect([...parseErroredFiles(stderr)]).toEqual([
+      '/scratch/svg-class/a/in.puml',
+      '/scratch/svg-state/b/in.puml',
+    ]);
+  });
+
+  it('is empty for a clean run', () => {
+    expect(parseErroredFiles('').size).toBe(0);
+    expect(parseErroredFiles('Some unrelated warning\n').size).toBe(0);
+  });
+
+  it('handles a path containing spaces', () => {
+    expect([...parseErroredFiles('Error line 1 in file: /a b/c d/in.puml')]).toEqual([
+      '/a b/c d/in.puml',
+    ]);
   });
 });
 
