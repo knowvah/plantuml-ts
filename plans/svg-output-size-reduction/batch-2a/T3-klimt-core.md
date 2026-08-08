@@ -70,7 +70,12 @@ and defaults to 3. T4 relies on both.
 2. Given a stroke, fill, or gradient stop of `#FF0000`, when emitted, then
    `#F00`; given `#181818`, then unchanged.
 3. Given any coordinate, when emitted, then 3 decimals with trailing zeros
-   trimmed (`77.8125 → 77.813`, `28.4805 → 28.48`).
+   trimmed (`77.8125 → 77.813`, `28.4805 → 28.481`).
+
+   > **Corrected 2026-08-08 (T1).** This read `28.4805 → 28.48`. Wrong:
+   > `28.4805`'s shortest round-trip decimal is `28.4805`, so HALF_UP on
+   > the 4th decimal rounds **up**. Verified on a live JVM —
+   > `String.format(Locale.US, "%.3f", 28.4805)` → `28.481`.
 4. Given the root `g`, when the document is built, then it carries
    `font-family="sans-serif"` and the correct `lengthAdjust`.
 5. Given `fill-opacity`, when emitted, then `formatOpacity`'s form — `0`

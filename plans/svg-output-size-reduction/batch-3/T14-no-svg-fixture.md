@@ -2,7 +2,35 @@
 
 **Agent:** debugger · **Depends on:** T9 · **Commit:** `fix(T14): <mechanism>` or `docs(T14): explain the no-svg fixture`
 
-## Context
+> ## ⚠ PREMISE VOID — diagnosed 2026-08-08 during T2. Read this first.
+>
+> **The fixture does not fail.** The jar emits a valid 2147-byte SVG and
+> exits 200. That SVG is a PlantUML **error diagram** (green `#33FF02` on
+> black) reading `Use 'allowmixing' if you want to mix classes and other
+> UML elements. (Assumed diagram type: class)`. The committed `golden.svg`
+> (2645 B) is the same error diagram, captured before the size-reduction
+> commits — so it re-baselines like any other golden.
+>
+> **Mechanism of the original report:** the ad-hoc scratch script behind
+> `SAME=0 CHANGED=445 FAILED=1` classified FAILED by the jar's **exit
+> code**; `scripts/rebaseline-svg-goldens.ts` classifies by **SVG
+> presence**, per its spec. They disagree on this fixture and no other.
+>
+> **Ruled out:** differently-named output file (the jar writes `in.svg`
+> where expected); `-o` handling (identical invocation to every other
+> fixture); pin advance as cause (the fixture is authored — SI10/T3 — and
+> its own header says it deliberately exercises a bare `actor` reachable
+> *without* `allowmixing`, so pinning the jar's error output is the point).
+>
+> Full artifact: `.agent-notes/svg-rebaseline-error-diagram-fixture.md`.
+>
+> **What remains for T14:** confirm the fixture re-baselined cleanly in T9
+> and that `ERROR-DIAGRAM=1` names only this fixture. Do **not** re-run the
+> diagnosis, un-pin the ratchet entry, or change the fixture — there is no
+> defect. Acceptance criteria 1–3 below are already satisfied by the note.
+> Expected disposition: `docs(T14)`, not `fix(T14)`.
+
+## Context (as originally written — superseded above)
 
 One pinned fixture produces **no SVG from the jar at all**. It is the sole
 `FAILED` in the regeneration run and predates this mission — it is not

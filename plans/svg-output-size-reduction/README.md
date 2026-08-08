@@ -56,7 +56,7 @@ structurally. Porting only the klimt emitter leaves 393 goldens red.
 | [batch-1](batch-1/overview.md) | Foundation — shared rules module, regeneration script | T1, T2 | normal | [ ] |
 | [batch-2a](batch-2a/overview.md) | Port both emitters | T3, T4, T5 | **deferred** | [ ] |
 | [batch-2b](batch-2b/overview.md) | Remove class-engine pre-rounding | T6a–T6e | **deferred** | [ ] |
-| [batch-2c](batch-2c/overview.md) | State cleanup, formatter retirement, regenerate goldens | T7, T8, T9 | **deferred** | [ ] |
+| [batch-2c](batch-2c/overview.md) | State cleanup, formatter retirement, regenerate goldens | T7, T8, T9, T9b | **deferred** | [ ] |
 | [batch-2d](batch-2d/overview.md) | Test repair | T10–T13 | **FULL GATE HERE** | [ ] |
 | [batch-3](batch-3/overview.md) | No-SVG fixture, docs + version | T14, T15 | normal | [ ] |
 
@@ -91,7 +91,12 @@ npx tsx scripts/rebaseline-svg-goldens.ts      # report only, no --write
 - An ADR in `decisions.md` is contradicted by what the code requires
 - **>20 goldens still failing after the full port lands** — that is a
   missed rule, not churn; diagnose before touching goldens
-- The regeneration script reports `FAILED` > 1 (one known: T14)
+- The regeneration script reports `FAILED` > 0. **Corrected 2026-08-08
+  (T2):** this originally read `> 1`, budgeting for one known failure —
+  `class-actor-bare-no-allowmixing`. That fixture does **not** fail: the
+  jar emits a valid 2147-byte *error diagram* and exits 200, which the
+  script correctly classifies CHANGED. Expect `FAILED=0`. See the decision
+  journal and `.agent-notes/svg-rebaseline-error-diagram-fixture.md`.
 - **Any last-digit mismatch pattern after T6/T7** — means pre-rounding
   survived somewhere; `rules/diagnosis.md` applies, find the call site
 

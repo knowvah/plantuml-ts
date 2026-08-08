@@ -6,8 +6,8 @@ green. This is the last normally-gated batch until the end of batch-2d.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Shared SVG format rules module | typescript-pro | `src/core/svg-format.ts` + test | — | [ ] |
-| T2 | Golden regeneration script | tooling-engineer | `scripts/rebaseline-svg-goldens.ts` + test | — | [ ] |
+| T1 | Shared SVG format rules module | typescript-pro | `src/core/svg-format.ts` + test | — | [x] |
+| T2 | Golden regeneration script | tooling-engineer | `scripts/rebaseline-svg-goldens.ts` + test | — | [x] |
 
 T1 and T2 are fully parallel — no shared files, no shared concepts.
 
