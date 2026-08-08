@@ -205,7 +205,7 @@ function buildUnderlinedNameRows(
     return [
       {
         text: display, y, indent,
-        width: javaRound4(measurer.measure(display, nameFontSpec).width),
+        width: measurer.measure(display, nameFontSpec).width,
         underline: true,
         ...fontSizeField,
       },
@@ -216,8 +216,8 @@ function buildUnderlinedNameRows(
   const nameRawWidth = measurer.measure(namePart, nameFontSpec).width;
   const typeRawWidth = measurer.measure(typePart, nameFontSpec).width;
   return [
-    { text: namePart, y, indent, width: javaRound4(nameRawWidth), underline: true, ...fontSizeField },
-    { text: typePart, y, indent: indent + nameRawWidth, width: javaRound4(typeRawWidth), ...fontSizeField },
+    { text: namePart, y, indent, width: nameRawWidth, underline: true, ...fontSizeField },
+    { text: typePart, y, indent: indent + nameRawWidth, width: typeRawWidth, ...fontSizeField },
   ];
 }
 

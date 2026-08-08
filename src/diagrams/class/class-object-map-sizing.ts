@@ -42,7 +42,6 @@ import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ClassifierGeo } from './layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
-import { javaRound4 } from '../../core/number-format.js';
 import { isEnhancedBody } from './class-body-enhanced.js';
 import { measureEnhancedBody } from './class-body-enhanced-layout.js';
 import type { Dim } from './class-object-map-header.js';
@@ -244,8 +243,9 @@ function methodOrFieldHeight(fieldsHeight: number, showFields: boolean): number 
  * `headerRows` in ./class-object-map-header.ts, one row-height stride per
  * index `i`) -- NOT the pre-O1 half-height guess (`i*fontSize +
  * fontSize/2`), which only coincided with jar for a font with zero descent
- * (never, for real text). Every row also carries its OWN `javaRound4`'d raw
- * text width for `textLength` -- jar-verified against figeze-77-fozi735's
+ * (never, for real text). Every row also carries its OWN raw text width
+ * for `textLength` (rounded at emission, `core/svg.ts`) -- jar-verified
+ * against figeze-77-fozi735's
  * "user" (`name = "Dummy"` -> 101.4125, `id = 123` -> 42.525, visibly
  * DIFFERENT per-row values, ruling out a shared-block-width hypothesis) and
  * nukera-08-dige359's p1 (4 identical-text visibility-icon rows, baseline
@@ -284,7 +284,7 @@ function measureObjectFields(
         text: run.text,
         y,
         indent: textIndent + run.x,
-        width: javaRound4(run.width),
+        width: run.width,
         // G3/O4: `visibilityIsField: true` UNCONDITIONALLY -- upstream's
         // `BodierLikeClassOrObject#getFieldsToDisplay` OBJECT branch
         // constructs EVERY member via `Member.field(s)` (never `Member
