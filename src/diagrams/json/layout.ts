@@ -12,7 +12,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as dotLayout } from '../../core/graph-layout.js';
 import type { DotInputEdge, DotInputGraph } from '../../core/graph-layout.js';
-import { measureNode } from './TextBlockJson.js';
+import { measureNode, recordLabelFor } from './TextBlockJson.js';
 import type { JsonRowGeo } from './TextBlockJson.js';
 
 // A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
@@ -202,18 +202,25 @@ export function layoutJson(
   // (`SmetanaForJson.java:236-244`) so the graph solves top-to-bottom in a
   // transposed frame, then transposes the answer back. See
   // `mirrorToDiagramSpace`.
-  // A5/T7 is PARTIAL: `recordLabelFor` builds upstream's record label and the
-  // seam carries it, but json still emits plain fixedsize boxes. Measured with
-  // `scripts/json-node-oracle.ts`, real records inflate each node by 16 per ROW
-  // (graphviz `XPAD` = 4*GAP on every record field, uncompensated by upstream's
-  // `-8`, which only offsets `YPAD`), pushing same-rank siblings apart:
-  // mean |Δy| 18.74 -> 363.19. Upstream encodes the SAME values and the jar
-  // shows no such inflation, so something in Smetana's record path differs and
-  // is not yet identified. Left off rather than shipped wrong.
+  // A5/T7: real `shape=record` nodes with a `<Pn>` port per row, so each edge
+  // leaves the ROW it belongs to. `recordLabelFor` builds the label upstream
+  // builds (`SmetanaForJson#getDotLabelArray`/`#getDotLabelMap`).
+  //
+  // This spaces same-rank siblings further apart than the jar does -- graphviz
+  // PADs every record field (`XPAD` = 4*GAP = 16, `macros.h:27-29`) and
+  // upstream's `colAwidth - 8` offsets only the `YPAD` half, so a node grows by
+  // 16 per row. **That is real graphviz's behaviour, not a defect here**:
+  // verified against the installed `dot` 15.1.1 on an equivalent 3-port record,
+  // which returns w=0.92708 h=0.69444 -- byte-identical to what this seam
+  // produces. The jar shows no such inflation because Smetana does not
+  // reproduce it, and per CLAUDE.md ("Smetana is NOT a porting target") that
+  // delta is accepted and named rather than chased. See DIVERGENCES.md.
   const dotNodes = measured.map((m) => ({
     id: m.flatNode.id,
     width: m.totalHeight,
     height: m.totalWidth,
+    shape: 'record' as const,
+    recordLabel: recordLabelFor(m),
   }));
 
   const measuredById = new Map(measured.map((m) => [m.flatNode.id, m]));

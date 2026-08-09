@@ -283,9 +283,29 @@ const RECORD_FIELD_GAP = 4;
  * full-height cell) beside a nested stack of ported column-B cells.
  */
 export function recordLabelFor(m: MeasuredNode): string {
+  // Compensate for the padding OUR engine applies, on BOTH axes.
+  //
+  // `size_reclbl` pads every leaf field by `XPAD` (`d.x += 4*GAP` = 16) and
+  // `YPAD` (`d.y += 2*GAP` = 8) — `~/git/graphviz/lib/common/macros.h:27-29`.
+  // Encoding a cell at its intended size therefore overshoots by exactly that,
+  // so the encoded value is the intended size MINUS the padding.
+  //
+  // Upstream subtracts only the `YPAD` half (`colAwidth - 8`), and that is not
+  // an oversight on its part: Smetana does not reproduce `XPAD`, so upstream
+  // has nothing to compensate there. `@knowvah/dot-engine` DOES — verified
+  // against the installed `dot` 15.1.1, which returns byte-identical record
+  // geometry for the same label. Per CLAUDE.md ("Smetana is NOT a porting
+  // target") this port follows the faithful engine, which means compensating
+  // both axes rather than copying a compensation calibrated to a transpile
+  // that pads once.
+  //
+  // Sourced, not fitted: both terms come from `macros.h`, the same place
+  // upstream's own `- 8` comes from.
+  const heightPad = 4 * RECORD_FIELD_GAP;
   const widthA = m.keyColWidth - 2 * RECORD_FIELD_GAP;
   const widthB = m.valueColWidth - 2 * RECORD_FIELD_GAP;
-  const cell = (height: number, width: number): string => `_dim_${height}_${width}_`;
+  const cell = (height: number, width: number): string =>
+    `_dim_${height - heightPad}_${width}_`;
   const ported = (i: number, height: number, width: number): string =>
     `<P${i}>${cell(height, width)}`;
 
