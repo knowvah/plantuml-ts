@@ -1,9 +1,23 @@
+/**
+ * `dotPlugin` — the assembled `@startdot` pipeline.
+ *
+ * This file used to assert that `skinparam` and `<style>` blocks recoloured
+ * the output. They never did upstream, and now they do not here either: the
+ * jar renders `@startdot` by handing the DOT to graphviz and writing its bytes
+ * out (`directdot/PSystemDot`), so a PlantUML skin has nothing to act on.
+ *
+ * That is not an assumption. Measured against the pinned oracle jar: a block
+ * with `skinparam BackgroundColor #AABBCC` above its `digraph` produces output
+ * BYTE-IDENTICAL to the same block without it. The old assertions were
+ * asserting a divergence; these assert the faithful behaviour.
+ */
 import { describe, it, expect } from 'vitest';
+
 import { dotPlugin } from '../../../src/diagrams/dot/index.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
-import { assembleSvg } from '../../../src/index.js';
+import { assembleSvg, renderSync } from '../../../src/index.js';
 
 const measurer = new FormulaMeasurer();
 const theme = defaultTheme;
@@ -18,142 +32,81 @@ function renderFull(source: UmlSource): string {
   return assembleSvg(dotPlugin.render(geo, theme));
 }
 
+const GRAPH = ['@startdot', 'digraph G {', '  a -> b;', '}', '@enddot'];
+
 describe('dotPlugin.parse()', () => {
-  it('passes rawStyles from UmlSource into AST', () => {
-    const source = makeSource(['@startdot', 'digraph { a }', '@enddot'], ['node { BackgroundColor: red }']);
-    const ast = dotPlugin.parse(source);
+  it('passes rawStyles from UmlSource into the AST', () => {
+    const ast = dotPlugin.parse(makeSource(GRAPH, ['node { BackgroundColor: red }']));
     expect(ast.rawStyles).toHaveLength(1);
     expect(ast.rawStyles[0]).toContain('BackgroundColor');
   });
 
   it('rawStyles defaults to [] when UmlSource provides none', () => {
-    const source: UmlSource = { type: 'dot', lines: ['@startdot', 'digraph { a }', '@enddot'] };
-    const ast = dotPlugin.parse(source);
+    const ast = dotPlugin.parse({ type: 'dot', lines: GRAPH });
     expect(ast.rawStyles).toEqual([]);
   });
 });
 
-describe('dotPlugin.layoutSync() — skinparam overrides', () => {
-  it('skinparam BackgroundColor is accepted without error', () => {
-    const source = makeSource([
-      '@startdot',
-      'skinparam BackgroundColor #AABBCC',
-      'digraph { a -> b }',
-      '@enddot',
-    ]);
-    expect(() => renderFull(source)).not.toThrow();
+describe('dotPlugin — skin directives are inert, as upstream', () => {
+  const baseline = renderFull(makeSource(GRAPH));
+
+  it('a skinparam line changes nothing about the output', () => {
+    const withSkin = renderFull(
+      makeSource(['@startdot', 'skinparam BackgroundColor #AABBCC', ...GRAPH.slice(1)]),
+    );
+    expect(withSkin).toBe(baseline);
   });
 
-  it('skinparam FontColor is accepted without error', () => {
-    const source = makeSource([
-      '@startdot',
-      'skinparam FontColor #FF0000',
-      'digraph { a -> b }',
-      '@enddot',
-    ]);
-    expect(() => renderFull(source)).not.toThrow();
+  it('several skinparam lines still change nothing', () => {
+    const withSkin = renderFull(
+      makeSource([
+        '@startdot',
+        'skinparam BackgroundColor #AABBCC',
+        'skinparam FontColor #FF0000',
+        'skinparam FontSize 22',
+        ...GRAPH.slice(1),
+      ]),
+    );
+    expect(withSkin).toBe(baseline);
+  });
+
+  it('a <style> block changes nothing', () => {
+    const withStyle = renderFull(
+      makeSource(GRAPH, ['node { BackgroundColor: red }', 'edge { LineColor: blue }']),
+    );
+    expect(withStyle).toBe(baseline);
+  });
+
+  it('an empty rawStyles array changes nothing', () => {
+    expect(renderFull(makeSource(GRAPH, []))).toBe(baseline);
   });
 });
 
-describe('dotPlugin.layoutSync() — <style> block overrides', () => {
-  it('node BackgroundColor applies without error and produces SVG', () => {
-    const svg = renderFull(makeSource(
-      ['@startdot', 'digraph { a -> b }', '@enddot'],
-      ['node { BackgroundColor: #FFD700 }'],
-    ));
-    expect(svg).toContain('<svg');
-    expect(svg).toContain('#FFD700');
+describe('dotPlugin — output shape', () => {
+  it('emits graphviz\'s document, untouched by assembleSvg', () => {
+    const svg = renderFull(makeSource(GRAPH));
+    expect(svg).toContain('id="graph0"');
+    expect(svg).toMatch(/width="\d+pt"/);
   });
 
-  it('node BorderColor applies without error and produces SVG', () => {
-    const svg = renderFull(makeSource(
-      ['@startdot', 'digraph { a }', '@enddot'],
-      ['node { BorderColor: #C00 }'],
-    ));
-    expect(svg).toContain('#C00');
+  it('renders chrome when the block carries a title (deliberate divergence)', () => {
+    // Through the real entry point, not `renderFull`: chrome is composed by
+    // `applyAnnotationChrome` inside src/index.ts's render path, which
+    // `assembleSvg` alone does not reach.
+    const svg = renderSync(['@startdot', 'title My Graph', ...GRAPH.slice(1)].join('\n'));
+    expect(svg).toContain('My Graph');
+    expect(svg).toContain('id="graph0"');
   });
 
-  it('diagram BackgroundColor applies without error and produces SVG', () => {
-    const svg = renderFull(makeSource(
-      ['@startdot', 'digraph { a -> b }', '@enddot'],
-      ['diagram { BackgroundColor: #E0F0FF }'],
-    ));
-    expect(svg).toContain('<svg');
-    expect(svg).toContain('#E0F0FF');
-  });
-
-  it('edge LineColor applies without error and produces SVG', () => {
-    const svg = renderFull(makeSource(
-      ['@startdot', 'digraph { a -> b }', '@enddot'],
-      ['edge { LineColor: #0A0 }'],
-    ));
-    expect(svg).toContain('<svg');
-    expect(svg).toContain('#0A0');
-  });
-
-  it('multiple style rules in one block all apply', () => {
-    const svg = renderFull(makeSource(
-      ['@startdot', 'digraph { a -> b }', '@enddot'],
-      ['node { BackgroundColor: #FEC }\nedge { LineColor: #08F }'],
-    ));
-    expect(svg).toContain('#FEC');
-    expect(svg).toContain('#08F');
-  });
-
-  it('diagram FontColor applies to SVG text', () => {
-    const svg = renderFull(makeSource(
-      ['@startdot', 'digraph { a }', '@enddot'],
-      ['diagram { FontColor: #A0A }'],
-    ));
-    expect(svg).toContain('#A0A');
-  });
-
-  it('diagram FontName applies without error', () => {
-    expect(() => renderFull(makeSource(
-      ['@startdot', 'digraph { a }', '@enddot'],
-      ['diagram { FontName: Helvetica }'],
-    ))).not.toThrow();
-  });
-
-  it('diagram FontSize applies without error', () => {
-    expect(() => renderFull(makeSource(
-      ['@startdot', 'digraph { a }', '@enddot'],
-      ['diagram { FontSize: 12 }'],
-    ))).not.toThrow();
-  });
-
-  it('node FontColor applies to SVG text', () => {
-    const svg = renderFull(makeSource(
-      ['@startdot', 'digraph { a }', '@enddot'],
-      ['node { FontColor: #050 }'],
-    ));
-    expect(svg).toContain('#050');
-  });
-
-  it('node FontSize and FontName apply without error', () => {
-    expect(() => renderFull(makeSource(
-      ['@startdot', 'digraph { a -> b }', '@enddot'],
-      ['node { FontSize: 16\nFontName: Courier }'],
-    ))).not.toThrow();
-  });
-
-  it('edge FontColor applies without error', () => {
-    expect(() => renderFull(makeSource(
-      ['@startdot', 'digraph { a -> b }', '@enddot'],
-      ['edge { FontColor: #880088 }'],
-    ))).not.toThrow();
-  });
-
-  it('empty rawStyles array leaves theme unchanged', () => {
-    const svgDefault = renderFull(makeSource(['@startdot', 'digraph { a }', '@enddot']));
-    const svgStyled = renderFull(makeSource(['@startdot', 'digraph { a }', '@enddot'], []));
-    expect(svgDefault).toBe(svgStyled);
+  it('emits graphviz\'s document verbatim through the real entry point when there is no chrome', () => {
+    const svg = renderSync(GRAPH.join('\n'));
+    expect(svg.startsWith('<?xml')).toBe(true);
+    expect(svg).not.toContain('<marker');
   });
 });
 
 describe('dotPlugin.accepts()', () => {
   it('always returns false (routing handled by START_SUFFIX_MAP)', () => {
-    expect(dotPlugin.accepts(['@startdot', 'digraph { a }', '@enddot'])).toBe(false);
-    expect(dotPlugin.accepts([])).toBe(false);
+    expect(dotPlugin.accepts(['digraph { a }'])).toBe(false);
   });
 });
