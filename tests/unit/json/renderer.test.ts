@@ -279,10 +279,18 @@ describe('renderJson — structural', () => {
     });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    expect(body).toContain('d="M 0 0 C 50 0 50 50 100 50"');
+    // A5/T8: the path is now the ported `JsonCurve` -- a 13-unit stub
+    // extrapolated along the spline's OWN direction (`supp`), a line to the
+    // spline start, then the engine's cubic segments. p0=(0,0) away from
+    // p1=(50,0) puts the stub at (-13, 0).
+    expect(body).toContain('d="M -13 0 L 0 0 C 50 0 50 50 100 50"');
   });
 
-  it('non-spline edge with 2 points builds stub+bezier path', () => {
+  // A5/T8: a 2-point spline yields a stub and a line, and NOTHING else. The
+  // hand-built S-curve this used to assert was an invention -- upstream's
+  // `drawCurve` only emits cubics for the points the engine actually returned
+  // (`for (i = 1; i < size; i += 3)`), so two points produce no curve at all.
+  it('a 2-point edge is stub + line, with no invented curve', () => {
     const edge = makeEdge({
       spline: false,
       points: [{ x: 10, y: 20 }, { x: 90, y: 60 }],
@@ -291,9 +299,12 @@ describe('renderJson — structural', () => {
       nodes: [makeNode({ id: 'n0' }), makeNode({ id: 'n1', x: 200, y: 0 })],
       edges: [edge],
     });
-    const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const body = contentAfterDefs(svg);
-    expect(body).toContain('d="M -3 20 L 10 20 C 42 20 58 44 90 60"');
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    const d = /d="([^"]*)"/.exec(body.slice(body.indexOf('<path')))?.[1] ?? '';
+    expect(d).toContain('L 10 20');
+    expect(d).not.toContain('C');
+    // The stub runs back along the segment's own direction, not horizontally.
+    expect(d.startsWith('M -1.6')).toBe(true);
   });
 
   it('number value uses numberValue color', () => {
@@ -376,7 +387,11 @@ describe('renderJson — branch coverage', () => {
     });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    expect(body).toContain('d="M 50 30"');
+    // A5/T8: with no second point there is no direction to extrapolate along,
+    // so `veryFirstPoint` degrades to p0 itself and the path is a zero-length
+    // stub. Upstream would index past the end here; a 1-point spline is not
+    // something the engine produces, and this guard is documented on `supp`.
+    expect(body).toContain('d="M 50 30 L 50 30"');
   });
 
   it('spline=true with only 2 points falls back to stub+bezier path', () => {
@@ -390,7 +405,10 @@ describe('renderJson — branch coverage', () => {
     });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    expect(body).toContain('d="M -3 10 L 10 10 C 42 10 58 58 90 90"');
+    // A5/T8: as above -- two points, so a stub and a line, no cubic.
+    const d2 = /d="([^"]*)"/.exec(body.slice(body.indexOf('<path')))?.[1] ?? '';
+    expect(d2).toContain('L 10 10');
+    expect(d2).not.toContain('C');
   });
 
   it('nested valueType with non-empty value uses keyText color (default branch)', () => {

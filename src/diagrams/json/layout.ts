@@ -295,38 +295,23 @@ export function layoutJson(
     rankMaxRight.set(n.x, Math.max(cur, n.x + n.width));
   }
 
-  // Build edges anchored to parent rows, not to node centers.
-  // Java: createEdge sets tailport="P{rowIndex}" so graphviz routes from the
-  // specific row's port on the right side of the parent node. We replicate this
-  // by computing the start point directly from the parent row's geometry.
-  const nodeById = new Map(nodes.map((n) => [n.id, n]));
-  const edges: JsonEdgeGeo[] = [];
-  for (const fn of flatNodes) {
-    if (fn.parentId === null) continue;
-    const parent = nodeById.get(fn.parentId);
-    const child = nodeById.get(fn.id);
-    if (parent === undefined || child === undefined) continue;
-
-    // Find the row in the parent whose key matches this child's entry.
-    const parentRow = parent.rows.find((r) => r.key === (fn.parentKey ?? ''));
-    const startX = parent.x + parent.width;
-    const startY =
-      parentRow !== undefined
-        ? parent.y + parentRow.y + parentRow.height / 2
-        : parent.y + parent.height / 2;
-    const endX = child.x;
-    const endY = child.y + child.height / 2;
-
-    // If a wider sibling exists at the same rank, add a horizontal waypoint at
-    // the rank boundary so the edge travels through the inter-rank gap rather
-    // than cutting through that sibling's bounding box.
-    const rankRight = rankMaxRight.get(parent.x) ?? startX;
-    const points: Array<{ x: number; y: number }> = [{ x: startX, y: startY }];
-    if (rankRight > startX) points.push({ x: rankRight, y: startY });
-    points.push({ x: endX, y: endY });
-
-    edges.push({ points, spline: false });
-  }
+  // A5/T8: the edges are the ENGINE's own splines, transposed into diagram
+  // space, not points re-derived from node geometry. Upstream does the same --
+  // `SmetanaForJson#drawMe` hands each `ST_Agedge_s` to `JsonCurve`, which
+  // reads `data.spl` (`JsonCurve.java:58-71`).
+  //
+  // This became worth doing at T7: with real `<Pn>` record ports the engine
+  // routes each edge out of the row it belongs to, so its spline carries
+  // information the old re-derivation could only approximate (a horizontal
+  // stub plus a hand-built S-curve).
+  //
+  // Same transposition as the nodes, and for the same reason -- `yAxis: 'down'`
+  // has already applied `Mirror#inv`, so only the x/y switch remains. See
+  // `mirrorToDiagramSpace`.
+  const edges: JsonEdgeGeo[] = dotResult.edges.map((e) => ({
+    points: e.points.map((p) => ({ x: p.y + CANVAS_PAD, y: p.x + CANVAS_PAD })),
+    spline: true,
+  }));
 
   // Canvas size: rightmost/bottommost extent of all positioned nodes plus a
   // right/bottom margin equal to CANVAS_PAD. Nodes already include the left/top

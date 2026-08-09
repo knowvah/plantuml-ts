@@ -8,6 +8,7 @@
 import { rect, line, text, path, ellipse } from '../../core/svg.js';
 import { openArrowHeadDef } from '../../core/svg-markers.js';
 import { getSeed, seedOf } from '../../core/klimt/drawing/svg/svg-seed.js';
+import { buildCurvePath, veryFirstPoint } from './JsonCurve.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
@@ -33,50 +34,6 @@ function valueColor(
     case 'null': return json?.nullValue ?? '#767676';
     default: return json?.keyText ?? '#181818';
   }
-}
-
-function buildEdgePathD(
-  edge: JsonEdgeGeo,
-): string {
-  const pts = edge.points;
-  if (pts.length === 0) return '';
-
-  const p0 = pts[0];
-  if (p0 === undefined) return '';
-
-  if (pts.length === 1) {
-    return `M ${p0.x} ${p0.y}`;
-  }
-
-  if (edge.spline && pts.length >= 4) {
-    // Explicit Bézier control points: M p0 C p1 p2 p3 [C p4 p5 p6 ...]
-    const parts: string[] = [`M ${p0.x} ${p0.y}`];
-    let i = 1;
-    while (i + 2 < pts.length) {
-      const cp1 = pts[i]!;
-      const cp2 = pts[i + 1]!;
-      const end = pts[i + 2]!;
-      parts.push(`C ${cp1.x} ${cp1.y} ${cp2.x} ${cp2.y} ${end.x} ${end.y}`);
-      i += 3;
-    }
-    return parts.join(' ');
-  }
-
-  // Stub + optional horizontal segment + S-curve to child.
-  // When a rank-boundary waypoint is present (3-point edge), the edge travels
-  // horizontally to clear wider siblings at the same rank before curving to
-  // the destination. Without a waypoint (2-point edge), it curves directly.
-  const DOT_STUB = 13;
-  const pEnd = pts[pts.length - 1]!;
-  const pCurveStart = pts.length >= 3 ? pts[pts.length - 2]! : p0;
-  const dx = pEnd.x - pCurveStart.x;
-  const dy = pEnd.y - pCurveStart.y;
-  const cp1x = pCurveStart.x + dx * 0.4;
-  const cp2x = pCurveStart.x + dx * 0.6;
-  const cp2y = pCurveStart.y + dy * 0.6;
-  const curve = `C ${cp1x} ${pCurveStart.y} ${cp2x} ${cp2y} ${pEnd.x} ${pEnd.y}`;
-  const horizontal = pts.length >= 3 ? `L ${pCurveStart.x} ${p0.y} ` : '';
-  return `M ${p0.x - DOT_STUB} ${p0.y} L ${p0.x} ${p0.y} ${horizontal}${curve}`;
 }
 
 /**
@@ -317,7 +274,11 @@ function jsonArrowMarkerDef(theme: Theme, markerId: string): string {
 }
 
 function renderEdge(edge: JsonEdgeGeo, theme: Theme, markerId: string): string {
-  const d = buildEdgePathD(edge);
+  // A5/T8: the path and the spot both come from the ported `JsonCurve`, which
+  // consumes the engine's spline. This used to build its own S-curve and place
+  // the spot on a horizontal offset; upstream extrapolates along the spline's
+  // OWN direction (`JsonCurve#getVeryFirst` -> `supp`).
+  const d = buildCurvePath(edge.points);
   if (d === '') return '';
 
   const json = theme.colors.graph.json;
@@ -332,10 +293,10 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, markerId: string): string {
     markerEnd: `url(#${markerId})`,
   });
 
-  const DOT_STUB = 13;
-  const p0 = edge.points[0];
-  const dotPart =
-    p0 !== undefined ? ellipse(p0.x - DOT_STUB, p0.y, 3, 3, { fill: stroke }) : '';
+  // `JsonCurve#drawSpot`: a filled circle of radius 3 at the same extrapolated
+  // point the stub starts from (`JsonCurve.java:114-118`).
+  const spot = veryFirstPoint(edge.points);
+  const dotPart = spot !== undefined ? ellipse(spot.x, spot.y, 3, 3, { fill: stroke }) : '';
 
   return dotPart + linePart;
 }
