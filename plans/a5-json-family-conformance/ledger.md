@@ -13,14 +13,14 @@ the index below, against a numbered mechanism. Measured with
 | byte-conformant | 0 | 0 — **and not reachable; see below** |
 | **element tally exact vs jar** | **0** | **75 / 92 (82 %)** |
 | fixtures whose interior is COMPARED at all | 0 | 75 |
-| total diffs | unmeasurable (all floors) | 14,371 |
+| total diffs | unmeasurable (all floors) | 13,414 |
 
 Diff composition, now that there is one to compose:
 
 | bucket | diffs | what it is |
 |---|---|---|
 | geometry (any numeric delta) | 12,804 | **M1** — the accepted layout divergence |
-| value-text colour | 957 | the DELIBERATE per-type colour divergence |
+| value-text colour | 0 | was 957; the per-type divergence was retired and now matches upstream |
 | document dimensions | 366 | **M1** again, at the root |
 | everything else | 244 | the real remainder — 17 fixtures, all named below |
 
@@ -79,11 +79,12 @@ measurement:
 
 | # | mechanism | class | origin | fixtures |
 |---|---|---|---|---|
-| M1 | Document dimensions and all node/edge geometry | **ACCEPTED DIVERGENCE** (ADR-2b) | upstream is Smetana-laid-out; this port uses dot-engine everywhere | 92 |
+| M1a | Horizontal layout geometry | **ACCEPTED DIVERGENCE** (ADR-2b) | upstream is Smetana-laid-out; this port uses dot-engine everywhere | 92 |
+| M1b | Document-dimension formula, constant +2 per axis | **PORT GAP — diagnosis in progress** | `json/layout.ts` sums geometry; the jar ink-walks, margins, then truncates `+1`. See below | 70 (height) |
 | M2 | Root had many children; the jar has 2 | **CLOSED** | `json/renderer-shell.ts#assembleJsonShell` now wraps the body in one content `<g>` | 0 |
 | M3 | `<defs>` carried an arrow `<marker>`; the jar's is empty | **CLOSED** | arrowhead is an inline filled `<path>` — `Arrow#drawArrow`, ported into `JsonCurve.ts#buildArrowHeadPath` | 0 |
 | M4 | Root `<g>` attributes never applied | **CLOSED** | consequence of M2; `withRootGroupAttributes` now sees the single `<g>` it requires | 0 |
-| M5 | Value text colour | **DELIBERATE DIVERGENCE** | DIVERGENCES.md, "Value text — per-type colors (aesthetic)" | ~57 |
+| M5 | Value text colour | **CLOSED** — matched to upstream, divergence retired 2026-08-09 | `renderer-style.ts`; DIVERGENCES.md entry marked RETIRED | 0 |
 | M6 | Element tally still differs | PORT GAP | 17 fixtures, each with its own small delta — see the index | 17 |
 
 ### M6 — the whole remaining structural gap, named
@@ -102,6 +103,78 @@ measurement:
 
 Each is individually diagnosable now that the interiors compare. None has been
 diagnosed — they are measured and named, not explained.
+
+### M1 is TWO mechanisms, and only one of them is the accepted divergence
+
+Measured 2026-08-09, after the value-colour match made the interiors legible.
+Document-dimension delta (jar − ours) across all 92 fixtures:
+
+| axis | delta | fixtures |
+|---|---|---|
+| **height** | **exactly +2** | **70 / 92** |
+| width | +2 | 47 / 92 |
+| width | anything else (+1, +3, +6, −12, +21, …) | 45 / 92 |
+
+The **width** spread is the genuine ADR-2b divergence: horizontal placement is
+what the two layout engines disagree about. The **height** constant is not —
+height follows the node stack, which this port reproduces exactly. Three
+fixtures (`json/bidire-98-kege137`, `giduve-36-xuvo448`, `karaju-04-caxi838`)
+are byte-identical to the jar on every drawn coordinate and differ ONLY in the
+four root dimension attributes, both axes +2.
+
+**So M1 has been carrying a defect of ours under an accepted-divergence
+label.** Splitting it:
+
+- **M1a — horizontal layout geometry.** ACCEPTED (ADR-2b). Unchanged.
+- **M1b — the document-dimension formula.** OURS, and fixable. A constant +2
+  per axis.
+
+#### M1b — mechanism, as far as it is established
+
+The jar does not size the document from the drawn extent. The chain is:
+
+1. `JsonDiagram#calculateDimension` (`JsonDiagram.java:130-137`) is an INK
+   WALK — `TextBlockUtils.getMinMax(this, stringBounder, true)` — not a
+   geometry sum.
+2. `LimitFinder#drawRectangle` (`LimitFinder.java:184-188`) contributes
+   `(x-1, y-1)` and `(x+w-1, y+h-1)` per rectangle, and ignores `UStroke`
+   entirely. `initToZero=true` seeds the box at `(0,0,0,0)`
+   (`MinMax.java:71-76`), so the ink dim depends on the drawing's ABSOLUTE
+   position, not just its size — `getDimension()` is `maxX-minX`
+   (`MinMax.java:151-153`).
+3. `TextBlockExporter#calculateFinalDimension` (`:199-203`) adds
+   `TitledDiagram#getDefaultMargins()` = `same(10)` (`TitledDiagram.java:275-277`)
+   and hands the result to `SvgOption.withMinDim` (`:284`).
+4. `SvgGraphics`'s constructor calls `ensureVisible(minDim…)` (`:143`), which
+   stores `maxX = (int)(x + 1)` (`:129-134`) — a TRUNCATING +1.
+5. `maxX`/`maxY` ARE the emitted `width`/`height`/`viewBox`
+   (`SvgGraphics.java:799-811`).
+
+`json/layout.ts` models none of this: it computes
+`max(node.x + node.width) + CANVAS_PAD` directly.
+
+**Ruled out, with the evidence:**
+
+- *Border stroke width.* `LimitFinder` never inspects `UStroke`.
+- *A margin of 11 rather than 10.* `getDefaultMargins` is `same(10)`, and a
+  constant float offset is inconsistent with the observed float deltas
+  (1.425 / 1.612 / 2.000) — those are consistent with `trunc(x + 22)` against
+  our `trunc(x + 20)`.
+- *The Smetana/dot-engine divergence,* for the height axis: the three fixtures
+  above match the jar on every drawn coordinate.
+
+**Not yet attributed: one `+1` per axis.** Steps 1-5 account for exactly one
+(`ensureVisible`). Walking the chain by hand for `bidire-98-kege137` (single
+node, w=24 h=18, drawn at 10,10) gives `24 + 20 + 1 = 45`, but the jar emits
+46; height likewise 39 against 40.
+
+**Next instrument — do NOT skip to a fix.** A `+2` reproduces on 70 fixtures
+and would "work"; shipping it would encode an unexplained constant, which this
+project forbids. Close it the way mission G2/N46 closed the equivalent class
+question: a debug-instrumented local oracle build that prints
+`JsonDiagram#calculateDimension`'s own return value for one fixture. That
+single number decides whether the missing `+1` is in the ink walk (step 1-2)
+or between `calculateFinalDimension` and `withMinDim` (step 3).
 
 ### M1 — accepted, with its measurement
 
