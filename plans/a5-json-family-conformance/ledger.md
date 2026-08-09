@@ -10,7 +10,7 @@ the index below, against a numbered mechanism. Measured with
 | | at Batch 4 close | after the structure pass |
 |---|---|---|
 | fixtures | 92 | 92 |
-| byte-conformant | 0 | **15** (9 json, 5 yaml, 1 hcl) — pinned |
+| byte-conformant | 0 | **16** (9 json, 6 yaml, 1 hcl) — pinned |
 | **element tally exact vs jar** | **0** | **75 / 92 (82 %)** |
 | fixtures whose interior is COMPARED at all | 0 | 75 |
 | total diffs | unmeasurable (all floors) | 13,178 |
@@ -95,7 +95,7 @@ measurement:
 | M5 | Value text colour | **CLOSED** — matched to upstream, divergence retired 2026-08-09 | `renderer-style.ts`; DIVERGENCES.md entry marked RETIRED | 0 |
 | M6 | Element tally still differs | PORT GAP | 17 fixtures, each with its own small delta — see the index | 17 |
 
-### M6 — element tally: 17 → 9 fixtures
+### M6 — element tally: 17 → 4 fixtures
 
 Four mechanisms closed, each read out of a branch rather than fitted.
 
@@ -126,6 +126,86 @@ spelled `#FFF` by a theme slipped past a string comparison. Now uses
 **4. Not a mechanism — `json/nixaxa-46-muge983` is malformed JSON.** The jar
 draws only the message text (`JsonDiagram#drawU`'s `root == null` branch), no
 box; this port draws its own error box. See the remaining table.
+
+### The SECOND NBSP rule — monospace, found and ported
+
+`nixaxa`'s message is NBSP-joined despite not being whitespace-only, which the
+already-ported `DriverTextSvg.java:115-116` guard cannot explain. There is a
+second, independent substitution:
+
+```java
+if ("monospaced".equalsIgnoreCase(fontFamily))
+    fontFamily = "monospace";
+…
+if (fontFamily.equalsIgnoreCase("monospace") || fontFamily.equalsIgnoreCase("courier"))
+    text = text.replace(' ', (char) 160);
+```
+`SvgGraphics.java:720-728`
+
+EVERY space becomes NBSP under a monospace/courier family. Three load-bearing
+details: the comparison is `equalsIgnoreCase` on the WHOLE family (a CSS stack
+like `"Courier, monospace"` does not qualify); `monospaced` is renamed to
+`monospace` BEFORE the test, so it qualifies through the rename; and it runs in
+`SvgGraphics#text`, AFTER `DriverTextSvg` computed `textLength` — so it is
+emission-only and the width still reflects the space-bearing string.
+
+Jar-verified on the error diagram, which mixes both families in one document:
+`font-family="monospace"` texts carry NBSP (`'class\xa0Example'`,
+`'Bob->Alice:\xa0Hello'`, `'license'`) while sans-serif ones keep real spaces
+(`'Bob -> Alice : hi'`).
+
+`core/klimt/drawing/svg/svg-graphics-elements.ts#applyTextFontFamily` ALREADY
+had this rule, so the klimt-drawn engines were correct; the gap was in
+`core/svg-shapes.ts#text`, the shared emitter class/state/object/json use.
+Now ported there.
+
+It exposed a separate, pre-existing divergence rather than fixing one: this
+port's OWN inline error boxes (`class/index.ts`, `chart/renderer.ts` — non-jar
+diagnostic surfaces by design) draw with `fontFamily: 'monospace'`, so their
+message text now legitimately carries NBSP. And the jar draws the
+allowmixing refusal in INHERITED sans-serif, not monospace, which this port
+does not yet match. Not chased here; it is a property of those bespoke error
+boxes, not of the json family.
+
+### M6 remainder — 4 fixtures, and only 3 mechanisms between them
+
+| fixture | signature | mechanism |
+|---|---|---|
+| `json/noleta-28-nutu456` | `text-112` | **wrap emits per-WORD atoms.** With a `LineBreakStrategy` active the jar draws one `<text>` per word AND one per inter-word space — `'This'`, `'\xa0'`, `'is'`, `'\xa0'`, `'a'`, … — where this port draws one per wrapped LINE. The space atom and the word after it share an `x`, because a space measures 0 under deterministic metrics. |
+| `yaml/vapoda-87-piku740` | `text-4` | SAME mechanism, and not obviously so: it sets no `MaximumWidth` itself — `!theme amiga` does, at `puml-theme-amiga.puml:63` (`node { MaximumWidth 300 }`). |
+| `json/vogeku-38-soxe333` | `text-12` | unexamined |
+| `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | a different shape family entirely; unexamined |
+
+`json/nixaxa-46-muge983` left the list: it is malformed JSON, where the jar
+draws a bare message with no box (`JsonDiagram#drawU`'s `root == null` branch)
+— now handled by the same refusal route class uses.
+
+### What closed this round
+
+**5. The `\n` split is on the ESCAPE, not the character.**
+`Display.getWithNewlines3` (`Display.java:233-257`) walks the string once and
+splits at the two-character `\` + `n`; a real U+000A falls to the `else`
+branch and is appended verbatim. This port rewrote the escape to U+000A and
+then split on U+000A, conflating them. ONE mechanism behind three fixtures:
+a YAML block scalar's newlines must stay inside one `<text>`
+(`yaml/ketunu-15-poli031`), and a JSON string ending in a real CR/LF is one
+line whose trailing control characters `trin` removes at emission
+(`json/gagebi-92-vere937`, `devime-19-toze896`). Ported as upstream's single
+pass, including its treatment of an unrecognised escape (consume both
+characters, append neither — which is why `\r` vanishes).
+
+**6. The background rect, three separate bugs, all in this mission's own
+shell.** It was skipped entirely for an ANNOTATED diagram, because the body
+arrives pre-wrapped by `applyChrome` — inherited from `assembleStateShell`,
+whose sampled corpus never combined a non-default background with chrome.
+`yaml/tadari-70-nare798` (`!theme amiga` + `title foo`) shows the jar still
+draws it, still as the first child of the content group. And the
+default-background comparison was too shallow twice over: a theme may supply
+`#FFF` rather than `#FFFFFF`, or the NAME `white` (`!theme plain`,
+`json/vogeku-38-soxe333`). Now compared through `resolveColorToSvgHex` +
+`shortenColor`, and the background is canonicalized BEFORE the document shell
+— which class already did (`assemble-svg.ts`, G2 N4) and json did not, so a
+themed `white` was reaching the root `style` verbatim.
 
 ### The SECOND NBSP rule — monospace, found and ported
 

@@ -19,7 +19,7 @@ import { emittedTextForm } from '../../core/svg.js';
 import {
   getDisplayValue,
   containerEntries,
-  processStringDisplay,
+  splitDisplayLines,
   wordWrapLine,
 } from './json-layout-prep.js';
 import type { FlatNode, BuildRowsOptions } from './json-layout-prep.js';
@@ -226,8 +226,11 @@ function cellLines(
   maximumWidth: number | undefined,
 ): { processed: string; valueLines: string[]; valueType: JsonRowGeo['valueType'] } {
   const { display, valueType } = getDisplayValue(v);
-  const processed = valueType === 'string' ? processStringDisplay(display) : display;
-  let valueLines: string[] = valueType === 'string' ? processed.split('\n') : [display];
+  // Split via upstream's own single pass, NOT by rewriting the escape to a
+  // newline and splitting on that — a real U+000A in the value must stay
+  // inside its line. See `json-layout-prep.ts#splitDisplayLines`.
+  let valueLines: string[] = valueType === 'string' ? splitDisplayLines(display) : [display];
+  const processed = valueLines.join('\n');
   if (valueType === 'string' && maximumWidth !== undefined) {
     const wrapped: string[] = [];
     for (const segment of valueLines) {

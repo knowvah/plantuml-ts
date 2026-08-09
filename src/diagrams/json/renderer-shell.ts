@@ -32,6 +32,7 @@
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { group, rect } from '../../core/svg.js';
 import { shortenColor } from '../../core/svg-format.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { assembleDocumentShell } from '../../core/klimt/document-shell.js';
 
 /** The default (unset) diagram background — matches `theme.ts`'s own
@@ -87,7 +88,25 @@ function maybeBackgroundRect(fragment: RenderFragment): string {
  */
 function isSolidNonDefault(background: string): boolean {
   if (background === 'transparent' || background === 'none' || background === '#00000000') return false;
-  return shortenColor(background) !== shortenColor(DEFAULT_BACKGROUND);
+  return canonicalColor(background) !== canonicalColor(DEFAULT_BACKGROUND);
+}
+
+/**
+ * A colour reduced to the exact form the SVG will carry, so two spellings of
+ * one colour compare equal.
+ *
+ * Both steps are needed, and each was learned from a fixture that slipped past
+ * an earlier version of this check:
+ *  - `resolveColorToSvgHex` maps a NAMED colour to hex. `!theme plain` leaves
+ *    the background as the literal string `"white"`
+ *    (`json/vogeku-38-soxe333`), which no comparison against `#FFFFFF` can
+ *    match. (`skinparam-key-normalize.ts#resolveColor` is NOT this function —
+ *    it passes names through untouched.)
+ *  - `shortenColor` collapses `#FFFFFF` to `#FFF`, which is the form a theme
+ *    may supply directly and the form the emitters write.
+ */
+function canonicalColor(color: string): string {
+  return shortenColor(resolveColorToSvgHex(color));
 }
 
 /**
@@ -97,7 +116,44 @@ function isSolidNonDefault(background: string): boolean {
  *   `assemble-svg.ts`'s own note on why `jsonShell` is the odd one out.
  */
 export function assembleJsonShell(fragment: RenderFragment, diagramType: string): string {
-  const backgroundRect = fragment.bodyWrapped === true ? '' : maybeBackgroundRect(fragment);
-  const body = fragment.bodyWrapped === true ? fragment.body : group(backgroundRect + fragment.body);
-  return assembleDocumentShell({ ...fragment, body }, diagramType);
+  // Canonicalize BEFORE the shell, as class already does (`assemble-svg.ts`'s
+  // G2 N4 note): `assembleDocumentShell` writes the value verbatim into the
+  // root `style`, so a themed `"white"` would reach the document as
+  // `background:white` where the jar writes `background:#FFFFFF`
+  // (`json/vogeku-38-soxe333`, `!theme plain`).
+  const canonical =
+    fragment.background === undefined
+      ? fragment
+      : { ...fragment, background: resolveColorToSvgHex(fragment.background) };
+  const backgroundRect = maybeBackgroundRect(canonical);
+  const body =
+    fragment.bodyWrapped === true
+      ? spliceIntoContentGroup(fragment.body, backgroundRect)
+      : group(backgroundRect + fragment.body);
+  return assembleDocumentShell({ ...canonical, body }, diagramType);
+}
+
+/** The content `<g>`'s open tag — `annotations/chrome.ts#applyChrome` emits a
+ *  bare one, but this matches an attributed tag too rather than assuming. */
+const CONTENT_G_OPEN_RE = new RegExp('^<g(?:\\s[^>]*)?>');
+
+/**
+ * Put `markup` immediately after the already-wrapped body's opening `<g>`.
+ *
+ * An ANNOTATED diagram arrives here pre-wrapped by `applyChrome`, and this
+ * shell used to skip the background rect entirely in that case — inherited
+ * from `assembleStateShell`, whose own sampled corpus never combined a
+ * non-default background with chrome. `yaml/tadari-70-nare798` does exactly
+ * that (`!theme amiga` + `title foo`) and shows the jar still draws the rect,
+ * still as the FIRST child of the content group, ahead of the title's own
+ * `<g class="title">`.
+ *
+ * Falls back to prefixing if the body is not a `<g>` at all, which keeps the
+ * rect in the document rather than silently dropping it.
+ */
+function spliceIntoContentGroup(body: string, markup: string): string {
+  if (markup === '') return body;
+  const openTag = CONTENT_G_OPEN_RE.exec(body)?.[0];
+  if (openTag === undefined) return markup + body;
+  return openTag + markup + body.slice(openTag.length);
 }

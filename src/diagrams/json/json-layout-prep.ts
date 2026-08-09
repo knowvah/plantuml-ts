@@ -213,12 +213,55 @@ export function buildHighlightMap(
  * that a literal "\\n" in source becomes "\" + "n" (not a newline).
  */
 export function processStringDisplay(s: string): string {
-  return s
-    .replace(/\\\\/g, '\x00') // protect \\ before other replacements
-    .replace(/\\n/g, '\n')    // \n → newline (row split)
-    .replace(/\\r/g, '')      // \r → empty (blank row)
-    .replace(/\\t/g, '\t')    // \t → tab (renders blank)
-    .replace(/\x00/g, '\\'); // restore protected \\ as single backslash
+  return splitDisplayLines(s).join('\n');
+}
+
+/**
+ * @see .../klimt/creole/Display.java#getWithNewlines3
+ *
+ * Splits a display string into its lines. **The split is on the two-character
+ * ESCAPE `\` + `n`, never on the newline CHARACTER** — a real U+000A falls
+ * through to the `else` branch upstream and is appended to the current line
+ * verbatim.
+ *
+ * That distinction is the whole mechanism, and this port previously lost it by
+ * rewriting the escape to U+000A and then splitting on U+000A, which
+ * conflated the two. Consequences, both measured against the jar:
+ *
+ *  - a YAML block scalar's real newlines stay INSIDE one line, so the jar
+ *    emits ONE `<text>` whose content contains literal U+000A characters
+ *    (`yaml/ketunu-15-poli031`); this port emitted one per line;
+ *  - a JSON string ending in a real CR/LF stays one line, and `trin` then
+ *    strips the trailing control characters at emission — so the jar draws one
+ *    text where this port drew a second, empty one
+ *    (`json/gagebi-92-vere937`, `devime-19-toze896`).
+ *
+ * Ported as upstream's single pass rather than a chain of replaces, including
+ * its treatment of an UNRECOGNISED escape: `\` plus any character other than
+ * `n`/`t`/`\` consumes BOTH and appends neither, which is why `\r` vanishes.
+ */
+export function splitDisplayLines(s: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charAt(i);
+    if (c === '\\' && i < s.length - 1) {
+      const c2 = s.charAt(i + 1);
+      i++;
+      if (c2 === 'n') {
+        result.push(current);
+        current = '';
+      } else if (c2 === 't') {
+        current += '\t';
+      } else if (c2 === '\\') {
+        current += '\\';
+      }
+    } else {
+      current += c;
+    }
+  }
+  result.push(current);
+  return result;
 }
 
 // ---------------------------------------------------------------------------
