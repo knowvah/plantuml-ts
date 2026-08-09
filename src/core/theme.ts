@@ -249,10 +249,14 @@ export const defaultTheme: Theme = {
         // keyText is intentionally absent so the renderer's fallback chain
         // reaches nodeFontColor (from jsonDiagram.node.FontColor style blocks).
         // Themes that want an explicit key color set it directly (e.g. darkTheme).
-        stringValue:         '#3A6E96',
-        numberValue:         '#A67F52',
-        booleanValue:        '#BE5D47',
-        nullValue:           '#767676',
+        // All four default to the skin's black (`plantuml.skin:446`), as
+        // upstream draws every value cell in the node's own FontColor. The
+        // per-type palette that used to be here was retired 2026-08-09 — see
+        // DIVERGENCES.md, "Value text — per-type colors".
+        stringValue:         '#000000',
+        numberValue:         '#000000',
+        booleanValue:        '#000000',
+        nullValue:           '#000000',
         // plantuml.skin sets jsonDiagram.node.BackGroundColor #F1F1F1 as the default.
         // Named themes override this via their compiled graph.json entry.
         background:          '#F1F1F1',

@@ -795,23 +795,35 @@ key cell is visually harmless and maintains consistency with object nodes.
 
 ---
 
-### Value text — per-type colors (aesthetic)
+### Value text — per-type colors (RETIRED 2026-08-09)
 
-**Upstream:** all value cell text uses `FontColor black` (the `jsonDiagram.node`
-skin default). Every value — string, number, boolean, null — renders in black.
+**This divergence no longer exists.** Value text now matches upstream: every
+cell — string, number, boolean, null — renders in the node's own FontColor,
+which `skin/plantuml.skin:446` sets to black for `yamlDiagram,jsonDiagram`.
 
-**This port:** value text is colored by type:
-- strings → `#3A6E96` (blue)
-- numbers → `#A67F52` (amber)
-- booleans → `#BE5D47` (red-orange)
-- nulls → `#767676` (gray)
+It previously defaulted to an IDE-style palette (strings `#3A6E96`, numbers
+`#A67F52`, booleans `#BE5D47`, nulls `#767676`), justified as making values
+scannable at a glance.
 
-**Reason:** type-based coloring is a common IDE convention for JSON and makes
-values scannable at a glance without changing the information conveyed.
-Colors are applied via the theme layer and can be overridden with
-`jsonDiagram { node { FontColor ... } }`.
+**Why it was retired,** since the reasoning is the reusable part: the entry
+claimed the palette was "applied via the theme layer", which implied the theme
+system was built around it. Measuring the theme layer showed the opposite —
+**all 20 built-in themes that set these four fields set all four to the SAME
+colour**, i.e. every theme already reproduced upstream's single-FontColor
+behaviour and discarded the palette. The per-type colouring was live in exactly
+one place, the default theme, so it was a default that nothing downstream
+wanted rather than a feature anything was built on.
 
-**Affects:** all `@startjson` diagrams using the default theme.
+The four theme fields (`stringValue`/`numberValue`/`booleanValue`/`nullValue`)
+are KEPT — that shared per-theme value colour is a real channel, and a custom
+theme can still set the four independently if someone wants the IDE look back.
+Only their defaults changed.
+
+**Not the reason:** this does not make the family byte-conformant. The ADR-2b
+geometry delta still moves every fixture's root dimensions, so `svg-json`'s
+ratchet remains unable to admit anything under a zero-diff rule (see
+`oracle/goldens/svg-json/README.md`). It was retired because its own
+justification did not hold, not to chase a gate it cannot reach.
 
 ---
 

@@ -44,14 +44,18 @@ function valueColor(
   valueType: JsonRowGeo['valueType'],
   json: Theme['colors']['graph']['json'],
 ): string {
+  // Upstream has NO per-type value styling: `TextBlockJson#getTextBlock` builds
+  // every cell from one `getStyleToUse(false, highlighted)` style, whose
+  // FontColor the skin sets to black for this family (`plantuml.skin:446`).
+  // So all five arms resolve to the same colour unless a THEME has set one —
+  // which is exactly what the four fields exist for, and what all 20 built-in
+  // themes use them for (each sets a single shared value colour).
   switch (valueType) {
-    case 'string': return json?.stringValue ?? '#3A6E96';
-    case 'number': return json?.numberValue ?? '#A67F52';
-    case 'boolean': return json?.booleanValue ?? '#BE5D47';
-    case 'null': return json?.nullValue ?? '#767676';
-    // 'nested' — the three-space cell (`TextBlockJson.java:194`). There is no
-    // per-type color to apply here, so it takes this family's plain node
-    // FontColor, which the skin sets to black (:446). Was `#181818`.
+    case 'string': return json?.stringValue ?? JSON_SKIN_BLACK;
+    case 'number': return json?.numberValue ?? JSON_SKIN_BLACK;
+    case 'boolean': return json?.booleanValue ?? JSON_SKIN_BLACK;
+    case 'null': return json?.nullValue ?? JSON_SKIN_BLACK;
+    // 'nested' — the three-space cell (`TextBlockJson.java:194`).
     default: return json?.keyText ?? JSON_SKIN_BLACK;
   }
 }

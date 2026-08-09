@@ -109,15 +109,36 @@ function contentAfterDefs(svg: string): string {
 // Acceptance criteria
 // ---------------------------------------------------------------------------
 
-describe('renderJson — AC #1: string value color', () => {
-  it('SVG contains the string value fill color for a string-typed row', () => {
+describe('renderJson — AC #1: value text color', () => {
+  it('draws a string value in the node FontColor, as upstream does', () => {
     const geo = makeGeo({
       nodes: [makeNode()],
     });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    // Default string value color from theme
-    expect(body).toContain('fill="#3A6E96"');
+    // `TextBlockJson` has no per-type value styling — every cell takes the
+    // node's own FontColor, black for this family (`plantuml.skin:446`).
+    // The IDE-style per-type palette this used to assert was retired; see
+    // DIVERGENCES.md, "Value text — per-type colors".
+    expect(body).toContain('fill="#000"');
+    expect(body).not.toContain('fill="#3A6E96"');
+  });
+
+  it('still honours a THEME-supplied value color', () => {
+    // The four per-type fields are kept precisely so a theme can set them —
+    // all 20 built-in themes do, each to one shared colour.
+    const themed = {
+      ...defaultTheme,
+      colors: {
+        ...defaultTheme.colors,
+        graph: {
+          ...defaultTheme.colors.graph,
+          json: { ...defaultTheme.colors.graph.json, stringValue: '#FF00FF' },
+        },
+      },
+    };
+    const body = contentAfterDefs(assembleSvg(renderJson(makeGeo({ nodes: [makeNode()] }), themed)));
+    expect(body).toContain('fill="#F0F"');
   });
 });
 
@@ -334,52 +355,24 @@ describe('renderJson — structural', () => {
     expect(d.startsWith('M -1.6')).toBe(true);
   });
 
-  it('number value uses numberValue color', () => {
-    const numRow = makeRow({
-      key: 'count',
-      value: '42',
-      valueType: 'number',
-      y: 4,
-      height: 20,
-    });
-    const node = makeNode({ rows: [numRow] });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const body = contentAfterDefs(svg);
-    const numColor = defaultTheme.colors.graph.json?.numberValue ?? '#A67F52';
-    expect(body).toContain(`fill="${numColor}"`);
-  });
-
-  it('null value uses nullValue color', () => {
-    const nullRow = makeRow({
-      key: 'nothing',
-      value: '␀',
-      valueType: 'null',
-      y: 4,
-      height: 20,
-    });
-    const node = makeNode({ rows: [nullRow] });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const body = contentAfterDefs(svg);
-    const nullColor = defaultTheme.colors.graph.json?.nullValue ?? '#767676';
-    expect(body).toContain(`fill="${nullColor}"`);
-  });
-
-  it('boolean value uses booleanValue color', () => {
-    const boolRow = makeRow({
-      key: 'flag',
-      value: '☑ true',
-      valueType: 'boolean',
-      y: 4,
-      height: 20,
-    });
-    const node = makeNode({ rows: [boolRow] });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const body = contentAfterDefs(svg);
-    const boolColor = defaultTheme.colors.graph.json?.booleanValue ?? '#BE5D47';
-    expect(body).toContain(`fill="${boolColor}"`);
+  it('draws every value type in the same colour — upstream has no per-type styling', () => {
+    // `TextBlockJson#getTextBlock` builds every cell from one
+    // `getStyleToUse(false, highlighted)` style. There is no branch on the
+    // JSON type anywhere in it, so number/null/boolean/string all land on the
+    // node's FontColor. Asserted together because "they are all the same" IS
+    // the property; four near-identical per-type tests asserted the opposite.
+    const types = [
+      { key: 'count', value: '42', valueType: 'number' as const },
+      { key: 'nothing', value: '\u2400', valueType: 'null' as const },
+      { key: 'flag', value: '\u2611 true', valueType: 'boolean' as const },
+      { key: 'name', value: 'Alice', valueType: 'string' as const },
+    ];
+    for (const t of types) {
+      const node = makeNode({ rows: [makeRow({ ...t, y: 4, height: 20 })] });
+      const body = contentAfterDefs(assembleSvg(renderJson(makeGeo({ nodes: [node] }), defaultTheme)));
+      // Two texts per row (key + value), both black.
+      expect(body.match(/fill="#000"/g) ?? []).toHaveLength(2);
+    }
   });
 
   it('SVG root has correct width and height from geometry', () => {
@@ -495,11 +488,12 @@ describe('renderJson — branch coverage', () => {
     const geo = makeGeo({ nodes: [node], edges: [edge] });
     const svg = assembleSvg(renderJson(geo, noJsonTheme));
     const body = contentAfterDefs(svg);
-    // Theme-inherited defaults (json field absent → falls back to theme.colors.*)
-    expect(body).toContain('fill="#3A6E96"');   // string — valueColor fallback
-    expect(body).toContain('fill="#A67F52"');   // number — valueColor fallback
-    expect(body).toContain('fill="#BE5D47"');   // boolean — valueColor fallback
-    expect(body).toContain('fill="#767676"');   // null — valueColor fallback
+    // With `graph.json` absent entirely, every arm of `valueColor` takes its
+    // OWN fallback — which is this family's skin black (`plantuml.skin:446`),
+    // the same for all five. That sameness is the point: upstream has no
+    // per-type value styling, so there is nothing for the arms to differ on.
+    // These four lines used to assert four distinct IDE-palette colours.
+    expect(body).toContain('fill="#000"');
     expect(body).toContain('fill="#CCFF02"');   // highlightBackground (plantuml.skin default)
     expect(body).toContain('fill="#FFF"');   // background → noJsonTheme.colors.background
     // headerBackground inherits from bg (#FFFFFF) — no longer a distinct hard-coded color
