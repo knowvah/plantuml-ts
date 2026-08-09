@@ -155,7 +155,7 @@ describe('drawScatter — AC4: triangle markers', () => {
     // Apex: (p.x, p.y - 5) = (50, 70)
     // Bottom-left: (p.x - 4, p.y + 3) = (46, 78)
     // Bottom-right: (p.x + 4, p.y + 3) = (54, 78)
-    expect(svg).toContain('points="50,70 46,78 54,78"');
+    expect(svg).toContain('points="50,70,46,78,54,78"');
   });
 });
 

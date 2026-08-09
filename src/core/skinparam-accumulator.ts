@@ -32,6 +32,7 @@ export interface SkinparamAccumulator {
   actorStyle: ActorStyle | undefined;
   minimumWidth: number | undefined;
   strictUml: boolean | undefined;
+  handwritten: boolean | undefined;
   monochrome: 'true' | 'reverse' | undefined;
   packageStyle: 'rect' | undefined;
   fixCircleLabelOverlapping: boolean | undefined;
@@ -110,7 +111,7 @@ export interface SkinparamAccumulator {
  */
 const SCALAR_FIELD_NAMES = [
   'fontFamily', 'fontSize', 'defaultFontSize', 'linetype', 'nodeSep', 'rankSep', 'wrapWidth',
-  'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize', 'roundCorner', 'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
+  'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize', 'roundCorner', 'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'handwritten', 'monochrome',
   'packageStyle', 'fixCircleLabelOverlapping', 'shadowing', 'background',
   'border', 'text', 'arrow', 'noteBackground', 'classBackground',
   'interfaceBackground', 'enumBackground', 'actorStroke', 'packageBackground',

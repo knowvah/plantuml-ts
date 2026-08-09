@@ -453,7 +453,13 @@ export function polygon(
   points: ReadonlyArray<{ x: number; y: number }>,
   style: BoxStyle = {},
 ): string {
-  const pts = points.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(' ');
+  // Flat comma-separated, which is how the jar writes it —
+  // `svg-graphics-elements.ts:200` (`points.map(format).join(',')`), mirroring
+  // `SvgGraphics`. Every cached golden agrees: `points="54,98,64,88,1006,88,…"`,
+  // never a space between pairs. This emitter used to join pairs with a space;
+  // `normalize.ts#normalizePoints` normalizes the NUMBERS inside the attribute
+  // but not the separators, so the two forms do not compare equal.
+  const pts = points.flatMap((p) => [fmt(p.x), fmt(p.y)]).join(',');
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
@@ -463,6 +469,12 @@ export function polygon(
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
+    // Unconditional on a polygon, exactly as `SvgGraphics.java:658` writes it
+    // (`styleMe(elt, "stroke-linejoin:miter;stroke-miterlimit:10;")`), which
+    // `core/klimt/.../svg-graphics-elements.ts:202` already mirrors for the
+    // klimt path. 4018 of the 4037 polygons in the cached corpus carry it.
+    ['stroke-linejoin', 'miter'],
+    ['stroke-miterlimit', 10],
   ] as const);
   return `${fillR.def}${strokeR.def}<polygon${a}/>`;
 }
@@ -475,7 +487,13 @@ export function polyline(
   points: ReadonlyArray<{ x: number; y: number }>,
   style: BoxStyle = {},
 ): string {
-  const pts = points.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(' ');
+  // Flat comma-separated, which is how the jar writes it —
+  // `svg-graphics-elements.ts:200` (`points.map(format).join(',')`), mirroring
+  // `SvgGraphics`. Every cached golden agrees: `points="54,98,64,88,1006,88,…"`,
+  // never a space between pairs. This emitter used to join pairs with a space;
+  // `normalize.ts#normalizePoints` normalizes the NUMBERS inside the attribute
+  // but not the separators, so the two forms do not compare equal.
+  const pts = points.flatMap((p) => [fmt(p.x), fmt(p.y)]).join(',');
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);

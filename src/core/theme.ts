@@ -95,6 +95,21 @@ export interface Theme {
   monochrome?: 'true' | 'reverse';
   strictUml?: boolean;
   /**
+   * `skinparam handwritten true` — draw every primitive through the sketchy
+   * renderer (`core/klimt/drawing/hand/`).
+   *
+   * `JsonDiagram#drawU` and its siblings open with
+   * `if (handwritten) ug = new UGraphicHandwritten(ug)`, a decorator that
+   * turns rectangles and ellipses into jiggled polygons and lines and paths
+   * into jiggled polylines. Deterministic: the jitter comes from a single
+   * `new Random(424242L)` per diagram.
+   *
+   * Honoured by the json family so far; other engines need their draw order
+   * confirmed against the jar before it can be switched on there, because the
+   * random stream is shared and sequential across every shape.
+   */
+  handwritten?: boolean;
+  /**
    * mission skin-file-loading Batch 1 (D3): `skin <name>` /
    * `<style> root { Shadowing N } }` / `<style> element { Shadowing N } }`
    * -- upstream `EntityImageState`/`InnerStateAutonom`/`Cluster`'s shared
@@ -359,6 +374,21 @@ export type ThemeOverride = {
   actorStyle?: ActorStyle;
   minimumWidth?: number;
   strictUml?: boolean;
+  /**
+   * `skinparam handwritten true` — draw every primitive through the sketchy
+   * renderer (`core/klimt/drawing/hand/`).
+   *
+   * `JsonDiagram#drawU` and its siblings open with
+   * `if (handwritten) ug = new UGraphicHandwritten(ug)`, a decorator that
+   * turns rectangles and ellipses into jiggled polygons and lines and paths
+   * into jiggled polylines. Deterministic: the jitter comes from a single
+   * `new Random(424242L)` per diagram.
+   *
+   * Honoured by the json family so far; other engines need their draw order
+   * confirmed against the jar before it can be switched on there, because the
+   * random stream is shared and sequential across every shape.
+   */
+  handwritten?: boolean;
   monochrome?: 'true' | 'reverse';
   /** See `Theme.shadowing`'s own doc comment. */
   shadowing?: number;
@@ -431,7 +461,7 @@ const OPTIONAL_SCALAR_KEYS = [
   // merge is a whole-value replacement, which is exactly right for a margin:
   // a theme that sets one replaces all four sides, it does not blend with the
   // default. Omitting it silently dropped every theme's margin.
-  'diagramMargin',
+  'diagramMargin', 'handwritten',
 ] as const;
 
 /** Copy the top-level optional scalars, preferring `partial` then `base`. */

@@ -5,9 +5,15 @@
  * No DOM, no async, no canvas.
  */
 
-import { rect, line, text, path, ellipse } from '../../core/svg.js';
+// Shapes are drawn through the PEN (`renderer-pen.ts`), not emitted directly:
+// a handwritten diagram routes every one of them through the sketchy builders.
+// `text` is the exception — upstream's handwritten decorator does not touch
+// text, it falls through to `getUg().draw(shape)`.
+import { text } from '../../core/svg.js';
 
-import { buildCurvePath, veryFirstPoint, buildArrowHeadPath } from './JsonCurve.js';
+import { buildCurvePath, veryFirstPoint, buildArrowHeadPath, buildCurveSegments, buildArrowHeadSegments } from './JsonCurve.js';
+import { penFor } from './renderer-pen.js';
+import type { JsonPen } from './renderer-pen.js';
 import { resolveNodeStyle, SVG_CORNER_DIVISOR, JSON_SKIN_BLACK } from './renderer-style.js';
 import type { NodeStyleJson, TextStyleJson, HighlightClassStyle } from './renderer-style.js';
 import type { Theme } from '../../core/theme.js';
@@ -114,8 +120,9 @@ function highlightRect(
   row: JsonRowGeo,
   box: NodeStyleJson['box'],
   background: string,
+  pen: JsonPen,
 ): string {
-  return rect(
+  return pen.rect(
     node.x + HIGHLIGHT_INSET_X,
     node.y + row.y,
     node.width - HIGHLIGHT_WIDTH_REDUCTION,
@@ -142,7 +149,7 @@ function highlightRect(
  * why the jar's output is one flat run of elements per node and this function
  * emits no group of its own.
  */
-function renderRow(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson): string {
+function renderRow(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson, pen: JsonPen): string {
   const { box } = style;
   const hl = highlightOverrides(row, style);
   const rowTop = node.y + row.y;
@@ -154,14 +161,14 @@ function renderRow(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson): st
   const dividerX = node.x + node.keyColWidth;
 
   return [
-    hl.isHighlighted ? highlightRect(node, row, box, hl.background) : '',
+    hl.isHighlighted ? highlightRect(node, row, box, hl.background, pen) : '',
     // `if (y > 0) ugline.draw(ULine.hline(trueWidth))` — no line above row 0.
-    row.y > 0 ? line(node.x, rowTop, node.x + node.width, rowTop, sepStyle) : '',
+    row.y > 0 ? pen.line(node.x, rowTop, node.x + node.width, rowTop, sepStyle) : '',
     renderRowText(node, row, style, hl),
     // The divider lives INSIDE `if (line.b2 != null)`, so an array row -- whose
     // lines all have a null b2 -- gets none, and it spans only THIS row's
     // height rather than the node's.
-    row.arrayEntry ? '' : line(dividerX, rowTop, dividerX, rowTop + row.height, sepStyle),
+    row.arrayEntry ? '' : pen.line(dividerX, rowTop, dividerX, rowTop + row.height, sepStyle),
   ].join('');
 }
 
@@ -242,11 +249,11 @@ function renderRowText(
  * no such column — the `header` style contributes font, not fill), and a
  * single full-height column divider in place of upstream's per-row one.
  */
-function renderNode(node: JsonNodeGeo, style: NodeStyleJson): string {
+function renderNode(node: JsonNodeGeo, style: NodeStyleJson, pen: JsonPen): string {
   const { box } = style;
   const corners = { rx: box.rx, ry: box.rx };
   const parts: string[] = [
-    rect(node.x, node.y, node.width, node.height, {
+    pen.rect(node.x, node.y, node.width, node.height, {
       fill: box.bg,
       stroke: box.bg,
       strokeWidth: box.borderWidth,
@@ -255,10 +262,10 @@ function renderNode(node: JsonNodeGeo, style: NodeStyleJson): string {
     }),
   ];
 
-  for (const row of node.rows) parts.push(renderRow(node, row, style));
+  for (const row of node.rows) parts.push(renderRow(node, row, style, pen));
 
   parts.push(
-    rect(node.x, node.y, node.width, node.height, {
+    pen.rect(node.x, node.y, node.width, node.height, {
       fill: 'none',
       stroke: box.border,
       strokeWidth: box.borderWidth,
@@ -282,7 +289,7 @@ function renderNode(node: JsonNodeGeo, style: NodeStyleJson): string {
  *
  * This port previously drew the spot FIRST, reversing upstream's order.
  */
-function renderEdge(edge: JsonEdgeGeo, theme: Theme): string {
+function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen): string {
   // A5/T8: the path and the spot both come from the ported `JsonCurve`, which
   // consumes the engine's spline. This used to build its own S-curve and place
   // the spot on a horizontal offset; upstream extrapolates along the spline's
@@ -297,12 +304,14 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme): string {
   // :449-451), emitted comma-separated — see `style-map-json-diagram.ts`.
   const strokeDasharray = json?.arrowDasharray ?? '3,3';
 
-  const linePart = path(d, { stroke, strokeWidth, strokeDasharray, fill: 'none' });
+  const linePart = pen.path(buildCurveSegments(edge.points), d, {
+    stroke, strokeWidth, strokeDasharray, fill: 'none',
+  });
 
   // `Arrow#drawArrow` — filled, and deliberately unstroked: the jar emits
   // `fill="#000"` with no `style` attribute at all on this element.
   const headD = buildArrowHeadPath(edge.points);
-  const headPart = headD === '' ? '' : path(headD, { fill: stroke });
+  const headPart = headD === '' ? '' : pen.path(buildArrowHeadSegments(edge.points), headD, { fill: stroke });
 
   // `JsonCurve#drawSpot`: a filled circle of radius 3 at the same extrapolated
   // point the stub starts from (`JsonCurve.java:114-118`), stroked by the
@@ -312,7 +321,7 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme): string {
     // `ellipse` takes RAW SVG attribute names, not the camelCase `BoxStyle`
     // keys `rect`/`line` use — `strokeWidth` here would emit a literal
     // `strokeWidth=` attribute.
-    ? ellipse(spot.x, spot.y, 3, 3, { fill: stroke, stroke, 'stroke-width': 1 })
+    ? pen.ellipse(spot.x, spot.y, 3, 3, { fill: stroke, stroke, 'stroke-width': 1 })
     : '';
 
   return linePart + headPart + dotPart;
@@ -358,17 +367,19 @@ export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
   }
 
   const style = resolveNodeStyle(theme);
+  // ONE pen per diagram: the handwritten one carries the shared random stream.
+  const pen = penFor(theme.handwritten);
   const parts: string[] = [];
 
   // Title is no longer drawn here (mission G0b/T8) -- it flows through
   // ast.annotations.title and is drawn once, centrally, by applyChrome
   // (src/index.ts) around the RenderFragment this function returns.
   for (const node of geo.nodes) {
-    parts.push(renderNode(node, style));
+    parts.push(renderNode(node, style, pen));
   }
 
   for (const edge of geo.edges) {
-    parts.push(renderEdge(edge, theme));
+    parts.push(renderEdge(edge, theme, pen));
   }
 
   // No `extraDefs`: the jar's json documents carry an EMPTY `<defs/>` (M3).

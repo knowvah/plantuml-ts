@@ -199,10 +199,12 @@ describe('renderActivity — diamond node (if-split)', () => {
     const content = contentAfterDefs(result);
     expect(content).toContain('Ready?');
     expect(content).toContain('<text');
-    // Hexagon has 6 coordinate pairs; diamond has 4
+    // Hexagon has 6 coordinate pairs; diamond has 4. The attribute is FLAT
+    // comma-separated, as the jar writes it (`svg-shapes.ts#polygon`), so the
+    // pairs are counted from the number of values rather than from spaces.
     const pointsMatch = content.match(/points="([^"]+)"/);
-    const pointCount = pointsMatch?.[1]?.trim().split(/\s+/).length ?? 0;
-    expect(pointCount).toBe(6);
+    const values = pointsMatch?.[1]?.trim().split(',').length ?? 0;
+    expect(values / 2).toBe(6);
   });
 });
 

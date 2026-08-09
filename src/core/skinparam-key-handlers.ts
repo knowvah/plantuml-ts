@@ -202,6 +202,12 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
   [['style'], (acc, value) => {
     if (value.trim().toLowerCase() === 'strictuml') acc.strictUml = true;
   }],
+  [['handwritten'], (acc, value) => {
+    // `skinparam handwritten true` — `TitledDiagram#isHandwritten` feeds
+    // `JsonDiagram#drawU`'s `new UGraphicHandwritten(ug)` (and every other
+    // engine's). Sketchy rendering, seeded so it is reproducible.
+    acc.handwritten = value.trim().toLowerCase() === 'true';
+  }],
   [['monochrome'], (acc, value) => {
     const v = value.trim().toLowerCase();
     if (v === 'true' || v === 'reverse') acc.monochrome = v;
