@@ -51,16 +51,14 @@
  * back to the caller's own id only in this function's returned map.
  */
 
-import { createGraph, render, setTextMeasurer, LutTextMeasurer } from '@knowvah/dot-engine';
+import { createGraph, render } from '@knowvah/dot-engine';
+import '../../core/dot-engine-measurer.js';
 import type { RectangleArea, Point } from './frontier-calculator.js';
 
-// plantuml-ts is a pure SVG library -- no DOM, no canvas (see graph-layout.ts's
-// identical pin, this module's own independent @knowvah/dot-engine consumer). Text
-// measurement is moot here (every shadow node is fixedsize with an empty
-// label), but @knowvah/dot-engine still probes for a canvas-backed measurer at
-// context-creation time unless one is pinned -- pin the canvas-free
-// lookup-table measurer so this module works under jsdom/browsers too.
-setTextMeasurer(new LutTextMeasurer());
+// The measurer pin now lives in `core/dot-engine-measurer.ts`, imported above
+// for its side effect (A5/T7). This module used to install its own, which was
+// safe only while every install point pinned the SAME measurer -- see that
+// module's doc comment for the bug that stopped being hypothetical.
 
 const PX_PER_INCH = 72;
 /** graphviz's own subgraph naming rule (`^cluster`) — a single, fixed name
