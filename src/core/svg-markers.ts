@@ -103,3 +103,23 @@ export function arrowHead(type: ArrowType, bgColor = '#FFFFFF'): string {
     `</marker>`
   );
 }
+
+/**
+ * The open "V" arrowhead of {@link MARKER_SPECS}.async, under a caller-chosen
+ * id and stroke color. json's edges need their own colored copy; building it
+ * there meant a second, drifting hand-written version of the same body (it
+ * was the one marker whose stroke bypassed {@link shortenColor}).
+ *
+ * `markerUnits="userSpaceOnUse"` keeps the head at a fixed pixel size
+ * regardless of the edge stroke-width -- the reason this cannot just be
+ * `arrowHead('async')`.
+ */
+export function openArrowHeadDef(markerId: string, stroke: string): string {
+  const s = MARKER_SPECS.async;
+  return (
+    `<marker id="${markerId}" markerWidth="${s.w}" markerHeight="${s.h}" ` +
+    `refX="${s.refX}" refY="${s.refY}" orient="${s.orient}" markerUnits="userSpaceOnUse">` +
+    s.body('').replace('stroke="#000"', `stroke="${shortenColor(stroke)}"`) +
+    `</marker>`
+  );
+}

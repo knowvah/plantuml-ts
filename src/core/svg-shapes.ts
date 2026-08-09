@@ -197,6 +197,23 @@ export function multilineText(
 }
 
 /**
+ * A single `<tspan>`. Same attribute choke point as {@link text}, so a color
+ * inside a creole run shortens exactly like one on a plain label -- they did
+ * not, and `spansToTspan` also emitted its content raw, producing invalid
+ * XML for any text containing `&` or `<`.
+ */
+export function tspan(content: string, style: TextStyle = {}): string {
+  const fillR = resolvePaint(style.fill);
+  const a = attrs([
+    ['fill', fillR.value],
+    ['font-weight', style.fontWeight],
+    ['font-style', style.fontStyle],
+    ['text-decoration', style.textDecoration],
+  ] as const);
+  return `${fillR.def}<tspan${a}>${escapeXmlText(content)}</tspan>`;
+}
+
+/**
  * `<image>` element -- G2 N22 (class-member-creole inline `<img>`/`<$sprite>`
  * atoms). Attribute order matches `klimt/drawing/svg/svg-graphics-elements
  * .ts#svgImageDataUri` (upstream: `SvgGraphics#svgImageDataUri`) exactly:

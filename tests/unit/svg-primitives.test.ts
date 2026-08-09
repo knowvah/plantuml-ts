@@ -205,11 +205,15 @@ describe('text', () => {
     expect(result).toContain('hello');
   });
 
+  // Text content escapes `&` and `<` only -- what the jar's serializer emits
+  // (verified: `say "hi" here` and `a > b & c` come back with `"` and `>`
+  // raw). `>` and `"` are escaped in ATTRIBUTE values, not here.
   it('escapes XML special characters in content', () => {
-    const result = text(0, 0, 'a < b & c > d');
+    const result = text(0, 0, 'a < b & c > d "e"');
     expect(result).toContain('&lt;');
     expect(result).toContain('&amp;');
-    expect(result).toContain('&gt;');
+    expect(result).not.toContain('&gt;');
+    expect(result).not.toContain('&quot;');
   });
 
   it('omits optional style attributes when style is empty', () => {

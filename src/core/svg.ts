@@ -344,7 +344,7 @@ export function strokeDecorationOf(
 // Shape emitters moved to a sibling module (line cap); re-exported. `noteBox`
 // joined them for the same reason when the emission rules below grew this
 // file past the cap.
-export { rect, line, text, multilineText, image, path, ellipse, circle, diamond, polygon, polyline, noteBox } from './svg-shapes.js';
+export { rect, line, text, multilineText, tspan, image, path, ellipse, circle, diamond, polygon, polyline, noteBox } from './svg-shapes.js';
 export type { NoteBoxStyle } from './svg-shapes.js';
 
 /**

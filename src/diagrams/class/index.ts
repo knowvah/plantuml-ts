@@ -10,6 +10,11 @@ import { classAccepts } from './class-dispatch.js';
 import { parseClass } from './parser.js';
 import { layoutClass } from './layout.js';
 import { renderClass } from './renderer.js';
+import { rect, text } from '../../core/svg.js';
+import { fmt } from '../../core/svg-format.js';
+
+/** Error-page red, shared by the two elements that use it. */
+const ERROR_COLOR = '#dc2626';
 
 // ---------------------------------------------------------------------------
 // Error rendering
@@ -28,18 +33,14 @@ import { renderClass } from './renderer.js';
  * precedent for a plugin returning a `completeSvg` error document.
  */
 function renderClassErrorDiagram(errors: readonly string[]): string {
-  const escaped = errors
-    .join('; ')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  const message = errors.join('; ');
   const width = 640;
   const height = 80;
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
-    `<rect width="${width}" height="${height}" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>` +
-    `<text x="10" y="28" fill="#dc2626" font-family="monospace" font-size="12">Class diagram error:</text>` +
-    `<text x="10" y="52" fill="#dc2626" font-family="monospace" font-size="11">${escaped}</text>` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${fmt(width)}" height="${fmt(height)}">` +
+    rect(0, 0, width, height, { fill: '#fee2e2', stroke: ERROR_COLOR, strokeWidth: 2 }) +
+    text(10, 28, 'Class diagram error:', { fill: ERROR_COLOR, fontFamily: 'monospace', fontSize: 12 }) +
+    text(10, 52, message, { fill: ERROR_COLOR, fontFamily: 'monospace', fontSize: 11 }) +
     `</svg>`
   );
 }

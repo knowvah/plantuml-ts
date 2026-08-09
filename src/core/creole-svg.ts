@@ -9,28 +9,32 @@
  */
 
 import type { CreoleSpan } from './creole-lexer.js';
+import { tspan } from './svg.js';
+import type { TextStyle } from './svg.js';
+
+/** underline and strikethrough both map to text-decoration; combine if both */
+function decorationOf(span: CreoleSpan): string | undefined {
+  if (span.underline && span.strikethrough) return 'underline line-through';
+  if (span.underline) return 'underline';
+  if (span.strikethrough) return 'line-through';
+  return undefined;
+}
 
 /**
- * Build the attributes string for a single tspan element.
+ * Map a creole span to the shared {@link TextStyle}. Attribute ORDER is the
+ * emitter's (fill, font-weight, font-style, text-decoration) -- the same
+ * order the hand-built string produced, so only the VALUES change: the fill
+ * now shortens, and the content is escaped.
  */
-function buildAttrs(span: CreoleSpan, inheritFill?: string): string {
-  const parts: string[] = [];
-
+function styleOf(span: CreoleSpan, inheritFill?: string): TextStyle {
   const fill = span.color ?? inheritFill;
-  if (fill !== undefined) parts.push(`fill="${fill}"`);
-  if (span.bold) parts.push('font-weight="bold"');
-  if (span.italic) parts.push('font-style="italic"');
-
-  // underline and strikethrough both map to text-decoration; combine if both
-  if (span.underline && span.strikethrough) {
-    parts.push('text-decoration="underline line-through"');
-  } else if (span.underline) {
-    parts.push('text-decoration="underline"');
-  } else if (span.strikethrough) {
-    parts.push('text-decoration="line-through"');
-  }
-
-  return parts.join(' ');
+  const decoration = decorationOf(span);
+  return {
+    ...(fill === undefined ? {} : { fill }),
+    ...(span.bold ? { fontWeight: 'bold' as const } : {}),
+    ...(span.italic ? { fontStyle: 'italic' as const } : {}),
+    ...(decoration === undefined ? {} : { textDecoration: decoration }),
+  };
 }
 
 /**
@@ -46,12 +50,5 @@ export function spansToTspan(
 ): string {
   if (spans.length === 0) return '';
 
-  return spans
-    .map(span => {
-      const attrs = buildAttrs(span, style?.fill);
-      return attrs.length > 0
-        ? `<tspan ${attrs}>${span.text}</tspan>`
-        : `<tspan>${span.text}</tspan>`;
-    })
-    .join('');
+  return spans.map(span => tspan(span.text, styleOf(span, style?.fill))).join('');
 }
