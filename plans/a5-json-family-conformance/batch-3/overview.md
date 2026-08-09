@@ -12,9 +12,21 @@ rule doing its job, not an oversight.
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
 | T5 | go/no-go: does the mirrored graph actually move geometry? | orchestrator (inline) | `plans/a5-json-family-conformance/adr1-gonogo.md` | T4 | [x] **GO (weak)** |
-| T6 | port `Mirror`, build the TB+swapped-dims graph | typescript-pro | `src/diagrams/json/Mirror.ts`, `src/diagrams/json/layout.ts` | T5 | [ ] |
-| T7 | real record ports: `P<n>` labels + `tailport` | typescript-pro | `src/diagrams/json/layout.ts`, `src/diagrams/json/json-layout-prep.ts` | T6 | [ ] |
+| T6 | port `Mirror`, build the TB+swapped-dims graph | orchestrator (inline) | `src/diagrams/json/Mirror.ts`, `src/diagrams/json/layout.ts` | T5 | [x] **dim error 111.88 → 101.83** |
+| **T6b** | **port `TextBlockJson`'s node sizing** (added mid-mission on T5's evidence) | typescript-pro | `src/diagrams/json/layout.ts`, `json-layout-prep.ts` | T6 | [ ] |
+| T7 | real record ports: `P<n>` labels + `tailport` | typescript-pro | `src/diagrams/json/layout.ts`, `src/diagrams/json/json-layout-prep.ts` | T6b | [ ] |
 | T8 | port `JsonCurve` edge routing onto mirrored coords | typescript-pro | `src/diagrams/json/JsonCurve.ts`, `src/diagrams/json/renderer.ts` | T7 | [ ] |
+
+## T6b was added mid-mission, and why that matters
+
+T5 did its job: it authorised T6 **and** falsified the brief's assumption that
+ADR-1 was the dimension lever. T6 delivered exactly the improvement T5
+predicted (111.88 → 101.83) and left **zero** fixtures at exact dimensions.
+
+Node sizing dominates. `T6b-node-sizing.md` ports `TextBlockJson`'s dimension
+calculation and names six specific divergences already identified against the
+Java. Without it this batch cannot reach the exit bar, however well T7 and T8
+land — they target edge geometry, which the dimension metric does not measure.
 
 ## T5 is a real gate, not a formality
 

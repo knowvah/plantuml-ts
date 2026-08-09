@@ -77,6 +77,11 @@ write-set (`on_fail: stop`).
 - [ ] **[Batch 3 — the layout re-mirror](batch-3/overview.md)** — ADR-1. Port
       `Mirror`, swap node dims, drive TB, and replace `tailportY` with real
       record ports. The largest batch; strictly sequential.
+      **T5 GO (weak)** and **T6 DONE** (`31137d2c`): dimension error
+      111.88 → 101.83, closer on 68 fixtures / worse on 2. **T6b ADDED
+      mid-mission** — T5 proved node SIZING, not topology, is the dimension
+      lever (zero fixtures exact after T6; `{}` renders 76×31 against the jar's
+      32×40). T7/T8 target edge geometry and cannot close it.
 - [ ] **[Batch 4 — close-out](batch-4/overview.md)** — yaml/hcl ratchets,
       per-fixture attribution of every remaining miss, divergence records,
       mission-index flip.
