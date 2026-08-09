@@ -221,7 +221,7 @@ describe('the rendered SVG', () => {
 
   it('escapes markup in the offending source line', () => {
     const svg = renderPSystemError(failing('@startuml\n<b>&x</b>', 'boom'), measurer);
-    expect(svg).toContain('&lt;b&gt;&amp;x&lt;/b&gt;');
+    expect(svg).toContain('&lt;b>&amp;x&lt;/b>');
   });
 
   it('renders the Welcome hyperlink underlined and its examples in monospace', () => {

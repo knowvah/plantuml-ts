@@ -47,6 +47,9 @@ export interface LineStyle {
   stroke?: Paint;
   strokeWidth?: number;
   strokeDasharray?: string;
+  /** `fill-opacity` -- takes rule 6's `max(decimals, 2)` formatting, same as
+   *  `opacity`. Needed by the area chart's translucent fill path. */
+  fillOpacity?: number;
   markerEnd?: string;
   markerStart?: string;
   /** `<path id="...">` -- jar's `Link#idCommentForSvg()` value
@@ -83,6 +86,8 @@ export interface TextStyle {
   fontStyle?: 'normal' | 'italic';
   fill?: Paint;
   textAnchor?: 'start' | 'middle' | 'end';
+  /** `transform` -- emitted verbatim. Rotated axis titles need it. */
+  transform?: string;
   dominantBaseline?: 'middle' | 'central' | 'auto' | 'hanging';
   /**
    * Emitted verbatim as the SVG `text-decoration` attribute. The error diagram
@@ -131,12 +136,29 @@ const XML_ENTITIES: Record<string, string> = {
   '"': '&quot;',
 };
 const XML_RE = new RegExp('[&<>"]', 'g');
+const XML_TEXT_RE = new RegExp('[&<]', 'g');
 
 /**
- * Escape characters that are special in XML text content and attribute values.
+ * Escape characters that are special in an XML **attribute value**.
  */
 export function escapeXml(s: string): string {
   return s.replace(XML_RE, (ch) => XML_ENTITIES[ch] ?? ch);
+}
+
+/**
+ * Escape characters that are special in XML **text content** -- `&` and `<`
+ * only, which is what the jar's serializer emits. Verified against the oracle
+ * jar: `say "hi" here` and `a > b & c` come back as `say "hi" here` and
+ * `a &amp; b`-style output with the `"` and `>` RAW; only `&` and `<` are
+ * entity-encoded.
+ *
+ * Attribute values still need `"` (and keep `>`) -- that is {@link escapeXml}.
+ * Using the attribute escaper for text content over-escaped `"` and `>`; the
+ * conformance harness could not see it because `normalize.ts` parses both
+ * forms to the same DOM text node.
+ */
+export function escapeXmlText(s: string): string {
+  return s.replace(XML_TEXT_RE, (ch) => XML_ENTITIES[ch] ?? ch);
 }
 
 /** The single point where an attribute value becomes text: numbers take
@@ -322,7 +344,7 @@ export function strokeDecorationOf(
 // Shape emitters moved to a sibling module (line cap); re-exported. `noteBox`
 // joined them for the same reason when the emission rules below grew this
 // file past the cap.
-export { rect, line, text, image, path, ellipse, diamond, polygon, noteBox } from './svg-shapes.js';
+export { rect, line, text, multilineText, tspan, image, path, ellipse, circle, diamond, polygon, polyline, noteBox } from './svg-shapes.js';
 export type { NoteBoxStyle } from './svg-shapes.js';
 
 /**

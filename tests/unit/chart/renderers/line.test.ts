@@ -155,7 +155,7 @@ describe('drawLine — zero points', () => {
 describe('drawLine — SVG attribute correctness', () => {
   it('line segments use geo.color for stroke', () => {
     const svg = drawLine(makeGeo([10, 20], { color: '#AABBCC' }), THEME);
-    expect(svg).toContain('stroke="#AABBCC"');
+    expect(svg).toContain('stroke="#ABC"');
   });
 
   it('line segments have stroke-width="2"', () => {
@@ -165,6 +165,6 @@ describe('drawLine — SVG attribute correctness', () => {
 
   it('circle markers use geo.color for fill', () => {
     const svg = drawLine(makeGeo([10], { color: '#112233', markerShape: 'circle' }), THEME);
-    expect(svg).toContain('fill="#112233"');
+    expect(svg).toContain('fill="#123"');
   });
 });

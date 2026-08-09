@@ -8,7 +8,7 @@
 import type { ActivityGeometry, ActivityEdgeGeo, SwimlaneGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, line, text } from '../../core/svg.js';
+import { rect, line, text, polygon, polyline as polylineEl } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode } from './activity-renderer-shapes.js';
 
@@ -41,7 +41,7 @@ function arrowTip(
   const y1 = y - udy * size + py;
   const x2 = x - udx * size - px;
   const y2 = y - udy * size - py;
-  return `<polygon points="${x},${y} ${x1},${y1} ${x2},${y2}" fill="${color}"/>`;
+  return polygon([{ x, y }, { x: x1, y: y1 }, { x: x2, y: y2 }], { fill: color });
 }
 
 /**
@@ -92,8 +92,7 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
 
 
   const edgeColor = theme.colors.arrow;
-  const pointsAttr = pts.map((p) => `${p.x},${p.y}`).join(' ');
-  const polyline = `<polyline points="${pointsAttr}" fill="none" stroke="${edgeColor}" stroke-width="1.5"/>`;
+  const polyline = polylineEl(pts, { fill: 'none', stroke: edgeColor, strokeWidth: 1.5 });
 
   // Arrowhead at last point, direction from second-to-last to last
   const last = pts[pts.length - 1]!;

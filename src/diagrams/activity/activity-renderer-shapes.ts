@@ -8,7 +8,7 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import { rect, text, diamond, noteBox } from '../../core/svg.js';
+import { rect, text, diamond, noteBox, circle, line, path, polygon, multilineText } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 
 const ACTION_RX = 8;
@@ -28,16 +28,13 @@ export function renderMultilineText(
   const lh = theme.fontSize * 1.4;
   const totalH = lh * lines.length;
   // y of first line baseline so the block is vertically centred around cy
-  let y = cy - totalH / 2 + lh * 0.8;
-  const attrs = `text-anchor="middle" font-family="${theme.fontFamily}" font-size="${theme.fontSize}" fill="${theme.colors.text}"`;
-  const tspans = lines
-    .map((ln) => {
-      const el = `<tspan x="${cx}" y="${y.toFixed(1)}">${ln.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</tspan>`;
-      y += lh;
-      return el;
-    })
-    .join('');
-  return `<text ${attrs}>${tspans}</text>`;
+  const y = cy - totalH / 2 + lh * 0.8;
+  return multilineText(lines, cx, y, lh, {
+    textAnchor: 'middle',
+    fontFamily: theme.fontFamily,
+    fontSize: theme.fontSize,
+    fill: theme.colors.text,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -75,7 +72,7 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
   const r = node.height / 2;
-  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${actColors(theme).startFill}"/>`;
+  return circle(cx, cy, r, { fill: actColors(theme).startFill });
 }
 
 export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
@@ -85,8 +82,8 @@ export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
   const innerR = outerR * 0.55;
   const c = actColors(theme);
   return (
-    `<circle cx="${cx}" cy="${cy}" r="${outerR}" fill="none" stroke="${c.endFill}" stroke-width="2"/>` +
-    `<circle cx="${cx}" cy="${cy}" r="${innerR}" fill="${c.endFill}"/>`
+    circle(cx, cy, outerR, { fill: 'none', stroke: c.endFill, strokeWidth: 2 }) +
+    circle(cx, cy, innerR, { fill: c.endFill })
   );
 }
 
@@ -102,9 +99,9 @@ export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
   const d = r * Math.SQRT1_2;
   const endFill = actColors(theme).endFill;
   return (
-    `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${endFill}" stroke-width="1.5"/>` +
-    `<line x1="${cx - d}" y1="${cy - d}" x2="${cx + d}" y2="${cy + d}" stroke="${endFill}" stroke-width="1.5"/>` +
-    `<line x1="${cx - d}" y1="${cy + d}" x2="${cx + d}" y2="${cy - d}" stroke="${endFill}" stroke-width="1.5"/>`
+    circle(cx, cy, r, { fill: 'none', stroke: endFill, strokeWidth: 1.5 }) +
+    line(cx - d, cy - d, cx + d, cy + d, { stroke: endFill, strokeWidth: 1.5 }) +
+    line(cx - d, cy + d, cx + d, cy - d, { stroke: endFill, strokeWidth: 1.5 })
   );
 }
 
@@ -131,17 +128,15 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
     const monoFamily = 'monospace';
     const lh = theme.fontSize * 1.4;
     const totalH = lh * codeLines.length;
-    let lineY = cy - totalH / 2 + lh * 0.8;
+    const lineY = cy - totalH / 2 + lh * 0.8;
     const labelX = node.x + ACTION_H_PAD;
-    const attrs = `text-anchor="start" font-family="${monoFamily}" font-size="${theme.fontSize}" fill="${theme.colors.text}"`;
-    const tspans = codeLines
-      .map((ln) => {
-        const el = `<tspan x="${labelX}" y="${lineY.toFixed(1)}">${ln.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</tspan>`;
-        lineY += lh;
-        return el;
-      })
-      .join('');
-    return box + `<text ${attrs}>${tspans}</text>`;
+    const labelText = multilineText(codeLines, labelX, lineY, lh, {
+      textAnchor: 'start',
+      fontFamily: monoFamily,
+      fontSize: theme.fontSize,
+      fill: theme.colors.text,
+    });
+    return box + labelText;
   }
 
   const lines = label.split('\n');
@@ -149,17 +144,15 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   if (lines.length > 1) {
     const lh = theme.fontSize * 1.4;
     const totalH = lh * lines.length;
-    let lineY = cy - totalH / 2 + lh * 0.8;
+    const lineY = cy - totalH / 2 + lh * 0.8;
     const labelX = node.x + ACTION_H_PAD;
-    const attrs = `text-anchor="start" font-family="${theme.fontFamily}" font-size="${theme.fontSize}" fill="${theme.colors.text}"`;
-    const tspans = lines
-      .map((ln) => {
-        const el = `<tspan x="${labelX}" y="${lineY.toFixed(1)}">${ln.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</tspan>`;
-        lineY += lh;
-        return el;
-      })
-      .join('');
-    labelEl = `<text ${attrs}>${tspans}</text>`;
+    const labelText = multilineText(lines, labelX, lineY, lh, {
+      textAnchor: 'start',
+      fontFamily: theme.fontFamily,
+      fontSize: theme.fontSize,
+      fill: theme.colors.text,
+    });
+    labelEl = labelText;
   } else {
     labelEl = renderLabel(label, cx, cy + theme.fontSize / 3, theme);
   }
@@ -206,16 +199,14 @@ export function renderSignalLabel(label: string, x: number, cy: number, theme: T
   }
   const lh = theme.fontSize * 1.4;
   const totalH = lh * lines.length;
-  let lineY = cy - totalH / 2 + lh * 0.8;
-  const attrs = `text-anchor="start" font-family="${theme.fontFamily}" font-size="${theme.fontSize}" fill="${theme.colors.text}"`;
-  const tspans = lines
-    .map((ln) => {
-      const el = `<tspan x="${labelX}" y="${lineY.toFixed(1)}">${ln.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</tspan>`;
-      lineY += lh;
-      return el;
-    })
-    .join('');
-  return `<text ${attrs}>${tspans}</text>`;
+  const lineY = cy - totalH / 2 + lh * 0.8;
+  const labelText = multilineText(lines, labelX, lineY, lh, {
+    textAnchor: 'start',
+    fontFamily: theme.fontFamily,
+    fontSize: theme.fontSize,
+    fill: theme.colors.text,
+  });
+  return labelText;
 }
 
 export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
@@ -228,14 +219,13 @@ export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
   // the midpoint of the right edge → concave right notch pointing left.
   // dent = (h/2) / tan(60°) = h / (2√3)
   const dent = h / (2 * Math.sqrt(3));
-  const points = [
-    `${x},${y}`,
-    `${x + w},${y}`,
-    `${x + w - dent},${y + h / 2}`,
-    `${x + w},${y + h}`,
-    `${x},${y + h}`,
-  ].join(' ');
-  const shape = `<polygon points="${points}" fill="${fill}" stroke="${c.nodeBorder}" stroke-width="1"/>`;
+  const shape = polygon([
+    { x: x, y: y },
+    { x: x + w, y: y },
+    { x: x + w - dent, y: y + h / 2 },
+    { x: x + w, y: y + h },
+    { x: x, y: y + h },
+  ], { fill, stroke: c.nodeBorder, strokeWidth: 1 });
   return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
 }
 
@@ -247,14 +237,13 @@ export function renderChevronRight(node: ActivityNodeGeo, theme: Theme): string 
   const dent = h / (2 * Math.sqrt(3));
   // <<output>> = right-pointing arrow: body rectangle indented on right,
   // vertex pointing right at the midpoint of the right edge.
-  const points = [
-    `${x},${y}`,
-    `${x + w - dent},${y}`,
-    `${x + w},${y + h / 2}`,
-    `${x + w - dent},${y + h}`,
-    `${x},${y + h}`,
-  ].join(' ');
-  const shape = `<polygon points="${points}" fill="${fill}" stroke="${c.nodeBorder}" stroke-width="1"/>`;
+  const shape = polygon([
+    { x: x, y: y },
+    { x: x + w - dent, y: y },
+    { x: x + w, y: y + h / 2 },
+    { x: x + w - dent, y: y + h },
+    { x: x, y: y + h },
+  ], { fill, stroke: c.nodeBorder, strokeWidth: 1 });
   return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
 }
 
@@ -263,15 +252,14 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const c = actColors(theme);
   const fill = node.color ?? c.diamondFill;
   const dent = h / 2;
-  const points = [
-    `${x + dent},${y}`,
-    `${x + w - dent},${y}`,
-    `${x + w},${y + h / 2}`,
-    `${x + w - dent},${y + h}`,
-    `${x + dent},${y + h}`,
-    `${x},${y + h / 2}`,
-  ].join(' ');
-  const shape = `<polygon points="${points}" fill="${fill}" stroke="${c.diamondBorder}" stroke-width="1"/>`;
+  const shape = polygon([
+    { x: x + dent, y: y },
+    { x: x + w - dent, y: y },
+    { x: x + w, y: y + h / 2 },
+    { x: x + w - dent, y: y + h },
+    { x: x + dent, y: y + h },
+    { x: x, y: y + h / 2 },
+  ], { fill, stroke: c.diamondBorder, strokeWidth: 1 });
   const cx = x + w / 2;
   const cy = y + h / 2;
   const lines = (node.label ?? '').split('\n');
@@ -289,13 +277,12 @@ export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string
   // Right-leaning parallelogram: interior angles 75° (acute) / 105° (obtuse).
   // tan(75°) = h/d  →  d = h / (2 + √3) = h · (2 − √3)
   const d = h * (2 - Math.sqrt(3));
-  const points = [
-    `${x + d},${y}`,
-    `${x + w},${y}`,
-    `${x + w - d},${y + h}`,
-    `${x},${y + h}`,
-  ].join(' ');
-  const shape = `<polygon points="${points}" fill="${fill}" stroke="${c.nodeBorder}" stroke-width="1"/>`;
+  const shape = polygon([
+    { x: x + d, y: y },
+    { x: x + w, y: y },
+    { x: x + w - d, y: y + h },
+    { x: x, y: y + h },
+  ], { fill, stroke: c.nodeBorder, strokeWidth: 1 });
   const cx = x + w / 2;
   const cy = y + h / 2;
   const lines = (node.label ?? '').split('\n');
@@ -345,9 +332,9 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const body =
     spike === undefined
       ? noteBox(x, y, w, h, { fill: noteFill, stroke, dogEar: NOTE_FOLD })
-      : `<path d="${bodyPath}" fill="${noteFill}" stroke="${stroke}" stroke-width="1"/>` +
-        `<line x1="${x + w - NOTE_FOLD}" y1="${y}" x2="${x + w - NOTE_FOLD}" y2="${y + NOTE_FOLD}" stroke="${stroke}"/>` +
-        `<line x1="${x + w - NOTE_FOLD}" y1="${y + NOTE_FOLD}" x2="${x + w}" y2="${y + NOTE_FOLD}" stroke="${stroke}"/>`;
+      : path(bodyPath, { fill: noteFill, stroke, strokeWidth: 1 }) +
+        line(x + w - NOTE_FOLD, y, x + w - NOTE_FOLD, y + NOTE_FOLD, { stroke }) +
+        line(x + w - NOTE_FOLD, y + NOTE_FOLD, x + w, y + NOTE_FOLD, { stroke });
 
   const label = node.label ?? '';
   const lines = label.split('\n');
@@ -355,16 +342,12 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const labelX = x + 4;
   let labelEl: string;
   if (lines.length > 1) {
-    const attrs = `text-anchor="start" font-family="${theme.fontFamily}" font-size="${theme.fontSize}" fill="${theme.colors.text}"`;
-    let lineY = y + NOTE_FOLD + theme.fontSize;
-    const tspans = lines
-      .map((ln) => {
-        const el = `<tspan x="${labelX}" y="${lineY.toFixed(1)}">${ln.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</tspan>`;
-        lineY += lh;
-        return el;
-      })
-      .join('');
-    labelEl = `<text ${attrs}>${tspans}</text>`;
+    labelEl = multilineText(lines, labelX, y + NOTE_FOLD + theme.fontSize, lh, {
+      textAnchor: 'start',
+      fontFamily: theme.fontFamily,
+      fontSize: theme.fontSize,
+      fill: theme.colors.text,
+    });
   } else {
     labelEl = text(labelX, y + NOTE_FOLD + theme.fontSize, label, {
       fill: theme.colors.text,

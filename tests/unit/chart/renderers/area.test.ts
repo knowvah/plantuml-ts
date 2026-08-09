@@ -93,7 +93,7 @@ describe('drawArea — top-edge stroke', () => {
     const pts = [makePoint(50, 200, 40), makePoint(100, 150, 60)];
     const svg = drawArea(makeGeo(pts, flatBaseline(pts), { color: '#FF4400' }), THEME);
 
-    expect(svg).toContain('stroke="#FF4400"');
+    expect(svg).toContain('stroke="#F40"');
   });
 
   it('AC3: top-edge stroke has stroke-width="2"', () => {

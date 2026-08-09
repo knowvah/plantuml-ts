@@ -175,7 +175,7 @@ describe('jsondiagram.node style block', () => {
     const svg = await render(
       '@startjson\n<style>\njsonDiagram {\n  node {\n    LineColor #FF0000\n  }\n}\n</style>\n{"a":{"b":1}}\n@endjson',
     );
-    expect(svg).toContain('#FF0000');
+    expect(svg).toContain('#F00');
   });
 
   it('applies FontColor from jsonDiagram.node style to value cells', async () => {

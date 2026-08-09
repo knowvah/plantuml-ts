@@ -14,7 +14,7 @@
  * `parseCreoleTokens` and re-exports `measureTable`/`tableTokenToSvg`.
  */
 
-import { attrs } from './svg.js';
+import { attrs, tspan } from './svg.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -205,14 +205,16 @@ function renderRow(params: RenderRowParams): string {
     // Cell text — centered horizontally and vertically
     const textX = cellX + colW / 2;
     const textY = rowY + rowHeight / 2;
-    const weightAttr = isHeader ? ' font-weight="bold"' : '';
     parts.push(
       `<text${attrs([
         ['x', textX],
         ['y', textY],
         ['font-size', fontSize],
-      ] as const)}${weightAttr} text-anchor="middle" dominant-baseline="central">` +
-      `<tspan>${content}</tspan>` +
+        ['font-weight', isHeader ? 'bold' : undefined],
+        ['text-anchor', 'middle'],
+        ['dominant-baseline', 'central'],
+      ] as const)}>` +
+      tspan(content) +
       `</text>`,
     );
 

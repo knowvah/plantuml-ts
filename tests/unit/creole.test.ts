@@ -270,7 +270,7 @@ describe('spansToTspan', () => {
 
   it('adds fill attribute for colored span', () => {
     const span: CreoleSpan = { ...plain, color: 'red' };
-    expect(spansToTspan([span])).toContain('fill="red"');
+    expect(spansToTspan([span])).toContain('fill="#F00"');
   });
 
   it('combines bold and italic on the same tspan', () => {
@@ -295,14 +295,14 @@ describe('spansToTspan', () => {
 
   it('applies style.fill to plain tspan when no color override', () => {
     const result = spansToTspan([plain], { fill: 'blue' });
-    expect(result).toContain('fill="blue"');
+    expect(result).toContain('fill="#00F"');
   });
 
   it('span color overrides style.fill', () => {
     const span: CreoleSpan = { ...plain, color: 'green' };
     const result = spansToTspan([span], { fill: 'blue' });
-    expect(result).toContain('fill="green"');
-    expect(result).not.toContain('fill="blue"');
+    expect(result).toContain('fill="#008000"');
+    expect(result).not.toContain('fill="#00F"');
   });
 
   it('returns empty string for empty spans array', () => {
@@ -350,7 +350,7 @@ describe('creoleToSvg', () => {
 
   it('renders <color:red>colored</color>', () => {
     const result = creoleToSvg('<color:red>colored</color>');
-    expect(result).toContain('fill="red"');
+    expect(result).toContain('fill="#F00"');
     expect(result).toContain('>colored<');
   });
 

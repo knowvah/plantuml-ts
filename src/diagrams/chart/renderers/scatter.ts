@@ -10,36 +10,31 @@
 
 import type { ScatterSeriesGeo, DataPoint } from '../layout.js';
 import type { Theme } from '../../../core/theme.js';
+import { circle, rect, polygon, text } from '../../../core/svg.js';
 
 // ---------------------------------------------------------------------------
 // Marker drawing helpers
 // ---------------------------------------------------------------------------
 
 function drawCircleMarker(p: DataPoint, color: string, r: number): string {
-  return (
-    `<circle cx="${p.x}" cy="${p.y}" r="${r}"` +
-    ` fill="${color}" stroke="${color}"/>`
-  );
+  return circle(p.x, p.y, r, { fill: color, stroke: color });
 }
 
 function drawSquareMarker(p: DataPoint, color: string, r: number): string {
   const size = r * 2;
-  return (
-    `<rect x="${p.x - r}" y="${p.y - r}"` +
-    ` width="${size}" height="${size}"` +
-    ` fill="${color}" stroke="${color}"/>`
-  );
+  return rect(p.x - r, p.y - r, size, size, { fill: color, stroke: color });
 }
 
 function drawTriangleMarker(p: DataPoint, color: string, r: number): string {
   // Upward-pointing triangle: apex at y-(r+1), base at y+(r-1), width ±r.
   // Matches ScatterRenderer.java proportions at default size (r=4).
-  const top = `${p.x},${p.y - (r + 1)}`;
-  const bl = `${p.x - r},${p.y + (r - 1)}`;
-  const br = `${p.x + r},${p.y + (r - 1)}`;
-  return (
-    `<polygon points="${top} ${bl} ${br}"` +
-    ` fill="${color}" stroke="${color}"/>`
+  return polygon(
+    [
+      { x: p.x, y: p.y - (r + 1) },
+      { x: p.x - r, y: p.y + (r - 1) },
+      { x: p.x + r, y: p.y + (r - 1) },
+    ],
+    { fill: color, stroke: color },
   );
 }
 
@@ -64,10 +59,7 @@ function drawMarker(
 // ---------------------------------------------------------------------------
 
 function drawLabel(p: DataPoint): string {
-  return (
-    `<text x="${p.x + 6}" y="${p.y - 4}"` +
-    ` font-size="10">${String(p.value)}</text>`
-  );
+  return text(p.x + 6, p.y - 4, String(p.value), { fontSize: 10 });
 }
 
 // ---------------------------------------------------------------------------

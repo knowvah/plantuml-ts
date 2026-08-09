@@ -6,7 +6,7 @@
 
 import {} from './paint.js';
 import type {} from './paint.js';
-import { attrs, escapeXml, resolvePaint, resolvePaintAttrs, attrsFromRecord, strokeDecorationOf, ROOT_FONT_FAMILY, PAINT_NONE, type BoxStyle, type LineStyle, type TextStyle, type SvgAttrsPaint } from './svg.js';
+import { attrs, escapeXmlText, resolvePaint, resolvePaintAttrs, attrsFromRecord, strokeDecorationOf, ROOT_FONT_FAMILY, PAINT_NONE, type BoxStyle, type LineStyle, type TextStyle, type SvgAttrsPaint } from './svg.js';
 import { DEFAULT_SVG_DECIMALS, fmt, formatOpacity, shortenColor } from './svg-format.js';
 
 /**
@@ -146,6 +146,7 @@ export function text(
     ['font-style', style.fontStyle],
     ['fill', fillR.value],
     ['text-anchor', style.textAnchor],
+    ['transform', style.transform],
     ['dominant-baseline', style.dominantBaseline],
     ['text-decoration', style.textDecoration],
     // Rule 3: no `lengthAdjust` — hoisted onto the document root and
@@ -153,7 +154,63 @@ export function text(
     // set it) but is no longer emitted per element.
     ['textLength', textLengthOf(content, style.textLength)],
   ] as const);
-  return `${fillR.def}<text${a}>${escapeXml(content)}</text>`;
+  return `${fillR.def}<text${a}>${escapeXmlText(content)}</text>`;
+}
+
+/**
+ * `<text>` with stacked `<tspan>` children -- one per line, advancing the
+ * baseline by `lineHeight`. Upstream has no single element for this (its
+ * `TextBlock` composes one `svgText` per line), but five byte-identical
+ * hand-built copies existed in `activity-renderer-shapes.ts` alone, each
+ * with its own `toFixed(1)` and its own three-`replace` XML escaping. This
+ * is the one emitter they now share, so rules 1-3 reach them.
+ *
+ * The parent `<text>` carries the shared attributes only; `x`/`y` live on
+ * the tspans, which is why this cannot just call {@link text}.
+ */
+export function multilineText(
+  lines: readonly string[],
+  x: number,
+  firstBaselineY: number,
+  lineHeight: number,
+  style: TextStyle = {},
+): string {
+  const fillR = resolvePaint(style.fill);
+  const a = attrs([
+    ['text-anchor', style.textAnchor],
+    ['font-family', textFontFamily(style.fontFamily)],
+    ['font-size', style.fontSize],
+    ['font-weight', style.fontWeight],
+    ['font-style', style.fontStyle],
+    ['fill', fillR.value],
+  ] as const);
+  const tspans = lines
+    .map((ln, i) => {
+      const ta = attrs([
+        ['x', x],
+        ['y', firstBaselineY + lineHeight * i],
+      ] as const);
+      return `<tspan${ta}>${escapeXmlText(ln)}</tspan>`;
+    })
+    .join('');
+  return `${fillR.def}<text${a}>${tspans}</text>`;
+}
+
+/**
+ * A single `<tspan>`. Same attribute choke point as {@link text}, so a color
+ * inside a creole run shortens exactly like one on a plain label -- they did
+ * not, and `spansToTspan` also emitted its content raw, producing invalid
+ * XML for any text containing `&` or `<`.
+ */
+export function tspan(content: string, style: TextStyle = {}): string {
+  const fillR = resolvePaint(style.fill);
+  const a = attrs([
+    ['fill', fillR.value],
+    ['font-weight', style.fontWeight],
+    ['font-style', style.fontStyle],
+    ['text-decoration', style.textDecoration],
+  ] as const);
+  return `${fillR.def}<tspan${a}>${escapeXmlText(content)}</tspan>`;
 }
 
 /**
@@ -187,6 +244,7 @@ export function path(d: string, style: LineStyle = {}): string {
   const a = attrs([
     ['d', d],
     ['fill', fillR?.value ?? PAINT_NONE],
+    ['fill-opacity', style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS)],
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -221,6 +279,33 @@ export function ellipse(
   const extra = resolved !== undefined ? attrsFromRecord(resolved.plain) : '';
   const def = resolved?.def ?? '';
   return `${def}<ellipse${a}${extra}/>`;
+}
+
+/**
+ * `<circle>` element. Distinct from {@link ellipse} on purpose: twelve call
+ * sites across the activity, sequence and json engines already emit a real
+ * `<circle>`, and rewriting them as an equal-radii `<ellipse>` would change
+ * the emitted element for no benefit. What they were missing is this
+ * function's whole point -- going through {@link attrs}, which is where
+ * rule 1 (decimal formatting) and rule 2 (`shortenColor`) are applied.
+ *
+ * Attribute order matches what those call sites already emitted, so the only
+ * byte difference is the formatting that was missing.
+ */
+export function circle(cx: number, cy: number, r: number, style: BoxStyle = {}): string {
+  const fillR = resolvePaint(style.fill);
+  const strokeR = resolvePaint(style.stroke);
+  const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const a = attrs([
+    ['cx', cx],
+    ['cy', cy],
+    ['r', r],
+    ['fill', fillR.value],
+    ['stroke', strokeR.value],
+    ['stroke-width', sd.strokeWidth],
+    ['stroke-dasharray', sd.strokeDasharray],
+  ] as const);
+  return `${fillR.def}${strokeR.def}<circle${a}/>`;
 }
 
 /**
@@ -270,6 +355,28 @@ export function polygon(
     ['stroke-dasharray', sd.strokeDasharray],
   ] as const);
   return `${fillR.def}${strokeR.def}<polygon${a}/>`;
+}
+
+/**
+ * `<polyline>` -- the open counterpart of {@link polygon}. Same attributes,
+ * same order; only the element name differs, so the two cannot drift.
+ */
+export function polyline(
+  points: ReadonlyArray<{ x: number; y: number }>,
+  style: BoxStyle = {},
+): string {
+  const pts = points.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(' ');
+  const fillR = resolvePaint(style.fill);
+  const strokeR = resolvePaint(style.stroke);
+  const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const a = attrs([
+    ['points', pts],
+    ['fill', fillR.value],
+    ['stroke', strokeR.value],
+    ['stroke-width', sd.strokeWidth],
+    ['stroke-dasharray', sd.strokeDasharray],
+  ] as const);
+  return `${fillR.def}${strokeR.def}<polyline${a}/>`;
 }
 
 // ---------------------------------------------------------------------------

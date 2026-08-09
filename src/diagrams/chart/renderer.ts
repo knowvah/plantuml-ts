@@ -23,7 +23,8 @@
 
 import type { ChartGeometry, LegendGeometry, AnnotationGeometry } from './layout.js';
 import type { Theme } from '../../core/theme.js';
-import { rect, line, text } from '../../core/svg.js';
+import { rect, line, text, circle, polygon } from '../../core/svg.js';
+import { fmt } from '../../core/svg-format.js';
 import type { AssembledSvg } from '../../core/dispatcher.js';
 import { drawBar } from './renderers/bar.js';
 import { drawLine } from './renderers/line.js';
@@ -101,16 +102,20 @@ function drawLegendScatterSwatch(pe: LegendEntryPos): string {
   const c = pe.color;
 
   if (shape === 'circle') {
-    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}" stroke="${c}"/>`;
+    return circle(cx, cy, r, { fill: c, stroke: c });
   }
   if (shape === 'square') {
-    return `<rect x="${cx - r}" y="${cy - r}" width="${r * 2}" height="${r * 2}" fill="${c}" stroke="${c}"/>`;
+    return rect(cx - r, cy - r, r * 2, r * 2, { fill: c, stroke: c });
   }
   // triangle
-  const top = `${cx},${cy - (r + 1)}`;
-  const bl = `${cx - r},${cy + (r - 1)}`;
-  const br = `${cx + r},${cy + (r - 1)}`;
-  return `<polygon points="${top} ${bl} ${br}" fill="${c}" stroke="${c}"/>`;
+  return polygon(
+    [
+      { x: cx, y: cy - (r + 1) },
+      { x: cx - r, y: cy + (r - 1) },
+      { x: cx + r, y: cy + (r - 1) },
+    ],
+    { fill: c, stroke: c },
+  );
 }
 
 /**
@@ -203,7 +208,14 @@ function drawAnnotation(ann: AnnotationGeometry, theme: Theme): string {
     const ax = tipX;
     const ay = tipY;
     parts.push(
-      `<polygon points="${ax},${ay} ${ax - arrowSize},${ay - arrowSize * 1.6} ${ax + arrowSize},${ay - arrowSize * 1.6}" fill="${theme.colors.arrow}"/>`,
+      polygon(
+        [
+          { x: ax, y: ay },
+          { x: ax - arrowSize, y: ay - arrowSize * 1.6 },
+          { x: ax + arrowSize, y: ay - arrowSize * 1.6 },
+        ],
+        { fill: theme.colors.arrow },
+      ),
     );
   }
 
@@ -219,17 +231,14 @@ function drawAnnotation(ann: AnnotationGeometry, theme: Theme): string {
  */
 function renderErrorDiagram(errors: string[]): string {
   const message = errors.join('; ');
-  const escaped = message
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
   const width = 600;
   const height = 80;
+  const errColor = '#dc2626';
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
-    `<rect width="${width}" height="${height}" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>` +
-    `<text x="10" y="28" fill="#dc2626" font-family="monospace" font-size="12">Chart error:</text>` +
-    `<text x="10" y="52" fill="#dc2626" font-family="monospace" font-size="11">${escaped}</text>` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${fmt(width)}" height="${fmt(height)}">` +
+    rect(0, 0, width, height, { fill: '#fee2e2', stroke: errColor, strokeWidth: 2 }) +
+    text(10, 28, 'Chart error:', { fill: errColor, fontFamily: 'monospace', fontSize: 12 }) +
+    text(10, 52, message, { fill: errColor, fontFamily: 'monospace', fontSize: 11 }) +
     `</svg>`
   );
 }

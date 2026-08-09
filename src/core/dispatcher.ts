@@ -6,6 +6,7 @@
  */
 
 import type { DiagramType, UmlSource } from './block-extractor.js';
+import { rect, text } from './svg.js';
 import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
 import type { AssetStore } from './asset-store.js';
@@ -217,10 +218,12 @@ const ERROR_SENTINEL: SyncPlugin = {
   render: (_geo: unknown, theme: Theme): AssembledSvg => ({
     completeSvg:
       `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="60">` +
-      `<rect width="300" height="60" fill="#fff8f8" stroke="${theme.colors.error}"/>` +
-      `<text x="10" y="35" font-family="${theme.fontFamily}" font-size="${theme.fontSize.toString()}" fill="${theme.colors.error}">` +
-      `Error: unknown diagram type` +
-      `</text>` +
+      rect(0, 0, 300, 60, { fill: '#fff8f8', stroke: theme.colors.error }) +
+      text(10, 35, 'Error: unknown diagram type', {
+        fontFamily: theme.fontFamily,
+        fontSize: theme.fontSize,
+        fill: theme.colors.error,
+      }) +
       `</svg>`,
   }),
 };

@@ -588,13 +588,13 @@ describe('renderActivity — activity theme colors', () => {
   it('start node uses activityStartColor', () => {
     const geo = makeGeo({ nodes: [makeNode({ kind: 'start', width: 16, height: 16 })] });
     const svg = assembleSvg(renderActivity(geo, activityTheme));
-    expect(svg).toContain('fill="blue"');
+    expect(svg).toContain('fill="#00F"');
   });
 
   it('stop node uses activityEndColor', () => {
     const geo = makeGeo({ nodes: [makeNode({ kind: 'stop', width: 16, height: 16 })] });
     const svg = assembleSvg(renderActivity(geo, activityTheme));
-    expect(svg).toContain('fill="yellow"');
+    expect(svg).toContain('fill="#FF0"');
   });
 
   it('action node uses activityBackgroundColor', () => {
@@ -625,13 +625,13 @@ describe('renderActivity — activity theme colors', () => {
       }],
     });
     const svg = assembleSvg(renderActivity(geo, activityTheme));
-    expect(svg).toContain('stroke="red"');
+    expect(svg).toContain('stroke="#F00"');
   });
 
   it('diamond node uses activityDiamondBackground', () => {
     const geo = makeGeo({ nodes: [makeNode({ kind: 'if-split', label: '?' })] });
     const svg = assembleSvg(renderActivity(geo, activityTheme));
-    expect(svg).toContain('fill="lavender"');
+    expect(svg).toContain('fill="#E6E6FA"');
   });
 });
 

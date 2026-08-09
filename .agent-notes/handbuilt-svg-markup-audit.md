@@ -71,3 +71,47 @@ build-time error.
 
 - **Confidence**: High — every site enumerated by grep, and each "already
   correct" claim verified by executing the function and reading its output.
+
+---
+
+## Resolved (2026-08-08)
+
+All 45 sites routed, plus 9 more the guard found in `core/`. The guard
+recommended above is `tests/architecture/svg-emission-seam.test.ts`, and it
+passes with **no allowlist** — no file outside `core/svg.ts`,
+`core/svg-shapes.ts`, `core/svg-markers.ts` and `core/klimt/` opens a shape
+element.
+
+Shape vs container is the guard's boundary: `<svg>`, `<g>`, `<defs>`,
+`<clipPath>`, `<marker>`, `<filter>`/`<fe*>` are document structure that
+upstream also assembles outside `SvgGraphics`, and are not covered.
+
+### Emitters added to close the gaps
+
+`circle`, `polyline`, `tspan`, `multilineText`; `LineStyle.fillOpacity`,
+`TextStyle.transform`; `svg-markers.ts#openArrowHeadDef`.
+
+### Two real bugs the routing surfaced
+
+1. **`text()` escaped text content with the ATTRIBUTE escaper** — emitting
+   `&quot;` and `&gt;` where the jar emits raw `"` and `>`. Verified on the
+   oracle jar: text content entity-encodes `&` and `<` ONLY. Split out
+   `escapeXmlText`. The conformance harness could not see this because
+   `normalize.ts` parses both forms to the same DOM text node — so it would
+   have survived any number of golden re-baselines.
+2. **`spansToTspan` emitted its content completely unescaped** — creole text
+   containing `&` or `<` produced INVALID XML (`<tspan>a & b <c></tspan>`),
+   and its `fill` bypassed `shortenColor`.
+
+### Verification
+
+Four gates green on two cold runs (563 files / 12612 tests);
+`rebaseline-svg-goldens.ts` **CHANGED=0 FAILED=0** across 447 goldens, so
+none of this moved jar-oracle output.
+
+Test-expectation churn was all of one kind: assertions pinning the
+*unrouted* rendering — raw named colors (`fill="red"`), lowercase or
+unshortened hex (`#dc2626`, `#AABBCC`), and over-escaped `&gt;`. One of
+them, json's `LineColor` test, passed only because the arrowhead marker was
+the last site not shortening, while the test beside it already expected
+`#ABC`.

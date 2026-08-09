@@ -337,7 +337,7 @@ describe('buildAnnotationBlock — Creole inline markup (G2 N45: one sibling <te
     const style = makeStyle();
     const measurer = new FixedMeasurer(10, 14);
     const block = buildAnnotationBlock('title', ['<a & b>'], style, measurer);
-    expect(block.body).toContain('&lt;a &amp; b&gt;');
+    expect(block.body).toContain('&lt;a &amp; b>');
     expect(block.body).not.toContain('<a & b>');
   });
 

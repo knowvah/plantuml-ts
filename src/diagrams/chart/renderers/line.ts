@@ -10,6 +10,7 @@
 
 import type { LineSeriesGeo, DataPoint } from '../layout.js';
 import type { Theme } from '../../../core/theme.js';
+import { circle, rect, polygon, line, text } from '../../../core/svg.js';
 
 // ---------------------------------------------------------------------------
 // Marker drawing helpers
@@ -19,20 +20,13 @@ import type { Theme } from '../../../core/theme.js';
 const MARKER_RADIUS = 4;
 
 function drawCircleMarker(p: DataPoint, color: string): string {
-  return (
-    `<circle cx="${p.x}" cy="${p.y}" r="${MARKER_RADIUS}"` +
-    ` fill="${color}" stroke="${color}"/>`
-  );
+  return circle(p.x, p.y, MARKER_RADIUS, { fill: color, stroke: color });
 }
 
 function drawSquareMarker(p: DataPoint, color: string): string {
   const offset = MARKER_RADIUS;
   const size = MARKER_RADIUS * 2;
-  return (
-    `<rect x="${p.x - offset}" y="${p.y - offset}"` +
-    ` width="${size}" height="${size}"` +
-    ` fill="${color}" stroke="${color}"/>`
-  );
+  return rect(p.x - offset, p.y - offset, size, size, { fill: color, stroke: color });
 }
 
 function drawTriangleMarker(p: DataPoint, color: string): string {
@@ -41,12 +35,13 @@ function drawTriangleMarker(p: DataPoint, color: string): string {
   // mirrors the UPolygon coordinates in ChartRenderer.java
   // drawLegendScatterMarker: points (0, -size/2), (-size/2, +size/2), (+size/2, +size/2)
   // with size ≈ 8 (MARKER_RADIUS*2).
-  const top = `${p.x},${p.y - 5}`;
-  const bl = `${p.x - MARKER_RADIUS},${p.y + 3}`;
-  const br = `${p.x + MARKER_RADIUS},${p.y + 3}`;
-  return (
-    `<polygon points="${top} ${bl} ${br}"` +
-    ` fill="${color}" stroke="${color}"/>`
+  return polygon(
+    [
+      { x: p.x, y: p.y - 5 },
+      { x: p.x - MARKER_RADIUS, y: p.y + 3 },
+      { x: p.x + MARKER_RADIUS, y: p.y + 3 },
+    ],
+    { fill: color, stroke: color },
   );
 }
 
@@ -70,10 +65,7 @@ function drawMarker(
 // ---------------------------------------------------------------------------
 
 function drawLabel(p: DataPoint): string {
-  return (
-    `<text x="${p.x}" y="${p.y - 10}"` +
-    ` text-anchor="middle" font-size="10">${String(p.value)}</text>`
-  );
+  return text(p.x, p.y - 10, String(p.value), { textAnchor: 'middle', fontSize: 10 });
 }
 
 // ---------------------------------------------------------------------------
@@ -101,8 +93,7 @@ export function drawLine(geo: LineSeriesGeo, _theme: Theme): string {
     const p1 = geo.points[i]!;
     const p2 = geo.points[i + 1]!;
     parts.push(
-      `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}"` +
-        ` stroke="${geo.color}" stroke-width="2"/>`,
+      line(p1.x, p1.y, p2.x, p2.y, { stroke: geo.color, strokeWidth: 2 }),
     );
   }
 

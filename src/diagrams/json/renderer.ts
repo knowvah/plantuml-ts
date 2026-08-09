@@ -6,6 +6,7 @@
  */
 
 import { rect, line, text, path, ellipse } from '../../core/svg.js';
+import { openArrowHeadDef } from '../../core/svg-markers.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
@@ -119,7 +120,7 @@ function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): strin
   const clipId = `json-node-clip-${diagramSalt}-${node.id}`;
   parts.push(
     `<defs><clipPath id="${clipId}">` +
-      `<rect width="${node.width}" height="${node.height}" rx="${rx}"/>` +
+      rect(0, 0, node.width, node.height, { rx }) +
       `</clipPath></defs>`,
   );
 
@@ -279,12 +280,7 @@ function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): strin
 function jsonArrowMarkerDef(theme: Theme, markerId: string): string {
   const json = theme.colors.graph.json;
   const stroke = json?.arrowColor ?? theme.colors.arrow;
-  return (
-    `<marker id="${markerId}" markerWidth="10" markerHeight="7" ` +
-    `refX="9" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">` +
-    `<polyline points="0 0, 9 3.5, 0 7" fill="none" stroke="${stroke}" stroke-width="1.5"/>` +
-    `</marker>`
-  );
+  return openArrowHeadDef(markerId, stroke);
 }
 
 function renderEdge(edge: JsonEdgeGeo, theme: Theme, markerId: string): string {
