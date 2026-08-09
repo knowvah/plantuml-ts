@@ -162,8 +162,11 @@ function ledgerRows(report: ParityReport, entries: readonly LedgerEntry[]): stri
   return rows;
 }
 
-export function ledgerSection(report: ParityReport): string {
-  const entries = loadLedger();
+export function ledgerSection(report: ParityReport, ledger?: readonly LedgerEntry[]): string {
+  // `ledger` is injectable so both branches stay testable: once a real
+  // divergence is signed off, the empty-ledger placeholder can no longer be
+  // reached by reading the real file.
+  const entries = ledger ?? loadLedger();
   const head = [
     "## Divergence ledger (accepted, won't-fix)",
     '',
