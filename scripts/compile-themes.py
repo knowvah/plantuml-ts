@@ -7,6 +7,8 @@ Reads .puml theme files from the plantuml source tree and extracts:
   - FontColor        -> colors.text
   - LineColor        -> colors.border + colors.arrow
   - FontName         -> fontFamily
+  - node MaximumWidth -> colors.graph.json.maximumWidth (top-level `node`
+    selector only; it cascades to root.element.jsonDiagram.node)
 
 Outputs a TypeScript module that maps theme names to Partial<Theme>.
 """
@@ -31,7 +33,30 @@ FILE_LINE_CAP = 500
 # ---------------------------------------------------------------------------
 MANUAL = {
     'aws-orange': {
-        'bg': 'transparent', 'fg': '#232F3E', 'lc': '#FF9900', 'fn': None,
+        'bg': 'transparent', 'fg': '#232F3E', 'lc': '#FF9900', 'fn': 'Verdana',
+        # R2j (mizupo-59) hand-carried these into the GENERATED file, which
+        # regenerating then silently discarded -- the header says "do not edit
+        # by hand" and something did. Held here instead, so the output is
+        # reproducible. They stay manual only until this script learns
+        # FontSize extraction.
+        'extra_theme': [
+            "    // R2j (mizupo-59): the upstream theme file sets `skinparam",
+            "    // defaultFontName \"Verdana\"` + `skinparam defaultFontSize 12`",
+            "    // (puml-theme-aws-orange.puml:195-196). compile-themes.py has no",
+            "    // FontSize extraction at all, so the two size fields are hand-carried",
+            "    // here until the script learns them (defaultFontSize doubles as the",
+            "    // explicit-set marker, see theme.ts#defaultFontSize).",
+        ],
+        'extra_after_font': ["    fontSize: 12,", "    defaultFontSize: 12,"],
+        'extra_graph': [
+            "        // R2j: `skinparam class { AttributeFontSize 11 }`",
+            "        // (puml-theme-aws-orange.puml:446) -- member rows at 11pt, and the",
+            "        // class HEADER cascades to 11 too (no ClassFontSize in the theme;",
+            "        // the N32 attribute->header cascade, `theme-graph-colors-a.ts",
+            "        // #classAttributeFontSize`). Jar-verified via mizupo-59-zala765's",
+            "        // own golden: bare-class width = widthTable(name)@11 + 30.",
+            "        classAttributeFontSize: 11,",
+        ],
     },
     'cloudscape-design': {
         'bg': 'transparent', 'fg': '#000716', 'lc': '#0972D3', 'fn': None,
@@ -144,6 +169,47 @@ def extract_root_style(content: str, vars: dict[str, str]) -> dict[str, str | No
     return result
 
 
+def extract_node_maximum_width(content: str) -> str | None:
+    """
+    A TOP-LEVEL `node { MaximumWidth N }` inside the theme's <style> block.
+
+    `node` there is a bare ELEMENT selector, a sibling of `root`/`document`, so
+    it cascades to every style signature containing `node` -- including
+    `root.element.jsonDiagram.node`. That is why a json diagram under
+    `!theme amiga` wraps its cells in the reference jar
+    (yaml/vapoda-87-piku740), and why this value belongs on graph.json.
+
+    Depth-tracked rather than regex-scanned, because `MaximumWidth` also
+    appears inside NESTED `node` blocks (puml-theme-carbon-gray has two), and
+    inside comments (puml-theme-mono's is commented out with a leading quote).
+    Only the top-level block, and only its first value, is taken.
+    """
+    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
+    if not m:
+        return None
+    depth = 0
+    node_depth: int | None = None
+    for line in m.group(1).split('\n'):
+        s = line.strip()
+        if s.startswith("'"):        # PlantUML line comment
+            continue
+        if s.endswith('{'):
+            if depth == 0 and s[:-1].strip().lower() == 'node':
+                node_depth = depth
+            depth += 1
+            continue
+        if s == '}':
+            depth -= 1
+            if node_depth is not None and depth <= node_depth:
+                node_depth = None
+            continue
+        if node_depth is not None and depth == node_depth + 1:
+            prop = re.match(r'MaximumWidth\s+([0-9]+(?:\.[0-9]+)?)\s*$', s, re.IGNORECASE)
+            if prop:
+                return prop.group(1)
+    return None
+
+
 def extract_skinparam(content: str, vars: dict[str, str]) -> dict[str, str | None]:
     """Extract top-level skinparam BackgroundColor / DefaultFontName / FontColor."""
     result: dict[str, str | None] = {'bg': None, 'fg': None, 'fn': None}
@@ -196,6 +262,7 @@ def parse_theme(fname: str) -> dict[str, str | None]:
         'fg': root['fg'] or skp['fg'],
         'lc': root['lc'],
         'fn': root['fn'] or skp['fn'],
+        'mw': extract_node_maximum_width(content),
     }
 
 
@@ -223,23 +290,31 @@ def _color_lines(bg: str | None, fg: str | None, lc: str | None) -> list[str]:
     return out
 
 
-def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None) -> list[str]:
+def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None,
+                      mw: str | None) -> list[str]:
     """
     For themes with a solid (non-transparent) background, propagate the theme
     colors into graph.json so JSON nodes inherit the theme instead of falling
-    back to defaultTheme's plantuml.skin json defaults. Empty otherwise.
+    back to defaultTheme's plantuml.skin json defaults.
+
+    `maximumWidth` is INDEPENDENT of that: it is carried whenever the theme
+    declares one, background or not, because it is a layout property rather
+    than a color and a transparent-background theme wraps its cells just the
+    same.
     """
-    if not bg or bg == 'transparent':
-        return []
-    out = [f"          background: '{bg}',"]
-    if lc:
-        out.append(f"          border: '{lc}',")
-        out.append(f"          arrowColor: '{lc}',")
-    if fg:
-        # Disable per-type value coloring for themed nodes — uniform text color.
-        for field in ('keyText', 'stringValue', 'numberValue',
-                      'booleanValue', 'nullValue'):
-            out.append(f"          {field}: '{fg}',")
+    out: list[str] = []
+    if bg and bg != 'transparent':
+        out.append(f"          background: '{bg}',")
+        if lc:
+            out.append(f"          border: '{lc}',")
+            out.append(f"          arrowColor: '{lc}',")
+        if fg:
+            # Disable per-type value coloring for themed nodes — uniform text color.
+            for field in ('keyText', 'stringValue', 'numberValue',
+                          'booleanValue', 'nullValue'):
+                out.append(f"          {field}: '{fg}',")
+    if mw:
+        out.append(f"          maximumWidth: {mw},")
     return out
 
 
@@ -253,19 +328,26 @@ def emit_theme_entry(name: str, props: dict) -> list[str]:
         fn = fn.strip().strip('"\'')
 
     lines = [f"  '{name}': {{"]
+    lines.extend(props.get('extra_theme', []))
     if fn:
         lines.append(f"    fontFamily: '{fn}',")
+    lines.extend(props.get('extra_after_font', []))
 
     color_lines = _color_lines(bg, fg, lc)
-    json_lines = _json_graph_lines(bg, fg, lc)
-    if color_lines:
+    json_lines = _json_graph_lines(bg, fg, lc, props.get('mw'))
+    # `colors` is emitted for a json-only property too -- a theme may declare
+    # `node { MaximumWidth }` and no colors at all.
+    if color_lines or json_lines:
         lines.append("    colors: {")
         lines.extend(color_lines)
-        if json_lines:
+        extra_graph = props.get('extra_graph', [])
+        if json_lines or extra_graph:
             lines.append("      graph: {")
-            lines.append("        json: {")
-            lines.extend(json_lines)
-            lines.append("        },")
+            lines.extend(extra_graph)
+            if json_lines:
+                lines.append("        json: {")
+                lines.extend(json_lines)
+                lines.append("        },")
             lines.append("      },")
         lines.append("    },")
     lines.append("  },")

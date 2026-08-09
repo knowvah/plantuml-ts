@@ -29,6 +29,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
           numberValue: 'black',
           booleanValue: 'black',
           nullValue: 'black',
+          maximumWidth: 300,
         },
       },
     },

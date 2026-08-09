@@ -171,12 +171,39 @@ boxes, not of the json family.
 
 | fixture | signature | mechanism |
 |---|---|---|
-| `yaml/vapoda-87-piku740` | `text-4` | The wrap port below is in and correct; this fixture never REACHES it. Its `MaximumWidth` comes from `!theme amiga` (`puml-theme-amiga.puml:63`, `node { MaximumWidth 300 }`), and `scripts/compile-themes.py` extracts only background/foreground/line colour and font — it has never carried `MaximumWidth`, so no built-in theme sets `graph.json.maximumWidth`. 8 upstream themes declare one. Fixing it means teaching the generator a non-colour property and regenerating every theme entry, and it first needs an answer to whether that `node {}` selector is global or diagram-scoped. Its own change, deliberately not started at the tail of a long session. |
 | `json/nixaxa-46-muge983` | `rect+1` | malformed JSON — the jar draws a bare monospace message with no box (`JsonDiagram#drawU`'s `root == null` branch). The class engine's refusals now route through the shared error page; this wants the same treatment for a json parse failure. |
+| `json/vogeku-38-soxe333` | `text-2` | was `text-12`; the theme's wrap width now reaches it. The residual 2 is unexamined. |
 | `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | a different shape family entirely; unexamined |
 
-`json/vogeku-38-soxe333` still carries a `text-12`, unexamined, but its tally
-is otherwise clean.
+### 8. `MaximumWidth` now survives theme compilation
+
+`yaml/vapoda-87-piku740` exercised mechanism 7 but never REACHED it: its wrap
+width comes from `!theme amiga`, and `scripts/compile-themes.py` extracted
+only background/foreground/line colour and font — no built-in theme set
+`graph.json.maximumWidth`. Now carried, and `vapoda` is exact.
+
+The scoping question that gated this is answered: the themes declare a
+TOP-LEVEL `node { … }` inside `<style>`, a sibling of `root`/`document`, so it
+is a bare ELEMENT selector that cascades to every signature containing `node`
+— `root.element.jsonDiagram.node` included. The jar wrapping `vapoda`'s json
+cells is the confirmation.
+
+Extraction is depth-tracked rather than regex-scanned, because the naive
+version is wrong three ways, each present in the corpus: `puml-theme-mono`'s
+declaration is COMMENTED OUT (leading `'`); `puml-theme-carbon-gray` has two
+`MaximumWidth 100`s nested inside `mindmapDiagram`/`wbsDiagram`, which must
+not be taken; and an exhaustive scan of every theme confirmed NO theme scopes
+one to `jsonDiagram`, so top-level-only is complete rather than merely
+convenient. Six themes qualify: amiga, blueprint, crt-amber, crt-green,
+mimeograph, plain.
+
+**It also repaired the generator.** `themes-builtin-a-m.ts` says "do not edit
+by hand" and had been hand-edited anyway — mission R2j carried `aws-orange`'s
+`fontFamily`/`fontSize`/`defaultFontSize`/`classAttributeFontSize` directly
+into the generated file, so simply re-running the script silently discarded
+them. Those values now live in the script's own `MANUAL` table, and a
+regeneration reproduces the committed file byte-for-byte apart from the six
+intended additions. That was verified, not assumed.
 
 ### 7. Wrapping emits per-WORD atoms — ported
 
