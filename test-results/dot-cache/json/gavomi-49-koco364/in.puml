@@ -1,0 +1,14 @@
+@startjson
+{
+    "a": true,
+    "desc": "a\\nb\\nc\\nd\\ne\\nf",
+    "required": [
+        "r1",
+        "r2",
+        "r3"
+    ],
+    "addP": false,
+    "properties": "",
+    "allOf": ""
+}
+@endjson

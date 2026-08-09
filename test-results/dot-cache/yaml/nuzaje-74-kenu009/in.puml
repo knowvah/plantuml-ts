@@ -1,0 +1,8 @@
+@startyaml
+scale 2
+fruit: Apple
+size: Large
+color: 
+ - Red
+ - Green
+@endyaml
