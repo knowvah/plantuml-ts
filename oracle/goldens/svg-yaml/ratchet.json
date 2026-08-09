@@ -1,1 +1,29 @@
-{ "fixtures": [] }
+{
+    "fixtures": [
+        {
+            "slug": "coxima-79-gano159",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "finofu-94-daso450",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "lifuxe-66-maxu442",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "vuzosu-08-pake421",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "xatato-75-mora801",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        }
+    ]
+}

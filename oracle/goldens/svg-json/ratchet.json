@@ -1,1 +1,39 @@
-{ "fixtures": [] }
+{
+    "fixtures": [
+        {
+            "slug": "bidire-98-kege137",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "giduve-36-xuvo448",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "karaju-04-caxi838",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "lipuxo-26-susi944",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "lulofe-05-dasu529",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "rutofu-66-kivu935",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        },
+        {
+            "slug": "xajini-72-rora309",
+            "addedAt": "2026-08-09",
+            "source": "dot-cache"
+        }
+    ]
+}

@@ -5,37 +5,28 @@ Mission **A5** (json family). Sibling of `svg-description`, `svg-class`,
 
 ## Current state
 
-**Still empty, 0 of 50 fixtures byte-conformant — and under the current exit
-bar it can never be otherwise.** That is a statement about the bar, not a
-stalled harness. The ratchet suite skips gracefully; the graceful-skip branch
-is genuinely exercised here.
+**7 of 50 `@startjson` fixtures byte-conformant and pinned** (plus 5 yaml and
+1 hcl in the sibling folders — 13 across the family).
 
-Two divergences, both DELIBERATE, touch essentially every fixture:
+This section previously said byte-conformance was unreachable here and the
+ratchet could never admit anything. **That was wrong, and the way it was wrong
+is worth keeping.** The claim rested on M1 — "document dimensions differ
+because upstream is Smetana-laid-out" — being one indivisible accepted
+divergence. Measuring the delta per axis showed it was two mechanisms sharing
+a label: the width spread is the real engine divergence, but the height was a
+constant +2 on 70 of 92 fixtures, which no layout difference explains. That +2
+was ours: `json/layout.ts` summed node extents where the jar ink-walks, adds
+margins and truncates. See `plans/a5-json-family-conformance/ledger.md`, M1b.
 
-1. **Document dimensions and all geometry** (ADR-2b, and CLAUDE.md "One layout
-   engine"). Upstream lays these types out with Smetana; this port uses one
-   engine for everything and accepts the delta. It moves the root
-   `@width`/`@height`/`@viewBox` on all 92 family fixtures.
-2. **Per-type value-text colour** (DIVERGENCES.md, "Value text — per-type
-   colors (aesthetic)"), on every fixture with a scalar value.
+An accepted divergence is a comfortable place for a defect to hide. This one
+sat there for a whole mission.
 
-A zero-diff rule cannot admit a fixture past either. **So do not read this
-folder's emptiness as a conformance signal, and do not "fix" a divergence to
-populate it.**
+## What blocks the other 37
 
-### What DID move, and what to gate on instead
-
-The structural port (A5 ledger M2/M3/M4, 2026-08-09) took the **element
-tally** — does this port emit the same elements, of the same kinds, in the
-same order as the jar — from **0 to 75 of 92**. Before it, every fixture
-mismatched at the root, `compare.ts` stopped recursing, and no fixture's
-interior had ever been compared.
-
-That metric is not contaminated by either divergence, it is mechanically
-checkable, and it is the one worth wiring as this family's gate. It is
-**proposed, not yet implemented**. The 17 fixtures that still differ are each
-named with their delta signature in
-`plans/a5-json-family-conformance/ledger.md`.
+- **M1a — horizontal layout geometry.** The genuine ADR-2b divergence, and
+  still accepted: this port uses one layout engine and takes the delta.
+- **M6 — element tally.** 17 fixtures still emit a different count of some
+  element than the jar; each is named with its delta signature in the ledger.
 
 ## Where this type's layout lives
 

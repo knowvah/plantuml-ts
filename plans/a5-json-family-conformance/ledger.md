@@ -10,10 +10,10 @@ the index below, against a numbered mechanism. Measured with
 | | at Batch 4 close | after the structure pass |
 |---|---|---|
 | fixtures | 92 | 92 |
-| byte-conformant | 0 | 0 — **and not reachable; see below** |
+| byte-conformant | 0 | **13** (7 json, 5 yaml, 1 hcl) — pinned |
 | **element tally exact vs jar** | **0** | **75 / 92 (82 %)** |
 | fixtures whose interior is COMPARED at all | 0 | 75 |
-| total diffs | unmeasurable (all floors) | 13,414 |
+| total diffs | unmeasurable (all floors) | 13,178 |
 
 Diff composition, now that there is one to compose:
 
@@ -24,22 +24,30 @@ Diff composition, now that there is one to compose:
 | document dimensions | 366 | **M1** again, at the root |
 | everything else | 244 | the real remainder — 17 fixtures, all named below |
 
-## Read this before trusting any number above
+## A claim this file made, and how it was falsified
 
-**Byte-conformance is not reachable for this family, by design.** M1 is an
-accepted divergence (ADR-2b: one layout engine, dot-engine, delta accepted)
-and it moves the root `@width`/`@height`/`@viewBox` on *every* fixture. The
-per-type value colouring is a second deliberate divergence, on every fixture
-with a scalar value. So `oracle/goldens/svg-json/ratchet.json` can never
-admit a fixture under a zero-diff rule, and its emptiness is not a signal of
-anything.
+An earlier revision of this section argued that byte-conformance was **not
+reachable** for the family: M1 moved the root dimensions on every fixture, the
+per-type value colouring moved the text on most, and therefore a zero-diff
+ratchet could never admit anything.
 
-That is a property of the exit bar, not of the port, and it means **this
-family needs a different gate than its siblings.** The metric that actually
-moved this session — and the one worth gating on — is the **element tally**:
-does this port emit the same elements, of the same kinds, in the same order,
-as the jar? That question is answerable, it is not contaminated by M1, and it
-went 0 → 75 of 92. Proposed as the successor gate; not yet wired.
+Both premises turned out to be soft.
+
+- The value colouring was a divergence whose own justification did not survive
+  measurement (all 20 built-in themes already discarded it). Retired; matched.
+- **M1 was two mechanisms wearing one label.** Per-axis measurement: width
+  varied (the real engine divergence), height was a constant +2 on 70 of 92 —
+  which no layout difference explains. The height half was a defect in this
+  port's document-dimension formula. Diagnosed and fixed (M1b).
+
+13 fixtures are now byte-conformant. The lesson is the reusable part: **an
+accepted divergence is a comfortable place for a defect to hide,** because
+every diff it touches is pre-excused. Measure a divergence per axis, per
+mechanism, before trusting it to explain anything.
+
+The **element tally** (same elements, kinds, order — 0 → 75 of 92 this
+session) remains a useful secondary metric for the fixtures M1a still blocks,
+but it is no longer needed as a *substitute* gate.
 
 ## What the structure pass changed
 
@@ -80,7 +88,7 @@ measurement:
 | # | mechanism | class | origin | fixtures |
 |---|---|---|---|---|
 | M1a | Horizontal layout geometry | **ACCEPTED DIVERGENCE** (ADR-2b) | upstream is Smetana-laid-out; this port uses dot-engine everywhere | 92 |
-| M1b | Document-dimension formula, constant +2 per axis | **PORT GAP — diagnosis in progress** | `json/layout.ts` sums geometry; the jar ink-walks, margins, then truncates `+1`. See below | 70 (height) |
+| M1b | Document-dimension formula, constant +2 per axis | **CLOSED** — oracle-instrumented, fixed | `json/layout.ts#documentDimensions` now mirrors the ink-walk → margins → truncating-`+1` chain | 0 |
 | M2 | Root had many children; the jar has 2 | **CLOSED** | `json/renderer-shell.ts#assembleJsonShell` now wraps the body in one content `<g>` | 0 |
 | M3 | `<defs>` carried an arrow `<marker>`; the jar's is empty | **CLOSED** | arrowhead is an inline filled `<path>` — `Arrow#drawArrow`, ported into `JsonCurve.ts#buildArrowHeadPath` | 0 |
 | M4 | Root `<g>` attributes never applied | **CLOSED** | consequence of M2; `withRootGroupAttributes` now sees the single `<g>` it requires | 0 |
@@ -163,18 +171,41 @@ The jar does not size the document from the drawn extent. The chain is:
 - *The Smetana/dot-engine divergence,* for the height axis: the three fixtures
   above match the jar on every drawn coordinate.
 
-**Not yet attributed: one `+1` per axis.** Steps 1-5 account for exactly one
-(`ensureVisible`). Walking the chain by hand for `bidire-98-kege137` (single
-node, w=24 h=18, drawn at 10,10) gives `24 + 20 + 1 = 45`, but the jar emits
-46; height likewise 39 against 40.
+#### M1b — CLOSED, both `+1`s attributed
 
-**Next instrument — do NOT skip to a fix.** A `+2` reproduces on 70 fixtures
-and would "work"; shipping it would encode an unexplained constant, which this
-project forbids. Close it the way mission G2/N46 closed the equivalent class
-question: a debug-instrumented local oracle build that prints
-`JsonDiagram#calculateDimension`'s own return value for one fixture. That
-single number decides whether the missing `+1` is in the ink walk (step 1-2)
-or between `calculateFinalDimension` and `withMinDim` (step 3).
+Closed by instrumenting the oracle (the method mission G2/N46 used for the
+class equivalent): a throwaway local build of the pinned fork with `printf`s in
+`JsonDiagram#calculateDimension`, `TextBlockExporter#calculateFinalDimension`
+and `SvgGraphics#ensureVisible`. The instrumentation was reverted; only
+`oracle/dist/plantuml-oracle.jar` remains, untouched.
+
+For `json/bidire-98-kege137` (one node, 24 × 18, drawn at 10,10):
+
+```
+[DBG] JsonDiagram.getMinMax = (-1.0,-1.0)->(24.0,18.0)  dim = 25.0 x 19.0
+[DBG] calculateFinalDimension: textBlock=25.0x19.0  margins L=10 R=10 T=10 B=10  -> 45.0x39.0
+[DBG] ensureVisible(45.0, 39.0)  maxX 10 -> 46   maxY 10 -> 40
+```
+
+The two `+1`s:
+
+1. **The ink box's MIN corner is `(-1, -1)`**, not `(0, 0)`.
+   `LimitFinder#drawRectangle` records `addPoint(x - 1, y - 1)`
+   (`LimitFinder.java:185`), and `MinMax#getDimension` is `maxX - minX`
+   (`MinMax.java:151-153`) — so that corner adds exactly 1 to each axis. This
+   is the one that was missing; `initToZero` seeds the box at `(0,0,0,0)` but
+   the rect's own `-1` pushes the min below zero. **Reasoning about it from
+   the source had produced the wrong answer twice** — the ink dim is neither
+   the node size nor node+stroke.
+2. `ensureVisible`'s `(int)(x + 1)` (`SvgGraphics.java:129-134`).
+
+Verified on five fixtures spanning 46px to 1356px wide, single- and
+multi-node: the min corner is `(-1.0,-1.0)` in every case, and
+`trunc(rawExtent + 1 + 20 + 1)` reproduces the jar's emitted dimensions
+exactly.
+
+**Result: 13 fixtures byte-conformant** (7 json, 5 yaml, 1 hcl), all pinned.
+Height delta is now 0 on the same 70 of 92 fixtures that carried the +2.
 
 ### M1 — accepted, with its measurement
 

@@ -313,18 +313,67 @@ export function layoutJson(
     spline: true,
   }));
 
-  // Canvas size: rightmost/bottommost extent of all positioned nodes plus a
-  // right/bottom margin equal to CANVAS_PAD. Nodes already include the left/top
-  // CANVAS_PAD in their x/y, so we just need to ensure the right/bottom padding.
-  let width = 0;
-  let height = 0;
-  for (const n of nodes) {
-    const r = n.x + n.width + CANVAS_PAD;
-    const b = n.y + n.height + CANVAS_PAD;
-    if (r > width) width = r;
-    if (b > height) height = b;
-  }
-
+  const { width, height } = documentDimensions(nodes);
   const result: JsonGeometry = { nodes, edges, width, height };
   return result;
+}
+
+/**
+ * `LimitFinder#drawRectangle` records a rectangle's ink as
+ * `addPoint(x - 1, y - 1)` … `addPoint(x + w - 1, y + h - 1)`
+ * (`LimitFinder.java:184-188`). The leftmost/topmost node sits at the graph
+ * origin, so the ink box's MIN corner is `(-1, -1)` — and `MinMax#getDimension`
+ * is `maxX - minX` (`MinMax.java:151-153`), so that corner adds exactly 1 to
+ * each axis. Oracle-verified on five fixtures spanning 46px to 1356px wide:
+ * the instrumented jar reports `getMinMax = (-1.0,-1.0)->(…)` every time.
+ */
+const INK_MIN_CORNER = -1;
+
+/**
+ * `SvgGraphics#ensureVisible` stores `maxX = (int)(x + 1)`
+ * (`SvgGraphics.java:129-134`), and `maxX`/`maxY` ARE the emitted
+ * `width`/`height`/`viewBox` (`:799-811`). The truncation is applied by
+ * `klimt/document-shell.ts#assembleDocumentShell`, which already `Math.trunc`s
+ * these values; only the `+1` belongs here.
+ */
+const ENSURE_VISIBLE_BUMP = 1;
+
+/**
+ * The document's own width/height.
+ *
+ * The jar does NOT size a json document from its drawn extent — it ink-walks
+ * the diagram, adds the margins, and truncates. Reproduced here in that order,
+ * because a flat "+2 versus the node extent" is what this looks like from the
+ * outside and it encodes nothing:
+ *
+ *   `JsonDiagram#calculateDimension` (`JsonDiagram.java:130-137`)
+ *     → `TextBlockUtils.getMinMax(this, sb, true)` → {@link INK_MIN_CORNER}
+ *   `TextBlockExporter#calculateFinalDimension` (`:199-203`)
+ *     → `+ margin.left + margin.right`, `TitledDiagram#getDefaultMargins()`
+ *       = `same(10)` (`TitledDiagram.java:275-277`)
+ *   `SvgGraphics#ensureVisible` → {@link ENSURE_VISIBLE_BUMP}
+ *
+ * Node `x`/`y` already carry the left/top {@link CANVAS_PAD}, so the raw ink
+ * extent is recovered by subtracting it back off before the margins are added
+ * — the same quantity the jar's ink walk measures.
+ *
+ * Only the node extents are folded in, matching the previous behaviour: on
+ * every measured fixture the rightmost/bottommost ink IS a node edge, because
+ * json edges run BETWEEN nodes. An edge or spot that overhung the outermost
+ * node would need adding here, and none does today.
+ */
+function documentDimensions(nodes: readonly JsonNodeGeo[]): { width: number; height: number } {
+  let inkMaxX = 0;
+  let inkMaxY = 0;
+  for (const n of nodes) {
+    const r = n.x + n.width - CANVAS_PAD;
+    const b = n.y + n.height - CANVAS_PAD;
+    if (r > inkMaxX) inkMaxX = r;
+    if (b > inkMaxY) inkMaxY = b;
+  }
+  const margins = CANVAS_PAD * 2;
+  return {
+    width: inkMaxX - INK_MIN_CORNER + margins + ENSURE_VISIBLE_BUMP,
+    height: inkMaxY - INK_MIN_CORNER + margins + ENSURE_VISIBLE_BUMP,
+  };
 }
