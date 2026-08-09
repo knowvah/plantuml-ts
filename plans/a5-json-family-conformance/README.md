@@ -81,7 +81,7 @@ write-set (`on_fail: stop`).
 - [x] **[Batch 2 — true baseline and the document shell](batch-2/overview.md)** —
       measure a real baseline through the harness, attribute it, and close the
       shell gap json shares with dot's old one.
-- [ ] **[Batch 3 — the layout re-mirror](batch-3/overview.md)** — ADR-1. Port
+- [x] **[Batch 3 — the layout re-mirror](batch-3/overview.md)** — ADR-1. Port
       `Mirror`, swap node dims, drive TB, and replace `tailportY` with real
       record ports. The largest batch; strictly sequential.
       **T5 GO (weak)** and **T6 DONE** (`31137d2c`): dimension error
@@ -97,6 +97,13 @@ write-set (`on_fail: stop`).
       mechanism is named, not fitted — `JsonDiagram#calculateDimension` is the
       INK-extent walk (`TextBlockUtils.getMinMax`), i.e. mission-index **F4**,
       which G0 solved for description via `LimitFinder`/`UGraphicNo`.
+      **T7 + T8 DONE.** A per-node oracle (`scripts/json-node-oracle.ts`) was
+      built after ADR-3 left this family with only a scalar metric; it caught a
+      FULLY MIRRORED diagram on its first run that document dimensions read
+      identically before and after. Final Batch 3 state: node Δy **6.65**, 21
+      nodes exact, child↔row alignment **64.34**, edges now the engine's own
+      splines. Remaining geometry delta vs the jar is the accepted Smetana
+      difference (ADR-2b).
 - [ ] **[Batch 4 — close-out](batch-4/overview.md)** — yaml/hcl ratchets,
       per-fixture attribution of every remaining miss, divergence records,
       mission-index flip.

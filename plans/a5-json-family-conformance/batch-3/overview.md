@@ -14,8 +14,8 @@ rule doing its job, not an oversight.
 | T5 | go/no-go: does the mirrored graph actually move geometry? | orchestrator (inline) | `plans/a5-json-family-conformance/adr1-gonogo.md` | T4 | [x] **GO (weak)** |
 | T6 | port `Mirror`, build the TB+swapped-dims graph | orchestrator (inline) | `src/diagrams/json/Mirror.ts`, `src/diagrams/json/layout.ts` | T5 | [x] **dim error 111.88 → 101.83** |
 | **T6b** | **port `TextBlockJson`'s node sizing** (added mid-mission on T5's evidence) | orchestrator (inline) | `src/diagrams/json/{TextBlockJson,layout}.ts` | T6 | [x] **dim error 101.83 → 30.28** |
-| T7 | real record ports: `P<n>` labels + `tailport` | orchestrator (inline) | seam: `core/graph-layout*.ts`; json side NOT wired | T6b | **[~] PARTIAL** — seam landed, json reverted (7x dim regression, no DOT oracle to diagnose against) |
-| T8 | port `JsonCurve` edge routing onto mirrored coords | typescript-pro | `src/diagrams/json/JsonCurve.ts`, `src/diagrams/json/renderer.ts` | T7 | [ ] |
+| T7 | real record ports: `P<n>` labels + `tailport` | orchestrator (inline) | `core/graph-layout*.ts`, `json/{layout,TextBlockJson}.ts` | T6b | [x] **child↔row 73.92 → 64.34; node Δy 18.74 → 6.65** |
+| T8 | port `JsonCurve` edge routing onto mirrored coords | orchestrator (inline) | `json/JsonCurve.ts`, `json/{layout,renderer}.ts` | T7 | [x] **edges are the engine's splines; starts 1.52px from node edges** |
 
 ## T6b was added mid-mission, and why that matters
 
