@@ -62,9 +62,9 @@ function valueColor(
   // Upstream has NO per-type value styling: `TextBlockJson#getTextBlock` builds
   // every cell from one `getStyleToUse(false, highlighted)` style, whose
   // FontColor the skin sets to black for this family (`plantuml.skin:446`).
-  // So all five arms resolve to the same colour unless a THEME has set one —
+  // So all five arms resolve to the same color unless a THEME has set one —
   // which is exactly what the four fields exist for, and what all 20 built-in
-  // themes use them for (each sets a single shared value colour).
+  // themes use them for (each sets a single shared value color).
   switch (valueType) {
     case 'string': return json?.stringValue ?? JSON_SKIN_BLACK;
     case 'number': return json?.numberValue ?? JSON_SKIN_BLACK;

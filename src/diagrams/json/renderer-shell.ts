@@ -92,12 +92,12 @@ function isSolidNonDefault(background: string): boolean {
 }
 
 /**
- * A colour reduced to the exact form the SVG will carry, so two spellings of
- * one colour compare equal.
+ * A color reduced to the exact form the SVG will carry, so two spellings of
+ * one color compare equal.
  *
  * Both steps are needed, and each was learned from a fixture that slipped past
  * an earlier version of this check:
- *  - `resolveColorToSvgHex` maps a NAMED colour to hex. `!theme plain` leaves
+ *  - `resolveColorToSvgHex` maps a NAMED color to hex. `!theme plain` leaves
  *    the background as the literal string `"white"`
  *    (`json/vogeku-38-soxe333`), which no comparison against `#FFFFFF` can
  *    match. (`skinparam-key-normalize.ts#resolveColor` is NOT this function —
