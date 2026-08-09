@@ -80,8 +80,16 @@ write-set (`on_fail: stop`).
       **T5 GO (weak)** and **T6 DONE** (`31137d2c`): dimension error
       111.88 → 101.83, closer on 68 fixtures / worse on 2. **T6b ADDED
       mid-mission** — T5 proved node SIZING, not topology, is the dimension
-      lever (zero fixtures exact after T6; `{}` renders 76×31 against the jar's
+      lever (zero fixtures exact after T6; `{}` rendered 76×31 against the jar's
       32×40). T7/T8 target edge geometry and cannot close it.
+      **T6b DONE**: `TextBlockJson` ported from the Java, every constant now
+      carrying its upstream `file:line`; the array-index-keys divergence
+      retired on the maintainer's call. **Mean document-dimension error
+      111.88 → 22.36 across Batch 3**, and `{}` now renders a 10×18 node rect
+      byte-identical to the jar. Still ZERO fixtures exact: the remaining
+      mechanism is named, not fitted — `JsonDiagram#calculateDimension` is the
+      INK-extent walk (`TextBlockUtils.getMinMax`), i.e. mission-index **F4**,
+      which G0 solved for description via `LimitFinder`/`UGraphicNo`.
 - [ ] **[Batch 4 — close-out](batch-4/overview.md)** — yaml/hcl ratchets,
       per-fixture attribution of every remaining miss, divergence records,
       mission-index flip.
