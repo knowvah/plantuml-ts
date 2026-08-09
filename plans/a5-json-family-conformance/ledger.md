@@ -436,6 +436,40 @@ boxes, not of the json family.
 | `json/noleta-28-nutu456` | `text-112` | large; `MaximumWidth` wrap case |
 | `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | **not a json mechanism at all** — `skinparam handwritten true`. See below. |
 
+### M1a is genuine — checked for a hidden defect, found none
+
+M1 turned out to be hiding M1b, a real defect of ours, so M1a was re-examined
+the same way rather than trusted. It survives.
+
+| what was measured | result | reads as |
+|---|---|---|
+| node SIZES | Δw ≈ 0.00, Δh ≈ 0.00 per node | our sizing port is correct |
+| overall ENVELOPE | origin 10 and y-span 216.00 on both, x-span within 0.56 | the graph occupies the same box |
+| node y | **191 of 276 exactly equal**; the rest scattered both ways | no systematic shift |
+| node x | 108 negative, 128 positive, 40 exact | no systematic bias |
+
+The aggregate `mean |Δw| 3.05` reported by `scripts/json-node-oracle.ts
+--summary` is an ARTEFACT: 8 fixtures return COUNT-MISMATCH because that
+script extracts node rects from the jar's SVG, and those fixtures now draw
+polygons (handwritten), no rects (parse failure), or a background rect it
+miscounts. Per-fixture, widths are exact.
+
+What differs is the interior arrangement, and not as a permutation — the
+multiset of y positions itself differs (`cilemo-38-fafi313`: the jar places
+nodes at 104/113/142/158/162/182/185.5, this port at
+118/127/145/159/167/172/177/197/199.13, both inside the same 10..226). That is
+within-rank coordinate assignment: `position.c`.
+
+**So closing M1a is not a bug fix — it is a version-matching exercise.**
+Smetana is a transpile of graphviz **2.38**; `@knowvah/dot-engine` is a port of
+**modern** graphviz. Two different upstreams, both correct for their version.
+Making them agree means reproducing 2.38's positioning, which is precisely
+what CLAUDE.md's standing ruling forbids: *"Never chase a Smetana-specific
+number… dot-engine's answer stands. Record the delta and move on."*
+
+Reversing that ruling is a maintainer decision, not a defect to fix. The
+measurement above is what it should be reversed (or upheld) on.
+
 ### M1 is TWO mechanisms, and only one of them is the accepted divergence
 
 Measured 2026-08-09, after the value-colour match made the interiors legible.
