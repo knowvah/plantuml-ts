@@ -95,7 +95,7 @@ measurement:
 | M5 | Value text colour | **CLOSED** — matched to upstream, divergence retired 2026-08-09 | `renderer-style.ts`; DIVERGENCES.md entry marked RETIRED | 0 |
 | M6 | Element tally still differs | PORT GAP | 17 fixtures, each with its own small delta — see the index | 17 |
 
-### M6 — element tally: 17 → 2 fixtures
+### M6 — element tally: 17 → 1 fixture
 
 Four mechanisms closed, each read out of a branch rather than fitted.
 
@@ -171,8 +171,37 @@ boxes, not of the json family.
 
 | fixture | signature | mechanism |
 |---|---|---|
-| `json/vogeku-38-soxe333` | `text-2` | was `text-12`; the theme's wrap width now reaches it. The residual 2 is unexamined. |
 | `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | a different shape family entirely; unexamined |
+
+`json/vogeku-38-soxe333` closed: wrap was gated on `valueType === 'string'`,
+and upstream makes no such distinction — `getShortString` hands `getTextBlock`
+a display string and the style's `wrapWidth()` applies whatever the JSON type
+was. A boolean's display is `"☑ true"`, which contains a space and therefore
+splits; the jar draws `'☑'`, NBSP, `'true'` as three elements. Its tally is now
+exact, though the fixture is still blocked from conformance by the margin
+finding below.
+
+### A theme can change the diagram MARGIN — new, unfixed
+
+`vogeku` is now tally-exact but its document is 11px larger than the jar's on
+both axes, and its first node sits at `(10, 19)` where the jar's is at
+`(5, 14)` — a uniform +5.
+
+`puml-theme-plain.puml:43` sets `root { Margin 5 }`, which overrides
+`TitledDiagram#getDefaultMargins()`'s `same(10)`. `json/layout.ts` hardcodes
+`CANVAS_PAD = 10`. `puml-theme-amiga` sets the same, and both `Margin 5` and
+the two-value `Margin 5 10` form appear in the themes, so the field is not a
+scalar.
+
+Deliberately not started here. It is the same shape as mechanism 8 — extract a
+non-colour property in `compile-themes.py` and regenerate — but it lands on
+`CANVAS_PAD`, which the whole layout is written against, and a diagram margin
+is not json-specific: every engine that assumes 10 would be equally wrong.
+That makes it a cross-engine change wanting its own measurement, not a tail
+addition to this one.
+
+Worth noting what it implies: 47 of 92 fixtures already have byte-exact
+document dimensions, so this affects the themed subset rather than the family.
 
 ### 9. The malformed-body page — CLOSED, byte-conformant
 

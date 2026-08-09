@@ -256,11 +256,20 @@ function cellLines(
   const rawLines: string[] = valueType === 'string' ? splitDisplayLines(display) : [display];
   const processed = rawLines.join('\n');
   // Each raw line is a stripe, and WRAPPING breaks a stripe into lines of
-  // ATOMS (`Fission.ts`) — one `<text>` per atom, not per line. A non-string
-  // display value is a single token with nothing to wrap, and `splitStripe`
-  // with a 0 width returns its input untouched, which is also the
-  // no-`MaximumWidth` case for strings.
-  const wrap = valueType === 'string' ? (maximumWidth ?? 0) : 0;
+  // ATOMS (`Fission.ts`) — one `<text>` per atom, not per line.
+  //
+  // Applied to EVERY value type, not just strings. Upstream makes no such
+  // distinction: `getShortString` hands `getTextBlock` a display string and
+  // the style's `wrapWidth()` applies to it whatever the JSON type was
+  // (`TextBlockJson.java:341-349`). A boolean's display is `"☑ true"`, which
+  // contains a space and therefore splits — the jar draws `'☑'`, NBSP,
+  // `'true'` as three elements (`json/vogeku-38-soxe333`). Gating this on
+  // `valueType === 'string'` cost exactly that.
+  //
+  // Harmless for the others: a number, a null (`␀`) and a nested cell
+  // (three spaces) each survive as one atom, and `splitStripe` with a 0
+  // width returns its input untouched, which is the no-`MaximumWidth` case.
+  const wrap = maximumWidth ?? 0;
   const atomLines: string[][] = [];
   for (const segment of rawLines) {
     for (const atoms of splitStripe(segment, wrap, (t) => measurer.measure(t, font).width)) {
