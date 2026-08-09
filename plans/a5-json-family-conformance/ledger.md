@@ -10,7 +10,7 @@ the index below, against a numbered mechanism. Measured with
 | | at Batch 4 close | after the structure pass |
 |---|---|---|
 | fixtures | 92 | 92 |
-| byte-conformant | 0 | **16** (9 json, 6 yaml, 1 hcl) — pinned |
+| byte-conformant | 0 | **17** (10 json, 6 yaml, 1 hcl) — pinned |
 | **element tally exact vs jar** | **0** | **75 / 92 (82 %)** |
 | fixtures whose interior is COMPARED at all | 0 | 75 |
 | total diffs | unmeasurable (all floors) | 13,178 |
@@ -95,7 +95,7 @@ measurement:
 | M5 | Value text colour | **CLOSED** — matched to upstream, divergence retired 2026-08-09 | `renderer-style.ts`; DIVERGENCES.md entry marked RETIRED | 0 |
 | M6 | Element tally still differs | PORT GAP | 17 fixtures, each with its own small delta — see the index | 17 |
 
-### M6 — element tally: 17 → 3 fixtures
+### M6 — element tally: 17 → 2 fixtures
 
 Four mechanisms closed, each read out of a branch rather than fitted.
 
@@ -171,9 +171,39 @@ boxes, not of the json family.
 
 | fixture | signature | mechanism |
 |---|---|---|
-| `json/nixaxa-46-muge983` | `rect+1` | malformed JSON — the jar draws a bare monospace message with no box (`JsonDiagram#drawU`'s `root == null` branch). The class engine's refusals now route through the shared error page; this wants the same treatment for a json parse failure. |
 | `json/vogeku-38-soxe333` | `text-2` | was `text-12`; the theme's wrap width now reaches it. The residual 2 is unexamined. |
 | `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | a different shape family entirely; unexamined |
+
+### 9. The malformed-body page — CLOSED, byte-conformant
+
+`JsonDiagram#drawU`'s `root == null` branch (`JsonDiagram.java:113-121`) draws
+ONE monospace text and nothing else — no box, no border:
+
+    Display.getWithNewlines(pragma, "Your data does not sound like " + type + " data")
+    …create(monospace 14, HorizontalAlignment.LEFT, skinParam)
+    TextBlockUtils.withMargin(result, 5, 2)
+
+This port drew its own 640x80 red box, the same bespoke shape the class engine
+used before its refusals were routed through the jar's page.
+
+The document chain is the family's usual one with ONE difference worth
+recording: a TEXT's ink is its box exactly (`LimitFinder.java:217-225`) — none
+of the `-1` corner a rectangle contributes — and `TextBlockMarged` draws a
+`UEmpty` of the full margined size, so the ink is `text + 2·5` by `text + 2·2`.
+That predicts `trunc(230.388 + 10 + 20 + 1) = 261` by `trunc(14 + 4 + 20 + 1)
+= 39`, which is exactly the golden's `viewBox="0 0 261 39"`.
+
+Everything else fell out of rules already ported: the message's spaces become
+NBSP because the family is `monospace` (mechanism 6), and `textLength` is the
+RAW width because upstream measures before that swap.
+
+`json/nixaxa-46-muge983` is byte-conformant and pinned.
+
+The message interpolates the diagram type upstream, so it can read YAML or HCL.
+Only the json parser reports `parseError` today, so only JSON is reachable —
+`JsonDiagramAST.diagramLabel` carries it anyway, and yaml/hcl set it, so the
+message cannot silently say JSON if either learns to report a failure. That
+yaml and hcl never report one at all is its own gap, not this one.
 
 ### 8. `MaximumWidth` now survives theme compilation
 

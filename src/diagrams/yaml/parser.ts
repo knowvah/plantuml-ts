@@ -114,5 +114,5 @@ export function parseYaml(source: UmlSource): JsonDiagramAST {
   // entry point (already over threshold before mission G0b/T6 added the
   // annotation-matcher check; T8 removed the bespoke title field/branch but
   // did not reduce the function below threshold).
-  return { root, parseError: false, highlights, annotations, sprites };
+  return { root, parseError: false, diagramLabel: 'YAML' as const, highlights, annotations, sprites };
 }

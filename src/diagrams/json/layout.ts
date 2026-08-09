@@ -32,6 +32,12 @@ export type { JsonRowGeo } from './TextBlockJson.js';
  */
 const CANVAS_PAD = 10;
 
+/** `TextBlockUtils.withMargin(result, 5, 2)` — the same per-cell margins
+ *  `TextBlockJson.ts` uses, applied to the parse-failure message too
+ *  (`JsonDiagram.java:120`). */
+const CELL_MARGIN_X = 5;
+const CELL_MARGIN_Y = 2;
+
 // ---------------------------------------------------------------------------
 // Public output types
 // ---------------------------------------------------------------------------
@@ -61,8 +67,13 @@ export interface JsonGeometry {
   edges: JsonEdgeGeo[];
   width: number;
   height: number;
-  /** When the JSON body could not be parsed, contains the error message to display. */
+  /** When the body could not be parsed, the message to display. */
   error?: string;
+  /**
+   * Where that message is drawn, and how wide it measures. Computed at layout
+   * time because only this stage holds a `StringMeasurer`.
+   */
+  errorLayout?: { x: number; y: number; textLength: number };
 }
 
 // ---------------------------------------------------------------------------
@@ -145,6 +156,56 @@ function mirrorToDiagramSpace(
 // Public layout function
 // ---------------------------------------------------------------------------
 
+/**
+ * `FontConfiguration.blackBlueTrue(UFontFactory.monospace(14))` — the fixed
+ * font `JsonDiagram#drawU` builds the failure message with
+ * (`JsonDiagram.java:114-121`). Deliberately NOT the theme's font or size:
+ * upstream hard-codes both on this path.
+ */
+const PARSE_FAILURE_FONT = { family: 'monospace', size: 14 };
+
+/**
+ * The page upstream draws when the body will not parse — `drawU`'s
+ * `root == null` branch (`JsonDiagram.java:113-121`):
+ *
+ *     Display.getWithNewlines(pragma, "Your data does not sound like " + type + " data")
+ *     …create(monospace 14, HorizontalAlignment.LEFT, skinParam)
+ *     TextBlockUtils.withMargin(result, 5, 2)
+ *     result.drawU(ug)
+ *
+ * ONE text and nothing else — no box, no border. This port drew its own
+ * 640x80 red box here, the same bespoke shape the class engine used before
+ * refusals were routed through the jar's own error page.
+ *
+ * Document size follows the family's normal chain (see `documentDimensions`),
+ * with one difference that matters: a TEXT's ink is its box exactly
+ * (`LimitFinder.java:217-225`), with none of the `-1` corner a rectangle
+ * contributes, and `TextBlockMarged` draws a `UEmpty` of the full margined
+ * size so the ink is `text + 2·5` wide by `text + 2·2` tall. Jar-verified on
+ * `json/nixaxa-46-muge983`: `trunc(230.388 + 10 + 20 + 1) = 261` by
+ * `trunc(14 + 4 + 20 + 1) = 39`, against its golden's `viewBox="0 0 261 39"`.
+ */
+function layoutParseFailure(ast: JsonDiagramAST, measurer: StringMeasurer): JsonGeometry {
+  const message = `Your data does not sound like ${ast.diagramLabel ?? 'JSON'} data`;
+  const { width: textWidth, height: textHeight } = measurer.measure(message, PARSE_FAILURE_FONT);
+  const inkWidth = textWidth + 2 * CELL_MARGIN_X;
+  const inkHeight = textHeight + 2 * CELL_MARGIN_Y;
+  return {
+    nodes: [],
+    edges: [],
+    width: inkWidth + CANVAS_PAD * 2 + ENSURE_VISIBLE_BUMP,
+    height: inkHeight + CANVAS_PAD * 2 + ENSURE_VISIBLE_BUMP,
+    error: message,
+    errorLayout: {
+      x: CANVAS_PAD + CELL_MARGIN_X,
+      y: CANVAS_PAD + CELL_MARGIN_Y + textHeight - measurer.getDescent(PARSE_FAILURE_FONT, message),
+      // Upstream measures for `textLength` BEFORE `SvgGraphics#text` swaps
+      // spaces for NBSP under a monospace family, so this is the raw width.
+      textLength: textWidth,
+    },
+  };
+}
+
 export function layoutJson(
   ast: JsonDiagramAST,
   theme: Theme,
@@ -152,15 +213,7 @@ export function layoutJson(
 ): JsonGeometry {
   // Handle parse failure: return an error geometry that the renderer will
   // display as PlantUML's canonical "Your data does not sound like JSON data".
-  if (ast.parseError) {
-    return {
-      nodes: [],
-      edges: [],
-      width: 0,
-      height: 0,
-      error: 'Your data does not sound like JSON data',
-    };
-  }
+  if (ast.parseError) return layoutParseFailure(ast, measurer);
 
   const flatNodes: FlatNode[] = walkTree(normalizeRoot(ast.root));
 

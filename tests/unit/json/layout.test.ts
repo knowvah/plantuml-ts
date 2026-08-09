@@ -82,14 +82,20 @@ describe('layoutJson', () => {
   });
 
   // 6. Parse error → empty geometry
-  it('parse error returns empty geometry', () => {
+  it('parse error lays out the failure MESSAGE, not an empty canvas', () => {
     const ast = makeAst(null, [], true);
     const geo = layoutJson(ast, defaultTheme, measurer);
 
+    // `JsonDiagram#drawU`'s `root == null` branch draws one monospace text —
+    // so the page has real dimensions and a real text position. It used to
+    // return a 0x0 geometry and let the renderer invent a 640x80 red box.
     expect(geo.nodes).toHaveLength(0);
     expect(geo.edges).toHaveLength(0);
-    expect(geo.width).toBe(0);
-    expect(geo.height).toBe(0);
+    expect(geo.error).toBe('Your data does not sound like JSON data');
+    expect(geo.width).toBeGreaterThan(0);
+    expect(geo.height).toBeGreaterThan(0);
+    // Text origin is the canvas margin plus the cell margin, on both axes.
+    expect(geo.errorLayout?.x).toBe(15);
   });
 
   // 7. boolean true value → '☑ true'

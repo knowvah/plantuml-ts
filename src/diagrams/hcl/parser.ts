@@ -383,5 +383,5 @@ export function parseHcl(source: UmlSource): JsonDiagramAST {
   // #lizard forgives -- pre-existing faithful port of the HCL entry point
   // (already over threshold before mission G0b/T6 added the annotation-
   // matcher check above).
-  return { root, parseError: false, highlights: [], annotations, sprites };
+  return { root, parseError: false, diagramLabel: 'HCL' as const, highlights: [], annotations, sprites };
 }

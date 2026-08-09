@@ -16,6 +16,16 @@ export interface JsonDiagramAST {
   root: unknown;
   /** True when JSON.parse failed (invalid JSON body). When false, root may still be null. */
   parseError: boolean;
+  /**
+   * The diagram type as it appears in the parse-failure message — upstream
+   * builds `"Your data does not sound like " + getDiagramType() + " data"`
+   * (`JsonDiagram.java:114-115`), so it reads JSON, YAML or HCL.
+   *
+   * Only the json parser currently reports `parseError`, so only `'JSON'` is
+   * reachable today; the field exists so the message cannot silently say JSON
+   * once yaml or hcl learn to report one. Defaults to `'JSON'` when unset.
+   */
+  diagramLabel?: 'JSON' | 'YAML' | 'HCL';
   /** Highlight directives from #highlight lines, each carrying a path and optional style class. */
   highlights: ReadonlyArray<HighlightDirective>;
   /**

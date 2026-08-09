@@ -53,7 +53,12 @@ describe('render @startjson — parse errors', () => {
     // Upstream renders "Your data does not sound like JSON data" for invalid input.
     const svg = await render('@startjson\n{\n{\n[\n"x"\n]\n}\n}\n@endjson');
     expect(svg).toContain('<svg');
-    expect(svg).toContain('Your data does not sound like JSON data');
+    // The message is drawn in `monospace`, and `SvgGraphics.java:727-728`
+    // replaces every space with NBSP under that family — so the document
+    // carries U+00A0, not U+0020.
+    expect(svg).toContain('Your\u00a0data\u00a0does\u00a0not\u00a0sound\u00a0like\u00a0JSON\u00a0data');
+    // …and no box: upstream draws the text and nothing else.
+    expect(svg).not.toContain('<rect');
   });
 });
 

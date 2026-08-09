@@ -36,6 +36,11 @@ const HIGHLIGHT_INSET_X = 1.5;
 const HIGHLIGHT_WIDTH_REDUCTION = 2;
 const HIGHLIGHT_ROUND = 4;
 
+/** `UFontFactory.monospace(14)` — `JsonDiagram#drawU`'s hard-coded failure
+ *  font (`JsonDiagram.java:116`), not the theme's. */
+const PARSE_FAILURE_FONT_FAMILY = 'monospace';
+const PARSE_FAILURE_FONT_SIZE = 14;
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
@@ -320,25 +325,33 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme): string {
 /**
  * Render a JSON diagram geometry into an SVG string.
  */
-/** The fixed-size diagnostic box drawn in place of a diagram whose JSON body
- *  would not parse. Not an upstream shape — this port's own error surface. */
-function renderErrorBox(message: string): RenderFragment {
-  const PAD = 12;
-  const FONT_SIZE = 14;
-  const msgWidth = message.length * FONT_SIZE * 0.6 + PAD * 2;
-  const msgHeight = FONT_SIZE + PAD * 2;
-  const body =
-    rect(PAD, PAD, msgWidth, msgHeight, { fill: '#FFFFFF', stroke: '#888888', rx: 4 }) +
-    text(PAD * 2, PAD * 2 + FONT_SIZE, message, {
-      fontFamily: 'Courier, monospace',
-      fontSize: FONT_SIZE,
-      fill: '#000000',
-    });
-  return { body, width: msgWidth + PAD * 2, height: msgHeight + PAD * 2 };
+/**
+ * The page upstream draws when the body will not parse — `JsonDiagram#drawU`'s
+ * `root == null` branch. ONE monospace text and nothing else: no box, no
+ * border. `layout.ts#layoutParseFailure` computed its position and width,
+ * because only the layout stage holds a measurer.
+ *
+ * The spaces reach the SVG as NBSP without anything here asking: the family is
+ * `monospace`, and `core/svg-shapes.ts` carries upstream's
+ * `SvgGraphics.java:727-728` rule. `textLength` is deliberately the RAW width,
+ * as upstream measures before that swap.
+ *
+ * Replaced a bespoke 640x80 red box — the same shape the class engine used
+ * before its refusals were routed through the jar's own error page.
+ */
+function renderParseFailure(geo: JsonGeometry): RenderFragment {
+  const at = geo.errorLayout;
+  const body = at === undefined ? '' : text(at.x, at.y, geo.error ?? '', {
+    fontFamily: PARSE_FAILURE_FONT_FAMILY,
+    fontSize: PARSE_FAILURE_FONT_SIZE,
+    fill: JSON_SKIN_BLACK,
+    textLength: at.textLength,
+  });
+  return { body, width: geo.width, height: geo.height };
 }
 
 export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
-  if (geo.error !== undefined) return renderErrorBox(geo.error);
+  if (geo.error !== undefined) return renderParseFailure(geo);
 
   if (geo.nodes.length === 0) {
     return { body: '', width: 0, height: 0 };
