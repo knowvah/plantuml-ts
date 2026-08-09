@@ -82,7 +82,16 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
     const svg = renderNote(boldNote, defaultTheme);
     const texts = [...svg.matchAll(/<text x="([^"]*)"[^>]*>([^<]*)<\/text>/g)];
     expect(texts).toHaveLength(2);
-    expect(texts[0]![2]).toBe('Yet ');
+    // `StringUtils.trin` — the SVG driver trims chars <= U+0020 from both ends
+    // of every label (`DriverTextSvg.java:125`, ported into
+    // `core/svg-shapes.ts#emittedTextForm`). This atom's own text is `'Yet '`;
+    // what reaches the SVG is `'Yet'`. Jar-verified on this very fixture:
+    //   <text x="12" … textLength="19.5" …>Yet</text>
+    //   <text x="31.5" …>another</text>
+    // Note the ADVANCE is unaffected (31.5 = 12 + 19.5) — trimming changes the
+    // emitted content, not the atom's measured width, which is why the x
+    // assertions below are unchanged.
+    expect(texts[0]![2]).toBe('Yet');
     expect(texts[1]![2]).toBe('another');
     expect(Number(texts[0]![1])).toBe(0 + 6); // note.x + NOTE_MARGIN_X1
     expect(Number(texts[1]![1])).toBe(0 + 6 + 20); // prior atom's own width

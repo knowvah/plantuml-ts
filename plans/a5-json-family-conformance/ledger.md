@@ -10,7 +10,7 @@ the index below, against a numbered mechanism. Measured with
 | | at Batch 4 close | after the structure pass |
 |---|---|---|
 | fixtures | 92 | 92 |
-| byte-conformant | 0 | **13** (7 json, 5 yaml, 1 hcl) — pinned |
+| byte-conformant | 0 | **15** (9 json, 5 yaml, 1 hcl) — pinned |
 | **element tally exact vs jar** | **0** | **75 / 92 (82 %)** |
 | fixtures whose interior is COMPARED at all | 0 | 75 |
 | total diffs | unmeasurable (all floors) | 13,178 |
@@ -95,22 +95,51 @@ measurement:
 | M5 | Value text colour | **CLOSED** — matched to upstream, divergence retired 2026-08-09 | `renderer-style.ts`; DIVERGENCES.md entry marked RETIRED | 0 |
 | M6 | Element tally still differs | PORT GAP | 17 fixtures, each with its own small delta — see the index | 17 |
 
-### M6 — the whole remaining structural gap, named
+### M6 — element tally: 17 → 9 fixtures
 
-| signature | fixtures | likely mechanism (unverified — do NOT relay as a finding) |
+Four mechanisms closed, each read out of a branch rather than fitted.
+
+**1. An empty cell is not an absent cell.** `StripeSimple#getAtoms`
+(`StripeSimple.java:124-129`) gives a stripe that collected no atoms a
+single-space atom, which the whitespace-only rule then writes as NBSP. This
+port skipped drawing an empty value entirely. Jar-verified: `{"a": ""}` emits a
+value `<text>`, and `{}` — which `JsonDiagram.java:78-88` rewrites to an array
+holding one empty string — emits exactly one text inside a 10×18 box. The
+space measures 0 wide, so this adds an element without moving any geometry,
+which is why that 10×18 box is a number no `MIN_WIDTH` produces.
+
+**2. `StringUtils.trin`** (`DriverTextSvg.java:125`) trims chars ≤ U+0020 from
+both ends of every emitted label. Ported into
+`core/svg-shapes.ts#emittedTextForm`, AFTER the NBSP swap — the order is
+load-bearing, since reversing it would trim json's three-space nested cell to
+nothing. Verified applicable: across 12,521 jar `<text>` elements in the
+json/yaml/class/state goldens, ZERO carry leading or trailing whitespace.
+This also fixed a latent CLASS divergence — note atom runs were emitting
+`'Yet '` where the jar emits `'Yet'` (`class/tenobo-24-liga464`).
+
+**3. Background rect emitted when it should not be.** Two ways, both mine from
+this mission's own shell: a non-solid background (`transparent` / `none` /
+`#00000000`) got a rect, and a background that IS the default white but
+spelled `#FFF` by a theme slipped past a string comparison. Now uses
+`assembleDocumentShell`'s own solidity rule plus a `shortenColor` comparison.
+
+**4. Not a mechanism — `json/nixaxa-46-muge983` is malformed JSON.** The jar
+draws only the message text (`JsonDiagram#drawU`'s `root == null` branch), no
+box; this port draws its own error box. See the remaining table.
+
+### M6 remainder — 9 fixtures, each diagnosed
+
+| fixture | signature | mechanism |
 |---|---|---|
-| `text-1` | 4 | one cell not drawn |
-| `rect+1` | 3 | one rect too many |
-| `text-4` | 2 | four cells not drawn |
-| `text+5`, `text+3`, `text+1` | 3 | cells drawn that the jar does not |
-| `text-2` | 1 | |
-| `text-112` (`json/noleta-28-nutu456`) | 1 | large; a wrap/`MaximumWidth` case |
-| `rect+1 text-12` (`json/vogeku-38-soxe333`) | 1 | |
-| `rect-1` (`yaml/tadari-70-nare798`) | 1 | the closest fixture in the corpus: 3 diffs |
-| `ellipse+1 line+6 path-6 polygon-5 rect+4` (`yaml/litife-43-novo083`) | 1 | a different shape family entirely |
-
-Each is individually diagnosable now that the interiors compare. None has been
-diagnosed — they are measured and named, not explained.
+| `json/nixaxa-46-muge983` | `rect+1` | malformed JSON: `JsonDiagram#drawU` draws a bare monospace message at the normal cell origin, no box. This port draws `renderErrorBox`. Note the jar NBSP-joins the message's spaces even though it is not whitespace-only — a monospace-font rule not yet located. |
+| `json/vogeku-38-soxe333` | `rect+1 text-12` | `!theme plain`; residual after the background fix |
+| `yaml/tadari-70-nare798` | `rect-1` | has a `title`; chrome interaction |
+| `json/gagebi-92-vere937` | `text+1` | value ends `\r\n`; we emit a trailing empty line the jar does not |
+| `json/devime-19-toze896` | `text+5` | same, ×5 |
+| `yaml/ketunu-15-poli031` | `text+4` | **the jar does NOT split on a literal newline.** Its golden carries ONE `<text>` whose content contains real U+000A characters (`"def func(x) do\n…"`). `Display.getWithNewlines` splits on the authored escape `\n`, not on U+000A, so a YAML block scalar's newlines survive into the SVG. This port splits on U+000A. |
+| `yaml/vapoda-87-piku740` | `text-4` | unexamined |
+| `json/noleta-28-nutu456` | `text-112` | large; `MaximumWidth` wrap case |
+| `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | a different shape family entirely; unexamined |
 
 ### M1 is TWO mechanisms, and only one of them is the accepted divergence
 

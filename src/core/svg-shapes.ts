@@ -154,8 +154,50 @@ function textLengthOf(content: string, textLength: number | undefined): number |
 const NBSP = ' ';
 const WHITESPACE_ONLY_RE = new RegExp('^\\s*$');
 
-export function nbspIfBlank(content: string): string {
+function nbspIfBlank(content: string): string {
   return WHITESPACE_ONLY_RE.test(content) ? content.split(' ').join(NBSP) : content;
+}
+
+/**
+ * `StringUtils.trin(String)` — trims only characters whose code point is
+ * <= U+0020, from both ends. Deliberately NOT JS's `.trim()`, which also
+ * strips U+00A0 per the ECMAScript WhiteSpace production: that would swallow
+ * the very NBSPs {@link nbspIfBlank} just inserted (0xA0 > 0x20).
+ *
+ * `core/klimt/drawing/svg/driver-text-svg.ts#trin` is the same port for the
+ * klimt-drawn engines; this is the copy for the shared shape emitters.
+ * @see .../klimt/drawing/svg/DriverTextSvg.java:125
+ */
+function trin(text: string): string {
+  let start = 0;
+  let end = text.length - 1;
+  while (start <= end && text.charCodeAt(start) <= 0x20) start++;
+  while (end >= start && text.charCodeAt(end) <= 0x20) end--;
+  return text.slice(start, end + 1);
+}
+
+/**
+ * The exact string the jar puts inside a `<text>`, given the raw label.
+ *
+ * ORDER IS LOAD-BEARING and matches `DriverTextSvg#draw` (`:114-125`):
+ * whitespace-only → NBSP FIRST, then `trin`. Reversed, a whitespace-only label
+ * would be trimmed to nothing before it could become NBSP, and json's
+ * three-space nested cell (`TextBlockJson.java:194`) would vanish instead of
+ * rendering as `\xa0\xa0\xa0`.
+ *
+ * Exported because the value that reaches `textLength` must be measured from
+ * THIS form, not the raw one — upstream measures after both steps
+ * (`dim = calculateDimension(font, trimmed)`, `:126`). Any caller computing a
+ * width for a label it will emit through {@link text} has to agree with it.
+ *
+ * Not ported: `leadingSpaceAdjust`'s conversion of leading spaces into an `x`
+ * advance (`:118-124`). It needs a measurer, which these emitters do not have.
+ * Verified unexercised by the current corpus — across 3,548 jar `<text>`
+ * elements in the json/yaml goldens, ZERO carry leading or trailing
+ * whitespace, so nothing in it survives to be positioned.
+ */
+export function emittedTextForm(content: string): string {
+  return trin(nbspIfBlank(content));
 }
 
 export function text(
@@ -164,7 +206,7 @@ export function text(
   rawContent: string,
   style: TextStyle = {},
 ): string {
-  const content = nbspIfBlank(rawContent);
+  const content = emittedTextForm(rawContent);
   const fillR = resolvePaint(style.fill);
   const a = attrs([
     ['x', x],

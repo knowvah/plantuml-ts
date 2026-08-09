@@ -15,7 +15,7 @@
  * yaml and hcl have no layout of their own.
  */
 import type { StringMeasurer } from '../../core/measurer.js';
-import { nbspIfBlank } from '../../core/svg.js';
+import { emittedTextForm } from '../../core/svg.js';
 import {
   getDisplayValue,
   containerEntries,
@@ -235,7 +235,25 @@ function cellLines(
     }
     valueLines = wrapped;
   }
-  return { processed, valueLines, valueType };
+  // `StripeSimple#getAtoms` (`StripeSimple.java:124-129`): a stripe that
+  // collected NO atoms is given a single-space one --
+  //
+  //     if (atoms.size() == 0)
+  //         atoms.add(AtomTextUtils.createLegacy(" ", fontConfiguration));
+  //
+  // so an empty cell is not an absent cell: it draws a space, which the SVG
+  // driver's whitespace-only rule then writes as NBSP. Each drawn line is one
+  // stripe, hence the per-line map. Jar-verified -- `{"a": ""}` emits
+  // `<text …> </text>` for the value, and `{}` (which
+  // `JsonDiagram.java:78-88` rewrites to an array holding one empty string)
+  // emits exactly that one text inside a 10x18 box.
+  //
+  // The space measures 0 wide under deterministic text metrics, so this adds
+  // an element without moving any geometry -- which is why the jar's box for
+  // `{}` is 10 wide (0 + 2x the 5pt cell margin), a number no MIN_WIDTH
+  // produces. CLAUDE.md cites that box as a case where hours went into fitting
+  // a constant instead of reading this branch.
+  return { processed, valueLines: valueLines.map((l) => (l === '' ? ' ' : l)), valueType };
 }
 
 /**
@@ -260,7 +278,7 @@ function cellMetrics(
   const firstBaseline = cell.rowY + CELL_MARGIN_Y + textHeight - descent;
   // See `JsonRowGeo.valueTextLengths` for why the emitted form is measured
   // separately from the raw one.
-  const emitted = (t: string, f: FontSpec) => measurer.measure(nbspIfBlank(t), f).width;
+  const emitted = (t: string, f: FontSpec) => measurer.measure(emittedTextForm(t), f).width;
   return {
     keyWidth: cell.arrayEntry ? 0 : measurer.measure(cell.key, keyFont).width,
     valueLineWidths: cell.valueLines.map((l) => measurer.measure(l, valFont).width),

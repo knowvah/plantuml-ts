@@ -186,7 +186,8 @@ function renderRowText(
     );
   }
 
-  if (row.value === '') return parts.join('');
+  // No early return for an empty value: an empty cell still draws (a space,
+  // per `TextBlockJson.ts#cellLines`). `valueLines` is always non-empty.
 
   const baseColor = ts.fontColor ?? valueColor(row.valueType, style.json);
   const vColor = hl.isHighlighted && hl.fontColor !== undefined ? hl.fontColor : baseColor;

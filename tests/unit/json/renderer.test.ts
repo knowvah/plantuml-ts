@@ -294,10 +294,11 @@ describe('renderJson — structural', () => {
     expect(lineCount).toBe(5);
   });
 
-  it('nested valueType row with empty value produces no value text element', () => {
+  it('an empty value cell still draws — an empty cell is not an absent cell', () => {
     const nestedRow = makeRow({
       key: 'child',
       value: '',
+      valueLines: [' '],
       valueType: 'nested',
       y: 4,
       height: 20,
@@ -306,9 +307,14 @@ describe('renderJson — structural', () => {
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    // Only one text element (the key), no second text for empty value
+    // `StripeSimple#getAtoms` (`StripeSimple.java:124-129`) gives a stripe that
+    // collected no atoms a single-space atom, so the cell draws a space --
+    // written as NBSP by the whitespace-only rule. Jar-verified: `{"a": ""}`
+    // emits a value `<text>`, and `{}` emits exactly one text in a 10x18 box.
+    // This test previously asserted the opposite (one text, the key only).
     const textMatches = body.match(/<text /g) ?? [];
-    expect(textMatches.length).toBe(1);
+    expect(textMatches.length).toBe(2);
+    expect(body).toContain('\u00a0');
   });
 
   it('spline edge with 4+ points builds cubic Bézier path', () => {

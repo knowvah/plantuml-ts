@@ -31,6 +31,7 @@
 
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { group, rect } from '../../core/svg.js';
+import { shortenColor } from '../../core/svg-format.js';
 import { assembleDocumentShell } from '../../core/klimt/document-shell.js';
 
 /** The default (unset) diagram background — matches `theme.ts`'s own
@@ -59,11 +60,34 @@ const DEFAULT_BACKGROUND = '#FFFFFF';
  */
 function maybeBackgroundRect(fragment: RenderFragment): string {
   const background = fragment.background ?? DEFAULT_BACKGROUND;
-  if (background === DEFAULT_BACKGROUND) return '';
+  if (!isSolidNonDefault(background)) return '';
   return rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
     fill: background,
     stroke: 'none',
   });
+}
+
+/**
+ * Whether the resolved background warrants the explicit content-level rect
+ * above. Two ways a background can fail to warrant one, and this port emitted
+ * a rect for BOTH before they were measured against the corpus:
+ *
+ * 1. **It is not solid.** `transparent` / `none` / the canonical
+ *    `#00000000` paint nothing, and the jar draws no rect for them —
+ *    `skinparam backgroundcolor transparent` (`json/sevaji-38-xita618`) keeps
+ *    the jar's root `style` at plain `background:#FFFFFF` with no content
+ *    rect at all. This is `assembleDocumentShell`'s own `isSolid` rule, which
+ *    it already applies to the root `style` attribute; the two must agree.
+ * 2. **It IS the default white, spelled differently.** A theme can resolve the
+ *    background to `#FFF` rather than `#FFFFFF` (`!theme plain`,
+ *    `json/vogeku-38-soxe333`). A string comparison against one spelling
+ *    misses the other, so the comparison is made on the SHORTENED form of
+ *    both — `shortenColor` is the same normalization the shape emitters use,
+ *    so anything that reaches the SVG identically compares equal here.
+ */
+function isSolidNonDefault(background: string): boolean {
+  if (background === 'transparent' || background === 'none' || background === '#00000000') return false;
+  return shortenColor(background) !== shortenColor(DEFAULT_BACKGROUND);
 }
 
 /**

@@ -58,12 +58,11 @@ describe('error diagram — an orphan !endif (jar: "No if related to this endif"
       '@startuml',
       'Bob -> Alice : hi',
       '!endif',
-      // NOTE (unrelated, pre-existing): the jar emits this WITHOUT the leading
-      // space — `DriverTextSvg` converts leading spaces into an x-offset and
-      // then `trin`s them (`:118-125`). This port's non-klimt text path does
-      // neither, so the space survives here. Left as measured, not "fixed"
-      // blind; it is its own mechanism and not in this change's scope.
-      ' No if related to this endif',
+      // The jar emits this WITHOUT a leading space, and so does this port now:
+      // `StringUtils.trin` is ported into `core/svg-shapes.ts#emittedTextForm`.
+      // (A previous revision of this test recorded the leading space as a
+      // known gap; closing `trin` closed it too.)
+      'No if related to this endif',
     ]);
   });
 
