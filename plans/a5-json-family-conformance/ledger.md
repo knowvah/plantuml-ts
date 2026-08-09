@@ -127,11 +127,51 @@ spelled `#FFF` by a theme slipped past a string comparison. Now uses
 draws only the message text (`JsonDiagram#drawU`'s `root == null` branch), no
 box; this port draws its own error box. See the remaining table.
 
+### The SECOND NBSP rule — monospace, found and ported
+
+`nixaxa`'s message is NBSP-joined despite not being whitespace-only, which the
+already-ported `DriverTextSvg.java:115-116` guard cannot explain. There is a
+second, independent substitution:
+
+```java
+if ("monospaced".equalsIgnoreCase(fontFamily))
+    fontFamily = "monospace";
+…
+if (fontFamily.equalsIgnoreCase("monospace") || fontFamily.equalsIgnoreCase("courier"))
+    text = text.replace(' ', (char) 160);
+```
+`SvgGraphics.java:720-728`
+
+EVERY space becomes NBSP under a monospace/courier family. Three load-bearing
+details: the comparison is `equalsIgnoreCase` on the WHOLE family (a CSS stack
+like `"Courier, monospace"` does not qualify); `monospaced` is renamed to
+`monospace` BEFORE the test, so it qualifies through the rename; and it runs in
+`SvgGraphics#text`, AFTER `DriverTextSvg` computed `textLength` — so it is
+emission-only and the width still reflects the space-bearing string.
+
+Jar-verified on the error diagram, which mixes both families in one document:
+`font-family="monospace"` texts carry NBSP (`'class\xa0Example'`,
+`'Bob->Alice:\xa0Hello'`, `'license'`) while sans-serif ones keep real spaces
+(`'Bob -> Alice : hi'`).
+
+`core/klimt/drawing/svg/svg-graphics-elements.ts#applyTextFontFamily` ALREADY
+had this rule, so the klimt-drawn engines were correct; the gap was in
+`core/svg-shapes.ts#text`, the shared emitter class/state/object/json use.
+Now ported there.
+
+It exposed a separate, pre-existing divergence rather than fixing one: this
+port's OWN inline error boxes (`class/index.ts`, `chart/renderer.ts` — non-jar
+diagnostic surfaces by design) draw with `fontFamily: 'monospace'`, so their
+message text now legitimately carries NBSP. And the jar draws the
+allowmixing refusal in INHERITED sans-serif, not monospace, which this port
+does not yet match. Not chased here; it is a property of those bespoke error
+boxes, not of the json family.
+
 ### M6 remainder — 9 fixtures, each diagnosed
 
 | fixture | signature | mechanism |
 |---|---|---|
-| `json/nixaxa-46-muge983` | `rect+1` | malformed JSON: `JsonDiagram#drawU` draws a bare monospace message at the normal cell origin, no box. This port draws `renderErrorBox`. Note the jar NBSP-joins the message's spaces even though it is not whitespace-only — a monospace-font rule not yet located. |
+| `json/nixaxa-46-muge983` | `rect+1` | malformed JSON: `JsonDiagram#drawU`'s `root == null` branch draws a bare monospace message at the normal cell origin, NO box. This port draws its own `renderErrorBox`. (The NBSP-joined spaces in that message are no longer a mystery — see below; that half is now ported.) |
 | `json/vogeku-38-soxe333` | `rect+1 text-12` | `!theme plain`; residual after the background fix |
 | `yaml/tadari-70-nare798` | `rect-1` | has a `title`; chrome interaction |
 | `json/gagebi-92-vere937` | `text+1` | value ends `\r\n`; we emit a trailing empty line the jar does not |

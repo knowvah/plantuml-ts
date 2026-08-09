@@ -66,6 +66,18 @@ import { renderSync } from '../../../src/index.js';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import { classAccepts } from '../../../src/diagrams/class/class-dispatch.js';
 
+/**
+ * The port's own inline error boxes draw with `fontFamily: 'monospace'`, and
+ * the SVG emitter applies upstream's monospace rule to any such text —
+ * `SvgGraphics.java:727-728` replaces every space with U+00A0 under a
+ * `monospace`/`courier` family. So the message IS in the document, spelled
+ * with NBSPs. These assertions are about the message being STATED, not about
+ * which space character carries it, so they compare against the de-NBSP'd
+ * text.
+ */
+const deNbsp = (svg: string): string => svg.split('\u00a0').join(' ');
+
+
 const GOLDENS_ROOT = join(
   dirname(fileURLToPath(import.meta.url)),
   '../../../oracle/goldens/svg-class',
@@ -148,8 +160,8 @@ describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside clas
    */
   it('is REFUSED, as upstream refuses it, with upstream\'s own message', () => {
     const svg = renderSync(readSource(slug));
-    expect(svg).toContain('Class diagram error:');
-    expect(svg).toContain(
+    expect(deNbsp(svg)).toContain('Class diagram error:');
+    expect(deNbsp(svg)).toContain(
       "Use 'allowmixing' if you want to mix classes and other UML elements.",
     );
     // The element the jar rejects must NOT be drawn.
@@ -159,7 +171,7 @@ describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside clas
   it('renders normally once `allowmixing` is present', () => {
     const withMixing = readSource(slug).replace('@startuml', '@startuml\nallowmixing');
     const svg = renderSync(withMixing);
-    expect(svg).not.toContain('Class diagram error:');
+    expect(deNbsp(svg)).not.toContain('Class diagram error:');
     expect(svg).toMatch(/>Bob</);
   });
 

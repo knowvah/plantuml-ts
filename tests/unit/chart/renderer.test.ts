@@ -17,6 +17,18 @@ import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ChartGeometry } from '../../../src/diagrams/chart/layout.js';
 import type { Theme } from '../../../src/core/theme.js';
 
+/**
+ * The port's own inline error boxes draw with `fontFamily: 'monospace'`, and
+ * the SVG emitter applies upstream's monospace rule to any such text —
+ * `SvgGraphics.java:727-728` replaces every space with U+00A0 under a
+ * `monospace`/`courier` family. So the message IS in the document, spelled
+ * with NBSPs. These assertions are about the message being STATED, not about
+ * which space character carries it, so they compare against the de-NBSP'd
+ * text.
+ */
+const deNbsp = (svg: string): string => svg.split('\u00a0').join(' ');
+
+
 // ---------------------------------------------------------------------------
 // Shared test fixtures
 // ---------------------------------------------------------------------------
@@ -203,7 +215,7 @@ describe('AC5: AST errors produce a visually distinct error SVG', () => {
     const geo = makeMinimalGeo();
     const errorGeo = { ...geo, errors: ['test validation error'] as readonly string[] };
     const svg = assembleSvg(renderChart(errorGeo, theme));
-    expect(svg).toContain('test validation error');
+    expect(deNbsp(svg)).toContain('test validation error');
     expect(svg).toContain('#DC2626');
     expect(svg).toContain('stroke="#DC2626"');
   });

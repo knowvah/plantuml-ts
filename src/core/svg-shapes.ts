@@ -196,8 +196,47 @@ function trin(text: string): string {
  * elements in the json/yaml goldens, ZERO carry leading or trailing
  * whitespace, so nothing in it survives to be positioned.
  */
-export function emittedTextForm(content: string): string {
-  return trin(nbspIfBlank(content));
+export function emittedTextForm(content: string, fontFamily?: string): string {
+  return nbspIfMonospace(trin(nbspIfBlank(content)), fontFamily);
+}
+
+/**
+ * The SECOND, independent NBSP rule — and the one whose absence here made a
+ * monospace label look like the whitespace-only rule was mis-scoped:
+ *
+ * ```java
+ * if ("monospaced".equalsIgnoreCase(fontFamily))
+ *     fontFamily = "monospace";
+ * …
+ * if (fontFamily.equalsIgnoreCase("monospace") || fontFamily.equalsIgnoreCase("courier"))
+ *     text = text.replace(' ', (char) 160);
+ * ```
+ * @see .../klimt/drawing/svg/SvgGraphics.java:720-728
+ *
+ * EVERY space becomes NBSP under a monospace or courier family, whitespace-only
+ * or not — which is why the jar writes
+ * `Your\xa0data\xa0does\xa0not\xa0sound\xa0like\xa0JSON\xa0data` for a message
+ * that {@link nbspIfBlank} would leave completely alone.
+ *
+ * Three details, all load-bearing:
+ *  - The comparison is `equalsIgnoreCase` against the WHOLE family, not a
+ *    substring. A CSS stack like `"Courier, monospace"` does NOT qualify.
+ *  - `monospaced` (PlantUML's own logical font name) is renamed to `monospace`
+ *    BEFORE the test, so it qualifies through the rename.
+ *  - Upstream applies this in `SvgGraphics#text`, AFTER `DriverTextSvg` has
+ *    already measured and passed `textLength` down. So it is emission-only:
+ *    the width still reflects the SPACE-bearing string. Hence its position
+ *    here, outside anything a caller measures.
+ *
+ * `core/klimt/drawing/svg/svg-graphics-elements.ts#applyTextFontFamily` is the
+ * same rule for the klimt-drawn engines, which already had it; this is the
+ * copy for every engine emitting through these shared shape functions.
+ */
+function nbspIfMonospace(content: string, fontFamily: string | undefined): string {
+  if (fontFamily === undefined) return content;
+  const lower = (fontFamily.toLowerCase() === 'monospaced' ? 'monospace' : fontFamily).toLowerCase();
+  if (lower !== 'monospace' && lower !== 'courier') return content;
+  return content.split(' ').join(NBSP);
 }
 
 export function text(
@@ -206,7 +245,7 @@ export function text(
   rawContent: string,
   style: TextStyle = {},
 ): string {
-  const content = emittedTextForm(rawContent);
+  const content = emittedTextForm(rawContent, style.fontFamily);
   const fillR = resolvePaint(style.fill);
   const a = attrs([
     ['x', x],
