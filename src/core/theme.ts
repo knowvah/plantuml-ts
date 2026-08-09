@@ -24,6 +24,19 @@ export interface Theme {
    *  so explicit 14 != unset (CIRCLED_CHARACTER 17->14: radius 11->10,
    *  jar-verified R2c pm14/). Unlike the ambient {@link fontSize}. */
   defaultFontSize?: number;
+  /**
+   * The diagram's own outer margin, when a theme declares one.
+   *
+   * `TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style
+   * for `root.document` and falls back to `TitledDiagram#getDefaultMargins()`
+   * — `same(10)` — only when that style carries no `Margin`. 28 built-in
+   * themes declare one; 21 restate the default 10 and 7 set 5.
+   *
+   * Four-sided because upstream's value is (`ClockwiseTopRightBottomLeft`,
+   * CSS-shaped 1/2/3/4 numbers); only the uniform form occurs at this scope
+   * today. Absent means "use the engine's default".
+   */
+  diagramMargin?: { top: number; right: number; bottom: number; left: number };
   /** `skinparam linetype ortho|polyline` — svek routes edge labels through
    *  xlabel and emits splines=ortho under ortho (SvekEdge.java:434-441,
    *  DotStringFactory.java:160-168). Absent = default splines. */
@@ -337,6 +350,7 @@ export const monochromeTheme: Theme = {
 export type ThemeOverride = {
   fontFamily?: string;
   fontSize?: number;
+  diagramMargin?: { top: number; right: number; bottom: number; left: number };
   /** See `Theme.defaultFontSize`'s own doc comment (R2j). */
   defaultFontSize?: number;
   linetype?: 'ortho' | 'polyline';
@@ -413,6 +427,11 @@ const OPTIONAL_SCALAR_KEYS = [
   'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
   'shadowing', 'packageStyle', 'nodeSep', 'rankSep', 'wrapWidth',
   'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize',
+  // `diagramMargin` is the one non-scalar here. It rides this list because the
+  // merge is a whole-value replacement, which is exactly right for a margin:
+  // a theme that sets one replaces all four sides, it does not blend with the
+  // default. Omitting it silently dropped every theme's margin.
+  'diagramMargin',
 ] as const;
 
 /** Copy the top-level optional scalars, preferring `partial` then `base`. */

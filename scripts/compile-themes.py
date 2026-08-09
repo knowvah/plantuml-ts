@@ -9,6 +9,7 @@ Reads .puml theme files from the plantuml source tree and extracts:
   - FontName         -> fontFamily
   - node MaximumWidth -> colors.graph.json.maximumWidth (top-level `node`
     selector only; it cascades to root.element.jsonDiagram.node)
+  - root/document Margin -> diagramMargin (overrides getDefaultMargins())
 
 Outputs a TypeScript module that maps theme names to Partial<Theme>.
 """
@@ -210,6 +211,56 @@ def extract_node_maximum_width(content: str) -> str | None:
     return None
 
 
+def extract_document_margin(content: str) -> str | None:
+    """
+    The diagram margin a theme declares, as `top right bottom left`.
+
+    `TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style for
+    `root.document` and falls back to `TitledDiagram#getDefaultMargins()` --
+    `same(10)` -- only when that style has no `Margin`. `root` is a prefix of
+    `root.document`, so a `root { Margin … }` cascades into it, which is the
+    form all 28 declaring themes use.
+
+    The value is CSS-shaped: 1/2/3/4 numbers (`ClockwiseTopRightBottomLeft
+    #read`, `:66-100`). Only the 1-number form appears at this scope in the
+    corpus; the others are ported anyway so an upstream change does not
+    silently truncate.
+    """
+    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
+    if not m:
+        return None
+    depth = 0
+    scope_depth: int | None = None
+    for line in m.group(1).split('\n'):
+        s = line.strip()
+        if s.startswith("'"):
+            continue
+        if s.endswith('{'):
+            if depth == 0 and s[:-1].strip().lower() in ('root', 'document'):
+                scope_depth = depth
+            depth += 1
+            continue
+        if s == '}':
+            depth -= 1
+            if scope_depth is not None and depth <= scope_depth:
+                scope_depth = None
+            continue
+        if scope_depth is not None and depth == scope_depth + 1:
+            prop = re.match(r'Margin\s+([0-9]+(?:\s+[0-9]+){0,3})\s*$', s, re.IGNORECASE)
+            if prop:
+                n = [int(x) for x in prop.group(1).split()]
+                if len(n) == 1:
+                    t = r = b = l = n[0]
+                elif len(n) == 2:
+                    t, r, b, l = n[0], n[1], n[0], n[1]
+                elif len(n) == 3:
+                    t, r, b, l = n[0], n[1], n[2], n[1]
+                else:
+                    t, r, b, l = n
+                return f"{{ top: {t}, right: {r}, bottom: {b}, left: {l} }}"
+    return None
+
+
 def extract_skinparam(content: str, vars: dict[str, str]) -> dict[str, str | None]:
     """Extract top-level skinparam BackgroundColor / DefaultFontName / FontColor."""
     result: dict[str, str | None] = {'bg': None, 'fg': None, 'fn': None}
@@ -263,6 +314,7 @@ def parse_theme(fname: str) -> dict[str, str | None]:
         'lc': root['lc'],
         'fn': root['fn'] or skp['fn'],
         'mw': extract_node_maximum_width(content),
+        'margin': extract_document_margin(content),
     }
 
 
@@ -332,6 +384,8 @@ def emit_theme_entry(name: str, props: dict) -> list[str]:
     if fn:
         lines.append(f"    fontFamily: '{fn}',")
     lines.extend(props.get('extra_after_font', []))
+    if props.get('margin'):
+        lines.append(f"    diagramMargin: {props['margin']},")
 
     color_lines = _color_lines(bg, fg, lc)
     json_lines = _json_graph_lines(bg, fg, lc, props.get('mw'))
@@ -361,8 +415,14 @@ def collect_entries() -> dict[str, list[str]]:
         if not fname.endswith('.puml') or fname == 'puml-theme-_none_.puml':
             continue
         theme_name = fname.replace('puml-theme-', '').replace('.puml', '')
-        props = MANUAL.get(theme_name) \
-            or parse_theme(os.path.join(THEMES_DIR, fname))
+        # MANUAL OVERLAYS the parse, it does not replace it. Replacing threw
+        # away every auto-extracted property for those themes: black-knight
+        # declares `root { Margin 10 }` and never saw it. The manual keys are
+        # all explicit, so they still win where they are set.
+        props = {
+            **parse_theme(os.path.join(THEMES_DIR, fname)),
+            **MANUAL.get(theme_name, {}),
+        }
         entries[theme_name] = emit_theme_entry(theme_name, props)
     return entries
 

@@ -14,6 +14,7 @@ import type { ThemeOverride } from './theme.js';
 export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'amiga': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
     colors: {
       background: '#0B58A8',
       text: '#FFFFFF',
@@ -61,6 +62,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
     },
   },
   'black-knight': {
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#FFF200',
@@ -70,6 +72,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'bluegray': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#fff',
@@ -79,6 +82,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'blueprint': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
     colors: {
       background: '#003153',
       text: '#D9D3D0',
@@ -110,6 +114,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'cerulean-outline': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#2FA4E7',
@@ -119,6 +124,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'cerulean': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#FFF',
@@ -136,6 +142,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'crt-amber': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
     colors: {
       background: '#282828',
       text: '#FFB000',
@@ -158,6 +165,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'crt-green': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
     colors: {
       background: '#282828',
       text: '#33FF33',
@@ -180,6 +188,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'cyborg-outline': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#2A9FD6',
@@ -189,6 +198,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'cyborg': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#FFF',
@@ -198,6 +208,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'hacker': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#151515',
@@ -207,6 +218,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'lightgray': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#336699',
@@ -236,6 +248,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'materia-outline': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#2196F3',
@@ -245,6 +258,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'materia': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#FFF',
@@ -254,6 +268,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'metal': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#4682B4',
@@ -263,6 +278,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'mimeograph': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
     colors: {
       background: '#D9D3D0',
       text: '#9275B6',
@@ -285,6 +301,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'minty': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#fff',
@@ -294,6 +311,7 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'mono': {
     fontFamily: 'Hack',
+    diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
     colors: {
       background: 'white',
       text: 'black',

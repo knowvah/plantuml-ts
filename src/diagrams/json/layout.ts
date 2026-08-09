@@ -32,6 +32,27 @@ export type { JsonRowGeo } from './TextBlockJson.js';
  */
 const CANVAS_PAD = 10;
 
+/**
+ * The diagram's outer margin for THIS render — a theme's own `Margin` when it
+ * declares one, else {@link CANVAS_PAD}.
+ *
+ * `TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style for
+ * `root.document` and only falls back to `TitledDiagram#getDefaultMargins()`
+ * when that style has no `Margin`. 7 built-in themes set 5, so a themed
+ * diagram's whole canvas shifts — `json/vogeku-38-soxe333` under
+ * `!theme plain` places its first node at `(5, 14)` in the jar against this
+ * port's former `(10, 19)`.
+ *
+ * Reduced to left/top and the two axis totals: this family's layout offsets by
+ * the leading margin and sizes by both. The four sides are kept on the theme
+ * because upstream's value has four; only the uniform form occurs today.
+ */
+function marginsOf(theme: Theme): { left: number; top: number; x: number; y: number } {
+  const m = theme.diagramMargin;
+  if (m === undefined) return { left: CANVAS_PAD, top: CANVAS_PAD, x: CANVAS_PAD * 2, y: CANVAS_PAD * 2 };
+  return { left: m.left, top: m.top, x: m.left + m.right, y: m.top + m.bottom };
+}
+
 /** `TextBlockUtils.withMargin(result, 5, 2)` — the same per-cell margins
  *  `TextBlockJson.ts` uses, applied to the parse-failure message too
  *  (`JsonDiagram.java:120`). */
@@ -185,7 +206,11 @@ const PARSE_FAILURE_FONT = { family: 'monospace', size: 14 };
  * `json/nixaxa-46-muge983`: `trunc(230.388 + 10 + 20 + 1) = 261` by
  * `trunc(14 + 4 + 20 + 1) = 39`, against its golden's `viewBox="0 0 261 39"`.
  */
-function layoutParseFailure(ast: JsonDiagramAST, measurer: StringMeasurer): JsonGeometry {
+function layoutParseFailure(
+  ast: JsonDiagramAST,
+  measurer: StringMeasurer,
+  margin: ReturnType<typeof marginsOf>,
+): JsonGeometry {
   const message = `Your data does not sound like ${ast.diagramLabel ?? 'JSON'} data`;
   const { width: textWidth, height: textHeight } = measurer.measure(message, PARSE_FAILURE_FONT);
   const inkWidth = textWidth + 2 * CELL_MARGIN_X;
@@ -193,12 +218,12 @@ function layoutParseFailure(ast: JsonDiagramAST, measurer: StringMeasurer): Json
   return {
     nodes: [],
     edges: [],
-    width: inkWidth + CANVAS_PAD * 2 + ENSURE_VISIBLE_BUMP,
-    height: inkHeight + CANVAS_PAD * 2 + ENSURE_VISIBLE_BUMP,
+    width: inkWidth + margin.x + ENSURE_VISIBLE_BUMP,
+    height: inkHeight + margin.y + ENSURE_VISIBLE_BUMP,
     error: message,
     errorLayout: {
-      x: CANVAS_PAD + CELL_MARGIN_X,
-      y: CANVAS_PAD + CELL_MARGIN_Y + textHeight - measurer.getDescent(PARSE_FAILURE_FONT, message),
+      x: margin.left + CELL_MARGIN_X,
+      y: margin.top + CELL_MARGIN_Y + textHeight - measurer.getDescent(PARSE_FAILURE_FONT, message),
       // Upstream measures for `textLength` BEFORE `SvgGraphics#text` swaps
       // spaces for NBSP under a monospace family, so this is the raw width.
       textLength: textWidth,
@@ -213,7 +238,8 @@ export function layoutJson(
 ): JsonGeometry {
   // Handle parse failure: return an error geometry that the renderer will
   // display as PlantUML's canonical "Your data does not sound like JSON data".
-  if (ast.parseError) return layoutParseFailure(ast, measurer);
+  const margin = marginsOf(theme);
+  if (ast.parseError) return layoutParseFailure(ast, measurer, margin);
 
   const flatNodes: FlatNode[] = walkTree(normalizeRoot(ast.root));
 
@@ -334,8 +360,8 @@ export function layoutJson(
   // ast.annotations.title and is drawn by the shared applyChrome step in
   // src/index.ts, entirely outside this layout stage.
   for (const n of nodes) {
-    n.x += CANVAS_PAD;
-    n.y += CANVAS_PAD;
+    n.x += margin.left;
+    n.y += margin.top;
   }
 
   // Compute per-rank right boundary: the rightmost edge of any node at that rank.
@@ -362,11 +388,11 @@ export function layoutJson(
   // has already applied `Mirror#inv`, so only the x/y switch remains. See
   // `mirrorToDiagramSpace`.
   const edges: JsonEdgeGeo[] = dotResult.edges.map((e) => ({
-    points: e.points.map((p) => ({ x: p.y + CANVAS_PAD, y: p.x + CANVAS_PAD })),
+    points: e.points.map((p) => ({ x: p.y + margin.left, y: p.x + margin.top })),
     spline: true,
   }));
 
-  const { width, height } = documentDimensions(nodes);
+  const { width, height } = documentDimensions(nodes, margin);
   const result: JsonGeometry = { nodes, edges, width, height };
   return result;
 }
@@ -415,18 +441,20 @@ const ENSURE_VISIBLE_BUMP = 1;
  * json edges run BETWEEN nodes. An edge or spot that overhung the outermost
  * node would need adding here, and none does today.
  */
-function documentDimensions(nodes: readonly JsonNodeGeo[]): { width: number; height: number } {
+function documentDimensions(
+  nodes: readonly JsonNodeGeo[],
+  margin: { left: number; top: number; x: number; y: number },
+): { width: number; height: number } {
   let inkMaxX = 0;
   let inkMaxY = 0;
   for (const n of nodes) {
-    const r = n.x + n.width - CANVAS_PAD;
-    const b = n.y + n.height - CANVAS_PAD;
+    const r = n.x + n.width - margin.left;
+    const b = n.y + n.height - margin.top;
     if (r > inkMaxX) inkMaxX = r;
     if (b > inkMaxY) inkMaxY = b;
   }
-  const margins = CANVAS_PAD * 2;
   return {
-    width: inkMaxX - INK_MIN_CORNER + margins + ENSURE_VISIBLE_BUMP,
-    height: inkMaxY - INK_MIN_CORNER + margins + ENSURE_VISIBLE_BUMP,
+    width: inkMaxX - INK_MIN_CORNER + margin.x + ENSURE_VISIBLE_BUMP,
+    height: inkMaxY - INK_MIN_CORNER + margin.y + ENSURE_VISIBLE_BUMP,
   };
 }

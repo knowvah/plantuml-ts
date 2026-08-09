@@ -14,6 +14,7 @@ import type { ThemeOverride } from './theme.js';
 export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'plain': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
     colors: {
       background: 'white',
       text: 'black',
@@ -204,6 +205,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'sandstone': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#fff',
@@ -213,6 +215,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'silver': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#336699',
@@ -222,6 +225,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'sketchy-outline': {
     fontFamily: 'Segoe Print',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#2E2E2E',
@@ -231,6 +235,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'sketchy': {
     fontFamily: 'Segoe Print',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#FFFFFF',
@@ -240,6 +245,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'spacelab-white': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'white',
       text: '#FFFFFF',
@@ -261,6 +267,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'spacelab': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#FFFFFF',
@@ -291,6 +298,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'superhero-outline': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#DF691A',
@@ -300,6 +308,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'superhero': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#FFF',
@@ -329,6 +338,7 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'united': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
     colors: {
       background: 'transparent',
       text: '#fff',

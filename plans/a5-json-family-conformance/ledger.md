@@ -181,27 +181,41 @@ splits; the jar draws `'☑'`, NBSP, `'true'` as three elements. Its tally is no
 exact, though the fixture is still blocked from conformance by the margin
 finding below.
 
-### A theme can change the diagram MARGIN — new, unfixed
+### 10. A theme can change the diagram MARGIN — ported
 
-`vogeku` is now tally-exact but its document is 11px larger than the jar's on
-both axes, and its first node sits at `(10, 19)` where the jar's is at
-`(5, 14)` — a uniform +5.
+`TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style for
+**`root.document`** and falls back to `TitledDiagram#getDefaultMargins()` —
+`same(10)` — only when that style carries no `Margin`. `root` is a prefix of
+`root.document`, which is why the themes' `root { Margin … }` reaches it.
 
-`puml-theme-plain.puml:43` sets `root { Margin 5 }`, which overrides
-`TitledDiagram#getDefaultMargins()`'s `same(10)`. `json/layout.ts` hardcodes
-`CANVAS_PAD = 10`. `puml-theme-amiga` sets the same, and both `Margin 5` and
-the two-value `Margin 5 10` form appear in the themes, so the field is not a
-scalar.
+28 built-in themes declare one; **21 restate the default 10 and 7 set 5**
+(amiga, blueprint, crt-amber, crt-green, mimeograph, mono, plain). Under one
+of those, the whole canvas shifts: `json/vogeku-38-soxe333` placed its first
+node at `(10, 19)` here against the jar's `(5, 14)`. It now matches exactly.
 
-Deliberately not started here. It is the same shape as mechanism 8 — extract a
-non-colour property in `compile-themes.py` and regenerate — but it lands on
-`CANVAS_PAD`, which the whole layout is written against, and a diagram margin
-is not json-specific: every engine that assumes 10 would be equally wrong.
-That makes it a cross-engine change wanting its own measurement, not a tail
-addition to this one.
+The value is four-sided (`ClockwiseTopRightBottomLeft`, CSS-shaped 1/2/3/4
+numbers, `:66-100`); only the uniform form occurs at this scope, and the other
+three are ported so an upstream change cannot silently truncate.
 
-Worth noting what it implies: 47 of 92 fixtures already have byte-exact
-document dimensions, so this affects the themed subset rather than the family.
+Two things this exposed, neither of them the margin:
+
+- **`deepMergeTheme` drops any field not on `OPTIONAL_SCALAR_KEYS`.** The
+  first wiring looked correct and did nothing at all, because the whitelist
+  never mentioned the new field. `diagramMargin` is the one non-scalar on that
+  list, which is right: the merge is a whole-value replacement, and a theme
+  that sets a margin replaces all four sides rather than blending.
+- **`MANUAL` in `compile-themes.py` REPLACED the parse rather than overlaying
+  it**, so every auto-extracted property was discarded for those themes —
+  `black-knight` declares `root { Margin 10 }` and never saw it. Now an
+  overlay; the manual keys are explicit and still win.
+
+Corpus effect: fixtures with byte-exact document dimensions 47 → 48, document
+diffs 124 → 116, total 20,185 → 19,806. No fixture regressed.
+
+**`vogeku` is still not conformant, and the residual is 1px on each axis, not
+the margin.** Its node extents differ from the jar's by 0.35px wide and 0.375
+tall — M1a, the accepted engine divergence — and those land either side of an
+integer boundary. Chasing it would mean fitting, so it is left measured.
 
 ### 9. The malformed-body page — CLOSED, byte-conformant
 
