@@ -17,46 +17,43 @@ hero:
 features:
   - title: Faithful to upstream PlantUML
     details: A deep port of the Java implementation's parsing, layout, and rendering rules — including the long tail of special cases. The class-diagram dot pipeline matches the upstream oracle on 680/680 comparable fixtures.
-  - title: Real graphviz, not Smetana
-    details: Where upstream lays out with Smetana — its partially-complete graphviz transpile — this port uses @knowvah/dot-engine, a real port of the graphviz C. Same diagram; better edge routing. See below.
+  - title: One layout engine, always
+    details: Upstream uses two layout implementations — a real graphviz binary for most diagram types, and Smetana for a few. This port uses only @knowvah/dot-engine, so there is one set of layout behaviours to reason about. On the affected types, geometry may differ from the Java. See below.
   - title: Pure SVG renderer
     details: No DOM, no canvas, no async rendering path. renderSync() takes PlantUML source and returns an SVG string, synchronously, in the browser or Node.
   - title: Preprocessor with documented scope
     details: "!define/!undefine, conditionals (!ifdef/!ifndef/!else/!endif), and !theme are supported. External !include is opt-in via a caller-supplied fetcher — see the divergences page for exact scope."
 ---
 
-## Layout: real graphviz, not Smetana
+## Layout: one engine, always
 
-Everywhere upstream PlantUML lays a diagram out with **Smetana**, this port uses
-[`@knowvah/dot-engine`](https://www.npmjs.com/package/@knowvah/dot-engine)
-instead, and accepts that the geometry differs. That is a deliberate, standing
-decision.
+All layout in this port goes through
+[`@knowvah/dot-engine`](https://www.npmjs.com/package/@knowvah/dot-engine).
+Upstream PlantUML uses two layout implementations — it shells out to a real
+graphviz binary for most diagram types, and uses **Smetana**, its in-JVM Java
+transpile of graphviz, for a few others. This port uses one. Where upstream
+would have used Smetana, we use dot-engine and accept that the geometry
+differs.
 
-Smetana is upstream's hand-transpile of graphviz 2.38 into Java. It was never
-brought to full fidelity with graphviz — that was hard — and it shows: it
-cannot measure text the way graphviz does, so it smuggles node dimensions
-through a sentinel string in the label. `@knowvah/dot-engine` is that work done
-properly, a real port of the graphviz C, which we wrote and publish separately.
-Reproducing Smetana's shortfalls would mean porting bugs on purpose.
+The reason is consistency, not ranking: a single layout implementation means
+one set of behaviours to reason about, test and fix, rather than two that must
+be kept in agreement. dot-engine is a port of the graphviz C source, which we
+maintain and publish separately.
 
 ### What this means for your diagrams
 
 PlantUML's value is in **what** it draws — the diagram types, the syntax, the
-semantics of your source. That is preserved faithfully. Layout is **how** the
-drawing is arranged, and there a better engine means better edge routing and
-spacing.
+semantics of your source. That is preserved. Layout is **how** the drawing is
+arranged.
 
-On Smetana-backed diagram types, expect:
+On the affected diagram types, expect:
 
 - the same diagram: same elements, labels, colours, structure;
 - node sizes and text metrics matching upstream;
-- **edge routing and node spacing that may differ from the Java**, and are
-  intended to be at least as readable.
+- **edge routing and node spacing that may differ from the Java.**
 
-Readability is the bar on those types, not pixel equality. Everywhere else —
-every diagram type upstream renders by calling a real graphviz binary — we do
-target upstream's geometry, measured fixture by fixture on the
-[parity page](/parity).
-
-Smetana-backed types: `@startjson`, `@startyaml`, `@starthcl`, `@startgit`, and
-any diagram using `!pragma layout smetana`.
+Our goals in priority order, on those types: **readability first, SVG fidelity
+to upstream second.** That trade applies to a closed, enumerated set —
+`@startjson`, `@startyaml`, `@starthcl`, `@startgit`, and any diagram using
+`!pragma layout smetana`. Every other diagram type is held to upstream's
+geometry and measured fixture by fixture on the [parity page](/parity).

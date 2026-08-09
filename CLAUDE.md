@@ -287,35 +287,45 @@ becomes a named divergence flagged for the human maintainer, not a quiet
 correction. Test: *would a long-time PlantUML user be surprised?* Surprise at
 reduced friction is the point; surprise at changed meaning is a regression.
 
-### Smetana is NOT a porting target. Ever. (maintainer ruling, 2026-08-09)
+### One layout engine: dot-engine, never Smetana (maintainer ruling, 2026-08-09)
 
 **Where upstream calls Smetana, we call `@knowvah/dot-engine` and accept the
-delta.** This is settled, it applies everywhere, and it is not a divergence
-that needs arguing per case.
+geometry delta.** Settled, applies everywhere, not a divergence to argue per
+case.
 
-Smetana is upstream's hand-transpile of graphviz 2.38 into Java. **It was never
-brought to full fidelity with graphviz, because doing so was hard** — that is
-the whole reason it carries hacks like `Macro.java#hackInitDimensionFromLabel`,
-which bypasses text measurement by smuggling dimensions through a `_dim_`
-sentinel in the label. dot-engine is the work upstream did not do: a real port
-of the graphviz C. Reproducing Smetana's shortfalls would mean porting bugs on
-purpose, and would make this library worse than the thing it ships.
+The reason is **one implementation of layout**, not a judgement about which is
+better. Upstream carries two — a real graphviz binary for most diagram types,
+Smetana (its in-JVM Java transpile of graphviz) for a few. Maintaining
+agreement with both would mean two sets of layout behaviour to reason about,
+test and fix. We keep one. dot-engine is a port of the graphviz C that we
+maintain and publish, so it is also the one we can fix.
 
-So, concretely:
+Smetana additionally makes a poor porting target on mechanics: it cannot
+measure text the way graphviz does, so `SmetanaForJson` smuggles cell
+dimensions through a `_dim_` sentinel in the record label, decoded by
+`smetana/core/Macro.java#hackInitDimensionFromLabel`. Behaviour that exists to
+work around a constraint we do not have is not behaviour worth reproducing.
+
+Concretely:
 
 - **Never chase a Smetana-specific number.** If the jar's geometry disagrees
-  with dot-engine and the path runs through Smetana, dot-engine wins. Record
-  the delta and move on — do not reverse-engineer the shortfall.
-- **This overrides "upstream architecture is authoritative" for layout
-  numbers only.** Still mirror upstream's *structure* — which graph it builds,
-  which attributes it sets, which engine boundary it draws — because that is a
-  design decision. Its transpile's *arithmetic* is not.
+  with dot-engine and the path runs through Smetana, dot-engine's answer
+  stands. Record the delta and move on.
+- **This overrides "upstream architecture is authoritative" for layout numbers
+  only.** Still mirror upstream's *structure* — which graph it builds, which
+  attributes it sets, where the engine boundary sits. Its transpile's
+  *arithmetic* is not a target.
 - **It does not license fitting.** "Accept the delta" means name and measure
-  it, not invent a constant to paper over it. Everything in "READ THE JAVA
-  FIRST" still applies to the structure you are porting.
+  it, never invent a constant to paper over it. "READ THE JAVA FIRST" still
+  governs the structure you are porting.
 
-**Which paths are Smetana's.** Grep-verified — these are every consumer outside
-the transpile itself (`grep -rln "SmetanaForJson\|import gen\.lib\|smetana\.core"
+**The bar on these types: readability first, SVG fidelity to upstream second.**
+That ordering is inverted from every other diagram type, and it applies only to
+the closed set below. Hold them to structure, node sizing, and everything this
+port controls; carry the layout delta as a named entry.
+
+**Which paths are Smetana's.** Grep-verified — every consumer outside the
+transpile (`grep -rln "SmetanaForJson\|import gen\.lib\|smetana\.core"
 src/main/java/net/`):
 
 | upstream | this port | status |
@@ -331,14 +341,9 @@ None of these makes an external dot call, which is why the jar emits no
 shells out to a real graphviz binary, where the jar's geometry IS a legitimate
 target.
 
-Git graph is the easy one to miss: it is a wholly separate Smetana consumer
-with its own `SmetanaForGit`, not a json relative, and it is unbuilt here — so
-whoever takes D6 should read this section before deciding what "conformant"
-means for it.
-
-Consequence for conformance bars: a Smetana-laid-out type cannot be held to
-byte-exact geometry. Hold it to structure, sizing, and everything this port
-controls; carry the layout delta as a named entry.
+Git graph is the easy one to miss: a wholly separate Smetana consumer with its
+own `SmetanaForGit`, not a json relative, and unbuilt here — so whoever takes
+D6 should read this before deciding what "conformant" means for it.
 
 ## Reference Corpora & layout source
 

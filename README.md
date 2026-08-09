@@ -6,39 +6,35 @@ A TypeScript port of [PlantUML](https://plantuml.com), producing SVG
 diagrams synchronously in the browser and Node.js with no server
 dependency.
 
-## Layout: real graphviz, not Smetana
+## Layout: one engine, always
 
-**Everywhere upstream PlantUML lays a diagram out with Smetana, this port uses
-[`@knowvah/dot-engine`](https://www.npmjs.com/package/@knowvah/dot-engine)
-instead, and accepts that the geometry differs.** That is a deliberate,
-standing decision, not an unfinished corner.
+**All layout in this port goes through
+[`@knowvah/dot-engine`](https://www.npmjs.com/package/@knowvah/dot-engine).**
+Upstream PlantUML uses two layout implementations — it shells out to a real
+graphviz binary for most diagram types, and uses Smetana, its in-JVM Java
+transpile of graphviz, for a few others. This port uses one. Where upstream
+would have used Smetana, we use dot-engine and accept that the resulting
+geometry differs.
 
-Smetana is upstream's hand-transpile of graphviz 2.38 into Java. It was never
-brought to full fidelity with graphviz — that was hard — and it carries the
-scars, including a mechanism that smuggles node dimensions through a sentinel
-string in the label because it cannot measure text the way graphviz does.
-`@knowvah/dot-engine` is that work done properly: a real port of the graphviz C,
-which we wrote and publish separately. Reproducing Smetana's shortfalls would
-mean porting bugs on purpose.
+The reason is consistency, not ranking: a single layout implementation means
+one set of behaviours to reason about, test, and fix, rather than two that must
+be kept in agreement. dot-engine is a port of the graphviz C source, which we
+maintain and publish separately.
 
 **What this means for your diagrams.** PlantUML's value is in *what* it draws —
-the diagram types, the syntax, the semantics of your source — and those are
-preserved faithfully. Layout is *how* the drawing is arranged, and there a
-better engine means better edge routing and spacing. So on Smetana-backed
-diagram types you should expect:
+the diagram types, the syntax, the semantics of your source — and that is
+preserved. Layout is *how* the drawing is arranged. So on the affected diagram
+types you should expect:
 
-- the same diagram, with the same elements, labels, colours and structure;
+- the same diagram: same elements, labels, colours and structure;
 - node sizes and text metrics matching upstream;
-- **edge routing and node spacing that may differ from the Java** — and are
-  intended to be at least as readable.
+- **edge routing and node spacing that may differ from the Java.**
 
-Readability is the bar we hold ourselves to on those types, not pixel equality.
-Everywhere else — every diagram type upstream renders by calling a real
-graphviz binary — we do target upstream's geometry, and measure it fixture by
-fixture (see [parity](docs/parity-report.md)).
-
-Smetana-backed types: `@startjson`, `@startyaml`, `@starthcl`, `@startgit`, and
-any diagram using `!pragma layout smetana`.
+Our goals in priority order, on those types: **readability first, SVG fidelity
+to upstream second.** That trade applies only to a closed, enumerated set —
+`@startjson`, `@startyaml`, `@starthcl`, `@startgit`, and any diagram using
+`!pragma layout smetana`. Every other diagram type is held to upstream's
+geometry and measured fixture by fixture (see [parity](docs/parity-report.md)).
 
 ## Provenance and Attribution
 

@@ -17,37 +17,43 @@ Categories:
 ### Smetana-backed diagram types — laid out by dot-engine, geometry differs
 
 **Standing decision (maintainer, 2026-08-09), not a per-case exception.** See
-the project README, "Layout: real graphviz, not Smetana", and CLAUDE.md.
+the project README, "Layout: one engine, always", and CLAUDE.md.
 
-**Upstream:** lays out `@startjson`, `@startyaml`, `@starthcl` (all three via
-`jsondiagram/SmetanaForJson.java`), `@startgit` (`gitlog/SmetanaForGit.java`),
-and any `!pragma layout smetana` diagram using **Smetana** — its hand-transpile
-of graphviz 2.38 into Java. None of these shells out to a real graphviz, which
-is why the jar emits no `svek-N.dot` for them and why they have no DOT-parity
-gate here.
+**Upstream:** uses two layout implementations. Most diagram types shell out to a
+real graphviz binary; `@startjson`, `@startyaml`, `@starthcl` (all three via
+`jsondiagram/SmetanaForJson.java`), `@startgit` (`gitlog/SmetanaForGit.java`)
+and any `!pragma layout smetana` diagram use **Smetana**, its in-JVM Java
+transpile of graphviz. None of those shells out, which is why the jar emits no
+`svek-N.dot` for them and why they have no DOT-parity gate here.
 
-**This port:** uses `@knowvah/dot-engine`, a real port of the graphviz C.
+**This port:** uses `@knowvah/dot-engine` for all layout, including these.
 
-**Reason:** Smetana was never brought to full fidelity with graphviz, because
-that was hard. `Macro.java#hackInitDimensionFromLabel` is the clearest symptom —
-it bypasses text measurement entirely by smuggling dimensions through a `_dim_`
-sentinel in the record label. Reproducing those shortfalls would mean porting
-bugs on purpose.
+**Reason:** one layout implementation rather than two. Keeping agreement with
+both would mean two sets of layout behaviour to reason about, test and fix.
+dot-engine is a port of the graphviz C that this project maintains and
+publishes, so it is also the one we can change. Smetana is additionally awkward
+as a porting target on mechanics: it cannot measure text the way graphviz does,
+so `SmetanaForJson` smuggles cell dimensions through a `_dim_` sentinel in the
+record label (decoded by `smetana/core/Macro.java#hackInitDimensionFromLabel`) —
+behaviour that exists to work around a constraint this port does not have.
 
 **Affects:** edge routing and node spacing on the types above. Diagram
-structure, element set, labels, colours, and node sizing are unaffected and
-remain held to upstream. The bar on these types is READABILITY, not pixel
-equality.
+structure, element set, labels, colours and node sizing are unaffected and
+remain held to upstream. **Priority on these types is readability first, SVG
+fidelity to upstream second** — an ordering that is inverted from every other
+diagram type and applies only to this closed set.
 
 **Worked example (A5/T7).** graphviz pads every `shape=record` field — `XPAD`
 = 4·GAP = 16 and `YPAD` = 2·GAP = 8 (`graphviz/lib/common/macros.h:27-29`).
 Upstream compensates only the `YPAD` half (`SmetanaForJson`'s `colAwidth - 8`),
-which is correct *for Smetana*, because Smetana does not reproduce `XPAD`. This
-port compensates both, because its engine applies both — verified against the
+which is right *for Smetana*, because Smetana does not apply `XPAD`. This port
+compensates both, because its engine applies both — verified against the
 installed `dot` 15.1.1, which returns byte-identical record geometry for the
-same label. Result: same-rank sibling spacing differs from the jar, and
-child-to-parent-row alignment measures better here (mean |Δy| 64.34 vs 73.92
+same label. Result: same-rank sibling spacing differs from the jar, while
+child-to-parent-row alignment measures closer here (mean |Δy| 64.34 vs 73.92
 without ports, over 277 edges).
+
+**Category:** limitation (one engine, by choice).
 
 ---
 
