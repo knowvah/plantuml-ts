@@ -7,8 +7,8 @@ on. The bar is **100% conformant minus named divergences** (maintainer ruling
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T9 | per-fixture attribution of every remaining miss | debugger | `plans/a5-json-family-conformance/ledger.md` | T8 | [ ] |
-| T10 | divergence records + mission-index close-out | technical-writer | `DIVERGENCES.md`, `planning/mission-index.md`, `oracle/goldens/svg-{json,yaml,hcl}/README.md` | T9 | [ ] |
+| T9 | per-fixture attribution of every remaining miss | orchestrator (inline) | `plans/a5-json-family-conformance/ledger.md` | T8 | [x] **92/92 named, 5 mechanisms** |
+| T10 | divergence records + mission-index close-out | orchestrator (inline) | `DIVERGENCES.md`, `planning/mission-index.md`, `oracle/goldens/svg-{json,yaml,hcl}/README.md` | T9 | [x] |
 
 Sequential — T10 writes up what T9 attributes.
 

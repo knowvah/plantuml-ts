@@ -5,9 +5,26 @@ Mission **A5** (json family). Sibling of `svg-description`, `svg-class`,
 
 ## Current state
 
-**Seeded empty at Batch 1 / T1.** The harness lands before the baseline, so the
-ratchet suite skips gracefully until the first fixture reaches zero diffs. That
-graceful-skip branch IS exercised at this point, as it was at G4/S0.
+**Still empty after A5 Batch 4 — 0 of 39 fixtures byte-conformant, and that is
+the accurate picture, not a stalled harness.** The ratchet suite skips
+gracefully; the graceful-skip branch is genuinely exercised here.
+
+Two independent reasons, and only the second is a defect:
+
+1. **Byte-exact geometry is not the target for this family** (ADR-2b, and
+   CLAUDE.md "One layout engine"). Upstream lays these types out with Smetana;
+   this port uses one engine for everything, so document dimensions differ by
+   design. Priority here is readability first, SVG fidelity second.
+2. **The document structure does not match yet.** Every fixture carries a root
+   `childCount` diff — the jar emits `<defs/>` plus one content `<g>`, this
+   port emits node groups and per-node `<defs>` as top-level siblings. Because
+   `compare.ts` stops recursing on a structural mismatch, **no fixture's
+   interior has been compared**, so no fixture can honestly be pinned.
+
+See `plans/a5-json-family-conformance/ledger.md` — mechanism M2 is the gate.
+What IS measured and good: node sizing (mean |Δw| 3.08, |Δh| 0.96 against the
+jar) and per-node placement (mean |Δy| 6.65, 21 of 557 nodes exact), via
+`scripts/json-node-oracle.ts`.
 
 Corpus: **39 `@startyaml` fixtures**, captured from the pinned oracle jar into
 `test-results/dot-cache/yaml/`.

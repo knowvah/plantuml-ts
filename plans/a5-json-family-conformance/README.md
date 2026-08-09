@@ -104,9 +104,16 @@ write-set (`on_fail: stop`).
       nodes exact, child↔row alignment **64.34**, edges now the engine's own
       splines. Remaining geometry delta vs the jar is the accepted Smetana
       difference (ADR-2b).
-- [ ] **[Batch 4 — close-out](batch-4/overview.md)** — yaml/hcl ratchets,
+- [x] **[Batch 4 — close-out](batch-4/overview.md)** — yaml/hcl ratchets,
       per-fixture attribution of every remaining miss, divergence records,
       mission-index flip.
+      **DONE 2026-08-09, and the honest answer is that A5 did NOT reach its
+      bar.** 0/92 byte-conformant; all 92 still carry a root `childCount` diff,
+      so no interior has ever been compared and every diff count is a floor.
+      [`ledger.md`](ledger.md) names all 92 fixtures against 5 mechanisms: M1 is
+      the accepted Smetana layout delta (ADR-2b), M2–M5 are ordinary port gaps.
+      **M2 is the gate** — the root emits many children where the jar emits two.
+      Mission-index A5 is `wip (substantial; NOT at bar)`, not `done`.
 
 ## Stop conditions
 
