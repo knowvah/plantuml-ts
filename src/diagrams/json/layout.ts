@@ -12,6 +12,8 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as dotLayout } from '../../core/graph-layout.js';
 import type { DotInputEdge, DotInputGraph } from '../../core/graph-layout.js';
+import { XPoint2D } from '../../core/klimt/geom/XPoint2D.js';
+import { Mirror } from './Mirror.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -193,6 +195,54 @@ function measureNode(
   return { flatNode, rows, keyColWidth, valueColWidth, totalWidth, totalHeight };
 }
 
+/**
+ * Transpose the solved layout back into diagram space (mission A5 / T6).
+ *
+ * The graph was handed to the engine with every node's width and height
+ * swapped and no `rankdir`, so it was solved top-to-bottom in a transposed
+ * frame — upstream's `SmetanaForJson#createNode` does exactly this
+ * (`SmetanaForJson.java:236-244`). Reading it back means applying
+ * `Mirror#invAndXYSwitch` (`x = max - y`, `y = x`).
+ *
+ * Node TOP-LEFTs, not points, so the flip has to account for the node's own
+ * extent along the flipped axis. In the transposed frame a node spans
+ * `gy … gy + trueWidth` vertically, so its mirrored left edge is
+ * `max - gy - trueWidth`, and its mirrored top is simply `gx`.
+ *
+ * `max` is the transposed frame's own height — the largest `gy + trueWidth`
+ * — so the leftmost node lands at x = 0 and nothing goes negative.
+ *
+ * Edges are NOT touched here: `layoutJson` derives its edge points from final
+ * node geometry rather than from the engine's splines, so they follow the
+ * nodes automatically. Porting `JsonCurve` to consume the engine's own
+ * splines is T8.
+ */
+function mirrorToDiagramSpace(
+  placed: ReadonlyArray<{ id: string; x: number; y: number }>,
+  measured: ReadonlyArray<MeasuredNode>,
+): Map<string, { x: number; y: number }> {
+  const trueDims = new Map(
+    measured.map((m) => [m.flatNode.id, { width: m.totalWidth, height: m.totalHeight }]),
+  );
+  let max = 0;
+  for (const p of placed) {
+    const d = trueDims.get(p.id);
+    if (d === undefined) continue;
+    max = Math.max(max, p.y + d.width);
+  }
+  const mirror = new Mirror(max);
+  const out = new Map<string, { x: number; y: number }>();
+  for (const p of placed) {
+    const d = trueDims.get(p.id);
+    if (d === undefined) continue;
+    // invAndXYSwitch on the node's far corner along the flipped axis gives the
+    // mirrored top-left in one step.
+    const corner = mirror.invAndXYSwitch(new XPoint2D(p.x, p.y + d.width));
+    out.set(p.id, { x: corner.getX(), y: corner.getY() });
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Public layout function
 // ---------------------------------------------------------------------------
@@ -266,11 +316,15 @@ export function layoutJson(
     ),
   );
 
-  // Build dot input graph
+  // Build dot input graph. A5/T6 (ADR-1): dimensions are SWAPPED on the way in
+  // -- upstream hands graphviz each node's height as its width and vice versa
+  // (`SmetanaForJson.java:236-244`) so the graph solves top-to-bottom in a
+  // transposed frame, then transposes the answer back. See
+  // `mirrorToDiagramSpace`.
   const dotNodes = measured.map((m) => ({
     id: m.flatNode.id,
-    width: m.totalWidth,
-    height: m.totalHeight,
+    width: m.totalHeight,
+    height: m.totalWidth,
   }));
 
   // Build lookup for parent geometry to compute tailportY
@@ -297,22 +351,27 @@ export function layoutJson(
       return edge;
     });
 
+  // A5/T6 (ADR-1): no `rankDir` and no separations, matching upstream. Its
+  // `agopen` never sets `rankdir`, `nodesep` or `ranksep`, so graphviz's own
+  // defaults (36pt / 18pt) apply -- this port previously forced `LR` with
+  // hand-picked 40/20. Measured over all 92 fixtures, the mirrored graph is
+  // closer to the jar on document dimensions for 68 fixtures and worse for 2
+  // (`plans/a5-json-family-conformance/adr1-gonogo.md`).
   const dotInput: DotInputGraph = {
     nodes: dotNodes,
     edges: dotEdges,
-    rankDir: 'LR',
-    rankSep: 40,
-    nodeSep: 20,
+    omitSepAttrs: true,
   };
 
   const dotResult = dotLayout(dotInput);
 
-  // Map dot result nodes → JsonNodeGeo
-  const dotNodeById = new Map(dotResult.nodes.map((n) => [n.id, n]));
+  // Transpose the solved layout back into diagram space before anything reads
+  // a coordinate off it.
+  const mirrored = mirrorToDiagramSpace(dotResult.nodes, measured);
 
   const nodes: JsonNodeGeo[] = [];
   for (const m of measured) {
-    const dn = dotNodeById.get(m.flatNode.id);
+    const dn = mirrored.get(m.flatNode.id);
     if (dn === undefined) continue;
     nodes.push({
       id: m.flatNode.id,
