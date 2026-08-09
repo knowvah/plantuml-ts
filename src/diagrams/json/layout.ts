@@ -12,8 +12,6 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as dotLayout } from '../../core/graph-layout.js';
 import type { DotInputEdge, DotInputGraph } from '../../core/graph-layout.js';
-import { XPoint2D } from '../../core/klimt/geom/XPoint2D.js';
-import { Mirror } from './Mirror.js';
 import { measureNode } from './TextBlockJson.js';
 import type { JsonRowGeo } from './TextBlockJson.js';
 
@@ -108,21 +106,27 @@ function normalizeRoot(root: unknown): JsonContainer {
  * The graph was handed to the engine with every node's width and height
  * swapped and no `rankdir`, so it was solved top-to-bottom in a transposed
  * frame — upstream's `SmetanaForJson#createNode` does exactly this
- * (`SmetanaForJson.java:236-244`). Reading it back means applying
- * `Mirror#invAndXYSwitch` (`x = max - y`, `y = x`).
+ * (`SmetanaForJson.java:236-244`). Reading it back means undoing that.
  *
- * Node TOP-LEFTs, not points, so the flip has to account for the node's own
- * extent along the flipped axis: the mirrored left edge is `max - bottomEdge`
- * and the mirrored top is the node's left edge in the transposed frame.
+ * **Only the x/y SWITCH is applied here, not upstream's flip — and that is a
+ * deliberate consequence of our seam, not a shortcut.** Upstream's
+ * `getPosition` computes `sym(x - width/2, xMirror.inv(y + height/2))`, where
+ * `Mirror#inv` turns graphviz's **y-up** coordinates into screen y-down ones.
+ * This port asks the engine for `getLayout({ yAxis: 'down' })`
+ * (`graph-layout.ts`), so that flip has ALREADY happened by the time these
+ * coordinates arrive. Applying `inv` again mirrors the diagram horizontally:
+ * measured against the jar on `bavize-88-jumu158`, it put the root node at
+ * x=76.83 with its child at x=10, where the jar has the root at x=10 and the
+ * child at x=132 — a fully reversed layout that the document-dimension metric
+ * cannot see, because a mirrored diagram has identical dimensions.
  *
- * **The extent is the ENGINE's node size, not our measured box.** Upstream's
- * `getPosition` reads `data.width`/`data.height` — the sizes graphviz SETTLED
- * on — and `InternalNode#getMaxX` does the same for `max`. Those exceed the
- * requested dims for a `shape=record` node, because `size_reclbl` PADs every
- * leaf field (`XPAD` = 4·GAP = 16, `YPAD` = 2·GAP = 8;
- * `~/git/graphviz/lib/common/macros.h:27-29`) and upstream compensates for
- * only the `YPAD` half (its `colAwidth - 8`). Using our measured box here
- * instead silently mis-centres every node the moment records arrive.
+ * `Mirror.ts` is still the faithful port of `Mirror.java` and still what an
+ * upstream-frame consumer should use; it is simply not needed on this path.
+ *
+ * So: a node's mirrored left edge is its transposed-frame TOP (`p.y` — its
+ * distance down from the graph's top, which is exactly what upstream's
+ * `max - topEdge` computes in the y-up frame), and its mirrored top is its
+ * transposed-frame left edge (`p.x`).
  *
  * Edges are NOT touched here: `layoutJson` derives its edge points from final
  * node geometry rather than from the engine's splines, so they follow the
@@ -130,21 +134,10 @@ function normalizeRoot(root: unknown): JsonContainer {
  * splines is T8.
  */
 function mirrorToDiagramSpace(
-  placed: ReadonlyArray<{ id: string; x: number; y: number; width: number; height: number }>,
+  placed: ReadonlyArray<{ id: string; x: number; y: number }>,
 ): Map<string, { x: number; y: number }> {
-  // `max` = the largest bottom edge in the transposed frame, matching
-  // `InternalNode#getMaxX` (`y_centre + height/2`).
-  let max = 0;
-  for (const p of placed) max = Math.max(max, p.y + p.height);
-
-  const mirror = new Mirror(max);
   const out = new Map<string, { x: number; y: number }>();
-  for (const p of placed) {
-    // invAndXYSwitch on the node's far corner along the flipped axis gives the
-    // mirrored top-left in one step.
-    const corner = mirror.invAndXYSwitch(new XPoint2D(p.x, p.y + p.height));
-    out.set(p.id, { x: corner.getX(), y: corner.getY() });
-  }
+  for (const p of placed) out.set(p.id, { x: p.y, y: p.x });
   return out;
 }
 
@@ -209,24 +202,35 @@ export function layoutJson(
   // (`SmetanaForJson.java:236-244`) so the graph solves top-to-bottom in a
   // transposed frame, then transposes the answer back. See
   // `mirrorToDiagramSpace`.
+  // A5/T7 is PARTIAL: `recordLabelFor` builds upstream's record label and the
+  // seam carries it, but json still emits plain fixedsize boxes. Measured with
+  // `scripts/json-node-oracle.ts`, real records inflate each node by 16 per ROW
+  // (graphviz `XPAD` = 4*GAP on every record field, uncompensated by upstream's
+  // `-8`, which only offsets `YPAD`), pushing same-rank siblings apart:
+  // mean |Δy| 18.74 -> 363.19. Upstream encodes the SAME values and the jar
+  // shows no such inflation, so something in Smetana's record path differs and
+  // is not yet identified. Left off rather than shipped wrong.
   const dotNodes = measured.map((m) => ({
     id: m.flatNode.id,
     width: m.totalHeight,
     height: m.totalWidth,
   }));
 
+  const measuredById = new Map(measured.map((m) => [m.flatNode.id, m]));
+
   const dotEdges: DotInputEdge[] = flatNodes
     .filter((fn) => fn.parentId !== null)
     .map((fn) => {
-      // A5/T7 is UNFINISHED: the seam now carries `tailport`, but json does not
-      // set it yet -- emitting real records regressed document dimensions 7x
-      // and there is no DOT oracle for this family to diagnose against (ADR-3).
-      // See the decision journal. Edges therefore still leave from node centres.
+      // `tailport="P<rowIndex>"` -- `SmetanaForJson#createEdge` (:224) names the
+      // port by the child's index among the parent's rows.
+      const parentM = measuredById.get(fn.parentId!);
+      const rowIndex = parentM?.rows.findIndex((r) => r.key === (fn.parentKey ?? '')) ?? -1;
       const edge: DotInputEdge = {
         id: `${fn.parentId!}->${fn.id}`,
         from: fn.parentId!,
         to: fn.id,
       };
+      if (rowIndex >= 0) edge.attributes = { tailport: `P${rowIndex}` };
       return edge;
     });
 
