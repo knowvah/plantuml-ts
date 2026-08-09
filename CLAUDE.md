@@ -13,6 +13,47 @@ exist: `skinparam.ts` (resolveSkinparam, parseStyleBlock), `latex.ts` (KaTeX),
 exact Java packages, reuse targets, architecture constraints, and common agent
 mistakes per remaining phase.
 
+## READ THE JAVA FIRST. Not the package list — the method.
+
+Before you implement, change, or explain any behavior, **open the Java that
+implements it and read it.** Not the table below, not a filename, not a
+remembered summary: the method body, and the constructor that built its inputs.
+This is the single most-violated rule in this repo, and every violation has
+cost hours.
+
+**Never derive a value by fitting.** Changing a constant, re-measuring, and
+keeping whatever shrank the error is forbidden even when the error shrinks —
+especially then. A fitted number matches today's corpus and encodes nothing, so
+the next fixture re-opens it. Every constant ships with the upstream
+`file:line` it came from, in a comment. If you cannot cite one, you have not
+finished.
+
+**Output measurements cannot reveal mechanisms.** They tell you *that* you are
+wrong, never *why*. A mechanism lives in a branch, a constructor, a sentinel
+string — none of which appear in a rendered SVG. Three from one 2026-08-09
+session, all invisible to measurement and all three lines of Java:
+
+- `JsonDiagram.java:78-88` replaces an empty object **or array** with a
+  `JsonArray` holding one empty string, and wraps a primitive root in a
+  `JsonArray`. Hours were spent fitting `MIN_WIDTH`/`MIN_HEIGHT` against a
+  10×18 box that no minimum produces.
+- `TextBlockJson.java:127-134` builds array rows with the one-arg `Line`
+  constructor — value in `b1`, `b2` null. A `DIVERGENCES.md` entry had argued
+  from "upstream leaves the column blank", which is not what the code does.
+- `smetana/core/Macro.java:1294` decodes a `_dim_` sentinel that bypasses text
+  measurement entirely. Nothing in any SVG hints that labels carry dimensions.
+
+**"I read the Java" means you can quote it.** If you are about to write "matches
+upstream", "as upstream does", or "faithful to the Java", the `file:line` goes
+in the same sentence. Relaying someone else's claim — a subagent's, a brief's,
+your own from earlier — is not reading it; three such claims were falsified
+against the code in a single prior mission.
+
+**Grep `src/main/java/`, never just `net/sourceforge/plantuml/`.** See the
+warning below: the Smetana transpile (`gen/`, `smetana/`) and `net/atmp/` are
+outside that subtree, and scoping a search to it produces confidently wrong
+conclusions.
+
 ## @knowvah/dot-engine issue tracking
 
 Verified @knowvah/dot-engine library findings live in `docs/graphviz-issues/` — one
@@ -33,8 +74,9 @@ MIT, per the MIT license option in upstream PlantUML's LICENSES.md (maintainer d
 
 ## Reference Implementation
 
-`~/git/plantuml` (Java) is the canonical spec — consult it whenever diagram
-semantics or rendering rules need looking up. Key packages under
+`~/git/plantuml` (Java) is the canonical spec. **Read it before you write —
+see "READ THE JAVA FIRST" above; this table is an index for finding the method,
+never a substitute for reading it.** Key packages under
 `src/main/java/net/sourceforge/plantuml/`:
 
 | Package | Purpose |
