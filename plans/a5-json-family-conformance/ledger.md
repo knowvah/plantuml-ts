@@ -171,7 +171,7 @@ boxes, not of the json family.
 
 | fixture | signature | mechanism |
 |---|---|---|
-| `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | a different shape family entirely; unexamined |
+| `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | **not a json mechanism at all** — `skinparam handwritten true`. See below. |
 
 `json/vogeku-38-soxe333` closed: wrap was gated on `valueType === 'string'`,
 and upstream makes no such distinction — `getShortString` hands `getTextBlock`
@@ -180,6 +180,44 @@ was. A boolean's display is `"☑ true"`, which contains a space and therefore
 splits; the jar draws `'☑'`, NBSP, `'true'` as three elements. Its tally is now
 exact, though the fixture is still blocked from conformance by the margin
 finding below.
+
+### litife is `skinparam handwritten true` — a subsystem, not a defect
+
+The last tally mismatch is not a json gap. `JsonDiagram#drawU` opens with
+
+    if (handwritten)
+        ug = new UGraphicHandwritten(ug);
+
+and that decorator replaces every primitive with a hand-drawn approximation
+(`klimt/drawing/hand/`). The shape mapping, read off the golden:
+
+| drawn | handwritten as |
+|---|---|
+| `URectangle` (node fill, node border) | `<polygon>` |
+| `ULine` (separators, dividers) | `<path>` |
+| `UEllipse` (the edge spot) | `<polygon>` |
+| `UPath` (edge curve, arrowhead) | `<path>` |
+
+which is exactly this fixture's signature: 4 rects + 1 ellipse become 5
+polygons, 6 lines + 2 paths become 8 paths.
+
+**It is all-or-nothing for byte-exactness, and that is measured rather than
+asserted.** `UGraphicHandwritten` holds ONE `new Random(424242L)`
+(`:54`) and threads that same instance into all six `*Hand` classes;
+`HandJiggle#getRnd()` is `rnd.nextDouble()`, called once per emitted point, so
+the stream is shared and sequential across every shape in the diagram. Port
+five of the six and the sixth consumes no draws — every shape after it
+desynchronises and nothing matches.
+
+Size: **748 Java lines across 8 files**, plus a `java.util.Random` LCG port
+(the seed is fixed, so the sequence must match bit-for-bit), plus an
+indirection in `json/renderer.ts`, which emits SVG strings directly where
+upstream decorates a `UGraphic`.
+
+Scope note: `handwritten` is a global skinparam, so this is a FEATURE this
+port does not support at all rather than a json defect — one fixture here, but
+it would serve every diagram type. Proposed as its own mission; deliberately
+not begun as a tail task.
 
 ### 10. A theme can change the diagram MARGIN — ported
 
@@ -396,7 +434,7 @@ boxes, not of the json family.
 | `yaml/ketunu-15-poli031` | `text+4` | **the jar does NOT split on a literal newline.** Its golden carries ONE `<text>` whose content contains real U+000A characters (`"def func(x) do\n…"`). `Display.getWithNewlines` splits on the authored escape `\n`, not on U+000A, so a YAML block scalar's newlines survive into the SVG. This port splits on U+000A. |
 | `yaml/vapoda-87-piku740` | `text-4` | unexamined |
 | `json/noleta-28-nutu456` | `text-112` | large; `MaximumWidth` wrap case |
-| `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | a different shape family entirely; unexamined |
+| `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | **not a json mechanism at all** — `skinparam handwritten true`. See below. |
 
 ### M1 is TWO mechanisms, and only one of them is the accepted divergence
 
