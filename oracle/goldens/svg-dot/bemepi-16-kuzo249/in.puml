@@ -1,0 +1,5 @@
+@startdot
+digraph toto {
+azerty;
+}
+@enddot

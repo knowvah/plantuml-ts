@@ -1,0 +1,6 @@
+@startdot
+graph graphname {
+    a -- b -- c; 
+    b -- d;
+}
+@enddot

@@ -40,8 +40,8 @@
  * exact 4-stage algorithm (see that function's own doc comment) using the
  * same already-exported building blocks.
  *
- * Usage: npx tsx scripts/svg-conformance-census.ts [component] [usecase] [class] [object] [state]
- *   (defaults to component + usecase; class/object/state must be requested
+ * Usage: npx tsx scripts/svg-conformance-census.ts [component] [usecase] [class] [object] [state] [dot]
+ *   (defaults to component + usecase; class/object/state/dot must be requested
  *   explicitly)
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -65,7 +65,7 @@ import { renderDescription, unwrapKlimtSvg } from '../src/diagrams/description/r
 import { seedOf } from '../src/core/klimt/drawing/svg/svg-graphics-core.js';
 import { applyChrome, isEmpty } from '../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../src/core/annotations/style.js';
-import { assembleSvg } from '../src/index.js';
+import { assembleSvg, renderSync } from '../src/index.js';
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
 import { withStdlib } from '../src/core/tim/StdlibStore.js';
 import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
@@ -206,6 +206,16 @@ function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer
   }
   if (type === 'state') {
     return renderFixtureState(markup, measurer, { includeStore: censusIncludeStore() });
+  }
+  if (type === 'dot') {
+    // Mission D14. The ONE type with no low-level pipeline to dispatch to, and
+    // no `measurer` to inject: `@startdot` is a passthrough to graphviz (see
+    // `src/diagrams/dot/ast.ts`), so this port makes no drawing or measurement
+    // decision the census could vary. Both of the census's two passes
+    // therefore produce the identical result for dot, by construction -- that
+    // is the type's nature, not a wiring miss. See
+    // `oracle/goldens/svg-dot/README.md`.
+    return renderSync(markup);
   }
   return renderFixtureDescription(markup, measurer);
 }
