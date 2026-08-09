@@ -136,7 +136,7 @@ SVG-structural bar defined at build time. mission-guide.md has Java sources.
 | D3 | WBS `@startwbs` | todo | D2 | shares mind-map layout |
 | D4 | Gantt `@startgantt` | todo | SI2 | constraint solver |
 | D5 | Network nwdiag/rackdiag | todo | — | row-based layout |
-| D6 | Git graph `@startgitgraph` | todo | — | lane layout |
+| D6 | Git graph `@startgitgraph` | todo | — | **NOT a lane layout — it is a SMETANA consumer.** `gitlog/SmetanaForGit.java` via `GitDiagram` (`DiagramType.GIT`), a wholly separate Smetana user from the json family. Per the 2026-08-09 maintainer ruling (CLAUDE.md, "Smetana is NOT a porting target"), this type must NOT be held to the jar's geometry: use `@knowvah/dot-engine` and carry the delta as a named entry. Decide what "conformant" means for it BEFORE building, and expect no `svek-N.dot` oracle (no external dot call). |
 | D7 | Salt `@startsalt` | todo | SI4? | grid; eval golem |
 | D8 | DITAA `@startditaa` | todo | — | ASCII-art grid → SVG; highest P5 complexity |
 | D9 | Chen EER `@startchen` | todo | — | dot layout + EER shapes |

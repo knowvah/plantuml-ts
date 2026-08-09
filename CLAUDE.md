@@ -314,11 +314,27 @@ So, concretely:
   it, not invent a constant to paper over it. Everything in "READ THE JAVA
   FIRST" still applies to the structure you are porting.
 
-Which paths are Smetana's: `@startjson` / `@startyaml` / `@starthcl` in full
-(`jsondiagram/SmetanaForJson.java` — there is no external dot call, which is
-why the jar emits no `svek-N.dot` for them), and any svek diagram under
-`!pragma layout smetana`. Everything else shells out to a real graphviz binary,
-where the jar's geometry IS a legitimate target.
+**Which paths are Smetana's.** Grep-verified — these are every consumer outside
+the transpile itself (`grep -rln "SmetanaForJson\|import gen\.lib\|smetana\.core"
+src/main/java/net/`):
+
+| upstream | this port | status |
+| --- | --- | --- |
+| `jsondiagram/SmetanaForJson.java`, via `JsonDiagram` | `@startjson` | A5 |
+| same — `YamlDiagramFactory:94` builds a `JsonDiagram` | `@startyaml` | A5 |
+| same — `HclDiagramFactory:84` builds a `JsonDiagram` | `@starthcl` | A5 |
+| `gitlog/SmetanaForGit.java`, via `GitDiagram` | `@startgit` (`DiagramType.GIT`) | **D6, unbuilt — the rule applies from day one** |
+| `sdot/CucaDiagramFileMakerSmetana.java` | any svek diagram under `!pragma layout smetana` | — |
+
+None of these makes an external dot call, which is why the jar emits no
+`svek-N.dot` for them and why they have no DOT-parity gate. Everything else
+shells out to a real graphviz binary, where the jar's geometry IS a legitimate
+target.
+
+Git graph is the easy one to miss: it is a wholly separate Smetana consumer
+with its own `SmetanaForGit`, not a json relative, and it is unbuilt here — so
+whoever takes D6 should read this section before deciding what "conformant"
+means for it.
 
 Consequence for conformance bars: a Smetana-laid-out type cannot be held to
 byte-exact geometry. Hold it to structure, sizing, and everything this port
