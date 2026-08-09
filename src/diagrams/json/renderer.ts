@@ -186,7 +186,13 @@ function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): strin
   }
 
   // --- Vertical column divider ---
-  parts.push(line(node.keyColWidth, 0, node.keyColWidth, node.height, sepLineStyle));
+  // A5/T6b: upstream draws it INSIDE `if (line.b2 != null)`
+  // (`TextBlockJson.java:311-314`), so an array node -- whose lines all have a
+  // null b2 -- gets none at all. Every row of an object node has a b2, which
+  // is why one full-height line is equivalent there.
+  if (node.rows[0]?.arrayEntry !== true) {
+    parts.push(line(node.keyColWidth, 0, node.keyColWidth, node.height, sepLineStyle));
+  }
 
   // --- Row text ---
   for (const row of node.rows) {
@@ -221,7 +227,10 @@ function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): strin
     const effectiveKeyColor = isHighlighted && effectiveHlFontColor !== undefined
       ? effectiveHlFontColor
       : keyColor;
-    parts.push(
+    // A5/T6b: an ARRAY row has no key cell. Upstream puts the VALUE in `b1`
+    // and never draws the index (it uses it only to resolve highlights) --
+    // this port used to draw it, a divergence now retired.
+    if (!row.arrayEntry) parts.push(
       text(keyX, midY, row.key, {
         fontFamily: nodeFontFamily,
         fontSize: nodeFontSize,
@@ -240,19 +249,21 @@ function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): strin
       const vColor = isHighlighted && effectiveHlFontColor !== undefined
         ? effectiveHlFontColor
         : baseVColor;
-      const valueColWidth = node.width - node.keyColWidth;
+      // An array row's single cell IS column A, so it spans the whole node.
+      const colLeft = row.arrayEntry ? 0 : node.keyColWidth;
+      const valueColWidth = node.width - colLeft;
 
       // Compute value text x and textAnchor based on textAlign.
       let valueX: number;
       let valueAnchor: 'start' | 'middle' | 'end';
       if (textAlign === 'center') {
-        valueX = node.keyColWidth + valueColWidth / 2;
+        valueX = colLeft + valueColWidth / 2;
         valueAnchor = 'middle';
       } else if (textAlign === 'right') {
         valueX = node.width - H_PAD;
         valueAnchor = 'end';
       } else {
-        valueX = node.keyColWidth + H_PAD;
+        valueX = colLeft + H_PAD;
         valueAnchor = 'start';
       }
 

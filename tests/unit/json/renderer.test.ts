@@ -15,6 +15,9 @@ function makeRow(overrides: Partial<JsonRowGeo> & Pick<JsonRowGeo, 'valueType'>)
     value: 'value',
     valueLines: ['value'],
     highlight: false,
+    // A5/T6b: object rows have both cells (upstream's `b1` = key, `b2` =
+    // value). Array rows set this true and carry only `b1`.
+    arrayEntry: false,
     y: 4,
     height: 20,
     ...overrides,

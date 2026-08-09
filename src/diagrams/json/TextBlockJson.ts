@@ -61,6 +61,23 @@ export interface JsonRowGeo {
    *   'h1', 'h2'   — highlighted with a named style class
    */
   highlight: string | false;
+  /**
+   * True when this row is an ARRAY entry, i.e. upstream's `Line` with a null
+   * `b2` (`TextBlockJson.java:127-134` builds array lines via the one-arg
+   * constructor, putting the VALUE in `b1`).
+   *
+   * Three consequences, all of them upstream's `drawU` (:307-314):
+   *  - the single cell is the VALUE and it occupies column A, styled as a
+   *    value (`getStyleToUse(false, …)`), not as a header;
+   *  - column B contributes nothing to the node's width — `getWidthColB`
+   *    skips lines whose `b2` is null (:251-258);
+   *  - no vertical divider is drawn for the row, since upstream draws it
+   *    inside the `if (line.b2 != null)` branch.
+   *
+   * `key` still holds the array INDEX, because upstream still resolves
+   * highlights by it (`isHighlighted("" + i, …)`) — it is simply never drawn.
+   */
+  arrayEntry: boolean;
   /** y offset within the node (top of row) */
   y: number;
   height: number;
@@ -108,9 +125,12 @@ function fontsFor(
  * does not have, and sizing the row from the KEY alone, which let a multi-line
  * value overflow its own row.
  */
-function heightOfRow(textHeight: number, valueLineCount: number): number {
-  const keyCell = textHeight + 2 * CELL_MARGIN_Y;
+function heightOfRow(textHeight: number, valueLineCount: number, arrayEntry: boolean): number {
   const valueCell = valueLineCount * textHeight + 2 * CELL_MARGIN_Y;
+  // An array line has no b2, so `getHeightOfRow` returns b1's height alone --
+  // and b1 IS the value cell.
+  if (arrayEntry) return valueCell;
+  const keyCell = textHeight + 2 * CELL_MARGIN_Y;
   return Math.max(keyCell, valueCell);
 }
 
@@ -131,11 +151,16 @@ function columnWidths(
   let keyColWidth = 0;
   let valueColWidth = 0;
   for (const row of rows) {
-    const kw = measurer.measure(row.key, keyFont).width + 2 * CELL_MARGIN_X;
     // For multi-line values, the widest individual line.
     const vw = Math.max(
       ...row.valueLines.map((l) => measurer.measure(l, valFont).width + 2 * CELL_MARGIN_X),
     );
+    if (row.arrayEntry) {
+      // b1 IS the value, and there is no b2 to widen column B.
+      if (vw > keyColWidth) keyColWidth = vw;
+      continue;
+    }
+    const kw = measurer.measure(row.key, keyFont).width + 2 * CELL_MARGIN_X;
     if (kw > keyColWidth) keyColWidth = kw;
     if (vw > valueColWidth) valueColWidth = vw;
   }
@@ -176,8 +201,7 @@ export function buildRows(
   options?: BuildRowsOptions,
 ): JsonRowGeo[] {
   const { valFont: font } = fontsFor(fontSize, options);
-  const maximumWidth = options?.maximumWidth;
-
+  const arrayEntry = Array.isArray(node.value);
   const rows: JsonRowGeo[] = [];
   // Rows start at the node's top edge: upstream's `drawU` walks
   // `y = 0; for (line) y += heightOfRow` (:267-275). No leading pad, and
@@ -185,10 +209,11 @@ export function buildRows(
   let currentY = 0;
 
   for (const [k, v] of containerEntries(node.value)) {
-    const { processed, valueLines, valueType } = cellLines(v, measurer, font, maximumWidth);
-    const rowHeight = heightOfRow(measurer.measure(k, font).height, valueLines.length);
+    const { processed, valueLines, valueType } = cellLines(v, measurer, font, options?.maximumWidth);
+    const rowHeight = heightOfRow(measurer.measure(k, font).height, valueLines.length, arrayEntry);
 
     rows.push({
+      arrayEntry,
       key: k,
       value: processed,
       valueLines,

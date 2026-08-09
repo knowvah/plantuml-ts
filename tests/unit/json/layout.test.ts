@@ -264,6 +264,27 @@ describe('layoutJson', () => {
     }
   });
 
+  // A5/T6b: DIVERGENCES.md's "Array index keys" is RETIRED. Upstream builds an
+  // array line with the one-arg `Line` constructor, putting the VALUE in `b1`
+  // and leaving `b2` null (`TextBlockJson.java:127-134`) -- so the index is
+  // used only to resolve highlights, never drawn, and column B stays empty.
+  it('array rows carry the value in column A, leaving column B empty', () => {
+    const geo = layoutJson(makeAst([10, 20]), defaultTheme, measurer);
+    const node = geo.nodes[0];
+    expect(node).toBeDefined();
+    expect(node!.rows.every((r) => r.arrayEntry)).toBe(true);
+    // `getWidthColB` skips lines whose b2 is null, so a pure array node has none.
+    expect(node!.valueColWidth).toBe(0);
+    expect(node!.keyColWidth).toBe(node!.width);
+  });
+
+  it('object rows keep both cells', () => {
+    const geo = layoutJson(makeAst({ a: 1 }), defaultTheme, measurer);
+    const node = geo.nodes[0];
+    expect(node!.rows.every((r) => r.arrayEntry)).toBe(false);
+    expect(node!.valueColWidth).toBeGreaterThan(0);
+  });
+
   // A5/T6b, `JsonDiagram.java:78-82`: a primitive root is wrapped in a
   // JsonArray holding that value -- NOT, as this port previously did, a
   // synthetic object keyed by the empty string. The key is therefore the array

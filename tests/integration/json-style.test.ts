@@ -143,6 +143,36 @@ describe('JSON style: #highlight path separator variants', () => {
 // Multiple diagrams on same page — defs ID uniqueness
 // ---------------------------------------------------------------------------
 
+// A5/T6b: the "Array index keys" divergence is retired. Upstream never draws
+// an array index -- it uses the index only to resolve `#highlight` -- and it
+// draws no column divider for a node whose lines all have a null `b2`.
+describe('JSON: array rows match upstream (index-key divergence retired)', () => {
+  it('does not draw the array index as a key', () => {
+    const svg = renderSync('@startjson\n["alpha", "beta"]\n@endjson');
+    expect(svg).toContain('alpha');
+    expect(svg).toContain('beta');
+    // The indices 0 and 1 must not appear as their own text runs.
+    expect(svg).not.toMatch(/>0</);
+    expect(svg).not.toMatch(/>1</);
+  });
+
+  it('draws no column divider for an array node', () => {
+    const array = renderSync('@startjson\n["alpha", "beta"]\n@endjson');
+    const object = renderSync('@startjson\n{"a": "alpha", "b": "beta"}\n@endjson');
+    // The object node has a vertical divider; the array node must not.
+    const verticals = (svg: string): number =>
+      [...svg.matchAll(/<line[^>]*x1="([\d.]+)"[^>]*x2="([\d.]+)"/g)]
+        .filter((m) => m[1] === m[2]).length;
+    expect(verticals(object)).toBeGreaterThan(0);
+    expect(verticals(array)).toBe(0);
+  });
+
+  it('still resolves #highlight by array index, which upstream also does', () => {
+    const svg = renderSync('@startjson\n#highlight "1"\n["alpha", "beta"]\n@endjson');
+    expect(svg).toContain('beta');
+  });
+});
+
 /**
  * These two cases used to assert the OPPOSITE — that repeated renders produce
  * DIFFERENT ids — which codified a `Math.random()` call in the render path.
