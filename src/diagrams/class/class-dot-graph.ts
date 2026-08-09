@@ -56,11 +56,28 @@ export const EDGE_DECORATION_MAP: Record<RelationshipType, EdgeDecoration> = {
   usage:          { targetDecor: 'none',          sourceDecor: 'none',         dashed: true  },
 };
 
-// For hierarchical relationships the parent must rank above the child in the
-// TB layout, so the dot graph swaps from/to. The edge points returned by dot
-// are then reversed so the rendered arrow still flows child → parent with the
-// triangle arrowhead at the parent end.
+// For hierarchical relationships the dot edge must run in the direction
+// upstream's own `Link` runs -- `entity1 -> entity2`, which the jar emits
+// verbatim and never reorders. This port normalizes every inheritance form to
+// `from` = child / `to` = parent, discarding that order, so the relationship
+// carries `parentIsLinkEntity1` to restore it (see its doc comment in
+// `class-relationship-ast.ts` for the per-form table).
+//
+// Swapping unconditionally -- as this did until 2026-08-08 -- is right only
+// when the parent was written first. It put the interface on the TOP rank for
+// `D ..|> I`, where the jar ranks it BELOW: jar-verified against
+// `class-inheritance-interface-assoc`, whose document height was 122px short
+// as a result.
+//
+// When the swap applies, the edge points dot returns are reversed so the
+// rendered arrow still flows child → parent with the triangle at the parent
+// end.
 const HIERARCHICAL = new Set<RelationshipType>(['extension', 'implementation']);
+
+/** Whether this relationship's dot edge runs parent → child. */
+function ranksParentFirst(rel: Relationship): boolean {
+  return HIERARCHICAL.has(rel.type) && rel.parentIsLinkEntity1 === true;
+}
 
 /** `FontParam.ARROW(13, normal)` (klimt/font/FontParam.java:54) --
  *  relationship-label default, distinct from `CLASS(12)`/`theme.fontSize`
@@ -196,7 +213,7 @@ function buildDotEdges(
   const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
   const ctx: DotEdgeAttrContext = { font, measurer, linetype, kindBIndices };
   return ast.relationships.map((rel: Relationship, i: number) => {
-    const swap = HIERARCHICAL.has(rel.type);
+    const swap = ranksParentFirst(rel);
     const from = swap ? rel.to : rel.from;
     const to = swap ? rel.from : rel.to;
     const attrs = buildDotEdgeAttrs(rel, i, ctx);
