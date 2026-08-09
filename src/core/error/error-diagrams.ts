@@ -54,6 +54,30 @@ export function preprocessorErrorSvg(
  * choked on — so the listing is the diagram's own source and the message is
  * attributed to its last line.
  */
+/**
+ * A diagram REFUSED by its own engine, as distinct from a crash.
+ *
+ * Upstream's engines abort by returning `CommandExecutionResult.error(...)`,
+ * and the surrounding machinery builds a `PSystemError` that knows WHICH line
+ * was refused and WHICH diagram type was assumed. A bare `Error` reaching
+ * {@link errorSvg} loses both: the message lands on the source's last line and
+ * carries no type. This carries them, so a refusal renders where the jar
+ * renders it.
+ *
+ * `line` is 0-indexed into the source as {@link errorSvg} reads it — the same
+ * indexing `ParseState.currentLine` uses.
+ */
+export class DiagramRefusal extends Error {
+  constructor(
+    message: string,
+    readonly line: number | undefined,
+    readonly assumedDiagramType: string | undefined,
+  ) {
+    super(message);
+    this.name = 'DiagramRefusal';
+  }
+}
+
 export function errorSvg(source: string, err: unknown, options?: RenderOptions): string {
   // The last-resort handler: it runs on input already known to be broken -- up
   // to and including a caller who passed something that is not a string at all
@@ -62,11 +86,23 @@ export function errorSvg(source: string, err: unknown, options?: RenderOptions):
   // prevent, so it does not trust its own argument.
   const input: readonly StringLocated[] = readLines(typeof source === 'string' ? source : '');
   const trace = umlSourceOf(input);
-  const error = new ErrorUml('EXECUTION_ERROR', errorMessage(err), 0, trace[trace.length - 1]);
+  // A refusal names its own line; anything else lands on the last one. The
+  // LISTING is cut at the same point, because upstream prints the executed
+  // source "up to and including the offending line" -- attributing to line N
+  // while listing past it would show source the diagram never reached.
+  const refusal = err instanceof DiagramRefusal ? err : undefined;
+  const at =
+    refusal?.line !== undefined && refusal.line < trace.length
+      ? refusal.line
+      : trace.length - 1;
+  const listing = trace.slice(0, at + 1);
+  const error = new ErrorUml(
+    'EXECUTION_ERROR', errorMessage(err), 0, trace[at], refusal?.assumedDiagramType,
+  );
   const system =
     trace.length === 0
       ? new PSystemErrorEmpty(trace, trace, error)
-      : new PSystemErrorV2(trace, trace, error, err);
+      : new PSystemErrorV2(trace, listing, error, err);
   return renderPSystemError(system, errorMeasurer(options));
 }
 

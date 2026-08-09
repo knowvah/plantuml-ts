@@ -38,13 +38,18 @@ const deNbsp = (svg: string): string => svg.split('\u00a0').join(' ');
 
 
 const ERR = "Use 'allowmixing' if you want to mix classes and other UML elements.";
+const ERROR_BANNER = 'plantuml-ts version';
 
 function render(body: string): string {
   return renderSync(`@startuml\n${body}\n@enduml`);
 }
 
 function isRefused(svg: string): boolean {
-  return deNbsp(svg).includes('Class diagram error:') && deNbsp(svg).includes(ERR);
+  // A refusal is now the STANDARD error diagram, not a bespoke box: the class
+  // plugin throws a `DiagramRefusal` and `renderSync`'s own catch builds the
+  // jar's welcome-plus-source-listing page. So the marker is the error
+  // diagram's banner, and the message carries upstream's assumed-type suffix.
+  return deNbsp(svg).includes(ERROR_BANNER) && deNbsp(svg).includes(ERR);
 }
 
 describe('a descriptive LEAF in a class diagram is refused without allowmixing', () => {
