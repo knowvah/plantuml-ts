@@ -13,7 +13,7 @@ rule doing its job, not an oversight.
 |----|-------------|-------|--------|-----------|------|
 | T5 | go/no-go: does the mirrored graph actually move geometry? | orchestrator (inline) | `plans/a5-json-family-conformance/adr1-gonogo.md` | T4 | [x] **GO (weak)** |
 | T6 | port `Mirror`, build the TB+swapped-dims graph | orchestrator (inline) | `src/diagrams/json/Mirror.ts`, `src/diagrams/json/layout.ts` | T5 | [x] **dim error 111.88 → 101.83** |
-| **T6b** | **port `TextBlockJson`'s node sizing** (added mid-mission on T5's evidence) | typescript-pro | `src/diagrams/json/layout.ts`, `json-layout-prep.ts` | T6 | [ ] |
+| **T6b** | **port `TextBlockJson`'s node sizing** (added mid-mission on T5's evidence) | orchestrator (inline) | `src/diagrams/json/{TextBlockJson,layout}.ts` | T6 | [x] **dim error 101.83 → 30.28** |
 | T7 | real record ports: `P<n>` labels + `tailport` | typescript-pro | `src/diagrams/json/layout.ts`, `src/diagrams/json/json-layout-prep.ts` | T6b | [ ] |
 | T8 | port `JsonCurve` edge routing onto mirrored coords | typescript-pro | `src/diagrams/json/JsonCurve.ts`, `src/diagrams/json/renderer.ts` | T7 | [ ] |
 
