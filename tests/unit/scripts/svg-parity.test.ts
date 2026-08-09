@@ -217,12 +217,28 @@ describe('svg-parity-dashboard pure functions', () => {
     expect(matchesEntry({ match: {} }, 'abc')).toBe(false);
   });
 
-  it('loadLedger reads the real (currently empty) accepted-divergences registry', () => {
-    expect(loadLedger()).toEqual([]);
+  it('loadLedger reads the real accepted-divergences registry', () => {
+    // No longer empty: the graphviz-2.38 edge-geometry divergence was signed
+    // off 2026-08-08. Assert it loads and is well-formed rather than pinning
+    // a count, which would make every future sign-off a test failure.
+    const ledger = loadLedger();
+    expect(Array.isArray(ledger)).toBe(true);
+    for (const e of ledger) expect(e).toHaveProperty('match');
   });
 
   it('ledgerSection renders an empty-ledger placeholder when no entries exist', () => {
-    expect(ledgerSection(sampleReport)).toContain('(no accepted divergences recorded yet)');
+    // Injected rather than read from disk: the real ledger is no longer empty
+    // (graphviz-2.38 edge geometry, signed off 2026-08-08), so this branch is
+    // otherwise unreachable.
+    expect(ledgerSection(sampleReport, [])).toContain('(no accepted divergences recorded yet)');
+  });
+
+  it('ledgerSection renders a table once a divergence is accepted', () => {
+    const out = ledgerSection(sampleReport, [
+      { match: { id: 'svg-class/some-slug' }, scope: 'class ratchet', reason: 'because' },
+    ] as never);
+    expect(out).toContain('| slug | class | reason | ref |');
+    expect(out).not.toContain('(no accepted divergences recorded yet)');
   });
 
   it('buildMarkdown includes every required section header with correct counts', () => {

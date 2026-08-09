@@ -1,5 +1,42 @@
 # Mission — class edge-spline conformance (`bipudo-23-xavu432`)
 
+> ## ✅ CLOSED 2026-08-08 — no fix, by maintainer decision
+>
+> **The divergence is Smetana's, not ours, and this port does not chase
+> compatibility with it.**
+>
+> T1 established that fed the jar's own `svek-1.dot`, this port's engine
+> returns exactly what **real graphviz 15.1.1** returns; the jar's control
+> points are that value quantized to 2 decimals. The jar lays out with
+> Smetana, a transpile of **graphviz 2.38**, which is years behind
+> upstream graphviz. The maintainer's ruling is that matching it is not a
+> goal — so **why** Smetana quantizes is moot, and our value is the better
+> one.
+>
+> This reclassifies the fixture from *a gap to close* to *a deliberate
+> divergence*:
+>
+> - Filed in `oracle/accepted-divergences.json` (its first entry).
+> - Recorded in `DIVERGENCES.md` under "Edge geometry follows modern
+>   graphviz…".
+> - `oracle/goldens/svg-class/README.md`'s removed-fixtures row is closed;
+>   **do not re-pin** — it can never be zero-diff against this oracle.
+>
+> **The original exit condition below (re-pin the fixture) is void.**
+>
+> ### The part worth carrying forward
+>
+> The conformance harness's **0.01pt tolerance**
+> (`tests/oracle/svg-conformance/compare.ts`) is what absorbs this version
+> gap for essentially every other fixture — that is now a load-bearing
+> fact about the oracle, not an arbitrary constant. Expect other fixtures
+> to cross it as either side evolves. **A fixture failing on edge geometry
+> alone, by a hair, is more likely this than a regression** — check the
+> raw layout against real graphviz before treating it as a defect.
+>
+> Everything below is the original brief, kept for the measurement and the
+> reasoning trail.
+
 Close a sub-pixel edge-spline divergence between this port and the jar.
 The fixture that exposes it was **un-pinned** from the class ratchet by
 maintainer decision on 2026-08-08 so the suite could go green; this mission

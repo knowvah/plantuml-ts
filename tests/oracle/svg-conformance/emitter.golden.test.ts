@@ -92,12 +92,29 @@ describe('emitter.golden — harness bites on a tampered golden (AC2)', () => {
   });
 });
 
-describe('oracle/accepted-divergences.json — ledger bootstrap (AC4)', () => {
-  test('is schema-valid JSON with zero entries', () => {
+describe('oracle/accepted-divergences.json — ledger schema (AC4)', () => {
+  // Was "zero entries" while the ledger was empty. It no longer is: the
+  // graphviz-2.38 edge-geometry divergence was signed off 2026-08-08 (see
+  // DIVERGENCES.md). Asserting emptiness would now be asserting that no
+  // divergence may ever be accepted, which is not the rule -- the rule is
+  // that every entry is deliberate and fully described. So this validates
+  // the SHAPE of whatever is recorded, which is the durable check.
+  test('every entry is schema-valid and carries its sign-off', () => {
     const ledgerPath = resolve(process.cwd(), 'oracle/accepted-divergences.json');
-    const ledger = JSON.parse(readFileSync(ledgerPath, 'utf8')) as { comment: string; entries: unknown[] };
+    const ledger = JSON.parse(readFileSync(ledgerPath, 'utf8')) as {
+      comment: string;
+      entries: { match?: Record<string, string>; scope?: string; reason?: string; acceptedBy?: string }[];
+    };
     expect(typeof ledger.comment).toBe('string');
     expect(Array.isArray(ledger.entries)).toBe(true);
-    expect(ledger.entries).toHaveLength(0);
+    for (const e of ledger.entries) {
+      // `match` is {id} exact or {idPattern} glob, per the ledger's own comment.
+      expect(e.match, 'entry needs a match').toBeDefined();
+      expect(Object.keys(e.match!).some((k) => k === 'id' || k === 'idPattern')).toBe(true);
+      expect(e.scope, 'entry needs the gate it applies to').toBeTruthy();
+      expect(e.acceptedBy, 'an accepted divergence is maintainer-signed').toBeTruthy();
+      // A bare "known difference" is what this file exists to prevent.
+      expect((e.reason ?? '').length, 'entry needs a real reason').toBeGreaterThan(80);
+    }
   });
 });

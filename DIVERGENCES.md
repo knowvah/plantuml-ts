@@ -24,6 +24,11 @@ PlantUML's in-JVM engine (`sdot/`, driving the transpiled `gen/lib/dotgen/`);
 laid out with graphviz-ts. We do not implement smetana or vizjs as distinct
 engines, and we do not conform to their output.
 
+**Measured consequence (2026-08-08):** "we do not conform to their output"
+has a sub-pixel price, now quantified — see *Edge geometry follows modern
+graphviz* below. It also explains why the conformance harness's 0.01pt
+tolerance is load-bearing rather than arbitrary.
+
 **Why (maintainer decision, 2026-07-12):** all three are *the same algorithm*.
 Smetana is a mechanical Java transpile of graphviz 2.38 (`gen/lib/dotgen/` —
 `acyclic__c.java`, `mincross__c.java`, `dotsplines__c.java` are line-for-line
@@ -313,6 +318,42 @@ matches upstream more closely than it did.
 Consumer impact: no API change, but the bytes differ. Anyone
 byte-comparing or snapshotting this library's SVG must re-baseline. See
 `CHANGELOG.md` for the full rule list.
+
+### Edge geometry follows modern graphviz, not the jar's graphviz-2.38 transpile
+
+**Status:** accepted, permanent.
+
+The jar lays out diagrams with **Smetana**, a Java transpile of **graphviz
+2.38**. This port lays them out with `@knowvah/dot-engine`, which tracks a
+modern graphviz. Where the two versions disagree, **this port follows
+modern graphviz** — it does not chase bug-for-bug compatibility with a
+transpile that is years behind upstream graphviz.
+
+This is the same maintainer decision as
+[`!pragma layout smetana|vizjs`](#pragma-layout-smetanavizjs--always-laid-out-with-graphviz)
+above, applied to geometry rather than to engine selection: a diagram that
+*asks* for Smetana is laid out with the dot engine, and so is every other
+diagram — which necessarily means Smetana's output is not the target.
+
+The difference is sub-pixel and almost always invisible. Measured on
+`oracle/goldens/svg-class/bipudo-23-xavu432`: the jar's edge-spline
+control points are quantized to 2 decimals (`76.19, 90.13`) where real
+graphviz 15.1.1 — and this port — produce full precision
+(`76.189044, 90.132030`). Clipping the trimmed end of the spline amplifies
+that into roughly **0.0097pt** of positional difference.
+
+Verified rather than assumed: fed the jar's own dumped `svek-1.dot`, this
+port's engine returns exactly what real graphviz returns (identical x, and
+y a pure flip about the graph height).
+
+**Consequence for conformance.** The SVG-conformance harness compares
+against jar output with a **0.01pt** tolerance
+(`tests/oracle/svg-conformance/compare.ts`). That tolerance is what
+absorbs this version gap for essentially every fixture. One fixture,
+`bipudo-23-xavu432`, sits far enough out to cross it; it is un-pinned from
+the class ratchet and recorded in `oracle/accepted-divergences.json`.
+Others may cross it as either side evolves — a fixture that fails on
+edge-geometry alone, by a hair, is more likely this than a regression.
 
 ## Preprocessor (TIM)
 

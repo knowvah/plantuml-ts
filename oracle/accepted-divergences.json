@@ -1,4 +1,14 @@
 {
-  "comment": "Single source of truth for ACCEPTED / known divergences from real PlantUML jar SVG output, for the svg-conformance golden suite (T6). Mirrors graphviz-ts's test/corpus/accepted-divergences.json schema (see that project's PARITY.md for the dashboard/rules-gate consumption pattern this is designed to slot into). An accepted entry is a deliberate, maintainer-signed, won't-fix difference; everything non-conformant NOT listed here is an unaccepted gap the emitter is expected to close. Bootstrap state: zero entries — T6 identified no case that both (a) cannot be made conformant within its write-set and (b) has maintainer sign-off to diverge; any non-conformant case found is reported to the orchestrator for a write-set decision instead of being silently accepted here. match: {id} exact | {idPattern} glob. scope: describes which gate the entry applies to.",
-  "entries": []
+  "comment": "Single source of truth for ACCEPTED / known divergences from real PlantUML jar SVG output, for the svg-conformance golden suite (T6). Mirrors graphviz-ts's test/corpus/accepted-divergences.json schema (see that project's PARITY.md for the dashboard/rules-gate consumption pattern this is designed to slot into). An accepted entry is a deliberate, maintainer-signed, won't-fix difference; everything non-conformant NOT listed here is an unaccepted gap the emitter is expected to close. Bootstrap state: zero entries \u2014 T6 identified no case that both (a) cannot be made conformant within its write-set and (b) has maintainer sign-off to diverge; any non-conformant case found is reported to the orchestrator for a write-set decision instead of being silently accepted here. match: {id} exact | {idPattern} glob. scope: describes which gate the entry applies to.",
+  "entries": [
+    {
+      "match": {
+        "id": "svg-class/bipudo-23-xavu432"
+      },
+      "scope": "svg-conformance class golden ratchet (edge spline control points)",
+      "acceptedAt": "2026-08-08",
+      "acceptedBy": "maintainer",
+      "reason": "The jar's edge-spline control points are quantized to 2 decimals; ours carry full precision, and clipping amplifies the difference into ~0.0097 at the trimmed end -- just over the harness's 0.01 tolerance. The quantization is Smetana's, not ours: on the jar's own svek-1.dot our engine returns exactly what real graphviz 15.1.1 returns. Smetana is a transpile of graphviz 2.38 and is years out of date; the maintainer's decision is that this port does NOT chase compatibility with it, so the cause is moot and our value is the better one. Deliberate divergence, not a gap. See .agent-notes/class-edge-spline-2dp-quantization.md and DIVERGENCES.md's \"Layout\" section."
+    }
+  ]
 }
