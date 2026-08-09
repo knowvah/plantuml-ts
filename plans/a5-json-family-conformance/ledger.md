@@ -24,6 +24,63 @@ Diff composition, now that there is one to compose:
 | document dimensions | 366 | **M1** again, at the root |
 | everything else | 244 | the real remainder — 17 fixtures, all named below |
 
+## The bar, redefined — this family is gated STRUCTURALLY
+
+Maintainer decision, 2026-08-09, taken on the M1a measurement below.
+
+A byte-exact bar measures something this family has decided not to control.
+Of ~20,028 diffs across the corpus, ~19,760 are the accepted ADR-2b layout
+divergence restated once per coordinate. That is not a conformance signal; it
+is noise deep enough to hide real defects — and it did, for a whole mission.
+
+The gate is now **structural**: every diff EXCEPT positional geometry. Same
+elements, same order, same sizes, colours, fonts, weights, text and
+`textLength` — everything the port controls once the engine has placed things.
+
+- `tests/oracle/svg-conformance/json-family-structural.ts` — the metric, and
+  the exclusion set with its rationale.
+- `tests/oracle/svg-conformance/json-family-structural.test.ts` — the gate.
+- `oracle/goldens/json-family-structural.json` — the shrink-only manifest.
+
+**73 of 92 fixtures pass it today.** Reading fixtures straight from the
+committed `test-results/dot-cache/`, so no goldens are duplicated.
+
+Deliberately NOT excluded: node `width`/`height`, `rx`/`ry`, and every style
+attribute. Sizing is this port's own and measured exact per node, so a
+regression there must fail. Only PLACEMENT is out of scope.
+
+Verified non-vacuous rather than assumed: changing `JSON_SKIN_BLACK` by one
+digit fails 65 fixtures, and moving `CELL_MARGIN_X` from 5 to 6 fails 71.
+
+Known limitation, stated rather than hidden: `points` and `d` are excluded as
+position-bearing, so a defect in a path's SHAPE that changes no other
+attribute would not be caught. The element tally still constrains how many
+paths exist, and mission H1's handwritten output was verified against raw
+bytes instead.
+
+### The structural backlog — 266 diffs over 19 fixtures
+
+What the reframing surfaces. Every one of these is a real gap in something
+this port controls, previously buried under the geometry noise:
+
+| diffs | attribute |
+|---|---|
+| 36 | `rect/@stroke-width` |
+| 32 + 32 | `rect/@rx`, `rect/@ry` |
+| 23 | `text/@textLength` |
+| 22 | `text/@font-size` |
+| 21 + 21 | `ellipse/@fill`, `ellipse/@stroke` |
+| 17 + 13 | `rect/@width`, `rect/@height` |
+| 12 | `line/@stroke-width` |
+| 6 + 4 | `text/@font-family`, `text/@font-weight` |
+| 3 + 3 | `rect/@fill`, `rect/@stroke` |
+| 2 | `svg/@background` |
+
+Worst fixtures: `json/timafu-94-bixe774` (47), `yaml/nuzaje-74-kenu009` (47),
+`json/vogeku-38-soxe333` (28), `json/bitepo-72-vija933` (23). The shape of it —
+thicknesses, corner radii, fonts and fills — reads as style resolution rather
+than layout, which is the same surface mechanisms 3, 6 and 8 came from.
+
 ## A claim this file made, and how it was falsified
 
 An earlier revision of this section argued that byte-conformance was **not

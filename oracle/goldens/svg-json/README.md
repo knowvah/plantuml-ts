@@ -21,6 +21,21 @@ margins and truncates. See `plans/a5-json-family-conformance/ledger.md`, M1b.
 An accepted divergence is a comfortable place for a defect to hide. This one
 sat there for a whole mission.
 
+## This folder is no longer the family's primary gate
+
+Byte-exactness is now the SECONDARY measure here. The family's gate is
+`tests/oracle/svg-conformance/json-family-structural.test.ts`, which compares
+everything except positional geometry — see
+`plans/a5-json-family-conformance/ledger.md`, "The bar, redefined".
+
+The reason is measured, not stylistic: ~19,760 of ~20,028 corpus diffs are the
+accepted ADR-2b layout divergence restated per coordinate, and M1a was
+verified genuine (node sizes exact, envelope exact, only within-rank placement
+differs — Smetana transpiles graphviz 2.38, dot-engine ports modern graphviz).
+
+This ratchet stays, and stays shrink-only: 17 fixtures reach byte-exactness
+and must keep it. It simply no longer defines the family's bar.
+
 ## What blocks the other 37
 
 - **M1a — horizontal layout geometry.** The genuine ADR-2b divergence, and
