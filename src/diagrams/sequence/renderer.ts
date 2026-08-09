@@ -25,8 +25,10 @@ import {
   text,
   path,
   noteBox,
+  circle,
   arrowHeadRef,
 } from '../../core/svg.js';
+import { fmt } from '../../core/svg-format.js';
 
 // ---------------------------------------------------------------------------
 // Activation constants
@@ -58,7 +60,7 @@ function renderActorShape(cx: number, topY: number, height: number, theme: Theme
   const legSpan = 12;
   const parts: string[] = [];
   // Head
-  parts.push(`<circle cx="${cx}" cy="${topY + headR}" r="${headR}" fill="${theme.colors.background}" stroke="${theme.colors.border}" stroke-width="1.5"/>`);
+  parts.push(circle(cx, topY + headR, headR, { fill: theme.colors.background, stroke: theme.colors.border, strokeWidth: 1.5 }));
   // Body
   parts.push(line(cx, bodyTop, cx, bodyBot, { stroke: theme.colors.border, strokeWidth: 1.5 }));
   // Arms
@@ -97,7 +99,13 @@ function renderDatabaseShape(x: number, topY: number, width: number, height: num
   parts.push(line(x + width - 2, bodyTop, x + width - 2, bodyBot, { stroke: theme.colors.border, strokeWidth: 1.5 }));
   // Bottom arc — sweep=0 (counter-clockwise from left to right) routes through
   // (cx, bodyBot+capRy), bowing the arc downward for a convex cylinder bottom.
-  parts.push(`<path d="M ${x + 2},${bodyBot} A ${rx},${capRy} 0 0,0 ${x + width - 2},${bodyBot}" fill="${theme.colors.background}" stroke="${theme.colors.border}" stroke-width="1.5"/>`);
+  parts.push(
+    path(`M ${fmt(x + 2)},${fmt(bodyBot)} A ${fmt(rx)},${fmt(capRy)} 0 0,0 ${fmt(x + width - 2)},${fmt(bodyBot)}`, {
+      fill: theme.colors.background,
+      stroke: theme.colors.border,
+      strokeWidth: 1.5,
+    }),
+  );
   return parts.join('');
 }
 

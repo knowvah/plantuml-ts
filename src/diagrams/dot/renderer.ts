@@ -5,7 +5,7 @@
  * The renderer is a pure function: same inputs always produce same output.
  */
 
-import { rect, ellipse, path, text } from '../../core/svg.js';
+import { rect, ellipse, path, text, polygon } from '../../core/svg.js';
 import type { TextStyle, BoxStyle } from '../../core/svg.js';
 import { arrowHeadRef } from '../../core/svg.js';
 import type { DotGeometry, DotNodeGeo, DotEdgeGeo } from './ast.js';
@@ -96,9 +96,16 @@ function renderNode(node: DotNodeGeo, theme: Theme, xOffset: number, yOffset: nu
       // so the diamond is proportional to the label, not forced square.
       const hw = width / 2;
       const hh = height / 2;
-      const pts = `${cx},${cy - hh} ${cx + hw},${cy} ${cx},${cy + hh} ${cx - hw},${cy}`;
       return (
-        `<polygon points="${pts}" fill="${style.fill}" stroke="${style.stroke}" stroke-width="${NODE_STROKE_WIDTH}"/>` +
+        polygon(
+          [
+            { x: cx, y: cy - hh },
+            { x: cx + hw, y: cy },
+            { x: cx, y: cy + hh },
+            { x: cx - hw, y: cy },
+          ],
+          { fill: style.fill, stroke: style.stroke, strokeWidth: NODE_STROKE_WIDTH },
+        ) +
         text(cx, cy, label, textStyle)
       );
     }
@@ -255,7 +262,7 @@ function renderEdge(edge: DotEdgeGeo, theme: Theme, xOffset: number, yOffset: nu
       const lw = edge.labelWidth;
       const lh = edge.labelHeight;
       labelEl =
-        `<rect x="${lx - lw / 2}" y="${ly - lh / 2}" width="${lw}" height="${lh}" fill="white"/>` +
+        rect(lx - lw / 2, ly - lh / 2, lw, lh, { fill: 'white' }) +
         text(lx, ly, edge.label, {
           fontFamily: theme.fontFamily,
           fontSize: theme.fontSize - 2,

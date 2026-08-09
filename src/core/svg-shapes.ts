@@ -338,6 +338,28 @@ export function polygon(
   return `${fillR.def}${strokeR.def}<polygon${a}/>`;
 }
 
+/**
+ * `<polyline>` -- the open counterpart of {@link polygon}. Same attributes,
+ * same order; only the element name differs, so the two cannot drift.
+ */
+export function polyline(
+  points: ReadonlyArray<{ x: number; y: number }>,
+  style: BoxStyle = {},
+): string {
+  const pts = points.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(' ');
+  const fillR = resolvePaint(style.fill);
+  const strokeR = resolvePaint(style.stroke);
+  const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const a = attrs([
+    ['points', pts],
+    ['fill', fillR.value],
+    ['stroke', strokeR.value],
+    ['stroke-width', sd.strokeWidth],
+    ['stroke-dasharray', sd.strokeDasharray],
+  ] as const);
+  return `${fillR.def}${strokeR.def}<polyline${a}/>`;
+}
+
 // ---------------------------------------------------------------------------
 // Note box (sticky-note shape with dog-ear fold)
 // ---------------------------------------------------------------------------

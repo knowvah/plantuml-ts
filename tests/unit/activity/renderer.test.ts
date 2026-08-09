@@ -625,7 +625,7 @@ describe('renderActivity — activity theme colors', () => {
       }],
     });
     const svg = assembleSvg(renderActivity(geo, activityTheme));
-    expect(svg).toContain('stroke="red"');
+    expect(svg).toContain('stroke="#F00"');
   });
 
   it('diamond node uses activityDiamondBackground', () => {
