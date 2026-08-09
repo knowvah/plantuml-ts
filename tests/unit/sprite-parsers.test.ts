@@ -145,10 +145,12 @@ describe('sprite registry population per engine', () => {
     expect(ast.root).toEqual({ a: '1' });
   });
 
-  it('dot: parseDot populates ast.sprites, DOT body still parses', () => {
+  it('dot: parseDot populates ast.sprites, DOT body survives untouched', () => {
     const ast = parseDot(`${SPRITE_BLOCK}\ndigraph { a -> b }`);
     expectIcon(ast.sprites);
-    expect(ast.nodes.map((n) => n.id).sort()).toEqual(['a', 'b']);
+    // The passthrough rewrite removed the projected node/edge model; the body
+    // is now carried verbatim to the engine, so assert on it directly.
+    expect(ast.dotContent.trim()).toBe('digraph { a -> b }');
   });
 
   it('chart: parseChart populates ast.sprites, series data still parses', () => {

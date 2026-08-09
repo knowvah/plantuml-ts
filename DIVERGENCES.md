@@ -589,16 +589,33 @@ longer a divergence; entry removed.
 
 ## DOT diagrams
 
-### @startdot — title and skinparam support
+### ~~@startdot — title and skinparam support~~ — HALF RETIRED (D14, 2026-08-08)
 
-Upstream Java (`PSystemDot`) ignores `title` and `skinparam` directives
-inside `@startdot` blocks (both are present in the source but never
-applied). This port parses and applies both, consistent with all other
-diagram types.
+This entry claimed the port "parses and applies" **both** `title` and
+`skinparam` inside `@startdot`, and that upstream "ignores" both. Two
+corrections, each jar-verified rather than reasoned about:
 
-**Rationale:** DOT diagrams frequently appear alongside other PlantUML
-content in the same document. Ignoring directives that work everywhere
-else creates confusing inconsistency for users.
+- **Upstream does not ignore `title` — it ERRORS.** `title My Graph` on line 2
+  of an `@startdot` block yields *"Syntax Error? (Assumed diagram type: dot)"*,
+  because `PSystemDotFactory#executeLine` skips every line until one matches
+  its graphviz-header pattern and never starts the diagram. The title half of
+  this divergence is real but was mis-described; it is stated correctly under
+  **DOT-passthrough diagrams → `title` inside `@startdot` renders; upstream
+  errors** below, which is now the single record for it.
+- **The `skinparam` half is RETIRED — it was never a defensible divergence.**
+  Upstream genuinely does ignore `skinparam` here (the line precedes the
+  header, so the factory drops it), and *ignoring it is the faithful
+  behaviour*: a block carrying `skinparam BackgroundColor #AABBCC` above its
+  `digraph` produces jar output **byte-identical** to the same block without
+  it. This port used to map those directives onto a `Theme` that coloured its
+  own re-drawing of the graph. D14 replaced that re-drawing with a passthrough
+  to graphviz (`src/diagrams/dot/`), so there is no longer anything for a skin
+  to act on, and the port now matches the jar instead of diverging from it.
+
+The rationale originally given — consistency with other diagram types — does
+not survive the measurement: honouring a skin here would have meant mutating
+the user's DOT before handing it to graphviz, which no amount of consistency
+justifies.
 
 ---
 
@@ -664,6 +681,16 @@ user value; the consolidation keeps exactly one title mechanism.
 
 **Affects:** `@startdot` blocks carrying annotation directives (no upstream
 oracle exists for them — the jar errors).
+
+**Retained through D14 (2026-08-08), deliberately.** The passthrough rewrite
+made `@startdot` emit graphviz's bytes verbatim, which is what took the type to
+5/5 SVG-conformant. Chrome is the one thing that cannot survive verbatim
+emission, so `src/diagrams/dot/renderer.ts` carries a second path: with chrome
+present it returns a `RenderFragment` wrapping graphviz's inner markup, and the
+shared `applyChrome` composes around it. That second path costs **zero**
+conformance — every input reaching it is one the jar rejects outright, so there
+is no oracle to miss — and the conformance path stays byte-exact. Confirmed by
+the `svg-dot` ratchet: 5/5 zero-diff with the divergence in place.
 
 ---
 

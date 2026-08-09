@@ -1,0 +1,13 @@
+@startdot
+digraph G {
+  subgraph cluster_0 {
+    label=Backend
+    db -> api
+  }
+  subgraph cluster_1 {
+    label=Frontend
+    ui -> cdn
+  }
+  api -> ui
+}
+@enddot

@@ -1,341 +1,56 @@
+import { isEmpty } from '../../core/annotations/index.js';
+import type { AssembledSvg, RenderFragment } from '../../core/dispatcher.js';
+
+import type { DotGeometry } from './ast.js';
+
 /**
- * Renderer for @startdot diagrams.
+ * Everything between the root `<svg …>` open tag and its `</svg>` close.
+ * Deliberately not a parse: the target is one known producer (the engine's own
+ * SVG writer), whose root element is the last `<svg` in the prolog and whose
+ * document ends with `</svg>`.
+ */
+const ROOT_OPEN_RE = /<svg\b[^>]*>/;
+
+function innerMarkup(svg: string): string {
+  const open = ROOT_OPEN_RE.exec(svg);
+  /* v8 ignore next */
+  if (open === null) return svg;
+  const start = open.index + open[0].length;
+  const end = svg.lastIndexOf('</svg>');
+  /* v8 ignore next */
+  if (end < start) return svg.slice(start);
+  return svg.slice(start, end);
+}
+
+/**
+ * Package graphviz's SVG for the pipeline.
  *
- * Converts a DotGeometry produced by layoutDot() into an SVG string.
- * The renderer is a pure function: same inputs always produce same output.
- */
-
-import { rect, ellipse, path, text, polygon } from '../../core/svg.js';
-import type { TextStyle, BoxStyle } from '../../core/svg.js';
-import { arrowHeadRef } from '../../core/svg.js';
-import type { DotGeometry, DotNodeGeo, DotEdgeGeo } from './ast.js';
-import type { Theme } from '../../core/theme.js';
-import type { RenderFragment } from '../../core/dispatcher.js';
-
-// Default stroke width for node shapes.
-const NODE_STROKE_WIDTH = 1.5;
-
-// Margin added on the left and top of the diagram content.  The layout engine
-// already adds 12px on the right and bottom, so this value keeps all four
-// sides roughly balanced.
-const MARGIN = 12;
-
-// ---------------------------------------------------------------------------
-// Node rendering helpers
-// ---------------------------------------------------------------------------
-
-// DEFAULT_FILL from graphviz const.h — used when style=filled but no fillcolor/color set.
-const DEFAULT_NODE_FILL = 'lightgrey';
-
-function nodeStyle(
-  node: DotNodeGeo,
-  theme: Theme,
-): { fill: string; stroke: string; strokeWidth: number } {
-  // C penColor(): N_color → DEFAULT_COLOR ("black")
-  const stroke = node.nodeColor ?? theme.colors.border;
-  // C findFill(): N_fillcolor → N_color → DEFAULT_FILL ("lightgrey")
-  // Only applied when style.filled (C: istyle.filled = true).
-  const fill = node.styleFilled
-    ? (node.fillColor ?? node.nodeColor ?? DEFAULT_NODE_FILL)
-    : theme.colors.nodeBackground;
-  return { fill, stroke, strokeWidth: NODE_STROKE_WIDTH };
-}
-
-function renderNode(node: DotNodeGeo, theme: Theme, xOffset: number, yOffset: number): string {
-  const { x: rawX, y: rawY, width, height, shape, label } = node;
-  const x = rawX + xOffset;
-  const y = rawY + yOffset;
-  // layout engine returns TOP-LEFT corner; shape primitives that take a center need cx/cy.
-  const cx = x + width / 2;
-  const cy = y + height / 2;
-  const textStyle: TextStyle = {
-    fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
-    fill: theme.colors.text,
-    textAnchor: 'middle',
-    dominantBaseline: 'middle',
-  };
-
-  // #lizard forgives(nloc) -- pre-existing faithful port of the four-shape
-  // node renderer (box/ellipse-circle/diamond/plaintext), unrelated to and
-  // unmodified by mission G0b/T8's title migration. (Metric-specific form,
-  // placed BEFORE the switch: lizard's TypeScript reader mis-parses a `case
-  // 'x':` string-literal colon as a type-annotation start once a template
-  // literal with multiple `${}` interpolations appears in a later case body
-  // (the diamond points string below), which desyncs its brace-depth
-  // tracking and drops a plain `#lizard forgive` set anywhere near/after the
-  // switch. The `forgives(metric)` form attaches directly to this function's
-  // record at parse time instead of relying on that end-of-function reset,
-  // so it survives the desync.)
-  switch (shape) {
-    case 'box': {
-      const style: BoxStyle = nodeStyle(node, theme);
-      return (
-        rect(x, y, width, height, style) +
-        text(cx, cy, label, textStyle)
-      );
-    }
-
-    case 'ellipse':
-    case 'circle': {
-      const style = nodeStyle(node, theme);
-      return (
-        ellipse(cx, cy, width / 2, height / 2, {
-          fill: style.fill,
-          stroke: style.stroke,
-          'stroke-width': style.strokeWidth,
-        }) +
-        text(cx, cy, label, textStyle)
-      );
-    }
-
-    case 'diamond': {
-      const style = nodeStyle(node, theme);
-      // The node bounding box is 2× the padded label size (Graphviz poly_init).
-      // Draw with separate horizontal (width/2) and vertical (height/2) half-extents
-      // so the diamond is proportional to the label, not forced square.
-      const hw = width / 2;
-      const hh = height / 2;
-      return (
-        polygon(
-          [
-            { x: cx, y: cy - hh },
-            { x: cx + hw, y: cy },
-            { x: cx, y: cy + hh },
-            { x: cx - hw, y: cy },
-          ],
-          { fill: style.fill, stroke: style.stroke, strokeWidth: NODE_STROKE_WIDTH },
-        ) +
-        text(cx, cy, label, textStyle)
-      );
-    }
-
-    case 'plaintext': {
-      return text(cx, cy, label, textStyle);
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Cluster rendering helpers
-// ---------------------------------------------------------------------------
-
-// Stroke color for cluster bounding boxes (C: penColor on subgraph → black).
-const CLUSTER_STROKE = '#000000';
-const CLUSTER_STROKE_WIDTH = 1;
-// C: const.h GAP=4; PAD adds 2*GAP=8 to label height → border height.
-// Label centre = box_top + border_height/2  (C: place_graph_label, UR.y - d.y/2).
-const CLUSTER_LABEL_GAP = 8;
-
-function renderCluster(
-  cl: { id: string; label: string | null; x: number; y: number; width: number; height: number; labelHeight?: number },
-  theme: Theme,
-  xOffset: number,
-  yOffset: number,
-): string {
-  const x = cl.x + xOffset;
-  const y = cl.y + yOffset;
-  const boxEl = rect(x, y, cl.width, cl.height, {
-    fill: 'none',
-    stroke: CLUSTER_STROKE,
-    strokeWidth: CLUSTER_STROKE_WIDTH,
-  });
-
-  if (cl.label === null) return boxEl;
-
-  // Label centred horizontally, centred vertically inside the top border strip.
-  // The border strip height = labelHeight + CLUSTER_LABEL_GAP (matches layout.ts).
-  const lx = x + cl.width / 2;
-  const borderHeight = (cl.labelHeight ?? theme.fontSize) + CLUSTER_LABEL_GAP;
-  const ly = y + borderHeight / 2;
-  const labelEl = text(lx, ly, cl.label, {
-    fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
-    fill: theme.colors.text,
-    textAnchor: 'middle',
-    dominantBaseline: 'middle',
-  });
-  return boxEl + labelEl;
-}
-
-// ---------------------------------------------------------------------------
-// Edge rendering helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Build an SVG path `d` attribute from a list of points.
+ * Two paths, and which one runs is decided entirely by whether the block
+ * carried PlantUML chrome:
  *
- * When `spline` is true and there are at least 4 points the points are
- * interpreted in Bezier format (M P0 then groups of 3: CP1 CP2 endpoint)
- * and `C` commands are emitted.  Otherwise polyline `L` commands are used.
+ *  - **No chrome — the conformance path, and 100% of both corpora.** Return
+ *    the engine's document as a `CompleteSvg`, byte-for-byte. `src/index.ts`
+ *    passes a non-`description` `CompleteSvg` straight through, so nothing
+ *    downstream re-wraps or re-formats it. This is what makes the type
+ *    conformant: upstream writes graphviz's bytes verbatim
+ *    (`PSystemDot#exportDiagramNow`), and so do we.
+ *
+ *  - **Chrome present — the divergence path.** Hand back a `RenderFragment`
+ *    whose body is graphviz's own inner markup (its `<g id="graph0">` and the
+ *    `translate(…)` that flips graphviz's negative y coordinates comes along
+ *    inside it, so no coordinate rewriting is needed), letting the SHARED
+ *    `applyChrome` compose title/caption/legend around it exactly as for every
+ *    other engine. Reachable only on inputs the jar rejects outright — see the
+ *    divergence note on `DotDiagramAST.annotations` — so it trades no
+ *    conformance for the capability.
  */
-function buildPathD(
-  points: Array<{ x: number; y: number }>,
-  xOffset: number,
-  yOffset: number,
-  spline?: boolean,
-): string {
-  if (points.length === 0) return '';
-  const [first, ...rest] = points as [{ x: number; y: number }, ...Array<{ x: number; y: number }>];
-  const ox = xOffset;
-  const oy = yOffset;
-  const parts = [`M ${first.x + ox},${first.y + oy}`];
+export function renderDot(geo: DotGeometry): AssembledSvg {
+  if (isEmpty(geo.annotations)) return { completeSvg: geo.svg };
 
-  if (spline === true && points.length >= 4) {
-    // Bezier format: P0, CP1, CP2, P1, CP1', CP2', P2, ...
-    // SVG: M P0 C CP1 CP2 P1 C CP1' CP2' P2 ...
-    let idx = 0;
-    while (idx + 2 < rest.length) {
-      const cp1 = rest[idx]!;
-      const cp2 = rest[idx + 1]!;
-      const ep  = rest[idx + 2]!;
-      parts.push(
-        `C ${cp1.x + ox},${cp1.y + oy} ${cp2.x + ox},${cp2.y + oy} ${ep.x + ox},${ep.y + oy}`,
-      );
-      idx += 3;
-    }
-    // Fall through with L for any remaining points (shouldn't happen in
-    // well-formed spline data, but be defensive).
-    for (; idx < rest.length; idx++) {
-      const pt = rest[idx]!;
-      parts.push(`L ${pt.x + ox},${pt.y + oy}`);
-    }
-  } else {
-    for (const pt of rest) {
-      parts.push(`L ${pt.x + ox},${pt.y + oy}`);
-    }
-  }
-
-  return parts.join(' ');
-}
-
-function midpoint(points: Array<{ x: number; y: number }>): { x: number; y: number } {
-  const mid = Math.floor(points.length / 2);
-  // When points.length is even, interpolate between mid-1 and mid.
-  if (points.length >= 2 && points.length % 2 === 0) {
-    const a = points[mid - 1]!;
-    const b = points[mid]!;
-    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-  }
-  return points[mid] ?? { x: 0, y: 0 };
-}
-
-function renderEdge(edge: DotEdgeGeo, theme: Theme, xOffset: number, yOffset: number): string {
-  if (edge.points.length === 0) return '';
-
-  const edgeColor = theme.colors.arrow;
-
-  const d = buildPathD(edge.points, xOffset, yOffset, edge.spline);
-
-  const strokeWidth = edge.edgeStyle === 'bold' ? 3 : 1.5;
-  const strokeDasharray =
-    edge.edgeStyle === 'dashed' ? '6 3' :
-    edge.edgeStyle === 'dotted' ? '2 3' :
-    undefined;
-
-  const dir = edge.dir ?? (edge.directed ? 'forward' : 'none');
-  const markerEnd =
-    (dir === 'forward' || dir === 'both') ? `url(#${arrowHeadRef('sync')})` : undefined;
-  const markerStart =
-    (dir === 'back' || dir === 'both') ? `url(#${arrowHeadRef('sync-back')})` : undefined;
-
-  const pathStyle = {
-    stroke: edgeColor,
-    strokeWidth,
-    ...(strokeDasharray !== undefined ? { strokeDasharray } : {}),
-    ...(markerEnd !== undefined ? { markerEnd } : {}),
-    ...(markerStart !== undefined ? { markerStart } : {}),
+  const fragment: RenderFragment = {
+    body: innerMarkup(geo.svg),
+    width: geo.width,
+    height: geo.height,
   };
-
-  const pathEl = path(d, pathStyle);
-
-  let labelEl = '';
-  if (edge.label !== null) {
-    // Use the layout-computed position when available; fall back to midpoint.
-    const lx = edge.labelX !== undefined ? edge.labelX + xOffset : midpoint(edge.points).x + xOffset;
-    const ly = edge.labelY !== undefined ? edge.labelY + yOffset : midpoint(edge.points).y + yOffset;
-    // White background rect knocks out the edge line behind the text so the
-    // label is readable even when the bezier curve sweeps through the label
-    // area on diagonal edges (Graphviz routes splines around the label box;
-    // we approximate that here with an opaque mask).
-    if (edge.labelWidth !== undefined && edge.labelHeight !== undefined) {
-      const lw = edge.labelWidth;
-      const lh = edge.labelHeight;
-      labelEl =
-        rect(lx - lw / 2, ly - lh / 2, lw, lh, { fill: 'white' }) +
-        text(lx, ly, edge.label, {
-          fontFamily: theme.fontFamily,
-          fontSize: theme.fontSize - 2,
-          fill: theme.colors.graph.edgeLabel,
-          textAnchor: 'middle',
-          dominantBaseline: 'middle',
-        });
-    } else {
-      labelEl = text(lx, ly, edge.label, {
-        fontFamily: theme.fontFamily,
-        fontSize: theme.fontSize - 2,
-        fill: theme.colors.graph.edgeLabel,
-        textAnchor: 'middle',
-        dominantBaseline: 'middle',
-      });
-    }
-  }
-
-  return pathEl + labelEl;
-}
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
-/**
- * Title is deliberately absent from this renderer (mission G0b/T8) — it
- * used to be drawn here in a bespoke TITLE_HEIGHT band above the content,
- * with a matching minimum-canvas-width computation (decisions.md D10). Both
- * are gone: title now flows through `ast.annotations.title` and is drawn
- * once, centrally, by `applyChrome` (src/index.ts) around the RenderFragment
- * this function returns.
- */
-export function renderDot(geo: DotGeometry, theme: Theme): RenderFragment {
-  // Cluster boxes (including label strips) may extend above y=0 in layout coords.
-  // Compute how much extra top padding is needed to keep them inside the canvas.
-  const minClusterY = geo.clusters.reduce((min, cl) => Math.min(min, cl.y), 0);
-  const extraTopPad = minClusterY < 0 ? Math.ceil(-minClusterY) : 0;
-
-  // NOTE: no horizontal analog (extraLeftPad from minClusterX) is wired up.
-  // The burn-graphviz mission's pre-flight stash proposed one for symmetry, but
-  // measurement showed it is a no-op: no cluster in the full fixture corpus ever
-  // has negative x (unlike y, where label strips push clusters above 0 — the
-  // 2b536a8 top-clipping fix). Add the left/right guard here if a diagram ever
-  // produces a cluster left of x=0 (or right-edge stroke clipping) — not before.
-
-  const finalWidth = geo.totalWidth + MARGIN;
-  const xOffset = MARGIN;
-  const yOffset = MARGIN + extraTopPad;
-  const finalHeight = geo.totalHeight + yOffset;
-
-  const children: string[] = [];
-
-  // Clusters drawn before edges and nodes (C: emit_clusters runs first).
-  for (const cluster of geo.clusters) {
-    children.push(renderCluster(cluster, theme, xOffset, yOffset));
-  }
-
-  // Edges drawn before nodes so nodes appear on top.
-  for (const edge of geo.edges) {
-    children.push(renderEdge(edge, theme, xOffset, yOffset));
-  }
-
-  // Nodes
-  for (const node of geo.nodes) {
-    children.push(renderNode(node, theme, xOffset, yOffset));
-  }
-
-  const bgColor = theme.colors.background;
-  return {
-    body: children.join(''),
-    width: finalWidth,
-    height: finalHeight,
-    background: bgColor,
-  };
+  return fragment;
 }
