@@ -1,5 +1,46 @@
 # Class engine ranks `..|>` realization edges on the wrong side
 
+> ## ✅ FIXED 2026-08-08 — and the original diagnosis was incomplete
+>
+> The rank does not depend on the relationship TYPE at all. It depends on
+> **which endpoint upstream's `Link` puts first**, which the jar emits
+> verbatim and never reorders:
+>
+> | form | jar `Link` cl1 | dot edge |
+> |---|---|---|
+> | `A <|-- B` | A (parent) | `A -> B` |
+> | `B --|> A` | B (child) | `B -> A` |
+> | `D ..|> I` | D (child) | `D -> I` |
+> | `I <|.. D` | I (parent) | `I -> D` |
+> | `class D extends P` | P (parent) | `P -> D` |
+> | `class D implements I` | I (parent) | `I -> D` |
+>
+> This port normalizes every inheritance form to `from` = child /
+> `to` = parent, discarding that order, and then swapped unconditionally --
+> correct only when the parent happened to be written first.
+>
+> **Why the original "remove `implementation` from HIERARCHICAL" broke four
+> fixtures:** all four use the `implements` KEYWORD form
+> (`class PA1 implements APA`), which the earlier grep for `|>` missed
+> entirely. `manageExtends` builds `Link(cl1 = parent, cl2 = child)`
+> regardless of writing order, so those must keep swapping. Only the
+> child-first ARROW forms must stop.
+>
+> **The fix:** `Relationship.parentIsLinkEntity1` records which endpoint was
+> upstream's `cl1` -- from `swapDirection` for arrow forms, unconditionally
+> `true` for the keyword forms -- and `class-dot-graph.ts#ranksParentFirst`
+> swaps on that instead of on the type.
+>
+> **Result:** class ratchet **314/314, zero regressions** (the blunt version
+> regressed four), and `class-inheritance-interface-assoc` goes 427 diffs ->
+> 204 with its height error 122px -> 1px.
+>
+> **Residual on that fixture, NOT this gap:** the remaining 204 diffs are
+> essentially ONE cause -- a constant **1.500** offset accounts for 148 of
+> them -- plus a ~58.8 horizontal placement difference for one entity. Both
+> are separate, unowned gaps.
+
+
 ## Observation: `implementation` should not be in `HIERARCHICAL`, but removing it alone regresses 4 pinned fixtures
 
 - **Context**: found while adding the maintainer-supplied fixture

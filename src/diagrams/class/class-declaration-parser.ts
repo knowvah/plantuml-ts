@@ -260,6 +260,10 @@ function applyInheritanceClauses(state: ParseState, childId: string, decl: Class
     state.ast.relationships.push({
       from: childId, to: p.id, type: parent.relType,
       creationIndex: state.creationCounter.value,
+      // `manageExtends` builds `Link(cl1 = parent, cl2 = child)` and never
+      // reverses it (see the jar-verified note below), so the parent leads
+      // in dot regardless of which side was written first.
+      parentIsLinkEntity1: true,
       // G2 N9: inline `extends`/`implements` builds the relationship
       // OUTSIDE the arrow-token grammar entirely (no `parseRelationshipLine`
       // call, hence no `swapDirection`/`upOrLeft` machinery) -- Java's own

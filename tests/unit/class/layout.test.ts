@@ -1432,20 +1432,52 @@ describe('layoutClass — minimum node width', () => {
 // Layout direction — parent ranks above child for extension/implementation
 // ---------------------------------------------------------------------------
 
-describe('layoutClass — extension layout direction', () => {
-  const ast: ClassDiagramAST = makeAST({
-    classifiers: [
-      { id: 'Animal', display: 'Animal', kind: 'class', typeParams: [], members: [] },
-      { id: 'Dog',    display: 'Dog',    kind: 'class', typeParams: [], members: [] },
-    ],
-    relationships: [{ from: 'Dog', to: 'Animal', type: 'extension' }],
-  });
+describe('layoutClass — hierarchical layout direction', () => {
+  // The rank follows which endpoint upstream's Link put FIRST, not the
+  // relationship type: the jar emits `entity1 -> entity2` verbatim and never
+  // reorders it. `parentIsLinkEntity1` carries that, because this port
+  // normalizes every inheritance form to from=child / to=parent and would
+  // otherwise have lost it. Ranking on the type alone put the interface of a
+  // `D ..|> I` on the TOP rank, where the jar ranks it below.
+  const twoClasses = [
+    { id: 'Animal', display: 'Animal', kind: 'class' as const, typeParams: [], members: [] },
+    { id: 'Dog',    display: 'Dog',    kind: 'class' as const, typeParams: [], members: [] },
+  ];
 
-  it('parent (Animal) has a smaller y than child (Dog)', () => {
+  it('parent-first source (`Animal <|-- Dog`, `class Dog extends Animal`) ranks the parent above', () => {
+    const ast: ClassDiagramAST = makeAST({
+      classifiers: twoClasses,
+      relationships: [{ from: 'Dog', to: 'Animal', type: 'extension', parentIsLinkEntity1: true }],
+    });
     const result = layoutClass(ast, defaultTheme, measurer);
     const animal = result.classifiers.find((c) => c.id === 'Animal')!;
     const dog    = result.classifiers.find((c) => c.id === 'Dog')!;
     expect(animal.y).toBeLessThan(dog.y);
+  });
+
+  it('child-first source (`Dog --|> Animal`) ranks the CHILD above, as the jar does', () => {
+    const ast: ClassDiagramAST = makeAST({
+      classifiers: twoClasses,
+      relationships: [{ from: 'Dog', to: 'Animal', type: 'extension', parentIsLinkEntity1: false }],
+    });
+    const result = layoutClass(ast, defaultTheme, measurer);
+    const animal = result.classifiers.find((c) => c.id === 'Animal')!;
+    const dog    = result.classifiers.find((c) => c.id === 'Dog')!;
+    expect(dog.y).toBeLessThan(animal.y);
+  });
+
+  it('a child-first realization (`Dog ..|> Pet`) ranks the interface BELOW', () => {
+    const ast: ClassDiagramAST = makeAST({
+      classifiers: [
+        { id: 'Dog', display: 'Dog', kind: 'class', typeParams: [], members: [] },
+        { id: 'Pet', display: 'Pet', kind: 'interface', typeParams: [], members: [] },
+      ],
+      relationships: [{ from: 'Dog', to: 'Pet', type: 'implementation', parentIsLinkEntity1: false }],
+    });
+    const result = layoutClass(ast, defaultTheme, measurer);
+    const dog = result.classifiers.find((c) => c.id === 'Dog')!;
+    const pet = result.classifiers.find((c) => c.id === 'Pet')!;
+    expect(dog.y).toBeLessThan(pet.y);
   });
 });
 

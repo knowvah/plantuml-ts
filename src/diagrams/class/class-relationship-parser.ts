@@ -258,6 +258,7 @@ interface OptionalRelFields {
   colorOverride?: string | undefined;
   single?: true | undefined;
   swapDirection?: boolean | undefined;
+  parentIsLinkEntity1?: boolean | undefined;
 }
 
 /** Assemble a Relationship, omitting undefined optional fields (and an
@@ -436,6 +437,16 @@ export function parseRelationshipLine(line: string, nsSep: string | null = null,
       // consumed at the relationship-push site, see
       // `Relationship.single`'s doc comment (class-relationship-ast.ts).
       single: styleOverrides.single,
+      // The dot rank swap's real input: whether upstream's Link put the
+      // PARENT first. For an arrow that is exactly `swapDirection` -- true
+      // when `from`/`to` were reordered away from source-text order, i.e.
+      // the parent was written on the left. Only meaningful for the two
+      // hierarchical types, so it is omitted elsewhere rather than carried
+      // as a meaningless flag. See `Relationship.parentIsLinkEntity1`.
+      parentIsLinkEntity1:
+        info.type === 'extension' || info.type === 'implementation'
+          ? info.swapDirection
+          : undefined,
       // G2 N59: `ArrowInfo.swapDirection` itself (NOT `upOrLeft`, which
       // `idEntity1FullId`/`idEntity2FullId` already carry) -- the ONE swap
       // that reorders `left.id`/`right.id` (pure source-text left-to-right

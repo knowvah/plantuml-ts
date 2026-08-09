@@ -323,4 +323,37 @@ export interface Relationship {
    * @see ~/git/plantuml/.../classdiagram/command/CommandLinkClass.java:295-333
    */
   swapDirection?: boolean;
+  /**
+   * Whether the jar's `Link` has the PARENT (this port's normalized `to`) as
+   * its `cl1`/entity1 -- i.e. whether the parent must lead when the edge is
+   * emitted to dot.
+   *
+   * This port normalizes EVERY inheritance form to `from` = child,
+   * `to` = parent, which discards the one thing dot ranking depends on: which
+   * endpoint upstream put first. The jar emits its `Link` as
+   * `entity1 -> entity2` verbatim and never reorders it, so the rank follows
+   * source construction, not relationship type:
+   *
+   * | form                  | jar `Link` cl1 | dot edge |
+   * |---|---|---|
+   * | `A <|-- B`            | A (parent)     | `A -> B` |
+   * | `B --|> A`            | B (child)      | `B -> A` |
+   * | `D ..|> I`            | D (child)      | `D -> I` |
+   * | `I <|.. D`            | I (parent)     | `I -> D` |
+   * | `class D extends P`   | P (parent)     | `P -> D` |
+   * | `class D implements I`| I (parent)     | `I -> D` |
+   *
+   * Arrow forms therefore set this from `swapDirection` (true exactly when
+   * `from` is NOT textually first, i.e. the parent was written first); the
+   * inline `extends`/`implements` forms set it unconditionally `true`,
+   * because `CommandCreateClassMultilines#manageExtends` always builds
+   * `Link(cl1 = parent, cl2 = child)` regardless of writing order -- see the
+   * jar-verified note at that construction site in
+   * `class-declaration-parser.ts`.
+   *
+   * Consumed ONLY by `class-dot-graph.ts`'s hierarchical rank swap.
+   * @see ~/git/plantuml/.../classdiagram/command/CommandLinkClass.java
+   * @see ~/git/plantuml/.../classdiagram/command/CommandCreateClassMultilines.java#manageExtends
+   */
+  parentIsLinkEntity1?: boolean;
 }
