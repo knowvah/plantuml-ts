@@ -31,8 +31,17 @@ export function getDisplayValue(v: unknown): DisplayValue {
   if (typeof v === 'string') {
     return { display: v, valueType: 'string' };
   }
-  // object or array — child node handles it
-  return { display: '', valueType: 'nested' };
+  // Object or array — the child node carries the content, but the cell is NOT
+  // empty: `getShortString` falls through to `return "   ";`
+  // (`TextBlockJson.java:194`), three literal spaces. They are drawn, and they
+  // are measured — `getWidthColB` folds them in like any other cell, so a
+  // nested row can be the widest in column B. This port returned `''`, which
+  // both skipped the `<text>` element the jar emits and under-measured the
+  // column by that string's width.
+  //
+  // On emission those spaces become NBSP: `core/svg-shapes.ts#text` carries
+  // upstream's whitespace-only substitution rule.
+  return { display: '   ', valueType: 'nested' };
 }
 
 // ---------------------------------------------------------------------------

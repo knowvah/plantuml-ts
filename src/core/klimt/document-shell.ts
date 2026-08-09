@@ -156,7 +156,12 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType: stri
     ' contentStyleType=' + DQUOTE + 'text/css' + DQUOTE +
     '>' +
     '<?plantuml ' + VERSION_PLACEHOLDER + '?>' +
-    `<defs>${extraDefs}</defs>` +
+    // Self-closing when empty, which is how the jar writes it: 973 of the 992
+    // cached class/state goldens carry a bare `<defs/>`, and the 19 that use
+    // the open/close form all have children. `createXml` serializes an
+    // empty element self-closed; this port was emitting `<defs></defs>`
+    // unconditionally.
+    (extraDefs === '' ? '<defs/>' : `<defs>${extraDefs}</defs>`) +
     withRootGroupAttributes(fragment.body) +
     '</svg>'
   );

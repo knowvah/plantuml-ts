@@ -50,7 +50,7 @@ function computeDataDiagramNodeColorOverride(node: StyleProps): Partial<JsonGrap
   const fc = node.get('fontcolor');
   if (fc !== undefined) override.nodeFontColor = resolveColor(fc);
   const nls = node.get('linestyle');
-  if (nls !== undefined) override.nodeLineDasharray = nls.replace(/[-;]/g, ' ');
+  if (nls !== undefined) override.nodeLineDasharray = nls.replace(/[-;]/g, ',');
   return override;
 }
 
@@ -127,6 +127,11 @@ function computeDataDiagramArrowOverride(styleMap: StyleMap, prefix: string): Pa
   const override: Partial<JsonGraphOverride> = {};
   const arrow = styleMap.get(`${prefix}.arrow`);
   if (arrow === undefined) return override;
+  // A `LineStyle 3-3` becomes the SVG `stroke-dasharray:3,3`, COMMA-separated:
+  // `UStroke#getDasharraySvg` hands back a `double[]` and
+  // `SvgGraphicsCore#setStrokeWidth` joins the pair with a comma
+  // (`svg-graphics-core.ts:382-383`, mirroring the jar). All three call sites
+  // here used a space, which no jar output ever contains.
   const lc = arrow.get('linecolor');
   if (lc !== undefined) override.arrowColor = resolveColor(lc);
   const lt = arrow.get('linethickness');
@@ -135,7 +140,7 @@ function computeDataDiagramArrowOverride(styleMap: StyleMap, prefix: string): Pa
     if (!isNaN(parsed)) override.arrowThickness = parsed;
   }
   const ls = arrow.get('linestyle');
-  if (ls !== undefined) override.arrowDasharray = ls.replace(/[-;]/g, ' ');
+  if (ls !== undefined) override.arrowDasharray = ls.replace(/[-;]/g, ',');
   return override;
 }
 
@@ -152,7 +157,7 @@ function computeDataDiagramSeparatorOverride(styleMap: StyleMap, prefix: string)
     if (!isNaN(parsed)) override.separatorThickness = parsed;
   }
   const sls = sep.get('linestyle');
-  if (sls !== undefined) override.separatorDasharray = sls.replace(/[-;]/g, ' ');
+  if (sls !== undefined) override.separatorDasharray = sls.replace(/[-;]/g, ',');
   return override;
 }
 

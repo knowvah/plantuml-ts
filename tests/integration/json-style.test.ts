@@ -108,9 +108,10 @@ describe('JSON style: RoundCorner', () => {
     expect(svg).toContain('rx="0"');
   });
 
-  it('noleta-28: RoundCorner 4 produces rx="4" on node rect', () => {
+  it('noleta-28: RoundCorner 4 produces rx="2" on node rect', () => {
     const svg = renderSync(getMarkup('noleta-28'));
-    expect(svg).toContain('rx="4"');
+    // `DriverRectangleSvg.java:78` emits `rx/2`, `ry/2`.
+    expect(svg).toContain('rx="2" ry="2"');
   });
 });
 
@@ -185,34 +186,30 @@ describe('JSON: array rows match upstream (index-key divergence retired)', () =>
  * one HTML page must not collide — is what the second pair of cases pins, and
  * that is preserved.
  */
-describe('JSON style: ID determinism and cross-diagram uniqueness', () => {
-  it('two renders of the SAME diagram produce identical clipPath IDs', () => {
-    const markup = '@startjson\n{"a": 1}\n@endjson';
-    const id1 = renderSync(markup).match(/id="(json-node-clip-[^"]+)"/)?.[1];
-    const id2 = renderSync(markup).match(/id="(json-node-clip-[^"]+)"/)?.[1];
-    expect(id1).toBeDefined();
-    expect(id1).toBe(id2);
+describe('JSON style: the document generates no ids at all', () => {
+  // This suite used to pin the DETERMINISM of two generated id namespaces
+  // (`json-node-clip-…`, `arrow-json-dep-…`), which existed because the
+  // renderer once emitted a per-node `<clipPath>` and an arrowhead `<marker>`.
+  // A5's M2/M3 removed both: upstream clips nothing in this family and draws
+  // its arrowheads as inline filled paths, so the jar's json documents contain
+  // an EMPTY `<defs/>` and no `id=` anywhere.
+  //
+  // The property is now stronger than determinism and is asserted as such —
+  // an id that is never emitted cannot collide, and cannot be non-deterministic.
+  const NESTED = '@startjson\n{"a": {"b": 1}}\n@endjson';
+
+  it('emits no clipPath and no marker', () => {
+    const svg = renderSync(NESTED);
+    expect(svg).not.toContain('clipPath');
+    expect(svg).not.toContain('<marker');
+    expect(svg).toContain('<defs/>');
   });
 
-  it('two renders of the SAME diagram produce identical arrow marker IDs', () => {
-    const markup = '@startjson\n{"a": {"b": 1}}\n@endjson';
-    const id1 = renderSync(markup).match(/id="(arrow-json-dep-[^"]+)"/)?.[1];
-    const id2 = renderSync(markup).match(/id="(arrow-json-dep-[^"]+)"/)?.[1];
-    expect(id1).toBeDefined();
-    expect(id1).toBe(id2);
+  it('emits no generated id of any kind', () => {
+    expect(renderSync(NESTED)).not.toMatch(/\bid="/);
   });
 
-  it('DIFFERENT diagrams get different clipPath IDs — the collision the salt exists to prevent', () => {
-    const a = renderSync('@startjson\n{"a": 1}\n@endjson').match(/id="(json-node-clip-[^"]+)"/)?.[1];
-    const b = renderSync('@startjson\n{"substantially": "different"}\n@endjson')
-      .match(/id="(json-node-clip-[^"]+)"/)?.[1];
-    expect(a).toBeDefined();
-    expect(b).toBeDefined();
-    expect(a).not.toBe(b);
-  });
-
-  it('the whole document is byte-identical across renders', () => {
-    const markup = '@startjson\n{"a": {"b": 1}, "c": [1, 2]}\n@endjson';
-    expect(renderSync(markup)).toBe(renderSync(markup));
+  it('is byte-identical across renders of the same source', () => {
+    expect(renderSync(NESTED)).toBe(renderSync(NESTED));
   });
 });

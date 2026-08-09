@@ -15,6 +15,7 @@
  * yaml and hcl have no layout of their own.
  */
 import type { StringMeasurer } from '../../core/measurer.js';
+import { nbspIfBlank } from '../../core/svg.js';
 import {
   getDisplayValue,
   containerEntries,
@@ -81,6 +82,50 @@ export interface JsonRowGeo {
   /** y offset within the node (top of row) */
   y: number;
   height: number;
+  /**
+   * Measured width of the key cell's text, WITHOUT the `withMargin(_, 5, 2)`
+   * horizontal margin — i.e. the text's own advance width.
+   *
+   * The renderer needs this for the jar's `textLength` attribute, and only the
+   * layout stage holds a `StringMeasurer`. Carrying it here rather than
+   * re-measuring downstream is what keeps the sizer and the renderer measuring
+   * the SAME thing; `planning/sizer-renderer-parity.md` catalogues what happens
+   * when they drift.
+   *
+   * Zero for an array row, which draws no key (see {@link JsonRowGeo.arrayEntry}).
+   */
+  keyWidth: number;
+  /** Measured width of each value line, index-aligned with `valueLines`. */
+  valueLineWidths: readonly number[];
+  /**
+   * The width the SVG driver measures, which is NOT always the one above.
+   *
+   * Upstream measures twice, on two different strings. Layout calls
+   * `TextBlock#calculateDimension` on the raw text; the driver first swaps
+   * every space for NBSP in a whitespace-ONLY label and only then measures
+   * (`DriverTextSvg.java:115-116` precedes its `calculateDimension` at :126).
+   * Under `PLANTUML_DETERMINISTIC_TEXT` an ASCII space is 0 wide and an NBSP
+   * is 0.275·size, so for json's three-space nested cell the two answers are
+   * 0 and 11.55 — the jar's node width reflects the former, its `textLength`
+   * attribute the latter.
+   *
+   * Index-aligned with `valueLines`; `keyTextLength` is the same for the key.
+   */
+  valueTextLengths: readonly number[];
+  keyTextLength: number;
+  /**
+   * Baseline y of the key text, relative to the NODE's top edge.
+   *
+   * Upstream never positions text by a midpoint: `withMargin(result, 5, 2)`
+   * (`TextBlockJson.java:348`) puts the cell's text block at `rowTop + 2`, and
+   * the block's own baseline sits `height - descent` below its top. Verified
+   * against the jar: `dometa-86-jepe218` draws its first row's key at
+   * `y="31.889"` for a node at `y="19"` — an offset of 12.889 = 2 + 14 −
+   * 14/4.5, the last term being `StringBounder#getDescent`.
+   */
+  keyBaselineY: number;
+  /** Baseline y of each value line, relative to the node's top edge. */
+  valueBaselineYs: readonly number[];
 }
 
 export interface MeasuredNode {
@@ -193,6 +238,71 @@ function cellLines(
   return { processed, valueLines, valueType };
 }
 
+/**
+ * The per-cell TEXT metrics the renderer cannot recover on its own: measured
+ * advance widths (for `textLength`) and absolute baselines.
+ *
+ * @see JsonRowGeo.keyBaselineY for the baseline derivation and its jar evidence.
+ */
+function cellMetrics(
+  cell: { key: string; valueLines: readonly string[]; rowY: number; arrayEntry: boolean },
+  textHeight: number,
+  measurer: StringMeasurer,
+  keyFont: FontSpec,
+  valFont: FontSpec,
+): Pick<
+  JsonRowGeo,
+  'keyWidth' | 'valueLineWidths' | 'keyBaselineY' | 'valueBaselineYs' | 'keyTextLength' | 'valueTextLengths'
+> {
+  // `withMargin(_, 5, 2)` — the text block's top edge sits CELL_MARGIN_Y below
+  // the row's, and its baseline `descent` above its own bottom.
+  const descent = measurer.getDescent(valFont, cell.key);
+  const firstBaseline = cell.rowY + CELL_MARGIN_Y + textHeight - descent;
+  // See `JsonRowGeo.valueTextLengths` for why the emitted form is measured
+  // separately from the raw one.
+  const emitted = (t: string, f: FontSpec) => measurer.measure(nbspIfBlank(t), f).width;
+  return {
+    keyWidth: cell.arrayEntry ? 0 : measurer.measure(cell.key, keyFont).width,
+    valueLineWidths: cell.valueLines.map((l) => measurer.measure(l, valFont).width),
+    keyTextLength: cell.arrayEntry ? 0 : emitted(cell.key, keyFont),
+    valueTextLengths: cell.valueLines.map((l) => emitted(l, valFont)),
+    keyBaselineY: firstBaseline,
+    valueBaselineYs: cell.valueLines.map((_, i) => firstBaseline + textHeight * i),
+  };
+}
+
+/** The measurer plus the two resolved cell fonts — one bundle so {@link buildRow}
+ *  stays inside this repo's 5-parameter cap. */
+interface RowFonts {
+  measurer: StringMeasurer;
+  keyFont: FontSpec;
+  valFont: FontSpec;
+  maximumWidth: number | undefined;
+}
+
+/** One `TextBlockJson.Line`, measured and positioned. */
+function buildRow(
+  cell: { key: string; value: unknown; rowY: number; arrayEntry: boolean },
+  fonts: RowFonts,
+  highlightKeys: ReadonlyMap<string, string>,
+): JsonRowGeo {
+  const { measurer, keyFont, valFont } = fonts;
+  const { processed, valueLines, valueType } = cellLines(cell.value, measurer, valFont, fonts.maximumWidth);
+  const textHeight = measurer.measure(cell.key, valFont).height;
+  const positioned = { key: cell.key, valueLines, rowY: cell.rowY, arrayEntry: cell.arrayEntry };
+  return {
+    arrayEntry: cell.arrayEntry,
+    key: cell.key,
+    value: processed,
+    valueLines,
+    valueType,
+    highlight: highlightKeys.get(cell.key) ?? false,
+    y: cell.rowY,
+    height: heightOfRow(textHeight, valueLines.length, cell.arrayEntry),
+    ...cellMetrics(positioned, textHeight, measurer, keyFont, valFont),
+  };
+}
+
 export function buildRows(
   node: FlatNode,
   highlightKeys: ReadonlyMap<string, string>,
@@ -200,7 +310,8 @@ export function buildRows(
   fontSize: number,
   options?: BuildRowsOptions,
 ): JsonRowGeo[] {
-  const { valFont: font } = fontsFor(fontSize, options);
+  const { keyFont, valFont } = fontsFor(fontSize, options);
+  const fonts: RowFonts = { measurer, keyFont, valFont, maximumWidth: options?.maximumWidth };
   const arrayEntry = Array.isArray(node.value);
   const rows: JsonRowGeo[] = [];
   // Rows start at the node's top edge: upstream's `drawU` walks
@@ -208,22 +319,10 @@ export function buildRows(
   // `getTotalHeight` is a plain sum with no trailing one either.
   let currentY = 0;
 
-  for (const [k, v] of containerEntries(node.value)) {
-    const { processed, valueLines, valueType } = cellLines(v, measurer, font, options?.maximumWidth);
-    const rowHeight = heightOfRow(measurer.measure(k, font).height, valueLines.length, arrayEntry);
-
-    rows.push({
-      arrayEntry,
-      key: k,
-      value: processed,
-      valueLines,
-      valueType,
-      highlight: highlightKeys.get(k) ?? false,
-      y: currentY,
-      height: rowHeight,
-    });
-
-    currentY += rowHeight;
+  for (const [key, value] of containerEntries(node.value)) {
+    const row = buildRow({ key, value, rowY: currentY, arrayEntry }, fonts, highlightKeys);
+    rows.push(row);
+    currentY += row.height;
   }
 
   return rows;

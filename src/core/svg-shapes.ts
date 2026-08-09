@@ -130,12 +130,41 @@ function textLengthOf(content: string, textLength: number | undefined): number |
   return content.length > 1 ? textLength : undefined;
 }
 
+/**
+ * A whitespace-ONLY label has every space swapped for NBSP (U+00A0):
+ *
+ * ```java
+ * if (text.matches("^\\s*$"))
+ *     text = text.replace(' ', (char) 160);
+ * ```
+ * @see .../klimt/drawing/svg/DriverTextSvg.java:115-116
+ *
+ * The guard is what makes this narrow, and it is easy to get wrong in the
+ * generous direction: ordinary labels keep their regular spaces (verified
+ * across the cached class corpus — `'int size'`, `'some page header'`), so a
+ * blanket substitution would corrupt every multi-word label in the port.
+ *
+ * It fires in practice for json's nested-value cell, whose display string is
+ * three spaces (`TextBlockJson.java:194`); the jar writes `\xa0\xa0\xa0`.
+ *
+ * `core/klimt/drawing/svg/driver-text-svg.ts#leadingSpaceAdjust` carries the
+ * same rule for the klimt-drawn engines. This is the copy for every engine
+ * that emits through these shared shape functions.
+ */
+const NBSP = ' ';
+const WHITESPACE_ONLY_RE = new RegExp('^\\s*$');
+
+export function nbspIfBlank(content: string): string {
+  return WHITESPACE_ONLY_RE.test(content) ? content.split(' ').join(NBSP) : content;
+}
+
 export function text(
   x: number,
   y: number,
-  content: string,
+  rawContent: string,
   style: TextStyle = {},
 ): string {
+  const content = nbspIfBlank(rawContent);
   const fillR = resolvePaint(style.fill);
   const a = attrs([
     ['x', x],

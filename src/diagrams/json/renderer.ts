@@ -6,9 +6,10 @@
  */
 
 import { rect, line, text, path, ellipse } from '../../core/svg.js';
-import { openArrowHeadDef } from '../../core/svg-markers.js';
-import { getSeed, seedOf } from '../../core/klimt/drawing/svg/svg-seed.js';
-import { buildCurvePath, veryFirstPoint } from './JsonCurve.js';
+
+import { buildCurvePath, veryFirstPoint, buildArrowHeadPath } from './JsonCurve.js';
+import { resolveNodeStyle, SVG_CORNER_DIVISOR, JSON_SKIN_BLACK } from './renderer-style.js';
+import type { NodeStyleJson, TextStyleJson, HighlightClassStyle } from './renderer-style.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
@@ -17,7 +18,23 @@ import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layou
 // Constants
 // ---------------------------------------------------------------------------
 
-const H_PAD = 8;
+/**
+ * `TextBlockUtils.withMargin(result, 5, 2)` — every json cell's text block
+ * (`TextBlockJson.java:348`). The horizontal half is the only one this module
+ * needs; the vertical half is already folded into the row baselines the layout
+ * hands over (`TextBlockJson.ts#cellMetrics`).
+ *
+ * Replaces an unsourced `H_PAD = 8`, which put every label 3px right of the
+ * jar's.
+ */
+const CELL_MARGIN_X = 5;
+
+/** `URectangle.build(trueWidth - 2, heightOfRow).rounded(4)` at
+ *  `UTranslate(1.5, 0)` — the highlighted-row backing rect
+ *  (`TextBlockJson.java:295-301`). */
+const HIGHLIGHT_INSET_X = 1.5;
+const HIGHLIGHT_WIDTH_REDUCTION = 2;
+const HIGHLIGHT_ROUND = 4;
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -32,248 +49,220 @@ function valueColor(
     case 'number': return json?.numberValue ?? '#A67F52';
     case 'boolean': return json?.booleanValue ?? '#BE5D47';
     case 'null': return json?.nullValue ?? '#767676';
-    default: return json?.keyText ?? '#181818';
+    // 'nested' — the three-space cell (`TextBlockJson.java:194`). There is no
+    // per-type color to apply here, so it takes this family's plain node
+    // FontColor, which the skin sets to black (:446). Was `#181818`.
+    default: return json?.keyText ?? JSON_SKIN_BLACK;
   }
+}
+
+
+/**
+ * `HorizontalAlignment#draw(ug, tb, 0, 0, width)` — the block (text plus its
+ * `withMargin` on both sides) is placed at `0`, `width - dim`, or
+ * `(width - dim) / 2`, and the text then sits one margin inside it. Reduced
+ * here to the resulting text origin.
+ *
+ * Upstream emits an absolute `x` and never a `text-anchor`, which is why this
+ * returns a coordinate rather than an anchor.
+ */
+function cellTextX(colLeft: number, colWidth: number, textWidth: number, align: TextStyleJson['align']): number {
+  if (align === 'center') return colLeft + (colWidth - textWidth) / 2;
+  if (align === 'right') return colLeft + colWidth - textWidth - CELL_MARGIN_X;
+  return colLeft + CELL_MARGIN_X;
+}
+
+/** The named `#highlight` class this row carries, if any — `''` means
+ *  "highlighted, but with no named class", i.e. the default highlight. */
+function highlightClassOf(row: JsonRowGeo, box: NodeStyleJson['box']): HighlightClassStyle {
+  if (row.highlight === false || row.highlight === '') return {};
+  return box.highlightClasses?.[row.highlight] ?? {};
+}
+
+function highlightFontFlags(cls: HighlightClassStyle, ts: TextStyleJson) {
+  return {
+    fontBold: cls.fontBold ?? ts.hlFontBold,
+    fontItalic: cls.fontItalic ?? ts.hlFontItalic,
+  };
+}
+
+/** The per-row style overrides a named highlight class contributes. */
+function highlightOverrides(row: JsonRowGeo, style: NodeStyleJson) {
+  const cls = highlightClassOf(row, style.box);
+  return {
+    isHighlighted: row.highlight !== false,
+    background: cls.background ?? style.box.hlBg,
+    fontColor: cls.fontColor ?? style.text.hlFontColor,
+    ...highlightFontFlags(cls, style.text),
+  };
+}
+
+/** `URectangle.build(trueWidth - 2, heightOfRow).rounded(4)` drawn at
+ *  `UTranslate(1.5, 0)` from the row's own origin, with fill AND stroke set to
+ *  the highlight color (`.apply(cellBackColor).apply(cellBackColor.bg())`). */
+function highlightRect(
+  node: JsonNodeGeo,
+  row: JsonRowGeo,
+  box: NodeStyleJson['box'],
+  background: string,
+): string {
+  return rect(
+    node.x + HIGHLIGHT_INSET_X,
+    node.y + row.y,
+    node.width - HIGHLIGHT_WIDTH_REDUCTION,
+    row.height,
+    {
+      fill: background,
+      stroke: background,
+      strokeWidth: box.sepThickness,
+      rx: HIGHLIGHT_ROUND / SVG_CORNER_DIVISOR,
+      ry: HIGHLIGHT_ROUND / SVG_CORNER_DIVISOR,
+    },
+  );
 }
 
 /**
- * A per-diagram id namespace, derived from the diagram's own geometry.
+ * One `TextBlockJson.Line`, in upstream's own draw order
+ * (`TextBlockJson.java:291-317`): highlight backing rect, then the row's top
+ * separator, then column A's text, then column B's text followed by the
+ * column divider.
  *
- * The ids built from this (`json-node-clip-…`, `arrow-json-dep-…`) only need to
- * be unique between diagrams sharing one HTML page. That used to be done with
- * `Math.random()`, which CLAUDE.md forbids outright in a rendering path:
- * *"every non-determinism (uid counters, gradient/shadow ids) is seeded so
- * output is reproducible."* Two diagrams differ in their geometry, so hashing
- * it gives the same uniqueness deterministically; two IDENTICAL diagrams
- * collide, which is harmless because their ids address identical shapes.
- *
- * Uses upstream's own hash rather than a new one — `seedOf` is
- * `UmlSource.seed()` and `getSeed` is `SvgGraphics.getSeed(long)`.
+ * Every coordinate is absolute. Upstream's `ugline` is the node's `UGraphic`
+ * translated by `UTranslate.dy(y)`, and `SvgGraphics` resolves a translate
+ * into the emitted coordinates rather than into a `<g transform>` — which is
+ * why the jar's output is one flat run of elements per node and this function
+ * emits no group of its own.
  */
-function saltFor(geo: JsonGeometry): string {
-  const fingerprint = geo.nodes
-    .map((n) => `${n.id}:${n.x},${n.y},${n.width},${n.height},${n.rows.length}`)
-    .join('\n');
-  return getSeed(seedOf(fingerprint));
+function renderRow(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson): string {
+  const { box } = style;
+  const hl = highlightOverrides(row, style);
+  const rowTop = node.y + row.y;
+  const sepStyle = {
+    stroke: box.sepColor,
+    strokeWidth: box.sepThickness,
+    ...(box.sepDash !== undefined ? { strokeDasharray: box.sepDash } : {}),
+  };
+  const dividerX = node.x + node.keyColWidth;
+
+  return [
+    hl.isHighlighted ? highlightRect(node, row, box, hl.background) : '',
+    // `if (y > 0) ugline.draw(ULine.hline(trueWidth))` — no line above row 0.
+    row.y > 0 ? line(node.x, rowTop, node.x + node.width, rowTop, sepStyle) : '',
+    renderRowText(node, row, style, hl),
+    // The divider lives INSIDE `if (line.b2 != null)`, so an array row -- whose
+    // lines all have a null b2 -- gets none, and it spans only THIS row's
+    // height rather than the node's.
+    row.arrayEntry ? '' : line(dividerX, rowTop, dividerX, rowTop + row.height, sepStyle),
+  ].join('');
 }
 
-function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): string {
-  const json = theme.colors.graph.json;
-  // Inherit from global theme colors when no explicit JSON override is set.
-  // This allows built-in themes (amiga, cerulean, etc.) to colorize JSON nodes
-  // without needing per-theme json overrides.
-  const bg = json?.background ?? theme.colors.background;
-  const border = json?.border ?? theme.colors.border;
-  // headerBackground inherits from the node background (matches upstream style inheritance)
-  const headerBg = json?.headerBackground ?? bg;
-  const hlBg = json?.highlightBackground ?? '#CCFF02';
-  // jsonDiagram.node style overrides (defaults from plantuml.skin yamlDiagram,jsonDiagram block)
-  const rx = json?.roundCorner ?? 10;
-  const borderWidth = json?.nodeLineThickness ?? 1.5;
-  const borderDash = json?.nodeLineDasharray;
-  const nodeFontSize = json?.nodeFontSize ?? theme.fontSize;
-  const nodeFontFamily = json?.nodeFontFamily ?? theme.fontFamily;
-  const nodeFontColor = json?.nodeFontColor;
-  const nodeFontBold = json?.nodeFontBold ?? false;
-  const nodeFontItalic = json?.nodeFontItalic ?? false;
-  const textAlign = json?.textAlign ?? 'left';
-  // jsonDiagram.node.separator sub-block
-  const sepColor = json?.separatorColor ?? border;
-  const sepThickness = json?.separatorThickness ?? 0.5;
-  const sepDash = json?.separatorDasharray;
-  // jsonDiagram.node.highlight sub-block
-  const hlFontColor = json?.highlightFontColor;
-  const hlFontBold = json?.highlightFontBold ?? false;
-  const hlFontItalic = json?.highlightFontItalic ?? false;
-  // Per-class highlight overrides (e.g. .h1 { BackGroundColor green; ... })
-  const highlightClasses = json?.highlightClasses;
-
-  // Key text inherits node-level FontColor/FontName/FontSize (Java style cascade)
-  const keyColor = json?.keyText ?? nodeFontColor ?? theme.colors.text;
-
+/** Column A's cell then column B's, both as absolute-positioned `<text>`. */
+function renderRowText(
+  node: JsonNodeGeo,
+  row: JsonRowGeo,
+  style: NodeStyleJson,
+  hl: ReturnType<typeof highlightOverrides>,
+): string {
+  const ts = style.text;
   const parts: string[] = [];
+  const common = { fontFamily: ts.fontFamily, fontSize: ts.fontSize };
 
-  // clipPath so key-column bg and highlight fills don't bleed into the
-  // rounded corner areas. Prefix includes a per-render salt so IDs stay
-  // unique when multiple diagrams are embedded in the same HTML page.
-  const clipId = `json-node-clip-${diagramSalt}-${node.id}`;
-  parts.push(
-    `<defs><clipPath id="${clipId}">` +
-      rect(0, 0, node.width, node.height, { rx }) +
-      `</clipPath></defs>`,
-  );
-
-  // --- Outer fill (no stroke yet — border drawn last to stay on top) ---
-  parts.push(
-    rect(0, 0, node.width, node.height, {
-      fill: bg,
-      rx,
-    }),
-  );
-
-  // --- Key-column background and highlighted row backgrounds ---
-  // Grouped under the clipPath so they are clipped to the rounded rect.
-  const clippedFills: string[] = [];
-  clippedFills.push(
-    rect(0, 0, node.keyColWidth, node.height, {
-      fill: headerBg,
-    }),
-  );
-  for (const row of node.rows) {
-    if (row.highlight !== false) {
-      const classStyle = row.highlight ? (highlightClasses?.[row.highlight] ?? {}) : {};
-      const effectiveBg = classStyle.background ?? hlBg;
-      clippedFills.push(
-        rect(1, row.y + 1, node.width - 2, row.height - 1, { fill: effectiveBg }),
-      );
-    }
-  }
-  parts.push(`<g clip-path="url(#${clipId})">${clippedFills.join('')}</g>`);
-
-  const sepLineStyle = {
-    stroke: sepColor,
-    strokeWidth: sepThickness,
-    ...(sepDash !== undefined ? { strokeDasharray: sepDash } : {}),
-  };
-
-  // --- Row separators (skip first row — no line above the first entry) ---
-  for (let i = 1; i < node.rows.length; i++) {
-    const row = node.rows[i]!;
-    parts.push(line(0, row.y, node.width, row.y, sepLineStyle));
-  }
-
-  // --- Vertical column divider ---
-  // A5/T6b: upstream draws it INSIDE `if (line.b2 != null)`
-  // (`TextBlockJson.java:311-314`), so an array node -- whose lines all have a
-  // null b2 -- gets none at all. Every row of an object node has a b2, which
-  // is why one full-height line is equivalent there.
-  if (node.rows[0]?.arrayEntry !== true) {
-    parts.push(line(node.keyColWidth, 0, node.keyColWidth, node.height, sepLineStyle));
-  }
-
-  // --- Row text ---
-  for (const row of node.rows) {
-    const midY = row.y + row.height / 2;
-    const isHighlighted = row.highlight !== false;
-    // Per-class style overrides for this row (empty if no named class or no class entry)
-    const classStyle = isHighlighted && row.highlight
-      ? (highlightClasses?.[row.highlight] ?? {})
-      : {};
-    const effectiveHlFontColor = classStyle.fontColor ?? hlFontColor;
-    const effectiveHlFontBold = classStyle.fontBold ?? hlFontBold;
-    const effectiveHlFontItalic = classStyle.fontItalic ?? hlFontItalic;
-
-    // Compute key text x and textAnchor based on textAlign.
-    // Key column alignment.
-    let keyX: number;
-    let keyAnchor: 'start' | 'middle' | 'end';
-    if (textAlign === 'center') {
-      keyX = node.keyColWidth / 2;
-      keyAnchor = 'middle';
-    } else if (textAlign === 'right') {
-      keyX = node.keyColWidth - H_PAD;
-      keyAnchor = 'end';
-    } else {
-      keyX = H_PAD;
-      keyAnchor = 'start';
-    }
-
-    // Key text — bold by default (plantuml.skin jsonDiagram.node.header { FontStyle bold })
-    // Can be overridden to non-bold via element.header { FontStyle: plain }
-    const headerBold = json?.headerFontBold !== false;
-    const effectiveKeyColor = isHighlighted && effectiveHlFontColor !== undefined
-      ? effectiveHlFontColor
-      : keyColor;
-    // A5/T6b: an ARRAY row has no key cell. Upstream puts the VALUE in `b1`
-    // and never draws the index (it uses it only to resolve highlights) --
-    // this port used to draw it, a divergence now retired.
-    if (!row.arrayEntry) parts.push(
-      text(keyX, midY, row.key, {
-        fontFamily: nodeFontFamily,
-        fontSize: nodeFontSize,
-        fill: effectiveKeyColor,
-        dominantBaseline: 'middle',
-        textAnchor: keyAnchor,
-        ...((isHighlighted ? effectiveHlFontBold : false) || headerBold ? { fontWeight: 'bold' } : {}),
-        ...(isHighlighted && effectiveHlFontItalic ? { fontStyle: 'italic' } : {}),
+  // A5/T6b: an ARRAY row has no key cell. Upstream puts the VALUE in `b1` and
+  // never draws the index (it uses it only to resolve highlights).
+  if (!row.arrayEntry) {
+    const keyColor = hl.isHighlighted && hl.fontColor !== undefined ? hl.fontColor : ts.keyColor;
+    parts.push(
+      text(cellTextX(node.x, node.keyColWidth, row.keyWidth, ts.align), node.y + row.keyBaselineY, row.key, {
+        ...common,
+        fill: keyColor,
+        textLength: row.keyTextLength,
+        ...((hl.isHighlighted ? hl.fontBold : false) || ts.headerBold ? { fontWeight: '700' as const } : {}),
+        ...(hl.isHighlighted && hl.fontItalic ? { fontStyle: 'italic' } : {}),
       }),
     );
-
-    // Value text (skip for nested/empty values)
-    if (row.value !== '') {
-      const lineH = row.height / row.valueLines.length;
-      const baseVColor = nodeFontColor ?? valueColor(row.valueType, json);
-      const vColor = isHighlighted && effectiveHlFontColor !== undefined
-        ? effectiveHlFontColor
-        : baseVColor;
-      // An array row's single cell IS column A, so it spans the whole node.
-      const colLeft = row.arrayEntry ? 0 : node.keyColWidth;
-      const valueColWidth = node.width - colLeft;
-
-      // Compute value text x and textAnchor based on textAlign.
-      let valueX: number;
-      let valueAnchor: 'start' | 'middle' | 'end';
-      if (textAlign === 'center') {
-        valueX = colLeft + valueColWidth / 2;
-        valueAnchor = 'middle';
-      } else if (textAlign === 'right') {
-        valueX = node.width - H_PAD;
-        valueAnchor = 'end';
-      } else {
-        valueX = colLeft + H_PAD;
-        valueAnchor = 'start';
-      }
-
-      const effectiveBold = isHighlighted ? effectiveHlFontBold : nodeFontBold;
-      const effectiveItalic = isHighlighted ? effectiveHlFontItalic : nodeFontItalic;
-      for (let li = 0; li < row.valueLines.length; li++) {
-        const lineY = row.y + lineH * li + lineH / 2;
-        parts.push(
-          text(valueX, lineY, row.valueLines[li]!, {
-            fontFamily: nodeFontFamily,
-            fontSize: nodeFontSize,
-            fill: vColor,
-            dominantBaseline: 'middle',
-            textAnchor: valueAnchor,
-            ...(effectiveBold ? { fontWeight: 'bold' } : {}),
-            ...(effectiveItalic ? { fontStyle: 'italic' } : {}),
-          }),
-        );
-      }
-    }
   }
 
-  // --- Outer border drawn last so it paints over the fills at the corners ---
-  parts.push(
-    rect(0, 0, node.width, node.height, {
-      fill: 'none',
-      stroke: border,
-      strokeWidth: borderWidth,
-      ...(borderDash !== undefined ? { strokeDasharray: borderDash } : {}),
-      rx,
-    }),
-  );
+  if (row.value === '') return parts.join('');
 
-  const inner = parts.join('');
-  return `<g transform="translate(${node.x}, ${node.y})">${inner}</g>`;
+  const baseColor = ts.fontColor ?? valueColor(row.valueType, style.json);
+  const vColor = hl.isHighlighted && hl.fontColor !== undefined ? hl.fontColor : baseColor;
+  // An array row's single cell IS column A, so it spans the whole node.
+  const colLeft = row.arrayEntry ? node.x : node.x + node.keyColWidth;
+  const colWidth = node.width - (row.arrayEntry ? 0 : node.keyColWidth);
+  const bold = hl.isHighlighted ? hl.fontBold : ts.bold;
+  const italic = hl.isHighlighted ? hl.fontItalic : ts.italic;
+
+  for (let li = 0; li < row.valueLines.length; li++) {
+    const lineWidth = row.valueLineWidths[li] ?? 0;
+    parts.push(
+      text(cellTextX(colLeft, colWidth, lineWidth, ts.align), node.y + (row.valueBaselineYs[li] ?? 0), row.valueLines[li]!, {
+        ...common,
+        fill: vColor,
+        textLength: row.valueTextLengths[li] ?? 0,
+        ...(bold ? { fontWeight: '700' as const } : {}),
+        ...(italic ? { fontStyle: 'italic' } : {}),
+      }),
+    );
+  }
+  return parts.join('');
 }
 
 /**
- * Build a `<marker>` string (no outer `<defs>`) for the JSON arrowhead with
- * the given stroke color embedded directly. Passed to svgRoot() as `extraDefs`
- * so it lands in the single top-level `<defs>` block — required when SVG is
- * injected via innerHTML, where late `<defs>` may not resolve url(#id) refs.
+ * One json node, mirroring `TextBlockJson#drawU` (`TextBlockJson.java:260-320`)
+ * element for element:
  *
- * markerUnits="userSpaceOnUse" keeps the arrowhead at a fixed pixel size
- * regardless of the edge stroke-width.
+ *   1. the filled rounded rect — `ugNode.apply(backColor.bg()).apply(backColor)`
+ *      sets fill AND stroke to the background color;
+ *   2. every row, in order (see {@link renderRow});
+ *   3. the SAME rect again, this time stroke-only, so the border paints over
+ *      the row fills at the rounded corners.
+ *
+ * Three things this port used to draw that upstream does not, all removed:
+ * a per-node `<defs><clipPath>`, a key-column background rect (`drawU` paints
+ * no such column — the `header` style contributes font, not fill), and a
+ * single full-height column divider in place of upstream's per-row one.
  */
-function jsonArrowMarkerDef(theme: Theme, markerId: string): string {
-  const json = theme.colors.graph.json;
-  const stroke = json?.arrowColor ?? theme.colors.arrow;
-  return openArrowHeadDef(markerId, stroke);
+function renderNode(node: JsonNodeGeo, style: NodeStyleJson): string {
+  const { box } = style;
+  const corners = { rx: box.rx, ry: box.rx };
+  const parts: string[] = [
+    rect(node.x, node.y, node.width, node.height, {
+      fill: box.bg,
+      stroke: box.bg,
+      strokeWidth: box.borderWidth,
+      ...(box.borderDash !== undefined ? { strokeDasharray: box.borderDash } : {}),
+      ...corners,
+    }),
+  ];
+
+  for (const row of node.rows) parts.push(renderRow(node, row, style));
+
+  parts.push(
+    rect(node.x, node.y, node.width, node.height, {
+      fill: 'none',
+      stroke: box.border,
+      strokeWidth: box.borderWidth,
+      ...(box.borderDash !== undefined ? { strokeDasharray: box.borderDash } : {}),
+      ...corners,
+    }),
+  );
+
+  return parts.join('');
 }
 
-function renderEdge(edge: JsonEdgeGeo, theme: Theme, markerId: string): string {
+/**
+ * One json edge, in `SmetanaForJson#drawMe`'s own order (:173-175): the curve
+ * and its arrowhead (both inside `JsonCurve#drawCurve`), then the spot.
+ *
+ * A5 ledger **M3**: the arrowhead is an INLINE filled `<path>`, not an SVG
+ * `<marker>`. Upstream has no markers anywhere — `drawCurve` ends by
+ * constructing an `Arrow` and drawing it — so the marker this port used to
+ * emit also left a child in the document's `<defs>`, which the jar leaves
+ * empty. Same mechanism mission G4 landed for state diagrams.
+ *
+ * This port previously drew the spot FIRST, reversing upstream's order.
+ */
+function renderEdge(edge: JsonEdgeGeo, theme: Theme): string {
   // A5/T8: the path and the spot both come from the ported `JsonCurve`, which
   // consumes the engine's spline. This used to build its own S-curve and place
   // the spot on a horizontal offset; upstream extrapolates along the spline's
@@ -284,21 +273,29 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, markerId: string): string {
   const json = theme.colors.graph.json;
   const stroke = json?.arrowColor ?? theme.colors.arrow;
   const strokeWidth = json?.arrowThickness ?? 1;
-  const strokeDasharray = json?.arrowDasharray ?? '3 3';
+  // `yamlDiagram,jsonDiagram { arrow { LineStyle 3-3 } }` (`skin/plantuml.skin`
+  // :449-451), emitted comma-separated — see `style-map-json-diagram.ts`.
+  const strokeDasharray = json?.arrowDasharray ?? '3,3';
 
-  const linePart = path(d, {
-    stroke,
-    strokeWidth,
-    strokeDasharray,
-    markerEnd: `url(#${markerId})`,
-  });
+  const linePart = path(d, { stroke, strokeWidth, strokeDasharray, fill: 'none' });
+
+  // `Arrow#drawArrow` — filled, and deliberately unstroked: the jar emits
+  // `fill="#000"` with no `style` attribute at all on this element.
+  const headD = buildArrowHeadPath(edge.points);
+  const headPart = headD === '' ? '' : path(headD, { fill: stroke });
 
   // `JsonCurve#drawSpot`: a filled circle of radius 3 at the same extrapolated
-  // point the stub starts from (`JsonCurve.java:114-118`).
+  // point the stub starts from (`JsonCurve.java:114-118`), stroked by the
+  // `UStroke.simple()` that call applies.
   const spot = veryFirstPoint(edge.points);
-  const dotPart = spot !== undefined ? ellipse(spot.x, spot.y, 3, 3, { fill: stroke }) : '';
+  const dotPart = spot !== undefined
+    // `ellipse` takes RAW SVG attribute names, not the camelCase `BoxStyle`
+    // keys `rect`/`line` use — `strokeWidth` here would emit a literal
+    // `strokeWidth=` attribute.
+    ? ellipse(spot.x, spot.y, 3, 3, { fill: stroke, stroke, 'stroke-width': 1 })
+    : '';
 
-  return dotPart + linePart;
+  return linePart + headPart + dotPart;
 }
 
 // ---------------------------------------------------------------------------
@@ -308,56 +305,49 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, markerId: string): string {
 /**
  * Render a JSON diagram geometry into an SVG string.
  */
+/** The fixed-size diagnostic box drawn in place of a diagram whose JSON body
+ *  would not parse. Not an upstream shape — this port's own error surface. */
+function renderErrorBox(message: string): RenderFragment {
+  const PAD = 12;
+  const FONT_SIZE = 14;
+  const msgWidth = message.length * FONT_SIZE * 0.6 + PAD * 2;
+  const msgHeight = FONT_SIZE + PAD * 2;
+  const body =
+    rect(PAD, PAD, msgWidth, msgHeight, { fill: '#FFFFFF', stroke: '#888888', rx: 4 }) +
+    text(PAD * 2, PAD * 2 + FONT_SIZE, message, {
+      fontFamily: 'Courier, monospace',
+      fontSize: FONT_SIZE,
+      fill: '#000000',
+    });
+  return { body, width: msgWidth + PAD * 2, height: msgHeight + PAD * 2 };
+}
+
 export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
-  if (geo.error !== undefined) {
-    const PAD = 12;
-    const FONT_SIZE = 14;
-    const msgWidth = geo.error.length * FONT_SIZE * 0.6 + PAD * 2;
-    const msgHeight = FONT_SIZE + PAD * 2;
-    const svgWidth = msgWidth + PAD * 2;
-    const svgHeight = msgHeight + PAD * 2;
-    const boxX = PAD;
-    const boxY = PAD;
-    const parts = [
-      rect(boxX, boxY, msgWidth, msgHeight, {
-        fill: '#FFFFFF',
-        stroke: '#888888',
-        rx: 4,
-      }),
-      text(boxX + PAD, boxY + PAD + FONT_SIZE, geo.error, {
-        fontFamily: 'Courier, monospace',
-        fontSize: FONT_SIZE,
-        fill: '#000000',
-      }),
-    ];
-    return { body: parts.join(''), width: svgWidth, height: svgHeight };
-  }
+  if (geo.error !== undefined) return renderErrorBox(geo.error);
 
   if (geo.nodes.length === 0) {
     return { body: '', width: 0, height: 0 };
   }
 
-  const diagramSalt = saltFor(geo);
+  const style = resolveNodeStyle(theme);
   const parts: string[] = [];
 
   // Title is no longer drawn here (mission G0b/T8) -- it flows through
   // ast.annotations.title and is drawn once, centrally, by applyChrome
   // (src/index.ts) around the RenderFragment this function returns.
   for (const node of geo.nodes) {
-    parts.push(renderNode(node, theme, diagramSalt));
+    parts.push(renderNode(node, style));
   }
-
-  const markerId = `arrow-json-dep-${diagramSalt}`;
 
   for (const edge of geo.edges) {
-    parts.push(renderEdge(edge, theme, markerId));
+    parts.push(renderEdge(edge, theme));
   }
 
+  // No `extraDefs`: the jar's json documents carry an EMPTY `<defs/>` (M3).
   return {
     body: parts.join(''),
     width: geo.width,
     height: geo.height,
     background: theme.colors.background,
-    extraDefs: jsonArrowMarkerDef(theme, markerId),
   };
 }

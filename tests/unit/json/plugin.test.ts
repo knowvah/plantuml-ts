@@ -88,16 +88,19 @@ describe('render @startjson end-to-end', () => {
     // dispatcher type-based routing.
     const svg = await render('@startjson\n[1, 2, 3]\n@endjson');
     expect(svg).toContain('<svg');
-    // JSON renderer wraps each node in <g transform=...>; at least one must exist
-    expect(svg).toMatch(/<g transform=/);
+    // A5/M2: nodes are drawn FLAT (no per-node `<g transform>`), so a node is
+    // counted by its own rounded fill rect rather than by a group.
+    expect(svg).toMatch(/<rect x=/);
   });
 
   it('renders nested arrays-of-arrays with correct node count', async () => {
     // [ [], [[]], [] ] → 5 nodes (root + 3 children + 1 grandchild)
     const svg = await render('@startjson\n[ [], [[]], [] ]\n@endjson');
     expect(svg).toContain('<svg');
-    const nodeGroups = svg.match(/<g transform=/g) ?? [];
-    expect(nodeGroups.length).toBe(5);
+    // A5/M2: each node draws exactly TWO rects — the fill and the border
+    // (`TextBlockJson#drawU` opens and closes with the same rectangle).
+    const nodeRects = svg.match(/<rect x=/g) ?? [];
+    expect(nodeRects.length).toBe(5 * 2);
   });
 
   it('renders title directive in SVG output', async () => {
@@ -137,7 +140,9 @@ describe('render @startjson — style block', () => {
 
   it('applies element.header.FontStyle: bold to key column text', async () => {
     const svg = await render(diagramWithStyle);
-    expect(svg).toContain('font-weight="bold"');
+    // `DriverTextSvg` emits the numeric CSS weight, never the keyword
+    // (`fontWeightOf` -> '700'); the jar's own goldens all read `font-weight="700"`.
+    expect(svg).toContain('font-weight="700"');
   });
 
   it('still renders the JSON content correctly', async () => {
@@ -152,7 +157,8 @@ describe('jsondiagram.node style block', () => {
     const svg = await render(
       '@startjson\n<style>\njsonDiagram {\n  node {\n    RoundCorner 8\n  }\n}\n</style>\n{"a":1}\n@endjson',
     );
-    expect(svg).toMatch(/rx="8"/);
+    // `DriverRectangleSvg.java:78` halves it: RoundCorner 8 -> rx="4".
+    expect(svg).toMatch(/rx="4"/);
   });
 
   it('applies MaximumWidth word-wrapping from jsonDiagram.node style', async () => {
@@ -185,25 +191,37 @@ describe('jsondiagram.node style block', () => {
     expect(svg).toContain('#123456');
   });
 
-  it('applies HorizontalAlignment center from jsonDiagram.node style', async () => {
+  // A5/M2: upstream positions a cell by computing an absolute `x` --
+  // `HorizontalAlignment#draw` translates the text BLOCK by `0`,
+  // `(width - dim) / 2` or `width - dim` and draws it there -- and never emits
+  // a `text-anchor`. So alignment is asserted through the coordinate it
+  // produces, which is the thing that actually has to be right.
+  const alignedKeyX = async (alignment: string): Promise<number> => {
     const svg = await render(
-      '@startjson\n<style>\njsonDiagram {\n  node {\n    HorizontalAlignment center\n  }\n}\n</style>\n{"k":"v"}\n@endjson',
+      // Two keys of very different lengths: with a single short key the column
+      // is exactly the text plus its margins, so all three alignments coincide
+      // at x=15 and the test would pass vacuously.
+      `@startjson\n<style>\njsonDiagram {\n  node {\n    HorizontalAlignment ${alignment}\n  }\n}\n</style>\n{"k":"v","a_much_longer_key":"v"}\n@endjson`,
     );
-    expect(svg).toContain('text-anchor="middle"');
+    expect(svg).not.toContain('text-anchor');
+    const first = /<text x="([0-9.]+)"/.exec(svg);
+    expect(first).not.toBeNull();
+    return Number(first![1]);
+  };
+
+  it('applies HorizontalAlignment center from jsonDiagram.node style', async () => {
+    expect(await alignedKeyX('center')).toBeGreaterThan(await alignedKeyX('left'));
   });
 
   it('applies HorizontalAlignment right from jsonDiagram.node style', async () => {
-    const svg = await render(
-      '@startjson\n<style>\njsonDiagram {\n  node {\n    HorizontalAlignment right\n  }\n}\n</style>\n{"k":"v"}\n@endjson',
-    );
-    expect(svg).toContain('text-anchor="end"');
+    expect(await alignedKeyX('right')).toBeGreaterThan(await alignedKeyX('center'));
   });
 
   it('applies FontStyle bold from jsonDiagram.node style', async () => {
     const svg = await render(
       '@startjson\n<style>\njsonDiagram {\n  node {\n    FontStyle bold\n  }\n}\n</style>\n{"k":"v"}\n@endjson',
     );
-    expect(svg).toContain('font-weight="bold"');
+    expect(svg).toContain('font-weight="700"');
   });
 
   it('applies FontStyle italic from jsonDiagram.node style', async () => {
@@ -224,7 +242,7 @@ describe('jsondiagram.node style block', () => {
     const svg = await render(
       '@startjson\n<style>\njsonDiagram {\n  node {\n    FontWeight bold\n  }\n}\n</style>\n{"k":"v"}\n@endjson',
     );
-    expect(svg).toContain('font-weight="bold"');
+    expect(svg).toContain('font-weight="700"');
   });
 
   it('applies LineThickness from jsonDiagram.node style', async () => {
@@ -258,6 +276,7 @@ describe('jsondiagram.node style block', () => {
     );
     // G1c: named colors resolve to their canonical jar hex.
     expect(svg).toContain('fill="#F00"');
-    expect(svg).toMatch(/rx="6"/);
+    // RoundCorner 6, halved for SVG (`DriverRectangleSvg.java:78`).
+    expect(svg).toMatch(/rx="3"/);
   });
 });

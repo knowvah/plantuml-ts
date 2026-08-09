@@ -34,8 +34,16 @@ function shell(body: string): string {
 }
 
 /** Everything the assembled document places between its `<defs>` block and
- *  the closing `</svg>`. */
+ *  the closing `</svg>`.
+ *
+ *  The block is SELF-CLOSING when it has no children — `<defs/>`, which is how
+ *  the jar writes it — so this cannot just look for `</defs>`. These fixtures
+ *  pass no `extraDefs`, so in practice they all take the self-closing form. */
 function afterDefs(svg: string): string {
+  const selfClosing = svg.indexOf('<defs/>');
+  if (selfClosing > -1) {
+    return svg.slice(selfClosing + '<defs/>'.length, svg.lastIndexOf('</svg>'));
+  }
   const end = svg.indexOf('</defs>');
   expect(end).toBeGreaterThan(-1);
   return svg.slice(end + '</defs>'.length, svg.lastIndexOf('</svg>'));

@@ -172,14 +172,18 @@ describe('layoutJson', () => {
     expect(otherRow!.highlight).toBe(false);
   });
 
-  it('nested value row has valueType "nested" and empty value string', () => {
+  it('nested value row has valueType "nested" and a three-space value', () => {
     const ast = makeAst({ child: { x: 1 } });
     const geo = layoutJson(ast, defaultTheme, measurer);
 
     const nestedRow = geo.nodes[0]!.rows.find((r) => r.key === 'child');
     expect(nestedRow).toBeDefined();
     expect(nestedRow!.valueType).toBe('nested');
-    expect(nestedRow!.value).toBe('');
+    // `getShortString` falls through to `return "   ";` for an object or array
+    // (`TextBlockJson.java:194`). The cell is drawn, and it is MEASURED --
+    // `getWidthColB` folds it in like any other, so a nested row can be the
+    // widest in column B. This port used to return `''`, losing both.
+    expect(nestedRow!.value).toBe('   ');
   });
 
   it('string value row has valueType "string"', () => {

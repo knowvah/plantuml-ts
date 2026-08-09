@@ -55,6 +55,78 @@ export function veryFirstPoint(points: readonly CurvePoint[]): CurvePoint | unde
 }
 
 /**
+ * graphviz's `#define ARROW_LENGTH 10.`
+ * (`~/git/graphviz/lib/common/arrows.c:29`) scaled by the `arrowsize` upstream
+ * sets on every json edge — `agsafeset(zz, edge, "arrowsize", ".75")`
+ * (`SmetanaForJson.java:221`, alongside `arrowhead=normal` at :223).
+ */
+const ARROW_LENGTH = 10 * 0.75;
+
+/**
+ * `Arrow#getPoint` — polar offset with sin on x and cos on y (note the
+ * ordering, which is not the usual convention and pairs with the equally
+ * unusual `atan2(dx, dy)` below).
+ * @see .../jsondiagram/Arrow.java#getPoint
+ */
+function arrowPoint(center: CurvePoint, alpha: number, len: number): CurvePoint {
+  return { x: center.x + len * Math.sin(alpha), y: center.y + len * Math.cos(alpha) };
+}
+
+/**
+ * Where the spline ENDS, as distinct from its last control point.
+ *
+ * graphviz stores this on the spline as `ep` (`bezier.ep`), separate from the
+ * control-point list, and upstream reads it straight off
+ * (`JsonCurve.java:78-82`). **`@knowvah/dot-engine` does not expose `sp`/`ep`**
+ * — `EdgeGeometry` carries only `points` — so this port extrapolates it from
+ * the spline's own terminal direction by one arrow length.
+ *
+ * That is an approximation of a value the engine already computed, not a
+ * fitted constant: both numbers behind `ARROW_LENGTH` are cited upstream. It
+ * is the arrowhead's DEPTH that is approximate; its direction and shape come
+ * from the spline. Tracked in `docs/graphviz-issues/` — exposing `sp`/`ep`
+ * removes the approximation entirely.
+ */
+function endPointOf(points: readonly CurvePoint[]): CurvePoint | undefined {
+  const last = points[points.length - 1];
+  const prev = points[points.length - 2];
+  if (last === undefined || prev === undefined) return undefined;
+  return supp(last, prev, ARROW_LENGTH);
+}
+
+/**
+ * The filled arrowhead upstream draws INLINE at the spline's end — not an SVG
+ * `<marker>`. `drawCurve` closes with
+ * `new Arrow(last, trueEp).drawArrow(ug.apply(color.bg()))`, and `drawArrow`
+ * builds a four-point path: the two barbs at `±90°` off the axis at `0.4·dist`,
+ * a notch at `0.3·dist` along it, and the tip at `p2`.
+ *
+ * Returns `''` for a spline too short to have a direction.
+ *
+ * @see .../jsondiagram/Arrow.java#drawArrow
+ * @see .../jsondiagram/JsonCurve.java#drawCurve
+ */
+export function buildArrowHeadPath(points: readonly CurvePoint[]): string {
+  const p1 = points[points.length - 1];
+  const p2 = endPointOf(points);
+  if (p1 === undefined || p2 === undefined) return '';
+
+  const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+  if (dist === 0) return '';
+  // `Math.atan2(p1p2.getDX(), p1p2.getDY())` — dx first, matching `arrowPoint`.
+  const alpha = Math.atan2(p2.x - p1.x, p2.y - p1.y);
+
+  const p3 = arrowPoint(p1, alpha + Math.PI / 2, dist * 0.4);
+  const p4 = arrowPoint(p1, alpha - Math.PI / 2, dist * 0.4);
+  const p11 = arrowPoint(p1, alpha, dist * 0.3);
+
+  return (
+    `M ${p4.x} ${p4.y} L ${p11.x} ${p11.y} L ${p3.x} ${p3.y} ` +
+    `L ${p2.x} ${p2.y} L ${p4.x} ${p4.y}`
+  );
+}
+
+/**
  * @see .../jsondiagram/JsonCurve.java#drawCurve
  *
  * `moveTo(veryFirst)`, `lineTo(points[0])`, then cubic segments consuming the

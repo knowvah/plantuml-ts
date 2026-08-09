@@ -256,9 +256,13 @@ export const defaultTheme: Theme = {
         // plantuml.skin sets jsonDiagram.node.BackGroundColor #F1F1F1 as the default.
         // Named themes override this via their compiled graph.json entry.
         background:          '#F1F1F1',
-        border:              '#181818',
+        // `skin/plantuml.skin`'s `yamlDiagram,jsonDiagram { LineColor black }`
+        // (:446) — this family does NOT take the global `#181818` default.
+        // Every cached golden draws its node borders, separators and edges in
+        // `#000`; these two were `#181818`, unsourced.
+        border:              '#000000',
         highlightBackground: '#CCFF02',
-        arrowColor:          '#181818',
+        arrowColor:          '#000000',
       },
     },
   },

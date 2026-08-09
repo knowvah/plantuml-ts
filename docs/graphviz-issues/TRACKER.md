@@ -13,3 +13,5 @@ object ratchets and census re-run instantly against an updated `.tgz`).
 - [x] 06-cluster-bbox-not-in-getlayout.md
 - [x] 07-html-label-mark-not-exported.md
 - [x] 08-cluster-scoped-rank-subgraph-bbox.md
+- [ ] 09-routesplines-drops-edge-on-record-ports.md
+- [ ] 10-edge-spline-sp-ep-not-exposed.md

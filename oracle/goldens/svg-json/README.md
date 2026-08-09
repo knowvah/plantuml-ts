@@ -5,29 +5,37 @@ Mission **A5** (json family). Sibling of `svg-description`, `svg-class`,
 
 ## Current state
 
-**Still empty after A5 Batch 4 — 0 of 50 fixtures byte-conformant, and that is
-the accurate picture, not a stalled harness.** The ratchet suite skips
-gracefully; the graceful-skip branch is genuinely exercised here.
+**Still empty, 0 of 50 fixtures byte-conformant — and under the current exit
+bar it can never be otherwise.** That is a statement about the bar, not a
+stalled harness. The ratchet suite skips gracefully; the graceful-skip branch
+is genuinely exercised here.
 
-Two independent reasons, and only the second is a defect:
+Two divergences, both DELIBERATE, touch essentially every fixture:
 
-1. **Byte-exact geometry is not the target for this family** (ADR-2b, and
-   CLAUDE.md "One layout engine"). Upstream lays these types out with Smetana;
-   this port uses one engine for everything, so document dimensions differ by
-   design. Priority here is readability first, SVG fidelity second.
-2. **The document structure does not match yet.** Every fixture carries a root
-   `childCount` diff — the jar emits `<defs/>` plus one content `<g>`, this
-   port emits node groups and per-node `<defs>` as top-level siblings. Because
-   `compare.ts` stops recursing on a structural mismatch, **no fixture's
-   interior has been compared**, so no fixture can honestly be pinned.
+1. **Document dimensions and all geometry** (ADR-2b, and CLAUDE.md "One layout
+   engine"). Upstream lays these types out with Smetana; this port uses one
+   engine for everything and accepts the delta. It moves the root
+   `@width`/`@height`/`@viewBox` on all 92 family fixtures.
+2. **Per-type value-text colour** (DIVERGENCES.md, "Value text — per-type
+   colors (aesthetic)"), on every fixture with a scalar value.
 
-See `plans/a5-json-family-conformance/ledger.md` — mechanism M2 is the gate.
-What IS measured and good: node sizing (mean |Δw| 3.08, |Δh| 0.96 against the
-jar) and per-node placement (mean |Δy| 6.65, 21 of 557 nodes exact), via
-`scripts/json-node-oracle.ts`.
+A zero-diff rule cannot admit a fixture past either. **So do not read this
+folder's emptiness as a conformance signal, and do not "fix" a divergence to
+populate it.**
 
-Corpus: **50 `@startjson` fixtures**, captured from the pinned oracle jar into
-`test-results/dot-cache/json/`.
+### What DID move, and what to gate on instead
+
+The structural port (A5 ledger M2/M3/M4, 2026-08-09) took the **element
+tally** — does this port emit the same elements, of the same kinds, in the
+same order as the jar — from **0 to 75 of 92**. Before it, every fixture
+mismatched at the root, `compare.ts` stopped recursing, and no fixture's
+interior had ever been compared.
+
+That metric is not contaminated by either divergence, it is mechanically
+checkable, and it is the one worth wiring as this family's gate. It is
+**proposed, not yet implemented**. The 17 fixtures that still differ are each
+named with their delta signature in
+`plans/a5-json-family-conformance/ledger.md`.
 
 ## Where this type's layout lives
 

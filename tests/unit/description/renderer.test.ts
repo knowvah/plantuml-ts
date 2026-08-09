@@ -1406,7 +1406,8 @@ describe('assembleKlimtShell (G1 I1)', () => {
 
   it('emits an empty <defs> block when extraDefs is absent', () => {
     const doc = assembleKlimtShell({ body: '<g/>', width: 10, height: 10, background: '#FFFFFF' });
-    expect(doc).toContain('<defs></defs>');
+    // Self-closing when empty — the jar's own form (`document-shell.ts`).
+    expect(doc).toContain('<defs/>');
   });
 
   it('places the body verbatim after defs, before the closing tag', () => {

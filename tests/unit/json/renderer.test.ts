@@ -20,6 +20,16 @@ function makeRow(overrides: Partial<JsonRowGeo> & Pick<JsonRowGeo, 'valueType'>)
     arrayEntry: false,
     y: 4,
     height: 20,
+    // Text metrics the layout stage measures and the renderer only reads
+    // (`TextBlockJson.ts#cellMetrics`). These hand-built rows are geometry
+    // fixtures, so the values are illustrative, not measured — the suites that
+    // assert real metrics render a real fixture end-to-end.
+    keyWidth: 30,
+    valueLineWidths: [40],
+    keyTextLength: 30,
+    valueTextLengths: [40],
+    keyBaselineY: 16,
+    valueBaselineYs: [16],
     ...overrides,
   };
   // Auto-derive valueLines from value when not explicitly provided
@@ -206,23 +216,40 @@ describe('renderJson — structural', () => {
     const geo = makeGeo({ nodes });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    expect(body).toContain('<g transform="translate(10, 20)">');
-    expect(body).toContain('<g transform="translate(300, 50)">');
+    // A5/M2: nodes are drawn FLAT, in absolute coordinates, with no per-node
+    // group. `SvgGraphics` resolves upstream's `UTranslate` into the emitted
+    // coordinates rather than into a `<g transform>`, so the jar's whole
+    // document is `<defs/>` plus ONE content `<g>`.
+    expect(body).not.toContain('<g transform=');
+    expect(body).toContain('x="10" y="20"');
+    expect(body).toContain('x="300" y="50"');
   });
 
-  it('outer border rect has rx="10" (plantuml.skin default)', () => {
+  it('node rects have rx="5" — RoundCorner 10 halved for SVG', () => {
     const geo = makeGeo({ nodes: [makeNode()] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    expect(body).toContain('rx="10"');
+    // `DriverRectangleSvg.java:78` emits `rx/2`, `ry/2`, so the skin's
+    // `RoundCorner 10` reaches the SVG as 5 — and `ry` is emitted too.
+    expect(body).toContain('rx="5" ry="5"');
+    expect(body).not.toContain('rx="10"');
   });
 
-  it('key column background uses headerBackground color', () => {
+  it('draws no key-column background — drawU paints no such column', () => {
     const geo = makeGeo({ nodes: [makeNode()] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    const headerColor = defaultTheme.colors.graph.json?.headerBackground ?? '#F1F1F1';
-    expect(body).toContain(`fill="${headerColor}"`);
+    // `TextBlockJson#drawU` draws the node rect, the rows, and the node rect
+    // again. The `header` style contributes FONT, not fill; this port used to
+    // paint a key-column rect (clipped by a `<clipPath>`) that upstream has
+    // no equivalent of, and the jar emits zero clipPaths in this family.
+    expect(body).not.toContain('clipPath');
+    // Exactly two POSITIONED rects for a single node: the fill and the border.
+    // (This suite calls `renderJson` directly rather than through the plugin,
+    // so the fragment has no `jsonShell` and `assembleSvg` falls through to
+    // the generic `svgRoot`, which contributes its own unpositioned canvas
+    // background rect. Hence `<rect x=`, not `<rect `.)
+    expect((body.match(/<rect x=/g) ?? []).length).toBe(2);
   });
 
   it('row separator lines are emitted for rows with y > 0', () => {
@@ -235,15 +262,15 @@ describe('renderJson — structural', () => {
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    // Row at y=20 and y=40 should emit separator lines
-    expect(body).toContain('y1="20"');
-    expect(body).toContain('y2="20"');
-    expect(body).toContain('y1="40"');
-    expect(body).toContain('y2="40"');
-    // Row at y=0 should NOT emit a separator
+    // Rows are at node.y (20) + row.y, so separators land at 40 and 60.
+    expect(body).toContain('y1="40" x2="210" y2="40"');
+    expect(body).toContain('y1="60" x2="210" y2="60"');
+    // Row at y=0 should NOT emit a separator above it.
     const lineCount = (body.match(/<line /g) ?? []).length;
-    // 2 row separators + 1 vertical divider = 3 total lines
-    expect(lineCount).toBe(3);
+    // A5/M2: upstream draws the column divider INSIDE the per-row loop, one
+    // per row spanning that row's own height (`TextBlockJson.java:311-313`),
+    // not one full-height line per node. So: 2 row separators + 3 dividers.
+    expect(lineCount).toBe(5);
   });
 
   it('nested valueType row with empty value produces no value text element', () => {
@@ -423,9 +450,12 @@ describe('renderJson — branch coverage', () => {
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    const keyColor = defaultTheme.colors.graph.json?.keyText ?? '#181818';
-    // Value text uses keyText color — the default branch of valueColor
-    expect(body).toContain(`fill="${keyColor}"`);
+    // Value text uses keyText color — the default branch of valueColor, whose
+    // fallback is this family's own black (`skin/plantuml.skin:446`
+    // `yamlDiagram,jsonDiagram { FontColor black }`), not the global `#181818`.
+    // `#000000` reaches the SVG in its shortened form, as the jar writes it.
+    expect(defaultTheme.colors.graph.json?.keyText).toBeUndefined();
+    expect(body).toContain('fill="#000"');
   });
 
   it('spline edge with 7 points builds two cubic Bézier segments', () => {
