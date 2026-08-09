@@ -14,41 +14,29 @@ import { layoutGraph as dotLayout } from '../../core/graph-layout.js';
 import type { DotInputEdge, DotInputGraph } from '../../core/graph-layout.js';
 import { XPoint2D } from '../../core/klimt/geom/XPoint2D.js';
 import { Mirror } from './Mirror.js';
+import { measureNode } from './TextBlockJson.js';
+import type { MeasuredNode, JsonRowGeo } from './TextBlockJson.js';
+
+// A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
+// boundary). Re-exported so `renderer.ts` and every existing consumer keep
+// importing `JsonRowGeo` from here.
+export type { JsonRowGeo } from './TextBlockJson.js';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const H_PAD = 8;
-const V_PAD = 4;
-const MIN_COL_WIDTH = 30;
-const MIN_HEIGHT = 15;
-const ROW_HEIGHT_MIN = 20;
 /** Margin added around the entire canvas so nodes don't touch the SVG edge. */
-const CANVAS_PAD = 8;
+/**
+ * A5/T6b: the diagram's own margin, from `TitledDiagram#getDefaultMargins()`
+ * -- `ClockwiseTopRightBottomLeft.same(10)` (`TitledDiagram.java:275-277`).
+ * `JsonDiagram` does not override it. This port previously used an unsourced 8.
+ */
+const CANVAS_PAD = 10;
 
 // ---------------------------------------------------------------------------
 // Public output types
 // ---------------------------------------------------------------------------
-
-/** A single row within a JSON node block */
-export interface JsonRowGeo {
-  key: string;
-  value: string;
-  /** Value split on literal \n for multi-line string display. Always ≥ 1 element. */
-  valueLines: readonly string[];
-  valueType: 'string' | 'number' | 'boolean' | 'null' | 'nested';
-  /**
-   * Highlight state:
-   *   false        — not highlighted
-   *   '' (empty)   — highlighted with no named style class (default highlight color)
-   *   'h1', 'h2'   — highlighted with a named style class
-   */
-  highlight: string | false;
-  /** y offset within the node (top of row) */
-  y: number;
-  height: number;
-}
 
 /** A positioned JSON node (one object or array) */
 export interface JsonNodeGeo {
@@ -84,115 +72,34 @@ export interface JsonGeometry {
 // ---------------------------------------------------------------------------
 
 
-import { getDisplayValue, containerEntries, walkTree, EMPTY_MAP, buildHighlightMap, processStringDisplay, wordWrapLine } from './json-layout-prep.js';
+import { walkTree, EMPTY_MAP, buildHighlightMap } from './json-layout-prep.js';
 import type { JsonContainer, FlatNode, BuildRowsOptions } from './json-layout-prep.js';
 
-function buildRows(
-  node: FlatNode,
-  highlightKeys: ReadonlyMap<string, string>,
-  measurer: StringMeasurer,
-  fontSize: number,
-  options?: BuildRowsOptions,
-): JsonRowGeo[] {
-  const fontFamily = options?.fontFamily ?? 'sans-serif';
-  const font = options?.fontBold
-    ? { family: fontFamily, size: fontSize, weight: 'bold' as const }
-    : { family: fontFamily, size: fontSize };
-  const entries = containerEntries(node.value);
-  const maximumWidth = options?.maximumWidth;
-
-  const rows: JsonRowGeo[] = [];
-  let currentY = V_PAD;
-
-  for (const [k, v] of entries) {
-    const { display, valueType } = getDisplayValue(v);
-    // Apply PlantUML escape interpretation to string values, then split on
-    // newlines produced by \n sequences. Non-string values are single-line.
-    const processed = valueType === 'string' ? processStringDisplay(display) : display;
-    let valueLines: string[] = valueType === 'string' ? processed.split('\n') : [display];
-
-    // Apply word-wrap only to string-type values when maximumWidth is set.
-    if (valueType === 'string' && maximumWidth !== undefined) {
-      const wrapped: string[] = [];
-      for (const segment of valueLines) {
-        const wl = wordWrapLine(segment, maximumWidth, measurer, font);
-        for (const wline of wl) wrapped.push(wline);
-      }
-      valueLines = wrapped;
-    }
-
-    const keyDims = measurer.measure(k, font);
-    const lineHeight = Math.max(ROW_HEIGHT_MIN, keyDims.height + V_PAD);
-    const rowHeight = valueLines.length * lineHeight;
-
-    rows.push({
-      key: k,
-      value: processed,
-      valueLines,
-      valueType,
-      highlight: highlightKeys.get(k) ?? false,
-      y: currentY,
-      height: rowHeight,
-    });
-
-    currentY += rowHeight;
-  }
-
-  return rows;
-}
-
-interface MeasuredNode {
-  flatNode: FlatNode;
-  rows: JsonRowGeo[];
-  keyColWidth: number;
-  valueColWidth: number;
-  totalWidth: number;
-  totalHeight: number;
-}
-
-function measureNode(
-  flatNode: FlatNode,
-  highlightKeys: ReadonlyMap<string, string>,
-  measurer: StringMeasurer,
-  fontSize: number,
-  options?: BuildRowsOptions,
-): MeasuredNode {
-  const fontFamily = options?.fontFamily ?? 'sans-serif';
-  const valFont = options?.fontBold
-    ? { family: fontFamily, size: fontSize, weight: 'bold' as const }
-    : { family: fontFamily, size: fontSize };
-  const keyFont =
-    options?.headerFontBold ?? options?.fontBold
-      ? { family: fontFamily, size: fontSize, weight: 'bold' as const }
-      : { family: fontFamily, size: fontSize };
-  const rows = buildRows(flatNode, highlightKeys, measurer, fontSize, options);
-
-  let maxKeyWidth = MIN_COL_WIDTH;
-  let maxValueWidth = MIN_COL_WIDTH;
-
-  for (const row of rows) {
-    const kw = measurer.measure(row.key, keyFont).width + 2 * H_PAD;
-    // For multi-line values, use the widest individual line
-    const vw = Math.max(...row.valueLines.map((l) => measurer.measure(l, valFont).width + 2 * H_PAD));
-    if (kw > maxKeyWidth) maxKeyWidth = kw;
-    if (vw > maxValueWidth) maxValueWidth = vw;
-  }
-
-  const keyColWidth = maxKeyWidth;
-  // Cap value column at maximumWidth + padding when wrapping is active.
-  const rawValueColWidth = maxValueWidth;
-  const maximumWidth = options?.maximumWidth;
-  const valueColWidth =
-    maximumWidth !== undefined
-      ? Math.min(rawValueColWidth, maximumWidth + 2 * H_PAD)
-      : rawValueColWidth;
-
-  const lastRow = rows.at(-1);
-  const rawHeight = lastRow !== undefined ? lastRow.y + lastRow.height + V_PAD : V_PAD * 2;
-  const totalHeight = Math.max(MIN_HEIGHT, rawHeight);
-  const totalWidth = keyColWidth + valueColWidth;
-
-  return { flatNode, rows, keyColWidth, valueColWidth, totalWidth, totalHeight };
+/**
+ * @see ~/git/plantuml/.../jsondiagram/JsonDiagram.java:78-88 (the constructor)
+ *
+ * Upstream normalises the root before anything measures it, and the two cases
+ * are not what this port assumed (A5 / T6b — both found by reading the Java
+ * after the measured residual refused to explain itself):
+ *
+ *  - A **primitive** root (string / boolean / number / null) becomes a
+ *    `JsonArray` holding that value. This port used to wrap it in a synthetic
+ *    single-entry OBJECT keyed by the empty string, which puts the value in
+ *    the wrong column: upstream's array rows carry their value in `b1`, and
+ *    `getWidthColB` returns 0 for them (`TextBlockJson.java:127-134`).
+ *
+ *  - An **empty** object or array becomes a `JsonArray` holding one empty
+ *    STRING. This is why the jar draws `{}` as a 10x18 box: one array row
+ *    whose only cell is `""`, so `0 + 2*CELL_MARGIN_X` wide and
+ *    `textHeight + 2*CELL_MARGIN_Y` tall. It is NOT `MIN_WIDTH`/`MIN_HEIGHT`,
+ *    which this port previously assumed — those stay as upstream's defensive
+ *    fallback for a genuinely line-less block, which this substitution makes
+ *    unreachable from the diagram root.
+ */
+function normalizeRoot(root: unknown): JsonContainer {
+  if (typeof root !== 'object' || root === null) return [root] as JsonContainer;
+  const isEmpty = Array.isArray(root) ? root.length === 0 : Object.keys(root).length === 0;
+  return (isEmpty ? [''] : root) as JsonContainer;
 }
 
 /**
@@ -264,24 +171,7 @@ export function layoutJson(
     };
   }
 
-  const root = ast.root;
-
-  let flatNodes: FlatNode[];
-
-  if (typeof root === 'object' && root !== null) {
-    flatNodes = walkTree(root as JsonContainer);
-  } else {
-    // Primitive root: wrap in a synthetic single-entry object so the
-    // generic row-building machinery handles it uniformly.
-    flatNodes = [
-      {
-        id: 'n0',
-        value: { '': root },
-        parentId: null,
-        parentKey: null,
-      },
-    ];
-  }
+  const flatNodes: FlatNode[] = walkTree(normalizeRoot(ast.root));
 
   // Build per-node highlight map: nodeId → Map<key, styleClass>.
   // Each #highlight path navigates from the root node through child nodes
