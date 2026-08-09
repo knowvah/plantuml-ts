@@ -61,9 +61,55 @@ transpose the result through a ported `Mirror`. Retire the fractional
 
 ---
 
-## ADR-2 — For json, Smetana IS the conformance target
+## ~~ADR-2 — For json, Smetana IS the conformance target~~ — SUPERSEDED 2026-08-09
 
-**Status:** Accepted
+**Status:** SUPERSEDED by ADR-2b. Kept because it was load-bearing for two
+tasks and its reasoning explains what T7 spent effort on.
+
+**What it got wrong:** it inferred, correctly, that Smetana is the only oracle
+for this family — and then concluded that Smetana is therefore the *target*.
+That does not follow. Being the only available comparison does not make
+something worth reproducing.
+
+---
+
+## ADR-2b — Smetana is NOT a porting target; dot-engine wins and we accept the delta
+
+**Status:** Accepted (maintainer ruling, 2026-08-09). Now a standing repo rule —
+see CLAUDE.md, "Smetana is NOT a porting target. Ever."
+
+### Context
+
+Smetana is upstream's hand-transpile of graphviz 2.38 into Java, and it was
+never brought to full fidelity because that was hard. `@knowvah/dot-engine` is
+the work upstream did not do. Reproducing Smetana's shortfalls would mean
+porting bugs deliberately.
+
+T7 is the concrete case. Real `shape=record` nodes inflate by 16 per row —
+graphviz's `XPAD` (4·GAP) on every record field, which upstream's
+`colAwidth - 8` does not offset. Read from the Java, upstream *should* inflate
+identically (`storeline` sets `lp->dimen` from the `_dim_` sentinel;
+`size_reclbl` PADs on top), yet the jar shows none. Under ADR-2 that gap was a
+blocker to reverse-engineer. Under ADR-2b it is very likely Smetana's own
+infidelity, and reproducing it is explicitly out of scope.
+
+### Decision
+
+Where upstream calls Smetana, this port calls dot-engine and accepts the
+geometry delta, named and measured. Mirror upstream's *structure* — the graph
+it builds, the attributes it sets — but not its transpile's arithmetic.
+
+### Consequences
+
+- **The json family's exit bar cannot be byte-exact geometry.** Hold it to
+  structure, node sizing, and everything this port controls; carry the layout
+  delta as a named entry. `README.md`'s bar is amended accordingly.
+- **T7 is unblocked**, and its remaining question changes from "why doesn't the
+  jar inflate?" to "does dot-engine's own record sizing produce a sane
+  diagram?" — a question about our output, not about matching Smetana.
+- `scripts/json-node-oracle.ts` stays valuable: node sizing and structure are
+  still legitimate targets, and it is what caught the mirrored-diagram bug that
+  no dimension metric could see.
 
 ### Context
 

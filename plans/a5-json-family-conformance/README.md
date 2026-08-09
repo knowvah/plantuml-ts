@@ -7,7 +7,14 @@
 
 Take the json family from `shallow` to **100% SVG-conformant minus named
 divergences**, the bar every other DOT-routed type has already met (G1
-description, G2 class, G3 object, G4 state, D14 dot). These three are the last
+description, G2 class, G3 object, G4 state, D14 dot).
+
+> **Bar amended 2026-08-09 (ADR-2b).** This family is laid out by Smetana
+> upstream, and Smetana is not a porting target — where upstream calls it, this
+> port calls `@knowvah/dot-engine` and accepts the geometry delta. So the bar
+> here is structure, node sizing, and everything this port controls, with the
+> layout delta carried as a named entry. **Byte-exact geometry is explicitly
+> NOT the target for json/yaml/hcl**, unlike every sibling type. These three are the last
 ones left. Today their only depth assertion is
 `tests/integration/json-corpus.test.ts`, which checks that the output contains
 `<svg` and is longer than 100 characters.

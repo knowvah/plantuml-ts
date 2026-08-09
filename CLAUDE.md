@@ -287,6 +287,43 @@ becomes a named divergence flagged for the human maintainer, not a quiet
 correction. Test: *would a long-time PlantUML user be surprised?* Surprise at
 reduced friction is the point; surprise at changed meaning is a regression.
 
+### Smetana is NOT a porting target. Ever. (maintainer ruling, 2026-08-09)
+
+**Where upstream calls Smetana, we call `@knowvah/dot-engine` and accept the
+delta.** This is settled, it applies everywhere, and it is not a divergence
+that needs arguing per case.
+
+Smetana is upstream's hand-transpile of graphviz 2.38 into Java. **It was never
+brought to full fidelity with graphviz, because doing so was hard** — that is
+the whole reason it carries hacks like `Macro.java#hackInitDimensionFromLabel`,
+which bypasses text measurement by smuggling dimensions through a `_dim_`
+sentinel in the label. dot-engine is the work upstream did not do: a real port
+of the graphviz C. Reproducing Smetana's shortfalls would mean porting bugs on
+purpose, and would make this library worse than the thing it ships.
+
+So, concretely:
+
+- **Never chase a Smetana-specific number.** If the jar's geometry disagrees
+  with dot-engine and the path runs through Smetana, dot-engine wins. Record
+  the delta and move on — do not reverse-engineer the shortfall.
+- **This overrides "upstream architecture is authoritative" for layout
+  numbers only.** Still mirror upstream's *structure* — which graph it builds,
+  which attributes it sets, which engine boundary it draws — because that is a
+  design decision. Its transpile's *arithmetic* is not.
+- **It does not license fitting.** "Accept the delta" means name and measure
+  it, not invent a constant to paper over it. Everything in "READ THE JAVA
+  FIRST" still applies to the structure you are porting.
+
+Which paths are Smetana's: `@startjson` / `@startyaml` / `@starthcl` in full
+(`jsondiagram/SmetanaForJson.java` — there is no external dot call, which is
+why the jar emits no `svek-N.dot` for them), and any svek diagram under
+`!pragma layout smetana`. Everything else shells out to a real graphviz binary,
+where the jar's geometry IS a legitimate target.
+
+Consequence for conformance bars: a Smetana-laid-out type cannot be held to
+byte-exact geometry. Hold it to structure, sizing, and everything this port
+controls; carry the layout delta as a named entry.
+
 ## Reference Corpora & layout source
 
 `~/git/pdiff/` — primary fixture corpus, 5600+ `.puml` (one per upstream issue),
