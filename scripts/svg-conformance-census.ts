@@ -40,8 +40,9 @@
  * exact 4-stage algorithm (see that function's own doc comment) using the
  * same already-exported building blocks.
  *
- * Usage: npx tsx scripts/svg-conformance-census.ts [component] [usecase] [class] [object] [state] [dot]
- *   (defaults to component + usecase; class/object/state/dot must be requested
+ * Usage: npx tsx scripts/svg-conformance-census.ts [component] [usecase] [class]
+ *          [object] [state] [dot] [json] [yaml] [hcl]
+ *   (defaults to component + usecase; every other type must be requested
  *   explicitly)
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -72,6 +73,7 @@ import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
+import { renderFixtureJson } from '../tests/oracle/svg-conformance/render-fixture-json.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
@@ -206,6 +208,13 @@ function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer
   }
   if (type === 'state') {
     return renderFixtureState(markup, measurer, { includeStore: censusIncludeStore() });
+  }
+  if (type === 'json' || type === 'yaml' || type === 'hcl') {
+    // Mission A5. ONE helper serves all three: yaml and hcl have no layout or
+    // renderer of their own (`yaml/index.ts` and `hcl/index.ts` both import
+    // `layoutJson`/`renderJson`), so only the parse differs and
+    // `renderFixtureJson` dispatches that internally on the block type.
+    return renderFixtureJson(markup, measurer, { includeStore: censusIncludeStore() });
   }
   if (type === 'dot') {
     // Mission D14. The ONE type with no low-level pipeline to dispatch to, and

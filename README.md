@@ -6,6 +6,36 @@ A TypeScript port of [PlantUML](https://plantuml.com), producing SVG
 diagrams synchronously in the browser and Node.js with no server
 dependency.
 
+## Layout: one engine, always
+
+**All layout in this port goes through
+[`@knowvah/dot-engine`](https://www.npmjs.com/package/@knowvah/dot-engine).**
+Upstream PlantUML uses two layout implementations — it shells out to a real
+graphviz binary for most diagram types, and uses Smetana, its in-JVM Java
+transpile of graphviz, for a few others. This port uses one. Where upstream
+would have used Smetana, we use dot-engine and accept that the resulting
+geometry differs.
+
+The reason is consistency, not ranking: a single layout implementation means
+one set of behaviours to reason about, test, and fix, rather than two that must
+be kept in agreement. dot-engine is a port of the graphviz C source, which we
+maintain and publish separately.
+
+**What this means for your diagrams.** PlantUML's value is in *what* it draws —
+the diagram types, the syntax, the semantics of your source — and that is
+preserved. Layout is *how* the drawing is arranged. So on the affected diagram
+types you should expect:
+
+- the same diagram: same elements, labels, colours and structure;
+- node sizes and text metrics matching upstream;
+- **edge routing and node spacing that may differ from the Java.**
+
+Our goals in priority order, on those types: **readability first, SVG fidelity
+to upstream second.** That trade applies only to a closed, enumerated set —
+`@startjson`, `@startyaml`, `@starthcl`, `@startgit`, and any diagram using
+`!pragma layout smetana`. Every other diagram type is held to upstream's
+geometry and measured fixture by fixture (see [parity](docs/parity-report.md)).
+
 ## Provenance and Attribution
 
 This project is a **derivative work** of PlantUML. The diagram parsing,

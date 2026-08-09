@@ -7,6 +7,8 @@
 
 import { rect, line, text, path, ellipse } from '../../core/svg.js';
 import { openArrowHeadDef } from '../../core/svg-markers.js';
+import { getSeed, seedOf } from '../../core/klimt/drawing/svg/svg-seed.js';
+import { buildCurvePath, veryFirstPoint } from './JsonCurve.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
@@ -34,48 +36,25 @@ function valueColor(
   }
 }
 
-function buildEdgePathD(
-  edge: JsonEdgeGeo,
-): string {
-  const pts = edge.points;
-  if (pts.length === 0) return '';
-
-  const p0 = pts[0];
-  if (p0 === undefined) return '';
-
-  if (pts.length === 1) {
-    return `M ${p0.x} ${p0.y}`;
-  }
-
-  if (edge.spline && pts.length >= 4) {
-    // Explicit Bézier control points: M p0 C p1 p2 p3 [C p4 p5 p6 ...]
-    const parts: string[] = [`M ${p0.x} ${p0.y}`];
-    let i = 1;
-    while (i + 2 < pts.length) {
-      const cp1 = pts[i]!;
-      const cp2 = pts[i + 1]!;
-      const end = pts[i + 2]!;
-      parts.push(`C ${cp1.x} ${cp1.y} ${cp2.x} ${cp2.y} ${end.x} ${end.y}`);
-      i += 3;
-    }
-    return parts.join(' ');
-  }
-
-  // Stub + optional horizontal segment + S-curve to child.
-  // When a rank-boundary waypoint is present (3-point edge), the edge travels
-  // horizontally to clear wider siblings at the same rank before curving to
-  // the destination. Without a waypoint (2-point edge), it curves directly.
-  const DOT_STUB = 13;
-  const pEnd = pts[pts.length - 1]!;
-  const pCurveStart = pts.length >= 3 ? pts[pts.length - 2]! : p0;
-  const dx = pEnd.x - pCurveStart.x;
-  const dy = pEnd.y - pCurveStart.y;
-  const cp1x = pCurveStart.x + dx * 0.4;
-  const cp2x = pCurveStart.x + dx * 0.6;
-  const cp2y = pCurveStart.y + dy * 0.6;
-  const curve = `C ${cp1x} ${pCurveStart.y} ${cp2x} ${cp2y} ${pEnd.x} ${pEnd.y}`;
-  const horizontal = pts.length >= 3 ? `L ${pCurveStart.x} ${p0.y} ` : '';
-  return `M ${p0.x - DOT_STUB} ${p0.y} L ${p0.x} ${p0.y} ${horizontal}${curve}`;
+/**
+ * A per-diagram id namespace, derived from the diagram's own geometry.
+ *
+ * The ids built from this (`json-node-clip-…`, `arrow-json-dep-…`) only need to
+ * be unique between diagrams sharing one HTML page. That used to be done with
+ * `Math.random()`, which CLAUDE.md forbids outright in a rendering path:
+ * *"every non-determinism (uid counters, gradient/shadow ids) is seeded so
+ * output is reproducible."* Two diagrams differ in their geometry, so hashing
+ * it gives the same uniqueness deterministically; two IDENTICAL diagrams
+ * collide, which is harmless because their ids address identical shapes.
+ *
+ * Uses upstream's own hash rather than a new one — `seedOf` is
+ * `UmlSource.seed()` and `getSeed` is `SvgGraphics.getSeed(long)`.
+ */
+function saltFor(geo: JsonGeometry): string {
+  const fingerprint = geo.nodes
+    .map((n) => `${n.id}:${n.x},${n.y},${n.width},${n.height},${n.rows.length}`)
+    .join('\n');
+  return getSeed(seedOf(fingerprint));
 }
 
 function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): string {
@@ -164,7 +143,13 @@ function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): strin
   }
 
   // --- Vertical column divider ---
-  parts.push(line(node.keyColWidth, 0, node.keyColWidth, node.height, sepLineStyle));
+  // A5/T6b: upstream draws it INSIDE `if (line.b2 != null)`
+  // (`TextBlockJson.java:311-314`), so an array node -- whose lines all have a
+  // null b2 -- gets none at all. Every row of an object node has a b2, which
+  // is why one full-height line is equivalent there.
+  if (node.rows[0]?.arrayEntry !== true) {
+    parts.push(line(node.keyColWidth, 0, node.keyColWidth, node.height, sepLineStyle));
+  }
 
   // --- Row text ---
   for (const row of node.rows) {
@@ -199,7 +184,10 @@ function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): strin
     const effectiveKeyColor = isHighlighted && effectiveHlFontColor !== undefined
       ? effectiveHlFontColor
       : keyColor;
-    parts.push(
+    // A5/T6b: an ARRAY row has no key cell. Upstream puts the VALUE in `b1`
+    // and never draws the index (it uses it only to resolve highlights) --
+    // this port used to draw it, a divergence now retired.
+    if (!row.arrayEntry) parts.push(
       text(keyX, midY, row.key, {
         fontFamily: nodeFontFamily,
         fontSize: nodeFontSize,
@@ -218,19 +206,21 @@ function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): strin
       const vColor = isHighlighted && effectiveHlFontColor !== undefined
         ? effectiveHlFontColor
         : baseVColor;
-      const valueColWidth = node.width - node.keyColWidth;
+      // An array row's single cell IS column A, so it spans the whole node.
+      const colLeft = row.arrayEntry ? 0 : node.keyColWidth;
+      const valueColWidth = node.width - colLeft;
 
       // Compute value text x and textAnchor based on textAlign.
       let valueX: number;
       let valueAnchor: 'start' | 'middle' | 'end';
       if (textAlign === 'center') {
-        valueX = node.keyColWidth + valueColWidth / 2;
+        valueX = colLeft + valueColWidth / 2;
         valueAnchor = 'middle';
       } else if (textAlign === 'right') {
         valueX = node.width - H_PAD;
         valueAnchor = 'end';
       } else {
-        valueX = node.keyColWidth + H_PAD;
+        valueX = colLeft + H_PAD;
         valueAnchor = 'start';
       }
 
@@ -284,7 +274,11 @@ function jsonArrowMarkerDef(theme: Theme, markerId: string): string {
 }
 
 function renderEdge(edge: JsonEdgeGeo, theme: Theme, markerId: string): string {
-  const d = buildEdgePathD(edge);
+  // A5/T8: the path and the spot both come from the ported `JsonCurve`, which
+  // consumes the engine's spline. This used to build its own S-curve and place
+  // the spot on a horizontal offset; upstream extrapolates along the spline's
+  // OWN direction (`JsonCurve#getVeryFirst` -> `supp`).
+  const d = buildCurvePath(edge.points);
   if (d === '') return '';
 
   const json = theme.colors.graph.json;
@@ -299,10 +293,10 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, markerId: string): string {
     markerEnd: `url(#${markerId})`,
   });
 
-  const DOT_STUB = 13;
-  const p0 = edge.points[0];
-  const dotPart =
-    p0 !== undefined ? ellipse(p0.x - DOT_STUB, p0.y, 3, 3, { fill: stroke }) : '';
+  // `JsonCurve#drawSpot`: a filled circle of radius 3 at the same extrapolated
+  // point the stub starts from (`JsonCurve.java:114-118`).
+  const spot = veryFirstPoint(edge.points);
+  const dotPart = spot !== undefined ? ellipse(spot.x, spot.y, 3, 3, { fill: stroke }) : '';
 
   return dotPart + linePart;
 }
@@ -343,7 +337,7 @@ export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
     return { body: '', width: 0, height: 0 };
   }
 
-  const diagramSalt = Math.random().toString(36).slice(2, 8);
+  const diagramSalt = saltFor(geo);
   const parts: string[] = [];
 
   // Title is no longer drawn here (mission G0b/T8) -- it flows through

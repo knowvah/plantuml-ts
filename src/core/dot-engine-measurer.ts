@@ -33,5 +33,48 @@
  *    lookup table is what reproduces graphviz's own built-in Times metrics.
  */
 import { setTextMeasurer, LutTextMeasurer } from '@knowvah/dot-engine';
+import type { TextMeasurer, TextSize, TextVariantFlags } from '@knowvah/dot-engine';
 
-setTextMeasurer(new LutTextMeasurer());
+/**
+ * `_dim_<x>_<y>_` — upstream's own escape from text measurement.
+ *
+ * @see ~/git/plantuml/src/main/java/smetana/core/Macro.java:1292-1305
+ *
+ * A record cell's size normally comes from measuring its label, but the json
+ * family already knows each cell's exact dimensions before layout and must not
+ * have them re-derived. Upstream solves this by encoding them INTO the label
+ * and decoding them in `hackInitDimensionFromLabel` — Smetana cannot measure
+ * text at all, so the sentinel is its only route.
+ *
+ * This port keeps the same mechanism rather than inventing a parallel one, so
+ * the label `SmetanaForJson` builds is the label this port builds. Note the
+ * group order is upstream's, and it is transposed like everything else in this
+ * family: group 1 lands in `x`, group 2 in `y`, and `SmetanaForJson` emits
+ * `_dim_<lineHeight>_<colWidth>_`.
+ */
+const DIM_SENTINEL = /^_dim_([.\d]+)_([\d.]+)_$/;
+
+/**
+ * The lookup-table measurer, plus upstream's `_dim_` decoding.
+ *
+ * Strictly additive: a label that is not the sentinel is measured exactly as
+ * before, so class/description/state/dot layout is untouched. Only the json
+ * family emits such labels. Upstream carries the identical exposure — a user
+ * whose own text is literally `_dim_1_2_` would hit the same branch there.
+ */
+class DimAwareLutMeasurer implements TextMeasurer {
+  private readonly lut = new LutTextMeasurer();
+
+  measure(
+    text: string,
+    fontname: string,
+    fontsize: number,
+    flags?: TextVariantFlags,
+  ): TextSize {
+    const m = DIM_SENTINEL.exec(text);
+    if (m !== null) return { w: Number(m[1]), h: Number(m[2]) };
+    return this.lut.measure(text, fontname, fontsize, flags);
+  }
+}
+
+setTextMeasurer(new DimAwareLutMeasurer());

@@ -1,0 +1,5 @@
+@startyaml
+- DATA
+- 
+  data: value
+@endyaml

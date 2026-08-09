@@ -57,6 +57,12 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
       : {};
     if (a?.weight !== undefined) attrs.weight = a.weight.toString();
     if (a?.minLen !== undefined) attrs.minlen = a.minLen.toString();
+    // A5/T7: a record field port on the TAIL node, resolved by the engine's own
+    // `map_rec_port`/`record_port` (`lib/common/shapes.c`), so the edge leaves
+    // that specific field instead of the node centre. Upstream emits `P<row>`
+    // (`SmetanaForJson.java:224`). Only json sets it; every other caller is
+    // unaffected.
+    if (a?.tailport !== undefined) attrs.tailport = a.tailport;
     // G8 T2 (spec.md §1a, mirrors `addClusters`' own `hasTitleTable` gate
     // — that seam is T1c's, unmodified here): a caller that supplies BOTH
     // `labelBoxWidth`/`labelBoxHeight` (currently only the state composite

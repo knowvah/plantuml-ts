@@ -1,0 +1,14 @@
+/**
+ * Offline SVG-conformance RATCHET for json diagrams. Mission A5 / T1.
+ *
+ * `@startjson` — the family's own engine (parser, layout, renderer).
+ *
+ * The suite body is shared with its two siblings — see
+ * `json-family-ratchet.ts` for why these three factor where
+ * class/object/state duplicate, and for why there is no AC3 here (ADR-3: the
+ * jar emits no DOT for this family, so the DOT-equal eligibility gate the
+ * siblings use cannot be computed).
+ */
+import { describeJsonFamilyRatchet } from './json-family-ratchet.js';
+
+describeJsonFamilyRatchet('json');

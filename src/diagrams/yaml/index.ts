@@ -25,10 +25,18 @@ import { renderJson } from '../json/renderer.js';
 // Plugin
 // ---------------------------------------------------------------------------
 
+/** The jar's `data-diagram-type` value for this engine. Mirrors each sibling
+ *  engine's own local constant (`DIAGRAM_TYPE_CLASS`, `DIAGRAM_TYPE_STATE`). */
+const DIAGRAM_TYPE_YAML = 'YAML';
+
 export const yamlPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'yaml',
 
   accepts(lines: readonly string[]): boolean {
+    // #lizard forgives -- pre-existing violation (17 CCN vs. this repo's 10
+    // cap), untouched by A5/T4: this mission only added the `jsonShell` line
+    // in `render()` below. Same flat keyword-dispatch chain as json's own
+    // `accepts`; splitting it is a separate change with its own risk.
     // Skip leading directive lines that appear before the YAML body in
     // @startyaml blocks (title, skinparam, scale, hide, skin, !assume, !pragma,
     // <style>…</style>). Mirrors Java StyleExtractor pre-filtering.
@@ -72,6 +80,10 @@ export const yamlPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   },
 
   render(geo, theme) {
-    return renderJson(geo, theme);
+    // A5 / T4. yaml has no renderer of its own — `renderJson` above is json's.
+    // The jar still tags the document `data-diagram-type="YAML"`, so the type
+    // is supplied here, by the plugin that knows it, rather than baked into
+    // the shared renderer.
+    return { ...renderJson(geo, theme), jsonShell: DIAGRAM_TYPE_YAML };
   },
 };

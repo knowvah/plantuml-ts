@@ -7,7 +7,14 @@
 
 Take the json family from `shallow` to **100% SVG-conformant minus named
 divergences**, the bar every other DOT-routed type has already met (G1
-description, G2 class, G3 object, G4 state, D14 dot). These three are the last
+description, G2 class, G3 object, G4 state, D14 dot).
+
+> **Bar amended 2026-08-09 (ADR-2b).** This family is laid out by Smetana
+> upstream, and Smetana is not a porting target — where upstream calls it, this
+> port calls `@knowvah/dot-engine` and accepts the geometry delta. So the bar
+> here is structure, node sizing, and everything this port controls, with the
+> layout delta carried as a named entry. **Byte-exact geometry is explicitly
+> NOT the target for json/yaml/hcl**, unlike every sibling type. These three are the last
 ones left. Today their only depth assertion is
 `tests/integration/json-corpus.test.ts`, which checks that the output contains
 `<svg` and is longer than 100 characters.
@@ -63,18 +70,50 @@ write-set (`on_fail: stop`).
 
 ## Batches
 
-- [ ] **[Batch 1 — harness and corpus](batch-1/overview.md)** — build the
+- [x] **[Batch 1 — harness and corpus](batch-1/overview.md)** — build the
       svg-json harness and widen the oracle cache to all 92 fixtures. No
       production code changes. T1 ∥ T2.
-- [ ] **[Batch 2 — true baseline and the document shell](batch-2/overview.md)** —
+      **DONE 2026-08-08** (`58aafc6a`, `67e21d29`). Corpus captured 92/92
+      (50/39/3, exactly as scoped), no `.dot` from any fixture (ADR-3 confirmed
+      by measurement). Census runs clean over all three types.
+      **Baseline preview: 0/92 conformant — 91 in the 11–30 bucket, 1 in 4–10,
+      zero errors.** Gates: 569 files / 12,568 tests, all four green.
+- [x] **[Batch 2 — true baseline and the document shell](batch-2/overview.md)** —
       measure a real baseline through the harness, attribute it, and close the
       shell gap json shares with dot's old one.
-- [ ] **[Batch 3 — the layout re-mirror](batch-3/overview.md)** — ADR-1. Port
+- [x] **[Batch 3 — the layout re-mirror](batch-3/overview.md)** — ADR-1. Port
       `Mirror`, swap node dims, drive TB, and replace `tailportY` with real
       record ports. The largest batch; strictly sequential.
-- [ ] **[Batch 4 — close-out](batch-4/overview.md)** — yaml/hcl ratchets,
+      **T5 GO (weak)** and **T6 DONE** (`31137d2c`): dimension error
+      111.88 → 101.83, closer on 68 fixtures / worse on 2. **T6b ADDED
+      mid-mission** — T5 proved node SIZING, not topology, is the dimension
+      lever (zero fixtures exact after T6; `{}` rendered 76×31 against the jar's
+      32×40). T7/T8 target edge geometry and cannot close it.
+      **T6b DONE**: `TextBlockJson` ported from the Java, every constant now
+      carrying its upstream `file:line`; the array-index-keys divergence
+      retired on the maintainer's call. **Mean document-dimension error
+      111.88 → 22.36 across Batch 3**, and `{}` now renders a 10×18 node rect
+      byte-identical to the jar. Still ZERO fixtures exact: the remaining
+      mechanism is named, not fitted — `JsonDiagram#calculateDimension` is the
+      INK-extent walk (`TextBlockUtils.getMinMax`), i.e. mission-index **F4**,
+      which G0 solved for description via `LimitFinder`/`UGraphicNo`.
+      **T7 + T8 DONE.** A per-node oracle (`scripts/json-node-oracle.ts`) was
+      built after ADR-3 left this family with only a scalar metric; it caught a
+      FULLY MIRRORED diagram on its first run that document dimensions read
+      identically before and after. Final Batch 3 state: node Δy **6.65**, 21
+      nodes exact, child↔row alignment **64.34**, edges now the engine's own
+      splines. Remaining geometry delta vs the jar is the accepted Smetana
+      difference (ADR-2b).
+- [x] **[Batch 4 — close-out](batch-4/overview.md)** — yaml/hcl ratchets,
       per-fixture attribution of every remaining miss, divergence records,
       mission-index flip.
+      **DONE 2026-08-09, and the honest answer is that A5 did NOT reach its
+      bar.** 0/92 byte-conformant; all 92 still carry a root `childCount` diff,
+      so no interior has ever been compared and every diff count is a floor.
+      [`ledger.md`](ledger.md) names all 92 fixtures against 5 mechanisms: M1 is
+      the accepted Smetana layout delta (ADR-2b), M2–M5 are ordinary port gaps.
+      **M2 is the gate** — the root emits many children where the jar emits two.
+      Mission-index A5 is `wip (substantial; NOT at bar)`, not `done`.
 
 ## Stop conditions
 

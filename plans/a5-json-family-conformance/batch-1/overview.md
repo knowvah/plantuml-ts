@@ -9,8 +9,8 @@ parallel.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | svg-json/yaml/hcl conformance harness | typescript-pro | `tests/oracle/svg-conformance/render-fixture-json.ts`, `tests/oracle/svg-conformance/{json,yaml,hcl}.golden.ratchet.test.ts`, `oracle/goldens/svg-{json,yaml,hcl}/{README.md,ratchet.json}`, `scripts/svg-conformance-census.ts` | — | [ ] |
-| T2 | widen the oracle cache to all 92 fixtures | general-purpose | `test-results/dot-cache/{json,yaml,hcl}/**` | — | [ ] |
+| T1 | svg-json/yaml/hcl conformance harness | orchestrator (inline) | `tests/oracle/svg-conformance/render-fixture-json.ts`, `tests/oracle/svg-conformance/{json,yaml,hcl}.golden.ratchet.test.ts`, `oracle/goldens/svg-{json,yaml,hcl}/{README.md,ratchet.json}`, `scripts/svg-conformance-census.ts` | — | [x] |
+| T2 | widen the oracle cache to all 92 fixtures | orchestrator (inline) | `test-results/dot-cache/{json,yaml,hcl}/**` | — | [x] |
 
 ## Why the cache needs widening
 

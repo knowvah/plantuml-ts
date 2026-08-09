@@ -18,10 +18,20 @@ import { renderJson } from './renderer.js';
 // Plugin
 // ---------------------------------------------------------------------------
 
+/** The jar's `data-diagram-type` value for this engine. Mirrors each sibling
+ *  engine's own local constant (`DIAGRAM_TYPE_CLASS`, `DIAGRAM_TYPE_STATE`,
+ *  `DIAGRAM_TYPE_DESCRIPTION`). */
+const DIAGRAM_TYPE_JSON = 'JSON';
+
 export const jsonPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'json',
 
   accepts(lines: readonly string[]): boolean {
+    // #lizard forgives -- pre-existing violation (16 CCN vs. this repo's 10
+    // cap), untouched by A5/T4: this mission only added the `jsonShell` line
+    // in `render()` below. The complexity is one flat keyword-dispatch chain
+    // mirroring upstream's StyleExtractor pre-filtering; splitting it is a
+    // separate change with its own risk, not a drive-by.
     // Skip leading directive lines that appear before the JSON body in
     // @startjson blocks (title, skinparam, scale, hide, skin, !assume, !pragma,
     // <style>…</style>). Mirrors Java StyleExtractor pre-filtering.
@@ -56,6 +66,12 @@ export const jsonPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   },
 
   render(geo, theme) {
-    return renderJson(geo, theme);
+    // A5 / T4: `jsonShell` routes the fragment through the shared
+    // jar-faithful document shell instead of the generic `svgRoot`, and
+    // carries the jar's own `data-diagram-type` value. Set HERE rather than
+    // inside `renderJson` because one renderer serves three diagram types --
+    // yaml and hcl import it directly and pass their own -- and the plugin is
+    // the thing that knows which type it is.
+    return { ...renderJson(geo, theme), jsonShell: DIAGRAM_TYPE_JSON };
   },
 };

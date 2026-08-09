@@ -1,19 +1,13 @@
-import type { PreprocessorFailure } from './core/preprocessor.js';
 import { buildBlockUmls, isBlockEmpty } from './core/BlockUmlBuilder.js';
 import type { BlockUml, BlockUmlOk } from './core/BlockUmlBuilder.js';
 import { registry } from './core/dispatcher.js';
 import type { AssembledSvg } from './core/dispatcher.js';
-import { svgRoot } from './core/svg.js';
 import { buildTheme } from './core/build-theme.js';
 import { applyChrome, isEmpty as isAnnotationsEmpty } from './core/annotations/index.js';
 import type { DiagramAnnotations } from './core/annotations/index.js';
 import { resolveAnnotationStyles } from './core/annotations/style.js';
-import { unwrapKlimtSvg, assembleKlimtShell } from './diagrams/description/renderer.js';
-import { assembleClassShell } from './diagrams/class/renderer-shell.js';
-import { assembleStateShell } from './diagrams/state/renderer-shell.js';
+import { unwrapKlimtSvg } from './diagrams/description/renderer.js';
 import { applyClassDocumentMargin } from './diagrams/class/layout-ink-extent.js';
-import { CanvasMeasurer, FormulaMeasurer } from './core/measurer.js';
-import { jarMeasurer } from './core/measurer-jar.js';
 import { sequencePlugin } from './diagrams/sequence/index.js';
 import { classPlugin } from './diagrams/class/index.js';
 import { statePlugin } from './diagrams/state/index.js';
@@ -32,20 +26,26 @@ import type { Theme } from './core/theme.js';
 import type { StyleMap } from './core/skinparam.js';
 import type { StringMeasurer } from './core/measurer.js';
 import type { DiagramType, UmlSource } from './core/block-extractor.js';
-import { prepareIncludeStore, type IncludeFetcher, type IncludeStore } from './core/include-resolver.js';
+import { prepareIncludeStore } from './core/include-resolver.js';
 import { surfaceSpriteWarnings } from './core/sprite-commands.js';
-import type { StdlibRegistry } from './core/tim/StdlibRegistry.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
-import { ErrorUml } from './core/error/ErrorUml.js';
-import { PSystemErrorEmpty } from './core/error/PSystemErrorEmpty.js';
-import { PSystemErrorPreprocessor } from './core/error/PSystemErrorPreprocessor.js';
-import { PSystemErrorV2 } from './core/error/PSystemErrorV2.js';
-import { PSystemWelcome } from './core/error/PSystemWelcome.js';
-import { umlSourceOf } from './core/error/UmlSource.js';
-import { renderPSystemError, renderPSystemWelcome } from './core/error/error-renderer.js';
-import { readLines } from './core/tim/ReadLineReader.js';
-import type { StringLocated } from './core/tim/StringLocated.js';
-import type { AssetStore } from './core/asset-store.js';
+import {
+  emptySvg,
+  errorSvg,
+  preprocessorErrorSvg,
+  welcomeSvg,
+} from './core/error/error-diagrams.js';
+import { resolveMeasurer } from './core/render-options.js';
+import type { RenderOptions } from './core/render-options.js';
+import { assembleSvg } from './core/assemble-svg.js';
+
+// A5/T4: `RenderOptions` and `assembleSvg` moved out of this file (which sits
+// at the repo's 500-line hook cap) but stay exported HERE -- `package.json`'s
+// "exports" map has a single "." entry, so this file is the only surface a
+// consumer of the built library can reach. Same shape as `buildTheme`'s
+// earlier move to `core/build-theme.ts`.
+export type { RenderOptions } from './core/render-options.js';
+export { assembleSvg } from './core/assemble-svg.js';
 
 // Re-exported so downstream stdlib packages (SI5b `@knowvah/plantuml-stdlib*`, plans/si5b-stdlib/decisions.md
 // D2) can build an `options.includeStore` carrying vendored bundles. Required here specifically:
@@ -86,104 +86,7 @@ registry.register(chartPlugin);
 registry.register(dotPlugin);
 registry.register(sequencePlugin);
 
-export interface RenderOptions {
-  theme?: 'default' | 'dark' | 'sketchy' | 'monochrome' | Partial<Theme>;
-  measurer?: StringMeasurer;
-  maxWidth?: number;
-  /** Async include fetcher used by `render()` / `renderAll()` to PREFILL the include store. Ignored by `renderSync` (which cannot await). */
-  fetcher?: IncludeFetcher;
-  /**
-   * Pre-populated include content: `path -> source`, read SYNCHRONOUSLY by the TIM interpreter wherever
-   * upstream would open a file (`src/core/tim/IncludeStore.ts`). Two reasons to pass one:
-   *  - `renderSync` cannot fetch. A store is the ONLY way it resolves includes.
-   *  - Stdlib bundles. `!include <c4/C4_Context.puml>` resolves from the store
-   *    and nowhere else — this port vendors no stdlib asset (mission SI5b).
-   * `render()` treats it as a base: it fetches the rest on top, and never
-   * mutates it. An include that neither the store nor the fetcher can serve is a
-   * typed error naming the path, never a silent skip.
-   */
-  includeStore?: IncludeStore;
-  /**
-   * Lazily-loaded stdlib bundles for `!include <bundle/thing>`, built with
-   * `stdlibRegistry()` (`core/tim/StdlibRegistry.ts`): each bundle's payload
-   * loads on first use rather than up front, which matters at these sizes (`tupadr3` alone is 19.54 MB).
-   * Consulted ONLY after `includeStore` misses on both channels, so passing one
-   * never changes the outcome for a target that already resolved. `render()` / `renderAll()` only —
-   * `renderSync` cannot await a dynamic `import()`; sync callers await `prepareIncludeStore` and pass its result as `includeStore`.
-   */
-  stdlibRegistry?: StdlibRegistry;
-  /** si11b sprite diagnostics (`surfaceSpriteWarnings`, `core/sprite-commands.js`): `onWarning` fires once per name collision found during parse (ADR-7; free when omitted); `sprites` is the escape hatch for macro-produced `<$name>` refs a source scan can't see (ADR-5b), consumed by the per-sprite prefetch scan. */
-  onWarning?: ((message: string) => void) | undefined;
-  sprites?: readonly string[] | undefined;
-  /** ADR-2 (plans/s1l-tail-fix): pre-populated vendored asset store (jar `/sprites/**`, F4-a; Twemoji artwork, F4-b), read SYNCHRONOUSLY like `includeStore` — `renderSync` can't await `import()`. A miss (`undefined`) makes the caller degrade to its existing fallback, never throw. */
-  assetStore?: AssetStore | undefined;
-}
 
-function getDefaultMeasurer(): StringMeasurer {
-  try {
-    return new CanvasMeasurer();
-  } catch {
-    return new FormulaMeasurer();
-  }
-}
-
-/**
- * Per-plugin default measurer resolution (T17, D12): the description
- * engine's production default is the jar-faithful measurer — its klimt
- * text emission is already jar-calibrated (D12), and mismatched layout vs
- * render metrics would misposition every entity/cluster/edge it draws.
- * Every other diagram type keeps the existing Canvas/Formula default
- * unchanged (acceptance criterion 3 — no cross-engine bleed). An explicit
- * `options.measurer` always wins, for both branches (e.g.
- * `scripts/dot-sync-report.ts`'s own oracle-DOT-emission measurer, which
- * bypasses this resolution entirely by calling `layoutDescription`
- * directly rather than going through `render()`/`renderSync()`).
- */
-function resolveMeasurer(pluginType: DiagramType, options?: RenderOptions): StringMeasurer {
-  if (options?.measurer !== undefined) return options.measurer;
-  if (pluginType === 'description') return jarMeasurer;
-  return getDefaultMeasurer();
-}
-
-/**
- * The single central `svgRoot` call site (decisions.md D2): every plugin
- * hands back an `AssembledSvg` — either a `RenderFragment` (the common
- * case, assembled here via `svgRoot`) or a `CompleteSvg` escape hatch for
- * engines that already emit a full document themselves (klimt/description;
- * chart's inline error path) and must not be re-wrapped.
- *
- * G1 I1: a `RenderFragment` carrying `klimtShell: true` (set ONLY by
- * `description/renderer.ts#unwrapKlimtSvg`, i.e. an ANNOTATED
- * description-diagram fragment) is reassembled via
- * `description/renderer.ts#assembleKlimtShell` instead of `svgRoot` —
- * klimt's own root-attribute/prolog/defs shell, not the generic one every
- * other engine uses. No other `RenderFragment` producer sets this flag, so
- * `svgRoot`'s own call path (every other engine, plus unannotated
- * description output, which never reaches this function at all) is
- * unchanged.
- *
- * G2 N1: a `RenderFragment` carrying `classShell: true` (set ONLY by
- * `class/renderer.ts#renderClass`, EVERY class-diagram fragment,
- * annotated or not) is reassembled via
- * `class/renderer-shell.ts#assembleClassShell` instead of `svgRoot` --
- * jar's class-diagram root-attribute/prolog/defs shell (the SAME literal
- * shape `assembleKlimtShell` uses, shared via `core/klimt/document-
- * shell.ts#assembleDocumentShell`). Unlike description, class has no
- * `CompleteSvg` escape hatch for the unannotated case -- every class
- * fragment reaches this function, so `classShell` is unconditional.
- *
- * mission G4 S1: a `RenderFragment` carrying `stateShell: true` (set ONLY
- * by `state/renderer.ts#renderState`, unconditional like `classShell`) is
- * reassembled via `state/renderer-shell.ts#assembleStateShell` -- the SAME
- * shared `assembleDocumentShell` mechanics, parameterized `'STATE'`.
- */
-export function assembleSvg(fragment: AssembledSvg): string {
-  if ('completeSvg' in fragment) return fragment.completeSvg;
-  if (fragment.klimtShell === true) return assembleKlimtShell(fragment);
-  if (fragment.classShell === true) return assembleClassShell(fragment);
-  if (fragment.stateShell === true) return assembleStateShell(fragment);
-  return svgRoot(fragment.width, fragment.height, [fragment.body], fragment.background, fragment.extraDefs);
-}
 
 /**
  * The block's preprocessed interior, carrying the `<style>` blocks the
@@ -411,90 +314,3 @@ async function renderBlock(block: BlockUml, options?: RenderOptions): Promise<st
   }
 }
 
-// ---------------------------------------------------------------------------
-// Error diagrams — upstream's `BlockUml#getDiagram`
-//
-// PlantUML never throws at its caller: a malformed document still produces an
-// SVG. What used to sit here (a homegrown 400x80 red box reading "PlantUML
-// error: <toString of whatever was thrown>") is replaced by the faithful
-// render — the Welcome block for a short source, the version banner, `[From
-// string (line N) ]`, the source listing with the offending line waved in red,
-// and the message.
-// ---------------------------------------------------------------------------
-
-/** The measurer the error diagram lays its text out with. */
-function errorMeasurer(options?: RenderOptions): StringMeasurer {
-  return options?.measurer ?? getDefaultMeasurer();
-}
-
-/**
- * A preprocessor (TIM) failure: an orphan `!endif`, an unknown function, an
- * unresolvable include. The trace is the lines the interpreter really executed
- * — through includes, loops and macro bodies — with the message already marked
- * on its last line.
- * @see ~/git/plantuml/.../BlockUml.java#getDiagram
- */
-function preprocessorErrorSvg(failure: PreprocessorFailure, options?: RenderOptions): string {
-  const system = new PSystemErrorPreprocessor(umlSourceOf(failure.input), failure.trace);
-  return renderPSystemError(system, errorMeasurer(options));
-}
-
-/**
- * A failure AFTER preprocessing (parse, layout or render). This port has no
- * per-line parser trace to hand over — upstream's parsers report the line they
- * choked on — so the listing is the diagram's own source and the message is
- * attributed to its last line.
- */
-function errorSvg(source: string, err: unknown, options?: RenderOptions): string {
-  // The last-resort handler: it runs on input already known to be broken -- up
-  // to and including a caller who passed something that is not a string at all
-  // (`renderAll(null)`, pinned by tests/integration/index.test.ts). A throw
-  // from HERE escapes render(), which is the one thing this path exists to
-  // prevent, so it does not trust its own argument.
-  const input: readonly StringLocated[] = readLines(typeof source === 'string' ? source : '');
-  const trace = umlSourceOf(input);
-  const error = new ErrorUml('EXECUTION_ERROR', errorMessage(err), 0, trace[trace.length - 1]);
-  const system =
-    trace.length === 0
-      ? new PSystemErrorEmpty(trace, trace, error)
-      : new PSystemErrorV2(trace, trace, error, err);
-  return renderPSystemError(system, errorMeasurer(options));
-}
-
-/**
- * Nothing to draw: the document has no `@start…@end` block at all. The jar
- * renders the Welcome screen here (live-oracle verified), not an error.
- * @see ~/git/plantuml/.../eggs/PSystemWelcome.java
- */
-function welcomeSvg(options?: RenderOptions): string {
-  return renderPSystemWelcome(new PSystemWelcome(), errorMeasurer(options));
-}
-
-/**
- * The block parsed, ran, and said nothing -- upstream's *Empty description*,
- * raised by `PSystemCommandFactory#createSystem` before any command runs. The
- * assumed type is the FIRST factory the `@start` line selects: for `@startuml`
- * that is `SequenceDiagramFactory` (every legacy factory raises the same empty
- * error, and `PSystemErrorUtils#merge` keeps the first of the equal-scoring
- * ones) -- jar-verified, `Empty description (Assumed diagram type: sequence)`.
- * For a typed block (`@startjson`, ...) it is that block's own type.
- * The listing is the `@start` line alone, waved, which is what the jar draws.
- * @see ~/git/plantuml/.../command/PSystemAbstractFactory.java#buildEmptyError
- */
-function emptySvg(block: BlockUmlOk, options?: RenderOptions): string {
-  const startLine = block.rawSource[0]!;
-  const assumed: DiagramType = block.suffix === 'uml' ? UML_EMPTY_ASSUMED_TYPE : block.source.type;
-  const error = new ErrorUml('SYNTAX_ERROR', EMPTY_DESCRIPTION, 0, startLine, assumed);
-  const system = new PSystemErrorEmpty(block.rawSource, [startLine], error);
-  return renderPSystemError(system, errorMeasurer(options));
-}
-
-/** @see ~/git/plantuml/.../command/PSystemAbstractFactory.java#EMPTY_DESCRIPTION */
-const EMPTY_DESCRIPTION = 'Empty description';
-
-/** The first factory `@startuml` selects -- see {@link emptySvg}. */
-const UML_EMPTY_ASSUMED_TYPE: DiagramType = 'sequence';
-
-function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}

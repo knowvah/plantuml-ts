@@ -1,0 +1,8 @@
+@startyaml
+skinparam handwritten true
+fruit: Apple
+size: Large
+color: 
+ - Red
+ - Green
+@endyaml

@@ -12,41 +12,29 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as dotLayout } from '../../core/graph-layout.js';
 import type { DotInputEdge, DotInputGraph } from '../../core/graph-layout.js';
+import { measureNode, recordLabelFor } from './TextBlockJson.js';
+import type { JsonRowGeo } from './TextBlockJson.js';
+
+// A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
+// boundary). Re-exported so `renderer.ts` and every existing consumer keep
+// importing `JsonRowGeo` from here.
+export type { JsonRowGeo } from './TextBlockJson.js';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const H_PAD = 8;
-const V_PAD = 4;
-const MIN_COL_WIDTH = 30;
-const MIN_HEIGHT = 15;
-const ROW_HEIGHT_MIN = 20;
 /** Margin added around the entire canvas so nodes don't touch the SVG edge. */
-const CANVAS_PAD = 8;
+/**
+ * A5/T6b: the diagram's own margin, from `TitledDiagram#getDefaultMargins()`
+ * -- `ClockwiseTopRightBottomLeft.same(10)` (`TitledDiagram.java:275-277`).
+ * `JsonDiagram` does not override it. This port previously used an unsourced 8.
+ */
+const CANVAS_PAD = 10;
 
 // ---------------------------------------------------------------------------
 // Public output types
 // ---------------------------------------------------------------------------
-
-/** A single row within a JSON node block */
-export interface JsonRowGeo {
-  key: string;
-  value: string;
-  /** Value split on literal \n for multi-line string display. Always ≥ 1 element. */
-  valueLines: readonly string[];
-  valueType: 'string' | 'number' | 'boolean' | 'null' | 'nested';
-  /**
-   * Highlight state:
-   *   false        — not highlighted
-   *   '' (empty)   — highlighted with no named style class (default highlight color)
-   *   'h1', 'h2'   — highlighted with a named style class
-   */
-  highlight: string | false;
-  /** y offset within the node (top of row) */
-  y: number;
-  height: number;
-}
 
 /** A positioned JSON node (one object or array) */
 export interface JsonNodeGeo {
@@ -82,115 +70,75 @@ export interface JsonGeometry {
 // ---------------------------------------------------------------------------
 
 
-import { getDisplayValue, containerEntries, walkTree, EMPTY_MAP, buildHighlightMap, processStringDisplay, wordWrapLine } from './json-layout-prep.js';
+import { walkTree, EMPTY_MAP, buildHighlightMap } from './json-layout-prep.js';
 import type { JsonContainer, FlatNode, BuildRowsOptions } from './json-layout-prep.js';
 
-function buildRows(
-  node: FlatNode,
-  highlightKeys: ReadonlyMap<string, string>,
-  measurer: StringMeasurer,
-  fontSize: number,
-  options?: BuildRowsOptions,
-): JsonRowGeo[] {
-  const fontFamily = options?.fontFamily ?? 'sans-serif';
-  const font = options?.fontBold
-    ? { family: fontFamily, size: fontSize, weight: 'bold' as const }
-    : { family: fontFamily, size: fontSize };
-  const entries = containerEntries(node.value);
-  const maximumWidth = options?.maximumWidth;
-
-  const rows: JsonRowGeo[] = [];
-  let currentY = V_PAD;
-
-  for (const [k, v] of entries) {
-    const { display, valueType } = getDisplayValue(v);
-    // Apply PlantUML escape interpretation to string values, then split on
-    // newlines produced by \n sequences. Non-string values are single-line.
-    const processed = valueType === 'string' ? processStringDisplay(display) : display;
-    let valueLines: string[] = valueType === 'string' ? processed.split('\n') : [display];
-
-    // Apply word-wrap only to string-type values when maximumWidth is set.
-    if (valueType === 'string' && maximumWidth !== undefined) {
-      const wrapped: string[] = [];
-      for (const segment of valueLines) {
-        const wl = wordWrapLine(segment, maximumWidth, measurer, font);
-        for (const wline of wl) wrapped.push(wline);
-      }
-      valueLines = wrapped;
-    }
-
-    const keyDims = measurer.measure(k, font);
-    const lineHeight = Math.max(ROW_HEIGHT_MIN, keyDims.height + V_PAD);
-    const rowHeight = valueLines.length * lineHeight;
-
-    rows.push({
-      key: k,
-      value: processed,
-      valueLines,
-      valueType,
-      highlight: highlightKeys.get(k) ?? false,
-      y: currentY,
-      height: rowHeight,
-    });
-
-    currentY += rowHeight;
-  }
-
-  return rows;
+/**
+ * @see ~/git/plantuml/.../jsondiagram/JsonDiagram.java:78-88 (the constructor)
+ *
+ * Upstream normalises the root before anything measures it, and the two cases
+ * are not what this port assumed (A5 / T6b — both found by reading the Java
+ * after the measured residual refused to explain itself):
+ *
+ *  - A **primitive** root (string / boolean / number / null) becomes a
+ *    `JsonArray` holding that value. This port used to wrap it in a synthetic
+ *    single-entry OBJECT keyed by the empty string, which puts the value in
+ *    the wrong column: upstream's array rows carry their value in `b1`, and
+ *    `getWidthColB` returns 0 for them (`TextBlockJson.java:127-134`).
+ *
+ *  - An **empty** object or array becomes a `JsonArray` holding one empty
+ *    STRING. This is why the jar draws `{}` as a 10x18 box: one array row
+ *    whose only cell is `""`, so `0 + 2*CELL_MARGIN_X` wide and
+ *    `textHeight + 2*CELL_MARGIN_Y` tall. It is NOT `MIN_WIDTH`/`MIN_HEIGHT`,
+ *    which this port previously assumed — those stay as upstream's defensive
+ *    fallback for a genuinely line-less block, which this substitution makes
+ *    unreachable from the diagram root.
+ */
+function normalizeRoot(root: unknown): JsonContainer {
+  if (typeof root !== 'object' || root === null) return [root] as JsonContainer;
+  const isEmpty = Array.isArray(root) ? root.length === 0 : Object.keys(root).length === 0;
+  return (isEmpty ? [''] : root) as JsonContainer;
 }
 
-interface MeasuredNode {
-  flatNode: FlatNode;
-  rows: JsonRowGeo[];
-  keyColWidth: number;
-  valueColWidth: number;
-  totalWidth: number;
-  totalHeight: number;
-}
-
-function measureNode(
-  flatNode: FlatNode,
-  highlightKeys: ReadonlyMap<string, string>,
-  measurer: StringMeasurer,
-  fontSize: number,
-  options?: BuildRowsOptions,
-): MeasuredNode {
-  const fontFamily = options?.fontFamily ?? 'sans-serif';
-  const valFont = options?.fontBold
-    ? { family: fontFamily, size: fontSize, weight: 'bold' as const }
-    : { family: fontFamily, size: fontSize };
-  const keyFont =
-    options?.headerFontBold ?? options?.fontBold
-      ? { family: fontFamily, size: fontSize, weight: 'bold' as const }
-      : { family: fontFamily, size: fontSize };
-  const rows = buildRows(flatNode, highlightKeys, measurer, fontSize, options);
-
-  let maxKeyWidth = MIN_COL_WIDTH;
-  let maxValueWidth = MIN_COL_WIDTH;
-
-  for (const row of rows) {
-    const kw = measurer.measure(row.key, keyFont).width + 2 * H_PAD;
-    // For multi-line values, use the widest individual line
-    const vw = Math.max(...row.valueLines.map((l) => measurer.measure(l, valFont).width + 2 * H_PAD));
-    if (kw > maxKeyWidth) maxKeyWidth = kw;
-    if (vw > maxValueWidth) maxValueWidth = vw;
-  }
-
-  const keyColWidth = maxKeyWidth;
-  // Cap value column at maximumWidth + padding when wrapping is active.
-  const rawValueColWidth = maxValueWidth;
-  const maximumWidth = options?.maximumWidth;
-  const valueColWidth =
-    maximumWidth !== undefined
-      ? Math.min(rawValueColWidth, maximumWidth + 2 * H_PAD)
-      : rawValueColWidth;
-
-  const lastRow = rows.at(-1);
-  const rawHeight = lastRow !== undefined ? lastRow.y + lastRow.height + V_PAD : V_PAD * 2;
-  const totalHeight = Math.max(MIN_HEIGHT, rawHeight);
-  const totalWidth = keyColWidth + valueColWidth;
-
-  return { flatNode, rows, keyColWidth, valueColWidth, totalWidth, totalHeight };
+/**
+ * Transpose the solved layout back into diagram space (mission A5 / T6).
+ *
+ * The graph was handed to the engine with every node's width and height
+ * swapped and no `rankdir`, so it was solved top-to-bottom in a transposed
+ * frame — upstream's `SmetanaForJson#createNode` does exactly this
+ * (`SmetanaForJson.java:236-244`). Reading it back means undoing that.
+ *
+ * **Only the x/y SWITCH is applied here, not upstream's flip — and that is a
+ * deliberate consequence of our seam, not a shortcut.** Upstream's
+ * `getPosition` computes `sym(x - width/2, xMirror.inv(y + height/2))`, where
+ * `Mirror#inv` turns graphviz's **y-up** coordinates into screen y-down ones.
+ * This port asks the engine for `getLayout({ yAxis: 'down' })`
+ * (`graph-layout.ts`), so that flip has ALREADY happened by the time these
+ * coordinates arrive. Applying `inv` again mirrors the diagram horizontally:
+ * measured against the jar on `bavize-88-jumu158`, it put the root node at
+ * x=76.83 with its child at x=10, where the jar has the root at x=10 and the
+ * child at x=132 — a fully reversed layout that the document-dimension metric
+ * cannot see, because a mirrored diagram has identical dimensions.
+ *
+ * `Mirror.ts` is still the faithful port of `Mirror.java` and still what an
+ * upstream-frame consumer should use; it is simply not needed on this path.
+ *
+ * So: a node's mirrored left edge is its transposed-frame TOP (`p.y` — its
+ * distance down from the graph's top, which is exactly what upstream's
+ * `max - topEdge` computes in the y-up frame), and its mirrored top is its
+ * transposed-frame left edge (`p.x`).
+ *
+ * Edges are NOT touched here: `layoutJson` derives its edge points from final
+ * node geometry rather than from the engine's splines, so they follow the
+ * nodes automatically. Porting `JsonCurve` to consume the engine's own
+ * splines is T8.
+ */
+function mirrorToDiagramSpace(
+  placed: ReadonlyArray<{ id: string; x: number; y: number }>,
+): Map<string, { x: number; y: number }> {
+  const out = new Map<string, { x: number; y: number }>();
+  for (const p of placed) out.set(p.id, { x: p.y, y: p.x });
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -214,24 +162,7 @@ export function layoutJson(
     };
   }
 
-  const root = ast.root;
-
-  let flatNodes: FlatNode[];
-
-  if (typeof root === 'object' && root !== null) {
-    flatNodes = walkTree(root as JsonContainer);
-  } else {
-    // Primitive root: wrap in a synthetic single-entry object so the
-    // generic row-building machinery handles it uniformly.
-    flatNodes = [
-      {
-        id: 'n0',
-        value: { '': root },
-        parentId: null,
-        parentKey: null,
-      },
-    ];
-  }
+  const flatNodes: FlatNode[] = walkTree(normalizeRoot(ast.root));
 
   // Build per-node highlight map: nodeId → Map<key, styleClass>.
   // Each #highlight path navigates from the root node through child nodes
@@ -266,53 +197,71 @@ export function layoutJson(
     ),
   );
 
-  // Build dot input graph
+  // Build dot input graph. A5/T6 (ADR-1): dimensions are SWAPPED on the way in
+  // -- upstream hands graphviz each node's height as its width and vice versa
+  // (`SmetanaForJson.java:236-244`) so the graph solves top-to-bottom in a
+  // transposed frame, then transposes the answer back. See
+  // `mirrorToDiagramSpace`.
+  // A5/T7: real `shape=record` nodes with a `<Pn>` port per row, so each edge
+  // leaves the ROW it belongs to. `recordLabelFor` builds the label upstream
+  // builds (`SmetanaForJson#getDotLabelArray`/`#getDotLabelMap`).
+  //
+  // This spaces same-rank siblings further apart than the jar does -- graphviz
+  // PADs every record field (`XPAD` = 4*GAP = 16, `macros.h:27-29`) and
+  // upstream's `colAwidth - 8` offsets only the `YPAD` half, so a node grows by
+  // 16 per row. **That is real graphviz's behaviour, not a defect here**:
+  // verified against the installed `dot` 15.1.1 on an equivalent 3-port record,
+  // which returns w=0.92708 h=0.69444 -- byte-identical to what this seam
+  // produces. The jar shows no such inflation because Smetana does not
+  // reproduce it, and per CLAUDE.md ("Smetana is NOT a porting target") that
+  // delta is accepted and named rather than chased. See DIVERGENCES.md.
   const dotNodes = measured.map((m) => ({
     id: m.flatNode.id,
-    width: m.totalWidth,
-    height: m.totalHeight,
+    width: m.totalHeight,
+    height: m.totalWidth,
+    shape: 'record' as const,
+    recordLabel: recordLabelFor(m),
   }));
 
-  // Build lookup for parent geometry to compute tailportY
   const measuredById = new Map(measured.map((m) => [m.flatNode.id, m]));
 
   const dotEdges: DotInputEdge[] = flatNodes
     .filter((fn) => fn.parentId !== null)
     .map((fn) => {
+      // `tailport="P<rowIndex>"` -- `SmetanaForJson#createEdge` (:224) names the
+      // port by the child's index among the parent's rows.
       const parentM = measuredById.get(fn.parentId!);
-      let tailportY: number | undefined;
-      if (parentM !== undefined && parentM.totalHeight > 0) {
-        const row = parentM.rows.find((r) => r.key === (fn.parentKey ?? ''));
-        if (row !== undefined) {
-          const rowCenterFromTop = row.y + row.height / 2;
-          tailportY = (rowCenterFromTop - parentM.totalHeight / 2) / parentM.totalHeight;
-        }
-      }
+      const rowIndex = parentM?.rows.findIndex((r) => r.key === (fn.parentKey ?? '')) ?? -1;
       const edge: DotInputEdge = {
         id: `${fn.parentId!}->${fn.id}`,
         from: fn.parentId!,
         to: fn.id,
       };
-      if (tailportY !== undefined) edge.attributes = { tailportY };
+      if (rowIndex >= 0) edge.attributes = { tailport: `P${rowIndex}` };
       return edge;
     });
 
+  // A5/T6 (ADR-1): no `rankDir` and no separations, matching upstream. Its
+  // `agopen` never sets `rankdir`, `nodesep` or `ranksep`, so graphviz's own
+  // defaults (36pt / 18pt) apply -- this port previously forced `LR` with
+  // hand-picked 40/20. Measured over all 92 fixtures, the mirrored graph is
+  // closer to the jar on document dimensions for 68 fixtures and worse for 2
+  // (`plans/a5-json-family-conformance/adr1-gonogo.md`).
   const dotInput: DotInputGraph = {
     nodes: dotNodes,
     edges: dotEdges,
-    rankDir: 'LR',
-    rankSep: 40,
-    nodeSep: 20,
+    omitSepAttrs: true,
   };
 
   const dotResult = dotLayout(dotInput);
 
-  // Map dot result nodes → JsonNodeGeo
-  const dotNodeById = new Map(dotResult.nodes.map((n) => [n.id, n]));
+  // Transpose the solved layout back into diagram space before anything reads
+  // a coordinate off it.
+  const mirrored = mirrorToDiagramSpace(dotResult.nodes);
 
   const nodes: JsonNodeGeo[] = [];
   for (const m of measured) {
-    const dn = dotNodeById.get(m.flatNode.id);
+    const dn = mirrored.get(m.flatNode.id);
     if (dn === undefined) continue;
     nodes.push({
       id: m.flatNode.id,
@@ -346,38 +295,23 @@ export function layoutJson(
     rankMaxRight.set(n.x, Math.max(cur, n.x + n.width));
   }
 
-  // Build edges anchored to parent rows, not to node centers.
-  // Java: createEdge sets tailport="P{rowIndex}" so graphviz routes from the
-  // specific row's port on the right side of the parent node. We replicate this
-  // by computing the start point directly from the parent row's geometry.
-  const nodeById = new Map(nodes.map((n) => [n.id, n]));
-  const edges: JsonEdgeGeo[] = [];
-  for (const fn of flatNodes) {
-    if (fn.parentId === null) continue;
-    const parent = nodeById.get(fn.parentId);
-    const child = nodeById.get(fn.id);
-    if (parent === undefined || child === undefined) continue;
-
-    // Find the row in the parent whose key matches this child's entry.
-    const parentRow = parent.rows.find((r) => r.key === (fn.parentKey ?? ''));
-    const startX = parent.x + parent.width;
-    const startY =
-      parentRow !== undefined
-        ? parent.y + parentRow.y + parentRow.height / 2
-        : parent.y + parent.height / 2;
-    const endX = child.x;
-    const endY = child.y + child.height / 2;
-
-    // If a wider sibling exists at the same rank, add a horizontal waypoint at
-    // the rank boundary so the edge travels through the inter-rank gap rather
-    // than cutting through that sibling's bounding box.
-    const rankRight = rankMaxRight.get(parent.x) ?? startX;
-    const points: Array<{ x: number; y: number }> = [{ x: startX, y: startY }];
-    if (rankRight > startX) points.push({ x: rankRight, y: startY });
-    points.push({ x: endX, y: endY });
-
-    edges.push({ points, spline: false });
-  }
+  // A5/T8: the edges are the ENGINE's own splines, transposed into diagram
+  // space, not points re-derived from node geometry. Upstream does the same --
+  // `SmetanaForJson#drawMe` hands each `ST_Agedge_s` to `JsonCurve`, which
+  // reads `data.spl` (`JsonCurve.java:58-71`).
+  //
+  // This became worth doing at T7: with real `<Pn>` record ports the engine
+  // routes each edge out of the row it belongs to, so its spline carries
+  // information the old re-derivation could only approximate (a horizontal
+  // stub plus a hand-built S-curve).
+  //
+  // Same transposition as the nodes, and for the same reason -- `yAxis: 'down'`
+  // has already applied `Mirror#inv`, so only the x/y switch remains. See
+  // `mirrorToDiagramSpace`.
+  const edges: JsonEdgeGeo[] = dotResult.edges.map((e) => ({
+    points: e.points.map((p) => ({ x: p.y + CANVAS_PAD, y: p.x + CANVAS_PAD })),
+    spline: true,
+  }));
 
   // Canvas size: rightmost/bottommost extent of all positioned nodes plus a
   // right/bottom margin equal to CANVAS_PAD. Nodes already include the left/top

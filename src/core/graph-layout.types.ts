@@ -16,7 +16,11 @@ export type DotInputNodeShape =
   | 'octagon'
   | 'hexagon'
   | 'point'
-  | 'plaintext';
+  | 'plaintext'
+  /** A5/T7: graphviz `shape=record`. The ONLY shape whose geometry the layout
+   *  actually derives from a label rather than from the caller's measured
+   *  `width`/`height` — see `DotInputNode.recordLabel`. */
+  | 'record';
 
 export interface DotInputNode {
   id: string;
@@ -25,6 +29,27 @@ export interface DotInputNode {
   /** Svek-faithful node outline. Layout ignores this (all nodes lay out as a
    *  box); only the Svek-DOT emitter reads it. Absent ⇒ rect. */
   shape?: DotInputNodeShape;
+  /**
+   * A5/T7: the record label for `shape: 'record'`, in graphviz's own record
+   * syntax (`a|b`, `{a|{b|c}}`, `<PORT>text`). Field ports declared here are
+   * what `DotInputEdge.attributes.tailport` targets.
+   *
+   * Unlike every other shape, a record is NOT laid out `fixedsize` from the
+   * caller's `width`/`height`: graphviz sizes it from its own fields, and
+   * `width`/`height` act as minimums. That is upstream's design --
+   * `SmetanaForJson#createNode` (`SmetanaForJson.java:233-262`) sets
+   * `shape=record`, the label, and the (swapped) width/height, and no
+   * `fixedsize`.
+   *
+   * **Field sizes come from the text measurer.** Upstream cannot measure text
+   * inside Smetana, so it encodes each cell's exact dimensions in the label as
+   * a `_dim_<h>_<w>_` sentinel and decodes it in
+   * `smetana/core/Macro.java:1294 hackInitDimensionFromLabel`. This port keeps
+   * that mechanism rather than inventing another: see
+   * `core/dot-engine-measurer.ts`, which installs a measurer that decodes the
+   * same sentinel and delegates everything else to the lookup table.
+   */
+  recordLabel?: string;
   xlabel?: string;
   xlabelWidth?: number;
   xlabelHeight?: number;
@@ -69,8 +94,19 @@ export interface DotInputEdge {
   attributes?: {
     weight?: number;
     minLen?: number;
-    /** Normalized port y-offset on the tail (FROM) node.
-     *  -0.5 = top edge of node, 0 = vertical center, +0.5 = bottom edge. */
+    /**
+     * A5/T7: a graphviz `tailport` — the NAME of a field port declared in the
+     * tail node's `recordLabel` (upstream emits `P0`, `P1`, ... per row:
+     * `SmetanaForJson.java:224`). Resolved by the engine's own
+     * `map_rec_port`/`record_port` (a port of `lib/common/shapes.c`), so the
+     * edge leaves the specific ROW rather than the node's centre.
+     */
+    tailport?: string;
+    /** ~~Normalized port y-offset on the tail (FROM) node.~~
+     *  **DEAD (A5/T7).** json set this on every edge and nothing ever
+     *  forwarded it to the engine, so it never had an effect; `tailport`
+     *  above is the real mechanism and replaced it. Retained only to keep the
+     *  field's history legible -- no producer remains. */
     tailportY?: number;
     label?: string;
     labelWidth?: number;

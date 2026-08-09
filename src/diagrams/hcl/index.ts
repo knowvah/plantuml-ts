@@ -19,6 +19,10 @@ import { renderJson } from '../json/renderer.js';
 // Plugin
 // ---------------------------------------------------------------------------
 
+/** The jar's `data-diagram-type` value for this engine. Mirrors each sibling
+ *  engine's own local constant (`DIAGRAM_TYPE_CLASS`, `DIAGRAM_TYPE_STATE`). */
+const DIAGRAM_TYPE_HCL = 'HCL';
+
 export const hclPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'hcl',
 
@@ -35,6 +39,8 @@ export const hclPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   },
 
   render(geo, theme) {
-    return renderJson(geo, theme);
+    // A5 / T4. hcl has no renderer of its own — `renderJson` above is json's.
+    // The jar still tags the document `data-diagram-type="HCL"`.
+    return { ...renderJson(geo, theme), jsonShell: DIAGRAM_TYPE_HCL };
   },
 };

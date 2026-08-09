@@ -14,6 +14,49 @@ Categories:
 
 ## General
 
+### Smetana-backed diagram types — laid out by dot-engine, geometry differs
+
+**Standing decision (maintainer, 2026-08-09), not a per-case exception.** See
+the project README, "Layout: one engine, always", and CLAUDE.md.
+
+**Upstream:** uses two layout implementations. Most diagram types shell out to a
+real graphviz binary; `@startjson`, `@startyaml`, `@starthcl` (all three via
+`jsondiagram/SmetanaForJson.java`), `@startgit` (`gitlog/SmetanaForGit.java`)
+and any `!pragma layout smetana` diagram use **Smetana**, its in-JVM Java
+transpile of graphviz. None of those shells out, which is why the jar emits no
+`svek-N.dot` for them and why they have no DOT-parity gate here.
+
+**This port:** uses `@knowvah/dot-engine` for all layout, including these.
+
+**Reason:** one layout implementation rather than two. Keeping agreement with
+both would mean two sets of layout behaviour to reason about, test and fix.
+dot-engine is a port of the graphviz C that this project maintains and
+publishes, so it is also the one we can change. Smetana is additionally awkward
+as a porting target on mechanics: it cannot measure text the way graphviz does,
+so `SmetanaForJson` smuggles cell dimensions through a `_dim_` sentinel in the
+record label (decoded by `smetana/core/Macro.java#hackInitDimensionFromLabel`) —
+behaviour that exists to work around a constraint this port does not have.
+
+**Affects:** edge routing and node spacing on the types above. Diagram
+structure, element set, labels, colours and node sizing are unaffected and
+remain held to upstream. **Priority on these types is readability first, SVG
+fidelity to upstream second** — an ordering that is inverted from every other
+diagram type and applies only to this closed set.
+
+**Worked example (A5/T7).** graphviz pads every `shape=record` field — `XPAD`
+= 4·GAP = 16 and `YPAD` = 2·GAP = 8 (`graphviz/lib/common/macros.h:27-29`).
+Upstream compensates only the `YPAD` half (`SmetanaForJson`'s `colAwidth - 8`),
+which is right *for Smetana*, because Smetana does not apply `XPAD`. This port
+compensates both, because its engine applies both — verified against the
+installed `dot` 15.1.1, which returns byte-identical record geometry for the
+same label. Result: same-rank sibling spacing differs from the jar, while
+child-to-parent-row alignment measures closer here (mean |Δy| 64.34 vs 73.92
+without ports, over 277 edges).
+
+**Category:** limitation (one engine, by choice).
+
+---
+
 ### `!pragma layout smetana|vizjs` — always laid out with graphviz
 
 **Upstream:** `!pragma layout` selects the layout engine. `smetana` uses
@@ -696,22 +739,41 @@ the `svg-dot` ratchet: 5/5 zero-diff with the divergence in place.
 
 ## JSON diagrams
 
-### Array index keys (clarity)
+### ~~Array index keys (clarity)~~ — RETIRED (A5/T6b, maintainer, 2026-08-09)
 
-**Upstream:** array elements have no key label in the key column — the
-left column is blank for every array entry.
+This port used to draw an array element's zero-based index (`0`, `1`, `2`, …)
+in the key column. **It no longer does.** The entry is kept, struck through,
+because the reasoning it recorded was wrong on the facts and that is worth
+knowing.
 
-**This port:** array elements show their zero-based index (`0`, `1`, `2`,
-…) in the key column.
+**The original claim was that upstream leaves the key column "blank" for array
+entries, and that this was "most likely a gap rather than a deliberate design
+choice."** Neither holds. Upstream builds an array line with the one-argument
+`Line` constructor, which puts the VALUE in `b1` and leaves `b2` **null**
+(`TextBlockJson.java:127-134`). There is no blank column: an array row has ONE
+cell, and it is the value. Three things follow, all of them deliberate:
 
-**Reason:** a blank key column makes nested array diagrams unreadable.
-Without index labels you cannot tell which child node corresponds to which
-array position. Showing the index is strictly more informative and imposes
-no cost on the value column. The upstream behavior is most likely a gap
-rather than a deliberate design choice.
+- `getWidthColB` skips lines whose `b2` is null (:251-258), so a pure-array
+  node's column B contributes **zero** to its width.
+- `drawU` draws the column divider inside `if (line.b2 != null)` (:311-314), so
+  an array node gets **no divider at all**.
+- The index is still computed — `isHighlighted("" + i, …)` — but only to
+  resolve `#highlight`. It is never drawn.
 
-**Affects:** all `@startjson` diagrams whose root or any nested value is an
-array.
+**What retiring it bought, measured over the 92-fixture corpus:** mean document
+dimension error 30.28 → **22.36**, and `{}` now renders a **10×18** node rect,
+byte-identical to the jar (it was 27.788 wide, because the index column was
+padding every array row).
+
+**Why it was retired rather than kept:** it was accepted as a readability
+improvement at a time when nobody had measured what it cost. It costs
+conformance on every array row in the corpus — and the readability argument
+was itself built on a misreading, since upstream's array rows are not missing a
+label, they are a different shape.
+
+Pinned by `tests/unit/json/layout.test.ts` ("array rows carry the value in
+column A") and `tests/integration/json-style.test.ts` ("array rows match
+upstream").
 
 ---
 

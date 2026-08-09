@@ -69,13 +69,16 @@ describe('layoutJson', () => {
   });
 
   // 5. Empty object → 1 node with 0 rows, height >= MIN_HEIGHT (15)
-  it('empty object produces 1 node with 0 rows and height >= 15', () => {
+  // A5/T6b, `JsonDiagram.java:78-88`: an empty object is replaced by a
+  // JsonArray holding ONE EMPTY STRING before measurement, so it produces one
+  // real row -- not the zero-row/MIN_HEIGHT shape this used to assert.
+  it('empty object produces 1 node with one empty-string row', () => {
     const ast = makeAst({});
     const geo = layoutJson(ast, defaultTheme, measurer);
 
     expect(geo.nodes).toHaveLength(1);
-    expect(geo.nodes[0]!.rows).toHaveLength(0);
-    expect(geo.nodes[0]!.height).toBeGreaterThanOrEqual(15);
+    expect(geo.nodes[0]!.rows).toHaveLength(1);
+    expect(geo.nodes[0]!.rows[0]!.value).toBe('');
   });
 
   // 6. Parse error → empty geometry
@@ -216,35 +219,85 @@ describe('layoutJson', () => {
     expect(geo.edges).toHaveLength(2);
   });
 
-  it('each node has keyColWidth >= MIN_COL_WIDTH (30) and valueColWidth >= MIN_COL_WIDTH', () => {
+  // A5/T6b: there is NO per-column floor. `getWidthColA`/`getWidthColB`
+  // (`TextBlockJson.java:243-259`) are plain `max` folds starting at zero; the
+  // 30 in that file is `MIN_WIDTH`, applied once to the WHOLE node and only
+  // when it would otherwise be zero. This test used to assert a 30 floor on
+  // each column, which made every node at least 60 wide before any text.
+  it('columns are sized to their content, with no per-column floor', () => {
     const ast = makeAst({ x: 1, y: 2 });
     const geo = layoutJson(ast, defaultTheme, measurer);
 
     for (const node of geo.nodes) {
-      expect(node.keyColWidth).toBeGreaterThanOrEqual(30);
-      expect(node.valueColWidth).toBeGreaterThanOrEqual(30);
+      // FixedMeasurer(8, 14): 'x' is 8 wide, + 2 * CELL_MARGIN_X (5) = 18.
+      expect(node.keyColWidth).toBe(18);
+      expect(node.valueColWidth).toBe(18);
+      expect(node.keyColWidth).toBeLessThan(30);
     }
   });
 
-  it('row y offsets are non-decreasing and first row starts at V_PAD (4)', () => {
+  // `JsonDiagram.java:78-88`: an empty object or array is replaced by a
+  // JsonArray holding one EMPTY STRING before anything measures it -- so the
+  // node is one real row, NOT the MIN_WIDTH/MIN_HEIGHT fallback (those stay as
+  // upstream's defensive branch for a line-less block, unreachable from the
+  // diagram root). Jar-verified: `{}` draws a rect 18 tall.
+  it('an empty object becomes one row holding the empty string', () => {
+    const geo = layoutJson(makeAst({}), defaultTheme, measurer);
+    const node = geo.nodes[0];
+    expect(node).toBeDefined();
+    expect(node!.rows).toHaveLength(1);
+    // FixedMeasurer(8, 14): row height = 14 + 2 * CELL_MARGIN_Y = 18.
+    expect(node!.height).toBe(18);
+  });
+
+  // A5/T6b: rows start at the node's top edge. Upstream's `drawU` walks
+  // `y = 0; for (line) y += heightOfRow` (`TextBlockJson.java:267-275`) -- no
+  // leading pad. This used to assert a 4px `V_PAD` offset with no upstream source.
+  it('row y offsets are non-decreasing and the first row starts at 0', () => {
     const ast = makeAst({ a: 1, b: 2, c: 3 });
     const geo = layoutJson(ast, defaultTheme, measurer);
 
     const rows = geo.nodes[0]!.rows;
-    expect(rows[0]!.y).toBe(4); // V_PAD = 4
+    expect(rows[0]!.y).toBe(0);
     for (let i = 1; i < rows.length; i++) {
       expect(rows[i]!.y).toBeGreaterThan(rows[i - 1]!.y);
     }
   });
 
-  it('primitive root (number) is laid out as a single node with one row', () => {
+  // A5/T6b: DIVERGENCES.md's "Array index keys" is RETIRED. Upstream builds an
+  // array line with the one-arg `Line` constructor, putting the VALUE in `b1`
+  // and leaving `b2` null (`TextBlockJson.java:127-134`) -- so the index is
+  // used only to resolve highlights, never drawn, and column B stays empty.
+  it('array rows carry the value in column A, leaving column B empty', () => {
+    const geo = layoutJson(makeAst([10, 20]), defaultTheme, measurer);
+    const node = geo.nodes[0];
+    expect(node).toBeDefined();
+    expect(node!.rows.every((r) => r.arrayEntry)).toBe(true);
+    // `getWidthColB` skips lines whose b2 is null, so a pure array node has none.
+    expect(node!.valueColWidth).toBe(0);
+    expect(node!.keyColWidth).toBe(node!.width);
+  });
+
+  it('object rows keep both cells', () => {
+    const geo = layoutJson(makeAst({ a: 1 }), defaultTheme, measurer);
+    const node = geo.nodes[0];
+    expect(node!.rows.every((r) => r.arrayEntry)).toBe(false);
+    expect(node!.valueColWidth).toBeGreaterThan(0);
+  });
+
+  // A5/T6b, `JsonDiagram.java:78-82`: a primitive root is wrapped in a
+  // JsonArray holding that value -- NOT, as this port previously did, a
+  // synthetic object keyed by the empty string. The key is therefore the array
+  // index, which this port shows and upstream does not (a named divergence:
+  // DIVERGENCES.md, "Array index keys").
+  it('primitive root (number) is wrapped in an array, giving one indexed row', () => {
     const ast = makeAst(42);
     const geo = layoutJson(ast, defaultTheme, measurer);
 
     expect(geo.nodes).toHaveLength(1);
     expect(geo.nodes[0]!.rows).toHaveLength(1);
-    // key is empty string for wrapped primitive
-    expect(geo.nodes[0]!.rows[0]!.key).toBe('');
+    expect(geo.nodes[0]!.rows[0]!.key).toBe('0');
+    expect(geo.nodes[0]!.rows[0]!.value).toBe('42');
   });
 
   // ---------------------------------------------------------------------------
@@ -261,14 +314,26 @@ describe('layoutJson', () => {
     expect(row!.valueLines).toEqual(['a', 'b', 'c']);
   });
 
-  it('multi-line string row height is numLines × single-line height', () => {
-    // FixedMeasurer(8, 14): lineHeight = max(ROW_HEIGHT_MIN=20, 14+V_PAD=18) = 20
+  // A5/T6b: `Line#getHeightOfRow` is `max(b1.height, b2.height)` where each
+  // cell carries `withMargin(_, 5, 2)`'s vertical 2 per side ONCE -- not once
+  // per wrapped line, and with no 20px floor. This used to assert
+  // `numLines * max(20, textHeight + 4)`.
+  it('multi-line row height is the value cell: lines × textHeight + one cell margin', () => {
+    // FixedMeasurer(8, 14): 6 * 14 + 2 * CELL_MARGIN_Y (2) = 88.
     const ast = makeAst({ desc: 'a\\nb\\nc\\nd\\ne\\nf' });
     const geo = layoutJson(ast, defaultTheme, measurer);
 
     const row = geo.nodes[0]!.rows.find((r) => r.key === 'desc');
     expect(row).toBeDefined();
-    expect(row!.height).toBe(6 * 20); // 6 lines × 20px each
+    expect(row!.height).toBe(6 * 14 + 4);
+  });
+
+  it('a single-line row is the key cell height, with no floor applied', () => {
+    const geo = layoutJson(makeAst({ a: 1 }), defaultTheme, measurer);
+    const row = geo.nodes[0]!.rows[0];
+    expect(row).toBeDefined();
+    // 14 + 2 * CELL_MARGIN_Y = 18, NOT the old max(20, ...) = 20.
+    expect(row!.height).toBe(18);
   });
 
   it('multi-line value column width uses the widest line, not the whole string', () => {

@@ -12,8 +12,6 @@ import {
   createGraph,
   render,
   getLayout,
-  setTextMeasurer,
-  LutTextMeasurer,
 } from '@knowvah/dot-engine';
 import type { LayoutSnapshot } from '@knowvah/dot-engine';
 import {
@@ -31,13 +29,15 @@ import type {
   DotLayoutResult,
 } from './graph-layout.types.js';
 
-// plantuml-ts is a pure SVG library — no DOM, no canvas. @knowvah/dot-engine otherwise
-// auto-selects a canvas-backed text measurer when a `document` is present
-// (jsdom, browsers), which both violates that guarantee and is unimplemented
-// under jsdom. Pin its built-in lookup-table measurer: canvas-free and
-// deterministic across Node, Workers, and the browser. Edge-label sizing is the
-// only thing this affects (nodes are laid out fixedsize from caller metrics).
-setTextMeasurer(new LutTextMeasurer());
+// Imported for its side effect: pins @knowvah/dot-engine's text measurer.
+// A5/T7: this file used to install `new LutTextMeasurer()` itself. That was a
+// LATENT BUG the moment a second install point existed -- `setTextMeasurer` sets
+// a module-global, so whichever module loaded last won, and this one loading
+// after `dot-engine-measurer.ts` silently replaced the `_dim_`-aware measurer
+// records need with the plain lookup table. Measured symptom: json record nodes
+// sized from the literal label text (231.5px wide against an expected 36).
+// There is now exactly one install point.
+import './dot-engine-measurer.js';
 
 /** Right/bottom canvas padding, matching the in-house engine's old extractResult. */
 const MARGIN = 12;
