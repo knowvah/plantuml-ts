@@ -11,7 +11,7 @@ rule doing its job, not an oversight.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T5 | go/no-go: does the mirrored graph actually move geometry? | debugger | `plans/a5-json-family-conformance/adr1-gonogo.md` | T4 | [ ] |
+| T5 | go/no-go: does the mirrored graph actually move geometry? | orchestrator (inline) | `plans/a5-json-family-conformance/adr1-gonogo.md` | T4 | [x] **GO (weak)** |
 | T6 | port `Mirror`, build the TB+swapped-dims graph | typescript-pro | `src/diagrams/json/Mirror.ts`, `src/diagrams/json/layout.ts` | T5 | [ ] |
 | T7 | real record ports: `P<n>` labels + `tailport` | typescript-pro | `src/diagrams/json/layout.ts`, `src/diagrams/json/json-layout-prep.ts` | T6 | [ ] |
 | T8 | port `JsonCurve` edge routing onto mirrored coords | typescript-pro | `src/diagrams/json/JsonCurve.ts`, `src/diagrams/json/renderer.ts` | T7 | [ ] |
