@@ -44,15 +44,28 @@ describe('renderFixtureJson — parse dispatch (AC4)', () => {
     expect(svg).toContain('ami');
   });
 
-  it('all three reach the SHARED layoutJson/renderJson — same document shell', () => {
+  it('all three reach the SHARED document shell, differing only by data-diagram-type', () => {
     // yaml and hcl have no renderer of their own; if either grew one, these
     // would diverge and this assertion is the tripwire.
-    const shellOf = (svg: string): string => svg.slice(0, svg.indexOf('>') + 1);
+    //
+    // The ONE attribute that legitimately differs is `data-diagram-type`: the
+    // jar tags each type with its own (`JSON`/`YAML`/`HCL`), which is exactly
+    // what `jsonShell` carries (A5/T4). Normalising it away is the point of
+    // this test — everything else about the shell must be identical.
+    const shellOf = (svg: string): string =>
+      svg.slice(0, svg.indexOf('>') + 1).replace(/data-diagram-type="[A-Z]+"/, 'data-diagram-type="_"');
+
     const j = shellOf(render('@startjson\n{"a": 1}\n@endjson'));
     const y = shellOf(render('@startyaml\na: 1\n@endyaml'));
     const h = shellOf(render('@starthcl\na = 1\n@endhcl'));
     expect(y).toBe(j);
     expect(h).toBe(j);
+  });
+
+  it('each type is tagged with the jar\'s own data-diagram-type', () => {
+    expect(render('@startjson\n{"a": 1}\n@endjson')).toContain('data-diagram-type="JSON"');
+    expect(render('@startyaml\na: 1\n@endyaml')).toContain('data-diagram-type="YAML"');
+    expect(render('@starthcl\na = 1\n@endhcl')).toContain('data-diagram-type="HCL"');
   });
 
   it('throws a named error when the markup holds no diagram block', () => {

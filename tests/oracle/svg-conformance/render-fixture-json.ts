@@ -87,6 +87,22 @@ function parseForType(block: UmlSource): JsonDiagramAST {
 }
 
 /**
+ * The jar's `data-diagram-type`, and the `jsonShell` discriminant that routes
+ * the fragment through the shared jar-faithful document shell.
+ *
+ * This helper renders through the LOW-LEVEL pipeline, so it calls `renderJson`
+ * directly and never reaches the plugin's own `render()` — which is where
+ * production sets this (A5/T4). Mirroring it here is therefore load-bearing,
+ * not redundant: without it the harness measures a document shell no shipped
+ * code path produces, and reports a gap that is purely its own.
+ */
+function shellTypeFor(block: UmlSource): string {
+  if (block.type === 'yaml') return 'YAML';
+  if (block.type === 'hcl') return 'HCL';
+  return 'JSON';
+}
+
+/**
  * Renders a `.puml` fixture through the json-family low-level pipeline with
  * `measurer` injected at the layout stage. Handles `@startjson`, `@startyaml`
  * and `@starthcl` — dispatching only the parse, since the three share
@@ -110,7 +126,7 @@ export function renderFixtureJson(
 
   const ast = parseForType(block);
   const geo = layoutJson(ast, theme, measurer);
-  const fragment = renderJson(geo, theme);
+  const fragment = { ...renderJson(geo, theme), jsonShell: shellTypeFor(block) };
 
   const annotations = ast.annotations;
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);

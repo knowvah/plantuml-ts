@@ -89,6 +89,26 @@ export interface RenderFragment {
    */
   stateShell?: true;
   /**
+   * A5 / T4: set by `json/renderer.ts#renderJson` -- tells `assembleSvg` to
+   * reassemble via the SAME shared `core/klimt/document-shell.ts
+   * #assembleDocumentShell` that `classShell`/`stateShell`/`klimtShell`
+   * delegate to, instead of the generic `svgRoot` (core/svg.ts), which json
+   * had been falling through to. Falling through cost every root attribute
+   * the jar emits (`xmlns:xlink`, `version`, `data-diagram-type`, `style`,
+   * `px` units, `zoomAndPan`, `preserveAspectRatio`, `contentStyleType`),
+   * the `<?plantuml?>` prolog, and the root `<g>` font attributes, AND
+   * added 13 arrowhead `<marker>` defs the jar does not emit -- a root
+   * `childCount` mismatch that stopped `compare.ts` recursing, leaving all
+   * 92 fixtures' interiors unmeasured.
+   *
+   * Unlike its three siblings this is a STRING, not `true`, and carries the
+   * `data-diagram-type` value: one renderer serves three diagram types
+   * (`yaml`/`hcl` import `renderJson` directly), and the jar emits `JSON`,
+   * `YAML` and `HCL` respectively. A boolean would have needed a second
+   * field beside it.
+   */
+  jsonShell?: string;
+  /**
    * G2 N1: set by `core/annotations/chrome.ts#applyChrome` whenever it
    * added its OWN single bare `<g>` wrap around a decorated fragment's body
    * (i.e. `decorated === true` inside that function). A klimt-shaped
