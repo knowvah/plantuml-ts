@@ -143,26 +143,46 @@ describe('JSON style: #highlight path separator variants', () => {
 // Multiple diagrams on same page — defs ID uniqueness
 // ---------------------------------------------------------------------------
 
-describe('JSON style: per-render ID uniqueness', () => {
-  it('two renders produce different clipPath IDs', () => {
+/**
+ * These two cases used to assert the OPPOSITE — that repeated renders produce
+ * DIFFERENT ids — which codified a `Math.random()` call in the render path.
+ * That violated CLAUDE.md outright: *"every non-determinism (uid counters,
+ * gradient/shadow ids) is seeded so output is reproducible."* The salt is now
+ * derived from the diagram's own geometry (`renderer.ts#saltFor`, via
+ * upstream's `UmlSource.seed()`), so the property under test inverts.
+ *
+ * The uniqueness the salt actually exists for — two DIFFERENT diagrams sharing
+ * one HTML page must not collide — is what the second pair of cases pins, and
+ * that is preserved.
+ */
+describe('JSON style: ID determinism and cross-diagram uniqueness', () => {
+  it('two renders of the SAME diagram produce identical clipPath IDs', () => {
     const markup = '@startjson\n{"a": 1}\n@endjson';
-    const svg1 = renderSync(markup);
-    const svg2 = renderSync(markup);
-    const id1 = svg1.match(/id="(json-node-clip-[^"]+)"/)?.[1];
-    const id2 = svg2.match(/id="(json-node-clip-[^"]+)"/)?.[1];
+    const id1 = renderSync(markup).match(/id="(json-node-clip-[^"]+)"/)?.[1];
+    const id2 = renderSync(markup).match(/id="(json-node-clip-[^"]+)"/)?.[1];
     expect(id1).toBeDefined();
-    expect(id2).toBeDefined();
-    expect(id1).not.toBe(id2);
+    expect(id1).toBe(id2);
   });
 
-  it('two renders produce different arrow marker IDs', () => {
+  it('two renders of the SAME diagram produce identical arrow marker IDs', () => {
     const markup = '@startjson\n{"a": {"b": 1}}\n@endjson';
-    const svg1 = renderSync(markup);
-    const svg2 = renderSync(markup);
-    const id1 = svg1.match(/id="(arrow-json-dep-[^"]+)"/)?.[1];
-    const id2 = svg2.match(/id="(arrow-json-dep-[^"]+)"/)?.[1];
+    const id1 = renderSync(markup).match(/id="(arrow-json-dep-[^"]+)"/)?.[1];
+    const id2 = renderSync(markup).match(/id="(arrow-json-dep-[^"]+)"/)?.[1];
     expect(id1).toBeDefined();
-    expect(id2).toBeDefined();
-    expect(id1).not.toBe(id2);
+    expect(id1).toBe(id2);
+  });
+
+  it('DIFFERENT diagrams get different clipPath IDs — the collision the salt exists to prevent', () => {
+    const a = renderSync('@startjson\n{"a": 1}\n@endjson').match(/id="(json-node-clip-[^"]+)"/)?.[1];
+    const b = renderSync('@startjson\n{"substantially": "different"}\n@endjson')
+      .match(/id="(json-node-clip-[^"]+)"/)?.[1];
+    expect(a).toBeDefined();
+    expect(b).toBeDefined();
+    expect(a).not.toBe(b);
+  });
+
+  it('the whole document is byte-identical across renders', () => {
+    const markup = '@startjson\n{"a": {"b": 1}, "c": [1, 2]}\n@endjson';
+    expect(renderSync(markup)).toBe(renderSync(markup));
   });
 });

@@ -7,6 +7,7 @@
 
 import { rect, line, text, path, ellipse } from '../../core/svg.js';
 import { openArrowHeadDef } from '../../core/svg-markers.js';
+import { getSeed, seedOf } from '../../core/klimt/drawing/svg/svg-seed.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
@@ -76,6 +77,27 @@ function buildEdgePathD(
   const curve = `C ${cp1x} ${pCurveStart.y} ${cp2x} ${cp2y} ${pEnd.x} ${pEnd.y}`;
   const horizontal = pts.length >= 3 ? `L ${pCurveStart.x} ${p0.y} ` : '';
   return `M ${p0.x - DOT_STUB} ${p0.y} L ${p0.x} ${p0.y} ${horizontal}${curve}`;
+}
+
+/**
+ * A per-diagram id namespace, derived from the diagram's own geometry.
+ *
+ * The ids built from this (`json-node-clip-…`, `arrow-json-dep-…`) only need to
+ * be unique between diagrams sharing one HTML page. That used to be done with
+ * `Math.random()`, which CLAUDE.md forbids outright in a rendering path:
+ * *"every non-determinism (uid counters, gradient/shadow ids) is seeded so
+ * output is reproducible."* Two diagrams differ in their geometry, so hashing
+ * it gives the same uniqueness deterministically; two IDENTICAL diagrams
+ * collide, which is harmless because their ids address identical shapes.
+ *
+ * Uses upstream's own hash rather than a new one — `seedOf` is
+ * `UmlSource.seed()` and `getSeed` is `SvgGraphics.getSeed(long)`.
+ */
+function saltFor(geo: JsonGeometry): string {
+  const fingerprint = geo.nodes
+    .map((n) => `${n.id}:${n.x},${n.y},${n.width},${n.height},${n.rows.length}`)
+    .join('\n');
+  return getSeed(seedOf(fingerprint));
 }
 
 function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): string {
@@ -343,7 +365,7 @@ export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
     return { body: '', width: 0, height: 0 };
   }
 
-  const diagramSalt = Math.random().toString(36).slice(2, 8);
+  const diagramSalt = saltFor(geo);
   const parts: string[] = [];
 
   // Title is no longer drawn here (mission G0b/T8) -- it flows through
