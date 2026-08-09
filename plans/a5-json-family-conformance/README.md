@@ -63,9 +63,14 @@ write-set (`on_fail: stop`).
 
 ## Batches
 
-- [ ] **[Batch 1 — harness and corpus](batch-1/overview.md)** — build the
+- [x] **[Batch 1 — harness and corpus](batch-1/overview.md)** — build the
       svg-json harness and widen the oracle cache to all 92 fixtures. No
       production code changes. T1 ∥ T2.
+      **DONE 2026-08-08** (`58aafc6a`, `67e21d29`). Corpus captured 92/92
+      (50/39/3, exactly as scoped), no `.dot` from any fixture (ADR-3 confirmed
+      by measurement). Census runs clean over all three types.
+      **Baseline preview: 0/92 conformant — 91 in the 11–30 bucket, 1 in 4–10,
+      zero errors.** Gates: 569 files / 12,568 tests, all four green.
 - [ ] **[Batch 2 — true baseline and the document shell](batch-2/overview.md)** —
       measure a real baseline through the harness, attribute it, and close the
       shell gap json shares with dot's old one.
