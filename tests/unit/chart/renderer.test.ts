@@ -194,8 +194,8 @@ describe('AC5: AST errors produce a visually distinct error SVG', () => {
     const geo = chartPlugin.layoutSync(ast, theme, measurer);
     const svg = assembleSvg(chartPlugin.render(geo, theme));
     // Error SVG must contain the error text and a red-ish border color
-    expect(svg).toContain('#dc2626');
-    expect(svg).toContain('stroke="#dc2626"');
+    expect(svg).toContain('#DC2626');
+    expect(svg).toContain('stroke="#DC2626"');
     expect(svg).not.toContain('<defs>'); // error SVG is minimal, no svgRoot defs
   });
 
@@ -204,15 +204,15 @@ describe('AC5: AST errors produce a visually distinct error SVG', () => {
     const errorGeo = { ...geo, errors: ['test validation error'] as readonly string[] };
     const svg = assembleSvg(renderChart(errorGeo, theme));
     expect(svg).toContain('test validation error');
-    expect(svg).toContain('#dc2626');
-    expect(svg).toContain('stroke="#dc2626"');
+    expect(svg).toContain('#DC2626');
+    expect(svg).toContain('stroke="#DC2626"');
   });
 
   it('error SVG has red fill on background rect', () => {
     const geo = makeMinimalGeo();
     const errorGeo = { ...geo, errors: ['oops'] as readonly string[] };
     const svg = assembleSvg(renderChart(errorGeo, theme));
-    expect(svg).toContain('fill="#fee2e2"');
+    expect(svg).toContain('fill="#FEE2E2"');
   });
 });
 

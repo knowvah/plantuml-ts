@@ -146,6 +146,7 @@ export function text(
     ['font-style', style.fontStyle],
     ['fill', fillR.value],
     ['text-anchor', style.textAnchor],
+    ['transform', style.transform],
     ['dominant-baseline', style.dominantBaseline],
     ['text-decoration', style.textDecoration],
     // Rule 3: no `lengthAdjust` — hoisted onto the document root and
@@ -226,6 +227,7 @@ export function path(d: string, style: LineStyle = {}): string {
   const a = attrs([
     ['d', d],
     ['fill', fillR?.value ?? PAINT_NONE],
+    ['fill-opacity', style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS)],
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],

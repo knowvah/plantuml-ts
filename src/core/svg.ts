@@ -47,6 +47,9 @@ export interface LineStyle {
   stroke?: Paint;
   strokeWidth?: number;
   strokeDasharray?: string;
+  /** `fill-opacity` -- takes rule 6's `max(decimals, 2)` formatting, same as
+   *  `opacity`. Needed by the area chart's translucent fill path. */
+  fillOpacity?: number;
   markerEnd?: string;
   markerStart?: string;
   /** `<path id="...">` -- jar's `Link#idCommentForSvg()` value
@@ -83,6 +86,8 @@ export interface TextStyle {
   fontStyle?: 'normal' | 'italic';
   fill?: Paint;
   textAnchor?: 'start' | 'middle' | 'end';
+  /** `transform` -- emitted verbatim. Rotated axis titles need it. */
+  transform?: string;
   dominantBaseline?: 'middle' | 'central' | 'auto' | 'hanging';
   /**
    * Emitted verbatim as the SVG `text-decoration` attribute. The error diagram

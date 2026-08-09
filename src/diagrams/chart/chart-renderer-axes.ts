@@ -7,6 +7,7 @@
 import type { ChartGeometry, AxisGeometry } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import { line, text } from '../../core/svg.js';
+import { fmt } from '../../core/svg-format.js';
 import type {} from '../../core/dispatcher.js';
 import {} from './renderers/bar.js';
 import {} from './renderers/line.js';
@@ -99,13 +100,13 @@ export function drawHAxis(axis: AxisGeometry, geo: ChartGeometry, theme: Theme):
   if (axis.title.length > 0) {
     if (axis.titlePos.rotate) {
       parts.push(
-        `<text x="${axis.titlePos.x}" y="${axis.titlePos.y}"` +
-          ` font-family="${theme.fontFamily}"` +
-          ` font-size="${String(AXIS_TITLE_FONT_SIZE)}"` +
-          ` fill="${theme.colors.text}"` +
-          ` text-anchor="middle"` +
-          ` transform="rotate(-90,${String(axis.titlePos.x)},${String(axis.titlePos.y)})"` +
-          `><tspan>${axis.title}</tspan></text>`,
+        text(axis.titlePos.x, axis.titlePos.y, axis.title, {
+          fontFamily: theme.fontFamily,
+          fontSize: AXIS_TITLE_FONT_SIZE,
+          fill: theme.colors.text,
+          textAnchor: 'middle',
+          transform: `rotate(-90,${fmt(axis.titlePos.x)},${fmt(axis.titlePos.y)})`,
+        }),
       );
     } else {
       parts.push(
@@ -187,13 +188,13 @@ export function drawVAxis(
   if (axis.title.length > 0) {
     const rotateDeg = leftSide ? -90 : 90;
     parts.push(
-      `<text x="${axis.titlePos.x}" y="${axis.titlePos.y}"` +
-        ` font-family="${theme.fontFamily}"` +
-        ` font-size="${String(AXIS_TITLE_FONT_SIZE)}"` +
-        ` fill="${theme.colors.text}"` +
-        ` text-anchor="middle"` +
-        ` transform="rotate(${rotateDeg},${String(axis.titlePos.x)},${String(axis.titlePos.y)})"` +
-        `><tspan>${axis.title}</tspan></text>`,
+      text(axis.titlePos.x, axis.titlePos.y, axis.title, {
+        fontFamily: theme.fontFamily,
+        fontSize: AXIS_TITLE_FONT_SIZE,
+        fill: theme.colors.text,
+        textAnchor: 'middle',
+        transform: `rotate(${fmt(rotateDeg)},${fmt(axis.titlePos.x)},${fmt(axis.titlePos.y)})`,
+      }),
     );
   }
 

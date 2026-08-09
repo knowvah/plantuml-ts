@@ -11,6 +11,7 @@
 
 import type { AreaSeriesGeo, DataPoint } from '../layout.js';
 import type { Theme } from '../../../core/theme.js';
+import { line, path, text } from '../../../core/svg.js';
 
 // ---------------------------------------------------------------------------
 // Constants — sourced from AreaRenderer.java
@@ -87,10 +88,10 @@ function formatValue(value: number): string {
 }
 
 function drawLabel(p: DataPoint): string {
-  return (
-    `<text x="${p.x}" y="${p.y - LABEL_OFFSET_Y}"` +
-    ` text-anchor="middle" font-size="${LABEL_FONT_SIZE}">${formatValue(p.value)}</text>`
-  );
+  return text(p.x, p.y - LABEL_OFFSET_Y, formatValue(p.value), {
+    textAnchor: 'middle',
+    fontSize: LABEL_FONT_SIZE,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -118,8 +119,7 @@ export function drawArea(geo: AreaSeriesGeo, _theme: Theme): string {
     const p = geo.points[0]!;
     const b = geo.baselinePoints[0] ?? { x: p.x, y: p.y };
     parts.push(
-      `<line x1="${p.x}" y1="${b.y}" x2="${p.x}" y2="${p.y}"` +
-        ` stroke="${geo.color}" stroke-width="${TOP_EDGE_STROKE_WIDTH}"/>`,
+      line(p.x, b.y, p.x, p.y, { stroke: geo.color, strokeWidth: TOP_EDGE_STROKE_WIDTH }),
     );
 
     if (geo.showLabels) {
@@ -132,15 +132,13 @@ export function drawArea(geo: AreaSeriesGeo, _theme: Theme): string {
   // --- Filled area polygon ---
   const fillD = buildFillPath(geo.points, geo.baselinePoints);
   parts.push(
-    `<path d="${fillD}"` +
-      ` fill="${geo.color}" fill-opacity="${FILL_OPACITY}" stroke="none"/>`,
+    path(fillD, { fill: geo.color, fillOpacity: FILL_OPACITY, stroke: 'none' }),
   );
 
   // --- Top-edge stroke ---
   const strokeD = buildStrokePath(geo.points);
   parts.push(
-    `<path d="${strokeD}"` +
-      ` fill="none" stroke="${geo.color}" stroke-width="${TOP_EDGE_STROKE_WIDTH}"/>`,
+    path(strokeD, { stroke: geo.color, strokeWidth: TOP_EDGE_STROKE_WIDTH }),
   );
 
   // --- Optional data labels ---

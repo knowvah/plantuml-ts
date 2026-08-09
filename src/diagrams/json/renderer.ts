@@ -6,6 +6,7 @@
  */
 
 import { rect, line, text, path, ellipse } from '../../core/svg.js';
+import { shortenColor } from '../../core/svg-format.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
@@ -119,7 +120,7 @@ function renderNode(node: JsonNodeGeo, theme: Theme, diagramSalt: string): strin
   const clipId = `json-node-clip-${diagramSalt}-${node.id}`;
   parts.push(
     `<defs><clipPath id="${clipId}">` +
-      `<rect width="${node.width}" height="${node.height}" rx="${rx}"/>` +
+      rect(0, 0, node.width, node.height, { rx }) +
       `</clipPath></defs>`,
   );
 
@@ -282,7 +283,7 @@ function jsonArrowMarkerDef(theme: Theme, markerId: string): string {
   return (
     `<marker id="${markerId}" markerWidth="10" markerHeight="7" ` +
     `refX="9" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">` +
-    `<polyline points="0 0, 9 3.5, 0 7" fill="none" stroke="${stroke}" stroke-width="1.5"/>` +
+    `<polyline points="0 0, 9 3.5, 0 7" fill="none" stroke="${shortenColor(stroke)}" stroke-width="1.5"/>` +
     `</marker>`
   );
 }
