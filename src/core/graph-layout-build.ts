@@ -132,25 +132,45 @@ export function firstEncounterOrder(input: DotInputGraph): DotInputNode[] {
   return [...first, ...rest];
 }
 
-export function addNodes(b: GvGraphBuilder, input: DotInputGraph): void {
-  for (const n of firstEncounterOrder(input)) {
-    if (n.shape === 'point' && n.titleLabelWidth === undefined) {
-      // emitter: `[shape=point,width=.01,label=""]` — width OVERRIDES the
-      // caller's measured size, exactly as ClusterDotString emits anchors.
-      b.addNode(n.id, { shape: 'point', width: '.01', label: '' });
-      continue;
-    }
+/** One node's graphviz declaration. Three shapes of emission, split out of
+ *  {@link addNodes} so each stays legible (and so the loop stays within the
+ *  repo's complexity budget). */
+function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
+  if (n.shape === 'point' && n.titleLabelWidth === undefined) {
+    // emitter: `[shape=point,width=.01,label=""]` — width OVERRIDES the
+    // caller's measured size, exactly as ClusterDotString emits anchors.
+    b.addNode(n.id, { shape: 'point', width: '.01', label: '' });
+    return;
+  }
+  if (n.shape === 'record' && n.recordLabel !== undefined) {
+    // A5/T7: the one shape sized from its LABEL rather than the caller's
+    // measured box -- graphviz derives the field grid (and the `<Pn>` ports
+    // edges target) from the record syntax, with width/height as minimums.
+    // Deliberately NO `fixedsize`, matching `SmetanaForJson#createNode`
+    // (`SmetanaForJson.java:233-262`), which would otherwise collapse the very
+    // fields the ports live on.
     b.addNode(n.id, {
-      shape: layoutShape(n),
-      fixedsize: 'true',
-      // Empty label: plantuml renders node text itself, so graphviz must not
-      // measure the implicit name-label (its default "Times,serif" has no LUT
-      // metrics and would warn). fixedsize keeps the caller's measured size.
-      label: '',
+      shape: 'record',
+      label: n.recordLabel,
       width: (n.width / PX_PER_INCH).toString(),
       height: (n.height / PX_PER_INCH).toString(),
     });
+    return;
   }
+  b.addNode(n.id, {
+    shape: layoutShape(n),
+    fixedsize: 'true',
+    // Empty label: plantuml renders node text itself, so graphviz must not
+    // measure the implicit name-label (its default "Times,serif" has no LUT
+    // metrics and would warn). fixedsize keeps the caller's measured size.
+    label: '',
+    width: (n.width / PX_PER_INCH).toString(),
+    height: (n.height / PX_PER_INCH).toString(),
+  });
+}
+
+export function addNodes(b: GvGraphBuilder, input: DotInputGraph): void {
+  for (const n of firstEncounterOrder(input)) addOneNode(b, n);
   // Rank constraints (rank=source|sink|same|min|max): graphviz groups nodes by
   // a subgraph carrying `rank=`. Declaring an existing node id inside the
   // subgraph references it (DOT semantics — no duplicate node is created).

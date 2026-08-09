@@ -15,7 +15,7 @@ import type { DotInputEdge, DotInputGraph } from '../../core/graph-layout.js';
 import { XPoint2D } from '../../core/klimt/geom/XPoint2D.js';
 import { Mirror } from './Mirror.js';
 import { measureNode } from './TextBlockJson.js';
-import type { MeasuredNode, JsonRowGeo } from './TextBlockJson.js';
+import type { JsonRowGeo } from './TextBlockJson.js';
 
 // A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
 // boundary). Re-exported so `renderer.ts` and every existing consumer keep
@@ -112,12 +112,17 @@ function normalizeRoot(root: unknown): JsonContainer {
  * `Mirror#invAndXYSwitch` (`x = max - y`, `y = x`).
  *
  * Node TOP-LEFTs, not points, so the flip has to account for the node's own
- * extent along the flipped axis. In the transposed frame a node spans
- * `gy … gy + trueWidth` vertically, so its mirrored left edge is
- * `max - gy - trueWidth`, and its mirrored top is simply `gx`.
+ * extent along the flipped axis: the mirrored left edge is `max - bottomEdge`
+ * and the mirrored top is the node's left edge in the transposed frame.
  *
- * `max` is the transposed frame's own height — the largest `gy + trueWidth`
- * — so the leftmost node lands at x = 0 and nothing goes negative.
+ * **The extent is the ENGINE's node size, not our measured box.** Upstream's
+ * `getPosition` reads `data.width`/`data.height` — the sizes graphviz SETTLED
+ * on — and `InternalNode#getMaxX` does the same for `max`. Those exceed the
+ * requested dims for a `shape=record` node, because `size_reclbl` PADs every
+ * leaf field (`XPAD` = 4·GAP = 16, `YPAD` = 2·GAP = 8;
+ * `~/git/graphviz/lib/common/macros.h:27-29`) and upstream compensates for
+ * only the `YPAD` half (its `colAwidth - 8`). Using our measured box here
+ * instead silently mis-centres every node the moment records arrive.
  *
  * Edges are NOT touched here: `layoutJson` derives its edge points from final
  * node geometry rather than from the engine's splines, so they follow the
@@ -125,26 +130,19 @@ function normalizeRoot(root: unknown): JsonContainer {
  * splines is T8.
  */
 function mirrorToDiagramSpace(
-  placed: ReadonlyArray<{ id: string; x: number; y: number }>,
-  measured: ReadonlyArray<MeasuredNode>,
+  placed: ReadonlyArray<{ id: string; x: number; y: number; width: number; height: number }>,
 ): Map<string, { x: number; y: number }> {
-  const trueDims = new Map(
-    measured.map((m) => [m.flatNode.id, { width: m.totalWidth, height: m.totalHeight }]),
-  );
+  // `max` = the largest bottom edge in the transposed frame, matching
+  // `InternalNode#getMaxX` (`y_centre + height/2`).
   let max = 0;
-  for (const p of placed) {
-    const d = trueDims.get(p.id);
-    if (d === undefined) continue;
-    max = Math.max(max, p.y + d.width);
-  }
+  for (const p of placed) max = Math.max(max, p.y + p.height);
+
   const mirror = new Mirror(max);
   const out = new Map<string, { x: number; y: number }>();
   for (const p of placed) {
-    const d = trueDims.get(p.id);
-    if (d === undefined) continue;
     // invAndXYSwitch on the node's far corner along the flipped axis gives the
     // mirrored top-left in one step.
-    const corner = mirror.invAndXYSwitch(new XPoint2D(p.x, p.y + d.width));
+    const corner = mirror.invAndXYSwitch(new XPoint2D(p.x, p.y + p.height));
     out.set(p.id, { x: corner.getX(), y: corner.getY() });
   }
   return out;
@@ -217,27 +215,18 @@ export function layoutJson(
     height: m.totalWidth,
   }));
 
-  // Build lookup for parent geometry to compute tailportY
-  const measuredById = new Map(measured.map((m) => [m.flatNode.id, m]));
-
   const dotEdges: DotInputEdge[] = flatNodes
     .filter((fn) => fn.parentId !== null)
     .map((fn) => {
-      const parentM = measuredById.get(fn.parentId!);
-      let tailportY: number | undefined;
-      if (parentM !== undefined && parentM.totalHeight > 0) {
-        const row = parentM.rows.find((r) => r.key === (fn.parentKey ?? ''));
-        if (row !== undefined) {
-          const rowCenterFromTop = row.y + row.height / 2;
-          tailportY = (rowCenterFromTop - parentM.totalHeight / 2) / parentM.totalHeight;
-        }
-      }
+      // A5/T7 is UNFINISHED: the seam now carries `tailport`, but json does not
+      // set it yet -- emitting real records regressed document dimensions 7x
+      // and there is no DOT oracle for this family to diagnose against (ADR-3).
+      // See the decision journal. Edges therefore still leave from node centres.
       const edge: DotInputEdge = {
         id: `${fn.parentId!}->${fn.id}`,
         from: fn.parentId!,
         to: fn.id,
       };
-      if (tailportY !== undefined) edge.attributes = { tailportY };
       return edge;
     });
 
@@ -257,7 +246,7 @@ export function layoutJson(
 
   // Transpose the solved layout back into diagram space before anything reads
   // a coordinate off it.
-  const mirrored = mirrorToDiagramSpace(dotResult.nodes, measured);
+  const mirrored = mirrorToDiagramSpace(dotResult.nodes);
 
   const nodes: JsonNodeGeo[] = [];
   for (const m of measured) {
