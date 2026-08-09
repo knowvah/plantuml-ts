@@ -71,7 +71,7 @@ write-set (`on_fail: stop`).
       by measurement). Census runs clean over all three types.
       **Baseline preview: 0/92 conformant — 91 in the 11–30 bucket, 1 in 4–10,
       zero errors.** Gates: 569 files / 12,568 tests, all four green.
-- [ ] **[Batch 2 — true baseline and the document shell](batch-2/overview.md)** —
+- [x] **[Batch 2 — true baseline and the document shell](batch-2/overview.md)** —
       measure a real baseline through the harness, attribute it, and close the
       shell gap json shares with dot's old one.
 - [ ] **[Batch 3 — the layout re-mirror](batch-3/overview.md)** — ADR-1. Port

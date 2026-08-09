@@ -10,8 +10,8 @@ and here it comes from T3. Do not fold it into a fix task.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|-------------|-------|--------|-----------|------|
-| T3 | true baseline + per-fixture attribution | debugger | `plans/a5-json-family-conformance/baseline.md` | T1, T2 | [ ] |
-| T4 | route json/yaml/hcl through the unified document shell | typescript-pro | `src/diagrams/json/renderer.ts`, `src/index.ts` (shell dispatch only) | T3 | [ ] |
+| T3 | true baseline + per-fixture attribution | orchestrator (inline) | `plans/a5-json-family-conformance/baseline.md` | T1, T2 | [x] |
+| T4 | route json/yaml/hcl through the unified document shell | orchestrator (inline) | `core/{dispatcher,assemble-svg,render-options}.ts`, `core/error/error-diagrams.ts`, `diagrams/{json,yaml,hcl}/index.ts`, `src/index.ts` (see journal #7: write-set amended) | T3 | [x] |
 
 Strictly sequential: T4 acts on what T3 measures.
 
