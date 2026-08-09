@@ -53,13 +53,37 @@ Consequences, now that the model is right:
   produced by a real JVM, not by inspection.
 - **B2** `HandJiggle` + the six shape builders, mirroring upstream's file names.
 - **B3** Wire it into the json renderer — DONE. `litife`'s element tally is
-  exact and node 1 is byte-identical to the jar. Not yet byte-conformant: node
-  2 sits 0.237px off (M1a, the accepted engine divergence, which the jiggle
-  then carries into every one of its coordinates) and the document is 19px
-  narrower than the jar's for a reason not yet attributed — the usual ink →
-  margins → `+1` chain predicts OUR number, not the jar's, so handwritten
-  changes document sizing somehow. `enlargeClip` was checked and is a clipping
-  flag, not it.
+  exact, node 1 is byte-identical, and the DOCUMENT DIMENSIONS now match
+  (`213 x 84`). See "Why a handwritten document is wider" below.
+
+  Not byte-conformant: node 2 sits 0.237px off — M1a, the accepted engine
+  divergence — and the jiggle amplifies it, since a different node width
+  changes `round(distance/10)` and therefore the whole jitter pattern for that
+  node. 241 diffs, all downstream of that one offset.
+
+## Why a handwritten document is wider
+
+`JsonDiagram#calculateDimension` measures by DRAWING into a `LimitFinder`, and
+`drawU` wraps that finder in `UGraphicHandwritten` too — so **the measured
+shapes are the jiggled ones**. Two consequences, and together they were the
+whole 19px:
+
+- `LimitFinder#drawUPolygon` (`:171-177`) pads a polygon's ink by
+  `HACK_X_FOR_POLYGON = 10` on each side **in x only**. Under handwritten
+  every rectangle IS a polygon, so each node claims 20 extra units of width.
+- the `-1` ink corner belongs to `LimitFinder#drawRectangle`, and a
+  handwritten diagram draws no rectangles — so it does not apply, which is the
+  1px the height was out by.
+
+Predicted before implementing, from the golden's own polygons: they span
+x 9.778..182.057 and y 9.287..73.247, giving `trunc(192.279 + 20 + 1) = 213`
+by `trunc(63.960 + 20 + 1) = 84`. Both matched the golden exactly, so the
+implementation followed a confirmed mechanism rather than a fitted one.
+
+The pen accumulates this ink as it draws, which is upstream's own approach —
+measure by drawing — expressed over this port's geometry. It is available to
+the layout only after rendering, so `renderJson` overrides the fragment's
+dimensions rather than `layout.ts` predicting them.
 - **B4** (not started) Other engines. Each needs its own draw-order check
   before `handwritten` can be honoured there.
 

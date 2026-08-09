@@ -13,7 +13,7 @@ import { text } from '../../core/svg.js';
 
 import { buildCurvePath, veryFirstPoint, buildArrowHeadPath, buildCurveSegments, buildArrowHeadSegments } from './JsonCurve.js';
 import { penFor } from './renderer-pen.js';
-import type { JsonPen } from './renderer-pen.js';
+import type { JsonPen, PenInk } from './renderer-pen.js';
 import { resolveNodeStyle, SVG_CORNER_DIVISOR, JSON_SKIN_BLACK } from './renderer-style.js';
 import type { NodeStyleJson, TextStyleJson, HighlightClassStyle } from './renderer-style.js';
 import type { Theme } from '../../core/theme.js';
@@ -41,6 +41,10 @@ const CELL_MARGIN_X = 5;
 const HIGHLIGHT_INSET_X = 1.5;
 const HIGHLIGHT_WIDTH_REDUCTION = 2;
 const HIGHLIGHT_ROUND = 4;
+
+/** `TitledDiagram#getDefaultMargins()` — `same(10)`, the fallback when no
+ *  theme sets one. Mirrors `layout.ts#CANVAS_PAD`. */
+const DEFAULT_MARGIN = 10;
 
 /** `UFontFactory.monospace(14)` — `JsonDiagram#drawU`'s hard-coded failure
  *  font (`JsonDiagram.java:116`), not the theme's. */
@@ -359,6 +363,30 @@ function renderParseFailure(geo: JsonGeometry): RenderFragment {
   return { body, width: geo.width, height: geo.height };
 }
 
+/**
+ * The document size for a handwritten diagram: the drawn SPAN plus the
+ * diagram margins plus `ensureVisible`'s truncating `+1`.
+ *
+ * The span is translation-invariant, so the already-applied margin on the
+ * shapes does not need removing first. There is no `-1` ink corner here —
+ * that belongs to `LimitFinder#drawRectangle`, and a handwritten diagram
+ * draws no rectangles.
+ *
+ * Verified against `yaml/litife-43-novo083`: its polygons span x 9.778..182.057
+ * and y 9.287..73.247, which with the x-only polygon padding gives
+ * `trunc(192.279 + 20 + 1) = 213` by `trunc(63.960 + 20 + 1) = 84` — the
+ * golden's exact `viewBox`.
+ */
+function handwrittenDims(ink: PenInk, theme: Theme): { width: number; height: number } {
+  const m = theme.diagramMargin;
+  const marginX = m === undefined ? DEFAULT_MARGIN * 2 : m.left + m.right;
+  const marginY = m === undefined ? DEFAULT_MARGIN * 2 : m.top + m.bottom;
+  return {
+    width: ink.maxX - ink.minX + marginX + 1,
+    height: ink.maxY - ink.minY + marginY + 1,
+  };
+}
+
 export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
   if (geo.error !== undefined) return renderParseFailure(geo);
 
@@ -383,10 +411,20 @@ export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
   }
 
   // No `extraDefs`: the jar's json documents carry an EMPTY `<defs/>` (M3).
+  //
+  // A handwritten diagram re-derives its own size from what was actually
+  // drawn. `JsonDiagram#calculateDimension` measures by DRAWING into a
+  // `LimitFinder`, and `drawU` wraps that finder in `UGraphicHandwritten`
+  // too — so the measured shapes are the jiggled ones, and every rectangle
+  // has become a polygon. `layout.ts` cannot know that extent without
+  // repeating the jiggle, and the pen already has it.
+  const ink = pen.ink();
+  const dims = ink === undefined
+    ? { width: geo.width, height: geo.height }
+    : handwrittenDims(ink, theme);
   return {
     body: parts.join(''),
-    width: geo.width,
-    height: geo.height,
+    ...dims,
     background: theme.colors.background,
   };
 }
