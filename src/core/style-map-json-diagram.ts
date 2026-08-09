@@ -11,8 +11,8 @@
  * modulo variable naming when this module was split out. json ALSO defines
  * a legacy bare `element` / `element.header` / `element.highlight` selector
  * trio that yaml/hcl do not (yaml/hcl instead use a single
- * `<prefix>.element` selector, header-background only) — this is the only
- * asymmetry between the three families; node/arrow/separator/highlight are
+ * `<prefix>.element` selector, which sets the NODE background) — this is the
+ * only asymmetry between the three families; node/arrow/separator/highlight are
  * fully shared via {@link computeDataDiagramFamilyOverride}.
  *
  * Relocated verbatim from `style-map-theme.ts` (not refactored — see
@@ -183,7 +183,7 @@ function computeDataDiagramHighlightOverride(styleMap: StyleMap, prefix: string)
  * json's own bare `element` / `element.header` / `element.highlight`
  * selector trio — see this module's head doc comment for why yaml/hcl
  * instead use a single `<prefix>.element` selector ({@link
- * computeDataDiagramHeaderElementOverride}).
+ * computeDataDiagramElementOverride}).
  */
 function computeJsonElementOverride(styleMap: StyleMap): Partial<JsonGraphOverride> {
   const override: Partial<JsonGraphOverride> = {};
@@ -199,8 +199,18 @@ function computeJsonElementOverride(styleMap: StyleMap): Partial<JsonGraphOverri
   }
   const elemHeader = styleMap.get('element.header');
   if (elemHeader !== undefined) {
-    const hbg = elemHeader.get('backgroundcolor');
-    if (hbg !== undefined) override.headerBackground = resolveColor(hbg);
+    // NO `BackgroundColor` here. The `header` style reaches exactly one place
+    // upstream -- `getTextBlock(getStyleToUse(true, …), key)`, which reads only
+    // `getFontConfiguration`, `wrapWidth` and `getHorizontalAlignment`
+    // (`TextBlockJson.java:341-349`). It has no background role, because there
+    // is no key-column shape for it to fill: `drawU` paints the node rect, the
+    // rows, and the node rect again. Jar-verified -- `element { header {
+    // BackgroundColor red } }` leaves the node `#F1F1F1`, unchanged.
+    //
+    // This port used to parse it and paint a key column with it. The column
+    // was removed as unfaithful (A5 M2), which left the property parsed and
+    // silently dropped; parsing input we cannot honour is worse than either
+    // honouring or refusing it, so the mapping is gone.
     const fs = elemHeader.get('fontstyle');
     if (fs !== undefined) override.headerFontBold = fs.toLowerCase().includes('bold');
   }
@@ -213,16 +223,23 @@ function computeJsonElementOverride(styleMap: StyleMap): Partial<JsonGraphOverri
 }
 
 /**
- * yaml's/hcl's shared `<prefix>.element { BackgroundColor }` selector —
- * header-background only (the yaml/hcl sibling of {@link
- * computeJsonElementOverride}'s 3-selector trio).
+ * yaml's/hcl's shared `<prefix>.element { BackgroundColor }` selector — the
+ * yaml/hcl sibling of {@link computeJsonElementOverride}'s 3-selector trio,
+ * and it targets the NODE background exactly as json's own `element` handler
+ * does. `element` is an ancestor of `node` in the style signature, so a
+ * background set there cascades to the node rect.
+ *
+ * It used to write `headerBackground`, i.e. the key column. That was the wrong
+ * target, not merely an unused one: jar-verified, `yamlDiagram { element {
+ * BackgroundColor red } }` renders the NODE RECT red
+ * (`fill="#F00" stroke="#F00"`), which is what this now produces.
  */
-function computeDataDiagramHeaderElementOverride(styleMap: StyleMap, prefix: string): Partial<JsonGraphOverride> {
+function computeDataDiagramElementOverride(styleMap: StyleMap, prefix: string): Partial<JsonGraphOverride> {
   const override: Partial<JsonGraphOverride> = {};
   const elem = styleMap.get(`${prefix}.element`);
   if (elem === undefined) return override;
   const bg = elem.get('backgroundcolor');
-  if (bg !== undefined) override.headerBackground = resolveColor(bg);
+  if (bg !== undefined) override.background = resolveColor(bg);
   return override;
 }
 
@@ -259,7 +276,7 @@ export function computeYamlFamilyOverride(styleMap: StyleMap): Partial<JsonGraph
   return computeDataDiagramFamilyOverride(
     styleMap,
     'yamldiagram',
-    computeDataDiagramHeaderElementOverride(styleMap, 'yamldiagram'),
+    computeDataDiagramElementOverride(styleMap, 'yamldiagram'),
   );
 }
 
@@ -268,7 +285,7 @@ export function computeHclFamilyOverride(styleMap: StyleMap): Partial<JsonGraphO
   return computeDataDiagramFamilyOverride(
     styleMap,
     'hcldiagram',
-    computeDataDiagramHeaderElementOverride(styleMap, 'hcldiagram'),
+    computeDataDiagramElementOverride(styleMap, 'hcldiagram'),
   );
 }
 
