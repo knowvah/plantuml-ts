@@ -30,11 +30,25 @@ function makeRow(overrides: Partial<JsonRowGeo> & Pick<JsonRowGeo, 'valueType'>)
     valueTextLengths: [40],
     keyBaselineY: 16,
     valueBaselineYs: [16],
+    // Overwritten just below unless explicitly supplied; declared here so the
+    // literal satisfies `JsonRowGeo`.
+    keyAtoms: [],
+    valueAtoms: [],
     ...overrides,
   };
   // Auto-derive valueLines from value when not explicitly provided
   if (!('valueLines' in overrides)) {
     base.valueLines = [base.value];
+  }
+  // ...and the drawn atoms from whatever `valueLines` ended up being. With no
+  // wrap a line is exactly one atom (`Fission.ts`), which is what these
+  // geometry fixtures exercise; a suite that needs real wrapping renders a
+  // fixture end-to-end instead of hand-building rows.
+  if (!('valueAtoms' in overrides)) {
+    base.valueAtoms = base.valueLines.map((l) => [{ text: l, dx: 0, textLength: 40 }]);
+  }
+  if (!('keyAtoms' in overrides)) {
+    base.keyAtoms = [{ text: base.key, dx: 0, textLength: 30 }];
   }
   return base;
 }

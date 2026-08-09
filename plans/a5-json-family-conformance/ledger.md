@@ -95,7 +95,7 @@ measurement:
 | M5 | Value text colour | **CLOSED** — matched to upstream, divergence retired 2026-08-09 | `renderer-style.ts`; DIVERGENCES.md entry marked RETIRED | 0 |
 | M6 | Element tally still differs | PORT GAP | 17 fixtures, each with its own small delta — see the index | 17 |
 
-### M6 — element tally: 17 → 4 fixtures
+### M6 — element tally: 17 → 3 fixtures
 
 Four mechanisms closed, each read out of a branch rather than fitted.
 
@@ -167,18 +167,55 @@ allowmixing refusal in INHERITED sans-serif, not monospace, which this port
 does not yet match. Not chased here; it is a property of those bespoke error
 boxes, not of the json family.
 
-### M6 remainder — 4 fixtures, and only 3 mechanisms between them
+### M6 remainder — 3 fixtures
 
 | fixture | signature | mechanism |
 |---|---|---|
-| `json/noleta-28-nutu456` | `text-112` | **wrap emits per-WORD atoms.** With a `LineBreakStrategy` active the jar draws one `<text>` per word AND one per inter-word space — `'This'`, `'\xa0'`, `'is'`, `'\xa0'`, `'a'`, … — where this port draws one per wrapped LINE. The space atom and the word after it share an `x`, because a space measures 0 under deterministic metrics. |
-| `yaml/vapoda-87-piku740` | `text-4` | SAME mechanism, and not obviously so: it sets no `MaximumWidth` itself — `!theme amiga` does, at `puml-theme-amiga.puml:63` (`node { MaximumWidth 300 }`). |
-| `json/vogeku-38-soxe333` | `text-12` | unexamined |
+| `yaml/vapoda-87-piku740` | `text-4` | The wrap port below is in and correct; this fixture never REACHES it. Its `MaximumWidth` comes from `!theme amiga` (`puml-theme-amiga.puml:63`, `node { MaximumWidth 300 }`), and `scripts/compile-themes.py` extracts only background/foreground/line colour and font — it has never carried `MaximumWidth`, so no built-in theme sets `graph.json.maximumWidth`. 8 upstream themes declare one. Fixing it means teaching the generator a non-colour property and regenerating every theme entry, and it first needs an answer to whether that `node {}` selector is global or diagram-scoped. Its own change, deliberately not started at the tail of a long session. |
+| `json/nixaxa-46-muge983` | `rect+1` | malformed JSON — the jar draws a bare monospace message with no box (`JsonDiagram#drawU`'s `root == null` branch). The class engine's refusals now route through the shared error page; this wants the same treatment for a json parse failure. |
 | `yaml/litife-43-novo083` | `ellipse+1 line+6 path-6 polygon-5 rect+4` | a different shape family entirely; unexamined |
 
-`json/nixaxa-46-muge983` left the list: it is malformed JSON, where the jar
-draws a bare message with no box (`JsonDiagram#drawU`'s `root == null` branch)
-— now handled by the same refusal route class uses.
+`json/vogeku-38-soxe333` still carries a `text-12`, unexamined, but its tally
+is otherwise clean.
+
+### 7. Wrapping emits per-WORD atoms — ported
+
+The largest remaining mechanism, and the one the corpus made look like several.
+
+`SheetBlock1` hands each stripe to `Fission#getSplitted` (`Fission.java:63-101`),
+which decomposes the atoms into **neutrons** — runs of same-type characters,
+where the types are WHITESPACE, CJK_IDEOGRAPH and UNBREAKABLE
+(`Neutron.java:120-127`) — and breaks between them at zero-width
+`ZWSP_SEPARATOR` markers that `AtomText#getNeutrons` (`AtomText.java:278-315`)
+places on BOTH sides of every whitespace or CJK run. Each surviving neutron
+becomes its own `Atom`, and **each atom is drawn as its own `<text>`**.
+
+So with wrap active the jar emits one element per word AND one per inter-word
+space — `'This'`, `'\xa0'`, `'is'`, … — where this port emitted one per
+wrapped line: 134 elements against 22 on `json/noleta-28-nutu456`. The space
+element and the word after it share an `x`, because a space measures 0 under
+deterministic metrics.
+
+Ported to `json/Fission.ts` — `getNeutrons`, `addNeutron`, `slightyShorten`,
+`removeFinalSpaces`, `isWhite` and the queue walk, including the detail that an
+overflowing run with no break in it stays put rather than being cut. It
+replaces `wordWrapLine`, a greedy re-join that could not produce per-atom
+output at all.
+
+**Wrap is the only thing that splits a line this way.** `getSplitted` returns
+the stripe untouched when `maxWidth` is 0 (`:64-66`), so an unwrapped cell
+stays one atom and one `<text>` — which is why none of the 16 already-conformant
+fixtures moved.
+
+Column A splits too: `getTextBlock` builds the key and the value from the same
+style, `wrapWidth()` included (`TextBlockJson.java:341-349`). Keys were the
+last two elements of `noleta`'s gap.
+
+One deliberate approximation, named: `Character.isWhitespace` is approximated
+by an explicit character class rather than a full Unicode table. It must NOT
+match U+00A0 — Java's `isWhitespace` excludes NBSP precisely because it is
+non-breaking, and json's nested cell is three NBSPs that have to stay one
+unbreakable atom.
 
 ### What closed this round
 

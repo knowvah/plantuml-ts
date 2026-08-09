@@ -175,15 +175,20 @@ function renderRowText(
   // never draws the index (it uses it only to resolve highlights).
   if (!row.arrayEntry) {
     const keyColor = hl.isHighlighted && hl.fontColor !== undefined ? hl.fontColor : ts.keyColor;
-    parts.push(
-      text(cellTextX(node.x, node.keyColWidth, row.keyWidth, ts.align), node.y + row.keyBaselineY, row.key, {
-        ...common,
-        fill: keyColor,
-        textLength: row.keyTextLength,
-        ...((hl.isHighlighted ? hl.fontBold : false) || ts.headerBold ? { fontWeight: '700' as const } : {}),
-        ...(hl.isHighlighted && hl.fontItalic ? { fontStyle: 'italic' } : {}),
-      }),
-    );
+    const keyStyle = {
+      ...common,
+      fill: keyColor,
+      ...((hl.isHighlighted ? hl.fontBold : false) || ts.headerBold ? { fontWeight: '700' as const } : {}),
+      ...(hl.isHighlighted && hl.fontItalic ? { fontStyle: 'italic' as const } : {}),
+    };
+    // Column A splits into atoms under wrap for the same reason column B does
+    // — `getTextBlock` builds both from the same style, wrapWidth included.
+    const keyX = cellTextX(node.x, node.keyColWidth, row.keyWidth, ts.align);
+    for (const atom of row.keyAtoms) {
+      parts.push(text(keyX + atom.dx, node.y + row.keyBaselineY, atom.text, {
+        ...keyStyle, textLength: atom.textLength,
+      }));
+    }
   }
 
   // No early return for an empty value: an empty cell still draws (a space,
@@ -197,17 +202,22 @@ function renderRowText(
   const bold = hl.isHighlighted ? hl.fontBold : ts.bold;
   const italic = hl.isHighlighted ? hl.fontItalic : ts.italic;
 
+  const runStyle = {
+    ...common,
+    fill: vColor,
+    ...(bold ? { fontWeight: '700' as const } : {}),
+    ...(italic ? { fontStyle: 'italic' as const } : {}),
+  };
   for (let li = 0; li < row.valueLines.length; li++) {
-    const lineWidth = row.valueLineWidths[li] ?? 0;
-    parts.push(
-      text(cellTextX(colLeft, colWidth, lineWidth, ts.align), node.y + (row.valueBaselineYs[li] ?? 0), row.valueLines[li]!, {
-        ...common,
-        fill: vColor,
-        textLength: row.valueTextLengths[li] ?? 0,
-        ...(bold ? { fontWeight: '700' as const } : {}),
-        ...(italic ? { fontStyle: 'italic' } : {}),
-      }),
-    );
+    // The LINE is aligned as a whole, then its atoms lay out left-to-right
+    // from that origin. Wrap off => exactly one atom, so this is the same
+    // single `<text>` as before; wrap on => one per word and inter-word space
+    // (`Fission.ts`), which is what the jar emits.
+    const lineX = cellTextX(colLeft, colWidth, row.valueLineWidths[li] ?? 0, ts.align);
+    const baseline = node.y + (row.valueBaselineYs[li] ?? 0);
+    for (const atom of row.valueAtoms[li] ?? []) {
+      parts.push(text(lineX + atom.dx, baseline, atom.text, { ...runStyle, textLength: atom.textLength }));
+    }
   }
   return parts.join('');
 }
