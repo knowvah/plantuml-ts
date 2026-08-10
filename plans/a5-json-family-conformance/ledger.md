@@ -868,7 +868,40 @@ same missing piece:
 Both need the tab-measurement mechanism, which is a measurer question rather
 than a json one. Do not fit a width to close it.
 
-### Also open — `yaml/vapoda-87-piku740` (1 diff, document width)
+### CLOSED 2026-08-10 — `yaml/vapoda-87-piku740`
+
+The recorded hypothesis was right in substance and wrong about the direction.
+`documentDimensions` did walk nodes only — but the excess is on the LEFT, not
+the right. Nothing in the jar's output reaches further right than 193.275,
+which this port already matched.
+
+`JsonCurve#getVeryFirst` places an edge's SPOT `VERY_FIRST_LINE` (13) back
+from its spline start, so when the parent node sits at the left margin the
+spot lands OUTSIDE it: on vapoda the spot's circle reaches x=0 against a
+leftmost node rect at x=5. Since `MinMax#getDimension` is `maxX - minX`
+(`MinMax.java:151-153`) — an EXTENT — that 4px of left overhang is 4px of
+document width, and folding only nodes lost it.
+
+The old code hardcoded the minimum as `margin.left + INK_MIN_CORNER`, which is
+right exactly when a node rect is the leftmost ink. Its own comment said as
+much: "An edge or spot that overhung the outermost node would need adding
+here, and none does today." One does.
+
+Verified against three fixtures with different margins before changing
+anything — extent + margin + 1 reproduces the jar's viewBox on all of them:
+
+| fixture | margin | ink min | ink max | computed | jar |
+| --- | --- | --- | --- | --- | --- |
+| vapoda | 5 | 0 (spot) | 193.275 | 204.275 -> 204 | 204 |
+| najoba | 5 | 4 (rect x-1) | 176.85 | 183.85 -> 183 | 183 |
+| nujuke | 10 | 9 (rect x-1) | 76 | 88 | 88 |
+
+Moved to `src/diagrams/json/document-dimensions.ts` — the edge walk pushed
+`layout.ts` past the 500-line cap.
+
+### Superseded — the original entry (kept for the record)
+
+`yaml/vapoda-87-piku740` (1 diff, document width)
 
 Found while closing najoba; NOT the engine delta, and not in that batch's
 scope. Measured with the deterministic flag:
