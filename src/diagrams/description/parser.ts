@@ -26,7 +26,7 @@ import {
   ELEMENT_MULTILINE_OPEN_TYPE0_RE,
   extractColor,
   extractNodeStereotype,
-  finalizeDisplay,
+  stripFullWrap,
   makeNode,
   parseNameSection,
 } from './parse-helpers.js';
@@ -98,7 +98,15 @@ function removeStartingSpaces(s: string, nb: number): string {
  *  (CommandCreateElementMultilines.java:191-199). Both are read off an
  *  already-trimmed line, so neither participates in `trimSmart`'s indent. */
 function pushElementEdgeText(pending: PendingElementState, text: string): void {
-  const t = pending.terminator === 'quote' ? text : finalizeDisplay(text.trim());
+  // NEITHER terminator resolves `\n`/`\r`/`\l` here. TYPE1's display is built
+  // by `lines.toDisplay()` (`CommandCreateElementMultilines.java:193`) ->
+  // `Display.createFoo` -> `create(lines)`, which takes the strings AS-IS --
+  // `Display.getWithNewlines` is the single-line path only
+  // (`CommandCreateElementFull.java:321,324`). So a literal `\n` inside a
+  // `[ … ]` body stays literal, and only `<U+..>` decodes (per atom).
+  // Jar-verified on `component/nujito-06-neca370`, whose body rows the jar
+  // draws as `aaa \n bbb \n`.
+  const t = pending.terminator === 'quote' ? text : stripFullWrap(text.trim());
   if (t.trim() !== '') pending.lines.push(t);
 }
 
@@ -123,7 +131,7 @@ function pushElementEdgeText(pending: PendingElementState, text: string): void {
 function pushElementBody(pending: PendingElementState, raw: string): void {
   if (pending.baseIndent === undefined) pending.baseIndent = nbStartingSpace(raw);
   const dedented = removeStartingSpaces(raw, pending.baseIndent);
-  const t = pending.terminator === 'quote' ? dedented : finalizeDisplay(dedented);
+  const t = pending.terminator === 'quote' ? dedented : stripFullWrap(dedented);
   if (t.trim() !== '') pending.lines.push(t);
 }
 
