@@ -213,4 +213,26 @@ describe('buildLineAtoms — <img> cannot-decode fallback is a hardcoded monospa
     expect(atoms).toHaveLength(1);
     expect(atoms[0]?.kind).toBe('inline');
   });
+
+  test('a codepoint escape does not hide a LATER creole tag (decode is per-atom)', () => {
+    // `AtomText` decodes `<U+XXXX>` in its CONSTRUCTOR (`AtomText.java:79-81`),
+    // so it necessarily runs AFTER the style-command engine has split the line
+    // into runs. This port used to decode the whole line first, which put a
+    // real newline into the string the tag tokenizer then scanned and left a
+    // following tag as literal text.
+    //
+    // Minimal repro from `component/gafico-37-cuma657`, whose node was 1.2in
+    // too wide because `<color:green>` was drawn verbatim. The trailing
+    // `<U+000A> eee` is load-bearing: without it the bug does not appear.
+    const { atoms } = buildLineAtoms('<u:blue>ccc <U+000A> <color:green>ddd <U+000A> eee', PLAIN);
+    const texts = atoms.filter((a) => a.kind === 'text').map((a) => (a as { text: string }).text);
+    expect(texts.join('|')).not.toContain('<color:green>');
+    // Two runs, split at the colour tag, and the escapes ARE still decoded --
+    // to REAL newlines, not left as `<U+000A>`.
+    //
+    // The first run keeps its trailing `\n ` where the jar's drawn `<text>` is
+    // a bare `ccc`: that trimming is `DriverTextSvg`'s emit-time `trin`, not an
+    // atom-level property, so it belongs to the driver test rather than here.
+    expect(texts).toEqual(['ccc \n ', 'ddd \n eee']);
+  });
 });

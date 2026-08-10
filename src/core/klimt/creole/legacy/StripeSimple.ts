@@ -367,10 +367,39 @@ export function buildLineAtoms(
 ): LineBuildAtoms {
   const classification = classifyStripeLine(line);
   if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
-  const content = resolveTextEscapes(classification.content);
+  const content = classification.content;
   if (classification.type === 'LITERAL') {
-    return { classification, atoms: buildLiteralAtoms(content, font), lineFont: font };
+    return { classification, atoms: decodeAtomEscapes(buildLiteralAtoms(content, font)), lineFont: font };
   }
   const lineFont = classification.type === 'HEADING' ? fontConfigurationForHeading(font, classification.order) : font;
-  return { classification, atoms: buildStripeAtoms(content, lineFont, mode), lineFont };
+  return {
+    classification,
+    atoms: decodeAtomEscapes(buildStripeAtoms(content, lineFont, mode)),
+    lineFont,
+  };
+}
+
+/**
+ * `<U+XXXX>`/`&#NNN;` decoding, applied PER ATOM once the creole tokenizer has
+ * split the line into runs.
+ *
+ * Upstream decodes in the `AtomText` CONSTRUCTOR
+ * (`AtomText.java:79-81`, `manageSpecialChars`) — so it necessarily runs after
+ * the style-command engine has produced the runs, and only ever sees one run's
+ * own text. `AtomTextUtils.createLegacy` (`:72`) passes `true`; its sibling at
+ * `:76` passes `false`, which is the whole of upstream's control over it.
+ *
+ * This port used to decode the WHOLE LINE before building atoms. That put a
+ * decoded `<U+000A>` — a real newline — into the string the tag tokenizer then
+ * scanned, and a tag after it could be left as literal text: on
+ * `component/gafico-37-cuma657` the run
+ * `<u:blue>ccc <U+000A> <color:green>ddd <U+000A> eee` kept `<color:green>`
+ * verbatim, and that literal is 1.2in of excess node width. Minimal repro is
+ * in this module's test.
+ *
+ * Only `text` atoms are decoded, matching upstream: an image/emoji/latex atom
+ * carries a name or expression, never display text.
+ */
+function decodeAtomEscapes(atoms: readonly CreoleAtom[]): CreoleAtom[] {
+  return atoms.map((a) => (a.kind === 'text' ? { ...a, text: resolveTextEscapes(a.text) } : a));
 }

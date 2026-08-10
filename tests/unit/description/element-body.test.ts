@@ -39,10 +39,33 @@ describe('description parser — [ … ] element body as display (S1L-b T2)', ()
     expect(c?.display).toBe('desc');
   });
 
-  it('body lines are finalized like single-line displays (`\\n` escape → newline)', () => {
+  it('a `\\n` escape stays LITERAL in a body — only the single-line path splits', () => {
+    // This previously asserted the opposite, on the assumption that a body row
+    // is "finalized like a single-line display". It is not. Upstream builds a
+    // TYPE1 display with `lines.toDisplay()`
+    // (`CommandCreateElementMultilines.java:193`) -> `Display.createFoo` ->
+    // `create(lines)`, which takes the strings AS-IS;
+    // `Display.getWithNewlines` — the thing that splits `\n`/`\r`/`\l` — is
+    // reached only from the single-line path
+    // (`CommandCreateElementFull.java:321,324`).
+    //
+    // Jar-verified on `component/nujito-06-neca370`, whose body rows the jar
+    // draws as the literal `aaa \\n bbb \\n`; sizing that fixture went from a
+    // 2.18in node-size delta to exact.
     const ast = parse('node n [\nfirst\\nsecond\n]');
     const n = nodeById(ast, 'n');
-    expect(n?.display).toBe('first\nsecond');
+    expect(n?.display).toBe('first\\nsecond');
+  });
+
+  it('a `\\t` escape in a body still becomes a tab (per-atom, not via getWithNewlines)', () => {
+    // The counterpart to the rule above, and the reason removing the body's
+    // getWithNewlines alone regressed `component/fariba-82-xolu802`: `\t` is
+    // converted per ATOM by `AtomText.manageSpecialChars` (java:140-145), a
+    // different mechanism that is unaffected by the display-construction path.
+    // Held at the atom layer, so the parser keeps the raw token.
+    const ast = parse('node n [\nfirst\\tsecond\n]');
+    const n = nodeById(ast, 'n');
+    expect(n?.display).toBe('first\\tsecond');
   });
 
   // Corrected in S1L-e: this previously asserted the code stayed as the
