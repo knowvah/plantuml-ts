@@ -37,6 +37,21 @@ export interface Theme {
    * today. Absent means "use the engine's default".
    */
   diagramMargin?: { top: number; right: number; bottom: number; left: number };
+  /**
+   * The theme's own `<style> document { … }` declarations, as
+   * `selector -> { property: value }` with lowercase keys — the same shape
+   * `parseStyleBlock` produces.
+   *
+   * `document` and `document.<element>` are genuine members of every chrome
+   * element's `{root, document, <element>}` signature, and
+   * `StyleStorage#computeMergedStyle` matches by set containment, so a theme's
+   * `document { title { FontSize 22 } }` reaches the title exactly as a user
+   * `<style>` block would. Everything else in a theme is compiled to the
+   * scalar fields above; these have no scalar home and were simply lost, which
+   * is why `!theme amiga` drew a 14px title where the jar draws 22px.
+   */
+  styleOverrides?: Record<string, Record<string, string>>;
+
   /** `skinparam linetype ortho|polyline` — svek routes edge labels through
    *  xlabel and emits splines=ortho under ortho (SvekEdge.java:434-441,
    *  DotStringFactory.java:160-168). Absent = default splines. */
@@ -366,6 +381,8 @@ export type ThemeOverride = {
   fontFamily?: string;
   fontSize?: number;
   diagramMargin?: { top: number; right: number; bottom: number; left: number };
+  /** See {@link Theme.styleOverrides}. */
+  styleOverrides?: Record<string, Record<string, string>>;
   /** See `Theme.defaultFontSize`'s own doc comment (R2j). */
   defaultFontSize?: number;
   linetype?: 'ortho' | 'polyline';
@@ -461,7 +478,7 @@ const OPTIONAL_SCALAR_KEYS = [
   // merge is a whole-value replacement, which is exactly right for a margin:
   // a theme that sets one replaces all four sides, it does not blend with the
   // default. Omitting it silently dropped every theme's margin.
-  'diagramMargin', 'handwritten',
+  'diagramMargin', 'handwritten', 'styleOverrides',
 ] as const;
 
 /** Copy the top-level optional scalars, preferring `partial` then `base`. */

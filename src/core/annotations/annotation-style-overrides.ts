@@ -29,6 +29,18 @@ const STYLE_PROPERTY_SETTERS: ReadonlyArray<readonly [key: string, apply: StyleS
   ['fontcolor', (s, v) => { s.fontColor = expandGrayShorthand(v.trim()); }],
   ['fontname', (s, v) => { s.fontFamily = v.trim(); }],
   ['linecolor', (s, v) => { s.lineColor = resolveChromeColor(v); }],
+  [
+    // Absent from this table until now, so `<style> … { LineThickness N }`
+    // never reached chrome at all -- only the `titleBorderThickness` /
+    // `legendBorderThickness` skinparams did (`annotation-skinparam.ts`).
+    // Every bundled theme sets `document { title { LineThickness 0 } }`, which
+    // `TextBlockBordered#noBorder()` turns into "draw no border box".
+    'linethickness',
+    (s, v) => {
+      const n = Number.parseFloat(v.trim());
+      if (Number.isFinite(n)) s.lineThickness = n;
+    },
+  ],
   ['backgroundcolor', (s, v) => { s.backgroundColor = resolveChromeColor(v); }],
   [
     'roundcorner',

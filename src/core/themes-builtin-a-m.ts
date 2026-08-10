@@ -15,6 +15,13 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'amiga': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
+    styleOverrides: {
+      'document.caption': { linethickness: '0' },
+      'document.footer': { linethickness: '0' },
+      'document.header': { linethickness: '0' },
+      'document.title': { fontsize: '22', linethickness: '0' },
+      'root': { backgroundcolor: '#0B58A8', fontcolor: '#FFFFFF', fontname: 'Verdana', hyperlinkcolor: '#FDA325', linecolor: '#FFFFFF', linethickness: '1', margin: '5' },
+    },
     colors: {
       background: '#0B58A8',
       text: '#FFFFFF',
@@ -66,6 +73,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   },
   'black-knight': {
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#fff200', hyperlinkcolor: '$ORANGE', linecolor: '$PRIMARY_DARK', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFF200',
@@ -82,6 +92,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'bluegray': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#fff', hyperlinkcolor: '$ORANGE', linecolor: '#007faf', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#fff',
@@ -98,6 +111,13 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'blueprint': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
+    styleOverrides: {
+      'document.caption': { linethickness: '0' },
+      'document.footer': { linethickness: '0' },
+      'document.header': { linethickness: '0' },
+      'document.title': { fontsize: '22', linethickness: '0' },
+      'root': { backgroundcolor: '#003153', fontcolor: '#D9D3D0', fontname: 'Verdana', hyperlinkcolor: '#D9D3D0', linecolor: '#D9D3D0', linethickness: '1', margin: '5' },
+    },
     colors: {
       background: '#003153',
       text: '#D9D3D0',
@@ -133,6 +153,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'cerulean-outline': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#2FA4E7', hyperlinkcolor: '#FD7E14', linecolor: '#2683B9', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#2FA4E7',
@@ -149,6 +172,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'cerulean': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#FFF', hyperlinkcolor: '#FD7E14', linecolor: '#2683B9', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFF',
@@ -179,6 +205,13 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'crt-amber': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
+    styleOverrides: {
+      'document.caption': { linethickness: '0' },
+      'document.footer': { linethickness: '0' },
+      'document.header': { linethickness: '0' },
+      'document.title': { fontsize: '22', linethickness: '0' },
+      'root': { backgroundcolor: '#282828', fontcolor: '#FFB000', fontname: 'Verdana', hyperlinkcolor: '#FFCC00', linecolor: '#FFB000', linethickness: '1', margin: '5' },
+    },
     colors: {
       background: '#282828',
       text: '#FFB000',
@@ -205,6 +238,13 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'crt-green': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
+    styleOverrides: {
+      'document.caption': { linethickness: '0' },
+      'document.footer': { linethickness: '0' },
+      'document.header': { linethickness: '0' },
+      'document.title': { fontsize: '22', linethickness: '0' },
+      'root': { backgroundcolor: '#282828', fontcolor: '#33FF33', fontname: 'Verdana', hyperlinkcolor: '#33FF33', linecolor: '#33FF33', linethickness: '1', margin: '5' },
+    },
     colors: {
       background: '#282828',
       text: '#33FF33',
@@ -231,6 +271,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'cyborg-outline': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#2A9FD6', hyperlinkcolor: '#fd7e14', linecolor: '#55B2DE', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#2A9FD6',
@@ -247,6 +290,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'cyborg': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#FFF', hyperlinkcolor: '#fd7e14', linecolor: '#55B2DE', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFF',
@@ -263,6 +309,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'hacker': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#151515', hyperlinkcolor: '$ORANGE', linecolor: '#6d8b32', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#151515',
@@ -279,6 +328,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'lightgray': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#336699', hyperlinkcolor: '$ORANGE', linecolor: '#888888', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#336699',
@@ -315,6 +367,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'materia-outline': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#2196F3', hyperlinkcolor: '#fd7e14', linecolor: '#1a78c2', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#2196F3',
@@ -331,6 +386,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'materia': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#FFF', hyperlinkcolor: '#fd7e14', linecolor: '#1a78c2', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFF',
@@ -347,6 +405,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'metal': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#4682b4', hyperlinkcolor: '$ORANGE', linecolor: '#b7b6b5', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#4682B4',
@@ -363,6 +424,13 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'mimeograph': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
+    styleOverrides: {
+      'document.caption': { linethickness: '0' },
+      'document.footer': { linethickness: '0' },
+      'document.header': { linethickness: '0' },
+      'document.title': { fontsize: '22', linethickness: '0' },
+      'root': { backgroundcolor: '#D9D3D0', fontcolor: '#9275B6', fontname: 'Verdana', hyperlinkcolor: '#9275B6', linecolor: '#9275B6', linethickness: '1', margin: '5' },
+    },
     colors: {
       background: '#D9D3D0',
       text: '#9275B6',
@@ -389,6 +457,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'minty': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#fff', hyperlinkcolor: '#fd7e14', linecolor: '#6caf9c', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#fff',
@@ -405,6 +476,13 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
   'mono': {
     fontFamily: 'Hack',
     diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
+    styleOverrides: {
+      'document.caption': { linethickness: '0' },
+      'document.footer': { linethickness: '0' },
+      'document.header': { linethickness: '0' },
+      'document.title': { fontsize: '22', linethickness: '0' },
+      'root': { backgroundcolor: 'white', fontcolor: 'black', fontname: 'Hack', hyperlinkcolor: '#333', linecolor: 'black', linethickness: '1', margin: '5' },
+    },
     colors: {
       background: 'white',
       text: 'black',

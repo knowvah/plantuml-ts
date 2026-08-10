@@ -213,6 +213,51 @@ def extract_node_maximum_width(content: str) -> str | None:
     return None
 
 
+def extract_document_styles(content: str, vars: dict[str, str]) -> dict[str, dict[str, str]]:
+    """
+    The theme's `<style> root { … }` and `document { … }` blocks, as
+    selector -> {prop: value}.
+
+    `document` and `document.<element>` are genuine members of every chrome
+    element's `{root, document, <element>}` style signature, and
+    `StyleStorage#computeMergedStyle` matches by set containment -- so a
+    theme's `document { title { FontSize 22 } }` reaches the title exactly as a
+    user `<style>` block would. `annotation-style-overrides.ts` already
+    resolves those selectors; this only has to hand it the theme's own
+    declarations, which are otherwise compiled away.
+
+    Returns lowercase property names to match `parseStyleBlock`'s own keys.
+    """
+    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
+    if not m:
+        return {}
+    out: dict[str, dict[str, str]] = {}
+    depth = 0
+    path: list[str] = []
+    for raw in m.group(1).split('\n'):
+        line = raw.strip()
+        if not line or line.startswith("'"):
+            continue
+        if line.endswith('{'):
+            path.append(line[:-1].strip().lower())
+            depth += 1
+            continue
+        if line == '}':
+            if path:
+                path.pop()
+            depth -= 1
+            continue
+        if not path or path[0] not in ('document', 'root'):
+            continue
+        parts = line.split(None, 1)
+        if len(parts) != 2:
+            continue
+        selector = '.'.join(path)
+        out.setdefault(selector, {})[parts[0].lower()] = _resolve_var(
+            parts[1].strip().strip('"\''), vars)
+    return out
+
+
 def extract_document_margin(content: str) -> str | None:
     """
     The diagram margin a theme declares, as `top right bottom left`.
@@ -323,6 +368,7 @@ def parse_theme(fname: str) -> dict[str, str | None]:
         'fn': root['fn'] or skp['fn'],
         'mw': extract_node_maximum_width(content),
         'margin': extract_document_margin(content),
+        'doc_styles': extract_document_styles(content, vars),
     }
 
 
@@ -410,6 +456,13 @@ def emit_theme_entry(name: str, props: dict) -> list[str]:
     lines.extend(props.get('extra_after_font', []))
     if props.get('margin'):
         lines.append(f"    diagramMargin: {props['margin']},")
+    doc_styles = props.get('doc_styles') or {}
+    if doc_styles:
+        lines.append("    styleOverrides: {")
+        for selector in sorted(doc_styles):
+            decls = ', '.join(f"{k}: '{v}'" for k, v in sorted(doc_styles[selector].items()))
+            lines.append(f"      '{selector}': {{ {decls} }},")
+        lines.append("    },")
 
     color_lines = _color_lines(bg, fg, lc)
     json_lines = _json_graph_lines(bg, fg, lc, props.get('mw'), props.get('lt'),

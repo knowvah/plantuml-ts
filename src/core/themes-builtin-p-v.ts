@@ -15,6 +15,13 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'plain': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
+    styleOverrides: {
+      'document.caption': { linethickness: '0' },
+      'document.footer': { linethickness: '0' },
+      'document.header': { linethickness: '0' },
+      'document.title': { fontsize: '22', linethickness: '0' },
+      'root': { backgroundcolor: 'white', fontcolor: 'black', fontname: 'Verdana', hyperlinkcolor: 'blue', linecolor: 'black', linethickness: '1', margin: '5' },
+    },
     colors: {
       background: 'white',
       text: 'black',
@@ -209,6 +216,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'sandstone': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#fff', hyperlinkcolor: '#f47c3c', linecolor: '#2d547a', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#fff',
@@ -225,6 +235,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'silver': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#336699', hyperlinkcolor: '$ORANGE', linecolor: '#bebebe', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#336699',
@@ -241,6 +254,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'sketchy-outline': {
     fontFamily: 'Segoe Print',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#2e2e2e', hyperlinkcolor: '#fd7e14', linecolor: '#2e2e2e', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#2E2E2E',
@@ -257,6 +273,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'sketchy': {
     fontFamily: 'Segoe Print',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#ffffff', hyperlinkcolor: '#fd7e14', linecolor: '#2e2e2e', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFFFFF',
@@ -273,6 +292,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'spacelab-white': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'white', fontcolor: '#ffffff', hyperlinkcolor: '#fd7e14', linecolor: '#304d6d', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'white',
       text: '#FFFFFF',
@@ -298,6 +320,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'spacelab': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#ffffff', hyperlinkcolor: '#fd7e14', linecolor: '#304d6d', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFFFFF',
@@ -335,6 +360,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'superhero-outline': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#DF691A', hyperlinkcolor: '#f0ad4e', linecolor: '#e58748', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#DF691A',
@@ -351,6 +379,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'superhero': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#FFF', hyperlinkcolor: '#f0ad4e', linecolor: '#e58748', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFF',
@@ -387,6 +418,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'united': {
     fontFamily: 'Verdana',
     diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#fff', hyperlinkcolor: '#e95420', linecolor: '#d24c1d', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#fff',

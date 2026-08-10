@@ -271,7 +271,16 @@ function resolveBoxFill(style: AnnotationBoxStyle): string {
  *  OWN non-null default `lineColor: 'black'` keeps its rect alive
  *  (`fill="none" stroke="black"`) under the identical collapse. */
 function buildBorderRect(style: AnnotationBoxStyle, textWidth: number, textHeight: number): string {
-  if (resolveBoxFill(style) === 'none' && style.lineColor === null) return '';
+  // `TextBlockBordered#noBorder()` is exactly `stroke.getThickness() == 0`,
+  // and `drawU` then sets `color = back` (transparent) rather than the border
+  // color — so a zero-thickness border makes BOTH sides transparent and the
+  // whole `ug.draw(polygon)` is skipped. Without this, a theme that sets
+  // `root { LineColor … }` and `document { title { LineThickness 0 } }` — the
+  // shape every bundled theme uses — draws a border the jar does not
+  // (`yaml/tadari-70-nare798`, whose `<g class=\"title\">` holds ONE child).
+  const noBorder = style.lineThickness === 0;
+  const effectiveLineColor = noBorder ? null : style.lineColor;
+  if (resolveBoxFill(style) === 'none' && effectiveLineColor === null) return '';
   return rect(0, 0, textWidth, textHeight, borderBoxStyle(style));
 }
 
