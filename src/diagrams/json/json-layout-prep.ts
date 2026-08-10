@@ -319,6 +319,8 @@ export function wordWrapLine(
 // ---------------------------------------------------------------------------
 
 export interface BuildRowsOptions {
+  /** `skinparam tabSize` — see `tab-stops.ts`. */
+  tabSize?: number;
   maximumWidth?: number;
   fontFamily?: string;
   fontBold?: boolean;

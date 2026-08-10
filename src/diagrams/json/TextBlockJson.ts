@@ -17,6 +17,7 @@
 import type { StringMeasurer } from '../../core/measurer.js';
 import { emittedTextForm } from '../../core/svg.js';
 import { splitStripe } from './Fission.js';
+import { tabStopWidth, tabAwareWidth, walkTabs, hasTab } from './tab-stops.js';
 import {
   getDisplayValue,
   containerEntries,
@@ -165,6 +166,10 @@ interface FontSpec {
   family: string;
   size: number;
   weight?: 'bold';
+  /** `skinparam tabSize` — upstream hangs it off the FONT CONFIGURATION
+   *  (`FontConfiguration#getTabSize`), which is why it rides here rather than
+   *  being threaded as a parameter. Consumed only by `tab-stops.ts`. */
+  tabSize?: number;
 }
 
 /** The key- and value-cell fonts. Upstream resolves these per cell through the
@@ -175,8 +180,9 @@ function fontsFor(
   options: BuildRowsOptions | undefined,
 ): { keyFont: FontSpec; valFont: FontSpec } {
   const family = options?.fontFamily ?? 'sans-serif';
-  const bold = { family, size: fontSize, weight: 'bold' as const };
-  const plain = { family, size: fontSize };
+  const tab = options?.tabSize === undefined ? {} : { tabSize: options.tabSize };
+  const bold = { family, size: fontSize, weight: 'bold' as const, ...tab };
+  const plain = { family, size: fontSize, ...tab };
   return {
     keyFont: (options?.headerFontBold ?? options?.fontBold) ? bold : plain,
     valFont: options?.fontBold ? bold : plain,
@@ -220,16 +226,18 @@ function columnWidths(
   let keyColWidth = 0;
   let valueColWidth = 0;
   for (const row of rows) {
-    // For multi-line values, the widest individual line.
-    const vw = Math.max(
-      ...row.valueLines.map((l) => measurer.measure(l, valFont).width + 2 * CELL_MARGIN_X),
-    );
+    // For multi-line values, the widest individual line -- taken from the
+    // widths `cellMetrics` already computed rather than re-measured here.
+    // Those are TAB-AWARE (`tab-stops.ts`): a `\t` advances to the next stop
+    // instead of contributing its table width, which is zero. Re-measuring
+    // lost that, so a tab-only cell sized to nothing.
+    const vw = Math.max(...row.valueLineWidths.map((w) => w + 2 * CELL_MARGIN_X));
     if (row.arrayEntry) {
       // b1 IS the value, and there is no b2 to widen column B.
       if (vw > keyColWidth) keyColWidth = vw;
       continue;
     }
-    const kw = measurer.measure(row.key, keyFont).width + 2 * CELL_MARGIN_X;
+    const kw = row.keyWidth + 2 * CELL_MARGIN_X;
     if (kw > keyColWidth) keyColWidth = kw;
     if (vw > valueColWidth) valueColWidth = vw;
   }
@@ -328,18 +336,34 @@ function cellMetrics(
   // See `JsonRowGeo.valueTextLengths` for why the emitted form is measured
   // separately from the raw one.
   const emitted = (t: string, f: FontSpec) => measurer.measure(emittedTextForm(t), f).width;
-  // Atoms advance by their SIZING width, exactly as consecutive text runs do.
+  // `AtomText#getTabSize` -- always `fontSize * 4` under deterministic metrics,
+  // because the space its `tabString()` is made of measures 0 there.
+  const valMeasure = (t: string) => measurer.measure(t, valFont).width;
+  const tabStop = tabStopWidth(valMeasure, valFont.size, valFont.tabSize);
+  // Atoms advance by their SIZING width, exactly as consecutive text runs do
+  // -- except a TAB, which advances to the next stop and draws nothing
+  // (`AtomText#drawU`), so it contributes an offset but no atom.
   const atomsOf = (atoms: readonly string[]): CellAtom[] => {
+    const out: CellAtom[] = [];
     let dx = 0;
-    return atoms.map((text) => {
-      const atom = { text, dx, textLength: emitted(text, valFont) };
-      dx += measurer.measure(text, valFont).width;
-      return atom;
-    });
+    for (const text of atoms) {
+      if (!hasTab(text)) {
+        out.push({ text, dx, textLength: emitted(text, valFont) });
+        dx += valMeasure(text);
+        continue;
+      }
+      for (const run of walkTabs(text, valMeasure, tabStop, dx)) {
+        out.push({ text: run.text, dx: run.dx, textLength: emitted(run.text, valFont) });
+      }
+      dx += tabAwareWidth(text, valMeasure, tabStop);
+    }
+    return out;
   };
+  const lineWidth = (l: string) =>
+    hasTab(l) ? tabAwareWidth(l, valMeasure, tabStop) : valMeasure(l);
   return {
     keyWidth: cell.arrayEntry ? 0 : measurer.measure(cell.key, keyFont).width,
-    valueLineWidths: cell.valueLines.map((l) => measurer.measure(l, valFont).width),
+    valueLineWidths: cell.valueLines.map(lineWidth),
     keyTextLength: cell.arrayEntry ? 0 : emitted(cell.key, keyFont),
     valueTextLengths: cell.valueLines.map((l) => emitted(l, valFont)),
     valueAtoms: cell.atomLines.map(atomsOf),

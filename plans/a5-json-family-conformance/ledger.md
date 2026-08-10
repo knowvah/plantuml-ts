@@ -830,7 +830,30 @@ document width 183 -> 184. On `timafu` the same delta divides into
 `scale max 100*100`'s factor and becomes a uniform 0.12% on every number.
 Never chased: a Smetana geometry number is not a target.
 
-### Still open — `json/nujuke-14-nabo073` (1 diff, a childCount)
+### CLOSED 2026-08-10 — `json/nujuke-14-nabo073`
+
+One mechanism explained both halves, and it was NOT a measurer bug: the
+deterministic width table is right that a TAB is 0 wide
+(`UnicodeFontWidthSansSerif` block 0, cp 0x09 -> 0). `AtomText`
+(`klimt/creole/legacy/AtomText.java`) never asks the bounder for a tab's
+width. It tokenizes on `\t` and advances to the next TAB STOP.
+
+- `getTabSize` measures `tabString()` -- which is only ever spaces -- and
+  falls back to `fontSize * 4` when that measures zero. Under the
+  deterministic table a space IS zero, so the fallback always fires: the stop
+  is 56 at font 14. That is the whole of the unexplained 66px node
+  (56 + the 5+5 cell margin), and the branch fires ONLY under deterministic
+  metrics, so no amount of measuring rendered output could reveal it.
+- `drawU` emits a run per NON-tab token only, so a line whose text is exactly
+  `"\t"` draws no `<text>` at all -- the 11th child this port had.
+
+Ported as `src/diagrams/json/tab-stops.ts`. `columnWidths` was also
+re-measuring `row.valueLines` instead of using the widths `cellMetrics` had
+already computed, which discarded the tab-awareness; it now reads them.
+
+### Superseded — the original entry (kept for the record)
+
+`json/nujuke-14-nabo073` (1 diff, a childCount)
 
 NOT the engine delta, and not closed. A `childCount` mismatch stops `compare`
 recursion, so its inner diffs remain masked. Two known causes, both wanting the
@@ -845,7 +868,40 @@ same missing piece:
 Both need the tab-measurement mechanism, which is a measurer question rather
 than a json one. Do not fit a width to close it.
 
-### Also open — `yaml/vapoda-87-piku740` (1 diff, document width)
+### CLOSED 2026-08-10 — `yaml/vapoda-87-piku740`
+
+The recorded hypothesis was right in substance and wrong about the direction.
+`documentDimensions` did walk nodes only — but the excess is on the LEFT, not
+the right. Nothing in the jar's output reaches further right than 193.275,
+which this port already matched.
+
+`JsonCurve#getVeryFirst` places an edge's SPOT `VERY_FIRST_LINE` (13) back
+from its spline start, so when the parent node sits at the left margin the
+spot lands OUTSIDE it: on vapoda the spot's circle reaches x=0 against a
+leftmost node rect at x=5. Since `MinMax#getDimension` is `maxX - minX`
+(`MinMax.java:151-153`) — an EXTENT — that 4px of left overhang is 4px of
+document width, and folding only nodes lost it.
+
+The old code hardcoded the minimum as `margin.left + INK_MIN_CORNER`, which is
+right exactly when a node rect is the leftmost ink. Its own comment said as
+much: "An edge or spot that overhung the outermost node would need adding
+here, and none does today." One does.
+
+Verified against three fixtures with different margins before changing
+anything — extent + margin + 1 reproduces the jar's viewBox on all of them:
+
+| fixture | margin | ink min | ink max | computed | jar |
+| --- | --- | --- | --- | --- | --- |
+| vapoda | 5 | 0 (spot) | 193.275 | 204.275 -> 204 | 204 |
+| najoba | 5 | 4 (rect x-1) | 176.85 | 183.85 -> 183 | 183 |
+| nujuke | 10 | 9 (rect x-1) | 76 | 88 | 88 |
+
+Moved to `src/diagrams/json/document-dimensions.ts` — the edge walk pushed
+`layout.ts` past the 500-line cap.
+
+### Superseded — the original entry (kept for the record)
+
+`yaml/vapoda-87-piku740` (1 diff, document width)
 
 Found while closing najoba; NOT the engine delta, and not in that batch's
 scope. Measured with the deterministic flag:

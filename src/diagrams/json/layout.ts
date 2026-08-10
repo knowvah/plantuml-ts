@@ -122,6 +122,7 @@ export interface JsonGeometry {
 import { walkTree, EMPTY_MAP, buildHighlightMap } from './json-layout-prep.js';
 import type { JsonContainer, FlatNode, BuildRowsOptions } from './json-layout-prep.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
+import { documentDimensions, ENSURE_VISIBLE_BUMP } from './document-dimensions.js';
 
 /**
  * @see ~/git/plantuml/.../jsondiagram/JsonDiagram.java:78-88 (the constructor)
@@ -282,6 +283,9 @@ export function layoutJson(
     ...(nodeFontBold ? { fontBold: true } : {}),
     ...(headerFontBold ? { headerFontBold: true } : {}),
     ...(maximumWidth !== undefined ? { maximumWidth } : {}),
+    // `skinparam tabSize` -- reaches the cell fonts, where `tab-stops.ts`
+    // uses it exactly as `AtomText#tabString` does.
+    ...(theme.tabSize !== undefined ? { tabSize: theme.tabSize } : {}),
   };
 
   // Measure each node
@@ -411,7 +415,7 @@ export function layoutJson(
     spline: true,
   }));
 
-  const { width, height, finalWidth, finalHeight } = documentDimensions(nodes, margin);
+  const { width, height, finalWidth, finalHeight } = documentDimensions(nodes, edges, margin);
   const result: JsonGeometry = {
     nodes, edges, width, height,
     finalDimension: { width: finalWidth, height: finalHeight },
@@ -421,77 +425,4 @@ export function layoutJson(
     ...(ast.scale === undefined ? {} : { scale: ast.scale }),
   };
   return result;
-}
-
-/**
- * `LimitFinder#drawRectangle` records a rectangle's ink as
- * `addPoint(x - 1, y - 1)` … `addPoint(x + w - 1, y + h - 1)`
- * (`LimitFinder.java:184-188`). The leftmost/topmost node sits at the graph
- * origin, so the ink box's MIN corner is `(-1, -1)` — and `MinMax#getDimension`
- * is `maxX - minX` (`MinMax.java:151-153`), so that corner adds exactly 1 to
- * each axis. Oracle-verified on five fixtures spanning 46px to 1356px wide:
- * the instrumented jar reports `getMinMax = (-1.0,-1.0)->(…)` every time.
- */
-const INK_MIN_CORNER = -1;
-
-/**
- * `SvgGraphics#ensureVisible` stores `maxX = (int)(x + 1)`
- * (`SvgGraphics.java:129-134`), and `maxX`/`maxY` ARE the emitted
- * `width`/`height`/`viewBox` (`:799-811`). The truncation is applied by
- * `klimt/document-shell.ts#assembleDocumentShell`, which already `Math.trunc`s
- * these values; only the `+1` belongs here.
- */
-const ENSURE_VISIBLE_BUMP = 1;
-
-/**
- * The document's own width/height.
- *
- * The jar does NOT size a json document from its drawn extent — it ink-walks
- * the diagram, adds the margins, and truncates. Reproduced here in that order,
- * because a flat "+2 versus the node extent" is what this looks like from the
- * outside and it encodes nothing:
- *
- *   `JsonDiagram#calculateDimension` (`JsonDiagram.java:130-137`)
- *     → `TextBlockUtils.getMinMax(this, sb, true)` → {@link INK_MIN_CORNER}
- *   `TextBlockExporter#calculateFinalDimension` (`:199-203`)
- *     → `+ margin.left + margin.right`, `TitledDiagram#getDefaultMargins()`
- *       = `same(10)` (`TitledDiagram.java:275-277`)
- *   `SvgGraphics#ensureVisible` → {@link ENSURE_VISIBLE_BUMP}
- *
- * Node `x`/`y` already carry the left/top {@link CANVAS_PAD}, so the raw ink
- * extent is recovered by subtracting it back off before the margins are added
- * — the same quantity the jar's ink walk measures.
- *
- * Only the node extents are folded in, matching the previous behaviour: on
- * every measured fixture the rightmost/bottommost ink IS a node edge, because
- * json edges run BETWEEN nodes. An edge or spot that overhung the outermost
- * node would need adding here, and none does today.
- */
-function documentDimensions(
-  nodes: readonly JsonNodeGeo[],
-  margin: { left: number; top: number; x: number; y: number },
-): { width: number; height: number; finalWidth: number; finalHeight: number } {
-  let inkMaxX = 0;
-  let inkMaxY = 0;
-  for (const n of nodes) {
-    const r = n.x + n.width - margin.left;
-    const b = n.y + n.height - margin.top;
-    if (r > inkMaxX) inkMaxX = r;
-    if (b > inkMaxY) inkMaxY = b;
-  }
-  // `TextBlockExporter#calculateFinalDimension` -- the ink extent plus both
-  // margins, and NOTHING else. This is the dimension `computeScaleFactor(dim)`
-  // divides by (`TextBlockExporter.java:165,199-202`).
-  const finalWidth = inkMaxX - INK_MIN_CORNER + margin.x;
-  const finalHeight = inkMaxY - INK_MIN_CORNER + margin.y;
-  return {
-    // The emitted width/height/viewBox are `maxX`/`maxY`, which SvgGraphics
-    // seeds with `ensureVisible(minDim)` -- i.e. the SAME final dimension, run
-    // through `(int)(x + 1)`. Two distinct notions upstream, and conflating
-    // them made `scale max W*H` divide by a number one larger than the jar's.
-    width: finalWidth + ENSURE_VISIBLE_BUMP,
-    height: finalHeight + ENSURE_VISIBLE_BUMP,
-    finalWidth,
-    finalHeight,
-  };
 }
