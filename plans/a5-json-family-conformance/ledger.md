@@ -756,3 +756,40 @@ Every fixture, exactly once. **† = the element tally still differs, so
 | hcl/citoda-80-dimi195 | 6 | exact |
 | hcl/jubete-32-sutu417 | 130 | exact |
 | hcl/vocago-35-xodu446 | 47 | exact |
+
+---
+
+## M7 — document dimensions disagree with the jar (found 2026-08-09, OPEN)
+
+**Measured.** Same content, scale directive removed, `@startjson` of
+`{"fruit":"Apple","size":"Large","color":["Red","Green"]}`:
+
+| | width | height |
+| --- | --- | --- |
+| jar (`plantuml-oracle.jar` 1.2026.7beta11) | 204 | 93 |
+| this port | 194 | 85 |
+
+**Why it went unseen.** The structural gate excludes `svg/@width`,
+`svg/@height` and `svg/@viewBox` as positional (they are a direct consequence
+of placement, which ADR-2b hands to the layout engine), and byte-conformance
+was saturated with the same geometry noise. Nothing else in the family reads
+the document dimension, so a 10x8 error produced no failing assertion.
+
+**Why it surfaced now.** `scale max W*H` resolves its factor AGAINST the
+document dimension (`TextBlockExporter#computeScaleFactor(dim)` reading
+`calculateFinalDimension()`), so a wrong dimension becomes a wrong factor and
+then perturbs EVERY emitted number. `json/timafu-94-bixe774` holds all 47 of
+its structural diffs for this reason and for no other — each value is off by
+the same ~0.64%, and back-solving its rect height gives the jar a scale
+dimension of 192.85 against this port's 194.09.
+
+Note that 192.85 is not 204 either: upstream has TWO distinct dimension
+notions, the declared `calculateFinalDimension()` that scale divides by, and
+the `ensureVisible`-accumulated `maxX`/`maxY` that becomes the viewBox. Any
+fix has to establish which of the two this port's `documentDimensions` is
+modelling, and probably needs both.
+
+**Do not** chase this by adjusting a constant until `timafu` shrinks — that is
+exactly the fitting this mission has been bitten by before. The next step is
+to read `TextBlockExporter#calculateFinalDimension` and `JsonDiagram
+#calculateDimension` and establish the mechanism.
