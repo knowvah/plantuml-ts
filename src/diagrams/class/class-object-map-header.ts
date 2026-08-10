@@ -43,6 +43,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import { splitStereotypeLabels, measureStereoLabelWidths } from './class-stereotype.js';
+import { objectDisplayText } from './class-object-display.js';
 
 // ---------------------------------------------------------------------------
 // Local interfaces (grouped at top — a declaration sitting between two
@@ -347,13 +348,16 @@ export function headerRows(
   const { boxWidth, namePadding, underlineName = false, nameFontSizeOverride } = options;
   const nameFontSpec = { family: theme.fontFamily, size: nameFontSizeOverride ?? theme.fontSize };
   const { rows, stereoHeight } = buildStereoHeaderRows(classifier, theme, measurer, boxWidth);
-  const nameWidth = measurer.measure(classifier.display, nameFontSpec).width;
-  const nameBaseline = nameFontSpec.size - measurer.getDescent(nameFontSpec, classifier.display);
+  // Same resolved text the sizer measures (`class-object-display.ts`); the
+  // two are gated in lock-step by the sizer<->renderer parity test.
+  const displayText = objectDisplayText(classifier.display);
+  const nameWidth = measurer.measure(displayText, nameFontSpec).width;
+  const nameBaseline = nameFontSpec.size - measurer.getDescent(nameFontSpec, displayText);
   const nameY = stereoHeight + namePadding + nameBaseline;
   const nameIndent = (boxWidth - nameWidth) / 2;
   if (underlineName) {
     rows.push(
-      ...buildUnderlinedNameRows(classifier.display, nameY, nameIndent, {
+      ...buildUnderlinedNameRows(displayText, nameY, nameIndent, {
         fontSpec: nameFontSpec,
         measurer,
         fontSizeOverride: nameFontSizeOverride,
@@ -361,7 +365,7 @@ export function headerRows(
     );
   } else {
     rows.push({
-      text: classifier.display, y: nameY, indent: nameIndent, width: nameWidth,
+      text: displayText, y: nameY, indent: nameIndent, width: nameWidth,
       ...(nameFontSizeOverride !== undefined ? { fontSize: nameFontSizeOverride } : {}),
     });
   }

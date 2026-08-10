@@ -46,6 +46,7 @@ import { isEnhancedBody } from './class-body-enhanced.js';
 import { measureEnhancedBody } from './class-body-enhanced-layout.js';
 import type { Dim } from './class-object-map-header.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
+import { objectDisplayText } from './class-object-display.js';
 
 export type { Dim } from './class-object-map-header.js';
 export { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
@@ -318,7 +319,8 @@ function measureObjectFields(
 function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: StringMeasurer): ObjectTitleInfo {
   const nameFontSizeOverride = theme.colors.elements?.['object']?.headerFontSize;
   const nameFontSpec = { family: theme.fontFamily, size: nameFontSizeOverride ?? theme.fontSize };
-  const nameM = measurer.measure(classifier.display, nameFontSpec);
+  // Tilde escapes resolved before measuring -- see `class-object-display.ts`.
+  const nameM = measurer.measure(objectDisplayText(classifier.display), nameFontSpec);
   const nameDim: Dim = {
     width: nameM.width + OBJECT_NAME_PADDING * 2,
     height: nameM.height + OBJECT_NAME_PADDING * 2,
