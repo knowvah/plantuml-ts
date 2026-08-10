@@ -140,6 +140,13 @@ function separatorIsDouble(char: string): boolean {
   return char === '=';
 }
 
+/** Shift a block's rows from the origin to their final `contentTop`. Row `y`
+ *  is the only absolute field a build carries, so a translate is equivalent to
+ *  rebuilding at that top -- and cheaper. */
+function translateRows(rows: ClassifierGeo['rows'], contentTop: number): ClassifierGeo['rows'] {
+  return contentTop === 0 ? rows : rows.map((r) => ({ ...r, y: r.y + contentTop }));
+}
+
 interface RowsBlockResult {
   readonly rows: ClassifierGeo['rows'];
   readonly width: number;
@@ -241,11 +248,24 @@ function layoutPlainDividerRows(
   // A2s R2d: EVERY line in a rows-block is one row now (blanks included --
   // see buildRowsBlockRows), so the row count is simply `lines.length`; the
   // former `memberLineCount` null-parse filter would undercount blank rows.
-  const contentHeight = lines.length * ctx.fontSpec.size;
-  const offsets = CLASS_BODY_GEOMETRY.deriveHeightOffsets(contentHeight, char);
+  // A2s (rotisi-30-loge424): the block's content height is the SUM OF ITS
+  // ROWS' OWN heights, not `lines.length * fontSize`. A sprite row is as tall
+  // as its scaled sprite (`MethodsOrFieldsArea#calculateDimensionOnlyMembers`
+  // sums per-member TextBlock heights, java:161-166) -- 15px at `fontSize/13`
+  // is 16.154, and the 2x2 `$point` sprite is 2.154, so a flat 14 was wrong in
+  // BOTH directions. `class-member-rows.ts` got this in R2i; the enhanced path
+  // kept the flat stepping and its errors happened to nearly cancel, leaving
+  // the 1.0769px net that made the residual look like a single scale bug.
+  //
+  // Built at the origin first because `deriveHeightOffsets` needs the height
+  // to place `contentTop`, while the height itself does not depend on it; the
+  // rows are then translated rather than rebuilt.
+  const probe = buildRowsBlockRows(lines, ctx, 0);
+  const offsets = CLASS_BODY_GEOMETRY.deriveHeightOffsets(probe.contentHeight, char);
   const dividerY = cursor + offsets.dividerY;
   const contentTop = cursor + offsets.contentTop;
-  const { rows, width } = buildRowsBlockRows(lines, ctx, contentTop);
+  const rows = translateRows(probe.rows, contentTop);
+  const width = probe.width;
   const dasharrayField = separatorStrokeDasharray(char);
   const partsOut: EnhancedBodyPart[] = [
     {
@@ -279,11 +299,12 @@ function layoutTitledDividerRows(
   const { fontSpec, measurer, sprites, baselineOffset } = ctx;
   const titleBuild = buildMemberRow(separator.title!, {}, fontSpec, measurer, sprites);
   const dimTitleHeight = fontSpec.size; // a title is always a single creole line
-  // A2s R2d: `lines.length`, not `memberLineCount` -- see layoutPlainDividerRows.
-  const contentHeight = lines.length * fontSpec.size;
-  const offsets = CLASS_BODY_GEOMETRY.deriveHeightOffsets(contentHeight, separator.char, dimTitleHeight);
+  // Row-height sum, not `lines.length * fontSize` -- see layoutPlainDividerRows.
+  const probe = buildRowsBlockRows(lines, ctx, 0);
+  const offsets = CLASS_BODY_GEOMETRY.deriveHeightOffsets(probe.contentHeight, separator.char, dimTitleHeight);
   const contentTop = cursor + offsets.contentTop;
-  const { rows, width } = buildRowsBlockRows(lines, ctx, contentTop);
+  const rows = translateRows(probe.rows, contentTop);
+  const width = probe.width;
   const dividerY = cursor + offsets.dividerY;
   const titleBaselineY = dividerY - dimTitleHeight / 2 - 0.5 + baselineOffset;
   const titledDasharrayField = separatorStrokeDasharray(separator.char);
