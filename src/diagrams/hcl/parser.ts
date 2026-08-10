@@ -2,6 +2,8 @@ import { createAnnotations, matchAnnotationCommand } from '../../core/annotation
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { JsonDiagramAST } from '../json/ast.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import { matchScaleCommand } from '../../core/scale-command.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 // ---------------------------------------------------------------------------
 // Token types — port of net.sourceforge.plantuml.hcl.SymbolType
@@ -312,6 +314,7 @@ function parseTerms(terms: HclTerm[]): unknown {
 
 export function parseHcl(source: UmlSource): JsonDiagramAST {
   const bodyLines: string[] = [];
+  let scale: ScaleSpec | undefined;
   let inStyleBlock = false;
   const annotations = createAnnotations();
   const sprites = createSpriteRegistry();
@@ -357,6 +360,10 @@ export function parseHcl(source: UmlSource): JsonDiagramAST {
       bodyLines.length === 0 &&
       /^(?:skinparam|scale|skin|hide|!assume|!pragma)\s/i.test(t)
     ) {
+      // …except `scale`: upstream captures it (StyleExtractor.java:82-83)
+      // and executes it (JsonDiagram.java:90-99). yaml and hcl share that
+      // path because both factories construct a JsonDiagram.
+      scale = matchScaleCommand(t) ?? scale;
       continue;
     }
 
@@ -383,5 +390,6 @@ export function parseHcl(source: UmlSource): JsonDiagramAST {
   // #lizard forgives -- pre-existing faithful port of the HCL entry point
   // (already over threshold before mission G0b/T6 added the annotation-
   // matcher check above).
-  return { root, parseError: false, diagramLabel: 'HCL' as const, highlights: [], annotations, sprites };
+  return { root, parseError: false, diagramLabel: 'HCL' as const, highlights: [], annotations, sprites,
+    ...(scale === undefined ? {} : { scale }) };
 }

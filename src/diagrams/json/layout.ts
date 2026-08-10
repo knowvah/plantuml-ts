@@ -88,6 +88,13 @@ export interface JsonGeometry {
   edges: JsonEdgeGeo[];
   width: number;
   height: number;
+  /**
+   * The `scale …` directive, carried from the AST unresolved. Resolved to a
+   * numeric factor by `renderJson` against `width`/`height` above, which are
+   * the UNSCALED document dims — the same order upstream uses
+   * (`TextBlockExporter#computeScaleFactor`).
+   */
+  scale?: ScaleSpec;
   /** When the body could not be parsed, the message to display. */
   error?: string;
   /**
@@ -104,6 +111,7 @@ export interface JsonGeometry {
 
 import { walkTree, EMPTY_MAP, buildHighlightMap } from './json-layout-prep.js';
 import type { JsonContainer, FlatNode, BuildRowsOptions } from './json-layout-prep.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 /**
  * @see ~/git/plantuml/.../jsondiagram/JsonDiagram.java:78-88 (the constructor)
@@ -228,6 +236,7 @@ function layoutParseFailure(
       // spaces for NBSP under a monospace family, so this is the raw width.
       textLength: textWidth,
     },
+    ...(ast.scale === undefined ? {} : { scale: ast.scale }),
   };
 }
 
@@ -393,7 +402,13 @@ export function layoutJson(
   }));
 
   const { width, height } = documentDimensions(nodes, margin);
-  const result: JsonGeometry = { nodes, edges, width, height };
+  const result: JsonGeometry = {
+    nodes, edges, width, height,
+    // Type-carrying only: resolved to a factor at RENDER time against these
+    // (unscaled) dims, mirroring `TextBlockExporter#computeScaleFactor(dim)`
+    // reading `calculateFinalDimension()`'s own pre-scale result.
+    ...(ast.scale === undefined ? {} : { scale: ast.scale }),
+  };
   return result;
 }
 

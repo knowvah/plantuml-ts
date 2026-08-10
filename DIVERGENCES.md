@@ -691,13 +691,24 @@ Covers `@startjson`, `@startyaml` and `@starthcl` — all three build a
 `JsonDiagram` and share the mechanism below.
 
 **Upstream:** the json family has **no command table**.
-`JsonDiagramFactory.java:70-101` walks the source itself and interprets
-exactly three things — `<style>` blocks and `!theme`/`title` (via
-`StyleExtractor`), and `#highlight` lines. Everything else falls through to
-the JSON payload. `skinparam` is therefore not a command here, so it never
-reaches the style system, and `TitledDiagram#calculateBackColor`
-(`TitledDiagram.java:280-289`) resolves against the style cascade alone —
-landing on `plantuml.skin:21-22` `document { BackGroundColor white }`.
+`JsonDiagramFactory.java:70-101` walks the source itself, and its directive
+handling is a single `if`/`else if` chain in `StyleExtractor.java:76-97`:
+
+| directive | upstream does |
+| --- | --- |
+| `<style>` … `</style>` | collected, applied via `applyStyles` |
+| `scale …` | collected, executed (`JsonDiagram.java:90-99`) |
+| `title …` | collected, set as the diagram title |
+| `skin …` | collected as `newSkin` |
+| `!assume`, `!pragma`, `hide` | matched and **explicitly ignored** |
+| `skinparam …` | matched, and **only `handwritten true` is honored** — every other key is read and discarded, and a `skinparam X { … }` block is consumed to its closing brace and dropped |
+| anything else | falls through to the JSON/YAML/HCL payload |
+
+So `skinparam` is not unparsed here; it is parsed and deliberately narrowed
+to one key. Nothing else reaches the style system, and
+`TitledDiagram#calculateBackColor` (`TitledDiagram.java:280-289`) resolves
+against the style cascade alone — landing on `plantuml.skin:21-22`
+`document { BackGroundColor white }`.
 
 Jar-verified 2026-08-09 against `plantuml-oracle.jar` (1.2026.7beta11).
 `skinparam backgroundcolor transparent` and `skinparam backgroundcolor red`
@@ -722,11 +733,16 @@ background.
 
 **Reason:** maintainer decision, 2026-08-09. A `skinparam` line is a
 customization the diagram's author deliberately wrote, and the upstream
-omission is a consequence of the family's hand-rolled parser rather than a
-decision that json should be unstylable — the same reading that authorized
-HCL `<style>` support below. Honoring it is this port reducing friction, and
-it costs nothing structural: node sizing, colors and text all still resolve
-through the normal cascade.
+narrowing to `handwritten` reads as an unfinished hand-rolled parser rather
+than a decision that json should be unstylable — the same reading that
+authorized HCL `<style>` support below. Honoring it is this port reducing
+friction, and it costs nothing structural: node sizing, colors and text all
+still resolve through the normal cascade.
+
+Note that upstream honoring `skinparam handwritten true` here is precisely
+what makes mission H1's handwritten renderer reachable in this family — so
+the one key upstream kept is already implemented, and this divergence only
+widens the set.
 
 **Cost, stated rather than hidden:** a themed json diagram differs from the
 jar in font and therefore in every derived width. Two corpus fixtures can

@@ -1,5 +1,8 @@
 {
   "clean": [
+    "hcl/citoda-80-dimi195",
+    "hcl/jubete-32-sutu417",
+    "hcl/vocago-35-xodu446",
     "json/babico-87-soxo095",
     "json/bavize-88-jumu158",
     "json/bidire-98-kege137",
@@ -57,6 +60,7 @@
     "yaml/litife-43-novo083",
     "yaml/medosa-24-jugi124",
     "yaml/mudeno-46-rado553",
+    "yaml/nuzaje-74-kenu009",
     "yaml/poxedu-72-bite327",
     "yaml/sozafu-05-xeka661",
     "yaml/sudabi-56-dedu341",
@@ -69,10 +73,7 @@
     "yaml/xubife-72-runi076",
     "yaml/zebapi-77-zasu051",
     "yaml/zeduse-06-fidi174",
-    "yaml/zomime-61-sase339",
-    "hcl/citoda-80-dimi195",
-    "hcl/jubete-32-sutu417",
-    "hcl/vocago-35-xodu446"
+    "yaml/zomime-61-sase339"
   ],
   "divergent": {
     "json/bitepo-72-vija933": {

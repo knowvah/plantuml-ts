@@ -62,6 +62,14 @@ export interface NodeStyleJson {
   box: BoxStyleJson;
   text: TextStyleJson;
   json: JsonColors;
+  /**
+   * The resolved `scale …` factor (`scale-geo.ts#scaleNodeStyle`), carried on
+   * the style so the renderer's own literal constants — the highlight rect's
+   * inset, width reduction and corner radius — can be scaled at their single
+   * use site without widening four call signatures past this repo's 5-param
+   * cap. 1 when the diagram is unscaled.
+   */
+  scale: number;
 }
 
 /**
@@ -156,6 +164,7 @@ export function resolveNodeStyle(theme: Theme): NodeStyleJson {
   const j: JsonColorsResolved = json ?? {};
   const font = resolveFontFace(j, theme);
   return {
+    scale: 1,
     box: { ...resolveBoxPaint(j, theme), ...resolveBoxSeparator(j) },
     text: {
       ...font,

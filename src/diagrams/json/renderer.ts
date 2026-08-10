@@ -10,6 +10,8 @@
 // `text` is the exception — upstream's handwritten decorator does not touch
 // text, it falls through to `getUg().draw(shape)`.
 import { text } from '../../core/svg.js';
+import { resolveScaleFactor } from '../../core/scale-command.js';
+import { scaleJsonGeometry, scaleNodeStyle } from './scale-geo.js';
 
 import { buildCurvePath, veryFirstPoint, buildArrowHeadPath, buildCurveSegments, buildArrowHeadSegments } from './JsonCurve.js';
 import { penFor } from './renderer-pen.js';
@@ -41,6 +43,11 @@ const CELL_MARGIN_X = 5;
 const HIGHLIGHT_INSET_X = 1.5;
 const HIGHLIGHT_WIDTH_REDUCTION = 2;
 const HIGHLIGHT_ROUND = 4;
+
+/** `JsonCurve#drawSpot` — `new UEllipse(6, 6)` drawn at `-3, -3`, stroked with
+ *  `UStroke.simple()` (`JsonCurve.java:114-118`). */
+const SPOT_RADIUS = 3;
+const SPOT_STROKE_WIDTH = 1;
 
 /** `TitledDiagram#getDefaultMargins()` — `same(10)`, the fallback when no
  *  theme sets one. Mirrors `layout.ts#CANVAS_PAD`. */
@@ -122,23 +129,34 @@ function highlightOverrides(row: JsonRowGeo, style: NodeStyleJson) {
 function highlightRect(
   node: JsonNodeGeo,
   row: JsonRowGeo,
-  box: NodeStyleJson['box'],
+  style: NodeStyleJson,
   background: string,
   pen: JsonPen,
 ): string {
+  // The three literals below are pre-scale lengths, so they take the diagram's
+  // `scale` the same way every other emitted numeric does (`style.scale`, set
+  // by `scale-geo.ts#scaleNodeStyle`; 1 when unscaled).
+  const k = style.scale;
   return pen.rect(
-    node.x + HIGHLIGHT_INSET_X,
+    node.x + HIGHLIGHT_INSET_X * k,
     node.y + row.y,
-    node.width - HIGHLIGHT_WIDTH_REDUCTION,
+    node.width - HIGHLIGHT_WIDTH_REDUCTION * k,
     row.height,
     {
       fill: background,
       stroke: background,
-      strokeWidth: box.sepThickness,
-      rx: HIGHLIGHT_ROUND / SVG_CORNER_DIVISOR,
-      ry: HIGHLIGHT_ROUND / SVG_CORNER_DIVISOR,
+      strokeWidth: style.box.sepThickness,
+      rx: (HIGHLIGHT_ROUND * k) / SVG_CORNER_DIVISOR,
+      ry: (HIGHLIGHT_ROUND * k) / SVG_CORNER_DIVISOR,
     },
   );
+}
+
+/** `stroke-dasharray` is a list of lengths, and `SvgGraphics#format` scales
+ *  each one. Non-numeric tokens are passed through untouched. */
+function scaleDasharray(dash: string, k: number): string {
+  if (k === 1) return dash;
+  return dash.replace(/[0-9]*\.?[0-9]+/g, (n) => String(Number(n) * k));
 }
 
 /**
@@ -165,7 +183,7 @@ function renderRow(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson, pen
   const dividerX = node.x + node.keyColWidth;
 
   return [
-    hl.isHighlighted ? highlightRect(node, row, box, hl.background, pen) : '',
+    hl.isHighlighted ? highlightRect(node, row, style, hl.background, pen) : '',
     // `if (y > 0) ugline.draw(ULine.hline(trueWidth))` — no line above row 0.
     row.y > 0 ? pen.line(node.x, rowTop, node.x + node.width, rowTop, sepStyle) : '',
     renderRowText(node, row, style, hl),
@@ -293,7 +311,7 @@ function renderNode(node: JsonNodeGeo, style: NodeStyleJson, pen: JsonPen): stri
  *
  * This port previously drew the spot FIRST, reversing upstream's order.
  */
-function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen): string {
+function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): string {
   // A5/T8: the path and the spot both come from the ported `JsonCurve`, which
   // consumes the engine's spline. This used to build its own S-curve and place
   // the spot on a horizontal offset; upstream extrapolates along the spline's
@@ -303,10 +321,12 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen): string {
 
   const json = theme.colors.graph.json;
   const stroke = json?.arrowColor ?? theme.colors.arrow;
-  const strokeWidth = json?.arrowThickness ?? 1;
+  const strokeWidth = (json?.arrowThickness ?? 1) * k;
   // `yamlDiagram,jsonDiagram { arrow { LineStyle 3-3 } }` (`skin/plantuml.skin`
   // :449-451), emitted comma-separated — see `style-map-json-diagram.ts`.
-  const strokeDasharray = json?.arrowDasharray ?? '3,3';
+  // Dashes go through `format` like every other numeric, so `3-3` at scale 2
+  // is emitted as `6,6` -- jar-verified on `json/timafu-94-bixe774`.
+  const strokeDasharray = scaleDasharray(json?.arrowDasharray ?? '3,3', k);
 
   const linePart = pen.path(buildCurveSegments(edge.points), d, {
     stroke, strokeWidth, strokeDasharray, fill: 'none',
@@ -325,7 +345,11 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen): string {
     // `ellipse` takes RAW SVG attribute names, not the camelCase `BoxStyle`
     // keys `rect`/`line` use — `strokeWidth` here would emit a literal
     // `strokeWidth=` attribute.
-    ? pen.ellipse(spot.x, spot.y, 3, 3, { fill: stroke, stroke, 'stroke-width': 1 })
+    // Radius and stroke are pre-scale lengths, so both take `k` like every
+    // other numeric `SvgGraphics#format` writes.
+    ? pen.ellipse(spot.x, spot.y, SPOT_RADIUS * k, SPOT_RADIUS * k, {
+        fill: stroke, stroke, 'stroke-width': SPOT_STROKE_WIDTH * k,
+      })
     : '';
 
   return linePart + headPart + dotPart;
@@ -387,14 +411,26 @@ function handwrittenDims(ink: PenInk, theme: Theme): { width: number; height: nu
   };
 }
 
-export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
+export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragment {
+  // `scale …` (StyleExtractor.java:82-83 -> JsonDiagram.java:90-99). Resolved
+  // HERE, against the unscaled dims, because that is the order upstream uses:
+  // `computeScaleFactor(dim)` reads `calculateFinalDimension()`'s own pre-scale
+  // result, then every numeric is multiplied on the way out by
+  // `SvgGraphics#format`. See `scale-geo.ts` for why this port multiplies the
+  // inputs instead of the outputs, and why that is the same arithmetic.
+  const k = resolveScaleFactor(rawGeo.scale, rawGeo.width, rawGeo.height);
+  const geo = scaleJsonGeometry(rawGeo, k);
+  const theme = rawTheme;
+
   if (geo.error !== undefined) return renderParseFailure(geo);
 
   if (geo.nodes.length === 0) {
     return { body: '', width: 0, height: 0 };
   }
 
-  const style = resolveNodeStyle(theme);
+  // Scaled AFTER resolution so a skin DEFAULT scales identically to a theme
+  // override -- see `scale-geo.ts#scaleNodeStyle`.
+  const style = scaleNodeStyle(resolveNodeStyle(theme), k);
   // ONE pen per diagram: the handwritten one carries the shared random stream.
   const pen = penFor(theme.handwritten);
   const parts: string[] = [];
@@ -407,7 +443,7 @@ export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
   }
 
   for (const edge of geo.edges) {
-    parts.push(renderEdge(edge, theme, pen));
+    parts.push(renderEdge(edge, theme, pen, k));
   }
 
   // No `extraDefs`: the jar's json documents carry an EMPTY `<defs/>` (M3).

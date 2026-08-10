@@ -4,6 +4,7 @@
 
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 export interface HighlightDirective {
   readonly path: readonly string[];
@@ -50,4 +51,19 @@ export interface JsonDiagramAST {
    * `createSpriteRegistry()`.
    */
   sprites?: SpriteRegistry;
+  /**
+   * The `scale …` directive, if the block carried one.
+   *
+   * Upstream captures this in `StyleExtractor.java:82-83` — one of the six
+   * directives the json family's hand-rolled parser recognises at all — and
+   * `JsonDiagram.java:90-99` then runs the captured line through
+   * `CommonCommands.addCommonScaleCommands` against the diagram. All three of
+   * `@startjson`/`@startyaml`/`@starthcl` share that path, because the yaml
+   * and hcl factories both construct a `JsonDiagram`.
+   *
+   * Type-carrying only: resolved to a numeric factor at render time, against
+   * the UNSCALED document dimensions, exactly as
+   * `TextBlockExporter#computeScaleFactor` does.
+   */
+  scale?: ScaleSpec;
 }
