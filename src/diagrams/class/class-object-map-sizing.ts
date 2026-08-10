@@ -37,7 +37,7 @@
 
 import type { Classifier, Member } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ClassifierGeo } from './layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
@@ -47,6 +47,9 @@ import { measureEnhancedBody } from './class-body-enhanced-layout.js';
 import type { Dim } from './class-object-map-header.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
 import { objectDisplayText } from './class-object-display.js';
+import { buildObjectMemberRow } from './class-object-member-creole.js';
+import { atomsToPlainText } from './class-member-creole.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 
 export type { Dim } from './class-object-map-header.js';
 export { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
@@ -56,12 +59,6 @@ export { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './
 // functions gets mis-attributed to the preceding one's NLOC by lizard).
 // ---------------------------------------------------------------------------
 
-/** One drawn text run within a tab-expanded line -- {@link layoutTabRuns}. */
-interface TabRun {
-  text: string;
-  x: number;
-  width: number;
-}
 
 interface FieldsResult {
   dim: Dim;
@@ -156,40 +153,6 @@ function tabStopWidthPx(theme: Theme, measurer: StringMeasurer): number {
   return width === 0 ? theme.fontSize * 4 : width;
 }
 
-/**
- * G3/O4: `AtomText#drawU`/`getWidth` -- splits a member line containing
- * literal `\t` characters into independently-positioned text runs. Jar
- * draws ONE `<text>` per non-tab token, advancing `x` by each token's own
- * measured width; a tab TOKEN instead jumps `x` to the next tab-stop
- * boundary (`x += tabStopPx - (x % tabStopPx)`) and draws nothing.
- * `totalWidth` is the final cursor position after every token -- the value
- * jar's OWN `getWidth()` uses for the line's box-sizing contribution
- * (`AtomText.java:241-256`, the SAME tokenize-and-jump algorithm as
- * `drawU`, not a naive whole-string measurement). A tab-free line degrades
- * to the pre-O4 shape exactly: one run at `x:0`, `totalWidth ===
- * run.width` -- zero behavior change for the common no-tab case.
- */
-function layoutTabRuns(
-  text: string,
-  fontSpec: FontSpec,
-  measurer: StringMeasurer,
-  tabStopPx: number,
-): { runs: TabRun[]; totalWidth: number } {
-  const tokens = text.split(/(\t)/).filter((t) => t.length > 0);
-  let x = 0;
-  const runs: TabRun[] = [];
-  for (const token of tokens) {
-    if (token === '\t') {
-      const remainder = x % tabStopPx;
-      x += tabStopPx - remainder;
-      continue;
-    }
-    const runWidth = measurer.measure(token, fontSpec).width;
-    runs.push({ text: token, x, width: runWidth });
-    x += runWidth;
-  }
-  return { runs, totalWidth: x };
-}
 
 /** Format a member text string for object diagram instances: the raw,
  *  visibility-stripped source line verbatim when present (upstream's
@@ -269,8 +232,15 @@ function measureObjectFields(
   // own doc comment. `tabStopWidthPx` is computed once per block (font-
   // dependent only, not per-row).
   const tabStopPx = tabStopWidthPx(theme, measurer);
-  const layouts = texts.map((t) => layoutTabRuns(t, fontSpec, measurer, tabStopPx));
-  const widths = layouts.map((l) => l.totalWidth);
+  // Member rows are CREOLE lines upstream (`MethodsOrFieldsArea
+  // #createTextBlock`, java:238-265, `CreoleMode.SIMPLE_LINE`), with tab
+  // stops expanded inside the resulting text atoms rather than instead of
+  // them -- see `class-object-member-creole.ts`.
+  const font: FontConfiguration = {
+    family: fontSpec.family, size: fontSpec.size, color: null, styles: new Set(),
+  };
+  const builds = texts.map((t) => buildObjectMemberRow(t, font, measurer, tabStopPx));
+  const widths = builds.map((b) => b.width);
   const hasIcon = visibleMembers.some((m) => m.visibilityExplicit === true);
   const iconReserve = hasIcon ? OBJECT_SMALL_ICON : 0;
   const textIndent = OBJECT_FIELD_MARGIN_X + iconReserve;
@@ -278,14 +248,15 @@ function measureObjectFields(
   const height = visibleMembers.length * theme.fontSize + OBJECT_FIELD_MARGIN_Y * 2;
   const baselineOffset = baselineOffsetFor(fontSpec, measurer);
   const rows: ClassifierGeo['rows'] = [];
-  layouts.forEach((layout, i) => {
+  builds.forEach((build, i) => {
     const y = OBJECT_FIELD_MARGIN_Y + i * theme.fontSize + baselineOffset;
-    layout.runs.forEach((run, runIndex) => {
+    build.runs.forEach(({ atom, x }, runIndex) => {
       rows.push({
-        text: run.text,
+        text: atomsToPlainText([atom]),
+        atoms: [atom],
         y,
-        indent: textIndent + run.x,
-        width: run.width,
+        indent: textIndent + x,
+        width: atom.width,
         // G3/O4: `visibilityIsField: true` UNCONDITIONALLY -- upstream's
         // `BodierLikeClassOrObject#getFieldsToDisplay` OBJECT branch
         // constructs EVERY member via `Member.field(s)` (never `Member
