@@ -805,3 +805,42 @@ which is exactly the scale dimension back-solved from `timafu`'s rect height.
 fell from 0.64% to 0.12%. The residual 0.12% is the 0.237px placement delta
 propagated through `scale max`'s division — the accepted divergence, amplified.
 It is pinned with a ceiling under `divergent`, not chased.
+
+---
+
+## Close-out of the structural backlog (2026-08-09)
+
+266 -> 4 residual diffs. 85 fixtures required structurally clean, 5 pinned as
+bounded divergences, 1 genuine defect left open and named.
+
+### Bounded divergences (`divergent` in the manifest, each with a diff ceiling)
+
+| fixture | ceiling | why |
+| --- | --- | --- |
+| `json/bitepo-72-vija933` | 23 | skinparam honored in this family (DIVERGENCES.md) |
+| `json/sevaji-38-xita618` | 1 | same |
+| `json/timafu-94-bixe774` | 37 | ADR-2b engine delta amplified by `scale max` |
+| `yaml/najoba-05-nino350` | 1 | ADR-2b engine delta crossing an integer boundary |
+| `yaml/tadari-70-nare798` | 1 | same |
+
+The last three are one measurement: node sizes and document HEIGHT match the
+jar exactly, and dot-engine places the child node 0.237px right of Smetana.
+On `najoba` that moves the ink right edge 176.85 -> 177.087, which rounds the
+document width 183 -> 184. On `timafu` the same delta divides into
+`scale max 100*100`'s factor and becomes a uniform 0.12% on every number.
+Never chased: a Smetana geometry number is not a target.
+
+### Still open — `json/nujuke-14-nabo073` (1 diff, a childCount)
+
+NOT the engine delta, and not closed. A `childCount` mismatch stops `compare`
+recursion, so its inner diffs remain masked. Two known causes, both wanting the
+same missing piece:
+
+- the jar emits NO `<text>` for the `\t` row. `SvgGraphics#text` has no
+  empty-string guard, so the suppression happens earlier, in the atom layer;
+- the node measures 66 wide against this port's 13.85. `DeterministicMeasurer`
+  returns ZERO width for both `' '` and `'\t'`, where the jar's contributes
+  ~56px.
+
+Both need the tab-measurement mechanism, which is a measurer question rather
+than a json one. Do not fit a width to close it.

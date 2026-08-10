@@ -98,6 +98,14 @@
     "json/timafu-94-bixe774": {
       "maxDiffs": 37,
       "reason": "ADR-2b engine delta amplified by `scale max 100*100`. dot-engine places the child node at x=133.237 where Smetana uses 133, so this port's calculateFinalDimension is 193.087 against the jar's 192.85; `scale max` divides by that dimension, so a 0.237px placement difference becomes a uniform 0.12% error in every emitted number. Node sizes are identical at scale 1. See ledger M7."
+    },
+    "yaml/najoba-05-nino350": {
+      "maxDiffs": 1,
+      "reason": "ADR-2b engine delta crossing an integer boundary. Node sizes and document HEIGHT are identical to the jar; dot-engine places the child node at x=128.237 where Smetana uses 128, which pushes the ink right edge from 176.85 to 177.087 so the document width rounds 183 -> 184. Measured 2026-08-09 with -DPLANTUML_DETERMINISTIC_TEXT=true. Not chased: the standing ruling is that a Smetana geometry number is never a target."
+    },
+    "yaml/tadari-70-nare798": {
+      "maxDiffs": 1,
+      "reason": "ADR-2b engine delta crossing an integer boundary. Node sizes and document HEIGHT are identical to the jar; dot-engine places the child node at x=128.237 where Smetana uses 128, which pushes the ink right edge from 176.85 to 177.087 so the document width rounds 183 -> 184. Measured 2026-08-09 with -DPLANTUML_DETERMINISTIC_TEXT=true. Not chased: the standing ruling is that a Smetana geometry number is never a target. tadari is najoba plus a title; its title chrome is now exact."
     }
   }
 }
