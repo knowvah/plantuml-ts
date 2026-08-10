@@ -830,7 +830,30 @@ document width 183 -> 184. On `timafu` the same delta divides into
 `scale max 100*100`'s factor and becomes a uniform 0.12% on every number.
 Never chased: a Smetana geometry number is not a target.
 
-### Still open — `json/nujuke-14-nabo073` (1 diff, a childCount)
+### CLOSED 2026-08-10 — `json/nujuke-14-nabo073`
+
+One mechanism explained both halves, and it was NOT a measurer bug: the
+deterministic width table is right that a TAB is 0 wide
+(`UnicodeFontWidthSansSerif` block 0, cp 0x09 -> 0). `AtomText`
+(`klimt/creole/legacy/AtomText.java`) never asks the bounder for a tab's
+width. It tokenizes on `\t` and advances to the next TAB STOP.
+
+- `getTabSize` measures `tabString()` -- which is only ever spaces -- and
+  falls back to `fontSize * 4` when that measures zero. Under the
+  deterministic table a space IS zero, so the fallback always fires: the stop
+  is 56 at font 14. That is the whole of the unexplained 66px node
+  (56 + the 5+5 cell margin), and the branch fires ONLY under deterministic
+  metrics, so no amount of measuring rendered output could reveal it.
+- `drawU` emits a run per NON-tab token only, so a line whose text is exactly
+  `"\t"` draws no `<text>` at all -- the 11th child this port had.
+
+Ported as `src/diagrams/json/tab-stops.ts`. `columnWidths` was also
+re-measuring `row.valueLines` instead of using the widths `cellMetrics` had
+already computed, which discarded the tab-awareness; it now reads them.
+
+### Superseded — the original entry (kept for the record)
+
+`json/nujuke-14-nabo073` (1 diff, a childCount)
 
 NOT the engine delta, and not closed. A `childCount` mismatch stops `compare`
 recursion, so its inner diffs remain masked. Two known causes, both wanting the

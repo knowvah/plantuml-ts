@@ -282,6 +282,9 @@ export function layoutJson(
     ...(nodeFontBold ? { fontBold: true } : {}),
     ...(headerFontBold ? { headerFontBold: true } : {}),
     ...(maximumWidth !== undefined ? { maximumWidth } : {}),
+    // `skinparam tabSize` -- reaches the cell fonts, where `tab-stops.ts`
+    // uses it exactly as `AtomText#tabString` does.
+    ...(theme.tabSize !== undefined ? { tabSize: theme.tabSize } : {}),
   };
 
   // Measure each node
