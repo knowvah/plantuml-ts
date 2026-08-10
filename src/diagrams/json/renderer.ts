@@ -119,6 +119,11 @@ function highlightFontFlags(cls: HighlightClassStyle, ts: TextStyleJson) {
   return {
     fontBold: cls.fontBold ?? ts.hlFontBold,
     fontItalic: cls.fontItalic ?? ts.hlFontItalic,
+    // A named `.h1` class declares FontStyle exactly when its two flags are
+    // set (`style-map-json-diagram.ts:311-315`), same rule as the unnamed
+    // `highlight` block. Either source declaring it replaces the enclosing
+    // node's FontStyle outright -- see `TextStyleJson.hlFontStyleDeclared`.
+    fontStyleDeclared: cls.fontBold !== undefined || ts.hlFontStyleDeclared,
   };
 }
 
@@ -155,7 +160,14 @@ function highlightRect(
     {
       fill: background,
       stroke: background,
+      // The highlight rect is drawn through `ugline`, which descends from
+      // `ugSeparator = styleSeparator.applyStrokeAndLineColor(ug, …)`
+      // (`TextBlockJson.java:287`, used at :296-300). So it inherits the
+      // SEPARATOR's whole stroke -- thickness and dash alike -- not the node's
+      // and not a plain one. Only the colors are overridden, by the
+      // `.apply(cellBackColor).apply(cellBackColor.bg())` on the draw itself.
       strokeWidth: style.box.sepThickness,
+      ...(style.box.sepDash === undefined ? {} : { strokeDasharray: style.box.sepDash }),
       rx: (HIGHLIGHT_ROUND * k) / SVG_CORNER_DIVISOR,
       ry: (HIGHLIGHT_ROUND * k) / SVG_CORNER_DIVISOR,
     },
@@ -172,6 +184,20 @@ function highlightRect(
 function scaleDasharray(dash: string, k: number): string {
   if (k === 1) return dash;
   return dash.replace(/[0-9]*\.?[0-9]+/g, (n) => fmt(Number(n) * k));
+}
+
+/**
+ * The key cell's weight. `header.node.highlight`: a highlight that DECLARED a
+ * FontStyle replaces the skin's `node { header { FontStyle bold } }` outright;
+ * one that did not leaves it standing.
+ */
+function keyIsBold(hl: ReturnType<typeof highlightOverrides>, ts: TextStyleJson): boolean {
+  return replacesFontStyle(hl) ? hl.fontBold : ts.headerBold;
+}
+
+/** Whether this row's highlight supplies the FontStyle for its cells. */
+function replacesFontStyle(hl: ReturnType<typeof highlightOverrides>): boolean {
+  return hl.isHighlighted && hl.fontStyleDeclared;
 }
 
 /**
@@ -227,7 +253,10 @@ function renderRowText(
     const keyStyle = {
       ...common,
       fill: keyColor,
-      ...((hl.isHighlighted ? hl.fontBold : false) || ts.headerBold ? { fontWeight: '700' as const } : {}),
+      // `header.node.highlight`: a highlight that DECLARED FontStyle replaces
+      // the skin's `node { header { FontStyle bold } }` entirely; one that did
+      // not leaves it standing.
+      ...(keyIsBold(hl, ts) ? { fontWeight: '700' as const } : {}),
       ...(hl.isHighlighted && hl.fontItalic ? { fontStyle: 'italic' as const } : {}),
     };
     // Column A splits into atoms under wrap for the same reason column B does
@@ -248,8 +277,8 @@ function renderRowText(
   // An array row's single cell IS column A, so it spans the whole node.
   const colLeft = row.arrayEntry ? node.x : node.x + node.keyColWidth;
   const colWidth = node.width - (row.arrayEntry ? 0 : node.keyColWidth);
-  const bold = hl.isHighlighted ? hl.fontBold : ts.bold;
-  const italic = hl.isHighlighted ? hl.fontItalic : ts.italic;
+  const bold = replacesFontStyle(hl) ? hl.fontBold : ts.bold;
+  const italic = replacesFontStyle(hl) ? hl.fontItalic : ts.italic;
 
   const runStyle = {
     ...common,

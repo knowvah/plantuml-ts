@@ -57,6 +57,19 @@ export interface TextStyleJson {
   hlFontColor: string | undefined;
   hlFontBold: boolean;
   hlFontItalic: boolean;
+  /**
+   * Whether the `highlight` block DECLARED a `FontStyle` at all.
+   *
+   * `FontStyle` is a single style property, not a set of flags, so a
+   * `highlight { FontStyle italic }` REPLACES an enclosing
+   * `node { FontStyle bold }` rather than adding to it — `getStyleToUse`
+   * (`TextBlockJson.java:138-153`) resolves one merged style per cell and
+   * `StyleStorage#computeMergedStyle` gives the last writer the whole
+   * property. A highlight that declares nothing must leave the surrounding
+   * bold intact, which is why the distinction has to be carried rather than
+   * inferred from `hlFontBold === false`.
+   */
+  hlFontStyleDeclared: boolean;
 }
 
 export interface NodeStyleJson {
@@ -156,6 +169,10 @@ function resolveTextHighlight(j: JsonColorsResolved) {
     hlFontColor: j.highlightFontColor,
     hlFontBold: j.highlightFontBold ?? false,
     hlFontItalic: j.highlightFontItalic ?? false,
+    // Both flags are written together by `style-map-json-diagram.ts:174-178`,
+    // and only when a `FontStyle` line is present — so one being defined is
+    // exactly "the block declared FontStyle".
+    hlFontStyleDeclared: j.highlightFontBold !== undefined,
   };
 }
 
