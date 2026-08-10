@@ -383,12 +383,17 @@ describe('layoutJson', () => {
     expect(row!.valueLines).toEqual(['a\\b']);
   });
 
-  it('\\r in string value produces a blank row (empty processed value)', () => {
+  it('\\r in string value breaks the line, like \\n', () => {
+    // Previously asserted an empty value, on the reading that `\r` was an
+    // unrecognised escape that vanished. `Display#getWithNewlines` breaks the
+    // line on `\n`, `\r` AND `\l` alike (`Display.java:257-270`) -- jar-
+    // verified on `json/nujuke-14-nabo073`, whose `"\\r"` entry occupies a
+    // two-line 32px row exactly as its `"\\n"` entry does.
     const ast = makeAst({ k: '\\r' });
     const geo = layoutJson(ast, defaultTheme, measurer);
     const row = geo.nodes[0]!.rows.find((r) => r.key === 'k');
     expect(row).toBeDefined();
-    expect(row!.value).toBe('');
+    expect(row!.valueLines).toEqual(['', '']);
   });
 
   it('\\t in string value produces a tab character', () => {

@@ -236,9 +236,17 @@ export function processStringDisplay(s: string): string {
  *    text where this port drew a second, empty one
  *    (`json/gagebi-92-vere937`, `devime-19-toze896`).
  *
- * Ported as upstream's single pass rather than a chain of replaces, including
- * its treatment of an UNRECOGNISED escape: `\` plus any character other than
- * `n`/`t`/`\` consumes BOTH and appends neither, which is why `\r` vanishes.
+ * Ported as upstream's single pass rather than a chain of replaces.
+ *
+ * This doc previously claimed `\r` "vanishes" as an unrecognised escape. That
+ * was wrong: `\r` and `\l` are line BREAKS alongside `\n`
+ * (`Display.java:257-270`), differing only in also setting the natural
+ * horizontal alignment — which this port does not yet carry, and no fixture
+ * currently measures.
+ *
+ * The unrecognised-escape branch is deliberately left as-is (consume both,
+ * append neither): upstream has two variants of this method and no cached
+ * fixture exercises the difference, so changing it would be unverified.
  */
 export function splitDisplayLines(s: string): string[] {
   const result: string[] = [];
@@ -248,7 +256,12 @@ export function splitDisplayLines(s: string): string[] {
     if (c === '\\' && i < s.length - 1) {
       const c2 = s.charAt(i + 1);
       i++;
-      if (c2 === 'n') {
+      if (c2 === 'n' || c2 === 'r' || c2 === 'l') {
+        // `Display#getWithNewlines` breaks the line on ALL THREE of \n, \r
+        // and \l (`Display.java:257-270`); \r and \l additionally set the
+        // natural horizontal alignment to RIGHT/LEFT, which this port does not
+        // yet carry. Jar-verified on `json/nujuke-14-nabo073`, whose "\\r"
+        // entry occupies a 32px two-line row exactly as its "\\n" entry does.
         result.push(current);
         current = '';
       } else if (c2 === 't') {
