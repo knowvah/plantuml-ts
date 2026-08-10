@@ -844,3 +844,23 @@ same missing piece:
 
 Both need the tab-measurement mechanism, which is a measurer question rather
 than a json one. Do not fit a width to close it.
+
+### Also open — `yaml/vapoda-87-piku740` (1 diff, document width)
+
+Found while closing najoba; NOT the engine delta, and not in that batch's
+scope. Measured with the deterministic flag:
+
+- every node size identical to the jar (10x36, 141.275x54, 134.363x54);
+- document HEIGHT identical (138);
+- only the third node's `x` differs, 55.456 vs 55.5 — 0.044px, immaterial;
+- yet the document WIDTH is 200 here against the jar's 204.
+
+The widest node's right edge is 193.275 in BOTH, so the jar's ink reaches
+~197 from something that is not a node. `layout.ts#documentDimensions` walks
+`nodes` only, where upstream's `JsonDiagram#calculateDimension` is
+`TextBlockUtils.getMinMax(this, …)` — a LimitFinder walk over EVERYTHING
+drawn, edges and arrowheads included, with `drawUPolygon` padding its bounds
+by `HACK_X_FOR_POLYGON = 10` in x. That is the likely mechanism and it is
+NOT yet confirmed; confirm before changing anything.
+
+It stays unpinned: a defect, not a divergence.
