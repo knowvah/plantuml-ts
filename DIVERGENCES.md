@@ -327,8 +327,17 @@ conformance is permanently out of scope for latex-bearing fixtures
 (`component/sunuju-01-pote718`, `component/vimulo-11-buni641` carry this
 entry in the census accounting).
 
-**Affects:** any diagram using `<latex>` (or `<math>`) creole tags. This is
-also the one exclusion from the S1L description size-`conformant` denominator:
+**Affects:** any diagram using `<latex>` (or `<math>`) creole tags. The
+`<math>` half has its own instances, named here because they were previously
+carried as undifferentiated work items: `state/corumi-91-mizo869` and
+`state/gupeto-19-mesa256` both label a state with
+`<math>S<=1/(F+(1-F)/N)</math>` and both pin at an identical 1.106597 in
+`oracle/goldens/state/size-backlog.json` — one shared inherent cause, not two
+defects. They are shrink-only pins for non-regression, excluded from that
+suite's conformant denominator.
+
+This is also the one exclusion from the S1L description size-`conformant`
+denominator:
 `gevozu-46-sasu860` and `sunuju-01-pote718` carry a ~4.67in node-size delta
 because the math label is sized by KaTeX, not JLaTeXMath. They remain pinned
 (shrink-only) in `oracle/goldens/description/size-backlog.json` for
