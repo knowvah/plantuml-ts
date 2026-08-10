@@ -685,6 +685,62 @@ lowest-surprise choice.
 
 ---
 
+### `skinparam` applies in the json family; upstream ignores it (deliberate)
+
+Covers `@startjson`, `@startyaml` and `@starthcl` — all three build a
+`JsonDiagram` and share the mechanism below.
+
+**Upstream:** the json family has **no command table**.
+`JsonDiagramFactory.java:70-101` walks the source itself and interprets
+exactly three things — `<style>` blocks and `!theme`/`title` (via
+`StyleExtractor`), and `#highlight` lines. Everything else falls through to
+the JSON payload. `skinparam` is therefore not a command here, so it never
+reaches the style system, and `TitledDiagram#calculateBackColor`
+(`TitledDiagram.java:280-289`) resolves against the style cascade alone —
+landing on `plantuml.skin:21-22` `document { BackGroundColor white }`.
+
+Jar-verified 2026-08-09 against `plantuml-oracle.jar` (1.2026.7beta11).
+`skinparam backgroundcolor transparent` and `skinparam backgroundcolor red`
+inside `@startjson` both emit `background:#FFFFFF`, while the same directive
+in `@startuml` is honored. `<style> document { BackGroundColor red }` in
+`@startjson` DOES apply (`#FF0000`) — so it is `skinparam` specifically that
+is inert, not styling in general.
+
+This bites `!theme` hardest, because a theme file is mostly skinparams.
+`!theme amiga` changes a json background (`#0B58A8`) only because amiga
+declares it inside a `<style>` block (`puml-theme-amiga.puml:32-34`) as well
+as via `skinparam` (:82). `!theme aws-orange` declares its background only as
+`skinparam BackgroundColor` (`puml-theme-aws-orange.puml:44`), so upstream
+drops it — along with that theme's `defaultFontName Verdana` and
+`defaultFontSize 12`, leaving json text at sans-serif/14.
+
+**This port:** `skinparam` resolves for the json family exactly as it does
+everywhere else, through the shared theme pipeline. A json diagram under
+`!theme aws-orange` renders in Verdana 12 on the theme's background; one
+carrying `skinparam backgroundcolor transparent` gets a transparent
+background.
+
+**Reason:** maintainer decision, 2026-08-09. A `skinparam` line is a
+customization the diagram's author deliberately wrote, and the upstream
+omission is a consequence of the family's hand-rolled parser rather than a
+decision that json should be unstylable — the same reading that authorized
+HCL `<style>` support below. Honoring it is this port reducing friction, and
+it costs nothing structural: node sizing, colors and text all still resolve
+through the normal cascade.
+
+**Cost, stated rather than hidden:** a themed json diagram differs from the
+jar in font and therefore in every derived width. Two corpus fixtures can
+never be structurally clean because of this, and both are pinned with a diff
+ceiling in `oracle/goldens/json-family-structural.json` under `divergent`
+(`json/bitepo-72-vija933`, 23; `json/sevaji-38-xita618`, 1) so the divergence
+is bounded and cannot quietly grow.
+
+**Affects:** `@startjson` / `@startyaml` / `@starthcl` blocks carrying
+`skinparam` directly, and any `!theme` whose styling is expressed as
+skinparams.
+
+---
+
 ### Style selector support (limitation)
 
 **Upstream:** `HclDiagramFactory.java` has `styleExtractor.applyStyles()`

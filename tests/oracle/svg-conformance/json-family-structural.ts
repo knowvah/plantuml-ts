@@ -37,6 +37,14 @@
  * port's own (`TextBlockJson.ts`), measured exact per node, and a regression
  * there must fail. Only *placement* is out of scope.
  *
+ * ## Named divergences
+ *
+ * A fixture whose residual diffs are a DELIBERATE divergence is listed under
+ * `divergent` with a diff ceiling instead of being required clean — see
+ * {@link DivergentEntry} for why a ceiling and not an attribute allowlist.
+ * Today that is the json family honoring `skinparam`, which upstream's
+ * `JsonDiagramFactory` has no command table to parse at all.
+ *
  * Shrink-only, like every other ratchet here: a fixture listed in the manifest
  * must stay clean, and one that becomes clean should be added.
  */
@@ -96,9 +104,29 @@ export function structuralDiffs(type: string, slug: string): StructuralResult {
   };
 }
 
+/**
+ * A fixture whose residual diffs are a NAMED divergence rather than a defect,
+ * carrying the count they are currently allowed to reach.
+ *
+ * A bounded count, not a path allowlist, and deliberately so. An allowlist of
+ * attribute paths would silently absorb a real regression that happened to
+ * land on an already-excused attribute — and on `json/bitepo-72-vija933` the
+ * excused set is `width`/`height`/`textLength`, which is most of what this
+ * gate exists to protect. A ceiling cannot do that: the divergence is allowed
+ * to persist at exactly its measured size and no larger.
+ */
+export interface DivergentEntry {
+  /** Structural diffs this fixture may still have. Shrink-only, like `clean`. */
+  readonly maxDiffs: number;
+  /** Why, naming the DIVERGENCES.md entry that authorizes it. */
+  readonly reason: string;
+}
+
 export interface StructuralManifest {
   /** `type/slug` entries required to stay structurally clean. */
   readonly clean: readonly string[];
+  /** `type/slug` entries excused by a named divergence, with their ceiling. */
+  readonly divergent: Readonly<Record<string, DivergentEntry>>;
 }
 
 export function readManifest(): StructuralManifest {

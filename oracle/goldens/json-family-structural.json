@@ -73,5 +73,15 @@
     "hcl/citoda-80-dimi195",
     "hcl/jubete-32-sutu417",
     "hcl/vocago-35-xodu446"
-  ]
+  ],
+  "divergent": {
+    "json/bitepo-72-vija933": {
+      "maxDiffs": 23,
+      "reason": "skinparam honored in the json family (DIVERGENCES.md, 'skinparam applies in the json family; upstream ignores it'). !theme aws-orange sets defaultFontName Verdana + defaultFontSize 12 via skinparam, which this port applies and the jar drops; every width/height/textLength diff here cascades from that font, and @background from the theme's skinparam BackgroundColor."
+    },
+    "json/sevaji-38-xita618": {
+      "maxDiffs": 1,
+      "reason": "skinparam honored in the json family (same entry). 'skinparam backgroundcolor transparent' suppresses the root background here; the jar ignores the directive and emits #FFFFFF."
+    }
+  }
 }

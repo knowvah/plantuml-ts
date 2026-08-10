@@ -28,6 +28,10 @@ describe('json family — structural conformance', () => {
     // Guards the whole suite against silently degrading to a no-op if the
     // manifest is ever emptied or fails to parse.
     expect(manifest.clean.length).toBeGreaterThan(0);
+    // A fixture cannot be both required-clean and excused; the two lists
+    // would then contradict each other and the weaker one would win silently.
+    const both = manifest.clean.filter((e) => e in manifest.divergent);
+    expect(both, `listed in both clean and divergent: ${both.join(', ')}`).toEqual([]);
   });
 
   for (const entry of manifest.clean) {
@@ -37,6 +41,16 @@ describe('json family — structural conformance', () => {
       // The message carries the diffs themselves: a failure here names the
       // attribute that regressed, which is the whole point of this gate.
       expect(diffs, `${entry}\n  ${diffs.slice(0, 10).join('\n  ')}`).toEqual([]);
+    });
+  }
+
+  for (const [entry, { maxDiffs, reason }] of Object.entries(manifest.divergent)) {
+    const [type, slug] = entry.split('/') as [string, string];
+    it(`${entry} stays within its named divergence (<= ${maxDiffs})`, () => {
+      const { diffs } = structuralDiffs(type, slug);
+      // Ceiling, not equality: shrinking below it is progress, and the pin
+      // should be lowered rather than the fixture failing for improving.
+      expect(diffs.length, `${entry}\n  ${reason}\n  ${diffs.slice(0, 10).join('\n  ')}`).toBeLessThanOrEqual(maxDiffs);
     });
   }
 
