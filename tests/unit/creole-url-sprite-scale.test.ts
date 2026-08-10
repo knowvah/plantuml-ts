@@ -179,7 +179,7 @@ describe('buildLineAtoms — url provenance on the inline atom token', () => {
     expect(spriteTokens('[[http://p.com lbl]]<$maxime>')).toEqual([{ kind: 'sprite', name: 'maxime', scale: 1 }]);
   });
 
-  it('preserves the markup’s own forced colour alongside the mark', () => {
+  it('preserves the markup’s own forced color alongside the mark', () => {
     expect(spriteTokens('[[http://p.com <#red$maxime>]]')).toEqual([
       { kind: 'sprite', name: 'maxime', forcedColor: 'red', scale: 1, insideUrl: true },
     ]);

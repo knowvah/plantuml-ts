@@ -47,11 +47,22 @@ describe('error diagram — an orphan !endif (jar: "No if related to this endif"
     const texts = textOf(renderSync(ORPHAN_ENDIF, opts));
     const from = texts.indexOf('[From string (line 3) ]');
     expect(texts.slice(from + 1)).toEqual([
-      ' ',
+      // A whitespace-ONLY label has its spaces swapped for NBSP before
+      // emission (`DriverTextSvg.java:115-116`, ported into
+      // `core/svg-shapes.ts#text`). Re-verified directly against the pinned
+      // oracle jar on this exact input: every blank line in the error
+      // diagram's source listing comes back as U+00A0, not U+0020. This
+      // expectation previously read `' '`, which was the port's own
+      // pre-port behaviour rather than the jar's.
+      ' ',
       '@startuml',
       'Bob -> Alice : hi',
       '!endif',
-      ' No if related to this endif',
+      // The jar emits this WITHOUT a leading space, and so does this port now:
+      // `StringUtils.trin` is ported into `core/svg-shapes.ts#emittedTextForm`.
+      // (A previous revision of this test recorded the leading space as a
+      // known gap; closing `trin` closed it too.)
+      'No if related to this endif',
     ]);
   });
 

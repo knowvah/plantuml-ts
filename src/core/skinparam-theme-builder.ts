@@ -44,6 +44,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['actorStyle', (acc) => acc.actorStyle],
   ['minimumWidth', (acc) => acc.minimumWidth],
   ['strictUml', (acc) => acc.strictUml],
+  ['handwritten', (acc) => acc.handwritten],
   ['monochrome', (acc) => acc.monochrome],
   ['packageStyle', (acc) => acc.packageStyle],
   ['fixCircleLabelOverlapping', (acc) => acc.fixCircleLabelOverlapping],

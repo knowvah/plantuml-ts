@@ -1,7 +1,7 @@
 /**
- * ColorResolver — resolves a raw SVG colour token (from a decomposed
- * `<$sprite>` `<path>`'s `fill`/`stroke` attribute) to a concrete colour,
- * honouring an optional "forced" override colour and the sprite's own
+ * ColorResolver — resolves a raw SVG color token (from a decomposed
+ * `<$sprite>` `<path>`'s `fill`/`stroke` attribute) to a concrete color,
+ * honouring an optional "forced" override color and the sprite's own
  * grey-level range. `SvgNanoParser.drawU` (T5/T8) constructs one per draw
  * call: `new ColorResolver(fontColor, forcedColor, this)` — `this` being
  * the parser, which implements {@link GrayLevelRange} over its own
@@ -10,9 +10,9 @@
  * This port has no `HColor`/`HColorSimple` object hierarchy (verified via
  * `grep -rn "class HColor\|HColorSimple\|HColors\." src/` — none exist;
  * `src/core/klimt/color/HColorSet.ts` and `src/core/paint.ts` are the
- * closest analogues, and both resolve colours to plain data: a
+ * closest analogues, and both resolve colors to plain data: a
  * `{r,g,b,a}` tuple (`ResolvedColor`) or a canonical hex string). This
- * file reuses `ResolvedColor` as its working colour type rather than
+ * file reuses `ResolvedColor` as its working color type rather than
  * inventing a parallel one, and reuses `HColorSet.ts#parseSimpleColor`/
  * `#toSvgHex` and `tim/builtin/color-utils.ts#grayScale` directly.
  *
@@ -59,14 +59,14 @@ const BLACK: ResolvedColor = { r: 0, g: 0, b: 0, a: 255 };
 const WHITE: ResolvedColor = { r: 255, g: 255, b: 255, a: 255 };
 
 /**
- * `HColors.none()` collapsed to this port's canonical "no colour"
+ * `HColors.none()` collapsed to this port's canonical "no color"
  * representation: alpha 0, matching `paint.ts`'s own documented
- * equivalence (`HColor#toSvg` collapses ANY transparent colour, the
+ * equivalence (`HColor#toSvg` collapses ANY transparent color, the
  * `none` sentinel included, to `#00000000`).
  */
 const NONE: ResolvedColor = { r: 0, g: 0, b: 0, a: 0 };
 
-/** `HColorSet#getColorOrWhite`, scoped to the single-token hex/named-colour
+/** `HColorSet#getColorOrWhite`, scoped to the single-token hex/named-color
  * path real sprite `fill=`/`stroke=` values use (not upstream's full
  * gradient-separator `parseColor`, out of scope for an SVG attribute
  * value — see `HColorSet.ts`'s own documented scope). */

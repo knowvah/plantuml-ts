@@ -685,6 +685,78 @@ lowest-surprise choice.
 
 ---
 
+### `skinparam` applies in the json family; upstream ignores it (deliberate)
+
+Covers `@startjson`, `@startyaml` and `@starthcl` — all three build a
+`JsonDiagram` and share the mechanism below.
+
+**Upstream:** the json family has **no command table**.
+`JsonDiagramFactory.java:70-101` walks the source itself, and its directive
+handling is a single `if`/`else if` chain in `StyleExtractor.java:76-97`:
+
+| directive | upstream does |
+| --- | --- |
+| `<style>` … `</style>` | collected, applied via `applyStyles` |
+| `scale …` | collected, executed (`JsonDiagram.java:90-99`) |
+| `title …` | collected, set as the diagram title |
+| `skin …` | collected as `newSkin` |
+| `!assume`, `!pragma`, `hide` | matched and **explicitly ignored** |
+| `skinparam …` | matched, and **only `handwritten true` is honored** — every other key is read and discarded, and a `skinparam X { … }` block is consumed to its closing brace and dropped |
+| anything else | falls through to the JSON/YAML/HCL payload |
+
+So `skinparam` is not unparsed here; it is parsed and deliberately narrowed
+to one key. Nothing else reaches the style system, and
+`TitledDiagram#calculateBackColor` (`TitledDiagram.java:280-289`) resolves
+against the style cascade alone — landing on `plantuml.skin:21-22`
+`document { BackGroundColor white }`.
+
+Jar-verified 2026-08-09 against `plantuml-oracle.jar` (1.2026.7beta11).
+`skinparam backgroundcolor transparent` and `skinparam backgroundcolor red`
+inside `@startjson` both emit `background:#FFFFFF`, while the same directive
+in `@startuml` is honored. `<style> document { BackGroundColor red }` in
+`@startjson` DOES apply (`#FF0000`) — so it is `skinparam` specifically that
+is inert, not styling in general.
+
+This bites `!theme` hardest, because a theme file is mostly skinparams.
+`!theme amiga` changes a json background (`#0B58A8`) only because amiga
+declares it inside a `<style>` block (`puml-theme-amiga.puml:32-34`) as well
+as via `skinparam` (:82). `!theme aws-orange` declares its background only as
+`skinparam BackgroundColor` (`puml-theme-aws-orange.puml:44`), so upstream
+drops it — along with that theme's `defaultFontName Verdana` and
+`defaultFontSize 12`, leaving json text at sans-serif/14.
+
+**This port:** `skinparam` resolves for the json family exactly as it does
+everywhere else, through the shared theme pipeline. A json diagram under
+`!theme aws-orange` renders in Verdana 12 on the theme's background; one
+carrying `skinparam backgroundcolor transparent` gets a transparent
+background.
+
+**Reason:** maintainer decision, 2026-08-09. A `skinparam` line is a
+customization the diagram's author deliberately wrote, and the upstream
+narrowing to `handwritten` reads as an unfinished hand-rolled parser rather
+than a decision that json should be unstylable — the same reading that
+authorized HCL `<style>` support below. Honoring it is this port reducing
+friction, and it costs nothing structural: node sizing, colors and text all
+still resolve through the normal cascade.
+
+Note that upstream honoring `skinparam handwritten true` here is precisely
+what makes mission H1's handwritten renderer reachable in this family — so
+the one key upstream kept is already implemented, and this divergence only
+widens the set.
+
+**Cost, stated rather than hidden:** a themed json diagram differs from the
+jar in font and therefore in every derived width. Two corpus fixtures can
+never be structurally clean because of this, and both are pinned with a diff
+ceiling in `oracle/goldens/json-family-structural.json` under `divergent`
+(`json/bitepo-72-vija933`, 23; `json/sevaji-38-xita618`, 1) so the divergence
+is bounded and cannot quietly grow.
+
+**Affects:** `@startjson` / `@startyaml` / `@starthcl` blocks carrying
+`skinparam` directly, and any `!theme` whose styling is expressed as
+skinparams.
+
+---
+
 ### Style selector support (limitation)
 
 **Upstream:** `HclDiagramFactory.java` has `styleExtractor.applyStyles()`
@@ -795,23 +867,35 @@ key cell is visually harmless and maintains consistency with object nodes.
 
 ---
 
-### Value text — per-type colors (aesthetic)
+### Value text — per-type colors (RETIRED 2026-08-09)
 
-**Upstream:** all value cell text uses `FontColor black` (the `jsonDiagram.node`
-skin default). Every value — string, number, boolean, null — renders in black.
+**This divergence no longer exists.** Value text now matches upstream: every
+cell — string, number, boolean, null — renders in the node's own FontColor,
+which `skin/plantuml.skin:446` sets to black for `yamlDiagram,jsonDiagram`.
 
-**This port:** value text is colored by type:
-- strings → `#3A6E96` (blue)
-- numbers → `#A67F52` (amber)
-- booleans → `#BE5D47` (red-orange)
-- nulls → `#767676` (gray)
+It previously defaulted to an IDE-style palette (strings `#3A6E96`, numbers
+`#A67F52`, booleans `#BE5D47`, nulls `#767676`), justified as making values
+scannable at a glance.
 
-**Reason:** type-based coloring is a common IDE convention for JSON and makes
-values scannable at a glance without changing the information conveyed.
-Colors are applied via the theme layer and can be overridden with
-`jsonDiagram { node { FontColor ... } }`.
+**Why it was retired,** since the reasoning is the reusable part: the entry
+claimed the palette was "applied via the theme layer", which implied the theme
+system was built around it. Measuring the theme layer showed the opposite —
+**all 20 built-in themes that set these four fields set all four to the SAME
+colour**, i.e. every theme already reproduced upstream's single-FontColor
+behaviour and discarded the palette. The per-type colouring was live in exactly
+one place, the default theme, so it was a default that nothing downstream
+wanted rather than a feature anything was built on.
 
-**Affects:** all `@startjson` diagrams using the default theme.
+The four theme fields (`stringValue`/`numberValue`/`booleanValue`/`nullValue`)
+are KEPT — that shared per-theme value colour is a real channel, and a custom
+theme can still set the four independently if someone wants the IDE look back.
+Only their defaults changed.
+
+**Not the reason:** this does not make the family byte-conformant. The ADR-2b
+geometry delta still moves every fixture's root dimensions, so `svg-json`'s
+ratchet remains unable to admit anything under a zero-diff rule (see
+`oracle/goldens/svg-json/README.md`). It was retired because its own
+justification did not hold, not to chase a gate it cannot reach.
 
 ---
 

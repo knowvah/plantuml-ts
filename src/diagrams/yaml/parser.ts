@@ -4,6 +4,8 @@ import type { HighlightDirective, JsonDiagramAST } from '../json/ast.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import { parseYamlLines } from './yaml-parser.js';
 import { monomorphToJson } from './monomorph.js';
+import { matchScaleCommand } from '../../core/scale-command.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 /**
  * Parse a single `#highlight` directive line into a HighlightDirective.
@@ -41,6 +43,7 @@ function parseYamlHighlightLine(line: string): HighlightDirective {
 export function parseYaml(source: UmlSource): JsonDiagramAST {
   const highlights: HighlightDirective[] = [];
   const bodyLines: string[] = [];
+  let scale: ScaleSpec | undefined;
   let inStyleBlock = false;
   const annotations = createAnnotations();
   const sprites = createSpriteRegistry();
@@ -88,7 +91,13 @@ export function parseYaml(source: UmlSource): JsonDiagramAST {
     // Directive lines before YAML body (only skip if no body lines yet).
     // `title ` no longer reaches here (consumed by the matcher above).
     if (bodyLines.length === 0) {
-      if (/^(?:skinparam|scale|skin|hide|!assume|!pragma)\s/i.test(t)) continue;
+      if (/^(?:skinparam|scale|skin|hide|!assume|!pragma)\s/i.test(t)) {
+      // …except `scale`: upstream captures it (StyleExtractor.java:82-83)
+      // and executes it (JsonDiagram.java:90-99). yaml and hcl share that
+      // path because both factories construct a JsonDiagram.
+        scale = matchScaleCommand(t) ?? scale;
+        continue;
+      }
     }
 
     // Skip leading blank lines, but include blank lines within the body
@@ -114,5 +123,6 @@ export function parseYaml(source: UmlSource): JsonDiagramAST {
   // entry point (already over threshold before mission G0b/T6 added the
   // annotation-matcher check; T8 removed the bespoke title field/branch but
   // did not reduce the function below threshold).
-  return { root, parseError: false, highlights, annotations, sprites };
+  return { root, parseError: false, diagramLabel: 'YAML' as const, highlights, annotations, sprites,
+    ...(scale === undefined ? {} : { scale }) };
 }

@@ -167,8 +167,8 @@ function continueElementBlock(
 
 /** Apply the opener's captured STEREO/COLOR run (`ELEMENT_DECORATION_RUN`)
  *  through the same extractors the single-line path uses. `withColor` is
- *  TYPE0-only: TYPE0's colour slot sits before `as` and has no single-line
- *  equivalent, whereas TYPE1's colour is a separate, unmeasured gap (see this
+ *  TYPE0-only: TYPE0's color slot sits before `as` and has no single-line
+ *  equivalent, whereas TYPE1's color is a separate, unmeasured gap (see this
  *  task's decision-journal row). */
 function applyElementDecorations(
   node: DescriptiveNode,

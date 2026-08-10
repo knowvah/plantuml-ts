@@ -177,7 +177,7 @@
   },
   {
     "slug": "cadani-60-zile435",
-    "markup": "@startuml\n\n<style>\nclassDiagram {\n    class { ' custom stereotype name '.xyz' may be used here as well\n        spot {\n            BackgroundColor #СССССС ' spot background colour\n            LineColor #СССССС ' spot line colour\n            LineThickness 1.0 ' spot line thickness\n            FontColor #000000 ' spot char colour\n            FontStyle normal ' spot char style\n            Char 'C' ' spot char content\n        }\n    }\n}\n</style>\n\nclass Foo\n\n@enduml"
+    "markup": "@startuml\n\n<style>\nclassDiagram {\n    class { ' custom stereotype name '.xyz' may be used here as well\n        spot {\n            BackgroundColor #СССССС ' spot background color\n            LineColor #СССССС ' spot line color\n            LineThickness 1.0 ' spot line thickness\n            FontColor #000000 ' spot char color\n            FontStyle normal ' spot char style\n            Char 'C' ' spot char content\n        }\n    }\n}\n</style>\n\nclass Foo\n\n@enduml"
   },
   {
     "slug": "cadutu-02-lazu601",

@@ -53,7 +53,7 @@ function rootGroupChildren(svg: string): string {
 describe('assembleClassShell — root <g> shape', () => {
   it('emits the jar’s root <g> as the first element after <defs>', () => {
     const svg = assembleClassShell(chromedFragment());
-    expect(svg).toContain('</defs><g font-family="sans-serif" lengthAdjust="spacing">');
+    expect(svg).toContain('<defs/><g font-family="sans-serif" lengthAdjust="spacing">');
   });
 
   it('wraps an UNwrapped body in that same root <g>', () => {
@@ -63,7 +63,7 @@ describe('assembleClassShell — root <g> shape', () => {
       height: FINAL_DIMS.height,
       classShell: true,
     });
-    expect(svg).toContain('</defs>' + ROOT_GROUP_OPEN + INNER + '</g>');
+    expect(svg).toContain('<defs/>' + ROOT_GROUP_OPEN + INNER + '</g>');
   });
 });
 

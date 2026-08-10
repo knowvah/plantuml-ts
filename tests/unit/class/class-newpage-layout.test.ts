@@ -155,7 +155,7 @@ describe('layoutClass / renderClass -- single page unaffected by T7', () => {
     // in `plans/g2-class-svg/ledger.md` N29.
     expect(svg).toBe(
       '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" data-diagram-type="CLASS" style="width:78px;height:178px;background:#FFFFFF;" width="78px" height="178px" viewBox="0 0 78 178" zoomAndPan="magnify" preserveAspectRatio="none" contentStyleType="text/css">' +
-        '<?plantuml $version$?><defs></defs><g font-family="sans-serif" lengthAdjust="spacing">' +
+        '<?plantuml $version$?><defs/><g font-family="sans-serif" lengthAdjust="spacing">' +
         '<!--class Foo--><g class="entity" data-qualified-name="Foo" id="ent0001">' +
         '<rect x="7" y="7" width="56" height="48" fill="#F1F1F1" stroke="#181818" stroke-width="0.5" rx="2.5" ry="2.5"/>' +
         '<ellipse cx="22" cy="23" rx="11" ry="11" fill="#ADD1B2" stroke="#181818" stroke-width="1"/>' +

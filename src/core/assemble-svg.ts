@@ -7,10 +7,10 @@
  */
 import type { AssembledSvg } from './dispatcher.js';
 import { svgRoot } from './svg.js';
-import { assembleDocumentShell } from './klimt/document-shell.js';
 import { assembleKlimtShell } from '../diagrams/description/renderer.js';
 import { assembleClassShell } from '../diagrams/class/renderer-shell.js';
 import { assembleStateShell } from '../diagrams/state/renderer-shell.js';
+import { assembleJsonShell } from '../diagrams/json/renderer-shell.js';
 
 /**
  * The single central `svgRoot` call site (decisions.md D2): every plugin
@@ -43,21 +43,23 @@ import { assembleStateShell } from '../diagrams/state/renderer-shell.js';
  * shared `assembleDocumentShell` mechanics, parameterized `'STATE'`.
  *
  * mission A5 T4: a `RenderFragment` carrying `jsonShell` (set by the
- * `json`/`yaml`/`hcl` PLUGINS, which each know their own type) goes
- * straight to that same shared `assembleDocumentShell`. It is the only one
- * of the four that is a STRING rather than `true`, because one renderer
- * serves three diagram types and it carries the jar's `data-diagram-type`
- * (`JSON`/`YAML`/`HCL`). Before this, json fell through to `svgRoot` and
- * lost every jar root attribute while gaining 13 arrowhead `<marker>` defs
- * the jar does not emit — a root `childCount` mismatch that stopped the
- * conformance comparator recursing, leaving all 92 fixtures' interiors
- * unmeasured.
+ * `json`/`yaml`/`hcl` PLUGINS, which each know their own type) is
+ * reassembled via `json/renderer-shell.ts#assembleJsonShell`, which wraps
+ * the body and then defers to that same shared `assembleDocumentShell`. It
+ * is the only one of the four that is a STRING rather than `true`, because
+ * one renderer serves three diagram types and it carries the jar's
+ * `data-diagram-type` (`JSON`/`YAML`/`HCL`). Before T4, json fell through to
+ * `svgRoot` and lost every jar root attribute while gaining 13 arrowhead
+ * `<marker>` defs the jar does not emit — a root `childCount` mismatch that
+ * stopped the conformance comparator recursing, leaving all 92 fixtures'
+ * interiors unmeasured. T4 fixed the root ATTRIBUTES but not the child
+ * COUNT; the A5 ledger's M2/M4 (this shell) is what closes that.
  */
 export function assembleSvg(fragment: AssembledSvg): string {
   if ('completeSvg' in fragment) return fragment.completeSvg;
   if (fragment.klimtShell === true) return assembleKlimtShell(fragment);
   if (fragment.classShell === true) return assembleClassShell(fragment);
   if (fragment.stateShell === true) return assembleStateShell(fragment);
-  if (fragment.jsonShell !== undefined) return assembleDocumentShell(fragment, fragment.jsonShell);
+  if (fragment.jsonShell !== undefined) return assembleJsonShell(fragment, fragment.jsonShell);
   return svgRoot(fragment.width, fragment.height, [fragment.body], fragment.background, fragment.extraDefs);
 }

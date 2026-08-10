@@ -142,7 +142,7 @@ const gapShaped = [...rendererRefs].filter((n) => !sizerRefs.has(n)).sort();
  */
 const SIZE_NEUTRAL: Record<string, string> = {
   resolveElementPaint:
-    'colour only — returns a Paint consumed as an SVG fill/stroke; no caller ' +
+    'color only — returns a Paint consumed as an SVG fill/stroke; no caller ' +
     'multiplies it into a width or height, and it never enters ' +
     'calculateDimension. Fill and stroke COLOUR cannot move a DOT box; stroke ' +
     "WIDTH can, and that is resolveElementLineThickness's row, not this one. " +

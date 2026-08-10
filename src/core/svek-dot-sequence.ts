@@ -141,7 +141,7 @@ function walkCluster(
 }
 
 /**
- * Assign every id/colour in upstream's construction order (see file header).
+ * Assign every id/color in upstream's construction order (see file header).
  *
  * Order here is the entire point — do not "simplify" it into a single pass
  * over `input.nodes`. That is exactly what this replaces.
@@ -170,7 +170,7 @@ export function assignSequence(input: DotInputGraph, tree: ClusterTree): SeqAssi
 
   // 4. SvekEdge ctors, last. Because edges come after every node and cluster,
   //    their reservation cannot perturb a single `sh####` id — but it is
-  //    reserved faithfully so edge colours line up too.
+  //    reserved faithfully so edge colors line up too.
   const edgeColors = input.edges.map(() => reserveEdge(seq));
 
   return { recs, nodeById, clusterColors, edgeColors };

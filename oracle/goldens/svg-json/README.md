@@ -5,29 +5,43 @@ Mission **A5** (json family). Sibling of `svg-description`, `svg-class`,
 
 ## Current state
 
-**Still empty after A5 Batch 4 — 0 of 50 fixtures byte-conformant, and that is
-the accurate picture, not a stalled harness.** The ratchet suite skips
-gracefully; the graceful-skip branch is genuinely exercised here.
+**7 of 50 `@startjson` fixtures byte-conformant and pinned** (plus 5 yaml and
+1 hcl in the sibling folders — 13 across the family).
 
-Two independent reasons, and only the second is a defect:
+This section previously said byte-conformance was unreachable here and the
+ratchet could never admit anything. **That was wrong, and the way it was wrong
+is worth keeping.** The claim rested on M1 — "document dimensions differ
+because upstream is Smetana-laid-out" — being one indivisible accepted
+divergence. Measuring the delta per axis showed it was two mechanisms sharing
+a label: the width spread is the real engine divergence, but the height was a
+constant +2 on 70 of 92 fixtures, which no layout difference explains. That +2
+was ours: `json/layout.ts` summed node extents where the jar ink-walks, adds
+margins and truncates. See `plans/a5-json-family-conformance/ledger.md`, M1b.
 
-1. **Byte-exact geometry is not the target for this family** (ADR-2b, and
-   CLAUDE.md "One layout engine"). Upstream lays these types out with Smetana;
-   this port uses one engine for everything, so document dimensions differ by
-   design. Priority here is readability first, SVG fidelity second.
-2. **The document structure does not match yet.** Every fixture carries a root
-   `childCount` diff — the jar emits `<defs/>` plus one content `<g>`, this
-   port emits node groups and per-node `<defs>` as top-level siblings. Because
-   `compare.ts` stops recursing on a structural mismatch, **no fixture's
-   interior has been compared**, so no fixture can honestly be pinned.
+An accepted divergence is a comfortable place for a defect to hide. This one
+sat there for a whole mission.
 
-See `plans/a5-json-family-conformance/ledger.md` — mechanism M2 is the gate.
-What IS measured and good: node sizing (mean |Δw| 3.08, |Δh| 0.96 against the
-jar) and per-node placement (mean |Δy| 6.65, 21 of 557 nodes exact), via
-`scripts/json-node-oracle.ts`.
+## This folder is no longer the family's primary gate
 
-Corpus: **50 `@startjson` fixtures**, captured from the pinned oracle jar into
-`test-results/dot-cache/json/`.
+Byte-exactness is now the SECONDARY measure here. The family's gate is
+`tests/oracle/svg-conformance/json-family-structural.test.ts`, which compares
+everything except positional geometry — see
+`plans/a5-json-family-conformance/ledger.md`, "The bar, redefined".
+
+The reason is measured, not stylistic: ~19,760 of ~20,028 corpus diffs are the
+accepted ADR-2b layout divergence restated per coordinate, and M1a was
+verified genuine (node sizes exact, envelope exact, only within-rank placement
+differs — Smetana transpiles graphviz 2.38, dot-engine ports modern graphviz).
+
+This ratchet stays, and stays shrink-only: 17 fixtures reach byte-exactness
+and must keep it. It simply no longer defines the family's bar.
+
+## What blocks the other 37
+
+- **M1a — horizontal layout geometry.** The genuine ADR-2b divergence, and
+  still accepted: this port uses one layout engine and takes the delta.
+- **M6 — element tally.** 17 fixtures still emit a different count of some
+  element than the jar; each is named with its delta signature in the ledger.
 
 ## Where this type's layout lives
 

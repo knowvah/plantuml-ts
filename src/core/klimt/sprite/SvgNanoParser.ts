@@ -56,7 +56,7 @@ import { applyFillAndStroke, getFillString, drawCircle, drawEllipse, drawText, D
  * fix): `UGraphicWithScale.ts` (T3, written in parallel before T2 landed)
  * declares its own LOCAL structural `ColorResolver` interface whose
  * `getDefaultColor`/`getTrueColor` return `Paint` (`string | Gradient`,
- * this port's SVG-emission colour type -- matching every other klimt seam,
+ * this port's SVG-emission color type -- matching every other klimt seam,
  * e.g. `UBackground.ts`/`UForeground.ts`, where upstream's `HColor`
  * becomes `Paint`). T2's REAL `ColorResolver` (`./ColorResolver.ts`)
  * instead returns `ResolvedColor` (`{r,g,b,a}`, this port's `HColor`

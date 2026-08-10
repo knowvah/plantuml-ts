@@ -93,6 +93,7 @@ export function resolveAnnotationStyles(
   styleMap: StyleMap,
 ): Record<AnnotationElement, AnnotationBoxStyle> {
   const documentBackgroundHex = resolveColorToSvgHex(theme.colors.background);
+  const themeStyleMap = toStyleMap(theme.styleOverrides);
   const result = {} as Record<AnnotationElement, AnnotationBoxStyle>;
   for (const element of ANNOTATION_ELEMENTS) {
     const style = cloneBoxStyle(BASE_DEFAULTS[element]);
@@ -111,6 +112,20 @@ export function resolveAnnotationStyles(
     // Helvetica` + `Title ...`, title `<text font-family="Helvetica">`).
     // Applied BEFORE the per-element overrides below so a more specific
     // override still wins (root < document < element cascade specificity).
+    // The theme's OWN `<style>` declarations (`root { … }` and
+    // `document { … }`), run through the SAME selector resolution a user
+    // `<style>` block gets -- and BEFORE it, so a user override still wins.
+    //
+    // Routed through the styleMap rather than seeded from the compiled scalar
+    // fields, and that distinction is load-bearing: `theme.fontFamily` and
+    // `theme.colors.text` always hold a value, so seeding from them clobbered
+    // the skin's own per-element defaults (`header`/`footer` FontColor `#8`)
+    // even when no theme was applied at all. Only a theme that actually
+    // DECLARED a root block should override them, which is exactly what an
+    // absent `styleOverrides` entry expresses.
+    if (themeStyleMap !== undefined) {
+      applyStyleOverrides(element, style, themeStyleMap, documentBackgroundHex);
+    }
     const defaultFontName = skinparam.get('defaultfontname');
     if (defaultFontName !== undefined) style.fontFamily = defaultFontName.trim();
     applySkinparamOverrides(element, style, skinparam, documentBackgroundHex);
@@ -118,4 +133,18 @@ export function resolveAnnotationStyles(
     result[element] = style;
   }
   return result;
+}
+
+/** `Theme.styleOverrides`'s plain-object form as the `StyleMap` the override
+ *  resolver takes. `undefined` in, `undefined` out — themes without a
+ *  `document { … }` block cost nothing. */
+function toStyleMap(
+  overrides: Record<string, Record<string, string>> | undefined,
+): StyleMap | undefined {
+  if (overrides === undefined) return undefined;
+  const map: StyleMap = new Map();
+  for (const [selector, decls] of Object.entries(overrides)) {
+    map.set(selector, new Map(Object.entries(decls)));
+  }
+  return map;
 }

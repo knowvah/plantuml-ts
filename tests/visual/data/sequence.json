@@ -2989,7 +2989,7 @@
   },
   {
     "slug": "pabato-83-refo550",
-    "markup": "@startuml\nnote over A #77AAFF: Note over A.\nnote left of A #FFAA77: Note left of A.\nnote right of A #AAFF77: Note right of A.\nA ->> B: request\nnote left #77FFAA: Note left of message\\ndoes not handle colour.\nA <<-- B: response\nnote right #FF77AA\n   Note right of message\n   does not handle colour.\nend note\n@enduml"
+    "markup": "@startuml\nnote over A #77AAFF: Note over A.\nnote left of A #FFAA77: Note left of A.\nnote right of A #AAFF77: Note right of A.\nA ->> B: request\nnote left #77FFAA: Note left of message\\ndoes not handle color.\nA <<-- B: response\nnote right #FF77AA\n   Note right of message\n   does not handle color.\nend note\n@enduml"
   },
   {
     "slug": "padomu-10-nati972",

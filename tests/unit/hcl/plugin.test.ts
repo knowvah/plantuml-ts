@@ -69,7 +69,20 @@ describe('hclPlugin', () => {
       '@endhcl',
     ].join('\n');
     const svg = renderSync(src);
-    expect(svg).toContain('#abc');
+    // Canonicalized to the 6-digit form before the document shell, as class
+    // already does and as the jar writes it (its own root styles are
+    // unshortened -- `background:#FFFFFF`, never `#FFF`).
+    //
+    // There is no jar oracle for the VALUE here, because upstream applies no
+    // hcl style at all: `HclDiagramFactory` extracts the `<style>` block (so
+    // it is stripped from the content) but its `applyStyles` call is
+    // commented out (`HclDiagramFactory.java:86-88`). Verified rather than
+    // assumed -- on a body the jar's `HclParser` accepts, its output is
+    // byte-identical with and without a `<style>` block setting both
+    // document and node backgrounds. Honouring it is this port's documented
+    // deliberate divergence (DIVERGENCES.md, "Style selector support"), so
+    // the spelling follows the port's own convention.
+    expect(svg).toContain('#AABBCC');
   });
 
   it('applies all hcldiagram.node style properties', () => {

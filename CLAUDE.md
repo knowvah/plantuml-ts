@@ -54,6 +54,29 @@ warning below: the Smetana transpile (`gen/`, `smetana/`) and `net/atmp/` are
 outside that subtree, and scoping a search to it produces confidently wrong
 conclusions.
 
+## Always render the oracle deterministically
+
+Use **`scripts/oracle-render.sh <out-dir> <file.puml> …`** for every ad-hoc jar
+render. Do not hand-type `java -jar oracle/dist/plantuml-oracle.jar`.
+
+The jar needs `-DPLANTUML_DETERMINISTIC_TEXT=true` to measure text the way this
+port does. Without it the jar uses **real platform font metrics**, while every
+harness here renders through `DeterministicMeasurer`. Every text-derived number
+then disagrees — node widths, row heights, `textLength`, and the document
+dimensions computed from them — so a comparison against that output measures
+the flag, not the port.
+
+This is not hypothetical, and it does not look like a flag error: it looks like
+a large, plausible, systematic defect. Mission A5's "M7" was filed on a measured
+204x93-vs-194x85 document-dimension gap that became **1px** once the flag was
+set, with node sizes byte-identical. A committed ledger entry and commit message
+both had to be retracted.
+
+The corpus goldens in `test-results/dot-cache/` are all generated with the flag
+(`scripts/oracle-corpus.ts#runOracle`), so anything you generate for comparison
+must be too. Older `plans/**` docs quote the bare `java -jar` form — they
+predate this rule; prefer the script.
+
 ## @knowvah/dot-engine issue tracking
 
 Verified @knowvah/dot-engine library findings live in `docs/graphviz-issues/` — one
@@ -141,10 +164,10 @@ tooling, test harness, CI.)
   file; real PlantUML features have zero coverage there (e.g. the bundled skins
   `reddress`/`sonyxperiadev` are exercised by NO upstream fixture). When a
   feature has no fixture, do NOT skip it or verify only synthetically — WRITE
-  new `.puml` fixtures that exercise it and generate their jar oracles (`java
-  -DPLANTUML_DUMP_DOT=<dir> -jar oracle/dist/plantuml-oracle.jar -tsvg -o <dir>
-  <puml>`, the pinned oracle jar; `scripts/oracle-corpus.ts#runOracle`), then
-  implement and verify against them. Skins change colors/fonts (SVG), not
+  new `.puml` fixtures that exercise it and generate their jar oracles with
+  **`scripts/oracle-render.sh <out-dir> <puml>`** — never a hand-typed `java
+  -jar`, for the reason in "Always render the oracle deterministically" below —
+  then implement and verify against them. Skins change colors/fonts (SVG), not
   structure (DOT), so byte-exact SVG golden comparison is the right gate for
   them, not DOT-parity. "One can do better" than upstream's coverage.
 - The bar is "pleasing aesthetic alignment with upstream," not "produces a

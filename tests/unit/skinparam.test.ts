@@ -812,11 +812,22 @@ describe('resolveSkinparam — key normalisation', () => {
 // ---------------------------------------------------------------------------
 describe('resolveSkinparam — unknown keys', () => {
   it('collects an unrecognised key in unknown[]', () => {
+    // `handwritten` used to stand in for "unrecognised" here. It is a real
+    // skinparam now (mission H1), so this needs a key that genuinely is not.
     const { unknown } = resolveSkinparam(
+      new Map([['notaskinparam', 'true']]),
+      defaultTheme,
+    );
+    expect(unknown).toContain('notaskinparam');
+  });
+
+  it('recognises handwritten, and does not report it as unknown', () => {
+    const { theme, unknown } = resolveSkinparam(
       new Map([['handwritten', 'true']]),
       defaultTheme,
     );
-    expect(unknown).toContain('handwritten');
+    expect(theme.handwritten).toBe(true);
+    expect(unknown).not.toContain('handwritten');
   });
 
   it('does not throw for unknown keys', () => {
@@ -859,13 +870,13 @@ describe('resolveSkinparam — unknown keys', () => {
     const { theme, unknown } = resolveSkinparam(
       new Map([
         ['backgroundcolor', '#FF0000'],
-        ['handwritten', 'true'],
+        ['notaskinparam', 'true'],
         ['nonsensicalkey', 'false'],
       ]),
       defaultTheme,
     );
     expect(theme.colors.background).toBe('#FF0000');
-    expect(unknown).toContain('handwritten');
+    expect(unknown).toContain('notaskinparam');
     expect(unknown).toContain('nonsensicalkey');
     expect(unknown).not.toContain('backgroundcolor');
   });

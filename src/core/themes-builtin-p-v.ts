@@ -14,6 +14,14 @@ import type { ThemeOverride } from './theme.js';
 export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   'plain': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 5, right: 5, bottom: 5, left: 5 },
+    styleOverrides: {
+      'document.caption': { linethickness: '0' },
+      'document.footer': { linethickness: '0' },
+      'document.header': { linethickness: '0' },
+      'document.title': { fontsize: '22', linethickness: '0' },
+      'root': { backgroundcolor: 'white', fontcolor: 'black', fontname: 'Verdana', hyperlinkcolor: 'blue', linecolor: 'black', linethickness: '1', margin: '5' },
+    },
     colors: {
       background: 'white',
       text: 'black',
@@ -29,6 +37,10 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
           numberValue: 'black',
           booleanValue: 'black',
           nullValue: 'black',
+          maximumWidth: 300,
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: 'white',
         },
       },
     },
@@ -203,42 +215,86 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'sandstone': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#fff', hyperlinkcolor: '#f47c3c', linecolor: '#2d547a', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#fff',
       border: '#2D547A',
       arrow: '#2D547A',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'silver': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#336699', hyperlinkcolor: '$ORANGE', linecolor: '#bebebe', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#336699',
       border: '#BEBEBE',
       arrow: '#BEBEBE',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'sketchy-outline': {
     fontFamily: 'Segoe Print',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#2e2e2e', hyperlinkcolor: '#fd7e14', linecolor: '#2e2e2e', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#2E2E2E',
       border: '#2E2E2E',
       arrow: '#2E2E2E',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'sketchy': {
     fontFamily: 'Segoe Print',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#ffffff', hyperlinkcolor: '#fd7e14', linecolor: '#2e2e2e', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFFFFF',
       border: '#2E2E2E',
       arrow: '#2E2E2E',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'spacelab-white': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'white', fontcolor: '#ffffff', hyperlinkcolor: '#fd7e14', linecolor: '#304d6d', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'white',
       text: '#FFFFFF',
@@ -254,17 +310,30 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
           numberValue: '#FFFFFF',
           booleanValue: '#FFFFFF',
           nullValue: '#FFFFFF',
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: 'white',
         },
       },
     },
   },
   'spacelab': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#ffffff', hyperlinkcolor: '#fd7e14', linecolor: '#304d6d', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFFFFF',
       border: '#304D6D',
       arrow: '#304D6D',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'sunlust': {
@@ -290,20 +359,40 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'superhero-outline': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#DF691A', hyperlinkcolor: '#f0ad4e', linecolor: '#e58748', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#DF691A',
       border: '#E58748',
       arrow: '#E58748',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'superhero': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#FFF', hyperlinkcolor: '#f0ad4e', linecolor: '#e58748', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#FFF',
       border: '#E58748',
       arrow: '#E58748',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'toy': {
@@ -328,11 +417,21 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
   },
   'united': {
     fontFamily: 'Verdana',
+    diagramMargin: { top: 10, right: 10, bottom: 10, left: 10 },
+    styleOverrides: {
+      'root': { backgroundcolor: 'transparent', fontcolor: '#fff', hyperlinkcolor: '#e95420', linecolor: '#d24c1d', linethickness: '1', margin: '10', padding: '6', shadowing: '0.0' },
+    },
     colors: {
       background: 'transparent',
       text: '#fff',
       border: '#D24C1D',
       arrow: '#D24C1D',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'vibrant': {

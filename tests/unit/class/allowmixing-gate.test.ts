@@ -25,14 +25,31 @@ import { describe, expect, it } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
 
+/**
+ * The port's own inline error boxes draw with `fontFamily: 'monospace'`, and
+ * the SVG emitter applies upstream's monospace rule to any such text —
+ * `SvgGraphics.java:727-728` replaces every space with U+00A0 under a
+ * `monospace`/`courier` family. So the message IS in the document, spelled
+ * with NBSPs. These assertions are about the message being STATED, not about
+ * which space character carries it, so they compare against the de-NBSP'd
+ * text.
+ */
+const deNbsp = (svg: string): string => svg.split('\u00a0').join(' ');
+
+
 const ERR = "Use 'allowmixing' if you want to mix classes and other UML elements.";
+const ERROR_BANNER = 'plantuml-ts version';
 
 function render(body: string): string {
   return renderSync(`@startuml\n${body}\n@enduml`);
 }
 
 function isRefused(svg: string): boolean {
-  return svg.includes('Class diagram error:') && svg.includes(ERR);
+  // A refusal is now the STANDARD error diagram, not a bespoke box: the class
+  // plugin throws a `DiagramRefusal` and `renderSync`'s own catch builds the
+  // jar's welcome-plus-source-listing page. So the marker is the error
+  // diagram's banner, and the message carries upstream's assumed-type suffix.
+  return deNbsp(svg).includes(ERROR_BANNER) && deNbsp(svg).includes(ERR);
 }
 
 describe('a descriptive LEAF in a class diagram is refused without allowmixing', () => {
@@ -60,7 +77,7 @@ describe('a descriptive LEAF in a class diagram is refused without allowmixing',
   });
 
   it('names the offending requirement in upstream\'s own words', () => {
-    expect(render('class Foo\nactor Bob')).toContain(ERR);
+    expect(deNbsp(render('class Foo\nactor Bob'))).toContain(ERR);
   });
 
   it('does not draw the element it refuses', () => {

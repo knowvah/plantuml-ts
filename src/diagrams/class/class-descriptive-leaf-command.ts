@@ -73,6 +73,7 @@ export function adjudicateAllowMixing(state: ParseState): void {
   if (!state.gatedLeafSeen) return;
   if (!state.ast.classifiers.some((c) => NATIVE_CLASS_KINDS.has(c.kind))) return;
   (state.ast.errors ??= []).push(ALLOW_MIXING_ERROR);
+  state.ast.errorLine = state.gatedLeafLine;
 }
 
 export const DESCRIPTIVE_LEAF_COMMANDS: readonly Command[] = [
@@ -98,6 +99,7 @@ export const DESCRIPTIVE_LEAF_COMMANDS: readonly Command[] = [
         !CONTAINER_OPENER.test(line.trim())
       ) {
         state.gatedLeafSeen = true;
+        state.gatedLeafLine ??= state.currentLine;
       }
       const decl = parseClassifierDecl(line);
       if (decl !== null) applyClassifierDecl(state, decl, false);

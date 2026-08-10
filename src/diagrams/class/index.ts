@@ -10,40 +10,7 @@ import { classAccepts } from './class-dispatch.js';
 import { parseClass } from './parser.js';
 import { layoutClass } from './layout.js';
 import { renderClass } from './renderer.js';
-import { rect, text } from '../../core/svg.js';
-import { fmt } from '../../core/svg-format.js';
-
-/** Error-page red, shared by the two elements that use it. */
-const ERROR_COLOR = '#dc2626';
-
-// ---------------------------------------------------------------------------
-// Error rendering
-// ---------------------------------------------------------------------------
-
-/**
- * Upstream aborts a diagram whose command returned
- * `CommandExecutionResult.error(...)` and draws an error page carrying the
- * message. This is that page's minimal equivalent — deliberately NOT a
- * reproduction of the jar's welcome-plus-source layout, which is a much
- * larger surface; the load-bearing part is that the diagram is REFUSED and
- * the reason is stated, rather than an element the jar rejects being drawn
- * silently.
- *
- * Shape mirrors `chart/renderer.ts#renderErrorDiagram`, the existing
- * precedent for a plugin returning a `completeSvg` error document.
- */
-function renderClassErrorDiagram(errors: readonly string[]): string {
-  const message = errors.join('; ');
-  const width = 640;
-  const height = 80;
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${fmt(width)}" height="${fmt(height)}">` +
-    rect(0, 0, width, height, { fill: '#fee2e2', stroke: ERROR_COLOR, strokeWidth: 2 }) +
-    text(10, 28, 'Class diagram error:', { fill: ERROR_COLOR, fontFamily: 'monospace', fontSize: 12 }) +
-    text(10, 52, message, { fill: ERROR_COLOR, fontFamily: 'monospace', fontSize: 11 }) +
-    `</svg>`
-  );
-}
+import { DiagramRefusal } from '../../core/error/error-diagrams.js';
 
 // ---------------------------------------------------------------------------
 // Plugin
@@ -81,14 +48,32 @@ export const classPlugin: SyncPlugin<ClassDiagramAST, ClassGeometry> = {
     const geo = layoutClass(ast, theme, measurer);
     const errors = ast.errors ?? [];
     const spritesField = ast.sprites !== undefined ? { sprites: ast.sprites } : {};
-    const errorsField = errors.length > 0 ? { errors } : {};
+    const errorsField = errors.length > 0 ? { errors, errorLine: ast.errorLine } : {};
     return { ...geo, measurer, ...spritesField, ...errorsField };
   },
 
   render(geo, theme) {
-    const errors = (geo as ClassGeometry & { errors?: readonly string[] }).errors;
+    const { errors, errorLine } = geo as ClassGeometry & {
+      errors?: readonly string[];
+      errorLine?: number;
+    };
+    // A refused diagram THROWS rather than drawing its own error page.
+    //
+    // Upstream aborts the diagram when a command returns
+    // `CommandExecutionResult.error(...)` and builds a `PSystemError` at the
+    // TOP level, which renders the full welcome-plus-source-listing page.
+    // `renderSync`/`render` already do exactly that in their own `catch` --
+    // `errorSvg(source, err, options)` -- and they are the only place with the
+    // source text and options that page needs, which `render(geo, theme)` has
+    // no access to.
+    //
+    // This replaced a bespoke 640x80 red box. That box diverged from the jar
+    // in shape AND in font: it drew its message with `fontFamily: 'monospace'`
+    // where the jar leaves the message in the inherited `sans-serif` -- a
+    // difference invisible until `SvgGraphics.java:727-728`'s monospace NBSP
+    // rule was ported and started rewriting its spaces.
     if (errors !== undefined && errors.length > 0) {
-      return { completeSvg: renderClassErrorDiagram(errors) };
+      throw new DiagramRefusal(errors.join('; '), errorLine, 'class');
     }
     return renderClass(geo, theme);
   },

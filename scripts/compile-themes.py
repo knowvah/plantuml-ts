@@ -7,6 +7,9 @@ Reads .puml theme files from the plantuml source tree and extracts:
   - FontColor        -> colors.text
   - LineColor        -> colors.border + colors.arrow
   - FontName         -> fontFamily
+  - node MaximumWidth -> colors.graph.json.maximumWidth (top-level `node`
+    selector only; it cascades to root.element.jsonDiagram.node)
+  - root/document Margin -> diagramMargin (overrides getDefaultMargins())
 
 Outputs a TypeScript module that maps theme names to Partial<Theme>.
 """
@@ -31,7 +34,30 @@ FILE_LINE_CAP = 500
 # ---------------------------------------------------------------------------
 MANUAL = {
     'aws-orange': {
-        'bg': 'transparent', 'fg': '#232F3E', 'lc': '#FF9900', 'fn': None,
+        'bg': 'transparent', 'fg': '#232F3E', 'lc': '#FF9900', 'fn': 'Verdana',
+        # R2j (mizupo-59) hand-carried these into the GENERATED file, which
+        # regenerating then silently discarded -- the header says "do not edit
+        # by hand" and something did. Held here instead, so the output is
+        # reproducible. They stay manual only until this script learns
+        # FontSize extraction.
+        'extra_theme': [
+            "    // R2j (mizupo-59): the upstream theme file sets `skinparam",
+            "    // defaultFontName \"Verdana\"` + `skinparam defaultFontSize 12`",
+            "    // (puml-theme-aws-orange.puml:195-196). compile-themes.py has no",
+            "    // FontSize extraction at all, so the two size fields are hand-carried",
+            "    // here until the script learns them (defaultFontSize doubles as the",
+            "    // explicit-set marker, see theme.ts#defaultFontSize).",
+        ],
+        'extra_after_font': ["    fontSize: 12,", "    defaultFontSize: 12,"],
+        'extra_graph': [
+            "        // R2j: `skinparam class { AttributeFontSize 11 }`",
+            "        // (puml-theme-aws-orange.puml:446) -- member rows at 11pt, and the",
+            "        // class HEADER cascades to 11 too (no ClassFontSize in the theme;",
+            "        // the N32 attribute->header cascade, `theme-graph-colors-a.ts",
+            "        // #classAttributeFontSize`). Jar-verified via mizupo-59-zala765's",
+            "        // own golden: bare-class width = widthTable(name)@11 + 30.",
+            "        classAttributeFontSize: 11,",
+        ],
     },
     'cloudscape-design': {
         'bg': 'transparent', 'fg': '#000716', 'lc': '#0972D3', 'fn': None,
@@ -118,7 +144,8 @@ def _resolve_var(val: str, vars: dict[str, str]) -> str:
 def _match_root_prop(s: str, vars: dict[str, str]) -> tuple[str, str] | None:
     """Match one `root { … }` property line, returning (key, resolved value)."""
     for prop, key in [('BackgroundColor', 'bg'), ('FontColor', 'fg'),
-                      ('LineColor', 'lc'), ('FontName', 'fn')]:
+                      ('LineColor', 'lc'), ('FontName', 'fn'),
+                      ('LineThickness', 'lt')]:
         if s.lower().startswith(prop.lower()):
             return key, _resolve_var(s[len(prop):].strip().strip('"\''), vars)
     return None
@@ -126,7 +153,8 @@ def _match_root_prop(s: str, vars: dict[str, str]) -> tuple[str, str] | None:
 
 def extract_root_style(content: str, vars: dict[str, str]) -> dict[str, str | None]:
     """Extract colors from <style> root { ... } block."""
-    result: dict[str, str | None] = {'bg': None, 'fg': None, 'lc': None, 'fn': None}
+    result: dict[str, str | None] = {'bg': None, 'fg': None, 'lc': None,
+                                     'fn': None, 'lt': None}
     m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
     if not m:
         return result
@@ -142,6 +170,142 @@ def extract_root_style(content: str, vars: dict[str, str]) -> dict[str, str | No
             if match:
                 result[match[0]] = match[1]
     return result
+
+
+def extract_node_maximum_width(content: str) -> str | None:
+    """
+    A TOP-LEVEL `node { MaximumWidth N }` inside the theme's <style> block.
+
+    `node` there is a bare ELEMENT selector, a sibling of `root`/`document`, so
+    it cascades to every style signature containing `node` -- including
+    `root.element.jsonDiagram.node`. That is why a json diagram under
+    `!theme amiga` wraps its cells in the reference jar
+    (yaml/vapoda-87-piku740), and why this value belongs on graph.json.
+
+    Depth-tracked rather than regex-scanned, because `MaximumWidth` also
+    appears inside NESTED `node` blocks (puml-theme-carbon-gray has two), and
+    inside comments (puml-theme-mono's is commented out with a leading quote).
+    Only the top-level block, and only its first value, is taken.
+    """
+    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
+    if not m:
+        return None
+    depth = 0
+    node_depth: int | None = None
+    for line in m.group(1).split('\n'):
+        s = line.strip()
+        if s.startswith("'"):        # PlantUML line comment
+            continue
+        if s.endswith('{'):
+            if depth == 0 and s[:-1].strip().lower() == 'node':
+                node_depth = depth
+            depth += 1
+            continue
+        if s == '}':
+            depth -= 1
+            if node_depth is not None and depth <= node_depth:
+                node_depth = None
+            continue
+        if node_depth is not None and depth == node_depth + 1:
+            prop = re.match(r'MaximumWidth\s+([0-9]+(?:\.[0-9]+)?)\s*$', s, re.IGNORECASE)
+            if prop:
+                return prop.group(1)
+    return None
+
+
+def extract_document_styles(content: str, vars: dict[str, str]) -> dict[str, dict[str, str]]:
+    """
+    The theme's `<style> root { … }` and `document { … }` blocks, as
+    selector -> {prop: value}.
+
+    `document` and `document.<element>` are genuine members of every chrome
+    element's `{root, document, <element>}` style signature, and
+    `StyleStorage#computeMergedStyle` matches by set containment -- so a
+    theme's `document { title { FontSize 22 } }` reaches the title exactly as a
+    user `<style>` block would. `annotation-style-overrides.ts` already
+    resolves those selectors; this only has to hand it the theme's own
+    declarations, which are otherwise compiled away.
+
+    Returns lowercase property names to match `parseStyleBlock`'s own keys.
+    """
+    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
+    if not m:
+        return {}
+    out: dict[str, dict[str, str]] = {}
+    depth = 0
+    path: list[str] = []
+    for raw in m.group(1).split('\n'):
+        line = raw.strip()
+        if not line or line.startswith("'"):
+            continue
+        if line.endswith('{'):
+            path.append(line[:-1].strip().lower())
+            depth += 1
+            continue
+        if line == '}':
+            if path:
+                path.pop()
+            depth -= 1
+            continue
+        if not path or path[0] not in ('document', 'root'):
+            continue
+        parts = line.split(None, 1)
+        if len(parts) != 2:
+            continue
+        selector = '.'.join(path)
+        out.setdefault(selector, {})[parts[0].lower()] = _resolve_var(
+            parts[1].strip().strip('"\''), vars)
+    return out
+
+
+def extract_document_margin(content: str) -> str | None:
+    """
+    The diagram margin a theme declares, as `top right bottom left`.
+
+    `TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style for
+    `root.document` and falls back to `TitledDiagram#getDefaultMargins()` --
+    `same(10)` -- only when that style has no `Margin`. `root` is a prefix of
+    `root.document`, so a `root { Margin … }` cascades into it, which is the
+    form all 28 declaring themes use.
+
+    The value is CSS-shaped: 1/2/3/4 numbers (`ClockwiseTopRightBottomLeft
+    #read`, `:66-100`). Only the 1-number form appears at this scope in the
+    corpus; the others are ported anyway so an upstream change does not
+    silently truncate.
+    """
+    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
+    if not m:
+        return None
+    depth = 0
+    scope_depth: int | None = None
+    for line in m.group(1).split('\n'):
+        s = line.strip()
+        if s.startswith("'"):
+            continue
+        if s.endswith('{'):
+            if depth == 0 and s[:-1].strip().lower() in ('root', 'document'):
+                scope_depth = depth
+            depth += 1
+            continue
+        if s == '}':
+            depth -= 1
+            if scope_depth is not None and depth <= scope_depth:
+                scope_depth = None
+            continue
+        if scope_depth is not None and depth == scope_depth + 1:
+            prop = re.match(r'Margin\s+([0-9]+(?:\s+[0-9]+){0,3})\s*$', s, re.IGNORECASE)
+            if prop:
+                n = [int(x) for x in prop.group(1).split()]
+                if len(n) == 1:
+                    t = r = b = l = n[0]
+                elif len(n) == 2:
+                    t, r, b, l = n[0], n[1], n[0], n[1]
+                elif len(n) == 3:
+                    t, r, b, l = n[0], n[1], n[2], n[1]
+                else:
+                    t, r, b, l = n
+                return f"{{ top: {t}, right: {r}, bottom: {b}, left: {l} }}"
+    return None
 
 
 def extract_skinparam(content: str, vars: dict[str, str]) -> dict[str, str | None]:
@@ -195,7 +359,16 @@ def parse_theme(fname: str) -> dict[str, str | None]:
         'bg': root['bg'] or skp['bg'],
         'fg': root['fg'] or skp['fg'],
         'lc': root['lc'],
+        'lt': root['lt'],
+        # The `<style> root { … }` background specifically, NOT the merged one.
+        # A theme's `skinparam BackgroundColor` converts to SName.document
+        # (`FromSkinparamToStyle.java:180`), whose signature does not match a
+        # node, so it cannot overwrite the highlight the way a root block does.
+        'root_bg': root['bg'],
         'fn': root['fn'] or skp['fn'],
+        'mw': extract_node_maximum_width(content),
+        'margin': extract_document_margin(content),
+        'doc_styles': extract_document_styles(content, vars),
     }
 
 
@@ -223,23 +396,47 @@ def _color_lines(bg: str | None, fg: str | None, lc: str | None) -> list[str]:
     return out
 
 
-def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None) -> list[str]:
+def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None,
+                      mw: str | None, lt: str | None = None,
+                      root_bg: str | None = None) -> list[str]:
     """
     For themes with a solid (non-transparent) background, propagate the theme
     colors into graph.json so JSON nodes inherit the theme instead of falling
-    back to defaultTheme's plantuml.skin json defaults. Empty otherwise.
+    back to defaultTheme's plantuml.skin json defaults.
+
+    `maximumWidth` is INDEPENDENT of that: it is carried whenever the theme
+    declares one, background or not, because it is a layout property rather
+    than a color and a transparent-background theme wraps its cells just the
+    same.
     """
-    if not bg or bg == 'transparent':
-        return []
-    out = [f"          background: '{bg}',"]
-    if lc:
-        out.append(f"          border: '{lc}',")
-        out.append(f"          arrowColor: '{lc}',")
-    if fg:
-        # Disable per-type value coloring for themed nodes — uniform text color.
-        for field in ('keyText', 'stringValue', 'numberValue',
-                      'booleanValue', 'nullValue'):
-            out.append(f"          {field}: '{fg}',")
+    out: list[str] = []
+    if bg and bg != 'transparent':
+        out.append(f"          background: '{bg}',")
+        if lc:
+            out.append(f"          border: '{lc}',")
+            out.append(f"          arrowColor: '{lc}',")
+        if fg:
+            # Disable per-type value coloring for themed nodes — uniform text color.
+            for field in ('keyText', 'stringValue', 'numberValue',
+                          'booleanValue', 'nullValue'):
+                out.append(f"          {field}: '{fg}',")
+    if mw:
+        out.append(f"          maximumWidth: {mw},")
+    # `root { LineThickness N }` and `root { BackgroundColor C }` OVERWRITE the
+    # skin's deeply-nested `jsonDiagram { node { LineThickness 1.5 } }` and
+    # `node { highlight { BackGroundColor #ccff02 } }`. That is not a
+    # specificity accident: `StyleStorage#computeMergedStyle`
+    # (`style/StyleStorage.java:102-114`) walks a LinkedHashMap in INSERTION
+    # order and merges with `MergeStrategy.OVERWRITE_EXISTING_VALUE`, with no
+    # specificity ranking at all -- so a theme, parsed after plantuml.skin,
+    # wins on every property it names however shallow its selector.
+    # Jar-verified: `!theme plain` renders json nodes at stroke-width 1 and its
+    # highlight rows at #FFF (its own root BackgroundColor), not #ccff02.
+    if lt:
+        out.append(f"          nodeLineThickness: {lt},")
+        out.append(f"          separatorThickness: {lt},")
+    if root_bg and root_bg != 'transparent':
+        out.append(f"          highlightBackground: '{root_bg}',")
     return out
 
 
@@ -253,19 +450,36 @@ def emit_theme_entry(name: str, props: dict) -> list[str]:
         fn = fn.strip().strip('"\'')
 
     lines = [f"  '{name}': {{"]
+    lines.extend(props.get('extra_theme', []))
     if fn:
         lines.append(f"    fontFamily: '{fn}',")
+    lines.extend(props.get('extra_after_font', []))
+    if props.get('margin'):
+        lines.append(f"    diagramMargin: {props['margin']},")
+    doc_styles = props.get('doc_styles') or {}
+    if doc_styles:
+        lines.append("    styleOverrides: {")
+        for selector in sorted(doc_styles):
+            decls = ', '.join(f"{k}: '{v}'" for k, v in sorted(doc_styles[selector].items()))
+            lines.append(f"      '{selector}': {{ {decls} }},")
+        lines.append("    },")
 
     color_lines = _color_lines(bg, fg, lc)
-    json_lines = _json_graph_lines(bg, fg, lc)
-    if color_lines:
+    json_lines = _json_graph_lines(bg, fg, lc, props.get('mw'), props.get('lt'),
+                                   normalize_color(props.get('root_bg')))
+    # `colors` is emitted for a json-only property too -- a theme may declare
+    # `node { MaximumWidth }` and no colors at all.
+    if color_lines or json_lines:
         lines.append("    colors: {")
         lines.extend(color_lines)
-        if json_lines:
+        extra_graph = props.get('extra_graph', [])
+        if json_lines or extra_graph:
             lines.append("      graph: {")
-            lines.append("        json: {")
-            lines.extend(json_lines)
-            lines.append("        },")
+            lines.extend(extra_graph)
+            if json_lines:
+                lines.append("        json: {")
+                lines.extend(json_lines)
+                lines.append("        },")
             lines.append("      },")
         lines.append("    },")
     lines.append("  },")
@@ -279,8 +493,14 @@ def collect_entries() -> dict[str, list[str]]:
         if not fname.endswith('.puml') or fname == 'puml-theme-_none_.puml':
             continue
         theme_name = fname.replace('puml-theme-', '').replace('.puml', '')
-        props = MANUAL.get(theme_name) \
-            or parse_theme(os.path.join(THEMES_DIR, fname))
+        # MANUAL OVERLAYS the parse, it does not replace it. Replacing threw
+        # away every auto-extracted property for those themes: black-knight
+        # declares `root { Margin 10 }` and never saw it. The manual keys are
+        # all explicit, so they still win where they are set.
+        props = {
+            **parse_theme(os.path.join(THEMES_DIR, fname)),
+            **MANUAL.get(theme_name, {}),
+        }
         entries[theme_name] = emit_theme_entry(theme_name, props)
     return entries
 

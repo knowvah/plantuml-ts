@@ -321,6 +321,8 @@ export interface ClassDiagramAST {
    * (`src/diagrams/chart/renderer.ts#renderErrorDiagram`).
    */
   errors?: string[];
+  /** 0-indexed source line the refusal in `errors` belongs to. */
+  errorLine?: number | undefined;
   /**
    * Additive (optional, unlike `directives` above) so existing AST literal
    * constructors elsewhere (object-diagram parser reuse, unit-test fixtures)

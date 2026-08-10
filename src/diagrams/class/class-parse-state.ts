@@ -51,6 +51,10 @@ export interface ParseState {
    * selection actually turns on.
    */
   gatedLeafSeen: boolean;
+  /** 0-indexed source line of the FIRST gated descriptive leaf, so a refusal
+   *  can be attributed where upstream attributes it rather than to the
+   *  source's last line. Set alongside {@link gatedLeafSeen}. */
+  gatedLeafLine?: number | undefined;
   /**
    * When non-null we are inside a multi-line note block (attached or
    * freestanding). Lines accumulate as note text until `end note`.

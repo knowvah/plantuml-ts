@@ -82,14 +82,20 @@ describe('layoutJson', () => {
   });
 
   // 6. Parse error → empty geometry
-  it('parse error returns empty geometry', () => {
+  it('parse error lays out the failure MESSAGE, not an empty canvas', () => {
     const ast = makeAst(null, [], true);
     const geo = layoutJson(ast, defaultTheme, measurer);
 
+    // `JsonDiagram#drawU`'s `root == null` branch draws one monospace text —
+    // so the page has real dimensions and a real text position. It used to
+    // return a 0x0 geometry and let the renderer invent a 640x80 red box.
     expect(geo.nodes).toHaveLength(0);
     expect(geo.edges).toHaveLength(0);
-    expect(geo.width).toBe(0);
-    expect(geo.height).toBe(0);
+    expect(geo.error).toBe('Your data does not sound like JSON data');
+    expect(geo.width).toBeGreaterThan(0);
+    expect(geo.height).toBeGreaterThan(0);
+    // Text origin is the canvas margin plus the cell margin, on both axes.
+    expect(geo.errorLayout?.x).toBe(15);
   });
 
   // 7. boolean true value → '☑ true'
@@ -172,14 +178,18 @@ describe('layoutJson', () => {
     expect(otherRow!.highlight).toBe(false);
   });
 
-  it('nested value row has valueType "nested" and empty value string', () => {
+  it('nested value row has valueType "nested" and a three-space value', () => {
     const ast = makeAst({ child: { x: 1 } });
     const geo = layoutJson(ast, defaultTheme, measurer);
 
     const nestedRow = geo.nodes[0]!.rows.find((r) => r.key === 'child');
     expect(nestedRow).toBeDefined();
     expect(nestedRow!.valueType).toBe('nested');
-    expect(nestedRow!.value).toBe('');
+    // `getShortString` falls through to `return "   ";` for an object or array
+    // (`TextBlockJson.java:194`). The cell is drawn, and it is MEASURED --
+    // `getWidthColB` folds it in like any other, so a nested row can be the
+    // widest in column B. This port used to return `''`, losing both.
+    expect(nestedRow!.value).toBe('   ');
   });
 
   it('string value row has valueType "string"', () => {
@@ -373,12 +383,17 @@ describe('layoutJson', () => {
     expect(row!.valueLines).toEqual(['a\\b']);
   });
 
-  it('\\r in string value produces a blank row (empty processed value)', () => {
+  it('\\r in string value breaks the line, like \\n', () => {
+    // Previously asserted an empty value, on the reading that `\r` was an
+    // unrecognised escape that vanished. `Display#getWithNewlines` breaks the
+    // line on `\n`, `\r` AND `\l` alike (`Display.java:257-270`) -- jar-
+    // verified on `json/nujuke-14-nabo073`, whose `"\\r"` entry occupies a
+    // two-line 32px row exactly as its `"\\n"` entry does.
     const ast = makeAst({ k: '\\r' });
     const geo = layoutJson(ast, defaultTheme, measurer);
     const row = geo.nodes[0]!.rows.find((r) => r.key === 'k');
     expect(row).toBeDefined();
-    expect(row!.value).toBe('');
+    expect(row!.valueLines).toEqual(['', '']);
   });
 
   it('\\t in string value produces a tab character', () => {

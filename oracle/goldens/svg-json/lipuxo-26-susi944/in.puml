@@ -1,0 +1,7 @@
+@startjson
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "isAlive": true
+}
+@endjson

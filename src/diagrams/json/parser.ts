@@ -9,6 +9,8 @@ import { parse as parseJsonc, type ParseError } from 'jsonc-parser';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import { matchScaleCommand } from '../../core/scale-command.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 import type { HighlightDirective, JsonDiagramAST } from './ast.js';
 
 // ---------------------------------------------------------------------------
@@ -77,6 +79,7 @@ function parseHighlightLine(raw: string): HighlightDirective {
  */
 export function parseJson(source: UmlSource): JsonDiagramAST {
   const highlights: HighlightDirective[] = [];
+  let scale: ScaleSpec | undefined;
   const bodyLines: string[] = [];
   let inStyleBlock = false;
   const annotations = createAnnotations();
@@ -132,6 +135,9 @@ export function parseJson(source: UmlSource): JsonDiagramAST {
     // `title ` no longer reaches here (consumed by the matcher above); the
     // remaining directives (skinparam, scale, hide…) are silently ignored.
     if (bodyLines.length === 0 && RE_DIRECTIVE.test(trimmed)) {
+      // …except `scale`, which upstream DOES act on: StyleExtractor.java:82-83
+      // captures the line and JsonDiagram.java:90-99 executes it.
+      scale = matchScaleCommand(trimmed) ?? scale;
       continue;
     }
 
@@ -155,5 +161,5 @@ export function parseJson(source: UmlSource): JsonDiagramAST {
   // entry point (already over threshold before mission G0b/T6 added the
   // annotation-matcher check; T8 removed the bespoke title field/branch but
   // did not reduce the function below threshold).
-  return { root, parseError, highlights, annotations, sprites };
+  return { root, parseError, highlights, annotations, sprites, ...(scale === undefined ? {} : { scale }) };
 }

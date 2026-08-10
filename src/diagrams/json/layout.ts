@@ -32,6 +32,33 @@ export type { JsonRowGeo } from './TextBlockJson.js';
  */
 const CANVAS_PAD = 10;
 
+/**
+ * The diagram's outer margin for THIS render — a theme's own `Margin` when it
+ * declares one, else {@link CANVAS_PAD}.
+ *
+ * `TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style for
+ * `root.document` and only falls back to `TitledDiagram#getDefaultMargins()`
+ * when that style has no `Margin`. 7 built-in themes set 5, so a themed
+ * diagram's whole canvas shifts — `json/vogeku-38-soxe333` under
+ * `!theme plain` places its first node at `(5, 14)` in the jar against this
+ * port's former `(10, 19)`.
+ *
+ * Reduced to left/top and the two axis totals: this family's layout offsets by
+ * the leading margin and sizes by both. The four sides are kept on the theme
+ * because upstream's value has four; only the uniform form occurs today.
+ */
+function marginsOf(theme: Theme): { left: number; top: number; x: number; y: number } {
+  const m = theme.diagramMargin;
+  if (m === undefined) return { left: CANVAS_PAD, top: CANVAS_PAD, x: CANVAS_PAD * 2, y: CANVAS_PAD * 2 };
+  return { left: m.left, top: m.top, x: m.left + m.right, y: m.top + m.bottom };
+}
+
+/** `TextBlockUtils.withMargin(result, 5, 2)` — the same per-cell margins
+ *  `TextBlockJson.ts` uses, applied to the parse-failure message too
+ *  (`JsonDiagram.java:120`). */
+const CELL_MARGIN_X = 5;
+const CELL_MARGIN_Y = 2;
+
 // ---------------------------------------------------------------------------
 // Public output types
 // ---------------------------------------------------------------------------
@@ -61,8 +88,30 @@ export interface JsonGeometry {
   edges: JsonEdgeGeo[];
   width: number;
   height: number;
-  /** When the JSON body could not be parsed, contains the error message to display. */
+  /**
+   * The `scale …` directive, carried from the AST unresolved. Resolved to a
+   * numeric factor by `renderJson` against `width`/`height` above, which are
+   * the UNSCALED document dims — the same order upstream uses
+   * (`TextBlockExporter#computeScaleFactor`).
+   */
+  scale?: ScaleSpec;
+  /**
+   * `TextBlockExporter#calculateFinalDimension()` — ink extent plus margins,
+   * WITHOUT the `ensureVisible` `+1` that `width`/`height` above carry. This
+   * is what {@link scale} is resolved against, because that is the value
+   * upstream passes to `computeScaleFactor`.
+   *
+   * Optional so hand-authored geometry literals in tests compile unchanged;
+   * `renderJson` falls back to `width`/`height` when absent.
+   */
+  finalDimension?: { width: number; height: number };
+  /** When the body could not be parsed, the message to display. */
   error?: string;
+  /**
+   * Where that message is drawn, and how wide it measures. Computed at layout
+   * time because only this stage holds a `StringMeasurer`.
+   */
+  errorLayout?: { x: number; y: number; textLength: number };
 }
 
 // ---------------------------------------------------------------------------
@@ -72,6 +121,7 @@ export interface JsonGeometry {
 
 import { walkTree, EMPTY_MAP, buildHighlightMap } from './json-layout-prep.js';
 import type { JsonContainer, FlatNode, BuildRowsOptions } from './json-layout-prep.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 /**
  * @see ~/git/plantuml/.../jsondiagram/JsonDiagram.java:78-88 (the constructor)
@@ -145,6 +195,61 @@ function mirrorToDiagramSpace(
 // Public layout function
 // ---------------------------------------------------------------------------
 
+/**
+ * `FontConfiguration.blackBlueTrue(UFontFactory.monospace(14))` — the fixed
+ * font `JsonDiagram#drawU` builds the failure message with
+ * (`JsonDiagram.java:114-121`). Deliberately NOT the theme's font or size:
+ * upstream hard-codes both on this path.
+ */
+const PARSE_FAILURE_FONT = { family: 'monospace', size: 14 };
+
+/**
+ * The page upstream draws when the body will not parse — `drawU`'s
+ * `root == null` branch (`JsonDiagram.java:113-121`):
+ *
+ *     Display.getWithNewlines(pragma, "Your data does not sound like " + type + " data")
+ *     …create(monospace 14, HorizontalAlignment.LEFT, skinParam)
+ *     TextBlockUtils.withMargin(result, 5, 2)
+ *     result.drawU(ug)
+ *
+ * ONE text and nothing else — no box, no border. This port drew its own
+ * 640x80 red box here, the same bespoke shape the class engine used before
+ * refusals were routed through the jar's own error page.
+ *
+ * Document size follows the family's normal chain (see `documentDimensions`),
+ * with one difference that matters: a TEXT's ink is its box exactly
+ * (`LimitFinder.java:217-225`), with none of the `-1` corner a rectangle
+ * contributes, and `TextBlockMarged` draws a `UEmpty` of the full margined
+ * size so the ink is `text + 2·5` wide by `text + 2·2` tall. Jar-verified on
+ * `json/nixaxa-46-muge983`: `trunc(230.388 + 10 + 20 + 1) = 261` by
+ * `trunc(14 + 4 + 20 + 1) = 39`, against its golden's `viewBox="0 0 261 39"`.
+ */
+function layoutParseFailure(
+  ast: JsonDiagramAST,
+  measurer: StringMeasurer,
+  margin: ReturnType<typeof marginsOf>,
+): JsonGeometry {
+  const message = `Your data does not sound like ${ast.diagramLabel ?? 'JSON'} data`;
+  const { width: textWidth, height: textHeight } = measurer.measure(message, PARSE_FAILURE_FONT);
+  const inkWidth = textWidth + 2 * CELL_MARGIN_X;
+  const inkHeight = textHeight + 2 * CELL_MARGIN_Y;
+  return {
+    nodes: [],
+    edges: [],
+    width: inkWidth + margin.x + ENSURE_VISIBLE_BUMP,
+    height: inkHeight + margin.y + ENSURE_VISIBLE_BUMP,
+    error: message,
+    errorLayout: {
+      x: margin.left + CELL_MARGIN_X,
+      y: margin.top + CELL_MARGIN_Y + textHeight - measurer.getDescent(PARSE_FAILURE_FONT, message),
+      // Upstream measures for `textLength` BEFORE `SvgGraphics#text` swaps
+      // spaces for NBSP under a monospace family, so this is the raw width.
+      textLength: textWidth,
+    },
+    ...(ast.scale === undefined ? {} : { scale: ast.scale }),
+  };
+}
+
 export function layoutJson(
   ast: JsonDiagramAST,
   theme: Theme,
@@ -152,15 +257,8 @@ export function layoutJson(
 ): JsonGeometry {
   // Handle parse failure: return an error geometry that the renderer will
   // display as PlantUML's canonical "Your data does not sound like JSON data".
-  if (ast.parseError) {
-    return {
-      nodes: [],
-      edges: [],
-      width: 0,
-      height: 0,
-      error: 'Your data does not sound like JSON data',
-    };
-  }
+  const margin = marginsOf(theme);
+  if (ast.parseError) return layoutParseFailure(ast, measurer, margin);
 
   const flatNodes: FlatNode[] = walkTree(normalizeRoot(ast.root));
 
@@ -281,8 +379,8 @@ export function layoutJson(
   // ast.annotations.title and is drawn by the shared applyChrome step in
   // src/index.ts, entirely outside this layout stage.
   for (const n of nodes) {
-    n.x += CANVAS_PAD;
-    n.y += CANVAS_PAD;
+    n.x += margin.left;
+    n.y += margin.top;
   }
 
   // Compute per-rank right boundary: the rightmost edge of any node at that rank.
@@ -309,22 +407,91 @@ export function layoutJson(
   // has already applied `Mirror#inv`, so only the x/y switch remains. See
   // `mirrorToDiagramSpace`.
   const edges: JsonEdgeGeo[] = dotResult.edges.map((e) => ({
-    points: e.points.map((p) => ({ x: p.y + CANVAS_PAD, y: p.x + CANVAS_PAD })),
+    points: e.points.map((p) => ({ x: p.y + margin.left, y: p.x + margin.top })),
     spline: true,
   }));
 
-  // Canvas size: rightmost/bottommost extent of all positioned nodes plus a
-  // right/bottom margin equal to CANVAS_PAD. Nodes already include the left/top
-  // CANVAS_PAD in their x/y, so we just need to ensure the right/bottom padding.
-  let width = 0;
-  let height = 0;
-  for (const n of nodes) {
-    const r = n.x + n.width + CANVAS_PAD;
-    const b = n.y + n.height + CANVAS_PAD;
-    if (r > width) width = r;
-    if (b > height) height = b;
-  }
-
-  const result: JsonGeometry = { nodes, edges, width, height };
+  const { width, height, finalWidth, finalHeight } = documentDimensions(nodes, margin);
+  const result: JsonGeometry = {
+    nodes, edges, width, height,
+    finalDimension: { width: finalWidth, height: finalHeight },
+    // Type-carrying only: resolved to a factor at RENDER time against these
+    // (unscaled) dims, mirroring `TextBlockExporter#computeScaleFactor(dim)`
+    // reading `calculateFinalDimension()`'s own pre-scale result.
+    ...(ast.scale === undefined ? {} : { scale: ast.scale }),
+  };
   return result;
+}
+
+/**
+ * `LimitFinder#drawRectangle` records a rectangle's ink as
+ * `addPoint(x - 1, y - 1)` … `addPoint(x + w - 1, y + h - 1)`
+ * (`LimitFinder.java:184-188`). The leftmost/topmost node sits at the graph
+ * origin, so the ink box's MIN corner is `(-1, -1)` — and `MinMax#getDimension`
+ * is `maxX - minX` (`MinMax.java:151-153`), so that corner adds exactly 1 to
+ * each axis. Oracle-verified on five fixtures spanning 46px to 1356px wide:
+ * the instrumented jar reports `getMinMax = (-1.0,-1.0)->(…)` every time.
+ */
+const INK_MIN_CORNER = -1;
+
+/**
+ * `SvgGraphics#ensureVisible` stores `maxX = (int)(x + 1)`
+ * (`SvgGraphics.java:129-134`), and `maxX`/`maxY` ARE the emitted
+ * `width`/`height`/`viewBox` (`:799-811`). The truncation is applied by
+ * `klimt/document-shell.ts#assembleDocumentShell`, which already `Math.trunc`s
+ * these values; only the `+1` belongs here.
+ */
+const ENSURE_VISIBLE_BUMP = 1;
+
+/**
+ * The document's own width/height.
+ *
+ * The jar does NOT size a json document from its drawn extent — it ink-walks
+ * the diagram, adds the margins, and truncates. Reproduced here in that order,
+ * because a flat "+2 versus the node extent" is what this looks like from the
+ * outside and it encodes nothing:
+ *
+ *   `JsonDiagram#calculateDimension` (`JsonDiagram.java:130-137`)
+ *     → `TextBlockUtils.getMinMax(this, sb, true)` → {@link INK_MIN_CORNER}
+ *   `TextBlockExporter#calculateFinalDimension` (`:199-203`)
+ *     → `+ margin.left + margin.right`, `TitledDiagram#getDefaultMargins()`
+ *       = `same(10)` (`TitledDiagram.java:275-277`)
+ *   `SvgGraphics#ensureVisible` → {@link ENSURE_VISIBLE_BUMP}
+ *
+ * Node `x`/`y` already carry the left/top {@link CANVAS_PAD}, so the raw ink
+ * extent is recovered by subtracting it back off before the margins are added
+ * — the same quantity the jar's ink walk measures.
+ *
+ * Only the node extents are folded in, matching the previous behaviour: on
+ * every measured fixture the rightmost/bottommost ink IS a node edge, because
+ * json edges run BETWEEN nodes. An edge or spot that overhung the outermost
+ * node would need adding here, and none does today.
+ */
+function documentDimensions(
+  nodes: readonly JsonNodeGeo[],
+  margin: { left: number; top: number; x: number; y: number },
+): { width: number; height: number; finalWidth: number; finalHeight: number } {
+  let inkMaxX = 0;
+  let inkMaxY = 0;
+  for (const n of nodes) {
+    const r = n.x + n.width - margin.left;
+    const b = n.y + n.height - margin.top;
+    if (r > inkMaxX) inkMaxX = r;
+    if (b > inkMaxY) inkMaxY = b;
+  }
+  // `TextBlockExporter#calculateFinalDimension` -- the ink extent plus both
+  // margins, and NOTHING else. This is the dimension `computeScaleFactor(dim)`
+  // divides by (`TextBlockExporter.java:165,199-202`).
+  const finalWidth = inkMaxX - INK_MIN_CORNER + margin.x;
+  const finalHeight = inkMaxY - INK_MIN_CORNER + margin.y;
+  return {
+    // The emitted width/height/viewBox are `maxX`/`maxY`, which SvgGraphics
+    // seeds with `ensureVisible(minDim)` -- i.e. the SAME final dimension, run
+    // through `(int)(x + 1)`. Two distinct notions upstream, and conflating
+    // them made `scale max W*H` divide by a number one larger than the jar's.
+    width: finalWidth + ENSURE_VISIBLE_BUMP,
+    height: finalHeight + ENSURE_VISIBLE_BUMP,
+    finalWidth,
+    finalHeight,
+  };
 }

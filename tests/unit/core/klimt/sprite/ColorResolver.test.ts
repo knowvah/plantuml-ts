@@ -54,7 +54,7 @@ describe('ColorResolver#getTrueColor', () => {
     expect(resolver.getTrueColor('#FF0000')).toEqual(RED);
   });
 
-  it('resolves a registered named colour unchanged when no forcedColor is set', () => {
+  it('resolves a registered named color unchanged when no forcedColor is set', () => {
     const resolver = new ColorResolver(undefined, undefined, grayLevelRange(0, 255));
     expect(resolver.getTrueColor('Red')).toEqual(RED);
   });

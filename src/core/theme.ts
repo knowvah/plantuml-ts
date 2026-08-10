@@ -24,6 +24,34 @@ export interface Theme {
    *  so explicit 14 != unset (CIRCLED_CHARACTER 17->14: radius 11->10,
    *  jar-verified R2c pm14/). Unlike the ambient {@link fontSize}. */
   defaultFontSize?: number;
+  /**
+   * The diagram's own outer margin, when a theme declares one.
+   *
+   * `TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style
+   * for `root.document` and falls back to `TitledDiagram#getDefaultMargins()`
+   * — `same(10)` — only when that style carries no `Margin`. 28 built-in
+   * themes declare one; 21 restate the default 10 and 7 set 5.
+   *
+   * Four-sided because upstream's value is (`ClockwiseTopRightBottomLeft`,
+   * CSS-shaped 1/2/3/4 numbers); only the uniform form occurs at this scope
+   * today. Absent means "use the engine's default".
+   */
+  diagramMargin?: { top: number; right: number; bottom: number; left: number };
+  /**
+   * The theme's own `<style> document { … }` declarations, as
+   * `selector -> { property: value }` with lowercase keys — the same shape
+   * `parseStyleBlock` produces.
+   *
+   * `document` and `document.<element>` are genuine members of every chrome
+   * element's `{root, document, <element>}` signature, and
+   * `StyleStorage#computeMergedStyle` matches by set containment, so a theme's
+   * `document { title { FontSize 22 } }` reaches the title exactly as a user
+   * `<style>` block would. Everything else in a theme is compiled to the
+   * scalar fields above; these have no scalar home and were simply lost, which
+   * is why `!theme amiga` drew a 14px title where the jar draws 22px.
+   */
+  styleOverrides?: Record<string, Record<string, string>>;
+
   /** `skinparam linetype ortho|polyline` — svek routes edge labels through
    *  xlabel and emits splines=ortho under ortho (SvekEdge.java:434-441,
    *  DotStringFactory.java:160-168). Absent = default splines. */
@@ -81,6 +109,21 @@ export interface Theme {
    *  untraced this iteration, named remainder. */
   monochrome?: 'true' | 'reverse';
   strictUml?: boolean;
+  /**
+   * `skinparam handwritten true` — draw every primitive through the sketchy
+   * renderer (`core/klimt/drawing/hand/`).
+   *
+   * `JsonDiagram#drawU` and its siblings open with
+   * `if (handwritten) ug = new UGraphicHandwritten(ug)`, a decorator that
+   * turns rectangles and ellipses into jiggled polygons and lines and paths
+   * into jiggled polylines. Deterministic: the jitter comes from a single
+   * `new Random(424242L)` per diagram.
+   *
+   * Honoured by the json family so far; other engines need their draw order
+   * confirmed against the jar before it can be switched on there, because the
+   * random stream is shared and sequential across every shape.
+   */
+  handwritten?: boolean;
   /**
    * mission skin-file-loading Batch 1 (D3): `skin <name>` /
    * `<style> root { Shadowing N } }` / `<style> element { Shadowing N } }`
@@ -249,16 +292,24 @@ export const defaultTheme: Theme = {
         // keyText is intentionally absent so the renderer's fallback chain
         // reaches nodeFontColor (from jsonDiagram.node.FontColor style blocks).
         // Themes that want an explicit key color set it directly (e.g. darkTheme).
-        stringValue:         '#3A6E96',
-        numberValue:         '#A67F52',
-        booleanValue:        '#BE5D47',
-        nullValue:           '#767676',
+        // All four default to the skin's black (`plantuml.skin:446`), as
+        // upstream draws every value cell in the node's own FontColor. The
+        // per-type palette that used to be here was retired 2026-08-09 — see
+        // DIVERGENCES.md, "Value text — per-type colors".
+        stringValue:         '#000000',
+        numberValue:         '#000000',
+        booleanValue:        '#000000',
+        nullValue:           '#000000',
         // plantuml.skin sets jsonDiagram.node.BackGroundColor #F1F1F1 as the default.
         // Named themes override this via their compiled graph.json entry.
         background:          '#F1F1F1',
-        border:              '#181818',
+        // `skin/plantuml.skin`'s `yamlDiagram,jsonDiagram { LineColor black }`
+        // (:446) — this family does NOT take the global `#181818` default.
+        // Every cached golden draws its node borders, separators and edges in
+        // `#000`; these two were `#181818`, unsourced.
+        border:              '#000000',
         highlightBackground: '#CCFF02',
-        arrowColor:          '#181818',
+        arrowColor:          '#000000',
       },
     },
   },
@@ -329,6 +380,9 @@ export const monochromeTheme: Theme = {
 export type ThemeOverride = {
   fontFamily?: string;
   fontSize?: number;
+  diagramMargin?: { top: number; right: number; bottom: number; left: number };
+  /** See {@link Theme.styleOverrides}. */
+  styleOverrides?: Record<string, Record<string, string>>;
   /** See `Theme.defaultFontSize`'s own doc comment (R2j). */
   defaultFontSize?: number;
   linetype?: 'ortho' | 'polyline';
@@ -337,6 +391,21 @@ export type ThemeOverride = {
   actorStyle?: ActorStyle;
   minimumWidth?: number;
   strictUml?: boolean;
+  /**
+   * `skinparam handwritten true` — draw every primitive through the sketchy
+   * renderer (`core/klimt/drawing/hand/`).
+   *
+   * `JsonDiagram#drawU` and its siblings open with
+   * `if (handwritten) ug = new UGraphicHandwritten(ug)`, a decorator that
+   * turns rectangles and ellipses into jiggled polygons and lines and paths
+   * into jiggled polylines. Deterministic: the jitter comes from a single
+   * `new Random(424242L)` per diagram.
+   *
+   * Honoured by the json family so far; other engines need their draw order
+   * confirmed against the jar before it can be switched on there, because the
+   * random stream is shared and sequential across every shape.
+   */
+  handwritten?: boolean;
   monochrome?: 'true' | 'reverse';
   /** See `Theme.shadowing`'s own doc comment. */
   shadowing?: number;
@@ -405,6 +474,11 @@ const OPTIONAL_SCALAR_KEYS = [
   'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
   'shadowing', 'packageStyle', 'nodeSep', 'rankSep', 'wrapWidth',
   'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize',
+  // `diagramMargin` is the one non-scalar here. It rides this list because the
+  // merge is a whole-value replacement, which is exactly right for a margin:
+  // a theme that sets one replaces all four sides, it does not blend with the
+  // default. Omitting it silently dropped every theme's margin.
+  'diagramMargin', 'handwritten', 'styleOverrides',
 ] as const;
 
 /** Copy the top-level optional scalars, preferring `partial` then `base`. */

@@ -325,8 +325,8 @@ export function buildNoteBody(display: string, font: FontConfiguration, opts?: N
   );
 }
 
-/** `buildDesc` never reads a colour (draw-time only) -- documents intent,
- *  not a real colour (`leaf-sizing-entity.ts#SIZING_PLACEHOLDER_COLOR`). */
+/** `buildDesc` never reads a color (draw-time only) -- documents intent,
+ *  not a real color (`leaf-sizing-entity.ts#SIZING_PLACEHOLDER_COLOR`). */
 const NOTE_PLACEHOLDER_COLOR = '#000000';
 
 /**

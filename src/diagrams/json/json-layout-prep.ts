@@ -31,8 +31,17 @@ export function getDisplayValue(v: unknown): DisplayValue {
   if (typeof v === 'string') {
     return { display: v, valueType: 'string' };
   }
-  // object or array — child node handles it
-  return { display: '', valueType: 'nested' };
+  // Object or array — the child node carries the content, but the cell is NOT
+  // empty: `getShortString` falls through to `return "   ";`
+  // (`TextBlockJson.java:194`), three literal spaces. They are drawn, and they
+  // are measured — `getWidthColB` folds them in like any other cell, so a
+  // nested row can be the widest in column B. This port returned `''`, which
+  // both skipped the `<text>` element the jar emits and under-measured the
+  // column by that string's width.
+  //
+  // On emission those spaces become NBSP: `core/svg-shapes.ts#text` carries
+  // upstream's whitespace-only substitution rule.
+  return { display: '   ', valueType: 'nested' };
 }
 
 // ---------------------------------------------------------------------------
@@ -204,12 +213,68 @@ export function buildHighlightMap(
  * that a literal "\\n" in source becomes "\" + "n" (not a newline).
  */
 export function processStringDisplay(s: string): string {
-  return s
-    .replace(/\\\\/g, '\x00') // protect \\ before other replacements
-    .replace(/\\n/g, '\n')    // \n → newline (row split)
-    .replace(/\\r/g, '')      // \r → empty (blank row)
-    .replace(/\\t/g, '\t')    // \t → tab (renders blank)
-    .replace(/\x00/g, '\\'); // restore protected \\ as single backslash
+  return splitDisplayLines(s).join('\n');
+}
+
+/**
+ * @see .../klimt/creole/Display.java#getWithNewlines3
+ *
+ * Splits a display string into its lines. **The split is on the two-character
+ * ESCAPE `\` + `n`, never on the newline CHARACTER** — a real U+000A falls
+ * through to the `else` branch upstream and is appended to the current line
+ * verbatim.
+ *
+ * That distinction is the whole mechanism, and this port previously lost it by
+ * rewriting the escape to U+000A and then splitting on U+000A, which
+ * conflated the two. Consequences, both measured against the jar:
+ *
+ *  - a YAML block scalar's real newlines stay INSIDE one line, so the jar
+ *    emits ONE `<text>` whose content contains literal U+000A characters
+ *    (`yaml/ketunu-15-poli031`); this port emitted one per line;
+ *  - a JSON string ending in a real CR/LF stays one line, and `trin` then
+ *    strips the trailing control characters at emission — so the jar draws one
+ *    text where this port drew a second, empty one
+ *    (`json/gagebi-92-vere937`, `devime-19-toze896`).
+ *
+ * Ported as upstream's single pass rather than a chain of replaces.
+ *
+ * This doc previously claimed `\r` "vanishes" as an unrecognised escape. That
+ * was wrong: `\r` and `\l` are line BREAKS alongside `\n`
+ * (`Display.java:257-270`), differing only in also setting the natural
+ * horizontal alignment — which this port does not yet carry, and no fixture
+ * currently measures.
+ *
+ * The unrecognised-escape branch is deliberately left as-is (consume both,
+ * append neither): upstream has two variants of this method and no cached
+ * fixture exercises the difference, so changing it would be unverified.
+ */
+export function splitDisplayLines(s: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charAt(i);
+    if (c === '\\' && i < s.length - 1) {
+      const c2 = s.charAt(i + 1);
+      i++;
+      if (c2 === 'n' || c2 === 'r' || c2 === 'l') {
+        // `Display#getWithNewlines` breaks the line on ALL THREE of \n, \r
+        // and \l (`Display.java:257-270`); \r and \l additionally set the
+        // natural horizontal alignment to RIGHT/LEFT, which this port does not
+        // yet carry. Jar-verified on `json/nujuke-14-nabo073`, whose "\\r"
+        // entry occupies a 32px two-line row exactly as its "\\n" entry does.
+        result.push(current);
+        current = '';
+      } else if (c2 === 't') {
+        current += '\t';
+      } else if (c2 === '\\') {
+        current += '\\';
+      }
+    } else {
+      current += c;
+    }
+  }
+  result.push(current);
+  return result;
 }
 
 // ---------------------------------------------------------------------------

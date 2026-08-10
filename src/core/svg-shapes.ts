@@ -8,6 +8,7 @@ import {} from './paint.js';
 import type {} from './paint.js';
 import { attrs, escapeXmlText, resolvePaint, resolvePaintAttrs, attrsFromRecord, strokeDecorationOf, ROOT_FONT_FAMILY, PAINT_NONE, type BoxStyle, type LineStyle, type TextStyle, type SvgAttrsPaint } from './svg.js';
 import { DEFAULT_SVG_DECIMALS, fmt, formatOpacity, shortenColor } from './svg-format.js';
+import { roundedCornerAttrs } from './svg-rect-corners.js';
 
 /**
  * `<rect>` element.
@@ -32,8 +33,7 @@ export function rect(
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
-    ['rx', style.rx],
-    ['ry', style.ry],
+    ...roundedCornerAttrs(style.rx, style.ry),
     ['opacity', opacity],
     ['filter', style.filter],
   ] as const);
@@ -130,12 +130,122 @@ function textLengthOf(content: string, textLength: number | undefined): number |
   return content.length > 1 ? textLength : undefined;
 }
 
+/**
+ * A whitespace-ONLY label has every space swapped for NBSP (U+00A0):
+ *
+ * ```java
+ * if (text.matches("^\\s*$"))
+ *     text = text.replace(' ', (char) 160);
+ * ```
+ * @see .../klimt/drawing/svg/DriverTextSvg.java:115-116
+ *
+ * The guard is what makes this narrow, and it is easy to get wrong in the
+ * generous direction: ordinary labels keep their regular spaces (verified
+ * across the cached class corpus — `'int size'`, `'some page header'`), so a
+ * blanket substitution would corrupt every multi-word label in the port.
+ *
+ * It fires in practice for json's nested-value cell, whose display string is
+ * three spaces (`TextBlockJson.java:194`); the jar writes `\xa0\xa0\xa0`.
+ *
+ * `core/klimt/drawing/svg/driver-text-svg.ts#leadingSpaceAdjust` carries the
+ * same rule for the klimt-drawn engines. This is the copy for every engine
+ * that emits through these shared shape functions.
+ */
+const NBSP = ' ';
+const WHITESPACE_ONLY_RE = new RegExp('^\\s*$');
+
+function nbspIfBlank(content: string): string {
+  return WHITESPACE_ONLY_RE.test(content) ? content.split(' ').join(NBSP) : content;
+}
+
+/**
+ * `StringUtils.trin(String)` — trims only characters whose code point is
+ * <= U+0020, from both ends. Deliberately NOT JS's `.trim()`, which also
+ * strips U+00A0 per the ECMAScript WhiteSpace production: that would swallow
+ * the very NBSPs {@link nbspIfBlank} just inserted (0xA0 > 0x20).
+ *
+ * `core/klimt/drawing/svg/driver-text-svg.ts#trin` is the same port for the
+ * klimt-drawn engines; this is the copy for the shared shape emitters.
+ * @see .../klimt/drawing/svg/DriverTextSvg.java:125
+ */
+function trin(text: string): string {
+  let start = 0;
+  let end = text.length - 1;
+  while (start <= end && text.charCodeAt(start) <= 0x20) start++;
+  while (end >= start && text.charCodeAt(end) <= 0x20) end--;
+  return text.slice(start, end + 1);
+}
+
+/**
+ * The exact string the jar puts inside a `<text>`, given the raw label.
+ *
+ * ORDER IS LOAD-BEARING and matches `DriverTextSvg#draw` (`:114-125`):
+ * whitespace-only → NBSP FIRST, then `trin`. Reversed, a whitespace-only label
+ * would be trimmed to nothing before it could become NBSP, and json's
+ * three-space nested cell (`TextBlockJson.java:194`) would vanish instead of
+ * rendering as `\xa0\xa0\xa0`.
+ *
+ * Exported because the value that reaches `textLength` must be measured from
+ * THIS form, not the raw one — upstream measures after both steps
+ * (`dim = calculateDimension(font, trimmed)`, `:126`). Any caller computing a
+ * width for a label it will emit through {@link text} has to agree with it.
+ *
+ * Not ported: `leadingSpaceAdjust`'s conversion of leading spaces into an `x`
+ * advance (`:118-124`). It needs a measurer, which these emitters do not have.
+ * Verified unexercised by the current corpus — across 3,548 jar `<text>`
+ * elements in the json/yaml goldens, ZERO carry leading or trailing
+ * whitespace, so nothing in it survives to be positioned.
+ */
+export function emittedTextForm(content: string, fontFamily?: string): string {
+  return nbspIfMonospace(trin(nbspIfBlank(content)), fontFamily);
+}
+
+/**
+ * The SECOND, independent NBSP rule — and the one whose absence here made a
+ * monospace label look like the whitespace-only rule was mis-scoped:
+ *
+ * ```java
+ * if ("monospaced".equalsIgnoreCase(fontFamily))
+ *     fontFamily = "monospace";
+ * …
+ * if (fontFamily.equalsIgnoreCase("monospace") || fontFamily.equalsIgnoreCase("courier"))
+ *     text = text.replace(' ', (char) 160);
+ * ```
+ * @see .../klimt/drawing/svg/SvgGraphics.java:720-728
+ *
+ * EVERY space becomes NBSP under a monospace or courier family, whitespace-only
+ * or not — which is why the jar writes
+ * `Your\xa0data\xa0does\xa0not\xa0sound\xa0like\xa0JSON\xa0data` for a message
+ * that {@link nbspIfBlank} would leave completely alone.
+ *
+ * Three details, all load-bearing:
+ *  - The comparison is `equalsIgnoreCase` against the WHOLE family, not a
+ *    substring. A CSS stack like `"Courier, monospace"` does NOT qualify.
+ *  - `monospaced` (PlantUML's own logical font name) is renamed to `monospace`
+ *    BEFORE the test, so it qualifies through the rename.
+ *  - Upstream applies this in `SvgGraphics#text`, AFTER `DriverTextSvg` has
+ *    already measured and passed `textLength` down. So it is emission-only:
+ *    the width still reflects the SPACE-bearing string. Hence its position
+ *    here, outside anything a caller measures.
+ *
+ * `core/klimt/drawing/svg/svg-graphics-elements.ts#applyTextFontFamily` is the
+ * same rule for the klimt-drawn engines, which already had it; this is the
+ * copy for every engine emitting through these shared shape functions.
+ */
+function nbspIfMonospace(content: string, fontFamily: string | undefined): string {
+  if (fontFamily === undefined) return content;
+  const lower = (fontFamily.toLowerCase() === 'monospaced' ? 'monospace' : fontFamily).toLowerCase();
+  if (lower !== 'monospace' && lower !== 'courier') return content;
+  return content.split(' ').join(NBSP);
+}
+
 export function text(
   x: number,
   y: number,
-  content: string,
+  rawContent: string,
   style: TextStyle = {},
 ): string {
+  const content = emittedTextForm(rawContent, style.fontFamily);
   const fillR = resolvePaint(style.fill);
   const a = attrs([
     ['x', x],
@@ -343,7 +453,13 @@ export function polygon(
   points: ReadonlyArray<{ x: number; y: number }>,
   style: BoxStyle = {},
 ): string {
-  const pts = points.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(' ');
+  // Flat comma-separated, which is how the jar writes it —
+  // `svg-graphics-elements.ts:200` (`points.map(format).join(',')`), mirroring
+  // `SvgGraphics`. Every cached golden agrees: `points="54,98,64,88,1006,88,…"`,
+  // never a space between pairs. This emitter used to join pairs with a space;
+  // `normalize.ts#normalizePoints` normalizes the NUMBERS inside the attribute
+  // but not the separators, so the two forms do not compare equal.
+  const pts = points.flatMap((p) => [fmt(p.x), fmt(p.y)]).join(',');
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
@@ -353,6 +469,12 @@ export function polygon(
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
+    // Unconditional on a polygon, exactly as `SvgGraphics.java:658` writes it
+    // (`styleMe(elt, "stroke-linejoin:miter;stroke-miterlimit:10;")`), which
+    // `core/klimt/.../svg-graphics-elements.ts:202` already mirrors for the
+    // klimt path. 4018 of the 4037 polygons in the cached corpus carry it.
+    ['stroke-linejoin', 'miter'],
+    ['stroke-miterlimit', 10],
   ] as const);
   return `${fillR.def}${strokeR.def}<polygon${a}/>`;
 }
@@ -365,7 +487,13 @@ export function polyline(
   points: ReadonlyArray<{ x: number; y: number }>,
   style: BoxStyle = {},
 ): string {
-  const pts = points.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(' ');
+  // Flat comma-separated, which is how the jar writes it —
+  // `svg-graphics-elements.ts:200` (`points.map(format).join(',')`), mirroring
+  // `SvgGraphics`. Every cached golden agrees: `points="54,98,64,88,1006,88,…"`,
+  // never a space between pairs. This emitter used to join pairs with a space;
+  // `normalize.ts#normalizePoints` normalizes the NUMBERS inside the attribute
+  // but not the separators, so the two forms do not compare equal.
+  const pts = points.flatMap((p) => [fmt(p.x), fmt(p.y)]).join(',');
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);

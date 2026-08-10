@@ -46,7 +46,7 @@ describe('CommandCreateElementMultilines TYPE0 — open-quote form (G1)', () => 
     expect(uc5?.symbol).toBe('usecase');
   });
 
-  it('reads the colour from its pre-`as` slot (ColorParser.exp1)', () => {
+  it('reads the color from its pre-`as` slot (ColorParser.exp1)', () => {
     const ast = parseRaw('usecase UC5 #red as "My usecase5\nand finished"');
     expect(nodeById(ast, 'UC5')?.color).toBe('#red');
   });
@@ -70,7 +70,7 @@ describe('CommandCreateElementMultilines TYPE0 — open-quote form (G1)', () => 
     expect(nodeById(ast, 'foo2')?.display).toBe('aaaa\\nbbbb\ncccc');
   });
 
-  it('captures a stereotype run ahead of the colour', () => {
+  it('captures a stereotype run ahead of the color', () => {
     const ast = parseRaw('usecase UC1 <<primary>> #red as "one\ntwo"');
     const uc1 = nodeById(ast, 'UC1');
     expect(uc1?.stereotype).toEqual(['primary']);

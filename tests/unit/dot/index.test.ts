@@ -1,7 +1,7 @@
 /**
  * `dotPlugin` — the assembled `@startdot` pipeline.
  *
- * This file used to assert that `skinparam` and `<style>` blocks recoloured
+ * This file used to assert that `skinparam` and `<style>` blocks recolored
  * the output. They never did upstream, and now they do not here either: the
  * jar renders `@startdot` by handing the DOT to graphviz and writing its bytes
  * out (`directdot/PSystemDot`), so a PlantUML skin has nothing to act on.

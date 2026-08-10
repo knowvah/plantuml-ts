@@ -15,11 +15,12 @@
  * yaml and hcl have no layout of their own.
  */
 import type { StringMeasurer } from '../../core/measurer.js';
+import { emittedTextForm } from '../../core/svg.js';
+import { splitStripe } from './Fission.js';
 import {
   getDisplayValue,
   containerEntries,
-  processStringDisplay,
-  wordWrapLine,
+  splitDisplayLines,
 } from './json-layout-prep.js';
 import type { FlatNode, BuildRowsOptions } from './json-layout-prep.js';
 
@@ -81,6 +82,74 @@ export interface JsonRowGeo {
   /** y offset within the node (top of row) */
   y: number;
   height: number;
+  /**
+   * Measured width of the key cell's text, WITHOUT the `withMargin(_, 5, 2)`
+   * horizontal margin — i.e. the text's own advance width.
+   *
+   * The renderer needs this for the jar's `textLength` attribute, and only the
+   * layout stage holds a `StringMeasurer`. Carrying it here rather than
+   * re-measuring downstream is what keeps the sizer and the renderer measuring
+   * the SAME thing; `planning/sizer-renderer-parity.md` catalogues what happens
+   * when they drift.
+   *
+   * Zero for an array row, which draws no key (see {@link JsonRowGeo.arrayEntry}).
+   */
+  keyWidth: number;
+  /** Measured width of each value line, index-aligned with `valueLines`. */
+  valueLineWidths: readonly number[];
+  /**
+   * The width the SVG driver measures, which is NOT always the one above.
+   *
+   * Upstream measures twice, on two different strings. Layout calls
+   * `TextBlock#calculateDimension` on the raw text; the driver first swaps
+   * every space for NBSP in a whitespace-ONLY label and only then measures
+   * (`DriverTextSvg.java:115-116` precedes its `calculateDimension` at :126).
+   * Under `PLANTUML_DETERMINISTIC_TEXT` an ASCII space is 0 wide and an NBSP
+   * is 0.275·size, so for json's three-space nested cell the two answers are
+   * 0 and 11.55 — the jar's node width reflects the former, its `textLength`
+   * attribute the latter.
+   *
+   * Index-aligned with `valueLines`; `keyTextLength` is the same for the key.
+   */
+  valueTextLengths: readonly number[];
+  keyTextLength: number;
+  /** The atoms the KEY is drawn as. `getTextBlock` applies the style's
+   *  `wrapWidth()` to column A exactly as it does to column B
+   *  (`TextBlockJson.java:341-349` builds both the same way), so a multi-word
+   *  key splits under wrap too. */
+  keyAtoms: readonly CellAtom[];
+  /**
+   * The atoms each value line is DRAWN as — one `<text>` element per entry.
+   *
+   * With wrap active upstream splits a line into words and inter-word spaces
+   * and draws each separately (`Fission.ts`); with wrap off a line stays one
+   * atom, so this is `[[wholeLine]]` and the renderer is unchanged. `dx` is
+   * the offset from the line's own start x, accumulated from the SIZING
+   * widths exactly as consecutive runs advance.
+   */
+  valueAtoms: readonly (readonly CellAtom[])[];
+  /**
+   * Baseline y of the key text, relative to the NODE's top edge.
+   *
+   * Upstream never positions text by a midpoint: `withMargin(result, 5, 2)`
+   * (`TextBlockJson.java:348`) puts the cell's text block at `rowTop + 2`, and
+   * the block's own baseline sits `height - descent` below its top. Verified
+   * against the jar: `dometa-86-jepe218` draws its first row's key at
+   * `y="31.889"` for a node at `y="19"` — an offset of 12.889 = 2 + 14 −
+   * 14/4.5, the last term being `StringBounder#getDescent`.
+   */
+  keyBaselineY: number;
+  /** Baseline y of each value line, relative to the node's top edge. */
+  valueBaselineYs: readonly number[];
+}
+
+/** One drawn text run — upstream's `Neutron`, once it has become an `Atom`. */
+export interface CellAtom {
+  text: string;
+  /** Offset from the line's start x. */
+  dx: number;
+  /** Width of the EMITTED form, for `textLength` — see `valueTextLengths`. */
+  textLength: number;
 }
 
 export interface MeasuredNode {
@@ -179,18 +248,142 @@ function cellLines(
   measurer: StringMeasurer,
   font: FontSpec,
   maximumWidth: number | undefined,
-): { processed: string; valueLines: string[]; valueType: JsonRowGeo['valueType'] } {
+): { processed: string; valueLines: string[]; atomLines: string[][]; valueType: JsonRowGeo['valueType'] } {
   const { display, valueType } = getDisplayValue(v);
-  const processed = valueType === 'string' ? processStringDisplay(display) : display;
-  let valueLines: string[] = valueType === 'string' ? processed.split('\n') : [display];
-  if (valueType === 'string' && maximumWidth !== undefined) {
-    const wrapped: string[] = [];
-    for (const segment of valueLines) {
-      for (const wline of wordWrapLine(segment, maximumWidth, measurer, font)) wrapped.push(wline);
+  // Split via upstream's own single pass, NOT by rewriting the escape to a
+  // newline and splitting on that — a real U+000A in the value must stay
+  // inside its line. See `json-layout-prep.ts#splitDisplayLines`.
+  const rawLines: string[] = valueType === 'string' ? splitDisplayLines(display) : [display];
+  const processed = rawLines.join('\n');
+  // Each raw line is a stripe, and WRAPPING breaks a stripe into lines of
+  // ATOMS (`Fission.ts`) — one `<text>` per atom, not per line.
+  //
+  // Applied to EVERY value type, not just strings. Upstream makes no such
+  // distinction: `getShortString` hands `getTextBlock` a display string and
+  // the style's `wrapWidth()` applies to it whatever the JSON type was
+  // (`TextBlockJson.java:341-349`). A boolean's display is `"☑ true"`, which
+  // contains a space and therefore splits — the jar draws `'☑'`, NBSP,
+  // `'true'` as three elements (`json/vogeku-38-soxe333`). Gating this on
+  // `valueType === 'string'` cost exactly that.
+  //
+  // Harmless for the others: a number, a null (`␀`) and a nested cell
+  // (three spaces) each survive as one atom, and `splitStripe` with a 0
+  // width returns its input untouched, which is the no-`MaximumWidth` case.
+  const wrap = maximumWidth ?? 0;
+  const atomLines: string[][] = [];
+  for (const segment of rawLines) {
+    for (const atoms of splitStripe(segment, wrap, (t) => measurer.measure(t, font).width)) {
+      atomLines.push(atoms);
     }
-    valueLines = wrapped;
   }
-  return { processed, valueLines, valueType };
+  // `StripeSimple#getAtoms` (`StripeSimple.java:124-129`): a stripe that
+  // collected NO atoms is given a single-space one --
+  //
+  //     if (atoms.size() == 0)
+  //         atoms.add(AtomTextUtils.createLegacy(" ", fontConfiguration));
+  //
+  // so an empty cell is not an absent cell: it draws a space, which the SVG
+  // driver's whitespace-only rule then writes as NBSP. Each drawn line is one
+  // stripe, hence the per-line map. Jar-verified -- `{"a": ""}` emits
+  // `<text …> </text>` for the value, and `{}` (which
+  // `JsonDiagram.java:78-88` rewrites to an array holding one empty string)
+  // emits exactly that one text inside a 10x18 box.
+  //
+  // The space measures 0 wide under deterministic text metrics, so this adds
+  // an element without moving any geometry -- which is why the jar's box for
+  // `{}` is 10 wide (0 + 2x the 5pt cell margin), a number no MIN_WIDTH
+  // produces. CLAUDE.md cites that box as a case where hours went into fitting
+  // a constant instead of reading this branch.
+  const blanked = atomLines.map((a) => (a.length === 0 ? [' '] : a));
+  return { processed, valueLines: blanked.map((a) => a.join('')), atomLines: blanked, valueType };
+}
+
+/**
+ * The per-cell TEXT metrics the renderer cannot recover on its own: measured
+ * advance widths (for `textLength`) and absolute baselines.
+ *
+ * @see JsonRowGeo.keyBaselineY for the baseline derivation and its jar evidence.
+ */
+function cellMetrics(
+  cell: {
+    key: string;
+    valueLines: readonly string[];
+    atomLines: readonly (readonly string[])[];
+    rowY: number;
+    arrayEntry: boolean;
+    wrap: number;
+  },
+  textHeight: number,
+  measurer: StringMeasurer,
+  keyFont: FontSpec,
+  valFont: FontSpec,
+): Pick<
+  JsonRowGeo,
+  'keyWidth' | 'valueLineWidths' | 'keyBaselineY' | 'valueBaselineYs' | 'keyTextLength' | 'valueTextLengths' | 'valueAtoms' | 'keyAtoms'
+> {
+  // `withMargin(_, 5, 2)` — the text block's top edge sits CELL_MARGIN_Y below
+  // the row's, and its baseline `descent` above its own bottom.
+  const descent = measurer.getDescent(valFont, cell.key);
+  const firstBaseline = cell.rowY + CELL_MARGIN_Y + textHeight - descent;
+  // See `JsonRowGeo.valueTextLengths` for why the emitted form is measured
+  // separately from the raw one.
+  const emitted = (t: string, f: FontSpec) => measurer.measure(emittedTextForm(t), f).width;
+  // Atoms advance by their SIZING width, exactly as consecutive text runs do.
+  const atomsOf = (atoms: readonly string[]): CellAtom[] => {
+    let dx = 0;
+    return atoms.map((text) => {
+      const atom = { text, dx, textLength: emitted(text, valFont) };
+      dx += measurer.measure(text, valFont).width;
+      return atom;
+    });
+  };
+  return {
+    keyWidth: cell.arrayEntry ? 0 : measurer.measure(cell.key, keyFont).width,
+    valueLineWidths: cell.valueLines.map((l) => measurer.measure(l, valFont).width),
+    keyTextLength: cell.arrayEntry ? 0 : emitted(cell.key, keyFont),
+    valueTextLengths: cell.valueLines.map((l) => emitted(l, valFont)),
+    valueAtoms: cell.atomLines.map(atomsOf),
+    keyAtoms: cell.arrayEntry
+      ? []
+      : atomsOf(splitStripe(cell.key, cell.wrap, (t) => measurer.measure(t, keyFont).width)[0] ?? [cell.key]),
+    keyBaselineY: firstBaseline,
+    valueBaselineYs: cell.valueLines.map((_, i) => firstBaseline + textHeight * i),
+  };
+}
+
+/** The measurer plus the two resolved cell fonts — one bundle so {@link buildRow}
+ *  stays inside this repo's 5-parameter cap. */
+interface RowFonts {
+  measurer: StringMeasurer;
+  keyFont: FontSpec;
+  valFont: FontSpec;
+  maximumWidth: number | undefined;
+}
+
+/** One `TextBlockJson.Line`, measured and positioned. */
+function buildRow(
+  cell: { key: string; value: unknown; rowY: number; arrayEntry: boolean },
+  fonts: RowFonts,
+  highlightKeys: ReadonlyMap<string, string>,
+): JsonRowGeo {
+  const { measurer, keyFont, valFont } = fonts;
+  const { processed, valueLines, atomLines, valueType } = cellLines(cell.value, measurer, valFont, fonts.maximumWidth);
+  const textHeight = measurer.measure(cell.key, valFont).height;
+  const positioned = {
+    key: cell.key, valueLines, atomLines, rowY: cell.rowY, arrayEntry: cell.arrayEntry,
+    wrap: fonts.maximumWidth ?? 0,
+  };
+  return {
+    arrayEntry: cell.arrayEntry,
+    key: cell.key,
+    value: processed,
+    valueLines,
+    valueType,
+    highlight: highlightKeys.get(cell.key) ?? false,
+    y: cell.rowY,
+    height: heightOfRow(textHeight, valueLines.length, cell.arrayEntry),
+    ...cellMetrics(positioned, textHeight, measurer, keyFont, valFont),
+  };
 }
 
 export function buildRows(
@@ -200,7 +393,8 @@ export function buildRows(
   fontSize: number,
   options?: BuildRowsOptions,
 ): JsonRowGeo[] {
-  const { valFont: font } = fontsFor(fontSize, options);
+  const { keyFont, valFont } = fontsFor(fontSize, options);
+  const fonts: RowFonts = { measurer, keyFont, valFont, maximumWidth: options?.maximumWidth };
   const arrayEntry = Array.isArray(node.value);
   const rows: JsonRowGeo[] = [];
   // Rows start at the node's top edge: upstream's `drawU` walks
@@ -208,22 +402,10 @@ export function buildRows(
   // `getTotalHeight` is a plain sum with no trailing one either.
   let currentY = 0;
 
-  for (const [k, v] of containerEntries(node.value)) {
-    const { processed, valueLines, valueType } = cellLines(v, measurer, font, options?.maximumWidth);
-    const rowHeight = heightOfRow(measurer.measure(k, font).height, valueLines.length, arrayEntry);
-
-    rows.push({
-      arrayEntry,
-      key: k,
-      value: processed,
-      valueLines,
-      valueType,
-      highlight: highlightKeys.get(k) ?? false,
-      y: currentY,
-      height: rowHeight,
-    });
-
-    currentY += rowHeight;
+  for (const [key, value] of containerEntries(node.value)) {
+    const row = buildRow({ key, value, rowY: currentY, arrayEntry }, fonts, highlightKeys);
+    rows.push(row);
+    currentY += row.height;
   }
 
   return rows;

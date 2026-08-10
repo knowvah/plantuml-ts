@@ -20,11 +20,35 @@ function makeRow(overrides: Partial<JsonRowGeo> & Pick<JsonRowGeo, 'valueType'>)
     arrayEntry: false,
     y: 4,
     height: 20,
+    // Text metrics the layout stage measures and the renderer only reads
+    // (`TextBlockJson.ts#cellMetrics`). These hand-built rows are geometry
+    // fixtures, so the values are illustrative, not measured — the suites that
+    // assert real metrics render a real fixture end-to-end.
+    keyWidth: 30,
+    valueLineWidths: [40],
+    keyTextLength: 30,
+    valueTextLengths: [40],
+    keyBaselineY: 16,
+    valueBaselineYs: [16],
+    // Overwritten just below unless explicitly supplied; declared here so the
+    // literal satisfies `JsonRowGeo`.
+    keyAtoms: [],
+    valueAtoms: [],
     ...overrides,
   };
   // Auto-derive valueLines from value when not explicitly provided
   if (!('valueLines' in overrides)) {
     base.valueLines = [base.value];
+  }
+  // ...and the drawn atoms from whatever `valueLines` ended up being. With no
+  // wrap a line is exactly one atom (`Fission.ts`), which is what these
+  // geometry fixtures exercise; a suite that needs real wrapping renders a
+  // fixture end-to-end instead of hand-building rows.
+  if (!('valueAtoms' in overrides)) {
+    base.valueAtoms = base.valueLines.map((l) => [{ text: l, dx: 0, textLength: 40 }]);
+  }
+  if (!('keyAtoms' in overrides)) {
+    base.keyAtoms = [{ text: base.key, dx: 0, textLength: 30 }];
   }
   return base;
 }
@@ -99,15 +123,36 @@ function contentAfterDefs(svg: string): string {
 // Acceptance criteria
 // ---------------------------------------------------------------------------
 
-describe('renderJson — AC #1: string value color', () => {
-  it('SVG contains the string value fill color for a string-typed row', () => {
+describe('renderJson — AC #1: value text color', () => {
+  it('draws a string value in the node FontColor, as upstream does', () => {
     const geo = makeGeo({
       nodes: [makeNode()],
     });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    // Default string value color from theme
-    expect(body).toContain('fill="#3A6E96"');
+    // `TextBlockJson` has no per-type value styling — every cell takes the
+    // node's own FontColor, black for this family (`plantuml.skin:446`).
+    // The IDE-style per-type palette this used to assert was retired; see
+    // DIVERGENCES.md, "Value text — per-type colors".
+    expect(body).toContain('fill="#000"');
+    expect(body).not.toContain('fill="#3A6E96"');
+  });
+
+  it('still honours a THEME-supplied value color', () => {
+    // The four per-type fields are kept precisely so a theme can set them —
+    // all 20 built-in themes do, each to one shared color.
+    const themed = {
+      ...defaultTheme,
+      colors: {
+        ...defaultTheme.colors,
+        graph: {
+          ...defaultTheme.colors.graph,
+          json: { ...defaultTheme.colors.graph.json, stringValue: '#FF00FF' },
+        },
+      },
+    };
+    const body = contentAfterDefs(assembleSvg(renderJson(makeGeo({ nodes: [makeNode()] }), themed)));
+    expect(body).toContain('fill="#F0F"');
   });
 });
 
@@ -206,23 +251,40 @@ describe('renderJson — structural', () => {
     const geo = makeGeo({ nodes });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    expect(body).toContain('<g transform="translate(10, 20)">');
-    expect(body).toContain('<g transform="translate(300, 50)">');
+    // A5/M2: nodes are drawn FLAT, in absolute coordinates, with no per-node
+    // group. `SvgGraphics` resolves upstream's `UTranslate` into the emitted
+    // coordinates rather than into a `<g transform>`, so the jar's whole
+    // document is `<defs/>` plus ONE content `<g>`.
+    expect(body).not.toContain('<g transform=');
+    expect(body).toContain('x="10" y="20"');
+    expect(body).toContain('x="300" y="50"');
   });
 
-  it('outer border rect has rx="10" (plantuml.skin default)', () => {
+  it('node rects have rx="5" — RoundCorner 10 halved for SVG', () => {
     const geo = makeGeo({ nodes: [makeNode()] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    expect(body).toContain('rx="10"');
+    // `DriverRectangleSvg.java:78` emits `rx/2`, `ry/2`, so the skin's
+    // `RoundCorner 10` reaches the SVG as 5 — and `ry` is emitted too.
+    expect(body).toContain('rx="5" ry="5"');
+    expect(body).not.toContain('rx="10"');
   });
 
-  it('key column background uses headerBackground color', () => {
+  it('draws no key-column background — drawU paints no such column', () => {
     const geo = makeGeo({ nodes: [makeNode()] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    const headerColor = defaultTheme.colors.graph.json?.headerBackground ?? '#F1F1F1';
-    expect(body).toContain(`fill="${headerColor}"`);
+    // `TextBlockJson#drawU` draws the node rect, the rows, and the node rect
+    // again. The `header` style contributes FONT, not fill; this port used to
+    // paint a key-column rect (clipped by a `<clipPath>`) that upstream has
+    // no equivalent of, and the jar emits zero clipPaths in this family.
+    expect(body).not.toContain('clipPath');
+    // Exactly two POSITIONED rects for a single node: the fill and the border.
+    // (This suite calls `renderJson` directly rather than through the plugin,
+    // so the fragment has no `jsonShell` and `assembleSvg` falls through to
+    // the generic `svgRoot`, which contributes its own unpositioned canvas
+    // background rect. Hence `<rect x=`, not `<rect `.)
+    expect((body.match(/<rect x=/g) ?? []).length).toBe(2);
   });
 
   it('row separator lines are emitted for rows with y > 0', () => {
@@ -235,21 +297,22 @@ describe('renderJson — structural', () => {
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    // Row at y=20 and y=40 should emit separator lines
-    expect(body).toContain('y1="20"');
-    expect(body).toContain('y2="20"');
-    expect(body).toContain('y1="40"');
-    expect(body).toContain('y2="40"');
-    // Row at y=0 should NOT emit a separator
+    // Rows are at node.y (20) + row.y, so separators land at 40 and 60.
+    expect(body).toContain('y1="40" x2="210" y2="40"');
+    expect(body).toContain('y1="60" x2="210" y2="60"');
+    // Row at y=0 should NOT emit a separator above it.
     const lineCount = (body.match(/<line /g) ?? []).length;
-    // 2 row separators + 1 vertical divider = 3 total lines
-    expect(lineCount).toBe(3);
+    // A5/M2: upstream draws the column divider INSIDE the per-row loop, one
+    // per row spanning that row's own height (`TextBlockJson.java:311-313`),
+    // not one full-height line per node. So: 2 row separators + 3 dividers.
+    expect(lineCount).toBe(5);
   });
 
-  it('nested valueType row with empty value produces no value text element', () => {
+  it('an empty value cell still draws — an empty cell is not an absent cell', () => {
     const nestedRow = makeRow({
       key: 'child',
       value: '',
+      valueLines: [' '],
       valueType: 'nested',
       y: 4,
       height: 20,
@@ -258,9 +321,14 @@ describe('renderJson — structural', () => {
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    // Only one text element (the key), no second text for empty value
+    // `StripeSimple#getAtoms` (`StripeSimple.java:124-129`) gives a stripe that
+    // collected no atoms a single-space atom, so the cell draws a space --
+    // written as NBSP by the whitespace-only rule. Jar-verified: `{"a": ""}`
+    // emits a value `<text>`, and `{}` emits exactly one text in a 10x18 box.
+    // This test previously asserted the opposite (one text, the key only).
     const textMatches = body.match(/<text /g) ?? [];
-    expect(textMatches.length).toBe(1);
+    expect(textMatches.length).toBe(2);
+    expect(body).toContain('\u00a0');
   });
 
   it('spline edge with 4+ points builds cubic Bézier path', () => {
@@ -307,52 +375,24 @@ describe('renderJson — structural', () => {
     expect(d.startsWith('M -1.6')).toBe(true);
   });
 
-  it('number value uses numberValue color', () => {
-    const numRow = makeRow({
-      key: 'count',
-      value: '42',
-      valueType: 'number',
-      y: 4,
-      height: 20,
-    });
-    const node = makeNode({ rows: [numRow] });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const body = contentAfterDefs(svg);
-    const numColor = defaultTheme.colors.graph.json?.numberValue ?? '#A67F52';
-    expect(body).toContain(`fill="${numColor}"`);
-  });
-
-  it('null value uses nullValue color', () => {
-    const nullRow = makeRow({
-      key: 'nothing',
-      value: '␀',
-      valueType: 'null',
-      y: 4,
-      height: 20,
-    });
-    const node = makeNode({ rows: [nullRow] });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const body = contentAfterDefs(svg);
-    const nullColor = defaultTheme.colors.graph.json?.nullValue ?? '#767676';
-    expect(body).toContain(`fill="${nullColor}"`);
-  });
-
-  it('boolean value uses booleanValue color', () => {
-    const boolRow = makeRow({
-      key: 'flag',
-      value: '☑ true',
-      valueType: 'boolean',
-      y: 4,
-      height: 20,
-    });
-    const node = makeNode({ rows: [boolRow] });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const body = contentAfterDefs(svg);
-    const boolColor = defaultTheme.colors.graph.json?.booleanValue ?? '#BE5D47';
-    expect(body).toContain(`fill="${boolColor}"`);
+  it('draws every value type in the same color — upstream has no per-type styling', () => {
+    // `TextBlockJson#getTextBlock` builds every cell from one
+    // `getStyleToUse(false, highlighted)` style. There is no branch on the
+    // JSON type anywhere in it, so number/null/boolean/string all land on the
+    // node's FontColor. Asserted together because "they are all the same" IS
+    // the property; four near-identical per-type tests asserted the opposite.
+    const types = [
+      { key: 'count', value: '42', valueType: 'number' as const },
+      { key: 'nothing', value: '\u2400', valueType: 'null' as const },
+      { key: 'flag', value: '\u2611 true', valueType: 'boolean' as const },
+      { key: 'name', value: 'Alice', valueType: 'string' as const },
+    ];
+    for (const t of types) {
+      const node = makeNode({ rows: [makeRow({ ...t, y: 4, height: 20 })] });
+      const body = contentAfterDefs(assembleSvg(renderJson(makeGeo({ nodes: [node] }), defaultTheme)));
+      // Two texts per row (key + value), both black.
+      expect(body.match(/fill="#000"/g) ?? []).toHaveLength(2);
+    }
   });
 
   it('SVG root has correct width and height from geometry', () => {
@@ -423,9 +463,12 @@ describe('renderJson — branch coverage', () => {
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    const keyColor = defaultTheme.colors.graph.json?.keyText ?? '#181818';
-    // Value text uses keyText color — the default branch of valueColor
-    expect(body).toContain(`fill="${keyColor}"`);
+    // Value text uses keyText color — the default branch of valueColor, whose
+    // fallback is this family's own black (`skin/plantuml.skin:446`
+    // `yamlDiagram,jsonDiagram { FontColor black }`), not the global `#181818`.
+    // `#000000` reaches the SVG in its shortened form, as the jar writes it.
+    expect(defaultTheme.colors.graph.json?.keyText).toBeUndefined();
+    expect(body).toContain('fill="#000"');
   });
 
   it('spline edge with 7 points builds two cubic Bézier segments', () => {
@@ -465,11 +508,12 @@ describe('renderJson — branch coverage', () => {
     const geo = makeGeo({ nodes: [node], edges: [edge] });
     const svg = assembleSvg(renderJson(geo, noJsonTheme));
     const body = contentAfterDefs(svg);
-    // Theme-inherited defaults (json field absent → falls back to theme.colors.*)
-    expect(body).toContain('fill="#3A6E96"');   // string — valueColor fallback
-    expect(body).toContain('fill="#A67F52"');   // number — valueColor fallback
-    expect(body).toContain('fill="#BE5D47"');   // boolean — valueColor fallback
-    expect(body).toContain('fill="#767676"');   // null — valueColor fallback
+    // With `graph.json` absent entirely, every arm of `valueColor` takes its
+    // OWN fallback — which is this family's skin black (`plantuml.skin:446`),
+    // the same for all five. That sameness is the point: upstream has no
+    // per-type value styling, so there is nothing for the arms to differ on.
+    // These four lines used to assert four distinct IDE-palette colors.
+    expect(body).toContain('fill="#000"');
     expect(body).toContain('fill="#CCFF02"');   // highlightBackground (plantuml.skin default)
     expect(body).toContain('fill="#FFF"');   // background → noJsonTheme.colors.background
     // headerBackground inherits from bg (#FFFFFF) — no longer a distinct hard-coded color
