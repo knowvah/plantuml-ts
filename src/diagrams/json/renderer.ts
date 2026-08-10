@@ -10,6 +10,7 @@
 // `text` is the exception — upstream's handwritten decorator does not touch
 // text, it falls through to `getUg().draw(shape)`.
 import { text } from '../../core/svg.js';
+import { fmt } from '../../core/svg-format.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { scaleJsonGeometry, scaleNodeStyle } from './scale-geo.js';
 
@@ -152,11 +153,16 @@ function highlightRect(
   );
 }
 
-/** `stroke-dasharray` is a list of lengths, and `SvgGraphics#format` scales
- *  each one. Non-numeric tokens are passed through untouched. */
+/**
+ * `stroke-dasharray` is a list of lengths, and every one goes through
+ * `SvgGraphics#format` — so each is both scaled AND rounded to the document's
+ * decimal precision. `fmt` is that rounding; without it a scaled dash emits
+ * JavaScript's full `1.5536997475237913` where the jar writes `1.556`.
+ * Non-numeric tokens are passed through untouched.
+ */
 function scaleDasharray(dash: string, k: number): string {
   if (k === 1) return dash;
-  return dash.replace(/[0-9]*\.?[0-9]+/g, (n) => String(Number(n) * k));
+  return dash.replace(/[0-9]*\.?[0-9]+/g, (n) => fmt(Number(n) * k));
 }
 
 /**
@@ -418,7 +424,8 @@ export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragmen
   // result, then every numeric is multiplied on the way out by
   // `SvgGraphics#format`. See `scale-geo.ts` for why this port multiplies the
   // inputs instead of the outputs, and why that is the same arithmetic.
-  const k = resolveScaleFactor(rawGeo.scale, rawGeo.width, rawGeo.height);
+  const dim = rawGeo.finalDimension ?? { width: rawGeo.width, height: rawGeo.height };
+  const k = resolveScaleFactor(rawGeo.scale, dim.width, dim.height);
   const geo = scaleJsonGeometry(rawGeo, k);
   const theme = rawTheme;
 

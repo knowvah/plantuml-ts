@@ -95,6 +95,16 @@ export interface JsonGeometry {
    * (`TextBlockExporter#computeScaleFactor`).
    */
   scale?: ScaleSpec;
+  /**
+   * `TextBlockExporter#calculateFinalDimension()` — ink extent plus margins,
+   * WITHOUT the `ensureVisible` `+1` that `width`/`height` above carry. This
+   * is what {@link scale} is resolved against, because that is the value
+   * upstream passes to `computeScaleFactor`.
+   *
+   * Optional so hand-authored geometry literals in tests compile unchanged;
+   * `renderJson` falls back to `width`/`height` when absent.
+   */
+  finalDimension?: { width: number; height: number };
   /** When the body could not be parsed, the message to display. */
   error?: string;
   /**
@@ -401,9 +411,10 @@ export function layoutJson(
     spline: true,
   }));
 
-  const { width, height } = documentDimensions(nodes, margin);
+  const { width, height, finalWidth, finalHeight } = documentDimensions(nodes, margin);
   const result: JsonGeometry = {
     nodes, edges, width, height,
+    finalDimension: { width: finalWidth, height: finalHeight },
     // Type-carrying only: resolved to a factor at RENDER time against these
     // (unscaled) dims, mirroring `TextBlockExporter#computeScaleFactor(dim)`
     // reading `calculateFinalDimension()`'s own pre-scale result.
@@ -459,7 +470,7 @@ const ENSURE_VISIBLE_BUMP = 1;
 function documentDimensions(
   nodes: readonly JsonNodeGeo[],
   margin: { left: number; top: number; x: number; y: number },
-): { width: number; height: number } {
+): { width: number; height: number; finalWidth: number; finalHeight: number } {
   let inkMaxX = 0;
   let inkMaxY = 0;
   for (const n of nodes) {
@@ -468,8 +479,19 @@ function documentDimensions(
     if (r > inkMaxX) inkMaxX = r;
     if (b > inkMaxY) inkMaxY = b;
   }
+  // `TextBlockExporter#calculateFinalDimension` -- the ink extent plus both
+  // margins, and NOTHING else. This is the dimension `computeScaleFactor(dim)`
+  // divides by (`TextBlockExporter.java:165,199-202`).
+  const finalWidth = inkMaxX - INK_MIN_CORNER + margin.x;
+  const finalHeight = inkMaxY - INK_MIN_CORNER + margin.y;
   return {
-    width: inkMaxX - INK_MIN_CORNER + margin.x + ENSURE_VISIBLE_BUMP,
-    height: inkMaxY - INK_MIN_CORNER + margin.y + ENSURE_VISIBLE_BUMP,
+    // The emitted width/height/viewBox are `maxX`/`maxY`, which SvgGraphics
+    // seeds with `ensureVisible(minDim)` -- i.e. the SAME final dimension, run
+    // through `(int)(x + 1)`. Two distinct notions upstream, and conflating
+    // them made `scale max W*H` divide by a number one larger than the jar's.
+    width: finalWidth + ENSURE_VISIBLE_BUMP,
+    height: finalHeight + ENSURE_VISIBLE_BUMP,
+    finalWidth,
+    finalHeight,
   };
 }

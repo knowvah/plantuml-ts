@@ -83,6 +83,10 @@
     "json/sevaji-38-xita618": {
       "maxDiffs": 1,
       "reason": "skinparam honored in the json family (same entry). 'skinparam backgroundcolor transparent' suppresses the root background here; the jar ignores the directive and emits #FFFFFF."
+    },
+    "json/timafu-94-bixe774": {
+      "maxDiffs": 37,
+      "reason": "ADR-2b engine delta amplified by `scale max 100*100`. dot-engine places the child node at x=133.237 where Smetana uses 133, so this port's calculateFinalDimension is 193.087 against the jar's 192.85; `scale max` divides by that dimension, so a 0.237px placement difference becomes a uniform 0.12% error in every emitted number. Node sizes are identical at scale 1. See ledger M7."
     }
   }
 }

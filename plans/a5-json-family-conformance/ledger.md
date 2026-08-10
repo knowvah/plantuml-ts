@@ -759,37 +759,49 @@ Every fixture, exactly once. **† = the element tally still differs, so
 
 ---
 
-## M7 — document dimensions disagree with the jar (found 2026-08-09, OPEN)
+## M7 — document dimensions (RESOLVED 2026-08-09; the original entry was WRONG)
 
-**Measured.** Same content, scale directive removed, `@startjson` of
-`{"fruit":"Apple","size":"Large","color":["Red","Green"]}`:
+### Retraction
 
-| | width | height |
+The first version of this entry reported the jar at 204x93 against this port's
+194x85 and called it a pre-existing defect. **That measurement was invalid.**
+It was taken with a hand-typed `java -jar … -tsvg`, omitting
+`-DPLANTUML_DETERMINISTIC_TEXT=true`, so it compared this port's
+`DeterministicMeasurer` render against the jar using REAL platform font
+metrics. Every text-derived number differed for that reason alone.
+
+Re-measured correctly on the same input:
+
+| | jar | this port |
 | --- | --- | --- |
-| jar (`plantuml-oracle.jar` 1.2026.7beta11) | 204 | 93 |
-| this port | 194 | 85 |
+| node sizes | 86.238x54, 48.85x36 | **identical** |
+| node 2 `x` | 133 | 133.237 |
+| viewBox | 193 x 85 | 194 x 85 |
 
-**Why it went unseen.** The structural gate excludes `svg/@width`,
-`svg/@height` and `svg/@viewBox` as positional (they are a direct consequence
-of placement, which ADR-2b hands to the layout engine), and byte-conformance
-was saturated with the same geometry noise. Nothing else in the family reads
-the document dimension, so a 10x8 error produced no failing assertion.
+1px in width, and it is the ADR-2b engine delta (dot-engine places the child
+0.237 further right than Smetana), not a defect. The commit that filed M7 has
+been superseded, and CLAUDE.md now carries "Always render the oracle
+deterministically" plus `scripts/oracle-render.sh` so the flag cannot be
+omitted again.
 
-**Why it surfaced now.** `scale max W*H` resolves its factor AGAINST the
-document dimension (`TextBlockExporter#computeScaleFactor(dim)` reading
-`calculateFinalDimension()`), so a wrong dimension becomes a wrong factor and
-then perturbs EVERY emitted number. `json/timafu-94-bixe774` holds all 47 of
-its structural diffs for this reason and for no other — each value is off by
-the same ~0.64%, and back-solving its rect height gives the jar a scale
-dimension of 192.85 against this port's 194.09.
+### The real finding underneath it
 
-Note that 192.85 is not 204 either: upstream has TWO distinct dimension
-notions, the declared `calculateFinalDimension()` that scale divides by, and
-the `ensureVisible`-accumulated `maxX`/`maxY` that becomes the viewBox. Any
-fix has to establish which of the two this port's `documentDimensions` is
-modelling, and probably needs both.
+Chasing the bogus number did surface a genuine bug, now fixed. Upstream carries
+TWO dimension notions and this port had conflated them:
 
-**Do not** chase this by adjusting a constant until `timafu` shrinks — that is
-exactly the fitting this mission has been bitten by before. The next step is
-to read `TextBlockExporter#calculateFinalDimension` and `JsonDiagram
-#calculateDimension` and establish the mechanism.
+- `TextBlockExporter#calculateFinalDimension()` (:199-202) — ink extent plus
+  both margins. This is what `computeScaleFactor(dim)` (:165) divides by.
+- `SvgGraphics`'s `maxX`/`maxY` — the same value seeded through
+  `ensureVisible(minDim)` (:142-143), i.e. `(int)(x + 1)`. This is what becomes
+  `width`/`height`/`viewBox` (:799-811).
+
+`documentDimensions` returned only the second and `renderJson` resolved `scale`
+against it, so `scale max W*H` divided by a number 1 larger than the jar's.
+Verified against the jar's own arithmetic: `181.85 - 10 + 1 + 20 = 192.85`,
+which is exactly the scale dimension back-solved from `timafu`'s rect height.
+`JsonGeometry` now carries `finalDimension` alongside `width`/`height`.
+
+`json/timafu-94-bixe774`: 47 -> 37 structural diffs, and its per-value error
+fell from 0.64% to 0.12%. The residual 0.12% is the 0.237px placement delta
+propagated through `scale max`'s division — the accepted divergence, amplified.
+It is pinned with a ceiling under `divergent`, not chased.
