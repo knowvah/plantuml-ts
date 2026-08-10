@@ -140,7 +140,7 @@ describe('renderJson — AC #1: value text color', () => {
 
   it('still honours a THEME-supplied value color', () => {
     // The four per-type fields are kept precisely so a theme can set them —
-    // all 20 built-in themes do, each to one shared colour.
+    // all 20 built-in themes do, each to one shared color.
     const themed = {
       ...defaultTheme,
       colors: {
@@ -375,7 +375,7 @@ describe('renderJson — structural', () => {
     expect(d.startsWith('M -1.6')).toBe(true);
   });
 
-  it('draws every value type in the same colour — upstream has no per-type styling', () => {
+  it('draws every value type in the same color — upstream has no per-type styling', () => {
     // `TextBlockJson#getTextBlock` builds every cell from one
     // `getStyleToUse(false, highlighted)` style. There is no branch on the
     // JSON type anywhere in it, so number/null/boolean/string all land on the
@@ -512,7 +512,7 @@ describe('renderJson — branch coverage', () => {
     // OWN fallback — which is this family's skin black (`plantuml.skin:446`),
     // the same for all five. That sameness is the point: upstream has no
     // per-type value styling, so there is nothing for the arms to differ on.
-    // These four lines used to assert four distinct IDE-palette colours.
+    // These four lines used to assert four distinct IDE-palette colors.
     expect(body).toContain('fill="#000"');
     expect(body).toContain('fill="#CCFF02"');   // highlightBackground (plantuml.skin default)
     expect(body).toContain('fill="#FFF"');   // background → noJsonTheme.colors.background

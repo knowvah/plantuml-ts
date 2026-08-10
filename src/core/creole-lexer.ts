@@ -14,7 +14,7 @@
  *   //text//          — italic
  *   __text__          — underline
  *   --text--          — strikethrough
- *   <color:X>text</color>  — text colour
+ *   <color:X>text</color>  — text color
  *   <b>text</b>       — bold (HTML alias)
  *   <i>text</i>       — italic (HTML alias)
  *   <u>text</u>       — underline (HTML alias)
@@ -339,7 +339,7 @@ function applyBooleanDelim(
 /**
  * Handle `<color:X>...</color>`. If unclosed, the literal open-tag text is
  * flushed; otherwise the enclosed tokens are parsed recursively with the
- * colour applied.
+ * color applied.
  */
 function applyColorDelim(
   tokens: Token[],

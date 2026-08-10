@@ -95,7 +95,7 @@ function measureMixedLabel(spans: LabelSpan[]): { width: number; height: number 
  * @param label  - Raw label string (may contain `<latex>…</latex>`).
  * @param cx     - Horizontal centre of the label.
  * @param cy     - Vertical centre of the label.
- * @param theme  - Theme for font and colour values.
+ * @param theme  - Theme for font and color values.
  */
 export function renderNodeLabel(
   label: string,
@@ -296,7 +296,7 @@ export function measureLatex(raw: string): { width: number; height: number } {
  * @param y      - Top-left y coordinate of the foreignObject.
  * @param w      - Width of the foreignObject.
  * @param h      - Height of the foreignObject.
- * @param color  - Text fill colour (applied as CSS `color` on the wrapper div).
+ * @param color  - Text fill color (applied as CSS `color` on the wrapper div).
  * @returns SVG string containing `<foreignObject …>…</foreignObject>`.
  */
 export function renderLatexMathML(

@@ -9,7 +9,7 @@
  *   //text//          — italic
  *   __text__          — underline
  *   --text--          — strikethrough
- *   <color:X>text</color>  — text colour
+ *   <color:X>text</color>  — text color
  *   <b>text</b>       — bold (HTML alias)
  *   <i>text</i>       — italic (HTML alias)
  *   <u>text</u>       — underline (HTML alias)

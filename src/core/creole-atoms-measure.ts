@@ -60,7 +60,7 @@ const SPRITE_FONT_REFERENCE_SIZE = 13;
  * Effective scale of a creole `<$name>` sprite atom: `Parser.getScale(...) *
  * fc.getSize2D() / 13.0` (`CommandCreoleSprite.java:82`) — the REQUESTED
  * scale times the ambient font size over a fixed 13px reference. This applies
- * to every sprite kind (monochrome, 4096-colour, SVG): the factor lives in
+ * to every sprite kind (monochrome, 4096-color, SVG): the factor lives in
  * the creole `<$…>` command, not in any `Sprite` implementation.
  *
  * Jar-verified against the deterministic oracle at two font sizes and two

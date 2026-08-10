@@ -9,7 +9,7 @@
  * here still stubs `addBackcolor`, so the same composition is expressed
  * directly against the house SVG emitter (`src/core/svg.ts` — `rect`, `text`,
  * `svgRoot`), which is how every diagram renderer in `src/diagrams/*` emits.
- * Fonts, colours, decorations, block order and line content are upstream's;
+ * Fonts, colors, decorations, block order and line content are upstream's;
  * only the seam differs.
  *
  * Verified against `oracle/dist/plantuml-oracle.jar` (`-tsvg -pipe`) on an
@@ -30,7 +30,7 @@ import type { PSystemError } from './PSystemError.js';
 import { PSystemWelcome } from './PSystemWelcome.js';
 import type { PSystemUnsupported } from './PSystemUnsupported.js';
 
-// --- Colours (klimt/color/HColors.java) ---------------------------------
+// --- Colors (klimt/color/HColors.java) ---------------------------------
 
 const BLACK = '#000000';
 const WHITE = '#FFFFFF';
@@ -69,7 +69,7 @@ const BAND_PAD_X = 1;
 const BAND_PAD_TOP = 1;
 const BAND_PAD_BOTTOM = 4;
 
-/** A run of characters sharing one font and colour. */
+/** A run of characters sharing one font and color. */
 interface Run {
   readonly content: string;
   readonly font: FontSpec;
@@ -77,13 +77,13 @@ interface Run {
   readonly decoration?: string;
 }
 
-/** One rendered line: its runs, and optionally a colour band drawn behind it. */
+/** One rendered line: its runs, and optionally a color band drawn behind it. */
 interface Line {
   readonly runs: readonly Run[];
   readonly band?: string;
 }
 
-/** A stack of lines over one background colour. */
+/** A stack of lines over one background color. */
 interface Block {
   readonly lines: readonly Line[];
   readonly background: string;

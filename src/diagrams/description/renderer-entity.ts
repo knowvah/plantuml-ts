@@ -302,7 +302,7 @@ const NOTE_MARGIN_Y = 5;
 
 /**
  * The note body's own font (`EntityImageNote.java:111`'s `style
- * .getFontConfiguration(...)`): family/colour/styles exactly as `textFont`
+ * .getFontConfiguration(...)`): family/color/styles exactly as `textFont`
  * resolves them, but the SIZE falls back to `NOTE_FONT_SIZE` (13,
  * `plantuml.skin:312-313`'s `note { FontSize 13 }`) rather than to the
  * diagram-wide `theme.fontSize` (14).

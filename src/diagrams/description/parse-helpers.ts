@@ -362,7 +362,7 @@ export const KEYWORD_RE = new RegExp(`^(${ALL_KW_ALT})\\s+(.+)$`, 'i');
  * `CommandCreateElementMultilines` phases place between CODE and their own
  * opener token (`CommandCreateElementMultilines.java:99-102, :111-114`).
  *
- * The colour alternative must accept the FULL colour/style spec, not just
+ * The color alternative must accept the FULL color/style spec, not just
  * `#word`: `node B #red|green;line.dashed;line:blue [` otherwise failed this
  * pattern entirely and fell through to KEYWORD_RE, which swallowed the spec
  * AND the trailing `[` into the element's name (titona-45-jile471 measured
@@ -406,7 +406,7 @@ export const ELEMENT_MULTILINE_OPEN_RE = new RegExp(
  * `CommandCreateElementFull` grammar:
  *
  * - COLOUR sits **before** `as`. On one line that ordering is a jar syntax
- *   error, so the single-line path's post-`as` colour slot cannot be reused
+ *   error, so the single-line path's post-`as` color slot cannot be reused
  *   (`pecupa-75-zote612`'s `usecase UC5 #red as "…`).
  * - DESC is `([^%g]*)` anchored at `$`, so an opener may not contain a
  *   closing quote at all. That is what keeps an already-closed single-line

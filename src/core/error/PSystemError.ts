@@ -12,7 +12,7 @@
  * here is a partial port whose `addBackcolor` is still a stub), so the class
  * keeps upstream's TEXT methods verbatim — `getTextFromStack`,
  * `getTextFullBody`, `getTextError`, `header`, `getPureAsciiFormatted`,
- * `score` — and the visual composition (which font, which colour, in which
+ * `score` — and the visual composition (which font, which color, in which
  * order) lives next door in `error-renderer.ts`, drawing through the house SVG
  * emitter (`src/core/svg.ts`). The line CONTENT and its ORDER are upstream's;
  * only the drawing seam differs.

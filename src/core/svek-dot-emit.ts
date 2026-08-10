@@ -171,7 +171,7 @@ function edgeRef(id: string, recs: Map<string, NodeRec>, nodeById: Map<string, D
 
 /** Optional edge label / taillabel / headlabel parts (Svek HTML tables).
  *
- *  Colours come from the edge's four RESERVED values (SvekEdge.java:275-278),
+ *  Colors come from the edge's four RESERVED values (SvekEdge.java:275-278),
  *  not from a live counter: `label`/`xlabel` share `noteLabel` because they
  *  are alternatives (ortho routes the label through xlabel), `taillabel` takes
  *  `startTail` and `headlabel` takes `endHead`. Upstream reserves all four

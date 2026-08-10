@@ -12,7 +12,7 @@ import { renderDot } from './renderer.js';
  * than an omission: graphviz produces the finished document, so this port has
  * no drawing decisions left to make. `skinparam` and `<style>` are parsed and
  * then ignored for the same reason — an earlier implementation mapped them
- * onto a `Theme` that coloured this port's OWN re-drawing of the graph, and
+ * onto a `Theme` that colored this port's OWN re-drawing of the graph, and
  * that re-drawing is what the passthrough replaced. Upstream honours neither
  * (its factory feeds every post-header line to graphviz as DOT).
  */

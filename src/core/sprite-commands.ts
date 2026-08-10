@@ -274,7 +274,7 @@ function scanSpriteBlock(lines: readonly string[], i: number): SpriteBlock | nul
 function registerSvg(registry: SpriteRegistry, name: string, svg: string): void {
   const sprite = SpriteSvg.from(svg);
   if (sprite === undefined) {
-    // Same shelf the 4096-colour form uses: the definition is fully consumed
+    // Same shelf the 4096-color form uses: the definition is fully consumed
     // (never leaks into diagram content), only registration is skipped.
     registry.skippedColorSprites.push(name);
     return;

@@ -111,7 +111,7 @@ test.describe('Theme switching', () => {
     // Switch to dark theme
     await page.locator('#theme').selectOption('dark');
 
-    // The re-rendered SVG should contain the dark background colour
+    // The re-rendered SVG should contain the dark background color
     await expect
       .poll(() => page.locator('#preview').innerHTML(), { timeout: 7000 })
       .toContain('#1E1E1E');

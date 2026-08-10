@@ -21,7 +21,7 @@
  * ## What this gate measures instead
  *
  * Every diff EXCEPT positional geometry. Concretely: the same elements, in the
- * same order, with the same sizes, colours, fonts, weights, text content and
+ * same order, with the same sizes, colors, fonts, weights, text content and
  * text lengths — everything the port controls once the engine has decided
  * where things go.
  *

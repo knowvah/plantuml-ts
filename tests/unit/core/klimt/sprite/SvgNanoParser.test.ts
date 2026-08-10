@@ -402,7 +402,7 @@ describe('SvgNanoParser -- <circle>/<ellipse> together under one ancestor <g fil
 });
 
 describe('SvgNanoParser#drawText (T8, acceptance criterion 6)', () => {
-  it('emits a UText through the existing text driver with the resolved font/colour (edgy2 pattern)', () => {
+  it('emits a UText through the existing text driver with the resolved font/color (edgy2 pattern)', () => {
     // Verbatim from assets/stdlib/edgy/edgy2.puml.
     const svg = `<svg viewBox="0 0 32 32">\n  <text x="17" y="10" font-size="10" fill="#262626">People</text>\n</svg>`;
 
@@ -478,7 +478,7 @@ describe('SvgNanoParser#drawText (T8, acceptance criterion 6)', () => {
 });
 
 describe('SvgNanoParser#applyFillAndStroke (T8, acceptance criteria 2 and 3)', () => {
-  it('a <path> with no own fill inherits the ancestor <g fill="...">\'s colour, not a default', () => {
+  it('a <path> with no own fill inherits the ancestor <g fill="...">\'s color, not a default', () => {
     const svg =
       `<svg width="16" height="16">\n` +
       `  <g fill="#123456">\n` +
@@ -494,7 +494,7 @@ describe('SvgNanoParser#applyFillAndStroke (T8, acceptance criteria 2 and 3)', (
     const changes = ug.drawnChanges[0]!;
     // LAST Fore/Back applied is what's active when the <path> is actually
     // drawn -- both the <g fill="#123456"> tag itself and the child <path>
-    // (via its own ancestor-lookup) apply this same colour along the way.
+    // (via its own ancestor-lookup) apply this same color along the way.
     const fore = changes.filter((c): c is Fore => c instanceof Fore).at(-1);
     const back = changes.filter((c): c is Back => c instanceof Back).at(-1);
     expect(fore?.getColor()).toBe('#123456');
@@ -655,7 +655,7 @@ describe('SvgNanoParser#applyTransform (T8, acceptance criterion 4)', () => {
 });
 
 describe('SvgNanoParser -- GrayLevelRange (constructor/minGray/maxGray fields)', () => {
-  it('returns the default 999/-1-derived min/max gray level for a sprite with no fill/stroke colour', () => {
+  it('returns the default 999/-1-derived min/max gray level for a sprite with no fill/stroke color', () => {
     const parser = new SvgNanoParser(BI_GLOBE_SVG);
     expect(parser.getMinGrayLevel()).toBe(999);
     expect(parser.getMaxGrayLevel()).toBe(-1);
@@ -682,7 +682,7 @@ describe('SvgNanoParser -- GrayLevelRange (constructor/minGray/maxGray fields)',
     expect(parser.getMaxGrayLevel()).toBe(45);
   });
 
-  it('falls back to white for an unparseable fill colour token', () => {
+  it('falls back to white for an unparseable fill color token', () => {
     const svg = `<svg width="16" height="16">\n  <path fill="not-a-real-color-xyz" d="${BI_GLOBE_D}"/>\n</svg>`;
     const parser = new SvgNanoParser(svg);
     expect(parser.getMinGrayLevel()).toBe(255);

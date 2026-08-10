@@ -31,7 +31,7 @@ export interface StereotypeSpriteRef {
   /** `Parser.getScale(...)`, defaulting to 1 (java:167). */
   readonly scale: number;
   /** `Stereotype#getHtmlColor()` — `HColors.BLACK` whenever a sprite run
-   *  matched and declared no explicit colour (java:164), so normally set.
+   *  matched and declared no explicit color (java:164), so normally set.
    *  Handed to `SvgNanoParser#drawU` as its `fontColor`, exactly as
    *  `Stereotype#getSprite` hands it to `asTextBlock`. */
   readonly color?: ResolvedColor | undefined;

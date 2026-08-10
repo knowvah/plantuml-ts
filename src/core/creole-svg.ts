@@ -41,8 +41,8 @@ function styleOf(span: CreoleSpan, inheritFill?: string): TextStyle {
  * Serialise an array of spans to a string of concatenated SVG `<tspan>`
  * elements.
  *
- * `style.fill` is the inherited text colour; it is applied to spans that do
- * not carry their own colour override.
+ * `style.fill` is the inherited text color; it is applied to spans that do
+ * not carry their own color override.
  */
 export function spansToTspan(
   spans: CreoleSpan[],
