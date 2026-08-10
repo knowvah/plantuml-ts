@@ -17,6 +17,7 @@
  */
 
 import type { Theme } from '../../core/theme.js';
+import { canonicalColor, canonicalColorOpt } from './color-form.js';
 
 type JsonColors = Theme['colors']['graph']['json'];
 
@@ -158,12 +159,62 @@ function resolveTextHighlight(j: JsonColorsResolved) {
   };
 }
 
+/**
+ * Every color the resolved style carries, in the jar's emitted form.
+ * Centralised here so the renderer cannot emit a raw theme string by omission
+ * — see `color-form.ts` for why the form matters.
+ */
+function canonicalizeColors(style: NodeStyleJson): NodeStyleJson {
+  const { box, text } = style;
+  return {
+    ...style,
+    box: {
+      ...box,
+      bg: canonicalColor(box.bg),
+      border: canonicalColor(box.border),
+      sepColor: canonicalColor(box.sepColor),
+      hlBg: canonicalColor(box.hlBg),
+      ...(box.highlightClasses === undefined
+        ? {}
+        : { highlightClasses: canonicalizeClasses(box.highlightClasses) }),
+    },
+    text: {
+      ...text,
+      keyColor: canonicalColor(text.keyColor),
+      ...opt('fontColor', text.fontColor),
+      ...opt('hlFontColor', text.hlFontColor),
+    },
+  };
+}
+
+/** Absent must stay absent under `exactOptionalPropertyTypes`. */
+function opt(key: 'fontColor' | 'hlFontColor', v: string | undefined) {
+  const c = canonicalColorOpt(v);
+  return c === undefined ? {} : { [key]: c };
+}
+
+function canonicalizeClasses(
+  classes: Record<string, HighlightClassStyle>,
+): Record<string, HighlightClassStyle> {
+  const out: Record<string, HighlightClassStyle> = {};
+  for (const [name, cls] of Object.entries(classes)) {
+    const bg = canonicalColorOpt(cls.background);
+    const fc = canonicalColorOpt(cls.fontColor);
+    out[name] = {
+      ...cls,
+      ...(bg === undefined ? {} : { background: bg }),
+      ...(fc === undefined ? {} : { fontColor: fc }),
+    };
+  }
+  return out;
+}
+
 /** Resolve the whole cascade once per diagram. */
 export function resolveNodeStyle(theme: Theme): NodeStyleJson {
   const json = theme.colors.graph.json;
   const j: JsonColorsResolved = json ?? {};
   const font = resolveFontFace(j, theme);
-  return {
+  return canonicalizeColors({
     scale: 1,
     box: { ...resolveBoxPaint(j, theme), ...resolveBoxSeparator(j) },
     text: {
@@ -175,5 +226,5 @@ export function resolveNodeStyle(theme: Theme): NodeStyleJson {
       ...resolveTextHighlight(j),
     },
     json,
-  };
+  });
 }

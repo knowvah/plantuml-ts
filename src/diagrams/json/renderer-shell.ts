@@ -31,7 +31,7 @@
 
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { group, rect } from '../../core/svg.js';
-import { shortenColor } from '../../core/svg-format.js';
+import { canonicalColor } from './color-form.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { assembleDocumentShell } from '../../core/klimt/document-shell.js';
 
@@ -105,9 +105,7 @@ function isSolidNonDefault(background: string): boolean {
  *  - `shortenColor` collapses `#FFFFFF` to `#FFF`, which is the form a theme
  *    may supply directly and the form the emitters write.
  */
-function canonicalColor(color: string): string {
-  return shortenColor(resolveColorToSvgHex(color));
-}
+
 
 /**
  * @param fragment    - the json/yaml/hcl render fragment.

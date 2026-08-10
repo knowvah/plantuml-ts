@@ -31,6 +31,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
           booleanValue: '#FFFFFF',
           nullValue: '#FFFFFF',
           maximumWidth: 300,
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: '#0B58A8',
         },
       },
     },
@@ -68,6 +71,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#FFF200',
       border: '#1C1C1C',
       arrow: '#1C1C1C',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'bluegray': {
@@ -78,6 +87,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#fff',
       border: '#007FAF',
       arrow: '#007FAF',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'blueprint': {
@@ -99,6 +114,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
           booleanValue: '#D9D3D0',
           nullValue: '#D9D3D0',
           maximumWidth: 300,
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: '#003153',
         },
       },
     },
@@ -120,6 +138,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#2FA4E7',
       border: '#2683B9',
       arrow: '#2683B9',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'cerulean': {
@@ -130,6 +154,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#FFF',
       border: '#2683B9',
       arrow: '#2683B9',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'cloudscape-design': {
@@ -138,6 +168,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#000716',
       border: '#0972D3',
       arrow: '#0972D3',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'crt-amber': {
@@ -159,6 +195,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
           booleanValue: '#FFB000',
           nullValue: '#FFB000',
           maximumWidth: 300,
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: '#282828',
         },
       },
     },
@@ -182,6 +221,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
           booleanValue: '#33FF33',
           nullValue: '#33FF33',
           maximumWidth: 300,
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: '#282828',
         },
       },
     },
@@ -194,6 +236,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#2A9FD6',
       border: '#55B2DE',
       arrow: '#55B2DE',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'cyborg': {
@@ -204,6 +252,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#FFF',
       border: '#55B2DE',
       arrow: '#55B2DE',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'hacker': {
@@ -214,6 +268,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#151515',
       border: '#6D8B32',
       arrow: '#6D8B32',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'lightgray': {
@@ -224,6 +284,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#336699',
       border: '#888888',
       arrow: '#888888',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'mars': {
@@ -254,6 +320,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#2196F3',
       border: '#1A78C2',
       arrow: '#1A78C2',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'materia': {
@@ -264,6 +336,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#FFF',
       border: '#1A78C2',
       arrow: '#1A78C2',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'metal': {
@@ -274,6 +352,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#4682B4',
       border: '#B7B6B5',
       arrow: '#B7B6B5',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'mimeograph': {
@@ -295,6 +379,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
           booleanValue: '#9275B6',
           nullValue: '#9275B6',
           maximumWidth: 300,
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: '#D9D3D0',
         },
       },
     },
@@ -307,6 +394,12 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
       text: '#fff',
       border: '#6CAF9C',
       arrow: '#6CAF9C',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'mono': {
@@ -327,6 +420,9 @@ export const BUILTIN_THEMES_A_M: Record<string, ThemeOverride> = {
           numberValue: 'black',
           booleanValue: 'black',
           nullValue: 'black',
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: 'white',
         },
       },
     },

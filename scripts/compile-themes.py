@@ -144,7 +144,8 @@ def _resolve_var(val: str, vars: dict[str, str]) -> str:
 def _match_root_prop(s: str, vars: dict[str, str]) -> tuple[str, str] | None:
     """Match one `root { … }` property line, returning (key, resolved value)."""
     for prop, key in [('BackgroundColor', 'bg'), ('FontColor', 'fg'),
-                      ('LineColor', 'lc'), ('FontName', 'fn')]:
+                      ('LineColor', 'lc'), ('FontName', 'fn'),
+                      ('LineThickness', 'lt')]:
         if s.lower().startswith(prop.lower()):
             return key, _resolve_var(s[len(prop):].strip().strip('"\''), vars)
     return None
@@ -152,7 +153,8 @@ def _match_root_prop(s: str, vars: dict[str, str]) -> tuple[str, str] | None:
 
 def extract_root_style(content: str, vars: dict[str, str]) -> dict[str, str | None]:
     """Extract colors from <style> root { ... } block."""
-    result: dict[str, str | None] = {'bg': None, 'fg': None, 'lc': None, 'fn': None}
+    result: dict[str, str | None] = {'bg': None, 'fg': None, 'lc': None,
+                                     'fn': None, 'lt': None}
     m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
     if not m:
         return result
@@ -312,6 +314,12 @@ def parse_theme(fname: str) -> dict[str, str | None]:
         'bg': root['bg'] or skp['bg'],
         'fg': root['fg'] or skp['fg'],
         'lc': root['lc'],
+        'lt': root['lt'],
+        # The `<style> root { … }` background specifically, NOT the merged one.
+        # A theme's `skinparam BackgroundColor` converts to SName.document
+        # (`FromSkinparamToStyle.java:180`), whose signature does not match a
+        # node, so it cannot overwrite the highlight the way a root block does.
+        'root_bg': root['bg'],
         'fn': root['fn'] or skp['fn'],
         'mw': extract_node_maximum_width(content),
         'margin': extract_document_margin(content),
@@ -343,7 +351,8 @@ def _color_lines(bg: str | None, fg: str | None, lc: str | None) -> list[str]:
 
 
 def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None,
-                      mw: str | None) -> list[str]:
+                      mw: str | None, lt: str | None = None,
+                      root_bg: str | None = None) -> list[str]:
     """
     For themes with a solid (non-transparent) background, propagate the theme
     colors into graph.json so JSON nodes inherit the theme instead of falling
@@ -367,6 +376,21 @@ def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None,
                 out.append(f"          {field}: '{fg}',")
     if mw:
         out.append(f"          maximumWidth: {mw},")
+    # `root { LineThickness N }` and `root { BackgroundColor C }` OVERWRITE the
+    # skin's deeply-nested `jsonDiagram { node { LineThickness 1.5 } }` and
+    # `node { highlight { BackGroundColor #ccff02 } }`. That is not a
+    # specificity accident: `StyleStorage#computeMergedStyle`
+    # (`style/StyleStorage.java:102-114`) walks a LinkedHashMap in INSERTION
+    # order and merges with `MergeStrategy.OVERWRITE_EXISTING_VALUE`, with no
+    # specificity ranking at all -- so a theme, parsed after plantuml.skin,
+    # wins on every property it names however shallow its selector.
+    # Jar-verified: `!theme plain` renders json nodes at stroke-width 1 and its
+    # highlight rows at #FFF (its own root BackgroundColor), not #ccff02.
+    if lt:
+        out.append(f"          nodeLineThickness: {lt},")
+        out.append(f"          separatorThickness: {lt},")
+    if root_bg and root_bg != 'transparent':
+        out.append(f"          highlightBackground: '{root_bg}',")
     return out
 
 
@@ -388,7 +412,8 @@ def emit_theme_entry(name: str, props: dict) -> list[str]:
         lines.append(f"    diagramMargin: {props['margin']},")
 
     color_lines = _color_lines(bg, fg, lc)
-    json_lines = _json_graph_lines(bg, fg, lc, props.get('mw'))
+    json_lines = _json_graph_lines(bg, fg, lc, props.get('mw'), props.get('lt'),
+                                   normalize_color(props.get('root_bg')))
     # `colors` is emitted for a json-only property too -- a theme may declare
     # `node { MaximumWidth }` and no colors at all.
     if color_lines or json_lines:

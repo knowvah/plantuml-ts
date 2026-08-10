@@ -11,6 +11,7 @@
 // text, it falls through to `getUg().draw(shape)`.
 import { text } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
+import { canonicalColor } from './color-form.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { scaleJsonGeometry, scaleNodeStyle } from './scale-geo.js';
 
@@ -64,6 +65,14 @@ const PARSE_FAILURE_FONT_SIZE = 14;
 // ---------------------------------------------------------------------------
 
 function valueColor(
+  valueType: JsonRowGeo['valueType'],
+  json: Theme['colors']['graph']['json'],
+): string {
+  return canonicalColor(rawValueColor(valueType, json));
+}
+
+/** The theme's own string, before `color-form.ts` puts it in emitted form. */
+function rawValueColor(
   valueType: JsonRowGeo['valueType'],
   json: Theme['colors']['graph']['json'],
 ): string {
@@ -326,7 +335,7 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): s
   if (d === '') return '';
 
   const json = theme.colors.graph.json;
-  const stroke = json?.arrowColor ?? theme.colors.arrow;
+  const stroke = canonicalColor(json?.arrowColor ?? theme.colors.arrow);
   const strokeWidth = (json?.arrowThickness ?? 1) * k;
   // `yamlDiagram,jsonDiagram { arrow { LineStyle 3-3 } }` (`skin/plantuml.skin`
   // :449-451), emitted comma-separated — see `style-map-json-diagram.ts`.

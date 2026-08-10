@@ -31,6 +31,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
           booleanValue: 'black',
           nullValue: 'black',
           maximumWidth: 300,
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: 'white',
         },
       },
     },
@@ -211,6 +214,12 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
       text: '#fff',
       border: '#2D547A',
       arrow: '#2D547A',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'silver': {
@@ -221,6 +230,12 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
       text: '#336699',
       border: '#BEBEBE',
       arrow: '#BEBEBE',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'sketchy-outline': {
@@ -231,6 +246,12 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
       text: '#2E2E2E',
       border: '#2E2E2E',
       arrow: '#2E2E2E',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'sketchy': {
@@ -241,6 +262,12 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
       text: '#FFFFFF',
       border: '#2E2E2E',
       arrow: '#2E2E2E',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'spacelab-white': {
@@ -261,6 +288,9 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
           numberValue: '#FFFFFF',
           booleanValue: '#FFFFFF',
           nullValue: '#FFFFFF',
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+          highlightBackground: 'white',
         },
       },
     },
@@ -273,6 +303,12 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
       text: '#FFFFFF',
       border: '#304D6D',
       arrow: '#304D6D',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'sunlust': {
@@ -304,6 +340,12 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
       text: '#DF691A',
       border: '#E58748',
       arrow: '#E58748',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'superhero': {
@@ -314,6 +356,12 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
       text: '#FFF',
       border: '#E58748',
       arrow: '#E58748',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'toy': {
@@ -344,6 +392,12 @@ export const BUILTIN_THEMES_P_V: Record<string, ThemeOverride> = {
       text: '#fff',
       border: '#D24C1D',
       arrow: '#D24C1D',
+      graph: {
+        json: {
+          nodeLineThickness: 1,
+          separatorThickness: 1,
+        },
+      },
     },
   },
   'vibrant': {
