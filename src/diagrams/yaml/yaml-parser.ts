@@ -49,32 +49,46 @@ export function parseYamlLines(lines: string[]): Monomorph {
     return parts.join(' ');
   }
 
-  // Collect subsequent lines that are EMPTY_LINE or NO_KEY_ONLY_TEXT with
-  // indent > the current key's indent. Advance i past each consumed line.
-  // Port of YamlParser.getBlockStyleString().
+  /**
+   * Port of `YamlParser#getBlockStyleString` (`yaml/parser/YamlParser.java`).
+   *
+   * Two details this previously got wrong, both visible in
+   * `yaml/ketunu-15-poli031`'s `text: |` block:
+   *
+   *  - **The indent guard belongs to the TERMINATING test only.** Upstream
+   *    stops at a line that is not text, not empty, AND indented no more than
+   *    the key. It never requires an indent of the lines it consumes. So a
+   *    line typed `NO_KEY_ONLY_TEXT` or `EMPTY_LINE` is swallowed at ANY
+   *    indent -- including one at the parent key's own indent, which strict
+   *    YAML would treat as ending the block.
+   *  - **It appends the RAW line, not the parsed value.** `cleanBlockStyle` is
+   *    just `s.trim()` (`YamlParser.java:151-154`, marked "Not finished!").
+   *    That matters because `YamlLine#removeYamlComment` blanks a line whose
+   *    first character is `#` (`YamlLine.java:210-211`), typing it as
+   *    `EMPTY_LINE` -- so a comment inside a block carries no parsed value but
+   *    its raw text still lands in the block. A `# comment` inside `text: |`
+   *    is therefore literal content, exactly as YAML says it should be, and
+   *    one directly after the block is pulled in too.
+   *
+   * Upstream appends a `\n` after EVERY part including the last, and does not
+   * trim trailing blanks; both are reproduced.
+   */
   function getBlockStyleString(indent: number): string {
-    const parts: string[] = [];
+    let result = '';
     while (i < lines.length) {
-      const line = build(lines[i]!);
-      if (line.type === YamlLineType.EMPTY_LINE) {
-        i++;
-        // empty lines within block scalar are preserved as empty entries
-        parts.push('');
-        continue;
-      }
+      const raw = lines[i]!;
+      const line = build(raw);
       if (
-        line.type === YamlLineType.NO_KEY_ONLY_TEXT &&
-        line.indent > indent
+        line.type !== YamlLineType.NO_KEY_ONLY_TEXT &&
+        line.type !== YamlLineType.EMPTY_LINE &&
+        line.indent <= indent
       ) {
-        parts.push(line.value!.trim());
-        i++;
-      } else {
         break;
       }
+      result += raw.trim() + '\n';
+      i++;
     }
-    // Trim trailing empty entries, then join with \n + trailing \n
-    while (parts.length > 0 && parts[parts.length - 1] === '') parts.pop();
-    return parts.join('\n') + (parts.length > 0 ? '\n' : '');
+    return result;
   }
 
   while (i < lines.length) {
