@@ -8,6 +8,7 @@ import {} from './paint.js';
 import type {} from './paint.js';
 import { attrs, escapeXmlText, resolvePaint, resolvePaintAttrs, attrsFromRecord, strokeDecorationOf, ROOT_FONT_FAMILY, PAINT_NONE, type BoxStyle, type LineStyle, type TextStyle, type SvgAttrsPaint } from './svg.js';
 import { DEFAULT_SVG_DECIMALS, fmt, formatOpacity, shortenColor } from './svg-format.js';
+import { roundedCornerAttrs } from './svg-rect-corners.js';
 
 /**
  * `<rect>` element.
@@ -32,8 +33,7 @@ export function rect(
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
-    ['rx', style.rx],
-    ['ry', style.ry],
+    ...roundedCornerAttrs(style.rx, style.ry),
     ['opacity', opacity],
     ['filter', style.filter],
   ] as const);

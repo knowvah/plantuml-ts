@@ -103,9 +103,16 @@ describe('JSON style: highlight BackGroundColor override', () => {
 // ---------------------------------------------------------------------------
 
 describe('JSON style: RoundCorner', () => {
-  it('kusule-69: RoundCorner 0 produces rx="0" on node rect', () => {
+  it('kusule-69: RoundCorner 0 emits NO rx/ry on the node rect', () => {
+    // This test previously asserted `rx="0"`, which encoded a defect: upstream
+    // guards both attributes behind `if (rx > 0 && ry > 0)`
+    // (`SvgGraphics.java:580-583`), so a zero radius removes them rather than
+    // writing zeros. Every cached `<style> … RoundCorner: 0` golden agrees.
     const svg = renderSync(getMarkup('kusule-69'));
-    expect(svg).toContain('rx="0"');
+    expect(svg).not.toContain('rx="0"');
+    expect(svg).not.toContain('ry="0"');
+    // Still a real render, so the assertion cannot pass vacuously.
+    expect(svg).toContain('<rect');
   });
 
   it('noleta-28: RoundCorner 4 produces rx="2" on node rect', () => {
