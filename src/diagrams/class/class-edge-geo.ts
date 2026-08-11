@@ -263,18 +263,24 @@ function buildStrokeOverride(
   rel: Relationship,
   dashed: boolean,
   defaultArrowThickness: number | undefined,
-): Pick<EdgeGeo, 'strokeWidth' | 'strokeDasharray' | 'colorOverride'> {
+): Pick<EdgeGeo, 'strokeWidth' | 'strokeDasharray' | 'colorOverride' | 'stereotypeTags'> {
   // G2 N51: `skinparam arrowThickness N` -- a theme-level DEFAULT thickness
   // every edge picks up when it carries no bracket override of its own,
   // see `theme.ts#arrowThickness`'s doc comment for the exact upstream
   // `LinkType#getStroke3(UStroke defaultThickness)` formula this reduces
   // to (a per-edge bracket override always wins over this default).
+  // B7/M8: the link's `<<tag>>` labels ride along regardless of whether the
+  // edge carries a bracket override -- they are resolved against
+  // `theme.colors.graph.arrowTagCascade` at render time, not here.
+  const tags = rel.stereotypeTags !== undefined && rel.stereotypeTags.length > 0
+    ? { stereotypeTags: rel.stereotypeTags }
+    : {};
   const hasOverride =
     rel.lineStyleOverride !== undefined ||
     rel.thicknessOverride !== undefined ||
     rel.colorOverride !== undefined ||
     defaultArrowThickness !== undefined;
-  if (!hasOverride) return {};
+  if (!hasOverride) return tags;
   const style = rel.lineStyleOverride ?? (dashed ? 'dashed' : 'solid');
   const stroke = strokeForStyle(style, rel.thicknessOverride ?? defaultArrowThickness);
   const dasharray = stroke.getDasharraySvg();
@@ -282,6 +288,7 @@ function buildStrokeOverride(
     strokeWidth: stroke.getThickness(),
     ...(dasharray !== undefined ? { strokeDasharray: dasharray } : {}),
     ...(rel.colorOverride !== undefined ? { colorOverride: rel.colorOverride } : {}),
+    ...tags,
   };
 }
 

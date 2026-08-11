@@ -861,6 +861,59 @@ filed, but "smaller than a whole subsystem" is not the same as "verified
 small", and beginning a re-scoped port at the end of a long turn is how the
 scope estimates that caused this got made in the first place.
 
+## B7 (M8) — outcome
+
+**Landed**, both halves, exactly where the diagnosis said. Four seams:
+
+1. `class-relationship-parser.ts` captures the `<<tag>>` — `REL_STEREO` was
+   spliced into `REL_RE` non-capturing. Adding the group shifted exactly one
+   index (the trailing label, m[10] → m[11]); `REL_DISPATCH_RE` is fully
+   non-capturing and unaffected. `<<a,b>>` splits on comma, each token cleaned
+   by the same `cleanStereotypeToken` a declaration's tag gets.
+2. `Relationship.stereotypeTags` → `EdgeGeo.stereotypeTags`, carried
+   regardless of whether the edge has a bracket override.
+3. `style-cascade-class.ts#arrowTagCascadeEntry` precomputes per-tag
+   `{color, thickness}` over `collectStyleTagNames`, resolved through the
+   EXISTING `resolveStyleCascade` two-subset matcher. Precomputed rather than
+   resolved at render time for the same reason `classTagCascade` already is:
+   the renderer has no `StyleMap`, only the resolved Theme. Colour and
+   thickness are ONE entry because upstream reads both off ONE merged style
+   (`SvekEdge.java:874-876`).
+4. `renderer-edge.ts` consumes it BELOW an explicit `-[#color]->` bracket
+   override and ABOVE the diagram-wide arrow cascade — the order that chain
+   already used. Multiple tags: last match wins, mirroring
+   `StyleStorage#computeMergedStyle`'s last-registered-wins rather than
+   inventing a specificity rule upstream lacks.
+
+**One thing the diagnosis did not anticipate.** `buildEdgeArrowheads`
+re-derived `edge.strokeWidth ?? 1` independently, so the arrowhead polygon
+still drew at width 1 after the line was fixed. It now takes the resolved
+width as a parameter. Upstream draws the line and its extremities from one
+`styleLine.getStroke()`, so they must agree by construction — and that
+function's own G2 N31 comment already said it existed to keep the two in sync.
+Re-deriving was the bug; passing it in removes the duplication.
+
+**Measured.** All three fixtures improve and **none flips**: `zebufu-01`
+39 → 34, `style-stereotype-on-arrow-3` 39 → 34, `style-stereotype-on-arrow-7`
+35 → 30. Census stays **31/80**. Colour and thickness are now correct on every
+one — the only non-numeric diff left anywhere in the three was the arrowhead
+stroke-width, and that is gone.
+
+**Residue is one mechanism, filed as B34/M39, not chased here.** What remains
+is geometry downstream of the thicker stroke: the canvas is short by exactly
+3px — the `linethickness` value — plus a 0.389px shift on every element and
+the spline/polygon points. `LimitFinder` walks the DRAWN shape, so a 3px line
+occupies more ink than its path geometry; our ink box uses the geometry alone.
+It was unmeasurable while the thickness itself was being dropped, which is the
+fourth time this session a fix has made the next mechanism visible.
+
+**Frozen counts — all at the B31 baselines, unmoved.** object DOT 73/80 ·
+class DOT 661/711 · component 262 · usecase 93 · state 264/267 · class SVG
+goldens 317 pass · description 48-set pass.
+
+**Quality gates.** `npm test` 574 files / 12760 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

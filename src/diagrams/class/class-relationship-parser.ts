@@ -7,6 +7,7 @@
 
 import type { Classifier, Relationship } from './ast.js';
 import { firstWithName, splitOnSeparator } from './class-namespace.js';
+import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import {
   ARROW_DIR, ARROW_STYLE, resolveArrow, parseArrowDecors, parseArrowDecorsRaw, arrowLength,
   parseArrowStyleOverrides,
@@ -163,7 +164,12 @@ const REL_RE = new RegExp(
     String.raw`\s*(?:\[([^[\]]+)\])?` +
     String.raw`\s*(${CLASS_ID})` +
     String.raw`\s*(?:${REL_COLOR})?` +
-    String.raw`\s*(?:${REL_URL})?\s*(?:${REL_STEREO})?` +
+    // B7/M8: the link's `<<stereo>>` is CAPTURED (it was `(?:...)`) -- it is a
+    // style-class selector upstream, `CommandLinkClass.java:368-371` ->
+    // `SvekEdge.java:817-822`. This inserts one group at this position, so the
+    // trailing label moved from m[10] to m[11]; REL_DISPATCH_RE below stays
+    // fully non-capturing and is unaffected.
+    String.raw`\s*(?:${REL_URL})?\s*(${REL_STEREO})?` +
     String.raw`\s*(?::\s*(.+))?$`,
   'u',
 );
@@ -383,7 +389,13 @@ export function parseRelationshipLine(line: string, nsSep: string | null = null,
   // `ast.ts#Relationship.idEntity1FullId`'s doc comment.
   const idFullNames = pickDirectional(info.upOrLeft, left.id, right.id);
   const sided = sidedRelFields(m, info.swapDirection, left, right);
-  let label = m[10]?.trim();
+  const stereotypeTags = (m[10] ?? '')
+    .replace(/^<</u, '')
+    .replace(/>>$/u, '')
+    .split(',')
+    .map((t) => cleanStereotypeToken(t.trim()))
+    .filter((t) => t.length > 0);
+  let label = m[11]?.trim();
   // Label-embedded multiplicities (Labels#init) — only when neither explicit
   // quantifier group matched (upstream: `firstLabel == null && secondLabel ==
   // null`). Decomposed ends map left→first / right→second, then go through
@@ -459,6 +471,11 @@ export function parseRelationshipLine(line: string, nsSep: string | null = null,
       // this file's own `undefined`-means-default convention) -- omitted
       // for the common (non-swapped) case, zero behavior change there.
       swapDirection: info.swapDirection === true ? true : undefined,
+      // B7/M8: the link's `<<tag>>` style-class label(s). `<<a,b>>` is a
+      // comma-separated label list upstream (`Stereotype#getLabels`), so it
+      // is split here and each token cleaned the same way
+      // `collectStyleTagNames` cleans a declaration's own tag.
+      ...(stereotypeTags.length > 0 ? { stereotypeTags } : {}),
     },
   );
 }

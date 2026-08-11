@@ -351,6 +351,11 @@ export interface EdgeGeo {
    *  doc comment) — raw, `#`-stripped color token, resolved through
    *  `HColorSet.ts#resolveColorToSvgHex` at render time. */
   colorOverride?: string;
+  /** B7/M8: copied unchanged from `Relationship.stereotypeTags` — the link's
+   *  own `<<tag>>` style-class label(s). `renderer-edge.ts` looks each up in
+   *  `theme.colors.graph.arrowTagCascade`. Absent for every link with no
+   *  `<<...>>`. */
+  stereotypeTags?: readonly string[];
 }
 
 export interface NamespaceGeo {

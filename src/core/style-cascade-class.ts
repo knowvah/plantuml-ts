@@ -60,6 +60,7 @@ type GraphCascadeOverride = Pick<
   | 'noteCascadeMaximumWidth'
   | 'noteCascadeFontColor'
   | 'classTagCascade'
+  | 'arrowTagCascade'
 >;
 
 /**
@@ -180,6 +181,32 @@ function classTagCascadeEntry(
 }
 
 /**
+ * B7/M8: the per-`.tagname` ARROW entry — `linecolor` and `linethickness`
+ * resolved against {@link ARROW_SNAMES} with the tag as the element's own
+ * stereotype label.
+ *
+ * Both properties come off ONE merged style upstream (`SvekEdge.java
+ * :874-876`: `Rainbow.build(styleLine, …)` and `styleLine.getStroke()`,
+ * whose thickness is `PName.LineThickness`, `Style.java:261-263`), so they
+ * are resolved together here rather than as two independent cascades.
+ * Mirrors {@link classTagCascadeEntry} exactly in shape.
+ */
+function arrowTagCascadeEntry(
+  styleMap: StyleMap,
+  tag: string,
+): NonNullable<Theme['colors']['graph']['arrowTagCascade']>[string] | undefined {
+  const entry: NonNullable<Theme['colors']['graph']['arrowTagCascade']>[string] = {};
+  const color = cascadeHex(styleMap, ARROW_SNAMES, 'linecolor', [tag]);
+  if (color !== undefined) entry.color = color;
+  const thicknessRaw = resolveStyleCascade(styleMap, ARROW_SNAMES, 'linethickness', [tag]);
+  if (thicknessRaw !== undefined) {
+    const n = Number(thicknessRaw);
+    if (Number.isFinite(n)) entry.thickness = n;
+  }
+  return Object.keys(entry).length > 0 ? entry : undefined;
+}
+
+/**
  * B4 (mission A2s): `skinparam wrapWidth` bridged into the MaximumWidth
  * cascade DEFAULTS. Upstream `FromSkinparamToStyle.java:250` converts the
  * skinparam into a `PName.MaximumWidth` declaration on `SName.element` --
@@ -291,6 +318,13 @@ export function computeClassStyleCascadeOverrides(
     if (entry !== undefined) tagCascade[cleanStereotypeToken(tag)] = entry;
   }
   if (Object.keys(tagCascade).length > 0) override.classTagCascade = tagCascade;
+  // B7/M8: the ARROW half of the same per-tag precomputation.
+  const arrowCascade: Record<string, NonNullable<Theme['colors']['graph']['arrowTagCascade']>[string]> = {};
+  for (const tag of collectStyleTagNames(styleMap)) {
+    const entry = arrowTagCascadeEntry(styleMap, tag);
+    if (entry !== undefined) arrowCascade[cleanStereotypeToken(tag)] = entry;
+  }
+  if (Object.keys(arrowCascade).length > 0) override.arrowTagCascade = arrowCascade;
   return override;
 }
 

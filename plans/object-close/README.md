@@ -47,7 +47,7 @@ ledger.
 |---|---|---|---|
 | [batch-0](batch-0/overview.md) | Clean tree + honest baseline + freshness guard | T0→T1→T2 (sequential) | [x] |
 | [batch-1](batch-1/overview.md) | Re-audit all 57 non-conformant fixtures | T3‖T4a‖T4b‖T5a‖T5b → T6 | [x] |
-| [batch-2](batch-2/overview.md) | Governed fix loop (B0…Bn) | loop — B0–B6, B10, B25, B31 landed; object census 23 → **31/80**, ratchet 22 → 30 | [ ] |
+| [batch-2](batch-2/overview.md) | Governed fix loop (B0…Bn) | loop — B0–B7, B10, B25, B31 landed; object census 23 → **31/80**, ratchet 22 → 30 | [ ] |
 | [batch-3](batch-3/overview.md) | Close-out: divergences, index, filings | T7→T8→T9 | [ ] |
 
 ## Quality gates — all four, every task, before any commit

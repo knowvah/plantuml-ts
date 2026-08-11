@@ -454,7 +454,38 @@ We swap on the arrowhead decor, and un-swap only for extension/implementation.
   reversal). **Re-measure the class DOT + SVG gates with this one.**
 - Cheapest high-reach item in the queue: a single predicate.
 
-## M8 — a link's `<<stereo>>` never reaches the arrow style signature; the arrow cascade never reads `LineThickness` — **reach 3**
+## M8 — a link's `<<stereo>>` never reaches the arrow style signature; the arrow cascade never reads `LineThickness` — **reach 3** — **LANDED at B7**
+
+> **B7 outcome (2026-08-11).** Both halves landed and both are now correct on
+> all three fixtures — the edge and its arrowhead draw `#00F` at width 3 where
+> we drew `#181818` at width 1. **None of the three flips**, and the census
+> stays 31/80: `zebufu-01` 39 → 34, `style-stereotype-on-arrow-3` 39 → 34,
+> `style-stereotype-on-arrow-7` 35 → 30.
+>
+> Implemented as the audit predicted — by CALLING the existing
+> `resolveStyleCascade` two-subset matcher, not by building new matching
+> machinery. Four seams: the parser captures the `<<tag>>` (`REL_STEREO` was
+> spliced in non-capturing; the label group moved m[10] → m[11]),
+> `Relationship`/`EdgeGeo` carry `stereotypeTags`,
+> `style-cascade-class.ts#arrowTagCascadeEntry` precomputes per-tag
+> `{color, thickness}` over `collectStyleTagNames` (the renderer has no
+> `StyleMap`, only the Theme — same reason `classTagCascade` is precomputed),
+> and `renderer-edge.ts` consumes it below a bracket override and above the
+> diagram-wide cascade.
+>
+> `buildEdgeArrowheads` now takes the RESOLVED width rather than re-deriving
+> `edge.strokeWidth ?? 1`: upstream draws the line and its extremities from
+> one `styleLine.getStroke()` (`SvekEdge.java:874-876`), and the old
+> re-derivation silently missed a tag-sourced width. Its own G2 N31 comment
+> already required the two to stay in sync.
+>
+> **Residue is a separate mechanism — filed as B34/M39.** What remains on all
+> three is geometry downstream of the thicker stroke: canvas 140 vs 143 (the
+> delta is exactly the 3px `linethickness`), 0.389px shifts on rects/text/the
+> header rule, and the spline/polygon points. Our ink extent measures the path
+> geometry without its stroke width, so a 3px line reserves the same box as a
+> 1px one. That is one mechanism, not three fixtures' worth, and it is
+> orthogonal to the style lookup this row fixed.
 
 - **Java:** `CommandLinkClass.java:369-371`
   (`link.setStereotype(Stereotype.build(arg.get("STEREOTYPE", 0)))`) →
@@ -735,7 +766,8 @@ the class census/DOT gate in the same pass.
 | ~~B4~~ | **M5** — `classAttributeIconSize` → visibility glyph | 4 | — | `vocute-12`, `nulixu-97` after B2 | Render-only, never reaches the DOT. Independently rediscovered by two audits.  **DONE — landed `d5950f53`; row was never struck by that iteration, corrected at B7.** |
 | ~~B5~~ | **M6** — `LimitFinder` `-1` ink max-corner inset | 4 | — | landed: `jabote-02`, `jotaga-99`, plus unpredicted `fafozi-27` | **DONE 2026-08-11.** Gate is NARROWER than this row proposed, not wider: only `EntityImageObject.java:110-113`'s empty-but-SHOWN branch. The "field list is empty" gate regressed pinned `kexica-21`; see M6's B5 correction block for the three-way jar control set. Census 23 → 26; class ratchet (317 goldens) and all five DOT counts unmoved. `beleso-08`'s 1px residual was M6 and is resolved. |
 | ~~B6~~ | **M7** — decor-driven endpoint swap | 3 | — | landed: all three, 19 → 0 each | **DONE 2026-08-11.** Not "a single predicate": the fix is at the dot boundary (`dotEdgeRunsReversed`), plus `swappedEdges` which fed decor pairing from a DIFFERENT predicate than emission used. Census 26 → 29. Class DOT unmoved at 689/711 — because the comparator is orientation-blind, see B31, not because the corpus was untouched. |
-| B7 | **M8** — link `<<stereo>>` → arrow style signature + `LineThickness` reader | 3 | After B2 (all three fixtures also carry M2) | none alone | `resolveStyleCascade` already does the two-subset match; `babcfa94` is precedent for the shape only. |
+| ~~B7~~ | **M8** — link `<<stereo>>` → arrow style signature + `LineThickness` reader | 3 | — | none — all three improve, none flips | **DONE 2026-08-11.** Colour AND thickness now correct on all three (39→34, 39→34, 35→30); census 31/80 unchanged. Built on the existing `resolveStyleCascade` matcher exactly as the audit said. Residue on all three is stroke-width-blind ink extent — one mechanism, filed as B34. |
+| **B34** | **M39** — ink extent ignores stroke width | 3 | — | `zebufu-01`, `style-stereotype-on-arrow-3`/`-7` | **NEW, surfaced by B7.** With `linethickness: 3` the canvas is short by exactly 3px (140 vs 143) and every element carries a 0.389px shift. `LimitFinder` walks the DRAWN shape, so a 3px-wide line/polygon occupies more ink than its path geometry; our ink box uses the geometry alone. Was invisible while the thickness itself was being dropped. |
 | B8 | **M10** — compiled theme table drops `skinparam` blocks | 2 | `fonulu-92` also needs B2 | `lunike-70` | Fix in `scripts/compile-themes.py` + regenerate. Reaches every `!theme` fixture in every corpus — **cross-type**. Confirmed by jar experiment for fonulu. |
 | B9 | **M11** — namespace phantom groups | 2 | After B2 (both fixtures also carry M2) | none alone | Parse-time, not layout. |
 | ~~B10~~ | **M12** — `monospaced` → `monospace` on the attribute half | 2 | — | landed: both, 1 → 0 each | **DONE 2026-08-11.** Prediction held exactly — one diff each, both flipped, zero collateral. Census 29 → 31. The rename is one line; the file split it forced (`svg-shapes.ts` was already 52 lines over the cap) was not. |

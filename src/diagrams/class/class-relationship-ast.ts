@@ -218,6 +218,20 @@ export interface Relationship {
    * fall back to the pre-existing `swappedEdges`-index reversal.
    * @see ~/git/plantuml/.../svek/SvekEdge.java:637-654
    */
+  /**
+   * B7/M8: the link's own `<<tag>>` style-class label(s), cleaned.
+   *
+   * Upstream `CommandLinkClass.java:368-371` builds a `Stereotype` from the
+   * arrow's STEREOTYPE group and sets it on the `Link`; `SvekEdge.java
+   * :817-822` then folds it into the arrow's style signature via
+   * `withTOBECHANGED`, which fans out one signature per label
+   * (`StyleSignatureBasic.java:119-132`) so a `<style> .tag {}` declaration
+   * matches by the stereotype half of the two-subset test. Read by
+   * `renderer-edge.ts` through `theme.colors.graph.arrowTagCascade`.
+   *
+   * Absent for every link with no `<<...>>` — the overwhelming majority.
+   */
+  stereotypeTags?: readonly string[];
   idEntity1FullId?: string;
   idEntity2FullId?: string;
   /**

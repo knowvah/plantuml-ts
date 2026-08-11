@@ -185,7 +185,18 @@ function segmentAngle(from: Point2D, to: Point2D): number {
  * points to anchor a direction on, or neither end carries a decor (a
  * plain `--` association).
  */
-export function buildEdgeArrowheads(edge: EdgeGeo, color: Paint, backgroundColor: Paint): EdgeArrowheads {
+export function buildEdgeArrowheads(
+  edge: EdgeGeo,
+  color: Paint,
+  backgroundColor: Paint,
+  // B7/M8: the ALREADY-RESOLVED stroke width, passed in rather than
+  // re-derived. Upstream draws the connecting line and its extremities from
+  // one `styleLine.getStroke()` (`SvekEdge.java:874-876`), so the two must
+  // agree by construction; `edge.strokeWidth ?? 1` alone misses a width that
+  // came from the link's own `<<tag>>` style class. Optional so every
+  // existing caller (and the unit tests) keeps the pre-B7 default.
+  resolvedStrokeWidth?: number,
+): EdgeArrowheads {
   const tailName = decorName(edge.sourceDecor);
   const headName = decorName(edge.targetDecor);
   if (tailName === undefined && headName === undefined) return EMPTY_ARROWHEADS;
@@ -202,10 +213,12 @@ export function buildEdgeArrowheads(edge: EdgeGeo, color: Paint, backgroundColor
   let tailTrim: Point2D | undefined;
   let headTrim: Point2D | undefined;
 
-  // G2 N31: same default (1) `renderer.ts#renderEdge`'s own connecting
-  // `<path strokeWidth={geo.strokeWidth ?? 1}>` already uses -- keeps both
-  // shapes' thickness in sync whether or not a bracket override is present.
-  const strokeWidth = edge.strokeWidth ?? 1;
+  // G2 N31: same value `renderer.ts#renderEdge`'s own connecting `<path>`
+  // uses -- keeps both shapes' thickness in sync whether or not a bracket
+  // override is present. B7/M8 passes the resolved width in (it may come
+  // from the link's `<<tag>>` style class, which this module cannot see);
+  // the `edge.strokeWidth ?? 1` fallback is the pre-B7 behavior verbatim.
+  const strokeWidth = resolvedStrokeWidth ?? edge.strokeWidth ?? 1;
   if (tailName !== undefined) {
     // Tail decor faces AWAY from the edge (back toward where it came
     // from) -- the travel direction leaving the start point (first ->
