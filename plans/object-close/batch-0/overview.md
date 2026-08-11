@@ -10,7 +10,7 @@ downstream number is measured against the oracle T1 re-captures.
 |---|---|---|---|---|---|
 | [T0](T0-land-inflight-fontsize.md) | Finish + commit the in-flight `skinparam <sname>FontSize<<label>>` mechanism; resolve the `CLAUDE.md` hunk separately | typescript-pro | `src/core/{preprocessor,skinparam-stereo-keys,theme-graph-colors}.ts`, `src/diagrams/class/class-object-map-sizing.ts`, `tests/unit/**`, `CLAUDE.md` | — | [x] |
 | [T1](T1-recapture-oracle.md) | Re-capture `test-results/dot-cache/object/` through the pinned jar; regenerate `parity-object.json`; record the true baseline | general-purpose | `test-results/dot-cache/object/**`, `tests/oracle/svg-conformance/parity-object.json`, `plans/object-close/decision-journal.md` | T0 | [x] |
-| [T2](T2-freshness-guard.md) | Oracle freshness guard (D4) | typescript-pro | `tests/oracle/svg-conformance/oracle-freshness.test.ts`, `scripts/svg-conformance-census.ts` | T1 | [ ] |
+| [T2](T2-freshness-guard.md) | Oracle freshness guard (D4) | typescript-pro | `tests/oracle/svg-conformance/oracle-freshness.test.ts`, `scripts/svg-conformance-census.ts` | T1 | [x] |
 
 ### T0 — landed as `babcfa94`, with two amendments to the plan
 
