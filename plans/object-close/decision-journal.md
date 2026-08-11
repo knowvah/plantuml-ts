@@ -1012,6 +1012,56 @@ the load-bearing check here.
 **Quality gates.** `npm test` 574 files / 12760 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped.
 
+## B20 (M19) — entity URL wrapper: the ledger's origin pointer was wrong again
+
+**Mechanism.** Upstream wraps the WHOLE entity image in the declaration's
+`[[url]]`: `EntityImageObject.drawU` opens `ug.startUrl(url)` before the rect
+and closes it after the body (`:186-187`, `:211-212`), so the jar emits
+`<g class="entity"><a …>rect,text,line…</a></g>` — one child. We emitted the
+four children bare, and no `<a>` anywhere.
+
+**The ledger pointed at `renderer-group.ts:78`. The bug was in the parser.**
+Our render path was already complete: `ClassifierGeo.url` exists (G2 N15),
+`class-geo-builders` copies it, and `renderer-url.ts#wrapClassifierBody`
+already defaults every primitive's effective url to `geo.url` — which merges
+the whole body into one `<a>` run, exactly the jar's shape. It never fired
+because `geo.url` was `undefined`.
+
+`class-object-commands.ts`'s `URL` fragment was `(?:\s*\[\[[^\]]*\]\])?`
+— non-capturing — under a comment stating "matched and discarded: `Classifier`
+has no `url` field". That comment went stale at G2 N15, which added
+`Classifier.url` and wired the class-declaration path
+(`class-declaration-parser.ts:228`). Nobody revisited the object path, so
+`class Foo [[url]]` worked and `object foo [[url]]` silently did not.
+
+The fix is one capture group plus `classifier.url = parseUrlBracket(raw)`.
+No renderer change at all.
+
+**That is now three iterations running where the ledger's `Ours:` pointer
+named the symptom site rather than the origin** — B21 (`renderer-uid.ts`,
+fixed at the counter), B20 (`renderer-group.ts`, fixed in the grammar), and
+B34's outright falsification. The audits located where the wrong output is
+visible, which is not the same question as where the wrong value is produced.
+Worth treating every `Ours:` line as a starting point, not a destination.
+
+**Measured.** `jocamu-71` **3 → 2**: the `childCount` 4-vs-1 is resolved.
+Census stays **32/80**; nothing else in the corpus moved (no other object
+fixture declares an entity URL).
+
+**Residual, filed as B35/M40, deliberately unattributed.** 1px on
+`@width`/`viewBox[2]` only — every rect, text and line matches exactly, zero
+non-numeric diffs. Both mechanisms this fixture was filed under are now fixed,
+so this is a genuinely new ink-extent max-X question on a fixture whose max-X
+comes from the populated sibling `p2` (established at B5). I am not naming a
+mechanism for it from the shape of the number; B34 this session is exactly
+what that produces.
+
+**Frozen counts — all at the B31 baselines.** object DOT 73/80 · class DOT
+661/711 · component 262 · usecase 93 · state 264/267 · 317 class goldens pass.
+
+**Quality gates.** `npm test` 574 files / 12761 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

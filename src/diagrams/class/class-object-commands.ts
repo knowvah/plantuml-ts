@@ -30,7 +30,8 @@
  * @see ~/git/plantuml/.../objectdiagram/ClassDiagramFactory.java (registration)
  */
 
-import type { Member, Visibility } from './ast.js';
+import type { Classifier, Member, Visibility } from './ast.js';
+import { parseUrlBracket } from './class-url.js';
 import { resolveReference } from './class-namespace.js';
 import { ensureClassifier, type ParseState } from './parser.js';
 
@@ -67,11 +68,20 @@ const NAME_AND_CODE =
 const STEREO = '(?:\\s*<<\\s*(.+?)\\s*>>)?';
 
 /**
- * `UrlBuilder.OPTIONAL` — matched and discarded: `Classifier` has no `url`
- * field (mirrors class-declaration-parser.ts's `extractDecorations`, which
- * strips a declaration's `[[url]]` the same way).
+ * `UrlBuilder.OPTIONAL`.
+ *
+ * B20/M19: now CAPTURED, not discarded. The old comment here ("`Classifier`
+ * has no `url` field") went stale at G2 N15, which added `Classifier.url`
+ * and threaded it all the way to `ClassifierGeo.url` and the renderer's
+ * `<a>`-run merge (`renderer-url.ts#wrapClassifierBody`, which already
+ * defaults every primitive to `geo.url`). The class-declaration path was
+ * wired up then (`class-declaration-parser.ts:228`); the object path kept
+ * discarding, so `object … [[url]]` rendered with no `<a>` at all while
+ * `class … [[url]]` worked. Upstream draws no distinction: both go through
+ * `getEntityImage`'s `if (url != null) ug.startUrl(url)` wrapper
+ * (`EntityImageObject.java:186-187`, `:211-212`).
  */
-const URL = '(?:\\s*\\[\\[[^\\]]*\\]\\])?';
+const URL = '(?:\\s*(\\[\\[[^\\]]*\\]\\]))?';
 
 /**
  * `ColorParser.exp1()` — the SAME `COLORS_REGEXP` grammar classifier
@@ -90,7 +100,7 @@ const COLOR =
  * `(?!.*\{\s*$)` lookahead excludes any line ending in `{` — the multi-line
  * opener is a separate command (see file doc); without the guard this
  * pattern would swallow `object foo {` lines that command must own.
- * Capture groups: 1-6 NAME_AND_CODE, 7 STEREO, 8 COLOR.
+ * Capture groups: 1-6 NAME_AND_CODE, 7 STEREO, 8 URL, 9 COLOR.
  */
 const OBJECT_DECL_RE = new RegExp(
   '^object\\s+(?!.*\\{\\s*$)' + NAME_AND_CODE + STEREO + URL + '\\s*' + COLOR + '\\s*$',
@@ -113,7 +123,25 @@ interface ObjectMatch {
   rawId: string;
   rawDisplay: string | undefined;
   stereotype: string | undefined;
+  /** B20/M19: the RAW `[[...]]` bracket, including its brackets --
+   *  `class-url.ts#parseUrlBracket` expects the full text. */
+  url: string | undefined;
   color: string | undefined;
+}
+
+/** B20/M19: parse and apply a declaration's `[[url]]` bracket. Upstream
+ *  wraps the WHOLE entity image in it (`EntityImageObject.java:186-187`,
+ *  `:211-212` — `ug.startUrl(url)` / `ug.closeUrl()` around the rect, header
+ *  and body), which this port reaches by setting `Classifier.url`: the geo
+ *  builder copies it to `ClassifierGeo.url` and
+ *  `renderer-url.ts#wrapClassifierBody` already defaults every primitive's
+ *  effective url to it, merging the body into ONE `<a>` run. Malformed
+ *  brackets yield `undefined` from `parseUrlBracket` (mirroring
+ *  `UrlBuilder#getUrl` returning null) and are left unset. */
+function applyObjectUrl(classifier: Classifier, raw: string | undefined): void {
+  if (raw === undefined) return;
+  const parsed = parseUrlBracket(raw);
+  if (parsed !== undefined) classifier.url = parsed;
 }
 
 /**
@@ -132,7 +160,8 @@ function parseObjectMatch(match: RegExpExecArray): ObjectMatch {
     rawId: (rawCode ?? rawDisplay)!,
     rawDisplay,
     stereotype: match[7]?.trim(),
-    color: match[8],
+    url: match[8],
+    color: match[9],
   };
 }
 
@@ -165,7 +194,7 @@ function parseObjectMatch(match: RegExpExecArray): ObjectMatch {
  * distinction, `ensureClassifier` does not expose it.
  */
 function applyObjectDecl(state: ParseState, match: RegExpExecArray): void {
-  const { rawId, rawDisplay, stereotype, color } = parseObjectMatch(match);
+  const { rawId, rawDisplay, stereotype, url, color } = parseObjectMatch(match);
 
   const { id } = resolveReference({
     namespaces: state.ast.namespaces,
@@ -181,6 +210,7 @@ function applyObjectDecl(state: ParseState, match: RegExpExecArray): void {
 
   const classifier = ensureClassifier(state, rawId, 'object', rawDisplay, true);
   if (stereotype !== undefined) classifier.stereotype = stereotype;
+  applyObjectUrl(classifier, url);
   if (color !== undefined) classifier.color = color;
 }
 
@@ -196,9 +226,10 @@ function applyObjectDecl(state: ParseState, match: RegExpExecArray): void {
  * @see ~/git/plantuml/.../objectdiagram/command/CommandCreateEntityObjectMultilines.java:152-177
  */
 function applyObjectMultilineOpen(state: ParseState, match: RegExpExecArray): void {
-  const { rawId, rawDisplay, stereotype, color } = parseObjectMatch(match);
+  const { rawId, rawDisplay, stereotype, url, color } = parseObjectMatch(match);
   const classifier = ensureClassifier(state, rawId, 'object', rawDisplay, true);
   if (stereotype !== undefined) classifier.stereotype = stereotype;
+  applyObjectUrl(classifier, url);
   if (color !== undefined) classifier.color = color;
   state.pendingBodyId = classifier.id;
 }
