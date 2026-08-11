@@ -45,7 +45,7 @@ ledger.
 
 | Batch | Description | Tasks | Status |
 |---|---|---|---|
-| [batch-0](batch-0/overview.md) | Clean tree + honest baseline + freshness guard | T0→T1→T2 (sequential) | [ ] |
+| [batch-0](batch-0/overview.md) | Clean tree + honest baseline + freshness guard | T0→T1→T2 (sequential) | [x] |
 | [batch-1](batch-1/overview.md) | Re-audit all 57 non-conformant fixtures | T3‖T4‖T5 → T6 | [ ] |
 | [batch-2](batch-2/overview.md) | Governed fix loop (O5…On) | loop | [ ] |
 | [batch-3](batch-3/overview.md) | Close-out: divergences, index, filings | T7→T8→T9 | [ ] |
