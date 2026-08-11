@@ -41,6 +41,57 @@ this file from disk, never trust a remembered number.**
 | 2026-08-11 | T1 | Survey concurrency 6 (the script default) produced 80/80 `timeout` — a silently WRONG file, not an error | Re-ran at `SVG_PARITY_CONCURRENCY=2` (the value my own notes already recorded for committed runs) with a 60s timeout: 23 conformant / 21 structural-match / 36 diverged, zero timeouts | first run wrote `{"timeout":80}`; second `{"conformant":23,...}` |
 | 2026-08-11 | T0 | Frozen-count denominators differ from the brief for class (711 vs 708) and usecase (93 vs 90) | Both report 100% EQUAL with zero diverging checks, so nothing regressed — the brief's denominators are stale, not the health. Not treated as stop condition #2 | `dot-sync-report.ts`: class 711/711, usecase 93/93, component 262/262, state 267/267, object 78/80 |
 
+## B1 (M1+M4) — diagnosis, written BEFORE any code change
+
+**Mechanism.** Upstream routes every map, every JSON, and every port-bearing
+object/class through `SvekNode#appendShape`'s `RECTANGLE_HTML_FOR_PORTS` branch
+(`svek/SvekNode.java:132-135`) into `appendLabelHtmlSpecialForLink`
+(`:269-311`). That routine asks the image for its `Ports`
+(`((WithPorts) image).getPorts(stringBounder)`), then emits a `shape=plaintext`
+node whose HTML `<TABLE>` carries, per port in ascending-position order, a
+filler `<TR>` for the gap since the last port and then a
+`<TR><TD … PORT="p<md5>" HEIGHT="…">` for the port's own band — closing with a
+trailer row for `getHeight() - sum`. **It emits no `width`/`height` attribute at
+all**; graphviz sizes the node from the label and pads it.
+
+We emit a 3×3 `shieldTable` with a single `PORT="h"`
+(`src/core/svek-dot-emit.ts:92-107`, placeholder constants `SHIELD_MARGIN_X=1`/
+`SHIELD_MARGIN_Y=16` at `:89-90`) and anchor every edge as `:h`
+(`:169` — `:h` is the only suffix `edgeRef` can produce for a plaintext node).
+
+**Origin, ours.** `src/core/svek-dot-emit.ts:150-152` (no
+`appendLabelHtmlSpecialForLink` analogue) and
+`src/core/graph-layout-build.ts:47-49` (`layoutShape` folds `plaintext`→`box`)
++ `:160-169` (`fixedsize:'true'`, `label:''`, explicit width/height).
+
+**Causal chain.** No ports emitted ⇒ every edge anchors to the whole node
+instead of a member row ⇒ tail/head y is the box centre, not the row band ⇒
+splines leave from the wrong place, and the node's own footprint is the raw
+measured label with none of graphviz's own padding ⇒ every downstream
+coordinate is 16px tight horizontally / 8px tight vertically.
+
+**Ruled out.** Not the layout engine: `@knowvah/dot-engine` ports `poly_init`'s
+sizing faithfully, `GAP = 4` included
+(`dist/common/poly-sizing.d.ts`) — it pads correctly when given a label
+dimension. The padding is missing because our adapter hands it
+`fixedsize:'true'` with a pre-measured box and an EMPTY label, so there is no
+label for `polySize` to pad. That is our call site, not the engine's arithmetic.
+
+**Already ported, do not rebuild** (checked per CLAUDE.md's catalog rule):
+`src/core/svek/Ports.ts` (full, including `encodePortNameToId`),
+`src/core/svek/PortGeometry.ts`, `src/core/utils/SignatureUtils.ts#getMD5Hex`,
+and `getPorts` implementations on `MethodsOrFieldsArea`/`SheetBlock2`. The
+model exists; **what is missing is the wiring** from it into `DotInputNode`/
+`DotInputEdge` and the emitter. `getPorts()` currently has no DOT-building
+caller anywhere in `src/`.
+
+**Open design question handed to the implementer.** The engine's `polySize`
+takes `labelDimen`; our builder's `addNode` takes DOT attrs. Making the engine
+pad requires handing it the table's dimensions as a LABEL rather than as
+`width`/`height` + `fixedsize`. Whether the builder exposes that today is
+unverified — it decides whether M4 is a call-site change or needs an adapter
+seam.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).
