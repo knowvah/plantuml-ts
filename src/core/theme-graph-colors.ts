@@ -93,6 +93,17 @@ export interface ElementColors {
    *  (`FromSkinparamToStyle.java:200`). Consulted BEFORE {@link headerFontSize}
    *  and the bare {@link fontSize}. */
   fontSizeByStereo?: Readonly<Record<string, number>>;
+  /** B13/M22: `skinparam <sname>BackgroundColor<<label>>` (and the block
+   *  form the preprocessor normalizes to the same key) — the element's own
+   *  background under a stereotype, keyed by RAW label. Upstream reaches it
+   *  generically: `FromSkinparamToStyle`'s ctor splits `<<...>>` off ANY key
+   *  (`:292-302`) and `addStyle` re-signs the resulting signature with
+   *  `.addStereotype(s)` at +1000 priority (`:396-410`,
+   *  `StyleLoader.java:178-186`). Consulted BEFORE the bare
+   *  {@link backgroundColor}. Exact mirror of {@link fontSizeByStereo}'s
+   *  shape — see `skinparam-stereo-keys.ts` for why this port models the
+   *  generic mechanism as per-key matchers and what that costs. */
+  backgroundColorByStereo?: Readonly<Record<string, string>>;
   /**
    * mission skin-file-loading (deferred D3 item, class+description
    * shadow): `<sname>Shadowing` skinparam (flat `skinparam databaseShadowing

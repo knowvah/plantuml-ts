@@ -1062,6 +1062,50 @@ what that produces.
 **Quality gates.** `npm test` 574 files / 12761 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped.
 
+## B13 (M22, BackgroundColor arm) — and a scope call I want on the record
+
+**Mechanism.** Upstream supports `<<stereo>>` on EVERY skinparam key for
+free: `FromSkinparamToStyle`'s constructor tokenizes the raw key on `<>` and
+splits the stereotype off BEFORE any key lookup (`:292-302`), then `addStyle`
+re-signs the resulting signature with `.addStereotype(s)` (splitting on `&`)
+and bumps priority via `StyleLoader.addPriorityForStereotype` (`:396-410`,
+`StyleLoader.java:178-186`). There is no per-key table anywhere.
+
+This port models it as a per-key allowlist, `STEREO_KEY_MATCHERS`. That IS
+the structural divergence M22 names, and `objectBackgroundColor<<azerty>>`
+simply had no row, so `majake-62`'s `foo3` drew red where the jar draws green.
+
+**The scope call.** CLAUDE.md says re-mirror rather than patch with special
+cases, so I measured the re-mirror before choosing: **7 matcher rows, 13
+`*ByStereo` accumulator fields, 63 consumer sites** across `src/`. Generic
+support means replacing the flat `<prop>ByStereo` maps with a
+signature+stereotype store and rewriting every one of those consumers — a
+redesign of the skinparam→Theme shape, and separable from object closure.
+
+So I added the row, mirroring `babcfa94`'s `applyElementFontSizeByStereo`
+exactly (same `ELEMENT_BUCKET_SNAMES` gate, same ordering contract: it runs
+after the whole matcher table because its `\w+` prefix also matches
+`statebackgroundcolor<<X>>`, whose own entry must win). `babcfa94` set that
+precedent inside this mission under review, and following it keeps the two
+arms symmetrical.
+
+**I want this on the record as a knowing patch, not a fix.** It deepens a
+divergence the ledger already names. The difference from a silent patch is
+that the generic form is now measured, cited, and tracked in M22's own row
+rather than described as "larger" on nobody's evidence — which is exactly the
+failure the D7 audit turned up earlier today.
+
+**Measured.** `majake-62-pero492` **1 → 0** (its only diff was `g[3]` `@fill`,
+`#F00` vs `#008000`). Census **32 → 33/80**, nothing else moved, ratcheted (32
+pinned). Also retired the stale "SEPARATE, larger, deferred mechanism" note in
+`renderer-classifier-colors.ts` — it predated `babcfa94`.
+
+**Frozen counts — all at the B31 baselines.** object DOT 73/80 · class DOT
+661/711 · component 262 · usecase 93 · state 264/267 · 317 class goldens pass.
+
+**Quality gates.** `npm test` 574 files / 12761 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

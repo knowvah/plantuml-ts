@@ -117,6 +117,11 @@ const ELEMENT_STEREOTYPE_FONT_SIZE_STEREO_RE = new RegExp('^(\\w+)stereotypefont
 // {@link STEREO_KEY_MATCHERS}, so the specific spellings claim their keys
 // first. Running it earlier silently swallowed `statefontsize<<X>>`.
 const ELEMENT_FONT_SIZE_STEREO_RE = new RegExp('^(\\w+)fontsize<<(.+)>>$');
+/** B13/M22: `skinparam <sname>BackgroundColor<<label>>`. Same `\\w+`-prefix
+ *  hazard as {@link ELEMENT_FONT_SIZE_STEREO_RE} -- it also matches
+ *  `statebackgroundcolor<<X>>`, whose own `STEREO_KEY_MATCHERS` entry must
+ *  win, so its handler runs AFTER that table. */
+const ELEMENT_BACKGROUND_COLOR_STEREO_RE = new RegExp('^(\\w+)backgroundcolor<<(.+)>>$');
 
 type StereoHandler = (
   acc: SkinparamAccumulator,
@@ -244,6 +249,39 @@ function applyElementFontSizeByStereo(
 }
 
 /**
+ * `skinparam <sname>BackgroundColor<<label>>` — the ELEMENT's own background
+ * under a stereotype. Exact mirror of {@link applyElementFontSizeByStereo},
+ * including its ordering contract: runs LAST, after the whole
+ * {@link STEREO_KEY_MATCHERS} table, because the `\w+` prefix also matches
+ * that table's `statebackgroundcolor<<X>>`. A non-bucket sname falls through
+ * to `acc.unknown` unconsumed.
+ *
+ * B13/M22: upstream needs no such per-key matcher at all — its
+ * `FromSkinparamToStyle` ctor strips `<<...>>` off ANY raw key before the key
+ * is ever looked up (`:292-302`), so EVERY skinparam supports a stereotype
+ * qualifier for free. This port models that with an allowlist, which is a
+ * real structural divergence; see the ledger's M22 row for the measured cost
+ * of re-mirroring it (7 matcher rows, 13 `*ByStereo` fields, 63 consumer
+ * sites) and why that is tracked separately rather than done inline.
+ */
+function applyElementBackgroundColorByStereo(
+  acc: SkinparamAccumulator,
+  key: string,
+  value: string,
+): boolean {
+  const m = ELEMENT_BACKGROUND_COLOR_STEREO_RE.exec(key);
+  if (m === null) return false;
+  const sname = m[1]!;
+  if (!ELEMENT_BUCKET_SNAMES.has(sname)) return false;
+  const bucket = (acc.elements[sname] ??= {});
+  bucket.backgroundColorByStereo = {
+    ...bucket.backgroundColorByStereo,
+    [m[2]!.trim()]: resolveColor(value),
+  };
+  return true;
+}
+
+/**
  * Handles a normalized key already known to contain `<<...>>`. Order is
  * specific-before-generic: {@link applyElementStereotypeFontSize}, then each
  * {@link STEREO_KEY_MATCHERS} regex in table order (the first match's handler
@@ -268,5 +306,6 @@ export function applyStereoOverride(
   // prefix also matches `statefontsize<<X>>`, whose own table entry above must
   // win.
   if (applyElementFontSizeByStereo(acc, key, value)) return;
+  if (applyElementBackgroundColorByStereo(acc, key, value)) return;
   acc.unknown.push(key);
 }

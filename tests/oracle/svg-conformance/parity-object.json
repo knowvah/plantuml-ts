@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-11T20:58:08.900Z",
+  "generatedAt": "2026-08-11T21:24:47.675Z",
   "fixtures": [
     {
       "slug": "baloca-83-nadu916",
@@ -156,9 +156,8 @@
       "slug": "jocamu-71-nuvo330",
       "type": "object",
       "dotEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 1,
-      "firstDiff": "svg/g[1]/g[2][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -280,9 +279,7 @@
       "slug": "majake-62-pero492",
       "type": "object",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[3]/rect[1]/@fill"
+      "verdict": "conformant"
     },
     {
       "slug": "maxosa-84-juci042",
