@@ -81,7 +81,7 @@ Verdicts: `fixable` · `fixable-large` (own tracked mission) · `scoping`
 | 4 | `diveje-52-xefe514` | M1 | `svek/image/EntityImageMap.java:245-247` → `svek/SvekNode.java:269-303` | `src/core/svek-dot-emit.ts:148-152`, `:169` | scoping | geom-a §M2, §diveje-52 |
 | 5 | `donoki-79-riku189` | M21 | `klimt/creole/atom/Bullet.java:58-69` | `src/diagrams/class/note-layout-measure.ts:365` | fixable | nonnum-b §donoki-79 |
 | 6 | `fafozi-27-reja300` | M33 | `svek/SvekUtils.java:99-102` | `src/core/svek-dot-emit.ts:42` | fixable | size §fafozi-27 |
-| 7 | `fajafu-44-cuve930` | M12 | `klimt/drawing/svg/SvgGraphics.java:720-725` | `src/core/svg-shapes.ts:117-121` | fixable | nonnum-b §fajafu-44 |
+| 7 | `fajafu-44-cuve930` | M12 | `klimt/drawing/svg/SvgGraphics.java:716-729` | `src/core/svg-text-font.ts#renameLogicalMonospace` | **FIXED (B10)** — zero-diff, ratcheted | nonnum-b §fajafu-44 |
 | 8 | `fikojo-87-tine499` | M7 | `CommandLinkClass.java:362-363`, `:517-527` | `class-dot-edge-order.ts#dotEdgeRunsReversed` | **FIXED (B6)** — zero-diff, ratcheted | geom-b §fikojo-87 |
 | 9 | `fonulu-92-libi014` | M10 + M2 | `skin/SkinParam.java:548-551` + `themes/puml-theme-crt-amber.puml:106-110` | `src/core/themes-builtin-a-m.ts:205-237` | fixable | size §fonulu-92 |
 | 10 | `fusopu-05-loxo960` | M3 + M1 | `cucadiagram/TextBlockMap.java:171-180`, `:145-152` | `src/diagrams/class/class-map-sizing.ts` | fixable | nonnum-b §fusopu-05 |
@@ -106,7 +106,7 @@ Verdicts: `fixable` · `fixable-large` (own tracked mission) · `scoping`
 | 29 | `nitica-38-cere665` | M16 + M1 | `svek/image/EntityImageClassHeader.java:229-242` | `src/diagrams/class/class-badge.ts:365-372` | fixable | nonnum-b §nitica-38 |
 | 30 | `nukera-08-dige359` | M2 (+M34) | `svek/SvekEdge.java:372-373` + `klimt/shape/TextBlockUtils.java:64-68` | `src/diagrams/class/class-layout-edge-labels.ts:221` | fixable | geom-a §M1, §nukera-08 |
 | 31 | `nulixu-97-nofi684` | M5 + M2 | `skin/VisibilityModifier.java:178-180`, `:100-102` | `src/diagrams/class/class-visibility-icon.ts:67-71` | fixable | geom-b §C4, §nulixu-97 |
-| 32 | `pavizi-27-xupe815` | M12 | `SvgGraphics.java:720-725` | `src/core/svg-shapes.ts:117-121` | fixable | nonnum-b §pavizi-27 |
+| 32 | `pavizi-27-xupe815` | M12 | `SvgGraphics.java:716-729` | `src/core/svg-text-font.ts#renameLogicalMonospace` | **FIXED (B10)** — zero-diff, ratcheted | nonnum-b §pavizi-27 |
 | 33 | `pikuba-31-faxo766` | M32 | `klimt/creole/legacy/CreoleParser.java:91-100` | `src/diagrams/class/class-body-enhanced-layout.ts:393`; `class-object-member-creole.ts` | fixable | size §pikuba-31 |
 | 34 | `rocepa-35-gepo708` | M1 + M4 | `svek/SvekNode.java:269-297`; `cucadiagram/TextBlockMap.java:66` | `src/core/svek-dot-emit.ts:88-104`; `graph-layout-build.ts:160-169` | scoping | geom-b §C3, §rocepa-35 |
 | 35 | `rozuxo-44-fudi093` | M1 + M4 | `SvekNode.java:269-297` + `appendTr :298-311`; `MethodsOrFieldsArea.java:81`; `abel/Link.java:219-231` | `src/core/svek-dot-emit.ts:88-104` | scoping | geom-b §rozuxo-44 |
@@ -548,7 +548,27 @@ post-parse sweep turns every childful data-less quark into a real
   the gap is at PARSE time — the groups never exist as entities, so no cluster
   is ever requested from the layout engine.
 
-## M12 — `monospaced` → `monospace` family rename missing on the attribute-emitting half — **reach 2**
+## M12 — `monospaced` → `monospace` family rename missing on the attribute-emitting half — **reach 2** — **LANDED at B10**
+
+> **B10 outcome (2026-08-11).** Confirmed exactly as filed, including "one
+> line; no geometry moves": both fixtures were a single diff on the same path
+> (`svg/g[1]/g[1]/text[4]/@font-family`, `monospaced` vs `monospace`), both
+> flipped, and NOTHING else in the corpus moved. Census 29 → 31/80.
+>
+> Landed as `src/core/svg-text-font.ts#renameLogicalMonospace`, applied inside
+> `textFontFamily` BEFORE the `ROOT_FONT_FAMILY` comparison — upstream's own
+> ordering (`SvgGraphics.java:716-729`: rename, then the `DEFAULT_FONT_FAMILY`
+> test, then the NBSP test). `nbspIfMonospace` now calls the same helper
+> instead of carrying its own inline copy, so the rename exists once and both
+> consumers provably see the same value.
+>
+> **Not a one-line diff in practice.** `svg-shapes.ts` was ALREADY over the
+> repo's 500-line cap (552) before this touched it, so the complexity hook
+> blocked the edit. The font-family/NBSP helpers moved to a new
+> `src/core/svg-text-font.ts` (pure move + the fix), leaving `svg-shapes.ts`
+> at 412. `textLengthOf` stayed behind — it is rule 5, not a font-family rule.
+> The new file is inside the `core/svg*.ts` namespace the SVG-emission-seam
+> fitness test scopes to, so that gate still covers it.
 
 The rename must run BEFORE the `DEFAULT_FONT_FAMILY` comparison that decides
 whether to emit `font-family` at all. Ours has it in the NBSP half and on the
@@ -670,7 +690,7 @@ the class census/DOT gate in the same pass.
 | B7 | **M8** — link `<<stereo>>` → arrow style signature + `LineThickness` reader | 3 | After B2 (all three fixtures also carry M2) | none alone | `resolveStyleCascade` already does the two-subset match; `babcfa94` is precedent for the shape only. |
 | B8 | **M10** — compiled theme table drops `skinparam` blocks | 2 | `fonulu-92` also needs B2 | `lunike-70` | Fix in `scripts/compile-themes.py` + regenerate. Reaches every `!theme` fixture in every corpus — **cross-type**. Confirmed by jar experiment for fonulu. |
 | B9 | **M11** — namespace phantom groups | 2 | After B2 (both fixtures also carry M2) | none alone | Parse-time, not layout. |
-| B10 | **M12** — `monospaced` → `monospace` on the attribute half | 2 | — | `fajafu-44`, `pavizi-27` | One line; no geometry moves. Cheapest item in the queue. |
+| ~~B10~~ | **M12** — `monospaced` → `monospace` on the attribute half | 2 | — | landed: both, 1 → 0 each | **DONE 2026-08-11.** Prediction held exactly — one diff each, both flipped, zero collateral. Census 29 → 31. The rename is one line; the file split it forced (`svg-shapes.ts` was already 52 lines over the cap) was not. |
 | B11 | **M25** — map-body link missing `creationIndex` | 1 | With B12 (same fixture) | none alone | One field stamp. Cheapest of `gubene-80`'s two causes. |
 | B12 | **M24** — bare top-level `<style> header { }` selector | 1 | With B11 | `gubene-80` once both land | One branch in `style-map-element.ts:197-199`. |
 | B13 | **M22** — generic `<<stereo>>`-qualified skinparam BackgroundColor | 1 | — | `majake-62` | Direct copy of `babcfa94`'s landed FontSize matcher shape. The "SEPARATE, larger mechanism, deferred" notes at `skinparam-element-buckets.ts:86-90` and `renderer-classifier-colors.ts:119-121` are now **stale**. |

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-11T19:00:24.029Z",
+  "generatedAt": "2026-08-11T19:37:03.649Z",
   "fixtures": [
     {
       "slug": "baloca-83-nadu916",
@@ -55,9 +55,7 @@
       "slug": "fajafu-44-cuve930",
       "type": "object",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1]/text[4]/@font-family"
+      "verdict": "conformant"
     },
     {
       "slug": "febadi-87-zozu271",
@@ -351,9 +349,7 @@
       "slug": "pavizi-27-xupe815",
       "type": "object",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1]/text[4]/@font-family"
+      "verdict": "conformant"
     },
     {
       "slug": "pikuba-31-faxo766",

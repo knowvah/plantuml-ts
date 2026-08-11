@@ -522,6 +522,62 @@ environment crash. Flagged because "the gate crashed once" is not the same
 claim as "the gate is green", and a second occurrence would deserve a real
 investigation rather than another rerun.
 
+## B10 (M12) — diagnosis and outcome
+
+Small enough that diagnosis and outcome fit together; the mechanism was never
+in doubt and the measurement confirmed it without a surprise.
+
+**Mechanism.** Upstream renames PlantUML's own LOGICAL font name `monospaced`
+to the CSS generic `monospace` inside `if (fontFamily != null)`, and does it
+BEFORE both tests that follow — the `DEFAULT_FONT_FAMILY` comparison that
+decides whether to emit `font-family` at all, and the `monospace`/`courier`
+test that swaps spaces for NBSP (`klimt/drawing/svg/SvgGraphics.java:716-729`,
+which carries its own link to the upstream QA report the rename came from).
+The comparison is `equalsIgnoreCase` against the WHOLE family, so a CSS stack
+like `Courier, monospaced` does not qualify.
+
+**Origin, ours.** `src/core/svg-shapes.ts` had the rename on the NBSP half
+only (`nbspIfMonospace`, inline) and not in `textFontFamily`, so `""monospaced""`
+creole NBSP-substituted its text correctly while emitting the raw logical name
+as the attribute VALUE. The klimt-drawn engines' copy of the rule
+(`svg-graphics-elements.ts#applyTextFontFamily`) already had both halves —
+this was the shared-shape-seam copy only.
+
+**Causal chain.** `font-family="monospaced"` vs jar's `font-family="monospace"`
+— one non-numeric diff, no geometry, because the rename is emission-only:
+upstream applies it in `SvgGraphics#text`, after `DriverTextSvg` has already
+measured and passed `textLength` down.
+
+**Ruled out.** Not a measurement or creole-parse difference: both fixtures had
+exactly ONE diff each, on the same path, with identical `ours`/`jar` values,
+and every coordinate already matched.
+
+**Landed** as `src/core/svg-text-font.ts#renameLogicalMonospace`, called from
+`textFontFamily` before the root-family comparison and from `nbspIfMonospace`
+in place of its inline copy — one definition, both consumers.
+
+**The one-line fix was not a one-file change.** `svg-shapes.ts` was ALREADY 52
+lines over the repo's 500-line cap (552) before this iteration touched it, so
+the complexity hook blocked the edit outright. The font-family/NBSP helpers
+moved to a new `core/svg-text-font.ts` (pure move plus the fix), leaving
+`svg-shapes.ts` at 412. `textLengthOf` was moved back — it is rule 5, unrelated
+to the font family. The new module sits inside the `core/svg*.ts` namespace the
+SVG-emission-seam fitness test scopes to, so that architectural gate still
+covers it.
+
+**Measured.** Object SVG census **29 → 31/80**. `fajafu-44-cuve930` and
+`pavizi-27-xupe815` each 1 → 0; **no other fixture in the corpus moved at all**,
+which is the expected signature for an emission-only rename. Zero lost.
+
+**Frozen counts — all unmoved.** object DOT 74/80 · class DOT 689/711 ·
+component 262 · usecase 93 · state 267 · class SVG goldens 317 pass ·
+description 48-set pass. This edit is on the SHARED shape seam, so class,
+state, json and every other engine emitting through it were in the blast
+radius; the golden ratchets are what confirm they were untouched.
+
+**Quality gates.** `npm test` 574 files / 12753 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped. No repeat of B6's SIGBUS.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).
