@@ -102,6 +102,48 @@ pad requires handing it the table's dimensions as a LABEL rather than as
 unverified — it decides whether M4 is a call-site change or needs an adapter
 seam.
 
+## B3 (M3) — diagnosis, written BEFORE any code change
+
+Read at the source, not taken from the ledger. Three sub-parts, ONE seam.
+
+**(a) Cells bypass creole.** `TextBlockMap#getTextBlock`
+(`cucadiagram/TextBlockMap.java:172-181`) builds every cell as
+`Display.getWithNewlines(...).create0(fontConfiguration, LEFT, skinParam,
+wordWrap, CreoleMode.FULL, null, null)` — so `__…__` underlines and
+`<font:…>` become real attributes. The `"\0"` key short-circuits to a `Point`
+BEFORE that (`:173-174`), which is the linked-row marker. JSON does the
+identical thing in its own `getTextBlock`
+(`cucadiagram/TextBlockCucaJSon.java:184-190`). Ours measures and renders the
+raw string (`src/diagrams/class/class-map-sizing.ts:71-76`, `:147-155`).
+
+**(b) The per-row vertical rule.** `TextBlockMap#drawU` (`:140-153`) draws, for
+every value that is NOT a `Point`, the value cell at `dx = widthColA` AND
+`ULine.vline(heightOfRow)` at that same x. Empty-string values included —
+`Point` is the only exemption. We draw horizontal rules only.
+
+**(c) JSON's full-height rule.** `TextBlockCucaJSon`'s inner `drawU`
+(`:163-167`) draws ONE `ULine.vline(height)` at `dx = width1` for the whole
+object, before the per-member loop — not per row as in the map case. A
+different shape from (b); do not unify them.
+
+**Already ported, do not rebuild.** The `withMargin(result, 5, 2)` both
+`getTextBlock`s apply is present as `MAP_CELL_MARGIN_X/Y`
+(`class-map-sizing.ts:71-76`), and its doc comment already cites the upstream
+contract. The creole commands are ported and wired for other paths
+(`core/klimt/creole/command/CommandCreoleFontFamilyChange.ts`,
+`CommandCreoleBuilder.ts:110`). This is a missing CALL, not a missing feature.
+
+**Causal chain.** Raw-string cells ⇒ `__x__` measures as 4 characters wider
+than the jar's underlined text and `<font:…>` measures as literal markup ⇒
+column A is mis-sized ⇒ every downstream x in the row is wrong, and the
+missing vline is a straight `childCount` divergence that also stops
+`compare.ts` recursion, hiding whatever sits below it.
+
+**Ruled out.** Not the cell margin (ported, correct). Not `getHeightOfRow`
+(`:167-170`, a plain `max` of the two cell heights — already what we do). Not
+the `Point` path: the jar never draws a Point row's value text at all, and our
+`buildOneMapRow` already special-cases it.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).
