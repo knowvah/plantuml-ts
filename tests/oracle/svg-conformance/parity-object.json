@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-11T21:24:47.675Z",
+  "generatedAt": "2026-08-11T21:48:38.502Z",
   "fixtures": [
     {
       "slug": "baloca-83-nadu916",
@@ -41,9 +41,7 @@
       "slug": "donoki-79-riku189",
       "type": "object",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[2]/text[1]"
+      "verdict": "conformant"
     },
     {
       "slug": "fafozi-27-reja300",

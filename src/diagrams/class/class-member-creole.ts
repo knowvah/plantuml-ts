@@ -127,6 +127,22 @@ export type MemberRenderAtom =
    *  `'image'`'s own "resolve dims here, resolve pixel position later"
    *  split). `fill` is the resolved color (forced `color=`/`#RRGGBB`
    *  override, else the ambient font color, else `#000000`). */
+  /** B22/M21: a creole bullet-list marker (`* item`) — upstream's
+   *  `klimt/creole/atom/Bullet.java:58-69` draws a real SHAPE, not text:
+   *  `order 0` translates `dx(3)` and draws `UEllipse.build(5, 5)`;
+   *  `order >= 1` translates `dx(1 + 8*order)` and draws
+   *  `URectangle.build(3.5, 3.5)`. Both are stroked with
+   *  `UStroke.withThickness(0)` and filled with the font colour, which is
+   *  why the emitted shape carries a `fill` and NO stroke — visibly
+   *  different from the `VisibilityModifier` glyph (`rx=3` WITH
+   *  `stroke-width:1`) that an object member row's `*` draws instead.
+   *  `width` is the cell width the layout already reserved, unchanged. */
+  | {
+      readonly kind: 'bullet';
+      readonly order: number;
+      readonly fill: string;
+      readonly width: number;
+    }
   | {
       readonly kind: 'vector';
       readonly name: string;

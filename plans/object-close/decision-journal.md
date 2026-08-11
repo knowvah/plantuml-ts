@@ -1106,6 +1106,56 @@ pinned). Also retired the stale "SEPARATE, larger, deferred mechanism" note in
 **Quality gates.** `npm test` 574 files / 12761 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped.
 
+## B22 (M21) — creole bullet glyph, and a scope correction found by looking
+
+**Scope was narrower than filed, and I only knew that by reading the jar.**
+The row implied the object body's `* ABullet list` rows were affected. They
+are not: the jar draws them with `<ellipse rx="3" … stroke-width:1>` inside a
+`<g data-visibility-modifier="IE_MANDATORY">`, which is the
+`VisibilityModifier` glyph (`skin/VisibilityModifier.java:169-171,280-281`),
+and our output is byte-identical there. `CreoleMode.SIMPLE_LINE` skips the
+bullet pattern entirely (`CreoleStripeSimpleParser.java:119-147`, gated
+`if (mode == CreoleMode.FULL)`), which is also why `** ASub item` stays
+literal text in both. Only the NOTE's creole bullets — `rx="2.5"`, no stroke —
+were missing.
+
+**Mechanism.** `klimt/creole/atom/Bullet.java:58-69` draws a real shape:
+order 0 translates `dx(3)` and draws `UEllipse.build(5, 5)`; order ≥ 1
+translates `dx(1 + 8*order)` and draws `URectangle.build(3.5, 3.5)`, both
+filled with the font colour under `UStroke.withThickness(0)`. Our note layout
+reserved the right WIDTH (`BULLET_ORDER0_WIDTH` 12 / `8 + 8*order`, already
+matching `calculateDimensionSlow`) but emitted a `{kind:'text', text:''}`
+spacer, so an empty `<text>` appeared where the jar draws a shape.
+
+**The vertical placement is derived, not fitted.** With the shapes emitted at
+the line top, all three were uniformly 3px high. Rather than encode a 3, I
+found the consumer: `klimt/creole/Sea.java:72-79`'s `doAlign` lays every atom
+at `y = -height + getStartingAltitude()`, then `translateMinYto` shifts the
+line so the tallest atom (the text) sets the top. For a bullet that first term
+is **-10 at BOTH orders** — `5 - 5` at order 0 and `3 - 7` at order n
+(`Bullet.java:72-83`) — which is exactly why two shapes of different heights
+share one top offset. So the top is `lineTop + lineHeight - 10`, and at the
+note's 13pt line that evaluates to `lineTop + 3`, reproducing the jar's
+`cy=27` against its `y=31.611` baseline. The constant that landed is
+`BULLET_SEA_DEPTH = 10` with that citation, not the 3 I measured.
+
+**Three existing tests failed, correctly.** They asserted the placeholder's
+shape (`{kind:'text', text:'', width:12}`). The widths — 12 and 16, which is
+what those tests actually protect — are unchanged; only the representation is,
+so the assertions were updated to the new atom kind rather than the invariant
+being weakened.
+
+**Measured.** `donoki-79-riku189` **3 → 0**, census **33 → 34/80**, nothing
+else moved, ratcheted (33 pinned). The unreachable `bullet` branch in
+`renderer-classifier-rows.ts` is handled anyway (TS exhaustiveness) with that
+file's own placement convention and a comment saying why it cannot fire.
+
+**Frozen counts — all at the B31 baselines.** object DOT 73/80 · class DOT
+661/711 · component 262 · usecase 93 · state 264/267 · 317 class goldens pass.
+
+**Quality gates.** `npm test` 574 files / 12762 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

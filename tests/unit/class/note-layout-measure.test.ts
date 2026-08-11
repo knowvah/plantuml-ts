@@ -33,14 +33,18 @@ describe('A4 — creole bullet lines in notes (Bullet atom header)', () => {
     const m = note('* Sjors Kaagman');
     expect(m.width).toBeCloseTo(12 + w('Sjors Kaagman') + MX, 4);
     expect(m.height).toBe(13 + MY);
-    expect(m.lineAtoms[0]![0]).toMatchObject({ kind: 'text', text: '', width: 12 });
+    // B22/M21: real `bullet` atom (drawn as `UEllipse.build(5,5)` at order
+    // 0); the reserved width is unchanged.
+    expect(m.lineAtoms[0]![0]).toMatchObject({ kind: 'bullet', order: 0, width: 12 });
     expect(m.lineAtoms[0]![1]).toMatchObject({ kind: 'text', text: 'Sjors Kaagman' });
   });
 
   it('measures nested "** text" as Bullet(8+8*order) + trimmed text', () => {
     const m = note('** Deep');
     expect(m.width).toBeCloseTo(8 + 8 * 1 + w('Deep') + MX, 4);
-    expect(m.lineAtoms[0]![0]).toMatchObject({ kind: 'text', text: '', width: 16 });
+    // B22/M21: real `bullet` atom (order >= 1 draws `URectangle.build(3.5,
+    // 3.5)`); the reserved width is unchanged.
+    expect(m.lineAtoms[0]![0]).toMatchObject({ kind: 'bullet', order: 1, width: 16 });
   });
 
   it('matches temise-16 jar note widths (max bullet line + margins)', () => {

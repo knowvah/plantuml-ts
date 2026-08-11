@@ -361,7 +361,16 @@ function buildBulletRows(bullet: { order: number; text: string }, ctx: NoteLineB
   const bulletWidth =
     bullet.order === 0 ? BULLET_ORDER0_WIDTH : BULLET_NESTED_WIDTH_BASE + BULLET_NESTED_WIDTH_BASE * bullet.order;
   const textCtx = ctx.maxWidth > 0 ? { ...ctx, maxWidth: ctx.maxWidth - bulletWidth } : ctx;
-  const spacer: MemberRenderAtom = { kind: 'text', text: '', font: ctx.font, width: bulletWidth };
+  // B22/M21: a real bullet atom, not a width-only spacer. The reserved
+  // width is unchanged (layout was already exact) -- only the GLYPH was
+  // missing, which rendered as an empty `<text>` where the jar draws an
+  // ellipse/rect. See `MemberRenderAtom`'s `'bullet'` doc comment.
+  const spacer: MemberRenderAtom = {
+    kind: 'bullet',
+    order: bullet.order,
+    fill: ctx.font.color ?? '#000000',
+    width: bulletWidth,
+  };
   return buildPlainRows(bullet.text, textCtx).map((row) => ({
     text: row.text,
     width: bulletWidth + row.width,
