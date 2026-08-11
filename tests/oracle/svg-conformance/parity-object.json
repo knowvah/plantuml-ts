@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-11T18:39:12.322Z",
+  "generatedAt": "2026-08-11T19:00:24.029Z",
   "fixtures": [
     {
       "slug": "baloca-83-nadu916",
@@ -13,9 +13,7 @@
       "slug": "beleso-08-ruca459",
       "type": "object",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 94,
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@y"
+      "verdict": "conformant"
     },
     {
       "slug": "bepafe-03-teda035",
@@ -77,9 +75,7 @@
       "slug": "fikojo-87-tine499",
       "type": "object",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 94,
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@y"
+      "verdict": "conformant"
     },
     {
       "slug": "fonulu-92-libi014",
@@ -304,7 +300,7 @@
       "type": "object",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 147,
+      "maxDelta": 171,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@height"
     },
@@ -419,9 +415,7 @@
       "slug": "sarepa-89-cevi460",
       "type": "object",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 94,
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@y"
+      "verdict": "conformant"
     },
     {
       "slug": "satuco-50-vusa163",
@@ -547,7 +541,7 @@
       "type": "object",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 114,
+      "maxDelta": 159,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@height"
     },

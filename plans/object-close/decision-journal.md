@@ -362,6 +362,166 @@ file claiming `{"timeout":80}`. Restored from HEAD and reran with
 census exactly (26 conformant). A committed parity run must not use the
 default.
 
+## B6 (M7) — diagnosis, written BEFORE any code change
+
+**Mechanism.** Upstream inverts a link in exactly one place —
+`CommandLinkClass.java:362-363`, `if (dir == Direction.LEFT || dir ==
+Direction.UP) link = link.getInv();` — and `dir` comes from `getDirection(arg)`
+(`:517-527`), which **strips the arrowheads before classifying**:
+`s.replaceAll("[^-.=\\w]", "")` deletes `<`, `>`, `|`, `*`, `#`, `+`, and then
+a leading/trailing `o`. `StringUtils.getQueueDirection`
+(`StringUtils.java:281-314`) then looks for a direction WORD (`left`/`right`/
+`up`/`down`, or a bare `l`/`r`/`u`/`d` word char), falling back to `RIGHT` for
+a length-1 body and `DOWN` otherwise.
+
+So `A <-- B` reduces to `--` → `DOWN` → **not inverted**. Only an explicit
+`-left-`/`-up-` inverts. The arrowhead never participates.
+
+**Origin, ours.** `src/diagrams/class/class-arrow-grammar.ts:248-249`:
+
+```ts
+const decorSwap = isDirectionKind(kind1) && !isDirectionKind(kind2);
+const swapDirection = decorSwap !== upOrLeft;   // XOR
+```
+
+`upOrLeft` alone is upstream's condition; the `decorSwap` term has no upstream
+counterpart. It fires on every arrow whose head decor sits on the LEFT end and
+not the right — `<--`, `<|--`, `*--`, `o--` — so those links are inverted where
+the jar does not invert them.
+
+**Causal chain.** `swapDirection` picks `from`/`to`
+(`class-relationship-parser.ts:380`), so an inverted link emits its dot edge
+backwards. Edge direction is what dot ranks on, so the two endpoints swap
+ranks, every node below them shifts, and the whole layout moves — hence the
+94px deltas on the "94.0 triple" rather than a decoration-level difference.
+
+**Why it has not shown up as total corpus carnage.** The port already
+compensates in two places, which is the tell that the model diverged rather
+than that one predicate is wrong:
+
+- `class-dot-graph.ts:78-80` `ranksParentFirst` re-reverses the dot edge for
+  `extension`/`implementation` only, driven by `parentIsLinkEntity1` (itself
+  just `swapDirection`, `class-relationship-parser.ts:446-449`). That was added
+  2026-08-08 for `class-inheritance-interface-assoc`, which was 122px short.
+- G2 N9/N30 already carry the *upstream* orientation separately as
+  `idEntity1FullId`/`idEntity2FullId` — picked by `upOrLeft` alone, exactly
+  upstream's rule — because the SVG id pair and the drawn path direction both
+  needed the real order.
+
+So the AST already holds upstream's `cl1`/`cl2` under a different name; only
+the dot emission fails to use it, and patches around the gap for two of the
+seven relationship types.
+
+**Fix, therefore, is not "flip the predicate".** Dropping `decorSwap` from
+`swapDirection` would re-orient `from`/`to` for every left-headed arrow and
+drag decors, roles, ports, quantifiers and every renderer consumer with it.
+The upstream-faithful and far narrower change is at the dot boundary, where
+upstream emits `entity1 -> entity2` verbatim (`SvekEdge.java:249-250` takes
+`getEntityPort1/2` as-is): emit the dot edge as
+`idEntity1FullId -> idEntity2FullId`, which generalizes `ranksParentFirst`
+from "hierarchical only" to "every relationship" and makes
+`parentIsLinkEntity1` a fallback for relationships built outside the arrow
+grammar rather than the rule.
+
+**Ruled out.**
+
+- Not a decoration bug: the arrowhead end is already correct in the rendered
+  SVG on all three fixtures; what differs is node placement.
+- Not `queue`/rank-length: `getQueueLength` (`:511-515`) is a separate
+  computation off the same arrow and is unaffected by the inversion.
+- Not object-specific — `decorSwap` lives in the shared class arrow grammar.
+- The existing hierarchical patch is not merely incomplete but wrong in one
+  case it can already reach: for a hierarchical arrow that ALSO carries
+  `-left-`/`-up-`, `swapDirection` is `decorSwap XOR upOrLeft` = false, so
+  `ranksParentFirst` declines to reverse and we emit the opposite of upstream.
+  The FullId pair gets that case right by construction.
+
+**Blast radius, measured, not estimated.** Left-headed arrows appear in **7 of
+80** object fixtures and **116 of 722** class fixtures. This iteration
+therefore expects the **class DOT count to move** — the B6 ledger row names
+`class/baneru-00-kuro607` and `class/mopesi-01-gapo101` in advance. A gain here
+is mechanism-explained, but the frozen-count rule is two-directional, so the
+result gets reported for a maintainer call rather than re-baselined in-flight
+(the object/class re-baseline at B0 was an explicit maintainer ruling, not a
+precedent I may reuse).
+
+## B6 (M7) — outcome, and a gate weakness the outcome exposed
+
+**Landed.** `class-dot-edge-order.ts#dotEdgeRunsReversed` — the dot edge is now
+emitted `idEntity1FullId -> idEntity2FullId`, upstream's own `Link` order, for
+every relationship type. `parentIsLinkEntity1` survives as the fallback for
+edges built outside the arrow grammar. Split into its own module because
+`class-dot-graph.ts` crossed the 500-line cap.
+
+**Second half of the same mechanism, required for correctness.** `swappedEdges`
+recorded "every HIERARCHICAL index" while emission used `ranksParentFirst`
+(hierarchical AND `parentIsLinkEntity1`). The two disagreed for any
+child-first inheritance form (`D --|> I`), and `class-edge-geo.ts
+#normalizeEdgePoints` derives `matchesFromTo` — which pairs
+`sourceDecor`/`targetDecor` with the point array — from that set. Both sides
+now call the same predicate. Without this, every newly-reversed association
+edge would have had its arrowhead placed at the wrong end.
+
+**Measured.** Object SVG census **26 → 29/80**. The whole "94.0 triple" flipped
+together — `beleso-08-ruca459`, `fikojo-87-tine499`, `sarepa-89-cevi460`, all
+19 → 0 diffs — which is the confirmation that they were one cause, as the
+audit claimed. `tobuka-93-jale775` 146 → 137. Zero lost, nothing worse.
+
+### The prediction I recorded in the diagnosis was wrong, and the reason matters
+
+I predicted the class DOT count would move, because 116 of 722 class fixtures
+carry a left-headed arrow. It did not move: class **689/711**, object
+**74/80**, both exactly frozen. That is not because the fix was inert — the
+object SVG census moved by 3 and the DOT emission changed for every one of
+those fixtures.
+
+**The DOT structural comparator cannot see edge direction.**
+`tests/oracle/svek-dot.ts#structurallyEqual` is the conjunction of: node count,
+edge count, `degreeSequence`, sorted minlens, sorted shapes, label counts,
+sorted endpoint ports, sorted cluster sizes, rankdir, nodesep, ranksep.
+`degreeSequence` (`:199-208`) increments BOTH endpoints and sorts, so it is an
+**undirected** signature; every other member is a sorted multiset or a scalar.
+Reversing `a -> b` to `b -> a` leaves all eleven invariant.
+
+So M7 was invisible to the mission's primary structural gate for its whole
+life, and 116 class fixtures have been scoring EQUAL while emitting edges the
+jar emits the other way. The frozen counts holding is therefore **not**
+evidence that the class corpus was unaffected — the class SVG goldens (317,
+all passing) are what carries that claim here.
+
+**Not fixed in this iteration, deliberately.** Teaching the comparator
+direction is a gate widening that would re-score the class and object
+denominators in the same pass that changes the emission, confounding both. It
+is also plainly separable. Filed as a queue item (ledger B31) rather than
+half-landed here — the batch-2 protocol's own "if an item turns out to hold
+several mechanisms, split it" rule, and the same call two earlier iterations
+made.
+
+**Frozen counts.**
+
+| gate | frozen | measured | verdict |
+|---|---|---|---|
+| object DOT structural | 74/80 | 74 (93%) | unmoved |
+| class DOT | 689/711 | 689 (97%) | unmoved (see blindness above) |
+| component DOT | 262 | 262 (100%) | unmoved |
+| usecase DOT | 93 | 93 (100%) | unmoved |
+| state DOT | 267 | 267 (100%) | unmoved |
+| class SVG goldens | 317 | 317 pass | unmoved — the load-bearing check |
+| object SVG ratchet | 25 | 28 pass (+3) | additive |
+
+**Quality gates.** `npm test` 574 files / 12748 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
+Recorded rather than swept up: the first post-ratchet `npm test` died at
+`EXIT=138` — `Bus error: 10`, a node SIGBUS ~34.5k lines in, immediately after
+`tests/unit/description/spline-clip.test.ts` and well AFTER
+`class.golden.ratchet.test.ts` had passed all 314. Not a test failure and not
+reproducible: the identical tree reran clean end-to-end. Four full suites ran
+green on this tree before it and one after, so it is being treated as an
+environment crash. Flagged because "the gate crashed once" is not the same
+claim as "the gate is green", and a second occurrence would deserve a real
+investigation rather than another rerun.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

@@ -47,7 +47,7 @@ ledger.
 |---|---|---|---|
 | [batch-0](batch-0/overview.md) | Clean tree + honest baseline + freshness guard | T0→T1→T2 (sequential) | [x] |
 | [batch-1](batch-1/overview.md) | Re-audit all 57 non-conformant fixtures | T3‖T4a‖T4b‖T5a‖T5b → T6 | [x] |
-| [batch-2](batch-2/overview.md) | Governed fix loop (B0…Bn) | loop — B0–B5 landed; object census 23 → **26/80**, ratchet 22 → 25 | [ ] |
+| [batch-2](batch-2/overview.md) | Governed fix loop (B0…Bn) | loop — B0–B6 landed; object census 23 → **29/80**, ratchet 22 → 28 | [ ] |
 | [batch-3](batch-3/overview.md) | Close-out: divergences, index, filings | T7→T8→T9 | [ ] |
 
 ## Quality gates — all four, every task, before any commit
@@ -69,11 +69,11 @@ vitest failures.
 | object DOT structural | **74/80 EQUAL** (58 after B0's re-baseline, 78 under the old blind gate) | `npx tsx scripts/dot-sync-report.ts object` |
 | component DOT | 262/262 | `npx tsx scripts/dot-sync-report.ts component` |
 | usecase DOT | 93/93 | `npx tsx scripts/dot-sync-report.ts usecase` |
-| class DOT | **689/711** (was 711/711) | `npx tsx scripts/dot-sync-report.ts class` |
+| class DOT | **689/711** (was 711/711) — orientation-blind, see ledger B31 | `npx tsx scripts/dot-sync-report.ts class` |
 | state DOT | 267/267 | `npx tsx scripts/dot-sync-report.ts state` |
 | class SVG census | zero-diff set intact, non-dropping | `npx tsx scripts/svg-conformance-census.ts class` |
 | description SVG census | 48-set intact | `npx tsx scripts/svg-conformance-census.ts component usecase` |
-| object SVG census | non-dropping — **26/80** after B5 (was 23 at T1) | `npx tsx scripts/svg-conformance-census.ts object` |
+| object SVG census | non-dropping — **29/80** after B6 (was 23 at T1) | `npx tsx scripts/svg-conformance-census.ts object` |
 
 **Object and class were re-baselined on 2026-08-11 by maintainer ruling** —
 this is the one authorized movement of a frozen count in this mission. The DOT

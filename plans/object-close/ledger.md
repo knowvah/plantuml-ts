@@ -76,13 +76,13 @@ Verdicts: `fixable` · `fixable-large` (own tracked mission) · `scoping`
 | # | Slug | Mech | Java `file:line` (primary) | Ours `file:line` (primary) | Verdict | Audit |
 |---|---|---|---|---|---|---|
 | 1 | `baloca-83-nadu916` | M1 + M3 | `svek/SvekNode.java:268-296` | `src/core/svek-dot-emit.ts:150-152` | fixable | nonnum-b §baloca-83 |
-| 2 | `beleso-08-ruca459` | M7 | `classdiagram/command/CommandLinkClass.java:363-364` | `src/diagrams/class/class-arrow-grammar.ts:248-249` | fixable | geom-b §C1, §beleso-08 |
+| 2 | `beleso-08-ruca459` | M7 | `classdiagram/command/CommandLinkClass.java:363-364` | `src/diagrams/class/class-arrow-grammar.ts:248-249` | **FIXED (B6)** — zero-diff, ratcheted | geom-b §C1, §beleso-08 |
 | 3 | `bepafe-03-teda035` | M3 + M1 | `cucadiagram/TextBlockCucaJSon.java:163-167` | `src/diagrams/class/class-json-sizing.ts` | fixable | nonnum-b §bepafe-03 |
 | 4 | `diveje-52-xefe514` | M1 | `svek/image/EntityImageMap.java:245-247` → `svek/SvekNode.java:269-303` | `src/core/svek-dot-emit.ts:148-152`, `:169` | scoping | geom-a §M2, §diveje-52 |
 | 5 | `donoki-79-riku189` | M21 | `klimt/creole/atom/Bullet.java:58-69` | `src/diagrams/class/note-layout-measure.ts:365` | fixable | nonnum-b §donoki-79 |
 | 6 | `fafozi-27-reja300` | M33 | `svek/SvekUtils.java:99-102` | `src/core/svek-dot-emit.ts:42` | fixable | size §fafozi-27 |
 | 7 | `fajafu-44-cuve930` | M12 | `klimt/drawing/svg/SvgGraphics.java:720-725` | `src/core/svg-shapes.ts:117-121` | fixable | nonnum-b §fajafu-44 |
-| 8 | `fikojo-87-tine499` | M7 | `CommandLinkClass.java:363-364` | `class-arrow-grammar.ts:248-249` | fixable | geom-b §fikojo-87 |
+| 8 | `fikojo-87-tine499` | M7 | `CommandLinkClass.java:362-363`, `:517-527` | `class-dot-edge-order.ts#dotEdgeRunsReversed` | **FIXED (B6)** — zero-diff, ratcheted | geom-b §fikojo-87 |
 | 9 | `fonulu-92-libi014` | M10 + M2 | `skin/SkinParam.java:548-551` + `themes/puml-theme-crt-amber.puml:106-110` | `src/core/themes-builtin-a-m.ts:205-237` | fixable | size §fonulu-92 |
 | 10 | `fusopu-05-loxo960` | M3 + M1 | `cucadiagram/TextBlockMap.java:171-180`, `:145-152` | `src/diagrams/class/class-map-sizing.ts` | fixable | nonnum-b §fusopu-05 |
 | 11 | `gapisu-00-celo011` | M9 | `decoration/symbol/USymbols.java:60-95`; `svek/image/EntityImageDescription.java:111-114,171,203-213` | `src/core/usymbol-shapes.ts:223-228`; `src/core/latex.ts:106-112` | deferred-D7 (fixable-large) | nonnum-a §gapisu-00 |
@@ -113,7 +113,7 @@ Verdicts: `fixable` · `fixable-large` (own tracked mission) · `scoping`
 | 36 | `ruloso-59-nato909` | M1 + M4 | `SvekNode.java:269-297`; `TextBlockMap.java:66`; `Link.java:219-231` | `src/core/svek-dot-emit.ts:88-104`; `graph-layout-build.ts:160-169` | scoping | geom-b §ruloso-59 |
 | 37 | `ruturo-47-kapi300` | M9 | `USymbols.java:60-95`; `EntityImageDescription.java:111-114,171,203-213` | `src/core/usymbol-shapes.ts:223-228`; `latex.ts:106-112` | deferred-D7 (fixable-large) | nonnum-a §ruturo-47 |
 | 38 | `sajege-04-zuce784` | M20 (M6 landed at B5: 6 → 2 diffs) | `CommandLinkClass.java:363-364` → `abel/Link.java:145-146`, `:135` | `src/diagrams/class/renderer-uid.ts:145-233` | fixable — B21 | nonnum-b §sajege-04 |
-| 39 | `sarepa-89-cevi460` | M7 | `CommandLinkClass.java:363-364` | `class-arrow-grammar.ts:248-249` | fixable | geom-b §sarepa-89 |
+| 39 | `sarepa-89-cevi460` | M7 | `CommandLinkClass.java:362-363`, `:517-527` | `class-dot-edge-order.ts#dotEdgeRunsReversed` | **FIXED (B6)** — zero-diff, ratcheted | geom-b §sarepa-89 |
 | 40 | `satuco-50-vusa163` | M15 + M3 + M1 | `cucadiagram/BodierMap.java:54`, `:72-76` | `src/diagrams/class/class-object-map-sizing.ts` / `class-map-sizing.ts` | fixable | nonnum-b §satuco-50 |
 | 41 | `sibika-09-sipu286` | M2 + M5 | `SvekEdge.java:372-373`; `VisibilityModifier.java:178-180`, `:186-190` | `class-layout-edge-labels.ts:221`; `class-visibility-icon.ts:68` | fixable | geom-a §sibika-09 |
 | 42 | `sigado-12-rina240` | M1 + M4 | `SvekNode.java:269-297`; `TextBlockMap.java:66`; `Link.java:219-231` | `src/core/svek-dot-emit.ts:88-104` | scoping | geom-b §sigado-12 |
@@ -406,7 +406,33 @@ axis after the `.delta(15,15)` box, the ±5 margins and `floor(v+1)`.
   "Residual"). It matches this signature but no audit assigns it. Check it
   during M6's re-measure; do not pre-credit it.
 
-## M7 — decor-driven endpoint swap reverses the DOT edge — **reach 3**
+## M7 — decor-driven endpoint swap reverses the DOT edge — **reach 3** — **LANDED at B6**
+
+> **B6 outcome (2026-08-11).** Confirmed exactly as filed: the "94.0 triple"
+> was one cause, and all three flipped together (19 → 0 diffs each). Object
+> census 26 → 29/80, zero lost.
+>
+> The fix is at the dot boundary, not in the arrow grammar. Dropping
+> `decorSwap` from `swapDirection` would re-orient `from`/`to` for every
+> left-headed arrow and drag decors, roles, ports and quantifiers with it;
+> instead the dot edge is now emitted `idEntity1FullId -> idEntity2FullId`
+> (`class-dot-edge-order.ts#dotEdgeRunsReversed`), which is upstream's `cl1`/
+> `cl2` verbatim — the AST already carried it under that name since G2 N9/N30.
+> This generalizes the 2026-08-08 `ranksParentFirst` patch from the two
+> hierarchical types to all seven, and fixes that patch's own blind spot (a
+> hierarchical arrow ALSO carrying `-left-`/`-up-`, where `swapDirection` is
+> `decorSwap XOR upOrLeft` = false and it declined to reverse).
+>
+> Second half, same mechanism: `swappedEdges` recorded every HIERARCHICAL
+> index while emission used `ranksParentFirst`, and `class-edge-geo.ts
+> #normalizeEdgePoints` derives `matchesFromTo` (decor-to-endpoint pairing)
+> from it. Both now call the same predicate.
+>
+> **The row's "re-measure the class DOT gate with this one" produced a null
+> result, and the null is itself the finding** — see B31. Class DOT stayed at
+> exactly 689/711 because the comparator is orientation-blind, not because the
+> class corpus was unaffected. The 317 class SVG goldens are what carries the
+> no-regression claim.
 
 Upstream swaps a link's endpoints in exactly one place, guarded on a
 `-left-`/`-up-` **direction word**; `<--` reduces to `--` and never inverts.
@@ -640,7 +666,7 @@ the class census/DOT gate in the same pass.
 | B3 | **M3** — map/JSON cell construction (creole FULL + empty-value cell + row vline + json full-height vline) | 9 | After B1 (its cell widths feed B1's row table; landing it first means measuring B1 against a moving body) | `bepafe-03`, `baloca-83` plausibly with B1 | `zicope-62`'s `<font:…>` half only; its `{{ }}` half is deferred. |
 | B4 | **M5** — `classAttributeIconSize` → visibility glyph | 4 | — | `vocute-12`, `nulixu-97` after B2 | Render-only, never reaches the DOT. Independently rediscovered by two audits. |
 | ~~B5~~ | **M6** — `LimitFinder` `-1` ink max-corner inset | 4 | — | landed: `jabote-02`, `jotaga-99`, plus unpredicted `fafozi-27` | **DONE 2026-08-11.** Gate is NARROWER than this row proposed, not wider: only `EntityImageObject.java:110-113`'s empty-but-SHOWN branch. The "field list is empty" gate regressed pinned `kexica-21`; see M6's B5 correction block for the three-way jar control set. Census 23 → 26; class ratchet (317 goldens) and all five DOT counts unmoved. `beleso-08`'s 1px residual was M6 and is resolved. |
-| B6 | **M7** — decor-driven endpoint swap | 3 | — | `beleso-08`, `fikojo-87`, `sarepa-89` (modulo `beleso`'s 1px residual, see B5) | A single predicate; cheapest high-reach item. Also reverses `class/baneru-00-kuro607` and `class/mopesi-01-gapo101` — **cross-type**. |
+| ~~B6~~ | **M7** — decor-driven endpoint swap | 3 | — | landed: all three, 19 → 0 each | **DONE 2026-08-11.** Not "a single predicate": the fix is at the dot boundary (`dotEdgeRunsReversed`), plus `swappedEdges` which fed decor pairing from a DIFFERENT predicate than emission used. Census 26 → 29. Class DOT unmoved at 689/711 — because the comparator is orientation-blind, see B31, not because the corpus was untouched. |
 | B7 | **M8** — link `<<stereo>>` → arrow style signature + `LineThickness` reader | 3 | After B2 (all three fixtures also carry M2) | none alone | `resolveStyleCascade` already does the two-subset match; `babcfa94` is precedent for the shape only. |
 | B8 | **M10** — compiled theme table drops `skinparam` blocks | 2 | `fonulu-92` also needs B2 | `lunike-70` | Fix in `scripts/compile-themes.py` + regenerate. Reaches every `!theme` fixture in every corpus — **cross-type**. Confirmed by jar experiment for fonulu. |
 | B9 | **M11** — namespace phantom groups | 2 | After B2 (both fixtures also carry M2) | none alone | Parse-time, not layout. |
@@ -664,6 +690,7 @@ the class census/DOT gate in the same pass.
 | B27 | **M31** — `state` leaf sizing in the class engine | 1 | — | `togixe-65`'s size half only; its non-numeric residue is deferred M9 | Correct constants already exist in `state-sizing.ts:134-136` — **cross-type** (state engine is the source of truth). |
 | B28 | **M32** — creole table stripe in object/entity bodies | 1 | — | `pikuba-31` | `StripeTable`/`AtomTable` already ported and unused on this path. |
 | B29 | **M18** — `note on link` merged into the edge label | 1 | After B2 | `lecali-51` | 222 diffs / 124px, all downstream of the un-merged label block. |
+| **B31** | **M36** — the DOT structural comparator cannot see edge direction | gate-wide | — | — | **NEW, found at B6.** `tests/oracle/svek-dot.ts#structurallyEqual` is the conjunction of node count, edge count, `degreeSequence`, sorted minlens/shapes/ports/cluster-sizes, label counts, rankdir, nodesep, ranksep. `degreeSequence` (`:199-208`) increments both endpoints and sorts — **undirected**; every other member is a sorted multiset or scalar. Reversing `a -> b` leaves all eleven invariant, so M7 was invisible to the mission's primary structural gate and 116/722 class fixtures scored EQUAL while emitting edges the jar emits the other way. Widening it will re-score the class and object denominators, so it must NOT ride along with an emission change. Maintainer scoping: it moves a frozen count by construction. |
 | ~~B30~~ | **M33** — DOT inches formatting (`toFixed` vs `%f`) | 0 | — | — | **Moot for `fafozi-27`**: B5 flipped it to zero-diff, so M33's only fixture is gone and this item leaves the actionable queue. The mechanism itself is real and latent everywhere; `fafozi-27`'s 2 diffs were the M6 canvas pair, misattributed here. Retain as a tracked-but-unfixtured note, not a queue item. |
 
 ## Deferred under D7 — carried as named rows, NOT batch-2 work
