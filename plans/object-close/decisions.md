@@ -72,6 +72,60 @@ A re-measure after every size fix is mandatory, not optional.
 
 ---
 
+## D3a — SUPERSEDES D3's ordering. Reach is measured, not inferred from pins
+
+**Authorization.** Maintainer, 2026-08-11, on T3's falsification of D3's
+premise (stop condition 4 raised and answered): "Re-rule D3: order by measured
+reach."
+
+**Context.** D3's table above is retained as the historical record, but its
+load-bearing sentence — "The three identical `0.055556` pins are the signature
+of one shared mechanism, not three bugs" — is **false**, measured:
+
+- `tenalu-53-meri239` is not at 4px at all any more (0.027778 since
+  `babcfa94`); the pin was never lowered.
+- The two that are at 4px get there by unrelated arithmetic: `fonulu-92`'s is
+  2×(badge radius 11−9) on width AND height; `lisepi-64`'s is 2 rows×(14−12)
+  on height only. Fixing either leaves the other at exactly 0.055556.
+- The genuine shared cause pairs `fonulu-92` with `lunike-70` — whose pins are
+  **not** equal. Both are `scripts/compile-themes.py` dropping the theme file's
+  `skinparam` blocks.
+
+The root error is instrumentation: `maxSizeDeltaIn` pairs nodes by sorted pool,
+so it cannot say which node or property moved (it reported 3.362px for
+`togixe-65` where the true single-node error is 12px). **Equal pins were never
+evidence of a shared mechanism.**
+
+**Decision.** Batch-2 works in descending order of *measured* reach, taken from
+`ledger.md`'s queue. The 8 size-backlog slugs are worked at their own reach,
+not as a block — they are 8 fixtures with 6 distinct causes. The re-measure
+after every landed mechanism stays mandatory.
+
+**Consequences.** The map/port node-emission family leads (~28 of 80 fixtures)
+rather than the size backlog (8). D3's re-measure discipline and its
+shared-mechanism-before-coordinates principle are unchanged — only the claim
+about *where* the sharing is.
+
+---
+
+## D7 — Large, separable subsystems are deferred as tracked missions
+
+**Authorization.** Maintainer, 2026-08-11: "Defer as tracked missions, carry in
+the ledger."
+
+**Decision.** Work that is genuinely large AND separable from object closure is
+filed as its own mission-index entry and carried in `ledger.md` by a named row
+naming its mechanism and `file:line` — which satisfies D1's exit bar without
+pretending the fixture is closed. Confirmed for the ~33 unported USymbol shapes
+(`gapisu-00-celo011`, `ruturo-47-kapi300`) and the `{{ }}` embedded-diagram
+pipeline (`zicope-62-pica490`, `zuvila-56-nuda425`).
+
+**Consequences.** A deferral is a measured product decision with a tracked
+owner, never an effort excuse — the standing CLAUDE.md bar. Everything not
+deferred under this decision is fixed in batch-2.
+
+---
+
 ## D4 — The harness gets a freshness guard
 
 **Context.** `svg-conformance-census.ts object` reported 0/80 for an unknown
