@@ -765,6 +765,61 @@ iterations (B1, B3) committed the diagnosis first and implemented next; the
 loop protocol requires the mechanism on disk before code, and a multi-file
 change plus a full gate run does not fit the remainder of this turn honestly.
 
+## B31 (M36) — comparator widening, maintainer-approved 2026-08-11
+
+**Landed.** `tests/oracle/svek-dot.ts#degreeSequenceDirected` — a sorted
+`in:out` degree multiset, added to `structurallyEqual` as `directionOk`, plus
+the matching `CHECKS`/`CHECK_DETAILS` entries so `dot-sync-report --slug`
+prints both sides on a mismatch.
+
+Kept id-agnostic on purpose: node ids are synthetic and no other check
+compares them, so direction is captured as each node's own (indegree,
+outdegree) pair rather than by matching endpoints. A reversal moves one node
+from `1:0` to `0:1` and its partner the other way, which no sorting hides. The
+honest limit: a graph whose every node has equal in- and out-degree stays
+indistinguishable under reversal at this resolution. That is a property of an
+id-agnostic comparison, not a gap this closes, and it is stated in the
+function's own doc comment rather than left for someone to discover.
+
+**Re-baselined, as approved.** The counts this moves, all in the strict
+direction:
+
+| gate | was | now | delta |
+|---|---|---|---|
+| object DOT | 74/80 | **73/80** | −1 |
+| class DOT | 689/711 | **661/711** | −28 |
+| state DOT | 267/267 | **264/267** | −3 |
+| component DOT | 262/262 | 262/262 | — |
+| usecase DOT | 93/93 | 93/93 | — |
+
+**These 32 are pre-existing defects, not regressions.** Nothing about the
+emission changed in this iteration; the gate simply stopped being blind to it.
+Every one of them still passes `edgeCountOk` and the UNDIRECTED `degreeOk`, so
+the multiset of endpoints is right and only the orientation is wrong — which
+is exactly what `directionOk` is for.
+
+**Quarantined, not skipped, following B0's own precedent.** When B0 made the
+gate port-aware it surfaced 42 fixtures and filed them in
+`port-backlog.json`, pinned to fail `portOk` and nothing else. B31 does the
+identical thing with `oracle/goldens/<type>/direction-backlog.json` (class 28,
+state 3, object 1) and the same assertion shape: a listed fixture must fail
+`directionOk` and NOTHING else, so every other structural check stays live and
+a real regression in it still fails `npm test`. The list is shrink-only.
+
+**Cause deliberately NOT attributed — filed as B33.** B6 already fixed M7's
+decor-driven endpoint swap, so these are something else, and guessing which
+mechanism from a count would be exactly the "repeat a scope claim without
+checking it" failure this mission keeps catching. One sampled fixture
+(`class/befasi-62-vimu310`) has the candidate's out-degrees collapsed into a
+hub — `5:0` and `7:0` against an oracle whose maxima are `3:4`/`1:3` — so at
+least some are edges emitted from one source that upstream emits per-pair.
+Note connectors and inline `extends` are the two builders that carry no
+`idEntity1FullId` pair and fall back to `parentIsLinkEntity1`, which makes
+them the first place an audit should look. That audit is B33.
+
+**Quality gates.** `npm test` 574 files / 12760 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

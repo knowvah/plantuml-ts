@@ -207,6 +207,44 @@ export function degreeSequence(g: StructuralGraph): number[] {
   return [...deg.values()].sort((a, b) => a - b);
 }
 
+/**
+ * Sorted `in:out` degree multiset — the DIRECTED analogue of {@link
+ * degreeSequence}, and the only orientation-sensitive check in this
+ * comparator.
+ *
+ * B31/M37 (approved 2026-08-11): every other member of `structurallyEqual`
+ * is an undirected or order-free signature — `degreeSequence` increments
+ * BOTH endpoints and sorts, and minlens/shapes/ports/cluster-sizes are
+ * sorted multisets — so reversing `a -> b` to `b -> a` left all eleven
+ * checks invariant. Edge ORIENTATION was therefore invisible to this gate
+ * for its whole life, which is how M7 (`class-arrow-grammar.ts`'s
+ * decor-driven endpoint swap) survived in 116 of 722 class fixtures while
+ * they scored EQUAL. See `plans/object-close/ledger.md` B31.
+ *
+ * Node ids are synthetic and deliberately never compared (the same reason
+ * `degreeSequence` and `sortedPorts` are id-agnostic), so direction is
+ * captured as each node's own (indegree, outdegree) pair rather than by
+ * matching endpoints: a reversal moves a node from `1:0` to `0:1` and its
+ * partner the other way, which no sorting can hide. A graph whose every
+ * node has equal in- and out-degree is genuinely indistinguishable under
+ * reversal at this resolution — that is a real limit of an id-agnostic
+ * comparison, not a gap this closes.
+ */
+const degreeSequenceDirected = (g: StructuralGraph): string[] => {
+  const inDeg = new Map<string, number>();
+  const outDeg = new Map<string, number>();
+  for (const n of g.nodes) {
+    inDeg.set(n.id, 0);
+    outDeg.set(n.id, 0);
+  }
+  for (const e of g.edges) {
+    outDeg.set(e.from, (outDeg.get(e.from) ?? 0) + 1);
+    inDeg.set(e.to, (inDeg.get(e.to) ?? 0) + 1);
+  }
+  const ids = new Set([...inDeg.keys(), ...outDeg.keys()]);
+  return [...ids].map((id) => `${inDeg.get(id) ?? 0}:${outDeg.get(id) ?? 0}`).sort();
+};
+
 const eqNum = (a: number[], b: number[]): boolean =>
   a.length === b.length && a.every((v, i) => v === b[i]);
 const eqStr = (a: string[], b: string[]): boolean =>
@@ -264,6 +302,10 @@ export interface StructuralDiff {
    *  see this module's doc comment for the measured blindness this closes. */
   portOk: boolean;
   clusterOk: boolean;
+  /** Edge ORIENTATION matches, as a sorted `in:out` degree multiset — see
+   *  {@link degreeSequenceDirected} for why this is not covered by
+   *  `degreeOk`, which is undirected. B31. */
+  directionOk: boolean;
   /** rankdir: textual equality; absent==absent equal; absent vs present mismatches. */
   rankdirOk: boolean;
   /** nodesep: numeric equality (epsilon 1e-6); absent==absent equal. */
@@ -324,6 +366,7 @@ export function compareStructural(
   const nodeCountOk = oracle.nodes.length === candidate.nodes.length;
   const edgeCountOk = oracle.edges.length === candidate.edges.length;
   const degreeOk = eqNum(od, cd);
+  const directionOk = eqStr(degreeSequenceDirected(oracle), degreeSequenceDirected(candidate));
   const minlenOk = eqNum(sortedMinlens(oracle), sortedMinlens(candidate));
   const shapeOk = eqStr(sortedShapes(oracle), sortedShapes(candidate));
   const labelOk = eqNum(labelCounts(oracle), labelCounts(candidate));
@@ -338,6 +381,7 @@ export function compareStructural(
     nodeCountOk,
     edgeCountOk,
     degreeOk,
+    directionOk,
     minlenOk,
     shapeOk,
     labelOk,
@@ -350,6 +394,7 @@ export function compareStructural(
       nodeCountOk &&
       edgeCountOk &&
       degreeOk &&
+      directionOk &&
       minlenOk &&
       shapeOk &&
       labelOk &&

@@ -20,6 +20,7 @@ export const CHECKS = [
   'nodeCountOk',
   'edgeCountOk',
   'degreeOk',
+  'directionOk',
   'minlenOk',
   'shapeOk',
   'labelOk',
@@ -62,6 +63,26 @@ const labelCountsOf = (g: StructuralGraph): [number, number, number, number] => 
   g.edges.filter((e) => e.hasXLabel).length,
 ];
 
+/** B31: the DIRECTED in:out degree multiset the comparator's `directionOk`
+ *  compares -- kept id-agnostic for the same reason `degreeSequence` is.
+ *  Mirrors `svek-dot.ts#degreeSequenceDirected`; duplicated rather than
+ *  exported so the comparator's own surface stays minimal. */
+const directedDegreesOf = (g: StructuralGraph): string[] => {
+  const inDeg = new Map<string, number>();
+  const outDeg = new Map<string, number>();
+  for (const n of g.nodes) {
+    inDeg.set(n.id, 0);
+    outDeg.set(n.id, 0);
+  }
+  for (const e of g.edges) {
+    outDeg.set(e.from, (outDeg.get(e.from) ?? 0) + 1);
+    inDeg.set(e.to, (inDeg.get(e.to) ?? 0) + 1);
+  }
+  return [...new Set([...inDeg.keys(), ...outDeg.keys()])]
+    .map((id) => `${inDeg.get(id) ?? 0}:${outDeg.get(id) ?? 0}`)
+    .sort();
+};
+
 interface CheckDetail {
   label: string;
   values: (o: StructuralGraph, c: StructuralGraph) => [unknown, unknown];
@@ -72,6 +93,10 @@ const CHECK_DETAILS: Record<Check, CheckDetail> = {
   nodeCountOk: { label: 'node count', values: (o, c) => [o.nodes.length, c.nodes.length] },
   edgeCountOk: { label: 'edge count', values: (o, c) => [o.edges.length, c.edges.length] },
   degreeOk: { label: 'degree sequence', values: (o, c) => [degreeSequence(o), degreeSequence(c)] },
+  directionOk: {
+    label: 'directed in:out degree multiset (B31)',
+    values: (o, c) => [directedDegreesOf(o), directedDegreesOf(c)],
+  },
   minlenOk: { label: 'minlen multiset', values: (o, c) => [minlensOf(o), minlensOf(c)] },
   shapeOk: { label: 'shape multiset', values: (o, c) => [shapesOf(o), shapesOf(c)] },
   labelOk: { label: 'label counts [label,tail,head,xlabel]', values: (o, c) => [labelCountsOf(o), labelCountsOf(c)] },

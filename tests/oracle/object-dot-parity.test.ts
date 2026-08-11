@@ -46,6 +46,15 @@ const portBacklog: ReadonlySet<string> = new Set(
     : [],
 );
 
+/** B31: slugs whose DOT differs from the oracle's ONLY in edge DIRECTION --
+ *  see `direction-backlog.json`'s own `_doc`. Same shape as `portBacklog`:
+ *  the assertion below keeps every other check live for these fixtures. */
+const directionBacklog: ReadonlySet<string> = new Set(
+  existsSync(join(GOLDENS, 'direction-backlog.json'))
+    ? (JSON.parse(readFileSync(join(GOLDENS, 'direction-backlog.json'), 'utf8')) as { slugs: string[] }).slugs
+    : [],
+);
+
 /** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-exact fixtures. */
 const sizeBacklog: Record<string, number> = existsSync(join(GOLDENS, 'size-backlog.json'))
   ? (JSON.parse(readFileSync(join(GOLDENS, 'size-backlog.json'), 'utf8')) as Record<string, number>)
@@ -98,7 +107,17 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — obj
         const failingChecks = Object.entries(diff)
           .filter(([k, v]) => k.endsWith('Ok') && v === false)
           .map(([k]) => k);
-        if (portBacklog.has(name)) {
+        if (directionBacklog.has(name)) {
+          // B31: known-unequal in edge DIRECTION ONLY (see
+          // direction-backlog.json's `_doc`). Same contract as portBacklog
+          // below/above -- NOT a skip: every other structural check stays
+          // live, so a regression in node count, degree, minlen, shape,
+          // labels, ports or clusters still fails here.
+          expect(
+            failingChecks.filter((k) => k !== 'sizeConformantOk'),
+            `${name}/${file}: direction-backlog fixtures may fail directionOk and NOTHING else`,
+          ).toEqual(['directionOk']);
+        } else if (portBacklog.has(name)) {
           // Known-unequal in edge ports ONLY (see port-backlog.json's `_doc`).
           // Deliberately NOT a skip: the fixture stays fully gated on every
           // other check, so a regression in node count, degree, minlen, shape,
