@@ -320,6 +320,98 @@ describe('computeClassRawInkDims — object empty-body ink (G3/O2)', () => {
   });
 });
 
+// B5/M6: the THIRD object body state -- an empty field list that is still
+// SHOWN. `EntityImageObject`'s ctor (`svek/image/EntityImageObject.java
+// :110-113`) substitutes `TextBlockLineBefore(TextBlockEmpty(10, 16))`,
+// whose payload draws NOTHING (`klimt/shape/TextBlockEmpty.java:63-64`) and
+// whose divider `ULine` spans only `[x+1, x+w-1]`
+// (`klimt/shape/UHorizontalLine.java:99-108,148-151`), so the classifier's
+// ink comes SOLELY from its own rect and takes `LimitFinder#drawRectangle`'s
+// native symmetric inset on BOTH corners (`klimt/drawing/LimitFinder.java
+// :184-188`) -- unlike EITHER sibling state. See `addRectInkEmptyShownBody`'s
+// own doc comment for the three-way jar-rendered control set.
+describe('computeClassRawInkDims — object empty-but-SHOWN placeholder ink (B5/M6)', () => {
+  it('jar-verified jabote-02-rajo672 (three bare `object oN`, no title): ' +
+    'canvas 115x149, i.e. the rect inset on BOTH axes', () => {
+    const geo = (id: string, x: number, y: number): ClassifierGeo =>
+      makeClassifierGeo({
+        id, kind: 'object', x, y, width: 29.575, height: 34,
+        dividerYs: [18], emptyFieldPlaceholder: true,
+      });
+    const classifiers = [geo('o1', 0, 0), geo('o2', 65, 0), geo('o3', 0, 94)];
+    expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 115, height: 149 });
+  });
+
+  it('drops exactly 1px on EACH axis versus the general addRectInk rule', () => {
+    const withFlag = makeClassifierGeo({
+      id: 'o1', kind: 'object', x: 0, y: 0, width: 29.575, height: 34,
+      dividerYs: [18], emptyFieldPlaceholder: true,
+    });
+    const { emptyFieldPlaceholder: _drop, ...withoutFlag } = withFlag;
+    const a = computeClassRawInkDims([withFlag], [], [], []);
+    const b = computeClassRawInkDims([withoutFlag], [], [], []);
+    expect(b.width - a.width).toBe(1);
+    expect(b.height - a.height).toBe(1);
+  });
+
+  it('authored jar control (2 bare objects, no title, no edges): the ' +
+    'zero-height-body sibling rule must NOT be reused -- it keeps y+h and ' +
+    'would give 56, jar says 55', () => {
+    // Rendered through the pinned jar as `@startuml object foo / object bar
+    // @enduml`: rects (7,7,33.425,34) and (75.61,7,34.213,34), canvas
+    // 123x55. Raw positions are the SVG ones less this port's +7 anchor.
+    const classifiers: ClassifierGeo[] = [
+      makeClassifierGeo({
+        id: 'foo', kind: 'object', x: 0, y: 0, width: 33.425, height: 34,
+        dividerYs: [18], emptyFieldPlaceholder: true,
+      }),
+      makeClassifierGeo({
+        id: 'bar', kind: 'object', x: 68.61, y: 0, width: 34.213, height: 34,
+        dividerYs: [18], emptyFieldPlaceholder: true,
+      }),
+    ];
+    expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 123, height: 55 });
+  });
+
+  it('authored jar control (`hide object fields`, 2 objects, no title): the ' +
+    'zero-height-body state keeps y+h -- canvas 123x40, NOT 39', () => {
+    // Rendered through the pinned jar as `@startuml hide object fields /
+    // object foo { field1 } / object bar { field2 } @enduml`: rects
+    // (7,7,33.425,18) and (75.61,7,34.213,18), canvas 123x40. This is the
+    // negative control that killed the wider "field list is empty" gate the
+    // B5 ledger row proposed.
+    const classifiers: ClassifierGeo[] = [
+      makeClassifierGeo({ id: 'foo', kind: 'object', x: 0, y: 0, width: 33.425, height: 18, dividerYs: [] }),
+      makeClassifierGeo({ id: 'bar', kind: 'object', x: 68.61, y: 0, width: 34.213, height: 18, dividerYs: [] }),
+    ];
+    expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 123, height: 40 });
+  });
+
+  it('authored jar control (2 POPULATED objects, no title): the general ' +
+    'addRectInk rule is unchanged -- canvas 148x62', () => {
+    // Pinned jar, `@startuml object foo { field1 } / object bar { field2 }
+    // @enduml`: rects (7,7,45.512,40) and (88,7,45.512,40), canvas 148x62.
+    const classifiers: ClassifierGeo[] = [
+      makeClassifierGeo({ id: 'foo', kind: 'object', x: 0, y: 0, width: 45.512, height: 40, dividerYs: [18] }),
+      makeClassifierGeo({ id: 'bar', kind: 'object', x: 81, y: 0, width: 45.512, height: 40, dividerYs: [18] }),
+    ];
+    expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 148, height: 62 });
+  });
+
+  it('is object-kind-gated: the flag is inert on a class leaf', () => {
+    const common = {
+      id: 'C', x: 0, y: 0, width: 29.575, height: 34,
+      dividerYs: [18], emptyFieldPlaceholder: true as const,
+    };
+    const asObject = makeClassifierGeo({ ...common, kind: 'object' });
+    const asClass = makeClassifierGeo({ ...common, kind: 'class' });
+    const objectDims = computeClassRawInkDims([asObject], [], [], []);
+    const classDims = computeClassRawInkDims([asClass], [], [], []);
+    expect(classDims.width - objectDims.width).toBe(1);
+    expect(classDims.height - objectDims.height).toBe(1);
+  });
+});
+
 // G2 N32: `class Foo<T>`'s generic type-parameter tag box -- drawn OUTSIDE
 // the classifier's own rect (above-right, `class-stereotype.ts
 // #buildGenericTagGeo`'s doc comment), contributing its OWN ink point via

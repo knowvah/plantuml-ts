@@ -375,7 +375,19 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
   });
   for (const r of fieldRows) rows.push({ ...r, y: title.height + r.y });
 
-  return { width, height, rows, dividerYs: showFields ? [title.height] : [] };
+  // B5/M6: an empty-but-SHOWN field list is upstream's
+  // `TextBlockLineBefore(LineThickness, TextBlockEmpty(10, 16))` placeholder
+  // branch (`EntityImageObject.java:110-113`), NOT the `showFields == false`
+  // branch (`BodierLikeClassOrObject.java:225-229`'s `TextBlockUtils
+  // .empty(0, 0)`) that `dividerYs: []` already marks. The two states carry
+  // DIFFERENT ink rules -- see `class-ink-box.ts#addRectInkEmptyShownBody`.
+  const emptyFieldPlaceholder = showFields && fieldRows.length === 0;
+
+  return {
+    width, height, rows,
+    dividerYs: showFields ? [title.height] : [],
+    ...(emptyFieldPlaceholder ? { emptyFieldPlaceholder: true as const } : {}),
+  };
 }
 
 /**

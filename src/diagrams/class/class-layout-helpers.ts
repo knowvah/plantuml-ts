@@ -237,6 +237,10 @@ export interface MeasuredClassifier {
    *  `dividerYs[0]`), but the LINES are drawn from this, not from
    *  `dividerYs`. */
   jsonBody?: readonly JsonBodyItem[];
+  /** B5/M6: see `ClassifierGeo.emptyFieldPlaceholder`'s doc comment
+   *  (./class-geo-types.ts). Set only by `class-object-map-sizing.ts
+   *  #buildFieldBasedObjectGeo`. */
+  emptyFieldPlaceholder?: true;
 }
 
 /**

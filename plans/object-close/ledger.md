@@ -89,10 +89,10 @@ Verdicts: `fixable` · `fixable-large` (own tracked mission) · `scoping`
 | 12 | `gatefi-65-curu360` | M4 | `svek/SvekNode.java:269-297` + `~/git/graphviz/lib/common/shapes.c:1993-2009` | `src/core/graph-layout-build.ts:160-169`, `:47-49` | fixable | geom-b §C2, §gatefi-65 |
 | 13 | `gubene-80-zume167` | M24 + M25 | `svek/image/EntityImageObject.java:132-135`, `:199-203`; `objectdiagram/command/CommandCreateMap.java:186-190` | `src/core/style-map-element.ts:197-199`; `src/diagrams/class/class-map-commands.ts:344-366` | fixable | nonnum-a §gubene-80 |
 | 14 | `guzojo-14-muxa584` | M3 + M1 + M2 | `TextBlockMap.java:171-180`; `cucadiagram/BodierMap.java:72-82` | `class-map-sizing.ts`; `src/core/svek-dot-emit.ts:150-152` | fixable | nonnum-b §guzojo-14 |
-| 15 | `jabote-02-rajo672` | M6 | `klimt/drawing/LimitFinder.java:184-187` + `svek/image/EntityImageObject.java:111-113` | `src/diagrams/class/class-ink-box.ts:68-73`, gate `:278` | fixable | geom-a §M3, §jabote-02 |
+| 15 | `jabote-02-rajo672` | M6 | `klimt/drawing/LimitFinder.java:184-188` + `svek/image/EntityImageObject.java:110-113` | `class-ink-box.ts#addRectInkEmptyShownBody` | **FIXED (B5)** — zero-diff, ratcheted | geom-a §M3, §jabote-02 |
 | 16 | `jaxere-74-cole479` | M1 | `EntityImageMap.java:245-247` → `SvekNode.java:269-303` | `src/core/svek-dot-emit.ts:148-152`, `:169`, `:92-105` | scoping | geom-a §jaxere-74 |
-| 17 | `jocamu-71-nuvo330` | M19 + M6 | `svek/image/EntityImageObject.java:186-187`, `:211-212` | `src/diagrams/class/renderer-group.ts:78` | fixable | nonnum-b §jocamu-71 |
-| 18 | `jotaga-99-fatu830` | M6 | `LimitFinder.java:184-187` + `EntityImageObject.java:111-113` | `class-ink-box.ts:68-73`, gate `:278` | fixable | geom-a §jotaga-99 |
+| 17 | `jocamu-71-nuvo330` | M19 (M6 landed, no movement) | `svek/image/EntityImageObject.java:186-187`, `:211-212` | `src/diagrams/class/renderer-group.ts:78` | fixable — B20 | nonnum-b §jocamu-71 |
+| 18 | `jotaga-99-fatu830` | M6 | `LimitFinder.java:184-188` + `EntityImageObject.java:110-113` | `class-ink-box.ts#addRectInkEmptyShownBody` | **FIXED (B5)** — zero-diff, ratcheted | geom-a §jotaga-99 |
 | 19 | `kagope-09-kubu001` | M26 | `svek/SvekResult.java:82-91`, `:97-101` | `src/diagrams/class/renderer.ts:316-320`, `:440-443` | fixable | nonnum-a §kagope-09 |
 | 20 | `kavako-54-zipa815` | M23 | `svek/image/EntityImageMap.java:160,166-167`; `EntityImageClass.java:193,200-201` | `src/diagrams/class/class-color-override.ts:25-28`; `renderer-classifier-colors.ts:152-160` | fixable | nonnum-a §kavako-54 |
 | 21 | `kiluja-96-pado371` | M17 + M1 + M2 | `decoration/symbol/USymbolFrame.java:68-96` | `src/diagrams/class/class-namespace-shape.ts` | fixable | nonnum-b §kiluja-96 |
@@ -112,7 +112,7 @@ Verdicts: `fixable` · `fixable-large` (own tracked mission) · `scoping`
 | 35 | `rozuxo-44-fudi093` | M1 + M4 | `SvekNode.java:269-297` + `appendTr :298-311`; `MethodsOrFieldsArea.java:81`; `abel/Link.java:219-231` | `src/core/svek-dot-emit.ts:88-104` | scoping | geom-b §rozuxo-44 |
 | 36 | `ruloso-59-nato909` | M1 + M4 | `SvekNode.java:269-297`; `TextBlockMap.java:66`; `Link.java:219-231` | `src/core/svek-dot-emit.ts:88-104`; `graph-layout-build.ts:160-169` | scoping | geom-b §ruloso-59 |
 | 37 | `ruturo-47-kapi300` | M9 | `USymbols.java:60-95`; `EntityImageDescription.java:111-114,171,203-213` | `src/core/usymbol-shapes.ts:223-228`; `latex.ts:106-112` | deferred-D7 (fixable-large) | nonnum-a §ruturo-47 |
-| 38 | `sajege-04-zuce784` | M20 + M6 | `CommandLinkClass.java:363-364` → `abel/Link.java:145-146`, `:135` | `src/diagrams/class/renderer-uid.ts:145-233`; `class-ink-box.ts:122-125` | fixable | nonnum-b §sajege-04 |
+| 38 | `sajege-04-zuce784` | M20 (M6 landed at B5: 6 → 2 diffs) | `CommandLinkClass.java:363-364` → `abel/Link.java:145-146`, `:135` | `src/diagrams/class/renderer-uid.ts:145-233` | fixable — B21 | nonnum-b §sajege-04 |
 | 39 | `sarepa-89-cevi460` | M7 | `CommandLinkClass.java:363-364` | `class-arrow-grammar.ts:248-249` | fixable | geom-b §sarepa-89 |
 | 40 | `satuco-50-vusa163` | M15 + M3 + M1 | `cucadiagram/BodierMap.java:54`, `:72-76` | `src/diagrams/class/class-object-map-sizing.ts` / `class-map-sizing.ts` | fixable | nonnum-b §satuco-50 |
 | 41 | `sibika-09-sipu286` | M2 + M5 | `SvekEdge.java:372-373`; `VisibilityModifier.java:178-180`, `:186-190` | `class-layout-edge-labels.ts:221`; `class-visibility-icon.ts:68` | fixable | geom-a §sibika-09 |
@@ -322,7 +322,59 @@ reaches the DOT.
   from the Java, not fitted: it reproduces all four observed pairs
   (10→6, 12→8, 14→10, 16→12, 20→16).
 
-## M6 — `LimitFinder`'s `-1` ink max-corner inset — **reach 4**
+## M6 — `LimitFinder`'s `-1` ink max-corner inset — **reach 4** — **LANDED at B5**
+
+> **B5 correction (2026-08-11).** The audit's diagnosis below is right about the
+> arithmetic and wrong about the GATE, and the correction matters because the
+> proposed gate would have regressed a pinned fixture. "The object's field list
+> is empty" is too wide: it merges two upstream branches that carry **different
+> ink rules**. The one that moves is only `EntityImageObject.java:110-113`
+> (empty list, still SHOWN → the `TextBlockEmpty(10, 16)` placeholder). The
+> `showFields == false` branch (`BodierLikeClassOrObject.java:225-229`) keeps
+> `y + h` and was already modeled correctly.
+>
+> Established with three untitled, edge-free, two-node fixtures authored for
+> this iteration and rendered through the pinned jar (two nodes so the
+> degenerate-single-leaf sizer path is not taken; no title so annotation chrome
+> cannot absorb a pixel) — the first control set in this mission that isolates
+> the two empty branches from each other:
+>
+> | body state | source | maxX | maxY | jar canvas |
+> |---|---|---|---|---|
+> | populated | `BodyFactory.create1` | `x+w` | `y+h` | 148 x 62 |
+> | `showFields == false` | `TextBlockUtils.empty(0,0)` | `x+w-1` | `y+h` | 123 x 40 |
+> | empty list, shown | `TextBlockEmpty(10,16)` | `x+w-1` | `y+h-1` | 123 x 55 |
+>
+> Applying the audit's wider gate (or simply adding the Y term to
+> `addRectInkEmptyBody`) took `kexica-21-gega428` — a **pinned, zero-diff**
+> fixture — from 0 to 2 diffs. That measurement is what forced the three-way
+> split. The audit's "G3/O2 concluded height is DELIBERATELY unaffected from
+> two title-bearing fixtures where the Y term never surfaced" is therefore also
+> wrong: the Y term *does* surface on `kexica`, and `y + h` is correct there.
+>
+> **Landed** as a third rule, `class-ink-box.ts#addRectInkEmptyShownBody`, gated
+> on a new `ClassifierGeo.emptyFieldPlaceholder` flag set at
+> `class-object-map-sizing.ts#buildFieldBasedObjectGeo` — keyed on the upstream
+> BRANCH, not on a predicate over the geometry.
+>
+> **Still open, and explicitly not claimed as understood:** the `+1` by which
+> the other two states exceed `LimitFinder#drawRectangle` has no identified
+> drawing shape. `addRectInk`'s doc comment attributes it to an invisible
+> `UEmpty` reservation, but `UEmpty` is drawn nowhere on any class/object path
+> (`USymbolNode`/`USymbolDatabase`/`LaneDivider`/activity ftiles only), so that
+> attribution cannot be right. Pre-existing since G2 N5, orthogonal to M6, and
+> the reason this rule is branch-keyed rather than derived.
+>
+> **Measured result:** object census **23 → 26/80**, zero regressions and zero
+> swaps (before/after zero-diff sets compared element-wise). Flipped
+> `jabote-02-rajo672`, `jotaga-99-fatu830`, and — unpredicted — `fafozi-27-reja300`,
+> whose 2 diffs the queue had filed under M33 (B30); see the B30 note.
+> Partials: `sajege-04` 6 → 2, `beleso-08`/`fikojo-87`/`sarepa-89` 23 → 19,
+> `sigado-12`/`sivime-00` 15 → 11, `ruloso-59` 9 → 7, `tenalu-53` 24 → 22,
+> `tobuka-93` 148 → 146, `zebufu-01`/`style-stereotype-on-arrow-3` 41 → 39.
+> `jocamu-71` did NOT move: its max-X comes from the populated sibling `p2`,
+> so the audit's "width only" prediction for it was a coincidence of the right
+> sign; it needs M19 (B20) as filed.
 
 `drawRectangle` records the ink max corner at `(x+w-1, y+h-1)`, not `(x+w, y+h)`.
 We overstate by (1,1), which inflates the canvas by exactly 1 px per affected
@@ -587,7 +639,7 @@ the class census/DOT gate in the same pass.
 | B2 | **M2 + M34 together** — link-label 1px margin + label-table truncation | 15 | Each other, non-negotiable — M2 alone overshoots by 1px on ~half the set | none alone (M2 is a secondary on 12 of its 15) | Resolves the 15-vs-16 count discrepancy in `audit-geometry-a.md` M1. Touches every diagram type that emits a link label — **cross-type**. |
 | B3 | **M3** — map/JSON cell construction (creole FULL + empty-value cell + row vline + json full-height vline) | 9 | After B1 (its cell widths feed B1's row table; landing it first means measuring B1 against a moving body) | `bepafe-03`, `baloca-83` plausibly with B1 | `zicope-62`'s `<font:…>` half only; its `{{ }}` half is deferred. |
 | B4 | **M5** — `classAttributeIconSize` → visibility glyph | 4 | — | `vocute-12`, `nulixu-97` after B2 | Render-only, never reaches the DOT. Independently rediscovered by two audits. |
-| B5 | **M6** — `LimitFinder` `-1` ink max-corner inset | 4 | — | `jabote-02`, `jotaga-99` alone; `sajege-04` with M20; `jocamu-71` with M19 | Gate must widen to "field list is empty" (`EntityImageObject.java:111`), and the Y term must be added at `class-ink-box.ts:122-125`. Moves the whole class corpus — **cross-type**. Check `beleso-08`'s unattributed 1px residual in the same re-measure. |
+| ~~B5~~ | **M6** — `LimitFinder` `-1` ink max-corner inset | 4 | — | landed: `jabote-02`, `jotaga-99`, plus unpredicted `fafozi-27` | **DONE 2026-08-11.** Gate is NARROWER than this row proposed, not wider: only `EntityImageObject.java:110-113`'s empty-but-SHOWN branch. The "field list is empty" gate regressed pinned `kexica-21`; see M6's B5 correction block for the three-way jar control set. Census 23 → 26; class ratchet (317 goldens) and all five DOT counts unmoved. `beleso-08`'s 1px residual was M6 and is resolved. |
 | B6 | **M7** — decor-driven endpoint swap | 3 | — | `beleso-08`, `fikojo-87`, `sarepa-89` (modulo `beleso`'s 1px residual, see B5) | A single predicate; cheapest high-reach item. Also reverses `class/baneru-00-kuro607` and `class/mopesi-01-gapo101` — **cross-type**. |
 | B7 | **M8** — link `<<stereo>>` → arrow style signature + `LineThickness` reader | 3 | After B2 (all three fixtures also carry M2) | none alone | `resolveStyleCascade` already does the two-subset match; `babcfa94` is precedent for the shape only. |
 | B8 | **M10** — compiled theme table drops `skinparam` blocks | 2 | `fonulu-92` also needs B2 | `lunike-70` | Fix in `scripts/compile-themes.py` + regenerate. Reaches every `!theme` fixture in every corpus — **cross-type**. Confirmed by jar experiment for fonulu. |
@@ -602,8 +654,8 @@ the class census/DOT gate in the same pass.
 | B17 | **M15** — `BodierMap` empty-key collision | 1 | After B1 + B3 | none alone | |
 | B18 | **M14** — `<style> json/map` property set | 1 | After B1 + B3 | none alone | Build MaximumWidth/FontSize/FontStyle/LineColor/LineThickness **only**. `Margin`/`Padding` are inert in the jar and must NOT be built. |
 | B19 | **M17** — `USymbolFrame#drawFrame` | 1 | After B1 + B2 | none alone | |
-| B20 | **M19** — entity `<a>` URL wrapper | 1 | With B5 | `jocamu-71` once both land | |
-| B21 | **M20** — `Link#getInv()` uid tick | 1 | With B5 | `sajege-04` once both land | |
+| B20 | **M19** — entity `<a>` URL wrapper | 1 | B5 landed; B20 is now the only blocker | `jocamu-71` | |
+| B21 | **M20** — `Link#getInv()` uid tick | 1 | B5 landed; B21 is now the only blocker | `sajege-04` (down to 2 diffs) | |
 | B22 | **M21** — creole `Bullet` glyph atom | 1 | — | `donoki-79` | Three shapes; all constants already in the file; geometry already exact. |
 | B23 | **M23** — inline entity LINE colour (`##`, `#line:`) | 1 | — | `kavako-54`'s 9 non-numeric diffs; ≤15px positional residue remains unattributed | Add a border-override tier to `classBorder` and stop discarding the token. |
 | B24 | **M26** — node/edge emission order (notes) | 1 | — | `kagope-09` | Zero numeric delta on this fixture — DOM sequence only. Schedule near B11/B12: adjacent code (`renderer-uid.ts` / `renderer.ts` / `class-map-commands.ts`). |
@@ -612,7 +664,7 @@ the class census/DOT gate in the same pass.
 | B27 | **M31** — `state` leaf sizing in the class engine | 1 | — | `togixe-65`'s size half only; its non-numeric residue is deferred M9 | Correct constants already exist in `state-sizing.ts:134-136` — **cross-type** (state engine is the source of truth). |
 | B28 | **M32** — creole table stripe in object/entity bodies | 1 | — | `pikuba-31` | `StripeTable`/`AtomTable` already ported and unused on this path. |
 | B29 | **M18** — `note on link` merged into the edge label | 1 | After B2 | `lecali-51` | 222 diffs / 124px, all downstream of the un-merged label block. |
-| B30 | **M33** — DOT inches formatting (`toFixed` vs `%f`) | 1 | **Last.** It is a 1e-6 in perturbation that can flip any node's laid-out extent | `fafozi-27` | Landing it earlier re-baselines every other measurement for no reach. **Cross-type** and latent everywhere. |
+| ~~B30~~ | **M33** — DOT inches formatting (`toFixed` vs `%f`) | 0 | — | — | **Moot for `fafozi-27`**: B5 flipped it to zero-diff, so M33's only fixture is gone and this item leaves the actionable queue. The mechanism itself is real and latent everywhere; `fafozi-27`'s 2 diffs were the M6 canvas pair, misattributed here. Retain as a tracked-but-unfixtured note, not a queue item. |
 
 ## Deferred under D7 — carried as named rows, NOT batch-2 work
 
@@ -665,8 +717,11 @@ so they are not mistaken for closure):
 - `style-stereotype-on-arrow-7` — 28.0px, empty-`map` box extent. Likely B1;
   confirm at the re-measure.
 - `kavako-54-zipa815` — ≤15px positional residue on `g[2]`/`g[3]`/`g[4]`.
-- `beleso-08-ruca459` — 1.0px on both axes; matches M6's signature but is not
-  assigned by any audit (see M6's open-candidate note).
+- ~~`beleso-08-ruca459` — 1.0px on both axes; matches M6's signature but is not
+  assigned by any audit (see M6's open-candidate note).~~ **RESOLVED at B5** —
+  it was M6 after all. Both its objects are empty-but-shown; the canvas
+  ±1-on-each-axis quartet cleared with the rule (23 → 19 diffs). Its remaining
+  19 are M7.
 - `tujasu-04-nota700` — 7.25px body offset (Question 2 above).
 
 ---

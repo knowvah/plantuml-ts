@@ -125,6 +125,60 @@ function addRectInkEmptyBody(box: InkBox, x: number, y: number, w: number, h: nu
 }
 
 /**
+ * B5/M6: the THIRD object body state — an empty field list that is still
+ * SHOWN. `EntityImageObject`'s ctor substitutes a placeholder body
+ * `TextBlockLineBefore(LineThickness, TextBlockEmpty(10, 16))` for a real
+ * `BodyFactory.create1` body whenever `getFieldsToDisplay().size() == 0 &&
+ * showFields` (`svek/image/EntityImageObject.java:110-113`). NOTHING in that
+ * placeholder reaches the classifier's max corner:
+ *
+ * - `TextBlockEmpty#drawU` is an empty method
+ *   (`klimt/shape/TextBlockEmpty.java:63-64`);
+ * - `TextBlockLineBefore#drawU` draws only `UHorizontalLine.infinite(
+ *   thickness, 1, 1, separator)` (`klimt/shape/TextBlockLineBefore.java:84`),
+ *   whose `ULine` runs from `startingX + 1` to `endingX - 1`
+ *   (`klimt/shape/UHorizontalLine.java:99-108,148-151`) at the body's TOP
+ *   edge, so it reaches neither `x + w` nor the bottom edge.
+ *
+ * The classifier's ink is therefore its own `URectangle` alone, taking
+ * `LimitFinder#drawRectangle`'s native symmetric inset on BOTH corners —
+ * `addPoint(x-1, y-1)`, `addPoint(x+w-1, y+h-1)`
+ * (`klimt/drawing/LimitFinder.java:184-188`).
+ *
+ * This is NOT a widening of {@link addRectInkEmptyBody}: the three object
+ * body states carry three DIFFERENT max corners, established against the
+ * pinned jar with untitled, edge-free, two-node controls (two nodes so the
+ * degenerate-single-leaf sizer path is not taken, no title so the annotation
+ * chrome cannot absorb a pixel):
+ *
+ * | body state                    | source                  | maxX    | maxY    | jar canvas |
+ * |-------------------------------|-------------------------|---------|---------|------------|
+ * | populated                     | `BodyFactory.create1`   | `x+w`   | `y+h`   | 148 x 62   |
+ * | `showFields == false`         | `TextBlockUtils.empty`  | `x+w-1` | `y+h`   | 123 x 40   |
+ * | empty list, shown (this rule) | `TextBlockEmpty(10,16)` | `x+w-1` | `y+h-1` | 123 x 55   |
+ *
+ * (`object foo {field1} / object bar {field2}`, the same with a leading
+ * `hide object fields`, and a bare `object foo / object bar` respectively;
+ * corpus confirmation on `jabote-02-rajo672` and `jotaga-99-fatu830`, whose
+ * canvases were each 1px over on BOTH axes before this rule.)
+ *
+ * OPEN, and deliberately not modeled here: the `+1` by which the first two
+ * rows exceed `LimitFinder#drawRectangle` has no identified drawing shape.
+ * `addRectInk`'s own doc comment attributes it to an invisible `UEmpty`
+ * reservation, but `UEmpty` is drawn nowhere on any class/object path
+ * (only `USymbolNode`/`USymbolDatabase`/`LaneDivider`/the activity ftiles),
+ * so that attribution cannot be right. Whatever supplies it, it is
+ * downstream of the body block those two states build and this one does
+ * not — which is what makes the three-way split observable, and which is
+ * why this rule is keyed on the upstream BRANCH rather than on a predicate
+ * over the geometry. Tracked in `plans/object-close/ledger.md` M6.
+ */
+function addRectInkEmptyShownBody(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPoint(box, x - 1, y - 1);
+  addPoint(box, x + w - 1, y + h - 1);
+}
+
+/**
  * `LimitFinder#drawEllipse` (`klimt/drawing/LimitFinder.java:206-209`) —
  * `addPoint(x, y)`, `addPoint(x + w - 1, y + h - 1)`. Note the ASYMMETRY
  * versus {@link addRectInk}: an ellipse's min corner carries NO `-1` (only
@@ -253,6 +307,39 @@ function addLollipopRowInk(box: InkBox, c: ClassifierGeo): void {
 
 /** One classifier's own ink contribution — split out of `buildInkBox` (G2
  *  N35) to keep that function's own complexity under the repo's CCN cap. */
+/**
+ * The classifier's own bordered-rect ink, which is one of THREE rules for
+ * `kind: 'object'` and one for everything else. Split out of {@link
+ * addClassifierInk} solely to keep that function under the repo's CCN cap
+ * (B5/M6 added the third object arm); no behavior change.
+ *
+ * Rule selection, all three jar-verified — see each helper's own doc
+ * comment, and `addRectInkEmptyShownBody`'s for the control set that
+ * distinguishes the two empty-body states from each other.
+ */
+function addClassifierBoxInk(box: InkBox, c: ClassifierGeo): void {
+  // B5/M6: `kind: 'object'` whose field list is empty but still SHOWN --
+  // upstream's `TextBlockEmpty(10, 16)` placeholder branch.
+  if (c.kind === 'object' && c.emptyFieldPlaceholder === true) {
+    addRectInkEmptyShownBody(box, c.x, c.y, c.width, c.height);
+    return;
+  }
+  // G3/O2: `kind: 'object'` with its field/body compartment entirely
+  // suppressed (`dividerYs: []` -- see `addRectInkEmptyBody`'s own doc
+  // comment for the jar-verified mechanism and why this is gated to
+  // `object` specifically, not class/interface/enum).
+  if (c.kind === 'object' && c.dividerYs.length === 0) {
+    // mission skin-file-loading (deferred D3 item): shadow NOT modeled
+    // here -- no fixture in this mission's corpus combines a shadowed
+    // skin with a suppressed-body object/map/json classifier; see
+    // `addRectInkEmptyBody`'s own doc comment for the (separately jar-
+    // verified) unshadowed rule this leaves unchanged.
+    addRectInkEmptyBody(box, c.x, c.y, c.width, c.height);
+    return;
+  }
+  addRectInk(box, c.x, c.y, c.width, c.height, c.shadowing ?? 0);
+}
+
 function addClassifierInk(box: InkBox, c: ClassifierGeo): void {
   // G2 N33: a collapsed-empty package/namespace leaf draws the SAME
   // `USymbolFolder` `UPath` outline a namespace CLUSTER draws (`addPlainInk`
@@ -271,20 +358,7 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo): void {
     addEllipseInk(box, c.x, c.y, c.width, c.height);
     return;
   }
-  // G3/O2: `kind: 'object'` with its field/body compartment entirely
-  // suppressed (`dividerYs: []` -- see `addRectInkEmptyBody`'s own doc
-  // comment for the jar-verified mechanism and why this is gated to
-  // `object` specifically, not class/interface/enum).
-  if (c.kind === 'object' && c.dividerYs.length === 0) {
-    // mission skin-file-loading (deferred D3 item): shadow NOT modeled
-    // here -- no fixture in this mission's corpus combines a shadowed
-    // skin with a suppressed-body object/map/json classifier; see
-    // `addRectInkEmptyBody`'s own doc comment for the (separately jar-
-    // verified) unshadowed rule this leaves unchanged.
-    addRectInkEmptyBody(box, c.x, c.y, c.width, c.height);
-  } else {
-    addRectInk(box, c.x, c.y, c.width, c.height, c.shadowing ?? 0);
-  }
+  addClassifierBoxInk(box, c);
   if (c.kind === 'lollipop') addLollipopRowInk(box, c);
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box is drawn
   // OUTSIDE the classifier's own rect (above-right, `class-stereotype.ts

@@ -193,6 +193,175 @@ colour or centring issue: `centeringDelta` (`:80-82`) derives from
 `audit-geometry-a.md` M4 and `audit-geometry-b.md` C4, same `file:line` on both
 sides. That is the strongest reach evidence this mission produced.
 
+## B5 (M6) — diagnosis, written BEFORE any code change
+
+**Mechanism.** `LimitFinder#drawRectangle` (`klimt/drawing/LimitFinder.java
+:184-188`) records a plain `URectangle`'s ink corners as `(x-1, y-1)` and
+`(x+w-1+2·shadow, y+h-1+2·shadow)` — inset on BOTH corners. Our classifier rule
+`addRectInk` deliberately overrides the max corner to `(x+w, y+h)` because a
+classifier that draws a body compartment has something else in its own draw
+reaching that corner (G2 N5's jar-verified net rule). An object whose field
+list is empty draws **no body content at all**, so nothing supplies that extra
+pixel and the rect's own symmetric inset governs both axes.
+
+Upstream reaches the empty body through two disjoint branches, and **neither
+draws anything**:
+
+- `EntityImageObject` ctor `svek/image/EntityImageObject.java:110-113` —
+  `getFieldsToDisplay().size() == 0 && showFields` ⇒ `new TextBlockLineBefore(
+  thickness, new TextBlockEmpty(10, 16))`. `TextBlockEmpty#drawU` is literally
+  empty (`klimt/shape/TextBlockEmpty.java:63-64`); `TextBlockLineBefore#drawU`
+  draws only `UHorizontalLine.infinite(thickness, 1, 1, sep)`
+  (`klimt/shape/TextBlockLineBefore.java:84`), whose `ULine` spans
+  `[startingX+1, endingX-1]` (`klimt/shape/UHorizontalLine.java:99-108,148-151`)
+  and so stops at `x+w-1` — it cannot reach the rect's max corner either.
+- `BodierLikeClassOrObject#getBody`'s OBJECT arm
+  (`cucadiagram/BodierLikeClassOrObject.java:225-229`) — `showFields == false`
+  ⇒ `TextBlockUtils.empty(0, 0)`, whose `drawU` is also empty
+  (`klimt/shape/TextBlockUtils.java:85-88`).
+
+The only branch that draws a body is `BodyFactory.create1` at `:231-232`,
+reached exactly when the field list is non-empty **and** shown. So the ink rule
+is keyed on *"the object's body TextBlock draws nothing"*, which is true in
+both empty-list branches; our gate models only the second.
+
+**Origin, ours.**
+
+- `src/diagrams/class/class-ink-box.ts:278` — the gate
+  `c.kind === 'object' && c.dividerYs.length === 0` models `showFields == false`
+  only. An empty-field object with `showFields` true carries
+  `dividerYs: [title.height]` (`class-object-map-sizing.ts:378`) and therefore
+  falls through to `addRectInk`.
+- `src/diagrams/class/class-ink-box.ts:122-125` — `addRectInkEmptyBody` applies
+  the `-1` on X but keeps `y + h`.
+
+**Causal chain.** Ink max corner 1px too large on each axis ⇒
+`computeClassDocumentDims`'s `.delta(15,15)` + margins + `floor(v+1)` canvas is
+1px too large on each axis. No shape coordinate moves, because the ink **min**
+corner is unchanged and the ink shift derives from it.
+
+Closed arithmetically on `jabote-02-rajo672`, both directions, no fitted
+constant. Jar rects `(7,7,29.575,34)`, `(72,7,…)`, `(7,101,…)`:
+
+- correct rule ⇒ ink `[6, 100.575] × [6, 134]` ⇒ `(94.575, 128)` `+ (15,15)`
+  ⇒ `+ (5,5)` margins ⇒ `(114.575, 148)` ⇒ `floor(v+1)` ⇒ **115 × 149** = jar.
+- our rule ⇒ `[6, 101.575] × [6, 135]` ⇒ … ⇒ **116 × 150** = what we emit.
+
+**Evidence.** `jabote-02-rajo672` and `jotaga-99-fatu830` each have exactly 4
+diffs — `svg/@width`, `svg/@height`, `viewBox[2]`, `viewBox[3]` — every one
+delta `1.0000`, and **no shape diffs at all**.
+
+**Ruled out.**
+
+- Not a sizing defect: every rect/line/text coordinate matches the jar exactly;
+  only the document extent differs.
+- Not the shadow term — `shadowing` is 0 on all four fixtures.
+- Not `showFields`: none of the four carries a hide directive; they reach the
+  empty body through the *other* branch, which is precisely the gap.
+- Not a `UEmpty` reservation asymmetry: `UEmpty` is never drawn on any
+  class/object path (`grep UEmpty src/main/java/net` hits only
+  `USymbolNode`/`USymbolDatabase`/`LaneDivider`/activity ftiles), so
+  `addRectInk`'s own doc comment attributes its `+1` to a shape that this path
+  does not draw. Whatever supplies it for a populated classifier, it is
+  downstream of `BodyFactory.create1`, which the empty branches never call.
+
+**Falsifiable prediction, to be checked in the same re-measure.**
+`kexica-21-gega428` and `janoma-30-dovo501` are zero-diff **today** under
+`addRectInkEmptyBody`'s `y + h`. Upstream draws nothing in either empty branch,
+so the Y term must be `y + h - 1` for both, and those two fixtures must stay
+zero-diff — i.e. their max-Y must be supplied by something other than the
+empty-bodied rect. **If either regresses, this diagnosis is wrong**: the two
+branches would have to differ in ink, for which the Java above offers no
+mechanism, and B5 stops rather than keeping a two-rule split that nothing
+justifies.
+
+**Open candidate, not pre-credited.** `beleso-08-ruca459` carries an
+unattributed 1.0px residual on both axes and its two objects are both
+empty-field. Expected to shrink by exactly that residual, not to flip (23
+diffs, max 94px, dominated by M7).
+
+## B5 (M6) — outcome: the prediction was FALSIFIED, and the gate is narrower
+
+**What happened.** Adding the Y term to `addRectInkEmptyBody` took
+`kexica-21-gega428` — pinned and zero-diff — from 0 to 2 diffs (canvas 1px
+SHORT on height). The falsification test written above did its job: the
+diagnosis's "both empty branches must share one ink rule, because upstream
+draws nothing in either" was wrong as a predictor, even though every Java
+citation in it is accurate.
+
+**What the evidence actually supports.** I authored three fixtures and rendered
+them through the pinned jar — untitled, edge-free, and TWO nodes each (two so
+the degenerate-single-leaf sizer path is not taken; untitled so annotation
+chrome cannot absorb a pixel). No existing fixture isolates these states:
+every `showFields == false` object in the corpus is either titled or a single
+leaf.
+
+| body state | upstream source | maxX | maxY | jar canvas |
+|---|---|---|---|---|
+| populated | `BodyFactory.create1` (`BodierLikeClassOrObject.java:231-232`) | `x+w` | `y+h` | 148 x 62 |
+| `showFields == false` | `TextBlockUtils.empty(0,0)` (`:225-229`) | `x+w-1` | `y+h` | 123 x 40 |
+| empty list, shown | `TextBlockEmpty(10,16)` (`EntityImageObject.java:110-113`) | `x+w-1` | `y+h-1` | 123 x 55 |
+
+Three states, three max corners. So the B5 ledger row's proposed gate ("field
+list is empty") is not merely imprecise — it is **wider than the truth**, and
+applying it regresses a pinned fixture. The correct gate is the single upstream
+branch at `EntityImageObject.java:110-113`.
+
+**Landed.** A third rule, `class-ink-box.ts#addRectInkEmptyShownBody`
+(`addPoint(x-1,y-1)`, `addPoint(x+w-1,y+h-1)` — `LimitFinder.java:184-188`
+verbatim), gated on a new `ClassifierGeo.emptyFieldPlaceholder` flag set at
+`class-object-map-sizing.ts#buildFieldBasedObjectGeo` when
+`showFields && fieldRows.length === 0`. `addRectInkEmptyBody` is untouched.
+`addClassifierBoxInk` was extracted from `addClassifierInk` to keep CCN under
+the repo cap (pure split, no behavior change).
+
+**What I could not explain, and did not paper over.** The `+1` by which the
+other two states exceed `LimitFinder#drawRectangle` has no identified drawing
+shape. `addRectInk`'s doc comment attributes it to an invisible full-box
+`UEmpty` reservation; `UEmpty` is drawn nowhere on any class/object path
+(`grep` finds only `USymbolNode`, `USymbolDatabase`, `LaneDivider`, and the
+activity ftiles), so that attribution is wrong. This is pre-existing since G2
+N5 and orthogonal to M6 — it is exactly why the new rule is keyed on the
+upstream branch rather than derived from geometry. Recorded in the ledger's M6
+section as open; NOT filed to `docs/graphviz-issues/` because it is this port's
+own model gap, not a `@knowvah/dot-engine` divergence.
+
+**Measured.** Object SVG census **23 → 26/80**. Before/after zero-diff sets
+compared element-wise: **zero lost, three gained**, and no fixture anywhere in
+the corpus got worse — the two-directional check the amended protocol requires,
+not the scalar count. Gains: `jabote-02-rajo672`, `jotaga-99-fatu830`, and
+`fafozi-27-reja300` (unpredicted — the queue had its 2 diffs under M33/B30;
+they were the M6 canvas pair, so B30 loses its only fixture). Partials on ten
+further fixtures, all strictly downward — see the ledger's M6 block.
+
+**Frozen counts — all five DOT gates and every sibling census unmoved.**
+
+| gate | frozen | measured | verdict |
+|---|---|---|---|
+| object DOT structural | 74/80 | 74 (93%) | unmoved |
+| class DOT | 689/711 | 689 (97%) | unmoved |
+| component DOT | 262 | 262 (100%) | unmoved |
+| usecase DOT | 93 | 93 (100%) | unmoved |
+| state DOT | 267 | 267 (100%) | unmoved |
+| class SVG goldens | 317 pinned | 317 pass | unmoved |
+| description SVG goldens | 48-set | pass | unmoved |
+| object SVG ratchet | 22 pinned | 25 pass (+3) | additive |
+
+The class/description/state *censuses* remain stale-cache artifacts (T1; only
+`object` was re-captured), so the trustworthy cross-type signal is the golden
+ratchets, all of which `npm test` exercised green. Flagging that explicitly
+rather than quoting a census number that measures the cache.
+
+**Quality gates.** `npm test` 574 files / 12739 tests, exit 0 · `npm run
+typecheck` exit 0 · `npm run lint` exit 0 · `npm run build` exit 0. None piped.
+
+**Harness note, cost me a rerun.** `scripts/svg-parity-survey.ts` at its default
+`SVG_PARITY_CONCURRENCY=6` timed out **all 80** object fixtures and wrote a
+file claiming `{"timeout":80}`. Restored from HEAD and reran with
+`SVG_PARITY_CONCURRENCY=2 SVG_PARITY_TIMEOUT_MS=60000`, which reproduces the
+census exactly (26 conformant). A committed parity run must not use the
+default.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

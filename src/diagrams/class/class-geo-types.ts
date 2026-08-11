@@ -236,6 +236,19 @@ export interface ClassifierGeo {
    * is always `undefined` before `skin <name>`/`<style> Shadowing`).
    */
   shadowing?: number;
+  /**
+   * B5/M6: this `object` leaf's field list is EMPTY but still SHOWN, so
+   * `EntityImageObject`'s ctor substituted the placeholder body
+   * `TextBlockLineBefore(LineThickness, TextBlockEmpty(10, 16))`
+   * (`svek/image/EntityImageObject.java:110-113`) for a real
+   * `BodyFactory.create1` body. Read ONLY by `class-ink-box.ts
+   * #addClassifierInk` -- see `addRectInkEmptyShownBody`'s doc comment for
+   * the three-way jar-rendered control set that distinguishes this state
+   * from both siblings. Absent for every other classifier, including the
+   * `showFields == false` state, which is a DIFFERENT ink rule
+   * ({@link addRectInkEmptyBody}) rather than a special case of this one.
+   */
+  emptyFieldPlaceholder?: true;
 }
 
 export interface EdgeGeo {
