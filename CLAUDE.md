@@ -21,6 +21,23 @@ remembered summary: the method body, and the constructor that built its inputs.
 This is the single most-violated rule in this repo, and every violation has
 cost hours.
 
+**It fires the moment you can name a mechanism.** In practice the rule is not
+forgotten, it is out-competed — by a measurement harness with a fast numeric
+loop, which feels like evidence. Stop and open the Java when you are about to:
+
+1. write or say *why* something differs (a cause, not a delta);
+2. act on a number you just measured;
+3. repeat a mechanism from a ledger, a brief, a subagent, or your own earlier
+   message;
+4. call something unported, unreachable, or out of scope.
+
+A diff tells you WHICH fixture and WHICH attribute. It never tells you why, and
+a plausible cause fitted to a diff is the failure this rule exists to prevent.
+Real cases: a 66px node "explained" by a tab's width when the tab measures 0
+and the real cause was `getTabSize`'s zero-width fallback; a
+`~#1: Person` width blamed on a visibility strip when it was creole's `~`
+escape; `<code>` called unported when it had shipped.
+
 **Never derive a value by fitting.** Changing a constant, re-measuring, and
 keeping whatever shrank the error is forbidden even when the error shrinks —
 especially then. A fitted number matches today's corpus and encodes nothing, so
