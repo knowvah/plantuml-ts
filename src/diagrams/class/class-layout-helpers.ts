@@ -344,7 +344,7 @@ function resolveMeasureFonts(classifier: Classifier, theme: Theme) {
     ? resolveClassTagCascadeEntry(theme, styleTags, classifier.styleGeneration)
     : undefined;
   const attributeFont = resolveAttributeFont(theme, fontSpec, tagCascadeEntry, styleTags);
-  const headerFont = resolveHeaderFont(theme, attributeFont, tagCascadeEntry);
+  const headerFont = resolveHeaderFont(theme, attributeFont, tagCascadeEntry, styleTags);
   return { attributeFont, headerFont };
 }
 

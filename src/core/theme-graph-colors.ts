@@ -83,6 +83,16 @@ export interface ElementColors {
   headerBackground?: Paint;
   headerFont?: Paint;
   headerFontSize?: number;
+  /** `skinparam <sname>FontSize<<label>>` — the ELEMENT's own font size when
+   *  it carries that stereotype, written by the flat key or by the nested
+   *  `skinparam <sname> { <<label>> { FontSize N } }` block form (the
+   *  preprocessor normalizes both to the same key). Upstream reaches it
+   *  through `getStyleHeader().withTOBECHANGED(stereotype)`
+   *  (`EntityImageObject.java:132-134`), i.e. a stereotype-qualified merge of
+   *  the SAME `SName.object` style `objectFontSize` writes
+   *  (`FromSkinparamToStyle.java:200`). Consulted BEFORE {@link headerFontSize}
+   *  and the bare {@link fontSize}. */
+  fontSizeByStereo?: Readonly<Record<string, number>>;
   /**
    * mission skin-file-loading (deferred D3 item, class+description
    * shadow): `<sname>Shadowing` skinparam (flat `skinparam databaseShadowing

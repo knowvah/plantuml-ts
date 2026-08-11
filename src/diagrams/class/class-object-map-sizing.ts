@@ -50,6 +50,7 @@ import { objectDisplayText } from './class-object-display.js';
 import { buildObjectMemberRow } from './class-object-member-creole.js';
 import { atomsToPlainText } from './class-member-creole.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { resolveStyleStereotypeTags } from './class-stereotype.js';
 
 export type { Dim } from './class-object-map-header.js';
 export { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
@@ -294,7 +295,30 @@ function measureObjectFields(
  *  upstream of the box's own final `width` -- `headerRows`'s own
  *  `nameFontSizeOverride` doc comment (./class-object-map-header.ts). */
 function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: StringMeasurer): ObjectTitleInfo {
-  const nameFontSizeOverride = theme.colors.elements?.['object']?.headerFontSize;
+  // `headerFontSize` wins over the bucket's own `fontSize` for the NAME row,
+  // but does not REPLACE it: `addConFont("object", SName.object)`
+  // (`FromSkinparamToStyle.java:200,424-429`) maps `objectFontSize` to
+  // `PName.FontSize` at `SName.object`, and `getStyleHeader()`'s signature
+  // `{root, element, objectDiagram, object, header}`
+  // (`EntityImageObject.java:132-134`) matches it by SET CONTAINMENT. So a
+  // bare `skinparam object { FontSize 16 }` reaches the header even with no
+  // header-specific override. Reading only `headerFontSize` left the name at
+  // the diagram default -- jar draws `object/tenalu-53-meri239`'s B at 16
+  // where this port drew 14.
+  const objectBucket = theme.colors.elements?.['object'];
+  // A stereotype-scoped size wins over both: upstream's
+  // `getStyleHeader().withTOBECHANGED(stereotype)`
+  // (`EntityImageObject.java:132-134`) merges the stereotype-qualified style
+  // over the plain one. `object/tenalu-53-meri239` sets
+  // `object { FontSize 16, <<Foo1>> { FontSize 8 } }`: its `A` must draw at 8
+  // and its unstereotyped `B` at 16.
+  const byStereo = objectBucket?.fontSizeByStereo;
+  const stereoSize = byStereo === undefined
+    ? undefined
+    : resolveStyleStereotypeTags(classifier)
+        .map((t) => byStereo[t.toLowerCase()])
+        .find((v) => v !== undefined);
+  const nameFontSizeOverride = stereoSize ?? objectBucket?.headerFontSize ?? objectBucket?.fontSize;
   const nameFontSpec = { family: theme.fontFamily, size: nameFontSizeOverride ?? theme.fontSize };
   // Tilde escapes resolved before measuring -- see `class-object-display.ts`.
   const nameM = measurer.measure(objectDisplayText(classifier.display), nameFontSpec);

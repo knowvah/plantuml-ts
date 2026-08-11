@@ -74,6 +74,16 @@ const STATE_FONT_SIZE_STEREO_RE = new RegExp('^statefontsize<<(.+)>>$');
 // for matching classes; non-matching classes untouched).
 const CLASS_ATTRIBUTE_FONT_SIZE_STEREO_RE = new RegExp('^classattributefontsize<<(.+)>>$');
 
+// `skinparam classFontSize<<stereo>> N` -- the class HEADER analog. `class` is
+// deliberately NOT in `ELEMENT_BUCKET_SNAMES` (it has its own explicit
+// `resolveSkinparam` cases), so the generic per-element matcher below cannot
+// claim this key; it gets its own entry, exactly as
+// `CLASS_ATTRIBUTE_FONT_SIZE_STEREO_RE` does. See `theme-graph-colors-a.ts
+// #classFontSizeByStereo`'s own doc comment for the upstream route (a
+// stereotype-RE-SIGNED style, not a suffixed value lookup) and for the
+// `tabaxa-70-pomu341` jar evidence.
+const CLASS_FONT_SIZE_STEREO_RE = new RegExp('^classfontsize<<(.+)>>$');
+
 // S1L-tail G4 tier 2: `skinparam <sname>StereotypeFontSize<<label>> N` (flat
 // or `skinparam <sname> { StereotypeFontSize<<label>> N }` block form -- the
 // preprocessor normalizes both to this ONE key) -- the per-element analog of
@@ -92,6 +102,22 @@ const CLASS_ATTRIBUTE_FONT_SIZE_STEREO_RE = new RegExp('^classattributefontsize<
 // per-element matcher; a non-bucket sname falls through to `acc.unknown`.
 const ELEMENT_STEREOTYPE_FONT_SIZE_STEREO_RE = new RegExp('^(\\w+)stereotypefontsize<<(.+)>>$');
 
+// `skinparam <sname>FontSize<<label>>` — the ELEMENT's own font size under a
+// stereotype, as distinct from the stereotype TEXT's size above. Written by
+// the flat key or by `skinparam <sname> { <<label>> { FontSize N } }`: upstream
+// `SkinLoader#getFullParam` (SkinLoader.java:82-87) concatenates the block
+// context into `object<<Foo1>>FontSize`, then `SkinParam#cleanForKeySlow`
+// (SkinParam.java:283-300) moves the `<<x>>` to the END — so both spellings
+// arrive as ONE key, exactly as `preprocessor.ts` normalizes them.
+//
+// This is the WIDEST `<<...>>` pattern in this module: `\w+` swallows any
+// prefix, so `statefontsize<<foo>>` matches it with `sname=state` — and
+// `state` IS in `ELEMENT_BUCKET_SNAMES`. It must therefore be tried LAST, after
+// {@link ELEMENT_STEREOTYPE_FONT_SIZE_STEREO_RE} *and* after every entry of
+// {@link STEREO_KEY_MATCHERS}, so the specific spellings claim their keys
+// first. Running it earlier silently swallowed `statefontsize<<X>>`.
+const ELEMENT_FONT_SIZE_STEREO_RE = new RegExp('^(\\w+)fontsize<<(.+)>>$');
+
 type StereoHandler = (
   acc: SkinparamAccumulator,
   stereo: string,
@@ -100,7 +126,7 @@ type StereoHandler = (
 
 /**
  * Regex → handler table for stereotype-qualified keys, tried in order
- * (first match wins). The six patterns are mutually exclusive by
+ * (first match wins). The seven patterns are mutually exclusive by
  * construction (each requires a distinct literal prefix), so trying them in
  * table order is behaviorally identical to the original if/else-if chain.
  */
@@ -156,6 +182,16 @@ const STEREO_KEY_MATCHERS: ReadonlyArray<readonly [RegExp, StereoHandler]> = [
       }
     },
   ],
+  [
+    CLASS_FONT_SIZE_STEREO_RE,
+    (acc, stereo, value) => {
+      const v = Number(value.trim());
+      if (Number.isFinite(v)) {
+        acc.classFontSizeByStereo ??= {};
+        acc.classFontSizeByStereo[stereo] = v;
+      }
+    },
+  ],
 ];
 
 /**
@@ -184,9 +220,35 @@ function applyElementStereotypeFontSize(
 }
 
 /**
- * Handles a normalized key already known to contain `<<...>>`. Tries each
- * {@link STEREO_KEY_MATCHERS} regex in order; the first match's handler runs
- * with the captured stereotype label (trimmed). No match falls through to
+ * `skinparam <sname>FontSize<<label>>` — the ELEMENT's own size under a
+ * stereotype. Runs LAST — after {@link applyElementStereotypeFontSize} and
+ * after the whole {@link STEREO_KEY_MATCHERS} table — because its `\w+` prefix
+ * also matches those tables' keys (`statefontsize<<X>>` most of all); anything
+ * reaching here is the plain element form. Same non-consumption contract as
+ * {@link applyElementStereotypeFontSize}: a non-bucket sname or a non-numeric
+ * value falls through to `acc.unknown`.
+ */
+function applyElementFontSizeByStereo(
+  acc: SkinparamAccumulator,
+  key: string,
+  value: string,
+): boolean {
+  const m = ELEMENT_FONT_SIZE_STEREO_RE.exec(key);
+  if (m === null) return false;
+  const sname = m[1]!;
+  const size = Number(value.trim());
+  if (!ELEMENT_BUCKET_SNAMES.has(sname) || !Number.isFinite(size)) return false;
+  const bucket = (acc.elements[sname] ??= {});
+  bucket.fontSizeByStereo = { ...bucket.fontSizeByStereo, [m[2]!.trim()]: size };
+  return true;
+}
+
+/**
+ * Handles a normalized key already known to contain `<<...>>`. Order is
+ * specific-before-generic: {@link applyElementStereotypeFontSize}, then each
+ * {@link STEREO_KEY_MATCHERS} regex in table order (the first match's handler
+ * runs with the captured stereotype label, trimmed), then the catch-all
+ * {@link applyElementFontSizeByStereo}. No match falls through to
  * `acc.unknown`.
  */
 export function applyStereoOverride(
@@ -202,5 +264,9 @@ export function applyStereoOverride(
       return;
     }
   }
+  // LAST, and deliberately so — see `ELEMENT_FONT_SIZE_STEREO_RE`: its `\w+`
+  // prefix also matches `statefontsize<<X>>`, whose own table entry above must
+  // win.
+  if (applyElementFontSizeByStereo(acc, key, value)) return;
   acc.unknown.push(key);
 }
