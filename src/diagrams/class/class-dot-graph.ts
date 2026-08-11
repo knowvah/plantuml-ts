@@ -10,7 +10,6 @@
 import type {
   Classifier,
   ClassDiagramAST,
-  ClassifierKind,
   Namespace,
   Relationship,
   RelationshipType,
@@ -34,6 +33,7 @@ import {
   type MeasuredClassifier,
 } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
+import { applyShapeAndPorts, edgePortAttrs } from './class-port-rows.js';
 import type { EdgeGeo } from './layout.js';
 
 // ---------------------------------------------------------------------------
@@ -184,6 +184,9 @@ interface DotEdgeAttrContext {
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
   kindBIndices: ReadonlySet<number>;
+  /** B1/M1: ids of the leaves emitted as RECTANGLE_HTML_FOR_PORTS row tables,
+   *  the only endpoints a `::member` port may legally attach to. */
+  portRowIds: ReadonlySet<string>;
 }
 
 /** One relationship's DOT edge attributes -- split out of `buildDotEdges`
@@ -211,41 +214,20 @@ function buildDotEdges(
   linetype: Theme['linetype'],
 ): DotInputEdge[] {
   const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
-  const ctx: DotEdgeAttrContext = { font, measurer, linetype, kindBIndices };
+  const portRowIds = new Set(
+    ast.classifiers.filter((c) => c.kind === 'map').map((c) => c.id),
+  );
+  const ctx: DotEdgeAttrContext = { font, measurer, linetype, kindBIndices, portRowIds };
   return ast.relationships.map((rel: Relationship, i: number) => {
     const swap = ranksParentFirst(rel);
     const from = swap ? rel.to : rel.from;
     const to = swap ? rel.from : rel.to;
+    const dotFrom = anchors.get(from) ?? from;
+    const dotTo = anchors.get(to) ?? to;
     const attrs = buildDotEdgeAttrs(rel, i, ctx);
-    return { id: `edge-${i}`, from: anchors.get(from) ?? from, to: anchors.get(to) ?? to, attributes: attrs };
+    Object.assign(attrs, edgePortAttrs(rel, swap, dotFrom, dotTo, ctx.portRowIds));
+    return { id: `edge-${i}`, from: dotFrom, to: dotTo, attributes: attrs };
   });
-}
-
-/** Classifier kind → non-default svek node shape (everything else → rect). */
-const KIND_SHAPE: Partial<Record<ClassifierKind, DotInputNode['shape']>> = {
-  association: 'diamond', // `<> name` (CommandDiamondAssociation)
-  'assoc-circle': 'circle', // `(A,B) .. C` connector on the A–B association
-  circle: 'plaintext', // `circle Foo` / `() name` — the small circle table
-  usecase: 'ellipse', // `usecase Foo` (LeafType.USECASE)
-  state: 'rounded', // `state Foo` (LeafType.STATE, classdiagram-only ALL_TYPES superset)
-  lollipop: 'circle', // `Name ()-- Existing` (CommandLinkLollipop)
-  map: 'plaintext', // `map Name { ... }` — EntityImageMap.getShapeType is
-  // ALWAYS RECTANGLE_HTML_FOR_PORTS (never a plain rect, even with zero rows).
-  json: 'plaintext', // `json Name { ... }` — EntityImageJson.getShapeType is
-  // the SAME RECTANGLE_HTML_FOR_PORTS shape as map, ALWAYS (even scalar/empty).
-};
-
-/**
- * A map/json's `shape=plaintext` is EntityImageMap/EntityImageJson's own
- * per-row shield table (svek's RECTANGLE_HTML_FOR_PORTS), NOT the qualifier/
- * `::member` port-shield mechanism this flag drives (svek-dot-emit.ts's
- * portTable — a single compass-point "P" cell, wrong shape for either). A map
- * row link (class-map-commands.ts) sets `fromPort` on its relationship purely
- * as row-target metadata; it must not flip this flag even though
- * shieldedClassifierIds sees the same relationship.
- */
-function shouldMarkPort(shape: DotInputNode['shape'] | undefined, isShieldedPort: boolean, kind: ClassifierKind): boolean {
-  return shape === 'plaintext' && isShieldedPort && kind !== 'map' && kind !== 'json';
 }
 
 /** `EntityImageProtected`'s border -- GeneralImageBuilder.java:113 wraps a
@@ -370,9 +352,7 @@ function buildOneDotNode(
     height: isLollipop ? LOLLIPOP_SIZE : isAssocPoint ? ASSOC_POINT_SIZE : measured.height + pad,
   };
   const shield = shielded.get(classifier.id);
-  const shape = KIND_SHAPE[classifier.kind] ?? (shield !== undefined ? 'plaintext' : undefined);
-  if (shape !== undefined) node.shape = shape;
-  if (shouldMarkPort(shape, shield?.isPort === true, classifier.kind)) node.isPort = true;
+  applyShapeAndPorts(node, classifier, measured, shield);
   return node;
 }
 

@@ -12,11 +12,16 @@ import type {
   DotInputNode,
 } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles } from './graph-layout-build-borderpoint.js';
+import { rowPortTable } from './svek-dot-emit-labels.js';
 
 /** graphviz width/height/nodesep/ranksep attrs are in inches; our measured
  *  sizes are in pixels. getLayout returns points (inches × 72), so dividing px
  *  by 72 on the way in round-trips: output points == original pixel value. */
 export const PX_PER_INCH = 72;
+
+/** Sizing-irrelevant BGCOLOR for the layout copy of a row-port table — see
+ *  {@link addRowPortNode}. */
+const LAYOUT_LABEL_BGCOLOR = 0;
 
 // `addEdges`/`EdgeIndex`/`edgeKey`/`CARDINALITY_FONT_SIZE` moved to
 // ./graph-layout-build-edges.ts (G7 T14b, 500-line file-cap compliance --
@@ -132,6 +137,35 @@ export function firstEncounterOrder(input: DotInputGraph): DotInputNode[] {
   return [...first, ...rest];
 }
 
+/**
+ * B1/M4: a `RECTANGLE_HTML_FOR_PORTS` node, laid out the way the jar's DOT
+ * makes graphviz lay it out — `shape=plaintext` carrying the SAME HTML row
+ * table `svek-dot-emit.ts` writes, and **no `width`/`height`/`fixedsize` at
+ * all** (`SvekNode#appendLabelHtmlSpecialForLink`, svek/SvekNode.java:268-296,
+ * emits none). That omission is the whole mechanism: with a real label and no
+ * fixed size, `poly_init` pads the label by `PAD` (4·GAP wide, 2·GAP tall) and
+ * floors the result at the 54x36 minimum, which the previous
+ * `fixedsize`+empty-label fold suppressed.
+ *
+ * Jar-verified against real graphviz 15.1.1 on the oracle DOT: a 49x18 label
+ * becomes a 65x36 node (`gatefi-65-curu360`, M4's sole-cause isolate); 65.94x36
+ * → 81x44; 69.49x68 → 85x76; 151.4x72 → 167x80.
+ *
+ * The engine exposes this directly — `GvNode#setHtmlAttr` tags the value as
+ * HTML exactly as `label=<...>` does in DOT text, so no adapter seam is needed
+ * (same public seam `addClusters` already uses for cluster title tables).
+ *
+ * @see ~/git/graphviz/lib/common/shapes.c:1993-2009 (PAD application)
+ * @see ~/git/graphviz/lib/common/const.h:251 (GAP = 4)
+ */
+function addRowPortNode(b: GvGraphBuilder, n: DotInputNode): void {
+  const node = b.addNode(n.id, { shape: 'plaintext' });
+  // The table's BGCOLOR is a paint attribute the jar fills from its
+  // ColorSequence; it is invisible to sizing, and layout never renders this
+  // label, so the emitter's sequence is deliberately not reproduced here.
+  node.setHtmlAttr('label', rowPortTable(n, n.portRows ?? [], LAYOUT_LABEL_BGCOLOR));
+}
+
 /** One node's graphviz declaration. Three shapes of emission, split out of
  *  {@link addNodes} so each stays legible (and so the loop stays within the
  *  repo's complexity budget). */
@@ -155,6 +189,10 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
       width: (n.width / PX_PER_INCH).toString(),
       height: (n.height / PX_PER_INCH).toString(),
     });
+    return;
+  }
+  if (n.portRows !== undefined) {
+    addRowPortNode(b, n);
     return;
   }
   b.addNode(n.id, {

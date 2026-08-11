@@ -437,3 +437,50 @@ describe('layoutGraph — cluster inner margin levels (G5 C7, mechanism 16 margi
     expect(r.clusters![0]!.id).toBe('grp1');
   });
 });
+
+/**
+ * B1/M4 — `RECTANGLE_HTML_FOR_PORTS` nodes reach graphviz as an HTML LABEL
+ * with no `width`/`height`, so `poly_init` applies its own `PAD`
+ * (4·GAP = 16 wide, 2·GAP = 8 tall) and the 54x36 minimum
+ * (`~/git/graphviz/lib/common/shapes.c:1993-2009`, `GAP` at
+ * `~/git/graphviz/lib/common/const.h:251`). Before this, the adapter folded
+ * `plaintext` into `shape=box, fixedsize=true, label=''`, leaving no label to
+ * pad.
+ *
+ * Every pair below was MEASURED on real graphviz 15.1.1 against the jar's own
+ * oracle DOT (`plans/object-close/ledger.md` M4) — not derived from the
+ * formula, so a wrong formula cannot agree with them by construction.
+ */
+describe('layoutGraph — plaintext row-port node padding (M4)', () => {
+  const GRAPHVIZ_PADDED: ReadonlyArray<readonly [number, number, number, number]> = [
+    // [labelW, labelH, nodeW, nodeH] — the first row is gatefi-65-curu360,
+    // M4's sole-cause isolate; height 26 there floors up to the 36 minimum.
+    [49, 18, 65, 36],
+    [65.94, 36, 81, 44],
+    [69.49, 68, 85, 76],
+    [151.4, 72, 167, 80],
+  ];
+
+  it.each(GRAPHVIZ_PADDED)(
+    'pads a %sx%s label to a %sx%s node',
+    (labelW, labelH, nodeW, nodeH) => {
+      const r = layoutGraph({
+        nodes: [{ id: 'a', width: labelW, height: labelH, shape: 'plaintext', portRows: [] }],
+        edges: [],
+      });
+      expect(r.nodes[0]!.width).toBe(nodeW);
+      expect(r.nodes[0]!.height).toBe(nodeH);
+    },
+  );
+
+  it('leaves a plaintext node WITHOUT portRows on the unpadded fixedsize fold', () => {
+    // description's circle/interface leaves and state's json states keep their
+    // existing geometry — `portRows` presence is the only switch.
+    const r = layoutGraph({
+      nodes: [{ id: 'a', width: 49, height: 18, shape: 'plaintext' }],
+      edges: [],
+    });
+    expect(r.nodes[0]!.width).toBe(49);
+    expect(r.nodes[0]!.height).toBe(18);
+  });
+});

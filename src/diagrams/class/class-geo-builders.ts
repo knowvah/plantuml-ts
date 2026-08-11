@@ -8,7 +8,7 @@
  * footprint formula (was an invented flat padding, now the jar-verified
  * folder-tab-driven formula — see `class-namespace-shape.ts`).
  */
-import type { ClassDiagramAST } from './ast.js';
+import type { ClassDiagramAST, Classifier } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import type { Theme } from '../../core/theme.js';
@@ -23,6 +23,49 @@ import {
 import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import type { ClassifierGeo, NamespaceGeo, ClassGeometry } from './layout.js';
+
+/**
+ * The drawn box for a laid-out leaf — `SvekNode#getRectangleArea()`
+ * (svek/SvekNode.java:380), which is ALWAYS `minXY + the IMAGE dimension`,
+ * never graphviz's node size.
+ *
+ * For every ordinary shape the two agree, because the jar emits an explicit
+ * `width=`/`height=` and graphviz honours it. A `RECTANGLE_HTML_FOR_PORTS`
+ * node is the exception (B1/M4): it is emitted with NO width/height, so
+ * graphviz pads the label by 4·GAP x 2·GAP and floors it at 54x36, making the
+ * node strictly larger than the entity. The jar never sees that padded box —
+ * `DotStringFactory#solve:386-389` takes the minXY of the rendered TABLE
+ * polygon, i.e. the label's own top-left, and `moveDelta`s the node there,
+ * keeping `getWidth()`/`getHeight()` at the measured image dimension.
+ * Graphviz centres the label inside the padded node, so that top-left is the
+ * node centre minus half the image — which is what this reconstructs.
+ *
+ * The padding is therefore SPACING that keeps neighbours apart, and is
+ * deliberately NOT drawn.
+ *
+ * Gated on `kind === 'map'`, which must track `class-port-rows.ts
+ * #applyShapeAndPorts`'s own `portRows` gate: every OTHER kind whose DOT node
+ * size differs from `measured` differs on purpose and must keep the laid-out
+ * box — a `lollipop`/`assoc-circle` is a fixed 10x10/4x4 with its generic text
+ * measurement discarded, and an `EntityImageProtected` class is measured+2x20
+ * because upstream's image dimension genuinely includes that border
+ * (`EntityImageProtected.java:77-79`).
+ */
+function contentBox(
+  classifier: Classifier,
+  pos: DotLayoutResult['nodes'][number],
+  measured: MeasuredClassifier,
+): { x: number; y: number; width: number; height: number } {
+  if (classifier.kind !== 'map') {
+    return { x: pos.x, y: pos.y, width: pos.width, height: pos.height };
+  }
+  return {
+    x: pos.x + (pos.width - measured.width) / 2,
+    y: pos.y + (pos.height - measured.height) / 2,
+    width: measured.width,
+    height: measured.height,
+  };
+}
 
 /**
  * Build ClassifierGeo entries from pre-measured sizes + dot-assigned
@@ -48,10 +91,7 @@ export function buildClassifierGeos(
     classifiers.push({
       id: classifier.id,
       kind: classifier.kind,
-      x: pos.x,
-      y: pos.y,
-      width: pos.width,
-      height: pos.height,
+      ...contentBox(classifier, pos, measured),
       dividerYs: measured.dividerYs,
       rows: measured.rows,
       ...(measured.headerRowCount !== undefined ? { headerRowCount: measured.headerRowCount } : {}),
