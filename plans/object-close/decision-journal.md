@@ -578,6 +578,127 @@ radius; the golden ratchets are what confirm they were untouched.
 **Quality gates.** `npm test` 574 files / 12753 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped. No repeat of B6's SIGBUS.
 
+## B25 (M27) — diagnosis, written BEFORE any code change
+
+**Mechanism.** `skinparam minClassWidth` is registered as
+`addConvert("MinClassWidth", PName.MinimumWidth)`
+(`style/FromSkinparamToStyle.java:241`) — with **no `SName` varargs at all**.
+`addConvert` (`:414-422`) stores `new Data(styleNames, propertyName)` with an
+EMPTY name array, and an empty style signature is a subset of every element's
+signature, so the value matches **every element**, not just classes. The name
+is a historical misnomer.
+
+Every one of the four `EntityImage*` classes that draws a boxed
+class-family leaf therefore reads it and floors its own width, with
+character-identical arithmetic:
+
+| class | line | code |
+|---|---|---|
+| `EntityImageClass` | `:103-105` | `width = max(dimBody.w, dimHeader.w)`, then floor |
+| `EntityImageObject` | `:150-153` | `width = max(dimFields.w, dimTitle.w + 2*xMarginCircle)`, then floor |
+| `EntityImageMap` | `:127-130` | identical to object |
+| `EntityImageJson` | `:127-132` | identical to object |
+
+In all four the floor is applied to the **box** width, after the
+content/title max and before the height computation, so the floored width is
+what `drawU` then hands to the header layout as `dimTotal.getWidth()`.
+
+**Origin, ours.** `class-layout-helpers.ts:414-416`:
+
+```ts
+function resolveMinClassWidth(theme: Theme, kind: ClassifierKind): number {
+  return LIKE_CLASS_KINDS.has(kind) ? resolveElementMinimumWidth(theme, 'class') ?? 0 : 0;
+}
+```
+
+The gate is `LIKE_CLASS_KINDS`, and `object`/`map`/`json` are not in it — so
+those three kinds get `0` and no floor is ever applied. The resolver itself is
+fine and already does the right cascade (element bucket over the bare global,
+`theme-element-resolve.ts:143-145`); it is simply never consulted on the
+object/map/json paths, which compute their width in four separate places:
+`class-object-map-sizing.ts:340` (enhanced body) and `:367` (plain fields),
+`class-map-sizing.ts:269`, `class-json-sizing.ts:348`.
+
+The `LIKE_CLASS_KINDS` gate is itself correct for what its own doc comment
+claims — `EntityImageClass` is only built for `isLikeClass` leaves — but that
+reasoning covers `sameClassWidth` and the `groupInheritance` wrap, which
+genuinely are `EntityImageClass`-only. `MinimumWidth` is not, and got swept in
+with them.
+
+**Causal chain.** `tobuka-93-jale775` sets `skinparam minClassWidth 400` over
+seven objects. Each box is measured at its natural width (66.9px for
+`Verbund`) instead of 400, so every node is ~333px too narrow; dot then packs
+them into a 390px canvas where the jar needs 1544 — a 1154px delta on
+`@width`/`viewBox[2]`, the largest single numeric delta in the corpus, from
+one missing clamp.
+
+**Scope is wider than the ledger row, and the row is not wrong — it is
+fixture-limited.** M27 is filed as "objects" because `tobuka-93` is the only
+fixture. But map and json carry the same clamp on the same line of their own
+`calculateDimensionSlow`, so porting only the object arm would leave a known
+divergence behind in code I had already read. All three arms land together.
+Expected to be inert for map/json in the current corpus (no fixture combines
+`minClassWidth` with a map or json leaf), which the measurement will confirm.
+
+**Ruled out.** Not a parse gap — `skinparam minClassWidth` already reaches
+`theme.minimumWidth` (`skinparam-key-handlers.ts:166-169`) and the class path
+consumes it today. Not `monochrome` (also set by this fixture): the rect
+widths are wrong, not the colours, and the colour attributes already match.
+Not `sameClassWidth`, which is a separate `getParamSameClassWidth()` floor
+applied after this one (`EntityImageClass.java:107-109`) and is already
+modelled elsewhere.
+
+## B25 (M27) — outcome
+
+**Landed** as `class-object-map-sizing.ts#floorAtMinimumWidth`, applied on
+all THREE missing arms: object (both the enhanced-body and plain-fields
+branches), map (`class-map-sizing.ts`) and json (`class-json-sizing.ts`).
+Applied after the content-vs-title max and before the height computation, so
+the floored width is what `headerRows` receives as `boxWidth` — upstream's own
+ordering, and the reason the header centring follows the floor.
+
+`class-layout-helpers.ts#resolveMinClassWidth` is deliberately left alone: its
+`LIKE_CLASS_KINDS` gate is still correct for its two other tenants
+(`sameClassWidth` and the `groupInheritance` wrap genuinely ARE
+`EntityImageClass`-only). Widening it would have re-scoped those two as a side
+effect.
+
+**Scope call.** The ledger row said "objects". I ported map and json too,
+because `EntityImageMap.java:127-130` and `EntityImageJson.java:127-132` carry
+the same clamp on the same line of their own `calculateDimensionSlow` — I had
+already read them while confirming the mechanism, and leaving two known
+divergences behind would have been a deliberate omission rather than a scope
+boundary. As predicted, inert on the current corpus (no fixture combines
+`minClassWidth` with a map or json leaf); unit-tested directly instead.
+
+**Measured — the fix worked, and the fixture still does not flip.**
+`tobuka-93-jale775` **137 → 41 diffs**. The 1196px error is gone: `@width`,
+`@height`, `viewBox` and **every `<rect>`** now match the jar exactly, and
+there are zero non-numeric diffs left. Census stays **31/80** — this fixture
+does not reach zero, and nothing else in the corpus moved (the clamp is inert
+without `minClassWidth`, which only tobuka sets).
+
+**The residue is a different mechanism, filed as M37/B32, not chased here.**
+All 41 remaining diffs are edge-label text positions
+(`g[N]/text[1..2]/@x,@y`) plus one 13-point spline on `g[15]`. The deltas
+cluster — y≈1.784 (×5), y≈11.44–11.49 (×6), scattered x up to 41.2 — so it is
+systematic, not routing noise.
+
+I specifically did NOT attribute it to M2/M34, the obvious-looking neighbours:
+`tobuka-93` is M2's own named **control**, because it carries only
+`taillabel=`/`headlabel=` tables, which upstream builds without
+`addVisibilityModifier` and whose DOT this port already emits byte-exact. The
+residue was simply invisible underneath a 1196px sizing error until now — the
+same "a fix makes a second mechanism measurable" pattern B3 recorded, and the
+reason the loop protocol requires a re-measure after every size fix.
+
+**Frozen counts — all unmoved.** object DOT 74/80 · class DOT 689/711 ·
+component 262 · usecase 93 · state 267 · class SVG goldens 317 pass ·
+description 48-set pass. No ratchet additions: no fixture newly reached zero.
+
+**Quality gates.** `npm test` 574 files / 12760 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

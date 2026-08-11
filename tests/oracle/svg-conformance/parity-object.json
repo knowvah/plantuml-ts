@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-11T19:37:03.649Z",
+  "generatedAt": "2026-08-11T20:01:09.327Z",
   "fixtures": [
     {
       "slug": "baloca-83-nadu916",
@@ -510,10 +510,9 @@
       "slug": "tobuka-93-jale775",
       "type": "object",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 1196.6190000000001,
-      "firstDiff": "svg/g[1]/g[8]/path[1]/@d",
-      "maxDeltaPath": "svg/g[1]/g[2]/line[1]/@x2"
+      "verdict": "structural-match",
+      "maxDelta": 41.200000000000045,
+      "maxDeltaPath": "svg/g[1]/g[15]/text[1]/@x"
     },
     {
       "slug": "togixe-65-bepo490",

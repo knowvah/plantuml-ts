@@ -62,6 +62,7 @@ import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { buildMemberAtoms, memberBaseFont, resolveMemberAtoms } from './class-member-creole.js';
+import { floorAtMinimumWidth } from './class-object-map-sizing.js';
 
 interface Dim {
   width: number;
@@ -345,7 +346,10 @@ export function measureJsonClassifier(
   const dimNode = measureJsonNode(classifier.jsonValue ?? EMPTY_OBJECT_NODE, cellFont, measurer);
   const fieldsHeight = dimNode.height === 0 ? JSON_EMPTY_HEIGHT_FALLBACK : dimNode.height;
 
-  const width = Math.max(dimNode.width, title.width + JSON_X_MARGIN_CIRCLE * 2);
+  // B25/M27: `EntityImageJson.java:127-132` clamps here, identically to
+  // object/map/class -- see `floorAtMinimumWidth`'s own doc comment.
+  const width = floorAtMinimumWidth(
+    Math.max(dimNode.width, title.width + JSON_X_MARGIN_CIRCLE * 2), theme, 'json');
   const height = title.height + fieldsHeight;
 
   const headerGeo = headerRows(classifier, theme, measurer, { boxWidth: width, namePadding: JSON_NAME_MARGIN });

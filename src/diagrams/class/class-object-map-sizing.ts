@@ -46,6 +46,7 @@ import { isEnhancedBody } from './class-body-enhanced.js';
 import { measureEnhancedBody } from './class-body-enhanced-layout.js';
 import type { Dim } from './class-object-map-header.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
+import { resolveElementMinimumWidth } from '../../core/theme.js';
 import { objectDisplayText } from './class-object-display.js';
 import { buildObjectMemberRow } from './class-object-member-creole.js';
 import { atomsToPlainText } from './class-member-creole.js';
@@ -99,6 +100,35 @@ interface FieldBasedObjectGeoParams {
 // ---------------------------------------------------------------------------
 // object
 // ---------------------------------------------------------------------------
+
+/**
+ * B25/M27: `skinparam minClassWidth` floors the BOX width of every boxed
+ * class-family leaf, not just `class`.
+ *
+ * It is registered as `addConvert("MinClassWidth", PName.MinimumWidth)` with
+ * NO `SName` varargs (`style/FromSkinparamToStyle.java:241`; `addConvert` at
+ * `:414-422` stores an empty name array), and an empty style signature is a
+ * subset of every element's signature — so the value matches every element
+ * and the `Class` in the skinparam's name is a historical misnomer. All four
+ * boxed images read it and clamp with character-identical arithmetic:
+ * `EntityImageClass.java:103-105`, `EntityImageObject.java:150-153`,
+ * `EntityImageMap.java:127-130`, `EntityImageJson.java:127-132`.
+ *
+ * Applied to the box width AFTER the content-vs-title max and BEFORE the
+ * height computation, exactly as upstream orders it, so the floored width is
+ * what `drawU` then hands the header layout as `dimTotal.getWidth()` — which
+ * is why `headerRows`'s `boxWidth` must receive the floored value, not the
+ * natural one.
+ *
+ * `class-layout-helpers.ts#resolveMinClassWidth` gates the SAME floor on
+ * `LIKE_CLASS_KINDS`. That gate is right for its two other tenants
+ * (`sameClassWidth` and the `groupInheritance` wrap ARE `EntityImageClass`-
+ * only); `MinimumWidth` was swept in with them and object/map/json got no
+ * floor at all.
+ */
+export function floorAtMinimumWidth(width: number, theme: Theme, sname: string): number {
+  return Math.max(width, resolveElementMinimumWidth(theme, sname) ?? 0);
+}
 
 /** `classDiagram,componentDiagram,objectDiagram > object { Padding 2 2 }`
  *  (plantuml.skin) -> ClockwiseTopRightBottomLeft.read("2 2") = all sides 2. */
@@ -337,7 +367,8 @@ function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: Stri
  *  keep this function's own param count under the file's cap. */
 function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredClassifier {
   const { classifier, theme, measurer, title, nameFontSizeOverride, enhancedBody } = params;
-  const width = Math.max(enhancedBody.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2);
+  const width = floorAtMinimumWidth(
+    Math.max(enhancedBody.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2), theme, 'object');
   const patchedHeaderRows = headerRows(classifier, theme, measurer, {
     boxWidth: width,
     namePadding: OBJECT_NAME_PADDING,
@@ -364,7 +395,8 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
   const { dim: fieldsDim, rows: fieldRows } = measureObjectFields(classifier, theme, measurer, showFields);
   const fieldsHeight = methodOrFieldHeight(fieldsDim.height, showFields);
 
-  const width = Math.max(fieldsDim.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2);
+  const width = floorAtMinimumWidth(
+    Math.max(fieldsDim.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2), theme, 'object');
   const height = title.height + fieldsHeight;
 
   const rows = headerRows(classifier, theme, measurer, {

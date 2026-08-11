@@ -30,6 +30,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import type { Dim } from './class-object-map-sizing.js';
+import { floorAtMinimumWidth } from './class-object-map-sizing.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-sizing.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
@@ -266,7 +267,10 @@ export function measureMapClassifier(classifier: Classifier, theme: Theme, measu
   const colB = metrics.length === 0 ? 0 : Math.max(...metrics.map((m) => m.valueWidth));
   const fieldsHeight = metrics.reduce((sum, m) => sum + m.height, 0);
 
-  const width = Math.max(colA + colB, title.width + MAP_X_MARGIN_CIRCLE * 2);
+  // B25/M27: `EntityImageMap.java:127-130` clamps here, identically to
+  // object/json/class -- see `floorAtMinimumWidth`'s own doc comment.
+  const width = floorAtMinimumWidth(
+    Math.max(colA + colB, title.width + MAP_X_MARGIN_CIRCLE * 2), theme, 'map');
   // getMethodOrFieldHeight's empty-substitution never fires for MAP
   // (leafType === MAP is excluded in the upstream condition) — height is
   // titleHeight + the raw (possibly zero, for an empty map body) fields height.
