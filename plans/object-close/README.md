@@ -66,7 +66,7 @@ vitest failures.
 
 | Gate | Frozen at | Command |
 |---|---|---|
-| object DOT structural | **58/80 EQUAL** (was 78/80) | `npx tsx scripts/dot-sync-report.ts object` |
+| object DOT structural | **74/80 EQUAL** (58 after B0's re-baseline, 78 under the old blind gate) | `npx tsx scripts/dot-sync-report.ts object` |
 | component DOT | 262/262 | `npx tsx scripts/dot-sync-report.ts component` |
 | usecase DOT | 93/93 | `npx tsx scripts/dot-sync-report.ts usecase` |
 | class DOT | **689/711** (was 711/711) | `npx tsx scripts/dot-sync-report.ts class` |
