@@ -18,6 +18,8 @@ this file from disk, never trust a remembered number.**
 | 2026-08-11 | T0 | Maintainer intervention: bare oracle literals in assertions are indistinguishable from fitted values | Named `DOT_PX_PER_INCH`/`PX_DIGITS`/`ORACLE_IN` (each entry citing its golden file + `shNNNN`). Repo-wide sweep proposed as a separate mission | `.agent-notes/oracle-number-constants-sweep.md` |
 | 2026-08-11 | T0 | `git -C .` is NOT protection against cwd drift — `checkout -b feat/object-close` landed in the JAVA reference repo | A prior `cd ~/git/plantuml` persisted in the shell; `.` resolved there. Restored `~/git/plantuml` to `dot-output` and deleted the stray branch (it held no commits — a duplicate pointer). Rule tightened to: absolute `-C <path>`, never `.` | `git -C ~/git/plantuml reflog`: `checkout: moving from dot-output to feat/object-close`, no commits on it |
 | 2026-08-11 | T0 | The class SVG census is ALSO reporting the stale-oracle artifact — 0 zero-diff of 721 | `test-results/dot-cache/class` was last written 2026-08-08 by `9b54513f`, which PREDATES the SVG-reduction merge `7c30f8ae`; same mechanism as the object finding. So the brief's "class SVG census: zero-diff set intact" gate is currently vacuous (0 → 0) | `git merge-base --is-ancestor 7c30f8ae 9b54513f` → false; census run: 0 diffs = 0 |
+| 2026-08-11 | T1 | Filed the stale-cache follow-up in `planning/mission-index.md` (SI16), NOT in `docs/graphviz-issues/TRACKER.md` as T1's text says | That tracker's own header restricts it to "one checklist item per issue file in this folder — nothing else", and a stale committed cache is not a `@knowvah/dot-engine` finding. Following T1 literally would have broken the tracker's stated invariant | `TRACKER.md:1-6`; the follow-up is cross-type infrastructure, which is what Phase C indexes |
+| 2026-08-11 | T1 | Survey concurrency 6 (the script default) produced 80/80 `timeout` — a silently WRONG file, not an error | Re-ran at `SVG_PARITY_CONCURRENCY=2` (the value my own notes already recorded for committed runs) with a 60s timeout: 23 conformant / 21 structural-match / 36 diverged, zero timeouts | first run wrote `{"timeout":80}`; second `{"conformant":23,...}` |
 | 2026-08-11 | T0 | Frozen-count denominators differ from the brief for class (711 vs 708) and usecase (93 vs 90) | Both report 100% EQUAL with zero diverging checks, so nothing regressed — the brief's denominators are stale, not the health. Not treated as stop condition #2 | `dot-sync-report.ts`: class 711/711, usecase 93/93, component 262/262, state 267/267, object 78/80 |
 
 ## Baseline snapshot (planning, 2026-08-11)
@@ -39,8 +41,64 @@ this file from disk, never trust a remembered number.**
 | ≥ 10px (to 1196px) | 26 |
 | ≥1 non-numeric diff | 19 |
 
+## T1 — the authoritative baseline (2026-08-11, fresh cache)
+
+Per-fixture contract rows: **`plans/object-close/baseline-object.json`**, 80
+entries, `{slug, diffs, maxNumericDelta, nonNumericPaths}`. Produced with the
+DeterministicMeasurer through `renderFixtureClass` — the same metric the
+24-test ratchet and `svg-conformance-census.ts` use, cross-checked by both
+independently reporting 23.
+
+**`baselineZeroDiff` = 23 / 80.** The planning estimate is confirmed exactly.
+
+| Band | Planning | T1 measured |
+|---|---|---|
+| < 0.5px | 0 | **0** |
+| ≤ 1.0px | 4 | 5 |
+| 2–10px | 8 | 11 |
+| > 10px (max 1196.619px) | 26 | 36 |
+| non-numeric ONLY (no numeric diff at all) | — | 5 |
+| carrying ≥1 non-numeric diff | 19 | 36 |
+
+Totals agree (57 non-conformant, max delta 1196.619px) and **D2/D3 survive
+unchanged**: still zero fixtures under 0.5px, so G3's sub-pixel `gvts-blocked`
+attribution stays rejected. The band composition does not agree, and T1's is
+authoritative — planning's "19 non-numeric" counted fixtures whose *worst*
+diff was non-numeric; measured properly, 36 carry at least one and only 5 are
+non-numeric-only.
+
+### Verdict changes vs the file G3 closed against
+
+`parity-object.json` moved `2026-07-19` → `2026-08-11`; **21 fixtures changed
+verdict**, all in the improving direction, none the other way:
+
+- `diverged` → `conformant` (6): `febadi-87-zozu271`, `lalizo-85-paxe277`,
+  `lapato-45-neje847`, `linuxu-41-cogo780`, `rotele-89-cuva650`,
+  `zagodo-28-ranu153`.
+- `diverged` → `structural-match` (15): `diveje-52-xefe514`,
+  `fafozi-27-reja300`, `jaxere-74-cole479`, `jotaga-99-fatu830`,
+  `lafemo-98-ruri220`, `nukera-08-dige359`, `nulixu-97-nofi684`,
+  `rocepa-35-gepo708`, `rozuxo-44-fudi093`, `ruloso-59-nato909`,
+  `sibika-09-sipu286`, `sigado-12-rina240`, `sivime-00-gudo607`,
+  `sorisi-53-xebi982`, `vocute-12-suxa445`.
+
+Not attributable to T0: the planning-session census already read 23/80 before
+T0 existed. These are the fresh oracle plus the 0.2.0 work landed since July.
+
+### A THIRD inconsistency in G3's accounting
+
+G3's README and ledger both close at **22 conformant**. The
+`parity-object.json` it left behind records **17**. The ledger itself explains
+the gap — three separate entries (`:831`, `:1336`, `:1893`) describe verdicts
+"updated to `conformant` (manual, targeted edit — NOT a full
+`svg-parity-survey` re-run)". So the file and the prose drifted apart, in
+addition to the stale cache and the falsified residue table this mission was
+chartered on. Recorded, not litigated: D5 already makes THIS mission's ledger
+authoritative.
+
 ## Quality-gate log
 
 | Date | Batch/Iter | test | typecheck | lint | build | frozen counts |
 |---|---|---|---|---|---|---|
 | 2026-08-11 | T0 | 573 files / 12707 pass, 1 todo | clean | clean | clean | object DOT 78/80 · component 262/262 · usecase 93/93 · class 711/711 · state 267/267 — all 100% EQUAL except object's 2 ledgered |
+| 2026-08-11 | T1 | 573 files / 12707 pass, 1 todo | clean | clean | clean | identical to T0's row — all five unmoved. Object SVG ratchet 24/24. Object census 23/80 (was 0/80) |
