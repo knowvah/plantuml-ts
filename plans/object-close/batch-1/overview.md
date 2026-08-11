@@ -9,10 +9,21 @@ its own audit file. T6 merges them.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T3](T3-audit-size-cluster.md) | Audit the 8 DOT size-backlog slugs | Explore | `plans/object-close/audit-size.md` | T1 | [ ] |
-| [T4](T4-audit-nonnumeric-cluster.md) | Audit the 19 fixtures carrying non-numeric diffs | Explore | `plans/object-close/audit-nonnumeric.md` | T1 | [ ] |
-| [T5](T5-audit-geometry-cluster.md) | Audit the remaining ~30 purely-geometric fixtures | Explore | `plans/object-close/audit-geometry.md` | T1 | [ ] |
-| [T6](T6-merge-ledger.md) | Merge the three audits into the authoritative ledger + prioritized queue | general-purpose | `plans/object-close/ledger.md` | T3, T4, T5 | [ ] |
+| [T3](T3-audit-size-cluster.md) | Audit the 8 DOT size-backlog slugs | general-purpose | `plans/object-close/audit-size.md` | T1 | [ ] |
+| [T4a](T4-audit-nonnumeric-cluster.md) | Audit the 9 fixtures with ≥5 non-numeric diffs | general-purpose | `plans/object-close/audit-nonnumeric-a.md` | T1 | [ ] |
+| [T4b](T4-audit-nonnumeric-cluster.md) | Audit the 20 fixtures with 1–4 non-numeric diffs | general-purpose | `plans/object-close/audit-nonnumeric-b.md` | T1 | [ ] |
+| [T5a](T5-audit-geometry-cluster.md) | Audit the 7 purely-numeric fixtures ≤10px | general-purpose | `plans/object-close/audit-geometry-a.md` | T1 | [ ] |
+| [T5b](T5-audit-geometry-cluster.md) | Audit the 13 purely-numeric fixtures >10px | general-purpose | `plans/object-close/audit-geometry-b.md` | T1 | [ ] |
+| [T6](T6-merge-ledger.md) | Merge the five audits into the authoritative ledger + prioritized queue | orchestrator | `plans/object-close/ledger.md` | T3, T4a, T4b, T5a, T5b | [ ] |
+
+### Amendments to this batch's plan (recorded 2026-08-11)
+
+T1's real numbers moved the cluster boundaries, which the batch pre-authorized
+as a push-forward. **T4 turned out to be the oversized cluster, not T5**:
+T3=8, T4=29, T5=20 against a planned 8/19/~30. T4 is split at
+`nonNumericPaths >= 5` and T5 at the brief's own 10px band boundary. The
+`Explore` agent named above cannot write a file — it has no Write tool — so
+the audits run as `general-purpose`. See the decision journal for both.
 
 ## Cluster boundaries
 
