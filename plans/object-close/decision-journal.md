@@ -914,6 +914,62 @@ goldens 317 pass · description 48-set pass.
 **Quality gates.** `npm test` 574 files / 12760 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped.
 
+## B34 (M39) — diagnosis: my own B7 attribution was wrong, and the measurement says so
+
+**No code changed this iteration.** It went to falsifying a mechanism I had
+asserted one iteration earlier.
+
+**What I claimed at B7.** That the residue on the three M8 fixtures was "ink
+extent ignores stroke width" — that `LimitFinder` walks the drawn shape so a
+3px line occupies more ink than its path geometry, and our ink box uses the
+geometry alone. I wrote that into the ledger and into B7's commit message on
+the strength of one observation: the canvas shortfall was exactly 3px, and the
+fixture sets `linethickness: 3`.
+
+**Why it was wrong, and the tell I ignored.** `LimitFinder` has NO stroke term
+in any handler — `drawRectangle`, `drawULine`, `drawUPath`, `drawUPolygon` all
+compute from geometry alone (`klimt/drawing/LimitFinder.java:159-225`). I had
+read that file twice this session, at B5. A mechanism that requires upstream to
+account for stroke width contradicts source I had already quoted.
+
+**Falsified by controlled experiment.** Two probe fixtures identical but for
+the `linethickness: 3` declaration, both rendered through the pinned jar:
+
+| | jar | ours |
+|---|---|---|
+| with `linethickness: 3` | 143x55, x=7/x=100, y=7.389 | 140x55, x=7/x=97, y=7 |
+| without it | **143x55, x=7/x=100, y=7.389** | **140x55, x=7/x=97, y=7** |
+
+Byte-identical on both sides with and without. The residue is entirely
+thickness-independent; the matching "3" was a coincidence.
+
+**What the residue actually is.** `minlen=0` places both nodes on the SAME
+rank with the edge label between them. Box-to-box gap: jar 63.425, ours
+60.425 — exactly 3px — plus a 0.389px y offset. And our emitted svek DOT is
+**byte-identical** to the oracle's: every structural check passes,
+`maxSizeDeltaIn` 0. So the divergence is downstream of the DOT text.
+
+**One confound I have NOT eliminated, so nothing is filed.** The structured
+input we hand the layout engine carries `labelWidth: 29.54375`, where the DOT
+text says `WIDTH="29"` — upstream truncates to int
+(`svek/SvekEdge.java:505-506`, `(int) dim.getWidth()`) and we `Math.round`
+(`svek-dot-emit.ts:44`). M2 already named that as a latent defect. It is 0.54px
+against a 3px symptom, so it is probably not the whole cause — but "probably
+not" is not "ruled out", and D6 requires a VERIFIED finding before anything
+goes to `docs/graphviz-issues/`. I did not file an engine issue.
+
+Fixing the truncation is also not a drive-by: M2's own note says it must land
+WITH the +2 label margin or it overshoots by 1px on roughly half that set, and
+that margin landed at B2. Entangling it with this diagnosis would repeat the
+mistake this entry is about.
+
+**The lesson, since this is the second attribution error of the session.** B5
+caught the ledger's mechanism being wrong before I wrote code, because I
+recorded a falsifiable prediction and checked it. Here I recorded a mechanism
+WITHOUT a prediction, in a commit message, and it survived a full gate run
+because nothing about the gates tests an explanation. The claim was
+load-bearing for whoever picks up B34 next, and it was wrong.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

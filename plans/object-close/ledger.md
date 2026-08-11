@@ -479,13 +479,12 @@ We swap on the arrowhead decor, and un-swap only for extension/implementation.
 > re-derivation silently missed a tag-sourced width. Its own G2 N31 comment
 > already required the two to stay in sync.
 >
-> **Residue is a separate mechanism — filed as B34/M39.** What remains on all
-> three is geometry downstream of the thicker stroke: canvas 140 vs 143 (the
-> delta is exactly the 3px `linethickness`), 0.389px shifts on rects/text/the
-> header rule, and the spline/polygon points. Our ink extent measures the path
-> geometry without its stroke width, so a 3px line reserves the same box as a
-> 1px one. That is one mechanism, not three fixtures' worth, and it is
-> orthogonal to the style lookup this row fixed.
+> **Residue is a separate mechanism — filed as B34/M39.** ~~What remains is
+> geometry downstream of the thicker stroke; our ink extent measures path
+> geometry without stroke width.~~ **That attribution was wrong — see B34's own
+> row for the falsification.** The residue is thickness-INDEPENDENT (the jar
+> renders this fixture identically with and without `linethickness: 3`): a 3px
+> same-rank node-gap delta and a 0.389px y offset, on byte-identical DOT.
 
 - **Java:** `CommandLinkClass.java:369-371`
   (`link.setStereotype(Stereotype.build(arg.get("STEREOTYPE", 0)))`) →
@@ -767,7 +766,7 @@ the class census/DOT gate in the same pass.
 | ~~B5~~ | **M6** — `LimitFinder` `-1` ink max-corner inset | 4 | — | landed: `jabote-02`, `jotaga-99`, plus unpredicted `fafozi-27` | **DONE 2026-08-11.** Gate is NARROWER than this row proposed, not wider: only `EntityImageObject.java:110-113`'s empty-but-SHOWN branch. The "field list is empty" gate regressed pinned `kexica-21`; see M6's B5 correction block for the three-way jar control set. Census 23 → 26; class ratchet (317 goldens) and all five DOT counts unmoved. `beleso-08`'s 1px residual was M6 and is resolved. |
 | ~~B6~~ | **M7** — decor-driven endpoint swap | 3 | — | landed: all three, 19 → 0 each | **DONE 2026-08-11.** Not "a single predicate": the fix is at the dot boundary (`dotEdgeRunsReversed`), plus `swappedEdges` which fed decor pairing from a DIFFERENT predicate than emission used. Census 26 → 29. Class DOT unmoved at 689/711 — because the comparator is orientation-blind, see B31, not because the corpus was untouched. |
 | ~~B7~~ | **M8** — link `<<stereo>>` → arrow style signature + `LineThickness` reader | 3 | — | none — all three improve, none flips | **DONE 2026-08-11.** Colour AND thickness now correct on all three (39→34, 39→34, 35→30); census 31/80 unchanged. Built on the existing `resolveStyleCascade` matcher exactly as the audit said. Residue on all three is stroke-width-blind ink extent — one mechanism, filed as B34. |
-| **B34** | **M39** — ink extent ignores stroke width | 3 | — | `zebufu-01`, `style-stereotype-on-arrow-3`/`-7` | **NEW, surfaced by B7.** With `linethickness: 3` the canvas is short by exactly 3px (140 vs 143) and every element carries a 0.389px shift. `LimitFinder` walks the DRAWN shape, so a 3px-wide line/polygon occupies more ink than its path geometry; our ink box uses the geometry alone. Was invisible while the thickness itself was being dropped. |
+| **B34** | **M39** — same-rank node gap: our layout places flat-edge nodes 3px closer than graphviz | 3 | — | `zebufu-01`, `style-stereotype-on-arrow-3`/`-7` | **RE-DIAGNOSED 2026-08-11 — the original claim was WRONG.** B7 filed this as "ink extent ignores stroke width" on the coincidence that the canvas shortfall equalled the 3px `linethickness`. **Falsified:** the pinned jar renders the fixture byte-identically WITH and WITHOUT `linethickness: 3` (143x55, rects x=7/x=100, y=7.389 both times), and so do we (140x55, x=7/x=97, y=7). The residue is entirely thickness-INDEPENDENT. `LimitFinder` has no stroke term in any handler, which should have been the tell. **Actual shape:** `minlen=0` puts both nodes on the SAME rank with the edge label between them; the box-to-box gap is 63.425 in the jar and 60.425 for us, exactly 3px, plus a 0.389px y offset. Our emitted svek DOT is **byte-identical** to the oracle's and every structural check passes (`maxSizeDeltaIn` 0). **One confound not yet eliminated:** the structured input we hand the engine carries `labelWidth: 29.54375` where the DOT text says `WIDTH="29"` — upstream truncates to int (`svek/SvekEdge.java:505-506`, `(int) dim.getWidth()`; we `Math.round` at `svek-dot-emit.ts:44`, the latent defect M2 already named). That is 0.54px, not 3, so it is unlikely to be the whole cause, but it must be ruled out before any `docs/graphviz-issues/` filing — D6 requires a VERIFIED finding, and this is not yet one. Not filed. |
 | B8 | **M10** — compiled theme table drops `skinparam` blocks | 2 | `fonulu-92` also needs B2 | `lunike-70` | Fix in `scripts/compile-themes.py` + regenerate. Reaches every `!theme` fixture in every corpus — **cross-type**. Confirmed by jar experiment for fonulu. |
 | B9 | **M11** — namespace phantom groups | 2 | After B2 (both fixtures also carry M2) | none alone | Parse-time, not layout. |
 | ~~B10~~ | **M12** — `monospaced` → `monospace` on the attribute half | 2 | — | landed: both, 1 → 0 each | **DONE 2026-08-11.** Prediction held exactly — one diff each, both flipped, zero collateral. Census 29 → 31. The rename is one line; the file split it forced (`svg-shapes.ts` was already 52 lines over the cap) was not. |
