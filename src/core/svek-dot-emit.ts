@@ -34,6 +34,7 @@ import {
 import {
   hex,
   labelTable,
+  edgeLabelTable,
   portTable,
   rowPortTable,
   shieldTable,
@@ -156,17 +157,17 @@ function edgeRef(
 function edgeLabelParts(a: EdgeAttrs, c: EdgeColors): string[] {
   const parts: string[] = [];
   if (a.label !== undefined && a.labelWidth !== undefined && a.labelHeight !== undefined) {
-    parts.push(`label=${labelTable(a.labelWidth, a.labelHeight, c.noteLabel)}`);
+    parts.push(`label=${edgeLabelTable(a.labelWidth, a.labelHeight, c.noteLabel)}`);
   }
   // linetype ortho routes the label through xlabel (SvekEdge.java:434-441).
   if (a.xlabel !== undefined && a.xlabelWidth !== undefined && a.xlabelHeight !== undefined) {
-    parts.push(`xlabel=${labelTable(a.xlabelWidth, a.xlabelHeight, c.noteLabel)}`);
+    parts.push(`xlabel=${edgeLabelTable(a.xlabelWidth, a.xlabelHeight, c.noteLabel)}`);
   }
   if (a.tailLabelWidth !== undefined && a.tailLabelHeight !== undefined) {
-    parts.push(`taillabel=${labelTable(a.tailLabelWidth, a.tailLabelHeight, c.startTail)}`);
+    parts.push(`taillabel=${edgeLabelTable(a.tailLabelWidth, a.tailLabelHeight, c.startTail)}`);
   }
   if (a.headLabelWidth !== undefined && a.headLabelHeight !== undefined) {
-    parts.push(`headlabel=${labelTable(a.headLabelWidth, a.headLabelHeight, c.endHead)}`);
+    parts.push(`headlabel=${edgeLabelTable(a.headLabelWidth, a.headLabelHeight, c.endHead)}`);
   }
   // #lizard forgives — faithful port of SvekEdge's fixed label-attr order
   // (SvekEdge.java:391-483); each branch is one upstream attribute.

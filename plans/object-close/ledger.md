@@ -207,10 +207,23 @@ block, not per line). We emit the raw measurement.
   the oracle byte for byte.
 - **MUST land with M34.** See the pairing note below.
 
-> **Conflict recorded.** `audit-geometry-a.md` M1 states its corpus scan found
-> **16** such fixtures but enumerates **15**. The 15 above are the named set;
-> the 16th is not identified in the audit. The re-measure after M2 lands will
-> resolve it — do not guess a 16th slug.
+> **Conflict RESOLVED by measurement, B2 (2026-08-11): the number is 11.**
+> A scan of every object fixture whose ORACLE emits a main `label=<<TABLE>>`
+> finds 11 — neither the 15 enumerated above nor the 16 claimed. The larger
+> counts conflated fixtures carrying only `taillabel=`/`headlabel=` tables,
+> which upstream builds WITHOUT `addVisibilityModifier` and which therefore
+> never carried this defect (the same reason `tobuka-93-jale775` was already
+> byte-exact and was named as the control).
+>
+> After B2, **10 of the 11 match the oracle exactly**. The 11th,
+> `lecali-51-funo316`, is a DIFFERENT mechanism — ours `20x15,20x15` vs the
+> jar's `75x48,174x46`, which is `EntityImageNoteLink` merged into `labelText`
+> (`svek/SvekEdge.java:308-326`), not a 1px margin. It is carried as its own
+> row, not inside M2's count.
+>
+> **B2 landed correctly and moved no fixture.** The object census held at
+> 23/80 with an identical bucket distribution: these fixtures' remaining
+> residues are other mechanisms, and M2 was one layer of several.
 
 ## M3 — map/JSON cell construction: cells not built through `CreoleMode.FULL`, empty-value cell and row vline suppressed, JSON full-height vline missing — **reach 9**
 

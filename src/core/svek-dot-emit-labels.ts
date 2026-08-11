@@ -18,8 +18,36 @@ export const hex = (n: number): string =>
   '#' + (n & 0xffffff).toString(16).padStart(6, '0');
 export const round = (v: number): string => String(Math.round(v));
 
+/**
+ * Upstream has TWO `SvekEdge.appendTable` overloads and they differ in exactly
+ * one way — which one has already turned its dimensions into integers:
+ *
+ * - `appendTable(sb, XDimension2D dim, col, gv)` (`svek/SvekEdge.java:504-508`)
+ *   TRUNCATES: `final int w = (int) dim.getWidth()`. Every EDGE label goes
+ *   through it — note label / xlabel (`:443`), taillabel (`:450`, `:455`),
+ *   headlabel (`:461`, `:466`).
+ * - `appendTable(sb, int w, int h, col)` (`:510`) does no conversion at all.
+ *   The CLUSTER title is its only caller (`svek/ClusterDotString.java:124`),
+ *   and it is already integral by construction —
+ *   `Cluster#getTitleAndAttributeWidth` returns `int` and ceils internally
+ *   (`svek/Cluster.java:261-264`).
+ *
+ * So {@link edgeLabelTable} truncates and {@link labelTable} does not. Do NOT
+ * collapse them: our cluster width is not integral by construction the way
+ * upstream's is, so truncating it would change laid-out geometry on every
+ * type that draws a package/namespace frame — none of which is this
+ * mechanism's subject.
+ */
+export const trunc = (v: number): string => String(Math.trunc(v));
+
+/** The cluster-title form — no rounding mode of its own; see {@link trunc}. */
 export const labelTable = (w: number, h: number, color: number): string =>
   `<<TABLE BGCOLOR="${hex(color)}" FIXEDSIZE="TRUE" WIDTH="${round(w)}" HEIGHT="${round(h)}">` +
+  `<TR><TD></TD></TR></TABLE>>`;
+
+/** The EDGE-label form — truncates, per `SvekEdge.java:505-506`. */
+export const edgeLabelTable = (w: number, h: number, color: number): string =>
+  `<<TABLE BGCOLOR="${hex(color)}" FIXEDSIZE="TRUE" WIDTH="${trunc(w)}" HEIGHT="${trunc(h)}">` +
   `<TR><TD></TD></TR></TABLE>>`;
 
 // SvekNode.appendLabelHtml: shield table for a shielded description entity
