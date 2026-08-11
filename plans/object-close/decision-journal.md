@@ -699,6 +699,72 @@ description 48-set pass. No ratchet additions: no fixture newly reached zero.
 **Quality gates.** `npm test` 574 files / 12760 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped.
 
+## B7 (M8) — diagnosis, written BEFORE any code change
+
+**Mechanism.** A link's `<<stereo>>` is a *style-class selector*, and upstream
+routes it into the arrow's style signature:
+
+1. `CommandLinkClass.java:368-371` — `link.setStereotype(Stereotype.build(
+   arg.get("STEREOTYPE", 0)))`.
+2. `SvekEdge.java:817-822` — the arrow's base signature is
+   `{root, element, <diagramType>, arrow}`, then `.withTOBECHANGED(stereotype)`.
+3. `StyleSignatureBasic.java:119-132` — `withTOBECHANGED` FANS OUT: for each
+   stereotype label it produces `this.addStereotype(name)`, yielding a
+   `StyleSignatures` **set**, so `<style> .mystyle { }` matches by the
+   stereotype half of the two-subset test at `:213`.
+4. `SvekEdge.java:874-876` — `styleLine.getStroke()` and
+   `Rainbow.build(styleLine, …)` read the merged style. `Style#getStroke()`
+   (`Style.java:261-263`) is `getStroke(PName.LineThickness, PName.LineStyle)`,
+   so **thickness comes from the same merged style as the colour**.
+
+**Origin, ours — two independent gaps, both required for the fixture.**
+
+- The stereotype never leaves the parser. `REL_STEREO`
+  (`class-relationship-parser.ts:144`) is spliced into `REL_RE` **non-capturing**
+  at both `:166` and `:185`, so `<<mystyle>>` is matched and discarded. The
+  `Relationship` AST has no field for it.
+- The arrow cascade has no stereotype dimension and no thickness reader.
+  `style-cascade-class.ts:326` computes ONE global
+  `classCascadeArrowColor = cascadeHex(styleMap, ARROW_SNAMES, 'linecolor')`
+  for the whole diagram, and nothing anywhere reads `linethickness` for an
+  arrow. `renderer-edge.ts:168-170` consumes that single value and `:198`
+  hardcodes `strokeWidth: geo.strokeWidth ?? 1`, where `geo.strokeWidth` is
+  set only by an explicit `-[...]->` bracket override.
+
+**Causal chain.** `zebufu-01-pevo013` declares
+`.mystyle { linecolor: blue; linethickness: 3 }` and applies it as
+`n0 -> n1 <<mystyle>>`. We drop the tag, so the edge renders with the default
+`#181818` at width 1 where the jar draws `#00F` at width 3 — confirmed on the
+`path` and on the arrowhead `polygon` (fill, stroke and stroke-width all three).
+The remaining 33 numeric diffs (canvas +3px, `0.389` y-shifts, polygon points)
+are downstream of the thicker stroke, not separate causes.
+
+**The primitive already exists.** `style-map-element.ts#resolveStyleCascade`
+(`:325-346`) already implements upstream's exact two-subset match INCLUDING
+`stereotypeTags`, with the last-registered-wins merge and no specificity
+reordering. So the fix is to *call* it per-edge with the arrow SNames and the
+link's own tags — not to build new matching machinery. `babcfa94` is precedent
+for the shape only: it is skinparam-side, and this is `<style>`-side.
+
+**Scope — this is a three-file change, not a one-liner, and it is one
+mechanism.** Capture the tag in the parser + AST; resolve `linecolor` and
+`linethickness` per-edge against the arrow signature; consume both in
+`renderer-edge.ts`. Splitting it would leave a captured-but-unused field or a
+reader with no input, so all three land together. The cascade is shared with
+every class-family diagram, so the class goldens are the boundary to watch.
+
+**Ruled out.** Not the `-[#color]->` bracket path — this fixture uses none, and
+that override already works (it sits ABOVE the cascade in
+`renderer-edge.ts:168-170`). Not a `<style>` parse gap: `parseStyleBlock`
+already stores `.mystyle`'s declarations; `parseTagSelector` already recovers
+the tag token. Not M2 — `style-stereotype-on-arrow-3` is a byte-identical
+duplicate of `zebufu`, so the reach is 2 independent fixtures, not 3.
+
+**Deliberately NOT started in the same turn as the diagnosis.** Two earlier
+iterations (B1, B3) committed the diagnosis first and implemented next; the
+loop protocol requires the mechanism on disk before code, and a multi-file
+change plus a full gate run does not fit the remainder of this turn honestly.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).
