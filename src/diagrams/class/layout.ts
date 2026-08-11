@@ -52,7 +52,7 @@ import {
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry } from './class-geo-types.js';
 
 export { formatMemberText, ROW_TEXT_LEFT_MARGIN } from './class-layout-helpers.js';
-export type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry } from './class-geo-types.js';
+export type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry, JsonBodyItem } from './class-geo-types.js';
 
 // ---------------------------------------------------------------------------
 // Directive resolution helpers

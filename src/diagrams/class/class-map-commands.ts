@@ -26,6 +26,7 @@
  */
 
 import type { Classifier, MapRow, Relationship } from './ast.js';
+import { MAP_POINT_SENTINEL } from './ast.js';
 import {
   countByName,
   firstWithName,
@@ -234,8 +235,10 @@ const LINKED_ENTRY_RE = /(\*-+_?>)/;
  * `BodierMap#addFieldOrMethod`'s two-branch `ok` decision: `=>` is checked
  * FIRST (a line containing both `=>` and a linked-entry token still takes
  * this branch — see {@link computeMapLink}'s doc for how the two diverge
- * on `key`), then the linked-entry pattern (row value = `''`, the port
- * `MapRow.linkedCode` is filled in by the caller once the link resolves).
+ * on `key`), then the linked-entry pattern (row value =
+ * {@link MAP_POINT_SENTINEL}, upstream's own `map.put(..., "\0")` at
+ * `BodierMap.java:79`; the port `MapRow.linkedCode` is filled in by the
+ * caller once the link resolves).
  * Returns `null` for neither form ("Map definition should contains key =>
  * value" upstream — silently dropped here, matching this parser's existing
  * no-error-channel posture).
@@ -247,7 +250,7 @@ function computeMapRow(line: string): MapRow | null {
   }
   const linked = LINKED_ENTRY_RE.exec(line);
   if (linked !== null) {
-    return { key: line.slice(0, linked.index).trim(), value: '' };
+    return { key: line.slice(0, linked.index).trim(), value: MAP_POINT_SENTINEL };
   }
   return null;
 }
@@ -366,8 +369,28 @@ export function applyMapBodyLine(state: ParseState, classifier: Classifier, rawL
     }
   }
   if (row !== null) {
-    (classifier.rows ??= []).push(row);
+    putMapRow((classifier.rows ??= []), row);
   }
+}
+
+/**
+ * `BodierMap`'s backing store is a `Map<String, String>` — a
+ * `LinkedHashMap` (`cucadiagram/BodierMap.java:55`) reached only through
+ * `map.put(...)` (`:74` for the `=>` branch, `:79` for the linked-entry
+ * one). So a repeated key does NOT add a second entry: it keeps its
+ * original insertion position and takes the LAST value written. The port's
+ * `rows[]` is an array, so that has to be replicated explicitly.
+ *
+ * Jar: satuco-50-vusa163's `CCC C` declares `=> uuuu` then `=> yyyy` (both
+ * keyed `""`) and draws ONE row, showing `yyyy`.
+ */
+function putMapRow(rows: MapRow[], row: MapRow): void {
+  const existing = rows.findIndex((r) => r.key === row.key);
+  if (existing === -1) {
+    rows.push(row);
+    return;
+  }
+  rows[existing] = { ...row, key: rows[existing]!.key };
 }
 
 /**

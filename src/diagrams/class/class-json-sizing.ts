@@ -38,28 +38,30 @@
  * height of TWO nested members). Every row also carries its OWN raw text
  * width for `textLength` (rounded at emission, `core/svg.ts`).
  *
- * RENDERING SIMPLIFICATION (documented divergence, see this task's return):
- * upstream draws one horizontal `hline` per row (top-level AND nested, each
- * scoped to its OWN local column width) plus one vertical `vline` PER TABLE
- * (top-level AND each nested sub-table, at that sub-table's own key-column
- * boundary). `ClassifierGeo` (layout.ts, at the project's 500-line cap) only
- * carries a flat `rows[]`/`dividerYs: number[]` — no per-line x-range — so
- * this port emits every row-boundary Y (top-level AND nested) as a
- * dividerYs entry (drawn FULL WIDTH by the existing renderer, correct only
- * for the true top-level rows) and omits the vertical column divider(s)
- * entirely (no schema room for one, let alone one per nesting level). Text
- * position/size is still exact at every depth — only the divider LINES are
- * simplified. This is "incidental rendering" per this project's own
- * divergence policy, not an information loss: every value is still visible
- * at its correct position.
+ * M3(c) retired the previous RENDERING SIMPLIFICATION (every row boundary
+ * emitted as a full-width `dividerYs` entry, every vertical divider dropped
+ * for lack of schema room). {@link buildJsonBody} now walks
+ * `TextBlockCucaJSon#drawU`'s own recursion and emits an ORDERED
+ * {@link JsonBodyItem} list — `vline` first per object, then per member an
+ * `hline` scoped to THAT table's `jsonTotalWidth`, the key text, and the
+ * value subtree — which `renderer-classifier-box.ts` draws verbatim (the
+ * same "this body owns its own draw order" dispatch `enhancedBody` already
+ * uses, not the Y-sort merge: upstream's order is a pre-order traversal, so
+ * a nested table's vline lands BETWEEN its parent's key text and its own
+ * first hline, which no Y-sort can produce). `dividerYs` is still populated
+ * (`dividerYs[0]` = the title height, which the header-background split and
+ * the ink box both read) but is no longer what draws the lines.
  */
 
 import type { Classifier, JsonNode } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import type { ClassifierGeo } from './layout.js';
+import type { JsonBodyItem } from './layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-sizing.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import type { MemberRenderAtom } from './class-member-creole.js';
+import { buildMemberAtoms, memberBaseFont, resolveMemberAtoms } from './class-member-creole.js';
 
 interface Dim {
   width: number;
@@ -90,23 +92,54 @@ const EMPTY_OBJECT_NODE: JsonNode = { kind: 'object', entries: [] };
 // ---------------------------------------------------------------------------
 
 type JsonDimNode =
-  | { kind: 'scalar'; text: string; width: number; height: number; rawWidth: number }
+  | {
+      kind: 'scalar';
+      text: string;
+      width: number;
+      height: number;
+      rawWidth: number;
+      atoms: readonly MemberRenderAtom[];
+    }
   | { kind: 'array'; items: JsonDimNode[]; width: number; height: number }
   | {
       kind: 'object';
-      members: { key: string; keyDim: Dim; keyRawWidth: number; value: JsonDimNode }[];
+      members: {
+        key: string;
+        keyDim: Dim;
+        keyRawWidth: number;
+        keyAtoms: readonly MemberRenderAtom[];
+        value: JsonDimNode;
+      }[];
       width1: number;
       width2: number;
       width: number;
       height: number;
     };
 
-/** `getTextBlock`'s shared margin-5,2 cell measurement — used for both a
- *  member's key AND a scalar value (TextBlockCucaJSon#getTextBlock /
- *  #getTextBlockValue's scalar branch). */
-function measureJsonCell(text: string, fontSpec: { family: string; size: number }, measurer: StringMeasurer): Dim {
-  const m = measurer.measure(text, fontSpec);
-  return { width: m.width + JSON_CELL_MARGIN_X * 2, height: m.height + JSON_CELL_MARGIN_Y * 2 };
+/**
+ * `getTextBlock`'s shared margin-5,2 cell build — used for both a member's
+ * key AND a scalar value (`TextBlockCucaJSon#getTextBlock` /
+ * `#getTextBlockValue`'s scalar branch, `TextBlockCucaJSon.java:184-190`
+ * and `:89-91`).
+ *
+ * M3(a): the cell is a `CreoleMode.FULL` line upstream, byte-identical to
+ * `TextBlockMap#getTextBlock` (`class-map-sizing.ts#measureMapCell` cites
+ * the same call), so `__…__`/`<font:…>` markup styles rather than measuring
+ * as literal text. Markup-free text is measurement-identical to the
+ * previous bare `measurer.measure` — see `class-member-creole.ts`'s own
+ * "measurement-identity guarantee" module note.
+ */
+function measureJsonCell(
+  text: string,
+  font: FontConfiguration,
+  measurer: StringMeasurer,
+): { dim: Dim; rawWidth: number; atoms: readonly MemberRenderAtom[] } {
+  const build = resolveMemberAtoms(buildMemberAtoms(text, font), font, measurer);
+  return {
+    dim: { width: build.width + JSON_CELL_MARGIN_X * 2, height: build.height + JSON_CELL_MARGIN_Y * 2 },
+    rawWidth: build.width,
+    atoms: build.atoms,
+  };
 }
 
 /** `getTextBlockValue`'s scalar display text: a JSON string shows unquoted
@@ -122,23 +155,36 @@ function scalarText(node: { kind: 'scalar'; value: string | number | boolean | n
 
 function measureScalarNode(
   node: JsonNode & { kind: 'scalar' },
-  fontSpec: { family: string; size: number },
+  font: FontConfiguration,
   measurer: StringMeasurer,
 ): JsonDimNode {
-  const text = scalarText(node);
-  const dim = measureJsonCell(text, fontSpec, measurer);
-  const rawWidth = measurer.measure(text, fontSpec).width;
-  return { kind: 'scalar', text, width: dim.width, height: dim.height, rawWidth };
+  const cell = measureJsonCell(scalarText(node), font, measurer);
+  return {
+    kind: 'scalar',
+    text: cellText(cell.atoms, scalarText(node)),
+    width: cell.dim.width,
+    height: cell.dim.height,
+    rawWidth: cell.rawWidth,
+    atoms: cell.atoms,
+  };
+}
+
+/** The DRAWN label of a built cell — the creole-stripped run text, falling
+ *  back to the source string for a cell whose atoms carry no text at all
+ *  (an image-only cell). */
+function cellText(atoms: readonly MemberRenderAtom[], fallback: string): string {
+  const joined = atoms.map((a) => (a.kind === 'text' ? a.text : '')).join('');
+  return joined === '' ? fallback : joined;
 }
 
 /** `TextBlockArray#calculateDimensionSlow`: `mergeTB` per element — width =
  *  max, height = sum (stacked top-to-bottom, no column split). */
 function measureArrayNode(
   node: JsonNode & { kind: 'array' },
-  fontSpec: { family: string; size: number },
+  font: FontConfiguration,
   measurer: StringMeasurer,
 ): JsonDimNode {
-  const items = node.items.map((i) => measureJsonNode(i, fontSpec, measurer));
+  const items = node.items.map((i) => measureJsonNode(i, font, measurer));
   const width = items.length === 0 ? 0 : Math.max(...items.map((i) => i.width));
   const height = items.reduce((sum, i) => sum + i.height, 0);
   return { kind: 'array', items, width, height };
@@ -149,101 +195,122 @@ function measureArrayNode(
  *  per-member `max(keyDim.height, valueDim.height)`. */
 function measureObjectNode(
   node: JsonNode & { kind: 'object' },
-  fontSpec: { family: string; size: number },
+  font: FontConfiguration,
   measurer: StringMeasurer,
 ): JsonDimNode {
-  const members = node.entries.map((e) => ({
-    key: e.key,
-    keyDim: measureJsonCell(e.key, fontSpec, measurer),
-    keyRawWidth: measurer.measure(e.key, fontSpec).width,
-    value: measureJsonNode(e.value, fontSpec, measurer),
-  }));
+  const members = node.entries.map((e) => {
+    const key = measureJsonCell(e.key, font, measurer);
+    return {
+      key: cellText(key.atoms, e.key),
+      keyDim: key.dim,
+      keyRawWidth: key.rawWidth,
+      keyAtoms: key.atoms,
+      value: measureJsonNode(e.value, font, measurer),
+    };
+  });
   const width1 = members.length === 0 ? 0 : Math.max(...members.map((m) => m.keyDim.width));
   const width2 = members.length === 0 ? 0 : Math.max(...members.map((m) => m.value.width));
   const height = members.reduce((sum, m) => sum + Math.max(m.keyDim.height, m.value.height), 0);
   return { kind: 'object', members, width1, width2, width: width1 + width2, height };
 }
 
-function measureJsonNode(
-  node: JsonNode,
-  fontSpec: { family: string; size: number },
-  measurer: StringMeasurer,
-): JsonDimNode {
-  if (node.kind === 'scalar') return measureScalarNode(node, fontSpec, measurer);
-  if (node.kind === 'array') return measureArrayNode(node, fontSpec, measurer);
-  return measureObjectNode(node, fontSpec, measurer);
+function measureJsonNode(node: JsonNode, font: FontConfiguration, measurer: StringMeasurer): JsonDimNode {
+  if (node.kind === 'scalar') return measureScalarNode(node, font, measurer);
+  if (node.kind === 'array') return measureArrayNode(node, font, measurer);
+  return measureObjectNode(node, font, measurer);
 }
 
 // ---------------------------------------------------------------------------
 // Recursive row/divider geometry (TextBlockCucaJSon#drawU)
 // ---------------------------------------------------------------------------
 
-interface RowsResult {
-  rows: ClassifierGeo['rows'];
-  /** Absolute (title-relative-origin) Y of every row-boundary hline this
-   *  node's own drawU + its descendants draw — see file doc's rendering
-   *  simplification note for why these are all emitted as full-width lines. */
-  starts: number[];
+/** The traversal cursor every `drawU` mirror below shares — bundled (rather
+ *  than 4 positional numbers) to stay under this repo's 5-parameter cap.
+ *  `totalWidth` is upstream's `jsonTotalWidth`/`arrayTotalWidth`: a
+ *  DRAW-time-only value (no `calculateDimensionSlow` reads it) that sets
+ *  how far this table's own hlines run, handed down as
+ *  `this.jsonTotalWidth - width1` at `TextBlockCucaJSon.java:171`. */
+interface JsonDrawCursor {
+  x: number;
+  y: number;
+  totalWidth: number;
+  baselineOffset: number;
 }
 
 /** G3/O1: `rowTop + JSON_CELL_MARGIN_Y + baselineOffset` — the SAME
  *  "ascent-from-row-top" baseline every other object/map/json row uses (see
  *  file doc); every cell also carries its OWN `rawWidth` for `textLength`,
  *  never a shared column width. */
-function buildScalarRows(node: JsonDimNode & { kind: 'scalar' }, x: number, y: number, baselineOffset: number): RowsResult {
-  return {
-    rows: [{ text: node.text, y: y + JSON_CELL_MARGIN_Y + baselineOffset, indent: x + JSON_CELL_MARGIN_X, width: node.rawWidth }],
-    starts: [],
-  };
+function buildScalarItems(node: JsonDimNode & { kind: 'scalar' }, cur: JsonDrawCursor): JsonBodyItem[] {
+  return [{
+    kind: 'text',
+    row: {
+      text: node.text,
+      y: cur.y + JSON_CELL_MARGIN_Y + cur.baselineOffset,
+      indent: cur.x + JSON_CELL_MARGIN_X,
+      width: node.rawWidth,
+      atoms: node.atoms,
+    },
+  }];
 }
 
-/** `TextBlockArray#drawU`: an hline BETWEEN elements only (`if (nb > 0)`) —
- *  the first element has no leading boundary of its own. */
-function buildArrayRows(node: JsonDimNode & { kind: 'array' }, x: number, y: number, baselineOffset: number): RowsResult {
-  const rows: ClassifierGeo['rows'] = [];
-  const starts: number[] = [];
-  let curY = y;
+/** `TextBlockArray#drawU` (`TextBlockCucaJSon.java:213-224`): an hline
+ *  BETWEEN elements only (`if (nb > 0)`) — the first element has no leading
+ *  boundary of its own — each spanning this array's own `arrayTotalWidth`.
+ *  No vline: an array has no key column. */
+function buildArrayItems(node: JsonDimNode & { kind: 'array' }, cur: JsonDrawCursor): JsonBodyItem[] {
+  const out: JsonBodyItem[] = [];
+  let curY = cur.y;
   node.items.forEach((item, i) => {
-    if (i > 0) starts.push(curY);
-    const sub = buildJsonRows(item, x, curY, baselineOffset);
-    rows.push(...sub.rows);
-    starts.push(...sub.starts);
+    if (i > 0) out.push({ kind: 'hline', x: cur.x, y: curY, width: cur.totalWidth });
+    out.push(...buildJsonItems(item, { ...cur, y: curY }));
     curY += item.height;
   });
-  return { rows, starts };
+  return out;
 }
 
-/** `TextBlockJson#drawU`: an hline before EVERY member (including the
- *  first); the value column starts at `x + width1`. The key row's baseline
- *  uses the SAME `rowTop + JSON_CELL_MARGIN_Y + baselineOffset` formula
- *  regardless of `rowHeight` -- for a nested object/array VALUE, `rowHeight`
- *  can far exceed one text line, so the key aligns to the row's TOP, not
- *  its center (G3/O1, jar-verified against bepafe-03-teda035's "user"). */
-function buildObjectRows(node: JsonDimNode & { kind: 'object' }, x: number, y: number, baselineOffset: number): RowsResult {
-  const rows: ClassifierGeo['rows'] = [];
-  const starts: number[] = [];
-  let curY = y;
+/**
+ * `TextBlockJson#drawU` (`TextBlockCucaJSon.java:162-180`), in ITS order:
+ * ONE `ULine.vline(height)` at `dx = width1` for the whole object first,
+ * then, per member, `hline(jsonTotalWidth)` -> key -> value subtree. The
+ * key row's baseline uses the SAME `rowTop + JSON_CELL_MARGIN_Y +
+ * baselineOffset` formula regardless of `rowHeight` -- for a nested
+ * object/array VALUE, `rowHeight` can far exceed one text line, so the key
+ * aligns to the row's TOP, not its center (G3/O1, jar-verified against
+ * bepafe-03-teda035's "user").
+ */
+function buildObjectItems(node: JsonDimNode & { kind: 'object' }, cur: JsonDrawCursor): JsonBodyItem[] {
+  const out: JsonBodyItem[] = [
+    { kind: 'vline', x: cur.x + node.width1, y: cur.y, height: node.height },
+  ];
+  let curY = cur.y;
   for (const m of node.members) {
-    starts.push(curY);
-    const rowHeight = Math.max(m.keyDim.height, m.value.height);
-    rows.push({
-      text: m.key,
-      y: curY + JSON_CELL_MARGIN_Y + baselineOffset,
-      indent: x + JSON_CELL_MARGIN_X,
-      width: m.keyRawWidth,
+    out.push({ kind: 'hline', x: cur.x, y: curY, width: cur.totalWidth });
+    out.push({
+      kind: 'text',
+      row: {
+        text: m.key,
+        y: curY + JSON_CELL_MARGIN_Y + cur.baselineOffset,
+        indent: cur.x + JSON_CELL_MARGIN_X,
+        width: m.keyRawWidth,
+        atoms: m.keyAtoms,
+      },
     });
-    const sub = buildJsonRows(m.value, x + node.width1, curY, baselineOffset);
-    rows.push(...sub.rows);
-    starts.push(...sub.starts);
-    curY += rowHeight;
+    out.push(...buildJsonItems(m.value, {
+      ...cur,
+      x: cur.x + node.width1,
+      y: curY,
+      totalWidth: cur.totalWidth - node.width1,
+    }));
+    curY += Math.max(m.keyDim.height, m.value.height);
   }
-  return { rows, starts };
+  return out;
 }
 
-function buildJsonRows(node: JsonDimNode, x: number, y: number, baselineOffset: number): RowsResult {
-  if (node.kind === 'scalar') return buildScalarRows(node, x, y, baselineOffset);
-  if (node.kind === 'array') return buildArrayRows(node, x, y, baselineOffset);
-  return buildObjectRows(node, x, y, baselineOffset);
+function buildJsonItems(node: JsonDimNode, cur: JsonDrawCursor): JsonBodyItem[] {
+  if (node.kind === 'scalar') return buildScalarItems(node, cur);
+  if (node.kind === 'array') return buildArrayItems(node, cur);
+  return buildObjectItems(node, cur);
 }
 
 // ---------------------------------------------------------------------------
@@ -270,7 +337,12 @@ export function measureJsonClassifier(
   const stereoDim = measureStereo(classifier, theme, measurer);
   const title = titleDimension(nameDim, stereoDim);
 
-  const dimNode = measureJsonNode(classifier.jsonValue ?? EMPTY_OBJECT_NODE, fontSpec, measurer);
+  // M3(a): every entry cell is a creole line upstream, so the recursion
+  // carries the base `FontConfiguration` rather than the bare `FontSpec`
+  // the header still uses. A json entry has no `{abstract}`/`{static}`
+  // member modifiers, hence the empty member.
+  const cellFont = memberBaseFont(fontSpec, {});
+  const dimNode = measureJsonNode(classifier.jsonValue ?? EMPTY_OBJECT_NODE, cellFont, measurer);
   const fieldsHeight = dimNode.height === 0 ? JSON_EMPTY_HEIGHT_FALLBACK : dimNode.height;
 
   const width = Math.max(dimNode.width, title.width + JSON_X_MARGIN_CIRCLE * 2);
@@ -278,7 +350,15 @@ export function measureJsonClassifier(
 
   const headerGeo = headerRows(classifier, theme, measurer, { boxWidth: width, namePadding: JSON_NAME_MARGIN });
   const baselineOffset = baselineOffsetFor(fontSpec, measurer);
-  const { rows: entryRows, starts } = buildJsonRows(dimNode, 0, title.height, baselineOffset);
+  // `EntityImageJson#drawU` seeds the ROOT block's own `jsonTotalWidth` with
+  // the finished box width (`setTotalWidth(dimTotal.getWidth())`,
+  // `svek/image/EntityImageJson.java:207`), then draws the entries area
+  // translated down by the title height (`:208`).
+  const jsonBody = buildJsonItems(dimNode, {
+    x: 0, y: title.height, totalWidth: width, baselineOffset,
+  });
+  const entryRows = jsonBody.flatMap((i) => (i.kind === 'text' ? [i.row] : []));
+  const dividerYs = jsonBody.flatMap((i) => (i.kind === 'hline' ? [i.y] : []));
 
-  return { width, height, rows: [...headerGeo, ...entryRows], dividerYs: starts };
+  return { width, height, rows: [...headerGeo, ...entryRows], dividerYs, jsonBody };
 }

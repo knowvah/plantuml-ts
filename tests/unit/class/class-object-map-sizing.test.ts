@@ -19,6 +19,7 @@
 import { describe, it, expect } from 'vitest';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import type { ClassDiagramAST, Classifier } from '../../../src/diagrams/class/ast.js';
+import { MAP_POINT_SENTINEL } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
@@ -291,7 +292,7 @@ describe('measureMapClassifier — linked (Point) row + 2 plain rows (diveje-52-
         typeParams: [],
         members: [],
         rows: [
-          { key: 'UK', value: '', linkedCode: 'London' },
+          { key: 'UK', value: MAP_POINT_SENTINEL, linkedCode: 'London' },
           { key: 'USA', value: 'Washington' },
           { key: 'Germany', value: 'Berlin' },
         ],
@@ -462,7 +463,7 @@ describe('map DOT emission', () => {
           kind: 'map',
           typeParams: [],
           members: [],
-          rows: [{ key: 'UK', value: '', linkedCode: 'London' }],
+          rows: [{ key: 'UK', value: MAP_POINT_SENTINEL, linkedCode: 'London' }],
         },
       ],
       [
@@ -679,5 +680,87 @@ describe('measureObjectFields -- visibilityIsField always true (xuvesu-44-laru20
     const [publicRow, privateRow] = c.rows.slice(1);
     expect(publicRow!.visibilityIsField).toBe(true);
     expect(privateRow!.visibilityIsField).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// map — M3 (a)/(b): every key/value cell is built through `CreoleMode.FULL`,
+// and the per-row `ULine.vline` fires for EVERY non-`Point` value, empty
+// string included.
+//
+// Java: `cucadiagram/TextBlockMap.java:172-181` (`getTextBlock` short-
+// circuits ONLY the `"\0"` key to a `Point`, then builds every other cell as
+// `Display.getWithNewlines(...).create0(fontConfiguration, LEFT, skinParam,
+// wordWrap, CreoleMode.FULL, null, null)`) and `:144-152` (`if (value
+// instanceof Point)` is the ONLY branch that skips the value cell + its
+// `ULine.vline(heightOfRow)`). The `"\0"` sentinel itself is written by
+// `cucadiagram/BodierMap.java:79` (`map.put(..., "\0")` for a `key *-> dest`
+// linked row) -- an ordinary `key => ` row stores `""`, which is a real,
+// drawn cell.
+//
+// Oracle: test-results/dot-cache/object/fusopu-05-loxo960/in.svg (the
+// `Interface` entity, `map { __method1__ => void / method2 => }`).
+// ---------------------------------------------------------------------------
+
+describe('measureMapClassifier — creole cells + empty-value rows (fusopu-05-loxo960)', () => {
+  /** jar `<text ... textLength="54.425" text-decoration="underline">method1
+   *  </text>` -- the creole-stripped label, NOT the 11-char raw
+   *  `__method1__` (85.575px). */
+  const METHOD1_UNDERLINED_WIDTH = 54.425;
+  /** jar `<text ... textLength="25.725">void</text>`. */
+  const VOID_WIDTH = 25.725;
+  /** jar rect `width="100.15"` for the `Interface` entity. */
+  const INTERFACE_BOX_WIDTH = 100.15;
+  /** jar vline `x1="71.425"` minus rect `x="7"` -- colA, i.e. the widest key
+   *  cell (`method1`/`method2` 54.425 + 2*5 margin = 64.425)... plus nothing
+   *  else: 71.425 - 7 = 64.425. */
+  const INTERFACE_COL_A = 64.425;
+
+  function interfaceAst(): ClassDiagramAST {
+    return makeAST([
+      {
+        id: 'Interface', display: 'Interface', kind: 'map', typeParams: [], members: [],
+        rows: [{ key: '__method1__', value: 'void' }, { key: 'method2', value: '' }],
+      },
+    ]);
+  }
+
+  it('strips `__…__` through CreoleMode.FULL and sizes colA from the stripped label', () => {
+    const c = layoutClass(interfaceAst(), theme, measurer).classifiers[0]!;
+    expect(c.width).toBeCloseTo(INTERFACE_BOX_WIDTH, 3);
+    const key1 = c.rows.slice(1)[0]!;
+    expect(key1.atoms).toBeDefined();
+    expect(key1.atoms!.map((a) => (a.kind === 'text' ? a.text : '')).join('')).toBe('method1');
+    expect(key1.atoms![0]!.width).toBeCloseTo(METHOD1_UNDERLINED_WIDTH, 3);
+  });
+
+  it('keeps an EMPTY value as a real (space) cell, not a Point', () => {
+    const c = layoutClass(interfaceAst(), theme, measurer).classifiers[0]!;
+    const [, value1, , value2] = c.rows.slice(1);
+    expect(value1!.atoms!.map((a) => (a.kind === 'text' ? a.text : '')).join('')).toBe('void');
+    expect(value1!.atoms![0]!.width).toBeCloseTo(VOID_WIDTH, 3);
+    // `method2 => ` -- `StripeSimple#getAtoms`'s empty-stripe fallback is one
+    // `" "` atom (StripeSimple.java:125-126), width 0, so colB stays 2*5.
+    expect(value2!.text).toBe(' ');
+    expect(value2!.indent).toBeCloseTo(INTERFACE_COL_A + 5, 3);
+  });
+
+  it('emits a column vline for an empty-value row and none for a Point row', () => {
+    const c = layoutClass(interfaceAst(), theme, measurer).classifiers[0]!;
+    // both rows are non-Point -> both value cells carry drawable atoms
+    const [, value1, , value2] = c.rows.slice(1);
+    expect(value1!.text).not.toBe('');
+    expect(value2!.text).not.toBe('');
+
+    const point = layoutClass(
+      makeAST([{
+        id: 'M', display: 'M', kind: 'map', typeParams: [], members: [],
+        rows: [{ key: 'UK', value: '\0', linkedCode: 'London' }],
+      }]),
+      theme, measurer,
+    ).classifiers[0]!;
+    const pointValue = point.rows.slice(1)[1]!;
+    expect(pointValue.text).toBe('');
+    expect(pointValue.atoms).toBeUndefined();
   });
 });

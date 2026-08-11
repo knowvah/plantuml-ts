@@ -197,6 +197,12 @@ export interface ClassifierGeo {
    *  classifier whose body does not trigger `class-body-enhanced.ts
    *  #isEnhancedBody`. */
   enhancedBody?: EnhancedBodyGeo;
+  /** M3(c): copied unchanged from `MeasuredClassifier.jsonBody`
+   *  (`class-layout-helpers.ts`'s doc comment) -- present only on a
+   *  `kind:'json'` leaf, and the thing `renderer-classifier-box.ts
+   *  #buildBodyPrimitives` draws INSTEAD OF the `dividerYs`/`rows` Y-sort
+   *  merge for one. */
+  jsonBody?: readonly JsonBodyItem[];
   /** G2 N37: EVERY stereotype label (2-or-3-bracket, `class-stereotype.ts
    *  #resolveStyleStereotypeTags`) this classifier carries -- feeds
    *  `renderer-classifier-box.ts`'s `.tagname` `<style>` cascade lookup
@@ -425,3 +431,29 @@ export interface ClassGeometry {
    */
   sprites?: SpriteRegistry;
 }
+
+/**
+ * One drawing operation of a `json` leaf's entries area, in
+ * `TextBlockCucaJSon#drawU`'s OWN order (see
+ * `class-json-sizing.ts#buildJsonItems`). Every coordinate is
+ * box-relative, the same frame `rows[].y`/`indent` and `dividerYs` use.
+ *
+ * A separate, ordered list rather than more `dividerYs` entries because
+ * upstream's order is a pre-order traversal, not a Y-order: a nested
+ * table's `vline` is drawn between its parent's key text and its own first
+ * `hline`, and both share the parent row's Y. Same "this body owns its own
+ * draw order" dispatch `enhancedBody` established.
+ *
+ * @see ~/git/plantuml/.../cucadiagram/TextBlockCucaJSon.java:162-180 (object),
+ *      :213-224 (array)
+ */
+export type JsonBodyItem =
+  /** `ULine.hline(jsonTotalWidth)` — scoped to the emitting table's OWN
+   *  width, which is the parent's minus the parent's key column. */
+  | { readonly kind: 'hline'; readonly x: number; readonly y: number; readonly width: number }
+  /** `ULine.vline(height)` at `dx = width1` — ONE per OBJECT table (never
+   *  per row, unlike `TextBlockMap`; never at all for an array). */
+  | { readonly kind: 'vline'; readonly x: number; readonly y: number; readonly height: number }
+  /** A key or scalar-value cell. `row` is the SAME object that appears in
+   *  `ClassifierGeo.rows`, not a copy. */
+  | { readonly kind: 'text'; readonly row: ClassifierGeo['rows'][number] };
