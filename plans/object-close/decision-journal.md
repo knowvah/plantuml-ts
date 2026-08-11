@@ -19,6 +19,9 @@ this file from disk, never trust a remembered number.**
 | 2026-08-11 | T0 | `git -C .` is NOT protection against cwd drift — `checkout -b feat/object-close` landed in the JAVA reference repo | A prior `cd ~/git/plantuml` persisted in the shell; `.` resolved there. Restored `~/git/plantuml` to `dot-output` and deleted the stray branch (it held no commits — a duplicate pointer). Rule tightened to: absolute `-C <path>`, never `.` | `git -C ~/git/plantuml reflog`: `checkout: moving from dot-output to feat/object-close`, no commits on it |
 | 2026-08-11 | T0 | The class SVG census is ALSO reporting the stale-oracle artifact — 0 zero-diff of 721 | `test-results/dot-cache/class` was last written 2026-08-08 by `9b54513f`, which PREDATES the SVG-reduction merge `7c30f8ae`; same mechanism as the object finding. So the brief's "class SVG census: zero-diff set intact" gate is currently vacuous (0 → 0) | `git merge-base --is-ancestor 7c30f8ae 9b54513f` → false; census run: 0 diffs = 0 |
 | 2026-08-11 | T1 | Filed the stale-cache follow-up in `planning/mission-index.md` (SI16), NOT in `docs/graphviz-issues/TRACKER.md` as T1's text says | That tracker's own header restricts it to "one checklist item per issue file in this folder — nothing else", and a stale committed cache is not a `@knowvah/dot-engine` finding. Following T1 literally would have broken the tracker's stated invariant | `TRACKER.md:1-6`; the follow-up is cross-type infrastructure, which is what Phase C indexes |
+| 2026-08-11 | B4 | Landed M5. All four fixtures improved: `nulixu` 66→62, `sibika` 66→62, `sorisi` 59→49, `vocute` 66→62 | Threaded `classAttributeIconSize` into the glyph geometry. Real reductions, not floor artefacts — every one of the four already had ZERO non-numeric diffs, so no `childCount` barrier existed to lift | all five frozen counts unmoved; census 23/80, buckets unchanged 23/7/10/16/24 |
+| 2026-08-11 | B4 | Split the size into TWO resolvers because upstream uses it two ways | `iconSizeOf` evens first (`ensureEven`, `skin/VisibilityModifier.java:135,186-190`) and feeds every draw* helper; `iconBlockHeight` uses the RAW value because `calculateDimension` is `size + 1` (`:100-102`). An ODD override therefore shifts the glyph WITHIN a block one pixel taller than the glyph implies. Collapsing them into one number is the trap | unit test asserts 15 draws exactly as 14 |
+| 2026-08-11 | B4 | Also threaded the theme into `visibilityIconOriginY`, which the ledger did not name | The centring divides by the BLOCK height, so leaving it at the hardcoded 11 would have centred an overridden glyph against the default block. Upstream centres against `size + 1`, so the override must reach it. Two call sites updated | `iconBlockHeight` would otherwise have been dead code — lint caught it, which is how the omission surfaced |
 | 2026-08-11 | B3 | Landed M3's three sub-parts. Census 23/80 held; **the bucket distribution got marginally WORSE while fidelity improved** | 1-3 bucket 8→7, 31+ 23→24, because `bepafe-03-teda035` went 3→37 diffs. Verified decisively rather than accepted: those 37 are **35 identical 7.8px offsets + 2 identical 8.0px**, i.e. ONE uniform displacement of one entity, with non-numeric 1→0. Before, 3 diffs included a `childCount` saying "the DOM shape is wrong, I cannot compare below here". Now the DOM matches element-for-element | re-measured every riser myself; delta-value histogram per fixture |
 | 2026-08-11 | B3 | **The headline metric is actively misleading — second demonstration in two iterations** | Diff COUNT rises when a fix removes a `childCount` barrier and the comparator can finally descend. B1 showed it on `fusopu`/`vimavu`; B3 shows it on `bepafe` (3→37), `guzojo` (25→45) and `lisepi` (192→265). In every case the non-numeric count FELL or the risers resolved to one repeated delta. Ordering or reporting work by diff count would invert the truth | `satuco`'s two map entities are now byte-identical to the jar; `bepafe`'s json entity is element-for-element identical |
 | 2026-08-11 | B3 | `lisepi-64-mudo307` rose 192→265 and non-numeric 67→95 — NOT caused by B3 | Its newly-visible diffs are `@font-family`/`@font-size`/`@font-weight`/`@font-style`/`@textLength`/`@stroke` — i.e. its OWN already-audited mechanism (T3: `<style> object { FontSize 12 }` never reaches member rows), previously hidden behind the childCount block. Max delta unchanged at 17.306 | grouped the non-numeric paths; none is a map/json cell construct |
@@ -149,6 +152,47 @@ missing vline is a straight `childCount` divergence that also stops
 the `Point` path: the jar never draws a Point row's value text at all, and our
 `buildOneMapRow` already special-cases it.
 
+## B4 (M5) — diagnosis, written BEFORE any code change
+
+**Mechanism.** `skinparam classAttributeIconSize` (default 10,
+`skin/SkinParam.java:554-556`) sizes the member-row visibility glyph. Upstream
+uses it in TWO places with DIFFERENT arithmetic, and conflating them is the
+trap:
+
+- **Block dimension** — `VisibilityModifier#getUBlock`'s `calculateDimension`
+  returns `new XDimension2D(size + 1, size + 1)` (`skin/VisibilityModifier.java
+  :100-102`) using the RAW size.
+- **Drawn glyph** — `drawU` first does `size = ensureEven(size)`
+  (`:135`, helper at `:186-190`: an odd n becomes n−1) and only then dispatches,
+  so every shape draws from the EVENED size: square/circle `size - 4` at
+  `translate(x+2, y+2)` (`:178-183`), diamond/triangle `size - 2` at
+  `translate(x+1, y)` (`:192-209`).
+
+So for 10 → block 11, glyph 6; 20 → 21/16; 14 → 15/10; 12 → 13/8; 16 → 17/12.
+That reproduces all four fixture pairs the audit measured, and it is read from
+the Java rather than fitted to them.
+
+**Origin, ours.** `src/diagrams/class/class-visibility-icon.ts:68`
+(`VISIBILITY_ICON_SIZE = 10`, whose own doc comment already says "skinparam
+override not wired"), `:71` (`ICON_BLOCK_HEIGHT`), and the four draw helpers at
+`:159-199`, all of which hardcode that constant. We therefore draw a 6px glyph
+whatever the user asks for.
+
+**Causal chain.** Wrong glyph size ⇒ wrong `rect`/`ellipse`/`polygon` geometry
+in the member row ⇒ the four fixtures' numeric diffs. Render-only: it never
+reaches the DOT, which is why all four are already DOT-EQUAL and why no frozen
+count should move.
+
+**Ruled out.** Not a parsing gap — `classAttributeIconSize` already reaches
+`theme.colors.graph` (`skinparam-key-handlers.ts:151-157` citing
+`SkinParam.java:554-556`, wired at `skinparam-theme-builder.ts:40`). Not a
+colour or centring issue: `centeringDelta` (`:80-82`) derives from
+`ICON_BLOCK_HEIGHT` and will follow the size once it is threaded.
+
+**Found independently by two audits with disjoint fixture sets** —
+`audit-geometry-a.md` M4 and `audit-geometry-b.md` C4, same `file:line` on both
+sides. That is the strongest reach evidence this mission produced.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).
@@ -234,3 +278,4 @@ authoritative.
 | 2026-08-11 | B1 | 574 files / 12719 pass, 1 todo | clean | clean | clean | **object 74/80** (+16); class 689/711 · component 262/262 · usecase 93/93 · state 267/267 unmoved; census 23/80 held |
 | 2026-08-11 | B2 | 574 files / 12719 pass, 1 todo | clean | clean | clean | ALL FIVE unmoved (object 74/80, class 689/711, component 262/262, usecase 93/93, state 267/267); census 23/80, distribution identical |
 | 2026-08-11 | B3 | 574 files / 12726 pass, 1 todo | clean | clean | clean | ALL FIVE unmoved; census 23/80, buckets 23/7/10/16/24 (one fixture moved 1-3 → 31+, verified as a floor effect) |
+| 2026-08-11 | B4 | 574 files / 12733 pass, 1 todo | clean | clean | clean | ALL FIVE unmoved; census 23/80, buckets identical |

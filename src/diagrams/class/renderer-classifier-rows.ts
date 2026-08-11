@@ -77,7 +77,7 @@ export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number]
           row.visibilityIcon,
           row.visibilityIsField === true,
           geo.x + ROW_TEXT_LEFT_MARGIN,
-          visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme)),
+          visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme), theme),
           undefined,
           theme,
         )

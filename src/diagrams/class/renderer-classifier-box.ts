@@ -426,7 +426,7 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
     // (`class-visibility-icon.ts#renderVisibilityUrlBackground`'s own doc
     // comment -- `dasagu-52-vani172`/`fijali-69-pina030`).
     const iconOriginX = geo.x + ROW_TEXT_LEFT_MARGIN;
-    const iconOriginY = visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme));
+    const iconOriginY = visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme), theme);
     if (row.url !== undefined) {
       interleaved.push({
         y: row.y,
