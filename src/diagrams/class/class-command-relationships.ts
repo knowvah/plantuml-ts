@@ -117,6 +117,16 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
       // endpoint's own uid always precedes the link's), see
       // ast.ts#Relationship.creationIndex's doc comment.
       state.creationCounter.value += 1;
+      // B21/M20: an inverted link costs TWO ticks upstream, not one --
+      // `new Link(...)` takes one in its constructor (`abel/Link.java:135`)
+      // and `getInv()` constructs a SECOND (`:145-146`), which is the one
+      // that renders. Record the discarded first as a phantom so the dense
+      // re-numbering in `renderer-uid.ts` leaves the same hole, then stamp
+      // this link from the second.
+      if (rel.invertedLinkBurnsTick === true) {
+        rel.phantomSlot = true;
+        state.creationCounter.value += 1;
+      }
       rel.creationIndex = state.creationCounter.value;
       // G2 N9: `<path codeLine="...">` -- see ast.ts#Relationship.sourceLine's
       // doc comment.

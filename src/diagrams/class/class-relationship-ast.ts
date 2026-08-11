@@ -232,6 +232,16 @@ export interface Relationship {
    * Absent for every link with no `<<...>>` — the overwhelming majority.
    */
   stereotypeTags?: readonly string[];
+  /** B21/M20: parser-side marker that this is a link upstream INVERTS
+   *  (`ArrowInfo.upOrLeft` — `dir == LEFT || dir == UP`,
+   *  `CommandLinkClass.java:362-363`). `getInv()` constructs a SECOND `Link`
+   *  (`abel/Link.java:145-146`) and every `Link` ctor burns a `cpt1` tick
+   *  (`:135`), so such a link consumes TWO numbers and renders under the
+   *  second. `class-command-relationships.ts`, which owns the counter, turns
+   *  this into the existing {@link phantomSlot} — the discarded ctor is the
+   *  same phenomenon that flag already models. */
+  invertedLinkBurnsTick?: true;
+
   idEntity1FullId?: string;
   idEntity2FullId?: string;
   /**
@@ -252,7 +262,15 @@ export interface Relationship {
    * (entity1, entity2); if (existingLink == null) existingLink = new Link
    * (..., LinkDecor.NONE, LinkDecor.NONE, ...);` -- a REAL `Link` ctor call,
    * burning a real cpt1 slot, but never `addLink`ed, so it never manifests
-   * as an `EdgeGeo` of its own). Set on the FIRST edge
+   * as an `EdgeGeo` of its own).
+   *
+   * B21/M20 adds a SECOND producer of the identical phenomenon: a link
+   * upstream inverts (`getInv()`, `abel/Link.java:145-146`) constructs a
+   * real `Link` whose uid is discarded, immediately before the one that
+   * renders. Same burn, same position, so it sets this same flag rather
+   * than a parallel one — see `invertedLinkBurnsTick`.
+   *
+   * Set on the FIRST edge
    * (`class-assoc-couple.ts`'s `aEdge`) synthesised immediately after this
    * burn, when the couple's own A-B pair had NO subsumed explicit
    * association to reuse (`buvake-41-vulu531`'s `(A,B) .. C` with no prior

@@ -970,6 +970,48 @@ WITHOUT a prediction, in a commit message, and it survived a full gate run
 because nothing about the gates tests an explanation. The claim was
 load-bearing for whoever picks up B34 next, and it was wrong.
 
+## B21 (M20) — uid tick burned by getInv()
+
+**Mechanism.** `Link`'s constructor takes a tick of the diagram's shared
+`cpt1` counter unconditionally — `this.uid = cucaDiagram.getUniqueSequence(
+"lnk")` (`abel/Link.java:135`, `net/atmp/CucaDiagram.java:745-746`). `getInv()`
+builds a **second** `Link` (`Link.java:145-146`), so a link upstream inverts
+(`dir == LEFT || dir == UP`, `CommandLinkClass.java:362-363`) consumes TWO
+numbers and renders under the second. The first is never drawn, but every
+later link is numbered past it.
+
+`sajege-04-zuce784`'s middle link is `-le->`, so its two later links were each
+one low: `lnk6`/`lnk7` against the jar's `lnk7`/`lnk8`. Exactly two diffs, both
+`@id`, nothing else.
+
+**Landed by reusing what was already there.** I started to add an
+`invertedLinkPhantomIndex` field and a new `Ranked` branch, then found
+`Relationship.phantomSlot` already means precisely this — "this relationship's
+`creationIndex` was preceded by a discarded phantom counter slot", whose
+existing producer is the couple machinery's synthetic default `Link`: also a
+real ctor, also burning a real `cpt1` slot, also never `addLink`ed. Same
+phenomenon, same position (immediately before the rendered edge). So the fix is
+one branch in `class-command-relationships.ts` setting `phantomSlot` when the
+parser marks the link inverted, and `renderer-uid.ts` needed **no change** —
+the phantom-rank path it already had does the work.
+
+That is the second time this session the right implementation was to call
+something that existed (B7 reused `resolveStyleCascade`) rather than build a
+parallel mechanism. Worth noting because the ledger's own file:line pointer
+sent me at `renderer-uid.ts:145-233`, which is where the symptom is visible,
+not where the fix belongs.
+
+**Measured.** `sajege-04` **2 → 0**, census **31 → 32/80**, nothing else in the
+corpus moved. Ratcheted (31 pinned).
+
+**Frozen counts — all at the B31 baselines.** object DOT 73/80 · class DOT
+661/711 · component 262 · usecase 93 · state 264/267 · 317 class SVG goldens
+pass. This changes SVG `lnk` ids, which those goldens pin, so their passing is
+the load-bearing check here.
+
+**Quality gates.** `npm test` 574 files / 12760 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

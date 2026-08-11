@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-11T20:01:09.327Z",
+  "generatedAt": "2026-08-11T20:58:08.900Z",
   "fixtures": [
     {
       "slug": "baloca-83-nadu916",
@@ -403,9 +403,7 @@
       "slug": "sajege-04-zuce784",
       "type": "object",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[6]/@id"
+      "verdict": "conformant"
     },
     {
       "slug": "sarepa-89-cevi460",
@@ -483,18 +481,16 @@
       "slug": "style-stereotype-on-arrow-3",
       "type": "object",
       "dotEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 3,
-      "firstDiff": "svg/g[1]/g[3]/path[1]/@stroke",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
       "slug": "style-stereotype-on-arrow-7",
       "type": "object",
       "dotEqual": false,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 9.139,
-      "firstDiff": "svg/g[1]/g[3]/path[1]/@stroke",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@y"
     },
     {
@@ -534,7 +530,7 @@
     {
       "slug": "tusiri-92-catu943",
       "type": "object",
-      "dotEqual": true,
+      "dotEqual": false,
       "verdict": "diverged",
       "maxDelta": 159,
       "firstDiff": "svg/g[1][childCount]",
@@ -578,9 +574,8 @@
       "slug": "zebufu-01-pevo013",
       "type": "object",
       "dotEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 3,
-      "firstDiff": "svg/g[1]/g[3]/path[1]/@stroke",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {

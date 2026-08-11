@@ -476,6 +476,12 @@ export function parseRelationshipLine(line: string, nsSep: string | null = null,
       // is split here and each token cleaned the same way
       // `collectStyleTagNames` cleans a declaration's own tag.
       ...(stereotypeTags.length > 0 ? { stereotypeTags } : {}),
+      // B21/M20: upstream inverts on the direction WORD alone
+      // (`CommandLinkClass.java:362-363`), and the inversion costs a uid
+      // tick because `getInv()` constructs a second `Link`. `upOrLeft` is
+      // exactly that condition. Consumed by `class-command-relationships.ts`,
+      // which owns the counter.
+      ...(info.upOrLeft === true ? { invertedLinkBurnsTick: true as const } : {}),
     },
   );
 }
