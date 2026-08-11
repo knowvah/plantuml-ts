@@ -1,0 +1,25 @@
+{
+  "_doc": "Slugs whose svek DOT differs from the oracle's ONLY in edge-endpoint PORTS -- the unported RECTANGLE_HTML_FOR_PORTS row-port emission (upstream svek/SvekNode.java:269-311; port ids are \"p\"+MD5Hex(portName), svek/Ports.java:53-55). Upstream anchors an edge to a specific member ROW; this port emits a 3x3 shield table with a single PORT=\"h\" and anchors every edge to the whole node. Until 2026-08-11 the comparison discarded ports entirely and scored these EQUAL -- 20 object and 22 class fixtures. Making the gate port-aware (tests/oracle/svek-dot.ts#sortedPorts) surfaced them. A listed slug is NOT exempt from the gate: the suite asserts that portOk is the ONLY failing check, so any other regression on these fixtures still fails. ADD nothing here without that being true. DELETE an entry when the mechanism lands -- this list only shrinks. Object: plans/object-close/ledger.md M1+M4. Class: its own tracked mission, same mechanism, different corpus.",
+  "slugs": [
+    "diveje-52-xefe514",
+    "fusopu-05-loxo960",
+    "gubene-80-zume167",
+    "guzojo-14-muxa584",
+    "jaxere-74-cole479",
+    "kavako-54-zipa815",
+    "kiluja-96-pado371",
+    "lafemo-98-ruri220",
+    "lisepi-64-mudo307",
+    "lunike-70-xipi897",
+    "nitica-38-cere665",
+    "rocepa-35-gepo708",
+    "rozuxo-44-fudi093",
+    "ruloso-59-nato909",
+    "satuco-50-vusa163",
+    "sigado-12-rina240",
+    "sivapa-41-sebu112",
+    "sivime-00-gudo607",
+    "style-stereotype-on-arrow-7",
+    "vimavu-26-civo110"
+  ]
+}

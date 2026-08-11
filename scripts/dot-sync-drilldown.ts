@@ -23,6 +23,7 @@ export const CHECKS = [
   'minlenOk',
   'shapeOk',
   'labelOk',
+  'portOk',
   'clusterOk',
   'rankdirOk',
   'nodesepOk',
@@ -47,6 +48,9 @@ export function stripLayoutPragma(markup: string): string {
 }
 
 const shapesOf = (g: StructuralGraph): string[] => g.nodes.map((n) => n.shape).sort();
+/** Mirrors `svek-dot.ts#sortedPorts` — `-` marks an endpoint with no port. */
+const portsOf = (g: StructuralGraph): string[] =>
+  g.edges.flatMap((e) => [e.fromPort ?? '-', e.toPort ?? '-']).sort();
 const minlensOf = (g: StructuralGraph): number[] =>
   g.edges.map((e) => e.minlen).sort((x, y) => x - y);
 const clusterSizesOf = (g: StructuralGraph): number[] =>
@@ -71,6 +75,7 @@ const CHECK_DETAILS: Record<Check, CheckDetail> = {
   minlenOk: { label: 'minlen multiset', values: (o, c) => [minlensOf(o), minlensOf(c)] },
   shapeOk: { label: 'shape multiset', values: (o, c) => [shapesOf(o), shapesOf(c)] },
   labelOk: { label: 'label counts [label,tail,head,xlabel]', values: (o, c) => [labelCountsOf(o), labelCountsOf(c)] },
+  portOk: { label: 'edge endpoint ports', values: (o, c) => [portsOf(o), portsOf(c)] },
   clusterOk: { label: 'cluster-size list', values: (o, c) => [clusterSizesOf(o), clusterSizesOf(c)] },
   rankdirOk: { label: 'rankdir', values: (o, c) => [o.rankdir, c.rankdir] },
   nodesepOk: { label: 'nodesep (in)', values: (o, c) => [o.nodesep, c.nodesep] },

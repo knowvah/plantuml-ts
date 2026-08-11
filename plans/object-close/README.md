@@ -66,11 +66,22 @@ vitest failures.
 
 | Gate | Frozen at | Command |
 |---|---|---|
-| object DOT structural | 78/80 EQUAL | `npx tsx scripts/dot-sync-report.ts object` |
+| object DOT structural | **58/80 EQUAL** (was 78/80) | `npx tsx scripts/dot-sync-report.ts object` |
 | component DOT | 262/262 | `npx tsx scripts/dot-sync-report.ts component` |
-| usecase DOT | 90/90 | `npx tsx scripts/dot-sync-report.ts usecase` |
-| class DOT | 708/708 | `npx tsx scripts/dot-sync-report.ts class` |
+| usecase DOT | 93/93 | `npx tsx scripts/dot-sync-report.ts usecase` |
+| class DOT | **689/711** (was 711/711) | `npx tsx scripts/dot-sync-report.ts class` |
 | state DOT | 267/267 | `npx tsx scripts/dot-sync-report.ts state` |
+
+**Object and class were re-baselined on 2026-08-11 by maintainer ruling** —
+this is the one authorized movement of a frozen count in this mission. The DOT
+comparison discarded edge endpoint ports, scoring 20 object and 22 class
+fixtures EQUAL while they anchored every edge to the whole node where upstream
+anchors to a specific member row. Making the gate port-aware surfaced them; it
+did not cause them. Both sets are pinned in `oracle/goldens/{object,class}/
+port-backlog.json`, which is not an exemption — the suites assert `portOk` is
+those fixtures' ONLY failing check. The class fallout is tracked as SI17.
+The component/usecase denominators were also stale in the original table
+(93, not 90); they never moved.
 | class SVG census | zero-diff set intact, non-dropping | `npx tsx scripts/svg-conformance-census.ts class` |
 | description SVG census | 48-set intact | `npx tsx scripts/svg-conformance-census.ts component usecase` |
 | object SVG census | non-dropping | `npx tsx scripts/svg-conformance-census.ts object` |

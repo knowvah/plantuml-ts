@@ -37,6 +37,15 @@ const GOLDENS = join(
   '../../oracle/goldens/object',
 );
 
+/** Slugs whose DOT differs from the oracle's ONLY in edge-endpoint ports — the
+ *  unported row-port emission. See `port-backlog.json`'s own `_doc`; the
+ *  assertion below keeps every other check live for these fixtures. */
+const portBacklog: ReadonlySet<string> = new Set(
+  existsSync(join(GOLDENS, 'port-backlog.json'))
+    ? (JSON.parse(readFileSync(join(GOLDENS, 'port-backlog.json'), 'utf8')) as { slugs: string[] }).slugs
+    : [],
+);
+
 /** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-exact fixtures. */
 const sizeBacklog: Record<string, number> = existsSync(join(GOLDENS, 'size-backlog.json'))
   ? (JSON.parse(readFileSync(join(GOLDENS, 'size-backlog.json'), 'utf8')) as Record<string, number>)
@@ -89,10 +98,24 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — obj
         const failingChecks = Object.entries(diff)
           .filter(([k, v]) => k.endsWith('Ok') && v === false)
           .map(([k]) => k);
-        expect(
-          diff.structurallyEqual,
-          `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
-        ).toBe(true);
+        if (portBacklog.has(name)) {
+          // Known-unequal in edge ports ONLY (see port-backlog.json's `_doc`).
+          // Deliberately NOT a skip: the fixture stays fully gated on every
+          // other check, so a regression in node count, degree, minlen, shape,
+          // labels or clusters still fails here. `sizeConformantOk` is excluded
+          // because it is not a structural check -- it is the tolerant size
+          // metric, kept out of `structurallyEqual` by design and gated
+          // separately by `sizeBacklog` immediately below.
+          expect(
+            failingChecks.filter((k) => k !== 'sizeConformantOk'),
+            `${name}/${file}: port-backlog fixtures may fail portOk and NOTHING else`,
+          ).toEqual(['portOk']);
+        } else {
+          expect(
+            diff.structurallyEqual,
+            `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
+          ).toBe(true);
+        }
         // D4: node sizes pinned (rect nodes; plaintext nodes parse as 0x0 on
         // both sides so they cannot mask a rect-size regression). Backlog
         // fixtures ratchet downward; everything else must be exactly 0.

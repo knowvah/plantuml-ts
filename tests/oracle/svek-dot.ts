@@ -6,8 +6,32 @@
  * Svek emitter (`toSvekDot`) and then parsed — so the comparison exercises the
  * emitter and is genuinely apples-to-apples. Synthetic ids/colors are ignored;
  * we compare graph attrs, node count + shape multiset, edge topology + minlen +
- * label presence, and cluster membership. `width`/`height` are tolerant metrics
- * (Java vs plantuml-ts text measurement) — reported, not asserted.
+ * label presence + ENDPOINT PORTS, and cluster membership. `width`/`height` are
+ * tolerant metrics (Java vs plantuml-ts text measurement) — reported, not
+ * asserted.
+ *
+ * ## Why endpoint ports are compared (object-close, 2026-08-11)
+ *
+ * `parseEdges` used to discard the `:port` on both endpoints with a
+ * NON-capturing `(?::\w+)?`. That made an edge anchored to a member ROW
+ * compare equal to one anchored to the whole node — and those are not the same
+ * graph. Upstream emits map/json/port-bearing classifiers through
+ * `SvekNode#appendLabelHtmlSpecialForLink`
+ * (`svek/SvekNode.java:269-311`): `shape=plaintext` wrapping an HTML table with
+ * one `<TR PORT="p<md5>">` per member row, and edges anchored to those specific
+ * rows. This port emits a 3×3 shield table with a single `PORT="h"` and every
+ * edge as `shNNNN:h`. The old comparison scored that EQUAL.
+ *
+ * Measured when the blindness was found: **20 object and 22 class fixtures**
+ * were being reported structurally EQUAL while emitting a materially different
+ * graph. `state` and the description family are unaffected — no description
+ * golden uses a row port at all.
+ *
+ * Comparing the port id verbatim is the correct bar, not an over-specification:
+ * upstream builds it as `"p" + SignatureUtils.getMD5Hex(portName)`
+ * (`svek/Ports.java:53-55`), a pure function of the member text, so a faithful
+ * port reproduces the same hash. `-` stands for an endpoint with no port at
+ * all, which is itself a meaningful difference from `h`.
  *
  * Svek DOT is graphviz-emitter-regular, so focused regexes suffice rather than a
  * full DOT grammar. Clusters use a brace-stack scan that normalizes Svek's
@@ -25,6 +49,11 @@ export interface StructuralNode {
 export interface StructuralEdge {
   from: string;
   to: string;
+  /** Tail endpoint port (`shNNNN:<port>`), or undefined when the edge anchors
+   *  to the whole node. See this module's doc comment for why it is compared. */
+  fromPort: string | undefined;
+  /** Head endpoint port; same contract as {@link StructuralEdge.fromPort}. */
+  toPort: string | undefined;
   minlen: number;
   hasLabel: boolean;
   hasTailLabel: boolean;
@@ -63,12 +92,15 @@ function nodeShape(attrs: string): string {
 
 function parseEdges(dot: string): StructuralEdge[] {
   const edges: StructuralEdge[] = [];
-  const edgeRe = /(\w+)(?::\w+)?\s*->\s*(\w+)(?::\w+)?\s*\[([^\]]*)\]/g;
+  // Both ports are CAPTURED, not discarded — see this module's doc comment.
+  const edgeRe = /(\w+)(?::(\w+))?\s*->\s*(\w+)(?::(\w+))?\s*\[([^\]]*)\]/g;
   for (let m = edgeRe.exec(dot); m !== null; m = edgeRe.exec(dot)) {
-    const a = m[3]!;
+    const a = m[5]!;
     edges.push({
       from: m[1]!,
-      to: m[2]!,
+      to: m[3]!,
+      fromPort: m[2],
+      toPort: m[4],
       minlen: Number(attr(a, 'minlen') ?? '1'),
       hasLabel: /(?:^|,)label=</.test(a),
       hasTailLabel: /taillabel=</.test(a),
@@ -191,6 +223,12 @@ const labelCounts = (g: StructuralGraph): [number, number, number, number] => [
 const sortedClusterSizes = (g: StructuralGraph): number[] =>
   g.clusters.map((c) => c.memberCount).sort((a, b) => a - b);
 
+/** Sorted multiset of every edge ENDPOINT's port id, `-` for "no port". Node
+ *  ids are synthetic and deliberately not compared, so the ports are gathered
+ *  id-agnostically, exactly like {@link degreeSequence}. */
+const sortedPorts = (g: StructuralGraph): string[] =>
+  g.edges.flatMap((e) => [e.fromPort ?? '-', e.toPort ?? '-']).sort();
+
 /** Epsilon for numeric graph-attr comparisons: both sides print 6-decimal inches. */
 const NUM_ATTR_EPSILON = 1e-6;
 
@@ -221,6 +259,10 @@ export interface StructuralDiff {
   minlenOk: boolean;
   shapeOk: boolean;
   labelOk: boolean;
+  /** Edge endpoint ports match as a sorted multiset. Anchoring an edge to a
+   *  member ROW is a different graph from anchoring it to the whole node —
+   *  see this module's doc comment for the measured blindness this closes. */
+  portOk: boolean;
   clusterOk: boolean;
   /** rankdir: textual equality; absent==absent equal; absent vs present mismatches. */
   rankdirOk: boolean;
@@ -285,6 +327,7 @@ export function compareStructural(
   const minlenOk = eqNum(sortedMinlens(oracle), sortedMinlens(candidate));
   const shapeOk = eqStr(sortedShapes(oracle), sortedShapes(candidate));
   const labelOk = eqNum(labelCounts(oracle), labelCounts(candidate));
+  const portOk = eqStr(sortedPorts(oracle), sortedPorts(candidate));
   const clusterOk = eqNum(sortedClusterSizes(oracle), sortedClusterSizes(candidate));
   const rdOk = rankdirOk(oracle.rankdir, candidate.rankdir);
   const nsOk = numAttrOk(oracle.nodesep, candidate.nodesep);
@@ -298,6 +341,7 @@ export function compareStructural(
     minlenOk,
     shapeOk,
     labelOk,
+    portOk,
     clusterOk,
     rankdirOk: rdOk,
     nodesepOk: nsOk,
@@ -309,6 +353,7 @@ export function compareStructural(
       minlenOk &&
       shapeOk &&
       labelOk &&
+      portOk &&
       clusterOk &&
       rdOk &&
       nsOk &&
