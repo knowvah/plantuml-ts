@@ -245,11 +245,17 @@ function measureObjectFields(
   const iconReserve = hasIcon ? OBJECT_SMALL_ICON : 0;
   const textIndent = OBJECT_FIELD_MARGIN_X + iconReserve;
   const width = Math.max(...widths) + iconReserve + OBJECT_FIELD_MARGIN_X * 2;
-  const height = visibleMembers.length * theme.fontSize + OBJECT_FIELD_MARGIN_Y * 2;
+  // Sum of each row's OWN height, not `count * fontSize`:
+  // `MethodsOrFieldsArea#calculateDimensionOnlyMembers` advances
+  // `y += dim.getHeight()` per member (java:161-166). A plain text row's
+  // height equals the font size, so text-only bodies are unchanged.
+  const height = builds.reduce((a, b) => a + b.height, 0) + OBJECT_FIELD_MARGIN_Y * 2;
   const baselineOffset = baselineOffsetFor(fontSpec, measurer);
   const rows: ClassifierGeo['rows'] = [];
+  let rowTop = OBJECT_FIELD_MARGIN_Y;
   builds.forEach((build, i) => {
-    const y = OBJECT_FIELD_MARGIN_Y + i * theme.fontSize + baselineOffset;
+    const y = rowTop + baselineOffset;
+    rowTop += build.height;
     build.runs.forEach(({ atom, x }, runIndex) => {
       rows.push({
         text: atomsToPlainText([atom]),
