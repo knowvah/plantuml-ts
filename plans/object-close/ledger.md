@@ -476,7 +476,32 @@ We swap on the arrowhead decor, and un-swap only for extension/implementation.
   `babcfa94` established the `<<stereo>>`-to-style precedent — but that work is
   skinparam-side, so it is **precedent for the shape of the fix, not the fix**.
 
-## M9 — descriptive USymbol emitter: 4-of-37 icon coverage, hardcoded stroke-width, centred/`textLength`-less label, spurious spot badge — **reach 3** — **DEFERRED (D7)**
+## M9 — descriptive USymbol emitter — **reach 3** — **D7 DEFERRAL BASIS FALSIFIED (B31 turn, 2026-08-11)**
+
+> **The "~33 unported USymbol shapes" premise is false against the current
+> tree, and D7's confirmation rests on it.** Measured:
+>
+> - `src/core/decoration/symbol/` contains **30 `USymbol*` classes** plus
+>   `USymbols.ts` with **38 registrations** — the upstream set
+>   (`USymbols.java` has 37 `record(...)` calls) is ALREADY PORTED.
+> - The description engine already consumes it
+>   (`src/diagrams/description/leaf-sizing.ts:63` imports `USymbols`).
+> - `src/core/usymbol-shapes.ts`'s 4-entry `USYMBOL_ICONS` is a **separate,
+>   class-engine-only emitter** reached from exactly one call site
+>   (`src/diagrams/class/renderer.ts:96`).
+>
+> The shapes are not missing: the CLASS engine's descriptive-leaf path does not
+> route through the drawing seam the description engine already uses. That is a
+> wiring question, not a 33-shape port. Both fixtures are `allow_mixing`
+> diagrams enumerating one leaf per keyword — exactly what such a routing
+> covers. The stroke-width / `textLength` / spot-badge halves of the original
+> entry are unaffected and stand as filed.
+>
+> **Not unilaterally un-deferred** — D7 is a maintainer decision. But it was
+> authorized on a measurement that no longer holds, so it must be re-taken
+> before this row can close under D1.
+
+### Original M9 entry, retained — descriptive USymbol emitter: 4-of-37 icon coverage, hardcoded stroke-width, centred/`textLength`-less label, spurious spot badge — **reach 3** — **DEFERRED (D7)**
 
 - **Java:** `decoration/symbol/USymbols.java:60-95` (37 `record(...)` entries);
   `svek/image/EntityImageDescription.java:111-114`, `:171` (stroke from the
@@ -583,7 +608,30 @@ klimt seam, but not on the shared shape seam the class/object engine uses.
   the same path, the same `monospaced`/`monospace` pair. Single-line fix; no
   geometry moves.
 
-## M13 — the `{{ }}` embedded-diagram pipeline does not exist in this port — **reach 2** — **DEFERRED (D7)**
+## M13 — the `{{ }}` embedded-diagram pipeline — **reach 2** — **D7 DEFERRAL BASIS FALSIFIED (B31 turn, 2026-08-11)**
+
+> **The entry's load-bearing sentence — "There is no `EmbeddedDiagram`
+> equivalent anywhere in `src/`" — is false against the current tree.**
+> Measured:
+>
+> - `src/core/EmbeddedDiagram.ts` **exists**, carrying `EMBEDDED_START`/
+>   `EMBEDDED_END`, `getEmbeddedType`, `createAndSkip` and a
+>   `NestedDiagramRenderer` seam, its doc comment citing
+>   `EmbeddedDiagram.java` line-for-line.
+> - `src/core/klimt/creole/Display.ts:49,185` imports and uses it;
+>   `SheetBuilder.ts:84` documents the `getEmbeddedType` scan.
+> - It has a dedicated unit test, `tests/unit/core/EmbeddedDiagram.test.ts`.
+>
+> The pipeline was ported after this audit was written. What is NOT verified is
+> the last mile: `zicope-62-pica490` still shows **24 diffs with an 84px height
+> shortfall** (`@height` 92 vs the jar's 176) — the signature of a `{{ }}`
+> block reserving no nested-diagram space. The remaining work is "find what
+> sits between the ported scaffolding and a rendered nested diagram", a bounded
+> diagnosis rather than the whole-subsystem port D7 was authorized against.
+>
+> **Not unilaterally un-deferred**, same as M9.
+
+### Original M13 entry, retained — the `{{ }}` embedded-diagram pipeline does not exist in this port — **reach 2** — **DEFERRED (D7)**
 
 - **Java:** `sourceforge/plantuml/EmbeddedDiagram.java:75-77`, `:77-78`
   (`EMBEDDED_START = "{{"`); reached from `klimt/creole/Display.java:190-195`

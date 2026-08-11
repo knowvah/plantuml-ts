@@ -820,6 +820,47 @@ them the first place an audit should look. That audit is B33.
 **Quality gates.** `npm test` 574 files / 12760 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped.
 
+## D7 — both deferrals rest on claims that are false against the current tree
+
+Asked to "handle the D7 deferred", I checked the two entries against the code
+before acting on them, per CLAUDE.md's "'hard' and 'out of scope' are triggers
+to VERIFY, not skip". Both scope claims are stale, and D7's authorization
+quotes them.
+
+**M9 — "4-of-37 icon coverage", ~33 unported USymbol shapes.** False.
+`src/core/decoration/symbol/` holds **30 `USymbol*` classes** and a
+`USymbols.ts` registry with **38 registrations**; upstream's `USymbols.java`
+has 37 `record(...)` calls. The set is ported, and the DESCRIPTION engine
+already consumes it (`diagrams/description/leaf-sizing.ts:63`). The 4-entry
+`USYMBOL_ICONS` in `core/usymbol-shapes.ts` is a separate class-engine-only
+emitter with exactly one caller (`diagrams/class/renderer.ts:96`). So M9 is
+"the class engine does not route through the drawing seam that already
+exists", not "33 shapes are unported" — a wiring question of unknown but
+plainly smaller size.
+
+**M13 — "There is no `EmbeddedDiagram` equivalent anywhere in `src/`".**
+False. `src/core/EmbeddedDiagram.ts` exists with `EMBEDDED_START`/
+`EMBEDDED_END`, `getEmbeddedType`, `createAndSkip` and a
+`NestedDiagramRenderer` seam; `klimt/creole/Display.ts:49,185` uses it;
+`SheetBuilder.ts:84` documents the scan; it has its own unit test. It was
+ported after the audit was written. The unverified part is the last mile —
+`zicope-62-pica490` still shows 24 diffs and an 84px height shortfall
+(`@height` 92 vs 176), the signature of a `{{ }}` block reserving no space.
+
+**What I did and did not do.** I corrected both ledger entries in place, with
+the measurements, retaining the original text beneath each so the record of
+what was believed is intact. I did **not** un-defer either one: D7 is a
+maintainer decision (decisions.md:111-125, "Defer as tracked missions"), and
+withdrawing it on my own would be substituting my judgment for an
+authorization — the same boundary that made B31 wait for approval. What I can
+say is that the authorization was given against measurements that no longer
+hold, so it needs re-taking.
+
+I also did not start either port in this turn. Both now look smaller than
+filed, but "smaller than a whole subsystem" is not the same as "verified
+small", and beginning a re-scoped port at the end of a long turn is how the
+scope estimates that caused this got made in the first place.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).
