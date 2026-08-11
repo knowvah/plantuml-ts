@@ -66,10 +66,10 @@ vitest failures.
 
 | Gate | Frozen at | Command |
 |---|---|---|
-| object DOT structural | **73/80 EQUAL** (B31 re-baseline, was 74) (58 after B0's re-baseline, 78 under the old blind gate) | `npx tsx scripts/dot-sync-report.ts object` |
+| object DOT structural | **74/80 EQUAL** (T1/B33 re-baseline, was 73 at B31) (58 after B0's re-baseline, 78 under the old blind gate) | `npx tsx scripts/dot-sync-report.ts object` |
 | component DOT | 262/262 | `npx tsx scripts/dot-sync-report.ts component` |
 | usecase DOT | 93/93 | `npx tsx scripts/dot-sync-report.ts usecase` |
-| class DOT | **661/711** (B31 re-baseline, was 689 under the orientation-blind gate) | `npx tsx scripts/dot-sync-report.ts class` |
+| class DOT | **688/711** (T1/B33 re-baseline, was 661 at B31) | `npx tsx scripts/dot-sync-report.ts class` |
 | state DOT | **264/267** (B31 re-baseline, was 267) | `npx tsx scripts/dot-sync-report.ts state` |
 | class SVG census | zero-diff set intact, non-dropping | `npx tsx scripts/svg-conformance-census.ts class` |
 | description SVG census | 48-set intact | `npx tsx scripts/svg-conformance-census.ts component usecase` |

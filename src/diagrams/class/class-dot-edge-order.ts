@@ -41,37 +41,39 @@ export const HIERARCHICAL = new Set<RelationshipType>(['extension', 'implementat
  * `-left-`/`-up-` direction word inverts; the head decor never participates.
  *
  * This port instead normalizes `from`/`to` by the arrowhead
- * (`class-arrow-grammar.ts#resolveArrow`'s `decorSwap`), so `from`/`to` is
- * NOT upstream's order for any left-headed arrow. It does, however, already
- * carry upstream's order under another name: `idEntity1FullId`/
- * `idEntity2FullId` are picked by `upOrLeft` alone — exactly upstream's rule
- * — because the SVG id pair and the drawn path direction both needed it
- * (G2 N9/N30, see those fields' doc comments in `class-relationship-ast.ts`).
- * Emitting from that pair is therefore the re-mirror, not a correction:
- * upstream's `cl1`/`cl2` reach dot unmodified.
+ * (`class-arrow-grammar.ts#resolveArrow`'s `decorSwap`), so `from`/`to` is NOT
+ * upstream's order for any left-headed arrow. `Relationship.dotEdgeReversed`
+ * records that fact at parse time, and this function simply reads it.
  *
- * Until B6 this reversal was applied to `extension`/`implementation` only,
- * via `parentIsLinkEntity1` — a patch added 2026-08-08 for
+ * Until B6 the reversal was applied to `extension`/`implementation` only, via
+ * `parentIsLinkEntity1` — a patch added 2026-08-08 for
  * `class-inheritance-interface-assoc` (122px short). That covered the two
  * types whose ranking is most visible and left every association, aggregation
- * and composition emitting backwards. It was also wrong for a hierarchical
- * arrow that ALSO carries `-left-`/`-up-`: there `swapDirection` is
- * `decorSwap XOR upOrLeft` = false, so it declined to reverse and emitted the
- * opposite of upstream. The FullId pair gets that case right by construction.
+ * and composition emitting backwards.
+ *
+ * T1/B33 replaced B6's own mechanism. B6 inferred the reversal by comparing
+ * `idEntity1FullId`/`idEntity2FullId` against `from`/`to`, which holds only
+ * until endpoint resolution rewrites `from`/`to` — see the inline note below
+ * and `Relationship.dotEdgeReversed`'s doc comment.
  *
  * The `parentIsLinkEntity1` rule survives as the FALLBACK for relationships
- * built outside the arrow grammar, which carry no FullId pair — magma
- * chaining edges and note connectors. (Inline `extends`/`implements` sets the
- * pair itself, `class-declaration-parser.ts:261-287`, and so takes the
- * primary path; the two agree there.)
+ * built outside the arrow grammar, which carry no flag — magma chaining edges
+ * and note connectors. Inline `extends`/`implements` sets the flag itself
+ * (`class-declaration-parser.ts`), so it takes the primary path.
  */
 export function dotEdgeRunsReversed(rel: Relationship): boolean {
-  const e1 = rel.idEntity1FullId;
-  const e2 = rel.idEntity2FullId;
-  // A self-link (`e1 === e2`) has no orientation to restore; fall through
-  // rather than reading a reversal out of a degenerate comparison.
-  if (e1 !== undefined && e2 !== undefined && e1 !== e2) {
-    return e1 === rel.to && e2 === rel.from;
-  }
+  // T1/B33: read the flag the PARSER set, never infer it by comparing ids.
+  //
+  // B6 compared `idEntity1FullId`/`idEntity2FullId` against `from`/`to`. Those
+  // agree only until `class-command-relationships.ts:107-113` rewrites
+  // `from`/`to` through `resolveRelationshipEndpoint`, which the FullId pair
+  // never sees — so inside a `namespace`/`package`, or with an `as "alias"`
+  // declaration, the comparison reported "not reversed" AND returned early,
+  // never reaching the fallback below. That was 28 of the 32 fixtures in
+  // `direction-backlog.json`; `class/famizo-04-joxe063` emitted `d1 -> c1`
+  // against the oracle's `c1 -> d1`. See `Relationship.dotEdgeReversed`.
+  if (rel.dotEdgeReversed !== undefined) return rel.dotEdgeReversed;
+  // Relationships built outside the arrow grammar carry no flag — magma
+  // chaining edges and note connectors. Unchanged since B6.
   return HIERARCHICAL.has(rel.type) && rel.parentIsLinkEntity1 === true;
 }

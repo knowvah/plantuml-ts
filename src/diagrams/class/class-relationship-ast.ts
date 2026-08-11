@@ -232,6 +232,25 @@ export interface Relationship {
    * Absent for every link with no `<<...>>` — the overwhelming majority.
    */
   stereotypeTags?: readonly string[];
+  /**
+   * T1/B33: this link's dot edge must be emitted `to -> from` to run in
+   * upstream's own `Link` order.
+   *
+   * Computed at PARSE time as `swapDirection !== upOrLeft` — the `decorSwap`
+   * term `class-arrow-grammar.ts#resolveArrow` already derives and then folds
+   * away. It is exactly "this port normalized `from`/`to` by the arrowhead,
+   * so they are no longer upstream's `cl1`/`cl2`".
+   *
+   * B6 inferred the same fact by comparing `idEntity1FullId`/`idEntity2FullId`
+   * against `from`/`to`. That is unsound: `class-command-relationships.ts`
+   * rewrites `from`/`to` through `resolveRelationshipEndpoint` AFTER the
+   * parser stamps the FullId pair from raw ids, so inside a `namespace` or
+   * with an `as "alias"` declaration the two disagree and the comparison
+   * reports "not reversed". 28 of the 32 fixtures in `direction-backlog.json`
+   * were that bug. A flag cannot be desynchronised by a later rename.
+   */
+  dotEdgeReversed?: true;
+
   /** B21/M20: parser-side marker that this is a link upstream INVERTS
    *  (`ArrowInfo.upOrLeft` — `dir == LEFT || dir == UP`,
    *  `CommandLinkClass.java:362-363`). `getInv()` constructs a SECOND `Link`

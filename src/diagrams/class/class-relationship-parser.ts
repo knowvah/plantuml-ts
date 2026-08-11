@@ -265,6 +265,9 @@ interface OptionalRelFields {
   single?: true | undefined;
   swapDirection?: boolean | undefined;
   parentIsLinkEntity1?: boolean | undefined;
+  /** T1/B33: tri-state -- `withOptionalFields` drops only `undefined`, so an
+   *  explicit `false` survives, which is exactly what this field needs. */
+  dotEdgeReversed?: boolean | undefined;
 }
 
 /** Assemble a Relationship, omitting undefined optional fields (and an
@@ -481,6 +484,14 @@ export function parseRelationshipLine(line: string, nsSep: string | null = null,
       // tick because `getInv()` constructs a second `Link`. `upOrLeft` is
       // exactly that condition. Consumed by `class-command-relationships.ts`,
       // which owns the counter.
+      // T1/B33: `decorSwap` -- true when this port's arrowhead-driven
+      // normalization moved `from`/`to` away from upstream's `cl1`/`cl2`.
+      // Recorded now, while the raw arrow is still in hand; comparing ids
+      // later cannot survive endpoint resolution.
+      // Always set, including `false` -- see the field's doc comment: an
+      // omitted flag means "not from the arrow grammar" and routes to a
+      // fallback that would reverse this link for the wrong reason.
+      dotEdgeReversed: info.swapDirection !== info.upOrLeft,
       ...(info.upOrLeft === true ? { invertedLinkBurnsTick: true as const } : {}),
     },
   );

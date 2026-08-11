@@ -1156,6 +1156,59 @@ file's own placement convention and a comment saying why it cannot fire.
 **Quality gates.** `npm test` 574 files / 12762 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped.
 
+## T1 (B33 class arm) — the cause was B6's own inference, not a new defect
+
+**Mechanism.** `dotEdgeRunsReversed` decided orientation by comparing
+`idEntity1FullId`/`idEntity2FullId` against `rel.from`/`rel.to`. Those agree
+only until `class-command-relationships.ts:107-113` rewrites `from`/`to`
+through `resolveRelationshipEndpoint` — which the FullId pair never sees. So
+inside a `namespace`/`package`, or with an `as "alias"` declaration, the
+comparison reported "not reversed" **and returned early**, never reaching the
+`parentIsLinkEntity1` fallback.
+
+`class/famizo-04-joxe063` (`namespace net.sourceforge { c1 <|-- d1 }`) emitted
+`d1 -> c1` against the oracle's `c1 -> d1`. **28 of the 32** backlog fixtures
+contained `namespace`/`package`.
+
+**Fix.** The parser already computes the answer without comparing anything:
+`decorSwap = swapDirection !== upOrLeft`, the term `resolveArrow` derives and
+folds away. Stored as `Relationship.dotEdgeReversed` and read directly. No id
+comparison survives, so no later rename can desynchronise it.
+
+**The first cut of this fix regressed two fixtures, and the two-directional
+check caught it.** I initially followed the file's omit-when-false convention
+and set the flag only when true. That sends a parsed relationship with
+`decorSwap === false` to the `parentIsLinkEntity1` fallback, which keys on
+`swapDirection` — a DIFFERENT predicate. For an arrow carrying BOTH a
+direction word and a head decor (`HashMap [a1] <|-u-> [e] V1`: `decorSwap`
+false, `swapDirection` true) it reversed where upstream does not, breaking
+`coxose-20-nifu136` and `ririlu-13-zipi740`, neither of which was in the
+backlog. The field is now deliberately **tri-state** — `false` is meaningful,
+`undefined` means "not from the arrow grammar" and is the only case allowed to
+reach the fallback — with that reasoning in its own doc comment.
+
+Worth naming: B6's comparison and the omit-when-false convention were each
+individually reasonable, and both were wrong here for the same underlying
+reason — they inferred a fact that was already known at parse time.
+
+**Measured — movement is exactly the backlog emptying, nothing else.**
+
+| gate | before | after | delta |
+|---|---|---|---|
+| class DOT | 661/711 | **688/711** | +27 |
+| object DOT | 73/80 | **74/80** | +1 |
+| component / usecase | 262 / 93 | 262 / 93 | — |
+| state DOT | 264/267 | 264/267 | — (T2's arm) |
+| object SVG census | 34/80 | 34/80 | — |
+
+28 slugs removed from `direction-backlog.json` (27 class + 1 object); the
+class/object counts rose by exactly that. `class/besepi-37-rori892` remains —
+an `as "alias"` fixture that is NOT explained by this mechanism and needs its
+own diagnosis. The 3 state slugs are untouched by design.
+
+**Quality gates.** `npm test` 574 files / 12764 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).
