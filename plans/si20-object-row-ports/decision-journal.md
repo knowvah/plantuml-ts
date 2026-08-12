@@ -379,3 +379,105 @@ records the same red state for the same reason.
 table (`.agent-notes/si17-sametail-gate-blindness.md`), so T2 additionally
 checked the emitted `svek-1.dot` for `rozuxo` against the jar oracle
 directly: byte-identical whitespace-normalized, rows `36/14/18` and `50/14/4`.
+
+---
+
+### T3 — re-measure, retire the object port backlog (2026-08-12)
+
+**Verdict: `rozuxo-44-fudi093` closed. `port-backlog.json` is deleted, not
+shrunk — it held exactly one slug.**
+
+#### Re-measurement, independent of T2's own numbers
+
+`npx jiti scripts/dot-sync-report.ts object`, re-run from this commit before
+any edit:
+
+```
+object: 80 CLASS fixtures
+  structurally EQUAL (DOT in sync): 78 (98%)
+  no-candidate (we feed nothing):   2
+  oracle-blind (pragma layout):     1  [already inside the 78]
+  graph-count mismatch:             0
+```
+
+Matches T2's stated numbers exactly: `77 EQUAL + 1 portOk (rozuxo) + 2
+no-candidate` at T2's commit → `78 EQUAL + 2 no-candidate` here. No
+correction needed.
+
+#### `rozuxo` closed — verified beyond `portOk`, per the SI17-derived rule
+
+`portOk` alone would not be enough: it is an edge-endpoint comparison
+(`.agent-notes/si17-sametail-gate-blindness.md`) and could pass on a wrong
+node table. Ran `npx jiti scripts/dot-sync-report.ts --slug rozuxo-44-fudi093
+object` directly (not the aggregate report) and read the raw DOT text, not
+just the per-check booleans:
+
+- `[per-check diff]` reports "all structural checks pass
+  (structurallyEqual=true)" — every check in `StructuralDiff`
+  (`tests/oracle/svek-dot.ts:293-320`), not `portOk` in isolation.
+- The printed oracle and candidate DOT blocks are identical character-for-
+  character on both nodes' full `<TABLE>` markup — widths, all three row
+  `HEIGHT`s (`36/14/18` and `50/14/4`), both `PORT="p…"` md5 ids, and the
+  edge's `sh0006:p…->sh0007:p…` endpoints.
+- Diffed the tool's raw oracle/candidate text blocks with `diff`; the only
+  lines that differed were blank-line padding the reporter itself inserts
+  between sections, confirmed by inspection, not assumed.
+- Compared the live-rendered DOT against the **pinned golden**
+  `oracle/goldens/object/rozuxo-44-fudi093/svek-1.dot` (the file this task's
+  gate reads back on every future run) — byte-identical.
+
+This satisfies "measure the removal in isolation before believing the
+diagnosis": the check is against the node table itself, the thing `portOk`
+cannot see, not against T2's own prior claim of closure.
+
+#### What was deleted
+
+- `oracle/goldens/object/port-backlog.json` — the file, not an entry. It
+  held one slug (`rozuxo-44-fudi093`); removing it emptied the file per the
+  task's own step 2, so step 3 (delete-if-empty) applies in the same commit,
+  identical to SI17's B1/T3 precedent for the class equivalent.
+- `tests/oracle/object-dot-parity.test.ts`: the `portBacklog` const (its
+  `existsSync`/`JSON.parse` read of the now-deleted file) and its
+  `else if (portBacklog.has(name))` branch. The `directionBacklog` branch's
+  comment previously said "same shape as `portBacklog`" — updated to name
+  this task instead of a construct that no longer exists in the file, since
+  a dangling forward reference in a comment is not itself a code defect but
+  is misleading on read.
+
+No production code touched. `class-dot-parity.test.ts` was read (not
+written) to confirm the reference-removal shape SI17's T3 used for the class
+file, so this task's deletion matches an established pattern rather than
+inventing one.
+
+#### The honest ceiling, stated per ADR-6 — do not read past 78/80
+
+Object DOT is **78/80**, not clean. The remaining two are `no-candidate`
+fixtures — we feed nothing into the comparison for them, a separate,
+unrelated mechanism not touched by this task. `besepi-37-rori892` fails
+`directionOk` (part of the **class** corpus's 711, not object's 80) and is
+tracked under object-close B33, not this mission. Nothing in this entry
+should be read as "the object corpus is clean" — 2/80 remain open by a
+mechanism this task did not touch, and 1/80 of the 78 EQUAL is oracle-blind
+(passes because the jar dumps no DOT to disagree with, not because it was
+verified against one).
+
+#### No slug added to any backlog
+
+Confirmed by inspection of every diff in this commit: the only backlog
+mutation is the deletion of `oracle/goldens/object/port-backlog.json` in
+full. `direction-backlog.json` and `size-backlog.json` (object) were not
+opened for writing. No collateral damage from T2 was found — the closure
+matched T2's own claim exactly, gate-side and byte-side.
+
+#### Gates, unpiped, exit codes read directly
+
+| Gate | Command | Result |
+|---|---|---|
+| test | `npm test` | `Test Files 577 passed (577)`, `Tests 12811 passed \| 1 todo (12812)`, exit 0 |
+| typecheck | `npm run typecheck` | exit 0 |
+| lint | `npm run lint` | exit 0 |
+| build | `npm run build` | exit 0 (vite build succeeded; the printed `TS2591`/`TS2503` diagnostics are vite-plugin-dts's isolated-declaration pass over `src/core/include-resolver-node.ts`, a file outside this task's write-set and unmodified by it — pre-existing, not introduced here) |
+
+Deleting the pin is what turned `npm test` from T2's documented RED
+(`rozuxo … expected [] to deeply equal [ 'portOk' ]`) to green — no other
+change was needed, confirming T2 already landed the full mechanism.
