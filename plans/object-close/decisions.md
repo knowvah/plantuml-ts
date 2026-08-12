@@ -124,6 +124,52 @@ pipeline (`zicope-62-pica490`, `zuvila-56-nuda425`).
 owner, never an effort excuse — the standing CLAUDE.md bar. Everything not
 deferred under this decision is fixed in batch-2.
 
+> ## D7 RE-TAKEN, 2026-08-11 (mission `direction-close`, T4/T5)
+>
+> The authorization above was given against two claims that were **false when
+> made or false by the time they were quoted**, and both are now replaced by
+> measurement. The deferral itself still stands — but for different, smaller,
+> and actually-stated reasons.
+>
+> **M9 — "~33 unported USymbol shapes" was wrong; nothing is unported.**
+> `src/core/decoration/symbol/` holds 30 `USymbol*` classes and a 38-entry
+> registry against upstream's 37 `record(...)` calls, and the description
+> engine already draws through them. More: SI14 T4 already built the
+> class-engine **render-side bridge** to `EntityImageDescription.drawU`
+> (`class/renderer-usymbol-entity.ts`), and class **sizing** already routes
+> descriptive leaves to the same place
+> (`class-layout-generic-classifier.ts#tryMeasureDescriptionLeaf`). The bridge
+> is symbol-agnostic apart from ONE expression (`symbolKeyword`) and its
+> dispatch guard.
+>
+> Measured by spike (applied, measured, reverted): widening those two
+> expressions takes `gapisu-00-celo011`'s NON-NUMERIC diffs **31 → 21** — the
+> DOM moves structurally closer — while total diffs rise 168 → 297, the
+> familiar count-inversion when a `childCount` barrier lifts and the
+> comparator can finally descend. So the direction is right and the remaining
+> work is **per-symbol conformance across ~37 symbols on two 165+-diff
+> fixtures**, plus a runtime keyword guard (`ClassifierGeo.usymbol` is
+> `string`; the bridge wants the `USymbol` union). That is more than one
+> iteration, so it stays deferred — as a conformance drill, NOT a port.
+>
+> **M13 — "no `EmbeddedDiagram` equivalent anywhere in `src/`" was wrong; the
+> plumbing is complete and invoked.** `src/core/EmbeddedDiagram.ts` exists with
+> `EMBEDDED_START`/`END`, `getEmbeddedType` and `createAndSkip`, and it is
+> CALLED — `klimt/creole/legacy/CreoleParser.ts:341` and
+> `cucadiagram/MethodsOrFieldsArea.ts:139`.
+>
+> What is missing is one thing, precisely: **no producer of a
+> `NestedDiagramRenderer` exists anywhere in `src/`.** Every reference is a
+> type declaration or a pass-through, and `MethodsOrFieldsArea.ts:133-138`
+> throws an explicit "deferred per SI1/ADR-2" when it meets an embedded block
+> without one. The remaining work is implementing recursive nested-diagram
+> render-and-measure and wiring it at the engine entry points — genuinely large
+> and genuinely separable, which is what D7 is for.
+>
+> **Net:** both deferrals survive, on evidence this time. M9 is a bounded
+> conformance drill over an existing seam; M13 is one missing implementation
+> behind finished plumbing.
+
 ---
 
 ## D4 — The harness gets a freshness guard

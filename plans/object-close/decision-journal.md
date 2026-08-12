@@ -1292,6 +1292,47 @@ reproduces on the same input without claiming it is the same cause.
 
 **No frozen count moved** — nothing executable changed.
 
+## T4/T5 (D7) — both spikes measured; both deferrals survive, on evidence
+
+The instruction was re-scope by measurement, then implement what fits. Neither
+fits, but both are now specified in a way they never were.
+
+**M9 — spike applied, measured, reverted.** The bridge is symbol-agnostic
+apart from one expression: `renderer-usymbol-entity.ts:80`'s
+`symbolKeyword = kind === 'usecase' ? 'usecase' : 'actor'`, plus the dispatch
+guard in `renderer.ts`. SI14 T4 had already built the render-side path to
+`EntityImageDescription.drawU`, and sizing already routes descriptive leaves
+there (`tryMeasureDescriptionLeaf`). So nothing is unported and no seam is
+missing.
+
+Widening both expressions moved `gapisu-00-celo011`'s **non-numeric diffs
+31 → 21** while total diffs rose 168 → 297. That is the count-inversion B3
+recorded: the DOM got structurally closer, so the comparator descended into
+numeric differences it previously could not reach. Directionally right, not a
+regression — and it also surfaced a type error (`ClassifierGeo.usymbol` is
+`string`, the bridge wants the `USymbol` union), so a runtime keyword guard is
+required.
+
+Remaining work: per-symbol conformance across ~37 symbols on two fixtures
+carrying 165+ diffs each. More than one iteration ⇒ re-filed, and re-labelled
+from "port 33 shapes" to "conformance drill over an existing seam". Experiment
+reverted; the tree carries no M9 change.
+
+**M13 — read, not guessed.** The plumbing is complete AND invoked:
+`CreoleParser.ts:341` and `MethodsOrFieldsArea.ts:139` both call
+`EmbeddedDiagram.createAndSkip`. Exactly one thing is missing — **no producer
+of a `NestedDiagramRenderer` exists anywhere in `src/`**; every reference is a
+type or a pass-through, and `MethodsOrFieldsArea.ts:133-138` throws an explicit
+"deferred per SI1/ADR-2" when it meets an embedded block without one. The
+remaining work is recursive nested-diagram render-and-measure plus wiring at
+the engine entry points. Genuinely large, genuinely separable ⇒ stays deferred.
+
+**`decisions.md`'s D7 is corrected in place** with both measurements, as the
+plan required whichever way the spikes went. The deferral now rests on numbers
+rather than on two claims that were false against the tree.
+
+**No executable change; no frozen count moved.**
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

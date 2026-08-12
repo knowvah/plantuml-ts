@@ -506,7 +506,7 @@ We swap on the arrowhead decor, and un-swap only for extension/implementation.
   `babcfa94` established the `<<stereo>>`-to-style precedent — but that work is
   skinparam-side, so it is **precedent for the shape of the fix, not the fix**.
 
-## M9 — descriptive USymbol emitter — **reach 3** — **D7 DEFERRAL BASIS FALSIFIED (B31 turn, 2026-08-11)**
+## M9 — descriptive USymbol emitter — **reach 3** — **D7 RE-TAKEN on measurement (T4, 2026-08-11): still deferred, as a per-symbol CONFORMANCE DRILL over an existing seam — not a port**
 
 > **The "~33 unported USymbol shapes" premise is false against the current
 > tree, and D7's confirmation rests on it.** Measured:
@@ -638,7 +638,7 @@ klimt seam, but not on the shared shape seam the class/object engine uses.
   the same path, the same `monospaced`/`monospace` pair. Single-line fix; no
   geometry moves.
 
-## M13 — the `{{ }}` embedded-diagram pipeline — **reach 2** — **D7 DEFERRAL BASIS FALSIFIED (B31 turn, 2026-08-11)**
+## M13 — the `{{ }}` embedded-diagram pipeline — **reach 2** — **D7 RE-TAKEN on measurement (T5, 2026-08-11): still deferred; plumbing is complete and invoked, the ONE missing piece is a `NestedDiagramRenderer` producer**
 
 > **The entry's load-bearing sentence — "There is no `EmbeddedDiagram`
 > equivalent anywhere in `src/`" — is false against the current tree.**
