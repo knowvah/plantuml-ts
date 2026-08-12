@@ -70,7 +70,7 @@ vitest failures.
 | component DOT | 262/262 | `npx tsx scripts/dot-sync-report.ts component` |
 | usecase DOT | 93/93 | `npx tsx scripts/dot-sync-report.ts usecase` |
 | class DOT | **688/711** (T1/B33 re-baseline, was 661 at B31) | `npx tsx scripts/dot-sync-report.ts class` |
-| state DOT | **264/267** (B31 re-baseline, was 267) | `npx tsx scripts/dot-sync-report.ts state` |
+| state DOT | **267/267** (T2/B33 — was 264 at B31; the 3 direction failures were a missing engine port, not a defect budget) | `npx tsx scripts/dot-sync-report.ts state` |
 | class SVG census | zero-diff set intact, non-dropping | `npx tsx scripts/svg-conformance-census.ts class` |
 | description SVG census | 48-set intact | `npx tsx scripts/svg-conformance-census.ts component usecase` |
 | object SVG census | non-dropping — **34/80** after B22 (was 23 at T1) | `npx tsx scripts/svg-conformance-census.ts object` |

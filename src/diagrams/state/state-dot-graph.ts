@@ -208,7 +208,20 @@ function buildDotEdges(
       ...edgeLabelAttrs(t, font, measurer),
     };
     if (theme.linetype === 'ortho') moveLabelToXlabel(attributes);
-    return { id: `edge-${i}`, from: endpointId(t.from, true), to: endpointId(t.to, false), attributes };
+    // T2/B33: upstream inverts the Link when the arrow carries a `left`/`up`
+    // direction word -- `statediagram/command/CommandLinkStateCommon.java
+    // :205-206`, `if (dir == Direction.LEFT || dir == Direction.UP) link =
+    // link.getInv();` -- the SAME rule `CommandLinkClass.java:362-363` applies
+    // to class. dot ranks on edge direction, so emitting the un-inverted order
+    // put `susena-02-gusa448` and `xupine-90-cupu906`'s targets on the wrong
+    // rank. The reverse-arrow form (`B <-- A`) is NOT handled here: its
+    // endpoints are already swapped at parse time, which is this port's
+    // equivalent of `CommandLinkStateReverse#getDefaultDirection`'s LEFT
+    // default (`CommandLinkStateReverse.java:77-79`).
+    const inverted = t.direction === 'left' || t.direction === 'up';
+    const tail = inverted ? t.to : t.from;
+    const head = inverted ? t.from : t.to;
+    return { id: `edge-${i}`, from: endpointId(tail, true), to: endpointId(head, false), attributes };
   });
 }
 

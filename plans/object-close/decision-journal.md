@@ -1209,6 +1209,47 @@ own diagnosis. The 3 state slugs are untouched by design.
 **Quality gates.** `npm test` 574 files / 12764 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped.
 
+## T2 (B33 state arm) — the state engine never had the inversion at all
+
+**Mechanism.** Upstream applies the identical rule in the state command:
+`statediagram/command/CommandLinkStateCommon.java:205-206`,
+`if (dir == Direction.LEFT || dir == Direction.UP) link = link.getInv();` —
+the same line as `CommandLinkClass.java:362-363`. Our state engine parsed the
+direction word (`state-transitions.ts:52` `ARROW_DIRECTION` →
+`TransitionDirection`) and used it ONLY for positioning
+(`state-dot-graph.ts:153`); the emitted edge kept source order.
+
+**Both halves were needed, and the jar proved the second one.** After
+inverting the edge, state DOT went 264 → **267/267**. But `getInv()`
+CONSTRUCTS a second `Link`, and every `Link` ctor burns a `cpt1` tick
+(`abel/Link.java:135,145-146`) — B21's mechanism, inherited here because it is
+the same constructor. `susena-02-gusa448`'s jar link uids are
+`lnk3, lnk5, lnk8, lnk11, lnk13`; the gaps sit exactly at its `-left-` and
+`-up-` transitions. We emitted `lnk3, 5, 7, 9, 11`. Burning the tick at
+`state-link-add.ts#emitTransition` reproduces the jar's sequence exactly.
+
+Unlike class, state keeps RAW `creationIndex` values with no dense re-packing
+(`ast.ts#Transition.creationIndex`), so advancing the counter is the whole
+fix — no phantom rank is required.
+
+**The reverse-arrow form is deliberately untouched.** `B <-- A` already swaps
+its endpoints at parse time, which is this port's equivalent of
+`CommandLinkStateReverse#getDefaultDirection()` returning `Direction.LEFT`
+(`CommandLinkStateReverse.java:77-79`). Handling it here too would invert it
+twice.
+
+**Measured.** state DOT **264 → 267/267 (100%)**, direction failures 3 → 0,
+`direction-backlog.json` emptied for state. All other gates unchanged: object
+74/80 · class 688/711 · component 262 · usecase 93 · object census 34/80.
+
+**B33 is now closed except one fixture.** `class/besepi-37-rori892` remains
+quarantined — an `as "alias"` class fixture that T1's mechanism does not
+explain. Notably `state/sagica-63-godi019`, also alias-bearing, was fixed by
+T2, so the two are not one cause.
+
+**Quality gates.** `npm test` 574 files / 12764 tests, exit 0 · `typecheck`
+exit 0 · `lint` exit 0 · `build` exit 0. None piped.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).
