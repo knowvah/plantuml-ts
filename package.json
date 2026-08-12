@@ -82,5 +82,11 @@
     "vite-plugin-dts": "^5.0.3",
     "vitepress": "^1.6.4",
     "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "vitepress": {
+      "vite": "^7.3.6",
+      "@vitejs/plugin-vue": "^6.0.0"
+    }
   }
 }

@@ -8,43 +8,41 @@ This file records what is redistributed and under which terms. It is a factual
 attribution notice, not legal advice.
 
 ================================================================================
-Components inlined into the published bundle (dist/)
+Runtime dependencies — imported by dist/, NOT contained in it
 ================================================================================
 
-@knowvah/dot-engine  v1.0.0
+All three are listed in this package's `dependencies` and are marked external
+in vite.config.ts, so `dist/plantuml-ts.js` and `dist/plantuml-ts.cjs` import
+them at runtime rather than carrying their code. npm installs them alongside
+this package, and each reaches the consumer under its own license, from its
+own publisher.
+
+@knowvah/dot-engine
     License:  Eclipse Public License 2.0 (EPL-2.0)
     Source:   https://github.com/knowvah/dot-engine
     Full text: https://www.eclipse.org/legal/epl-2.0/
                and node_modules/@knowvah/dot-engine/LICENSE
 
-    The graph layout engine. It is a TypeScript port of Graphviz's dot layout
-    (see also Graphviz below, from which it derives). It is bundled directly
-    into dist/plantuml-ts.js and dist/plantuml-ts.cjs -- the published artifact
-    contains this code rather than importing it at runtime.
+    The graph layout engine, a TypeScript port of Graphviz's dot layout (see
+    Graphviz below, from which it derives).
 
     EPL-2.0 is a weak, file-level copyleft: obligations attach to the
     EPL-covered files and their modifications, not to a larger work that merely
-    combines with them. Source for this component is available at the URL
-    above.
+    combines with them. Source is available at the URL above. Because this
+    package depends on the component rather than redistributing its code, the
+    EPL terms are satisfied by the component's own distribution.
 
 jsonc-parser
     License:  MIT
     Source:   https://github.com/microsoft/node-jsonc-parser
 
-    JSON-with-comments parsing, used by the @startjson diagram path. Bundled
-    directly into dist/ as above.
-
-================================================================================
-Components declared as dependencies but NOT inlined
-================================================================================
+    JSON-with-comments parsing, used by the @startjson diagram path.
 
 katex
     License:  MIT
     Source:   https://github.com/KaTeX/KaTeX
 
-    Math typesetting for <latex>/<math> creole. It is marked external in
-    vite.config.ts, so dist/ imports it at runtime rather than containing it.
-    Consumers receive it as an ordinary npm dependency under its own license.
+    Math typesetting for <latex>/<math> creole.
 
 ================================================================================
 Upstream works this project ports or derives from
