@@ -9,7 +9,11 @@ export default defineConfig({
   plugins: [
     dts({
       include: ['src'],
-      rollupTypes: true,
+      // vite-plugin-dts 5 re-bases onto `unplugin-dts` and renames
+      // `rollupTypes` to `bundleTypes`. Same behaviour: roll the emitted
+      // declarations up into the single dist/plantuml-ts.d.ts that
+      // package.json's `types` points at.
+      bundleTypes: true,
     }),
   ],
   build: {

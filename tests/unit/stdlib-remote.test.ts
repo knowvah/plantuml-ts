@@ -117,8 +117,10 @@ describe('remoteStdlib -- fetch failure (criterion 4)', () => {
   });
 
   it('a rejected fetch is not cached -- a subsequent call retries rather than replaying it', async () => {
+    // Vitest 4 changed `vi.fn`'s type parameter from `<Args, Return>` to the
+    // whole function signature (`Mock<T extends Procedure>`).
     const fetcher = vi
-      .fn<[string], Promise<string>>()
+      .fn<(url: string) => Promise<string>>()
       .mockRejectedValueOnce(new Error('offline'))
       .mockResolvedValueOnce('sprite $ban [...] endsprite');
     const bundle = remoteStdlib({ manifest: TUPADR3, baseUrl: 'https://example.com/tupadr3', fetcher });
