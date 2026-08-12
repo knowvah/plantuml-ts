@@ -439,7 +439,7 @@ export function classifierPortShortNames(
 /**
  * T2 (SI17): {@link classifierPortShortNames}, ONE call per `LIKE_CLASS_KINDS`
  * leaf rather than per-edge, indexed by classifier id -- mirrors
- * `class-layout-helpers.ts#shieldedClassifierIds`'s own "precompute once
+ * `class-shield-helpers.ts#shieldedClassifierIds`'s own "precompute once
  * over `ast.relationships`" precedent. Every other kind is excluded: `map`'s
  * row bands are `mapPortRows`' own concern, and no other kind has a
  * row-port producer yet (see `applyShapeAndPorts`'s doc comment). Consumed
