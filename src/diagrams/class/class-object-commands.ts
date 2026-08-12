@@ -34,6 +34,11 @@ import type { Classifier, Member, Visibility } from './ast.js';
 import { parseUrlBracket } from './class-url.js';
 import { resolveReference } from './class-namespace.js';
 import { ensureClassifier, type ParseState } from './parser.js';
+// The canonical `' = '` spelling is shared with `class-object-sizing.ts
+// #formatObjectMemberText`, the other half of the round-trip; it lives in the
+// leaf `class-object-display.ts` because this module is in an import cycle
+// with `parser.ts`. See that constant's own doc comment.
+import { CANONICAL_OBJECT_SEPARATOR } from './class-object-display.js';
 
 // ---------------------------------------------------------------------------
 // Grammar fragments (NameAndCodeParser.nameAndCode() + ColorParser.exp1())
@@ -297,11 +302,6 @@ function withVisibilityFlag(member: Omit<Member, 'visibilityExplicit'>, explicit
  * `Member | null` return type) when neither shape matches — the caller
  * falls back to a raw display row (Bodier never rejects a line).
  */
-/** The `name = value` spelling `formatObjectMemberText` reconstructs when a
- *  member carries no `typeSeparator` -- the object analogue of the class
- *  parser's `': '` (`class-member-parser.ts#CANONICAL_TYPE_SEPARATOR`). */
-const CANONICAL_OBJECT_SEPARATOR = ' = ';
-
 /** Upstream stores a member's display line VERBATIM (`Member`'s constructor
  *  trims only the ends, via `StringUtils.trin`) and `getDisplay(false)` hands
  *  that same string back, so `a=1` must not come back out as `a = 1`. This

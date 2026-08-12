@@ -47,7 +47,7 @@ import { measureEnhancedBody } from './class-body-enhanced-layout.js';
 import type { Dim } from './class-object-map-header.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
 import { floorAtMinimumWidth, objectBodyReportsPorts } from './class-object-map-sizing.js';
-import { objectDisplayText } from './class-object-display.js';
+import { objectDisplayText, CANONICAL_OBJECT_SEPARATOR } from './class-object-display.js';
 import { buildObjectMemberRow } from './class-object-member-creole.js';
 import type { ObjectMemberRow } from './class-object-member-creole.js';
 import { atomsToPlainText } from './class-member-creole.js';
@@ -186,7 +186,7 @@ export function formatObjectMemberText(
     member.rawDisplay !== undefined
       ? member.rawDisplay
       : member.type !== undefined
-        ? `${member.name}${member.typeSeparator ?? ' = '}${member.type}`
+        ? `${member.name}${member.typeSeparator ?? CANONICAL_OBJECT_SEPARATOR}${member.type}`
         : member.name;
   return raw.includes('\\t') ? raw.replace(/\\t/g, '\t') : raw;
 }
