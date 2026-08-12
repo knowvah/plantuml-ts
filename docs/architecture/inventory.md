@@ -6,7 +6,7 @@ upstream reference it ports).
 
 | Repo | Language | Runtime | Framework | Database | Key Deps | Entry | Notes |
 |------|----------|---------|-----------|----------|----------|-------|-------|
-| plantuml-ts | TypeScript 5.4 | Node 18+ / browser (ESM) | Vite 5 lib build, Vitest 1 | — | graphviz-ts (file dep), katex 0.16, jsonc-parser 3 | `src/index.ts` (`render`/`renderSync`/`renderAll`) | Pure-SVG PlantUML port; no DOM/canvas/async in core |
+| plantuml-ts | TypeScript 6.0 | Node 18+ / browser (ESM) | Vite 5 lib build, Vitest 1 | — | graphviz-ts (file dep), katex 0.16, jsonc-parser 3 | `src/index.ts` (`render`/`renderSync`/`renderAll`) | Pure-SVG PlantUML port; no DOM/canvas/async in core |
 | graphviz-ts | TypeScript 6.0 | Node 26.3.1 (engines) / browser (ESM) | esbuild bundle, Vitest 4, Peggy parser | — | none (zero runtime deps) | `src/index.ts` (`renderSvg`, `parse`, `GvcContext`) | Faithful port of Graphviz 2.38 C; DOT layout engine consumed by plantuml-ts |
 | plantuml | Java (upstream ref) | JVM (Gradle Kotlin DSL) | Gradle, TeaVM | — | (upstream Java libs) | `net.sourceforge.plantuml.Run` (CLI) | Reference implementation being ported; v1.2026.7beta3, ~3,656 `.java` files; **not built here** |
 

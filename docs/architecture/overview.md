@@ -79,7 +79,7 @@ pipeline once per `@start…@end` block.
 
 | Repo | Language | Runtime | Framework | Database | External deps |
 |------|----------|---------|-----------|----------|---------------|
-| plantuml-ts | TypeScript 5.4 | Node 18+ / browser (ESM) | Vite 5, Vitest 1, Playwright | — | graphviz-ts, katex, jsonc-parser |
+| plantuml-ts | TypeScript 6.0 | Node 18+ / browser (ESM) | Vite 5, Vitest 1, Playwright | — | graphviz-ts, katex, jsonc-parser |
 | graphviz-ts | TypeScript 6.0 | Node 26.3.1 / browser (ESM) | esbuild, Vitest 4, Peggy | — | none (zero runtime deps) |
 | plantuml | Java | JVM | Gradle (Kotlin DSL), TeaVM | — | upstream Java libraries |
 
