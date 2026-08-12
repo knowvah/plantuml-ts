@@ -378,6 +378,12 @@ function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredCla
   return {
     width, height: title.height + enhancedBody.height, rows: patchedHeaderRows,
     dividerYs: [title.height], enhancedBody,
+    // B35/M40: an enhanced body is upstream `BodyEnhanced1`, whose
+    // `decorate` wraps every block in `TextBlockUtils.withMargin(block,
+    // getMarginX() = 6, 4)` (`BodyEnhancedAbstract.java:106-113`) -- a real
+    // `TextBlockMarged`, so its `UEmpty` reservation exists and spans the
+    // body's own full width. See `class-ink-box.ts#addRectInk`.
+    bodyInkWidth: enhancedBody.width,
   };
 }
 
@@ -419,6 +425,16 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
     width, height, rows,
     dividerYs: showFields ? [title.height] : [],
     ...(emptyFieldPlaceholder ? { emptyFieldPlaceholder: true as const } : {}),
+    // B35/M40: only a POPULATED field list is a real `BodyFactory.create1`
+    // body, whose `decorate` wraps it in a `TextBlockMarged` that draws the
+    // `UEmpty` reservation (`BodyEnhancedAbstract.java:106-113`). Both empty
+    // states draw NO `UEmpty` at all and so reserve zero body ink:
+    // `showFields == false` is `TextBlockUtils.empty(0, 0)`
+    // (`BodierLikeClassOrObject.java:225-229`) and the empty-but-shown
+    // placeholder is `TextBlockEmpty(10, 16)` inside a bare
+    // `TextBlockLineBefore` (`EntityImageObject.java:110-113`) -- neither is
+    // a `TextBlockMarged`. See `class-ink-box.ts#addRectInk`.
+    bodyInkWidth: showFields && !emptyFieldPlaceholder ? fieldsDim.width : 0,
   };
 }
 

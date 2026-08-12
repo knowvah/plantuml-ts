@@ -278,9 +278,19 @@ describe('computeClassRawInkDims — object empty-body ink (G3/O2)', () => {
   it('two hidden-members object classifiers -- jar-verified kexica-21-gega428 ' +
     '(global "hide members"): rawWidth 96.3625 (NOT addRectInk\'s 97.3625), ' +
     'rawHeight unaffected', () => {
+    // B35/M40: `bodyInkWidth: 0` is what `class-object-map-sizing.ts` emits
+    // for this state -- upstream's `TextBlockUtils.empty(0, 0)` body draws no
+    // `TextBlockMarged`/`UEmpty`, so it reserves no ink. The jar numbers below
+    // are UNCHANGED; only the geo is now fully specified (the dedicated
+    // `addRectInkEmptyBody` rule these once exercised collapsed into the
+    // general one).
     const classifiers: ClassifierGeo[] = [
-      makeClassifierGeo({ id: 'A', kind: 'object', x: 7, y: 7, width: 23.3625, height: 18, dividerYs: [] }),
-      makeClassifierGeo({ id: 'B', kind: 'object', x: 65, y: 7, width: 23.3625, height: 18, dividerYs: [] }),
+      makeClassifierGeo({
+        id: 'A', kind: 'object', x: 7, y: 7, width: 23.3625, height: 18, dividerYs: [], bodyInkWidth: 0,
+      }),
+      makeClassifierGeo({
+        id: 'B', kind: 'object', x: 65, y: 7, width: 23.3625, height: 18, dividerYs: [], bodyInkWidth: 0,
+      }),
     ];
     const dims = computeClassRawInkDims(classifiers, [], [], []);
     expect(dims.width).toBeCloseTo(96.3625, 4);
@@ -295,13 +305,15 @@ describe('computeClassRawInkDims — object empty-body ink (G3/O2)', () => {
       dividerYs: [18],
     });
     const emptyBody = makeClassifierGeo({
-      id: 'B', kind: 'object', x: 73.03125, y: 18, width: 23.3625, height: 18, dividerYs: [],
+      id: 'B', kind: 'object', x: 73.03125, y: 18, width: 23.3625, height: 18,
+      dividerYs: [], bodyInkWidth: 0,
     });
     const withEmptyRule = computeClassRawInkDims([populated, emptyBody], [], [], []);
-    const withGeneralRuleOnly = computeClassRawInkDims(
-      [populated, { ...emptyBody, kind: 'class' }],
-      [], [], [],
-    );
+    // B35/M40: the contrast is now carried by `bodyInkWidth`, not by `kind`.
+    // Dropping it models an UNMEASURED body, which keeps the pre-B35 fixed
+    // `x + w`; the two jar numbers below are unchanged.
+    const { bodyInkWidth: _dropped, ...unmeasured } = emptyBody;
+    const withGeneralRuleOnly = computeClassRawInkDims([populated, unmeasured], [], [], []);
     // The empty-body sibling's own rule shaves exactly 1px off the raw
     // width relative to treating it with the general (addRectInk) rule --
     // jar-verified rawWidth 104.39375 (this rule) vs 105.39375 (general).
@@ -310,13 +322,20 @@ describe('computeClassRawInkDims — object empty-body ink (G3/O2)', () => {
     expect(withEmptyRule.height).toBe(withGeneralRuleOnly.height);
   });
 
-  it('does NOT apply the empty-body rule to non-object kinds (class/interface/' +
-    'enum keep addRectInk even with dividerYs: [])', () => {
-    const asClass = makeClassifierGeo({ id: 'C', kind: 'class', x: 65, y: 7, width: 23.3625, height: 18, dividerYs: [] });
-    const asObject = makeClassifierGeo({ id: 'C', kind: 'object', x: 65, y: 7, width: 23.3625, height: 18, dividerYs: [] });
-    const classDims = computeClassRawInkDims([asClass], [], [], []);
-    const objectDims = computeClassRawInkDims([asObject], [], [], []);
-    expect(classDims.width - objectDims.width).toBe(1);
+  it('B35/M40: the 1px is gated on the body reservation, NOT on kind -- an ' +
+    'unmeasured body (class/interface/enum) keeps x+w, a zero-width one gives x+w-1', () => {
+    // Pre-B35 this asserted a KIND gate, because the suppressed-body rule was
+    // reachable only for `kind: 'object'`. The real discriminator is whether
+    // the body draws a `TextBlockMarged` `UEmpty` at all -- so an object with
+    // a zero-width reservation and a class with none differ by exactly the
+    // same 1px, and an object whose body DROVE the width does not.
+    const base: Partial<ClassifierGeo> = { id: 'C', x: 65, y: 7, width: 23.3625, height: 18, dividerYs: [] };
+    const unmeasured = makeClassifierGeo({ ...base, kind: 'class' });
+    const noReservation = makeClassifierGeo({ ...base, kind: 'object', bodyInkWidth: 0 });
+    const bodyDriven = makeClassifierGeo({ ...base, kind: 'object', bodyInkWidth: 23.3625 });
+    const widthOf = (c: ClassifierGeo): number => computeClassRawInkDims([c], [], [], []).width;
+    expect(widthOf(unmeasured) - widthOf(noReservation)).toBe(1);
+    expect(widthOf(bodyDriven)).toBe(widthOf(unmeasured));
   });
 });
 
@@ -381,8 +400,12 @@ describe('computeClassRawInkDims — object empty-but-SHOWN placeholder ink (B5/
     // negative control that killed the wider "field list is empty" gate the
     // B5 ledger row proposed.
     const classifiers: ClassifierGeo[] = [
-      makeClassifierGeo({ id: 'foo', kind: 'object', x: 0, y: 0, width: 33.425, height: 18, dividerYs: [] }),
-      makeClassifierGeo({ id: 'bar', kind: 'object', x: 68.61, y: 0, width: 34.213, height: 18, dividerYs: [] }),
+      makeClassifierGeo({
+        id: 'foo', kind: 'object', x: 0, y: 0, width: 33.425, height: 18, dividerYs: [], bodyInkWidth: 0,
+      }),
+      makeClassifierGeo({
+        id: 'bar', kind: 'object', x: 68.61, y: 0, width: 34.213, height: 18, dividerYs: [], bodyInkWidth: 0,
+      }),
     ];
     expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 123, height: 40 });
   });

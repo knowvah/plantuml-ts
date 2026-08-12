@@ -68,6 +68,20 @@ function contentBox(
 }
 
 /**
+ * The two body-state fields `class-ink-box.ts` reads to pick a classifier's
+ * ink rule (B5/M6's `emptyFieldPlaceholder`, B35/M40's `bodyInkWidth`) --
+ * bundled into one spread so the two `ClassifierGeo` literals below stay
+ * under this file's own per-function NLOC cap. Both stay ABSENT when unset,
+ * exactly as spreading them individually did; no behavior change.
+ */
+function inkBodyFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
+  return {
+    ...(m.emptyFieldPlaceholder === true ? { emptyFieldPlaceholder: true as const } : {}),
+    ...(m.bodyInkWidth !== undefined ? { bodyInkWidth: m.bodyInkWidth } : {}),
+  };
+}
+
+/**
  * Build ClassifierGeo entries from pre-measured sizes + dot-assigned
  * positions.
  *
@@ -98,7 +112,7 @@ export function buildClassifierGeos(
       ...(measured.nameRowCount !== undefined ? { nameRowCount: measured.nameRowCount } : {}),
       ...(measured.badgeChar !== undefined ? { badgeChar: measured.badgeChar } : {}),
       ...(measured.badgeColor !== undefined ? { badgeColor: measured.badgeColor } : {}),
-      ...(measured.emptyFieldPlaceholder === true ? { emptyFieldPlaceholder: true as const } : {}),
+      ...inkBodyFields(measured),
       ...(measured.genericTag !== undefined ? { genericTag: measured.genericTag } : {}),
       ...(measured.folderTab !== undefined ? { folderTab: measured.folderTab } : {}),
       ...(measured.enhancedBody !== undefined ? { enhancedBody: measured.enhancedBody } : {}),
@@ -314,7 +328,7 @@ export function degenerateSingleClassifier(
     ...(measured.nameRowCount !== undefined ? { nameRowCount: measured.nameRowCount } : {}),
     ...(measured.badgeChar !== undefined ? { badgeChar: measured.badgeChar } : {}),
     ...(measured.badgeColor !== undefined ? { badgeColor: measured.badgeColor } : {}),
-    ...(measured.emptyFieldPlaceholder === true ? { emptyFieldPlaceholder: true as const } : {}),
+    ...inkBodyFields(measured),
     ...(measured.genericTag !== undefined ? { genericTag: measured.genericTag } : {}),
     ...(measured.folderTab !== undefined ? { folderTab: measured.folderTab } : {}),
     ...(measured.enhancedBody !== undefined ? { enhancedBody: measured.enhancedBody } : {}),

@@ -249,6 +249,17 @@ export interface ClassifierGeo {
    * ({@link addRectInkEmptyBody}) rather than a special case of this one.
    */
   emptyFieldPlaceholder?: true;
+  /**
+   * B35/M40: the width of this classifier body's own `UEmpty` reservation
+   * -- upstream `dimFields.getWidth()`. Read ONLY by `class-ink-box.ts
+   * #addRectInk`, whose doc comment carries the full jar-verified
+   * mechanism. `undefined` means "this leaf's body reservation has not
+   * been measured", and keeps the pre-B35 fixed `x + w` max-X; it is set
+   * only on the `object` family, the only place the conditional rule is
+   * jar-verified (see `addRectInk` for why `class`/`interface`/`enum`
+   * reach `x + w` unconditionally and `map`/`json` are left unmeasured).
+   */
+  bodyInkWidth?: number;
 }
 
 export interface EdgeGeo {

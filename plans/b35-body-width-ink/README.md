@@ -184,3 +184,79 @@ The default concurrency times out all 80 and writes a file claiming
   **M6** row (B5's three-way object body-state split, with its jar controls).
 - `plans/object-close/decision-journal.md` — entries `B5`, `B25`, `T7`.
 - `src/diagrams/class/class-ink-box.ts` — `addRectInk`'s corrected doc comment.
+
+---
+
+## OUTCOME — DONE 2026-08-11
+
+Landed. All four gates green (574 test files / 12 764 tests, typecheck, lint,
+build). Two things above turned out to be **wrong** and are corrected here;
+the arithmetic and the two jar controls were right.
+
+### Correction 1 — the mechanism is a `UEmpty`, sized to the body
+
+T7's "`UEmpty` is drawn nowhere on any class/object path" is false. It is
+drawn in exactly one place in the whole upstream tree —
+`TextBlockMarged#drawU`'s `ug.draw(UEmpty.create(dim))`
+(`klimt/shape/TextBlockMarged.java:83`) — and `LimitFinder#drawEmpty`
+(`LimitFinder.java:159-162`) bounds it with no inset, so it reaches 1px past
+the rect. `dim` is the marged block's OWN dimension, never the box's, and
+`BodyEnhancedAbstract#decorate:106-118` /
+`MethodsOrFieldsArea#asBlockMemberImpl:83-86` wrap every body compartment in
+one. So G2 N5 had the right shape and the wrong size, and T7 threw out the
+right shape. That is why the rule is conditional rather than universal.
+
+### Correction 2 — NOT corpus-wide; the class path was already correct
+
+"Expect class movement — this rule is corpus-wide" is false, and the
+strongest available evidence said so before a line was written: 317 class
+goldens are byte-exact against the jar *today* under the fixed `x + w`, which
+a title-driven class box could not be if it needed `x + w - 1`.
+
+The reason is `HeaderLayout#drawU` (`svek/HeaderLayout.java:89-109`): the
+name is centered in `suppWith = width - circleW - widthStereoAndName -
+genericW`, which is **exactly 0** when the header drove the width — so the
+name block's own `UEmpty` lands on `x + w`, and when the body drove it
+instead, the body's does. Either way `x + w`. An object header cannot do
+this: `PlacementStrategyY1Y2#getPositions`
+(`klimt/geom/PlacementStrategyY1Y2.java:59`) centers it strictly at
+`x = (width - blockWidth)/2`, leaving `xMarginCircle` (5px) clear on each
+side. The fix is therefore **object-family-scoped**, and
+`class-layout-generic-classifier.ts` was correctly left untouched.
+`map`/`json` are left unmeasured on purpose — `TextBlockMap`/
+`TextBlockCucaJSon` are not marged body blocks and no jar control isolates
+them, so they keep the pre-B35 `x + w` via `bodyInkWidth === undefined`.
+
+### Item 3 answered — one of the two empty-body rules collapsed
+
+Verified empirically, not assumed, in both directions:
+
+| rule | disabling it | verdict |
+|---|---|---|
+| `addRectInkEmptyBody` (`showFields == false`) | census zero-diff **set byte-identical** (35) | strict special case — **DELETED** |
+| `addRectInkEmptyShownBody` (empty but shown) | census **35 → 29** | survives, on max-Y alone |
+
+The first is `TextBlockUtils.empty(0, 0)` ⇒ `bodyInkWidth` 0 ⇒ the general
+rule already yields its hard-coded `(x+w-1, y+h)` corner, including for its
+own two jar fixtures `kexica-21-gega428` and `janoma-30-dovo501`. The second
+differs only on max-Y (`y+h-1`), which this mission left alone as instructed.
+
+### Acceptance
+
+1. ✅ Title-driven → `x + w - 1`. `jocamu-71-nuvo330` reached **0 diffs** and
+   is now **ratcheted in** (object manifest 33 → 34).
+2. ✅ Body-driven → `x + w` (both authored controls unchanged).
+3. ✅ Object SVG census **34 → 35**; the +1 is jocamu, nothing else moved.
+4. ✅ No class movement, and now positively explained rather than merely
+   observed — see Correction 2.
+
+### Frozen counts at close
+
+| gate | start | end |
+|---|---|---|
+| object DOT structural | 74/80 | 74/80 |
+| class DOT | 688/711 | 688/711 |
+| component / usecase / state DOT | 262 / 93 / 267 | unchanged |
+| class SVG goldens | 317 | 317, all pass |
+| object SVG ratchet | 33 | **34** (jocamu added) |
+| object SVG census | 34/80 | **35/80** |
