@@ -12,3 +12,29 @@ class Foo {
 
 actor Bob
 @enduml
+
+' ---------------------------------------------------------------------------
+' NOTE, and it is why this fixture looks incomplete -- do not "fix" either:
+'
+' 1. The pinned jar REJECTS this input. `golden.svg` is PlantUML's own error
+'    image (black ground, green text), ending "Use 'allowmixing' if you want
+'    to mix classes and other UML elements. (Assumed diagram type: class)".
+'    That rejection IS what this fixture pins on the upstream side; the
+'    routing claim above is about THIS PORT reaching its class engine.
+'
+' 2. There is therefore NO `test-results/dot-cache/class/<slug>/` entry and
+'    there CANNOT be one: the jar errors before the graphviz stage, so no
+'    svek DOT is ever dumped. Its four sibling authored fixtures each track a
+'    4-file entry (.done, in.puml, in.svg, svek-1.dot); the missing
+'    `svek-1.dot` here is structural, not an oversight. Generating one was
+'    attempted and produced only the error SVG.
+'
+' 3. This fixture is deliberately absent from `oracle/goldens/svg-class/
+'    ratchet.json` -- an error image is not a conformance target.
+'
+' 4. These lines sit AFTER `@enduml` ON PURPOSE. `golden.svg` embeds
+'    "[From in.puml (line 13) ]" and echoes the source, so `actor Bob` must
+'    stay on line 13. Inserting anything above it invalidates a tracked jar
+'    oracle. Verified: with this block appended, a fresh
+'    `scripts/oracle-render.sh` render is still byte-identical to golden.svg.
+' ---------------------------------------------------------------------------
