@@ -200,6 +200,31 @@ and the ratchet asserts a pinned fixture fails `portOk` **and nothing else** —
 so passing completely is a failure of the pin, not of the port. T3 retires it
 in the next commit. Identical to SI17's T2.
 
+**4. `62a356ca` is NOT revertible on its own — correcting its own commit
+body.** That message ends "Reverting restores the `:P` mechanism for objects",
+which is true of the code and misleading about the tree. Verified empirically
+at close-out (detached worktree at `93b04555`, `git revert --no-commit
+62a356ca`, then `npx vitest run tests/oracle/object-dot-parity.test.ts -t
+rozuxo`): the revert applies cleanly to every `src/` file, but the suite goes
+**RED** —
+
+```
+rozuxo-44-fudi093/svek-1.dot: structural regression — failing checks:
+portOk: expected false to be true
+```
+
+because `83bc0e98` had already deleted `port-backlog.json`, the pin that
+tolerated exactly that state. The revertible unit is therefore **`62a356ca` +
+`83bc0e98` together** (or revert `62a356ca` and restore the pin by hand with
+`rozuxo-44-fudi093` in it). `af82b0ee`'s comments also describe
+`isRowPortKind`, which an isolated revert deletes, so it belongs to the same
+unit.
+
+The general lesson, which outlives this mission: **a commit that is red by
+construction and a later commit that greens it are one rollback unit, not
+two.** Splitting the fix from its pin buys independent review, not independent
+revert — and the commit body should say which it bought.
+
 ---
 
 ## T3 — retire the object port backlog (commit `83bc0e98`)

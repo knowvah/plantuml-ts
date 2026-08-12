@@ -35,7 +35,7 @@ import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { buildMemberAtoms, memberBaseFont, resolveMemberAtoms } from './class-member-creole.js';
-import { mapPortName } from './class-port-rows.js';
+import { mapPortName } from './class-map-port-rows.js';
 
 /** EntityImageMap: `withMargin(name, 2, 2)` — fixed, not style-driven
  *  (unlike object's Padding-based name margin, which happens to share the
@@ -126,7 +126,7 @@ function measureMapRow(row: MapRow, font: FontConfiguration, measurer: StringMea
   // the KEY (and only the key) before `getTextBlock` ever sees it —
   // `if (VisibilityModifier.isVisibilityCharacter(key)) key = key.substring(1)`
   // (`cucadiagram/TextBlockMap.java:82-83`), the same `keys.add(key)` the
-  // port band ids already go through (`class-port-rows.ts#mapPortName`).
+  // port band ids already go through (`class-map-port-rows.ts#mapPortName`).
   // Jar: vimavu-26-civo110 / guzojo-14-muxa584 draw `+__method1__` as an
   // underlined `method1`, with no `+` glyph and 8.225px less key width.
   const key = measureMapCell(mapPortName(row.key), font, measurer);

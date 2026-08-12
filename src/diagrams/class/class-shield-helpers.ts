@@ -40,7 +40,7 @@ import { LIKE_CLASS_KINDS } from './class-layout-helpers.js';
  *
  * `map`/`json` are deliberately NOT accepted (SI20 ADR-4): their bands are
  * `EntityImageMap`/`EntityImageJson`'s own per-row table, produced by
- * `class-port-rows.ts#mapPortRows` off the flat sizer's `dividerYs`, and
+ * `class-map-port-rows.ts#mapPortRows` off the flat sizer's `dividerYs`, and
  * their `:P` marking is separately suppressed by `shouldMarkPort`.
  *
  * A PREDICATE, not a `Set` spread over `LIKE_CLASS_KINDS`: there is a real

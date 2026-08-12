@@ -8,7 +8,7 @@
 import type { ClassDiagramAST, Relationship } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { EDGE_DECORATION_MAP } from './class-dot-graph.js';
+import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
 import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 import { CARDINALITY_FONT_SIZE, splitEdgeLabelLines } from './class-layout-helpers.js';
 import { ARROW_GLYPH_SIZE, parseMagicArrowLabel, magicArrowAngle, magicArrowGlyphPoints, type MagicArrowLabel } from './class-magic-arrow.js';
