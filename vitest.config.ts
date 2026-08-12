@@ -14,8 +14,12 @@ export default defineConfig({
     passWithNoTests: true,
     coverage: {
       provider: 'v8',
+      // Vitest 4 removed `coverage.all` (and `coverage.extensions`): reports
+      // now include only files the run actually touched, which is exactly
+      // what `all: false` used to select. The behaviour is unchanged; the
+      // option that expressed it is gone. `include` still scopes analysis to
+      // src, and is now the only knob that does.
       include: ['src/**/*.ts'],
-      all: false,
       thresholds: {
         lines: 90,
         branches: 90,

@@ -107,8 +107,10 @@ describe('stdlibRegistry -- the two failure modes stay distinct', () => {
   });
 
   it('a failed load can be retried rather than being cached as permanent', async () => {
+    // Vitest 4: `vi.fn`'s type parameter is the whole function signature now,
+    // not `<Args, Return>`.
     const thunk = vi
-      .fn<[], Promise<unknown>>()
+      .fn<() => Promise<unknown>>()
       .mockRejectedValueOnce(new Error('offline'))
       .mockResolvedValueOnce({ c4: C4 });
     const registry = stdlibRegistry({ c4: thunk });
