@@ -470,5 +470,16 @@ function buildNormalClassifierResult(
       acc, memberSections.methodFlat, stereoGeo.headerRowHeight + fieldsH, memberSections.methodsHasIcon, rowCtx,
     );
   }
-  return { width, height, rows: acc.rows, dividerYs: acc.dividerYs, ...commonFields };
+  // T2 (SI17), publish-only: surface the ALREADY-COMPUTED headerRowHeight +
+  // per-compartment FlatMemberRows for `class-port-rows.ts#classPortRows`'
+  // caller -- see `MeasuredClassifier.portMemberSections`'s own doc comment.
+  // No new measurement; `suppress.fields`/`.methods` gate exactly like
+  // `fieldsH`/`methodsH` above (a suppressed compartment is OMITTED, not an
+  // empty one).
+  const portMemberSections = {
+    headerHeight: stereoGeo.headerRowHeight,
+    ...(suppress.fields ? {} : { fields: memberSections.fieldFlat }),
+    ...(suppress.methods ? {} : { methods: memberSections.methodFlat }),
+  };
+  return { width, height, rows: acc.rows, dividerYs: acc.dividerYs, ...commonFields, portMemberSections };
 }

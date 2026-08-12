@@ -123,13 +123,27 @@ function nodeLine(node: DotInputNode, rec: NodeRec): string {
 }
 
 /** Bibliotekon.getNodeUid: every DOT reference to a shielded node's uid gets
- *  a ":h" port suffix (the shield table's colored center cell).
+ *  a ":h" port suffix (the shield table's colored center cell). "Shielded"
+ *  is `SvekNode#isShielded()` (svek/SvekNode.java:383-396) -- a property of
+ *  the NODE, independent of its shape/type; `DotInputNode.qualifierShielded`
+ *  carries that signal (see its own doc comment for the upstream mechanism
+ *  and this port's scope note).
  *
  *  B1/M1: a `RECTANGLE_HTML_FOR_PORTS` endpoint whose link named a member row
  *  takes THAT row's md5 port instead — `abel/Link.java:219-231` threads the
  *  port name onto the endpoint, and `Ports#encodePortNameToId` has already
- *  encoded it by the time it reaches `DotInputEdge`. A port-bearing node whose
- *  link named no row still falls through to `:h`. */
+ *  encoded it by the time it reaches `DotInputEdge`.
+ *
+ *  B1: a `portRows`-bearing node whose link named no row is NOT automatically
+ *  shielded -- `RECTANGLE_HTML_FOR_PORTS` bypasses `isShielded` entirely in
+ *  `appendShape` (svek/SvekNode.java:132-152, checked BEFORE the `RECTANGLE
+ *  && isShielded` branch), so only an explicit `qualifierShielded` earns
+ *  `:h` there. Every OTHER `shape=plaintext` node (no `portRows`) keeps the
+ *  prior unconditional `:h` -- upstream's other plaintext producers
+ *  (`EntityImageDescription`'s interface shield, `EntityImageClass`'s bare
+ *  `RECTANGLE && isShielded` shield) only ever choose `plaintext` FOR a
+ *  shield reason in the first place, so the blanket rule was already correct
+ *  there and this port's node builders for those never populate `portRows`. */
 function edgeRef(
   id: string,
   recs: Map<string, NodeRec>,
@@ -143,7 +157,9 @@ function edgeRef(
   // OWN node line took.
   if (node?.isPort === true) return `${rec.sh}:P`;
   if (rowPort !== undefined && node?.portRows !== undefined) return `${rec.sh}:${rowPort}`;
-  return (node?.shape ?? 'rect') === 'plaintext' ? `${rec.sh}:h` : rec.sh;
+  if ((node?.shape ?? 'rect') !== 'plaintext') return rec.sh;
+  if (node?.portRows !== undefined) return node.qualifierShielded === true ? `${rec.sh}:h` : rec.sh;
+  return `${rec.sh}:h`;
 }
 
 /** Optional edge label / taillabel / headlabel parts (Svek HTML tables).

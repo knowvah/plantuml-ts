@@ -108,6 +108,20 @@ export interface DotInputNode {
    * short names (`:249-253` / `:254-258`).
    */
   portRows?: readonly DotInputPortRow[];
+  /**
+   * B1 (SI17): `SvekNode#isShielded` (svek/SvekNode.java:383-396) — true when
+   * this leaf is the qualified end of some `Link` (`link.hasKal1()`/
+   * `hasKal2()`, `abel/Link.java:569-575`, off `[Qualifier]` association
+   * syntax). `Bibliotekon#getNodeUid` (svek/Bibliotekon.java:126-132)
+   * appends `:h` to every DOT reference to a shielded leaf's uid,
+   * independently of node shape/type — a `portRows` leaf (RECTANGLE_
+   * HTML_FOR_PORTS) still needs this flag to earn `:h`; shape alone
+   * (`EntityImageClass`/`EntityImageMap#getShapeType`) is a separate switch.
+   * Does NOT cover the OTHER `isShielded` trigger — a plain quantifier/role
+   * cardinality label's margin bump, gated on graphviz <= 2.28
+   * (`svek/SvekEdge.java:232-239`, `dot/GraphvizVersionFinder.java:48-88`);
+   * out of scope, no corpus fixture needs it. */
+  qualifierShielded?: true;
   /** Svek `ClusterDotString.empty()` port placeholder: reuses the
    *  group-anchor id as a tiny `.01in` rect carrying the OWNING cluster's
    *  own title HTML as its label, instead of the plain `shape:'point'`

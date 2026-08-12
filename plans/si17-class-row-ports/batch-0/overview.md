@@ -5,7 +5,7 @@
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T0](T0-band-source-gono-go.md) | Measure both band sources against jar oracle DOT | general-purpose | `../decision-journal.md` | — | [ ] |
+| [T0](T0-band-source-gono-go.md) | Measure both band sources against jar oracle DOT | general-purpose | `../decision-journal.md` | — | [x] |
 
 ## Why this is a batch of its own
 

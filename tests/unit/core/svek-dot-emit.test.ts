@@ -491,4 +491,52 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
     });
     expect(dot).toMatch(/sh\d{4}:h->sh\d{4}:h\[/);
   });
+
+  /**
+   * B1 (SI17, `plans/si17-class-row-ports/decision-journal.md`) — the `:h`
+   * fall-through. `Bibliotekon#getNodeUid` (svek/Bibliotekon.java:126-132)
+   * gates `:h` on `SvekNode#isShielded()` (a qualified-association test,
+   * `:383-396`), NOT on having port rows — a `RECTANGLE_HTML_FOR_PORTS`
+   * node whose link named no member row must get the BARE uid.
+   * Jar-verified: bicabi-42-coto932 `sh0009->sh0007` (no `:h`), pijiju-95-
+   * xexi872 `sh0007->sh0008`/`sh0007->sh0009`, refeku-65-gapu585
+   * `sh0007->sh0008` (`test-results/dot-cache/class/{bicabi-42-coto932,
+   * pijiju-95-xexi872,refeku-65-gapu585}/svek-1.dot`).
+   */
+  it('routes a portRows node with no matching row port to the BARE uid, not ":h"', () => {
+    const dot = toSvekDot({
+      nodes: [
+        { id: 'a', width: 20, height: 20 },
+        {
+          id: 'b', width: 20, height: 20, shape: 'plaintext',
+          portRows: [{ id: FUSOPU_METHOD1_PORT, position: 0, height: FUSOPU_ROW_HEIGHT }],
+        },
+      ],
+      edges: [{ id: 'e0', from: 'a', to: 'b', attributes: { minLen: 1 } }],
+    });
+    expect(dot).toMatch(/sh\d{4}->sh\d{4}\[arrowtail=none,arrowhead=none,minlen=1,/);
+    expect(dot).not.toMatch(/->sh\d{4}:h\[/);
+  });
+
+  /**
+   * B1 regression guard: a portRows node that IS ALSO the qualified end of
+   * some link (`DotInputNode.qualifierShielded`) must keep the `:h` suffix
+   * — `isShielded()` is independent of the `RECTANGLE_HTML_FOR_PORTS` shape
+   * (svek/SvekNode.java:383-396 has no type check at all). No corpus
+   * fixture combines port short names with a qualified association, so
+   * this is the fixture-free coverage for that combination.
+   */
+  it('still shields a portRows node marked qualifierShielded', () => {
+    const dot = toSvekDot({
+      nodes: [
+        { id: 'a', width: 20, height: 20 },
+        {
+          id: 'b', width: 20, height: 20, shape: 'plaintext', qualifierShielded: true,
+          portRows: [{ id: FUSOPU_METHOD1_PORT, position: 0, height: FUSOPU_ROW_HEIGHT }],
+        },
+      ],
+      edges: [{ id: 'e0', from: 'a', to: 'b', attributes: { minLen: 1 } }],
+    });
+    expect(dot).toMatch(/sh\d{4}->sh\d{4}:h\[arrowtail=none,arrowhead=none,minlen=1,/);
+  });
 });

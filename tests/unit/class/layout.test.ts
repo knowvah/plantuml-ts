@@ -14,6 +14,7 @@ import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { LOLLIPOP_SIZE } from '../../../src/diagrams/class/class-lollipop.js';
 import { FontStyle } from '../../../src/core/klimt/shape/UText.js';
+import { Ports } from '../../../src/core/svek/Ports.js';
 
 const measurer = new FormulaMeasurer();
 
@@ -165,7 +166,18 @@ describe('layoutClass — qualifier/port nodes render as plaintext (shapeOk)', (
     expect(b?.isPort).toBeUndefined();
   });
 
-  it('a ::member port target is a plaintext port node', () => {
+  it('a ::member port target is a row-port table, NOT the PORTIN/PORTOUT ":P" compass shield', () => {
+    // T8/ADR-2 (SI17 T2): this assertion PREVIOUSLY encoded the T8-flagged
+    // WRONG mechanism -- `isPort: true` borrows the PORTIN/PORTOUT ":P"
+    // compass shield for a plain `::member` target. Upstream's
+    // `Link.getEntityPort` discriminates on the TARGET leaf's OWN
+    // `EntityPosition.usePortP()` (`abel/Link.java:227-231`); a class-family
+    // `::member` target is EntityPosition.NORMAL and takes the md5 row-port
+    // suffix instead (`class-port-rows.ts#classPortRows`/`edgePortAttrs`),
+    // never ":P". `B` declares no members, so its election elects nothing --
+    // ADR-4 still flips the shape because `m` was DECLARED as a port name,
+    // independent of whether any row won it (`bicabi-42-coto932`'s
+    // zero-election control emits the identical shape+empty-portRows pair).
     const ast = makeAST({
       classifiers: [
         { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
@@ -175,7 +187,8 @@ describe('layoutClass — qualifier/port nodes render as plaintext (shapeOk)', (
     });
     const b = captureNodes(ast).find((n) => n.id === 'B');
     expect(b?.shape).toBe('plaintext');
-    expect(b?.isPort).toBe(true);
+    expect(b?.isPort).toBeUndefined();
+    expect(b?.portRows).toEqual([]);
   });
 
   it('a plain classifier stays rect (shape unset)', () => {
@@ -201,6 +214,132 @@ describe('layoutClass — qualifier/port nodes render as plaintext (shapeOk)', (
       relationships: [],
     });
     expect(captureNodes(ast).find((n) => n.id === 'd')?.shape).toBe('diamond');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T2 (SI17): class `::member` port rows wired end-to-end through
+// layoutClass -- reproduces T0's jar-verified oracle table
+// (plans/si17-class-row-ports/decision-journal.md) through the REAL
+// measured pipeline (defaultTheme + FormulaMeasurer), not just the pure
+// `classPortRows` function T1's own tests already cover
+// (tests/unit/class/class-port-rows.test.ts).
+// ---------------------------------------------------------------------------
+
+describe('layoutClass — class ::member port rows wired end-to-end (T2, SI17)', () => {
+  // T0 oracle: `dimHeader.getHeight()` for a plain single-line class header
+  // at default font (decision-journal.md's T0 entry).
+  const HEADER_HEIGHT = 32;
+  // T0 oracle: a single-line member row at default font.
+  const ROW_HEIGHT = 14;
+
+  function captureGraph(ast: ClassDiagramAST): DotInputGraph {
+    let captured: DotInputGraph | undefined;
+    setLayoutInputObserver((g) => { captured = g; });
+    try {
+      layoutClass(ast, defaultTheme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    return captured!;
+  }
+
+  it('dekaba-54-fafi485: one elected member -> band at headerHeight+margin (36/14)', () => {
+    const ast = makeAST({
+      classifiers: [
+        {
+          id: 'A', display: 'A', kind: 'class', typeParams: [],
+          members: [
+            { visibility: '+', name: 'ID', type: 'int', isStatic: false, isAbstract: false },
+            { visibility: '+', name: 'OSM_ID', type: 'int', isStatic: false, isAbstract: false },
+            { visibility: '+', name: 'OtherID', type: 'int', isStatic: false, isAbstract: false },
+          ],
+        },
+        { id: 'B', display: 'B', kind: 'class', typeParams: [], members: [] },
+      ],
+      relationships: [{ from: 'A', to: 'B', type: 'association', fromPort: 'ID' }],
+    });
+    const g = captureGraph(ast);
+    const a = g.nodes.find((n) => n.id === 'A');
+    expect(a?.shape).toBe('plaintext');
+    expect(a?.isPort).toBeUndefined();
+    expect(a?.portRows).toEqual([
+      { id: Ports.encodePortNameToId('ID'), position: HEADER_HEIGHT + 4, height: ROW_HEIGHT },
+    ]);
+    // ADR-3: the edge's OWN endpoint carries the SAME md5 suffix, unconditionally.
+    const edge = g.edges[0]!;
+    expect(edge.attributes?.tailport).toBe(Ports.encodePortNameToId('ID'));
+  });
+
+  it('xefeme-77-fagu709: two classes, one elected member each -> both bands at 36/14', () => {
+    const ast = makeAST({
+      classifiers: [
+        {
+          id: 'Foo', display: 'Foo', kind: 'class', typeParams: [],
+          members: [
+            { visibility: '+', name: 'field1', isStatic: false, isAbstract: false },
+            { visibility: '+', name: 'field2', isStatic: false, isAbstract: false },
+          ],
+        },
+        {
+          id: 'Bar', display: 'Bar', kind: 'class', typeParams: [],
+          members: [
+            { visibility: '+', name: 'field3', isStatic: false, isAbstract: false },
+          ],
+        },
+      ],
+      relationships: [
+        { from: 'Foo', to: 'Bar', type: 'association', fromPort: 'field1', toPort: 'field3' },
+      ],
+    });
+    const g = captureGraph(ast);
+    const foo = g.nodes.find((n) => n.id === 'Foo');
+    const bar = g.nodes.find((n) => n.id === 'Bar');
+    expect(foo?.portRows).toEqual([
+      { id: Ports.encodePortNameToId('field1'), position: HEADER_HEIGHT + 4, height: ROW_HEIGHT },
+    ]);
+    expect(bar?.portRows).toEqual([
+      { id: Ports.encodePortNameToId('field3'), position: HEADER_HEIGHT + 4, height: ROW_HEIGHT },
+    ]);
+    const edge = g.edges[0]!;
+    expect(edge.attributes?.tailport).toBe(Ports.encodePortNameToId('field1'));
+    expect(edge.attributes?.headport).toBe(Ports.encodePortNameToId('field3'));
+  });
+
+  it('bicabi-42-coto932 control: a declared port name with zero declared members -> [] bands, still plaintext', () => {
+    // No `class Gtk { }` body at all -- portShortNames.size > 0 (ADR-4) still
+    // flips the shape, but classPortRows has no compartments to elect from.
+    const ast = makeAST({
+      classifiers: [
+        { id: 'MainWindow', display: 'MainWindow', kind: 'class', typeParams: [], members: [] },
+        { id: 'Gtk', display: 'Gtk', kind: 'class', typeParams: [], members: [] },
+      ],
+      relationships: [{ from: 'MainWindow', to: 'Gtk', type: 'extension', toPort: 'Window' }],
+    });
+    const g = captureGraph(ast);
+    const gtk = g.nodes.find((n) => n.id === 'Gtk');
+    expect(gtk?.shape).toBe('plaintext');
+    expect(gtk?.isPort).toBeUndefined();
+    expect(gtk?.portRows).toEqual([]);
+    // ADR-3: the edge still carries the suffix -- graphviz tolerates a
+    // dangling port; no "only if a matching row exists" guard.
+    const edge = g.edges[0]!;
+    expect(edge.attributes?.headport).toBe(Ports.encodePortNameToId('Window'));
+  });
+
+  it('a genuine PORTIN leaf target still gets the ":P" compass shield (isPort), unaffected by ADR-2', () => {
+    const ast = makeAST({
+      classifiers: [
+        { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
+        { id: 'Entry', display: 'Entry', kind: 'descriptive', usymbol: 'portin', typeParams: [], members: [] },
+      ],
+      relationships: [{ from: 'A', to: 'Entry', type: 'association', toPort: 'x' }],
+    });
+    const g = captureGraph(ast);
+    const entry = g.nodes.find((n) => n.id === 'Entry');
+    expect(entry?.shape).toBe('plaintext');
+    expect(entry?.isPort).toBe(true);
+    expect(entry?.portRows).toBeUndefined();
   });
 });
 

@@ -5,7 +5,7 @@ record true.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T4](T4-close-out.md) | Flip the index row, file the findings, state the real number | general-purpose | `planning/mission-index.md`, `.agent-notes/**`, `DIVERGENCES.md` (only if something is left diverging), `../README.md`, `../ledger.md` | batch-1, batch-2 | [ ] |
+| [T4](T4-close-out.md) | Flip the index row, file the findings, state the real number | general-purpose | `planning/mission-index.md`, `.agent-notes/**`, `DIVERGENCES.md` (only if something is left diverging), `../README.md`, `../ledger.md` | batch-1, batch-2 | [x] |
 
 ## Batch exit
 

@@ -264,20 +264,22 @@ function makeCoupleCircle(
     sourceDecor: 'none', targetDecor: subsumed.bSideDecor ?? 'none', dashed: subsumedDashed,
   };
   if (subsumed.a !== undefined) aEdge.fromMultiplicity = subsumed.a;
-  // A `Class::member` port on the subsumed edge (pajoka-72-reju527) still
-  // registers the classifier as port-shielded (upstream: `Entity
-  // #addPortShortName`, a permanent entity-level flag set once, independent
-  // of the link's later lifecycle) — our port has no such persistent flag, so
-  // the port is carried onto the surviving circle edge instead: shieldedClassifierIds
-  // (class-layout-helpers.ts) scans ALL current relationships for `fromPort`/
-  // `toPort`, so this reproduces the same observable shield.
-  if (subsumed.portA !== undefined) aEdge.fromPort = subsumed.portA;
+  // B2 (SI17): a `Class::member` port on the subsumed edge (pajoka-72-reju527)
+  // still shields its classifier (upstream: `Entity#addPortShortName`, a
+  // permanent entity-level registry set once, independent of the link's
+  // later lifecycle -- `Classifier.portShortNames`'s own doc comment,
+  // ast.ts). It does NOT carry onto aEdge/bEdge themselves: upstream builds
+  // BOTH replacement edges (`entity1ToPoint`/`pointToEntity2`,
+  // `AbstractClassOrObjectDiagram.java:264-273`) from a fresh `LinkArg` that
+  // never calls `Link#setPortMembers`, so the split edges have no port of
+  // their own (`sh0006->sh0009`, bare, not `sh0006:pea9f6…->sh0009`).
+  registerPersistentPort(ast, aId, subsumed.portA);
   const bEdge: Relationship = {
     from: circleId, to: bId, type: 'association', length: entityLength,
     sourceDecor: subsumed.aSideDecor ?? 'none', targetDecor: 'none', dashed: subsumedDashed,
   };
   if (subsumed.b !== undefined) bEdge.toMultiplicity = subsumed.b;
-  if (subsumed.portB !== undefined) bEdge.toPort = subsumed.portB;
+  registerPersistentPort(ast, bId, subsumed.portB);
 
   // Association#createNew's parity flip: default 1, flip to 2 exactly when
   // the subsumed length/self-couple-ness disagree. A repeat coupling instead
@@ -337,6 +339,20 @@ function makeCoupleCircle(
     invisSiblingEdges.push(sibling);
   }
   return { circleId, aId, bId, classEdgeLength, forceCircleToClass: isRepeatCouple, circle, invisSiblingEdges };
+}
+
+/**
+ * B2 (SI17): `Entity#addPortShortName` (`abel/Entity.java:538`) -- registers
+ * a `Class::member` port on the CLASSIFIER's own persistent set
+ * ({@link Classifier.portShortNames}), not on any particular edge. A no-op
+ * when `port` is `undefined` (no port to register) or the classifier id
+ * can't be found (defensive only; both `aId`/`bId` always resolve here).
+ */
+function registerPersistentPort(ast: ClassDiagramAST, classifierId: string, port: string | undefined): void {
+  if (port === undefined) return;
+  const classifier = ast.classifiers.find((c) => c.id === classifierId);
+  if (classifier === undefined) return;
+  (classifier.portShortNames ??= new Set()).add(port);
 }
 
 /** The circle's OWN class-link edge — the one relationship touching

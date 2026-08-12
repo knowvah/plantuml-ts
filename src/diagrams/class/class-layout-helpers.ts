@@ -43,7 +43,7 @@ import {
 } from './class-stereotype.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
-import { ROW_TEXT_LEFT_MARGIN, isMethodMember } from './class-member-rows.js';
+import { ROW_TEXT_LEFT_MARGIN, isMethodMember, type FlatMemberRows } from './class-member-rows.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { JsonBodyItem } from './class-geo-types.js';
 import {
@@ -110,18 +110,51 @@ export function packageEndpointAnchors(
   return anchors;
 }
 
-export function shieldedClassifierIds(ast: ClassDiagramAST): Map<string, { isPort: boolean }> {
-  const shielded = new Map<string, { isPort: boolean }>();
-  const mark = (id: string, isPort: boolean): void => {
+/**
+ * T2/ADR-2 (SI17, `.agent-notes/T8-member-ports-wrong-mechanism.md`): whether
+ * a `::member` relationship TARGET still takes the PORTIN/PORTOUT ":P"
+ * compass shield (`isPort`), per upstream's own discriminator --
+ * `leaf.getEntityPosition().usePortP()` (`abel/Link.java:227-231`, ported at
+ * `core/abel/EntityBase.ts:332`). Scoped to a `LIKE_CLASS_KINDS` target ONLY
+ * (T2's write-set is this engine's generic name+members box; every other
+ * kind -- `object` in particular -- keeps its PRE-EXISTING unconditional
+ * `true`, since fixing it needs that kind's own row-port producer and its
+ * DOT gate is a count this task must not move). Within that scope the
+ * predicate is PROVABLY false, not merely computed false: `LeafType` is a
+ * single discriminant upstream (Entity.java:331-337) and this port's
+ * `ClassifierKind` mirrors that exclusivity -- `'class'|'abstract'|
+ * 'interface'|'enum'|'annotation'|'entity'` can never simultaneously be the
+ * `'descriptive'` kind `portin`/`portout`/`port` leaves are declared under
+ * (`class-descriptive-leaf-keywords.ts`), so no live class-family leaf can
+ * ever reach `EntityPosition.PORTIN`/`PORTOUT` in the first place.
+ */
+function memberPortIsP(target: Classifier | undefined): boolean {
+  return target === undefined || !LIKE_CLASS_KINDS.has(target.kind);
+}
+
+/** B1 (SI17): `hasQualifier` is `SvekNode#isShielded`'s `hasKal1`/`hasKal2`
+ *  half (svek/SvekNode.java:390-393) — set ONLY by `fromQualifier`/
+ *  `toQualifier` below, never by a `::member` port relationship. Kept
+ *  separate from `isPort` because a class-family port target ALSO lands in
+ *  this map with `isPort: false` (`memberPortIsP`) yet is not shielded. */
+export function shieldedClassifierIds(
+  ast: ClassDiagramAST,
+): Map<string, { isPort: boolean; hasQualifier: boolean }> {
+  const shielded = new Map<string, { isPort: boolean; hasQualifier: boolean }>();
+  const byId = new Map(ast.classifiers.map((c) => [c.id, c] as const));
+  const mark = (id: string, isPort: boolean, hasQualifier: boolean): void => {
     const existing = shielded.get(id);
-    if (existing === undefined) shielded.set(id, { isPort });
-    else if (isPort) existing.isPort = true;
+    if (existing === undefined) shielded.set(id, { isPort, hasQualifier });
+    else {
+      if (isPort) existing.isPort = true;
+      if (hasQualifier) existing.hasQualifier = true;
+    }
   };
   for (const rel of ast.relationships) {
-    if (rel.fromPort !== undefined) mark(rel.from, true);
-    if (rel.toPort !== undefined) mark(rel.to, true);
-    if (rel.fromQualifier !== undefined) mark(rel.from, false);
-    if (rel.toQualifier !== undefined) mark(rel.to, false);
+    if (rel.fromPort !== undefined) mark(rel.from, memberPortIsP(byId.get(rel.from)), false);
+    if (rel.toPort !== undefined) mark(rel.to, memberPortIsP(byId.get(rel.to)), false);
+    if (rel.fromQualifier !== undefined) mark(rel.from, false, true);
+    if (rel.toQualifier !== undefined) mark(rel.to, false, true);
   }
   return shielded;
 }
@@ -245,6 +278,28 @@ export interface MeasuredClassifier {
    *  (./class-geo-types.ts). Set only by `class-object-map-sizing.ts
    *  #buildFieldBasedObjectGeo`. */
   emptyFieldPlaceholder?: true;
+  /**
+   * T2 (SI17) publish-only plumbing -- see `plans/si17-class-row-ports/
+   * decision-journal.md`'s "SCOPE DECISION" entry. `class-port-rows.ts
+   * #classPortRows` (ADR-1's block-tree frame) needs the header height plus
+   * each compartment's OWN per-member measured height, both of which this
+   * file's `buildNormalClassifierResult` already computes and then discards
+   * -- `rows[].y` keeps only the baked-in text BASELINE
+   * (`class-member-rows.ts:200-201`). `fields`/`methods` are each the SAME
+   * `FlatMemberRows` that function already built for its own row/height
+   * math; `undefined` for a compartment means it was SUPPRESSED
+   * (`MemberSuppression`) and contributes NOTHING (not an empty 8px-floor
+   * compartment) -- matches `fieldsH`/`methodsH`'s own suppress gate.
+   * Present ONLY for a classifier that reached `buildNormalClassifierResult`
+   * (a `LIKE_CLASS_KINDS` leaf, no enhanced body, not fully suppressed);
+   * `undefined` for every other shape (map/json/object/usecase/lollipop/…,
+   * none of which use `classPortRows`).
+   */
+  portMemberSections?: {
+    readonly headerHeight: number;
+    readonly fields?: FlatMemberRows;
+    readonly methods?: FlatMemberRows;
+  };
 }
 
 /**
