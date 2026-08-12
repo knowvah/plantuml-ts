@@ -193,7 +193,7 @@ interface DotEdgesRenderCtx {
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
   /** T2: `classPortShortNamesById`'s output -- ADR-4's declared port-name
-   *  sets, `LIKE_CLASS_KINDS` leaves only. */
+   *  sets, row-port leaves only (`isRowPortKind`: class family + object). */
   classPortShortNames: ReadonlyMap<string, Set<string>>;
 }
 

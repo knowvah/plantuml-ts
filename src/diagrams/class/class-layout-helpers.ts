@@ -218,10 +218,10 @@ export interface MeasuredClassifier {
    * math; `undefined` for a compartment means it was SUPPRESSED
    * (`MemberSuppression`) and contributes NOTHING (not an empty 8px-floor
    * compartment) -- matches `fieldsH`/`methodsH`'s own suppress gate.
-   * Present ONLY for a classifier that reached `buildNormalClassifierResult`
-   * (a `LIKE_CLASS_KINDS` leaf, no enhanced body, not fully suppressed);
-   * `undefined` for every other shape (map/json/object/usecase/lollipop/…,
-   * none of which use `classPortRows`).
+   * Present for a row-port leaf: a `LIKE_CLASS_KINDS` one via
+   * `buildNormalClassifierResult`, or an `object` via SI20's
+   * `buildFieldBasedObjectGeo`; `undefined` for every other shape
+   * (map/json/usecase/lollipop/…, none of which use `classPortRows`).
    */
   portMemberSections?: {
     readonly headerHeight: number;
