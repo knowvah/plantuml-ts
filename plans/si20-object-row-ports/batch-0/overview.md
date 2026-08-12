@@ -6,8 +6,8 @@ and [ADR-2](../decisions.md#adr-2--is-the-object-election-input-getdisplayfalse-
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T0](T0-band-source-gono-go.md) | Resolve the header translate and the election input by measurement | general-purpose | `../decision-journal.md` | — | [ ] |
-| [S1](S1-split-object-sizing.md) | Relocate object geo builders to `class-object-sizing.ts` | typescript-pro | `class-object-map-sizing.ts`, `class-object-sizing.ts` (new), `class-layout-helpers.ts` (import only) | — | [ ] |
+| [T0](T0-band-source-gono-go.md) | Resolve the header translate and the election input by measurement | general-purpose | `../decision-journal.md` | — | [x] `c28a9cca` |
+| [S1](S1-split-object-sizing.md) | Relocate object geo builders to `class-object-sizing.ts` | typescript-pro | `class-object-map-sizing.ts`, `class-object-sizing.ts` (new), `class-layout-helpers.ts` (import only) | — | [x] `c5be12be` |
 
 ## Why these two run in parallel
 

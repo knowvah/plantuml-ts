@@ -19,6 +19,7 @@ wrong fix without it:
 
 | Date | Task | test | typecheck | lint | build | frozen counts |
 |---|---|---|---|---|---|---|
+| 2026-08-12 | Batch 0 (T0+S1) | 12795 pass, 1 todo | rc=0 | rc=0 | rc=0 | object DOT 77/80 (1 portOk `rozuxo`, 2 no-candidate) · class DOT 710, portOk 0, 1 `directionOk` (`besepi-37-rori892`) · object census 35/80 — all byte-identical to frozen |
 
 ## Entries
 
@@ -270,3 +271,44 @@ sep,sep1,sep2,minwidth}.puml`), rendered with
 DeterministicMeasurer() })`, reading the node `<rect>`, the divider `<line>`
 and the `<text>` contents. No production code was modified; no git command
 was run.
+
+---
+
+### Orchestrator — execution plan and Batch 0 close (2026-08-12)
+
+**Execution plan** (logged per `rules/parallelism.md`, autonomous-mode
+exception — no user review step). Batch 0 `T0 ∥ S1` on disjoint write-sets
+(T0: journal only; S1: source only), then S2, then `T1 → T2 → T3`, then T4.
+The only parallelism is Batch 0, exactly as the brief specifies; everything
+after is one mechanism through one path, where the intermediate states are
+the hazard. Agents were forbidden all state-mutating git — they share this
+worktree — and the orchestrator commits after verifying each batch.
+
+**Model routing.** T0 to Opus: it is a multi-path measurement whose failure
+mode is a plausible-but-wrong constant, which is exactly the case
+`rules/parallelism.md` reserves Opus for. S1/S2 to Sonnet: mechanical
+relocations with an unambiguous acceptance test.
+
+**Batch 0 outcome.** Both tasks green. Gates re-run by the orchestrator, each
+unpiped with its exit code read directly — `npm test | tail` reports `tail`'s
+status and would mask a vitest failure. Both DOT gates and the object census
+re-measured independently of S1's own run; all three byte-identical to
+frozen. Commits `c28a9cca` (T0), `c5be12be` (S1).
+
+**One correction carried forward into T1.** T0's ADR-1 context named
+`MethodsOrFieldsArea#asBlockMemberImpl` as the composition an object walks.
+It is not: an object body is `BodyEnhanced1`, built through
+`BodierLikeClassOrObject.java:225-233` → `BodyFactory.java:71`, and its
+margin of 4 comes from `BodyEnhancedAbstract#decorate:111-113`'s
+`withMargin(block, 6, 4)` — not from `TextBlockUtils.java:64-69` via the
+class path. The frame and both values are unchanged; the route is not. This
+is the brief's own thesis holding up: closing object from SI17's change
+would have been a result without a mechanism, and the mechanism turned out
+to run through a different constructor than the brief assumed.
+
+**T0's hazard is a real behavior, not a caveat.** `MinimumWidth > 0` wraps
+the body in `TextBlockMinWidth`, which does not implement `WithPorts`
+(`TextBlockMinWidth.java:45`), so `BodyEnhanced1#getPorts:230` returns an
+empty `Ports`. Jar-confirmed: the shape stays `RECTANGLE_HTML_FOR_PORTS`,
+the table emits one row with no `PORT=`, and the edge still names the port
+ids. T1 must reproduce the suppression, not guard against it.
