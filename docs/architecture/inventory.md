@@ -6,8 +6,8 @@ upstream reference it ports).
 
 | Repo | Language | Runtime | Framework | Database | Key Deps | Entry | Notes |
 |------|----------|---------|-----------|----------|----------|-------|-------|
-| plantuml-ts | TypeScript 6.0 | Node 18+ / browser (ESM) | Vite 5 lib build, Vitest 1 | — | graphviz-ts (file dep), katex 0.16, jsonc-parser 3 | `src/index.ts` (`render`/`renderSync`/`renderAll`) | Pure-SVG PlantUML port; no DOM/canvas/async in core |
-| graphviz-ts | TypeScript 6.0 | Node 26.3.1 (engines) / browser (ESM) | esbuild bundle, Vitest 4, Peggy parser | — | none (zero runtime deps) | `src/index.ts` (`renderSvg`, `parse`, `GvcContext`) | Faithful port of Graphviz 2.38 C; DOT layout engine consumed by plantuml-ts |
+| plantuml-ts | TypeScript 6.0 | Node 18+ / browser (ESM) | Vite 5 lib build, Vitest 1 | — | dot-engine (file dep), katex 0.16, jsonc-parser 3 | `src/index.ts` (`render`/`renderSync`/`renderAll`) | Pure-SVG PlantUML port; no DOM/canvas/async in core |
+| dot-engine | TypeScript 6.0 | Node 26.3.1 (engines) / browser (ESM) | esbuild bundle, Vitest 4, Peggy parser | — | none (zero runtime deps) | `src/index.ts` (`renderSvg`, `parse`, `GvcContext`) | Faithful port of Graphviz 2.38 C; DOT layout engine consumed by plantuml-ts |
 | plantuml | Java (upstream ref) | JVM (Gradle Kotlin DSL) | Gradle, TeaVM | — | (upstream Java libs) | `net.sourceforge.plantuml.Run` (CLI) | Reference implementation being ported; v1.2026.7beta3, ~3,656 `.java` files; **not built here** |
 
 Field `—` means not applicable / none. Neither TypeScript repo uses a
@@ -27,9 +27,9 @@ database — both are pure in-memory string-to-SVG transforms.
 - **Entry points:** library API `renderSync` / `render` / `renderAll`
   in `src/index.ts`. Demo app under `demo/` (Vite dev server).
 - **Layout:** all 15 plugins expose `layoutSync`; graph-topology
-  diagrams delegate layout to graphviz-ts via `src/core/graph-layout.ts`.
+  diagrams delegate layout to dot-engine via `src/core/graph-layout.ts`.
 
-### graphviz-ts (runtime dependency)
+### dot-engine (runtime dependency)
 - **Languages:** TypeScript (primary); a generated Peggy grammar
   (`src/parser/dot.pegjs` → `dot.js`) for DOT parsing.
 - **Key components:** faithful C-module ports — `layout/` (dotgen:
@@ -40,8 +40,10 @@ database — both are pure in-memory string-to-SVG transforms.
 - **Databases / external services:** none (zero runtime dependencies).
 - **Entry points:** `renderSvg(dot, engine)`, `tryRenderSvg`, `parse`,
   `GvcContext`, plus `./api` and `./render` subpath exports.
-- **Consumed by plantuml-ts** as `file:../graphviz-ts/graphviz-ts-0.1.0.tgz`
-  (pinned tarball, not live source — see project memory).
+- **Consumed by plantuml-ts** from npm as `@knowvah/dot-engine@^1.2.7`, a
+  published package with a lockfile integrity hash — no longer the local
+  `file:../graphviz-ts/*.tgz` tarball this document described while the engine
+  was still being developed alongside the port.
 
 ### plantuml (upstream reference)
 - **Role:** authoritative behavioral + architectural spec for the port.

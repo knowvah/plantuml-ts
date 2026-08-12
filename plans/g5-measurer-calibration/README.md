@@ -119,10 +119,10 @@ iteration" below.
   in the final state.
 - **C2**: landed chunk 1 — `layoutGraph()`'s
   `DotLayoutResult` now exposes real per-cluster geometry
-  (`graphviz-ts` 0.1.26072115's new `getLayout().clusters`, TDD, 4 new
+  (`dot-engine` 0.1.26072115's new `getLayout().clusters`, TDD, 4 new
   tests, additive/no-consumer-yet). Deep jar-verified diagnosis of
   mechanism 16 (entity-vs-cluster wrap)'s RENDER half found it blocked on
-  a graphviz-ts programmatic-builder-API gap (no supported way to
+  a dot-engine programmatic-builder-API gap (no supported way to
   construct an HTML-table cluster label outside DOT-text parsing) — filed
   `docs/graphviz-issues/07-html-label-mark-not-exported.md`, with a
   jar-verified 19px header-height constant (18/19 real fixtures exact, the
@@ -454,7 +454,7 @@ setHtmlAttr cluster title-table adoption (19px header constant,
 fix; sibling document order (printGroups-before-printEntities + the
 creationIndex edge-order bug) + conditional body-fill
 (RoundedSouth); jar-exact cluster wrapper margins (p1 / i+p1
-CL_OFFSET nesting, 84/84). graphviz-ts issues 06 and 07 filed,
+CL_OFFSET nesting, 84/84). dot-engine issues 06 and 07 filed,
 fixed upstream (0.1.26072115 / 0.1.26072117), verified, adopted.
 size-backlog 103 → 92 entries over the mission, zero widenings.
 

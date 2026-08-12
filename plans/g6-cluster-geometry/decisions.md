@@ -7,9 +7,9 @@ graphviz's cluster rank-separation (`~/git/graphviz/lib/dotgen/
 position.c:780`, `d1 = rank[r+1].ht2 + rank[r].ht1 + CL_OFFSET`), a
 per-adjacent-rank-pair computation that runs inside the layout engine.
 **Decision:** T1 first localizes where behavior diverges: (a)
-graphviz-ts vs the C source → fix upstream in graphviz-ts (file under
+dot-engine vs the C source → fix upstream in dot-engine (file under
 `docs/graphviz-issues/` + TRACKER.md line, fix, adopt new pinned .tgz,
-re-measure); (b) graphviz-ts matches C but jar adds vertical margin
+re-measure); (b) dot-engine matches C but jar adds vertical margin
 outside layout → fix at the seam (`src/core/graph-layout-build.ts`),
 mirroring how C7's side margins landed. Both paths pre-authorized.
 **Consequences:** T2's write-set is conditional on T1's verdict; a

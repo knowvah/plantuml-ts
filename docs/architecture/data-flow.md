@@ -4,10 +4,10 @@ Sequence diagrams for the most important flows, derived from
 `src/index.ts` and `src/core/`. All steps are in-process synchronous
 calls except where an `async`/`await` boundary is drawn explicitly.
 
-## 1. `renderSync` of a graph-topology diagram (the graphviz-ts seam)
+## 1. `renderSync` of a graph-topology diagram (the dot-engine seam)
 
 The critical path: a class/state/description/dot diagram that borrows
-graphviz-ts for layout. This is the flow where most accumulated fidelity
+dot-engine for layout. This is the flow where most accumulated fidelity
 lives.
 
 ```plantuml
@@ -20,7 +20,7 @@ participant "block-extractor" as Blk
 participant "dispatcher registry" as Reg
 participant "diagram plugin (e.g. class)" as Plg
 participant "graph-layout.ts" as GL
-participant "graphviz-ts" as GV
+participant "dot-engine" as GV
 participant "plugin.render + svg.ts" as Ren
 App -> API : renderSync(source, options)
 API -> API : reject if source has !include
@@ -92,7 +92,7 @@ note over API,App : errors (including include errors) → errorSvg
 
 ## 3. `renderSync` of a self-laying-out diagram (sequence)
 
-Contrast case: no graphviz-ts. Sequence (and the data-shape diagrams)
+Contrast case: no dot-engine. Sequence (and the data-shape diagrams)
 compute geometry directly from the AST, so the pipeline is shorter and
 never crosses the layout seam.
 
@@ -121,9 +121,9 @@ API --> App : svg…/svg
 ## Why these three
 
 - **Flow 1** exercises the single most complex and highest-value seam
-  (graphviz-ts integration) and the full plugin contract.
+  (dot-engine integration) and the full plugin contract.
 - **Flow 2** is the only async/effectful path and the only place the
   library reaches outside the process — the security-relevant boundary
   (CSP/CORS-aware fetch injection).
-- **Flow 3** shows the self-contained layout path, confirming graphviz-ts
+- **Flow 3** shows the self-contained layout path, confirming dot-engine
   is a per-diagram-type dependency, not a global one.

@@ -6,10 +6,10 @@ cluster wrap) — 92 state fixtures + the 20-fixture `<<entrypoint>>`/
 `<<exitpoint>>` family gated behind it. `graph-layout-build.ts#addClusters`
 (the seam `layoutGraph()` actually uses in production) builds its graph
 programmatically (`createGraph`/`addSubgraph`/`setAttr`), never through
-graphviz-ts's DOT-text parser. The jar drives every cluster's real title
+dot-engine's DOT-text parser. The jar drives every cluster's real title
 reservation via an HTML `<TABLE FIXEDSIZE="TRUE" WIDTH=".." HEIGHT="..">`
 label (`ClusterHeader.java`, `ClusterDotString.java:121-133`,
-`SvekEdge.appendTable`) — issue 05 already confirmed graphviz-ts's LAYOUT
+`SvekEdge.appendTable`) — issue 05 already confirmed dot-engine's LAYOUT
 ENGINE honors this correctly once given one, but only demonstrated it via
 DOT-TEXT input (where `label=<...>` syntax is parsed natively). The
 programmatic `GvGraphBuilder.addSubgraph(name, attrs)` takes a plain
@@ -23,7 +23,7 @@ constant is not part of the package's public surface (absent from
 ## Repro
 
 ```ts
-import { createGraph, render, getLayout, setTextMeasurer, LutTextMeasurer } from 'graphviz-ts';
+import { createGraph, render, getLayout, setTextMeasurer, LutTextMeasurer } from 'dot-engine';
 setTextMeasurer(new LutTextMeasurer());
 const b = createGraph({ directed: true });
 b.addNode('F', { shape: 'box', fixedsize: 'true', label: '', width: '0.694', height: '0.694' });
@@ -71,7 +71,7 @@ DOT-text parsing, not the programmatic builder this port actually calls).
 
 ---
 
-**RESOLVED — graphviz-ts 0.1.26072117 (verified 2026-07-21).** The ask's
+**RESOLVED — dot-engine 0.1.26072117 (verified 2026-07-21).** The ask's
 second option was delivered: `setHtmlAttr(k, v)` is now public on
 `GvNode`, `GvEdge`, and `GvGraphBuilder` (subgraphs included). Behavioral
 verification through the exact programmatic path this issue filed:

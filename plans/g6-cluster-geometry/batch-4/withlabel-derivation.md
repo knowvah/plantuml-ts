@@ -54,7 +54,7 @@ Two things are missing, and they are **not** where the batch-4
    byte-for-byte against jar's cached `svek-3.dot` for pesita — see
    §3). This is why the DOT gate is already 267/267 for state. Nothing
    to do here either, for the *comparator-visible* structure. The gap
-   is exclusively in the **real graphviz-ts layout path**
+   is exclusively in the **real dot-engine layout path**
    (`graph-layout-build.ts`), which is a separate code path from the
    text emitter and currently has no equivalent nesting for this
    family.
@@ -515,20 +515,20 @@ the `titleTableEligible` boolean itself whose conjunct list shrinks.
 # Round 2 (orchestrator-authorized continuation)
 
 **Verdict: ISOLATED.** Both missing pieces T9 diagnosed are now fully
-specified with citations and empirically confirmed against graphviz-ts's
+specified with citations and empirically confirmed against dot-engine's
 real layout engine (not just the DOT-parity text emitter). Round 1's
 FrontierCalculator predictions (§4) are **unchanged** — they were
 computed from `initial`/`insides`/`points` values read off jar's own
 real cached DOT, which already has the correct rank/`i`-wrapper shape
 baked in. What was missing is purely *how T9's `addClusters` must
-build the graphviz-ts input* to reproduce that same `initial`. Round 1
+build the dot-engine input* to reproduce that same `initial`. Round 1
 under-specified this; this round closes it.
 
 ## Round 2 method note
 
 Everything below was verified with disposable probes
 (`scripts/_tmp-g6-t8-round2-*.ts`, `npx tsx`, deleted before finishing)
-that call graphviz-ts's **real programmatic builder + layout engine**
+that call dot-engine's **real programmatic builder + layout engine**
 directly (`createGraph`/`addSubgraph`/`render`/`getLayout` — the exact
 functions `graph-layout.ts`/`graph-layout-build.ts` use), not the DOT
 text emitter. This is the "run the builder-emitted equivalent"
@@ -567,15 +567,15 @@ right shape; it is simply never read by the real-layout builder
 text emitter (`svek-dot-emit.ts:249-258`, confirmed by grep — zero
 `portRanks` references in `graph-layout-build.ts`).
 
-**Builder-API verdict: the graphviz-ts programmatic builder CAN express
+**Builder-API verdict: the dot-engine programmatic builder CAN express
 this — with one non-obvious placement requirement, confirmed by a
 minimal repro that reproduces T9's own failure mode.**
 
 `GvGraphBuilder.addSubgraph(name, attrs?)` accepts an arbitrary
-`Record<string,string>` attrs bag (`node_modules/graphviz-ts/dist/api/builder.d.ts:57`).
-graphviz-ts's real rank-assignment code (not the emitter) reads a
+`Record<string,string>` attrs bag (`node_modules/dot-engine/dist/api/builder.d.ts:57`).
+dot-engine's real rank-assignment code (not the emitter) reads a
 subgraph's `rank` attribute directly:
-`csRanksetKind(g)` (`node_modules/graphviz-ts/dist/index.js`, the
+`csRanksetKind(g)` (`node_modules/dot-engine/dist/index.js`, the
 function immediately preceding `csSetupCluster`/`csProcessRankset`) —
 `g.attrs.get("rank")` mapped `"source"→SOURCERANK`, `"sink"→SINKRANK`
 etc., the direct port of `dotgen/rank.c`'s cluster-local ranking pass.
@@ -592,7 +592,7 @@ cluster with a jar-shaped title table, twice:
    `graph-layout-build.ts:83-98`, used today for TOP-level
    `{rank=...}` groups — e.g. state pseudo-node ranks). Result:
    `Warning: port1 was already in a rankset, deleted from cluster unix`
-   printed by graphviz-ts (`node_modules/graphviz-ts/dist/index.js`,
+   printed by dot-engine (`node_modules/dot-engine/dist/index.js`,
    `markClusterNode`: `if ((n.info.ranktype ?? 0) !== 0) { console.error(...);
    agDeleteFromCluster(clust, n); return; }` — a faithful port of real
    graphviz's `dotgen/rank.c` cluster/rankset conflict rule: a node
@@ -708,7 +708,7 @@ directly (the real layout engine, not DOT text):
 | Variant | port node Y | outer cluster bbox (w×h) | Note |
 |---|---|---|---|
 | No rank constraint | same rank as anchor | 132×68.72 | baseline |
-| Rank constraint, **root**-level subgraph | moved (rank honored) | **132×68.72 — unchanged** | graphviz-ts evicts the node from the cluster (`markClusterNode` conflict path) before computing the cluster bbox — this is T9's exact failure mode |
+| Rank constraint, **root**-level subgraph | moved (rank honored) | **132×68.72 — unchanged** | dot-engine evicts the node from the cluster (`markClusterNode` conflict path) before computing the cluster bbox — this is T9's exact failure mode |
 | Rank constraint, **cluster**-level (nested) subgraph | moved (rank honored) | **132×108.72 — correctly grew** | matches jar's real nesting |
 | `i` wrapper absent (anchor added directly to `ee`), rank correct | — | 132×80.00 | |
 | `i` wrapper present (anchor added to a nested `${id}i` inside `ee`), rank correct | — | 132×84.72 | +4.72 — real, not noise |
@@ -805,7 +805,7 @@ C3/C7 path, outside both Round 2 mechanisms.
   and is not itself a bug** — it is correct for what it already does
   (this port's other, non-cluster-scoped `{rank=...}` groups); the
   border-point family simply needs its OWN, cluster-nested instance of
-  the same underlying graphviz-ts feature (`{rank=...}` subgraph +
+  the same underlying dot-engine feature (`{rank=...}` subgraph +
   `attrs`), built at a different call site (`addClusters`, not
   `addNodes`). T9 should **not** modify `addNodes`'s existing behavior
   or its `DotInputNode.attributes.rank` field/contract — that field/
@@ -822,7 +822,7 @@ C3/C7 path, outside both Round 2 mechanisms.
   bbox value (not just DOT-shape presence) for at least one
   rank-bearing fixture, so a future accidental root-level placement is
   caught by the numeric regression, not just eyeballed.
-- **No new graphviz-ts API gap was found.** Both mechanisms are fully
+- **No new dot-engine API gap was found.** Both mechanisms are fully
   expressible via the EXISTING public `GvGraphBuilder` surface
   (`addSubgraph`, `.addNode`, `.setHtmlAttr`) already imported by
   `graph-layout-build.ts` — no `docs/graphviz-issues/` filing needed
@@ -839,8 +839,8 @@ C3/C7 path, outside both Round 2 mechanisms.
 
 ## Round 2 files/paths used
 
-- `node_modules/graphviz-ts/dist/api/builder.d.ts`,
-  `node_modules/graphviz-ts/dist/index.js` (`csRanksetKind`,
+- `node_modules/dot-engine/dist/api/builder.d.ts`,
+  `node_modules/dot-engine/dist/index.js` (`csRanksetKind`,
   `markClusterNode`, `agDeleteFromCluster`)
 - `src/core/graph-layout-build.ts` (`addNodes`'s existing rank
   mechanism, read for contrast — not modified)
@@ -875,7 +875,7 @@ directly on the fixture's real cached jar DOT
 border-point cluster's raw `initial` bbox and every relevant member's
 post-layout box/center — this is the exact input Round 3 §1's
 "end-anchor confirmation" table already proved byte-exact vs.
-graphviz-ts's own `getLayout()` (both `parse`+`render` text-path and,
+dot-engine's own `getLayout()` (both `parse`+`render` text-path and,
 per Round 3's isolation matrix, the programmatic builder path once
 wired per Round 3 §2's call sequences). Then hand-applied
 `frontierCalculator`/`ensureMinWidth` exactly as committed in
@@ -1092,7 +1092,7 @@ by the independent script re-implementation.
 Attempt 3 (reverted, not inspectable — Round 3 §3 item 7) got bitaxo
 byte-exact but missed pesita and kotagu badly (55×293.61 vs 126×104.72;
 248×398 vs 289×358), despite Round 3's isolation matrix proving
-graphviz-ts's raw layout correct for every context variable and
+dot-engine's raw layout correct for every context variable and
 compound that distinguishes those two fixtures from bitaxo. The defect
 is therefore necessarily in plantuml-ts's own wiring, not the
 algorithm. This derivation pins down precisely what that wiring must
@@ -1210,14 +1210,14 @@ above) was missing or wrong.
 # Round 3 (G7 T1 — isolation-matrix adjudication of the suspected second bug)
 
 **Verdict: USAGE DEFECT, NOT A LIBRARY DEFECT. No issue 09 exists.**
-graphviz-ts's raw layout output (the `initial` bbox `FrontierCalculator`
+dot-engine's raw layout output (the `initial` bbox `FrontierCalculator`
 consumes, `getLayout().clusters`) is byte-exact vs. real `dot` 15.1.0 for
 every context variable that distinguishes pesita/kotagu from the already-
 verified bitaxo control — individually and in the exact two-variable
 combinations that mirror pesita's and kotagu's real shapes. batch-4
 retry-3's misses (pesita 55×293.61 vs. target 126×104.72; kotagu
 248×398 vs. target 289×358 — see the "batch-4 retry-3" decision-journal
-row above) are therefore **not** explained by any graphviz-ts behavior
+row above) are therefore **not** explained by any dot-engine behavior
 this round could reproduce a divergence for. The mechanism must lie in
 plantuml-ts's own code (§4 below).
 
@@ -1226,7 +1226,7 @@ plantuml-ts's own code (§4 below).
 Disposable probes (`scripts/_tmp-g7-t1-matrix.ts`,
 `scripts/_tmp-g7-t1-endanchor.ts`, `npx tsx`, deleted before finishing;
 DOT fixtures written only to the session scratchpad, never the repo),
-calling graphviz-ts's real `parse`/`createGraph`/`render`/`getLayout`
+calling dot-engine's real `parse`/`createGraph`/`render`/`getLayout`
 directly — the same functions `graph-layout.ts` uses — plus real `dot
 -Txdot` as ground truth. Cluster w×h in points (native y-up frame,
 delta of the `bb=` corners); node y is the ranked port node's native-frame
@@ -1302,7 +1302,7 @@ Method, in order:
    pre-T7-era edit list could not have anticipated (§3 below).
 5. Diff the resulting port-simulated builder shape against the cached
    jar DOT (step 3) for structural isomorphism, fixture by fixture (§4).
-6. Since Round 3 T1's isolation matrix already proved graphviz-ts
+6. Since Round 3 T1's isolation matrix already proved dot-engine
    reproduces real `dot` byte-exact for every constituent sub-shape used
    here (rank group, `${id}i`-inside-`ee`, nested child cluster inside
    `ee`, ancestor cluster wrapping a border-point cluster [proven
@@ -1312,7 +1312,7 @@ Method, in order:
    targets — the `initial`/`insides`/`points` triples the port would
    compute are the SAME values T4 already read off jar's cached DOT via a
    fresh `dot -Txdot` run this session's predecessor performed. No new
-   `dot -Txdot`/graphviz-ts execution was needed to re-derive them; §5
+   `dot -Txdot`/dot-engine execution was needed to re-derive them; §5
    states this transfer explicitly per fixture rather than asserting it
    globally.
 
@@ -1514,7 +1514,7 @@ values T4's Walkthrough 1 already read off this exact cached file this
 session's predecessor (`initial=155,8,197,123.72` → 42×115.72 raw;
 `insides=[]`; `points=[{176,109.72}]`) — inherited unchanged since the
 port's construction reproduces the identical structure Round 3's C0 cell
-already proved graphviz-ts lays out byte-exact vs real `dot`.
+already proved dot-engine lays out byte-exact vs real `dot`.
 **Final: 42 × 101.72 (frontier arithmetic unchanged from T4 §Walkthrough
 1) — EXACT MATCH to target.**
 
@@ -1748,7 +1748,7 @@ if item 3's guard were somehow bypassed).
   gate (G7 T4)" section above (§ Walkthroughs 1-3) — not re-run, since §0
   step 6/§4 establish the transfer argument (structural isomorphism +
   Round 3 T1's already-completed isolation matrix) rather than
-  re-executing `dot -Txdot`/graphviz-ts this session.
+  re-executing `dot -Txdot`/dot-engine this session.
 - No production files modified. No probe scripts created under
   `scripts/` this session (`git status --short` clean, verified before
   and after this addendum was written).
@@ -1815,11 +1815,11 @@ because those ARE meant to be treated as real clusters by `isACluster`
    Ruled out: every cell used the non-`cluster`-prefixed
    `sink_group_15` name (issue 08's fix); all seven cells still agree
    three-way, so a naming regression is not present in any tested shape.
-2. **`${id}i` wrapper mis-handling in graphviz-ts.** Ruled out (C1,
+2. **`${id}i` wrapper mis-handling in dot-engine.** Ruled out (C1,
    C1+C3): isolated cell and the pesita-mirror compound cell agree
    exactly across all three paths; the +8pt height delta it introduces
    is identical real-dot/text/builder.
-3. **Nested child cluster inside `ee` mis-handling in graphviz-ts.**
+3. **Nested child cluster inside `ee` mis-handling in dot-engine.**
    Ruled out (C2, C2+C4): agrees exactly in isolation and combined with
    the pseudo-node.
 4. **Parent-cluster nesting shifting the rank-forced node or the
@@ -1828,10 +1828,10 @@ because those ARE meant to be treated as real clusters by `isACluster`
    uniformly by the parent's own margin, identically in all three
    paths.
 5. **Non-border pseudo-node co-membership in `ee` corrupting
-   `points`/`insides` computation in graphviz-ts.** Ruled out (C4,
+   `points`/`insides` computation in dot-engine.** Ruled out (C4,
    C2+C4): agrees exactly in isolation and combined with a nested child
    cluster.
-6. **graphviz-ts's raw layout diverging from real dot on the actual
+6. **dot-engine's raw layout diverging from real dot on the actual
    production fixtures (as opposed to minimal repros).** Ruled out
    directly: `parse`+`render`+`getLayout` on pesita's full `svek-3.dot`
    and kotagu's full `svek-1.dot` reproduce real dot's cluster bbox
@@ -1874,7 +1874,7 @@ matrix is the complete input a paper derivation needs.
 
 ## 5. Round 3 files/paths used
 
-- `node_modules/graphviz-ts/dist/{api,render,parser}/*.d.ts` (`parse`,
+- `node_modules/dot-engine/dist/{api,render,parser}/*.d.ts` (`parse`,
   `createGraph`, `render`, `getLayout` signatures)
 - `src/core/graph-layout.ts` (existing `layoutGraph` call pattern,
   read for the builder/text-path construction template — not modified)
@@ -1936,7 +1936,7 @@ round's citation:
    T7-landed `graph-layout-build.ts#handlesFor`/`addClusters` (verbatim
    copy of the existing non-border-point branch + one new
    `portRanksLabelOnEe` branch implementing T8 Round-3 §5 items 1/3/5/6),
-   built with the REAL `graphviz-ts` programmatic builder
+   built with the REAL `dot-engine` programmatic builder
    (`createGraph`/`addSubgraph`/`addNode`/`setHtmlAttr`/`render`/
    `getLayout`) fed the CAPTURED (step 1) node/edge/cluster data —
    not hand-copied numbers (`scripts/_tmp-g7-t13-simulate.ts`, deleted).
@@ -1947,8 +1947,8 @@ round's citation:
    `cluster.labelWidth + 10` (not copied from any prior doc).
 5. **Divergence isolation (pesita only, after step 3 missed)** — ran
    real `dot` 15.1.0 directly on jar's own VERBATIM cached
-   `svek-3.dot` (unmodified) to reconfirm graphviz-ts's text path
-   reproduces it byte-exact (it does — rules out a graphviz-ts defect
+   `svek-3.dot` (unmodified) to reconfirm dot-engine's text path
+   reproduces it byte-exact (it does — rules out a dot-engine defect
    outright), then performed a controlled bisection: substituted
    individual pieces (node sizes, edge-label dimensions, cluster names,
    ids, named-vs-anonymous rank subgraph) between jar's real DOT and
@@ -1985,7 +1985,7 @@ Simulated T14 construction (rank subgraph named `sink_group_cluster0`,
 non-`cluster`-prefixed per `docs/graphviz-issues/08`'s resolution; no
 `a`/`i` wrap, `isGroupTouched('C')`=false, matching probed value):
 
-- probed `initial` (graphviz-ts `getLayout().clusters['cluster0']`,
+- probed `initial` (dot-engine `getLayout().clusters['cluster0']`,
   native frame, ALREADY top-left-corner — not center, see §5 note):
   `{x:155,y:11,width:42,height:115.72}`
 - `insides=[]`, `points=[{x:176,y:25}]` (probed `d`'s post-layout
@@ -2033,11 +2033,11 @@ correct given its input; the input itself is wrong.
 
 ### Mechanism (isolated by controlled bisection, `dot` 15.1.0)
 
-1. Confirmed graphviz-ts is not the cause: `parse()`+`render()`+
+1. Confirmed dot-engine is not the cause: `parse()`+`render()`+
    `getLayout()` on jar's own VERBATIM cached `svek-3.dot` (unmodified,
    byte-for-byte) reproduces `cluster15` (`AA`) at exactly
    `148×118.720012` — matching real `dot` to the sub-px level. No
-   graphviz-ts defect exists for this shape.
+   dot-engine defect exists for this shape.
 2. Confirmed it is not a numeric-value difference: substituted this
    session's own captured node sizes (Reanimate/Closing/etc, which do
    differ slightly from jar's — a KNOWN, separate, unrelated autonom-
@@ -2079,7 +2079,7 @@ correct given its input; the input itself is wrong.
    cluster bbox for the exact same cluster-structure input.**
    Confirmed by 4 independent single-variable experiments on this
    session's own reconstructed DOT (fed to real `dot`, not just
-   graphviz-ts): (a) moving BOTH reversed edges to the top of the file
+   dot-engine): (a) moving BOTH reversed edges to the top of the file
    (matching jar's position) → fixes the height (≈111.72); (b) moving
    only ONE of the two → also fixes it (either back-edge choice from a
    different root still resolves the same cycle correctly once the
@@ -2116,13 +2116,13 @@ correct given its input; the input itself is wrong.
    126.46 after order-fix) already matches target exactly once the
    unrelated order issue is corrected, confirming the structure itself
    is right.
-2. **A graphviz-ts library defect.** Ruled out directly: graphviz-ts's
+2. **A dot-engine library defect.** Ruled out directly: dot-engine's
    real `parse`/`render`/`getLayout` reproduces jar's own verbatim
    cached DOT byte-exact (148×118.72). The order-sensitivity itself
    (§4 item 4) was independently reproduced against the REAL `dot`
-   15.1.0 binary, not just graphviz-ts — confirming it is standard,
+   15.1.0 binary, not just dot-engine — confirming it is standard,
    documented `dot` layout-engine behavior (DFS-root-dependent cycle
-   breaking), not a graphviz-ts-specific bug.
+   breaking), not a dot-engine-specific bug.
 3. **T11's `titleAndAttributeWidth` fix.** Ruled out as the cause of
    THIS specific miss: `AA`'s probed `labelWidth`/`labelHeight`
    (116.4625/28) already match jar's cached DOT exactly (§1);
@@ -2289,7 +2289,7 @@ textpath,dumpdot,debug-bitaxo}.ts`, `npx tsx`, all deleted before finishing):
    `graph-layout-build.ts#addClusters` (verbatim copy of the non-border
    branch, unmodified addNodes/applyGraphAttrs reused as-is) plus a NEW
    `portRanksLabelOnEe` branch implementing T8's ten items, built with the
-   REAL `graphviz-ts` programmatic builder (`createGraph`/`addSubgraph`/
+   REAL `dot-engine` programmatic builder (`createGraph`/`addSubgraph`/
    `addNode`/`setHtmlAttr`/`render`/`getLayout`) fed the CAPTURED (step 1)
    data, augmented only with `titleTableWidth/Height` (= the already-T11-
    correct, already-unconditionally-computed `labelWidth/Height` — no new
@@ -2303,7 +2303,7 @@ textpath,dumpdot,debug-bitaxo}.ts`, `npx tsx`, all deleted before finishing):
    (`src/diagrams/state/state-composite-frontier.ts`), imported directly.
 4. **Controlled bisection (pesita only, after step 2 missed)** — isolated
    the blocking mechanism by substituting one variable at a time against
-   the REAL graphviz-ts builder/layout call (not a hand-reconstructed DOT
+   the REAL dot-engine builder/layout call (not a hand-reconstructed DOT
    text, unlike T13's own §4 method) and re-running the full pipeline after
    each substitution.
 
@@ -2388,7 +2388,7 @@ specifically the jar-verbatim-DOT recheck reproduces T13 §4 item 1's own
    `layoutGraph()`-OUTPUT-side-only (echoed back to renderers via
    `toEdgeEntry`, `graph-layout.ts:74-97`); the REAL layout call measures
    the label fresh, internally, from the `label` text string via
-   graphviz-ts's own configured text measurer. Confirms the two intended
+   dot-engine's own configured text measurer. Confirms the two intended
    bisections (§4 item 2 in T13, and this session's own first attempt)
    were literal no-ops from the start, not genuine negative evidence
    about the `\n`/height-formula bug itself.
@@ -2421,7 +2421,7 @@ through" behavior T13 §4 already established for this insides-empty case).
    `addEdges` (:350-411, the REAL LAYOUT path, a SEPARATE code path from
    the emitter, per that file's own header comment) instead sets
    `attrs.label = a.label` (:380-381) as PLAIN TEXT, relying on
-   graphviz-ts's own internal text measurement (whatever its configured
+   dot-engine's own internal text measurement (whatever its configured
    `LutTextMeasurer` computes for that text+font) rather than the port's
    own pre-computed, jar-calibrated `labelWidth`/`labelHeight`. This is
    the EXACT SAME class of gap the cluster-title-table mechanism already
@@ -2506,11 +2506,11 @@ through" behavior T13 §4 already established for this insides-empty case).
    HEIGHT, driven by the edge-label mechanism above, varies. A structural
    defect in the nesting would be expected to also perturb the width or
    the bitaxo/kotagu results; neither happens.
-2. **A graphviz-ts library defect.** Not implicated: item 4/§4's
+2. **A dot-engine library defect.** Not implicated: item 4/§4's
    FIXEDSIZE-table fix uses the SAME public `GvGraphBuilder.setHtmlAttr`
    surface already relied on for cluster titles (no new API gap); the
    remaining shortfall (item 2's 1px/line + `\n`-split) is entirely
-   upstream of graphviz-ts, in this port's OWN text-dimension computation
+   upstream of dot-engine, in this port's OWN text-dimension computation
    fed to it.
 3. **The "cluster"-prefix naming bug this session found (§6 below)
    being pesita-specific.** It is NOT — it broke bitaxo FIRST (the
@@ -2526,7 +2526,7 @@ T8's Round 2 (§ "rankSpec", "Synthetic subgraph names...") suggested
 rank-constraint subgraph, reasoning only about the DOT-parity comparator's
 `^cluster\d+$` regex. That name STARTS WITH "cluster" (e.g.
 `cluster0rank_source`) — and real graphviz (DOT language convention,
-faithfully mirrored by graphviz-ts) treats ANY subgraph whose name begins
+faithfully mirrored by dot-engine) treats ANY subgraph whose name begins
 with "cluster" as its own independent VISUAL cluster with its own bounding
 box, not a bare rank-grouping construct. Jar's own real DOT uses an
 ANONYMOUS (unnamed) `{rank=source;...}` block for this — no cluster
@@ -2629,7 +2629,7 @@ task):
   `state-composite-detect.ts` (read only)
 - `src/core/graph-layout-build.ts`, `graph-layout.ts`,
   `graph-layout.types.ts`, `svek-dot-emit.ts`, `measurer.ts` (read only)
-- `node_modules/graphviz-ts/dist/api/{builder,geometry}.d.ts` (read only
+- `node_modules/dot-engine/dist/api/{builder,geometry}.d.ts` (read only
   — `GvGraphBuilder`/`getLayout` public surface, confirming no new API
   gap for §4 item 1's fix)
 - jar: `~/git/plantuml/.../svek/SvekEdge.java` (read only — confirmed
@@ -2638,7 +2638,7 @@ task):
   2's 1px/line gap)
 - Real `dot` 15.1.0 (`dot -Tplain`, `dot -Txdot`) on jar's cached DOT —
   cross-checked bitaxo's and AA's own real geometry independently of
-  graphviz-ts, confirming every graphviz-ts result above against the
+  dot-engine, confirming every dot-engine result above against the
   actual external binary, not just the pinned library.
 - Probes (`scripts/_tmp-g7-t17-{capture,capture2,simulate,bisect,
   minimal,minimal2,textpath,dumpdot,debug-bitaxo}.ts`, `npx tsx`, this
@@ -2661,7 +2661,7 @@ FIXEDSIZE + height fix landed for real (`state-composite-edge-label.ts`'s
 probe-only substitution), the ink-walk aggregation (T20b) landed, label
 placement now consumes graphviz-returned `labelX`/`labelY`, and the
 `insideAutonomPass` title-table guard was relaxed. The engine package was
-also renamed `graphviz-ts` → `@knowvah/dot-engine` (byte-identical
+also renamed `dot-engine` → `@knowvah/dot-engine` (byte-identical
 layout, per the 2026-07-24 journal row). None of this is asserted here —
 every number below comes from this session's own instrumented execution
 against the CURRENT tree.

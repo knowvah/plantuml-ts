@@ -8,7 +8,7 @@ plantuml-ts ledger **B34/M39**.
 
 **Finding.** For an edge with `minlen=0` (both endpoints on the same
 rank, which is how PlantUML expresses a horizontal association),
-graphviz-ts places the two nodes a **constant** distance apart
+dot-engine places the two nodes a **constant** distance apart
 regardless of the edge label's width. Real graphviz grows the gap with
 the label, because the label occupies horizontal space between the two
 nodes on that rank.
@@ -16,7 +16,7 @@ nodes on that rank.
 Measured with the same graph fed to `layoutGraph()` four times, varying
 only `labelWidth`:
 
-| `labelWidth` | graphviz-ts box-to-box gap |
+| `labelWidth` | dot-engine box-to-box gap |
 |---|---|
 | 0 | 60.425 |
 | 29 | 60.425 |
@@ -32,7 +32,7 @@ equivalent sources:
 | `label` (29 wide) | **63.425** |
 | `aVeryMuchLongerEdgeLabelHere` | 232.425 |
 
-i.e. jar gap ≈ `labelWidth + 34.4`; graphviz-ts is flat at 60.425.
+i.e. jar gap ≈ `labelWidth + 34.4`; dot-engine is flat at 60.425.
 
 **What is NOT the cause (falsified — don't chase):**
 
@@ -69,7 +69,7 @@ sh0006->sh0007[arrowtail=none,arrowhead=none,minlen=0,
 Expected (real `dot`): the two nodes' box-to-box gap grows with the
 label's width — 63.425 for `WIDTH="29"`.
 
-Actual (graphviz-ts): 60.425, unchanged for any `WIDTH`.
+Actual (dot-engine): 60.425, unchanged for any `WIDTH`.
 
 ## Secondary symptom, same repro
 

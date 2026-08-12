@@ -2,7 +2,7 @@
 
 Port upstream PlantUML's SVG emission stack — the `klimt` drawing model
 (`UGraphic` state chain + primitive shapes) and `SvgGraphics` serializer —
-into `src/core/klimt/`, plus a near-verbatim port of graphviz-ts's golden
+into `src/core/klimt/`, plus a near-verbatim port of dot-engine's golden
 comparison harness (`normalize.ts` + `compare.ts`, 0.01 conformance band).
 Deliverable: an emitter whose output is **fully conformant** with the jar's
 serialization for every ported primitive, proven by a golden conformance

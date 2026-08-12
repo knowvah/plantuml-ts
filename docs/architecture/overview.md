@@ -29,28 +29,29 @@ Three repositories in the `sseely` org form the working set:
 plantuml (Java, upstream)        graphviz (C, upstream — not in org)
         │  ports behavior/AST                 │  ports algorithms
         ▼                                      ▼
-   plantuml-ts  ───── depends on ─────►   graphviz-ts
+   plantuml-ts  ───── depends on ─────►   dot-engine
    (this repo)     (file: tarball dep)   (DOT layout engine)
 ```
 
 - **plantuml (upstream Java, `sseely/plantuml`)** — the authoritative
   reference. Its parser packages and rendering rules define what
   plantuml-ts must reproduce. It is consulted, not built or shipped.
-- **graphviz-ts (`sseely/graphviz-ts`)** — a faithful pure-TypeScript
+- **dot-engine (`knowvah/dot-engine`)** — a faithful pure-TypeScript
   port of Graphviz 2.38's C source. plantuml-ts delegates all
   graph-topology layout (rank assignment, crossing minimization,
   coordinate assignment, edge routing) to it through a single seam,
-  `src/core/graph-layout.ts`. It is consumed as a pinned tarball
-  (`file:../graphviz-ts/graphviz-ts-0.1.0.tgz`), not as live source.
+  `src/core/graph-layout.ts`. It is consumed from npm as
+  `@knowvah/dot-engine@^1.2.7` — a published package, not a local tarball and
+  not live source.
 - **plantuml-ts (this repo)** — owns preprocessing, block extraction,
   diagram-type dispatch, parsing into per-type ASTs, theme/skinparam
   resolution, text measurement, and SVG rendering. It owns layout for
-  non-graph diagram types (e.g. sequence) and borrows graphviz-ts for
+  non-graph diagram types (e.g. sequence) and borrows dot-engine for
   the graph-topology ones.
 
 Two further repos are referenced by code/docs but are **not in the
 `sseely` org** (they are local upstream mirrors / corpora): `graphviz`
-(the Graphviz C source, used as the algorithm spec for graphviz-ts) and
+(the Graphviz C source, used as the algorithm spec for dot-engine) and
 `pdiff` (a 5,600-file `.puml` fixture corpus keyed to upstream GitHub
 issues, used as the work queue).
 
@@ -66,7 +67,7 @@ source string
   → registry.resolve()      (pick the diagram plugin via accepts())
   → plugin.parse()          (source → per-type AST)
   → plugin.layoutSync()     (AST → positioned geometry)
-        └─ graph-layout.ts → graphviz-ts.renderSvg (topology diagrams only)
+        └─ graph-layout.ts → dot-engine.renderSvg (topology diagrams only)
   → plugin.render()         (geometry → SVG string)
 ```
 
@@ -79,8 +80,8 @@ pipeline once per `@start…@end` block.
 
 | Repo | Language | Runtime | Framework | Database | External deps |
 |------|----------|---------|-----------|----------|---------------|
-| plantuml-ts | TypeScript 6.0 | Node 18+ / browser (ESM) | Vite 5, Vitest 1, Playwright | — | graphviz-ts, katex, jsonc-parser |
-| graphviz-ts | TypeScript 6.0 | Node 26.3.1 / browser (ESM) | esbuild, Vitest 4, Peggy | — | none (zero runtime deps) |
+| plantuml-ts | TypeScript 6.0 | Node 18+ / browser (ESM) | Vite 5, Vitest 1, Playwright | — | dot-engine, katex, jsonc-parser |
+| dot-engine | TypeScript 6.0 | Node 26.3.1 / browser (ESM) | esbuild, Vitest 4, Peggy | — | none (zero runtime deps) |
 | plantuml | Java | JVM | Gradle (Kotlin DSL), TeaVM | — | upstream Java libraries |
 
 ## Documents in this folder

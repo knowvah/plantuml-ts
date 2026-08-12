@@ -5,7 +5,7 @@ Subject: [PATCH] feat(oracle): dump svek DOT to PLANTUML_DUMP_DOT for parity
  harness
 
 plantuml-ts verifies its DOT-generation port by diffing the DOT it feeds
-graphviz-ts against the DOT PlantUML feeds graphviz. This taps the exact
+dot-engine against the DOT PlantUML feeds graphviz. This taps the exact
 string at the DotStringFactory.getSvg chokepoint. Gated on the system
 property; the jar is byte-identical to stock when unset.
 

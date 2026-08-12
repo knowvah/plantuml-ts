@@ -126,7 +126,7 @@ ledger's family-level accounting table).
 | Mechanism | Reach (fixtures) | Status |
 |---|---|---|
 | `leaf-sizing.ts` creole-stripped-width/heading-height box sizing | ~260 (dominant family, `svg/@height`/`@width` + all downstream text/rect/path/polygon/line coordinate cascades) | deferred — E2r/L1 decision journal; the single highest-value remaining target for a future mission |
-| `svg/g/g/path/@d`, `svg/g/g/polygon/@points` (edge/spline routing, entity decoration) | 144 / 125 | graphviz-ts territory (OUT OF SCOPE) and/or leaf-sizing downstream — not this mission's charter |
+| `svg/g/g/path/@d`, `svg/g/g/polygon/@points` (edge/spline routing, entity decoration) | 144 / 125 | dot-engine territory (OUT OF SCOPE) and/or leaf-sizing downstream — not this mission's charter |
 | G1 I5 `g[childCount]` sub-families (C: multi-stereotype, D: bracket-body `\n`, E: transparent-color, F: link-endpoint stereotype, H: sprite path-count, I: content-`<g>`-wrapper (I5g), J: `<linearGradient>` count) | ~12–20 each | queued by G1, not resolved by E2r (out of creole-engine charter) |
 | `<back:>` (100% overlap with `<latex>`) | 4 | E2r/L2, deferred — zero marginal value given `<latex>`'s own unreachable byte-conformance |
 | `<u:color>` extended-underline-color | 3 | E2r/L2, deferred — needs a new draw-time `<line>` rendering primitive |

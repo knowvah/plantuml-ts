@@ -4,7 +4,7 @@
 The PARITY-style corpus dashboard (charter gate design): a survey runs
 every corpus fixture through our pipeline, compares against the cached
 jar SVG, and writes per-fixture verdicts to `parity.json`; a dashboard
-renders that to markdown, exactly as graphviz-ts's
+renders that to markdown, exactly as dot-engine's
 `test/corpus/dashboard.ts` renders `PARITY.md`. Report, not a gate.
 
 ## Task
@@ -20,7 +20,7 @@ renders that to markdown, exactly as graphviz-ts's
    Per-fixture timeout (default 10s) → `timeout`. Also record the DOT-
    EQUAL status from the dot-sync data so T18/T19 can filter eligibility.
    Output: `tests/oracle/svg-conformance/parity.json`.
-2. `scripts/svg-parity-dashboard.ts`: near-verbatim port of graphviz-ts
+2. `scripts/svg-parity-dashboard.ts`: near-verbatim port of dot-engine
    `dashboard.ts` → renders `tests/oracle/svg-conformance/PARITY-SVG.md`
    (totals, per-verdict counts, per-family tables, divergence ledger
    section fed from `oracle/accepted-divergences.json`).
@@ -49,7 +49,7 @@ dotEqual: boolean, firstDiff?: string, maxDelta?: number }> }`.
    overwhelmingly `diverged` (expected pre-cutover; proves the
    instrument).
 2. Given parity.json, when the dashboard renders, then PARITY-SVG.md
-   matches graphviz-ts's structural shape (totals, tables).
+   matches dot-engine's structural shape (totals, tables).
 3. Given one fixture that throws in render, then its verdict is
    `errored` with the message captured, and the survey continues.
 

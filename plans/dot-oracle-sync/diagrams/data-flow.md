@@ -19,7 +19,7 @@ package "plantuml-ts" {
   [parser → diagram model] as T1p
   [diagrams/] as T2p
   [core/graph-layout.ts (seam)] as T3p
-  [graphviz-ts → geometry → SVG] as T4p
+  [dot-engine → geometry → SVG] as T4p
   [DotInputGraph] as D2
   [svek-dot-emit.ts\ntoSvekDot()] as E1
 }
@@ -46,6 +46,6 @@ CMP --> R2
 @enduml
 ```
 
-The DOT gate compares the two dashed taps. graphviz-ts sits BELOW the tap —
+The DOT gate compares the two dashed taps. dot-engine sits BELOW the tap —
 its fidelity is a separate concern (measured in ~/git/knowvah/dot-engine itself).
 ```

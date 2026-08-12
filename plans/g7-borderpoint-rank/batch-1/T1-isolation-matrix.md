@@ -2,8 +2,8 @@
 
 ## Context
 
-plantuml-ts (`/Users/scottseely/git/plantuml-ts`). graphviz-ts is the
-pinned layout library (`file:../graphviz-ts/*.tgz`, source readable at
+plantuml-ts (`/Users/scottseely/git/plantuml-ts`). dot-engine is the
+pinned layout library (`file:../dot-engine/*.tgz`, source readable at
 `/Users/scottseely/git/knowvah/dot-engine` — READ-ONLY, never modify). Real
 `dot` 15.1.0 is ground truth. Vitest; probes via `npx tsx`.
 
@@ -25,7 +25,7 @@ pinned layout library (`file:../graphviz-ts/*.tgz`, source readable at
   matches real dot to the digit on the un-nested repro AND on pesita's
   full cached `svek-3.dot` (cluster15 148×118.72). Builder path
   matches when rank-subgraph names don't start with `cluster`
-  (case-insensitive; `isACluster`, graphviz-ts
+  (case-insensitive; `isACluster`, dot-engine
   `src/layout/dot/rank.ts:87-91`).
 - Correct builder sequence (issue 08 Resolution): cluster handle `c`;
   `c.addSubgraph('sink_group_N', {rank:'sink'}).addNode(id)`;
@@ -52,8 +52,8 @@ builder-call equivalent):
   kotagu) if single-variable cells all agree — push-forward.
 
 For each cell measure THREE ways: (1) real `dot -Txdot` on the DOT
-text; (2) graphviz-ts DOT-text path (`parse` → layout → `getLayout`);
-(3) graphviz-ts programmatic builder. Record cluster bbox (w×h) and
+text; (2) dot-engine DOT-text path (`parse` → layout → `getLayout`);
+(3) dot-engine programmatic builder. Record cluster bbox (w×h) and
 the ranked node's y. Also re-run the winning/losing variants against
 pesita's and kotagu's real cached svek DOT via the text path as
 end-anchors.
@@ -68,7 +68,7 @@ finishing; `git status` clean of src/tests at finish.
 Matrix table, machine-readable: cell → {realDot: w×h,y | textPath:
 w×h,y | builder: w×h,y | agree: yes/no}. Plus: the minimal cell(s)
 where builder first diverges from text path, and a one-paragraph
-mechanism statement (which graphviz-ts code path, file:line, causal
+mechanism statement (which dot-engine code path, file:line, causal
 chain, ruled-out list — diagnosis.md discipline).
 
 ## Acceptance criteria
@@ -82,7 +82,7 @@ chain, ruled-out list — diagnosis.md discipline).
 
 ## Boundaries
 
-- Never modify ../graphviz-ts, goldens, size-backlog, or src/.
+- Never modify ../dot-engine, goldens, size-backlog, or src/.
 - No git mutations. If no decisive verdict within budget: return
   ruled-out list + next instrumentation, marked NO-MECHANISM (README
   stop cond. 5).

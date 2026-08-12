@@ -4,7 +4,7 @@
 @startuml
 participant "T1 matrix" as T1
 participant "T2 adjudicate" as T2
-participant "graphviz-ts project (external)" as EXT
+participant "dot-engine project (external)" as EXT
 participant "T3 adopt pin" as T3
 participant "T4 paper gate" as T4
 participant "T5 implement" as T5

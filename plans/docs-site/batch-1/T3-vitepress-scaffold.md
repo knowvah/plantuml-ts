@@ -6,11 +6,11 @@ plantuml-ts (Vite lib build; npm). Model: `~/git/knowvah/dot-engine/docs-site`
 whole). GH Pages project site → base `/plantuml-ts/`.
 
 ## Task
-1. `npm i -D vitepress` (pin like graphviz-ts does).
+1. `npm i -D vitepress` (pin like dot-engine does).
 2. `docs-site/.vitepress/config.ts`: title/description, base
    `/plantuml-ts/`, local MiniSearch (`search: {provider: 'local'}`),
    nav + sidebar covering: Guide (getting-started, api), Playground,
-   Parity, Divergences. Port the graphviz-ts config shape; adjust
+   Parity, Divergences. Port the dot-engine config shape; adjust
    naming.
 3. `docs-site/index.md`: hero (name, tagline: PlantUML in pure
    TypeScript — no Java, no server; browser-native), features (faithful

@@ -1,6 +1,6 @@
 # System Architecture
 
-High-level architecture of plantuml-ts and its coupling to graphviz-ts
+High-level architecture of plantuml-ts and its coupling to dot-engine
 and the upstream reference. Communication is **in-process, synchronous
 function calls** unless labeled otherwise — there are no network hops,
 services, or databases in the runtime path.
@@ -25,7 +25,7 @@ package "src/core/" {
   [theme.ts / skinparam.ts\nstyle-map-theme.ts] as THEME
   [dispatcher.ts\nplugin registry + accepts()] as DISP
   [measurer.ts\ndeterministic text width LUT] as MEAS
-  [graph-layout.ts\ngraphviz-ts adapter seam] as GL
+  [graph-layout.ts\ndot-engine adapter seam] as GL
   [svg.ts / svg-sanitize.ts\nSVG assembly + defs] as SVG
   [latex.ts → KaTeX] as LATEX
 }
@@ -41,7 +41,7 @@ package "src/diagrams/* (15 plugins)" {
 }
 
 package "Dependencies" {
-  [graphviz-ts\n(pinned .tgz)\nDOT layout engines] as GVTS
+  [dot-engine\n(pinned .tgz)\nDOT layout engines] as GVTS
   [katex 0.16] as KATEX
   [jsonc-parser] as JSONC
 }
@@ -89,8 +89,8 @@ JSONC ..> OTHER : parses JSON/YAML diagrams
 |------|------|----------------------|
 | Consumer → `render`/`renderSync` | sync (async wrapper for includes) | direct function call |
 | core → diagram plugins | sync | `DiagramPlugin` interface (`accepts`/`parse`/`layoutSync`/`render`) |
-| graph plugins → graphviz-ts | sync | `graph-layout.ts` serializes a `DotInputGraph` into a graphviz-ts builder, runs an engine, reads back a `LayoutSnapshot` |
-| dot plugin → graphviz-ts | sync | `parse()` (Peggy DOT grammar) |
+| graph plugins → dot-engine | sync | `graph-layout.ts` serializes a `DotInputGraph` into a dot-engine builder, runs an engine, reads back a `LayoutSnapshot` |
+| dot plugin → dot-engine | sync | `parse()` (Peggy DOT grammar) |
 | latex → KaTeX | sync | `renderToString` |
 | async path → `IncludeFetcher` | **async** | injected `fetch`-like callback (CSP/CORS aware); only reachable via `render`, never `renderSync` |
 
@@ -98,9 +98,9 @@ JSONC ..> OTHER : parses JSON/YAML diagrams
 
 - **No DOM, no canvas, no async in the core transform.** Text width is
   resolved by a deterministic lookup table (`measurer.ts`), which is why
-  layout is reproducible and server-safe. graphviz-ts is consumed
+  layout is reproducible and server-safe. dot-engine is consumed
   through the same DOM-free contract.
-- **Single layout seam.** All graph-topology diagrams reach graphviz-ts
+- **Single layout seam.** All graph-topology diagrams reach dot-engine
   through exactly one adapter (`graph-layout.ts`); no plugin talks to
   the engine directly except the `dot` plugin's parser.
 - **Plugin dispatch is order-sensitive.** The registry tries `accepts()`

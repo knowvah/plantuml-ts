@@ -17,7 +17,7 @@ parent, ee content), with the matrix numbers. Do not rewrite Rounds
 **Library verdict** (builder cannot match under any correct
 sequence): file `docs/graphviz-issues/09-<slug>.md` mirroring issue
 08's format — Status header, Impact (~20-fixture family, pesita/
-kotagu numbers), the question for graphviz-ts, minimal repro DOT
+kotagu numbers), the question for dot-engine, minimal repro DOT
 (the first-breaking matrix cell), builder-call transcript,
 expected/actual table, Procedure, Evidence trail (T1 journal artifact,
 G6 attempt-3 row). Add ONE unchecked TRACKER.md line. Then flip
@@ -39,9 +39,9 @@ Usage: `plans/g6-cluster-geometry/batch-4/withlabel-derivation.md`,
 - Given a usage verdict, when T2 lands, then T4 can paper-derive from
   the addendum without re-measuring.
 - Given a library verdict, when T2 lands, then issue 09 is
-  self-contained (a graphviz-ts session needs nothing else) and the
+  self-contained (a dot-engine session needs nothing else) and the
   README PAUSED block + resume procedure are active.
 
 ## Boundaries
 
-Never modify ../graphviz-ts. No git mutations (orchestrator commits).
+Never modify ../dot-engine. No git mutations (orchestrator commits).

@@ -10,7 +10,7 @@ the first step of docs:dev/docs:build).
 `docs-site/parity.md` and `DIVERGENCES.md` → `docs-site/divergences.md`,
 rewriting repo-relative links to site paths (e.g. a parity-report link
 to DIVERGENCES.md → `/divergences`). Replace T3's stubs. Wire
-`docs:copy-reports` into `docs:dev`/`docs:build` (graphviz-ts pattern).
+`docs:copy-reports` into `docs:dev`/`docs:build` (dot-engine pattern).
 Gitignore the two mirrored copies (sources are the originals — put a
 header comment in each copy saying so).
 

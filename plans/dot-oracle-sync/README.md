@@ -120,5 +120,5 @@ Java source → fix at origin → re-run → extend ratchet → one commit.
   `cucadiagram/` — per-type entity/link semantics.
 - `tests/oracle/svek-dot.ts` — comparator; `src/core/svek-dot-emit.ts` —
   emitter; `src/core/graph-layout.ts` — the seam + input observer.
-- graphviz-ts is consumed as `file:../graphviz-ts` today, npm later — DOT-input
-  parity does not depend on it; do not modify graphviz-ts in this mission.
+- dot-engine is consumed as `file:../dot-engine` today, npm later — DOT-input
+  parity does not depend on it; do not modify dot-engine in this mission.

@@ -12,10 +12,10 @@ behavior is uniform. `core/dot` can die entirely (no stub-in-place needed).
 ## D2 — Delete `auto-layout.ts`
 **Context:** It is the in-house engine-selection dispatcher (imports all engines).
 **Decision:** Delete it; the chokepoint subsumes engine choice (later via
-`opts.engine` passed to graphviz-ts). Its 2 consumers (`class`, `component`)
+`opts.engine` passed to dot-engine). Its 2 consumers (`class`, `component`)
 repoint to `graph-layout`.
 **Consequences:** BFS-depth heuristic is dropped; re-derive in the adapter if
-needed (graphviz-ts may select differently). Reversible via git.
+needed (dot-engine may select differently). Reversible via git.
 
 ## D3 — Named `PendingGraphvizError` for the stub
 **Decision:** `layoutGraph()` throws `PendingGraphvizError` (exported from
@@ -23,22 +23,22 @@ needed (graphviz-ts may select differently). Reversible via git.
 work item for the adapter mission.
 
 ## D4 — Type names + shapes untouched this mission
-**Context:** Should the seam adopt graphviz-ts type names now?
+**Context:** Should the seam adopt dot-engine type names now?
 **Decision:** No. Relocate `DotInputNode/Edge/Graph` and `DotLayoutResult` to
 `src/core/graph-layout.types.ts` **unchanged** (names and shapes). Drop the
 engine-internal working types (`DotNode`, `DotEdge`, `DotWorkingGraph`) — they
 die with the engines.
 **Consequences:** Renderers compile unchanged (they read `DotLayoutResult`).
-Adopting graphviz-ts geometry (`LayoutSnapshot`/`NodeGeometry`/`EdgeGeometry`/
+Adopting dot-engine geometry (`LayoutSnapshot`/`NodeGeometry`/`EdgeGeometry`/
 `BoundsGeometry`) changes *shapes*, which forces rewriting all 6 renderers — that
 is the adapter mission's job, not the burn's. Input stays `DotInputGraph` (the
-adapter serializes it to DOT; graphviz-ts builder types are not our input vocab).
+adapter serializes it to DOT; dot-engine builder types are not our input vocab).
 
 ## D5 — Dark-type tests: skip; engine tests: delete; parser tests: keep
 **Decision:** Classify each test by **what it imports**, not its name:
 - imports `src/core/<engine>` internals → **delete** (code is gone).
 - exercises a dark type's layout/render or full pipeline → **`describe.skip`**
-  with `// pending graphviz-ts adapter — see plans/burn-graphviz-engines/handoff-adapter.md`.
+  with `// pending dot-engine adapter — see plans/burn-graphviz-engines/handoff-adapter.md`.
 - imports only a diagram's parser (`src/diagrams/<type>/parser`) → **keep**
   (parsing is unaffected by the burn).
 **Consequences:** `npm test` stays green. Skipped tests are the adapter mission's

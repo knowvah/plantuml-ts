@@ -15,19 +15,19 @@ rejected for now (blocked early on label-table internals).
 description → class(+object) → state → json/dot (after a scoping probe —
 upstream may not route json/dot through svek; @startdot's oracle is the input
 DOT itself). Activity is out of scope: our engine is ftile-based
-(activitydiagram3), not svek. graphviz-ts is out of scope: parity is measured
-on the DOT we *feed* the layout engine, so graphviz-ts fidelity is orthogonal.
+(activitydiagram3), not svek. dot-engine is out of scope: parity is measured
+on the DOT we *feed* the layout engine, so dot-engine fidelity is orthogonal.
 
-**graphviz-ts pinning (maintainer directive, 2026-07-04):** its source is
+**dot-engine pinning (maintainer directive, 2026-07-04):** its source is
 actively changing (algorithm/perf work). Do NOT depend on the live source
 dir. Install a packed snapshot into node_modules
-(`npm install ../graphviz-ts/graphviz-ts-*.tgz`) and pin it; refresh the
+(`npm install ../dot-engine/graphviz-ts-*.tgz`) and pin it; refresh the
 snapshot only as a deliberate, journaled action (or the npm release when it
 ships). Current upstream status for context: 100% unit tests, 91.1%
 conformance / 97.1% structural similarity on the extreme-graph suite —
 remaining deltas are being addressed there. If, after our DOT matches the
 oracle, the *rendered layout* still differs, attribute downstream (file it
-against graphviz-ts with the offending DOT); do not work around it here.
+against dot-engine with the offending DOT); do not work around it here.
 
 ## D3 — Loop-shaped execution, not pre-enumerated tasks
 

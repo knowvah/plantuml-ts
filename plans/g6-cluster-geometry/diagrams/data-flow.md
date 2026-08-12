@@ -5,7 +5,7 @@
 participant "state parser/AST" as P
 participant "state-composite-cluster.ts" as C
 participant "graph-layout-build.ts (seam)" as B
-participant "graphviz-ts (layout)" as G
+participant "dot-engine (layout)" as G
 participant "state renderers" as R
 participant "oracle ratchet" as O
 P -> C : composite states + classification

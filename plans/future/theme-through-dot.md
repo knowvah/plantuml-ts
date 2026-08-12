@@ -9,7 +9,7 @@ plantuml-ts splits layout from styling:
 
 1. **Layout pass** — each diagram builds a *geometry-only* `DotInputGraph`
    (`shape=rect`, `label=""`, `fixedsize`, measured width/height) and the
-   `graph-layout` adapter feeds that to graphviz-ts, reading back **positions
+   `graph-layout` adapter feeds that to dot-engine, reading back **positions
    only** (`LayoutSnapshot`).
 2. **Style pass** — each diagram's `renderer.ts` draws its own SVG from scratch,
    re-applying all PlantUML theming: skinparam, `<style>` blocks, stereotypes,
@@ -28,7 +28,7 @@ separate hand-rolled pass per renderer. Candidate shapes:
 
 - Pass resolved theme colors/fonts/line-styles as graphviz node/edge attributes
   (`fillcolor`, `fontcolor`, `color`, `style`, `penwidth`, …) and lean on
-  graphviz-ts's own SVG/draw-op output (`getDrawOps`/`render(g,'svg')`) for the
+  dot-engine's own SVG/draw-op output (`getDrawOps`/`render(g,'svg')`) for the
   styled result — shrinking or deleting the bespoke per-type SVG renderers.
 - Or keep our renderer but drive it from a single resolved-style model attached
   to the layout result, so theming is computed once, not re-derived per type.
@@ -52,7 +52,7 @@ behavior we haven't finished capturing.
 
 ## Open questions for the mission
 
-- Does graphviz-ts's SVG / draw-op output give enough control to match
+- Does dot-engine's SVG / draw-op output give enough control to match
   PlantUML's visual style exactly, or only approximately?
 - How do skinparam / `<style>` / stereotype resolution map onto DOT attributes
   (and what doesn't map — gradients, multi-line member tables, badges)?
@@ -65,4 +65,4 @@ behavior we haven't finished capturing.
   would be injected).
 - `src/diagrams/*/renderer.ts` — the per-type style passes this would unify.
 - `src/core/skinparam.ts`, `src/core/theme.ts` — theme/skinparam resolution.
-- graphviz-ts `getDrawOps` / `render(g,'svg')` — the styled-output path to evaluate.
+- dot-engine `getDrawOps` / `render(g,'svg')` — the styled-output path to evaluate.

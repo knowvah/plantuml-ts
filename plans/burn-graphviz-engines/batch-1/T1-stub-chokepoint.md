@@ -1,9 +1,9 @@
 # T1 — Create the layout chokepoint (stubbed)
 
 ## Context
-plantuml-ts is dropping its in-house graphviz port in favor of `graphviz-ts`.
+plantuml-ts is dropping its in-house graphviz port in favor of `dot-engine`.
 This task creates the single seam consumer that the adapter mission will later
-wire to graphviz-ts. For now it throws.
+wire to dot-engine. For now it throws.
 
 ## Task
 1. Create `src/core/graph-layout.types.ts` with the **consumer-facing** types,

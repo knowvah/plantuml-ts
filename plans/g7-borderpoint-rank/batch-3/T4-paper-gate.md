@@ -13,7 +13,7 @@ title-table formula); D4 (`<<O-O>>` sentinel exclusion — jar
 
 ON PAPER (no production code; probe arithmetic scripts fine), walk
 each target fixture through the full adjudicated pipeline — DOT shape
-(ranks, ee, i-wrapper) → expected graphviz-ts layout (`initial`) →
+(ranks, ee, i-wrapper) → expected dot-engine layout (`initial`) →
 FrontierCalculator correction → final bbox:
 
 - pesita-10-dene726 `AA` (nested in nasreq_auth, groupTouched,

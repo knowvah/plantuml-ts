@@ -4,7 +4,7 @@
 @startuml
 participant "state pipeline" as P
 participant "graph-layout-build" as B
-participant "graphviz-ts" as G
+participant "dot-engine" as G
 participant "attachTransitionLabel" as A
 participant "renderer / ink walk" as R
 P -> B : edge + label text + measured box (13pt w, split h)

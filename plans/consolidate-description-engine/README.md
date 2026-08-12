@@ -109,7 +109,7 @@ cluster counts must hold vs the pre-merge baseline.
   upstream model after the maintainer confirmed upstream routes edges as
   graphviz bezier splines (not center-to-center): single-pass cluster-aware
   layout over a new seam capability (`layoutGraph` now forwards `clusters` to
-  graphviz-ts), with container-endpoint edges clipped to the cluster rectangle
+  dot-engine), with container-endpoint edges clipped to the cluster rectangle
   (`SvekEdge.simulateCompound`).
 - **Phase 3 (B8):** atomic cutover — registered `descriptionPlugin`, deleted
   the two old plugins + suites, updated `DiagramType` + catalog.

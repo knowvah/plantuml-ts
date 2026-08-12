@@ -5,7 +5,7 @@ node inside the cluster, used as a link target for the package
 itself) lands on the wrong side of its sibling.
 
 **Finding (g2 ledger N18, re-confirmed N60-61):** real graphviz ranks
-the point-anchor ABOVE the sibling classifier; graphviz-ts ranks it
+the point-anchor ABOVE the sibling classifier; dot-engine ranks it
 BELOW. Confirmed via direct `getLayout()` instrumentation; a
 nodeIds-reorder experiment had zero effect (it is not input-order
 sensitivity).
@@ -34,9 +34,9 @@ zaent0001->sh0011[arrowtail=none,arrowhead=none,minlen=1];
 ## Procedure
 
 Compare `zaent0001`'s y relative to `sh0010` between real
-`dot -Tplain`/`-Tsvg` and graphviz-ts. Real dot places the point above
+`dot -Tplain`/`-Tsvg` and dot-engine. Real dot places the point above
 sh0010 (~8px of extra cluster-top gap results, matching the jar's 41px
-vs 33px package footprints); graphviz-ts places it below.
+vs 33px package footprints); dot-engine places it below.
 
 ## Evidence trail
 
@@ -44,7 +44,7 @@ vs 33px package footprints); graphviz-ts places it below.
 
 ---
 
-**RESOLVED — graphviz-ts 0.1.26072013 (verified 2026-07-20).** Repro DOT
+**RESOLVED — dot-engine 0.1.26072013 (verified 2026-07-20).** Repro DOT
 re-run through `renderSvg`/`getLayout` vs real `dot -Tsvg` (graphviz 15.1):
 full SVG geometry stream byte-identical to real dot on the repro (anchor
 point placement matches). plantuml-ts's own layout adapter additionally now

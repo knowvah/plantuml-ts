@@ -1,6 +1,6 @@
 # Batch 2 — New-.tgz adoption (library path ONLY — skip on usage verdict)
 
-Runs after the external graphviz-ts fix ships (mission resumes per
+Runs after the external dot-engine fix ships (mission resumes per
 README cold-start procedure).
 
 | ID | Description | Agent | Writes | Depends On | Done |

@@ -1,6 +1,6 @@
 # Component Maps
 
-Per-repo internal structure. plantuml-ts is shown in full; graphviz-ts
+Per-repo internal structure. plantuml-ts is shown in full; dot-engine
 (the consumed layout engine) is shown at module granularity; the Java
 upstream is summarized (reference-only, not built here).
 
@@ -47,7 +47,7 @@ package "Diagram plugins — src/diagrams/*" {
 }
 
 [diag] as diag
-[graphviz-ts engines] as EXT
+[dot-engine engines] as EXT
 
 R --> PRE
 PRE --> BLK
@@ -69,7 +69,7 @@ OBJ --> GL
 DOT --> GL
 GL --> SVEK
 DESC --> DESCKW
-GL ==> EXT : graphviz-ts
+GL ==> EXT : dot-engine
 DOT ==> EXT : parse()
 @enduml
 ```
@@ -87,11 +87,11 @@ future WASM/worker engine. Each plugin directory typically contains
 - *Own layout* — `sequence` (lifelines/messages), and the data-shape
   diagrams (`json`, `yaml`, `hcl`, `board`, `packetdiag`, `chart`,
   `files`, `chronology`) which compute geometry directly.
-- *graphviz-ts layout* — graph-topology diagrams (`class`, `state`,
+- *dot-engine layout* — graph-topology diagrams (`class`, `state`,
   `description`/deployment, `activity`, `object`, `dot`) route through
   `graph-layout.ts`.
 
-## graphviz-ts
+## dot-engine
 
 Faithful port of Graphviz 2.38's C modules, consumed by plantuml-ts.
 
@@ -167,7 +167,7 @@ Not built in this workspace. Relevant packages under
 - `command/` — the `Command*` classes that define per-keyword parsing.
 - `klimt/` / `skin/` — rendering + skin parameter resolution.
 - an embedded **Smetana** (Java transpile of Graphviz 2.38 C) — the
-  same algorithm graphviz-ts ports, kept as a cross-check.
+  same algorithm dot-engine ports, kept as a cross-check.
 
 ~3,656 `.java` files; treated as authoritative for both behavior and
 engine/parser boundaries.

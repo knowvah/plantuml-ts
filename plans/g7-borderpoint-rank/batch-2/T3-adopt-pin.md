@@ -1,10 +1,10 @@
-# T3 — Adopt the fixed graphviz-ts build
+# T3 — Adopt the fixed dot-engine build
 
 ## Context
 
-Library-path only. The graphviz-ts project has shipped a fix for
+Library-path only. The dot-engine project has shipped a fix for
 `docs/graphviz-issues/09-*.md`; a new `.tgz` exists in
-`../graphviz-ts/`.
+`../dot-engine/`.
 
 ## Task
 

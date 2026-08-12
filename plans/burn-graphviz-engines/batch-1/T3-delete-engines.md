@@ -35,4 +35,4 @@ Reversible — `git checkout` restores the deleted dirs.
 
 ## Quality bar
 `npm run typecheck` passes. Commit: `refactor(layout): delete in-house graphviz
-engines (superseded by graphviz-ts)`. Body: list the 11 dirs + LOC removed.
+engines (superseded by dot-engine)`. Body: list the 11 dirs + LOC removed.

@@ -45,7 +45,7 @@ D8–D12 below were approved by the maintainer 2026-07-09 during
   `StringBounderFixed`-derived table approximates. The injection seam
   already exists at both levels: `StringMeasurer` DI into layout
   (`src/core/measurer.ts`) and the `stringBounder` param on
-  `UGraphicSvg.build` (Brief 1 T5), mirroring graphviz-ts
+  `UGraphicSvg.build` (Brief 1 T5), mirroring dot-engine
   `ctx.textMeasurer`.
 - **Decision:** extract per-glyph advance widths + ascent/descent from
   the local JVM (one-time Java helper → committed data table); implement

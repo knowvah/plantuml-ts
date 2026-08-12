@@ -104,7 +104,7 @@ Note: `plans/` is COMMITTED in this repo (established convention).
 ## Mission summary (2026-07-12, close-out)
 
 **Exit bar met:** 261 comparable fixtures → **260 structurally EQUAL
-(99.6%)** + 1 ledgered ([ledger.md](ledger.md): a graphviz-ts render
+(99.6%)** + 1 ledgered ([ledger.md](ledger.md): a dot-engine render
 crash on verified-byte-correct DOT input — recommend filing the minimal
 repro upstream). Zero unledgered non-EQUAL. Baseline was **0/261 (0%)**.
 

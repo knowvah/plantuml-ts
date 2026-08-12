@@ -19,7 +19,7 @@ package "src/core/" {
   [skinparam.ts\nstyle-block selectors (T4)] as SKP
 }
 
-[graphviz-ts (pinned .tgz)\nrank-sep fix, if library-side (T2)] as GVTS
+[dot-engine (pinned .tgz)\nrank-sep fix, if library-side (T2)] as GVTS
 [oracle/goldens/state/\npins + size-backlog.json (T5/T7/T10)] as ORACLE
 
 SCC --> GLB : DotInputCluster

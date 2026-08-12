@@ -1,22 +1,22 @@
 # Mission: burn-graphviz-engines
 
-Demolish-first step of the graphviz-ts re-founding. Delete plantuml-ts's
+Demolish-first step of the dot-engine re-founding. Delete plantuml-ts's
 in-house graphviz layout engines (~38 files, ~9.7k LOC) — wholly superseded by
-the `graphviz-ts` package — and funnel the 7 scattered seam consumers through a
-single chokepoint that today throws and tomorrow becomes the graphviz-ts adapter.
+the `dot-engine` package — and funnel the 7 scattered seam consumers through a
+single chokepoint that today throws and tomorrow becomes the dot-engine adapter.
 
 End state: the tree **compiles and all gates pass**; the 6 graph diagram types
 (`class, component, state, usecase, dot, json`) intentionally **throw at render**
-until the follow-on adapter mission wires `graphviz-ts`.
+until the follow-on adapter mission wires `dot-engine`.
 
 ## Branch
 `refactor/burn-graphviz-engines` off the current branch. Squash on merge.
 
 ## Context
-- `graphviz-ts` (~/git/knowvah/dot-engine) replaces every `src/core/<engine>` dir.
+- `dot-engine` (~/git/knowvah/dot-engine) replaces every `src/core/<engine>` dir.
 - Faithful to upstream: PlantUML's Svek generates DOT; graphviz lays out.
 - This mission removes the engines and stubs the seam. It does **not** wire
-  graphviz-ts (that is the adapter mission, seeded by T6).
+  dot-engine (that is the adapter mission, seeded by T6).
 
 ## The chokepoint
 All graph layout flows through one new module — `src/core/graph-layout.ts`
@@ -35,7 +35,7 @@ skinparam shadowing false
 [dot] as D
 [json] as J
 [stub] as X
-[graphviz-ts.getLayout] as GV
+[dot-engine.getLayout] as GV
 
 C --> GL
 CO --> GL

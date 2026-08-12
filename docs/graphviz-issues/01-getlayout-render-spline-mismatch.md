@@ -13,7 +13,7 @@ spline computation as data (`dist/api/geometry.d.ts` — `getLayout(g,
 opts)` has no option; ADR-1 keeps the internal Edge model private).
 
 **What is NOT broken (falsified — don't chase):** node-position
-assignment. On every graph tested, graphviz-ts node positions and
+assignment. On every graph tested, dot-engine node positions and
 `render()`-emitted splines are **byte-identical** to real `dot -Tsvg`
 (verified down to path `d` strings). The early "routing offset" theory
 was falsified three separate times.
@@ -71,7 +71,7 @@ harness pattern: rebuild the DOT via the builder API,
 
 ---
 
-**RESOLVED — graphviz-ts 0.1.26072013 (verified 2026-07-20).** Repro DOT
+**RESOLVED — dot-engine 0.1.26072013 (verified 2026-07-20).** Repro DOT
 re-run through `renderSvg`/`getLayout` vs real `dot -Tsvg` (graphviz 15.1):
 `getLayout()` (after the now-required layout pass — `render()` triggers it,
 matching production's call order) returns the SAME spline points `render()`

@@ -2,13 +2,13 @@
 
 ## Context
 The methodology needs an outward-facing definition (maintainer directive:
-the term is **conformant**, defined as graphviz-ts defines it), the catalog
+the term is **conformant**, defined as dot-engine defines it), the catalog
 must record the new modules so future agents reuse instead of reinvent, and
 Brief 2 needs a charter capturing the settled program decisions so its
 detailed `/plan-mission` starts from facts, not rediscovery.
 
 ## Task
-1. `docs/svg-conformance.md` — modeled on graphviz-ts `docs/conformance.md`:
+1. `docs/svg-conformance.md` — modeled on dot-engine `docs/conformance.md`:
    define *conformant* (numeric agreement within ±0.01 after normalization;
    non-numeric exactly equal; per-case pass = zero diffs), the divergence
    accounting model (100% target; tracked gap vs accepted divergence;

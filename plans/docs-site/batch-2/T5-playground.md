@@ -1,7 +1,7 @@
 # T5 — Live playground
 
 ## Context
-Model: graphviz-ts's playground (find its theme component under
+Model: dot-engine's playground (find its theme component under
 `~/git/knowvah/dot-engine/docs-site/.vitepress/theme/` and `playground.md`;
 read whole). Our library: `renderSync(source)` → SVG string, pure,
 browser-safe (decisions.md#d2: import from `../src` via Vite alias in

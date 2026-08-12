@@ -14,12 +14,12 @@ Write `plans/burn-graphviz-engines/handoff-adapter.md` containing:
    name), grouped by diagram type.
 3. **Renderer-shape migration.** The 6 renderers currently read `DotLayoutResult`
    (`{ nodes:[{id,x,y,width,height,xlabelX?}], edges:[{id,points,...}], width,
-   height }`). The adapter switches the chokepoint output to graphviz-ts
+   height }`). The adapter switches the chokepoint output to dot-engine
    `LayoutSnapshot` (`{ bounds, nodes:NodeGeometry[], edges:EdgeGeometry[] }`,
    `name` not `id`, points/y-down). Each renderer must migrate field reads.
 4. **Type-adoption plan.** Output: re-export `LayoutSnapshot`, `NodeGeometry`,
-   `EdgeGeometry`, `BoundsGeometry` from `graphviz-ts/api`. Input: keep
-   `DotInputGraph`; the adapter serializes it to DOT for `graphviz-ts`.
+   `EdgeGeometry`, `BoundsGeometry` from `dot-engine/api`. Input: keep
+   `DotInputGraph`; the adapter serializes it to DOT for `dot-engine`.
 5. **Oracle gate.** The adapter is verified by `oracle/` (DOT parity first via
    the staged fail-fast gate, then tolerant SVG). Point at `oracle/README.md`.
 6. **Open question for the adapter mission:** engine selection — `auto-layout`'s
@@ -48,5 +48,5 @@ N/A.
 Reversible — delete the file.
 
 ## Quality bar
-File exists and is self-contained. Commit: `docs(layout): seed graphviz-ts
+File exists and is self-contained. Commit: `docs(layout): seed dot-engine
 adapter mission`.
