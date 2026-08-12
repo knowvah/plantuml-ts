@@ -7,7 +7,12 @@ deliberately unresolved** and is Batch 0's whole job.
 
 ## ADR-1 — Where do the class port bands come from? *(UNRESOLVED — Batch 0)*
 
-**Status:** Proposed. Resolved by [batch-0/T0](batch-0/T0-band-source-gono-go.md).
+**Status:** **Accepted — Option A (block tree)**, resolved by measurement in
+[batch-0/T0](batch-0/T0-band-source-gono-go.md); numbers in
+[decision-journal.md](decision-journal.md) under "T0". `headerTranslate =
+dimHeader.getHeight()`. Option B is not a near miss: `MeasuredClassifier
+.dividerYs` is the *compartment* separator list for a class, not one entry
+per row as it is for a `map`, so `mapPortRows`' recipe drops bands outright.
 
 **Context.** Upstream reads the bands off the live `TextBlock` tree:
 `EntityImageClass#getPorts` (`svek/image/EntityImageClass.java:247-253`)
