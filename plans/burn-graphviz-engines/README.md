@@ -13,7 +13,7 @@ until the follow-on adapter mission wires `graphviz-ts`.
 `refactor/burn-graphviz-engines` off the current branch. Squash on merge.
 
 ## Context
-- `graphviz-ts` (~/git/graphviz-ts) replaces every `src/core/<engine>` dir.
+- `graphviz-ts` (~/git/knowvah/dot-engine) replaces every `src/core/<engine>` dir.
 - Faithful to upstream: PlantUML's Svek generates DOT; graphviz lays out.
 - This mission removes the engines and stubs the seam. It does **not** wire
   graphviz-ts (that is the adapter mission, seeded by T6).

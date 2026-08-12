@@ -1,7 +1,7 @@
 # T3 — VitePress scaffold + guide pages
 
 ## Context
-plantuml-ts (Vite lib build; npm). Model: `~/git/graphviz-ts/docs-site`
+plantuml-ts (Vite lib build; npm). Model: `~/git/knowvah/dot-engine/docs-site`
 (VitePress; read its `.vitepress/config.ts`, `index.md`, `guide/`
 whole). GH Pages project site → base `/plantuml-ts/`.
 
@@ -34,7 +34,7 @@ whole). GH Pages project site → base `/plantuml-ts/`.
   docs-site/parity.md + divergences.md (stubs), package.json, .gitignore
 
 ## Read-set
-- ~/git/graphviz-ts/docs-site/.vitepress/config.ts, index.md, guide/
+- ~/git/knowvah/dot-engine/docs-site/.vitepress/config.ts, index.md, guide/
 - src/index.ts (public exports), README.md
 - plans/docs-site/decisions.md
 

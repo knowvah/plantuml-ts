@@ -11,7 +11,7 @@ that plan-A had to discard.
 Create `tests/oracle/svg-conformance/normalize.ts` + `compare.ts` + tests.
 Add `@xmldom/xmldom` to `devDependencies` only (D6).
 
-**Port verbatim** from `~/git/graphviz-ts/test/golden/normalize.ts` (163 ln)
+**Port verbatim** from `~/git/knowvah/dot-engine/test/golden/normalize.ts` (163 ln)
 and `compare.ts` (~400 ln; read both fully first): `NUMERIC_ATTRS`,
 `normalizeNumber` (toPrecision(6) + trailing-zero strip), `d`/`points`/
 `viewBox`/`transform` re-serialization, `NormalizedNode`, `convertNode`,
@@ -31,7 +31,7 @@ check, transform parsing, `compareNodes` walker, `compareSvg`, CLI entry.
 - `package.json`, `package-lock.json` (devDep only)
 
 ## Read-set
-- `~/git/graphviz-ts/test/golden/normalize.ts` (all), `compare.ts` (all)
+- `~/git/knowvah/dot-engine/test/golden/normalize.ts` (all), `compare.ts` (all)
 - `../decisions.md` — D1′, D6, D7, adaptation seams, jar preamble sample
 - One cached jar SVG: `test-results/dot-cache/component/<any>/in.svg`
 

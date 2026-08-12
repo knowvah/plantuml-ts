@@ -33,7 +33,7 @@ accepted-divergence entry; no loose pinning, no untracked residue.
 ## Read-set
 - T1 harness (`tests/oracle/svg-conformance/{normalize,compare}.ts`)
 - T5 surface (`src/core/klimt/drawing/svg/u-graphic-svg.ts`)
-- Cached jar SVGs; `~/git/graphviz-ts/test/corpus/PARITY.md` +
+- Cached jar SVGs; `~/git/knowvah/dot-engine/test/corpus/PARITY.md` +
   `accepted-divergences.json` for the ledger schema
 - `../decisions.md` — D4′, D5′
 

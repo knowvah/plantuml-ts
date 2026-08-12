@@ -47,5 +47,5 @@ CMP --> R2
 ```
 
 The DOT gate compares the two dashed taps. graphviz-ts sits BELOW the tap —
-its fidelity is a separate concern (measured in ~/git/graphviz-ts itself).
+its fidelity is a separate concern (measured in ~/git/knowvah/dot-engine itself).
 ```

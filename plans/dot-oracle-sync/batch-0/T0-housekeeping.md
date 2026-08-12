@@ -21,7 +21,7 @@ committed; two stray debug artifacts must get out of the repo root.
    (merge commit — brief requirement). Re-run the four gates on main.
 5. `git checkout -b feat/dot-oracle-sync`.
 5b. Pin graphviz-ts to a packed snapshot (decisions.md D2): run
-   `npm pack` in `~/git/graphviz-ts` if no current tarball exists, then
+   `npm pack` in `~/git/knowvah/dot-engine` if no current tarball exists, then
    `npm install ../graphviz-ts/graphviz-ts-<version>.tgz`. Verify
    package.json now points at the tgz (not the live dir), run the four
    gates, commit: `chore(deps): pin graphviz-ts to packed snapshot`.

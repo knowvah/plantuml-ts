@@ -1,7 +1,7 @@
 # Mission: docs-site (F3)
 
 Publish a GitHub Pages documentation site for plantuml-ts, modeled on
-`~/git/graphviz-ts/docs-site` (VitePress). Required: a **parity page**
+`~/git/knowvah/dot-engine/docs-site` (VitePress). Required: a **parity page**
 (per-diagram-type numbers, regenerated from committed report output,
 never hand-maintained) and a **divergences page organized per diagram
 type**; a live in-browser playground running the actual library; guide

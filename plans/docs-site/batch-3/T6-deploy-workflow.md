@@ -1,7 +1,7 @@
 # T6 — Deploy workflow + final verification
 
 ## Context
-Model: `~/git/graphviz-ts/.github/workflows/docs.yml` (read whole —
+Model: `~/git/knowvah/dot-engine/.github/workflows/docs.yml` (read whole —
 push-to-main + workflow_dispatch, pages/id-token permissions,
 concurrency group, build job uploading docs-site/.vitepress/dist,
 deploy job). NOTE: this repo has NO .github/ directory yet — docs.yml
@@ -22,7 +22,7 @@ node-version.
 - .github/workflows/docs.yml (new), planning/mission-index.md
 
 ## Read-set
-- ~/git/graphviz-ts/.github/workflows/docs.yml (whole)
+- ~/git/knowvah/dot-engine/.github/workflows/docs.yml (whole)
 - existing .github/workflows/* (conventions)
 
 ## Acceptance criteria

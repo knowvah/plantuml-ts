@@ -4,7 +4,7 @@
 
 plantuml-ts (`/Users/scottseely/git/plantuml-ts`). graphviz-ts is the
 pinned layout library (`file:../graphviz-ts/*.tgz`, source readable at
-`/Users/scottseely/git/graphviz-ts` — READ-ONLY, never modify). Real
+`/Users/scottseely/git/knowvah/dot-engine` — READ-ONLY, never modify). Real
 `dot` 15.1.0 is ground truth. Vitest; probes via `npx tsx`.
 
 ## Prior observations (verified — do not re-discover)

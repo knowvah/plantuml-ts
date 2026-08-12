@@ -9,7 +9,7 @@ shape-inventory adaptation around the homegrown `svg.ts` emitter.
   (verified: same fixture → `6 g/5 path/3 text/2 polygon/2 ellipse` vs
   `12 marker/7 polygon/4 line/2 rect/2 circle/…`). With the emitter mirroring
   `SvgGraphics.java`, graphviz-ts's positional tree-walk becomes valid.
-- **Decision:** port `~/git/graphviz-ts/test/golden/normalize.ts` (163 ln)
+- **Decision:** port `~/git/knowvah/dot-engine/test/golden/normalize.ts` (163 ln)
   and `compare.ts` (~400 ln) **near-verbatim**, walker included. No
   shape-inventory layer. Renderers gain an SVG gate only when migrated.
 
@@ -71,7 +71,7 @@ shape-inventory adaptation around the homegrown `svg.ts` emitter.
 
 | Port target | Upstream source | Lines |
 |---|---|---|
-| T1 harness | `~/git/graphviz-ts/test/golden/normalize.ts`, `compare.ts` | 163 + ~400 |
+| T1 harness | `~/git/knowvah/dot-engine/test/golden/normalize.ts`, `compare.ts` | 163 + ~400 |
 | T2 model | `klimt/drawing/UGraphic.java`, `AbstractCommonUGraphic.java`, `klimt/UParam.java`, `UTranslate.java`, `UStroke.java`, `UShape.java`, `UChange.java` | ~600 |
 | T3 shapes | `klimt/UPath.java` (250), `shape/UEllipse` (111), `ULine` (100), `URectangle` (217), `UPolygon` (183), `UText` (98), `UComment`, `UGroup`, `DotPath` | ~1,200 |
 | T4 serializer | `klimt/drawing/svg/SvgGraphics.java` (1,267), `XmlWriter` (285) + `Xml*` (~350) | ~1,900 |

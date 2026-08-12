@@ -2,7 +2,7 @@
 
 ## Context
 Model: graphviz-ts's playground (find its theme component under
-`~/git/graphviz-ts/docs-site/.vitepress/theme/` and `playground.md`;
+`~/git/knowvah/dot-engine/docs-site/.vitepress/theme/` and `playground.md`;
 read whole). Our library: `renderSync(source)` → SVG string, pure,
 browser-safe (decisions.md#d2: import from `../src` via Vite alias in
 docs-site/.vitepress/config.ts — VitePress compiles TS fine).
@@ -24,7 +24,7 @@ argument, use the documented default).
   docs-site/.vitepress/config.ts (alias + theme registration)
 
 ## Read-set
-- ~/git/graphviz-ts/docs-site/playground.md + theme component (whole)
+- ~/git/knowvah/dot-engine/docs-site/playground.md + theme component (whole)
 - src/index.ts (public API), plans/docs-site/decisions.md#d2
 
 ## Acceptance criteria
