@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-31T14:20:33.935Z",
+  "generatedAt": "2026-08-12T13:17:21.728Z",
   "fixtures": [
     {
       "slug": "babafi-51-dixi026",
@@ -7,7 +7,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 48.70700000000002,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/g[1]/text[2]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
     },
     {
@@ -16,7 +16,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 297,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -24,8 +24,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 49.2065,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 49.2061,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -34,7 +34,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 7.271000000000001,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "firstDiff": "svg/defs[1]/linearGradient[1]/stop[1]/@stop-color",
       "maxDeltaPath": "svg/g[1]/g[1]/path[1]/@d[0]"
     },
     {
@@ -43,7 +43,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 142,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -51,8 +51,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -61,7 +61,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 158.389,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/polygon[1]/@points[7]"
     },
     {
@@ -70,7 +70,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 2,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -78,8 +78,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 18.322000000000003,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 18.323000000000008,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
@@ -88,7 +88,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 109,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -97,7 +97,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 10.58499999999998,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -105,8 +105,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 10.263999999999996,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "maxDelta": 10.263000000000005,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -115,7 +115,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 138,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -124,7 +124,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 355.34000000000003,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[15]/text[1]/@x"
     },
     {
@@ -133,7 +133,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 36.20600000000002,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
@@ -141,9 +141,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.921999999999997,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
+      "maxDelta": 2.922000000000004,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
       "slug": "bozana-38-xufi750",
@@ -159,7 +159,7 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 98.063,
+      "maxDelta": 98.062,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@font-weight",
       "maxDeltaPath": "svg/g[1]/g[1]/path[1]/@d[0]"
     },
@@ -168,8 +168,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 46,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "maxDelta": 27,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -178,7 +178,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 38.00099999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
@@ -186,8 +186,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 4.504900000000006,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 4.5049999999999955,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -195,8 +195,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -205,7 +205,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 133,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -214,7 +214,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 18,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -232,7 +232,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 18,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -241,7 +241,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 6,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -250,7 +250,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 9,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -259,7 +259,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 103,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -267,9 +267,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 3.986699999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+      "maxDelta": 3.9864999999999995,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
       "slug": "ciboso-93-romi495",
@@ -277,7 +277,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 14,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -286,7 +286,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 4,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -295,15 +295,16 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8.00200000000001,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
       "slug": "cobadu-43-gabi397",
       "type": "component",
       "dotEqual": true,
-      "verdict": "structural-match",
+      "verdict": "diverged",
       "maxDelta": 8,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -321,7 +322,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 17,
-      "firstDiff": "svg/g[1]/g[1]/ellipse[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -330,7 +331,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 38,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -339,7 +340,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 10.950999999999993,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -348,7 +349,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 54,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -356,8 +357,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.6461000000000006,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -366,7 +367,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 113.65099999999998,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[2]/@x"
     },
     {
@@ -374,9 +375,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 123.213,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+      "maxDelta": 123.212,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
       "slug": "daxija-24-pozu867",
@@ -384,7 +385,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 184.209,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
     },
     {
@@ -393,7 +394,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 551.028,
-      "firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[5]/polygon[1]/@points[4]"
     },
     {
@@ -411,7 +412,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8.518,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@width"
     },
     {
@@ -420,7 +421,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 123,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -429,7 +430,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -438,7 +439,7 @@
       "dotEqual": false,
       "verdict": "diverged",
       "maxDelta": 261,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height",
       "oracleBlind": true
     },
@@ -448,7 +449,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8.518,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -456,8 +457,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 10,
-      "firstDiff": "svg/g[1][childCount]",
+      "maxDelta": 4,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -466,7 +467,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 79,
-      "firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -475,7 +476,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 42,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -484,7 +485,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 36.20599999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[9]/path[1]/@d[7]"
     },
     {
@@ -493,7 +494,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 7.452500000000001,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
@@ -502,7 +503,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 4,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -511,7 +512,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 20.97200000000001,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/rect[2]/@x"
     },
     {
@@ -520,7 +521,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 9.555000000000007,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[2]/@x"
     },
     {
@@ -529,7 +530,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 74.5,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[4]/rect[1]/@y"
     },
     {
@@ -538,7 +539,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 131,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -547,7 +548,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 62.04600000000001,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[5]/path[1]/@d[7]"
     },
     {
@@ -556,7 +557,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 255.5,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[5]/rect[1]/@x"
     },
     {
@@ -565,7 +566,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 38.00099999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
@@ -574,7 +575,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 22.427999999999997,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
@@ -583,7 +584,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 16.926000000000002,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/path[1]/@d[7]"
     },
     {
@@ -592,7 +593,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8.00099999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[5]/text[1]/@x"
     },
     {
@@ -601,7 +602,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 80,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -609,8 +610,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 64.7506,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 64.75030000000001,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
@@ -618,8 +619,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -628,7 +629,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 18,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@y"
     },
     {
@@ -637,7 +638,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 10,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -646,7 +647,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 94,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x"
     },
     {
@@ -654,8 +655,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 296,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "maxDelta": 117,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -664,7 +665,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 210.212,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/polygon[1]/@points[4]"
     },
     {
@@ -673,7 +674,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 27,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@x"
     },
     {
@@ -682,7 +683,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 26,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -691,7 +692,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 5,
-      "firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
     },
     {
@@ -699,9 +700,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 200.812,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[4]/rect[2]/@x"
+      "maxDelta": 196.067,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[10]/path[1]/@d[0]"
     },
     {
       "slug": "gezemu-34-kamu453",
@@ -709,7 +710,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 26,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -718,7 +719,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 2,
-      "firstDiff": "svg/g[1]/g[1]/ellipse[1]/@stroke-width",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -727,7 +728,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 94,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x"
     },
     {
@@ -735,8 +736,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -745,7 +746,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 127.25,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[12]/text[1]/@x"
     },
     {
@@ -754,7 +755,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 63.014999999999986,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[16]/text[2]/@x"
     },
     {
@@ -762,8 +763,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.6461000000000006,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -780,8 +781,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 827,
-      "firstDiff": "svg/g[1][childCount]",
+      "maxDelta": 807,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -790,7 +791,7 @@
       "dotEqual": false,
       "verdict": "diverged",
       "maxDelta": 8966,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -799,7 +800,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 53,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -807,8 +808,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -816,8 +817,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 19,
-      "firstDiff": "svg/g[1][childCount]",
+      "maxDelta": 8,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -826,7 +827,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -834,8 +835,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 5.722999999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 5.723500000000001,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/rect[1]/@width"
     },
     {
@@ -843,8 +844,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -853,7 +854,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 152,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -861,18 +862,18 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 18.349999999999994,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+      "maxDelta": 19,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/@height"
     },
     {
       "slug": "juvucu-92-bugo434",
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 7.6229999999999905,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
-      "maxDeltaPath": "svg/g[1]/g[3]/text[3]/@y"
+      "maxDelta": 7.623099999999994,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[2]/text[3]/@y"
     },
     {
       "slug": "kabasu-44-caxu950",
@@ -880,7 +881,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 6.5535,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/polygon[1]/@points[0]"
     },
     {
@@ -889,7 +890,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 11.649999999999977,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/path[1]/@d[2]"
     },
     {
@@ -898,7 +899,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 176.638,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[4]/polygon[1]/@points[4]"
     },
     {
@@ -906,8 +907,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 5.134500000000003,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 5.134100000000004,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[2]/@y"
     },
     {
@@ -925,16 +926,15 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 13.088999999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[2]/@x"
     },
     {
       "slug": "kavico-81-sonu694",
       "type": "component",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "verdict": "structural-match",
+      "maxDelta": 2.6459999999999937,
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -942,7 +942,7 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 177.6533,
+      "maxDelta": 177.653,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
@@ -952,7 +952,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 16.926000000000002,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[5]/path[1]/@d[7]"
     },
     {
@@ -960,9 +960,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 269,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "maxDelta": 420,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[1]/image[1]/@width"
     },
     {
       "slug": "kizobu-64-rozo458",
@@ -970,15 +970,16 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 89,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
       "slug": "kokebo-27-vafi688",
       "type": "component",
       "dotEqual": true,
-      "verdict": "structural-match",
+      "verdict": "diverged",
       "maxDelta": 3,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -987,7 +988,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 128,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -996,7 +997,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 106.392,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[5]/text[1]/@x"
     },
     {
@@ -1005,7 +1006,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 10.266999999999996,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
@@ -1014,7 +1015,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 10,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1022,8 +1023,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 161.2487,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 161.24900000000002,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
@@ -1031,8 +1032,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -1041,7 +1042,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 84,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1049,8 +1050,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 3.1601,
-      "firstDiff": "svg/g[1]/g[1]/ellipse[1]/@fill",
+      "maxDelta": 3.1602999999999923,
+      "firstDiff": "svg/defs[1]/linearGradient[1]/stop[1]/@stop-color",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
     },
     {
@@ -1058,8 +1059,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -1067,8 +1068,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 5.134500000000003,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 5.134100000000004,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[2]/@y"
     },
     {
@@ -1077,7 +1078,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 4,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1085,16 +1086,16 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 12.914999999999992,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
+      "maxDelta": 16.201100000000004,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[2]/text[2]/@y"
     },
     {
       "slug": "lotofa-28-rudo664",
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 11.086999999999989,
+      "maxDelta": 11.085999999999999,
       "firstDiff": "svg/g[1]/g[1]/path[1]/@stroke-dasharray",
       "maxDeltaPath": "svg/g[1]/g[3]/path[1]/@d[2]"
     },
@@ -1104,7 +1105,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 10.266999999999996,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
@@ -1113,7 +1114,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 18,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1122,7 +1123,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 4.145999999999987,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@y"
     },
     {
@@ -1131,7 +1132,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 24.440999999999974,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[2]/@x"
     },
     {
@@ -1140,7 +1141,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8,
-      "firstDiff": "svg/g[1]/g[1]/ellipse[1]/@stroke",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1149,7 +1150,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 25.039999999999964,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[7]/text[10]/@y"
     },
     {
@@ -1158,7 +1159,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 10,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1167,7 +1168,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 5.516999999999996,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
     },
     {
@@ -1176,7 +1177,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 145.095,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[12]/@x"
     },
     {
@@ -1185,7 +1186,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 164.00400000000002,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[7]/rect[1]/@x"
     },
     {
@@ -1194,7 +1195,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 78.42500000000001,
-      "firstDiff": "svg/g[1]/g[1]/path[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/path[1]/@d[13]"
     },
     {
@@ -1203,7 +1204,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 106.64609999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@y"
     },
     {
@@ -1212,7 +1213,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1221,7 +1222,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 106.392,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[5]/text[1]/@x"
     },
     {
@@ -1230,7 +1231,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 87.014,
-      "firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[4]/rect[1]/@x"
     },
     {
@@ -1239,7 +1240,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 9,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1248,7 +1249,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 1051.895,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[18]/text[1]/@x"
     },
     {
@@ -1256,8 +1257,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 65,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "maxDelta": 34,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1266,7 +1267,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 12.312999999999988,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -1275,7 +1276,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 19.017000000000024,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[4]/text[1]/@x"
     },
     {
@@ -1284,7 +1285,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 25.002999999999986,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[5]/text[1]/@x"
     },
     {
@@ -1293,7 +1294,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 101,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1302,7 +1303,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 22.427999999999997,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
@@ -1311,7 +1312,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 22.498999999999995,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
@@ -1320,7 +1321,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 9.079000000000008,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@width"
     },
     {
@@ -1329,7 +1330,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 90,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1338,7 +1339,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 72.00099999999998,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[14]/rect[1]/@x"
     },
     {
@@ -1346,8 +1347,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -1355,9 +1356,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 55,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/@height"
+      "maxDelta": 94.577,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[3]/polygon[1]/@points[4]"
     },
     {
       "slug": "nujove-77-xiva558",
@@ -1365,7 +1366,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1374,7 +1375,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 108.64609999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[6]/text[1]/@y"
     },
     {
@@ -1383,7 +1384,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 6,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1392,7 +1393,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 11,
-      "firstDiff": "svg/g[1]/g[1]/path[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1401,7 +1402,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 11,
-      "firstDiff": "svg/g[1]/g[1]/path[1]/@stroke",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1409,8 +1410,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 11.969099999999997,
-      "firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+      "maxDelta": 11.969300000000004,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@y"
     },
     {
@@ -1418,8 +1419,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 5.134500000000003,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 5.134100000000004,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[2]/@y"
     },
     {
@@ -1428,7 +1429,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 77.50400000000002,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -1437,7 +1438,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 38.00099999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
@@ -1446,7 +1447,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 40,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1455,7 +1456,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 69,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1464,7 +1465,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 526.5,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[12]/path[1]/@d[13]"
     },
     {
@@ -1473,7 +1474,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 12.763000000000005,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[4]/rect[1]/@width"
     },
     {
@@ -1481,8 +1482,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 63.494800000000005,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 63.495000000000005,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[6]/text[1]/@x"
     },
     {
@@ -1491,7 +1492,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 62,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1500,7 +1501,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 17.370000000000005,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
@@ -1509,7 +1510,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 94,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x"
     },
     {
@@ -1518,7 +1519,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 84,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1526,9 +1527,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.877999999999986,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[3]/rect[2]/@x"
+      "maxDelta": 2.878,
+      "firstDiff": "svg/defs[1]/linearGradient[1]/stop[2]/@stop-color",
+      "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@width"
     },
     {
       "slug": "rekisu-47-pesa949",
@@ -1536,7 +1537,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 26,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1545,7 +1546,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 101.394,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x"
     },
     {
@@ -1553,8 +1554,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 648,
-      "firstDiff": "svg/g[1][childCount]",
+      "maxDelta": 628,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1563,7 +1564,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 131,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1571,8 +1572,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 4.488300000000002,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "maxDelta": 4.4879999999999995,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@height"
     },
     {
@@ -1580,8 +1581,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 13,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@font-style",
+      "maxDelta": 15,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1590,7 +1591,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 51.48199999999997,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
@@ -1598,9 +1599,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 3.986699999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+      "maxDelta": 3.9864999999999995,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
       "slug": "riradu-09-xipo824",
@@ -1608,7 +1609,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 18.153999999999996,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[10]/path[1]/@d[7]"
     },
     {
@@ -1617,7 +1618,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 13.692000000000007,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[2]/@x"
     },
     {
@@ -1635,7 +1636,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 11,
-      "firstDiff": "svg/g[1]/g[1]/path[1]/@stroke",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1644,7 +1645,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 11.881,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@stroke",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
@@ -1653,7 +1654,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 142,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1662,7 +1663,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 22,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1671,7 +1672,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 18,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1679,8 +1680,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 25.8911,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 25.891,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[2]/@x"
     },
     {
@@ -1688,8 +1689,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 25.8911,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@font-family",
+      "maxDelta": 25.891,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[2]/@x"
     },
     {
@@ -1697,7 +1698,7 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 11.086999999999989,
+      "maxDelta": 11.085999999999999,
       "firstDiff": "svg/g[1]/g[1]/path[1]/@stroke-dasharray",
       "maxDeltaPath": "svg/g[1]/g[3]/path[1]/@d[2]"
     },
@@ -1707,7 +1708,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 4,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1716,7 +1717,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 11.472000000000008,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -1725,7 +1726,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 651,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1733,8 +1734,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -1742,8 +1743,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -1751,8 +1752,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 176.82029999999997,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 176.82,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[4]/text[1]/@x"
     },
     {
@@ -1761,7 +1762,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 9.079000000000008,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@width"
     },
     {
@@ -1769,8 +1770,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 11.997499999999988,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 11.99799999999999,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
@@ -1779,7 +1780,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 4,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1796,8 +1797,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 519,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "maxDelta": 646,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1805,8 +1806,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 5.134500000000003,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 5.135000000000005,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@y"
     },
     {
@@ -1815,7 +1816,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 73,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1823,9 +1824,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 52,
+      "maxDelta": 19.314999999999998,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "maxDeltaPath": "svg/g[1]/g[2]/text[2]/@x"
     },
     {
       "slug": "tajuki-26-bime046",
@@ -1833,7 +1834,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 13.522999999999996,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
     },
     {
@@ -1841,8 +1842,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 228.87630000000001,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 228.876,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[4]/text[1]/@x"
     },
     {
@@ -1851,7 +1852,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 285.996,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[9]/rect[1]/@x"
     },
     {
@@ -1859,7 +1860,7 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 704.8805,
+      "maxDelta": 704.8810000000001,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[13]/rect[2]/@x"
     },
@@ -1868,9 +1869,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 23,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "maxDelta": 8,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/@height"
     },
     {
       "slug": "tilexe-28-fiju280",
@@ -1878,7 +1879,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 186,
-      "firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[14]/path[1]/@d[6]"
     },
     {
@@ -1887,7 +1888,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 7.271000000000001,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "firstDiff": "svg/defs[1]/linearGradient[1]/stop[1]/@stop-color",
       "maxDeltaPath": "svg/g[1]/g[1]/path[1]/@d[0]"
     },
     {
@@ -1896,7 +1897,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 11,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1905,7 +1906,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 117,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1913,9 +1914,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 12.914999999999992,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
+      "maxDelta": 16.201100000000004,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[2]/text[2]/@y"
     },
     {
       "slug": "tujica-34-tire129",
@@ -1923,7 +1924,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 2,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1932,7 +1933,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 20,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1940,8 +1941,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 99,
-      "firstDiff": "svg/g[1][childCount]",
+      "maxDelta": 113,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1949,8 +1950,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 167,
-      "firstDiff": "svg/g[1]/g[1]/text[1]",
+      "maxDelta": 38,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1959,7 +1960,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 5,
-      "firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
     },
     {
@@ -1967,8 +1968,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 4.504900000000006,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 4.5049999999999955,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -1977,7 +1978,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 20,
-      "firstDiff": "svg/g[1]/g[1]/polygon[1]/@stroke",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1986,7 +1987,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 8.518,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -1995,7 +1996,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 51,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -2003,8 +2004,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -2013,7 +2014,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 5,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2021,18 +2022,18 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 196,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "maxDelta": 500,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[1]/image[1]/@width"
     },
     {
       "slug": "vixeni-34-nici683",
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 81.174,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[2]/line[14]/@y1"
+      "maxDelta": 57.785000000000025,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
     },
     {
       "slug": "vogefo-33-xeve917",
@@ -2040,7 +2041,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 53,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -2048,8 +2049,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -2058,7 +2059,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 49,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2066,8 +2067,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -2076,7 +2077,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 47.36099999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[17]/text[1]/@y"
     },
     {
@@ -2085,7 +2086,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 102,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2093,9 +2094,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 3.986699999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+      "maxDelta": 3.9864999999999995,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
       "slug": "vunimi-85-xadu895",
@@ -2103,7 +2104,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 25,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -2112,7 +2113,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 31.208,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[10]/path[1]/@d[7]"
     },
     {
@@ -2120,9 +2121,9 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 3.986699999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+      "maxDelta": 3.9864999999999995,
+      "firstDiff": "svg/g[1]/@font-family",
+      "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
       "slug": "xagino-11-vazo768",
@@ -2130,7 +2131,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 233.575,
-      "firstDiff": "svg/g[1]/g[1]/path[1]/@stroke",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/path[1]/@d[13]"
     },
     {
@@ -2139,7 +2140,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 12.87299999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[4]/text[1]/@x"
     },
     {
@@ -2148,7 +2149,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 61,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -2157,7 +2158,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 7.452500000000001,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[2]/@x"
     },
     {
@@ -2166,7 +2167,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 4.472000000000008,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[4]/rect[1]/@width"
     },
     {
@@ -2175,7 +2176,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 22.498999999999995,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
@@ -2183,7 +2184,7 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 45,
+      "maxDelta": 12,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@height"
     },
@@ -2202,7 +2203,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 18,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2211,7 +2212,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 5,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@height"
     },
     {
@@ -2219,8 +2220,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 4.023600000000002,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 4.0234999999999985,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/rect[1]/@width"
     },
     {
@@ -2229,7 +2230,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 27.99799999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
@@ -2238,7 +2239,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 51.48199999999997,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
@@ -2247,7 +2248,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 5,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]/@stroke",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2256,7 +2257,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 22.310000000000002,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/path[1]/@d[2]"
     },
     {
@@ -2264,7 +2265,7 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 177.6533,
+      "maxDelta": 177.653,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
@@ -2273,8 +2274,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -2282,8 +2283,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463000000000036,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 2.646099999999997,
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -2292,7 +2293,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 15,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2301,7 +2302,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 17.370000000000005,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
     {
@@ -2310,7 +2311,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 21,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -2319,7 +2320,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 219.425,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[7]/text[1]/@x"
     },
     {
@@ -2337,7 +2338,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 54,
-      "firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2346,7 +2347,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 5.133999999999986,
-      "firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[3]/text[2]/@y"
     },
     {
@@ -2355,7 +2356,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 81,
-      "firstDiff": "svg/g[1][childCount]",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2364,7 +2365,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 36,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/rect[1]/@y"
     },
     {
@@ -2373,7 +2374,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 40.09700000000001,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[2]/rect[2]/@x"
     },
     {
@@ -2382,7 +2383,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 42.364000000000004,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/@font-family",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
     },
     {
@@ -2390,7 +2391,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 7.321400000000011,
+      "maxDelta": 7.322000000000003,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@fill",
       "maxDeltaPath": "svg/g[1]/g[1]/path[1]/@d[28]"
     },
@@ -2399,7 +2400,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 151,
+      "maxDelta": 157,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@height"
     },
@@ -2408,7 +2409,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 56.00400000000002,
+      "maxDelta": 56.50799999999998,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[2]/image[1]/@x"
     },
@@ -2426,7 +2427,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 157,
+      "maxDelta": 174,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -2444,7 +2445,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 87,
+      "maxDelta": 30,
       "firstDiff": "svg/g[1]/g[1][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -2498,7 +2499,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 290.5919,
+      "maxDelta": 290.59200000000004,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[8]/ellipse[1]/@cx"
     },
@@ -2507,16 +2508,16 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 6.116800000000012,
+      "maxDelta": 6.116999999999997,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+      "maxDeltaPath": "svg/g[1]/g[1]/polygon[1]/@points[0]"
     },
     {
       "slug": "dipixi-71-nuga611",
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 5.362099999999998,
+      "maxDelta": 5.362000000000009,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@width"
     },
@@ -2525,7 +2526,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 146,
+      "maxDelta": 143,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -2552,7 +2553,7 @@
       "type": "usecase",
       "verdict": "oracle-error",
       "dotEqual": false,
-      "errMsg": "cached in.svg not well-formed XML: 10743B"
+      "errMsg": "cached in.svg not well-formed XML: 9677B"
     },
     {
       "slug": "fogiku-22-gone205",
@@ -2568,7 +2569,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 9.079499999999996,
+      "maxDelta": 9.079000000000008,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/text[3]/@y"
     },
@@ -2585,9 +2586,8 @@
       "slug": "fubaje-48-xaje065",
       "type": "usecase",
       "dotEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 4,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -2605,7 +2605,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 5,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/g[4][childCount]",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2613,8 +2613,8 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 66.7082,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 66.708,
+      "firstDiff": "svg/g[1]/g[1]/text[2]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/text[5]/@x"
     },
     {
@@ -2631,9 +2631,9 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 401.315,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[3]/ellipse[1]/@cx"
+      "maxDelta": 71.00200000000001,
+      "firstDiff": "svg/g[1]/g[1]/ellipse[1]/@stroke",
+      "maxDeltaPath": "svg/g[1]/g[17]/text[1]/@x"
     },
     {
       "slug": "jafuke-47-xepe403",
@@ -2666,9 +2666,8 @@
       "slug": "kevipe-39-gaji640",
       "type": "usecase",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 2.433799999999998,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "verdict": "structural-match",
+      "maxDelta": 2.4339999999999975,
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
     {
@@ -2676,7 +2675,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 66.7082,
+      "maxDelta": 66.708,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/text[4]/@x"
     },
@@ -2712,7 +2711,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 3,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/g[5]/text[1]/@textLength",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2720,7 +2719,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 973,
+      "maxDelta": 1058,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@height"
     },
@@ -2729,7 +2728,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 167.341,
+      "maxDelta": 167.34000000000003,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[3]/ellipse[1]/@cy"
     },
@@ -2747,7 +2746,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 6.162399999999998,
+      "maxDelta": 6.161999999999999,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@fill",
       "maxDeltaPath": "svg/g[1]/g[1]/text[2]/@y"
     },
@@ -2756,7 +2755,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 3.0035999999999987,
+      "maxDelta": 3.003999999999998,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
@@ -2802,7 +2801,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 7,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/g[4]/text[1]/@textLength",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -2820,7 +2819,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 68.92599999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/g[4]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[8]/text[6]/@x"
     },
     {
@@ -2828,7 +2827,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 99,
+      "maxDelta": 98,
       "firstDiff": "svg/g[1]/g[1]/text[1]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -2837,16 +2836,16 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 208,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/@height"
+      "maxDelta": 41,
+      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
       "slug": "nobiza-91-fimo741",
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 23,
+      "maxDelta": 3,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -2855,7 +2854,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.5220999999999982,
+      "maxDelta": 2.5229999999999997,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
@@ -2864,7 +2863,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 43,
+      "maxDelta": 14,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -2873,9 +2872,9 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 9,
+      "maxDelta": 5,
       "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/@height"
+      "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
       "slug": "rabida-94-kula497",
@@ -2891,7 +2890,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 13,
+      "maxDelta": 6,
       "firstDiff": "svg/g[1]/g[1][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -2936,7 +2935,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 73.1041,
+      "maxDelta": 73.105,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@y"
     },
@@ -2945,7 +2944,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 3.004100000000001,
+      "maxDelta": 3.0049999999999955,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@y"
     },
@@ -2954,7 +2953,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 151,
+      "maxDelta": 157,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@height"
     },
@@ -2963,8 +2962,8 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 66.7082,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDelta": 66.708,
+      "firstDiff": "svg/g[1]/g[1]/text[2]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/text[5]/@x"
     },
     {
@@ -2981,7 +2980,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 3.004100000000001,
+      "maxDelta": 3.0049999999999955,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@y"
     },
@@ -2990,9 +2989,9 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 260,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "maxDelta": 155.20499999999998,
+      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
     {
       "slug": "sprite-svg-archimate-0",
@@ -3012,7 +3011,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 83,
-      "firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/g[4][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -3029,7 +3028,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 12.003599999999999,
+      "maxDelta": 12.003999999999998,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[3]/text[1]/@x"
     },
@@ -3047,7 +3046,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 66.7082,
+      "maxDelta": 66.708,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/text[4]/@x"
     },
@@ -3057,7 +3056,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 83,
-      "firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+      "firstDiff": "svg/g[1]/g[4][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -3065,7 +3064,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 79.29999999999995,
+      "maxDelta": 79.30100000000004,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
     },
@@ -3137,7 +3136,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 157,
+      "maxDelta": 174,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -3155,7 +3154,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 20.752899999999997,
+      "maxDelta": 20.753,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[5]/text[1]/@x"
     },
@@ -3182,7 +3181,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 973,
+      "maxDelta": 1058,
       "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@height"
     },
@@ -3200,7 +3199,7 @@
       "type": "usecase",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 2.6463,
+      "maxDelta": 2.646000000000001,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
     },
