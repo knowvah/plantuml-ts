@@ -297,16 +297,35 @@ function withVisibilityFlag(member: Omit<Member, 'visibilityExplicit'>, explicit
  * `Member | null` return type) when neither shape matches — the caller
  * falls back to a raw display row (Bodier never rejects a line).
  */
+/** The `name = value` spelling `formatObjectMemberText` reconstructs when a
+ *  member carries no `typeSeparator` -- the object analogue of the class
+ *  parser's `': '` (`class-member-parser.ts#CANONICAL_TYPE_SEPARATOR`). */
+const CANONICAL_OBJECT_SEPARATOR = ' = ';
+
+/** Upstream stores a member's display line VERBATIM (`Member`'s constructor
+ *  trims only the ends, via `StringUtils.trin`) and `getDisplay(false)` hands
+ *  that same string back, so `a=1` must not come back out as `a = 1`. This
+ *  parser structures the line into name/type instead, so it carries the source
+ *  separator whenever it differs from the canonical spelling -- the same
+ *  round-trip `Member.typeSeparator` already does on the class path (G2 N31),
+ *  and the same "canonical maps to absent" rule, so the common case is
+ *  unchanged.
+ *  @see ~/git/plantuml/.../cucadiagram/Member.java (constructor) */
+function objectTypeSeparatorField(rawSeparator: string): { typeSeparator?: string } {
+  return rawSeparator === CANONICAL_OBJECT_SEPARATOR ? {} : { typeSeparator: rawSeparator };
+}
+
 function tryStructuredObjectMember(
   remainder: string,
   visibility: Visibility | undefined,
 ): Omit<Member, 'visibilityExplicit'> | undefined {
-  const eqMatch = /^(\w+)\s*=\s*(.+)$/.exec(remainder);
+  const eqMatch = /^(\w+)(\s*=\s*)(.+)$/.exec(remainder);
   if (eqMatch !== null) {
     return {
       visibility: visibility ?? '+',
       name: eqMatch[1]!,
-      type: eqMatch[2]!.trim(),
+      type: eqMatch[3]!.trim(),
+      ...objectTypeSeparatorField(eqMatch[2]!),
       isStatic: false,
       isAbstract: false,
     };

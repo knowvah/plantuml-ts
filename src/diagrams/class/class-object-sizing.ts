@@ -179,12 +179,14 @@ function tabStopWidthPx(theme: Theme, measurer: StringMeasurer): number {
  *  `\n` specifically has NO meaning inside a single already-newline-split
  *  field line. `layoutTabRuns` (above) consumes the resulting real tab
  *  byte via `AtomText#drawU`'s own tokenizer shape. */
-export function formatObjectMemberText(member: Pick<Member, 'name' | 'type' | 'rawDisplay'>): string {
+export function formatObjectMemberText(
+  member: Pick<Member, 'name' | 'type' | 'rawDisplay' | 'typeSeparator'>,
+): string {
   const raw =
     member.rawDisplay !== undefined
       ? member.rawDisplay
       : member.type !== undefined
-        ? `${member.name} = ${member.type}`
+        ? `${member.name}${member.typeSeparator ?? ' = '}${member.type}`
         : member.name;
   return raw.includes('\\t') ? raw.replace(/\\t/g, '\t') : raw;
 }
