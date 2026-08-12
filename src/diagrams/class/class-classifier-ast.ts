@@ -417,4 +417,23 @@ export interface Classifier {
    * @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java#isBodyEnhanced
    */
   rawBodyLines?: string[];
+  /**
+   * B2 (SI17): `Entity#portShortNames`'s own persistent registry
+   * (`abel/Entity.java:112` `private final Collection<String> portShortNames
+   * = new HashSet<>()`, `abel/Entity.java:538` `addPortShortName`) — outlives
+   * the removal of the `Class::member` link that first named it
+   * (`Link#setPortMembers`, `abel/Link.java:515-522`, invoked once at that
+   * link's own creation, independent of the link's later lifecycle). An
+   * association-class couple `(A,B) arrow C` that subsumes an explicit
+   * `Foo::method --> Bar` association (`class-assoc-couple.ts
+   * #makeCoupleCircle`) still shields `Foo` even though the couple's own
+   * replacement edges (`entity1ToPoint`/`pointToEntity2`,
+   * `AbstractClassOrObjectDiagram.java:264-273`) are built from a fresh
+   * `LinkArg` that names no port of its own — this field is that surviving
+   * record. Read by `class-port-rows.ts#classPortShortNamesById` ALONGSIDE
+   * (not instead of) its live `ast.relationships` scan, so an ordinary
+   * still-connected `Class::member` edge keeps registering the same way it
+   * always did. Absent for every classifier with no subsumed-port history.
+   */
+  portShortNames?: Set<string>;
 }

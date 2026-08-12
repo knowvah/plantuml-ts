@@ -391,3 +391,134 @@ the pre-SI16 number forward without re-measuring it.
 48/355. T4 should correct the frozen-count table in the brief rather than
 leave a number that will read as a regression to the next reader. The two
 censuses the brief froze *after* SI16 (class 343, object 35) are both intact.
+
+### 2026-08-12 — B1: a frozen count MOVED (object 74 → 77). Deliberately accepted, not banked quietly.
+
+**This crosses a stated stop condition.** The brief freezes object DOT at
+74/80 and says "ANY movement, in EITHER direction, is a stop condition". B1
+moved it to **77/80**. Recorded here in full because the next reader must be
+able to overrule it.
+
+**Why it moved.** `edgeRef` is a shared emitter — the maintainer ruled it IN
+scope precisely because its changes are cross-type. `SvekNode#isShielded`
+(`svek/SvekNode.java:383-396`) is **type-independent**: it tests
+`link.hasKal1()`/`hasKal2()` (qualified-association syntax, `abel/Link.java
+:569-575`) and a non-zero `shield()`, and never looks at the node's shape.
+So the `:h` fall-through B1 fixed was never a class-only defect; object
+routes the same classifier kinds through the same emitter, and fixing the
+mechanism at its origin necessarily fixed it everywhere. Repairing class
+while leaving object broken would have required a type-specific guard —
+inventing a divergence to protect a number.
+
+**Verified against the jar, not inferred.** `guzojo-14-muxa584`'s oracle
+(`test-results/dot-cache/object/guzojo-14-muxa584/svek-1.dot:10`) emits
+`sh0006:p48c4d45f…->sh0007` — a **bare** `sh0007`. We emitted `sh0007:h`.
+The oracle is unambiguous that the old output was wrong.
+
+**Ruled out — that B1 disabled `:h` rather than gating it.**
+`fonulu-92-libi014` is the one object oracle that genuinely carries
+`PORT="h"`. It is still EQUAL, inside the new 77. So the shield path is
+intact and correctly gated, not switched off. Object's remaining
+`portOk` failure is `rozuxo-44-fudi093`, which is the real missing object
+row-port producer — object's own equivalent of the work SI17 just did for
+class, and it needs its own mission.
+
+**Action taken.** Deleted the three earned slugs from
+`oracle/goldens/object/port-backlog.json` in B1's commit, per the mission's
+own rule that a pin travels with the fix that earned it. B1's agent
+correctly refused to touch that file (outside its write-set) and reported
+instead; the deletion is the orchestrator's call, on the record here.
+
+**Judgment.** The frozen counts exist to catch collateral damage. This is
+its opposite: an oracle-verified improvement in a sibling type, arising from
+exactly the cross-type coupling the brief anticipated when it ruled the
+shared emitters in scope. Halting here would protect the number at the
+expense of the thing the number measures. **Flagged for maintainer review at
+close-out** — if the ruling is that 74/80 was meant to be inviolable, the
+remedy is to revise the frozen table, not to re-break object.
+
+### 2026-08-12 — B2 first attempt: T3's diagnosis was INCOMPLETE, and the refinement is the finding
+
+**T3's B2 entry ruled out "the persistent entity flag being unreproduced" on
+the evidence that `sh0006` carries its `PORT="pea9f6…"` row identically on
+both sides. That observation was correct and the inference from it was
+wrong.** The node table is right *because of* the carry, not independently
+of it.
+
+**Mechanism (measured, not argued).** Deleting the carry at
+`class-assoc-couple.ts:274` in isolation flips `sh0006` from plaintext back
+to `shape=rect` with **no port row at all** — `shapeOk` FAILS and
+`maxSizeDeltaIn` goes 0.0000 → 0.6111. B2's agent reproduced this on
+`--slug pajoka-72-reju527` before keeping any change, then reverted.
+
+**Origin.** `class-port-rows.ts:423-433,446-454` —
+`classPortShortNamesById`/`classifierPortShortNames` derive a leaf's port
+short names by scanning `ast.relationships[].fromPort/.toPort` **at render
+time**, which is *after* subsumption has spliced the original
+`Foo::method --> Bar` relationship out of that array. So `aEdge.fromPort` is
+the only surviving carrier of `'method'` for `Foo`, and it feeds two
+consumers that must disagree: the node table (which needs the name) and the
+DOT edge tailport (which must not have it).
+
+**The real defect is a structural divergence from upstream, one level up.**
+`Entity.portShortNames` is a **persistent field on the entity**
+(`abel/Entity.java:112`), populated by `Link#setPortMembers`
+(`abel/Link.java:515-522`) and outliving any individual link — which is
+exactly why upstream can build `entity1ToPoint` from a port-free `LinkArg`
+(`AbstractClassOrObjectDiagram.java:264-273`) without losing the node's port
+row. We reconstruct the same set from the live relationship array instead,
+so subsumption destroys it. CLAUDE.md is explicit that a structural
+divergence IS the bug and is re-mirrored, not patched around.
+
+**Also found: the defect is symmetric.** T3 named only the A side.
+`AbstractClassOrObjectDiagram.java:264-273` builds **both** `entity1ToPoint`
+and `pointToEntity2` port-free, so `bEdge.toPort` carries the same leak.
+
+**Write-set expansion authorized (second and last of this mission).** B2 may
+also write `src/diagrams/class/class-classifier-ast.ts` (a persistent
+`Classifier` field mirroring `Entity#addPortShortName`) and
+`src/diagrams/class/class-port-rows.ts` (union that field into
+`classifierPortShortNames`). Rationale: no in-write-set change can decouple
+the two consumers, the alternative is a conditional suppression that ADR-3
+forbids, and the expansion moves the port toward upstream's own structure
+rather than away from it. `class-port-rows.ts` is already a mission file
+(T1, T2). Flagged for maintainer review at close-out alongside the T2
+crossing.
+
+**Credit where due:** the agent measured the isolated removal and reverted it
+rather than reporting a plausible fix, which is what turned an incomplete
+"ruled out" into a named mechanism.
+
+### 2026-08-12 — B2 landed: the class port backlog is empty and deleted
+
+Fixed at the origin the refinement identified, by re-mirroring upstream
+rather than suppressing the symptom: `Classifier.portShortNames` is now a
+persistent per-classifier registry (`abel/Entity.java:112,538`), populated by
+`class-assoc-couple.ts#registerPersistentPort` at subsumption time and read
+by `classPortShortNamesById` **alongside** — not instead of — its live
+`ast.relationships` scan. Neither split edge carries a port any more, on
+either side, matching `AbstractClassOrObjectDiagram.java:264-273`.
+
+`oracle/goldens/class/port-backlog.json` is **empty and deleted**, and
+`tests/oracle/class-dot-parity.test.ts`'s now-dead `portBacklog` const and
+branch are removed with it.
+
+**Independently re-measured by the orchestrator, not taken on report:**
+
+| Gate | Result |
+|---|---|
+| class DOT | **710 / 711** — `portOk` **0**, `directionOk` 1 (`besepi-37-rori892`), 7 oracle-blind inside the 710 |
+| object DOT | 77/80 — 1 `portOk` (`rozuxo-44-fudi093`), unchanged by B2 |
+| component / usecase / state DOT | 262/262 · 93/93 · 267/267 — frozen |
+| class / object / description SVG census | **343**/722 ✓ · **35**/80 ✓ · 26/358 (stale baseline, see its own entry) |
+| four quality gates | ✅ 575 files / 12795 tests, typecheck, lint, build |
+
+`rozuxo-44-fudi093` correctly did **not** close: it is object's own missing
+row-port producer — the object-corpus equivalent of the work SI17 just did
+for class — and closing it from this change would have been a result without
+a mechanism.
+
+**The exit bar is met as far as this mission can reach it, and no further.**
+Class DOT is 710/711. The single outstanding fixture is
+`besepi-37-rori892`, failing `directionOk`, which belongs to object-close
+B33's remainder per ADR-6. **711/711 is not claimed.**

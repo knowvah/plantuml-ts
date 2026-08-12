@@ -7,8 +7,8 @@ flip, T3 measures and shrinks the pin.
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
 | [T1](T1-class-port-band-producer.md) | Class port-band producer, pure + unit-tested, NOT wired | typescript-pro | `src/diagrams/class/class-port-rows.ts`, `tests/unit/class/class-port-rows.test.ts` | T0 | [x] |
-| [T2](T2-wire-the-mechanism.md) | Atomic flip: bands + edge suffix + retire `:P` | typescript-pro | `class-port-rows.ts`, `class-dot-graph.ts`, `class-layout-helpers.ts`, `tests/unit/class/layout.test.ts` | T1 | [ ] |
-| [T3](T3-shrink-the-backlog.md) | Re-measure, shrink/delete the backlog | general-purpose | `oracle/goldens/class/port-backlog.json`, `../decision-journal.md` | T2 | [ ] |
+| [T2](T2-wire-the-mechanism.md) | Atomic flip: bands + edge suffix + retire `:P` | typescript-pro | `class-port-rows.ts`, `class-dot-graph.ts`, `class-layout-helpers.ts`, `tests/unit/class/layout.test.ts` | T1 | [x] |
+| [T3](T3-shrink-the-backlog.md) | Re-measure, shrink/delete the backlog | general-purpose | `oracle/goldens/class/port-backlog.json`, `../decision-journal.md` | T2 | [x] |
 
 ## Why T2 is one commit and not three
 

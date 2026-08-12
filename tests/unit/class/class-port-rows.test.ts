@@ -9,10 +9,12 @@ import { describe, it, expect } from 'vitest';
 import {
   classPortRows,
   classifierPortShortNames,
+  classPortShortNamesById,
   type PortRowCompartmentInput,
 } from '../../../src/diagrams/class/class-port-rows.js';
 import { formatMemberText } from '../../../src/diagrams/class/class-layout-helpers.js';
 import { Ports } from '../../../src/core/svek/Ports.js';
+import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 
 /** T0's oracle header height for a plain single-line class header at
  *  default font -- `dimHeader.getHeight()` read off three independent
@@ -164,5 +166,42 @@ describe('classifierPortShortNames (Entity#getPortShortNames, abel/Link.java:515
 
   it('returns an empty set when no relationship names the classifier', () => {
     expect(classifierPortShortNames('Foo', [])).toEqual(new Set());
+  });
+});
+
+describe('classPortShortNamesById (B2, SI17: unions Classifier.portShortNames)', () => {
+  it('unions a classifier\'s persistent portShortNames with its live relationship scan', () => {
+    const ast: ClassDiagramAST = {
+      classifiers: [
+        { id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [], portShortNames: new Set(['method']) },
+        { id: 'Bar', display: 'Bar', kind: 'class', typeParams: [], members: [] },
+      ],
+      relationships: [{ from: 'Foo', to: 'Bar', type: 'association' }],
+      namespaces: [],
+      directives: [],
+      notes: [],
+    };
+
+    const result = classPortShortNamesById(ast);
+
+    // 'method' comes ONLY from Foo.portShortNames -- the live relationship
+    // above names no port at all.
+    expect(result.get('Foo')).toEqual(new Set(['method']));
+    expect(result.has('Bar')).toBe(false);
+  });
+
+  it('a classifier with no persistent portShortNames falls back to the relationship scan alone', () => {
+    const ast: ClassDiagramAST = {
+      classifiers: [
+        { id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [] },
+        { id: 'Bar', display: 'Bar', kind: 'class', typeParams: [], members: [] },
+      ],
+      relationships: [{ from: 'Foo', to: 'Bar', type: 'association', fromPort: 'field2' }],
+      namespaces: [],
+      directives: [],
+      notes: [],
+    };
+
+    expect(classPortShortNamesById(ast).get('Foo')).toEqual(new Set(['field2']));
   });
 });

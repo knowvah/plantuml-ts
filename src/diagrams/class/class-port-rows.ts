@@ -415,10 +415,14 @@ export function classPortRows(
  * later lifecycle (`~/git/plantuml/.../abel/Link.java:515-524` ->
  * `Entity#addPortShortName`, `abel/Entity.java:538`). `Relationship
  * .fromPort`/`.toPort` already carry the raw (un-encoded) name
- * (`class-relationship-parser.ts:314`, `class-map-commands.ts:365`,
- * `class-assoc-couple.ts:274,280`) -- this collects them per classifier id,
- * matching `Entity#portShortNames`'s `Set` semantics (each name registered
- * at most once, regardless of how many edges name it).
+ * (`class-relationship-parser.ts:314`, `class-map-commands.ts:365`) for any
+ * edge that is STILL alive -- this collects them per classifier id, matching
+ * `Entity#portShortNames`'s `Set` semantics (each name registered at most
+ * once, regardless of how many edges name it). B2 (SI17): a subsumed edge's
+ * OWN port does not survive here -- `class-assoc-couple.ts` no longer copies
+ * it onto a live relationship (upstream's replacement edges name no port of
+ * their own); see {@link classPortShortNamesById}'s doc comment for where
+ * that history is actually preserved.
  */
 export function classifierPortShortNames(
   classifierId: string,
@@ -442,12 +446,23 @@ export function classifierPortShortNames(
  * by `class-dot-graph.ts` to thread the SAME map to both node building
  * (ADR-4's shape/`portRows` gate) and edge building (ADR-3's unconditional
  * tailport/headport gate), so they agree on exactly which ids carry bands.
+ *
+ * B2 (SI17): unions in {@link Classifier.portShortNames} -- the classifier's
+ * OWN persistent registry (`Entity#portShortNames`, `abel/Entity.java:112`),
+ * which is how a subsumed `Class::member` association-class-couple edge
+ * keeps shielding its classifier after `class-assoc-couple.ts` removes the
+ * link, without that history leaking onto the couple's port-free replacement
+ * edge (`edgePortAttrs` reads ONLY `rel.fromPort`/`.toPort`, never this
+ * field, so the union here cannot put a port back onto a DOT edge).
  */
 export function classPortShortNamesById(ast: ClassDiagramAST): Map<string, Set<string>> {
   const byId = new Map<string, Set<string>>();
   for (const c of ast.classifiers) {
     if (!LIKE_CLASS_KINDS.has(c.kind)) continue;
     const names = classifierPortShortNames(c.id, ast.relationships);
+    if (c.portShortNames !== undefined) {
+      for (const name of c.portShortNames) names.add(name);
+    }
     if (names.size > 0) byId.set(c.id, names);
   }
   return byId;

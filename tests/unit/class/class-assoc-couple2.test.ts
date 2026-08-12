@@ -138,11 +138,36 @@ describe('association-class couple: subsumed-edge length transfer', () => {
     expect(findRel(ast, circleId!, bar.id).length).toBe(2);
     // distinct pair, entityLength=2 -> no flip -> class edge stays 1.
     expect(findRel(ast, circleId!, qux.id).length).toBe(1);
-    // The port-based association line itself is gone (subsumed), but its
-    // port carries onto the surviving Foo->circle edge — a `Class::member`
-    // port permanently shields the classifier upstream (Entity
-    // #addPortShortName), independent of the link's later fate.
-    expect(findRel(ast, foo.id, circleId!).fromPort).toBe('method');
+    // B2: the port-based association line itself is gone (subsumed), and its
+    // port does NOT carry onto the surviving Foo->circle edge -- upstream's
+    // replacement edge (`entity1ToPoint`) is built from a port-free LinkArg
+    // (`AbstractClassOrObjectDiagram.java:264-268`), so the split DOT edge is
+    // bare (`sh0006->sh0009`, not `sh0006:pea9f6…->sh0009`).
+    expect(findRel(ast, foo.id, circleId!).fromPort).toBeUndefined();
+    // A `Class::member` port still permanently shields the classifier
+    // upstream (`Entity#addPortShortName`), independent of the link's later
+    // fate -- reproduced here via the classifier's OWN persistent registry,
+    // not via the edge.
+    expect(foo.portShortNames).toEqual(new Set(['method']));
+  });
+
+  it('a PORT on the B-side endpoint of the subsumed link registers on Bar, ' +
+    'not on the surviving circle->Bar edge (B2, symmetric with the A side)', () => {
+    const ast = parse(`
+      class Foo
+      class Bar
+      class Qux
+      Foo --> Bar::method
+      (Foo, Bar) --> Qux
+    `);
+    const foo = ast.classifiers.find((c) => c.display === 'Foo')!;
+    const bar = ast.classifiers.find((c) => c.display === 'Bar')!;
+    const [circleId] = circleIds(ast);
+
+    expect(findRel(ast, circleId!, bar.id).toPort).toBeUndefined();
+    expect(bar.portShortNames).toEqual(new Set(['method']));
+    // The A side named no port -- no spurious registration.
+    expect(foo.portShortNames).toBeUndefined();
   });
 
   it('subsumes the MOST RECENTLY declared relationship between the pair, ' +

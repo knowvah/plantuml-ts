@@ -46,8 +46,8 @@ reach it. Do **not** load the whole plan directory at once.
 | Batch | Description | Tasks | Status |
 |---|---|---|---|
 | [batch-0](batch-0/overview.md) | Go/no-go: which source reproduces the oracle's bands | T0 | [x] |
-| [batch-1](batch-1/overview.md) | The mechanism | T1 → T2 → T3 (sequential) | [ ] |
-| [batch-2](batch-2/overview.md) | Governed remediation loop, only if T3 leaves residue | B0…Bn | [ ] |
+| [batch-1](batch-1/overview.md) | The mechanism | T1 → T2 → T3 (sequential) | [x] |
+| [batch-2](batch-2/overview.md) | Governed remediation loop, only if T3 leaves residue | B0…Bn | [x] |
 | [batch-3](batch-3/overview.md) | Close-out | T4 | [ ] |
 
 There is deliberately **almost no parallelism**: this is one mechanism

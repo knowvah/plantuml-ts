@@ -22,8 +22,8 @@ are the index, not the argument.
 
 | ID | Mechanism | Reach | Depends On | Done |
 |---|---|---|---|---|
-| B1 | `:h` suffixed to every `plaintext` endpoint that named no member row. Upstream gates `:h` on `SvekNode#isShielded()` (a qualified-association test), so a `RECTANGLE_HTML_FOR_PORTS` node's non-port edges take the bare uid. Origin `src/core/svek-dot-emit.ts:146`; upstream `svek/Bibliotekon.java:126-132` + `svek/SvekNode.java:383-396`. | 3 class slugs: `bicabi-42-coto932`, `pijiju-95-xexi872`, `refeku-65-gapu585`. **Floor, not a ceiling** — `edgeRef` is shared, so re-measure object/component/usecase/state too. | T3 | [ ] |
-| B2 | A subsumed link's port is copied onto the split `entity1→point` association edge to reproduce the shield. Upstream builds that edge from a fresh `LinkArg` with **no** port. Origin `src/diagrams/class/class-assoc-couple.ts:274`; upstream `objectdiagram/AbstractClassOrObjectDiagram.java:264-268`. | 1 class slug: `pajoka-72-reju527`. | T3 | [ ] |
+| B1 | `:h` suffixed to every `plaintext` endpoint that named no member row. Upstream gates `:h` on `SvekNode#isShielded()` (a qualified-association test), so a `RECTANGLE_HTML_FOR_PORTS` node's non-port edges take the bare uid. Origin `src/core/svek-dot-emit.ts:146`; upstream `svek/Bibliotekon.java:126-132` + `svek/SvekNode.java:383-396`. | 3 class slugs: `bicabi-42-coto932`, `pijiju-95-xexi872`, `refeku-65-gapu585`. **Floor, not a ceiling** — `edgeRef` is shared, so re-measure object/component/usecase/state too. | T3 | [x] |
+| B2 | A subsumed link's port is copied onto the split `entity1→point` association edge to reproduce the shield. Upstream builds that edge from a fresh `LinkArg` with **no** port. Origin `src/diagrams/class/class-assoc-couple.ts:274`; upstream `objectdiagram/AbstractClassOrObjectDiagram.java:264-268`. | 1 class slug: `pajoka-72-reju527`. | T3 | [x] |
 
 Take B1 first: larger measured reach, and it sits in shared emitter code that
 B2's fixture also routes through.
