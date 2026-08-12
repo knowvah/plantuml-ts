@@ -1333,6 +1333,53 @@ rather than on two claims that were false against the tree.
 
 **No executable change; no frozen count moved.**
 
+## T7 (B35) — the mechanism found, and it is corpus-wide, so it is not fixed here
+
+**Mechanism.** A classifier's ink max-X is `max(x + w - 1, x + bodyWidth)`,
+not a fixed per-state constant.
+
+The rect contributes `x + w - 1` (`LimitFinder#drawRectangle`,
+`klimt/drawing/LimitFinder.java:184-188`). The BODY block is drawn at the box's
+left edge with its OWN width, so it contributes `x + dimFields.width`. Since
+`EntityImageObject.calculateDimensionSlow:150-153` sets
+`width = max(dimFields.getWidth(), dimTitle.getWidth() + 2*xMarginCircle)`,
+the body reaches the box's right edge **only when the body is what set the
+width**. A title-driven box gets no body point out there and falls back to the
+rect's own inset.
+
+**Jar-verified with two authored controls differing only in which term wins:**
+
+| control | p2 box | `x+w` predicts | `x+w-1` predicts | jar |
+|---|---|---|---|---|
+| body-driven | x=74.36, w=180 | **269** | 268 | 269 |
+| title-driven | x=74.74, w=201.25 | 290 | **289** | 289 |
+
+`jocamu-71-nuvo330` is title-driven — `"~#1: Person"` is wider than its `tutu`
+body — so our fixed `x + w` overshoots by exactly 1. That is its whole
+remaining diff.
+
+**This closes a question open since G2 N5.** `addRectInk`'s doc comment
+attributed its `+1` to an invisible full-box `UEmpty` reservation. B5 already
+showed `UEmpty` is drawn nowhere on any class/object path but could not say
+what the real source was. It is the body block, and the rule is conditional,
+not constant. `addRectInk`'s comment now carries the correction with the
+original text retained beneath it.
+
+**Deliberately not fixed in this iteration.** `addRectInk` is the ink rule for
+EVERY class/object/map/json leaf, and the fix needs the measured body width
+threaded onto `ClassifierGeo`. That is a corpus-wide change to the class
+census and the 317 class goldens — its own iteration with its own measurement,
+not a tail-end edit. Tracked as B35 with the mechanism and both controls
+recorded.
+
+**B32 not started.** `tobuka-93`'s 41 edge-label-placement diffs remain
+undiagnosed; the session ran out of room before it, and starting a fresh
+diagnosis at this point would produce exactly the kind of half-measured
+attribution B34 already cost.
+
+**No executable change.** Comment-only; `npm test` 574 files / 12764 tests,
+exit 0 · typecheck · lint · build all clean.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

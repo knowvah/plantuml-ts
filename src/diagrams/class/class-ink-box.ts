@@ -49,7 +49,24 @@ function addPoint(box: InkBox, x: number, y: number): void {
   if (y > box.maxY) box.maxY = y;
 }
 
-/** `LimitFinder#drawRectangle`'s own `-1`-inset corners are NOT the true
+/**
+ *  **T7/M40 CORRECTION (2026-08-11): the `UEmpty` attribution below is
+ *  WRONG and is retained only as the record of what was believed.** `UEmpty`
+ *  is drawn nowhere on any class/object path. The real source of the `+1`
+ *  is the BODY block: it is drawn at the box's left edge with its OWN width
+ *  (`dimFields.width`), so its ink reaches `x + dimFields.width`, while the
+ *  rect reaches only `x + w - 1`. Since `w = max(dimFields.width,
+ *  dimTitle.width + 2*xMarginCircle)` (`EntityImageObject.java:150-153`), the
+ *  body reaches the box edge ONLY when the body set the width. Jar-verified:
+ *  a body-driven box needs `x+w`, a title-driven box needs `x+w-1` (see the
+ *  ledger's M40 row for the two controls). This function's fixed `x+w` is
+ *  therefore right for body-driven boxes and 1px wide for title-driven ones
+ *  -- `jocamu-71-nuvo330`'s remaining diff. Fixing it needs the measured body
+ *  width threaded onto `ClassifierGeo`; tracked as B35.
+ *
+ *  ORIGINAL NOTE, retained:
+ *
+ *  `LimitFinder#drawRectangle`'s own `-1`-inset corners are NOT the true
  *  boundary here — `EntityImageClass`'s header/body `TextBlockUtils
  *  .withMargin` composition also draws an invisible full-box `UEmpty`
  *  reservation over the SAME `(widthTotal, heightTotal)` the visible
