@@ -256,7 +256,7 @@ corpus.
 |---|---|---|
 | `zicope-62-pica490`, `zuvila-56-nuda425` — object `no-candidate`: embedded `{{ }}` sub-diagrams inside `!procedure`-generated `map` bodies | unassigned | this summary; ADR-6 |
 | `besepi-37-rori892` — `directionOk`, class corpus | **object-close B33** (pre-existing) | SI17 ADR-6 |
-| `formatObjectMemberText` normalizes the `=` separator: `a=1` → `"a = 1"` where `getDisplay(false)` gives `"a=1"`. Gate-invisible (a space measures 0 wide) and election-neutral. One-field fix — carry `typeSeparator` through `tryStructuredObjectMember` — but it needs its own SVG-census measurement | unassigned | `.agent-notes/si20-object-body-is-bodyenhanced1.md` |
+| ~~`formatObjectMemberText` normalizes the `=` separator: `a=1` → `"a = 1"` where `getDisplay(false)` gives `"a=1"`~~ — **CLOSED** on `fix/object-separator-spacing`: `tryStructuredObjectMember` now carries `typeSeparator` and the formatter reads it, mirroring the class path's G2 N31 round-trip. Measured as predicted: object DOT 78/80, object census 35/80, class DOT 710 — all unmoved, since no corpus fixture uses a non-canonical separator | closed | `.agent-notes/si20-object-body-is-bodyenhanced1.md` |
 | SI17's "7 oracle-blind inside the 710" phrasing, unverified against the same `dot-sync-report` mechanism corrected here | unassigned | `.agent-notes/si20-oracle-blind-is-outside-the-comparable-set.md` |
 
 **No `DIVERGENCES.md` entry was added, and none is owed.** Every remaining
