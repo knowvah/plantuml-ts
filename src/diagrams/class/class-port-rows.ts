@@ -25,6 +25,8 @@ import type { MeasuredClassifier } from './class-layout-helpers.js';
 import type { DotInputNode, DotInputPortRow } from '../../core/graph-layout.types.js';
 import { Ports } from '../../core/svek/Ports.js';
 import { VisibilityModifier } from '../../core/skin/VisibilityModifier.js';
+import { MethodsOrFieldsArea } from '../../core/cucadiagram/MethodsOrFieldsArea.js';
+import type { Elected } from '../../core/cucadiagram/Elected.js';
 
 /** `TextBlockMap#getPorts` reports every data row at a FIXED score of 100 —
  *  a map row is never in competition with another report for the same id, so
@@ -152,4 +154,203 @@ export function applyShapeAndPorts(
   // rather than a shield. `portRows` being PRESENT (not its length) is what
   // switches the emitter and the layout adapter over.
   if (classifier.kind === 'map') node.portRows = mapPortRows(classifier, measured);
+}
+
+// ---------------------------------------------------------------------------
+// T1 (SI17): class port-band PRODUCER -- NOT wired into `applyShapeAndPorts`
+// above (T2's job). ADR-1 (`plans/si17-class-row-ports/decision-journal.md`'s
+// T0 entry): a class's bands come off the upstream `EntityImageClass
+// #getPorts` -> `MethodsOrFieldsArea#getPorts` BLOCK-TREE composition, not
+// `mapPortRows`' flat `dividerYs` recipe above -- `MeasuredClassifier
+// .dividerYs` is the COMPARTMENT separator list for a class (`[32,68]` for a
+// 5-row class), not one entry per row as it is for a `map`, so that recipe
+// drops or misplaces every class band it touches (T0's measured table).
+//
+// PLUMBING CONSTRAINT (verified, not re-derived): `class-dot-graph.ts
+// #buildOneDotNode` (this module's only caller) has no `StringMeasurer`/
+// `Theme` at its call site, so a producer here cannot itself measure text or
+// construct the real klimt `TextBlock` tree `MethodsOrFieldsArea#getPorts`
+// runs on. `MeasuredClassifier` also does not (yet) publish a per-member
+// height or compartment boundary -- `class-member-rows.ts:200-201` computes
+// upstream's exact per-row `y` and keeps only a text BASELINE, discarding the
+// row-top/height terms this producer needs. `classPortRows` below therefore
+// takes those terms as an EXPLICIT parameter (`PortRowCompartmentInput`);
+// wiring a caller that supplies them from `MeasuredClassifier` is T2's task.
+// ---------------------------------------------------------------------------
+
+/**
+ * One member row's producer-facing input -- the per-member terms the
+ * block-tree frame needs that `MeasuredClassifier` does not yet publish
+ * (see the plumbing-constraint note above).
+ */
+export interface PortRowMemberInput {
+  /**
+   * ADR-5: the election's input text is upstream's `Member.getDisplay(false)`
+   * -- the display form WITHOUT the visibility character, even when the row
+   * itself RENDERS with one. T2 must supply `formatMemberText(member, false)`
+   * (`class-layout-helpers.ts:145`'s `keepVisibilityChar` default), NEVER
+   * `ClassifierGeo.rows[i].text` (`class-member-rows.ts:180,203`), which
+   * carries the char whenever `member.visibilityExplicit` is true. Drift
+   * here does not fail loudly -- it silently elects a DIFFERENT row.
+   * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:213-217 (convert)
+   */
+  readonly text: string;
+  /**
+   * This member's own measured content height -- T2 must supply the SAME
+   * `MemberRowBuild.height` value `class-member-rows.ts:182,201` already
+   * reads into its `rowTop` accumulator and then discards.
+   * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:201-208 (dim.getHeight())
+   */
+  readonly height: number;
+}
+
+/**
+ * One fields-or-methods compartment, in `BodierLikeClassOrObject#getBody`'s
+ * `mergeTB(fields, methods)` order (fields first, methods second) --
+ * `~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:237-249`.
+ * `classPortRows` composes however many compartments it is given the SAME
+ * way `TextBlockVertical#getPorts`'s child loop does
+ * (`~/git/plantuml/.../klimt/shape/TextBlockVertical.java:107-118`), so a
+ * caller with one compartment or more than two is handled identically.
+ */
+export interface PortRowCompartmentInput {
+  readonly members: readonly PortRowMemberInput[];
+}
+
+/**
+ * `TextBlockUtils.withMargin(area, 6, 4)`'s top/bottom margin term (4) --
+ * `TextBlockMarged#getPorts`'s `translateY(top)` (`~/git/plantuml/.../
+ * klimt/shape/TextBlockMarged.java:100-102`), fed by `withMargin`'s own
+ * `top = marginY` assignment (`~/git/plantuml/.../klimt/shape/
+ * TextBlockUtils.java:64-69`). The SAME upstream value `class-member-
+ * rows.ts`'s (unexported) `SECTION_MARGIN_TOP`/half of `EMPTY_SECTION_
+ * HEIGHT` (8 = 4+4) already establishes for that file's own margin-only
+ * empty-compartment floor -- redeclared locally rather than imported
+ * because this task's write-set may not touch `class-member-rows.ts`.
+ */
+const SECTION_MARGIN = 4;
+
+/**
+ * `MethodsOrFieldsArea#getElected`/`#sortBySize` (java:180-192,219-236;
+ * ported in full at `core/cucadiagram/MethodsOrFieldsArea.ts:219-274`) are
+ * this producer's REQUIRED election mechanism -- never reimplemented here.
+ * Constructing a real `MethodsOrFieldsArea` instance needs a `Display`/
+ * `Entity`/`StringBounder` this seam does not have (see the plumbing-
+ * constraint note above), so both ported methods are invoked directly
+ * against the class's OWN `.prototype` object as the method receiver.
+ * This is sound because BOTH methods are pure over their own parameters --
+ * confirmed by reading the bodies, not assumed: `sortBySize` sorts a COPY
+ * of its input and touches no field; `getElected` calls only
+ * `this.getScore(cs, shortName)`, and `getScore` reads only its own two
+ * parameters. Supplying `MethodsOrFieldsArea.prototype` as `this` gives
+ * `getElected`'s internal `this.getScore` call exactly what it dereferences
+ * (the sibling method itself, found directly ON that prototype object) --
+ * no different from a real instance for this call, since no instance field
+ * is ever read. `getElected` is invoked through its normal PUBLIC method
+ * syntax; `sortBySize` is private (upstream and here), so its call site
+ * narrows the prototype to that one method's own signature rather than
+ * casting to `any`.
+ */
+function electedFor(memberText: string, sortedShortNames: readonly string[]): Elected | null {
+  return MethodsOrFieldsArea.prototype.getElected(memberText, sortedShortNames);
+}
+
+/** @see {@link electedFor}'s doc comment -- same reuse rationale, for the
+ *  private `sortBySize` half of the election. */
+function sortShortNamesBySize(shortNames: Iterable<string>): string[] {
+  const proto = MethodsOrFieldsArea.prototype as unknown as {
+    sortBySize(all: Iterable<string>): string[];
+  };
+  return proto.sortBySize(shortNames);
+}
+
+/**
+ * The port bands of a class/interface/enum/... leaf's body (ADR-1, block
+ * tree) -- `EntityImageClass#getPorts` -> `MethodsOrFieldsArea#getPorts`,
+ * composed exactly as T0 measured it:
+ *
+ * `position = headerHeight + Σ(prior compartments' FULL margined height) +
+ * SECTION_MARGIN + Σ(prior members' own height, SAME compartment)`
+ *
+ * | Layer | behavior | `file:line` |
+ * |---|---|---|
+ * | `EntityImageClass` | `body.getPorts().translateY(dimHeader.getHeight())` | `svek/image/EntityImageClass.java:247-253` |
+ * | `TextBlockVertical` | per-child `translateY(y)`, `y += child's OWN full height` | `klimt/shape/TextBlockVertical.java:107-118` |
+ * | `TextBlockLineBefore` | pass-through, no translate | `klimt/shape/TextBlockLineBefore.java:103-107` |
+ * | `TextBlockMarged` | `translateY(top)`, `top = SECTION_MARGIN` | `klimt/shape/TextBlockMarged.java:100-102` |
+ * | `MethodsOrFieldsArea` | `y` accumulates each member's own height | `cucadiagram/MethodsOrFieldsArea.java:194-211` |
+ *
+ * A compartment's FULL margined height is `SECTION_MARGIN * 2 +
+ * Σ(member heights)` -- the same margin-only floor `class-member-rows.ts`'s
+ * `EMPTY_SECTION_HEIGHT` (8 = 4+4) already establishes for an EMPTY
+ * compartment, so an empty leading compartment still pushes the next one
+ * down by 8, matching `BodierLikeClassOrObject#getBody` always building
+ * BOTH compartments even when one has zero members.
+ *
+ * ADR-4: the shape flip is on `portShortNames.size > 0`, NOT on this
+ * function's return -- a classifier with declared port names whose every
+ * member loses its election still returns `[]` here, and the CALLER (not
+ * this function) must still flip the node to `RECTANGLE_HTML_FOR_PORTS`.
+ *
+ * Jar-verified against T0's three oracle controls (`plans/si17-class-row-
+ * ports/decision-journal.md`): `dekaba-54-fafi485` (single compartment, one
+ * elected member: 36/14), the authored `fm-both` fixture (fields `field2`
+ * 50/14, methods `method1` 72/14 -- the methods compartment correctly
+ * carries the whole fields compartment's height), and `xefeme-77-fagu709`
+ * (two elected members in one compartment: 36/14, 50/14).
+ */
+export function classPortRows(
+  compartments: readonly PortRowCompartmentInput[],
+  portShortNames: Iterable<string>,
+  headerHeight: number,
+): DotInputPortRow[] {
+  const sortedShortNames = sortShortNamesBySize(portShortNames);
+  if (sortedShortNames.length === 0) return [];
+
+  const ports = new Ports();
+  let compartmentTop = headerHeight;
+  for (const compartment of compartments) {
+    let memberTop = compartmentTop + SECTION_MARGIN;
+    let contentHeight = 0;
+    for (const member of compartment.members) {
+      const elected = electedFor(member.text, sortedShortNames);
+      if (elected !== null) {
+        ports.add(elected.getShortName(), elected.getScore(), memberTop, member.height);
+      }
+      memberTop += member.height;
+      contentHeight += member.height;
+    }
+    compartmentTop += SECTION_MARGIN * 2 + contentHeight;
+  }
+
+  return ports.getAllPortGeometry().map((g) => ({
+    id: g.getId(),
+    position: g.getPosition(),
+    height: g.getHeight(),
+  }));
+}
+
+/**
+ * `Entity#getPortShortNames()`'s originating mechanism, for a T2 caller that
+ * has an `ast.relationships` array but no live `Entity` graph: `Link
+ * #setPortMembers` registers a `Class::member` edge's port name on BOTH the
+ * FROM and TO classifier, independently of each other and of the link's
+ * later lifecycle (`~/git/plantuml/.../abel/Link.java:515-524` ->
+ * `Entity#addPortShortName`, `abel/Entity.java:538`). `Relationship
+ * .fromPort`/`.toPort` already carry the raw (un-encoded) name
+ * (`class-relationship-parser.ts:314`, `class-map-commands.ts:365`,
+ * `class-assoc-couple.ts:274,280`) -- this collects them per classifier id,
+ * matching `Entity#portShortNames`'s `Set` semantics (each name registered
+ * at most once, regardless of how many edges name it).
+ */
+export function classifierPortShortNames(
+  classifierId: string,
+  relationships: readonly { from: string; to: string; fromPort?: string; toPort?: string }[],
+): Set<string> {
+  const names = new Set<string>();
+  for (const rel of relationships) {
+    if (rel.from === classifierId && rel.fromPort !== undefined) names.add(rel.fromPort);
+    if (rel.to === classifierId && rel.toPort !== undefined) names.add(rel.toPort);
+  }
+  return names;
 }
