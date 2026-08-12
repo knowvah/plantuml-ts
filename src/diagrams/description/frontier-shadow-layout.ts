@@ -139,12 +139,25 @@ function parseSubgraphBounds(text: string, name: string): RectangleArea {
   return { minX: minX!, minY: minY!, maxX: maxX!, maxY: maxY! };
 }
 
-/** Extracts one node's `pos="x,y"` from its own (single-line) node
- *  statement. `id` is always one of this module's own synthetic bare
- *  identifiers (see this module's doc comment), never a caller-supplied
- *  one — no quoting concern applies here either. */
+/** Extracts one node's `pos="x,y"` from its own node statement. `id` is
+ *  always one of this module's own synthetic bare identifiers (see this
+ *  module's doc comment), never a caller-supplied one — no quoting concern
+ *  applies here either.
+ *
+ *  The attribute list is matched ACROSS newlines, terminated by `];`.
+ *  `@knowvah/dot-engine` emitted each node statement on one line through
+ *  1.0.x; from 1.2.x it wraps the attributes one per line:
+ *
+ *      n0	[_draw_="c 7 -#000000 p 4 …",
+ *      		pos="36,144",
+ *      		width=1];
+ *
+ *  A `[^\n]*` capture cannot reach the closing bracket in that shape, so it
+ *  matched nothing and every port cluster threw "no node statement for n0".
+ *  Terminating on `];` rather than a bare `]` keeps the match from stopping
+ *  inside a bracketed attribute value. */
 function parseNodePos(text: string, id: string): Point {
-  const line = new RegExp(`^\\s*${id}\\s*\\[([^\\n]*)\\]`, 'm').exec(text);
+  const line = new RegExp(`^\\s*${id}\\s*\\[([\\s\\S]*?)\\];`, 'm').exec(text);
   if (line === undefined || line === null) {
     throw new Error(`frontier-shadow-layout: no node statement for ${id}`);
   }
