@@ -236,3 +236,49 @@ describe('SI20 T2 — skinparam minClassWidth suppresses every object band', () 
     expect(edge!.attributes!.headport).toBe(PORT_3);
   });
 });
+
+/**
+ * SI20 code review, A6's MEDIUM gap: the suppressed vs empty-but-shown
+ * distinction was asserted only at the `measureObjectClassifier` PUBLISH layer
+ * (`class-object-port-bands.test.ts`), never through to the emitted
+ * `DotInputNode`. Upstream treats the two states differently -- a SUPPRESSED
+ * fields compartment contributes NOTHING, while an empty-but-SHOWN one is a
+ * real `TextBlockEmpty(10, 16)` box (`EntityImageObject`'s ctor, the
+ * `fieldsToDisplay.size() == 0 && showFields` branch) -- so a port that
+ * collapsed the two would still satisfy the publish-layer tests while emitting
+ * the wrong node height.
+ *
+ * The two heights are not arbitrary: 18 is the header alone, T0's resolved
+ * `H` for a plain object (`plans/si20-object-row-ports/decision-journal.md`),
+ * and 34 is that header plus exactly the 16 of
+ * `class-object-fields.ts#OBJECT_EMPTY_FIELDS`. Collapsing the states in
+ * either direction moves one of these numbers.
+ */
+describe('SI20 review -- suppressed vs empty-but-shown reaches the DOT node', () => {
+  const SHOWN_EMPTY = [
+    '@startuml', 'object Shown {', '}', 'object Peer {', ' x', '}', 'Shown --> Peer', '@enduml',
+  ].join('\n');
+  const SUPPRESSED = [
+    '@startuml', 'hide Hidden members', 'object Hidden {', ' alpha', '}',
+    'object Peer {', ' x', '}', 'Hidden --> Peer', '@enduml',
+  ].join('\n');
+
+  it('reserves TextBlockEmpty(10,16) for an empty-but-SHOWN field list', () => {
+    expect(nodeById(captureAll(SHOWN_EMPTY), 'Shown').height).toBe(34);
+  });
+
+  it('reserves NOTHING below the header for a SUPPRESSED field list', () => {
+    expect(nodeById(captureAll(SUPPRESSED), 'Hidden').height).toBe(18);
+  });
+
+  it('suppresses only the named object, leaving its peer\'s body intact', () => {
+    // Guards the control itself: if `hide Hidden members` were diagram-wide,
+    // Peer would also collapse and the comparison above would prove nothing.
+    expect(nodeById(captureAll(SUPPRESSED), 'Peer').height).toBe(40);
+  });
+
+  it('emits no port rows for either state -- neither declares a port name', () => {
+    expect(nodeById(captureAll(SHOWN_EMPTY), 'Shown').portRows ?? []).toEqual([]);
+    expect(nodeById(captureAll(SUPPRESSED), 'Hidden').portRows ?? []).toEqual([]);
+  });
+});

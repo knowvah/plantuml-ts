@@ -1,0 +1,13 @@
+@startuml
+object Config {
+ host=localhost
+ port =8080
+ mode  =  debug
+}
+
+object Client {
+ target = Config
+}
+
+Client::target --> Config::port
+@enduml
