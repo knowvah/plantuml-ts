@@ -1,0 +1,66 @@
+plantuml-ts
+Copyright (c) 2026 Scott Seely
+
+This product is licensed under the MIT License; see LICENSE for the full text.
+
+It includes third-party components under their own licenses, listed below.
+This file records what is redistributed and under which terms. It is a factual
+attribution notice, not legal advice.
+
+================================================================================
+Components inlined into the published bundle (dist/)
+================================================================================
+
+@knowvah/dot-engine  v1.0.0
+    License:  Eclipse Public License 2.0 (EPL-2.0)
+    Source:   https://github.com/knowvah/dot-engine
+    Full text: https://www.eclipse.org/legal/epl-2.0/
+               and node_modules/@knowvah/dot-engine/LICENSE
+
+    The graph layout engine. It is a TypeScript port of Graphviz's dot layout
+    (see also Graphviz below, from which it derives). It is bundled directly
+    into dist/plantuml-ts.js and dist/plantuml-ts.cjs -- the published artifact
+    contains this code rather than importing it at runtime.
+
+    EPL-2.0 is a weak, file-level copyleft: obligations attach to the
+    EPL-covered files and their modifications, not to a larger work that merely
+    combines with them. Source for this component is available at the URL
+    above.
+
+jsonc-parser
+    License:  MIT
+    Source:   https://github.com/microsoft/node-jsonc-parser
+
+    JSON-with-comments parsing, used by the @startjson diagram path. Bundled
+    directly into dist/ as above.
+
+================================================================================
+Components declared as dependencies but NOT inlined
+================================================================================
+
+katex
+    License:  MIT
+    Source:   https://github.com/KaTeX/KaTeX
+
+    Math typesetting for <latex>/<math> creole. It is marked external in
+    vite.config.ts, so dist/ imports it at runtime rather than containing it.
+    Consumers receive it as an ordinary npm dependency under its own license.
+
+================================================================================
+Upstream works this project ports or derives from
+================================================================================
+
+PlantUML
+    Source:   https://github.com/plantuml/plantuml
+
+    plantuml-ts is a port of PlantUML to TypeScript. No PlantUML source is
+    redistributed here; the Java is used as the specification the port is
+    written against. PlantUML itself is multi-licensed -- see its LICENSES.md.
+
+Graphviz
+    License:  Eclipse Public License 1.0 (EPL-1.0)
+    Source:   https://gitlab.com/graphviz/graphviz
+
+    The layout algorithms this project's engine implements originate in
+    Graphviz. No Graphviz source is redistributed by this package; it is
+    named here because the lineage is relevant to the EPL terms above.

@@ -16,6 +16,17 @@
  * it is invisible to every DOT gate, because `DeterministicMeasurer` measures
  * a space as width 0, so only the SVG `<text>` content differs.
  *
+ * **These tests are the ONLY guard on this behavior, and that is not a gap
+ * anyone should try to close with an oracle fixture.** The code review
+ * proposed adding one so the DOT-parity ratchet would cover the path; it was
+ * authored (`oracle/goldens/object/si20-member-separator-spacing`) and the
+ * experiment run: with the fix reverted, that fixture still PASSES. The
+ * ratchet compares structure and geometry, and a zero-width space changes
+ * neither, so the emitted DOT is byte-identical with the bug present. The
+ * fixture was kept for what it does guard -- election and port ids on members
+ * carrying non-canonical separators -- but it cannot observe the spacing
+ * itself. Delete these unit tests and the behavior becomes unguarded.
+ *
  * Goes through `parseClass` rather than importing `parseObjectField` directly:
  * loading `class-object-commands.js` first trips the command-registry import
  * cycle (`OBJECT_COMMANDS is not iterable`).

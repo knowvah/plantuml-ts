@@ -140,7 +140,19 @@ function toPortCompartments(
  *  object one against `getDisplay(false)` on a visibility-char control.
  *  Picking the wrong one does NOT fail loudly: it silently elects a different
  *  row, which is why `class-object-row-ports.test.ts` carries a purpose-built
- *  `\t` control (rozuxo's bare-word members cannot tell the two apart). */
+ *  `\t` control (rozuxo's bare-word members cannot tell the two apart).
+ *
+ *  CO-MAINTENANCE POINT with `class-shield-helpers.ts#isRowPortKind`. The
+ *  `else` here is the class family by construction, not by default: every
+ *  kind that reaches this function has passed `isRowPortKind`, which today is
+ *  exactly `LIKE_CLASS_KINDS` plus `object`. **A kind added to that predicate
+ *  without a branch here would silently take the class reconstructor** -- the
+ *  precise defect SI20's T2 shipped and caught. Because the two live in
+ *  different modules and the coupling is not expressible in the type system
+ *  (`LIKE_CLASS_KINDS` is a runtime `Set`, reachable here only through an
+ *  import cycle), it is pinned by a fitness test instead:
+ *  `class-port-rows.test.ts`'s "row-port kind set is pinned" case fails the
+ *  moment `isRowPortKind` accepts anything new, forcing this decision. */
 function electionTextFor(kind: ClassifierKind): (member: Member) => string {
   return kind === 'object' ? formatObjectMemberText : (member) => formatMemberText(member, false);
 }
@@ -434,14 +446,43 @@ export function classifierPortShortNames(
  * edge (`edgePortAttrs` reads ONLY `rel.fromPort`/`.toPort`, never this
  * field, so the union here cannot put a port back onto a DOT edge).
  */
-export function classPortShortNamesById(ast: ClassDiagramAST): Map<string, Set<string>> {
+/**
+ * ONE pass over `ast.relationships`, building every eligible leaf's port-name
+ * set at once -- the shape `class-shield-helpers.ts#shieldedClassifierIds`
+ * already uses, and the reason {@link classifierPortShortNames} (which scans
+ * the whole relationship list for a SINGLE id) is not called in a loop here.
+ * Doing that is O(classifiers x relationships), and SI20 widened
+ * `isRowPortKind` to include `object`, so in an object diagram -- where every
+ * leaf is an object -- every leaf now qualifies where none used to, taking a
+ * path that was previously skipped outright.
+ *
+ * Per-id insertion order is deliberately unchanged: relationships are still
+ * visited in source order and each id's names still land in that order, so
+ * the resulting `Set`s iterate exactly as the per-classifier version's did.
+ */
+function rowPortNamesFromRelationships(ast: ClassDiagramAST): Map<string, Set<string>> {
+  const eligible = new Set<string>();
+  for (const c of ast.classifiers) if (isRowPortKind(c.kind)) eligible.add(c.id);
   const byId = new Map<string, Set<string>>();
+  const add = (id: string, name: string | undefined): void => {
+    if (name === undefined || !eligible.has(id)) return;
+    const existing = byId.get(id);
+    if (existing === undefined) byId.set(id, new Set([name]));
+    else existing.add(name);
+  };
+  for (const rel of ast.relationships) {
+    add(rel.from, rel.fromPort);
+    add(rel.to, rel.toPort);
+  }
+  return byId;
+}
+
+export function classPortShortNamesById(ast: ClassDiagramAST): Map<string, Set<string>> {
+  const byId = rowPortNamesFromRelationships(ast);
   for (const c of ast.classifiers) {
-    if (!isRowPortKind(c.kind)) continue;
-    const names = classifierPortShortNames(c.id, ast.relationships);
-    if (c.portShortNames !== undefined) {
-      for (const name of c.portShortNames) names.add(name);
-    }
+    if (!isRowPortKind(c.kind) || c.portShortNames === undefined) continue;
+    const names = byId.get(c.id) ?? new Set<string>();
+    for (const name of c.portShortNames) names.add(name);
     if (names.size > 0) byId.set(c.id, names);
   }
   return byId;

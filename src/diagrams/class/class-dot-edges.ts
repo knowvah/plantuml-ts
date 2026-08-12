@@ -126,8 +126,9 @@ export function buildDotEdges(
   const { font, measurer, linetype, classPortShortNames } = render;
   const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
   // ADR-3: unconditional whenever the TARGET carries row bands at all -- a
-  // `map` (its own flat-sizer bands) or a `LIKE_CLASS_KINDS` leaf with a
-  // declared port-name set (T2's `classPortShortNamesById`, ADR-4). Neither
+  // `map` (its own flat-sizer bands) or an `isRowPortKind` leaf -- class
+  // family or object -- with a declared port-name set (T2's
+  // `classPortShortNamesById`, ADR-4). Neither
   // set membership depends on whether any row actually WON an election
   // (`bicabi-42-coto932`'s dangling-port control) -- `edgePortAttrs` must
   // not re-derive that from `portRows.length`.

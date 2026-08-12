@@ -318,7 +318,7 @@ function buildStereoHeaderRows(
  * numeric match).
  *
  * G3/O1 landed the SAME missing-`width`/wrong-baseline fix for object FIELD
- * rows (`class-object-map-sizing.ts#measureObjectFields`), map DATA rows
+ * rows (`class-object-fields.ts#measureObjectFields`), map DATA rows
  * (`class-map-sizing.ts#buildMapRowGeo`), and json entry rows
  * (`class-json-sizing.ts#buildJsonRows`) — a related but functionally
  * separate mechanism from this function's own header fix (different padding
