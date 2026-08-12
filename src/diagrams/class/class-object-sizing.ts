@@ -49,9 +49,11 @@ import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './
 import { floorAtMinimumWidth } from './class-object-map-sizing.js';
 import { objectDisplayText } from './class-object-display.js';
 import { buildObjectMemberRow } from './class-object-member-creole.js';
+import type { ObjectMemberRow } from './class-object-member-creole.js';
 import { atomsToPlainText } from './class-member-creole.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { resolveStyleStereotypeTags } from './class-stereotype.js';
+import type { FlatMemberRows } from './class-member-rows.js';
 
 // ---------------------------------------------------------------------------
 // Local interfaces (grouped at top — a declaration sitting between two
@@ -62,6 +64,11 @@ import { resolveStyleStereotypeTags } from './class-stereotype.js';
 interface FieldsResult {
   dim: Dim;
   rows: ClassifierGeo['rows'];
+  /** SI20 T1, publish-only: `visibleMembers`/`texts`/`builds`, already
+   *  computed for `dim`/`rows` above, reshaped into `class-layout-generic-
+   *  classifier.ts#buildNormalClassifierResult`'s `FlatMemberRows` shape --
+   *  no new measurement. See {@link toFlatMemberRows}. */
+  flat: FlatMemberRows;
 }
 
 /** Result of {@link computeObjectTitle} -- the combined name+stereotype
@@ -187,6 +194,23 @@ function methodOrFieldHeight(fieldsHeight: number, showFields: boolean): number 
   return fieldsHeight === 0 && showFields ? OBJECT_EMPTY_HEIGHT_FALLBACK : fieldsHeight;
 }
 
+/** SI20 T1, publish-only: reshapes already-computed `visibleMembers`/
+ *  `texts`/`builds` into `buildNormalClassifierResult`'s `FlatMemberRows`
+ *  shape -- no new measurement. `ObjectMemberRow.runs[].atom` unwraps into
+ *  `MemberRowBuild.atoms` (`x` is run-only, unused by `toPortCompartments`,
+ *  which reads only `.height`). */
+function toFlatMemberRows(
+  members: Classifier['members'],
+  texts: string[],
+  builds: readonly ObjectMemberRow[],
+): FlatMemberRows {
+  return {
+    members,
+    texts,
+    builds: builds.map((b) => ({ atoms: b.runs.map((r) => r.atom), width: b.width, height: b.height })),
+  };
+}
+
 /**
  * MethodsOrFieldsArea (via BodyFactory.create1 -> BodyEnhanced1 -> a single
  * buildTextBlock, since object field lines never contain a block separator/
@@ -221,8 +245,8 @@ function measureObjectFields(
   showFields: boolean,
 ): FieldsResult {
   const visibleMembers = classifier.members.filter((m) => m.hidden !== true);
-  if (!showFields) return { dim: { width: 0, height: 0 }, rows: [] };
-  if (visibleMembers.length === 0) return { dim: OBJECT_EMPTY_FIELDS, rows: [] };
+  if (!showFields) return { dim: { width: 0, height: 0 }, rows: [], flat: toFlatMemberRows([], [], []) };
+  if (visibleMembers.length === 0) return { dim: OBJECT_EMPTY_FIELDS, rows: [], flat: toFlatMemberRows([], [], []) };
 
   const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
   const texts = visibleMembers.map(formatObjectMemberText);
@@ -282,7 +306,7 @@ function measureObjectFields(
       });
     });
   });
-  return { dim: { width, height }, rows };
+  return { dim: { width, height }, rows, flat: toFlatMemberRows(visibleMembers, texts, builds) };
 }
 
 /** The name+stereotype title dimension and the resolved header FontSize
@@ -366,7 +390,7 @@ function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredCla
  *  members (the empty-fields placeholder is ALSO wrapped in one). */
 function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredClassifier {
   const { classifier, theme, measurer, showFields, title, nameFontSizeOverride } = params;
-  const { dim: fieldsDim, rows: fieldRows } = measureObjectFields(classifier, theme, measurer, showFields);
+  const { dim: fieldsDim, rows: fieldRows, flat } = measureObjectFields(classifier, theme, measurer, showFields);
   const fieldsHeight = methodOrFieldHeight(fieldsDim.height, showFields);
 
   const width = floorAtMinimumWidth(
@@ -389,8 +413,17 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
   // DIFFERENT ink rules -- see `class-ink-box.ts#addRectInkEmptyShownBody`.
   const emptyFieldPlaceholder = showFields && fieldRows.length === 0;
 
+  // SI20 T1, publish-only: T0's resolved header (`title.height`, NOT
+  // `+ margin` -- ../decision-journal.md's T0 entry) plus the already-built
+  // field compartment. Mirrors `buildNormalClassifierResult`'s suppression
+  // gate: omitted when SUPPRESSED (`showFields === false`), present
+  // (possibly zero members) for shown-but-empty -- same gate `dividerYs`
+  // above uses, so the two empty states stay distinct. Not wired: unread
+  // for an object leaf until T2 adds it to `classPortShortNamesById`.
+  const portMemberSections = { headerHeight: title.height, ...(showFields ? { fields: flat } : {}) };
+
   return {
-    width, height, rows,
+    width, height, rows, portMemberSections,
     dividerYs: showFields ? [title.height] : [],
     ...(emptyFieldPlaceholder ? { emptyFieldPlaceholder: true as const } : {}),
     // B35/M40: only a POPULATED field list is a real `BodyFactory.create1`
