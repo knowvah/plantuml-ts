@@ -193,22 +193,25 @@ function classFamilyPortRows(
  *  applyShapeAndPorts} purely for that function's CCN budget. */
 function resolveNodeShape(
   classifier: Classifier,
-  shield: { isPort: boolean } | undefined,
+  shield: { isPort: boolean; hasQualifier: boolean } | undefined,
   hasPortBands: boolean,
 ): DotInputNode['shape'] | undefined {
   return KIND_SHAPE[classifier.kind] ?? (shield !== undefined || hasPortBands ? 'plaintext' : undefined);
 }
 
-/** Svek shape selection plus the three port mechanisms riding on it: the
- *  `:P` compass shield (`isPort`), a map's flat-sizer row bands, and (T2)
- *  a class-family leaf's block-tree row bands (`portRows` on both). Split
- *  out of `class-dot-graph.ts#buildOneDotNode` for that function's CCN
+/** Svek shape selection plus the four port/shield mechanisms riding on it:
+ *  the `:P` compass shield (`isPort`), a map's flat-sizer row bands, (T2) a
+ *  class-family leaf's block-tree row bands (`portRows` on both), and (B1)
+ *  the `:h` shield flag (`qualifierShielded`) -- `SvekNode#isShielded`'s
+ *  `hasKal1`/`hasKal2` half, independent of the shape/port mechanisms above
+ *  (svek/SvekNode.java:383-396; see `graph-layout.types.ts`'s field doc).
+ *  Split out of `class-dot-graph.ts#buildOneDotNode` for that function's CCN
  *  budget. */
 export function applyShapeAndPorts(
   node: DotInputNode,
   classifier: Classifier,
   measured: MeasuredClassifier,
-  shield: { isPort: boolean } | undefined,
+  shield: { isPort: boolean; hasQualifier: boolean } | undefined,
   // T2: this leaf's `Entity#getPortShortNames()` (`classifierPortShortNames`),
   // ONLY for a `LIKE_CLASS_KINDS` leaf -- see `class-dot-graph.ts`'s caller.
   portShortNames: ReadonlySet<string> | undefined,
@@ -217,6 +220,7 @@ export function applyShapeAndPorts(
   const shape = resolveNodeShape(classifier, shield, hasPortBands);
   if (shape !== undefined) node.shape = shape;
   if (shouldMarkPort(shape, shield?.isPort === true, classifier.kind)) node.isPort = true;
+  if (shield?.hasQualifier === true) node.qualifierShielded = true;
   if (classifier.kind === 'map') {
     // A map is RECTANGLE_HTML_FOR_PORTS unconditionally (EntityImageMap
     // #getShapeType, svek/image/EntityImageMap.java:245-247) -- even with

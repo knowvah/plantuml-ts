@@ -66,3 +66,49 @@ describe('class-dot-graph.ts buildDotGraph — relationship-label font size', ()
     expect(edge!.attributes!.labelWidth).not.toBeCloseTo(expectedAt14 + LINK_LABEL_MARGIN_BOTH_SIDES, 3);
   });
 });
+
+/**
+ * B1 (SI17) — `applyShapeAndPorts`/`shieldedClassifierIds` wiring: a leaf
+ * that is BOTH a `::member` port target (ADR-4's `portRows`) AND the
+ * qualified end of a DIFFERENT relationship (`[Qualifier]`, `hasKal2`) must
+ * carry `qualifierShielded: true` on its emitted node -- the exact
+ * regression risk named in the B1 mission brief. No corpus fixture combines
+ * the two (T3's diagnosis), so this is a synthetic fixture built from the
+ * two mechanisms' own individually jar-verified grammars (`A --> [Right] B`
+ * / `pack.ClassA::a --> ClassB::b`, both `parser.test.ts`-covered).
+ */
+describe('class-dot-graph.ts buildDotGraph — B1 qualifierShielded wiring', () => {
+  it('marks a port-row node qualifierShielded when it is ALSO a qualified target', () => {
+    const puml = [
+      '@startuml',
+      'class A',
+      'class B {',
+      '  method1()',
+      '}',
+      'class C',
+      'A --> [Q] B',
+      'C --> B::method1',
+      '@enduml',
+    ].join('\n');
+    const graphs = captureAll(puml);
+    const portRowNode = graphs.flatMap((g) => g.nodes).find((n) => n.portRows !== undefined);
+    expect(portRowNode, 'expected one node with portRows (class B)').toBeDefined();
+    expect(portRowNode!.qualifierShielded).toBe(true);
+  });
+
+  it('leaves a port-row node WITHOUT a qualifier unshielded', () => {
+    const puml = [
+      '@startuml',
+      'class B {',
+      '  method1()',
+      '}',
+      'class C',
+      'C --> B::method1',
+      '@enduml',
+    ].join('\n');
+    const graphs = captureAll(puml);
+    const portRowNode = graphs.flatMap((g) => g.nodes).find((n) => n.portRows !== undefined);
+    expect(portRowNode, 'expected one node with portRows (class B)').toBeDefined();
+    expect(portRowNode!.qualifierShielded).toBeUndefined();
+  });
+});

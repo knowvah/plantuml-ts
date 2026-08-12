@@ -132,19 +132,29 @@ function memberPortIsP(target: Classifier | undefined): boolean {
   return target === undefined || !LIKE_CLASS_KINDS.has(target.kind);
 }
 
-export function shieldedClassifierIds(ast: ClassDiagramAST): Map<string, { isPort: boolean }> {
-  const shielded = new Map<string, { isPort: boolean }>();
+/** B1 (SI17): `hasQualifier` is `SvekNode#isShielded`'s `hasKal1`/`hasKal2`
+ *  half (svek/SvekNode.java:390-393) — set ONLY by `fromQualifier`/
+ *  `toQualifier` below, never by a `::member` port relationship. Kept
+ *  separate from `isPort` because a class-family port target ALSO lands in
+ *  this map with `isPort: false` (`memberPortIsP`) yet is not shielded. */
+export function shieldedClassifierIds(
+  ast: ClassDiagramAST,
+): Map<string, { isPort: boolean; hasQualifier: boolean }> {
+  const shielded = new Map<string, { isPort: boolean; hasQualifier: boolean }>();
   const byId = new Map(ast.classifiers.map((c) => [c.id, c] as const));
-  const mark = (id: string, isPort: boolean): void => {
+  const mark = (id: string, isPort: boolean, hasQualifier: boolean): void => {
     const existing = shielded.get(id);
-    if (existing === undefined) shielded.set(id, { isPort });
-    else if (isPort) existing.isPort = true;
+    if (existing === undefined) shielded.set(id, { isPort, hasQualifier });
+    else {
+      if (isPort) existing.isPort = true;
+      if (hasQualifier) existing.hasQualifier = true;
+    }
   };
   for (const rel of ast.relationships) {
-    if (rel.fromPort !== undefined) mark(rel.from, memberPortIsP(byId.get(rel.from)));
-    if (rel.toPort !== undefined) mark(rel.to, memberPortIsP(byId.get(rel.to)));
-    if (rel.fromQualifier !== undefined) mark(rel.from, false);
-    if (rel.toQualifier !== undefined) mark(rel.to, false);
+    if (rel.fromPort !== undefined) mark(rel.from, memberPortIsP(byId.get(rel.from)), false);
+    if (rel.toPort !== undefined) mark(rel.to, memberPortIsP(byId.get(rel.to)), false);
+    if (rel.fromQualifier !== undefined) mark(rel.from, false, true);
+    if (rel.toQualifier !== undefined) mark(rel.to, false, true);
   }
   return shielded;
 }

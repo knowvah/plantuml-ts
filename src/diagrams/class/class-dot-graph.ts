@@ -331,7 +331,7 @@ function protectedPad(classifier: Classifier, protectedIds: ReadonlySet<string>)
 function buildOneDotNode(
   classifier: Classifier,
   measuredMap: Map<string, MeasuredClassifier>,
-  shielded: Map<string, { isPort: boolean }>,
+  shielded: Map<string, { isPort: boolean; hasQualifier: boolean }>,
   protectedIds: ReadonlySet<string>,
   // T2: this leaf's declared `::member` port-name set (`classPortShortNamesById`),
   // `undefined` for every classifier not in that map (ADR-4's gate).
