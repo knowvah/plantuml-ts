@@ -99,7 +99,7 @@ the one we implement).
 **See also:** `!pragma layout elk` — **not supported**, below. It is not a
 graphviz copy and is not covered by this entry.
 
-### `!pragma layout elk` — not supported at this time
+### `!pragma layout elk` — not supported
 
 **Upstream:** `!pragma layout elk` lays the diagram out with the Eclipse Layout
 Kernel — a genuinely different algorithm (Sugiyama-style), not a graphviz
@@ -107,27 +107,36 @@ reimplementation.
 
 **This port:** **unsupported.** Unlike `smetana` and `vizjs` (which are graphviz
 under other names — see above), ELK cannot be satisfied by routing to
-graphviz-ts: it would produce a different layout. Diagrams carrying this pragma
-currently lay out with graphviz-ts, which will **not** match upstream. The ~8
-corpus fixtures using it are ledgered and excluded from the conformance bars.
+`@knowvah/dot-engine`: it would produce a different layout. Diagrams carrying
+this pragma lay out with `@knowvah/dot-engine`, which will **not** match
+upstream. The ~8 corpus fixtures using it are ledgered and excluded from the
+conformance bars.
 
-**Why deferred (maintainer decision, 2026-07-12):** supporting ELK means taking
-on `elkjs`, and three properties make that a poor trade for 8 fixtures:
+**Why (ruling, extending "one layout engine" of 2026-08-09):** this port has
+**one** layout engine, `@knowvah/dot-engine`, and supports no alternative
+routing engine. That ruling was originally written for Smetana — where upstream
+calls Smetana we call dot-engine and accept the geometry delta — and it governs
+ELK for the same reason: a second engine with a genuinely different algorithm
+is precisely what the single-engine rule exists to prevent. This is an
+architectural decision, not a cost/benefit deferral, so it does not turn on the
+fixture count and is **not re-argued per case**.
 
-1. **Async-only API.** `elkjs`'s sole entry point is `layout(): Promise<…>`.
-   This port's public `renderSync` contract is synchronous, as is the entire
-   SVG-conformance harness. ELK diagrams could therefore only work through the
-   async `render()` path — and would remain **untestable** by the conformance
-   harness regardless, so supporting them would not even move the bar.
-2. **License.** `elkjs` is EPL-2.0 — the first non-permissive dependency in a
-   tree that is otherwise MIT (graphviz-ts, katex, jsonc-parser).
-3. **Bundle size.** Large enough that it would need to be an optional peer
-   dependency, not a hard one, for a browser-targeted library.
+One practical consequence, worth recording because it would bite anyone who
+tried anyway: `elkjs`'s sole entry point is `layout(): Promise<…>`, while this
+port's public `renderSync` contract and its entire SVG-conformance harness are
+synchronous. ELK diagrams could only work through the async `render()` path and
+would remain untestable by the harness — so even an integration would not move
+the conformance bar. Bundle size would additionally force it to be an optional
+peer dependency rather than a hard one.
 
-**Revisit if** real demand appears, as an optional, async-only, peer-dependency
-integration.
+**Superseded rationale, recorded so it is not reintroduced:** this entry
+previously listed `elkjs`'s EPL-2.0 license as a reason, describing it as "the
+first non-permissive dependency in a tree that is otherwise MIT." That premise
+does not hold — `@knowvah/dot-engine`, this port's own layout engine, is itself
+EPL-2.0 — and licensing was never the operative reason. The single-engine
+ruling above is, and it stands on its own.
 
-**Category:** limitation (unimplemented upstream feature).
+**Category:** limitation (one engine, by choice).
 
 
 ### External `!import` / `!include` deferred (scope)
