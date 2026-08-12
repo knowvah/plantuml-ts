@@ -1380,6 +1380,40 @@ attribution B34 already cost.
 **No executable change.** Comment-only; `npm test` 574 files / 12764 tests,
 exit 0 · typecheck · lint · build all clean.
 
+## T6 (B32) — an engine divergence, isolated on a 2-node graph
+
+**Mechanism.** `getLayout()` returns `taillabel`/`headlabel` centres that do
+not match real graphviz. Graphviz clears both port labels ~14.5px from their
+adjacent node edge; graphviz-ts places the tail at 12.80 and the **head at
+2.96**.
+
+**Isolated to a 2-node, 1-edge graph** — `object A / object B / A "1" -- "*"
+B` — whose emitted svek DOT is byte-identical to the jar's (all structural
+checks pass, `maxSizeDeltaIn` 0). The two deltas, **1.784** (tail) and
+**11.439** (head), reproduce UNCHANGED on `tobuka-93-jale775`'s 9-edge graph.
+One mechanism, not a per-fixture accident.
+
+**Our own conversion is falsified as the cause, not assumed innocent.**
+Rendered baseline minus the engine's returned centre is **10.611 for BOTH**
+labels, and the x offset is exactly half each label's own measured width
+(`8.311 + 7 - 7.23125/2 = 11.696` and `8.311 + 7 - 5.0375/2 = 12.792`, both
+matching the emitted SVG byte-for-byte). A conversion error shifts both labels
+equally; these shift by different amounts in opposite directions.
+
+x diverges too, and differently: graphviz-ts returns the SAME x (8.311) for
+both labels where graphviz varies it per label (implied centres 14.216 and
+15.408) and sits ~6px further right.
+
+**Filed** as `docs/graphviz-issues/12-port-label-placement-near-head-node.md`
+plus its TRACKER line — the second verified engine finding this mission, after
+issue 11. Both were reached the same way: reduce to the smallest graph that
+still shows it, prove our side of the seam is uniform, then compare centres
+rather than rendered output.
+
+**Not M2/M34**, as the filing warned: `tobuka-93` is M2's own named control.
+
+**No executable change; no frozen count moved.**
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).

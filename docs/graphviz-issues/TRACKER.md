@@ -16,3 +16,4 @@ object ratchets and census re-run instantly against an updated `.tgz`).
 - [ ] 09-routesplines-drops-edge-on-record-ports.md
 - [ ] 10-edge-spline-sp-ep-not-exposed.md
 - [ ] 11-flat-edge-label-width-ignored-in-nodesep.md
+- [ ] 12-port-label-placement-near-head-node.md
