@@ -14,6 +14,7 @@ non-trivial defect means the cause was guessed.
 |---|---|---|---|---|---|---|
 | 2026-08-12 | T0 (docs only) | ✅ 574 files / 12772 | ✅ | ✅ | ✅ | class DOT baseline re-confirmed: 711 = 688 EQUAL + 22 `portOk` + 1 `directionOk` (`besepi-37-rori892`), 7 oracle-blind inside the 688. Matches the brief exactly. |
 | 2026-08-12 | T1 | ✅ 575 files / 12784 | ✅ | ✅ | ✅ | class DOT unmoved: 688 EQUAL, 22 `portOk`, 1 `directionOk`. Inert as designed — the producer has no caller yet. |
+| 2026-08-12 | T2 + T3 (orchestrator re-run, all cross-type) | ✅ 575 files / 12788 | ✅ | ✅ | ✅ | **class DOT 688 → 706** EQUAL of 711 (`portOk` 22 → **4**, `directionOk` 1, oracle-blind 7 inside EQUAL). Unmoved: object 74/80, component 262/262, usecase 93/93, state 267/267. Censuses: class **343**/722 ✓ frozen, object **35**/80 ✓ frozen, description 26/358 (see the stale-baseline entry below). |
 
 ## Entries
 
@@ -230,3 +231,163 @@ out-of-write-set file a stop when it is "in no other task's write-set either";
 that is literally true here, and the judgment is that halting the mission over
 a publish-only plumbing line — with the required data provably reachable
 nowhere else — serves the rule's purpose worse than crossing it on the record.
+
+---
+
+## T3 — re-measure, shrink the backlog, diagnose the residue
+
+**Gate re-run, confirming T2's numbers** (`npx tsx scripts/dot-sync-report.ts
+class`, full breakdown):
+
+| | before T2 | after T2 (T3-confirmed) |
+|---|---|---|
+| CLASS fixtures analysed | 711 | 711 |
+| structurally EQUAL | 688 | **706 (99%)** |
+| `portOk` fails | 22 | **4** |
+| `directionOk` fails | 1 | 1 |
+| oracle-blind (`pragma layout`) | 7 (inside EQUAL) | 7 (inside EQUAL) |
+| no-candidate | 0 | 0 |
+| graph-count mismatch | 0 | 0 |
+| node/edge/cluster over-under | 0/0 · 0/0 · 0/0 | 0/0 · 0/0 · 0/0 |
+
+706 + 4 + 1 = 711. Sibling gates **re-measured by T3, not taken from T2**
+(`npx tsx scripts/dot-sync-report.ts object component usecase state`) and all
+unmoved: object 74/80 (4 `portOk`, 2 no-candidate, 1 oracle-blind), component
+262/262, usecase 93/93, state 267/267. No `graph-count mismatch` anywhere.
+
+**18 slugs deleted from `oracle/goldens/class/port-backlog.json`:**
+`cidepu-54-bemo048, dekaba-54-fafi485, garizu-98-nixo496, gekope-01-ricu859,
+gojofu-46-xaci340, juxora-90-fisu720, kicolo-81-sidi387, kidugi-68-noje040,
+kuxosa-67-keko885, minuko-19-pobo264, monoda-73-guto455, mulafo-23-tove961,
+nenepe-70-keri784, paroxa-83-lofa387, pegeso-72-mana305, rocere-18-faza042,
+sijisi-94-ripu606, xefeme-77-fagu709`. No slug was added to any backlog. The
+file survives with 4 entries, so no test reference changed.
+
+### Read the arithmetic honestly — the bar is NOT met
+
+Per ADR-6, closing all 22 would put class DOT at **710/711**, not 711/711,
+because `besepi-37-rori892` fails `directionOk` and belongs to object-close
+B33's remainder. We are at **706/711**, five short of even that ceiling: four
+`portOk` residuals named below, plus `besepi-37-rori892`. When the four close,
+`besepi-37-rori892` will be the single outstanding cause and it belongs to
+**object-close B33**, not to SI17. Neither state is "the bar was met".
+
+### B1 — the `:h` fall-through (bicabi-42-coto932, pijiju-95-xexi872, refeku-65-gapu585)
+
+**Mechanism.** `edgeRef` suffixes `:h` to *any* `shape=plaintext` endpoint
+whose link named no member row. Upstream appends `:h` only when
+`SvekNode#isShielded()` is true — a **qualified-association** test
+(`hasKal1`/`hasKal2`, plus a non-zero `image.getShield()`), not a ports test —
+so a `RECTANGLE_HTML_FOR_PORTS` node's non-port edges get the bare uid.
+
+**Origin.** `src/core/svek-dot-emit.ts:146`
+(`return (node?.shape ?? 'rect') === 'plaintext' ? \`${rec.sh}:h\` : rec.sh;`).
+Upstream: `svek/Bibliotekon.java:126-132` (`getNodeUid`) gated on
+`svek/SvekNode.java:383-396` (`isShielded`).
+
+**Causal chain.** T2 flips a classifier with ≥1 port short name to
+`shape=plaintext` (ADR-4 — gated on port-name *count*, so it flips even when
+some edges name no row). Every remaining edge touching that node now falls
+through the `plaintext` branch and gains `:h`, so `portOk`'s sorted endpoint
+list carries an `"h"` where the oracle carries `"-"`. Affected edges:
+`sh0009->sh0007:h` (bicabi, the `DrawOptionsBox <|-- Gtk::Frame …` link);
+`sh0007:h->sh0008` and `sh0007:h->sh0009` (pijiju, the two `implements B`
+edges); `sh0007:h->sh0008` (refeku, the `style=invis` note-attach edge).
+
+**Ruled out.**
+- *The node table.* Both sides emit byte-identical row-port tables, and the
+  oracle DOT contains **no `PORT="h"` cell at all** in any of the three — so
+  `:h` names a port that does not exist. Jar-proven, not inferred.
+- *Sizing.* `maxSizeDeltaIn = 0.0000` on all three.
+- *The brief's `Gtk::Window` parse hypothesis for `bicabi`.* Disproven at the
+  source: the oracle SVG (`test-results/dot-cache/class/bicabi-42-coto932/
+  in.svg`) renders the literal edge label `:Frame     ' remove this to fix the
+  error`, i.e. upstream parsed entity `Gtk` plus a **label**, not port `Frame`.
+  Our side emits the identical 178×15 label table on the same edge, so the
+  parse agrees end-to-end and `:h` is the only divergence. ADR-3's control
+  fixture did not close for a reason unrelated to ADR-3, which still holds:
+  `pc89686…`/`pcd2581…` are emitted against a node with zero `PORT=` rows on
+  both sides.
+- *Upstream's shield predicate being genuinely true here.*
+  `EntityImageClass#getShield` returns `getEntity().getMargins()`
+  (`svek/image/EntityImageClass.java:262-264`), zero absent a qualifier, and
+  none of the three fixtures uses qualifier syntax.
+
+**Side observation, gate-blind:** pijiju's oracle carries `sametail=ent0002`
+on both `implements` edges (`skinparam groupInheritance 2`); we emit neither.
+`compareStructural` does not check `sametail`, so this is invisible to the
+gate and is *not* part of B1 — logged so it is not lost.
+
+### B2 — port carried onto a split association edge (pajoka-72-reju527)
+
+**Mechanism.** When `(Foo, Bar) --> Qux` subsumes the existing
+`Foo::method --> Bar` link, we copy the subsumed link's port onto the new
+`Foo → point` edge in order to reproduce the entity-level shield. Upstream
+builds `entity1ToPoint` from a fresh `LinkArg` carrying label, quantifier and
+label-distance but **no port**, so the split link has `port1 == null` and
+`EntityPort.create(uid, null)` yields the bare uid.
+
+**Origin.** `src/diagrams/class/class-assoc-couple.ts:274`
+(`if (subsumed.portA !== undefined) aEdge.fromPort = subsumed.portA;`).
+Upstream: `objectdiagram/AbstractClassOrObjectDiagram.java:264-268`
+(`Association#createNew`), with `abel/Link.java:226-230` (`getEntityPort`) and
+`cucadiagram/EntityPort.java:56-61` (`getFullString`).
+
+**Causal chain.** `aEdge.fromPort` reaches `DotInputEdge` as a row port, so
+`edgeRef` takes the `rowPort !== undefined` branch
+(`src/core/svek-dot-emit.ts:145`) and emits
+`sh0006:pea9f6aca279138c58f705c8d4cb4b8ce->sh0009` where the oracle emits bare
+`sh0006->sh0009`. The sorted port list gains one md5 hash where the oracle has
+`-`.
+
+**Ruled out.**
+- *The persistent entity flag being unreproduced.* It is reproduced: `sh0006`
+  carries `PORT="pea9f6aca279138c58f705c8d4cb4b8ce"` **identically on both
+  sides**, so upstream's `Entity#addPortShortName` outliving the subsumed link
+  is already modelled correctly. Only the edge endpoint leaks — which means
+  the code comment at `class-assoc-couple.ts:271-273` justifying the carry is
+  solving a problem that no longer exists.
+- *B1's `:h` fall-through.* This endpoint emits a real md5 hash, not `h`, so it
+  takes a different branch two lines earlier.
+- *Edge topology.* Edge count, direction, minlen and labels all match; the
+  only per-check failure is `portOk`, and `maxSizeDeltaIn = 0.0000`.
+
+**No fix proposed here — T3 writes no production code.** B1 and B2 are the
+batch-2 work items.
+
+### 2026-08-12 — the brief's "description census 48-set" frozen count is STALE, not regressed
+
+**Not a stop condition.** The brief freezes the description census at a
+"48-set intact". The current tree reports **26 zero-diff of 358**. That looks
+like a 22-fixture drop and would be a stop condition if it were one. It is not.
+
+**Mechanism.** The 48 is a figure from the g4-state-svg era, recorded as
+`48/355` (`plans/g4-state-svg/ledger.md:346,721,1037`). It was measured
+against the oracle cache that **SI16 subsequently re-captured**. Every census
+moved when that cache was replaced — `planning/mission-index.md`'s SI19 row
+records class going `2 → 343/722` for exactly this reason. The fixture count
+moving `355 → 358` is the same re-capture showing through. The brief carried
+the pre-SI16 number forward without re-measuring it.
+
+**Ruled out, with the evidence:**
+
+- *T2 caused it.* Disproven structurally, not by argument: none of T2's four
+  changed files (`class-port-rows.ts`, `class-dot-graph.ts`,
+  `class-layout-helpers.ts`, `class-layout-generic-classifier.ts`) appears in
+  the **481-module transitive import closure** of the description engine
+  (`src/diagrams/description/{index,layout,renderer}.ts`). The description
+  census cannot execute a line T2 touched.
+- *A general census/oracle problem on this tree.* Disproven by the two
+  frozen counts that the brief records post-SI16: class census reads exactly
+  **343/722** and object exactly **35/80**, both measured on this tree with T2
+  applied. A broken oracle would not land both on their frozen values.
+- *A pristine-baseline re-measurement.* Attempted first, and it failed —
+  a `git worktree` at pre-mission `2873d798` returns **358 errors of 358**,
+  because the census depends on gitignored generated assets a fresh worktree
+  does not have (the cold-tree hazard in `.agent-notes`). The import-closure
+  proof above replaced it; the worktree was removed.
+
+**Consequence.** The description census baseline is **26/358** as of SI16, not
+48/355. T4 should correct the frozen-count table in the brief rather than
+leave a number that will read as a regression to the next reader. The two
+censuses the brief froze *after* SI16 (class 343, object 35) are both intact.
