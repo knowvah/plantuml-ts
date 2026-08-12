@@ -1250,6 +1250,48 @@ T2, so the two are not one cause.
 **Quality gates.** `npm test` 574 files / 12764 tests, exit 0 · `typecheck`
 exit 0 · `lint` exit 0 · `build` exit 0. None piped.
 
+## T3 (B34) — experiment only: the confound is eliminated, and it is the engine
+
+**No repo behaviour changed**, per the standing instruction to report before
+touching `svek-dot-emit.ts`.
+
+**The label-width confound is gone, by measurement rather than argument.**
+Feeding `layoutGraph()` the same graph four times, varying only `labelWidth`:
+
+| `labelWidth` | our box-to-box gap |
+|---|---|
+| 0 | 60.425 |
+| 29 | 60.425 |
+| 200 | 60.425 |
+| 400 | 60.425 |
+
+The engine ignores a flat (`minlen=0`) edge's label width entirely. So
+`svek-dot-emit.ts:44`'s `Math.round` where upstream truncates
+(`SvekEdge.java:505-506`) — a 0.54px discrepancy — **cannot** be the cause of a
+3px gap. It stays a real faithfulness item on its own merits, and is NOT worth
+the frozen-count risk to chase for this symptom.
+
+**And the jar-side control confirms graphviz does the opposite.** Authored
+three sources differing only in edge-label text:
+
+| edge label | jar gap |
+|---|---|
+| `ab` | 50.425 |
+| `label` (29 wide) | 63.425 |
+| `aVeryMuchLongerEdgeLabelHere` | 232.425 |
+
+jar gap ≈ `labelWidth + 34.4`. Ours is flat. I ran this control rather than
+asserting graphviz's behaviour from one data point — the B34 falsification
+earlier today came from exactly that shortcut.
+
+**Filed**, now a verified finding as D6 requires:
+`docs/graphviz-issues/11-flat-edge-label-width-ignored-in-nodesep.md` plus its
+`TRACKER.md` line. The file records both falsified attributions (stroke width,
+label rounding) so neither is re-chased, and notes the 0.389px y offset that
+reproduces on the same input without claiming it is the same cause.
+
+**No frozen count moved** — nothing executable changed.
+
 ## Baseline snapshot (planning, 2026-08-11)
 
 - Object SVG census: **23/80** vs fresh oracle (census reads 0/80 vs stale).
