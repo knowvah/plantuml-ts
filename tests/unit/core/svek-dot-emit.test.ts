@@ -342,3 +342,153 @@ describe('toSvekDot — kermor cluster/ranksep path (`!pragma kermor on`)', () =
     expect(outerBody).toContain('subgraph cluster1gamma {');
   });
 });
+
+/**
+ * M1 — `SvekNode#appendLabelHtmlSpecialForLink` (svek/SvekNode.java:268-296)
+ * and its `appendTr` helper (`:298-311`).
+ *
+ * Every constant below is READ OFF a committed jar oracle DOT, never chosen:
+ * `test-results/dot-cache/object/{fusopu-05-loxo960,rozuxo-44-fudi093,
+ * gatefi-65-curu360}/svek-1.dot`. The md5 port ids are the jar's own
+ * (`Ports#encodePortNameToId`, svek/Ports.java:53-55).
+ */
+describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
+  /** gatefi-65-curu360/svek-1.dot sh0006: `map map0`, zero rows. */
+  const GATEFI_BOX_WIDTH = 49;
+  const GATEFI_BOX_HEIGHT = 18;
+
+  /** fusopu-05-loxo960/svek-1.dot sh0006 (`map User`, one row `method3`):
+   *  box 74.425 x 36, an 18px title filler then the 18px `method3` port row. */
+  const FUSOPU_USER_WIDTH = 74.425;
+  const FUSOPU_USER_HEIGHT = 36;
+  const FUSOPU_TITLE_HEIGHT = 18;
+  const FUSOPU_ROW_HEIGHT = 18;
+  /** jar's `Ports.encodePortNameToId("method3")`, read off sh0006. */
+  const FUSOPU_METHOD3_PORT = 'p48c4d45fdb68cdc056e4871ac668c7e5';
+  /** jar's id for `__method1__`, read off sh0007's first port row. */
+  const FUSOPU_METHOD1_PORT = 'pcb851aedb8f4a103116df5644c66a401';
+
+  /** rozuxo-44-fudi093/svek-1.dot sh0006 (`object CC`, port on member `USA`):
+   *  36px filler (18 header + 4 body margin + 14 `UK`), 14px port row, 18px
+   *  trailer (14 `Germany` + 4 bottom body margin). */
+  const ROZUXO_CC_WIDTH = 69.48750000000001;
+  const ROZUXO_CC_HEIGHT = 68;
+  const ROZUXO_USA_POSITION = 36;
+  const ROZUXO_MEMBER_HEIGHT = 14;
+  const ROZUXO_USA_PORT = 'pf75d91cdd36b85cc4a8dfeca4f24fa14';
+
+  it('emits a portless node as one full-height trailer row (gatefi-65-curu360)', () => {
+    const dot = toSvekDot({
+      nodes: [{
+        id: 'map0',
+        width: GATEFI_BOX_WIDTH,
+        height: GATEFI_BOX_HEIGHT,
+        shape: 'plaintext',
+        portRows: [],
+      }],
+      edges: [],
+    });
+    expect(dot).toContain(
+      'shape=plaintext,label=<<TABLE BGCOLOR="#000006" BORDER="0" CELLBORDER="0" ' +
+      'CELLSPACING="0" CELLPADDING="0">' +
+      '<TR><TD  FIXEDSIZE="TRUE" WIDTH="49.0" HEIGHT="18"></TD></TR></TABLE>>];',
+    );
+    // No width=/height= node attribute at all — graphviz sizes it from the
+    // label and pads it (SvekNode.java:268-296 emits neither).
+    expect(dot).not.toMatch(/shape=plaintext,label=<<TABLE[^\n]*width=/);
+  });
+
+  it('emits a filler row, then the port row, then the trailer (fusopu-05-loxo960)', () => {
+    const dot = toSvekDot({
+      nodes: [{
+        id: 'User',
+        width: FUSOPU_USER_WIDTH,
+        height: FUSOPU_USER_HEIGHT,
+        shape: 'plaintext',
+        portRows: [
+          { id: FUSOPU_METHOD3_PORT, position: FUSOPU_TITLE_HEIGHT, height: FUSOPU_ROW_HEIGHT },
+        ],
+      }],
+      edges: [],
+    });
+    expect(dot).toContain(
+      '<TR><TD  FIXEDSIZE="TRUE" WIDTH="74.425" HEIGHT="18"></TD></TR>' +
+      `<TR><TD  FIXEDSIZE="TRUE" WIDTH="74.425" HEIGHT="18" PORT="${FUSOPU_METHOD3_PORT}">` +
+      '</TD></TR></TABLE>',
+    );
+  });
+
+  it('drops zero-height filler and trailer rows (appendTr `if (height <= 0) return`)', () => {
+    // A port at position 0 covering the whole box: no filler before it, no
+    // trailer after it — exactly one TR.
+    const dot = toSvekDot({
+      nodes: [{
+        id: 'only',
+        width: FUSOPU_USER_WIDTH,
+        height: FUSOPU_ROW_HEIGHT,
+        shape: 'plaintext',
+        portRows: [{ id: FUSOPU_METHOD1_PORT, position: 0, height: FUSOPU_ROW_HEIGHT }],
+      }],
+      edges: [],
+    });
+    const table = dot.slice(dot.indexOf('<TABLE'), dot.indexOf('</TABLE>'));
+    expect(table.match(/<TR>/g)).toHaveLength(1);
+    expect(table).toContain(`PORT="${FUSOPU_METHOD1_PORT}"`);
+  });
+
+  it('truncates the trailer height to an int (rozuxo-44-fudi093 object rows)', () => {
+    const dot = toSvekDot({
+      nodes: [{
+        id: 'CC',
+        width: ROZUXO_CC_WIDTH,
+        height: ROZUXO_CC_HEIGHT,
+        shape: 'plaintext',
+        portRows: [
+          { id: ROZUXO_USA_PORT, position: ROZUXO_USA_POSITION, height: ROZUXO_MEMBER_HEIGHT },
+        ],
+      }],
+      edges: [],
+    });
+    expect(dot).toContain(
+      '<TR><TD  FIXEDSIZE="TRUE" WIDTH="69.48750000000001" HEIGHT="36"></TD></TR>' +
+      `<TR><TD  FIXEDSIZE="TRUE" WIDTH="69.48750000000001" HEIGHT="14" PORT="${ROZUXO_USA_PORT}">` +
+      '</TD></TR>' +
+      '<TR><TD  FIXEDSIZE="TRUE" WIDTH="69.48750000000001" HEIGHT="18"></TD></TR>',
+    );
+  });
+
+  it('anchors edges to the named row ports, not to ":h" (fusopu-05-loxo960)', () => {
+    const dot = toSvekDot({
+      nodes: [
+        {
+          id: 'User', width: FUSOPU_USER_WIDTH, height: FUSOPU_USER_HEIGHT, shape: 'plaintext',
+          portRows: [{ id: FUSOPU_METHOD3_PORT, position: FUSOPU_TITLE_HEIGHT, height: FUSOPU_ROW_HEIGHT }],
+        },
+        {
+          id: 'Interface', width: FUSOPU_USER_WIDTH, height: FUSOPU_USER_HEIGHT, shape: 'plaintext',
+          portRows: [{ id: FUSOPU_METHOD1_PORT, position: FUSOPU_TITLE_HEIGHT, height: FUSOPU_ROW_HEIGHT }],
+        },
+      ],
+      edges: [{
+        id: 'e0',
+        from: 'User',
+        to: 'Interface',
+        attributes: { minLen: 1, tailport: FUSOPU_METHOD3_PORT, headport: FUSOPU_METHOD1_PORT },
+      }],
+    });
+    expect(dot).toMatch(
+      new RegExp(`sh\\d{4}:${FUSOPU_METHOD3_PORT}->sh\\d{4}:${FUSOPU_METHOD1_PORT}\\[`),
+    );
+  });
+
+  it('still routes a portRows node with no edge port through ":h"', () => {
+    const dot = toSvekDot({
+      nodes: [
+        { id: 'a', width: 20, height: 20, shape: 'plaintext' },
+        { id: 'b', width: 20, height: 20, shape: 'plaintext' },
+      ],
+      edges: [{ id: 'e0', from: 'a', to: 'b', attributes: { minLen: 1 } }],
+    });
+    expect(dot).toMatch(/sh\d{4}:h->sh\d{4}:h\[/);
+  });
+});

@@ -54,7 +54,15 @@ describe('class-dot-graph.ts buildDotGraph — relationship-label font size', ()
     const expectedAt14 = measurer.measure('contains', { family: 'sans-serif', size: 14 }).width;
     expect(expectedAt13).toBeCloseTo(48.425, 3);
     expect(expectedAt14).not.toBeCloseTo(expectedAt13, 3);
-    expect(edge!.attributes!.labelWidth).toBeCloseTo(expectedAt13, 6);
-    expect(edge!.attributes!.labelWidth).not.toBeCloseTo(expectedAt14, 3);
+    // `labelWidth` now carries SvekEdge#addVisibilityModifier's all-round
+    // `withMargin(block, 1, 1)` (svek/SvekEdge.java:372-373), so the assertion
+    // is the measurement PLUS 2. The jar agrees exactly: this fixture's own
+    // svek-1.dot emits `label=<<TABLE ... WIDTH="50" HEIGHT="15"` for a
+    // 48.425x13 block -- trunc(48.425 + 2) = 50, 13 + 2 = 15 -- while its
+    // taillabel/headlabel stay 7x13, unmargined, exactly as upstream's single
+    // `addVisibilityModifier` call site (SvekEdge.java:302) predicts.
+    const LINK_LABEL_MARGIN_BOTH_SIDES = 2;
+    expect(edge!.attributes!.labelWidth).toBeCloseTo(expectedAt13 + LINK_LABEL_MARGIN_BOTH_SIDES, 6);
+    expect(edge!.attributes!.labelWidth).not.toBeCloseTo(expectedAt14 + LINK_LABEL_MARGIN_BOTH_SIDES, 3);
   });
 });

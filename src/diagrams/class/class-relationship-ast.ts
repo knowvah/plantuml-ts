@@ -218,6 +218,49 @@ export interface Relationship {
    * fall back to the pre-existing `swappedEdges`-index reversal.
    * @see ~/git/plantuml/.../svek/SvekEdge.java:637-654
    */
+  /**
+   * B7/M8: the link's own `<<tag>>` style-class label(s), cleaned.
+   *
+   * Upstream `CommandLinkClass.java:368-371` builds a `Stereotype` from the
+   * arrow's STEREOTYPE group and sets it on the `Link`; `SvekEdge.java
+   * :817-822` then folds it into the arrow's style signature via
+   * `withTOBECHANGED`, which fans out one signature per label
+   * (`StyleSignatureBasic.java:119-132`) so a `<style> .tag {}` declaration
+   * matches by the stereotype half of the two-subset test. Read by
+   * `renderer-edge.ts` through `theme.colors.graph.arrowTagCascade`.
+   *
+   * Absent for every link with no `<<...>>` — the overwhelming majority.
+   */
+  stereotypeTags?: readonly string[];
+  /**
+   * T1/B33: this link's dot edge must be emitted `to -> from` to run in
+   * upstream's own `Link` order.
+   *
+   * Computed at PARSE time as `swapDirection !== upOrLeft` — the `decorSwap`
+   * term `class-arrow-grammar.ts#resolveArrow` already derives and then folds
+   * away. It is exactly "this port normalized `from`/`to` by the arrowhead,
+   * so they are no longer upstream's `cl1`/`cl2`".
+   *
+   * B6 inferred the same fact by comparing `idEntity1FullId`/`idEntity2FullId`
+   * against `from`/`to`. That is unsound: `class-command-relationships.ts`
+   * rewrites `from`/`to` through `resolveRelationshipEndpoint` AFTER the
+   * parser stamps the FullId pair from raw ids, so inside a `namespace` or
+   * with an `as "alias"` declaration the two disagree and the comparison
+   * reports "not reversed". 28 of the 32 fixtures in `direction-backlog.json`
+   * were that bug. A flag cannot be desynchronised by a later rename.
+   */
+  dotEdgeReversed?: true;
+
+  /** B21/M20: parser-side marker that this is a link upstream INVERTS
+   *  (`ArrowInfo.upOrLeft` — `dir == LEFT || dir == UP`,
+   *  `CommandLinkClass.java:362-363`). `getInv()` constructs a SECOND `Link`
+   *  (`abel/Link.java:145-146`) and every `Link` ctor burns a `cpt1` tick
+   *  (`:135`), so such a link consumes TWO numbers and renders under the
+   *  second. `class-command-relationships.ts`, which owns the counter, turns
+   *  this into the existing {@link phantomSlot} — the discarded ctor is the
+   *  same phenomenon that flag already models. */
+  invertedLinkBurnsTick?: true;
+
   idEntity1FullId?: string;
   idEntity2FullId?: string;
   /**
@@ -238,7 +281,15 @@ export interface Relationship {
    * (entity1, entity2); if (existingLink == null) existingLink = new Link
    * (..., LinkDecor.NONE, LinkDecor.NONE, ...);` -- a REAL `Link` ctor call,
    * burning a real cpt1 slot, but never `addLink`ed, so it never manifests
-   * as an `EdgeGeo` of its own). Set on the FIRST edge
+   * as an `EdgeGeo` of its own).
+   *
+   * B21/M20 adds a SECOND producer of the identical phenomenon: a link
+   * upstream inverts (`getInv()`, `abel/Link.java:145-146`) constructs a
+   * real `Link` whose uid is discarded, immediately before the one that
+   * renders. Same burn, same position, so it sets this same flag rather
+   * than a parallel one — see `invertedLinkBurnsTick`.
+   *
+   * Set on the FIRST edge
    * (`class-assoc-couple.ts`'s `aEdge`) synthesised immediately after this
    * burn, when the couple's own A-B pair had NO subsumed explicit
    * association to reuse (`buvake-41-vulu531`'s `(A,B) .. C` with no prior

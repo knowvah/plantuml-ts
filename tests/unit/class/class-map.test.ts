@@ -18,6 +18,7 @@ import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST, Classifier } from '../../../src/diagrams/class/ast.js';
+import { MAP_POINT_SENTINEL } from '../../../src/diagrams/class/ast.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -89,7 +90,7 @@ describe('map body — "key *-> dest" linked row', () => {
     const m = ast.classifiers.find((c) => c.id === 'm');
     expect(m).toBeDefined();
     expect(m!.kind).toBe('map');
-    expect(m!.rows).toEqual([{ key: 'Warsaw', value: '', linkedCode: 'POL' }]);
+    expect(m!.rows).toEqual([{ key: 'Warsaw', value: MAP_POINT_SENTINEL, linkedCode: 'POL' }]);
 
     expect(ast.relationships).toHaveLength(1);
     expect(ast.relationships[0]).toMatchObject({
@@ -113,7 +114,7 @@ describe('map body — "key *-> dest" linked row', () => {
     const ast = parse('map m {\nWarsaw *-> Nowhere\n}');
     const m = ast.classifiers.find((c) => c.id === 'm');
     expect(m).toBeDefined();
-    expect(m!.rows).toEqual([{ key: 'Warsaw', value: '' }]);
+    expect(m!.rows).toEqual([{ key: 'Warsaw', value: MAP_POINT_SENTINEL }]);
     expect(ast.relationships).toHaveLength(0);
     // No phantom classifier is created for the unresolved dest either.
     expect(ast.classifiers.find((c) => c.id === 'Nowhere')).toBeUndefined();
@@ -165,5 +166,29 @@ describe('map keyword — relationship endpoint named "map"', () => {
     // Auto-created relationship endpoints default to kind "class", never "map".
     const mapEndpoint = ast.classifiers.find((c) => c.id === 'map');
     expect(mapEndpoint?.kind).toBe('class');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// M3: `BodierMap.map` is a `Map<String, String>` (a LinkedHashMap,
+// `BodierMap.java:55`), and `addFieldOrMethod` reaches it through
+// `map.put(...)` (`:74`/`:79`) — so a REPEATED key keeps its FIRST position
+// and takes its LAST value; it does not add a second row.
+//
+// Oracle: test-results/dot-cache/object/satuco-50-vusa163/in.svg — the
+// `CCC C` map declares four body lines (`oooo`, `ssss`, `=> uuuu`,
+// `=> yyyy`, the last two both keyed `""`) and the jar draws THREE rows,
+// the third showing `yyyy`.
+// ---------------------------------------------------------------------------
+
+describe('map body — repeated key (LinkedHashMap put semantics)', () => {
+  it('replaces the value in place instead of appending a second row', () => {
+    const ast = parse('map CCCC {\n  oooo => pppp\n  ssss => tttt\n  => uuuu\n  => yyyy\n}');
+    const m = ast.classifiers.find((c) => c.id === 'CCCC');
+    expect(m!.rows).toEqual([
+      { key: 'oooo', value: 'pppp' },
+      { key: 'ssss', value: 'tttt' },
+      { key: '', value: 'yyyy' },
+    ]);
   });
 });

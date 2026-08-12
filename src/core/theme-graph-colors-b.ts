@@ -166,6 +166,30 @@ export interface ThemeGraphColorsB {
     fontBold?: boolean;
     fontItalic?: boolean;
   }>> | undefined)[];
+  /**
+   * B7/M8: per-`.tagname` ARROW style, keyed by cleaned tag token.
+   *
+   * A link's `<<stereo>>` is a style-class selector upstream: the arrow's
+   * base signature `{root, element, classDiagram, arrow}`
+   * (`svek/SvekEdge.java:817-822`) is fanned out one-signature-per-label by
+   * `StyleSignatureBasic#withTOBECHANGED` (`:119-132`), so `<style> .foo {}`
+   * matches the stereotype half of the two-subset test. `SvekEdge.java
+   * :874-876` then reads BOTH properties off that ONE merged style —
+   * `Rainbow.build(styleLine, …)` for the colour and `styleLine.getStroke()`
+   * for the width, the latter resolving to `PName.LineThickness`
+   * (`style/Style.java:261-263`) — which is why they are one entry here and
+   * not two independent lookups.
+   *
+   * Precomputed at Theme-build time over `collectStyleTagNames`, the same
+   * shape and for the same reason as {@link classTagCascade}: the renderer
+   * has no `StyleMap`, only the resolved Theme. Populated only for tags that
+   * actually carry an arrow-relevant declaration; absent otherwise, so every
+   * diagram with no `<style>` tag selector is unchanged.
+   */
+  arrowTagCascade?: Readonly<Record<string, {
+    color?: string;
+    thickness?: number;
+  }>>;
   /** G2 N27: `skinparam guillemet <value>` -- `Guillemet.
    *  fromDescription`'s resolved start/end wrapper strings for
    *  stereotype text (`«Foo»` by default). Both unset means the

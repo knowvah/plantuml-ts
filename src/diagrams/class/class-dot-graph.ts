@@ -10,7 +10,6 @@
 import type {
   Classifier,
   ClassDiagramAST,
-  ClassifierKind,
   Namespace,
   Relationship,
   RelationshipType,
@@ -34,7 +33,9 @@ import {
   type MeasuredClassifier,
 } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
+import { applyShapeAndPorts, edgePortAttrs } from './class-port-rows.js';
 import type { EdgeGeo } from './layout.js';
+import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
 
 // ---------------------------------------------------------------------------
 // Edge decoration map
@@ -56,28 +57,6 @@ export const EDGE_DECORATION_MAP: Record<RelationshipType, EdgeDecoration> = {
   usage:          { targetDecor: 'none',          sourceDecor: 'none',         dashed: true  },
 };
 
-// For hierarchical relationships the dot edge must run in the direction
-// upstream's own `Link` runs -- `entity1 -> entity2`, which the jar emits
-// verbatim and never reorders. This port normalizes every inheritance form to
-// `from` = child / `to` = parent, discarding that order, so the relationship
-// carries `parentIsLinkEntity1` to restore it (see its doc comment in
-// `class-relationship-ast.ts` for the per-form table).
-//
-// Swapping unconditionally -- as this did until 2026-08-08 -- is right only
-// when the parent was written first. It put the interface on the TOP rank for
-// `D ..|> I`, where the jar ranks it BELOW: jar-verified against
-// `class-inheritance-interface-assoc`, whose document height was 122px short
-// as a result.
-//
-// When the swap applies, the edge points dot returns are reversed so the
-// rendered arrow still flows child → parent with the triangle at the parent
-// end.
-const HIERARCHICAL = new Set<RelationshipType>(['extension', 'implementation']);
-
-/** Whether this relationship's dot edge runs parent → child. */
-function ranksParentFirst(rel: Relationship): boolean {
-  return HIERARCHICAL.has(rel.type) && rel.parentIsLinkEntity1 === true;
-}
 
 /** `FontParam.ARROW(13, normal)` (klimt/font/FontParam.java:54) --
  *  relationship-label default, distinct from `CLASS(12)`/`theme.fontSize`
@@ -184,6 +163,9 @@ interface DotEdgeAttrContext {
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
   kindBIndices: ReadonlySet<number>;
+  /** B1/M1: ids of the leaves emitted as RECTANGLE_HTML_FOR_PORTS row tables,
+   *  the only endpoints a `::member` port may legally attach to. */
+  portRowIds: ReadonlySet<string>;
 }
 
 /** One relationship's DOT edge attributes -- split out of `buildDotEdges`
@@ -211,41 +193,20 @@ function buildDotEdges(
   linetype: Theme['linetype'],
 ): DotInputEdge[] {
   const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
-  const ctx: DotEdgeAttrContext = { font, measurer, linetype, kindBIndices };
+  const portRowIds = new Set(
+    ast.classifiers.filter((c) => c.kind === 'map').map((c) => c.id),
+  );
+  const ctx: DotEdgeAttrContext = { font, measurer, linetype, kindBIndices, portRowIds };
   return ast.relationships.map((rel: Relationship, i: number) => {
-    const swap = ranksParentFirst(rel);
+    const swap = dotEdgeRunsReversed(rel);
     const from = swap ? rel.to : rel.from;
     const to = swap ? rel.from : rel.to;
+    const dotFrom = anchors.get(from) ?? from;
+    const dotTo = anchors.get(to) ?? to;
     const attrs = buildDotEdgeAttrs(rel, i, ctx);
-    return { id: `edge-${i}`, from: anchors.get(from) ?? from, to: anchors.get(to) ?? to, attributes: attrs };
+    Object.assign(attrs, edgePortAttrs(rel, swap, dotFrom, dotTo, ctx.portRowIds));
+    return { id: `edge-${i}`, from: dotFrom, to: dotTo, attributes: attrs };
   });
-}
-
-/** Classifier kind → non-default svek node shape (everything else → rect). */
-const KIND_SHAPE: Partial<Record<ClassifierKind, DotInputNode['shape']>> = {
-  association: 'diamond', // `<> name` (CommandDiamondAssociation)
-  'assoc-circle': 'circle', // `(A,B) .. C` connector on the A–B association
-  circle: 'plaintext', // `circle Foo` / `() name` — the small circle table
-  usecase: 'ellipse', // `usecase Foo` (LeafType.USECASE)
-  state: 'rounded', // `state Foo` (LeafType.STATE, classdiagram-only ALL_TYPES superset)
-  lollipop: 'circle', // `Name ()-- Existing` (CommandLinkLollipop)
-  map: 'plaintext', // `map Name { ... }` — EntityImageMap.getShapeType is
-  // ALWAYS RECTANGLE_HTML_FOR_PORTS (never a plain rect, even with zero rows).
-  json: 'plaintext', // `json Name { ... }` — EntityImageJson.getShapeType is
-  // the SAME RECTANGLE_HTML_FOR_PORTS shape as map, ALWAYS (even scalar/empty).
-};
-
-/**
- * A map/json's `shape=plaintext` is EntityImageMap/EntityImageJson's own
- * per-row shield table (svek's RECTANGLE_HTML_FOR_PORTS), NOT the qualifier/
- * `::member` port-shield mechanism this flag drives (svek-dot-emit.ts's
- * portTable — a single compass-point "P" cell, wrong shape for either). A map
- * row link (class-map-commands.ts) sets `fromPort` on its relationship purely
- * as row-target metadata; it must not flip this flag even though
- * shieldedClassifierIds sees the same relationship.
- */
-function shouldMarkPort(shape: DotInputNode['shape'] | undefined, isShieldedPort: boolean, kind: ClassifierKind): boolean {
-  return shape === 'plaintext' && isShieldedPort && kind !== 'map' && kind !== 'json';
 }
 
 /** `EntityImageProtected`'s border -- GeneralImageBuilder.java:113 wraps a
@@ -370,9 +331,7 @@ function buildOneDotNode(
     height: isLollipop ? LOLLIPOP_SIZE : isAssocPoint ? ASSOC_POINT_SIZE : measured.height + pad,
   };
   const shield = shielded.get(classifier.id);
-  const shape = KIND_SHAPE[classifier.kind] ?? (shield !== undefined ? 'plaintext' : undefined);
-  if (shape !== undefined) node.shape = shape;
-  if (shouldMarkPort(shape, shield?.isPort === true, classifier.kind)) node.isPort = true;
+  applyShapeAndPorts(node, classifier, measured, shield);
   return node;
 }
 
@@ -415,8 +374,8 @@ function sepAttrs(theme: Theme): Partial<DotInputGraph> {
 
 /**
  * Build the dot input graph — all classifiers + notes flattened into the
- * root graph (D5) — plus the set of hierarchical edge indices that were
- * swapped from/to for ranking (see HIERARCHICAL above).
+ * root graph (D5) — plus the set of edge indices emitted `to -> from`
+ * (`./class-dot-edge-order.ts#dotEdgeRunsReversed`).
  */
 export function buildDotGraph(
   ast: ClassDiagramAST,
@@ -437,9 +396,19 @@ export function buildDotGraph(
   // Magma standalone-chaining edges appended after the real relationship edges.
   const dotEdges: DotInputEdge[] = [...buildDotEdges(ast, labelFont, measurer, anchors, theme.linetype), ...buildClassMagmaEdges(ast, anchors)];
 
+  // B6/M7: the indices whose dot edge `buildDotEdges` actually emitted as
+  // `rel.to -> rel.from`. `class-edge-geo.ts#normalizeEdgePoints` reads this
+  // as "the raw point list runs to -> from" and derives `matchesFromTo`
+  // (which pairs `sourceDecor`/`targetDecor` with the point array) from it,
+  // so it MUST use the same predicate the emission did.
+  //
+  // It did not, before B6: this was every HIERARCHICAL index, while emission
+  // used `ranksParentFirst` (hierarchical AND `parentIsLinkEntity1`). A
+  // `D --|> I` was emitted unswapped and recorded here as swapped, inverting
+  // `matchesFromTo` for it. Now both sides call `dotEdgeRunsReversed`.
   const swappedEdges = new Set(
     ast.relationships
-      .map((rel, i) => (HIERARCHICAL.has(rel.type) ? i : -1))
+      .map((rel, i) => (dotEdgeRunsReversed(rel) ? i : -1))
       .filter((i) => i >= 0),
   );
 

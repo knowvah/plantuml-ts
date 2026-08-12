@@ -64,11 +64,35 @@ import type { Theme } from '../../core/theme.js';
 import { linkWrap, attrs } from '../../core/svg.js';
 import { fmt, formatDecimal, shortenColor, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 
-/** `SkinParam#classAttributeIconSize()` default -- skinparam override not wired. */
+/** `SkinParam#classAttributeIconSize()`'s own default (skin/SkinParam.java
+ *  :554-556). `skinparam classAttributeIconSize N` overrides it -- resolved
+ *  per call by {@link iconSizeOf}. */
 export const VISIBILITY_ICON_SIZE = 10;
 
-/** `VisibilityModifier#getUBlock`'s `calculateDimension` height (size + 1). */
-const ICON_BLOCK_HEIGHT = VISIBILITY_ICON_SIZE + 1;
+/** `VisibilityModifier#ensureEven` (skin/VisibilityModifier.java:186-190):
+ *  an odd size loses one before ANY shape is drawn. `drawU` applies it once
+ *  (`:135`) and every draw* helper below then works from the evened value --
+ *  which is why 15 draws exactly as 14 does. */
+function ensureEven(n: number): number {
+  return n % 2 === 1 ? n - 1 : n;
+}
+
+/** The resolved `classAttributeIconSize`, ALREADY EVENED -- the size every
+ *  draw* helper works from. Kept separate from {@link iconBlockHeight}, which
+ *  deliberately uses the RAW value: upstream's `calculateDimension` is
+ *  `size + 1` on the raw size (`skin/VisibilityModifier.java:100-102`) while
+ *  `drawU` evens first, so an odd override shifts the glyph WITHIN a block
+ *  one pixel taller than the glyph implies. Conflating the two is the trap
+ *  this split exists to avoid. */
+function iconSizeOf(theme?: Theme): number {
+  return ensureEven(theme?.classAttributeIconSize ?? VISIBILITY_ICON_SIZE);
+}
+
+/** `VisibilityModifier#getUBlock`'s `calculateDimension` height (RAW size + 1,
+ *  skin/VisibilityModifier.java:100-102). */
+function iconBlockHeight(theme?: Theme): number {
+  return (theme?.classAttributeIconSize ?? VISIBILITY_ICON_SIZE) + 1;
+}
 
 /**
  * `PlacementStrategyVisibility#getPositions`'s `2 + (maxHeight12 -
@@ -77,8 +101,8 @@ const ICON_BLOCK_HEIGHT = VISIBILITY_ICON_SIZE + 1;
  * ICON_BLOCK_HEIGHT) / 2`, evaluated at the corpus's only sampled
  * `fontSize` (14) and left as a function of `rowHeight` for other sizes.
  */
-function centeringDelta(rowHeight: number): number {
-  return 2 + (rowHeight - ICON_BLOCK_HEIGHT) / 2;
+function centeringDelta(rowHeight: number, blockHeight: number): number {
+  return 2 + (rowHeight - blockHeight) / 2;
 }
 
 /** Default (unthemed) `visibilityIcon { ... }` colors, `plantuml.skin`. */
@@ -157,8 +181,8 @@ function polygonTag(points: ReadonlyArray<readonly [number, number]>, fill: stri
 }
 
 /** `VisibilityModifier#drawSquare`: translate(x+2,y+2), size-4 square. */
-function drawSquare(x: number, y: number, fill: string, stroke: string): string {
-  const s = VISIBILITY_ICON_SIZE - 4;
+function drawSquare(x: number, y: number, fill: string, stroke: string, size: number): string {
+  const s = size - 4;
   return `<rect${attrs([
     ['x', x + 2], ['y', y + 2], ['width', s], ['height', s],
     ['fill', fill], ['style', styleAttr(stroke, STROKE_WIDTH)],
@@ -166,8 +190,8 @@ function drawSquare(x: number, y: number, fill: string, stroke: string): string 
 }
 
 /** `VisibilityModifier#drawCircle`: translate(x+2,y+2), size-4 diameter. */
-function drawCircle(x: number, y: number, fill: string, stroke: string): string {
-  const r = (VISIBILITY_ICON_SIZE - 4) / 2;
+function drawCircle(x: number, y: number, fill: string, stroke: string, size: number): string {
+  const r = (size - 4) / 2;
   return `<ellipse${attrs([
     ['cx', x + 2 + r], ['cy', y + 2 + r], ['rx', r], ['ry', r],
     ['fill', fill], ['style', styleAttr(stroke, STROKE_WIDTH)],
@@ -175,8 +199,8 @@ function drawCircle(x: number, y: number, fill: string, stroke: string): string 
 }
 
 /** `VisibilityModifier#drawDiamond`: size-2 diamond, translate(x+1,y). */
-function drawDiamond(x: number, y: number, fill: string, stroke: string): string {
-  const s = VISIBILITY_ICON_SIZE - 2;
+function drawDiamond(x: number, y: number, fill: string, stroke: string, size: number): string {
+  const s = size - 2;
   const ox = x + 1;
   const points: Array<[number, number]> = [
     [ox + s / 2, y],
@@ -188,8 +212,8 @@ function drawDiamond(x: number, y: number, fill: string, stroke: string): string
 }
 
 /** `VisibilityModifier#drawTriangle`: size-2 triangle, translate(x+1,y). */
-function drawTriangle(x: number, y: number, fill: string, stroke: string): string {
-  const s = VISIBILITY_ICON_SIZE - 2;
+function drawTriangle(x: number, y: number, fill: string, stroke: string, size: number): string {
+  const s = size - 2;
   const ox = x + 1;
   const points: Array<[number, number]> = [
     [ox + s / 2, y + 1],
@@ -216,14 +240,15 @@ export function renderVisibilityIcon(
   const { line, background } = colorsFor(icon, theme);
   const filled = isFilled(icon, isField);
   const fill = filled ? background : 'none';
+  const size = iconSizeOf(theme);
   const shape =
     icon === '-'
-      ? drawSquare(originX, originY, fill, line)
+      ? drawSquare(originX, originY, fill, line, size)
       : icon === '#'
-        ? drawDiamond(originX, originY, fill, line)
+        ? drawDiamond(originX, originY, fill, line, size)
         : icon === '~'
-          ? drawTriangle(originX, originY, fill, line)
-          : drawCircle(originX, originY, fill, line); // '+' and '*'
+          ? drawTriangle(originX, originY, fill, line, size)
+          : drawCircle(originX, originY, fill, line, size); // '+' and '*'
   // G2 N21: `SvgGraphics#startGroup`/`closeGroup` flush the ACTIVE `<a>`
   // link on every nested group boundary (`renderer-url.ts`'s own module
   // doc comment) -- this icon's own `<g data-visibility-modifier>` wrapper
@@ -299,8 +324,11 @@ export function renderVisibilityUrlBackground(
  * (matches `renderer.ts`'s pre-existing `iconBaselineLift` doc comment,
  * which this function replaces).
  */
-export function visibilityIconOriginY(rowBaselineY: number, rowHeight: number): number {
+export function visibilityIconOriginY(rowBaselineY: number, rowHeight: number, theme?: Theme): number {
   const descent = rowHeight / 4.5;
   const ascent = rowHeight - descent;
-  return rowBaselineY - ascent + centeringDelta(rowHeight);
+  // The centring follows `classAttributeIconSize` because upstream's block IS
+  // `size + 1` (skin/VisibilityModifier.java:100-102) and the placement
+  // strategy centres against that block, not against a fixed 11.
+  return rowBaselineY - ascent + centeringDelta(rowHeight, iconBlockHeight(theme));
 }

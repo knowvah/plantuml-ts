@@ -22,6 +22,25 @@ export type DotInputNodeShape =
    *  `width`/`height` — see `DotInputNode.recordLabel`. */
   | 'record';
 
+/**
+ * One `PortGeometry` band on a `RECTANGLE_HTML_FOR_PORTS` node — the DOT-input
+ * projection of `svek/PortGeometry.java`, carrying only what
+ * `SvekNode#appendLabelHtmlSpecialForLink` reads back out of `Ports`.
+ * `score` is deliberately absent: it exists to arbitrate which report wins
+ * inside `Ports#add`, and is already spent by the time `getAllPortGeometry()`
+ * hands the sorted snapshot to the emitter.
+ */
+export interface DotInputPortRow {
+  /** ALREADY md5-encoded (`Ports#encodePortNameToId`, svek/Ports.java:53-55) —
+   *  the emitter writes this verbatim into `PORT="…"`. */
+  id: string;
+  /** Top of the band, in px from the node box's top edge
+   *  (`PortGeometry#getPosition`). */
+  position: number;
+  /** Band height in px (`PortGeometry#getHeight`). */
+  height: number;
+}
+
 export interface DotInputNode {
   id: string;
   width: number;
@@ -68,6 +87,27 @@ export interface DotInputNode {
    *  (`SvekNode.appendLabelHtmlSpecialForPortHtml`'s `fullWidth`, clamped to
    *  a 10px floor). Emitter-only. */
   portPad?: number;
+  /**
+   * Svek `ShapeType.RECTANGLE_HTML_FOR_PORTS`: the per-member-row port bands
+   * `SvekNode#appendLabelHtmlSpecialForLink` turns into `<TR><TD … PORT="…">`
+   * rows (svek/SvekNode.java:268-296, rows via `appendTr` `:298-311`). Present
+   * (even as an EMPTY array) ⇒ this node is emitted as a row table and, unlike
+   * every other shape, is handed to the layout engine as an HTML **label**
+   * with no `width`/`height`, so graphviz pads it by 4·GAP wide / 2·GAP tall
+   * and floors it at 54x36 exactly as it does for the jar
+   * (`~/git/graphviz/lib/common/shapes.c:1993-2009`, `GAP` at
+   * `~/git/graphviz/lib/common/const.h:251`).
+   *
+   * Absent ⇒ the pre-existing shield-table emission and `fixedsize` layout
+   * fold, unchanged — `description`'s `circle`/interface leaves and `state`'s
+   * json states keep their current geometry.
+   *
+   * Selected upstream by `EntityImageMap#getShapeType` (unconditional,
+   * `svek/image/EntityImageMap.java:245-247`), `EntityImageJson` (`:241`),
+   * and `EntityImageObject`/`EntityImageClass` only when the leaf has port
+   * short names (`:249-253` / `:254-258`).
+   */
+  portRows?: readonly DotInputPortRow[];
   /** Svek `ClusterDotString.empty()` port placeholder: reuses the
    *  group-anchor id as a tiny `.01in` rect carrying the OWNING cluster's
    *  own title HTML as its label, instead of the plain `shape:'point'`
@@ -102,6 +142,15 @@ export interface DotInputEdge {
      * edge leaves the specific ROW rather than the node's centre.
      */
     tailport?: string;
+    /**
+     * B1/M1: the head-side counterpart of {@link tailport}. On a
+     * `RECTANGLE_HTML_FOR_PORTS` node this is a `DotInputPortRow.id` (an
+     * md5-encoded member-row port), so the edge lands on the specific member
+     * row rather than the node's centre — the jar emits both suffixes on one
+     * statement (`sh0006:p48c4…->sh0007:pcb85…`, `svek/SvekEdge.java` via
+     * `Bibliotekon#getNodeUid` + `abel/Link.java:219-231`).
+     */
+    headport?: string;
     /** ~~Normalized port y-offset on the tail (FROM) node.~~
      *  **DEAD (A5/T7).** json set this on every edge and nothing ever
      *  forwarded it to the engine, so it never had an effect; `tailport`

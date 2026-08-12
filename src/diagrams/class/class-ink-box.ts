@@ -49,28 +49,57 @@ function addPoint(box: InkBox, x: number, y: number): void {
   if (y > box.maxY) box.maxY = y;
 }
 
-/** `LimitFinder#drawRectangle`'s own `-1`-inset corners are NOT the true
- *  boundary here — `EntityImageClass`'s header/body `TextBlockUtils
- *  .withMargin` composition also draws an invisible full-box `UEmpty`
- *  reservation over the SAME `(widthTotal, heightTotal)` the visible
- *  bordered rect uses. `LimitFinder#drawEmpty` has NO `-1` inset
- *  (`addPoint(x,y)`, `addPoint(x+w,y+h)` — plain bbox), and since its
- *  max corner is exactly 1px past the bordered rect's own `-1`-inset max
- *  corner, it strictly dominates on the max side while the rect's `-1`
- *  inset still dominates on the min side. Net effect, jar-verified with
- *  zero residual against 6+ edge-free multi-classifier fixtures
- *  (`jalexi-21-xoje231`, `vaxaza-84-gune985`, `mexaka-52-gati860`,
- *  `bipudo-23-xavu432`; debug-instrumented local oracle build tracing
- *  `SvekResult#calculateDimension`'s raw `LimitFinder` walk directly —
- *  see `plans/g2-class-svg/ledger.md` N5): ink box = `[x-1, x+w] ×
- *  [y-1, y+h]` — nominal box size plus exactly 1px on the min side only,
- *  not the classic symmetric `-1`-inset URectangle rule. */
-function addRectInk(box: InkBox, x: number, y: number, w: number, h: number, shadow = 0): void {
-  // #lizard forgives -- pre-existing 6-PARAM violation, unchanged by the
-  // usecase-ellipse ink task; signature matches every sibling ink rule in
-  // this module.
-  addPoint(box, x - 1, y - 1);
-  addPoint(box, x + w, y + h);
+/**
+ * B35/M40: a classifier's ink max-X is `max(x + w - 1, x + bodyInkWidth)`,
+ * NOT a fixed `x + w`. Two independent shapes compete for it:
+ *
+ * - the bordered `URectangle`, inset by `LimitFinder#drawRectangle`'s own
+ *   `-1` on BOTH corners (`klimt/drawing/LimitFinder.java:184-188`);
+ * - an invisible `UEmpty` reservation, bounded by `LimitFinder#drawEmpty`
+ *   with NO inset at all (`addPoint(x,y)`, `addPoint(x+w,y+h)`,
+ *   `LimitFinder.java:159-162`), so it reaches 1px FURTHER when present.
+ *
+ * `TextBlockMarged#drawU`'s `ug.draw(UEmpty.create(dim))`
+ * (`klimt/shape/TextBlockMarged.java:83`) is the ONLY `UEmpty` draw site in
+ * the whole upstream tree, and `dim` is that block's OWN dimension — never
+ * the box's. So the reservation reaches `x + bodyInkWidth`, and clears the
+ * rect's inset corner only when the BODY is what set the box width.
+ * `EntityImageObject#calculateDimensionSlow:150-153` takes `w =
+ * max(dimFields.width, dimTitle.width + 2*xMarginCircle)`, so a title-driven
+ * object box gets no body point out there and falls back to `x + w - 1`.
+ * Jar-verified with two authored controls differing only in which term wins
+ * the `max` (ledger M40): body-driven `x=74.36, w=180` → canvas 269
+ * (`x+w`); title-driven `x=74.74, w=201.25` → canvas 289 (`x+w-1`).
+ *
+ * **This retires the pre-B35 attribution** (G2 N5) of the `+1` to a
+ * full-box `UEmpty` over `(widthTotal, heightTotal)`: the shape is real and
+ * the `+1` is real, but it is sized to the BODY, which is why the rule is
+ * conditional rather than universal. It equally retires T7's counter-claim
+ * that `UEmpty` is drawn nowhere on this path — T7 read the entity images,
+ * where it indeed appears nowhere, and missed `TextBlockMarged`.
+ *
+ * `bodyInkWidth === undefined` keeps the pre-B35 fixed `x + w`, which is
+ * correct for `class`/`interface`/`enum` for a DIFFERENT reason and is not
+ * merely un-migrated: `HeaderLayout#drawU` centers the name block in
+ * `suppWith = width - circleW - widthStereoAndName - genericW`
+ * (`svek/HeaderLayout.java:89-109`), which is exactly 0 when the header
+ * drove the width — so the name's own `TextBlockMarged` `UEmpty` lands on
+ * `x + w`, and when the body drove it instead the body's does. Either way
+ * `x + w`, which is why all 317 byte-exact class goldens hold under the
+ * fixed rule. The object header cannot do this: it is placed by
+ * `PlacementStrategyY1Y2#getPositions`'s strict `x = (width - blockWidth)/2`
+ * (`klimt/geom/PlacementStrategyY1Y2.java:59`), leaving `xMarginCircle` (5px)
+ * clear on each side. `map`/`json` are left unmeasured deliberately — their
+ * bodies are `TextBlockMap`/`TextBlockCucaJSon`, not a marged body block, and
+ * no jar control isolates them.
+ */
+function addRectInk(box: InkBox, c: ClassifierGeo): void {
+  const shadow = c.shadowing ?? 0;
+  addPoint(box, c.x - 1, c.y - 1);
+  const bodyMaxX = c.x + (c.bodyInkWidth ?? c.width);
+  // Y is deliberately untouched at `y + h`: the three-way object body-state
+  // split on max-Y (B5/M6) is a separate question this rule does not model.
+  addPoint(box, Math.max(c.x + c.width - 1, bodyMaxX), c.y + c.height);
   // mission skin-file-loading (deferred D3 item): `LimitFinder
   // #drawRectangle`'s own shadow term (`addPoint(x+w-1+2*shadow,
   // y+h-1+2*shadow)`, see `state/layout-ink-extent.ts#addStateBoxInk`'s
@@ -82,46 +111,68 @@ function addRectInk(box: InkBox, x: number, y: number, w: number, h: number, sha
   // pre-mission fixture) reduces to `addPoint(x+w-1,y+h-1)`, strictly
   // dominated by the existing `x+w,y+h` UEmpty point, so this is a
   // zero-behavior-change no-op for every shadow-off fixture.
-  if (shadow > 0) addPoint(box, x + w - 1 + 2 * shadow, y + h - 1 + 2 * shadow);
+  if (shadow > 0) {
+    addPoint(box, c.x + c.width - 1 + 2 * shadow, c.y + c.height - 1 + 2 * shadow);
+  }
 }
 
+
 /**
- * G3/O2: `EntityImageObject#drawU`'s outer bordered `URectangle` when the
- * classifier's field/body compartment is ENTIRELY suppressed (`showFields
- * == false` -- "hide members"/"hide empty members" on an object with no
- * visible members left, `class-object-map-sizing.ts#measureObjectClassifier`'s
- * `dividerYs: []` case). {@link addRectInk}'s own "+1px past the rect's
- * own inset" dominance comes from a SEPARATE invisible-`UEmpty` reservation
- * that `EntityImageObject`'s populated-fields branch draws alongside the
- * name/stereo header (`BodierLikeClassOrObject#getBody`'s `LeafType.OBJECT`
- * arm: `BodyFactory.create1(...)` when `showFields`, vs a genuinely
- * zero-size `TextBlockUtils.empty(0, 0)` when NOT) -- with NO body
- * compartment drawn at all, that reservation never exists, so the
- * classifier's ink comes SOLELY from the visible rect's own native
- * `LimitFinder#drawRectangle` inset: `addPoint(x-1,y-1)`,
- * `addPoint(x+w-1,y+h-1)` (`klimt/drawing/LimitFinder.java:184-188`) --
- * symmetric `-1` on BOTH corners, 1px narrower than {@link addRectInk} on
- * the WIDTH axis specifically.
+ * B5/M6: the THIRD object body state — an empty field list that is still
+ * SHOWN. `EntityImageObject`'s ctor substitutes a placeholder body
+ * `TextBlockLineBefore(LineThickness, TextBlockEmpty(10, 16))` for a real
+ * `BodyFactory.create1` body whenever `getFieldsToDisplay().size() == 0 &&
+ * showFields` (`svek/image/EntityImageObject.java:110-113`). NOTHING in that
+ * placeholder reaches the classifier's max corner:
  *
- * Height is deliberately UNCHANGED here (`y+h`, not `y+h-1`) -- jar-verified
- * against 2 independent title-bearing samples (`kexica-21-gega428`: global
- * `hide members`, BOTH classifiers empty-bodied; `janoma-30-dovo501`: `hide
- * empty members`, only the genuinely-empty sibling affected) -- both show
- * the SAME 0.5px horizontal chrome-centering residual (`core/annotations
- * /chrome.ts#decorateEntityImage`'s `xImage = (dimTotal.width -
- * original.width) / 2` split a 1px `rawWidth` delta in half) with ZERO
- * accompanying height/y diff, meaning whatever ELSE reaches the box's max-Y
- * corner (the header name/stereo text's own ink, drawn unconditionally
- * regardless of `showFields`) already supplies the un-inset max-Y bound
- * this rule's own asymmetry leaves alone. Object-kind-gated only (not
- * class/interface/enum): `EntityImageClass`'s equivalent hidden-fields path
- * returns `null` (skipped draw entirely, `BodierLikeClassOrObject#getBody`'s
- * `isBodyEnhanced()` arm), a structurally different upstream mechanism this
- * rule does not model.
+ * - `TextBlockEmpty#drawU` is an empty method
+ *   (`klimt/shape/TextBlockEmpty.java:63-64`);
+ * - `TextBlockLineBefore#drawU` draws only `UHorizontalLine.infinite(
+ *   thickness, 1, 1, separator)` (`klimt/shape/TextBlockLineBefore.java:84`),
+ *   whose `ULine` runs from `startingX + 1` to `endingX - 1`
+ *   (`klimt/shape/UHorizontalLine.java:99-108,148-151`) at the body's TOP
+ *   edge, so it reaches neither `x + w` nor the bottom edge.
+ *
+ * The classifier's ink is therefore its own `URectangle` alone, taking
+ * `LimitFinder#drawRectangle`'s native symmetric inset on BOTH corners —
+ * `addPoint(x-1, y-1)`, `addPoint(x+w-1, y+h-1)`
+ * (`klimt/drawing/LimitFinder.java:184-188`).
+ *
+ * This is NOT a widening of the general rule: the three object body states
+ * carry three DIFFERENT max corners, established against the
+ * pinned jar with untitled, edge-free, two-node controls (two nodes so the
+ * degenerate-single-leaf sizer path is not taken, no title so the annotation
+ * chrome cannot absorb a pixel):
+ *
+ * | body state                    | source                  | maxX    | maxY    | jar canvas |
+ * |-------------------------------|-------------------------|---------|---------|------------|
+ * | populated                     | `BodyFactory.create1`   | `x+w`   | `y+h`   | 148 x 62   |
+ * | `showFields == false`         | `TextBlockUtils.empty`  | `x+w-1` | `y+h`   | 123 x 40   |
+ * | empty list, shown (this rule) | `TextBlockEmpty(10,16)` | `x+w-1` | `y+h-1` | 123 x 55   |
+ *
+ * (`object foo {field1} / object bar {field2}`, the same with a leading
+ * `hide object fields`, and a bare `object foo / object bar` respectively;
+ * corpus confirmation on `jabote-02-rajo672` and `jotaga-99-fatu830`, whose
+ * canvases were each 1px over on BOTH axes before this rule.)
+ *
+ * RESOLVED at B35/M40, on the max-X axis: the `+1` by which the first two
+ * rows exceed `LimitFinder#drawRectangle` is the `UEmpty` that
+ * `TextBlockMarged#drawU` reserves at its block's OWN width
+ * (`klimt/shape/TextBlockMarged.java:83` — see {@link addRectInk}). This
+ * state's `TextBlockEmpty(10, 16)` placeholder is not wrapped in one, so it
+ * reserves nothing, and row 2's `TextBlockUtils.empty(0, 0)` reserves a
+ * zero-width one; both therefore fall back to the bare rect on X. That
+ * made row 2 a strict special case of the general rule, and its separate
+ * helper is gone. THIS row survives on the max-Y axis alone (`y+h-1`, where
+ * the general rule gives `y+h`) — the header's own `TextBlockMarged`
+ * `UEmpty` supplies row 2's un-inset max-Y and this row's shorter header
+ * cannot reach it, but that Y mechanism is not jar-isolated, so the rule
+ * stays keyed on the upstream BRANCH rather than on a geometric predicate.
+ * Tracked in `plans/object-close/ledger.md` M6.
  */
-function addRectInkEmptyBody(box: InkBox, x: number, y: number, w: number, h: number): void {
+function addRectInkEmptyShownBody(box: InkBox, x: number, y: number, w: number, h: number): void {
   addPoint(box, x - 1, y - 1);
-  addPoint(box, x + w - 1, y + h);
+  addPoint(box, x + w - 1, y + h - 1);
 }
 
 /**
@@ -253,6 +304,39 @@ function addLollipopRowInk(box: InkBox, c: ClassifierGeo): void {
 
 /** One classifier's own ink contribution — split out of `buildInkBox` (G2
  *  N35) to keep that function's own complexity under the repo's CCN cap. */
+/**
+ * The classifier's own bordered-rect ink, which is one of THREE rules for
+ * `kind: 'object'` and one for everything else. Split out of {@link
+ * addClassifierInk} solely to keep that function under the repo's CCN cap
+ * (B5/M6 added the third object arm); no behavior change.
+ *
+ * Rule selection, all three jar-verified — see each helper's own doc
+ * comment, and `addRectInkEmptyShownBody`'s for the control set that
+ * distinguishes the two empty-body states from each other.
+ */
+function addClassifierBoxInk(box: InkBox, c: ClassifierGeo): void {
+  // B5/M6: `kind: 'object'` whose field list is empty but still SHOWN --
+  // upstream's `TextBlockEmpty(10, 16)` placeholder branch.
+  if (c.kind === 'object' && c.emptyFieldPlaceholder === true) {
+    addRectInkEmptyShownBody(box, c.x, c.y, c.width, c.height);
+    return;
+  }
+  // B35/M40: the THIRD state -- G3/O2's separate `addRectInkEmptyBody` rule
+  // for a `kind: 'object'` whose body is entirely suppressed (`showFields ==
+  // false`, `dividerYs: []`) is GONE, because it is now a strict special
+  // case of {@link addRectInk}: upstream hands that state a genuinely
+  // zero-size `TextBlockUtils.empty(0, 0)` body
+  // (`BodierLikeClassOrObject.java:225-229`), which draws no
+  // `TextBlockMarged`/`UEmpty` at all, so `bodyInkWidth` is 0 and the
+  // general rule yields exactly the `(x+w-1, y+h)` corner that rule
+  // hard-coded. Verified empirically, not assumed: deleting it leaves the
+  // object census's zero-diff SET byte-identical (35, `kexica-21-gega428`
+  // and `janoma-30-dovo501` -- its own two jar-verified fixtures --
+  // included). The empty-but-SHOWN arm above does NOT collapse (its max-Y
+  // is `y+h-1`, not `y+h`); disabling IT drops the census 35 -> 29.
+  addRectInk(box, c);
+}
+
 function addClassifierInk(box: InkBox, c: ClassifierGeo): void {
   // G2 N33: a collapsed-empty package/namespace leaf draws the SAME
   // `USymbolFolder` `UPath` outline a namespace CLUSTER draws (`addPlainInk`
@@ -271,20 +355,7 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo): void {
     addEllipseInk(box, c.x, c.y, c.width, c.height);
     return;
   }
-  // G3/O2: `kind: 'object'` with its field/body compartment entirely
-  // suppressed (`dividerYs: []` -- see `addRectInkEmptyBody`'s own doc
-  // comment for the jar-verified mechanism and why this is gated to
-  // `object` specifically, not class/interface/enum).
-  if (c.kind === 'object' && c.dividerYs.length === 0) {
-    // mission skin-file-loading (deferred D3 item): shadow NOT modeled
-    // here -- no fixture in this mission's corpus combines a shadowed
-    // skin with a suppressed-body object/map/json classifier; see
-    // `addRectInkEmptyBody`'s own doc comment for the (separately jar-
-    // verified) unshadowed rule this leaves unchanged.
-    addRectInkEmptyBody(box, c.x, c.y, c.width, c.height);
-  } else {
-    addRectInk(box, c.x, c.y, c.width, c.height, c.shadowing ?? 0);
-  }
+  addClassifierBoxInk(box, c);
   if (c.kind === 'lollipop') addLollipopRowInk(box, c);
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box is drawn
   // OUTSIDE the classifier's own rect (above-right, `class-stereotype.ts

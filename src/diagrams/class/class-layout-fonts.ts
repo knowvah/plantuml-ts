@@ -84,6 +84,30 @@ export function resolveAttributeFont(
 }
 
 /**
+ * `skinparam classFontSize<<Stereo>>` — the SAME registration as the plain
+ * `classFontSize` below (`PName.FontSize` at `element.class.header`,
+ * `FromSkinparamToStyle.java:185`), re-signed `.addStereotype(label)` at
+ * +1000 priority by `addStyle` (`FromSkinparamToStyle.java:396-410`,
+ * `StyleLoader.java:178-186`) and picked up by the header's own
+ * `withTOBECHANGED(stereotype)` merge — so a matching label WINS over every
+ * unstereotyped tier. Same LOWERCASED-label, first-hit-wins shape as
+ * {@link attributeFontSizeByStereo}; see `theme-graph-colors-a.ts
+ * #classFontSizeByStereo` for the `tabaxa-70-pomu341` jar evidence.
+ */
+function headerFontSizeByStereo(
+  theme: Theme,
+  stereotypeLabels: readonly string[] | undefined,
+): number | undefined {
+  const byStereo = theme.colors.graph.classFontSizeByStereo;
+  if (byStereo === undefined || stereotypeLabels === undefined) return undefined;
+  for (const label of stereotypeLabels) {
+    const hit = byStereo[label.toLowerCase()];
+    if (hit !== undefined) return hit;
+  }
+  return undefined;
+}
+
+/**
  * `skinparam classFontSize/classFontName/classFontStyle`
  * (`FromSkinparamToStyle.java:185-188`, `element.class.header`) is the
  * classifier HEADER's own, independently-overridable font, which CASCADES
@@ -97,6 +121,7 @@ export function resolveHeaderFont(
   theme: Theme,
   attributeFont: ReturnType<typeof resolveAttributeFont>,
   tagCascadeEntry: TagCascadeEntry,
+  stereotypeLabels?: readonly string[],
 ) {
   return {
     family: theme.colors.graph.classFontFamily ?? attributeFont.family,
@@ -112,7 +137,12 @@ export function resolveHeaderFont(
     // the element bucket stays as a secondary source for skin files. Jar
     // evidence: momaku-69-duxe918 `o1` header at 20pt (delta =
     // w('o1'@20) - w('o1'@14) = 6.675px exact).
-    size: theme.colors.graph.classCascadeHeaderFontSize
+    // The stereotype-qualified tier leads: upstream gives it +1000 priority
+    // over every unstereotyped value at the same signature
+    // ({@link headerFontSizeByStereo}), mirroring where
+    // `attributeFontSizeByStereo` sits in `resolveAttributeFont` above.
+    size: headerFontSizeByStereo(theme, stereotypeLabels)
+      ?? theme.colors.graph.classCascadeHeaderFontSize
       ?? theme.colors.elements?.['class']?.headerFontSize
       ?? theme.colors.graph.classFontSize ?? attributeFont.size,
     bold: resolveCascadedFontFlag(tagCascadeEntry?.fontBold, theme.colors.graph.classFontBold, attributeFont.bold),

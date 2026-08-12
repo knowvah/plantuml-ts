@@ -27,14 +27,27 @@ import type { SpriteRegistry } from '../../core/sprite-commands.js';
  * parsing (a map row's value is opaque display text, not a typed member).
  *
  * A row created from the linked-entry form (`key *-> dest`, no `=>`) has
- * `value` = `''` (upstream stores the NUL placeholder `"\0"` — the empty
- * string here has the same "no display value" meaning, since a map row
- * never legitimately has an actual empty-string value from the `=>` form:
- * `BodierMap#addFieldOrMethod` trims the right-hand side but never rejects
- * an empty result) and `linkedCode` set to the resolved destination
- * classifier's id.
+ * `value` = {@link MAP_POINT_SENTINEL} and `linkedCode` set to the resolved
+ * destination classifier's id.
+ *
+ * `''` used to double as that marker here. It cannot: `BodierMap
+ * #addFieldOrMethod` trims the right-hand side of `=>` but never rejects an
+ * empty result, so `key => ` stores a genuine `""` — a REAL cell that
+ * `TextBlockMap` measures (2*5 margin), draws (as `StripeSimple`'s
+ * empty-stripe `" "` fallback atom) and gives a column `vline`, while the
+ * `"\0"` `Point` gets none of the three. Fixtures: fusopu-05-loxo960,
+ * guzojo-14-muxa584, vimavu-26-civo110, satuco-50-vusa163.
  * @see ~/git/plantuml/.../cucadiagram/BodierMap.java
  */
+/**
+ * The `MapRow.value` a `key *-> dest` linked row carries — upstream's own
+ * literal (`map.put(s.substring(0, pos).trim(), "\0")`,
+ * `cucadiagram/BodierMap.java:79`), which `TextBlockMap#getTextBlock`
+ * short-circuits to a `TextBlockMap.Point` before any creole runs
+ * (`cucadiagram/TextBlockMap.java:173-174`).
+ */
+export const MAP_POINT_SENTINEL = '\0';
+
 export interface MapRow {
   key: string;
   value: string;

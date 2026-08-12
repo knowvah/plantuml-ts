@@ -16,6 +16,7 @@ import {} from './class-badge.js';
 import { renderVisibilityIcon, visibilityIconOriginY } from './class-visibility-icon.js';
 import {} from './renderer-url.js';
 import { linkWrap } from '../../core/svg.js';
+import { renderBulletAtom } from './renderer-note.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
@@ -77,7 +78,7 @@ export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number]
           row.visibilityIcon,
           row.visibilityIsField === true,
           geo.x + ROW_TEXT_LEFT_MARGIN,
-          visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme)),
+          visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme), theme),
           undefined,
           theme,
         )
@@ -267,6 +268,18 @@ export function renderRowAtoms(
       // its OWN `<a href>` -- `class-member-creole.ts#MemberRenderAtom`'s
       // `url` field doc comment.
       out += atom.url !== undefined ? linkWrap(rendered, atom.url) : rendered;
+      x += atom.width;
+      continue;
+    }
+    if (atom.kind === 'bullet') {
+      // B22/M21: unreachable on this path in practice -- a classifier member
+      // row's `*` is a `VisibilityModifier` char (`IE_MANDATORY`), not a
+      // creole bullet, because `CreoleMode.SIMPLE_LINE` skips the bullet
+      // pattern entirely (`CreoleStripeSimpleParser.java:119-147`, both
+      // patterns gated `if (mode == CreoleMode.FULL)`). Handled anyway so the
+      // atom union stays exhaustive here, using this file's own
+      // line-bottom-minus-height convention rather than the note renderer's.
+      out += renderBulletAtom(atom, x, y + theme.fontSize / 4.5 - theme.fontSize, theme.fontSize);
       x += atom.width;
       continue;
     }

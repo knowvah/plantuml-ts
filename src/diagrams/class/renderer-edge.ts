@@ -139,6 +139,33 @@ export function uniqLinkId(ids: Set<string>, base: string): string {
   }
 }
 
+
+/**
+ * B7/M8: the arrow style a link's own `<<tag>>` labels resolve to, or
+ * `undefined` when the link carries none / none of them has an
+ * arrow-relevant `<style>` declaration.
+ *
+ * `theme.colors.graph.arrowTagCascade` is precomputed per cleaned tag at
+ * Theme-build time (`style-cascade-class.ts#arrowTagCascadeEntry`) because
+ * the renderer has no `StyleMap` — only the resolved Theme. Where a link
+ * carries several labels, the LAST matching one wins, mirroring
+ * `StyleStorage#computeMergedStyle`'s own last-registered-wins merge rather
+ * than inventing a specificity rule upstream does not have.
+ */
+function resolveArrowTagStyle(
+  tags: readonly string[] | undefined,
+  theme: Theme,
+): { color?: string; thickness?: number } | undefined {
+  const cascade = theme.colors.graph.arrowTagCascade;
+  if (tags === undefined || cascade === undefined) return undefined;
+  let found: { color?: string; thickness?: number } | undefined;
+  for (const tag of tags) {
+    const entry = cascade[tag];
+    if (entry !== undefined) found = entry;
+  }
+  return found;
+}
+
 export function renderEdge(
   geo: EdgeGeo,
   theme: Theme,
@@ -165,10 +192,20 @@ export function renderEdge(
   // `-[#color]->` bracket override, ABOVE the cross-diagram-type
   // `theme.colors.arrow` default (never overwritten directly -- this Theme
   // shape is shared with description/other diagram types).
+  // B7/M8: a link's own `<<tag>>` resolves against the ARROW signature with
+  // the tag as its stereotype label (`SvekEdge.java:817-822` ->
+  // `StyleSignatureBasic#withTOBECHANGED`'s per-label fan-out), and both the
+  // colour and the thickness come off that ONE merged style
+  // (`SvekEdge.java:874-876`). It sits BELOW an explicit `-[#color]->`
+  // bracket override and ABOVE the diagram-wide arrow cascade -- the same
+  // order the bracket/cascade/default chain below already uses. Last tag
+  // wins, mirroring the merge's own last-registered-wins rule.
+  const tagStyle = resolveArrowTagStyle(geo.stereotypeTags, theme);
   const strokeColor = geo.colorOverride !== undefined
     ? resolveColorToSvgHex(geo.colorOverride)
-    : theme.colors.graph.classCascadeArrowColor ?? theme.colors.arrow;
-  const arrowheads = buildEdgeArrowheads(geo, strokeColor, theme.colors.background);
+    : tagStyle?.color ?? theme.colors.graph.classCascadeArrowColor ?? theme.colors.arrow;
+  const edgeStrokeWidth = geo.strokeWidth ?? tagStyle?.thickness ?? 1;
+  const arrowheads = buildEdgeArrowheads(geo, strokeColor, theme.colors.background, edgeStrokeWidth);
   const trimmedPoints = applyDecorTrim(geo.points, arrowheads.tailTrim, arrowheads.headTrim);
   const d = buildPathData(trimmedPoints);
   if (d !== '') {
@@ -195,7 +232,7 @@ export function renderEdge(
         // for every other edge, so the `?? 1`/`geo.dashed` fallbacks below
         // reproduce this comment's own jar-verified defaults unchanged.
         stroke: strokeColor,
-        strokeWidth: geo.strokeWidth ?? 1,
+        strokeWidth: edgeStrokeWidth,
         ...(geo.strokeDasharray !== undefined
           ? { strokeDasharray: `${geo.strokeDasharray[0]},${geo.strokeDasharray[1]}` }
           : geo.dashed ? { strokeDasharray: '7,7' } : {}),

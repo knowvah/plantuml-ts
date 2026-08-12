@@ -895,6 +895,37 @@ describe('rule 3 — font-family/lengthAdjust hoisted to the root', () => {
       'lengthAdjust',
     );
   });
+
+  // B10/M12: upstream renames PlantUML's own logical family `monospaced` to
+  // the CSS `monospace` inside `if (fontFamily != null)`, BEFORE both the
+  // DEFAULT_FONT_FAMILY comparison that decides whether to emit the attribute
+  // at all and the NBSP space substitution
+  // (`klimt/drawing/svg/SvgGraphics.java:716-729`). This seam had the rename
+  // on the NBSP half only, so `""monospaced""` creole emitted the raw logical
+  // name as the attribute VALUE.
+  it('renames the logical family `monospaced` to `monospace` in the attribute', () => {
+    expect(text(0, 0, 'hello', { fontFamily: 'monospaced' })).toContain('font-family="monospace"');
+    expect(text(0, 0, 'hello', { fontFamily: 'monospaced' })).not.toContain('font-family="monospaced"');
+  });
+
+  it('renames case-insensitively, as upstream\'s equalsIgnoreCase does', () => {
+    expect(text(0, 0, 'hello', { fontFamily: 'Monospaced' })).toContain('font-family="monospace"');
+  });
+
+  it('renames only the WHOLE family, never a substring of a CSS stack', () => {
+    // `equalsIgnoreCase` against the whole string — a stack that merely
+    // contains the word is left alone.
+    expect(text(0, 0, 'hello', { fontFamily: 'Courier, monospaced' }))
+      .toContain('font-family="Courier, monospaced"');
+  });
+
+  it('leaves an already-CSS `monospace` family untouched', () => {
+    expect(text(0, 0, 'hello', { fontFamily: 'monospace' })).toContain('font-family="monospace"');
+  });
+
+  it('still NBSP-substitutes under the logical name (the half that already worked)', () => {
+    expect(text(0, 0, 'a b', { fontFamily: 'monospaced' })).toContain('a\u00A0b');
+  });
 });
 
 describe('rule 4 — stroke:none suppresses stroke-width and stroke-dasharray', () => {

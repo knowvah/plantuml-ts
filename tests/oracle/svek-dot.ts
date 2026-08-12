@@ -6,8 +6,32 @@
  * Svek emitter (`toSvekDot`) and then parsed — so the comparison exercises the
  * emitter and is genuinely apples-to-apples. Synthetic ids/colors are ignored;
  * we compare graph attrs, node count + shape multiset, edge topology + minlen +
- * label presence, and cluster membership. `width`/`height` are tolerant metrics
- * (Java vs plantuml-ts text measurement) — reported, not asserted.
+ * label presence + ENDPOINT PORTS, and cluster membership. `width`/`height` are
+ * tolerant metrics (Java vs plantuml-ts text measurement) — reported, not
+ * asserted.
+ *
+ * ## Why endpoint ports are compared (object-close, 2026-08-11)
+ *
+ * `parseEdges` used to discard the `:port` on both endpoints with a
+ * NON-capturing `(?::\w+)?`. That made an edge anchored to a member ROW
+ * compare equal to one anchored to the whole node — and those are not the same
+ * graph. Upstream emits map/json/port-bearing classifiers through
+ * `SvekNode#appendLabelHtmlSpecialForLink`
+ * (`svek/SvekNode.java:269-311`): `shape=plaintext` wrapping an HTML table with
+ * one `<TR PORT="p<md5>">` per member row, and edges anchored to those specific
+ * rows. This port emits a 3×3 shield table with a single `PORT="h"` and every
+ * edge as `shNNNN:h`. The old comparison scored that EQUAL.
+ *
+ * Measured when the blindness was found: **20 object and 22 class fixtures**
+ * were being reported structurally EQUAL while emitting a materially different
+ * graph. `state` and the description family are unaffected — no description
+ * golden uses a row port at all.
+ *
+ * Comparing the port id verbatim is the correct bar, not an over-specification:
+ * upstream builds it as `"p" + SignatureUtils.getMD5Hex(portName)`
+ * (`svek/Ports.java:53-55`), a pure function of the member text, so a faithful
+ * port reproduces the same hash. `-` stands for an endpoint with no port at
+ * all, which is itself a meaningful difference from `h`.
  *
  * Svek DOT is graphviz-emitter-regular, so focused regexes suffice rather than a
  * full DOT grammar. Clusters use a brace-stack scan that normalizes Svek's
@@ -25,6 +49,11 @@ export interface StructuralNode {
 export interface StructuralEdge {
   from: string;
   to: string;
+  /** Tail endpoint port (`shNNNN:<port>`), or undefined when the edge anchors
+   *  to the whole node. See this module's doc comment for why it is compared. */
+  fromPort: string | undefined;
+  /** Head endpoint port; same contract as {@link StructuralEdge.fromPort}. */
+  toPort: string | undefined;
   minlen: number;
   hasLabel: boolean;
   hasTailLabel: boolean;
@@ -63,12 +92,15 @@ function nodeShape(attrs: string): string {
 
 function parseEdges(dot: string): StructuralEdge[] {
   const edges: StructuralEdge[] = [];
-  const edgeRe = /(\w+)(?::\w+)?\s*->\s*(\w+)(?::\w+)?\s*\[([^\]]*)\]/g;
+  // Both ports are CAPTURED, not discarded — see this module's doc comment.
+  const edgeRe = /(\w+)(?::(\w+))?\s*->\s*(\w+)(?::(\w+))?\s*\[([^\]]*)\]/g;
   for (let m = edgeRe.exec(dot); m !== null; m = edgeRe.exec(dot)) {
-    const a = m[3]!;
+    const a = m[5]!;
     edges.push({
       from: m[1]!,
-      to: m[2]!,
+      to: m[3]!,
+      fromPort: m[2],
+      toPort: m[4],
       minlen: Number(attr(a, 'minlen') ?? '1'),
       hasLabel: /(?:^|,)label=</.test(a),
       hasTailLabel: /taillabel=</.test(a),
@@ -175,6 +207,44 @@ export function degreeSequence(g: StructuralGraph): number[] {
   return [...deg.values()].sort((a, b) => a - b);
 }
 
+/**
+ * Sorted `in:out` degree multiset — the DIRECTED analogue of {@link
+ * degreeSequence}, and the only orientation-sensitive check in this
+ * comparator.
+ *
+ * B31/M37 (approved 2026-08-11): every other member of `structurallyEqual`
+ * is an undirected or order-free signature — `degreeSequence` increments
+ * BOTH endpoints and sorts, and minlens/shapes/ports/cluster-sizes are
+ * sorted multisets — so reversing `a -> b` to `b -> a` left all eleven
+ * checks invariant. Edge ORIENTATION was therefore invisible to this gate
+ * for its whole life, which is how M7 (`class-arrow-grammar.ts`'s
+ * decor-driven endpoint swap) survived in 116 of 722 class fixtures while
+ * they scored EQUAL. See `plans/object-close/ledger.md` B31.
+ *
+ * Node ids are synthetic and deliberately never compared (the same reason
+ * `degreeSequence` and `sortedPorts` are id-agnostic), so direction is
+ * captured as each node's own (indegree, outdegree) pair rather than by
+ * matching endpoints: a reversal moves a node from `1:0` to `0:1` and its
+ * partner the other way, which no sorting can hide. A graph whose every
+ * node has equal in- and out-degree is genuinely indistinguishable under
+ * reversal at this resolution — that is a real limit of an id-agnostic
+ * comparison, not a gap this closes.
+ */
+const degreeSequenceDirected = (g: StructuralGraph): string[] => {
+  const inDeg = new Map<string, number>();
+  const outDeg = new Map<string, number>();
+  for (const n of g.nodes) {
+    inDeg.set(n.id, 0);
+    outDeg.set(n.id, 0);
+  }
+  for (const e of g.edges) {
+    outDeg.set(e.from, (outDeg.get(e.from) ?? 0) + 1);
+    inDeg.set(e.to, (inDeg.get(e.to) ?? 0) + 1);
+  }
+  const ids = new Set([...inDeg.keys(), ...outDeg.keys()]);
+  return [...ids].map((id) => `${inDeg.get(id) ?? 0}:${outDeg.get(id) ?? 0}`).sort();
+};
+
 const eqNum = (a: number[], b: number[]): boolean =>
   a.length === b.length && a.every((v, i) => v === b[i]);
 const eqStr = (a: string[], b: string[]): boolean =>
@@ -190,6 +260,12 @@ const labelCounts = (g: StructuralGraph): [number, number, number, number] => [
 ];
 const sortedClusterSizes = (g: StructuralGraph): number[] =>
   g.clusters.map((c) => c.memberCount).sort((a, b) => a - b);
+
+/** Sorted multiset of every edge ENDPOINT's port id, `-` for "no port". Node
+ *  ids are synthetic and deliberately not compared, so the ports are gathered
+ *  id-agnostically, exactly like {@link degreeSequence}. */
+const sortedPorts = (g: StructuralGraph): string[] =>
+  g.edges.flatMap((e) => [e.fromPort ?? '-', e.toPort ?? '-']).sort();
 
 /** Epsilon for numeric graph-attr comparisons: both sides print 6-decimal inches. */
 const NUM_ATTR_EPSILON = 1e-6;
@@ -221,7 +297,15 @@ export interface StructuralDiff {
   minlenOk: boolean;
   shapeOk: boolean;
   labelOk: boolean;
+  /** Edge endpoint ports match as a sorted multiset. Anchoring an edge to a
+   *  member ROW is a different graph from anchoring it to the whole node —
+   *  see this module's doc comment for the measured blindness this closes. */
+  portOk: boolean;
   clusterOk: boolean;
+  /** Edge ORIENTATION matches, as a sorted `in:out` degree multiset — see
+   *  {@link degreeSequenceDirected} for why this is not covered by
+   *  `degreeOk`, which is undirected. B31. */
+  directionOk: boolean;
   /** rankdir: textual equality; absent==absent equal; absent vs present mismatches. */
   rankdirOk: boolean;
   /** nodesep: numeric equality (epsilon 1e-6); absent==absent equal. */
@@ -282,9 +366,11 @@ export function compareStructural(
   const nodeCountOk = oracle.nodes.length === candidate.nodes.length;
   const edgeCountOk = oracle.edges.length === candidate.edges.length;
   const degreeOk = eqNum(od, cd);
+  const directionOk = eqStr(degreeSequenceDirected(oracle), degreeSequenceDirected(candidate));
   const minlenOk = eqNum(sortedMinlens(oracle), sortedMinlens(candidate));
   const shapeOk = eqStr(sortedShapes(oracle), sortedShapes(candidate));
   const labelOk = eqNum(labelCounts(oracle), labelCounts(candidate));
+  const portOk = eqStr(sortedPorts(oracle), sortedPorts(candidate));
   const clusterOk = eqNum(sortedClusterSizes(oracle), sortedClusterSizes(candidate));
   const rdOk = rankdirOk(oracle.rankdir, candidate.rankdir);
   const nsOk = numAttrOk(oracle.nodesep, candidate.nodesep);
@@ -295,9 +381,11 @@ export function compareStructural(
     nodeCountOk,
     edgeCountOk,
     degreeOk,
+    directionOk,
     minlenOk,
     shapeOk,
     labelOk,
+    portOk,
     clusterOk,
     rankdirOk: rdOk,
     nodesepOk: nsOk,
@@ -306,9 +394,11 @@ export function compareStructural(
       nodeCountOk &&
       edgeCountOk &&
       degreeOk &&
+      directionOk &&
       minlenOk &&
       shapeOk &&
       labelOk &&
+      portOk &&
       clusterOk &&
       rdOk &&
       nsOk &&

@@ -55,6 +55,10 @@ export interface SkinparamAccumulator {
   /** R2j: `skinparam classAttributeFontSize<<Stereo>>` — see
    *  `theme-graph-colors-a.ts#classAttributeFontSizeByStereo`. */
   classAttributeFontSizeByStereo: Record<string, number> | undefined;
+  /** `skinparam classFontSize<<Stereo>>` (flat, or the nested
+   *  `skinparam class { <<Stereo>> { FontSize N } }` block) — see
+   *  `theme-graph-colors-a.ts#classFontSizeByStereo`. */
+  classFontSizeByStereo: Record<string, number> | undefined;
   stateBorderColorByStereo: Record<string, string> | undefined;
   stateBackgroundColorByStereo: Record<string, string> | undefined;
   stateFontColorByStereo: Record<string, string> | undefined;
@@ -117,7 +121,7 @@ const SCALAR_FIELD_NAMES = [
   'interfaceBackground', 'enumBackground', 'actorStroke', 'packageBackground',
   'packageBorder', 'packageBorderThickness', 'classBorder',
   'classBorderThickness', 'classBorderThicknessByStereo',
-  'classAttributeFontSizeByStereo',
+  'classAttributeFontSizeByStereo', 'classFontSizeByStereo',
   'stateBorderColorByStereo', 'stateBackgroundColorByStereo',
   'stateFontColorByStereo', 'stateFontSizeByStereo', 'arrowThickness',
   'classAttributeFontSize', 'classAttributeFontFamily',

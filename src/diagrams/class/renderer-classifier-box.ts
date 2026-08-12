@@ -12,7 +12,7 @@
  * comment for the G3/O3 map/json divider fix, which DID change behavior).
  */
 import { roundedTopRectD } from '../../core/svg-path-builder.js';
-import type { ClassifierGeo } from './layout.js';
+import type { ClassifierGeo, JsonBodyItem } from './layout.js';
 import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, text, line, ellipse, path } from '../../core/svg.js';
@@ -337,6 +337,35 @@ function renderGenericTag(geo: ClassifierGeo, tag: NonNullable<ClassifierGeo['ge
  * SAME classifier fallback (G2 N16, generalizing N15's whole-box-only rule
  * -- `renderer-url.ts`'s own module doc comment).
  */
+/**
+ * M3(c): draw a `json` leaf's entries area in `TextBlockCucaJSon#drawU`'s
+ * OWN order — one primitive per {@link JsonBodyItem}, no Y-sort. Both line
+ * kinds use the map/json divider convention
+ * ({@link MAP_JSON_DIVIDER_STROKE_WIDTH}): full span, fixed stroke-width 1,
+ * never `classBorderStrokeWidth` (`TextBlockCucaJSon` draws on a UGraphic
+ * that never picked up the classifier's own border stroke).
+ */
+function buildJsonBodyPrimitives(
+  geo: ClassifierGeo,
+  body: readonly JsonBodyItem[],
+  theme: Theme,
+): UrlTaggedPrimitive[] {
+  const stroke = { stroke: classBorder(geo, theme), strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH };
+  return body.map((item) => {
+    if (item.kind === 'hline')
+      return {
+        url: geo.url,
+        body: line(geo.x + item.x, geo.y + item.y, geo.x + item.x + item.width, geo.y + item.y, stroke),
+      };
+    if (item.kind === 'vline')
+      return {
+        url: geo.url,
+        body: line(geo.x + item.x, geo.y + item.y, geo.x + item.x, geo.y + item.y + item.height, stroke),
+      };
+    return { url: item.row.url ?? geo.url, body: renderRowText(geo, item.row, theme) };
+  });
+}
+
 function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimitive[] {
   // G2 N42: an enhanced body (`--`/`==`/`..`/`__` block separator or a
   // `|_` tree-list line) draws its OWN part list, in EXACT jar draw order
@@ -348,6 +377,10 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
       body: renderEnhancedBody(geo, geo.enhancedBody, theme, classifierFill(geo, theme), classBorder(geo, theme)),
     }];
   }
+  // M3(c): a `json` leaf's entries area owns its own draw order
+  // (`TextBlockCucaJSon#drawU` is a pre-order traversal, not a Y-order) --
+  // same "return the part list verbatim" dispatch as `enhancedBody` above.
+  if (geo.jsonBody !== undefined) return buildJsonBodyPrimitives(geo, geo.jsonBody, theme);
   const memberRows = geo.rows.slice(geo.headerRowCount ?? 1);
   // G3/O3: `map`/`json` horizontal row dividers use a DIFFERENT drawing
   // convention from class/interface/enum's own body dividers -- full box
@@ -393,7 +426,7 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
     // (`class-visibility-icon.ts#renderVisibilityUrlBackground`'s own doc
     // comment -- `dasagu-52-vani172`/`fijali-69-pina030`).
     const iconOriginX = geo.x + ROW_TEXT_LEFT_MARGIN;
-    const iconOriginY = visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme));
+    const iconOriginY = visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme), theme);
     if (row.url !== undefined) {
       interleaved.push({
         y: row.y,

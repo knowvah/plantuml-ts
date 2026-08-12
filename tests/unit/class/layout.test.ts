@@ -1479,6 +1479,89 @@ describe('layoutClass — hierarchical layout direction', () => {
     const pet = result.classifiers.find((c) => c.id === 'Pet')!;
     expect(dog.y).toBeLessThan(pet.y);
   });
+
+  // B6/M7: the dot edge runs in upstream's own Link order for EVERY
+  // relationship type, not just the two hierarchical ones. Upstream inverts a
+  // link only on an explicit `-left-`/`-up-` direction word
+  // (`CommandLinkClass.java:362-363`, whose `getDirection` at `:517-527`
+  // strips `<`/`>`/`|`/`*` before classifying), so `A <-- B` is emitted
+  // `A -> B` and ranks A above B. This port normalizes `from`/`to` by the
+  // arrowhead instead, and carried upstream's order separately as
+  // `idEntity1FullId`/`idEntity2FullId` (G2 N9/N30) without ever emitting
+  // from it.
+  it('a left-headed association (`Animal <-- Dog`) ranks the ARROWHEAD end above', () => {
+    const ast: ClassDiagramAST = makeAST({
+      classifiers: twoClasses,
+      // `<--` normalizes to from=Dog/to=Animal here, but upstream's Link is
+      // (cl1=Animal, cl2=Dog) — unreversed, because `<--` reduces to `--`.
+      relationships: [{
+        from: 'Dog', to: 'Animal', type: 'association',
+        idEntity1FullId: 'Animal', idEntity2FullId: 'Dog',
+        dotEdgeReversed: true,
+      }],
+    });
+    const result = layoutClass(ast, defaultTheme, measurer);
+    const animal = result.classifiers.find((c) => c.id === 'Animal')!;
+    const dog    = result.classifiers.find((c) => c.id === 'Dog')!;
+    expect(animal.y).toBeLessThan(dog.y);
+  });
+
+  // T1/B33: the orientation must survive endpoint RESOLUTION. `from`/`to` are
+  // rewritten by `class-command-relationships.ts`'s
+  // `resolveRelationshipEndpoint` after the parser stamped the FullId pair
+  // from raw ids, so inside a `namespace` (or with an `as "alias"`
+  // declaration) the two no longer agree. B6 decided orientation by comparing
+  // them, which silently returned "not reversed" for 28 of the 32 fixtures in
+  // `direction-backlog.json` — `class/famizo-04-joxe063` emitted `d1 -> c1`
+  // where the jar emits `c1 -> d1`.
+  it('a left-headed association still inverts when endpoints were namespace-resolved', () => {
+    const nsClasses = [
+      { id: 'net.sourceforge.Animal', display: 'Animal', kind: 'class' as const, typeParams: [], members: [] },
+      { id: 'net.sourceforge.Dog',    display: 'Dog',    kind: 'class' as const, typeParams: [], members: [] },
+    ];
+    const ast: ClassDiagramAST = makeAST({
+      classifiers: nsClasses,
+      relationships: [{
+        // Resolved ids on from/to; RAW ids on the FullId pair — exactly the
+        // mismatch resolution produces.
+        from: 'net.sourceforge.Dog', to: 'net.sourceforge.Animal', type: 'association',
+        idEntity1FullId: 'Animal', idEntity2FullId: 'Dog',
+        dotEdgeReversed: true,
+      }],
+    });
+    const result = layoutClass(ast, defaultTheme, measurer);
+    const animal = result.classifiers.find((c) => c.id === 'net.sourceforge.Animal')!;
+    const dog    = result.classifiers.find((c) => c.id === 'net.sourceforge.Dog')!;
+    expect(animal.y).toBeLessThan(dog.y);
+  });
+
+  it('a right-headed association (`Animal --> Dog`) keeps source order', () => {
+    const ast: ClassDiagramAST = makeAST({
+      classifiers: twoClasses,
+      relationships: [{
+        from: 'Animal', to: 'Dog', type: 'association',
+        idEntity1FullId: 'Animal', idEntity2FullId: 'Dog',
+      }],
+    });
+    const result = layoutClass(ast, defaultTheme, measurer);
+    const animal = result.classifiers.find((c) => c.id === 'Animal')!;
+    const dog    = result.classifiers.find((c) => c.id === 'Dog')!;
+    expect(animal.y).toBeLessThan(dog.y);
+  });
+
+  // The fallback path: relationships built outside the arrow grammar (inline
+  // `extends`, magma chaining, note connectors) carry no FullId pair, so the
+  // pre-B6 `parentIsLinkEntity1` rule still governs them unchanged.
+  it('falls back to parentIsLinkEntity1 when the FullId pair is absent', () => {
+    const ast: ClassDiagramAST = makeAST({
+      classifiers: twoClasses,
+      relationships: [{ from: 'Dog', to: 'Animal', type: 'extension', parentIsLinkEntity1: true }],
+    });
+    const result = layoutClass(ast, defaultTheme, measurer);
+    const animal = result.classifiers.find((c) => c.id === 'Animal')!;
+    const dog    = result.classifiers.find((c) => c.id === 'Dog')!;
+    expect(animal.y).toBeLessThan(dog.y);
+  });
 });
 
 // ---------------------------------------------------------------------------

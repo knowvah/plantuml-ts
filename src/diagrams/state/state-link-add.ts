@@ -48,6 +48,17 @@ function transitionEndpointKey(ps: ParseState, id: string, which: 'start' | 'end
  *  already-kept link connects the same two endpoints in either direction
  *  (`Link.sameConnections`). */
 export function emitTransition(ps: ParseState, t: Transition): void {
+  // T2/B33: a `left`/`up` transition costs TWO ticks upstream, not one.
+  // `CommandLinkStateCommon.java:205-206` calls `link.getInv()`, which
+  // CONSTRUCTS a second `Link` (`abel/Link.java:145-146`), and every `Link`
+  // ctor burns a `cpt1` slot (`:135`). The first is discarded; the second is
+  // what renders. Jar-verified against `susena-02-gusa448`, whose link uids
+  // are `lnk3, lnk5, lnk8, lnk11, lnk13` -- the gaps at its `-left-` and
+  // `-up-` transitions are exactly the discarded ctors (we emitted
+  // `lnk3, 5, 7, 9, 11` before this). Unlike class, state keeps RAW
+  // creationIndex values with no dense re-packing, so burning the tick here
+  // is the whole fix -- no phantom rank is needed.
+  if (t.direction === 'left' || t.direction === 'up') nextCreationIndex(ps);
   t.creationIndex = nextCreationIndex(ps);
   const connection: readonly [string, string] = [
     transitionEndpointKey(ps, t.from, 'start'),

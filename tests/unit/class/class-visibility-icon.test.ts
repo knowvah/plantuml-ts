@@ -6,6 +6,7 @@ import {
   VISIBILITY_ICON_SIZE,
 } from '../../../src/diagrams/class/class-visibility-icon.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
+import type { Theme } from '../../../src/core/theme.js';
 
 // ---------------------------------------------------------------------------
 // G2 N6: shape/color/wrapper for the member-row visibility icon --
@@ -187,5 +188,51 @@ describe('renderVisibilityIcon — theme icon-color overrides (G2 N54)', () => {
   it('public field: unfilled, LineColor override applies to stroke only', () => {
     const svg = renderVisibilityIcon('+', true, 13, 102.5, undefined, themeWithOverride);
     expect(svg).toContain('fill="none" style="stroke:#038048;');
+  });
+});
+
+/**
+ * B4 / ledger M5 — `skinparam classAttributeIconSize` reaching the glyph.
+ *
+ * Upstream uses the value in TWO places with DIFFERENT arithmetic, which is
+ * the whole trap: `getUBlock`'s `calculateDimension` is `size + 1` on the RAW
+ * value (`skin/VisibilityModifier.java:100-102`), while `drawU` evens it first
+ * — `size = ensureEven(size)` (`:135`, helper `:186-190`) — so every shape
+ * draws from the EVENED size: square/circle `size - 4` at `translate(x+2,y+2)`
+ * (`:178-183`), diamond/triangle `size - 2` at `translate(x+1,y)` (`:192-209`).
+ *
+ * The pairs below are read from that arithmetic, not fitted to fixtures; the
+ * four audited fixtures (`nulixu-97-nofi684` 20, `vocute-12-suxa445` 16,
+ * `sibika-09-sipu286` 14, `sorisi-53-xebi982` 12) all fall out of it.
+ */
+describe('renderVisibilityIcon — classAttributeIconSize (ledger M5)', () => {
+  /** `VisibilityModifier#drawSquare`: evened size, minus 4. */
+  const squareEdgeFor = (iconSize: number): number => (iconSize - (iconSize % 2)) - 4;
+
+  const themeWith = (classAttributeIconSize: number): Theme =>
+    ({ ...defaultTheme, classAttributeIconSize });
+
+  it.each([
+    [10, 6],  // the default — must stay byte-identical to pre-B4 output
+    [12, 8],
+    [14, 10],
+    [16, 12],
+    [20, 16],
+  ])('sizes the private-field square at %i → %i', (iconSize, expectedEdge) => {
+    expect(squareEdgeFor(iconSize)).toBe(expectedEdge);
+    const svg = renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(iconSize));
+    expect(svg).toContain(`width="${expectedEdge}"`);
+    expect(svg).toContain(`height="${expectedEdge}"`);
+  });
+
+  it('evens an ODD size before drawing, per ensureEven', () => {
+    // 15 → 14 → edge 10, the SAME glyph as an explicit 14.
+    expect(renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(15)))
+      .toBe(renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(14)));
+  });
+
+  it('leaves the default output unchanged when no override is set', () => {
+    expect(renderVisibilityIcon('-', true, 0, 0))
+      .toBe(renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(10)));
   });
 });

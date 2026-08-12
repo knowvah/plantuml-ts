@@ -63,6 +63,12 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
     // (`SmetanaForJson.java:224`). Only json sets it; every other caller is
     // unaffected.
     if (a?.tailport !== undefined) attrs.tailport = a.tailport;
+    // B1/M1: the head-side counterpart. A RECTANGLE_HTML_FOR_PORTS node's row
+    // ports are HTML-table ports (`lib/common/htmltable.c:html_port`), not
+    // record fields, but they reach the engine through the same two edge
+    // attributes — the jar emits both suffixes on one statement
+    // (`sh0006:p48c4…->sh0007:pcb85…`).
+    if (a?.headport !== undefined) attrs.headport = a.headport;
     // G8 T2 (spec.md §1a, mirrors `addClusters`' own `hasTitleTable` gate
     // — that seam is T1c's, unmodified here): a caller that supplies BOTH
     // `labelBoxWidth`/`labelBoxHeight` (currently only the state composite

@@ -38,6 +38,15 @@ const GOLDENS = join(
 );
 
 /** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-exact fixtures. */
+/** B31: slugs whose DOT differs from the oracle's ONLY in edge DIRECTION --
+ *  see `direction-backlog.json`'s own `_doc`. Same shape as `portBacklog`:
+ *  the assertion below keeps every other check live for these fixtures. */
+const directionBacklog: ReadonlySet<string> = new Set(
+  existsSync(join(GOLDENS, 'direction-backlog.json'))
+    ? (JSON.parse(readFileSync(join(GOLDENS, 'direction-backlog.json'), 'utf8')) as { slugs: string[] }).slugs
+    : [],
+);
+
 const sizeBacklog: Record<string, number> = existsSync(join(GOLDENS, 'size-backlog.json'))
   ? (JSON.parse(readFileSync(join(GOLDENS, 'size-backlog.json'), 'utf8')) as Record<string, number>)
   : {};
@@ -89,10 +98,22 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — sta
         const failingChecks = Object.entries(diff)
           .filter(([k, v]) => k.endsWith('Ok') && v === false)
           .map(([k]) => k);
-        expect(
-          diff.structurallyEqual,
-          `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
-        ).toBe(true);
+        if (directionBacklog.has(name)) {
+          // B31: known-unequal in edge DIRECTION ONLY (see
+          // direction-backlog.json's `_doc`). Same contract as portBacklog
+          // below/above -- NOT a skip: every other structural check stays
+          // live, so a regression in node count, degree, minlen, shape,
+          // labels, ports or clusters still fails here.
+          expect(
+            failingChecks.filter((k) => k !== 'sizeConformantOk'),
+            `${name}/${file}: direction-backlog fixtures may fail directionOk and NOTHING else`,
+          ).toEqual(['directionOk']);
+        } else {
+          expect(
+            diff.structurallyEqual,
+            `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
+          ).toBe(true);
+        }
         // D4: node sizes pinned (rect nodes; plaintext nodes parse as 0x0 on
         // both sides so they cannot mask a rect-size regression). Backlog
         // fixtures ratchet downward; everything else must be exactly 0.

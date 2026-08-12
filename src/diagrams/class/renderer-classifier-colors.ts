@@ -45,7 +45,27 @@ export function classDefaultBackground(theme: Theme): string {
  *  the corpus exercises is out of this iteration's scope -- falls through
  *  to the class default in that (currently unencountered) case, same as
  *  "unset". */
-export function resolveElementBackground(theme: Theme, sname: string): string | undefined {
+export function resolveElementBackground(
+  theme: Theme,
+  sname: string,
+  // B13/M22: the classifier's own `<<stereo>>` label(s). A
+  // stereotype-qualified `skinparam <sname>BackgroundColor<<label>>` wins
+  // over the bare bucket, because upstream registers it at +1000 priority
+  // (`style/StyleLoader.java:178-186`, via `FromSkinparamToStyle#addStyle`'s
+  // `addPriorityForStereotype`). Optional so every existing caller keeps its
+  // pre-B13 behavior.
+  stereotypeLabels?: readonly string[],
+): string | undefined {
+  const byStereo = theme.colors.elements?.[sname]?.backgroundColorByStereo;
+  if (byStereo !== undefined && stereotypeLabels !== undefined) {
+    // Last label wins, mirroring the merge's own last-registered-wins rule.
+    let hit: string | undefined;
+    for (const label of stereotypeLabels) {
+      const v = byStereo[label];
+      if (v !== undefined) hit = v;
+    }
+    if (hit !== undefined) return resolveColorToSvgHex(hit);
+  }
   const bucket = theme.colors.elements?.[sname]?.background;
   if (typeof bucket === 'string') return resolveColorToSvgHex(bucket);
   return undefined;
@@ -116,11 +136,14 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
   // the SAME terminal class default ONLY because object/map/json have no
   // distinct default color of their own upstream (all three coincidentally
   // default to jar's shared `#F1F1F1`), not because they share class's
-  // cascade -- `<<tag>>`-scoped `objectBackgroundColor<<X>>` is a SEPARATE,
-  // larger, deferred mechanism (`skinparam.ts#ELEMENT_BUCKET_SNAMES`'s own
-  // doc comment on the `object`/`map`/`json` entries).
+  // cascade. B13/M22: `<<tag>>`-scoped `objectBackgroundColor<<X>>` now
+  // resolves here too -- the note that called it "a SEPARATE, larger,
+  // deferred mechanism" was written before `babcfa94` landed the same shape
+  // for FontSize, and is retired. (The GENERIC rewrite -- upstream needs no
+  // per-key matcher at all -- remains tracked; see the ledger's M22 row.)
   if (geo.kind === 'object' || geo.kind === 'map' || geo.kind === 'json') {
-    return resolveElementBackground(theme, geo.kind) ?? classDefaultBackground(theme);
+    return resolveElementBackground(theme, geo.kind, geo.stereotypeLabels)
+      ?? classDefaultBackground(theme);
   }
   // G2 N37: the `.tagname` sub-selector cascade (`class { .mystyle {
   // BackgroundColor cyan } } }`) wins over the plain ancestor cascade below

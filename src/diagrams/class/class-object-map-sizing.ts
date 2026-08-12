@@ -46,10 +46,12 @@ import { isEnhancedBody } from './class-body-enhanced.js';
 import { measureEnhancedBody } from './class-body-enhanced-layout.js';
 import type { Dim } from './class-object-map-header.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
+import { resolveElementMinimumWidth } from '../../core/theme.js';
 import { objectDisplayText } from './class-object-display.js';
 import { buildObjectMemberRow } from './class-object-member-creole.js';
 import { atomsToPlainText } from './class-member-creole.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { resolveStyleStereotypeTags } from './class-stereotype.js';
 
 export type { Dim } from './class-object-map-header.js';
 export { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
@@ -98,6 +100,35 @@ interface FieldBasedObjectGeoParams {
 // ---------------------------------------------------------------------------
 // object
 // ---------------------------------------------------------------------------
+
+/**
+ * B25/M27: `skinparam minClassWidth` floors the BOX width of every boxed
+ * class-family leaf, not just `class`.
+ *
+ * It is registered as `addConvert("MinClassWidth", PName.MinimumWidth)` with
+ * NO `SName` varargs (`style/FromSkinparamToStyle.java:241`; `addConvert` at
+ * `:414-422` stores an empty name array), and an empty style signature is a
+ * subset of every element's signature — so the value matches every element
+ * and the `Class` in the skinparam's name is a historical misnomer. All four
+ * boxed images read it and clamp with character-identical arithmetic:
+ * `EntityImageClass.java:103-105`, `EntityImageObject.java:150-153`,
+ * `EntityImageMap.java:127-130`, `EntityImageJson.java:127-132`.
+ *
+ * Applied to the box width AFTER the content-vs-title max and BEFORE the
+ * height computation, exactly as upstream orders it, so the floored width is
+ * what `drawU` then hands the header layout as `dimTotal.getWidth()` — which
+ * is why `headerRows`'s `boxWidth` must receive the floored value, not the
+ * natural one.
+ *
+ * `class-layout-helpers.ts#resolveMinClassWidth` gates the SAME floor on
+ * `LIKE_CLASS_KINDS`. That gate is right for its two other tenants
+ * (`sameClassWidth` and the `groupInheritance` wrap ARE `EntityImageClass`-
+ * only); `MinimumWidth` was swept in with them and object/map/json got no
+ * floor at all.
+ */
+export function floorAtMinimumWidth(width: number, theme: Theme, sname: string): number {
+  return Math.max(width, resolveElementMinimumWidth(theme, sname) ?? 0);
+}
 
 /** `classDiagram,componentDiagram,objectDiagram > object { Padding 2 2 }`
  *  (plantuml.skin) -> ClockwiseTopRightBottomLeft.read("2 2") = all sides 2. */
@@ -245,11 +276,17 @@ function measureObjectFields(
   const iconReserve = hasIcon ? OBJECT_SMALL_ICON : 0;
   const textIndent = OBJECT_FIELD_MARGIN_X + iconReserve;
   const width = Math.max(...widths) + iconReserve + OBJECT_FIELD_MARGIN_X * 2;
-  const height = visibleMembers.length * theme.fontSize + OBJECT_FIELD_MARGIN_Y * 2;
+  // Sum of each row's OWN height, not `count * fontSize`:
+  // `MethodsOrFieldsArea#calculateDimensionOnlyMembers` advances
+  // `y += dim.getHeight()` per member (java:161-166). A plain text row's
+  // height equals the font size, so text-only bodies are unchanged.
+  const height = builds.reduce((a, b) => a + b.height, 0) + OBJECT_FIELD_MARGIN_Y * 2;
   const baselineOffset = baselineOffsetFor(fontSpec, measurer);
   const rows: ClassifierGeo['rows'] = [];
+  let rowTop = OBJECT_FIELD_MARGIN_Y;
   builds.forEach((build, i) => {
-    const y = OBJECT_FIELD_MARGIN_Y + i * theme.fontSize + baselineOffset;
+    const y = rowTop + baselineOffset;
+    rowTop += build.height;
     build.runs.forEach(({ atom, x }, runIndex) => {
       rows.push({
         text: atomsToPlainText([atom]),
@@ -288,7 +325,30 @@ function measureObjectFields(
  *  upstream of the box's own final `width` -- `headerRows`'s own
  *  `nameFontSizeOverride` doc comment (./class-object-map-header.ts). */
 function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: StringMeasurer): ObjectTitleInfo {
-  const nameFontSizeOverride = theme.colors.elements?.['object']?.headerFontSize;
+  // `headerFontSize` wins over the bucket's own `fontSize` for the NAME row,
+  // but does not REPLACE it: `addConFont("object", SName.object)`
+  // (`FromSkinparamToStyle.java:200,424-429`) maps `objectFontSize` to
+  // `PName.FontSize` at `SName.object`, and `getStyleHeader()`'s signature
+  // `{root, element, objectDiagram, object, header}`
+  // (`EntityImageObject.java:132-134`) matches it by SET CONTAINMENT. So a
+  // bare `skinparam object { FontSize 16 }` reaches the header even with no
+  // header-specific override. Reading only `headerFontSize` left the name at
+  // the diagram default -- jar draws `object/tenalu-53-meri239`'s B at 16
+  // where this port drew 14.
+  const objectBucket = theme.colors.elements?.['object'];
+  // A stereotype-scoped size wins over both: upstream's
+  // `getStyleHeader().withTOBECHANGED(stereotype)`
+  // (`EntityImageObject.java:132-134`) merges the stereotype-qualified style
+  // over the plain one. `object/tenalu-53-meri239` sets
+  // `object { FontSize 16, <<Foo1>> { FontSize 8 } }`: its `A` must draw at 8
+  // and its unstereotyped `B` at 16.
+  const byStereo = objectBucket?.fontSizeByStereo;
+  const stereoSize = byStereo === undefined
+    ? undefined
+    : resolveStyleStereotypeTags(classifier)
+        .map((t) => byStereo[t.toLowerCase()])
+        .find((v) => v !== undefined);
+  const nameFontSizeOverride = stereoSize ?? objectBucket?.headerFontSize ?? objectBucket?.fontSize;
   const nameFontSpec = { family: theme.fontFamily, size: nameFontSizeOverride ?? theme.fontSize };
   // Tilde escapes resolved before measuring -- see `class-object-display.ts`.
   const nameM = measurer.measure(objectDisplayText(classifier.display), nameFontSpec);
@@ -307,7 +367,8 @@ function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: Stri
  *  keep this function's own param count under the file's cap. */
 function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredClassifier {
   const { classifier, theme, measurer, title, nameFontSizeOverride, enhancedBody } = params;
-  const width = Math.max(enhancedBody.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2);
+  const width = floorAtMinimumWidth(
+    Math.max(enhancedBody.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2), theme, 'object');
   const patchedHeaderRows = headerRows(classifier, theme, measurer, {
     boxWidth: width,
     namePadding: OBJECT_NAME_PADDING,
@@ -317,6 +378,12 @@ function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredCla
   return {
     width, height: title.height + enhancedBody.height, rows: patchedHeaderRows,
     dividerYs: [title.height], enhancedBody,
+    // B35/M40: an enhanced body is upstream `BodyEnhanced1`, whose
+    // `decorate` wraps every block in `TextBlockUtils.withMargin(block,
+    // getMarginX() = 6, 4)` (`BodyEnhancedAbstract.java:106-113`) -- a real
+    // `TextBlockMarged`, so its `UEmpty` reservation exists and spans the
+    // body's own full width. See `class-ink-box.ts#addRectInk`.
+    bodyInkWidth: enhancedBody.width,
   };
 }
 
@@ -334,7 +401,8 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
   const { dim: fieldsDim, rows: fieldRows } = measureObjectFields(classifier, theme, measurer, showFields);
   const fieldsHeight = methodOrFieldHeight(fieldsDim.height, showFields);
 
-  const width = Math.max(fieldsDim.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2);
+  const width = floorAtMinimumWidth(
+    Math.max(fieldsDim.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2), theme, 'object');
   const height = title.height + fieldsHeight;
 
   const rows = headerRows(classifier, theme, measurer, {
@@ -345,7 +413,29 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
   });
   for (const r of fieldRows) rows.push({ ...r, y: title.height + r.y });
 
-  return { width, height, rows, dividerYs: showFields ? [title.height] : [] };
+  // B5/M6: an empty-but-SHOWN field list is upstream's
+  // `TextBlockLineBefore(LineThickness, TextBlockEmpty(10, 16))` placeholder
+  // branch (`EntityImageObject.java:110-113`), NOT the `showFields == false`
+  // branch (`BodierLikeClassOrObject.java:225-229`'s `TextBlockUtils
+  // .empty(0, 0)`) that `dividerYs: []` already marks. The two states carry
+  // DIFFERENT ink rules -- see `class-ink-box.ts#addRectInkEmptyShownBody`.
+  const emptyFieldPlaceholder = showFields && fieldRows.length === 0;
+
+  return {
+    width, height, rows,
+    dividerYs: showFields ? [title.height] : [],
+    ...(emptyFieldPlaceholder ? { emptyFieldPlaceholder: true as const } : {}),
+    // B35/M40: only a POPULATED field list is a real `BodyFactory.create1`
+    // body, whose `decorate` wraps it in a `TextBlockMarged` that draws the
+    // `UEmpty` reservation (`BodyEnhancedAbstract.java:106-113`). Both empty
+    // states draw NO `UEmpty` at all and so reserve zero body ink:
+    // `showFields == false` is `TextBlockUtils.empty(0, 0)`
+    // (`BodierLikeClassOrObject.java:225-229`) and the empty-but-shown
+    // placeholder is `TextBlockEmpty(10, 16)` inside a bare
+    // `TextBlockLineBefore` (`EntityImageObject.java:110-113`) -- neither is
+    // a `TextBlockMarged`. See `class-ink-box.ts#addRectInk`.
+    bodyInkWidth: showFields && !emptyFieldPlaceholder ? fieldsDim.width : 0,
+  };
 }
 
 /**

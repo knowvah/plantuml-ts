@@ -134,6 +134,44 @@ describe('A7 — minClassWidth floors the like-class box width', () => {
     const m = measureClassifier(classifier('a', 'state'), themed, measurer, SUPPRESS);
     expect(m.width).toBeLessThan(70);
   });
+
+  // B25/M27: `addConvert("MinClassWidth", PName.MinimumWidth)` passes NO SName
+  // varargs (`style/FromSkinparamToStyle.java:241`, `addConvert` at `:414-422`),
+  // so the empty style signature is a subset of every element's and the value
+  // reaches all four boxed class-family images, not just EntityImageClass:
+  // EntityImageObject.java:150-153, EntityImageMap.java:127-130 and
+  // EntityImageJson.java:127-132 each floor their own `width` with
+  // character-identical arithmetic. The name is a historical misnomer.
+  it('floors an OBJECT box too (EntityImageObject.java:150-153)', () => {
+    const m = measureClassifier(classifier('o1', 'object'), themed, measurer, SUPPRESS);
+    expect(m.width).toBe(70);
+  });
+
+  it('floors a MAP box too (EntityImageMap.java:127-130)', () => {
+    const m = measureClassifier(classifier('m1', 'map'), themed, measurer, SUPPRESS);
+    expect(m.width).toBe(70);
+  });
+
+  it('floors a JSON box too (EntityImageJson.java:127-132)', () => {
+    const m = measureClassifier(classifier('j1', 'json'), themed, measurer, SUPPRESS);
+    expect(m.width).toBe(70);
+  });
+
+  it('leaves an object wider than the floor untouched', () => {
+    const m = measureClassifier(classifier('thisisaverylongobjectname', 'object'), themed, measurer, SUPPRESS);
+    expect(m.width).toBeGreaterThan(70);
+  });
+
+  it('honours a per-element `<style> object { MinimumWidth }` over the bare global', () => {
+    // resolveElementMinimumWidth cascades the element bucket over
+    // theme.minimumWidth (theme-element-resolve.ts:143-145).
+    const scoped = deepMergeTheme(themed, {
+      colors: { elements: { object: { minimumWidth: 120 } } },
+    });
+    expect(measureClassifier(classifier('o1', 'object'), scoped, measurer, SUPPRESS).width).toBe(120);
+    // A sibling kind with no scoped override still falls through to the global.
+    expect(measureClassifier(classifier('m1', 'map'), scoped, measurer, SUPPRESS).width).toBe(70);
+  });
 });
 
 // ---------------------------------------------------------------------------

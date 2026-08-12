@@ -252,6 +252,31 @@ export interface ThemeGraphColorsA {
    *  plain value (jar-verified R2c probes ps/p1 ≡ ps/p4 for the matching
    *  class; ps/p1's non-stereotyped class ≡ ps/p3's -- untouched). */
   classAttributeFontSizeByStereo?: Readonly<Record<string, number>>;
+  /** `skinparam classFontSize<<Stereo>> N` — the class HEADER's own size
+   *  under that stereotype. Written by the flat key or by the nested
+   *  `skinparam class { <<Stereo>> { FontSize N } }` block, which
+   *  `SkinLoader#getFullParam` (`command/SkinLoader.java:69-75`) concatenates
+   *  to `class<<Stereo>>FontSize` and `SkinParam#cleanForKeySlow`
+   *  (`skin/SkinParam.java:283-300`) rewrites to this one key.
+   *
+   *  Upstream does NOT route it through the stereotype-suffixed VALUE lookup
+   *  {@link classAttributeFontSizeByStereo} uses: `SkinParam#setParam`
+   *  (`SkinParam.java:225-232`) hands every key to `FromSkinparamToStyle`,
+   *  whose constructor (`style/FromSkinparamToStyle.java:292-302`) splits the
+   *  `<<...>>` off, so `classfontsize` resolves through its ordinary
+   *  registration — `PName.FontSize` at `element.class.header`
+   *  (`FromSkinparamToStyle.java:185`) — and `addStyle`
+   *  (`FromSkinparamToStyle.java:396-410`) then re-signs it
+   *  `.addStereotype(label)` with `StyleLoader#addPriorityForStereotype`
+   *  (`StyleLoader.java:178-186`, +1000 priority). The class header picks it
+   *  up via its own `withTOBECHANGED(stereotype)` merge, so a matching
+   *  stereotype WINS over the plain `classFontSize`.
+   *
+   *  Read by `class-layout-fonts.ts#resolveHeaderFont`. Jar-verified
+   *  `tabaxa-70-pomu341`: `class { FontSize 16, <<Foo1>> { FontSize 8 } }`
+   *  draws the stereotyped `A` and the plain `B` at the SAME 0.997917x0.861111in
+   *  — A's header shrinks to 8 by exactly the height its stereotype row adds. */
+  classFontSizeByStereo?: Readonly<Record<string, number>>;
   /** Same mechanism, `FontParam.CLASS_ATTRIBUTE`'s font-family override
    *  (`skinparam class { AttributeFontName X }` / `classAttributeFontName
    *  X`). */

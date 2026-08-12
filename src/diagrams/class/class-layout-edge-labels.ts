@@ -188,6 +188,42 @@ type MultiplicityAttrs = Pick<
  *  factored out purely to keep that function's NLOC/CCN under the project's
  *  per-function caps; see that function's own doc comment for the upstream
  *  derivation of every branch below (unchanged, pure move). */
+/**
+ * `SvekEdge#addVisibilityModifier` (`svek/SvekEdge.java:372-373`) closes by
+ * wrapping the finished label block in `TextBlockUtils.withMargin(block,
+ * marginLabel, marginLabel)`, where `marginLabel = startUid.equalsId(endUid)
+ * ? 6 : 1` — 6 for a SELF-link, 1 otherwise. `withMargin(tb, x, y)` builds
+ * `TextBlockMarged(tb, y, x, y, x)` (`klimt/shape/TextBlockUtils.java:64-68`),
+ * i.e. the margin lands on BOTH sides of BOTH axes, so the measured block
+ * grows by `2 * marginLabel` in each — once for the whole block, not per line.
+ *
+ * Applies to the MAIN label only. `addVisibilityModifier` has exactly one
+ * caller (`SvekEdge.java:302`, building `labelOnly`); taillabel and headlabel
+ * are built straight from `Display.create` and never pass through it — which
+ * is why `tobuka-93-jale775`, whose only labels are tail/head, already matched
+ * the oracle byte for byte before this change.
+ */
+const SELF_LINK_LABEL_MARGIN = 6;
+const LINK_LABEL_MARGIN = 1;
+
+function labelMarginOf(rel: Relationship): number {
+  return rel.from === rel.to ? SELF_LINK_LABEL_MARGIN : LINK_LABEL_MARGIN;
+}
+
+/** Grow a MEASURED label block by its all-round margin — see
+ *  {@link labelMarginOf}. Returns the attrs untouched when there is no label,
+ *  and when the only "label" is the `linkConstraint` spot: upstream reaches
+ *  that through `SvekEdge.java:440`'s `CONSTRAINT_SPOT` arm, which never
+ *  builds a `labelText` and so never passes through `addVisibilityModifier`.
+ *  `computeRelLabelAttrs` marks that arm with an EMPTY `label`, which is what
+ *  distinguishes it from a real one here. */
+function withLabelMargin(attrs: LabelAttrs, rel: Relationship): LabelAttrs {
+  if (attrs.labelWidth === undefined || attrs.labelHeight === undefined) return attrs;
+  if (attrs.label === '') return attrs;
+  const m = 2 * labelMarginOf(rel);
+  return { ...attrs, labelWidth: attrs.labelWidth + m, labelHeight: attrs.labelHeight + m };
+}
+
 function computeRelLabelAttrs(
   rel: Relationship,
   font: { family: string; size: number },
@@ -253,7 +289,14 @@ export function edgeLabelAttrs(
   measurer: StringMeasurer,
 ): NonNullable<DotInputEdge['attributes']> {
   return {
-    ...computeRelLabelAttrs(rel, font, measurer),
+    // The margin is applied HERE rather than inside each branch of
+    // `computeRelLabelAttrs` so it lands exactly once, on whichever branch
+    // produced the block — mirroring upstream, where `addVisibilityModifier`
+    // wraps the finished `block` at a single call site (`SvekEdge.java:302`).
+    // The `linkConstraint` spot deliberately keeps its raw 10x10: upstream
+    // reaches it through the `CONSTRAINT_SPOT` arm at `SvekEdge.java:440`,
+    // which never builds a `labelText` and so never sees the margin.
+    ...withLabelMargin(computeRelLabelAttrs(rel, font, measurer), rel),
     ...computeMultiplicityAttrs(rel, font, measurer),
   };
 }

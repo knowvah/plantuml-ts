@@ -54,6 +54,24 @@ const GOLDENS = join(
  *  scripts/measure-class-size-deltas.ts). Absent slug ⇒ ≤0.01in `conformant`;
  *  backlog entries ratchet downward only. The tail is class HTML-record node
  *  sizing — see size-backlog.json's `_doc` and the A2 note in mission-index. */
+/** Slugs whose DOT differs from the oracle's ONLY in edge-endpoint ports — the
+ *  unported row-port emission. See `port-backlog.json`'s own `_doc`; the
+ *  assertion below keeps every other check live for these fixtures. */
+const portBacklog: ReadonlySet<string> = new Set(
+  existsSync(join(GOLDENS, 'port-backlog.json'))
+    ? (JSON.parse(readFileSync(join(GOLDENS, 'port-backlog.json'), 'utf8')) as { slugs: string[] }).slugs
+    : [],
+);
+
+/** B31: slugs whose DOT differs from the oracle's ONLY in edge DIRECTION --
+ *  see `direction-backlog.json`'s own `_doc`. Same shape as `portBacklog`:
+ *  the assertion below keeps every other check live for these fixtures. */
+const directionBacklog: ReadonlySet<string> = new Set(
+  existsSync(join(GOLDENS, 'direction-backlog.json'))
+    ? (JSON.parse(readFileSync(join(GOLDENS, 'direction-backlog.json'), 'utf8')) as { slugs: string[] }).slugs
+    : [],
+);
+
 const sizeBacklog: Record<string, number> = existsSync(join(GOLDENS, 'size-backlog.json'))
   ? (JSON.parse(readFileSync(join(GOLDENS, 'size-backlog.json'), 'utf8')) as Record<string, number>)
   : {};
@@ -141,10 +159,34 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — cla
         const failingChecks = Object.entries(diff)
           .filter(([k, v]) => k.endsWith('Ok') && v === false)
           .map(([k]) => k);
-        expect(
-          diff.structurallyEqual,
-          `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
-        ).toBe(true);
+        if (directionBacklog.has(name)) {
+          // B31: known-unequal in edge DIRECTION ONLY (see
+          // direction-backlog.json's `_doc`). Same contract as portBacklog
+          // below/above -- NOT a skip: every other structural check stays
+          // live, so a regression in node count, degree, minlen, shape,
+          // labels, ports or clusters still fails here.
+          expect(
+            failingChecks.filter((k) => k !== 'sizeConformantOk'),
+            `${name}/${file}: direction-backlog fixtures may fail directionOk and NOTHING else`,
+          ).toEqual(['directionOk']);
+        } else if (portBacklog.has(name)) {
+          // Known-unequal in edge ports ONLY (see port-backlog.json's `_doc`).
+          // Deliberately NOT a skip: the fixture stays fully gated on every
+          // other check, so a regression in node count, degree, minlen, shape,
+          // labels or clusters still fails here. `sizeConformantOk` is excluded
+          // because it is not a structural check -- it is the tolerant size
+          // metric, kept out of `structurallyEqual` by design and gated
+          // separately by `sizeBacklog` immediately below.
+          expect(
+            failingChecks.filter((k) => k !== 'sizeConformantOk'),
+            `${name}/${file}: port-backlog fixtures may fail portOk and NOTHING else`,
+          ).toEqual(['portOk']);
+        } else {
+          expect(
+            diff.structurallyEqual,
+            `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
+          ).toBe(true);
+        }
         // A-phase size-gating: node width/height pinned. Non-backlog fixtures
         // must stay within the 0.01in `conformant` bar; backlog fixtures
         // ratchet downward only (a class node-sizing fix drops one to ≤0.01

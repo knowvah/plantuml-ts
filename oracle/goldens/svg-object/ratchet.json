@@ -1,8 +1,28 @@
 {
   "fixtures": [
     {
+      "slug": "beleso-08-ruca459",
+      "addedAt": "2026-08-11",
+      "source": "dot-cache"
+    },
+    {
       "slug": "beruju-17-jigi548",
       "addedAt": "2026-07-19",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "donoki-79-riku189",
+      "addedAt": "2026-08-11",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "fafozi-27-reja300",
+      "addedAt": "2026-08-11",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "fajafu-44-cuve930",
+      "addedAt": "2026-08-11",
       "source": "dot-cache"
     },
     {
@@ -16,13 +36,33 @@
       "source": "dot-cache"
     },
     {
+      "slug": "fikojo-87-tine499",
+      "addedAt": "2026-08-11",
+      "source": "dot-cache"
+    },
+    {
       "slug": "gizini-87-vuve916",
       "addedAt": "2026-07-19",
       "source": "dot-cache"
     },
     {
+      "slug": "jabote-02-rajo672",
+      "addedAt": "2026-08-11",
+      "source": "dot-cache"
+    },
+    {
       "slug": "janoma-30-dovo501",
       "addedAt": "2026-07-19",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "jocamu-71-nuvo330",
+      "addedAt": "2026-08-11",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "jotaga-99-fatu830",
+      "addedAt": "2026-08-11",
       "source": "dot-cache"
     },
     {
@@ -61,6 +101,11 @@
       "source": "dot-cache"
     },
     {
+      "slug": "majake-62-pero492",
+      "addedAt": "2026-08-11",
+      "source": "dot-cache"
+    },
+    {
       "slug": "niloru-34-nuve651",
       "addedAt": "2026-07-19",
       "source": "dot-cache"
@@ -76,8 +121,23 @@
       "source": "dot-cache"
     },
     {
+      "slug": "pavizi-27-xupe815",
+      "addedAt": "2026-08-11",
+      "source": "dot-cache"
+    },
+    {
       "slug": "rotele-89-cuva650",
       "addedAt": "2026-07-19",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "sajege-04-zuce784",
+      "addedAt": "2026-08-11",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "sarepa-89-cevi460",
+      "addedAt": "2026-08-11",
       "source": "dot-cache"
     },
     {

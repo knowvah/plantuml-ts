@@ -327,3 +327,67 @@ describe('json — single-line form (CommandCreateJsonSingleLine)', () => {
     expect(jsonClassifiers[0]!.jsonValue).toEqual({ kind: 'scalar', value: 1 });
   });
 });
+
+// ---------------------------------------------------------------------------
+// M3(c): `TextBlockJson#drawU` (`cucadiagram/TextBlockCucaJSon.java:162-180`)
+// draws ONE `ULine.vline(height)` at `dx = width1` for the WHOLE object,
+// BEFORE the per-member loop — a different shape from `TextBlockMap`'s
+// per-ROW vline, and one per nested sub-table too. The hlines it draws are
+// `ULine.hline(this.jsonTotalWidth)`, i.e. scoped to that sub-table's own
+// width (`this.jsonTotalWidth - width1` is handed down at `:171`), not the
+// full box.
+//
+// Oracle: test-results/dot-cache/object/bepafe-03-teda035/in.svg, entity
+// `A` at rect x=209 y=7 (width 143.025, height 144).
+// ---------------------------------------------------------------------------
+
+describe('json — TextBlockJson#drawU line geometry (bepafe-03-teda035)', () => {
+  /** jar `<line x1="258.025" y1="25" x2="258.025" y2="151"/>` minus rect
+   *  x=209 / y=7 — the top-level vline: width1, title height, full entries
+   *  height. */
+  const ROOT_VLINE_X = 49.025;
+  const ROOT_VLINE_Y = 18;
+  const ROOT_VLINE_HEIGHT = 126;
+  /** jar `<line x1="303.025" y1="115" x2="303.025" y2="151"/>` — the NESTED
+   *  `user` object's own vline: its local width1 (45) offset by the parent's
+   *  width1 (49.025), and only its own 36px height. */
+  const NESTED_VLINE_X = 94.025;
+  const NESTED_VLINE_Y = 108;
+  const NESTED_VLINE_HEIGHT = 36;
+  /** jar `<line x1="209" y1="25" x2="352.025" y2="25"/>` — a TOP-level
+   *  member's hline spans the whole box. */
+  const ROOT_HLINE_WIDTH = 143.025;
+  /** jar `<line x1="258.025" ... />` at y=61, 79 (the `color` ARRAY's two
+   *  between-element hlines) and y=115, 133 (the `user` object's two
+   *  per-member hlines) — a nested table's hline spans
+   *  `jsonTotalWidth - width1` only. */
+  const NESTED_HLINE_X = 49.025;
+  const NESTED_HLINE_WIDTH = 94;
+
+  function bodyOf() {
+    const geo = layoutClass(parse(BEPAFE_JSON_SOURCE), theme, measurer);
+    return geo.classifiers.find((c) => c.kind === 'json')!.jsonBody!;
+  }
+
+  it('emits the object vline FIRST, before that object\'s first hline', () => {
+    const body = bodyOf();
+    expect(body[0]).toEqual({ kind: 'vline', x: ROOT_VLINE_X, y: ROOT_VLINE_Y, height: ROOT_VLINE_HEIGHT });
+    expect(body[1]).toMatchObject({ kind: 'hline', y: ROOT_VLINE_Y, width: ROOT_HLINE_WIDTH });
+  });
+
+  it('emits a nested object\'s OWN vline, at its own x/height', () => {
+    const body = bodyOf();
+    const vlines = body.filter((i) => i.kind === 'vline');
+    expect(vlines).toHaveLength(2);
+    expect(vlines[1]).toEqual({
+      kind: 'vline', x: NESTED_VLINE_X, y: NESTED_VLINE_Y, height: NESTED_VLINE_HEIGHT,
+    });
+  });
+
+  it('scopes a nested table\'s hlines to its own width, not the full box', () => {
+    const body = bodyOf();
+    const hlines = body.filter((i) => i.kind === 'hline');
+    expect(hlines.filter((h) => h.width === ROOT_HLINE_WIDTH && h.x === 0)).toHaveLength(4);
+    expect(hlines.filter((h) => h.width === NESTED_HLINE_WIDTH && h.x === NESTED_HLINE_X)).toHaveLength(4);
+  });
+});

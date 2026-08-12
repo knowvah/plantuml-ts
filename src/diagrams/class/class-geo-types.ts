@@ -197,6 +197,12 @@ export interface ClassifierGeo {
    *  classifier whose body does not trigger `class-body-enhanced.ts
    *  #isEnhancedBody`. */
   enhancedBody?: EnhancedBodyGeo;
+  /** M3(c): copied unchanged from `MeasuredClassifier.jsonBody`
+   *  (`class-layout-helpers.ts`'s doc comment) -- present only on a
+   *  `kind:'json'` leaf, and the thing `renderer-classifier-box.ts
+   *  #buildBodyPrimitives` draws INSTEAD OF the `dividerYs`/`rows` Y-sort
+   *  merge for one. */
+  jsonBody?: readonly JsonBodyItem[];
   /** G2 N37: EVERY stereotype label (2-or-3-bracket, `class-stereotype.ts
    *  #resolveStyleStereotypeTags`) this classifier carries -- feeds
    *  `renderer-classifier-box.ts`'s `.tagname` `<style>` cascade lookup
@@ -230,6 +236,30 @@ export interface ClassifierGeo {
    * is always `undefined` before `skin <name>`/`<style> Shadowing`).
    */
   shadowing?: number;
+  /**
+   * B5/M6: this `object` leaf's field list is EMPTY but still SHOWN, so
+   * `EntityImageObject`'s ctor substituted the placeholder body
+   * `TextBlockLineBefore(LineThickness, TextBlockEmpty(10, 16))`
+   * (`svek/image/EntityImageObject.java:110-113`) for a real
+   * `BodyFactory.create1` body. Read ONLY by `class-ink-box.ts
+   * #addClassifierInk` -- see `addRectInkEmptyShownBody`'s doc comment for
+   * the three-way jar-rendered control set that distinguishes this state
+   * from both siblings. Absent for every other classifier, including the
+   * `showFields == false` state, which is a DIFFERENT ink rule
+   * ({@link addRectInkEmptyBody}) rather than a special case of this one.
+   */
+  emptyFieldPlaceholder?: true;
+  /**
+   * B35/M40: the width of this classifier body's own `UEmpty` reservation
+   * -- upstream `dimFields.getWidth()`. Read ONLY by `class-ink-box.ts
+   * #addRectInk`, whose doc comment carries the full jar-verified
+   * mechanism. `undefined` means "this leaf's body reservation has not
+   * been measured", and keeps the pre-B35 fixed `x + w` max-X; it is set
+   * only on the `object` family, the only place the conditional rule is
+   * jar-verified (see `addRectInk` for why `class`/`interface`/`enum`
+   * reach `x + w` unconditionally and `map`/`json` are left unmeasured).
+   */
+  bodyInkWidth?: number;
 }
 
 export interface EdgeGeo {
@@ -332,6 +362,11 @@ export interface EdgeGeo {
    *  doc comment) — raw, `#`-stripped color token, resolved through
    *  `HColorSet.ts#resolveColorToSvgHex` at render time. */
   colorOverride?: string;
+  /** B7/M8: copied unchanged from `Relationship.stereotypeTags` — the link's
+   *  own `<<tag>>` style-class label(s). `renderer-edge.ts` looks each up in
+   *  `theme.colors.graph.arrowTagCascade`. Absent for every link with no
+   *  `<<...>>`. */
+  stereotypeTags?: readonly string[];
 }
 
 export interface NamespaceGeo {
@@ -425,3 +460,29 @@ export interface ClassGeometry {
    */
   sprites?: SpriteRegistry;
 }
+
+/**
+ * One drawing operation of a `json` leaf's entries area, in
+ * `TextBlockCucaJSon#drawU`'s OWN order (see
+ * `class-json-sizing.ts#buildJsonItems`). Every coordinate is
+ * box-relative, the same frame `rows[].y`/`indent` and `dividerYs` use.
+ *
+ * A separate, ordered list rather than more `dividerYs` entries because
+ * upstream's order is a pre-order traversal, not a Y-order: a nested
+ * table's `vline` is drawn between its parent's key text and its own first
+ * `hline`, and both share the parent row's Y. Same "this body owns its own
+ * draw order" dispatch `enhancedBody` established.
+ *
+ * @see ~/git/plantuml/.../cucadiagram/TextBlockCucaJSon.java:162-180 (object),
+ *      :213-224 (array)
+ */
+export type JsonBodyItem =
+  /** `ULine.hline(jsonTotalWidth)` — scoped to the emitting table's OWN
+   *  width, which is the parent's minus the parent's key column. */
+  | { readonly kind: 'hline'; readonly x: number; readonly y: number; readonly width: number }
+  /** `ULine.vline(height)` at `dx = width1` — ONE per OBJECT table (never
+   *  per row, unlike `TextBlockMap`; never at all for an array). */
+  | { readonly kind: 'vline'; readonly x: number; readonly y: number; readonly height: number }
+  /** A key or scalar-value cell. `row` is the SAME object that appears in
+   *  `ClassifierGeo.rows`, not a copy. */
+  | { readonly kind: 'text'; readonly row: ClassifierGeo['rows'][number] };

@@ -24,12 +24,18 @@
  */
 
 import type { Classifier, MapRow } from './ast.js';
+import { MAP_POINT_SENTINEL } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import type { Dim } from './class-object-map-sizing.js';
+import { floorAtMinimumWidth } from './class-object-map-sizing.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-sizing.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import type { MemberRenderAtom } from './class-member-creole.js';
+import { buildMemberAtoms, memberBaseFont, resolveMemberAtoms } from './class-member-creole.js';
+import { mapPortName } from './class-port-rows.js';
 
 /** EntityImageMap: `withMargin(name, 2, 2)` — fixed, not style-driven
  *  (unlike object's Padding-based name margin, which happens to share the
@@ -61,45 +67,86 @@ interface MapRowMetrics {
   /** Raw (unpadded) value text width, unrounded, `0` (unused) for a Point
    *  row -- jar never draws Point-row value text at all. */
   rawValueWidth: number;
+  /** M3(a): the key cell's `CreoleMode.FULL` runs. */
+  keyAtoms: readonly MemberRenderAtom[];
+  /** M3(a): the value cell's runs — `undefined` for a Point row, the ONLY
+   *  case `TextBlockMap#drawU` never draws a value cell for. */
+  valueAtoms?: readonly MemberRenderAtom[];
 }
 
-/** A cell's measured `TextBlockMap#getTextBlock` dimension: `raw` (unpadded,
- *  unrounded, feeds `textLength`) alongside `dim` (padded 5,2, feeds the
- *  column width). Shared by both the key AND value cell of a row —
- *  `TextBlockMap`'s own `getTextBlock` applies the identical margin to
- *  both. */
-function measureMapCell(text: string, fontSpec: { family: string; size: number }, measurer: StringMeasurer): { raw: number; dim: Dim } {
-  const m = measurer.measure(text, fontSpec);
+/**
+ * M3(a): a cell's `TextBlockMap#getTextBlock` build. Upstream runs EVERY
+ * non-`Point` cell — key and value alike — through
+ * `Display.getWithNewlines(pragma, key).create0(fontConfiguration, LEFT,
+ * skinParam, wordWrap, CreoleMode.FULL, null, null)`
+ * (`cucadiagram/TextBlockMap.java:176-178`), so `__…__` becomes a real
+ * `text-decoration="underline"` run over the STRIPPED label and
+ * `<font:…>text</font>` becomes a `font-family` run — not the literal
+ * markup this port used to measure and draw. `CreoleMode.FULL` (not the
+ * `SIMPLE_LINE` an object member row uses, `class-object-member-creole.ts`)
+ * is what registers the underline command at all
+ * (`CommandCreoleBuilder.java:85-86`), which is the whole difference:
+ * `buildMemberAtoms` already defaults to FULL.
+ *
+ * An EMPTY cell is not a special case here — `StripeSimple#getAtoms`'s own
+ * empty-stripe fallback (`StripeSimple.java:125-126`) yields one `" "`
+ * atom, which is exactly the `<text> </text>` the jar draws for `key => `
+ * (fusopu-05-loxo960) and for satuco-50-vusa163's empty KEY.
+ */
+function measureMapCell(
+  text: string,
+  font: FontConfiguration,
+  measurer: StringMeasurer,
+): { raw: number; dim: Dim; atoms: readonly MemberRenderAtom[] } {
+  const build = resolveMemberAtoms(buildMemberAtoms(text, font), font, measurer);
   return {
-    raw: m.width,
-    dim: { width: m.width + MAP_CELL_MARGIN_X * 2, height: m.height + MAP_CELL_MARGIN_Y * 2 },
+    raw: build.width,
+    dim: { width: build.width + MAP_CELL_MARGIN_X * 2, height: build.height + MAP_CELL_MARGIN_Y * 2 },
+    atoms: build.atoms,
   };
+}
+
+/** The drawn text of a built cell — the creole-STRIPPED label
+ *  (`__method1__` -> `method1`), which is what `row.text` must carry so the
+ *  renderer's "a Point row's value entry is the empty one" test stays
+ *  exact. Never `''` for a real cell: `StripeSimple`'s empty-stripe
+ *  fallback guarantees at least the `" "` atom (see {@link measureMapCell}),
+ *  and the `?? ' '` only covers an image-only cell, which would otherwise
+ *  be mistaken for a Point. */
+function cellText(atoms: readonly MemberRenderAtom[]): string {
+  const joined = atoms.map((a) => (a.kind === 'text' ? a.text : '')).join('');
+  return joined === '' ? ' ' : joined;
 }
 
 /** One TextBlockMap row: getHeightOfRow = max(key, value) cell height; each
  *  cell (key always, value only for a non-point row) gets the 5,2 margin;
  *  a point row's value cell is the 7x7 Point diameter instead. */
-function measureMapRow(row: MapRow, fontSpec: { family: string; size: number }, measurer: StringMeasurer): MapRowMetrics {
-  const key = measureMapCell(row.key, fontSpec, measurer);
-  const isPoint = row.value === '';
-  if (isPoint) {
+function measureMapRow(row: MapRow, font: FontConfiguration, measurer: StringMeasurer): MapRowMetrics {
+  // `TextBlockMap`'s CONSTRUCTOR strips a leading visibility character from
+  // the KEY (and only the key) before `getTextBlock` ever sees it —
+  // `if (VisibilityModifier.isVisibilityCharacter(key)) key = key.substring(1)`
+  // (`cucadiagram/TextBlockMap.java:82-83`), the same `keys.add(key)` the
+  // port band ids already go through (`class-port-rows.ts#mapPortName`).
+  // Jar: vimavu-26-civo110 / guzojo-14-muxa584 draw `+__method1__` as an
+  // underlined `method1`, with no `+` glyph and 8.225px less key width.
+  const key = measureMapCell(mapPortName(row.key), font, measurer);
+  const shared = { keyWidth: key.dim.width, rawKeyWidth: key.raw, keyAtoms: key.atoms };
+  if (row.value === MAP_POINT_SENTINEL)
     return {
-      keyWidth: key.dim.width,
+      ...shared,
       valueWidth: MAP_POINT_DIAMETER,
       height: Math.max(key.dim.height, MAP_POINT_DIAMETER),
-      isPoint,
-      rawKeyWidth: key.raw,
+      isPoint: true,
       rawValueWidth: 0,
     };
-  }
-  const value = measureMapCell(row.value, fontSpec, measurer);
+  const value = measureMapCell(row.value, font, measurer);
   return {
-    keyWidth: key.dim.width,
+    ...shared,
     valueWidth: value.dim.width,
     height: Math.max(key.dim.height, value.dim.height),
-    isPoint,
-    rawKeyWidth: key.raw,
+    isPoint: false,
     rawValueWidth: value.raw,
+    valueAtoms: value.atoms,
   };
 }
 
@@ -145,13 +192,23 @@ function buildOneMapRow(
   const textY = rowTop + MAP_CELL_MARGIN_Y + ctx.baselineOffset;
   const keyCenterAgainst = m.isPoint ? ctx.boxWidth : ctx.colAWidth;
   return {
-    key: { text: row.key, y: textY, indent: (keyCenterAgainst - m.rawKeyWidth) / 2, width: m.rawKeyWidth },
-    value: {
-      text: m.isPoint ? '' : row.value,
+    key: {
+      text: cellText(m.keyAtoms),
       y: textY,
-      indent: ctx.colAWidth + MAP_CELL_MARGIN_X,
-      ...(m.isPoint ? {} : { width: m.rawValueWidth }),
+      indent: (keyCenterAgainst - m.rawKeyWidth) / 2,
+      width: m.rawKeyWidth,
+      atoms: m.keyAtoms,
     },
+    value:
+      m.valueAtoms === undefined
+        ? { text: '', y: textY, indent: ctx.colAWidth + MAP_CELL_MARGIN_X }
+        : {
+            text: cellText(m.valueAtoms),
+            y: textY,
+            indent: ctx.colAWidth + MAP_CELL_MARGIN_X,
+            width: m.rawValueWidth,
+            atoms: m.valueAtoms,
+          },
   };
 }
 
@@ -200,12 +257,20 @@ export function measureMapClassifier(classifier: Classifier, theme: Theme, measu
   const title = titleDimension(nameDim, stereoDim);
 
   const rows = classifier.rows ?? [];
-  const metrics = rows.map((r) => measureMapRow(r, fontSpec, measurer));
+  // M3(a): every cell is a creole line upstream, so the base
+  // `FontConfiguration` (not the bare `FontSpec` the header still uses) is
+  // what `TextBlockMap#getTextBlock` hands `create0`. No `{abstract}`/
+  // `{static}` modifiers exist on a map row, hence the empty member.
+  const cellFont = memberBaseFont(fontSpec, {});
+  const metrics = rows.map((r) => measureMapRow(r, cellFont, measurer));
   const colA = metrics.length === 0 ? 0 : Math.max(...metrics.map((m) => m.keyWidth));
   const colB = metrics.length === 0 ? 0 : Math.max(...metrics.map((m) => m.valueWidth));
   const fieldsHeight = metrics.reduce((sum, m) => sum + m.height, 0);
 
-  const width = Math.max(colA + colB, title.width + MAP_X_MARGIN_CIRCLE * 2);
+  // B25/M27: `EntityImageMap.java:127-130` clamps here, identically to
+  // object/json/class -- see `floorAtMinimumWidth`'s own doc comment.
+  const width = floorAtMinimumWidth(
+    Math.max(colA + colB, title.width + MAP_X_MARGIN_CIRCLE * 2), theme, 'map');
   // getMethodOrFieldHeight's empty-substitution never fires for MAP
   // (leafType === MAP is excluded in the upstream condition) — height is
   // titleHeight + the raw (possibly zero, for an empty map body) fields height.

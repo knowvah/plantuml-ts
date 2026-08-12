@@ -68,6 +68,12 @@ export interface ObjectMemberRow {
   readonly runs: readonly ObjectMemberRun[];
   /** Total advance, tab gaps included. */
   readonly width: number;
+  /** This row's OWN height — the max of its atoms' line contributions, so a
+   *  sprite/image row is taller than the font size.
+   *  `MethodsOrFieldsArea#calculateDimensionOnlyMembers` advances
+   *  `y += dim.getHeight()` per MEMBER (java:161-166), not by a uniform
+   *  step. */
+  readonly height: number;
 }
 
 /** One member row's creole atoms, with tab stops expanded into spacer atoms. */
@@ -135,5 +141,5 @@ export function buildObjectMemberRow(
       x += width;
     }
   }
-  return { runs: out, width: x };
+  return { runs: out, width: x, height: build.height };
 }

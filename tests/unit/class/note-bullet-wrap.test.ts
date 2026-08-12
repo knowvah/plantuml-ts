@@ -46,7 +46,10 @@ describe('R2h — Fission counts the Bullet header on every wrapped stripe', () 
     const m = measureNote('* here is a very long sentence which should be wrapped. I can make it even longer by adding more words', wrapTheme, measurer);
     expect(m.lineAtoms.length).toBeGreaterThan(1);
     for (const atoms of m.lineAtoms) {
-      expect(atoms[0]).toMatchObject({ kind: 'text', text: '', width: 12 });
+      // B22/M21: the header is a real `bullet` atom now, not a width-only
+      // text spacer. The WIDTH -- what this test is actually about -- is
+      // unchanged; only the atom's representation is.
+      expect(atoms[0]).toMatchObject({ kind: 'bullet', order: 0, width: 12 });
     }
     // Every row's stored width includes the header (blank(header) on
     // continuations — Fission.java:88-89).

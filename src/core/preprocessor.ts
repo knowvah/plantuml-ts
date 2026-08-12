@@ -136,6 +136,8 @@ const RE_SKINPARAM_BLOCK_OPEN = /^skinparam\s*\{$/;
  *  measured each node's raw `<img data:image/png;base64,...>` markup as
  *  label text (19214px wide vs the jar's 142px). Found closing S1L-f. */
 const RE_SKINPARAM_SELECTOR_BLOCK_OPEN = /^skinparam\s+(\w+)(<<[^<>]+>>)?\s*\{$/;
+/** A stereotype sub-block inside a selector block: `<<Foo1>> {`. */
+const RE_SKINPARAM_NESTED_STEREO_OPEN = /^<<([^<>]+)>>\s*\{$/;
 const RE_SKINPARAM_BLOCK_ENTRY = /^\s*(\w+(?:<<[^<>]+>>)?)\s+(.+)$/;
 const RE_SKINPARAM_BLOCK_CLOSE = /^\s*\}\s*$/;
 
@@ -186,6 +188,8 @@ class StyleAndSkinparamCollector {
   private inStyleBlock = false;
   private readonly styleBuffer: string[] = [];
   private inSkinparamBlock = false;
+  /** A `<<label>> {` scope open INSIDE a selector block; '' when none. */
+  private skinparamNestedStereo = '';
   private skinparamBlockSelector = '';
   /** `<<stereotype>>` suffix of a scoped selector block (`skinparam
    *  rectangle<<stereo>> {`), lowercased and kept SEPARATE from the selector
@@ -245,7 +249,31 @@ class StyleAndSkinparamCollector {
   }
 
   private collectSkinparamBlockEntry(trimmed: string, substitute: (text: string) => string): boolean {
+    // A NESTED `<<label>> {` opens a stereotype scope INSIDE an element block:
+    //
+    //     skinparam object { FontSize 16
+    //       <<Foo1>> { FontSize 8 }
+    //     }
+    //
+    // Upstream reaches these as separate keys -- `SkinParam#cleanForKeySlow`
+    // moves a `<<x>>` to the END of the key, so the inner entry becomes
+    // `objectfontsize<<foo1>>` while the outer stays `objectfontsize`. Without
+    // this scope both lines flattened into ONE key and the inner value
+    // OVERWROTE the outer, so `object/tenalu-53-meri239`'s unstereotyped `B`
+    // inherited the `<<Foo1>>` font size and background
+    // (jar: 16/LightCoral, this port: 8/LightBlue).
+    const nested = RE_SKINPARAM_NESTED_STEREO_OPEN.exec(trimmed);
+    if (nested !== null && this.skinparamBlockStereo === '') {
+      this.skinparamNestedStereo = nested[1]!.toLowerCase();
+      return true;
+    }
     if (RE_SKINPARAM_BLOCK_CLOSE.test(trimmed)) {
+      // The inner `}` closes only the stereotype scope; the element block
+      // stays open for the entries after it.
+      if (this.skinparamNestedStereo !== '') {
+        this.skinparamNestedStereo = '';
+        return true;
+      }
       this.inSkinparamBlock = false;
       this.skinparamBlockSelector = '';
       this.skinparamBlockStereo = '';
@@ -257,7 +285,10 @@ class StyleAndSkinparamCollector {
       // The block's `<<stereotype>>` is appended AFTER the entry name (see
       // `skinparamBlockStereo`). An entry carrying its own guillemet suffix
       // keeps it and the block's is not doubled.
-      const stereo = name.includes('<<') ? '' : this.skinparamBlockStereo;
+      const scope = this.skinparamNestedStereo !== ''
+        ? `<<${this.skinparamNestedStereo}>>`
+        : this.skinparamBlockStereo;
+      const stereo = name.includes('<<') ? '' : scope;
       this.skinparam.set(
         (this.skinparamBlockSelector + name + stereo).toLowerCase(),
         substitute(entry[2]!).trim(),

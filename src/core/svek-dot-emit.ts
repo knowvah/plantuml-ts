@@ -29,6 +29,16 @@ import {
   type NodeRec,
   type SeqAssignment,
 } from './svek-dot-sequence.js';
+// B1/M1: the HTML label-table builders moved to a sibling module for the
+// 500-line file cap (pure move -- see that file's header).
+import {
+  hex,
+  labelTable,
+  edgeLabelTable,
+  portTable,
+  rowPortTable,
+  shieldTable,
+} from './svek-dot-emit-labels.js';
 
 const PX_PER_INCH = 72;
 const MIN_NODESEP_PX = 35; // Svek getMinNodeSep() (non-activity)
@@ -40,13 +50,6 @@ const MIN_RANKSEP_PX = 60; // Svek getMinRankSep() (non-activity)
 const MIN_RANKSEP_PX_KERMOR = 40;
 
 const inches = (px: number): string => (px / PX_PER_INCH).toFixed(6);
-const hex = (n: number): string => '#' + (n & 0xffffff).toString(16).padStart(6, '0');
-const round = (v: number): string => String(Math.round(v));
-
-const labelTable = (w: number, h: number, color: number): string =>
-  `<<TABLE BGCOLOR="${hex(color)}" FIXEDSIZE="TRUE" WIDTH="${round(w)}" HEIGHT="${round(h)}">` +
-  `<TR><TD></TD></TR></TABLE>>`;
-
 type EdgeAttrs = NonNullable<DotInputEdge['attributes']>;
 
 /** Explicit skinparam overrides skip the minimum floor
@@ -79,50 +82,6 @@ function shapeAttr(node: DotInputNode): string {
   return `shape=${shape}`;
 }
 
-// SvekNode.appendLabelHtml: shield table for a shielded description entity
-// (hideText symbols, e.g. INTERFACE lollipops) -- 3x3 grid, center cell
-// holds the real icon box with PORT="h"; margin cells reserve space for the
-// name/stereotype text drawn outside the icon. Exact text-metric margins
-// are D1 tolerance territory (width/height are reported, not asserted, and
-// the comparator never reads inside a label=<...> value) -- nominal
-// constants stand in for the real measured shield here.
-const SHIELD_MARGIN_X = 1;
-const SHIELD_MARGIN_Y = 16;
-
-function shieldTable(node: DotInputNode, color: number): string {
-  const w = round(node.width);
-  const h = round(node.height);
-  const my = String(SHIELD_MARGIN_Y);
-  const mx = String(SHIELD_MARGIN_X);
-  return (
-    '<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">' +
-    `<TR><TD></TD><TD FIXEDSIZE="TRUE" WIDTH="1" HEIGHT="${my}"></TD><TD></TD></TR>` +
-    `<TR><TD FIXEDSIZE="TRUE" WIDTH="${mx}" HEIGHT="1"></TD>` +
-    `<TD BGCOLOR="${hex(color)}" FIXEDSIZE="TRUE" WIDTH="${w}" HEIGHT="${h}" PORT="h"></TD>` +
-    `<TD FIXEDSIZE="TRUE" WIDTH="${mx}" HEIGHT="1"></TD></TR>` +
-    `<TR><TD></TD><TD FIXEDSIZE="TRUE" WIDTH="1" HEIGHT="${my}"></TD><TD></TD></TR>` +
-    '</TABLE>'
-  );
-}
-
-/** SvekNode.appendLabelHtmlSpecialForPortHtml: a port entity whose label
- *  text is wide enough (>40px, `isPortLabelWide`) renders as an HTML table
- *  with a bordered PORT="P" cell (the compass point `edgeRef` attaches to)
- *  flanked by blank padding cells sized to the overflow width. */
-function portTable(node: DotInputNode, color: number): string {
-  const w = round(node.width);
-  const h = round(node.height);
-  const pad = String(node.portPad ?? 10);
-  return (
-    '<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">' +
-    `<TR><TD WIDTH="${pad}" HEIGHT="1" COLSPAN="3"></TD></TR>` +
-    `<TR><TD></TD><TD FIXEDSIZE="TRUE" PORT="P" BORDER="1" COLOR="${hex(color)}" ` +
-    `WIDTH="${w}" HEIGHT="${h}"></TD><TD></TD></TR>` +
-    `<TR><TD WIDTH="${pad}" HEIGHT="1" COLSPAN="3"></TD></TR>` +
-    '</TABLE>'
-  );
-}
-
 function nodeLine(node: DotInputNode, rec: NodeRec): string {
   const shape = node.shape ?? 'rect';
   if (shape === 'point') {
@@ -146,6 +105,12 @@ function nodeLine(node: DotInputNode, rec: NodeRec): string {
     }];`;
   }
   if (shape === 'plaintext') {
+    // RECTANGLE_HTML_FOR_PORTS is checked FIRST: SvekNode#appendShape tests it
+    // before RECTANGLE_PORT and before the shielded-RECTANGLE branch
+    // (svek/SvekNode.java:132-143), and it emits no width/height at all.
+    if (node.portRows !== undefined) {
+      return `${rec.sh} [shape=plaintext,label=<${rowPortTable(node, node.portRows, rec.color)}>];`;
+    }
     if (node.isPort === true) {
       return `${rec.sh} [shape=plaintext,label=<${portTable(node, rec.color)}>];`;
     }
@@ -158,14 +123,26 @@ function nodeLine(node: DotInputNode, rec: NodeRec): string {
 }
 
 /** Bibliotekon.getNodeUid: every DOT reference to a shielded node's uid gets
- *  a ":h" port suffix (the shield table's colored center cell). */
-function edgeRef(id: string, recs: Map<string, NodeRec>, nodeById: Map<string, DotInputNode>): string {
+ *  a ":h" port suffix (the shield table's colored center cell).
+ *
+ *  B1/M1: a `RECTANGLE_HTML_FOR_PORTS` endpoint whose link named a member row
+ *  takes THAT row's md5 port instead — `abel/Link.java:219-231` threads the
+ *  port name onto the endpoint, and `Ports#encodePortNameToId` has already
+ *  encoded it by the time it reaches `DotInputEdge`. A port-bearing node whose
+ *  link named no row still falls through to `:h`. */
+function edgeRef(
+  id: string,
+  recs: Map<string, NodeRec>,
+  nodeById: Map<string, DotInputNode>,
+  rowPort: string | undefined,
+): string {
   const rec = recs.get(id)!;
   const node = nodeById.get(id);
   // Link.getEntityPort: a port entity always gets the ":P" compass suffix,
   // regardless of which shape branch (HTML table vs plain small rect) its
   // OWN node line took.
   if (node?.isPort === true) return `${rec.sh}:P`;
+  if (rowPort !== undefined && node?.portRows !== undefined) return `${rec.sh}:${rowPort}`;
   return (node?.shape ?? 'rect') === 'plaintext' ? `${rec.sh}:h` : rec.sh;
 }
 
@@ -180,17 +157,17 @@ function edgeRef(id: string, recs: Map<string, NodeRec>, nodeById: Map<string, D
 function edgeLabelParts(a: EdgeAttrs, c: EdgeColors): string[] {
   const parts: string[] = [];
   if (a.label !== undefined && a.labelWidth !== undefined && a.labelHeight !== undefined) {
-    parts.push(`label=${labelTable(a.labelWidth, a.labelHeight, c.noteLabel)}`);
+    parts.push(`label=${edgeLabelTable(a.labelWidth, a.labelHeight, c.noteLabel)}`);
   }
   // linetype ortho routes the label through xlabel (SvekEdge.java:434-441).
   if (a.xlabel !== undefined && a.xlabelWidth !== undefined && a.xlabelHeight !== undefined) {
-    parts.push(`xlabel=${labelTable(a.xlabelWidth, a.xlabelHeight, c.noteLabel)}`);
+    parts.push(`xlabel=${edgeLabelTable(a.xlabelWidth, a.xlabelHeight, c.noteLabel)}`);
   }
   if (a.tailLabelWidth !== undefined && a.tailLabelHeight !== undefined) {
-    parts.push(`taillabel=${labelTable(a.tailLabelWidth, a.tailLabelHeight, c.startTail)}`);
+    parts.push(`taillabel=${edgeLabelTable(a.tailLabelWidth, a.tailLabelHeight, c.startTail)}`);
   }
   if (a.headLabelWidth !== undefined && a.headLabelHeight !== undefined) {
-    parts.push(`headlabel=${labelTable(a.headLabelWidth, a.headLabelHeight, c.endHead)}`);
+    parts.push(`headlabel=${edgeLabelTable(a.headLabelWidth, a.headLabelHeight, c.endHead)}`);
   }
   // #lizard forgives — faithful port of SvekEdge's fixed label-attr order
   // (SvekEdge.java:391-483); each branch is one upstream attribute.
@@ -439,8 +416,10 @@ function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree):
   body.push(...rankLines(input, recs));
   input.edges.forEach((e, i) => {
     if (!recs.has(e.from) || !recs.has(e.to)) return;
-    const from = edgeRef(e.from, recs, nodeById);
-    body.push(edgeLine(e, from, edgeRef(e.to, recs, nodeById), edgeColors[i]!));
+    const from = edgeRef(e.from, recs, nodeById, e.attributes?.tailport);
+    body.push(
+      edgeLine(e, from, edgeRef(e.to, recs, nodeById, e.attributes?.headport), edgeColors[i]!),
+    );
   });
   return body;
 }

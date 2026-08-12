@@ -264,6 +264,11 @@ function applyInheritanceClauses(state: ParseState, childId: string, decl: Class
       // reverses it (see the jar-verified note below), so the parent leads
       // in dot regardless of which side was written first.
       parentIsLinkEntity1: true,
+      // T1/B33: `manageExtends` builds `Link(cl1 = parent, cl2 = child)`
+      // while this port normalizes to `from` = child / `to` = parent, so
+      // the dot edge runs `to -> from`. Stated explicitly rather than
+      // inferred from ids, same as the arrow-grammar path.
+      dotEdgeReversed: true,
       // G2 N9: inline `extends`/`implements` builds the relationship
       // OUTSIDE the arrow-token grammar entirely (no `parseRelationshipLine`
       // call, hence no `swapDirection`/`upOrLeft` machinery) -- Java's own

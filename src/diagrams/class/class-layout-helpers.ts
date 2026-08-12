@@ -45,6 +45,7 @@ import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
 import { ROW_TEXT_LEFT_MARGIN, isMethodMember } from './class-member-rows.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
+import type { JsonBodyItem } from './class-geo-types.js';
 import {
   CARDINALITY_FONT_SIZE,
   splitEdgeLabelLines,
@@ -229,6 +230,21 @@ export interface MeasuredClassifier {
    *  every other `MeasuredClassifier`, but left EMPTY-equivalent for an
    *  enhanced classifier -- `rows` carries only the header bundle). */
   enhancedBody?: EnhancedBodyGeo;
+  /** M3(c): present only for a `kind:'json'` leaf — the ordered
+   *  `TextBlockCucaJSon#drawU` operation list
+   *  (`class-json-sizing.ts#buildJsonItems`). `rows`/`dividerYs` stay
+   *  populated (the ink box and the header-background split both read
+   *  `dividerYs[0]`), but the LINES are drawn from this, not from
+   *  `dividerYs`. */
+  jsonBody?: readonly JsonBodyItem[];
+  /** B35/M40: see `ClassifierGeo.bodyInkWidth`'s doc comment (the geo
+   *  field this one feeds) and `class-ink-box.ts#addRectInk`'s (the
+   *  jar-verified rule that consumes it). */
+  bodyInkWidth?: number;
+  /** B5/M6: see `ClassifierGeo.emptyFieldPlaceholder`'s doc comment
+   *  (./class-geo-types.ts). Set only by `class-object-map-sizing.ts
+   *  #buildFieldBasedObjectGeo`. */
+  emptyFieldPlaceholder?: true;
 }
 
 /**
@@ -344,7 +360,7 @@ function resolveMeasureFonts(classifier: Classifier, theme: Theme) {
     ? resolveClassTagCascadeEntry(theme, styleTags, classifier.styleGeneration)
     : undefined;
   const attributeFont = resolveAttributeFont(theme, fontSpec, tagCascadeEntry, styleTags);
-  const headerFont = resolveHeaderFont(theme, attributeFont, tagCascadeEntry);
+  const headerFont = resolveHeaderFont(theme, attributeFont, tagCascadeEntry, styleTags);
   return { attributeFont, headerFont };
 }
 
