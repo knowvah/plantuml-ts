@@ -153,7 +153,7 @@ function groupEdge(group: NoteGroup, anchors: ReadonlyMap<string, string>): DotI
  * Build the seam nodes + connector edges for note-on-entity.
  *
  * `anchors` maps a package/namespace id to its `zaent-*` point-anchor id
- * (see class-layout-helpers.ts's `packageEndpointAnchors`) — a
+ * (see class-shield-helpers.ts's `packageEndpointAnchors`) — a
  * `note <pos> of <package>` target routes its connector to that anchor
  * instead of the package's own id, the same substitution relationship
  * edges get when a package is used as an endpoint.

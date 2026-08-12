@@ -27,7 +27,7 @@ import { preprocess } from '../../../src/core/preprocessor.js';
 import { resolveSkinparam } from '../../../src/core/skinparam.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { measureObjectClassifier } from '../../../src/diagrams/class/class-object-map-sizing.js';
+import { measureObjectClassifier } from '../../../src/diagrams/class/class-object-sizing.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import { renderSync } from '../../../src/index.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';

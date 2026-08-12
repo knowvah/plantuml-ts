@@ -2,7 +2,7 @@
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [S2](S2-split-shield-helpers.md) | Relocate shield helpers to `class-shield-helpers.ts` | typescript-pro | `class-layout-helpers.ts`, `class-shield-helpers.ts` (new), import repoints | S1 | [ ] |
+| [S2](S2-split-shield-helpers.md) | Relocate shield helpers to `class-shield-helpers.ts` | typescript-pro | `class-layout-helpers.ts`, `class-shield-helpers.ts` (new), import repoints | S1 | [x] `3936ddb5` |
 
 ## Why this is not in Batch 0 with S1
 

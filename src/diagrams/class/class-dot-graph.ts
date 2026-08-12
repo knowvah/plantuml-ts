@@ -27,11 +27,10 @@ import { findFreestandingNoteRelationshipIndices } from './note-freestanding.js'
 import { buildClassMagmaEdges } from './class-magma.js';
 import {
   edgeLabelAttrs,
-  packageEndpointAnchors,
-  shieldedClassifierIds,
   LIKE_CLASS_KINDS,
   type MeasuredClassifier,
 } from './class-layout-helpers.js';
+import { packageEndpointAnchors, shieldedClassifierIds } from './class-shield-helpers.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
 import { applyShapeAndPorts, edgePortAttrs, classPortShortNamesById } from './class-port-rows.js';
 import type { EdgeGeo } from './layout.js';
@@ -194,7 +193,7 @@ interface DotEdgesRenderCtx {
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
   /** T2: `classPortShortNamesById`'s output -- ADR-4's declared port-name
-   *  sets, `LIKE_CLASS_KINDS` leaves only. */
+   *  sets, row-port leaves only (`isRowPortKind`: class family + object). */
   classPortShortNames: ReadonlyMap<string, Set<string>>;
 }
 
