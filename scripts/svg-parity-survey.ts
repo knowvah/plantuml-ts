@@ -54,7 +54,27 @@ const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
 const PARITY_OUT = join(REPO, 'tests', 'oracle', 'svg-conformance', 'parity.json');
 const THIS_FILE = fileURLToPath(import.meta.url);
 const DEFAULT_TYPES = ['component', 'usecase'];
-const RENDER_TIMEOUT_MS = Number(process.env.SVG_PARITY_TIMEOUT_MS ?? 10_000);
+/**
+ * Wall-clock budget per fixture. **60s, not the 10s this started at** — SI19,
+ * 2026-08-12.
+ *
+ * The budget has to cover process START, not just the render, and the start
+ * dominates by two orders of magnitude: a spawned worker spends **~10.5s
+ * importing `src/index.js`** through jiti (measured directly; the render
+ * itself and every other import are in the tens of milliseconds, and
+ * `JITI_FS_CACHE=true` changes nothing). `src` outgrew the original 10s
+ * budget, so a full run returned almost entirely `timeout` — it wrote 270
+ * timeouts of 271 over a good `parity-state.json` before being caught and
+ * reverted. Discriminating experiment on the 3-fixture `hcl` type: 2 timeouts
+ * of 3 at 10s, 0 of 3 at 60s.
+ *
+ * That failure mode is the reason this is generous rather than snug. A survey
+ * that times out does not fail loudly — it writes a `timeout` verdict, which
+ * looks like data, over a file that held real measurements. Budget for the
+ * slowest machine that will ever run this, and treat ANY `timeout` in a
+ * committed run as a defect to investigate rather than a fixture to accept.
+ */
+const RENDER_TIMEOUT_MS = Number(process.env.SVG_PARITY_TIMEOUT_MS ?? 60_000);
 const CONCURRENCY = Number(process.env.SVG_PARITY_CONCURRENCY ?? 6);
 /** Lizard-safe (no regex literals in flagged positions): svek-<N>.dot dumps. */
 const SVEK_DOT_RE = new RegExp('^svek-([0-9]+)\\.dot$');
