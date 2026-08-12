@@ -27,7 +27,8 @@
   "module": "./dist/plantuml-ts.js",
   "types": "./dist/plantuml-ts.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "NOTICE"
   ],
   "exports": {
     ".": {

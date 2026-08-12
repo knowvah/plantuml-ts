@@ -14,7 +14,8 @@ import {
 } from '../../../src/diagrams/class/class-port-rows.js';
 import { formatMemberText } from '../../../src/diagrams/class/class-layout-helpers.js';
 import { Ports } from '../../../src/core/svek/Ports.js';
-import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
+import type { ClassDiagramAST, ClassifierKind } from '../../../src/diagrams/class/ast.js';
+import { isRowPortKind } from '../../../src/diagrams/class/class-shield-helpers.js';
 
 /** T0's oracle header height for a plain single-line class header at
  *  default font -- `dimHeader.getHeight()` read off three independent
@@ -203,5 +204,58 @@ describe('classPortShortNamesById (B2, SI17: unions Classifier.portShortNames)',
     };
 
     expect(classPortShortNamesById(ast).get('Foo')).toEqual(new Set(['field2']));
+  });
+});
+
+/**
+ * Fitness function for the `isRowPortKind` <-> `electionTextFor` coupling.
+ *
+ * `class-port-rows.ts#electionTextFor` picks the member-text reconstructor by
+ * kind: `formatObjectMemberText` for `object`, `formatMemberText` for
+ * everything else. That `else` is the class family *by construction* -- every
+ * kind reaching it has passed `isRowPortKind` -- but the two live in
+ * different modules and the invariant is not expressible in the type system,
+ * because `LIKE_CLASS_KINDS` is a runtime `Set` reachable from
+ * `class-shield-helpers.ts` only through an import cycle.
+ *
+ * So a kind added to `isRowPortKind` without a matching branch in
+ * `electionTextFor` would silently take the class reconstructor and elect the
+ * wrong row -- exactly the defect SI20's T2 shipped into its own wiring and
+ * caught late, invisible to every DOT gate because the one corpus fixture
+ * has bare-word members that reconstruct identically under both.
+ *
+ * Two guards, per `rules/architecture.md`'s "express every architectural
+ * constraint as a test":
+ *   1. `ALL_KINDS_BY_NAME` is a `Record<ClassifierKind, true>`, so adding a
+ *      member to the union fails to COMPILE here until it is listed.
+ *   2. The pinned set below fails the moment `isRowPortKind` accepts anything
+ *      new, sending the author to `electionTextFor` to make the choice
+ *      deliberately.
+ * Neither guard adds defensive code to the production path.
+ */
+const ALL_KINDS_BY_NAME: Record<ClassifierKind, true> = {
+  class: true, abstract: true, interface: true, enum: true, annotation: true,
+  object: true, map: true, json: true, entity: true, circle: true,
+  descriptive: true, usecase: true, state: true, association: true,
+  'assoc-circle': true, lollipop: true,
+};
+
+describe('row-port kind set is pinned (isRowPortKind <-> electionTextFor)', () => {
+  it('accepts exactly the class family plus object', () => {
+    const rowPort = (Object.keys(ALL_KINDS_BY_NAME) as ClassifierKind[])
+      .filter(isRowPortKind)
+      .sort();
+    expect(rowPort).toEqual([
+      'abstract', 'annotation', 'class', 'entity', 'enum', 'interface', 'object',
+    ]);
+  });
+
+  it('excludes map and json, whose bands are mapPortRows own concern (ADR-4)', () => {
+    expect(isRowPortKind('map')).toBe(false);
+    expect(isRowPortKind('json')).toBe(false);
+  });
+
+  it('excludes descriptive, which owns the PORTIN/PORTOUT `:P` path (ADR-5)', () => {
+    expect(isRowPortKind('descriptive')).toBe(false);
   });
 });

@@ -37,16 +37,14 @@ const GOLDENS = join(
   '../../oracle/goldens/object',
 );
 
-/** B31: slugs whose DOT differs from the oracle's ONLY in edge DIRECTION --
- *  see `direction-backlog.json`'s own `_doc`. NOT a skip: the assertion below
- *  keeps every other structural check live for these fixtures. (T3 of
- *  si20-object-row-ports closed object's own port-backlog.json; direction is
- *  the one backlog left, tracked by object-close B33.) */
-const directionBacklog: ReadonlySet<string> = new Set(
-  existsSync(join(GOLDENS, 'direction-backlog.json'))
-    ? (JSON.parse(readFileSync(join(GOLDENS, 'direction-backlog.json'), 'utf8')) as { slugs: string[] }).slugs
-    : [],
-);
+/** Both of object's structural backlogs are now closed and their files
+ *  deleted: `port-backlog.json` by SI20's T3 once `rozuxo-44-fudi093` reached
+ *  full structural equality, and `direction-backlog.json` here, having been
+ *  emptied to `slugs: []` by an earlier object-close pass. Every object
+ *  fixture is therefore held to `structurallyEqual` outright, with no
+ *  per-slug exemption -- `size-backlog.json` below is the only remaining
+ *  allowance, and it is a numeric tolerance rather than a check exemption.
+ *  A future direction regression is a plain failure, which is the point. */
 
 /** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-exact fixtures. */
 const sizeBacklog: Record<string, number> = existsSync(join(GOLDENS, 'size-backlog.json'))
@@ -100,22 +98,10 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — obj
         const failingChecks = Object.entries(diff)
           .filter(([k, v]) => k.endsWith('Ok') && v === false)
           .map(([k]) => k);
-        if (directionBacklog.has(name)) {
-          // B31: known-unequal in edge DIRECTION ONLY (see
-          // direction-backlog.json's `_doc`). NOT a skip: every other
-          // structural check stays live, so a regression in node count,
-          // degree, minlen, shape, labels, ports or clusters still fails
-          // here.
-          expect(
-            failingChecks.filter((k) => k !== 'sizeConformantOk'),
-            `${name}/${file}: direction-backlog fixtures may fail directionOk and NOTHING else`,
-          ).toEqual(['directionOk']);
-        } else {
-          expect(
-            diff.structurallyEqual,
-            `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
-          ).toBe(true);
-        }
+        expect(
+          diff.structurallyEqual,
+          `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
+        ).toBe(true);
         // D4: node sizes pinned (rect nodes; plaintext nodes parse as 0x0 on
         // both sides so they cannot mask a rect-size regression). Backlog
         // fixtures ratchet downward; everything else must be exactly 0.

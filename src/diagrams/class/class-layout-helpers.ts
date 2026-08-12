@@ -81,14 +81,6 @@ export {
 };
 
 /**
- * Classifiers that svek wraps in a `shape=plaintext` HTML table because a
- * relationship attaches a `[Qualifier]` shield or a `::member` port to them.
- * Maps the classifier id to whether it is a PORT target (port table) vs a
- * qualifier shield — both emit `shape=plaintext`, differing only in the table.
- */
-
-
-/**
  * Format a member text string for class/interface/enum members (no
  * visibility prefix). G2 N4: the `: <type>` suffix is OMITTED entirely
  * when `type` is `undefined` (no `:` in the source line at all) -- was

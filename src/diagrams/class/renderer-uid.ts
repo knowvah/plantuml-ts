@@ -29,7 +29,7 @@
  * (a relationship endpoint that resolves to an EXISTING namespace, e.g.
  * `pkg --> Foo` where `pkg` is a package — `ensureClassifier` still
  * auto-creates a phantom `Classifier` row for the bare reference before
- * `class-dot-graph.ts#packageEndpointAnchors` redirects the actual DOT
+ * `class-shield-helpers.ts#packageEndpointAnchors` redirects the actual DOT
  * edge to an anchor point inside the cluster, so the phantom never gets a
  * `ClassifierGeo` — verified against `bajotu-30-soku184`: raw
  * creationIndex values are namespace=1, classifier=2, classifier=3,
