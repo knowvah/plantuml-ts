@@ -64,8 +64,8 @@ PlantUML's in-JVM engine (`sdot/`, driving the transpiled `gen/lib/dotgen/`);
 `vizjs` uses Viz.js; the default shells out to the graphviz `dot` binary.
 
 **This port:** the pragma is accepted and **ignored** — every graph diagram is
-laid out with graphviz-ts. We do not implement smetana or vizjs as distinct
-engines, and we do not conform to their output.
+laid out with `@knowvah/dot-engine`. We do not implement smetana or vizjs as
+distinct engines, and we do not conform to their output.
 
 **Measured consequence (2026-08-08):** "we do not conform to their output"
 has a sub-pixel price, now quantified — see *Edge geometry follows modern
@@ -76,8 +76,8 @@ tolerance is load-bearing rather than arbitrary.
 Smetana is a mechanical Java transpile of graphviz 2.38 (`gen/lib/dotgen/` —
 `acyclic__c.java`, `mincross__c.java`, `dotsplines__c.java` are line-for-line
 transpiles of `acyclic.c`, `mincross.c`, `dotsplines.c`). Viz.js is graphviz
-compiled to JS via Emscripten. graphviz-ts is a faithful TypeScript port of the
-same graphviz source. Conforming to Smetana's *output* would mean faithfully
+compiled to JS via Emscripten. `@knowvah/dot-engine` is a faithful TypeScript
+port of the same graphviz source. Conforming to Smetana's *output* would mean faithfully
 reproducing the divergences its transpilation introduced — porting the bugs of
 a copy rather than the behavior of the original. Real graphviz is the correct
 oracle, and it is the one we already match.
