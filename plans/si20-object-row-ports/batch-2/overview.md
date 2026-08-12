@@ -6,9 +6,9 @@ flip, T3 measures and retires the pin.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T1](T1-publish-port-bands.md) | Publish `portMemberSections` for objects, NOT wired | typescript-pro | `class-object-sizing.ts`, unit tests | T0, S1 | [ ] |
-| [T2](T2-wire-the-flip.md) | Atomic flip: object bands + edge suffix + retire `:P` | typescript-pro | `class-port-rows.ts`, `class-shield-helpers.ts`, unit tests | T1, S2 | [ ] |
-| [T3](T3-shrink-backlog.md) | Re-measure, delete the object backlog | general-purpose | `oracle/goldens/object/port-backlog.json`, `tests/oracle/object-dot-parity.test.ts`, `../decision-journal.md` | T2 | [ ] |
+| [T1](T1-publish-port-bands.md) | Publish `portMemberSections` for objects, NOT wired | typescript-pro | `class-object-sizing.ts`, unit tests | T0, S1 | [x] `750387f7` |
+| [T2](T2-wire-the-flip.md) | Atomic flip: object bands + edge suffix + retire `:P` | typescript-pro | `class-port-rows.ts`, `class-shield-helpers.ts`, unit tests | T1, S2 | [x] `62a356ca` |
+| [T3](T3-shrink-backlog.md) | Re-measure, delete the object backlog | general-purpose | `oracle/goldens/object/port-backlog.json`, `tests/oracle/object-dot-parity.test.ts`, `../decision-journal.md` | T2 | [x] `83bc0e98` |
 
 ## Why T2 is one commit and not three
 

@@ -20,6 +20,10 @@ wrong fix without it:
 | Date | Task | test | typecheck | lint | build | frozen counts |
 |---|---|---|---|---|---|---|
 | 2026-08-12 | Batch 0 (T0+S1) | 12795 pass, 1 todo | rc=0 | rc=0 | rc=0 | object DOT 77/80 (1 portOk `rozuxo`, 2 no-candidate) · class DOT 710, portOk 0, 1 `directionOk` (`besepi-37-rori892`) · object census 35/80 — all byte-identical to frozen |
+| 2026-08-12 | Batch 1 (S2) | 12795 pass, 1 todo | rc=0 | rc=0 | rc=0 | all five DOT gates and all three censuses re-run (`shieldedClassifierIds` is cross-type): 710 · 77/80 · 262 · 93 · 267 · 343/722 · 35/80 · 26/358. None moved. |
+| 2026-08-12 | Batch 2 — T1 | 12800 pass, 1 todo | rc=0 | rc=0 | rc=0 | object DOT 77/80, class DOT 710 portOk 0 — unmoved, confirming T1 inert by construction |
+| 2026-08-12 | Batch 2 — T2 | **RED by construction** (12810 pass, 1 fail) | rc=0 | rc=0 | rc=0 | object DOT **77 → 78/80, portOk 1 → 0** · class DOT 710 portOk 0 **unmoved** · component 262 · usecase 93 · state 267 · censuses 343/722, 35/80, 26/358 — nothing moved but object `portOk` |
+| 2026-08-12 | Batch 2 — T3 | 12811 pass, 1 todo | rc=0 | rc=0 | rc=0 | object DOT 78/80 confirmed; backlog file deleted, suite green. No slug added to any backlog. |
 
 ## Entries
 
