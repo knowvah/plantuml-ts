@@ -1,5 +1,42 @@
 # Observation: class `::member` ports reuse the wrong upstream mechanism
 
+> **RETIRED 2026-08-12 — the mechanism described below no longer exists in the
+> tree.** Fixed by SI17 T2, commit `5e074b8f` ("fix(T2): anchor class ::member
+> edges to the member row"), on branch `feat/si17-class-row-ports`. The
+> original diagnosis is preserved verbatim below as history — it was correct,
+> and it is the reason the fix knew where to look. **Do not act on it as a
+> live finding.**
+
+## Retirement record
+
+- **Context**: SI17 close-out (T4), mission `plans/si17-class-row-ports/`.
+- **Finding**: The `isPort`/`:P`/`portTable()` reuse is gone. Class `A::member`
+  links now take upstream's own mechanism: `Link.getEntityPort` →
+  `EntityPort.create(uid, port)` yields a `:p<md5(memberName)>` edge suffix,
+  and the target node emits a per-member-row HTML table
+  (`RECTANGLE_HTML_FOR_PORTS`) whose row carries `PORT="p<md5>"`. The bands
+  come from upstream's live block tree — `EntityImageClass#getPorts`
+  (`svek/image/EntityImageClass.java:247-253`) →
+  `MethodsOrFieldsArea#getPorts` (`cucadiagram/MethodsOrFieldsArea.java
+  :194-211`) — resolved by measurement in SI17's ADR-1, not by argument.
+  Producer: `src/diagrams/class/class-port-rows.ts`.
+- **Impact**: The note's "any future comparator tightening will surface this"
+  prediction came true and has been paid: the port-aware DOT gate moved class
+  711 → 689, and SI17 took it to **710/711** with `portOk` at **0**. Two
+  downstream claims in the original text are now stale and must not be
+  followed: `oracle/goldens/class/port-backlog.json` no longer exists (emptied
+  and deleted in `7fccbef5`), and the assertion at
+  `tests/unit/class/layout.test.ts:166-177` that encoded the
+  wrong-but-intentional behavior was **replaced** in `5e074b8f` — it now
+  asserts the row-port table and explicitly documents why the old expectation
+  was wrong.
+- **Confidence**: High — verified against the commit diff and the re-measured
+  DOT gate, not taken from a report.
+
+---
+
+## Original diagnosis (preserved as history — superseded, do not act on)
+
 - **Context**: T8 (class-dot-sync) audit of shielded/qualifier `:h` edge
   ports against `svek/SvekNode.java` / `svek/Bibliotekon.java`.
 - **Finding**: Class-diagram named ports (`A::member --> B`,

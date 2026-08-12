@@ -522,3 +522,31 @@ a mechanism.
 Class DOT is 710/711. The single outstanding fixture is
 `besepi-37-rori892`, failing `directionOk`, which belongs to object-close
 B33's remainder per ADR-6. **711/711 is not claimed.**
+
+### 2026-08-12 — T4: close-out, and what the record now says
+
+`planning/mission-index.md`'s SI17 row is flipped to **done**, carrying
+**710/711** and naming `besepi-37-rori892`. The original exit bar's "back to
+711/711" half is recorded as **falsified, not rewritten** — ADR-6's
+arithmetic disproved it as reachable by this mission alone.
+
+`.agent-notes/T8-member-ports-wrong-mechanism.md` is retired against commit
+`5e074b8f` with its original diagnosis preserved verbatim; it also flags the
+two claims in its own text that went stale (the backlog file is gone, and
+the `layout.test.ts` assertion it named was replaced).
+
+Three new notes filed for findings that would otherwise be re-derived:
+`si17-stale-frozen-count-and-closure-proof.md` (including the import-closure
+method, since the worktree baseline failed),
+`si17-rozuxo-object-row-port-producer.md`, and
+`si17-sametail-gate-blindness.md`.
+
+**No `DIVERGENCES.md` entry, deliberately.** Every change this mission made
+moved *toward* upstream structure, and the two open items are defects with
+named mechanisms and named owners (`besepi-37-rori892` → object-close B33;
+`rozuxo-44-fudi093` → its own mission), which the brief classes as backlog
+rather than divergence. Batch-2's exit clause is satisfied by its
+"named mechanism with a `file:line`" branch. An effort excuse is not a
+divergence, and neither is a tracked defect.
+
+Final gates: ✅ 575 files / 12795 tests / 1 todo · typecheck · lint · build.
