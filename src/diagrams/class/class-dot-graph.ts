@@ -33,7 +33,7 @@ import {
   type MeasuredClassifier,
 } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
-import { applyShapeAndPorts, edgePortAttrs } from './class-port-rows.js';
+import { applyShapeAndPorts, edgePortAttrs, classPortShortNamesById } from './class-port-rows.js';
 import type { EdgeGeo } from './layout.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
 
@@ -185,17 +185,36 @@ function buildDotEdgeAttrs(rel: Relationship, i: number, ctx: DotEdgeAttrContext
   return attrs;
 }
 
+/** Rendering inputs {@link buildDotEdges} needs beyond `ast`/`anchors` --
+ *  bundled purely to stay under the project's per-function param cap (T2
+ *  added `classPortShortNames` to what was already `font`/`measurer`/
+ *  `linetype`). */
+interface DotEdgesRenderCtx {
+  font: { family: string; size: number };
+  measurer: StringMeasurer;
+  linetype: Theme['linetype'];
+  /** T2: `classPortShortNamesById`'s output -- ADR-4's declared port-name
+   *  sets, `LIKE_CLASS_KINDS` leaves only. */
+  classPortShortNames: ReadonlyMap<string, Set<string>>;
+}
+
 function buildDotEdges(
   ast: ClassDiagramAST,
-  font: { family: string; size: number },
-  measurer: StringMeasurer,
   anchors: Map<string, string>,
-  linetype: Theme['linetype'],
+  render: DotEdgesRenderCtx,
 ): DotInputEdge[] {
+  const { font, measurer, linetype, classPortShortNames } = render;
   const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
-  const portRowIds = new Set(
-    ast.classifiers.filter((c) => c.kind === 'map').map((c) => c.id),
-  );
+  // ADR-3: unconditional whenever the TARGET carries row bands at all -- a
+  // `map` (its own flat-sizer bands) or a `LIKE_CLASS_KINDS` leaf with a
+  // declared port-name set (T2's `classPortShortNamesById`, ADR-4). Neither
+  // set membership depends on whether any row actually WON an election
+  // (`bicabi-42-coto932`'s dangling-port control) -- `edgePortAttrs` must
+  // not re-derive that from `portRows.length`.
+  const portRowIds = new Set([
+    ...ast.classifiers.filter((c) => c.kind === 'map').map((c) => c.id),
+    ...classPortShortNames.keys(),
+  ]);
   const ctx: DotEdgeAttrContext = { font, measurer, linetype, kindBIndices, portRowIds };
   return ast.relationships.map((rel: Relationship, i: number) => {
     const swap = dotEdgeRunsReversed(rel);
@@ -314,6 +333,9 @@ function buildOneDotNode(
   measuredMap: Map<string, MeasuredClassifier>,
   shielded: Map<string, { isPort: boolean }>,
   protectedIds: ReadonlySet<string>,
+  // T2: this leaf's declared `::member` port-name set (`classPortShortNamesById`),
+  // `undefined` for every classifier not in that map (ADR-4's gate).
+  portShortNames: ReadonlySet<string> | undefined,
 ): DotInputNode {
   const measured = measuredMap.get(classifier.id)!;
   // A lollipop circle is a fixed 10x10 (upstream `EntityImageLollipopInterface
@@ -331,7 +353,7 @@ function buildOneDotNode(
     height: isLollipop ? LOLLIPOP_SIZE : isAssocPoint ? ASSOC_POINT_SIZE : measured.height + pad,
   };
   const shield = shielded.get(classifier.id);
-  applyShapeAndPorts(node, classifier, measured, shield);
+  applyShapeAndPorts(node, classifier, measured, shield, portShortNames);
   return node;
 }
 
@@ -346,11 +368,14 @@ function buildDotNodes(
   measuredMap: Map<string, MeasuredClassifier>,
   anchors: Map<string, string>,
   protectedIds: ReadonlySet<string>,
+  classPortShortNames: ReadonlyMap<string, Set<string>>,
 ): DotInputNode[] {
   const shielded = shieldedClassifierIds(ast);
   const nodes = ast.classifiers
     .filter((classifier) => !anchors.has(classifier.id))
-    .map((classifier) => buildOneDotNode(classifier, measuredMap, shielded, protectedIds));
+    .map((classifier) => buildOneDotNode(
+      classifier, measuredMap, shielded, protectedIds, classPortShortNames.get(classifier.id),
+    ));
   for (const anchorId of anchors.values()) {
     // Width/height are ignored by the point emitter (hardcoded .01in).
     nodes.push({ id: anchorId, width: 1, height: 1, shape: 'point' });
@@ -373,6 +398,33 @@ function sepAttrs(theme: Theme): Partial<DotInputGraph> {
 }
 
 /**
+ * `buildDotNodes` + `buildDotEdges` (+ magma edges), sharing ONE
+ * `classPortShortNamesById` computation between them (T2, ADR-3/ADR-4) so
+ * they agree on exactly which classifiers carry `::member` row bands. Split
+ * out of `buildDotGraph` purely to keep that function's own NLOC under the
+ * project's per-function cap.
+ */
+function buildDotNodesAndEdges(
+  ast: ClassDiagramAST,
+  measuredMap: Map<string, MeasuredClassifier>,
+  anchors: Map<string, string>,
+  theme: Theme,
+  measurer: StringMeasurer,
+): { dotNodes: DotInputNode[]; dotEdges: DotInputEdge[] } {
+  const classPortShortNames = classPortShortNamesById(ast);
+  const dotNodes = buildDotNodes(
+    ast, measuredMap, anchors, computeGroupInheritanceProtectedIds(ast, theme), classPortShortNames,
+  );
+  const labelFont = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
+  // Magma standalone-chaining edges appended after the real relationship edges.
+  const dotEdges = [
+    ...buildDotEdges(ast, anchors, { font: labelFont, measurer, linetype: theme.linetype, classPortShortNames }),
+    ...buildClassMagmaEdges(ast, anchors),
+  ];
+  return { dotNodes, dotEdges };
+}
+
+/**
  * Build the dot input graph — all classifiers + notes flattened into the
  * root graph (D5) — plus the set of edge indices emitted `to -> from`
  * (`./class-dot-edge-order.ts#dotEdgeRunsReversed`).
@@ -390,11 +442,7 @@ export function buildDotGraph(
   // objects so the renderer geos built after this call agree.
   applySameClassWidthFloor(ast.classifiers, measuredMap, theme);
   const anchors = packageEndpointAnchors(ast, nonEmptyNamespaceIds(ast));
-  const dotNodes: DotInputNode[] = buildDotNodes(ast, measuredMap, anchors, computeGroupInheritanceProtectedIds(ast, theme));
-
-  const labelFont = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
-  // Magma standalone-chaining edges appended after the real relationship edges.
-  const dotEdges: DotInputEdge[] = [...buildDotEdges(ast, labelFont, measurer, anchors, theme.linetype), ...buildClassMagmaEdges(ast, anchors)];
+  const { dotNodes, dotEdges } = buildDotNodesAndEdges(ast, measuredMap, anchors, theme, measurer);
 
   // B6/M7: the indices whose dot edge `buildDotEdges` actually emitted as
   // `rel.to -> rel.from`. `class-edge-geo.ts#normalizeEdgePoints` reads this

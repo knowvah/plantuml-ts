@@ -20,8 +20,8 @@
  * `USA` and `3`.
  */
 
-import type { Classifier, ClassifierKind } from './ast.js';
-import type { MeasuredClassifier } from './class-layout-helpers.js';
+import type { Classifier, ClassDiagramAST, ClassifierKind } from './ast.js';
+import { formatMemberText, LIKE_CLASS_KINDS, type MeasuredClassifier } from './class-layout-helpers.js';
 import type { DotInputNode, DotInputPortRow } from '../../core/graph-layout.types.js';
 import { Ports } from '../../core/svek/Ports.js';
 import { VisibilityModifier } from '../../core/skin/VisibilityModifier.js';
@@ -136,24 +136,97 @@ function shouldMarkPort(shape: DotInputNode['shape'] | undefined, isShieldedPort
   return shape === 'plaintext' && isShieldedPort && kind !== 'map' && kind !== 'json';
 }
 
-/** Svek shape selection plus the two port mechanisms riding on it: the `:P`
- *  compass shield (`isPort`) and B1/M1's row bands (`portRows`). Split out of
- *  `class-dot-graph.ts#buildOneDotNode` for that function's CCN budget. */
+/**
+ * T2 (SI17): adapts the publish-only `MeasuredClassifier.portMemberSections`
+ * (`class-layout-generic-classifier.ts#buildNormalClassifierResult`) into
+ * `classPortRows`' own `PortRowCompartmentInput[]` shape, fields compartment
+ * first then methods (`classPortRows`' own doc comment / `BodierLikeClassOr
+ * Object#getBody`'s `mergeTB` order). A `undefined` compartment (SUPPRESSED,
+ * see `portMemberSections`'s doc comment) is OMITTED entirely, not passed as
+ * an empty one -- an omitted compartment contributes no `SECTION_MARGIN*2`
+ * floor at all, matching `fieldsH`/`methodsH` being 0 rather than 8.
+ *
+ * ADR-5, load-bearing: `text` is ALWAYS `formatMemberText(member, false)`,
+ * recomputed fresh from the member object -- NEVER `FlatMemberRows.texts`,
+ * which carries the visibility char whenever the caller measured with
+ * `noIcon` (`classAttributeIconSize 0`, `computeMemberSectionsGeo`'s own
+ * `formatMemberText(m, noIcon)` call). The election's input text and the
+ * member's RENDERED row text are two independently-resolved upstream calls
+ * (`MethodsOrFieldsArea.java`'s `convert` vs. `createTextBlock`), and only
+ * the former may reach `classPortRows`.
+ */
+function toPortCompartments(
+  sections: NonNullable<MeasuredClassifier['portMemberSections']>,
+): PortRowCompartmentInput[] {
+  const compartments: PortRowCompartmentInput[] = [];
+  for (const section of [sections.fields, sections.methods]) {
+    if (section === undefined) continue;
+    compartments.push({
+      members: section.members.map((member, i) => ({
+        text: formatMemberText(member, false),
+        height: section.builds[i]!.height,
+      })),
+    });
+  }
+  return compartments;
+}
+
+/** ADR-4 continued: `classPortRows` returns `[]` when every member loses its
+ *  election (`bicabi-42-coto932`'s zero-election control) -- `[]` is still
+ *  PRESENT, so the emitter still draws the one-trailer-row table. Split out
+ *  of {@link applyShapeAndPorts} purely for that function's CCN budget. */
+function classFamilyPortRows(
+  measured: MeasuredClassifier,
+  portShortNames: ReadonlySet<string>,
+): DotInputPortRow[] {
+  const compartments = measured.portMemberSections !== undefined
+    ? toPortCompartments(measured.portMemberSections)
+    : [];
+  return classPortRows(compartments, portShortNames, measured.portMemberSections?.headerHeight ?? 0);
+}
+
+/** ADR-4: the shape flip is on the DECLARED port-name COUNT, not on election
+ *  success -- written explicitly here (not left to fall out of `shield !==
+ *  undefined`, which happens to always be true in this same case since both
+ *  derive from the identical `rel.fromPort`/`toPort` scan) so the gate this
+ *  ADR names is visible at its own call site. Split out of {@link
+ *  applyShapeAndPorts} purely for that function's CCN budget. */
+function resolveNodeShape(
+  classifier: Classifier,
+  shield: { isPort: boolean } | undefined,
+  hasPortBands: boolean,
+): DotInputNode['shape'] | undefined {
+  return KIND_SHAPE[classifier.kind] ?? (shield !== undefined || hasPortBands ? 'plaintext' : undefined);
+}
+
+/** Svek shape selection plus the three port mechanisms riding on it: the
+ *  `:P` compass shield (`isPort`), a map's flat-sizer row bands, and (T2)
+ *  a class-family leaf's block-tree row bands (`portRows` on both). Split
+ *  out of `class-dot-graph.ts#buildOneDotNode` for that function's CCN
+ *  budget. */
 export function applyShapeAndPorts(
   node: DotInputNode,
   classifier: Classifier,
   measured: MeasuredClassifier,
   shield: { isPort: boolean } | undefined,
+  // T2: this leaf's `Entity#getPortShortNames()` (`classifierPortShortNames`),
+  // ONLY for a `LIKE_CLASS_KINDS` leaf -- see `class-dot-graph.ts`'s caller.
+  portShortNames: ReadonlySet<string> | undefined,
 ): void {
-  const shape = KIND_SHAPE[classifier.kind] ?? (shield !== undefined ? 'plaintext' : undefined);
+  const hasPortBands = portShortNames !== undefined && portShortNames.size > 0;
+  const shape = resolveNodeShape(classifier, shield, hasPortBands);
   if (shape !== undefined) node.shape = shape;
   if (shouldMarkPort(shape, shield?.isPort === true, classifier.kind)) node.isPort = true;
-  // A map is RECTANGLE_HTML_FOR_PORTS unconditionally (EntityImageMap
-  // #getShapeType, svek/image/EntityImageMap.java:245-247) -- even with zero
-  // rows, which is what makes `map map0` a row table with a lone trailer row
-  // rather than a shield. `portRows` being PRESENT (not its length) is what
-  // switches the emitter and the layout adapter over.
-  if (classifier.kind === 'map') node.portRows = mapPortRows(classifier, measured);
+  if (classifier.kind === 'map') {
+    // A map is RECTANGLE_HTML_FOR_PORTS unconditionally (EntityImageMap
+    // #getShapeType, svek/image/EntityImageMap.java:245-247) -- even with
+    // zero rows, which is what makes `map map0` a row table with a lone
+    // trailer row rather than a shield. `portRows` being PRESENT (not its
+    // length) is what switches the emitter and the layout adapter over.
+    node.portRows = mapPortRows(classifier, measured);
+  } else if (portShortNames !== undefined && hasPortBands) {
+    node.portRows = classFamilyPortRows(measured, portShortNames);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -353,4 +426,25 @@ export function classifierPortShortNames(
     if (rel.to === classifierId && rel.toPort !== undefined) names.add(rel.toPort);
   }
   return names;
+}
+
+/**
+ * T2 (SI17): {@link classifierPortShortNames}, ONE call per `LIKE_CLASS_KINDS`
+ * leaf rather than per-edge, indexed by classifier id -- mirrors
+ * `class-layout-helpers.ts#shieldedClassifierIds`'s own "precompute once
+ * over `ast.relationships`" precedent. Every other kind is excluded: `map`'s
+ * row bands are `mapPortRows`' own concern, and no other kind has a
+ * row-port producer yet (see `applyShapeAndPorts`'s doc comment). Consumed
+ * by `class-dot-graph.ts` to thread the SAME map to both node building
+ * (ADR-4's shape/`portRows` gate) and edge building (ADR-3's unconditional
+ * tailport/headport gate), so they agree on exactly which ids carry bands.
+ */
+export function classPortShortNamesById(ast: ClassDiagramAST): Map<string, Set<string>> {
+  const byId = new Map<string, Set<string>>();
+  for (const c of ast.classifiers) {
+    if (!LIKE_CLASS_KINDS.has(c.kind)) continue;
+    const names = classifierPortShortNames(c.id, ast.relationships);
+    if (names.size > 0) byId.set(c.id, names);
+  }
+  return byId;
 }
