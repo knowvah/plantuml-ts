@@ -51,7 +51,7 @@ import type { ClassDiagramAST, Classifier, Relationship } from './ast.js';
 import { isNoteId } from './class-notes.js';
 import { stripQuotes } from './class-relationship-parser.js';
 import { resolveArrow, parseArrowDecors } from './class-arrow-grammar.js';
-import { EDGE_DECORATION_MAP } from './class-dot-graph.js';
+import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
 import { EMPTY_SUBSUMED, subsumeExplicitAssociation } from './class-assoc-subsume.js';
 
 /**

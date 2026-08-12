@@ -6,7 +6,7 @@
  * symbol here was previously defined verbatim in that file).
  */
 import type { ClassDiagramAST, Relationship, LinkDecor } from './ast.js';
-import { EDGE_DECORATION_MAP } from './class-dot-graph.js';
+import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
 
 export interface SubsumedLink {
   a: string | undefined;
