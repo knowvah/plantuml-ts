@@ -1,6 +1,6 @@
 # Conformance: what "match" means (plantuml-ts)
 
-Adopted from graphviz-ts (`~/git/graphviz-ts/docs/conformance.md`). "Faithful"
+Adopted from graphviz-ts (`~/git/knowvah/dot-engine/docs/conformance.md`). "Faithful"
 is not a feeling and not byte-identity — it is a **graded, code-enforced
 verdict** against PlantUML as the oracle. This doc defines the verdicts; the
 `oracle/` harness is the code that assigns them.

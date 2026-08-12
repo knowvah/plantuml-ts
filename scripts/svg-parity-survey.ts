@@ -8,7 +8,7 @@
  * are overwhelmingly `diverged`, which proves the instrument rather than
  * signaling a regression). The survey never crashes on a bad fixture: every
  * render is isolated in a spawned `jiti` subprocess with a wall-clock
- * timeout, mirroring ~/git/graphviz-ts's test/corpus/survey.ts (a hang
+ * timeout, mirroring ~/git/knowvah/dot-engine's test/corpus/survey.ts (a hang
  * becomes `timeout`, a throw becomes `errored`). Verdict comparison logic
  * (`diffVerdict`, `isWellFormedSvg`) is ported near-verbatim from that
  * project's survey.ts.

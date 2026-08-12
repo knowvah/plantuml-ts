@@ -1,7 +1,7 @@
 /**
  * SVG parity dashboard — renders `tests/oracle/svg-conformance/PARITY-SVG.md`
  * from `parity.json` (scripts/svg-parity-survey.ts). Structural shape is a
- * near-verbatim port of ~/git/graphviz-ts's test/corpus/dashboard.ts, scoped
+ * near-verbatim port of ~/git/knowvah/dot-engine's test/corpus/dashboard.ts, scoped
  * to what T15 asks for: totals, per-verdict counts, per-family tables, and a
  * divergence ledger joined from `oracle/accepted-divergences.json` (that
  * project's triage-bucket backlog machinery is out of scope here — it is a

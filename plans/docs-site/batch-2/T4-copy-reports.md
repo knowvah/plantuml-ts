@@ -1,7 +1,7 @@
 # T4 — copy-reports pipeline
 
 ## Context
-Model: `~/git/graphviz-ts/docs-site/copy-reports.mjs` (read whole —
+Model: `~/git/knowvah/dot-engine/docs-site/copy-reports.mjs` (read whole —
 mirror + per-source link-rewrite table, gitignored copies, wired as
 the first step of docs:dev/docs:build).
 
@@ -20,9 +20,9 @@ header comment in each copy saying so).
   (delete the T3 stubs)
 
 ## Read-set
-- ~/git/graphviz-ts/docs-site/copy-reports.mjs (whole)
+- ~/git/knowvah/dot-engine/docs-site/copy-reports.mjs (whole)
 - docs/parity-report.md (T1 output), DIVERGENCES.md (T2 shape)
-- ~/git/graphviz-ts/package.json:43-46 (script wiring)
+- ~/git/knowvah/dot-engine/package.json:43-46 (script wiring)
 
 ## Acceptance criteria
 - Given `npm run docs:build`, when run, then the site contains parity

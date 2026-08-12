@@ -20,7 +20,7 @@ text.
 > diffs at the tolerance band.
 
 This is the same conformance model graphviz-ts uses for its dot-oracle
-parity survey (`~/git/graphviz-ts/docs/conformance.md`); the harness below
+parity survey (`~/git/knowvah/dot-engine/docs/conformance.md`); the harness below
 is a near-verbatim port of graphviz-ts's `normalize.ts` / `compare.ts`.
 
 ## Why not literal bytes?

@@ -80,7 +80,7 @@ All under `~/git/plantuml/src/main/java/net/sourceforge/plantuml/`.
 - **DOT-parity ratchet precedent:** `tests/oracle/description-parity.ratchet.test.ts`
   (91 ln) already ratchets DOT output — model the SVG ratchet's manifest
   handling on it, but goldens/manifest live under `oracle/` per D11.
-- **Dashboard model:** `~/git/graphviz-ts/test/corpus/dashboard.ts`
+- **Dashboard model:** `~/git/knowvah/dot-engine/test/corpus/dashboard.ts`
   renders `PARITY.md` from survey JSON; `survey.test.ts` adjacent.
 - **Current description renderer:** `renderer.ts` (143 ln) +
   `renderer-helpers.ts` (287 ln), emitting via `src/core/svg.ts` helpers

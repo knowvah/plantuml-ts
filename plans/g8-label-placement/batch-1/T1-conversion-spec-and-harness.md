@@ -5,7 +5,7 @@
 plantuml-ts (`/Users/scottseely/git/plantuml-ts`), TypeScript port of
 PlantUML (Java at `~/git/plantuml`; grep `src/main/java/net/`).
 graphviz-ts pinned layout library (READ-ONLY at
-`/Users/scottseely/git/graphviz-ts`). Real `dot` 15.1.0. Vitest;
+`/Users/scottseely/git/knowvah/dot-engine`). Real `dot` 15.1.0. Vitest;
 probes `scripts/_tmp-g8-t1-*.ts` via `npx tsx`, deleted before
 finish; Serena MCP for symbols.
 

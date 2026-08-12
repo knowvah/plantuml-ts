@@ -40,7 +40,7 @@ detailed `/plan-mission` starts from facts, not rediscovery.
 - `planning/mission-svg-conformance-2/README.md` (new)
 
 ## Read-set
-- `~/git/graphviz-ts/docs/conformance.md` (model), `test/corpus/PARITY.md`
+- `~/git/knowvah/dot-engine/docs/conformance.md` (model), `test/corpus/PARITY.md`
 - `../decisions.md`, `../README.md`
 - `.claude/catalog.md` (existing format)
 

@@ -16,7 +16,7 @@ renders that to markdown, exactly as graphviz-ts's
    row: `conformant | structural-match | diverged | oracle-error |
    errored | timeout` (structural-match = same normalized tree shape,
    numeric diffs beyond band; port the verdict logic graviz-ts's survey
-   uses where applicable — read `~/git/graphviz-ts/test/corpus/survey.test.ts`).
+   uses where applicable — read `~/git/knowvah/dot-engine/test/corpus/survey.test.ts`).
    Per-fixture timeout (default 10s) → `timeout`. Also record the DOT-
    EQUAL status from the dot-sync data so T18/T19 can filter eligibility.
    Output: `tests/oracle/svg-conformance/parity.json`.
@@ -35,7 +35,7 @@ renders that to markdown, exactly as graphviz-ts's
 - `package.json` (two scripts)
 
 ## Read-set
-- `~/git/graphviz-ts/test/corpus/{dashboard.ts,survey.test.ts}` + `PARITY.md` (shape)
+- `~/git/knowvah/dot-engine/test/corpus/{dashboard.ts,survey.test.ts}` + `PARITY.md` (shape)
 - `scripts/dot-sync-report.ts` (cache-reading precedent)
 - `tests/oracle/svg-conformance/compare.ts` (harness)
 

@@ -24,7 +24,7 @@ change any existing mode's behavior.
 
 ## Read-set
 - scripts/dot-sync-report.ts (whole)
-- ~/git/graphviz-ts/test/corpus/PARITY-dot.md (format inspiration)
+- ~/git/knowvah/dot-engine/test/corpus/PARITY-dot.md (format inspiration)
 - plans/docs-site/decisions.md#d1
 
 ## Interface contracts (consumed by T4)

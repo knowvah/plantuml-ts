@@ -5,7 +5,7 @@
 plantuml-ts (`/Users/scottseely/git/plantuml-ts`), TypeScript port of
 PlantUML (Java at `~/git/plantuml`; preserve upstream names with
 `@see`; port faithfully, no refactoring). graphviz-ts pinned
-(READ-ONLY at `/Users/scottseely/git/graphviz-ts`). Vitest; probes
+(READ-ONLY at `/Users/scottseely/git/knowvah/dot-engine`). Vitest; probes
 `scripts/_tmp-g8-t2-*.ts` via `npx tsx`, deleted before finish;
 Serena MCP; `npm run typecheck` after edits.
 

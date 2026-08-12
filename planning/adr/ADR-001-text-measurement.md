@@ -22,7 +22,7 @@ plugin, so graphviz falls back to its built-in `estimate_textspan_size`
 of that same routine, dependency-injected through a one-method `TextMeasurer`
 seam at every sizing call site. With both sides measuring identically, node
 sizes become **assertable, not tolerant**, and any residual is provably layout,
-not font. (See `~/git/graphviz-ts/docs/known-divergences.md`.)
+not font. (See `~/git/knowvah/dot-engine/docs/known-divergences.md`.)
 
 The question S1 asked: does the same move exist for PlantUML, or are we stuck
 with a tolerance band?
