@@ -1,0 +1,37 @@
+@startuml
+' Authored fixture (mission svg-output-size-reduction, T13-extra --
+' maintainer-supplied 2026-08-08). Covers, in ONE diagram, a combination
+' no hashed-corpus svg-class fixture exercises together:
+'   - all three visibility modifiers on fields/methods (- # +)
+'   - `extends` inheritance (two subclasses of one base)
+'   - an `interface` plus a realization edge (`..|>`)
+'   - a labelled association carrying BOTH endpoint cardinalities and a
+'     direction marker (`"1" -- "0..*" : owns >`)
+'   - a class declared AFTER the edge that references it (Toy)
+class Animal {
+  -name: String
+  #age: int
+  +makeSound(): void
+}
+
+class Dog extends Animal {
+  +breed: String
+  +fetch(): void
+}
+
+class Cat extends Animal {
+  +indoor: boolean
+  +scratch(): void
+}
+
+interface Pet {
+  +play(): void
+}
+
+Dog ..|> Pet
+Animal "1" -- "0..*" Toy : owns >
+
+class Toy {
+  +name: String
+}
+@enduml
