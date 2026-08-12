@@ -46,7 +46,7 @@ import { isEnhancedBody } from './class-body-enhanced.js';
 import { measureEnhancedBody } from './class-body-enhanced-layout.js';
 import type { Dim } from './class-object-map-header.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-header.js';
-import { floorAtMinimumWidth } from './class-object-map-sizing.js';
+import { floorAtMinimumWidth, objectBodyReportsPorts } from './class-object-map-sizing.js';
 import { objectDisplayText } from './class-object-display.js';
 import { buildObjectMemberRow } from './class-object-member-creole.js';
 import type { ObjectMemberRow } from './class-object-member-creole.js';
@@ -418,9 +418,11 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
   // field compartment. Mirrors `buildNormalClassifierResult`'s suppression
   // gate: omitted when SUPPRESSED (`showFields === false`), present
   // (possibly zero members) for shown-but-empty -- same gate `dividerYs`
-  // above uses, so the two empty states stay distinct. Not wired: unread
-  // for an object leaf until T2 adds it to `classPortShortNamesById`.
-  const portMemberSections = { headerHeight: title.height, ...(showFields ? { fields: flat } : {}) };
+  // above uses, so the two empty states stay distinct. SI20 T2 adds the
+  // SECOND omission: a `MinimumWidth`-wrapped body reports no ports at all,
+  // shape flip and edge ports notwithstanding -- `objectBodyReportsPorts`.
+  const bodyPorts = showFields && objectBodyReportsPorts(theme);
+  const portMemberSections = { headerHeight: title.height, ...(bodyPorts ? { fields: flat } : {}) };
 
   return {
     width, height, rows, portMemberSections,

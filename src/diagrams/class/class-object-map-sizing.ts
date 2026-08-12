@@ -50,3 +50,33 @@ export { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './
 export function floorAtMinimumWidth(width: number, theme: Theme, sname: string): number {
   return Math.max(width, resolveElementMinimumWidth(theme, sname) ?? 0);
 }
+
+/**
+ * SI20 T2: `MinimumWidth`'s SECOND consequence for an `object` leaf, and the
+ * only one that is not a width. `BodyEnhanced1#getArea` wraps its finished
+ * area in `TextBlockUtils.withMinWidth(area, minClassWidth, align)` whenever
+ * the value is > 0 (`~/git/plantuml/.../cucadiagram/BodyEnhanced1.java
+ * :182-184`), and `TextBlockMinWidth` does NOT implement `WithPorts`
+ * (`~/git/plantuml/.../klimt/shape/TextBlockMinWidth.java:45`) — so
+ * `BodyEnhanced1#getPorts`'s `area instanceof WithPorts` test (`:228-232`)
+ * fails and the body reports an EMPTY `Ports`, every member band with it.
+ *
+ * Jar-confirmed on SI20 T0's `ctl-minwidth.puml` control (`skinparam
+ * minClassWidth 300` over `rozuxo-44-fudi093`'s two objects, see that
+ * mission's decision journal): the node still flips to
+ * `RECTANGLE_HTML_FOR_PORTS` — `EntityImageObject#getShapeType` keys ONLY on
+ * `getPortShortNames().size()` (`svek/image/EntityImageObject.java:249-253`),
+ * never on what the body produced — and the edge still names both md5 port
+ * ids. Only the member `PORT=` rows go, leaving the lone filler row
+ * `<TD FIXEDSIZE="TRUE" WIDTH="300.0" HEIGHT="40">`.
+ *
+ * Object-only by construction, so it lives here rather than in
+ * `class-port-rows.ts`: a class leaf reaches `BodyEnhanced1` only through
+ * `BodierLikeClassOrObject#getBody`'s `isLikeClass() && isBodyEnhanced()`
+ * branch (`cucadiagram/BodierLikeClassOrObject.java:215-221`), never through
+ * the plain `asBlockMemberImpl` composition `classPortRows` models — and this
+ * engine publishes no `portMemberSections` for an enhanced body at all.
+ */
+export function objectBodyReportsPorts(theme: Theme): boolean {
+  return (resolveElementMinimumWidth(theme, 'object') ?? 0) <= 0;
+}

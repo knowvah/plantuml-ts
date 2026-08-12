@@ -20,8 +20,10 @@
  * `USA` and `3`.
  */
 
-import type { Classifier, ClassDiagramAST, ClassifierKind } from './ast.js';
-import { formatMemberText, LIKE_CLASS_KINDS, type MeasuredClassifier } from './class-layout-helpers.js';
+import type { Classifier, ClassDiagramAST, ClassifierKind, Member } from './ast.js';
+import { formatMemberText, type MeasuredClassifier } from './class-layout-helpers.js';
+import { isRowPortKind } from './class-shield-helpers.js';
+import { formatObjectMemberText } from './class-object-sizing.js';
 import type { DotInputNode, DotInputPortRow } from '../../core/graph-layout.types.js';
 import { Ports } from '../../core/svek/Ports.js';
 import { VisibilityModifier } from '../../core/skin/VisibilityModifier.js';
@@ -138,7 +140,8 @@ function shouldMarkPort(shape: DotInputNode['shape'] | undefined, isShieldedPort
 
 /**
  * T2 (SI17): adapts the publish-only `MeasuredClassifier.portMemberSections`
- * (`class-layout-generic-classifier.ts#buildNormalClassifierResult`) into
+ * (`class-layout-generic-classifier.ts#buildNormalClassifierResult`, and for
+ * an object leaf `class-object-sizing.ts#buildFieldBasedObjectGeo`) into
  * `classPortRows`' own `PortRowCompartmentInput[]` shape, fields compartment
  * first then methods (`classPortRows`' own doc comment / `BodierLikeClassOr
  * Object#getBody`'s `mergeTB` order). A `undefined` compartment (SUPPRESSED,
@@ -146,10 +149,10 @@ function shouldMarkPort(shape: DotInputNode['shape'] | undefined, isShieldedPort
  * an empty one -- an omitted compartment contributes no `SECTION_MARGIN*2`
  * floor at all, matching `fieldsH`/`methodsH` being 0 rather than 8.
  *
- * ADR-5, load-bearing: `text` is ALWAYS `formatMemberText(member, false)`,
- * recomputed fresh from the member object -- NEVER `FlatMemberRows.texts`,
- * which carries the visibility char whenever the caller measured with
- * `noIcon` (`classAttributeIconSize 0`, `computeMemberSectionsGeo`'s own
+ * ADR-5, load-bearing: `text` is ALWAYS recomputed fresh from the member
+ * object by {@link electionTextFor} -- NEVER `FlatMemberRows.texts`, which
+ * carries the visibility char whenever the caller measured with `noIcon`
+ * (`classAttributeIconSize 0`, `computeMemberSectionsGeo`'s own
  * `formatMemberText(m, noIcon)` call). The election's input text and the
  * member's RENDERED row text are two independently-resolved upstream calls
  * (`MethodsOrFieldsArea.java`'s `convert` vs. `createTextBlock`), and only
@@ -157,18 +160,36 @@ function shouldMarkPort(shape: DotInputNode['shape'] | undefined, isShieldedPort
  */
 function toPortCompartments(
   sections: NonNullable<MeasuredClassifier['portMemberSections']>,
+  electionText: (member: Member) => string,
 ): PortRowCompartmentInput[] {
   const compartments: PortRowCompartmentInput[] = [];
   for (const section of [sections.fields, sections.methods]) {
     if (section === undefined) continue;
     compartments.push({
       members: section.members.map((member, i) => ({
-        text: formatMemberText(member, false),
+        text: electionText(member),
         height: section.builds[i]!.height,
       })),
     });
   }
   return compartments;
+}
+
+/** SI20 ADR-2: the election's input is upstream's `Member.getDisplay(false)`,
+ *  and this port reconstructs that from the PARSED member with a different
+ *  function per parser -- `formatMemberText` for the class family
+ *  (`name: type`, `class-member-parser.ts`) and `formatObjectMemberText` for
+ *  an object leaf (`name = type`, plus G3/O4's `\t` unescape,
+ *  `class-object-commands.ts#parseObjectField`). Upstream needs only one
+ *  because it never re-splits the line -- `Member#getDisplay` returns the
+ *  stored display verbatim (`cucadiagram/Member.java:146-155`) -- so the
+ *  reconstructor here must match the parser that ran. T0 jar-verified the
+ *  object one against `getDisplay(false)` on a visibility-char control.
+ *  Picking the wrong one does NOT fail loudly: it silently elects a different
+ *  row, which is why `class-object-row-ports.test.ts` carries a purpose-built
+ *  `\t` control (rozuxo's bare-word members cannot tell the two apart). */
+function electionTextFor(kind: ClassifierKind): (member: Member) => string {
+  return kind === 'object' ? formatObjectMemberText : (member) => formatMemberText(member, false);
 }
 
 /** ADR-4 continued: `classPortRows` returns `[]` when every member loses its
@@ -178,9 +199,10 @@ function toPortCompartments(
 function classFamilyPortRows(
   measured: MeasuredClassifier,
   portShortNames: ReadonlySet<string>,
+  kind: ClassifierKind,
 ): DotInputPortRow[] {
   const compartments = measured.portMemberSections !== undefined
-    ? toPortCompartments(measured.portMemberSections)
+    ? toPortCompartments(measured.portMemberSections, electionTextFor(kind))
     : [];
   return classPortRows(compartments, portShortNames, measured.portMemberSections?.headerHeight ?? 0);
 }
@@ -201,7 +223,8 @@ function resolveNodeShape(
 
 /** Svek shape selection plus the four port/shield mechanisms riding on it:
  *  the `:P` compass shield (`isPort`), a map's flat-sizer row bands, (T2) a
- *  class-family leaf's block-tree row bands (`portRows` on both), and (B1)
+ *  class-family OR (SI20 T2) object leaf's block-tree row bands (`portRows`
+ *  on both), and (B1)
  *  the `:h` shield flag (`qualifierShielded`) -- `SvekNode#isShielded`'s
  *  `hasKal1`/`hasKal2` half, independent of the shape/port mechanisms above
  *  (svek/SvekNode.java:383-396; see `graph-layout.types.ts`'s field doc).
@@ -213,7 +236,7 @@ export function applyShapeAndPorts(
   measured: MeasuredClassifier,
   shield: { isPort: boolean; hasQualifier: boolean } | undefined,
   // T2: this leaf's `Entity#getPortShortNames()` (`classifierPortShortNames`),
-  // ONLY for a `LIKE_CLASS_KINDS` leaf -- see `class-dot-graph.ts`'s caller.
+  // ONLY for an `isRowPortKind` leaf -- see `class-dot-graph.ts`'s caller.
   portShortNames: ReadonlySet<string> | undefined,
 ): void {
   const hasPortBands = portShortNames !== undefined && portShortNames.size > 0;
@@ -229,7 +252,7 @@ export function applyShapeAndPorts(
     // length) is what switches the emitter and the layout adapter over.
     node.portRows = mapPortRows(classifier, measured);
   } else if (portShortNames !== undefined && hasPortBands) {
-    node.portRows = classFamilyPortRows(measured, portShortNames);
+    node.portRows = classFamilyPortRows(measured, portShortNames, classifier.kind);
   }
 }
 
@@ -437,8 +460,11 @@ export function classifierPortShortNames(
 }
 
 /**
- * T2 (SI17): {@link classifierPortShortNames}, ONE call per `LIKE_CLASS_KINDS`
- * leaf rather than per-edge, indexed by classifier id -- mirrors
+ * T2 (SI17): {@link classifierPortShortNames}, ONE call per
+ * `isRowPortKind` leaf (SI20 T2: that predicate, not `LIKE_CLASS_KINDS` --
+ * see its own doc comment in `class-shield-helpers.ts` for why `object`
+ * joined it and why `map`/`json` did not) rather than per-edge, indexed by
+ * classifier id -- mirrors
  * `class-shield-helpers.ts#shieldedClassifierIds`'s own "precompute once
  * over `ast.relationships`" precedent. Every other kind is excluded: `map`'s
  * row bands are `mapPortRows`' own concern, and no other kind has a
@@ -458,7 +484,7 @@ export function classifierPortShortNames(
 export function classPortShortNamesById(ast: ClassDiagramAST): Map<string, Set<string>> {
   const byId = new Map<string, Set<string>>();
   for (const c of ast.classifiers) {
-    if (!LIKE_CLASS_KINDS.has(c.kind)) continue;
+    if (!isRowPortKind(c.kind)) continue;
     const names = classifierPortShortNames(c.id, ast.relationships);
     if (c.portShortNames !== undefined) {
       for (const name of c.portShortNames) names.add(name);

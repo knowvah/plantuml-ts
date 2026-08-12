@@ -312,3 +312,70 @@ the body in `TextBlockMinWidth`, which does not implement `WithPorts`
 empty `Ports`. Jar-confirmed: the shape stays `RECTANGLE_HTML_FOR_PORTS`,
 the table emits one row with no `PORT=`, and the edge still names the port
 ids. T1 must reproduce the suppression, not guard against it.
+
+---
+
+### T2 — SCOPE DECISION: the MinimumWidth suppression lands outside the declared write-set (2026-08-12)
+
+T2's write-set is `class-port-rows.ts` + `class-shield-helpers.ts`. It also
+wrote `class-object-map-sizing.ts` (new `objectBodyReportsPorts`, 52 → 82
+lines) and `class-object-sizing.ts:421` (the call site). Accepted, on the same
+grounds and with the same precedent as SI17's T2, which expanded into
+`class-layout-generic-classifier.ts` and journalled it under this same
+heading (`5e074b8f`).
+
+**Why the declared seam could not hold it.** The suppression needs the
+resolved `MinimumWidth`, which means it needs `Theme`. `class-port-rows.ts`
+has no `Theme` at that seam, and `applyShapeAndPorts` is already at the
+hook-enforced 5-parameter cap — so threading one would have forced an edit to
+`class-dot-graph.ts`, which has 2 lines of headroom and whose modification is
+an explicit **stop condition** in this brief. The chosen site is also the
+architecturally correct one: upstream applies the wrapper at body
+construction (`BodyEnhanced1#getArea`), not at port emission.
+
+**The behavior, cited.** `BodyEnhanced1#getArea` wraps the area in
+`TextBlockUtils.withMinWidth(...)` when `PName.MinimumWidth > 0`
+(`cucadiagram/BodyEnhanced1.java:182-184`). `TextBlockMinWidth implements
+TextBlock`, **not** `WithPorts` (`klimt/shape/TextBlockMinWidth.java:45`), so
+`BodyEnhanced1#getPorts:228-232` returns an empty `Ports`. The shape still
+flips, because `getShapeType` keys only on the declared port-name **count**
+(`EntityImageObject.java:249-253`, SI17 ADR-4). Net effect, jar-confirmed:
+`RECTANGLE_HTML_FOR_PORTS` with a single row carrying no `PORT=`, while the
+edge still names the port ids.
+
+### T2 — diagnosis: the election reconstructor was the class one (2026-08-12)
+
+Found and fixed by T2 inside its own wiring, before the gates ran.
+
+- **Mechanism.** `toPortCompartments` rebuilt the election text with
+  `formatMemberText`, the **class** reconstructor, for object leaves too.
+  ADR-2 resolved the object election input as `formatObjectMemberText`.
+- **Origin.** `src/diagrams/class/class-port-rows.ts`, `toPortCompartments`.
+- **Causal chain.** The two disagree on reachable input (`\t` unescaping,
+  `=` vs `:`). `getScore`'s `\bshortName\b` tier is sensitive to exactly
+  that: a literal `\t` puts a word character where a real tab puts a word
+  boundary, dropping the score 100 → 50. `Ports#add` replaces only on a
+  strictly greater score, so the band is then handed to the wrong row.
+- **Ruled out.** Not caught by any gate: `rozuxo`'s members are bare words
+  that render identically under both reconstructors, so every count stayed
+  green while the code was wrong. The control that exposed it asserted
+  position 22 where the correct value is 36; it failed before the fix and
+  passes after.
+
+This is ADR-2's stated trap firing in the code rather than in the
+measurement — the brief predicted drift here would be *silent*, and it was.
+
+### T2 — gate state at this commit: RED by construction (2026-08-12)
+
+`npm test` exits 1 with exactly one failure:
+`rozuxo-44-fudi093 … expected [] to deeply equal [ 'portOk' ]`. The fixture
+now passes **every** check while `port-backlog.json` still pins it as a
+`portOk` failure. The ratchet asserts a backlog fixture fails `portOk` and
+nothing else, so passing completely is a failure of the pin, not of the port.
+T3 retires it in the next commit. Identical to SI17's T2, whose commit body
+records the same red state for the same reason.
+
+`portOk` is an **edge-endpoint** comparison and does not inspect the node
+table (`.agent-notes/si17-sametail-gate-blindness.md`), so T2 additionally
+checked the emitted `svek-1.dot` for `rozuxo` against the jar oracle
+directly: byte-identical whitespace-normalized, rows `36/14/18` and `50/14/4`.
