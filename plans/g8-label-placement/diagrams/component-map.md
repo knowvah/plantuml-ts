@@ -5,7 +5,7 @@
 skinparam componentStyle rectangle
 skinparam shadowing false
 
-package "graphviz-ts [graphviz-ts - READ ONLY]" {
+package "dot-engine [dot-engine - READ ONLY]" {
   [splines-label.ts place_vnlabel\ncomputes ED_label pos] as VN
   [api/geometry.ts\nEdgeGeometry.label x,y] as GEO
 }

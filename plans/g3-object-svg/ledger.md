@@ -122,7 +122,7 @@ AC1 + 1 AC2 + 1 AC3).
 |---|---|---|---|---|
 | 1 | Header row centering/baseline/textLength (object/map/json name + single stereo) | was ~40-64, now 0 (FIXED O0) | done | none — object-specific, new mechanism |
 | 2 | **DATA-row (object field / map cell / json entry) baseline+textLength** — SAME missing-`width`/wrong-half-height-Y pattern as #1, in `measureObjectFields`/`buildMapRowGeo`/`class-json-sizing.ts#buildJsonRows` (3 sibling functions, NOT touched by O0's fix). Jar-verified formula already derived (O0 triage): `y = cellTop + marginY + (fontSize - descent)` per row, `width = javaRound4(rawWidth)`. `x`/`indent` already correct (unaffected). | ~35-45 (post-O0 family scan: `text/@y` 50, `text/@lengthAdjust` 37, `text/@textLength` 39 reach, mostly this family now that #1 is fixed) | **HIGH — single largest O1 target**, same mechanism shape as #1, 3 call sites, formula pre-derived | none — object-specific, new mechanism |
-| 3 | `svg/g/g/path/@d` edge/spline geometry (graphviz-ts numeric divergence) | 41/80 (1346 individual diffs) | OUT OF SCOPE, no in-repo fix without the ADR-1 engine cutover | **= G2's `gvts-blocked`** (`plans/g2-class-svg/ledger.md` N67, ~288/718 in class) — same root mechanism, cross-attributed not re-drilled |
+| 3 | `svg/g/g/path/@d` edge/spline geometry (dot-engine numeric divergence) | 41/80 (1346 individual diffs) | OUT OF SCOPE, no in-repo fix without the ADR-1 engine cutover | **= G2's `gvts-blocked`** (`plans/g2-class-svg/ledger.md` N67, ~288/718 in class) — same root mechanism, cross-attributed not re-drilled |
 | 4 | Downstream canvas-dims (`viewBox`/`width`/`height`) | 48-62/80 | Mostly downstream of #3 (G2's own caveat: "not a 1:1 subset" — some fixtures combine a real structural/width bug). ≥1 CONFIRMED independent case: `gatefi-65-curu360` (`map0`/`map1`, both empty-body maps side-by-side — each map's OWN box width formula verified correct in isolation, yet the SECOND node's rendered X position is off by 16px; mechanism NOT yet root-caused, likely a DOT-node-size-vs-render-width rounding drift specific to zero-row maps) | Mostly OUT OF SCOPE (#3); the `gatefi` case needs dedicated instrumentation | Mostly `gvts-blocked`; `gatefi`'s own sub-case is UNRESOLVED, not yet attributable either way |
 | 5 | Multi-stacked-stereotype rendering split (`object X <<Bar>> <<Foo>>` draws as TWO stacked guillemet lines upstream, jar's `Stereotype#getLabels()`) — the PARSER already captures the correct raw blob (`class-object-stacked-stereo.test.ts`, upstream's own greedy-regex-collision quirk faithfully ported), but `headerRows`/`measureStereo` only ever wrap+draw it as ONE line | >=1 (`fafozi-27-reja300`), likely more with 2+ stacked stereotypes on object/map | Medium — well-scoped (parser output already correct; needs `Stereotype#getLabels()`-equivalent splitting + a 2nd/3rd stacked-line header layout, generalizing O0's now-single-stereo-line `headerRows`) | none — object-specific, new mechanism |
 | 6 | `<<tag>> { FontSize }` skinparam cascade for object/map/json headers | >=1 (`tenalu-53-meri239`, EXCLUDED from O0's own fix verification for this exact reason) | Medium-large — entirely unbuilt feature (no tag-cascade FontSize threading exists anywhere in `class-object-map-sizing.ts`/`class-json-sizing.ts`, unlike the generic class header's `row.fontSize` N23/N32 mechanism) | none — object-specific, new mechanism (analogous in SHAPE to class's N23/N32, but a fresh port for the object/map/json code path) |
@@ -618,7 +618,7 @@ jar-verified against the real golden numbers).
 **Census delta**: no NEW zero-diff fixture from this mechanism alone
 (`fafozi-27-reja300` moved 3 diffs -> 1 diff: `svg/@viewBox[2]`/`svg/@width`
 off by exactly 1px, traced to a `x=117.33` (jar) vs `x=117.33125` (ours)
-node-position float residual — a graphviz-ts numeric-layout artifact,
+node-position float residual — a dot-engine numeric-layout artifact,
 gvts-attributed, NOT a header-row regression; every stereo/name row
 position now matches jar EXACTLY where DOT positions are exact, e.g.
 `node1`'s own class-side rendering, confirming the mechanism itself is
@@ -780,7 +780,7 @@ DOT gate unchanged.
   SEPARATION delta, not a box-width or ink-extent issue) — jar's node
   positions (`rect x=7`/`x=107`) vs ours (`x=7`/`x=91`) diverge purely in
   the DOT-assigned horizontal spacing between two adjacent same-width empty
-  nodes. Reclassified as `gvts-blocked` (graphviz-ts numeric-layout
+  nodes. Reclassified as `gvts-blocked` (dot-engine numeric-layout
   divergence, same root category as the 41/80 `path/@d` family) — NOT a
   render-side bug, out of scope, closes O1's own open question.
 
@@ -1232,7 +1232,7 @@ mechanisms above first, accounting second):
 ### Full per-fixture attribution table (80/80 named)
 
 Every non-conformant fixture named to a specific mechanism — no anonymous
-misses. `gvts-blocked` = graphviz-ts edge-spline/node-separation numeric
+misses. `gvts-blocked` = dot-engine edge-spline/node-separation numeric
 layout divergence (permanent residue pending the dot-engine ADR-1 cutover,
 cross-attributed per the SVG-channel standing rule, not re-instrumented
 per-fixture). Fixtures are grouped by mechanism, not listed 80 times
@@ -1243,7 +1243,7 @@ GROUPING of that attribution, not a dominant-signature approximation.
 | Mechanism | Fixtures | Count |
 |---|---|---|
 | **Conformant (zero-diff)** | `beruju-17-jigi548`, `febadi-87-zozu271`, `figeze-77-fozi735`, `gizini-87-vuve916`, `janoma-30-dovo501`, `juciri-29-tamu404`, `kexica-21-gega428`, `lalizo-85-paxe277`, `lapato-45-neje847`, `niloru-34-nuve651`, `pagidu-67-doxa131`, `rotele-89-cuva650`, `sinepa-64-beze711`, `sobosi-40-xuda813`, `vozomu-86-rodo657`, `zagodo-28-ranu153` | 16 |
-| `gvts-blocked` — edge-spline `path/@d` family (graphviz-ts numeric divergence, ADR-1) | `beleso-08-ruca459`, `diveje-52-xefe514`, `fikojo-87-tine499`, `fonulu-92-libi014`, `fusopu-05-loxo960`, `gapisu-00-celo011`, `gubene-80-zume167`, `guzojo-14-muxa584`, `jaxere-74-cole479`, `kagope-09-kubu001`, `kavako-54-zipa815`, `kiluja-96-pado371`, `lafemo-98-ruri220`, `lecali-51-funo316`, `lijoda-62-teci632`, `lisepi-64-mudo307`, `lunike-70-xipi897`, `nitica-38-cere665`, `nukera-08-dige359`, `nulixu-97-nofi684`, `pavizi-27-xupe815`, `rocepa-35-gepo708`, `rozuxo-44-fudi093`, `ruloso-59-nato909`, `ruturo-47-kapi300`, `sarepa-89-cevi460`, `satuco-50-vusa163`, `sibika-09-sipu286`, `sigado-12-rina240`, `sivapa-41-sebu112`, `sivime-00-gudo607`, `sorisi-53-xebi982`, `style-stereotype-on-arrow-3`, `style-stereotype-on-arrow-7`, `tenalu-53-meri239`, `tobuka-93-jale775`, `togixe-65-bepo490`, `tujasu-04-nota700`, `vimavu-26-civo110`, `vocute-12-suxa445`, `zebufu-01-pevo013` | 41 |
+| `gvts-blocked` — edge-spline `path/@d` family (dot-engine numeric divergence, ADR-1) | `beleso-08-ruca459`, `diveje-52-xefe514`, `fikojo-87-tine499`, `fonulu-92-libi014`, `fusopu-05-loxo960`, `gapisu-00-celo011`, `gubene-80-zume167`, `guzojo-14-muxa584`, `jaxere-74-cole479`, `kagope-09-kubu001`, `kavako-54-zipa815`, `kiluja-96-pado371`, `lafemo-98-ruri220`, `lecali-51-funo316`, `lijoda-62-teci632`, `lisepi-64-mudo307`, `lunike-70-xipi897`, `nitica-38-cere665`, `nukera-08-dige359`, `nulixu-97-nofi684`, `pavizi-27-xupe815`, `rocepa-35-gepo708`, `rozuxo-44-fudi093`, `ruloso-59-nato909`, `ruturo-47-kapi300`, `sarepa-89-cevi460`, `satuco-50-vusa163`, `sibika-09-sipu286`, `sigado-12-rina240`, `sivapa-41-sebu112`, `sivime-00-gudo607`, `sorisi-53-xebi982`, `style-stereotype-on-arrow-3`, `style-stereotype-on-arrow-7`, `tenalu-53-meri239`, `tobuka-93-jale775`, `togixe-65-bepo490`, `tujasu-04-nota700`, `vimavu-26-civo110`, `vocute-12-suxa445`, `zebufu-01-pevo013` | 41 |
 | `gvts-blocked` — adjacent-node separation, no edges (shape-match to `gatefi-65-curu360`/`bepafe-03-teda035`'s own root-caused instrumentation) | `gatefi-65-curu360`, `bepafe-03-teda035`, `jabote-02-rajo672`, `baloca-83-nadu916`\* | 4 |
 | `awaiting-maintainer` — legacy tag-scoped `objectBackgroundColor<<X>>` (generic skinparam-to-style-cascade transform, broader than a narrow port) | `majake-62-pero492` | 1 |
 | `awaiting-maintainer` — DOT-topology, namespace/package nesting (O0 family #7) | `meloxo-38-jeti489`, `tusiri-92-catu943` | 2 |
@@ -1757,7 +1757,7 @@ O2.
 | Mechanism | Fixtures | Count |
 |---|---|---|
 | **Conformant (zero-diff)** | `beruju-17-jigi548`, `febadi-87-zozu271`, `figeze-77-fozi735`, `gizini-87-vuve916`, `janoma-30-dovo501`, `juciri-29-tamu404`, `kexica-21-gega428`, `kocupi-02-ripa662`, `lalizo-85-paxe277`, `lapato-45-neje847`, `lijoda-62-teci632`, `linazi-45-gevo553`, `niloru-34-nuve651`, `nufoju-44-dabi767`, `pagidu-67-doxa131`, `rotele-89-cuva650`, `sinepa-64-beze711`, `sobosi-40-xuda813`, `soxufi-98-nita528`, `vozomu-86-rodo657`, `xuvesu-44-laru205`, `zagodo-28-ranu153` | 22 |
-| `gvts-blocked` — edge-spline `path/@d` family (graphviz-ts numeric divergence, ADR-1) | `beleso-08-ruca459`, `diveje-52-xefe514`, `fikojo-87-tine499`, `fonulu-92-libi014`, `fusopu-05-loxo960`, `gapisu-00-celo011`, `gubene-80-zume167`, `guzojo-14-muxa584`, `jaxere-74-cole479`, `kagope-09-kubu001`, `kavako-54-zipa815`, `kiluja-96-pado371`, `lafemo-98-ruri220`, `lecali-51-funo316`, `lisepi-64-mudo307`, `lunike-70-xipi897`, `nitica-38-cere665`, `nukera-08-dige359`, `nulixu-97-nofi684`, `pavizi-27-xupe815`, `rocepa-35-gepo708`, `rozuxo-44-fudi093`, `ruloso-59-nato909`, `ruturo-47-kapi300`, `sarepa-89-cevi460`, `satuco-50-vusa163`, `sibika-09-sipu286`, `sigado-12-rina240`, `sivapa-41-sebu112`, `sivime-00-gudo607`, `sorisi-53-xebi982`, `style-stereotype-on-arrow-3`, `style-stereotype-on-arrow-7`, `tenalu-53-meri239`, `tobuka-93-jale775`, `togixe-65-bepo490`, `tujasu-04-nota700`, `vimavu-26-civo110`, `vocute-12-suxa445`, `zebufu-01-pevo013` | 40 |
+| `gvts-blocked` — edge-spline `path/@d` family (dot-engine numeric divergence, ADR-1) | `beleso-08-ruca459`, `diveje-52-xefe514`, `fikojo-87-tine499`, `fonulu-92-libi014`, `fusopu-05-loxo960`, `gapisu-00-celo011`, `gubene-80-zume167`, `guzojo-14-muxa584`, `jaxere-74-cole479`, `kagope-09-kubu001`, `kavako-54-zipa815`, `kiluja-96-pado371`, `lafemo-98-ruri220`, `lecali-51-funo316`, `lisepi-64-mudo307`, `lunike-70-xipi897`, `nitica-38-cere665`, `nukera-08-dige359`, `nulixu-97-nofi684`, `pavizi-27-xupe815`, `rocepa-35-gepo708`, `rozuxo-44-fudi093`, `ruloso-59-nato909`, `ruturo-47-kapi300`, `sarepa-89-cevi460`, `satuco-50-vusa163`, `sibika-09-sipu286`, `sigado-12-rina240`, `sivapa-41-sebu112`, `sivime-00-gudo607`, `sorisi-53-xebi982`, `style-stereotype-on-arrow-3`, `style-stereotype-on-arrow-7`, `tenalu-53-meri239`, `tobuka-93-jale775`, `togixe-65-bepo490`, `tujasu-04-nota700`, `vimavu-26-civo110`, `vocute-12-suxa445`, `zebufu-01-pevo013` | 40 |
 | `gvts-blocked` — adjacent-node separation, no edges (canvas-dimension rounding drift; shape-match, not independently re-instrumented for `jotaga`/`fafozi`) | `gatefi-65-curu360`, `bepafe-03-teda035`, `jabote-02-rajo672`, `baloca-83-nadu916`\*, `fafozi-27-reja300`\*\*, `jotaga-99-fatu830`\*\*\* | 6 |
 | `awaiting-maintainer` — legacy tag-scoped `objectBackgroundColor<<X>>` (generic skinparam-to-style-cascade transform, broader than a narrow port) | `majake-62-pero492` | 1 |
 | `awaiting-maintainer` — DOT-topology, namespace/package nesting | `meloxo-38-jeti489`, `tusiri-92-catu943` | 2 |
@@ -1771,7 +1771,7 @@ O2.
 
 \* `baloca-83-nadu916` — symptom-shape attribution only (per O3).
 \*\* `fafozi-27-reja300` — O2's own root-caused instrumentation
-(`x=117.33` jar vs `x=117.33125` ours, a graphviz-ts node-position float
+(`x=117.33` jar vs `x=117.33125` ours, a dot-engine node-position float
 residual); folded in here from O3's arithmetic gap, not re-instrumented.
 \*\*\* `jotaga-99-fatu830` — this iteration's own instrumentation (theme
 .strictUml toggle A/B, confirmed zero effect on node positions; NOT

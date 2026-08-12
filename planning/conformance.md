@@ -1,6 +1,6 @@
 # Conformance: what "match" means (plantuml-ts)
 
-Adopted from graphviz-ts (`~/git/knowvah/dot-engine/docs/conformance.md`). "Faithful"
+Adopted from dot-engine (`~/git/knowvah/dot-engine/docs/conformance.md`). "Faithful"
 is not a feeling and not byte-identity — it is a **graded, code-enforced
 verdict** against PlantUML as the oracle. This doc defines the verdicts; the
 `oracle/` harness is the code that assigns them.
@@ -17,14 +17,14 @@ activity, bespoke-layout) have only the SVG gate.
 | Gate | Compares | Applies to | Instrument |
 |------|----------|-----------|------------|
 | **DOT** | the DOT we feed graphviz vs PlantUML's svek DOT | svek types (description, class, state, object) | `scripts/dot-sync-report.ts`, `tests/oracle/svek-dot.ts`, the ratchet |
-| **SVG** | our final SVG vs PlantUML's SVG | every type | (to build — roadmap E4; graphviz-ts's `compareSvg` is the template) |
+| **SVG** | our final SVG vs PlantUML's SVG | every type | (to build — roadmap E4; dot-engine's `compareSvg` is the template) |
 
 The DOT gate fails fast: a structural DOT mismatch guarantees a broken SVG, so
 we stop there and never reach the SVG gate for that fixture.
 
 ## The verdicts (per gate, per fixture)
 
-Each fixture gets exactly one verdict, mirroring graphviz-ts:
+Each fixture gets exactly one verdict, mirroring dot-engine:
 
 | Verdict | Meaning |
 |---------|---------|
@@ -38,7 +38,7 @@ Each fixture gets exactly one verdict, mirroring graphviz-ts:
 
 `conformant` is the bar; `structural-match` is meaningful progress; everything
 else is a gap or an exclusion. **Report both `conformant %` and
-`structural-match %`** — the way graphviz-ts reports "91.1% conformant / 97.1%
+`structural-match %`** — the way dot-engine reports "91.1% conformant / 97.1%
 structural." Two numbers, because they answer different questions: *is the shape
 right* (structural) vs *is it right to the pixel* (conformant).
 
@@ -58,17 +58,17 @@ right* (structural) vs *is it right to the pixel* (conformant).
   `UnicodeFontWidthSansSerif` table our `WidthTableMeasurer` ports — proven
   per-glyph identical, 6×M = 0.969792 in both sides), node sizes become
   assertable within a tiny decimal-noise tolerance (±0.01 in, matching
-  graphviz-ts's deterministic class). `structural-match` + sizes-in-tolerance =
+  dot-engine's deterministic class). `structural-match` + sizes-in-tolerance =
   `conformant`.
 
 ## SVG-gate specifics — the ultimate bar (to build, roadmap E4)
 
 The DOT gate is a proxy: it proves the *input* to layout matches. The real
-product is SVG. The SVG gate is graphviz-ts's model applied to PlantUML output:
+product is SVG. The SVG gate is dot-engine's model applied to PlantUML output:
 parse both SVGs into a normalized element tree, then numeric-within-tolerance +
 non-numeric-exact. It is the **only** gate for non-svek types, and the final
 word for svek types once their DOT is conformant. Tolerance classes follow
-graphviz-ts (deterministic ±0.01; anything iterative looser + structural).
+dot-engine (deterministic ±0.01; anything iterative looser + structural).
 
 ## Vocabulary reconciliation
 
@@ -84,7 +84,7 @@ graphviz-ts (deterministic ±0.01; anything iterative looser + structural).
 
 ## Why this matters
 
-Same reason as graphviz-ts: byte-identity is untestable (float formatting,
+Same reason as dot-engine: byte-identity is untestable (float formatting,
 IEEE-754, platform libm), and "looks right" is unfalsifiable. A defined verdict
 pins the property a viewer actually sees, at a bound small enough to be
 sub-perceptual, and makes progress a number the ratchet defends rather than a

@@ -24,7 +24,7 @@ entity text, verified by grep — not ported) → this port's
 | `klimt/creole/StripeStyle.java` | NOT ported as a separate file — its 3 fields (type/order/style-char) live directly in `StripeClassification`'s discriminated union; `getHeader` (bullet-list atom) is out of L1 scope, so there was nothing left to justify a standalone wrapper class (YAGNI, journaled) |
 | `klimt/creole/CreoleContext.java` | NOT ported — only consumed by `StripeStyle#getHeader` (list numbering), out of L1 scope |
 | `klimt/creole/CreoleMode.java` | NOT ported as a type — this port has exactly one creole mode (always-FULL); see `CommandCreoleBuilder.ts`'s doc comment |
-| `com.plantuml.ubrex.*` (~30 files) | NOT ported — a general-purpose pattern-matching engine, out of mission charter (same category as graphviz-ts); `CommandCreoleStyle.ts` reproduces its three challenge classes' OBSERVABLE semantics directly, see decision journal |
+| `com.plantuml.ubrex.*` (~30 files) | NOT ported — a general-purpose pattern-matching engine, out of mission charter (same category as dot-engine); `CommandCreoleStyle.ts` reproduces its three challenge classes' OBSERVABLE semantics directly, see decision journal |
 
 Cutover: `src/core/svek/image/EntityImageDescriptionSupport.ts#buildTextBlock`
 (the single seam every descdiagram entity/cluster/stereotype text block goes
@@ -609,7 +609,7 @@ byte-untouched this iteration (grep-verified, zero diff against HEAD).
 |---|---|---|---|
 | `svg/@height`, `svg/@width` | 260, 243 | 260, 243 | leaf-sizing.ts creole-stripped-width/heading-font-height gap — already ledgered (E2r/L1 decision journal: "box/actor/usecase/note sizing formulas do not yet account for creole-style-markup-stripped width or heading-font-driven height growth") |
 | `svg/g/g/text/@x`, `@y` | 187, 175 | 940, 833 | downstream of the same leaf-sizing gap (text position is box-relative) |
-| `svg/g/g/path/@d` | 144 | 6259 | edge/spline routing + entity decoration paths — graphviz-ts layout territory (OUT OF SCOPE, `CLAUDE.md`) and/or downstream box-size cascade |
+| `svg/g/g/path/@d` | 144 | 6259 | edge/spline routing + entity decoration paths — dot-engine layout territory (OUT OF SCOPE, `CLAUDE.md`) and/or downstream box-size cascade |
 | `svg/g/g/rect/@x,@y,@width,@height` | 132/107/60/59 | — | same leaf-sizing family |
 | `svg/g/g/polygon/@points` | 125 | 3129 | decoration/shape geometry, same downstream cascade |
 | `svg/g/g[childCount]` | 76 | 158 | G1 I5's sub-families A–M (already classified: chrome nesting, multi-stereotype, bracket-body `\n`, transparent-color, link-endpoint, lollipop decor, sprite path-count, content-`<g>`-wrapper (I5g, queued), `<linearGradient>` count) — re-verified unchanged this iteration (I5's own sub-classification still applies; no new childCount sub-family observed) |

@@ -51,7 +51,7 @@ numerically-verified cases. Read those sections first, every iteration.
   minimum. The actor Y case is numerically closed (jar 5.5 = 6 − 0.5 ink
   offset); the X-axis formula has an OPEN sub-question (jar `x=7` does not
   cleanly reduce — resolve with jar evidence before generalizing).
-  graphviz-ts is RULED OUT with direct evidence (real-dot cross-check).
+  dot-engine is RULED OUT with direct evidence (real-dot cross-check).
   NOTE: G0 already ported the ink primitives — `LimitFinder`, `UGraphicNo`,
   `MinMax`, `TextBlockUtils.getMinMax` (src/core/klimt/...), used by the
   doc-dimension pass (`renderer-ink-extent.ts` per G1 ledger). The gap is
@@ -82,7 +82,7 @@ numerically-verified cases. Read those sections first, every iteration.
 Upstream spec: jar cached SVGs (`test-results/dot-cache/{component,usecase}/
 <slug>/in.svg`) + `~/git/plantuml/src/main/java/net/` (grep `net/`, never
 just `net/sourceforge/plantuml/`). Fix at origin — never post-hoc
-coordinate surgery. graphviz-ts is OUT OF SCOPE (pinned .tgz); before
+coordinate surgery. dot-engine is OUT OF SCOPE (pinned .tgz); before
 blaming it, run the real-dot cross-check (I7/I9 technique). Complexity-hook
 playbook per project memory (\x22 for quotes in src, string-built regexes
 for <>{}, no `new Array<T>()` call syntax, `// #lizard forgives` near fn

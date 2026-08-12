@@ -16,7 +16,7 @@ fixed constant. Byte comparison of two single-child composites shows the
 header-height constant recurs (19px on all three samples) but the side
 margin does not (16px vs 24px, tracking child content shape) —
 consistent only with real cluster-margin computation, not a derivable
-constant. graphviz-ts computes this bbox correctly (its rendered SVG
+constant. dot-engine computes this bbox correctly (its rendered SVG
 cluster polygon is byte-identical to real dot — see Procedure), but the
 public `getLayout()` snapshot exposes only `bounds`/`nodes`/`edges`, so
 a geometry consumer cannot obtain it. plantuml-ts's layout seam
@@ -45,11 +45,11 @@ sh0010->sh0011[arrowtail=none,arrowhead=none,minlen=1];
 
 ## Procedure
 
-Verified 2026-07-21 on graphviz-ts 0.1.26072013 vs real `dot -Tsvg`
+Verified 2026-07-21 on dot-engine 0.1.26072013 vs real `dot -Tsvg`
 (graphviz 15.1, /opt/homebrew/bin/dot):
 
 - real dot cluster polygon: `8,-100 8,-166 74,-166 74,-100 8,-100`
-- graphviz-ts `renderSvg` cluster polygon: byte-identical
+- dot-engine `renderSvg` cluster polygon: byte-identical
 - `getLayout(g)` after layout: snapshot keys are exactly
   `['bounds','nodes','edges']`; the string `cluster` appears nowhere in
   the serialized snapshot.
@@ -85,7 +85,7 @@ decede-10-buvu414, gojuja-90-pune699, bajelo-54-dixe684.
 
 ---
 
-**RESOLVED — graphviz-ts 0.1.26072115 (verified 2026-07-21).** The
+**RESOLVED — dot-engine 0.1.26072115 (verified 2026-07-21).** The
 `getLayout()` snapshot now includes a `clusters` array (`name`, `x`,
 `y`, `width`, `height`). Verified against real `dot -Tsvg` on both
 filed repros: the flat case returns cluster6 at 8,8 66×66 matching the

@@ -1303,7 +1303,7 @@ it is sized via graphviz's OWN cluster-label mechanism
 `materializeCluster`'s own `boundingBox(children)` recomputes a LOCAL
 approximation with a flat `BOX_PAD=12`, unrelated to graphviz's real
 cluster-label-reserved rectangle). Landing this would require: (1)
-exposing real cluster bounding boxes from the graphviz-ts layout result (a
+exposing real cluster bounding boxes from the dot-engine layout result (a
 library-level or `graph-layout.ts`-level change, the SAME class of item
 the mission brief's "fenced sub-item 4" describes, requiring census proof
 across ALL cluster-bearing diagram types before keeping it) OR (2)
@@ -2652,7 +2652,7 @@ scope).
    separate, larger item, unchanged in scope-size assessment from S5, but
    now much more precisely specified).
 2. **Mechanism 16** (entity-vs-cluster wrap dimension) — needs
-   `layoutGraph()`/graphviz-ts cluster-bbox exposure; re-confirmed
+   `layoutGraph()`/dot-engine cluster-bbox exposure; re-confirmed
    unbounded a third time, larger reach than previously known (7/27
    sampled).
 3. **`skin debug`/named-skin-file directive support** — a whole
@@ -3046,12 +3046,12 @@ change. No tighten-only edits made (nothing to tighten).
    still unstarted as its own scoped item (a preliminary look at
    `nelupe`'s own `[*]-to-chat1` diff shows OUR path has ~8 short
    piecewise-cubic segments vs jar's ONE clean 4-point cubic for what
-   should be a straight vertical edge — looks like a graphviz-ts/dot-layout
+   should be a straight vertical edge — looks like a dot-engine/dot-layout
    spline-simplification gap, not a state-diagram-specific bug; needs
    investigation in `core/graph-layout*`/`core/dot/` before any fix, not a
    quick formula tweak).
 2. **Mechanism 16** (entity-vs-cluster wrap dimension) — unchanged, needs
-   `layoutGraph()`/graphviz-ts cluster-bbox exposure.
+   `layoutGraph()`/dot-engine cluster-bbox exposure.
 3. **`<<meblue>>`-style stereotype-scoped `StateBorderColor` cascade gap**
    (S6's own item 11) — now the SOLE remaining blocker on
    `semala-31-joji042` (2 diffs, both this mechanism).
@@ -3072,7 +3072,7 @@ change. No tighten-only edits made (nothing to tighten).
     unchanged from S4.
 
 ## S8 — mechanism 19 (transition path/@d routing) LANDED in full: root
-cause was a missing `manualArrowheads: true` seam flag, NOT a graphviz-ts
+cause was a missing `manualArrowheads: true` seam flag, NOT a dot-engine
 routing/spline-simplification gap -- 16→39 pins (+23), the largest
 single-iteration jump this mission has seen
 
@@ -3095,7 +3095,7 @@ input, the natural next step was tracing WHY -- leading directly to
 `graph-layout-build.ts#addEdges`'s existing `manualArrowheads` flag
 (`DotInputGraph.manualArrowheads`, already landed for `class` in mission
 G2's own N29 and for `description` in mission G1's own I9): when unset,
-`addEdges` defaults to `arrowhead=normal` and graphviz-ts reserves a
+`addEdges` defaults to `arrowhead=normal` and dot-engine reserves a
 ~10-11px arrow-clip gap, EVEN when the edge itself carries
 `arrowtail=none,arrowhead=none` (state draws its arrowhead as an inline
 `<polygon>` at the raw spline endpoint, mission G4 S1 mechanism 3 -- the
@@ -3106,7 +3106,7 @@ flag, despite state having made the identical arrowhead-rendering switch
 `class` made. This is the SAME "seam invocation gap, not an engine bug"
 class of root cause G2 N29 already diagnosed -- confirming (not merely
 suspecting, per this iteration's own explicit attribution-first
-instruction) that S7's "looks like a graphviz-ts spline-simplification gap"
+instruction) that S7's "looks like a dot-engine spline-simplification gap"
 framing was UNVERIFIED and, once actually reproduced against real dot, WRONG.
 
 Landing the `manualArrowheads` fix alone immediately exposed a SECOND,
@@ -3147,7 +3147,7 @@ state-local post-hoc string patch, `renderer-pseudostate.ts
 | Fixture / family | Symptom (pre-S8) | Root cause | Attribution | Evidence |
 |---|---|---|---|---|
 | `nelupe-49-xova546` (`s7_2→chat1`, circle→rounded-rect, minlen=1) | Spline 3 segments, ~11.5px short of target boundary | Missing `manualArrowheads: true` (state's 3 `DotInputGraph` sites) + Catmull-Rom over-expansion (`buildPathD`) | **OURS** (consumer, both parts) | Real `dot -Tplain` on the pinned `svek-3.dot` golden reaches to within 0.27px of the target boundary; identical structure through `layoutGraph()` WITHOUT the flag stopped 11.5px short; raw (pre-render) `layoutState()` output already carried the correct 4-point/1-segment spline |
-| `pevene-26-kebo361` (`a→b`, box→box, `minlen=0`, same-rank) | 0.15-0.27px residual on interior control points, 27 diffs (all same shape ×3 regions) | Small (<0.5px), genuine graphviz-ts vs real-dot clip-inset difference for `minlen=0` same-rank straight edges | **LIBRARY** (small, unfiled — see below) | Minimal `layoutGraph()` probe with jar's EXACT `svek-1.dot` structure (2 boxes, `minlen=0`) reproduces the SAME ~0.27px start-inset delta vs real `dot -Tplain` on the identical input; node positions match exactly (gap=18 both), only the edge's OWN clip-into-gap amount differs |
+| `pevene-26-kebo361` (`a→b`, box→box, `minlen=0`, same-rank) | 0.15-0.27px residual on interior control points, 27 diffs (all same shape ×3 regions) | Small (<0.5px), genuine dot-engine vs real-dot clip-inset difference for `minlen=0` same-rank straight edges | **LIBRARY** (small, unfiled — see below) | Minimal `layoutGraph()` probe with jar's EXACT `svek-1.dot` structure (2 boxes, `minlen=0`) reproduces the SAME ~0.27px start-inset delta vs real `dot -Tplain` on the identical input; node positions match exactly (gap=18 both), only the edge's OWN clip-into-gap amount differs |
 | `kilato-12-laso661` (choice diamond) | Polygon `@points` token count 4 vs jar's 5 | `core/svg.ts#diamond` never repeats the first point to close the polygon | **OURS** (consumer) | jar's `<polygon points="162,86,174,98,162,110,150,98,162,86">` (5 pairs) vs our 4; fixed via `closeDiamondPoints`, now byte-token-exact |
 | `lalava-26-zosi801`, `tegali-39-molu382` (2 composites, each with concurrent regions) | `<path id>` says `*start*CONC1-...` for the SECOND composite's region, jar says `*start*CONC2-...` | `CONC<n>` bare-name numbering is diagram-GLOBAL in jar (`getUniqueSequence2`), per-composite-LOCAL in this port | **OURS** (consumer, diagnosed, NOT landed) | jar's own `data-qualified-name`s confirm `State2.CONC2...` (global), but `normalize.ts` strips ALL `data-*` attrs before comparison — the ONLY live-checked consumer is `renderer.ts#localScopeName`'s `<path id>` derivation |
 | `semala-31-joji042` (`<<meblue>>` stereotype) | `rect`/`line` `@stroke` `#181818` vs jar's `#0000FF` | `StateBorderColor<<X>>` stereotype-scoped skinparam entirely unimplemented (`core/skinparam.ts` discards ALL `<<tag>>` keys except `classBorderThickness<<X>>`) | **OURS** (consumer, diagnosed S6/S7, still blocked by write-set boundary) | `core/skinparam.ts`'s own `key.includes('<<')` early-branch comment names the ONE modeled exception; `StateBorderColor<<meblue>>` falls into `unknown[]` |
@@ -3270,7 +3270,7 @@ after every change.
    unimplemented-cascade family as S4's own `FontColor` finding
    (`lonuti-97-voko521`).
 7. Mechanism 16 (entity-vs-cluster wrap dimension) — unchanged, needs
-   `layoutGraph()`/graphviz-ts cluster-bbox exposure.
+   `layoutGraph()`/dot-engine cluster-bbox exposure.
 8. `skin debug`/named-skin-file directive support — unchanged, unscoped.
 9. `addStateBoxInk`'s max-corner asymmetry (`bilare`'s 1px rounding) —
    unchanged, exact fix named, unverified blast radius.
@@ -3532,7 +3532,7 @@ changes) — `state-dot-parity.test.ts` (size-backlog ratchet) stayed at
 8. **`maruju-55-soko478`'s json+composite childCount gap** (NEW, S9,
    symptom only) — root cause not yet isolated, needs a probe script pass.
 9. Mechanism 16 (entity-vs-cluster wrap dimension) — unchanged, needs
-   `layoutGraph()`/graphviz-ts cluster-bbox exposure. LARGEST family in the
+   `layoutGraph()`/dot-engine cluster-bbox exposure. LARGEST family in the
    near-zero bucket this iteration (10/31 sampled fixtures).
 10. `pevene-26-kebo361`'s minlen=0 same-rank clip-inset delta (S8) —
     unchanged, needs a second independent sample before filing to
@@ -3823,7 +3823,7 @@ affects NOTE nodes, which size-backlog.json's own 268 entries don't cover).
    `dajipi-09-doki542`, URL-inheritance + anchor-reference resolution +
    missing `State.url` AST field, re-scoped at S9.
 6. Mechanism 16 (entity-vs-cluster wrap dimension) — unchanged, LARGEST
-   family in the near-zero bucket, needs `layoutGraph()`/graphviz-ts
+   family in the near-zero bucket, needs `layoutGraph()`/dot-engine
    cluster-bbox exposure.
 7. **CONC-region bare-name global numbering** (S8/S9, unchanged) — exact
    Java call site pinned (`StateDiagram.java:194-208`, `cpt2`), still needs
@@ -3888,7 +3888,7 @@ arrowhead -- jar-verified DOM order).
 
 ### Deeper mechanism found while verifying: edge-label real-size injection
 ### gap (NEW, blocks note-on-link AND, unverified but likely, any real
-### guard/action label whose real rendered size diverges from graphviz-ts's
+### guard/action label whose real rendered size diverges from dot-engine's
 ### own internal guess)
 
 Jar-verifying the wired implementation against `vateco-92-pece508` (the
@@ -3898,25 +3898,25 @@ box landed 7px too far right and 5.8px too far up, AND `State1`'s own
 `<rect>` position (unrelated to the note itself) shifted 16.5px off from
 golden too. Instrumented (per diagnosis.md, BEFORE proposing any further
 fix) `state-dot-graph.ts#buildDotGraph` -> `core/graph-layout.ts#layoutGraph`
-directly: the raw graphviz-ts-computed node/edge positions differ from a
+directly: the raw dot-engine-computed node/edge positions differ from a
 label-less control graph by only ~16.5px of extra rank separation, matching
 the observed position error almost exactly. Traced to
 `graph-layout-build.ts#addEdges` (line ~186): `attrs.label = a.label` feeds
-graphviz-ts the RAW TEXT STRING only, plus `fontname: 'Times'` -- our own
+dot-engine the RAW TEXT STRING only, plus `fontname: 'Times'` -- our own
 `labelWidth`/`labelHeight` (`state-dot-graph.ts#edgeLabelAttrs`,
 `measureLinkNote`) are read back by `core/graph-layout.ts` (`entry.labelWidth
 = inp?.attributes?.labelWidth`) but this is a PURE ECHO for downstream
 consumers (e.g. `state-composite-cluster.ts`'s own width calc) -- grep-
 confirmed `graph-layout-build.ts` NEVER emits `labelWidth`/`labelHeight`/an
-HTML-table label into the actual DOT text/builder calls graphviz-ts lays out
-from. graphviz-ts instead computes its OWN label bounding box via
-`node_modules/graphviz-ts/src/common/make-label.ts#makePlainLabel`, which
+HTML-table label into the actual DOT text/builder calls dot-engine lays out
+from. dot-engine instead computes its OWN label bounding box via
+`node_modules/dot-engine/src/common/make-label.ts#makePlainLabel`, which
 calls a GLOBAL `TextMeasurer` (`core/graph-layout.ts#setTextMeasurer(new
 LutTextMeasurer())`, set ONCE at module load, no per-call override point) --
 this measurer's own per-line height (Times-font LUT) has no relationship to
 jar's real note-box height formula (13pt font + marginY(5)*2, mission G4
 S10's own `measureNote`). For `vateco`'s single-line "this is a note",
-graphviz-ts reserved only ~16.5px of extra rank gap where jar's real note
+dot-engine reserved only ~16.5px of extra rank gap where jar's real note
 needs 23px -- a ~6.5px under-reservation that cascades into every downstream
 position (the note box AND, since ink-extent/shift are diagram-global, the
 neighboring state box too).
@@ -3924,17 +3924,17 @@ neighboring state box too).
 Ruled out before landing this finding: (1) the `measureLinkNote` formula
 fix alone (already correct per this iteration's own re-derivation, matching
 `state-note-layout.ts#measureNote` exactly) does NOT fix this -- confirmed
-by grep that the override is architecturally unreachable from graphviz-ts's
+by grep that the override is architecturally unreachable from dot-engine's
 real layout call, not merely miscalibrated; (2) a `fontsize`-attribute-
-tuning workaround (inflating `attrs.fontsize` so graphviz-ts's own Times-LUT
+tuning workaround (inflating `attrs.fontsize` so dot-engine's own Times-LUT
 height calculation happens to land near 23px) was considered and REJECTED
 as unverified/fragile -- it would only work for the SPECIFIC 1-line case
 tuned against, would not generalize to jar's real `n*13+10` multi-line
-formula (graphviz-ts's own per-line accumulation has no additive `+10`
+formula (dot-engine's own per-line accumulation has no additive `+10`
 margin term to match), and constitutes exactly the kind of "guess to make
 progress" diagnosis.md prohibits; (3) a real HTML-table label injection
-(graphviz-ts DOES support an HTML label form via an internal control-
-character-prefixed marker, `node_modules/graphviz-ts/src/common/
+(dot-engine DOES support an HTML label form via an internal control-
+character-prefixed marker, `node_modules/dot-engine/src/common/
 html-string.ts`) is architecturally the CORRECT fix but is a substantial,
 unverified-blast-radius new mechanism (touches the shared `graph-layout-
 build.ts`/`core/graph-layout.ts` used by EVERY diagram type, not just
@@ -4060,15 +4060,15 @@ change to any sizing formula either.
 
 1. **Edge-label real-size injection gap** (NEW, S11, the mission's own
    deepest finding this iteration) -- `graph-layout-build.ts#addEdges`
-   passes edge labels to graphviz-ts as raw text only; the caller's real
+   passes edge labels to dot-engine as raw text only; the caller's real
    `labelWidth`/`labelHeight` (`state-dot-graph.ts#edgeLabelAttrs`) is never
    fed into the actual layout call, only echoed back for OTHER downstream
    consumers. Blocks `note ... on link` (and, unverified but plausible, any
-   guard/action label whose real size diverges materially from graphviz-ts's
+   guard/action label whose real size diverges materially from dot-engine's
    own Times-LUT guess -- no currently-pinned fixture exercises a REAL guard/
    action label to confirm either way, a gap worth closing FIRST in S12).
-   The architecturally-correct fix is an HTML-table label (graphviz-ts DOES
-   support this via `node_modules/graphviz-ts/src/common/html-string.ts`'s
+   The architecturally-correct fix is an HTML-table label (dot-engine DOES
+   support this via `node_modules/dot-engine/src/common/html-string.ts`'s
    own control-character-prefixed marker) -- a shared-infrastructure change
    (`core/graph-layout.ts`/`graph-layout-build.ts`, used by EVERY diagram
    type), needing its OWN careful, cross-diagram-verified iteration, not a
@@ -4122,13 +4122,13 @@ this iteration)
 ### Fenced item: edge-label real-size injection gap
 
 Followed the task's own two-step protocol in full. Step 1 (determine whether
-graphviz-ts can accept an explicit edge-label size): read jar's cached svek
+dot-engine can accept an explicit edge-label size): read jar's cached svek
 DOT for a real labeled edge (`test-results/dot-cache/state/bajelo-54-dixe684/
 svek-2.dot:11`) -- confirmed jar's own DOT emission uses an HTML-table label
 (`label=<<TABLE BGCOLOR="..." FIXEDSIZE="TRUE" WIDTH=".." HEIGHT="..">
 <TR><TD></TD></TR></TABLE>>`), the EXACT shape `svek-dot-emit.ts#labelTable`
 already emits for the (test-only) DOT-parity comparison channel. Then read
-graphviz-ts's BUNDLED runtime source (`node_modules/graphviz-ts/dist/
+dot-engine's BUNDLED runtime source (`node_modules/dot-engine/dist/
 index.js`, not just its `.d.ts` -- the library's public `exports` map does
 not expose `common/html-string.js`/`common/htmltable.js` as importable
 subpaths at the pinned version) to confirm the mechanism end-to-end:
@@ -4146,7 +4146,7 @@ with a disposable 2-node/1-edge probe script (`scripts/_tmp-s12-probe.mjs`,
 deleted before finishing) BEFORE writing any production code: a plain-text
 `"hi"` vs. `"this is a note"` label produced an IDENTICAL 52.5px rank gap
 (same fontsize/line-count -> same Times-LUT height, confirming the text
-CONTENT doesn't matter to graphviz-ts's OWN plain-text sizing), while an HTML
+CONTENT doesn't matter to dot-engine's OWN plain-text sizing), while an HTML
 label with `HEIGHT="23"` vs. `HEIGHT="100"` produced a strictly larger gap
 (59px vs. 136px) tracking the DECLARED height, not the (empty) cell content.
 
@@ -4192,7 +4192,7 @@ already names this as NOT FULLY CLOSED, a same-iteration S4 attempt to
 measure label ink inline was jar-verified to overshoot a different fixture
 and was reverted in favor of this floor). `result.*` is EXACTLY the raw
 `layoutGraph()` canvas size the fenced item changes: BEFORE the fix,
-graphviz-ts's default-14pt-Times guess for the internal transition's real
+dot-engine's default-14pt-Times guess for the internal transition's real
 (smaller, state's own ~11-13pt) label text happened to OVER-reserve rank gap
 relative to the real font -- an accidental, uncredited compensation the
 pre-existing floor bug was silently benefiting from. Feeding the REAL
@@ -4209,7 +4209,7 @@ after, not just the same count; class 303/718; object 22/80; description
 48/355; DOT gate frozen EXACTLY `component 262/262 - usecase 90/90 - class
 708/708 - object 78/80 - state 267/267`) -- no currently-pinned or near-zero
 fixture exercises a real guard/action label whose size diverges enough from
-graphviz-ts's own guess to matter, and `note ... on link` (the mechanism's
+dot-engine's own guess to matter, and `note ... on link` (the mechanism's
 own intended beneficiary, per S11's queue) was not re-wired this iteration.
 Unlike every prior mission mechanism-landing iteration's own "mixed-direction
 unmasking with a net positive" pattern, this landing had a real cost (12
@@ -4437,7 +4437,7 @@ mechanism 24). No entry was tightened or widened.
    `attachTransitionLabel`'s own placement formula (`state-transition-
    label.ts`) -- `attachTransitionLabel` currently derives its position from
    the routed spline's OWN midpoint, never from `edgeResult.labelX/labelY`
-   (graphviz-ts's real computed label position, now correct once the
+   (dot-engine's real computed label position, now correct once the
    injection lands) at all, which may itself be part of the fix.
 2. **`note ... on link`** (S10/S11, blocked on item 1 above) -- render shape
    + DOM order + X-position formula already derived and jar-verified
@@ -4503,7 +4503,7 @@ length (`"hi"` vs `"this is a note"` both 88.5px gap on a synthetic 2-node
 probe graph); an HTML label's rank gap tracked the DECLARED HEIGHT exactly
 (`HEIGHT="23"` -> 95px gap, `HEIGHT="100"` -> 172px gap). Confirmed
 `HTML_STRING_MARK = "\x01"` via direct byte inspection of
-`node_modules/graphviz-ts/dist/index.js` (`od -c`), matching S12's own
+`node_modules/dot-engine/dist/index.js` (`od -c`), matching S12's own
 finding exactly. Implemented `graph-layout-build.ts#addEdges`'s
 `htmlSizedLabel`/`applyEdgeLabelAttrs` (`HTML_LABEL_MARK =
 String.fromCharCode(1)`), TDD-first (`tests/unit/core/graph-layout.test.ts`,
@@ -4595,7 +4595,7 @@ Compared jar's REAL rendered `<text>` element (from `bemena-23-zebu249`'s
 own cached golden SVG, `lnk16`'s "EvNewValueSaved" label: absolute
 `x="262.86"`, `textLength="111.475"`; local x = 255.86 (abs 262.86 minus
 `Configuring`'s own doc-frame origin x=7), right edge = 367.335 local)
-against a naive centered box built from graphviz-ts's own real `labelX`/
+against a naive centered box built from dot-engine's own real `labelX`/
 `labelWidth` for the SAME edge (center 317.94, our own measured
 `labelWidth`=120.05, half-width 60.025, right edge = 377.965 -- off from
 jar's real right edge by 10.63px). Two independent, COMPOUNDING gaps:
@@ -5207,7 +5207,7 @@ pre-S15 `parity-state.json`), which unmasked BOTH of its edges' own
 `path/@d` control-point deltas (2-8 units, well past the 0.01 tolerance) —
 a genuinely different, pre-existing mechanism (`dotEqual: true` was already
 confirmed true before S15, meaning graphviz's own STRUCTURAL graph matches;
-the divergence is in the exact spline COORDINATES graphviz-ts computes for
+the divergence is in the exact spline COORDINATES dot-engine computes for
 this specific self-loop/short-edge shape). Ruled out: NOT the already-named
 `pevene-26-kebo361` clip-inset gap (that one is sub-0.5px, this is 2-8px, a
 different order of magnitude); NOT the edge-label-injection mechanism
@@ -6134,7 +6134,7 @@ The `xexika-61-fedu273` fixture itself: fixing the `o--`/`x-->` decoration child
 
 #### pevene minlen=0 same-rank clip-inset delta — 1 fixture(s)
 
-A genuine, sub-0.5px graphviz-ts vs real-dot clip-inset delta on same-rank `minlen=0` edges (S8) -- reproduced, not yet filed, needs a second independent sample.
+A genuine, sub-0.5px dot-engine vs real-dot clip-inset delta on same-rank `minlen=0` edges (S8) -- reproduced, not yet filed, needs a second independent sample.
 
 
 | Fixture | Evidence |

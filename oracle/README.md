@@ -13,7 +13,7 @@ One patched jar, one render pass, **two reference artifacts**:
 
 The verdict vocabulary (`conformant` / `structural-match` / `diverged`
 + exclusion buckets) is defined in `planning/conformance.md` — adopted from
-graphviz-ts. This section is how the DOT gate is staged; that doc is what the
+dot-engine. This section is how the DOT gate is staged; that doc is what the
 verdicts mean.
 
 ## Staged gate — fail fast at DOT
@@ -41,7 +41,7 @@ The stage that fails **is** the triage bucket:
   sizes, the text-metrics sub-problem). Only structural divergence fails fast.
 - **SVG gate** — only reached when the layout input already matched, so a failure
   here isolates cleanly to plantuml-ts's **drawing** layer. Keep it **tolerant**:
-  plantuml-ts lays out via graphviz-ts while the oracle lays out via PlantUML's
+  plantuml-ts lays out via dot-engine while the oracle lays out via PlantUML's
   own graphviz, so small layout deltas leak in even when the DOT matches. For
   non-Svek types (sequence + bespoke renderers) the SVG gate is the only gate.
 

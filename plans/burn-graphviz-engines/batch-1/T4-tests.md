@@ -13,7 +13,7 @@ rule (`decisions.md#d5`) so `npm test` is green.
    sameport, splines, tailport, and any other importing `src/core/dot/*`), and
    `tests/unit/auto-layout.test.ts`. Confirm each by grep before deleting.
 2. **Skip** (`describe.skip`, with comment
-   `// pending graphviz-ts adapter — see plans/burn-graphviz-engines/handoff-adapter.md`)
+   `// pending dot-engine adapter — see plans/burn-graphviz-engines/handoff-adapter.md`)
    every test that exercises a dark type's **layout, renderer, or full pipeline**:
    `tests/unit/{class,component,state,usecase,dot,json}/{layout,renderer}.test.ts`,
    `tests/unit/json/plugin.test.ts`, `tests/unit/dot/index.test.ts` &
@@ -50,4 +50,4 @@ Reversible — `git checkout` restores deleted/edited tests.
 
 ## Quality bar
 `npm test` green. Commit: `test(layout): drop engine tests, skip dark-type tests
-pending graphviz-ts`.
+pending dot-engine`.

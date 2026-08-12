@@ -6,7 +6,7 @@ majority of the gvts-blocked class/object fixtures.
 
 **Finding (g2 ledger N61):** same DOT text → real dot resolves the
 nested node's center to a fractional x (`32.32`, matching the jar);
-graphviz-ts `getLayout()` resolves it to the exact integer `32`.
+dot-engine `getLayout()` resolves it to the exact integer `32`.
 Node SIZE matches; only the sub-pixel position differs.
 
 ## Repro DOT
@@ -31,8 +31,8 @@ sh0010 [shape=rect,label="",width=0.213368,height=0.555556];
 
 ## Procedure
 
-Run through real `dot -Tsvg` and graphviz-ts; compare sh0010's center
-x. Real dot: 32.32. graphviz-ts: 32.00.
+Run through real `dot -Tsvg` and dot-engine; compare sh0010's center
+x. Real dot: 32.32. dot-engine: 32.00.
 
 ## Evidence trail
 
@@ -40,7 +40,7 @@ x. Real dot: 32.32. graphviz-ts: 32.00.
 
 ---
 
-**RESOLVED — graphviz-ts 0.1.26072013 (verified 2026-07-20).** Repro DOT
+**RESOLVED — dot-engine 0.1.26072013 (verified 2026-07-20).** Repro DOT
 re-run through `renderSvg`/`getLayout` vs real `dot -Tsvg` (graphviz 15.1):
 full SVG geometry stream byte-identical to real dot on the repro (sh0010
 polygon at 32.32-fractional coords). Consumer-side adoption of HTML-table

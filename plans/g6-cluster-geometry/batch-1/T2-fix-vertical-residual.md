@@ -25,10 +25,10 @@ comments citing the jar/C origin (`@see` convention). Set values in
 `src/diagrams/state/state-composite-cluster.ts` if a per-cluster
 input is needed.
 
-**Path B — fixLocation 'graphviz-ts':** file the finding under
+**Path B — fixLocation 'dot-engine':** file the finding under
 `docs/graphviz-issues/` (self-contained: finding, census impact,
 minimal DOT repro, evidence pointer) + one TRACKER.md checklist line;
-implement the fix in `../graphviz-ts` (separate repo — mirror its
+implement the fix in `../dot-engine` (separate repo — mirror its
 own conventions); build + pin the new `.tgz`; bump the
 `package.json` pin here; check the tracker box only after fixtures
 re-measure clean.
@@ -52,7 +52,7 @@ input is required), `tests/unit/state/layout.test.ts`,
 `oracle/goldens/state/size-backlog.json`.
 Path B: `docs/graphviz-issues/*` (new file + TRACKER.md),
 `package.json` + lockfile (pin bump), `tests/unit/state/layout.test.ts`,
-`oracle/goldens/state/size-backlog.json`; plus `../graphviz-ts`
+`oracle/goldens/state/size-backlog.json`; plus `../dot-engine`
 (external repo — its own commit, per its own conventions).
 
 ## Read-set
@@ -84,7 +84,7 @@ green before finishing.
 - Do not modify side-margin logic (innerMarginLevels mechanism is
   final) except to sit new code beside it.
 - Never widen a backlog entry; never touch `insideAutonomPass`.
-- No git mutations (orchestrator commits; Path B's graphviz-ts commit
+- No git mutations (orchestrator commits; Path B's dot-engine commit
   is also orchestrator-run).
 
 ## Observability

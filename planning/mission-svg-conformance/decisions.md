@@ -8,7 +8,7 @@ shape-inventory adaptation around the homegrown `svg.ts` emitter.
 - **Context:** jar vs current-`svg.ts` SVGs are structurally incomparable
   (verified: same fixture → `6 g/5 path/3 text/2 polygon/2 ellipse` vs
   `12 marker/7 polygon/4 line/2 rect/2 circle/…`). With the emitter mirroring
-  `SvgGraphics.java`, graphviz-ts's positional tree-walk becomes valid.
+  `SvgGraphics.java`, dot-engine's positional tree-walk becomes valid.
 - **Decision:** port `~/git/knowvah/dot-engine/test/golden/normalize.ts` (163 ln)
   and `compare.ts` (~400 ln) **near-verbatim**, walker included. No
   shape-inventory layer. Renderers gain an SVG gate only when migrated.
@@ -33,11 +33,11 @@ shape-inventory adaptation around the homegrown `svg.ts` emitter.
   be **fully conformant**: zero diffs at the 0.01 band via `compareSvg`.
   Includes the document preamble (root attrs + `<?plantuml?>` PI) so Brief 2
   inherits a root-comparable document. Outward term: **conformant** —
-  numeric agreement within ±0.01, non-numeric exactly equal (graphviz-ts
+  numeric agreement within ±0.01, non-numeric exactly equal (dot-engine
   `docs/conformance.md` definition). Never “byte-level” in docs.
 
 ## D5′ — Divergence accounting (the PARITY.md model)
-- **Context:** graphviz-ts `test/corpus/PARITY.md`: 759/788 conformant,
+- **Context:** dot-engine `test/corpus/PARITY.md`: 759/788 conformant,
   **0 tracked gaps** — every non-conformance is an accepted divergence:
   root-caused, bounded (maxΔ), family-classified, ledgered in
   `accepted-divergences.json` + `known-divergences.md`.
@@ -48,9 +48,9 @@ shape-inventory adaptation around the homegrown `svg.ts` emitter.
   Brief 2's dashboard generates the PARITY-style report.
 
 ## D6 — XML parsing: `@xmldom/xmldom` devDependency
-- Same parser graphviz-ts uses. Dev-only; never bundled.
+- Same parser dot-engine uses. Dev-only; never bundled.
 
-## D7 — Conformance band: 0.01 (graphviz-ts TOLERANCES model)
+## D7 — Conformance band: 0.01 (dot-engine TOLERANCES model)
 - `TOLERANCES = { deterministic: 0.01 }`; per-case pass = zero diffs beyond
   band; numeric attrs + path/points/transform numbers banded, everything
   else exact.
@@ -60,7 +60,7 @@ shape-inventory adaptation around the homegrown `svg.ts` emitter.
   carries the existing `Paint` model (`src/core/paint.ts`, render-fidelity
   mission). Drivers serialize via `paintToSvg`. The full HColor system is
   NOT ported.
-- **Harness normalize (T1):** adds jar-specific normalization graphviz-ts
+- **Harness normalize (T1):** adds jar-specific normalization dot-engine
   doesn't need: resolve `style="k:v;…"` into attrs (style wins, then drop),
   strip `data-*` attrs and comments/PI. Needed so Brief 2 can compare
   jar output whose paint rides in `style=""`.

@@ -28,7 +28,7 @@ package "After — mirrors ClassDiagramFactory" {
   [dispatcher] as dispB
   [class engine\n+ CommandCreateEntityObject\n+ …Multilines + AddData\n+ CommandCreateMap] as clsB
   [class layout+renderer\n+ object/map sizing] as layB
-  [class-dot-graph → graphviz-ts] as dotB
+  [class-dot-graph → dot-engine] as dotB
 }
 
 dispB --> clsB : accepts: class object map …

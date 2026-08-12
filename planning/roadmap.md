@@ -48,7 +48,7 @@ object, json, yaml, hcl, board, chronology, files, packetdiag, chart. ~15 of
   and the bespoke-layout types) — depth is eyeball-only today.
 
 ### Layout engines
-- **dot**: delegated to `graphviz-ts` (external, pinned as a tarball, npm
+- **dot**: delegated to `dot-engine` (external, pinned as a tarball, npm
   pending). This is the right call and is working.
 - **neato, fdp, sfdp, circo, twopi, osage**: functional *stubs*, not authentic
   Graphviz ports. Fine for types that only need "a layout"; wrong for anything
@@ -96,7 +96,7 @@ Each has a mission-guide.md entry with Java sources and reuse targets.
 16. **Regex** (`@startregex`) — regex → railroad IR (after EBNF).
 17. **Wire** (`@startwire`) — schematic grid.
 18. **Flow** (`@startflow`) — golem grid (Track SI-4); alpha-doc only.
-19. **DOT passthrough** (`@startdot`) — feeds user DOT straight to graphviz-ts;
+19. **DOT passthrough** (`@startdot`) — feeds user DOT straight to dot-engine;
     needs `common/{arrows,shapes,htmltable,labels}.c` for shape/arrow attrs.
 
 ### C. Shared infrastructure tracks (unblock multiple types)
@@ -120,7 +120,7 @@ Each has a mission-guide.md entry with Java sources and reuse targets.
 
 ### E. Ecosystem / packaging
 29. **Markdown integration** (Phase 6) — autoload, markdown-it, remark plugins.
-30. **graphviz-ts npm cutover** — swap the pinned tarball for the release.
+30. **dot-engine npm cutover** — swap the pinned tarball for the release.
 
 ---
 
@@ -143,9 +143,9 @@ These need a spike or a decision before they become missions.
   twopi; if the stub looks fine against upstream, we may never need the port.
   **Spike:** oracle-diff the stub engines on their consuming types before
   committing to any port.
-- **SVG rendering fidelity vs. graphviz-ts.** Once our DOT matches the oracle,
-  remaining visual deltas are graphviz-ts's layout output vs. PlantUML's native
-  graphviz. graphviz-ts is ~91% conformant on extreme graphs (maintainer's
+- **SVG rendering fidelity vs. dot-engine.** Once our DOT matches the oracle,
+  remaining visual deltas are dot-engine's layout output vs. PlantUML's native
+  graphviz. dot-engine is ~91% conformant on extreme graphs (maintainer's
   number). Unknown how much of the residual visual gap is ours vs. theirs until
   we have a DOT-matched SVG-diff pass.
 - **`!include <stdlib>` surface area.** How much of the C4/AWS/archimate/etc.
@@ -172,7 +172,7 @@ Not predictions; postures.
 - **Upstream drift.** PlantUML ships continuously; the oracle jar is pinned to
   one SHA. Long-lived divergences will appear as upstream changes behavior.
   Re-pin deliberately and re-baseline the ratchets when we do.
-- **graphviz-ts is a moving dependency.** It's mid-refactor. Its algorithm
+- **dot-engine is a moving dependency.** It's mid-refactor. Its algorithm
   changes can shift our SVG output without any change on our side. The tarball
   pin is the guard; refreshes must be journaled and re-baselined.
 - **Preprocessor is a Turing tarpit.** `!procedure`/`!function`/`%invoke` +

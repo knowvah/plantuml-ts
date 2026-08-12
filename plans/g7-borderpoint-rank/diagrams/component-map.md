@@ -9,7 +9,7 @@ package "plantuml-ts" {
   [state-composite-cluster.ts\ngate + titleTableHeight + O-O fix] as SCC
   [graph-layout-build.ts\naddClusters: ee/i/rank branch] as GLB
   [graph-layout.types.ts\nDotInputCluster seam] as GLT
-  [graphviz-ts .tgz\nREAD-ONLY, pinned] as GVTS
+  [dot-engine .tgz\nREAD-ONLY, pinned] as GVTS
   [state-composite-geo.ts\nmaterializeCluster] as GEO
   [state-composite-frontier.ts\nFrontierCalculator - committed, unwired] as FC
   [renderer-composite-box.ts\nunchanged] as REN

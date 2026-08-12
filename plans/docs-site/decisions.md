@@ -6,7 +6,7 @@ CI cannot run the oracle jar (5,800-fixture corpus, local cache).
 `scripts/dot-sync-report.ts --markdown` (additive flag) writes
 `docs/parity-report.md` locally; the file is COMMITTED;
 `docs-site/copy-reports.mjs` mirrors it into the site at build time
-with link rewrites. Mirrors graphviz-ts (`test/corpus/PARITY-dot.md` →
+with link rewrites. Mirrors dot-engine (`test/corpus/PARITY-dot.md` →
 `copy-reports.mjs`). Regenerating the report joins the parity-mission
 close-out convention (A3/A4 keep it current); CI never needs the jar.
 

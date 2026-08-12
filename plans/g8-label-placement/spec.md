@@ -10,7 +10,7 @@ not a formula defect.** §2's box computation is proven exact for pesita's
 own pass (9/9 labeled edges, ground-truth-matched against the jar's cached
 `svek-3.dot`, including both multi-line labels), but a full-seam simulation
 (every edge in the pass given its jar-exact FIXEDSIZE box simultaneously)
-shows graphviz-ts still does not reproduce jar's node ORDERING for this
+shows dot-engine still does not reproduce jar's node ORDERING for this
 pass's `Idle`/`Reanimate`/`Closing` cycle (`Idle`/`Closing` end up in
 exactly reversed left-right order; ranks/Y match jar exactly). See §5 for
 the full evidence, ruled-out list, and verdict. Per stop condition 5, this
@@ -276,7 +276,7 @@ result against the frozen oracle `in.svg`'s real entity boxes:
 
 ### 5.4 Verdict
 
-This is a **real divergence** between graphviz-ts's layout of this
+This is a **real divergence** between dot-engine's layout of this
 box-corrected pass and jar's actual cached layout: a left-right node-ordering
 (mincross) decision, not a rank or box-sizing difference. It is consistent
 with — and very plausibly the SAME root cause as — the already-diagnosed,
@@ -358,7 +358,7 @@ the ±epsilon boundary and the zero-allowed/pin-only path).
 
 `src/core/graph-layout-build.ts#addClusters` never wired
 `DotInputCluster.portRanks`/`portAnchorId`/`portRanksLabelOnEe` into the REAL
-graphviz-ts layout builder call — these fields were consumed only by the
+dot-engine layout builder call — these fields were consumed only by the
 Svek-DOT TEXT emitter (`svek-dot-emit.ts`, for the DOT-parity oracle
 comparator), never by the actual `layoutGraph()` seam. Jar's
 `ClusterDotString.printRanks` (`Cluster.java`'s `RANK_SOURCE`/`RANK_SINK`,
@@ -403,19 +403,19 @@ ended at `return handles;` with no port-rank handling at all).
    autonom-composite box dimensions — see "Ruled out" below — not a T1b
    defect).
 
-### Bisection table (disposable text-probe ablations, DOT-text `parse()` against real graphviz-ts, using pesita's own node ids/sizes/structure)
+### Bisection table (disposable text-probe ablations, DOT-text `parse()` against real dot-engine, using pesita's own node ids/sizes/structure)
 
 | Dimension varied | Result |
 |---|---|
 | Flat node declaration order (T16 unchanged / removed / jar-first-mention-exact) | Never alone reproduces jar's order — always either `Idle<Reanimate<Closing` (T16-shape) or `Reanimate<Closing<Idle` (no-T16 shape) |
 | Edge registration order (lines0-first vs unchanged) | No effect once flat node order is fixed |
-| `cluster.nodeIds` reorder (Closing-first, mirroring `getNodesOrderedTop`) | Zero effect — node CREATION already happened via the flat `addNodes` pass; a later subgraph-membership reference (`agsubnode`) never reorders `root.nodes` (confirmed by reading `graphviz-ts/src/model/cgraph-ops.ts#agnode`: first-mention order is fixed at `root.nodes.set()`, a `Map` — insertion-ordered) |
+| `cluster.nodeIds` reorder (Closing-first, mirroring `getNodesOrderedTop`) | Zero effect — node CREATION already happened via the flat `addNodes` pass; a later subgraph-membership reference (`agsubnode`) never reorders `root.nodes` (confirmed by reading `dot-engine/src/model/cgraph-ops.ts#agnode`: first-mention order is fixed at `root.nodes.set()`, a `Map` — insertion-ordered) |
 | `addEdge`-before-`addNode` auto-vivification (mimicking jar's implicit node creation via an edge statement) | Zero effect — confirms creation-order hypotheses are not the mechanism |
 | AA's outer "a" wrapper / inner "i" wrapper (present vs absent) | Zero effect on order in all 4 combinations |
 | AA's "ee" WithLabel wrapper + FIXEDSIZE title reservation | Zero effect on order (with or without `{rank=sink;...}` present) |
 | Plain-text `label="AA"` on AA's own cluster (vs blank) | Zero effect |
 | **`{rank=sink; aa_ok_ex;}` constraint inside AA's cluster** | **Necessary AND sufficient** — flips `Idle(138)<Reanimate(298)<Closing(645)` to `Closing(273)<Reanimate(643)<Idle(718)` (jar-exact order) regardless of every other dimension above |
-| Rank-group subgraph name `cluster1ranksink` (starts with "cluster") vs `__portrank_N` | **Critical naming pitfall**: `cluster1ranksink` is silently promoted to a real nested CLUSTER by graphviz-ts's bare `name.toLowerCase().startsWith('cluster')` detection (`graphviz-ts/src/layout/dot/rank.ts:89`), reproducing the WRONG order even with the rank constraint logically present. Confirmed by dumping the built `Graph` model's subgraph tree directly (not assumed) — production code uses `__portrank_N`, never `cluster`-prefixed. |
+| Rank-group subgraph name `cluster1ranksink` (starts with "cluster") vs `__portrank_N` | **Critical naming pitfall**: `cluster1ranksink` is silently promoted to a real nested CLUSTER by dot-engine's bare `name.toLowerCase().startsWith('cluster')` detection (`dot-engine/src/layout/dot/rank.ts:89`), reproducing the WRONG order even with the rank constraint logically present. Confirmed by dumping the built `Graph` model's subgraph tree directly (not assumed) — production code uses `__portrank_N`, never `cluster`-prefixed. |
 
 ### Ruled out
 
@@ -433,10 +433,10 @@ ended at `return handles;` with no port-rank handling at all).
   ablations (flat order × 3, edge order × 1, cluster.nodeIds × 1, auto-
   vivify-via-edge × 1) — none reproduce jar's order in isolation or combined
   with each other. Confirmed instead that feeding jar's LITERAL `svek-3.dot`
-  through `graphviz-ts`'s own `parse()` (no builder API at all) reproduces
+  through `dot-engine`'s own `parse()` (no builder API at all) reproduces
   jar's exact positions (`sh0012`=266.0, `sh0011`=629.0, `sh0010`=704.0,
   matching real `dot -Tplain`'s own output to 2 decimals) — proving
-  graphviz-ts itself is not the defect; the defect is specifically the
+  dot-engine itself is not the defect; the defect is specifically the
   missing `portRanks` wiring in this port's construction.
 - **AA's "a"/"i"/"ee" wrapper nesting and title-table reservation**: ruled
   out as unnecessary for THIS defect specifically (4-way + label-presence
@@ -473,7 +473,7 @@ pins, 149/149 size-delta measurements unchanged, zero widened).
 Mincross order: `Closing(273.0) < Reanimate(643.0) < Idle(718.0)` — matches
 jar's real order `Closing(249.0) < Reanimate(612.0) < Idle(687.0)` exactly
 (same relative ordering; residual offset is the pre-existing sizing gap
-above, not an ordering defect). Per-edge label centre (raw graphviz-ts
+above, not an ordering defect). Per-edge label centre (raw dot-engine
 coordinate, pre-shift) for all 9 labeled edges in this pass, confirming
 every edge now resolves a label position (none fall back to
 `undefined`/orphan handling):
@@ -576,7 +576,7 @@ height, jar-verified exact independently) against the port's own
   per-line text measurement — out of this task's write-set and D5 scope
   (not a round/floor question; both mechanisms are equally wrong there).
   Logged for a future task, not filed as a `docs/graphviz-issues/` entry
-  (this is a port-side measurement gap, not a graphviz-ts finding).
+  (this is a port-side measurement gap, not a dot-engine finding).
 - 28 slugs have at least one title where `floor(width) !== round(width)`
   (i.e. this fix changes real production DOT output for them): `cakaxu-97-
   nexe753, cesifo-37-rugu443, desebo-47-maro096, dikipu-79-noko487, dogeji-46-
@@ -607,9 +607,9 @@ mission's own "do not re-litigate" instruction for the third):
 2. T2's (separately owned, out of this task's write-set) edge-label
    FIXEDSIZE fix already reproduces jar's edge-label terms exactly
    (`W=69/62 H=15`, spec §1a/§2, 11/11 anchor matches jar-verified).
-3. graphviz-ts is byte-faithful given byte-identical input (orchestrator's
+3. dot-engine is byte-faithful given byte-identical input (orchestrator's
    own prior verification, "Decisive facts" section above: jar's own
-   `svek-2.dot` run through graphviz-ts equals real `dot -Tsvg`, 0.00 on
+   `svek-2.dot` run through dot-engine equals real `dot -Tsvg`, 0.00 on
    every node).
 
 Once T2 relands (its own task, including whatever relaxation of

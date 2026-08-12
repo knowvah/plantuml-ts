@@ -15,11 +15,11 @@ lockfiles, except where noted.
 | plantuml-ts | KaTeX | ^0.16.45 | supported line | CVE-2025-23207 (XSS, fixed 0.16.21) | OK — pinned range already patched |
 | plantuml-ts | jsonc-parser | ^3.3.1 | supported | — | OK |
 | plantuml-ts | Playwright | ^1.40 | rolling | — | Update available (minor) |
-| graphviz-ts | Node.js (engines) | 26.3.1 | Node 26 → LTS Oct 2026 | — | OK (Current line) |
-| graphviz-ts | TypeScript | ^6.0 + native-preview 7.x | current | — | OK |
-| graphviz-ts | esbuild | ^0.28.1 | rolling | — | OK |
-| graphviz-ts | Vitest | ^4.1.9 | current | — | OK |
-| graphviz-ts | Peggy | ^5.0 | current | — | OK |
+| dot-engine | Node.js (engines) | 26.3.1 | Node 26 → LTS Oct 2026 | — | OK (Current line) |
+| dot-engine | TypeScript | ^6.0 + native-preview 7.x | current | — | OK |
+| dot-engine | esbuild | ^0.28.1 | rolling | — | OK |
+| dot-engine | Vitest | ^4.1.9 | current | — | OK |
+| dot-engine | Peggy | ^5.0 | current | — | OK |
 | plantuml | JVM / PlantUML | 1.2026.7beta3 | upstream, not shipped here | (upstream-tracked) | N/A — reference only |
 
 ## Notes and reasoning
@@ -28,18 +28,18 @@ lockfiles, except where noted.
 Node 18 (the README's stated floor) reached **EOL in April 2025** and
 Node 20 EOLs in 2026. The **Active LTS is Node 24** (EOL Apr 30 2028;
 enters Maintenance Oct 2026). Node 22 is Maintenance LTS (EOL Apr 2027).
-Node 26 (graphviz-ts's `engines` pin) is the **Current** line, promoted
+Node 26 (dot-engine's `engines` pin) is the **Current** line, promoted
 to LTS in October 2026. From Node 27 the odd/even distinction is dropped
 — annual April majors, LTS every October.
 **Recommendation:** raise plantuml-ts's supported floor to Node 24 LTS;
-graphviz-ts's Node 26 pin is fine but is a Current (not yet LTS) line.
+dot-engine's Node 26 pin is fine but is a Current (not yet LTS) line.
 
 ### TypeScript
 **TypeScript 6.0 shipped March 2026** (6.0.3 on Apr 16 2026) as the last
 JS-based compiler, a transition release toward the Go-based **TS 7.0**
 (native port, mid/late 2026). 6.0 turns `--strict` on by default, drops
 ES5 targets and classic Node module resolution. plantuml-ts on `^5.4` is
-a major behind; graphviz-ts is already on `^6.0` and trialing the TS 7
+a major behind; dot-engine is already on `^6.0` and trialing the TS 7
 native preview (`@typescript/native-preview`).
 **Recommendation:** plan the 5.4 → 6.0 migration for plantuml-ts
 (strict-by-default and module-resolution changes are the main risks).
@@ -52,7 +52,7 @@ Vite 7 dropped Node 18. plantuml-ts is on `^5.0`.
 
 ### Vitest
 Vitest **1.x is EOL**; only 4.1 (and the immediately prior minor/major)
-receive fixes. plantuml-ts is on `^1.0`; graphviz-ts on `^4.1.9`.
+receive fixes. plantuml-ts is on `^1.0`; dot-engine on `^4.1.9`.
 **Recommendation:** upgrade plantuml-ts to Vitest 4.x (coincides with
 Vite upgrade; the two share a release train).
 
@@ -71,7 +71,7 @@ dependency ranges (the one relevant CVE, KaTeX XSS, is already patched by
 the pinned range). The health gap is **staleness, not vulnerability**:
 plantuml-ts's build/test toolchain (Node floor, TypeScript, Vite,
 Vitest) trails current supported lines by roughly one major each and
-should be modernized together. graphviz-ts is current.
+should be modernized together. dot-engine is current.
 
 ## Sources
 - [Node.js — endoflife.date](https://endoflife.date/nodejs)

@@ -63,7 +63,7 @@ package "diagrams" {
 [D] as D
 [J] as J
 [stub — this mission] as STUB
-[graphviz-ts.getLayout] as GVT
+[dot-engine.getLayout] as GVT
 
 C --> GL
 CO --> GL

@@ -21,7 +21,7 @@ accepted-divergence entry; no loose pinning, no untracked residue.
    — assert `pass === true`. On failure the message names the case + first
    diff path. Also assert determinism: two runs, identical strings.
 3. Bootstrap `oracle/accepted-divergences.json` as an empty ledger with the
-   graphviz-ts schema (id, verdict, maxΔ, class, bound, ref). **Adding an
+   dot-engine schema (id, verdict, maxΔ, class, bound, ref). **Adding an
    entry requires maintainer sign-off — that is a STOP, not a judgment
    call** (README constraint).
 

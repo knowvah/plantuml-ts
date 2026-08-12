@@ -5,7 +5,7 @@
 Replace `attachTransitionLabel`'s hand-rolled perpendicular-offset
 formula (`LABEL_PERP=12`, `state-transition-label.ts`) with the jar's
 actual mechanism: consume the graphviz-computed edge-label position
-that graphviz-ts already exposes (`EdgeGeometry.label` → the port's
+that dot-engine already exposes (`EdgeGeometry.label` → the port's
 `DotLayoutResult.labelX/labelY`, currently thrown away). The jar
 never computes label geometry — it reads dot's returned position
 (`SvekEdge#getXY` color-scan). The class diagram already made this
@@ -102,7 +102,7 @@ run git mutations.
    stop; no variants without human sign-off.
 7. Any fixture-conditional branch would be required to pass a gate
    (D5: no special-casing, ever).
-8. NEVER modify `../graphviz-ts`. If `EdgeGeometry.label` proves
+8. NEVER modify `../dot-engine`. If `EdgeGeometry.label` proves
    wrong vs real dot: file `docs/graphviz-issues/` + PAUSE, no local
    fix.
 9. A pinned fixture exercises the changed code despite the

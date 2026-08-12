@@ -36,7 +36,7 @@ sh0009->sh0008[arrowtail=none,arrowhead=none,minlen=1];
 ## Procedure
 
 Real `dot -Tsvg` on this text produces polyline (straight-segment)
-edges; graphviz-ts produces curved splines regardless.
+edges; dot-engine produces curved splines regardless.
 
 ## Ask
 
@@ -48,7 +48,7 @@ Honor/expose `splines` (`polyline` and `ortho` at minimum).
 
 ---
 
-**RESOLVED — graphviz-ts 0.1.26072013 (verified 2026-07-20).** Repro DOT
+**RESOLVED — dot-engine 0.1.26072013 (verified 2026-07-20).** Repro DOT
 re-run through `renderSvg`/`getLayout` vs real `dot -Tsvg` (graphviz 15.1):
 `splines=polyline` now honored — edge `sh0006->sh0008` path d byte-identical
 to real dot. Production wiring of `skinparam linetype polyline` through the

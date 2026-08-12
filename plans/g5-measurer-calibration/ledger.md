@@ -519,8 +519,8 @@ logging-not-chasing the `gutute-00-gaki684` secondary finding).
    unrelated to this mechanism.
 
 ## C2 — landed the cluster-geometry seam (`DotLayoutResult.clusters`,
-## graphviz-ts 0.1.26072115), TDD-tested and additive; deep jar-verified
-## diagnosis of mechanism 16's render half (BLOCKED on a graphviz-ts
+## dot-engine 0.1.26072115), TDD-tested and additive; deep jar-verified
+## diagnosis of mechanism 16's render half (BLOCKED on a dot-engine
 ## builder-API gap, filed as issue 07); confirmed sites 2/3 blocked for a
 ## DIFFERENT, more precise reason than the C1 queue's own hypothesis --
 ## 0 state/ files touched, all protected sets unchanged
@@ -528,18 +528,18 @@ logging-not-chasing the `gutute-00-gaki684` secondary finding).
 ### Chunk 1 — `layoutGraph()` exposes real per-cluster geometry (LANDED)
 
 `docs/graphviz-issues/06-cluster-bbox-not-in-getlayout.md`'s RESOLVED note
-(graphviz-ts 0.1.26072115, repo bump already landed as this iteration's
+(dot-engine 0.1.26072115, repo bump already landed as this iteration's
 HEAD commit) confirmed `getLayout()`'s snapshot now carries a `clusters`
 array (`name`/`x`/`y`/`width`/`height`, byte-matching real `dot -Tsvg`
 cluster polygons). This chunk threads that into the public seam:
 
 - `graph-layout-build.ts#addClusters` now returns a `ClusterIndex`
-  (`idByName: Map<graphviz-ts's own 'cluster<N>' name, our
+  (`idByName: Map<dot-engine's own 'cluster<N>' name, our
   DotInputCluster.id>`), built alongside the existing name-assignment loop
-  (zero behavior change to the DOT emitted to graphviz-ts — same names,
+  (zero behavior change to the DOT emitted to dot-engine — same names,
   same nesting, same node membership).
 - `graph-layout.types.ts#DotLayoutResult` gains an optional `clusters`
-  field, keyed by `DotInputCluster.id` (NOT graphviz-ts's internal name —
+  field, keyed by `DotInputCluster.id` (NOT dot-engine's internal name —
   callers never need to know that naming scheme).
 - `graph-layout.ts#layoutGraph` maps `snap.clusters` through the
   `ClusterIndex` (new `mapClusters` helper) and threads the result through
@@ -569,7 +569,7 @@ before the implementation (`Target cannot be null or undefined` /
 `Cannot read properties of undefined`), GREEN after.
 
 **Additive, verified**: `addClusters`'s only production call site
-(`graph-layout.ts`) is unchanged in what it feeds graphviz-ts (same
+(`graph-layout.ts`) is unchanged in what it feeds dot-engine (same
 subgraph names/nesting/membership) — only its RETURN VALUE changed shape
 (`void` → `ClusterIndex`). No existing consumer reads
 `DotLayoutResult.clusters` yet, so this is provably a no-op for every
@@ -580,7 +580,7 @@ re-verified byte-identical BEFORE any chunk-2 investigation began (see
 Gates below) — confirms the "additive" claim held, not just assumed.
 
 ### Chunk 2 — mechanism 16 (entity-vs-cluster wrap): deep diagnosis,
-### NOT landed this iteration -- render half BLOCKED on a graphviz-ts
+### NOT landed this iteration -- render half BLOCKED on a dot-engine
 ### builder-API gap (filed, docs/graphviz-issues/07)
 
 Per diagnosis.md discipline: instrumented before hypothesizing, at every
@@ -658,11 +658,11 @@ independently on `zoriza-41-rege543` (`scale 1.4`, header gap 26.6 =
 `GvGraphBuilder.addSubgraph`/`.setAttr` seam `layoutGraph()` actually
 calls in production) has no way to construct an HTML label — `attrs.label`
 is always treated as a literal DOT string unless prefixed with
-graphviz-ts's internal `HTML_STRING_MARK` (a single U+0001 control
+dot-engine's internal `HTML_STRING_MARK` (a single U+0001 control
 character, `common/html-string.d.ts`), which is NOT exported from the
 package's public surface (absent from `api/index.d.ts`/`index.d.ts`).
 Issue 05 (`docs/graphviz-issues/05-cluster-label-dimensions-ignored.md`)
-already confirmed the graphviz-ts LAYOUT ENGINE honors HTML-table labels
+already confirmed the dot-engine LAYOUT ENGINE honors HTML-table labels
 correctly once given one — but ONLY demonstrated through DOT-TEXT parsing
 (where `label=<...>` is natively recognized), never through the
 programmatic builder path this port's `layoutGraph()` exclusively uses.
@@ -810,7 +810,7 @@ change.
 
 1. **Mechanism 16 shape half** — now precisely scoped (4 named sub-items
    above), still needs: (a) sign-off to depend on the unexported
-   `HTML_STRING_MARK` marker (or a graphviz-ts release exporting it —
+   `HTML_STRING_MARK` marker (or a dot-engine release exporting it —
    issue 07), (b) the WIDTH/side-margin formula re-verified against
    chunk-1's real bbox specifically (not just the marker-based HEIGHT
    finding), (c) the `getTitleAndAttributeHeight()` height-convention
@@ -842,7 +842,7 @@ change.
 
 ### Chunk 1 — DOT-side seam: `setHtmlAttr` wired opt-in (LANDED)
 
-`docs/graphviz-issues/07`'s RESOLVED note (graphviz-ts 0.1.26072117, this
+`docs/graphviz-issues/07`'s RESOLVED note (dot-engine 0.1.26072117, this
 iteration's HEAD commit) confirmed `setHtmlAttr(k,v)` is public on
 `GvGraphBuilder` (subgraphs included). Landed:
 
@@ -1218,7 +1218,7 @@ so graphviz's rank-gap reservation and virtual-label-node placement are
 computed from the REAL box, not an internal font-metrics guess. This port
 had never done the equivalent for state's composite-pipeline edge labels:
 `graph-layout-build.ts#addEdges` fed a plain-text `label` attr (`fontname:
-'Times'`), so graphviz-ts sized/placed every state edge label using its OWN
+'Times'`), so dot-engine sized/placed every state edge label using its OWN
 default Times-LUT guess of the label TEXT — completely independent of this
 port's own (now jar-exact, per C1) `labelWidth`/`labelHeight` measurement,
 which was computed but silently discarded at the layout-feed step.
@@ -1235,7 +1235,7 @@ approximating jar's placement:
    13pt value.
 2. **C3's `setHtmlAttr` precedent, extended from subgraphs to edges.** Confirmed
    `GvEdge.setHtmlAttr` (not just `GvNode`/`GvGraphBuilder`) is public
-   (`node_modules/graphviz-ts/dist/api/builder.d.ts`), eliminating S12/S13's
+   (`node_modules/dot-engine/dist/api/builder.d.ts`), eliminating S12/S13's
    own `String.fromCharCode(1)` unexported-marker workaround entirely --
    this attempt uses the SAME public API C3 already landed for cluster
    titles, applied to `b.addEdge(...)`'s own return value.
@@ -2208,7 +2208,7 @@ NOT started this iteration.
 ## compounding to 16px (untouched) or 24px (touched -- `isGroupTouched`,
 ## the SAME condition already driving the pre-existing zaent-anchor
 ## mechanism) -- verified EXACT width match on all 5 of §C5's own named
-## margin samples via real graphviz-ts execution, not inference -- 0 new
+## margin samples via real dot-engine execution, not inference -- 0 new
 ## zero-diff pins: a THIRD, NEWLY DISCOVERED residual (a ~1-6px vertical/
 ## height gap, NOT proportional to margin-level count) is now the sole
 ## remaining blocker for the whole cluster family; entrypoint/exitpoint
@@ -2341,7 +2341,7 @@ function called twice — safe).
 No changes needed to `state-composite-geo.ts#materializeCluster` or
 `renderer-composite-box.ts` — both ALREADY consume `DotLayoutResult
 .clusters`' real graphviz-computed bbox (C3's own landed seam), which
-automatically reflects the new, correctly-larger margin once graphviz-ts
+automatically reflects the new, correctly-larger margin once dot-engine
 lays out the wrapped structure. This is the SAME "additive infrastructure,
 zero-touch consumer" pattern C2's own chunk 1 established.
 

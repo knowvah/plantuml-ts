@@ -28,8 +28,8 @@
 ## Context
 
 plantuml-ts (TypeScript PlantUML port). State-diagram composite
-clusters are laid out by the pinned graphviz-ts library
-(`file:../graphviz-ts/*.tgz`) through the seam
+clusters are laid out by the pinned dot-engine library
+(`file:../dot-engine/*.tgz`) through the seam
 `src/core/graph-layout-build.ts`; the jar oracle SVGs under
 `oracle/` are the spec. Vitest; run scripts with `npx tsx`.
 
@@ -47,13 +47,13 @@ list with evidence. Specifically:
    the named symptoms.
 2. Test the rank-sep hypothesis: build a minimal DOT repro (a cluster
    whose boundary is crossed by adjacent ranks of differing heights),
-   run it through graphviz-ts directly AND reason it through
+   run it through dot-engine directly AND reason it through
    `position.c` (`~/git/graphviz/lib/dotgen/position.c`, the
    `dot_position`/cluster-sep region around line 780). Determine
-   whether graphviz-ts reproduces the C behavior.
+   whether dot-engine reproduces the C behavior.
 3. Localize the divergence origin to exactly one of:
-   (a) graphviz-ts diverges from the C source → fixLocation
-   'graphviz-ts'; (b) graphviz-ts matches C, jar adds vertical
+   (a) dot-engine diverges from the C source → fixLocation
+   'dot-engine'; (b) dot-engine matches C, jar adds vertical
    margin/height outside layout (e.g. in svek Cluster/ClusterHeader —
    check `~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/`;
    grep `src/main/java/net/`, never just the plantuml subtree) →
@@ -84,7 +84,7 @@ the mechanism artifact appended to
 
 Journal entry must contain, machine-readably:
 `mechanism` (prose + origin file:line), `fixLocation`
-('graphviz-ts' | 'seam'), `formula` (the exact per-rank-pair or
+('dot-engine' | 'seam'), `formula` (the exact per-rank-pair or
 per-cluster computation to implement), `ruledOut` (list + evidence),
 `coverage` (per-fixture predicted gap closure for all measured
 fixtures, including the fresh ones).
@@ -94,7 +94,7 @@ fixtures, including the fresh ones).
 - Given the 4 named fixtures + ≥4 fresh ones, when heights are
   box-extracted vs oracle, then every gap is attributed to the stated
   mechanism (predicted delta matches measured delta per fixture).
-- Given the minimal DOT repro, when run through graphviz-ts, then the
+- Given the minimal DOT repro, when run through dot-engine, then the
   divergence-vs-C verdict is demonstrated by output, not asserted.
 - Given the artifact, when T2 reads it, then it can implement without
   re-measuring anything.

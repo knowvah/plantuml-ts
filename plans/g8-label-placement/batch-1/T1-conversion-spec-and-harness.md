@@ -4,17 +4,17 @@
 
 plantuml-ts (`/Users/scottseely/git/plantuml-ts`), TypeScript port of
 PlantUML (Java at `~/git/plantuml`; grep `src/main/java/net/`).
-graphviz-ts pinned layout library (READ-ONLY at
+dot-engine pinned layout library (READ-ONLY at
 `/Users/scottseely/git/knowvah/dot-engine`). Real `dot` 15.1.0. Vitest;
 probes `scripts/_tmp-g8-t1-*.ts` via `npx tsx`, deleted before
 finish; Serena MCP for symbols.
 
 ## Prior observations (verified — do not re-discover)
 
-- graphviz-ts exposes per-edge label centre:
-  `node_modules/graphviz-ts/dist/api/geometry.d.ts:107-110`
+- dot-engine exposes per-edge label centre:
+  `node_modules/dot-engine/dist/api/geometry.d.ts:107-110`
   (`EdgeGeometry.label?: {x,y}`, from `ED_label`/`textlabel_t.pos`;
-  filled at `graphviz-ts/src/api/geometry.ts:216-218`, computed by
+  filled at `dot-engine/src/api/geometry.ts:216-218`, computed by
   `src/layout/dot/splines-label.ts#place_vnlabel`).
 - The port already surfaces it: `src/core/graph-layout.ts:83-93`
   (`toEdgeEntry` → `labelX/labelY/labelWidth/labelHeight`), type at
@@ -98,4 +98,4 @@ Reversible (new script + doc only; plain git revert).
 
 Stop cond. 5: if the conversion cannot reproduce the oracle
 positions, STOP before T2 — report the divergent term, per-fixture
-table, ruled-out list. Never modify `../graphviz-ts` (stop cond. 8).
+table, ruled-out list. Never modify `../dot-engine` (stop cond. 8).

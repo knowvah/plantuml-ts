@@ -12,7 +12,7 @@ component [class-layout-leaf-shapes.ts\nusecase/actor leaves] as leaves
 component [class-namespace-shape.ts +\nclass-geo-builders.ts\ncluster footprint] as cluster
 component [class-dot-graph.ts\nbuildOneDotNode :235] as dotgraph
 component [core/graph-layout-build.ts\npx/72 -> inches :150] as build
-component [graphviz-ts\nDOT layout] as gv
+component [dot-engine\nDOT layout] as gv
 component [renderer-classifier-box.ts\nreads SAME geo] as renderer
 
 helpers --> generic : dispatch classifier kinds

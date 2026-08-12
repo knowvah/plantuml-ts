@@ -2,9 +2,9 @@
 
 **Status: INVESTIGATION REQUESTED — not a verified finding.** Two
 independent probe sessions ran what should be the same minimal repro
-against graphviz-ts's programmatic builder and got contradictory
+against dot-engine's programmatic builder and got contradictory
 results (details below). Filed by maintainer direction (2026-07-22) so
-graphviz-ts can investigate, despite failing this tracker's normal
+dot-engine can investigate, despite failing this tracker's normal
 "verified" bar; do not treat either claimed behavior as established.
 
 **Impact:** blocks the entire PlantUML entrypoint/exitpoint border-point
@@ -14,12 +14,12 @@ Jar's DOT for these clusters puts each border-point node in an
 anonymous `{rank=source;...}` / `{rank=sink;...}` subgraph that is a
 direct child of the cluster (sibling of the `${id}ee` inner subgraph),
 forcing the port node to the cluster's topmost/bottommost rank. Until
-graphviz-ts's behavior for this shape is pinned down, plantuml-ts
+dot-engine's behavior for this shape is pinned down, plantuml-ts
 cannot thread its (already-computed) `DotInputCluster.portRanks` into
 the real-layout builder, and the family's clusters collapse (e.g.
 pesita's `AA` renders 36×36 vs jar's 126×104.72).
 
-## The question for graphviz-ts
+## The question for dot-engine
 
 For a rank subgraph nested INSIDE a cluster (built programmatically:
 `clusterHandle.addSubgraph(name, {rank: 'source'})` + `.addNode(id)`,
@@ -77,7 +77,7 @@ zaent0002->sh0020[arrowtail=none,arrowhead=none,minlen=1];
 ## Procedure
 
 1. Ground truth: run the repro through real `dot -Tsvg` (15.x) and
-   through graphviz-ts's DOT-text parser (`renderSvg(dotSource)`).
+   through dot-engine's DOT-text parser (`renderSvg(dotSource)`).
    Record `cluster15`'s bbox and `sh0019`'s y. (G6 T8-R1 found the
    text-parser path byte-matches real dot on jar's full cached DOT —
    expected to agree here.)
@@ -124,9 +124,9 @@ bitaxo `C` 42×~101.4).
 
 ---
 
-**RESOLVED — usage defect, no graphviz-ts change (investigated
-2026-07-22, graphviz-ts side closed).** The contradiction adjudicated:
-`isACluster(g)` (`graphviz-ts/src/layout/dot/rank.ts:87-91`,
+**RESOLVED — usage defect, no dot-engine change (investigated
+2026-07-22, dot-engine side closed).** The contradiction adjudicated:
+`isACluster(g)` (`dot-engine/src/layout/dot/rank.ts:87-91`,
 C-faithful port of `lib/common/utils.c:is_a_cluster`) treats ANY
 subgraph whose name starts with `cluster` (case-insensitive) as a
 real rendered cluster. G6 T8-R2's suggested rank-subgraph naming
@@ -139,7 +139,7 @@ Session B (T9) followed that naming and saw exactly this failure;
 Session A evidently used a non-cluster-prefixed name. Call order and
 membership-call variants ruled out (identical results). Jar's real
 DOT uses ANONYMOUS rank subgraphs (auto-named `%N` — can never start
-with `cluster`), so real dot and graphviz-ts's DOT-text path were
+with `cluster`), so real dot and dot-engine's DOT-text path were
 never affected.
 
 Verified: minimal repro builder path with a non-`cluster`-prefixed
@@ -159,7 +159,7 @@ c.addNode('sh0019', { shape: 'rect', width: '0.693576', height: '0.666667', labe
 c.addSubgraph('cluster15ee', { label: '' }).addNode('zaent0002', /* point */);
 ```
 
-Tracker box checked on this basis: nothing pending in graphviz-ts.
+Tracker box checked on this basis: nothing pending in dot-engine.
 NOTE: the affected plantuml-ts fixtures have NOT yet re-measured
 clean — the border-point wiring itself remains unimplemented (G6
 batch-4 stopped; see plans/g6-cluster-geometry/README.md). The
@@ -168,7 +168,7 @@ maintainer-authorized effort.
 
 ---
 
-**VERIFIED (graphviz-ts maintainer, 2026-07-22).** Re-ran the minimal
+**VERIFIED (dot-engine maintainer, 2026-07-22).** Re-ran the minimal
 repro three ways against real dot 15.1.0 as ground truth. This upgrades
 the finding from "investigation requested" to confirmed; the numbers
 settle the Session A / Session B contradiction definitively:
@@ -176,7 +176,7 @@ settle the Session A / Session B contradiction definitively:
 | path | cluster15 (w×h) | sh0019 | vs real dot |
 |---|---|---|---|
 | real `dot -Txdot` (ground truth) | 66 × 149.72 | sink (bottom, y≈40) | — |
-| graphviz-ts DOT-text (`renderSvg`/`getLayout`) | 66.00 × 149.72 | y=40 (sink) | exact |
+| dot-engine DOT-text (`renderSvg`/`getLayout`) | 66.00 × 149.72 | y=40 (sink) | exact |
 | builder, rank-subgraph name `cluster15rank_sink` | **117 × 97** | y=132 (NOT sink) | broken |
 | builder, rank-subgraph name `sink_group_15` | 66.00 × 149.72 | y=40 (sink) | exact |
 
@@ -187,5 +187,5 @@ rank set is routed through `makeNewCluster`/`nodeInduce` instead of
 `csProcessRankset`, giving a wrong bbox (117×97) and no rank forcing
 (sh0019 at y=132, not the sink). A non-`cluster` name reproduces real dot
 to the digit. Call order and node-membership variants were irrelevant.
-**graphviz-ts confirmed closed — no library change.** Session A used a
+**dot-engine confirmed closed — no library change.** Session A used a
 clean name; Session B used the `cluster`-prefixed one.

@@ -6,7 +6,7 @@ Unblock the ~20-fixture entrypoint/exitpoint family. G6 attempt 3
 proved the full mechanism (naming fix + rankSpec + iWrapperSpec +
 FrontierCalculator) byte-exact on the un-nested case (bitaxo `C`
 42×101.72) but pesita/kotagu still miss. Isolate the suspected SECOND
-graphviz-ts interaction (rank group coexisting with i-wrapper /
+dot-engine interaction (rank group coexisting with i-wrapper /
 nested child / parent cluster / other ee content), adjudicate
 usage-vs-library, then run the paper-gated FOURTH implementation and
 the family sweep. G6's derivation (batch-4/withlabel-derivation.md)
@@ -81,9 +81,9 @@ rule; subagents never run git mutations).
 | [5](batch-5/overview.md) | Attempt 5: a/p0 port → paper gate v2 → wiring → sweep | T7, T8, T9, T10 | T7-T8 [x]; T9 MISS; T10 not run |
 | [6](batch-6/overview.md) | Attempt 6: two gap fixes → paper gate v3 → wiring → sweep | T11-T15 | [ ] |
 
-## Resume procedure (cold-start, after external graphviz-ts fix)
+## Resume procedure (cold-start, after external dot-engine fix)
 
-1. Pull the new `.tgz` from `../graphviz-ts`; bump the
+1. Pull the new `.tgz` from `../dot-engine`; bump the
    `package.json` pin + lockfile (T3).
 2. Re-run the issue-09 repro matrix — builder path must now match
    real dot on every cell.
@@ -138,7 +138,7 @@ rule; subagents never run git mutations).
 6. T4's paper reproduction misses any target bbox — stop BEFORE code.
 7. T5 misses any measured target bbox — full revert (G5 protocol),
    PERMANENT stop; a fifth attempt requires human sign-off.
-8. NEVER modify `../graphviz-ts` (read-only for probes). A library
+8. NEVER modify `../dot-engine` (read-only for probes). A library
    verdict routes to issue 09 + PAUSE, not a local fix.
 9. Out of scope entirely: `insideAutonomPass` relaxation, SvekEdge
    placement, side-margin re-derivation, geometric approximation
@@ -166,7 +166,7 @@ rule; subagents never run git mutations).
 - **Tasks:** T1 [x], T2 [x] (usage verdict — no issue 09), T3 skipped
   (library path not taken), T4 [x] (paper gate PASS), T5 **MISS →
   full revert → permanent stop**, T6 not run.
-- **Outcome:** graphviz-ts fully exonerated (7-cell isolation matrix
+- **Outcome:** dot-engine fully exonerated (7-cell isolation matrix
   + end-anchors, all byte-exact three-way). Attempt 4 implemented the
   gated spec; bitaxo exact, pesita/kotagu missed identically to
   attempt 3. Root cause found and journaled (T5 row): pre-existing
@@ -200,7 +200,7 @@ label-placement), not from more wiring iterations.
 ### Task arc (T1–T20b, then T16–T19, T14b–T15)
 
 - **Batch 1 (T1–T2):** 7-cell isolation matrix → **usage-defect** verdict;
-  graphviz-ts exonerated byte-exact three-way, no issue-09 filed.
+  dot-engine exonerated byte-exact three-way, no issue-09 filed.
 - **Batch 3 (T4–T5):** paper gate v1 PASS; attempt 4 **MISS** (pesita/
   kotagu) → permanent stop. Root cause: unported a/p0 ancestor wrappers +
   `addClusters` parent-resolution gap.

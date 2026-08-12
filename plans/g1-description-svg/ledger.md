@@ -21,18 +21,18 @@
   separately counted — folds into whichever fixtures happen to hit this
   attribute; harness-level fix, not fixture-specific).
 
-### graphviz-ts layout crash on cluster + cross-boundary-edge topology
-- Mechanism: `graphviz-ts` (vendored, pinned via `.tgz`, not in this
+### dot-engine layout crash on cluster + cross-boundary-edge topology
+- Mechanism: `dot-engine` (vendored, pinned via `.tgz`, not in this
   mission's write-set) throws `TypeError: Cannot read properties of
   undefined (reading 'info')` inside `ctx.layout(g, 'dot')` for
   `xusuxe-62-guba767`'s specific 4-node-cluster + 2-external-node +
   5-labeled-edge topology (one edge crosses the cluster boundary). Full
   mechanism + ruled-out list already recorded in
-  `plans/si5b-stdlib/decision-journal.md` (I0/T9, "graphviz-ts layout crash
+  `plans/si5b-stdlib/decision-journal.md` (I0/T9, "dot-engine layout crash
   on cluster + cross-boundary-edge topology (xusuxe-62-guba767)") — cited
   here rather than re-diagnosed, per that entry's own note that the crash
   is orthogonal to every G1-reachable source file.
-- Disposition: blocked-on third-party (graphviz-ts, out of write-set).
+- Disposition: blocked-on third-party (dot-engine, out of write-set).
 - Slugs: component/xusuxe-62-guba767
 
 ### jar's own SVG comment defang leaves a residual `--` for 3+ consecutive dashes
@@ -193,7 +193,7 @@
   after the fix).
 
 
-## RESOLVED 2026-07-14: xusuxe-62 graphviz-ts crash
+## RESOLVED 2026-07-14: xusuxe-62 dot-engine crash
 - graphviz-ts@0.1.26071415 fixes the labeled cross-cluster-boundary-edge crash;
   xusuxe renders a real 71KB diagram (image icons present), census errors 2->1
   (residual: fepuvo jar-side malformed golden), golden-pinned in
@@ -977,7 +977,7 @@ the tag-multiset signature alone.
   89/214 (10 fixtures fully clear their childCount diff at this specific
   node; the rest of the 20 port-bearing fixtures still carry OTHER,
   out-of-scope diffs — x/y coordinate precision from this port's own
-  graphviz-ts layout numbers differing from the jar's, not this
+  dot-engine layout numbers differing from the jar's, not this
   mechanism). Census conformant HELD at 15/355 (expected — no port
   fixture was blocked ONLY by this). Full census bucket movement: 11-30
   56 (was 59), 31+ 157 (was 154) — a masking-artifact shift (I3's own
@@ -1757,14 +1757,14 @@ from its box in this port's architecture).
   leaves drift. Also ruled out: an ellipse SIZE-formula bug — `rx`/`ry`
   match jar byte-for-byte in every sampled fixture, only `cx`/`cy`
   differ.
-- Disposition: not fixed here — candidate suspects (graphviz-ts's own
+- Disposition: not fixed here — candidate suspects (dot-engine's own
   px↔inch node-size-to-position rounding for ellipse-shaped dot nodes,
   vs jar's Smetana/real-graphviz rounding) were NOT verified against
   jar's dot/SVEK internals; `tests/oracle/svek-dot.ts`'s own doc comment
   confirms node `width`/`height` are explicitly TOLERANT metrics in the
   DOT gate, so a small numeric divergence here is invisible to "DOT gate
   frozen" and is not a DOT-gate violation — but pinning the exact origin
-  needs a dedicated diagnosis pass on graphviz-ts's node-size-to-
+  needs a dedicated diagnosis pass on dot-engine's node-size-to-
   position conversion for ellipse leaves, paired with I7.
 - Slugs: component/zanibo-14-sami874, mifuvu-23-kalu239,
   xevidu-92-texu148, usecase/komivo-22-toki497 (actor, ~1.5px);
@@ -1922,24 +1922,24 @@ from its box in this port's architecture).
   against the newly-read Java).
 
 ### mechanism C: document-wide translate on actor/ellipse-topmost
-### diagrams — CONFIRMED root cause (graphviz-ts ruled out with direct
+### diagrams — CONFIRMED root cause (dot-engine ruled out with direct
 ### evidence), still NOT FIXED
 - Mechanism: I6 left this as "candidate suspects... NOT verified
   against jar's dot/SVEK internals." This iteration verified it
-  directly and RULED OUT graphviz-ts: for `component/zanibo-14-sami874`
+  directly and RULED OUT dot-engine: for `component/zanibo-14-sami874`
   (`actor "Employee" as EMP` / `[Tomcat] as APP` / `[Oracle] as DB`,
   chain topology), the jar's OWN cached `svek-1.dot` (`test-results/
   dot-cache/component/zanibo-14-sami874/svek-1.dot`) was run through
   BOTH the real `dot` binary (`dot -Tplain`, graphviz 15.1.0, installed
   at `/opt/homebrew/bin/dot`) AND `layoutGraph()` (this port's own
-  graphviz-ts seam, `src/core/graph-layout.ts`) with the IDENTICAL
+  dot-engine seam, `src/core/graph-layout.ts`) with the IDENTICAL
   node/edge/nodesep/ranksep values read from that same `.dot` file.
   Both produce the SAME raw positions to 4 decimal places (e.g. the
   actor node's post-shift-to-origin top: real graphviz `0.0000`,
-  graphviz-ts `0.0000`; component nodes' y: real graphviz `134.0024`/
-  `238.0021`, graphviz-ts `134.0000`/`238.0000`) — graphviz-ts is
+  dot-engine `0.0000`; component nodes' y: real graphviz `134.0024`/
+  `238.0021`, dot-engine `134.0000`/`238.0000`) — dot-engine is
   PROVABLY faithful to real graphviz for this exact input, so the
-  divergence is NOT inside graphviz-ts (per the mission's own
+  divergence is NOT inside dot-engine (per the mission's own
   instruction to verify before concluding that). The real mechanism:
   jar's `SvekResult.java:125-136#calculateDimension` computes `minMax =
   TextBlockUtils.getMinMax(this, stringBounder, false)` — an ACTUAL
@@ -1973,8 +1973,8 @@ from its box in this port's architecture).
   magnitude is a DIFFERENT per-shape ink offset under the SAME general
   mechanism (usecase ellipses have their own local ink-vs-box geometry,
   not yet worked out numerically).
-- Ruled out (this iteration, with direct evidence): graphviz-ts /
-  layout-engine rounding (real-`dot`-vs-graphviz-ts comparison above,
+- Ruled out (this iteration, with direct evidence): dot-engine /
+  layout-engine rounding (real-`dot`-vs-dot-engine comparison above,
   bit-for-bit match). Ruled out (re-confirmed): a document-wide margin
   CONSTANT being simply the wrong number — the constant itself (jar's
   `6`) is knowable and cited above; what's missing is the INK-EXTENT
@@ -2562,7 +2562,7 @@ from its box in this port's architecture).
   Full suite: 309/309 files, 8431/8431 tests passing (8412 baseline +
   19 net new -- 21 added, 2 removed with the hidden-bracket revert).
 
-## I9 — `path/@d` (edge splines) sub-classification + drill: graphviz-ts
+## I9 — `path/@d` (edge splines) sub-classification + drill: dot-engine
 ## arrowhead-reservation seam bug, fixed and scoped to manual-arrowhead
 ## renderers only
 
@@ -2601,7 +2601,7 @@ from its box in this port's architecture).
   verified correct everywhere else in the fixture -- the safe,
   isolable drill target.
 
-### mechanism: `graph-layout.ts#addEdges` never told graphviz-ts that
+### mechanism: `graph-layout.ts#addEdges` never told dot-engine that
 ### edges have no arrowhead -- FIXED, scoped to manual-arrowhead
 ### renderers via a new `DotInputGraph.manualArrowheads` flag
 - Mechanism: drilled `component/katane-80-xeka153` (4 simple
@@ -2613,20 +2613,20 @@ from its box in this port's architecture).
   ours ends at x=235.03, arrow tip at 240.03, vs the target box's own
   left edge at 251.71 -- an 11.68px gap; jar's own spline ends at
   x=246.47, arrow tip at 251.47, a 0.24px gap). Per the mission's own
-  explicit instruction (I7 already proved one suspected-graphviz-ts
-  mechanism was actually ours), cross-checked graphviz-ts against real
+  explicit instruction (I7 already proved one suspected-dot-engine
+  mechanism was actually ours), cross-checked dot-engine against real
   graphviz BEFORE concluding anything: fed this fixture's cached
   `svek-1.dot` node/edge geometry (5 rect nodes, 4 edges,
   nodesep=0.486111in, ranksep=0.833333in) to BOTH `dot -Txdot` (real
   graphviz 15.1.0, `/opt/homebrew/bin/dot`) and `layoutGraph()`
-  (`src/core/graph-layout.ts`, this port's own graphviz-ts seam) with
+  (`src/core/graph-layout.ts`, this port's own dot-engine seam) with
   IDENTICAL inputs. Real graphviz's raw spline endpoints matched the
   jar's SVG almost exactly (within ~0.5px, real dot's own small clip
   epsilon: e.g. `sh0007->sh0006` ends at x=126.95, 0.475px short of
   the 127.425 target-node edge) -- `layoutGraph()`'s raw output for
-  the SAME edge stopped at x=115.59, ~11.36px short. graphviz-ts is
+  the SAME edge stopped at x=115.59, ~11.36px short. dot-engine is
   PROVABLY faithful to real graphviz here (matching I7's own finding
-  for node positions) -- the divergence is NOT inside graphviz-ts, it
+  for node positions) -- the divergence is NOT inside dot-engine, it
   is in how this port's shared layout seam talks to it. Root cause,
   confirmed exactly: `svek-dot-emit.ts` (the faithfully-ported, DOT-
   gate-frozen Svek-DOT TEXT emitter) already writes `arrowtail=none,
@@ -2636,25 +2636,25 @@ from its box in this port's architecture).
   counterexamples -- because every graph diagram's renderer draws its
   own arrowhead client-side (either `SvekEdge`'s manual `Extremity`
   polygon trim, or an SVG `marker-end`). But `graph-layout.ts
-  #addEdges` builds the graphviz-ts graph OBJECT directly via its
+  #addEdges` builds the dot-engine graph OBJECT directly via its
   builder API (`b.addEdge(...)`) -- it never round-trips through that
   emitted DOT text at all, and never passed the same `arrowhead`/
-  `arrowtail` attrs to graphviz-ts's builder. graphviz-ts therefore
+  `arrowtail` attrs to dot-engine's builder. dot-engine therefore
   silently defaulted to `arrowhead=normal` and reserved an arrow-
-  length gap (`ARROW_LENGTH`-scaled, `node_modules/graphviz-ts/dist/
+  length gap (`ARROW_LENGTH`-scaled, `node_modules/dot-engine/dist/
   index.js`'s `arrows.js`/`edge-route-arrow.d.ts` machinery) when
   clipping every spline to its target node's boundary -- a reservation
   the jar's own dot layout never makes, because the jar's dot text
   ALSO says `arrowhead=none`. Confirmed the exact mechanism directly
-  (not just correlated): re-ran graphviz-ts's own builder API
+  (not just correlated): re-ran dot-engine's own builder API
   (`createGraph`/`addEdge`/`render`/`getLayout`, bypassing
   `layoutGraph()`) with `arrowhead:'none',arrowtail:'none'` added to
   every edge's attrs on the IDENTICAL geometry -- spline endpoints then
   matched real graphviz to within 0.001px on all 4 edges (both X- and
   Y-routed).
-- Ruled out: a graphviz-ts spline-FITTING bug (the real-dot-vs-
-  graphviz-ts cross-check, run BEFORE hypothesizing further per
-  diagnosis.md, showed graphviz-ts is faithful once given the same
+- Ruled out: a dot-engine spline-FITTING bug (the real-dot-vs-
+  dot-engine cross-check, run BEFORE hypothesizing further per
+  diagnosis.md, showed dot-engine is faithful once given the same
   input the jar's own dot receives -- this is categorically the same
   ruled-out class I7 already established for node positions, now
   extended to edge splines with equally direct evidence); a node-
@@ -2756,7 +2756,7 @@ from its box in this port's architecture).
   green (29 tests, up from 19).
 
 ### outcome
-- Fixed: the graphviz-ts arrowhead-reservation seam gap (`graph-
+- Fixed: the dot-engine arrowhead-reservation seam gap (`graph-
   layout.ts#addEdges`), scoped via a new `DotInputGraph.
   manualArrowheads` flag to avoid any blast radius into class/state/
   dot/json's marker-based arrow rendering. This is the FIRST

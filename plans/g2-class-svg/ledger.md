@@ -1390,7 +1390,7 @@ Non-degenerate fixtures: 508/509 showed BOTH width and height off (not
 width-only or height-only) -- one universal, non-degenerate-path mechanism,
 not several small ones. Root cause (confirmed by direct code read): class's
 `layoutSinglePage` (non-degenerate/DOT-driven branch, `layout.ts`) returned
-`layoutGraph()`'s (graphviz-ts's own dot-layout) raw `result.width`/
+`layoutGraph()`'s (dot-engine's own dot-layout) raw `result.width`/
 `result.height` UNCHANGED as the document canvas size -- dot's internal
 layout-margin convention, with NO ink-extent/document-margin recipe applied
 at all. This is the SAME class of gap description's own G0/T3 fixed via
@@ -1520,7 +1520,7 @@ mechanism, a straightforward rendering-format fix, not a routing change.
   applied for byte-fidelity since the SAME function draws note connectors
   too.
 - Reach: fixture COUNT held flat at 417/718 (the underlying edge-routing
-  divergence between graphviz-ts and real graphviz -- explicitly
+  divergence between dot-engine and real graphviz -- explicitly
   out-of-scope per CLAUDE.md/mission decisions -- is untouched by a
   rendering-format fix), but the family's DIFF COUNT rose (71289->74825).
   Root-caused as EXPECTED, not a regression: with `L`-vs-`C` command
@@ -1969,7 +1969,7 @@ never touch node/edge/cluster counts or DOT graph construction).
   disconnected classifier like `aaa`, even though its content never draws,
   still occupies a graphviz component that our port packs slightly
   differently from real graphviz -- OUT OF SCOPE per CLAUDE.md's
-  graphviz-ts boundary) and a namespace-cluster-local canvas-height
+  dot-engine boundary) and a namespace-cluster-local canvas-height
   residual (`cixote-08`'s 5px `@height` gap, not diagnosed this
   iteration). Both named for a future iteration; NOT a regression from
   this mechanism (verified: the SAME 7px delta was already present on
@@ -2266,14 +2266,14 @@ Diagnosed, not fixed:
   plumbing (absent engine-wide).
 - Uniform ~7px whole-canvas offset on couple-touching fixtures — our DOT
   input for bosiki-11 now matches the oracle EXACTLY (structurally equal,
-  maxSizeDeltaIn 0.0000), so the residual is graphviz-ts's own
+  maxSizeDeltaIn 0.0000), so the residual is dot-engine's own
   coordinate assignment diverging from real graphviz: OUT OF SCOPE
-  (pinned .tgz); candidate for an upstream graphviz-ts issue with the
+  (pinned .tgz); candidate for an upstream dot-engine issue with the
   minimal repro from the drill.
 
 Census: 31/718 held (identical slug set); 1-3: 52->43, 31+: 421->430 —
 the 9 movers are all couple-touching fixtures whose structural fix
-un-bailed the comparator onto the graphviz-ts offset above (precedented
+un-bailed the comparator onto the dot-engine offset above (precedented
 unmasking). Full-corpus scan: 193 improved / 0 regressed.
 
 ## N9 — edge `<path>` `@id`/`@codeLine`, the decor/direction matrix (220/191 reach)
@@ -2518,7 +2518,7 @@ cluster position/height offset" (N7) / "arrowhead-polygon + edge-label ink
 contribution to canvas dims" (N5) residual, now confirmed (via 2 fresh,
 independently-obtained samples) to be the DOMINANT driver of the coarse
 viewBox/width/height/coordinate-family signature across the bulk of the
-corpus, not a graphviz-ts-only phenomenon — it reproduces on
+corpus, not a dot-engine-only phenomenon — it reproduces on
 non-couple-touching, non-graphviz-adjacent fixtures too. Still NOT root-
 caused to a single mechanism this iteration (deep, needs a debug-
 instrumented oracle rebuild per N5's own precedent) — re-ledgered as the
@@ -2745,7 +2745,7 @@ node).
     malformed-attribute bug (`tipude-10-tizi427`) — both unchanged,
     single-fixture, still unsurveyed.
 16. `sadamo-18-siva346` pathological stress fixture (unchanged since N9).
-17. graphviz-ts coordinate-assignment offset (OUT OF SCOPE, unchanged since
+17. dot-engine coordinate-assignment offset (OUT OF SCOPE, unchanged since
     N8) — may overlap #1 above; still not cross-checked which residual
     dominates on any given fixture.
 
@@ -2767,7 +2767,7 @@ Confirmed by direct comparison against real Java source
 (`svek/SvekResult.java`, read in full this iteration, not just the
 `calculateDimension` method N5 already cited) that the residual is
 overwhelmingly **case A — uniform-translate-everything**, not a per-element-
-family offset and not primarily graphviz-ts:
+family offset and not primarily dot-engine:
 
 - **Uniform whole-diagram translate (this iteration's fix, dominant case)**:
   `SvekResult#calculateDimension` (svek/SvekResult.java:130-136) does TWO
@@ -2792,7 +2792,7 @@ family offset and not primarily graphviz-ts:
   own equivalent wiring" — README's asset-inheritance note, never acted on
   until now). Full corpus reach: dominates the vast majority of the 543
   previously-untagged non-conformant fixtures (see census below).
-- **graphviz-ts coordinate-assignment divergence (N8's own sub-case, OUT OF
+- **dot-engine coordinate-assignment divergence (N8's own sub-case, OUT OF
   SCOPE, bounded reach, unchanged)**: re-confirmed still real and separate
   — `bosiki-11-xaza958` (N8's own couple fixture) still shows a residual
   AFTER this iteration's shift lands, with our DOT input structurally
@@ -3016,7 +3016,7 @@ verified via the new unit tests asserting `width`/`height` are unchanged by
     single-fixture, still unsurveyed.
 18. `sadamo-18-siva346` pathological stress fixture (unchanged since
     N9-N10).
-19. graphviz-ts coordinate-assignment offset (OUT OF SCOPE, unchanged since
+19. dot-engine coordinate-assignment offset (OUT OF SCOPE, unchanged since
     N8) — narrower now that the ink-shift is landed (N8's own
     `bosiki-11-xaza958` sample re-confirmed still diverging after this
     fix, DOT input still byte-equal).
@@ -3456,7 +3456,7 @@ absorbs this without any of the five counts moving, exactly as anticipated.
     iteration**, remove from future queues).
 19. `sadamo-18-siva346` pathological stress fixture (unchanged since
     N9-N11).
-20. graphviz-ts coordinate-assignment offset (OUT OF SCOPE, unchanged since
+20. dot-engine coordinate-assignment offset (OUT OF SCOPE, unchanged since
     N8-N11).
 21. Single-fixture unsurveyed residuals from this iteration's harvest
     (`gatula-10-bifu561`, `nekali-92-loda300`, `ponaxo-71-muze275`,
@@ -3780,7 +3780,7 @@ unsurveyed this iteration.
 19. `skinparam mode dark` (1/718, unchanged since N7-N12).
 20. `sadamo-18-siva346` pathological stress fixture (unchanged since
     N9-N12).
-21. graphviz-ts coordinate-assignment offset (OUT OF SCOPE, unchanged since
+21. dot-engine coordinate-assignment offset (OUT OF SCOPE, unchanged since
     N8-N12).
 22. Single-fixture unsurveyed residuals from N12's harvest (unchanged,
     `gatula-10-bifu561`, `nekali-92-loda300`, `ponaxo-71-muze275`,
@@ -4002,7 +4002,7 @@ were net-new.
    `core/graph-layout.ts#addEdges`'s own doc comment already named this
    exact mechanism (`manualArrowheads`, ported for `description`'s SvekEdge/
    extremity case) — a class-diagram edge with NO explicit `arrowhead=none`/
-   `arrowtail=none` gets graphviz-ts's DEFAULT ~10-11px arrow-length clip
+   `arrowtail=none` gets dot-engine's DEFAULT ~10-11px arrow-length clip
    reservation when trimming the routed spline to the target node's
    boundary. A note connector NEVER draws a real arrowhead (merged into the
    Opale outline, or a bare undecorated line otherwise) but was never told
@@ -4015,7 +4015,7 @@ were net-new.
    that same doc comment, to avoid regressing every other already-correct
    class edge) — `note-layout.ts#groupEdge` now always sets `noArrow: true`.
    This is a SHARED `src/core/` adapter change (NOT the vendored
-   graphviz-ts package itself, which stays out of scope) — purely additive
+   dot-engine package itself, which stays out of scope) — purely additive
    (`noArrow` optional, default `undefined`/falsy, identical behavior to
    before for every OTHER edge in every OTHER diagram type); the description
    ratchet (51/51 green, unchanged) confirms zero cross-type impact.
@@ -4256,8 +4256,8 @@ brief's explicit empirical-check requirement for both priorities.
 7. **~2px uniform position offset across UNCONNECTED sibling classifiers in
    a multi-component (no-edge) layout** (NEWLY DISCOVERED N14,
    `mujopi-06-lusi222`, confirmed via a width-UNAFFECTED control-point box —
-   likely graphviz-ts's disconnected-component packing margin, OUT-OF-SCOPE-
-   adjacent per CLAUDE.md's `graphviz-ts` boundary but not yet confirmed
+   likely dot-engine's disconnected-component packing margin, OUT-OF-SCOPE-
+   adjacent per CLAUDE.md's `dot-engine` boundary but not yet confirmed
    which side owns it) — needs a dedicated diagnosis pass, may overlap N8's
    `bosiki-11-xaza958` coordinate-assignment residual or be a genuinely
    distinct mechanism; not cross-checked this iteration.
@@ -4298,7 +4298,7 @@ brief's explicit empirical-check requirement for both priorities.
 23. `skinparam mode dark` (1/718, unchanged since N7-N13).
 24. `sadamo-18-siva346` pathological stress fixture (unchanged since
     N9-N13).
-25. graphviz-ts coordinate-assignment offset (OUT OF SCOPE, unchanged since
+25. dot-engine coordinate-assignment offset (OUT OF SCOPE, unchanged since
     N8-N13 — may overlap item 7 above, not cross-checked).
 26. Single-fixture unsurveyed residuals from N12's harvest (unchanged,
     `gatula-10-bifu561`, `nekali-92-loda300`, `vudepo-27-cuvo793`,
@@ -4568,7 +4568,7 @@ touched. `dot-sync-report.ts` re-run for all five types: component 262/262
 firi471`, `laluve-92-raxu863`) stayed in the SAME 31+ bucket both before
 and after — all four share the identical `Dog --|> Mammal, Cat` skeleton
 with an ALREADY-confirmed (via `gavimi`'s own byte-diff against a pristine
-pre-N15 render) unrelated graphviz-ts/multi-classifier positioning
+pre-N15 render) unrelated dot-engine/multi-classifier positioning
 divergence; `jinoba`/`laluve` ALSO use `skinparam topurl` (a `UrlBuilder
 #withTopUrl` relative-url-prefix feature this iteration does not read —
 NEWLY NAMED remainder below). The FIFTH, `rakuci-96-tuti371`, is the one
@@ -4780,7 +4780,7 @@ refactor.
 27. `skinparam mode dark` (1/718, unchanged since N7-N14).
 28. `sadamo-18-siva346` pathological stress fixture (unchanged since
     N9-N14).
-29. graphviz-ts coordinate-assignment offset (OUT OF SCOPE, unchanged since
+29. dot-engine coordinate-assignment offset (OUT OF SCOPE, unchanged since
     N8-N14).
 30. Single-fixture unsurveyed residuals from N12's harvest (unchanged,
     `gatula-10-bifu561`, `nekali-92-loda300`, `vudepo-27-cuvo793`,
@@ -4900,15 +4900,15 @@ shape.test.ts`'s "byte-level jar parity" describe block.
 cluster-label WIDTH/HEIGHT dot attribute is DOT-gate-relevant. Separately,
 `class-dot-graph.ts#buildDotClusters` has NEVER set `DotInputCluster
 .labelWidth`/`.labelHeight` (only `.label`, a bare string) — description's
-own `buildDotClusters` is identical (neither diagram type feeds graphviz-ts
+own `buildDotClusters` is identical (neither diagram type feeds dot-engine
 a literal cluster-label dimension; `core/graph-layout.ts#addClusters`
 forwards only `{ label: c.label }` to `GvGraphBuilder#addSubgraph`, letting
-graphviz-ts measure the label text with its OWN internal text measurer).
-graphviz-ts's public `getLayout()` API (`node_modules/graphviz-ts/dist/
+dot-engine measure the label text with its OWN internal text measurer).
+dot-engine's public `getLayout()` API (`node_modules/dot-engine/dist/
 api/geometry.d.ts`) exposes `bounds`/`nodes`/`edges` only — NO per-cluster
 bounding box (`GD_bb`) is surfaced at all (ADR-1: the internal `Graph`
 class is not exported as a value). So neither the "what we emit" question
-nor "what graphviz-ts computed for the cluster" is directly readable —
+nor "what dot-engine computed for the cluster" is directly readable —
 confirmed empirically that the footprint must be derived externally from
 already-laid-out CLASSIFIER positions (the pre-existing `buildNamespaceGeos`
 strategy), not from a cluster-label DOT attribute change.
@@ -4981,7 +4981,7 @@ namespace and stored on the returned `NamespaceGeo` (see Mechanism 1's
    it today.
 2. The title-driven-width case (`pixexi-81-sete111`) — needs a
    `max(contentWidth + 2*padding, wtitle + marginTitleX3 + ...)` width
-   floor in `buildNamespaceGeos`, plus verifying graphviz-ts's own cluster
+   floor in `buildNamespaceGeos`, plus verifying dot-engine's own cluster
    auto-width/centering behavior actually mirrors jar's (not attempted;
    `renderNamespaceFolder`'s path degrades ungracefully, not incorrectly-
    but-plausibly, if `wtitle + marginTitleX3 > geo.width` — no crash, just
@@ -5080,7 +5080,7 @@ field (confirmed via grep + the passing ratchet).
    `skinparam package { FontSize N }`, NEWLY SURVEYED N17) — needs
    `max(contentWidth + 2*NAMESPACE_SIDE_PADDING, wtitle + marginTitleX3 +
    ...)` in `buildNamespaceGeos`'s width computation, plus verifying
-   graphviz-ts's own cluster-label-driven auto-width/centering actually
+   dot-engine's own cluster-label-driven auto-width/centering actually
    mirrors jar's (unverified this iteration).
 3. **`skinparam style strictuml`** (`jinibe-02-tebi269`'s own `<polygon>`
    output, roundCorner=0 sharp-corner variant — reach unsurveyed beyond
@@ -5114,7 +5114,7 @@ field (confirmed via grep + the passing ratchet).
    sprite/font-awesome glyphs, inline `!define` macros, `hide C2 circle`,
    undefined-entity arrow variants, `ent0001`/`ent0002` id swap, `scale
    max N height`, `!pragma layout elk`, `[hidden]` suppression,
-   `skinparam mode dark`, `sadamo-18-siva346`, graphviz-ts coordinate
+   `skinparam mode dark`, `sadamo-18-siva346`, dot-engine coordinate
    offset, N12's single-fixture unsurveyed residuals) — see N15's own
    ledger entry for full detail; not re-audited this iteration.
 8. **File-size-cap housekeeping** (WORSENED N17, not newly caused):
@@ -5148,13 +5148,13 @@ committed (orchestrator owns commits per mission rule).
 ## irreducible), title/font/color/thickness overrides LANDED, title-text
 ## textLength/font-weight bug found+fixed, strictuml sharp-corner polygon
 ## LANDED (base case); title-width-floor centering confirmed BLOCKED by
-## graphviz-ts; stereotype/packageStyle NOT landed (Java source fully
+## dot-engine; stereotype/packageStyle NOT landed (Java source fully
 ## surveyed, deferred)
 
 Worked N17's five named remainders in the brief's stated priority order.
 Two landed cleanly (font/color/thickness threading, strictuml shape); one
-diagnosed to a graphviz-ts-adjacent dead end (anchor); one confirmed
-BLOCKED by a genuine graphviz-ts API limitation (title-width floor); one
+diagnosed to a dot-engine-adjacent dead end (anchor); one confirmed
+BLOCKED by a genuine dot-engine API limitation (title-width floor); one
 surveyed but deferred for scope (stereotype/packageStyle). A SIXTH,
 previously-unflagged mechanism (title `<text>` missing
 `textLength`/`lengthAdjust`, wrong `font-weight` format) was found while
@@ -5203,7 +5203,7 @@ are ALL pre-existing, unrelated: `@viewBox`/`@width` off-by-one,
 arc-path residual, badge spot-color `#ADD1B2` vs `#C2C2C2`).
 
 ### Mechanism 1: anchor-in-cluster footprint — anchors THREADED (LANDED,
-### code-correct) but jar parity NOT REACHED (diagnosed: graphviz-ts
+### code-correct) but jar parity NOT REACHED (diagnosed: dot-engine
 ### rank-assignment divergence, genuinely out of scope)
 
 Implemented exactly as N17 named it: `DotGraphParts.anchors: Map<string,
@@ -5225,22 +5225,22 @@ Fixture-level diff for `bajotu-30-soku184` showed ZERO improvement after
 landing the wiring (190 diffs before AND after). Instrumented via a
 disposable debug script calling `layoutGraph()` directly on the captured
 `DotInputGraph` (`setLayoutInputObserver`) to read RAW (pre-shift)
-node positions: this port's OWN graphviz-ts places `zaent-p1` at
+node positions: this port's OWN dot-engine places `zaent-p1` at
 `y=23.28`, STRICTLY BELOW `p1.cl1` at `y=0` — the OPPOSITE of jar's real
 graphviz, which places its own anchor ABOVE the classifier (the
 mechanism N17 derived from direct jar-SVG geometry). Confirmed this is
 NOT a nodeIds-ordering artifact: reordering `cluster.nodeIds` (anchor
 first vs. last, mirroring jar's own DOT declaration order exactly) and
 re-running `layoutGraph()` on the SAME input produces IDENTICAL anchor/
-classifier positions — graphviz-ts's rank tie-break for two same-cluster,
+classifier positions — dot-engine's rank tie-break for two same-cluster,
 edge-unconstrained-relative-to-each-other nodes does not honor
 declaration order the way real graphviz's initial-rank assignment does.
 
-**Mechanism**: graphviz-ts's rank-assignment (tie-break for nodes with no
+**Mechanism**: dot-engine's rank-assignment (tie-break for nodes with no
 edge constraining their RELATIVE rank) places a cluster's point-anchor at
 or below its sibling classifier, where real graphviz places it above.
-**Origin**: inside graphviz-ts's own `dotgen`/rank-assignment internals —
-no file:line in THIS repo; graphviz-ts is a pinned `.tgz` dependency, out
+**Origin**: inside dot-engine's own `dotgen`/rank-assignment internals —
+no file:line in THIS repo; dot-engine is a pinned `.tgz` dependency, out
 of scope to modify (`plans/dot-oracle-sync`/CLAUDE.md/this mission's own
 boundary). **Causal chain**: `buildNamespaceGeos`'s min/max walk is
 mathematically correct (unit-tested), but folds in a position that itself
@@ -5255,16 +5255,16 @@ before this iteration's changes (full-population baseline scan, below).
 This RECLASSIFIES the anchor case from "needs `anchors` threaded out"
 (N17's framing, implying a implementable render-side fix) to "correctly
 wired at the footprint-math level, but full jar parity additionally
-requires a graphviz-ts rank-assignment change" — the SAME category as the
-already-ledgered "graphviz-ts coordinate-assignment ~7px offset" (named
+requires a dot-engine rank-assignment change" — the SAME category as the
+already-ledgered "dot-engine coordinate-assignment ~7px offset" (named
 since N8). Kept the wiring (harmless, matches the true upstream
 invariant, jar-verified byte-correct math, zero regression) rather than
-reverting it, since a different topology where our own graphviz-ts DOES
+reverting it, since a different topology where our own dot-engine DOES
 rank the anchor above its sibling would benefit from it immediately with
 no further code change.
 
 ### Mechanism 2: title-driven package width floor — CONFIRMED BLOCKED
-### (graphviz-ts label-width API limitation, not attempted)
+### (dot-engine label-width API limitation, not attempted)
 
 Traced `pixexi-81-sete111`'s exact jar geometry byte-for-byte
 (`skinparam package { FontSize 40 }`, `htitle=46`/`wtitle=315.25`):
@@ -5277,24 +5277,24 @@ measured width, not the classifier's own content width.
 Checked whether this port's `class-dot-graph.ts#buildDotClusters` could
 replicate this by setting `DotInputCluster.labelWidth`/`.labelHeight`
 (fields that already EXIST on the type, per N17's own finding they are
-"NEVER set"): confirmed via `node_modules/graphviz-ts/dist/api/builder.d.ts`
+"NEVER set"): confirmed via `node_modules/dot-engine/dist/api/builder.d.ts`
 that `GraphBuilder#addSubgraph(name, attrs?: Record<string,string>)`
 accepts ONLY a plain string-keyed attribute map — there is no numeric
-label-width/label-height parameter graphviz-ts's public API exposes for
+label-width/label-height parameter dot-engine's public API exposes for
 a subgraph/cluster at all (`addClusters` in `core/graph-layout.ts` only
-ever forwards `{ label: c.label }`, letting graphviz-ts measure the
+ever forwards `{ label: c.label }`, letting dot-engine measure the
 label text with ITS OWN internal, font-unaware default metric). Setting
 `labelWidth`/`labelHeight` on `DotInputCluster` would therefore be
 inert — there is no consuming code path in this port's own `addClusters`
-NOR any graphviz-ts API surface to feed it to, even if `addClusters`
+NOR any dot-engine API surface to feed it to, even if `addClusters`
 were extended.
 
 **Mechanism**: reproducing jar's title-driven centered layout requires
 graphviz's own cluster-label-width-aware node positioning, which
-graphviz-ts's current public API does not expose a hook for (font-aware
-label sizing is entirely internal to graphviz-ts, not parameterizable
-from outside). **Origin**: `node_modules/graphviz-ts/dist/api/builder.d.ts`
-(pinned dependency, `graphviz-ts OUT OF SCOPE` per CLAUDE.md). **Ruled
+dot-engine's current public API does not expose a hook for (font-aware
+label sizing is entirely internal to dot-engine, not parameterizable
+from outside). **Origin**: `node_modules/dot-engine/dist/api/builder.d.ts`
+(pinned dependency, `dot-engine OUT OF SCOPE` per CLAUDE.md). **Ruled
 out**: a pure post-layout width-floor widening `NamespaceGeo`'s box
 around the ALREADY-mislaid-out classifier was considered and explicitly
 NOT implemented — it would produce a plausible-LOOKING wider box but with
@@ -5450,8 +5450,8 @@ after:  75/718 · 1-3:43 · 4-10:166 · 11-30:47 · 31+:387 · errors:0
 ```
 
 0 new zero-diff (every package fixture near-zero remains blocked by at
-least one OTHER, still-open sub-case — anchor's graphviz-ts divergence,
-the title-width floor's graphviz-ts API limitation, strictuml's newly-
+least one OTHER, still-open sub-case — anchor's dot-engine divergence,
+the title-width floor's dot-engine API limitation, strictuml's newly-
 unmasked badge-suppression gap, or the unlanded stereotype/packageStyle
 dispatch). Ratchet: `class.golden.ratchet.test.ts` 77/77 green — all 75
 prior pins held (exact slug-set, verified via the ratchet test itself).
@@ -5518,7 +5518,7 @@ count).
   dispatches to a NEW `folderPolygonPoints`/`renderFolderPolygon` pair
   under `theme.strictUml`.
 - `tests/unit/class/class-geo-builders.test.ts` (NEW) — 4 tests, the
-  anchor-footprint mechanism in isolation (no measurer/graphviz-ts
+  anchor-footprint mechanism in isolation (no measurer/dot-engine
   dependency).
 - `tests/unit/class/layout.test.ts` — 1 new end-to-end test on the
   existing "zaent anchor" describe block.
@@ -5535,17 +5535,17 @@ count).
 
 1. **Anchor-in-cluster footprint, full jar parity** (`bajotu-30-soku184`/
    `pecabi-95-demu756`) — the footprint MATH is now correct (landed,
-   unit-tested); full parity additionally needs a graphviz-ts rank-
+   unit-tested); full parity additionally needs a dot-engine rank-
    assignment fix (point-anchor vs. sibling-classifier same-cluster tie-
    break) — confirmed OUT OF SCOPE per CLAUDE.md/this mission's own
    boundary (pinned `.tgz` dependency). Candidate for an upstream
-   graphviz-ts issue, same category as the N8-named coordinate-assignment
+   dot-engine issue, same category as the N8-named coordinate-assignment
    offset.
 2. **Title-driven package width floor + centering** (`pixexi-81-sete111`)
-   — CONFIRMED BLOCKED: graphviz-ts's public `addSubgraph` API has no
+   — CONFIRMED BLOCKED: dot-engine's public `addSubgraph` API has no
    numeric label-width/label-height parameter, so a real graphviz-style
    label-width-aware node-centering fix cannot be threaded through this
-   port's DOT emission at all without a graphviz-ts API change (out of
+   port's DOT emission at all without a dot-engine API change (out of
    scope). A pure post-layout width-floor (widen the box, leave the
    mislaid-out classifier where it is) was considered and explicitly
    rejected as not payoff-positive (see Mechanism 2's "ruled out").
@@ -5593,7 +5593,7 @@ count).
    `!define` macros, `hide C2 circle`, undefined-entity arrow variants,
    `ent0001`/`ent0002` id swap, `scale max N height`, `!pragma layout
    elk`, `[hidden]` suppression, `skinparam mode dark`, `sadamo-18-
-   siva346`, graphviz-ts coordinate offset, N12's single-fixture
+   siva346`, dot-engine coordinate offset, N12's single-fixture
    unsurveyed residuals) — see `plans/g2-class-svg/ledger.md` N15/N17 for
    the full renumbered list; not re-audited this iteration.
 
@@ -5603,7 +5603,7 @@ never actually verified by N17 despite the "byte-verified" claim — fixed,
 corpus-wide, 0 known reach remaining). `packageFontSize`/`packageFontColor`
 /`packageBorderThickness` skinparam threading (was entirely absent). The
 anchor-footprint MATH (was entirely absent) — the remaining jar-parity
-gap is RENAMED/NARROWED to a graphviz-ts rank-assignment issue (item 1
+gap is RENAMED/NARROWED to a dot-engine rank-assignment issue (item 1
 above), not a re-statement of N17's original framing. The strictuml
 folder-tab SHAPE (base case, was entirely absent) — the remaining
 strictuml gap is RENAMED/NARROWED to the classifier-badge-suppression
@@ -5814,7 +5814,7 @@ after the reorder, with zero additional code.
 
 **19 improved / 0 regressed / 699 unchanged / 0 zero-diff regressions.**
 Improved: the 4 single-coupling no-subsumption fixtures (17→9 diffs each, all
-9 residual diffs are the ALREADY-named graphviz-ts routing offset — verified
+9 residual diffs are the ALREADY-named dot-engine routing offset — verified
 by grepping the post-fix diff dump for `@id` mismatches: zero remain),
 `jaloja-18-tisu915` (11→5, residual is a newly-surfaced, separate,
 NOT-this-iteration's-scope multiplicity-label `childCount` gap on the entity
@@ -5892,7 +5892,7 @@ scan's own finding).
    large this divergence actually is beyond the `childCount`/`@width`
    deltas observed; a separate, real rendering-completeness mechanism, not a
    naming issue, out of this iteration's scope.
-4. `graphviz-ts` coordinate-assignment offset (unchanged since N8) — every
+4. `dot-engine` coordinate-assignment offset (unchanged since N8) — every
    single-coupling fixture's residual `@d` deltas trace to this, confirmed
    via zero remaining `@id` mismatches post-fix.
 5. Every item unchanged from N18's own queue not superseded above.
@@ -5911,7 +5911,7 @@ use. Nothing committed (orchestrator owns commits per mission rule).
 ## (diagnosed, deferred)
 
 ### Priority 1: lollipop display-label text (LANDED, all 13 target fixtures
-### structurally converted; zero-diff blocked only by graphviz-ts)
+### structurally converted; zero-diff blocked only by dot-engine)
 
 **Cause**: `EntityImageLollipopInterface.java:94-133`'s `desc.drawU(...)`
 call (the entity's own display name, drawn BELOW the circle) had no
@@ -5980,7 +5980,7 @@ HEAD`, symlinked `node_modules`/`test-results`/`assets/stdlib`,
 96-497) / 705 unchanged / 0 zero-diff regressions**. Every regressed
 fixture verified (per-fixture diff-path grep) to carry ZERO `@id`/
 `childCount` diffs post-fix — the ENTIRE residual on all 13 is `path/@d`
-edge-routing coordinates, the SAME pre-existing graphviz-ts coordinate-
+edge-routing coordinates, the SAME pre-existing dot-engine coordinate-
 assignment offset named since N8 (confirmed via a disposable pre-fix
 baseline: `bososa-44-fipu544`'s own pre-fix diff was 5, ALL of it
 `svg/@width`/`@viewBox`/`g[1][childCount]` — a childCount-masked
@@ -6112,7 +6112,7 @@ uniform 34) / 13 regressed (Priority 1's own 13 lollipop fixtures,
 unchanged from that scan) / 696 unchanged / 0 zero-diff regressions / 0
 zero-diff gains**. Every improved fixture's residual 34 diffs is,
 identically, `path/@d` edge-routing coordinates only (grep-confirmed zero
-`@id`/`childCount` diffs) — the SAME pre-existing graphviz-ts offset
+`@id`/`childCount` diffs) — the SAME pre-existing dot-engine offset
 blocking Priority 1.
 
 @see ~/git/plantuml/.../objectdiagram/AbstractClassOrObjectDiagram.java:112-341
@@ -7416,11 +7416,11 @@ after use. Nothing committed (orchestrator owns commits per mission rule).
 
 | Mechanism | Fixed/deferred | Cause file:line | Jar evidence | Census contribution |
 |---|---|---|---|---|
-| Relationship multiplicity/cardinality end labels (`C1 "1" -- "1" C2`, `fromMultiplicity`/`toMultiplicity`) never drawn | **LANDED** (structurally correct, jar-derived formula + jar-verified attribute set; blocked from zero-diff on both direct target fixtures by SEPARATE, already-named or newly-unmasked mechanisms — see below) | `src/diagrams/class/class-layout-helpers.ts#edgeLabelAttrs` (measured for DOT sizing only, `attrs.tailLabel`/`attrs.headLabel` text now added); `src/core/graph-layout.ts#addEdges`/`extractPortLabelPositions` (new — feeds the real graphviz-ts layout call + extracts the computed position via `render()`'s own SVG, since `getLayout()`'s public snapshot never exposes it, ADR-1 in `graphviz-ts`); `src/diagrams/class/class-geo-builders.ts#attachPortLabels`/`portLabelAnchor` (new — center→baseline-anchor conversion); `src/diagrams/class/renderer.ts#renderEdge` (new tail/head `<text>` emission) | `test-results/dot-cache/class/kipure-14-suli112/in.svg` (`<text x="153.8795" y="87.147" ... textLength="7.2313">1</text>` etc., 2 edges, diagonal splines), `dokego-92-zilu832/in.svg` (2 edges, straight vertical splines) — font-size 13/`sans-serif`/no `text-anchor` attribute confirmed corpus-wide (`plantuml.skin`'s `arrow{FontSize 13}` block, `GraphvizImageBuilder#getStyleArrowCardinality`); real placement algorithm confirmed via `~/git/graphviz/lib/label/xlabels.c`/`lib/common/postproc.c#addXLabels` (external-label force-search, NOT `place_portlabel`'s angle/distance formula — `CucaDiagram#getLabeldistance/getLabelangle` are dead fields, never read by any `net/` DOT-emission call site) | 0 new zero-diff (both target fixtures blocked by separate mechanisms, see below); census 121/718 (unchanged) · 1-3:46 (was 48) · 4-10:161 (was 165) · 11-30:55 (was 53) · 31+:335 (was 331) — the childCount-unmasking pattern this mission has recorded every iteration since N2, NOT a regression (ratchet re-verified 121/121, zero zero-diff regressions) |
+| Relationship multiplicity/cardinality end labels (`C1 "1" -- "1" C2`, `fromMultiplicity`/`toMultiplicity`) never drawn | **LANDED** (structurally correct, jar-derived formula + jar-verified attribute set; blocked from zero-diff on both direct target fixtures by SEPARATE, already-named or newly-unmasked mechanisms — see below) | `src/diagrams/class/class-layout-helpers.ts#edgeLabelAttrs` (measured for DOT sizing only, `attrs.tailLabel`/`attrs.headLabel` text now added); `src/core/graph-layout.ts#addEdges`/`extractPortLabelPositions` (new — feeds the real dot-engine layout call + extracts the computed position via `render()`'s own SVG, since `getLayout()`'s public snapshot never exposes it, ADR-1 in `dot-engine`); `src/diagrams/class/class-geo-builders.ts#attachPortLabels`/`portLabelAnchor` (new — center→baseline-anchor conversion); `src/diagrams/class/renderer.ts#renderEdge` (new tail/head `<text>` emission) | `test-results/dot-cache/class/kipure-14-suli112/in.svg` (`<text x="153.8795" y="87.147" ... textLength="7.2313">1</text>` etc., 2 edges, diagonal splines), `dokego-92-zilu832/in.svg` (2 edges, straight vertical splines) — font-size 13/`sans-serif`/no `text-anchor` attribute confirmed corpus-wide (`plantuml.skin`'s `arrow{FontSize 13}` block, `GraphvizImageBuilder#getStyleArrowCardinality`); real placement algorithm confirmed via `~/git/graphviz/lib/label/xlabels.c`/`lib/common/postproc.c#addXLabels` (external-label force-search, NOT `place_portlabel`'s angle/distance formula — `CucaDiagram#getLabeldistance/getLabelangle` are dead fields, never read by any `net/` DOT-emission call site) | 0 new zero-diff (both target fixtures blocked by separate mechanisms, see below); census 121/718 (unchanged) · 1-3:46 (was 48) · 4-10:161 (was 165) · 11-30:55 (was 53) · 31+:335 (was 331) — the childCount-unmasking pattern this mission has recorded every iteration since N2, NOT a regression (ratchet re-verified 121/121, zero zero-diff regressions) |
 | `-[#blue]->`/inline edge-color override (`Relationship.color`, `CommandLinkClass`'s `[#color]` bracket) | NOT landed — NEWLY UNMASKED by this iteration (was hidden behind `kipure-14-suli112`'s own childCount mismatch; `Relationship` has no `color` field at all, `EDGE_DECORATION_MAP`-derived stroke is the only color source) | unimplemented — no `class-relationship-parser.ts` field, no `renderer.ts` consumer | `kipure-14-suli112/in.svg`'s `Subscriber-to-IpSession` edge: `style="stroke:#0000FF;..."` (source: `-[#blue]->`) vs this port's `stroke="#181818"` (default) | 0 (blocks `kipure-14-suli112` from zero even after the multiplicity fix); named for a future iteration |
 | `hide C2 circle` / entity-qualified compound hide | Unchanged since N12/N24 (`dokego-92-zilu832`'s C1/C2 pair, `hide C2 circle` unimplemented — C2's box in this port is 49.9375×48 vs jar's 23.9375×40, a real geometry difference cascading into edge-routing divergence for that pair) | `src/diagrams/class/class-commands.ts` (no `CommandHideShowByGender`-equivalent entity+circle-qualifier dispatch) | `dokego-92-zilu832/in.svg` C2 rect `width="23.9375" height="40"` (no badge circle reserved) vs this port's `width="49.9375" height="48"` | 0 (blocks `dokego-92-zilu832`'s C1-C2 edge from zero even after the multiplicity fix; the fixture's OTHER edge, D1-D2, is unaffected by hide-circle and shows the multiplicity mechanism's own residual cleanly, see below) |
-| graphviz-ts spline-routing/edge-length divergence (already named since N8, OUT OF SCOPE per CLAUDE.md) | Not attempted (explicitly out of scope) — CONFIRMED to be the dominant (~10-16px) component of the new head-label position residual, via byte-identical-pre/post-this-iteration spline endpoint comparison (`dokego-92-zilu832`'s D1-D2 edge: this port's spline ends at y=117.62, jar's own ends at y=128.81, an ~11.2px gap, present identically with or without this iteration's code) | `src/core/graph-layout.ts` (graphviz-ts's own dot-engine routing, not this port's DOT input — already proven byte-equal in N8) | `dokego-92-zilu832/in.svg` D1-D2 path `d="M116.97,69.28 C...128.81"` vs this port's `M116.96875,69.28... 117.62...` | Propagates into the new head-label position (computed relative to the edge's OWN, already-short endpoint) — not a new mechanism, the same library-boundary limitation named since N8 |
-| `graphviz-ts` builder API has no fixed-size (HTML `FIXEDSIZE`) text-label override for `taillabel`/`headlabel` (NEWLY DISCOVERED N25) | Not landed — a smaller (~1-4px) residual on the OTHERWISE-clean tail-side label position, traced to `graphviz-ts`'s own internal `Times`-metrics LUT measurement of the plain-string label (used for its `xladjust` placement-search geometry) differing slightly from this port's own `sans-serif` `WidthTableMeasurer` value (jar's real graphviz never measures the label itself at all — `SvekEdge.java#appendTable` emits an explicit `<TABLE FIXEDSIZE="TRUE" WIDTH=.. HEIGHT=..>`, bypassing graphviz's own font metrics entirely) | `node_modules/graphviz-ts/src/api/builder.js#addEdge` (plain `Record<string,string>` attrs only — no HTML-label marking path via the programmatic builder, confirmed via `node_modules/graphviz-ts/src/model/edge.js`/`api/index.d.ts`'s `ADR-1` doc comment) | `dokego-92-zilu832` D1-D2 tail label: this port x=109.973/y=85.24 vs jar x=109.272/y=87.183 (dx=0.70, dy=1.94) — small but nonzero even where the edge spline start point matches jar's almost exactly (69.28 vs 69.28) | Named for a future iteration; would require either modifying `graphviz-ts` (out of scope) or a second, DOT-text-based `renderSvg()` layout pass purely for label sizing (materially bigger change than this iteration's mandate) |
+| dot-engine spline-routing/edge-length divergence (already named since N8, OUT OF SCOPE per CLAUDE.md) | Not attempted (explicitly out of scope) — CONFIRMED to be the dominant (~10-16px) component of the new head-label position residual, via byte-identical-pre/post-this-iteration spline endpoint comparison (`dokego-92-zilu832`'s D1-D2 edge: this port's spline ends at y=117.62, jar's own ends at y=128.81, an ~11.2px gap, present identically with or without this iteration's code) | `src/core/graph-layout.ts` (dot-engine's own dot-engine routing, not this port's DOT input — already proven byte-equal in N8) | `dokego-92-zilu832/in.svg` D1-D2 path `d="M116.97,69.28 C...128.81"` vs this port's `M116.96875,69.28... 117.62...` | Propagates into the new head-label position (computed relative to the edge's OWN, already-short endpoint) — not a new mechanism, the same library-boundary limitation named since N8 |
+| `dot-engine` builder API has no fixed-size (HTML `FIXEDSIZE`) text-label override for `taillabel`/`headlabel` (NEWLY DISCOVERED N25) | Not landed — a smaller (~1-4px) residual on the OTHERWISE-clean tail-side label position, traced to `dot-engine`'s own internal `Times`-metrics LUT measurement of the plain-string label (used for its `xladjust` placement-search geometry) differing slightly from this port's own `sans-serif` `WidthTableMeasurer` value (jar's real graphviz never measures the label itself at all — `SvekEdge.java#appendTable` emits an explicit `<TABLE FIXEDSIZE="TRUE" WIDTH=.. HEIGHT=..>`, bypassing graphviz's own font metrics entirely) | `node_modules/dot-engine/src/api/builder.js#addEdge` (plain `Record<string,string>` attrs only — no HTML-label marking path via the programmatic builder, confirmed via `node_modules/dot-engine/src/model/edge.js`/`api/index.d.ts`'s `ADR-1` doc comment) | `dokego-92-zilu832` D1-D2 tail label: this port x=109.973/y=85.24 vs jar x=109.272/y=87.183 (dx=0.70, dy=1.94) — small but nonzero even where the edge spline start point matches jar's almost exactly (69.28 vs 69.28) | Named for a future iteration; would require either modifying `dot-engine` (out of scope) or a second, DOT-text-based `renderSvg()` layout pass purely for label sizing (materially bigger change than this iteration's mandate) |
 
 ### Full-corpus regression scan (scoped to the 34-fixture quoted-multiplicity
 ### grep population, per N25's own reach estimate — disposable git worktree
@@ -7433,7 +7433,7 @@ skipped. Of the 12: 8 REGRESSED (diff COUNT increased — every one of them
 already non-zero before this iteration, confirmed via the disposable
 worktree; the exact "childCount-unmasking" pattern recorded every iteration
 since N2, revealing pre-existing, separately-named mismatches — the `-[#
-blue]->` color gap, `hide circle`, and the graphviz-ts routing divergence
+blue]->` color gap, `hide circle`, and the dot-engine routing divergence
 above — that the prior childCount mismatch had been masking), 3 unchanged
 (`cadutu-02-lazu601` uses `!pragma layout elk`, unaffected; `nenexe-35-
 zere033`'s `"owner"/"1"` combined role+multiplicity syntax does not set
@@ -7464,19 +7464,19 @@ green, 0 zero-diff regressions. `description.golden.ratchet.test.ts`:
 
 See the mechanism table above for the four deferred/named items
 (`-[#color]->` inline edge color, `hide C2 circle`, the already-out-of-scope
-graphviz-ts routing divergence, and the newly-discovered `graphviz-ts`
+dot-engine routing divergence, and the newly-discovered `dot-engine`
 builder-API fixed-size-label gap). Per the brief's own explicit "if scope
 remains" ordering, the `(CHAR,COLOR)` badge-decoration color half and the
 note/rect background-color override were NOT started this iteration — the
 multiplicity mechanism's diagnosis (deriving the real graphviz placement
-algorithm from C source, discovering `graphviz-ts`'s own faithful-but-
+algorithm from C source, discovering `dot-engine`'s own faithful-but-
 unexposed port, and building the render()-SVG-scrape extraction technique)
 consumed the iteration's full time budget.
 
 ### Scratch/worktree hygiene
 
 `scripts/_tmp-n25-diff.ts`/`_tmp-n25-probe.ts`/`_tmp-n25-probe2.ts`/
-`_tmp-n25-measure.ts` (single-fixture diff dumps, isolated graphviz-ts
+`_tmp-n25-measure.ts` (single-fixture diff dumps, isolated dot-engine
 builder-API probes, LUT-measurement probes) all deleted before finishing.
 One disposable `git worktree add HEAD` (symlinked `node_modules`/
 `test-results`/`oracle`/`assets`) removed via `git worktree remove --force`
@@ -7492,7 +7492,7 @@ mission rule).
 | `-[#color]->`/`-[bold\|dashed\|dotted]->`/`-[thickness=N]->` inline bracket-modifier overrides (`WithLinkType.applyStyle`/`applyOneStyle`, N25's named priority 1) | **LANDED** — full render-relevant token set (color/thickness/dashed/dotted/bold), widened from the brief's literal "-[#color]->" wording after a corpus survey (13 fixtures) found thickness=N (7) and dashed/dotted/bold (2) sit behind the SAME already-captured-and-discarded bracket grammar; `hidden`/`norank` (2) explicitly excluded (DOT-graph-affecting, out of a render-only iteration) | `class-arrow-grammar.ts#parseArrowStyleOverrides`/`extractArrowStyleRaw` (new); `class-relationship-parser.ts#parseRelationshipLine` (wires `Relationship.lineStyleOverride`/`.thicknessOverride`/`.colorOverride`, ast.ts new fields); `class-geo-builders.ts#buildStrokeOverride` (new — reuses shared `core/svek/svek-edge-stroke.ts#strokeForStyle`, the SAME `LinkStyle#getStroke3()` formula description's own edge renderer already uses); `renderer.ts#renderEdge` (stroke/strokeWidth/strokeDasharray now read the new `EdgeGeo` fields, `geo.colorOverride` resolved through `HColorSet.ts#resolveColorToSvgHex`) | `kipure-14-suli112` (`Subscriber -[#blue]-> IpSession`): `stroke="#0000FF"` now byte-exact (was `#181818`); `pofebo-79-nape407` (5 `thickness=N` edges): `stroke-width` 1/2/4/8/16 all byte-exact; `ruzibe-92-doti700` (`bold`/`plain`): width 2/no-dasharray and width 1/no-dasharray both byte-exact; `vufuko-05-lapu034` (`dotted`/`dashed,thickness=2`): dasharray `1,3`/`7,7` both byte-exact. 13-fixture diff-count scan: every touched fixture's diff count strictly decreased or stayed unchanged (2 fixtures, `hidden`/`norank`, correctly untouched); 0 regressions |
 | Entity-qualified `hide <entity> circle\|members\|fields\|attributes\|methods` (`CommandHideShowByGender`, GENDER = bare/quoted entity id; N25's named priority 3, "hide C2 circle") | **LANDED** — widened from the 1 named fixture to the full entity-id-GENDER form after an 8-fixture corpus survey; type-keyword GENDER (`hide class circled`) and `<<stereotype>>` GENDER (`hide <<even>> methods`) explicitly excluded (deferred, separate grammar branches, unverified) | `ast.ts#HideShowEntityDirective`/`Classifier.suppressFields`/`.suppressMethods` (new); `class-directives.ts#parseHideShowEntityDirective`/`applyHideShowEntityDirectives` (new); `class-commands.ts` dispatch (new arm, tried before the single-token pattern/visibility-compound parsers); `layout.ts#preMeasureClassifiers` (ORs the new per-classifier flags into the pre-existing global `suppressFields`/`suppressMethods` computation) | `dokego-92-zilu832` (`hide C2 circle`): C2's `<rect width="23.9375" height="40">` byte-exact (was 49.9375×48); `nirija-04-veti140` (`hide X members`/`hide Y members`, 5 real member lines each): both `<rect width="41.3625" height="32">` byte-exact, zero `<line>` dividers — reached **zero-diff**. 27-fixture diff-count scan: every touched fixture improved or unchanged, 0 regressions |
 | `measureGenericClassifier`'s `memberAreaWidth` computed from ALL members regardless of `suppress.fields`/`.methods` (PRE-EXISTING bug, unmasked by the entity-hide TDD test above — the global `hide members`/`hide empty fields`/`hide empty methods` callers never exercised a suppressed-but-content-bearing compartment in any ratchet-pinned sample) | **LANDED** (fixed at origin, not worked around) | `class-layout-helpers.ts:320-324` (`memberAreaWidth` now gated by `suppress.fields`/`suppress.methods`, same as the pre-existing `dividerYs`/`rows`/height gating just below it) | `nujiga-81-peno983`'s `Dummy2` (jar: methods suppressed, width 78.15 — narrower than the wide-methods-driven 162.85 every other classifier in that fixture uses) confirms the fix direction; `foraso-61-gesu813`/`vevoju-56-medu197` (clean versions of `nujiga`/`vokulo` without the confounding `hide class circled` line) both reached **zero-diff** |
-| Badge `(CHAR,COLOR)` decoration customization (`StereotypeDecoration#buildComplex`'s CHAR/COLOR capture, N24/N25's named priority 2) | **LANDED, narrowed** — COLOR always wired (jar-correct for every sample); LETTER only when the custom char coincides with one of the 5 pre-captured glyph outlines (C/I/A/E/@) — the ~10 other corpus letters (R/M/J/O/P/W/D/F/Q/S/X, `$sprite`) fall back to the kind-default letter, explicitly deferred (would need new corpus-scraped glyph `d` data per letter, same technique N3 used for the original 5) | `class-stereotype.ts#parseCircledCharDecoration` (new); `class-layout-helpers.ts#measureGenericClassifier` (computes once, threads via `MeasuredClassifier.badgeChar`/`.badgeColor`); `layout.ts#ClassifierGeo.badgeChar`/`.badgeColor` (new, copied through BOTH `buildClassifierGeos` and `degenerateSingleClassifier`, mirroring N24's `headerRowCount` precedent); `class-badge.ts#resolveBadgeFill`/`resolveBadgeLetter` (new); `renderer-classifier-box.ts#renderBadge` (consumes both) | `bejeli-39-sina124`: `NamedStereotype`/`ColoredCircle` (`<<(S,#FF7700)...>>`) both `fill="#FF7700"` byte-exact; `PlainCircle`/`PlainCircleStereotype` (`<<(S)>>`, no COLOR) both fall back to `fill="#ADD1B2"` byte-exact. `romuco-53-sesu052` (`<<(A,#FF00DD)>>`, char 'A' coincides with the known glyph): reached **zero-diff**. 20-fixture diff-count scan: 6 improved, 13 unchanged (dominated by OTHER unbuilt mechanisms — bare `hide methods`, `!pragma`, graphviz-ts routing — via the childCount-unmasking pattern), 1 regressed (`nagega-30-poso418`, diagnosed below, kept) |
+| Badge `(CHAR,COLOR)` decoration customization (`StereotypeDecoration#buildComplex`'s CHAR/COLOR capture, N24/N25's named priority 2) | **LANDED, narrowed** — COLOR always wired (jar-correct for every sample); LETTER only when the custom char coincides with one of the 5 pre-captured glyph outlines (C/I/A/E/@) — the ~10 other corpus letters (R/M/J/O/P/W/D/F/Q/S/X, `$sprite`) fall back to the kind-default letter, explicitly deferred (would need new corpus-scraped glyph `d` data per letter, same technique N3 used for the original 5) | `class-stereotype.ts#parseCircledCharDecoration` (new); `class-layout-helpers.ts#measureGenericClassifier` (computes once, threads via `MeasuredClassifier.badgeChar`/`.badgeColor`); `layout.ts#ClassifierGeo.badgeChar`/`.badgeColor` (new, copied through BOTH `buildClassifierGeos` and `degenerateSingleClassifier`, mirroring N24's `headerRowCount` precedent); `class-badge.ts#resolveBadgeFill`/`resolveBadgeLetter` (new); `renderer-classifier-box.ts#renderBadge` (consumes both) | `bejeli-39-sina124`: `NamedStereotype`/`ColoredCircle` (`<<(S,#FF7700)...>>`) both `fill="#FF7700"` byte-exact; `PlainCircle`/`PlainCircleStereotype` (`<<(S)>>`, no COLOR) both fall back to `fill="#ADD1B2"` byte-exact. `romuco-53-sesu052` (`<<(A,#FF00DD)>>`, char 'A' coincides with the known glyph): reached **zero-diff**. 20-fixture diff-count scan: 6 improved, 13 unchanged (dominated by OTHER unbuilt mechanisms — bare `hide methods`, `!pragma`, dot-engine routing — via the childCount-unmasking pattern), 1 regressed (`nagega-30-poso418`, diagnosed below, kept) |
 
 ### `nagega-30-poso418` regression — diagnosed, kept (not reverted)
 
@@ -7513,7 +7513,7 @@ after the badge mechanism landed. Per diagnosis.md, traced before accepting:
   by NAME (not position): `Action::Functor1`'s badge fill (`#AFEEEE`) and
   glyph coordinates (`M214.2733,143.3481...`) are BYTE-EXACT against jar; `
   Action::Functor2`'s fill is also byte-exact, its glyph carries a small
-  residual, consistent with the mission's own already-named graphviz-ts
+  residual, consistent with the mission's own already-named dot-engine
   layout-divergence category (not a badge-mechanism defect).
 - **Ruled out**: a badge geometry-formula regression (rect/ellipse cx/cy
   are IDENTICAL before/after this iteration's diff, confirmed via a
@@ -7623,7 +7623,7 @@ diff-family-set.
 | Dotted-namespace nesting (`namespace A.B.C { }` / `set namespaceSeparator .` + qualified refs) | **NEWLY DISCOVERED**, ≥7 direct ("Revelate.Legacy.Base.Biz" cluster: `dudimi-83-mimo845`/`dujinu-38-badu006`/`duvuti-29-lugi970`/`gaxipe-22-maxa852`/`joguva-54-tevo966`/`pareli-69-cixe116`/`xodopa-41-tazo512`) + likely more corpus-wide | Surveyed, NOT landed (see below) — a real, substantial, DOT-topology-affecting gap |
 | `newpage` (multi-page diagram) | ≥2 (`bufogi-69-naba929`/`gevuci-69-fafe469`) | Unchanged, unbuilt directive (renders only the first page) |
 | `mainframe <text>` | ≥1 (`jakaja-15-faze022`) | Unchanged, unbuilt annotation |
-| graphviz-ts spline-routing/edge-length divergence (OUT OF SCOPE, named since N8) | dominant across the corpus — every large multi-family diff bucket (`svg/g/g/path/@d`, cascading into `svg/@viewBox`/`@width`/`@height`) traces back here once childCount/structural gaps are excluded | Confirmed still dominant; not attempted (out of scope per CLAUDE.md) |
+| dot-engine spline-routing/edge-length divergence (OUT OF SCOPE, named since N8) | dominant across the corpus — every large multi-family diff bucket (`svg/g/g/path/@d`, cascading into `svg/@viewBox`/`@width`/`@height`) traces back here once childCount/structural gaps are excluded | Confirmed still dominant; not attempted (out of scope per CLAUDE.md) |
 
 Two large *diff-family* (not mechanism) clusters, sub-classified:
 - 50 fixtures share the exact signature `svg/@height,svg/@viewBox,svg/@width,
@@ -7633,7 +7633,7 @@ Two large *diff-family* (not mechanism) clusters, sub-classified:
   `skinparam style strictuml` combined with other features, and several
   already-named single-fixture items all co-occur in this bucket.
 - 26 fixtures' ONLY diff family is `svg/g/g/path/@d` (edge routing alone,
-  nothing else different) — pure graphviz-ts routing divergence, matches
+  nothing else different) — pure dot-engine routing divergence, matches
   the already-established, out-of-scope category exactly.
 
 ### Mechanisms landed
@@ -7641,7 +7641,7 @@ Two large *diff-family* (not mechanism) clusters, sub-classified:
 | Mechanism | Fixed/deferred | Cause file:line | Jar evidence | Census contribution |
 |---|---|---|---|---|
 | `skinparam guillemet <value>` — stereotype wrapper-string override (`Guillemet.fromDescription`) | **LANDED** | `src/core/skinparam.ts` (new `'guillemet'` switch case, `Guillemet.fromDescription`'s `false`/`<< >>`→DOUBLE_COMPARATOR, `none`→empty, space-containing value→tokenize, else→unset/default port); `src/core/theme.ts` (`colors.graph.guillemetStart`/`.guillemetEnd`, new optional fields); `src/diagrams/class/class-stereotype.ts#wrapGuillemet`/`measureStereoLabelWidths`/`buildStereoRows` (new optional `GuillemetPair` param, defaults to `«`/`»` — every pre-existing caller unaffected); `src/diagrams/class/class-layout-helpers.ts#measureClassifier`/`measureGenericClassifier` (threads the resolved pair through; `sprites`+`guillemet` folded into one trailing options object to stay within the project's 5-param cap) | `cezazo-40-raja394` (`skinparam guillemet << >>`): stereotype text `<<stereotype>>` byte-exact (was `«stereotype»`); `ribomo-92-naco581` (`$$ $$`): `$$stereotype$$` exact; `topige-52-fiku910` (`[ ]`): `[stereotype]` exact; `zalazo-34-livu931` (`none`): bare `stereotype` exact. `class-object-map-sizing.ts`'s own separate `wrapGuillemet` copy (object/map leaves, shared with `state-sizing.ts` — a DIFFERENT diagram type) deliberately left unwired this iteration, named below | All 4 reached **zero-diff** |
-| Bare (non-"empty") global `hide fields`/`hide methods` (`CommandHideShowByGender`, GENDER absent → every classifier, no `empty` qualifier → unconditional) | **LANDED**, widened from N26's 1-fixture estimate to the corpus-verified 5-fixture reach | `src/diagrams/class/ast.ts#HideTarget` (new `'fields'`/`'methods'` members); `src/diagrams/class/class-directives.ts#HIDE_TARGET_MAP` (new entries) + `applyDirectives` (new `hideFields`/`hideMethods` effective-action reads, per-member `isMethodMember`-gated marking — same shape as the pre-existing `hideMembers` branch, just filtered to one member kind) | `cutasu-32-zete658`/`gabejo-44-juki791`/`jecopa-66-vepe168`/`vegubu-29-bomu147`/`xogixe-78-zuro619` — mechanism structurally correct (member `.hidden` now set), but 0/5 reach zero-diff (each fixture carries 1-2 OTHER, larger, already-named or newly-discovered issues — icon/`<a>`-link rendering, creole markup, graphviz-ts routing) |
+| Bare (non-"empty") global `hide fields`/`hide methods` (`CommandHideShowByGender`, GENDER absent → every classifier, no `empty` qualifier → unconditional) | **LANDED**, widened from N26's 1-fixture estimate to the corpus-verified 5-fixture reach | `src/diagrams/class/ast.ts#HideTarget` (new `'fields'`/`'methods'` members); `src/diagrams/class/class-directives.ts#HIDE_TARGET_MAP` (new entries) + `applyDirectives` (new `hideFields`/`hideMethods` effective-action reads, per-member `isMethodMember`-gated marking — same shape as the pre-existing `hideMembers` branch, just filtered to one member kind) | `cutasu-32-zete658`/`gabejo-44-juki791`/`jecopa-66-vepe168`/`vegubu-29-bomu147`/`xogixe-78-zuro619` — mechanism structurally correct (member `.hidden` now set), but 0/5 reach zero-diff (each fixture carries 1-2 OTHER, larger, already-named or newly-discovered issues — icon/`<a>`-link rendering, creole markup, dot-engine routing) |
 
 ### Note/rect background-color override — surveyed in full, NOT landed
 
@@ -7806,20 +7806,20 @@ directly against the working tree via `dot-sync-report.ts`/the census
 script, no baseline comparison needed). Nothing committed (orchestrator
 owns commits per mission rule).
 
-## Orchestrator entry (2026-07-17): graphviz-ts divergence attribution FALSIFIED
+## Orchestrator entry (2026-07-17): dot-engine divergence attribution FALSIFIED
 
 Attempted the minimal upstream repro the N8/N11/N20 entries called for
-(bosiki-11-xaza958's jar svek-1.dot rebuilt via graphviz-ts's builder API,
+(bosiki-11-xaza958's jar svek-1.dot rebuilt via dot-engine's builder API,
 compared against real dot 15.1 in IDENTICAL -Tsvg space). Result: node
 positions byte-identical on every extracted node AND the edge spline d
 strings byte-identical (e.g. sh0008->sh0010:
 "M101.8,-215.74C96.73,-187.46 88.67,-142.48 87.2,-134.3" on BOTH sides).
 The first-pass "101pt delta" was an extraction-regex artifact, immediately
-corrected. graphviz-ts is faithful to real graphviz on this input; there is
+corrected. dot-engine is faithful to real graphviz on this input; there is
 NO library-level repro to file.
 
 Consequences:
-1. The ~400-fixture "graphviz-ts routing divergence" row is RE-ATTRIBUTED:
+1. The ~400-fixture "dot-engine routing divergence" row is RE-ATTRIBUTED:
    the divergence must originate in the difference between OUR emitted DOT
    and the jar's dot TEXT that the structural gate deliberately tolerates -
    node/edge declaration ORDER (mincross is input-order-sensitive) and/or
@@ -7923,8 +7923,8 @@ rather than only through the full `renderClass` pipeline.
 
 | Mechanism | Fixed/deferred | Cause file:line | Jar evidence | Census contribution |
 |---|---|---|---|---|
-| SQUARE/PLUS/PARENTHESIS/CROWFOOT + crow's-foot family glyph→decor wiring | **LANDED** | `src/diagrams/class/class-arrow-grammar.ts#headToDecor` (widened switch); `src/diagrams/class/ast.ts#LinkDecor` (8 new members); `src/diagrams/class/renderer-arrowhead.ts#DECOR_TO_NAME` (8 new entries) | `zerofa-77-caro506` (`#--`, SQUARE), `xekeje`... n/a — verified via `cenubi-27-xova754`/`zerofa-77-caro506`/`medosa-71-ligu412`/`xosiza-60-sobu480` childCount corrections (marker now present with the correct child-element count for each shape family) | 0 new zero-diff directly (every target fixture blocked by a SEPARATE, already-named residual — graphviz-ts routing divergence or an unrelated pre-existing coordinate bug, both confirmed via disposable-worktree baseline diff, not caused by this mechanism) |
-| Decor-trim mechanism (`applyDecorTrim`, universal — every decor kind, not just the 4 new ones) | **LANDED** | `src/diagrams/class/renderer-arrowhead.ts#applyDecorTrim` (new); `src/diagrams/class/renderer.ts#renderEdge` (reordered to resolve arrowheads before building path `d`) | Direct live-jar run of `Foo --> Bar` (`oracle/dist/plantuml-oracle.jar -tsvg`): path end y=109.79, polygon tip y=114.79, delta 5.0 — matches this port's own post-fix delta exactly | 0 new zero-diff on its own targets (same graphviz-ts-routing-blocked pattern); corrected 2 stale golden-string unit tests, both re-verified against the live jar |
+| SQUARE/PLUS/PARENTHESIS/CROWFOOT + crow's-foot family glyph→decor wiring | **LANDED** | `src/diagrams/class/class-arrow-grammar.ts#headToDecor` (widened switch); `src/diagrams/class/ast.ts#LinkDecor` (8 new members); `src/diagrams/class/renderer-arrowhead.ts#DECOR_TO_NAME` (8 new entries) | `zerofa-77-caro506` (`#--`, SQUARE), `xekeje`... n/a — verified via `cenubi-27-xova754`/`zerofa-77-caro506`/`medosa-71-ligu412`/`xosiza-60-sobu480` childCount corrections (marker now present with the correct child-element count for each shape family) | 0 new zero-diff directly (every target fixture blocked by a SEPARATE, already-named residual — dot-engine routing divergence or an unrelated pre-existing coordinate bug, both confirmed via disposable-worktree baseline diff, not caused by this mechanism) |
+| Decor-trim mechanism (`applyDecorTrim`, universal — every decor kind, not just the 4 new ones) | **LANDED** | `src/diagrams/class/renderer-arrowhead.ts#applyDecorTrim` (new); `src/diagrams/class/renderer.ts#renderEdge` (reordered to resolve arrowheads before building path `d`) | Direct live-jar run of `Foo --> Bar` (`oracle/dist/plantuml-oracle.jar -tsvg`): path end y=109.79, polygon tip y=114.79, delta 5.0 — matches this port's own post-fix delta exactly | 0 new zero-diff on its own targets (same dot-engine-routing-blocked pattern); corrected 2 stale golden-string unit tests, both re-verified against the live jar |
 
 ### Full-corpus regression scan (both priority-1 mechanisms together)
 
@@ -7936,7 +7936,7 @@ count rose) via the SAME childCount-unmasking pattern documented every
 iteration since N2 — each regression traced to a marker that now draws
 STRUCTURALLY correctly (matching child-element count) but sits at a
 position still blocked by an ALREADY-NAMED, unrelated pre-existing
-mechanism (the dominant graphviz-ts spline-routing/edge-length
+mechanism (the dominant dot-engine spline-routing/edge-length
 divergence, out of scope per CLAUDE.md; one case, `jojime-80-savu279`,
 traced to a `!pragma svek_trace on` + package-cluster layout offset
 already present before this iteration, confirmed via the disposable
@@ -8056,7 +8056,7 @@ working-tree changes were lost. Nothing committed (orchestrator owns
 commits per mission rule).
 
 ## N29 — routing-divergence re-attribution drill: `manualArrowheads` seam gap
-## (the "~400-fixture graphviz-ts divergence" was a seam bug, not an engine bug)
+## (the "~400-fixture dot-engine divergence" was a seam bug, not an engine bug)
 
 ### Method: byte-diff our ACTUAL emitted DOT/layout-call vs the jar's cached
 ### svek-1.dot, on the 41-fixture pure-`path/@d` population (grown from the
@@ -8076,12 +8076,12 @@ line-for-line, modulo synthetic `shNNNN` id renumbering) — directly
 contradicting the orchestrator's hypothesis 1 (declaration-order
 sensitivity) for this fixture. A companion standalone repro (mirroring
 `gvts-coord-repro.mjs`'s technique: feed the SAME exact graph through
-graphviz-ts's builder API and real `dot -Tplain`, both independent of this
-port's code) confirmed graphviz-ts is ALSO byte-identical to real dot on
+dot-engine's builder API and real `dot -Tplain`, both independent of this
+port's code) confirmed dot-engine is ALSO byte-identical to real dot on
 this exact 3-node graph (node y-positions and spline control points
 match to the tolerance of transcription) — so neither order nor a
-graphviz-ts engine bug explains farina's divergence either. A THIRD
-experiment (feeding `bosiki-11-xaza958`'s graph through graphviz-ts twice
+dot-engine engine bug explains farina's divergence either. A THIRD
+experiment (feeding `bosiki-11-xaza958`'s graph through dot-engine twice
 — once in the jar's exact order+attrs, once in our order with
 remincross/searchsize omitted, once in our order with them added) found
 **zero coordinate difference in all three variants** — hypothesis 1
@@ -8109,7 +8109,7 @@ hits). Every jar svek DOT edge line carries `arrowtail=none,
 arrowhead=none` unconditionally regardless of decor kind
 (`svek-dot-emit.ts`, corpus-wide) — `class` should have been forwarding
 `manualArrowheads: true` since N1's cutover and never was. This is a pure
-seam-invocation gap (`class-dot-graph.ts:317-323`), not a graphviz-ts
+seam-invocation gap (`class-dot-graph.ts:317-323`), not a dot-engine
 defect and not a declaration-order issue — the orchestrator's hypotheses
 1/2 were both falsified on direct evidence; the real mechanism was
 hypothesis "3" implied but not named in the entry (a missing flag, not a
@@ -8219,15 +8219,15 @@ build`: clean (vite + dts build succeeded).
 
 The orchestrator's 2026-07-17 falsification entry's hypotheses 1
 (declaration order) and 2 (remincross/searchsize) are BOTH empirically
-falsified as the mechanism (neither changes graphviz-ts's output on any
+falsified as the mechanism (neither changes dot-engine's output on any
 tested graph) — the real "seam invocation gap" was a THIRD, simpler
 possibility the entry did not explicitly name: a stale/never-updated
 `manualArrowheads` flag, a one-line fix once found. The ~400-fixture
-"graphviz-ts routing divergence" family this mission has treated as
+"dot-engine routing divergence" family this mission has treated as
 out-of-scope since N8 was, for a large fraction of its population, this
 single seam bug — not an engine defect. The remaining 25-fixture
 pure-`path/@d` population (down from 41) is the genuine residual: either
-real multi-node/multi-rank graphs where graphviz-ts's own mincross/
+real multi-node/multi-rank graphs where dot-engine's own mincross/
 position algorithm plausibly does diverge from real dot (unverified,
 would need the same per-fixture byte-diff treatment `bosiki-11-xaza958`
 already got), or fixtures blocked by an unrelated already-named
@@ -8235,7 +8235,7 @@ mechanism sitting on the SAME fixture. Recommended N30 pickup: re-run
 this iteration's byte-diff method on 3-5 of the REMAINING 25 pure-path
 fixtures (`bivize-12-xiko303`, `bunuce-10-vere519`, `cotacu-63-jisi866`,
 `getufo-87-xeca508`, `gojole-09-solo793`) to determine whether any
-residual graphviz-ts engine divergence actually exists, or whether it is
+residual dot-engine engine divergence actually exists, or whether it is
 entirely further seam/attribute gaps of this same kind.
 
 ### Scratch/worktree hygiene
@@ -8244,7 +8244,7 @@ entirely further seam/attribute gaps of this same kind.
 `scripts/_tmp-n29-capture-dot.ts` (production `DotInputGraph` capture via
 `setLayoutInputObserver`+`toSvekDot`), `scripts/_tmp-n29-order-attr-test.mjs`
 (bosiki order/attr isolation experiment), `scripts/_tmp-n29-farina-repro.mjs`
-(farina graphviz-ts-vs-real-dot standalone repro), `scripts/_tmp-n29-farina-svg.ts`
+(farina dot-engine-vs-real-dot standalone repro), `scripts/_tmp-n29-farina-svg.ts`
 (farina full-SVG diff dump), `scripts/_tmp-n29-diffcounts.ts` (full-corpus
 per-fixture diffCount CSV, used for the before/after regression scan),
 `scripts/_tmp-n29-regress-diag.ts` (the 2-fixture regression diff-family
@@ -8259,7 +8259,7 @@ committed (orchestrator owns commits per mission rule).
 ## N30 — path-direction normalization: `SvekEdge.java#solveLine`'s
 ## distance-based reversal, replacing a hardcoded "always reverse
 ## hierarchical" rule (the remaining pure-`path/@d` population was mostly
-## THIS seam gap, not a graphviz-ts engine divergence)
+## THIS seam gap, not a dot-engine engine divergence)
 
 ### Method: N29's byte-diff protocol, re-run on the recommended 5 fixtures
 ### from the remaining 25-fixture pure-`path/@d` population
@@ -8285,8 +8285,8 @@ renumbering, the same noise N29 already established is inert) —
 confirms the DOT-emission layer is correct; the divergence is render-side.
 **The 3 couple-shape fixtures ALSO structurally match jar's DOT exactly**
 (same rect/circle/rect topology bosiki-11-xaza958 already has, which N29's
-own `gvts-coord-repro.mjs` proved graphviz-ts renders byte-identically to
-real dot) — ruling out a graphviz-ts engine divergence for THIS population
+own `gvts-coord-repro.mjs` proved dot-engine renders byte-identically to
+real dot) — ruling out a dot-engine engine divergence for THIS population
 too, on direct evidence, not assumption.
 
 ### Root cause, found by diffing the RENDERED `<path d>` (bivize)
@@ -8415,7 +8415,7 @@ byte-exact zero-diff landings above); feeding it a node position that
 ALREADY diverges from jar's (an existing, unrelated rank-assignment
 divergence) naturally amplifies rather than fixes that fixture's edge
 direction. Named for a future iteration as a NARROWER case of the
-already-out-of-scope "graphviz-ts routing divergence" family — NOT
+already-out-of-scope "dot-engine routing divergence" family — NOT
 launched this iteration (both fixtures were already 100+ diffs deep before
 any change here).
 
@@ -8442,9 +8442,9 @@ clean. `npm run build`: clean (vite + dts build succeeded).
 Confirms N30's brief question directly: on this iteration's evidence, the
 remaining pure-`path/@d` population was overwhelmingly ANOTHER seam gap
 (a hardcoded reversal rule instead of jar's real distance-based one), not
-a graphviz-ts engine divergence — the SECOND consecutive iteration to find
+a dot-engine engine divergence — the SECOND consecutive iteration to find
 this (N29 found `manualArrowheads`, N30 finds the reversal rule). No
-genuine graphviz-ts engine divergence has been PROVEN on any tested graph
+genuine dot-engine engine divergence has been PROVEN on any tested graph
 shape across N18/N29/N30's repros. The remaining 16-fixture pure-`path/@d`
 population is: 3 couple-shape fixtures (already-named N19 repeat-coupling,
 not this mechanism), `cotacu`/`jarigi`/`renezi`/`jikase` (already-named
@@ -8705,15 +8705,15 @@ listing rather than referenced only as precedent). Full breakdown:
   anywhere in that function, for either class OR description, and
   description's own `ast.ts` doc comment claiming `splines=ortho;
   forcelabels=true;` for ortho is similarly aspirational/unwired for the
-  ACTUAL graphviz-ts layout call, as opposed to the diff-only
-  `svek-dot-emit.ts` DOT-TEXT serialization). Confirmed `graphviz-ts`'s
-  own public builder API/type declarations (`node_modules/graphviz-ts/
+  ACTUAL dot-engine layout call, as opposed to the diff-only
+  `svek-dot-emit.ts` DOT-TEXT serialization). Confirmed `dot-engine`'s
+  own public builder API/type declarations (`node_modules/dot-engine/
   dist/parser/builder.d.ts`, `common/types.d.ts`) expose no `splines`
   graph-attribute setter at all — matches N25's own precedent finding
   ("no fixed-size/HTML-table label override exists via the programmatic
-  builder"). Per CLAUDE.md's explicit "graphviz-ts OUT OF SCOPE" rule and
+  builder"). Per CLAUDE.md's explicit "dot-engine OUT OF SCOPE" rule and
   this mission's standing rules, NOT attempted — named for a maintainer
-  scoping decision (would need either a graphviz-ts upstream contribution
+  scoping decision (would need either a dot-engine upstream contribution
   or a raw-DOT-text fallback path, neither a render-side fix).
 - **2 fixtures — NEW finding, surveyed, deferred (not "small")**:
   `pafare-13-raje687`/`mudune-38-kide806` (`skinparam
@@ -8730,7 +8730,7 @@ listing rather than referenced only as precedent). Full breakdown:
   DOT-gate risk, this mission's own recurring stop condition). Not a
   value-wiring fix; named for a dedicated future iteration.
 
-No genuine graphviz-ts ENGINE divergence was found or claimed for any of
+No genuine dot-engine ENGINE divergence was found or claimed for any of
 these 3 new-finding fixtures — all three trace to seam gaps (unwired
 skinparam -> DOT/render attribute), consistent with N29/N30's own
 "second/third consecutive iteration, no engine divergence" finding.
@@ -8777,17 +8777,17 @@ seam gap like N29/N30's findings). `zuramo-86-liku129`'s own untouched
 non-hierarchical composition edge (N30's own regression trace) shows the
 identical symptom on a structurally-unrelated edge in the SAME diagram,
 reinforcing that this is a whole-graph position/ordering effect, not
-per-edge. No minimal graphviz-ts-vs-real-graphviz repro was built this
+per-edge. No minimal dot-engine-vs-real-graphviz repro was built this
 iteration (time-budget-bounded, per the brief's explicit "survey, don't
 guess" instruction) — the evidence above is sufficient to state the
 SHAPE of the divergence (same-rank-eligible multi-edge convergence,
 tie-break ordering) without yet proving whether the root cause sits in
-graphviz-ts's mincross/ordering pass or this port's edge-declaration
+dot-engine's mincross/ordering pass or this port's edge-declaration
 order feeding it. Recommended next step for whichever iteration picks
 this up: a `gvts-coord-repro.mjs`-style isolated 3-node/2-edge repro
 (N29's own precedent script) feeding the EXACT `duruga` DOT text into
-both real `dot` (via the graphviz-ts test harness, if available) and
-graphviz-ts directly, to determine whether the divergence is graphviz-ts-
+both real `dot` (via the dot-engine test harness, if available) and
+dot-engine directly, to determine whether the divergence is dot-engine-
 internal (OUT OF SCOPE) or an edge-declaration-ORDER sensitivity this
 port's own DOT emission could route around (IN SCOPE, a seam gap).
 
@@ -9096,7 +9096,7 @@ if fixed):
  1  mode-dark                          1  remove-restore
 untagged: 288 (confirms N6/N10/N27's fragmentation finding generalizes --
 no single hidden universal mechanism remains; the untagged population
-skews heavily toward 31+ (200/288) where the already-named "graphviz-ts
+skews heavily toward 31+ (200/288) where the already-named "dot-engine
 routing divergence"/childCount-cascade families dominate, per N7-N32's own
 repeated finding)
 ```
@@ -9116,10 +9116,10 @@ than N31's own "2 reach" sample (21+10) -- still explicit DOT-gate risk
 ### Accounting rows (per the brief's explicit instruction)
 
 - **gvts-genuine items** (confirmed engine-level, OUT OF SCOPE per
-  CLAUDE.md, no graphviz-ts API surface exists): `skinparam linetype
+  CLAUDE.md, no dot-engine API surface exists): `skinparam linetype
   polyline` (N31, `kuxato-79-muno809`, 1 direct + `linetype-polyline` tag
-  2 reach -- `graphviz-ts`'s builder API has no `splines` setter,
-  confirmed again this iteration via `node_modules/graphviz-ts/dist/
+  2 reach -- `dot-engine`'s builder API has no `splines` setter,
+  confirmed again this iteration via `node_modules/dot-engine/dist/
   parser/builder.d.ts`, unchanged since N31). Anchor rank (N18) and
   label-width (N18) gvts-genuine items: no new reach data gathered this
   iteration (not re-surveyed, time budget went to the items below) --
@@ -9138,19 +9138,19 @@ than N31's own "2 reach" sample (21+10) -- still explicit DOT-gate risk
   byte-diff method, verdict below.
 
 ### DOT-rank multi-edge-same-pair divergence — SURVEYED: SEAM GAP, not a
-### graphviz-ts engine divergence (root cause identified, NOT fixed —
+### dot-engine engine divergence (root cause identified, NOT fixed —
 ### explicit DOT-gate risk, scope beyond this iteration's budget)
 
 Method: fed `duruga-39-lani451`'s (`class A; A<-B; C<-B`) EXACT cached
 `svek-1.dot` into BOTH real `dot` (`/opt/homebrew/bin/dot`, graphviz
-15.1.0, confirmed present on this machine) and `graphviz-ts`'s own
+15.1.0, confirmed present on this machine) and `dot-engine`'s own
 `renderSvg(dotText, 'dot')` directly (bypassing this port's own DOT
 construction entirely — N29's `gvts-coord-repro.mjs` precedent). **Both
 engines agree exactly** on node x-order for the identical jar DOT text:
 `sh0006` (leftmost) < `sh0008` (middle) < `sh0007` (rightmost) — real
-`dot -Tplain`: x = 0.287/1.357/2.426; `graphviz-ts`: x-ranges [0,41.36] /
+`dot -Tplain`: x = 0.287/1.357/2.426; `dot-engine`: x-ranges [0,41.36] /
 [76.61,118.76] / [154,195.36], same relative order. **This falsifies a
-graphviz-ts engine divergence for this graph shape** — the SAME
+dot-engine engine divergence for this graph shape** — the SAME
 conclusion N29 (`manualArrowheads`) and N30 (path-reversal rule) already
 reached for their own populations, now a THIRD consecutive confirmation.
 
@@ -9204,7 +9204,7 @@ iteration budget, not a survey-iteration add-on).
 
 **Verdict for the brief's own question: SEAM GAP** (a real, identified,
 NOT-YET-fixed bug in this port's OWN DOT-tail/head derivation), **not a
-graphviz-ts engine divergence** — the THIRD consecutive iteration to reach
+dot-engine engine divergence** — the THIRD consecutive iteration to reach
 this conclusion (N29, N30, N33). Recommended next step: a dedicated
 future iteration scoped around `buildDotEdges`'s `from`/`to`→`idEntity1`/
 `idEntity2` migration, empirically DOT-gate-verified before landing (N32's
@@ -9706,8 +9706,8 @@ owns commits per mission rule).
 ## N35 — couple/lollipop residual family: fresh sub-classification (37
 ## fixtures), lollipop label ink-extent gap LANDED (2 new zero-diff, 9
 ## improved), multiplicity-label textLength rounding LANDED (28 improved,
-## corpus-wide reach), getLayout()-vs-render() graphviz-ts internal
-## divergence FALSIFIES "graphviz-ts routing offset" for repeat-coupling —
+## corpus-wide reach), getLayout()-vs-render() dot-engine internal
+## divergence FALSIFIES "dot-engine routing offset" for repeat-coupling —
 ## narrower seam gap named, not fixed (cross-cutting, deferred)
 
 Baseline confirmed exact against the brief: `192/718 · 1-3:36 · 4-10:125 ·
@@ -9742,16 +9742,16 @@ distinct sub-population; not investigated further (the tagger script that
 produced it no longer exists to audit).
 
 ### Repeat-coupling `<path d>` residual — RE-VERIFIED with the
-### falsification-era lens: NOT the named "graphviz-ts routing offset"
+### falsification-era lens: NOT the named "dot-engine routing offset"
 ### (N8), NOT the N33 `buildDotEdges` seam gap either — a THIRD, narrower,
-### genuinely NEW mechanism (graphviz-ts internal `getLayout()`-vs-
+### genuinely NEW mechanism (dot-engine internal `getLayout()`-vs-
 ### `render()` inconsistency)
 
 All 9 repeat-coupling fixtures sit at a UNIFORM 16 diffs (down from N20's
 own post-landing 34 — an unrelated intervening iteration's fix, not this
 one's), every single diff a `path/@d[N]` coordinate value (grep-confirmed:
 zero `@id`/`childCount` diffs anywhere in the 9-fixture set) — matching
-N19/N20's own "blocked only by graphviz-ts" classification. Per the
+N19/N20's own "blocked only by dot-engine" classification. Per the
 brief's explicit falsification-era instruction, did NOT accept that label
 at face value — re-verified via the SAME byte-diff method N29/N30/N33
 established, extended one layer deeper:
@@ -9771,12 +9771,12 @@ established, extended one layer deeper:
    tags, not just node x-extents): fed BOTH jar's cached `svek-1.dot` text
    AND this port's own captured `DotInputGraph` (re-serialized via
    `toSvekDot`, the SAME production graph `setLayoutInputObserver`
-   captures) into `graphviz-ts`'s `renderSvg(dotText,'dot')` directly,
+   captures) into `dot-engine`'s `renderSvg(dotText,'dot')` directly,
    bypassing this port's own layout-consumption code entirely. Result:
    **byte-identical edge splines** once node ids are correlated (e.g. jar
    `sh0010->sh0009: M87.18,-129.81C88.59,-121.94 96.68,-76.84
    101.77,-48.43` == ours `sh0006->sh0005:` the SAME string, verbatim) —
-   this FALSIFIES a `graphviz-ts` engine-level routing divergence for this
+   this FALSIFIES a `dot-engine` engine-level routing divergence for this
    graph shape, the SAME conclusion N29/N30/N33 each reached for their own
    populations, now a fourth consecutive confirmation.
 3. **The actual mechanism** (found by going one layer deeper than any
@@ -9787,12 +9787,12 @@ established, extended one layer deeper:
    tail/head-label-position path, G2 N25). Calling `layoutGraph()`
    directly on the SAME captured graph and comparing ITS OWN edge points
    against `render()`'s own `<path d>` for the IDENTICAL graph (no
-   jar/oracle involved at all — a pure graphviz-ts self-consistency check)
+   jar/oracle involved at all — a pure dot-engine self-consistency check)
    found `getLayout()` and `render()` **disagree with each other**:
    `getLayout()`'s edge-1 (circle→B) raw x-values `87.2373, 88.798,
    96.8036, 101.8307` vs `render()`'s own `<path d>` x-values for the
    IDENTICAL edge `87.18, 88.59, 96.68, 101.77` (both computed from the
-   SAME single `graphviz-ts` layout call, same input graph) — a ~0.03-
+   SAME single `dot-engine` layout call, same input graph) — a ~0.03-
    0.06px x-drift and a non-constant (264.31-265.15px, not a pure
    translation) y-drift between the two APIs' own outputs. Jar's real
    value (this port's oracle) — 94.18/141.19/... after subtracting this
@@ -9804,18 +9804,18 @@ established, extended one layer deeper:
    the mechanism — `getLayout()` vs `render()` internal spline
    inconsistency — is now established generically, not per-edge).
 
-**Verdict**: this is a real `graphviz-ts` INTERNAL inconsistency — its own
+**Verdict**: this is a real `dot-engine` INTERNAL inconsistency — its own
 `getLayout()` geometry-snapshot API and its own `render()` SVG-emission
 API compute slightly different spline control points for the SAME graph,
 and `render()`'s value is the one that matches real graphviz (jar's own
-oracle). This is narrower and more specific than the catch-all "graphviz-ts
+oracle). This is narrower and more specific than the catch-all "dot-engine
 routing offset" label used since N8 — it is not a coordinate-ASSIGNMENT
 (node-position) divergence at all (node positions match byte-exact
 everywhere checked, including this population), it is a SPLINE-
 RECONSTRUCTION divergence isolated to `getLayout()`'s own edge-points
 output. Classified **gvts-genuine** (external library limitation, no
-graphviz-ts API surface exists to select `render()`'s own spline
-computation from `getLayout()` — confirmed via `node_modules/graphviz-ts/
+dot-engine API surface exists to select `render()`'s own spline
+computation from `getLayout()` — confirmed via `node_modules/dot-engine/
 dist/api/geometry.d.ts`, `getLayout(g, opts)` has no such option).
 
 **NOT fixed this iteration** — a candidate repair (parse `render()`'s
@@ -9837,8 +9837,8 @@ whether it generalizes to ordinary rect-to-rect edges), (b) prototypes
 substituting `render()`-parsed points for edge splines behind the SAME
 empirical dot-sync-report-before/after protocol N32 established.
 
-@see node_modules/graphviz-ts/dist/api/geometry.d.ts (`getLayout`)
-@see node_modules/graphviz-ts/dist/render/public.d.ts (`render`)
+@see node_modules/dot-engine/dist/api/geometry.d.ts (`getLayout`)
+@see node_modules/dot-engine/dist/render/public.d.ts (`render`)
 @see src/core/graph-layout.ts:509-553 (`layoutGraph`, both APIs called;
     `render()`'s return value discarded outside the `needsPortLabels`
     branch)
@@ -10028,7 +10028,7 @@ typecheck`: clean (`tsc --noEmit` both configs). `npm run lint`: clean.
 `scripts/_tmp-n35-classify.ts` (regex-based family classifier + census,
 rebuilt twice — once for the initial sub-classification, once for the
 final report numbers after both fixes landed), `scripts/_tmp-n35-dotfeed.ts`
-/`_tmp-n35-dotfeed2.ts` (graphviz-ts `renderSvg` byte-diff repro, node
+/`_tmp-n35-dotfeed2.ts` (dot-engine `renderSvg` byte-diff repro, node
 x-extents then full node+edge-spline extents), `scripts/_tmp-n35-diffvals.ts`
 (single-fixture actual/expected diff-value dumper), `scripts/_tmp-n35-svgdump.ts`
 (raw SVG dump for manual path inspection), `scripts/_tmp-n35-getlayout.ts`
@@ -13623,7 +13623,7 @@ blocked by something else entirely -- N10/N27/N33's own repeated finding):
 untagged: 279 (skews heavily toward 31+, matches N6/N10/N27/N33's own
 repeated "no single hidden universal mechanism remains" finding -- the
 untagged population is dominated by the ALREADY-NAMED gvts-genuine
-graphviz-ts routing divergence, per the family-level `svg/g/g/path/@d`
+dot-engine routing divergence, per the family-level `svg/g/g/path/@d`
 scan below)
 ```
 
@@ -13649,8 +13649,8 @@ design pass," and this iteration's diagnosis work doubled as that pass.
 ### budget went to the 3 mechanisms below)
 
 - **gvts-genuine** (confirmed engine-level, OUT OF SCOPE per CLAUDE.md, no
-  graphviz-ts API surface exists): `skinparam linetype polyline` (N31, 1
-  direct + 2 tagged reach, `graphviz-ts`'s builder API has no `splines`
+  dot-engine API surface exists): `skinparam linetype polyline` (N31, 1
+  direct + 2 tagged reach, `dot-engine`'s builder API has no `splines`
   setter). Anchor rank (N18) and label-width (N18) gvts-genuine items:
   figures carried forward unchanged, not re-surveyed.
 - **DOT-topology-awaiting-maintainer** (real DOT-emission-level changes,
@@ -15169,8 +15169,8 @@ layout tricks`) holding two otherwise-disconnected packages at a stable
 relative rank; `buildEdgeGeos`'s pre-existing `if (rel.invis === true)
 continue` (class-geo-builders.ts) drops the edge from `geo.edges` AFTER
 dot-layout already ran, so `class-dot-graph.ts` DOES still submit it to
-graphviz-ts's layout engine with an `invis` attribute (topology
-preserved) — but graphviz-ts's own rank/position computation evidently
+dot-engine's layout engine with an `invis` attribute (topology
+preserved) — but dot-engine's own rank/position computation evidently
 does NOT honor an `invis`-attributed edge as a real ranking constraint
 the way jar's real graphviz does (real graphviz keeps `style=invis`
 edges in rank computation for exactly this "layout trick" purpose).
@@ -15458,7 +15458,7 @@ before finishing, confirmed via `git diff` showing zero net change on
    the SAME `dx = JAR_INK_MARGIN - minX` formula applied to BOTH A's
    and the note's own final coordinates; both back-derive to the SAME
    raw positions this port already computes, to 3 decimal places —
-   ruled out a graphviz-ts position-assignment divergence for THESE
+   ruled out a dot-engine position-assignment divergence for THESE
    two nodes specifically.
 
 **Confirmed mechanism**: `layout-ink-extent.ts`'s own file-header doc
@@ -16613,7 +16613,7 @@ Read `EntityImageNote.java#drawU`'s real 3-way dispatch (`opaleLink !=
 null` -> Smetana-path merge; `opaleLine == null || !opaleLine.isOpale()`
 -> `drawNormal` PLAIN box; else -> `opaleLine`-path merge) and
 `GraphvizImageBuilder.java#isOpalisable(Entity)` (the non-Smetana,
-graphviz-ts-relevant gate this port actually exercises):
+dot-engine-relevant gate this port actually exercises):
 ```java
 private boolean isOpalisable(Entity entity) {
     if (dotData.getSkinParam().strictUmlStyle()) return false;
@@ -16875,7 +16875,7 @@ Traced why the CURRENT `isPort`/`shieldedClassifierIds` machinery
 (`svg/@width`/`@height` came back matching the NO-port jar baseline, not
 jar's real port-active dimensions, on first inspection): `graph-layout
 .ts#addNodes` (the ONLY function that turns a `DotInputNode` into a real
-graphviz-ts `builder.addNode(...)` call) hardcodes `shape: 'box'`
+dot-engine `builder.addNode(...)` call) hardcodes `shape: 'box'`
 unconditionally --
 
 ```
@@ -16895,7 +16895,7 @@ completely disconnected from the real render pipeline. Confirmed via
 `grep -n "isPort\|shieldTable\|portTable\|plaintext" src/core/graph-
 layout.ts` (zero hits).
 
-De-risked a FUTURE attempt by confirming graphviz-ts's underlying engine
+De-risked a FUTURE attempt by confirming dot-engine's underlying engine
 DOES support the needed primitives -- the bundled `node_modules/graphviz-
 ts/dist/index.js` reads `e.attrs.get("tailport")`/`"headport")` at
 `initEdgePorts` (line ~23468) and resolves them via a per-node-shape
@@ -16912,18 +16912,18 @@ Landing it for real requires wiring an ENTIRELY NEW node-shape capability
 (HTML-like plaintext port tables) into `addNodes`, plus `tailport`/
 `headport` edge-attribute plumbing into whatever builds `DotInputEdge.from`/
 `.to` for `Class::member`-referencing relationships, plus verifying the
-RESULTING node/port geometry graphviz-ts computes actually matches this
+RESULTING node/port geometry dot-engine computes actually matches this
 port's own `measureEnhancedBody`-computed sizes (a new, untested code path
--- HTML-table nodes may be sized by graphviz-ts's OWN htmltable engine, not
+-- HTML-table nodes may be sized by dot-engine's OWN htmltable engine, not
 trusted verbatim from the supplied `width`/`height`). This is a materially
 larger undertaking than "rewrite portTable's shape" -- it is new-subsystem
 wiring into the render pipeline's core node-construction code, squarely the
 kind of change the mission's "DOT-topology-awaiting-maintainer" accounting
 category exists to flag, not a same-iteration land-and-verify. Combined
 with the CONFIRMED-still-tiny reach (2 fixtures, unmoved since N44) and the
-graphviz-ts-fidelity uncertainty even after correct DOT emission (jar's
+dot-engine-fidelity uncertainty even after correct DOT emission (jar's
 real width delta on `gojofu`, 338px no-port baseline -> 353px port-active,
-implies graphviz-ts's OWN port-based edge-routing clearance behavior would
+implies dot-engine's OWN port-based edge-routing clearance behavior would
 ALSO need to match jar's real graphviz -- unverified, a NEW "gvts-genuine"-
 shaped risk), the reach-to-effort-to-risk ratio no longer favors landing
 this iteration. Full derivation above is reusable without re-deriving.
@@ -17109,7 +17109,7 @@ DECLARATION ORDER. This port's AST produced `Gtk` (creationIndex=1) before
   sharing one `pickDirectional` swap. A wrong creation order changes
   `creationIndex`, which drives the dense uid-renumbering plan
   (`renderer-uid.ts`, N2) and the DOT node declaration order fed to
-  graphviz-ts -- both cascade into large `childCount`/coordinate diffs on
+  dot-engine -- both cascade into large `childCount`/coordinate diffs on
   any fixture where an undeclared classifier is FIRST introduced via a
   `swapDirection=true` relationship (the common case for hierarchical
   (`<|--`/`<|..`) edges specifically, since UML convention almost always
@@ -17152,7 +17152,7 @@ direction, matching the mission's established "childCount/coordinate-
 unmasking, not a regression" pattern (N2/N7/N8/... N58): `bicabi`'s own
 entity order now matches jar EXACTLY (confirmed `MainWindow` first, `Gtk`
 second, both `<!--class-->` comment order AND `creationIndex`), so its
-diffCount increase is graphviz-ts's OWN layout output differing from real
+diffCount increase is dot-engine's OWN layout output differing from real
 graphviz given the NOW-CORRECT (but still just as `gvts-genuine`-divergent)
 input -- an existing, out-of-scope engine-level gap, not a new defect this
 fix introduced. Reach beyond the 4 named fixtures is real: `nadono`/
@@ -17231,7 +17231,7 @@ UNCHANGED at width 48 both sides, but its ABSOLUTE position shifts `x=6`(ours)
 -> `x=16`(jar), ~9-11px extra on BOTH left and right). Canvas HEIGHT is
 byte-identical (110 both) -- confirms the effect is PURELY horizontal, not a
 top/tab-notch ink-extent issue. Ruled out (each independently tested):
-- **Not the DOT cluster's `label` text** feeding graphviz-ts's own internal
+- **Not the DOT cluster's `label` text** feeding dot-engine's own internal
   centering: blanking `class-dot-graph.ts#buildDotClusters`'s
   `cluster.label` entirely (a scoped, class-only experiment, reverted after
   testing) produced ZERO change to either fixture's numbers.
@@ -17423,7 +17423,7 @@ per-fixture diffCount before/after, all 718 class fixtures): **0
 regressions, 3 fixtures improved, 0 new zero-diff** (the catastrophic
 mechanism is fully closed but a SEPARATE, already-named small residual
 -- `NAMESPACE_SIDE_PADDING=16` vs jar's real `~16.32`, N59's own "small
-universal residual," suspected graphviz-ts-vs-real-graphviz margin
+universal residual," suspected dot-engine-vs-real-graphviz margin
 default and therefore out of this mission's declared scope -- blocks all
 3 from reaching zero-diff):
 - `jinibe-02-tebi269`: 18 -> 10 diffs (canvas width delta 21px -> 1px;
@@ -17574,16 +17574,16 @@ committed (orchestrator owns commits per mission rule).
 ## zero-diff, 0 regressions
 
 ### Priority 1: `NAMESPACE_SIDE_PADDING` residual (`~16.32` vs flat `16`) --
-### DEFINITIVELY root-caused to graphviz-ts, confirmed OUT OF SCOPE
+### DEFINITIVELY root-caused to dot-engine, confirmed OUT OF SCOPE
 
 **Mechanism** (diagnosis.md artifact):
-- **Origin**: `node_modules/graphviz-ts`'s own `getLayout()` cluster/rank
+- **Origin**: `node_modules/dot-engine`'s own `getLayout()` cluster/rank
   positioning algorithm (a JS reimplementation of graphviz's C
   `dotgen/position.c`), NOT this port's `class-geo-builders.ts
   #buildNamespaceGeos`/`NAMESPACE_SIDE_PADDING` formula.
 - **Cause**: fed `jinibe-02-tebi269`'s EXACT cached `svek-1.dot` (the
   triple-nested `cluster6p0 > cluster6 > cluster6p1` wrapper, single node
-  `sh0010` `width=0.213368`) to graphviz-ts's `createGraph`/`render`/
+  `sh0010` `width=0.213368`) to dot-engine's `createGraph`/`render`/
   `getLayout` API directly, bypassing this port's own `graph-layout.ts`
   pipeline entirely (a standalone minimal repro, `scripts/_tmp-n61-
   probe.ts`, deleted). Result: `snap.nodes[0].x = 376` (a bare INTEGER,
@@ -17595,7 +17595,7 @@ committed (orchestrator owns commits per mission rule).
   g2-class-svg/ledger.md` N60) shows real graphviz 15.1, fed the IDENTICAL
   DOT text via `dot -Tsvg`, reproduces jar's real `[32.32,47.68]` node
   bbox EXACTLY. SAME DOT input, SAME node geometry, TWO engines, TWO
-  different answers: graphviz-ts collapses to an exact-integer center;
+  different answers: dot-engine collapses to an exact-integer center;
   real graphviz preserves a sub-pixel fraction.
 - **Causal chain**: `NAMESPACE_SIDE_PADDING`'s own doc comment (`class-
   namespace-shape.ts`) and N17's own table (`finono-05-cuvu171`: 16.18,
@@ -17604,20 +17604,20 @@ committed (orchestrator owns commits per mission rule).
   signature of a per-fixture graphviz-internal float artifact (packing/
   margin/rank-separation arithmetic depending on each fixture's own node
   geometry), not a portable plantuml-side formula. Since this port's
-  classifier `x` position is READ DIRECTLY from graphviz-ts's own
+  classifier `x` position is READ DIRECTLY from dot-engine's own
   `getLayout()` output (`class-geo-builders.ts#buildClassifierGeos`, no
   independent recompute), and the namespace box is then derived from THAT
-  already-graphviz-ts-computed position via a flat `±16`, the residual
-  traces entirely to graphviz-ts's own node-x computation being wrong (by
+  already-dot-engine-computed position via a flat `±16`, the residual
+  traces entirely to dot-engine's own node-x computation being wrong (by
   jar's real-graphviz standard), not to the padding formula built on top
   of it. Hardcoding jar's exact `16.32` (or `16.18`, or any other single
   sample) would not generalize -- the true target value is graphviz's own
-  internal float output, which graphviz-ts does not reproduce.
+  internal float output, which dot-engine does not reproduce.
 - **Ruled out**: (1) `NAMESPACE_SIDE_PADDING`'s OWN value being wrong in
   isolation -- ruled out; the constant is arithmetically consistent with
   jar's real `(clusterWidth - classifierWidth) / 2` for `jinibe` itself
   (`(48 - 15.3625) / 2 = 16.31875 ~= 16.32`), it's simply not achievable
-  from THIS port's own (already graphviz-ts-corrupted) classifier x. (2)
+  from THIS port's own (already dot-engine-corrupted) classifier x. (2)
   A rounding step inside `graph-layout.ts#mapNodes`/`shiftToOrigin`
   introducing the integer collapse -- read both functions directly, no
   `Math.round`/`Math.floor` present; the integer value comes out of
@@ -17625,14 +17625,14 @@ committed (orchestrator owns commits per mission rule).
   port's code entirely.
 - **Scope decision**: per the mission's standing rule (`README.md`:
   "Standing rule (maintainer, 2026-07-17): SVG-channel extraction until
-  parity ... graphviz-ts OUT OF SCOPE") and this mission's own repeated
-  precedent (N5 item 2: "the underlying graphviz-ts-vs-real-graphviz
+  parity ... dot-engine OUT OF SCOPE") and this mission's own repeated
+  precedent (N5 item 2: "the underlying dot-engine-vs-real-graphviz
   ROUTING divergence is genuinely out-of-scope"), this residual is
   confirmed out of scope -- NOT attempted, no code change. Matches N60's
-  own suspicion ("suspected graphviz-ts-vs-real-graphviz margin default")
+  own suspicion ("suspected dot-engine-vs-real-graphviz margin default")
   but is now a PROVEN mechanism (direct side-by-side repro), not a
   suspicion -- should not be re-opened by a future iteration without a
-  graphviz-ts upstream fix or a post-parity cutover (per the standing
+  dot-engine upstream fix or a post-parity cutover (per the standing
   rule's own stated exit condition).
 
 ### Priority 2: `skinparam monochrome true|reverse` LANDED
@@ -17811,7 +17811,7 @@ New: 12 cases in `tests/unit/class/class-monochrome.test.ts` (TDD -- RED
 before the module existed, GREEN after). Full suite: 9703/9703 passing
 (357 test files, +15 vs N60's 9688: 12 new unit tests + 3 new AC1 ratchet
 tests). `npm run typecheck`/`npm run lint`/`npm run build` all clean.
-Disposable scripts (`scripts/_tmp-n61-*.ts`, 5 total: graphviz-ts
+Disposable scripts (`scripts/_tmp-n61-*.ts`, 5 total: dot-engine
 standalone probe, jinibe/mucuxi x-position dumper, pofabe monochrome
 diff dumper, fogexa connector dumper, full-corpus scanner) all deleted
 before finishing (confirmed via `ls scripts/ | grep n61`, empty).
@@ -17882,7 +17882,7 @@ N52/N56/N58/N60/N61), no undiscovered universal mechanism.
   N56). Subsumes `getLayout`-vs-`render` (N35), the `splines` setter gap
   (N31), anchor-rank/label-width (N18), and -- NEW this iteration -- the
   plain edge-label placement residual (N62's own Mechanism 1, below,
-  confirmed the SAME graphviz-ts-vs-real-graphviz category N25 already
+  confirmed the SAME dot-engine-vs-real-graphviz category N25 already
   named for tail/head multiplicity labels). None independently re-surveyed
   beyond N62's own two drilled items.
 - **fenced**: `buildDotEdges` `rel.from`/`rel.to` direction gap (N33/N37)
@@ -17931,7 +17931,7 @@ correctly (`CARDINALITY_FONT_SIZE=13`, `fill:'#000000'`, `lengthAdjust:
 the plain label was simply never wired to reuse it.
 
 For POSITION: `core/graph-layout.ts#toEdgeEntry` ALREADY populates
-`entry.labelX`/`.labelY` from graphviz-ts's own `getLayout()` snapshot
+`entry.labelX`/`.labelY` from dot-engine's own `getLayout()` snapshot
 (`ge.label`, unconditional -- no `needsPortLabels`/SVG-scan gate needed,
 unlike `tailLabel`/`headLabel`'s xlabel extraction) whenever the DOT edge
 carries a `label=` attribute (`edgeLabelAttrs` already sends one for
@@ -17953,13 +17953,13 @@ label-shift spread widened (`{...edge.label, x:...,y:...}`) to carry
 **Jar-verified** against `siteza-47-lixe343` (`class Foo; class Bar; Foo
 --> Bar : demo`, the smallest clean single-edge-label fixture -- no
 multiplicity, no magic-arrow complication): `textLength` now matches
-jar's real `32.5` EXACTLY (measurer-derived, independent of graphviz-ts's
+jar's real `32.5` EXACTLY (measurer-derived, independent of dot-engine's
 own placement search); `x`/`y` moved from `(45.075, 93.307)` (pre-fix,
 ~9px/3px off jar's real `36.07, 96.1111`) to `(34.2, 96.86)` (post-fix,
 ~1.9px/0.75px off) -- a real, substantial improvement, though NOT
-byte-exact: the residual is the SAME graphviz-ts-vs-real-graphviz label-
+byte-exact: the residual is the SAME dot-engine-vs-real-graphviz label-
 placement mismatch N25 already named and accepted as gvts-genuine
-(graphviz-ts's own internal label-box measurement uses a different font
+(dot-engine's own internal label-box measurement uses a different font
 metric than this port's verified sans-serif metrics, so its native
 placement decision -- while structurally the RIGHT mechanism to consume
 -- doesn't reproduce jar's exact sub-pixel position). Re-classified as
@@ -18198,7 +18198,7 @@ per-line offsets within each block match jar's own to the ten-thousandth
 (LEFT: all lines share one x; RIGHT: all lines share one right edge;
 CENTER: all lines share one center) -- the absolute block anchor carries
 the SAME gvts-genuine label-placement residual N25/N62 already named
-(graphviz-ts's own box-center doesn't match jar's exact sub-pixel value),
+(dot-engine's own box-center doesn't match jar's exact sub-pixel value),
 structurally correct, not byte-exact.
 
 **Tests** (TDD, jar-verified where a golden exists): `tests/unit/class/
@@ -18330,7 +18330,7 @@ EACH individually per diagnosis.md before accepting (no blanket
   unmasked gvts-genuine coordinate diffs" pattern this mission has
   recorded since N2 -- both fixtures were ALREADY deep in the
   catastrophically-broken 31+ bucket pre-fix (476 and 1299 diffs
-  respectively), dominated by the already-out-of-scope graphviz-ts-vs-
+  respectively), dominated by the already-out-of-scope dot-engine-vs-
   real-graphviz routing divergence (`xamule`'s own unmasked diffs show
   coordinate deltas in the HUNDREDS of px, the established signature of
   that category, not a small residual).
@@ -18640,11 +18640,11 @@ assumption):
   OWN targets. `jireze` (no `RoundCorner` skinparam) confirms `g[1]/g[1]`
   (the `user` classifier) is 100% byte-exact -- EVERY remaining diff is
   positional (`x`/`y`/`cx`/`cy`/path coordinates), the SAME gvts-genuine
-  graphviz-ts-vs-real-graphviz numeric-layout residual N25/N61/N62/N63
+  dot-engine-vs-real-graphviz numeric-layout residual N25/N61/N62/N63
   already named, RE-CONFIRMED via a direct DOT-input-identity check
   (`dot-sync-report.ts --slug dofima-22-kofe334 class`: `maxSizeDeltaIn:
   0.0000`, our emitted node widths/heights match jar's real captured DOT
-  to 6 decimal places EXACTLY -- graphviz-ts itself, given the IDENTICAL
+  to 6 decimal places EXACTLY -- dot-engine itself, given the IDENTICAL
   correct input real graphviz used, still produces a ~5px-different `y`
   for the second node, matching N61's own standalone-repro finding for
   a DIFFERENT fixture). `dofima` ALSO unmasks a SECOND, unrelated,
@@ -18684,7 +18684,7 @@ assumption):
   (`csprob2dtd`, the corollary's own jar-verification target) shows ONLY
   positional diffs (`x`/`y`/`cx`/`cy`, zero shape/content/textLength
   diffs), confirming byte-exact correctness; the diffCount jump is the
-  natural graphviz-ts whole-graph rank-position cascade from correctly
+  natural dot-engine whole-graph rank-position cascade from correctly
   changing SIX node heights simultaneously, compounded by the SAME
   childCount-unmasking pattern (fixing the blank-line childCount for 3
   classifiers un-bails deeper coordinate comparison for all 6). Confirmed
@@ -18883,7 +18883,7 @@ tests still cover the `<style>`-block half unchanged),
 **Census impact**: `zukice-84-tedu426` (`skinparam RoundCorner 25`, two bare
 classes, nothing else) reaches **zero-diff** -- NEW ratchet pin. `dofima-22-
 kofe334` improves 75->71 (still blocked by the SAME gvts-genuine
-graphviz-ts-vs-real-graphviz layout residual N25/N61-N64 already named, now
+dot-engine-vs-real-graphviz layout residual N25/N61-N64 already named, now
 re-confirmed via `dot-sync-report.ts --slug dofima-22-kofe334 class`:
 `structurallyEqual=true`, DOT-level box sizes for `user`/`session` still
 byte-match oracle regardless of the RoundCorner render fix -- this was
@@ -19664,7 +19664,7 @@ STRUCTURAL difference, not pure rounding) -- confirms N50/N51/N53/N54/N58's
 own repeated "genuinely heterogeneous, no shared mechanism" finding
 empirically, with real numbers this time rather than diff-path-shape
 inference alone. Each requires independent root-causing; several plausibly
-trace into graphviz-ts numeric/structural divergence (OUT OF SCOPE per the
+trace into dot-engine numeric/structural divergence (OUT OF SCOPE per the
 standing rule), not attempted.
 
 **NEW leads, precisely diagnosed, NOT landed** (5):
@@ -19768,7 +19768,7 @@ diff-family scan run this iteration (not carried from a stale prior count)
 cross-referenced against the ledger's own named-mechanism history for
 qualitative labels. Every count below states its provenance explicitly.
 
-**gvts-blocked (graphviz-ts library limitation, OUT OF SCOPE per the
+**gvts-blocked (dot-engine library limitation, OUT OF SCOPE per the
 mission's standing rule)** -- **~288/718 fixtures (67.6% of the 426 non-
 conformant)**, FRESHLY measured this iteration via the `svg/g/g/path/@d`
 diff-family reach (the umbrella signature for edge/spline geometry
@@ -19781,14 +19781,14 @@ count): (1) `getLayout()`-vs-`render()` internal-value exposure gap (N35);
 (2) the `splines` setter gap (N31); (3) anchor-rank/label-width sub-pixel
 loss (N18); (4) cluster/rank sub-pixel positioning loss -- the
 `NAMESPACE_SIDE_PADDING` residual, root-caused N61 via a standalone
-`graphviz-ts getLayout()` repro against real graphviz 15.1 dot output,
+`dot-engine getLayout()` repro against real graphviz 15.1 dot output,
 SAME-DOT-different-engine confirmed; (5) HTML-table/fixed-size label
-placement-search geometry gap (surfaced N25, `graphviz-ts`'s internal
+placement-search geometry gap (surfaced N25, `dot-engine`'s internal
 placement search uses its own `Times`-LUT text measurement rather than this
 port's verified sans-serif metrics). This count also implicitly covers the
 downstream `svg/@viewBox`/`svg/@width`/`svg/@height` families (364/327/263
 fixture reach respectively) wherever the canvas-dims delta stems from a
-node position graphviz-ts computed differently -- NOT a 1:1 subset (this
+node position dot-engine computed differently -- NOT a 1:1 subset (this
 iteration's own near-zero drill confirmed at least a few canvas-dims
 fixtures, e.g. `cicovi-23-zipe215`/`bijevi-38-duza931`, combine a REAL
 `childCount` structural difference alongside the numeric one, meaning a
@@ -19857,7 +19857,7 @@ mode-dark)**:
 
 **Bottom line for the orchestrator's next-phase decision**: of 426 non-
 conformant fixtures, roughly two-thirds (~288) are blocked on the
-graphviz-ts library itself (OUT OF SCOPE, no further in-repo work possible
+dot-engine library itself (OUT OF SCOPE, no further in-repo work possible
 without the ADR-1 engine-cutover this mission's standing rule defers) --
 this is now the DOMINANT remaining category and has been stable for 6+
 iterations (N62 -> N67) despite continued mechanism landings elsewhere,

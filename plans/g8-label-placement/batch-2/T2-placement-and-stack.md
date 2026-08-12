@@ -4,7 +4,7 @@
 
 plantuml-ts (`/Users/scottseely/git/plantuml-ts`), TypeScript port of
 PlantUML (Java at `~/git/plantuml`; preserve upstream names with
-`@see`; port faithfully, no refactoring). graphviz-ts pinned
+`@see`; port faithfully, no refactoring). dot-engine pinned
 (READ-ONLY at `/Users/scottseely/git/knowvah/dot-engine`). Vitest; probes
 `scripts/_tmp-g8-t2-*.ts` via `npx tsx`, deleted before finish;
 Serena MCP; `npm run typecheck` after edits.
@@ -81,7 +81,7 @@ fixture + the divergent intermediate vs T1's spec, STOP (stop cond.
 `src/diagrams/state/state-composite-autonom.ts`,
 `tests/unit/**`. Complexity-hook splits per the existing
 `state-composite-*` pattern (report them). No git mutations. Never
-touch graphviz-ts, goldens, pins, `size-backlog.json` (T3's job),
+touch dot-engine, goldens, pins, `size-backlog.json` (T3's job),
 DOT-gate expectations.
 
 ## Interface contract (consumed by T3)

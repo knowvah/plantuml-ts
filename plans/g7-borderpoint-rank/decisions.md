@@ -8,11 +8,11 @@ group + bare anchor in `ee`; byte-exact in G6 attempt 3) and add ONE
 variable per cell: (a) +`${id}i` wrapper, (b) +nested child cluster
 inside `ee`, (c) +parent cluster wrapping everything, (d) +non-border
 content (pseudo-node) in `ee`. Each cell measured three ways: real
-`dot` (ground truth), graphviz-ts DOT-text path, graphviz-ts builder
+`dot` (ground truth), dot-engine DOT-text path, dot-engine builder
 path. Rejected alternative: diagnosing on pesita/kotagu directly —
 too many co-varying factors (that burned G6 attempts 1-2).
 
-## D2 — Adjudication with external-fix pause (graphviz-ts is read-only)
+## D2 — Adjudication with external-fix pause (dot-engine is read-only)
 
 Decisive test: text path vs builder path on identical structure (text
 path is proven to match real dot on jar's full DOT). If a builder
@@ -22,7 +22,7 @@ match under any correct sequence → library defect → file
 `docs/graphviz-issues/09-*.md` (self-contained: finding, minimal
 repro DOT, builder transcript, expected/actual table, census impact)
 + TRACKER line → **planned mission PAUSE**. This mission NEVER
-modifies `../graphviz-ts`; the fix comes from the graphviz-ts
+modifies `../dot-engine`; the fix comes from the dot-engine
 project. Resume per README's cold-start procedure (pin bump → repro
 re-verify → full gates → batch 3). Both outcomes pre-authorized.
 

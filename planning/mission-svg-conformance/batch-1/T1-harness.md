@@ -1,7 +1,7 @@
 # T1 — Near-verbatim harness port (normalize + compare) + xmldom devDep
 
 ## Context
-graphviz-ts's golden methodology (D1′/D7): xmldom-normalized trees, 6-sig-fig
+dot-engine's golden methodology (D1′/D7): xmldom-normalized trees, 6-sig-fig
 numbers, sorted attrs, positional tree-walk with per-attribute numeric
 tolerances, XPath-anchored `Diff[]`, 0.01 conformance band. With the klimt
 emitter mirroring upstream, this ports near-verbatim — including the walker
@@ -65,4 +65,4 @@ Standard gates green; modules ≥90/90/90. Hook: files ≤500 ln (split compare
 if needed); string-built regexes for `<>{}` classes.
 
 ## Commit
-`feat(T1): port graphviz-ts golden SVG harness (0.01 conformance band)`
+`feat(T1): port dot-engine golden SVG harness (0.01 conformance band)`

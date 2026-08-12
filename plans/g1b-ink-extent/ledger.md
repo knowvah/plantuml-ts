@@ -105,13 +105,13 @@
   `svek/FrontierCalculator.java`, the whole file) and summarized in
   `decision-journal.md`'s three J2 rows above. In short: a port-only
   cluster's real drawn rectangle needs the cluster's own graphviz-assigned
-  "initial" rect (unavailable via any public graphviz-ts API — see the
+  "initial" rect (unavailable via any public dot-engine API — see the
   decision journal for the ADR-1/`exports`-map evidence this was verified
   against, not assumed), the port centers merged into a seed core, then a
   DELTA=18 edge-push with a rankdir-perpendicular corner exclusion.
 - Disposition: fixed. Three new modules: `frontier-calculator.ts` (pure
   `manageEntryExitPoint`/`ensureMinWidth` port, RectangleArea/Point types),
-  `frontier-shadow-layout.ts` (isolated graphviz-ts shadow graph +
+  `frontier-shadow-layout.ts` (isolated dot-engine shadow graph +
   public-API-only `render(...,'xdot')` text-parse, obtains `initial`
   faithfully without widening the shared `layoutGraph()`/`addClusters`
   seam), `frontier-cluster-bbox.ts` (wires the two together into a `Bbox`,
@@ -133,7 +133,7 @@
   | port `rect@x` (all 4) | 19,66,113,160 | 23,70,117,164 | **19,66,113,160 (exact)** |
   Algorithm cross-checked TWO independent ways before wiring: (1) hand-fed
   jar's own raw graphviz-native numbers (from `dot -Txdot` on the jar's
-  cached `svek-1.dot`, cross-checked bit-for-bit against `graphviz-ts`'s
+  cached `svek-1.dot`, cross-checked bit-for-bit against `dot-engine`'s
   own xdot render of the SAME dot text) straight into `manageEntryExitPoint`
   — reproduces 177x99 exactly; (2) ran the real pipeline end-to-end and
   compared the rendered SVG. The 1px height residual (98 vs jar's 99) is

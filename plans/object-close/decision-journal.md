@@ -1384,7 +1384,7 @@ exit 0 · typecheck · lint · build all clean.
 
 **Mechanism.** `getLayout()` returns `taillabel`/`headlabel` centres that do
 not match real graphviz. Graphviz clears both port labels ~14.5px from their
-adjacent node edge; graphviz-ts places the tail at 12.80 and the **head at
+adjacent node edge; dot-engine places the tail at 12.80 and the **head at
 2.96**.
 
 **Isolated to a 2-node, 1-edge graph** — `object A / object B / A "1" -- "*"
@@ -1400,7 +1400,7 @@ labels, and the x offset is exactly half each label's own measured width
 matching the emitted SVG byte-for-byte). A conversion error shifts both labels
 equally; these shift by different amounts in opposite directions.
 
-x diverges too, and differently: graphviz-ts returns the SAME x (8.311) for
+x diverges too, and differently: dot-engine returns the SAME x (8.311) for
 both labels where graphviz varies it per label (implied centres 14.216 and
 15.408) and sits ~6px further right.
 

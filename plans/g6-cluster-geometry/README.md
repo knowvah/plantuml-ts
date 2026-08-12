@@ -88,7 +88,7 @@ Hard bars carried from G5 (non-negotiable, apply to every task):
 6. The fix appears to require touching either out-of-scope mechanism:
    the `ctx.insideAutonomPass` gate (bajelo/rovese/fotuje) or SvekEdge
    label placement (nimana/beguxu). Each needs its own sign-off.
-7. graphviz-ts path only: the upstream fix's blast radius grows beyond
+7. dot-engine path only: the upstream fix's blast radius grows beyond
    the cluster rank-separation area of the library.
 8. Batch 4 only: the jar WithLabel path cannot be cleanly isolated.
    A geometric approximation is NEVER the fallback (D5).
@@ -137,9 +137,9 @@ incomplete; T9 stopped after 2 authorized attempts; T10 not run).
 derivation rounds + two implementation attempts; all predictions
 missed; every attempt fully reverted (zero behavior change). Blocking
 unknown: T8-R2 and T9 obtained CONTRADICTORY minimal-repro results
-for graphviz-ts's in-cluster `rank=source/sink` handling (height
+for dot-engine's in-cluster `rank=source/sink` handling (height
 change vs width-margin-only). Resolve that contradiction first;
-candidate graphviz-ts finding, not yet filed (fails the "verified"
+candidate dot-engine finding, not yet filed (fails the "verified"
 bar).
 
 **Decisions:** 14 journal rows; 5 flagged for review (T3 renderer.ts

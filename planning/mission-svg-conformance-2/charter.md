@@ -46,12 +46,12 @@ gap vs. maintainer-signed accepted divergence, no untracked residue), D6
   T6 material — `test-results/dot-cache/description/<slug>/in.svg` and the
   component/usecase/deployment variants). A fixture only ratchets into the
   gated set once its klimt-drawn output is conformant; the gate then holds
-  it there (regression-proof), mirroring graphviz-ts's corpus-survey
+  it there (regression-proof), mirroring dot-engine's corpus-survey
   discipline rather than a single pass/fail suite.
 - **PARITY-style corpus dashboard.** Generated from a `parity.json` survey
   (per-fixture verdict: conformant / structural-match / diverged /
   oracle-error / errored / timeout), rendered to a markdown dashboard the
-  same way graphviz-ts's `test/corpus/dashboard.ts` renders
+  same way dot-engine's `test/corpus/dashboard.ts` renders
   `test/corpus/PARITY.md` from its survey. Report, not a gate — visibility
   into progress across the full description/component/usecase/deployment
   corpus while the fixture ratchet gates the committed subset.

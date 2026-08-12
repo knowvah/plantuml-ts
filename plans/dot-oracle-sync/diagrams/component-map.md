@@ -20,7 +20,7 @@ package "Phases 2–5 (fix targets, per diagnosis)" {
   [core/graph-layout.types.ts (additive attrs only)] as GT
 }
 
-[READ-ONLY: core/graph-layout.ts seam,\n~/git/plantuml Java, graphviz-ts] as RO
+[READ-ONLY: core/graph-layout.ts seam,\n~/git/plantuml Java, dot-engine] as RO
 
 DP --> RT
 CP --> RT
@@ -29,6 +29,6 @@ EM --> SD
 @enduml
 ```
 
-Not touched: renderers (geometry consumption unchanged), graphviz-ts,
+Not touched: renderers (geometry consumption unchanged), dot-engine,
 sequence/activity/timing and other non-svek types, the visual-QA SVG tools
 (parked until DOT syncs).

@@ -19,9 +19,9 @@ text.
 > differs, the render is **not** conformant. A per-case pass requires zero
 > diffs at the tolerance band.
 
-This is the same conformance model graphviz-ts uses for its dot-oracle
+This is the same conformance model dot-engine uses for its dot-oracle
 parity survey (`~/git/knowvah/dot-engine/docs/conformance.md`); the harness below
-is a near-verbatim port of graphviz-ts's `normalize.ts` / `compare.ts`.
+is a near-verbatim port of dot-engine's `normalize.ts` / `compare.ts`.
 
 ## Why not literal bytes?
 
@@ -43,7 +43,7 @@ comparable `NormalizedNode` tree:
 2. Resolve `style="k:v;…"` declarations into plain attributes — where a
    `style` value and a same-named plain attribute both exist, `style` wins,
    then the `style` attribute itself is dropped. (This is a jar-specific
-   addition beyond graphviz-ts's normalizer: PlantUML's jar SVGs carry paint
+   addition beyond dot-engine's normalizer: PlantUML's jar SVGs carry paint
    in `style=""`.)
 3. Strip `data-*` attributes, XML comments, and processing instructions —
    these carry no rendered geometry or content and differ incidentally

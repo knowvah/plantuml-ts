@@ -14,7 +14,7 @@ and a sub-pixel size error can flip a structural check (an edge routes one
 bezier segment differently, a compress/pack constraint becomes binding). It is
 the single ceiling that limits depth on *every* svek type.
 
-graphviz-ts hit the identical problem comparing against native graphviz and
+dot-engine hit the identical problem comparing against native graphviz and
 solved it by **neutralizing measurement**: run *both* sides through the same
 estimator. Their oracle runs under a headless `GVBINDIR` with no font-layout
 plugin, so graphviz falls back to its built-in `estimate_textspan_size`
@@ -42,9 +42,9 @@ PlantUML has the exact analog of graphviz's `textspan_lut.c`:
   can be run to measure every label with this exact deterministic table instead
   of AWT font metrics.
 
-This is graphviz-ts's play one-to-one:
+This is dot-engine's play one-to-one:
 
-| | graphviz-ts | plantuml-ts (this ADR) |
+| | dot-engine | plantuml-ts (this ADR) |
 |---|---|---|
 | Portable estimator in the reference | `textspan_lut.c` | `UnicodeFontWidthSansSerif` + `StringBounderFromWidthTable` |
 | Port it into the TS engine | `EstimateTextMeasurer` | new `WidthTableMeasurer` |
@@ -55,7 +55,7 @@ This is graphviz-ts's play one-to-one:
 
 Adopt the neutralization approach. Reject the roadmap's other two options
 (bundle Java AWT font tables; permanent tolerance band) — this is faithful,
-deterministic, and matches the pattern already proven in graphviz-ts.
+deterministic, and matches the pattern already proven in dot-engine.
 
 Two deliverables (a follow-on mission, **S1-impl**):
 

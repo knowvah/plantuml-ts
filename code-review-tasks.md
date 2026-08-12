@@ -67,7 +67,7 @@
   the hook cap, and untouched by this work. One more branch trips the blocking
   hook. Awareness only.
 
-- [ ] **~772 bare `graphviz-ts` prose mentions** in `docs/` and `planning/`
+- [ ] **~772 bare `dot-engine` prose mentions** in `docs/` and `planning/`
   describe the engine by its former name. Low priority now that the old name
   is known to have been private. The 33 broken *path* references were fixed
   separately (`db4bf0f4`); `plans/` history is deliberately left alone.

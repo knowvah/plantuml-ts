@@ -12,4 +12,4 @@ every sample checked, NOT proportional to `innerMarginLevels`
 
 T1 produces no committed code — its deliverable is the mechanism
 artifact appended to `decision-journal.md`. T2's commit is the batch's
-only feature commit (plus a possible graphviz-ts issue-file commit).
+only feature commit (plus a possible dot-engine issue-file commit).

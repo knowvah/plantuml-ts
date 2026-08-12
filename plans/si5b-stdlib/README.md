@@ -103,8 +103,8 @@ fetching (SecurityProfile — browser fetch is out; data URIs only);
 - E2 sprite/img half shipped end-to-end (decode -> raster -> atoms ->
   measurement -> SVG image emission), jar-relation-verified.
 - Two port bugs fixed en route (quoted-display URL stripping; sprite bodies
-  vs the type-scan window); one third-party ledger item (graphviz-ts crash
+  vs the type-scan window); one third-party ledger item (dot-engine crash
   on xusuxe full render -- DOT EQUAL counted; file upstream).
 - Maintainer follow-ups: cloudogu upstream has NO LICENSE file (README-only
   MIT claim) -- confirm before publishing @plantuml-ts/stdlib; npm publish
-  of all four packages; graphviz-ts bug report.
+  of all four packages; dot-engine bug report.
