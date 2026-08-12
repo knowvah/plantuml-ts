@@ -26,7 +26,7 @@ import type { Classifier, ClassifierKind, ClassDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
-import { measureObjectClassifier } from './class-object-map-sizing.js';
+import { measureObjectClassifier } from './class-object-sizing.js';
 import { measureMapClassifier } from './class-map-sizing.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import { measureJsonClassifier } from './class-json-sizing.js';
