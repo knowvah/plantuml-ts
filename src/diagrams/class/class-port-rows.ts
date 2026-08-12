@@ -23,7 +23,7 @@
 import type { Classifier, ClassDiagramAST, ClassifierKind, Member } from './ast.js';
 import { formatMemberText, type MeasuredClassifier } from './class-layout-helpers.js';
 import { isRowPortKind } from './class-shield-helpers.js';
-import { formatObjectMemberText } from './class-object-sizing.js';
+import { formatObjectMemberText } from './class-object-fields.js';
 import type { DotInputNode, DotInputPortRow } from '../../core/graph-layout.types.js';
 import { Ports } from '../../core/svek/Ports.js';
 import { VisibilityModifier } from '../../core/skin/VisibilityModifier.js';

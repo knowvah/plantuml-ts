@@ -26,7 +26,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
-import { formatObjectMemberText } from '../../../src/diagrams/class/class-object-sizing.js';
+import { formatObjectMemberText } from '../../../src/diagrams/class/class-object-fields.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { Member } from '../../../src/diagrams/class/ast.js';
 
