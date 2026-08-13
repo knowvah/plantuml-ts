@@ -69,6 +69,12 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
     // attributes — the jar emits both suffixes on one statement
     // (`sh0006:p48c4…->sh0007:pcb85…`).
     if (a?.headport !== undefined) attrs.headport = a.headport;
+    // Not cosmetic: graphviz collapses every edge sharing a `sametail` value
+    // onto ONE tail point. Verified on dot-engine 1.4.0 -- with it, an
+    // inheritance group's edges all start at the identical point; without,
+    // they fan out from the node border. Omitting it here would emit a
+    // faithful DOT and then lay it out as if the attribute were absent.
+    if (a?.sametail !== undefined) attrs.sametail = a.sametail;
     // G8 T2 (spec.md §1a, mirrors `addClusters`' own `hasTitleTable` gate
     // — that seam is T1c's, unmodified here): a caller that supplies BOTH
     // `labelBoxWidth`/`labelBoxHeight` (currently only the state composite

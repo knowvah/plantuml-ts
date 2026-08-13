@@ -234,6 +234,19 @@ export interface DotInputEdge {
      * clip behavior every OTHER class-diagram edge already relies on).
      */
     noArrow?: boolean;
+    /**
+     * `sametail` — graphviz groups every edge sharing this value onto ONE
+     * shared tail point instead of letting them fan out from the node
+     * border. Upstream sets it on inheritance links whose tail reaches
+     * `skinparam groupInheritance N` (`dot/DotData.java:122-161`
+     * `removeIrrelevantSametail`) and emits it last on the edge line
+     * (`svek/SvekEdge.java:478-479`).
+     *
+     * The value is the TAIL ENTITY's `ent%04d` uid, not its `sh####` node
+     * id — a different counter (`abel/Entity.java:171`). Carried here rather
+     * than derived at emission because only the class engine knows it.
+     */
+    sametail?: string;
   };
 }
 

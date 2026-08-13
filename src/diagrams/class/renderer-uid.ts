@@ -60,7 +60,7 @@
  * dense count from wherever the exact/fallback pass left off, in `geo
  * .notes` array order.
  */
-import type { ClassGeometry } from './layout.js';
+import type { ClassDiagramAST } from './ast.js';
 
 /** `StringUtils.getUid("ent", n)` — `"ent" + "%04d".format(n)`. */
 function entUid(n: number): string {
@@ -109,7 +109,77 @@ interface EntityItem {
   readonly creationIndex: number;
 }
 
-function isExact(geo: ClassGeometry): boolean {
+/**
+ * The numbering's TRUE input — every field the exact/fallback passes below
+ * actually read, and nothing else.
+ *
+ * This exists because upstream assigns `Entity.uid` in the Entity constructor
+ * at PARSE time (`abel/Entity.java:171`), long before any DOT or geometry
+ * exists, whereas this module was written to take a post-layout
+ * `ClassGeometry`. That inversion is invisible until something needs a uid
+ * *before* layout — which `sametail` does: it is a DOT attribute, and the DOT
+ * is the layout's input (`class-dot-graph.ts#buildDotGraph`, called from
+ * `layout.ts` before any geometry exists).
+ *
+ * Every field here is carried onto geo from the AST unchanged (see each
+ * field's own doc comment in `class-classifier-ast.ts` /
+ * `class-note-decl-ast.ts`), so `ClassGeometry` satisfies this shape
+ * structurally and `buildClassUidPlan(geo)` needs no adapter at its existing
+ * call site. `classUidPlanInputFromAst` builds the same shape pre-layout.
+ *
+ * **The two are NOT generally equivalent, and that is measured, not assumed.**
+ * Across 300 class fixtures the AST-derived and geo-derived plans disagree on
+ * 20 of them, in both directions: the AST carries phantom classifiers that
+ * never reach geometry (this module's own doc comment above describes the
+ * `ensureClassifier` package-endpoint case), and geometry carries synthetic
+ * classifiers the AST never had. Either shifts every later rank by one,
+ * because the numbering is DENSE.
+ *
+ * So the AST-derived plan is usable only where those two populations are
+ * empty. `tests/unit/class/renderer-uid-ast-equivalence.test.ts` pins exactly
+ * that: for every corpus fixture where `sametail` applies — the one consumer
+ * of the AST path — the two plans must agree. Today that is 6 of 6. A future
+ * fixture combining `groupInheritance` with a phantom- or synthetic-producing
+ * feature fails that test by name rather than emitting a wrong uid.
+ *
+ * The renderer keeps using the geo-derived plan and is unaffected.
+ */
+export interface ClassUidPlanInput {
+  readonly classifiers: readonly {
+    readonly id: string;
+    readonly creationIndex?: number;
+    readonly noUidSlot?: true;
+    readonly phantomSlot?: true;
+    readonly subsumedLinkCreationIndex?: number;
+    readonly invertedClassEdgeOldCreationIndex?: number;
+    readonly repeatCoupleInvisLinkCreationIndex?: number;
+  }[];
+  readonly namespaces: readonly { readonly id: string; readonly creationIndex?: number }[];
+  readonly notes: readonly {
+    readonly id: string;
+    readonly creationIndex?: number;
+    readonly phantomSlot?: true;
+    readonly tipGroupPhantomIndex?: number;
+  }[];
+  readonly edges: readonly { readonly creationIndex?: number; readonly phantomSlot?: true }[];
+}
+
+/** Projects a parsed AST onto {@link ClassUidPlanInput}. `relationships` are
+ *  the AST's name for what geometry calls `edges`; every other collection
+ *  maps by the same name. Pure field selection — no reordering, no filtering
+ *  — so any divergence from the geo-derived plan is a real geometry/AST
+ *  membership difference, which is exactly what the equivalence test looks
+ *  for. */
+export function classUidPlanInputFromAst(ast: ClassDiagramAST): ClassUidPlanInput {
+  return {
+    classifiers: ast.classifiers,
+    namespaces: ast.namespaces,
+    notes: ast.notes,
+    edges: ast.relationships,
+  };
+}
+
+function isExact(geo: ClassUidPlanInput): boolean {
   return (
     geo.classifiers.every((c) => c.creationIndex !== undefined) &&
     geo.namespaces.every((n) => n.creationIndex !== undefined) &&
@@ -124,7 +194,7 @@ function isExact(geo: ClassGeometry): boolean {
  *  the number of uids assigned, since a phantom consumes a rank but no
  *  uid), so the caller's note-fallback continuation starts from the right
  *  place. */
-function assignExact(geo: ClassGeometry, maps: UidMaps): number {
+function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
   // G2 N19: an assoc-circle classifier's OWN uid slot is a REAL jar cpt1
   // burn that must consume a numbering rank, but `EntityImageAssociationPoint
   // #drawU` never wraps it in a `<g id="...">` -- excluded here from the
@@ -251,7 +321,7 @@ function assignExact(geo: ClassGeometry, maps: UidMaps): number {
  *  before leaves, in array order" shape) then edges. Mirrors description
  *  `renderer-uid.ts`'s own documented fallback-is-an-approximation
  *  posture. Returns the final counter value (the next-free rank). */
-function assignFallback(geo: ClassGeometry, maps: UidMaps): number {
+function assignFallback(geo: ClassUidPlanInput, maps: UidMaps): number {
   let counter = 0;
   for (const n of geo.namespaces) {
     counter += 1;
@@ -271,7 +341,7 @@ function assignFallback(geo: ClassGeometry, maps: UidMaps): number {
 /** Builds the uid plan for one `ClassGeometry` — see module doc comment
  *  for the exact-vs-fallback algorithm choice and notes' partially-exact
  *  numbering. */
-export function buildClassUidPlan(geo: ClassGeometry): ClassUidPlan {
+export function buildClassUidPlan(geo: ClassUidPlanInput): ClassUidPlan {
   const maps: UidMaps = {
     classifierUid: new Map<string, string>(),
     namespaceUid: new Map<string, string>(),
@@ -310,6 +380,6 @@ export function buildClassUidPlan(geo: ClassGeometry): ClassUidPlan {
 
 /** Thin wrapper so `buildClassUidPlan`'s ternary can share the same
  *  "returns the next-free rank" shape as `assignFallback`. */
-function assignExactAndCountRank(geo: ClassGeometry, maps: UidMaps): number {
+function assignExactAndCountRank(geo: ClassUidPlanInput, maps: UidMaps): number {
   return assignExact(geo, maps);
 }

@@ -59,6 +59,14 @@ export interface StructuralEdge {
   hasTailLabel: boolean;
   hasHeadLabel: boolean;
   hasXLabel: boolean;
+  /** `sametail=<entNNNN>` — graphviz groups every edge sharing this value
+   *  onto ONE tail point, so an edge that carries it is a different graph
+   *  from one that does not. Compared as a sorted multiset of VALUES (not a
+   *  count): the value is the tail entity's uid, so two groups collapsing
+   *  onto the wrong tails would compare equal by count alone. Was invisible
+   *  to this comparator until 2026-08-13 — see
+   *  `.agent-notes/si17-sametail-gate-blindness.md`. */
+  sametail: string | undefined;
 }
 export interface StructuralCluster {
   memberCount: number;
@@ -78,6 +86,13 @@ export interface StructuralGraph {
 
 const attr = (attrs: string, name: string): string | undefined =>
   new RegExp(`\\b${name}=([0-9.]+)`).exec(attrs)?.[1];
+
+/** `attr` above only accepts a NUMERIC value, so it silently returns
+ *  undefined for `sametail=ent0001` — on BOTH sides, which made an early
+ *  version of the sametail check compare [] against [] and pass no matter
+ *  what. Identifier-valued attrs need their own extractor. */
+const identAttr = (attrs: string, name: string): string | undefined =>
+  new RegExp(`\\b${name}=([A-Za-z_][A-Za-z0-9_]*)`).exec(attrs)?.[1];
 
 const numAttr = (dot: string, name: string): number | undefined => {
   const v = new RegExp(`(?:^|\\n|\\s)${name}=([0-9.]+)`).exec(dot)?.[1];
@@ -106,6 +121,7 @@ function parseEdges(dot: string): StructuralEdge[] {
       hasTailLabel: /taillabel=</.test(a),
       hasHeadLabel: /headlabel=</.test(a),
       hasXLabel: /(?:^|,)xlabel=</.test(a),
+      sametail: identAttr(a, 'sametail'),
     });
   }
   return edges;
@@ -258,6 +274,10 @@ const labelCounts = (g: StructuralGraph): [number, number, number, number] => [
   g.edges.filter((e) => e.hasHeadLabel).length,
   g.edges.filter((e) => e.hasXLabel).length,
 ];
+/** Sorted multiset of the `sametail` VALUES present, absent edges skipped. */
+const sortedSametails = (g: StructuralGraph): string[] =>
+  g.edges.map((e) => e.sametail).filter((v): v is string => v !== undefined).sort();
+
 const sortedClusterSizes = (g: StructuralGraph): number[] =>
   g.clusters.map((c) => c.memberCount).sort((a, b) => a - b);
 
@@ -295,6 +315,9 @@ export interface StructuralDiff {
   edgeCountOk: boolean;
   degreeOk: boolean;
   minlenOk: boolean;
+  /** `sametail` values match as a sorted multiset — see
+   *  {@link StructuralEdge.sametail}. */
+  sametailOk: boolean;
   shapeOk: boolean;
   labelOk: boolean;
   /** Edge endpoint ports match as a sorted multiset. Anchoring an edge to a
@@ -368,6 +391,7 @@ export function compareStructural(
   const degreeOk = eqNum(od, cd);
   const directionOk = eqStr(degreeSequenceDirected(oracle), degreeSequenceDirected(candidate));
   const minlenOk = eqNum(sortedMinlens(oracle), sortedMinlens(candidate));
+  const sametailOk = eqStr(sortedSametails(oracle), sortedSametails(candidate));
   const shapeOk = eqStr(sortedShapes(oracle), sortedShapes(candidate));
   const labelOk = eqNum(labelCounts(oracle), labelCounts(candidate));
   const portOk = eqStr(sortedPorts(oracle), sortedPorts(candidate));
@@ -383,6 +407,7 @@ export function compareStructural(
     degreeOk,
     directionOk,
     minlenOk,
+    sametailOk,
     shapeOk,
     labelOk,
     portOk,
@@ -396,6 +421,7 @@ export function compareStructural(
       degreeOk &&
       directionOk &&
       minlenOk &&
+      sametailOk &&
       shapeOk &&
       labelOk &&
       portOk &&
