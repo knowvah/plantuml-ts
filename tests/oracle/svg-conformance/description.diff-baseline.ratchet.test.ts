@@ -37,7 +37,7 @@
  * Re-run this exact 22-fixture check to re-measure by hand:
  *   npx vitest run tests/oracle/svg-conformance/description.diff-baseline.ratchet.test.ts
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,6 +45,16 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { compareSvg } from './compare.js';
 import { renderFixture } from './render-fixture.js';
+
+// The sprite-heavy `usecase/bootstrap-*` fixtures in this file render in about
+// 1.6s each in isolation -- comfortably inside vitest's 5s default -- but they
+// are the slowest cases in the suite, and under full-suite worker contention
+// they stretch past it. Observed twice (2026-08-12 and 2026-08-13), both times
+// this same pair, both times a TIMEOUT rather than a diff, on commits that
+// could not have affected rendering (a docs-only change once). Raised here
+// rather than in vitest.config.ts so the rest of the suite keeps the tight
+// default and a genuinely hung test still fails quickly.
+vi.setConfig({ testTimeout: 30_000 });
 
 interface BaselineFixture {
   readonly type: string;
