@@ -6,15 +6,23 @@
  * from `DotStringFactory.java:425-434`'s `cluster.setPosition(min,max)`
  * BEFORE `manageEntryExitPoint` overwrites it).
  *
- * `@knowvah/dot-engine`'s public API (`LayoutSnapshot`, `getLayout()`) does not
- * expose per-cluster geometry (nodes/edges/overall bounds only) — and this
- * project treats `@knowvah/dot-engine` as an out-of-scope, pinned dependency (no
- * reaching into its internal `Graph`/`GraphInfo` model, which isn't part of
- * its public `exports` map either). What IS public: `render(graph, 'xdot',
- * opts)` (`@knowvah/dot-engine/render`), which re-serializes the laid-out graph as
- * xdot text — including every subgraph's own `bb="minx,miny,maxx,maxy"`
- * (verified byte-identical to real `dot -Txdot` for this exact shape, see
- * decision-journal.md's J2 entry).
+ * Geometry comes from `@knowvah/dot-engine`'s public `getLayout()`
+ * (`LayoutSnapshot`), which reports every cluster subgraph's own bounding box
+ * alongside node centres. `clusters[]` carries `{name, x, y, width, height}`
+ * and, under the default `yAxis: 'down'`, `x`/`y` are the box's TOP-LEFT in
+ * the screen frame this module returns — so no manual y-flip is needed.
+ *
+ * This module used to text-parse `render(graph, 'xdot')` instead, because
+ * `getLayout()` exposed nodes/edges/overall bounds ONLY through dot-engine
+ * 1.0.x. That workaround coupled the port to the engine's text serialization
+ * format rather than to its API, and 1.2.x broke it by wrapping node
+ * attributes one per line — a change no API contract forbade. It surfaced as
+ * six description fixtures comparing an ERROR diagram against their oracle,
+ * which is why this now reads the typed snapshot: the scraping had no upstream
+ * counterpart to validate against, so nothing could tell us it had gone stale.
+ * The replacement was verified to reproduce the scraped values exactly
+ * (cluster 8,8→177,121 and port centres 22/69/116/163 at y=22 on the
+ * gafegu-06 shape).
  *
  * This module builds a small, ISOLATED shadow graph — mirroring `svek-dot-
  * emit.ts`'s own `portClusterBlock` structure exactly (ports ranked at the
@@ -51,7 +59,7 @@
  * back to the caller's own id only in this function's returned map.
  */
 
-import { createGraph, render } from '@knowvah/dot-engine';
+import { createGraph, render, getLayout } from '@knowvah/dot-engine';
 import '../../core/dot-engine-measurer.js';
 import type { RectangleArea, Point } from './frontier-calculator.js';
 
@@ -110,69 +118,6 @@ interface SafeRank {
 
 function inches(px: number): string {
   return (px / PX_PER_INCH).toString();
-}
-
-/** Extracts `bb="minx,miny,maxx,maxy"` from the FIRST `graph [...]` block
- *  found in `text` (the root graph's own attrs always come first in xdot
- *  output, before any subgraph). */
-function parseRootBounds(text: string): RectangleArea {
-  const m = /\bbb="([^"]+)"/.exec(text);
-  if (m === undefined || m === null) throw new Error('frontier-shadow-layout: no root bb= found');
-  const [minX, minY, maxX, maxY] = m[1]!.split(',').map(Number);
-  return { minX: minX!, minY: minY!, maxX: maxX!, maxY: maxY! };
-}
-
-/** Extracts the named subgraph's own `bb=`, scoped to the text starting at
- *  `subgraph <name> {` (its `graph [...]` line always comes first inside
- *  that block, before member node lines or a nested subgraph). Subgraph
- *  names are this module's own fixed constants (never caller-supplied), so
- *  no quoting concern applies here. */
-function parseSubgraphBounds(text: string, name: string): RectangleArea {
-  const start = new RegExp(`subgraph\\s+${name}\\s*\\{`).exec(text);
-  if (start === undefined || start === null) {
-    throw new Error(`frontier-shadow-layout: no subgraph ${name} found`);
-  }
-  const scoped = text.slice(start.index);
-  const m = /\bbb="([^"]+)"/.exec(scoped);
-  if (m === undefined || m === null) throw new Error(`frontier-shadow-layout: no bb= for ${name}`);
-  const [minX, minY, maxX, maxY] = m[1]!.split(',').map(Number);
-  return { minX: minX!, minY: minY!, maxX: maxX!, maxY: maxY! };
-}
-
-/** Extracts one node's `pos="x,y"` from its own node statement. `id` is
- *  always one of this module's own synthetic bare identifiers (see this
- *  module's doc comment), never a caller-supplied one — no quoting concern
- *  applies here either.
- *
- *  The attribute list is matched ACROSS newlines, terminated by `];`.
- *  `@knowvah/dot-engine` emitted each node statement on one line through
- *  1.0.x; from 1.2.x it wraps the attributes one per line:
- *
- *      n0	[_draw_="c 7 -#000000 p 4 …",
- *      		pos="36,144",
- *      		width=1];
- *
- *  A `[^\n]*` capture cannot reach the closing bracket in that shape, so it
- *  matched nothing and every port cluster threw "no node statement for n0".
- *  Terminating on `];` rather than a bare `]` keeps the match from stopping
- *  inside a bracketed attribute value. */
-function parseNodePos(text: string, id: string): Point {
-  const line = new RegExp(`^\\s*${id}\\s*\\[([\\s\\S]*?)\\];`, 'm').exec(text);
-  if (line === undefined || line === null) {
-    throw new Error(`frontier-shadow-layout: no node statement for ${id}`);
-  }
-  const m = /\bpos="([^"]+)"/.exec(line[1]!);
-  if (m === undefined || m === null) throw new Error(`frontier-shadow-layout: no pos= for ${id}`);
-  const [x, y] = m[1]!.split(',').map(Number);
-  return { x: x!, y: y! };
-}
-
-function toScreenRect(r: RectangleArea, totalHeight: number): RectangleArea {
-  return { minX: r.minX, minY: totalHeight - r.maxY, maxX: r.maxX, maxY: totalHeight - r.minY };
-}
-
-function toScreenPoint(p: Point, totalHeight: number): Point {
-  return { x: p.x, y: totalHeight - p.y };
 }
 
 /** Assigns a synthetic, always-bare-DOT-identifier `safeId` (`n0`, `n1`,
@@ -248,12 +193,32 @@ function buildShadowGraph(
 export function computePortClusterInitialRect(input: ShadowLayoutInput): ShadowLayoutResult {
   const safeRanks = assignSafeIds(input.ranks);
   const b = buildShadowGraph(input, safeRanks);
-  const xdot = render(b.graph, 'xdot', { engine: 'dot' });
-  const totalHeight = parseRootBounds(xdot).maxY;
-  const rawInitial = parseSubgraphBounds(xdot, SHADOW_CLUSTER_NAME);
+  // `render` is called for its LAYOUT side effect, not its output: `getLayout`
+  // rejects a graph that has not been laid out rather than returning
+  // calloc-zero geometry, and `render` is the documented way to run it
+  // through the public API.
+  render(b.graph, 'xdot', { engine: 'dot' });
+  const snapshot = getLayout(b.graph, { yAxis: 'down' });
+
+  const cluster = snapshot.clusters.find((c) => c.name === SHADOW_CLUSTER_NAME);
+  if (cluster === undefined) {
+    throw new Error(`frontier-shadow-layout: no cluster ${SHADOW_CLUSTER_NAME} in layout snapshot`);
+  }
+  const initial: RectangleArea = {
+    minX: cluster.x,
+    minY: cluster.y,
+    maxX: cluster.x + cluster.width,
+    maxY: cluster.y + cluster.height,
+  };
+
+  const centerById = new Map(snapshot.nodes.map((n) => [n.name, { x: n.x, y: n.y }]));
   const portCenters = new Map<string, Point>();
   for (const r of safeRanks) {
-    for (const p of r.ports) portCenters.set(p.id, toScreenPoint(parseNodePos(xdot, p.safeId), totalHeight));
+    for (const p of r.ports) {
+      const c = centerById.get(p.safeId);
+      if (c === undefined) throw new Error(`frontier-shadow-layout: no node ${p.safeId} in layout snapshot`);
+      portCenters.set(p.id, c);
+    }
   }
-  return { initial: toScreenRect(rawInitial, totalHeight), portCenters };
+  return { initial, portCenters };
 }

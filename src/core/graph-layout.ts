@@ -156,7 +156,30 @@ function decodeSvgEntities(s: string): string {
 /** Bounding-box center of a `<g id="nodeN" class="node">` block's own
  *  `<polygon points="...">`, keyed by the node id in its `<title>` — used to
  *  derive the constant translation between @knowvah/dot-engine's raw `render()`
- *  coordinate frame and `getLayout()`'s frame (see `computeRenderOffset`). */
+ *  coordinate frame and `getLayout()`'s frame (see `computeRenderOffset`).
+ *
+ *  This is the port's analogue of upstream's own read-back of graphviz output:
+ *  `DotStringFactory#solve(String svg)` parses the RENDERED SVG through
+ *  `SvgResult`, whose `extractList(POINTS_EQUALS)` finds `points="` and hands
+ *  the slice to `getPoints(" MC")` (`svek/SvgResult.java:52,67-77,101-112`).
+ *  Kept text-based deliberately, for the same reason upstream is.
+ *
+ *  Audited against that Java (2026-08-12). Upstream's `" MC"` is a
+ *  `StringTokenizer` delimiter SET — space, `M`, `C` — because the same
+ *  routine also serves path `d="M10,20 C30,40 …"` data. A `points="` attribute
+ *  contains no `M` or `C` (they are path commands), so splitting on whitespace
+ *  alone is EQUIVALENT here, not a shortcut. The `M`/`C` delimiters would only
+ *  matter for `d=` parsing, which this port deliberately does not do:
+ *  `svek-edge-geometry.ts`'s doc comment records why (upstream's
+ *  `SvekEdge#solveLine` round-trips through `SvgResult#toDotPath`, while this
+ *  port already holds the same control points as plain numbers).
+ *
+ *  One knowing divergence: upstream's `getPoints` catches
+ *  `NumberFormatException` and yields an empty list, whereas `Number()` here
+ *  yields `NaN` (`?? 0` catches `undefined`, not `NaN`). Unreachable on this
+ *  input — the SVG is produced by our own engine in the line above — so no
+ *  guard is added, per the project's rule against defending states that
+ *  cannot occur. */
 function parseNodeRenderCenters(svg: string): Map<string, { x: number; y: number }> {
   const centers = new Map<string, { x: number; y: number }>();
   const nodeRe = /<g id="node\d+" class="node">\s*<title>([^<]*)<\/title>([\s\S]*?)<\/g>/g;
