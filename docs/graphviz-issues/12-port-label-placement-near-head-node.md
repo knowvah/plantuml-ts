@@ -101,6 +101,51 @@ derived through the SVG-scraping path that issue 13 has since retired.
    Its rule admits only checklist items, so it carries no status prose; this
    file is the status.
 
+### Measurement: the two per-end constants, and where "uniform" came from
+
+Measured on `tobuka-93-jale775` after the issue-13 migration — engine anchors
+from `getLayout({yAxis:'down'}).edges[].tailLabel/.headLabel` on the fixture's
+own `svek-1.dot`, jar baselines from the cached `in.svg`, matched by proximity:
+
+| end | jar baseline − engine anchor | samples |
+|---|---|---|
+| tail | **+18.244** | 18.246, 18.239, 18.247 |
+| head | **+3.022** | 3.019, 3.025 |
+
+Their **midpoint is 10.633**, against the original filing's "uniform +10.611".
+That is the whole story of the earlier misdiagnosis: `portLabelAnchor`'s single
+formula lands on the average of two real per-end constants, so measuring "the"
+offset finds the midpoint and it looks uniform. The resulting error is
+**±7.611** at the two ends — equal and opposite by construction, matching the
+±6.6 observed in the diff table above (the spread varies a little with label
+shape).
+
+### The head end is already explained by upstream; the tail end is not
+
+Read the chain: `SvekEdge#getXY` is `SvekUtils.getMinXY(...extractList(
+POINTS_EQUALS))` (`SvekEdge.java:808-815`) — the **minimum** x/y of the marker
+polygon, i.e. the reserved box's TOP-LEFT. `TextBlockUtils.asPositionable`
+hands that to `PositionableImpl.create(pt, dim)`, which stores `pt`
+**verbatim** — no centring (`PositionableImpl.java:44-52`). The draw is then
+`drawU(ug.apply(new UTranslate(labelX, labelY)))` (`SvekEdge.java:956-980`),
+so the text block's TOP-LEFT sits on the box's top-left and its baseline lands
+at `boxTop + ascent`.
+
+Both reserved boxes in this fixture are `HEIGHT="13"`, so with the engine
+anchor at the box centre, `boxTop = centre − 6.5` and a 13pt ascent of ≈9.5
+predicts **centre + 3.0** — which is the measured head constant (+3.022) to
+0.02. **So the head end follows upstream's plain top-left anchoring, and our
+centre−height/2+baselineOffset formula is simply the wrong shape for it.**
+
+The tail end does **not**: +18.244 is `boxTop + 24.74`, roughly a full box
+height further down than top-left anchoring predicts. That extra ≈15.2 is
+unexplained and is the actual open question. It is deliberately NOT fitted
+here — the two constants above are evidence, not a formula to hard-code.
+Upstream's draw path for the two ends is textually identical (`:956-967` vs
+`:969-980`), so the asymmetry must enter earlier: either the two markers are
+emitted at different anchors, or `moveAwayFrom`/the cluster-avoidance pass
+(`:1208-1214`) displaces one end. That is the next thing to read.
+
 ---
 
 ## Original filing (2026-08-11), kept verbatim
