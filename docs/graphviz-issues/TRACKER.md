@@ -21,11 +21,17 @@ object ratchets and census re-run instantly against an updated `.tgz`).
         itself says suppresses the symptom. Corrected in the issue file, which
         now carries a working reproducer.
      10 has no consumer in this repo, so no fixture can move either way.
-     11's three fixtures sit in the object census's 31+ bucket, which is
-        byte-identical across the bump; separating "fix does not reach them"
-        from "fix lands but something else dominates" needs per-fixture diff
-        counts the census does not print. -->
+     11 is RECLASSIFIED as ours (2026-08-13) -- see its own note below. The
+        per-fixture counts it needed now exist (`--per-fixture`) and its
+        baseline is 34/30/34, but the question is moot: there is no upstream
+        fix to detect. -->
 - [ ] 10-edge-spline-sp-ep-not-exposed.md
-- [ ] 11-flat-edge-label-width-ignored-in-nodesep.md
+- [~] 11-flat-edge-label-width-ignored-in-nodesep.md  <!-- RECLASSIFIED 2026-08-13:
+        NOT a dot-engine defect. The engine honors the label box; this was
+        measured through graph-layout-build-edges.ts's plain-text label path,
+        which never sends a width. Given a FIXEDSIZE table it tracks the jar
+        within ~0.6 horizontally and matches real graphviz exactly vertically.
+        No upstream fix to wait for -- work is ours, scoped in
+        .agent-notes/class-edge-label-rank-gap.md. -->
 - [ ] 12-port-label-placement-near-head-node.md
 - [x] 13-edge-tail-head-label-positions-not-in-getlayout.md
