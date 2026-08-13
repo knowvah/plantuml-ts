@@ -17,4 +17,4 @@ object ratchets and census re-run instantly against an updated `.tgz`).
 - [ ] 10-edge-spline-sp-ep-not-exposed.md
 - [ ] 11-flat-edge-label-width-ignored-in-nodesep.md
 - [ ] 12-port-label-placement-near-head-node.md
-- [ ] 13-edge-tail-head-label-positions-not-in-getlayout.md
+- [x] 13-edge-tail-head-label-positions-not-in-getlayout.md
