@@ -65,3 +65,12 @@ Any json-family fixture with a nested value, e.g.
 
 where `132.27` is `ep`. This port reconstructs a tip 7.5 points along the
 spline's own final direction instead.
+
+
+## Verification attempt on dot-engine 1.4.0 (2026-08-13) — not applicable yet
+
+This issue asks for `sp`/`ep` to be EXPOSED on the spline API. Nothing in
+`plantuml-ts` consumes them yet, so no fixture can move whether or not 1.4.0
+publishes them. Checking this box needs a consumer first: the arrowhead
+approximation this issue describes has to be switched over to the real
+endpoints, and then the affected fixtures re-measured.

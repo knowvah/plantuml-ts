@@ -77,3 +77,18 @@ The nodes also sit 0.389px higher than the jar places them (`y=7` vs
 `y=7.389`). Recorded here because it reproduces on the identical input
 and may share a cause with the rank's own height allocation; it has not
 been isolated separately.
+
+
+## Verification attempt on dot-engine 1.4.0 (2026-08-13) — inconclusive
+
+Not verified. The three fixtures this issue names — `object/zebufu-01-pevo013`,
+`object/style-stereotype-on-arrow-3`, `object/style-stereotype-on-arrow-7`,
+each cited at 30-34 diffs — sit in the object SVG census's `31+ diffs` bucket.
+That census is **byte-identical between 1.3.0 and 1.4.0**, distribution
+included: `0 diffs 35 / 1-3 1 / 4-10 7 / 11-30 15 / 31+ 22`. All five DOT gates
+are likewise unmoved.
+
+So either the fix does not reach these fixtures, or it does and something
+downstream still dominates their diff count. Distinguishing those needs a
+per-fixture diff count before and after, not the bucket histogram — the census
+only names fixtures in its zero-diff list.
