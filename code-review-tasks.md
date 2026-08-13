@@ -84,7 +84,12 @@
   that reason, the repo's established treatment for a faithful port at the cap
   (119 existing uses, e.g. `hcl/parser.ts`).
 
-- [x] **The `graphviz-ts` prose mentions** — CLOSED (`33bcc915`): 880 renamed
-  across 112 files. Twelve version-pinned references remain by design (see the
-  note in that commit); `graphviz-ts@0.1.26072117` still resolves on npm, so
-  they are live provenance rather than dead identifiers.
+- [x] **The `graphviz-ts` name — CLOSED.** 880 bare mentions renamed
+  (`33bcc915`), then the 8 remaining incidental version pins renamed too once
+  the old package was **deleted from npm**. An earlier note here claimed
+  `graphviz-ts@0.1.26072117` "still resolves on npm, so they are live
+  provenance" — that was true when written and is now false, which is why the
+  pins were retired. Those pre-1.x builds are unrecoverable from npm and
+  untagged in the engine repo (its tags start at `v1.2.3`). Two references
+  deliberately keep the old name: `plans/g7-borderpoint-rank/` records the
+  rename transition itself, where both names are the subject.
