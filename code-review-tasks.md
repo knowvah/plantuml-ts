@@ -48,26 +48,42 @@
 
 ## Standing findings — still open, not introduced by the diff
 
-- [ ] **Licensing decision — needs a human call.** `@knowvah/dot-engine@1.0.0`
-  is EPL-2.0 and is *inlined* into `dist/` (verified: zero import statements
-  for it in the bundle, unlike `katex`, which is external and imported), while
-  this package declares MIT. A `NOTICE` now records what is redistributed and
-  under which terms, and ships in the tarball (`package.json` `files`). That is
-  attribution, not a conclusion: whether EPL-2.0-inside-an-MIT-bundle is
-  acceptable for this distribution model remains to be decided. The related
-  `DIVERGENCES.md` misstatement is already corrected (`dbdc295d`).
+- [ ] **Licensing decision — DEFERRED by the maintainer (2026-08-12).** Much
+  smaller than when first raised: `dist/` no longer inlines
+  `@knowvah/dot-engine`, so the package now *depends on* the EPL-2.0 component
+  rather than redistributing its code, and `NOTICE` records the terms and ships
+  in the tarball. What remains is the judgement call — whether that
+  arrangement is acceptable for this distribution model — and it is explicitly
+  parked, not forgotten. The `DIVERGENCES.md` misstatement that entangled this
+  with the elk decision is already corrected (`dbdc295d`).
 
-- [ ] **Dev-dependency CVEs.** `vitest@1.6.1` and `@vitest/coverage-v8@1.6.1`
-  carry a critical advisory (GHSA-5xrq-8626-4rwp); `vite@5.4.21` carries three
-  high advisories. All three are 3 majors behind. Dev/CI only — nothing ships
-  in `dist/`, and the production dependency graph reported zero
-  vulnerabilities. Worth its own mission.
+- [x] **Dev-dependency CVEs — CLOSED.** `npm audit` is at **0**, down from 20.
+  vitest 1 → 4, vite 5 → 7 (not 8: that swaps Rollup for Rolldown and would
+  change the bundler behind the published artifact), vite-plugin-dts 3 → 5,
+  vitepress overridden to vite 7 since 1.6.4 is already the latest stable.
+  `@microsoft/api-extractor` had to be added explicitly — it became a peer of
+  vite-plugin-dts, and without it the build exits 0 while silently shipping a
+  41-byte `types` stub.
 
-- [ ] **`class-object-commands.ts` `parseObjectMatch` is at CCN 10**, exactly
-  the hook cap, and untouched by this work. One more branch trips the blocking
-  hook. Awareness only.
+- [x] **`class-object-commands.ts` `parseObjectMatch` was at CCN 10** — CLOSED.
+  The `match[2] ?? match[3] ?? match[5] ?? match[6]` chain counted each `??` as
+  its own branch, pinning it at exactly the hook cap so any new alternative in
+  the object-declaration regex would have blocked the write. Extracted to a
+  `firstGroup(match, indices)` helper, making the alternation data rather than
+  control flow: **CCN 10 → 2**, helper at 3, group numbers still visible at the
+  call site.
 
-- [ ] **~772 bare `dot-engine` prose mentions** in `docs/` and `planning/`
-  describe the engine by its former name. Low priority now that the old name
-  is known to have been private. The 33 broken *path* references were fixed
-  separately (`db4bf0f4`); `plans/` history is deliberately left alone.
+- [x] **`class-object-commands.ts` `isBlockSeparatorLine` at CCN 10** — CLOSED,
+  but deliberately NOT by simplifying it. Unlike `parseObjectMatch`, this one
+  is a line-for-line port of `BodyEnhancedAbstract#isBlockSeparator` (:67-82):
+  same four prefix/suffix tests, same order, same `equals("...")` exception.
+  Collapsing it into a table would buy back branch budget by destroying the
+  property that makes it reviewable — that it reads like the Java beside it —
+  which this project's porting rules put first. Marked `#lizard forgives` with
+  that reason, the repo's established treatment for a faithful port at the cap
+  (119 existing uses, e.g. `hcl/parser.ts`).
+
+- [x] **The `graphviz-ts` prose mentions** — CLOSED (`33bcc915`): 880 renamed
+  across 112 files. Twelve version-pinned references remain by design (see the
+  note in that commit); `graphviz-ts@0.1.26072117` still resolves on npm, so
+  they are live provenance rather than dead identifiers.

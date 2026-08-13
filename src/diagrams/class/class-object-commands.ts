@@ -158,9 +158,24 @@ function applyObjectUrl(classifier: Classifier, raw: string | undefined): void {
  * match — the `!` below reflects that regex-guaranteed invariant, not a
  * runtime fallback.
  */
+/** The first of `indices` that this match actually captured. Replaces a
+ *  `match[2] ?? match[3] ?? match[5] ?? match[6]` chain: each `??` is its own
+ *  branch to `lizard`, which put {@link parseObjectMatch} at CCN 10 -- exactly
+ *  the hook-enforced cap, so any future alternative added to the object
+ *  declaration regex would have blocked the write. The alternation is data
+ *  here rather than control flow, and the group numbers stay visible at the
+ *  call site. */
+function firstGroup(match: RegExpExecArray, indices: readonly number[]): string | undefined {
+  for (const i of indices) {
+    const v = match[i];
+    if (v !== undefined) return v;
+  }
+  return undefined;
+}
+
 function parseObjectMatch(match: RegExpExecArray): ObjectMatch {
-  const rawCode = match[2] ?? match[3] ?? match[5] ?? match[6];
-  const rawDisplay = match[1] ?? match[4];
+  const rawCode = firstGroup(match, [2, 3, 5, 6]);
+  const rawDisplay = firstGroup(match, [1, 4]);
   return {
     rawId: (rawCode ?? rawDisplay)!,
     rawDisplay,
@@ -275,6 +290,14 @@ function detectVisibilityChar(line: string): Visibility | undefined {
  * @see ~/git/plantuml/.../cucadiagram/BodyEnhancedAbstract.java#isBlockSeparator
  */
 function isBlockSeparatorLine(line: string): boolean {
+  // #lizard forgives -- faithful port of BodyEnhancedAbstract#isBlockSeparator
+  // (:67-82), line for line: same four prefix/suffix tests, same order, same
+  // `equals("...")` exception on the `..` case, same trailing `return false`.
+  // It measures CCN 10, exactly the cap, so a fifth separator type added
+  // upstream would otherwise block the write here. Collapsing the branches
+  // into a table would buy back the budget at the cost of the property that
+  // makes this reviewable -- that it reads the same as the Java beside it --
+  // which this project's porting rules put first.
   if (line.startsWith('--') && line.endsWith('--')) return true;
   if (line.startsWith('==') && line.endsWith('==')) return true;
   if (line.startsWith('..') && line.endsWith('..') && line !== '...') return true;
