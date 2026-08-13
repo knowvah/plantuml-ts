@@ -73,8 +73,15 @@
   control flow: **CCN 10 → 2**, helper at 3, group numbers still visible at the
   call site.
 
-- [ ] **`class-object-commands.ts` `isBlockSeparatorLine` is at CCN 10** —
-  the same hazard, found while measuring the above. Untouched; awareness only.
+- [x] **`class-object-commands.ts` `isBlockSeparatorLine` at CCN 10** — CLOSED,
+  but deliberately NOT by simplifying it. Unlike `parseObjectMatch`, this one
+  is a line-for-line port of `BodyEnhancedAbstract#isBlockSeparator` (:67-82):
+  same four prefix/suffix tests, same order, same `equals("...")` exception.
+  Collapsing it into a table would buy back branch budget by destroying the
+  property that makes it reviewable — that it reads like the Java beside it —
+  which this project's porting rules put first. Marked `#lizard forgives` with
+  that reason, the repo's established treatment for a faithful port at the cap
+  (119 existing uses, e.g. `hcl/parser.ts`).
 
 - [x] **The `graphviz-ts` prose mentions** — CLOSED (`33bcc915`): 880 renamed
   across 112 files. Twelve version-pinned references remain by design (see the

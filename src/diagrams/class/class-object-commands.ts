@@ -290,6 +290,14 @@ function detectVisibilityChar(line: string): Visibility | undefined {
  * @see ~/git/plantuml/.../cucadiagram/BodyEnhancedAbstract.java#isBlockSeparator
  */
 function isBlockSeparatorLine(line: string): boolean {
+  // #lizard forgives -- faithful port of BodyEnhancedAbstract#isBlockSeparator
+  // (:67-82), line for line: same four prefix/suffix tests, same order, same
+  // `equals("...")` exception on the `..` case, same trailing `return false`.
+  // It measures CCN 10, exactly the cap, so a fifth separator type added
+  // upstream would otherwise block the write here. Collapsing the branches
+  // into a table would buy back the budget at the cost of the property that
+  // makes this reviewable -- that it reads the same as the Java beside it --
+  // which this project's porting rules put first.
   if (line.startsWith('--') && line.endsWith('--')) return true;
   if (line.startsWith('==') && line.endsWith('==')) return true;
   if (line.startsWith('..') && line.endsWith('..') && line !== '...') return true;
