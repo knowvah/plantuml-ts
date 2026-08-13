@@ -80,3 +80,25 @@ engine). It was found on stderr during a census and only then attributed.
 stating". The warning had been seen once during an earlier census and left
 unattributed for a batch; the per-fixture isolation above is what turned it
 into a filed finding.
+
+
+## Verification attempt on dot-engine 1.4.0 (2026-08-13) — inconclusive
+
+Not verified, and the blocker is an instrument gap rather than a result.
+
+**There is no gate for this corpus.** `@startjson`/`@startyaml`/`@starthcl` are
+the Smetana-path types: per `CLAUDE.md` they emit no `svek-N.dot`, so they have
+no DOT-parity gate by design, and the `test-results/dot-cache/json/*` fixtures
+carry only `in.puml` + `in.svg`. `dot-sync-report.ts json --type-tag JSON` does
+run (49 analysed, 1 EQUAL) but it compares DOT *input*, while this issue's
+symptom is a spline missing from layout *output* — the wrong instrument.
+
+**The symptom did not reproduce on either version.** Rendering all 50 cached
+json fixtures through `renderSync`: 50/50 succeeded, 0 threw, and zero
+`routesplines`/`Pshortestpath`/`lost n… n… edge` warnings reached stderr, on
+1.4.0 AND on 1.3.0. So there is no before-state to observe going green.
+
+**What would settle it:** a reproducer that emits the warning on a known-bad
+version, or a count of edges-with-splines against edges-declared for the 7
+named fixtures. Until one exists, this box cannot honestly be checked from the
+plantuml-ts side — the fix may well be correct and simply unobservable here.
