@@ -349,6 +349,13 @@ export interface Relationship {
    * Same field/semantics as description's `DescriptiveLink.single`.
    */
   single?: true;
+  /** `[norank]` ARROW_STYLE token -- `WithLinkType.goNorank`
+   *  (`decoration/WithLinkType.java:156-158`) calls `Link#setConstraint(false)`
+   *  (`abel/Link.java:159-161`), which `SvekEdge.java:475-476` emits as
+   *  `constraint=false`: the edge is drawn but takes no part in rank
+   *  assignment. Rank-affecting, not a render style -- hence carried on the
+   *  AST rather than folded into `lineStyleOverride`. */
+  norank?: true;
   /**
    * G2 N59: `ArrowInfo.swapDirection` ("the left operand is semantically
    * `to`", `class-arrow-grammar.ts`'s own doc comment) -- `true` only when

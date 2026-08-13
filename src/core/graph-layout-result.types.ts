@@ -1,0 +1,53 @@
+/**
+ * `DotLayoutResult` — the layout engine's OUTPUT shape.
+ *
+ * Split out of `graph-layout.types.ts` (2026-08-13) purely for the repo's
+ * 500-line file cap: that file had been sitting at 512 lines, so any addition
+ * to the INPUT types was blocked by a limit it already exceeded. The seam is
+ * the natural one — input types describe what we hand graphviz, this describes
+ * what comes back — and it is a pure move, no shape change.
+ *
+ * Re-exported from `graph-layout.types.ts`, so no consumer import changed.
+ */
+
+export interface DotLayoutResult {
+  nodes: Array<{ id: string; x: number; y: number; width: number; height: number; xlabelX?: number; xlabelY?: number }>;
+  edges: Array<{
+    id: string;
+    points: Array<{ x: number; y: number }>;
+    labelX?: number;
+    labelY?: number;
+    labelWidth?: number;
+    labelHeight?: number;
+    /** G2/N25: computed position for `attributes.tailLabel`/`.headLabel`
+     *  (see that field's own doc comment) — the CENTER point of the label
+     *  box @knowvah/dot-engine's own `xladjust` placed, in the same origin-shifted
+     *  frame as `points`/`labelX`/`labelY`. Absent when the input edge did
+     *  not carry `tailLabel`/`headLabel`. */
+    tailLabelX?: number;
+    tailLabelY?: number;
+    headLabelX?: number;
+    headLabelY?: number;
+    spline?: boolean;
+    reversed?: boolean;
+  }>;
+  width: number;
+  height: number;
+  /** G5 C2: real per-cluster bbox from graphviz's own subgraph-cluster
+   *  layout (@knowvah/dot-engine's `getLayout().clusters`, see
+   *  docs/graphviz-issues/06-cluster-bbox-not-in-getlayout.md's RESOLVED
+   *  note) — keyed by `DotInputCluster.id` (re-mapped from @knowvah/dot-engine's own
+   *  `cluster<N>` naming by `graph-layout-build.ts#addClusters`'s
+   *  `ClusterIndex`, NOT @knowvah/dot-engine's internal name). `x`/`y` are the
+   *  top-left corner in the SAME origin-shifted frame as `nodes`/`edges`
+   *  (`shiftToOrigin` applies the identical node/edge-derived translation to
+   *  these boxes too — clusters never participate in DERIVING that
+   *  translation, only in receiving it, so pre-existing node/edge output is
+   *  byte-identical for every caller that ignores this field). Absent when
+   *  the input graph carried no `clusters` (mirrors `DotInputGraph.clusters`
+   *  itself being optional) — additive, no existing consumer reads this yet.
+   *  Replaces the entity-vs-cluster wrap APPROXIMATION named in G4 §S1/S3/S6
+   *  ("mechanism 16") and `state-composite-geo.ts#materializeCluster`'s own
+   *  fixed-`BOX_PAD` bounding box. */
+  clusters?: Array<{ id: string; x: number; y: number; width: number; height: number }>;
+}

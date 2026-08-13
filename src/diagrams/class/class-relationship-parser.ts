@@ -263,6 +263,7 @@ interface OptionalRelFields {
   thicknessOverride?: number | undefined;
   colorOverride?: string | undefined;
   single?: true | undefined;
+  norank?: true | undefined;
   swapDirection?: boolean | undefined;
   parentIsLinkEntity1?: boolean | undefined;
   /** T1/B33: tri-state -- `withOptionalFields` drops only `undefined`, so an
@@ -452,6 +453,10 @@ export function parseRelationshipLine(line: string, nsSep: string | null = null,
       // consumed at the relationship-push site, see
       // `Relationship.single`'s doc comment (class-relationship-ast.ts).
       single: styleOverrides.single,
+      // `[norank]` -- `WithLinkType.goNorank` -> `setConstraint(false)`,
+      // emitted as `constraint=false` (`SvekEdge.java:475-476`). Consumed by
+      // `class-dot-edges.ts#buildDotEdgeAttrs`.
+      norank: styleOverrides.norank,
       // The dot rank swap's real input: whether upstream's Link put the
       // PARENT first. For an arrow that is exactly `swapDirection` -- true
       // when `from`/`to` were reordered away from source-text order, i.e.

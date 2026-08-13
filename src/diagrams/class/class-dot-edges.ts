@@ -96,6 +96,8 @@ function buildDotEdgeAttrs(rel: Relationship, i: number, ctx: DotEdgeAttrContext
   const attrs = { minLen: (rel.length ?? 2) - 1, ...edgeLabelAttrs(rel, ctx.font, ctx.measurer) };
   if (ctx.linetype === 'ortho') moveLabelToXlabel(attrs);
   if (rel.invis === true) attrs.invis = true;
+  // `[norank]` -> constraint=false (`Relationship.norank`'s doc comment).
+  if (rel.norank === true) attrs.constraint = false;
   // `DotData#removeIrrelevantSametail` survivors only -- the map is empty
   // unless `skinparam groupInheritance N` (N >= 2) is set AND this tail
   // reaches N. Emitted by `svek-dot-emit.ts` and forwarded to the layout

@@ -199,10 +199,11 @@ function edgeLine(edge: DotInputEdge, fromSh: string, toSh: string, c: EdgeColor
     `color="${hex(c.line)}"`,
     ...edgeLabelParts(a, c),
   ];
+  // Order is load-bearing for the byte-comparison against the oracle DOT:
+  // `SvekEdge.java:470-479` emits style=invis, then constraint=false, then
+  // sametail, in exactly this sequence.
   if (a.invis === true) parts.push('style=invis');
-  // LAST, after style=invis -- `SvekEdge.java:470-479` emits style=invis,
-  // then constraint=false (not modeled here), then sametail. Position is
-  // load-bearing for the byte-comparison against the oracle DOT.
+  if (a.constraint === false) parts.push('constraint=false');
   if (a.sametail !== undefined) parts.push(`sametail=${a.sametail}`);
   return `${fromSh}->${toSh}[${parts.join(',')}];`;
 }
