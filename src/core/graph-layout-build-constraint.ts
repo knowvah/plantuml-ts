@@ -26,13 +26,24 @@
  * cluster6 -> cluster13, and the oracle correctly omits `constraint=false`).
  *
  * KNOWN GAP: `class/sokevu-87-toce485` is the one corpus fixture of thirteen
- * where this does not reproduce the oracle (ours 0, oracle 1). Its cause is
- * upstream of anything here — our graph has **4 edges where the oracle has
- * 6**, a pre-existing structural divergence, so two of the endpoints this
- * predicate would test do not exist on our side yet. It is also the only one
- * of the thirteen that is NOT pinned in `oracle/goldens/`, which is why no
- * gate reports it. Fix the missing edges and this should follow without
- * changes here.
+ * where this does not reproduce the oracle (ours 0, oracle 1), and the cause
+ * is entirely upstream of this predicate.
+ *
+ * (An earlier version of this comment said "4 edges where the oracle has 6".
+ * That was a miscount: two of the oracle's six `->` lines are the port
+ * rank-chain `ClusterDotString.printRanks` emits, not edges. The real edge
+ * counts match at 4.)
+ *
+ * The actual gap is that the CLASS engine does not model `port` declarations.
+ * For `node n { port p … }` the oracle emits every port endpoint as `:P`
+ * (`sh0013:h->sh0010:P`) and chains them with `sh0010->sh0011->sh0012
+ * [arrowhead=none]`, whereas this port's graph has `isPort: undefined` on all
+ * three port nodes and `portRanks: null` on their cluster. With no `isPort`
+ * there is nothing for the same-container rule to match, so the missing
+ * `constraint=false` on `n.nwd -> n.firstportname` is a symptom, not a defect
+ * here. It is also the only one of the thirteen NOT pinned in
+ * `oracle/goldens/`, which is why no gate reports it. Model class-side ports
+ * and this follows with no change to this file.
  */
 import type { DotInputGraph } from './graph-layout.types.js';
 
