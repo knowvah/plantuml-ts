@@ -21,7 +21,7 @@ on the DOT we *feed* the layout engine, so dot-engine fidelity is orthogonal.
 **dot-engine pinning (maintainer directive, 2026-07-04):** its source is
 actively changing (algorithm/perf work). Do NOT depend on the live source
 dir. Install a packed snapshot into node_modules
-(`npm install ../dot-engine/graphviz-ts-*.tgz`) and pin it; refresh the
+(`npm install ../dot-engine/dot-engine-*.tgz`) and pin it; refresh the
 snapshot only as a deliberate, journaled action (or the npm release when it
 ships). Current upstream status for context: 100% unit tests, 91.1%
 conformance / 97.1% structural similarity on the extreme-graph suite —

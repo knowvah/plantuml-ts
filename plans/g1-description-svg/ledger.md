@@ -194,7 +194,7 @@
 
 
 ## RESOLVED 2026-07-14: xusuxe-62 dot-engine crash
-- graphviz-ts@0.1.26071415 fixes the labeled cross-cluster-boundary-edge crash;
+- dot-engine@0.1.26071415 fixes the labeled cross-cluster-boundary-edge crash;
   xusuxe renders a real 71KB diagram (image icons present), census errors 2->1
   (residual: fepuvo jar-side malformed golden), golden-pinned in
   oracle/goldens/description/. The si5b journal + state-dot-sync ledger rows

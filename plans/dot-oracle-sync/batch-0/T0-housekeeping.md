@@ -22,7 +22,7 @@ committed; two stray debug artifacts must get out of the repo root.
 5. `git checkout -b feat/dot-oracle-sync`.
 5b. Pin dot-engine to a packed snapshot (decisions.md D2): run
    `npm pack` in `~/git/knowvah/dot-engine` if no current tarball exists, then
-   `npm install ../dot-engine/graphviz-ts-<version>.tgz`. Verify
+   `npm install ../dot-engine/dot-engine-<version>.tgz`. Verify
    package.json now points at the tgz (not the live dir), run the four
    gates, commit: `chore(deps): pin dot-engine to packed snapshot`.
 6. Add `"Bash(java *:*)"` and `"Bash(git merge *:*)"` to
