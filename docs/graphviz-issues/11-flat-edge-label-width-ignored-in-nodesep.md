@@ -92,3 +92,30 @@ So either the fix does not reach these fixtures, or it does and something
 downstream still dominates their diff count. Distinguishing those needs a
 per-fixture diff count before and after, not the bucket histogram — the census
 only names fixtures in its zero-diff list.
+
+### Resolved: the instrument now exists, and this is its baseline
+
+`scripts/svg-conformance-census.ts --per-fixture` prints one name-sorted line
+per fixture with its diff count, which is what the bucket histogram could not
+show. Baseline on **dot-engine 1.4.0**, `DeterministicMeasurer`:
+
+| fixture | diffs |
+|---|---|
+| `object/style-stereotype-on-arrow-3` | 34 |
+| `object/style-stereotype-on-arrow-7` | 30 |
+| `object/zebufu-01-pevo013` | 34 |
+
+These reproduce this issue's own "each 30-34 diffs" claim exactly, so the
+instrument agrees with the original filing rather than re-deriving a different
+number.
+
+To verify a future engine bump, re-run and compare:
+
+```bash
+npx tsx scripts/svg-conformance-census.ts object --per-fixture > after.txt
+diff before.txt after.txt
+```
+
+Rows are name-sorted precisely so this diff is readable — any count that moves
+shows up as a one-line change. **Unchanged counts now mean "the fix does not
+reach these fixtures", which the bucket histogram could never establish.**

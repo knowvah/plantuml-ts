@@ -380,41 +380,63 @@ Consumer impact: no API change, but the bytes differ. Anyone
 byte-comparing or snapshotting this library's SVG must re-baseline. See
 `CHANGELOG.md` for the full rule list.
 
-### Edge geometry follows modern graphviz, not the jar's graphviz-2.38 transpile
+### Edge geometry carries more precision than the jar's, because the jar reads graphviz as text
 
-**Status:** accepted, permanent.
+**Status:** accepted, permanent. **Cause corrected 2026-08-13** — this was
+previously filed as a graphviz-2.38-vs-modern *version* gap. It is not a
+version gap; the two engines agree exactly. See "What this is not" below.
 
-The jar lays out diagrams with **Smetana**, a Java transpile of **graphviz
-2.38**. This port lays them out with `@knowvah/dot-engine`, which tracks a
-modern graphviz. Where the two versions disagree, **this port follows
-modern graphviz** — it does not chase bug-for-bug compatibility with a
-transpile that is years behind upstream graphviz.
+The jar obtains edge splines by shelling out to the external `dot` binary
+and **scraping its SVG text**: `svek/DotStringFactory.java:316` calls
+`create(skinParam, dotString, "svg")`, and
+`GraphvizRuntimeEnvironment#create` dispatches to `GraphvizLinux`. The
+`dot -Tsvg` writer prints coordinates to **2 decimals**, so every control
+point the jar ever sees is already quantized to 0.01 before PlantUML does
+any clipping. This port calls `@knowvah/dot-engine` in-process and
+receives full-precision doubles.
 
-This is the same maintainer decision as
+So the divergence is one of **serialization precision, not layout**: we
+clip from exact control points where the jar clips from values rounded to
+2dp, and that quantization error (≤0.005 per point) propagates through
+clipping.
+
+Measured on `oracle/goldens/svg-class/bipudo-23-xavu432`, whose four
+classes and four inheritance edges make it the minimal case:
+
+| control point | this port / real graphviz | what `dot -Tsvg` prints |
+|---|---|---|
+| 3 | `76.189044, 90.132030` | `76.19, 90.13` |
+| 4 | `90.183850, 107.792146` | `90.18, 107.79` |
+| vertical edge x | `24.575004` | `24.58` |
+
+Clipping the trimmed end amplifies that into roughly **0.0097pt**.
+
+**Verified rather than assumed.** Fed the jar's own dumped `svek-1.dot`,
+this port's engine returns exactly what real graphviz 15.1.1 returns.
+Rounding this port's control points to 2dp reproduces the jar's spline
+**byte-for-byte** — `M61.184,69.372 C75.184,87.052 83.19,97.13 97.18,114.79`
+— and takes the whole fixture to zero diffs.
+
+**What this is not.** It is not Smetana, and not a graphviz version gap.
+This fixture has a `svek-1.dot`, and Smetana paths emit none — the jar
+shelled out to real graphviz here. Because both sides agree at full
+precision and differ only in what `-Tsvg` can print, **this will not
+disappear when the jar updates its graphviz.** The
 [`!pragma layout smetana|vizjs`](#pragma-layout-smetanavizjs--always-laid-out-with-graphviz)
-above, applied to geometry rather than to engine selection: a diagram that
-*asks* for Smetana is laid out with the dot engine, and so is every other
-diagram — which necessarily means Smetana's output is not the target.
+ruling is a separate matter and does not apply to this path.
 
-The difference is sub-pixel and almost always invisible. Measured on
-`oracle/goldens/svg-class/bipudo-23-xavu432`: the jar's edge-spline
-control points are quantized to 2 decimals (`76.19, 90.13`) where real
-graphviz 15.1.1 — and this port — produce full precision
-(`76.189044, 90.132030`). Clipping the trimmed end of the spline amplifies
-that into roughly **0.0097pt** of positional difference.
-
-Verified rather than assumed: fed the jar's own dumped `svek-1.dot`, this
-port's engine returns exactly what real graphviz returns (identical x, and
-y a pure flip about the graph height).
-
-**Consequence for conformance.** The SVG-conformance harness compares
-against jar output with a **0.01pt** tolerance
-(`tests/oracle/svg-conformance/compare.ts`). That tolerance is what
-absorbs this version gap for essentially every fixture. One fixture,
-`bipudo-23-xavu432`, sits far enough out to cross it; it is un-pinned from
-the class ratchet and recorded in `oracle/accepted-divergences.json`.
-Others may cross it as either side evolves — a fixture that fails on
-edge-geometry alone, by a hair, is more likely this than a regression.
+**Consequence for conformance.** The harness compares against jar output
+with a **0.01pt** tolerance (`tests/oracle/svg-conformance/compare.ts`).
+That tolerance absorbs the quantization for every fixture measured: across
+802 class and object fixtures, quantizing our own points to 2dp changes
+only 3 of them, by 1–2 diffs each, and flips none to zero. `bipudo-23-
+xavu432` was believed to cross the band and was un-pinned on 2026-08-08;
+it does not — ~0.0097 is inside 0.01, and it failed only because 3-decimal
+emission rounded the gap to exactly 0.010 and the comparator then rejected
+that on a floating-point boundary defect. That defect is fixed
+(`compare.ts#exceedsTolerance`), the fixture measures zero diffs, and it is
+re-pinned; the accepted divergence is retired in
+`oracle/accepted-divergences.json`.
 
 ## Preprocessor (TIM)
 

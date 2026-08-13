@@ -44,6 +44,14 @@
  *          [object] [state] [dot] [json] [yaml] [hcl]
  *   (defaults to component + usecase; every other type must be requested
  *   explicitly)
+ *
+ * Two triage flags, each of which prints and then SKIPS the jar pass:
+ *   --per-fixture  one line per fixture with its diff count, name-sorted, so
+ *                  two runs diff mechanically. Use this to decide whether an
+ *                  engine bump or a fix actually moved a fixture: the bucket
+ *                  report alone cannot show movement inside a bucket.
+ *   --families     diff paths de-indexed into structural families, ranked by
+ *                  how many fixtures each reaches.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -309,6 +317,32 @@ function printReport(label: string, results: readonly CensusResult[]): void {
   }
 }
 
+/**
+ * Per-fixture diff counts, one line per fixture, stable-sorted by
+ * `type/slug`.
+ *
+ * `printReport` above buckets counts and then names ONLY the zero-diff
+ * fixtures, which makes every non-zero fixture unobservable: a fixture can
+ * move 45 -> 44 diffs, or 45 -> 47, without moving a bucket boundary or
+ * changing a single printed character. That is not a hypothetical — it is
+ * why `docs/graphviz-issues/11` could not be verified against an engine bump
+ * (its three fixtures all sit in the `31+` bucket, so "the fix does not reach
+ * them" and "the fix lands but something else dominates" print identically).
+ *
+ * Sorted by name rather than by count so two runs diff cleanly with `diff(1)`
+ * — a count-ordered table reshuffles rows whenever any single fixture moves,
+ * burying the one real change in spurious line moves.
+ */
+function printPerFixture(label: string, results: readonly CensusResult[]): void {
+  console.log(`\n=== ${label} — per-fixture diff counts (${results.length} fixtures) ===`);
+  const rows = [...results].sort((a, b) =>
+    (a.type + '/' + a.slug).localeCompare(b.type + '/' + b.slug),
+  );
+  for (const r of rows) {
+    console.log(String(r.diffCount).padStart(8) + '  ' + r.type + '/' + r.slug);
+  }
+}
+
 /** De-index a diff path into its structural family (svg/g[2]/text/@x -> svg/g/text/@x). */
 function familyOf(path: string): string {
   const indexRe = new RegExp('\\[' + String.raw`\d` + '+\\]', 'g');
@@ -348,6 +382,11 @@ function main(): void {
 
   const deterministicResults = census(fixtures, new DeterministicMeasurer());
   printReport('DeterministicMeasurer (ratchet metric)', deterministicResults);
+
+  if (process.argv.includes('--per-fixture')) {
+    printPerFixture('DeterministicMeasurer', deterministicResults);
+    return; // triage tool, like --families: skip the jar pass
+  }
 
   if (process.argv.includes('--families')) {
     printFamilies(deterministicResults);
