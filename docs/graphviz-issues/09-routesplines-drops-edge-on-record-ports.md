@@ -81,24 +81,45 @@ stating". The warning had been seen once during an earlier census and left
 unattributed for a batch; the per-fixture isolation above is what turned it
 into a filed finding.
 
+## Verification on dot-engine 1.4.0 (2026-08-13) — REPRODUCED, still open
 
-## Verification attempt on dot-engine 1.4.0 (2026-08-13) — inconclusive
+**Correcting an earlier attempt in this same file.** A first pass reported the
+symptom as unreproducible on either 1.3.0 or 1.4.0 and speculated it might be
+unobservable from this repo. That was wrong, and this file already said why:
+the probe used the DETERMINISTIC measurer, which the Finding above states
+produces **zero** occurrences. Wrong instrument, not a null result.
 
-Not verified, and the blocker is an instrument gap rather than a result.
+Re-run with `jarMeasurer` over the seven fixtures named in the table:
 
-**There is no gate for this corpus.** `@startjson`/`@startyaml`/`@starthcl` are
-the Smetana-path types: per `CLAUDE.md` they emit no `svek-N.dot`, so they have
-no DOT-parity gate by design, and the `test-results/dot-cache/json/*` fixtures
-carry only `in.puml` + `in.svg`. `dot-sync-report.ts json --type-tag JSON` does
-run (49 analysed, 1 EQUAL) but it compares DOT *input*, while this issue's
-symptom is a spline missing from layout *output* — the wrong instrument.
+| version | warning lines | lost edges |
+|---|---|---|
+| 1.3.0 | 34 | 17 |
+| 1.4.0 | 34 | 17 |
 
-**The symptom did not reproduce on either version.** Rendering all 50 cached
-json fixtures through `renderSync`: 50/50 succeeded, 0 threw, and zero
-`routesplines`/`Pshortestpath`/`lost n… n… edge` warnings reached stderr, on
-1.4.0 AND on 1.3.0. So there is no before-state to observe going green.
+The **lost-edge sets are identical** between the two versions (`diff` over the
+sorted `lost nX nY edge` lines is empty), and 34 is exactly the sum of this
+issue's own per-fixture warning-line column — so the behaviour is unchanged
+from the original filing. **Not fixed in 1.4.0.**
 
-**What would settle it:** a reproducer that emits the warning on a known-bad
-version, or a count of edges-with-splines against edges-declared for the 7
-named fixtures. Until one exists, this box cannot honestly be checked from the
-plantuml-ts side — the fix may well be correct and simply unobservable here.
+Reproducer, for whoever picks this up next:
+
+```ts
+import { renderSync } from 'src/index.js';
+import { jarMeasurer } from 'src/core/measurer-jar.js';
+renderSync(readFileSync('test-results/dot-cache/json/gejena-99-veme626/in.puml','utf8'),
+           { measurer: jarMeasurer });   // stderr: "in routesplines, Pshortestpath failed" / "lost n3 n4 edge"
+```
+
+The measurer is load-bearing: swap in `WidthTableMeasurer` and the warnings
+vanish, which is the dimension-sensitivity the Finding describes and the trap
+that produced the wrong verification above.
+
+**Attribution (maintainer, 2026-08-13): the Smetana-lineage port carries this
+bug.** The failing routine is `routesplines`/`Pshortestpath` in the
+graphviz-2.38-derived routing code, on the `shape=record` + `<Pn>` tailport
+shape `SmetanaForJson` builds — so it is inherited from that lineage rather
+than introduced by dot-engine, and it will not be resolved by a
+regression-style fix. Note this does NOT fall under the project's "never chase
+a Smetana-specific number" ruling: that ruling accepts geometry deltas, and a
+dropped connector is a missing diagram element, not a delta.
+
