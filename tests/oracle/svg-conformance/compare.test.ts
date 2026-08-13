@@ -289,4 +289,55 @@ describe('compareSvg', () => {
       ]);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Tolerance boundary. A pair whose TRUE decimal difference equals the band
+  // exactly is one the strict `>` accepts by construction — but IEEE-754
+  // subtraction of the parsed decimals lands ~5.1e-15 above 0.01, so the
+  // naive `Math.abs(a - b) > tolerance` rejected it on representation error.
+  // See `exceedsTolerance` in compare.ts. Both directions are pinned: the
+  // boundary passes, and a hair beyond it still fails.
+  // -------------------------------------------------------------------------
+  describe('tolerance boundary (float representation, not band width)', () => {
+    const svgWith = (d: string): string =>
+      `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g><path d="${d}"/></g>
+</svg>`;
+
+    // The real numbers from class/bipudo-23-xavu432, the fixture this fixed.
+    test('a path param differing by exactly the band passes', () => {
+      const { pass, diffs } = compareSvg(
+        svgWith('M 10,10 L 75.194,20'),
+        svgWith('M 10,10 L 75.184,20'),
+        'deterministic',
+      );
+      expect(pass).toBe(true);
+      expect(diffs).toEqual([]);
+    });
+
+    test('the same boundary on a plain numeric attribute passes', () => {
+      const attrSvg = (cx: string): string =>
+        `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g><ellipse cx="${cx}" cy="50.0" rx="20" ry="10"/></g>
+</svg>`;
+      const { pass, diffs } = compareSvg(attrSvg('50.194'), attrSvg('50.184'), 'deterministic');
+      expect(pass).toBe(true);
+      expect(diffs).toEqual([]);
+    });
+
+    // Discrimination: the slack is ~1.7e-14 at this magnitude, so a genuine
+    // 1e-4 overshoot is still caught. Without this the fix would be a band
+    // widening rather than a boundary correction.
+    test('a param 0.0001 BEYOND the band still fails', () => {
+      const { pass, diffs } = compareSvg(
+        svgWith('M 10,10 L 75.1941,20'),
+        svgWith('M 10,10 L 75.184,20'),
+        'deterministic',
+      );
+      expect(pass).toBe(false);
+      expect(diffs).toHaveLength(1);
+      expect(diffs[0]!.path).toBe('svg/g[1]/path[1]/@d[2]');
+      expect(diffs[0]!.delta!).toBeGreaterThan(0.01);
+    });
+  });
 });

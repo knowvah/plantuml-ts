@@ -56,6 +56,36 @@ function parseNumber(s: string): number | null {
   return isNaN(n) ? null : n;
 }
 
+/**
+ * Does `a` differ from `b` by MORE than `tolerance`?
+ *
+ * The naive `Math.abs(a - b) > tolerance` is wrong at the boundary, and the
+ * band's edge is a place real fixtures land. Both operands are decimal
+ * strings from SVG text, so a pair whose true decimal difference EQUALS the
+ * tolerance is one the strict `>` is written to accept — but IEEE-754
+ * subtraction does not produce the exact decimal:
+ *
+ *   75.194 - 75.184  ->  0.010000000000005116   (5.1e-15 above 0.01)
+ *
+ * so the pair is rejected on representation error alone. That single
+ * artifact is what kept `class/bipudo-23-xavu432` at 1 diff and therefore
+ * out of `oracle/goldens/svg-class/ratchet.json`.
+ *
+ * The slack is the size of that error, not a number chosen to make a fixture
+ * pass: one ULP scaled to the operands' own magnitude. At 75.19 that is
+ * ~1.7e-14, which covers the 5.1e-15 overshoot above while remaining ~10
+ * orders of magnitude below the smallest difference anyone would call a
+ * geometry change — a 0.0100001 delta still exceeds the band by 1e-7 and
+ * still fails. This RESTORES the declared 0.01 conformance band (D7); it
+ * does not widen it. `tests/oracle/svg-conformance/compare.test.ts` pins
+ * both directions.
+ */
+function exceedsTolerance(a: number, b: number, tolerance: number): boolean {
+  const delta = Math.abs(a - b);
+  const slack = Number.EPSILON * Math.max(Math.abs(a), Math.abs(b), 1);
+  return delta - tolerance > slack;
+}
+
 // ---------------------------------------------------------------------------
 // Path-data and points comparison helpers
 // ---------------------------------------------------------------------------
@@ -191,7 +221,7 @@ function compareNodes(
         const en = parseNumber(ev);
         if (an !== null && en !== null) {
           const delta = Math.abs(an - en);
-          if (delta > tolerance) {
+          if (exceedsTolerance(an, en, tolerance)) {
             diffs.push({ path: attrPath, actual: av, expected: ev, delta, tolerance });
           }
           continue;
@@ -218,7 +248,7 @@ function compareNodes(
         for (let i = 0; i < actualNums.length; i++) {
           /* v8 ignore next */
           const delta = Math.abs((actualNums[i] ?? 0) - (expectedNums[i] ?? 0));
-          if (delta > tolerance) {
+          if (exceedsTolerance(actualNums[i] ?? 0, expectedNums[i] ?? 0, tolerance)) {
             diffs.push({
               path: `${attrPath}[${i}]`,
               actual: String(actualNums[i]),
@@ -242,7 +272,7 @@ function compareNodes(
         for (let i = 0; i < actualNums.length; i++) {
           /* v8 ignore next */
           const delta = Math.abs((actualNums[i] ?? 0) - (expectedNums[i] ?? 0));
-          if (delta > tolerance) {
+          if (exceedsTolerance(actualNums[i] ?? 0, expectedNums[i] ?? 0, tolerance)) {
             diffs.push({
               path: `${attrPath}[${i}]`,
               actual: String(actualNums[i]),
@@ -287,7 +317,7 @@ function compareNodes(
           for (let j = 0; j < at.params.length; j++) {
             /* v8 ignore next */
             const delta = Math.abs((at.params[j] ?? 0) - (et.params[j] ?? 0));
-            if (delta > tolerance) {
+            if (exceedsTolerance(at.params[j] ?? 0, et.params[j] ?? 0, tolerance)) {
               diffs.push({
                 path: `${attrPath}[${i}].param[${j}]`,
                 actual: String(at.params[j]),
