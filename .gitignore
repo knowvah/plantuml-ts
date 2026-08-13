@@ -8,7 +8,13 @@ dist/
 dist-demo/
 coverage/
 .claude/
-.agent-notes/
+# .agent-notes/ is deliberately NOT ignored. It was, until 2026-08-13, while 86
+# notes were already tracked -- so the rule only ever hid NEW notes, silently,
+# from the one audience they exist for. That cost a full re-derivation of an
+# already-diagnosed defect (see .agent-notes/class-edge-spline-2dp-quantization
+# .md, re-diagnosed from scratch because the note was one `cat` away and nobody
+# knew). rules/memory.md requires reading these before starting a task; a note
+# only the authoring machine can see cannot be read.
 .mcp.json
 # Run artifacts are throwaway, with ONE exception: dot-cache holds jar-derived
 # DOT/SVG oracle output that 15 test files read directly, so a clean checkout
