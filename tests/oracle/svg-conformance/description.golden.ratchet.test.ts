@@ -24,7 +24,7 @@
  * dependency at test time — that tree is gitignored and regenerable; see
  * `oracle/goldens/svg-description/README.md`).
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -32,6 +32,13 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { compareSvg } from './compare.js';
 import { renderFixture } from './render-fixture.js';
+
+// See the matching note in description.diff-baseline.ratchet.test.ts:
+// `usecase/sprite-svg-bootstrap-0` renders in ~1.6s alone but is the slowest
+// case in the suite, and full-suite worker contention pushed it past the 5s
+// default twice, always as a timeout rather than a diff. Scoped to this file
+// so the rest of the suite keeps the tight default.
+vi.setConfig({ testTimeout: 30_000 });
 
 interface RatchetFixture {
   slug: string;
