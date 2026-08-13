@@ -224,7 +224,23 @@ export function buildLinkEdgeAttributes(
 ): NonNullable<DotInputEdge['attributes']> {
   const ctx: MeasureCtx = { fontSpec, measurer, sprites };
   const attrs: NonNullable<DotInputEdge['attributes']> = { minLen: link.length - 1 };
-  if (link.hidden === true) attrs.invis = true;
+  // `-[hidden]-` does NOT produce `style=invis`, despite the name. Upstream
+  // keeps two separate fields and this port conflated them:
+  //   `WithLinkType.applyOneStyle`'s "hidden" branch calls `goHidden()`
+  //   (`WithLinkType.java:100-102`), setting `hidden` -- a DRAW-time flag read
+  //   by `ArrowConfiguration#isHidden` / `ComponentRoseArrow`. `style=invis`
+  //   is emitted from `Link#isInvis()` (`Link.java:177-182`), which reads the
+  //   SEPARATE `invis` field and `type.isInvisible()`, neither of which the
+  //   bracket keyword touches.
+  // (`LinkStyle.getByName("hidden")` does return INVISIBLE(), but that is a
+  // different parse path -- the bracket-token loop never reaches it, and the
+  // oracle confirms: `component/balopu-66-jagu236`'s `-[hidden]->` produces no
+  // `style=invis` at all.)
+  // Emitter-only either way -- `invis` is never forwarded to the layout
+  // engine -- so this corrected DOT changes no geometry and no drawing. The
+  // draw-time half is a separate, still-open gap; see
+  // `layout-helpers-types.ts`'s `G1 I-linkstyle` note for why folding
+  // `link.hidden` into the edge-skip was attempted and reverted.
   // `[norank]` -> `Link#goNorank` -> `setConstraint(false)`
   // (`WithLinkType.java:157-158`, `Link.java:159-161`), emitted by
   // `SvekEdge.java:475-476`. The flag has been parsed onto the AST since

@@ -74,6 +74,13 @@ export interface StructuralEdge {
    *  numeric values and would return undefined for `constraint=false` on BOTH
    *  sides — the exact vacuous comparison that hid `sametail`. */
   constraint: boolean;
+  /** `style=invis` — an invisible edge is still laid out and still constrains
+   *  ranks, so its presence is structural, not cosmetic. Present on 166
+   *  corpus fixtures and compared by nothing until 2026-08-13; closing it was
+   *  blocked on a real divergence (we conflated `-[hidden]-` with `invis`,
+   *  which upstream keeps as separate fields), fixed in
+   *  `description/link-edge-attrs.ts`. */
+  invis: boolean;
 }
 export interface StructuralCluster {
   memberCount: number;
@@ -130,6 +137,7 @@ function parseEdges(dot: string): StructuralEdge[] {
       hasXLabel: /(?:^|,)xlabel=</.test(a),
       sametail: identAttr(a, 'sametail'),
       constraint: /\bconstraint=false\b/.test(a),
+      invis: /\bstyle=invis\b/.test(a),
     });
   }
   return edges;
@@ -282,19 +290,12 @@ const labelCounts = (g: StructuralGraph): [number, number, number, number] => [
   g.edges.filter((e) => e.hasHeadLabel).length,
   g.edges.filter((e) => e.hasXLabel).length,
 ];
-/** How many edges carry `constraint=false`. A count rather than a multiset
- *  because the attribute has no value — only presence.
- *
- *  `style=invis` is deliberately NOT compared here yet. It is equally
- *  structural (an invisible edge still constrains ranks) and equally
- *  unguarded, but adding it now would fail four description fixtures on a
- *  PRE-EXISTING divergence unrelated to `constraint`: we emit one invisible
- *  edge the jar does not. Measured and filed in
- *  `.agent-notes/description-invis-over-emission.md`; it needs its own change,
- *  either fixing the four or backlogging them the way
- *  `direction-backlog.json` does. */
-const constraintCount = (g: StructuralGraph): number[] =>
-  [g.edges.filter((e) => e.constraint).length];
+/** How many edges carry `constraint=false` and `style=invis`. Counts rather
+ *  than multisets because neither attribute has a value — only presence. */
+const flagCounts = (g: StructuralGraph): number[] => [
+  g.edges.filter((e) => e.constraint).length,
+  g.edges.filter((e) => e.invis).length,
+];
 
 /** Sorted multiset of the `sametail` VALUES present, absent edges skipped. */
 const sortedSametails = (g: StructuralGraph): string[] =>
@@ -340,8 +341,8 @@ export interface StructuralDiff {
   /** `sametail` values match as a sorted multiset — see
    *  {@link StructuralEdge.sametail}. */
   sametailOk: boolean;
-  /** `constraint=false` edge counts match — see
-   *  {@link StructuralEdge.constraint}. */
+  /** `constraint=false` and `style=invis` edge counts match — see
+   *  {@link StructuralEdge.constraint} / {@link StructuralEdge.invis}. */
   constraintOk: boolean;
   shapeOk: boolean;
   labelOk: boolean;
@@ -417,7 +418,7 @@ export function compareStructural(
   const directionOk = eqStr(degreeSequenceDirected(oracle), degreeSequenceDirected(candidate));
   const minlenOk = eqNum(sortedMinlens(oracle), sortedMinlens(candidate));
   const sametailOk = eqStr(sortedSametails(oracle), sortedSametails(candidate));
-  const constraintOk = eqNum(constraintCount(oracle), constraintCount(candidate));
+  const constraintOk = eqNum(flagCounts(oracle), flagCounts(candidate));
   const shapeOk = eqStr(sortedShapes(oracle), sortedShapes(candidate));
   const labelOk = eqNum(labelCounts(oracle), labelCounts(candidate));
   const portOk = eqStr(sortedPorts(oracle), sortedPorts(candidate));
