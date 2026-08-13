@@ -75,6 +75,10 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
     // they fan out from the node border. Omitting it here would emit a
     // faithful DOT and then lay it out as if the attribute were absent.
     if (a?.sametail !== undefined) attrs.sametail = a.sametail;
+    // Rank-affecting, not decorative: without this the edge still constrains
+    // ranks and the diagram gains a rank the jar does not have. dot-engine
+    // 1.4.0 honors it (verified: a 3-rank chain collapses to 2).
+    if (a?.constraint === false) attrs.constraint = 'false';
     // G8 T2 (spec.md §1a, mirrors `addClusters`' own `hasTitleTable` gate
     // — that seam is T1c's, unmodified here): a caller that supplies BOTH
     // `labelBoxWidth`/`labelBoxHeight` (currently only the state composite

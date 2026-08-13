@@ -412,6 +412,14 @@ export function extractArrowStyleRaw(rawArrow: string): string | undefined {
 }
 
 export interface ArrowStyleOverrides {
+  /** `norank` ARROW_STYLE token (`WithLinkType.goNorank`, applyOneStyle's
+   *  `equalsIgnoreCase("norank")` branch) -- sets `Link#setConstraint(false)`
+   *  (`abel/Link.java:159-161`), which `SvekEdge.java:475-476` emits as
+   *  `constraint=false`. Carried (no longer discarded as a NON_COLOR_KEYWORD)
+   *  so the DOT edge builder can apply it; it is rank-affecting, not a render
+   *  style.
+   *  @see ~/git/plantuml/.../decoration/WithLinkType.java:156-158 */
+  norank?: true;
   lineStyle?: 'solid' | 'dashed' | 'dotted' | 'bold';
   thickness?: number;
   color?: string;
@@ -428,17 +436,17 @@ export interface ArrowStyleOverrides {
 const CLASS_THICKNESS_TOKEN_RE = /^thickness=(\d+)$/i;
 
 /**
- * Bracket keywords with no render effect via this function -- `hidden`/
- * `norank` are DOT-graph-affecting flags already matched-and-discarded by
- * the surrounding grammar (`class-relationship-parser.ts`'s own
- * `ARROW_STYLE` doc comment: consumed so the arrow still matches, never
- * carried on `Relationship`); `plain`/`node` are upstream no-ops
+ * Bracket keywords with no render effect via this function -- `hidden` is a
+ * DOT-graph-affecting flag matched-and-discarded by the surrounding grammar
+ * (`class-relationship-parser.ts`'s own `ARROW_STYLE` doc comment: consumed
+ * so the arrow still matches, never carried on `Relationship`); `plain`/
+ * `node` are upstream no-ops
  * (`WithLinkType.applyOneStyle`'s own "Do nothing"/no reachable svek/abel
  * consumer). Recognized here ONLY so none of the four is ever
  * misclassified as a color token. (`single` was in this set until SI1/T11
  * -- it now has its own branch, see `ArrowStyleOverrides.single`.)
  */
-const NON_COLOR_KEYWORDS = new Set(['hidden', 'norank', 'plain', 'node']);
+const NON_COLOR_KEYWORDS = new Set(['hidden', 'plain', 'node']);
 
 /**
  * `WithLinkType.applyStyle`/`applyOneStyle` (`decoration/WithLinkType.java:
@@ -450,9 +458,10 @@ const NON_COLOR_KEYWORDS = new Set(['hidden', 'norank', 'plain', 'node']);
  * directly) to avoid a cross-diagram-type dependency -- same upstream
  * method, independently faithful port; `Relationship.lineStyleOverride`'s
  * doc comment (ast.ts) has the full derivation. Only the render-relevant
- * subset is returned -- `hidden`/`norank`/`single`/`plain`/`node` are
- * recognized (so they never fall through to the color branch) but produce
- * no field here, see `NON_COLOR_KEYWORDS`'s doc comment.
+ * subset is returned -- `hidden`/`plain`/`node` are recognized (so they never
+ * fall through to the color branch) but produce no field here, see
+ * `NON_COLOR_KEYWORDS`'s doc comment. `single` and `norank` DO produce
+ * fields: both are rank/add-time behavior rather than render style.
  */
 export function parseArrowStyleOverrides(rawArrow: string): ArrowStyleOverrides {
   const rawStyle = extractArrowStyleRaw(rawArrow);
@@ -468,6 +477,7 @@ export function parseArrowStyleOverrides(rawArrow: string): ArrowStyleOverrides 
       else if (lower === 'dotted') { result.lineStyle = 'dotted'; delete result.thickness; }
       else if (lower === 'bold') { result.lineStyle = 'bold'; delete result.thickness; }
       else if (lower === 'single') { result.single = true; } // goSingle() -- add-time dedup flag
+      else if (lower === 'norank') { result.norank = true; } // goNorank() -- constraint=false
       else if (NON_COLOR_KEYWORDS.has(lower)) { /* upstream no-op / DOT-only, see doc comment */ }
       else {
         const m = CLASS_THICKNESS_TOKEN_RE.exec(lower);

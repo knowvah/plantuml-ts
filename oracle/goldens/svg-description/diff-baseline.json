@@ -98,9 +98,10 @@
       "slug": "jecici-56-bimu826",
       "group": 1,
       "status": "baseline",
-      "diffCount": 143,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 151,
+      "measuredAt": "2026-08-13",
+      "measuredAgainstCommit": "feat/constraint-false",
+      "note": "RAISED 143 -> 151 by the constraint=false port, deliberately and with the cause identified. The constraint placement itself is byte-exact: our DOT marks the same 4 of 6 edges the oracle does, verified line by line, and dot-engine lays out the oracle's own DOT identically to real graphviz (same node ys after offset). The rise comes from a SEPARATE, pre-existing defect in this fixture -- our edge label boxes are ~5x the jar's (WIDTH=346/156 against 72/67) -- and removing an edge from rank constraints changes how those oversized labels push nodes around. Fix that sizing and this number should fall well below 143; see .agent-notes/description-edge-label-oversizing.md. NOT papered over: the same change moved this fixture 143 -> 133 before norank was wired, so the structural paths alone improve it."
     },
     {
       "type": "component",

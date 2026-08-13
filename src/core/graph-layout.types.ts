@@ -247,6 +247,30 @@ export interface DotInputEdge {
      * than derived at emission because only the class engine knows it.
      */
     sametail?: string;
+    /**
+     * `constraint=false` — the edge is drawn but does NOT participate in rank
+     * assignment. Far more consequential than it looks: on
+     * `class/kupetu-36-kive480` its absence adds an entire extra rank and
+     * moves every node.
+     *
+     * Only `false` is ever carried. Upstream never writes `constraint=true`
+     * (that is graphviz's default), so the field's presence IS the signal —
+     * `svek/SvekEdge.java:475-476`:
+     *
+     *     if (link.isConstraint() == false || link.hasTwoEntryPointsSameContainer())
+     *         sb.append(",constraint=false");
+     *
+     * Two ports feed it. `isConstraint() == false` comes from the `[norank]`
+     * link style (`WithLinkType.java:157-158` -> `Link#goNorank`), set per
+     * engine at the same site that handles `invis`.
+     * `hasTwoEntryPointsSameContainer()` (`Link.java:443-448`) is computed
+     * generically from the assembled graph — see
+     * `graph-layout-build-constraint.ts`.
+     *
+     * Both graph-level paths -- the same-container rule and `Link.java:139
+     * -141`'s kermor XOR -- live in `graph-layout-build-constraint.ts`.
+     */
+    constraint?: false;
   };
 }
 
@@ -468,45 +492,6 @@ export interface DotInputGraph {
    *  this. */
   manualArrowheads?: true;
 }
-
-export interface DotLayoutResult {
-  nodes: Array<{ id: string; x: number; y: number; width: number; height: number; xlabelX?: number; xlabelY?: number }>;
-  edges: Array<{
-    id: string;
-    points: Array<{ x: number; y: number }>;
-    labelX?: number;
-    labelY?: number;
-    labelWidth?: number;
-    labelHeight?: number;
-    /** G2/N25: computed position for `attributes.tailLabel`/`.headLabel`
-     *  (see that field's own doc comment) — the CENTER point of the label
-     *  box @knowvah/dot-engine's own `xladjust` placed, in the same origin-shifted
-     *  frame as `points`/`labelX`/`labelY`. Absent when the input edge did
-     *  not carry `tailLabel`/`headLabel`. */
-    tailLabelX?: number;
-    tailLabelY?: number;
-    headLabelX?: number;
-    headLabelY?: number;
-    spline?: boolean;
-    reversed?: boolean;
-  }>;
-  width: number;
-  height: number;
-  /** G5 C2: real per-cluster bbox from graphviz's own subgraph-cluster
-   *  layout (@knowvah/dot-engine's `getLayout().clusters`, see
-   *  docs/graphviz-issues/06-cluster-bbox-not-in-getlayout.md's RESOLVED
-   *  note) — keyed by `DotInputCluster.id` (re-mapped from @knowvah/dot-engine's own
-   *  `cluster<N>` naming by `graph-layout-build.ts#addClusters`'s
-   *  `ClusterIndex`, NOT @knowvah/dot-engine's internal name). `x`/`y` are the
-   *  top-left corner in the SAME origin-shifted frame as `nodes`/`edges`
-   *  (`shiftToOrigin` applies the identical node/edge-derived translation to
-   *  these boxes too — clusters never participate in DERIVING that
-   *  translation, only in receiving it, so pre-existing node/edge output is
-   *  byte-identical for every caller that ignores this field). Absent when
-   *  the input graph carried no `clusters` (mirrors `DotInputGraph.clusters`
-   *  itself being optional) — additive, no existing consumer reads this yet.
-   *  Replaces the entity-vs-cluster wrap APPROXIMATION named in G4 §S1/S3/S6
-   *  ("mechanism 16") and `state-composite-geo.ts#materializeCluster`'s own
-   *  fixed-`BOX_PAD` bounding box. */
-  clusters?: Array<{ id: string; x: number; y: number; width: number; height: number }>;
-}
+// `DotLayoutResult` moved to ./graph-layout-result.types.ts for the 500-line
+// file cap (see that module's header). Re-exported so no consumer changed.
+export type { DotLayoutResult } from './graph-layout-result.types.js';

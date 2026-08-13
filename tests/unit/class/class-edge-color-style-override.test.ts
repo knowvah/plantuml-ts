@@ -63,11 +63,20 @@ describe('parseArrowStyleOverrides', () => {
     });
   });
 
-  it('ignores hidden/norank/plain/node — never misclassified as color', () => {
+  it('ignores hidden/plain/node — never misclassified as color', () => {
     expect(parseArrowStyleOverrides('-[hidden]->')).toEqual({});
-    expect(parseArrowStyleOverrides('-[norank]->')).toEqual({});
     expect(parseArrowStyleOverrides('-[plain]->')).toEqual({});
     expect(parseArrowStyleOverrides('-[node]->')).toEqual({});
+  });
+
+  it('norank is carried as the constraint flag, never a color', () => {
+    // `WithLinkType.goNorank` (decoration/WithLinkType.java:156-158) calls
+    // `Link#setConstraint(false)`, which `SvekEdge.java:475-476` emits as
+    // `constraint=false` -- rank-affecting, so it must reach the DOT rather
+    // than being discarded with the render no-ops above. Same shape as
+    // `single` below.
+    expect(parseArrowStyleOverrides('-[norank]->')).toEqual({ norank: true });
+    expect(parseArrowStyleOverrides('-[#red,norank]->')).toEqual({ color: 'red', norank: true });
   });
 
   it('single is carried as the add-time dedup flag (SI1/T11), never a color', () => {

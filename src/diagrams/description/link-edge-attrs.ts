@@ -225,6 +225,11 @@ export function buildLinkEdgeAttributes(
   const ctx: MeasureCtx = { fontSpec, measurer, sprites };
   const attrs: NonNullable<DotInputEdge['attributes']> = { minLen: link.length - 1 };
   if (link.hidden === true) attrs.invis = true;
+  // `[norank]` -> `Link#goNorank` -> `setConstraint(false)`
+  // (`WithLinkType.java:157-158`, `Link.java:159-161`), emitted by
+  // `SvekEdge.java:475-476`. The flag has been parsed onto the AST since
+  // link-grammar.ts:406; this is the consumer that was missing.
+  if (link.norank === true) attrs.constraint = false;
   applyMainLabel(attrs, link, ctx, linetype);
   applyQualifierLabels(attrs, link, ctx);
   return attrs;

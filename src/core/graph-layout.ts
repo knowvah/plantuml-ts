@@ -38,6 +38,7 @@ import type {
 // sized from the literal label text (231.5px wide against an expected 36).
 // There is now exactly one install point.
 import './dot-engine-measurer.js';
+import { withSameContainerConstraints } from './graph-layout-build-constraint.js';
 
 /** Right/bottom canvas padding, matching the in-house engine's old extractResult. */
 const MARGIN = 12;
@@ -222,6 +223,11 @@ export function layoutGraph(
   input: DotInputGraph,
   opts?: { engine?: string },
 ): DotLayoutResult {
+  // BEFORE the observer, deliberately: the oracle DOT-parity harness captures
+  // its comparison subject here, and it must see the same graph the engine
+  // does. Marking after this point would emit a faithful DOT from a graph the
+  // layout never saw -- the exact split `sametail` had before it was fixed.
+  input = withSameContainerConstraints(input);
   layoutInputObserver?.(input);
   if (input.nodes.length === 0) {
     return { nodes: [], edges: [], width: 0, height: 0 };
