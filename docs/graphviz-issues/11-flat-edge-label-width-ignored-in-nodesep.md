@@ -119,3 +119,47 @@ diff before.txt after.txt
 Rows are name-sorted precisely so this diff is readable — any count that moves
 shows up as a one-line change. **Unchanged counts now mean "the fix does not
 reach these fixtures", which the bucket histogram could never establish.**
+
+---
+
+## RECLASSIFIED 2026-08-13 — this is ours, not dot-engine's
+
+**dot-engine honors the label width. This issue measured it through a path
+that never sends one.**
+
+Found while diagnosing the vertical analogue on
+`class-inheritance-interface-assoc` (a rank gap that was 1.5pt too tall).
+`src/core/graph-layout-build-edges.ts:85-89` sends class/component/usecase
+edges a plain-text `label` attribute; only the state-composite pipeline sends
+the jar's `<TABLE FIXEDSIZE="TRUE" WIDTH=".." HEIGHT="..">` reservation. On
+the text path the engine measures the *text*, so `labelWidth` is inert — which
+is exactly the "flat regardless of `labelWidth`" symptom above.
+
+Re-measured, `minLen: 0`, box-to-box gap:
+
+| label width | plain text (this issue's path) | FIXEDSIZE table | jar (from the table above) |
+|---|---|---|---|
+| 0 | 42.000 | 47.000 | — |
+| 29 | 42.000 | **64.000** | 63.425 |
+| 200 | 42.000 | **235.000** | ~234.4 |
+| 400 | 42.000 | **435.000** | ~434.4 |
+
+Flat on the text path; tracks the jar within ~0.6 on the table path.
+
+The vertical case confirms it independently: given the table, dot-engine
+reproduces real graphviz's rank gap *exactly* at every height tested
+(boxH 15/20/30/60 → 75/80/90/120, identical to `dot`).
+
+**What this issue got right and where it went wrong.** The DOT repro at the
+top is sound — real `dot` does grow the gap with `WIDTH`. The error is the
+inference that `layoutGraph()` was feeding the engine that same graph. It was
+not: the `WIDTH` in the repro never reaches the engine through the call the
+measurements used. The three "what is NOT the cause" entries all remain
+correctly ruled out; the cause is a fourth thing none of them covered.
+
+**Disposition:** not a dot-engine defect — no upstream fix to wait for. The
+work is on our side and is scoped in
+`.agent-notes/class-edge-label-rank-gap.md`, including why the one-line
+fallback is not the fix (it regresses `usecase/jecici-56-bimu826`; the jar
+reserves a *margined* box, `WIDTH="45"` where our raw `labelWidth` is
+`42.3875`).
