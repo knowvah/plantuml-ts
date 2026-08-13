@@ -1639,12 +1639,21 @@ describe('layoutDescription — link-grammar wiring', () => {
     expect(attrs?.headLabelHeight).toBeGreaterThan(0);
   });
 
-  it('hidden link sets invis=true on the DotInputEdge (still emitted)', () => {
+  it('hidden link is still emitted, and does NOT set invis (they are different upstream fields)', () => {
+    // Corrected 2026-08-13. This test used to assert `invis === true`, pinning
+    // a conflation: `-[hidden]-` routes through `WithLinkType#goHidden`
+    // (`WithLinkType.java:100-102`), which sets a DRAW-time flag, while
+    // `style=invis` comes from `Link#isInvis()` (`Link.java:177-182`) reading a
+    // separate `invis` field the bracket keyword never touches. Jar-confirmed
+    // on `component/balopu-66-jagu236`, whose `-[hidden]->` produces no
+    // `style=invis` in the oracle DOT. Emitting it made four description
+    // fixtures diverge and blocked the gate from comparing `style=invis` at
+    // all.
     const link: DescriptiveLink = { from: 'A', to: 'B', style: 'solid', length: 2, hidden: true };
     const ast = makeAst([comp('A'), comp('B')], [link]);
     const input = captureGraphInput(ast);
     expect(input.edges).toHaveLength(1);
-    expect(input.edges[0]!.attributes?.invis).toBe(true);
+    expect(input.edges[0]!.attributes?.invis).toBeUndefined();
   });
 
   it('`a -r-> b` (direction hint, no explicit length) yields minLen 0', () => {

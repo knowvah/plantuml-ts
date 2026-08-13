@@ -240,8 +240,11 @@ export interface DescriptiveLink {
   tailDecor?: string;
   headDecor?: string;
   /**
-   * Upstream ARROW_STYLE1/2 `hidden` keyword. `SvekEdge` still emits the DOT
-   * edge (`style=invis`) — a hidden link still counts structurally.
+   * Upstream ARROW_STYLE1/2 `hidden` keyword — `WithLinkType#goHidden`, which
+   * sets a DRAW-time flag only. It does NOT produce `style=invis`: that comes
+   * from `Link#isInvis()`, reading a different field entirely (corrected
+   * 2026-08-13 — see `link-edge-attrs.ts#buildLinkEdgeAttributes`). The DOT
+   * edge is still emitted, unchanged, and still counts structurally.
    */
   hidden?: boolean;
   /**
