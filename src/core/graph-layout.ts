@@ -71,6 +71,30 @@ function mapNodes(snap: LayoutSnapshot): OutNodes {
   }));
 }
 
+/**
+ * Copies one snapshot label position onto the output entry. The three
+ * positions differ only in field name: the CENTRE label (`ED_label`), and the
+ * `taillabel`/`headlabel` placements graphviz computes in `gvPostprocess` ->
+ * `addXLabels`.
+ *
+ * All three are read straight off `getLayout()` as of dot-engine 1.3.0. Before
+ * that, only the centre one was published, and this seam recovered the other
+ * two by regex-scanning `render()`'s SVG and deriving a translation between
+ * two coordinate frames -- roughly 190 lines whose only job was to work around
+ * the missing fields. See `docs/graphviz-issues/13-edge-tail-head-label-
+ * positions-not-in-getlayout.md` for what that cost and how it was retired.
+ */
+function assignLabelPos(
+  entry: OutEdges[number],
+  pos: { x: number; y: number } | undefined,
+  xKey: 'labelX' | 'tailLabelX' | 'headLabelX',
+  yKey: 'labelY' | 'tailLabelY' | 'headLabelY',
+): void {
+  if (pos === undefined) return;
+  entry[xKey] = pos.x;
+  entry[yKey] = pos.y;
+}
+
 function toEdgeEntry(
   ge: LayoutSnapshot['edges'][number],
   id: string,
@@ -80,10 +104,9 @@ function toEdgeEntry(
     id,
     points: ge.points.map((p) => ({ x: p.x, y: p.y })),
   };
-  if (ge.label !== undefined) {
-    entry.labelX = ge.label.x;
-    entry.labelY = ge.label.y;
-  }
+  assignLabelPos(entry, ge.label, 'labelX', 'labelY');
+  assignLabelPos(entry, ge.tailLabel, 'tailLabelX', 'tailLabelY');
+  assignLabelPos(entry, ge.headLabel, 'headLabelX', 'headLabelY');
   // @knowvah/dot-engine returns only the label position; echo back the caller's
   // measured label box so renderers size the label as before.
   if (inp?.attributes?.labelWidth !== undefined) {
@@ -124,195 +147,6 @@ function mapClusters(snap: LayoutSnapshot, idx: ClusterIndex): OutClusters | und
     out.push({ id, x: c.x, y: c.y, width: c.width, height: c.height });
   }
   return out.length > 0 ? out : undefined;
-}
-
-// ---------------------------------------------------------------------------
-// External tail/head label position extraction (G2/N25)
-//
-// @knowvah/dot-engine's public `getLayout()` snapshot never exposes `tail_label`/
-// `head_label` positions (ADR-1: the internal `Edge` model is intentionally
-// not re-exported), even though the SAME layout call already computes them
-// (`gvPostprocess` -> `addXLabels`, `label/xlabels.ts`) whenever an edge
-// carries a `taillabel`/`headlabel` attr. The only public surface that
-// reveals them is the rendered SVG string `render()` already produces (and
-// `layoutGraph()` already calls, purely to trigger layout — its return value
-// was previously discarded). This mirrors upstream's OWN technique for the
-// exact same problem (`SvekEdge.java#solveLine`'s `getXY(fullSvg, color)`,
-// scanning a raw intermediate SVG for a marker's rendered position) instead
-// of re-deriving the placement algorithm by hand.
-// ---------------------------------------------------------------------------
-
-/** Minimal decode for the handful of entities @knowvah/dot-engine's SVG emitter uses
- *  in `<title>` text (`->` renders as `&#45;&gt;`). */
-function decodeSvgEntities(s: string): string {
-  return s
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&#45;/g, '-')
-    .replace(/&quot;/g, '"');
-}
-
-/** Bounding-box center of a `<g id="nodeN" class="node">` block's own
- *  `<polygon points="...">`, keyed by the node id in its `<title>` — used to
- *  derive the constant translation between @knowvah/dot-engine's raw `render()`
- *  coordinate frame and `getLayout()`'s frame (see `computeRenderOffset`).
- *
- *  This is the port's analogue of upstream's own read-back of graphviz output:
- *  `DotStringFactory#solve(String svg)` parses the RENDERED SVG through
- *  `SvgResult`, whose `extractList(POINTS_EQUALS)` finds `points="` and hands
- *  the slice to `getPoints(" MC")` (`svek/SvgResult.java:52,67-77,101-112`).
- *  Kept text-based deliberately, for the same reason upstream is.
- *
- *  Audited against that Java (2026-08-12). Upstream's `" MC"` is a
- *  `StringTokenizer` delimiter SET — space, `M`, `C` — because the same
- *  routine also serves path `d="M10,20 C30,40 …"` data. A `points="` attribute
- *  contains no `M` or `C` (they are path commands), so splitting on whitespace
- *  alone is EQUIVALENT here, not a shortcut. The `M`/`C` delimiters would only
- *  matter for `d=` parsing, which this port deliberately does not do:
- *  `svek-edge-geometry.ts`'s doc comment records why (upstream's
- *  `SvekEdge#solveLine` round-trips through `SvgResult#toDotPath`, while this
- *  port already holds the same control points as plain numbers).
- *
- *  One knowing divergence: upstream's `getPoints` catches
- *  `NumberFormatException` and yields an empty list, whereas `Number()` here
- *  yields `NaN` (`?? 0` catches `undefined`, not `NaN`). Unreachable on this
- *  input — the SVG is produced by our own engine in the line above — so no
- *  guard is added, per the project's rule against defending states that
- *  cannot occur. */
-function parseNodeRenderCenters(svg: string): Map<string, { x: number; y: number }> {
-  const centers = new Map<string, { x: number; y: number }>();
-  const nodeRe = /<g id="node\d+" class="node">\s*<title>([^<]*)<\/title>([\s\S]*?)<\/g>/g;
-  let m: RegExpExecArray | null;
-  while ((m = nodeRe.exec(svg)) !== null) {
-    const id = decodeSvgEntities(m[1] ?? '');
-    const ptsMatch = /points="([^"]+)"/.exec(m[2] ?? '');
-    if (ptsMatch === null) continue;
-    const pts = (ptsMatch[1] ?? '').trim().split(/\s+/).map((p) => {
-      const [px, py] = p.split(',').map(Number);
-      return { x: px ?? 0, y: py ?? 0 };
-    });
-    if (pts.length === 0) continue;
-    const xs = pts.map((p) => p.x);
-    const ys = pts.map((p) => p.y);
-    centers.set(id, {
-      x: (Math.min(...xs) + Math.max(...xs)) / 2,
-      y: (Math.min(...ys) + Math.max(...ys)) / 2,
-    });
-  }
-  return centers;
-}
-
-/** Constant (dx,dy) translation from @knowvah/dot-engine's raw `render()` SVG frame
- *  into `getLayout({yAxis:'down'})`'s frame — derived from any one node
- *  present in both (a pure translation: one match fully determines it).
- *  `undefined` when no id matched (defensive; not expected for a non-empty
- *  graph since every `input.node.id` is also the render SVG's node title). */
-function computeRenderOffset(
-  svg: string,
-  nodes: LayoutSnapshot['nodes'],
-): { dx: number; dy: number } | undefined {
-  const centers = parseNodeRenderCenters(svg);
-  for (const n of nodes) {
-    const c = centers.get(n.name);
-    if (c === undefined) continue;
-    return { dx: c.x - n.x, dy: c.y - n.y };
-  }
-  return undefined;
-}
-
-/** One `<g id="edgeN" class="edge">` block's tail/head node ids (from its
- *  `<title>`) and the ordered `<text>` positions it carries (raw render
- *  frame). Emit order is "label, xlabel, head, tail"
- *  (`gvc/edge-labels.ts#renderEdgeLabels`'s own doc comment); this seam
- *  never sets `xlabel`. */
-interface PortLabelBlock {
-  tail: string;
-  head: string;
-  texts: Array<{ x: number; y: number }>;
-}
-
-function parsePortLabelBlocks(svg: string): PortLabelBlock[] {
-  const blocks: PortLabelBlock[] = [];
-  const edgeRe = /<g id="edge\d+" class="edge">\s*<title>([^<]*)<\/title>([\s\S]*?)<\/g>/g;
-  const textRe = /<text\b[^>]*\bx="(-?[\d.]+)"[^>]*\by="(-?[\d.]+)"[^>]*>/g;
-  let m: RegExpExecArray | null;
-  while ((m = edgeRe.exec(svg)) !== null) {
-    const title = decodeSvgEntities(m[1] ?? '');
-    const sep = title.indexOf('->');
-    if (sep === -1) continue;
-    const tail = title.slice(0, sep);
-    const head = title.slice(sep + 2);
-    const body = m[2] ?? '';
-    const texts: Array<{ x: number; y: number }> = [];
-    textRe.lastIndex = 0;
-    let tm: RegExpExecArray | null;
-    while ((tm = textRe.exec(body)) !== null) {
-      texts.push({ x: Number(tm[1]), y: Number(tm[2]) });
-    }
-    blocks.push({ tail, head, texts });
-  }
-  return blocks;
-}
-
-/** Pick the head/tail label text out of one block's ordered `texts`, per
- *  that edge's own input attrs (see `PortLabelBlock`'s doc comment for the
- *  emit order). An empty `label` (`edgeLabelAttrs`'s `CONSTRAINT_SPOT`
- *  branch) draws NO text upstream (`common_init_edge`'s `str[0]` guard), so
- *  only a non-empty label consumes a slot. */
-function pickPortLabelTexts(
-  block: PortLabelBlock,
-  a: DotInputEdge['attributes'],
-): { head?: { x: number; y: number }; tail?: { x: number; y: number } } {
-  let i = 0;
-  if (a?.label !== undefined && a.label !== '') i++;
-  const head = a?.headLabel !== undefined ? block.texts[i++] : undefined;
-  const tail = a?.tailLabel !== undefined ? block.texts[i++] : undefined;
-  return {
-    ...(head !== undefined ? { head } : {}),
-    ...(tail !== undefined ? { tail } : {}),
-  };
-}
-
-/** Extracts `tailLabel`/`headLabel` CENTER positions (translated into
- *  `getLayout()`'s coordinate frame) for every edge that requested one,
- *  keyed by our own edge id. Mirrors `mapEdges`'s own same-(tail,head)-pair
- *  left-to-right queue consumption — neither `render()` nor `getLayout()`
- *  publicly exposes a per-edge identity to match on directly, and both walk
- *  the same underlying model, so the same ordering assumption `mapEdges`
- *  already relies on applies here too.
- *  #lizard forgives -- straight-line extraction/merge, not branchy logic. */
-function extractPortLabelPositions(
-  svg: string,
-  input: DotInputGraph,
-  snapNodes: LayoutSnapshot['nodes'],
-): Map<string, { headX?: number; headY?: number; tailX?: number; tailY?: number }> {
-  const result = new Map<string, { headX?: number; headY?: number; tailX?: number; tailY?: number }>();
-  const offset = computeRenderOffset(svg, snapNodes);
-  if (offset === undefined) return result;
-
-  const blockQueues = new Map<string, PortLabelBlock[]>();
-  for (const block of parsePortLabelBlocks(svg)) {
-    const k = edgeKey(block.tail, block.head);
-    const arr = blockQueues.get(k) ?? [];
-    arr.push(block);
-    blockQueues.set(k, arr);
-  }
-
-  const nodeIds = new Set(input.nodes.map((n) => n.id));
-  for (const e of input.edges) {
-    if (!nodeIds.has(e.from) || !nodeIds.has(e.to)) continue;
-    const q = blockQueues.get(edgeKey(e.from, e.to));
-    const block = q !== undefined && q.length > 0 ? q.shift() : undefined;
-    if (block === undefined) continue;
-    const { head, tail } = pickPortLabelTexts(block, e.attributes);
-    if (head === undefined && tail === undefined) continue;
-    result.set(e.id, {
-      ...(head !== undefined ? { headX: head.x - offset.dx, headY: head.y - offset.dy } : {}),
-      ...(tail !== undefined ? { tailX: tail.x - offset.dx, tailY: tail.y - offset.dy } : {}),
-    });
-  }
-  return result;
 }
 
 /** Shift content so the leftmost/topmost rendered point sits at (0,0).
@@ -400,30 +234,18 @@ export function layoutGraph(
   const clusterIdx = addClusters(b, input);
   const idx = addEdges(b, input);
 
-  // render triggers layout; getLayout alone returns zeroed coords. Its own
-  // SVG return value is normally unneeded (getLayout covers every other
-  // consumer) -- captured only when some edge requested a tail/head label
-  // position (G2/N25), the one thing getLayout's public snapshot can't
-  // report (see `extractPortLabelPositions`'s own doc comment).
-  const needsPortLabels = input.edges.some(
-    (e) => e.attributes?.tailLabel !== undefined || e.attributes?.headLabel !== undefined,
-  );
-  const renderedSvg = render(b.graph, 'svg', { engine });
+  // `render` triggers layout and its return value is discarded: `getLayout`
+  // alone returns zeroed coords, but every geometry this seam needs now comes
+  // from the snapshot. Until dot-engine 1.3.0 the SVG string was also scraped
+  // here for tail/head label positions, the one thing the snapshot could not
+  // report (G2/N25); `EdgeGeometry.tailLabel`/`.headLabel` publish them
+  // directly now, so that whole read-the-output-as-text path is gone --
+  // filed as docs/graphviz-issues/13, landed in 1.3.0.
+  render(b.graph, 'svg', { engine });
   const snap = getLayout(b.graph, { yAxis: 'down' });
 
   const nodes = mapNodes(snap);
   const edges = mapEdges(snap, idx);
-  if (needsPortLabels) {
-    const portLabels = extractPortLabelPositions(renderedSvg, input, snap.nodes);
-    for (const e of edges) {
-      const pl = portLabels.get(e.id);
-      if (pl === undefined) continue;
-      if (pl.headX !== undefined) e.headLabelX = pl.headX;
-      if (pl.headY !== undefined) e.headLabelY = pl.headY;
-      if (pl.tailX !== undefined) e.tailLabelX = pl.tailX;
-      if (pl.tailY !== undefined) e.tailLabelY = pl.tailY;
-    }
-  }
   const clusters = mapClusters(snap, clusterIdx);
   shiftToOrigin(nodes, edges, clusters);
   const { width, height } = canvasSize(nodes, edges);

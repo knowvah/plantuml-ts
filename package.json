@@ -62,7 +62,7 @@
     "docs:preview": "vitepress preview docs-site"
   },
   "dependencies": {
-    "@knowvah/dot-engine": "^1.2.7",
+    "@knowvah/dot-engine": "^1.3.0",
     "jsonc-parser": "^3.3.1",
     "katex": "^0.16.45"
   },
