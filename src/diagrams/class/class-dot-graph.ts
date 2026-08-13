@@ -22,6 +22,7 @@ import type {
 } from '../../core/graph-layout.js';
 import { buildNoteGraphParts } from './note-layout.js';
 import { buildClassMagmaEdges } from './class-magma.js';
+import { buildClassUidPlan, classUidPlanInputFromAst } from './renderer-uid.js';
 import {
   LIKE_CLASS_KINDS,
   type MeasuredClassifier,
@@ -177,17 +178,53 @@ function maxLikeClassWidth(
  * Jar evidence: mefike-75-vova900 `A3` +0.555555in BOTH dims; jakapi-64
  * `Group` +40px each axis (hidden PLACEHOLDER's link still counts).
  */
-function computeGroupInheritanceProtectedIds(ast: ClassDiagramAST, theme: Theme): ReadonlySet<string> {
+/** Both products of upstream's single `DotData#removeIrrelevantSametail`
+ *  pass (dot/DotData.java:122-161): the tails that earn a `Neighborhood`
+ *  (this port's `EntityImageProtected` sizing inflation, `protectedIds`) and
+ *  the `sametail` DOT attribute those same links carry
+ *  (`svek/SvekEdge.java:478-479`). One function because upstream is one
+ *  function: the qualifying set is computed once and consumed twice, and
+ *  splitting it invites the two consumers to drift. */
+interface GroupInheritanceResult {
+  readonly protectedIds: ReadonlySet<string>;
+  /** Index into `ast.relationships` → the tail entity's `ent%04d` uid.
+   *  Empty unless `groupInheritance` is set AND a tail reaches the limit. */
+  readonly sametailByRelIndex: ReadonlyMap<number, string>;
+}
+
+function computeGroupInheritance(
+  ast: ClassDiagramAST,
+  theme: Theme,
+  uidOf?: (classifierId: string) => string | undefined,
+): GroupInheritanceResult {
   const raw = (theme as Theme & ThemeGroupInheritance).groupInheritance;
-  if (raw === undefined || raw <= 1) return new Set();
+  const empty = { protectedIds: new Set<string>(), sametailByRelIndex: new Map<number, string>() };
+  // `SkinParam.java:1041-1044`: `getAsInt("groupinheritance", MAX)` with
+  // `value <= 1 -> MAX`, i.e. no tail can ever reach the limit.
+  if (raw === undefined || raw <= 1) return empty;
+
+  // Upstream sets `sametail` on EVERY extends-like link first, counts, then
+  // nulls out the ones below the limit -- the two-phase shape is preserved
+  // here rather than collapsed, because the count is over the pre-filter
+  // population.
   const counts = new Map<string, number>();
   for (const rel of ast.relationships) {
     if (rel.idEntity1Decor !== 'triangle' || rel.idEntity1FullId === undefined) continue;
     counts.set(rel.idEntity1FullId, (counts.get(rel.idEntity1FullId) ?? 0) + 1);
   }
-  const ids = new Set<string>();
-  for (const [id, n] of counts) if (n >= raw) ids.add(id);
-  return ids;
+  const protectedIds = new Set<string>();
+  for (const [id, n] of counts) if (n >= raw) protectedIds.add(id);
+
+  const sametailByRelIndex = new Map<number, string>();
+  if (uidOf !== undefined) {
+    ast.relationships.forEach((rel, i) => {
+      if (rel.idEntity1Decor !== 'triangle' || rel.idEntity1FullId === undefined) return;
+      if (!protectedIds.has(rel.idEntity1FullId)) return;
+      const uid = uidOf(rel.idEntity1FullId);
+      if (uid !== undefined) sametailByRelIndex.set(i, uid);
+    });
+  }
+  return { protectedIds, sametailByRelIndex };
 }
 
 /** A2s F-D mechanism A10/B3: the `EntityImageProtected` +2*20px inflation on
@@ -286,13 +323,25 @@ function buildDotNodesAndEdges(
   measurer: StringMeasurer,
 ): { dotNodes: DotInputNode[]; dotEdges: DotInputEdge[] } {
   const classPortShortNames = classPortShortNamesById(ast);
+  // ONE `removeIrrelevantSametail` pass feeding both consumers, as upstream
+  // does. The uid lookup is AST-derived because `sametail` is a DOT attribute
+  // and the DOT is layout's INPUT -- there is no geometry yet. See
+  // `renderer-uid.ts#ClassUidPlanInput` for why that projection is sound only
+  // where it is (and the test that pins it).
+  const uidPlan = buildClassUidPlan(classUidPlanInputFromAst(ast));
+  const groupInheritance = computeGroupInheritance(ast, theme, (id) =>
+    uidPlan.classifierUid.get(id),
+  );
   const dotNodes = buildDotNodes(
-    ast, measuredMap, anchors, computeGroupInheritanceProtectedIds(ast, theme), classPortShortNames,
+    ast, measuredMap, anchors, groupInheritance.protectedIds, classPortShortNames,
   );
   const labelFont = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
   // Magma standalone-chaining edges appended after the real relationship edges.
   const dotEdges = [
-    ...buildDotEdges(ast, anchors, { font: labelFont, measurer, linetype: theme.linetype, classPortShortNames }),
+    ...buildDotEdges(ast, anchors, {
+      font: labelFont, measurer, linetype: theme.linetype, classPortShortNames,
+      sametailByRelIndex: groupInheritance.sametailByRelIndex,
+    }),
     ...buildClassMagmaEdges(ast, anchors),
   ];
   return { dotNodes, dotEdges };

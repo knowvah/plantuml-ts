@@ -83,6 +83,10 @@ interface DotEdgeAttrContext {
   /** B1/M1: ids of the leaves emitted as RECTANGLE_HTML_FOR_PORTS row tables,
    *  the only endpoints a `::member` port may legally attach to. */
   portRowIds: ReadonlySet<string>;
+  /** `DotData#removeIrrelevantSametail` survivors, keyed by index into
+   *  `ast.relationships`. Absent/empty for every diagram without
+   *  `skinparam groupInheritance`. */
+  sametailByRelIndex?: ReadonlyMap<number, string> | undefined;
 }
 
 /** One relationship's DOT edge attributes -- split out of `buildDotEdges`
@@ -92,6 +96,12 @@ function buildDotEdgeAttrs(rel: Relationship, i: number, ctx: DotEdgeAttrContext
   const attrs = { minLen: (rel.length ?? 2) - 1, ...edgeLabelAttrs(rel, ctx.font, ctx.measurer) };
   if (ctx.linetype === 'ortho') moveLabelToXlabel(attrs);
   if (rel.invis === true) attrs.invis = true;
+  // `DotData#removeIrrelevantSametail` survivors only -- the map is empty
+  // unless `skinparam groupInheritance N` (N >= 2) is set AND this tail
+  // reaches N. Emitted by `svek-dot-emit.ts` and forwarded to the layout
+  // engine, which converges the group's splines onto one shared tail point.
+  const sametail = ctx.sametailByRelIndex?.get(i);
+  if (sametail !== undefined) attrs.sametail = sametail;
   if (rel.weight !== undefined) attrs.weight = rel.weight;
   // G2/N16 Kind B: a freestanding note's ONE real relationship connector
   // must route with NO arrow-clip reservation (the SAME `noArrow` fix N14
@@ -113,6 +123,8 @@ interface DotEdgesRenderCtx {
   /** T2: `classPortShortNamesById`'s output -- ADR-4's declared port-name
    *  sets, row-port leaves only (`isRowPortKind`: class family + object). */
   classPortShortNames: ReadonlyMap<string, Set<string>>;
+  /** Threaded straight through to {@link DotEdgeAttrContext}. */
+  sametailByRelIndex?: ReadonlyMap<number, string> | undefined;
 }
 
 /** S-A: exported (was module-private) so ./class-dot-graph.ts's
@@ -136,7 +148,10 @@ export function buildDotEdges(
     ...ast.classifiers.filter((c) => c.kind === 'map').map((c) => c.id),
     ...classPortShortNames.keys(),
   ]);
-  const ctx: DotEdgeAttrContext = { font, measurer, linetype, kindBIndices, portRowIds };
+  const ctx: DotEdgeAttrContext = {
+    font, measurer, linetype, kindBIndices, portRowIds,
+    sametailByRelIndex: render.sametailByRelIndex,
+  };
   return ast.relationships.map((rel: Relationship, i: number) => {
     const swap = dotEdgeRunsReversed(rel);
     const from = swap ? rel.to : rel.from;
