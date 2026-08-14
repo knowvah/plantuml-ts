@@ -28,21 +28,30 @@ export const round = (v: number): string => String(Math.round(v));
  *   headlabel (`:461`, `:466`).
  * - `appendTable(sb, int w, int h, col)` (`:510`) does no conversion at all.
  *   The CLUSTER title is its only caller (`svek/ClusterDotString.java:124`),
- *   and it is already integral by construction —
- *   `Cluster#getTitleAndAttributeWidth` returns `int` and ceils internally
- *   (`svek/Cluster.java:261-264`).
+ *   and it is already integral by construction. That integer is made by
+ *   TRUNCATION too, one layer up: `ClusterHeader.java:91` is
+ *   `titleAndAttributeWidth = (int) Math.max(dimLabel.getWidth(),
+ *   attributeWidth) + suppWidthBecauseOfShape`.
  *
- * So {@link edgeLabelTable} truncates and {@link labelTable} does not. Do NOT
- * collapse them: our cluster width is not integral by construction the way
- * upstream's is, so truncating it would change laid-out geometry on every
- * type that draws a package/namespace frame — none of which is this
- * mechanism's subject.
+ * So BOTH forms truncate; they differ only in WHERE upstream does it. An
+ * earlier revision of this comment read `Cluster#getTitleAndAttributeWidth`
+ * (`svek/Cluster.java:261-264`) as ceiling the width — that `Math.ceil`
+ * applies to the `MinimumWidth` STYLE FLOOR it is maxed against, never to
+ * the measured label, so it does not describe this value at all.
+ *
+ * The same revision warned that truncating here "would change laid-out
+ * geometry". It cannot: this emitter is parity-inspection only and is not on
+ * the layout path, and the layout builder already floors the same field
+ * independently (`graph-layout-build.ts`'s `Math.floor(c.titleTableWidth)`).
+ * Rounding here only ever made the emitted DOT TEXT disagree with jar's —
+ * 45.9375 emitted `46` where jar emits `45` — which the DOT gate cannot see,
+ * because it compares label PRESENCE and not pixel size.
  */
 export const trunc = (v: number): string => String(Math.trunc(v));
 
-/** The cluster-title form — no rounding mode of its own; see {@link trunc}. */
+/** The cluster-title form — truncates, per `ClusterHeader.java:91`. */
 export const labelTable = (w: number, h: number, color: number): string =>
-  `<<TABLE BGCOLOR="${hex(color)}" FIXEDSIZE="TRUE" WIDTH="${round(w)}" HEIGHT="${round(h)}">` +
+  `<<TABLE BGCOLOR="${hex(color)}" FIXEDSIZE="TRUE" WIDTH="${trunc(w)}" HEIGHT="${trunc(h)}">` +
   `<TR><TD></TD></TR></TABLE>>`;
 
 /** The EDGE-label form — truncates, per `SvekEdge.java:505-506`. */
