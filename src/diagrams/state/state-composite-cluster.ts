@@ -121,6 +121,21 @@ const CLUSTER_HEADER_HEIGHT = 19;
  *  (`ClusterHeader`, not `InnerStateAutonom`). */
 const CLUSTER_TITLE_BASELINE_MARGIN = 4;
 
+/** The BORDER-POINT family's own title offset — `IEntityImage.MARGIN`,
+ *  literally (`svek/IEntityImage.java:45`). A composite whose title moved onto
+ *  the `${id}ee` subgraph never gets its title position from graphviz's own
+ *  cluster label: `Cluster#manageEntryExitPoint` computes it itself, as
+ *  `rectangleArea.getMinY() + IEntityImage.MARGIN` (`Cluster.java:435`), and
+ *  `drawUState` draws the title block's TOP there (`:496-498`). Hence 15.8889
+ *  (= 5 + `textAscent(14)`) against the plain family's 14.8889, which comes
+ *  from `setTitlePosition` and the entirely different `ClusterHeader` path.
+ *
+ *  G7 T14b measured this split and deliberately left it — "the WithLabel
+ *  family's own `=5` correction is OUT of the confirmed ten-item edit list
+ *  (render-position-only)". G9/T10 closes it; `temuxi-28-cega322`'s four
+ *  composite titles were the last thing in that fixture not matching jar. */
+const BORDER_POINT_TITLE_BASELINE_MARGIN = 5;
+
 /** `SvekResult.calculateDimension`'s `delta(15,15)` -- a CONCURRENT_STATE
  *  region's raw graph image (`GroupMakerState.getImage():116-117` returns
  *  it DIRECTLY, never wrapped by `InnerStateAutonom`) adds a flat 15px to
@@ -452,7 +467,13 @@ export function resolveClusterComposite(
     kind: 'cluster', id: s.id, display: s.display, children: sortSpecsByCreationIndex([...pseudoSpecs, ...childSpecs, ...regionSpecs]),
     clusterId,
     ...(titleTableEligible
-      ? { titleWidth: title.width, clusterHeaderHeight: CLUSTER_HEADER_HEIGHT, titleBaselineMargin: CLUSTER_TITLE_BASELINE_MARGIN }
+      ? {
+          titleWidth: title.width,
+          clusterHeaderHeight: CLUSTER_HEADER_HEIGHT,
+          titleBaselineMargin: hasBorderPointChildren
+            ? BORDER_POINT_TITLE_BASELINE_MARGIN
+            : CLUSTER_TITLE_BASELINE_MARGIN,
+        }
       : {}),
     // G7 T14b: `Cluster#manageEntryExitPoint`'s own inputs, threaded onto the
     // GeoSpec so `state-composite-geo.ts#materializeCluster` can run
