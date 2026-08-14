@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { layoutGraph } from '../../../src/core/graph-layout.js';
-import type { DotInputGraph } from '../../../src/core/graph-layout.js';
+import type { DotInputGraph, DotLayoutResult } from '../../../src/core/graph-layout.js';
 
 // Box sizes in px; the adapter divides by 72 (inches) on the way into graphviz
 // and getLayout returns points (= the original px), so widths round-trip.
@@ -450,6 +450,14 @@ describe('layoutGraph — cluster inner margin levels (G5 C7, mechanism 16 margi
  * Every pair below was MEASURED on real graphviz 15.1.1 against the jar's own
  * oracle DOT (`plans/object-close/ledger.md` M4) — not derived from the
  * formula, so a wrong formula cannot agree with them by construction.
+ *
+ * G9/T15: the padded box is what SPACES the graph, and it is no longer what
+ * the node REPORTS — `portNodeSize` now hands `RECTANGLE_HTML_FOR_PORTS` back
+ * at its declared size, the other half of the `solve:382-389` branch the port
+ * block below already covers. So these measured pairs are asserted where the
+ * padding actually acts: centre-to-centre spacing, which carries the padded
+ * dimension plus the graph's own `nodesep`/`ranksep`. Same four numbers, same
+ * provenance — read through the effect rather than off a box the jar discards.
  */
 describe('layoutGraph — plaintext row-port node padding (M4)', () => {
   const GRAPHVIZ_PADDED: ReadonlyArray<readonly [number, number, number, number]> = [
@@ -460,16 +468,43 @@ describe('layoutGraph — plaintext row-port node padding (M4)', () => {
     [69.49, 68, 85, 76],
     [151.4, 72, 167, 80],
   ];
+  /** the defaults `layoutGraph` hands the engine, in points */
+  const NODESEP = 18;
+  const RANKSEP = 36;
+
+  type OutNode = DotLayoutResult['nodes'][number];
+
+  const pair = (w: number, h: number, edge: boolean): readonly [OutNode, OutNode] => {
+    const r = layoutGraph({
+      nodes: [
+        { id: 'a', width: w, height: h, shape: 'plaintext', portRows: [] },
+        { id: 'b', width: w, height: h, shape: 'plaintext', portRows: [] },
+      ],
+      edges: edge ? [{ id: 'e', from: 'a', to: 'b' }] : [],
+    });
+    return [r.nodes[0]!, r.nodes[1]!];
+  };
+  const centre = (n: OutNode): readonly [number, number] =>
+    [n.x + n.width / 2, n.y + n.height / 2];
 
   it.each(GRAPHVIZ_PADDED)(
-    'pads a %sx%s label to a %sx%s node',
+    'spaces a %sx%s label as a %sx%s node',
     (labelW, labelH, nodeW, nodeH) => {
-      const r = layoutGraph({
-        nodes: [{ id: 'a', width: labelW, height: labelH, shape: 'plaintext', portRows: [] }],
-        edges: [],
-      });
-      expect(r.nodes[0]!.width).toBe(nodeW);
-      expect(r.nodes[0]!.height).toBe(nodeH);
+      // same rank, no edge: the horizontal gap carries the padded WIDTH
+      const [sa, sb] = pair(labelW, labelH, false);
+      expect(centre(sb)[0] - centre(sa)[0]).toBeCloseTo(nodeW + NODESEP, 6);
+      // one edge, two ranks: the vertical gap carries the padded HEIGHT
+      const [ra, rb] = pair(labelW, labelH, true);
+      expect(Math.abs(centre(rb)[1] - centre(ra)[1])).toBeCloseTo(nodeH + RANKSEP, 6);
+    },
+  );
+
+  it.each(GRAPHVIZ_PADDED)(
+    'still REPORTS a %sx%s label at its own size, not the %sx%s node',
+    (labelW, labelH) => {
+      const [a] = pair(labelW, labelH, false);
+      expect(a.width).toBe(labelW);
+      expect(a.height).toBe(labelH);
     },
   );
 

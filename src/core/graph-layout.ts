@@ -103,9 +103,26 @@ const ROUND_TRIP_EPSILON = 1e-3;
  * before it moved here the state engine drew a 12x12 pin from a 12x12 layout
  * node (right drawing, ranks 12px too close) and the description engine drew a
  * 54x36 rect where jar draws 12x12.
+ *
+ * The `RECTANGLE_HTML_FOR_PORTS` half of that same `solve` branch — a class or
+ * object leaf whose members carry link ports, `portRows` here — needs the very
+ * same correction for the very same reason. `addRowPortNode` hands graphviz an
+ * HTML row table with no `width`/`height`/`fixedsize`, exactly as
+ * `SvekNode#appendLabelHtmlSpecialForLink` does, and `poly_init` pads it by
+ * `PAD` (`4*GAP` wide, `2*GAP` tall — graphviz `common/shapes.c:1993-2009`,
+ * `common/const.h:251`). That padding is what spaces the ranks, and jar wants
+ * it; jar simply never reads it back as the classifier's box.
+ *
+ * Measured on `kidugi-68-noje040`: `BigLibrary`'s declared 251.6625x76 came
+ * back as the padded 267x84 — +15.3375 and +8.0, i.e. `PAD` to the pixel — so
+ * the class drew 16px too wide with an empty methods compartment twice its
+ * height, and its whole interior sat 4px high on jar's (same centre, taller
+ * box). Its two neighbours were 8px off in x for the same reason.
  */
 function portNodeSize(d: DotInputNode | undefined, engine: number, declared: number): number {
-  return d?.isPort === true && d.shape === 'plaintext' ? declared : engine;
+  if (d === undefined) return engine;
+  const htmlSized = (d.isPort === true && d.shape === 'plaintext') || d.portRows !== undefined;
+  return htmlSized ? declared : engine;
 }
 
 function mapNodes(snap: LayoutSnapshot, input: DotInputGraph): OutNodes {
