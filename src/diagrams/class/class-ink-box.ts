@@ -301,7 +301,14 @@ function addClassicRectInk(box: InkBox, x: number, y: number, w: number, h: numb
 function addLollipopRowInk(box: InkBox, c: ClassifierGeo): void {
   const row = c.rows[0];
   if (row === undefined) return;
-  addPlainInk(box, c.x + row.indent, c.y, row.width ?? 0, c.height);
+  // G9/T14: the y bounds stay pinned to the circle's own span, as this
+  // function's doc comment has always said — but that span is the ELLIPSE
+  // rule's `[c.y, c.y + c.height - 1]`, not a box's `+ c.height`. Using the
+  // latter made a labelled lollipop one pixel taller than an unlabelled one,
+  // which is exactly the "row's OWN vertical descent" the doc comment says is
+  // deliberately unmodeled.
+  addPoint(box, c.x + row.indent, c.y);
+  addPoint(box, c.x + row.indent + (row.width ?? 0), c.y + c.height - 1);
 }
 
 /** One classifier's own ink contribution — split out of `buildInkBox` (G2
@@ -398,9 +405,20 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo, iconSize: number): void
     addEllipseInk(box, c.x, c.y, c.width, c.height);
     return;
   }
+  // G9/T14: a lollipop is an `EntityImageLollipopInterface` — upstream draws
+  // a `UEllipse` and its label, never a box, so `LimitFinder#drawEllipse`'s
+  // uninset min corner applies, NOT `addRectInk`'s `y - 1`. Taking the box
+  // rule put our ink one pixel above the circle and pushed the whole diagram
+  // down by 1 (`bososa-44-fipu544` and four siblings: our circles at cy=12
+  // against jar's cy=11, every later shape following). Same shape as the
+  // `usecase` branch above, which already dispatches away from the box rule.
+  if (c.kind === 'lollipop') {
+    addEllipseInk(box, c.x, c.y, c.width, c.height);
+    addLollipopRowInk(box, c);
+    return;
+  }
   addClassifierBoxInk(box, c);
   addVisibilityIconInk(box, c, iconSize);
-  if (c.kind === 'lollipop') addLollipopRowInk(box, c);
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box is drawn
   // OUTSIDE the classifier's own rect (above-right, `class-stereotype.ts
   // #buildGenericTagGeo`'s doc comment) via a plain stroked `URectangle`

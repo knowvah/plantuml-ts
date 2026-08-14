@@ -496,13 +496,20 @@ describe('computeClassDocumentDims - lollipop label overhang (G2 N35)', () => {
   }
 
   it('a label wider than the circle overhangs on both sides and widens the canvas', () => {
-    // textWidth=30 -> indent = 10/2 - 30/2 = -10, row spans x in [-10, 20].
-    // addRectInk(0,0,10,10) -> (-1,-1)/(10,10). Combined: minX=-10, maxX=20,
-    // minY=-1, maxY=10. width=(20-(-10))+15+0+5=50 -> floor(51)=51.
-    // height=(10-(-1))+15+0+5=31 -> floor(32)=32.
+    // G9/T14: the circle takes `LimitFinder#drawEllipse`'s rule, not a box's
+    // -- `addEllipseInk(0,0,10,10)` -> (0,0)/(9,9), where the old box rule
+    // gave (-1,-1)/(10,10) and made the whole diagram 1px taller. Corpus-
+    // verified: it takes all five lollipop fixtures to zero diffs
+    // (`bososa-44-fipu544`, `rilaki-69-cuni337`, `makoko-44-mapu988`,
+    // `gidabo-27-juza410`, `rofijo-47-masa695`).
+    //
+    // textWidth=30 -> indent = 10/2 - 30/2 = -10, row spans x in [-10, 20],
+    // its y pinned to the circle's own [0, 9]. Combined: minX=-10, maxX=20,
+    // minY=0, maxY=9. width=(20-(-10))+15+0+5=50 -> floor(51)=51.
+    // height=(9-0)+15+0+5=29 -> floor(30)=30.
     const classifiers = [makeLollipopGeo(-10, 30)];
     const dims = computeClassDocumentDims(classifiers, [], [], []);
-    expect(dims).toEqual({ width: 51, height: 32 });
+    expect(dims).toEqual({ width: 51, height: 30 });
   });
 
   it('a label narrower than the circle does NOT widen the canvas beyond the circle box', () => {
