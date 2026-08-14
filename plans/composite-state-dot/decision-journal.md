@@ -188,3 +188,62 @@ this task made because it lives in the same missing dispatch. `EXPANSION_INPUT`
 /`EXPANSION_OUTPUT` keep the plain square: upstream draws a four-cell bar of a
 different size (`EntityPosition.java:100-115,120-128`) and no corpus fixture
 exercises them, so the shape stays unverified rather than guessed.
+
+## T8 — temuxi's last 50px (follow-on, authorized after T7)
+
+### Mechanism
+
+`Cluster#drawU` calls `manageEntryExitPoint` on EVERY invocation, and that
+method REASSIGNS `this.rectangleArea` from a `FrontierCalculator` seeded with
+`in.getRectangleArea()` of each child cluster (`Cluster.java:344-345,410-436`,
+specifically `:419-423`). `drawU` runs at least twice — once through
+`TextBlockUtils.getMinMax` (`TextBlockUtils.java:138-142`, which simply calls
+`drawU` on a `LimitFinder`) inside `SvekResult#calculateDimension`
+(`SvekResult.java:130-136`), then again for the real render — and
+`SvekResult#drawU` walks `allCluster()` in creation order, parents first.
+
+So the INK pass frontiers a parent against its children's RAW graphviz boxes,
+and the DRAW pass against their already-corrected ones. With raw children the
+union of `insides` reaches above every border point, no point sits on that
+edge, and the frontier's touch rule (`state-composite-frontier.ts` step 3)
+resets the boundary to the cluster's own raw box.
+
+### Origin and causal chain
+
+`src/diagrams/state/state-composite-geo.ts#materializeCluster` ran the frontier
+exactly once, bottom-up, and handed the single resulting box to both the
+renderer and `layout-ink-extent.ts`. On `temuxi-28-cega322` the module's raw
+box is 81px taller at the top than the frame it draws; jar's ink minimum lands
+at `rawTop - 1`; our canvas was 368 where jar's is 418.
+
+### Ruled out
+
+- **The earlier "jar's canvas is graphviz's graph bbox" guess — WRONG, and the
+  reason for reading the Java first.** `calculateDimension` is a `LimitFinder`
+  walk over `drawU`; it never sees graphviz's bb.
+- **Missing or extra elements.** Element inventories are identical (75 each);
+  only `<g>` nesting differs.
+- **A drawing-position defect.** Before this fix every one of temuxi's 75
+  shapes was exactly +50 from jar's — a rigid translation, so the drawing was
+  already right and only the canvas was short.
+- **A universal constant.** 119 state fixtures have a document-size gap, most
+  with no border point at all; the border-point ones split cleanly into a
+  ~2px group (the recorded text-ink band) and a 48/50 group, which is what
+  pointed at a nesting-dependent mechanism rather than a fixed offset.
+
+### Result
+
+temuxi: 418x1109, exactly jar's. Corpus, by total positional error: one
+fixture changes, to ZERO; none regress. Census: one falls, none rise;
+class/object byte-identical.
+
+### Two residuals this exposed
+
+- **1px composite-title baseline.** Four of temuxi's 75 shapes remain off:
+  the composite titles, ours at y=102.889 against jar's 103.889, same x. The
+  comparator cannot see them — `svg/g[1]`'s `childCount` (31 vs 40) stops the
+  recursion first, which is also why temuxi now reports 1 diff and 0
+  positional error while this is still open.
+- **`jucori-40-cevo136`'s 48px is NOT this mechanism.** Its composites hold
+  only leaves, so both passes agree; its frames are each 12px shorter than
+  jar's — a pin-span layout gap, closer in kind to what T6 fixed. Its own task.
