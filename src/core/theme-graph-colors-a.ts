@@ -215,6 +215,14 @@ export interface ThemeGraphColorsA {
    *  the bracket-override path already uses -- jar-verified
    *  `jezepa-12-padu194`/`vufuko-05-lapu034`. */
   arrowThickness?: number;
+  /** `skinparam arrowFontSize N` -- `FontParam.ARROW`'s size override
+   *  (`klimt/font/FontParam.java:54`, default 13). Feeds edge-label
+   *  MEASUREMENT via `core/edge-label-box.ts`, so it changes the reserved box
+   *  in the DOT and therefore rank separation -- not only how the text draws.
+   *  Was unported until 2026-08-14; the omission is why
+   *  `usecase/jecici-56-bimu826` measured its labels at 13 where the fixture
+   *  asks for 10. */
+  arrowFontSize?: number;
   /** G2 N23/N32: `skinparam class { AttributeFontSize N }` / `skinparam
    *  classAttributeFontSize N` -- upstream `FontParam.CLASS_ATTRIBUTE`'s
    *  dedicated size override, style-mapped by `FromSkinparamToStyle

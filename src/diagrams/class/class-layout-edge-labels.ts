@@ -178,7 +178,10 @@ export function wrapPlainTextLine(
  * the literal `>`/`<` token as a visible glyph and never reserve space for
  * the triangle).
  */
-type LabelAttrs = Pick<NonNullable<DotInputEdge['attributes']>, 'label' | 'labelWidth' | 'labelHeight'>;
+type LabelAttrs = Pick<
+  NonNullable<DotInputEdge['attributes']>,
+  'label' | 'labelWidth' | 'labelHeight' | 'labelBoxWidth' | 'labelBoxHeight'
+>;
 type MultiplicityAttrs = Pick<
   NonNullable<DotInputEdge['attributes']>,
   'tailLabelWidth' | 'tailLabelHeight' | 'tailLabel' | 'headLabelWidth' | 'headLabelHeight' | 'headLabel'
@@ -288,7 +291,7 @@ export function edgeLabelAttrs(
   font: { family: string; size: number },
   measurer: StringMeasurer,
 ): NonNullable<DotInputEdge['attributes']> {
-  return {
+  return withLayoutBox({
     // The margin is applied HERE rather than inside each branch of
     // `computeRelLabelAttrs` so it lands exactly once, on whichever branch
     // produced the block — mirroring upstream, where `addVisibilityModifier`
@@ -298,5 +301,31 @@ export function edgeLabelAttrs(
     // which never builds a `labelText` and so never sees the margin.
     ...withLabelMargin(computeRelLabelAttrs(rel, font, measurer), rel),
     ...computeMultiplicityAttrs(rel, font, measurer),
-  };
+  });
+}
+
+/**
+ * T6: hand the LAYOUT engine the same reserved box the DOT gate already gets.
+ *
+ * Without `labelBoxWidth`/`labelBoxHeight`, `graph-layout-build-edges.ts`
+ * sends the engine plain TEXT, which it measures itself -- reserving a
+ * constant ~16.5 per line instead of the declared height. A labelled edge
+ * spans the rank gap, so that lands as rank separation: measured 76.5 against
+ * the jar's 75 on `class-inheritance-interface-assoc`, putting every node
+ * below that rank 1.5 too low and accounting for 148 of its 202 diffs.
+ *
+ * The values are the ALREADY-margined ones `withLabelMargin` produced, which
+ * is this engine's equivalent of `computeReservedLabelBox`'s reserved box --
+ * class measures multi-line labels correctly on its own
+ * (`splitEdgeLabelLines`, max width, lineHeight * lineCount). The consumer
+ * floors, matching the jar's truncation (`SvekEdge.java:504-507`).
+ *
+ * Skipped for the `linkConstraint` spot, whose EMPTY `label` marks the
+ * `CONSTRAINT_SPOT` arm that never builds a `labelText` upstream -- the same
+ * discriminator `withLabelMargin` uses.
+ */
+function withLayoutBox(attrs: LabelAttrs): LabelAttrs {
+  if (attrs.labelWidth === undefined || attrs.labelHeight === undefined) return attrs;
+  if (attrs.label === '') return attrs;
+  return { ...attrs, labelBoxWidth: attrs.labelWidth, labelBoxHeight: attrs.labelHeight };
 }

@@ -64,6 +64,7 @@ export interface SkinparamAccumulator {
   stateFontColorByStereo: Record<string, string> | undefined;
   stateFontSizeByStereo: Record<string, number> | undefined;
   arrowThickness: number | undefined;
+  arrowFontSize: number | undefined;
   classAttributeFontSize: number | undefined;
   classAttributeFontFamily: string | undefined;
   classAttributeFontBold: boolean | undefined;
@@ -124,6 +125,7 @@ const SCALAR_FIELD_NAMES = [
   'classAttributeFontSizeByStereo', 'classFontSizeByStereo',
   'stateBorderColorByStereo', 'stateBackgroundColorByStereo',
   'stateFontColorByStereo', 'stateFontSizeByStereo', 'arrowThickness',
+  'arrowFontSize',
   'classAttributeFontSize', 'classAttributeFontFamily',
   'classAttributeFontBold', 'classAttributeFontItalic', 'classFontSize',
   'classFontFamily', 'classFontBold', 'classFontItalic',

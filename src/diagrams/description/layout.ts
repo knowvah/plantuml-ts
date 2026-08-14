@@ -342,7 +342,13 @@ export function layoutDescription(
   // site to swap in place. No `skinparam ArrowFontSize` override path
   // exists yet (`core/skinparam.ts#ELEMENT_BUCKET_SNAMES` omits
   // `'arrow'`) -- bare DEFAULT only.
-  const edgeFontSpec: FontSpec = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
+  // T3: `skinparam arrowFontSize N` overrides `FontParam.ARROW`'s 13 default.
+  // This spec feeds edge-label MEASUREMENT, so the override changes the
+  // reserved DOT box and therefore rank separation -- not only how text draws.
+  const edgeFontSpec: FontSpec = {
+    family: theme.fontFamily,
+    size: theme.colors.graph.arrowFontSize ?? ARROW_LABEL_FONT_SIZE,
+  };
   // Container-scoped identity (mission I1b): the set of TRUE cross-scope
   // colliding bare ids, computed from the ORIGINAL (un-grouped) tree once --
   // reused by both `classifyAst` (walks the namespace-grouped tree) and

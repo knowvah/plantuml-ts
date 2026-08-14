@@ -17,11 +17,13 @@ import type { DescriptiveLink } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import { resolveInlineLinks } from './parse-helpers.js';
+import { computeReservedLabelBox } from '../../core/edge-label-box.js';
 import {
   type SpriteDimsLookup,
 } from '../../core/creole-atoms.js';
 import {
   measureLineWithAtoms,
+  lineAtomHeightExcess,
 } from '../../core/creole-atoms-measure.js';
 
 // ---------------------------------------------------------------------------
@@ -183,7 +185,33 @@ function applyMainLabel(
   const labelText = mainLabelText(link);
   if (labelText === undefined) return;
   const resolvedLabelText = resolveInlineLinks(labelText);
-  const m = measureLineWithAtoms(resolvedLabelText, ctx.fontSpec, ctx.measurer, ctx.sprites);
+  // T4: the shared box formula, not a single-line string measure. Multi-line
+  // labels take the MAX line width rather than the concatenation, creole
+  // formatting tags are stripped, and the line count reaches the height --
+  // see `core/edge-label-box.ts`. Atom-bearing lines still need
+  // `measureLineWithAtoms`' extra width, so the two combine: the box supplies
+  // the text dimensions, the atom scan adds any icon width on the widest line.
+  // `box.lines` are already split on `\n` and stripped of formatting tags;
+  // each is then measured atom-aware, and the WIDEST wins. Height is one font
+  // size per line plus whatever a tall atom on that line needs -- the per-line
+  // pattern `lineAtomHeightExcess` documents for exactly this composition.
+  const box = computeReservedLabelBox(resolvedLabelText, ctx.fontSpec, ctx.measurer, link.from === link.to);
+  // The RESERVED box, not the measured one -- the jar writes the margined,
+  // floored value into the DOT table (`SvekEdge.java:504-507`). `marginLabel`
+  // is read off the helper rather than restated, so the 1-vs-6 self-loop rule
+  // stays in one place; only the atom-aware measurement is redone here,
+  // because the helper measures plain text and an icon occupies real width.
+  const widest = Math.max(
+    ...box.lines.map((l) => measureLineWithAtoms(l, ctx.fontSpec, ctx.measurer, ctx.sprites).width),
+  );
+  const stacked = box.lines.reduce(
+    (h, l) => h + ctx.fontSpec.size + lineAtomHeightExcess(l, ctx.fontSpec, ctx.sprites),
+    0,
+  );
+  const m = {
+    width: Math.floor(widest + 2 * box.marginLabel),
+    height: stacked + 2 * box.marginLabel,
+  };
   if (linetype === 'ortho') {
     attrs.xlabel = resolvedLabelText;
     attrs.xlabelWidth = m.width;
@@ -192,6 +220,19 @@ function applyMainLabel(
     attrs.label = resolvedLabelText;
     attrs.labelWidth = m.width;
     attrs.labelHeight = m.height;
+    // T5: hand the LAYOUT engine the same reserved box, not the label text.
+    // Without these two fields `graph-layout-build-edges.ts` sends plain text
+    // and the engine measures it, reserving a constant ~16.5 per line instead
+    // of the declared height -- which lands as rank separation, since a
+    // labelled edge spans the rank gap. Same pair the state pipeline has set
+    // since G8/T2 (`state-composite-edge-label.ts`).
+    //
+    // These are `m.width`/`m.height` because AFTER T4 those ARE the reserved,
+    // margined, floored box. The batch-2 brief's "do not reuse raw
+    // labelWidth/labelHeight" warns against the PRE-T4 values, which were the
+    // unmargined single-line measurement.
+    attrs.labelBoxWidth = m.width;
+    attrs.labelBoxHeight = m.height;
   }
 }
 

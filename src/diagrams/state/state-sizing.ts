@@ -37,6 +37,7 @@
  */
 
 import type { State, StateKind } from './ast.js';
+import { splitCreoleLines } from '../../core/edge-label-box.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { DotInputNodeShape } from '../../core/graph-layout.js';
@@ -48,19 +49,11 @@ import { resolveStateFontSize } from './state-render-colors.js';
 // Creole line splitting
 // ---------------------------------------------------------------------------
 
-/**
- * Split a display/description string on PlantUML's literal `\n` line-break
- * token (two source characters: backslash, n — NOT a real newline; our
- * parser never converts it, mirroring upstream's Creole renderer which
- * treats the literal token as a line break at draw time). A raw newline
- * character (if one ever appears) is also treated as a break, since no
- * upstream state-diagram source produces one but defensive parity costs
- * nothing here.
- * @see ~/git/plantuml/.../klimt/creole/Display.java (line splitting on `\n`)
- */
-export function splitCreoleLines(text: string): string[] {
-  return text.split(/\\n|\n/);
-}
+// Relocated to `core/edge-label-box.ts` (T1) so class and description can
+// reach it too; imported-and-re-exported (not `export ... from`, which would
+// not bind the name for this module's OWN callers below). See that module's
+// header for why one formula now serves every engine.
+export { splitCreoleLines };
 
 // ---------------------------------------------------------------------------
 // Fixed-size pseudostate table (§1 of mechanisms.md)

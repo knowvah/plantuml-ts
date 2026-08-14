@@ -101,6 +101,13 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
   [['bordercolor'], (acc, _v, color) => { acc.border = color; }],
   [['fontcolor', 'defaultfontcolor'], (acc, _v, color) => { acc.text = color; }],
   [['arrowcolor', 'defaultarrowcolor'], (acc, _v, color) => { acc.arrow = color; }],
+  // `FontParam.ARROW` size override. Sibling of arrowcolor above, NOT a
+  // bucket key -- `ELEMENT_BUCKET_SNAMES` has no 'arrow' entry and does not
+  // need one (D3: extend the existing model, do not restructure it).
+  [['arrowfontsize'], (acc, value) => {
+    const v = parseFiniteNumber(value);
+    if (v !== undefined) acc.arrowFontSize = v;
+  }],
   [['notebackgroundcolor'], (acc, _v, color) => { acc.noteBackground = color; }],
   [['pathhovercolor'], (acc, _v, color) => { acc.pathHoverColor = color; }],
   [['diagrambordercolor'], (acc, _v, color) => { acc.diagramBorderColor = color; }],

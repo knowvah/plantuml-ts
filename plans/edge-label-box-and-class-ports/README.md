@@ -89,7 +89,7 @@ those fixtures too. Expect census movement and measure it per fixture.
 
 ## Batches
 
-- [ ] **batch-1** — correct the edge-label measurement (items 2)
+- [x] **batch-1** — correct the edge-label measurement (items 2)
 - [ ] **batch-2** — hand the engine a FIXEDSIZE box, not plain text (item 4)
 - [ ] **batch-3** — model class-side `port` declarations (item 3)
 - [ ] **batch-4** — per-end port-label placement (issue 12)

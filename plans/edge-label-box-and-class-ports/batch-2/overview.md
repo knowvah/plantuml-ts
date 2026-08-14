@@ -32,9 +32,9 @@ identical to `dot`).
 
 | id | task | write-set |
 |---|---|---|
-| [ ] T5 | Populate `labelBoxWidth`/`labelBoxHeight` for description edges | `src/diagrams/description/link-edge-attrs.ts` |
-| [ ] T6 | Same for class edges | `src/diagrams/class/class-layout-helpers.ts`, `class-dot-edges.ts` |
-| [ ] T7 | Pin `class-inheritance-interface-assoc` in the class ratchet | `oracle/goldens/svg-class/ratchet.json` |
+| [x] T5 | Populate `labelBoxWidth`/`labelBoxHeight` for description edges | `src/diagrams/description/link-edge-attrs.ts` |
+| [x] T6 | Same for class edges | `src/diagrams/class/class-layout-helpers.ts`, `class-dot-edges.ts` |
+| [~] T7 | Pin `class-inheritance-interface-assoc` in the class ratchet | `oracle/goldens/svg-class/ratchet.json` |
 
 T7 is the exit bar's first clause. It is eligible today — `dotEqual: true` in
 `parity-class.json` — and blocked only by the geometry T5/T6 fix.

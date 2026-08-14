@@ -20,54 +20,17 @@
 import type { Transition } from './ast.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { transitionLabelText } from './state-dot-graph.js';
-import { splitCreoleLines } from './state-sizing.js';
+import { computeReservedLabelBox } from '../../core/edge-label-box.js';
 
 /** Label offset perpendicular to the edge direction -- legacy fallback only
  *  (D1): still used verbatim when the layout result carries no label
  *  position at all. */
 const LABEL_PERP = 12;
 
-/** The box jar actually reserves (spec.md §1a): `SvekEdge`'s ctor wraps
- *  every edge label in `addVisibilityModifier` -> `TextBlockUtils.withMargin`
- *  (marginLabel = 6 for a self-loop, 1 otherwise) BEFORE measuring, then
- *  `appendTable` truncates towards zero (`Math.floor`) before writing the
- *  FIXEDSIZE HTML table dot receives. `measuredHeight` splits on PlantUML's
- *  literal `\n` line-break TOKEN (two source characters -- backslash, n --
- *  our parser never converts it to a real newline; `state-sizing.ts
- *  #splitCreoleLines`'s own doc comment has the full upstream-Creole-
- *  renderer rationale) -- `lines.length * font.size`, no `*1.4` -- matches
- *  note-layout.ts precedent -- rather than relying on `measurer.measure`'s
- *  own single-line height (which cannot see line breaks embedded in one
- *  string, and would also badly over-measure the WIDTH of a multi-line
- *  label as if it were one long line). Shared by
- *  {@link transitionLabelAnchor} (the anchor formula) and
- *  {@link attachTransitionLabel} (the box stored on `TransitionGeo.label`) so
- *  both consumers compute the SAME two reserved numbers from the SAME
- *  formula -- D3's "one mechanism" mandate, without literally duplicating
- *  spec.md §2's arithmetic inline in two places. */
-interface ReservedLabelBox {
-  readonly marginLabel: number;
-  readonly lines: readonly string[];
-  readonly measuredWidth: number;
-  readonly measuredHeight: number;
-  readonly reservedWidth: number;
-  readonly reservedHeight: number;
-}
-
-export function computeReservedLabelBox(
-  text: string,
-  font: FontSpec,
-  measurer: StringMeasurer,
-  isSelfLoop: boolean,
-): ReservedLabelBox {
-  const marginLabel = isSelfLoop ? 6 : 1;
-  const lines = splitCreoleLines(text);
-  const measuredWidth = Math.max(...lines.map((l) => measurer.measure(l, font).width));
-  const measuredHeight = lines.length * font.size;
-  const reservedWidth = Math.floor(measuredWidth + 2 * marginLabel);
-  const reservedHeight = measuredHeight + 2 * marginLabel;
-  return { marginLabel, lines, measuredWidth, measuredHeight, reservedWidth, reservedHeight };
-}
+// Relocated to `core/edge-label-box.ts` (T1) -- one box formula for every
+// engine, per that module's header. Re-exported so `state-composite-edge-
+// label.ts` and any other state caller is unchanged.
+export { computeReservedLabelBox };
 
 /**
  * Closed-form centre->anchor conversion (spec.md §2, no fixture-conditional
