@@ -165,6 +165,20 @@ export interface StateNodeGeo {
    */
   borderPointLabelHeight?: number;
   /**
+   * G9/T8: how far this composite's INK extends beyond its DRAWN box, per
+   * side — see `state-composite-geo.ts#borderPointInkOverflow` for the
+   * upstream mechanism (jar's ink pass and its draw pass compute a
+   * border-point cluster's frontier from different child rectangles, so its
+   * canvas reserves space the frame never covers).
+   *
+   * A shift-invariant OVERFLOW rather than a second box, so `shiftGeo` and
+   * `layout.ts#shiftStateNode` carry it through unchanged. Every side is >= 0:
+   * the frontier only ever resets a boundary OUTWARD, to the raw box.
+   * `undefined` whenever the two passes agree, which is every composite
+   * without a border point and every one whose children are all leaves.
+   */
+  inkOverflow?: { readonly top: number; readonly right: number; readonly bottom: number; readonly left: number };
+  /**
    * mission G4 S10 (notes never render): present ONLY for `kind: 'note'` --
    * per-line note-body text + measured width (mirrors `headerLines`'s
    * identical per-line-width rationale, `state-note-layout.ts#measureNote`).

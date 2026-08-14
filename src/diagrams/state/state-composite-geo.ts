@@ -272,6 +272,70 @@ function borderPointBox(
   return box;
 }
 
+/**
+ * G9/T8: the box jar's INK pass sees for a border-point composite, which is
+ * NOT the one it draws.
+ *
+ * `Cluster#drawU` calls `manageEntryExitPoint` (`Cluster.java:344-345,410-436`)
+ * on every invocation, and that method REASSIGNS `this.rectangleArea` from a
+ * `FrontierCalculator` seeded with `in.getRectangleArea()` of each child
+ * cluster (`:419-423`). `drawU` runs at least twice — once through
+ * `TextBlockUtils.getMinMax` inside `SvekResult#calculateDimension`
+ * (`SvekResult.java:130-136`), then again for the real render — and
+ * `SvekResult#drawU` walks `allCluster()` in CREATION order, parents first.
+ * So on the first pass a parent's frontier reads its children's RAW graphviz
+ * boxes, and only on the second does it read their corrected ones.
+ *
+ * The consequence is a canvas taller than anything drawn on it: with raw
+ * children the union of `insides` reaches above every border point, no point
+ * sits on that edge, and the frontier's touch rule resets the boundary to the
+ * cluster's own RAW box (`state-composite-frontier.ts` step 3). Jar-verified
+ * on `temuxi-28-cega322`: its module frame draws at y=88 with the raw box 81px
+ * higher, and jar's own ink minimum lands at 6 — `rawTop - 1`, the standard
+ * rect inset — putting 50px of reserved-but-empty space above the topmost
+ * label. A composite whose children are all LEAVES is unaffected (the leaf
+ * rects sit inside, the pins extend the core, the touch rule keeps them), so
+ * `lulozu-10-bopu547` and `cinoni-00-sere847` see no such band — which is
+ * exactly what their oracles show.
+ *
+ * Returned as an OVERFLOW rather than a box so it survives the shift passes
+ * (`shiftGeo`, `layout.ts#shiftStateNode`) untouched — see
+ * `StateNodeGeo.inkOverflow`.
+ */
+function borderPointInkOverflow(
+  spec: Extract<GeoSpec, { kind: 'cluster' }>,
+  children: readonly StateNodeGeo[],
+  clusterPosMap: ClusterPosMap,
+  drawn: Box,
+): StateNodeGeo['inkOverflow'] {
+  const rawById = new Map<string, Box>();
+  for (const child of spec.children) {
+    const id = child.kind === 'cluster' ? child.clusterId : undefined;
+    const raw = id !== undefined ? clusterPosMap.get(id) : undefined;
+    if (raw !== undefined) rawById.set(child.id, raw);
+  }
+  if (rawById.size === 0) return undefined;
+  const rawChildren = children.map((c) => {
+    const raw = rawById.get(c.id);
+    return raw === undefined ? c : { ...c, x: raw.x, y: raw.y, width: raw.width, height: raw.height };
+  });
+  const ink = borderPointBox(
+    clusterPosMap.get(spec.clusterId!)!,
+    rawChildren,
+    spec.borderPointMemberIds ?? [],
+    spec.frontierMinWidth ?? 0,
+    spec.rankdir ?? 'TB',
+  );
+  const overflow = {
+    top: Math.max(0, drawn.y - ink.y),
+    left: Math.max(0, drawn.x - ink.x),
+    bottom: Math.max(0, ink.y + ink.height - (drawn.y + drawn.height)),
+    right: Math.max(0, ink.x + ink.width - (drawn.x + drawn.width)),
+  };
+  const empty = overflow.top === 0 && overflow.left === 0 && overflow.bottom === 0 && overflow.right === 0;
+  return empty ? undefined : overflow;
+}
+
 function materializeCluster(
   spec: Extract<GeoSpec, { kind: 'cluster' }>,
   posMap: PosMap,
@@ -292,13 +356,19 @@ function materializeCluster(
     // composites (`state-composite-cluster.ts#resolveClusterComposite`) --
     // every other cluster (the pre-T14b path) keeps using `real` directly,
     // byte-identical to before this task.
-    const box =
-      spec.borderPointMemberIds !== undefined && spec.borderPointMemberIds.length > 0
-        ? borderPointBox(real, children, spec.borderPointMemberIds, spec.frontierMinWidth ?? 0, spec.rankdir ?? 'TB')
-        : real;
+    const hasBorderPoints =
+      spec.borderPointMemberIds !== undefined && spec.borderPointMemberIds.length > 0;
+    const box = hasBorderPoints
+      ? borderPointBox(real, children, spec.borderPointMemberIds!, spec.frontierMinWidth ?? 0, spec.rankdir ?? 'TB')
+      : real;
+    // G9/T8 -- see `borderPointInkOverflow`'s own doc comment.
+    const inkOverflow = hasBorderPoints
+      ? borderPointInkOverflow(spec, children, clusterPosMap, box)
+      : undefined;
     return {
       id: spec.id, kind: 'normal', display: spec.display,
       x: box.x, y: box.y, width: box.width, height: box.height,
+      ...(inkOverflow !== undefined ? { inkOverflow } : {}),
       children, transitions: [],
       headerLines: [{ text: spec.display, width: spec.titleWidth }],
       clusterHeaderHeight: spec.clusterHeaderHeight,

@@ -287,6 +287,15 @@ function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolea
     // composite reuse is flagged NOT-jar-verified in this module's own doc
     // comment, and flipping it is a separate, separately-evidenced change.
     addStateBoxInk(box, node, true);
+    // G9/T8: a border-point composite reserves ink OUTSIDE the frame it draws
+    // — jar's ink pass and its draw pass frontier it against different child
+    // rectangles. Same `-1`/`+0` insets as the rect ink above, applied to the
+    // overflowed corners. See `StateNodeGeo.inkOverflow`.
+    const over = node.inkOverflow;
+    if (over !== undefined) {
+      addPoint(box, node.x - over.left - 1, node.y - over.top - 1);
+      addPoint(box, node.x + node.width + over.right, node.y + node.height + over.bottom - 1);
+    }
     for (const child of node.children) addNodeInk(box, child, includeArrowheadInk, labelInk);
     for (const t of node.transitions) addTransitionInk(box, t, includeArrowheadInk, labelInk);
     return;
