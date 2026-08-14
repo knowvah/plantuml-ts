@@ -62,9 +62,20 @@ function mergeNoteWithLabel(label: LabelDims | undefined, note: LabelDims, posit
 
 type EdgeAttrs = NonNullable<DotInputEdge['attributes']>;
 
+/** A `ReservedLabelBox` as the `{width, height}` the merge helpers take. */
+const reservedDims = (box: { reservedWidth: number; reservedHeight: number }): LabelDims => ({
+  width: box.reservedWidth,
+  height: box.reservedHeight,
+});
+
 function edgeLabelAttrs(t: Transition, font: FontSpec, measurer: StringMeasurer): EdgeAttrs {
   const text = transitionLabelOf(t);
-  const labelDims = text === undefined ? undefined : measurer.measure(text, font);
+  // The RESERVED box, not the raw text: upstream margin-wraps the label
+  // block (`marginLabel = self-loop ? 6 : 1`) at `SvekEdge.java:372-373`,
+  // BEFORE any note is merged onto it (`:302` vs `:319-325`), so the margin
+  // belongs to the label component of the merge exactly as it does here.
+  const labelDims =
+    text === undefined ? undefined : reservedDims(computeReservedLabelBox(text, font, measurer, t.from === t.to));
   const noteDims = t.linkNote === undefined ? undefined : measureLinkNote(t.linkNote, font, measurer);
   if (labelDims === undefined && noteDims === undefined) return {};
   const merged =

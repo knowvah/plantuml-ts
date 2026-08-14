@@ -21,6 +21,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotInputGraph, DotInputNode, DotInputEdge } from '../../core/graph-layout.js';
 import { measureState, CIRCLE_START_SIZE, CIRCLE_END_SIZE } from './state-sizing.js';
 import { buildNoteGraphPartsByScope } from './state-note-layout.js';
+import { computeReservedLabelBox } from '../../core/edge-label-box.js';
 
 // ---------------------------------------------------------------------------
 // [*] pseudostate anchors — one shared start/end node per (flat) diagram,
@@ -159,13 +160,26 @@ function mergeNoteWithLabel(label: LabelDims | undefined, note: LabelDims, posit
 /** Edge label attrs (HTML-table label, svek convention — mirrors class
  *  engine's edgeLabelAttrs). Widths/heights are measured but tolerant: the
  *  DOT-parity comparator only checks label PRESENCE, not pixel size. */
+/** A `ReservedLabelBox` as the `{width, height}` the merge helpers take. */
+const reservedDims = (box: { reservedWidth: number; reservedHeight: number }): LabelDims => ({
+  width: box.reservedWidth,
+  height: box.reservedHeight,
+});
+
 function edgeLabelAttrs(
   t: Transition,
   font: { family: string; size: number },
   measurer: StringMeasurer,
 ): NonNullable<DotInputEdge['attributes']> {
   const text = transitionLabelText(t);
-  const labelDims = text === undefined ? undefined : measurer.measure(text, font);
+  // The RESERVED box, not the raw text: upstream margin-wraps the label
+  // block (`marginLabel = self-loop ? 6 : 1`) at `SvekEdge.java:372-373`,
+  // BEFORE any note is merged onto it (`:302` vs `:319-325`), so the margin
+  // belongs to the label component of the merge exactly as it does here.
+  // Emitting the raw measurement instead left this path's DOT 2px short in
+  // both dims against jar's on every labelled transition.
+  const labelDims =
+    text === undefined ? undefined : reservedDims(computeReservedLabelBox(text, font, measurer, t.from === t.to));
   const noteDims = t.linkNote === undefined ? undefined : measureLinkNote(t.linkNote, font, measurer);
   if (labelDims === undefined && noteDims === undefined) return {};
   const merged =
@@ -175,7 +189,22 @@ function edgeLabelAttrs(
   // returns, mirrors state-composite-edge-label.ts's own identical shape
   // (D1 duplication, not new branching). Surfaced by this file's full
   // rescan on ANY edit, not introduced here (mission G5/C1).
-  return { label: text ?? t.linkNote ?? '', labelWidth: merged.width, labelHeight: merged.height };
+  const attrs: NonNullable<DotInputEdge['attributes']> = {
+    label: text ?? t.linkNote ?? '',
+    labelWidth: merged.width,
+    labelHeight: merged.height,
+  };
+  // The FIXEDSIZE layout-input reservation this flat path never set, so the
+  // engine measured the plain text itself instead of honouring jar's box
+  // (`graph-layout-build-edges.ts` gates the table on these two fields).
+  // Scoped to note-free labels exactly as `state-composite-edge-label.ts`
+  // scopes its own: the merged label+note margin story is still unverified.
+  if (text !== undefined && noteDims === undefined) {
+    const box = computeReservedLabelBox(text, font, measurer, t.from === t.to);
+    attrs.labelBoxWidth = box.reservedWidth;
+    attrs.labelBoxHeight = box.reservedHeight;
+  }
+  return attrs;
 }
 
 /** Under `skinparam linetype ortho`, svek routes the main edge label through
