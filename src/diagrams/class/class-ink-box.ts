@@ -358,8 +358,20 @@ function addClassifierBoxInk(box: InkBox, c: ClassifierGeo): void {
  * #renderRow` draws the icon at `geo.x + ROW_TEXT_LEFT_MARGIN`, and both
  * polygon helpers span `[originX + 1, originX + 1 + (size - 2)]`.
  */
+function hasPolygonIcon(rows: ClassifierGeo['rows']): boolean {
+  return rows.some((r) => r.visibilityIcon === '#' || r.visibilityIcon === '~');
+}
+
 function addVisibilityIconInk(box: InkBox, c: ClassifierGeo, iconSize: number): void {
-  if (!c.rows.some((r) => r.visibilityIcon === '#' || r.visibilityIcon === '~')) return;
+  // `enhancedBody` carries its own rows and is drawn INSTEAD OF `rows` for a
+  // `BodyEnhanced` classifier (`class-body-enhanced-layout.ts`), so both
+  // lists have to be scanned or a `{method} # …` member's icon is invisible
+  // to this walk -- `filoxo-23-fafi328`'s `Doer` has exactly one entry in
+  // `rows` (its header) and both its icon-bearing members in `enhancedBody`.
+  const enhanced = (c.enhancedBody?.parts ?? []).some(
+    (p) => p.kind === 'rows' && hasPolygonIcon(p.rows),
+  );
+  if (!hasPolygonIcon(c.rows) && !enhanced) return;
   const left = c.x + ROW_TEXT_LEFT_MARGIN + 1;
   const right = left + (iconSize - 2);
   // y is unpadded and always inside the box, so only the x extremes matter;

@@ -676,6 +676,31 @@ describe('computeClassDocumentDims — visibility-icon polygon ink', () => {
     expect(computeClassDocumentDims([withIcon('-')], [], [], []).width).toBe(plain.width);
   });
 
+  it('finds the icon in `enhancedBody` too, where a `{method}` member lives', () => {
+    // A `BodyEnhanced` classifier draws `enhancedBody.parts` INSTEAD OF
+    // `rows` (`class-body-enhanced-layout.ts`), so an icon-bearing member is
+    // absent from `rows` entirely -- `filoxo-23-fafi328`'s `Doer` has only
+    // its header there, and both `{method} # …` members in `enhancedBody`.
+    const plain = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    const viaEnhanced = computeClassDocumentDims(
+      [
+        makeClassifierGeo({
+          x: 0,
+          y: 0,
+          enhancedBody: {
+            parts: [{ kind: 'rows', rows: [{ y: 20, text: 'm', indent: 0, width: 30, visibilityIcon: '#' }] }],
+            width: 30,
+            height: 20,
+          },
+        }),
+      ],
+      [],
+      [],
+      [],
+    );
+    expect(viaEnhanced.width - plain.width).toBe(2);
+  });
+
   it('shifts the whole drawing right by the same 2px, per computeClassInkShift', () => {
     const plain = computeClassInkShift([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
     const diamond = computeClassInkShift([withIcon('#')], [], [], []);
