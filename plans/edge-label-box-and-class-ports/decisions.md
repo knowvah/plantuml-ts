@@ -71,6 +71,23 @@ regression to diagnose, not to re-baseline — and if a baseline is raised
 anyway, the entry carries the mechanism, as `diff-baseline.json`'s `jecici`
 entry does today.
 
+## D8 — Batch 4 fixes the placement RULE, never the two constants
+
+`portLabelAnchor` applies one formula to both ends of an edge; upstream applies
+a per-end rule. The head end is already derived from upstream
+(`SvekEdge#getXY` -> `getMinXY` -> top-left anchoring -> `boxTop + ascent`,
+predicting +3.0 against a measured +3.022). The tail end's +18.244 is not, and
+finding out why is the batch.
+
+**`+18.244` and `+3.022` must never appear in source.** They are measurements
+that a correct rule has to reproduce, not inputs to it. Shipping them turns 14
+diffs green and buries the mechanism — the precise failure `rules/diagnosis.md`
+and this repo's "never fit a value" rule exist to prevent. T11 is deliberately
+separated from T12 so the mechanism has to exist before any code moves.
+
+If T11 cannot produce one, STOP. A documented open question is a better outcome
+than a green fixture with two magic numbers in it.
+
 ## D7 — Add edge-label dimensions to the DOT comparator, or say why not
 
 `parseEdges` records only `hasLabel: boolean`, so a 336-vs-72 box scores EQUAL.
