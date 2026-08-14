@@ -35,8 +35,8 @@ place relative to their composite frame. Document height 316 against jar's 418.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T5 | **Diagnose** why our pin centres span 143.5 where jar's span 170 | debugger | none (diagnosis) — findings to `decision-journal.md` | — | [ ] |
-| T6 | Implement the fix | typescript-pro | **determined by T5** | T5 | [ ] |
+| T5 | **Diagnose** why our pin centres span 143.5 where jar's span 170 | debugger | none (diagnosis) — findings to `decision-journal.md` | — | [x] |
+| T6 | Implement the fix | typescript-pro | **determined by T5** | T5 | [ ] STOPPED — see stop-condition 4 |
 
 **If T5's mechanism lands outside `src/diagrams/state/state-composite-*.ts` or
 `state-dot-graph.ts`, STOP.** T6's write-set is deliberately open; widening it
