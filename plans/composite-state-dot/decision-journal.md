@@ -299,3 +299,49 @@ is this.
 positional error 96 -> 0. `fukexa-85-cuvi894` and `vujuru-50-toku619` also
 reach zero, `dobexo-69-zeki749` goes 448 -> 4. Census: 7 fixtures fall
 (3 state, 3 component, 1 more state), NONE rise; class/object byte-identical.
+
+## T10 — the 1px composite title baseline (follow-on, authorized after T9)
+
+### Mechanism
+
+Two upstream paths set a cluster's title position, and this port used the
+plain one for both families.
+
+A plain composite gets it from graphviz's own cluster label, which
+`DotStringFactory` hands to `Cluster#setTitlePosition` — empirically
+`y + 4 + textAscent`, and that 4 is jar-verified on `decede-10-buvu414`'s `E`,
+`bajelo-54-dixe684`'s `Track_FSM.Run` and a 98-sample corpus probe.
+
+A composite whose title moved onto its `${id}ee` subgraph never gets a
+graphviz cluster label to read, so `Cluster#manageEntryExitPoint` computes the
+position itself: `xyTitle.y = rectangleArea.getMinY() + IEntityImage.MARGIN`
+(`Cluster.java:435`; `IEntityImage.java:45` defines MARGIN as 5), and
+`drawUState` draws the title block's TOP at that y (`:496-498`). Baseline
+therefore `frameTop + 5 + textAscent(14)` = `frameTop + 15.889`, against the
+plain family's 14.889.
+
+### Origin
+
+`src/diagrams/state/state-composite-cluster.ts` applied
+`CLUSTER_TITLE_BASELINE_MARGIN` (4) to every title-table-eligible composite.
+G7 T14b measured this exact split and left it on purpose — its own comment
+says the WithLabel family's "=5 correction is OUT of the confirmed ten-item
+edit list (render-position-only, doesn't affect box width/height)". This is
+that correction, and the constant is jar's `IEntityImage.MARGIN` rather than a
+fitted value.
+
+### Measurement — both gates are blind here
+
+The census and the total-positional-error metric BOTH report zero change: on
+these fixtures `compareSvg` stops at `svg/g[1]`'s `childCount` and never
+descends to the titles. Gated instead on a direct count of drawn primitives
+sitting exactly where jar's do, over all 271 cached state fixtures:
+
+- 17 fixtures gain exactly-placed shapes, **none lose any**
+- corpus 3516 -> 3539 of 6007
+- `temuxi-28-cega322` 71/75 -> **75/75** — every rect, ellipse, text, line and
+  path in that fixture is now within 0.02px of jar's
+
+That harness is worth keeping in mind: two of this mission's last three fixes
+were invisible to both standing gates, and only a shape-level comparison saw
+them.
