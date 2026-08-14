@@ -21,10 +21,10 @@ previous run of our own code.
 
 | id | task | write-set |
 |---|---|---|
-| [ ] T1 | Relocate `computeReservedLabelBox` + `splitCreoleLines` to `src/core/` | `src/core/edge-label-box.ts` (new), `src/diagrams/state/state-transition-label.ts`, `state-sizing.ts` |
-| [ ] T2 | Add `stripCreoleMarkup` and apply it inside the box computation | `src/core/edge-label-box.ts`, its test |
-| [ ] T3 | Port `skinparam arrowFontSize` | `src/core/skinparam.ts`, `src/core/theme.ts` |
-| [ ] T4 | Route description link labels through the shared box | `src/diagrams/description/link-edge-attrs.ts` |
+| [x] T1 | Relocate `computeReservedLabelBox` + `splitCreoleLines` to `src/core/` | `src/core/edge-label-box.ts` (new), `src/diagrams/state/state-transition-label.ts`, `state-sizing.ts` |
+| [x] T2 | Add `stripCreoleMarkup` and apply it inside the box computation | `src/core/edge-label-box.ts`, its test |
+| [x] T3 | Port `skinparam arrowFontSize` | `src/core/skinparam.ts`, `src/core/theme.ts` |
+| [x] T4 | Route description link labels through the shared box | `src/diagrams/description/link-edge-attrs.ts` |
 
 T1 is a pure move — state's output must be **byte-identical** after it, proven
 by the state DOT-parity suite, before T2 changes any behaviour.
