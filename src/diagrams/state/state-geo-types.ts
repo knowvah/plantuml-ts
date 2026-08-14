@@ -138,6 +138,33 @@ export interface StateNodeGeo {
    */
   stereotype?: string;
   /**
+   * G9/T7: which side of its own 12x12 symbol a BORDER POINT
+   * (`<<entrypoint>>`/`<<exitpoint>>`/`<<inputPin>>`/`<<outputPin>>`) draws
+   * its name label on — `EntityImageStateBorder#upPosition`
+   * (`svek/image/EntityImageStateBorder.java:70-77`): `true` when the
+   * symbol's TOP edge is above the vertical centre of the parent cluster's
+   * final drawn rectangle, `false` otherwise. Upstream evaluates this at DRAW
+   * time from `parent.getRectangleArea()`; that rectangle is the same
+   * frontier-corrected box `state-composite-geo.ts#materializeCluster`
+   * computes, so this port decides it there and carries the answer.
+   *
+   * Present ONLY on a border point, so it doubles as the marker that selects
+   * `renderer-border-point.ts` over the ordinary state-box renderer — the
+   * dispatch upstream makes by instantiating a different image class
+   * entirely (`GeneralImageBuilder#createEntityImageBlock`).
+   */
+  borderPointLabelAbove?: boolean;
+  /**
+   * G9/T7: the height of that same border point's name label — `desc
+   * .calculateDimension().height` in `EntityImageStateBorder#drawU`, which is
+   * `lines * fontSize` under this port's own `measureTextLines` convention.
+   * Recorded at measurement time (`state-sizing.ts#buildStateGeoTextFields`,
+   * the only place the resolved font size is known) because
+   * `layout-ink-extent.ts` needs it to reserve the band the label occupies
+   * OUTSIDE the symbol, and that module is deliberately theme-free.
+   */
+  borderPointLabelHeight?: number;
+  /**
    * mission G4 S10 (notes never render): present ONLY for `kind: 'note'` --
    * per-line note-body text + measured width (mirrors `headerLines`'s
    * identical per-line-width rationale, `state-note-layout.ts#measureNote`).

@@ -258,7 +258,18 @@ function borderPointBox(
     }
   }
   const core = frontierCalculator(initial, insides, points, rankdir);
-  return ensureMinWidth(core, minWidth, initial);
+  const box = ensureMinWidth(core, minWidth, initial);
+  // G9/T7: `EntityImageStateBorder#upPosition` (`:70-77`) — a border point
+  // draws its name label ABOVE its symbol when the symbol's TOP edge is above
+  // the vertical centre of the parent cluster's FINAL rectangle, below
+  // otherwise. Upstream reads `parent.getRectangleArea()` at draw time; that
+  // rectangle is exactly `box`, which only exists here, so the answer is
+  // recorded on each border-point child now (see `StateNodeGeo
+  // .borderPointLabelAbove`). Mutating the child is how every other
+  // post-correction field in this pass is threaded.
+  const centerY = box.y + box.height / 2;
+  for (const c of children) if (borderSet.has(c.id)) c.borderPointLabelAbove = c.y < centerY;
+  return box;
 }
 
 function materializeCluster(
@@ -347,6 +358,11 @@ export function materializeSpecs(
         ...(spec.bodyLines !== undefined ? { bodyLines: spec.bodyLines } : {}),
         ...(spec.color !== undefined ? { color: spec.color } : {}),
         ...(spec.stereotype !== undefined ? { stereotype: spec.stereotype } : {}),
+        // G9/T7: a border point's label height, for the ink band its label
+        // occupies outside the symbol (`StateNodeGeo.borderPointLabelHeight`).
+        ...(spec.borderPointLabelHeight !== undefined
+          ? { borderPointLabelHeight: spec.borderPointLabelHeight }
+          : {}),
         ...(spec.creationIndex !== undefined ? { creationIndex: spec.creationIndex } : {}),
         // mission skin-file-loading Batch 2: only `EntityImageState`'s own
         // `'normal'`/`'json'` leaf shape draws jar's shadow -- see

@@ -98,6 +98,7 @@
 import type { StateNodeGeo, TransitionGeo } from './state-geo-types.js';
 import { absorbLayoutEpsilon } from '../../core/layout-epsilon.js';
 import { transitionArrowheadInk } from './renderer-arrowhead.js';
+import { positionFromStereotype, usesPortShape } from './state-entity-position.js';
 
 /** `CucaDiagram#getDefaultMargins()` (net/atmp/CucaDiagram.java:719-722) —
  *  shared across the whole `CucaDiagram` family, see module doc comment. */
@@ -213,6 +214,39 @@ function addEllipseInk(box: InkBox, cx: number, cy: number, r: number): void {
   addPoint(box, x + w - 1, y + h - 1);
 }
 
+/**
+ * G9/T7: a BORDER POINT's own ink — the `RADIUS*2` symbol plus the name label
+ * `EntityImageStateBorder#drawU` (`:79-89`) draws OUTSIDE it, above or below.
+ *
+ * The label is what makes this its own rule: every other leaf's text sits
+ * INSIDE the shape whose ink already dominates it, so no other case here adds
+ * a text contribution. `LimitFinder` walks what `drawU` actually draws, and
+ * `drawU` draws both — which is why jar's canvas has room above the topmost
+ * border point and this port's did not (`lulozu-10-bopu547`: 136 against our
+ * 109, the difference being exactly one `2*RADIUS + descHeight` band).
+ *
+ * The symbol takes the ellipse rule for ENTRY_POINT/EXIT_POINT and the
+ * rectangle rule otherwise, matching what `renderer-border-point.ts` draws;
+ * the label takes the uninset text-block rule (`LimitFinder`'s own text walk,
+ * the same one `addNoteInk` documents for a path).
+ */
+function addBorderPointInk(box: InkBox, node: StateNodeGeo): void {
+  const r = node.width / 2;
+  if (usesPortShape(positionFromStereotype(node.stereotype))) {
+    addEllipseInk(box, node.x + r, node.y + r, r);
+  } else {
+    addBarInk(box, node.x, node.y, node.width, node.height);
+  }
+  const lines = node.headerLines ?? [];
+  const labelHeight = node.borderPointLabelHeight;
+  if (lines.length === 0 || labelHeight === undefined) return;
+  const labelWidth = Math.max(...lines.map((ln) => ln.width));
+  const top =
+    node.borderPointLabelAbove === true ? node.y - node.height - labelHeight : node.y + node.height;
+  addPoint(box, node.x - (labelWidth - node.width) / 2, top);
+  addPoint(box, node.x + (labelWidth + node.width) / 2, top + labelHeight);
+}
+
 /** `choice` diamond (`core/svg.ts#diamond`'s own 4-point layout) —
  *  `LimitFinder#drawUPolygon`'s real rule (x padded by `HACK_X_FOR_POLYGON`
  *  on both sides, y unpadded). */
@@ -255,6 +289,12 @@ function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolea
     addStateBoxInk(box, node, true);
     for (const child of node.children) addNodeInk(box, child, includeArrowheadInk, labelInk);
     for (const t of node.transitions) addTransitionInk(box, t, includeArrowheadInk, labelInk);
+    return;
+  }
+  // G9/T7: a border point is a different image class upstream, not a state
+  // box — `renderer.ts#renderShape` dispatches on the same marker.
+  if (node.borderPointLabelAbove !== undefined) {
+    addBorderPointInk(box, node);
     return;
   }
   switch (node.kind) {

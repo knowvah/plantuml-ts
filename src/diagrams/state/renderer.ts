@@ -37,6 +37,7 @@ import { wrapEntity, wrapCluster, wrapStartEntity, wrapEndEntity } from './rende
 import {} from './renderer-arrowhead.js';
 import { renderInitial, renderFinal, renderForkJoin, renderChoiceJunction, renderHistory } from './renderer-pseudostate.js';
 import { renderNormal, renderSdlReceive } from './renderer-box.js';
+import { renderBorderPoint } from './renderer-border-point.js';
 import {} from './state-render-colors.js';
 import { renderComposite } from './renderer-composite-box.js';
 import { renderStateNote } from './renderer-note.js';
@@ -69,6 +70,12 @@ function renderShape(node: StateNodeGeo, theme: Theme): string {
   if (node.children.length > 0) {
     return renderComposite(node, theme);
   }
+  // G9/T7: a border point is a DIFFERENT image class upstream
+  // (`EntityImageStateBorder`, chosen in `GeneralImageBuilder
+  // #createEntityImageBlock`), not a state box — its `<<stereotype>>` never
+  // changes `StateKind`, so the switch below cannot see it. See
+  // `StateNodeGeo.borderPointLabelAbove`, which is set only for these nodes.
+  if (node.borderPointLabelAbove !== undefined) return renderBorderPoint(node, theme);
 
   switch (node.kind) {
     case 'initial':

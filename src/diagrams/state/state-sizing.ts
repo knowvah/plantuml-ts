@@ -44,6 +44,7 @@ import type { DotInputNodeShape } from '../../core/graph-layout.js';
 import type { StateTextLine } from './state-geo-types.js';
 import { measureJsonState } from './state-json-sizing.js';
 import { resolveStateFontSize } from './state-render-colors.js';
+import { isBorderPoint } from './state-entity-position.js';
 
 // ---------------------------------------------------------------------------
 // Creole line splitting
@@ -334,6 +335,8 @@ export interface StateGeoTextFields {
   emptyDescription?: true;
   /** mission G4 S9 -- see `StateNodeGeo.stereotype`'s own doc comment. */
   stereotype?: string;
+  /** G9/T7 -- see `StateNodeGeo.borderPointLabelHeight`'s own doc comment. */
+  borderPointLabelHeight?: number;
 }
 
 /**
@@ -371,5 +374,10 @@ export function buildStateGeoTextFields(
   }
   if (state.color !== undefined) fields.color = state.color;
   if (state.stereotype !== undefined) fields.stereotype = state.stereotype;
+  // G9/T7: a border point's label is drawn OUTSIDE its symbol, so the ink
+  // extent has to reserve it — see `StateNodeGeo.borderPointLabelHeight`.
+  if (isBorderPoint(state) && fields.headerLines !== undefined) {
+    fields.borderPointLabelHeight = fields.headerLines.length * fontSize;
+  }
   return fields;
 }
