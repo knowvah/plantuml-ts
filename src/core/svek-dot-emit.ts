@@ -180,11 +180,51 @@ function rankLines(input: DotInputGraph, recs: Map<string, NodeRec>): string[] {
   return [...groups].map(([rank, shs]) => `{rank=${rank}; ${shs.join('; ')}}`);
 }
 
+/**
+ * `Bibliotekon#addLine`'s two global edge batches: `lines0` is every edge with
+ * `first(line)` — jar's `link.getLength() == 1`, which reaches this port as
+ * `minLen === 0` — and `lines1` is the rest
+ * (`~/git/plantuml/.../svek/Bibliotekon.java:89-114`). `DotStringFactory
+ * #createDotString` prints `lines0` BEFORE any node's shape line or cluster
+ * subgraph and `lines1` after all cluster content (`:187-198`), which is what
+ * makes a `lines0` endpoint the first node graphviz's parser creates — and so
+ * the root of the cycle-breaking DFS that runs before ranking
+ * (`graph-layout-build.ts#firstEncounterOrder` has the full derivation, and
+ * mirrors this same split on the layout path).
+ *
+ * Deliberately not ported: `addLine`'s own tie-break inside `lines0`, which
+ * moves a note-labelled edge ahead of the first same-connections unlabelled
+ * one (`:90-99`). No cached fixture's `lines0` order differs from the input
+ * edge order because of it — `temuxi-28-cega322`'s seven-edge batch matches
+ * jar's exactly — so it is an unexercised residual, recorded rather than
+ * guessed at.
+ */
+function edgeBatches(input: DotInputGraph): { lines0: number[]; lines1: number[] } {
+  const lines0: number[] = [];
+  const lines1: number[] = [];
+  input.edges.forEach((e, i) => (e.attributes?.minLen === 0 ? lines0 : lines1).push(i));
+  return { lines0, lines1 };
+}
+
 function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree): string[] {
   const { recs, nodeById, clusterColors, edgeColors } = seqs;
   const body = [...graphAttrLines(input)];
   const kermor = input.kermor === true;
   const unclustered = input.nodes.filter((n) => !tree.clusteredIds.has(n.id));
+  const { lines0, lines1 } = edgeBatches(input);
+  const emitEdges = (indices: readonly number[]): void => {
+    for (const i of indices) {
+      const e = input.edges[i]!;
+      if (!recs.has(e.from) || !recs.has(e.to)) continue;
+      const from = edgeRef(e.from, recs, nodeById, e.attributes?.tailport);
+      const to = edgeRef(e.to, recs, nodeById, e.attributes?.headport);
+      body.push(edgeLine(e, from, to, edgeColors[i]!));
+    }
+  };
+  // Under kermor BOTH batches print first, before any content
+  // (DotStringFactory.java:178-185); otherwise only `lines0` does, and
+  // `lines1` closes the file (`:187-198`).
+  emitEdges(kermor ? [...lines0, ...lines1] : lines0);
   // DotStringFactory.java:184: `root.printCluster3_forKermor(...)` runs
   // BEFORE recursing into children — root's own direct (non-clustered)
   // "normal" members are empty in every one of these fixtures (all content
@@ -202,13 +242,7 @@ function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree):
     body.push(...clusterBlock(top, tree.childrenOf, recs, nodeById, clusterColors, kermor));
   }
   body.push(...rankLines(input, recs));
-  input.edges.forEach((e, i) => {
-    if (!recs.has(e.from) || !recs.has(e.to)) return;
-    const from = edgeRef(e.from, recs, nodeById, e.attributes?.tailport);
-    body.push(
-      edgeLine(e, from, edgeRef(e.to, recs, nodeById, e.attributes?.headport), edgeColors[i]!),
-    );
-  });
+  if (!kermor) emitEdges(lines1);
   return body;
 }
 

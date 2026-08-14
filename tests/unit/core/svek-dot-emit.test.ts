@@ -162,7 +162,10 @@ describe('toSvekDot — port cluster emission', () => {
   it('emits bare (bracket-less) port->anchor constraint chain', () => {
     const dot = toSvekDot(portGraph());
     expect(dot).toMatch(/sh\d+ \[arrowhead=none\];/);
-    expect(dot).toMatch(/sh\d+->sh\d+;\n/);
+    // G9/T3: the chain's head is jar's `empty()` = `getSpecialPointId(group)`
+    // (ClusterDotString.java:220-226,283), a `za` id and never an `sh` one —
+    // verbatim in `banatu-09-koce254`'s oracle: `sh0010->zaent0001;`.
+    expect(dot).toMatch(/sh\d+->zaent\d+;\n/);
   });
 
   it('does not duplicate port ranks at top level', () => {
@@ -208,7 +211,7 @@ describe('toSvekDot — port cluster anchor also targeted by an outer edge', () 
 
   it('emits the point pre-declaration before the ee-placeholder rect/table line', () => {
     const dot = toSvekDot(portGraphWithGroupEdge());
-    const anchorSh = /(sh\d+) \[shape=rect,width=\.01,height=\.01,label=<<TABLE/.exec(dot)![1]!;
+    const anchorSh = /(zaent\d+) \[shape=rect,width=\.01,height=\.01,label=<<TABLE/.exec(dot)![1]!;
     const pointRe = new RegExp(`${anchorSh} \\[shape=point,width=\\.01,label=""\\];`);
     expect(dot).toMatch(pointRe);
     const pointIdx = dot.search(pointRe);
@@ -669,5 +672,103 @@ describe('toSvekDot — cluster protection wrappers (ClusterDotString.java:91-15
     // `temuxi-28-cega322`: every cluster is pin-bearing and none is linked
     // from or to as a group, so the count stays at base + ee.
     expect(subgraphs(toSvekDot(borderPoint(false)))).toEqual(['cluster0', 'cluster0ee']);
+  });
+});
+
+/**
+ * G9/T3 — the `za` group anchor and jar's two global edge batches.
+ *
+ * `DotStringFactory#createDotString` (`:187-198`) prints `lines0` (jar's
+ * `link.getLength() == 1`, this port's `minLen === 0`) BEFORE any node shape
+ * line or cluster subgraph, and `lines1` after all cluster content; under
+ * `!pragma kermor on` (`:178-185`) both batches print first. The group's
+ * special point is not an entity: it takes no `sh` number and is named
+ * `Cluster.CENTER_ID + group.getUid()` (`Cluster.java:104,653`).
+ *
+ * Ground truth for the numbering is `banatu-09-koce254`'s cached oracle: two
+ * port clusters whose anchors are `zaent0001`/`zaent0003`, whose placeholder
+ * tables carry the OWNING CLUSTER's title color (`#000007`, `#00000C`), and
+ * whose presence shifts nothing — the second cluster still opens at
+ * `#00000B` and the edge still reserves `#000010`.
+ */
+describe('toSvekDot — za anchor identity and lines0/lines1 batches', () => {
+  const twoPortClusters = (): DotInputGraph => ({
+    nodes: [
+      { id: 'a', width: 12, height: 12, shape: 'plaintext', isPort: true },
+      { id: 'a-anchor', width: 1, height: 1, shape: 'rect', titleLabelWidth: 69, titleLabelHeight: 14 },
+      { id: 'b', width: 12, height: 12, shape: 'plaintext', isPort: true },
+      { id: 'b-anchor', width: 1, height: 1, shape: 'rect', titleLabelWidth: 69, titleLabelHeight: 14 },
+    ],
+    edges: [],
+    clusters: [
+      {
+        id: 'cluster0', label: 'A', nodeIds: ['a', 'a-anchor'],
+        portRanks: [{ rank: 'sink', nodeIds: ['a'] }], portAnchorId: 'a-anchor',
+      },
+      {
+        id: 'cluster1', label: 'B', nodeIds: ['b', 'b-anchor'],
+        portRanks: [{ rank: 'source', nodeIds: ['b'] }], portAnchorId: 'b-anchor',
+      },
+    ],
+  });
+
+  it('names the anchor za<uid> and consumes no sh number for it', () => {
+    const dot = toSvekDot(twoPortClusters());
+    // Oracle: cluster6 takes 6-9, its port node sh0010, cluster11 takes 11-14,
+    // its port node sh0015 — the anchors in between take nothing.
+    expect(dot).toContain('subgraph cluster0 {style=solid;color="#000006"');
+    expect(dot).toContain('sh0010 [shape=plaintext');
+    expect(dot).toContain('subgraph cluster1 {style=solid;color="#00000b"');
+    expect(dot).toContain('sh0015 [shape=plaintext');
+    expect(dot).not.toMatch(/sh\d+ \[shape=rect,width=\.01,height=\.01,label=/);
+  });
+
+  it("paints the placeholder table with the owning cluster's title color", () => {
+    // ClusterDotString.java:123-127,179-181 — `empty()`'s label is the SAME
+    // string the cluster's own title table uses, built from getTitleColor().
+    const dot = toSvekDot(twoPortClusters());
+    expect(dot).toContain('zaent0001 [shape=rect,width=.01,height=.01,label=<<TABLE BGCOLOR="#000007"');
+    expect(dot).toContain('zaent0002 [shape=rect,width=.01,height=.01,label=<<TABLE BGCOLOR="#00000c"');
+  });
+
+  const batched = (): DotInputGraph => ({
+    nodes: [
+      { id: 'a', width: 10, height: 10 },
+      { id: 'b', width: 10, height: 10 },
+    ],
+    edges: [
+      { id: 'e0', from: 'a', to: 'b', attributes: { minLen: 1 } },
+      { id: 'e1', from: 'b', to: 'a', attributes: { minLen: 0 } },
+    ],
+    clusters: [{ id: 'cluster0', label: 'C', labelWidth: 20, labelHeight: 14, nodeIds: ['a', 'b'] }],
+  });
+
+  it('prints the minlen=0 batch before any node, and the rest last', () => {
+    const dot = toSvekDot(batched());
+    const zero = dot.indexOf('minlen=0');
+    const one = dot.indexOf('minlen=1');
+    expect(zero).toBeLessThan(dot.indexOf('subgraph cluster0'));
+    expect(zero).toBeLessThan(dot.indexOf('shape=rect,label=""'));
+    expect(one).toBeGreaterThan(dot.indexOf('subgraph cluster0'));
+  });
+
+  it('keeps each batch in input edge order', () => {
+    const g = batched();
+    g.edges = [
+      { id: 'e0', from: 'a', to: 'b', attributes: { minLen: 0 } },
+      { id: 'e1', from: 'b', to: 'a', attributes: { minLen: 0 } },
+    ];
+    const dot = toSvekDot(g);
+    expect(dot.indexOf('sh0010->sh0011')).toBeLessThan(dot.indexOf('sh0011->sh0010'));
+  });
+
+  it('prints BOTH batches first under kermor', () => {
+    // DotStringFactory.java:178-185 — `siseda-71-napu395`'s oracle opens with
+    // its minlen=0 edge, then the minlen=1 ones, then `cluster2empty`.
+    const g = batched();
+    g.kermor = true;
+    const dot = toSvekDot(g);
+    expect(dot.indexOf('minlen=1')).toBeLessThan(dot.indexOf('subgraph cluster0gamma'));
+    expect(dot.indexOf('minlen=0')).toBeLessThan(dot.indexOf('minlen=1'));
   });
 });
