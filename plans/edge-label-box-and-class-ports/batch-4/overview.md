@@ -89,6 +89,24 @@ byte-exact on both axes.** Both residuals sit on ONE edge (`edge-7`) at
 Census class+object **44,683 -> 44,249 (-434), 55 improved, 0 regressed**.
 component/usecase/state censuses byte-identical. All four gates green.
 
+**The 2 residuals are diagnosed and are not a label defect.** All 17
+remaining diffs sit on ONE element, `g[15]` (13 path + 4 text) — the edge
+`Produkt "*" -- "*" Attribut`. Its SPLINE is displaced 0.85-1.10px in x and
+0.02-0.10px in y; graphviz derives the xlabel anchors FROM the spline, so
+the labels inherit that displacement and `moveAwayFrom` scales it by 1.32.
+The label's inferred pre-collision delta matches the spline's own control-
+point delta to 2dp, and replaying the real `moveAwayFrom` from the inferred
+input reproduces jar's output to 0.0035px. **12 of 14 edges have a matching
+spline and are byte-exact on both axes; the 2 that remain are the 1 edge
+whose spline does not.**
+
+So the bar's PREMISE was wrong, not just its number: port-label placement
+is downstream of edge routing, and cannot be closed while routing diverges.
+The spline divergence is characterized but unattributed (`dotEqual: true`,
+so it enters at or after the engine's spline computation) and is tracked in
+the journal as needing the canonical engine-vs-graphviz check before it can
+be filed.
+
 Two premises in this file were falsified by measuring them, both recorded in
 the journal: the head end is **not** un-pushed (all 14 labels intersect), and
 the reserved box was **not** "already correct" (we hand the layout engine raw
