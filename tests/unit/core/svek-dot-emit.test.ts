@@ -540,3 +540,134 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
     expect(dot).toMatch(/sh\d{4}->sh\d{4}:h\[arrowtail=none,arrowhead=none,minlen=1,/);
   });
 });
+
+/**
+ * G9/T1 — jar's cluster protection wrappers (`ClusterDotString.java:91-158`).
+ *
+ * The layout builder has built this nesting since G7 T7; the DOT text did not,
+ * on 85 of the 271 cached state fixtures. The gate that should have caught it
+ * cannot: `tests/oracle/svek-dot.ts#parseClusters` only records subgraphs
+ * matching `^cluster\d+$`, so every wrapper — jar's and ours — is invisible to
+ * it. These assertions are therefore the only thing holding the wrapper shape.
+ *
+ * Expected shapes are quoted from real cached oracle DOT, not derived:
+ *   bupani-17-puxi938  a/p0/base/i/p1, anchor in the BASE cluster
+ *   butigu-57-tobi481  p0/base/p1 (no link from/to the group → no a/i)
+ *   viroxo-69-fito663  a/base/ee/i (border points force protection0/1 off)
+ *   temuxi-28-cega322  base/ee only (border points, group untouched)
+ */
+describe('toSvekDot — cluster protection wrappers (ClusterDotString.java:91-158)', () => {
+  const subgraphs = (dot: string): string[] =>
+    [...dot.matchAll(/subgraph\s+(\w+)\s*\{/g)].map((m) => m[1]!);
+
+  /** `bupani-17-puxi938`'s own shape: one composite, one member, one anchor. */
+  const bupani = (): DotInputGraph => ({
+    nodes: [
+      { id: 'm', width: 76, height: 50 },
+      { id: 'zaent0001', width: 1, height: 1, shape: 'point' },
+    ],
+    edges: [{ id: 'e0', from: 'zaent0001', to: 'm', attributes: { minLen: 1 } }],
+    clusters: [
+      {
+        id: 'cluster0',
+        label: 'C',
+        labelWidth: 9,
+        labelHeight: 14,
+        nodeIds: ['m', 'zaent0001'],
+        innerMarginLevels: 2,
+        unwrappedNodeId: 'zaent0001',
+      },
+    ],
+  });
+
+  it("emits five cluster subgraphs in jar's order a, p0, base, i, p1", () => {
+    expect(subgraphs(toSvekDot(bupani()))).toEqual([
+      'cluster0a',
+      'cluster0p0',
+      'cluster0',
+      'cluster0i',
+      'cluster0p1',
+    ]);
+  });
+
+  it('declares the group anchor in the BASE cluster, outside the i/p1 wrappers', () => {
+    const dot = toSvekDot(bupani());
+    // ClusterDotString.java:148-152 — the `za<uid>` point is printed before
+    // the "i" wrapper opens, so it is a sibling of it, not a descendant.
+    const anchor = dot.indexOf('[shape=point,width=.01,label=""];');
+    expect(anchor).toBeGreaterThan(dot.indexOf('subgraph cluster0 {'));
+    expect(anchor).toBeLessThan(dot.indexOf('subgraph cluster0i'));
+  });
+
+  it('closes every wrapper it opened', () => {
+    const dot = toSvekDot(bupani());
+    expect((dot.match(/\{/g) ?? []).length).toBe((dot.match(/\}/g) ?? []).length);
+  });
+
+  it('emits p0/p1 without a/i when nothing links from or to the group', () => {
+    // `butigu-57-tobi481`: innerMarginLevels 1 — protection0/1 on,
+    // thereALinkFromOrToGroup1 off (ClusterDotString.java:98,151).
+    const dot = toSvekDot({
+      nodes: [{ id: 'a', width: 50, height: 50 }],
+      edges: [],
+      clusters: [
+        {
+          id: 'cluster0',
+          label: 'C',
+          labelWidth: 37,
+          labelHeight: 14,
+          nodeIds: ['a'],
+          innerMarginLevels: 1,
+        },
+      ],
+    });
+    expect(subgraphs(dot)).toEqual(['cluster0p0', 'cluster0', 'cluster0p1']);
+  });
+
+  it('emits no wrapper at all when the cluster carries no innerMarginLevels', () => {
+    const dot = toSvekDot({
+      nodes: [{ id: 'a', width: 50, height: 50 }],
+      edges: [],
+      clusters: [{ id: 'cluster0', label: 'C', labelWidth: 37, labelHeight: 14, nodeIds: ['a'] }],
+    });
+    expect(subgraphs(dot)).toEqual(['cluster0']);
+  });
+
+  /** `viroxo-69-fito663`: a border-point composite whose group IS touched. */
+  const borderPoint = (wrap: boolean): DotInputGraph => ({
+    nodes: [
+      { id: 'p', width: 12, height: 12, isPort: true },
+      { id: 'm', width: 50, height: 50 },
+    ],
+    edges: [],
+    clusters: [
+      {
+        id: 'cluster0',
+        label: 'C',
+        labelWidth: 42,
+        labelHeight: 14,
+        nodeIds: ['p', 'm'],
+        portRanks: [{ rank: 'sink', nodeIds: ['p'] }],
+        portRanksLabelOnEe: true,
+        ...(wrap ? { borderPointAncestorWrap: true as const } : {}),
+      },
+    ],
+  });
+
+  it('suppresses p0/p1 for a border-point cluster and opens i inside ee', () => {
+    // ClusterDotString.java:109-112 — any border point forces protection0 and
+    // protection1 false, which is why the wrapper and pin populations are
+    // disjoint; :139-152 puts the "i" wrapper INSIDE the ee subgraph.
+    const dot = toSvekDot(borderPoint(true));
+    expect(subgraphs(dot)).toEqual(['cluster0a', 'cluster0', 'cluster0ee', 'cluster0i']);
+    expect(dot).not.toContain('cluster0p0');
+    expect(dot).not.toContain('cluster0p1');
+    expect((dot.match(/\{/g) ?? []).length).toBe((dot.match(/\}/g) ?? []).length);
+  });
+
+  it('leaves a border-point cluster unwrapped when its group is untouched', () => {
+    // `temuxi-28-cega322`: every cluster is pin-bearing and none is linked
+    // from or to as a group, so the count stays at base + ee.
+    expect(subgraphs(toSvekDot(borderPoint(false)))).toEqual(['cluster0', 'cluster0ee']);
+  });
+});
