@@ -32,8 +32,8 @@ in PAIRS.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Emit `a`/`p0`/`i`/`p1` wrappers | typescript-pro | `src/core/svek-dot-emit.ts`, `tests/unit/core/svek-dot-emit.test.ts` | — | [ ] |
-| T2 | Cross-path wrapper-count fitness test | typescript-pro | `tests/oracle/wrapper-parity.test.ts` (new) | T1 | [ ] |
+| T1 | Emit `a`/`p0`/`i`/`p1` wrappers | typescript-pro | `src/core/svek-dot-emit.ts`, `tests/unit/core/svek-dot-emit.test.ts` | — | [x] |
+| T2 | Cross-path wrapper-count fitness test | typescript-pro | `tests/oracle/wrapper-parity.test.ts` (new) | T1 | [x] |
 
 ## Exit bar
 
