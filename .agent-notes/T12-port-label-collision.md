@@ -23,3 +23,30 @@
 - **Impact**: when per-element deltas cluster into groups with opposite signs,
   suspect a geometry-dependent solver before fitting an offset.
 - **Confidence**: High — `manageCollision` reproduces 12 of 14 edges byte-exact.
+
+## Observation: builder and DOT emitter disagree on numeric precision
+- **Context**: chasing the last 2 diffs on `tobuka-93-jale775` after T12.
+- **Finding**: `svek-dot-emit.ts#inches` writes node dims as
+  `(px/72).toFixed(6)` (jar's own 6dp), so jar's graphviz reads
+  `width=5.555556` = **400.000032px**. `graph-layout-build.ts#addNodes` passes
+  `(n.width/72).toString()` — full float — giving the engine **400.0px**. The
+  two paths lay out numerically different graphs from one `DotInputGraph`.
+  Isolated by injecting full-precision width into the ORACLE DOT text, which
+  reproduces the builder path's output exactly.
+- **Impact**: this is the THIRD builder/emitter divergence found in one
+  session (the others: tail/head label boxes never reaching the engine, and
+  this). The DOT parity gate compares emitted TEXT and is structural with a
+  0.01-inch tolerance, so it can see none of them. Any future "our geometry
+  differs but dotEqual is true" should suspect this seam first.
+- **Confidence**: High — controlled experiment, engine exonerated against
+  real graphviz 15.1.1 on both its entry points.
+
+## Observation: the engine is NOT the default suspect
+- **Context**: two hypotheses in a row blamed `@knowvah/dot-engine`.
+- **Finding**: on the fixture's own `svek-1.dot` the engine is byte-identical
+  to real graphviz via `renderSvg` AND via `parse` -> `render` -> `getLayout`.
+  Both prior hypotheses (issue-01-style getLayout drift; a sub-pixel N25/N62
+  residual) were wrong.
+- **Impact**: run the canonical check BEFORE writing a graphviz-issue file.
+  Two of three graphviz-issue-shaped hypotheses this session were ours.
+- **Confidence**: High.
