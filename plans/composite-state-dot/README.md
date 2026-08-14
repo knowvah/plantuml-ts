@@ -69,7 +69,7 @@ baseline is the only way to tell a fix from a trade.
 
 - [x] **batch-1** — [emit the wrapper subgraphs](batch-1/overview.md) (exit-bar 1, 2)
 - [x] **batch-2** — [declaration order + `za` anchor](batch-2/overview.md) (exit-bar 3)
-- [ ] **batch-3** — [border-point pins](batch-3/overview.md) (exit-bar 4)
+- [x] **batch-3** — [border-point pins](batch-3/overview.md) (exit-bar 4)
 
 ## Stop conditions
 
@@ -121,7 +121,7 @@ baseline is the only way to tell a fix from a trade.
 | 1. `bupani` emits 5 subgraphs in jar's order | **met** — `a p0 base i p1`, anchor in the base cluster |
 | 2. batch 1's census neutral on all five types | **met** — byte-identical per-fixture, both censuses |
 | 3. batch 2 improves the census, no fixture rising | **partly met** — 25 fell, 2 rose, both with a named mechanism (stop-condition 6 discharged, not waived) |
-| 4. `temuxi` reaches height 418, or T5 says why not | **T5 says why not** — mechanism found and verified; the fix reaches every frame and leaves a separate 75px top-offset defect |
+| 4. `temuxi` reaches height 418, or T5 says why not | **partly met** — T6 landed the mechanism; every frame now matches jar (module 316, counter 300, Somp 170, flop 130) and the height reaches 343. The residual 75px is a named leaf-label placement defect, not a size |
 | 5. every remaining miss carries a mechanism | **met** — six recorded in the journal, each with a `file:line` |
 
 Corpus movement: subgraph-count deficit 85 fixtures → 1; DFS-root mismatches
@@ -132,8 +132,8 @@ Two fitness tests now hold the emitter/builder seam that produced four of this
 area's defects: `tests/oracle/wrapper-parity.test.ts` and
 `tests/oracle/declaration-order-parity.test.ts`.
 
-**Open, each needing its own decision:** T6 (the inheritance fix, blast radius
-= every diagram type with nested clusters), `niveno`'s `skin debug` wrapper
+**Open, each needing its own decision:** the border-point name label jar draws
+ABOVE its box (the last 75px of `temuxi`), `niveno`'s `skin debug` wrapper
 suppression, the `[*]`-pseudostate creation order behind `rijoki`'s rise, the
 border-point `za` anchor's `i`-vs-`ee` placement, kermor's missing `${id}empty`
 node, and temuxi's residual 75px top offset.

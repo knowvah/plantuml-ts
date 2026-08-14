@@ -91,3 +91,43 @@ That is a separate top-margin/origin defect, and it is the reason exit-bar 4's
 The fix belongs in `graph-layout-build.ts` / `graph-layout-build-borderpoint.ts`
 — **outside** the write-set stop-condition 4 names, and it would change every
 diagram type that nests a labelled cluster inside another. T6 is not started.
+
+## T6 — outcome
+
+Landed at the origin T5 named: `graph-layout-build-borderpoint.ts
+#inheritedEeLabel`, applied in `graph-layout-build.ts#handlesFor`. No fitted
+constant — the 26.5px never appears in the code; the label itself is what
+graphviz measures.
+
+**Met:** every drawn frame on `temuxi-28-cega322` matches jar exactly (module
+1086x316, counter 529x300, Somp 258x170, flop 170x130), and the engine's raw
+cluster boxes now match real graphviz on the same graph.
+
+**Not met:** document height 343, not 418.
+
+**Measurement note.** The census is BLIND to this fix — `temuxi`'s diff count
+is pinned at 5 by a `childCount` recursion stop (`svg/g[1]`, 31 vs 40), so the
+metric cannot move whatever the geometry does. Gated on total positional error
+instead, over all 271 cached state fixtures: **one fixture changes and it
+improves** (206 -> 152px), zero worse. `temuxi` is the only cached fixture with
+a border-point composite nested inside another — the fix is correct and its
+corpus reach is one fixture. Class/object and component/usecase censuses are
+byte-identical.
+
+### Residual — the last 75px, and why it is not a size
+
+With T6 in, our whole diagram is a RIGID 75px translation of jar's: every frame
+and every node box matches, and every gap between them matches. Jar draws a
+border point's own name label ABOVE its 12x12 box and reserves that band at the
+top of the document; we draw it below the box top and reserve nothing.
+
+- jar: `sig_in` label baseline y=66.889, its box top y=82 → label ABOVE, by 15.1
+- ours: same label baseline y=22.889, its box top y=7 → label BELOW the box top,
+  by 15.9
+- x is identical on both sides (127.669), so only the vertical rule differs
+- consequence: jar's outermost frame starts at y=88, ours at y=13
+
+That is a leaf-label placement rule in the border-point node's own geometry
+(`state-leaf-node.ts:35-62` builds these nodes from `getEntityPosition`; the
+label y comes from the shared leaf text geometry, with no border-point-specific
+case), not cluster construction — outside T6's write-set and its own task.
