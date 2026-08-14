@@ -10,6 +10,7 @@ import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
 import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
+import { attachPortLabels, multiLineLabelAnchor, portLabelAnchor } from './class-edge-label-anchor.js';
 import { CARDINALITY_FONT_SIZE, splitEdgeLabelLines } from './class-layout-helpers.js';
 import { ARROW_GLYPH_SIZE, parseMagicArrowLabel, magicArrowAngle, magicArrowGlyphPoints, type MagicArrowLabel } from './class-magic-arrow.js';
 import type { EdgeGeo } from './layout.js';
@@ -129,119 +130,6 @@ function attachMagicArrow(
       { x: blockLeft + ARROW_GLYPH_SIZE + textWidth / 2, y: center.y },
       measurer,
       fontFamily,
-    );
-  }
-}
-
-/**
- * G2 item 43: lay out a `\n`/`\l`/`\r`-split edge label as one `<text>`
- * per line, generalizing `portLabelAnchor`'s single-line CENTER-to-left/
- * baseline conversion (reduces to the EXACT SAME formula when `lines.length
- * === 1`, verified algebraically below). Jar draws every line via ONE
- * `TextBlock` translated as a whole to `labelXY`'s top-left corner
- * (`SvekEdge.java:953`, `Display#create0`) -- each line is then
- * individually positioned WITHIN that block's own max-line-width per the
- * block's resolved `HorizontalAlignment` (default CENTER, or LEFT/RIGHT
- * when the label carried a trailing `\l`/`\r` -- {@link
- * splitEdgeLabelLines}). Jar-verified byte-exact SHAPE against
- * `sicile-99-pefa679`'s 3 sibling edges (identical 3-line text, one
- * alignment mode each): the block's LEFT edge sits at the SAME x for every
- * mode (`center.x - maxWidth/2`), and each line offsets from that left
- * edge by `0` (LEFT), `maxWidth-lineWidth` (RIGHT), or
- * `(maxWidth-lineWidth)/2` (CENTER) -- exactly `portLabelAnchor`'s own
- * `center.x - width/2` formula generalized from a single `width` to the
- * block's `maxWidth`. Line spacing is `CARDINALITY_FONT_SIZE` (13) exactly
- * -- jar's real per-line `y` delta on every sampled fixture. `totalHeight`
- * folds the extra `(lines.length-1)` rows into the SAME single-line
- * `m.height`/`baselineOffset` formula `portLabelAnchor` already uses, so at
- * `lines.length === 1` this function's `x`/`y` are algebraically identical
- * to `portLabelAnchor`'s. Still bound by the SAME gvts-genuine
- * label-placement residual N25/N62 already named (@knowvah/dot-engine's own
- * box-center doesn't match jar's sub-pixel placement) -- structurally
- * correct, not guaranteed byte-exact.
- */
-function multiLineLabelAnchor(
-  lines: string[],
-  align: 'center' | 'left' | 'right',
-  center: { x: number; y: number },
-  measurer: StringMeasurer,
-  fontFamily: string,
-): Array<{ text: string; x: number; y: number; width: number }> {
-  const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
-  const widths = lines.map((l) => measurer.measure(l, font).width);
-  const maxWidth = Math.max(...widths);
-  const blockLeft = center.x - maxWidth / 2;
-  const firstLine = lines[0] ?? '';
-  const m0 = measurer.measure(firstLine, font);
-  const baselineOffset = CARDINALITY_FONT_SIZE - measurer.getDescent(font, firstLine);
-  const totalHeight = (lines.length - 1) * CARDINALITY_FONT_SIZE + m0.height;
-  const blockTop = center.y - totalHeight / 2;
-  return lines.map((text, i) => {
-    const width = widths[i]!;
-    const offset = align === 'left' ? 0 : align === 'right' ? maxWidth - width : (maxWidth - width) / 2;
-    return {
-      text,
-      x: blockLeft + offset,
-      y: blockTop + baselineOffset + i * CARDINALITY_FONT_SIZE,
-      width,
-    };
-  });
-}
-
-/**
- * Convert a `graph-layout.ts#extractPortLabelPositions` CENTER point into
- * the left/baseline anchor jar's own `<text>` emits (no `text-anchor`/
- * `dominant-baseline` attribute at all -- unlike the pre-existing `label`
- * center-label render, which uses `dominant-baseline:middle`, this mirrors
- * every OTHER text element in this engine's own established convention,
- * `class-member-rows.ts`'s doc comment: "un-centered `<text>`... `y =
- * lineTop + baselineOffset`"). `measurer`/`CARDINALITY_FONT_SIZE` give the
- * SAME box @knowvah/dot-engine itself measured the text with (`core/graph-layout.ts
- * #addEdges`'s `labelfontsize`), so the conversion is self-consistent.
- */
-function portLabelAnchor(
-  text: string,
-  center: { x: number; y: number },
-  measurer: StringMeasurer,
-  fontFamily: string,
-): { text: string; x: number; y: number; width: number } {
-  const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
-  const m = measurer.measure(text, font);
-  const baselineOffset = CARDINALITY_FONT_SIZE - measurer.getDescent(font, text);
-  // G2 N35 (superseded by ADR-1): the `19.418750000000003` vs jar's
-  // `19.4188` mismatch that once motivated pre-rounding this width is now
-  // resolved at emission -- `core/svg.ts` formats every numeric attribute
-  // through `formatDecimal(value, 3)` (T5), so this raw float reaches the
-  // same jar-matching output without a class-engine-local round-trip.
-  const width = m.width;
-  return {
-    text,
-    x: center.x - width / 2,
-    y: center.y - m.height / 2 + baselineOffset,
-    width,
-  };
-}
-
-/** Attach `tailLabel`/`headLabel` (G2/N25) if `graph-layout.ts` computed a
- *  position for them -- absent when the relationship carries no
- *  `fromMultiplicity`/`toMultiplicity` (`edgeLabelAttrs` then never set
- *  `tailLabel`/`headLabel` on the DOT input, so `extractPortLabelPositions`
- *  never ran for this edge). */
-function attachPortLabels(
-  edgeGeo: EdgeGeo,
-  rel: Relationship,
-  edgeResult: DotLayoutResult['edges'][number],
-  measurer: StringMeasurer,
-  fontFamily: string,
-): void {
-  if (rel.fromMultiplicity !== undefined && edgeResult.tailLabelX !== undefined && edgeResult.tailLabelY !== undefined) {
-    edgeGeo.tailLabel = portLabelAnchor(
-      rel.fromMultiplicity, { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY }, measurer, fontFamily,
-    );
-  }
-  if (rel.toMultiplicity !== undefined && edgeResult.headLabelX !== undefined && edgeResult.headLabelY !== undefined) {
-    edgeGeo.headLabel = portLabelAnchor(
-      rel.toMultiplicity, { x: edgeResult.headLabelX, y: edgeResult.headLabelY }, measurer, fontFamily,
     );
   }
 }
@@ -438,7 +326,10 @@ export function buildEdgeGeos(
       edgeGeo, rel, edgeResult, measurer, fontFamily,
       matchesFromTo ? pts : [...pts].reverse(),
     );
-    attachPortLabels(edgeGeo, rel, edgeResult, measurer, fontFamily);
+    // `result.nodes` is the collision set — the closest analogue to
+    // upstream's `getBibliotekon().allNodes()` (`DotStringFactory.java:466`),
+    // which is likewise every laid-out node, in layout order.
+    attachPortLabels(edgeGeo, rel, edgeResult, { measurer, fontFamily, nodes: result.nodes });
     edges.push(edgeGeo);
   }
   return edges;

@@ -27,6 +27,14 @@ export interface EdgeIndex {
 
 export const edgeKey = (tail: string, head: string): string => `${tail} ${head}`;
 
+/** The empty FIXEDSIZE reservation jar hands graphviz for an edge label —
+ *  `SvekEdge#appendTable` (SvekEdge.java:504-521), whose `(int)` casts are
+ *  the `Math.trunc` here. Graphviz draws nothing; jar draws the text itself
+ *  from the box graphviz reserved. */
+const fixedSizeTable = (width: number, height: number): string =>
+  `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.trunc(width)}" ` +
+  `HEIGHT="${Math.trunc(height)}"><TR><TD></TD></TR></TABLE>`;
+
 export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
   const nodeIds = new Set(input.nodes.map((n) => n.id));
   const idQueues = new Map<string, string[]>();
@@ -106,12 +114,20 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
     // the computed position back out via `extractPortLabelPositions` (no
     // public snapshot API exposes it directly — ADR-1 in @knowvah/dot-engine hides
     // the internal `Edge` model).
-    if (a?.tailLabel !== undefined) {
+    // Same seam as `labelBoxWidth`/`labelBoxHeight` above, one edge-end
+    // out: jar reserves a FIXEDSIZE TABLE for `taillabel`/`headlabel` too
+    // (`SvekEdge.java:447-468` -> `appendTable`), so handing the engine the
+    // raw TEXT makes it reserve a box of its OWN measurement instead of
+    // jar's. The reserved box is what `getXY`'s `getMinXY` reads, so the
+    // difference lands directly on every port label's placement.
+    const hasTailBox = a?.tailLabelWidth !== undefined && a?.tailLabelHeight !== undefined;
+    const hasHeadBox = a?.headLabelWidth !== undefined && a?.headLabelHeight !== undefined;
+    if (a?.tailLabel !== undefined && !hasTailBox) {
       attrs.taillabel = a.tailLabel;
       attrs.labelfontname = 'Times';
       attrs.labelfontsize = CARDINALITY_FONT_SIZE.toString();
     }
-    if (a?.headLabel !== undefined) {
+    if (a?.headLabel !== undefined && !hasHeadBox) {
       attrs.headlabel = a.headLabel;
       attrs.labelfontname = 'Times';
       attrs.labelfontsize = CARDINALITY_FONT_SIZE.toString();
@@ -130,6 +146,15 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
         `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.floor(a.labelBoxWidth!)}" ` +
           `HEIGHT="${Math.floor(a.labelBoxHeight!)}"><TR><TD></TD></TR></TABLE>`,
       );
+    }
+
+    // `Math.trunc` IS `appendTable`'s `(int)` cast (SvekEdge.java:505-506);
+    // identical to the `Math.floor` above for these non-negative dims.
+    if (a?.tailLabel !== undefined && hasTailBox) {
+      edge.setHtmlAttr('taillabel', fixedSizeTable(a.tailLabelWidth!, a.tailLabelHeight!));
+    }
+    if (a?.headLabel !== undefined && hasHeadBox) {
+      edge.setHtmlAttr('headlabel', fixedSizeTable(a.headLabelWidth!, a.headLabelHeight!));
     }
 
     const k = edgeKey(e.from, e.to);
