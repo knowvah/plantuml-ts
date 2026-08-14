@@ -63,7 +63,7 @@ different anchors, or `moveAwayFrom` / the cluster-avoidance pass
 
 | id | task | write-set |
 |---|---|---|
-| [ ] T11 | **Diagnose** the tail-end ≈15.2. Produce a mechanism with `file:line`, not a constant. | none (diagnosis) — findings to `decision-journal.md` |
+| [x] T11 | **Diagnose** the tail-end ≈15.2. Produce a mechanism with `file:line`, not a constant. | none (diagnosis) — findings to `decision-journal.md` |
 | [ ] T12 | Port the per-end placement into `portLabelAnchor` | `src/diagrams/class/class-edge-geo.ts` |
 | [ ] T13 | Scope the 14 x diffs (deltas 0.98–39.36, not constant) — separate question, NOT explained by the above | none (scoping) |
 
