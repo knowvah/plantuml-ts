@@ -13,6 +13,7 @@ import type {
 } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles } from './graph-layout-build-borderpoint.js';
 import { rowPortTable } from './svek-dot-emit-labels.js';
+import { inches } from './svek-dot-emit.js';
 
 /** graphviz width/height/nodesep/ranksep attrs are in inches; our measured
  *  sizes are in pixels. getLayout returns points (inches × 72), so dividing px
@@ -186,8 +187,8 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
     b.addNode(n.id, {
       shape: 'record',
       label: n.recordLabel,
-      width: (n.width / PX_PER_INCH).toString(),
-      height: (n.height / PX_PER_INCH).toString(),
+      width: inches(n.width),
+      height: inches(n.height),
     });
     return;
   }
@@ -202,8 +203,8 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
     // measure the implicit name-label (its default "Times,serif" has no LUT
     // metrics and would warn). fixedsize keeps the caller's measured size.
     label: '',
-    width: (n.width / PX_PER_INCH).toString(),
-    height: (n.height / PX_PER_INCH).toString(),
+    width: inches(n.width),
+    height: inches(n.height),
   });
 }
 

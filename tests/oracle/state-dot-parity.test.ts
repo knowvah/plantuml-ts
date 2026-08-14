@@ -118,10 +118,20 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — sta
         // both sides so they cannot mask a rect-size regression). Backlog
         // fixtures ratchet downward; everything else must be exactly 0.
         const allowed = sizeBacklog[name] ?? 0;
+        // Compared WITH float slack, mirroring `compare.ts#exceedsTolerance`'s
+        // own note that a naive `>` is wrong at the boundary. Node dims reach
+        // the engine as a 6dp inches string (`svek-dot-emit.ts#inches`), so a
+        // drift of exactly one 1e-6 unit is the quantization granularity and
+        // is what this `+ 1e-6` band was written to admit — but 1e-6 is not
+        // representable, and the value arrives as 0.000001000000000139778,
+        // failing an exact `<=` by 1.4e-16. The band is unchanged; only the
+        // comparison stops tripping over its own representation.
+        const bound = allowed + 1e-6;
+        const slack = Number.EPSILON * Math.max(diff.maxSizeDeltaIn, bound, 1);
         expect(
-          diff.maxSizeDeltaIn,
+          diff.maxSizeDeltaIn - bound,
           `${name}/${file}: node size drift — maxSizeDeltaIn=${diff.maxSizeDeltaIn} > allowed ${allowed}`,
-        ).toBeLessThanOrEqual(allowed + 1e-6);
+        ).toBeLessThanOrEqual(slack);
       }
     });
   }

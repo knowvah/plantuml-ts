@@ -61,15 +61,35 @@ export function setLayoutInputObserver(
   layoutInputObserver = fn;
 }
 
-/** graphviz reports node centre coords; renderers expect the top-left corner. */
-function mapNodes(snap: LayoutSnapshot): OutNodes {
-  return snap.nodes.map((n) => ({
-    id: n.name,
-    x: n.x - n.width / 2,
-    y: n.y - n.height / 2,
-    width: n.width,
-    height: n.height,
-  }));
+/** graphviz reports node centre coords; renderers expect the top-left corner.
+ *
+ *  Dimensions come from `input`, NOT from the snapshot. The snapshot echoes
+ *  our own numbers back through the 6-decimal inches STRING the engine was
+ *  given (`graph-layout-build.ts#addNodes`), so a 49.938px node returns as
+ *  49.937968 and renderers would DRAW that. The engine decides POSITION; it
+ *  never decides a node's size THAT WAY, so echoing the size we asked for is
+ *  the accurate value, not an approximation of one.
+ *
+ *  But it does sometimes decide a size outright: a `shape=plaintext` node
+ *  carrying an HTML label is declared with no `width`/`height` at all
+ *  (`graph-layout-build.ts#addRowPortNode`), and graphviz pads the label to
+ *  produce the node — 49x18 of label becomes a 65x36 node. Echoing our
+ *  declared value there would discard a real layout decision. `ROUND_TRIP_
+ *  EPSILON` tells the two cases apart without re-deriving `addNodes`'
+ *  per-shape branches: a returned size within it IS our own number coming
+ *  back, and anything further out is the engine's own. */
+const ROUND_TRIP_EPSILON = 1e-3;
+
+function mapNodes(snap: LayoutSnapshot, input: DotInputGraph): OutNodes {
+  const declared = new Map(input.nodes.map((n) => [n.id, n]));
+  return snap.nodes.map((n) => {
+    const d = declared.get(n.name);
+    const echo = (ours: number | undefined, engine: number): number =>
+      ours !== undefined && Math.abs(ours - engine) < ROUND_TRIP_EPSILON ? ours : engine;
+    const width = echo(d?.width, n.width);
+    const height = echo(d?.height, n.height);
+    return { id: n.name, x: n.x - width / 2, y: n.y - height / 2, width, height };
+  });
 }
 
 /**
@@ -250,7 +270,7 @@ export function layoutGraph(
   render(b.graph, 'svg', { engine });
   const snap = getLayout(b.graph, { yAxis: 'down' });
 
-  const nodes = mapNodes(snap);
+  const nodes = mapNodes(snap, input);
   const edges = mapEdges(snap, idx);
   const clusters = mapClusters(snap, clusterIdx);
   shiftToOrigin(nodes, edges, clusters);

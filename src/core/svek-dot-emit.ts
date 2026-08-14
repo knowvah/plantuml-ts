@@ -49,7 +49,14 @@ const MIN_RANKSEP_PX = 60; // Svek getMinRankSep() (non-activity)
  *  divisor, applied upstream in description/link-edge-attrs.ts). */
 const MIN_RANKSEP_PX_KERMOR = 40;
 
-const inches = (px: number): string => (px / PX_PER_INCH).toFixed(6);
+/** Pixels -> the inches string graphviz is given, at jar's own 6-decimal
+ *  precision. Exported because the LAYOUT builder must hand the engine the
+ *  numerically identical graph this emitter writes: jar's graphviz reads
+ *  this text, so 6dp is what upstream's layout actually sees. Passing full
+ *  float precision instead is not "more accurate" -- it is a different
+ *  graph (a 400px node becomes 400.000032px at 6dp, and that difference
+ *  changes spline routing). See `graph-layout-build.ts#addNodes`. */
+export const inches = (px: number): string => (px / PX_PER_INCH).toFixed(6);
 type EdgeAttrs = NonNullable<DotInputEdge['attributes']>;
 
 /** Explicit skinparam overrides skip the minimum floor

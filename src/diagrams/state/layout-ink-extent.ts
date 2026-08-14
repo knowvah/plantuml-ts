@@ -96,6 +96,7 @@
  * @see class/layout-ink-extent.ts (the class-engine precedent this mirrors)
  */
 import type { StateNodeGeo, TransitionGeo } from './state-geo-types.js';
+import { absorbLayoutEpsilon } from '../../core/layout-epsilon.js';
 import { transitionArrowheadInk } from './renderer-arrowhead.js';
 
 /** `CucaDiagram#getDefaultMargins()` (net/atmp/CucaDiagram.java:719-722) —
@@ -372,8 +373,8 @@ export function computeStateDocumentDims(
   // `SvgGraphics#ensureVisible`: `(int)(v + 1)` — a truncating cast, which
   // for non-negative `v` is `Math.floor`.
   return {
-    width: Math.floor(finalWidth + 1),
-    height: Math.floor(finalHeight + 1),
+    width: Math.floor(absorbLayoutEpsilon(finalWidth) + 1),
+    height: Math.floor(absorbLayoutEpsilon(finalHeight) + 1),
   };
 }
 
