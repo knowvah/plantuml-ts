@@ -131,3 +131,60 @@ That is a leaf-label placement rule in the border-point node's own geometry
 (`state-leaf-node.ts:35-62` builds these nodes from `getEntityPosition`; the
 label y comes from the shared leaf text geometry, with no border-point-specific
 case), not cluster construction — outside T6's write-set and its own task.
+
+## T7 — border-point label placement (follow-on, authorized after T6)
+
+### Mechanism
+
+A border point kept `StateKind:'normal'` (`state-entity-position.ts`'s own doc
+comment records why: `Stereogroup` has no entry/exit case), so
+`renderer.ts#renderShape` had no case for it and it fell through to
+`renderNormal` — the ordinary state box. Upstream instantiates a different
+image class, `EntityImageStateBorder`, whose `drawU` (`:79-89`) draws the
+symbol at the node origin and the label OUTSIDE it.
+
+Every divergence followed from that one missing dispatch: a rounded rect at
+stroke 0.5 instead of a circle/square at 1.5, a divider `<line>` upstream never
+draws, and the label at `node.y + MARGIN + ascent` (`renderer-box.ts:246-250`)
+instead of above or below the symbol.
+
+### Measured, before and after
+
+| | ours before | ours after | jar |
+|---|---|---|---|
+| `lulozu` `en1` label baseline | 22.889 (dy +15.889) | 18.5 | 18.5 |
+| `temuxi` pins, top half | dy +15.889 | dy -15.111 | dy -15.111 |
+| `temuxi` pins, bottom half | dy +15.889 | dy +22.889 | dy +22.889 |
+| `temuxi` document height | 316 | 368 | 418 |
+
+Corpus, all 271 cached state fixtures, by total positional error: 12 better, 0
+worse, four to exactly zero. Census: 5 fall, 0 rise. Class/object unchanged.
+
+### Residual 1 — a 1.611px text-ink band, NOT fitted
+
+`lulozu` is 134 against jar's 136, and every element in it is a rigid 1.611px
+translation of jar's. The label's own ink in jar starts 1.611px above the box
+top this port computes, i.e. jar's text ink spans `[baseline - 12.5, baseline +
+3.111]` where ours spans `[baseline - 10.889, baseline + 3.111]`. Our
+`DeterministicMeasurer` reports height 14 and descent 3.111 for that string —
+ascent 10.889, the same value `textAscent` models and the same one that
+reproduces jar's BASELINE exactly. So the 12.5 is not derivable from anything
+this port measures, and 1.611 is not going into the code as a constant.
+The remaining 0.389px of the 2px gap is at the bottom and is unexplained.
+
+### Residual 2 — temuxi's last 50px
+
+Not a size and not the label: the document extent itself. Jar's canvas is
+`SvekResult`'s dimension, which is graphviz's own graph bounding box and
+therefore includes each cluster's RESERVED box; ours is the drawn ink. On
+temuxi graphviz's `cluster0` bb is 397 tall where the frontier-corrected frame
+we draw is 316, and `dot -Tplain` puts the whole graph at 413 against our
+engine's reported 302. Its own task.
+
+### Recorded, not fixed
+
+`<<entrypoint>>`/`<<exitpoint>>` now draw jar's circle, which is a shape change
+this task made because it lives in the same missing dispatch. `EXPANSION_INPUT`
+/`EXPANSION_OUTPUT` keep the plain square: upstream draws a four-cell bar of a
+different size (`EntityPosition.java:100-115,120-128`) and no corpus fixture
+exercises them, so the shape stays unverified rather than guessed.
