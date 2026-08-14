@@ -99,6 +99,7 @@ import type { StateNodeGeo, TransitionGeo } from './state-geo-types.js';
 import { absorbLayoutEpsilon } from '../../core/layout-epsilon.js';
 import { transitionArrowheadInk } from './renderer-arrowhead.js';
 import { positionFromStereotype, usesPortShape } from './state-entity-position.js';
+import { textAscent } from './state-render-colors.js';
 
 /** `CucaDiagram#getDefaultMargins()` (net/atmp/CucaDiagram.java:719-722) —
  *  shared across the whole `CucaDiagram` family, see module doc comment. */
@@ -215,6 +216,24 @@ function addEllipseInk(box: InkBox, cx: number, cy: number, r: number): void {
 }
 
 /**
+ * `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:217-225`): a
+ * `UText`'s ink is NOT its layout box. Given the BASELINE `y` it is drawn at,
+ * `LimitFinder` records `[y - (height - 1.5), y + 1.5]` — so the ink reaches
+ * `height - 1.5` above the baseline and only `1.5` below it, where a text
+ * block's own box spans `[y - ascent, y - ascent + height]`.
+ *
+ * At 14pt those differ by `1.611` at BOTH edges (`fontSize/4.5 - 1.5`), which
+ * is exactly the rigid offset eight border-point fixtures carried — jar's
+ * whole drawing sat 1.611px lower than ours because its canvas reserved that
+ * much more above the topmost label.
+ *
+ * Only the border-point label needs this: every other text in a state diagram
+ * sits inside a shape whose own ink already dominates it, which is why no
+ * other case in this module models text at all.
+ */
+const TEXT_INK_BASELINE_DROP = 1.5;
+
+/**
  * G9/T7: a BORDER POINT's own ink — the `RADIUS*2` symbol plus the name label
  * `EntityImageStateBorder#drawU` (`:79-89`) draws OUTSIDE it, above or below.
  *
@@ -243,8 +262,15 @@ function addBorderPointInk(box: InkBox, node: StateNodeGeo): void {
   const labelWidth = Math.max(...lines.map((ln) => ln.width));
   const top =
     node.borderPointLabelAbove === true ? node.y - node.height - labelHeight : node.y + node.height;
-  addPoint(box, node.x - (labelWidth - node.width) / 2, top);
-  addPoint(box, node.x + (labelWidth + node.width) / 2, top + labelHeight);
+  // One `UText` per line, each contributing `LimitFinder#drawText`'s own box
+  // (see {@link TEXT_INK_BASELINE_DROP}). `labelHeight` is `lines * fontSize`
+  // by construction (`state-sizing.ts#buildStateGeoTextFields`), so the
+  // division recovers the per-line height `calculateDimension` reports.
+  const lineHeight = labelHeight / lines.length;
+  const firstBaseline = top + textAscent(lineHeight);
+  const lastBaseline = firstBaseline + (lines.length - 1) * lineHeight;
+  addPoint(box, node.x - (labelWidth - node.width) / 2, firstBaseline - lineHeight + TEXT_INK_BASELINE_DROP);
+  addPoint(box, node.x + (labelWidth + node.width) / 2, lastBaseline + TEXT_INK_BASELINE_DROP);
 }
 
 /** `choice` diamond (`core/svg.ts#diamond`'s own 4-point layout) —

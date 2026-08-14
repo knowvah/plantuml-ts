@@ -78,3 +78,53 @@ describe('computeStateDocumentDims — border-point composite ink overflow', () 
     );
   });
 });
+
+/**
+ * Feature: a border point's LABEL reserves jar's text ink, not its layout box.
+ *
+ * `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:217-225`) records a
+ * `UText`'s ink from the BASELINE it is drawn at: `[y - (height - 1.5),
+ * y + 1.5]`. A text block's own box is `[y - ascent, y - ascent + height]`, so
+ * at 14pt the two differ by `fontSize/4.5 - 1.5 = 1.611` at each edge.
+ *
+ * That 1.611 was a rigid offset on eight cached border-point fixtures — jar's
+ * entire drawing sat that much lower than ours, because its canvas reserved
+ * more above the topmost label. `lulozu-10-bopu547` was 134 tall against
+ * jar's 136.
+ */
+describe('computeStateDocumentDims — a border point`s label ink', () => {
+  const pin = (o: Partial<StateNodeGeo> = {}): StateNodeGeo => ({
+    id: 'p',
+    kind: 'normal',
+    display: 'p',
+    x: 100,
+    y: 100,
+    width: 12,
+    height: 12,
+    children: [],
+    transitions: [],
+    stereotype: 'inputPin',
+    headerLines: [{ text: 'p', width: 40 }],
+    borderPointLabelHeight: 14,
+    borderPointLabelAbove: true,
+    ...o,
+  });
+
+  it('reserves only the symbol when there is no label', () => {
+    // `addBarInk`: [99, 111]. 12 + INK_DELTA 15 + bottom margin 5, +1 truncating.
+    expect(computeStateDocumentDims([pin({ headerLines: [] })], []).height).toBe(33);
+  });
+
+  it('reserves the label ABOVE from its baseline, not its box top', () => {
+    // box top 100 - 12 - 14 = 74; baseline 74 + textAscent(14) = 84.889;
+    // ink top = baseline - (14 - 1.5) = 72.389 — 1.611 ABOVE the box top.
+    // Union with the symbol's [99, 111] gives 38.611, + 15 + 5, +1 → 59.
+    expect(computeStateDocumentDims([pin()], []).height).toBe(59);
+  });
+
+  it('reserves the label BELOW down to baseline + 1.5, not box top + height', () => {
+    // box top 100 + 12 = 112; baseline 122.889; ink bottom = 124.389 — 1.611
+    // ABOVE the box's own bottom (126). Union with [99, 111] gives 25.389.
+    expect(computeStateDocumentDims([pin({ borderPointLabelAbove: false })], []).height).toBe(46);
+  });
+});
