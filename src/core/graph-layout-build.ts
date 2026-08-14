@@ -12,7 +12,7 @@ import type {
   DotInputNode,
 } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
-import { rowPortTable } from './svek-dot-emit-labels.js';
+import { rowPortTable, portTable } from './svek-dot-emit-labels.js';
 import { inches } from './svek-dot-emit.js';
 import { firstEncounterOrder } from './svek-dot-order.js';
 
@@ -120,6 +120,21 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
   }
   if (n.portRows !== undefined) {
     addRowPortNode(b, n);
+    return;
+  }
+  if (n.isPort === true && n.shape === 'plaintext') {
+    // G9/T9: an entry/exit point whose own label is wider than 40px is a
+    // `shape=plaintext` HTML port table upstream
+    // (`SvekNode#appendLabelHtmlSpecialForPort`), and graphviz sizes the node
+    // from that table plus its `PAD`ded 54x36 minimum — the same `addRowPortNode`
+    // mechanism one branch up, for the other kind of port table. Declaring it
+    // as a fixed 12x12 box instead spaced the neighbouring rank 12px too close
+    // (`jucori-40-cevo136`: pin centres 133px apart where `dot -Tplain` on the
+    // very same DOT puts them at 145). The SYMBOL stays 12x12 — `graph-layout
+    // .ts#portNodeSize` reports it back at that size, on this box's centre,
+    // exactly as `DotStringFactory#solve` reads it from the port cell.
+    const node = b.addNode(n.id, { shape: 'plaintext' });
+    node.setHtmlAttr('label', portTable(n, LAYOUT_LABEL_BGCOLOR));
     return;
   }
   b.addNode(n.id, {

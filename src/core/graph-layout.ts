@@ -26,6 +26,7 @@ import {
 import type {
   DotInputEdge,
   DotInputGraph,
+  DotInputNode,
   DotLayoutResult,
 } from './graph-layout.types.js';
 
@@ -80,14 +81,41 @@ export function setLayoutInputObserver(
  *  back, and anything further out is the engine's own. */
 const ROUND_TRIP_EPSILON = 1e-3;
 
+/**
+ * G9/T9: a PORT node occupies its own symbol, not the box graphviz laid out.
+ *
+ * `SvekNode#appendLabelHtmlSpecialForPort` emits an entry/exit point as a
+ * `shape=plaintext` HTML table whenever its label is wider than 40px, so
+ * graphviz sizes the NODE from that table and its `PAD`ded minimum — 54x36 for
+ * `jucori-40-cevo136`'s `Aentry1`, against the 12x12 symbol drawn there. That
+ * bigger box is CORRECT for layout (it is what spaces the ranks), and jar
+ * keeps it: `dot -Tplain` puts that fixture's two pin centres 145px apart,
+ * exactly the frame height jar draws.
+ *
+ * Jar reconciles the two when it reads the layout back. `DotStringFactory
+ * #solve:382-389` takes a `RECTANGLE_PORT`/`RECTANGLE_HTML_FOR_PORTS` node's
+ * position from the `points="…"` polygon beside its `<title>` in graphviz's
+ * own SVG — which is the PORT CELL's polygon, not the outer table's — and
+ * graphviz centres that cell in the padded table. So the reported box is the
+ * caller's declared symbol size, on the engine's own centre.
+ *
+ * This is the seam `solve` occupies, so every consumer sees the corrected box:
+ * before it moved here the state engine drew a 12x12 pin from a 12x12 layout
+ * node (right drawing, ranks 12px too close) and the description engine drew a
+ * 54x36 rect where jar draws 12x12.
+ */
+function portNodeSize(d: DotInputNode | undefined, engine: number, declared: number): number {
+  return d?.isPort === true && d.shape === 'plaintext' ? declared : engine;
+}
+
 function mapNodes(snap: LayoutSnapshot, input: DotInputGraph): OutNodes {
   const declared = new Map(input.nodes.map((n) => [n.id, n]));
   return snap.nodes.map((n) => {
     const d = declared.get(n.name);
     const echo = (ours: number | undefined, engine: number): number =>
       ours !== undefined && Math.abs(ours - engine) < ROUND_TRIP_EPSILON ? ours : engine;
-    const width = echo(d?.width, n.width);
-    const height = echo(d?.height, n.height);
+    const width = portNodeSize(d, echo(d?.width, n.width), d?.width ?? n.width);
+    const height = portNodeSize(d, echo(d?.height, n.height), d?.height ?? n.height);
     return { id: n.name, x: n.x - width / 2, y: n.y - height / 2, width, height };
   });
 }

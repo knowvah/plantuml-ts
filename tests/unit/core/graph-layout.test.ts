@@ -484,3 +484,58 @@ describe('layoutGraph — plaintext row-port node padding (M4)', () => {
     expect(r.nodes[0]!.height).toBe(18);
   });
 });
+
+/**
+ * G9/T9: a PORT node's reported box is its own SYMBOL, on the engine's centre.
+ *
+ * `SvekNode#appendLabelHtmlSpecialForPort` emits an entry/exit point whose
+ * label is wider than 40px as a `shape=plaintext` HTML table, so graphviz
+ * sizes the NODE from that table and its `PAD`ded minimum — 54x36 for
+ * `jucori-40-cevo136`'s `Aentry1` against the 12x12 symbol drawn there. That
+ * larger box is what spaces the ranks and is kept; `DotStringFactory
+ * #solve:382-389` then reads the node's POSITION from the port cell's own
+ * polygon, which graphviz centres in the padded table.
+ *
+ * Jar-verified on that fixture: `dot -Tplain` puts its two pin centres 145px
+ * apart — exactly the frame height jar draws — and jar's entry-point ellipse
+ * sits at `cy=104`, the node centre, not its top-left.
+ */
+describe('layoutGraph — port nodes report their symbol, not the padded table', () => {
+  const portGraph = (shape: 'plaintext' | 'rect'): DotInputGraph => ({
+    nodes: [
+      { id: 'p', width: 12, height: 12, shape, isPort: true, portPad: 10 },
+      { id: 'other', width: 72, height: 36 },
+    ],
+    edges: [{ id: 'e0', from: 'p', to: 'other', attributes: { minLen: 1 } }],
+  });
+
+  it('keeps the declared 12x12 for a plaintext port, whatever the engine sized', () => {
+    const p = layoutGraph(portGraph('plaintext')).nodes.find((n) => n.id === 'p')!;
+    expect(p.width).toBe(12);
+    expect(p.height).toBe(12);
+  });
+
+  it('centres that symbol in the box the engine laid out', () => {
+    // The engine pads the HTML table well past 12x12, so the ranks separate as
+    // if the node were the larger box while the symbol stays centred in it —
+    // which is what puts the neighbouring rank further away than a bare 12x12
+    // node would.
+    const padded = layoutGraph(portGraph('plaintext'));
+    const bare = layoutGraph(portGraph('rect'));
+    const gap = (r: typeof padded): number => {
+      const p = r.nodes.find((n) => n.id === 'p')!;
+      const o = r.nodes.find((n) => n.id === 'other')!;
+      return Math.abs(o.y + o.height / 2 - (p.y + p.height / 2));
+    };
+    expect(gap(padded)).toBeGreaterThan(gap(bare));
+  });
+
+  it('leaves a non-port plaintext node on the engine`s own box', () => {
+    const g: DotInputGraph = {
+      nodes: [{ id: 'a', width: 12, height: 12, shape: 'plaintext' }],
+      edges: [],
+    };
+    const a = layoutGraph(g).nodes.find((n) => n.id === 'a')!;
+    expect(a.width).toBeGreaterThanOrEqual(12);
+  });
+});
