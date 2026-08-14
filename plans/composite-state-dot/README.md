@@ -133,8 +133,7 @@ area's defects: `tests/oracle/wrapper-parity.test.ts` and
 `tests/oracle/declaration-order-parity.test.ts`.
 
 **Open, each needing its own decision:** the 1px composite-title baseline
-`temuxi` still shows, `jucori-40-cevo136`'s 12px-short pin span (a layout
-gap, unlike temuxi's), the 1.611px text-ink band, `niveno`'s `skin debug`
+`temuxi` still shows, the 1.611px text-ink band, `niveno`'s `skin debug`
 wrapper suppression, the `[*]`-pseudostate creation order behind `rijoki`'s rise, the
 border-point `za` anchor's `i`-vs-`ee` placement, kermor's missing `${id}empty`
 node, and temuxi's residual 75px top offset.

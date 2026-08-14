@@ -247,3 +247,55 @@ class/object byte-identical.
 - **`jucori-40-cevo136`'s 48px is NOT this mechanism.** Its composites hold
   only leaves, so both passes agree; its frames are each 12px shorter than
   jar's — a pin-span layout gap, closer in kind to what T6 fixed. Its own task.
+
+## T9 — jucori's 12px pin span (follow-on, authorized after T8)
+
+### Mechanism
+
+A fifth instance of this mission's central failure mode: the emitter and the
+layout builder disagreed about one node.
+
+`SvekNode#appendLabelHtmlSpecialForPort` emits an entry/exit point whose own
+display text is wider than 40px as a `shape=plaintext` HTML port table, and
+graphviz sizes the NODE from that table plus its `PAD`ded 54x36 minimum. Our
+emitter wrote that table faithfully; `graph-layout-build.ts#addOneNode` handed
+the ENGINE a fixed 12x12 box, because `layoutShape` maps `plaintext` to `box`
+and nothing carried the table across. Every rank beside such a port therefore
+sat `(36 - 12) / 2 = 12`px too close.
+
+### Origin, and the second half nobody would have guessed
+
+`src/core/graph-layout-build.ts#addOneNode` — it had a branch for the OTHER
+port table (`portRows`, `addRowPortNode`) and none for this one.
+
+Handing the engine the table fixes the spacing and breaks the drawing: the
+node becomes 54x36 where the symbol is 12x12. Jar reconciles that when it
+reads the layout back — `DotStringFactory#solve:382-389` takes a
+`RECTANGLE_PORT`/`RECTANGLE_HTML_FOR_PORTS` node's position from the
+`points="…"` polygon beside its `<title>` in graphviz's own SVG, which is the
+PORT CELL's polygon rather than the outer table's, and graphviz centres that
+cell in the padded table.
+
+That second half went to the LAYOUT SEAM (`graph-layout.ts#mapNodes`, which
+already centres on the engine's centre) rather than into the state engine.
+The first attempt put it in `state-composite-geo.ts`, and the census caught it
+immediately: two COMPONENT fixtures rose, because that engine was then drawing
+the raw 54x36 table as its port rect. `solve` is diagram-type-agnostic and so
+is this.
+
+### Ruled out
+
+- **The DOT.** Our emitted DOT is byte-equivalent to jar's for this fixture,
+  and real graphviz 15.1.1 lays out both to identical `-Tplain` coordinates.
+- **The frontier.** It reports the span of the pin centres faithfully; the pin
+  centres themselves were 12px apart from jar's.
+- **T6's cluster-label inheritance and T8's ink pass.** jucori's composites
+  hold only leaves, so neither mechanism can fire — which is why its 48px
+  looked like temuxi's 50 but was not.
+
+### Result
+
+`jucori-40-cevo136`: every rect and ellipse matches jar to the digit; total
+positional error 96 -> 0. `fukexa-85-cuvi894` and `vujuru-50-toku619` also
+reach zero, `dobexo-69-zeki749` goes 448 -> 4. Census: 7 fixtures fall
+(3 state, 3 component, 1 more state), NONE rise; class/object byte-identical.
