@@ -28,8 +28,8 @@ position, not a missing node.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Emitter: `za` identity + anchor position + `lines0` ordering | typescript-pro | `src/core/svek-dot-emit.ts`, `src/core/svek-dot-sequence.ts`, `tests/unit/core/svek-dot-emit.test.ts` | — | [ ] |
-| T4 | Builder: mirror the same insertion order | typescript-pro | `src/core/graph-layout-build.ts`, `src/core/graph-layout-build-edges.ts`, `tests/unit/core/graph-layout.test.ts` | T3 | [ ] |
+| T3 | Emitter: `za` identity + anchor position + `lines0` ordering | typescript-pro | `src/core/svek-dot-emit.ts`, `src/core/svek-dot-sequence.ts`, `tests/unit/core/svek-dot-emit.test.ts` | — | [x] |
+| T4 | Builder: mirror the same insertion order | typescript-pro | `src/core/graph-layout-build.ts`, `src/core/graph-layout-build-edges.ts`, `tests/unit/core/graph-layout.test.ts` | T3 | [x] |
 
 T3 and T1 both write `svek-dot-emit.ts`, which is why they are in different
 batches. Do not merge them: T1 is census-neutral and T3 is not.

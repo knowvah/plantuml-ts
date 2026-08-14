@@ -68,7 +68,7 @@ baseline is the only way to tell a fix from a trade.
 ## Batches
 
 - [x] **batch-1** — [emit the wrapper subgraphs](batch-1/overview.md) (exit-bar 1, 2)
-- [ ] **batch-2** — [declaration order + `za` anchor](batch-2/overview.md) (exit-bar 3)
+- [x] **batch-2** — [declaration order + `za` anchor](batch-2/overview.md) (exit-bar 3)
 - [ ] **batch-3** — [border-point pins](batch-3/overview.md) (exit-bar 4)
 
 ## Stop conditions
