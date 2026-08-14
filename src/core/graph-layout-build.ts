@@ -11,7 +11,7 @@ import type {
   DotInputGraph,
   DotInputNode,
 } from './graph-layout.types.js';
-import { buildBorderPointClusterHandles } from './graph-layout-build-borderpoint.js';
+import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
 import { rowPortTable } from './svek-dot-emit-labels.js';
 import { inches } from './svek-dot-emit.js';
 import { firstEncounterOrder } from './svek-dot-order.js';
@@ -285,7 +285,15 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // as-is, below, for genuine PORTIN/PORTOUT ports (`c.portRanks` set
     // WITHOUT `portRanksLabelOnEe`), which this branch does not touch.
     if (c.portRanksLabelOnEe === true) {
-      const handles = buildBorderPointClusterHandles(c, outerName, parentInnermost, () => borderRankSubId++);
+      // G9/T6: the label jar's DOT text leaks onto this cluster from the
+      // enclosing `<parent>ee` — see `inheritedEeLabel`'s own doc comment.
+      const handles = buildBorderPointClusterHandles(
+        c,
+        outerName,
+        parentInnermost,
+        () => borderRankSubId++,
+        inheritedEeLabel(c.parentId === undefined ? undefined : byId.get(c.parentId)),
+      );
       handlesById.set(c.id, handles);
       return handles;
     }
