@@ -35,3 +35,4 @@ object ratchets and census re-run instantly against an updated `.tgz`).
         .agent-notes/class-edge-label-rank-gap.md. -->
 - [ ] 12-port-label-placement-near-head-node.md
 - [x] 13-edge-tail-head-label-positions-not-in-getlayout.md
+- [ ] 14-cluster-label-position-not-in-getlayout.md
