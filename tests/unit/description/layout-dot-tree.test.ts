@@ -54,7 +54,14 @@ function captureAll(puml: string): DotInputGraph[] {
 }
 
 describe('description/layout.ts layoutDescription — edge-label font size (site 5)', () => {
-  it('measures "use" at font-size 13 (jar-exact 20.9625px), not 14 (babafi-51-dixi026)', () => {
+  it('measures "use" at font-size 13, and reserves the jar-exact 22x15 box (babafi-51-dixi026)', () => {
+    // Corrected 2026-08-14 (mission T4). This used to assert `labelWidth`
+    // equalled the RAW measurement at size 13 (20.9625). That was our own
+    // pre-margin number, not the jar's: the fixture's oracle svek-1.dot
+    // declares `WIDTH="22" HEIGHT="15"`, which is the MARGINED, floored box
+    // (`SvekEdge.java:504-507`). We now emit exactly that. The font-size
+    // discrimination the test was written for is preserved below — 13 vs 14
+    // still produce different boxes.
     const puml = readFileSync(join(CACHE, 'babafi-51-dixi026', 'in.puml'), 'utf8');
     const graphs = captureAll(puml);
     const edge = graphs.flatMap((g) => g.edges).find((e) => e.attributes?.label === 'use');
@@ -63,8 +70,11 @@ describe('description/layout.ts layoutDescription — edge-label font size (site
     const expectedAt14 = measurer.measure('use', { family: 'sans-serif', size: 14 }).width;
     expect(expectedAt13).toBeCloseTo(20.9625, 3);
     expect(expectedAt14).not.toBeCloseTo(expectedAt13, 3);
-    expect(edge!.attributes!.labelWidth).toBeCloseTo(expectedAt13, 6);
-    expect(edge!.attributes!.labelWidth).not.toBeCloseTo(expectedAt14, 3);
+    // marginLabel is 1 for a non-self-loop, so the box is floor(w + 2) x (h + 2).
+    expect(edge!.attributes!.labelWidth).toBe(Math.floor(expectedAt13 + 2));
+    expect(edge!.attributes!.labelWidth).toBe(22);
+    expect(edge!.attributes!.labelHeight).toBe(15);
+    expect(edge!.attributes!.labelWidth).not.toBe(Math.floor(expectedAt14 + 2));
   });
 
   it('does NOT narrow node/title measurement — "b" entity node stays at font-size 14', () => {
