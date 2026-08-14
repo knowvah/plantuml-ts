@@ -197,8 +197,9 @@ export function computeClassRawInkDims(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
+  iconSize?: number,
 ): ClassDocumentDims {
-  const box = buildInkBox(classifiers, namespaces, edges, notes);
+  const box = buildInkBox(classifiers, namespaces, edges, notes, iconSize);
   if (!Number.isFinite(box.minX)) return { width: 0, height: 0 };
 
   return {
@@ -241,8 +242,9 @@ export function computeClassDocumentDims(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
+  iconSize?: number,
 ): ClassDocumentDims {
-  const raw = computeClassRawInkDims(classifiers, namespaces, edges, notes);
+  const raw = computeClassRawInkDims(classifiers, namespaces, edges, notes, iconSize);
   // Empty diagram (no ink at all): stay {0, 0} rather than applying margin
   // to nothing -- `computeClassRawInkDims`'s own `{width: 0, height: 0}`
   // sentinel (no ink walked) is indistinguishable in VALUE from "1x1 ink at
@@ -277,8 +279,9 @@ export function computeClassInkShift(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
+  iconSize?: number,
 ): InkShift {
-  const box = buildInkBox(classifiers, namespaces, edges, notes);
+  const box = buildInkBox(classifiers, namespaces, edges, notes, iconSize);
   if (!Number.isFinite(box.minX)) return { dx: 0, dy: 0 };
   return {
     dx: JAR_INK_MARGIN - box.minX,

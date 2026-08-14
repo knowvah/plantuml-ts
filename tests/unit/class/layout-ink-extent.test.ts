@@ -632,3 +632,53 @@ describe('computeClassBorderRectDims (G2 N66)', () => {
     expect(dims).toEqual({ width: 105, height: 55 });
   });
 });
+
+/**
+ * G9/T12: a `#`/`~` visibility icon is a `UPolygon`, so its ink is padded.
+ *
+ * `VisibilityModifier#drawDiamond`/`drawTriangle`
+ * (`skin/VisibilityModifier.java:192-210`) build a `UPolygon`, which
+ * `LimitFinder#drawUPolygon` records with `HACK_X_FOR_POLYGON = 10` added on
+ * BOTH x sides — the same rule this module already applies to a `strictuml`
+ * namespace outline. `+` draws a `UEllipse` and `-` a `URectangle`; neither
+ * is padded.
+ *
+ * The icon sits inside its classifier at `x + ROW_TEXT_LEFT_MARGIN`, so only
+ * the left pad escapes the box's own `x - 1` corner — by exactly 2px, which
+ * is the uniform offset `dejuse-14-pule208` carried against jar on every one
+ * of its 44 shapes (ours at x=7/15/205/213 against jar's 9/17/207/215).
+ */
+describe('computeClassDocumentDims — visibility-icon polygon ink', () => {
+  const withIcon = (icon: string): ClassifierGeo =>
+    makeClassifierGeo({
+      x: 0,
+      y: 0,
+      rows: [{ y: 20, text: 'field', width: 30, visibilityIcon: icon } as ClassifierGeo['rows'][number]],
+    });
+
+  it('pads a protected (#) icon`s ink 10px each side', () => {
+    const plain = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    const diamond = computeClassDocumentDims([withIcon('#')], [], [], []);
+    // left pad reaches `x + 6 + 1 - 10 = x - 3`, against the box's own
+    // `x - 1`: 2px further left, and the box still bounds the right side.
+    expect(diamond.width - plain.width).toBe(2);
+    expect(diamond.height).toBe(plain.height);
+  });
+
+  it('pads a package (~) icon the same way — it is the same UPolygon rule', () => {
+    const plain = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    expect(computeClassDocumentDims([withIcon('~')], [], [], []).width - plain.width).toBe(2);
+  });
+
+  it('leaves public (+) and private (-) alone — UEllipse and URectangle', () => {
+    const plain = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    expect(computeClassDocumentDims([withIcon('+')], [], [], []).width).toBe(plain.width);
+    expect(computeClassDocumentDims([withIcon('-')], [], [], []).width).toBe(plain.width);
+  });
+
+  it('shifts the whole drawing right by the same 2px, per computeClassInkShift', () => {
+    const plain = computeClassInkShift([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    const diamond = computeClassInkShift([withIcon('#')], [], [], []);
+    expect(diamond.dx - plain.dx).toBe(2);
+  });
+});

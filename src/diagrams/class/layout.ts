@@ -43,6 +43,7 @@ import {
 } from './class-layout-helpers.js';
 import { buildDotGraph } from './class-dot-graph.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
+import { iconSizeOf } from './class-visibility-icon.js';
 import {
   buildClassifierGeos,
   buildNamespaceGeos,
@@ -287,7 +288,7 @@ function layoutSinglePage(
     consumedEdgeIds.has(e.id) ? { ...e, consumedByOpaleNote: true as const } : e,
   );
 
-  return assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes);
+  return assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, iconSizeOf(theme));
   // #lizard forgives -- linear orchestration (empty-diagram guard,
   // namespace-collapse, hide/show resolution, pre-measure, degenerate skip,
   // dot-graph build+layout, geo builders, final assembly), each step ALREADY
@@ -314,13 +315,17 @@ function assembleShiftedGeometry(
   namespaces: NamespaceGeo[],
   edges: EdgeGeo[],
   notes: NoteGeo[],
+  // G9/T12: the resolved `classAttributeIconSize` — a `#`/`~` visibility
+  // icon is a `UPolygon`, whose ink `LimitFinder` pads by 10px on each side
+  // (see `class-ink-box.ts#addVisibilityIconInk`).
+  iconSize: number,
 ): ClassGeometry {
-  const documentDims = computeClassDocumentDims(classifiers, namespaces, edges, notes);
+  const documentDims = computeClassDocumentDims(classifiers, namespaces, edges, notes, iconSize);
   // G2 N46: raw (pre-margin, pre-quirk) ink dims -- see `ClassGeometry
   // .rawWidth`'s own doc comment for why chrome centering needs this
   // instead of `documentDims`.
-  const rawDims = computeClassRawInkDims(classifiers, namespaces, edges, notes);
-  const shift = computeClassInkShift(classifiers, namespaces, edges, notes);
+  const rawDims = computeClassRawInkDims(classifiers, namespaces, edges, notes, iconSize);
+  const shift = computeClassInkShift(classifiers, namespaces, edges, notes, iconSize);
 
   return {
     totalWidth: documentDims.width,

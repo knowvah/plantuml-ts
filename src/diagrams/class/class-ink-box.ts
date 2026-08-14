@@ -7,6 +7,8 @@
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
 import type { NoteGeo } from './note-layout.js';
 import { edgeExtremityInk } from './renderer-arrowhead.js';
+import { ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
+import { VISIBILITY_ICON_SIZE } from './class-visibility-icon.js';
 
 export const DOCUMENT_MARGIN_TOP = 0;
 export const DOCUMENT_MARGIN_RIGHT = 5;
@@ -337,7 +339,36 @@ function addClassifierBoxInk(box: InkBox, c: ClassifierGeo): void {
   addRectInk(box, c);
 }
 
-function addClassifierInk(box: InkBox, c: ClassifierGeo): void {
+/**
+ * G9/T12: a member row's PROTECTED (`#`) or PACKAGE (`~`) visibility icon is
+ * a `UPolygon` upstream — `VisibilityModifier#drawDiamond`/`drawTriangle`
+ * (`skin/VisibilityModifier.java:192-210`) — so `LimitFinder#drawUPolygon`
+ * pads its ink by `HACK_X_FOR_POLYGON` on BOTH sides, exactly as this file
+ * already does for a `strictuml` namespace outline. PUBLIC (`+`) draws a
+ * `UEllipse` and PRIVATE (`-`) a `URectangle`, neither of which is padded.
+ *
+ * The icon sits INSIDE its classifier, so only that 10px left pad can escape
+ * the box's own `x - 1` corner — and it does, by `ROW_TEXT_LEFT_MARGIN + 1 -
+ * 10 - (-1)` = 2px. That is the whole of the uniform +2px x-offset four
+ * cached fixtures carried against jar (`dejuse-14-pule208`, whose every
+ * shape sat exactly 2px left of jar's; `picija-82-jebu272`;
+ * `nukera-08-dige359` and `sorisi-53-xebi982` object-side).
+ *
+ * Geometry mirrors the renderer exactly: `renderer-classifier-rows.ts
+ * #renderRow` draws the icon at `geo.x + ROW_TEXT_LEFT_MARGIN`, and both
+ * polygon helpers span `[originX + 1, originX + 1 + (size - 2)]`.
+ */
+function addVisibilityIconInk(box: InkBox, c: ClassifierGeo, iconSize: number): void {
+  if (!c.rows.some((r) => r.visibilityIcon === '#' || r.visibilityIcon === '~')) return;
+  const left = c.x + ROW_TEXT_LEFT_MARGIN + 1;
+  const right = left + (iconSize - 2);
+  // y is unpadded and always inside the box, so only the x extremes matter;
+  // the box's own rule already supplies a dominating y for every row.
+  addPoint(box, left - HACK_X_FOR_POLYGON, c.y);
+  addPoint(box, right + HACK_X_FOR_POLYGON, c.y);
+}
+
+function addClassifierInk(box: InkBox, c: ClassifierGeo, iconSize: number): void {
   // G2 N33: a collapsed-empty package/namespace leaf draws the SAME
   // `USymbolFolder` `UPath` outline a namespace CLUSTER draws (`addPlainInk`
   // below), never `EntityImageClass`'s own rect+`UEmpty` composition -- the
@@ -356,6 +387,7 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo): void {
     return;
   }
   addClassifierBoxInk(box, c);
+  addVisibilityIconInk(box, c, iconSize);
   if (c.kind === 'lollipop') addLollipopRowInk(box, c);
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box is drawn
   // OUTSIDE the classifier's own rect (above-right, `class-stereotype.ts
@@ -403,12 +435,13 @@ export function buildInkBox(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
+  iconSize: number | undefined = VISIBILITY_ICON_SIZE,
 ): InkBox {
   // #lizard forgives -- pre-existing CCN violation, unchanged by the
   // usecase-ellipse ink task: a flat per-shape-family accumulation loop,
   // not branchy logic (each `if` is one independent ink source).
   const box = newInkBox();
-  for (const c of classifiers) addClassifierInk(box, c);
+  for (const c of classifiers) addClassifierInk(box, c, iconSize ?? VISIBILITY_ICON_SIZE);
   for (const n of namespaces) addNamespaceInk(box, n);
   // G2/N13: a dropped member-tip note (unresolved `::member`) draws
   // NOTHING at all -- jar's own ink extent excludes it (`fupope-12-zoku847`'s
