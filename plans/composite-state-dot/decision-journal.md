@@ -345,3 +345,54 @@ sitting exactly where jar's do, over all 271 cached state fixtures:
 That harness is worth keeping in mind: two of this mission's last three fixes
 were invisible to both standing gates, and only a shape-level comparison saw
 them.
+
+## T11 — the 1.611px text-ink band (follow-on)
+
+### Mechanism
+
+`LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:217-225`) records a
+`UText`'s ink from the BASELINE it is drawn at:
+
+```java
+final XDimension2D dim = getStringBounder().calculateDimension(font, text);
+y -= dim.getHeight() - 1.5;
+addPoint(x, y);  addPoint(x, y + dim.getHeight());  …
+```
+
+So the ink is `[baseline - (height - 1.5), baseline + 1.5]`, where a text
+block's own BOX is `[baseline - ascent, baseline - ascent + height]`. At 14pt
+the two differ by `fontSize/4.5 - 1.5 = 1.611` at each edge.
+
+### Correcting my own earlier record
+
+The T7 entry called this "a 1.611px text-ink band that neither our measurer's
+metrics nor `textAscent` account for", said `12.5` was "not derivable from
+anything this port measures", and declined to fit it. Declining was right; the
+premise was wrong. It IS derivable — from `LimitFinder`, which is where the
+rule lives. `12.5` is `height - 1.5`. The lesson is the mission's own: the
+mechanism was in the Java, and a delta between two measurements was never
+going to yield it.
+
+### Why it only ever showed here
+
+Every other text in a state diagram sits inside a shape whose own ink already
+dominates it — this module's doc comment says so, and models no other text.
+The 1.5 had nowhere to surface until G9/T7 put a label OUTSIDE its symbol.
+
+### Result
+
+Corpus, all 271 cached state fixtures, by drawn primitives sitting exactly
+where jar's do: 9 fixtures gain, NONE lose, 3539 -> 3619 of 6007.
+`cinoni-00-sere847`, `jufevo-34-taxu911` and `lulozu-10-bopu547` join the exact
+set; `dobexo-69-zeki749` 1/19 -> 16/19; `xipela-98-nuvu593` 1/16 -> 14/16.
+Census: 5 fall, none rise; class/object byte-identical.
+
+### The border-point family now
+
+10 of its 25 fixtures match jar on every drawn primitive (was 7 before this
+session's follow-ons, 0 of them exact before T6). 639 of 756 shapes across the
+family. What remains is no longer one shared mechanism: `viroxo-69-fito663`
+(3/23) and `resido-15-reza040` (4/34) carry ±2/±3/+10px x-offsets, and
+`diteme-18-favi840`, `nicebo-05-guxa290`, `pesita-10-dene726`,
+`zaloga-87-lonu477`, `zumuje-46-gufe080` each miss a handful. Each needs its
+own diagnosis.

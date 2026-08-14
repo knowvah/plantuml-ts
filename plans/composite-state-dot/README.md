@@ -132,7 +132,7 @@ Two fitness tests now hold the emitter/builder seam that produced four of this
 area's defects: `tests/oracle/wrapper-parity.test.ts` and
 `tests/oracle/declaration-order-parity.test.ts`.
 
-**Open, each needing its own decision:** the 1.611px text-ink band, `niveno`'s `skin debug`
+**Open, each needing its own decision:** `niveno`'s `skin debug`
 wrapper suppression, the `[*]`-pseudostate creation order behind `rijoki`'s rise, the
 border-point `za` anchor's `i`-vs-`ee` placement, kermor's missing `${id}empty`
 node, and temuxi's residual 75px top offset.
