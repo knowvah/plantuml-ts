@@ -150,7 +150,14 @@ describe('toSvekDot — port cluster emission', () => {
 
   it('emits the rank group inside the cluster braces, svek format', () => {
     const dot = toSvekDot(portGraph());
-    expect(dot).toMatch(/subgraph cluster0 \{style=solid;color="#[0-9a-f]+";labeljust="c";\{rank=sink;sh\d+;\}/);
+    // G9/T4: `printRanks` (ClusterDotString.java:254-266) emits the group and
+    // then ITS OWN entries' shape lines, per rank — so the group opens the
+    // cluster's content rather than riding on the `subgraph` line. Line
+    // breaks are not a parity target (this emitter joins statements with
+    // newlines throughout where jar's `SvekUtils.println` does not).
+    expect(dot).toMatch(
+      /subgraph cluster0 \{style=solid;color="#[0-9a-f]+";labeljust="c";\n\{rank=sink;sh\d+;\}/,
+    );
   });
 
   it('wraps the placeholder in clusterNee and omits the cluster label attr', () => {

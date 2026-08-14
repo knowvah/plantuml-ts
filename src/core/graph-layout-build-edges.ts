@@ -35,11 +35,29 @@ const fixedSizeTable = (width: number, height: number): string =>
   `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.trunc(width)}" ` +
   `HEIGHT="${Math.trunc(height)}"><TR><TD></TD></TR></TABLE>`;
 
+/** `DotStringFactory#createDotString:187-198` registers jar's two edge batches
+ *  in `lines0`-then-`lines1` order, not in link-declaration order; `lines0` is
+ *  `Bibliotekon#first`, this port's `minLen === 0`. Stable within each batch,
+ *  so two edges that share a (tail,head) key keep their relative order and
+ *  `EdgeIndex#idQueues` still pairs them correctly.
+ *
+ *  G7 T16 deliberately left this alone — its own bisection found DFS-root
+ *  selection sufficient for the defect it was chasing. G9/T4 needs it: with
+ *  the node order now matching jar's, `rijoki-89-teno556` still laid its
+ *  ranks out mirrored, and edge insertion order is what mincross's initial
+ *  permutation and transpose tie-breaks read after that. */
+function svekEdgeOrder(edges: readonly DotInputEdge[]): DotInputEdge[] {
+  return [
+    ...edges.filter((e) => e.attributes?.minLen === 0),
+    ...edges.filter((e) => e.attributes?.minLen !== 0),
+  ];
+}
+
 export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
   const nodeIds = new Set(input.nodes.map((n) => n.id));
   const idQueues = new Map<string, string[]>();
   const inputEdgeById = new Map<string, DotInputEdge>();
-  for (const e of input.edges) {
+  for (const e of svekEdgeOrder(input.edges)) {
     // Defensive: skip edges to/from unknown nodes (the old engine dropped
     // dangling edges in buildWorkingGraph).
     if (!nodeIds.has(e.from) || !nodeIds.has(e.to)) continue;

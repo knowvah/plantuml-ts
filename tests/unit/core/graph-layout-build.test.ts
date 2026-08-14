@@ -316,7 +316,12 @@ describe('firstEncounterOrder — jar lines0 node-creation order (G7 T16)', () =
       edges: [{ id: 'e1', from: 'a', to: 'b', attributes: { minLen: 1 } }],
       // clusters/other fields absent -- irrelevant to this pure function.
     };
-    expect(firstEncounterOrder(input)).toBe(input.nodes);
+    // G9/T4: compared by VALUE, not identity. The function now walks the
+    // cluster tree to reproduce jar's full declaration order, so it always
+    // builds a fresh array; the property this guards — an input with no
+    // `minLen === 0` edge and no clusters keeps its array order — is
+    // unchanged, and is what `acyclic.c`'s DFS root actually depends on.
+    expect(firstEncounterOrder(input).map((n) => n.id)).toEqual(input.nodes.map((n) => n.id));
   });
 
   it('one minLen===0 edge: its tail then its head come first, remaining nodes keep their existing order', () => {

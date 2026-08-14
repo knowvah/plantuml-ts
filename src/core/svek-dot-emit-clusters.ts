@@ -101,18 +101,62 @@ function portChainLines(cluster: DotInputCluster, recs: Map<string, NodeRec>): s
   return lines;
 }
 
-/** ClusterDotString.printRanks: `{rank=source;shA;shB;}` groups emitted as the
- *  FIRST content inside a ports cluster (matching Svek's exact text — the
- *  in-cluster anonymous braces are part of the oracle's byte shape). */
-function portRankGroups(cluster: DotInputCluster, recs: Map<string, NodeRec>): string {
-  return (cluster.portRanks ?? [])
-    .map(({ rank, nodeIds }) => {
-      const shs = nodeIds
-        .map((id) => recs.get(id)?.sh)
-        .filter((sh): sh is string => sh !== undefined);
-      return shs.length > 0 ? `{rank=${rank};${shs.join(';')};}` : '';
-    })
-    .join('');
+/** One `printRanks` call (`ClusterDotString.java:254-287`): the `{rank=X;…;}`
+ *  group, then EACH ENTRY'S OWN SHAPE LINE, then — on the `hasPort()` branch
+ *  only — that rank's constraint chain. G9/T4: the shapes belong to this
+ *  block, in the OUTER cluster and interleaved per rank; emitting all the
+ *  groups first and the shapes inside `ee` put four of `cinoni-00-sere847`'s
+ *  border points in the wrong place and in `nodeIds` order rather than jar's
+ *  source-then-sink order. */
+function rankBlockLines(
+  rank: 'source' | 'sink',
+  nodeIds: readonly string[],
+  cluster: DotInputCluster,
+  recs: Map<string, NodeRec>,
+  nodeById: Map<string, DotInputNode>,
+): string[] {
+  const shs = nodeIds.map((id) => recs.get(id)?.sh).filter((sh): sh is string => sh !== undefined);
+  if (shs.length === 0) return [];
+  const out = [`{rank=${rank};${shs.join(';')};}`];
+  for (const id of nodeIds) {
+    const node = nodeById.get(id);
+    const rec = recs.get(id);
+    if (node !== undefined && rec !== undefined) out.push(nodeLine(node, rec));
+  }
+  // Entry/exit border points (the WithLabel branch, `portRanksLabelOnEe`)
+  // never chain to the anchor — only genuine PORTIN/PORTOUT ports do
+  // (ClusterDotString.java:267's `hasPort()` split).
+  const anchorSh = cluster.portRanksLabelOnEe === true ? undefined : recs.get(cluster.portAnchorId ?? '')?.sh;
+  if (anchorSh !== undefined) {
+    out.push(`${shs.join('->')} [arrowhead=none];`, `${shs[shs.length - 1]!}->${anchorSh};`);
+  }
+  return out;
+}
+
+/** Every id a `portRanks` group names — the members `printRanks` declares in
+ *  the OUTER cluster, and so the ones `ee` must not repeat. */
+function rankedIds(cluster: DotInputCluster): Set<string> {
+  return new Set((cluster.portRanks ?? []).flatMap((r) => r.nodeIds));
+}
+
+/** A port that no rank group names still gets its shape line in the outer
+ *  cluster. `printRanks` is upstream's only writer of those lines, but this
+ *  port builds `portRanks` per diagram type and a caller may leave a port out
+ *  of both groups; without this they would silently vanish from the DOT. */
+function unrankedPortLines(
+  cluster: DotInputCluster,
+  recs: Map<string, NodeRec>,
+  nodeById: Map<string, DotInputNode>,
+): string[] {
+  const ranked = rankedIds(cluster);
+  const out: string[] = [];
+  for (const id of cluster.nodeIds) {
+    const node = nodeById.get(id);
+    const rec = recs.get(id);
+    if (ranked.has(id) || node?.isPort !== true || rec === undefined) continue;
+    out.push(nodeLine(node, rec));
+  }
+  return out;
 }
 
 /** `ee`'s own label attribute: the cluster's title table on the border-point
@@ -148,11 +192,14 @@ function portClusterEeBlock(
     `subgraph ${cluster.id}ee {${eeLabelAttr(cluster, colors.get(cluster.id)!)}`,
     ...innerWrapperLines(cluster.id, w),
   ];
+  // Ranked members are declared by `printRanks` in the OUTER cluster, so `ee`
+  // carries only what is left: the anchor/placeholder and any real member.
+  const outer = rankedIds(cluster);
   for (const id of cluster.nodeIds) {
-    if (nodeById.get(id)?.isPort === true) continue;
     const node = nodeById.get(id);
     const rec = recs.get(id);
-    if (node !== undefined && rec !== undefined) out.push(nodeLine(node, rec));
+    if (outer.has(id) || node?.isPort === true || node === undefined || rec === undefined) continue;
+    out.push(nodeLine(node, rec));
   }
   for (const child of childrenOf.get(cluster.id) ?? []) {
     // portClusterBlock is only ever reached on the non-kermor path
@@ -179,7 +226,6 @@ function portClusterBlock(
   colors: Map<string, ClusterColors>,
 ): string[] {
   const cc = colors.get(cluster.id)!;
-  const labelOnEe = cluster.portRanksLabelOnEe === true;
   const attrs = cluster.labelWidth !== undefined ? 'labeljust="c";' : '';
   // G9/T1: this family gets the "a"/"i" pair only — a border point forces
   // `protection0`/`protection1` off (`ClusterDotString.java:109-112`), so `w.p0`
@@ -188,19 +234,14 @@ function portClusterBlock(
   const w = wrapperLevels(cluster);
   const out = [
     ...outerWrapperLines(cluster.id, w),
-    `subgraph ${cluster.id} {style=solid;color="${hex(cc.color)}";${attrs}` +
-      portRankGroups(cluster, recs),
+    `subgraph ${cluster.id} {style=solid;color="${hex(cc.color)}";${attrs}`,
   ];
-  const emitLine = (id: string): void => {
-    const node = nodeById.get(id);
-    const rec = recs.get(id);
-    if (node !== undefined && rec !== undefined) out.push(nodeLine(node, rec));
-  };
-  for (const id of cluster.nodeIds) if (nodeById.get(id)?.isPort === true) emitLine(id);
-  // Entry/exit border points (state diagrams, mechanisms.md §2's WithLabel
-  // branch) never chain to the anchor — only genuine PORTIN/PORTOUT
-  // (NoLabel branch) do (ClusterDotString.java's hasPort() split).
-  if (!labelOnEe) out.push(...portChainLines(cluster, recs));
+  // `:136-137` — RANK_SOURCE first, then RANK_SINK, each a complete
+  // group-plus-shapes-plus-chain block.
+  for (const { rank, nodeIds } of cluster.portRanks ?? []) {
+    out.push(...rankBlockLines(rank, nodeIds, cluster, recs, nodeById));
+  }
+  out.push(...unrankedPortLines(cluster, recs, nodeById));
   out.push(...portClusterEeBlock(cluster, childrenOf, recs, nodeById, colors));
   out.push('}');
   if (w.a) out.push('}');
