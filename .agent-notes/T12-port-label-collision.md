@@ -50,3 +50,19 @@
 - **Impact**: run the canonical check BEFORE writing a graphviz-issue file.
   Two of three graphviz-issue-shaped hypotheses this session were ours.
 - **Confidence**: High.
+
+## Observation: cancelling errors make a fixture look conformant
+- **Context**: `state/buniva-95-zije634` "regressed" 36 -> 53 when node-dim
+  precision was aligned with jar's 6dp.
+- **Finding**: it had been landing on jar's node position because two
+  independent errors cancelled — a transition label box 2px short in both
+  dims (19x13 vs jar's 21x15, pulling the node left) and a full-precision
+  node width that inflated the engine's separation by one point (pushing it
+  right). On jar's OWN svek-1.dot, 6dp width reproduces jar's position
+  exactly and full precision does not.
+- **Impact**: a fixture at a low diff count is not evidence that the inputs
+  feeding it are right. When a correctness fix RAISES a count, check whether
+  it un-masked a compensator before treating it as a regression — twice this
+  mission (batch 2's `xamule`, and this).
+- **Confidence**: High — controlled substitution on the oracle DOT isolates
+  both terms independently.
