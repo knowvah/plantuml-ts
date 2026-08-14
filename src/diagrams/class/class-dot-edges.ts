@@ -71,6 +71,11 @@ function moveLabelToXlabel(attrs: NonNullable<DotInputEdge['attributes']>): void
   delete attrs.label;
   delete attrs.labelWidth;
   delete attrs.labelHeight;
+  // The FIXEDSIZE reservation goes with the label it describes: under ortho
+  // the label rides `xlabel`, so leaving these behind would hand the engine a
+  // `label` table for a label that is no longer there.
+  delete attrs.labelBoxWidth;
+  delete attrs.labelBoxHeight;
 }
 
 /** Build one dot edge per relationship, with minlen + label attributes. An

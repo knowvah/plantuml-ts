@@ -220,6 +220,19 @@ function applyMainLabel(
     attrs.label = resolvedLabelText;
     attrs.labelWidth = m.width;
     attrs.labelHeight = m.height;
+    // T5: hand the LAYOUT engine the same reserved box, not the label text.
+    // Without these two fields `graph-layout-build-edges.ts` sends plain text
+    // and the engine measures it, reserving a constant ~16.5 per line instead
+    // of the declared height -- which lands as rank separation, since a
+    // labelled edge spans the rank gap. Same pair the state pipeline has set
+    // since G8/T2 (`state-composite-edge-label.ts`).
+    //
+    // These are `m.width`/`m.height` because AFTER T4 those ARE the reserved,
+    // margined, floored box. The batch-2 brief's "do not reuse raw
+    // labelWidth/labelHeight" warns against the PRE-T4 values, which were the
+    // unmargined single-line measurement.
+    attrs.labelBoxWidth = m.width;
+    attrs.labelBoxHeight = m.height;
   }
 }
 

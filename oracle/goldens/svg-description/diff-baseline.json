@@ -98,10 +98,10 @@
       "slug": "jecici-56-bimu826",
       "group": 1,
       "status": "baseline",
-      "diffCount": 151,
-      "measuredAt": "2026-08-13",
-      "measuredAgainstCommit": "feat/constraint-false",
-      "note": "RAISED 143 -> 151 by the constraint=false port, deliberately and with the cause identified. The constraint placement itself is byte-exact: our DOT marks the same 4 of 6 edges the oracle does, verified line by line, and dot-engine lays out the oracle's own DOT identically to real graphviz (same node ys after offset). The rise comes from a SEPARATE, pre-existing defect in this fixture -- our edge label boxes are ~5x the jar's (WIDTH=346/156 against 72/67) -- and removing an edge from rank constraints changes how those oversized labels push nodes around. Fix that sizing and this number should fall well below 143; see .agent-notes/description-edge-label-oversizing.md. NOT papered over: the same change moved this fixture 143 -> 133 before norank was wired, so the structural paths alone improve it."
+      "diffCount": 138,
+      "measuredAt": "2026-08-14",
+      "measuredAgainstCommit": "feat/edge-label-box",
+      "note": "LOWERED 151 -> 138 by the edge-label-box mission, batches 1-2. The label boxes this fixture emits are now byte-exact against its oracle (72x22 and 67x12, previously 346x13 and 156x13): creole tags are stripped before measuring, multi-line labels take the max line width rather than the concatenation, `skinparam arrowFontSize 10` is honoured, and the reserved box is handed to the layout engine instead of plain text. The earlier RAISED-to-151 note is superseded; its cause -- ~5x oversized label boxes -- is what these batches fixed. Still ABOVE the mission's <=133 exit bar, which is recorded as unmet rather than redefined; the residue is not the label box."
     },
     {
       "type": "component",
