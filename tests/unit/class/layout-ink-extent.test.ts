@@ -714,3 +714,63 @@ describe('computeClassDocumentDims — visibility-icon polygon ink', () => {
     expect(diamond.dx - plain.dx).toBe(2);
   });
 });
+
+/**
+ * G9/T16: an edge label reserves `LimitFinder#drawText`'s ink, not one point.
+ *
+ * `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:217-225`) records a
+ * `UText` from its BASELINE: `[y - (height - 1.5), y + 1.5]` across
+ * `[x, x + width]`. Edge labels used to contribute their `<text>` anchor
+ * `(x, y)` alone — a simplification `class-ink-box.ts`'s own header called
+ * "usually dominated by the classifier boxes' own ink reach".
+ *
+ * `style-stereotype-on-arrow-3` and `zebufu-01-pevo013` are where it is not.
+ * Their label baseline sits at 17.111, so jar's ink reaches 5.611 — 0.389
+ * ABOVE the topmost object box's own `y - 1` of 6 — and jar's ENTIRE drawing
+ * therefore sat 0.389px lower than ours on an otherwise byte-identical 143x55
+ * canvas. Neither the census nor the document dimensions can see that: it is a
+ * pure `computeClassInkShift` difference, so this is the gate.
+ */
+describe('edge-label text ink (G9/T16)', () => {
+  const labelled = (label: EdgeGeo['label']): EdgeGeo[] => [
+    {
+      id: 'e0',
+      points: [{ x: 30, y: 60 }, { x: 30, y: 90 }],
+      targetDecor: 'none',
+      sourceDecor: 'none',
+      dashed: false,
+      from: 'A',
+      to: 'B',
+      ...(label === undefined ? {} : { label }),
+    },
+  ];
+  /** a 40x40 box at the origin: `addRectInk` puts its ink top at y = -1 */
+  const boxes = [makeClassifierGeo({ x: 0, y: 0, width: 40, height: 40 })];
+
+  it('reaches CARDINALITY_FONT_SIZE - 1.5 above the baseline', () => {
+    // baseline 8 -> ink top 8 - 13 + 1.5 = -3.5, i.e. 2.5 above the box's -1.
+    // The shift is `JAR_INK_MARGIN - minY`, so a lower ink top RAISES dy by
+    // that much — which is the direction jar's whole drawing moved.
+    const shift = computeClassInkShift(boxes, [], labelled({ text: 'x', x: 5, y: 8, width: 12 }), []);
+    const plain = computeClassInkShift(boxes, [], labelled(undefined), []);
+    expect(shift.dy - plain.dy).toBe(2.5);
+  });
+
+  it('reaches 1.5 below it, and the label width to the right', () => {
+    // baseline 200 -> ink bottom 201.5 against the box's own 39; x spans
+    // [100, 160] against the box's 39. Both dominate, so both show in dims.
+    const dims = computeClassDocumentDims(
+      boxes, [], labelled({ text: 'x', x: 100, y: 200, width: 60 }), [],
+    );
+    // width  = (160 - (-1)) + INK_DELTA 15 + margins 0/5, +1 truncating
+    // height = (201.5 - (-1)) + 15 + 0/5 -> floor(223.5) = 223
+    expect(dims).toEqual({ width: 182, height: 223 });
+  });
+
+  it('leaves a label sitting inside the boxes` own ink with no effect', () => {
+    const inside = computeClassDocumentDims(
+      boxes, [], labelled({ text: 'x', x: 5, y: 30, width: 12 }), [],
+    );
+    expect(inside).toEqual(computeClassDocumentDims(boxes, [], labelled(undefined), []));
+  });
+});
