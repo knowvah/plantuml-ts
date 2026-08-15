@@ -38,6 +38,18 @@
  *   npx tsx scripts/note-order-report.ts                 # print report
  *   npx tsx scripts/note-order-report.ts --check <file>  # diff against a
  *       saved report; prints every differing line, exits 1 on any difference
+ *   npx tsx scripts/note-order-report.ts --vs-jar        # compare OUR
+ *       entity/link uid sequence with jar's `in.svg` per fixture: prints
+ *       `SAME` / `ORDER-ONLY` (same uid set, different order) / `OTHER`
+ *       (different uid set) per fixture, then a tally. This is the gate for
+ *       the leaf-draw-order follow-on named in
+ *       `plans/note-leaf-model/decision-journal.md` (Batch 3 STOP entry):
+ *       jar draws nodes in `bibliotekon` insertion order -- packaged leaves
+ *       first (`GraphvizImageBuilder#printGroups`), then unpackaged
+ *       (`printEntities(getUnpackagedEntities())`), each in creation order,
+ *       notes and TIPS included (`SvekResult#drawU`, `:82`) -- and this
+ *       port's declaration-order + host-interleave (`renderer.ts`, G2 N52)
+ *       is a proxy that holds on 65/97 note fixtures (2026-08-15).
  *
  * Output (stable, diffable, name-sorted): one line per fixture,
  *   <type>/<slug> notes=<n> tips=<k> sha=<12 hex of the whole SVG> <seq>
@@ -208,8 +220,55 @@ function checkAgainst(baselinePath: string, current: readonly string[]): number 
   return diffs === 0 ? 0 : 1;
 }
 
+// ---------------------------------------------------------------------------
+// --vs-jar mode
+// ---------------------------------------------------------------------------
+
+/** Every `<g class="entity|link">` uid in document order -- the same walk
+ *  as {@link walkGroups} minus the note/cls label, so OUR sequence and jar's
+ *  (whose attached notes are named `GMNn`, unknown to us) compare on uids. */
+function uidSequence(svg: string): string[] {
+  const seq: string[] = [];
+  walkGroups(new DOMParser().parseFromString(svg, 'image/svg+xml'), new Set(), seq);
+  return seq.map((t) => t.replace(/^(cls|note):[^=]*=/, ''));
+}
+
+function compareWithJar(f: FixtureDir): 'SAME' | 'ORDER-ONLY' | 'OTHER' | 'NO-NOTES' | 'ERR' {
+  const jarPath = join(f.dir, 'in.svg');
+  if (!existsSync(jarPath)) return 'ERR';
+  try {
+    const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
+    const options: PreprocessOptions = { includeStore: includeStore() };
+    if (noteIdentity(markup, options).ids.size === 0) return 'NO-NOTES';
+    const ours = uidSequence(renderFixtureClass(markup, new DeterministicMeasurer(), options));
+    const jar = uidSequence(readFileSync(jarPath, 'utf-8'));
+    if (ours.join(' ') === jar.join(' ')) return 'SAME';
+    return [...ours].sort().join(' ') === [...jar].sort().join(' ') ? 'ORDER-ONLY' : 'OTHER';
+  } catch {
+    return 'ERR';
+  }
+}
+
+function runVsJar(): void {
+  const fixtures = TYPES.flatMap((t) => listFixtureDirs(t)).sort((a, b) =>
+    (a.type + '/' + a.slug).localeCompare(b.type + '/' + b.slug),
+  );
+  const tally = { SAME: 0, 'ORDER-ONLY': 0, OTHER: 0, ERR: 0 };
+  for (const f of fixtures) {
+    const verdict = compareWithJar(f);
+    if (verdict === 'NO-NOTES') continue;
+    tally[verdict]++;
+    console.log(`${f.type}/${f.slug} ${verdict}`);
+  }
+  console.log(`TOTAL vs-jar: same=${tally.SAME} order-only=${tally['ORDER-ONLY']} other=${tally.OTHER} err=${tally.ERR}`);
+}
+
 function main(): void {
   const args = process.argv.slice(2);
+  if (args.includes('--vs-jar')) {
+    runVsJar();
+    return;
+  }
   const checkIdx = args.indexOf('--check');
   const lines = buildReport();
   if (checkIdx === -1) {
