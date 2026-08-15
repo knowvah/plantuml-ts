@@ -61,7 +61,31 @@ to take `renderEmptyPackageLeaf` instead. That is unproven.
 WITH an upstream citation, and say so in the commit message. This is the one
 failure mode that could lose output rather than misplace it.
 
-## 4. The title position comes from the cluster too
+## 4. The title position comes from the cluster too — SUPERSEDED (2026-08-14, T7)
+
+**SUPERSEDED, with the owner's approval.** This decision describes STATE's
+mechanism, not a package's. `Cluster#setTitlePosition`/`xyTitle` — the
+`DotStringFactory.java:436-439` read cited below — is consumed only by
+`Cluster#drawUState` and `#drawSwinLinesState` (`Cluster.java:439,497`),
+both state/swimlane paths. A class or object package leaves `Cluster#drawU`
+into `ClusterDecoration.drawU` (`Cluster.java:357-373`), which never reads
+`xyTitle`; `USymbolFolder#asBig` draws the title at a FIXED symbol-local
+`UTranslate(4, 2)` from the box corner (`USymbolFolder.java:228`),
+independent of wherever graphviz placed the title-table reservation.
+
+Measurement agrees with the reading: wiring `cluster.label` into the class
+title position moved every titled namespace's `<text>` down 2px and cost
+333 matched shapes (25403 → 25070, document sizes unchanged at 769).
+
+What survives: the `1.5.0` bump, `ClusterGeometry.label` surfaced through
+`mapClusters` onto `DotLayoutResult.clusters[]`, and the centre→top
+conversion asserted at the seam — ready for the state-side consumer that
+genuinely needs graphviz's placed position. The class path keeps
+`getTitleBaselineOffset`, which mirrors `USymbolFolder`'s fixed offset.
+
+The original decision follows, unedited, for the record.
+
+
 
 **Context.** `DotStringFactory.java:436-439` reads the title polygon and
 hands it to `Cluster#setTitlePosition`. We instead re-measure the title with

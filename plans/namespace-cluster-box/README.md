@@ -74,10 +74,10 @@ harness before anything changes:
 
 | Signal | Baseline | Direction |
 |---|---|---|
-| Fixtures matching jar's document size exactly | 691 / 1073 | must rise |
-| Rigid-aligned matching shapes | 20765 (re-pinned; see journal) | must rise |
-| Class DOT-parity ratchet | 712/712 conformant | must hold |
-| The 11 named residual fixtures | 0 fully exact | should reach exact |
+| Fixtures matching jar's document size exactly | 691 / 1073 | **769** ✅ |
+| Rigid-aligned matching shapes | 20765 (re-pinned; see journal) | **25403** ✅ |
+| Class DOT-parity ratchet | 712/712 conformant | **712/712** ✅ |
+| The 11 named residual fixtures | 0 fully exact | **9 / 11 fully exact** |
 
 **One planned exception:** after T4 alone the numbers DIP — layouts shift
 while `buildNamespaceGeos` still applies the old padding. That is expected,
@@ -96,8 +96,8 @@ Object diagrams are in scope; they share `src/diagrams/class/`.
 | [1](batch-1/overview.md) | Measurement harness, wrapper-level derivation, shared title helper | — | [x] `492617a9` `1e450493` `f63afbed` |
 | [2](batch-2/overview.md) | Emit wrappers + title table in the class DOT | B1 | [x] |
 | [3](batch-3/overview.md) | Read the box from the cluster; retire the constants | B2 | [x] |
-| [4](batch-4/overview.md) | Title position (needs dot-engine 1.5.0) | B3 | [ ] |
-| [5](batch-5/overview.md) | Record the outcome | B4 | [ ] |
+| [4](batch-4/overview.md) | Title position (needs dot-engine 1.5.0) | B3 | [x] `e5fa03cf` — decision 4 superseded |
+| [5](batch-5/overview.md) | Record the outcome | B4 | [x] |
 
 ## Stop conditions
 
@@ -139,3 +139,57 @@ Stop and wait for a human when:
 - [decision-journal.md](decision-journal.md) — appended during execution
 - `.agent-notes/class-ink-shared-offset-groups.md` — the measured evidence
   this mission is built on. Read it before Batch 1.
+
+---
+
+## Outcome (2026-08-14)
+
+All five batches complete; eight tasks, one commit each plus five brief
+commits. All four quality gates green at every batch boundary.
+
+| Signal | Baseline | Final |
+|---|---|---|
+| Fixtures matching jar's document size exactly | 691 / 1073 | **769** |
+| Rigid-aligned matching shapes | 20765 | **25403** |
+| Class DOT-parity ratchet | 712/712 | **712/712** |
+| The 11 named residual fixtures | 0 fully exact | **9 fully exact** |
+
+No fixture regressed at any point, and no state fixture moved at all —
+the change stayed inside the class engine, which is where it belonged.
+
+### Three things the brief got wrong, and what they were
+
+**The planned dip never happened.** T4 was expected to lower the numbers;
+they rose 17.7% instead. A box is 1–3 shapes against ~29 members, so the
+wrapper margins moving members into jar's real layout space swamped the
+still-wrong box. Verified rather than assumed: 78 fixtures moved, 76 class
+and 2 object, zero state, zero regressions.
+
+**Decision 4 was superseded, with the owner's approval.** The title
+position is not read from the cluster on the class path — `xyTitle` is
+state/swimlane only (`Cluster.java:439,497`), and a package's title is
+drawn at a fixed `UTranslate(4, 2)` by `USymbolFolder#asBig`. Implementing
+the decision as written cost 333 matched shapes. The dependency bump and
+the surfaced `label` field were kept for the state-side consumer that
+genuinely needs them.
+
+**`cocube-46-tusu692` was not a counter-example.** The brief flagged it as
+contradicting the wrapper-level predicate. It does not: the parser turns a
+dotted endpoint into a leaf classifier under its parent, so that namespace
+never carries the edge. All 126 cached DOTs agree with the predicate.
+
+### What is left, and where it is written down
+
+`cidepu-54-bemo048` and `kicolo-81-sidi387` reach exact document size but
+stay at 13/28 shapes, on a mechanism this mission does not own:
+`.agent-notes/class-html-node-corner-vs-quantized-width.md`. It is ours,
+not the engine's — graphviz sizes an HTML-table node from the table
+quantized to whole points, and we convert centre→corner with the
+unquantized width. Mission-sized: its blast radius is most class nodes.
+
+That note also records a hypothesis that was WRONG and how it died —
+the first reading blamed `@knowvah/dot-engine`, and the arithmetic fit.
+Building the minimal repro in order to file the issue is what disproved
+it: the engine returns the same 92/93 real graphviz does. No issue was
+filed. A correct measurement sent to the wrong repository is still a bug
+report someone has to close.

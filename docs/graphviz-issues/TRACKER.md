@@ -60,6 +60,18 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         PUBLISHED 2026-08-15 in 1.5.0, verified here against that release's
         own dist/api/geometry.d.ts (not inferred from the version bump): the
         optional `label` field is present with the centre convention above.
+        PINNED 2026-08-14 (T7, e5fa03cf): package.json is now ^1.5.0 and the
+        field is surfaced through mapClusters onto DotLayoutResult.clusters[].
+        STILL UNCHECKED, and this half will not be satisfied by the consumer
+        the filing anticipated. buildNamespaceGeos does NOT read cluster.label
+        and should not: Cluster#setTitlePosition/xyTitle is consumed only by
+        drawUState/drawSwinLinesState (Cluster.java:439,497), while a package
+        goes through ClusterDecoration.drawU and USymbolFolder#asBig, which
+        draws the title at a fixed local UTranslate(4, 2) from the box corner
+        (USymbolFolder.java:228). Wiring it cost 333 matched shapes. The
+        genuine consumer is state's composite title, unbuilt — so no fixture
+        moves either way yet, and the box stays open per this file's own rule
+        rather than being ticked on the strength of the fix existing.
         This repo is still on ^1.4.0, so the box stays unchecked per the rule
         at the top of this file — plans/namespace-cluster-box/ T7 is what
         moves the pin and re-measures. -->

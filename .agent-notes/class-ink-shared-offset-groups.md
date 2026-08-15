@@ -11,6 +11,47 @@
   (`fe5e43db`); do not re-open it as an ink question.
 - **Finding**:
 
+  **(a) — SUPERSEDED 2026-08-14 by the `namespace-cluster-box` mission
+  (`dc202e31` T5, with `62a278aa` T4 and `3a3fc581` T6). FIXED; do not
+  re-open.** The package box is now the cluster polygon, read from
+  `DotLayoutResult.clusters` with no padding, mirroring `Cluster#setPosition`
+  (`Cluster.java:511-512`); the protection wrappers and HTML title table jar
+  emits are now in our DOT, so the polygon graphviz returns is the real one;
+  and `NAMESPACE_SIDE_PADDING`/`NAMESPACE_TOP_EXTRA` are deleted.
+
+  Measured on `scripts/shape-match-report.ts` (committed by that mission as
+  the gate both standing suites were blind to): **691 → 769** fixtures
+  matching jar's document size exactly, and **20765 → 25403** rigid-aligned
+  matched shapes, with zero fixtures regressing.
+
+  Per-fixture outcome for the 11 named below — nine went FULLY exact
+  (every shape, not just the document size):
+
+  | fixture | before | after |
+  |---|---|---|
+  | `dopuzi-50-muxo994` | 6/9 | **9/9** |
+  | `finono-05-cuvu171` | 6/9 | **9/9** |
+  | `zomidu-04-fizu253` | 6/9 | **9/9** |
+  | `jinibe-02-tebi269` | 4/7 | **7/7** |
+  | `mucuxi-36-beku683` | 5/6 | **6/6** |
+  | `ditapa-46-bete946` | 4/7 | **7/7** |
+  | `repipi-06-dike782` | 28/31 | **31/31** |
+  | `sugifi-33-xefe083` | 6/9 | **9/9** |
+  | `sumule-00-pefa744` | 6/9 | **9/9** |
+  | `cidepu-54-bemo048` | 13/28 | 13/28 (doc size now exact) |
+  | `kicolo-81-sidi387` | 13/28 | 13/28 (doc size now exact) |
+
+  The two that did not are a DIFFERENT mechanism, diagnosed and written up
+  separately in `class-html-node-corner-vs-quantized-width.md`: both are
+  member-port diagrams, and their residual is our centre→corner conversion
+  using an unquantized width, not the package box. The `(8, 4)` group's
+  "y side is +4, not +8, and that is NOT yet explained" question below is
+  ANSWERED — there was never a separate y mechanism; the asymmetry was the
+  old approximation's own (flat padding on three sides, `htitle + extra` on
+  top, `CL_OFFSET` on none). Both axes went exact together.
+
+  The original finding follows, unedited, for the record.
+
   **(a) `(0.18, 0)` — the namespace box is a member-bbox approximation, not
   the cluster box.** `class-geo-builders.ts#buildNamespaceGeos:222-227`
   computes a package's box as `min/max` over its member NODE positions
@@ -108,7 +149,9 @@
   `LimitFinder` walk. That is where a fix has to start.
 - **Impact**: (a) is a single mission worth 11 measured fixtures and ~100 in
   principle, not the five separate small groups the ranking makes it look like.
-  (b) and (c) are smaller and independent. Everything else in the ranking is
+  **(a) is now DONE — see the superseded block above.** (b) and (c) are
+  smaller, independent, and REMAIN OPEN: the `namespace-cluster-box` mission
+  touched neither. Everything else in the ranking is
   float noise (`0.001`, `0.005`), a singleton, or a structurally-divergent big
   diagram (`puvono-84-doro361`/`sekame-22-meze147`, 20 of 160 shapes aligned and
   161px too wide — a different kind of problem). There are no cheap shared-offset

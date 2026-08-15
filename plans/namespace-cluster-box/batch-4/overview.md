@@ -19,7 +19,7 @@ The repo is on `^1.4.0`; T7 bumps it.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T7](T7-title-position.md) | Read the cluster title position from the snapshot instead of re-measuring | typescript-pro | `package.json`, `src/core/graph-layout.ts`, `graph-layout.types.ts`, `class-geo-builders.ts`, tests | T5 | [ ] |
+| [T7](T7-title-position.md) | Read the cluster title position from the snapshot instead of re-measuring | typescript-pro | `package.json`, `src/core/graph-layout.ts`, `graph-layout.types.ts`, `class-geo-builders.ts`, tests | T5 | [x] |
 
 ## The trap in this batch
 

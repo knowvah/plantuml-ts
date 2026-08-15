@@ -4,7 +4,7 @@ One task. Nothing in `src/` changes.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T8](T8-record-outcome.md) | Supersede the offset-groups note, tick the tracker, correct a stale doc | technical-writer | `.agent-notes/class-ink-shared-offset-groups.md`, `docs/graphviz-issues/TRACKER.md`, `docs/architecture/overview.md`, `DIVERGENCES.md` if needed | T7 | [ ] |
+| [T8](T8-record-outcome.md) | Supersede the offset-groups note, tick the tracker, correct a stale doc | technical-writer | `.agent-notes/class-ink-shared-offset-groups.md`, `docs/graphviz-issues/TRACKER.md`, `docs/architecture/overview.md`, `DIVERGENCES.md` if needed | T7 | [x] |
 
 ## Why this is a task and not an afterthought
 
