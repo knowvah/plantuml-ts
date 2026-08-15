@@ -5,8 +5,8 @@ files below. Quantization: IN SCOPE, label position only.
 
 | ID | Description | Agent | Writes | Depends on | Done |
 |----|-------------|-------|--------|-----------|------|
-| T3 | Land the marged-box ink fold + the label-position quantization in ONE commit, with tests | orchestrator | `src/diagrams/state/state-geo-types.ts`, `state-transition-label.ts`, `layout-ink-extent.ts` + their tests | B1 + approval | [ ] |
-| T4 | Sweep, ledger, close | orchestrator | brief + `.agent-notes/` | T3 | [ ] |
+| T3 | Land the marged-box ink fold + the label-position quantization in ONE commit, with tests | orchestrator | `src/diagrams/state/state-geo-types.ts`, `state-transition-label.ts`, `layout-ink-extent.ts`, `tests/unit/state/transition-label-ink.test.ts`, `oracle/goldens/state/size-backlog.json` | B1 + approval | [x] `c62f7d21` |
+| T4 | Sweep, ledger, close | orchestrator | brief + `.agent-notes/` | T3 | [x] |
 
 Serial. T4 writes no `src/`.
 
@@ -38,11 +38,22 @@ inside the 0.01 px conformance band.
 
 ## Batch exit bar
 
-1. The three named fixtures report composite width delta **0.000** in
-   `measure-composite-declared-size.ts`.
-2. That harness's `exact` count RISES from **2454**; nothing regresses.
-3. `shape-match-report.ts` does not fall from **776 / 25695**.
-4. state DOT-parity **268/268**; all **59** svg-state pins hold.
-5. The document-level `labelInk: false` fold is untouched and its fixtures
-   are byte-identical (decision D5).
-6. Every constant introduced carries an upstream `file:line` (D4).
+1. ~~The three named fixtures report composite width delta **0.000**~~ —
+   **MET, and by six fixtures**: `bemena-23-zebu249`, `pajefo-95-neri955`,
+   `xepafa-33-lazi826`, `jorere-75-peja265`, `ketibo-84-juzo029`,
+   `zitifa-97-bizo337`.
+2. ~~`exact` RISES from 2454~~ — **MET: 2469** (160 → 145 mismatched,
+   **zero** exact → non-exact, 15 declarations newly exact).
+3. ~~`shape-match-report.ts` does not fall~~ — **MET, it rose**:
+   776 → **779** doc-size-exact, 25695 → **25952** matched shapes.
+4. ~~state DOT-parity 268/268; 59 svg pins~~ — **MET.** Six *size-backlog*
+   entries were loosened with a human-approved, jar-verified `_doc`
+   account; the structural 268/268 and all 59 SVG pins are unmoved.
+5. ~~The document-level `labelInk: false` fold is untouched~~ — **MET**,
+   and now asserted as an invariance in
+   `tests/unit/state/transition-label-ink.test.ts`.
+6. ~~Every constant carries an upstream `file:line`~~ — **MET.** No new
+   numeric constant at all: `marginLabel`, `measuredWidth` and
+   `measuredHeight` all already existed on `ReservedLabelBox`, and the
+   quantization cites `~/git/graphviz/lib/gvc/gvdevice.c:513-528`. `21`
+   was never introduced (D4).

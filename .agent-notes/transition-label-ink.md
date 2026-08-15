@@ -1,5 +1,17 @@
 # T1 diagnosis — jar's transition-label ink is the MARGED box, not the drawn text
 
+> **LANDED 2026-08-15, commit `c62f7d21`.** Everything below held when
+> implemented. Measured outcome: `measure-composite-declared-size.ts`
+> **2454 → 2469** exact (160 → 145 mismatched, **zero** exact →
+> non-exact); all six `Configuring` fixtures at **0.000**, was +0.527;
+> `shape-match-report.ts` **776 → 779** doc-size-exact and **25695 →
+> 25952** matched shapes; state DOT-parity 268/268; 59 svg-state pins
+> hold. The residual predicted below was closed too — the quantization
+> was scoped to the label's ink box (human-approved), which is why the
+> six land exact rather than at 0.0017. Port-side detail, including the
+> six `size-backlog.json` entries this unmasked, in
+> `transition-label-ink-port.md`.
+
 Mission `plans/transition-label-ink/`, batch-1/T1. Subject:
 `test-results/dot-cache/state/bemena-23-zebu249`, the `Configuring`
 composite (392.86168 ours against jar's 392.335).

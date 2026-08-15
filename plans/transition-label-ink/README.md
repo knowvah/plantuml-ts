@@ -1,5 +1,32 @@
 # Mission: a state composite is 0.527px too wide, and we know almost why
 
+## COMPLETE — 2026-08-15
+
+| Signal | Baseline | Bar | Result |
+|---|---|---|---|
+| `measure-composite-declared-size.ts` exact | 2454 / 2642 | must RISE | **2469** ✓ |
+| The fixtures' composite width delta | +0.527 | 0.000 | **0.000 on all six** ✓ |
+| `shape-match-report.ts` | 776 / 25695 | must not FALL | **779 / 25952** ✓ |
+| state DOT-parity | 268/268 | unmoved | **268/268** ✓ |
+| svg-state ratchet | 59 pins | all hold | **59/59** ✓ |
+
+**Mechanism (B) was `marginLabel`, on the right-hand side of the label's
+marged box** — and with it, the whole two-opposing-mechanisms framing
+below is wrong. Upstream folds `TextBlockMarged`'s own `UEmpty`
+(`TextBlockMarged.java:79-87` + `LimitFinder.java:159-162`), which renders
+nothing; the second term was graphviz's 2dp SVG print precision
+(`gvdevice.c:513-528`), which the jar inherits by scraping `dot -Tsvg`'s
+text. One error, `1 − frac(measuredWidth)`, not a −1.525/+0.998 pair.
+`21` was never adopted; no new numeric constant was introduced at all.
+
+The family is **six** fixtures, not three. Read
+[`.agent-notes/transition-label-ink.md`](../../.agent-notes/transition-label-ink.md)
+for the mechanism and
+[`-port.md`](../../.agent-notes/transition-label-ink-port.md) for what
+landing it did — including the six `size-backlog.json` entries it
+unmasked. Corrections are marked in place below and in `evidence.md`;
+nothing is silently rewritten.
+
 ## Read this first
 
 You are starting cold. A previous session did four sessions' worth of
@@ -64,7 +91,7 @@ Full detail and method in [evidence.md](evidence.md). Summary:
 |---|---|---|---|
 | [1](batch-1/overview.md) | Java excavation + port-side trace. **No `src/` edits.** | `.agent-notes/` + this brief | [x] |
 | — | **CHECKPOINT — stop, report, request write-set expansion** | — | [x] awaiting human |
-| [2](batch-2/overview.md) | Land both mechanisms in one commit; sweep | as approved at the checkpoint | [ ] |
+| [2](batch-2/overview.md) | Land both mechanisms in one commit; sweep | three state files + tests + `size-backlog.json` | [x] `c62f7d21` |
 
 ## The checkpoint is a hard stop
 

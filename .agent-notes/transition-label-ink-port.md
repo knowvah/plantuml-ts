@@ -177,13 +177,56 @@ $ cd test-results/dot-cache/state && for d in */; do \
   somuke-94-buzi673.puml` writes `Test.svg`), and both denominators were
   measured before and after.
 
-## The scope question this batch cannot decide
+## What landing it actually did (T3, commit `c62f7d21`)
 
-Closing the last 0.0008–0.003 px needs the 2-decimal read-seam
-quantization, which is a different, already-filed mechanism
+Implemented as proposed, in the three files above, plus the label-position
+quantization (approved at the checkpoint) applied to the ink box only —
+`state-transition-label.ts#svgPrecision`, cited to
+`~/git/graphviz/lib/gvc/gvdevice.c:513-528`. `label.x`/`label.y` stay
+unquantized so D5's document-level point fold and the drawn SVG position
+are byte-identical; the cost, documented rather than hidden, is that we
+draw the label at the unquantized x where jar draws the quantized one
+(≤0.005px, inside the 0.01px conformance band).
+
+Every prediction in the table above held except one: `exact` DID rise,
+because the quantization went in. **2454 → 2469**, zero exact →
+non-exact, 15 declarations newly exact across 15 fixtures.
+
+**One thing the estimate got wrong, and it is worth knowing.** "Fixtures
+at risk: 62" was right as an upper bound, but the *direction* was not
+uniform: 19 deltas shrank and **9 grew**. All nine were already NOT exact
+and already SMALLER than jar; the too-wide label fold had been partly
+cancelling a separate narrower-than-jar mechanism, and correcting it
+unmasks that. Six of the nine tripped `oracle/goldens/state/
+size-backlog.json`, which is tighten-only, and were re-pinned with a
+`_doc` account (human-approved).
+
+The rule itself is not in doubt on those fixtures — checked on the worst
+near-exact case, `bunade-42-fudu910`: jar's own SVG puts its rightmost
+label box at `90.464 + 52.8125 + 2 = 145.2765`, its ink min at `25.72`,
+so extent `119.5565` against the `154.557 − 35 = 119.557` its declared
+node width implies. Jar folds the marged box there too; our residual
+0.165 is a label-POSITION divergence, an order of magnitude above
+quantization, and its own mission.
+
+## The scope question — asked at the checkpoint, and answered
+
+Closing the last 0.0008–0.003 px needed the 2-decimal read-seam
+quantization, a different, already-filed mechanism
 (`class-edge-spline-2dp-quantization.md`) whose own note ends: *"Do not
 apply quantization anywhere until that is answered; the measurement above
 shows it costs more than it buys"* — blanket quantization at
 `graph-layout.ts:81` took the oracle suites from 1969/1969 to 1961/1969.
-Whether a narrower quantization of `labelX`/`labelY` only is in scope is a
-maintainer call, not an inference. See the mission's checkpoint report.
+
+**Ruled in at the checkpoint, narrowly.** Quantizing one derived value
+inside one state module is not the blanket change that note warns off: it
+cannot reach another diagram type, and D5 keeps it out of the pinned
+document-level path.
+
+That note's own open question — *why* the jar's coordinates are
+2-decimal — is now ANSWERED, and should be closed there too: it is not
+Smetana vintage (its leading hypothesis), it is `dot -Tsvg`'s own number
+writer, `snprintf(buf, 50, "%.02f", num)` at
+`~/git/graphviz/lib/gvc/gvdevice.c:513-528`. Its "blanket quantization is
+the wrong place" measurement still stands; a per-read-seam one is right,
+and this mission did one seam of it.
