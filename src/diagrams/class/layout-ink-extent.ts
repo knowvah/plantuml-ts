@@ -114,7 +114,8 @@
  * independent of dot's own routing accuracy.
  */
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
-import { absorbLayoutEpsilon } from '../../core/layout-epsilon.js';
+import { svekDimension, svekInkShift } from '../../core/svek/SvekResult.js';
+import { applyCucaDocumentMargin } from '../../core/TextBlockExporter.js';
 import type { NoteGeo } from './note-layout.js';
 
 /** `CucaDiagram#getDefaultMargins()` (net/atmp/CucaDiagram.java:719-722) —
@@ -122,11 +123,21 @@ import type { NoteGeo } from './note-layout.js';
  *  bottom=5, left=0. Same constants as `renderer-ink-extent.ts` (shared
  *  upstream base class); duplicated here rather than imported since class
  *  has no klimt dependency and this module must stay klimt-free. */
+// `INK_DELTA`/`JAR_INK_MARGIN` are no longer read here: the recipe that used
+// them moved to `core/TextBlockExporter.ts#applyCucaDocumentMargin` and
+// `core/svek/SvekResult.ts#svekDimension`/`#svekInkShift`, which own them.
+//
+// The four margin constants ARE still read directly, by
+// `computeClassBorderRectDims` — it adds the margin but deliberately does
+// NOT apply `ensureVisible`, subtracting the border stroke instead, so it
+// cannot go through `applyCucaDocumentMargin`.
+import { buildInkBox } from './class-ink-box.js';
 import {
-  buildInkBox,
-  DOCUMENT_MARGIN_TOP, DOCUMENT_MARGIN_RIGHT, DOCUMENT_MARGIN_BOTTOM, DOCUMENT_MARGIN_LEFT,
-  INK_DELTA, JAR_INK_MARGIN,
-} from './class-ink-box.js';
+  CUCA_DOCUMENT_MARGIN_TOP as DOCUMENT_MARGIN_TOP,
+  CUCA_DOCUMENT_MARGIN_RIGHT as DOCUMENT_MARGIN_RIGHT,
+  CUCA_DOCUMENT_MARGIN_BOTTOM as DOCUMENT_MARGIN_BOTTOM,
+  CUCA_DOCUMENT_MARGIN_LEFT as DOCUMENT_MARGIN_LEFT,
+} from '../../core/atmp/CucaDiagram.js';
 
 export interface ClassDocumentDims {
   readonly width: number;
@@ -199,13 +210,7 @@ export function computeClassRawInkDims(
   notes: readonly NoteGeo[],
   iconSize?: number,
 ): ClassDocumentDims {
-  const box = buildInkBox(classifiers, namespaces, edges, notes, iconSize);
-  if (!Number.isFinite(box.minX)) return { width: 0, height: 0 };
-
-  return {
-    width: box.maxX - box.minX + INK_DELTA,
-    height: box.maxY - box.minY + INK_DELTA,
-  };
+  return svekDimension(buildInkBox(classifiers, namespaces, edges, notes, iconSize));
 }
 
 /**
@@ -218,15 +223,7 @@ export function computeClassRawInkDims(
  * computeClassRawInkDims}'s doc comment for the full mechanism.
  */
 export function applyClassDocumentMargin(dims: ClassDocumentDims): ClassDocumentDims {
-  const finalWidth = dims.width + DOCUMENT_MARGIN_LEFT + DOCUMENT_MARGIN_RIGHT;
-  const finalHeight = dims.height + DOCUMENT_MARGIN_TOP + DOCUMENT_MARGIN_BOTTOM;
-
-  // `SvgGraphics#ensureVisible`: `(int)(v + 1)` — a truncating cast, which
-  // for non-negative `v` is `Math.floor`.
-  return {
-    width: Math.floor(absorbLayoutEpsilon(finalWidth) + 1),
-    height: Math.floor(absorbLayoutEpsilon(finalHeight) + 1),
-  };
+  return applyCucaDocumentMargin(dims);
 }
 
 /**
@@ -281,10 +278,5 @@ export function computeClassInkShift(
   notes: readonly NoteGeo[],
   iconSize?: number,
 ): InkShift {
-  const box = buildInkBox(classifiers, namespaces, edges, notes, iconSize);
-  if (!Number.isFinite(box.minX)) return { dx: 0, dy: 0 };
-  return {
-    dx: JAR_INK_MARGIN - box.minX,
-    dy: JAR_INK_MARGIN - box.minY,
-  };
+  return svekInkShift(buildInkBox(classifiers, namespaces, edges, notes, iconSize));
 }
