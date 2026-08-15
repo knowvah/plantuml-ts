@@ -308,7 +308,7 @@ export function buildInkBox(
   // early return -- never stored on the geo (`note-tips-resolve.ts`).
   const tips = resolveTips(notes, classifiers);
   for (const nt of notes) {
-    if (nt.leafType === 'TIPS' && tips.get(nt.id) === 'dropped') continue;
+    if (nt.kind === 'tips' && tips.get(nt.id) === 'dropped') continue;
     addPlainInk(box, nt.x, nt.y, nt.width, nt.height);
   }
   for (const e of edges) {

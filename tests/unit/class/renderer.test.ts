@@ -3,6 +3,7 @@ import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
 import { classPlugin } from '../../../src/diagrams/class/index.js';
 import type { ClassGeometry, ClassifierGeo, EdgeGeo, NamespaceGeo } from '../../../src/diagrams/class/layout.js';
+import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { visibilityIconOriginY } from '../../../src/diagrams/class/class-visibility-icon.js';
 
@@ -64,15 +65,30 @@ function makeNamespaceGeo(overrides?: Partial<NamespaceGeo>): NamespaceGeo {
   };
 }
 
-function makeMinimalGeo(overrides?: Partial<ClassGeometry>): ClassGeometry {
+/** T3: `ClassGeometry.leaves` replaces `classifiers`/`notes` -- callers keep
+ *  passing those two (mechanical migration, no assertion changes); this
+ *  helper folds them into `leaves` (today's `[...classifiers, ...notes]`
+ *  concatenation order, unchanged). */
+interface MinimalGeoOverrides {
+  totalWidth?: number;
+  totalHeight?: number;
+  rawWidth?: number;
+  rawHeight?: number;
+  classifiers?: ClassifierGeo[];
+  notes?: NoteGeo[];
+  edges?: EdgeGeo[];
+  namespaces?: NamespaceGeo[];
+}
+
+function makeMinimalGeo(overrides?: MinimalGeoOverrides): ClassGeometry {
+  const { classifiers = [], notes = [], ...rest } = overrides ?? {};
   return {
     totalWidth: 300,
     totalHeight: 200,
-    classifiers: [],
     edges: [],
     namespaces: [],
-    notes: [],
-    ...overrides,
+    ...rest,
+    leaves: [...classifiers, ...notes],
   };
 }
 
@@ -1564,7 +1580,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
-          leafType: 'NOTE',
+          kind: 'note',
           x: 20,
           y: 30,
           width: 80,
@@ -1592,7 +1608,7 @@ describe('renderClass — notes', () => {
       classifiers: [makeClassifierGeo('A', 'A', { rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] })],
       notes: [
         {
-          id: '__note_0', leafType: 'TIPS', x: 20, y: 30, width: 80, height: 40, lines: ['error'], lineWidths: [30], connector: [],
+          id: '__note_0', kind: 'tips', x: 20, y: 30, width: 80, height: 40, lines: ['error'], lineWidths: [30], connector: [],
           target: 'A', tipRequest: { member: 'typo', position: 'right', baselineOffset: 10, rowHeight: 13 },
         },
       ],
@@ -1607,7 +1623,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
-          leafType: 'NOTE',
+          kind: 'note',
           x: 20,
           y: 30,
           width: 80,
@@ -1633,7 +1649,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
-          leafType: 'TIPS',
+          kind: 'tips',
           x: 20,
           y: 30,
           width: 80,

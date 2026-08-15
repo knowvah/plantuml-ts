@@ -1,20 +1,19 @@
 /**
  * Public geometry types for the class-diagram layout engine. Split out of
- * ./layout.ts (which re-exports them, preserving the public import path used
- * by ./renderer.ts, ./class-geo-builders.ts, and other callers) to keep
- * layout.ts under the project's 500-line file-size cap — mirrors the
- * existing `state/state-geo-types.ts` split precedent exactly (pure move,
- * no behavior change).
+ * ./layout.ts (which re-exports them) to keep layout.ts under the
+ * project's 500-line cap — mirrors `state/state-geo-types.ts`'s split.
  */
 import type { LeafSymbolInk } from '../description/leaf-sizing.js';
 import type { ClassifierKind, LinkDecor, UrlInfo, Visibility } from './ast.js';
-import type { NoteGeo } from './note-layout.js';
+import type { ClassLeafGeo } from './class-leaf-geo.js';
 import type { GenericTagGeo } from './class-stereotype.js';
 import type { EmptyPackageLeafDim } from './class-namespace-shape.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+
+export { isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves, type ClassLeafGeo } from './class-leaf-geo.js';
 
 export interface ClassifierGeo {
   id: string;
@@ -444,10 +443,10 @@ export interface ClassGeometry {
    */
   rawWidth?: number;
   rawHeight?: number;
-  classifiers: ClassifierGeo[];
   edges: EdgeGeo[];
   namespaces: NamespaceGeo[];
-  notes: NoteGeo[];
+  /** Single leaf collection, replacing `classifiers`/`notes` (T3) -- see `class-leaf-geo.ts`'s doc comment for jar mechanism + draw-order. */
+  leaves: ClassLeafGeo[];
   /**
    * SI14 T3: the SAME `StringMeasurer` instance `SyncPlugin.layoutSync`
    * received, carried onto the geometry for the same reason `errors` above

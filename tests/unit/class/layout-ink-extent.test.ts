@@ -186,7 +186,7 @@ describe('computeClassDocumentDims', () => {
     // against `fezugi-39-fujo327` before this fix (see
     // layout-ink-extent.ts's own doc comment for the full derivation).
     const notes: NoteGeo[] = [
-      { id: 'n0', leafType: 'NOTE', x: 0, y: 0, width: 50, height: 30, lines: ['hi'], lineWidths: [], connector: [] },
+      { id: 'n0', kind: 'note', x: 0, y: 0, width: 50, height: 30, lines: ['hi'], lineWidths: [], connector: [] },
     ];
     const dims = computeClassDocumentDims([], [], [], notes);
     // Ink span (unpadded): [0,50] x [0,30].
@@ -202,7 +202,7 @@ describe('computeClassDocumentDims', () => {
     const host = makeClassifierGeo({ id: 'A', x: 600, y: 0, width: 0, height: 0, rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] });
     const notes: NoteGeo[] = [
       {
-        id: 'n0', leafType: 'TIPS', x: 0, y: 0, width: 500, height: 500, lines: ['error'], lineWidths: [], connector: [],
+        id: 'n0', kind: 'tips', x: 0, y: 0, width: 500, height: 500, lines: ['error'], lineWidths: [], connector: [],
         target: 'A', tipRequest: { member: 'typo', position: 'right', baselineOffset: 10, rowHeight: 13 },
       },
     ];

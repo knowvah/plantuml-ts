@@ -92,7 +92,7 @@ function copiedNoteFields(note: ClassNote): Pick<NoteGeo, 'target' | 'color' | '
  */
 function tipNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; y: number }, req: TipRequest): NoteGeo {
   return {
-    id: note.id, leafType: 'TIPS', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines,
+    id: note.id, kind: 'tips', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines,
     lineWidths: m.lineWidths,
     lineAtoms: m.lineAtoms,
     lineHeights: m.lineHeights,
@@ -106,7 +106,7 @@ function tipNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; y:
  *  non-tip stacking branches would otherwise repeat inline. */
 function plainNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; y: number }, connector: Array<{ x: number; y: number }>): NoteGeo {
   return {
-    id: note.id, leafType: 'NOTE', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines, lineWidths: m.lineWidths,
+    id: note.id, kind: 'note', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines, lineWidths: m.lineWidths,
     lineAtoms: m.lineAtoms,
     lineHeights: m.lineHeights,
     connector,

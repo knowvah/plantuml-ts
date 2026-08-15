@@ -250,7 +250,7 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     const geo = geos[0]!;
     // note-leaf-model T2: a resolved tip is upstream's `LeafType.TIPS` leaf
     // (`EntityImageTips`, GeneralImageBuilder.java:219-220).
-    expect(geo.leafType).toBe('TIPS');
+    expect(geo.kind).toBe('tips');
     expect(geo.connector).toEqual([]);
     // note-leaf-model T3 (D3): the geo carries only the draw-time INPUTS --
     // the member text, the declared side and the two baked font metrics --
@@ -283,7 +283,7 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     expect(geos).toHaveLength(1);
     // note-leaf-model T2: dropping is `EntityImageTips#drawU`'s own early
     // return -- a dropped note is still a `LeafType.TIPS` leaf.
-    expect(geos[0]!.leafType).toBe('TIPS');
+    expect(geos[0]!.kind).toBe('tips');
     expect(resolveTips(geos, [host]).get('__note_0')).toBe('dropped');
   });
 
@@ -296,7 +296,7 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     const { measurements, groups } = buildNoteGraphParts(notes, defaultTheme, measurer, noAnchors);
     const result = layoutResultFor('__note_0', 200, 50, measurements.get('__note_0')!.width, measurements.get('__note_0')!.height);
     const geos = mapNoteGeos(notes, result, { measurements, groups }, { theme: defaultTheme, measurer });
-    expect(geos[0]!.leafType).toBe('TIPS');
+    expect(geos[0]!.kind).toBe('tips');
     expect(resolveTips(geos, []).get('__note_0')).toBe('dropped');
   });
 
@@ -371,7 +371,7 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     // note-leaf-model T2: opalisable-or-not is a DRAW-time branch inside
     // `EntityImageNote#drawU`; the leaf is `LeafType.NOTE` either way
     // (GeneralImageBuilder.java:118-119).
-    expect(geos[0]!.leafType).toBe('NOTE');
+    expect(geos[0]!.kind).toBe('note');
   });
 });
 

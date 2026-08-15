@@ -14,7 +14,7 @@ const METRICS = { baselineOffset: 10, rowHeight: 13 };
 
 function tip(id: string, member: string, position: 'left' | 'right', x: number, y = 0): NoteGeo {
   return {
-    id, leafType: 'TIPS', x, y, width: 80, height: 40, lines: ['hi'], lineWidths: [10], connector: [],
+    id, kind: 'tips', x, y, width: 80, height: 40, lines: ['hi'], lineWidths: [10], connector: [],
     target: 'A', tipRequest: { member, position, ...METRICS },
   };
 }
@@ -29,7 +29,7 @@ const classicHost: ClassifierAnchor = {
 
 describe('resolveTips -- EntityImageTips#drawU at draw time', () => {
   it('ignores NOTE leaves entirely (returns no entry for them)', () => {
-    const plain: NoteGeo = { id: 'n', leafType: 'NOTE', x: 0, y: 0, width: 1, height: 1, lines: [], lineWidths: [], connector: [], target: 'A' };
+    const plain: NoteGeo = { id: 'n', kind: 'note', x: 0, y: 0, width: 1, height: 1, lines: [], lineWidths: [], connector: [], target: 'A' };
     expect(resolveTips([plain], [classicHost]).size).toBe(0);
   });
 

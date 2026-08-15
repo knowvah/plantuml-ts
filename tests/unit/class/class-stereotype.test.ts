@@ -20,7 +20,7 @@ import {
   resolveVisibleStereotypeLabels,
   resolveStyleStereotypeTags,
 } from '../../../src/diagrams/class/class-stereotype.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
@@ -407,7 +407,7 @@ describe('layoutClass — stereotype row', () => {
       ],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.headerRowCount).toBe(2);
     expect(geo.rows[0]).toMatchObject({ text: '«Test»', italic: true, fontSize: CLASS_STEREOTYPE_FONT_SIZE });
     expect(geo.rows[1]!.text).toBe('C');
@@ -421,7 +421,7 @@ describe('layoutClass — stereotype row', () => {
       classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
-    expect(result.classifiers[0]!.headerRowCount).toBeUndefined();
+    expect(classifierLeaves(result.leaves)[0]!.headerRowCount).toBeUndefined();
   });
 
   // G2 N39: `skinparam classStereotypeFontSize`/`FontStyle` -- end-to-end
@@ -445,7 +445,7 @@ describe('layoutClass — stereotype row', () => {
       },
     };
     const result = layoutClass(ast, theme, measurer);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.rows[0]).toMatchObject({ text: '«Test»', fontSize: 20, italic: false, bold: true });
   });
 
@@ -454,7 +454,7 @@ describe('layoutClass — stereotype row', () => {
       classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [], stereotype: 'Test' }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.rows[0]).toMatchObject({ text: '«Test»', fontSize: CLASS_STEREOTYPE_FONT_SIZE, italic: true });
     expect(geo.rows[0]).not.toHaveProperty('bold');
   });
@@ -466,7 +466,7 @@ describe('layoutClass — stereotype row', () => {
       directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     const nameH = measurer.measure('C', { family: defaultTheme.fontFamily, size: defaultTheme.fontSize }).height;
     const expectedHeaderRowHeight = Math.max(32, CLASS_STEREOTYPE_FONT_SIZE + nameH + 10);
     expect(geo.height).toBe(expectedHeaderRowHeight);
@@ -500,7 +500,7 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
       directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
     });
     const result = layoutClass(ast, defaultTheme, detMeasurer);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.headerRowCount).toBe(2);
     expect(geo.rows).toHaveLength(2);
     expect(geo.rows[0]!.text).toBe('User');
@@ -529,7 +529,7 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
       classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, detMeasurer);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.headerRowCount).toBeUndefined();
     expect(geo.rows[0]!.text).toBe('C');
   });
@@ -545,7 +545,7 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
       directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
     });
     const result = layoutClass(ast, defaultTheme, detMeasurer);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.rows[0]!.indent).toBe(geo.rows[1]!.indent);
   });
 
@@ -559,7 +559,7 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
       }],
     });
     const result = layoutClass(ast, defaultTheme, detMeasurer);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.headerRowCount).toBe(3);
     expect(geo.rows[0]!.text).toBe('«Test»');
     expect(geo.rows[1]!.text).toBe('Line1');
@@ -596,7 +596,7 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
       }],
     });
     const result = layoutClass(ast, defaultTheme, detMeasurer);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.headerRowCount).toBe(2);
     expect(geo.rows[0]!.text).toBe('CuttingStockPrb');
     // U+00A0 (NBSP), not a plain space or an empty string.
@@ -739,7 +739,7 @@ describe('layoutClass — generic type-parameter tag box end-to-end (G2 N32)', (
     const ast = parse('class Foo<Param>');
     const det = new DeterministicMeasurer();
     const result = layoutClass(ast, defaultTheme, det);
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.width).toBeCloseTo(95.475, 4);
     expect(geo.genericTag).toBeDefined();
     expect(geo.genericTag?.text).toBe('Param');
@@ -751,7 +751,7 @@ describe('layoutClass — generic type-parameter tag box end-to-end (G2 N32)', (
     '(zero behavior change)', () => {
     const ast = parse('class Foo');
     const result = layoutClass(ast, defaultTheme, new DeterministicMeasurer());
-    expect(result.classifiers[0]!.genericTag).toBeUndefined();
+    expect(classifierLeaves(result.leaves)[0]!.genericTag).toBeUndefined();
   });
 });
 
@@ -770,7 +770,7 @@ describe('layoutClass — item 35, MaximumWidth header word-wrap', () => {
     const ast = parse('class "Long Long Long Long Long Long Long Long Long Long **class**" as C1');
     const theme = deepMergeTheme(defaultTheme, { colors: { graph: { classCascadeHeaderMaximumWidth: 100 } } });
     const result = layoutClass(ast, theme, new DeterministicMeasurer());
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.headerRowCount).toBe(4);
     expect(geo.width).toBeCloseTo(125.45000000000003, 4);
     expect(geo.height).toBe(82);
@@ -779,7 +779,7 @@ describe('layoutClass — item 35, MaximumWidth header word-wrap', () => {
   it('classCascadeHeaderMaximumWidth unset (0) leaves the header on one line (zero behavior change)', () => {
     const ast = parse('class "Long Long Long Long Long Long Long Long Long Long class" as C1');
     const result = layoutClass(ast, defaultTheme, new DeterministicMeasurer());
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     expect(geo.headerRowCount).toBeUndefined();
   });
 });
@@ -801,7 +801,7 @@ describe('layoutClass — item 35, MaximumWidth member-row word-wrap', () => {
     // nucite's own `<style>` block sets `class { MaximumWidth 100 }`.
     const theme = deepMergeTheme(defaultTheme, { colors: { graph: { classCascadeMaximumWidth: 100 } } });
     const result = layoutClass(ast, theme, new DeterministicMeasurer());
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     // jar's real golden: <rect width="105.45" height="104"/>.
     expect(geo.width).toBeCloseTo(105.45, 4);
     expect(geo.height).toBe(104);
@@ -813,7 +813,7 @@ describe('layoutClass — item 35, MaximumWidth member-row word-wrap', () => {
   it('classCascadeMaximumWidth unset (0) leaves the row on one line (zero behavior change)', () => {
     const ast = parse('class C2 {\nLong Long Long Long Long Long Long Long Long Method()\n}');
     const result = layoutClass(ast, defaultTheme, new DeterministicMeasurer());
-    const geo = result.classifiers[0]!;
+    const geo = classifierLeaves(result.leaves)[0]!;
     // header row + 1 unwrapped body row.
     expect(geo.rows).toHaveLength(2);
   });

@@ -156,7 +156,7 @@ function resolveGroup(members: readonly NoteGeo[], host: ClassifierAnchor, out: 
 function groupTips(notes: readonly NoteGeo[]): NoteGeo[][] {
   const groups = new Map<string, NoteGeo[]>();
   for (const note of notes) {
-    if (note.leafType !== 'TIPS' || note.tipRequest === undefined) continue;
+    if (note.kind !== 'tips' || note.tipRequest === undefined) continue;
     const key = `${note.target ?? ''}|${note.tipRequest.position}`;
     const bucket = groups.get(key) ?? [];
     bucket.push(note);

@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -32,7 +32,7 @@ describe('measureObjectClassifier -- enhanced body dispatch (G3/O4)', () => {
       '}',
     ]));
     const geo = layoutClass(ast, theme, measurer);
-    const c = geo.classifiers[0]!;
+    const c = classifierLeaves(geo.leaves)[0]!;
     expect(c.enhancedBody).toBeDefined();
     expect(c.dividerYs).toEqual([18]); // headerRowHeight (nameHeight, no stereo)
   });
@@ -40,7 +40,7 @@ describe('measureObjectClassifier -- enhanced body dispatch (G3/O4)', () => {
   it('does NOT set enhancedBody for a plain object body (zero behavior change)', () => {
     const ast = parseClass(src(['object Foo {', 'field1', '}']));
     const geo = layoutClass(ast, theme, measurer);
-    const c = geo.classifiers[0]!;
+    const c = classifierLeaves(geo.leaves)[0]!;
     expect(c.enhancedBody).toBeUndefined();
   });
 

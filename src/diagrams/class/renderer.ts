@@ -6,6 +6,7 @@
  */
 
 import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from './layout.js';
+import { classifierLeaves, noteLeaves } from './class-geo-types.js';
 import { renderNote, renderTipNote, renderOpaleNote } from './renderer-note.js';
 import type { NoteGeo } from './note-layout.js';
 import { resolveTips, type TipResolution } from './note-tips-resolve.js';
@@ -164,7 +165,7 @@ function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: Theme): str
   // the notch against the host at DRAW time (mission note-leaf-model D3,
   // `note-tips-resolve.ts`) and draws NOTHING for a dropped tip;
   // `LeafType.NOTE -> EntityImageNote` (:118-119), plain or opalisable.
-  if (note.leafType === 'TIPS') {
+  if (note.kind === 'tips') {
     const tip = tips.get(note.id);
     return tip === undefined || tip === 'dropped' ? [] : [renderTipNote(note, tip, theme)];
   }
@@ -304,31 +305,32 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     canonicalBackground !== '#FFFFFF'
       ? canonicalBackground
       : undefined;
-  // G2 N2 (mechanism 3): every drawn element gets an `ent%04d`/`lnk%d`
-  // uid + `<g class="entity"/"cluster"/"link">` wrapper -- see
-  // `renderer-uid.ts#buildClassUidPlan`/`renderer-group.ts`'s own doc
-  // comments for the scheme and its exact/fallback gate.
-  const uidPlan = buildClassUidPlan(geo);
+  // T3: `geo.leaves` replaces the former `classifiers`/`notes` split
+  // (`class-leaf-geo.ts`) -- every loop below reads these views instead.
+  const classifiers = classifierLeaves(geo.leaves);
+  const notes = noteLeaves(geo.leaves);
+  // G2 N2 (mechanism 3): every drawn element gets an `ent%04d`/`lnk%d` uid
+  // + `<g class="entity"/"cluster"/"link">` wrapper -- see `renderer-uid.ts
+  // #buildClassUidPlan`'s own doc comment for the scheme/exact-fallback
+  // gate; `ClassUidPlanInput` is structural, so the views above suffice.
+  const uidPlan = buildClassUidPlan({ ...geo, classifiers, notes });
 
   // G2 N52: notes hosted on a classifier (`NoteGeo.target`'s own doc
   // comment) draw immediately after that classifier, INTERLEAVED with the
-  // classifier loop below -- not in the separate trailing notes pass (step
-  // 4) that pass now only handles unhosted notes (freestanding, or an
-  // unresolved `of` target). Matches jar: every classifier/note is a graph
-  // NODE, drawn in real creation order, strictly BEFORE every edge; this
-  // port's classifier array order already matches jar's node order (every
-  // already-zero-diff multi-classifier fixture depends on that), so
-  // grouping each note under its host classifier reproduces the same
-  // sequence without needing a full creation-order re-sort.
-  // A note is "hosted" iff its `of` target IS a drawn classifier -- decided
-  // here from `geo.classifiers` (mission note-leaf-model D3: the geo build
-  // no longer looks the host up; `NoteGeo.target` is the raw parse-side id,
-  // a package target or freestanding note simply never matches).
-  const drawnClassifierIds = new Set(geo.classifiers.map((c) => c.id));
-  const noteCtx: NoteRenderContext = { uidPlan, tips: resolveTips(geo.notes, geo.classifiers) };
-  const notesByHost = new Map<string, ClassGeometry['notes']>();
+  // classifier loop below -- not the separate trailing notes pass (step 4,
+  // unhosted notes only: freestanding, or an unresolved `of` target).
+  // Matches jar: every classifier/note is a graph NODE, drawn in real
+  // creation order, strictly BEFORE every edge; this port's classifier
+  // array order already matches jar's node order, so grouping each note
+  // under its host reproduces the sequence without a full re-sort. "Hosted"
+  // iff `of` target IS a drawn classifier -- decided from `classifiers`
+  // (mission note-leaf-model D3: `NoteGeo.target` is the raw parse-side id,
+  // a package target or freestanding note never matches).
+  const drawnClassifierIds = new Set(classifiers.map((c) => c.id));
+  const noteCtx: NoteRenderContext = { uidPlan, tips: resolveTips(notes, classifiers) };
+  const notesByHost = new Map<string, NoteGeo[]>();
   const hostedNoteIds = new Set<string>();
-  for (const note of geo.notes) {
+  for (const note of notes) {
     if (note.target === undefined || !drawnClassifierIds.has(note.target)) continue;
     const bucket = notesByHost.get(note.target) ?? [];
     bucket.push(note);
@@ -353,10 +355,8 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // matching jar (`net/atmp/CucaDiagram.java#isHidden` -> `SvekResult`'s
   // `UHidden` wrap). Layout/uid numbering already ran as if it were visible,
   // so simply skipping the push here is enough — no renumbering needed.
-  const hiddenClassifierIds = new Set(
-    geo.classifiers.filter((c) => c.hidden === true).map((c) => c.id),
-  );
-  for (const classifier of geo.classifiers) {
+  const hiddenClassifierIds = new Set(classifiers.filter((c) => c.hidden === true).map((c) => c.id));
+  for (const classifier of classifiers) {
     if (classifier.hidden === true) continue;
     // G2 N8: an association-class-couple "point" entity draws unwrapped --
     // no `<g class="entity">`, no id, no comment -- see `renderAssocPoint`'s
@@ -423,7 +423,7 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // `Entity.getName()` for an assoc-circle/lollipop endpoint -- see
   // `linkIdForSvg`'s doc comment.
   const syntheticNames = new Map<string, string>();
-  for (const classifier of geo.classifiers) {
+  for (const classifier of classifiers) {
     if (classifier.syntheticIdName !== undefined) {
       syntheticNames.set(classifier.id, classifier.syntheticIdName);
     }
@@ -459,7 +459,7 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // resolve to a drawn classifier): every HOSTED note already drew in step
   // 2, immediately after its host classifier (`renderHostedNotes` above --
   // see `NoteGeo.target`'s own doc comment for why).
-  for (const note of geo.notes) {
+  for (const note of notes) {
     if (hostedNoteIds.has(note.id)) continue;
     children.push(...renderOneNote(note, noteCtx, theme));
   }

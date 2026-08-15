@@ -9,7 +9,7 @@
  * class/layout.ts).
  */
 import { describe, it, expect } from 'vitest';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves, noteLeaves } from '../../../src/diagrams/class/layout.js';
 import type {
   ClassDiagramAST,
   Classifier,
@@ -61,19 +61,19 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     const ast = makeAST({ classifiers: [makeClassifier('A')] });
     const { geo, captured } = layoutAndCount(ast);
     expect(captured).toBe(0);
-    expect(geo.classifiers).toHaveLength(1);
-    expect(geo.classifiers[0]?.id).toBe('A');
+    expect(classifierLeaves(geo.leaves)).toHaveLength(1);
+    expect(classifierLeaves(geo.leaves)[0]?.id).toBe('A');
     // G2 N3: the degenerate single-classifier box is no longer drawn flush
     // at the canvas origin -- `EntityImageDegenerated.java`'s own `delta =
     // 7` translate (jar-verified, `plans/g2-class-svg/ledger.md` N3) is now
     // reproduced as a fixed (7, 7) near-edge margin.
-    expect(geo.classifiers[0]?.x).toBe(7);
-    expect(geo.classifiers[0]?.y).toBe(7);
+    expect(classifierLeaves(geo.leaves)[0]?.x).toBe(7);
+    expect(classifierLeaves(geo.leaves)[0]?.y).toBe(7);
     expect(geo.totalWidth).toBeGreaterThan(0);
     expect(geo.totalHeight).toBeGreaterThan(0);
     expect(geo.edges).toHaveLength(0);
     expect(geo.namespaces).toHaveLength(0);
-    expect(geo.notes).toHaveLength(0);
+    expect(noteLeaves(geo.leaves)).toHaveLength(0);
   });
 
   it('two classifiers + one relationship -- exactly 1 graph (unchanged)', () => {
@@ -83,7 +83,7 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     });
     const { geo, captured } = layoutAndCount(ast);
     expect(captured).toBe(1);
-    expect(geo.classifiers).toHaveLength(2);
+    expect(classifierLeaves(geo.leaves)).toHaveLength(2);
     expect(geo.edges).toHaveLength(1);
   });
 
@@ -92,8 +92,8 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     const ast = makeAST({ classifiers: [makeClassifier('A')], notes: [note] });
     const { geo, captured } = layoutAndCount(ast);
     expect(captured).toBe(1);
-    expect(geo.classifiers).toHaveLength(1);
-    expect(geo.notes).toHaveLength(1);
+    expect(classifierLeaves(geo.leaves)).toHaveLength(1);
+    expect(noteLeaves(geo.leaves)).toHaveLength(1);
   });
 
   it('one classifier + a floating (unattached) note -- NOT degenerate', () => {
@@ -101,8 +101,8 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     const ast = makeAST({ classifiers: [makeClassifier('A')], notes: [note] });
     const { geo, captured } = layoutAndCount(ast);
     expect(captured).toBe(1);
-    expect(geo.classifiers).toHaveLength(1);
-    expect(geo.notes).toHaveLength(1);
+    expect(classifierLeaves(geo.leaves)).toHaveLength(1);
+    expect(noteLeaves(geo.leaves)).toHaveLength(1);
   });
 
   it('single classifier inside a declared namespace -- NOT degenerate (any declared group disqualifies, even non-empty)', () => {
@@ -132,7 +132,7 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     const ast = makeAST({ notes: [note] });
     const { geo, captured } = layoutAndCount(ast);
     expect(captured).toBe(1);
-    expect(geo.notes).toHaveLength(1);
+    expect(noteLeaves(geo.leaves)).toHaveLength(1);
   });
 
   it('empty diagram (0 classifiers, 0 namespaces) -- 0 graphs, zero-size geometry', () => {
@@ -140,7 +140,7 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     expect(captured).toBe(0);
     expect(geo.totalWidth).toBe(0);
     expect(geo.totalHeight).toBe(0);
-    expect(geo.classifiers).toHaveLength(0);
+    expect(classifierLeaves(geo.leaves)).toHaveLength(0);
   });
 
   it('end-to-end: "class A" alone renders an SVG containing the class box', () => {

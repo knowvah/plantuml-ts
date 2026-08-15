@@ -20,7 +20,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST, Classifier } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
@@ -81,7 +81,7 @@ describe('json — baloca-83-nadu916 shape', () => {
   it('sizes the json node to the oracle dims (73.9375 x 36)', () => {
     const ast = parse(BALOCA_SOURCE);
     const geo = layoutClass(ast, theme, measurer);
-    const jsonGeo = geo.classifiers.find((c) => c.kind === 'json')!;
+    const jsonGeo = classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!;
     expect(jsonGeo.width).toBeCloseTo(73.9375, 3);
     expect(jsonGeo.height).toBeCloseTo(36, 5);
   });
@@ -137,7 +137,7 @@ describe('json — bepafe-03-teda035 shape (nested braces on one line)', () => {
   it('sizes the json node to the oracle dims (143.025 x 144)', () => {
     const ast = parse(BEPAFE_JSON_SOURCE);
     const geo = layoutClass(ast, theme, measurer);
-    const jsonGeo = geo.classifiers.find((c) => c.kind === 'json')!;
+    const jsonGeo = classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!;
     expect(jsonGeo.width).toBeCloseTo(143.025, 3);
     expect(jsonGeo.height).toBeCloseTo(144, 5);
   });
@@ -149,7 +149,7 @@ describe('json — bepafe-03-teda035 shape (nested braces on one line)', () => {
   it('centers the name row within the final box width and sets textLength', () => {
     const ast = parse(BEPAFE_JSON_SOURCE);
     const geo = layoutClass(ast, theme, measurer);
-    const jsonGeo = geo.classifiers.find((c) => c.kind === 'json')!;
+    const jsonGeo = classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!;
     const nameRow = jsonGeo.rows[0]!;
     expect(nameRow.text).toBe('A');
     expect(nameRow.width).toBeCloseTo(9.3625, 3);
@@ -171,7 +171,7 @@ describe('json — bepafe-03-teda035 shape (nested braces on one line)', () => {
      "(including a nested object's key, top-aligned not centered)", () => {
     const ast = parse(BEPAFE_JSON_SOURCE);
     const geo = layoutClass(ast, theme, measurer);
-    const jsonGeo = geo.classifiers.find((c) => c.kind === 'json')!;
+    const jsonGeo = classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!;
     const [, nameKey, nameValue, colorKey, , , , , , userKey, ageKey, ageValue] = jsonGeo.rows;
 
     // "name" key/value row -- jar y=37.8889, rect y=7 -> relative 30.8889
@@ -273,7 +273,7 @@ describe('json — invalid JSON body', () => {
   it('measures the leaf as an empty json object (13px empty-fields fallback)', () => {
     const ast = parse('json Bad {\nnot valid json at all\n}');
     const geo = layoutClass(ast, theme, measurer);
-    const jsonGeo = geo.classifiers[0]!;
+    const jsonGeo = classifierLeaves(geo.leaves)[0]!;
     // title height + 13 (JSON_EMPTY_HEIGHT_FALLBACK) — no crash, deterministic.
     expect(jsonGeo.height).toBeGreaterThan(13);
   });
@@ -366,7 +366,7 @@ describe('json — TextBlockJson#drawU line geometry (bepafe-03-teda035)', () =>
 
   function bodyOf() {
     const geo = layoutClass(parse(BEPAFE_JSON_SOURCE), theme, measurer);
-    return geo.classifiers.find((c) => c.kind === 'json')!.jsonBody!;
+    return classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!.jsonBody!;
   }
 
   it('emits the object vline FIRST, before that object\'s first hline', () => {

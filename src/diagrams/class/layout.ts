@@ -50,10 +50,15 @@ import {
   buildEdgeGeos,
   degenerateSingleClassifier,
 } from './class-geo-builders.js';
-import type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry } from './class-geo-types.js';
+import {
+  isNoteGeo, type ClassifierGeo, type EdgeGeo, type NamespaceGeo, type ClassGeometry, type ClassLeafGeo,
+} from './class-geo-types.js';
 
 export { formatMemberText, ROW_TEXT_LEFT_MARGIN } from './class-layout-helpers.js';
-export type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry, JsonBodyItem } from './class-geo-types.js';
+export {
+  isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves,
+  type ClassifierGeo, type EdgeGeo, type NamespaceGeo, type ClassGeometry, type JsonBodyItem, type ClassLeafGeo,
+} from './class-geo-types.js';
 
 // ---------------------------------------------------------------------------
 // Directive resolution helpers
@@ -218,7 +223,7 @@ function layoutSinglePage(
     ast.classifiers.length === 0 &&
     ast.notes.length === 0
   ) {
-    return { totalWidth: 0, totalHeight: 0, classifiers: [], edges: [], namespaces: [], notes: [] };
+    return { totalWidth: 0, totalHeight: 0, leaves: [], edges: [], namespaces: [] };
   }
 
   // Collapse any namespace left empty by parsing into a flat leaf classifier
@@ -334,15 +339,19 @@ function assembleShiftedGeometry(
   const rawDims = computeClassRawInkDims(classifiers, namespaces, edges, notes, iconSize);
   const shift = computeClassInkShift(classifiers, namespaces, edges, notes, iconSize);
 
+  // T3 (mission leaf-draw-order): concatenation order only -- T4 lands the
+  // real jar draw order (`ClassGeometry.leaves`'s own doc comment).
   return {
     totalWidth: documentDims.width,
     totalHeight: documentDims.height,
     rawWidth: rawDims.width,
     rawHeight: rawDims.height,
-    classifiers: classifiers.map((c) => shiftClassifierGeo(c, shift.dx, shift.dy)),
+    leaves: [
+      ...classifiers.map((c) => shiftClassifierGeo(c, shift.dx, shift.dy)),
+      ...notes.map((n) => shiftNoteGeo(n, shift.dx, shift.dy)),
+    ],
     edges: edges.map((e) => shiftEdgeGeo(e, shift.dx, shift.dy)),
     namespaces: namespaces.map((n) => shiftNamespaceGeo(n, shift.dx, shift.dy)),
-    notes: notes.map((n) => shiftNoteGeo(n, shift.dx, shift.dy)),
   };
 }
 
@@ -378,10 +387,9 @@ function layoutMultiPage(
   theme: Theme,
   measurer: StringMeasurer,
 ): ClassGeometry {
-  const classifiers: ClassifierGeo[] = [];
+  const leaves: ClassLeafGeo[] = [];
   const edges: EdgeGeo[] = [];
   const namespaces: NamespaceGeo[] = [];
-  const notes: NoteGeo[] = [];
   let maxWidth = 0;
   let yOffset = 0;
 
@@ -390,17 +398,21 @@ function layoutMultiPage(
     const geo = layoutSinglePage(page, theme, measurer);
     const dy = yOffset;
 
-    for (const c of geo.classifiers) classifiers.push(shiftClassifierGeo(c, 0, dy));
+    // T3: each page's own `leaves` is already `[...classifiers, ...notes]`
+    // order (`assembleShiftedGeometry`); shifting per-kind and re-pushing in
+    // the same relative order preserves that concatenation across pages.
+    for (const leaf of geo.leaves) {
+      leaves.push(isNoteGeo(leaf) ? shiftNoteGeo(leaf, 0, dy) : shiftClassifierGeo(leaf, 0, dy));
+    }
     for (const e of geo.edges) edges.push(shiftEdgeGeo(e, 0, dy));
     for (const n of geo.namespaces) namespaces.push(shiftNamespaceGeo(n, 0, dy));
-    for (const n of geo.notes) notes.push(shiftNoteGeo(n, 0, dy));
 
     maxWidth = Math.max(maxWidth, geo.totalWidth);
     yOffset += geo.totalHeight;
     if (i < pages.length - 1) yOffset += NEWPAGE_GAP;
   }
 
-  return { totalWidth: maxWidth, totalHeight: yOffset, classifiers, edges, namespaces, notes };
+  return { totalWidth: maxWidth, totalHeight: yOffset, leaves, edges, namespaces };
 }
 
 // ---------------------------------------------------------------------------

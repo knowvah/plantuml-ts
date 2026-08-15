@@ -26,28 +26,32 @@ import type { MemberRenderAtom } from './class-member-creole.js';
  *    whose `::member` matches no row is `dropped` by that same draw path.
  * Mission `note-leaf-model` D2: the two stay distinct on the way into the
  * single leaf collection — this field is what carries the distinction.
+ * Mission `leaf-draw-order` T3: renamed `leafType` -> `kind`, values
+ * lowercased -- the discriminant for `ClassLeafGeo = ClassifierGeo |
+ * NoteGeo` (`class-leaf-geo.ts`), mirroring `ClassifierGeo.kind` and
+ * state's `StateNodeGeo.kind: ... | 'note'` precedent.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/LeafType.java:49
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/GeneralImageBuilder.java:118-119,219-220
  */
-export type NoteLeafType = 'NOTE' | 'TIPS';
+export type NoteLeafType = 'note' | 'tips';
 
 export interface NoteGeo {
   id: string;
   /**
    * Which upstream image class draws this note — see {@link NoteLeafType}.
    * Set by EVERY producer to the leaf type upstream's COMMAND created:
-   * `note-layout-tip.ts#tipNoteGeo` -> `'TIPS'` (a `::member` note in a
+   * `note-layout-tip.ts#tipNoteGeo` -> `'tips'` (a `::member` note in a
    * member-tip group, `CommandFactoryTipOnEntity`), `plainNoteGeo` and
-   * `note-opale.ts#buildOpaleNoteGeo` -> `'NOTE'` (opalisable-or-not is a
+   * `note-opale.ts#buildOpaleNoteGeo` -> `'note'` (opalisable-or-not is a
    * draw-time branch inside `EntityImageNote#drawU`, same leaf). The two
    * draw passes dispatch on it exactly as `GeneralImageBuilder` does; a
-   * `'TIPS'` leaf whose host is not a drawn classifier draws nothing
+   * `'tips'` leaf whose host is not a drawn classifier draws nothing
    * (`EntityImageTips#drawU`'s "Error1"/"Error2" return, `note-tips-
    * resolve.ts`) -- before mission `note-leaf-model` D3 this port instead
    * fell through to an opalised plain box for that case (0 corpus fixtures,
    * jar-verified 2026-08-15 that upstream draws no tip there).
    */
-  leafType: NoteLeafType;
+  kind: NoteLeafType;
   x: number;
   y: number;
   width: number;
@@ -101,9 +105,9 @@ export interface NoteGeo {
    */
   lineHeights?: readonly number[];
   /** Routed connector points from the note to its host classifier. Empty
-   *  for a `'TIPS'` leaf (G2/N13 — the connector is a notch merged into the
+   *  for a `'tips'` leaf (G2/N13 — the connector is a notch merged into the
    *  note's own outline instead, resolved at draw time from `tipRequest`
-   *  below) and for a resolved opalisable `'NOTE'` (`opale` below). */
+   *  below) and for a resolved opalisable `'note'` (`opale` below). */
   connector: Array<{ x: number; y: number }>;
   /**
    * `ClassNote.target` copied verbatim -- the `of <Entity>` host id (a
@@ -118,11 +122,11 @@ export interface NoteGeo {
    * `janeba-15-duja043`/`cajicu-52-cego765`, each showing the note's `<g>`
    * between its host and the NEXT classifier), a note whose target is not
    * (package target, freestanding) keeps the trailing position; and
-   * `note-tips-resolve.ts` looks a `'TIPS'` leaf's host up by this id.
+   * `note-tips-resolve.ts` looks a `'tips'` leaf's host up by this id.
    */
   target?: string;
   /**
-   * Present iff `leafType === 'TIPS'`: the INPUTS `EntityImageTips#drawU`
+   * Present iff `kind === 'tips'`: the INPUTS `EntityImageTips#drawU`
    * resolves against the host at DRAW time -- `member` (`ClassNote
    * .targetPort`, the `::member` text `nodeOther.getBestMatch(member)` fuzzy-
    * matches), `position` (`getPosition()`, the declared side whose
@@ -181,7 +185,7 @@ export interface NoteGeo {
 }
 
 /**
- * A `'TIPS'` leaf's draw-time resolution inputs -- see
+ * A `'tips'` leaf's draw-time resolution inputs -- see
  * {@link NoteGeo.tipRequest}. `position` keeps the full `NotePosition`
  * (upstream's `CommandFactoryTipOnEntity` regex admits only `right|left`;
  * this port's `NOTE_TARGET` grammar also reaches here for `top|bottom` --
@@ -198,7 +202,7 @@ export interface TipRequest {
 
 /**
  * Minimal classifier-position + row-text view `note-tips-resolve.ts` needs
- * to resolve a `'TIPS'` leaf against its host — a structural subset of
+ * to resolve a `'tips'` leaf against its host — a structural subset of
  * `class-geo-types.ts#ClassifierGeo` (every `ClassifierGeo` satisfies it),
  * kept as its own leaf type so a test can hand-build a host without a full
  * `ClassifierGeo` literal and so this module stays import-cycle-free.
