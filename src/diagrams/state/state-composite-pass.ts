@@ -94,7 +94,7 @@ export const ANCHOR_SIZE = 0.72;
  *  body/title text). Duplicated locally (D1, avoid-import-cycle convention)
  *  rather than imported from `state-dot-graph.ts` -- same value as
  *  `description/renderer-edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
-const ARROW_LABEL_FONT_SIZE = 13;
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 export function newAccumulator(labelFont?: FontSpec, measurer?: StringMeasurer): PassAccumulator {
   return { nodes: [], edges: [], clusters: [], edgeSources: [], ...(labelFont !== undefined ? { labelFont } : {}), ...(measurer !== undefined ? { measurer } : {}) };

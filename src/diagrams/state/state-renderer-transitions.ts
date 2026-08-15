@@ -22,7 +22,7 @@ import {} from './renderer-composite-box.js';
 import {} from './renderer-note.js';
 import {} from './state-shadow.js';
 
-const ARROW_LABEL_FONT_SIZE = 13;
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 /**
  * mission G4 S8 (mechanism 19): `TransitionGeo.points` is a well-formed

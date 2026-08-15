@@ -245,7 +245,7 @@ export const INTERFACE_CIRCLE_SIZE = 18;
 // EntityImageNote sizing. Notes use FontParam.NOTE — a fixed 13px font, not the
 // theme's default. Total horizontal margin (text padding + folded corner) and
 // vertical margin measured exactly against the deterministic oracle.
-export const NOTE_FONT_SIZE = 13;
+export { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 export const NOTE_MARGIN_H = 21;
 export const NOTE_MARGIN_V = 10;
 

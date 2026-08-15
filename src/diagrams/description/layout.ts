@@ -76,7 +76,7 @@ export type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-ty
 /** `FontParam.ARROW(13, normal)` (klimt/font/FontParam.java:54) -- see
  *  `layoutDescription`'s `edgeFontSpec` construction for the full
  *  jar-verified derivation (G5/C0). */
-const ARROW_LABEL_FONT_SIZE = 13;
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 
 // ── Phase 1: AST classification ──

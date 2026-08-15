@@ -45,7 +45,7 @@ import { buildFlatNoteGeos, type FlatNoteGeoCtx } from './renderer-note.js';
  *  same avoid-import-cycle convention that file's own `transitionLabelText`
  *  re-export already documents) -- same value as `description/renderer-
  *  edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
-const ARROW_LABEL_FONT_SIZE = 13;
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 /** A state (or top-level ast) is composite-free iff no state anywhere has
  *  local content (`hasLocalContent`, state-composite-detect.ts) OR its OWN

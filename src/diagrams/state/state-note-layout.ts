@@ -61,7 +61,7 @@ import type { DotInputNode } from '../../core/graph-layout.js';
  * before its own G2 N39) — not modeled here, `plans/g4-state-svg/ledger.md`
  * S10 queue.
  */
-const NOTE_FONT_SIZE = 13;
+import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 const NOTE_MARGIN_X1 = 6;
 const NOTE_MARGIN_X2 = 15;
 const NOTE_MARGIN_Y = 5;

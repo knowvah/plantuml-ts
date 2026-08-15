@@ -74,7 +74,7 @@ import {
 // jar-verified derivation against labono-83-nega255/gedude-95-subi666).
 // ---------------------------------------------------------------------------
 
-const NOTE_FONT_SIZE = 13;
+import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 const NOTE_MARGIN_X1 = 6;
 const NOTE_MARGIN_Y = 5;
 /** `Opale.java`'s `cornersize` — the folded-corner triangle size, SAME

@@ -138,7 +138,7 @@ const NOTE_MARGIN_Y = 5;
  *  G2 N39: the DEFAULT only -- see that constant's own doc comment for the
  *  `theme.colors.elements['note'].fontSize` override this renderer now also
  *  consults (`renderNoteText`'s own `fontSize` local). */
-const NOTE_FONT_SIZE = 13;
+import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 /** `note { LineThickness 0.5 }` (`plantuml.skin`) -- both the outline/
  *  corner paths and the plain connector line. */
 const NOTE_STROKE_WIDTH = 0.5;

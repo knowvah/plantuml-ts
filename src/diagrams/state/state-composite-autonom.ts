@@ -41,7 +41,7 @@ type ExtractAutonomSpec = Extract<GeoSpec, { kind: 'autonom' }>;
  *  needs for `buildLevelTransitionGeos`'s label-anchor conversion (G8 T2).
  *  Duplicated locally (D1, avoid-import-cycle convention) -- same value as
  *  `state-composite-pass.ts`'s own identical constant. */
-const ARROW_LABEL_FONT_SIZE = 13;
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 /** Uniformly translate a pass's own raw layout result — mission G4 S4,
  *  mechanism 7's own position-offset half: reproduces `SvekResult

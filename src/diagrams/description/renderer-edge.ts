@@ -18,7 +18,7 @@ import { JAR_DEFAULT_TEXT_COLOR } from './renderer-symbol.js';
  *  `theme.fontSize` of 14, but diverges from the jar the moment
  *  `theme.fontSize` differs from 14 — `FontParam.ARROW`'s default size is
  *  independent of every other `FontParam` entry). */
-const ARROW_LABEL_FONT_SIZE = 13;
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 /**
  * Fallback raw decor token when `DescriptionEdgeGeo.tailDecor`/`.headDecor`

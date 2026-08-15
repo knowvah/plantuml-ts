@@ -59,7 +59,7 @@ import {
  *  BUCKET_SNAMES`'s pre-existing 'note' entry, G2 N34 -- the bucket was
  *  already populated, this constant just never consulted it, jar-verified
  *  `xokipa-29-rafu481`). */
-const NOTE_FONT_SIZE = 13;
+import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 /** `Opale.java`'s `marginX1`/`marginX2`/`marginY` — the note text's own
  *  inset from the folded-corner box (asymmetric: more room on the right,
  *  where the fold lives). */
