@@ -63,9 +63,9 @@ import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 /** `Opale.java`'s `marginX1`/`marginX2`/`marginY` — the note text's own
  *  inset from the folded-corner box (asymmetric: more room on the right,
  *  where the fold lives). */
-const NOTE_MARGIN_X1 = 6;
+import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.js';
 const NOTE_MARGIN_X2 = 15;
-const NOTE_MARGIN_Y = 5;
+import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 /** `Bullet.java:73-75` — order 0 is an ellipse cell 12 wide; order n>=1 a
  *  rectangle cell `8 + 8*order` wide. */
 const BULLET_ORDER0_WIDTH = 12;

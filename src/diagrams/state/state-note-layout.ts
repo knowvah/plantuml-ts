@@ -62,9 +62,9 @@ import type { DotInputNode } from '../../core/graph-layout.js';
  * S10 queue.
  */
 import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
-const NOTE_MARGIN_X1 = 6;
+import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.js';
 const NOTE_MARGIN_X2 = 15;
-const NOTE_MARGIN_Y = 5;
+import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 
 /** One measured line's own text + advance width — parallel data the S10
  *  note renderer (`renderer-note.ts`) needs for per-line `textLength`;

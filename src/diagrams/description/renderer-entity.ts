@@ -298,7 +298,7 @@ function drawFallbackBox(ug: UGraphic, node: DescriptionNodeGeo, uid: string, fi
  *  (3-line note: every line shares the SAME x offset 6.0 from the box's
  *  left edge — `HorizontalAlignment.LEFT`, not centered). */
 const NOTE_MARGIN_X = 6;
-const NOTE_MARGIN_Y = 5;
+import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 
 /**
  * The note body's own font (`EntityImageNote.java:111`'s `style

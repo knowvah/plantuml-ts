@@ -75,11 +75,11 @@ import {
 // ---------------------------------------------------------------------------
 
 import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
-const NOTE_MARGIN_X1 = 6;
-const NOTE_MARGIN_Y = 5;
+import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.js';
+import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 /** `Opale.java`'s `cornersize` — the folded-corner triangle size, SAME
  *  constant `../class/note-opale.ts#OPALE_CORNER_SIZE` already uses. */
-const NOTE_FOLD = 10;
+import { OPALE_CORNERSIZE as NOTE_FOLD } from '../../core/svek/image/Opale.js';
 /** `ColorParam.noteBackground`'s plantuml.skin default — the fallback when
  *  a note has no `#color` override (mission G4 S12: resolved via
  *  `resolveStateFill`, the SAME fill-only override precedent
