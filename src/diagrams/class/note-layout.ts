@@ -11,9 +11,10 @@
  *
  * G2/N13: member-tip notes (`note <left|right> of Class::member`, `invis`
  * groups below) draw via the Opale zigzag-notch mechanism instead of a
- * plain folded box + separate connector — `mapNoteGeos` now also resolves
- * each member-tip note's target row (fuzzy match, `note-opale.ts`) and
- * computes its notch anchor points; see that function's own doc comment.
+ * plain folded box + separate connector. Mission `note-leaf-model` D3: the
+ * notch is resolved at DRAW time by `note-tips-resolve.ts` (as
+ * `EntityImageTips#drawU` does); `mapNoteGeos` only stacks the tips and
+ * bakes their `tipRequest` inputs — it reads no classifier.
  *
  * Split (500-line file cap) into a one-way dependency chain of sibling
  * modules -- this file is now a re-export barrel so every external import
@@ -21,9 +22,9 @@
  *   `note-layout-types.ts`   -- shared `NoteGeo`/`NoteLeafType`/`ClassifierAnchor` (leaf)
  *   `note-layout-measure.ts` -- note text measurement (leaf)
  *   `note-layout-groups.ts`  -- same-side/host grouping (depends on measure)
- *   `note-layout-tip.ts`     -- tip/geo resolution + `mapNoteGeos` entry
- *                                (depends on types, measure, groups)
+ *   `note-layout-tip.ts`     -- geo building + `mapNoteGeos` entry (depends
+ *                                on types, measure, groups; reads no classifier)
  */
-export type { NoteGeo, NoteLeafType, ClassifierAnchor } from './note-layout-types.js';
+export type { NoteGeo, NoteLeafType, TipRequest, ClassifierAnchor } from './note-layout-types.js';
 export { buildNoteGraphParts } from './note-layout-groups.js';
 export { mapNoteGeos } from './note-layout-tip.js';

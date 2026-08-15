@@ -4,7 +4,7 @@
  * `note-layout-measure.ts`, `note-layout-groups.ts`, and `note-layout-tip.ts`
  * can each import the shapes they need without creating an import cycle.
  */
-import type { UrlInfo } from './ast.js';
+import type { UrlInfo, NotePosition } from './ast.js';
 import type { OpalePoint, OpaleDirection } from './note-opale.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
@@ -35,20 +35,17 @@ export interface NoteGeo {
   id: string;
   /**
    * Which upstream image class draws this note — see {@link NoteLeafType}.
-   * Set by EVERY producer (`note-layout-tip.ts`'s tip/dropped/plain
-   * builders and `note-opale.ts#buildOpaleNoteGeo`) to the value
-   * `GeneralImageBuilder` would dispatch on for the shape actually drawn:
-   * `'TIPS'` iff the note went through `EntityImageTips`'s path (`tip` set,
-   * or `dropped`), `'NOTE'` otherwise. Parse-side the same split is
-   * `ClassNote.targetPort !== undefined` (`CommandFactoryTipOnEntity`);
-   * the two agree everywhere the corpus reaches (probed 2026-08-15: 33
-   * TIPS = 31 resolved + 2 dropped, 144 NOTE, 0 `::member` notes falling
-   * through to the plain path). The one case they could disagree — a
-   * `::member` note whose host never resolves to a drawn classifier
-   * (`resolveGroupTipContext` returns `undefined`) — is a note upstream
-   * never creates at all (`CommandFactoryTipOnEntity:208-209`, "Nothing to
-   * note to"); this port draws it as a plain box, so it is stamped by what
-   * is drawn.
+   * Set by EVERY producer to the leaf type upstream's COMMAND created:
+   * `note-layout-tip.ts#tipNoteGeo` -> `'TIPS'` (a `::member` note in a
+   * member-tip group, `CommandFactoryTipOnEntity`), `plainNoteGeo` and
+   * `note-opale.ts#buildOpaleNoteGeo` -> `'NOTE'` (opalisable-or-not is a
+   * draw-time branch inside `EntityImageNote#drawU`, same leaf). The two
+   * draw passes dispatch on it exactly as `GeneralImageBuilder` does; a
+   * `'TIPS'` leaf whose host is not a drawn classifier draws nothing
+   * (`EntityImageTips#drawU`'s "Error1"/"Error2" return, `note-tips-
+   * resolve.ts`) -- before mission `note-leaf-model` D3 this port instead
+   * fell through to an opalised plain box for that case (0 corpus fixtures,
+   * jar-verified 2026-08-15 that upstream draws no tip there).
    */
   leafType: NoteLeafType;
   x: number;
@@ -104,24 +101,46 @@ export interface NoteGeo {
    */
   lineHeights?: readonly number[];
   /** Routed connector points from the note to its host classifier. Empty
-   *  for a member-tip note (G2/N13 — the connector is a notch merged into
-   *  the note's own outline instead, see `tip` below). */
+   *  for a `'TIPS'` leaf (G2/N13 — the connector is a notch merged into the
+   *  note's own outline instead, resolved at draw time from `tipRequest`
+   *  below) and for a resolved opalisable `'NOTE'` (`opale` below). */
   connector: Array<{ x: number; y: number }>;
   /**
-   * G2/N13: true when a member-tip note's `::member` target could not be
-   * resolved against any row of its host — `EntityImageTips#drawU`'s
-   * `bestMatch == null` early return, which draws NOTHING for this note (no
-   * box, no notch, no text). The renderer skips it entirely; ink-extent
-   * walkers must too (jar's canvas excludes a dropped tip's space).
+   * `ClassNote.target` copied verbatim -- the `of <Entity>` host id (a
+   * classifier OR a package/namespace id; NOT the `::member` suffix, which
+   * is `tipRequest.member`). `undefined` for a freestanding note. Two
+   * draw-side consumers, neither resolved here (mission `note-leaf-model`
+   * D3 -- the geo build no longer looks the host up in the classifier
+   * collection at all): `renderer.ts` draws a note whose target IS a drawn
+   * classifier immediately after that host in document order (G2 N52 --
+   * jar draws every classifier/note as a graph NODE in real creation order,
+   * then every edge; jar-verified `dozugo-00-jado141`/`refeku-65-gapu585`/
+   * `janeba-15-duja043`/`cajicu-52-cego765`, each showing the note's `<g>`
+   * between its host and the NEXT classifier), a note whose target is not
+   * (package target, freestanding) keeps the trailing position; and
+   * `note-tips-resolve.ts` looks a `'TIPS'` leaf's host up by this id.
    */
-  dropped?: boolean;
+  target?: string;
   /**
-   * G2/N13: present only for a RESOLVED member-tip note — the zigzag notch
-   * replaces the plain folded-corner box + separate dashed connector every
-   * other note kind draws. `pp1`/`pp2` are LOCAL to this note's own
-   * (0,0)-at-top-left frame (`note-opale.ts#OpaleConnector`).
+   * Present iff `leafType === 'TIPS'`: the INPUTS `EntityImageTips#drawU`
+   * resolves against the host at DRAW time -- `member` (`ClassNote
+   * .targetPort`, the `::member` text `nodeOther.getBestMatch(member)` fuzzy-
+   * matches), `position` (`getPosition()`, the declared side whose
+   * `reverseDirection()` seeds the notch direction) and the two font metrics
+   * `memberPosition.getCenterY()` needs to turn a host row's text baseline
+   * (`ClassifierGeo.rows[].y`) into the row's centre (`baselineOffset =
+   * fontSize - descent`, `rowHeight = fontSize` -- baked here at layout time
+   * exactly as `lineHeights`/`lineWidths` are, so the draw passes stay
+   * measurer-free). The RESULT (direction, `pp1`/`pp2`, or dropped) is
+   * produced by `note-tips-resolve.ts#resolveTips` from `(notes,
+   * classifiers)` inside both draw passes -- `class-ink-box.ts#buildInkBox`
+   * (this port's `LimitFinder`) and `renderer.ts` -- never stored on the geo
+   * (mission `note-leaf-model` D3: upstream has no layout-time member-tip
+   * resolution, `GeneralImageBuilder` hands `EntityImageTips` the
+   * `bibliotekon` and it resolves in `drawU`).
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageTips.java#drawU
    */
-  tip?: { direction: 'left' | 'right'; pp1: OpalePoint; pp2: OpalePoint };
+  tipRequest?: TipRequest;
   /**
    * G2/N14: present only for a RESOLVED general "opalisable" note (a
    * single-link `note <pos> of X`, NOT a member-tip — `EntityImageNote
@@ -135,41 +154,23 @@ export interface NoteGeo {
   /**
    * G2 N15: copied from `ClassNote.creationIndex` (that field's own doc
    * comment covers the phantom-GMN-slot derivation) — `undefined` for a
-   * member-tip note (unchanged fallback numbering) or a dropped note.
+   * member-tip note (unchanged fallback numbering).
    */
   creationIndex?: number;
   /** G2 N15: copied from `ClassNote.phantomSlot` — see that field's doc
    *  comment (`renderer-uid.ts#assignExact` consumes it). */
   phantomSlot?: true;
   /** G2 N34: copied from `ClassNote.color` — see that field's doc comment
-   *  (`renderer-note.ts#resolveNoteBackground` consumes it). Absent for a
-   *  dropped note (no box is drawn, so no fill to resolve). */
+   *  (`renderer-note.ts#resolveNoteBackground` consumes it). */
   color?: string;
   /** G2 N37: copied from `ClassNote.stereotype` — see that field's doc
    *  comment (`renderer-note.ts#resolveNoteBackground` consumes it for the
-   *  `.tagname` `<style>` cascade). Absent for a dropped note. */
+   *  `.tagname` `<style>` cascade). */
   stereotype?: string;
   /** G2 N70: copied from `ClassNote.url` — `renderer.ts` wraps the note's
    *  rendered inner SVG in a single `<a xlink:href>` via `svg.ts#linkWrap`
    *  when set. Absent for a note with no `[[url]]`. */
   url?: UrlInfo;
-  /**
-   * G2 N52: the host classifier's `Classifier.id` this note is attached to
-   * (`ClassNote.target`, copied verbatim -- NOT the `::member` port suffix,
-   * which stays in `ClassNote.targetPort` and has no renderer-side use here).
-   * `undefined` for a freestanding note (no `of <Entity>` clause) or a note
-   * whose `of`-target didn't resolve to an actual drawn classifier.
-   * `renderer.ts` uses this to draw a note immediately after its host in
-   * document order (jar draws every classifier/note as a graph NODE in real
-   * creation order, then every edge -- `renderer.ts`'s own fixed classifier-
-   * then-edges-then-notes phase order previously pushed EVERY note to the
-   * very end regardless of source position; jar-verified via `dozugo-00-
-   * jado141`/`refeku-65-gapu585`/`janeba-15-duja043`/`cajicu-52-cego765`,
-   * each showing the note's `<g>` sitting between its host and the NEXT
-   * classifier in jar's own output, not trailing after every classifier and
-   * edge). A note with no resolved host keeps the old trailing position.
-   */
-  hostId?: string;
   /**
    * G2 N53: copied from `ClassNote.tipGroupPhantomIndex` -- see that
    * field's doc comment (ast.ts) and `renderer-uid.ts#assignExact` (which
@@ -180,10 +181,27 @@ export interface NoteGeo {
 }
 
 /**
- * Minimal classifier-position + row-text view `mapNoteGeos` needs to resolve
- * a member-tip note's connector — a local subset of `layout.ts#ClassifierGeo`
- * (importing that type directly would cycle: `layout.ts` imports
- * `mapNoteGeos` from this module).
+ * A `'TIPS'` leaf's draw-time resolution inputs -- see
+ * {@link NoteGeo.tipRequest}. `position` keeps the full `NotePosition`
+ * (upstream's `CommandFactoryTipOnEntity` regex admits only `right|left`;
+ * this port's `NOTE_TARGET` grammar also reaches here for `top|bottom` --
+ * `.agent-notes/note-leaf-model-b1.md`), and the direction seed treats
+ * anything but `'left'` as `Position.RIGHT.reverseDirection()`, unchanged
+ * from the pre-D3 `resolveTipDirection`.
+ */
+export interface TipRequest {
+  member: string;
+  position: NotePosition;
+  baselineOffset: number;
+  rowHeight: number;
+}
+
+/**
+ * Minimal classifier-position + row-text view `note-tips-resolve.ts` needs
+ * to resolve a `'TIPS'` leaf against its host — a structural subset of
+ * `class-geo-types.ts#ClassifierGeo` (every `ClassifierGeo` satisfies it),
+ * kept as its own leaf type so a test can hand-build a host without a full
+ * `ClassifierGeo` literal and so this module stays import-cycle-free.
  */
 export interface ClassifierAnchor {
   id: string;

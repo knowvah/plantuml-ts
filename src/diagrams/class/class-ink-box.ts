@@ -6,6 +6,7 @@
 
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
 import type { NoteGeo } from './note-layout.js';
+import { resolveTips } from './note-tips-resolve.js';
 import { edgeExtremityInk } from './renderer-arrowhead.js';
 import { ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
 import { VISIBILITY_ICON_SIZE } from './class-visibility-icon.js';
@@ -302,8 +303,12 @@ export function buildInkBox(
   // checked (this module's own file-header doc comment already flagged it
   // as unverified) -- jar-verified wrong by exactly `HACK_X_FOR_POLYGON`
   // (10px) against `fezugi-39-fujo327` (canvas width 174 vs jar's real 164).
+  // Mission note-leaf-model D3: dropped-ness is resolved HERE, in the draw
+  // pass, exactly as upstream's `LimitFinder` sees `EntityImageTips#drawU`'s
+  // early return -- never stored on the geo (`note-tips-resolve.ts`).
+  const tips = resolveTips(notes, classifiers);
   for (const nt of notes) {
-    if (nt.dropped === true) continue;
+    if (nt.leafType === 'TIPS' && tips.get(nt.id) === 'dropped') continue;
     addPlainInk(box, nt.x, nt.y, nt.width, nt.height);
   }
   for (const e of edges) {

@@ -264,8 +264,11 @@ function layoutSinglePage(
     effAst, result, swappedEdges, measurer, theme.fontFamily, posMap, anchors,
     theme.colors.graph.arrowThickness,
   );
-  // G2/N13: classifiers computed FIRST -- mapNoteGeos needs their positions
-  // + row text to resolve member-tip (`::member`) note connectors. G2/N16
+  // Mission note-leaf-model D3: `mapNoteGeos` reads NO classifier -- a
+  // member-tip (`::member`) note's notch is resolved inside the draw passes
+  // (`note-tips-resolve.ts`, as `EntityImageTips#drawU` does), so notes no
+  // longer have to be built after classifiers; the order below is kept
+  // only until Batch 3 folds the two arrays into one collection. G2/N16
   // Kind B: a freestanding note's ONE real relationship connector (if any)
   // feeds the SAME Opale mechanism `mapGroupNoteGeos` already tries for an
   // attached single-link note (Kind C) -- `findFreestandingNoteConnectors`'s
@@ -277,7 +280,7 @@ function layoutSinglePage(
   // safe fallback `buildOpaleNoteGeo ?? plainNoteGeo` already applies.
   const freestandingConnectors = findFreestandingNoteConnectors(effAst.notes, edges, effAst.classifiers);
   const notes: NoteGeo[] = mapNoteGeos(
-    effAst.notes, result, noteParts, { classifiers, theme, measurer }, freestandingConnectors,
+    effAst.notes, result, noteParts, { theme, measurer }, freestandingConnectors,
   );
   const opaleNoteIds = new Set(notes.filter((n) => n.opale !== undefined).map((n) => n.id));
   const consumedEdgeIds = new Set(
