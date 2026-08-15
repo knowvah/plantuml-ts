@@ -18,12 +18,12 @@
  * Split (500-line file cap) into a one-way dependency chain of sibling
  * modules -- this file is now a re-export barrel so every external import
  * site (`from './note-layout.js'`) keeps working unchanged:
- *   `note-layout-types.ts`   -- shared `NoteGeo`/`ClassifierAnchor` (leaf)
+ *   `note-layout-types.ts`   -- shared `NoteGeo`/`NoteLeafType`/`ClassifierAnchor` (leaf)
  *   `note-layout-measure.ts` -- note text measurement (leaf)
  *   `note-layout-groups.ts`  -- same-side/host grouping (depends on measure)
  *   `note-layout-tip.ts`     -- tip/geo resolution + `mapNoteGeos` entry
  *                                (depends on types, measure, groups)
  */
-export type { NoteGeo, ClassifierAnchor } from './note-layout-types.js';
+export type { NoteGeo, NoteLeafType, ClassifierAnchor } from './note-layout-types.js';
 export { buildNoteGraphParts } from './note-layout-groups.js';
 export { mapNoteGeos } from './note-layout-tip.js';

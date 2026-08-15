@@ -204,7 +204,7 @@ function buildTipNoteGeo(
   if (match === undefined) return undefined;
   const pp2 = tipAnchor(ctx, match, heightAccum);
   return {
-    id: note.id, x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines,
+    id: note.id, leafType: 'TIPS', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines,
     lineWidths: m.lineWidths,
     lineAtoms: m.lineAtoms,
     lineHeights: m.lineHeights,
@@ -221,14 +221,14 @@ function buildTipNoteGeo(
  *  text; kept in the output only so ink-extent walkers and uid assignment
  *  have a stable slot to skip. */
 function droppedNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; y: number }): NoteGeo {
-  return { id: note.id, x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines, lineWidths: m.lineWidths, lineAtoms: m.lineAtoms, lineHeights: m.lineHeights, connector: [], dropped: true };
+  return { id: note.id, leafType: 'TIPS', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines, lineWidths: m.lineWidths, lineAtoms: m.lineAtoms, lineHeights: m.lineHeights, connector: [], dropped: true };
 }
 
 /** A plain (non-tip) note's geo — the shared shape both the tip and
  *  non-tip stacking branches would otherwise repeat inline. */
 function plainNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; y: number }, connector: Array<{ x: number; y: number }>): NoteGeo {
   return {
-    id: note.id, x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines, lineWidths: m.lineWidths,
+    id: note.id, leafType: 'NOTE', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines, lineWidths: m.lineWidths,
     lineAtoms: m.lineAtoms,
     lineHeights: m.lineHeights,
     connector,

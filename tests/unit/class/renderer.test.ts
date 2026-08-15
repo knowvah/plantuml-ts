@@ -1564,6 +1564,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
+          leafType: 'NOTE',
           x: 20,
           y: 30,
           width: 80,
@@ -1587,7 +1588,7 @@ describe('renderClass — notes', () => {
   it('G2/N13: a dropped member-tip note (unresolved ::member) draws NOTHING at all', () => {
     const geo = makeMinimalGeo({
       notes: [
-        { id: '__note_0', x: 20, y: 30, width: 80, height: 40, lines: ['error'], lineWidths: [30], connector: [], dropped: true },
+        { id: '__note_0', leafType: 'TIPS', x: 20, y: 30, width: 80, height: 40, lines: ['error'], lineWidths: [30], connector: [], dropped: true },
       ],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
@@ -1600,6 +1601,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
+          leafType: 'NOTE',
           x: 20,
           y: 30,
           width: 80,
@@ -1622,6 +1624,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
+          leafType: 'TIPS',
           x: 20,
           y: 30,
           width: 80,

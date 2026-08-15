@@ -51,7 +51,7 @@ export function buildOpaleNoteGeo(
   const resolved = resolveOpaleConnector({ width: m.width, height: m.height }, origin, points);
   if (resolved === undefined) return undefined;
   return {
-    id: note.id, x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines,
+    id: note.id, leafType: 'NOTE', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines,
     lineWidths: m.lineWidths,
     lineAtoms: m.lineAtoms,
     lineHeights: m.lineHeights,

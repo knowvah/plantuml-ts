@@ -9,8 +9,48 @@ import type { OpalePoint, OpaleDirection } from './note-opale.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 
+/**
+ * Upstream's leaf type for a class-diagram note — the two `LeafType` values
+ * `GeneralImageBuilder#createEntityImageBlock` dispatches to DIFFERENT image
+ * classes: `LeafType.NOTE -> new EntityImageNote(leaf)` (`:118-119`) and
+ * `LeafType.TIPS -> new EntityImageTips(leaf, bibliotekon)` (`:219-220`).
+ *  - `'NOTE'` — created by `CommandFactoryNote` (freestanding, `:197`) or
+ *    `CommandFactoryNoteOnEntity` (`note <pos> [of X]`, `:329`): the folded-
+ *    corner box, plain OR opalisable (`EntityImageNote#drawU`'s `opaleLine`
+ *    branch is a DRAW-time choice inside the same leaf type, so a `NoteGeo`
+ *    with `opale` set is still `'NOTE'`).
+ *  - `'TIPS'` — created by `CommandFactoryTipOnEntity` (`note <left|right>
+ *    of Class::member`, `:218-220`): ONE leaf per (host, side), each
+ *    `::member` line a tip INSIDE it (`tips.putTip(member, display)`); draws
+ *    unwrapped via the zigzag notch (`EntityImageTips#drawU`), and a tip
+ *    whose `::member` matches no row is `dropped` by that same draw path.
+ * Mission `note-leaf-model` D2: the two stay distinct on the way into the
+ * single leaf collection — this field is what carries the distinction.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/LeafType.java:49
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/GeneralImageBuilder.java:118-119,219-220
+ */
+export type NoteLeafType = 'NOTE' | 'TIPS';
+
 export interface NoteGeo {
   id: string;
+  /**
+   * Which upstream image class draws this note — see {@link NoteLeafType}.
+   * Set by EVERY producer (`note-layout-tip.ts`'s tip/dropped/plain
+   * builders and `note-opale.ts#buildOpaleNoteGeo`) to the value
+   * `GeneralImageBuilder` would dispatch on for the shape actually drawn:
+   * `'TIPS'` iff the note went through `EntityImageTips`'s path (`tip` set,
+   * or `dropped`), `'NOTE'` otherwise. Parse-side the same split is
+   * `ClassNote.targetPort !== undefined` (`CommandFactoryTipOnEntity`);
+   * the two agree everywhere the corpus reaches (probed 2026-08-15: 33
+   * TIPS = 31 resolved + 2 dropped, 144 NOTE, 0 `::member` notes falling
+   * through to the plain path). The one case they could disagree — a
+   * `::member` note whose host never resolves to a drawn classifier
+   * (`resolveGroupTipContext` returns `undefined`) — is a note upstream
+   * never creates at all (`CommandFactoryTipOnEntity:208-209`, "Nothing to
+   * note to"); this port draws it as a plain box, so it is stamped by what
+   * is drawn.
+   */
+  leafType: NoteLeafType;
   x: number;
   y: number;
   width: number;

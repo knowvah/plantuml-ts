@@ -247,6 +247,9 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
 
     expect(geos).toHaveLength(1);
     const geo = geos[0]!;
+    // note-leaf-model T2: a resolved tip is upstream's `LeafType.TIPS` leaf
+    // (`EntityImageTips`, GeneralImageBuilder.java:219-220).
+    expect(geo.leafType).toBe('TIPS');
     expect(geo.dropped).toBeUndefined();
     expect(geo.connector).toEqual([]);
     // position === 'right' -> initial direction LEFT (Position.RIGHT.reverseDirection() === LEFT);
@@ -267,6 +270,9 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     expect(geos).toHaveLength(1);
     expect(geos[0]!.dropped).toBe(true);
     expect(geos[0]!.tip).toBeUndefined();
+    // note-leaf-model T2: dropping is `EntityImageTips#drawU`'s own early
+    // return -- a dropped note is still a `LeafType.TIPS` leaf.
+    expect(geos[0]!.leafType).toBe('TIPS');
   });
 
   it('aborts every LATER member in a merged group once one fails to match (EntityImageTips#drawU mid-loop early return)', () => {
@@ -326,6 +332,10 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     // replaces it, no separate line draws.
     expect(geos[0]!.connector).toEqual([]);
     expect(geos[0]!.opale).toBeDefined();
+    // note-leaf-model T2: opalisable-or-not is a DRAW-time branch inside
+    // `EntityImageNote#drawU`; the leaf is `LeafType.NOTE` either way
+    // (GeneralImageBuilder.java:118-119).
+    expect(geos[0]!.leafType).toBe('NOTE');
   });
 });
 
