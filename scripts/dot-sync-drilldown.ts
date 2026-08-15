@@ -48,6 +48,40 @@ export function stripLayoutPragma(markup: string): string {
     .join('\n');
 }
 
+/** Matches the optional DIAGRAM NAME argument on any `@start…` directive —
+ *  `@startuml Test`, `@startcreole math-Page-2`. Anchored to the start of a
+ *  line so a `@startuml` appearing inside creole/quoted content is untouched. */
+const START_DIRECTIVE_NAME_RE = /^([ \t]*@start[A-Za-z_]+)[ \t]+\S.*$/gm;
+
+/**
+ * Drops the diagram-name argument from every `@start…` line.
+ *
+ * **Why the oracle caches need this.** The jar names its output file after
+ * the DIAGRAM, not the source file, so `@startuml Test` in
+ * `somuke-94-buzi673.puml` renders to `Test.svg`. Both caches key on the
+ * slug — `dot-sync-fixtures.ts#missingCanonicalSlugs` looks for
+ * `<slug>.svg` and `taggedSlugs` derives the slug from the filename — so a
+ * named fixture is permanently "missing", never gets a
+ * `data-diagram-type` tag, and drops out of its type's denominator. It
+ * cost state DOT-parity one fixture (267 reported where the corpus has
+ * 268) until this was found.
+ *
+ * **Why stripping rather than renaming the output.** The name has no
+ * rendering effect — verified by rendering `somuke-94-buzi673` both ways
+ * through the oracle jar with `-nometadata`, byte-identical SVG — and
+ * stripping keeps the jar's output named after the SOURCE file, which is
+ * the slug and therefore unique. Renaming after the fact would leave two
+ * fixtures that happen to share a diagram name overwriting each other in
+ * the shared batch output directory.
+ *
+ * 18 of the 5848 enumerated fixtures carry a name (4 `@startuml`, 14
+ * `@startcreole`), so this is rare but silent, which is the bad
+ * combination.
+ */
+export function stripDiagramName(markup: string): string {
+  return markup.replace(START_DIRECTIVE_NAME_RE, '$1');
+}
+
 const shapesOf = (g: StructuralGraph): string[] => g.nodes.map((n) => n.shape).sort();
 /** Mirrors `svek-dot.ts#sortedPorts` — `-` marks an endpoint with no port. */
 const portsOf = (g: StructuralGraph): string[] =>

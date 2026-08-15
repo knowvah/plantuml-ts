@@ -45,7 +45,7 @@ import {
   compareStructural,
   type StructuralDiff,
 } from '../tests/oracle/svek-dot.js';
-import { CHECKS, drillDownGraph, stripLayoutPragma } from './dot-sync-drilldown.js';
+import { CHECKS, drillDownGraph, stripDiagramName, stripLayoutPragma } from './dot-sync-drilldown.js';
 import {
   DATA_DIR,
   CANON_DIR,
@@ -111,7 +111,12 @@ function plantumlDots(jar: string, type: string, f: Fixture, rebuild: boolean): 
   for (const old of readdirSync(dir)) {
     if (SVEK_DOT_RE.test(old)) writeFileSync(join(dir, old), '');
   }
-  writeFileSync(join(dir, 'in.puml'), stripLayoutPragma(f.markup), 'utf-8');
+  // `stripDiagramName` for the same reason `generateCanonical` needs it: the
+  // jar names output after the DIAGRAM, so a named fixture's SVG lands as
+  // `<name>.svg` instead of `in.svg`. Only `svek-*.dot` is read back here, so
+  // this cache tolerated it — but an entry with no `in.svg` reads as
+  // corrupt to anyone inspecting it.
+  writeFileSync(join(dir, 'in.puml'), stripDiagramName(stripLayoutPragma(f.markup)), 'utf-8');
   try {
     execFileSync(
       'java',

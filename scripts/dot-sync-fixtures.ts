@@ -37,7 +37,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
-import { stripLayoutPragma } from './dot-sync-drilldown.js';
+import { stripDiagramName, stripLayoutPragma } from './dot-sync-drilldown.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** execFileSync stdout cap for jar batch runs (256 MiB). */
@@ -177,7 +177,12 @@ function freshDir(path: string): string {
 function generateCanonical(jar: string, type: string, fixtures: Fixture[]): void {
   const pumlDir = freshDir(join(CANON_PUML_DIR, type));
   const svgDir = freshDir(join(CANON_DIR, type));
-  for (const f of fixtures) writeFileSync(join(pumlDir, f.slug + '.puml'), stripLayoutPragma(f.markup), 'utf-8');
+  // `stripDiagramName` is load-bearing, not cosmetic: the jar names its
+  // output after the DIAGRAM, so a named fixture would land as `<name>.svg`
+  // and be invisible to `missingCanonicalSlugs`/`taggedSlugs`, which key on
+  // the slug. See that function's own doc comment.
+  for (const f of fixtures)
+    writeFileSync(join(pumlDir, f.slug + '.puml'), stripDiagramName(stripLayoutPragma(f.markup)), 'utf-8');
   try {
     execFileSync('java', ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', jar, '-tsvg', '-nometadata', '-o', svgDir, pumlDir], {
       stdio: ['ignore', 'ignore', 'inherit'],

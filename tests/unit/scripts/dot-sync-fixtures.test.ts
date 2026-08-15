@@ -27,6 +27,7 @@ import {
   CLASS_GOLDEN_DIR,
   type Fixture,
 } from '../../../scripts/dot-sync-fixtures.js';
+import { stripDiagramName, stripLayoutPragma } from '../../../scripts/dot-sync-drilldown.js';
 
 /** The three fixtures authored by `svg-sprite-nanoparser`; SI9 exists so that
  *  fixtures like these can be measured and ratcheted. */
@@ -471,6 +472,75 @@ describe('reportSkips', () => {
       expect(lines[2]).toBe('  skip usecase/never-rendered: no canonical SVG');
     } finally {
       err.mockRestore();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// stripDiagramName — the named-@startuml corpus drop
+// ---------------------------------------------------------------------------
+
+/**
+ * A fixture whose markup names its diagram (`@startuml Test`) renders to
+ * `Test.svg`, because the jar names output after the DIAGRAM rather than the
+ * source file. Both oracle caches key on the SLUG, so such a fixture is
+ * permanently "missing", never gets a `data-diagram-type` tag, and silently
+ * leaves its type's denominator — it cost state DOT-parity one fixture (267
+ * against a corpus of 268) until `somuke-94-buzi673` was traced.
+ *
+ * The name has no rendering effect (verified through the oracle jar with
+ * `-nometadata`: byte-identical SVG either way), so stripping it is safe and
+ * keeps the jar's output named after the source file, which IS the slug and
+ * is therefore unique — a rename-after-render fix would let two fixtures
+ * sharing a diagram name overwrite each other in the shared batch directory.
+ */
+describe('stripDiagramName', () => {
+  it('drops the name from @startuml, the case that cost a state fixture', () => {
+    expect(stripDiagramName('@startuml Test\n[*] --> A\n@enduml\n')).toBe(
+      '@startuml\n[*] --> A\n@enduml\n',
+    );
+  });
+
+  it('drops the name from any @start directive, not just @startuml', () => {
+    // 14 of the corpus's 18 named fixtures are @startcreole.
+    expect(stripDiagramName('@startcreole math-Page-2\n= T\n@endcreole\n')).toBe(
+      '@startcreole\n= T\n@endcreole\n',
+    );
+    expect(stripDiagramName('@startjson n\n{}\n@endjson\n')).toBe('@startjson\n{}\n@endjson\n');
+  });
+
+  it('leaves an unnamed directive byte-identical — the 5830-fixture majority', () => {
+    const plain = '@startuml\nAlice -> Bob : hi\n@enduml\n';
+    expect(stripDiagramName(plain)).toBe(plain);
+  });
+
+  it('preserves leading whitespace and CRLF line endings', () => {
+    expect(stripDiagramName('  @startuml Test\r\nA\r\n@enduml\r\n')).toBe(
+      '  @startuml\r\nA\r\n@enduml\r\n',
+    );
+  });
+
+  it('does not touch an @startuml that is not at the start of a line', () => {
+    // Creole and quoted content can carry the token mid-line; only a real
+    // directive owns its own line.
+    const inline = '@startuml\nnote left\n  see @startuml Foo for more\nend note\n@enduml\n';
+    expect(stripDiagramName(inline)).toBe(inline);
+  });
+
+  it('composes with stripLayoutPragma, the order generateCanonical uses', () => {
+    const src = '@startuml Test\n!pragma layout smetana\nA --> B\n@enduml\n';
+    expect(stripDiagramName(stripLayoutPragma(src))).toBe('@startuml\nA --> B\n@enduml\n');
+  });
+
+  it('leaves every committed corpus fixture parseable — no @start line loses its directive', () => {
+    const all = enumerateFixtures('state');
+    expect(all).toBeDefined();
+    const named = all!.filter((f) => /^@start\w+[ \t]+\S/m.test(f.markup));
+    expect(named.length).toBeGreaterThan(0); // somuke-94-buzi673 at minimum
+    for (const f of named) {
+      const out = stripDiagramName(f.markup);
+      expect(out, f.slug).toMatch(/^@startuml\s*$/m);
+      expect(out.length, f.slug).toBeLessThan(f.markup.length);
     }
   });
 });

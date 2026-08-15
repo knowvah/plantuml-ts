@@ -145,6 +145,21 @@ $ cd test-results/dot-cache/state && for d in */; do \
 
 ## Observation (en route, unrelated): a named `@startuml` drops out of both oracle caches
 
+> **FIXED 2026-08-15**, immediately after this mission, by
+> `stripDiagramName` (`scripts/dot-sync-drilldown.ts`), applied in
+> `generateCanonical` and `plantumlDots`. Verified by deleting the state
+> canonical cache and regenerating: `somuke-94-buzi673.svg` now lands under
+> its slug, no stray `Test.svg`, and DOT-parity reads **268/268 from a
+> clean regeneration** with no manual rename.
+>
+> **The baseline caveat below is now obsolete — do not apply it.**
+> `test-results/dot-cache/state/somuke-94-buzi673/` is committed and
+> well-formed, so the composite harness reads **272 fixtures / 2654
+> declarations / 2481 exact** and that is the number to compare against.
+> The mission's own 271 / 2642 / 2454 → 2469 figures were measured with
+> the fixture absent; the delta it contributes is +12 declarations, all
+> exact, and `mismatched` is unmoved at 145 either way.
+
 - **Context**: running `scripts/dot-sync-report.ts state` as a Batch 1 gate
   reported **267**, not the brief's 268, and self-healed by re-invoking the
   jar — which did not fix it.
