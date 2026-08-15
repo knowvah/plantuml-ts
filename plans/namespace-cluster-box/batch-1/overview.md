@@ -9,9 +9,9 @@ All three tasks have disjoint write-sets and no dependencies on each other.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T1](T1-measurement-harness.md) | Commit the shape-match / document-size harness with its baseline pinned | typescript-pro | `scripts/shape-match-report.ts` | — | [ ] |
-| [T2](T2-wrapper-level.md) | Derive the cluster wrapper level from upstream's predicate; validate against all 126 cached DOTs | typescript-pro | `src/diagrams/class/class-cluster-levels.ts`, `tests/unit/class/class-cluster-levels.test.ts` | — | [ ] |
-| [T3](T3-share-title-helper.md) | Move `computeTitleTableHeight` to a shared core module | typescript-pro | `src/core/cluster-title-table.ts`, `src/diagrams/state/state-composite-header.ts`, state importers | — | [ ] |
+| [T1](T1-measurement-harness.md) | Commit the shape-match / document-size harness with its baseline pinned | typescript-pro | `scripts/shape-match-report.ts` | — | [x] |
+| [T2](T2-wrapper-level.md) | Derive the cluster wrapper level from upstream's predicate; validate against all 126 cached DOTs | typescript-pro | `src/diagrams/class/class-cluster-levels.ts`, `tests/unit/class/class-cluster-levels.test.ts` | — | [x] |
+| [T3](T3-share-title-helper.md) | Move `computeTitleTableHeight` to a shared core module | typescript-pro | `src/core/cluster-title-table.ts`, `src/diagrams/state/state-composite-header.ts`, state importers | — | [x] |
 
 ## Batch exit criteria
 

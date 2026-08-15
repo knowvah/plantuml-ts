@@ -74,8 +74,8 @@ harness before anything changes:
 
 | Signal | Baseline | Direction |
 |---|---|---|
-| Fixtures matching jar's document size exactly | 691 / 1069 | must rise |
-| Rigid-aligned matching shapes | 20685 | must rise |
+| Fixtures matching jar's document size exactly | 691 / 1073 | must rise |
+| Rigid-aligned matching shapes | 20765 (re-pinned; see journal) | must rise |
 | Class DOT-parity ratchet | 712/712 conformant | must hold |
 | The 11 named residual fixtures | 0 fully exact | should reach exact |
 
@@ -93,7 +93,7 @@ Object diagrams are in scope; they share `src/diagrams/class/`.
 | # | What | Depends on | Done |
 |---|---|---|---|
 | 0 | File dot-engine issue 14 | — | [x] `6726ddec` |
-| [1](batch-1/overview.md) | Measurement harness, wrapper-level derivation, shared title helper | — | [ ] |
+| [1](batch-1/overview.md) | Measurement harness, wrapper-level derivation, shared title helper | — | [x] `492617a9` `1e450493` `f63afbed` |
 | [2](batch-2/overview.md) | Emit wrappers + title table in the class DOT | B1 | [ ] |
 | [3](batch-3/overview.md) | Read the box from the cluster; retire the constants | B2 | [ ] |
 | [4](batch-4/overview.md) | Title position (needs dot-engine 1.5.0) | B3 | [ ] |
