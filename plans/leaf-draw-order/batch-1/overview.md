@@ -7,9 +7,9 @@ to sort and loop.
 
 | ID | Description | Agent | Writes | Depends on | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | `--vs-jar` over all fixtures + `--check-order`; capture baselines | typescript-pro | `scripts/note-order-report.ts`, `plans/leaf-draw-order/baseline/*` | — | [ ] |
-| T2 | `computeLeafDrawOrder(ast)` — jar's `printGroups`/`printEntities` order | typescript-pro | `src/diagrams/class/class-leaf-order.ts`, `tests/unit/class/class-leaf-order.test.ts` | — | [ ] |
-| T3 | Fold `classifiers`+`notes` into `leaves` (`ClassLeafGeo`), byte-identically | typescript-pro | `src/diagrams/class/{class-geo-types,note-layout-types,note-layout-tip,note-opale,note-tips-resolve,layout,class-geo-builders,class-ink-box,layout-ink-extent,renderer,renderer-uid,renderer-note}.ts`, `tests/unit/class/*` | — | [ ] |
+| T1 | `--vs-jar` over all fixtures + `--check-order`; capture baselines | typescript-pro | `scripts/note-order-report.ts`, `plans/leaf-draw-order/baseline/*` | — | [x] |
+| T2 | `computeLeafDrawOrder(ast)` — jar's `printGroups`/`printEntities` order | typescript-pro | `src/diagrams/class/class-leaf-order.ts`, `tests/unit/class/class-leaf-order.test.ts` | — | [x] |
+| T3 | Fold `classifiers`+`notes` into `leaves` (`ClassLeafGeo`), byte-identically | typescript-pro | `src/diagrams/class/{class-geo-types,note-layout-types,note-layout-tip,note-opale,note-tips-resolve,layout,class-geo-builders,class-ink-box,layout-ink-extent,renderer,renderer-uid,renderer-note}.ts`, `tests/unit/class/*` | — | [x] |
 
 Parallel: disjoint write-sets. T1 must capture its baselines from the base
 commit BEFORE T3's changes exist in the tree — run T1 first (it is ~10 min),
