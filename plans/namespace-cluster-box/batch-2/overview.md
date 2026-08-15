@@ -5,7 +5,7 @@ move for all 126 cluster-bearing fixtures.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T4](T4-emit-wrappers-and-title-table.md) | Give class/object clusters their protection wrappers and HTML title table | typescript-pro | `src/diagrams/class/class-dot-graph.ts`, `tests/oracle/wrapper-parity.test.ts` | T2, T3 | [ ] |
+| [T4](T4-emit-wrappers-and-title-table.md) | Give class/object clusters their protection wrappers and HTML title table | typescript-pro | `src/diagrams/class/class-dot-graph.ts`, `tests/oracle/wrapper-parity.test.ts` | T2, T3 | [x] |
 
 ## Expect the measurement to DIP here
 
