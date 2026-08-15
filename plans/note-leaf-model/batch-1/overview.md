@@ -6,8 +6,8 @@ see note ORDER (which the standing gates only see indirectly).
 
 | ID | Description | Agent | Writes | Depends on | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | Note-order/uid invariant harness + baseline | typescript-pro | `scripts/note-order-report.ts` | — | [ ] |
-| T2 | Carry the upstream leaf type on `NoteGeo` | typescript-pro | `class/note-layout-types.ts` + producers | — | [ ] |
+| T1 | Note-order/uid invariant harness + baseline | typescript-pro | `scripts/note-order-report.ts` | — | [x] |
+| T2 | Carry the upstream leaf type on `NoteGeo` | typescript-pro | `class/note-layout-types.ts` + producers | — | [x] |
 
 Parallel: disjoint write-sets.
 
