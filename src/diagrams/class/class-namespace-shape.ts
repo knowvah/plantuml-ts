@@ -151,45 +151,6 @@ export function getTitleBaselineOffset(measurer: StringMeasurer, theme: Theme, l
   return 2 + theme.fontSize - measurer.getDescent(titleFont(theme), label);
 }
 
-/**
- * Extra vertical gap ABOVE the tab reserved between the folder-tab's own
- * `htitle` and the first classifier row inside the package — jar-verified
- * as a CONSTANT +13 independent of `htitle` itself: default 14pt font
- * (htitle=20) gives a 33px cluster-top-to-classifier-top gap
- * (`finono-05-cuvu171`/`jinibe-02-tebi269`/6 more corpus samples, `plans/
- * g2-class-svg/ledger.md` N17); `skinparam package { FontSize 40 }`
- * (htitle=46) gives 59px (`pixexi-81-sete111`) — both reduce to
- * `htitle + 13` exactly. Not traced to a single upstream Java constant
- * this iteration (would need the N5-style debug-jar rebuild to attribute
- * it to a specific `dotgen`/`Cluster.java` margin field) — kept as a
- * documented, dual-sample-verified empirical constant per this mission's
- * own precedent (e.g. `layout-ink-extent.ts`'s `DEGENERATE_NEAR_MARGIN`).
- * A THIRD sample (`pecabi-95-demu756`, `note top of <package>`) measures
- * 41px at htitle=20 -- NOT a third value of this constant: the note
- * attaches via an invisible DOT anchor node that is a REAL extra member of
- * the package's own dot cluster (`class-dot-graph.ts#buildDotClusters`'s
- * `anchorId` "extra direct member" comment), occupying vertical rank space
- * ABOVE the classifier -- the base gap stays 13, the extra 8px lives
- * entirely in the classifier's OWN already-shifted graphviz y-position,
- * not in this constant. Reproducing that case exactly needs the anchor's
- * own position threaded into `buildNamespaceGeos` (not attempted this
- * iteration -- `class-dot-graph.ts`'s `anchors` map isn't returned out of
- * `buildDotGraph` today; named remainder, `plans/g2-class-svg/ledger.md`
- * N17).
- */
-export const NAMESPACE_TOP_EXTRA = 13;
-
-/** Jar-observed uniform left/right/bottom padding around a package's
- *  content when the box's width is content-driven (the common case — a
- *  title narrower than `contentWidth + 2*NAMESPACE_SIDE_PADDING`), matches
- *  this port's PRE-EXISTING constant. When the title text is wide enough
- *  to dominate the box (`skinparam package { FontSize 40 }`,
- *  `pixexi-81-sete111`: 136px/137px sides), graphviz centers the sole
- *  member under the title-driven width instead — NOT reproduced by this
- *  constant; named remainder (title-driven package width floor), `plans/
- *  g2-class-svg/ledger.md` N17. */
-export const NAMESPACE_SIDE_PADDING = 16;
-
 // folderPathD / folderPolygonPoints / renderFolderPolygon moved to
 // class-namespace-folder-outline.ts (T7b, file-length split -- see that
 // module's own doc comment).
