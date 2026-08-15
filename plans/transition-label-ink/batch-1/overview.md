@@ -112,3 +112,51 @@ Read `SvekEdge`'s label drawing and `EntityImageTransitionLabel` to
 distinguish them. Do NOT pick between them by arithmetic — 1.000 and
 0.998 are within float noise of each other here, and fitting is what this
 repo's rules forbid.
+
+
+### Java read of the label draw path (2026-08-15) — more ruled out, not closed
+
+`SvekEdge` is the drawer, not `EntityImageTransitionLabel` (that is
+`LeafType.TRANSITION_LABEL` and paints a rounded-rect background our labels
+do not have).
+
+```java
+this.labelText.drawU(ug.apply(new UTranslate(
+        x + this.labelXY.getPosition().getX() + labelShield,
+        y + this.labelXY.getPosition().getY() + labelShield)));   // :951-954
+
+XDimension2D dimNote = labelText.calculateDimension(stringBounder);   // :440
+dimNote = dimNote.delta(2 * labelShield);                             // :441
+
+this.labelShield = link.getType().getMiddleDecor() == LinkMiddleDecor.NONE ? 0 : 7;  // :353-356
+```
+
+**`labelShield` is 0 or 7 — never 1**, and it is 0 here (no middle decor),
+which the numbers confirm: jar's reserved box is 113 and
+`113 = labelText.calculateDimension().getWidth() + 2*0`. So the shield is
+not the missing 1.000, and it is not an offset applied to the draw either.
+
+What this DOES establish: jar's `labelText` TextBlock measures **113** wide
+while the `UText` it draws renders at `textLength="111.475"` — the block is
+1.525 wider than its own text. `LimitFinder#drawText` folds the UText's
+`StringBounder` width, not the block's, so jar's label ink should be
+374.335 absolute and its extent 356.335. It is 357.335.
+
+**So the contradiction is now sharp and localised**: jar's ink is 1.000
+wider than the rightmost thing it draws, `labelShield` cannot supply it,
+and the composite formula (ink + 15 + 20) is corroborated by the 8 fixtures
+this harness already reports exact — a systematic `+1` in the margin layer
+would break those.
+
+Two candidates remain, and BOTH require reading further rather than more
+arithmetic:
+
+1. `labelText.drawU` draws something besides the `UText` — a `UEmpty` or
+   background the SVG does not show. Follow `Display.create0` →
+   `addVisibilityModifier` → whatever `TextBlockUtils` wraps it in.
+2. jar's `StringBounder.calculateDimension()` width for this string is
+   112.475 while the SVG writer emits `textLength="111.475"`. If those two
+   measurements differ by design, LimitFinder sees the larger one. Check
+   how the SVG writer derives `textLength`.
+
+Do not choose by arithmetic: 1.000 and 0.998 are within float noise here.
