@@ -95,7 +95,7 @@ Object diagrams are in scope; they share `src/diagrams/class/`.
 | 0 | File dot-engine issue 14 | — | [x] `6726ddec` |
 | [1](batch-1/overview.md) | Measurement harness, wrapper-level derivation, shared title helper | — | [x] `492617a9` `1e450493` `f63afbed` |
 | [2](batch-2/overview.md) | Emit wrappers + title table in the class DOT | B1 | [x] |
-| [3](batch-3/overview.md) | Read the box from the cluster; retire the constants | B2 | [ ] |
+| [3](batch-3/overview.md) | Read the box from the cluster; retire the constants | B2 | [x] |
 | [4](batch-4/overview.md) | Title position (needs dot-engine 1.5.0) | B3 | [ ] |
 | [5](batch-5/overview.md) | Record the outcome | B4 | [ ] |
 

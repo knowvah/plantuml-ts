@@ -4,8 +4,8 @@ T5 then T6, in that order. T6 depends on T5 having landed.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T5](T5-read-cluster-box.md) | `buildNamespaceGeos` reads `DotLayoutResult.clusters` | typescript-pro | `class-geo-builders.ts`, `layout.ts`, `class-dot-graph.ts`, affected tests | T4 | [ ] |
-| [T6](T6-retire-padding-constants.md) | Delete `NAMESPACE_SIDE_PADDING` / `NAMESPACE_TOP_EXTRA` | typescript-pro | `class-namespace-shape.ts`, affected tests | T5 | [ ] |
+| [T5](T5-read-cluster-box.md) | `buildNamespaceGeos` reads `DotLayoutResult.clusters` | typescript-pro | `class-geo-builders.ts`, `layout.ts`, `class-dot-graph.ts`, affected tests | T4 | [x] |
+| [T6](T6-retire-padding-constants.md) | Delete `NAMESPACE_SIDE_PADDING` / `NAMESPACE_TOP_EXTRA` | typescript-pro | `class-namespace-shape.ts`, affected tests | T5 | [x] |
 
 ## This is where the mission pays off
 
