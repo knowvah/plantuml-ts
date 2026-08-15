@@ -6,6 +6,7 @@
  * "split purely for size, no behavior change" precedent).
  */
 import type { NoteGeo } from './note-layout.js';
+import type { TipShape } from './note-tips-resolve.js';
 import type { EdgeGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
@@ -420,8 +421,7 @@ export function renderNote(note: NoteGeo, theme: Theme): string {
  * `renderAssocPoint`'s identical unwrapped precedent, G2 N8).
  * @see ~/git/plantuml/.../svek/image/EntityImageTips.java#drawU
  */
-export function renderTipNote(note: NoteGeo, theme: Theme): string {
-  const tip = note.tip!;
+export function renderTipNote(note: NoteGeo, tip: TipShape, theme: Theme): string {
   const box: OpaleBox = { origin: { x: note.x, y: note.y }, width: note.width, height: note.height };
   const connector: OpaleConnector = { pp1: tip.pp1, pp2: tip.pp2 };
   const outline = tip.direction === 'left' ? opalePolygonLeft(box, connector) : opalePolygonRight(box, connector);

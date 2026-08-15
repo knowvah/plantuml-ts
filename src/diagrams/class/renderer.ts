@@ -8,6 +8,7 @@
 import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from './layout.js';
 import { renderNote, renderTipNote, renderOpaleNote } from './renderer-note.js';
 import type { NoteGeo } from './note-layout.js';
+import { resolveTips, type TipResolution } from './note-tips-resolve.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { ellipse, linkWrap } from '../../core/svg.js';
@@ -141,6 +142,13 @@ function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
   return renderEmptyPackageIcon(nsGeo, theme);
 }
 
+/** The two per-render note tables `renderOneNote` reads (complexity-hook
+ *  param cap): the uid plan and the draw-time tip resolutions. */
+interface NoteRenderContext {
+  readonly uidPlan: ClassUidPlan;
+  readonly tips: ReadonlyMap<string, TipResolution>;
+}
+
 /**
  * G2 N52: one note's own draw output -- extracted so both the interleaved
  * (hosted, step 2) and trailing (unhosted, step 4) call sites in
@@ -149,9 +157,17 @@ function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
  * `NoteGeo`'s own doc comments (`note-layout.ts`) cover the tip/opale/
  * plain shape choice this mirrors unchanged from the pre-N52 single loop.
  */
-function renderOneNote(note: NoteGeo, uidPlan: ClassUidPlan, theme: Theme): string[] {
-  if (note.dropped === true) return [];
-  if (note.tip !== undefined) return [renderTipNote(note, theme)];
+function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: Theme): string[] {
+  const { uidPlan, tips } = ctx;
+  // `GeneralImageBuilder#createEntityImageBlock`'s leaf-type dispatch:
+  // `LeafType.TIPS -> EntityImageTips` (:219-220), whose `drawU` resolves
+  // the notch against the host at DRAW time (mission note-leaf-model D3,
+  // `note-tips-resolve.ts`) and draws NOTHING for a dropped tip;
+  // `LeafType.NOTE -> EntityImageNote` (:118-119), plain or opalisable.
+  if (note.leafType === 'TIPS') {
+    const tip = tips.get(note.id);
+    return tip === undefined || tip === 'dropped' ? [] : [renderTipNote(note, tip, theme)];
+  }
   const uid = uidPlan.noteUid.get(note.id) ?? '';
   const raw = note.opale !== undefined ? renderOpaleNote(note, theme) : renderNote(note, theme);
   // G2 N70: a note's own `[[url]]` wraps its ENTIRE drawn body in one
@@ -294,7 +310,7 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // comments for the scheme and its exact/fallback gate.
   const uidPlan = buildClassUidPlan(geo);
 
-  // G2 N52: notes hosted on a classifier (`NoteGeo.hostId`'s own doc
+  // G2 N52: notes hosted on a classifier (`NoteGeo.target`'s own doc
   // comment) draw immediately after that classifier, INTERLEAVED with the
   // classifier loop below -- not in the separate trailing notes pass (step
   // 4) that pass now only handles unhosted notes (freestanding, or an
@@ -304,18 +320,24 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // already-zero-diff multi-classifier fixture depends on that), so
   // grouping each note under its host classifier reproduces the same
   // sequence without needing a full creation-order re-sort.
+  // A note is "hosted" iff its `of` target IS a drawn classifier -- decided
+  // here from `geo.classifiers` (mission note-leaf-model D3: the geo build
+  // no longer looks the host up; `NoteGeo.target` is the raw parse-side id,
+  // a package target or freestanding note simply never matches).
+  const drawnClassifierIds = new Set(geo.classifiers.map((c) => c.id));
+  const noteCtx: NoteRenderContext = { uidPlan, tips: resolveTips(geo.notes, geo.classifiers) };
   const notesByHost = new Map<string, ClassGeometry['notes']>();
   const hostedNoteIds = new Set<string>();
   for (const note of geo.notes) {
-    if (note.hostId === undefined) continue;
-    const bucket = notesByHost.get(note.hostId) ?? [];
+    if (note.target === undefined || !drawnClassifierIds.has(note.target)) continue;
+    const bucket = notesByHost.get(note.target) ?? [];
     bucket.push(note);
-    notesByHost.set(note.hostId, bucket);
+    notesByHost.set(note.target, bucket);
     hostedNoteIds.add(note.id);
   }
   const renderHostedNotes = (classifierId: string): void => {
     for (const note of notesByHost.get(classifierId) ?? []) {
-      children.push(...renderOneNote(note, uidPlan, theme));
+      children.push(...renderOneNote(note, noteCtx, theme));
     }
   };
 
@@ -436,10 +458,10 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // with NO resolved host (freestanding, or an `of` target that didn't
   // resolve to a drawn classifier): every HOSTED note already drew in step
   // 2, immediately after its host classifier (`renderHostedNotes` above --
-  // see `NoteGeo.hostId`'s own doc comment for why).
+  // see `NoteGeo.target`'s own doc comment for why).
   for (const note of geo.notes) {
     if (hostedNoteIds.has(note.id)) continue;
-    children.push(...renderOneNote(note, uidPlan, theme));
+    children.push(...renderOneNote(note, noteCtx, theme));
   }
 
   // SI14 T4 (ADR-2): de-dup usecase/actor fragment defs (e.g. gradients)

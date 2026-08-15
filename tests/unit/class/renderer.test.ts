@@ -1564,6 +1564,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
+          leafType: 'NOTE',
           x: 20,
           y: 30,
           width: 80,
@@ -1585,9 +1586,15 @@ describe('renderClass — notes', () => {
   });
 
   it('G2/N13: a dropped member-tip note (unresolved ::member) draws NOTHING at all', () => {
+    // note-leaf-model T3: dropped-ness is resolved at DRAW time against the
+    // host's rows (`note-tips-resolve.ts`) -- `typo` matches no row of `A`.
     const geo = makeMinimalGeo({
+      classifiers: [makeClassifierGeo('A', 'A', { rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] })],
       notes: [
-        { id: '__note_0', x: 20, y: 30, width: 80, height: 40, lines: ['error'], lineWidths: [30], connector: [], dropped: true },
+        {
+          id: '__note_0', leafType: 'TIPS', x: 20, y: 30, width: 80, height: 40, lines: ['error'], lineWidths: [30], connector: [],
+          target: 'A', tipRequest: { member: 'typo', position: 'right', baselineOffset: 10, rowHeight: 13 },
+        },
       ],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
@@ -1600,6 +1607,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
+          leafType: 'NOTE',
           x: 20,
           y: 30,
           width: 80,
@@ -1618,17 +1626,21 @@ describe('renderClass — notes', () => {
   });
 
   it('G2/N13: a resolved member-tip note draws UNWRAPPED (no <g class="entity">) via the Opale zigzag mechanism', () => {
+    // note-leaf-model T3: the notch is resolved at DRAW time against the
+    // host (`note-tips-resolve.ts`) -- `member` matches `A`'s second row.
     const geo = makeMinimalGeo({
+      classifiers: [makeClassifierGeo('A', 'A', { x: 110, rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] })],
       notes: [
         {
           id: '__note_0',
+          leafType: 'TIPS',
           x: 20,
           y: 30,
           width: 80,
           height: 40,
           lines: ['hi'],
           lineWidths: [10], connector: [],
-          tip: { direction: 'right', pp1: { x: 0, y: 20 }, pp2: { x: 90, y: 20 } },
+          target: 'A', tipRequest: { member: 'member', position: 'left', baselineOffset: 10, rowHeight: 13 },
         },
       ],
     });

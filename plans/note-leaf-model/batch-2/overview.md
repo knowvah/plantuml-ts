@@ -4,7 +4,7 @@
 
 | ID | Description | Agent | Writes | Depends on | Done |
 |----|-------------|-------|--------|-----------|------|
-| T3 | Resolve the Opale connector at DRAW time, as `EntityImageNote#drawU` does | typescript-pro | `class/note-layout*.ts`, `class/renderer-note.ts` | B1 | [ ] |
+| T3 | Resolve the Opale connector at DRAW time, as `EntityImageNote#drawU` does | typescript-pro | `class/note-layout*.ts`, `class/renderer-note.ts` | B1 | [x] |
 
 ## Why this is the risky one
 

@@ -74,8 +74,8 @@ restructure changed one of those — which is the failure mode, not a result.
 
 | # | What | Depends on | Done |
 |---|---|---|---|
-| [1](batch-1/overview.md) | Make NOTE vs TIPS explicit; pin the note-order invariant | — | [ ] |
-| [2](batch-2/overview.md) | Move Opale resolution to draw time (retires the phase dependency) | B1 | [ ] |
+| [1](batch-1/overview.md) | Make NOTE vs TIPS explicit; pin the note-order invariant | — | [x] |
+| [2](batch-2/overview.md) | Move Opale resolution to draw time (retires the phase dependency) | B1 | [x] |
 | [3](batch-3/overview.md) | Fold notes into the leaf collection; sweep and close | B2 | [ ] |
 
 Batch 2 is the one that matters. If it cannot be done byte-identically,
@@ -141,3 +141,26 @@ Run all four between every batch. **Never pipe `npm test`.**
 - [decision-journal.md](decision-journal.md) — appended during execution
 - `src/diagrams/state/renderer-note.ts` + `state/layout.ts` — the reference
   implementation. **Read these before Batch 3**; state already did this.
+
+## Session summary — 2026-08-15 (autonomous run, branch `feat/note-leaf-model`)
+
+- **Tasks:** 4 of 5 completed (T1, T2, T3, and T5's tooling half); T4 not
+  started — **STOPPED** on a brief stop condition, see the Batch 3 rows of
+  `decision-journal.md`. Batches 1 and 2 met every clause of their exit
+  bars; Batch 2's verdict is the mission's pivot and it is POSITIVE (draw-
+  time resolution is byte-identical; `mapNoteGeos` reads no classifier).
+- **Decisions:** 12 journal rows; 3 flagged for review — the re-pinned
+  baseline (brief numbers were stale on day one), the corner-case behaviour
+  change outside the corpus (moves toward jar, jar-verified), and the Batch
+  3 STOP + recommended `leaf-draw-order` follow-on.
+- **Quality gates:** typecheck / lint / build / `npm test` (14313 passed, 1
+  todo) all exit 0 after every batch; `shape-match-report` and class
+  `dot-sync-report` diff-empty against `baseline/`; `note-order-report
+  --check` identical (97 note fixtures, whole-SVG sha).
+- **Known issues / follow-ups:** `leaf-draw-order` (jar's `bibliotekon`
+  insertion order — 19 ORDER-ONLY fixtures, packaged-first classifier
+  order); a hidden host swallows its member-tip notes (renderer skips
+  hidden classifiers before `renderHostedNotes`, jar draws the tip); the
+  single-line / `top|bottom` `::member` note grammar divergence
+  (`.agent-notes/note-leaf-model-b1.md`). Branch left unmerged pending the
+  ruling.
