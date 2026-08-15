@@ -145,6 +145,29 @@
   a per-USymbol ink rule (the same shape `renderer-arrowhead.ts
   #edgeExtremityInk` already takes for edge decor: walk the symbol's own
   shapes), not another special case.
+  **(c) CLOSED 2026-08-15** — by `plans/transition-label-ink/`, commit
+  `c62f7d21`. It WAS an ink rule after all, just not one of the ones this
+  entry ruled out: the composite's ink walk folded the label's
+  `(int)`-floored DOT reservation at the glyph anchor, where upstream folds
+  the `UEmpty` `TextBlockMarged#drawU` emits for the whole MARGED block
+  (`TextBlockMarged.java:79-87` + `LimitFinder.java:159-162`), anchored at
+  the reserved box's own corner. The per-fixture error is
+  `floor(w + 2m) − w − m` = `1 − frac(measuredWidth)`, which is 0.525 for
+  `EvNewValueSaved`; the remaining 0.002 was graphviz's 2dp SVG print
+  precision, which jar inherits by scraping `dot -Tsvg`'s text.
+
+  This entry's "our DOT is not wrong" and "the engine is not wrong" lines
+  were both correct and remain so — the defect was downstream of both, in
+  how the port derived the composite's node size from the inner layout,
+  exactly where the entry's last paragraph said a fix had to start.
+
+  Harness: `measure-composite-declared-size.ts` **2454 → 2469** exact with
+  zero regressions; `shape-match-report.ts` **776 → 779** doc-size-exact
+  and **25695 → 25952** matched shapes. The family is **six** fixtures, not
+  the three named below — `jorere-75-peja265`, `ketibo-84-juzo029` and
+  `zitifa-97-bizo337` carry the same composite. Full mechanism in
+  `transition-label-ink.md`. The original entry follows, unedited.
+
   **(c) state's `(-0.261, 0)` — the composite's inner canvas, not an ink rule.**
   `bemena-23-zebu249`, `pajefo-95-neri955`, `xepafa-33-lazi826` are one diagram
   in three spellings. Their document size already matches jar exactly and every
@@ -175,9 +198,8 @@
   `LimitFinder` walk. That is where a fix has to start.
 - **Impact**: (a) is a single mission worth 11 measured fixtures and ~100 in
   principle, not the five separate small groups the ranking makes it look like.
-  **(a) is now DONE — see the superseded block above.** (b) and (c) are
-  smaller, independent, and REMAIN OPEN: the `namespace-cluster-box` mission
-  touched neither. Everything else in the ranking is
+  **(a), (b) and (c) are now ALL DONE — see their blocks above.**
+  Everything else in the ranking is
   float noise (`0.001`, `0.005`), a singleton, or a structurally-divergent big
   diagram (`puvono-84-doro361`/`sekame-22-meze147`, 20 of 160 shapes aligned and
   161px too wide — a different kind of problem). There are no cheap shared-offset

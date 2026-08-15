@@ -51,6 +51,20 @@ finding; its `decision-journal.md` STOP entry is the fuller write-up.
 
 ## 3. Mechanism (A) — the fold uses the reserved box, not the drawn text
 
+> **CORRECTED 2026-08-15 (Batch 1/T1).** This section's premise — that
+> upstream folds the DRAWN text — is **wrong**, and with it the whole
+> two-opposing-mechanisms framing. Upstream folds the label's **marged
+> block** (`measuredWidth + 2·marginLabel` = 113.475), anchored at the
+> reserved box's own corner. So there is no −1.525, no opposing +0.998,
+> and no second mechanism: the single error is
+> `floor(w + 2·m) − w − m` = **1 − frac(w) = 0.525**, and the remaining
+> 0.00168 is the already-filed 2-decimal read-seam quantization.
+> Full derivation and `file:line` chain in
+> `.agent-notes/transition-label-ink.md`; port-side trace in
+> `.agent-notes/transition-label-ink-port.md`.
+>
+> The original text follows unedited, for the record.
+
 `src/diagrams/state/layout-ink-extent.ts:391`:
 
 ```ts
@@ -95,7 +109,26 @@ jar DRAWS                        = 356.335
 
 `18.000` independently corroborates our raw `minX = 0`.
 
-## 5. Mechanism (B) — the 1.000 nobody can source
+## 5. Mechanism (B) — SOLVED 2026-08-15: it is `marginLabel`, on the right
+
+> **ANSWERED (Batch 1/T1).** The 1.000 is the label's right-hand
+> `marginLabel` (`svek/SvekEdge.java:372-373`). `TextBlockMarged.drawU`
+> emits `ug.draw(UEmpty.create(dim))` for the FULL marged box
+> (`klimt/shape/TextBlockMarged.java:83`, dimension at `:74-77`), and
+> `LimitFinder#drawEmpty` folds it at full size with no inset
+> (`klimt/drawing/LimitFinder.java:159-162`). `UEmpty` renders nothing,
+> which is exactly why jar's ink exceeds every element visible in its own
+> SVG. The left margin was already inside the anchor; the right one is the
+> missing 1.000.
+>
+> **Arithmetic, absolute frame:** box corner 261.86 + 113.475 = 375.335 =
+> ink maxX; − 18 (spline) = 357.335; + 15 + 20 = **392.335** = jar's
+> `5.449097 in × 72` exactly. Predicted in advance and confirmed on two
+> further fixtures with different labels — `movuva-53-jude799` (0.23125
+> predicted / 0.23206 observed) and `dulixa-11-kufe247` (0.18750 /
+> 0.19051).
+>
+> The original text follows unedited, for the record.
 
 ```
 jar drawn extent    356.335   (measured above)
@@ -138,6 +171,17 @@ the entire remaining question.
    composite-specific formula error and contradicts a leaf-level one.
 
 ### The number you must not adopt
+
+> **STILL FORBIDDEN, and now explained (2026-08-15).** `21` is
+> `20 + marginLabel`. The 1 is real and has an upstream `file:line`
+> (`SvekEdge.java:372-373`), but it belongs to the LABEL'S INK, not to
+> `calculateDimensionSlow`'s margin sum. Adding it to the margin formula
+> would be right by 0.002 on this fixture and wrong on every diagram whose
+> extent is not set by a label. D4 stands unchanged: `calculateDimension
+> Slow` is 20, and nothing in `state-composite-autonom.ts` gains a
+> constant.
+>
+> The original text follows unedited.
 
 Corrected fold (356.337) + 15 + **21** = 392.337 against jar's 392.335 —
 fits to 0.002. **`21` has no upstream source.**

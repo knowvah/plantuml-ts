@@ -118,7 +118,40 @@ So 2 decimals may be the right *quantity* at the wrong *place*. Any real
 fix has to apply only where the jar applies it, which requires knowing
 where that is.
 
-## Open question — the next step
+## Open question — ANSWERED 2026-08-15
+
+> **CLOSED** by `plans/transition-label-ink/` (commit `c62f7d21`). The
+> three probes below are moot and were never needed: modern graphviz
+> quantizes too, in the SVG writer.
+>
+> ```c
+> /* ~/git/graphviz/lib/gvc/gvdevice.c:513-528 — gvprintdouble */
+> if (num > -0.005 && num < 0.005) { gvwrite(job, "0", 1); return; }
+> snprintf(buf, 50, "%.02f", num);
+> size_t len = gv_trim_zeros(buf);
+> ```
+>
+> So it is `%.02f` rounding (half-to-even, per C), not truncation, and not
+> a 2.38-vs-modern behaviour difference — the corrected Origin section
+> above already said `-Tsvg`; this is the line. Nothing about Smetana's
+> vintage is involved, and there is no version question to settle.
+>
+> Verified end to end: real graphviz 15.1.1 on the jar's own
+> `test-results/dot-cache/state/bemena-23-zebu249/svek-1.dot` puts that
+> fixture's `EvNewValueSaved` label-table corner at `235.61`, where our
+> engine carries `235.61168`.
+>
+> **"Do not apply quantization anywhere" is superseded, narrowly.** The
+> measurement below still stands — a blanket quantization at
+> `graph-layout.ts:81` is the wrong place, because that seam feeds node
+> geometry too. A PER-READ-SEAM one is the right place, and the
+> transition-label mission did one: it quantizes only the label's own ink
+> box, inside one state module, and took
+> `measure-composite-declared-size.ts` from 2454 to 2469 exact with zero
+> regressions. Whoever takes this fixture's splines should do the same for
+> the spline read seam rather than the shared one.
+>
+> The superseded text follows.
 
 **Why does Smetana produce 2-decimal coordinates when modern graphviz does
 not?** The strongest candidate is vintage: CLAUDE.md records Smetana as a
