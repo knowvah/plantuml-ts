@@ -6,6 +6,7 @@
  * existing `state/state-geo-types.ts` split precedent exactly (pure move,
  * no behavior change).
  */
+import type { LeafSymbolInk } from '../description/leaf-sizing.js';
 import type { ClassifierKind, LinkDecor, UrlInfo, Visibility } from './ast.js';
 import type { NoteGeo } from './note-layout.js';
 import type { GenericTagGeo } from './class-stereotype.js';
@@ -260,6 +261,19 @@ export interface ClassifierGeo {
    * reach `x + w` unconditionally and `map`/`json` are left unmeasured).
    */
   bodyInkWidth?: number;
+
+  /** The DRAWN ink extent of a USymbol leaf's own shapes, relative to this
+   *  classifier's own `x`/`y` — measured by a `LimitFinder` walk over the
+   *  same `EntityImageDescription` instance that sized the leaf
+   *  (`description/leaf-sizing-entity.ts#measureUsecaseOrActorLeafInk`).
+   *
+   *  Present only for an `actor` leaf. `addClassifierInk` reads it in place
+   *  of `addRectInk`'s asymmetric `(x - 1, y - 1)` corner, which is wrong
+   *  for a symbol that draws an ellipse+path+label rather than a box: the
+   *  actor's drawn head top is `y + 0.5`, so the box rule sat 1.5 high and
+   *  shifted every shape in the document by that much
+   *  (`.agent-notes/class-ink-shared-offset-groups.md` item (b)). */
+  symbolInk?: LeafSymbolInk;
 }
 
 export interface EdgeGeo {

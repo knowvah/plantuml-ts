@@ -25,6 +25,7 @@
  * that module imports `LIKE_CLASS_KINDS` back from here).
  */
 
+import type { LeafSymbolInk } from '../description/leaf-sizing.js';
 import type { Classifier, ClassifierKind } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
@@ -138,6 +139,14 @@ export function formatMemberText(member: {
 export interface MeasuredClassifier {
   width: number;
   height: number;
+  /** The DRAWN ink extent of a USymbol leaf's own shapes, in the leaf's own
+   *  frame (origin at its box top-left) — from a `LimitFinder` walk over the
+   *  same `EntityImageDescription` instance that sizes it
+   *  (`description/leaf-sizing-entity.ts#measureUsecaseOrActorLeafInk`).
+   *  Present only for an `actor` leaf; see that function's doc comment for
+   *  why usecase is excluded. Read by `class-ink-box.ts#addClassifierInk`
+   *  in place of `addRectInk`'s box rule. */
+  symbolInk?: LeafSymbolInk;
   rows: ClassifierGeo['rows'];
   dividerYs: number[];
   /** G2 N24: number of LEADING `rows[]` entries that belong to the header

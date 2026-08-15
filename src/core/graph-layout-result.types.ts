@@ -28,6 +28,30 @@ export interface DotLayoutResult {
     tailLabelY?: number;
     headLabelX?: number;
     headLabelY?: number;
+    /**
+     * The head-end arrow ATTACHMENT point — graphviz's `bezier.ep`, reported
+     * by `EdgeGeometry.ep` and republished here in the same origin-shifted
+     * frame as `points` (it rides `shiftToOrigin`'s translation, exactly as
+     * `labelX`/`labelY` and `clusters[].label` do).
+     *
+     * Distinct from the last control point: when an end carries an arrow the
+     * spline is SHORTENED to leave room, and the arrow spans from the terminal
+     * control point out to this point. A consumer drawing its own arrowhead
+     * reads the tip here instead of extrapolating one.
+     *
+     * Present only when that end actually has an arrow (C `eflag`) — which
+     * requires the input edge to have declared `attributes.arrowhead`. Absent
+     * otherwise, and upstream treats absence the same way: `JsonCurve.java:72
+     * -82` nulls `ep` on the calloc-zero point and `#drawCurve` draws no arrow
+     * at all when it is null.
+     *
+     * `sp` (the tail-end counterpart) is deliberately NOT republished: the
+     * engine exposes it, but upstream's only consumer stores it and never
+     * reads it (`JsonCurve.java:55,73-76` assign `sp`; nothing uses it), so
+     * plumbing it here would add a field no faithful consumer can justify.
+     */
+    epX?: number;
+    epY?: number;
     spline?: boolean;
     reversed?: boolean;
   }>;

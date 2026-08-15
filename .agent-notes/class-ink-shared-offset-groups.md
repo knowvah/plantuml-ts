@@ -105,6 +105,32 @@
   takes (a) should treat the vertical half as an open question rather than
   assume `CL_OFFSET` applies symmetrically.
 
+  **(b) CLOSED 2026-08-15** — fixed exactly as this entry proposed, by the
+  per-USymbol ink walk rather than a fourth special case
+  (`plans/usymbol-ink-rule/`, commit `bb820507`). `ClassifierGeo.symbolInk`
+  now carries a `LimitFinder` walk over the leaf's own
+  `EntityImageDescription`, measured at layout time where the drawable
+  already exists, and `addClassifierInk` reads it in place of `addRectInk`.
+  Harness: **773 → 776 doc-size-exact**, matched-shapes flat at 25695 (a
+  UNIFORM offset is what rigid alignment already absorbed, so document size
+  was the only axis that could move). `cezaka-60-jado323`,
+  `sofagu-98-fezi999` and `gapisu-00-celo011` newly exact;
+  `cacoma-43-poxu615` exact on height and every shape, 1px wide.
+
+  **Two corrections to this entry's own text**, both found by measuring:
+  the affected set is NOT just the two named here — `sofagu-98-fezi999`
+  (class) and `gapisu-00-celo011`/`ruturo-47-kapi300` (OBJECT, which shares
+  the class ink path) move too, so 6 class + 3 object carry the family. And
+  "6 cached class fixtures" is RIGHT; an earlier pass through this mission
+  reported 5 and blamed the note, which was a case-sensitive grep missing
+  `sofagu`'s `Actor "fg" as fr`. The note was correct.
+
+  Residual: `ruturo-47-kapi300` moved 424 → 422 against jar's 430, 2px
+  further out on a fixture already 6 off and never exact — its height is
+  dominated by another mechanism, unidentified.
+
+  Original entry follows.
+
   **(b) `(0, -1.5)` — a USymbol classifier takes the classifier-box ink rule.**
   A `kind: 'descriptive'` classifier with a `usymbol` (actor, component, node,
   database, …) draws its own klimt shapes, but `class-ink-box.ts

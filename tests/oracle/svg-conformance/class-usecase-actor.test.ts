@@ -195,12 +195,28 @@ describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside clas
     // nine consecutive re-captures of the same invocation do not reproduce
     // (they give 2147 bytes, deterministically). The golden is restored and
     // this pin with it. The error page's own geometry never moved.
+    // Re-pinned 2026-08-15 (usymbol-ink-rule): 96 -> 92 high, 169 -> 168
+    // wide. This fixture draws an ACTOR, and an actor's ink is now its own
+    // drawn head/body/label union rather than `addRectInk`'s box corner
+    // (`class-ink-box.ts#addClassifierInk`), which sat 1.5 above the head's
+    // real top. The geometry moving here is the fix reaching this fixture,
+    // not a regression.
+    //
+    // Re-pinning is legitimate specifically because of what the `expected`
+    // column IS: the jar's own 579x162 ERROR PAGE, emitted because upstream
+    // REFUSES a bare `actor` without `allowmixing` (the two tests above
+    // assert that refusal is what users see). This path bypasses that gate,
+    // so the golden is not a rendering of this diagram and the deltas are
+    // not a fidelity measure — the same 4px that reads as "further from
+    // 162" here is what makes `cezaka-60-jado323` land EXACTLY on jar,
+    // where jar does draw the diagram. Do NOT treat this as a target to
+    // close, and do not re-pin it to make an unrelated gate pass.
     const expected: Diff[] = [
       { path: 'svg/@background', actual: '#FFFFFF', expected: '#000000', tolerance: 0.01 },
-      { path: 'svg/@height', actual: '96', expected: '162', delta: 66, tolerance: 0.01 },
-      { path: 'svg/@viewBox[2]', actual: '169', expected: '579', delta: 410, tolerance: 0.01 },
-      { path: 'svg/@viewBox[3]', actual: '96', expected: '162', delta: 66, tolerance: 0.01 },
-      { path: 'svg/@width', actual: '169', expected: '579', delta: 410, tolerance: 0.01 },
+      { path: 'svg/@height', actual: '92', expected: '162', delta: 70, tolerance: 0.01 },
+      { path: 'svg/@viewBox[2]', actual: '168', expected: '579', delta: 411, tolerance: 0.01 },
+      { path: 'svg/@viewBox[3]', actual: '92', expected: '162', delta: 70, tolerance: 0.01 },
+      { path: 'svg/@width', actual: '168', expected: '579', delta: 411, tolerance: 0.01 },
       { path: 'svg/g[1][childCount]', actual: '2', expected: '11', tolerance: 0.01 },
     ];
     expect(diffs).toEqual(expected);

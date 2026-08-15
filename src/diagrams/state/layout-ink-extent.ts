@@ -100,6 +100,7 @@ import { absorbLayoutEpsilon } from '../../core/layout-epsilon.js';
 import { transitionArrowheadInk } from './renderer-arrowhead.js';
 import { positionFromStereotype, usesPortShape } from './state-entity-position.js';
 import { textAscent } from './state-render-colors.js';
+import { INK_DELTA, JAR_INK_MARGIN } from '../../core/svek/SvekResult.js';
 
 /** `CucaDiagram#getDefaultMargins()` (net/atmp/CucaDiagram.java:719-722) —
  *  shared across the whole `CucaDiagram` family, see module doc comment. */
@@ -108,15 +109,11 @@ const DOCUMENT_MARGIN_RIGHT = 5;
 const DOCUMENT_MARGIN_BOTTOM = 5;
 const DOCUMENT_MARGIN_LEFT = 0;
 
-/** `SvekResult#calculateDimension`'s own `.delta(15, 15)` padding. */
-const INK_DELTA = 15;
-
-/** `SvekResult#calculateDimension`'s own `moveDelta(6 - minMax.getMinX(),
- *  6 - minMax.getMinY())` constant — the SAME value description's
- *  `layout-ink-shift.ts#JAR_INK_MARGIN` and class's own `layout-ink-
- *  extent.ts#JAR_INK_MARGIN` already jar-verified (shared `SvekResult`
- *  machinery). */
-const JAR_INK_MARGIN = 6;
+// Both from the single owner, `core/svek/SvekResult.ts`. They were declared
+// locally here until 2026-08-15; the comment that stood in this place cited
+// "class's own `layout-ink-extent.ts#JAR_INK_MARGIN`", a file that does not
+// exist (class's copy was in `class-ink-box.ts`) — the drift that four
+// declarations of two constants predicts.
 
 /** `LimitFinder#drawUPolygon`'s own `x`-only padding quirk
  *  (`HACK_X_FOR_POLYGON = 10` upstream) — duplicated here rather than

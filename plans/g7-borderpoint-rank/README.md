@@ -79,7 +79,7 @@ rule; subagents never run git mutations).
 | [3](batch-3/overview.md) | Attempt 4: paper gate → implementation | T4, T5 | T4 [x]; T5 MISS — permanent stop |
 | [4](batch-4/overview.md) | Family sweep + close | T6 | NOT RUN (T5 stop) |
 | [5](batch-5/overview.md) | Attempt 5: a/p0 port → paper gate v2 → wiring → sweep | T7, T8, T9, T10 | T7-T8 [x]; T9 MISS; T10 not run |
-| [6](batch-6/overview.md) | Attempt 6: two gap fixes → paper gate v3 → wiring → sweep | T11-T15 | [ ] |
+| [6](batch-6/overview.md) | Attempt 6: two gap fixes → paper gate v3 → wiring → sweep | T11-T15 | [x] `d74cfde` `aa5f6961` |
 
 ## Resume procedure (cold-start, after external dot-engine fix)
 
@@ -286,3 +286,75 @@ measure size-exact all the same. Fresh measurement
 
 Left unmerged — the G7→main merge (merge commit, never squash) is the
 orchestrator/human's call.
+
+<!-- Merged since: d74cfde, 7ef0134 and aa5f6961 are all ancestors of main
+     as of 2026-08-15. -->
+
+---
+
+## Follow-up outcomes (2026-08-15)
+
+Worked the three follow-ups above. **Follow-up 1's premise is false**;
+follow-up 2 is confirmed still real; one unrelated fixture was pinnable.
+
+### 1. Pin the 18 size-exact family fixtures — NOT POSSIBLE, premise falsified
+
+The follow-up says they "are DOT-EQUAL in `parity-state.json`, so eligible
+once a golden exists". DOT-EQUAL is only **one** of the two add-rule
+conditions (`oracle/goldens/svg-state/README.md#add-rule`). The other is
+zero-diff SVG under `DeterministicMeasurer`, and **none of the 24 family
+fixtures meets it** — measured, not assumed:
+
+```
+npx tsx scripts/svg-conformance-census.ts state --per-fixture
+```
+17 of 24 report exactly 1 diff, 6 report 3, one reports 5. Zero report 0.
+
+**The "1 diff" is not near-conformance.** It is
+`svg/g[1][childCount]` — a mismatch on the ROOT content `<g>`, where
+`compareSvg` stops recursing, so everything below it is UNCOMPARED. bitaxo
+emits 4 children against jar's 6, kotagu 13 against 14, jucori 13 against
+21. Their true distance is unmeasured, not small.
+
+**Mechanism** (bitaxo-18-tamo974, children of the root `<g>`): jar emits a
+FLAT mix — `g.cluster`, bare `text`, bare `ellipse`, bare `rect`, `text`,
+`g.entity` — while this port wraps every entity in its own
+`<g class="entity">` and emits 4 such wrappers. So the gap is element
+GROUPING, not missing content. That is the known corpus-wide G-phase
+defect #2 ("`g[childCount]` mismatch — 215 fixtures … missing/extra
+elements, not geometry", `planning/mission-index.md` Phase G), and it is
+in no way border-point-specific.
+
+The conflation to avoid repeating: G7's sweep measured **DOT node-size**
+exactness (`measure-state-size-deltas.ts`). Pin eligibility is **SVG
+byte** exactness. The follow-up read the first as implying the second.
+They are different axes, and on this family the second is nowhere near met.
+
+### 2. bitaxo/resido/nijugi size residuals — CONFIRMED, still open
+
+Re-measured on the current tree; unchanged from close-out, still pinned
+backlog entries: `bitaxo-18-tamo974` 0.138888, `resido-15-reza040`
+0.138889, `nijugi-19-jazi166` 0.5, `pesita-10-dene726` 0.000519. Still a
+separate size-parity task, still not a G7 defect.
+
+### 3. Reversed-edge SVG path text — untouched
+
+Gated on those 17 fixtures becoming pin candidates, which per (1) they are
+not. Unchanged.
+
+### What DID land
+
+`pevene-26-kebo361` pinned (state ratchet **58 → 59**) — the only state
+fixture meeting both add-rule conditions but missing from `ratchet.json`.
+Not a family member; found while enumerating eligibility. Golden copied
+verbatim from the dot-cache, ratchet test green at 61.
+
+### One pre-existing defect noticed, not fixed
+
+`measure-state-size-deltas.ts` exits **2** on `tumaba-64-tosu281`
+(`widened`): measured 0.229168 against a stored allowance of 0.229167, a
+1e-6-inch float wobble. Verified pre-existing — the identical summary
+(`widened:1, improved:2, unchanged:146`) reproduces on `main` with no
+local changes. Outside this work's scope and the backlog is
+tighten-only/maintainer-ruled, so it is recorded rather than silently
+re-pinned. See `.agent-notes/g7-followup-pin-eligibility.md`.

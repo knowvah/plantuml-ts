@@ -81,7 +81,7 @@ function edgeInkPoints(edge: JsonEdgeGeo): Array<{ x: number; y: number }> {
     );
   }
   // The arrowhead is a filled path, not a node edge; its tip can overhang.
-  const head = buildArrowHeadPath(edge.points);
+  const head = buildArrowHeadPath(edge.points, edge.ep);
   const nums = head === '' ? [] : head.split(' ').filter((t) => t !== '' && !Number.isNaN(Number(t)));
   for (let i = 0; i + 1 < nums.length; i += 2) {
     points.push({ x: Number(nums[i]), y: Number(nums[i + 1]) });

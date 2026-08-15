@@ -90,7 +90,8 @@ export {
  *  `leaf-sizing-entity.ts` (a same-mission split, see that file's doc) and
  *  re-exported here so `leaf-sizing.ts` remains the ONE module that exports
  *  usecase/actor leaf sizing, per ADR-2. */
-export { measureUsecaseOrActorLeaf } from './leaf-sizing-entity.js';
+export { measureUsecaseOrActorLeaf, measureUsecaseOrActorLeafInk } from './leaf-sizing-entity.js';
+export type { LeafSymbolInk } from './leaf-sizing-entity.js';
 
 /**
  * Measure a leaf node's bounding box, dispatching by USymbol: port/note stay

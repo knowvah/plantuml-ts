@@ -4,6 +4,8 @@ import type { JsonDiagramAST, HighlightDirective } from '../../../src/diagrams/j
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FixedMeasurer } from '../../../src/core/measurer.js';
 import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
+import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
+import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -24,6 +26,43 @@ function makeAst(root: unknown, highlights: ReadonlyArray<readonly string[]> = [
 // ---------------------------------------------------------------------------
 // Acceptance criteria tests
 // ---------------------------------------------------------------------------
+
+describe('layoutJson arrow attributes', () => {
+  // `SmetanaForJson#createEdge` (:221-223) sets all three on EVERY edge. They
+  // are layout-affecting, not decorative: `arrowsize=.75` shortens the spline
+  // by 7.5 rather than graphviz's default 10, and the arrowhead is what makes
+  // the engine report `bezier.ep` at all.
+  it('sets arrowsize/arrowtail/arrowhead on every edge', () => {
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutJson(makeAst({ a: { b: 1 }, c: 2 }), defaultTheme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const edges = captured.flatMap((g) => g.edges);
+    expect(edges.length).toBeGreaterThan(0);
+    for (const e of edges) {
+      expect(e.attributes?.arrowsize).toBe('.75');
+      expect(e.attributes?.arrowtail).toBe('none');
+      expect(e.attributes?.arrowhead).toBe('normal');
+    }
+  });
+
+  // The arrow attrs are set unconditionally, but `tailport` keeps its own
+  // `rowIndex >= 0` guard — declaring one must not have dropped the other.
+  it('keeps the tailport alongside the arrow attrs', () => {
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      layoutJson(makeAst({ a: { b: 1 } }), defaultTheme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const edges = captured.flatMap((g) => g.edges);
+    expect(edges.some((e) => e.attributes?.tailport !== undefined)).toBe(true);
+  });
+});
 
 describe('layoutJson', () => {
   // 1. Flat object → 1 node, 2 rows

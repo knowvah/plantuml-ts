@@ -22,16 +22,14 @@ export const DOCUMENT_MARGIN_RIGHT = 5;
 export const DOCUMENT_MARGIN_BOTTOM = 5;
 export const DOCUMENT_MARGIN_LEFT = 0;
 
-/** `SvekResult#calculateDimension`'s `.delta(15, 15)` padding. */
-export const INK_DELTA = 15;
-
-/** `SvekResult#calculateDimension`'s own `moveDelta(6 - minMax.getMinX(),
- *  6 - minMax.getMinY())` constant (svek/SvekResult.java:133) — the SAME
- *  value as description's `layout-ink-shift.ts#JAR_INK_MARGIN` (G1b/J1,
- *  shared upstream `SvekResult` machinery). Duplicated here rather than
- *  imported per this module's own klimt-free-module convention (see file
- *  doc comment). */
-export const JAR_INK_MARGIN = 6;
+// `INK_DELTA`/`JAR_INK_MARGIN` now have a single owner, `core/svek/
+// SvekResult.ts` — they are that method's constants, shared by every svek
+// engine, and were previously declared four times across three engines.
+// Re-exported here so this module's existing consumers are unaffected.
+// The klimt-free-module convention below still holds for
+// `HACK_X_FOR_POLYGON`, which `LimitFinder.ts` keeps private; it never
+// applied to these two.
+export { INK_DELTA, JAR_INK_MARGIN } from '../../core/svek/SvekResult.js';
 
 /**
  * G2 N35: the lollipop's OWN display-label row
@@ -172,6 +170,28 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo, iconSize: number): void
   if (c.kind === 'lollipop') {
     addEllipseInk(box, c.x, c.y, c.width, c.height);
     addLollipopRowInk(box, c);
+    return;
+  }
+  // A leaf DRAWN as a USymbol contributes the ink of its own shapes, not a
+  // box rule. Upstream has one ink concept — walk what was drawn — and jar's
+  // extent for an actor is the union of its `UEllipse` head, `UPath` body
+  // and label `UText`. `addRectInk`'s `(x - 1, y - 1)` corner sits 1.5 above
+  // the drawn head's real top of `y + 0.5`, which moved every shape in
+  // `cacoma-43-poxu615` by that much (`.agent-notes/class-ink-shared-offset
+  // -groups.md` item (b)).
+  //
+  // Placed AFTER the three branches above on purpose: `usecase` and
+  // `lollipop` already dispatch away from the box rule with jar-verified
+  // rules of their own, and this mission leaves their output byte-identical
+  // (decision D2). Only leaves that would otherwise have fallen through to
+  // the box rule reach here, so the change is additive by construction.
+  //
+  // The extent is measured at layout time, where the drawable and its
+  // font/sprite context already exist — SI14's "share the measurement
+  // OBJECT" shape. See `ClassifierGeo.symbolInk`.
+  if (c.symbolInk !== undefined) {
+    addPoint(box, c.x + c.symbolInk.minX, c.y + c.symbolInk.minY);
+    addPoint(box, c.x + c.symbolInk.maxX, c.y + c.symbolInk.maxY);
     return;
   }
   addClassifierBoxInk(box, c);

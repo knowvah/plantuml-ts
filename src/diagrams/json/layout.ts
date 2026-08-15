@@ -80,6 +80,11 @@ export interface JsonNodeGeo {
 /** A routed edge from a parent node row to a child node */
 export interface JsonEdgeGeo {
   points: ReadonlyArray<{ x: number; y: number }>;
+  /** The arrow's attachment point (graphviz `bezier.ep`), already transposed
+   *  into diagram space alongside `points`. Absent when the engine placed no
+   *  arrow on this end — upstream nulls it on the same condition and then
+   *  draws no arrowhead at all (`JsonCurve.java:72-82`, `#drawCurve`). */
+  ep?: { x: number; y: number };
   spline: boolean;
 }
 
@@ -334,12 +339,18 @@ export function layoutJson(
       // port by the child's index among the parent's rows.
       const parentM = measuredById.get(fn.parentId!);
       const rowIndex = parentM?.rows.findIndex((r) => r.key === (fn.parentKey ?? '')) ?? -1;
+      // `SmetanaForJson#createEdge` (:221-223) sets all three arrow attrs on
+      // EVERY edge, unconditionally and in this order, right before the
+      // `tailport` below. They make graphviz shorten the spline for the arrow
+      // and record its attachment point as `bezier.ep` — read back below as
+      // `epX`/`epY` and drawn by `JsonCurve.ts`.
       const edge: DotInputEdge = {
         id: `${fn.parentId!}->${fn.id}`,
         from: fn.parentId!,
         to: fn.id,
+        attributes: { arrowsize: '.75', arrowtail: 'none', arrowhead: 'normal' },
       };
-      if (rowIndex >= 0) edge.attributes = { tailport: `P${rowIndex}` };
+      if (rowIndex >= 0) edge.attributes!.tailport = `P${rowIndex}`;
       return edge;
     });
 
@@ -410,8 +421,15 @@ export function layoutJson(
   // Same transposition as the nodes, and for the same reason -- `yAxis: 'down'`
   // has already applied `Mirror#inv`, so only the x/y switch remains. See
   // `mirrorToDiagramSpace`.
+  // `ep` takes the IDENTICAL transposition as the points — it is reported in
+  // the same frame, so anything else would put the arrow tip in a different
+  // space from the spline it terminates. Absent when the engine placed no
+  // arrow, which `JsonCurve.ts` handles the way upstream does (draw nothing).
   const edges: JsonEdgeGeo[] = dotResult.edges.map((e) => ({
     points: e.points.map((p) => ({ x: p.y + margin.left, y: p.x + margin.top })),
+    ...(e.epX !== undefined && e.epY !== undefined
+      ? { ep: { x: e.epY + margin.left, y: e.epX + margin.top } }
+      : {}),
     spline: true,
   }));
 

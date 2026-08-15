@@ -5,6 +5,7 @@ import type { UParam } from '../UParam.js';
 import { UStroke } from '../UStroke.js';
 import { UTranslate } from '../UTranslate.js';
 import type { StringBounder } from '../font/StringBounder.js';
+import type { UGroup } from '../shape/UGroup.js';
 
 /**
  * UGraphicNo — abstract no-op `UGraphic` base: everything a
@@ -28,9 +29,6 @@ import type { StringBounder } from '../font/StringBounder.js';
  * note, "where upstream methods don't exist in our interface, omit and
  * document"):
  * - `startUrl`/`closeUrl` — need `Url`, not ported.
- * - `startGroup`/`closeGroup` — need `UGroup`'s drawing role (a
- *   `UGroup.ts` exists in this port but only as a data shape, not wired
- *   through `UGraphic`).
  * - `getColorMapper()` — needs `ColorMapper`, not ported.
  * - `getDefaultBackground()` — needs `HColor`/`HColors`, not ported.
  * - `flushUg()` — no counterpart; this port's renderers have no
@@ -52,6 +50,32 @@ export abstract class UGraphicNo implements UGraphic {
 
   abstract apply(change: UChange): UGraphic;
   abstract draw(shape: UShape): void;
+
+  /**
+   * No-ops, verbatim from upstream — `UGraphicNo.java:75-77,84-86` both have
+   * empty bodies. A group is a DOM-wrapping concern (`UGraphicSvg` emits the
+   * `<g>`); a measuring UGraphic has nothing to wrap, so ignoring them is
+   * the faithful behaviour, not a stub.
+   *
+   * Previously omitted here, and this file's own header said so, on the
+   * grounds that `UGroup` was "not wired through `UGraphic`". That is still
+   * true — `startGroup`/`closeGroup` are duck-typed extras this port narrows
+   * to via `requireGroups`, not members of the `UGraphic` interface — but
+   * omitting them made `LimitFinder` (which extends this class) fail
+   * `requireGroups` and so unable to walk any `EntityImageDescription`,
+   * which calls `startGroup` unconditionally. Upstream's own
+   * `TextBlockUtils.getMinMax` walks exactly those images with exactly this
+   * class, so the omission was the divergence.
+   *
+   * The `group` parameter is deliberately unused, matching upstream.
+   */
+  startGroup(_group: UGroup): void {
+    /* upstream: empty */
+  }
+
+  closeGroup(): void {
+    /* upstream: empty */
+  }
 
   getParam(): UParam {
     return {

@@ -11,7 +11,7 @@
 
 import type { Classifier } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { measureUsecaseOrActorLeaf } from '../description/leaf-sizing.js';
+import { measureUsecaseOrActorLeaf, measureUsecaseOrActorLeafInk } from '../description/leaf-sizing.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE } from './class-lollipop.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
@@ -43,6 +43,22 @@ export function measureUsecaseOrActor(
   const symbol = classifier.kind === 'usecase' ? 'usecase' : 'actor';
   const spriteDims = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
   const dim = measureUsecaseOrActorLeaf(classifier.display, symbol, fontSpec, measurer, spriteDims);
+  // The DRAWN ink extent, carried through to `class-ink-box.ts
+  // #addClassifierInk` so an actor's ink is its own head/body/label union
+  // rather than `addRectInk`'s `(x - 1, y - 1)` box corner — which sits 1.5
+  // above the drawn head ellipse's real top of `y + 0.5` and shifts the
+  // whole document by that much (`cacoma-43-poxu615`,
+  // `.agent-notes/class-ink-shared-offset-groups.md` item (b)).
+  //
+  // ACTOR ONLY, deliberately: a `usecase` leaf already dispatches to
+  // `addEllipseInk`, a jar-verified rule this mission must leave
+  // byte-identical (decision D2), so measuring ink no consumer reads would
+  // be dead work. Routing usecase through the same walk is a separate,
+  // measurable question — see this mission's journal.
+  const symbolInk =
+    symbol === 'actor'
+      ? measureUsecaseOrActorLeafInk(classifier.display, symbol, fontSpec, measurer, spriteDims)
+      : undefined;
 
   // SI14 T5: no longer pre-resolves the label's creole atoms here. That
   // existed only because `renderClass(geo, theme)` received no sprite
@@ -60,7 +76,10 @@ export function measureUsecaseOrActor(
     indent: 0,
     italic: false,
   };
-  return { width: dim.width, height: dim.height, rows: [row], dividerYs: [] };
+  return {
+    width: dim.width, height: dim.height, rows: [row], dividerYs: [],
+    ...(symbolInk !== undefined ? { symbolInk } : {}),
+  };
 }
 
 /**

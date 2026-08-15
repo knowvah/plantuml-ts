@@ -74,10 +74,10 @@ import { buildUidPlan } from './renderer-uid.js';
 import { collectByKind, drawClusters, drawEntities, drawEdges } from './renderer-draw-sequence.js';
 import { runInkWalk, driverBounderFor } from './renderer-ink-extent.js';
 
-/** `SvekResult.java:133`'s forced constant — `moveDelta(6 - minMax.getMinX(),
- *  6 - minMax.getMinY())`. Same value on both axes; see this module's doc
- *  comment for the closed per-axis derivation. */
-const JAR_INK_MARGIN = 6;
+// `JAR_INK_MARGIN` comes from the single owner, `core/svek/SvekResult.ts`;
+// same value on both axes, and see this module's doc comment for the closed
+// per-axis derivation.
+import { JAR_INK_MARGIN } from '../../core/svek/SvekResult.js';
 
 export interface InkShift {
   readonly dx: number;
