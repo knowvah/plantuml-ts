@@ -62,8 +62,8 @@ Full detail and method in [evidence.md](evidence.md). Summary:
 
 | # | What | Write-set | Done |
 |---|---|---|---|
-| [1](batch-1/overview.md) | Java excavation + port-side trace. **No `src/` edits.** | `.agent-notes/` + this brief | [ ] |
-| — | **CHECKPOINT — stop, report, request write-set expansion** | — | [ ] |
+| [1](batch-1/overview.md) | Java excavation + port-side trace. **No `src/` edits.** | `.agent-notes/` + this brief | [x] |
+| — | **CHECKPOINT — stop, report, request write-set expansion** | — | [x] awaiting human |
 | [2](batch-2/overview.md) | Land both mechanisms in one commit; sweep | as approved at the checkpoint | [ ] |
 
 ## The checkpoint is a hard stop

@@ -5,8 +5,8 @@ the one that is left, and ends at a hard human checkpoint.
 
 | ID | Description | Agent | Writes | Depends on | Done |
 |----|-------------|-------|--------|-----------|------|
-| T1 | Java excavation: where jar's extra 1.000 comes from | debugger | `.agent-notes/transition-label-ink.md` | — | [ ] |
-| T2 | Port-side trace: which line changes, what else reads it | debugger | `.agent-notes/transition-label-ink-port.md` | — | [ ] |
+| T1 | Java excavation: where jar's extra 1.000 comes from | orchestrator (see journal) | `.agent-notes/transition-label-ink.md` | — | [x] |
+| T2 | Port-side trace: which line changes, what else reads it | orchestrator (see journal) | `.agent-notes/transition-label-ink-port.md` | — | [x] |
 
 Parallel — disjoint write-sets, neither consumes the other.
 
