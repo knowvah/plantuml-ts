@@ -25,8 +25,11 @@
  * from the PARSE output, keeps the report independent of the post-layout
  * geometry model — which is exactly the thing the mission restructures.
  *
- * Only fixtures whose parse yields at least one note are listed (a note-less
- * fixture has nothing here to move); the TOTAL line counts both.
+ * Every class/object fixture is listed, including note-less ones (printed
+ * with `notes=0 tips=0` and its own sha + `cls:`/`link=` sequence) — mission
+ * `leaf-draw-order` widened this so its `--check-order` gate can name
+ * note-less movers too. The TOTAL line's numerator still counts only
+ * note-carrying fixtures.
  *
  * Upstream's `LeafType.TIPS` leaf (`note <left|right> of Class::member`,
  * `CommandFactoryTipOnEntity`) draws UNWRAPPED — no `<g>`, no uid
@@ -39,17 +42,26 @@
  *   npx tsx scripts/note-order-report.ts --check <file>  # diff against a
  *       saved report; prints every differing line, exits 1 on any difference
  *   npx tsx scripts/note-order-report.ts --vs-jar        # compare OUR
- *       entity/link uid sequence with jar's `in.svg` per fixture: prints
+ *       entity/link uid sequence with jar's `in.svg` per fixture (every
+ *       class/object fixture, note-carrying or not): prints
  *       `SAME` / `ORDER-ONLY` (same uid set, different order) / `OTHER`
- *       (different uid set) per fixture, then a tally. This is the gate for
- *       the leaf-draw-order follow-on named in
- *       `plans/note-leaf-model/decision-journal.md` (Batch 3 STOP entry):
- *       jar draws nodes in `bibliotekon` insertion order -- packaged leaves
- *       first (`GraphvizImageBuilder#printGroups`), then unpackaged
+ *       (different uid set) / `ERR` per fixture, then a tally. This is the
+ *       gate for the `leaf-draw-order` mission
+ *       (`plans/leaf-draw-order/decisions.md`, D6): jar draws nodes in
+ *       `bibliotekon` insertion order -- packaged leaves first
+ *       (`GraphvizImageBuilder#printGroups`), then unpackaged
  *       (`printEntities(getUnpackagedEntities())`), each in creation order,
  *       notes and TIPS included (`SvekResult#drawU`, `:82`) -- and this
  *       port's declaration-order + host-interleave (`renderer.ts`, G2 N52)
  *       is a proxy that holds on 65/97 note fixtures (2026-08-15).
+ *   npx tsx scripts/note-order-report.ts --check-order <baseline-report>
+ *       # re-render and compare every fixture in a saved default-mode
+ *       report against the current one on BOTH `sha=` and the uid sequence
+ *       (names stripped, `cls:Foo=ent0001` / `link=lnk1` -> the bare uid):
+ *       `MOVED <label>` when both changed, `OFFENDER <label> (...)` when
+ *       only one did, `MISSING`/`EXTRA <label>` for fixtures on only one
+ *       side. Final line `check-order: moved=<n> offenders=<m>`; exits 1
+ *       iff offenders > 0.
  *
  * Output (stable, diffable, name-sorted): one line per fixture,
  *   <type>/<slug> notes=<n> tips=<k> sha=<12 hex of the whole SVG> <seq>
@@ -167,14 +179,13 @@ function reportFixture(f: FixtureDir): FixtureLine {
     const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
     const options: PreprocessOptions = { includeStore: includeStore() };
     const identity = noteIdentity(markup, options);
-    if (identity.ids.size === 0) return { label, line: '', hasNotes: false };
     const svg = renderFixtureClass(markup, new DeterministicMeasurer(), options);
     const sha = createHash('sha1').update(svg).digest('hex').slice(0, SHA_PREFIX_LEN);
     const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
     const seq: string[] = [];
     walkGroups(doc, identity.ids, seq);
     const line = `${label} notes=${identity.ids.size} tips=${identity.tips} sha=${sha} ${seq.join(' ')}`;
-    return { label, line, hasNotes: true };
+    return { label, line, hasNotes: identity.ids.size > 0 };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return { label, line: `${label} ERR: ${message}`, hasNotes: true };
@@ -189,8 +200,7 @@ function buildReport(): string[] {
   let withNotes = 0;
   for (const f of fixtures) {
     const r = reportFixture(f);
-    if (!r.hasNotes) continue;
-    withNotes++;
+    if (r.hasNotes) withNotes++;
     lines.push(r.line);
   }
   lines.push(`TOTAL fixtures-with-notes: ${withNotes}/${fixtures.length}`);
@@ -233,13 +243,12 @@ function uidSequence(svg: string): string[] {
   return seq.map((t) => t.replace(/^(cls|note):[^=]*=/, ''));
 }
 
-function compareWithJar(f: FixtureDir): 'SAME' | 'ORDER-ONLY' | 'OTHER' | 'NO-NOTES' | 'ERR' {
+function compareWithJar(f: FixtureDir): 'SAME' | 'ORDER-ONLY' | 'OTHER' | 'ERR' {
   const jarPath = join(f.dir, 'in.svg');
   if (!existsSync(jarPath)) return 'ERR';
   try {
     const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
     const options: PreprocessOptions = { includeStore: includeStore() };
-    if (noteIdentity(markup, options).ids.size === 0) return 'NO-NOTES';
     const ours = uidSequence(renderFixtureClass(markup, new DeterministicMeasurer(), options));
     const jar = uidSequence(readFileSync(jarPath, 'utf-8'));
     if (ours.join(' ') === jar.join(' ')) return 'SAME';
@@ -256,17 +265,98 @@ function runVsJar(): void {
   const tally = { SAME: 0, 'ORDER-ONLY': 0, OTHER: 0, ERR: 0 };
   for (const f of fixtures) {
     const verdict = compareWithJar(f);
-    if (verdict === 'NO-NOTES') continue;
     tally[verdict]++;
     console.log(`${f.type}/${f.slug} ${verdict}`);
   }
   console.log(`TOTAL vs-jar: same=${tally.SAME} order-only=${tally['ORDER-ONLY']} other=${tally.OTHER} err=${tally.ERR}`);
 }
 
+// ---------------------------------------------------------------------------
+// --check-order mode
+// ---------------------------------------------------------------------------
+
+interface FixtureRecord { readonly sha: string; readonly seq: string }
+
+/** `cls:Foo=ent0001` -> `ent0001`, `link=lnk1` -> `lnk1`: the same
+ *  strip-to-uid idea as {@link uidSequence}, applied to a report LINE's
+ *  tokens rather than a live SVG walk. */
+function stripToUid(token: string): string {
+  return token.replace(/^(cls|note):[^=]*=/, '').replace(/^link=/, '');
+}
+
+/** Parse one report line's `sha=` value and its uid-normalised sequence.
+ *  `undefined` for an `... ERR: ...` line, which carries no `sha=` token. */
+function parseFixtureRecord(line: string): FixtureRecord | undefined {
+  const parts = line.split(' ');
+  const shaIdx = parts.findIndex((p) => p.startsWith('sha='));
+  if (shaIdx === -1) return undefined;
+  const sha = parts[shaIdx]!.slice('sha='.length);
+  const seq = parts.slice(shaIdx + 1).map(stripToUid).join(' ');
+  return { sha, seq };
+}
+
+function parseReport(lines: readonly string[]): Map<string, FixtureRecord> {
+  const map = new Map<string, FixtureRecord>();
+  for (const line of lines) {
+    const label = line.split(' ')[0];
+    if (label === undefined) continue;
+    map.set(label, parseFixtureRecord(line) ?? { sha: line, seq: '' });
+  }
+  return map;
+}
+
+type OrderVerdict = 'moved' | 'offender-sha' | 'offender-order' | 'same';
+
+function classify(before: FixtureRecord, after: FixtureRecord): OrderVerdict {
+  const shaChanged = before.sha !== after.sha;
+  const seqChanged = before.seq !== after.seq;
+  if (shaChanged && seqChanged) return 'moved';
+  if (shaChanged) return 'offender-sha';
+  if (seqChanged) return 'offender-order';
+  return 'same';
+}
+
+function printVerdict(label: string, verdict: OrderVerdict): void {
+  if (verdict === 'moved') console.log(`MOVED ${label}`);
+  else if (verdict === 'offender-sha') console.log(`OFFENDER ${label} (sha changed, order did not)`);
+  else if (verdict === 'offender-order') console.log(`OFFENDER ${label} (order changed, sha did not)`);
+}
+
+function runCheckOrder(baselinePath: string): void {
+  const baselineLines = readFileSync(baselinePath, 'utf-8')
+    .split('\n')
+    .filter((l: string) => l.length > 0 && !l.startsWith('TOTAL'));
+  const currentLines = buildReport().filter((l) => !l.startsWith('TOTAL'));
+  const before = parseReport(baselineLines);
+  const after = parseReport(currentLines);
+  let moved = 0;
+  let offenders = 0;
+  for (const [label, was] of before) {
+    const now = after.get(label);
+    if (now === undefined) { console.log(`MISSING ${label}`); continue; }
+    const verdict = classify(was, now);
+    printVerdict(label, verdict);
+    if (verdict === 'moved') moved++;
+    if (verdict === 'offender-sha' || verdict === 'offender-order') offenders++;
+  }
+  for (const label of after.keys()) {
+    if (!before.has(label)) console.log(`EXTRA ${label}`);
+  }
+  console.log(`check-order: moved=${moved} offenders=${offenders}`);
+  process.exitCode = offenders > 0 ? 1 : 0;
+}
+
 function main(): void {
   const args = process.argv.slice(2);
   if (args.includes('--vs-jar')) {
     runVsJar();
+    return;
+  }
+  const checkOrderIdx = args.indexOf('--check-order');
+  if (checkOrderIdx !== -1) {
+    const baselinePath = args[checkOrderIdx + 1];
+    if (baselinePath === undefined) throw new Error('--check-order needs a baseline file path');
+    runCheckOrder(baselinePath);
     return;
   }
   const checkIdx = args.indexOf('--check');
