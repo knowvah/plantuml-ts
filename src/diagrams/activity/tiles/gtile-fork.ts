@@ -9,10 +9,8 @@ import {
 } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
+import { BAR_HEIGHT, NODE_MARGIN_X, NODE_MARGIN_Y } from '../activity-layout-constants.js';
 
-const NODE_MARGIN_X = 40;
-const NODE_MARGIN_Y = 20;
-const BAR_HEIGHT = 8;
 const BAR_OVERHANG = 10;
 
 export class GtileFork extends TileComposite {

@@ -128,17 +128,17 @@ function resolveNoteTagBackground(theme: Theme, stereotype: string | undefined):
 /** `Opale.java`'s `cornersize` -- the folded-corner triangle size, shared by
  *  BOTH the plain fold (this file) and the zigzag-notch tip outline
  *  (`note-opale.ts#opaleCorner`, the SAME upstream constant). */
-const NOTE_FOLD = 10;
+import { OPALE_CORNERSIZE as NOTE_FOLD } from '../../core/svek/image/Opale.js';
 /** `Opale.java`'s `marginX1`/`marginY` -- text inset from the note box's
  *  own top-left corner (matches `note-layout.ts#measureNote`'s sizing). */
-const NOTE_MARGIN_X1 = 6;
-const NOTE_MARGIN_Y = 5;
+import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.js';
+import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 /** `plantuml.skin`'s `note { FontSize 13 }` default -- one point smaller
  *  than the diagram's normal text (matches `note-layout.ts#NOTE_FONT_SIZE`).
  *  G2 N39: the DEFAULT only -- see that constant's own doc comment for the
  *  `theme.colors.elements['note'].fontSize` override this renderer now also
  *  consults (`renderNoteText`'s own `fontSize` local). */
-const NOTE_FONT_SIZE = 13;
+import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 /** `note { LineThickness 0.5 }` (`plantuml.skin`) -- both the outline/
  *  corner paths and the plain connector line. */
 const NOTE_STROKE_WIDTH = 0.5;

@@ -42,11 +42,11 @@ const CELL_MARGIN_Y = 2;
 /**
  * `TextBlockJson.java:74-75`. Both apply to the WHOLE node, and only when the
  * measured value would otherwise be zero — `drawU`'s `if (y == 0) y =
- * MIN_HEIGHT` / `if (trueWidth == 0) trueWidth = MIN_WIDTH` (:277-280).
+ * MIN_HEIGHT` / `if (trueWidth == 0) trueWidth = JSON_CELL_MIN_WIDTH` (:277-280).
  * Never per column: this port used to floor `maxKeyWidth` AND `maxValueWidth`
  * at 30 each, so an empty node came out 60 + 32 wide where the jar draws 30.
  */
-const MIN_WIDTH = 30;
+const JSON_CELL_MIN_WIDTH = 30;
 const MIN_HEIGHT = 15;
 
 /** A single row within a JSON node block */
@@ -299,7 +299,7 @@ function cellLines(
   //
   // The space measures 0 wide under deterministic text metrics, so this adds
   // an element without moving any geometry -- which is why the jar's box for
-  // `{}` is 10 wide (0 + 2x the 5pt cell margin), a number no MIN_WIDTH
+  // `{}` is 10 wide (0 + 2x the 5pt cell margin), a number no JSON_CELL_MIN_WIDTH
   // produces. CLAUDE.md cites that box as a case where hours went into fitting
   // a constant instead of reading this branch.
   const blanked = atomLines.map((a) => (a.length === 0 ? [' '] : a));
@@ -459,7 +459,7 @@ export function measureNode(
     rows,
     keyColWidth,
     valueColWidth,
-    totalWidth: summedWidth === 0 ? MIN_WIDTH : summedWidth,
+    totalWidth: summedWidth === 0 ? JSON_CELL_MIN_WIDTH : summedWidth,
     totalHeight: summedHeight === 0 ? MIN_HEIGHT : summedHeight,
   };
 }

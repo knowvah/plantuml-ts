@@ -24,7 +24,7 @@ import {
   wrapperLevels,
 } from './svek-dot-wrappers.js';
 
-const PX_PER_INCH = 72;
+import { PX_PER_INCH } from './graph-layout-build.js';
 
 /** Pixels -> the inches string graphviz is given, at jar's own 6-decimal
  *  precision. Exported (and re-exported from ./svek-dot-emit.ts, the import

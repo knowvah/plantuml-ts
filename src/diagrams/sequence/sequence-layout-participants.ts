@@ -20,7 +20,7 @@ import { fontSpecOf } from './sequence-layout-shared.js';
 const LEFT_MARGIN = 30;
 const LABEL_H_PADDING = 8; // min px between a message label edge and a lifeline
 // Actors and database cylinders are taller than plain boxes.
-const ACTOR_HEIGHT = 90;
+const SEQUENCE_ACTOR_HEIGHT = 90;
 const DB_HEIGHT = 80;
 const DB_MIN_WIDTH = 40; // cylinders are narrower than plain boxes
 
@@ -172,7 +172,7 @@ function buildParticipantGeo(
   const measured = measurer.measure(p.display, fontSpec);
   const boxHeight = measured.height + 20;
   const pHeight =
-    p.type === 'actor' ? Math.max(boxHeight, ACTOR_HEIGHT) :
+    p.type === 'actor' ? Math.max(boxHeight, SEQUENCE_ACTOR_HEIGHT) :
     p.type === 'database' ? Math.max(boxHeight, DB_HEIGHT) :
     boxHeight;
   const centerX = currentX + width / 2;

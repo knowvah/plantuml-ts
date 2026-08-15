@@ -12,7 +12,7 @@ const NOTE_PAD = 6;
 const NOTE_LINE_H = 16;
 const NOTE_FALLBACK_WIDTH = 120;
 
-const MIN_WIDTH = 200;
+const FILES_MIN_WIDTH = 200;
 
 function renderFileOrFolder(entry: EntryGeometry): string {
   const icon = entry.type === 'folder' ? '📂' : '📄';
@@ -66,7 +66,7 @@ function renderEntry(entry: EntryGeometry): string {
 export function renderFiles(geo: FilesGeometry, theme: Theme): RenderFragment {
   const parts: string[] = geo.entries.map(renderEntry);
 
-  const width = Math.max(geo.totalWidth, MIN_WIDTH);
+  const width = Math.max(geo.totalWidth, FILES_MIN_WIDTH);
   const height = Math.max(geo.totalHeight, 40);
   return {
     body: parts.join(''),

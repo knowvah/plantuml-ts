@@ -47,7 +47,7 @@ export const FINAL_ID = '__final__';
  * `'arrow'`) -- this is the bare DEFAULT only, matching current behavior
  * for every fixture (none of which had a working override to lose).
  */
-const ARROW_LABEL_FONT_SIZE = 13;
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 /** Resolve a transition endpoint id, redirecting the anonymous `[*]` token
  *  to the shared start (`from` position) or end (`to` position) anchor.

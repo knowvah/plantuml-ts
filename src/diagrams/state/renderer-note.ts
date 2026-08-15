@@ -33,12 +33,18 @@
  *    this branch (`Opale.drawU` strokes both with one shared `ug`, unlike
  *    `drawNormal`'s asymmetric split above).
  *
- * Reuses `../class/note-opale.ts`'s pure geometry functions
+ * Reuses `core/svek/image/Opale.ts`'s geometry functions
  * (`opalePolygonLeft/Right/Up/Down`/`opaleCorner`/`resolveOpaleConnector`) —
- * diagram-agnostic byte-exact ports of `Opale.java`, the SAME upstream
- * mechanism regardless of diagram type (see that module's own doc comment;
- * `state-render-colors.ts` already establishes the precedent of importing
- * from `../class/` for shared, diagram-agnostic geometry/color helpers).
+ * byte-exact ports of `Opale.java`, the SAME upstream mechanism regardless
+ * of diagram type: upstream builds every cuca diagram's note through one
+ * `EntityImageNote` (`svek/GeneralImageBuilder.java:118-119`).
+ *
+ * Those functions used to live in `../class/note-opale.ts`, and this module
+ * imported them across an engine boundary — justified at the time by
+ * `state-render-colors.ts`'s own `../class/` precedent. That was backwards:
+ * a diagram-agnostic port of an `svek/image/` class does not belong inside
+ * the class engine. It now sits in the package upstream puts it in, and
+ * neither engine reaches into the other for it.
  *
  * NOT built this iteration (queued in full, `plans/g4-state-svg/ledger.md`
  * S10): `note ... on link` (embedded in the transition's OWN `<g
@@ -67,19 +73,19 @@ import {
   opalePolygonDown,
   opaleCorner,
   resolveOpaleConnector,
-} from '../class/note-opale.js';
+} from '../../core/svek/image/Opale.js';
 
 // ---------------------------------------------------------------------------
 // Constants — Opale.java's real jar values (see module doc comment for the
 // jar-verified derivation against labono-83-nega255/gedude-95-subi666).
 // ---------------------------------------------------------------------------
 
-const NOTE_FONT_SIZE = 13;
-const NOTE_MARGIN_X1 = 6;
-const NOTE_MARGIN_Y = 5;
+import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.js';
+import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 /** `Opale.java`'s `cornersize` — the folded-corner triangle size, SAME
  *  constant `../class/note-opale.ts#OPALE_CORNER_SIZE` already uses. */
-const NOTE_FOLD = 10;
+import { OPALE_CORNERSIZE as NOTE_FOLD } from '../../core/svek/image/Opale.js';
 /** `ColorParam.noteBackground`'s plantuml.skin default — the fallback when
  *  a note has no `#color` override (mission G4 S12: resolved via
  *  `resolveStateFill`, the SAME fill-only override precedent

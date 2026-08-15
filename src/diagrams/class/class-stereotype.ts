@@ -55,7 +55,7 @@ export const CLASS_STEREOTYPE_FONT_SIZE = 12;
 
 /** `TextBlockUtils.withMargin(stereoBlock, 1, 0)`'s marginX — applied on
  *  BOTH left and right (total width contribution is 2x this). */
-const STEREO_MARGIN = 1;
+const CLASS_STEREO_MARGIN = 1;
 
 /**
  * G2 N27: `skinparam guillemet <value>` (`Guillemet.fromDescription`) --
@@ -310,7 +310,7 @@ export function stereoBlockDim(
 ): Dim {
   if (labelWidths.length === 0) return { width: 0, height: 0 };
   return {
-    width: Math.max(...labelWidths) + STEREO_MARGIN * 2,
+    width: Math.max(...labelWidths) + CLASS_STEREO_MARGIN * 2,
     height: labelWidths.length * stereoLineHeight(fontSize),
   };
 }
@@ -367,7 +367,7 @@ export function buildStereoRows(
   const diffHeight = headerRowHeight - blockDim.height - nameLineHeight;
   if (labels.length === 0) return { rows: [], nameTop: diffHeight / 2 };
 
-  const blockX = circleWidth + (widthStereoAndName - blockDim.width) / 2 + h1 + h2 + STEREO_MARGIN;
+  const blockX = circleWidth + (widthStereoAndName - blockDim.width) / 2 + h1 + h2 + CLASS_STEREO_MARGIN;
   const rawBlockWidth = Math.max(...labelWidths);
   // A2s R2f: rows step by the FLOORED line height ({@link stereoLineHeight})
   // so stacking matches `stereoBlockDim`'s reserved block height.

@@ -95,10 +95,10 @@ Out of scope, and deliberately:
 
 | # | What | Depends on | Done |
 |---|---|---|---|
-| [1](batch-1/overview.md) | Inventory harness + classification pass | — | [ ] |
-| [2](batch-2/overview.md) | The cited cross-engine svek/CucaDiagram family | B1 | [ ] |
-| [3](batch-3/overview.md) | Intra-engine clusters (activity/tiles) | B1 | [ ] |
-| [4](batch-4/overview.md) | Rename the collisions; sweep and close | B2, B3 | [ ] |
+| [1](batch-1/overview.md) | Inventory harness + classification pass | — | [x] |
+| [2](batch-2/overview.md) | The cited cross-engine svek/CucaDiagram family | B1 | [x] |
+| [3](batch-3/overview.md) | Intra-engine clusters (activity/tiles) | B1 | [x] |
+| [4](batch-4/overview.md) | Rename the collisions; sweep and close | B2, B3 | [x] |
 
 Batches 2 and 3 are independent (disjoint write-sets, different engines) and
 may run in either order or together.
@@ -169,3 +169,64 @@ code masks vitest failures.
 - `src/core/svek/SvekResult.ts` — the worked example. **Read it first**; its
   doc comment states the share-vs-coincidence distinction this whole mission
   turns on.
+
+
+---
+
+## Outcome (2026-08-15) — COMPLETE
+
+| Signal | Baseline | Final |
+|---|---|---|
+| Duplicated names | 67 | **34** |
+| Redundant declarations | 114 | **37** |
+| Name collisions | 6 | **0** |
+| `shape-match-report` | 776 / 25695 | **776 / 25695**, byte-identical at every commit |
+| Class DOT-parity | 100% EQUAL | 100% EQUAL |
+
+Seven owners created, each mirroring the upstream file that declares the
+field: `core/atmp/CucaDiagram.ts`, `core/klimt/font/FontParam.ts`,
+`core/svek/SvekResult.ts`, `core/svek/IEntityImage.ts`,
+`core/svek/image/Opale.ts`, `core/svek/image/EntityImageJson.ts`, plus the
+activity engine's own pre-existing constants module finally being used.
+
+### What the share-vs-coincidence rule actually caught
+
+Not theoretical. Four cases where equal values were **not** one constant:
+
+- `ARROW_LABEL_FONT_SIZE` and `NOTE_FONT_SIZE` are both 13 and both live in
+  `FontParam.java` — as two independent enum entries (`:54`, `:66`). One
+  module, two exports, never merged.
+- `NOTE_FOLD` held 10 (Opale's `cornersize`) and 8 (activity's own fold).
+- `getDefaultMargins()` is overridden by Sequence, Gantt, Nwdiag, Salt and
+  Flow, so `(0,5,5,0)` is **CucaDiagram's**, hence the `CUCA_` prefix.
+- `MARGIN` held four values across seven modules; `RADIUS` four across four.
+
+And two where the reverse was true — a **share hiding inside a collision**:
+both `RADIUS = 6`s were `EntityPosition.RADIUS`, and `gtile-start`'s 10 was
+the activity owner's `START_STOP_RADIUS`. Three of `RADIUS`'s four
+resolved as shares, not renames.
+
+### Three things this mission got wrong, and how they surfaced
+
+**A rename armed a new collision.** Naming activity's circle `SPOT_RADIUS`
+collided with json's existing `SPOT_RADIUS = 3`. Caught by the harness on
+the next run, renamed to `CONNECTOR_SPOT_RADIUS`. Run the inventory *after*
+a rename, not only before.
+
+**`OPALE_MARGIN_X2` was skipped on a false premise** — "nothing declares it
+twice" — when class and state each had a copy. Same detection route.
+
+**`HACK_X_FOR_POLYGON` was scoped out on an incomplete reading.** It IS
+upstream, verbatim, and upstream declares it *twice itself*
+(`LimitFinder.java:169`, `AbstractUGraphic.java:213`). So part of our
+duplication mirrors upstream. Still 4 vs 2, so not fully justified, but the
+original rationale was wrong even though the decision stands.
+
+### What is left
+
+34 names / 37 declarations, **triaged but not cleared** — classified in
+`.agent-notes/constant-inventory.md`, not individually verified. 20 are
+intra-engine (lower risk, no upstream read needed to be safe) and 14
+cross-engine (each needs the Java). The bar was never a removal count; it is
+"every remaining duplicate is one somebody deliberately kept", and these are
+recorded rather than claimed as cleared.

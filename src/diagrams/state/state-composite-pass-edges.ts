@@ -30,7 +30,7 @@ import { levelEndpointId } from './state-composite-pseudo.js';
  *  body/title text). Duplicated locally (D1, avoid-import-cycle convention)
  *  rather than imported from `state-dot-graph.ts` -- same value as
  *  `description/renderer-edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
-const ARROW_LABEL_FONT_SIZE = 13;
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 let edgeCounter = 0;
 function nextEdgeId(): string {

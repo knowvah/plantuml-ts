@@ -19,7 +19,7 @@ interface ActivitySpot {
   swimlane?: string;
 }
 
-const RADIUS = 8;
+import { CONNECTOR_SPOT_RADIUS as RADIUS } from '../activity-layout-constants.js';
 
 export class GtileSpot extends TileLeaf {
   readonly kind = 'gtile-spot' as const;

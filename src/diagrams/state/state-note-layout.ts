@@ -61,10 +61,10 @@ import type { DotInputNode } from '../../core/graph-layout.js';
  * before its own G2 N39) — not modeled here, `plans/g4-state-svg/ledger.md`
  * S10 queue.
  */
-const NOTE_FONT_SIZE = 13;
-const NOTE_MARGIN_X1 = 6;
-const NOTE_MARGIN_X2 = 15;
-const NOTE_MARGIN_Y = 5;
+import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.js';
+import { OPALE_MARGIN_X2 as NOTE_MARGIN_X2 } from '../../core/svek/image/Opale.js';
+import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 
 /** One measured line's own text + advance width — parallel data the S10
  *  note renderer (`renderer-note.ts`) needs for per-line `textLength`;

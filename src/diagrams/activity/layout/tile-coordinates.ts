@@ -25,10 +25,9 @@ import { GConnectionVerticalDownThenBack } from '../routing/gconnection-vertical
 import { GConnectionDownThenUp } from '../routing/gconnection-down-then-up.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
 import { buildSwimlaneContexts } from './swimlane-context.js';
+import { BAR_HEIGHT, SWIMLANE_MIN_WIDTH } from '../activity-layout-constants.js';
 
 export const LAYOUT_MARGIN = 12;
-const SWIMLANE_MIN_WIDTH = 120;
-const BAR_HEIGHT = 8;
 
 interface Out {
   nodes: ActivityNodeGeo[];

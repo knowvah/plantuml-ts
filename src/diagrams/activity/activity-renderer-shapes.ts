@@ -10,10 +10,9 @@ import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
 import { rect, text, diamond, noteBox, circle, line, path, polygon, multilineText } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
+import { ACTION_H_PAD, NOTE_FOLD } from './activity-layout-constants.js';
 
 const ACTION_RX = 8;
-const ACTION_H_PAD = 16;
-const NOTE_FOLD = 8;
 
 export function renderLabel(label: string, cx: number, cy: number, theme: Theme): string {
   return renderNodeLabel(label, cx, cy, theme);

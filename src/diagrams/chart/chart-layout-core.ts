@@ -8,7 +8,7 @@ import type { GridMode, SeriesType } from './ast.js';
 import type {} from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 
-export const MARGIN = 20;
+export const CHART_MARGIN = 20;
 export const TITLE_SPACE = 30;
 export const LEGEND_MARGIN = 10;
 export const LEGEND_SYMBOL_SIZE = 12;

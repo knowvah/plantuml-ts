@@ -41,8 +41,10 @@ import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBu
 import { stateShadowFilterUrl } from './state-shadow.js';
 
 const STATE_BOX_RX = 12.5;
-const MARGIN = 5;
-const MARGIN_LINE = 5;
+import {
+  ENTITY_IMAGE_MARGIN as MARGIN,
+  ENTITY_IMAGE_MARGIN_LINE as MARGIN_LINE,
+} from '../../core/svek/IEntityImage.js';
 /** `USymbolFrame#getMargin`/`BodyEnhanced1#getMarginX` -- duplicated from
  *  `state-sizing.ts`'s own `SDL_MARGIN`/`BODY_MARGIN_X` (this codebase's
  *  established per-module constant convention, `STATE_BOX_RX`'s own

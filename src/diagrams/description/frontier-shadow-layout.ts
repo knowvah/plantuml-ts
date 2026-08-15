@@ -68,7 +68,7 @@ import type { RectangleArea, Point } from './frontier-calculator.js';
 // safe only while every install point pinned the SAME measurer -- see that
 // module's doc comment for the bug that stopped being hypothetical.
 
-const PX_PER_INCH = 72;
+import { PX_PER_INCH } from '../../core/graph-layout-build.js';
 /** graphviz's own subgraph naming rule (`^cluster`) — a single, fixed name
  *  since each call builds exactly one isolated shadow cluster. */
 const SHADOW_CLUSTER_NAME = 'clusterpc';

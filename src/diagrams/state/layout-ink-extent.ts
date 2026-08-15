@@ -96,18 +96,17 @@
  * @see class/layout-ink-extent.ts (the class-engine precedent this mirrors)
  */
 import type { StateNodeGeo, TransitionGeo } from './state-geo-types.js';
-import { absorbLayoutEpsilon } from '../../core/layout-epsilon.js';
+import { svekDimension, svekInkShift } from '../../core/svek/SvekResult.js';
+import { applyCucaDocumentMargin } from '../../core/TextBlockExporter.js';
 import { transitionArrowheadInk } from './renderer-arrowhead.js';
 import { positionFromStereotype, usesPortShape } from './state-entity-position.js';
 import { textAscent } from './state-render-colors.js';
-import { INK_DELTA, JAR_INK_MARGIN } from '../../core/svek/SvekResult.js';
 
 /** `CucaDiagram#getDefaultMargins()` (net/atmp/CucaDiagram.java:719-722) —
  *  shared across the whole `CucaDiagram` family, see module doc comment. */
-const DOCUMENT_MARGIN_TOP = 0;
-const DOCUMENT_MARGIN_RIGHT = 5;
-const DOCUMENT_MARGIN_BOTTOM = 5;
-const DOCUMENT_MARGIN_LEFT = 0;
+// `CucaDiagram#getDefaultMargins()` — single owner at
+// `core/atmp/CucaDiagram.ts`. Aliased to the local names so the call
+// sites below read unchanged.
 
 // Both from the single owner, `core/svek/SvekResult.ts`. They were declared
 // locally here until 2026-08-15; the comment that stood in this place cited
@@ -434,20 +433,16 @@ export function computeStateDocumentDims(
   // `labelInk: false` -- this function is already jar-verified/pinned
   // (57 svg-state goldens) at the pre-existing point-only label fold;
   // G8 T2's box fold is scoped to `computeSvekResultGeometry` below.
-  const box = buildInkBox(states, transitions, true, false);
-  if (!Number.isFinite(box.minX)) return { width: 0, height: 0 };
-
-  const rawWidth = box.maxX - box.minX + INK_DELTA;
-  const rawHeight = box.maxY - box.minY + INK_DELTA;
-  const finalWidth = rawWidth + DOCUMENT_MARGIN_LEFT + DOCUMENT_MARGIN_RIGHT;
-  const finalHeight = rawHeight + DOCUMENT_MARGIN_TOP + DOCUMENT_MARGIN_BOTTOM;
-
-  // `SvgGraphics#ensureVisible`: `(int)(v + 1)` — a truncating cast, which
-  // for non-negative `v` is `Math.floor`.
-  return {
-    width: Math.floor(absorbLayoutEpsilon(finalWidth) + 1),
-    height: Math.floor(absorbLayoutEpsilon(finalHeight) + 1),
-  };
+  const raw = svekDimension(buildInkBox(states, transitions, true, false));
+  // Empty diagram (no ink at all): stay {0, 0} rather than applying the
+  // margin to nothing, which would yield 6x6. The pre-refactor code got this
+  // from an early `return {width: 0, height: 0}` before the margin
+  // arithmetic; sharing the recipe made the guard explicit, and
+  // `class/layout-ink-extent.ts#computeClassDocumentDims` states the reason:
+  // a `{0, 0}` raw is the "no ink walked" sentinel, indistinguishable in
+  // VALUE from 1x1 ink at the origin, and only the former skips the margin.
+  if (raw.width === 0 && raw.height === 0) return raw;
+  return applyCucaDocumentMargin(raw);
 }
 
 export interface StateInkShift {
@@ -470,12 +465,7 @@ export function computeStateInkShift(
   // `labelInk: false` -- same already-pinned point-only fold as
   // `computeStateDocumentDims` above (shares its own ink-extent bbox
   // mechanism, must stay consistent with it).
-  const box = buildInkBox(states, transitions, true, false);
-  if (!Number.isFinite(box.minX)) return { dx: 0, dy: 0 };
-  return {
-    dx: JAR_INK_MARGIN - box.minX,
-    dy: JAR_INK_MARGIN - box.minY,
-  };
+  return svekInkShift(buildInkBox(states, transitions, true, false));
 }
 
 export interface SvekResultGeometry {
@@ -532,12 +522,9 @@ export function computeSvekResultGeometry(
   // aggregation gap `buildPlainAutonomSpec`'s `Math.max` floor used to
   // compensate for (see that call site's own doc comment: proven redundant
   // once this box fold lands, D6, and removed there).
+  // The SAME `SvekResult#calculateDimension` recipe the document-level
+  // functions above use — dimension and moveDelta together, which is what
+  // that one upstream method returns. This was a third inline copy.
   const box = buildInkBox(states, transitions, false, true);
-  if (!Number.isFinite(box.minX)) return { width: 0, height: 0, dx: 0, dy: 0 };
-  return {
-    width: box.maxX - box.minX + INK_DELTA,
-    height: box.maxY - box.minY + INK_DELTA,
-    dx: JAR_INK_MARGIN - box.minX,
-    dy: JAR_INK_MARGIN - box.minY,
-  };
+  return { ...svekDimension(box), ...svekInkShift(box) };
 }

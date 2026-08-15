@@ -94,8 +94,10 @@ import { stateShadowFilterUrl } from './state-shadow.js';
  *  G6 T4) -- overridden per-diagram by a `<style> stateDiagram { RoundCorner
  *  N } }` cascade, unchanged otherwise. */
 const STATE_BOX_RX = 12.5;
-const MARGIN = 5;
-const MARGIN_LINE = 5;
+import {
+  ENTITY_IMAGE_MARGIN as MARGIN,
+  ENTITY_IMAGE_MARGIN_LINE as MARGIN_LINE,
+} from '../../core/svek/IEntityImage.js';
 
 /** `URectangle.halfRounded(roundCorner=25)`'s own arc+line sequence
  *  (r=`STATE_BOX_RX`), reproduced as a local string-builder — the SAME math

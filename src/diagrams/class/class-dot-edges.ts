@@ -56,7 +56,7 @@ export const EDGE_DECORATION_MAP: Record<RelationshipType, EdgeDecoration> = {
  *  S-A: exported (was module-private) -- ./class-dot-graph.ts's
  *  `buildDotNodesAndEdges` (stays behind) is its only OTHER consumer and
  *  now reaches it across the new module boundary. */
-export const ARROW_LABEL_FONT_SIZE = 13;
+export { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 /** Under `skinparam linetype ortho`, svek routes the main edge label through
  *  `xlabel` instead of `label` (SvekEdge.java:434-441: dotSplines == ORTHO
