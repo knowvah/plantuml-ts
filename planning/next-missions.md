@@ -11,11 +11,23 @@ before repeating a status from here.**
 Standing corpus signals at refresh time (from the `transition-label-ink`
 close-out, 2026-08-15): `shape-match-report.ts` **779 doc-size-exact /
 25952 rigid-aligned shapes**; class DOT-parity 712/712; state 268/268;
-svg-state ratchet 59 pins; svg-class ratchet 292+; ~14.3k tests.
+svg-state ratchet 59 pins; svg-class ratchet 292+; ~14.3k tests. **Later the
+same day SI22's D7 re-baselined the DOT EQUAL counts** (label BOX size is now
+asserted): class 680/710, state 259/268, component 257/263, usecase 88/93,
+object 76/78 — the drops are the new `label-size-backlog.json` queue, not
+regressions.
 
 ---
 
-## 1. Close out `edge-label-box-and-class-ports` — NOW
+## 1. Close out `edge-label-box-and-class-ports` — DONE 2026-08-15
+
+Closed the same day this file was refreshed (mission-index **SI22**; Outcome
+in the brief's README). Clauses 3/4/5 met, 1/2 unmet and left named. D7 landed
+and re-baselined every type's DOT EQUAL count (component 257/263, usecase
+88/93, class 680/710, object 76/78, state 259/268 — all `labelSizeOk`), leaving
+**four `label-size-backlog.json` files, 51 pinned goldens, as the follow-on
+queue** (shapes triaged in the journal). The table below is the state it was
+found in, kept for the record.
 
 Brief: `plans/edge-label-box-and-class-ports/`. Dangling since 2026-08-14,
 when its journal spun off `composite-state-dot` (→ `namespace-cluster-box` →
@@ -44,7 +56,7 @@ Remaining work, all small:
    it; none exists).
 5. Journal summary; merge with a merge commit.
 
-## 2. `note-leaf-model` — next new mission
+## 2. `note-leaf-model` — NOW
 
 Brief: `plans/note-leaf-model/` (3 batches, 0 started; branch
 `feat/note-leaf-model`). The class engine carries `NoteGeo[]` *parallel to*
@@ -67,6 +79,11 @@ Ordered by how ready they are, not by size.
   tally 17 → 1 fixture. Byte-conformance is not the target for this family;
   what is left is the M6 singleton and any readability items. Low priority
   unless a user-facing json defect surfaces.
+- **Edge-label box backlog** (SI22 follow-on) — 51 pinned goldens across
+  four `oracle/goldens/<type>/label-size-backlog.json` files, each failing
+  ONLY `labelSizeOk`. Shapes triaged in
+  `plans/edge-label-box-and-class-ports/decision-journal.md` (2026-08-15).
+  Read `SvekEdge.java:440-507` per shape; shrink the lists, never fit.
 - **S1L-i / S1L-j** (description; mission-index Phase B, `todo`) — two small,
   fully-scoped sizing gaps: creole *titled* separators (`--title--` sizes the
   title, not the markup; 3 fixtures) and multi-line quoted display

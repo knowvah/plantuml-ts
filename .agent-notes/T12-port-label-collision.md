@@ -11,7 +11,9 @@
 - **Impact**: worth checking for any other attribute pair that exists in
   `svek-dot-emit.ts` but not in `graph-layout-build-edges.ts` — the DOT gate
   cannot see the difference, because it compares the emitted text, not what the
-  engine was handed.
+  engine was handed. (2026-08-15, D7: the gate now asserts the emitted label
+  BOX SIZE via `svek-dot.ts#labelSizeOk`, so at least the emitter's side of
+  the pair is measured; the emit-vs-engine split itself is still invisible.)
 - **Confidence**: High — closing it moved 55 class/object fixtures, 0 regressions.
 
 ## Observation: a "uniform" measured offset can be two rules averaged
