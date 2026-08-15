@@ -172,6 +172,28 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo, iconSize: number): void
     addLollipopRowInk(box, c);
     return;
   }
+  // A leaf DRAWN as a USymbol contributes the ink of its own shapes, not a
+  // box rule. Upstream has one ink concept — walk what was drawn — and jar's
+  // extent for an actor is the union of its `UEllipse` head, `UPath` body
+  // and label `UText`. `addRectInk`'s `(x - 1, y - 1)` corner sits 1.5 above
+  // the drawn head's real top of `y + 0.5`, which moved every shape in
+  // `cacoma-43-poxu615` by that much (`.agent-notes/class-ink-shared-offset
+  // -groups.md` item (b)).
+  //
+  // Placed AFTER the three branches above on purpose: `usecase` and
+  // `lollipop` already dispatch away from the box rule with jar-verified
+  // rules of their own, and this mission leaves their output byte-identical
+  // (decision D2). Only leaves that would otherwise have fallen through to
+  // the box rule reach here, so the change is additive by construction.
+  //
+  // The extent is measured at layout time, where the drawable and its
+  // font/sprite context already exist — SI14's "share the measurement
+  // OBJECT" shape. See `ClassifierGeo.symbolInk`.
+  if (c.symbolInk !== undefined) {
+    addPoint(box, c.x + c.symbolInk.minX, c.y + c.symbolInk.minY);
+    addPoint(box, c.x + c.symbolInk.maxX, c.y + c.symbolInk.maxY);
+    return;
+  }
   addClassifierBoxInk(box, c);
   addVisibilityIconInk(box, c, iconSize);
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box is drawn

@@ -17,6 +17,7 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { measureInlineAtom } from '../../core/creole-atoms-measure.js';
 import type { SpriteDimsLookup, AtomImageResolver } from '../../core/creole-atoms.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
+import { LimitFinder } from '../../core/klimt/drawing/LimitFinder.js';
 import {
   EntityImageDescription,
   type EntityImageDescriptionParams,
@@ -309,4 +310,55 @@ export function measureUsecaseOrActorLeaf(
 ): Dim {
   const node: DescriptiveNode = { id: '', display, symbol, children: [] };
   return measureEntityLeaf(node, fontSpec, { opts: undefined, sprites, measurer }, false);
+}
+
+/** The ink extent of a leaf symbol's DRAWN shapes, in the symbol's own
+ *  frame (origin at its box's top-left). */
+export interface LeafSymbolInk {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
+/**
+ * The ink extent of a usecase/actor leaf, from a `LimitFinder` walk over the
+ * SAME `EntityImageDescription` instance shape that sizes it.
+ *
+ * Upstream has ONE ink concept — walk what was drawn — and jar's extent for
+ * an actor is the union of the drawn `UEllipse` head, the `UPath` body and
+ * the label `UText`. This port reconstructs ink analytically per shape
+ * instead (`class/class-ink-box.ts#addClassifierInk`), and its box rule's
+ * `(x - 1, y - 1)` corner is 1.5 above an actor's real drawn head, whose top
+ * sits at `y + 0.5` — measured on `cacoma-43-poxu615`, where every shape in
+ * the document is uniformly 1.5 off jar's as a result.
+ *
+ * Measuring here rather than in the ink walk is SI14's "share the
+ * measurement OBJECT" shape: this is where the drawable is already
+ * constructed, and it is the only place that holds the font/sprite context
+ * the walk would otherwise have to have threaded down four call levels
+ * through a seam the object engine shares.
+ *
+ * `undefined` when the walk records nothing (a symbol that draws no shape),
+ * which keeps the caller's existing box rule in play rather than
+ * substituting an empty extent.
+ *
+ * @see ~/git/plantuml/.../svek/image/EntityImageDescription.java
+ * @see .agent-notes/class-ink-shared-offset-groups.md item (b)
+ */
+export function measureUsecaseOrActorLeafInk(
+  display: string,
+  symbol: 'usecase' | 'actor',
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  sprites?: SpriteDimsLookup,
+): LeafSymbolInk | undefined {
+  const node: DescriptiveNode = { id: '', display, symbol, children: [] };
+  const bounder = new MeasurerStringBounder(measurer);
+  const params = buildSizingEntityParams(node, fontSpec, { opts: undefined, sprites, measurer });
+  const finder = LimitFinder.create(bounder, false);
+  new EntityImageDescription(params).drawU(finder);
+  const minX = finder.getMinX();
+  if (!Number.isFinite(minX)) return undefined;
+  return { minX, minY: finder.getMinY(), maxX: finder.getMaxX(), maxY: finder.getMaxY() };
 }

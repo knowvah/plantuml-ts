@@ -76,6 +76,7 @@ function inkBodyFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
   return {
     ...(m.emptyFieldPlaceholder === true ? { emptyFieldPlaceholder: true as const } : {}),
     ...(m.bodyInkWidth !== undefined ? { bodyInkWidth: m.bodyInkWidth } : {}),
+    ...(m.symbolInk !== undefined ? { symbolInk: m.symbolInk } : {}),
   };
 }
 
