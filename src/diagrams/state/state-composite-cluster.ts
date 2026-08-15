@@ -5,10 +5,9 @@
  * its own doc below). Mirrors state-composite-concurrent.ts's existing
  * split (same file-cap rationale, same "coherent unit on its own" note).
  * The `ClusterHeader` title/stereotype/attribute-text sizing formula itself
- * (`measureClusterTitle`, `titleAndAttributeWidth`, `computeTitleTableHeight`)
- * was split further into ./state-composite-header.ts (G7 T11, same 500-line
- * file-cap rationale) once the width-side formula pushed this file over the
- * cap — a pure move, no behavior change.
+ * (`measureClusterTitle`, `titleAndAttributeWidth`; `computeTitleTableHeight`
+ * moved to ../../core/cluster-title-table.ts, T3) was split further into
+ * ./state-composite-header.ts (G7 T11, same file-cap rationale) — pure move.
  *
  * @see ~/git/plantuml/.../svek/ClusterDotString.java
  * @see ~/git/plantuml/.../svek/GroupMakerState.java#getImage
@@ -21,9 +20,9 @@ import { splitCreoleLines } from './state-sizing.js';
 import {
   measureLines,
   measureClusterTitle,
-  computeTitleTableHeight,
   titleAndAttributeWidth,
 } from './state-composite-header.js';
+import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
 import { zaentId } from './state-composite-classify.js';
 import { isGroupTouched } from './state-composite-detect.js';
 import { getEntityPosition, isInputPosition, isOutputPosition } from './state-entity-position.js';
