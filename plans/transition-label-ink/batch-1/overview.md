@@ -160,3 +160,66 @@ arithmetic:
    how the SVG writer derives `textLength`.
 
 Do not choose by arithmetic: 1.000 and 0.998 are within float noise here.
+
+
+### Candidate 1 traced to the end — DEAD. So is candidate 2.
+
+**Candidate 1 (an undrawn ink contributor in the label).** Full chain read:
+
+```
+SvekEdge:951-954   labelText.drawU(... + labelShield)     labelShield = 0 here
+Display.create0    -> getCreole                            Display.java:692-701
+getCreole          -> new SheetBlock2(sheetBlock1, sheetBlock1, UStroke.withThickness(1.5))
+SheetBlock2.drawU  -> UGraphicStencil.create(ug, stencil, stroke)
+                   -> optional alignment dx
+                   -> block.drawU(ug)
+UGraphicStencil    overrides drawHline ONLY — creole `----` separators
+```
+
+The 1.5 stroke looked promising and is not it: `UGraphicStencil` only draws
+horizontal RULES, and a plain one-line label has none. `SheetBlock2` adds no
+shape of its own. Nothing in the chain contributes ink beyond the `UText`.
+
+**Candidate 2 (StringBounder width vs emitted textLength).** Dead by
+construction — `DriverTextSvg.java:126-127`:
+
+```java
+final XDimension2D dim = stringBounder.calculateDimension(font, text);
+final double width = dim.getWidth();   // ... passed as textLength
+```
+
+The emitted `textLength` IS the `StringBounder` width `LimitFinder#drawText`
+folds. They cannot differ.
+
+**Also eliminated:** `InnerStateAutonom#getShield` returns `Margins.NONE`
+(:203-205), so no shield inflates the composite node.
+
+### Where that leaves it — and one number NOT to trust
+
+Everything about the LABEL now checks out against jar. The residual is
+therefore probably not in the label at all, and the hypothesis I rejected
+earlier deserves reopening because **my rejection was unsound**: I dismissed
+a formula-level `+1` on the grounds that "8 fixtures report exact would
+break", but the harness reports every NODE, and those 8 are very likely
+leaf states rather than composites. On the three named fixtures the
+composite is the ONLY mismatched node in its scope — every leaf beside it is
+exact. That pattern is consistent with a composite-specific formula error
+and inconsistent with a leaf-level one.
+
+**The arithmetic that "works", and why it must not be adopted as-is:**
+corrected fold (356.337) + delta 15 + margin **21** = 392.337, against jar's
+392.335. It fits to 0.002. But 21 has NO upstream source —
+`InnerStateAutonom#calculateDimensionSlow` is
+`MARGIN*2 + 2*MARGIN_LINE + marginForFields` = 20, and `marginForFields` is
+5 or 0, never 1. Adopting 21 because it lands the fixture is precisely the
+fitting this repo forbids, and it would be the third constant in this file
+with no `file:line`.
+
+**Next read, and it is a read not a measurement:** how the composite's
+`IEntityImage` dimension becomes the declared DOT node size — `SvekNode`'s
+constructor around the `getShield` call at :224, and whatever
+`GroupMakerState`/`GeneralImageBuilder` does between
+`InnerStateAutonom.calculateDimension` and the emitted `width=`. If there is
+a legitimate `+1` there, it explains this without inventing a constant. If
+there is not, the premise that jar's ink is 357.335 is itself wrong and the
+composite-width derivation needs re-deriving from scratch.
