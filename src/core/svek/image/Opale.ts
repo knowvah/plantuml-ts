@@ -11,9 +11,11 @@
  * private final       int marginY     = 5;    // :58
  * ```
  *
- * Only the three this port actually duplicates are ported here. `marginX2`
- * is deliberately absent: nothing declares it twice, and adding a constant
- * no caller reads would be speculative.
+ * All four are ported. `marginX2` was initially left out on the grounds that
+ * nothing declared it twice — an error: `class/note-layout-measure.ts` and
+ * `state/state-note-layout.ts` each had one. Found by the inventory harness
+ * on a later pass, which is the argument for running it after every batch
+ * rather than only before.
  *
  * Readers: the class and state engines, which each drew notes from their
  * own copies of these numbers. Description sizes notes through
@@ -34,6 +36,12 @@ export const OPALE_CORNERSIZE = 10;
 
 /** `Opale#marginX1` — the note's left text inset. */
 export const OPALE_MARGIN_X1 = 6;
+
+/** `Opale#marginX2` — the note's RIGHT text inset, wider than the left to
+ *  leave room for the folded corner. Not ported when this module was first
+ *  written, on the stated grounds that nothing declared it twice; that was
+ *  wrong — the class and state note sizers each had a copy. */
+export const OPALE_MARGIN_X2 = 15;
 
 /** `Opale#marginY` — the note's vertical text inset. */
 export const OPALE_MARGIN_Y = 5;

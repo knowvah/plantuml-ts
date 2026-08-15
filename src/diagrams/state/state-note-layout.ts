@@ -63,7 +63,7 @@ import type { DotInputNode } from '../../core/graph-layout.js';
  */
 import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.js';
-const NOTE_MARGIN_X2 = 15;
+import { OPALE_MARGIN_X2 as NOTE_MARGIN_X2 } from '../../core/svek/image/Opale.js';
 import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 
 /** One measured line's own text + advance width — parallel data the S10

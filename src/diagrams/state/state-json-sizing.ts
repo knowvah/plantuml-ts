@@ -30,23 +30,24 @@ import type { State } from './ast.js';
 import type { JsonNode } from './state-json-ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import {
+  JSON_CELL_MARGIN_X,
+  JSON_CELL_MARGIN_Y,
+  JSON_EMPTY_HEIGHT_FALLBACK,
+  JSON_NAME_MARGIN,
+  JSON_X_MARGIN_CIRCLE,
+} from '../../core/svek/image/EntityImageJson.js';
 
 interface Dim {
   width: number;
   height: number;
 }
 
-/** EntityImageJson: `withMargin(name, 2, 2)`. */
-const JSON_NAME_MARGIN = 2;
-/** TextBlockCucaJSon#getTextBlock: `withMargin(result, 5, 2)` — applied to
- *  BOTH a key and a scalar value cell. */
-const JSON_CELL_MARGIN_X = 5;
-const JSON_CELL_MARGIN_Y = 2;
-/** EntityImageJson.xMarginCircle. */
-const JSON_X_MARGIN_CIRCLE = 5;
-/** BodierLikeClassOrObject#marginEmptyFieldsOrMethod, substituted by
- *  `getMethodOrFieldHeight` when the entries area is empty. */
-const JSON_EMPTY_HEIGHT_FALLBACK = 13;
+
+
+
+
+
 /** FontParam.OBJECT_STEREOTYPE's hardcoded size (12, italic) — shared by
  *  every EntityImage* header formula; independent of theme.fontSize. */
 const STEREO_FONT_SIZE = 12;
