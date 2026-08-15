@@ -117,6 +117,15 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
     // (class, component, usecase, the flat state pipeline, a state
     // transition with an attached `note on link`) doesn't set these two
     // fields, so its plain-text path below is byte-for-byte unchanged.
+    // Arrow attributes — forwarded verbatim, no defaulting. Only the json
+    // family sets them (`SmetanaForJson.java:221-223`); every other engine
+    // leaves them absent, which is what upstream does too. They are
+    // layout-affecting, not decorative: an arrowhead makes graphviz shorten
+    // the spline and record `bezier.ep`, which is how the arrow tip reaches
+    // `DotLayoutResult.edges[].epX`. See `DotInputEdge.attributes.arrowhead`.
+    if (a?.arrowhead !== undefined) attrs.arrowhead = a.arrowhead;
+    if (a?.arrowtail !== undefined) attrs.arrowtail = a.arrowtail;
+    if (a?.arrowsize !== undefined) attrs.arrowsize = a.arrowsize;
     const hasLabelBox = a?.labelBoxWidth !== undefined && a?.labelBoxHeight !== undefined;
     if (a?.label !== undefined && !hasLabelBox) {
       attrs.label = a.label;

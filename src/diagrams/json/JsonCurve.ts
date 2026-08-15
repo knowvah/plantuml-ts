@@ -57,14 +57,6 @@ export function veryFirstPoint(points: readonly CurvePoint[]): CurvePoint | unde
 }
 
 /**
- * graphviz's `#define ARROW_LENGTH 10.`
- * (`~/git/graphviz/lib/common/arrows.c:29`) scaled by the `arrowsize` upstream
- * sets on every json edge — `agsafeset(zz, edge, "arrowsize", ".75")`
- * (`SmetanaForJson.java:221`, alongside `arrowhead=normal` at :223).
- */
-const ARROW_LENGTH = 10 * 0.75;
-
-/**
  * `Arrow#getPoint` — polar offset with sin on x and cos on y (note the
  * ordering, which is not the usual convention and pairs with the equally
  * unusual `atan2(dx, dy)` below).
@@ -75,42 +67,34 @@ function arrowPoint(center: CurvePoint, alpha: number, len: number): CurvePoint 
 }
 
 /**
- * Where the spline ENDS, as distinct from its last control point.
- *
- * graphviz stores this on the spline as `ep` (`bezier.ep`), separate from the
- * control-point list, and upstream reads it straight off
- * (`JsonCurve.java:78-82`). **`@knowvah/dot-engine` does not expose `sp`/`ep`**
- * — `EdgeGeometry` carries only `points` — so this port extrapolates it from
- * the spline's own terminal direction by one arrow length.
- *
- * That is an approximation of a value the engine already computed, not a
- * fitted constant: both numbers behind `ARROW_LENGTH` are cited upstream. It
- * is the arrowhead's DEPTH that is approximate; its direction and shape come
- * from the spline. Tracked in `docs/graphviz-issues/` — exposing `sp`/`ep`
- * removes the approximation entirely.
- */
-function endPointOf(points: readonly CurvePoint[]): CurvePoint | undefined {
-  const last = points[points.length - 1];
-  const prev = points[points.length - 2];
-  if (last === undefined || prev === undefined) return undefined;
-  return supp(last, prev, ARROW_LENGTH);
-}
-
-/**
  * The filled arrowhead upstream draws INLINE at the spline's end — not an SVG
  * `<marker>`. `drawCurve` closes with
  * `new Arrow(last, trueEp).drawArrow(ug.apply(color.bg()))`, and `drawArrow`
  * builds a four-point path: the two barbs at `±90°` off the axis at `0.4·dist`,
  * a notch at `0.3·dist` along it, and the tip at `p2`.
  *
- * Returns `''` for a spline too short to have a direction.
+ * `ep` is graphviz's own `bezier.ep`, the arrow ATTACHMENT point, distinct
+ * from the last control point: with an arrowhead declared the spline is
+ * shortened and the arrow spans the gap. It arrives here already transposed
+ * into diagram space (`layout.ts`).
+ *
+ * **Absent `ep` means no arrow, not a fallback.** Upstream nulls `ep` on the
+ * calloc-zero point and guards the whole draw with `if (ep != null)`
+ * (`JsonCurve.java:72-82`, `#drawCurve`); the engine omits it on the same
+ * condition (C `eflag`). This port previously EXTRAPOLATED a tip one
+ * `ARROW_LENGTH` along the spline's terminal direction, because the engine
+ * did not publish `sp`/`ep` — that approximation is retired here, along with
+ * the constant behind it. Returns `''` for a degenerate spline.
  *
  * @see .../jsondiagram/Arrow.java#drawArrow
  * @see .../jsondiagram/JsonCurve.java#drawCurve
  */
-export function buildArrowHeadPath(points: readonly CurvePoint[]): string {
+export function buildArrowHeadPath(
+  points: readonly CurvePoint[],
+  ep: CurvePoint | undefined,
+): string {
   const p1 = points[points.length - 1];
-  const p2 = endPointOf(points);
+  const p2 = ep;
   if (p1 === undefined || p2 === undefined) return '';
 
   const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
@@ -132,8 +116,11 @@ export function buildArrowHeadPath(points: readonly CurvePoint[]): string {
 }
 
 /** {@link buildArrowHeadPath}'s segments, for a pen that jiggles them. */
-export function buildArrowHeadSegments(points: readonly CurvePoint[]): HandSegment[] {
-  const d = buildArrowHeadPath(points);
+export function buildArrowHeadSegments(
+  points: readonly CurvePoint[],
+  ep: CurvePoint | undefined,
+): HandSegment[] {
+  const d = buildArrowHeadPath(points, ep);
   if (d === '') return [];
   return d.split(' ').reduce<HandSegment[]>((acc, tok, i, all) => {
     if (tok !== 'M' && tok !== 'L') return acc;

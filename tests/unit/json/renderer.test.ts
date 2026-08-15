@@ -375,6 +375,46 @@ describe('renderJson — structural', () => {
     expect(d.startsWith('M -1.6')).toBe(true);
   });
 
+  // The arrowhead's tip is graphviz's own `bezier.ep`, not a point
+  // extrapolated from the spline's terminal direction. Upstream draws
+  // `new Arrow(last, trueEp)` (`JsonCurve.java#drawCurve`), so the LAST
+  // point of the 5-point head path is `ep` verbatim.
+  it('draws the arrowhead tip AT ep, not one arrow-length past the spline', () => {
+    const edge = makeEdge({
+      points: [{ x: 0, y: 0 }, { x: 100, y: 0 }],
+      // Deliberately NOT 7.5 past the last point: a fabricated tip would land
+      // at x=107.5, so this value can only be reproduced by reading `ep`.
+      ep: { x: 130, y: 0 },
+    });
+    const geo = makeGeo({
+      nodes: [makeNode({ id: 'n0' }), makeNode({ id: 'n1', x: 200, y: 0 })],
+      edges: [edge],
+    });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    const head = /<path d="([^"]*)" fill="#000"/.exec(body)?.[1] ?? '';
+    expect(head).not.toBe('');
+    // `Arrow#drawArrow` order: p4, p11, p3, p2(tip), p4 — the tip is 4th.
+    expect(head.split('L')[3]?.trim()).toBe('130 0');
+  });
+
+  // `JsonCurve.java:72-82` nulls `ep` on the calloc-zero point and
+  // `#drawCurve` guards the whole arrow on `if (ep != null)`. The engine omits
+  // it on the same condition (C `eflag`), so absence means NO arrow — not a
+  // fallback to the retired extrapolation.
+  it('draws no arrowhead at all when the engine reported no ep', () => {
+    const edge = makeEdge({ points: [{ x: 0, y: 0 }, { x: 100, y: 0 }] });
+    const geo = makeGeo({
+      nodes: [makeNode({ id: 'n0' }), makeNode({ id: 'n1', x: 200, y: 0 })],
+      edges: [edge],
+    });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    // Specifically the filled arrowhead PATH — the spline's own spot ellipse
+    // and the cell text are also `fill="#000"` and are expected to remain.
+    expect(/<path d="[^"]*" fill="#000"/.test(body)).toBe(false);
+    // The edge itself still draws; only its head is absent.
+    expect(body).toContain('<path d="M -13 0 L 0 0" fill="none"');
+  });
+
   it('draws every value type in the same color — upstream has no per-type styling', () => {
     // `TextBlockJson#getTextBlock` builds every cell from one
     // `getStyleToUse(false, highlighted)` style. There is no branch on the

@@ -24,13 +24,20 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         be a divergence from the C, so there is no upstream fix to wait for.
         Supersedes the earlier note here that recorded it as reproduced and
         pending. -->
-- [ ] 10-edge-spline-sp-ep-not-exposed.md  <!-- FIXED upstream 2026-08-13
+- [x] 10-edge-spline-sp-ep-not-exposed.md  <!-- FIXED upstream 2026-08-13
         (dot-engine #47): EdgeGeometry carries sp/ep, gated on C's sflag/eflag.
-        Unchecked until the pinned .tgz moves; no consumer here yet, so no
-        fixture can move either way. The issue's premise that the engine
-        neither reserves nor shortens for the arrowhead was checked upstream
-        and is wrong — it already does, oracle-verified. Our remaining work is
-        to pass arrowhead/arrowsize through DotInputEdge. -->
+        CONSUMED HERE 2026-08-15 on the pinned 1.5.0: arrowhead/arrowtail/
+        arrowsize now pass through DotInputEdge, epX/epY republish bezier.ep,
+        and json/JsonCurve.ts draws the head to it (ARROW_LENGTH and the
+        extrapolation deleted). `sp` deliberately NOT plumbed — upstream's own
+        JsonCurve stores it and never reads it. Two premises in the issue file
+        were wrong and are corrected there: the attr list is THREE calls
+        (arrowtail=none as well), and `ep` was ALWAYS reported because
+        graphviz defaults arrowhead=normal — the attrs change the SHORTENING,
+        not ep's availability. Arrow tips now land on their target node (they
+        were 3.9px short of it); the residual ~6.7px against jar is the
+        Smetana node-position delta, recorded not chased per the 2026-08-09
+        one-engine ruling. -->
 - [~] 11-flat-edge-label-width-ignored-in-nodesep.md  <!-- RECLASSIFIED 2026-08-13:
         NOT a dot-engine defect. The engine honors the label box; this was
         measured through graph-layout-build-edges.ts's plain-text label path,
@@ -72,6 +79,5 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         genuine consumer is state's composite title, unbuilt — so no fixture
         moves either way yet, and the box stays open per this file's own rule
         rather than being ticked on the strength of the fix existing.
-        This repo is still on ^1.4.0, so the box stays unchecked per the rule
-        at the top of this file — plans/namespace-cluster-box/ T7 is what
-        moves the pin and re-measures. -->
+        (A trailing line here said "this repo is still on ^1.4.0" — stale the
+        moment T7 landed the bump recorded above, and removed 2026-08-15.) -->

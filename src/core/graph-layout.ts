@@ -221,6 +221,14 @@ function toEdgeEntry(
     id,
     points: ge.points.map((p) => ({ x: p.x, y: p.y })),
   };
+  // Not routed through `assignLabelPos`: `ep` is an arrow attachment point,
+  // not a label position, and that helper's contract is labels. Same
+  // presence rule though — the engine omits `ep` unless the head end carries
+  // an arrow (C `eflag`), which needs `attributes.arrowhead` on the input.
+  if (ge.ep !== undefined) {
+    entry.epX = ge.ep.x;
+    entry.epY = ge.ep.y;
+  }
   assignLabelPos(entry, ge.label, 'labelX', 'labelY');
   assignLabelPos(entry, ge.tailLabel, 'tailLabelX', 'tailLabelY');
   assignLabelPos(entry, ge.headLabel, 'headLabelX', 'headLabelY');
@@ -290,6 +298,33 @@ function mapClusters(snap: LayoutSnapshot, idx: ClusterIndex): OutClusters | und
  *  nodes/edges alone — clusters never participate in DERIVING minX/minY, only
  *  in receiving the shift, so this is byte-identical for every pre-existing
  *  caller that doesn't read `DotLayoutResult.clusters`. */
+/** The optional per-edge positions that RIDE `shiftToOrigin`'s translation
+ *  without participating in DERIVING it (only `points` and the node boxes do
+ *  that). `epX`/`epY` join the pre-existing label positions here for the
+ *  reason given on `DotLayoutResult.edges[].epX`: the arrow attachment point
+ *  sits on the head node's own boundary, inside the extent the nodes already
+ *  establish, so folding it into the min could only move the origin — and
+ *  would shift every existing fixture. */
+const EDGE_SHIFTED_X = ['epX', 'labelX', 'tailLabelX', 'headLabelX'] as const;
+const EDGE_SHIFTED_Y = ['epY', 'labelY', 'tailLabelY', 'headLabelY'] as const;
+
+/** Split out of {@link shiftToOrigin} solely to keep that function under the
+ *  repo's CCN cap; behaviour is the per-edge half of it, unchanged. */
+function shiftEdge(e: OutEdges[number], minX: number, minY: number): void {
+  for (const p of e.points) {
+    p.x -= minX;
+    p.y -= minY;
+  }
+  for (const k of EDGE_SHIFTED_X) {
+    const v = e[k];
+    if (v !== undefined) e[k] = v - minX;
+  }
+  for (const k of EDGE_SHIFTED_Y) {
+    const v = e[k];
+    if (v !== undefined) e[k] = v - minY;
+  }
+}
+
 function shiftToOrigin(nodes: OutNodes, edges: OutEdges, clusters?: OutClusters): void {
   let minX = Math.min(...nodes.map((n) => n.x));
   let minY = Math.min(...nodes.map((n) => n.y));
@@ -304,18 +339,7 @@ function shiftToOrigin(nodes: OutNodes, edges: OutEdges, clusters?: OutClusters)
     n.x -= minX;
     n.y -= minY;
   }
-  for (const e of edges) {
-    for (const p of e.points) {
-      p.x -= minX;
-      p.y -= minY;
-    }
-    if (e.labelX !== undefined) e.labelX -= minX;
-    if (e.labelY !== undefined) e.labelY -= minY;
-    if (e.tailLabelX !== undefined) e.tailLabelX -= minX;
-    if (e.tailLabelY !== undefined) e.tailLabelY -= minY;
-    if (e.headLabelX !== undefined) e.headLabelX -= minX;
-    if (e.headLabelY !== undefined) e.headLabelY -= minY;
-  }
+  for (const e of edges) shiftEdge(e, minX, minY);
   if (clusters !== undefined) {
     for (const c of clusters) {
       c.x -= minX;

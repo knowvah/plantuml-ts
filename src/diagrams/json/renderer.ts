@@ -378,8 +378,8 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): s
 
   // `Arrow#drawArrow` — filled, and deliberately unstroked: the jar emits
   // `fill="#000"` with no `style` attribute at all on this element.
-  const headD = buildArrowHeadPath(edge.points);
-  const headPart = headD === '' ? '' : pen.path(buildArrowHeadSegments(edge.points), headD, { fill: stroke });
+  const headD = buildArrowHeadPath(edge.points, edge.ep);
+  const headPart = headD === '' ? '' : pen.path(buildArrowHeadSegments(edge.points, edge.ep), headD, { fill: stroke });
 
   // `JsonCurve#drawSpot`: a filled circle of radius 3 at the same extrapolated
   // point the stub starts from (`JsonCurve.java:114-118`), stroked by the
