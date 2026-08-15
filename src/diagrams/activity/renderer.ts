@@ -11,13 +11,13 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 import { rect, line, text, polygon, polyline as polylineEl } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode } from './activity-renderer-shapes.js';
+import { SWIMLANE_HEADER_H } from './activity-layout-constants.js';
 
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const SWIMLANE_HEADER_H = 28;
 
 // ---------------------------------------------------------------------------
 // Label helpers

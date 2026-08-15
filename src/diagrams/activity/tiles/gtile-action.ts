@@ -11,9 +11,8 @@ import { TileLeaf } from './tile.js';
 import type { StringBounder } from './tile.js';
 import type { ActivityAction } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
+import { ACTION_HEIGHT, ACTION_H_PAD } from '../activity-layout-constants.js';
 
-const ACTION_HEIGHT = 36;
-const ACTION_H_PAD = 16;
 const V_PAD = 8;
 const MIN_WIDTH = 120;
 

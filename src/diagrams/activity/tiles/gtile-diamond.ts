@@ -10,9 +10,8 @@ import {
 import type { StringBounder } from './tile.js';
 import { TileLeaf } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
+import { DIAMOND_LABEL_PAD, DIAMOND_MIN } from '../activity-layout-constants.js';
 
-const DIAMOND_MIN = 20;
-const DIAMOND_LABEL_PAD = 10;
 
 export class GtileDiamond extends TileLeaf {
   readonly kind = 'gtile-diamond' as const;

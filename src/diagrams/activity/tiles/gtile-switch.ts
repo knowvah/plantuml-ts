@@ -11,9 +11,8 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { GtileDiamond } from './gtile-diamond.js';
 import type { Theme } from '../../../core/theme.js';
+import { NODE_MARGIN_X, NODE_MARGIN_Y } from '../activity-layout-constants.js';
 
-const NODE_MARGIN_Y = 20;
-const NODE_MARGIN_X = 40;
 
 export class GtileSwitch extends TileComposite {
   readonly kind = 'gtile-switch' as const;

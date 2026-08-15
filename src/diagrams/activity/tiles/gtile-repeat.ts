@@ -11,8 +11,8 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { GtileDiamond } from './gtile-diamond.js';
 import type { Theme } from '../../../core/theme.js';
+import { NODE_MARGIN_Y } from '../activity-layout-constants.js';
 
-const NODE_MARGIN_Y = 20;
 const BACK_EDGE_MARGIN = 20;
 
 export class GtileRepeat extends TileComposite {

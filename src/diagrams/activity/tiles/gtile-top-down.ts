@@ -10,8 +10,8 @@ import {
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
+import { NODE_MARGIN_Y } from '../activity-layout-constants.js';
 
-const NODE_MARGIN_Y = 20;
 
 export class GtileTopDown extends TileComposite {
   readonly kind = 'gtile-top-down' as const;
