@@ -13,11 +13,16 @@
  * invisible to it by design; the SVG census sees the wrappers' pixel effect on
  * the layout path only, and the emitter is not on that path at all.
  *
- * So this file asserts the property directly, over the whole state corpus:
- * for every cluster of every captured layout graph, the wrapper levels the
- * BUILDER actually created and the ones the EMITTER actually wrote both equal
- * `wrapperLevels(cluster)` — the single shared definition of jar's
- * `ClusterDotString.java:91-158` conditions.
+ * So this file asserts the property directly, over BOTH corpora this
+ * mechanism is shared by (state, ported first at G9/T1-T2; class, wired at
+ * namespace-cluster-box mission T4): for every cluster of every captured
+ * layout graph, the wrapper levels the BUILDER actually created and the ones
+ * the EMITTER actually wrote both equal `wrapperLevels(cluster)` — the single
+ * shared definition of jar's `ClusterDotString.java:91-158` conditions. Both
+ * diagram types feed the SAME `graph-layout-build.ts`/`svek-dot-emit.ts`
+ * consumers (a diagram-type-agnostic core module pair), so one parametrized
+ * suite over `{ state, class }` golden roots covers both without duplicating
+ * the property.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterDotString.java:91-158
  */
@@ -35,14 +40,29 @@ import type { DotInputGraph } from '../../src/core/graph-layout.js';
 import { addClusters } from '../../src/core/graph-layout-build.js';
 import { toSvekDot, wrapperLevels, type WrapperLevels } from '../../src/core/svek-dot-emit.js';
 
-const GOLDENS = join(dirname(fileURLToPath(import.meta.url)), '../../oracle/goldens/state');
+const GOLDENS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../oracle/goldens');
 
-const fixtures = existsSync(GOLDENS)
-  ? readdirSync(GOLDENS, { withFileTypes: true })
-      .filter((d) => d.isDirectory() && existsSync(join(GOLDENS, d.name, 'input.puml')))
-      .map((d) => d.name)
-      .sort()
-  : [];
+/** One corpus root to sweep — `oracle/goldens/state` (the original scope)
+ *  and `oracle/goldens/class` (T4: the class engine now wires the same two
+ *  `DotInputCluster` fields, `class-dot-graph.ts#buildDotClusters`). */
+interface GoldenCorpus {
+  label: string;
+  dir: string;
+  fixtures: string[];
+}
+
+function loadCorpus(label: string): GoldenCorpus {
+  const dir = join(GOLDENS_ROOT, label);
+  const fixtures = existsSync(dir)
+    ? readdirSync(dir, { withFileTypes: true })
+        .filter((d) => d.isDirectory() && existsSync(join(dir, d.name, 'input.puml')))
+        .map((d) => d.name)
+        .sort()
+    : [];
+  return { label, dir, fixtures };
+}
+
+const CORPORA: GoldenCorpus[] = [loadCorpus('state'), loadCorpus('class')];
 
 /** Every subgraph name reachable from `g`, in creation order. */
 function subgraphNames(g: Graph): string[] {
@@ -90,27 +110,29 @@ let captured: DotInputGraph[] = [];
 beforeAll(() => setLayoutInputObserver((g) => captured.push(g)));
 afterAll(() => setLayoutInputObserver(undefined));
 
-describe.skipIf(fixtures.length === 0)('cluster wrapper levels — builder and emitter agree', () => {
-  it('has fixtures to check', () => {
-    expect(fixtures.length).toBeGreaterThan(0);
-  });
-
-  for (const name of fixtures) {
-    it(`${name}: every cluster wraps identically on both paths`, () => {
-      captured = [];
-      renderSync(readFileSync(join(GOLDENS, name, 'input.puml'), 'utf8'), {
-        measurer: new WidthTableMeasurer(),
-      });
-      for (const [n, input] of captured.entries()) {
-        const built = builderLevels(input);
-        const emitted = emitterLevels(input);
-        for (const c of input.clusters ?? []) {
-          const expected = wrapperLevels(c);
-          const where = `${name} graph ${String(n)} cluster ${c.id}`;
-          expect(built.get(c.id), `${where}: builder wrapper levels`).toEqual(expected);
-          expect(emitted.get(c.id), `${where}: emitter wrapper levels`).toEqual(expected);
-        }
-      }
+for (const { label, dir, fixtures } of CORPORA) {
+  describe.skipIf(fixtures.length === 0)(`cluster wrapper levels — builder and emitter agree (${label})`, () => {
+    it('has fixtures to check', () => {
+      expect(fixtures.length).toBeGreaterThan(0);
     });
-  }
-});
+
+    for (const name of fixtures) {
+      it(`${name}: every cluster wraps identically on both paths`, () => {
+        captured = [];
+        renderSync(readFileSync(join(dir, name, 'input.puml'), 'utf8'), {
+          measurer: new WidthTableMeasurer(),
+        });
+        for (const [n, input] of captured.entries()) {
+          const built = builderLevels(input);
+          const emitted = emitterLevels(input);
+          for (const c of input.clusters ?? []) {
+            const expected = wrapperLevels(c);
+            const where = `${label}/${name} graph ${String(n)} cluster ${c.id}`;
+            expect(built.get(c.id), `${where}: builder wrapper levels`).toEqual(expected);
+            expect(emitted.get(c.id), `${where}: emitter wrapper levels`).toEqual(expected);
+          }
+        }
+      });
+    }
+  });
+}
