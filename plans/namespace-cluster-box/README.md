@@ -180,6 +180,12 @@ never carries the edge. All 126 cached DOTs agree with the predicate.
 
 ### What is left, and where it is written down
 
+**CLOSED after the mission, 2026-08-15.** `cidepu-54-bemo048` and
+`kicolo-81-sidi387` now reach **28/28** — the follow-on mechanism was
+fixed in `graph-layout.ts#cornerSize` (773 doc-size-exact / 25695 shapes,
+34 fixtures improved, zero regressions). What follows is how it stood at
+mission close:
+
 `cidepu-54-bemo048` and `kicolo-81-sidi387` reach exact document size but
 stay at 13/28 shapes, on a mechanism this mission does not own:
 `.agent-notes/class-html-node-corner-vs-quantized-width.md`. It is ours,

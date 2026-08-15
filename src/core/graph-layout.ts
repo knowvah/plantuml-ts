@@ -125,6 +125,56 @@ function portNodeSize(d: DotInputNode | undefined, engine: number, declared: num
   return htmlSized ? declared : engine;
 }
 
+/**
+ * The box HALVED to derive a node's CORNER from graphviz's centre — separate
+ * from `width`/`height` (what gets DRAWN) because the two diverge for
+ * exactly one shape: a `portRows` row-table classifier's declared cell
+ * `WIDTH=`/`HEIGHT=` values carry sub-point fractions (this port's own text
+ * measurement), and real graphviz's HTML-table layout floors each to a
+ * whole point before it ever fixes a centre — `addRowPortNode` (`graph-
+ * layout-build.ts`) hands it those fractional `FIXEDSIZE` cells verbatim,
+ * with no `fixedsize`/`width`/`height` on the outer node for graphviz to
+ * echo back untouched. Jar reads that FLOORED box's own left edge off
+ * graphviz's rendered SVG (`DotStringFactory#solve`) and draws its own
+ * (fractional) width FROM that edge; it does not re-centre. So the corner
+ * this port computes must floor too, or it draws centred on the fraction
+ * graphviz never kept.
+ *
+ * Verified directly against real graphviz 15.1.1 `-Tsvg` (not dot-engine)
+ * on two cached oracle DOTs, disambiguating floor from round-to-nearest:
+ * `garizu-98-nixo496`'s `sh0006` (`WIDTH="220.51250000000005"`, fraction
+ * .5125 — ROUNDS to 221, but the rendered polygon is exactly 220 wide,
+ * `Math.floor`) and `kidugi-68-noje040`'s `sh0006` (`WIDTH=
+ * "251.66250000000008"`, HEIGHT sums to 76) — polygon `8,-4` to `259,-80`,
+ * i.e. 251x76 exactly, `Math.floor` on both axes and NO extra padding (the
+ * `portNodeSize` doc comment's own +15.3375/+8.0 pad measurement above this
+ * function was against `@knowvah/dot-engine`, not real graphviz, for this
+ * SAME fixture — that divergence is real but orthogonal: it explains why
+ * `portNodeSize` must override the engine's raw width for DRAWING, not
+ * where the CENTRE the pad is applied around sits, which real graphviz's
+ * own floored-not-padded box confirms is unaffected either way).
+ *
+ * Scoped to `portRows` only, matching the measured evidence
+ * (`.agent-notes/class-html-node-corner-vs-quantized-width.md`: "both are
+ * member-port diagrams… the other nine have no ports and take the engine
+ * width"). The `isPort`-plaintext port SYMBOL (G9/T9, one function up) keeps
+ * centring on its own small declared size inside graphviz's larger box —
+ * jar reads THAT case from the port CELL's own polygon, a different
+ * mechanism this fix does not touch.
+ *
+ * @see ~/git/graphviz/lib/common/htmllex.c, lib/common/htmltable.c (HTML
+ *      table cell sizing — the floor happens inside graphviz's own table
+ *      layout, before `poly_init` ever sees a size)
+ */
+function cornerSize(
+  d: DotInputNode | undefined,
+  width: number,
+  height: number,
+): [number, number] {
+  if (d?.portRows === undefined) return [width, height];
+  return [Math.floor(width), Math.floor(height)];
+}
+
 function mapNodes(snap: LayoutSnapshot, input: DotInputGraph): OutNodes {
   const declared = new Map(input.nodes.map((n) => [n.id, n]));
   return snap.nodes.map((n) => {
@@ -133,7 +183,8 @@ function mapNodes(snap: LayoutSnapshot, input: DotInputGraph): OutNodes {
       ours !== undefined && Math.abs(ours - engine) < ROUND_TRIP_EPSILON ? ours : engine;
     const width = portNodeSize(d, echo(d?.width, n.width), d?.width ?? n.width);
     const height = portNodeSize(d, echo(d?.height, n.height), d?.height ?? n.height);
-    return { id: n.name, x: n.x - width / 2, y: n.y - height / 2, width, height };
+    const [cornerW, cornerH] = cornerSize(d, width, height);
+    return { id: n.name, x: n.x - cornerW / 2, y: n.y - cornerH / 2, width, height };
   });
 }
 
