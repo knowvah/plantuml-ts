@@ -33,12 +33,18 @@
  *    this branch (`Opale.drawU` strokes both with one shared `ug`, unlike
  *    `drawNormal`'s asymmetric split above).
  *
- * Reuses `../class/note-opale.ts`'s pure geometry functions
+ * Reuses `core/svek/image/Opale.ts`'s geometry functions
  * (`opalePolygonLeft/Right/Up/Down`/`opaleCorner`/`resolveOpaleConnector`) —
- * diagram-agnostic byte-exact ports of `Opale.java`, the SAME upstream
- * mechanism regardless of diagram type (see that module's own doc comment;
- * `state-render-colors.ts` already establishes the precedent of importing
- * from `../class/` for shared, diagram-agnostic geometry/color helpers).
+ * byte-exact ports of `Opale.java`, the SAME upstream mechanism regardless
+ * of diagram type: upstream builds every cuca diagram's note through one
+ * `EntityImageNote` (`svek/GeneralImageBuilder.java:118-119`).
+ *
+ * Those functions used to live in `../class/note-opale.ts`, and this module
+ * imported them across an engine boundary — justified at the time by
+ * `state-render-colors.ts`'s own `../class/` precedent. That was backwards:
+ * a diagram-agnostic port of an `svek/image/` class does not belong inside
+ * the class engine. It now sits in the package upstream puts it in, and
+ * neither engine reaches into the other for it.
  *
  * NOT built this iteration (queued in full, `plans/g4-state-svg/ledger.md`
  * S10): `note ... on link` (embedded in the transition's OWN `<g
@@ -67,7 +73,7 @@ import {
   opalePolygonDown,
   opaleCorner,
   resolveOpaleConnector,
-} from '../class/note-opale.js';
+} from '../../core/svek/image/Opale.js';
 
 // ---------------------------------------------------------------------------
 // Constants — Opale.java's real jar values (see module doc comment for the
