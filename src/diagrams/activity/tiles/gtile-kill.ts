@@ -9,7 +9,7 @@ import {
 } from './points.js';
 import { TileLeaf } from './tile.js';
 
-const OUTER_RADIUS = 14;
+import { STOP_OUTER_RADIUS as OUTER_RADIUS } from '../activity-layout-constants.js';
 
 export class GtileKill extends TileLeaf {
   readonly kind = 'gtile-kill' as const;

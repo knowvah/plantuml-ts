@@ -16,5 +16,9 @@ export const SWIMLANE_MIN_WIDTH = 120;
 export const DEFAULT_WIDTH = 600;
 export const LAYOUT_MARGIN = 12;
 
+/** The horizontal clearance a loop's back-edge routes around its body
+ *  (`gtile-repeat`/`gtile-while`). */
+export const BACK_EDGE_MARGIN = 20;
+
 export const DIAMOND_MIN = 20;
 export const DIAMOND_LABEL_PAD = 10;

@@ -21,8 +21,10 @@ interface Dim {
 
 /** IEntityImage.MARGIN / MARGIN_LINE (both 5) — same constants used by the
  *  flat EntityImageState formula (state-sizing.ts's STATE_MARGIN_DELTA). */
-const MARGIN = 5;
-const MARGIN_LINE = 5;
+import {
+  ENTITY_IMAGE_MARGIN as MARGIN,
+  ENTITY_IMAGE_MARGIN_LINE as MARGIN_LINE,
+} from '../../core/svek/IEntityImage.js';
 
 function measureLines(lines: readonly string[], font: FontSpec, measurer: StringMeasurer): Dim {
   if (lines.length === 0) return { width: 0, height: 0 };
