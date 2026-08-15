@@ -1,0 +1,105 @@
+[dot-sync] oracle jar: /Users/scottseely/git/plantuml/build/libs/plantuml-1.2026.7beta11.jar
+[dot-sync] class: manifest markup wins for 301 identical-markup authored slug(s) and 9 DIFFERING-markup slug(s): bemuvo-33-jofa419, cadani-60-zile435, dojuvi-07-duja723, fezugi-39-fujo327, gerima-02-fade831, jibili-77-vatu959, libobe-85-veli517, xexapu-93-kuto175, zucedi-63-rugu584
+  class: 50/718
+Warning: no hard-coded metrics for 'Times,serif'.  Falling back to 'Times' metrics
+  class: 100/718
+  class: 150/718
+  class: 200/718
+  class: 250/718
+  class: 300/718
+  class: 350/718
+  class: 400/718
+  class: 450/718
+  class: 500/718
+  class: 550/718
+  class: 600/718
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: note-layout-measure: no NestedDiagramRenderer wired for {{...}} embedded-diagram note regions yet (see EmbeddedDiagram.ts#NestedDiagramRenderer, the seam to implement)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:195:11)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:391:38)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:407:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at consumeEmbeddedRow (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:245:24)
+    at buildBlockRows (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:312:24)
+    at flushBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:125:31)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:136:3)
+    at buildNoteGraphParts (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-groups.ts:176:55)
+    at buildDotGraph (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-dot-graph.ts:428:21)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: note-layout-measure: no NestedDiagramRenderer wired for {{...}} embedded-diagram note regions yet (see EmbeddedDiagram.ts#NestedDiagramRenderer, the seam to implement)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:195:11)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:391:38)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:407:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at consumeEmbeddedRow (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:245:24)
+    at buildBlockRows (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:312:24)
+    at flushBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:125:31)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:136:3)
+    at buildNoteGraphParts (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-groups.ts:176:55)
+    at buildDotGraph (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-dot-graph.ts:428:21)
+  class: 650/718
+  class: 700/718
+[dot-sync] class: enumerated 773, analysed 718, skipped 55 (0 with no canonical SVG, 55 canonical but not tagged CLASS)
+  skip class/benogu-57-mefi213: not tagged CLASS
+  skip class/bumove-14-neva674: not tagged CLASS
+  skip class/cazace-10-nebi625: not tagged CLASS
+  skip class/cocice-93-xezi825: not tagged CLASS
+  skip class/difufa-66-cici681: not tagged CLASS
+  skip class/divani-97-lode006: not tagged CLASS
+  skip class/fajesi-79-pode068: not tagged CLASS
+  skip class/fegafi-82-xiri255: not tagged CLASS
+  skip class/foxufo-19-nuco936: not tagged CLASS
+  skip class/furita-76-voka334: not tagged CLASS
+  skip class/gidike-19-rudi116: not tagged CLASS
+  skip class/gikizu-32-zolu433: not tagged CLASS
+  skip class/guvuja-20-joma991: not tagged CLASS
+  skip class/jepinu-82-nuve921: not tagged CLASS
+  skip class/jicogu-02-cani636: not tagged CLASS
+  skip class/jotibi-62-juzi772: not tagged CLASS
+  skip class/kazugi-06-bano280: not tagged CLASS
+  skip class/kelaca-68-goju321: not tagged CLASS
+  skip class/kepife-84-jigi755: not tagged CLASS
+  skip class/lidunu-97-lana125: not tagged CLASS
+  skip class/lofipa-95-gere133: not tagged CLASS
+  skip class/lokuxi-74-daje287: not tagged CLASS
+  skip class/ludeke-24-ruro832: not tagged CLASS
+  skip class/luzida-92-gebi610: not tagged CLASS
+  skip class/luzive-62-zote562: not tagged CLASS
+  skip class/maboso-96-fagi719: not tagged CLASS
+  skip class/manule-42-fuzu444: not tagged CLASS
+  skip class/notevi-43-sita948: not tagged CLASS
+  skip class/nudoji-00-mafe679: not tagged CLASS
+  skip class/pajude-35-jisu021: not tagged CLASS
+  skip class/pavapo-86-juni007: not tagged CLASS
+  skip class/pedoze-30-xoxo765: not tagged CLASS
+  skip class/pinoje-11-sevu836: not tagged CLASS
+  skip class/rogoxa-80-mori838: not tagged CLASS
+  skip class/rubife-18-nege510: not tagged CLASS
+  skip class/runedi-09-voce726: not tagged CLASS
+  skip class/ruzuke-10-nivu471: not tagged CLASS
+  skip class/sadamo-18-siva346: not tagged CLASS
+  skip class/secune-13-roju535: not tagged CLASS
+  skip class/sifagi-73-kexu776: not tagged CLASS
+  skip class/sokevu-87-toce485: not tagged CLASS
+  skip class/sunuli-13-geju490: not tagged CLASS
+  skip class/suteli-91-joje610: not tagged CLASS
+  skip class/suzifi-02-jeca455: not tagged CLASS
+  skip class/taneno-85-fatu449: not tagged CLASS
+  skip class/vevatu-41-xixo630: not tagged CLASS
+  skip class/vuveno-42-toza400: not tagged CLASS
+  skip class/xadepe-11-noja686: not tagged CLASS
+  skip class/xapeli-43-vuvu895: not tagged CLASS
+  skip class/xozabi-32-tagi234: not tagged CLASS
+  skip class/xucuko-56-zovu144: not tagged CLASS
+  skip class/zalulo-78-voma912: not tagged CLASS
+  skip class/zefite-33-jeki137: not tagged CLASS
+  skip class/zuduxu-90-kosi876: not tagged CLASS
+  skip class/class-actor-bare-no-allowmixing: not tagged CLASS
+
+===== class — 711 CLASS fixtures =====
+  structurally EQUAL (DOT in sync): 680 (96%)
+  no-candidate (we feed nothing):   0
+  oracle-blind (pragma layout):     7
+  graph-count mismatch:             0
+  diverging-check failures (per fixture, among the rest):
+    directionOk  fails: 1   e.g. besepi-37-rori892
+    labelSizeOk  fails: 30   e.g. bitove-03-sanu160, camuna-58-veca254, canuti-20-jotu614, dorelu-66-lixu637
+  node count: over 0 / under 0 | edges: over 0 / under 0 | clusters: over 0 / under 0
