@@ -90,10 +90,15 @@ import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
  *  bottom=5, left=0. Applied by `TextBlockExporter#calculateFinalDimension`
  *  on top of `SvekResult#calculateDimension`'s own return value, before it
  *  reaches `SvgOption#minDim`. */
-const DOCUMENT_MARGIN_TOP = 0;
-const DOCUMENT_MARGIN_RIGHT = 5;
-const DOCUMENT_MARGIN_BOTTOM = 5;
-const DOCUMENT_MARGIN_LEFT = 0;
+// `CucaDiagram#getDefaultMargins()` — single owner at
+// `core/atmp/CucaDiagram.ts`. Aliased to the local names so the call
+// sites below read unchanged.
+import {
+  CUCA_DOCUMENT_MARGIN_TOP as DOCUMENT_MARGIN_TOP,
+  CUCA_DOCUMENT_MARGIN_RIGHT as DOCUMENT_MARGIN_RIGHT,
+  CUCA_DOCUMENT_MARGIN_BOTTOM as DOCUMENT_MARGIN_BOTTOM,
+  CUCA_DOCUMENT_MARGIN_LEFT as DOCUMENT_MARGIN_LEFT,
+} from '../../core/atmp/CucaDiagram.js';
 
 /**
  * `UGraphicWithGroups`-shaped decorator (see `DecorateEntityImage.ts`'s own

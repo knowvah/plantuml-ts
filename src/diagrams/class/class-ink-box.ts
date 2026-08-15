@@ -17,10 +17,16 @@ import {
 } from './class-ink-shapes.js';
 export type { InkBox } from './class-ink-shapes.js';
 
-export const DOCUMENT_MARGIN_TOP = 0;
-export const DOCUMENT_MARGIN_RIGHT = 5;
-export const DOCUMENT_MARGIN_BOTTOM = 5;
-export const DOCUMENT_MARGIN_LEFT = 0;
+// `CucaDiagram#getDefaultMargins()` — single owner at
+// `core/atmp/CucaDiagram.ts`; the class, description and state engines all
+// inherit this one method. Re-exported under the pre-existing names so this
+// module's consumers are unaffected.
+export {
+  CUCA_DOCUMENT_MARGIN_TOP as DOCUMENT_MARGIN_TOP,
+  CUCA_DOCUMENT_MARGIN_RIGHT as DOCUMENT_MARGIN_RIGHT,
+  CUCA_DOCUMENT_MARGIN_BOTTOM as DOCUMENT_MARGIN_BOTTOM,
+  CUCA_DOCUMENT_MARGIN_LEFT as DOCUMENT_MARGIN_LEFT,
+} from '../../core/atmp/CucaDiagram.js';
 
 // `INK_DELTA`/`JAR_INK_MARGIN` now have a single owner, `core/svek/
 // SvekResult.ts` — they are that method's constants, shared by every svek

@@ -104,10 +104,15 @@ import { INK_DELTA, JAR_INK_MARGIN } from '../../core/svek/SvekResult.js';
 
 /** `CucaDiagram#getDefaultMargins()` (net/atmp/CucaDiagram.java:719-722) —
  *  shared across the whole `CucaDiagram` family, see module doc comment. */
-const DOCUMENT_MARGIN_TOP = 0;
-const DOCUMENT_MARGIN_RIGHT = 5;
-const DOCUMENT_MARGIN_BOTTOM = 5;
-const DOCUMENT_MARGIN_LEFT = 0;
+// `CucaDiagram#getDefaultMargins()` — single owner at
+// `core/atmp/CucaDiagram.ts`. Aliased to the local names so the call
+// sites below read unchanged.
+import {
+  CUCA_DOCUMENT_MARGIN_TOP as DOCUMENT_MARGIN_TOP,
+  CUCA_DOCUMENT_MARGIN_RIGHT as DOCUMENT_MARGIN_RIGHT,
+  CUCA_DOCUMENT_MARGIN_BOTTOM as DOCUMENT_MARGIN_BOTTOM,
+  CUCA_DOCUMENT_MARGIN_LEFT as DOCUMENT_MARGIN_LEFT,
+} from '../../core/atmp/CucaDiagram.js';
 
 // Both from the single owner, `core/svek/SvekResult.ts`. They were declared
 // locally here until 2026-08-15; the comment that stood in this place cited
