@@ -22,16 +22,14 @@ export const DOCUMENT_MARGIN_RIGHT = 5;
 export const DOCUMENT_MARGIN_BOTTOM = 5;
 export const DOCUMENT_MARGIN_LEFT = 0;
 
-/** `SvekResult#calculateDimension`'s `.delta(15, 15)` padding. */
-export const INK_DELTA = 15;
-
-/** `SvekResult#calculateDimension`'s own `moveDelta(6 - minMax.getMinX(),
- *  6 - minMax.getMinY())` constant (svek/SvekResult.java:133) — the SAME
- *  value as description's `layout-ink-shift.ts#JAR_INK_MARGIN` (G1b/J1,
- *  shared upstream `SvekResult` machinery). Duplicated here rather than
- *  imported per this module's own klimt-free-module convention (see file
- *  doc comment). */
-export const JAR_INK_MARGIN = 6;
+// `INK_DELTA`/`JAR_INK_MARGIN` now have a single owner, `core/svek/
+// SvekResult.ts` — they are that method's constants, shared by every svek
+// engine, and were previously declared four times across three engines.
+// Re-exported here so this module's existing consumers are unaffected.
+// The klimt-free-module convention below still holds for
+// `HACK_X_FOR_POLYGON`, which `LimitFinder.ts` keeps private; it never
+// applied to these two.
+export { INK_DELTA, JAR_INK_MARGIN } from '../../core/svek/SvekResult.js';
 
 /**
  * G2 N35: the lollipop's OWN display-label row
