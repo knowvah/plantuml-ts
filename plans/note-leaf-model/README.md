@@ -75,7 +75,7 @@ restructure changed one of those — which is the failure mode, not a result.
 | # | What | Depends on | Done |
 |---|---|---|---|
 | [1](batch-1/overview.md) | Make NOTE vs TIPS explicit; pin the note-order invariant | — | [x] |
-| [2](batch-2/overview.md) | Move Opale resolution to draw time (retires the phase dependency) | B1 | [ ] |
+| [2](batch-2/overview.md) | Move Opale resolution to draw time (retires the phase dependency) | B1 | [x] |
 | [3](batch-3/overview.md) | Fold notes into the leaf collection; sweep and close | B2 | [ ] |
 
 Batch 2 is the one that matters. If it cannot be done byte-identically,
