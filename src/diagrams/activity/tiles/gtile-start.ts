@@ -9,7 +9,7 @@ import {
 } from './points.js';
 import { TileLeaf } from './tile.js';
 
-const RADIUS = 10;
+import { START_STOP_RADIUS as RADIUS } from '../activity-layout-constants.js';
 
 export class GtileStart extends TileLeaf {
   readonly kind = 'gtile-start' as const;

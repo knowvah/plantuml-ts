@@ -6,7 +6,7 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 const CARD_W = 150;
 const CARD_H = 70;
 const CELL_H = 90;
-const MARGIN = 10;
+const BOARD_MARGIN = 10;
 function buildShadowDefs(shadowId: string): string {
   return (
     `<filter id="${shadowId}" x="-1" y="-1" width="300%" height="300%">` +
@@ -44,19 +44,19 @@ export function renderBoard(geo: BoardGeometry, theme: Theme): RenderFragment {
     const headerLabel = activity.cards[0]?.label ?? '';
 
     // Header card drawn first (mirrors Java Activity.getBox().drawU()) — Decision E
-    parts.push(renderCard(ox + MARGIN, MARGIN, headerLabel, shadowId));
+    parts.push(renderCard(ox + BOARD_MARGIN, BOARD_MARGIN, headerLabel, shadowId));
 
     // All BArray cards, including root at (dx=0, dy=0) — root drawn twice per Decision E
     for (const card of activity.cards) {
-      parts.push(renderCard(ox + card.dx + MARGIN, card.dy + MARGIN, card.label, shadowId));
+      parts.push(renderCard(ox + card.dx + BOARD_MARGIN, card.dy + BOARD_MARGIN, card.label, shadowId));
     }
   }
 
   // Horizontal dashed row separator lines (BoardDiagram.drawMe)
   for (let i = 0; i < geo.maxStage; i++) {
-    const y = (i + 1) * CELL_H - 10 + MARGIN;
+    const y = (i + 1) * CELL_H - 10 + BOARD_MARGIN;
     parts.push(
-      line(MARGIN, y, geo.totalWidth + MARGIN, y, {
+      line(BOARD_MARGIN, y, geo.totalWidth + BOARD_MARGIN, y, {
         stroke: '#000000',
         strokeWidth: 0.5,
         strokeDasharray: '5 5',
@@ -64,8 +64,8 @@ export function renderBoard(geo: BoardGeometry, theme: Theme): RenderFragment {
     );
   }
 
-  const width = (geo.totalWidth || 10) + 2 * MARGIN;
-  const height = ((geo.maxStage + 1) * CELL_H || 10) + 2 * MARGIN;
+  const width = (geo.totalWidth || 10) + 2 * BOARD_MARGIN;
+  const height = ((geo.maxStage + 1) * CELL_H || 10) + 2 * BOARD_MARGIN;
   return {
     body: parts.join(''),
     width,

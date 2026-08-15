@@ -14,7 +14,7 @@ import type { Theme } from '../../../core/theme.js';
 import { ACTION_HEIGHT, ACTION_H_PAD } from '../activity-layout-constants.js';
 
 const V_PAD = 8;
-const MIN_WIDTH = 120;
+const ACTION_MIN_WIDTH = 120;
 
 export class GtileAction extends TileLeaf {
   readonly kind = 'gtile-action' as const;
@@ -40,7 +40,7 @@ export class GtileAction extends TileLeaf {
     const maxWidth = isCodeBlock
       ? Math.max(0, ...lines.map(l => l.length * monoCharWidth))
       : Math.max(...lines.map(l => bounder.getDimension(l, theme.fontSize).width));
-    this.width = Math.max(maxWidth + 2 * ACTION_H_PAD, MIN_WIDTH);
+    this.width = Math.max(maxWidth + 2 * ACTION_H_PAD, ACTION_MIN_WIDTH);
     this.height = Math.max(lineHeight * lineCount + 2 * V_PAD, ACTION_HEIGHT);
   }
 

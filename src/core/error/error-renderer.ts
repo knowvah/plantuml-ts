@@ -61,7 +61,7 @@ const LINE_ADVANCE_RATIO = 14.1328 / 12;
 const ASCENT_RATIO = 11.6016 / 12;
 
 /** `GraphicStrings#margin` */
-const MARGIN = 5;
+const ERROR_PAGE_MARGIN = 5;
 
 /** `PSystemError#getGraphicalFormatted`: `withMargin(…, 1, 1, 1, 4)` on the
  *  `[From … ]` band — left 1, right 1, top 1, bottom 4. */
@@ -248,7 +248,7 @@ function drawLine(
   if (line.band !== undefined)
     svg.push(
       rect(
-        MARGIN,
+        ERROR_PAGE_MARGIN,
         top - BAND_PAD_TOP,
         lineWidth(line, measurer) + 2 * BAND_PAD_X,
         advance + BAND_PAD_TOP + BAND_PAD_BOTTOM,
@@ -256,7 +256,7 @@ function drawLine(
       ),
     );
 
-  let x = MARGIN + (line.band === undefined ? 0 : BAND_PAD_X);
+  let x = ERROR_PAGE_MARGIN + (line.band === undefined ? 0 : BAND_PAD_X);
   for (const run of line.runs) {
     svg.push(drawRun(run, x, baseline));
     x += measurer.measure(run.content, run.font).width;
@@ -265,11 +265,11 @@ function drawLine(
 }
 
 function blockWidth(block: Block, measurer: StringMeasurer): number {
-  return 2 * MARGIN + Math.max(0, ...block.lines.map((l) => lineWidth(l, measurer)));
+  return 2 * ERROR_PAGE_MARGIN + Math.max(0, ...block.lines.map((l) => lineWidth(l, measurer)));
 }
 
 function blockHeight(block: Block): number {
-  return 2 * MARGIN + block.lines.reduce((h, l) => h + lineAdvance(l), 0);
+  return 2 * ERROR_PAGE_MARGIN + block.lines.reduce((h, l) => h + lineAdvance(l), 0);
 }
 
 /** Draw one block's background band and its lines, at `top`, `width` wide. */
@@ -285,7 +285,7 @@ function drawBlock(
       stroke: block.background,
     }),
   ];
-  let y = top + MARGIN;
+  let y = top + ERROR_PAGE_MARGIN;
   for (const line of block.lines) {
     const drawn = drawLine(line, y, measurer);
     svg.push(...drawn.svg);

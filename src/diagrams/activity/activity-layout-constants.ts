@@ -5,6 +5,11 @@
 export const NODE_MARGIN_Y = 20;
 export const NODE_MARGIN_X = 40;
 export const START_STOP_RADIUS = 10;
+/** The connector-spot circle (`gtile-spot`). A DIFFERENT circle from
+ *  {@link START_STOP_RADIUS} and from `abel/EntityPosition.RADIUS` — all
+ *  three were once spelled `RADIUS` — and different again from json's
+ *  own `SPOT_RADIUS = 3`, which is why this one is not called that. */
+export const CONNECTOR_SPOT_RADIUS = 8;
 export const STOP_OUTER_RADIUS = 14;
 export const ACTION_HEIGHT = 36;
 export const ACTION_H_PAD = 16;

@@ -10,7 +10,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 
 import { valueToPixel } from './chart-layout-core.js';
 import type { PlotArea, BarRect, DataPoint, LegendEntry, LegendGeometry, PointContext, BarSpec, LegendSpec, AreaBaselineSpec } from './chart-layout-core.js';
-import { MARGIN, LEGEND_MARGIN, LEGEND_SYMBOL_SIZE, LEGEND_TEXT_SPACING, LEGEND_ITEM_SPACING, BAR_WIDTH_RATIO, AXIS_LABEL_SPACE } from './chart-layout-core.js';
+import { CHART_MARGIN, LEGEND_MARGIN, LEGEND_SYMBOL_SIZE, LEGEND_TEXT_SPACING, LEGEND_ITEM_SPACING, BAR_WIDTH_RATIO, AXIS_LABEL_SPACE } from './chart-layout-core.js';
 
 // ---------------------------------------------------------------------------
 // Module-private param/return bundles.
@@ -121,11 +121,11 @@ function computeLegendPosition(
 
   switch (legendPosition) {
     case 'left':
-      return { x: MARGIN, y: topMargin, width: leftRightWidth, height: m.totalItemHeight };
+      return { x: CHART_MARGIN, y: topMargin, width: leftRightWidth, height: m.totalItemHeight };
     case 'right':
       return { x: rightX, y: topMargin, width: leftRightWidth, height: m.totalItemHeight };
     case 'top':
-      return { x: leftMargin, y: MARGIN, width: m.totalItemWidth, height: topBottomHeight };
+      return { x: leftMargin, y: CHART_MARGIN, width: m.totalItemWidth, height: topBottomHeight };
     case 'bottom':
       return { x: leftMargin, y: bottomY, width: m.totalItemWidth, height: topBottomHeight };
     default:

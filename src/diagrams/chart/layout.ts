@@ -16,7 +16,7 @@ import { valueToPixel, resolveColor, AXIS_LABEL_SPACE } from './chart-layout-cor
 import type { PlotArea, BarRect, SeriesGeo, AnnotationGeometry, ChartGeometry, AxisGeometry, LegendGeometry, PointContext } from './chart-layout-core.js';
 import { buildVAxisGeometry, buildHAxisGeometry } from './chart-layout-axes.js';
 import { buildLegendGeometry, buildBarRectsGrouped, buildBarRectsStacked, buildBarRectsHorizontal, buildDataPoints, buildAreaBaseline } from './chart-layout-series.js';
-import { MARGIN, TITLE_SPACE, LEGEND_MARGIN, LEGEND_SYMBOL_SIZE, LEGEND_TEXT_SPACING, LEGEND_ITEM_SPACING, X_AXIS_TITLE_EXTRA, MIN_PLOT_WIDTH, PLOT_HEIGHT } from './chart-layout-core.js';
+import { CHART_MARGIN, TITLE_SPACE, LEGEND_MARGIN, LEGEND_SYMBOL_SIZE, LEGEND_TEXT_SPACING, LEGEND_ITEM_SPACING, X_AXIS_TITLE_EXTRA, MIN_PLOT_WIDTH, PLOT_HEIGHT } from './chart-layout-core.js';
 
 
 export type { PlotArea, TickMark, AxisGeometry, BarRect, DataPoint, BarSeriesGeo, LineSeriesGeo, AreaSeriesGeo, ScatterSeriesGeo, SeriesGeo, LegendEntry, LegendGeometry, AnnotationGeometry, ChartGeometry } from './chart-layout-core.js';
@@ -203,8 +203,8 @@ function computeMargins(
   ast: ChartDiagramAST,
   legendEstimate: LegendEstimate,
 ): { leftMargin: number; topMargin: number } {
-  let leftMargin = MARGIN + AXIS_LABEL_SPACE;
-  let topMargin = MARGIN + TITLE_SPACE;
+  let leftMargin = CHART_MARGIN + AXIS_LABEL_SPACE;
+  let topMargin = CHART_MARGIN + TITLE_SPACE;
 
   if (ast.legendPosition === 'left') {
     leftMargin += legendEstimate.width + LEGEND_MARGIN;
@@ -223,8 +223,8 @@ function computeSvgDimensions(input: SvgDimensionInput): { svgWidth: number; svg
   const { ast, plotWidth, plotHeight, hasY2, legendEstimate } = input;
   const hasXTitle = ast.hAxis.title !== '' && ast.hAxis.title !== undefined;
 
-  let svgWidth = MARGIN + AXIS_LABEL_SPACE + plotWidth + (hasY2 ? AXIS_LABEL_SPACE : 0) + MARGIN;
-  let svgHeight = MARGIN + TITLE_SPACE + plotHeight + AXIS_LABEL_SPACE + MARGIN;
+  let svgWidth = CHART_MARGIN + AXIS_LABEL_SPACE + plotWidth + (hasY2 ? AXIS_LABEL_SPACE : 0) + CHART_MARGIN;
+  let svgHeight = CHART_MARGIN + TITLE_SPACE + plotHeight + AXIS_LABEL_SPACE + CHART_MARGIN;
 
   if (hasXTitle) svgHeight += X_AXIS_TITLE_EXTRA;
 

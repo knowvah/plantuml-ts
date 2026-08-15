@@ -42,7 +42,7 @@ import './dot-engine-measurer.js';
 import { withSameContainerConstraints } from './graph-layout-build-constraint.js';
 
 /** Right/bottom canvas padding, matching the in-house engine's old extractResult. */
-const MARGIN = 12;
+const CANVAS_MARGIN = 12;
 
 type OutNodes = DotLayoutResult['nodes'];
 type OutEdges = DotLayoutResult['edges'];
@@ -360,16 +360,16 @@ function canvasSize(nodes: OutNodes, edges: OutEdges): { width: number; height: 
   let width = 0;
   let height = 0;
   for (const n of nodes) {
-    width = Math.max(width, n.x + n.width + MARGIN);
-    height = Math.max(height, n.y + n.height + MARGIN);
+    width = Math.max(width, n.x + n.width + CANVAS_MARGIN);
+    height = Math.max(height, n.y + n.height + CANVAS_MARGIN);
   }
   for (const e of edges) {
     if (e.labelX !== undefined && e.labelWidth !== undefined) {
-      width = Math.max(width, e.labelX + e.labelWidth / 2 + MARGIN);
+      width = Math.max(width, e.labelX + e.labelWidth / 2 + CANVAS_MARGIN);
     }
     for (const p of e.points) {
-      width = Math.max(width, p.x + MARGIN);
-      height = Math.max(height, p.y + MARGIN);
+      width = Math.max(width, p.x + CANVAS_MARGIN);
+      height = Math.max(height, p.y + CANVAS_MARGIN);
     }
   }
   return { width, height };

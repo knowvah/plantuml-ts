@@ -47,7 +47,7 @@ import {
 } from './state-render-colors.js';
 
 /** `EntityPosition.RADIUS` (`:56`). */
-const RADIUS = 6;
+import { RADIUS } from '../../core/abel/EntityPosition.js';
 
 /** `EntityImageStateBorder#getUStroke` (`:106-108`) — 1.5 for the symbol,
  *  where an ordinary state box uses 0.5. */
