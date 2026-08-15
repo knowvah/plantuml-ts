@@ -1,5 +1,14 @@
 # Batch 6 - Attempt 6 (human sign-off 2026-07-22)
 
+> **STALE TABLE — corrected 2026-08-15.** The "Done" cells below stopped
+> being updated at the T20 stop and still read `NOT RUN (T20 stop)` for
+> T19/T14b/T15. All three DID run: G8's close (T3, `814d9dc6`) unblocked this
+> batch, T19 paper gate v5 PASSED, T14b landed the wiring (`d74cfde`), and
+> T15 closed the mission (`aa5f6961`, family swept 18/22 size-exact). The
+> mission README's `## Status: COMPLETE` is the accurate record; this table
+> is not. Left in place rather than rewritten, per this repo's convention of
+> amending dated entries — but do not read the Done column as current.
+
 Fix the two T9-isolated pre-existing gaps as standalone jar-faithful
 mechanism ports, re-gate on paper, then re-apply the T9 wiring
 unchanged.
