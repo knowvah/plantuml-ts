@@ -24,6 +24,7 @@ export const CHECKS = [
   'minlenOk',
   'shapeOk',
   'labelOk',
+  'labelSizeOk',
   'portOk',
   'clusterOk',
   'rankdirOk',
@@ -122,6 +123,21 @@ interface CheckDetail {
   values: (o: StructuralGraph, c: StructuralGraph) => [unknown, unknown];
 }
 
+/** D7 (edge-label-box, 2026-08-15): the reserved label boxes the comparator's
+ *  `labelSizeOk` compares, tagged by kind. Mirrors
+ *  `svek-dot.ts#sortedLabelBoxes`; duplicated for the same reason
+ *  `directedDegreesOf` is. */
+const labelBoxesOf = (g: StructuralGraph): string[] =>
+  g.edges
+    .flatMap((e) => [
+      e.labelBox === undefined ? [] : [`label:${e.labelBox}`],
+      e.tailLabelBox === undefined ? [] : [`tail:${e.tailLabelBox}`],
+      e.headLabelBox === undefined ? [] : [`head:${e.headLabelBox}`],
+      e.xLabelBox === undefined ? [] : [`xlabel:${e.xLabelBox}`],
+    ])
+    .flat()
+    .sort();
+
 /** One entry per CHECKS member — extend here when new checks land. */
 const CHECK_DETAILS: Record<Check, CheckDetail> = {
   nodeCountOk: { label: 'node count', values: (o, c) => [o.nodes.length, c.nodes.length] },
@@ -134,6 +150,7 @@ const CHECK_DETAILS: Record<Check, CheckDetail> = {
   minlenOk: { label: 'minlen multiset', values: (o, c) => [minlensOf(o), minlensOf(c)] },
   shapeOk: { label: 'shape multiset', values: (o, c) => [shapesOf(o), shapesOf(c)] },
   labelOk: { label: 'label counts [label,tail,head,xlabel]', values: (o, c) => [labelCountsOf(o), labelCountsOf(c)] },
+  labelSizeOk: { label: 'label boxes kind:WxH (D7)', values: (o, c) => [labelBoxesOf(o), labelBoxesOf(c)] },
   portOk: { label: 'edge endpoint ports', values: (o, c) => [portsOf(o), portsOf(c)] },
   clusterOk: { label: 'cluster-size list', values: (o, c) => [clusterSizesOf(o), clusterSizesOf(c)] },
   rankdirOk: { label: 'rankdir', values: (o, c) => [o.rankdir, c.rankdir] },

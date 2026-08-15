@@ -158,8 +158,10 @@ function mergeNoteWithLabel(label: LabelDims | undefined, note: LabelDims, posit
 }
 
 /** Edge label attrs (HTML-table label, svek convention — mirrors class
- *  engine's edgeLabelAttrs). Widths/heights are measured but tolerant: the
- *  DOT-parity comparator only checks label PRESENCE, not pixel size. */
+ *  engine's edgeLabelAttrs). Widths/heights are ASSERTED by the DOT gate
+ *  since 2026-08-15 (`svek-dot.ts#labelSizeOk`, edge-label-box D7) — the
+ *  earlier "measured but tolerant, presence only" note here was the blind
+ *  spot that let a 19x13-vs-21x15 box through (`buniva-95-zije634`). */
 /** A `ReservedLabelBox` as the `{width, height}` the merge helpers take. */
 const reservedDims = (box: { reservedWidth: number; reservedHeight: number }): LabelDims => ({
   width: box.reservedWidth,

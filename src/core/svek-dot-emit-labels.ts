@@ -44,8 +44,11 @@ export const round = (v: number): string => String(Math.round(v));
  * the layout path, and the layout builder already floors the same field
  * independently (`graph-layout-build.ts`'s `Math.floor(c.titleTableWidth)`).
  * Rounding here only ever made the emitted DOT TEXT disagree with jar's —
- * 45.9375 emitted `46` where jar emits `45` — which the DOT gate cannot see,
- * because it compares label PRESENCE and not pixel size.
+ * 45.9375 emitted `46` where jar emits `45` — which the DOT gate could not
+ * see at the time, because it compared label PRESENCE and not pixel size.
+ * (Since 2026-08-15 it can: `tests/oracle/svek-dot.ts#labelSizeOk` compares
+ * every EDGE label's `WIDTHxHEIGHT` verbatim — edge-label-box D7. Cluster
+ * TITLE tables are still presence-only.)
  */
 export const trunc = (v: number): string => String(Math.trunc(v));
 

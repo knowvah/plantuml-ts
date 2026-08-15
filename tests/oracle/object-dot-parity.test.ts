@@ -31,6 +31,13 @@ import {
   dotInputToStructural,
   compareStructural,
 } from './svek-dot.js';
+import {
+  assertBacklogFailures,
+  expectedBacklogFailures,
+  loadSlugBacklog,
+  structuralFailures,
+  type BacklogFile,
+} from './dot-parity-backlogs.js';
 
 const GOLDENS = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -44,7 +51,17 @@ const GOLDENS = join(
  *  fixture is therefore held to `structurallyEqual` outright, with no
  *  per-slug exemption -- `size-backlog.json` below is the only remaining
  *  allowance, and it is a numeric tolerance rather than a check exemption.
- *  A future direction regression is a plain failure, which is the point. */
+ *  A future direction regression is a plain failure, which is the point.
+ *  (D7, 2026-08-15, re-opened ONE per-slug exemption: `label-size-backlog.json`
+ *  below, for the label-box SIZE check that did not exist when this was
+ *  written -- 2 slugs, shrink-only.) */
+
+/** Per-slug structural backlog (NOT a skip -- see dot-parity-backlogs.ts):
+ *  D7 `label-size-backlog.json`, edge-label BOX SIZE only (edge-label-box,
+ *  2026-08-15; 2 slugs, shrink-only). Its `_doc` carries the mechanism. */
+const backlogs: ReadonlyMap<BacklogFile, ReadonlySet<string>> = new Map(
+  (['label-size-backlog.json'] as const).map((f) => [f, loadSlugBacklog(GOLDENS, f)]),
+);
 
 /** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-exact fixtures. */
 const sizeBacklog: Record<string, number> = existsSync(join(GOLDENS, 'size-backlog.json'))
@@ -90,18 +107,18 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — obj
         `${name}: expected ${files.length} captured layout graph(s), got ${captured.length}`,
       ).toBe(files.length);
 
+      // Structural gate, per fixture: see dot-parity-backlogs.ts for why the
+      // backlog check is a per-file subset and a per-fixture union.
+      const diffs = files.map((file, i) =>
+        compareStructural(
+          parseSvekDot(readFileSync(join(GOLDENS, name, file), 'utf8')),
+          dotInputToStructural(captured[i]!),
+        ),
+      );
+      assertBacklogFailures(name, files, diffs.map(structuralFailures), expectedBacklogFailures(name, backlogs));
       for (let i = 0; i < files.length; i++) {
         const file = files[i]!;
-        const oracle = parseSvekDot(readFileSync(join(GOLDENS, name, file), 'utf8'));
-        const candidate = dotInputToStructural(captured[i]!);
-        const diff = compareStructural(oracle, candidate);
-        const failingChecks = Object.entries(diff)
-          .filter(([k, v]) => k.endsWith('Ok') && v === false)
-          .map(([k]) => k);
-        expect(
-          diff.structurallyEqual,
-          `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
-        ).toBe(true);
+        const diff = diffs[i]!;
         // D4: node sizes pinned (rect nodes; plaintext nodes parse as 0x0 on
         // both sides so they cannot mask a rect-size regression). Backlog
         // fixtures ratchet downward; everything else must be exactly 0.
