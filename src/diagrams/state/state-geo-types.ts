@@ -271,6 +271,35 @@ export interface StateSeparatorGeo {
   readonly y2: number;
 }
 
+/**
+ * A transition label's own INK contribution — the `UEmpty` upstream's
+ * `TextBlockMarged#drawU` emits for the whole marged block before drawing
+ * the glyphs inset by `marginLabel`
+ * (`klimt/shape/TextBlockMarged.java:79-87`, dimension at `:74-77`), which
+ * `LimitFinder#drawEmpty` then folds at full size with no inset
+ * (`klimt/drawing/LimitFinder.java:159-162`).
+ *
+ * Distinct from `TransitionGeo.label`'s `width`/`height` in BOTH terms, and
+ * that is the whole point:
+ *
+ * - **Size.** `width` here is `measuredWidth + 2*marginLabel`, UNfloored.
+ *   `label.width` is the DOT reservation, floored by upstream's `(int)`
+ *   cast (`svek/SvekEdge.java:504-507`) and correct for that use only.
+ * - **Anchor.** `x`/`y` are the reserved box's own top-left corner —
+ *   `labelXY.getPosition()`, which is where upstream draws the marged block
+ *   (`SvekEdge.java:951-954`). `label.x`/`label.y` are the drawn TEXT
+ *   anchor, one `marginLabel` (plus the ascent, on y) further in.
+ *
+ * `x`/`y` carry graphviz's own 2-decimal SVG print precision; `width`/
+ * `height` do not. See `state-transition-label.ts#svgPrecision`.
+ */
+export interface LabelInkBox {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
 export interface TransitionGeo {
   from: string;
   to: string;
@@ -282,8 +311,19 @@ export interface TransitionGeo {
    *  for a label built without a font/measurer available (concurrent-region
    *  passes, `state-composite-concurrent.ts`, out of this task's write-set)
    *  -- both consumers already treat absence as "fold the point only",
-   *  the pre-existing behavior. */
-  label?: { text: string; x: number; y: number; width?: number; height?: number };
+   *  the pre-existing behavior.
+   *
+   *  `inkBox` (mission `transition-label-ink`, T3) is what the ink walk
+   *  reads instead; see {@link LabelInkBox} for why the two differ. Present
+   *  exactly when `width`/`height` are. */
+  label?: {
+    text: string;
+    x: number;
+    y: number;
+    width?: number;
+    height?: number;
+    inkBox?: LabelInkBox;
+  };
   /** mission G4 S7 -- see `StateNodeGeo.creationIndex`'s own doc comment;
    *  same raw-value contract, sourced from `Transition.creationIndex`. */
   creationIndex?: number;

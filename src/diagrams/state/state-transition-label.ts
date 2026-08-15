@@ -19,6 +19,8 @@
 
 import type { Transition } from './ast.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import type { ReservedLabelBox } from '../../core/edge-label-box.js';
+import type { LabelInkBox } from './state-geo-types.js';
 import { transitionLabelText } from './state-dot-graph.js';
 import { computeReservedLabelBox } from '../../core/edge-label-box.js';
 
@@ -56,11 +58,88 @@ export function transitionLabelAnchor(
   measurer: StringMeasurer,
   isSelfLoop: boolean,
 ): { x: number; y: number } {
+  return anchorFromCentre(centre, measureLabel(text, font, measurer, isSelfLoop));
+}
+
+/** The reserved box plus the first line's ascent -- everything both the
+ *  anchor conversion and the ink box need, measured once. */
+interface MeasuredLabel {
+  readonly box: ReservedLabelBox;
+  readonly ascent: number;
+}
+
+function measureLabel(
+  text: string,
+  font: FontSpec,
+  measurer: StringMeasurer,
+  isSelfLoop: boolean,
+): MeasuredLabel {
   const box = computeReservedLabelBox(text, font, measurer, isSelfLoop);
-  const ascent = font.size - measurer.getDescent(font, box.lines[0]!);
+  return { box, ascent: font.size - measurer.getDescent(font, box.lines[0]!) };
+}
+
+function anchorFromCentre(
+  centre: { x: number; y: number },
+  { box, ascent }: MeasuredLabel,
+): { x: number; y: number } {
   return {
     x: centre.x - box.reservedWidth / 2 + box.marginLabel,
     y: centre.y - box.measuredHeight / 2 + ascent,
+  };
+}
+
+/**
+ * Round to the 2 decimals graphviz's SVG writer prints — the precision jar's
+ * label geometry actually carries.
+ *
+ * PlantUML never sees a full-precision label position: it scrapes `dot
+ * -Tsvg`'s TEXT, taking the min corner of the invisible label table's
+ * `points="..."` (`svek/SvekEdge.java:808-813`, `SvekUtils.getMinXY`), and
+ * graphviz prints every coordinate through
+ * `snprintf(buf, 50, "%.02f", num)`.
+ *
+ * Measured, not assumed: real graphviz 15.1.1 on jar's own
+ * `test-results/dot-cache/state/bemena-23-zebu249/svek-1.dot` puts the
+ * `EvNewValueSaved` box corner at `235.61` where our engine carries
+ * `235.61168` — the whole of that fixture's residual composite-width error
+ * once the marged-box fold is correct.
+ *
+ * Applied to the ink box ONLY, never to `label.x`/`label.y`: the draw
+ * anchor and the document-level (`labelInk: false`) point fold are pinned
+ * and must stay byte-identical (mission decision D5). We therefore draw the
+ * label at the unquantized x where jar draws the quantized one — ≤0.005px,
+ * inside the 0.01px SVG-conformance band.
+ *
+ * `toFixed` rounds half away from zero where C's `%.02f` rounds half to
+ * even; they differ only for a double that is an exact `n.xx5`, which a
+ * layout coordinate is not in practice. The `+ 0` normalizes `-0`, matching
+ * graphviz's own `num > -0.005 && num < 0.005` guard.
+ *
+ * @see ~/git/graphviz/lib/gvc/gvdevice.c:513-528 (`gvprintdouble`)
+ * @see .agent-notes/class-edge-spline-2dp-quantization.md
+ */
+function svgPrecision(v: number): number {
+  return Number(v.toFixed(2)) + 0;
+}
+
+/** The label fields `TransitionGeo.label` carries beyond text and anchor:
+ *  the floored DOT reservation (`width`/`height`, unchanged) and the
+ *  unfloored, box-anchored ink extent ({@link LabelInkBox}). */
+function labelBoxFields(
+  anchor: { x: number; y: number },
+  { box, ascent }: MeasuredLabel,
+): { width: number; height: number; inkBox: LabelInkBox } {
+  return {
+    width: box.reservedWidth,
+    height: box.reservedHeight,
+    // `LimitFinder#drawEmpty` over `TextBlockMarged`'s own `UEmpty`: the
+    // marged block's top-left corner, and its UNfloored dimension.
+    inkBox: {
+      x: svgPrecision(anchor.x - box.marginLabel),
+      y: svgPrecision(anchor.y - ascent - box.marginLabel),
+      width: box.measuredWidth + 2 * box.marginLabel,
+      height: box.measuredHeight + 2 * box.marginLabel,
+    },
   };
 }
 
@@ -115,7 +194,9 @@ export function attachTransitionLabel(
   edgeResult: LabelEdgeResult | undefined,
   font: FontSpec | undefined,
   measurer: StringMeasurer | undefined,
-): { text: string; x: number; y: number; width?: number; height?: number } | undefined {
+):
+  | { text: string; x: number; y: number; width?: number; height?: number; inkBox?: LabelInkBox }
+  | undefined {
   const labelText = transitionLabelText(t);
   if (labelText === undefined) return undefined;
 
@@ -127,28 +208,25 @@ export function attachTransitionLabel(
   // pre-existing perpendicular-only, no-box shape (D1's own "absent falls
   // back unchanged" spirit, generalized to a missing measurer rather than
   // just a missing layout position).
-  const box =
+  const measured =
     font !== undefined && measurer !== undefined
-      ? computeReservedLabelBox(labelText, font, measurer, isSelfLoop)
+      ? measureLabel(labelText, font, measurer, isSelfLoop)
       : undefined;
-  const boxFields = box !== undefined ? { width: box.reservedWidth, height: box.reservedHeight } : {};
 
   // D1: gate on `labelX !== undefined` specifically, never truthiness (0 is
   // a valid coordinate) -- `labelY` is present together with `labelX`
   // whenever it is (`graph-layout.ts#toEdgeEntry` sets both from the same
   // `ge.label` pair).
-  if (edgeResult?.labelX !== undefined && font !== undefined && measurer !== undefined) {
-    const anchor = transitionLabelAnchor(
-      { x: edgeResult.labelX, y: edgeResult.labelY! },
-      labelText,
-      font,
-      measurer,
-      isSelfLoop,
-    );
-    return { text: labelText, x: anchor.x, y: anchor.y, ...boxFields };
+  if (edgeResult?.labelX !== undefined && measured !== undefined) {
+    const anchor = anchorFromCentre({ x: edgeResult.labelX, y: edgeResult.labelY! }, measured);
+    return { text: labelText, x: anchor.x, y: anchor.y, ...labelBoxFields(anchor, measured) };
   }
 
   const legacy = perpendicularOffsetLabel(points);
   if (legacy === undefined) return undefined;
+  // The fallback anchor is this port's own (upstream draws no label at all
+  // when graphviz returned no position), so it keeps the SAME box
+  // convention rather than a second one.
+  const boxFields = measured !== undefined ? labelBoxFields(legacy, measured) : {};
   return { text: labelText, x: legacy.x, y: legacy.y, ...boxFields };
 }

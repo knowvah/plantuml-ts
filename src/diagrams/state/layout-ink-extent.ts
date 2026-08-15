@@ -359,12 +359,12 @@ function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolea
   }
 }
 
-/** One transition's own ink contribution — plain points/label anchors
- *  (`LimitFinder#drawDotPath`-equivalent: no inset) plus, when
- *  `includeArrowheadInk` is true, the head-side arrowhead's own ink
- *  (`renderer-arrowhead.ts#transitionArrowheadInk`, already
+/** One transition's own ink contribution — plain points
+ *  (`LimitFinder#drawDotPath`-equivalent: no inset) and its label box,
+ *  plus, when `includeArrowheadInk` is true, the head-side arrowhead's own
+ *  ink (`renderer-arrowhead.ts#transitionArrowheadInk`, already
  *  `HACK_X_FOR_POLYGON`-padded internally via a real `LimitFinder` walk
- *  over the placed `ExtremityArrow`) — see module doc comment's
+ *  over the placed `ExtremityArrow`) — see the module doc comment's
  *  mechanism-7 note for why {@link computeSvekResultGeometry} passes
  *  `false`. */
 function addTransitionInk(
@@ -374,20 +374,20 @@ function addTransitionInk(
   labelInk: boolean,
 ): void {
   for (const p of transition.points) addPoint(box, p.x, p.y);
-  // G8 T2 (mission g7-borderpoint-rank T20b's verified mechanism): fold the
-  // label's own reserved BOX -- `[x, x+w] x [y-h, y]`, `label.x`/`.y` being
-  // the draw anchor (top-left-ish, per state-transition-label.ts's own
-  // anchor convention) -- at the RETURNED (graphviz) position, not just its
-  // anchor POINT. Only when both a width/height are present AND the caller
-  // opted in (`labelInk`, mirroring `includeArrowheadInk` below) --
-  // `computeStateDocumentDims`/`computeStateInkShift` (the document-level,
-  // already-pinned functions) pass `false` and keep the pre-existing
-  // point-only fold unchanged; `computeSvekResultGeometry` (the composite
-  // autonom-sizing aggregation T20b targeted) passes `true`.
+  // G8 T2 (mission g7-borderpoint-rank T20b): fold the label's own BOX at
+  // the RETURNED (graphviz) position, not just its anchor POINT -- only
+  // when the box is present AND the caller opted in (`labelInk`, mirroring
+  // `includeArrowheadInk` below); `computeStateDocumentDims`/
+  // `computeStateInkShift` pass `false` and keep the point-only fold.
+  // `transition-label-ink` T3: upstream folds neither the drawn text nor
+  // the floored DOT reservation but `TextBlockMarged#drawU`'s own `UEmpty`
+  // (`klimt/shape/TextBlockMarged.java:79-87`), so the lines below are
+  // `drawEmpty` over `label.inkBox` (`klimt/drawing/LimitFinder.java:159-162`).
   if (transition.label !== undefined) {
-    if (labelInk && transition.label.width !== undefined && transition.label.height !== undefined) {
-      addPoint(box, transition.label.x, transition.label.y - transition.label.height);
-      addPoint(box, transition.label.x + transition.label.width, transition.label.y);
+    const ink = transition.label.inkBox;
+    if (labelInk && ink !== undefined) {
+      addPoint(box, ink.x, ink.y);
+      addPoint(box, ink.x + ink.width, ink.y + ink.height);
     } else {
       addPoint(box, transition.label.x, transition.label.y);
     }

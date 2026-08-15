@@ -1,26 +1,40 @@
 # Batch 2 — land the fix
 
-**Do not start this batch until a human has approved the write-set at the
-Batch 1 checkpoint.** The `Writes` column below is a placeholder; replace it
-with what was approved, and record the approval in `decision-journal.md`.
+**APPROVED at the checkpoint, 2026-08-15.** Write-set: the three state
+files below. Quantization: IN SCOPE, label position only.
 
 | ID | Description | Agent | Writes | Depends on | Done |
 |----|-------------|-------|--------|-----------|------|
-| T3 | Land mechanisms (A) and (B) in ONE commit, with tests | typescript-pro | *as approved* — expect `src/diagrams/state/layout-ink-extent.ts` plus T1's site | B1 + approval | [ ] |
-| T4 | Sweep, ledger, close | typescript-pro | brief + `.agent-notes/` | T3 | [ ] |
+| T3 | Land the marged-box ink fold + the label-position quantization in ONE commit, with tests | orchestrator | `src/diagrams/state/state-geo-types.ts`, `state-transition-label.ts`, `layout-ink-extent.ts` + their tests | B1 + approval | [ ] |
+| T4 | Sweep, ledger, close | orchestrator | brief + `.agent-notes/` | T3 | [ ] |
 
 Serial. T4 writes no `src/`.
 
 ## One commit, deliberately
 
-(A) is −1.525 and (B) is +0.998. Landing either alone leaves the fixture
-measurably worse than baseline and a bisect landing on that commit will
+Both corrections act on the same number and the intermediate state is
+worse than either endpoint, so a bisect landing between them would
 mislead. This is the case "one commit per task" exists to permit.
 
-Route the label fold through `LimitFinder#drawText`'s rule rather than
-re-implementing it at the call site — our port of that method is already
-verbatim-correct (`evidence.md` §3), and the defect is that
-`layout-ink-extent.ts:391` does not use it.
+Batch 1 restated the mechanism: there is no −1.525/+0.998 pair. Upstream
+folds `TextBlockMarged`'s `UEmpty` — the marged BLOCK
+(`measuredWidth + 2·marginLabel`, UNfloored) anchored at the reserved
+box's own corner — so the fold to port is `LimitFinder#drawEmpty`
+(`LimitFinder.java:159-162`), not `#drawText`. The second term is the
+2-decimal read-seam quantization: jar reads the box corner out of
+graphviz's SVG text (`SvekEdge.java:808-813`), which graphviz prints with
+`snprintf(buf, 50, "%.02f", num)` (`~/git/graphviz/lib/gvc/gvdevice.c
+:513-528`). Verified directly — real graphviz 15.1.1 on jar's own
+`svek-1.dot` puts the `EvNewValueSaved` box corner at **235.61** where our
+engine carries **235.61168**.
+
+**D5 constrains where the quantization goes.** Quantizing `label.x`/
+`label.y` themselves would perturb the document-level `labelInk: false`
+point fold and the drawn SVG position, which D5 forbids. It is therefore
+applied to the ink box only, leaving the draw anchor and the point fold
+byte-identical. Consequence, documented rather than hidden: we draw the
+label at the unquantized x where jar draws the quantized one — ≤0.005 px,
+inside the 0.01 px conformance band.
 
 ## Batch exit bar
 
