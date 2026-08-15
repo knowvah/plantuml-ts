@@ -68,8 +68,8 @@ one merge old.
 
 | # | What | Depends on | Done |
 |---|---|---|---|
-| [1](batch-1/overview.md) | Baseline + reconcile the family + a symbol ink walk | — | [ ] |
-| [2](batch-2/overview.md) | Dispatch USymbol leaves to it; sweep and close | B1 | [ ] |
+| [1](batch-1/overview.md) | Baseline + reconcile the family + a symbol ink walk | — | [x] |
+| [2](batch-2/overview.md) | Dispatch USymbol leaves to it; sweep and close | B1 | [x] `bb820507` |
 
 ## Quality gates
 
@@ -126,3 +126,56 @@ Run all four between every batch. **Never pipe `npm test`.**
 - [decision-journal.md](decision-journal.md) — appended during execution
 - `.agent-notes/class-ink-shared-offset-groups.md` item **(b)** — the
   measured evidence. **Read it before Batch 1.**
+
+
+---
+
+## Outcome (2026-08-15) — COMPLETE
+
+| Signal | Baseline | Final |
+|---|---|---|
+| `cacoma` / `cezaka` uniform offset | 1.5 | **0** |
+| Class doc-size-exact | 773 / 1073 | **776** |
+| Rigid-aligned matching shapes | 25695 | 25695 (flat — see below) |
+| Class DOT-parity | 100% EQUAL | **100% EQUAL** |
+| svg-class / svg-object pins | all hold | **all hold** |
+
+Newly exact: `cezaka-60-jado323`, `sofagu-98-fezi999`, `gapisu-00-celo011`.
+`cacoma-43-poxu615` is exact on height and on every shape, 1px wide.
+
+### Three things the brief got wrong
+
+**"Matched shapes must RISE" was the wrong bar.** They stayed flat at
+25695, and that is the CORRECT signature for this defect rather than a
+miss: the harness aligns each document under one rigid offset, which
+already absorbed a UNIFORM 1.5 shift. Document size was the only axis that
+could move, and it did. A bar copied from the previous mission did not fit
+this defect class.
+
+**The family is 9, not 5 — and note (b)'s "6" was right.** An earlier pass
+in this mission reported 5 class fixtures and concluded the note
+overcounted. That was a case-sensitive grep missing `sofagu-98-fezi999`'s
+`Actor "fg" as fr`. The real set is 6 class + 3 OBJECT (object shares the
+class ink path, which the brief's scope section did not anticipate).
+
+**T2 and T3 could not be separated.** The brief split "build the walk" from
+"dispatch to it" so a measurement change and a behaviour change would not
+share a commit. They landed together because the walk could not be
+verified at all in isolation: `EntityImageDescription.drawU` calls
+`startGroup`, and `LimitFinder` could not accept it until `UGraphicNo`
+gained upstream's no-op `startGroup`/`closeGroup` — a real faithfulness gap
+this mission surfaced and fixed.
+
+### What is left
+
+- `ruturo-47-kapi300` moved 424 → 422 against jar's 430 — 2px further out
+  on a fixture already 6 off and never exact. Its height is dominated by
+  another, unidentified mechanism; the actor correction merely shifted
+  within it.
+- `cacoma-43-poxu615`'s remaining 1px of WIDTH. Every shape matches and the
+  height is exact, so this is a max-X contributor, not the ink rule fixed
+  here.
+- Routing `usecase` through the same walk was deliberately not attempted
+  (decision D2 required its output byte-identical, and its `addEllipseInk`
+  rule is jar-verified). Whether the general walk reproduces it exactly is
+  a measurable open question, not a known win.
