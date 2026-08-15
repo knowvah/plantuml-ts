@@ -247,7 +247,8 @@ function layoutSinglePage(
   const effAst = filterRemovedEntities(collapsedAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
-  const { dotGraph, swappedEdges, noteParts, anchors } = buildDotGraph(effAst, measuredMap, theme, measurer);
+  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs } =
+    buildDotGraph(effAst, measuredMap, theme, measurer);
 
   const result = layout(dotGraph);
 
@@ -255,7 +256,10 @@ function layoutSinglePage(
   const posMap = new Map(result.nodes.map((n) => [n.id, n]));
   const hiddenIds = computeHiddenIds(effAst);
   const classifiers = buildClassifierGeos(effAst, measuredMap, posMap, hiddenIds, theme);
-  const namespaces = buildNamespaceGeos(effAst, posMap, theme, measurer, anchors);
+  // T5 (namespace-cluster-box): read the namespace box from the real
+  // graphviz cluster polygon (`result.clusters`), not a member-bbox walk --
+  // see `class-geo-builders.ts#buildNamespaceGeos`'s own doc comment.
+  const namespaces = buildNamespaceGeos(effAst, theme, measurer, result.clusters, clusterIdByNs);
   const edges = buildEdgeGeos(
     effAst, result, swappedEdges, measurer, theme.fontFamily, posMap, anchors,
     theme.colors.graph.arrowThickness,
