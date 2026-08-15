@@ -36,3 +36,28 @@
 - **Impact**: Any class-engine restructure that promises "no output change"
   can use it (save a report on the base commit, `--check` after).
 - **Confidence**: High.
+
+## Observation: jar's leaf document order is `bibliotekon` insertion order, not declaration/host order
+- **Context**: Deciding Batch 3's shape (fold notes into one collection).
+- **Finding**: `GraphvizImageBuilder#buildImage` → `printGroups(root)` (each
+  package's `g.leafs()` in creation order, recursing) THEN
+  `printEntities(getUnpackagedEntities())`; `SvekResult#drawU` iterates
+  `bibliotekon.allNodes()` (`SvekResult.java:82`). Notes/TIPS are ordinary
+  entries. Port: classifiers in AST order, notes host-interleaved (N52).
+  `scripts/note-order-report.ts --vs-jar`: 65 SAME / 19 ORDER-ONLY / 13
+  OTHER on the 97 note fixtures. Live probe: `class X; package P { class A;
+  note "n" as N }; class Y; note left of X` → jar `P.A P.N X Y note`, port
+  `X note P.A Y N`.
+- **Impact**: A separate fidelity mission (`leaf-draw-order`); it is what
+  makes the note-fold's target shape (creation-ordered collection) valuable.
+  Until then, N52's host-interleave is a proxy that is right on 65/97.
+- **Confidence**: High (Java read + jar rendered).
+
+## Observation: a hidden host swallows its notes
+- **Context**: Corner probes for T3.
+- **Finding**: `renderer.ts` step 2 `continue`s on `classifier.hidden` BEFORE
+  calling `renderHostedNotes`, and step 4 skips hosted notes — so `hide A`
+  drops every note `of A`. Jar draws the tip (host node stays in
+  bibliotekon; `hide` only wraps its image in `UHidden`).
+- **Impact**: Small renderer fix, out of this mission's scope (moves output).
+- **Confidence**: High (jar-rendered `hide A` probe: hello=1 in jar, 0 here).

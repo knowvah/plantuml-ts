@@ -56,7 +56,20 @@ Remaining work, all small:
    it; none exists).
 5. Journal summary; merge with a merge commit.
 
-## 2. `note-leaf-model` — NOW
+## 2. `note-leaf-model` — batches 1–2 DONE on `feat/note-leaf-model`, batch 3 STOPPED (ruling needed)
+
+2026-08-15: T1–T3 landed byte-identically (draw-time TIPS resolution;
+`mapNoteGeos` reads no classifier). Batch 3 stopped before T4: the faithful
+fold (state's shape, one creation-ordered collection) cannot be byte-identical
+because jar's leaf document order is `bibliotekon` insertion order (packaged
+first, then unpackaged, creation order within) and this port's declaration
+order + host-interleave differs on 19 note fixtures (ORDER-ONLY) and on any
+package/unpackaged mix. Recommended: spin out **`leaf-draw-order`** (gate:
+`scripts/note-order-report.ts --vs-jar`, order-only 19 → 0) and retire this
+brief's batch 3 into it. Details: `plans/note-leaf-model/decision-journal.md`
+(Batch 3 rows) and the README's session summary.
+
+### Original entry
 
 Brief: `plans/note-leaf-model/` (3 batches, 0 started; branch
 `feat/note-leaf-model`). The class engine carries `NoteGeo[]` *parallel to*
