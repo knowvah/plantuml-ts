@@ -1,5 +1,23 @@
 # Mission: a composite's size is its inner INK, not the engine's canvas
 
+> ## HALTED at T2, 2026-08-15 — the premise below is FALSE
+>
+> A state composite's declared size is **already** a faithful port of
+> `SvekResult#calculateDimension` + `InnerStateAutonom#calculateDimensionSlow`
+> (`state-composite-autonom.ts:196-205`, measured exact: ink `+15`, wrapper
+> `+20`, `dx`/`dy` = 6). `BOX_PAD` is a fallback for CLUSTER composites and
+> the named fixtures never reach it — `Configuring` is an `autonom` spec,
+> probe-verified.
+>
+> The real 0.527 is a transition LABEL's placed `x`, folded into the
+> composite's ink max-X at `layout-ink-extent.ts:391`. Full diagnosis, with
+> the measurements, in [decision-journal.md](decision-journal.md).
+>
+> **T1 stands and is committed** (`456d83e5`) — the declared-size harness is
+> real, its baseline is pinned, and it is what disproved the rest of the
+> brief. Batches 2 and 3 are void as written. The successor mission belongs
+> to the label-placement family, not composite sizing.
+
 ## Objective
 
 A state composite reaches the outer scope as a plain node, and we declare
