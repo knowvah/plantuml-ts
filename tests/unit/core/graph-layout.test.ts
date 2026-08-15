@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { layoutGraph } from '../../../src/core/graph-layout.js';
-import type { DotInputGraph } from '../../../src/core/graph-layout.js';
+import type { DotInputGraph, DotLayoutResult } from '../../../src/core/graph-layout.js';
 
 // Box sizes in px; the adapter divides by 72 (inches) on the way into graphviz
 // and getLayout returns points (= the original px), so widths round-trip.
@@ -309,6 +309,90 @@ describe('layoutGraph — cluster title-table label (G5 C3, mechanism 16 shape h
   });
 });
 
+// T7 (`plans/namespace-cluster-box/`, docs/graphviz-issues/14's RESOLVED
+// note): `@knowvah/dot-engine@1.5.0` publishes `ClusterGeometry.label` --
+// the title-table reservation's PLACED position, previously invisible to
+// this seam. Additive: no consumer reads it yet (`class-geo-builders.ts
+// #namespaceGeoFromBox`'s own doc comment records why that specific
+// consumer deliberately does NOT read it -- a measured 333-shape
+// regression traced to `USymbolFolder#asBig` drawing a class/object
+// package title at a fixed local offset, independent of this value). This
+// block asserts only the SEAM's own contract: the field is copied and
+// shifted correctly, and its `x`/`y` are the label space's CENTRE.
+describe('layoutGraph — cluster.label (T7, @knowvah/dot-engine 1.5.0)', () => {
+  it('publishes label with the exact reserved width/height, once a title table is set', () => {
+    const g: DotInputGraph = {
+      nodes: [box('a')],
+      edges: [],
+      clusters: [{ id: 'grp1', nodeIds: ['a'], titleTableWidth: 10, titleTableHeight: 3 }],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    const c = r.clusters!.find((cl) => cl.id === 'grp1')!;
+    expect(c.label).toBeDefined();
+    expect(c.label!.width).toBe(10);
+    expect(c.label!.height).toBe(3);
+  });
+
+  it('omits label when the cluster carries no title reservation at all', () => {
+    const g: DotInputGraph = {
+      nodes: [box('a')],
+      edges: [],
+      clusters: [{ id: 'grp1', nodeIds: ['a'] }],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    const c = r.clusters!.find((cl) => cl.id === 'grp1')!;
+    expect(c.label).toBeUndefined();
+  });
+
+  // The trap this task's own boundary section calls out: `label.x`/`.y`
+  // are the label space's CENTRE (matching `EdgeGeometry.label`'s
+  // convention), not the corner `x`/`y` on the SAME object describes for
+  // the box. Treating `label.y` as a top-left corner overshoots by half
+  // the label's own height -- asserted here by converting explicitly and
+  // checking the converted top sits BELOW the box's reported y (inside the
+  // cluster, as a title reservation must), while the raw centre does not
+  // equal that converted value.
+  it('label.y is the CENTRE of the reservation -- converting to its top requires half the height', () => {
+    const g: DotInputGraph = {
+      nodes: [box('a')],
+      edges: [],
+      clusters: [{ id: 'grp1', nodeIds: ['a'], titleTableWidth: 10, titleTableHeight: 3 }],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    const c = r.clusters!.find((cl) => cl.id === 'grp1')!;
+    const labelTop = c.label!.y - c.label!.height / 2;
+    expect(labelTop).not.toBe(c.label!.y);
+    expect(labelTop).toBeGreaterThan(c.y);
+    expect(labelTop).toBeLessThan(c.y + c.height);
+  });
+
+  it('shifts label.x/.y by the SAME origin translation the box receives', () => {
+    // An extra node to the left/above forces `shiftToOrigin` to apply a
+    // nonzero translation, so the box AND label both move off their raw
+    // @knowvah/dot-engine coordinates -- if `label` were forgotten in
+    // `shiftToOrigin`, this would desync it from `x`/`y` by exactly that
+    // translation.
+    const g: DotInputGraph = {
+      nodes: [box('anchor'), box('a')],
+      edges: [{ id: 'e0', from: 'anchor', to: 'a' }],
+      clusters: [{ id: 'grp1', nodeIds: ['a'], titleTableWidth: 10, titleTableHeight: 3 }],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    const c = r.clusters!.find((cl) => cl.id === 'grp1')!;
+    // Every node/edge point is clamped to >= 0 by shiftToOrigin; the same
+    // clamp must hold for the label's own centre, or it would carry
+    // leftover pre-shift coordinates (well past the graph's own bounds).
+    expect(c.label!.x).toBeGreaterThanOrEqual(0);
+    expect(c.label!.y).toBeGreaterThanOrEqual(0);
+    expect(c.label!.x).toBeLessThanOrEqual(r.width);
+    expect(c.label!.y).toBeLessThanOrEqual(r.height);
+  });
+});
+
 // G5 C7, mechanism 16 margin half: `innerMarginLevels` mirrors jar's
 // ClusterDotString "i"/"p1" protection-wrapper nesting -- each extra
 // `subgraph cluster*` level gets graphviz's own default CL_OFFSET(8pt)
@@ -450,6 +534,14 @@ describe('layoutGraph — cluster inner margin levels (G5 C7, mechanism 16 margi
  * Every pair below was MEASURED on real graphviz 15.1.1 against the jar's own
  * oracle DOT (`plans/object-close/ledger.md` M4) — not derived from the
  * formula, so a wrong formula cannot agree with them by construction.
+ *
+ * G9/T15: the padded box is what SPACES the graph, and it is no longer what
+ * the node REPORTS — `portNodeSize` now hands `RECTANGLE_HTML_FOR_PORTS` back
+ * at its declared size, the other half of the `solve:382-389` branch the port
+ * block below already covers. So these measured pairs are asserted where the
+ * padding actually acts: centre-to-centre spacing, which carries the padded
+ * dimension plus the graph's own `nodesep`/`ranksep`. Same four numbers, same
+ * provenance — read through the effect rather than off a box the jar discards.
  */
 describe('layoutGraph — plaintext row-port node padding (M4)', () => {
   const GRAPHVIZ_PADDED: ReadonlyArray<readonly [number, number, number, number]> = [
@@ -460,16 +552,43 @@ describe('layoutGraph — plaintext row-port node padding (M4)', () => {
     [69.49, 68, 85, 76],
     [151.4, 72, 167, 80],
   ];
+  /** the defaults `layoutGraph` hands the engine, in points */
+  const NODESEP = 18;
+  const RANKSEP = 36;
+
+  type OutNode = DotLayoutResult['nodes'][number];
+
+  const pair = (w: number, h: number, edge: boolean): readonly [OutNode, OutNode] => {
+    const r = layoutGraph({
+      nodes: [
+        { id: 'a', width: w, height: h, shape: 'plaintext', portRows: [] },
+        { id: 'b', width: w, height: h, shape: 'plaintext', portRows: [] },
+      ],
+      edges: edge ? [{ id: 'e', from: 'a', to: 'b' }] : [],
+    });
+    return [r.nodes[0]!, r.nodes[1]!];
+  };
+  const centre = (n: OutNode): readonly [number, number] =>
+    [n.x + n.width / 2, n.y + n.height / 2];
 
   it.each(GRAPHVIZ_PADDED)(
-    'pads a %sx%s label to a %sx%s node',
+    'spaces a %sx%s label as a %sx%s node',
     (labelW, labelH, nodeW, nodeH) => {
-      const r = layoutGraph({
-        nodes: [{ id: 'a', width: labelW, height: labelH, shape: 'plaintext', portRows: [] }],
-        edges: [],
-      });
-      expect(r.nodes[0]!.width).toBe(nodeW);
-      expect(r.nodes[0]!.height).toBe(nodeH);
+      // same rank, no edge: the horizontal gap carries the padded WIDTH
+      const [sa, sb] = pair(labelW, labelH, false);
+      expect(centre(sb)[0] - centre(sa)[0]).toBeCloseTo(nodeW + NODESEP, 6);
+      // one edge, two ranks: the vertical gap carries the padded HEIGHT
+      const [ra, rb] = pair(labelW, labelH, true);
+      expect(Math.abs(centre(rb)[1] - centre(ra)[1])).toBeCloseTo(nodeH + RANKSEP, 6);
+    },
+  );
+
+  it.each(GRAPHVIZ_PADDED)(
+    'still REPORTS a %sx%s label at its own size, not the %sx%s node',
+    (labelW, labelH) => {
+      const [a] = pair(labelW, labelH, false);
+      expect(a.width).toBe(labelW);
+      expect(a.height).toBe(labelH);
     },
   );
 
@@ -482,5 +601,60 @@ describe('layoutGraph — plaintext row-port node padding (M4)', () => {
     });
     expect(r.nodes[0]!.width).toBe(49);
     expect(r.nodes[0]!.height).toBe(18);
+  });
+});
+
+/**
+ * G9/T9: a PORT node's reported box is its own SYMBOL, on the engine's centre.
+ *
+ * `SvekNode#appendLabelHtmlSpecialForPort` emits an entry/exit point whose
+ * label is wider than 40px as a `shape=plaintext` HTML table, so graphviz
+ * sizes the NODE from that table and its `PAD`ded minimum — 54x36 for
+ * `jucori-40-cevo136`'s `Aentry1` against the 12x12 symbol drawn there. That
+ * larger box is what spaces the ranks and is kept; `DotStringFactory
+ * #solve:382-389` then reads the node's POSITION from the port cell's own
+ * polygon, which graphviz centres in the padded table.
+ *
+ * Jar-verified on that fixture: `dot -Tplain` puts its two pin centres 145px
+ * apart — exactly the frame height jar draws — and jar's entry-point ellipse
+ * sits at `cy=104`, the node centre, not its top-left.
+ */
+describe('layoutGraph — port nodes report their symbol, not the padded table', () => {
+  const portGraph = (shape: 'plaintext' | 'rect'): DotInputGraph => ({
+    nodes: [
+      { id: 'p', width: 12, height: 12, shape, isPort: true, portPad: 10 },
+      { id: 'other', width: 72, height: 36 },
+    ],
+    edges: [{ id: 'e0', from: 'p', to: 'other', attributes: { minLen: 1 } }],
+  });
+
+  it('keeps the declared 12x12 for a plaintext port, whatever the engine sized', () => {
+    const p = layoutGraph(portGraph('plaintext')).nodes.find((n) => n.id === 'p')!;
+    expect(p.width).toBe(12);
+    expect(p.height).toBe(12);
+  });
+
+  it('centres that symbol in the box the engine laid out', () => {
+    // The engine pads the HTML table well past 12x12, so the ranks separate as
+    // if the node were the larger box while the symbol stays centred in it —
+    // which is what puts the neighbouring rank further away than a bare 12x12
+    // node would.
+    const padded = layoutGraph(portGraph('plaintext'));
+    const bare = layoutGraph(portGraph('rect'));
+    const gap = (r: typeof padded): number => {
+      const p = r.nodes.find((n) => n.id === 'p')!;
+      const o = r.nodes.find((n) => n.id === 'other')!;
+      return Math.abs(o.y + o.height / 2 - (p.y + p.height / 2));
+    };
+    expect(gap(padded)).toBeGreaterThan(gap(bare));
+  });
+
+  it('leaves a non-port plaintext node on the engine`s own box', () => {
+    const g: DotInputGraph = {
+      nodes: [{ id: 'a', width: 12, height: 12, shape: 'plaintext' }],
+      edges: [],
+    };
+    const a = layoutGraph(g).nodes.find((n) => n.id === 'a')!;
+    expect(a.width).toBeGreaterThanOrEqual(12);
   });
 });

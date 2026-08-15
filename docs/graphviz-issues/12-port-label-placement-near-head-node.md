@@ -216,3 +216,63 @@ Actual (dot-engine): tail 12.80, head 2.96.
 > **Superseded.** Real `dot` and dot-engine both put the tail box at
 > y 80.55–93.55 and the head box at y 34.31–47.31 (native, y-up) for this
 > input — identical, and neither clears its node by 14.5px.
+
+---
+
+## The tail-end offset is SOLVED — it is collision avoidance, not a rule (2026-08-14)
+
+Mission `edge-label-box-and-class-ports`, batch 4 / T11. The open question at
+the end of the re-diagnosis — "the tail end does not follow top-left anchoring;
+that extra ≈15.2 is unexplained" — has an answer, and it changes what a fix can
+look like.
+
+**`SvekEdge#manageCollision` (`svek/SvekEdge.java:1204-1216`)** runs over every
+node in the diagram:
+
+```java
+final Positionable cl = PositionableUtils.addMargin(sh, 8, 8);
+if ((startTailText != null || startTailRoleText != null) && startTailLabelXY != null
+        && PositionableUtils.intersect(cl, startTailLabelXY))
+    startTailLabelXY = PositionableUtils.moveAwayFrom(cl, startTailLabelXY);
+```
+
+`moveAwayFrom` (`klimt/geom/PositionableUtils.java:86-117`) is a **five-round
+binary search** along the vector from the node's centre to the label's centre,
+returning the smallest coefficient at which the two stop overlapping.
+
+**So there is no per-end placement formula to find.** Both ends are assigned
+identically (`SvekEdge.java:750-767` differ only in the colour key passed to
+`getXY`) and drawn identically (`:956-980`). The only thing that separates them
+is whether a label happened to intersect a node's 8px-margined box. The head
+label does not, so it keeps its `getMinXY` position and matches the derived
+`boxTop + ascent` rule exactly (+3.022 against a predicted +3.0). The tail
+label does, so it is pushed clear — and **+18.244 is the output of that search
+over this fixture's geometry, not a constant of the layout.**
+
+Hard-coding the two measured constants would have turned 14 diffs green while
+encoding one fixture's search result as a rule. The earlier note called them
+"evidence, not a formula" on instinct; this is the mechanical reason.
+
+### What a fix has to do
+
+Port `manageCollision` — the 8px margin, the intersection test, and
+`moveAwayFrom`'s binary search — and run it after the port-label anchors are
+computed. Not a change to `portLabelAnchor`'s formula.
+
+### Eliminated, each by reading the Java
+
+- **A per-end draw rule** — the two branches are structurally identical.
+- **A per-end assignment rule** — identical but for the colour key.
+- **Markers emitted at different anchors** — the first of the two candidates
+  this file previously named; both ends go through the same
+  `getXY`/`getMinXY` path.
+- **`place_portlabel`** — gated on `labelangle`/`labeldistance`, which our DOT
+  never sets (established earlier in this file).
+- **The engine** — verified against the canonical oracle on four inputs.
+
+### One inferred step, to confirm before implementing
+
+That on `tobuka-93-jale775` the tail label actually intersects its node's +8
+box while the head label does not. The arithmetic fits — the head matches the
+un-moved rule to 0.02 and the tail does not — but the intersection itself was
+not instrumented. Everything else above is read from the Java.

@@ -63,9 +63,9 @@ different anchors, or `moveAwayFrom` / the cluster-avoidance pass
 
 | id | task | write-set |
 |---|---|---|
-| [ ] T11 | **Diagnose** the tail-end ≈15.2. Produce a mechanism with `file:line`, not a constant. | none (diagnosis) — findings to `decision-journal.md` |
-| [ ] T12 | Port the per-end placement into `portLabelAnchor` | `src/diagrams/class/class-edge-geo.ts` |
-| [ ] T13 | Scope the 14 x diffs (deltas 0.98–39.36, not constant) — separate question, NOT explained by the above | none (scoping) |
+| [x] T11 | **Diagnose** the tail-end ≈15.2. Produce a mechanism with `file:line`, not a constant. | none (diagnosis) — findings to `decision-journal.md` |
+| [~] T12 | Port the per-end placement into `portLabelAnchor` | `src/diagrams/class/class-edge-geo.ts` + **`src/core/graph-layout-build-edges.ts` (unapproved)**, new `class-edge-label-anchor.ts`, new `core/klimt/geom/PositionableUtils.ts` |
+| [x] T13 | ~~Scope the 14 x diffs~~ — **not a separate question.** Same `moveAwayFrom` coefficient; the x delta is `deltaX * c` dragged along by a vertical clearance, which is why it was never constant. 14 x diffs -> 2. | none |
 
 T12 depends on T11. **If T11 cannot produce a mechanism, STOP** — do not ship
 `+18.244` and `+3.022` as constants. The issue file is explicit that they are
@@ -78,6 +78,39 @@ value" rule exists to prevent.
 `tobuka-93-jale775`'s **14 y diffs go to zero**, via a rule whose every term
 traces to a Java line. The 14 x diffs may remain; they are T13's to scope, not
 this batch's to close.
+
+### Outcome — 2 short, held for sign-off
+
+`tobuka-93-jale775` **41 -> 17**: y diffs 14 -> 2, x diffs 14 -> 2, the 13
+`path/@d` diffs untouched (not this batch's). **12 of the 14 edges are
+byte-exact on both axes.** Both residuals sit on ONE edge (`edge-7`) at
+0.033-1.12px and are NOT diagnosed — see the decision journal's last two rows.
+
+Census class+object **44,683 -> 44,249 (-434), 55 improved, 0 regressed**.
+component/usecase/state censuses byte-identical. All four gates green.
+
+**The 2 residuals are diagnosed and are not a label defect.** All 17
+remaining diffs sit on ONE element, `g[15]` (13 path + 4 text) — the edge
+`Produkt "*" -- "*" Attribut`. Its SPLINE is displaced 0.85-1.10px in x and
+0.02-0.10px in y; graphviz derives the xlabel anchors FROM the spline, so
+the labels inherit that displacement and `moveAwayFrom` scales it by 1.32.
+The label's inferred pre-collision delta matches the spline's own control-
+point delta to 2dp, and replaying the real `moveAwayFrom` from the inferred
+input reproduces jar's output to 0.0035px. **12 of 14 edges have a matching
+spline and are byte-exact on both axes; the 2 that remain are the 1 edge
+whose spline does not.**
+
+So the bar's PREMISE was wrong, not just its number: port-label placement
+is downstream of edge routing, and cannot be closed while routing diverges.
+The spline divergence is characterized but unattributed (`dotEqual: true`,
+so it enters at or after the engine's spline computation) and is tracked in
+the journal as needing the canonical engine-vs-graphviz check before it can
+be filed.
+
+Two premises in this file were falsified by measuring them, both recorded in
+the journal: the head end is **not** un-pushed (all 14 labels intersect), and
+the reserved box was **not** "already correct" (we hand the layout engine raw
+text where jar hands graphviz a truncated FIXEDSIZE table).
 
 ## Dead ends — recorded so they are not re-walked
 

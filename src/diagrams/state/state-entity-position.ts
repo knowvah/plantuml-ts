@@ -31,9 +31,12 @@ export type EntityPositionKind =
   | 'expansioninput'
   | 'expansionoutput';
 
-/** EntityPosition.fromStereotype (case-insensitive `<<label>>` match). */
-export function getEntityPosition(state: State): EntityPositionKind {
-  const key = state.stereotype?.toLowerCase();
+/** EntityPosition.fromStereotype (case-insensitive `<<label>>` match) —
+ *  reads the stereotype TEXT, so it serves both the AST (`getEntityPosition`)
+ *  and the geometry, which carries the same string on `StateNodeGeo
+ *  .stereotype` and never the `State` it came from. */
+export function positionFromStereotype(stereotype: string | undefined): EntityPositionKind {
+  const key = stereotype?.toLowerCase();
   switch (key) {
     case 'entrypoint':
       return 'entrypoint';
@@ -50,6 +53,10 @@ export function getEntityPosition(state: State): EntityPositionKind {
     default:
       return 'normal';
   }
+}
+
+export function getEntityPosition(state: State): EntityPositionKind {
+  return positionFromStereotype(state.stereotype);
 }
 
 export function isBorderPoint(state: State): boolean {

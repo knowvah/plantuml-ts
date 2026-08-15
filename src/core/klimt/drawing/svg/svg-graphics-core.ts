@@ -55,6 +55,7 @@
  */
 
 import { XmlDocument } from './xml-writer.js';
+import { absorbLayoutEpsilon } from '../../../layout-epsilon.js';
 import type { XmlNode } from './xml-writer.js';
 import type { Paint } from '../../../paint.js';
 import { isTransparentColor } from '../../../paint.js';
@@ -227,8 +228,11 @@ export class SvgGraphicsCore {
   }
 
   protected ensureVisible(x: number, y: number): void {
-    if (x > this.maxX) this.maxX = Math.trunc(x) + 1;
-    if (y > this.maxY) this.maxY = Math.trunc(y) + 1;
+    // `absorbLayoutEpsilon`: this port's px->6dp-inches->px round trip can
+    // leave a coordinate a hair under an integer, which this truncating
+    // cast would drop a whole pixel. See that function's own doc comment.
+    if (x > this.maxX) this.maxX = Math.trunc(absorbLayoutEpsilon(x)) + 1;
+    if (y > this.maxY) this.maxY = Math.trunc(absorbLayoutEpsilon(y)) + 1;
   }
 
   /** Upstream: `addRoboto()`. `protected`, not `private`, since `text()`

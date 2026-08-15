@@ -26,6 +26,7 @@ import {
 import type {
   DotInputEdge,
   DotInputGraph,
+  DotInputNode,
   DotLayoutResult,
 } from './graph-layout.types.js';
 
@@ -61,15 +62,130 @@ export function setLayoutInputObserver(
   layoutInputObserver = fn;
 }
 
-/** graphviz reports node centre coords; renderers expect the top-left corner. */
-function mapNodes(snap: LayoutSnapshot): OutNodes {
-  return snap.nodes.map((n) => ({
-    id: n.name,
-    x: n.x - n.width / 2,
-    y: n.y - n.height / 2,
-    width: n.width,
-    height: n.height,
-  }));
+/** graphviz reports node centre coords; renderers expect the top-left corner.
+ *
+ *  Dimensions come from `input`, NOT from the snapshot. The snapshot echoes
+ *  our own numbers back through the 6-decimal inches STRING the engine was
+ *  given (`graph-layout-build.ts#addNodes`), so a 49.938px node returns as
+ *  49.937968 and renderers would DRAW that. The engine decides POSITION; it
+ *  never decides a node's size THAT WAY, so echoing the size we asked for is
+ *  the accurate value, not an approximation of one.
+ *
+ *  But it does sometimes decide a size outright: a `shape=plaintext` node
+ *  carrying an HTML label is declared with no `width`/`height` at all
+ *  (`graph-layout-build.ts#addRowPortNode`), and graphviz pads the label to
+ *  produce the node — 49x18 of label becomes a 65x36 node. Echoing our
+ *  declared value there would discard a real layout decision. `ROUND_TRIP_
+ *  EPSILON` tells the two cases apart without re-deriving `addNodes`'
+ *  per-shape branches: a returned size within it IS our own number coming
+ *  back, and anything further out is the engine's own. */
+const ROUND_TRIP_EPSILON = 1e-3;
+
+/**
+ * G9/T9: a PORT node occupies its own symbol, not the box graphviz laid out.
+ *
+ * `SvekNode#appendLabelHtmlSpecialForPort` emits an entry/exit point as a
+ * `shape=plaintext` HTML table whenever its label is wider than 40px, so
+ * graphviz sizes the NODE from that table and its `PAD`ded minimum — 54x36 for
+ * `jucori-40-cevo136`'s `Aentry1`, against the 12x12 symbol drawn there. That
+ * bigger box is CORRECT for layout (it is what spaces the ranks), and jar
+ * keeps it: `dot -Tplain` puts that fixture's two pin centres 145px apart,
+ * exactly the frame height jar draws.
+ *
+ * Jar reconciles the two when it reads the layout back. `DotStringFactory
+ * #solve:382-389` takes a `RECTANGLE_PORT`/`RECTANGLE_HTML_FOR_PORTS` node's
+ * position from the `points="…"` polygon beside its `<title>` in graphviz's
+ * own SVG — which is the PORT CELL's polygon, not the outer table's — and
+ * graphviz centres that cell in the padded table. So the reported box is the
+ * caller's declared symbol size, on the engine's own centre.
+ *
+ * This is the seam `solve` occupies, so every consumer sees the corrected box:
+ * before it moved here the state engine drew a 12x12 pin from a 12x12 layout
+ * node (right drawing, ranks 12px too close) and the description engine drew a
+ * 54x36 rect where jar draws 12x12.
+ *
+ * The `RECTANGLE_HTML_FOR_PORTS` half of that same `solve` branch — a class or
+ * object leaf whose members carry link ports, `portRows` here — needs the very
+ * same correction for the very same reason. `addRowPortNode` hands graphviz an
+ * HTML row table with no `width`/`height`/`fixedsize`, exactly as
+ * `SvekNode#appendLabelHtmlSpecialForLink` does, and `poly_init` pads it by
+ * `PAD` (`4*GAP` wide, `2*GAP` tall — graphviz `common/shapes.c:1993-2009`,
+ * `common/const.h:251`). That padding is what spaces the ranks, and jar wants
+ * it; jar simply never reads it back as the classifier's box.
+ *
+ * Measured on `kidugi-68-noje040`: `BigLibrary`'s declared 251.6625x76 came
+ * back as the padded 267x84 — +15.3375 and +8.0, i.e. `PAD` to the pixel — so
+ * the class drew 16px too wide with an empty methods compartment twice its
+ * height, and its whole interior sat 4px high on jar's (same centre, taller
+ * box). Its two neighbours were 8px off in x for the same reason.
+ */
+function portNodeSize(d: DotInputNode | undefined, engine: number, declared: number): number {
+  if (d === undefined) return engine;
+  const htmlSized = (d.isPort === true && d.shape === 'plaintext') || d.portRows !== undefined;
+  return htmlSized ? declared : engine;
+}
+
+/**
+ * The box HALVED to derive a node's CORNER from graphviz's centre — separate
+ * from `width`/`height` (what gets DRAWN) because the two diverge for
+ * exactly one shape: a `portRows` row-table classifier's declared cell
+ * `WIDTH=`/`HEIGHT=` values carry sub-point fractions (this port's own text
+ * measurement), and real graphviz's HTML-table layout floors each to a
+ * whole point before it ever fixes a centre — `addRowPortNode` (`graph-
+ * layout-build.ts`) hands it those fractional `FIXEDSIZE` cells verbatim,
+ * with no `fixedsize`/`width`/`height` on the outer node for graphviz to
+ * echo back untouched. Jar reads that FLOORED box's own left edge off
+ * graphviz's rendered SVG (`DotStringFactory#solve`) and draws its own
+ * (fractional) width FROM that edge; it does not re-centre. So the corner
+ * this port computes must floor too, or it draws centred on the fraction
+ * graphviz never kept.
+ *
+ * Verified directly against real graphviz 15.1.1 `-Tsvg` (not dot-engine)
+ * on two cached oracle DOTs, disambiguating floor from round-to-nearest:
+ * `garizu-98-nixo496`'s `sh0006` (`WIDTH="220.51250000000005"`, fraction
+ * .5125 — ROUNDS to 221, but the rendered polygon is exactly 220 wide,
+ * `Math.floor`) and `kidugi-68-noje040`'s `sh0006` (`WIDTH=
+ * "251.66250000000008"`, HEIGHT sums to 76) — polygon `8,-4` to `259,-80`,
+ * i.e. 251x76 exactly, `Math.floor` on both axes and NO extra padding (the
+ * `portNodeSize` doc comment's own +15.3375/+8.0 pad measurement above this
+ * function was against `@knowvah/dot-engine`, not real graphviz, for this
+ * SAME fixture — that divergence is real but orthogonal: it explains why
+ * `portNodeSize` must override the engine's raw width for DRAWING, not
+ * where the CENTRE the pad is applied around sits, which real graphviz's
+ * own floored-not-padded box confirms is unaffected either way).
+ *
+ * Scoped to `portRows` only, matching the measured evidence
+ * (`.agent-notes/class-html-node-corner-vs-quantized-width.md`: "both are
+ * member-port diagrams… the other nine have no ports and take the engine
+ * width"). The `isPort`-plaintext port SYMBOL (G9/T9, one function up) keeps
+ * centring on its own small declared size inside graphviz's larger box —
+ * jar reads THAT case from the port CELL's own polygon, a different
+ * mechanism this fix does not touch.
+ *
+ * @see ~/git/graphviz/lib/common/htmllex.c, lib/common/htmltable.c (HTML
+ *      table cell sizing — the floor happens inside graphviz's own table
+ *      layout, before `poly_init` ever sees a size)
+ */
+function cornerSize(
+  d: DotInputNode | undefined,
+  width: number,
+  height: number,
+): [number, number] {
+  if (d?.portRows === undefined) return [width, height];
+  return [Math.floor(width), Math.floor(height)];
+}
+
+function mapNodes(snap: LayoutSnapshot, input: DotInputGraph): OutNodes {
+  const declared = new Map(input.nodes.map((n) => [n.id, n]));
+  return snap.nodes.map((n) => {
+    const d = declared.get(n.name);
+    const echo = (ours: number | undefined, engine: number): number =>
+      ours !== undefined && Math.abs(ours - engine) < ROUND_TRIP_EPSILON ? ours : engine;
+    const width = portNodeSize(d, echo(d?.width, n.width), d?.width ?? n.width);
+    const height = portNodeSize(d, echo(d?.height, n.height), d?.height ?? n.height);
+    const [cornerW, cornerH] = cornerSize(d, width, height);
+    return { id: n.name, x: n.x - cornerW / 2, y: n.y - cornerH / 2, width, height };
+  });
 }
 
 /**
@@ -138,14 +254,33 @@ function mapEdges(snap: LayoutSnapshot, idx: EdgeIndex): OutEdges {
  *  no clusters (empty `idByName` — mirrors `DotInputGraph.clusters` being
  *  optional). A snapshot entry with no matching id is defensively skipped
  *  (cannot occur given `addClusters`'s own naming contract: every name it
- *  hands @knowvah/dot-engine is recorded in `idByName` before use). */
+ *  hands @knowvah/dot-engine is recorded in `idByName` before use).
+ *
+ *  T7: `c.label` (present only when the input cluster declared a title, per
+ *  `ClusterGeometry.label`'s own doc comment — existence-gated, not
+ *  `set`-gated) is copied VERBATIM here, still in the label-space CENTRE
+ *  convention `getLayout()` returns it in. Converting centre -> corner or
+ *  baseline is deliberately NOT this seam's job — `graph-layout-result
+ *  .types.ts`'s own doc comment on `clusters[].label` says so explicitly.
+ *  No consumer reads this yet: `class-geo-builders.ts#namespaceGeoFromBox`
+ *  (the field's original motivating consumer) investigated it and its own
+ *  doc comment records why it deliberately does not — the value published
+ *  here is unaffected either way, this seam only republishes what
+ *  `getLayout()` reports. */
 function mapClusters(snap: LayoutSnapshot, idx: ClusterIndex): OutClusters | undefined {
   if (idx.idByName.size === 0) return undefined;
   const out: OutClusters = [];
   for (const c of snap.clusters) {
     const id = idx.idByName.get(c.name);
     if (id === undefined) continue;
-    out.push({ id, x: c.x, y: c.y, width: c.width, height: c.height });
+    out.push({
+      id,
+      x: c.x,
+      y: c.y,
+      width: c.width,
+      height: c.height,
+      ...(c.label !== undefined ? { label: { ...c.label } } : {}),
+    });
   }
   return out.length > 0 ? out : undefined;
 }
@@ -185,6 +320,14 @@ function shiftToOrigin(nodes: OutNodes, edges: OutEdges, clusters?: OutClusters)
     for (const c of clusters) {
       c.x -= minX;
       c.y -= minY;
+      // T7: the label-space CENTRE rides the identical translation — it is
+      // reported in the same pre-shift frame as the box, verified directly
+      // against @knowvah/dot-engine (both move by the same graph-wide bb
+      // origin normalisation).
+      if (c.label !== undefined) {
+        c.label.x -= minX;
+        c.label.y -= minY;
+      }
     }
   }
 }
@@ -250,7 +393,7 @@ export function layoutGraph(
   render(b.graph, 'svg', { engine });
   const snap = getLayout(b.graph, { yAxis: 'down' });
 
-  const nodes = mapNodes(snap);
+  const nodes = mapNodes(snap, input);
   const edges = mapEdges(snap, idx);
   const clusters = mapClusters(snap, clusterIdx);
   shiftToOrigin(nodes, edges, clusters);

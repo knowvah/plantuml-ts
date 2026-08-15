@@ -17,8 +17,6 @@ import {
   getHTitle,
   getWTitle,
   getTitleBaselineOffset,
-  NAMESPACE_TOP_EXTRA,
-  NAMESPACE_SIDE_PADDING,
 } from './class-namespace-shape.js';
 import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
@@ -175,69 +173,96 @@ function drawsBorderedBox(classifier: ClassDiagramAST['classifiers'][number], me
   return true;
 }
 
+/** One entry of `DotLayoutResult.clusters` — the real graphviz-returned
+ *  cluster polygon, keyed by our synthetic `clusterN` id. */
+type ClusterBox = NonNullable<DotLayoutResult['clusters']>[number];
+
 /**
- * Build NamespaceGeo entries by computing bounds from member classifier
- * positions plus the folder-tab's own footprint constants -- G2 N17
- * (`class-namespace-shape.ts`'s own doc comments carry the jar evidence):
- * `NAMESPACE_SIDE_PADDING` (16, unchanged) on left/right/bottom,
- * `getHTitle(...) + NAMESPACE_TOP_EXTRA` on top (was an invented flat 28;
- * jar-verified `htitle + 13` at TWO independent font sizes). `wtitle`/
- * `htitle` are stored on the returned `NamespaceGeo` so the render phase
- * never needs its own `StringMeasurer` (see `NamespaceGeo`'s own doc
- * comment in `layout.ts`).
+ * One namespace's geo from its already-laid-out cluster box -- split out of
+ * `buildNamespaceGeos` to keep that function under the per-function NLOC cap.
+ * `x`/`y`/`width`/`height` are `box` verbatim (no padding), mirroring
+ * `Cluster#setPosition` (Cluster.java:511-512). `wtitle`/`htitle`/
+ * `baselineOffset` are unchanged from before T5: still pre-computed here so
+ * the render phase never needs its own `StringMeasurer` (see `NamespaceGeo`'s
+ * own doc comment in `layout.ts`).
+ *
+ * T7 (`plans/namespace-cluster-box/`) investigated reading `baselineOffset`
+ * from `box.label` (the layout-placed title-table reservation @knowvah/
+ * dot-engine now publishes, `ClusterGeometry.label` per docs/graphviz-issues/
+ * 14's RESOLVED note) instead of `getTitleBaselineOffset`'s fixed-offset
+ * re-derivation. **Deliberately NOT wired in** -- read the Java first:
+ * `Cluster#setTitlePosition`/`xyTitle` (`DotStringFactory.java:436-439`,
+ * the mechanism the issue cites) is consumed ONLY by `Cluster#drawUState`
+ * and `#drawSwinLinesState` (state-diagram/swimlane draw paths,
+ * `Cluster.java:439,497`) -- NEVER by `ClusterDecoration.drawU`, the path
+ * `buildNamespaceGeos` mirrors for a class/object package. That path calls
+ * `asBig.drawU(ug.apply(rectangleArea.getPosition()))`
+ * (`ClusterDecoration.java:78`), and `USymbolFolder#asBig` draws the title
+ * at a FIXED local `(4, 2)` (`USymbolFolder.java:228`) -- a property of the
+ * shape's own draw routine, independent of wherever graphviz placed the
+ * title-table reservation. Measured directly: `@knowvah/dot-engine` places
+ * that reservation ~4px below the cluster box's own top (verified via a
+ * standalone probe at both `innerMarginLevels` 1 and 2: `box.y=16,
+ * label.y=24.5, label.height=9` -> `label.y - label.height/2 - box.y = 4`),
+ * not jar's real 2px -- wiring it in shifts every titled namespace's
+ * `<text>` down by the 2px difference and cost 333 matched shapes on the
+ * full corpus (`scripts/shape-match-report.ts`: 25403 -> 25070, doc-size-
+ * exact held at 769/1073), confirming the mechanism empirically. The
+ * `label` field IS surfaced through the seam (`graph-layout.ts#mapClusters`,
+ * `graph-layout-result.types.ts`) for a consumer that genuinely needs
+ * graphviz's placed position -- state's `drawUState`-equivalent composite
+ * title, not this one.
+ */
+function namespaceGeoFromBox(
+  ns: ClassDiagramAST['namespaces'][number],
+  box: ClusterBox,
+  theme: Theme,
+  measurer: StringMeasurer,
+  inkShape: 'polygon' | 'rect' | undefined,
+): NamespaceGeo {
+  return {
+    id: ns.id,
+    x: box.x,
+    y: box.y,
+    width: box.width,
+    height: box.height,
+    label: ns.display,
+    wtitle: getWTitle(measurer, theme, ns.display, 0),
+    htitle: getHTitle(measurer, theme, ns.display),
+    baselineOffset: getTitleBaselineOffset(measurer, theme, ns.display),
+    ...(ns.creationIndex !== undefined ? { creationIndex: ns.creationIndex } : {}),
+    ...(inkShape !== undefined ? { inkShape } : {}),
+  };
+}
+
+/**
+ * Build NamespaceGeo entries by READING the box graphviz already computed,
+ * mirroring `DotStringFactory.java:425-433`: upstream does not compute a
+ * package box, it scrapes the rendered `clusterN` polygon (`getMinXY`/
+ * `getMaxXY`, no padding) and stores it verbatim (`Cluster#setPosition`,
+ * Cluster.java:511-512). The box is looked up via `clusterIdByNs` (T4,
+ * `class-dot-graph.ts#buildDotClusters`) -- no member-bbox walk, no padding
+ * constants (T5, `plans/namespace-cluster-box/decisions.md#3`).
+ *
+ * A namespace with no matching cluster entry is skipped, exactly as the old
+ * "no member positions" skip was -- decision 3 governs the no-cluster case
+ * (T6 proves no namespace draws a box while having no cluster).
  */
 export function buildNamespaceGeos(
   ast: ClassDiagramAST,
-  posMap: Map<string, DotLayoutResult['nodes'][number]>,
   theme: Theme,
   measurer: StringMeasurer,
-  anchors: ReadonlyMap<string, string>,
+  clusters: DotLayoutResult['clusters'],
+  clusterIdByNs: ReadonlyMap<string, string>,
 ): NamespaceGeo[] {
-  const namespaces: NamespaceGeo[] = [];
   const inkShape = resolveNamespaceInkShape(theme);
+  const clusterById = new Map<string, ClusterBox>((clusters ?? []).map((c) => [c.id, c]));
+  const namespaces: NamespaceGeo[] = [];
   for (const ns of ast.namespaces) {
-    const memberPositions = ns.classifiers
-      .map((id) => posMap.get(id))
-      .filter((p): p is NonNullable<typeof p> => p !== undefined);
-
-    // G2 N18: a package used as a relationship/note endpoint carries a REAL
-    // `zaent-*` point anchor as an extra direct member of its own dot
-    // cluster (`class-dot-graph.ts#buildDotClusters`), occupying a rank
-    // slot ABOVE the topmost classifier -- `ns.classifiers` alone misses
-    // it, undercounting the footprint's top extent by the anchor's own
-    // rank offset (jar-verified 41px vs the base 33px top gap,
-    // `plans/g2-class-svg/ledger.md` N17/N18). Folding the anchor's own
-    // dot-assigned position into the SAME min/max walk (rather than a
-    // special-cased extra offset) keeps left/right/bottom correct too, in
-    // case the anchor ever lands off-center.
-    const anchorId = anchors.get(ns.id);
-    const anchorPos = anchorId !== undefined ? posMap.get(anchorId) : undefined;
-    if (anchorPos !== undefined) memberPositions.push(anchorPos);
-
-    if (memberPositions.length === 0) continue;
-
-    const htitle = getHTitle(measurer, theme, ns.display);
-    const wtitle = getWTitle(measurer, theme, ns.display, 0);
-    const baselineOffset = getTitleBaselineOffset(measurer, theme, ns.display);
-    const topPad = htitle + NAMESPACE_TOP_EXTRA;
-    const minX = Math.min(...memberPositions.map((p) => p.x)) - NAMESPACE_SIDE_PADDING;
-    const minY = Math.min(...memberPositions.map((p) => p.y)) - topPad;
-    const maxX = Math.max(...memberPositions.map((p) => p.x + p.width)) + NAMESPACE_SIDE_PADDING;
-    const maxY = Math.max(...memberPositions.map((p) => p.y + p.height)) + NAMESPACE_SIDE_PADDING;
-
-    namespaces.push({
-      id: ns.id,
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY,
-      label: ns.display,
-      wtitle,
-      htitle,
-      baselineOffset,
-      ...(ns.creationIndex !== undefined ? { creationIndex: ns.creationIndex } : {}),
-      ...(inkShape !== undefined ? { inkShape } : {}),
-    });
+    const clusterId = clusterIdByNs.get(ns.id);
+    const box = clusterId !== undefined ? clusterById.get(clusterId) : undefined;
+    if (box === undefined) continue;
+    namespaces.push(namespaceGeoFromBox(ns, box, theme, measurer, inkShape));
   }
   return namespaces;
 }

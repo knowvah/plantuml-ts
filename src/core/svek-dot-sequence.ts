@@ -111,30 +111,75 @@ const reserveEdge = (seq: Seq): EdgeColors => ({
   endHead: seq.next(),
 });
 
-/** `printEntities` — one value per leaf, in declaration order. */
-function assignNodes(
-  ids: readonly string[],
-  nodeById: Map<string, DotInputNode>,
-  recs: Map<string, NodeRec>,
-  seq: Seq,
-): void {
+/**
+ * G9/T3: the group's special point is NOT an entity, so it consumes no
+ * ColorSequence value and carries no `sh####` id. Jar synthesizes its DOT id
+ * as `Cluster.CENTER_ID + group.getUid()` = `"za" + "ent####"`
+ * (`Cluster.java:104,653-654`), and declares it either as the `za` anchor
+ * point (`ClusterDotString.java:148-149`) or as the `empty()` title-table
+ * placeholder (`:179-183`) — the same id in both cases (`:220-226`).
+ *
+ * `DotInputGraph` models the anchor as an ordinary node, so before this it
+ * took an `sh` number of its own and shifted every id and color after it by
+ * one (`banatu-09-koce254`: our `sh0011`/`#00000b` against jar's
+ * `zaent0001`/`#000007`, and every later id off by the count of anchors).
+ *
+ * The numeric suffix is allocated here, in cluster-walk order, and does NOT
+ * reproduce jar's: jar takes it from the diagram-wide entity uid sequence
+ * (`EntityBase#getUid`, which numbers leaves too — hence its `zaent0004` where
+ * the first cluster's anchor would be ours), and `DotInputGraph` does not
+ * carry entity uids. Only the id's FORM is structural; `tests/oracle/
+ * svek-dot.ts` compares shapes, counts and degrees, never id text.
+ */
+const zaId = (n: number): string => 'zaent' + String(n).padStart(4, '0');
+
+/** The node ids that are group anchors rather than entities: jar's `za` point
+ *  (`unwrappedNodeId`) and its `empty()` placeholder (`portAnchorId`), mapped
+ *  to the cluster that owns them. */
+function anchorOwners(clusters: readonly DotInputCluster[]): Map<string, string> {
+  const owners = new Map<string, string>();
+  for (const c of clusters) {
+    for (const id of [c.unwrappedNodeId, c.portAnchorId]) {
+      if (id !== undefined && !owners.has(id)) owners.set(id, c.id);
+    }
+  }
+  return owners;
+}
+
+interface SeqOut {
+  recs: Map<string, NodeRec>;
+  nodeById: Map<string, DotInputNode>;
+  clusterColors: Map<string, ClusterColors>;
+  /** node id → owning cluster id, for anchors only (see {@link anchorOwners}). */
+  anchorOf: Map<string, string>;
+  /** Anchors met so far, in walk order — their `zaent####` suffix. */
+  zaCount: number;
+}
+
+/** `printEntities` — one value per leaf, in declaration order. Anchors take a
+ *  `za` id and their cluster's TITLE color instead: jar's `empty()` label
+ *  table is built from `cluster.getTitleColor()` (`ClusterDotString.java:
+ *  123-127,179-181`), which is what `banatu-09-koce254`'s `BGCOLOR="#000007"`
+ *  is — cluster6's title, not a value of the anchor's own. */
+function assignNodes(ids: readonly string[], out: SeqOut, seq: Seq): void {
   for (const id of ids) {
-    if (!nodeById.has(id) || recs.has(id)) continue;
+    if (!out.nodeById.has(id) || out.recs.has(id)) continue;
+    const ownerId = out.anchorOf.get(id);
+    if (ownerId !== undefined) {
+      out.zaCount += 1;
+      out.recs.set(id, { sh: zaId(out.zaCount), color: out.clusterColors.get(ownerId)?.title ?? 0 });
+      continue;
+    }
     const color = seq.next();
-    recs.set(id, { sh: shId(color), color });
+    out.recs.set(id, { sh: shId(color), color });
   }
 }
 
 /** `printGroup` — openCluster (4), then this group's OWN leaves, then recurse
  *  into child groups. Leaves-before-groups: the nested order. */
-function walkCluster(
-  cluster: DotInputCluster,
-  tree: ClusterTree,
-  out: { recs: Map<string, NodeRec>; nodeById: Map<string, DotInputNode>; clusterColors: Map<string, ClusterColors> },
-  seq: Seq,
-): void {
+function walkCluster(cluster: DotInputCluster, tree: ClusterTree, out: SeqOut, seq: Seq): void {
   out.clusterColors.set(cluster.id, reserveCluster(seq));
-  assignNodes(cluster.nodeIds, out.nodeById, out.recs, seq);
+  assignNodes(cluster.nodeIds, out, seq);
   for (const child of tree.childrenOf.get(cluster.id) ?? []) {
     walkCluster(child, tree, out, seq);
   }
@@ -157,14 +202,19 @@ export function assignSequence(input: DotInputGraph, tree: ClusterTree): SeqAssi
   reserveCluster(seq);
 
   // 2. printGroups(rootGroup) — groups BEFORE the root's own leaves.
-  const out = { recs, nodeById, clusterColors };
+  const out: SeqOut = {
+    recs,
+    nodeById,
+    clusterColors,
+    anchorOf: anchorOwners(input.clusters ?? []),
+    zaCount: 0,
+  };
   for (const top of tree.childrenOf.get(undefined) ?? []) walkCluster(top, tree, out, seq);
 
   // 3. printEntities(getUnpackagedEntities()).
   assignNodes(
     input.nodes.filter((n) => !tree.clusteredIds.has(n.id)).map((n) => n.id),
-    nodeById,
-    recs,
+    out,
     seq,
   );
 

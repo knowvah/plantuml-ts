@@ -84,7 +84,7 @@ function ensureEven(n: number): number {
  *  `drawU` evens first, so an odd override shifts the glyph WITHIN a block
  *  one pixel taller than the glyph implies. Conflating the two is the trap
  *  this split exists to avoid. */
-function iconSizeOf(theme?: Theme): number {
+export function iconSizeOf(theme?: Theme): number {
   return ensureEven(theme?.classAttributeIconSize ?? VISIBILITY_ICON_SIZE);
 }
 

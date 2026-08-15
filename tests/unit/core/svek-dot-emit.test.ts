@@ -150,7 +150,14 @@ describe('toSvekDot — port cluster emission', () => {
 
   it('emits the rank group inside the cluster braces, svek format', () => {
     const dot = toSvekDot(portGraph());
-    expect(dot).toMatch(/subgraph cluster0 \{style=solid;color="#[0-9a-f]+";labeljust="c";\{rank=sink;sh\d+;\}/);
+    // G9/T4: `printRanks` (ClusterDotString.java:254-266) emits the group and
+    // then ITS OWN entries' shape lines, per rank — so the group opens the
+    // cluster's content rather than riding on the `subgraph` line. Line
+    // breaks are not a parity target (this emitter joins statements with
+    // newlines throughout where jar's `SvekUtils.println` does not).
+    expect(dot).toMatch(
+      /subgraph cluster0 \{style=solid;color="#[0-9a-f]+";labeljust="c";\n\{rank=sink;sh\d+;\}/,
+    );
   });
 
   it('wraps the placeholder in clusterNee and omits the cluster label attr', () => {
@@ -162,7 +169,10 @@ describe('toSvekDot — port cluster emission', () => {
   it('emits bare (bracket-less) port->anchor constraint chain', () => {
     const dot = toSvekDot(portGraph());
     expect(dot).toMatch(/sh\d+ \[arrowhead=none\];/);
-    expect(dot).toMatch(/sh\d+->sh\d+;\n/);
+    // G9/T3: the chain's head is jar's `empty()` = `getSpecialPointId(group)`
+    // (ClusterDotString.java:220-226,283), a `za` id and never an `sh` one —
+    // verbatim in `banatu-09-koce254`'s oracle: `sh0010->zaent0001;`.
+    expect(dot).toMatch(/sh\d+->zaent\d+;\n/);
   });
 
   it('does not duplicate port ranks at top level', () => {
@@ -208,7 +218,7 @@ describe('toSvekDot — port cluster anchor also targeted by an outer edge', () 
 
   it('emits the point pre-declaration before the ee-placeholder rect/table line', () => {
     const dot = toSvekDot(portGraphWithGroupEdge());
-    const anchorSh = /(sh\d+) \[shape=rect,width=\.01,height=\.01,label=<<TABLE/.exec(dot)![1]!;
+    const anchorSh = /(zaent\d+) \[shape=rect,width=\.01,height=\.01,label=<<TABLE/.exec(dot)![1]!;
     const pointRe = new RegExp(`${anchorSh} \\[shape=point,width=\\.01,label=""\\];`);
     expect(dot).toMatch(pointRe);
     const pointIdx = dot.search(pointRe);
@@ -538,5 +548,234 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
       edges: [{ id: 'e0', from: 'a', to: 'b', attributes: { minLen: 1 } }],
     });
     expect(dot).toMatch(/sh\d{4}->sh\d{4}:h\[arrowtail=none,arrowhead=none,minlen=1,/);
+  });
+});
+
+/**
+ * G9/T1 — jar's cluster protection wrappers (`ClusterDotString.java:91-158`).
+ *
+ * The layout builder has built this nesting since G7 T7; the DOT text did not,
+ * on 85 of the 271 cached state fixtures. The gate that should have caught it
+ * cannot: `tests/oracle/svek-dot.ts#parseClusters` only records subgraphs
+ * matching `^cluster\d+$`, so every wrapper — jar's and ours — is invisible to
+ * it. These assertions are therefore the only thing holding the wrapper shape.
+ *
+ * Expected shapes are quoted from real cached oracle DOT, not derived:
+ *   bupani-17-puxi938  a/p0/base/i/p1, anchor in the BASE cluster
+ *   butigu-57-tobi481  p0/base/p1 (no link from/to the group → no a/i)
+ *   viroxo-69-fito663  a/base/ee/i (border points force protection0/1 off)
+ *   temuxi-28-cega322  base/ee only (border points, group untouched)
+ */
+describe('toSvekDot — cluster protection wrappers (ClusterDotString.java:91-158)', () => {
+  const subgraphs = (dot: string): string[] =>
+    [...dot.matchAll(/subgraph\s+(\w+)\s*\{/g)].map((m) => m[1]!);
+
+  /** `bupani-17-puxi938`'s own shape: one composite, one member, one anchor. */
+  const bupani = (): DotInputGraph => ({
+    nodes: [
+      { id: 'm', width: 76, height: 50 },
+      { id: 'zaent0001', width: 1, height: 1, shape: 'point' },
+    ],
+    edges: [{ id: 'e0', from: 'zaent0001', to: 'm', attributes: { minLen: 1 } }],
+    clusters: [
+      {
+        id: 'cluster0',
+        label: 'C',
+        labelWidth: 9,
+        labelHeight: 14,
+        nodeIds: ['m', 'zaent0001'],
+        innerMarginLevels: 2,
+        unwrappedNodeId: 'zaent0001',
+      },
+    ],
+  });
+
+  it("emits five cluster subgraphs in jar's order a, p0, base, i, p1", () => {
+    expect(subgraphs(toSvekDot(bupani()))).toEqual([
+      'cluster0a',
+      'cluster0p0',
+      'cluster0',
+      'cluster0i',
+      'cluster0p1',
+    ]);
+  });
+
+  it('declares the group anchor in the BASE cluster, outside the i/p1 wrappers', () => {
+    const dot = toSvekDot(bupani());
+    // ClusterDotString.java:148-152 — the `za<uid>` point is printed before
+    // the "i" wrapper opens, so it is a sibling of it, not a descendant.
+    const anchor = dot.indexOf('[shape=point,width=.01,label=""];');
+    expect(anchor).toBeGreaterThan(dot.indexOf('subgraph cluster0 {'));
+    expect(anchor).toBeLessThan(dot.indexOf('subgraph cluster0i'));
+  });
+
+  it('closes every wrapper it opened', () => {
+    const dot = toSvekDot(bupani());
+    expect((dot.match(/\{/g) ?? []).length).toBe((dot.match(/\}/g) ?? []).length);
+  });
+
+  it('emits p0/p1 without a/i when nothing links from or to the group', () => {
+    // `butigu-57-tobi481`: innerMarginLevels 1 — protection0/1 on,
+    // thereALinkFromOrToGroup1 off (ClusterDotString.java:98,151).
+    const dot = toSvekDot({
+      nodes: [{ id: 'a', width: 50, height: 50 }],
+      edges: [],
+      clusters: [
+        {
+          id: 'cluster0',
+          label: 'C',
+          labelWidth: 37,
+          labelHeight: 14,
+          nodeIds: ['a'],
+          innerMarginLevels: 1,
+        },
+      ],
+    });
+    expect(subgraphs(dot)).toEqual(['cluster0p0', 'cluster0', 'cluster0p1']);
+  });
+
+  it('emits no wrapper at all when the cluster carries no innerMarginLevels', () => {
+    const dot = toSvekDot({
+      nodes: [{ id: 'a', width: 50, height: 50 }],
+      edges: [],
+      clusters: [{ id: 'cluster0', label: 'C', labelWidth: 37, labelHeight: 14, nodeIds: ['a'] }],
+    });
+    expect(subgraphs(dot)).toEqual(['cluster0']);
+  });
+
+  /** `viroxo-69-fito663`: a border-point composite whose group IS touched. */
+  const borderPoint = (wrap: boolean): DotInputGraph => ({
+    nodes: [
+      { id: 'p', width: 12, height: 12, isPort: true },
+      { id: 'm', width: 50, height: 50 },
+    ],
+    edges: [],
+    clusters: [
+      {
+        id: 'cluster0',
+        label: 'C',
+        labelWidth: 42,
+        labelHeight: 14,
+        nodeIds: ['p', 'm'],
+        portRanks: [{ rank: 'sink', nodeIds: ['p'] }],
+        portRanksLabelOnEe: true,
+        ...(wrap ? { borderPointAncestorWrap: true as const } : {}),
+      },
+    ],
+  });
+
+  it('suppresses p0/p1 for a border-point cluster and opens i inside ee', () => {
+    // ClusterDotString.java:109-112 — any border point forces protection0 and
+    // protection1 false, which is why the wrapper and pin populations are
+    // disjoint; :139-152 puts the "i" wrapper INSIDE the ee subgraph.
+    const dot = toSvekDot(borderPoint(true));
+    expect(subgraphs(dot)).toEqual(['cluster0a', 'cluster0', 'cluster0ee', 'cluster0i']);
+    expect(dot).not.toContain('cluster0p0');
+    expect(dot).not.toContain('cluster0p1');
+    expect((dot.match(/\{/g) ?? []).length).toBe((dot.match(/\}/g) ?? []).length);
+  });
+
+  it('leaves a border-point cluster unwrapped when its group is untouched', () => {
+    // `temuxi-28-cega322`: every cluster is pin-bearing and none is linked
+    // from or to as a group, so the count stays at base + ee.
+    expect(subgraphs(toSvekDot(borderPoint(false)))).toEqual(['cluster0', 'cluster0ee']);
+  });
+});
+
+/**
+ * G9/T3 — the `za` group anchor and jar's two global edge batches.
+ *
+ * `DotStringFactory#createDotString` (`:187-198`) prints `lines0` (jar's
+ * `link.getLength() == 1`, this port's `minLen === 0`) BEFORE any node shape
+ * line or cluster subgraph, and `lines1` after all cluster content; under
+ * `!pragma kermor on` (`:178-185`) both batches print first. The group's
+ * special point is not an entity: it takes no `sh` number and is named
+ * `Cluster.CENTER_ID + group.getUid()` (`Cluster.java:104,653`).
+ *
+ * Ground truth for the numbering is `banatu-09-koce254`'s cached oracle: two
+ * port clusters whose anchors are `zaent0001`/`zaent0003`, whose placeholder
+ * tables carry the OWNING CLUSTER's title color (`#000007`, `#00000C`), and
+ * whose presence shifts nothing — the second cluster still opens at
+ * `#00000B` and the edge still reserves `#000010`.
+ */
+describe('toSvekDot — za anchor identity and lines0/lines1 batches', () => {
+  const twoPortClusters = (): DotInputGraph => ({
+    nodes: [
+      { id: 'a', width: 12, height: 12, shape: 'plaintext', isPort: true },
+      { id: 'a-anchor', width: 1, height: 1, shape: 'rect', titleLabelWidth: 69, titleLabelHeight: 14 },
+      { id: 'b', width: 12, height: 12, shape: 'plaintext', isPort: true },
+      { id: 'b-anchor', width: 1, height: 1, shape: 'rect', titleLabelWidth: 69, titleLabelHeight: 14 },
+    ],
+    edges: [],
+    clusters: [
+      {
+        id: 'cluster0', label: 'A', nodeIds: ['a', 'a-anchor'],
+        portRanks: [{ rank: 'sink', nodeIds: ['a'] }], portAnchorId: 'a-anchor',
+      },
+      {
+        id: 'cluster1', label: 'B', nodeIds: ['b', 'b-anchor'],
+        portRanks: [{ rank: 'source', nodeIds: ['b'] }], portAnchorId: 'b-anchor',
+      },
+    ],
+  });
+
+  it('names the anchor za<uid> and consumes no sh number for it', () => {
+    const dot = toSvekDot(twoPortClusters());
+    // Oracle: cluster6 takes 6-9, its port node sh0010, cluster11 takes 11-14,
+    // its port node sh0015 — the anchors in between take nothing.
+    expect(dot).toContain('subgraph cluster0 {style=solid;color="#000006"');
+    expect(dot).toContain('sh0010 [shape=plaintext');
+    expect(dot).toContain('subgraph cluster1 {style=solid;color="#00000b"');
+    expect(dot).toContain('sh0015 [shape=plaintext');
+    expect(dot).not.toMatch(/sh\d+ \[shape=rect,width=\.01,height=\.01,label=/);
+  });
+
+  it("paints the placeholder table with the owning cluster's title color", () => {
+    // ClusterDotString.java:123-127,179-181 — `empty()`'s label is the SAME
+    // string the cluster's own title table uses, built from getTitleColor().
+    const dot = toSvekDot(twoPortClusters());
+    expect(dot).toContain('zaent0001 [shape=rect,width=.01,height=.01,label=<<TABLE BGCOLOR="#000007"');
+    expect(dot).toContain('zaent0002 [shape=rect,width=.01,height=.01,label=<<TABLE BGCOLOR="#00000c"');
+  });
+
+  const batched = (): DotInputGraph => ({
+    nodes: [
+      { id: 'a', width: 10, height: 10 },
+      { id: 'b', width: 10, height: 10 },
+    ],
+    edges: [
+      { id: 'e0', from: 'a', to: 'b', attributes: { minLen: 1 } },
+      { id: 'e1', from: 'b', to: 'a', attributes: { minLen: 0 } },
+    ],
+    clusters: [{ id: 'cluster0', label: 'C', labelWidth: 20, labelHeight: 14, nodeIds: ['a', 'b'] }],
+  });
+
+  it('prints the minlen=0 batch before any node, and the rest last', () => {
+    const dot = toSvekDot(batched());
+    const zero = dot.indexOf('minlen=0');
+    const one = dot.indexOf('minlen=1');
+    expect(zero).toBeLessThan(dot.indexOf('subgraph cluster0'));
+    expect(zero).toBeLessThan(dot.indexOf('shape=rect,label=""'));
+    expect(one).toBeGreaterThan(dot.indexOf('subgraph cluster0'));
+  });
+
+  it('keeps each batch in input edge order', () => {
+    const g = batched();
+    g.edges = [
+      { id: 'e0', from: 'a', to: 'b', attributes: { minLen: 0 } },
+      { id: 'e1', from: 'b', to: 'a', attributes: { minLen: 0 } },
+    ];
+    const dot = toSvekDot(g);
+    expect(dot.indexOf('sh0010->sh0011')).toBeLessThan(dot.indexOf('sh0011->sh0010'));
+  });
+
+  it('prints BOTH batches first under kermor', () => {
+    // DotStringFactory.java:178-185 — `siseda-71-napu395`'s oracle opens with
+    // its minlen=0 edge, then the minlen=1 ones, then `cluster2empty`.
+    const g = batched();
+    g.kermor = true;
+    const dot = toSvekDot(g);
+    expect(dot.indexOf('minlen=1')).toBeLessThan(dot.indexOf('subgraph cluster0gamma'));
+    expect(dot.indexOf('minlen=0')).toBeLessThan(dot.indexOf('minlen=1'));
   });
 });

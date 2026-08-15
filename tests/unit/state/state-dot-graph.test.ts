@@ -41,6 +41,14 @@ function captureFirst(puml: string): DotInputGraph {
   return captured!;
 }
 
+/** jar's reserved label box around a measured width: `+ 2 * marginLabel`
+ *  (`marginLabel` = 1 for a non-self-loop, `SvekEdge.java:372-373`) then
+ *  `appendTable`'s `(int)` truncation. Confirmed against the oracle DOT:
+ *  buniva-95-zije634's svek-1.dot declares `WIDTH="21"` for "xxx", and
+ *  `floor(19.5 + 2)` is 21. The font-size discrimination these tests exist
+ *  for is unaffected -- size 13 reserves 21 where size 14 reserves 23. */
+const reserved = (measuredWidth: number): number => Math.floor(measuredWidth + 2);
+
 describe('state-dot-graph.ts buildDotEdges — flat-pipeline transition label font size', () => {
   it('measures "xxx" at font-size 13 (jar-exact 19.5px), not 14 (buniva-95-zije634)', () => {
     const puml = readFileSync(join(CACHE, 'buniva-95-zije634', 'in.puml'), 'utf8');
@@ -52,8 +60,8 @@ describe('state-dot-graph.ts buildDotEdges — flat-pipeline transition label fo
     expect(expectedAt13).toBeCloseTo(19.5, 3);
     expect(expectedAt14).not.toBeCloseTo(expectedAt13, 3);
     for (const e of labeled) {
-      expect(e.attributes!.labelWidth).toBeCloseTo(expectedAt13, 6);
-      expect(e.attributes!.labelWidth).not.toBeCloseTo(expectedAt14, 3);
+      expect(e.attributes!.labelWidth).toBe(reserved(expectedAt13));
+      expect(e.attributes!.labelWidth).not.toBe(reserved(expectedAt14));
     }
   });
 });

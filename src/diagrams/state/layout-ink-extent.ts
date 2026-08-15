@@ -96,7 +96,10 @@
  * @see class/layout-ink-extent.ts (the class-engine precedent this mirrors)
  */
 import type { StateNodeGeo, TransitionGeo } from './state-geo-types.js';
+import { absorbLayoutEpsilon } from '../../core/layout-epsilon.js';
 import { transitionArrowheadInk } from './renderer-arrowhead.js';
+import { positionFromStereotype, usesPortShape } from './state-entity-position.js';
+import { textAscent } from './state-render-colors.js';
 
 /** `CucaDiagram#getDefaultMargins()` (net/atmp/CucaDiagram.java:719-722) —
  *  shared across the whole `CucaDiagram` family, see module doc comment. */
@@ -212,6 +215,64 @@ function addEllipseInk(box: InkBox, cx: number, cy: number, r: number): void {
   addPoint(box, x + w - 1, y + h - 1);
 }
 
+/**
+ * `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:217-225`): a
+ * `UText`'s ink is NOT its layout box. Given the BASELINE `y` it is drawn at,
+ * `LimitFinder` records `[y - (height - 1.5), y + 1.5]` — so the ink reaches
+ * `height - 1.5` above the baseline and only `1.5` below it, where a text
+ * block's own box spans `[y - ascent, y - ascent + height]`.
+ *
+ * At 14pt those differ by `1.611` at BOTH edges (`fontSize/4.5 - 1.5`), which
+ * is exactly the rigid offset eight border-point fixtures carried — jar's
+ * whole drawing sat 1.611px lower than ours because its canvas reserved that
+ * much more above the topmost label.
+ *
+ * Only the border-point label needs this: every other text in a state diagram
+ * sits inside a shape whose own ink already dominates it, which is why no
+ * other case in this module models text at all.
+ */
+const TEXT_INK_BASELINE_DROP = 1.5;
+
+/**
+ * G9/T7: a BORDER POINT's own ink — the `RADIUS*2` symbol plus the name label
+ * `EntityImageStateBorder#drawU` (`:79-89`) draws OUTSIDE it, above or below.
+ *
+ * The label is what makes this its own rule: every other leaf's text sits
+ * INSIDE the shape whose ink already dominates it, so no other case here adds
+ * a text contribution. `LimitFinder` walks what `drawU` actually draws, and
+ * `drawU` draws both — which is why jar's canvas has room above the topmost
+ * border point and this port's did not (`lulozu-10-bopu547`: 136 against our
+ * 109, the difference being exactly one `2*RADIUS + descHeight` band).
+ *
+ * The symbol takes the ellipse rule for ENTRY_POINT/EXIT_POINT and the
+ * rectangle rule otherwise, matching what `renderer-border-point.ts` draws;
+ * the label takes the uninset text-block rule (`LimitFinder`'s own text walk,
+ * the same one `addNoteInk` documents for a path).
+ */
+function addBorderPointInk(box: InkBox, node: StateNodeGeo): void {
+  const r = node.width / 2;
+  if (usesPortShape(positionFromStereotype(node.stereotype))) {
+    addEllipseInk(box, node.x + r, node.y + r, r);
+  } else {
+    addBarInk(box, node.x, node.y, node.width, node.height);
+  }
+  const lines = node.headerLines ?? [];
+  const labelHeight = node.borderPointLabelHeight;
+  if (lines.length === 0 || labelHeight === undefined) return;
+  const labelWidth = Math.max(...lines.map((ln) => ln.width));
+  const top =
+    node.borderPointLabelAbove === true ? node.y - node.height - labelHeight : node.y + node.height;
+  // One `UText` per line, each contributing `LimitFinder#drawText`'s own box
+  // (see {@link TEXT_INK_BASELINE_DROP}). `labelHeight` is `lines * fontSize`
+  // by construction (`state-sizing.ts#buildStateGeoTextFields`), so the
+  // division recovers the per-line height `calculateDimension` reports.
+  const lineHeight = labelHeight / lines.length;
+  const firstBaseline = top + textAscent(lineHeight);
+  const lastBaseline = firstBaseline + (lines.length - 1) * lineHeight;
+  addPoint(box, node.x - (labelWidth - node.width) / 2, firstBaseline - lineHeight + TEXT_INK_BASELINE_DROP);
+  addPoint(box, node.x + (labelWidth + node.width) / 2, lastBaseline + TEXT_INK_BASELINE_DROP);
+}
+
 /** `choice` diamond (`core/svg.ts#diamond`'s own 4-point layout) —
  *  `LimitFinder#drawUPolygon`'s real rule (x padded by `HACK_X_FOR_POLYGON`
  *  on both sides, y unpadded). */
@@ -252,8 +313,23 @@ function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolea
     // composite reuse is flagged NOT-jar-verified in this module's own doc
     // comment, and flipping it is a separate, separately-evidenced change.
     addStateBoxInk(box, node, true);
+    // G9/T8: a border-point composite reserves ink OUTSIDE the frame it draws
+    // — jar's ink pass and its draw pass frontier it against different child
+    // rectangles. Same `-1`/`+0` insets as the rect ink above, applied to the
+    // overflowed corners. See `StateNodeGeo.inkOverflow`.
+    const over = node.inkOverflow;
+    if (over !== undefined) {
+      addPoint(box, node.x - over.left - 1, node.y - over.top - 1);
+      addPoint(box, node.x + node.width + over.right, node.y + node.height + over.bottom - 1);
+    }
     for (const child of node.children) addNodeInk(box, child, includeArrowheadInk, labelInk);
     for (const t of node.transitions) addTransitionInk(box, t, includeArrowheadInk, labelInk);
+    return;
+  }
+  // G9/T7: a border point is a different image class upstream, not a state
+  // box — `renderer.ts#renderShape` dispatches on the same marker.
+  if (node.borderPointLabelAbove !== undefined) {
+    addBorderPointInk(box, node);
     return;
   }
   switch (node.kind) {
@@ -372,8 +448,8 @@ export function computeStateDocumentDims(
   // `SvgGraphics#ensureVisible`: `(int)(v + 1)` — a truncating cast, which
   // for non-negative `v` is `Math.floor`.
   return {
-    width: Math.floor(finalWidth + 1),
-    height: Math.floor(finalHeight + 1),
+    width: Math.floor(absorbLayoutEpsilon(finalWidth) + 1),
+    height: Math.floor(absorbLayoutEpsilon(finalHeight) + 1),
   };
 }
 

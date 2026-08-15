@@ -114,6 +114,7 @@
  * independent of dot's own routing accuracy.
  */
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
+import { absorbLayoutEpsilon } from '../../core/layout-epsilon.js';
 import type { NoteGeo } from './note-layout.js';
 
 /** `CucaDiagram#getDefaultMargins()` (net/atmp/CucaDiagram.java:719-722) —
@@ -196,8 +197,9 @@ export function computeClassRawInkDims(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
+  iconSize?: number,
 ): ClassDocumentDims {
-  const box = buildInkBox(classifiers, namespaces, edges, notes);
+  const box = buildInkBox(classifiers, namespaces, edges, notes, iconSize);
   if (!Number.isFinite(box.minX)) return { width: 0, height: 0 };
 
   return {
@@ -222,8 +224,8 @@ export function applyClassDocumentMargin(dims: ClassDocumentDims): ClassDocument
   // `SvgGraphics#ensureVisible`: `(int)(v + 1)` — a truncating cast, which
   // for non-negative `v` is `Math.floor`.
   return {
-    width: Math.floor(finalWidth + 1),
-    height: Math.floor(finalHeight + 1),
+    width: Math.floor(absorbLayoutEpsilon(finalWidth) + 1),
+    height: Math.floor(absorbLayoutEpsilon(finalHeight) + 1),
   };
 }
 
@@ -240,8 +242,9 @@ export function computeClassDocumentDims(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
+  iconSize?: number,
 ): ClassDocumentDims {
-  const raw = computeClassRawInkDims(classifiers, namespaces, edges, notes);
+  const raw = computeClassRawInkDims(classifiers, namespaces, edges, notes, iconSize);
   // Empty diagram (no ink at all): stay {0, 0} rather than applying margin
   // to nothing -- `computeClassRawInkDims`'s own `{width: 0, height: 0}`
   // sentinel (no ink walked) is indistinguishable in VALUE from "1x1 ink at
@@ -276,8 +279,9 @@ export function computeClassInkShift(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
+  iconSize?: number,
 ): InkShift {
-  const box = buildInkBox(classifiers, namespaces, edges, notes);
+  const box = buildInkBox(classifiers, namespaces, edges, notes, iconSize);
   if (!Number.isFinite(box.minX)) return { dx: 0, dy: 0 };
   return {
     dx: JAR_INK_MARGIN - box.minX,

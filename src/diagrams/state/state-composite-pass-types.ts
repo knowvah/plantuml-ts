@@ -145,6 +145,8 @@ export type GeoSpec =
       display: string;
       /** mission G4 S2 -- see `StateNodeGeo.headerLines` doc (state-geo-types.ts). */
       headerLines?: readonly StateTextLine[];
+      /** G9/T7 -- see `StateNodeGeo.borderPointLabelHeight`'s own doc comment. */
+      borderPointLabelHeight?: number;
       bodyLines?: readonly StateTextLine[];
       color?: string;
       /** mission G4 S9 -- see `StateNodeGeo.stereotype`'s own doc comment. */

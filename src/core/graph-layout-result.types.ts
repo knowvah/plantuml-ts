@@ -48,6 +48,27 @@ export interface DotLayoutResult {
    *  itself being optional) — additive, no existing consumer reads this yet.
    *  Replaces the entity-vs-cluster wrap APPROXIMATION named in G4 §S1/S3/S6
    *  ("mechanism 16") and `state-composite-geo.ts#materializeCluster`'s own
-   *  fixed-`BOX_PAD` bounding box. */
-  clusters?: Array<{ id: string; x: number; y: number; width: number; height: number }>;
+   *  fixed-`BOX_PAD` bounding box.
+   *
+   *  T7 (`plans/namespace-cluster-box/`, docs/graphviz-issues/14's RESOLVED
+   *  note): `label` is the cluster title's placed position + measured size,
+   *  from `@knowvah/dot-engine@1.5.0`'s own `ClusterGeometry.label`
+   *  (`getLayout().clusters[].label`) -- present only when the input cluster
+   *  declared a title (`DotInputCluster.titleTableWidth`/`.titleTableHeight`
+   *  or plain `.label`, `graph-layout-build.ts#addClusters`). Absent exactly
+   *  when the box carries no title -- there is no upstream `set`-flag gate
+   *  to mirror (dot-engine's own doc comment on `ClusterGeometry.label`:
+   *  presence is gated on existence alone, matching `emit.c:3920`'s lack of
+   *  a `->set` test). **`x`/`y` are the label space's CENTRE, in the SAME
+   *  origin-shifted frame as the box `x`/`y` above -- NOT a corner.** A
+   *  consumer that treats `label.y` as a top-left corner draws the title off
+   *  by roughly half its own height. */
+  clusters?: Array<{
+    id: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    label?: { x: number; y: number; width: number; height: number };
+  }>;
 }

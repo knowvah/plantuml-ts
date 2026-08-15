@@ -14,16 +14,10 @@
 // Synthetic sh-ids / colors come from one counter (Svek's ColorSequence); the
 // parity gate normalizes them away, so only their presence/structure matters.
 
-import type {
-  DotInputCluster,
-  DotInputEdge,
-  DotInputGraph,
-  DotInputNode,
-} from './graph-layout.types.js';
+import type { DotInputEdge, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 import {
   assignSequence,
   buildClusterTree,
-  type ClusterColors,
   type ClusterTree,
   type EdgeColors,
   type NodeRec,
@@ -31,16 +25,23 @@ import {
 } from './svek-dot-sequence.js';
 // B1/M1: the HTML label-table builders moved to a sibling module for the
 // 500-line file cap (pure move -- see that file's header).
-import {
-  hex,
-  labelTable,
-  edgeLabelTable,
-  portTable,
-  rowPortTable,
-  shieldTable,
-} from './svek-dot-emit-labels.js';
+import { hex, edgeLabelTable } from './svek-dot-emit-labels.js';
+// G9/T1: the node lines and cluster blocks moved to a sibling module for the
+// same file cap (see that file's header) — this file keeps the graph
+// attributes, the edge lines and the top-level assembly.
+import { clusterBlock, inches, nodeLine } from './svek-dot-emit-clusters.js';
+// G9/T1: jar's `a`/`p0`/`i`/`p1` protection-wrapper conditions, shared with the
+// LAYOUT builder, which has built this same nesting since G7 T7 — see that
+// file's header for the upstream derivation and for why both consumers must
+// read the SAME fields.
+import { wrapperLevels, type WrapperLevels } from './svek-dot-wrappers.js';
 
-const PX_PER_INCH = 72;
+// Re-exported so callers keep reaching these through the emitter's own module
+// path: `inches` for the LAYOUT builder (`graph-layout-build.ts#addNodes`), and
+// the wrapper conditions for the `wrapper-parity` fitness test, which checks
+// the DOT-text path against the builder's.
+export { inches, wrapperLevels, type WrapperLevels };
+
 const MIN_NODESEP_PX = 35; // Svek getMinNodeSep() (non-activity)
 const MIN_RANKSEP_PX = 60; // Svek getMinRankSep() (non-activity)
 /** DotStringFactory.getMinRankSep():247-249 — `!pragma kermor on` floors
@@ -49,7 +50,6 @@ const MIN_RANKSEP_PX = 60; // Svek getMinRankSep() (non-activity)
  *  divisor, applied upstream in description/link-edge-attrs.ts). */
 const MIN_RANKSEP_PX_KERMOR = 40;
 
-const inches = (px: number): string => (px / PX_PER_INCH).toFixed(6);
 type EdgeAttrs = NonNullable<DotInputEdge['attributes']>;
 
 /** Explicit skinparam overrides skip the minimum floor
@@ -74,52 +74,6 @@ function graphAttrLines(input: DotInputGraph): string[] {
   lines.push('remincross=true;', 'searchsize=500;');
   if (input.rankDir === 'LR') lines.push('rankdir=LR;');
   return lines;
-}
-
-function shapeAttr(node: DotInputNode): string {
-  const shape = node.shape ?? 'rect';
-  if (shape === 'rounded') return 'shape=rect,style=rounded';
-  return `shape=${shape}`;
-}
-
-function nodeLine(node: DotInputNode, rec: NodeRec): string {
-  const shape = node.shape ?? 'rect';
-  if (shape === 'point') {
-    return `${rec.sh} [shape=point,width=.01,label=""];`;
-  }
-  // ClusterDotString.empty() port placeholder — a tiny `.01in` rect whose
-  // label is the owning cluster's own title table (see graph-layout.types
-  // DotInputNode.titleLabelWidth). Checked before the generic 'rect' branch
-  // since it shares that default shape value.
-  if (node.titleLabelWidth !== undefined && node.titleLabelHeight !== undefined) {
-    // ClusterDotString.java:148-149 — the plain point anchor declaration is
-    // ALWAYS emitted first when the group itself is also a real edge target
-    // (thereALinkFromOrToGroup2), independently of hasPort(); graphviz lets
-    // a node id be redeclared, and the comparator dedupes by first-seen
-    // shape, so both lines matter (see graph-layout.types.ts).
-    const pointDecl = node.groupAnchorAlsoPoint === true
-      ? `${rec.sh} [shape=point,width=.01,label=""];`
-      : '';
-    return `${pointDecl}${rec.sh} [shape=rect,width=.01,height=.01,label=${
-      labelTable(node.titleLabelWidth, node.titleLabelHeight, rec.color)
-    }];`;
-  }
-  if (shape === 'plaintext') {
-    // RECTANGLE_HTML_FOR_PORTS is checked FIRST: SvekNode#appendShape tests it
-    // before RECTANGLE_PORT and before the shielded-RECTANGLE branch
-    // (svek/SvekNode.java:132-143), and it emits no width/height at all.
-    if (node.portRows !== undefined) {
-      return `${rec.sh} [shape=plaintext,label=<${rowPortTable(node, node.portRows, rec.color)}>];`;
-    }
-    if (node.isPort === true) {
-      return `${rec.sh} [shape=plaintext,label=<${portTable(node, rec.color)}>];`;
-    }
-    return `${rec.sh} [shape=plaintext,label=<${shieldTable(node, rec.color)}>];`;
-  }
-  return (
-    `${rec.sh} [${shapeAttr(node)},label="",` +
-    `width=${inches(node.width)},height=${inches(node.height)},color="${hex(rec.color)}"];`
-  );
 }
 
 /** Bibliotekon.getNodeUid: every DOT reference to a shielded node's uid gets
@@ -208,193 +162,6 @@ function edgeLine(edge: DotInputEdge, fromSh: string, toSh: string, c: EdgeColor
   return `${fromSh}->${toSh}[${parts.join(',')}];`;
 }
 
-/** ClusterDotString.printRanks' port rank-chain: one `A->B->C
- *  [arrowhead=none]` statement per rank present, then `C->anchor;`
- *  (bare, bracket-less — matching Svek's `empty()` link exactly). */
-function portChainLines(cluster: DotInputCluster, recs: Map<string, NodeRec>): string[] {
-  if (cluster.portRanks === undefined || cluster.portAnchorId === undefined) return [];
-  const anchorRec = recs.get(cluster.portAnchorId);
-  if (anchorRec === undefined) return [];
-  const lines: string[] = [];
-  for (const { nodeIds } of cluster.portRanks) {
-    const shs = nodeIds.map((id) => recs.get(id)?.sh).filter((sh): sh is string => sh !== undefined);
-    if (shs.length === 0) continue;
-    lines.push(`${shs.join('->')} [arrowhead=none];`);
-    lines.push(`${shs[shs.length - 1]!}->${anchorRec.sh};`);
-  }
-  return lines;
-}
-
-/** ClusterDotString.printRanks: `{rank=source;shA;shB;}` groups emitted as the
- *  FIRST content inside a ports cluster (matching Svek's exact text — the
- *  in-cluster anonymous braces are part of the oracle's byte shape). */
-function portRankGroups(cluster: DotInputCluster, recs: Map<string, NodeRec>): string {
-  return (cluster.portRanks ?? [])
-    .map(({ rank, nodeIds }) => {
-      const shs = nodeIds
-        .map((id) => recs.get(id)?.sh)
-        .filter((sh): sh is string => sh !== undefined);
-      return shs.length > 0 ? `{rank=${rank};${shs.join(';')};}` : '';
-    })
-    .join('');
-}
-
-/** ClusterDotString port branch: labeljust only (no label attr — the title
- *  table moves onto the ee-placeholder), rank groups first, port nodes +
- *  bare constraint chains in the outer cluster, then `clusterNee` wrapping
- *  the placeholder and normal members (hasPort() → subgraphClusterNoLabel
- *  ID_EE + the trailing `empty()` rect, ClusterDotString.java:134-184). */
-function portClusterBlock(
-  cluster: DotInputCluster,
-  childrenOf: ClusterTree['childrenOf'],
-  recs: Map<string, NodeRec>,
-  nodeById: Map<string, DotInputNode>,
-  colors: Map<string, ClusterColors>,
-): string[] {
-  const cc = colors.get(cluster.id)!;
-  const labelOnEe = cluster.portRanksLabelOnEe === true;
-  const attrs = cluster.labelWidth !== undefined ? 'labeljust="c";' : '';
-  const out = [
-    `subgraph ${cluster.id} {style=solid;color="${hex(cc.color)}";${attrs}` +
-      portRankGroups(cluster, recs),
-  ];
-  const emitLine = (id: string): void => {
-    const node = nodeById.get(id);
-    const rec = recs.get(id);
-    if (node !== undefined && rec !== undefined) out.push(nodeLine(node, rec));
-  };
-  const isPortId = (id: string): boolean => nodeById.get(id)?.isPort === true;
-  for (const id of cluster.nodeIds) if (isPortId(id)) emitLine(id);
-  // Entry/exit border points (state diagrams, mechanisms.md §2's WithLabel
-  // branch) never chain to the anchor — only genuine PORTIN/PORTOUT
-  // (NoLabel branch) do (ClusterDotString.java's hasPort() split).
-  if (!labelOnEe) out.push(...portChainLines(cluster, recs));
-  const eeLabel =
-    labelOnEe && cluster.labelWidth !== undefined && cluster.labelHeight !== undefined
-      ? `label=${labelTable(cluster.labelWidth, cluster.labelHeight, cc.title)};`
-      : 'label="";';
-  out.push(`subgraph ${cluster.id}ee {${eeLabel}`);
-  for (const id of cluster.nodeIds) if (!isPortId(id)) emitLine(id);
-  for (const child of childrenOf.get(cluster.id) ?? []) {
-    // portClusterBlock is only ever reached on the non-kermor path
-    // (clusterBlock dispatches to kermorClusterBlock first when kermor is
-    // true, before this function can be reached) — `false` is not a stand-in
-    // default, it is the only value this call site can ever mean.
-    out.push(...clusterBlock(child, childrenOf, recs, nodeById, colors, false));
-  }
-  out.push('}');
-  out.push('}');
-  return out;
-}
-
-/** `!pragma kermor on`'s per-rank node emission: `{rank=X;shA;shB;}` then
- *  each node's own shape line (ClusterDotStringKermor.printRanks:231-245 —
- *  unlike `ClusterDotString.printRanks`, there is NO `hasPort()` chain-to-
- *  anchor branch here at all). */
-function kermorRankGroupLines(
-  ranks: { rank: 'source' | 'sink'; nodeIds: string[] }[],
-  recs: Map<string, NodeRec>,
-  nodeById: Map<string, DotInputNode>,
-): string[] {
-  const out: string[] = [];
-  for (const { rank, nodeIds } of ranks) {
-    const shs = nodeIds.map((id) => recs.get(id)?.sh).filter((sh): sh is string => sh !== undefined);
-    if (shs.length === 0) continue;
-    out.push(`{rank=${rank};${shs.join(';')};}`);
-    for (const id of nodeIds) {
-      const node = nodeById.get(id);
-      const rec = recs.get(id);
-      if (node !== undefined && rec !== undefined) out.push(nodeLine(node, rec));
-    }
-  }
-  return out;
-}
-
-/** `!pragma kermor on`'s cluster body — `ClusterDotStringKermor.printInternal`
- *  + `Cluster.printCluster3_forKermor` (svek/ClusterDotStringKermor.java,
- *  Cluster.java:595-609). Deliberately narrower than the full Java: the
- *  `alpha`/`beta` note-label wrapper subgraphs are omitted (a group-attached
- *  note becomes `Entity#addNote` data under kermor, never a DOT node/edge —
- *  see description/parse-state.ts's `attachNoteToEntity` — so there is no
- *  label content to wrap, and the comparator's `parseClusters` never matches
- *  ANY kermor subgraph name against `/^cluster\d+$/` regardless of alpha/
- *  beta nesting depth, so the omission is invisible to DOT-parity). What IS
- *  ported: the rank-source group (before gamma opens), the `${id}empty`
- *  point placeholder when direct non-port members are empty, and the
- *  rank-sink group (inside gamma, no anchor/chain — contrast
- *  `portClusterBlock`'s `hasPort()` chain, which kermor's own `printRanks`
- *  never has). See description-dot-100 decision-journal.md I2. */
-function kermorClusterBlock(
-  cluster: DotInputCluster,
-  childrenOf: ClusterTree['childrenOf'],
-  recs: Map<string, NodeRec>,
-  nodeById: Map<string, DotInputNode>,
-  colors: Map<string, ClusterColors>,
-): string[] {
-  const cc = colors.get(cluster.id)!;
-  const portIds = new Set((cluster.portRanks ?? []).flatMap((r) => r.nodeIds));
-  const sourceRanks = (cluster.portRanks ?? []).filter((r) => r.rank === 'source');
-  const sinkRanks = (cluster.portRanks ?? []).filter((r) => r.rank === 'sink');
-  const normalIds = cluster.nodeIds.filter((id) => !portIds.has(id));
-
-  const out: string[] = [...kermorRankGroupLines(sourceRanks, recs, nodeById)];
-
-  const label =
-    cluster.labelWidth !== undefined && cluster.labelHeight !== undefined
-      ? `labeljust="c";label=${labelTable(cluster.labelWidth, cluster.labelHeight, cc.title)};`
-      : 'label="";';
-  out.push(`subgraph ${cluster.id}gamma {style=solid;color="${hex(cc.color)}";${label}`);
-
-  if (normalIds.length === 0) {
-    out.push(`${cluster.id}empty [shape=point,label=""];`);
-  } else {
-    for (const id of normalIds) {
-      const node = nodeById.get(id);
-      const rec = recs.get(id);
-      if (node !== undefined && rec !== undefined) out.push(nodeLine(node, rec));
-    }
-  }
-  for (const child of childrenOf.get(cluster.id) ?? []) {
-    out.push(...kermorClusterBlock(child, childrenOf, recs, nodeById, colors));
-  }
-  out.push(...kermorRankGroupLines(sinkRanks, recs, nodeById));
-  out.push('}');
-  return out;
-}
-
-/** Emit a cluster subgraph (clean form): title table, member nodes, nested children. */
-function clusterBlock(
-  cluster: DotInputCluster,
-  childrenOf: ClusterTree['childrenOf'],
-  recs: Map<string, NodeRec>,
-  nodeById: Map<string, DotInputNode>,
-  colors: Map<string, ClusterColors>,
-  kermor: boolean,
-): string[] {
-  if (kermor) return kermorClusterBlock(cluster, childrenOf, recs, nodeById, colors);
-  if (cluster.portRanks !== undefined && cluster.portRanks.length > 0) {
-    return portClusterBlock(cluster, childrenOf, recs, nodeById, colors);
-  }
-  const cc = colors.get(cluster.id)!;
-  const label =
-    cluster.labelWidth !== undefined && cluster.labelHeight !== undefined
-      ? `labeljust="c";label=${labelTable(cluster.labelWidth, cluster.labelHeight, cc.title)};`
-      : 'label="";';
-  const out = [`subgraph ${cluster.id} {style=solid;color="${hex(cc.color)}";${label}`];
-  for (const id of cluster.nodeIds) {
-    const node = nodeById.get(id);
-    const rec = recs.get(id);
-    if (node !== undefined && rec !== undefined) out.push(nodeLine(node, rec));
-  }
-  out.push(...portChainLines(cluster, recs));
-  for (const child of childrenOf.get(cluster.id) ?? []) {
-    out.push(...clusterBlock(child, childrenOf, recs, nodeById, colors, kermor));
-  }
-  out.push('}');
-  // #lizard forgives — faithful port of Cluster/ClusterDotString's nested
-  // subgraph emission; the branch count mirrors upstream's cases.
-  return out;
-}
 
 function rankLines(input: DotInputGraph, recs: Map<string, NodeRec>): string[] {
   // Port nodes' ranks are emitted inside their cluster (portRankGroups) —
@@ -413,11 +180,51 @@ function rankLines(input: DotInputGraph, recs: Map<string, NodeRec>): string[] {
   return [...groups].map(([rank, shs]) => `{rank=${rank}; ${shs.join('; ')}}`);
 }
 
+/**
+ * `Bibliotekon#addLine`'s two global edge batches: `lines0` is every edge with
+ * `first(line)` — jar's `link.getLength() == 1`, which reaches this port as
+ * `minLen === 0` — and `lines1` is the rest
+ * (`~/git/plantuml/.../svek/Bibliotekon.java:89-114`). `DotStringFactory
+ * #createDotString` prints `lines0` BEFORE any node's shape line or cluster
+ * subgraph and `lines1` after all cluster content (`:187-198`), which is what
+ * makes a `lines0` endpoint the first node graphviz's parser creates — and so
+ * the root of the cycle-breaking DFS that runs before ranking
+ * (`graph-layout-build.ts#firstEncounterOrder` has the full derivation, and
+ * mirrors this same split on the layout path).
+ *
+ * Deliberately not ported: `addLine`'s own tie-break inside `lines0`, which
+ * moves a note-labelled edge ahead of the first same-connections unlabelled
+ * one (`:90-99`). No cached fixture's `lines0` order differs from the input
+ * edge order because of it — `temuxi-28-cega322`'s seven-edge batch matches
+ * jar's exactly — so it is an unexercised residual, recorded rather than
+ * guessed at.
+ */
+function edgeBatches(input: DotInputGraph): { lines0: number[]; lines1: number[] } {
+  const lines0: number[] = [];
+  const lines1: number[] = [];
+  input.edges.forEach((e, i) => (e.attributes?.minLen === 0 ? lines0 : lines1).push(i));
+  return { lines0, lines1 };
+}
+
 function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree): string[] {
   const { recs, nodeById, clusterColors, edgeColors } = seqs;
   const body = [...graphAttrLines(input)];
   const kermor = input.kermor === true;
   const unclustered = input.nodes.filter((n) => !tree.clusteredIds.has(n.id));
+  const { lines0, lines1 } = edgeBatches(input);
+  const emitEdges = (indices: readonly number[]): void => {
+    for (const i of indices) {
+      const e = input.edges[i]!;
+      if (!recs.has(e.from) || !recs.has(e.to)) continue;
+      const from = edgeRef(e.from, recs, nodeById, e.attributes?.tailport);
+      const to = edgeRef(e.to, recs, nodeById, e.attributes?.headport);
+      body.push(edgeLine(e, from, to, edgeColors[i]!));
+    }
+  };
+  // Under kermor BOTH batches print first, before any content
+  // (DotStringFactory.java:178-185); otherwise only `lines0` does, and
+  // `lines1` closes the file (`:187-198`).
+  emitEdges(kermor ? [...lines0, ...lines1] : lines0);
   // DotStringFactory.java:184: `root.printCluster3_forKermor(...)` runs
   // BEFORE recursing into children — root's own direct (non-clustered)
   // "normal" members are empty in every one of these fixtures (all content
@@ -435,13 +242,7 @@ function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree):
     body.push(...clusterBlock(top, tree.childrenOf, recs, nodeById, clusterColors, kermor));
   }
   body.push(...rankLines(input, recs));
-  input.edges.forEach((e, i) => {
-    if (!recs.has(e.from) || !recs.has(e.to)) return;
-    const from = edgeRef(e.from, recs, nodeById, e.attributes?.tailport);
-    body.push(
-      edgeLine(e, from, edgeRef(e.to, recs, nodeById, e.attributes?.headport), edgeColors[i]!),
-    );
-  });
+  if (!kermor) emitEdges(lines1);
   return body;
 }
 

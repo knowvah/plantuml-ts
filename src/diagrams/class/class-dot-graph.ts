@@ -32,6 +32,8 @@ import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
 import { applyShapeAndPorts, classPortShortNamesById } from './class-port-rows.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
 import { ARROW_LABEL_FONT_SIZE, buildDotEdges } from './class-dot-edges.js';
+import { clusterWrapperLevel } from './class-cluster-levels.js';
+import { namespaceTitleTableDims } from './class-namespace-title-table.js';
 
 export interface DotGraphParts {
   dotGraph: DotInputGraph;
@@ -46,6 +48,14 @@ export interface DotGraphParts {
    *  relationship/note endpoint -- `ns.classifiers` alone misses it). Pure
    *  data export, no change to what is emitted to @knowvah/dot-engine. */
   anchors: Map<string, string>;
+  /** T4 (namespace-cluster-box mission): namespace id -> this port's own
+   *  synthetic `clusterN` DOT id (`buildDotClusters`'s own doc comment on
+   *  why the id is synthetic, not `ns.id`, verbatim). Threaded OUT the same
+   *  way `anchors` already is, so T5 can look a namespace up in
+   *  `DotLayoutResult.clusters` (keyed by this same `clusterN` token)
+   *  without re-deriving the numbering. Empty when the diagram has no
+   *  cluster-bearing namespace. */
+  clusterIdByNs: Map<string, string>;
 }
 
 /**
@@ -84,23 +94,46 @@ function nonEmptyNamespaceIds(ast: ClassDiagramAST): Set<string> {
 function buildDotClusters(
   ast: ClassDiagramAST,
   anchors: Map<string, string>,
-): DotInputCluster[] | undefined {
+  theme: Theme,
+  measurer: StringMeasurer,
+): { clusters: DotInputCluster[]; clusterIdByNs: Map<string, string> } | undefined {
   const keep = nonEmptyNamespaceIds(ast);
   if (keep.size === 0) return undefined;
   const kept = ast.namespaces.filter((ns) => keep.has(ns.id));
   const clusterIdByNs = new Map(kept.map((ns, i) => [ns.id, `cluster${i}`] as const));
-  return kept.map((ns, i) => {
+  const clusters = kept.map((ns, i) => {
     // A package used as a relationship endpoint carries its point anchor as an
     // extra direct member of its own cluster (svek ClusterDotString).
     const anchorId = anchors.get(ns.id);
     const nodeIds = anchorId !== undefined ? [...ns.classifiers, anchorId] : ns.classifiers;
     const cluster: DotInputCluster = { id: `cluster${i}`, nodeIds };
-    if (ns.display.length > 0) cluster.label = ns.display;
+    // T4: `protection0`/`protection1` (ClusterDotString.java:107-115) are
+    // unconditional for a non-swimlane, non-`USymbols.NODE` group -- NOT
+    // gated on `cluster.isLabel()` (line 122's SEPARATE branch, below) -- so
+    // `innerMarginLevels`/`unwrappedNodeId` are set for every kept cluster,
+    // independent of whether it carries a title.
+    cluster.innerMarginLevels = clusterWrapperLevel(ns.id, ast);
+    if (anchorId !== undefined) cluster.unwrappedNodeId = anchorId;
+    if (ns.display.length > 0) {
+      cluster.label = ns.display;
+      const dims = namespaceTitleTableDims(ns.display, theme, measurer);
+      // Same pair, two consumers (cluster-title-table.ts's own
+      // `computeTitleTableHeight` doc comment): `labelWidth`/`labelHeight`
+      // feed the DOT-TEXT emitter's `label=<TABLE...>` (svek-dot-emit-
+      // clusters.ts#clusterBlock, unconditional whenever both are defined);
+      // `titleTableWidth`/`titleTableHeight` feed the LAYOUT builder's real
+      // @knowvah/dot-engine reservation (graph-layout-build.ts#addClusters).
+      cluster.labelWidth = dims.width;
+      cluster.labelHeight = dims.height;
+      cluster.titleTableWidth = dims.width;
+      cluster.titleTableHeight = dims.height;
+    }
     const parentClusterId =
       ns.parentId !== undefined ? clusterIdByNs.get(ns.parentId) : undefined;
     if (parentClusterId !== undefined) cluster.parentId = parentClusterId;
     return cluster;
   });
+  return { clusters, clusterIdByNs };
 }
 
 /** `EntityImageProtected`'s border -- GeneralImageBuilder.java:113 wraps a
@@ -348,6 +381,27 @@ function buildDotNodesAndEdges(
 }
 
 /**
+ * B6/M7: the indices whose dot edge `buildDotEdges` actually emitted as
+ * `rel.to -> rel.from`. `class-edge-geo.ts#normalizeEdgePoints` reads this
+ * as "the raw point list runs to -> from" and derives `matchesFromTo`
+ * (which pairs `sourceDecor`/`targetDecor` with the point array) from it,
+ * so it MUST use the same predicate the emission did.
+ *
+ * It did not, before B6: this was every HIERARCHICAL index, while emission
+ * used `ranksParentFirst` (hierarchical AND `parentIsLinkEntity1`). A
+ * `D --|> I` was emitted unswapped and recorded here as swapped, inverting
+ * `matchesFromTo` for it. Now both sides call `dotEdgeRunsReversed`. Split
+ * out of `buildDotGraph` for the project's per-function NLOC cap.
+ */
+function computeSwappedEdges(ast: ClassDiagramAST): Set<number> {
+  return new Set(
+    ast.relationships
+      .map((rel, i) => (dotEdgeRunsReversed(rel) ? i : -1))
+      .filter((i) => i >= 0),
+  );
+}
+
+/**
  * Build the dot input graph — all classifiers + notes flattened into the
  * root graph (D5) — plus the set of edge indices emitted `to -> from`
  * (`./class-dot-edge-order.ts#dotEdgeRunsReversed`).
@@ -366,22 +420,7 @@ export function buildDotGraph(
   applySameClassWidthFloor(ast.classifiers, measuredMap, theme);
   const anchors = packageEndpointAnchors(ast, nonEmptyNamespaceIds(ast));
   const { dotNodes, dotEdges } = buildDotNodesAndEdges(ast, measuredMap, anchors, theme, measurer);
-
-  // B6/M7: the indices whose dot edge `buildDotEdges` actually emitted as
-  // `rel.to -> rel.from`. `class-edge-geo.ts#normalizeEdgePoints` reads this
-  // as "the raw point list runs to -> from" and derives `matchesFromTo`
-  // (which pairs `sourceDecor`/`targetDecor` with the point array) from it,
-  // so it MUST use the same predicate the emission did.
-  //
-  // It did not, before B6: this was every HIERARCHICAL index, while emission
-  // used `ranksParentFirst` (hierarchical AND `parentIsLinkEntity1`). A
-  // `D --|> I` was emitted unswapped and recorded here as swapped, inverting
-  // `matchesFromTo` for it. Now both sides call `dotEdgeRunsReversed`.
-  const swappedEdges = new Set(
-    ast.relationships
-      .map((rel, i) => (dotEdgeRunsReversed(rel) ? i : -1))
-      .filter((i) => i >= 0),
-  );
+  const swappedEdges = computeSwappedEdges(ast);
 
   // Notes lay out as their own nodes + connector edges (Svek note-on-entity).
   // `anchors` also routes a `note <pos> of <package>` target to that
@@ -390,14 +429,14 @@ export function buildDotGraph(
   dotNodes.push(...noteParts.nodes);
   dotEdges.push(...noteParts.edges);
 
-  const clusters = buildDotClusters(ast, anchors);
+  const clusterParts = buildDotClusters(ast, anchors, theme, measurer);
 
   const dotGraph: DotInputGraph = {
     nodes: dotNodes,
     edges: dotEdges,
     rankDir: ast.rankdir === 'LR' ? 'LR' : 'TB',
     ...sepAttrs(theme),
-    ...(clusters !== undefined ? { clusters } : {}),
+    ...(clusterParts !== undefined ? { clusters: clusterParts.clusters } : {}),
     // G2/N29: class's renderer draws EVERY edge decoration as an inline
     // extremity polygon (`renderer-arrowhead.ts`, landed N1 mechanism 2 --
     // the old SVG `<marker>`-reference `targetMarker`/`sourceMarker`
@@ -418,5 +457,11 @@ export function buildDotGraph(
     manualArrowheads: true,
   };
 
-  return { dotGraph, swappedEdges, noteParts, anchors };
+  return {
+    dotGraph,
+    swappedEdges,
+    noteParts,
+    anchors,
+    clusterIdByNs: clusterParts?.clusterIdByNs ?? new Map<string, string>(),
+  };
 }

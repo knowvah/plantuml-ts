@@ -6,8 +6,6 @@ import {
   getHTitle,
   getTitleBaselineOffset,
   renderNamespaceFolder,
-  NAMESPACE_TOP_EXTRA,
-  NAMESPACE_SIDE_PADDING,
   PACKAGE_ROUND_CORNER,
   PACKAGE_STROKE_WIDTH,
 } from '../../../src/diagrams/class/class-namespace-shape.js';
@@ -61,18 +59,6 @@ describe('getTitleBaselineOffset', () => {
   it('is 2 + fontSize - descent, matching jar text y=18.8889 at box-top 6', () => {
     const offset = getTitleBaselineOffset(measurer, defaultTheme, 'foo');
     expect(6 + offset).toBeCloseTo(18.8889, 3);
-  });
-});
-
-describe('NAMESPACE_TOP_EXTRA / NAMESPACE_SIDE_PADDING constants', () => {
-  it('NAMESPACE_TOP_EXTRA is 13 (htitle=20 -> 33px gap, htitle=46 -> 59px gap)', () => {
-    expect(NAMESPACE_TOP_EXTRA).toBe(13);
-    expect(20 + NAMESPACE_TOP_EXTRA).toBe(33);
-    expect(46 + NAMESPACE_TOP_EXTRA).toBe(59);
-  });
-
-  it('NAMESPACE_SIDE_PADDING is 16 (jar-verified content-driven side/bottom gap)', () => {
-    expect(NAMESPACE_SIDE_PADDING).toBe(16);
   });
 });
 

@@ -1,16 +1,21 @@
 /**
- * Unit tests for class-geo-builders.ts#buildNamespaceGeos — G2 N18: the
- * anchor-in-cluster footprint case (a package used as a relationship/note
- * endpoint carries a real `zaent-*` point anchor as an extra direct member
- * of its own dot cluster, occupying a rank slot ABOVE the topmost
- * classifier — `plans/g2-class-svg/ledger.md` N17/N18).
+ * Unit tests for class-geo-builders.ts#buildNamespaceGeos — T5
+ * (namespace-cluster-box mission): the namespace box is now READ verbatim
+ * from `DotLayoutResult.clusters` via `clusterIdByNs` (T4), mirroring
+ * `DotStringFactory.java:425-433` + `Cluster#setPosition`
+ * (Cluster.java:511-512) — upstream scrapes the rendered `clusterN` polygon
+ * and stores it with no padding. The pre-T5 member-bbox walk (and the
+ * anchor-folding it needed, G2 N18) moved entirely into graphviz's own
+ * cluster layout — `buildDotClusters` (class-dot-graph.ts) already puts the
+ * `zaent-*` point anchor into the cluster's `nodeIds`, so the anchor's
+ * effect on the box now arrives pre-baked in the box this function reads,
+ * with no anchor-specific logic left in this file to unit-test directly.
  */
 import { describe, it, expect } from 'vitest';
 import { buildNamespaceGeos } from '../../../src/diagrams/class/class-geo-builders.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { getHTitle } from '../../../src/diagrams/class/class-namespace-shape.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
@@ -27,82 +32,60 @@ function makeAST(overrides?: Partial<ClassDiagramAST>): ClassDiagramAST {
   };
 }
 
-describe('buildNamespaceGeos — anchor-in-cluster footprint (G2 N18)', () => {
+describe('buildNamespaceGeos — reads the cluster box verbatim (T5)', () => {
   const ast = makeAST();
-  const topPad = getHTitle(measurer, defaultTheme, 'p') + 13;
+  const box = { id: 'cluster0', x: 12, y: 34, width: 56, height: 78 };
+  const clusterIdByNs = new Map([['p', 'cluster0']]);
 
-  it('uses the classifier position alone when no anchor exists for the namespace', () => {
-    const posMap = new Map([['c', { id: 'c', x: 100, y: 100, width: 50, height: 50 }]]);
-    const [geo] = buildNamespaceGeos(ast, posMap, defaultTheme, measurer, new Map());
-    expect(geo?.y).toBeCloseTo(100 - topPad, 6);
+  it('takes x/y/width/height straight from the matching cluster box, no padding applied', () => {
+    const [geo] = buildNamespaceGeos(ast, defaultTheme, measurer, [box], clusterIdByNs);
+    expect(geo?.x).toBe(12);
+    expect(geo?.y).toBe(34);
+    expect(geo?.width).toBe(56);
+    expect(geo?.height).toBe(78);
   });
 
-  it('folds the anchor position into the footprint walk when the namespace is an edge endpoint', () => {
-    // Anchor sits ABOVE the classifier (smaller y) — the real jar-observed
-    // rank-slot mechanism (ledger.md N17/N18's 41px vs 33px pair).
-    const posMap = new Map([
-      ['c', { id: 'c', x: 100, y: 100, width: 50, height: 50 }],
-      ['zaent-p', { id: 'zaent-p', x: 120, y: 92, width: 1, height: 1 }],
-    ]);
-    const anchors = new Map([['p', 'zaent-p']]);
-    const [geo] = buildNamespaceGeos(ast, posMap, defaultTheme, measurer, anchors);
-    // Top boundary now derives from the anchor's y (92), not the
-    // classifier's y (100) -- the box grows upward to enclose the anchor.
-    expect(geo?.y).toBeCloseTo(92 - topPad, 6);
-    expect(geo?.y).toBeLessThan(100 - topPad);
+  it('skips a namespace with no clusterIdByNs entry at all', () => {
+    const geos = buildNamespaceGeos(ast, defaultTheme, measurer, [box], new Map());
+    expect(geos).toHaveLength(0);
   });
 
-  it('does not affect left/right/bottom when the anchor sits within the classifier footprint', () => {
-    const posMap = new Map([
-      ['c', { id: 'c', x: 100, y: 100, width: 50, height: 50 }],
-      ['zaent-p', { id: 'zaent-p', x: 120, y: 92, width: 1, height: 1 }],
-    ]);
-    const anchors = new Map([['p', 'zaent-p']]);
-    const withAnchor = buildNamespaceGeos(ast, posMap, defaultTheme, measurer, anchors)[0]!;
-    const without = buildNamespaceGeos(
-      ast,
-      new Map([['c', { id: 'c', x: 100, y: 100, width: 50, height: 50 }]]),
-      defaultTheme,
-      measurer,
-      new Map(),
-    )[0]!;
-    expect(withAnchor.x).toBeCloseTo(without.x, 6);
-    expect(withAnchor.width).toBeCloseTo(without.width, 6);
-    expect(withAnchor.y + withAnchor.height).toBeCloseTo(without.y + without.height, 6);
+  it('skips a namespace whose clusterIdByNs id has no matching cluster entry', () => {
+    const geos = buildNamespaceGeos(ast, defaultTheme, measurer, [], clusterIdByNs);
+    expect(geos).toHaveLength(0);
   });
 
-  it('ignores an anchor id that has no matching dot-layout position', () => {
-    const posMap = new Map([['c', { id: 'c', x: 100, y: 100, width: 50, height: 50 }]]);
-    const anchors = new Map([['p', 'zaent-p']]); // never laid out
-    const [geo] = buildNamespaceGeos(ast, posMap, defaultTheme, measurer, anchors);
-    expect(geo?.y).toBeCloseTo(100 - topPad, 6);
+  it('skips every namespace when clusters is undefined (degenerate / no-cluster diagram)', () => {
+    const geos = buildNamespaceGeos(ast, defaultTheme, measurer, undefined, clusterIdByNs);
+    expect(geos).toHaveLength(0);
   });
 });
 
 describe('buildNamespaceGeos — inkShape resolution (G2 N60, item 42)', () => {
   const ast = makeAST();
-  const posMap = new Map([['c', { id: 'c', x: 100, y: 100, width: 50, height: 50 }]]);
+  const box = { id: 'cluster0', x: 0, y: 0, width: 10, height: 10 };
+  const clusterIdByNs = new Map([['p', 'cluster0']]);
 
   it('leaves inkShape undefined for the default (non-strict, non-rect) FOLDER style', () => {
-    const [geo] = buildNamespaceGeos(ast, posMap, defaultTheme, measurer, new Map());
+    const [geo] = buildNamespaceGeos(ast, defaultTheme, measurer, [box], clusterIdByNs);
     expect(geo?.inkShape).toBeUndefined();
   });
 
   it('resolves "polygon" for FOLDER style under skinparam style strictuml', () => {
     const strictTheme = { ...defaultTheme, strictUml: true };
-    const [geo] = buildNamespaceGeos(ast, posMap, strictTheme, measurer, new Map());
+    const [geo] = buildNamespaceGeos(ast, strictTheme, measurer, [box], clusterIdByNs);
     expect(geo?.inkShape).toBe('polygon');
   });
 
   it('resolves "rect" for skinparam packageStyle rect, even under strictuml', () => {
     const rectTheme = { ...defaultTheme, strictUml: true, packageStyle: 'rect' as const };
-    const [geo] = buildNamespaceGeos(ast, posMap, rectTheme, measurer, new Map());
+    const [geo] = buildNamespaceGeos(ast, rectTheme, measurer, [box], clusterIdByNs);
     expect(geo?.inkShape).toBe('rect');
   });
 
   it('resolves "rect" for skinparam packageStyle rect without strictuml too', () => {
     const rectTheme = { ...defaultTheme, packageStyle: 'rect' as const };
-    const [geo] = buildNamespaceGeos(ast, posMap, rectTheme, measurer, new Map());
+    const [geo] = buildNamespaceGeos(ast, rectTheme, measurer, [box], clusterIdByNs);
     expect(geo?.inkShape).toBe('rect');
   });
 });

@@ -3,6 +3,7 @@ import { createGraph } from '@knowvah/dot-engine';
 import type { Graph } from '@knowvah/dot-engine';
 import { addClusters, addNodes, firstEncounterOrder } from '../../../src/core/graph-layout-build.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
+import type { DotInputCluster } from '../../../src/core/graph-layout.types.js';
 
 /**
  * G7 T7 (`plans/g7-borderpoint-rank/decision-journal.md`, T5 root-cause row +
@@ -316,7 +317,12 @@ describe('firstEncounterOrder — jar lines0 node-creation order (G7 T16)', () =
       edges: [{ id: 'e1', from: 'a', to: 'b', attributes: { minLen: 1 } }],
       // clusters/other fields absent -- irrelevant to this pure function.
     };
-    expect(firstEncounterOrder(input)).toBe(input.nodes);
+    // G9/T4: compared by VALUE, not identity. The function now walks the
+    // cluster tree to reproduce jar's full declaration order, so it always
+    // builds a fresh array; the property this guards — an input with no
+    // `minLen === 0` edge and no clusters keeps its array order — is
+    // unchanged, and is what `acyclic.c`'s DFS root actually depends on.
+    expect(firstEncounterOrder(input).map((n) => n.id)).toEqual(input.nodes.map((n) => n.id));
   });
 
   it('one minLen===0 edge: its tail then its head come first, remaining nodes keep their existing order', () => {
@@ -436,5 +442,93 @@ describe('addClusters — title-table FIXEDSIZE dims truncate, never round (G8 T
     const label = b.graph.subgraphs.get('cluster0')!.attrs.get('label')!;
     expect(label).toContain('WIDTH="91"');
     expect(label).toContain('HEIGHT="9"');
+  });
+});
+
+/**
+ * G9/T6 — DOT attribute inheritance for a nested border-point composite.
+ *
+ * Jar builds its graph as DOT TEXT, where `label=` written on `<parent>ee`
+ * (`ClusterDotString.java:135-141`) applies to every cluster declared inside it
+ * afterwards (`Cluster.java:580` recurses only after that). A border-point
+ * `cluster<N>` writes no `label` of its own, so it silently takes the
+ * parent's — and graphviz reserves a label band at the top of its box.
+ *
+ * Ground truth is `temuxi-28-cega322`: real graphviz reports `lp` and
+ * `lheight=0.12` for `cluster1`/`cluster2`/`cluster3` although none declares a
+ * label, and blanking ONLY `cluster0ee`'s label strips all three. Restoring the
+ * inheritance here makes the engine's cluster boxes identical to graphviz's on
+ * the same graph (cluster0 1082x397, cluster1 166x178, cluster2 258x232,
+ * cluster3 543x348).
+ */
+describe('addClusters — nested border-point clusters inherit the parent ee label (G9/T6)', () => {
+  const nested = (parentExtra: Partial<DotInputCluster> = {}): DotInputGraph => ({
+    nodes: [
+      { id: 'pp', width: 12, height: 12, isPort: true },
+      { id: 'cp', width: 12, height: 12, isPort: true },
+      { id: 'inner', width: 50, height: 50 },
+    ],
+    edges: [],
+    clusters: [
+      {
+        id: 'parent',
+        nodeIds: ['pp'],
+        portRanks: [{ rank: 'source', nodeIds: ['pp'] }],
+        portRanksLabelOnEe: true,
+        titleTableWidth: 45.9375,
+        titleTableHeight: 9,
+        ...parentExtra,
+      },
+      {
+        id: 'child',
+        parentId: 'parent',
+        nodeIds: ['cp', 'inner'],
+        portRanks: [{ rank: 'source', nodeIds: ['cp'] }],
+        portRanksLabelOnEe: true,
+        titleTableWidth: 36.575,
+        titleTableHeight: 9,
+      },
+    ],
+  });
+
+  /** The child's own `cluster<N>` subgraph, wherever the nesting put it. */
+  function findChildMain(g: Graph): Graph | undefined {
+    for (const [name, sub] of g.subgraphs) {
+      if (name === 'cluster1') return sub;
+      const hit = findChildMain(sub);
+      if (hit !== undefined) return hit;
+    }
+    return undefined;
+  }
+
+  it("gives the child the PARENT's title table, floored, not its own", () => {
+    const b = createGraph({ directed: true });
+    addClusters(b, nested());
+    const label = findChildMain(b.graph)!.attrs.get('label')!;
+    expect(label).toContain('WIDTH="45"'); // parent's 45.9375, floored
+    expect(label).toContain('HEIGHT="9"');
+    expect(label).not.toContain('WIDTH="36"'); // NOT the child's own
+  });
+
+  it('leaves the parent`s own ee label untouched', () => {
+    const b = createGraph({ directed: true });
+    addClusters(b, nested());
+    const parentEe = b.graph.subgraphs.get('cluster0')!.subgraphs.get('cluster0ee')!;
+    expect(parentEe.attrs.get('label')).toContain('WIDTH="45"');
+  });
+
+  it('inherits nothing when the parent`s `i` wrapper blocks it', () => {
+    // `borderPointAncestorWrap` opens `${id}i` inside `ee`, and every wrapper is
+    // written `label=""` (ClusterDotString.java:245-252) — an override, not a
+    // pass-through, so the child sees no label at all.
+    const b = createGraph({ directed: true });
+    addClusters(b, nested({ borderPointAncestorWrap: true }));
+    expect(findChildMain(b.graph)!.attrs.get('label')).toBeUndefined();
+  });
+
+  it('inherits nothing at the top level, where the root graph has no label', () => {
+    const b = createGraph({ directed: true });
+    addClusters(b, nested());
+    expect(b.graph.subgraphs.get('cluster0')!.attrs.get('label')).toBeUndefined();
   });
 });

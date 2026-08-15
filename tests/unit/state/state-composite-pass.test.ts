@@ -83,6 +83,14 @@ function findEdgeByLabel(graphs: readonly DotInputGraph[], label: string): DotIn
   throw new Error(`no edge with label "${label}" found in any captured graph`);
 }
 
+/** jar's reserved label box around a measured width: `+ 2 * marginLabel`
+ *  (`marginLabel` = 1 for a non-self-loop, `SvekEdge.java:372-373`) then
+ *  `appendTable`'s `(int)` truncation. Confirmed against the oracle DOT:
+ *  buniva-95-zije634's svek-1.dot declares `WIDTH="21"` for "xxx", and
+ *  `floor(19.5 + 2)` is 21. The font-size discrimination these tests exist
+ *  for is unaffected -- size 13 reserves 21 where size 14 reserves 23. */
+const reserved = (measuredWidth: number): number => Math.floor(measuredWidth + 2);
+
 describe('state-composite-pass.ts addLevelEdges — site 2, top-level scope call', () => {
   const graphs = captureAll(readPuml('nimana-36-veco708'));
 
@@ -90,13 +98,13 @@ describe('state-composite-pass.ts addLevelEdges — site 2, top-level scope call
     const edge = findEdgeByLabel(graphs, 'go to yes');
     expect(size13('go to yes')).toBeCloseTo(45.5, 3);
     expect(size14('go to yes')).not.toBeCloseTo(size13('go to yes'), 3);
-    expect(edge.attributes!.labelWidth).toBeCloseTo(size13('go to yes'), 6);
+    expect(edge.attributes!.labelWidth).toBe(reserved(size13('go to yes')));
   });
 
   it('measures "go to no" at font-size 13, not 14', () => {
     const edge = findEdgeByLabel(graphs, 'go to no');
-    expect(edge.attributes!.labelWidth).toBeCloseTo(size13('go to no'), 6);
-    expect(edge.attributes!.labelWidth).not.toBeCloseTo(size14('go to no'), 3);
+    expect(edge.attributes!.labelWidth).toBe(reserved(size13('go to no')));
+    expect(edge.attributes!.labelWidth).not.toBe(reserved(size14('go to no')));
   });
 });
 
@@ -107,8 +115,8 @@ describe('state-composite-pass.ts addLevelEdges — non-top-level scope call (be
     const edge = findEdgeByLabel(graphs, 'EvNewValueSaved');
     expect(size13('EvNewValueSaved')).toBeCloseTo(111.475, 3);
     expect(size14('EvNewValueSaved')).toBeCloseTo(120.05, 3);
-    expect(edge.attributes!.labelWidth).toBeCloseTo(111.475, 3);
-    expect(edge.attributes!.labelWidth).not.toBeCloseTo(120.05, 1);
+    expect(edge.attributes!.labelWidth).toBe(reserved(111.475));
+    expect(edge.attributes!.labelWidth).not.toBe(reserved(120.05));
   });
 });
 
@@ -119,13 +127,13 @@ describe('state-composite-pass.ts sweepOrphanEdges — site 3', () => {
     const edge = findEdgeByLabel(graphs, 'go to yes-yes');
     expect(size13('go to yes-yes')).toBeCloseTo(70.0375, 3);
     expect(size14('go to yes-yes')).not.toBeCloseTo(size13('go to yes-yes'), 3);
-    expect(edge.attributes!.labelWidth).toBeCloseTo(size13('go to yes-yes'), 6);
+    expect(edge.attributes!.labelWidth).toBe(reserved(size13('go to yes-yes')));
   });
 
   it('measures "go to yes-no" at font-size 13 (jar-exact 64.2688px), not 14', () => {
     const edge = findEdgeByLabel(graphs, 'go to yes-no');
     expect(size13('go to yes-no')).toBeCloseTo(64.2688, 3);
-    expect(edge.attributes!.labelWidth).toBeCloseTo(size13('go to yes-no'), 6);
-    expect(edge.attributes!.labelWidth).not.toBeCloseTo(size14('go to yes-no'), 3);
+    expect(edge.attributes!.labelWidth).toBe(reserved(size13('go to yes-no')));
+    expect(edge.attributes!.labelWidth).not.toBe(reserved(size14('go to yes-no')));
   });
 });

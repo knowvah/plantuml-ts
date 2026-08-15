@@ -11,8 +11,10 @@ import type {
   DotInputGraph,
   DotInputNode,
 } from './graph-layout.types.js';
-import { buildBorderPointClusterHandles } from './graph-layout-build-borderpoint.js';
-import { rowPortTable } from './svek-dot-emit-labels.js';
+import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
+import { rowPortTable, portTable } from './svek-dot-emit-labels.js';
+import { inches } from './svek-dot-emit.js';
+import { firstEncounterOrder } from './svek-dot-order.js';
 
 /** graphviz width/height/nodesep/ranksep attrs are in inches; our measured
  *  sizes are in pixels. getLayout returns points (inches × 72), so dividing px
@@ -54,88 +56,13 @@ function layoutShape(n: DotInputNode): string {
   return shape;
 }
 
-/**
- * G7 T16: reorders `input.nodes` so the nodes touched by a `minLen===0` edge
- * (jar's `Bibliotekon.java#first`, `link.getLength()==1` — LEFT/RIGHT-
- * direction transitions, `CommandLinkStateCommon.java:176-182`) come FIRST,
- * in edge-encounter order (tail then head, first edge first, first
- * occurrence wins), followed by every other node in its pre-existing order.
- *
- * Jar's `DotStringFactory#createDotString` interleaves cluster/node
- * declarations with two GLOBAL edge batches: `lines0` (length==1 edges)
- * printed BEFORE any node's own explicit shape line or cluster subgraph,
- * `lines1` (every other edge) printed LAST, after all cluster content
- * (`~/git/plantuml/.../svek/DotStringFactory.java:187-198`). In real DOT
- * text this means a `lines0` edge statement IMPLICITLY creates its endpoint
- * nodes the moment graphviz's parser reaches it — before any later explicit
- * shape line for the SAME node changes anything but that node's attributes.
- * Graphviz's cycle-breaking DFS (`dotgen/acyclic.c`, run before rank
- * assignment) roots at the FIRST node the parser encounters, so this
- * ordering can choose a materially different DFS root — and hence a
- * different back-edge — for any pass whose edge set contains a cycle.
- *
- * This port's builder has no implicit-node-creation phase (`addNodes`
- * declares every node explicitly, in one flat pass, before any edge is
- * registered via `addEdges`) — reordering the flat declaration pass here
- * reproduces the SAME effective "first encountered" order jar's text
- * produces, without needing a textual DOT intermediate.
- *
- * Jar-verified: `pesita-10-dene726`'s `nasreq_auth` pass has a 4-node cycle
- * (`Idle -> __zaent_AA -> Reanimate -> Closing -> Idle`) closed by two
- * `-left-`-direction transitions (both `length===1`); jar's cached
- * `svek-3.dot` emits the reversed `sh0012->sh0010` (`Closing->Idle`) edge as
- * the file's literal first statement, before any node shape declaration,
- * making `Closing` graphviz's DFS root. Pre-fix, this port's flat
- * `input.nodes`-array order made `aa_ok_ex` the first-declared node instead,
- * choosing a different back-edge and producing a >2.5x-too-tall cluster bbox
- * (G7 T13 derivation, `plans/g6-cluster-geometry/batch-4/
- * withlabel-derivation.md` §4). Reordering so `Closing` (the tail of the
- * FIRST `minLen===0` edge) is declared first restores jar's DFS root.
- *
- * Deliberately narrower than jar's full rule in one respect: jar ALSO lets a
- * cluster's own `printCluster1` (`Cluster.java#getNodesOrderedTop`) bump a
- * root-DIRECT NORMAL-position node ahead of `lines0` when it is the tail of
- * an INVERTED (`-left-`/`-up-`) edge that is NOT ALSO length==1 (an `-up-`
- * transition keeps its default length, so it never enters `lines0`) —
- * unimplemented here. Every fixture examined this task (the 3 paper-gate
- * targets and the 57 pinned svg-state goldens) has that condition evaluate
- * to empty: no root-direct node in any of them is the tail of an
- * `-up-`-only inverted edge with no ALSO-length==1 edge covering it. Flagged
- * as a documented, deliberately out-of-scope residual (mission convention:
- * G7 T13 journal items 11/12) — not a silent gap.
- *
- * Edge REGISTRATION order (`addEdges`) is deliberately left unmodified:
- * `withlabel-derivation.md`'s own controlled bisection (§4 item 4,
- * experiments (b)/(d)) found DFS-root selection ALONE — not the specific
- * back-edge choice — is the dominant, sufficient term for the verified
- * defect (either back-edge choice from a corrected root resolves the same
- * cycle correctly); reordering edges too would add blast radius against the
- * 268-fixture DOT-parity gate with no verified fixture that needs it.
- * @see ~/git/plantuml/.../svek/Bibliotekon.java#addLine (`first`, lines0/1 split)
- * @see ~/git/plantuml/.../svek/DotStringFactory.java#createDotString (statement order)
- * @see ~/git/plantuml/.../svek/Cluster.java#getNodesOrderedTop (residual, not ported)
- * @see ~/git/plantuml/.../statediagram/command/CommandLinkStateCommon.java#executeArg (length==1)
- */
-export function firstEncounterOrder(input: DotInputGraph): DotInputNode[] {
-  const byId = new Map(input.nodes.map((n) => [n.id, n]));
-  const first: DotInputNode[] = [];
-  const seen = new Set<string>();
-  for (const e of input.edges) {
-    if (e.attributes?.minLen !== 0) continue;
-    for (const id of [e.from, e.to]) {
-      if (seen.has(id)) continue;
-      const n = byId.get(id);
-      // Dangling edges (unknown endpoint) are `addEdges`'s own concern
-      // (`nodeIds.has` filter) — nothing to reorder for one here.
-      if (n === undefined) continue;
-      seen.add(id);
-      first.push(n);
-    }
-  }
-  if (first.length === 0) return input.nodes;
-  const rest = input.nodes.filter((n) => !seen.has(n.id));
-  return [...first, ...rest];
-}
+// G9/T4: `firstEncounterOrder` moved to ./svek-dot-order.ts — it grew from
+// the `lines0`-only rule G7 T16 ported into the full Svek declaration order
+// (root leaves, then each cluster's own anchor/members/children), which is a
+// module's worth of `ClusterDotString` walk. Re-exported here so the import
+// path callers and tests already use keeps working unchanged.
+export { firstEncounterOrder };
+
 
 /**
  * B1/M4: a `RECTANGLE_HTML_FOR_PORTS` node, laid out the way the jar's DOT
@@ -186,13 +113,28 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
     b.addNode(n.id, {
       shape: 'record',
       label: n.recordLabel,
-      width: (n.width / PX_PER_INCH).toString(),
-      height: (n.height / PX_PER_INCH).toString(),
+      width: inches(n.width),
+      height: inches(n.height),
     });
     return;
   }
   if (n.portRows !== undefined) {
     addRowPortNode(b, n);
+    return;
+  }
+  if (n.isPort === true && n.shape === 'plaintext') {
+    // G9/T9: an entry/exit point whose own label is wider than 40px is a
+    // `shape=plaintext` HTML port table upstream
+    // (`SvekNode#appendLabelHtmlSpecialForPort`), and graphviz sizes the node
+    // from that table plus its `PAD`ded 54x36 minimum — the same `addRowPortNode`
+    // mechanism one branch up, for the other kind of port table. Declaring it
+    // as a fixed 12x12 box instead spaced the neighbouring rank 12px too close
+    // (`jucori-40-cevo136`: pin centres 133px apart where `dot -Tplain` on the
+    // very same DOT puts them at 145). The SYMBOL stays 12x12 — `graph-layout
+    // .ts#portNodeSize` reports it back at that size, on this box's centre,
+    // exactly as `DotStringFactory#solve` reads it from the port cell.
+    const node = b.addNode(n.id, { shape: 'plaintext' });
+    node.setHtmlAttr('label', portTable(n, LAYOUT_LABEL_BGCOLOR));
     return;
   }
   b.addNode(n.id, {
@@ -202,8 +144,8 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
     // measure the implicit name-label (its default "Times,serif" has no LUT
     // metrics and would warn). fixedsize keeps the caller's measured size.
     label: '',
-    width: (n.width / PX_PER_INCH).toString(),
-    height: (n.height / PX_PER_INCH).toString(),
+    width: inches(n.width),
+    height: inches(n.height),
   });
 }
 
@@ -358,7 +300,15 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // as-is, below, for genuine PORTIN/PORTOUT ports (`c.portRanks` set
     // WITHOUT `portRanksLabelOnEe`), which this branch does not touch.
     if (c.portRanksLabelOnEe === true) {
-      const handles = buildBorderPointClusterHandles(c, outerName, parentInnermost, () => borderRankSubId++);
+      // G9/T6: the label jar's DOT text leaks onto this cluster from the
+      // enclosing `<parent>ee` — see `inheritedEeLabel`'s own doc comment.
+      const handles = buildBorderPointClusterHandles(
+        c,
+        outerName,
+        parentInnermost,
+        () => borderRankSubId++,
+        inheritedEeLabel(c.parentId === undefined ? undefined : byId.get(c.parentId)),
+      );
       handlesById.set(c.id, handles);
       return handles;
     }

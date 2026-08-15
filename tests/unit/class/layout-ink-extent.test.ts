@@ -496,13 +496,20 @@ describe('computeClassDocumentDims - lollipop label overhang (G2 N35)', () => {
   }
 
   it('a label wider than the circle overhangs on both sides and widens the canvas', () => {
-    // textWidth=30 -> indent = 10/2 - 30/2 = -10, row spans x in [-10, 20].
-    // addRectInk(0,0,10,10) -> (-1,-1)/(10,10). Combined: minX=-10, maxX=20,
-    // minY=-1, maxY=10. width=(20-(-10))+15+0+5=50 -> floor(51)=51.
-    // height=(10-(-1))+15+0+5=31 -> floor(32)=32.
+    // G9/T14: the circle takes `LimitFinder#drawEllipse`'s rule, not a box's
+    // -- `addEllipseInk(0,0,10,10)` -> (0,0)/(9,9), where the old box rule
+    // gave (-1,-1)/(10,10) and made the whole diagram 1px taller. Corpus-
+    // verified: it takes all five lollipop fixtures to zero diffs
+    // (`bososa-44-fipu544`, `rilaki-69-cuni337`, `makoko-44-mapu988`,
+    // `gidabo-27-juza410`, `rofijo-47-masa695`).
+    //
+    // textWidth=30 -> indent = 10/2 - 30/2 = -10, row spans x in [-10, 20],
+    // its y pinned to the circle's own [0, 9]. Combined: minX=-10, maxX=20,
+    // minY=0, maxY=9. width=(20-(-10))+15+0+5=50 -> floor(51)=51.
+    // height=(9-0)+15+0+5=29 -> floor(30)=30.
     const classifiers = [makeLollipopGeo(-10, 30)];
     const dims = computeClassDocumentDims(classifiers, [], [], []);
-    expect(dims).toEqual({ width: 51, height: 32 });
+    expect(dims).toEqual({ width: 51, height: 30 });
   });
 
   it('a label narrower than the circle does NOT widen the canvas beyond the circle box', () => {
@@ -630,5 +637,140 @@ describe('computeClassBorderRectDims (G2 N66)', () => {
   it('a thickness of 0 leaves the full margined dims untouched', () => {
     const dims = computeClassBorderRectDims({ width: 100, height: 50 }, 0);
     expect(dims).toEqual({ width: 105, height: 55 });
+  });
+});
+
+/**
+ * G9/T12: a `#`/`~` visibility icon is a `UPolygon`, so its ink is padded.
+ *
+ * `VisibilityModifier#drawDiamond`/`drawTriangle`
+ * (`skin/VisibilityModifier.java:192-210`) build a `UPolygon`, which
+ * `LimitFinder#drawUPolygon` records with `HACK_X_FOR_POLYGON = 10` added on
+ * BOTH x sides — the same rule this module already applies to a `strictuml`
+ * namespace outline. `+` draws a `UEllipse` and `-` a `URectangle`; neither
+ * is padded.
+ *
+ * The icon sits inside its classifier at `x + ROW_TEXT_LEFT_MARGIN`, so only
+ * the left pad escapes the box's own `x - 1` corner — by exactly 2px, which
+ * is the uniform offset `dejuse-14-pule208` carried against jar on every one
+ * of its 44 shapes (ours at x=7/15/205/213 against jar's 9/17/207/215).
+ */
+describe('computeClassDocumentDims — visibility-icon polygon ink', () => {
+  const withIcon = (icon: string): ClassifierGeo =>
+    makeClassifierGeo({
+      x: 0,
+      y: 0,
+      rows: [{ y: 20, text: 'field', width: 30, visibilityIcon: icon } as ClassifierGeo['rows'][number]],
+    });
+
+  it('pads a protected (#) icon`s ink 10px each side', () => {
+    const plain = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    const diamond = computeClassDocumentDims([withIcon('#')], [], [], []);
+    // left pad reaches `x + 6 + 1 - 10 = x - 3`, against the box's own
+    // `x - 1`: 2px further left, and the box still bounds the right side.
+    expect(diamond.width - plain.width).toBe(2);
+    expect(diamond.height).toBe(plain.height);
+  });
+
+  it('pads a package (~) icon the same way — it is the same UPolygon rule', () => {
+    const plain = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    expect(computeClassDocumentDims([withIcon('~')], [], [], []).width - plain.width).toBe(2);
+  });
+
+  it('leaves public (+) and private (-) alone — UEllipse and URectangle', () => {
+    const plain = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    expect(computeClassDocumentDims([withIcon('+')], [], [], []).width).toBe(plain.width);
+    expect(computeClassDocumentDims([withIcon('-')], [], [], []).width).toBe(plain.width);
+  });
+
+  it('finds the icon in `enhancedBody` too, where a `{method}` member lives', () => {
+    // A `BodyEnhanced` classifier draws `enhancedBody.parts` INSTEAD OF
+    // `rows` (`class-body-enhanced-layout.ts`), so an icon-bearing member is
+    // absent from `rows` entirely -- `filoxo-23-fafi328`'s `Doer` has only
+    // its header there, and both `{method} # …` members in `enhancedBody`.
+    const plain = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    const viaEnhanced = computeClassDocumentDims(
+      [
+        makeClassifierGeo({
+          x: 0,
+          y: 0,
+          enhancedBody: {
+            parts: [{ kind: 'rows', rows: [{ y: 20, text: 'm', indent: 0, width: 30, visibilityIcon: '#' }] }],
+            width: 30,
+            height: 20,
+          },
+        }),
+      ],
+      [],
+      [],
+      [],
+    );
+    expect(viaEnhanced.width - plain.width).toBe(2);
+  });
+
+  it('shifts the whole drawing right by the same 2px, per computeClassInkShift', () => {
+    const plain = computeClassInkShift([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    const diamond = computeClassInkShift([withIcon('#')], [], [], []);
+    expect(diamond.dx - plain.dx).toBe(2);
+  });
+});
+
+/**
+ * G9/T16: an edge label reserves `LimitFinder#drawText`'s ink, not one point.
+ *
+ * `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:217-225`) records a
+ * `UText` from its BASELINE: `[y - (height - 1.5), y + 1.5]` across
+ * `[x, x + width]`. Edge labels used to contribute their `<text>` anchor
+ * `(x, y)` alone — a simplification `class-ink-box.ts`'s own header called
+ * "usually dominated by the classifier boxes' own ink reach".
+ *
+ * `style-stereotype-on-arrow-3` and `zebufu-01-pevo013` are where it is not.
+ * Their label baseline sits at 17.111, so jar's ink reaches 5.611 — 0.389
+ * ABOVE the topmost object box's own `y - 1` of 6 — and jar's ENTIRE drawing
+ * therefore sat 0.389px lower than ours on an otherwise byte-identical 143x55
+ * canvas. Neither the census nor the document dimensions can see that: it is a
+ * pure `computeClassInkShift` difference, so this is the gate.
+ */
+describe('edge-label text ink (G9/T16)', () => {
+  const labelled = (label: EdgeGeo['label']): EdgeGeo[] => [
+    {
+      id: 'e0',
+      points: [{ x: 30, y: 60 }, { x: 30, y: 90 }],
+      targetDecor: 'none',
+      sourceDecor: 'none',
+      dashed: false,
+      from: 'A',
+      to: 'B',
+      ...(label === undefined ? {} : { label }),
+    },
+  ];
+  /** a 40x40 box at the origin: `addRectInk` puts its ink top at y = -1 */
+  const boxes = [makeClassifierGeo({ x: 0, y: 0, width: 40, height: 40 })];
+
+  it('reaches CARDINALITY_FONT_SIZE - 1.5 above the baseline', () => {
+    // baseline 8 -> ink top 8 - 13 + 1.5 = -3.5, i.e. 2.5 above the box's -1.
+    // The shift is `JAR_INK_MARGIN - minY`, so a lower ink top RAISES dy by
+    // that much — which is the direction jar's whole drawing moved.
+    const shift = computeClassInkShift(boxes, [], labelled({ text: 'x', x: 5, y: 8, width: 12 }), []);
+    const plain = computeClassInkShift(boxes, [], labelled(undefined), []);
+    expect(shift.dy - plain.dy).toBe(2.5);
+  });
+
+  it('reaches 1.5 below it, and the label width to the right', () => {
+    // baseline 200 -> ink bottom 201.5 against the box's own 39; x spans
+    // [100, 160] against the box's 39. Both dominate, so both show in dims.
+    const dims = computeClassDocumentDims(
+      boxes, [], labelled({ text: 'x', x: 100, y: 200, width: 60 }), [],
+    );
+    // width  = (160 - (-1)) + INK_DELTA 15 + margins 0/5, +1 truncating
+    // height = (201.5 - (-1)) + 15 + 0/5 -> floor(223.5) = 223
+    expect(dims).toEqual({ width: 182, height: 223 });
+  });
+
+  it('leaves a label sitting inside the boxes` own ink with no effect', () => {
+    const inside = computeClassDocumentDims(
+      boxes, [], labelled({ text: 'x', x: 5, y: 30, width: 12 }), [],
+    );
+    expect(inside).toEqual(computeClassDocumentDims(boxes, [], labelled(undefined), []));
   });
 });
