@@ -309,6 +309,90 @@ describe('layoutGraph — cluster title-table label (G5 C3, mechanism 16 shape h
   });
 });
 
+// T7 (`plans/namespace-cluster-box/`, docs/graphviz-issues/14's RESOLVED
+// note): `@knowvah/dot-engine@1.5.0` publishes `ClusterGeometry.label` --
+// the title-table reservation's PLACED position, previously invisible to
+// this seam. Additive: no consumer reads it yet (`class-geo-builders.ts
+// #namespaceGeoFromBox`'s own doc comment records why that specific
+// consumer deliberately does NOT read it -- a measured 333-shape
+// regression traced to `USymbolFolder#asBig` drawing a class/object
+// package title at a fixed local offset, independent of this value). This
+// block asserts only the SEAM's own contract: the field is copied and
+// shifted correctly, and its `x`/`y` are the label space's CENTRE.
+describe('layoutGraph — cluster.label (T7, @knowvah/dot-engine 1.5.0)', () => {
+  it('publishes label with the exact reserved width/height, once a title table is set', () => {
+    const g: DotInputGraph = {
+      nodes: [box('a')],
+      edges: [],
+      clusters: [{ id: 'grp1', nodeIds: ['a'], titleTableWidth: 10, titleTableHeight: 3 }],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    const c = r.clusters!.find((cl) => cl.id === 'grp1')!;
+    expect(c.label).toBeDefined();
+    expect(c.label!.width).toBe(10);
+    expect(c.label!.height).toBe(3);
+  });
+
+  it('omits label when the cluster carries no title reservation at all', () => {
+    const g: DotInputGraph = {
+      nodes: [box('a')],
+      edges: [],
+      clusters: [{ id: 'grp1', nodeIds: ['a'] }],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    const c = r.clusters!.find((cl) => cl.id === 'grp1')!;
+    expect(c.label).toBeUndefined();
+  });
+
+  // The trap this task's own boundary section calls out: `label.x`/`.y`
+  // are the label space's CENTRE (matching `EdgeGeometry.label`'s
+  // convention), not the corner `x`/`y` on the SAME object describes for
+  // the box. Treating `label.y` as a top-left corner overshoots by half
+  // the label's own height -- asserted here by converting explicitly and
+  // checking the converted top sits BELOW the box's reported y (inside the
+  // cluster, as a title reservation must), while the raw centre does not
+  // equal that converted value.
+  it('label.y is the CENTRE of the reservation -- converting to its top requires half the height', () => {
+    const g: DotInputGraph = {
+      nodes: [box('a')],
+      edges: [],
+      clusters: [{ id: 'grp1', nodeIds: ['a'], titleTableWidth: 10, titleTableHeight: 3 }],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    const c = r.clusters!.find((cl) => cl.id === 'grp1')!;
+    const labelTop = c.label!.y - c.label!.height / 2;
+    expect(labelTop).not.toBe(c.label!.y);
+    expect(labelTop).toBeGreaterThan(c.y);
+    expect(labelTop).toBeLessThan(c.y + c.height);
+  });
+
+  it('shifts label.x/.y by the SAME origin translation the box receives', () => {
+    // An extra node to the left/above forces `shiftToOrigin` to apply a
+    // nonzero translation, so the box AND label both move off their raw
+    // @knowvah/dot-engine coordinates -- if `label` were forgotten in
+    // `shiftToOrigin`, this would desync it from `x`/`y` by exactly that
+    // translation.
+    const g: DotInputGraph = {
+      nodes: [box('anchor'), box('a')],
+      edges: [{ id: 'e0', from: 'anchor', to: 'a' }],
+      clusters: [{ id: 'grp1', nodeIds: ['a'], titleTableWidth: 10, titleTableHeight: 3 }],
+      rankDir: 'TB',
+    };
+    const r = layoutGraph(g);
+    const c = r.clusters!.find((cl) => cl.id === 'grp1')!;
+    // Every node/edge point is clamped to >= 0 by shiftToOrigin; the same
+    // clamp must hold for the label's own centre, or it would carry
+    // leftover pre-shift coordinates (well past the graph's own bounds).
+    expect(c.label!.x).toBeGreaterThanOrEqual(0);
+    expect(c.label!.y).toBeGreaterThanOrEqual(0);
+    expect(c.label!.x).toBeLessThanOrEqual(r.width);
+    expect(c.label!.y).toBeLessThanOrEqual(r.height);
+  });
+});
+
 // G5 C7, mechanism 16 margin half: `innerMarginLevels` mirrors jar's
 // ClusterDotString "i"/"p1" protection-wrapper nesting -- each extra
 // `subgraph cluster*` level gets graphviz's own default CL_OFFSET(8pt)

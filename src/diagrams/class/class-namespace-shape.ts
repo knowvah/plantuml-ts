@@ -146,6 +146,14 @@ export function getWTitle(measurer: StringMeasurer, theme: Theme, label: string,
  * `getWTitle`/`getHTitle`) so the render phase never needs a
  * `StringMeasurer` of its own -- jar-verified against `finono-05-cuvu171`
  * (`y="18.8889"` = box-top 6 + 2 + 10.8889).
+ *
+ * T7 (`plans/namespace-cluster-box/`) considered deriving this from
+ * `@knowvah/dot-engine`'s own placed `cluster.label` (the layout-computed
+ * title-table reservation position, `ClusterGeometry.label`) instead of
+ * this fixed `2`. NOT adopted: `class-geo-builders.ts#namespaceGeoFromBox`'s
+ * own doc comment has the full mechanism (`USymbolFolder#asBig` draws at a
+ * fixed local offset, independent of graphviz's title-table placement) and
+ * the measured 333-matched-shape regression that confirmed it.
  */
 export function getTitleBaselineOffset(measurer: StringMeasurer, theme: Theme, label: string): number {
   return 2 + theme.fontSize - measurer.getDescent(titleFont(theme), label);

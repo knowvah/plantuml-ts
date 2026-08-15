@@ -203,14 +203,33 @@ function mapEdges(snap: LayoutSnapshot, idx: EdgeIndex): OutEdges {
  *  no clusters (empty `idByName` — mirrors `DotInputGraph.clusters` being
  *  optional). A snapshot entry with no matching id is defensively skipped
  *  (cannot occur given `addClusters`'s own naming contract: every name it
- *  hands @knowvah/dot-engine is recorded in `idByName` before use). */
+ *  hands @knowvah/dot-engine is recorded in `idByName` before use).
+ *
+ *  T7: `c.label` (present only when the input cluster declared a title, per
+ *  `ClusterGeometry.label`'s own doc comment — existence-gated, not
+ *  `set`-gated) is copied VERBATIM here, still in the label-space CENTRE
+ *  convention `getLayout()` returns it in. Converting centre -> corner or
+ *  baseline is deliberately NOT this seam's job — `graph-layout-result
+ *  .types.ts`'s own doc comment on `clusters[].label` says so explicitly.
+ *  No consumer reads this yet: `class-geo-builders.ts#namespaceGeoFromBox`
+ *  (the field's original motivating consumer) investigated it and its own
+ *  doc comment records why it deliberately does not — the value published
+ *  here is unaffected either way, this seam only republishes what
+ *  `getLayout()` reports. */
 function mapClusters(snap: LayoutSnapshot, idx: ClusterIndex): OutClusters | undefined {
   if (idx.idByName.size === 0) return undefined;
   const out: OutClusters = [];
   for (const c of snap.clusters) {
     const id = idx.idByName.get(c.name);
     if (id === undefined) continue;
-    out.push({ id, x: c.x, y: c.y, width: c.width, height: c.height });
+    out.push({
+      id,
+      x: c.x,
+      y: c.y,
+      width: c.width,
+      height: c.height,
+      ...(c.label !== undefined ? { label: { ...c.label } } : {}),
+    });
   }
   return out.length > 0 ? out : undefined;
 }
@@ -250,6 +269,14 @@ function shiftToOrigin(nodes: OutNodes, edges: OutEdges, clusters?: OutClusters)
     for (const c of clusters) {
       c.x -= minX;
       c.y -= minY;
+      // T7: the label-space CENTRE rides the identical translation — it is
+      // reported in the same pre-shift frame as the box, verified directly
+      // against @knowvah/dot-engine (both move by the same graph-wide bb
+      // origin normalisation).
+      if (c.label !== undefined) {
+        c.label.x -= minX;
+        c.label.y -= minY;
+      }
     }
   }
 }

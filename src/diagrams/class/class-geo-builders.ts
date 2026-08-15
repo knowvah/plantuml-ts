@@ -185,6 +185,33 @@ type ClusterBox = NonNullable<DotLayoutResult['clusters']>[number];
  * `baselineOffset` are unchanged from before T5: still pre-computed here so
  * the render phase never needs its own `StringMeasurer` (see `NamespaceGeo`'s
  * own doc comment in `layout.ts`).
+ *
+ * T7 (`plans/namespace-cluster-box/`) investigated reading `baselineOffset`
+ * from `box.label` (the layout-placed title-table reservation @knowvah/
+ * dot-engine now publishes, `ClusterGeometry.label` per docs/graphviz-issues/
+ * 14's RESOLVED note) instead of `getTitleBaselineOffset`'s fixed-offset
+ * re-derivation. **Deliberately NOT wired in** -- read the Java first:
+ * `Cluster#setTitlePosition`/`xyTitle` (`DotStringFactory.java:436-439`,
+ * the mechanism the issue cites) is consumed ONLY by `Cluster#drawUState`
+ * and `#drawSwinLinesState` (state-diagram/swimlane draw paths,
+ * `Cluster.java:439,497`) -- NEVER by `ClusterDecoration.drawU`, the path
+ * `buildNamespaceGeos` mirrors for a class/object package. That path calls
+ * `asBig.drawU(ug.apply(rectangleArea.getPosition()))`
+ * (`ClusterDecoration.java:78`), and `USymbolFolder#asBig` draws the title
+ * at a FIXED local `(4, 2)` (`USymbolFolder.java:228`) -- a property of the
+ * shape's own draw routine, independent of wherever graphviz placed the
+ * title-table reservation. Measured directly: `@knowvah/dot-engine` places
+ * that reservation ~4px below the cluster box's own top (verified via a
+ * standalone probe at both `innerMarginLevels` 1 and 2: `box.y=16,
+ * label.y=24.5, label.height=9` -> `label.y - label.height/2 - box.y = 4`),
+ * not jar's real 2px -- wiring it in shifts every titled namespace's
+ * `<text>` down by the 2px difference and cost 333 matched shapes on the
+ * full corpus (`scripts/shape-match-report.ts`: 25403 -> 25070, doc-size-
+ * exact held at 769/1073), confirming the mechanism empirically. The
+ * `label` field IS surfaced through the seam (`graph-layout.ts#mapClusters`,
+ * `graph-layout-result.types.ts`) for a consumer that genuinely needs
+ * graphviz's placed position -- state's `drawUState`-equivalent composite
+ * title, not this one.
  */
 function namespaceGeoFromBox(
   ns: ClassDiagramAST['namespaces'][number],
