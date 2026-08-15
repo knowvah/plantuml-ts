@@ -37,9 +37,9 @@ Real edge counts match at 4. Corrected in
 
 | id | task | write-set |
 |---|---|---|
-| [ ] T8 | Mark class-side port declarations `isPort` | `src/diagrams/class/class-dot-graph.ts`, the classifier AST |
-| [ ] T9 | Emit the cluster's port rank-chain | `src/diagrams/class/class-dot-graph.ts` |
-| [ ] T10 | Close-out: mission-index row, comparator widening (D7), journal summary | `planning/mission-index.md`, `tests/oracle/svek-dot.ts` |
+| [x] T8 | Mark class-side port declarations `isPort` — **landed by SI17** (`class-port-rows.ts#shouldMarkPort`), not by this mission; pinned here (`225107c0`) | `src/diagrams/class/class-dot-graph.ts`, the classifier AST |
+| [x] T9 | Emit the cluster's port rank-chain — **landed by SI17**; `sokevu` drill-down shows `sh0010->sh0011->sh0012 [arrowhead=none]` + `constraint=false`, `structurallyEqual` | `src/diagrams/class/class-dot-graph.ts` |
+| [x] T10 | Close-out: mission-index row (SI22), comparator widening (D7, `d3ff29be`), journal summary — 2026-08-15 | `planning/mission-index.md`, `tests/oracle/svek-dot.ts` |
 
 ## Exit signal
 

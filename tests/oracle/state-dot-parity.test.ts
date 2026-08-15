@@ -31,22 +31,28 @@ import {
   dotInputToStructural,
   compareStructural,
 } from './svek-dot.js';
+import {
+  assertBacklogFailures,
+  expectedBacklogFailures,
+  loadSlugBacklog,
+  structuralFailures,
+  type BacklogFile,
+} from './dot-parity-backlogs.js';
 
 const GOLDENS = join(
   dirname(fileURLToPath(import.meta.url)),
   '../../oracle/goldens/state',
 );
 
-/** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-exact fixtures. */
-/** B31: slugs whose DOT differs from the oracle's ONLY in edge DIRECTION --
- *  see `direction-backlog.json`'s own `_doc`. Same shape as `portBacklog`:
- *  the assertion below keeps every other check live for these fixtures. */
-const directionBacklog: ReadonlySet<string> = new Set(
-  existsSync(join(GOLDENS, 'direction-backlog.json'))
-    ? (JSON.parse(readFileSync(join(GOLDENS, 'direction-backlog.json'), 'utf8')) as { slugs: string[] }).slugs
-    : [],
+/** Per-slug structural backlogs (NOT skips -- see dot-parity-backlogs.ts):
+ *  B31 `direction-backlog.json` (edge DIRECTION only; emptied by object-close
+ *  T2/B33, kept as the seam) and D7 `label-size-backlog.json` (edge-label BOX
+ *  SIZE only, edge-label-box 2026-08-15). Each file's `_doc` has the mechanism. */
+const backlogs: ReadonlyMap<BacklogFile, ReadonlySet<string>> = new Map(
+  (['direction-backlog.json', 'label-size-backlog.json'] as const).map((f) => [f, loadSlugBacklog(GOLDENS, f)]),
 );
 
+/** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-exact fixtures. */
 const sizeBacklog: Record<string, number> = existsSync(join(GOLDENS, 'size-backlog.json'))
   ? (JSON.parse(readFileSync(join(GOLDENS, 'size-backlog.json'), 'utf8')) as Record<string, number>)
   : {};
@@ -90,30 +96,18 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — sta
         `${name}: expected ${files.length} captured layout graph(s), got ${captured.length}`,
       ).toBe(files.length);
 
+      // Structural gate, per fixture: see dot-parity-backlogs.ts for why the
+      // backlog check is a per-file subset and a per-fixture union.
+      const diffs = files.map((file, i) =>
+        compareStructural(
+          parseSvekDot(readFileSync(join(GOLDENS, name, file), 'utf8')),
+          dotInputToStructural(captured[i]!),
+        ),
+      );
+      assertBacklogFailures(name, files, diffs.map(structuralFailures), expectedBacklogFailures(name, backlogs));
       for (let i = 0; i < files.length; i++) {
         const file = files[i]!;
-        const oracle = parseSvekDot(readFileSync(join(GOLDENS, name, file), 'utf8'));
-        const candidate = dotInputToStructural(captured[i]!);
-        const diff = compareStructural(oracle, candidate);
-        const failingChecks = Object.entries(diff)
-          .filter(([k, v]) => k.endsWith('Ok') && v === false)
-          .map(([k]) => k);
-        if (directionBacklog.has(name)) {
-          // B31: known-unequal in edge DIRECTION ONLY (see
-          // direction-backlog.json's `_doc`). Same contract as portBacklog
-          // below/above -- NOT a skip: every other structural check stays
-          // live, so a regression in node count, degree, minlen, shape,
-          // labels, ports or clusters still fails here.
-          expect(
-            failingChecks.filter((k) => k !== 'sizeConformantOk'),
-            `${name}/${file}: direction-backlog fixtures may fail directionOk and NOTHING else`,
-          ).toEqual(['directionOk']);
-        } else {
-          expect(
-            diff.structurallyEqual,
-            `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
-          ).toBe(true);
-        }
+        const diff = diffs[i]!;
         // D4: node sizes pinned (rect nodes; plaintext nodes parse as 0x0 on
         // both sides so they cannot mask a rect-size regression). Backlog
         // fixtures ratchet downward; everything else must be exactly 0.

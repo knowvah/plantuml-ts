@@ -6,7 +6,7 @@
  * Svek emitter (`toSvekDot`) and then parsed — so the comparison exercises the
  * emitter and is genuinely apples-to-apples. Synthetic ids/colors are ignored;
  * we compare graph attrs, node count + shape multiset, edge topology + minlen +
- * label presence + ENDPOINT PORTS, and cluster membership. `width`/`height` are
+ * label presence + reserved LABEL BOX sizes + ENDPOINT PORTS, and cluster membership. `width`/`height` are
  * tolerant metrics (Java vs plantuml-ts text measurement) — reported, not
  * asserted.
  *
@@ -59,6 +59,20 @@ export interface StructuralEdge {
   hasTailLabel: boolean;
   hasHeadLabel: boolean;
   hasXLabel: boolean;
+  /** The FIXEDSIZE box each label reserves, as `WIDTHxHEIGHT` verbatim from
+   *  the `<TABLE ... WIDTH=".." HEIGHT="..">` — undefined when the label is
+   *  absent. This is what graphviz lays out against, so a 336-vs-72 box is a
+   *  different graph even though `hasLabel` scores it EQUAL. Compared by
+   *  {@link StructuralDiff.labelSizeOk} (edge-label-box D7, 2026-08-15): the
+   *  gate that would have caught that mission's batch-1 bug on its own, and
+   *  the fourth "present, not measured" blind spot this comparator has
+   *  closed (ports, sametail, constraint/invis before it). Truncated by BOTH
+   *  emitters (`SvekEdge.java:504-507`'s `(int)` cast; our
+   *  `svek-dot-emit-labels.ts#trunc`), so the strings compare exactly. */
+  labelBox: string | undefined;
+  tailLabelBox: string | undefined;
+  headLabelBox: string | undefined;
+  xLabelBox: string | undefined;
   /** `sametail=<entNNNN>` — graphviz groups every edge sharing this value
    *  onto ONE tail point, so an edge that carries it is a different graph
    *  from one that does not. Compared as a sorted multiset of VALUES (not a
@@ -108,6 +122,15 @@ const attr = (attrs: string, name: string): string | undefined =>
 const identAttr = (attrs: string, name: string): string | undefined =>
   new RegExp(`\\b${name}=([A-Za-z_][A-Za-z0-9_]*)`).exec(attrs)?.[1];
 
+/** `WIDTHxHEIGHT` of the FIXEDSIZE `<TABLE>` a `label=<...>` / `taillabel` /
+ *  `headlabel` / `xlabel` attr reserves; undefined when absent. Anchored on
+ *  the attr NAME (`(?:^|,)`) so `label=` never matches inside `taillabel=`.
+ *  Both emitters write WIDTH before HEIGHT on the `<TABLE>` tag. */
+const labelBox = (attrs: string, name: string): string | undefined => {
+  const m = new RegExp(`(?:^|,)${name}=<<TABLE[^>]*\\bWIDTH="([0-9.]+)"[^>]*\\bHEIGHT="([0-9.]+)"`).exec(attrs);
+  return m === null ? undefined : `${m[1]}x${m[2]}`;
+};
+
 const numAttr = (dot: string, name: string): number | undefined => {
   const v = new RegExp(`(?:^|\\n|\\s)${name}=([0-9.]+)`).exec(dot)?.[1];
   return v === undefined ? undefined : Number(v);
@@ -135,6 +158,10 @@ function parseEdges(dot: string): StructuralEdge[] {
       hasTailLabel: /taillabel=</.test(a),
       hasHeadLabel: /headlabel=</.test(a),
       hasXLabel: /(?:^|,)xlabel=</.test(a),
+      labelBox: labelBox(a, 'label'),
+      tailLabelBox: labelBox(a, 'taillabel'),
+      headLabelBox: labelBox(a, 'headlabel'),
+      xLabelBox: labelBox(a, 'xlabel'),
       sametail: identAttr(a, 'sametail'),
       constraint: /\bconstraint=false\b/.test(a),
       invis: /\bstyle=invis\b/.test(a),
@@ -290,6 +317,19 @@ const labelCounts = (g: StructuralGraph): [number, number, number, number] => [
   g.edges.filter((e) => e.hasHeadLabel).length,
   g.edges.filter((e) => e.hasXLabel).length,
 ];
+/** Sorted multiset of every reserved label box, tagged by kind so a tail box
+ *  cannot satisfy a head box of the same size. Absent labels contribute
+ *  nothing (presence is `labelCounts`' job). */
+const sortedLabelBoxes = (g: StructuralGraph): string[] =>
+  g.edges
+    .flatMap((e) => [
+      e.labelBox === undefined ? [] : [`label:${e.labelBox}`],
+      e.tailLabelBox === undefined ? [] : [`tail:${e.tailLabelBox}`],
+      e.headLabelBox === undefined ? [] : [`head:${e.headLabelBox}`],
+      e.xLabelBox === undefined ? [] : [`xlabel:${e.xLabelBox}`],
+    ])
+    .flat()
+    .sort();
 /** How many edges carry `constraint=false` and `style=invis`. Counts rather
  *  than multisets because neither attribute has a value — only presence. */
 const flagCounts = (g: StructuralGraph): number[] => [
@@ -346,6 +386,11 @@ export interface StructuralDiff {
   constraintOk: boolean;
   shapeOk: boolean;
   labelOk: boolean;
+  /** Every edge label's reserved FIXEDSIZE box matches, as a sorted multiset
+   *  of `kind:WIDTHxHEIGHT` over label/taillabel/headlabel/xlabel — see
+   *  {@link StructuralEdge.labelBox}. `labelOk` is presence only; this is
+   *  the size graphviz actually lays out against. */
+  labelSizeOk: boolean;
   /** Edge endpoint ports match as a sorted multiset. Anchoring an edge to a
    *  member ROW is a different graph from anchoring it to the whole node —
    *  see this module's doc comment for the measured blindness this closes. */
@@ -421,6 +466,7 @@ export function compareStructural(
   const constraintOk = eqNum(flagCounts(oracle), flagCounts(candidate));
   const shapeOk = eqStr(sortedShapes(oracle), sortedShapes(candidate));
   const labelOk = eqNum(labelCounts(oracle), labelCounts(candidate));
+  const labelSizeOk = eqStr(sortedLabelBoxes(oracle), sortedLabelBoxes(candidate));
   const portOk = eqStr(sortedPorts(oracle), sortedPorts(candidate));
   const clusterOk = eqNum(sortedClusterSizes(oracle), sortedClusterSizes(candidate));
   const rdOk = rankdirOk(oracle.rankdir, candidate.rankdir);
@@ -438,6 +484,7 @@ export function compareStructural(
     constraintOk,
     shapeOk,
     labelOk,
+    labelSizeOk,
     portOk,
     clusterOk,
     rankdirOk: rdOk,
@@ -453,6 +500,7 @@ export function compareStructural(
       constraintOk &&
       shapeOk &&
       labelOk &&
+      labelSizeOk &&
       portOk &&
       clusterOk &&
       rdOk &&

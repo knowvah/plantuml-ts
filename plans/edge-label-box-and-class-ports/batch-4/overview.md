@@ -64,7 +64,7 @@ different anchors, or `moveAwayFrom` / the cluster-avoidance pass
 | id | task | write-set |
 |---|---|---|
 | [x] T11 | **Diagnose** the tail-end ≈15.2. Produce a mechanism with `file:line`, not a constant. | none (diagnosis) — findings to `decision-journal.md` |
-| [~] T12 | Port the per-end placement into `portLabelAnchor` | `src/diagrams/class/class-edge-geo.ts` + **`src/core/graph-layout-build-edges.ts` (unapproved)**, new `class-edge-label-anchor.ts`, new `core/klimt/geom/PositionableUtils.ts` |
+| [x] T12 | Port the per-end placement into `portLabelAnchor` — **landed `b24f6038`** (`manageCollision` port; `tobuka-93-jale775` 41 -> 0 byte-exact); the unapproved `graph-layout-build-edges.ts` write was signed off in the journal | `src/diagrams/class/class-edge-geo.ts` + **`src/core/graph-layout-build-edges.ts` (unapproved)**, new `class-edge-label-anchor.ts`, new `core/klimt/geom/PositionableUtils.ts` |
 | [x] T13 | ~~Scope the 14 x diffs~~ — **not a separate question.** Same `moveAwayFrom` coefficient; the x delta is `deltaX * c` dragged along by a vertical clearance, which is why it was never constant. 14 x diffs -> 2. | none |
 
 T12 depends on T11. **If T11 cannot produce a mechanism, STOP** — do not ship

@@ -165,10 +165,10 @@ export function wrapPlainTextLine(
  * and never reflect the real multi-row reserved space) -- feeds @knowvah/dot-engine's
  * OWN layout/label-placement search with the true reserved box size, matching
  * jar's own `dimNote = labelText.calculateDimension(...)` over the FULL
- * multi-line `TextBlock` (`SvekEdge.java:440`). DOT-gate safe: the frozen
- * comparator's `labelOk` only counts label PRESENCE, never numeric
- * width/height (`tests/oracle/svek-dot.ts#compareStructural`, confirmed via
- * direct source read before this change).
+ * multi-line `TextBlock` (`SvekEdge.java:440`). When this landed the DOT
+ * gate's `labelOk` counted label PRESENCE only; since 2026-08-15 the box is
+ * ASSERTED too (`tests/oracle/svek-dot.ts#labelSizeOk`, edge-label-box D7),
+ * so a wrong reservation here now fails `class-dot-parity.test.ts`.
  *
  * G2 item 44: a single-line label carrying a magic-arrow token (`class-
  * magic-arrow.ts#parseMagicArrowLabel`) reserves `ARROW_GLYPH_SIZE` (the

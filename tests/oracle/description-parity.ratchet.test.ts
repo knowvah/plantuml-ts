@@ -33,6 +33,13 @@ import {
   SIZE_CONFORMANCE_TOLERANCE_IN,
 } from './svek-dot.js';
 import { expectNoErrorDiagram } from '../helpers/error-diagram.js';
+import {
+  assertBacklogFailures,
+  expectedBacklogFailures,
+  loadSlugBacklog,
+  structuralFailures,
+  type BacklogFile,
+} from './dot-parity-backlogs.js';
 import { buildStdlibAssetsStore } from '../helpers/stdlib-assets-store.js';
 import { buildSpriteAssetsStore } from '../helpers/sprite-assets-store.js';
 import { buildEmojiAssetsStore } from '../helpers/emoji-assets-store.js';
@@ -41,6 +48,13 @@ import { combineAssetStores } from '../../src/core/asset-store.js';
 const GOLDENS = join(
   dirname(fileURLToPath(import.meta.url)),
   '../../oracle/goldens/description',
+);
+
+/** Per-slug structural backlog (NOT a skip -- see dot-parity-backlogs.ts):
+ *  D7 `label-size-backlog.json`, edge-label BOX SIZE only (edge-label-box,
+ *  2026-08-15; 10 slugs, shrink-only). Its `_doc` carries the mechanism. */
+const backlogs: ReadonlyMap<BacklogFile, ReadonlySet<string>> = new Map(
+  (['label-size-backlog.json'] as const).map((f) => [f, loadSlugBacklog(GOLDENS, f)]),
 );
 
 /** Slug → allowed maxSizeDeltaIn (inches) for not-yet-size-conformant fixtures
@@ -104,18 +118,18 @@ describe.skipIf(fixtures.length === 0)('oracle DOT-parity ratchet — descriptio
         `${name}: expected ${files.length} captured layout graph(s), got ${captured.length}`,
       ).toBe(files.length);
 
+      // Structural gate, per fixture: see dot-parity-backlogs.ts for why the
+      // backlog check is a per-file subset and a per-fixture union.
+      const diffs = files.map((file, i) =>
+        compareStructural(
+          parseSvekDot(readFileSync(join(GOLDENS, name, file), 'utf8')),
+          dotInputToStructural(captured[i]!),
+        ),
+      );
+      assertBacklogFailures(name, files, diffs.map(structuralFailures), expectedBacklogFailures(name, backlogs));
       for (let i = 0; i < files.length; i++) {
         const file = files[i]!;
-        const oracle = parseSvekDot(readFileSync(join(GOLDENS, name, file), 'utf8'));
-        const candidate = dotInputToStructural(captured[i]!);
-        const diff = compareStructural(oracle, candidate);
-        const failingChecks = Object.entries(diff)
-          .filter(([k, v]) => k.endsWith('Ok') && v === false)
-          .map(([k]) => k);
-        expect(
-          diff.structurallyEqual,
-          `${name}/${file}: structural regression — failing checks: ${failingChecks.join(', ')}`,
-        ).toBe(true);
+        const diff = diffs[i]!;
         // S1L: node width/height pinned. Non-backlog fixtures must stay within
         // the 0.01in `conformant` bar; backlog fixtures ratchet downward only
         // (a sub-mission that drops one to ≤0.01 deletes its entry).
