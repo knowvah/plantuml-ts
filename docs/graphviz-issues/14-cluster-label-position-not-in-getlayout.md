@@ -1,5 +1,21 @@
 # `getLayout()` exposes no cluster label position
 
+> **RESOLVED upstream 2026-08-14** — `ClusterGeometry` now carries
+> `label { x, y, width, height }`. Not yet published: npm latest is 1.4.0.
+>
+> Two deltas from the Requested API below, both upstream's call and both
+> correct:
+>
+> 1. **`x`/`y` is the label CENTRE**, not a corner. The same object's
+>    `x`/`y` for the cluster box IS a corner, and `render()`'s `<text>`
+>    carries a baseline — three conventions in one object. Consumers must
+>    convert deliberately.
+> 2. **Presence is gated on existence, not on `set`.** The "omit when `set`
+>    is false" half of the request below was deliberately not implemented,
+>    because C draws cluster labels on existence alone — `emit.c:3920` has
+>    no `->set` test, unlike `emit_edge_label` at `:2891`. The request was
+>    wrong on that point; this note supersedes it.
+
 **Impact:** blocks porting upstream PlantUML's own cluster-title placement.
 `DotStringFactory#solve` reads a cluster's title position straight out of
 graphviz's SVG — `cluster.setTitlePosition(SvekUtils.getMinXY(pointsTitle))`
