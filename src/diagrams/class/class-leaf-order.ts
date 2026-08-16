@@ -21,8 +21,14 @@
  *
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:226-227 buildImage
  *   -- `printGroups(root); printEntities(getUnpackagedEntities());`
+ *
+ * T5 fix: a namespace collapsed to a leaf by `collapseEmptyNamespacesFinal`
+ * (`class-namespace.ts`) is a GROUP for print-order purposes, not a leaf --
+ * see {@link collapsedGroupRankMap} and its use in {@link drawNamespace}/
+ * {@link computeLeafDrawOrder}.
  */
-import type { ClassDiagramAST, ClassNote, Namespace } from './ast.js';
+import type { ClassDiagramAST, Classifier, ClassNote, Namespace } from './ast.js';
+import { isCollapsedGroup } from './class-magma.js';
 
 /** Stable sort of `ids` by `rank.get(id)`, `undefined` treated as
  *  `+Infinity` -- ranked entries first (ascending), unranked entries keep
@@ -91,9 +97,41 @@ function buildNamespaceRankMap(namespaces: readonly Namespace[]): Map<string, nu
 }
 
 /**
- * One namespace's contribution: its OWN member leaves (by creation rank)
- * THEN its child namespaces, recursively, in that fixed structural order --
- * `printGroup` never interleaves a group's leaves with its subgroups.
+ * `Classifier.creationIndex` for every classifier synthesized by
+ * `collapseEmptyNamespace` from a collapsed-empty `package`/`namespace`
+ * (`isCollapsedGroup`, class-magma.ts) -- these ids must sort as a GROUP
+ * (among sibling namespaces), never as a plain leaf, however their
+ * `creationIndex` was stamped: `printGroup` draws a group's OWN leaves in
+ * full (`g.leafs()`) BEFORE any of its child groups (`printGroups(g)`), a
+ * fixed structural split, not a merge-by-rank across the two -- an empty
+ * package can never interleave with its parent's real leaf classifiers even
+ * when it was declared earlier in source. `Classifier.creationIndex` and
+ * `Namespace.creationIndex` share ONE counter
+ * (`class-parse-state.ts#creationCounter`, confirmed by
+ * `renderer-uid.ts:35`'s own worked example interleaving namespace=1,
+ * classifier=2,3), so a collapsed classifier's rank is directly comparable
+ * against sibling `Namespace.creationIndex` values -- no new tick.
+ * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:425-435 printGroup
+ *   -- `printEntities(g.leafs())` THEN `printGroups(g)`, never interleaved.
+ * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:408-422 printGroups
+ *   -- `g.muteToType(LeafType.EMPTY_PACKAGE); printEntity(g)` for an empty
+ *   PACKAGE child group, positioned among `getChildrenGroups(parent)`.
+ */
+function collapsedGroupRankMap(classifiers: readonly Classifier[]): Map<string, number> {
+  const rank = new Map<string, number>();
+  for (const c of classifiers) {
+    if (isCollapsedGroup(c) && c.creationIndex !== undefined) rank.set(c.id, c.creationIndex);
+  }
+  return rank;
+}
+
+/**
+ * One namespace's contribution: its OWN member leaves (by creation rank,
+ * EXCLUDING any collapsed-empty-package id -- {@link collapsedGroupRankMap})
+ * THEN its child groups -- live child namespaces plus any collapsed-empty
+ * child, merged and sorted by the SAME shared-counter rank -- recursively,
+ * in that fixed structural order. `printGroup` never interleaves a group's
+ * leaves with its subgroups.
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:425-435 printGroup
  *   -- `printEntities(g.leafs())` then `printGroups(g)`.
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:408-422 printGroups
@@ -105,52 +143,98 @@ function drawNamespace(
   allNamespaces: readonly Namespace[],
   leafRank: ReadonlyMap<string, number>,
   nsRank: ReadonlyMap<string, number>,
+  collapsedGroupRank: ReadonlyMap<string, number>,
 ): string[] {
-  const ownLeaves = sortByRank(ns.classifiers, leafRank);
+  const ownLeaves = sortByRank(
+    ns.classifiers.filter((id) => !collapsedGroupRank.has(id)),
+    leafRank,
+  );
+  const childGroupRank = new Map([...nsRank, ...collapsedGroupRank]);
   const childIds = sortByRank(
-    allNamespaces.filter((n) => n.parentId === ns.id).map((n) => n.id),
-    nsRank,
+    [
+      ...allNamespaces.filter((n) => n.parentId === ns.id).map((n) => n.id),
+      ...ns.classifiers.filter((id) => collapsedGroupRank.has(id)),
+    ],
+    childGroupRank,
   );
   const childLeaves = childIds.flatMap((childId) => {
-    const child = allNamespaces.find((n) => n.id === childId)!;
-    return drawNamespace(child, allNamespaces, leafRank, nsRank);
+    const child = allNamespaces.find((n) => n.id === childId);
+    return child === undefined
+      ? [childId]
+      : drawNamespace(child, allNamespaces, leafRank, nsRank, collapsedGroupRank);
   });
   return [...ownLeaves, ...childLeaves];
 }
 
+/** Every id directly claimed by some namespace's `.classifiers` member
+ *  list (real leaves and threaded-in nested collapsed-empty children
+ *  alike -- `class-namespace.ts#collapseEmptyNamespace`'s `parentId !==
+ *  null` push). */
+function namespacedIds(ast: ClassDiagramAST): Set<string> {
+  return new Set(ast.namespaces.flatMap((ns) => ns.classifiers));
+}
+
 /** Every classifier/note id NOT claimed by any namespace's `.classifiers`
- *  member list, in `[...classifiers, ...notes]` declaration order (the
- *  fallback a hand-built AST with no namespaces and no `creationIndex`
- *  reduces to). */
-function unpackagedIds(ast: ClassDiagramAST): string[] {
-  const namespaced = new Set(ast.namespaces.flatMap((ns) => ns.classifiers));
+ *  member list AND not a ROOT-level collapsed-empty-package id (those sort
+ *  with the root namespaces -- {@link computeLeafDrawOrder}), in
+ *  `[...classifiers, ...notes]` declaration order (the fallback a
+ *  hand-built AST with no namespaces and no `creationIndex` reduces to). */
+function unpackagedIds(
+  ast: ClassDiagramAST,
+  namespaced: ReadonlySet<string>,
+  collapsedGroupRank: ReadonlyMap<string, number>,
+): string[] {
   return [...ast.classifiers.map((c) => c.id), ...ast.notes.map((n) => n.id)].filter(
-    (id) => !namespaced.has(id),
+    (id) => !namespaced.has(id) && !collapsedGroupRank.has(id),
   );
 }
 
 /**
- * Jar's leaf draw order: every root namespace's subtree (own leaves, then
- * child namespaces, recursively -- {@link drawNamespace}), root namespaces
- * ordered by `Namespace.creationIndex`, THEN every leaf claimed by no
- * namespace, by creation rank ({@link unpackagedIds}).
+ * Jar's leaf draw order: every root GROUP's subtree -- a root namespace
+ * (own leaves, then child groups, recursively -- {@link drawNamespace}) or
+ * a ROOT-level collapsed-empty-package classifier, which takes a sibling
+ * slot among the root namespaces rather than a leaf slot -- ordered by the
+ * shared creation counter ({@link collapsedGroupRankMap}), THEN every leaf
+ * claimed by no namespace and not itself a root-level collapsed-empty
+ * package, by creation rank ({@link unpackagedIds}). D2's own wording: "an
+ * empty package is already a leaf and takes its slot by its own
+ * creationIndex" -- among GROUP siblings, not among unpackaged leaves
+ * (T5 fix; jar-verified against a root-level and a nested empty-package
+ * fixture, see class-leaf-order.test.ts).
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:226-227 buildImage
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:399-405
  *   getUnpackagedEntities -- `dotData.getLeafs()` filtered to the root
  *   parent, D1's rank substitute for `CucaDiagram#leafs()`'s flat quark
  *   registration order (`net/atmp/CucaDiagram.java:852-862`,
- *   `plasma/Plasma.java:56-64`).
+ *   `plasma/Plasma.java:56-64`). A muted empty-package entity stays in
+ *   `entityFactory.groups()`, never `leafs()` (`Entity#muteToType` only
+ *   flips `leafType`/`groupType` fields, abel/Entity.java:194-199), so it
+ *   never reaches `getUnpackagedEntities()` -- it draws exactly once, from
+ *   `printGroups`.
  */
 export function computeLeafDrawOrder(ast: ClassDiagramAST): readonly string[] {
   const leafRank = buildLeafRankMap(ast);
   const nsRank = buildNamespaceRankMap(ast.namespaces);
+  const collapsedGroupRank = collapsedGroupRankMap(ast.classifiers);
+  const namespaced = namespacedIds(ast);
+  const rootGroupRank = new Map([...nsRank, ...collapsedGroupRank]);
   const rootIds = sortByRank(
-    ast.namespaces.filter((ns) => ns.parentId === undefined).map((ns) => ns.id),
-    nsRank,
+    [
+      ...ast.namespaces.filter((ns) => ns.parentId === undefined).map((ns) => ns.id),
+      ...ast.classifiers
+        .filter((c) => collapsedGroupRank.has(c.id) && !namespaced.has(c.id))
+        .map((c) => c.id),
+    ],
+    rootGroupRank,
   );
   const grouped = rootIds.flatMap((id) => {
-    const ns = ast.namespaces.find((n) => n.id === id)!;
-    return drawNamespace(ns, ast.namespaces, leafRank, nsRank);
+    const ns = ast.namespaces.find((n) => n.id === id);
+    return ns === undefined
+      ? [id]
+      : drawNamespace(ns, ast.namespaces, leafRank, nsRank, collapsedGroupRank);
   });
-  return [...grouped, ...sortByRank(unpackagedIds(ast), leafRank)];
+  return [
+    ...grouped,
+    ...sortByRank(unpackagedIds(ast, namespaced, collapsedGroupRank), leafRank),
+  ];
 }

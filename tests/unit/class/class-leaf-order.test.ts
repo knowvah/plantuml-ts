@@ -10,9 +10,13 @@
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:408-422 printGroups
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:425-435 printGroup
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:399-405 getUnpackagedEntities
+ *
+ * T5 adds the collapsed-empty-package-as-group cases (root-level and
+ * nested), both jar-verified via `scripts/oracle-render.sh`.
  */
 import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { collapseEmptyNamespacesFinal } from '../../../src/diagrams/class/class-namespace.js';
 import { computeLeafDrawOrder } from '../../../src/diagrams/class/class-leaf-order.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
@@ -112,6 +116,43 @@ describe('computeLeafDrawOrder (T2, leaf-draw-order)', () => {
       notes: [{ id: 'n1', target: 'a', position: 'right', targetPort: 'x', text: 'hi' }],
     };
     expect(computeLeafDrawOrder(ast)).toEqual(['a', 'n1']);
+  });
+
+  it('T5: a ROOT-level empty package sorts as a GROUP sibling of the root ' +
+     'namespaces, by shared creation counter -- NOT among the unpackaged ' +
+     'leaves (D2). jar-verified 2026-08-15 via oracle-render.sh on ' +
+     '`class X / package E {} / package P { class A } / class Y`: ' +
+     'draw order is `E, P.A, X, Y` (E created before P, so E prints before ' +
+     "P's own leaf A; X/Y are truly unpackaged and print only after the " +
+     'whole root-group pass finishes).', () => {
+    const raw = parse('class X\npackage E {\n}\npackage P {\nclass A\n}\nclass Y');
+    const ast = collapseEmptyNamespacesFinal(raw);
+    const e = ast.classifiers.find((c) => c.id === 'E')!;
+    const pa = ast.classifiers.find((c) => c.id === 'P.A')!;
+    expect(e.kind).toBe('descriptive');
+    expect(e.usymbol).toBeUndefined();
+    expect(e.creationIndex).toBe(2);
+    expect(pa.creationIndex).toBe(4);
+    expect(computeLeafDrawOrder(ast)).toEqual(['E', 'P.A', 'X', 'Y']);
+  });
+
+  it('T5: a NESTED empty package sorts as a child-group sibling of its ' +
+     "parent's other child namespaces, AFTER the parent's own real leaves " +
+     '(`printGroup`: leaves in full, then subgroups -- never merged by ' +
+     'rank). jar-verified 2026-08-15 via oracle-render.sh on `package P { ' +
+     'class A / package Inner {} / class B } class Z`: draw order is ' +
+     '`P.A, P.B, P.Inner, Z` -- Inner (created between A and B) still ' +
+     "draws AFTER B, since it is a child GROUP of P, not one of P's own " +
+     'leaves.', () => {
+    const raw = parse('package P {\nclass A\npackage Inner {\n}\nclass B\n}\nclass Z');
+    const ast = collapseEmptyNamespacesFinal(raw);
+    const inner = ast.classifiers.find((c) => c.id === 'P.Inner')!;
+    expect(inner.kind).toBe('descriptive');
+    expect(inner.usymbol).toBeUndefined();
+    expect(inner.creationIndex).toBe(3);
+    const pb = ast.classifiers.find((c) => c.id === 'P.B')!;
+    expect(pb.creationIndex).toBe(4);
+    expect(computeLeafDrawOrder(ast)).toEqual(['P.A', 'P.B', 'P.Inner', 'Z']);
   });
 
   it('the result is always a permutation of every classifier id and every ' +
