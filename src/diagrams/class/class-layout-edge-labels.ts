@@ -12,6 +12,7 @@ import type { Relationship } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { CARDINALITY_FONT_SIZE } from '../../core/graph-layout.js';
 import { computeQuantifierBox, computeMergedLabelBox } from '../../core/edge-label-box.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
@@ -246,11 +247,10 @@ function labelMarginOf(rel: Relationship): number {
  *  {@link computeMergedLabelBox} already bakes this SAME margin into the
  *  label operand internally, BEFORE the note merge (`addVisibilityModifier`
  *  runs before `mergeLR`/`mergeTB`, `SvekEdge.java:302-325`); applying it
- *  again here would double it. The `noteCtx` check matters ONLY in the
- *  interim state where no production caller supplies it yet
- *  (`computeRelLabelAttrs`'s own doc comment): a `linkNote`-bearing rel then
- *  falls through to the ordinary measured-label branch, which DOES still
- *  need this margin. */
+ *  again here would double it. The `noteCtx` check also covers a hand-built
+ *  `Relationship` with `linkNote` set but no `noteCtx` passed (test literals
+ *  predating this task): it falls through to the ordinary measured-label
+ *  branch instead, which DOES still need this margin. */
 function withLabelMargin(attrs: LabelAttrs, rel: Relationship, noteCtx: NoteBoxContext | undefined): LabelAttrs {
   if (attrs.labelWidth === undefined || attrs.labelHeight === undefined) return attrs;
   if (attrs.label === '') return attrs;
@@ -260,15 +260,16 @@ function withLabelMargin(attrs: LabelAttrs, rel: Relationship, noteCtx: NoteBoxC
 }
 
 /**
- * Theme needed to size a note merged into an edge label (`rel.linkNote`) --
- * OPTIONAL; no production caller threads a `Theme` here yet (write-set
- * widening beyond this file, reported not done -- see
- * `computeRelLabelAttrs`'s doc comment). {@link measureLinkNoteDim} resolves
- * its OWN font from `theme`, unlike the label operand's already-resolved
- * `font`. No `sprites` field -- see {@link computeNoteMergedLabelAttrs}.
+ * Theme + sprites needed to size a note merged into an edge label
+ * (`rel.linkNote`) -- threaded from `class-dot-graph.ts`, which already
+ * holds both when it builds the DOT edges (`buildNoteGraphParts` a few
+ * lines later in that file takes the SAME `theme`/`ast.sprites` for
+ * attached/freestanding notes). {@link measureLinkNoteDim} resolves its OWN
+ * font from `theme`, unlike the label operand's already-resolved `font`.
  */
 export interface NoteBoxContext {
   theme: Theme;
+  sprites?: SpriteRegistry;
 }
 
 /**
@@ -278,12 +279,13 @@ export interface NoteBoxContext {
  * {@link measureLinkNoteDim} (`class-note-link-box.ts` -- `EntityImageNoteLink`
  * is a `ComponentRoseNote`, NOT the plain-note component the class engine's
  * OTHER note sizer, `measureNote`, models; see that module's own doc
- * comment for the derivation). **Known limitation, not fixed here**: called
- * with no `SpriteRegistry` (see {@link NoteBoxContext}'s doc comment), so a
- * `<$name>` sprite atom inside the note text measures 0x0
- * (`creole-atoms-measure.ts:49-50`) -- `lozego-15-coci435`'s `<$test>Note on
- * rel` therefore reserves LESS than the oracle's `137x135` no matter how
- * correct the merge arithmetic below is; it stays in the backlog.
+ * comment for the derivation). `noteCtx.sprites` reaches the SAME
+ * `<$name>` atom resolution attached/freestanding notes use
+ * (`measureNote`'s own `sprites` param) -- jar-verified end to end against
+ * `lozego-15-coci435`: `<$test>` resolves via `ast.sprites` to its declared
+ * `[50x100/8z]` box, scaled by `spriteScale(1, 13) === 1` (ambient note font
+ * 13 === the sprite's own 13px reference), landing on the oracle's exact
+ * `137x135`.
  */
 function computeNoteMergedLabelAttrs(
   rel: Relationship,
@@ -291,7 +293,7 @@ function computeNoteMergedLabelAttrs(
   measurer: StringMeasurer,
   noteCtx: NoteBoxContext,
 ): LabelAttrs {
-  const noteDim = measureLinkNoteDim(rel.linkNote!, noteCtx.theme, measurer);
+  const noteDim = measureLinkNoteDim(rel.linkNote!, noteCtx.theme, measurer, noteCtx.sprites);
   const box = computeMergedLabelBox({
     label: rel.label ?? '',
     noteDim,
@@ -346,14 +348,9 @@ function computeMeasuredLabelAttrs(
   return { label, labelWidth: m.width, labelHeight: m.height };
 }
 
-/**
- * `noteCtx` is OPTIONAL and, today, never supplied by any production caller
- * (`class-dot-edges.ts` does not thread a `Theme` down -- see
- * {@link NoteBoxContext}'s doc comment): a `linkNote`-bearing relationship
- * therefore still falls through to the plain-label branch below in
- * production, UNCHANGED from pre-T10 behavior, until that plumbing is
- * authorized. Passing `noteCtx` (e.g. from a unit test) activates the merge.
- */
+/** `noteCtx` is OPTIONAL only so a hand-built `Relationship` literal
+ *  predating this task (no `noteCtx` argument) keeps compiling -- every
+ *  production caller (`class-dot-edges.ts`) supplies it. */
 function computeRelLabelAttrs(
   rel: Relationship,
   font: { family: string; size: number },
@@ -456,8 +453,7 @@ export function edgeLabelAttrs(
   // derivation of `font`. See `computeMultiplicityAttrs`'s own doc comment.
   cardinalityFont: { family: string; size: number },
   measurer: StringMeasurer,
-  // T10: OPTIONAL -- see `NoteBoxContext`/`computeRelLabelAttrs`'s own doc
-  // comments for why no production caller supplies this yet.
+  // T10: OPTIONAL -- see `computeRelLabelAttrs`'s own doc comment.
   noteCtx?: NoteBoxContext,
 ): NonNullable<DotInputEdge['attributes']> {
   return withLayoutBox({

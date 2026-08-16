@@ -26,6 +26,7 @@ import { buildClassUidPlan, classUidPlanInputFromAst } from './renderer-uid.js';
 import {
   LIKE_CLASS_KINDS,
   type MeasuredClassifier,
+  type NoteBoxContext,
 } from './class-layout-helpers.js';
 import { packageEndpointAnchors, shieldedClassifierIds } from './class-shield-helpers.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
@@ -382,10 +383,14 @@ function buildDotNodesAndEdges(
     family: theme.cardinalityFontFamily!,
     size: theme.cardinalityFontSize!,
   };
+  // T10: same `theme`/`ast.sprites` pair `buildNoteGraphParts` below already
+  // takes for attached/freestanding notes -- sizes a `note on link`-merged
+  // label (`rel.linkNote`).
+  const noteCtx: NoteBoxContext = { theme, ...(ast.sprites !== undefined ? { sprites: ast.sprites } : {}) };
   // Magma standalone-chaining edges appended after the real relationship edges.
   const dotEdges = [
     ...buildDotEdges(ast, anchors, {
-      font: labelFont, cardinalityFont, measurer, linetype: theme.linetype, classPortShortNames,
+      font: labelFont, cardinalityFont, measurer, linetype: theme.linetype, noteCtx, classPortShortNames,
       sametailByRelIndex: groupInheritance.sametailByRelIndex,
     }),
     ...buildClassMagmaEdges(ast, anchors),

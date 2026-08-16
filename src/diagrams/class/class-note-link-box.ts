@@ -38,12 +38,15 @@
  * single-block note bodies this backlog's `note on link` fixtures carry (no
  * `--`/`==` separator, no bullet, no table); only its OUTER margin (Opale
  * alone) is the wrong one for this component, which is corrected below. A
- * `<$name>` sprite atom therefore measures 0x0 without a `SpriteDimsLookup`
- * (`creole-atoms-measure.ts:49-50`) -- see `class-layout-edge-labels.ts
- * #NoteBoxContext`'s own doc comment for why that is not wired here.
+ * `<$name>` sprite atom resolves through the SAME registry attached/
+ * freestanding notes use (`sprites`, threaded from `ast.sprites` -- see
+ * `class-layout-edge-labels.ts#NoteBoxContext`'s doc comment); with no
+ * registry entry it measures 0x0 (`creole-atoms-measure.ts:49-50`), matching
+ * upstream's `StripeSimple.addSprite`'s "unknown name contributes nothing".
  */
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { measureNote } from './note-layout-measure.js';
 import { OPALE_MARGIN_X1, OPALE_MARGIN_X2, OPALE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 
@@ -64,8 +67,13 @@ export interface LinkNoteDim {
  * .linkNote` value (already `.trim()`-med by `class-notes.ts#applyNoteOnLink`,
  * never creole-stripped here -- `measureNote`'s own engine handles that).
  */
-export function measureLinkNoteDim(text: string, theme: Theme, measurer: StringMeasurer): LinkNoteDim {
-  const note = measureNote(text, theme, measurer);
+export function measureLinkNoteDim(
+  text: string,
+  theme: Theme,
+  measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
+): LinkNoteDim {
+  const note = measureNote(text, theme, measurer, sprites);
   const maxLineWidth = note.lineWidths.length === 0 ? 0 : Math.max(...note.lineWidths);
   const totalLineHeight = note.lineHeights.reduce((sum, h) => sum + h, 0);
   return {

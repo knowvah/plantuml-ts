@@ -15,7 +15,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import { findFreestandingNoteRelationshipIndices } from './note-freestanding.js';
-import { edgeLabelAttrs } from './class-layout-helpers.js';
+import { edgeLabelAttrs, type NoteBoxContext } from './class-layout-helpers.js';
 import { edgePortAttrs } from './class-port-rows.js';
 import type { EdgeGeo } from './layout.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
@@ -87,6 +87,9 @@ interface DotEdgeAttrContext {
   cardinalityFont: { family: string; size: number };
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
+  /** T10: threaded straight through to {@link edgeLabelAttrs} -- sizes a
+   *  `note on link`-merged label (`rel.linkNote`). */
+  noteCtx: NoteBoxContext;
   kindBIndices: ReadonlySet<number>;
   /** B1/M1: ids of the leaves emitted as RECTANGLE_HTML_FOR_PORTS row tables,
    *  the only endpoints a `::member` port may legally attach to. */
@@ -103,7 +106,7 @@ interface DotEdgeAttrContext {
 function buildDotEdgeAttrs(rel: Relationship, i: number, ctx: DotEdgeAttrContext): NonNullable<DotInputEdge['attributes']> {
   const attrs = {
     minLen: (rel.length ?? 2) - 1,
-    ...edgeLabelAttrs(rel, ctx.font, ctx.cardinalityFont, ctx.measurer),
+    ...edgeLabelAttrs(rel, ctx.font, ctx.cardinalityFont, ctx.measurer, ctx.noteCtx),
   };
   if (ctx.linetype === 'ortho') moveLabelToXlabel(attrs);
   if (rel.invis === true) attrs.invis = true;
@@ -135,6 +138,8 @@ interface DotEdgesRenderCtx {
   cardinalityFont: { family: string; size: number };
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
+  /** T10: threaded straight through to {@link DotEdgeAttrContext}. */
+  noteCtx: NoteBoxContext;
   /** T2: `classPortShortNamesById`'s output -- ADR-4's declared port-name
    *  sets, row-port leaves only (`isRowPortKind`: class family + object). */
   classPortShortNames: ReadonlyMap<string, Set<string>>;
@@ -150,7 +155,7 @@ export function buildDotEdges(
   anchors: Map<string, string>,
   render: DotEdgesRenderCtx,
 ): DotInputEdge[] {
-  const { font, cardinalityFont, measurer, linetype, classPortShortNames } = render;
+  const { font, cardinalityFont, measurer, linetype, noteCtx, classPortShortNames } = render;
   const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
   // ADR-3: unconditional whenever the TARGET carries row bands at all -- a
   // `map` (its own flat-sizer bands) or an `isRowPortKind` leaf -- class
@@ -164,7 +169,7 @@ export function buildDotEdges(
     ...classPortShortNames.keys(),
   ]);
   const ctx: DotEdgeAttrContext = {
-    font, cardinalityFont, measurer, linetype, kindBIndices, portRowIds,
+    font, cardinalityFont, measurer, linetype, noteCtx, kindBIndices, portRowIds,
     sametailByRelIndex: render.sametailByRelIndex,
   };
   return ast.relationships.map((rel: Relationship, i: number) => {
