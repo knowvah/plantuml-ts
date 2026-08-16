@@ -136,3 +136,133 @@ text-derived number measures the flag rather than the port.
   formula touches
 - [diagrams/data-flow.md](diagrams/data-flow.md) — how a label becomes a
   reserved box
+
+---
+
+# Close-out (T13) — 2026-08-16
+
+Every number below comes from a command run during close-out on a clean tree,
+not from an earlier task's journal entry.
+
+## Exit bar, scored clause by clause
+
+| # | Clause | | Measurement |
+|---|---|---|---|
+| 1 | The four backlogs go from 50 slugs to ≤ 12 | **✗** | **22** — class 11, description 9, state 2, object 0. Missed by 10. |
+| 2 | Every remaining slug carries a named mechanism, or an explicit "undiagnosed" | **✓** | 20 of 22 carry a named mechanism; `vuresa-33-kumu160` and `ticuxa-26-tixo262` are labelled **undiagnosed** explicitly, each with its ruled-out observation. |
+| 3 | DOT EQUAL rises toward class 710 / state 268 / component 263 / usecase 93 / object 78 | **✗ partial** | class 680→**699** (target 710), state 259→**266** (268), component 257→**257** (263), usecase 88→**89** (93), object 76→**78** (**78 ✓ met**). Every type rose or held; only object reached target. |
+| 4 | No fixture rises in `shape-match-report` | **✓** | **Zero fixtures regressed**; 24 improved. Verified per-fixture against the mission baseline, not by totals. Census 779→**783** doc-size-exact, 25975→**26206** matched-shapes. |
+| 5 | All four quality gates green | **✓** | `npm test` 594 files / 14426 passed / 1 todo · `npm run typecheck` exit 0 · `npm run lint` exit 0 · `npm run build` exit 0. |
+
+**Scored 3 of 5.** Clause 1 is missed by 10 slugs and clause 3 is met only for
+object. Neither is reworded and neither is softened; see the residue table for
+where the 22 actually are.
+
+## Why clause 1 was missed
+
+The bar assumed four mechanisms covered the 50 slugs. **They do not.** The
+mission delivered all four — M1 (quantifier font + `\n` split), M2 (note-on-link
+merge), M3 (tail/head swap), M4 (all three sub-mechanisms) — and the residue is
+dominated by mechanisms the brief never named:
+
+- **9 slugs** belong to mechanisms outside M1–M4 entirely (`<latex>` sizing,
+  `skinparam maxMessageSize` word-wrap, `<style> arrow { FontSize }` on the main
+  label, a `!define` macro, an `AssociationClass` text route, a `NOTE_COLOR`
+  regex ambiguity, an embedded `{{ }}` sub-diagram, and two undiagnosed).
+- **4 slugs** are M2 in the **description** engine, which the brief's Batch 5
+  never scoped a task for (T9 was state, T10 was class).
+- **3 slugs** are documented residue requiring a real creole `TextBlock` (the
+  Phase 4h track) or a per-line extension of cause D.
+- **6 slugs** are follow-on work newly specified during this mission.
+
+So the ≤ 12 target was unreachable from the plan as written, not from the work
+done. M4 alone grew from 4 slugs to ~13 once diagnosed.
+
+## Residue — all 22, each with its mechanism
+
+### class (11)
+
+| slug | mechanism |
+|---|---|
+| `camuna-58-veca254` | `<style> arrow { FontSize }` not applied to **main-label** measurement (head labels fixed by T14) |
+| `focaci-80-suzu938` | quantifier labels take cause A's visibility strip but **not** cause B's icon — confirmed: `61.1` → strip `~` → `53.46` → **53** = oracle |
+| `gobuco-16-ruke239` | magic-arrow tokens on individual lines of a multi-line label (cause D is per-label, not per-line) |
+| `lapoma-04-vaga142` | same as `gobuco` |
+| `nagega-30-poso418` | `!define` macro label never expanded |
+| `nuvake-96-gofe203` | `NOTE_COLOR` regex backtracks past a `;`-colour spec's embedded colons |
+| `ticuxa-26-tixo262` | **undiagnosed** — our 23 correctly measures `toto`; the oracle's 98x60 comes from something in the file we are not reading |
+| `tunelu-64-xica833` | `AssociationClass` routes note text via `class-assoc-couple.ts`'s `.label` substitution, never `.linkNote` |
+| `vonago-16-zime449` | same as `tunelu` |
+| `vuresa-33-kumu160` | **undiagnosed** — 14px too wide on a multi-line label with inline `<b>`; failing to strip `<b>` would make us *narrower*, so that hypothesis is ruled out by the sign of the error |
+| `xamule-03-jeda376` | per-run `<size:30>` font change inside a label — needs a real creole `TextBlock` (Phase 4h) |
+
+### description (9)
+
+| slug | mechanism |
+|---|---|
+| `berelu-46-namo819` | inline creole (`**missing**`) measured literally; only such slug corpus-wide |
+| `dikexa-30-jobu917` | **M2 unwired for the description engine** |
+| `fogiku-22-gone205` | M2, description |
+| `jafuke-47-xepe403` | M2, description |
+| `zavitu-69-cemu013` | M2, description |
+| `gevozu-46-sasu860` | `<latex>` block sizing |
+| `sunuju-01-pote718` | `<latex>` block sizing |
+| `kafexo-72-xupa679` | `skinparam maxMessageSize` word-wrap unported |
+| `zosuje-43-zebi775` | `<style> arrow { FontSize 10 }` not applied to main-label measurement |
+
+### state (2)
+
+| slug | mechanism |
+|---|---|
+| `lurage-50-kobo763` | multi-line label measured as one line (472x15 vs 125x54) |
+| `xetase-70-zaza808` | `{{ }}` embedded sub-diagram in an edge label — `EmbeddedDiagram.ts#NestedDiagramRenderer` unbuilt |
+
+### object (0) — backlog fully cleared
+
+## Corrections this mission owed, and paid
+
+- **The 2026-08-15 shape survey was wrong twice.** `lozego-15-coci435` was read
+  as "multi-line measured as one line"; it is a **note-on-link merged box (M2)**,
+  now exact at 137x135. The `givoli` family was read as a tail-box size delta;
+  it is a **tail/head swap (M3)**, an assignment defect, now fixed.
+- **`class-layout-edge-labels.ts:34`'s "theme.fontSize = 14" claim was stale** —
+  the path measures at 13. Corrected in T6 with both proofs.
+- **`class-layout-edge-labels.ts:25`'s "no diagram overrides `cardinality`"** —
+  `camuna-58-veca254` does. Corrected in T6.
+- **The brief's own starting census figure ("25952 rigid-aligned") matches no
+  metric the report emits.** `doc-size-exact` matched exactly at 779; the
+  mission adopted its own captured per-fixture baseline as the D4 comparison.
+
+## Tasks: 14 planned → 16 executed
+
+T1–T11 and T13 as planned; **T12 split into T12a/T12b/T12c** (maintainer-approved,
+after T4 found three sub-mechanisms where the brief scoped one); **T14 added**
+(maintainer-approved, to complete D3 after T6 and T7 both hit the same write-set
+escape and left the cardinality cascade with zero callers).
+
+## Known issues and follow-ups
+
+1. **M2 for the description engine** — 4 slugs, the cheapest remaining win; the
+   shared arm exists and two engines are already wired. Note the trap T9 hit:
+   the correct note sizer is `ComponentRoseNote` (`pureText + 31`), **not** the
+   `Opale`-based `measureNote` (`+21`).
+2. **Cause A for quantifier labels** — strip only, no icon. `focaci`, confirmed
+   arithmetically above.
+3. **Cause D per-line inside multi-line labels** — `gobuco`, `lapoma`.
+4. **`<style> arrow { FontSize }` on main-label measurement** — `camuna`,
+   `zosuje`. Cheap now that T1's arrow cascade exists.
+5. **Two undiagnosed slugs** — `vuresa`, `ticuxa`, with ruled-out notes attached.
+6. **`.claude/catalog.md` does not exist**, though `CLAUDE.md` directs every
+   agent to check it before implementing. `.claude/` is gitignored, so anything
+   written there would not be committed. **Unowned.** A rule pointing at a
+   nonexistent file is exactly the stale premise this mission line keeps paying
+   for. New public surface this mission added, recorded here instead:
+   `computeQuantifierBox`, `computeMergedLabelBox`, `applyVisibilityIcon`,
+   `applyGuillemet`, `parseMagicArrowLabel` (all `src/core/edge-label-box.ts`),
+   `computeCardinalityFontOverride` (`src/core/style-cascade-class.ts`),
+   `class-edge-label-lines.ts` (split), `scripts/label-box-triage.ts`.
+7. **`hasMiddleDecor` is dead code, categorically** — this port has no
+   `LinkMiddleDecor` concept (`CommandLinkClass.java:490-509`'s `INSIDE` group
+   is unported), so T8's shield term can never fire. Kept as faithful upstream
+   arithmetic; belongs in `DIVERGENCES.md`.
+8. **`theme.ts` has no line budget left** under the complexity hook.
