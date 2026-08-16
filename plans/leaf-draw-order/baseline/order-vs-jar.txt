@@ -96,7 +96,7 @@ class/dareti-67-siti389 SAME
 class/dasagu-52-vani172 SAME
 class/dativu-93-pona469 SAME
 class/datugo-88-sote552 SAME
-class/daxeno-00-kasu166 ORDER-ONLY
+class/daxeno-00-kasu166 SAME
 class/deboga-81-zuza232 SAME
 class/defipi-14-xunu847 SAME
 class/dejuse-14-pule208 SAME
@@ -800,4 +800,4 @@ object/zagodo-28-ranu153 SAME
 object/zebufu-01-pevo013 SAME
 object/zicope-62-pica490 SAME
 object/zuvila-56-nuda425 SAME
-TOTAL vs-jar: same=718 order-only=7 other=77 err=0
+TOTAL vs-jar: same=719 order-only=6 other=77 err=0

@@ -96,7 +96,7 @@ class/dareti-67-siti389 notes=0 tips=0 sha=d6bd36831175 ink=e969b146e3fc cls:P1.
 class/dasagu-52-vani172 notes=0 tips=0 sha=325c797c234d ink=788d346e8612 cls:Foo2=ent0001 cls:Foo3=ent0002 link=lnk3
 class/dativu-93-pona469 notes=0 tips=0 sha=9eedcf3365a1 ink=9e91790213ca cls:foo.A=ent0002 cls:foo.B=ent0003 cls:foo1.A1=ent0005 cls:foo1.B1=ent0006
 class/datugo-88-sote552 notes=0 tips=0 sha=c1d63e05b802 ink=3d86930d0d7f cls:Toto=ent0001
-class/daxeno-00-kasu166 notes=0 tips=0 sha=6c5201c60392 ink=c770f6218b45 cls:<size:18>styled2</size>\nshould be styled.foo=ent0003 cls:<size:18>styled</size>\nshould be styled=ent0001
+class/daxeno-00-kasu166 notes=0 tips=0 sha=034184e7b96e ink=c770f6218b45 cls:<size:18>styled</size>\nshould be styled=ent0001 cls:<size:18>styled2</size>\nshould be styled.foo=ent0003
 class/deboga-81-zuza232 notes=0 tips=0 sha=50263479d0a8 ink=2cf27f4785ae cls:foo1=ent0001 cls:foo2=ent0002 cls:foo3=ent0003 cls:bar1=ent0004
 class/defipi-14-xunu847 notes=0 tips=0 sha=ff548ddea4cb ink=73c76a96af9f cls:Toto=ent0001
 class/dejuse-14-pule208 notes=0 tips=0 sha=6e9f03c9bdb6 ink=4d0ccd01d10c cls:Dummy1=ent0001 cls:Dummy2=ent0002

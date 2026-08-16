@@ -56,25 +56,23 @@ Remaining work, all small:
    it; none exists).
 5. Journal summary; merge with a merge commit.
 
-## 2. `leaf-draw-order` — DONE on `feat/leaf-draw-order`, NOT merged (ruling needed)
+## 2. `leaf-draw-order` — DONE on `feat/leaf-draw-order`, ready to merge (merge commit)
 
 2026-08-15: completed all 3 batches (`plans/leaf-draw-order/`, branch
-`feat/leaf-draw-order`, commits `a1c721e3..e1f4c869`) — the mission spun out
+`feat/leaf-draw-order`, commits `a1c721e3..d7bd50a0` + docs) — the mission spun out
 of `note-leaf-model`'s Batch 3 STOP (below). `ClassGeometry.leaves` now folds
 classifiers, notes and TIPS into one collection built in jar's `bibliotekon`
 insertion order (`computeLeafDrawOrder`, D1–D3 of `decisions.md`);
 `renderer.ts` iterates it as a single loop, retiring the old
 declaration-order + host-interleave proxy. **Result: `note-order-report
---vs-jar` same=678→718, order-only=47→7, other=77 unchanged, err=0;
-`--check-order` moved=80 offenders=0** (baseline 678/47/77/0; target was
-order-only=0). **One fixture regressed** (daxeno-00-kasu166, SAME→
-ORDER-ONLY): a `package … <<Database>> {}` collapses to a `usymbol:'database'`
-classifier structurally indistinguishable, on the fields the port has today,
-from a genuinely-declared `database Foo` leaf — needs a new marker stamped at
-`class-container.ts`/`class-namespace.ts`'s collapse call sites, both outside
-every task's write-set in this mission. **Branch left unmerged; human ruling
-requested**: accept the one regression pending a follow-on `collapsedGroup`
-marker, or authorise that fix now on this branch. Details:
+--vs-jar` same=678→719, order-only=47→6, other=77 unchanged, err=0;
+`--check-order` vs the pre-mission baseline moved=79 offenders=0** (baseline
+678/47/77/0; target was order-only=0 — the six left are EDGE order, below).
+One fixture (daxeno-00-kasu166) regressed after T4 because a `package …
+<<Database>> {}` collapses to a `usymbol:'database'` classifier
+indistinguishable from a declared `database Foo` leaf; the human ruled
+option (b) and `Classifier.collapsedGroup` (stamped once, in
+`collapseEmptyNamespace`) landed on the branch (`d7bd50a0`). Details:
 `plans/leaf-draw-order/decision-journal.md` (all rows, esp. B2's and T6's)
 and the README's session summary.
 
@@ -94,8 +92,7 @@ Follow-on candidates surfaced by this mission (not started):
   -burn divergences (extra or missing `creationIndex` ticks), not sequence
   order. A separate mission from leaf order; needs a fuller survey before
   scoping.
-- **daxeno's collapsed-container marker** — see above; est. 4 files, ~20
-  lines, plus a `class-leaf-order.ts` read, per the mission's own scoping.
+- ~~daxeno's collapsed-container marker~~ — done on the branch (`d7bd50a0`).
 
 ## `note-leaf-model` — batches 1–2 DONE (merged to main), batch 3 retired into `leaf-draw-order`
 

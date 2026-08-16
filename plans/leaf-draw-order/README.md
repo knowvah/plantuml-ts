@@ -127,22 +127,24 @@ Run all between every batch. **Never pipe `npm test`.**
 
 ## Session summary — 2026-08-15 (autonomous run, branch `feat/leaf-draw-order`)
 
-**ONE fixture regressed** (daxeno-00-kasu166, SAME→ORDER-ONLY) and a human
-ruling is requested before merge — see "Known follow-ups (a)" below and the
-B2 journal row. The mission is otherwise complete and green; the branch is
-**not merged to main**, left for review.
+**Ruling 2026-08-15 — option (b) taken:** the one regressed fixture
+(daxeno-00-kasu166, SAME→ORDER-ONLY after T4) was fixed on this branch by the
+`Classifier.collapsedGroup` marker (`d7bd50a0`, see the post-T6 journal
+rows). Final: **`--vs-jar` same=719 order-only=6 other=77 err=0**; the six
+remaining are EDGE order, outside this mission. The branch is complete and
+green, **not merged to main** — merge with a merge commit.
 
 - **Tasks:** 6 of 6 planned tasks completed (T1–T6 across Batches 1–3); T4
   cleared 41 of the 47 ORDER-ONLY fixtures. T5 diagnosed all 7 remaining
   (6 are EDGE order — a different mechanism, outside this mission; 1 is
   daxeno-00) and landed a jar-verified general fix (collapsed-empty-group
   print slot, which also restored rojoxi-79 to jar's order) but cleared none
-  of the 7: daxeno-00 needs new plumbing outside its write-set (a
-  `collapsedGroup` marker at `class-container.ts`/`class-namespace.ts`), so
-  it stayed ORDER-ONLY by design, not oversight.
-- **Decisions:** 32 journal rows. Flagged for review: (1) the daxeno ruling
-  request (B2 row) — accept the one regression pending a follow-on marker,
-  or authorise that change now on this branch; (2) the `--check-order`
+  of the 7 at the time: daxeno-00 needed new plumbing outside its write-set
+  (a `collapsedGroup` marker stamped in `collapseEmptyNamespace`), which the
+  human authorised afterwards (option (b), `d7bd50a0`) — daxeno-00 is SAME.
+- **Decisions:** 34 journal rows. Flagged for review: (1) the daxeno ruling
+  request (B2 row) — resolved by the human as option (b), marker landed on
+  this branch (`d7bd50a0`); (2) the `--check-order`
   instrument amendment (T4 rows, landed `2f233a23`) — the original
   uid-sequence-only signature was blind to unwrapped leaves (TIPS,
   collapsed-empty-package), so the gate's own definition was widened
@@ -151,18 +153,17 @@ B2 journal row. The mission is otherwise complete and green; the branch is
   T5 rows) — both breaches of "no agent runs any git command", both
   self-disclosed, both reverted within the same tool-call sequence, no
   destructive flag used, no history rewritten.
-- **Final gate results (HEAD `e1f4c869`):** typecheck 0, lint 0 (re-run at
-  T6), build 0; `npm test` 591 files / 14325 pass + 1 todo, coverage
+- **Final gate results (HEAD `d7bd50a0` + docs):** typecheck 0, lint 0,
+  build 0; `npm test` 591 files / 14326 pass + 1 todo, coverage
   95.34/90.3/96.91/96.44; `shape-match-report` and `dot-sync-report class`
-  diff-empty against `baseline/`; **`--vs-jar` same=718 order-only=7
+  diff-empty against `baseline/`; **`--vs-jar` same=719 order-only=6
   other=77 err=0** (baseline was 678/47/77/0 — the mission bar); **
-  `--check-order` vs the re-pinned `note-order.t1.txt`: moved=80
-  offenders=0**; `--check-order` vs the freshly-captured `note-order.txt`:
-  moved=0 offenders=0 (self-consistency check on the new baseline).
+  `--check-order` vs the pre-mission `note-order.t1.txt`: moved=79
+  offenders=0** (79 = 80 minus daxeno, whose sha returned to baseline);
+  `--check-order` vs the re-captured `note-order.txt`: moved=0 offenders=0.
 - **Known follow-ups:**
-  - (a) daxeno-00's collapsed-`<<Database>>`-package marker gap
-    (`class-container.ts`/`class-namespace.ts`/`ast.ts`, T5's row) — needs a
-    human ruling before this is fixed or accepted.
+  - (a) ~~daxeno-00's collapsed-`<<Database>>`-package marker gap~~ — DONE
+    on this branch (`d7bd50a0`, option (b) ruling).
   - (b) 6 EDGE-order fixtures (bicabi-42, cobumi-83, gujigi-63, kevoda-64,
     momoba-92, tedeba-19) — jar's `getOrderedLinks`/`sameConnections`
     same-pair grouping, a different mechanism than this mission's leaf

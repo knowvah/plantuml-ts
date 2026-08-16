@@ -61,12 +61,13 @@
   correct discrimination needs a NEW marker stamped at the collapse call
   sites (`class-container.ts`, `class-namespace.ts`), not a smarter
   predicate over existing fields.
-- **Impact**: This is the one open regression (daxeno, SAME→ORDER-ONLY)
-  blocking merge. A follow-on needs write access to
-  `class-container.ts`/`class-namespace.ts`/`ast.ts` to add e.g.
-  `Classifier.collapsedFromNamespace: true`, distinguishing "collapsed FROM
-  an empty namespace" from "declared as a descriptive container" —
-  currently indistinguishable by design of the existing AST shape.
+- **Impact**: Resolved on the branch (`d7bd50a0`, human ruling option (b)):
+  `Classifier.collapsedGroup: true` is stamped at the ONE mute site
+  (`class-namespace.ts#collapseEmptyNamespace` — both `closeContainer` and
+  `collapseEmptyNamespacesFinal` route through it), and
+  `class-leaf-order.ts#collapsedGroupRankMap` ranks on that marker rather
+  than `class-magma.ts#isCollapsedGroup` (which still requires
+  `usymbol === undefined` for its own magma/render purposes — leave it).
 - **Confidence**: High (Java read + AST field inspection, T5's journal row).
 
 ## Observation: `class-assoc-couple.ts:251` skips namespace registration for an auto-created endpoint
