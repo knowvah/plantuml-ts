@@ -12,6 +12,7 @@ import { describe, it, expect } from 'vitest';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import {
   computeReservedLabelBox,
+  computeQuantifierBox,
   splitCreoleLines,
   stripCreoleMarkup,
 } from '../../../src/core/edge-label-box.js';
@@ -19,6 +20,13 @@ import {
 const measurer = new DeterministicMeasurer();
 /** `skinparam arrowFontSize 10`, which the fixture sets. */
 const ARROW_FONT = { family: 'SansSerif', size: 10 };
+/**
+ * `class/camuna-58-veca254`'s `<style>` block: `arrow.cardinality { FontSize
+ * 10  FontStyle italic }` — its own scoped override wins over the enclosing
+ * `arrow { FontSize 14 FontStyle bold }`, so the resolved cardinality font is
+ * size 10 italic, NOT the arrow label's 14 bold.
+ */
+const CARDINALITY_FONT = { family: 'SansSerif', size: 10, style: 'italic' as const };
 
 describe('stripCreoleMarkup', () => {
   it('removes formatting tags, opening and closing', () => {
@@ -95,5 +103,50 @@ describe('computeReservedLabelBox — jar-measured cases', () => {
     );
     const stripped = computeReservedLabelBox(raw, ARROW_FONT, measurer, false);
     expect(widestUnstripped).toBeGreaterThan(stripped.reservedWidth * 1.5);
+  });
+});
+
+/**
+ * `computeQuantifierBox` — the SEPARATE, un-shielded formula
+ * `SvekEdge.java:447-467` uses for `taillabel`/`headlabel`
+ * (`startTailText`/`endHeadText`, built at `:330-351` from
+ * `Display.getWithNewlines(...).create(cardinalityFont, ...)`). Both cases
+ * below are the jar's own numbers, read off
+ * `class/camuna-58-veca254`'s cached `svek-1.dot`: `headlabel` on the
+ * `HashMap -> Customer` edge is `41x20` (two lines, `"customer\n1"`); on the
+ * `Map -> HashMap` edge it is `23x10` (one line, `"value"`) — both at the
+ * fixture's `<style>`-overridden cardinality font, size 10 italic.
+ */
+describe('computeQuantifierBox — jar-measured cases, no shield/margin', () => {
+  it('two-line quantifier reserves the oracle box (camuna-58-veca254, HashMap edge)', () => {
+    const box = computeQuantifierBox(String.raw`customer\n1`, CARDINALITY_FONT, measurer);
+    expect(box.lines).toEqual(['customer', '1']);
+    expect(box.reservedWidth).toBe(41);
+    expect(box.reservedHeight).toBe(20);
+  });
+
+  it('single-line quantifier reserves the oracle box (camuna-58-veca254, Map edge)', () => {
+    const box = computeQuantifierBox('value', CARDINALITY_FONT, measurer);
+    expect(box.lines).toEqual(['value']);
+    expect(box.reservedWidth).toBe(23);
+    expect(box.reservedHeight).toBe(10);
+  });
+
+  it('adds neither labelShield nor 2 * marginLabel — matches raw measured width', () => {
+    // The label arm (computeReservedLabelBox) would add 2 * marginLabel (>=2)
+    // to this exact width/height. The quantifier arm must not.
+    const rawWidth = measurer.measure('value', CARDINALITY_FONT).width;
+    const box = computeQuantifierBox('value', CARDINALITY_FONT, measurer);
+    expect(box.reservedWidth).toBe(Math.floor(rawWidth));
+    expect(box.reservedHeight).toBe(CARDINALITY_FONT.size);
+  });
+
+  it('truncates a fractional width toward zero, not rounds', () => {
+    // `measure('value', ...).width` is 23.9375 — appendTable's `(int)` cast
+    // (SvekEdge.java:504-507) truncates to 23, not Math.round's 24.
+    const box = computeQuantifierBox('value', CARDINALITY_FONT, measurer);
+    const rawWidth = measurer.measure('value', CARDINALITY_FONT).width;
+    expect(rawWidth).not.toBe(Math.trunc(rawWidth));
+    expect(box.reservedWidth).toBe(Math.trunc(rawWidth));
   });
 });

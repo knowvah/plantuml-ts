@@ -16,6 +16,11 @@
  * state-side import changed.
  */
 import type { FontSpec, StringMeasurer } from './measurer.js';
+// `src/core/` already imports from `src/diagrams/` elsewhere (`assemble-svg
+// .ts` imports each engine's `renderer.js`), so reusing the existing
+// `\n`/`\l`/`\r` splitter here is not a new or backwards layering — see D1
+// and this task's boundary note.
+import { splitEdgeLabelLines } from '../diagrams/class/class-layout-edge-labels.js';
 
 /**
  * Split a display/description string on PlantUML's literal `\n` line-break
@@ -102,4 +107,47 @@ export function computeReservedLabelBox(
   const reservedWidth = Math.floor(measuredWidth + 2 * marginLabel);
   const reservedHeight = measuredHeight + 2 * marginLabel;
   return { marginLabel, lines, measuredWidth, measuredHeight, reservedWidth, reservedHeight };
+}
+
+/** {@link computeQuantifierBox}'s result — deliberately narrower than
+ *  {@link ReservedLabelBox}: the quantifier/role arm never has a margin or a
+ *  shield to report, so there is nothing else to expose. */
+export interface QuantifierBox {
+  readonly lines: readonly string[];
+  readonly reservedWidth: number;
+  readonly reservedHeight: number;
+}
+
+/**
+ * The box formula for an edge's QUANTIFIER (multiplicity) and ROLE labels —
+ * `startTailText`/`endHeadText`/`startTailRoleText`/`endHeadRoleText`,
+ * measured at the CARDINALITY font, not the arrow label font.
+ *
+ * Construction (`SvekEdge.java:330-351`): each is
+ * `Display.getWithNewlines(pragma, text).create(cardinalityFont, CENTER,
+ * skinParam)` — split on `\n`, same mechanism `splitEdgeLabelLines` already
+ * ports (reused here rather than duplicated, per this task's boundary).
+ *
+ * Emission (`SvekEdge.java:447-467`) is the point of this function existing
+ * separately from {@link computeReservedLabelBox}: `appendTable(sb,
+ * startTailText.calculateDimension(stringBounder), ...)` passes the RAW
+ * dimension straight through. Unlike the main label at `:440-445`, which adds
+ * `2 * labelShield` before its own `appendTable` call, the quantifier/role
+ * arms add nothing — no shield, no `marginLabel`. `appendTable`'s `(int)`
+ * cast (`:504-507`) truncates toward zero, mirrored here with `Math.floor`
+ * (measured widths are never negative, so floor and trunc agree).
+ *
+ * `font` is the resolved CARDINALITY font — this function does not resolve
+ * it; the caller (T6/T7) reads it through T1's style cascade.
+ */
+export function computeQuantifierBox(
+  text: string,
+  font: FontSpec,
+  measurer: StringMeasurer,
+): QuantifierBox {
+  const { lines } = splitEdgeLabelLines(text);
+  const measuredWidth = Math.max(...lines.map((l) => measurer.measure(l, font).width));
+  const reservedWidth = Math.floor(measuredWidth);
+  const reservedHeight = lines.length * font.size;
+  return { lines, reservedWidth, reservedHeight };
 }
