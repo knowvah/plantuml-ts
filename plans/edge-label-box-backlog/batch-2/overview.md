@@ -5,7 +5,7 @@ rewrites that file and the two must not interleave.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T5 | `computeQuantifierBox` in the shared module | `typescript-pro` | `src/core/edge-label-box.ts`, `tests/unit/core/edge-label-box.test.ts` | T1 | [ ] |
+| T5 | `computeQuantifierBox` in the shared module | `typescript-pro` | `src/core/edge-label-box.ts`, `tests/unit/core/edge-label-box.test.ts` | T1 | [x] |
 
 **Depends on T1** for the resolved cardinality font. Check the journal for the
 exact field names T1 settled on rather than guessing them.
