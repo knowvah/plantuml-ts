@@ -48,7 +48,7 @@ share this worktree: **no agent runs any git command.**
 | # | What | Depends on | Done |
 |---|---|---|---|
 | [1](batch-1/overview.md) | Widen the gate; leaf order over the AST; fold the collection byte-identically | — | [x] |
-| [2](batch-2/overview.md) | Draw in leaf order; triage the remainder | B1 | [ ] |
+| [2](batch-2/overview.md) | Draw in leaf order; triage the remainder | B1 | [x] |
 | [3](batch-3/overview.md) | Sweep, re-baseline, close (retire note-leaf-model Batch 3) | B2 | [ ] |
 
 ## Quality gates

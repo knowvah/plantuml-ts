@@ -6,8 +6,8 @@ reports as ORDER-ONLY.
 
 | ID | Description | Agent | Writes | Depends on | Done |
 |----|-------------|-------|--------|-----------|------|
-| T4 | `leaves` built in draw order; renderer single loop; hidden host draws its notes | typescript-pro | `src/diagrams/class/{layout,class-geo-builders,renderer,renderer-uid}.ts`, `tests/unit/class/renderer*.test.ts` + any test pinning N52 order | T2, T3 | [ ] |
-| T5 | Remainder triage — every fixture still ORDER-ONLY, and a sample of OTHER | typescript-pro | `plans/leaf-draw-order/decision-journal.md` (+ `src/diagrams/class/class-leaf-order.ts` ONLY for a root-caused, Java-cited ordering bug) | T4 | [ ] |
+| T4 | `leaves` built in draw order; renderer single loop; hidden host draws its notes | typescript-pro | `src/diagrams/class/{layout,class-geo-builders,renderer,renderer-uid}.ts`, `tests/unit/class/renderer*.test.ts` + any test pinning N52 order | T2, T3 | [x] |
+| T5 | Remainder triage — every fixture still ORDER-ONLY, and a sample of OTHER | typescript-pro | `plans/leaf-draw-order/decision-journal.md` (+ `src/diagrams/class/class-leaf-order.ts` ONLY for a root-caused, Java-cited ordering bug) | T4 | [x] |
 
 Serial.
 
