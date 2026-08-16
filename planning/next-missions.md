@@ -11,58 +11,92 @@ two shipped missions as "not started", and the 2026-08-15 version was out of
 date within a day (both of its top two entries landed on main that same
 evening). Verify against `git log` and the tree before acting on any line here.
 
-Standing corpus signals at refresh time (from the `transition-label-ink`
-close-out, 2026-08-15): `shape-match-report.ts` **779 doc-size-exact /
-25952 rigid-aligned shapes**; class DOT-parity 712/712; state 268/268;
-svg-state ratchet 59 pins; svg-class ratchet 292+; ~14.3k tests. **Later the
-same day SI22's D7 re-baselined the DOT EQUAL counts** (label BOX size is now
-asserted): class 680/710, state 259/268, component 257/263, usecase 88/93,
-object 76/78 — the drops are the new `label-size-backlog.json` queue, not
-regressions.
+Standing corpus signals, **measured at SI23's close-out 2026-08-16** on a clean
+tree (not carried forward from a previous refresh): `shape-match-report.ts`
+**783 doc-size-exact / 26,206 matched-shapes** of 1,074 fixtures. DOT EQUAL
+**class 699/711 · state 266/268 · component 257/263 · usecase 89/93 · object
+78/80**. `label-size-backlog` totals **22** (class 11 · description 9 · state 2
+· object **0**, cleared). svg-state ratchet 59 pins; svg-class ratchet 292+;
+**14,426 tests** across 594 files, coverage 95.35/90.33/96.92/96.45.
+
+Two corrections to what this block used to say. The long-standing
+"**25952 rigid-aligned shapes**" figure **matches no metric the report emits** —
+the two it prints are `doc-size-exact` and `matched-shapes`. And the
+"class DOT-parity 712/712 · state 268/268" line predated SI22's D7, which
+re-baselined every count by asserting label BOX size; the numbers above are the
+post-D7 measurements.
 
 ---
 
-## 1. `edge-label-box-backlog` — IN EXECUTION since 2026-08-16
+## 1. `edge-label-box-followups` — NAMED 2026-08-16, needs `/plan-mission`
 
-Brief: `plans/edge-label-box-backlog/` (7 batches; branch
-`feat/edge-label-box-backlog` exists). Batches 1–2 done, batch 3 in flight.
-**T12 was split into T12a/T12b/T12c** after T4 established M4 as three
-sub-mechanisms over ~13 slugs, not the four planned — read the brief's
-`decision-journal.md` before acting on any M4 line below. SI22's follow-on
-queue: the
-**50 pinned goldens** across four `oracle/goldens/*/label-size-backlog.json`
-files (class 29, description 10, state 9, object 2) that D7 caught scoring
-EQUAL with a wrong edge-label box.
+`edge-label-box-backlog` **closed 2026-08-16** (mission-index SI23) at **3 of 5
+exit-bar clauses**: backlogs 50 → **22** against a ≤ 12 bar, DOT EQUAL class
+680 → **699**, state 259 → **266**, usecase 88 → **89**, object 76 → **78**
+(target met, backlog empty), component unmoved at 257. **Zero fixtures
+regressed, 24 improved.** Full residue table with a named mechanism per slug is
+in `plans/edge-label-box-backlog/README.md`'s close-out section.
 
-**Not 50 fixtures — four mechanisms**, three confirmed by drill-down during
-planning:
+It missed ≤ 12 because **the brief's premise was wrong**: four mechanisms do not
+cover the 50 slugs. That is the finding, not an excuse — 9 of the 22 belong to
+mechanisms the brief never named. The residue is now fully specified, which
+makes this follow-on cheap to plan.
 
-- **M1** quantifier/role boxes use the arrow label font and never split `\n`;
-  upstream uses a separate `cardinalityFont` (`GraphvizImageBuilder.java:237`)
-  and `Display.getWithNewlines`. `camuna-58-veca254` proves both halves in one
-  fixture — its `<style>` block overrides `arrow { cardinality { FontSize 10 } }`
-  and its head label is `"customer\n1"`. Already named and deferred at
-  `class-layout-edge-labels.ts:33-38`, on the grounds that the gate could not
-  see it. D7 changed that.
-- **M2** note-on-link merged box unmodelled (`mergeLR`/`mergeTB`,
-  `labelShield`, `divideLabelWidthByTwo` — `SvekEdge.java:302-356`).
-  `lozego-15-coci435`: oracle `137x135`, ours `33x15`.
-- **M3** tail and head **swapped** on one edge of the `givoli`/`nadepi`/
-  `tekena`/`tiguma` family — not a size defect at all. Diagnosis-gated, and
-  hands off to edge-draw-order if the cause is emission order.
-- **M4** ~~few-px single-line width deltas~~ — **DIAGNOSED 2026-08-16**
-  (`.agent-notes/m4-single-line-width.md`), and it is not what this line said.
-  Three independent sub-mechanisms over **~13** gate-failing slugs, not four:
-  (A+B) strip a leading visibility char and prepend its 12px icon, gated on
-  `classAttributeIconSize>0`; (C) `<<x>>` → `«x»`, class engine only;
-  (D) strip the `<`/`>` magic-arrow token and prepend a 13px triangle block.
-  22/22 predicted widths reproduced exactly, validated predictively against
-  four slugs named before they were run.
+**Ordered by cost, cheapest first — all four are small and independently
+shippable:**
 
-**Correction to the 2026-08-15 shape survey** recorded in
-`plans/edge-label-box-and-class-ports/decision-journal.md`: it read `lozego` as
-"multi-line measured as one line" (it is M2) and the `givoli` family as a tail-box
-size delta (it is M3). Both were first-pass reads.
+1. **M2 for the description engine** (4 slugs: `dikexa-30-jobu917`,
+   `fogiku-22-gone205`, `jafuke-47-xepe403`, `zavitu-69-cemu013`).
+   `link-edge-attrs.ts` has no `computeMergedLabelBox`, no `linkNote`, no
+   `noteDim` — Batch 5 wired state (T9) and class (T10) and never scoped a
+   description arm. The shared function already exists and two engines are
+   already wired. **Read T9's trap first:** the correct note sizer is
+   `ComponentRoseNote` (`pureText + 31`, `Rose.java:65-66` +
+   `ComponentRoseNote.java:82-91`), **not** the `Opale`-based `measureNote`
+   (`+21`) that both its brief and its prompt named. Following the brief there
+   would have been 10px short on every box.
+2. **Cause A for quantifier labels** (1 slug: `focaci-80-suzu938`). Quantifiers
+   take the visibility-char **strip** but not the icon block, because the
+   quantifier arm never calls `addVisibilityModifier`. Confirmed arithmetically
+   at close-out: `~* initiators` = 61.1 → strip `~` → 53.46 → **53** = oracle.
+3. **`<style> arrow { FontSize }` on main-label measurement** (2 slugs:
+   `camuna-58-veca254`, `zosuje-43-zebi775`). Cheap now that SI23's T1 built the
+   arrow/cardinality cascade — the cascade exists, the main-label path just does
+   not consult it.
+4. **Cause D per-line inside multi-line labels** (2 slugs:
+   `gobuco-16-ruke239`, `lapoma-04-vaga142`). SI23's T12c handles the
+   magic-arrow token per-label; these carry one per line.
+
+**Two slugs are explicitly UNDIAGNOSED** and should be diagnosed before being
+scoped: `vuresa-33-kumu160` (14px too wide on a multi-line label with inline
+`<b>`; note the sign — failing to strip `<b>` would make us *narrower*, so that
+hypothesis is already ruled out) and `ticuxa-26-tixo262` (our 23 correctly
+measures `toto`; the oracle's 98x60 comes from something in the file we are not
+reading).
+
+**Out of scope for this follow-on, each owned elsewhere:** `xamule-03-jeda376`
+and `lurage-50-kobo763` need a real creole `TextBlock` (Phase 4h);
+`xetase-70-zaza808` needs `EmbeddedDiagram.ts#NestedDiagramRenderer`, unbuilt;
+`nagega-30-poso418` (`!define` macro), `nuvake-96-gofe203` (`NOTE_COLOR` regex
+backtracking past a `;`-colour spec), `tunelu`/`vonago` (`AssociationClass`
+routes note text through `class-assoc-couple.ts`'s `.label`, never `.linkNote`),
+`gevozu`/`sunuju` (`<latex>` sizing), `kafexo` (`skinparam maxMessageSize`).
+
+## Unowned, and it is a live trap: `.claude/catalog.md` does not exist
+
+`CLAUDE.md` tells every agent "**Check before implementing anything**; agents
+routinely rebuild what exists" and points at `.claude/catalog.md`. **That file
+is not in the repo** (verified 2026-08-16), and `.claude/` is gitignored, so
+anything written there would never commit. A rule pointing at a nonexistent
+file is exactly the stale-premise failure this mission line keeps paying for —
+three premises went stale inside SI23 alone.
+
+Either create a committed catalog somewhere that is not gitignored, or delete
+the rule. SI23's own new public surface is recorded in its brief instead:
+`computeQuantifierBox`, `computeMergedLabelBox`, `applyVisibilityIcon`,
+`applyGuillemet`, `parseMagicArrowLabel` (all `src/core/edge-label-box.ts`),
+`computeCardinalityFontOverride` (`src/core/style-cascade-class.ts`),
+`class-edge-label-lines.ts`, `scripts/label-box-triage.ts`.
 
 ## Done since the 2026-08-15 refresh
 
@@ -216,7 +250,7 @@ alignment escapes; #1 handles tabs, guide lines and Jaws sentinels). **Their
 disagreements are the mission's real content** — and any one of them may be a
 latent bug in a caller today. Do not scope this by the import count.
 
-## 3. Named, briefed or diagnosed — pick from here after 1
+## 4. Named, briefed or diagnosed — pick from here after 1
 
 Ordered by how ready they are, not by size.
 
@@ -248,7 +282,7 @@ Ordered by how ready they are, not by size.
 - **`plans/future/theme-through-dot.md`** — collapse the layout/style two-pass
   split. Explicitly gated on "the port is faithful first". Not now.
 
-## 4. Mission-index rows still open (no brief yet)
+## 5. Mission-index rows still open (no brief yet)
 
 From `planning/mission-index.md`; each warrants `/plan-mission` when picked:
 
