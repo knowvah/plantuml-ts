@@ -66,7 +66,7 @@ which one and why, with the measurement — SI22's own rule, and it scored itsel
 | [3](batch-3/overview.md) | Engine wiring for M1 (2 parallel) | T6 T7 | [x] |
 | [4](batch-4/overview.md) | Note-merge arm + D3 completion (2 parallel) | T8 T14 | [x] |
 | [5](batch-5/overview.md) | Engine wiring for M2 (2 parallel) | T9 T10 | [x] |
-| [6](batch-6/overview.md) | Gated fixes for M3 / M4 | T11 T12a T12b T12c | [ ] |
+| [6](batch-6/overview.md) | Gated fixes for M3 / M4 | T11 T12a T12b T12c | [x] |
 | [7](batch-7/overview.md) | Close-out | T13 | [ ] |
 
 Diagnoses run in Batch 1 on purpose: they block nothing, and M4 is the

@@ -8,10 +8,10 @@ now declared rather than guessed.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T11 | M3 fix: tail/head swap | `typescript-pro` | `class-dot-edges.ts`, `class-edge-label-anchor.ts` | T3 | [ ] |
-| T12a | M4 cause A+B: visibility strip + icon block | `typescript-pro` | `core/edge-label-box.ts`, `class-layout-edge-labels.ts` | T4 | [ ] |
-| T12b | M4 cause C: `<<x>>` → `«x»`, class only | `typescript-pro` | `class-layout-edge-labels.ts` | T4, T12a | [ ] |
-| T12c | M4 cause D: magic arrow, both engines | `typescript-pro` | `class-layout-edge-labels.ts`, `description/link-edge-attrs.ts` | T4, T12b | [ ] |
+| T11 | M3 fix: tail/head swap | `typescript-pro` | `class-dot-edges.ts`, `class-edge-label-anchor.ts` | T3 | [x] |
+| T12a | M4 cause A+B: visibility strip + icon block | `typescript-pro` | `core/edge-label-box.ts`, `class-layout-edge-labels.ts` | T4 | [x] |
+| T12b | M4 cause C: `<<x>>` → `«x»`, class only | `typescript-pro` | `core/edge-label-box.ts`, `class-layout-edge-labels.ts`, `class-edge-label-lines.ts` (new, split), `class-edge-geo.ts` | T4, T12a | [x] |
+| T12c | M4 cause D: magic arrow, both engines | `typescript-pro` | `core/edge-label-box.ts`, `class-layout-edge-labels.ts`, `class-magic-arrow.ts`, `class-edge-geo.ts`, `description/link-edge-attrs.ts` | T4, T12b | [x] |
 
 ## Why T12 became three tasks
 
@@ -72,3 +72,34 @@ Named, not fitted — carried into T13's accounting:
 **Batch exit:** for each task, either the fix landed with its slugs cleared and
 no fixture risen, or the skip is recorded with the reason and the owning
 mission named.
+
+## Write-sets of record, corrected after execution
+
+T12b and T12c both exceeded their declared write-sets, and both were right to.
+The declared sets were drawn before the mechanisms were known, and causes C and
+D each turned out to have a **render** consumer as well as a measurement one:
+
+- **T12b** needed `class-edge-geo.ts`: `attachEdgeLabel` fed raw `rel.label`
+  into `portLabelAnchor`, a second independent measure-and-draw path.
+  Rewriting only the measurement left the DOT box sized for `«alias»` while
+  the glyphs drawn inside it were still `<<alias>>`, and `tebore-53-tese080`
+  regressed 15/15 → 14/15. Caught in orchestrator review, not by the agent,
+  and only because the agent's own attribution (to the accepted dot-engine
+  geometry delta) was checked rather than accepted — that ruling covers
+  Smetana paths, and class diagrams shell out to real graphviz.
+- **T12c** needed `class-magic-arrow.ts` and `class-edge-geo.ts` for the same
+  reason on the class side, and `core/edge-label-box.ts` because
+  `parseMagicArrowLabel` is now shared by both engines (D1's stated trigger).
+- **T12b** also split `class-edge-label-lines.ts` out of
+  `class-layout-edge-labels.ts`, which had hit the 500-line hook cap with zero
+  headroom. Authorized as a pure extraction on the `DisplayNewlines.ts`
+  precedent, re-exported so no import path changed. The alternative — trimming
+  comments to fit, as an earlier task had done — would have destroyed the
+  upstream `file:line` citations that are this mission's evidence trail.
+
+**The generalisable lesson: a fix to a measurement is not finished until you
+have checked whether the same string is also drawn.** Three tasks in this batch
+faced that question and it had three different correct answers — T12a left the
+rendered text alone (this port draws no visibility icon, so stripping the char
+would delete information), T12b had to rewrite it (jar renders `«alias»`), and
+T12c had to rewrite it for class but not description (which draws no glyph).
