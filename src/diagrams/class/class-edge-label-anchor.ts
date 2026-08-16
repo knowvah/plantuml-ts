@@ -13,6 +13,7 @@ import type { Relationship } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
+import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
 import type { EdgeGeo } from './layout.js';
 import type { Positionable } from '../../core/klimt/geom/Positionable.js';
 import { PositionableImpl } from '../../core/klimt/geom/PositionableImpl.js';
@@ -195,14 +196,27 @@ export function attachPortLabels(
   ctx: PortLabelContext,
 ): void {
   const { measurer, fontFamily, nodes } = ctx;
-  if (rel.fromMultiplicity !== undefined && edgeResult.tailLabelX !== undefined && edgeResult.tailLabelY !== undefined) {
+  // T11: `edgeResult.tailLabelX/Y` and `headLabelX/Y` are @knowvah/dot-engine's
+  // placement for the DOT `taillabel`/`headlabel` attributes -- which
+  // `class-dot-edges.ts#buildDotEdgeAttrs` now reserves from the SWAPPED
+  // quantifier pair whenever `dotEdgeRunsReversed(rel)` is true (same root
+  // this function must follow, or the rendered `<text>` carries the wrong
+  // string at the right position -- the second consumer T3's diagnosis
+  // named, `.agent-notes/m3-tail-head-swap.md`). `dotEdgeRunsReversed` is
+  // pure over `rel`, so recomputing it here reproduces `class-dot-edges.ts`'s
+  // own `swap` exactly (`class-dot-graph.ts#computeSwappedEdges` builds its
+  // `swappedEdges` set the identical way).
+  const swap = dotEdgeRunsReversed(rel);
+  const tailMultiplicity = swap ? rel.toMultiplicity : rel.fromMultiplicity;
+  const headMultiplicity = swap ? rel.fromMultiplicity : rel.toMultiplicity;
+  if (tailMultiplicity !== undefined && edgeResult.tailLabelX !== undefined && edgeResult.tailLabelY !== undefined) {
     edgeGeo.tailLabel = portLabelAnchor(
-      rel.fromMultiplicity, { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY }, measurer, fontFamily, nodes,
+      tailMultiplicity, { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY }, measurer, fontFamily, nodes,
     );
   }
-  if (rel.toMultiplicity !== undefined && edgeResult.headLabelX !== undefined && edgeResult.headLabelY !== undefined) {
+  if (headMultiplicity !== undefined && edgeResult.headLabelX !== undefined && edgeResult.headLabelY !== undefined) {
     edgeGeo.headLabel = portLabelAnchor(
-      rel.toMultiplicity, { x: edgeResult.headLabelX, y: edgeResult.headLabelY }, measurer, fontFamily, nodes,
+      headMultiplicity, { x: edgeResult.headLabelX, y: edgeResult.headLabelY }, measurer, fontFamily, nodes,
     );
   }
 }
