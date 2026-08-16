@@ -21,6 +21,9 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
+import { edgeLabelAttrs } from '../../../src/diagrams/class/class-layout-edge-labels.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import type { Relationship } from '../../../src/diagrams/class/class-relationship-ast.js';
 
 const measurer = new FormulaMeasurer();
 
@@ -146,5 +149,48 @@ describe('G16 — <<stereotype>> on a relationship arrow (zapibo-38-kope984, sty
   it('parses a relationship carrying a stereotype before the label', () => {
     const r = parseRelationshipLine('n0 -> n1 <<mystyle>> : label');
     expect(r).toMatchObject({ from: 'n0', to: 'n1', type: 'association', length: 1, label: 'label' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T12b/M4 cause C — `<<x>>` -> `«x»` before measuring a class link LABEL
+// (`.agent-notes/m4-single-line-width.md`, `Guillemet.java:78-88`). Distinct
+// from G16 above: G16 is the pre-colon ARROW stereotype, consumed by the
+// parser and never measured as label text; this is the post-colon LABEL
+// text itself, e.g. `Foo ..> IBar: <<delegate>>`.
+// ---------------------------------------------------------------------------
+
+describe('M4 cause C — guillemet rewrite (xopuku-46-nefa571, tebore-53-tese080, tedeba-19-lisi250)', () => {
+  const oracleMeasurer = new DeterministicMeasurer();
+  const font = { family: 'SansSerif', size: 13 };
+
+  function stereotypeRel(label: string): Relationship {
+    return { from: 'A', to: 'B', type: 'association', label };
+  }
+
+  it.each([
+    ['<<delegate>>', 66],
+    ['<<create>>', 52],
+    ['<<alias>>', 43],
+    ['<<implement>>', 76],
+  ])('%s reserves width %i at font 13', (label, expectedWidth) => {
+    const attrs = edgeLabelAttrs(stereotypeRel(label), font, font, oracleMeasurer);
+    // `edgeLabelAttrs` itself leaves `labelWidth` fractional; the DOT
+    // emitter truncates at write time (`svek-dot-emit-labels.ts#trunc`,
+    // `SvekEdge.java:505-506`), so this mirrors that final step rather than
+    // asserting a floor `edgeLabelAttrs` never performs.
+    expect(Math.trunc(attrs.labelWidth!)).toBe(expectedWidth);
+  });
+
+  it('rewrites a MID-STRING <<x>> run, not only one at position 0', () => {
+    const label = 'see <<delegate>> now';
+    const attrs = edgeLabelAttrs(stereotypeRel(label), font, font, oracleMeasurer);
+    // `applyGuillemet`'s own unit tests (edge-label-box.test.ts) prove the
+    // rewrite in isolation; this proves the class engine actually calls it
+    // on a label whose `<<x>>` is NOT at position 0 -- computed via the
+    // SAME measurer + margin arithmetic `edgeLabelAttrs` itself uses, not a
+    // hardcoded pixel count (no corpus oracle covers this synthetic label).
+    const expectedWidth = Math.trunc(oracleMeasurer.measure('see «delegate» now', font).width + 2 * 1);
+    expect(Math.trunc(attrs.labelWidth!)).toBe(expectedWidth);
   });
 });

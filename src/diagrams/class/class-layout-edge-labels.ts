@@ -14,10 +14,14 @@ import type { DotInputEdge } from '../../core/graph-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { CARDINALITY_FONT_SIZE } from '../../core/graph-layout.js';
-import { computeQuantifierBox, computeMergedLabelBox, applyVisibilityIcon } from '../../core/edge-label-box.js';
-import { getSplitted } from '../../core/klimt/creole/Fission.js';
-import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
+import {
+  computeQuantifierBox,
+  computeMergedLabelBox,
+  applyVisibilityIcon,
+  applyGuillemet,
+} from '../../core/edge-label-box.js';
 import { ARROW_GLYPH_SIZE, parseMagicArrowLabel } from './class-magic-arrow.js';
+import { splitEdgeLabelLines } from './class-edge-label-lines.js';
 // T10: the note operand's REAL dimension -- `EntityImageNoteLink` builds a
 // `ComponentRoseNote`, a DIFFERENT upstream component from the one
 // `measureNote` models -- see `class-note-link-box.ts`'s own doc comment for
@@ -62,117 +66,22 @@ const CONSTRAINT_SPOT = 10;
  */
 export { CARDINALITY_FONT_SIZE };
 
-/** G2 item 43: the alignment a `\\n`/`\\l`/`\\r`-split edge label resolves
- *  to -- see {@link splitEdgeLabelLines}'s doc comment. */
-export type EdgeLabelAlign = 'center' | 'left' | 'right';
-
-export interface EdgeLabelLines {
-  lines: string[];
-  align: EdgeLabelAlign;
-}
-
 /**
- * G2 item 43: split a relationship label's `\\n`/`\\l`/`\\r` line-break
- * escape sequences into individual lines, mirroring jar's
- * `Display#getWithNewlines` (`klimt/creole/Display.java:259-343`,
- * `Pragma.legacyReplaceBackslashNByNewline()` always `true`). `\\n` breaks
- * the line with no alignment change; `\\l`/`\\r` ALSO break the line and
- * additionally set the WHOLE block's horizontal alignment (the LAST
- * `\\l`/`\\r` in the string wins -- jar's `naturalHorizontalAlignment`
- * field is overwritten on each occurrence, not tracked per-line).
- * `\\t` -> a literal tab (`current.append('\t')`); `\\\\` -> a literal
- * backslash; any OTHER `\\x` pair is kept AS-IS (jar's trailing `else`
- * branch appends both characters unchanged, Display.java:308-310). Default
- * alignment (no `\\l`/`\\r` present) is CENTER
- * (`SvekEdge#getMessageTextAlignment` -> `getDefaultTextAlignment(CENTER)`,
- * SvekEdge.java:376-381). Jar-verified against `sicile-99-pefa679`'s 3
- * sibling edges (identical 3-line text, one `\\n`/`\\l`/`\\r` each).
- * Deliberately narrower than `Display.java`'s full state machine (no
- * `<math>`/`<latex>`/`[[`-raw-mode gating, no `%newline()`/`%n()` macro
- * forms, no `Jaws`-internal control-char handling) -- those branches are
- * unreached by any grep-confirmed edge-label fixture in this mission's
- * corpus (`ledger.md` item 43's own reach survey).
+ * `EdgeLabelAlign`/`EdgeLabelLines`/`splitEdgeLabelLines`/`wrapPlainTextLine`
+ * moved to `class-edge-label-lines.ts` (2026-08-16, mission
+ * `edge-label-box-backlog` T12b) purely to keep THIS file under the
+ * project's 500-line cap without trimming any upstream-citation comment --
+ * a pure move, re-exported below so every existing import of this file
+ * (`core/edge-label-box.ts`, `class-magic-arrow.ts`, `class-edge-geo.ts`,
+ * etc.) keeps working unchanged. See that file's own header for the full
+ * rationale; precedent: `core/klimt/creole/DisplayNewlines.ts`.
  */
-/** One resolved `\\x` escape pair's effect on `splitEdgeLabelLines`'s scan
- *  state -- factored out purely to keep that function's CCN under the
- *  project's per-function cap; the resolution logic itself is unchanged. */
-interface EscapeEffect {
-  /** Literal text to append to the current line (empty when the escape
-   *  breaks the line instead of appending anything). */
-  append: string;
-  /** True when this escape ends the current line (`\\n`/`\\l`/`\\r`). */
-  breakLine: boolean;
-  /** New whole-block alignment, when this escape sets one (`\\l`/`\\r`). */
-  align?: EdgeLabelAlign | undefined;
-}
-
-function resolveLabelEscape(c2: string): EscapeEffect {
-  if (c2 === 'n' || c2 === 'r' || c2 === 'l') {
-    return { append: '', breakLine: true, align: c2 === 'r' ? 'right' : c2 === 'l' ? 'left' : undefined };
-  }
-  if (c2 === 't') return { append: '\t', breakLine: false };
-  if (c2 === '\\') return { append: c2, breakLine: false };
-  return { append: `\\${c2}`, breakLine: false };
-}
-
-export function splitEdgeLabelLines(text: string): EdgeLabelLines {
-  const lines: string[] = [];
-  let current = '';
-  let align: EdgeLabelAlign = 'center';
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i]!;
-    if (c === '\\' && i < text.length - 1) {
-      const c2 = text[i + 1]!;
-      i++;
-      const effect = resolveLabelEscape(c2);
-      if (effect.align !== undefined) align = effect.align;
-      if (effect.breakLine) {
-        lines.push(current);
-        current = '';
-      } else {
-        current += effect.append;
-      }
-    } else {
-      current += c;
-    }
-  }
-  lines.push(current);
-  return { lines, align };
-}
-
-/**
- * G2 N65 item 35: word-wraps ONE already-`\\n`/`\\l`/`\\r`-split line
- * (`splitEdgeLabelLines`'s own output) via the SAME Fission engine E2r built
- * for description word-wrap (`Fission.ts#getSplitted`) -- upstream mirror:
- * `EntityImageClassHeader.java:108`'s `Display#create8(..., styleHeader
- * .wrapWidth())` call runs `Fission#getSplitted` on EACH already-newline-
- * split `CharSequence` independently (`Display.getWithNewlines` splits
- * first, `create8` wraps each resulting line second -- the two mechanisms
- * compose, never interact). A classifier header carries no creole markup
- * today (item 48, unattempted -- a header's `**bold**`/`<color:>` runs
- * render as literal text, not interpreted), so this wraps a SINGLE
- * synthetic plain-text `CreoleAtom` per line rather than a real multi-atom
- * sequence -- `getSplitted`'s own word-boundary scan (`Neutron
- * .getNeutronTypeFromChar`) operates identically on a lone text atom either
- * way. `maxWidth<=0` (no `MaximumWidth` cascade in effect) short-circuits to
- * `[text]`, byte-identical to pre-item-35 behavior.
- */
-export function wrapPlainTextLine(
-  text: string,
-  fontSpec: { readonly family: string; readonly size: number },
-  maxWidth: number,
-  measurer: StringMeasurer,
-): readonly string[] {
-  if (maxWidth <= 0) return [text];
-  const atom: CreoleAtom = {
-    kind: 'text', text,
-    font: { family: fontSpec.family, size: fontSpec.size, color: null, styles: new Set() },
-  };
-  const wrapped = getSplitted(
-    [atom], maxWidth, (a) => (a.kind === 'text' ? measurer.measure(a.text, fontSpec).width : 0),
-  );
-  return wrapped.map((lineAtoms) => lineAtoms.filter((a) => a.kind === 'text').map((a) => a.text).join(''));
-}
+export {
+  type EdgeLabelAlign,
+  type EdgeLabelLines,
+  splitEdgeLabelLines,
+  wrapPlainTextLine,
+} from './class-edge-label-lines.js';
 
 /**
  * Edge label attributes from a relationship's label + multiplicities. The Svek
@@ -324,9 +233,12 @@ function computeNoteMergedLabelAttrs(
 
 /** The plain (non-note, non-constraint-spot) measured label -- multi-line,
  *  magic-arrow, or a single plain string. Plain single-line now ports M4
- *  causes A+B ({@link applyVisibilityIcon}, `core/edge-label-box.ts`);
- *  multi-line/magic-arrow untouched (no fixture combines either with a
- *  leading visibility char). `label` stays RAW: only width/height change. */
+ *  causes A+B+C ({@link applyVisibilityIcon}, {@link applyGuillemet},
+ *  `core/edge-label-box.ts`); multi-line gets C only (no fixture combines
+ *  a leading visibility char with a multi-line label); magic-arrow gets
+ *  neither (cause D territory, out of this task's scope -- no fixture
+ *  combines a magic-arrow token with `<<x>>` either). `label` stays RAW:
+ *  only width/height change. */
 function computeMeasuredLabelAttrs(
   label: string,
   font: { family: string; size: number },
@@ -335,8 +247,14 @@ function computeMeasuredLabelAttrs(
 ): LabelAttrs {
   const { lines } = splitEdgeLabelLines(label);
   if (lines.length > 1) {
-    const widths = lines.map((l) => measurer.measure(l, font).width);
-    const lineHeight = measurer.measure(lines[0] ?? '', font).height;
+    // M4 cause C applies to EVERY line, unconditionally
+    // (`Display.manageGuillemet`'s loop body, `Display.java:413-419` --
+    // no `first`-only gate on the guillemet call, unlike the visibility
+    // strip). No corpus fixture combines this with a multi-line label; the
+    // per-line call is still correct upstream behavior, not speculation.
+    const guillemetLines = lines.map(applyGuillemet);
+    const widths = guillemetLines.map((l) => measurer.measure(l, font).width);
+    const lineHeight = measurer.measure(guillemetLines[0] ?? '', font).height;
     return { label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };
   }
   const magic = parseMagicArrowLabel(label);
@@ -347,7 +265,11 @@ function computeMeasuredLabelAttrs(
     return { label, labelWidth: ARROW_GLYPH_SIZE + m.width, labelHeight: Math.max(ARROW_GLYPH_SIZE, m.height) };
   }
   const vis = applyVisibilityIcon(label, classAttributeIconSize);
-  const m = measurer.measure(vis.text, font);
+  // M4 cause C: `<<x>>` -> `«x»` BEFORE measuring (`core/edge-label-box.ts
+  // #applyGuillemet`, `Guillemet.java:78-88`) -- runs AFTER the visibility
+  // strip, mirroring `Display.manageGuillemet`'s per-line order
+  // (`Display.java:415-418`: strip first, guillemet second, same line).
+  const m = measurer.measure(applyGuillemet(vis.text), font);
   return { label, labelWidth: m.width + vis.iconWidth, labelHeight: Math.max(m.height, vis.iconHeight) };
 }
 

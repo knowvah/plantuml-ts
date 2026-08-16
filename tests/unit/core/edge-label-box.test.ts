@@ -17,6 +17,7 @@ import {
   splitCreoleLines,
   stripCreoleMarkup,
   applyVisibilityIcon,
+  applyGuillemet,
 } from '../../../src/core/edge-label-box.js';
 
 /** M4 causes A+B (`.agent-notes/m4-single-line-width.md`) at the default
@@ -155,6 +156,55 @@ describe('applyVisibilityIcon — M4 causes A+B', () => {
     expect(adj.text).toBe('+parameter');
     expect(adj.iconWidth).toBe(0);
     expect(adj.iconHeight).toBe(0);
+  });
+});
+
+/**
+ * M4 cause C (`.agent-notes/m4-single-line-width.md`,
+ * `Guillemet.java:76,78-88`). The four widths are T4's oracle values,
+ * jar-measured on `class/xopuku-46-nefa571` (`<<delegate>>` 66,
+ * `<<create>>` 52), `class/tebore-53-tese080` (`<<alias>>` 43) and
+ * `class/tedeba-19-lisi250` (`<<implement>>` 76) -- reproduced here by
+ * `applyGuillemet` + `WidthTableMeasurer` + `2 * marginLabel(1)`, the same
+ * arithmetic `computeMeasuredLabelAttrs`/`withLabelMargin` in
+ * `class-layout-edge-labels.ts` perform.
+ */
+describe('applyGuillemet — M4 cause C', () => {
+  it.each([
+    ['<<delegate>>', '«delegate»', 66],
+    ['<<create>>', '«create»', 52],
+    ['<<alias>>', '«alias»', 43],
+    ['<<implement>>', '«implement»', 76],
+  ])('%s -> %s, reserved width %i', (input, expectedText, expectedWidth) => {
+    const rewritten = applyGuillemet(input);
+    expect(rewritten).toBe(expectedText);
+    const width = Math.floor(measurer.measure(rewritten, LINK_FONT).width + 2 * 1);
+    expect(width).toBe(expectedWidth);
+  });
+
+  it('rewrites a run ANYWHERE in the string, not only at position 0', () => {
+    // `GUILLEMET_PATTERN` (`Guillemet.java:76`) has no `^` anchor --
+    // `Matcher#replaceAll` (`:86-87`) scans the whole input.
+    expect(applyGuillemet('foo <<bar>> baz')).toBe('foo «bar» baz');
+  });
+
+  it('rewrites every run when more than one is present', () => {
+    expect(applyGuillemet('<<a>> and <<b>>')).toBe('«a» and «b»');
+  });
+
+  it('eats exactly one optional space inside each bracket', () => {
+    expect(applyGuillemet('<< a >>')).toBe('«a»');
+    expect(applyGuillemet('<<a>>')).toBe('«a»');
+    // Only ONE of two spaces is eaten per side -- `\s?` matches at most one.
+    expect(applyGuillemet('<<  a  >>')).toBe('« a »');
+  });
+
+  it('leaves a string with no "<" untouched (fast path)', () => {
+    expect(applyGuillemet('plain label')).toBe('plain label');
+  });
+
+  it('leaves an unmatched single-angle-bracket pair untouched', () => {
+    expect(applyGuillemet('<foo>')).toBe('<foo>');
   });
 });
 

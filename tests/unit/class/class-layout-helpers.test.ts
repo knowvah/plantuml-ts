@@ -105,8 +105,11 @@ describe('edgeLabelAttrs — magic-arrow label sizing (G2 item 44)', () => {
   });
 
   it('a stereotype guillemet label is measured via the plain (non-arrow) path', () => {
+    // M4 cause C (`.agent-notes/m4-single-line-width.md`, `Guillemet.java
+    // :78-88`): `<<alias>>` -> `«alias»` BEFORE measuring, so this counts
+    // 7 glyphs (`«alias»`.length), not the raw 9-character token.
     const attrs = edgeLabelAttrs(rel('<<alias>>'), font, font, measurer);
-    expect(attrs.labelWidth).toBe(65); // '<<alias>>'.length(9) * 7 + 2
+    expect(attrs.labelWidth).toBe(51); // '«alias»'.length(7) * 7 + 2
   });
 });
 

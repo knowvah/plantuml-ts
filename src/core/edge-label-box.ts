@@ -123,6 +123,16 @@ export interface VisibilityIconAdjustment {
 }
 
 /**
+ * `Guillemet.GUILLEMET_PATTERN` (`text/Guillemet.java:76`), transliterated
+ * character for character: `\<\<\s?((?:\<&\w+\>|[^<>])+?)\s?\>\>`. The
+ * alternation's first arm (`<&\w+>`) lets an icon-atom token survive INSIDE
+ * a guillemet run (`<<​<&icon> foo>>`); the second (`[^<>]`) is everything
+ * else. See {@link applyGuillemet}'s doc comment for the two behaviors this
+ * reproduces that a naive string replace would miss.
+ */
+const GUILLEMET_PATTERN = /<<\s?((?:<&\w+>|[^<>])+?)\s?>>/g;
+
+/**
  * Causes A+B of M4 (`.agent-notes/m4-single-line-width.md`): strip a leading
  * visibility character off a label's first line and reserve the icon block
  * upstream draws in its place. Both are gated on `classAttributeIconSize() >
@@ -160,6 +170,42 @@ export function applyVisibilityIcon(
     iconWidth: classAttributeIconSize + 2,
     iconHeight: classAttributeIconSize + 3,
   };
+}
+
+/**
+ * M4 cause C (`.agent-notes/m4-single-line-width.md`): `Guillemet.GUILLEMET
+ * .manageGuillemet(String)` (`text/Guillemet.java:76,78-88`) rewrites a
+ * `<<stereotype>>` run to the single-glyph guillemet form `«stereotype»`
+ * BEFORE measurement. Two details a naive `replace('<<', '«')` gets wrong,
+ * both read off `GUILLEMET_PATTERN` (`Guillemet.java:76`,
+ * `\<\<\s?((?:\<&\w+\>|[^<>])+?)\s?\>\>`):
+ *
+ * 1. The pattern matches ANYWHERE in the string — `Matcher#replaceAll`
+ *    (`:86-87`) scans and rewrites every non-overlapping match in the
+ *    whole input, not only one at position 0. `st.indexOf('<') < 0` (`:83
+ *    -84`) is a FAST-PATH short-circuit, not an anchor.
+ * 2. It eats one OPTIONAL space just inside each bracket — `\s?` on both
+ *    sides of the captured group: `<< a >>` -> `«a»`, but `<<a>>` (no
+ *    space) is untouched by that rule and only ONE of two spaces is eaten
+ *    per side (`<<  a  >>` -> `« a »`).
+ *
+ * `Display#manageGuillemet(boolean)` (`klimt/creole/Display.java:410-424`)
+ * calls this on EVERY line, unconditionally — unlike the visibility strip
+ * ({@link applyVisibilityIcon}), which is gated on `classAttributeIconSize()
+ * > 0` and line 0 only (`:415-416` vs `:418`, same loop body, two
+ * independent conditions). Kept as a SEPARATE function rather than folded
+ * into {@link applyVisibilityIcon} because folding would silently reach
+ * every caller of {@link computeReservedLabelBox} (state, description via
+ * `link-edge-attrs.ts:234`) — this mission's T12b scopes cause C to the
+ * CLASS engine only: the description engine already rewrites its
+ * POST-COLON stereotype correctly via a different route
+ * (`link-edge-attrs.ts:206`, `mainLabelText`), and a MID-STRING `<<x>>`
+ * inside a description main label is a real, separate, un-fixed gap that
+ * route cannot represent — left as residue, not fixed here.
+ */
+export function applyGuillemet(text: string): string {
+  if (!text.includes('<')) return text;
+  return text.replace(GUILLEMET_PATTERN, '«$1»');
 }
 
 /**
