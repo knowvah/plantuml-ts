@@ -90,18 +90,24 @@ describe('edgeLabelAttrs — multi-line label sizing (G2 item 43)', () => {
   });
 });
 
-describe('edgeLabelAttrs — magic-arrow label sizing (G2 item 44)', () => {
-  it('reserves ARROW_GLYPH_SIZE plus the stripped text width for "foo >"', () => {
+describe('edgeLabelAttrs — magic-arrow label sizing (G2 item 44 / M4 cause D)', () => {
+  it('reserves the arrow font size plus the stripped text width for "foo >"', () => {
     const attrs = edgeLabelAttrs(rel('foo >'), font, font, measurer);
-    // 'foo'.length(3) * 7 = 21; ARROW_GLYPH_SIZE = trunc(13*0.8) = 10.
-    expect(attrs.labelWidth).toBe(33); // 21 + 10 + 2
-    expect(attrs.labelHeight).toBe(16); // max(10, 14) + 2
+    // 'foo'.length(3) * 7 = 21. Arrow block = font.size(14)
+    // (`TextBlockArrow2.calculateDimension`, `klimt/shape/TextBlockArrow2
+    // .java:57,87`) -- NOT `ARROW_GLYPH_SIZE`(10), the draw-only `.80` ink
+    // triangle (`:64-65`) that never enters a measurement.
+    expect(attrs.labelWidth).toBe(37); // 21 + 14 + 2
+    expect(attrs.labelHeight).toBe(16); // max(14, 14) + 2
   });
 
-  it('reserves ONLY ARROW_GLYPH_SIZE for a bare ">" (no remaining text)', () => {
+  it('reserves ONLY the arrow font size for a bare ">" -- no marginLabel at all', () => {
+    // `Display.isNull` arm (`SvekEdge.java:281-285`) never calls
+    // `addVisibilityModifier`, so the bare token skips marginLabel entirely
+    // (unlike every other label shape, including a text-bearing arrow).
     const attrs = edgeLabelAttrs(rel('>'), font, font, measurer);
-    expect(attrs.labelWidth).toBe(12); // ARROW_GLYPH_SIZE + 2
-    expect(attrs.labelHeight).toBe(12); // ARROW_GLYPH_SIZE + 2
+    expect(attrs.labelWidth).toBe(14); // font.size, no margin
+    expect(attrs.labelHeight).toBe(14);
   });
 
   it('a stereotype guillemet label is measured via the plain (non-arrow) path', () => {

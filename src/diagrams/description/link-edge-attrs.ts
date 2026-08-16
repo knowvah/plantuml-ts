@@ -17,7 +17,12 @@ import type { DescriptiveLink } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import { resolveInlineLinks } from './parse-helpers.js';
-import { computeReservedLabelBox, computeQuantifierBox } from '../../core/edge-label-box.js';
+import {
+  computeReservedLabelBox,
+  computeQuantifierBox,
+  splitCreoleLines,
+  parseMagicArrowLabel,
+} from '../../core/edge-label-box.js';
 import {
   type SpriteDimsLookup,
 } from '../../core/creole-atoms.js';
@@ -208,6 +213,83 @@ function mainLabelText(link: DescriptiveLink): string | undefined {
   return parts.length > 0 ? parts.join('\n') : undefined;
 }
 
+/**
+ * The plain (non-arrow) reserved box for a main-label text -- T4's shared
+ * box formula, not a single-line string measure. Multi-line labels take the
+ * MAX line width rather than the concatenation, creole formatting tags are
+ * stripped, and the line count reaches the height -- see
+ * `core/edge-label-box.ts`. Atom-bearing lines still need
+ * `measureLineWithAtoms`'s extra width, so the two combine: the box supplies
+ * the text dimensions, the atom scan adds any icon width on the widest line.
+ * `box.lines` are already split on `\n` and stripped of formatting tags;
+ * each is then measured atom-aware, and the WIDEST wins. Height is one font
+ * size per line plus whatever a tall atom on that line needs -- the per-line
+ * pattern `lineAtomHeightExcess` documents for exactly this composition.
+ *
+ * The RESERVED box, not the measured one -- the jar writes the margined,
+ * floored value into the DOT table (`SvekEdge.java:504-507`). `marginLabel`
+ * is read off the helper rather than restated, so the 1-vs-6 self-loop rule
+ * stays in one place; only the atom-aware measurement is redone here,
+ * because the helper measures plain text and an icon occupies real width.
+ */
+function measureMainLabelBox(
+  text: string,
+  isSelfLoop: boolean,
+  ctx: MeasureCtx,
+): { width: number; height: number } {
+  const box = computeReservedLabelBox(text, ctx.fontSpec, ctx.measurer, isSelfLoop);
+  const widest = Math.max(
+    ...box.lines.map((l) => measureLineWithAtoms(l, ctx.fontSpec, ctx.measurer, ctx.sprites).width),
+  );
+  const stacked = box.lines.reduce(
+    (h, l) => h + ctx.fontSpec.size + lineAtomHeightExcess(l, ctx.fontSpec, ctx.sprites),
+    0,
+  );
+  return { width: Math.floor(widest + 2 * box.marginLabel), height: stacked + 2 * box.marginLabel };
+}
+
+/**
+ * M4 cause D (`.agent-notes/m4-single-line-width.md`, T12c): a main label
+ * carrying a magic-arrow token strips it and reserves a `fontSize`-square
+ * triangle block instead (`TextBlockArrow2.java:57,87` -- `calculateDimension`
+ * returns `(size, size)`; the `.80` at `:64-65` is DRAW-only and never
+ * enters a measurement). Two upstream shapes (`SvekEdge.java:280-306`):
+ *
+ * - BARE token (`Display.isNull(link.getLabel())`, `:281-285`): the arrow
+ *   block IS the whole reservation -- `addVisibilityModifier` is never
+ *   called, so there is NO `marginLabel` at all. `fontSize x fontSize`
+ *   (`13x13` at the default).
+ * - Text-bearing (`:296-306`): the remaining text runs through the SAME
+ *   line-split/creole-strip/margin pipeline as any other label
+ *   (`addVisibilityModifier`, `:302`) BEFORE the arrow block is merged on
+ *   (`:304`, `TextBlockUtils.mergeLR` -- width SUMS, height MAXES,
+ *   `XDimension2D.java:108-112`), so margin lands on the text side only.
+ *
+ * Single-line only, mirroring `StringWithArrow`'s own `hasSeveralGuideLines`
+ * guard (`:63-65`) -- a multi-line main label is never read as an arrow
+ * token upstream. The description engine has no separate arrow-token AST
+ * field (unlike upstream's `Labels`/`StringWithArrow` parse-time split, see
+ * `descdiagram/command/Labels.java:59-64`), so detection runs on the
+ * assembled, `[[url]]`-resolved text here -- no corpus fixture combines a
+ * magic arrow with `[[url]]` markup, so this is a verified no-op ordering
+ * simplification, not a guess.
+ */
+function computeMainLabelDims(
+  resolvedLabelText: string,
+  isSelfLoop: boolean,
+  ctx: MeasureCtx,
+): { width: number; height: number } {
+  const magic = splitCreoleLines(resolvedLabelText).length === 1
+    ? parseMagicArrowLabel(resolvedLabelText)
+    : undefined;
+  if (magic === undefined) return measureMainLabelBox(resolvedLabelText, isSelfLoop, ctx);
+  if (magic.text === undefined || magic.text === '') {
+    return { width: ctx.fontSpec.size, height: ctx.fontSpec.size };
+  }
+  const rest = measureMainLabelBox(magic.text, isSelfLoop, ctx);
+  return { width: ctx.fontSpec.size + rest.width, height: Math.max(ctx.fontSpec.size, rest.height) };
+}
+
 /** Applies the main label (`label`/`labelWidth`/`labelHeight`, or the
  *  `xlabel*` triple under `skinparam linetype ortho` — SvekEdge.java:434-441)
  *  to `attrs`, resolving `[[url]]` markup (I5) and img/sprite atoms (D9)
@@ -221,33 +303,7 @@ function applyMainLabel(
   const labelText = mainLabelText(link);
   if (labelText === undefined) return;
   const resolvedLabelText = resolveInlineLinks(labelText);
-  // T4: the shared box formula, not a single-line string measure. Multi-line
-  // labels take the MAX line width rather than the concatenation, creole
-  // formatting tags are stripped, and the line count reaches the height --
-  // see `core/edge-label-box.ts`. Atom-bearing lines still need
-  // `measureLineWithAtoms`' extra width, so the two combine: the box supplies
-  // the text dimensions, the atom scan adds any icon width on the widest line.
-  // `box.lines` are already split on `\n` and stripped of formatting tags;
-  // each is then measured atom-aware, and the WIDEST wins. Height is one font
-  // size per line plus whatever a tall atom on that line needs -- the per-line
-  // pattern `lineAtomHeightExcess` documents for exactly this composition.
-  const box = computeReservedLabelBox(resolvedLabelText, ctx.fontSpec, ctx.measurer, link.from === link.to);
-  // The RESERVED box, not the measured one -- the jar writes the margined,
-  // floored value into the DOT table (`SvekEdge.java:504-507`). `marginLabel`
-  // is read off the helper rather than restated, so the 1-vs-6 self-loop rule
-  // stays in one place; only the atom-aware measurement is redone here,
-  // because the helper measures plain text and an icon occupies real width.
-  const widest = Math.max(
-    ...box.lines.map((l) => measureLineWithAtoms(l, ctx.fontSpec, ctx.measurer, ctx.sprites).width),
-  );
-  const stacked = box.lines.reduce(
-    (h, l) => h + ctx.fontSpec.size + lineAtomHeightExcess(l, ctx.fontSpec, ctx.sprites),
-    0,
-  );
-  const m = {
-    width: Math.floor(widest + 2 * box.marginLabel),
-    height: stacked + 2 * box.marginLabel,
-  };
+  const m = computeMainLabelDims(resolvedLabelText, link.from === link.to, ctx);
   if (linetype === 'ortho') {
     attrs.xlabel = resolvedLabelText;
     attrs.xlabelWidth = m.width;

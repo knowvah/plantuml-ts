@@ -20,7 +20,7 @@ import {
   applyVisibilityIcon,
   applyGuillemet,
 } from '../../core/edge-label-box.js';
-import { ARROW_GLYPH_SIZE, parseMagicArrowLabel } from './class-magic-arrow.js';
+import { isBareMagicArrowLabel, parseMagicArrowLabel } from './class-magic-arrow.js';
 import { splitEdgeLabelLines } from './class-edge-label-lines.js';
 // T10: the note operand's REAL dimension -- `EntityImageNoteLink` builds a
 // `ComponentRoseNote`, a DIFFERENT upstream component from the one
@@ -102,13 +102,16 @@ export {
  * ASSERTED too (`tests/oracle/svek-dot.ts#labelSizeOk`, edge-label-box D7),
  * so a wrong reservation here now fails `class-dot-parity.test.ts`.
  *
- * G2 item 44: a single-line label carrying a magic-arrow token (`class-
- * magic-arrow.ts#parseMagicArrowLabel`) reserves `ARROW_GLYPH_SIZE` (the
- * glyph's own fixed box) PLUS the stripped text's own width/height --
+ * G2 item 44 / M4 cause D: a single-line label carrying a magic-arrow token
+ * (`class-magic-arrow.ts#parseMagicArrowLabel`) reserves the arrow font's
+ * OWN size (`TextBlockArrow2.calculateDimension`, `klimt/shape/
+ * TextBlockArrow2.java:57,87` -- `(size, size)`, NOT the draw-only `.80`
+ * ink triangle at `:64-65`) PLUS the stripped text's own width/height --
  * `TextBlockUtils.mergeLR`'s width-sums/height-maxes semantics
  * (`SvekEdge.java:284,304`), NOT the raw string's width (which would count
  * the literal `>`/`<` token as a visible glyph and never reserve space for
- * the triangle).
+ * the triangle). A BARE token (no remaining text) additionally skips
+ * `marginLabel` entirely -- see {@link withLabelMargin}'s bare-arrow check.
  */
 type LabelAttrs = Pick<
   NonNullable<DotInputEdge['attributes']>,
@@ -159,11 +162,20 @@ function labelMarginOf(rel: Relationship): number {
  *  again here would double it. The `noteCtx` check also covers a hand-built
  *  `Relationship` with `linkNote` set but no `noteCtx` passed (test literals
  *  predating this task): it falls through to the ordinary measured-label
- *  branch instead, which DOES still need this margin. */
+ *  branch instead, which DOES still need this margin.
+ *
+ *  T12c/M4 cause D bare-arrow sub-case: a label that is ONLY a magic-arrow
+ *  token (`class-magic-arrow.ts#isBareMagicArrowLabel`) takes jar's
+ *  `Display.isNull` arm (`SvekEdge.java:281-285`), which never calls
+ *  `addVisibilityModifier` -- no `marginLabel` at all, unlike every other
+ *  shape this function margins (including a TEXT-BEARING arrow label,
+ *  `:296-306`, which DOES run `addVisibilityModifier` before the arrow is
+ *  merged on and so keeps the normal margin below). */
 function withLabelMargin(attrs: LabelAttrs, rel: Relationship, noteCtx: NoteBoxContext | undefined): LabelAttrs {
   if (attrs.labelWidth === undefined || attrs.labelHeight === undefined) return attrs;
   if (attrs.label === '') return attrs;
   if (rel.linkNote !== undefined && noteCtx !== undefined) return attrs;
+  if (rel.label !== undefined && isBareMagicArrowLabel(rel.label)) return attrs;
   const m = 2 * labelMarginOf(rel);
   return { ...attrs, labelWidth: attrs.labelWidth + m, labelHeight: attrs.labelHeight + m };
 }
@@ -262,7 +274,14 @@ function computeMeasuredLabelAttrs(
     const m = magic.text !== undefined && magic.text !== ''
       ? measurer.measure(magic.text, font)
       : { width: 0, height: 0 };
-    return { label, labelWidth: ARROW_GLYPH_SIZE + m.width, labelHeight: Math.max(ARROW_GLYPH_SIZE, m.height) };
+    // `TextBlockArrow2.calculateDimension` (`klimt/shape/TextBlockArrow2
+    // .java:57,87`) returns `(size, size)` where `size` is the SAME font
+    // passed to `addMagicArrow` (`SvekEdge.java:304`) -- `font.size` here,
+    // NOT `ARROW_GLYPH_SIZE` (the draw-only `.80` ink triangle, `:64-65`,
+    // which never enters a measurement). `mergeLR` sums width, maxes
+    // height (`XDimension2D.java:108-112`). A bare token's `marginLabel`
+    // skip lives in {@link withLabelMargin}, not here.
+    return { label, labelWidth: font.size + m.width, labelHeight: Math.max(font.size, m.height) };
   }
   const vis = applyVisibilityIcon(label, classAttributeIconSize);
   // M4 cause C: `<<x>>` -> `«x»` BEFORE measuring (`core/edge-label-box.ts

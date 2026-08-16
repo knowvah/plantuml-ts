@@ -75,7 +75,7 @@ describe('magicArrowGlyphPoints (G2 item 44)', () => {
   // relative deltas from the tip to each back corner are (-9.0451,-2.9389)
   // and (-9.0451,2.9389) -- reproduced here from the local (0,0)-origin box.
   it('produces the exact jar-verified triangle shape for a PI/2 (rightward) angle', () => {
-    const [tip, a, b] = magicArrowGlyphPoints(0, 0, Math.PI / 2);
+    const [tip, a, b] = magicArrowGlyphPoints(0, 0, Math.PI / 2, 13);
     expect(tip).toBeDefined();
     expect(a).toBeDefined();
     expect(b).toBeDefined();
@@ -85,16 +85,23 @@ describe('magicArrowGlyphPoints (G2 item 44)', () => {
     expect(b!.y - tip!.y).toBeCloseTo(2.9389, 3);
   });
 
-  it('the tip sits at (originX + ARROW_GLYPH_SIZE, originY + 6.5) for a PI/2 angle', () => {
+  it('the tip sits at (originX + ARROW_GLYPH_SIZE, originY + arrowFontSize/2) for a PI/2 angle', () => {
     // cx = originX + half, tip.x = cx + half*sin(PI/2) = cx + half = originX + 2*half.
-    const [tip] = magicArrowGlyphPoints(10, 20, Math.PI / 2);
+    const [tip] = magicArrowGlyphPoints(10, 20, Math.PI / 2, 13);
     expect(tip!.x).toBeCloseTo(10 + ARROW_GLYPH_SIZE, 6);
     expect(tip!.y).toBeCloseTo(20 + 6.5, 6);
   });
 
+  it('the y-center tracks the CALLER\'s arrowFontSize, not ARROW_GLYPH_SIZE', () => {
+    // TextBlockArrow2.java:68: UTranslate(triSize/2, size/2) -- the
+    // y-translate is the FULL font size, never the draw-only ink triangle.
+    const [tip] = magicArrowGlyphPoints(0, 0, Math.PI / 2, 20);
+    expect(tip!.y).toBeCloseTo(10, 6); // 20/2, not ARROW_GLYPH_SIZE/2
+  });
+
   it('rotating by PI mirrors the tip to the opposite side', () => {
-    const [tipRight] = magicArrowGlyphPoints(0, 0, Math.PI / 2);
-    const [tipLeft] = magicArrowGlyphPoints(0, 0, Math.PI / 2 + Math.PI);
+    const [tipRight] = magicArrowGlyphPoints(0, 0, Math.PI / 2, 13);
+    const [tipLeft] = magicArrowGlyphPoints(0, 0, Math.PI / 2 + Math.PI, 13);
     // sin(angle+PI) = -sin(angle) -- the tip's x-offset flips sign.
     expect(tipLeft!.x - ARROW_GLYPH_SIZE / 2).toBeCloseTo(-(tipRight!.x - ARROW_GLYPH_SIZE / 2), 6);
   });

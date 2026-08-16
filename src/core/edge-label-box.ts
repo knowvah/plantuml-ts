@@ -208,6 +208,45 @@ export function applyGuillemet(text: string): string {
   return text.replace(GUILLEMET_PATTERN, '«$1»');
 }
 
+/** {@link parseMagicArrowLabel}'s parsed direction — `LinkArrow.BACKWARD` /
+ *  `DIRECT_NORMAL` (`abel/LinkArrow.java`). */
+export type MagicArrowDirection = 'forward' | 'backward';
+
+/** {@link parseMagicArrowLabel}'s result. */
+export interface MagicArrowLabel {
+  /** Remaining label text after stripping the arrow token; `undefined` for
+   *  a BARE `<`/`>` label (jar's `label = null` branch — no text at all,
+   *  glyph only, `StringWithArrow.java:68-73`). */
+  readonly text: string | undefined;
+  readonly direction: MagicArrowDirection;
+}
+
+/**
+ * M4 cause D (`.agent-notes/m4-single-line-width.md`, T12c): detect and
+ * strip a magic-arrow token from a SINGLE-line label, mirroring
+ * `StringWithArrow`'s constructor (`descdiagram/command/StringWithArrow
+ * .java:56-91`) exactly, in the SAME check order (jar tests bare-equality
+ * before the `startsWith`/`endsWith` forms). Returns `undefined` when the
+ * label carries no magic-arrow token at all (jar's trailing `else` branch,
+ * `linkArrow = NONE_OR_SEVERAL`).
+ *
+ * Shared seam (decisions.md D1): class (`class-magic-arrow.ts`, which also
+ * owns the CLASS-ONLY triangle-glyph render geometry — description does not
+ * draw the glyph) and description (`link-edge-attrs.ts`) both call this
+ * directly. The caller is responsible for the single-line gate
+ * (`StringWithArrow.java:63-65`'s `hasSeveralGuideLines` check) — this
+ * function does not see the rest of the label and cannot apply it.
+ */
+export function parseMagicArrowLabel(label: string): MagicArrowLabel | undefined {
+  if (label === '<') return { text: undefined, direction: 'backward' };
+  if (label === '>') return { text: undefined, direction: 'forward' };
+  if (label.startsWith('< ')) return { text: label.slice(2).trim(), direction: 'backward' };
+  if (label.startsWith('> ')) return { text: label.slice(2).trim(), direction: 'forward' };
+  if (label.endsWith(' >')) return { text: label.slice(0, -2).trim(), direction: 'forward' };
+  if (label.endsWith(' <')) return { text: label.slice(0, -2).trim(), direction: 'backward' };
+  return undefined;
+}
+
 /**
  * Width is the MAX over lines, not their sum; height is the line count times
  * the font size; both then take `2 * marginLabel` and the width floors, as

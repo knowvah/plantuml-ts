@@ -12,7 +12,7 @@ import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
 import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 import { attachPortLabels, multiLineLabelAnchor, portLabelAnchor } from './class-edge-label-anchor.js';
 import { CARDINALITY_FONT_SIZE, splitEdgeLabelLines } from './class-layout-helpers.js';
-import { ARROW_GLYPH_SIZE, parseMagicArrowLabel, magicArrowAngle, magicArrowGlyphPoints, type MagicArrowLabel } from './class-magic-arrow.js';
+import { parseMagicArrowLabel, magicArrowAngle, magicArrowGlyphPoints, type MagicArrowLabel } from './class-magic-arrow.js';
 import { applyGuillemet } from '../../core/edge-label-box.js';
 import type { EdgeGeo } from './layout.js';
 
@@ -111,25 +111,32 @@ function attachEdgeLabel(
 }
 
 /**
- * G2 item 44: position the magic-arrow glyph (+ its optional remaining
- * text) as ONE combined block, mirroring jar's `TextBlockUtils.mergeLR
- * (arrow, label, CENTER)` (`SvekEdge.java:284,304`, `descdiagram/command/
- * StringWithArrow.java:105-113`) -- width SUMS (`ARROW_GLYPH_SIZE` +
- * text width), height/vertical-center is shared (mergeLR's CENTER
+ * G2 item 44 / M4 cause D: position the magic-arrow glyph (+ its optional
+ * remaining text) as ONE combined block, mirroring jar's
+ * `TextBlockUtils.mergeLR(arrow, label, CENTER)` (`SvekEdge.java:284,304`,
+ * `descdiagram/command/StringWithArrow.java:105-113`) -- width SUMS the
+ * arrow block's OWN font-size square (`TextBlockArrow2.calculateDimension`,
+ * `klimt/shape/TextBlockArrow2.java:57,87` -- `arrowFontSize`, NOT
+ * `ARROW_GLYPH_SIZE`, the draw-only `.80` ink triangle, `:64-65`) plus the
+ * text width; height/vertical-center is shared (mergeLR's CENTER
  * alignment). `blockLeft` generalizes `portLabelAnchor`'s own
  * `center.x - width/2` formula from a single `width` to the combined
  * block's `totalWidth` (algebraically identical when `hasText` is
- * `false` and `totalWidth === ARROW_GLYPH_SIZE`). The glyph always sits
- * in the LEFT `ARROW_GLYPH_SIZE`-wide slot regardless of arrow direction
+ * `false` and `totalWidth === arrowFontSize`). The glyph always sits
+ * in the LEFT `arrowFontSize`-wide slot regardless of arrow direction
  * (`mergeLR(arrow, label, ...)`'s fixed argument order) -- the triangle's
  * own ROTATION (`magicArrowAngle`) encodes direction, not its position.
  * Text position reuses `portLabelAnchor` verbatim by passing it the
- * TEXT-ONLY sub-block's own center (`blockLeft + ARROW_GLYPH_SIZE +
+ * TEXT-ONLY sub-block's own center (`blockLeft + arrowFontSize +
  * textWidth/2`), so its `y`/baseline formula is byte-identical to the
- * plain single-line label path. Jar-verified byte-exact SHAPE (glyph
- * triangle) against `lojepe-37-liri985`'s golden `<polygon>`; absolute
- * block position carries the SAME gvts-genuine placement residual N25/N62
- * already named.
+ * plain single-line label path. This SAME `arrowFontSize` is what
+ * `class-layout-edge-labels.ts#computeMeasuredLabelAttrs` reserves in the
+ * DOT box (T12c) -- deriving both from the caller's own `font.size` keeps
+ * the drawn glyph's slot and the reserved box in sync, unlike the
+ * pre-T12c code which used `ARROW_GLYPH_SIZE` (10) for BOTH and reserved
+ * the wrong width. Jar-verified byte-exact SHAPE (glyph triangle) against
+ * `lojepe-37-liri985`'s golden `<polygon>`; absolute block position
+ * carries the SAME gvts-genuine placement residual N25/N62 already named.
  */
 function attachMagicArrow(
   edgeGeo: EdgeGeo,
@@ -142,16 +149,15 @@ function attachMagicArrow(
   const angle = magicArrowAngle(fromToPoints, magic.direction);
   const hasText = magic.text !== undefined && magic.text !== '';
   const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
-  const textWidth = hasText ? measurer.measure(magic.text!, font).width : 0;
-  const totalWidth = ARROW_GLYPH_SIZE + textWidth;
-  const blockLeft = center.x - totalWidth / 2;
+  const textWidth = hasText ? measurer.measure(magic.text, font).width : 0;
+  const blockLeft = center.x - (font.size + textWidth) / 2;
   edgeGeo.arrowGlyph = {
-    points: magicArrowGlyphPoints(blockLeft, center.y - ARROW_GLYPH_SIZE / 2, angle),
+    points: magicArrowGlyphPoints(blockLeft, center.y - font.size / 2, angle, font.size),
   };
   if (hasText) {
     edgeGeo.label = portLabelAnchor(
-      magic.text!,
-      { x: blockLeft + ARROW_GLYPH_SIZE + textWidth / 2, y: center.y },
+      magic.text,
+      { x: blockLeft + font.size + textWidth / 2, y: center.y },
       measurer,
       fontFamily,
     );
