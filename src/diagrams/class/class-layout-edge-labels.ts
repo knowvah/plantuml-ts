@@ -14,7 +14,7 @@ import type { DotInputEdge } from '../../core/graph-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { CARDINALITY_FONT_SIZE } from '../../core/graph-layout.js';
-import { computeQuantifierBox, computeMergedLabelBox } from '../../core/edge-label-box.js';
+import { computeQuantifierBox, computeMergedLabelBox, applyVisibilityIcon } from '../../core/edge-label-box.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import { ARROW_GLYPH_SIZE, parseMagicArrowLabel } from './class-magic-arrow.js';
@@ -323,13 +323,15 @@ function computeNoteMergedLabelAttrs(
 }
 
 /** The plain (non-note, non-constraint-spot) measured label -- multi-line,
- *  magic-arrow, or a single plain string. Split out of
- *  {@link computeRelLabelAttrs} purely for the project's per-function NLOC
- *  cap; behavior unchanged (pure move, pre-existing logic). */
+ *  magic-arrow, or a single plain string. Plain single-line now ports M4
+ *  causes A+B ({@link applyVisibilityIcon}, `core/edge-label-box.ts`);
+ *  multi-line/magic-arrow untouched (no fixture combines either with a
+ *  leading visibility char). `label` stays RAW: only width/height change. */
 function computeMeasuredLabelAttrs(
   label: string,
   font: { family: string; size: number },
   measurer: StringMeasurer,
+  classAttributeIconSize?: number,
 ): LabelAttrs {
   const { lines } = splitEdgeLabelLines(label);
   if (lines.length > 1) {
@@ -344,8 +346,9 @@ function computeMeasuredLabelAttrs(
       : { width: 0, height: 0 };
     return { label, labelWidth: ARROW_GLYPH_SIZE + m.width, labelHeight: Math.max(ARROW_GLYPH_SIZE, m.height) };
   }
-  const m = measurer.measure(label, font);
-  return { label, labelWidth: m.width, labelHeight: m.height };
+  const vis = applyVisibilityIcon(label, classAttributeIconSize);
+  const m = measurer.measure(vis.text, font);
+  return { label, labelWidth: m.width + vis.iconWidth, labelHeight: Math.max(m.height, vis.iconHeight) };
 }
 
 /** `noteCtx` is OPTIONAL only so a hand-built `Relationship` literal
@@ -375,7 +378,8 @@ function computeRelLabelAttrs(
     }
     return {};
   }
-  return computeMeasuredLabelAttrs(rel.label, font, measurer);
+  // `bugeli-63-mixa543` guard: an icon-size-0 override must reach here as 0.
+  return computeMeasuredLabelAttrs(rel.label, font, measurer, noteCtx?.theme.classAttributeIconSize);
 }
 
 /** The `rel.fromMultiplicity`/`rel.toMultiplicity` half of

@@ -16,7 +16,13 @@ import {
   computeMergedLabelBox,
   splitCreoleLines,
   stripCreoleMarkup,
+  applyVisibilityIcon,
 } from '../../../src/core/edge-label-box.js';
+
+/** M4 causes A+B (`.agent-notes/m4-single-line-width.md`) at the default
+ *  `classAttributeIconSize` (10, `SkinParam.java:555`), the arrow-label font
+ *  used by `class/gikipi-69-pepo172` etc. (`FontParam.ARROW`, size 13). */
+const LINK_FONT = { family: 'SansSerif', size: 13 };
 
 const measurer = new DeterministicMeasurer();
 /** `skinparam arrowFontSize 10`, which the fixture sets. */
@@ -104,6 +110,100 @@ describe('computeReservedLabelBox — jar-measured cases', () => {
     );
     const stripped = computeReservedLabelBox(raw, ARROW_FONT, measurer, false);
     expect(widestUnstripped).toBeGreaterThan(stripped.reservedWidth * 1.5);
+  });
+});
+
+/**
+ * M4 causes A+B (`.agent-notes/m4-single-line-width.md`, T12a): strip a
+ * leading visibility character off line 0 (`Display.java:415-416`) and
+ * reserve the icon block it's replaced by (`VisibilityModifier.java
+ * :100-102`, `TextBlockUtils.java:75-78`) — gated on `classAttributeIconSize
+ * () > 0` (`AbstractClassOrObjectDiagram.java:74`). Oracle widths read off
+ * `.agent-notes/m4-single-line-width.md`'s own table (T4, jar-verified
+ * against `class/gikipi-69-pepo172`, `class/canuti-20-jotu614`,
+ * `class/gixesa-28-feri809`, `state/susena-02-gusa448`).
+ */
+describe('applyVisibilityIcon — M4 causes A+B', () => {
+  it('strips the leading char and reports the default icon width (10+2=12)', () => {
+    const adj = applyVisibilityIcon('+parameter');
+    expect(adj.text).toBe('parameter');
+    expect(adj.iconWidth).toBe(12);
+    expect(adj.iconHeight).toBe(13);
+  });
+
+  it('leaves a label with no leading visibility char untouched', () => {
+    const adj = applyVisibilityIcon('parameter');
+    expect(adj.text).toBe('parameter');
+    expect(adj.iconWidth).toBe(0);
+    expect(adj.iconHeight).toBe(0);
+  });
+
+  it('does not treat a doubled leading char as a visibility marker', () => {
+    // `VisibilityModifier#isVisibilityCharacter`'s `s.charAt(1) == c` guard
+    // (`VisibilityModifier.java:216-217`) — `--comment` is not `-comment`.
+    const adj = applyVisibilityIcon('--comment');
+    expect(adj.text).toBe('--comment');
+    expect(adj.iconWidth).toBe(0);
+  });
+
+  it('requires more than 2 characters (VisibilityModifier.java:212-213)', () => {
+    expect(applyVisibilityIcon('-x').iconWidth).toBe(0);
+  });
+
+  it('is gated off by classAttributeIconSize <= 0', () => {
+    const adj = applyVisibilityIcon('+parameter', 0);
+    expect(adj.text).toBe('+parameter');
+    expect(adj.iconWidth).toBe(0);
+    expect(adj.iconHeight).toBe(0);
+  });
+});
+
+describe('computeReservedLabelBox — M4 causes A+B, jar-measured cases', () => {
+  it.each([
+    ['+parameter', 73],
+    ['-entries', 53],
+    ['#factory', 52],
+    ['+parent', 50],
+    ['-var1', 39],
+    ['+var2', 39],
+    ['#var3', 39],
+    ['~var4', 39],
+    ['+OK', 32],
+    ['-ok', 27],
+    ['+marche pas', 78],
+    ['-marche pas', 78],
+  ])('%s reserves the oracle width %i', (label, oracleWidth) => {
+    const box = computeReservedLabelBox(label, LINK_FONT, measurer, false);
+    expect(box.reservedWidth).toBe(oracleWidth);
+    expect(box.reservedHeight).toBe(15);
+  });
+
+  it('regression guard: classAttributeIconSize 0 keeps the raw-string width (bugeli-63-mixa543)', () => {
+    // gixesa's `-var1` measures 39 by default (A+B applied); the guard
+    // fixture pins the same label at icon size 0, which must reproduce the
+    // OLD raw-string reservation, not 39. This assertion fails against the
+    // pre-fix code, which had no `classAttributeIconSize` parameter at all
+    // and always measured the raw string — i.e. it already "passes"
+    // pre-fix, which is exactly what a regression guard must do.
+    const gated = computeReservedLabelBox('-var1', LINK_FONT, measurer, false, 0);
+    const rawWidth = measurer.measure('-var1', LINK_FONT).width;
+    expect(gated.reservedWidth).toBe(Math.floor(rawWidth + 2));
+    expect(gated.reservedWidth).not.toBe(39);
+  });
+
+  it('a label with no leading visibility char is unaffected by the gate', () => {
+    const withIcon = computeReservedLabelBox('plainlabel', LINK_FONT, measurer, false);
+    const withoutIcon = computeReservedLabelBox('plainlabel', LINK_FONT, measurer, false, 0);
+    expect(withIcon.reservedWidth).toBe(withoutIcon.reservedWidth);
+  });
+
+  it('FAILS against pre-fix computeReservedLabelBox (no 5th argument existed)', () => {
+    // Pre-fix, `computeReservedLabelBox('+parameter', LINK_FONT, measurer,
+    // false)` measured the raw string INCLUDING the leading `+` and never
+    // added an icon block, landing on 68 (`floor(66.788 + 2)`), not 73.
+    const box = computeReservedLabelBox('+parameter', LINK_FONT, measurer, false);
+    expect(box.reservedWidth).not.toBe(68);
+    expect(box.reservedWidth).toBe(73);
   });
 });
 

@@ -85,25 +85,111 @@ export interface ReservedLabelBox {
 }
 
 /**
+ * `VisibilityModifier#isVisibilityCharacter` (`skin/VisibilityModifier.java
+ * :211-234`): a line carries a leading visibility marker only when it is
+ * longer than 2 characters, its SECOND character differs from its first
+ * (guards a doubled leading char, e.g. `--comment`, from being read as one),
+ * and the first character is one of `-#+~*`.
+ */
+function isVisibilityCharacter(line: string): boolean {
+  if (line.length <= 2) return false;
+  const c = line[0]!;
+  if (line[1] === c) return false;
+  return c === '-' || c === '#' || c === '+' || c === '~' || c === '*';
+}
+
+/**
+ * `SkinParam#classAttributeIconSize()`'s own default (`skin/SkinParam.java
+ * :555`, `getAsInt("classAttributeIconSize", 10)`). Every caller of
+ * {@link computeReservedLabelBox} / {@link applyVisibilityIcon} that omits
+ * the size argument gets this — matching every diagram that never sets
+ * `skinparam classAttributeIconSize`.
+ */
+export const CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT = 10;
+
+/** {@link applyVisibilityIcon}'s result. */
+export interface VisibilityIconAdjustment {
+  /** Line 0 with a leading visibility character stripped and trimmed
+   *  (`Display.java:415-416`) — identical to the input when no icon
+   *  applies. */
+  readonly text: string;
+  /** Extra width the icon block reserves, ALREADY merged left of the label
+   *  (`SvekEdge.java:302,363-374`) — 0 when no icon applies. */
+  readonly iconWidth: number;
+  /** Extra height the icon block contributes — MAXED against the label's own
+   *  height (`XDimension2D#mergeLR` takes the max, not the sum,
+   *  `XDimension2D.java:108-112`), not added. 0 when no icon applies. */
+  readonly iconHeight: number;
+}
+
+/**
+ * Causes A+B of M4 (`.agent-notes/m4-single-line-width.md`): strip a leading
+ * visibility character off a label's first line and reserve the icon block
+ * upstream draws in its place. Both are gated on `classAttributeIconSize() >
+ * 0` (`AbstractClassOrObjectDiagram.java:74`, `CommandLinkStateCommon.java
+ * :202`, `LinkArg.java:65-72`) — the one flag that reaches every cuca engine
+ * (class, state, description); when the skinparam is 0, upstream skips BOTH
+ * the strip and the icon, and the raw string measures as written.
+ *
+ * A — `Display#manageGuillemet`'s visibility arm (`klimt/creole/Display.java
+ * :415-416`): `lineString.substring(1).trim()`.
+ *
+ * B — `VisibilityModifier#getUBlock`'s `calculateDimension` returns `(size+1,
+ * size+1)` (`skin/VisibilityModifier.java:100-102`). `SvekEdge
+ * #addVisibilityModifier` wraps it in `TextBlockUtils.withMargin(v, 0, 1, 2,
+ * 0)` (`svek/SvekEdge.java:363`) — the 4-arg overload maps to
+ * `TextBlockMarged(v, top=marginY1=2, right=marginX2=1, bottom=marginY2=0,
+ * left=marginX1=0)` (`klimt/shape/TextBlockUtils.java:75-78`), and
+ * `TextBlockMarged#calculateDimension` adds `left+right` to width and
+ * `top+bottom` to height (`klimt/shape/TextBlockMarged.java:74-77`). Net:
+ * width `size+1+1 = size+2`, height `size+1+2 = size+3` — 12 and 13 at the
+ * default size 10, the 12px M4 measured. The block is then merged LEFT of
+ * the label (`TextBlockUtils.mergeLR`, `SvekEdge.java:374`), which sums
+ * widths and MAXES heights (`XDimension2D#mergeLR`, `XDimension2D.java
+ * :108-112`).
+ */
+export function applyVisibilityIcon(
+  firstLine: string,
+  classAttributeIconSize: number = CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT,
+): VisibilityIconAdjustment {
+  if (classAttributeIconSize <= 0 || !isVisibilityCharacter(firstLine)) {
+    return { text: firstLine, iconWidth: 0, iconHeight: 0 };
+  }
+  return {
+    text: firstLine.slice(1).trim(),
+    iconWidth: classAttributeIconSize + 2,
+    iconHeight: classAttributeIconSize + 3,
+  };
+}
+
+/**
  * Width is the MAX over lines, not their sum; height is the line count times
  * the font size; both then take `2 * marginLabel` and the width floors, as
  * the jar truncates toward zero (`(int)` cast, `SvekEdge.java:504-507`).
  *
  * `marginLabel` is 6 for a self-loop and 1 otherwise.
+ *
+ * `classAttributeIconSize` gates M4 causes A+B (visibility-char strip +
+ * icon block, see {@link applyVisibilityIcon}) on LINE 0 only — every other
+ * line is unaffected, matching `Display#manageGuillemet`'s `first`-only
+ * guard (`klimt/creole/Display.java:414-416`).
  */
 export function computeReservedLabelBox(
   text: string,
   font: FontSpec,
   measurer: StringMeasurer,
   isSelfLoop: boolean,
+  classAttributeIconSize: number = CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT,
 ): ReservedLabelBox {
   const marginLabel = isSelfLoop ? 6 : 1;
+  const rawLines = splitCreoleLines(text);
+  const vis = applyVisibilityIcon(rawLines[0] ?? '', classAttributeIconSize);
   // Strip BEFORE measuring: a colour tag is a formatting change upstream, not
   // glyphs. `lines` carries the stripped text because its only consumer is a
   // descent measurement (`state-transition-label.ts:60`), not drawing.
-  const lines = splitCreoleLines(text).map(stripCreoleMarkup);
-  const measuredWidth = Math.max(...lines.map((l) => measurer.measure(l, font).width));
-  const measuredHeight = lines.length * font.size;
+  const lines = [vis.text, ...rawLines.slice(1)].map(stripCreoleMarkup);
+  const measuredWidth = Math.max(...lines.map((l) => measurer.measure(l, font).width)) + vis.iconWidth;
+  const measuredHeight = Math.max(lines.length * font.size, vis.iconHeight);
   const reservedWidth = Math.floor(measuredWidth + 2 * marginLabel);
   const reservedHeight = measuredHeight + 2 * marginLabel;
   return { marginLabel, lines, measuredWidth, measuredHeight, reservedWidth, reservedHeight };
