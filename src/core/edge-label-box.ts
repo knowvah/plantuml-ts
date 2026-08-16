@@ -255,11 +255,29 @@ export interface MergedLabelBoxInput {
  * `appendTable`'s `(int)` cast (`:504-507`) truncates the final width AND
  * height — unlike {@link computeReservedLabelBox}, where only width can be
  * fractional; here both can, since `noteDim` may carry sub-pixel values.
+ *
+ * **Exactly one truncation, at the end.** Upstream's whole pipeline —
+ * `withMargin` (`TextBlockUtils.java:75-78`), `mergeLR`/`mergeTB`
+ * (`XDimension2D.java:94-98,108-112`), `delta` (`:87-92`),
+ * `eventuallyDivideByTwo` — stays in doubles; only `appendTable`'s `(int)`
+ * cast (`:504-507`) truncates, once, on the fully-combined dimension. The
+ * label operand therefore enters the merge as `measuredWidth + 2 *
+ * marginLabel` (fractional), NOT {@link computeReservedLabelBox}'s
+ * `reservedWidth` (already floored, `:107`) — using the floored value here
+ * would truncate the label twice (once early, once at the end below),
+ * losing up to 1px whenever `mergeLR` sums it into the note's width or
+ * `mergeTB` maxes against it. `computeReservedLabelBox`'s OWN callers still
+ * get the early floor; only this merge path skips it, on the label operand
+ * only. Height is unaffected: `computeReservedLabelBox` never floors
+ * `reservedHeight` (`:108`), so it is already the fractional value.
  */
 export function computeMergedLabelBox(input: MergedLabelBoxInput): ReservedLabelBox {
   const { label, noteDim, position, halfWidth, hasMiddleDecor, font, measurer } = input;
   const labelBox = computeReservedLabelBox(label, font, measurer, false);
-  const labelDim: Dim = { width: labelBox.reservedWidth, height: labelBox.reservedHeight };
+  const labelDim: Dim = {
+    width: labelBox.measuredWidth + 2 * labelBox.marginLabel,
+    height: labelBox.reservedHeight,
+  };
   const merged = label.length === 0 ? noteDim : mergeByPosition(position, noteDim, labelDim);
   const shield = hasMiddleDecor ? LABEL_SHIELD : 0;
   const shieldedWidth = merged.width + 2 * shield;

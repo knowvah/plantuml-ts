@@ -336,8 +336,12 @@ describe('computeMergedLabelBox — mergeLR/mergeTB, shield, halving', () => {
   it('truncates a fractional merged dimension toward zero on BOTH axes', () => {
     // Unlike the plain label arm, both width and height can be fractional
     // here because `noteDim` (the note sizer's output) is not naturally
-    // integer the way `lines.length * font.size` is.
+    // integer the way `lines.length * font.size` is. The expected width
+    // uses the UNFLOORED label width (`measuredWidth + 2 * marginLabel`) —
+    // NOT `labelDim.reservedWidth`, which is already floored and would
+    // silently paper over the double-truncation regression below.
     const fractionalNote = { width: 100.7, height: 80.6 };
+    const unflooredLabelWidth = measurer.measure(label, ARROW_FONT).width + 2 * 1;
     const box = computeMergedLabelBox({
       label,
       noteDim: fractionalNote,
@@ -347,7 +351,37 @@ describe('computeMergedLabelBox — mergeLR/mergeTB, shield, halving', () => {
       font: ARROW_FONT,
       measurer,
     });
-    expect(box.reservedWidth).toBe(Math.floor(fractionalNote.width + labelDim.reservedWidth));
+    expect(box.reservedWidth).toBe(Math.floor(fractionalNote.width + unflooredLabelWidth));
     expect(box.reservedHeight).toBe(Math.floor(Math.max(fractionalNote.height, labelDim.reservedHeight)));
+  });
+
+  it('regression: the label operand enters the merge UNFLOORED, not pre-floored', () => {
+    // Defect fixed in fix(T8): `computeMergedLabelBox` used to build the
+    // label operand from `computeReservedLabelBox(...).reservedWidth`,
+    // which is already `Math.floor(measuredWidth + 2 * marginLabel)`
+    // (`edge-label-box.ts:107`), then floored the merged SUM again.
+    // Upstream's own pipeline stays in doubles the entire way —
+    // `withMargin` (`TextBlockUtils.java:75-78`), `mergeLR`
+    // (`XDimension2D.java:108-112`), `delta` (`:87-92`) — and truncates
+    // exactly ONCE, at `appendTable`'s `(int)` cast (`SvekEdge.java:504-507`).
+    //
+    // `measuredWidth('Items', ARROW_FONT) === 24.375` (DeterministicMeasurer);
+    // `marginLabel === 1` (non-self-loop) => unfloored label width 26.375.
+    // `noteDim.width = 100.7` is chosen so the two fractional parts (.375
+    // and .7) sum past 1 — exactly where an early floor on the label loses
+    // a pixel: `floor(26.375) + 100.7 = 126.7 -> floor -> 126` (the old,
+    // wrong result) vs `floor(26.375 + 100.7) = floor(127.075) -> 127`
+    // (correct, and what this asserts). This test fails against the
+    // pre-fix commit (`dee0972f`), which produces 126.
+    const box = computeMergedLabelBox({
+      label,
+      noteDim: { width: 100.7, height: 80 },
+      position: 'left',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(box.reservedWidth).toBe(127);
   });
 });
