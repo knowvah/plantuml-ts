@@ -22,10 +22,14 @@ regressions.
 
 ---
 
-## 1. `edge-label-box-backlog` — BRIEFED 2026-08-16, ready to execute
+## 1. `edge-label-box-backlog` — IN EXECUTION since 2026-08-16
 
-Brief: `plans/edge-label-box-backlog/` (7 batches, 13 tasks, 0 started; branch
-`feat/edge-label-box-backlog` not yet created). SI22's follow-on queue: the
+Brief: `plans/edge-label-box-backlog/` (7 batches; branch
+`feat/edge-label-box-backlog` exists). Batches 1–2 done, batch 3 in flight.
+**T12 was split into T12a/T12b/T12c** after T4 established M4 as three
+sub-mechanisms over ~13 slugs, not the four planned — read the brief's
+`decision-journal.md` before acting on any M4 line below. SI22's follow-on
+queue: the
 **50 pinned goldens** across four `oracle/goldens/*/label-size-backlog.json`
 files (class 29, description 10, state 9, object 2) that D7 caught scoring
 EQUAL with a wrong edge-label box.
@@ -46,9 +50,14 @@ planning:
 - **M3** tail and head **swapped** on one edge of the `givoli`/`nadepi`/
   `tekena`/`tiguma` family — not a size defect at all. Diagnosis-gated, and
   hands off to edge-draw-order if the cause is emission order.
-- **M4** few-px single-line width deltas (`berelu`, `canuti`, `gikipi`,
-  `xopuku`) — **undiagnosed**, and the reason the exit bar is ≤ 12 remaining
-  slugs rather than 0.
+- **M4** ~~few-px single-line width deltas~~ — **DIAGNOSED 2026-08-16**
+  (`.agent-notes/m4-single-line-width.md`), and it is not what this line said.
+  Three independent sub-mechanisms over **~13** gate-failing slugs, not four:
+  (A+B) strip a leading visibility char and prepend its 12px icon, gated on
+  `classAttributeIconSize>0`; (C) `<<x>>` → `«x»`, class engine only;
+  (D) strip the `<`/`>` magic-arrow token and prepend a 13px triangle block.
+  22/22 predicted widths reproduced exactly, validated predictively against
+  four slugs named before they were run.
 
 **Correction to the 2026-08-15 shape survey** recorded in
 `plans/edge-label-box-and-class-ports/decision-journal.md`: it read `lozego` as
@@ -115,7 +124,99 @@ parity unmoved, all pins hold). Batch 2 (Opale resolution at draw time) is the
 load-bearing one; if it cannot be done byte-identically, stop there with the
 mechanism recorded rather than force batch 3.
 
-## 2. Named, briefed or diagnosed — pick from here after 1
+## 2. `shared-seam-extraction` — NAMED 2026-08-16, needs `/plan-mission`
+
+**Pull code that upstream puts in a shared package, and this port put in a
+diagram engine, back into the shared area.** Queued by the maintainer during
+`edge-label-box-backlog` execution, after T5 had to import *upward* from
+`src/core/` into `src/diagrams/class/` to reuse a line splitter.
+
+### The finding that named it
+
+`Display.getWithNewlines` — one upstream method,
+`klimt/creole/Display.java:410-420` — has **three independent ports here**:
+
+| # | where | what it is |
+|---|---|---|
+| 1 | `src/core/klimt/creole/DisplayNewlines.ts:281` (`parseWithNewlines`) + `Display.ts:193-213` | the faithful port, in the faithful location, mirroring upstream's package |
+| 2 | `src/diagrams/class/class-layout-edge-labels.ts:110` (`splitEdgeLabelLines` + `resolveLabelEscape:101`) | an independent re-derivation of the same escape scan, in a diagram engine |
+| 3 | `src/core/edge-label-box.ts:35` (`splitCreoleLines`) | a third, simpler one — `split(/\\n|\n/)` |
+
+T5 (`ca60cd0f`) then imported **#2** from `src/core/edge-label-box.ts`, because
+#2 was the one the class engine already used. So `src/core/` now depends on
+`src/diagrams/class/` to do something `src/core/klimt/creole/` already does
+faithfully. That is the divergence, not the import.
+
+### Why this is in scope, given "do not refactor while porting"
+
+`CLAUDE.md` forbids refactoring *while porting* — that rule protects upstream's
+design from being tidied away by a porter who thinks a branch looks redundant.
+This mission is its complement, and the same paragraph authorises it:
+**"Upstream architecture is authoritative — engine boundaries, dispatch, parser
+seams. A structural divergence IS the bug: re-mirror rather than patch with
+special cases."** Moving `Display`-derived code out of `diagrams/class/` and
+into `core/klimt/creole/` *restores* upstream's package layout; it does not
+impose a new one. Any move that cannot be justified by pointing at the upstream
+package the code belongs in is out of scope for this mission.
+
+### Measured starting state (2026-08-16, verify before trusting)
+
+`src/core/` importing from `src/diagrams/` — 5 lines, 2 files:
+
+- `src/core/edge-label-box.ts:23` → `../diagrams/class/class-layout-edge-labels.js`
+  (the one above; the clear defect)
+- `src/core/assemble-svg.ts:10-13` → `description/renderer`, `class/renderer-shell`,
+  `state/renderer-shell`, `json/renderer-shell`
+  (**probably legitimate** — a dispatcher naming its engines mirrors upstream's
+  own `*DiagramFactory` dispatch. Confirm against upstream before touching it;
+  it may be the one that should stay.)
+
+Cross-engine `diagrams/X` → `diagrams/Y`:
+
+- `class` → `description` ×7 — `leaf-sizing.js` (×4), `ast.js`,
+  `renderer-symbol.js`, `render-atoms.js`. **The largest real candidate**:
+  leaf sizing is `svek/image/EntityImage*` territory upstream, i.e. shared, not
+  description-owned.
+- `state` → `class` ×1 — `class-color-override.js`
+- `hcl` → `json` ×5, `yaml` → `json` ×5 — **not violations.** `CLAUDE.md`'s
+  layout-engine ruling records that `@starthcl`/`@startyaml` render *via*
+  `JsonDiagram`; this mirrors upstream and stays.
+- `activity` → `routing`, `tiles` — shared activity infrastructure, already
+  siblings rather than an engine reaching into another engine. Check, don't
+  assume.
+
+### The template already exists
+
+`src/core/edge-label-box.ts`'s own doc comment records the pattern: it was
+relocated out of `diagrams/state/` in `edge-label-box-and-class-ports` T1, and
+the move was proved safe by the state engine's DOT output staying
+**byte-identical** across it. That is the exit bar for every move in this
+mission — a pure move, evidenced, not a rewrite with a move inside it.
+
+### Sketch of an exit bar (for `/plan-mission` to sharpen)
+
+1. Every retained `src/core/` → `src/diagrams/` import is justified in writing
+   against the upstream package that sanctions it, or removed.
+2. `Display.getWithNewlines` has **one** port. Ports #2 and #3 above are
+   retired into `core/klimt/creole/`, with their callers rewired.
+3. DOT output byte-identical for every engine touched — that is what makes a
+   move provably a move.
+4. `shape-match-report`: no fixture rises. All four quality gates green.
+5. A fitness function (`rules/architecture.md`) so the layering cannot silently
+   re-invert: a test asserting no `src/core/**` file imports `src/diagrams/**`,
+   with an explicit allowlist for whatever step 1 justified.
+
+### Sizing caveat, honestly
+
+The import counts are small (5 + 8 lines), but the *work* is not the imports —
+it is proving each move is behaviour-preserving across engines whose DOT feeds
+`@knowvah/dot-engine`. Item 2 alone means reconciling three escape scanners
+that may not agree on edge cases (#3 handles a literal newline; #2 handles
+alignment escapes; #1 handles tabs, guide lines and Jaws sentinels). **Their
+disagreements are the mission's real content** — and any one of them may be a
+latent bug in a caller today. Do not scope this by the import count.
+
+## 3. Named, briefed or diagnosed — pick from here after 1
 
 Ordered by how ready they are, not by size.
 
@@ -147,7 +248,7 @@ Ordered by how ready they are, not by size.
 - **`plans/future/theme-through-dot.md`** — collapse the layout/style two-pass
   split. Explicitly gated on "the port is faithful first". Not now.
 
-## 3. Mission-index rows still open (no brief yet)
+## 4. Mission-index rows still open (no brief yet)
 
 From `planning/mission-index.md`; each warrants `/plan-mission` when picked:
 
