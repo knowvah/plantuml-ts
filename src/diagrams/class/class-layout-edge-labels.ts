@@ -11,6 +11,8 @@
 import type { Relationship } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
+import { CARDINALITY_FONT_SIZE } from '../../core/graph-layout.js';
+import { computeQuantifierBox } from '../../core/edge-label-box.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import { ARROW_GLYPH_SIZE, parseMagicArrowLabel } from './class-magic-arrow.js';
@@ -22,22 +24,35 @@ const CONSTRAINT_SPOT = 10;
 /**
  * `plantuml.skin`'s `arrow { FontSize 13 }` block (`svek/GraphvizImageBuilder
  * .java#getStyleArrowCardinality` resolves the `arrow.cardinality` style,
- * which falls through to the plain `arrow` block -- no diagram in the corpus
- * overrides `cardinality` specifically), jar-verified against every sampled
- * `<text font-size="13">` multiplicity/role glyph in `test-results/dot-cache
- * /class/*` `in.svg`. G2/N25: used for the label's REAL rendered size
- * (`class-geo-builders.ts#attachPortLabels`'s baseline conversion + the
- * `textLength` this port's own `renderer.ts` emits) and for @knowvah/dot-engine's
- * own placement search (`core/graph-layout.ts#CARDINALITY_FONT_SIZE`, an
- * independent same-value constant in that module -- core/ does not import
- * class-local constants). NOT the same font `edgeLabelAttrs` below measures
- * with for DOT-gate sizing (`font` param, `theme.fontSize` = 14) -- that is
- * a pre-existing, separate, NOT-fixed-this-iteration mismatch (the DOT-gate
- * comparator never numeric-checks `taillabel`/`headlabel` table dims, so it
- * has never surfaced as a gate failure); left untouched to avoid ANY risk
- * to the frozen DOT gate.
+ * which falls through to the plain `arrow` block) -- the DEFAULT only.
+ * **Corrected T6** (was: "no diagram in the corpus overrides `cardinality`
+ * specifically"): `camuna-58-veca254` DOES, in a `<style> arrow { cardinality
+ * { FontSize 10 } } }` block (decisions.md#D3). jar-verified against every
+ * OTHER sampled `<text font-size="13">` multiplicity/role glyph in
+ * `test-results/dot-cache/class/*` `in.svg`. G2/N25: used for the label's
+ * REAL rendered size (`class-geo-builders.ts#attachPortLabels`'s baseline
+ * conversion + the `textLength` this port's own `renderer.ts` emits) and for
+ * @knowvah/dot-engine's own placement search (`core/graph-layout-build-edges.ts
+ * #CARDINALITY_FONT_SIZE`, re-exported from `core/graph-layout.ts` -- T6
+ * retired the independent same-value duplicate that used to live here;
+ * this is now an IMPORT, one owner in core). SAME font `edgeLabelAttrs`
+ * below now measures QUANTIFIER/ROLE boxes with via `computeQuantifierBox`
+ * (T6) -- **corrected T6** (was: claimed a `theme.fontSize` = 14 mismatch
+ * against the main-LABEL font; T4 (`decision-journal.md`) proved that stale:
+ * `class-dot-graph.ts:371` builds the label font at `ARROW_LABEL_FONT_SIZE`
+ * = 13, not 14, and `gikipi`'s 68px measurement only reproduces at 13). The
+ * comment's other half stays true: `skinparam ArrowFontSize` has no cascade
+ * path yet (`core/skinparam.ts#ELEMENT_BUCKET_SNAMES` omits `'arrow'`).
+ *
+ * **Known gap, not fixed by T6 (write-set escape, journalled):** a
+ * diagram's `<style> arrow { cardinality { FontSize N } } }` override is
+ * NOT read by `computeMultiplicityAttrs` below -- `computeCardinalityFontOverride`
+ * (`style-cascade-class.ts`) resolves it from a StyleMap, but no StyleMap
+ * reaches this file's functions; threading one through touches
+ * `style-map-theme.ts`/`class-dot-graph.ts`, outside T6's write-set. See
+ * `computeMultiplicityAttrs`'s own doc comment.
  */
-export const CARDINALITY_FONT_SIZE = 13;
+export { CARDINALITY_FONT_SIZE };
 
 /** G2 item 43: the alignment a `\\n`/`\\l`/`\\r`-split edge label resolves
  *  to -- see {@link splitEdgeLabelLines}'s doc comment. */
@@ -262,25 +277,70 @@ function computeRelLabelAttrs(
 
 /** The `rel.fromMultiplicity`/`rel.toMultiplicity` half of
  *  {@link edgeLabelAttrs} -- see that function's own doc comment. */
+/**
+ * T6/M1: size the tail/head quantifier boxes via {@link computeQuantifierBox}
+ * -- T5's cardinality-font, `\n`-split, raw-dimension (no shield, no
+ * `marginLabel`) formula (`SvekEdge.java:328-351` construction, `:447-467`
+ * emission -- the quantifier/role arms take the RAW `calculateDimension`,
+ * unlike the main label's `:440-445`). Replaces the prior single
+ * `measurer.measure` call at the ARROW LABEL font, which produced neither
+ * the right font size nor a multi-line split (`camuna-58-veca254`: oracle
+ * `23x10`/`41x20`, prior output `31x13`/`71x13`).
+ *
+ * `cardinalityFont`'s family reuses `font.family` (== `theme.fontFamily`) --
+ * the same reuse `class-edge-geo.ts:120` and `class-edge-label-anchor.ts:56`
+ * already make for every other `CARDINALITY_FONT_SIZE` consumer in this
+ * engine; only the SIZE differs from `font`, which carries the arrow LABEL
+ * size instead.
+ *
+ * **Known gap (write-set escape, journalled -- decision-journal.md T6):**
+ * `computeCardinalityFontOverride` (`style-cascade-class.ts`, D3) resolves a
+ * diagram's `<style> arrow { cardinality { FontSize N } } }` override from a
+ * StyleMap, but no StyleMap reaches this function -- its one caller chain
+ * (`edgeLabelAttrs` -> `class-dot-edges.ts` -> `class-dot-graph.ts:371`)
+ * builds `font` once, with no cascade lookup. Threading the override through
+ * touches `style-map-theme.ts`/`class-dot-graph.ts`, both outside this
+ * task's declared write-set (T7's sibling brief names the identical trap and
+ * requires the same stop-and-log). `camuna-58-veca254` therefore still
+ * fails `labelSizeOk` after this task -- it needs the 10px override, not the
+ * 13px default this function now correctly applies everywhere else.
+ *
+ * **Role labels (spec item 2, journalled): no path exists to route.**
+ * `Relationship.fromRole`/`toRole` are parsed and stored
+ * (`class-relationship-parser.ts:247-248,314`) but never READ anywhere in
+ * `src/` -- `computeMultiplicityAttrs` only ever consumed
+ * `fromMultiplicity`/`toMultiplicity`, and no DOT-emission or render site
+ * implements upstream's `else if` role fallback
+ * (`SvekEdge.java:447-466`: use the role name in place of the cardinality
+ * when that end has no multiplicity). This is a genuinely UNBUILT feature,
+ * not an existing path this "wiring" task can route through
+ * `computeQuantifierBox` -- building it would add new DOT-attribute
+ * emission (this file, in-write-set) but also new render/positioning
+ * support (`class-geo-builders.ts`/`class-edge-label-anchor.ts`/
+ * `renderer.ts`, all outside T6's write-set) and could move geometry for
+ * any corpus fixture using bare role syntax, which D4's zero-fixture-rise
+ * bar forbids attempting speculatively in this task.
+ */
 function computeMultiplicityAttrs(
   rel: Relationship,
   font: { family: string; size: number },
   measurer: StringMeasurer,
 ): MultiplicityAttrs {
   const attrs: MultiplicityAttrs = {};
+  const cardinalityFont = { family: font.family, size: CARDINALITY_FONT_SIZE };
   if (rel.fromMultiplicity !== undefined) {
-    const m = measurer.measure(rel.fromMultiplicity, font);
-    attrs.tailLabelWidth = m.width;
-    attrs.tailLabelHeight = m.height;
+    const box = computeQuantifierBox(rel.fromMultiplicity, cardinalityFont, measurer);
+    attrs.tailLabelWidth = box.reservedWidth;
+    attrs.tailLabelHeight = box.reservedHeight;
     // G2/N25: the actual text, fed into the real @knowvah/dot-engine layout call so
     // it computes a real position (`core/graph-layout.ts
     // #extractPortLabelPositions`) -- see that field's own doc comment.
     attrs.tailLabel = rel.fromMultiplicity;
   }
   if (rel.toMultiplicity !== undefined) {
-    const m = measurer.measure(rel.toMultiplicity, font);
-    attrs.headLabelWidth = m.width;
-    attrs.headLabelHeight = m.height;
+    const box = computeQuantifierBox(rel.toMultiplicity, cardinalityFont, measurer);
+    attrs.headLabelWidth = box.reservedWidth;
+    attrs.headLabelHeight = box.reservedHeight;
     attrs.headLabel = rel.toMultiplicity;
   }
   return attrs;

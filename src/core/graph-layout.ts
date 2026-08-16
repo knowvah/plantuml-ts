@@ -23,6 +23,13 @@ import {
   type EdgeIndex,
   type ClusterIndex,
 } from './graph-layout-build.js';
+// T6 (edge-label-box-backlog): the ONE owner of the cardinality-font
+// constant, re-exported at this chokepoint so `class-layout-edge-labels.ts`
+// can import it from core instead of holding its own duplicate literal —
+// see that module's own `CARDINALITY_FONT_SIZE` doc comment for why core
+// itself cannot import the class-local copy (`core/` -> `diagrams/class/`
+// is the wrong layering direction; the reverse, done here, is not).
+export { CARDINALITY_FONT_SIZE } from './graph-layout-build.js';
 import type {
   DotInputEdge,
   DotInputGraph,
