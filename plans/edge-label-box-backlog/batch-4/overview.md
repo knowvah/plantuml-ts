@@ -6,8 +6,8 @@ neither that file nor its test.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T8 | `mergeLR`/`mergeTB` + shield + half-width | `typescript-pro` | `src/core/edge-label-box.ts`, `tests/unit/core/edge-label-box.test.ts` | — | [ ] |
-| T14 | Thread the cardinality cascade to both engines (D3 completion) | `typescript-pro` | `style-map-theme.ts`; class `dot-graph`/`dot-edges`/`layout-edge-labels`; description `layout`/`layout-dot-tree`/`link-edge-attrs`; class backlog | T1, T6, T7 | [ ] |
+| T8 | `mergeLR`/`mergeTB` + shield + half-width | `typescript-pro` | `src/core/edge-label-box.ts`, `tests/unit/core/edge-label-box.test.ts` | — | [x] |
+| T14 | Thread the cardinality cascade to both engines (D3 completion) | `typescript-pro` | `style-map-theme.ts`; class `dot-graph`/`dot-edges`/`layout-edge-labels`; description `layout`/`layout-dot-tree`/`link-edge-attrs`; class backlog | T1, T6, T7 | [x] |
 
 T8 has no dependency on Batches 2–3: the merge arm is independent of the
 quantifier arm. It is sequenced after them only because of the shared file.
