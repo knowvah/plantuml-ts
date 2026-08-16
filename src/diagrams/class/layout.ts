@@ -42,6 +42,7 @@ import {
   type MeasuredClassifier,
 } from './class-layout-helpers.js';
 import { buildDotGraph } from './class-dot-graph.js';
+import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
 import { iconSizeOf } from './class-visibility-icon.js';
 import {
@@ -191,6 +192,25 @@ function shiftNoteGeo(note: NoteGeo, dx: number, dy: number): NoteGeo {
   };
 }
 
+/**
+ * T4 (mission leaf-draw-order, D3): reorders `leaves` (built by
+ * `assembleShiftedGeometry` in the old classifiers-then-notes concatenation
+ * order) into jar's real leaf draw order -- `computeLeafDrawOrder`'s id
+ * list, T2's pure fold of the AST. A geo id with no matching order entry is
+ * a T2 bug (the id list must cover every classifier/note id that reached
+ * geometry) -- thrown rather than silently appended, per this task's own
+ * contract.
+ */
+function orderLeaves(leaves: readonly ClassLeafGeo[], order: readonly string[]): ClassLeafGeo[] {
+  const rank = new Map(order.map((id, i) => [id, i]));
+  for (const leaf of leaves) {
+    if (!rank.has(leaf.id)) {
+      throw new Error(`computeLeafDrawOrder: leaf "${leaf.id}" is missing from the draw order (T2 bug)`);
+    }
+  }
+  return [...leaves].sort((a, b) => rank.get(a.id)! - rank.get(b.id)!);
+}
+
 // ---------------------------------------------------------------------------
 // Single-page layout (internal)
 // ---------------------------------------------------------------------------
@@ -300,7 +320,11 @@ function layoutSinglePage(
     consumedEdgeIds.has(e.id) ? { ...e, consumedByOpaleNote: true as const } : e,
   );
 
-  return assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, iconSizeOf(theme));
+  const assembled = assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, iconSizeOf(theme));
+  // T4 (D3): `leaves` built by `assembleShiftedGeometry` in concatenation
+  // order -- reorder into jar's real draw order here, over the SAME
+  // `effAst` the dot graph/geo builders above already read.
+  return { ...assembled, leaves: orderLeaves(assembled.leaves, computeLeafDrawOrder(effAst)) };
   // #lizard forgives -- linear orchestration (empty-diagram guard,
   // namespace-collapse, hide/show resolution, pre-measure, degenerate skip,
   // dot-graph build+layout, geo builders, final assembly), each step ALREADY
@@ -339,8 +363,11 @@ function assembleShiftedGeometry(
   const rawDims = computeClassRawInkDims(classifiers, namespaces, edges, notes, iconSize);
   const shift = computeClassInkShift(classifiers, namespaces, edges, notes, iconSize);
 
-  // T3 (mission leaf-draw-order): concatenation order only -- T4 lands the
-  // real jar draw order (`ClassGeometry.leaves`'s own doc comment).
+  // T3/T4 (mission leaf-draw-order): `leaves` here is still the plain
+  // classifiers-then-notes concatenation -- `layoutSinglePage`'s caller
+  // reorders it into jar's real draw order via `orderLeaves` right after
+  // this function returns (kept out of here so this stays a pure
+  // shift/assemble step, unaware of AST-derived order).
   return {
     totalWidth: documentDims.width,
     totalHeight: documentDims.height,
@@ -398,9 +425,11 @@ function layoutMultiPage(
     const geo = layoutSinglePage(page, theme, measurer);
     const dy = yOffset;
 
-    // T3: each page's own `leaves` is already `[...classifiers, ...notes]`
-    // order (`assembleShiftedGeometry`); shifting per-kind and re-pushing in
-    // the same relative order preserves that concatenation across pages.
+    // T4: each page's own `leaves` is already jar's real draw order (D3,
+    // `layoutSinglePage`'s own `orderLeaves` call); shifting per-kind and
+    // re-pushing in the same relative order preserves that order, and pages
+    // concatenate in page order (the outer `for` loop) -- no re-sort needed
+    // here, each page IS its own upstream `NewpagedDiagram` page.
     for (const leaf of geo.leaves) {
       leaves.push(isNoteGeo(leaf) ? shiftNoteGeo(leaf, 0, dy) : shiftClassifierGeo(leaf, 0, dy));
     }

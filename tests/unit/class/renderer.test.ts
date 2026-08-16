@@ -6,6 +6,8 @@ import type { ClassGeometry, ClassifierGeo, EdgeGeo, NamespaceGeo } from '../../
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { visibilityIconOriginY } from '../../../src/diagrams/class/class-visibility-icon.js';
+import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 // ---------------------------------------------------------------------------
 // Geometry factory helpers
@@ -1669,6 +1671,39 @@ describe('renderClass — notes', () => {
     // identical unwrapped precedent, G2 N8) -- the note id never appears as a
     // data-qualified-name/entity id.
     expect(svg).not.toContain('data-qualified-name="__note_0"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Mission leaf-draw-order T4: full parse->layout->render pipeline, exercising
+// `computeLeafDrawOrder` (T2) + `layout.ts#orderLeaves` (T4), not a
+// hand-built `ClassGeometry` (those bypass `layoutClass`/`orderLeaves`
+// entirely and stay in concatenation order -- see `class-leaf-fold-render
+// .test.ts`'s own T3 doc comment).
+// ---------------------------------------------------------------------------
+describe('renderClass — leaf draw order (mission leaf-draw-order T4)', () => {
+  it('D5: a tip note on a hidden host still draws (jar probe 2026-08-15, ' +
+    'pinned jar: hello=1, 223x84; port before T4: hello=0)', () => {
+    const svg = renderFixtureClass(
+      '@startuml\nclass A {\n  m\n}\nclass C\nnote left of A::m\nhello\nend note\nhide A\n@enduml',
+      new DeterministicMeasurer(),
+    );
+    expect(svg).toContain('width="223px" height="84px"');
+    expect((svg.match(/hello/g) ?? []).length).toBe(1);
+    // The hidden host itself still draws nothing.
+    expect(svg).not.toContain('data-qualified-name="A"');
+  });
+
+  it('D1/D2: packaged leaves draw before unpackaged ones, even when the ' +
+    'unpackaged leaf was declared FIRST in source (jar: P.A, P.N, X, Y, GMN6 ' +
+    '-- this port\'s own note-naming scheme differs from jar\'s, orthogonal ' +
+    'to this test\'s own ORDER claim)', () => {
+    const svg = renderFixtureClass(
+      '@startuml\nclass X\npackage P {\nclass A\nnote "n" as N\n}\nclass Y\nnote left of X : hello\n@enduml',
+      new DeterministicMeasurer(),
+    );
+    const order = [...svg.matchAll(/data-qualified-name="([^"]*)"/g)].map((m) => m[1]);
+    expect(order).toEqual(['P', 'P.A', 'N', 'X', 'Y', '__note_1']);
   });
 });
 
