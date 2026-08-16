@@ -155,6 +155,25 @@ describe('computeLeafDrawOrder (T2, leaf-draw-order)', () => {
     expect(computeLeafDrawOrder(ast)).toEqual(['P.A', 'P.B', 'P.Inner', 'Z']);
   });
 
+  it('option (b) marker: a `<<Database>>` empty package collapses to a ' +
+     '`usymbol` classifier (class-container.ts) that is indistinguishable ' +
+     'from a declared `database` leaf on kind/usymbol alone -- ' +
+     '`Classifier.collapsedGroup` is what makes it sort as a GROUP. ' +
+     'jar-verified on `daxeno-00-kasu166` (in.svg: cluster styled2, then ' +
+     'the unwrapped empty package "styled", then styled2.foo): ' +
+     '`package E <<Database>> {} / package P { class A }` draws `E, P.A`.', () => {
+    const raw = parse('package "E" <<Database>> {\n}\npackage P {\nclass A\n}');
+    const ast = collapseEmptyNamespacesFinal(raw);
+    const e = ast.classifiers.find((c) => c.id === 'E')!;
+    expect(e.kind).toBe('descriptive');
+    expect(e.usymbol).toBe('database');
+    expect(e.collapsedGroup).toBe(true);
+    const declared = parse('database D\nclass A').classifiers.find((c) => c.id === 'D')!;
+    expect(declared.usymbol).toBe('database');
+    expect(declared.collapsedGroup).toBeUndefined();
+    expect(computeLeafDrawOrder(ast)).toEqual(['E', 'P.A']);
+  });
+
   it('the result is always a permutation of every classifier id and every ' +
      'note id, with no duplicates', () => {
     const ast = parse(

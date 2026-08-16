@@ -214,6 +214,20 @@ export interface Classifier {
    */
   usymbol?: string;
   /**
+   * Set (to `true`) ONLY by `class-namespace.ts#collapseEmptyNamespace`: this
+   * classifier IS an empty `package`/`namespace`/descriptive container muted
+   * to a leaf — upstream's `g.muteToType(LeafType.EMPTY_PACKAGE)`
+   * (`svek/GraphvizImageBuilder.java:408-422`). It stays a GROUP for
+   * document/draw order (`class-leaf-order.ts#collapsedGroupRankMap`: it
+   * prints at its slot among its parent's child groups, never among the
+   * parent's leaves). Needed because `kind`/`usymbol` alone cannot tell a
+   * collapsed `package X <<Database>> {}` (usymbol stamped from the
+   * stereotype, `class-container.ts#closeContainer`) from a declared
+   * `database X` leaf (`class-declaration-parser.ts` TYPE_MAP) — jar
+   * fixture `daxeno-00-kasu166`. Never set by any declaration path.
+   */
+  collapsedGroup?: true;
+  /**
    * For `kind: 'lollipop'` only — `'half'` (required interface / socket, a
    * half-circle notch) vs `'full'` (provided interface, a full circle), from
    * whether the two paren glyphs matched (`((`/`))`) or differed (`()`)

@@ -28,7 +28,6 @@
  * {@link computeLeafDrawOrder}.
  */
 import type { ClassDiagramAST, Classifier, ClassNote, Namespace } from './ast.js';
-import { isCollapsedGroup } from './class-magma.js';
 
 /** Stable sort of `ids` by `rank.get(id)`, `undefined` treated as
  *  `+Infinity` -- ranked entries first (ascending), unranked entries keep
@@ -98,8 +97,12 @@ function buildNamespaceRankMap(namespaces: readonly Namespace[]): Map<string, nu
 
 /**
  * `Classifier.creationIndex` for every classifier synthesized by
- * `collapseEmptyNamespace` from a collapsed-empty `package`/`namespace`
- * (`isCollapsedGroup`, class-magma.ts) -- these ids must sort as a GROUP
+ * `collapseEmptyNamespace` from a collapsed-empty `package`/`namespace`/
+ * descriptive container (`Classifier.collapsedGroup`, stamped at that one
+ * collapse site -- NOT `class-magma.ts#isCollapsedGroup`, which also
+ * requires `usymbol === undefined` and so misses a `<<Database>>` package
+ * whose usymbol came from its stereotype, daxeno-00-kasu166) -- these ids
+ * must sort as a GROUP
  * (among sibling namespaces), never as a plain leaf, however their
  * `creationIndex` was stamped: `printGroup` draws a group's OWN leaves in
  * full (`g.leafs()`) BEFORE any of its child groups (`printGroups(g)`), a
@@ -120,7 +123,7 @@ function buildNamespaceRankMap(namespaces: readonly Namespace[]): Map<string, nu
 function collapsedGroupRankMap(classifiers: readonly Classifier[]): Map<string, number> {
   const rank = new Map<string, number>();
   for (const c of classifiers) {
-    if (isCollapsedGroup(c) && c.creationIndex !== undefined) rank.set(c.id, c.creationIndex);
+    if (c.collapsedGroup === true && c.creationIndex !== undefined) rank.set(c.id, c.creationIndex);
   }
   return rank;
 }
