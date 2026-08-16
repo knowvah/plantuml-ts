@@ -53,8 +53,25 @@ const DECOR_MARGIN_ARROW = 10;
  *  of threading `fontSpec`/`measurer`/`sprites` through each one separately. */
 interface MeasureCtx {
   fontSpec: FontSpec;
+  /** T14/D3: the resolved `{root,element,classDiagram,arrow,cardinality}`
+   *  font -- see {@link applyQualifierLabels}'s own doc comment. */
+  cardinalityFontSpec: FontSpec;
   measurer: StringMeasurer;
   sprites: SpriteDimsLookup | undefined;
+}
+
+/**
+ * T14/D3: the two independently-resolved fonts `SvekEdge`'s constructor
+ * takes (`GraphvizImageBuilder.java:235-241`) -- the arrow LABEL font and
+ * the `arrow.cardinality` cascade font -- bundled into one param so
+ * {@link buildLinkEdgeAttributes}/`buildDotEdges` (layout-dot-tree.ts)/
+ * `runLayout` (layout.ts) stay under the project's 5-parameter cap while
+ * carrying both. `label` is the SAME `edgeFontSpec` this file already built
+ * (T3's `skinparam arrowFontSize` cascade) -- unchanged by this task.
+ */
+export interface EdgeFontSpecs {
+  readonly label: FontSpec;
+  readonly cardinality: FontSpec;
 }
 
 /** Head-decor margin for a link's arrowHead (tail decor is always NONE — we
@@ -145,7 +162,13 @@ export function computeGraphSpacing(
   kermor = false,
   sprites?: SpriteDimsLookup,
 ): { nodeSep: number; rankSep: number } {
-  const ctx: MeasureCtx = { fontSpec, measurer, sprites };
+  // `cardinalityFontSpec` is unused on this path -- `dzetaTexts`/
+  // `computeLinkDzeta` measure every text (main label AND qualifiers) at
+  // `ctx.fontSpec` uniformly, a pre-existing, named, verified-inert gap this
+  // task does not touch (see this file's own T7 doc comment above
+  // `dzetaTexts`). Filled with `fontSpec` only to satisfy `MeasureCtx`'s
+  // shape -- never read.
+  const ctx: MeasureCtx = { fontSpec, cardinalityFontSpec: fontSpec, measurer, sprites };
   let maxHorizontal = 0;
   let maxVertical = 0;
   for (const link of links) {
@@ -269,21 +292,18 @@ function applyMainLabel(
  * `secondLabel` are always Quantifier1/Quantifier2 here, never Role1/Role2,
  * and this function has no role arm to write.
  *
- * T7/D3 gap (write-set escape, logged rather than silently patched): `font`
- * below is `ctx.fontSpec` -- the ARROW label font (`edgeFontSpec`,
- * `layout.ts`'s T3 `skinparam arrowFontSize` cascade), not the resolved
+ * **T14/D3 resolved** (was: a T7 write-set-escape gap, logged rather than
+ * silently patched). `ctx.cardinalityFontSpec` below is the resolved
  * `{root,element,classDiagram,arrow,cardinality}` font
  * (`GraphvizImageBuilder.java:124-126`, `style-cascade-class.ts
- * #computeCardinalityFontOverride`, T1). Both resolve to the SAME default
- * (13, sans-serif -- `theme.ts`'s `defaultTheme.cardinalityFontSize`/
- * `cardinalityFontFamily`), and no description-diagram golden overrides
- * `cardinality` specifically (`zosuje-43-zebi775` overrides `arrow` but not
- * `arrow.cardinality`), so this is a verified no-op divergence today, not a
- * guessed one. Threading the real cascade needs a `cardinalityFontSpec`
- * parameter carried from `layoutDescription` (which holds `theme`) through
- * `runLayout` -> `buildDotEdges` (`layout.ts`, `layout-dot-tree.ts`) -- both
- * outside this task's write-set, so this is the STOP-and-log this file's own
- * task spec calls for, not a silent substitution.
+ * #computeCardinalityFontOverride`, T1) -- folded into `theme` by
+ * `style-map-theme.ts#buildStyleMapPartialTheme` and carried here from
+ * `layoutDescription` through `runLayout` -> `buildDotEdges`
+ * (`layout.ts`, `layout-dot-tree.ts`) as `EdgeFontSpecs.cardinality`. No
+ * description-diagram golden overrides `cardinality` specifically
+ * (`zosuje-43-zebi775` overrides `arrow` but not `arrow.cardinality`), so
+ * this remains a verified no-op divergence for every EXISTING golden; the
+ * wiring itself is what this task delivers.
  */
 function applyQualifierLabels(
   attrs: NonNullable<DotInputEdge['attributes']>,
@@ -291,12 +311,12 @@ function applyQualifierLabels(
   ctx: MeasureCtx,
 ): void {
   if (link.firstLabel !== undefined) {
-    const box = computeQuantifierBox(resolveInlineLinks(link.firstLabel), ctx.fontSpec, ctx.measurer);
+    const box = computeQuantifierBox(resolveInlineLinks(link.firstLabel), ctx.cardinalityFontSpec, ctx.measurer);
     attrs.tailLabelWidth = box.reservedWidth;
     attrs.tailLabelHeight = box.reservedHeight;
   }
   if (link.secondLabel !== undefined) {
-    const box = computeQuantifierBox(resolveInlineLinks(link.secondLabel), ctx.fontSpec, ctx.measurer);
+    const box = computeQuantifierBox(resolveInlineLinks(link.secondLabel), ctx.cardinalityFontSpec, ctx.measurer);
     attrs.headLabelWidth = box.reservedWidth;
     attrs.headLabelHeight = box.reservedHeight;
   }
@@ -304,12 +324,14 @@ function applyQualifierLabels(
 
 export function buildLinkEdgeAttributes(
   link: DescriptiveLink,
-  fontSpec: FontSpec,
+  fonts: EdgeFontSpecs,
   measurer: StringMeasurer,
   linetype?: 'ortho' | 'polyline',
   sprites?: SpriteDimsLookup,
 ): NonNullable<DotInputEdge['attributes']> {
-  const ctx: MeasureCtx = { fontSpec, measurer, sprites };
+  const ctx: MeasureCtx = {
+    fontSpec: fonts.label, cardinalityFontSpec: fonts.cardinality, measurer, sprites,
+  };
   const attrs: NonNullable<DotInputEdge['attributes']> = { minLen: link.length - 1 };
   // `-[hidden]-` does NOT produce `style=invis`, despite the name. Upstream
   // keeps two separate fields and this port conflated them:

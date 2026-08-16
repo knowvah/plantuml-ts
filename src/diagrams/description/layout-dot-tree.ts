@@ -38,7 +38,7 @@ import {
   measureTitleLabel,
 } from './layout-helpers.js';
 import { computePortClusterBbox, type PortClusterInfo, type ClusterSpacing } from './frontier-cluster-bbox.js';
-import { buildLinkEdgeAttributes } from './link-edge-attrs.js';
+import { buildLinkEdgeAttributes, type EdgeFontSpecs } from './link-edge-attrs.js';
 import { visibleStereotypeLabels, nodeWithVisibleStereotype } from './element-grammar.js';
 import { dotKeyFor } from './namespace-groups.js';
 import type { ClassifyCtx, EdgeDotBuildResult } from './layout.js';
@@ -255,7 +255,9 @@ export function buildDotClusters(
 export function buildDotEdges(
   links: readonly DescriptiveLink[],
   ctx: ClassifyCtx,
-  fontSpec: FontSpec,
+  // T14/D3: bundled label/cardinality fonts -- see `EdgeFontSpecs`'s own
+  // doc comment (`link-edge-attrs.ts`).
+  fonts: EdgeFontSpecs,
   measurer: StringMeasurer,
   linetype: 'ortho' | 'polyline' | undefined,
 ): EdgeDotBuildResult {
@@ -291,7 +293,7 @@ export function buildDotEdges(
       id: dotId,
       from: fromRes.dotNodeId,
       to: toRes.dotNodeId,
-      attributes: buildLinkEdgeAttributes(link, fontSpec, measurer, linetype, ctx.sprites),
+      attributes: buildLinkEdgeAttributes(link, fonts, measurer, linetype, ctx.sprites),
     });
     dotEdgeToLinkIdx.set(dotId, i);
 

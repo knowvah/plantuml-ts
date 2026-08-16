@@ -82,6 +82,9 @@ function moveLabelToXlabel(attrs: NonNullable<DotInputEdge['attributes']>): void
  *  endpoint that is a package cluster is routed to that cluster's point anchor. */
 interface DotEdgeAttrContext {
   font: { family: string; size: number };
+  /** T14/D3: threaded straight through to {@link edgeLabelAttrs} -- see
+   *  that function's own doc comment. */
+  cardinalityFont: { family: string; size: number };
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
   kindBIndices: ReadonlySet<number>;
@@ -98,7 +101,10 @@ interface DotEdgeAttrContext {
  *  (G2/N16) to keep that function's own CCN under the project's complexity
  *  cap after adding the Kind-B `noArrow` gate. */
 function buildDotEdgeAttrs(rel: Relationship, i: number, ctx: DotEdgeAttrContext): NonNullable<DotInputEdge['attributes']> {
-  const attrs = { minLen: (rel.length ?? 2) - 1, ...edgeLabelAttrs(rel, ctx.font, ctx.measurer) };
+  const attrs = {
+    minLen: (rel.length ?? 2) - 1,
+    ...edgeLabelAttrs(rel, ctx.font, ctx.cardinalityFont, ctx.measurer),
+  };
   if (ctx.linetype === 'ortho') moveLabelToXlabel(attrs);
   if (rel.invis === true) attrs.invis = true;
   // `[norank]` -> constraint=false (`Relationship.norank`'s doc comment).
@@ -125,6 +131,8 @@ function buildDotEdgeAttrs(rel: Relationship, i: number, ctx: DotEdgeAttrContext
  *  `linetype`). */
 interface DotEdgesRenderCtx {
   font: { family: string; size: number };
+  /** T14/D3: threaded straight through to {@link DotEdgeAttrContext}. */
+  cardinalityFont: { family: string; size: number };
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
   /** T2: `classPortShortNamesById`'s output -- ADR-4's declared port-name
@@ -142,7 +150,7 @@ export function buildDotEdges(
   anchors: Map<string, string>,
   render: DotEdgesRenderCtx,
 ): DotInputEdge[] {
-  const { font, measurer, linetype, classPortShortNames } = render;
+  const { font, cardinalityFont, measurer, linetype, classPortShortNames } = render;
   const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
   // ADR-3: unconditional whenever the TARGET carries row bands at all -- a
   // `map` (its own flat-sizer bands) or an `isRowPortKind` leaf -- class
@@ -156,7 +164,7 @@ export function buildDotEdges(
     ...classPortShortNames.keys(),
   ]);
   const ctx: DotEdgeAttrContext = {
-    font, measurer, linetype, kindBIndices, portRowIds,
+    font, cardinalityFont, measurer, linetype, kindBIndices, portRowIds,
     sametailByRelIndex: render.sametailByRelIndex,
   };
   return ast.relationships.map((rel: Relationship, i: number) => {

@@ -39,7 +39,7 @@ import {
 } from './layout-geo-post.js';
 import { computeInkShift } from './layout-ink-shift.js';
 import type { PortClusterInfo, ClusterSpacing } from './frontier-cluster-bbox.js';
-import { computeGraphSpacing } from './link-edge-attrs.js';
+import { computeGraphSpacing, type EdgeFontSpecs } from './link-edge-attrs.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
@@ -199,7 +199,11 @@ function runLayout(
   ast: DescriptionDiagramAST,
   ctx: ClassifyCtx,
   fontSpec: FontSpec,
-  edgeFontSpec: FontSpec,
+  // T14/D3: bundled label/cardinality fonts (was a bare `FontSpec`) -- see
+  // `EdgeFontSpecs`'s own doc comment (`link-edge-attrs.ts`). Retyping this
+  // EXISTING param keeps the function's own param count unchanged, rather
+  // than adding a 9th positional param.
+  edgeFonts: EdgeFontSpecs,
   measurer: StringMeasurer,
   linetype: 'ortho' | 'polyline' | undefined,
   removed: ReadonlySet<string>,
@@ -213,7 +217,7 @@ function runLayout(
   // require a group-anchor node — either a direct group-edge
   // (edgeDotBuild.groupAnchorClusterIds, P2/i5) or port children
   // (portRanksByCluster, ClusterDotString.entityPositionsExceptNormal).
-  const edgeDotBuild = buildDotEdges(ast.links, ctx, edgeFontSpec, measurer, linetype);
+  const edgeDotBuild = buildDotEdges(ast.links, ctx, edgeFonts, measurer, linetype);
   // applySingleStrategy: standalone leaves square-chain with invisible
   // links per group (magma.ts).
   edgeDotBuild.dotEdges.push(...buildMagmaEdges(magmaGroups(ctx),
@@ -238,7 +242,7 @@ function runLayout(
     : new Set([...edgeDotBuild.groupAnchorClusterIds, ...portClusterIds]);
   const dotClusters = buildDotClusters(ctx, anchorClusterIds, portRanksByCluster, kermor)
     .map((c) => ({ ...c, nodeIds: c.nodeIds.filter((id) => !removed.has(id)) }));
-  const { nodeSep, rankSep } = computeGraphSpacing(ast.links, edgeFontSpec, measurer, kermor, ctx.sprites);
+  const { nodeSep, rankSep } = computeGraphSpacing(ast.links, edgeFonts.label, measurer, kermor, ctx.sprites);
   const input: DotInputGraph = {
     nodes: buildDotNodes(
       ctx, fontSpec, measurer, anchorClusterIds, portClusterIds,
@@ -349,6 +353,22 @@ export function layoutDescription(
     family: theme.fontFamily,
     size: theme.colors.graph.arrowFontSize ?? ARROW_LABEL_FONT_SIZE,
   };
+  // T14/D3: `theme.cardinalityFontFamily`/`cardinalityFontSize` are optional
+  // in the `Theme` TYPE (pre-existing hand-built Theme literals elsewhere
+  // stay valid, `theme.ts:21-22`'s own doc comment), but `defaultTheme`/
+  // `darkTheme` always set concrete values and `theme` here always descends
+  // from one of them via `resolveTheme()`/`applyStyleMap` (`build-theme.ts`
+  // Stage 1/3c) -- `deepMergeTheme`'s `partial[key] ?? base[key]` merge
+  // (`theme.ts:491`) preserves that invariant through every stage. The `!`
+  // below asserts that invariant rather than papering over it with a
+  // fitted fallback literal.
+  const edgeFonts: EdgeFontSpecs = {
+    label: edgeFontSpec,
+    cardinality: {
+      family: theme.cardinalityFontFamily!,
+      size: theme.cardinalityFontSize!,
+    },
+  };
   // Container-scoped identity (mission I1b): the set of TRUE cross-scope
   // colliding bare ids, computed from the ORIGINAL (un-grouped) tree once --
   // reused by both `classifyAst` (walks the namespace-grouped tree) and
@@ -410,7 +430,7 @@ export function layoutDescription(
     };
   }
   const { result, edgeDotBuild, portClusterInfoByAstId, spacing } = runLayout(
-    ast, ctx, fontSpec, edgeFontSpec, measurer, theme.linetype ?? ast.linetype, removed,
+    ast, ctx, fontSpec, edgeFonts, measurer, theme.linetype ?? ast.linetype, removed,
     theme.fixCircleLabelOverlapping === true,
   );
   const { nodes, edges } = buildGeoAndEdges(

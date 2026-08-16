@@ -148,3 +148,34 @@ describe('applyStyleMap -- per-signature element-bucket merge (F4-e / M1)', () =
     expect(theme.colors.elements?.rectangle?.stereotypeFontSize).toBe(12);
   });
 });
+
+/**
+ * T14/D3: `applyStyleMap`'s fold of `computeCardinalityFontOverride`
+ * (`style-cascade-class.ts`, T1) into `theme.cardinalityFontSize`/
+ * `cardinalityFontFamily` -- the top-level Theme scalars T1 built but never
+ * wired to a StyleMap. `camuna-58-veca254`'s own `<style>` block is used
+ * verbatim (not synthesized), per this project's "prefer upstream fixtures"
+ * convention.
+ */
+describe('applyStyleMap -- cardinality font fold (T14, D3)', () => {
+  it("camuna-58-veca254's arrow { cardinality { FontSize 10 } } resolves theme.cardinalityFontSize to 10", () => {
+    const styleMap = parseStyleBlock(
+      'arrow {\n  FontSize 14\n  cardinality {\n    FontSize 10\n  }\n}',
+    );
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.cardinalityFontSize).toBe(10);
+  });
+
+  it('a <style> block setting only arrow { FontSize 14 } (no cardinality block) falls through to 14 -- through arrow, not the skin default', () => {
+    const styleMap = parseStyleBlock('arrow {\n  FontSize 14\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.cardinalityFontSize).toBe(14);
+  });
+
+  it('a StyleMap that never touches arrow leaves the base Theme cardinality font unchanged -- no fixture moves', () => {
+    const styleMap = parseStyleBlock('class {\n  BackgroundColor yellow\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.cardinalityFontSize).toBe(defaultTheme.cardinalityFontSize);
+    expect(theme.cardinalityFontFamily).toBe(defaultTheme.cardinalityFontFamily);
+  });
+});

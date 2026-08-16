@@ -71,7 +71,7 @@ function rel(label: string): Relationship {
 
 describe('edgeLabelAttrs — multi-line label sizing (G2 item 43)', () => {
   it('measures a single-line label unchanged (pre-existing behavior)', () => {
-    const attrs = edgeLabelAttrs(rel('demo'), font, measurer);
+    const attrs = edgeLabelAttrs(rel('demo'), font, font, measurer);
     expect(attrs.label).toBe('demo');
     // +2 on each axis is SvekEdge#addVisibilityModifier's all-round
     // `withMargin(block, 1, 1)` (svek/SvekEdge.java:372-373), applied once
@@ -83,7 +83,7 @@ describe('edgeLabelAttrs — multi-line label sizing (G2 item 43)', () => {
 
   it('reserves the WIDEST line\'s width and the stacked height for a multi-line label', () => {
     // Lines: 'this is' (7), 'on several' (10), 'lines' (5) -- widths *7.
-    const attrs = edgeLabelAttrs(rel('this is\\non several\\nlines'), font, measurer);
+    const attrs = edgeLabelAttrs(rel('this is\\non several\\nlines'), font, font, measurer);
     expect(attrs.label).toBe('this is\\non several\\nlines');
     expect(attrs.labelWidth).toBe(72); // 'on several'.length(10) * 7 + 2
     expect(attrs.labelHeight).toBe(44); // 14 * 3 lines + 2 (block margin, not per line)
@@ -92,20 +92,20 @@ describe('edgeLabelAttrs — multi-line label sizing (G2 item 43)', () => {
 
 describe('edgeLabelAttrs — magic-arrow label sizing (G2 item 44)', () => {
   it('reserves ARROW_GLYPH_SIZE plus the stripped text width for "foo >"', () => {
-    const attrs = edgeLabelAttrs(rel('foo >'), font, measurer);
+    const attrs = edgeLabelAttrs(rel('foo >'), font, font, measurer);
     // 'foo'.length(3) * 7 = 21; ARROW_GLYPH_SIZE = trunc(13*0.8) = 10.
     expect(attrs.labelWidth).toBe(33); // 21 + 10 + 2
     expect(attrs.labelHeight).toBe(16); // max(10, 14) + 2
   });
 
   it('reserves ONLY ARROW_GLYPH_SIZE for a bare ">" (no remaining text)', () => {
-    const attrs = edgeLabelAttrs(rel('>'), font, measurer);
+    const attrs = edgeLabelAttrs(rel('>'), font, font, measurer);
     expect(attrs.labelWidth).toBe(12); // ARROW_GLYPH_SIZE + 2
     expect(attrs.labelHeight).toBe(12); // ARROW_GLYPH_SIZE + 2
   });
 
   it('a stereotype guillemet label is measured via the plain (non-arrow) path', () => {
-    const attrs = edgeLabelAttrs(rel('<<alias>>'), font, measurer);
+    const attrs = edgeLabelAttrs(rel('<<alias>>'), font, font, measurer);
     expect(attrs.labelWidth).toBe(65); // '<<alias>>'.length(9) * 7 + 2
   });
 });

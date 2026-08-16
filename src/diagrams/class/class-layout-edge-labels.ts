@@ -287,23 +287,19 @@ function computeRelLabelAttrs(
  * the right font size nor a multi-line split (`camuna-58-veca254`: oracle
  * `23x10`/`41x20`, prior output `31x13`/`71x13`).
  *
- * `cardinalityFont`'s family reuses `font.family` (== `theme.fontFamily`) --
- * the same reuse `class-edge-geo.ts:120` and `class-edge-label-anchor.ts:56`
- * already make for every other `CARDINALITY_FONT_SIZE` consumer in this
- * engine; only the SIZE differs from `font`, which carries the arrow LABEL
- * size instead.
- *
- * **Known gap (write-set escape, journalled -- decision-journal.md T6):**
- * `computeCardinalityFontOverride` (`style-cascade-class.ts`, D3) resolves a
- * diagram's `<style> arrow { cardinality { FontSize N } } }` override from a
- * StyleMap, but no StyleMap reaches this function -- its one caller chain
- * (`edgeLabelAttrs` -> `class-dot-edges.ts` -> `class-dot-graph.ts:371`)
- * builds `font` once, with no cascade lookup. Threading the override through
- * touches `style-map-theme.ts`/`class-dot-graph.ts`, both outside this
- * task's declared write-set (T7's sibling brief names the identical trap and
- * requires the same stop-and-log). `camuna-58-veca254` therefore still
- * fails `labelSizeOk` after this task -- it needs the 10px override, not the
- * 13px default this function now correctly applies everywhere else.
+ * **T14/D3 resolved** (was: a known write-set-escape gap logged by T6).
+ * `cardinalityFont` is no longer derived locally from `font.family` +
+ * `CARDINALITY_FONT_SIZE` -- the caller (`edgeLabelAttrs` below, fed by
+ * `class-dot-edges.ts` <- `class-dot-graph.ts`) now resolves it from
+ * `theme.cardinalityFontFamily`/`cardinalityFontSize`, which
+ * `style-map-theme.ts#buildStyleMapPartialTheme` folds in from
+ * `computeCardinalityFontOverride` (`style-cascade-class.ts`, D3) whenever a
+ * diagram's own `<style>` sets `arrow { cardinality { FontSize N } } }` --
+ * `camuna-58-veca254`'s 10px override included. Absent an override, the
+ * fold contributes nothing and `deepMergeTheme` keeps the base Theme's own
+ * 13/sans-serif default (`theme.ts:255-256`), so this function's own
+ * contract (a plain `{family,size}` font) and its jar citations above are
+ * unchanged -- only WHERE the font comes from moved.
  *
  * **Role labels (spec item 2, journalled): no path exists to route.**
  * `Relationship.fromRole`/`toRole` are parsed and stored
@@ -323,11 +319,10 @@ function computeRelLabelAttrs(
  */
 function computeMultiplicityAttrs(
   rel: Relationship,
-  font: { family: string; size: number },
+  cardinalityFont: { family: string; size: number },
   measurer: StringMeasurer,
 ): MultiplicityAttrs {
   const attrs: MultiplicityAttrs = {};
-  const cardinalityFont = { family: font.family, size: CARDINALITY_FONT_SIZE };
   if (rel.fromMultiplicity !== undefined) {
     const box = computeQuantifierBox(rel.fromMultiplicity, cardinalityFont, measurer);
     attrs.tailLabelWidth = box.reservedWidth;
@@ -349,6 +344,11 @@ function computeMultiplicityAttrs(
 export function edgeLabelAttrs(
   rel: Relationship,
   font: { family: string; size: number },
+  // T14/D3: the resolved `{root,element,classDiagram,arrow,cardinality}`
+  // font (`GraphvizImageBuilder.java:124-126,235-241` resolves it SEPARATELY
+  // from `labelFont`) -- `class-dot-graph.ts` builds it from `theme`, not a
+  // derivation of `font`. See `computeMultiplicityAttrs`'s own doc comment.
+  cardinalityFont: { family: string; size: number },
   measurer: StringMeasurer,
 ): NonNullable<DotInputEdge['attributes']> {
   return withLayoutBox({
@@ -360,7 +360,7 @@ export function edgeLabelAttrs(
     // reaches it through the `CONSTRAINT_SPOT` arm at `SvekEdge.java:440`,
     // which never builds a `labelText` and so never sees the margin.
     ...withLabelMargin(computeRelLabelAttrs(rel, font, measurer), rel),
-    ...computeMultiplicityAttrs(rel, font, measurer),
+    ...computeMultiplicityAttrs(rel, cardinalityFont, measurer),
   });
 }
 
