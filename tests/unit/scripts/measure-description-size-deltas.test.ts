@@ -6,6 +6,14 @@
  * `description-parity.ratchet.test.ts` suite it reuses.
  */
 import { describe, it, expect } from 'vitest';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import type { StructuralDiff } from '../../oracle/svek-dot.js';
+import {
+  expectedBacklogFailures,
+  loadStructuralBacklogs,
+  unexcusedFailures,
+} from '../../oracle/dot-parity-backlog-data.js';
 import {
   classifyDelta,
   detectCause,
@@ -13,6 +21,8 @@ import {
   DELTA_EPSILON,
   type DeltaResult,
 } from '../../../scripts/measure-description-size-deltas.js';
+
+const REPO = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
 describe('classifyDelta', () => {
   it('classifies a larger delta than allowed as widened', () => {
@@ -131,5 +141,36 @@ describe('summarize', () => {
     expect(s.improved).toBe(1);
     expect(s.unchanged).toBe(3);
     expect(s.causes).toEqual({ sprite: 2, latex: 1 });
+  });
+});
+
+describe('unexcusedFailures (dot-parity-backlog-data, shared with the ratchets)', () => {
+  // A minimal StructuralDiff stand-in: only the `*Ok` keys matter to the
+  // helper, so cast through unknown rather than fabricate every field.
+  const diff = (ok: Record<string, boolean>): StructuralDiff => ok as unknown as StructuralDiff;
+
+  it('an EQUAL graph has no unexcused failures with or without a backlog', () => {
+    expect(unexcusedFailures(diff({ labelSizeOk: true, portOk: true }), [])).toEqual([]);
+    expect(unexcusedFailures(diff({ labelSizeOk: true, portOk: true }), ['labelSizeOk'])).toEqual([]);
+  });
+
+  it('a label-size-only miss is excused ONLY when label-size-backlog names the slug ' +
+     '(the 10 description slugs CI run 31919140187 reported as widened, e.g. berelu-46)', () => {
+    const d = diff({ labelSizeOk: false, portOk: true, sizeConformantOk: false });
+    expect(unexcusedFailures(d, ['labelSizeOk'])).toEqual([]);
+    expect(unexcusedFailures(d, [])).toEqual(['labelSizeOk']);
+  });
+
+  it('a backlog never excuses a check it does not name', () => {
+    const d = diff({ labelSizeOk: false, portOk: false });
+    expect(unexcusedFailures(d, ['labelSizeOk'])).toEqual(['portOk']);
+  });
+
+  it('the description goldens name exactly the 10 label-size slugs and no direction slugs', () => {
+    const backlogs = loadStructuralBacklogs(join(REPO, 'oracle', 'goldens', 'description'));
+    expect(expectedBacklogFailures('berelu-46-namo819', backlogs)).toEqual(['labelSizeOk']);
+    expect(expectedBacklogFailures('zosuje-43-zebi775', backlogs)).toEqual(['labelSizeOk']);
+    expect(expectedBacklogFailures('zusota-76-jagu564', backlogs)).toEqual([]);
+    expect(backlogs.get('label-size-backlog.json')!.size).toBe(10);
   });
 });

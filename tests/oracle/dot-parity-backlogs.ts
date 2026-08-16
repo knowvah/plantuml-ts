@@ -19,42 +19,28 @@
  * each suite's `size-backlog.json`. It is filtered out here for that reason.
  */
 import { expect } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import {
+  BACKLOG_CHECKS,
+  loadSlugBacklog,
+  loadStructuralBacklogs,
+  expectedBacklogFailures,
+  structuralFailures,
+  unexcusedFailures,
+  type BacklogFile,
+} from './dot-parity-backlog-data.js';
 
-import type { StructuralDiff } from './svek-dot.js';
-
-/** Which `compareStructural` check each backlog file names. */
-export const BACKLOG_CHECKS = {
-  'direction-backlog.json': 'directionOk',
-  'label-size-backlog.json': 'labelSizeOk',
-} as const;
-export type BacklogFile = keyof typeof BACKLOG_CHECKS;
-
-/** `{ slugs: [...] }` from `<goldens>/<file>`, or empty when absent. */
-export function loadSlugBacklog(goldens: string, file: BacklogFile): ReadonlySet<string> {
-  const path = join(goldens, file);
-  if (!existsSync(path)) return new Set();
-  return new Set((JSON.parse(readFileSync(path, 'utf8')) as { slugs: string[] }).slugs);
-}
-
-/** The checks `name` is allowed (and required, in union) to fail, sorted. */
-export function expectedBacklogFailures(
-  name: string,
-  backlogs: ReadonlyMap<BacklogFile, ReadonlySet<string>>,
-): string[] {
-  const out: string[] = [];
-  for (const [file, slugs] of backlogs) if (slugs.has(name)) out.push(BACKLOG_CHECKS[file]);
-  return out.sort();
-}
-
-/** Every `*Ok` check that is false on `diff`, excluding the size metric. */
-export function structuralFailures(diff: StructuralDiff): string[] {
-  return Object.entries(diff)
-    .filter(([k, v]) => k.endsWith('Ok') && k !== 'sizeConformantOk' && v === false)
-    .map(([k]) => k)
-    .sort();
-}
+// The data half (file→check map, loaders, pure set arithmetic) lives in
+// `dot-parity-backlog-data.ts` so the vitest-free size-delta scripts can share
+// the contract; re-exported here so every ratchet keeps its one import.
+export {
+  BACKLOG_CHECKS,
+  loadSlugBacklog,
+  loadStructuralBacklogs,
+  expectedBacklogFailures,
+  structuralFailures,
+  unexcusedFailures,
+  type BacklogFile,
+};
 
 /**
  * Assert one fixture's graphs against its backlogs. `perFile` is the sorted
