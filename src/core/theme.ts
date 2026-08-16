@@ -1,6 +1,5 @@
 /**
  * Theme system for plantuml-ts.
- *
  * Defines the visual appearance of all diagram types via a single Theme
  * interface. The resolveTheme helper normalises string aliases and deep-merges
  * partial overrides without mutating the built-in theme objects.
@@ -18,6 +17,9 @@ export type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
 export interface Theme {
   fontFamily: string;
   fontSize: number;
+  /** GraphvizImageBuilder.java:124-126 cascade font (`getStyleArrowCardinality`); default 13 = plantuml.skin:307 arrow FontSize, family = root's SansSerif (plantuml.skin:6, arrow sets no FontName). Optional so pre-existing hand-built `Theme` literals elsewhere stay valid; `defaultTheme`/`darkTheme` always set both. No consumer yet — T5/T6, decisions.md#D3. */
+  cardinalityFontSize?: number;
+  cardinalityFontFamily?: string;
   /** R2j: EXPLICIT `skinparam defaultFontSize` marker (set only when the key
    *  was seen) — `SkinParam#getFontSize`'s middle tier between per-param
    *  skinparams and each FontParam's own default (SkinParam.java:441-448),
@@ -26,12 +28,10 @@ export interface Theme {
   defaultFontSize?: number;
   /**
    * The diagram's own outer margin, when a theme declares one.
-   *
    * `TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style
    * for `root.document` and falls back to `TitledDiagram#getDefaultMargins()`
    * — `same(10)` — only when that style carries no `Margin`. 28 built-in
    * themes declare one; 21 restate the default 10 and 7 set 5.
-   *
    * Four-sided because upstream's value is (`ClockwiseTopRightBottomLeft`,
    * CSS-shaped 1/2/3/4 numbers); only the uniform form occurs at this scope
    * today. Absent means "use the engine's default".
@@ -41,7 +41,6 @@ export interface Theme {
    * The theme's own `<style> document { … }` declarations, as
    * `selector -> { property: value }` with lowercase keys — the same shape
    * `parseStyleBlock` produces.
-   *
    * `document` and `document.<element>` are genuine members of every chrome
    * element's `{root, document, <element>}` signature, and
    * `StyleStorage#computeMergedStyle` matches by set containment, so a theme's
@@ -112,13 +111,11 @@ export interface Theme {
   /**
    * `skinparam handwritten true` — draw every primitive through the sketchy
    * renderer (`core/klimt/drawing/hand/`).
-   *
    * `JsonDiagram#drawU` and its siblings open with
    * `if (handwritten) ug = new UGraphicHandwritten(ug)`, a decorator that
    * turns rectangles and ellipses into jiggled polygons and lines and paths
    * into jiggled polylines. Deterministic: the jitter comes from a single
    * `new Random(424242L)` per diagram.
-   *
    * Honoured by the json family so far; other engines need their draw order
    * confirmed against the jar before it can be switched on there, because the
    * random stream is shared and sequential across every shape.
@@ -255,6 +252,8 @@ export interface Theme {
 export const defaultTheme: Theme = {
   fontFamily: 'sans-serif',
   fontSize: 14,
+  cardinalityFontSize: 13, // plantuml.skin:307
+  cardinalityFontFamily: 'sans-serif', // plantuml.skin:6 root default; arrow sets no FontName
   colors: {
     background: '#FFFFFF',
     nodeBackground: '#F1F1F1',
@@ -328,6 +327,8 @@ export const defaultTheme: Theme = {
 export const darkTheme: Theme = {
   fontFamily: defaultTheme.fontFamily,
   fontSize: defaultTheme.fontSize,
+  cardinalityFontSize: 13, // plantuml.skin:307; same default as defaultTheme's
+  cardinalityFontFamily: 'sans-serif',
   colors: {
     background: '#1E1E1E',
     nodeBackground: '#2D2D2D',
@@ -372,7 +373,6 @@ export const monochromeTheme: Theme = {
 
 /**
  * Deep-partial theme override, safe to compose onto a base Theme.
- *
  * Unlike Partial<Theme> (which is only one level deep), colors and its nested
  * fields may each be partially specified. deepMergeTheme accepts this type and
  * fills missing fields from the base.
@@ -380,6 +380,8 @@ export const monochromeTheme: Theme = {
 export type ThemeOverride = {
   fontFamily?: string;
   fontSize?: number;
+  cardinalityFontSize?: number;
+  cardinalityFontFamily?: string;
   diagramMargin?: { top: number; right: number; bottom: number; left: number };
   /** See {@link Theme.styleOverrides}. */
   styleOverrides?: Record<string, Record<string, string>>;
@@ -394,13 +396,11 @@ export type ThemeOverride = {
   /**
    * `skinparam handwritten true` — draw every primitive through the sketchy
    * renderer (`core/klimt/drawing/hand/`).
-   *
    * `JsonDiagram#drawU` and its siblings open with
    * `if (handwritten) ug = new UGraphicHandwritten(ug)`, a decorator that
    * turns rectangles and ellipses into jiggled polygons and lines and paths
    * into jiggled polylines. Deterministic: the jitter comes from a single
    * `new Random(424242L)` per diagram.
-   *
    * Honoured by the json family so far; other engines need their draw order
    * confirmed against the jar before it can be switched on there, because the
    * random stream is shared and sequential across every shape.
@@ -441,7 +441,6 @@ export type ThemeOverride = {
 
 /**
  * Deep-merge a partial Theme on top of a base Theme.
- *
  * Returns a new Theme object — neither `base` nor `partial` is mutated.
  * Nested objects (`colors`, `colors.graph`, `colors.graph.activity`,
  * `colors.graph.json`, `sequence`) are merged one level deep; scalar fields
@@ -474,6 +473,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
   'shadowing', 'packageStyle', 'nodeSep', 'rankSep', 'wrapWidth',
   'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize',
+  'cardinalityFontSize', 'cardinalityFontFamily', // T1 (edge-label-box-backlog, D3)
   // `diagramMargin` is the one non-scalar here. It rides this list because the
   // merge is a whole-value replacement, which is exactly right for a margin:
   // a theme that sets one replaces all four sides, it does not blend with the
@@ -515,7 +515,6 @@ export function deepMergeTheme(base: Theme, partial: ThemeOverride): Theme {
 
 /**
  * Resolve a theme option to a concrete Theme object.
- *
  * - String aliases: 'default' → defaultTheme, 'dark' → darkTheme,
  *   'sketchy' → sketchyTheme, 'monochrome' → monochromeTheme.
  * - Any other string: looked up in BUILTIN_THEMES, merged onto defaultTheme.
