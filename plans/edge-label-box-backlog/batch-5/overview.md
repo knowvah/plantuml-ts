@@ -5,8 +5,8 @@ Geometry moves, so D4's census bar is live.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T9 | State note-on-link | `typescript-pro` | `src/diagrams/state/state-dot-graph.ts`, `src/diagrams/state/state-composite-edge-label.ts`, `tests/unit/state/state-note-link-dot.test.ts`, `oracle/goldens/state/label-size-backlog.json` | T8 | [ ] |
-| T10 | Class note-on-link | `typescript-pro` | `src/diagrams/class/class-layout-edge-labels.ts`, `oracle/goldens/class/label-size-backlog.json` | T8 | [ ] |
+| T9 | State note-on-link | `typescript-pro` | `src/diagrams/state/state-dot-graph.ts`, `src/diagrams/state/state-composite-edge-label.ts`, `tests/unit/state/state-note-link-dot.test.ts`, `oracle/goldens/state/label-size-backlog.json` | T8 | [x] |
+| T10 | Class note-on-link | `typescript-pro` | `src/diagrams/class/class-layout-edge-labels.ts`, `oracle/goldens/class/label-size-backlog.json` | T8 | [x] |
 
 **Write-set conflicts:** none within the batch. Note that T10 re-opens
 `class-layout-edge-labels.ts` and the class backlog, both of which T6 edited in
