@@ -13,6 +13,7 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import {
   computeReservedLabelBox,
   computeQuantifierBox,
+  computeMergedLabelBox,
   splitCreoleLines,
   stripCreoleMarkup,
 } from '../../../src/core/edge-label-box.js';
@@ -148,5 +149,205 @@ describe('computeQuantifierBox — jar-measured cases, no shield/margin', () => 
     const rawWidth = measurer.measure('value', CARDINALITY_FONT).width;
     expect(rawWidth).not.toBe(Math.trunc(rawWidth));
     expect(box.reservedWidth).toBe(Math.trunc(rawWidth));
+  });
+});
+
+/**
+ * `computeMergedLabelBox` — the note-on-link arm (`SvekEdge.java:302-325,
+ * 440-445, 485-489`). `noteDim` stands in for the note sizer's decorated
+ * image output (T9/T10 wire the real sizer); the values below are chosen
+ * to make the three terms (merge, shield, halving) individually legible,
+ * not to match the `lozego-15-coci435` oracle — that fixture needs the
+ * real note sizer to verify end to end.
+ */
+describe('computeMergedLabelBox — mergeLR/mergeTB, shield, halving', () => {
+  const label = 'Items';
+  const labelDim = computeReservedLabelBox(label, ARROW_FONT, measurer, false);
+  const noteDim = { width: 100, height: 80 };
+
+  it('LEFT: width sums note+label, height is the max (XDimension2D.java:108-112)', () => {
+    const box = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'left',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(box.reservedWidth).toBe(noteDim.width + labelDim.reservedWidth);
+    expect(box.reservedHeight).toBe(Math.max(noteDim.height, labelDim.reservedHeight));
+  });
+
+  it('RIGHT: same numbers as LEFT — width-sum/height-max are commutative', () => {
+    const left = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'left',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    const right = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'right',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(right.reservedWidth).toBe(left.reservedWidth);
+    expect(right.reservedHeight).toBe(left.reservedHeight);
+  });
+
+  it('TOP: width is the max, height sums note+label (XDimension2D.java:94-98)', () => {
+    const box = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'top',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(box.reservedWidth).toBe(Math.max(noteDim.width, labelDim.reservedWidth));
+    expect(box.reservedHeight).toBe(noteDim.height + labelDim.reservedHeight);
+  });
+
+  it('BOTTOM: same numbers as TOP — max/sum are commutative', () => {
+    const top = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'top',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    const bottom = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'bottom',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(bottom.reservedWidth).toBe(top.reservedWidth);
+    expect(bottom.reservedHeight).toBe(top.reservedHeight);
+  });
+
+  it('a middle decor adds 2 * 7 to BOTH dimensions (SvekEdge.java:353-356, 441)', () => {
+    const noShield = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'left',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    const shielded = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'left',
+      halfWidth: false,
+      hasMiddleDecor: true,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(shielded.reservedWidth - noShield.reservedWidth).toBe(14);
+    expect(shielded.reservedHeight - noShield.reservedHeight).toBe(14);
+  });
+
+  it('NONE middle decor adds no shield', () => {
+    const box = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'left',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(box.reservedWidth).toBe(noteDim.width + labelDim.reservedWidth);
+  });
+
+  it('a HALF_* strategy halves width only, never height (SvekEdge.java:485-489)', () => {
+    const full = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'left',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    const halved = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'left',
+      halfWidth: true,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(halved.reservedWidth).toBe(Math.floor(full.reservedWidth / 2));
+    expect(halved.reservedHeight).toBe(full.reservedHeight);
+  });
+
+  it('halving is applied AFTER the shield, not before', () => {
+    // If halving ran before the shield, the shield's 14 would survive intact
+    // on top of a halved base; SvekEdge halves the SHIELDED dimension
+    // (`eventuallyDivideByTwo(dimNote)` at `:443`, where `dimNote` already
+    // includes `delta(2 * labelShield)` from `:441`).
+    const halvedAndShielded = computeMergedLabelBox({
+      label,
+      noteDim,
+      position: 'left',
+      halfWidth: true,
+      hasMiddleDecor: true,
+      font: ARROW_FONT,
+      measurer,
+    });
+    const preHalfWidth = noteDim.width + labelDim.reservedWidth + 2 * 7;
+    expect(halvedAndShielded.reservedWidth).toBe(Math.floor(preHalfWidth / 2));
+  });
+
+  it('an empty label short-circuits to the bare note dimension, unmerged', () => {
+    // Mirrors `TextBlockUtils.mergeLR`/`mergeTB`'s own `EMPTY_TEXT_BLOCK`
+    // check (`TextBlockUtils.java:112-120, 122-130`): a link with no label
+    // text merges to exactly the note's own dimension, no margin added.
+    const box = computeMergedLabelBox({
+      label: '',
+      noteDim,
+      position: 'left',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(box.reservedWidth).toBe(noteDim.width);
+    expect(box.reservedHeight).toBe(noteDim.height);
+  });
+
+  it('truncates a fractional merged dimension toward zero on BOTH axes', () => {
+    // Unlike the plain label arm, both width and height can be fractional
+    // here because `noteDim` (the note sizer's output) is not naturally
+    // integer the way `lines.length * font.size` is.
+    const fractionalNote = { width: 100.7, height: 80.6 };
+    const box = computeMergedLabelBox({
+      label,
+      noteDim: fractionalNote,
+      position: 'left',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(box.reservedWidth).toBe(Math.floor(fractionalNote.width + labelDim.reservedWidth));
+    expect(box.reservedHeight).toBe(Math.floor(Math.max(fractionalNote.height, labelDim.reservedHeight)));
   });
 });

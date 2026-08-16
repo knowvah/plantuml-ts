@@ -151,3 +151,126 @@ export function computeQuantifierBox(
   const reservedHeight = lines.length * font.size;
   return { lines, reservedWidth, reservedHeight };
 }
+
+/** Two-dimensional size, independent of where it came from (a measured
+ *  label or the note sizer's decorated-image output). */
+interface Dim {
+  readonly width: number;
+  readonly height: number;
+}
+
+/** `Position.LEFT` / `RIGHT` / `TOP` / `BOTTOM` — the note's placement
+ *  relative to the label, `SvekEdge.java:318-325`. */
+export type NoteOnLinkPosition = 'left' | 'right' | 'top' | 'bottom';
+
+/**
+ * `labelShield` — 7 when the link type's middle decor is not `NONE`, 0
+ * otherwise (`SvekEdge.java:353-356`). `2 * LABEL_SHIELD` is added to BOTH
+ * width and height via `dimNote.delta(2 * labelShield)` (`:441`), because
+ * `XDimension2D#delta(double)` (`XDimension2D.java:75-77`) forwards to the
+ * two-arg form with the same value for width and height (`:87-92`).
+ */
+const LABEL_SHIELD = 7;
+
+/**
+ * `XDimension2D#mergeLR` (`XDimension2D.java:108-112`) — the arithmetic
+ * `TextBlockHorizontal#calculateDimensionSlow` reduces over via
+ * `TextBlockUtils.mergeLR` (`TextBlockHorizontal.java:69-75`,
+ * `TextBlockUtils.java:112-120`). Read here, not inferred from the method
+ * name (decisions.md D2): width sums, height takes the max — the alignment
+ * parameter (`VerticalAlignment`) only affects `drawU`'s vertical offset
+ * (`:77-93`), never the dimension. Width-sum and height-max are both
+ * commutative, so operand order does not change the numbers this function
+ * returns — it is preserved anyway to mirror upstream for a future drawing
+ * consumer (T9/T10), which DOES care which side is on the left.
+ */
+function mergeLR(left: Dim, right: Dim): Dim {
+  return { width: left.width + right.width, height: Math.max(left.height, right.height) };
+}
+
+/**
+ * `XDimension2D#mergeTB` (`XDimension2D.java:94-98`) — same reduction, via
+ * `TextBlockVertical#calculateDimensionSlow` (`TextBlockVertical.java:71-77`,
+ * `TextBlockUtils.java:122-130`): width takes the max, height sums.
+ */
+function mergeTB(top: Dim, bottom: Dim): Dim {
+  return { width: Math.max(top.width, bottom.width), height: top.height + bottom.height };
+}
+
+/**
+ * Operand order per position (`SvekEdge.java:318-325`): note-first for
+ * `LEFT`/`TOP`, label-first for `RIGHT`/`BOTTOM`.
+ */
+function mergeByPosition(position: NoteOnLinkPosition, noteDim: Dim, labelDim: Dim): Dim {
+  switch (position) {
+    case 'left':
+      return mergeLR(noteDim, labelDim);
+    case 'right':
+      return mergeLR(labelDim, noteDim);
+    case 'top':
+      return mergeTB(noteDim, labelDim);
+    case 'bottom':
+      return mergeTB(labelDim, noteDim);
+  }
+}
+
+export interface MergedLabelBoxInput {
+  readonly label: string;
+  /** From the note sizer (`EntityImageNoteLink` — padding, border, and any
+   *  sprite already baked in), NOT a string measurement. */
+  readonly noteDim: Dim;
+  readonly position: NoteOnLinkPosition;
+  /** `NoteLinkStrategy.HALF_NOT_PRINTED` / `HALF_PRINTED_FULL`
+   *  (`SvekEdge.java:314-317`). */
+  readonly halfWidth: boolean;
+  /** `link.getType().getMiddleDecor() != LinkMiddleDecor.NONE`
+   *  (`:353-356`). */
+  readonly hasMiddleDecor: boolean;
+  readonly font: FontSpec;
+  readonly measurer: StringMeasurer;
+}
+
+/**
+ * The box formula for a link whose note is merged into the label
+ * (`SvekEdge.java:302-325, 440-445, 485-489`), covering all three terms in
+ * order of application:
+ *
+ * 1. **Merge** — `mergeLR`/`mergeTB` over the label's ALREADY-margined
+ *    dimension (`labelOnly = addVisibilityModifier(block, link, skinParam)`,
+ *    `:302`, which bakes in `2 * marginLabel` via `withMargin` — `:372-373`
+ *    — BEFORE the merge, not after) and the note operand's raw dimension.
+ *    Reuses {@link computeReservedLabelBox} for the label side so the same
+ *    creole-strip/split/margin arithmetic is not re-derived; `isSelfLoop`
+ *    is fixed `false` because this contract carries no such flag — no
+ *    corpus fixture combines a self-loop link with `note on link`, so the
+ *    self-loop margin (6, `:372`) is unrepresented here. If one surfaces,
+ *    that is a `DIVERGENCES.md` entry, not a reason to guess a flag through.
+ *    An empty label mirrors `TextBlockUtils.mergeLR`/`mergeTB`'s own
+ *    `EMPTY_TEXT_BLOCK` short-circuit (`TextBlockUtils.java:112-120,
+ *    122-130`): the note dimension passes through untouched, unmerged.
+ * 2. **Shield** — `+ 2 * labelShield` on BOTH dimensions.
+ * 3. **Halving** — width only, via `eventuallyDivideByTwo`
+ *    (`SvekEdge.java:485-489`).
+ *
+ * `appendTable`'s `(int)` cast (`:504-507`) truncates the final width AND
+ * height — unlike {@link computeReservedLabelBox}, where only width can be
+ * fractional; here both can, since `noteDim` may carry sub-pixel values.
+ */
+export function computeMergedLabelBox(input: MergedLabelBoxInput): ReservedLabelBox {
+  const { label, noteDim, position, halfWidth, hasMiddleDecor, font, measurer } = input;
+  const labelBox = computeReservedLabelBox(label, font, measurer, false);
+  const labelDim: Dim = { width: labelBox.reservedWidth, height: labelBox.reservedHeight };
+  const merged = label.length === 0 ? noteDim : mergeByPosition(position, noteDim, labelDim);
+  const shield = hasMiddleDecor ? LABEL_SHIELD : 0;
+  const shieldedWidth = merged.width + 2 * shield;
+  const shieldedHeight = merged.height + 2 * shield;
+  const finalWidth = halfWidth ? shieldedWidth / 2 : shieldedWidth;
+  return {
+    marginLabel: labelBox.marginLabel,
+    lines: labelBox.lines,
+    measuredWidth: merged.width,
+    measuredHeight: merged.height,
+    reservedWidth: Math.floor(finalWidth),
+    reservedHeight: Math.floor(shieldedHeight),
+  };
+}
