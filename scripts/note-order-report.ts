@@ -56,15 +56,25 @@
  *       is a proxy that holds on 65/97 note fixtures (2026-08-15).
  *   npx tsx scripts/note-order-report.ts --check-order <baseline-report>
  *       # re-render and compare every fixture in a saved default-mode
- *       report against the current one on BOTH `sha=` and the uid sequence
- *       (names stripped, `cls:Foo=ent0001` / `link=lnk1` -> the bare uid):
- *       `MOVED <label>` when both changed, `OFFENDER <label> (...)` when
- *       only one did, `MISSING`/`EXTRA <label>` for fixtures on only one
- *       side. Final line `check-order: moved=<n> offenders=<m>`; exits 1
- *       iff offenders > 0.
+ *       report against the current one on `sha=`, `ink=` and the uid
+ *       sequence (names stripped, `cls:Foo=ent0001` / `link=lnk1` -> the
+ *       bare uid). `ink=` is the ORDER-INDEPENDENT hash of the SVG's
+ *       top-level children (each child serialised, then sorted), so a
+ *       fixture whose sha changed but whose ink did not is a PURE REORDER
+ *       of siblings -- which is what "nothing but order moved" means, and
+ *       it covers the leaves that draw UNWRAPPED (TIPS, collapsed-empty
+ *       packages, assoc-circles: no `<g>`, no uid, invisible to the uid
+ *       sequence -- mission leaf-draw-order T4's five false offenders).
+ *       `MOVED <label>` when sha changed and ink did not (suffix
+ *       `(unwrapped)` when the uid sequence did not move either);
+ *       `OFFENDER <label> (...)` when sha and ink both changed, or the
+ *       sequence changed without the sha; `MISSING`/`EXTRA <label>` for
+ *       fixtures on only one side. Baselines without an `ink=` column fall
+ *       back to the sha-vs-sequence rule. Final line `check-order:
+ *       moved=<n> offenders=<m>`; exits 1 iff offenders > 0.
  *
  * Output (stable, diffable, name-sorted): one line per fixture,
- *   <type>/<slug> notes=<n> tips=<k> sha=<12 hex of the whole SVG> <seq>
+ *   <type>/<slug> notes=<n> tips=<k> sha=<12 hex of the whole SVG> ink=<12 hex, see above> <seq>
  * where <seq> is a space-separated document-order list of
  *   cls:<qualified-name>=<uid> | note:<id>=<uid> | link=<uid>
  * (`-` when the element carries no id), or `<type>/<slug> ERR: <message>`
@@ -167,6 +177,34 @@ function walkGroups(node: XmlNode, noteIds: ReadonlySet<string>, out: string[]):
   }
 }
 
+/** Order-independent hash of the SVG's DRAW-LEVEL siblings: every node
+ *  under the root `<svg>` (elements AND the `<!--class ...-->` comments;
+ *  whitespace-only text skipped) serialised, sorted, joined, sha1'd -- with
+ *  the class-less top-level `<g font-family=...>` container (jar's root
+ *  group, under which every entity/link/unwrapped shape sits) flattened
+ *  one level: its own start tag as one token, each of its children as
+ *  further tokens. Two renders with the same value differ AT MOST in the
+ *  ORDER of their draw-level siblings. */
+function inkHash(doc: XmlNode): string {
+  const root = (doc as unknown as { documentElement: XmlNode }).documentElement;
+  const parts: string[] = [];
+  const pushChildren = (parent: XmlNode, flattenContainers: boolean): void => {
+    for (let child = parent.firstChild; child !== null; child = child.nextSibling) {
+      const el = child as unknown as Element;
+      if (flattenContainers && child.nodeType === ELEMENT_NODE && el.tagName === 'g' && !el.hasAttribute('class')) {
+        parts.push(`<g ${Array.from(el.attributes, (a) => `${a.name}="${a.value}"`).join(' ')}>`);
+        pushChildren(child, false);
+        continue;
+      }
+      const text = String(child);
+      if (text.trim().length > 0) parts.push(text);
+    }
+  };
+  pushChildren(root, true);
+  parts.sort();
+  return createHash('sha1').update(parts.join('\n')).digest('hex').slice(0, SHA_PREFIX_LEN);
+}
+
 // ---------------------------------------------------------------------------
 // Per-fixture line
 // ---------------------------------------------------------------------------
@@ -184,7 +222,7 @@ function reportFixture(f: FixtureDir): FixtureLine {
     const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
     const seq: string[] = [];
     walkGroups(doc, identity.ids, seq);
-    const line = `${label} notes=${identity.ids.size} tips=${identity.tips} sha=${sha} ${seq.join(' ')}`;
+    const line = `${label} notes=${identity.ids.size} tips=${identity.tips} sha=${sha} ink=${inkHash(doc)} ${seq.join(' ')}`;
     return { label, line, hasNotes: identity.ids.size > 0 };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -275,7 +313,9 @@ function runVsJar(): void {
 // --check-order mode
 // ---------------------------------------------------------------------------
 
-interface FixtureRecord { readonly sha: string; readonly seq: string }
+/** `ink` is `undefined` for a report line captured before the `ink=` column
+ *  existed (falls back to the sha-vs-sequence rule in {@link classify}). */
+interface FixtureRecord { readonly sha: string; readonly ink: string | undefined; readonly seq: string }
 
 /** `cls:Foo=ent0001` -> `ent0001`, `link=lnk1` -> `lnk1`: the same
  *  strip-to-uid idea as {@link uidSequence}, applied to a report LINE's
@@ -291,8 +331,10 @@ function parseFixtureRecord(line: string): FixtureRecord | undefined {
   const shaIdx = parts.findIndex((p) => p.startsWith('sha='));
   if (shaIdx === -1) return undefined;
   const sha = parts[shaIdx]!.slice('sha='.length);
-  const seq = parts.slice(shaIdx + 1).map(stripToUid).join(' ');
-  return { sha, seq };
+  const hasInk = parts[shaIdx + 1]?.startsWith('ink=') === true;
+  const ink = hasInk ? parts[shaIdx + 1]!.slice('ink='.length) : undefined;
+  const seq = parts.slice(shaIdx + (hasInk ? 2 : 1)).map(stripToUid).join(' ');
+  return { sha, ink, seq };
 }
 
 function parseReport(lines: readonly string[]): Map<string, FixtureRecord> {
@@ -300,26 +342,41 @@ function parseReport(lines: readonly string[]): Map<string, FixtureRecord> {
   for (const line of lines) {
     const label = line.split(' ')[0];
     if (label === undefined) continue;
-    map.set(label, parseFixtureRecord(line) ?? { sha: line, seq: '' });
+    map.set(label, parseFixtureRecord(line) ?? { sha: line, ink: undefined, seq: '' });
   }
   return map;
 }
 
-type OrderVerdict = 'moved' | 'offender-sha' | 'offender-order' | 'same';
+type OrderVerdict = 'moved' | 'moved-unwrapped' | 'offender-sha' | 'offender-ink' | 'offender-order' | 'same';
 
+/** With `ink=` on both sides: sha changed & ink unchanged = a pure reorder
+ *  (MOVED, `-unwrapped` when even the uid sequence stayed put); sha & ink
+ *  both changed = something other than order moved. Without `ink=` (an old
+ *  baseline): the original sha-vs-sequence rule. */
 function classify(before: FixtureRecord, after: FixtureRecord): OrderVerdict {
   const shaChanged = before.sha !== after.sha;
   const seqChanged = before.seq !== after.seq;
-  if (shaChanged && seqChanged) return 'moved';
-  if (shaChanged) return 'offender-sha';
-  if (seqChanged) return 'offender-order';
-  return 'same';
+  if (!shaChanged) return seqChanged ? 'offender-order' : 'same';
+  if (before.ink !== undefined && after.ink !== undefined) {
+    if (before.ink !== after.ink) return 'offender-ink';
+    return seqChanged ? 'moved' : 'moved-unwrapped';
+  }
+  return seqChanged ? 'moved' : 'offender-sha';
 }
 
+/** `[keyword, suffix]` per verdict; `same` prints nothing. */
+const VERDICT_TEXT: Readonly<Record<OrderVerdict, readonly [string, string] | undefined>> = {
+  moved: ['MOVED', ''],
+  'moved-unwrapped': ['MOVED', ' (unwrapped)'],
+  'offender-sha': ['OFFENDER', ' (sha changed, order did not)'],
+  'offender-ink': ['OFFENDER', ' (sha and ink changed: not a pure reorder)'],
+  'offender-order': ['OFFENDER', ' (order changed, sha did not)'],
+  same: undefined,
+};
+
 function printVerdict(label: string, verdict: OrderVerdict): void {
-  if (verdict === 'moved') console.log(`MOVED ${label}`);
-  else if (verdict === 'offender-sha') console.log(`OFFENDER ${label} (sha changed, order did not)`);
-  else if (verdict === 'offender-order') console.log(`OFFENDER ${label} (order changed, sha did not)`);
+  const text = VERDICT_TEXT[verdict];
+  if (text !== undefined) console.log(`${text[0]} ${label}${text[1]}`);
 }
 
 function runCheckOrder(baselinePath: string): void {
@@ -336,8 +393,8 @@ function runCheckOrder(baselinePath: string): void {
     if (now === undefined) { console.log(`MISSING ${label}`); continue; }
     const verdict = classify(was, now);
     printVerdict(label, verdict);
-    if (verdict === 'moved') moved++;
-    if (verdict === 'offender-sha' || verdict === 'offender-order') offenders++;
+    if (verdict.startsWith('moved')) moved++;
+    if (verdict.startsWith('offender')) offenders++;
   }
   for (const label of after.keys()) {
     if (!before.has(label)) console.log(`EXTRA ${label}`);
