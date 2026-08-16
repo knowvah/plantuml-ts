@@ -13,6 +13,7 @@ import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 import { attachPortLabels, multiLineLabelAnchor, portLabelAnchor } from './class-edge-label-anchor.js';
 import { CARDINALITY_FONT_SIZE, splitEdgeLabelLines } from './class-layout-helpers.js';
 import { ARROW_GLYPH_SIZE, parseMagicArrowLabel, magicArrowAngle, magicArrowGlyphPoints, type MagicArrowLabel } from './class-magic-arrow.js';
+import { applyGuillemet } from '../../core/edge-label-box.js';
 import type { EdgeGeo } from './layout.js';
 
 /**
@@ -60,13 +61,33 @@ function attachEdgeLabel(
   if (edgeResult.labelX === undefined || edgeResult.labelY === undefined) return;
   const center = { x: edgeResult.labelX, y: edgeResult.labelY };
 
+  // M4 cause C (T12b follow-on, `.agent-notes/m4-single-line-width.md`):
+  // rewrite `<<x>>` -> `«x»` ONCE, here, before any of the three branches
+  // below read the label -- upstream RENDERS the guillemet-rewritten text,
+  // not just measures it (`Display.manageGuillemet` returns the rewritten
+  // `Display`; `SvekEdge`'s `labelOnly` block, which BOTH sizes the DOT
+  // reservation AND draws the glyphs, is built from that single rewritten
+  // copy -- `SvekEdge.java:302,440-445,956-980`; there is no second,
+  // unrewritten copy anywhere upstream). `class-layout-edge-labels.ts
+  // #computeMeasuredLabelAttrs` sizes the DOT box from the SAME
+  // `applyGuillemet` (`core/edge-label-box.ts`) applied to the SAME
+  // `rel.label` -- calling the one shared, pure, deterministic function
+  // from both sites cannot drift: identical input always yields identical
+  // output. Unlike M4 causes A/B (the visibility-char strip), which T12a
+  // deliberately left OUT of the rendered text because upstream also draws
+  // an icon glyph this port does not render (stripping the char alone
+  // would delete information), cause C drops nothing -- upstream's
+  // rewritten text IS the whole visible label, so both measurement and
+  // render use it unconditionally.
+  const label = applyGuillemet(rel.label);
+
   // G2 item 43: a `\n`/`\l`/`\r`-split label draws ONE `<text>` per line
   // in jar's real golden SVG (`Display.hasSeveralGuideLines`/`create0`'s
   // line-wrapping, `SvekEdge.java:299`) -- see `multiLineLabelAnchor`'s doc
   // comment for the jar-verified per-line layout formula. A label with no
   // line breaks keeps the EXACT pre-existing single-`<text>` path below,
   // unchanged (`EdgeGeo.label`, N62).
-  const { lines, align } = splitEdgeLabelLines(rel.label);
+  const { lines, align } = splitEdgeLabelLines(label);
   if (lines.length > 1) {
     edgeGeo.labelLines = multiLineLabelAnchor(lines, align, center, measurer, fontFamily);
     return;
@@ -76,14 +97,17 @@ function attachEdgeLabel(
   // `>`/`<`/`"< "`/`"> "` forms) strips the arrow token and draws a small
   // triangle glyph instead -- see `attachMagicArrow`'s doc comment. A label
   // with no arrow token (`parseMagicArrowLabel` returns `undefined`) keeps
-  // the EXACT pre-existing plain-text path below, unchanged.
-  const magic = parseMagicArrowLabel(rel.label);
+  // the EXACT pre-existing plain-text path below, unchanged. Reads `label`
+  // (post-guillemet), not `rel.label`: harmless when both differ, since a
+  // magic-arrow token is a single `<`/`>`, never the `<<`/`>>` pair
+  // `applyGuillemet` rewrites -- no corpus fixture combines the two.
+  const magic = parseMagicArrowLabel(label);
   if (magic !== undefined) {
     attachMagicArrow(edgeGeo, magic, fromToPoints, center, measurer, fontFamily);
     return;
   }
 
-  edgeGeo.label = portLabelAnchor(rel.label, center, measurer, fontFamily);
+  edgeGeo.label = portLabelAnchor(label, center, measurer, fontFamily);
 }
 
 /**

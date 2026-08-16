@@ -382,6 +382,16 @@ describe('buildEdgeGeos — magic-arrow edge label (G2 item 44)', () => {
     const edge = geo.edges[0]!;
     expect(edge.arrowGlyph).toBeUndefined();
     expect(edge.label).toBeDefined();
-    expect(edge.label!.text).toBe('<<alias>>');
+    // M4 cause C (T12b follow-on): upstream RENDERS the guillemet-rewritten
+    // text, not the raw `<<x>>` token (`Display.manageGuillemet`,
+    // `Guillemet.java:78-88`) -- see `class-edge-geo.ts#attachEdgeLabel`.
+    expect(edge.label!.text).toBe('«alias»');
+    // The rendered `textLength` must match a DIRECT measurement of the SAME
+    // rewritten string -- proves the render width isn't left over from
+    // measuring the raw `<<alias>>` token (jar's own tebore-53-tese080
+    // golden: `textLength="41.275"` on `«alias»` at font-size 13).
+    const expectedWidth = new WidthTableMeasurer()
+      .measure('«alias»', { family: defaultTheme.fontFamily, size: 13 }).width;
+    expect(edge.label!.width).toBeCloseTo(expectedWidth, 5);
   });
 });
