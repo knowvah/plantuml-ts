@@ -17,7 +17,7 @@ import type { DescriptiveLink } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import { resolveInlineLinks } from './parse-helpers.js';
-import { computeReservedLabelBox } from '../../core/edge-label-box.js';
+import { computeReservedLabelBox, computeQuantifierBox } from '../../core/edge-label-box.js';
 import {
   type SpriteDimsLookup,
 } from '../../core/creole-atoms.js';
@@ -77,11 +77,24 @@ interface LinkDzeta {
  *   vertical = 0.
  * - length > 1: vertical = labelHeight + decor; horizontal = 0.
  *
- * We have no tail/head qualifiers today, so only the label contributes
- * beyond decorDzeta.
+ * T7: `getHorizontalDzeta`/`getVerticalDzeta` (`SvekEdge.java:1159-1203`) sum
+ * the RAW `calculateDimension()` of `labelText` and, when set,
+ * `startTailText`/`endHeadText` -- no `(int)` truncation anywhere in that
+ * method (the cast lives only in `appendTable`'s DOT-table emission,
+ * `:504-507`, a different call site). `computeQuantifierBox` (T5) returns
+ * only the FLOORED `reservedWidth`/`reservedHeight` it built for that other
+ * call site, so reusing it here would inject a truncation upstream never
+ * applies to this sum. Left as a flat string measure below -- unchanged by
+ * this task -- rather than adopting a box contract built for a different
+ * upstream method. No golden fixture combines a `\n`-bearing quantifier with
+ * a horizontal/vertical dzeta contribution (`purevo-74-pamo264`, the only
+ * golden with quantifier syntax, uses a single un-split digit), so this is a
+ * named, verified-inert gap, not a silent one.
  */
-/** The three text blocks SvekEdge feeds its ArithmeticStrategySum: the main
- *  label (stereotype included) and the tail/head qualifier labels. */
+/** The text blocks SvekEdge feeds its ArithmeticStrategySum: the main label
+ *  (stereotype included) and the tail/head qualifier labels
+ *  (`link.firstLabel`/`secondLabel` -- always Quantifier1/Quantifier2 here,
+ *  never Role1/Role2; see `applyQualifierLabels`'s doc comment). */
 function dzetaTexts(link: DescriptiveLink): string[] {
   const texts: string[] = [];
   const main = mainLabelText(link);
@@ -236,23 +249,56 @@ function applyMainLabel(
   }
 }
 
-/** Applies the tail/head qualifier-label dims (CommandLinkElement
- *  FIRST_LABEL/SECOND_LABEL) to `attrs`, same [[url]]/atom resolution as
- *  the main label. */
+/**
+ * Applies the tail/head qualifier-label dims (`CommandLinkElement`
+ * FIRST_LABEL/SECOND_LABEL, `link.firstLabel`/`secondLabel`) to `attrs`,
+ * resolving `[[url]]` markup as the main label does, then sizing through
+ * T5's {@link computeQuantifierBox} -- `\n` split, max-line-width, no
+ * shield, no `marginLabel`, `Math.floor` truncation -- matching
+ * `SvekEdge.java:447-467`'s `startTailText`/`endHeadText.calculateDimension`
+ * emission (raw dimension straight into `appendTable`, unlike the main
+ * label's `:440-445` which adds `2 * labelShield` first).
+ *
+ * Role labels (`startTailRoleText`/`endHeadRoleText`, `SvekEdge.java:341-351`,
+ * a taillabel/headlabel fallback for when NO quantifier is set) are NEVER
+ * reached here: the description engine's link command,
+ * `CommandLinkElement.executeArg` (`descdiagram/command/CommandLinkElement
+ * .java:320-324`), always calls `linkArg.withQuantifier(first, second)` --
+ * `withRole` is called ONLY by the class engine's link command
+ * (`classdiagram/command/CommandLinkClass.java:351`). So `link.firstLabel`/
+ * `secondLabel` are always Quantifier1/Quantifier2 here, never Role1/Role2,
+ * and this function has no role arm to write.
+ *
+ * T7/D3 gap (write-set escape, logged rather than silently patched): `font`
+ * below is `ctx.fontSpec` -- the ARROW label font (`edgeFontSpec`,
+ * `layout.ts`'s T3 `skinparam arrowFontSize` cascade), not the resolved
+ * `{root,element,classDiagram,arrow,cardinality}` font
+ * (`GraphvizImageBuilder.java:124-126`, `style-cascade-class.ts
+ * #computeCardinalityFontOverride`, T1). Both resolve to the SAME default
+ * (13, sans-serif -- `theme.ts`'s `defaultTheme.cardinalityFontSize`/
+ * `cardinalityFontFamily`), and no description-diagram golden overrides
+ * `cardinality` specifically (`zosuje-43-zebi775` overrides `arrow` but not
+ * `arrow.cardinality`), so this is a verified no-op divergence today, not a
+ * guessed one. Threading the real cascade needs a `cardinalityFontSpec`
+ * parameter carried from `layoutDescription` (which holds `theme`) through
+ * `runLayout` -> `buildDotEdges` (`layout.ts`, `layout-dot-tree.ts`) -- both
+ * outside this task's write-set, so this is the STOP-and-log this file's own
+ * task spec calls for, not a silent substitution.
+ */
 function applyQualifierLabels(
   attrs: NonNullable<DotInputEdge['attributes']>,
   link: DescriptiveLink,
   ctx: MeasureCtx,
 ): void {
   if (link.firstLabel !== undefined) {
-    const m = measureLineWithAtoms(resolveInlineLinks(link.firstLabel), ctx.fontSpec, ctx.measurer, ctx.sprites);
-    attrs.tailLabelWidth = m.width;
-    attrs.tailLabelHeight = m.height;
+    const box = computeQuantifierBox(resolveInlineLinks(link.firstLabel), ctx.fontSpec, ctx.measurer);
+    attrs.tailLabelWidth = box.reservedWidth;
+    attrs.tailLabelHeight = box.reservedHeight;
   }
   if (link.secondLabel !== undefined) {
-    const m = measureLineWithAtoms(resolveInlineLinks(link.secondLabel), ctx.fontSpec, ctx.measurer, ctx.sprites);
-    attrs.headLabelWidth = m.width;
-    attrs.headLabelHeight = m.height;
+    const box = computeQuantifierBox(resolveInlineLinks(link.secondLabel), ctx.fontSpec, ctx.measurer);
+    attrs.headLabelWidth = box.reservedWidth;
+    attrs.headLabelHeight = box.reservedHeight;
   }
 }
 
