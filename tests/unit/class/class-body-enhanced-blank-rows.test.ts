@@ -20,7 +20,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
@@ -40,7 +40,7 @@ function rowsParts(parts: readonly EnhancedBodyPart[]): Extract<EnhancedBodyPart
 
 function layoutOne(lines: string[]) {
   const geo = layoutClass(parseClass(src(lines)), theme, measurer);
-  const c = geo.classifiers.find((cl) => cl.id === 'A')!;
+  const c = classifierLeaves(geo.leaves).find((cl) => cl.id === 'A')!;
   expect(c.enhancedBody).toBeDefined();
   return c;
 }

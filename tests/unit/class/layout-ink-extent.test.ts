@@ -186,7 +186,7 @@ describe('computeClassDocumentDims', () => {
     // against `fezugi-39-fujo327` before this fix (see
     // layout-ink-extent.ts's own doc comment for the full derivation).
     const notes: NoteGeo[] = [
-      { id: 'n0', x: 0, y: 0, width: 50, height: 30, lines: ['hi'], lineWidths: [], connector: [] },
+      { id: 'n0', kind: 'note', x: 0, y: 0, width: 50, height: 30, lines: ['hi'], lineWidths: [], connector: [] },
     ];
     const dims = computeClassDocumentDims([], [], [], notes);
     // Ink span (unpadded): [0,50] x [0,30].
@@ -196,12 +196,20 @@ describe('computeClassDocumentDims', () => {
   });
 
   it('G2/N13: a dropped member-tip note contributes NO ink at all (jar draws nothing for it)', () => {
+    // note-leaf-model T3: dropped-ness is resolved inside this draw pass
+    // (`buildInkBox` is this port's `LimitFinder`) -- `typo` matches no row
+    // of host `A`, so `EntityImageTips#drawU` returns before drawing.
+    const host = makeClassifierGeo({ id: 'A', x: 600, y: 0, width: 0, height: 0, rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] });
     const notes: NoteGeo[] = [
-      { id: 'n0', x: 0, y: 0, width: 500, height: 500, lines: ['error'], lineWidths: [], connector: [], dropped: true },
+      {
+        id: 'n0', kind: 'tips', x: 0, y: 0, width: 500, height: 500, lines: ['error'], lineWidths: [], connector: [],
+        target: 'A', tipRequest: { member: 'typo', position: 'right', baselineOffset: 10, rowHeight: 13 },
+      },
     ];
-    const dims = computeClassDocumentDims([], [], [], notes);
-    expect(dims.width).toBe(0);
-    expect(dims.height).toBe(0);
+    const dims = computeClassDocumentDims([host], [], [], notes);
+    // The 500x500 note box adds nothing: dims are those of the host alone.
+    expect(dims).toEqual(computeClassDocumentDims([host], [], [], []));
+    expect(dims.width).toBeLessThan(500);
   });
 });
 

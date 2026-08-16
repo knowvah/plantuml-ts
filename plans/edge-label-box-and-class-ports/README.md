@@ -1,5 +1,14 @@
 # Mission: edge-label-box-and-class-ports
 
+> ## CLOSED 2026-08-15 — 3 of 5 exit-bar clauses met, 2 unmet and named
+>
+> Clauses 3 (`sokevu` rank-chain + `constraint=false`) and 4 (`tobuka` port
+> labels, 41 → 0) are MET; clause 5 (every miss named) is MET. Clauses 1 and
+> 2 are **unmet as written and left that way** — see [Outcome](#outcome-2026-08-15).
+> D7 landed: the DOT gate now asserts edge-label BOX SIZE, which re-baselined
+> every type's EQUAL count and produced four `label-size-backlog.json` files
+> (51 pinned goldens) as the follow-on work queue.
+
 **Close the four gaps left by the DOT-attribute audit and its predecessors.**
 That audit (2026-08-13) shipped `sametail`, `constraint=false` and
 `style=invis`, and left three findings each too large to fold into the change
@@ -32,6 +41,10 @@ close-out task creates it.
 
 **Do not redefine the bar to make it look met.** If a number cannot be
 reached, say which one and why, with the measurement.
+
+> **Scored 2026-08-15:** 1 ✗ (13 residual, predicted by batch 2's own
+> watch-out; ratchet pins zero-diff only) · 2 ✗ (138; label boxes byte-exact,
+> residue is elsewhere and unidentified) · 3 ✓ · 4 ✓ · 5 ✓.
 
 ## Why one mission, and why this order
 
@@ -90,9 +103,9 @@ those fixtures too. Expect census movement and measure it per fixture.
 ## Batches
 
 - [x] **batch-1** — correct the edge-label measurement (items 2)
-- [ ] **batch-2** — hand the engine a FIXEDSIZE box, not plain text (item 4)
-- [ ] **batch-3** — model class-side `port` declarations (item 3)
-- [ ] **batch-4** — per-end port-label placement (issue 12)
+- [x] **batch-2** — hand the engine a FIXEDSIZE box, not plain text (item 4) — T7 closed as unmeetable-as-written, see Outcome
+- [x] **batch-3** — model class-side `port` declarations (item 3) — T8/T9 landed by SI17, pinned here; T10 close-out 2026-08-15
+- [x] **batch-4** — per-end port-label placement (issue 12) — `b24f6038`
 
 ## Branch
 
@@ -143,3 +156,50 @@ that baseline is the only way to tell a fix from a trade.
 - A gate fails on a pre-existing violation in a file you are touching and the
   fix is under 3 lines.
 - The census moves a fixture DOWN. Record it and continue.
+
+## Outcome (2026-08-15)
+
+Closed on branch `feat/edge-label-box-closeout` (merge commit to `main`).
+The mission had dangled since 2026-08-14, when its journal's tail spun off
+`composite-state-dot`; on resumption every batch was checked against the tree
+before a checkbox moved.
+
+| Signal | Before | After |
+|---|---|---|
+| `tobuka-93-jale775` (clause 4) | 41 diffs | **0** (`b24f6038`) |
+| `class-inheritance-interface-assoc` (clause 1) | 202 | **13** — bar said 0 |
+| `jecici-56-bimu826` baseline (clause 2) | 151 | **138** — bar said ≤133 |
+| `sokevu-87-toce485` (clause 3) | ungated | **pinned**, `structurallyEqual`, size delta 0.0000 |
+| DOT gate label check | presence (`hasLabel`) | **presence + `WIDTHxHEIGHT`** (`labelSizeOk`) |
+| Corpus EQUAL — component / usecase / class / object / state | 263 / 93 / 710 / 78 / 268 | **257 / 88 / 680 / 76 / 259** — every drop is `labelSizeOk` |
+| Tests | 14,291 | 14,307; coverage 95.3 / 90.3 / 96.9 |
+
+**What was actually delivered by this mission vs. by others.** Batch 1 (label
+measurement) and batch 2's T5/T6 (FIXEDSIZE box to the engine) are this
+mission's. Batch 4's T12 (`manageCollision` port) is this mission's. Batch 3's
+mechanism (`isPort` on class-side ports, the rank-chain) was landed by **SI17**
+under its own brief; this mission only pinned the fixture. Saying so matters:
+a mechanism claimed here would have no journal entry behind it.
+
+**Two clauses unmet, on purpose.** Clause 1 contradicted batch 2's own
+watch-out (~13 residual predicted, 13 measured); the 13 are 8 `polygon/@points`,
+3 `text/@x`, 2 `text/@y`, named in
+`.agent-notes/class-realization-edge-rank-gap.md`. Clause 2's target of 133 was
+measured with `norank` disabled and was never like-for-like; `jecici`'s label
+boxes are now byte-exact (72×22, 67×12), so its residual 5 are **not** the label
+box and are not identified. Neither number was moved to look met.
+
+**D7 is the durable part.** `tests/oracle/svek-dot.ts#labelSizeOk` compares
+every edge label's reserved box; a +1px perturbation fails 228 pinned fixtures,
+so it discriminates. It surfaced 51 goldens (10 description, 29 class,
+2 object, 10 state graphs) that were EQUAL with a wrong box — carried in
+per-type `label-size-backlog.json` files with the direction-backlog contract
+(must fail `labelSizeOk` and nothing else, shrink-only), and the contract lives
+once in `tests/oracle/dot-parity-backlogs.ts`. The shapes are triaged in the
+journal (multi-line-as-one-line, `<<stereotype>>` head boxes, a `T19x13` tail
+in one family, the state note-on-link merged box); none is diagnosed here.
+
+**Follow-on, unowned:** the 51-entry label-size backlog is a ready work queue —
+read `SvekEdge.java:440-507` per shape, do not fit. `temuxi-28-cega322`'s
+1px stays unattributed (journal, 08-14). Cluster TITLE tables are still
+presence-only in the gate.

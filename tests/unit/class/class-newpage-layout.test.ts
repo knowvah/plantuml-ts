@@ -23,7 +23,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
 import type { ClassDiagramAST, Classifier, Relationship } from '../../../src/diagrams/class/ast.js';
@@ -188,7 +188,7 @@ describe('layoutClass / renderClass -- single page unaffected by T7', () => {
     expect(ast.pages).toBeUndefined();
     const { geo, captured } = layoutAndCount(ast);
     expect(captured).toBe(1);
-    expect(geo.classifiers).toHaveLength(2);
+    expect(classifierLeaves(geo.leaves)).toHaveLength(2);
   });
 });
 
@@ -210,7 +210,7 @@ describe('layoutClass -- multi-page (T7)', () => {
 
     const { geo, captured } = layoutAndCount(page1);
     expect(captured).toBe(2);
-    expect(geo.classifiers.map((c) => c.id)).toEqual(['A', 'B', 'C', 'D']);
+    expect(classifierLeaves(geo.leaves).map((c) => c.id)).toEqual(['A', 'B', 'C', 'D']);
     expect(geo.edges).toHaveLength(2);
   });
 
@@ -224,13 +224,13 @@ describe('layoutClass -- multi-page (T7)', () => {
     // totalHeight and internal top-of-content offset.
     const solo1 = layoutClass(makePage1(), defaultTheme, measurer);
     const soloPage2 = layoutClass(makePage2(), defaultTheme, measurer);
-    const page2InternalMinY = Math.min(...soloPage2.classifiers.map((c) => c.y));
+    const page2InternalMinY = Math.min(...classifierLeaves(soloPage2.leaves).map((c) => c.y));
 
     const multiPage1 = makePage1();
     multiPage1.pages = [multiPage1, makePage2()];
     const combined = layoutClass(multiPage1, defaultTheme, measurer);
 
-    const page2Classifiers = combined.classifiers.filter((c) => c.id === 'C' || c.id === 'D');
+    const page2Classifiers = classifierLeaves(combined.leaves).filter((c) => c.id === 'C' || c.id === 'D');
     const minPage2Y = Math.min(...page2Classifiers.map((c) => c.y));
     // The whole page-2 block starts at solo1.totalHeight + 20 (NEWPAGE_GAP),
     // plus page 2's own internal top-of-content offset.
@@ -246,9 +246,9 @@ describe('layoutClass -- multi-page (T7)', () => {
 
     const { geo, captured } = layoutAndCount(page1);
     expect(captured).toBe(1); // only page 2 reaches graphviz
-    expect(geo.classifiers).toHaveLength(3);
-    const lonely = geo.classifiers.find((c) => c.id === 'Lonely')!;
-    const page2First = geo.classifiers.filter((c) => c.id === 'C' || c.id === 'D');
+    expect(classifierLeaves(geo.leaves)).toHaveLength(3);
+    const lonely = classifierLeaves(geo.leaves).find((c) => c.id === 'Lonely')!;
+    const page2First = classifierLeaves(geo.leaves).filter((c) => c.id === 'C' || c.id === 'D');
     expect(Math.min(...page2First.map((c) => c.y))).toBeGreaterThan(lonely.y + lonely.height);
   });
 
@@ -259,7 +259,7 @@ describe('layoutClass -- multi-page (T7)', () => {
 
     const { geo, captured } = layoutAndCount(page1);
     expect(captured).toBe(0);
-    expect(geo.classifiers).toHaveLength(2);
+    expect(classifierLeaves(geo.leaves)).toHaveLength(2);
     expect(geo.totalHeight).toBeGreaterThan(0);
   });
 

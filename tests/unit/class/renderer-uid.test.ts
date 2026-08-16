@@ -11,8 +11,8 @@
  * all — see the module's own doc comment for the distinction).
  */
 import { describe, it, expect } from 'vitest';
-import { buildClassUidPlan } from '../../../src/diagrams/class/renderer-uid.js';
-import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from '../../../src/diagrams/class/layout.js';
+import { buildClassUidPlan, type ClassUidPlanInput } from '../../../src/diagrams/class/renderer-uid.js';
+import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from '../../../src/diagrams/class/layout.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 
 function classifier(
@@ -48,11 +48,22 @@ function namespace(id: string, creationIndex?: number): NamespaceGeo {
 }
 
 function note(id: string, opts: { creationIndex?: number; phantomSlot?: true } = {}): NoteGeo {
-  return { id, x: 0, y: 0, width: 10, height: 10, lines: [], lineWidths: [], connector: [], ...opts };
+  return { id, kind: 'note', x: 0, y: 0, width: 10, height: 10, lines: [], lineWidths: [], connector: [], ...opts };
 }
 
-function geo(overrides: Partial<ClassGeometry>): ClassGeometry {
-  return { totalWidth: 0, totalHeight: 0, classifiers: [], edges: [], namespaces: [], notes: [], ...overrides };
+// T3: `buildClassUidPlan` takes `ClassUidPlanInput` (structural), not
+// `ClassGeometry` -- built directly here rather than via a `ClassGeometry`
+// literal, since `ClassGeometry` no longer carries `classifiers`/`notes`.
+// Param types stay the full Geo shapes (not `ClassUidPlanInput`'s own
+// narrower structural fields) so the edge/classifier/note object literals
+// below aren't excess-property-checked against that narrower shape.
+function geo(overrides: {
+  classifiers?: ClassifierGeo[];
+  namespaces?: NamespaceGeo[];
+  notes?: NoteGeo[];
+  edges?: EdgeGeo[];
+}): ClassUidPlanInput {
+  return { classifiers: [], edges: [], namespaces: [], notes: [], ...overrides };
 }
 
 describe('buildClassUidPlan — note creation-index / phantom-slot handling (G2 N15)', () => {

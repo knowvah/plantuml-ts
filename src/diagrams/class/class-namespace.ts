@@ -92,6 +92,11 @@ export function collapseEmptyNamespace(
   const remaining = namespaces.filter((n) => n.id !== nsId);
   const parentId = ns.parentId ?? null;
   const classifier = makeClassifier(nsId, 'descriptive', ns.display, parentId);
+  // leaf-draw-order option (b): mark the mute so `class-leaf-order.ts` can
+  // keep this leaf at its GROUP slot even when `closeContainer` later stamps
+  // a `usymbol` on it (a `<<Database>>` package, daxeno-00-kasu166) -- see
+  // `Classifier.collapsedGroup`'s own doc comment.
+  classifier.collapsedGroup = true;
   // G2 N33: without this, the synthesized classifier's DRAW-ORDER position
   // (both uid numbering, `renderer-uid.ts`, and the plain array-iteration
   // order `renderer.ts`'s classifier loop pushes children in) defaults to

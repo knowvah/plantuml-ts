@@ -7,6 +7,7 @@ import type { MemberRenderAtom } from '../../../src/diagrams/class/class-member-
 
 const baseNote: NoteGeo = {
   id: '__note_0',
+  kind: 'note',
   x: 0,
   y: 0,
   width: 40,
@@ -63,6 +64,7 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
 
   const boldNote: NoteGeo = {
     id: '__note_0',
+    kind: 'note',
     x: 0,
     y: 0,
     width: 80,
@@ -194,6 +196,7 @@ describe('renderNote — per-atom baseline on a mixed-font-size line (G2 N56)', 
 
   const mixedNote: NoteGeo = {
     id: '__note_0',
+    kind: 'note',
     x: 6,
     y: 6,
     width: 132.9125,

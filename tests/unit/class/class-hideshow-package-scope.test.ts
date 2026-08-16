@@ -17,7 +17,7 @@ import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 
@@ -229,8 +229,8 @@ describe('hide/show directive package scope — layout sizing', () => {
       Twin1 -- Twin2
     `);
     const geo = layoutClass(ast, defaultTheme, measurer);
-    const g1 = geo.classifiers.find((c) => c.id === 'Twin1')!;
-    const g2 = geo.classifiers.find((c) => c.id === 'example.Twin2')!;
+    const g1 = classifierLeaves(geo.leaves).find((c) => c.id === 'Twin1')!;
+    const g2 = classifierLeaves(geo.leaves).find((c) => c.id === 'example.Twin2')!;
     // Identical bodies: the out-of-scope twin must keep its methods
     // compartment and therefore be strictly taller than the suppressed one.
     expect(g1.height).toBeGreaterThan(g2.height);
@@ -250,8 +250,8 @@ describe('hide/show directive package scope — layout sizing', () => {
       Twin1 -- Twin2
     `);
     const geo = layoutClass(ast, defaultTheme, measurer);
-    const g1 = geo.classifiers.find((c) => c.id === 'Twin1')!;
-    const g2 = geo.classifiers.find((c) => c.id === 'example.Twin2')!;
+    const g1 = classifierLeaves(geo.leaves).find((c) => c.id === 'Twin1')!;
+    const g2 = classifierLeaves(geo.leaves).find((c) => c.id === 'example.Twin2')!;
     expect(g1.height).toBeGreaterThan(g2.height);
   });
 });

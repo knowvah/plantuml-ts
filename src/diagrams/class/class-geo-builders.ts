@@ -398,10 +398,9 @@ export function degenerateSingleClassifier(
     totalHeight: totalDims.height,
     rawWidth: rawDims.width,
     rawHeight: rawDims.height,
-    classifiers: [geo],
+    leaves: [geo],
     edges: [],
     namespaces: [],
-    notes: [],
   };
   // #lizard forgives — flat chain of early-return guards encoding upstream's
   // single conjunctive predicate (isDegeneratedWithFewEntities) plus the

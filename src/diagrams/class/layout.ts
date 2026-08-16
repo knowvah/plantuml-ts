@@ -42,6 +42,7 @@ import {
   type MeasuredClassifier,
 } from './class-layout-helpers.js';
 import { buildDotGraph } from './class-dot-graph.js';
+import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
 import { iconSizeOf } from './class-visibility-icon.js';
 import {
@@ -50,10 +51,15 @@ import {
   buildEdgeGeos,
   degenerateSingleClassifier,
 } from './class-geo-builders.js';
-import type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry } from './class-geo-types.js';
+import {
+  isNoteGeo, type ClassifierGeo, type EdgeGeo, type NamespaceGeo, type ClassGeometry, type ClassLeafGeo,
+} from './class-geo-types.js';
 
 export { formatMemberText, ROW_TEXT_LEFT_MARGIN } from './class-layout-helpers.js';
-export type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry, JsonBodyItem } from './class-geo-types.js';
+export {
+  isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves,
+  type ClassifierGeo, type EdgeGeo, type NamespaceGeo, type ClassGeometry, type JsonBodyItem, type ClassLeafGeo,
+} from './class-geo-types.js';
 
 // ---------------------------------------------------------------------------
 // Directive resolution helpers
@@ -186,6 +192,25 @@ function shiftNoteGeo(note: NoteGeo, dx: number, dy: number): NoteGeo {
   };
 }
 
+/**
+ * T4 (mission leaf-draw-order, D3): reorders `leaves` (built by
+ * `assembleShiftedGeometry` in the old classifiers-then-notes concatenation
+ * order) into jar's real leaf draw order -- `computeLeafDrawOrder`'s id
+ * list, T2's pure fold of the AST. A geo id with no matching order entry is
+ * a T2 bug (the id list must cover every classifier/note id that reached
+ * geometry) -- thrown rather than silently appended, per this task's own
+ * contract.
+ */
+function orderLeaves(leaves: readonly ClassLeafGeo[], order: readonly string[]): ClassLeafGeo[] {
+  const rank = new Map(order.map((id, i) => [id, i]));
+  for (const leaf of leaves) {
+    if (!rank.has(leaf.id)) {
+      throw new Error(`computeLeafDrawOrder: leaf "${leaf.id}" is missing from the draw order (T2 bug)`);
+    }
+  }
+  return [...leaves].sort((a, b) => rank.get(a.id)! - rank.get(b.id)!);
+}
+
 // ---------------------------------------------------------------------------
 // Single-page layout (internal)
 // ---------------------------------------------------------------------------
@@ -218,7 +243,7 @@ function layoutSinglePage(
     ast.classifiers.length === 0 &&
     ast.notes.length === 0
   ) {
-    return { totalWidth: 0, totalHeight: 0, classifiers: [], edges: [], namespaces: [], notes: [] };
+    return { totalWidth: 0, totalHeight: 0, leaves: [], edges: [], namespaces: [] };
   }
 
   // Collapse any namespace left empty by parsing into a flat leaf classifier
@@ -264,8 +289,11 @@ function layoutSinglePage(
     effAst, result, swappedEdges, measurer, theme.fontFamily, posMap, anchors,
     theme.colors.graph.arrowThickness,
   );
-  // G2/N13: classifiers computed FIRST -- mapNoteGeos needs their positions
-  // + row text to resolve member-tip (`::member`) note connectors. G2/N16
+  // Mission note-leaf-model D3: `mapNoteGeos` reads NO classifier -- a
+  // member-tip (`::member`) note's notch is resolved inside the draw passes
+  // (`note-tips-resolve.ts`, as `EntityImageTips#drawU` does), so notes no
+  // longer have to be built after classifiers; the order below is kept
+  // only until Batch 3 folds the two arrays into one collection. G2/N16
   // Kind B: a freestanding note's ONE real relationship connector (if any)
   // feeds the SAME Opale mechanism `mapGroupNoteGeos` already tries for an
   // attached single-link note (Kind C) -- `findFreestandingNoteConnectors`'s
@@ -277,7 +305,7 @@ function layoutSinglePage(
   // safe fallback `buildOpaleNoteGeo ?? plainNoteGeo` already applies.
   const freestandingConnectors = findFreestandingNoteConnectors(effAst.notes, edges, effAst.classifiers);
   const notes: NoteGeo[] = mapNoteGeos(
-    effAst.notes, result, noteParts, { classifiers, theme, measurer }, freestandingConnectors,
+    effAst.notes, result, noteParts, { theme, measurer }, freestandingConnectors,
   );
   const opaleNoteIds = new Set(notes.filter((n) => n.opale !== undefined).map((n) => n.id));
   const consumedEdgeIds = new Set(
@@ -292,7 +320,11 @@ function layoutSinglePage(
     consumedEdgeIds.has(e.id) ? { ...e, consumedByOpaleNote: true as const } : e,
   );
 
-  return assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, iconSizeOf(theme));
+  const assembled = assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, iconSizeOf(theme));
+  // T4 (D3): `leaves` built by `assembleShiftedGeometry` in concatenation
+  // order -- reorder into jar's real draw order here, over the SAME
+  // `effAst` the dot graph/geo builders above already read.
+  return { ...assembled, leaves: orderLeaves(assembled.leaves, computeLeafDrawOrder(effAst)) };
   // #lizard forgives -- linear orchestration (empty-diagram guard,
   // namespace-collapse, hide/show resolution, pre-measure, degenerate skip,
   // dot-graph build+layout, geo builders, final assembly), each step ALREADY
@@ -331,15 +363,22 @@ function assembleShiftedGeometry(
   const rawDims = computeClassRawInkDims(classifiers, namespaces, edges, notes, iconSize);
   const shift = computeClassInkShift(classifiers, namespaces, edges, notes, iconSize);
 
+  // T3/T4 (mission leaf-draw-order): `leaves` here is still the plain
+  // classifiers-then-notes concatenation -- `layoutSinglePage`'s caller
+  // reorders it into jar's real draw order via `orderLeaves` right after
+  // this function returns (kept out of here so this stays a pure
+  // shift/assemble step, unaware of AST-derived order).
   return {
     totalWidth: documentDims.width,
     totalHeight: documentDims.height,
     rawWidth: rawDims.width,
     rawHeight: rawDims.height,
-    classifiers: classifiers.map((c) => shiftClassifierGeo(c, shift.dx, shift.dy)),
+    leaves: [
+      ...classifiers.map((c) => shiftClassifierGeo(c, shift.dx, shift.dy)),
+      ...notes.map((n) => shiftNoteGeo(n, shift.dx, shift.dy)),
+    ],
     edges: edges.map((e) => shiftEdgeGeo(e, shift.dx, shift.dy)),
     namespaces: namespaces.map((n) => shiftNamespaceGeo(n, shift.dx, shift.dy)),
-    notes: notes.map((n) => shiftNoteGeo(n, shift.dx, shift.dy)),
   };
 }
 
@@ -375,10 +414,9 @@ function layoutMultiPage(
   theme: Theme,
   measurer: StringMeasurer,
 ): ClassGeometry {
-  const classifiers: ClassifierGeo[] = [];
+  const leaves: ClassLeafGeo[] = [];
   const edges: EdgeGeo[] = [];
   const namespaces: NamespaceGeo[] = [];
-  const notes: NoteGeo[] = [];
   let maxWidth = 0;
   let yOffset = 0;
 
@@ -387,17 +425,23 @@ function layoutMultiPage(
     const geo = layoutSinglePage(page, theme, measurer);
     const dy = yOffset;
 
-    for (const c of geo.classifiers) classifiers.push(shiftClassifierGeo(c, 0, dy));
+    // T4: each page's own `leaves` is already jar's real draw order (D3,
+    // `layoutSinglePage`'s own `orderLeaves` call); shifting per-kind and
+    // re-pushing in the same relative order preserves that order, and pages
+    // concatenate in page order (the outer `for` loop) -- no re-sort needed
+    // here, each page IS its own upstream `NewpagedDiagram` page.
+    for (const leaf of geo.leaves) {
+      leaves.push(isNoteGeo(leaf) ? shiftNoteGeo(leaf, 0, dy) : shiftClassifierGeo(leaf, 0, dy));
+    }
     for (const e of geo.edges) edges.push(shiftEdgeGeo(e, 0, dy));
     for (const n of geo.namespaces) namespaces.push(shiftNamespaceGeo(n, 0, dy));
-    for (const n of geo.notes) notes.push(shiftNoteGeo(n, 0, dy));
 
     maxWidth = Math.max(maxWidth, geo.totalWidth);
     yOffset += geo.totalHeight;
     if (i < pages.length - 1) yOffset += NEWPAGE_GAP;
   }
 
-  return { totalWidth: maxWidth, totalHeight: yOffset, classifiers, edges, namespaces, notes };
+  return { totalWidth: maxWidth, totalHeight: yOffset, leaves, edges, namespaces };
 }
 
 // ---------------------------------------------------------------------------

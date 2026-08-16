@@ -30,7 +30,7 @@ export {
   type OpaleDirection,
 } from '../../core/svek/image/Opale.js';
 export function buildOpaleNoteGeo(
-  note: { id: string; creationIndex?: number; phantomSlot?: true; color?: string; stereotype?: string; url?: UrlInfo },
+  note: { id: string; target?: string; creationIndex?: number; phantomSlot?: true; color?: string; stereotype?: string; url?: UrlInfo },
   // G2 N55: `lineAtoms` added, threading `NoteGeo.lineAtoms`'s own doc
   // comment through this note-shape builder too (the general-opalisable
   // branch of `mapGroupNoteGeos`'s singleton-group dispatch) -- kept as a
@@ -51,11 +51,12 @@ export function buildOpaleNoteGeo(
   const resolved = resolveOpaleConnector({ width: m.width, height: m.height }, origin, points);
   if (resolved === undefined) return undefined;
   return {
-    id: note.id, x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines,
+    id: note.id, kind: 'note', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines,
     lineWidths: m.lineWidths,
     lineAtoms: m.lineAtoms,
     lineHeights: m.lineHeights,
     connector: [], opale: resolved,
+    ...(note.target !== undefined ? { target: note.target } : {}),
     ...(note.creationIndex !== undefined ? { creationIndex: note.creationIndex } : {}),
     ...(note.phantomSlot !== undefined ? { phantomSlot: note.phantomSlot } : {}),
     ...(note.color !== undefined ? { color: note.color } : {}),

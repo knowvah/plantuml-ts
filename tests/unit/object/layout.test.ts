@@ -11,7 +11,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
@@ -31,8 +31,8 @@ describe('layoutClass with object diagram — classifier kind', () => {
   it('produces classifiers with kind object', () => {
     const ast = parseClass(src(['object Foo']));
     const geo = layoutClass(ast, theme, measurer);
-    expect(geo.classifiers).toHaveLength(1);
-    expect(geo.classifiers[0]!.kind).toBe('object');
+    expect(classifierLeaves(geo.leaves)).toHaveLength(1);
+    expect(classifierLeaves(geo.leaves)[0]!.kind).toBe('object');
   });
 });
 
@@ -49,7 +49,7 @@ describe('layoutClass with object diagram — member row format', () => {
       '}',
     ]));
     const geo = layoutClass(ast, theme, measurer);
-    const c = geo.classifiers[0]!;
+    const c = classifierLeaves(geo.leaves)[0]!;
 
     // Rows: header + 2 members
     expect(c.rows).toHaveLength(3);
@@ -76,7 +76,7 @@ describe('layoutClass with object diagram — member row format', () => {
       '}',
     ]));
     const geo = layoutClass(ast, theme, measurer);
-    const memberRow = geo.classifiers[0]!.rows[1]!;
+    const memberRow = classifierLeaves(geo.leaves)[0]!.rows[1]!;
     expect(memberRow.text).toBe('name');
   });
 });
@@ -93,10 +93,10 @@ describe('layoutClass with object diagram — multiple objects', () => {
       'Alice --> Bob',
     ]));
     const geo = layoutClass(ast, theme, measurer);
-    expect(geo.classifiers).toHaveLength(2);
+    expect(classifierLeaves(geo.leaves)).toHaveLength(2);
     expect(geo.edges).toHaveLength(1);
 
-    const [a, b] = geo.classifiers;
+    const [a, b] = classifierLeaves(geo.leaves);
     // They must not overlap
     const aRight = a!.x + a!.width;
     const bRight = b!.x + b!.width;
@@ -117,7 +117,7 @@ describe('layoutClass with object diagram — empty', () => {
     const geo = layoutClass(ast, theme, measurer);
     expect(geo.totalWidth).toBe(0);
     expect(geo.totalHeight).toBe(0);
-    expect(geo.classifiers).toHaveLength(0);
+    expect(classifierLeaves(geo.leaves)).toHaveLength(0);
     expect(geo.edges).toHaveLength(0);
   });
 });
@@ -147,7 +147,7 @@ describe('layoutClass with object diagram — canonical example', () => {
       'alice --> Address : livesAt',
     ]));
     const geo = layoutClass(ast, theme, measurer);
-    expect(geo.classifiers).toHaveLength(3);
+    expect(classifierLeaves(geo.leaves)).toHaveLength(3);
     expect(geo.edges).toHaveLength(2);
     expect(geo.totalWidth).toBeGreaterThan(0);
     expect(geo.totalHeight).toBeGreaterThan(0);

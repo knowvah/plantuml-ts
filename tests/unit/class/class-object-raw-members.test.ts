@@ -14,7 +14,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
 import { parseObjectField } from '../../../src/diagrams/class/class-object-commands.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST, Classifier } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
@@ -202,7 +202,7 @@ describe('measureObjectClassifier — raw member rows size the box (nukera-08-di
       notes: [],
     };
     const geo = layoutClass(ast, theme, measurer);
-    const c = geo.classifiers[0]!;
+    const c = classifierLeaves(geo.leaves)[0]!;
     expect(c.width).toBeCloseTo(133.7125, 4);
     expect(c.height).toBeCloseTo(82, 4);
     // header row + 4 raw member rows, each with a visibility icon.

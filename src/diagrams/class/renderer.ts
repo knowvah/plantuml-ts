@@ -6,8 +6,10 @@
  */
 
 import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from './layout.js';
+import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
 import { renderNote, renderTipNote, renderOpaleNote } from './renderer-note.js';
 import type { NoteGeo } from './note-layout.js';
+import { resolveTips, type TipResolution } from './note-tips-resolve.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { ellipse, linkWrap } from '../../core/svg.js';
@@ -141,17 +143,36 @@ function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
   return renderEmptyPackageIcon(nsGeo, theme);
 }
 
+/** The two per-render note tables `renderOneNote` reads (complexity-hook
+ *  param cap): the uid plan and the draw-time tip resolutions. */
+interface NoteRenderContext {
+  readonly uidPlan: ClassUidPlan;
+  readonly tips: ReadonlyMap<string, TipResolution>;
+}
+
 /**
- * G2 N52: one note's own draw output -- extracted so both the interleaved
- * (hosted, step 2) and trailing (unhosted, step 4) call sites in
- * `renderClass` share IDENTICAL per-note logic; only WHERE the returned
- * array is spliced into `children` differs between the two call sites.
- * `NoteGeo`'s own doc comments (`note-layout.ts`) cover the tip/opale/
- * plain shape choice this mirrors unchanged from the pre-N52 single loop.
+ * G2 N52 / mission leaf-draw-order T4: one note's own draw output -- called
+ * once per `'note'`/`'tips'` leaf from `renderClass`'s single ordered
+ * `geo.leaves` loop, the same dispatch site every `ClassifierGeo` leaf goes
+ * through (jar's `SvekResult#drawU` draws every `bibliotekon.allNodes()`
+ * entry through ONE loop, notes and classifiers alike --
+ * `svek/SvekResult.java:82-90`). D5: drawn regardless of its host's
+ * `hidden` -- nothing in the leaf loop below skips a note/tips leaf for its
+ * host's sake, matching jar (`UHidden` wraps only the host NODE's own
+ * image, `:84-87`). `NoteGeo`'s own doc comments (`note-layout.ts`) cover
+ * the tip/opale/plain shape choice this mirrors unchanged.
  */
-function renderOneNote(note: NoteGeo, uidPlan: ClassUidPlan, theme: Theme): string[] {
-  if (note.dropped === true) return [];
-  if (note.tip !== undefined) return [renderTipNote(note, theme)];
+function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: Theme): string[] {
+  const { uidPlan, tips } = ctx;
+  // `GeneralImageBuilder#createEntityImageBlock`'s leaf-type dispatch:
+  // `LeafType.TIPS -> EntityImageTips` (:219-220), whose `drawU` resolves
+  // the notch against the host at DRAW time (mission note-leaf-model D3,
+  // `note-tips-resolve.ts`) and draws NOTHING for a dropped tip;
+  // `LeafType.NOTE -> EntityImageNote` (:118-119), plain or opalisable.
+  if (note.kind === 'tips') {
+    const tip = tips.get(note.id);
+    return tip === undefined || tip === 'dropped' ? [] : [renderTipNote(note, tip, theme)];
+  }
   const uid = uidPlan.noteUid.get(note.id) ?? '';
   const raw = note.opale !== undefined ? renderOpaleNote(note, theme) : renderNote(note, theme);
   // G2 N70: a note's own `[[url]]` wraps its ENTIRE drawn body in one
@@ -288,60 +309,52 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     canonicalBackground !== '#FFFFFF'
       ? canonicalBackground
       : undefined;
-  // G2 N2 (mechanism 3): every drawn element gets an `ent%04d`/`lnk%d`
-  // uid + `<g class="entity"/"cluster"/"link">` wrapper -- see
-  // `renderer-uid.ts#buildClassUidPlan`/`renderer-group.ts`'s own doc
-  // comments for the scheme and its exact/fallback gate.
-  const uidPlan = buildClassUidPlan(geo);
+  // T3/T4: `geo.leaves` replaces the former `classifiers`/`notes` split
+  // (`class-leaf-geo.ts`) AND is now jar's own draw order (D3) -- these
+  // views feed the uid plan / tip resolution below; the leaf loop further
+  // down reads `geo.leaves` directly, in order, not these views.
+  const classifiers = classifierLeaves(geo.leaves);
+  const notes = noteLeaves(geo.leaves);
+  // G2 N2 (mechanism 3): every drawn element gets an `ent%04d`/`lnk%d` uid
+  // + `<g class="entity"/"cluster"/"link">` wrapper -- see `renderer-uid.ts
+  // #buildClassUidPlan`'s own doc comment for the scheme/exact-fallback
+  // gate; `ClassUidPlanInput` is structural, so the views above suffice.
+  const uidPlan = buildClassUidPlan({ ...geo, classifiers, notes });
+  const noteCtx: NoteRenderContext = { uidPlan, tips: resolveTips(notes, classifiers) };
 
-  // G2 N52: notes hosted on a classifier (`NoteGeo.hostId`'s own doc
-  // comment) draw immediately after that classifier, INTERLEAVED with the
-  // classifier loop below -- not in the separate trailing notes pass (step
-  // 4) that pass now only handles unhosted notes (freestanding, or an
-  // unresolved `of` target). Matches jar: every classifier/note is a graph
-  // NODE, drawn in real creation order, strictly BEFORE every edge; this
-  // port's classifier array order already matches jar's node order (every
-  // already-zero-diff multi-classifier fixture depends on that), so
-  // grouping each note under its host classifier reproduces the same
-  // sequence without needing a full creation-order re-sort.
-  const notesByHost = new Map<string, ClassGeometry['notes']>();
-  const hostedNoteIds = new Set<string>();
-  for (const note of geo.notes) {
-    if (note.hostId === undefined) continue;
-    const bucket = notesByHost.get(note.hostId) ?? [];
-    bucket.push(note);
-    notesByHost.set(note.hostId, bucket);
-    hostedNoteIds.add(note.id);
-  }
-  const renderHostedNotes = (classifierId: string): void => {
-    for (const note of notesByHost.get(classifierId) ?? []) {
-      children.push(...renderOneNote(note, uidPlan, theme));
-    }
-  };
-
-  // 1. Namespace boxes (behind classifiers)
+  // 1. Namespace boxes (behind classifiers) -- jar draws every CLUSTER
+  // before any node (`svek/SvekResult.java:72-74`).
   for (const ns of geo.namespaces) {
     const uid = uidPlan.namespaceUid.get(ns.id) ?? '';
     children.push(wrapCluster(ns.label, uid, ns.id, renderNamespace(ns, theme)));
   }
 
-  // 2. Classifier boxes — a `hide <entity|$tag|...>` match (G2 N7,
-  // `layout.ts#buildClassifierGeos`'s own doc comment on `ClassifierGeo
-  // .hidden`) suppresses ALL drawn content: no `<g class="entity">` at all,
-  // matching jar (`net/atmp/CucaDiagram.java#isHidden` -> `SvekResult`'s
-  // `UHidden` wrap). Layout/uid numbering already ran as if it were visible,
-  // so simply skipping the push here is enough — no renumbering needed.
-  const hiddenClassifierIds = new Set(
-    geo.classifiers.filter((c) => c.hidden === true).map((c) => c.id),
-  );
-  for (const classifier of geo.classifiers) {
+  // G2 N7: a `hide <entity|$tag|...>` match (`layout.ts#buildClassifierGeos`'s
+  // own doc comment on `ClassifierGeo.hidden`) suppresses ALL drawn content
+  // for that classifier -- matching jar (`net/atmp/CucaDiagram.java#isHidden`
+  // -> `SvekResult`'s `UHidden` wrap). Layout/uid numbering already ran as if
+  // it were visible, so skipping the push in the loop below is enough -- no
+  // renumbering needed. Also feeds the edge-suppression check (step 3).
+  const hiddenClassifierIds = new Set(classifiers.filter((c) => c.hidden === true).map((c) => c.id));
+
+  // 2. Every leaf (classifier OR note/tips), ONE loop, in jar's own node
+  // order (D3, `svek/SvekResult.java:82-90`) -- `bibliotekon.allNodes()`
+  // draws EVERY node, hidden ones through `UHidden` (nothing), strictly
+  // before any edge. D5: a note/tips leaf draws regardless of its host's
+  // `hidden` -- `UHidden` wraps only the HOST node's own image, never a
+  // separate note/tips node (see `renderOneNote`'s own doc comment).
+  for (const leaf of geo.leaves) {
+    if (isNoteGeo(leaf)) {
+      children.push(...renderOneNote(leaf, noteCtx, theme));
+      continue;
+    }
+    const classifier = leaf;
     if (classifier.hidden === true) continue;
     // G2 N8: an association-class-couple "point" entity draws unwrapped --
     // no `<g class="entity">`, no id, no comment -- see `renderAssocPoint`'s
     // own doc comment.
     if (classifier.kind === 'assoc-circle') {
       children.push(renderAssocPoint(classifier, theme));
-      renderHostedNotes(classifier.id);
       continue;
     }
     // G2 N33: a collapsed-empty package/namespace draws its folder-tab icon
@@ -352,7 +365,6 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     // precedent above) -- see `renderEmptyPackageLeaf`'s doc comment.
     if (classifier.folderTab !== undefined) {
       children.push(renderEmptyPackageLeaf(classifier, theme));
-      renderHostedNotes(classifier.id);
       continue;
     }
     // G2 N20: the lollipop circle DOES get a normal `<g class="entity">`
@@ -363,7 +375,6 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       const { circle, label } = renderLollipop(classifier, theme);
       children.push(wrapEntity(leafPortion(classifier.id), lollipopUid, classifier.id, false, circle));
       if (label !== '') children.push(label);
-      renderHostedNotes(classifier.id);
       continue;
     }
     // SI14 T4 (ADR-1/ADR-2): usecase/actor draws via the SAME faithful
@@ -380,15 +391,14 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       const fragment = renderUsecaseOrActorEntity(classifier, theme, geo.measurer, geo.sprites, entityUid);
       usymbolEntityFragments.push(fragment);
       children.push(fragment.body);
-      renderHostedNotes(classifier.id);
       continue;
     }
     const uid = uidPlan.classifierUid.get(classifier.id) ?? '';
     children.push(wrapEntity(leafPortion(classifier.id), uid, classifier.id, true, renderClassifier(classifier, theme)));
-    renderHostedNotes(classifier.id);
   }
 
-  // 3. Edges — `Link#isHidden` ORs its own flag with EITHER endpoint's
+  // 3. Edges (last, matching jar: `svek/SvekResult.java:97-101` draws every
+  // node before any edge) — `Link#isHidden` ORs its own flag with EITHER endpoint's
   // `isHidden()` (`abel/Link.java:459`): an edge touching a hidden
   // classifier is suppressed too, even though the classifier itself may not
   // be an edge endpoint's "hide" target (jar-verified: `lafama-65-zoci799`'s
@@ -401,7 +411,7 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // `Entity.getName()` for an assoc-circle/lollipop endpoint -- see
   // `linkIdForSvg`'s doc comment.
   const syntheticNames = new Map<string, string>();
-  for (const classifier of geo.classifiers) {
+  for (const classifier of classifiers) {
     if (classifier.syntheticIdName !== undefined) {
       syntheticNames.set(classifier.id, classifier.syntheticIdName);
     }
@@ -431,16 +441,6 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       ),
     );
   });
-
-  // 4. Remaining notes (folded boxes + dashed connectors) -- only those
-  // with NO resolved host (freestanding, or an `of` target that didn't
-  // resolve to a drawn classifier): every HOSTED note already drew in step
-  // 2, immediately after its host classifier (`renderHostedNotes` above --
-  // see `NoteGeo.hostId`'s own doc comment for why).
-  for (const note of geo.notes) {
-    if (hostedNoteIds.has(note.id)) continue;
-    children.push(...renderOneNote(note, uidPlan, theme));
-  }
 
   // SI14 T4 (ADR-2): de-dup usecase/actor fragment defs (e.g. gradients)
   // across nodes before folding into the diagram-wide defs string.

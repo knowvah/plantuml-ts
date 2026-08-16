@@ -32,7 +32,7 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import { resolveTheme } from '../../../src/core/theme.js';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves, noteLeaves } from '../../../src/diagrams/class/layout.js';
 import {
   buildClassUidPlan,
   classUidPlanInputFromAst,
@@ -72,7 +72,11 @@ describe.skipIf(slugs.length === 0)('class uid plan: AST-derived == geo-derived 
       const geo = layoutClass(ast, theme, new DeterministicMeasurer());
 
       const fromAst = buildClassUidPlan(classUidPlanInputFromAst(ast));
-      const fromGeo = buildClassUidPlan(geo);
+      // T3: `ClassUidPlanInput` needs `classifiers`/`notes` explicitly --
+      // `geo.leaves` replaced them (`ClassGeometry`'s own doc comment).
+      const fromGeo = buildClassUidPlan({
+        ...geo, classifiers: classifierLeaves(geo.leaves), notes: noteLeaves(geo.leaves),
+      });
 
       // Compare over the GEO keys: those are the classifiers that actually
       // render, and therefore the only ones a `sametail` can name.

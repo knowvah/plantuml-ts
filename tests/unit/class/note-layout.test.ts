@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildNoteGraphParts, mapNoteGeos } from '../../../src/diagrams/class/note-layout.js';
+import { resolveTips } from '../../../src/diagrams/class/note-tips-resolve.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
@@ -243,30 +244,60 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     const notes = [tipNote('__note_0', 'member1')];
     const { measurements, groups } = buildNoteGraphParts(notes, defaultTheme, measurer, noAnchors);
     const result = layoutResultFor('__note_0', 200, 50, measurements.get('__note_0')!.width, measurements.get('__note_0')!.height);
-    const geos = mapNoteGeos(notes, result, { measurements, groups }, { classifiers: [host], theme: defaultTheme, measurer });
+    const geos = mapNoteGeos(notes, result, { measurements, groups }, { theme: defaultTheme, measurer });
 
     expect(geos).toHaveLength(1);
     const geo = geos[0]!;
-    expect(geo.dropped).toBeUndefined();
+    // note-leaf-model T2: a resolved tip is upstream's `LeafType.TIPS` leaf
+    // (`EntityImageTips`, GeneralImageBuilder.java:219-220).
+    expect(geo.kind).toBe('tips');
     expect(geo.connector).toEqual([]);
+    // note-leaf-model T3 (D3): the geo carries only the draw-time INPUTS --
+    // the member text, the declared side and the two baked font metrics --
+    // never a resolved notch. `mapNoteGeos` read no classifier to build it.
+    expect(geo.target).toBe('A');
+    expect(geo.tipRequest?.member).toBe('member1');
+    expect(geo.tipRequest?.position).toBe('right');
+    expect(geo.tipRequest?.rowHeight).toBe(defaultTheme.fontSize);
+
+    // The notch is `EntityImageTips#drawU`'s, resolved against the host at
+    // draw time (`note-tips-resolve.ts`).
+    const tip = resolveTips(geos, [host]).get(geo.id);
+    expect(tip).not.toBe('dropped');
+    if (tip === undefined || tip === 'dropped') throw new Error('unreachable');
     // position === 'right' -> initial direction LEFT (Position.RIGHT.reverseDirection() === LEFT);
     // host.x(100) - note.x(200) = -100 < 0, but the flip only triggers for an
     // initial RIGHT direction, so LEFT stays LEFT here.
-    expect(geo.tip?.direction).toBe('left');
-    expect(geo.tip?.pp1).toEqual({ x: 0, y: geo.height / 2 });
+    expect(tip.direction).toBe('left');
+    expect(tip.pp1).toEqual({ x: 0, y: geo.height / 2 });
     // pp2.x = (host.x - note.x) + (ROW_TEXT_LEFT_MARGIN + row.width) for LEFT.
-    expect(geo.tip?.pp2.x).toBeCloseTo(-100 + 6 + 59.0625, 6);
+    expect(tip.pp2.x).toBeCloseTo(-100 + 6 + 59.0625, 6);
   });
 
   it('drops a member-tip note whose ::member target matches no host row', () => {
     const notes = [tipNote('__note_0', 'typo')];
     const { measurements, groups } = buildNoteGraphParts(notes, defaultTheme, measurer, noAnchors);
     const result = layoutResultFor('__note_0', 200, 50, measurements.get('__note_0')!.width, measurements.get('__note_0')!.height);
-    const geos = mapNoteGeos(notes, result, { measurements, groups }, { classifiers: [host], theme: defaultTheme, measurer });
+    const geos = mapNoteGeos(notes, result, { measurements, groups }, { theme: defaultTheme, measurer });
 
     expect(geos).toHaveLength(1);
-    expect(geos[0]!.dropped).toBe(true);
-    expect(geos[0]!.tip).toBeUndefined();
+    // note-leaf-model T2: dropping is `EntityImageTips#drawU`'s own early
+    // return -- a dropped note is still a `LeafType.TIPS` leaf.
+    expect(geos[0]!.kind).toBe('tips');
+    expect(resolveTips(geos, [host]).get('__note_0')).toBe('dropped');
+  });
+
+  it('a member-tip note whose host is not a drawn classifier draws nothing (EntityImageTips#drawU Error1/Error2 return)', () => {
+    // jar-verified 2026-08-15 (1.2026.7beta11): `note left of P::m` on a
+    // package and a tip on a `remove`d host both print "Error2 in
+    // EntityImageTips" and draw no tip. Before note-leaf-model D3 this port
+    // fell through to an opalised plain box here.
+    const notes = [tipNote('__note_0', 'member1')];
+    const { measurements, groups } = buildNoteGraphParts(notes, defaultTheme, measurer, noAnchors);
+    const result = layoutResultFor('__note_0', 200, 50, measurements.get('__note_0')!.width, measurements.get('__note_0')!.height);
+    const geos = mapNoteGeos(notes, result, { measurements, groups }, { theme: defaultTheme, measurer });
+    expect(geos[0]!.kind).toBe('tips');
+    expect(resolveTips(geos, []).get('__note_0')).toBe('dropped');
   });
 
   it('aborts every LATER member in a merged group once one fails to match (EntityImageTips#drawU mid-loop early return)', () => {
@@ -275,13 +306,13 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     const grp = groups[0]!;
     expect(grp.memberIndices).toEqual([0, 1]); // merged: same host + side
     const result = layoutResultFor(grp.id, 200, 50, 999, 999);
-    const geos = mapNoteGeos(notes, result, { measurements, groups }, { classifiers: [host], theme: defaultTheme, measurer });
+    const geos = mapNoteGeos(notes, result, { measurements, groups }, { theme: defaultTheme, measurer });
 
     expect(geos).toHaveLength(2);
-    expect(geos[0]!.dropped).toBe(true);
+    const tips = resolveTips(geos, [host]);
+    expect(tips.get('__note_0')).toBe('dropped');
     // member1 WOULD match on its own, but the group already aborted.
-    expect(geos[1]!.dropped).toBe(true);
-    expect(geos[1]!.tip).toBeUndefined();
+    expect(tips.get('__note_1')).toBe('dropped');
   });
 
   it('stacks each tip at its OWN individual width, not the shared group max (jar: tenobo-24-liga464)', () => {
@@ -291,17 +322,28 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     const groupW = Math.max(...grp.memberIndices.map((i) => measurements.get(notes[i]!.id)!.width));
     const groupH = grp.memberIndices.reduce((s, i) => s + measurements.get(notes[i]!.id)!.height, 0);
     const result = layoutResultFor(grp.id, 200, 50, groupW, groupH);
-    const geos = mapNoteGeos(notes, result, { measurements, groups }, { classifiers: [host], theme: defaultTheme, measurer });
+    const geos = mapNoteGeos(notes, result, { measurements, groups }, { theme: defaultTheme, measurer });
 
     expect(geos).toHaveLength(2);
-    expect(geos[0]!.dropped).toBeUndefined();
-    expect(geos[1]!.dropped).toBeUndefined();
+    const tips = resolveTips(geos, [host]);
+    expect(tips.get('__note_0')).not.toBe('dropped');
+    expect(tips.get('__note_1')).not.toBe('dropped');
     // Different note text ("hi" for both here, so widths match this time --
     // the important assertion is that width comes from the INDIVIDUAL
     // measurement, not the shared node's max, and the second tip stacks
-    // BELOW the first (y increases by the first tip's own height).
+    // BELOW the first (y increases by the first tip's own height + the
+    // `EntityImageTips#drawU` ySpacing, `OPALE_Y_SPACING`).
     expect(geos[0]!.width).toBe(measurements.get('__note_0')!.width);
-    expect(geos[1]!.y).toBeGreaterThan(geos[0]!.y);
+    expect(geos[1]!.y).toBe(geos[0]!.y + geos[0]!.height + 10);
+    // The second tip's pp2.y is measured from ITS OWN stacked origin: jar's
+    // `positionOther.getY() - positionMe.getY() - height + centerY`, where
+    // `height` is the running stack -- exactly `note.y - group.y` here.
+    const t0 = tips.get('__note_0')!;
+    const t1 = tips.get('__note_1')!;
+    if (t0 === 'dropped' || t1 === 'dropped') throw new Error('unreachable');
+    // memberB row centre sits 14px below member1's; the tip origin moved
+    // down by height+10, so pp2.y shifts by 14 - (height + 10).
+    expect(t1.pp2.y - t0.pp2.y).toBeCloseTo(60.8889 - 46.8889 - (geos[0]!.height + 10), 6);
   });
 
   it('a non-member (plain) note on the same host+side never resolves as a tip', () => {
@@ -313,11 +355,11 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
       width: 0,
       height: 0,
     };
-    const geos = mapNoteGeos([plain], result, { measurements, groups }, { classifiers: [host], theme: defaultTheme, measurer });
+    const geos = mapNoteGeos([plain], result, { measurements, groups }, { theme: defaultTheme, measurer });
 
     expect(geos).toHaveLength(1);
-    expect(geos[0]!.tip).toBeUndefined();
-    expect(geos[0]!.dropped).toBeUndefined();
+    expect(geos[0]!.tipRequest).toBeUndefined();
+    expect(resolveTips(geos, [host]).size).toBe(0);
     // G2/N14: a single-member group with a real 2+-point connector resolves
     // as a general opalisable note (EntityImageNote.java's opaleLine branch)
     // -- NOT the old plain-fold-box + separate-dashed-line shape (that path
@@ -326,6 +368,10 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
     // replaces it, no separate line draws.
     expect(geos[0]!.connector).toEqual([]);
     expect(geos[0]!.opale).toBeDefined();
+    // note-leaf-model T2: opalisable-or-not is a DRAW-time branch inside
+    // `EntityImageNote#drawU`; the leaf is `LeafType.NOTE` either way
+    // (GeneralImageBuilder.java:118-119).
+    expect(geos[0]!.kind).toBe('note');
   });
 });
 

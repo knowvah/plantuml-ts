@@ -24,7 +24,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
+import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -64,7 +64,7 @@ describe('T6: an empty package never draws a cluster box with no cluster', () =>
 
   it('Empty becomes an isCollapsedGroup leaf classifier with a folderTab footprint', () => {
     const geo = layoutClass(parse(SOURCE), defaultTheme, measurer);
-    const emptyLeaf = geo.classifiers.find((c) => c.id === 'Empty');
+    const emptyLeaf = classifierLeaves(geo.leaves).find((c) => c.id === 'Empty');
     expect(emptyLeaf).toBeDefined();
     expect(emptyLeaf!.folderTab).toBeDefined();
     // Never appears as a NamespaceGeo -- that would mean it reached the
@@ -75,7 +75,7 @@ describe('T6: an empty package never draws a cluster box with no cluster', () =>
   it('Full gets a NamespaceGeo box, is not also a leaf classifier', () => {
     const geo = layoutClass(parse(SOURCE), defaultTheme, measurer);
     expect(geo.namespaces.some((n) => n.id === 'Full')).toBe(true);
-    expect(geo.classifiers.some((c) => c.id === 'Full')).toBe(false);
+    expect(classifierLeaves(geo.leaves).some((c) => c.id === 'Full')).toBe(false);
   });
 });
 

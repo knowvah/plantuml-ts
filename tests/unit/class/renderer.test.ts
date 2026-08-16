@@ -3,8 +3,11 @@ import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
 import { classPlugin } from '../../../src/diagrams/class/index.js';
 import type { ClassGeometry, ClassifierGeo, EdgeGeo, NamespaceGeo } from '../../../src/diagrams/class/layout.js';
+import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { visibilityIconOriginY } from '../../../src/diagrams/class/class-visibility-icon.js';
+import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 // ---------------------------------------------------------------------------
 // Geometry factory helpers
@@ -64,15 +67,30 @@ function makeNamespaceGeo(overrides?: Partial<NamespaceGeo>): NamespaceGeo {
   };
 }
 
-function makeMinimalGeo(overrides?: Partial<ClassGeometry>): ClassGeometry {
+/** T3: `ClassGeometry.leaves` replaces `classifiers`/`notes` -- callers keep
+ *  passing those two (mechanical migration, no assertion changes); this
+ *  helper folds them into `leaves` (today's `[...classifiers, ...notes]`
+ *  concatenation order, unchanged). */
+interface MinimalGeoOverrides {
+  totalWidth?: number;
+  totalHeight?: number;
+  rawWidth?: number;
+  rawHeight?: number;
+  classifiers?: ClassifierGeo[];
+  notes?: NoteGeo[];
+  edges?: EdgeGeo[];
+  namespaces?: NamespaceGeo[];
+}
+
+function makeMinimalGeo(overrides?: MinimalGeoOverrides): ClassGeometry {
+  const { classifiers = [], notes = [], ...rest } = overrides ?? {};
   return {
     totalWidth: 300,
     totalHeight: 200,
-    classifiers: [],
     edges: [],
     namespaces: [],
-    notes: [],
-    ...overrides,
+    ...rest,
+    leaves: [...classifiers, ...notes],
   };
 }
 
@@ -1564,6 +1582,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
+          kind: 'note',
           x: 20,
           y: 30,
           width: 80,
@@ -1585,9 +1604,15 @@ describe('renderClass — notes', () => {
   });
 
   it('G2/N13: a dropped member-tip note (unresolved ::member) draws NOTHING at all', () => {
+    // note-leaf-model T3: dropped-ness is resolved at DRAW time against the
+    // host's rows (`note-tips-resolve.ts`) -- `typo` matches no row of `A`.
     const geo = makeMinimalGeo({
+      classifiers: [makeClassifierGeo('A', 'A', { rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] })],
       notes: [
-        { id: '__note_0', x: 20, y: 30, width: 80, height: 40, lines: ['error'], lineWidths: [30], connector: [], dropped: true },
+        {
+          id: '__note_0', kind: 'tips', x: 20, y: 30, width: 80, height: 40, lines: ['error'], lineWidths: [30], connector: [],
+          target: 'A', tipRequest: { member: 'typo', position: 'right', baselineOffset: 10, rowHeight: 13 },
+        },
       ],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
@@ -1600,6 +1625,7 @@ describe('renderClass — notes', () => {
       notes: [
         {
           id: '__note_0',
+          kind: 'note',
           x: 20,
           y: 30,
           width: 80,
@@ -1618,17 +1644,21 @@ describe('renderClass — notes', () => {
   });
 
   it('G2/N13: a resolved member-tip note draws UNWRAPPED (no <g class="entity">) via the Opale zigzag mechanism', () => {
+    // note-leaf-model T3: the notch is resolved at DRAW time against the
+    // host (`note-tips-resolve.ts`) -- `member` matches `A`'s second row.
     const geo = makeMinimalGeo({
+      classifiers: [makeClassifierGeo('A', 'A', { x: 110, rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] })],
       notes: [
         {
           id: '__note_0',
+          kind: 'tips',
           x: 20,
           y: 30,
           width: 80,
           height: 40,
           lines: ['hi'],
           lineWidths: [10], connector: [],
-          tip: { direction: 'right', pp1: { x: 0, y: 20 }, pp2: { x: 90, y: 20 } },
+          target: 'A', tipRequest: { member: 'member', position: 'left', baselineOffset: 10, rowHeight: 13 },
         },
       ],
     });
@@ -1641,6 +1671,39 @@ describe('renderClass — notes', () => {
     // identical unwrapped precedent, G2 N8) -- the note id never appears as a
     // data-qualified-name/entity id.
     expect(svg).not.toContain('data-qualified-name="__note_0"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Mission leaf-draw-order T4: full parse->layout->render pipeline, exercising
+// `computeLeafDrawOrder` (T2) + `layout.ts#orderLeaves` (T4), not a
+// hand-built `ClassGeometry` (those bypass `layoutClass`/`orderLeaves`
+// entirely and stay in concatenation order -- see `class-leaf-fold-render
+// .test.ts`'s own T3 doc comment).
+// ---------------------------------------------------------------------------
+describe('renderClass — leaf draw order (mission leaf-draw-order T4)', () => {
+  it('D5: a tip note on a hidden host still draws (jar probe 2026-08-15, ' +
+    'pinned jar: hello=1, 223x84; port before T4: hello=0)', () => {
+    const svg = renderFixtureClass(
+      '@startuml\nclass A {\n  m\n}\nclass C\nnote left of A::m\nhello\nend note\nhide A\n@enduml',
+      new DeterministicMeasurer(),
+    );
+    expect(svg).toContain('width="223px" height="84px"');
+    expect((svg.match(/hello/g) ?? []).length).toBe(1);
+    // The hidden host itself still draws nothing.
+    expect(svg).not.toContain('data-qualified-name="A"');
+  });
+
+  it('D1/D2: packaged leaves draw before unpackaged ones, even when the ' +
+    'unpackaged leaf was declared FIRST in source (jar: P.A, P.N, X, Y, GMN6 ' +
+    '-- this port\'s own note-naming scheme differs from jar\'s, orthogonal ' +
+    'to this test\'s own ORDER claim)', () => {
+    const svg = renderFixtureClass(
+      '@startuml\nclass X\npackage P {\nclass A\nnote "n" as N\n}\nclass Y\nnote left of X : hello\n@enduml',
+      new DeterministicMeasurer(),
+    );
+    const order = [...svg.matchAll(/data-qualified-name="([^"]*)"/g)].map((m) => m[1]);
+    expect(order).toEqual(['P', 'P.A', 'N', 'X', 'Y', '__note_1']);
   });
 });
 
