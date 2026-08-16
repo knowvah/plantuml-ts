@@ -3,7 +3,7 @@
  * re-exported from `ast.ts` for existing import sites.
  */
 
-
+import type { NotePosition } from './class-note-decl-ast.js';
 
 export type RelationshipType =
   | 'extension'      // <|--
@@ -149,6 +149,16 @@ export interface Relationship {
    * `HALF_NOT_PRINTED`; class-assoc-couple.ts).
    */
   linkNote?: string;
+  /**
+   * `CucaNote#getPosition` (`abel/CucaNote.java:76-78`) for the note above --
+   * default BOTTOM when the source wrote no explicit `left|right|top|bottom`
+   * token (`CommandFactoryNoteOnLink.java:208-210`). Only meaningful together
+   * with {@link linkNote}; set by the SAME `applyNoteOnLink` call
+   * (class-notes.ts). Drives `computeMergedLabelBox`'s `mergeLR`/`mergeTB`
+   * choice (T10, `class-layout-edge-labels.ts`) -- mirrors the state engine's
+   * identical `Transition.linkNotePosition` field (`diagrams/state/ast.ts`).
+   */
+  linkNotePosition?: NotePosition;
   /**
    * Marked by `constraint on links : text` (CommandConstraintOnLinks →
    * `Link#setLinkConstraint`, applied to the two most-recent non-note links).

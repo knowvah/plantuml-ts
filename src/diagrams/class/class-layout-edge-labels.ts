@@ -11,11 +11,18 @@
 import type { Relationship } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
+import type { Theme } from '../../core/theme.js';
 import { CARDINALITY_FONT_SIZE } from '../../core/graph-layout.js';
-import { computeQuantifierBox } from '../../core/edge-label-box.js';
+import { computeQuantifierBox, computeMergedLabelBox } from '../../core/edge-label-box.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import { ARROW_GLYPH_SIZE, parseMagicArrowLabel } from './class-magic-arrow.js';
+// T10: the note operand's REAL dimension -- `EntityImageNoteLink` builds a
+// `ComponentRoseNote`, a DIFFERENT upstream component from the one
+// `measureNote` models -- see `class-note-link-box.ts`'s own doc comment for
+// the full derivation (verified independently against the Java, not
+// inherited from a comment).
+import { measureLinkNoteDim } from './class-note-link-box.js';
 
 /** SvekEdge.CONSTRAINT_SPOT (SvekEdge.java:122): the fixed side length of the
  *  10x10 label spot emitted for a `constraint on links` edge with no text. */
@@ -234,19 +241,132 @@ function labelMarginOf(rel: Relationship): number {
  *  that through `SvekEdge.java:440`'s `CONSTRAINT_SPOT` arm, which never
  *  builds a `labelText` and so never passes through `addVisibilityModifier`.
  *  `computeRelLabelAttrs` marks that arm with an EMPTY `label`, which is what
- *  distinguishes it from a real one here. */
-function withLabelMargin(attrs: LabelAttrs, rel: Relationship): LabelAttrs {
+ *  distinguishes it from a real one here. Also skipped when the note-merge
+ *  branch actually ran (`rel.linkNote` set AND `noteCtx` supplied) --
+ *  {@link computeMergedLabelBox} already bakes this SAME margin into the
+ *  label operand internally, BEFORE the note merge (`addVisibilityModifier`
+ *  runs before `mergeLR`/`mergeTB`, `SvekEdge.java:302-325`); applying it
+ *  again here would double it. The `noteCtx` check matters ONLY in the
+ *  interim state where no production caller supplies it yet
+ *  (`computeRelLabelAttrs`'s own doc comment): a `linkNote`-bearing rel then
+ *  falls through to the ordinary measured-label branch, which DOES still
+ *  need this margin. */
+function withLabelMargin(attrs: LabelAttrs, rel: Relationship, noteCtx: NoteBoxContext | undefined): LabelAttrs {
   if (attrs.labelWidth === undefined || attrs.labelHeight === undefined) return attrs;
   if (attrs.label === '') return attrs;
+  if (rel.linkNote !== undefined && noteCtx !== undefined) return attrs;
   const m = 2 * labelMarginOf(rel);
   return { ...attrs, labelWidth: attrs.labelWidth + m, labelHeight: attrs.labelHeight + m };
 }
 
+/**
+ * Theme needed to size a note merged into an edge label (`rel.linkNote`) --
+ * OPTIONAL; no production caller threads a `Theme` here yet (write-set
+ * widening beyond this file, reported not done -- see
+ * `computeRelLabelAttrs`'s doc comment). {@link measureLinkNoteDim} resolves
+ * its OWN font from `theme`, unlike the label operand's already-resolved
+ * `font`. No `sprites` field -- see {@link computeNoteMergedLabelAttrs}.
+ */
+export interface NoteBoxContext {
+  theme: Theme;
+}
+
+/**
+ * T10/M2: `note on link` merges the note image into the label reservation
+ * instead of drawing beside it (`SvekEdge.java:302-325`) -- routes through
+ * T8's {@link computeMergedLabelBox}, sourcing the note operand from
+ * {@link measureLinkNoteDim} (`class-note-link-box.ts` -- `EntityImageNoteLink`
+ * is a `ComponentRoseNote`, NOT the plain-note component the class engine's
+ * OTHER note sizer, `measureNote`, models; see that module's own doc
+ * comment for the derivation). **Known limitation, not fixed here**: called
+ * with no `SpriteRegistry` (see {@link NoteBoxContext}'s doc comment), so a
+ * `<$name>` sprite atom inside the note text measures 0x0
+ * (`creole-atoms-measure.ts:49-50`) -- `lozego-15-coci435`'s `<$test>Note on
+ * rel` therefore reserves LESS than the oracle's `137x135` no matter how
+ * correct the merge arithmetic below is; it stays in the backlog.
+ */
+function computeNoteMergedLabelAttrs(
+  rel: Relationship,
+  font: { family: string; size: number },
+  measurer: StringMeasurer,
+  noteCtx: NoteBoxContext,
+): LabelAttrs {
+  const noteDim = measureLinkNoteDim(rel.linkNote!, noteCtx.theme, measurer);
+  const box = computeMergedLabelBox({
+    label: rel.label ?? '',
+    noteDim,
+    position: rel.linkNotePosition ?? 'bottom',
+    // `NoteLinkStrategy.HALF_NOT_PRINTED`/`HALF_PRINTED_FULL` only fires on
+    // the association-class couple's split-note path (`Association
+    // .createNew`, class-assoc-couple.ts) -- untouched by this task. Every
+    // note reaching this function (a still-live `ast.relationships` entry)
+    // carries the NORMAL strategy (SvekEdge.java:314-317).
+    halfWidth: false,
+    // This port has no `LinkMiddleDecor` concept: the `0`/`(0`/`0)`/`(0)`
+    // mid-arrow "INSIDE" syntax (`CommandLinkClass.java:490-509`) is a
+    // surveyed-and-deferred, unbuilt feature (class-relationship-ast.ts's
+    // own `LinkDecor` doc comment -- "CIRCLE_CONNECT ... deferred"). Every
+    // `RelationshipType`/`LinkDecor` this port can construct therefore takes
+    // `LinkType`'s default constructor, which is `LinkMiddleDecor.NONE`
+    // (`decoration/LinkType.java:73`) -- so `labelShield` is always 0
+    // (`SvekEdge.java:353-356`). T10 item 2: for `lozego-15-coci435`'s `--{`
+    // specifically, the crowfoot `{` is parsed from `ARROW_HEAD2`, a
+    // DIFFERENT regex group from `INSIDE` (`CommandLinkClass.java:132-139`),
+    // so it cannot set a middle decor even if this port modeled one.
+    hasMiddleDecor: false,
+    font,
+    measurer,
+  });
+  return { label: rel.label ?? '', labelWidth: box.reservedWidth, labelHeight: box.reservedHeight };
+}
+
+/** The plain (non-note, non-constraint-spot) measured label -- multi-line,
+ *  magic-arrow, or a single plain string. Split out of
+ *  {@link computeRelLabelAttrs} purely for the project's per-function NLOC
+ *  cap; behavior unchanged (pure move, pre-existing logic). */
+function computeMeasuredLabelAttrs(
+  label: string,
+  font: { family: string; size: number },
+  measurer: StringMeasurer,
+): LabelAttrs {
+  const { lines } = splitEdgeLabelLines(label);
+  if (lines.length > 1) {
+    const widths = lines.map((l) => measurer.measure(l, font).width);
+    const lineHeight = measurer.measure(lines[0] ?? '', font).height;
+    return { label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };
+  }
+  const magic = parseMagicArrowLabel(label);
+  if (magic !== undefined) {
+    const m = magic.text !== undefined && magic.text !== ''
+      ? measurer.measure(magic.text, font)
+      : { width: 0, height: 0 };
+    return { label, labelWidth: ARROW_GLYPH_SIZE + m.width, labelHeight: Math.max(ARROW_GLYPH_SIZE, m.height) };
+  }
+  const m = measurer.measure(label, font);
+  return { label, labelWidth: m.width, labelHeight: m.height };
+}
+
+/**
+ * `noteCtx` is OPTIONAL and, today, never supplied by any production caller
+ * (`class-dot-edges.ts` does not thread a `Theme` down -- see
+ * {@link NoteBoxContext}'s doc comment): a `linkNote`-bearing relationship
+ * therefore still falls through to the plain-label branch below in
+ * production, UNCHANGED from pre-T10 behavior, until that plumbing is
+ * authorized. Passing `noteCtx` (e.g. from a unit test) activates the merge.
+ */
 function computeRelLabelAttrs(
   rel: Relationship,
   font: { family: string; size: number },
   measurer: StringMeasurer,
+  noteCtx?: NoteBoxContext,
 ): LabelAttrs {
+  // `hasNoteLabelText()` (SvekEdge.java:401) wins over the constraint-spot
+  // check below -- a note-bearing link is measured via the merge, REGARDLESS
+  // of `linkConstraint` (SvekEdge.java:437's ternary tests `hasNoteLabelText()
+  // || linkConstraint != null`, in that order).
+  if (rel.linkNote !== undefined && noteCtx !== undefined) {
+    return computeNoteMergedLabelAttrs(rel, font, measurer, noteCtx);
+  }
   if (rel.label === undefined) {
     if (rel.linkConstraint === true) {
       // `constraint on links` puts a fixed 10x10 spot label on a constrained
@@ -258,21 +378,7 @@ function computeRelLabelAttrs(
     }
     return {};
   }
-  const { lines } = splitEdgeLabelLines(rel.label);
-  if (lines.length > 1) {
-    const widths = lines.map((l) => measurer.measure(l, font).width);
-    const lineHeight = measurer.measure(lines[0] ?? '', font).height;
-    return { label: rel.label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };
-  }
-  const magic = parseMagicArrowLabel(rel.label);
-  if (magic !== undefined) {
-    const m = magic.text !== undefined && magic.text !== ''
-      ? measurer.measure(magic.text, font)
-      : { width: 0, height: 0 };
-    return { label: rel.label, labelWidth: ARROW_GLYPH_SIZE + m.width, labelHeight: Math.max(ARROW_GLYPH_SIZE, m.height) };
-  }
-  const m = measurer.measure(rel.label, font);
-  return { label: rel.label, labelWidth: m.width, labelHeight: m.height };
+  return computeMeasuredLabelAttrs(rel.label, font, measurer);
 }
 
 /** The `rel.fromMultiplicity`/`rel.toMultiplicity` half of
@@ -350,6 +456,9 @@ export function edgeLabelAttrs(
   // derivation of `font`. See `computeMultiplicityAttrs`'s own doc comment.
   cardinalityFont: { family: string; size: number },
   measurer: StringMeasurer,
+  // T10: OPTIONAL -- see `NoteBoxContext`/`computeRelLabelAttrs`'s own doc
+  // comments for why no production caller supplies this yet.
+  noteCtx?: NoteBoxContext,
 ): NonNullable<DotInputEdge['attributes']> {
   return withLayoutBox({
     // The margin is applied HERE rather than inside each branch of
@@ -359,7 +468,7 @@ export function edgeLabelAttrs(
     // The `linkConstraint` spot deliberately keeps its raw 10x10: upstream
     // reaches it through the `CONSTRAINT_SPOT` arm at `SvekEdge.java:440`,
     // which never builds a `labelText` and so never sees the margin.
-    ...withLabelMargin(computeRelLabelAttrs(rel, font, measurer), rel),
+    ...withLabelMargin(computeRelLabelAttrs(rel, font, measurer, noteCtx), rel, noteCtx),
     ...computeMultiplicityAttrs(rel, cardinalityFont, measurer),
   });
 }

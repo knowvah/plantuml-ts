@@ -125,6 +125,15 @@ export type PendingNote =
       color?: string;
       /** G2 N37: see the `attached` variant's identical field above. */
       stereotype?: string;
+    }
+  | {
+      /** T10: `note [pos] on|of link` (multi-line, `NOTE_ON_LINK_MULTI_RE`)
+       *  — attaches to the LAST relationship in `ast.relationships` at
+       *  `end note` time, not to an entity; never sets `lastEntity`. Mirrors
+       *  `state-notes.ts#PendingNote`'s `'link'` variant. */
+      kind: 'link';
+      position: NotePosition;
+      textLines: string[];
     };
 
 /** True if `line` is the closer for `note` (`}` for a brace note, else `end note`). */
@@ -278,7 +287,11 @@ export function addFreestandingNote(
  * not be resolved (no explicit `of <Entity>` and no `lastEntity` to fall back
  * to) mirrors upstream's `CommandExecutionResult.error("Nothing to note to")`
  * (`CommandFactoryNoteOnEntity.java:299-301`): our parser's posture for an
- * unresolvable command is a silent no-op, not a thrown error.
+ * unresolvable command is a silent no-op, not a thrown error. A `'link'`
+ * note (T10) never has an id and never updates `lastEntity` either — mirrors
+ * `CommandFactoryNoteOnLink#executeInternal`, which only calls
+ * `link.addNote(...)`, never `diagram.setLastEntity(...)`; same posture as
+ * `state-notes.ts#finalizePendingNote`'s identical `'link'` branch.
  */
 export function finalizePendingNote(
   ast: ClassDiagramAST,
@@ -297,6 +310,10 @@ export function finalizePendingNote(
       ...(note.url !== undefined ? { url: note.url } : {}),
     }, counter, tipGroupsSeen);
   }
+  if (note.kind === 'link') {
+    applyNoteOnLink(ast, note.position, text);
+    return undefined;
+  }
   return addFreestandingNote(ast, note.alias, text, note.namespace, note.color, counter, note.stereotype);
 }
 
@@ -306,28 +323,63 @@ export function isNoteId(ast: ClassDiagramAST, id: string): boolean {
 }
 
 /**
- * `note [pos] on|of link [#color] : text` (CommandFactoryNoteOnLink) — a note
- * attached to the LAST relationship parsed, not to an entity. Matched BEFORE
- * the attached-note commands (class-commands.ts rules 6b/6c), which require
- * an explicit `left|right|top|bottom` position and would otherwise treat a
- * position-less `note on link:` as a bare `note <pos>` targeting
- * `lastEntity`, or read `link` as a literal entity id.
+ * `note [pos] on|of link [#color] : text` (CommandFactoryNoteOnLink,
+ * single-line form) — a note attached to the LAST relationship parsed, not
+ * to an entity. Matched BEFORE the attached-note commands (class-commands.ts
+ * rules 6b/6c), which require an explicit `left|right|top|bottom` position
+ * and would otherwise treat a position-less `note on link:` as a bare
+ * `note <pos>` targeting `lastEntity`, or read `link` as a literal entity
+ * id. T10: position is now CAPTURED (group 1, optional) rather than
+ * discarded -- mirrors the state engine's identical
+ * `state-notes.ts#NOTE_ON_LINK_RE`; NOTE_COLOR's own capture (group 2) and
+ * the text group (group 3) shift accordingly.
+ * @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnLink.java:76-91
  */
 export const NOTE_ON_LINK_RE = new RegExp(
-  String.raw`^note\s+(?:(?:left|right|top|bottom)\s+)?(?:on|of)\s+link` + NOTE_COLOR + String.raw`\s*:\s*(.+)$`,
+  String.raw`^note\s+(left|right|top|bottom)?\s*(?:on|of)\s+link` + NOTE_COLOR + String.raw`\s*:\s*(.+)$`,
   'i',
 );
 
 /**
- * Attach `text` as the `linkNote` of the last relationship — mirrors
- * `Link#addNote`/`diagram.getLastLink()`. Silent no-op with no prior
- * relationship (upstream: `CommandExecutionResult.error("No link defined")`).
- * class-assoc-couple.ts moves this text onto an association-class couple's
- * circle edges if that relationship later gets subsumed.
+ * `note [pos] on|of link [#color]` (CommandFactoryNoteOnLink, multi-line
+ * form) — same target/position rule as {@link NOTE_ON_LINK_RE}, opens a
+ * block closed by `end note` (no bracket variant upstream). Anchored at `$`
+ * with no colon so it never overlaps the single-line form. T10: previously
+ * unbuilt -- a `note on link` block (no trailing `: text`) matched no
+ * command at all, so `Relationship.linkNote` was never populated for the
+ * block form (`lozego-15-coci435`'s `note on link #aqua/aliceblue` /
+ * `<$test>Note on rel` / `end note`). Mirrors
+ * `state-notes.ts#NOTE_ON_LINK_MULTI_RE`.
+ * @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnLink.java:93-102
  */
-export function applyNoteOnLink(ast: ClassDiagramAST, text: string): void {
+export const NOTE_ON_LINK_MULTI_RE = new RegExp(
+  String.raw`^note\s+(left|right|top|bottom)?\s*(?:on|of)\s+link` + NOTE_COLOR + String.raw`\s*$`,
+  'i',
+);
+
+/** Parse an optional `left|right|top|bottom` capture, defaulting to BOTTOM
+ *  (`CommandFactoryNoteOnLink.java:203`, `abel/CucaNote.java:76-78`) --
+ *  shared by the single- and multi-line `note on link` rules
+ *  (class-command-containers.ts). Mirrors
+ *  `state-commands-notes.ts#linkNotePosition`. */
+export function resolveLinkNotePosition(raw: string | undefined): NotePosition {
+  return (raw?.toLowerCase() as NotePosition | undefined) ?? 'bottom';
+}
+
+/**
+ * Attach `text` as the `linkNote` (+ `linkNotePosition`) of the last
+ * relationship — mirrors `Link#addNote`/`diagram.getLastLink()`. Silent
+ * no-op with no prior relationship (upstream:
+ * `CommandExecutionResult.error("No link defined")`). class-assoc-couple.ts
+ * moves this text onto an association-class couple's circle edges if that
+ * relationship later gets subsumed (position is NOT carried across that
+ * move -- see `class-assoc-couple.ts`'s own doc comment, untouched by T10).
+ */
+export function applyNoteOnLink(ast: ClassDiagramAST, position: NotePosition, text: string): void {
   const last = ast.relationships.at(-1);
-  if (last !== undefined) last.linkNote = text.trim();
+  if (last === undefined) return;
+  last.linkNote = text.trim();
+  last.linkNotePosition = position;
 }
 
 /** `constraint on links [#color] : text` — upstream CommandConstraintOnLinks
