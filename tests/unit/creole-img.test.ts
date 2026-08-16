@@ -350,8 +350,9 @@ describe('buildLinkEdgeAttributes — img/sprite atoms in an edge label', () => 
       ...baseLink,
       label: `x<img:${AWSLIB_DYNAMODB_ITEMS_DATA_URI}{scale=0.25}>`,
     } as DescriptiveLink;
-    const baseAttrs = buildLinkEdgeAttributes(baseLink, fontSpec, stubMeasurer);
-    const imgAttrs = buildLinkEdgeAttributes(imgLink, fontSpec, stubMeasurer);
+    const fonts = { label: fontSpec, cardinality: fontSpec };
+    const baseAttrs = buildLinkEdgeAttributes(baseLink, fonts, stubMeasurer);
+    const imgAttrs = buildLinkEdgeAttributes(imgLink, fonts, stubMeasurer);
     expect(imgAttrs.labelWidth).toBe((baseAttrs.labelWidth ?? 0) + 64 * 0.25);
   });
 });

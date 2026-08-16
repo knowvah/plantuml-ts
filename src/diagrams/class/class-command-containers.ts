@@ -25,8 +25,10 @@ import { collapseEmptyNamespace } from './class-namespace.js';
 import {
   applyConstraintOnLinks,
   applyNoteOnLink,
+  resolveLinkNotePosition,
   CONSTRAINT_ON_LINKS_RE,
   NOTE_ON_LINK_RE,
+  NOTE_ON_LINK_MULTI_RE,
 } from './class-notes.js';
 import { applyUrlStatement, URL_STATEMENT_RE } from './class-url-command.js';
 import { ensureClassifier } from './parser.js';
@@ -149,12 +151,25 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   },
 
   // 5e. `note on|of link: text` — see NOTE_ON_LINK_RE's doc (class-notes.ts).
-  // G2 N34: NOTE_COLOR is now capturing -- the text group shifted from
-  // match[1] to match[2] (the color itself is not yet consumed here, same
+  // T10: position is now group 1 (optional, default BOTTOM); G2 N34's
+  // capturing NOTE_COLOR is group 2 (still not consumed here, same
   // "captured but not wired to render" posture as the link-note-color
   // cluster generally -- surveyed, named remainder, not this iteration's
-  // scope).
-  { pattern: NOTE_ON_LINK_RE, execute: (state, match) => applyNoteOnLink(state.ast, match[2]!) },
+  // scope); text is group 3.
+  {
+    pattern: NOTE_ON_LINK_RE,
+    execute: (state, match) => applyNoteOnLink(state.ast, resolveLinkNotePosition(match[1]), match[3]!),
+  },
+
+  // 5e-multi. `note [pos] on|of link [#color]` (no colon) — opens a
+  // multi-line note-on-link block closed by `end note`. See
+  // NOTE_ON_LINK_MULTI_RE's doc (class-notes.ts).
+  {
+    pattern: NOTE_ON_LINK_MULTI_RE,
+    execute: (state, match) => {
+      state.pendingNote = { kind: 'link', position: resolveLinkNotePosition(match[1]), textLines: [] };
+    },
+  },
 
   // 5f. `constraint on links` — see CONSTRAINT_ON_LINKS_RE (class-notes.ts).
   { pattern: CONSTRAINT_ON_LINKS_RE, execute: (state) => applyConstraintOnLinks(state.ast) },

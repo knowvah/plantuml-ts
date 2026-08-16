@@ -166,11 +166,20 @@ describe('unexcusedFailures (dot-parity-backlog-data, shared with the ratchets)'
     expect(unexcusedFailures(d, ['labelSizeOk'])).toEqual(['portOk']);
   });
 
-  it('the description goldens name exactly the 10 label-size slugs and no direction slugs', () => {
+  it('the description goldens name exactly the 9 label-size slugs and no direction slugs', () => {
     const backlogs = loadStructuralBacklogs(join(REPO, 'oracle', 'goldens', 'description'));
     expect(expectedBacklogFailures('berelu-46-namo819', backlogs)).toEqual(['labelSizeOk']);
     expect(expectedBacklogFailures('zosuje-43-zebi775', backlogs)).toEqual(['labelSizeOk']);
     expect(expectedBacklogFailures('zusota-76-jagu564', backlogs)).toEqual([]);
-    expect(backlogs.get('label-size-backlog.json')!.size).toBe(10);
+    // Was 10 until `edge-label-box-backlog` T12c ported cause D (the `<`/`>`
+    // magic-arrow token and its `TextBlockArrow2` triangle block, sized at the
+    // font size per `TextBlockArrow2.java:87` -- NOT the draw-only `.80` at
+    // `:65`). That cleared `usecase/funeme-74-tenu200`, whose two edges went
+    // 21->16 and 22->16 to match the oracle exactly.
+    //
+    // This count is deliberately hardcoded rather than derived from the file:
+    // the backlog is shrink-only, so a bare `.size` assertion is what catches
+    // a slug being ADDED. Lower it as slugs legitimately clear; never raise it.
+    expect(backlogs.get('label-size-backlog.json')!.size).toBe(9);
   });
 });

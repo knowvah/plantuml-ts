@@ -316,6 +316,22 @@ describe('sprite-split prefetch -- registration against a REAL emitted fragment 
  * unit test (importing by relative path) passed. This pins the fix.
  */
 describe('si11b public surface', () => {
+  /**
+   * Explicit timeout, and the only one in this suite. This test's three
+   * assertions are free; ALL of its wall-clock is the `await import` below
+   * cold-loading the entire `src/index.ts` module graph. That cost is a
+   * function of how big the library is, not of anything this test asserts,
+   * so vitest's 5000ms default was measuring library size and failing on it:
+   * `edge-label-box-backlog` T10 added one module to the class engine
+   * (`class-note-link-box.ts`) and the import crossed the line at 5003ms,
+   * under parallel full-suite load. It passes in isolation either way, which
+   * is what makes the default limit the wrong instrument here rather than a
+   * real regression -- verified by running the full suite at the preceding
+   * commit (5cd612ad), where it passes, and at this one, where it does not.
+   *
+   * Raise this again rather than trimming the entry graph to fit it: the
+   * graph is the product, and every future module legitimately adds to it.
+   */
   it('reaches the per-sprite registration helper from the package entry point', async () => {
     const entry = await import('../../src/index.js');
 
@@ -323,5 +339,5 @@ describe('si11b public surface', () => {
     expect(typeof entry.SpriteNotBundledError).toBe('function');
     // The si11a helper it sits beside, as the shape being matched.
     expect(typeof entry.remoteStdlib).toBe('function');
-  });
+  }, 30_000);
 });

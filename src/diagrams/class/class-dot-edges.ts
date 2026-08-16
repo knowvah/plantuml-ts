@@ -15,7 +15,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import { findFreestandingNoteRelationshipIndices } from './note-freestanding.js';
-import { edgeLabelAttrs } from './class-layout-helpers.js';
+import { edgeLabelAttrs, type NoteBoxContext } from './class-layout-helpers.js';
 import { edgePortAttrs } from './class-port-rows.js';
 import type { EdgeGeo } from './layout.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
@@ -82,8 +82,14 @@ function moveLabelToXlabel(attrs: NonNullable<DotInputEdge['attributes']>): void
  *  endpoint that is a package cluster is routed to that cluster's point anchor. */
 interface DotEdgeAttrContext {
   font: { family: string; size: number };
+  /** T14/D3: threaded straight through to {@link edgeLabelAttrs} -- see
+   *  that function's own doc comment. */
+  cardinalityFont: { family: string; size: number };
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
+  /** T10: threaded straight through to {@link edgeLabelAttrs} -- sizes a
+   *  `note on link`-merged label (`rel.linkNote`). */
+  noteCtx: NoteBoxContext;
   kindBIndices: ReadonlySet<number>;
   /** B1/M1: ids of the leaves emitted as RECTANGLE_HTML_FOR_PORTS row tables,
    *  the only endpoints a `::member` port may legally attach to. */
@@ -94,11 +100,61 @@ interface DotEdgeAttrContext {
   sametailByRelIndex?: ReadonlyMap<number, string> | undefined;
 }
 
+/**
+ * T11: the tail/head-bound quantifier pair, following `swap` -- upstream
+ * keeps `quantifier1` bound to `entity1` by construction, and the ONE place
+ * a link inverts (`CommandLinkClass.java:364`, `link.getInv()`) inverts
+ * entities and sided fields TOGETHER: `Link.java:145-146` builds
+ * `new Link(..., cl2, cl1, ..., linkArg.getInv())`, and `LinkArg.java:
+ * 115-117` is `new LinkArg(label, length, quantifier2, quantifier1, ...)`.
+ * This port normalizes `rel.from`/`rel.to` by the arrowhead
+ * (`class-arrow-grammar.ts#resolveArrow`) rather than by upstream's own
+ * `Link` order, so `dotEdgeRunsReversed(rel)` can be true while
+ * `rel.fromMultiplicity`/`rel.toMultiplicity` still name the ORIGINAL
+ * from/to ends -- `buildDotEdges` already re-reverses the DOT tail/head
+ * endpoints themselves (`swap`, below) and `edgePortAttrs` already follows
+ * it for `tailport`/`headport`; this was the one remaining call
+ * (`edgeLabelAttrs` -> `computeMultiplicityAttrs`) still reading the
+ * UN-swapped pair, pairing the wrong multiplicity with `taillabel`/
+ * `headlabel`. Only `fromMultiplicity`/`toMultiplicity` are swapped:
+ * `fromRole`/`toRole` are parsed but read nowhere in `src/` yet
+ * (`class-layout-edge-labels.ts#computeMultiplicityAttrs`'s own doc
+ * comment), so swapping them would be inert. `fromQualifier`/`toQualifier`
+ * key off `rel.from`/`rel.to` classifier ids directly
+ * (`class-shield-helpers.ts:129-130`), which this swap never touches, so
+ * they need no adjustment. See `.agent-notes/m3-tail-head-swap.md`.
+ */
+function swappedRel(rel: Relationship, swap: boolean): Relationship {
+  if (!swap) return rel;
+  const out: Relationship = { ...rel };
+  // `exactOptionalPropertyTypes`: an absent quantifier must be OMITTED, not
+  // assigned `undefined` -- mirrors `moveLabelToXlabel`'s own `delete` idiom
+  // a few lines up in this same file.
+  if (rel.toMultiplicity !== undefined) out.fromMultiplicity = rel.toMultiplicity;
+  else delete out.fromMultiplicity;
+  if (rel.fromMultiplicity !== undefined) out.toMultiplicity = rel.fromMultiplicity;
+  else delete out.toMultiplicity;
+  return out;
+}
+
 /** One relationship's DOT edge attributes -- split out of `buildDotEdges`
  *  (G2/N16) to keep that function's own CCN under the project's complexity
  *  cap after adding the Kind-B `noArrow` gate. */
-function buildDotEdgeAttrs(rel: Relationship, i: number, ctx: DotEdgeAttrContext): NonNullable<DotInputEdge['attributes']> {
-  const attrs = { minLen: (rel.length ?? 2) - 1, ...edgeLabelAttrs(rel, ctx.font, ctx.measurer) };
+function buildDotEdgeAttrs(
+  rel: Relationship,
+  i: number,
+  ctx: DotEdgeAttrContext,
+  // T11: whether `dotEdgeRunsReversed(rel)` reverses the DOT tail/head
+  // relative to `rel.from`/`rel.to` -- the SAME flag `buildDotEdges` already
+  // computes for `edgePortAttrs` two lines below its own call site, now also
+  // threaded here so the quantifier pairing follows it. See `swappedRel`'s
+  // own doc comment.
+  swap: boolean,
+): NonNullable<DotInputEdge['attributes']> {
+  const attrs = {
+    minLen: (rel.length ?? 2) - 1,
+    ...edgeLabelAttrs(swappedRel(rel, swap), ctx.font, ctx.cardinalityFont, ctx.measurer, ctx.noteCtx),
+  };
   if (ctx.linetype === 'ortho') moveLabelToXlabel(attrs);
   if (rel.invis === true) attrs.invis = true;
   // `[norank]` -> constraint=false (`Relationship.norank`'s doc comment).
@@ -125,8 +181,12 @@ function buildDotEdgeAttrs(rel: Relationship, i: number, ctx: DotEdgeAttrContext
  *  `linetype`). */
 interface DotEdgesRenderCtx {
   font: { family: string; size: number };
+  /** T14/D3: threaded straight through to {@link DotEdgeAttrContext}. */
+  cardinalityFont: { family: string; size: number };
   measurer: StringMeasurer;
   linetype: Theme['linetype'];
+  /** T10: threaded straight through to {@link DotEdgeAttrContext}. */
+  noteCtx: NoteBoxContext;
   /** T2: `classPortShortNamesById`'s output -- ADR-4's declared port-name
    *  sets, row-port leaves only (`isRowPortKind`: class family + object). */
   classPortShortNames: ReadonlyMap<string, Set<string>>;
@@ -142,7 +202,7 @@ export function buildDotEdges(
   anchors: Map<string, string>,
   render: DotEdgesRenderCtx,
 ): DotInputEdge[] {
-  const { font, measurer, linetype, classPortShortNames } = render;
+  const { font, cardinalityFont, measurer, linetype, noteCtx, classPortShortNames } = render;
   const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
   // ADR-3: unconditional whenever the TARGET carries row bands at all -- a
   // `map` (its own flat-sizer bands) or an `isRowPortKind` leaf -- class
@@ -156,7 +216,7 @@ export function buildDotEdges(
     ...classPortShortNames.keys(),
   ]);
   const ctx: DotEdgeAttrContext = {
-    font, measurer, linetype, kindBIndices, portRowIds,
+    font, cardinalityFont, measurer, linetype, noteCtx, kindBIndices, portRowIds,
     sametailByRelIndex: render.sametailByRelIndex,
   };
   return ast.relationships.map((rel: Relationship, i: number) => {
@@ -165,7 +225,7 @@ export function buildDotEdges(
     const to = swap ? rel.from : rel.to;
     const dotFrom = anchors.get(from) ?? from;
     const dotTo = anchors.get(to) ?? to;
-    const attrs = buildDotEdgeAttrs(rel, i, ctx);
+    const attrs = buildDotEdgeAttrs(rel, i, ctx, swap);
     Object.assign(attrs, edgePortAttrs(rel, swap, dotFrom, dotTo, ctx.portRowIds));
     return { id: `edge-${i}`, from: dotFrom, to: dotTo, attributes: attrs };
   });

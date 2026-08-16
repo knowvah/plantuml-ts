@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  computeCardinalityFontOverride,
   computeClassStyleCascadeOverrides,
   computeClassTagCascadeGenerations,
   resolveClassTagCascadeEntry,
@@ -417,5 +418,67 @@ describe('computeClassStyleCascadeOverrides -- skinparam wrapWidth default (A2s 
       'classCascadeMaximumWidth',
       'noteCascadeMaximumWidth',
     ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T1 (edge-label-box-backlog, D3): `computeCardinalityFontOverride` --
+// `{root,element,classDiagram,arrow,cardinality}` (`GraphvizImageBuilder
+// .java:124-126`, `getStyleArrowCardinality`). Building block only -- no
+// caller yet (T5/T6 wire it). `camuna-58-veca254`'s own `<style>` block is
+// used verbatim below (not a synthesized shape) per the project's "prefer
+// upstream fixtures" convention.
+// ---------------------------------------------------------------------------
+describe('computeCardinalityFontOverride (T1, D3)', () => {
+  it('returns nothing for an empty StyleMap -- the caller keeps the Theme default', () => {
+    const override = computeCardinalityFontOverride(styleMap({}));
+    expect(override).toEqual({});
+  });
+
+  it("camuna-58-veca254's arrow { cardinality { FontSize 10 } } resolves to 10, not arrow's own 14", () => {
+    const override = computeCardinalityFontOverride(
+      styleMap({
+        arrow: { fontcolor: 'blue', fontsize: '14', fontstyle: 'bold' },
+        'arrow.cardinality': { fontcolor: 'red', fontsize: '10', fontstyle: 'italic' },
+      }),
+    );
+    expect(override.cardinalityFontSize).toBe(10);
+  });
+
+  it('a <style> block setting only arrow { FontSize 14 } (no cardinality block) falls through to 14', () => {
+    const override = computeCardinalityFontOverride(styleMap({ arrow: { fontsize: '14' } }));
+    expect(override.cardinalityFontSize).toBe(14);
+  });
+
+  it('resolves FontName the same way -- arrow.cardinality wins over a plain arrow declaration', () => {
+    const override = computeCardinalityFontOverride(
+      styleMap({
+        arrow: { fontname: 'Arial' },
+        'arrow.cardinality': { fontname: 'Courier' },
+      }),
+    );
+    expect(override.cardinalityFontFamily).toBe('Courier');
+  });
+
+  it('a bare classDiagram {} cascades down (a genuine CARDINALITY_SNAMES ancestor token), but class {} does not', () => {
+    const override = computeCardinalityFontOverride(
+      styleMap({ classdiagram: { fontsize: '20' }, class: { fontsize: '30' } }),
+    );
+    expect(override.cardinalityFontSize).toBe(20);
+  });
+
+  it('a bare class {} declaration never leaks into the cardinality font -- class is not an arrow ancestor', () => {
+    const override = computeCardinalityFontOverride(styleMap({ class: { fontsize: '30' } }));
+    expect(override).toEqual({});
+  });
+
+  it('non-numeric FontSize is dropped, matching every sibling cascade\'s guard', () => {
+    const override = computeCardinalityFontOverride(styleMap({ arrow: { fontsize: 'not-a-number' } }));
+    expect(override.cardinalityFontSize).toBeUndefined();
+  });
+
+  it("defaultTheme's own cardinality font is 13/sans-serif -- the plantuml.skin arrow default (:307/:6), used when no override resolves", () => {
+    expect(defaultTheme.cardinalityFontSize).toBe(13);
+    expect(defaultTheme.cardinalityFontFamily).toBe('sans-serif');
   });
 });

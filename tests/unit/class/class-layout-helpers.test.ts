@@ -71,7 +71,7 @@ function rel(label: string): Relationship {
 
 describe('edgeLabelAttrs — multi-line label sizing (G2 item 43)', () => {
   it('measures a single-line label unchanged (pre-existing behavior)', () => {
-    const attrs = edgeLabelAttrs(rel('demo'), font, measurer);
+    const attrs = edgeLabelAttrs(rel('demo'), font, font, measurer);
     expect(attrs.label).toBe('demo');
     // +2 on each axis is SvekEdge#addVisibilityModifier's all-round
     // `withMargin(block, 1, 1)` (svek/SvekEdge.java:372-373), applied once
@@ -83,30 +83,39 @@ describe('edgeLabelAttrs — multi-line label sizing (G2 item 43)', () => {
 
   it('reserves the WIDEST line\'s width and the stacked height for a multi-line label', () => {
     // Lines: 'this is' (7), 'on several' (10), 'lines' (5) -- widths *7.
-    const attrs = edgeLabelAttrs(rel('this is\\non several\\nlines'), font, measurer);
+    const attrs = edgeLabelAttrs(rel('this is\\non several\\nlines'), font, font, measurer);
     expect(attrs.label).toBe('this is\\non several\\nlines');
     expect(attrs.labelWidth).toBe(72); // 'on several'.length(10) * 7 + 2
     expect(attrs.labelHeight).toBe(44); // 14 * 3 lines + 2 (block margin, not per line)
   });
 });
 
-describe('edgeLabelAttrs — magic-arrow label sizing (G2 item 44)', () => {
-  it('reserves ARROW_GLYPH_SIZE plus the stripped text width for "foo >"', () => {
-    const attrs = edgeLabelAttrs(rel('foo >'), font, measurer);
-    // 'foo'.length(3) * 7 = 21; ARROW_GLYPH_SIZE = trunc(13*0.8) = 10.
-    expect(attrs.labelWidth).toBe(33); // 21 + 10 + 2
-    expect(attrs.labelHeight).toBe(16); // max(10, 14) + 2
+describe('edgeLabelAttrs — magic-arrow label sizing (G2 item 44 / M4 cause D)', () => {
+  it('reserves the arrow font size plus the stripped text width for "foo >"', () => {
+    const attrs = edgeLabelAttrs(rel('foo >'), font, font, measurer);
+    // 'foo'.length(3) * 7 = 21. Arrow block = font.size(14)
+    // (`TextBlockArrow2.calculateDimension`, `klimt/shape/TextBlockArrow2
+    // .java:57,87`) -- NOT `ARROW_GLYPH_SIZE`(10), the draw-only `.80` ink
+    // triangle (`:64-65`) that never enters a measurement.
+    expect(attrs.labelWidth).toBe(37); // 21 + 14 + 2
+    expect(attrs.labelHeight).toBe(16); // max(14, 14) + 2
   });
 
-  it('reserves ONLY ARROW_GLYPH_SIZE for a bare ">" (no remaining text)', () => {
-    const attrs = edgeLabelAttrs(rel('>'), font, measurer);
-    expect(attrs.labelWidth).toBe(12); // ARROW_GLYPH_SIZE + 2
-    expect(attrs.labelHeight).toBe(12); // ARROW_GLYPH_SIZE + 2
+  it('reserves ONLY the arrow font size for a bare ">" -- no marginLabel at all', () => {
+    // `Display.isNull` arm (`SvekEdge.java:281-285`) never calls
+    // `addVisibilityModifier`, so the bare token skips marginLabel entirely
+    // (unlike every other label shape, including a text-bearing arrow).
+    const attrs = edgeLabelAttrs(rel('>'), font, font, measurer);
+    expect(attrs.labelWidth).toBe(14); // font.size, no margin
+    expect(attrs.labelHeight).toBe(14);
   });
 
   it('a stereotype guillemet label is measured via the plain (non-arrow) path', () => {
-    const attrs = edgeLabelAttrs(rel('<<alias>>'), font, measurer);
-    expect(attrs.labelWidth).toBe(65); // '<<alias>>'.length(9) * 7 + 2
+    // M4 cause C (`.agent-notes/m4-single-line-width.md`, `Guillemet.java
+    // :78-88`): `<<alias>>` -> `«alias»` BEFORE measuring, so this counts
+    // 7 glyphs (`«alias»`.length), not the raw 9-character token.
+    const attrs = edgeLabelAttrs(rel('<<alias>>'), font, font, measurer);
+    expect(attrs.labelWidth).toBe(51); // '«alias»'.length(7) * 7 + 2
   });
 });
 

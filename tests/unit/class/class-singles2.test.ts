@@ -205,11 +205,11 @@ describe('gujigi-63-roki030: constraint on links marks the two last links', () =
     };
     const font = { family: 'sans', size: 14 };
     const [plain, selfLoop] = ast.relationships;
-    const plainAttrs = edgeLabelAttrs(plain!, font, measurer);
+    const plainAttrs = edgeLabelAttrs(plain!, font, font, measurer);
     expect(plainAttrs.label).toBe('');
     expect(plainAttrs.labelWidth).toBe(10);
     expect(plainAttrs.labelHeight).toBe(10);
-    const loopAttrs = edgeLabelAttrs(selfLoop!, font, measurer);
+    const loopAttrs = edgeLabelAttrs(selfLoop!, font, font, measurer);
     expect(loopAttrs.label).toBe('underarkiv');
   });
 

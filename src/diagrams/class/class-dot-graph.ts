@@ -26,6 +26,7 @@ import { buildClassUidPlan, classUidPlanInputFromAst } from './renderer-uid.js';
 import {
   LIKE_CLASS_KINDS,
   type MeasuredClassifier,
+  type NoteBoxContext,
 } from './class-layout-helpers.js';
 import { packageEndpointAnchors, shieldedClassifierIds } from './class-shield-helpers.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
@@ -369,10 +370,27 @@ function buildDotNodesAndEdges(
     ast, measuredMap, anchors, groupInheritance.protectedIds, classPortShortNames,
   );
   const labelFont = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
+  // T14/D3: `theme.cardinalityFontFamily`/`cardinalityFontSize` are optional
+  // in the `Theme` TYPE (pre-existing hand-built Theme literals elsewhere
+  // stay valid, `theme.ts:21-22`'s own doc comment), but `defaultTheme`/
+  // `darkTheme` always set concrete values and `theme` here always descends
+  // from one of them via `resolveTheme()`/`applyStyleMap` (`build-theme.ts`
+  // Stage 1/3c) -- `deepMergeTheme`'s `partial[key] ?? base[key]` merge
+  // (`theme.ts:491`) preserves that invariant through every stage. The `!`
+  // below asserts that invariant rather than papering over it with a
+  // fitted fallback literal.
+  const cardinalityFont = {
+    family: theme.cardinalityFontFamily!,
+    size: theme.cardinalityFontSize!,
+  };
+  // T10: same `theme`/`ast.sprites` pair `buildNoteGraphParts` below already
+  // takes for attached/freestanding notes -- sizes a `note on link`-merged
+  // label (`rel.linkNote`).
+  const noteCtx: NoteBoxContext = { theme, ...(ast.sprites !== undefined ? { sprites: ast.sprites } : {}) };
   // Magma standalone-chaining edges appended after the real relationship edges.
   const dotEdges = [
     ...buildDotEdges(ast, anchors, {
-      font: labelFont, measurer, linetype: theme.linetype, classPortShortNames,
+      font: labelFont, cardinalityFont, measurer, linetype: theme.linetype, noteCtx, classPortShortNames,
       sametailByRelIndex: groupInheritance.sametailByRelIndex,
     }),
     ...buildClassMagmaEdges(ast, anchors),

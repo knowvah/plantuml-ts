@@ -23,7 +23,10 @@ import {
   resolveGlobalBackground,
   resolveGlobalBorder,
 } from './style-map-element.js';
-import { computeClassStyleCascadeOverrides } from './style-cascade-class.js';
+import {
+  computeClassStyleCascadeOverrides,
+  computeCardinalityFontOverride,
+} from './style-cascade-class.js';
 import { computeSimpleSelectorOverrides } from './style-map-simple-fields.js';
 import {
   computeJsonFamilyOverride,
@@ -96,12 +99,23 @@ interface StyleMapExtras {
   readonly hasNoteTagCascade: boolean;
   readonly shadowing: number | undefined;
   readonly rootElementBorderRaw: string | undefined;
+  /** T14/D3: `computeCardinalityFontOverride`'s result -- the ONLY two
+   *  `StyleMap`-derived fields that live at the TOP of `Theme` rather than
+   *  under `colors.graph` (`theme.ts:21-22`), so they ride the partial's
+   *  own top level in {@link buildStyleMapPartialTheme} instead of
+   *  `graphOverride`. Empty (`{}`) for a StyleMap that never touches
+   *  `arrow`/`arrow.cardinality` -- the caller keeps `base`'s own value via
+   *  `deepMergeTheme`'s `partial[key] ?? base[key]` (`theme.ts:491`), which
+   *  is how the "fallthrough through arrow, not a literal" behavior this
+   *  task requires falls out for free. */
+  readonly cardinalityFont: ReturnType<typeof computeCardinalityFontOverride>;
 }
 
 /**
  * document { BackgroundColor } canvas bg; database { … } → per-element
- * buckets (D4); the `.tagname` note-bucket cascade (G2 N37); and the bare
- * root/element Shadowing/LineColor cascade (D3).
+ * buckets (D4); the `.tagname` note-bucket cascade (G2 N37); the bare
+ * root/element Shadowing/LineColor cascade (D3); and the D3 cardinality-font
+ * cascade (T14).
  */
 function computeStyleMapExtras(styleMap: StyleMap): StyleMapExtras {
   const elements = collectElementStyleBuckets(styleMap);
@@ -114,6 +128,7 @@ function computeStyleMapExtras(styleMap: StyleMap): StyleMapExtras {
     hasNoteTagCascade: Object.keys(noteTagCascade).length > 0,
     shadowing: resolveGlobalShadowing(styleMap),
     rootElementBorderRaw: resolveGlobalBorder(styleMap),
+    cardinalityFont: computeCardinalityFontOverride(styleMap),
   };
 }
 
@@ -126,7 +141,8 @@ function styleMapHasNoOverrides(graphOverride: Partial<GraphColors>, extras: Sty
     !extras.hasElements &&
     !extras.hasNoteTagCascade &&
     extras.shadowing === undefined &&
-    extras.rootElementBorderRaw === undefined
+    extras.rootElementBorderRaw === undefined &&
+    Object.keys(extras.cardinalityFont).length === 0
   );
 }
 
@@ -179,6 +195,10 @@ function mergeElementBuckets(base: Theme, incoming: Record<string, ElementColors
 function buildStyleMapPartialTheme(base: Theme, graphOverride: Partial<GraphColors>, extras: StyleMapExtras): Partial<Theme> {
   return {
     ...(extras.shadowing !== undefined ? { shadowing: extras.shadowing } : {}),
+    // T14/D3: top-level fold -- see StyleMapExtras#cardinalityFont's own
+    // doc comment for why this rides the partial's top level rather than
+    // graphOverride.
+    ...extras.cardinalityFont,
     colors: {
       ...base.colors,
       ...(extras.documentBg !== undefined ? { background: extras.documentBg } : {}),

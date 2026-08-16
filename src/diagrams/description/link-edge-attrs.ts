@@ -17,7 +17,12 @@ import type { DescriptiveLink } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import { resolveInlineLinks } from './parse-helpers.js';
-import { computeReservedLabelBox } from '../../core/edge-label-box.js';
+import {
+  computeReservedLabelBox,
+  computeQuantifierBox,
+  splitCreoleLines,
+  parseMagicArrowLabel,
+} from '../../core/edge-label-box.js';
 import {
   type SpriteDimsLookup,
 } from '../../core/creole-atoms.js';
@@ -53,8 +58,25 @@ const DECOR_MARGIN_ARROW = 10;
  *  of threading `fontSpec`/`measurer`/`sprites` through each one separately. */
 interface MeasureCtx {
   fontSpec: FontSpec;
+  /** T14/D3: the resolved `{root,element,classDiagram,arrow,cardinality}`
+   *  font -- see {@link applyQualifierLabels}'s own doc comment. */
+  cardinalityFontSpec: FontSpec;
   measurer: StringMeasurer;
   sprites: SpriteDimsLookup | undefined;
+}
+
+/**
+ * T14/D3: the two independently-resolved fonts `SvekEdge`'s constructor
+ * takes (`GraphvizImageBuilder.java:235-241`) -- the arrow LABEL font and
+ * the `arrow.cardinality` cascade font -- bundled into one param so
+ * {@link buildLinkEdgeAttributes}/`buildDotEdges` (layout-dot-tree.ts)/
+ * `runLayout` (layout.ts) stay under the project's 5-parameter cap while
+ * carrying both. `label` is the SAME `edgeFontSpec` this file already built
+ * (T3's `skinparam arrowFontSize` cascade) -- unchanged by this task.
+ */
+export interface EdgeFontSpecs {
+  readonly label: FontSpec;
+  readonly cardinality: FontSpec;
 }
 
 /** Head-decor margin for a link's arrowHead (tail decor is always NONE — we
@@ -77,11 +99,24 @@ interface LinkDzeta {
  *   vertical = 0.
  * - length > 1: vertical = labelHeight + decor; horizontal = 0.
  *
- * We have no tail/head qualifiers today, so only the label contributes
- * beyond decorDzeta.
+ * T7: `getHorizontalDzeta`/`getVerticalDzeta` (`SvekEdge.java:1159-1203`) sum
+ * the RAW `calculateDimension()` of `labelText` and, when set,
+ * `startTailText`/`endHeadText` -- no `(int)` truncation anywhere in that
+ * method (the cast lives only in `appendTable`'s DOT-table emission,
+ * `:504-507`, a different call site). `computeQuantifierBox` (T5) returns
+ * only the FLOORED `reservedWidth`/`reservedHeight` it built for that other
+ * call site, so reusing it here would inject a truncation upstream never
+ * applies to this sum. Left as a flat string measure below -- unchanged by
+ * this task -- rather than adopting a box contract built for a different
+ * upstream method. No golden fixture combines a `\n`-bearing quantifier with
+ * a horizontal/vertical dzeta contribution (`purevo-74-pamo264`, the only
+ * golden with quantifier syntax, uses a single un-split digit), so this is a
+ * named, verified-inert gap, not a silent one.
  */
-/** The three text blocks SvekEdge feeds its ArithmeticStrategySum: the main
- *  label (stereotype included) and the tail/head qualifier labels. */
+/** The text blocks SvekEdge feeds its ArithmeticStrategySum: the main label
+ *  (stereotype included) and the tail/head qualifier labels
+ *  (`link.firstLabel`/`secondLabel` -- always Quantifier1/Quantifier2 here,
+ *  never Role1/Role2; see `applyQualifierLabels`'s doc comment). */
 function dzetaTexts(link: DescriptiveLink): string[] {
   const texts: string[] = [];
   const main = mainLabelText(link);
@@ -132,7 +167,13 @@ export function computeGraphSpacing(
   kermor = false,
   sprites?: SpriteDimsLookup,
 ): { nodeSep: number; rankSep: number } {
-  const ctx: MeasureCtx = { fontSpec, measurer, sprites };
+  // `cardinalityFontSpec` is unused on this path -- `dzetaTexts`/
+  // `computeLinkDzeta` measure every text (main label AND qualifiers) at
+  // `ctx.fontSpec` uniformly, a pre-existing, named, verified-inert gap this
+  // task does not touch (see this file's own T7 doc comment above
+  // `dzetaTexts`). Filled with `fontSpec` only to satisfy `MeasureCtx`'s
+  // shape -- never read.
+  const ctx: MeasureCtx = { fontSpec, cardinalityFontSpec: fontSpec, measurer, sprites };
   let maxHorizontal = 0;
   let maxVertical = 0;
   for (const link of links) {
@@ -172,6 +213,83 @@ function mainLabelText(link: DescriptiveLink): string | undefined {
   return parts.length > 0 ? parts.join('\n') : undefined;
 }
 
+/**
+ * The plain (non-arrow) reserved box for a main-label text -- T4's shared
+ * box formula, not a single-line string measure. Multi-line labels take the
+ * MAX line width rather than the concatenation, creole formatting tags are
+ * stripped, and the line count reaches the height -- see
+ * `core/edge-label-box.ts`. Atom-bearing lines still need
+ * `measureLineWithAtoms`'s extra width, so the two combine: the box supplies
+ * the text dimensions, the atom scan adds any icon width on the widest line.
+ * `box.lines` are already split on `\n` and stripped of formatting tags;
+ * each is then measured atom-aware, and the WIDEST wins. Height is one font
+ * size per line plus whatever a tall atom on that line needs -- the per-line
+ * pattern `lineAtomHeightExcess` documents for exactly this composition.
+ *
+ * The RESERVED box, not the measured one -- the jar writes the margined,
+ * floored value into the DOT table (`SvekEdge.java:504-507`). `marginLabel`
+ * is read off the helper rather than restated, so the 1-vs-6 self-loop rule
+ * stays in one place; only the atom-aware measurement is redone here,
+ * because the helper measures plain text and an icon occupies real width.
+ */
+function measureMainLabelBox(
+  text: string,
+  isSelfLoop: boolean,
+  ctx: MeasureCtx,
+): { width: number; height: number } {
+  const box = computeReservedLabelBox(text, ctx.fontSpec, ctx.measurer, isSelfLoop);
+  const widest = Math.max(
+    ...box.lines.map((l) => measureLineWithAtoms(l, ctx.fontSpec, ctx.measurer, ctx.sprites).width),
+  );
+  const stacked = box.lines.reduce(
+    (h, l) => h + ctx.fontSpec.size + lineAtomHeightExcess(l, ctx.fontSpec, ctx.sprites),
+    0,
+  );
+  return { width: Math.floor(widest + 2 * box.marginLabel), height: stacked + 2 * box.marginLabel };
+}
+
+/**
+ * M4 cause D (`.agent-notes/m4-single-line-width.md`, T12c): a main label
+ * carrying a magic-arrow token strips it and reserves a `fontSize`-square
+ * triangle block instead (`TextBlockArrow2.java:57,87` -- `calculateDimension`
+ * returns `(size, size)`; the `.80` at `:64-65` is DRAW-only and never
+ * enters a measurement). Two upstream shapes (`SvekEdge.java:280-306`):
+ *
+ * - BARE token (`Display.isNull(link.getLabel())`, `:281-285`): the arrow
+ *   block IS the whole reservation -- `addVisibilityModifier` is never
+ *   called, so there is NO `marginLabel` at all. `fontSize x fontSize`
+ *   (`13x13` at the default).
+ * - Text-bearing (`:296-306`): the remaining text runs through the SAME
+ *   line-split/creole-strip/margin pipeline as any other label
+ *   (`addVisibilityModifier`, `:302`) BEFORE the arrow block is merged on
+ *   (`:304`, `TextBlockUtils.mergeLR` -- width SUMS, height MAXES,
+ *   `XDimension2D.java:108-112`), so margin lands on the text side only.
+ *
+ * Single-line only, mirroring `StringWithArrow`'s own `hasSeveralGuideLines`
+ * guard (`:63-65`) -- a multi-line main label is never read as an arrow
+ * token upstream. The description engine has no separate arrow-token AST
+ * field (unlike upstream's `Labels`/`StringWithArrow` parse-time split, see
+ * `descdiagram/command/Labels.java:59-64`), so detection runs on the
+ * assembled, `[[url]]`-resolved text here -- no corpus fixture combines a
+ * magic arrow with `[[url]]` markup, so this is a verified no-op ordering
+ * simplification, not a guess.
+ */
+function computeMainLabelDims(
+  resolvedLabelText: string,
+  isSelfLoop: boolean,
+  ctx: MeasureCtx,
+): { width: number; height: number } {
+  const magic = splitCreoleLines(resolvedLabelText).length === 1
+    ? parseMagicArrowLabel(resolvedLabelText)
+    : undefined;
+  if (magic === undefined) return measureMainLabelBox(resolvedLabelText, isSelfLoop, ctx);
+  if (magic.text === undefined || magic.text === '') {
+    return { width: ctx.fontSpec.size, height: ctx.fontSpec.size };
+  }
+  const rest = measureMainLabelBox(magic.text, isSelfLoop, ctx);
+  return { width: ctx.fontSpec.size + rest.width, height: Math.max(ctx.fontSpec.size, rest.height) };
+}
+
 /** Applies the main label (`label`/`labelWidth`/`labelHeight`, or the
  *  `xlabel*` triple under `skinparam linetype ortho` — SvekEdge.java:434-441)
  *  to `attrs`, resolving `[[url]]` markup (I5) and img/sprite atoms (D9)
@@ -185,33 +303,7 @@ function applyMainLabel(
   const labelText = mainLabelText(link);
   if (labelText === undefined) return;
   const resolvedLabelText = resolveInlineLinks(labelText);
-  // T4: the shared box formula, not a single-line string measure. Multi-line
-  // labels take the MAX line width rather than the concatenation, creole
-  // formatting tags are stripped, and the line count reaches the height --
-  // see `core/edge-label-box.ts`. Atom-bearing lines still need
-  // `measureLineWithAtoms`' extra width, so the two combine: the box supplies
-  // the text dimensions, the atom scan adds any icon width on the widest line.
-  // `box.lines` are already split on `\n` and stripped of formatting tags;
-  // each is then measured atom-aware, and the WIDEST wins. Height is one font
-  // size per line plus whatever a tall atom on that line needs -- the per-line
-  // pattern `lineAtomHeightExcess` documents for exactly this composition.
-  const box = computeReservedLabelBox(resolvedLabelText, ctx.fontSpec, ctx.measurer, link.from === link.to);
-  // The RESERVED box, not the measured one -- the jar writes the margined,
-  // floored value into the DOT table (`SvekEdge.java:504-507`). `marginLabel`
-  // is read off the helper rather than restated, so the 1-vs-6 self-loop rule
-  // stays in one place; only the atom-aware measurement is redone here,
-  // because the helper measures plain text and an icon occupies real width.
-  const widest = Math.max(
-    ...box.lines.map((l) => measureLineWithAtoms(l, ctx.fontSpec, ctx.measurer, ctx.sprites).width),
-  );
-  const stacked = box.lines.reduce(
-    (h, l) => h + ctx.fontSpec.size + lineAtomHeightExcess(l, ctx.fontSpec, ctx.sprites),
-    0,
-  );
-  const m = {
-    width: Math.floor(widest + 2 * box.marginLabel),
-    height: stacked + 2 * box.marginLabel,
-  };
+  const m = computeMainLabelDims(resolvedLabelText, link.from === link.to, ctx);
   if (linetype === 'ortho') {
     attrs.xlabel = resolvedLabelText;
     attrs.xlabelWidth = m.width;
@@ -236,34 +328,66 @@ function applyMainLabel(
   }
 }
 
-/** Applies the tail/head qualifier-label dims (CommandLinkElement
- *  FIRST_LABEL/SECOND_LABEL) to `attrs`, same [[url]]/atom resolution as
- *  the main label. */
+/**
+ * Applies the tail/head qualifier-label dims (`CommandLinkElement`
+ * FIRST_LABEL/SECOND_LABEL, `link.firstLabel`/`secondLabel`) to `attrs`,
+ * resolving `[[url]]` markup as the main label does, then sizing through
+ * T5's {@link computeQuantifierBox} -- `\n` split, max-line-width, no
+ * shield, no `marginLabel`, `Math.floor` truncation -- matching
+ * `SvekEdge.java:447-467`'s `startTailText`/`endHeadText.calculateDimension`
+ * emission (raw dimension straight into `appendTable`, unlike the main
+ * label's `:440-445` which adds `2 * labelShield` first).
+ *
+ * Role labels (`startTailRoleText`/`endHeadRoleText`, `SvekEdge.java:341-351`,
+ * a taillabel/headlabel fallback for when NO quantifier is set) are NEVER
+ * reached here: the description engine's link command,
+ * `CommandLinkElement.executeArg` (`descdiagram/command/CommandLinkElement
+ * .java:320-324`), always calls `linkArg.withQuantifier(first, second)` --
+ * `withRole` is called ONLY by the class engine's link command
+ * (`classdiagram/command/CommandLinkClass.java:351`). So `link.firstLabel`/
+ * `secondLabel` are always Quantifier1/Quantifier2 here, never Role1/Role2,
+ * and this function has no role arm to write.
+ *
+ * **T14/D3 resolved** (was: a T7 write-set-escape gap, logged rather than
+ * silently patched). `ctx.cardinalityFontSpec` below is the resolved
+ * `{root,element,classDiagram,arrow,cardinality}` font
+ * (`GraphvizImageBuilder.java:124-126`, `style-cascade-class.ts
+ * #computeCardinalityFontOverride`, T1) -- folded into `theme` by
+ * `style-map-theme.ts#buildStyleMapPartialTheme` and carried here from
+ * `layoutDescription` through `runLayout` -> `buildDotEdges`
+ * (`layout.ts`, `layout-dot-tree.ts`) as `EdgeFontSpecs.cardinality`. No
+ * description-diagram golden overrides `cardinality` specifically
+ * (`zosuje-43-zebi775` overrides `arrow` but not `arrow.cardinality`), so
+ * this remains a verified no-op divergence for every EXISTING golden; the
+ * wiring itself is what this task delivers.
+ */
 function applyQualifierLabels(
   attrs: NonNullable<DotInputEdge['attributes']>,
   link: DescriptiveLink,
   ctx: MeasureCtx,
 ): void {
   if (link.firstLabel !== undefined) {
-    const m = measureLineWithAtoms(resolveInlineLinks(link.firstLabel), ctx.fontSpec, ctx.measurer, ctx.sprites);
-    attrs.tailLabelWidth = m.width;
-    attrs.tailLabelHeight = m.height;
+    const box = computeQuantifierBox(resolveInlineLinks(link.firstLabel), ctx.cardinalityFontSpec, ctx.measurer);
+    attrs.tailLabelWidth = box.reservedWidth;
+    attrs.tailLabelHeight = box.reservedHeight;
   }
   if (link.secondLabel !== undefined) {
-    const m = measureLineWithAtoms(resolveInlineLinks(link.secondLabel), ctx.fontSpec, ctx.measurer, ctx.sprites);
-    attrs.headLabelWidth = m.width;
-    attrs.headLabelHeight = m.height;
+    const box = computeQuantifierBox(resolveInlineLinks(link.secondLabel), ctx.cardinalityFontSpec, ctx.measurer);
+    attrs.headLabelWidth = box.reservedWidth;
+    attrs.headLabelHeight = box.reservedHeight;
   }
 }
 
 export function buildLinkEdgeAttributes(
   link: DescriptiveLink,
-  fontSpec: FontSpec,
+  fonts: EdgeFontSpecs,
   measurer: StringMeasurer,
   linetype?: 'ortho' | 'polyline',
   sprites?: SpriteDimsLookup,
 ): NonNullable<DotInputEdge['attributes']> {
-  const ctx: MeasureCtx = { fontSpec, measurer, sprites };
+  const ctx: MeasureCtx = {
+    fontSpec: fonts.label, cardinalityFontSpec: fonts.cardinality, measurer, sprites,
+  };
   const attrs: NonNullable<DotInputEdge['attributes']> = { minLen: link.length - 1 };
   // `-[hidden]-` does NOT produce `style=invis`, despite the name. Upstream
   // keeps two separate fields and this port conflated them:

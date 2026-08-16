@@ -26,6 +26,17 @@ const CLASS_SNAMES = ['root', 'element', 'classdiagram', 'class'] as const;
 const HEADER_SNAMES = [...CLASS_SNAMES, 'header'] as const;
 /** `SvekEdge.java:819`: `{root,element,classDiagram,arrow}`. */
 const ARROW_SNAMES = ['root', 'element', 'classdiagram', 'arrow'] as const;
+/** D3: `GraphvizImageBuilder.java:124-126` (`getStyleArrowCardinality`):
+ *  `{root,element,classDiagram,arrow,cardinality}` -- a strict superset of
+ *  {@link ARROW_SNAMES}, so a bare `arrow { FontSize N }` (no nested
+ *  `cardinality` block) already satisfies THIS query too --
+ *  `resolveStyleCascade`'s subset-match test only requires a matched
+ *  declaration's OWN tokens (here, just `arrow`) to be contained in the
+ *  query set. The "fallthrough through arrow, not to the skin default"
+ *  decisions.md#D3 requires is therefore free: no separate arrow-only
+ *  lookup or explicit fallback branch, just this longer signature queried
+ *  against the SAME StyleMap. */
+const CARDINALITY_SNAMES = [...ARROW_SNAMES, 'cardinality'] as const;
 /** `EntityImageClassHeader#spotStyleSignature`: `{root,element,spot,spot
  *  <Kind>}` -- generalized across every badge kind (only `root` can ever
  *  match this set in practice, since none of the four tokens includes
@@ -204,6 +215,39 @@ function arrowTagCascadeEntry(
     if (Number.isFinite(n)) entry.thickness = n;
   }
   return Object.keys(entry).length > 0 ? entry : undefined;
+}
+
+/**
+ * D3: resolve the `{root,element,classDiagram,arrow,cardinality}` font
+ * override (T1, edge-label-box-backlog) from a diagram's own `<style>`
+ * StyleMap -- `GraphvizImageBuilder.java:235-241` resolves this SEPARATELY
+ * from `labelFont` and passes both into `SvekEdge`'s constructor as
+ * `cardinalityFont`, sizing quantifier/role labels independently of the
+ * arrow's own label text.
+ *
+ * Returns only the properties a matching selector actually declares
+ * (`resolveStyleCascade` returns `undefined` when none does) -- an empty
+ * StyleMap, or one that never touches `arrow`/`arrow.cardinality`,
+ * contributes nothing, and the caller keeps the Theme's own default
+ * (`defaultTheme.cardinalityFontSize` = 13, `plantuml.skin:307`).
+ *
+ * Building block only: no caller yet. T5/T6 of the edge-label-box-backlog
+ * mission wire this into `computeQuantifierBox`'s font (D3, D4 -- the batch's
+ * own zero-fixture-movement bar forbids wiring a consumer in this task).
+ */
+export function computeCardinalityFontOverride(
+  styleMap: StyleMap,
+  stereotypeTags: readonly string[] = [],
+): { cardinalityFontSize?: number; cardinalityFontFamily?: string } {
+  const override: { cardinalityFontSize?: number; cardinalityFontFamily?: string } = {};
+  const sizeRaw = resolveStyleCascade(styleMap, CARDINALITY_SNAMES, 'fontsize', stereotypeTags);
+  if (sizeRaw !== undefined) {
+    const n = Number(sizeRaw);
+    if (Number.isFinite(n) && n > 0) override.cardinalityFontSize = n;
+  }
+  const familyRaw = resolveStyleCascade(styleMap, CARDINALITY_SNAMES, 'fontname', stereotypeTags);
+  if (familyRaw !== undefined) override.cardinalityFontFamily = familyRaw;
+  return override;
 }
 
 /**

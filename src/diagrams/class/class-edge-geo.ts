@@ -12,7 +12,8 @@ import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
 import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 import { attachPortLabels, multiLineLabelAnchor, portLabelAnchor } from './class-edge-label-anchor.js';
 import { CARDINALITY_FONT_SIZE, splitEdgeLabelLines } from './class-layout-helpers.js';
-import { ARROW_GLYPH_SIZE, parseMagicArrowLabel, magicArrowAngle, magicArrowGlyphPoints, type MagicArrowLabel } from './class-magic-arrow.js';
+import { parseMagicArrowLabel, magicArrowAngle, magicArrowGlyphPoints, type MagicArrowLabel } from './class-magic-arrow.js';
+import { applyGuillemet } from '../../core/edge-label-box.js';
 import type { EdgeGeo } from './layout.js';
 
 /**
@@ -60,13 +61,33 @@ function attachEdgeLabel(
   if (edgeResult.labelX === undefined || edgeResult.labelY === undefined) return;
   const center = { x: edgeResult.labelX, y: edgeResult.labelY };
 
+  // M4 cause C (T12b follow-on, `.agent-notes/m4-single-line-width.md`):
+  // rewrite `<<x>>` -> `«x»` ONCE, here, before any of the three branches
+  // below read the label -- upstream RENDERS the guillemet-rewritten text,
+  // not just measures it (`Display.manageGuillemet` returns the rewritten
+  // `Display`; `SvekEdge`'s `labelOnly` block, which BOTH sizes the DOT
+  // reservation AND draws the glyphs, is built from that single rewritten
+  // copy -- `SvekEdge.java:302,440-445,956-980`; there is no second,
+  // unrewritten copy anywhere upstream). `class-layout-edge-labels.ts
+  // #computeMeasuredLabelAttrs` sizes the DOT box from the SAME
+  // `applyGuillemet` (`core/edge-label-box.ts`) applied to the SAME
+  // `rel.label` -- calling the one shared, pure, deterministic function
+  // from both sites cannot drift: identical input always yields identical
+  // output. Unlike M4 causes A/B (the visibility-char strip), which T12a
+  // deliberately left OUT of the rendered text because upstream also draws
+  // an icon glyph this port does not render (stripping the char alone
+  // would delete information), cause C drops nothing -- upstream's
+  // rewritten text IS the whole visible label, so both measurement and
+  // render use it unconditionally.
+  const label = applyGuillemet(rel.label);
+
   // G2 item 43: a `\n`/`\l`/`\r`-split label draws ONE `<text>` per line
   // in jar's real golden SVG (`Display.hasSeveralGuideLines`/`create0`'s
   // line-wrapping, `SvekEdge.java:299`) -- see `multiLineLabelAnchor`'s doc
   // comment for the jar-verified per-line layout formula. A label with no
   // line breaks keeps the EXACT pre-existing single-`<text>` path below,
   // unchanged (`EdgeGeo.label`, N62).
-  const { lines, align } = splitEdgeLabelLines(rel.label);
+  const { lines, align } = splitEdgeLabelLines(label);
   if (lines.length > 1) {
     edgeGeo.labelLines = multiLineLabelAnchor(lines, align, center, measurer, fontFamily);
     return;
@@ -76,36 +97,46 @@ function attachEdgeLabel(
   // `>`/`<`/`"< "`/`"> "` forms) strips the arrow token and draws a small
   // triangle glyph instead -- see `attachMagicArrow`'s doc comment. A label
   // with no arrow token (`parseMagicArrowLabel` returns `undefined`) keeps
-  // the EXACT pre-existing plain-text path below, unchanged.
-  const magic = parseMagicArrowLabel(rel.label);
+  // the EXACT pre-existing plain-text path below, unchanged. Reads `label`
+  // (post-guillemet), not `rel.label`: harmless when both differ, since a
+  // magic-arrow token is a single `<`/`>`, never the `<<`/`>>` pair
+  // `applyGuillemet` rewrites -- no corpus fixture combines the two.
+  const magic = parseMagicArrowLabel(label);
   if (magic !== undefined) {
     attachMagicArrow(edgeGeo, magic, fromToPoints, center, measurer, fontFamily);
     return;
   }
 
-  edgeGeo.label = portLabelAnchor(rel.label, center, measurer, fontFamily);
+  edgeGeo.label = portLabelAnchor(label, center, measurer, fontFamily);
 }
 
 /**
- * G2 item 44: position the magic-arrow glyph (+ its optional remaining
- * text) as ONE combined block, mirroring jar's `TextBlockUtils.mergeLR
- * (arrow, label, CENTER)` (`SvekEdge.java:284,304`, `descdiagram/command/
- * StringWithArrow.java:105-113`) -- width SUMS (`ARROW_GLYPH_SIZE` +
- * text width), height/vertical-center is shared (mergeLR's CENTER
+ * G2 item 44 / M4 cause D: position the magic-arrow glyph (+ its optional
+ * remaining text) as ONE combined block, mirroring jar's
+ * `TextBlockUtils.mergeLR(arrow, label, CENTER)` (`SvekEdge.java:284,304`,
+ * `descdiagram/command/StringWithArrow.java:105-113`) -- width SUMS the
+ * arrow block's OWN font-size square (`TextBlockArrow2.calculateDimension`,
+ * `klimt/shape/TextBlockArrow2.java:57,87` -- `arrowFontSize`, NOT
+ * `ARROW_GLYPH_SIZE`, the draw-only `.80` ink triangle, `:64-65`) plus the
+ * text width; height/vertical-center is shared (mergeLR's CENTER
  * alignment). `blockLeft` generalizes `portLabelAnchor`'s own
  * `center.x - width/2` formula from a single `width` to the combined
  * block's `totalWidth` (algebraically identical when `hasText` is
- * `false` and `totalWidth === ARROW_GLYPH_SIZE`). The glyph always sits
- * in the LEFT `ARROW_GLYPH_SIZE`-wide slot regardless of arrow direction
+ * `false` and `totalWidth === arrowFontSize`). The glyph always sits
+ * in the LEFT `arrowFontSize`-wide slot regardless of arrow direction
  * (`mergeLR(arrow, label, ...)`'s fixed argument order) -- the triangle's
  * own ROTATION (`magicArrowAngle`) encodes direction, not its position.
  * Text position reuses `portLabelAnchor` verbatim by passing it the
- * TEXT-ONLY sub-block's own center (`blockLeft + ARROW_GLYPH_SIZE +
+ * TEXT-ONLY sub-block's own center (`blockLeft + arrowFontSize +
  * textWidth/2`), so its `y`/baseline formula is byte-identical to the
- * plain single-line label path. Jar-verified byte-exact SHAPE (glyph
- * triangle) against `lojepe-37-liri985`'s golden `<polygon>`; absolute
- * block position carries the SAME gvts-genuine placement residual N25/N62
- * already named.
+ * plain single-line label path. This SAME `arrowFontSize` is what
+ * `class-layout-edge-labels.ts#computeMeasuredLabelAttrs` reserves in the
+ * DOT box (T12c) -- deriving both from the caller's own `font.size` keeps
+ * the drawn glyph's slot and the reserved box in sync, unlike the
+ * pre-T12c code which used `ARROW_GLYPH_SIZE` (10) for BOTH and reserved
+ * the wrong width. Jar-verified byte-exact SHAPE (glyph triangle) against
+ * `lojepe-37-liri985`'s golden `<polygon>`; absolute block position
+ * carries the SAME gvts-genuine placement residual N25/N62 already named.
  */
 function attachMagicArrow(
   edgeGeo: EdgeGeo,
@@ -118,16 +149,15 @@ function attachMagicArrow(
   const angle = magicArrowAngle(fromToPoints, magic.direction);
   const hasText = magic.text !== undefined && magic.text !== '';
   const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
-  const textWidth = hasText ? measurer.measure(magic.text!, font).width : 0;
-  const totalWidth = ARROW_GLYPH_SIZE + textWidth;
-  const blockLeft = center.x - totalWidth / 2;
+  const textWidth = hasText ? measurer.measure(magic.text, font).width : 0;
+  const blockLeft = center.x - (font.size + textWidth) / 2;
   edgeGeo.arrowGlyph = {
-    points: magicArrowGlyphPoints(blockLeft, center.y - ARROW_GLYPH_SIZE / 2, angle),
+    points: magicArrowGlyphPoints(blockLeft, center.y - font.size / 2, angle, font.size),
   };
   if (hasText) {
     edgeGeo.label = portLabelAnchor(
-      magic.text!,
-      { x: blockLeft + ARROW_GLYPH_SIZE + textWidth / 2, y: center.y },
+      magic.text,
+      { x: blockLeft + font.size + textWidth / 2, y: center.y },
       measurer,
       fontFamily,
     );

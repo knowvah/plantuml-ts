@@ -57,6 +57,7 @@ import {
   edgeLabelAttrs,
   type EdgeLabelAlign,
   type EdgeLabelLines,
+  type NoteBoxContext,
 } from './class-layout-edge-labels.js';
 import { measureGenericClassifier, tryMeasureDescriptionLeaf } from './class-layout-generic-classifier.js';
 // R2j: the attribute/header/stereotype font + guillemet resolvers moved to
@@ -78,7 +79,7 @@ export { ROW_TEXT_LEFT_MARGIN, isMethodMember };
 // this file under the 500-line cap; the public import path is unchanged.
 export {
   CARDINALITY_FONT_SIZE, splitEdgeLabelLines, wrapPlainTextLine, edgeLabelAttrs,
-  type EdgeLabelAlign, type EdgeLabelLines,
+  type EdgeLabelAlign, type EdgeLabelLines, type NoteBoxContext,
 };
 
 /**
