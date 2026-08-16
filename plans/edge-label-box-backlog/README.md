@@ -64,7 +64,7 @@ which one and why, with the measurement — SI22's own rule, and it scored itsel
 | [1](batch-1/overview.md) | Foundation + both diagnoses (4 parallel) | T1 T2 T3 T4 | [x] |
 | [2](batch-2/overview.md) | Shared module: quantifier arm | T5 | [x] |
 | [3](batch-3/overview.md) | Engine wiring for M1 (2 parallel) | T6 T7 | [x] |
-| [4](batch-4/overview.md) | Shared module: note-merge arm | T8 | [ ] |
+| [4](batch-4/overview.md) | Note-merge arm + D3 completion (2 parallel) | T8 T14 | [ ] |
 | [5](batch-5/overview.md) | Engine wiring for M2 (2 parallel) | T9 T10 | [ ] |
 | [6](batch-6/overview.md) | Gated fixes for M3 / M4 | T11 T12a T12b T12c | [ ] |
 | [7](batch-7/overview.md) | Close-out | T13 | [ ] |
