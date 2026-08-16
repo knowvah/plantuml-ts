@@ -7,8 +7,8 @@ is live from here on.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T6 | Class + object quantifier wiring | `typescript-pro` | `src/diagrams/class/class-layout-edge-labels.ts`, `src/core/graph-layout.ts`, `oracle/goldens/class/label-size-backlog.json`, `oracle/goldens/object/label-size-backlog.json` | T5 | [ ] |
-| T7 | Description quantifier wiring | `typescript-pro` | `src/diagrams/description/link-edge-attrs.ts`, `oracle/goldens/description/label-size-backlog.json` | T5 | [ ] |
+| T6 | Class + object quantifier wiring | `typescript-pro` | `src/diagrams/class/class-layout-edge-labels.ts`, `src/core/graph-layout.ts`, `oracle/goldens/class/label-size-backlog.json`, `oracle/goldens/object/label-size-backlog.json` | T5 | [x] |
+| T7 | Description quantifier wiring | `typescript-pro` | `src/diagrams/description/link-edge-attrs.ts`, `oracle/goldens/description/label-size-backlog.json` | T5 | [x] |
 
 **Write-set conflicts:** none. T6 owns the class/object backlogs and both
 copies of `CARDINALITY_FONT_SIZE`; T7 owns the description backlog only.
