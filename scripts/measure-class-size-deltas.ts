@@ -29,6 +29,11 @@ import {
   SIZE_CONFORMANCE_TOLERANCE_IN,
 } from '../tests/oracle/svek-dot.js';
 import {
+  expectedBacklogFailures,
+  loadStructuralBacklogs,
+  unexcusedFailures,
+} from '../tests/oracle/dot-parity-backlog-data.js';
+import {
   classifyDelta,
   detectCause,
   summarize,
@@ -66,19 +71,25 @@ function comparePasses(
   dir: string,
   files: readonly string[],
   captured: readonly DotInputGraph[],
+  excused: readonly string[],
 ): { maxDelta: number } | { failure: string } {
   let maxDelta = 0;
   for (let i = 0; i < files.length; i++) {
     const oracle = parseSvekDot(readFileSync(join(dir, files[i]!), 'utf8'));
     const candidate = dotInputToStructural(captured[i]!);
     const diff = compareStructural(oracle, candidate);
-    if (!diff.structurallyEqual) return { failure: `${files[i]}: structurally unequal` };
+    // Same contract as the parity ratchets (`dot-parity-backlogs.ts`): a
+    // graph may fail ONLY the checks its backlogs name (label-size /
+    // direction) and is then still measurable for size; anything else is a
+    // structural regression, harder than a size drift.
+    const failing = unexcusedFailures(diff, excused);
+    if (failing.length > 0) return { failure: `${files[i]}: structurally unequal (${failing.join(', ')})` };
     maxDelta = Math.max(maxDelta, diff.maxSizeDeltaIn);
   }
   return { maxDelta };
 }
 
-function measureFixture(slug: string, allowed: number, inBacklog: boolean): DeltaResult {
+function measureFixture(slug: string, allowed: number, inBacklog: boolean, excused: readonly string[]): DeltaResult {
   const dir = join(GOLDENS, slug);
   const markup = readFileSync(join(dir, 'input.puml'), 'utf8');
   const files = svekFiles(dir);
@@ -90,7 +101,7 @@ function measureFixture(slug: string, allowed: number, inBacklog: boolean): Delt
       detail: `captured ${captured.length} layout graph(s), expected ${files.length}`,
     };
   }
-  const outcome = comparePasses(dir, files, captured);
+  const outcome = comparePasses(dir, files, captured, excused);
   if ('failure' in outcome) {
     return {
       slug, delta: Number.POSITIVE_INFINITY, allowed, status: 'widened',
@@ -132,11 +143,12 @@ function ratchetSlugs(): string[] {
 
 function runMeasurement(): DeltaResult[] {
   const backlog = loadBacklog();
+  const structural = loadStructuralBacklogs(GOLDENS);
   const results: DeltaResult[] = [];
   for (const slug of ratchetSlugs()) {
     const inBacklog = Object.prototype.hasOwnProperty.call(backlog, slug);
     const allowed = inBacklog ? backlog[slug]! : SIZE_CONFORMANCE_TOLERANCE_IN;
-    results.push(measureFixture(slug, allowed, inBacklog));
+    results.push(measureFixture(slug, allowed, inBacklog, expectedBacklogFailures(slug, structural)));
   }
   return results;
 }
