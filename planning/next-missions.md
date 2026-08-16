@@ -37,6 +37,10 @@ exit-bar clauses**: backlogs 50 → **22** against a ≤ 12 bar, DOT EQUAL class
 regressed, 24 improved.** Full residue table with a named mechanism per slug is
 in `plans/edge-label-box-backlog/README.md`'s close-out section.
 
+**Landing state:** branch `feat/edge-label-box-backlog` (38 commits) is up as
+PR #29 against `main`, all four gates green at head (2026-08-16). Merge with a
+merge commit before starting this follow-on.
+
 It missed ≤ 12 because **the brief's premise was wrong**: four mechanisms do not
 cover the 50 slugs. That is the finding, not an excuse — 9 of the 22 belong to
 mechanisms the brief never named. The residue is now fully specified, which
