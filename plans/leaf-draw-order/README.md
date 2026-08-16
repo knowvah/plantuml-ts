@@ -49,7 +49,7 @@ share this worktree: **no agent runs any git command.**
 |---|---|---|---|
 | [1](batch-1/overview.md) | Widen the gate; leaf order over the AST; fold the collection byte-identically | — | [x] |
 | [2](batch-2/overview.md) | Draw in leaf order; triage the remainder | B1 | [x] |
-| [3](batch-3/overview.md) | Sweep, re-baseline, close (retire note-leaf-model Batch 3) | B2 | [ ] |
+| [3](batch-3/overview.md) | Sweep, re-baseline, close (retire note-leaf-model Batch 3) | B2 | [x] |
 
 ## Quality gates
 
@@ -124,3 +124,56 @@ Run all between every batch. **Never pipe `npm test`.**
 - `baseline/` — T1 captures the four reports here on the base commit
 - Reference implementation: `src/diagrams/state/layout.ts#buildFlatStateGeos`
   + `state/renderer-note.ts` (one array, `sortSpecsByCreationIndex`).
+
+## Session summary — 2026-08-15 (autonomous run, branch `feat/leaf-draw-order`)
+
+**ONE fixture regressed** (daxeno-00-kasu166, SAME→ORDER-ONLY) and a human
+ruling is requested before merge — see "Known follow-ups (a)" below and the
+B2 journal row. The mission is otherwise complete and green; the branch is
+**not merged to main**, left for review.
+
+- **Tasks:** 6 of 6 planned tasks completed (T1–T6 across Batches 1–3); T4
+  cleared 41 of the 47 ORDER-ONLY fixtures. T5 diagnosed all 7 remaining
+  (6 are EDGE order — a different mechanism, outside this mission; 1 is
+  daxeno-00) and landed a jar-verified general fix (collapsed-empty-group
+  print slot, which also restored rojoxi-79 to jar's order) but cleared none
+  of the 7: daxeno-00 needs new plumbing outside its write-set (a
+  `collapsedGroup` marker at `class-container.ts`/`class-namespace.ts`), so
+  it stayed ORDER-ONLY by design, not oversight.
+- **Decisions:** 32 journal rows. Flagged for review: (1) the daxeno ruling
+  request (B2 row) — accept the one regression pending a follow-on marker,
+  or authorise that change now on this branch; (2) the `--check-order`
+  instrument amendment (T4 rows, landed `2f233a23`) — the original
+  uid-sequence-only signature was blind to unwrapped leaves (TIPS,
+  collapsed-empty-package), so the gate's own definition was widened
+  mid-mission with a jar-grounded justification rather than silently
+  loosened; (3) two subagent `git stash`/`git stash pop` boundary notes (T4,
+  T5 rows) — both breaches of "no agent runs any git command", both
+  self-disclosed, both reverted within the same tool-call sequence, no
+  destructive flag used, no history rewritten.
+- **Final gate results (HEAD `e1f4c869`):** typecheck 0, lint 0 (re-run at
+  T6), build 0; `npm test` 591 files / 14325 pass + 1 todo, coverage
+  95.34/90.3/96.91/96.44; `shape-match-report` and `dot-sync-report class`
+  diff-empty against `baseline/`; **`--vs-jar` same=718 order-only=7
+  other=77 err=0** (baseline was 678/47/77/0 — the mission bar); **
+  `--check-order` vs the re-pinned `note-order.t1.txt`: moved=80
+  offenders=0**; `--check-order` vs the freshly-captured `note-order.txt`:
+  moved=0 offenders=0 (self-consistency check on the new baseline).
+- **Known follow-ups:**
+  - (a) daxeno-00's collapsed-`<<Database>>`-package marker gap
+    (`class-container.ts`/`class-namespace.ts`/`ast.ts`, T5's row) — needs a
+    human ruling before this is fixed or accepted.
+  - (b) 6 EDGE-order fixtures (bicabi-42, cobumi-83, gujigi-63, kevoda-64,
+    momoba-92, tedeba-19) — jar's `getOrderedLinks`/`sameConnections`
+    same-pair grouping, a different mechanism than this mission's leaf
+    order; candidate follow-on mission (T5's row).
+  - (c) the OTHER=77 uid-set divergences — T5's 5-fixture sample
+    (begico/famizo/mocoda/sabaku/xakatu) classifies all 5 as
+    uid-NUMBERING/phantom-slot-burn divergences, not order; a separate
+    mission from leaf order.
+  - (d) `class-assoc-couple.ts:251` skips `registerInNamespace` for an
+    auto-created association-endpoint circle (T2's row) — a D2 membership
+    gap, 0 corpus fixtures affected today.
+  - (e) T3 noted `npm run lint` does not cover `scripts/` — the instrument
+    fix in `scripts/note-order-report.ts` (`2f233a23`) went un-linted by
+    the project's own gate.

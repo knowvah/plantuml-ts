@@ -1,9 +1,20 @@
 # Batch 3 — one collection, then close
 
+**RETIRED, not pending.** Stopped before T4 (`decision-journal.md`'s Batch 3
+STOP rows: the faithful fold cannot be byte-identical, so this batch's exit
+bar clause 3 is unreachable as specified). T4 and T5 below were never
+started under THIS brief. The fold they describe was completed instead under
+mission `leaf-draw-order` (`plans/leaf-draw-order/`, branch
+`feat/leaf-draw-order`, commits `a1c721e3..e1f4c869`) against a
+movement-toward-jar bar rather than byte-identity — see that mission's
+`decisions.md` D1–D6 and its README's session summary. The `[ ]` rows below
+are left as historical record of the original (unreachable) plan, not as
+outstanding work on this brief.
+
 | ID | Description | Agent | Writes | Depends on | Done |
 |----|-------------|-------|--------|-----------|------|
-| T4 | Fold notes into the class leaf collection, carrying leaf type | typescript-pro | `class/layout.ts`, `class-geo-types.ts`, `class-ink-box.ts`, `renderer*.ts` | B2 | [ ] |
-| T5 | Sweep, ledger, close | typescript-pro | brief + `.agent-notes/` | T4 | [ ] |
+| T4 | Fold notes into the class leaf collection, carrying leaf type | typescript-pro | `class/layout.ts`, `class-geo-types.ts`, `class-ink-box.ts`, `renderer*.ts` | B2 | [ ] retired into `leaf-draw-order` |
+| T5 | Sweep, ledger, close | typescript-pro | brief + `.agent-notes/` | T4 | [ ] retired into `leaf-draw-order` |
 
 Serial. T5 writes no `src/`.
 

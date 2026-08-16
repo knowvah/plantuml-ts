@@ -2,7 +2,7 @@
 
 | ID | Description | Agent | Writes | Depends on | Done |
 |----|-------------|-------|--------|-----------|------|
-| T6 | Re-baseline note-order; journal summary; retire note-leaf-model Batch 3; next-missions; notes | typescript-pro | `plans/leaf-draw-order/*`, `plans/note-leaf-model/{README,decision-journal,batch-3/overview}.md`, `planning/next-missions.md`, `.agent-notes/leaf-draw-order.md` — no `src/` | T5 | [ ] |
+| T6 | Re-baseline note-order; journal summary; retire note-leaf-model Batch 3; next-missions; notes | typescript-pro | `plans/leaf-draw-order/*`, `plans/note-leaf-model/{README,decision-journal,batch-3/overview}.md`, `planning/next-missions.md`, `.agent-notes/leaf-draw-order.md` — no `src/` | T5 | [x] |
 
 ## Batch exit bar
 

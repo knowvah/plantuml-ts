@@ -56,18 +56,60 @@ Remaining work, all small:
    it; none exists).
 5. Journal summary; merge with a merge commit.
 
-## 2. `note-leaf-model` — batches 1–2 DONE on `feat/note-leaf-model`, batch 3 STOPPED (ruling needed)
+## 2. `leaf-draw-order` — DONE on `feat/leaf-draw-order`, NOT merged (ruling needed)
+
+2026-08-15: completed all 3 batches (`plans/leaf-draw-order/`, branch
+`feat/leaf-draw-order`, commits `a1c721e3..e1f4c869`) — the mission spun out
+of `note-leaf-model`'s Batch 3 STOP (below). `ClassGeometry.leaves` now folds
+classifiers, notes and TIPS into one collection built in jar's `bibliotekon`
+insertion order (`computeLeafDrawOrder`, D1–D3 of `decisions.md`);
+`renderer.ts` iterates it as a single loop, retiring the old
+declaration-order + host-interleave proxy. **Result: `note-order-report
+--vs-jar` same=678→718, order-only=47→7, other=77 unchanged, err=0;
+`--check-order` moved=80 offenders=0** (baseline 678/47/77/0; target was
+order-only=0). **One fixture regressed** (daxeno-00-kasu166, SAME→
+ORDER-ONLY): a `package … <<Database>> {}` collapses to a `usymbol:'database'`
+classifier structurally indistinguishable, on the fields the port has today,
+from a genuinely-declared `database Foo` leaf — needs a new marker stamped at
+`class-container.ts`/`class-namespace.ts`'s collapse call sites, both outside
+every task's write-set in this mission. **Branch left unmerged; human ruling
+requested**: accept the one regression pending a follow-on `collapsedGroup`
+marker, or authorise that fix now on this branch. Details:
+`plans/leaf-draw-order/decision-journal.md` (all rows, esp. B2's and T6's)
+and the README's session summary.
+
+Follow-on candidates surfaced by this mission (not started):
+
+- **Edge draw order** — 6 fixtures (bicabi-42, cobumi-83, gujigi-63,
+  kevoda-64, momoba-92, tedeba-19) have byte-identical classifier/note order
+  to jar but wrong `<g class="link">` order. Mechanism (fully traced on 2,
+  pattern-matched on 4): jar's `CucaDiagramFileMakerSvek#getOrderedLinks`
+  groups relationships sharing the same entity pair adjacent
+  (`Link#sameConnections`), regardless of declaration order, BEFORE DOT
+  emission — so a fix may also touch `class-dot-graph.ts`'s edge-emission
+  order, not just `class-edge-geo.ts`'s draw order, and needs its own
+  shape-match/dot-sync gate run since it could perturb geometry.
+- **OTHER=77 uid-set divergences** — a 5-fixture sample (begico-70, famizo-04,
+  mocoda-55, sabaku-38, xakatu-11) all classify as uid-NUMBERING/phantom-slot
+  -burn divergences (extra or missing `creationIndex` ticks), not sequence
+  order. A separate mission from leaf order; needs a fuller survey before
+  scoping.
+- **daxeno's collapsed-container marker** — see above; est. 4 files, ~20
+  lines, plus a `class-leaf-order.ts` read, per the mission's own scoping.
+
+## `note-leaf-model` — batches 1–2 DONE (merged to main), batch 3 retired into `leaf-draw-order`
 
 2026-08-15: T1–T3 landed byte-identically (draw-time TIPS resolution;
-`mapNoteGeos` reads no classifier). Batch 3 stopped before T4: the faithful
-fold (state's shape, one creation-ordered collection) cannot be byte-identical
-because jar's leaf document order is `bibliotekon` insertion order (packaged
-first, then unpackaged, creation order within) and this port's declaration
-order + host-interleave differs on 19 note fixtures (ORDER-ONLY) and on any
-package/unpackaged mix. Recommended: spin out **`leaf-draw-order`** (gate:
-`scripts/note-order-report.ts --vs-jar`, order-only 19 → 0) and retire this
-brief's batch 3 into it. Details: `plans/note-leaf-model/decision-journal.md`
-(Batch 3 rows) and the README's session summary.
+`mapNoteGeos` reads no classifier) and merged to main via a merge commit
+(`82bbdda3`). Batch 3 stopped before T4: the faithful fold (state's shape,
+one creation-ordered collection) cannot be byte-identical because jar's leaf
+document order is `bibliotekon` insertion order (packaged first, then
+unpackaged, creation order within) and this port's declaration order +
+host-interleave differed on 19 note fixtures (ORDER-ONLY) and on any
+package/unpackaged mix. The fold was completed instead as mission 2 above —
+this brief's own Batch 3 is retired, not pending. Details:
+`plans/note-leaf-model/decision-journal.md` (Batch 3 rows) and the README's
+session summary.
 
 ### Original entry
 

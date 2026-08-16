@@ -76,12 +76,26 @@ restructure changed one of those — which is the failure mode, not a result.
 |---|---|---|---|
 | [1](batch-1/overview.md) | Make NOTE vs TIPS explicit; pin the note-order invariant | — | [x] |
 | [2](batch-2/overview.md) | Move Opale resolution to draw time (retires the phase dependency) | B1 | [x] |
-| [3](batch-3/overview.md) | Fold notes into the leaf collection; sweep and close | B2 | [ ] |
+| [3](batch-3/overview.md) | Fold notes into the leaf collection; sweep and close | B2 | **retired** — see note below, not pending |
 
 Batch 2 is the one that matters. If it cannot be done byte-identically,
 Batch 3 is not reachable and the mission should stop there with the
 mechanism recorded — a correct diagnosis of why the phase split is load
 bearing is a better outcome than a forced merge.
+
+**Batch 3 status: RETIRED, not pending.** It stopped before T4 (see the
+Batch 3 rows of `decision-journal.md`) because the faithful fold cannot be
+byte-identical — jar's leaf document order is `bibliotekon` insertion order,
+which this port's declaration-order + host-interleave gets wrong on 19+
+fixtures. The fold was re-scoped and completed as its own mission,
+**`leaf-draw-order`** (`plans/leaf-draw-order/`, branch
+`feat/leaf-draw-order`, commit range `a1c721e3..e1f4c869`), whose gate is
+document-order movement (`note-order-report --vs-jar`) rather than
+byte-identity. That mission is complete (same=678→718, order-only=47→7,
+`--check-order` moved=80 offenders=0) but not yet merged to main, pending a
+human ruling on one residual regression (daxeno-00). The `[ ]`-shaped
+checkbox above is intentionally not ticked `[x]` — this brief's own
+byte-identical bar was never met, by design; it is retired, not done.
 
 ## Branch
 
