@@ -69,16 +69,16 @@ function captureAll(puml: string): DotInputGraph[] {
 /** Assert every captured pass is structurally EQUAL to its oracle dump,
  *  reporting which checks failed (mirrors the other state-*-dot test files'
  *  loop). */
-/** Every structural check except `labelSizeOk` must hold on every pass.
+/** Every structural check must hold on every pass.
  *
- *  `labelSizeOk` (edge-label-box D7, 2026-08-15) is excluded HERE ONLY
- *  because it is a different defect from the one this file pins: mechanism 1
- *  is that the note text reaches the label at all (presence + topology),
- *  and that holds. The MERGED note+label box is a few px off on all four
- *  fixtures (jar `104x33` vs ours `105x30` on fotigo; `48x33` vs `43x30` on
- *  tumaba) — a mergeLR/mergeTB sizing gap that is now visible to the gate,
- *  carried by `oracle/goldens/state/label-size-backlog.json`, and to be
- *  closed there. Do NOT widen this exclusion; a wrong box is not "equal". */
+ *  `labelSizeOk` (edge-label-box D7, 2026-08-15) used to be excluded here:
+ *  mechanism 1 is that the note text reaches the label at all (presence +
+ *  topology), which always held, but the MERGED note+label box was a few px
+ *  off on all four fixtures (jar `104x33` vs ours `105x30` on fotigo; `48x33`
+ *  vs `43x30` on tumaba) — a mergeLR/mergeTB sizing gap carried by
+ *  `oracle/goldens/state/label-size-backlog.json`. T9 closes that gap
+ *  (`computeMergedLabelBox`), so the exclusion is gone: a wrong box was never
+ *  "equal", and now it doesn't need to be excused as one. */
 function expectAllPassesEqual(slug: string): void {
   const files = svekFiles(slug);
   const captured = captureAll(readPuml(slug));
@@ -89,8 +89,9 @@ function expectAllPassesEqual(slug: string): void {
     const diff = compareStructural(oracle, candidate);
     const failing = Object.entries(diff)
       // `sizeConformantOk` is the tolerant size metric, never part of
-      // `structurallyEqual`; `labelSizeOk` is excluded per the note above.
-      .filter(([k, v]) => k.endsWith('Ok') && k !== 'sizeConformantOk' && k !== 'labelSizeOk' && v === false)
+      // `structurallyEqual` — the one exclusion that stays (separate,
+      // deliberately tolerant check, per this helper's own doc above).
+      .filter(([k, v]) => k.endsWith('Ok') && k !== 'sizeConformantOk' && v === false)
       .map(([k]) => k);
     expect(failing, `${slug} svek-${i + 1}.dot: failing checks: ${failing.join(', ')}`).toEqual([]);
   }

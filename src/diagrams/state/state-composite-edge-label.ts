@@ -9,11 +9,18 @@
  * @see ~/git/plantuml/.../svek/SvekEdge.java
  */
 
-import type { NotePosition, Transition } from './ast.js';
+import type { Transition } from './ast.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import type { DiagramCtx } from './state-composite-pass.js';
+import type { ReservedLabelBox } from '../../core/edge-label-box.js';
 import { computeReservedLabelBox } from './state-transition-label.js';
+import { computeMergedLabelBox } from '../../core/edge-label-box.js';
+// `EntityImageNoteLink`'s own margins — see `measureLinkNoteDim`'s doc in
+// ./state-dot-graph.ts (duplicated here per this file's own D1 rationale,
+// avoid-import-cycle) for the full derivation.
+import { OPALE_MARGIN_X1, OPALE_MARGIN_X2, OPALE_MARGIN_Y } from '../../core/svek/image/Opale.js';
+import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 /** Guard/action/plain label — same precedence as ./state-dot-graph.ts's
  *  `transitionLabelText` (duplicated to avoid an import cycle: layout.ts
@@ -27,78 +34,70 @@ function transitionLabelOf(t: Transition): string | undefined {
   return undefined;
 }
 
-/** `note on link` box padding — duplicated from ./state-dot-graph.ts (D1,
- *  same avoid-import-cycle rationale as `transitionLabelOf` above). Mirrors
- *  class engine's note-on-entity measurement (class/note-layout.ts). */
-const LINK_NOTE_HPAD = 8;
-const LINK_NOTE_VPAD = 6;
-const LINK_NOTE_FOLD = 10;
+/** `EntityImageNoteLink`'s own dimension — duplicated from
+ *  ./state-dot-graph.ts's `measureLinkNoteDim` (D1, same avoid-import-cycle
+ *  rationale as `transitionLabelOf` above); see that file's doc comment for
+ *  the full `ComponentRoseNote`/`Opale` derivation and its numeric proof
+ *  against `fotigo-12-gufu949`. `ROSE_NOTE_PADDING` = `Rose.java:65-66`. */
+const ROSE_NOTE_PADDING = 5;
 
 interface LabelDims {
   width: number;
   height: number;
 }
 
-function measureLinkNote(text: string, font: FontSpec, measurer: StringMeasurer): LabelDims {
+function measureLinkNoteDim(text: string, fontFamily: string, measurer: StringMeasurer): LabelDims {
+  const font = { family: fontFamily, size: NOTE_FONT_SIZE };
   const lines = text.split('\n');
-  const lineHeight = font.size * 1.4;
   let maxW = 0;
   for (const ln of lines) maxW = Math.max(maxW, measurer.measure(ln, font).width);
   return {
-    width: maxW + LINK_NOTE_HPAD * 2 + LINK_NOTE_FOLD,
-    height: lines.length * lineHeight + LINK_NOTE_VPAD * 2,
+    width: maxW + OPALE_MARGIN_X1 + OPALE_MARGIN_X2 + 2 * ROSE_NOTE_PADDING,
+    height: lines.length * NOTE_FONT_SIZE + 2 * OPALE_MARGIN_Y + 2 * ROSE_NOTE_PADDING,
   };
-}
-
-/** Combine a transition's own label with its attached `note on link` — see
- *  ./state-dot-graph.ts's `mergeNoteWithLabel` (SvekEdge.java:308-326). */
-function mergeNoteWithLabel(label: LabelDims | undefined, note: LabelDims, position: NotePosition): LabelDims {
-  if (label === undefined) return note;
-  if (position === 'left' || position === 'right') {
-    return { width: label.width + note.width, height: Math.max(label.height, note.height) };
-  }
-  return { width: Math.max(label.width, note.width), height: label.height + note.height };
 }
 
 type EdgeAttrs = NonNullable<DotInputEdge['attributes']>;
 
-/** A `ReservedLabelBox` as the `{width, height}` the merge helpers take. */
-const reservedDims = (box: { reservedWidth: number; reservedHeight: number }): LabelDims => ({
-  width: box.reservedWidth,
-  height: box.reservedHeight,
-});
+/** See ./state-dot-graph.ts's `computeEdgeLabelBox` (same split rationale:
+ *  keep `edgeLabelAttrs`'s own optional-presence branching separate from
+ *  this one's which-formula branching). `halfWidth`/`hasMiddleDecor` are
+ *  always false for state — see ./state-dot-graph.ts's
+ *  `measureLinkNoteDim` doc for the citations. */
+function computeEdgeLabelBox(
+  t: Transition,
+  text: string | undefined,
+  font: FontSpec,
+  measurer: StringMeasurer,
+): ReservedLabelBox {
+  if (t.linkNote === undefined) return computeReservedLabelBox(text!, font, measurer, t.from === t.to);
+  return computeMergedLabelBox({
+    label: text ?? '',
+    noteDim: measureLinkNoteDim(t.linkNote, font.family, measurer),
+    position: t.linkNotePosition ?? 'bottom',
+    halfWidth: false,
+    hasMiddleDecor: false,
+    font,
+    measurer,
+  });
+}
 
+/** Both `labelWidth`/`labelHeight` (DOT-gate) and `labelBoxWidth`/
+ *  `labelBoxHeight` (the real `@knowvah/dot-engine` layout input) are set
+ *  together from the same box, including when a `note on link` is attached
+ *  — T9 closes the gap the prior "merged label+note margin story is still
+ *  unverified" comment named; see `computeEdgeLabelBox`. */
 function edgeLabelAttrs(t: Transition, font: FontSpec, measurer: StringMeasurer): EdgeAttrs {
   const text = transitionLabelOf(t);
-  // The RESERVED box, not the raw text: upstream margin-wraps the label
-  // block (`marginLabel = self-loop ? 6 : 1`) at `SvekEdge.java:372-373`,
-  // BEFORE any note is merged onto it (`:302` vs `:319-325`), so the margin
-  // belongs to the label component of the merge exactly as it does here.
-  const labelDims =
-    text === undefined ? undefined : reservedDims(computeReservedLabelBox(text, font, measurer, t.from === t.to));
-  const noteDims = t.linkNote === undefined ? undefined : measureLinkNote(t.linkNote, font, measurer);
-  if (labelDims === undefined && noteDims === undefined) return {};
-  const merged =
-    noteDims === undefined ? labelDims! : mergeNoteWithLabel(labelDims, noteDims, t.linkNotePosition ?? 'bottom');
-  const attrs: EdgeAttrs = { label: text ?? t.linkNote ?? '', labelWidth: merged.width, labelHeight: merged.height };
-  // G8 T2 (spec.md §1a/§6): the REAL FIXEDSIZE layout-input reservation
-  // (margin+floor around the measured text) -- ONLY for a plain (note-free)
-  // label: the merged label+note box's own margin story is a SEPARATE,
-  // not-yet-jar-verified mechanism (spec.md's 11/11 table covers plain
-  // guard/action labels only), so a note-attached transition deliberately
-  // keeps the pre-existing plain-text `label` DOT path unchanged rather than
-  // guessing an unverified formula.
-  if (text !== undefined && noteDims === undefined) {
-    const box = computeReservedLabelBox(text, font, measurer, t.from === t.to);
-    attrs.labelBoxWidth = box.reservedWidth;
-    attrs.labelBoxHeight = box.reservedHeight;
-  }
-  return attrs;
-  // #lizard forgives -- pure move from state-composite-pass.ts (mission A4
-  // Phase L file-cap split), unchanged legacy logic (two independent
-  // optional dimension sources merged) plus ONE additive, independently-
-  // conditional G8 T2 branch (plain-label-only FIXEDSIZE reservation), not
-  // decision complexity to simplify.
+  if (text === undefined && t.linkNote === undefined) return {};
+  const box = computeEdgeLabelBox(t, text, font, measurer);
+  return {
+    label: text ?? t.linkNote ?? '',
+    labelWidth: box.reservedWidth,
+    labelHeight: box.reservedHeight,
+    labelBoxWidth: box.reservedWidth,
+    labelBoxHeight: box.reservedHeight,
+  };
 }
 
 /** Under `skinparam linetype ortho`, svek routes the main edge label through
