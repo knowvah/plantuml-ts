@@ -216,3 +216,49 @@ describe('applyStyleMap -- arrow-label font fold (T2, T6, D3, D4)', () => {
     expect(theme.colors.graph.arrowFontFamily).toBe(defaultTheme.colors.graph.arrowFontFamily);
   });
 });
+
+// ---------------------------------------------------------------------------
+// SI26 T2 (D4/D5): the `<style>` FontColor path into
+// `colors.graph.arrowFontColor` (graph override) and `theme
+// .cardinalityFontColor` (top-level fold). Oracle experiment ids refer to
+// `plans/arrow-label-font-colour/decisions.md`; `parseStyleBlock` keeps
+// declaration order, so `resolveStyleCascade`'s last-declared-wins walk
+// (`StyleStorage#computeMergedStyle`) reproduces i/k/l/m unchanged.
+// ---------------------------------------------------------------------------
+describe('applyStyleMap -- arrow / arrow.cardinality FontColor fold (SI26 T2)', () => {
+  it('f/e: arrow { FontColor blue } -> arrowFontColor #0000FF; cardinalityFontColor #0000FF (superset match)', () => {
+    const theme = applyStyleMap(parseStyleBlock('arrow {\n  FontColor blue\n}'), defaultTheme);
+    expect(theme.colors.graph.arrowFontColor).toBe('#0000FF');
+    expect(theme.cardinalityFontColor).toBe('#0000FF');
+  });
+
+  it('i/k: root { FontColor red } arrow { FontColor green } -> #008000; reversed -> #FF0000', () => {
+    const ik = 'root {\n  FontColor red\n}\narrow {\n  FontColor green\n}';
+    expect(applyStyleMap(parseStyleBlock(ik), defaultTheme).colors.graph.arrowFontColor).toBe('#008000');
+    const ki = 'arrow {\n  FontColor green\n}\nroot {\n  FontColor red\n}';
+    expect(applyStyleMap(parseStyleBlock(ki), defaultTheme).colors.graph.arrowFontColor).toBe('#FF0000');
+  });
+
+  it('l/m: classDiagram { arrow { FontColor green } } arrow { FontColor red } -> #FF0000; reversed -> #008000', () => {
+    const lm = 'classDiagram {\n  arrow {\n    FontColor green\n  }\n}\narrow {\n  FontColor red\n}';
+    expect(applyStyleMap(parseStyleBlock(lm), defaultTheme).colors.graph.arrowFontColor).toBe('#FF0000');
+    const ml = 'arrow {\n  FontColor red\n}\nclassDiagram {\n  arrow {\n    FontColor green\n  }\n}';
+    expect(applyStyleMap(parseStyleBlock(ml), defaultTheme).colors.graph.arrowFontColor).toBe('#008000');
+  });
+
+  it("camuna-58-veca254's block: arrowFontColor #0000FF AND cardinalityFontColor #FF0000", () => {
+    const styleMap = parseStyleBlock(
+      'arrow {\n  FontColor Blue\n  FontSize 14\n  FontStyle bold\n  cardinality {\n  \tFontColor red\n\tFontSize 10\n\tFontStyle italic\n  }\n}',
+    );
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.colors.graph.arrowFontColor).toBe('#0000FF');
+    expect(theme.cardinalityFontColor).toBe('#FF0000');
+  });
+
+  it('a StyleMap with no arrow declarations leaves both fields absent and returns the base Theme unchanged', () => {
+    const theme = applyStyleMap(parseStyleBlock('class {\n  BackgroundColor yellow\n}'), defaultTheme);
+    expect(theme.colors.graph.arrowFontColor).toBeUndefined();
+    expect(theme.cardinalityFontColor).toBeUndefined();
+    expect(applyStyleMap(parseStyleBlock(''), defaultTheme)).toBe(defaultTheme);
+  });
+});

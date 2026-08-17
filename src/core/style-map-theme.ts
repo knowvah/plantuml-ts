@@ -88,10 +88,13 @@ function computeGraphOverride(styleMap: StyleMap, base: Theme): Partial<GraphCol
   // `description/layout.ts`, was skinparam-only) until T6 retired that read
   // in favor of `resolveArrowLabelFont`, which now wires the cascade into
   // both the DOT-measurement and SVG-text sites in the same commit (D4).
-  const arrowFont = computeArrowFontOverride(styleMap);
+  // SI26 D4: `arrowFontColor` rides the same call; `base.colors.background`
+  // is the canvas the label paints on (`#?light:dark` resolution).
+  const arrowFont = computeArrowFontOverride(styleMap, [], base.colors.background);
   if (arrowFont.arrowFontFamily !== undefined) graphOverride.arrowFontFamily = arrowFont.arrowFontFamily;
   if (arrowFont.arrowFontSize !== undefined) graphOverride.arrowFontSize = arrowFont.arrowFontSize;
   if (arrowFont.arrowFontStyle !== undefined) graphOverride.arrowFontStyle = arrowFont.arrowFontStyle;
+  if (arrowFont.arrowFontColor !== undefined) graphOverride.arrowFontColor = arrowFont.arrowFontColor;
   // mission skin-file-loading Batch 1 (D3): see `style-map-element.ts
   // #resolveGlobalBackground`'s own doc comment for the bare root/element
   // selector precedence this resolves.
@@ -129,7 +132,7 @@ interface StyleMapExtras {
  * root/element Shadowing/LineColor cascade (D3); and the D3 cardinality-font
  * cascade (T14).
  */
-function computeStyleMapExtras(styleMap: StyleMap): StyleMapExtras {
+function computeStyleMapExtras(styleMap: StyleMap, base: Theme): StyleMapExtras {
   const elements = collectElementStyleBuckets(styleMap);
   const noteTagCascade = computeNoteStyleTagCascade(styleMap);
   return {
@@ -140,7 +143,8 @@ function computeStyleMapExtras(styleMap: StyleMap): StyleMapExtras {
     hasNoteTagCascade: Object.keys(noteTagCascade).length > 0,
     shadowing: resolveGlobalShadowing(styleMap),
     rootElementBorderRaw: resolveGlobalBorder(styleMap),
-    cardinalityFont: computeCardinalityFontOverride(styleMap),
+    // SI26 D5: `cardinalityFontColor` rides the same top-level fold.
+    cardinalityFont: computeCardinalityFontOverride(styleMap, [], base.colors.background),
   };
 }
 
@@ -233,7 +237,7 @@ function buildStyleMapPartialTheme(base: Theme, graphOverride: Partial<GraphColo
  */
 export function applyStyleMap(styleMap: StyleMap, base: Theme): Theme {
   const graphOverride = computeGraphOverride(styleMap, base);
-  const extras = computeStyleMapExtras(styleMap);
+  const extras = computeStyleMapExtras(styleMap, base);
   if (styleMapHasNoOverrides(graphOverride, extras)) return base;
   return deepMergeTheme(base, buildStyleMapPartialTheme(base, graphOverride, extras));
 }

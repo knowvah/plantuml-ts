@@ -81,6 +81,22 @@ describe('Theme per-element buckets (D4)', () => {
     // Base theme is not mutated.
     expect(defaultTheme.colors.elements).toBeUndefined();
   });
+
+  // SI26 T1 (D1/D5): `cardinalityFontColor` rides `OPTIONAL_SCALAR_KEYS`
+  // beside `cardinalityFontSize/Family`; `colors.graph.arrowFontColor` rides
+  // the graph merge. Neither has a default in the theme literals -- absent
+  // means "fall back", exactly like `arrowFontSize`.
+  it('carries cardinalityFontColor and colors.graph.arrowFontColor through deepMergeTheme', () => {
+    const merged = deepMergeTheme(defaultTheme, {
+      cardinalityFontColor: '#FF0000',
+      colors: { graph: { arrowFontColor: '#008000' } },
+    });
+    expect(merged.cardinalityFontColor).toBe('#FF0000');
+    expect(merged.colors.graph.arrowFontColor).toBe('#008000');
+    expect(defaultTheme.cardinalityFontColor).toBeUndefined();
+    expect(defaultTheme.colors.graph.arrowFontColor).toBeUndefined();
+    expect(deepMergeTheme(defaultTheme, {}).cardinalityFontColor).toBeUndefined();
+  });
 });
 
 describe('resolveElementFontSize (G1 I4b)', () => {

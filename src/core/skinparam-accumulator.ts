@@ -71,6 +71,9 @@ export interface SkinparamAccumulator {
   /** D3 (T2): raw, unparsed -- see
    *  `theme-graph-colors-a.ts#arrowFontStyle`'s own doc comment. */
   arrowFontStyle: string | undefined;
+  /** SI26 D1/D4: resolved hex -- see
+   *  `theme-graph-colors-a.ts#arrowFontColor`'s own doc comment. */
+  arrowFontColor: string | undefined;
   classAttributeFontSize: number | undefined;
   classAttributeFontFamily: string | undefined;
   classAttributeFontBold: boolean | undefined;
@@ -131,7 +134,7 @@ const SCALAR_FIELD_NAMES = [
   'classAttributeFontSizeByStereo', 'classFontSizeByStereo',
   'stateBorderColorByStereo', 'stateBackgroundColorByStereo',
   'stateFontColorByStereo', 'stateFontSizeByStereo', 'arrowThickness',
-  'arrowFontSize', 'arrowFontFamily', 'arrowFontStyle',
+  'arrowFontSize', 'arrowFontFamily', 'arrowFontStyle', 'arrowFontColor',
   'classAttributeFontSize', 'classAttributeFontFamily',
   'classAttributeFontBold', 'classAttributeFontItalic', 'classFontSize',
   'classFontFamily', 'classFontBold', 'classFontItalic',

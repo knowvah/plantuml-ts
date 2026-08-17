@@ -86,6 +86,7 @@ const GRAPH_OVERRIDE_FIELDS: FieldTable = [
   ['arrowFontSize', (acc) => acc.arrowFontSize],
   ['arrowFontFamily', (acc) => acc.arrowFontFamily],
   ['arrowFontStyle', (acc) => acc.arrowFontStyle],
+  ['arrowFontColor', (acc) => acc.arrowFontColor],
   ['classAttributeFontSize', (acc) => acc.classAttributeFontSize],
   ['classAttributeFontFamily', (acc) => acc.classAttributeFontFamily],
   ['classAttributeFontBold', (acc) => acc.classAttributeFontBold],

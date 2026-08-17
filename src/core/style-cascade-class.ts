@@ -2,17 +2,12 @@
  * Class-diagram `<style>` ancestor cascade (G2 N36) -- computes every
  * `theme.colors.graph.classCascade*`/`spotCascade*` field from a raw
  * StyleMap, pre-resolved to SVG-ready hex via {@link resolveColorToSvgHex}
- * (matching the existing inline-`#color`-override precedent, `class-color-
- * override.ts`). Split into its own module rather than growing
- * `style-map-theme.ts` (already at the project's 500-line cap) -- "new code
- * in new modules" per this mission's own established precedent (`renderer-
- * classifier-box.ts`'s doc comment).
- *
- * See `theme.ts`'s own field doc comments for the full upstream style-
- * signature derivation (`EntityImageClass.getStyleSignature()`, `SvekEdge
- * .java:819`, `EntityImageClassHeader.java#spotStyleSignature`) and
- * `style-map-element.ts#resolveStyleCascade`'s doc comment for the subset-
- * match algorithm this is built on.
+ * (the inline-`#color`-override precedent, `class-color-override.ts`). Own
+ * module because `style-map-theme.ts` sits at the 500-line cap. See
+ * `theme.ts`'s field doc comments for the upstream style-signature
+ * derivation (`EntityImageClass.getStyleSignature()`, `SvekEdge.java:819`,
+ * `EntityImageClassHeader.java#spotStyleSignature`) and `style-map-element
+ * .ts#resolveStyleCascade` for the subset-match algorithm.
  */
 import type { Theme } from './theme.js';
 import type { StyleMap } from './skinparam.js';
@@ -38,20 +33,14 @@ const ARROW_SNAMES = ['root', 'element', 'classdiagram', 'arrow'] as const;
  *  against the SAME StyleMap. */
 const CARDINALITY_SNAMES = [...ARROW_SNAMES, 'cardinality'] as const;
 /** `EntityImageClassHeader#spotStyleSignature`: `{root,element,spot,spot
- *  <Kind>}` -- generalized across every badge kind (only `root` can ever
- *  match this set in practice, since none of the four tokens includes
- *  `classDiagram`; kept general rather than hardcoding "root only" so a
- *  future bare `spot {}`/`spotClass {}` cascade slots in for free). */
+ *  <Kind>}` -- generalized across every badge kind (only `root` matches in
+ *  practice; kept general so a bare `spot {}`/`spotClass {}` slots in). */
 const SPOT_SNAMES = ['root', 'element', 'spot', 'spotclass'] as const;
 /** G2 N66: `EntityImageNote.getStyleSignature()`: `{root,element,
- *  classDiagram,note}` -- `getStyleName()` resolves to `SName.classDiagram`
- *  for a class-diagram note (`AbstractEntityImage.java:96`,
- *  `entity.getDiagramType().getStyleName()`), so this differs from
- *  `CLASS_SNAMES` ONLY in its last token (`note` vs `class_`) -- a bare
- *  `element {}`/`note {}`/`classDiagram {}` selector reaches BOTH a
- *  classifier box and a note body via the SAME `element`/`classdiagram`
- *  ancestor tokens, jar-verified `rubecu-40-cixu870` (`element { MaximumWidth
- *  100 }` wraps both). */
+ *  classDiagram,note}` -- `getStyleName()` is `SName.classDiagram` for a
+ *  class-diagram note (`AbstractEntityImage.java:96`), so this differs from
+ *  `CLASS_SNAMES` ONLY in its last token; a bare `element {}` reaches BOTH
+ *  a classifier box and a note body, jar-verified `rubecu-40-cixu870`. */
 const NOTE_SNAMES = ['root', 'element', 'classdiagram', 'note'] as const;
 
 type GraphCascadeOverride = Pick<
@@ -77,19 +66,14 @@ type GraphCascadeOverride = Pick<
 /**
  * Resolve one cascade lookup to an SVG-ready hex string, or `undefined`
  * when no matching declaration exists OR the matched value is not a
- * resolvable color token at all. `resolveColorToSvgHex` returns an
- * UNRESOLVABLE token UNCHANGED (by design, its own doc comment) rather than
- * erroring -- passing an unresolvable raw string straight through as an SVG
+ * resolvable color token. `resolveColorToSvgHex` returns an UNRESOLVABLE
+ * token UNCHANGED (its own doc comment); passing that through as an SVG
  * `fill` would be WORSE than leaving the field unset (every caller's own
- * hardcoded `'#000000'` default already happens to match jar's resolved
- * value for every conditional-color fixture sampled, a coincidence this
- * guard preserves rather than clobbers -- regression caught and fixed
- * within N36). G2 N48: `#?light:dark[:transparent]` (`HColorScheme`,
- * `xalaco-64-vuzu312`/`dipune-93-sare489` shape) is a FontColor-only
- * grammar upstream (`FromSkinparamToStyle.java` never registers it for
- * BackgroundColor/LineColor) -- handled by the sibling
- * {@link cascadeFontColorHex} below, NOT here; this function stays the
- * plain-color path for every other property.
+ * `'#000000'` default matches jar's resolved value for every conditional-
+ * color fixture sampled -- regression caught and fixed within N36). G2 N48:
+ * `#?light:dark[:transparent]` (`HColorScheme`, `xalaco-64-vuzu312`/
+ * `dipune-93-sare489`) is a FontColor-only grammar upstream -- handled by
+ * the sibling {@link cascadeFontColorHex}, NOT here.
  */
 function cascadeHex(
   styleMap: StyleMap,
@@ -120,17 +104,13 @@ const DEFAULT_CLASS_BACKGROUND = '#F1F1F1';
 
 /**
  * G2 N67 item 49: the note-side sibling of {@link DEFAULT_CLASS_BACKGROUND}
- * -- `renderer-note.ts#NOTE_FILL`'s own jar-verified default fill
- * (`ColorParam.noteBackground`, `plantuml.skin`), duplicated here for the
- * SAME reason `DEFAULT_CLASS_BACKGROUND` is: this module only ever receives
- * a raw `StyleMap`, not the resolved `Theme` a live `<style> note {
- * BackgroundColor ... } }` override would otherwise be read from. Used ONLY
- * as the local-paint-background estimate for `#?light:dark[:transparent]`
- * FontColor resolution (zero corpus reach for a note combining BOTH a
- * conditional FontColor AND a BackgroundColor override, so this constant-
- * estimate approximation, not a live-threaded background, is the scoped
- * choice here -- matches `classCascadeFontColor`'s own identical
- * constant-estimate precedent for the class side).
+ * -- `renderer-note.ts#NOTE_FILL`'s jar-verified default (`ColorParam
+ * .noteBackground`, `plantuml.skin`), duplicated for the SAME reason: this
+ * module receives a raw `StyleMap`, not the resolved `Theme`. Used ONLY as
+ * the local-paint-background estimate for `#?light:dark[:transparent]`
+ * FontColor resolution (zero corpus reach for a note combining a
+ * conditional FontColor AND a BackgroundColor override -- same constant-
+ * estimate precedent as `classCascadeFontColor`).
  */
 const DEFAULT_NOTE_BACKGROUND = '#FEFFDD';
 
@@ -222,24 +202,20 @@ function arrowTagCascadeEntry(
  * override (T1, edge-label-box-backlog) from a diagram's own `<style>`
  * StyleMap -- `GraphvizImageBuilder.java:235-241` resolves this SEPARATELY
  * from `labelFont` and passes both into `SvekEdge`'s constructor as
- * `cardinalityFont`, sizing quantifier/role labels independently of the
- * arrow's own label text.
- *
- * Returns only the properties a matching selector actually declares
- * (`resolveStyleCascade` returns `undefined` when none does) -- an empty
- * StyleMap, or one that never touches `arrow`/`arrow.cardinality`,
- * contributes nothing, and the caller keeps the Theme's own default
+ * `cardinalityFont`. Returns only the properties a matching selector
+ * actually declares (`resolveStyleCascade` -> `undefined` otherwise), so a
+ * StyleMap that never touches `arrow`/`arrow.cardinality` contributes
+ * nothing and the caller keeps the Theme's own default
  * (`defaultTheme.cardinalityFontSize` = 13, `plantuml.skin:307`).
- *
- * Building block only: no caller yet. T5/T6 of the edge-label-box-backlog
- * mission wire this into `computeQuantifierBox`'s font (D3, D4 -- the batch's
- * own zero-fixture-movement bar forbids wiring a consumer in this task).
+ * SI26 D5: `cardinalityFontColor` -- absent means "inherit the arrow
+ * label colour" (`arrow-label-font.ts#resolveCardinalityFontColor`).
  */
 export function computeCardinalityFontOverride(
   styleMap: StyleMap,
   stereotypeTags: readonly string[] = [],
-): { cardinalityFontSize?: number; cardinalityFontFamily?: string } {
-  const override: { cardinalityFontSize?: number; cardinalityFontFamily?: string } = {};
+  backgroundHex?: string,
+): { cardinalityFontSize?: number; cardinalityFontFamily?: string; cardinalityFontColor?: string } {
+  const override: { cardinalityFontSize?: number; cardinalityFontFamily?: string; cardinalityFontColor?: string } = {};
   const sizeRaw = resolveStyleCascade(styleMap, CARDINALITY_SNAMES, 'fontsize', stereotypeTags);
   if (sizeRaw !== undefined) {
     const n = Number(sizeRaw);
@@ -247,21 +223,44 @@ export function computeCardinalityFontOverride(
   }
   const familyRaw = resolveStyleCascade(styleMap, CARDINALITY_SNAMES, 'fontname', stereotypeTags);
   if (familyRaw !== undefined) override.cardinalityFontFamily = familyRaw;
+  const color = cascadeArrowFontColor(styleMap, CARDINALITY_SNAMES, stereotypeTags, backgroundHex);
+  if (color !== undefined) override.cardinalityFontColor = color;
   return override;
 }
 
-/** D3: arrow `labelFont` (`GraphvizImageBuilder.java:234-235`); `fontstyle` rides UNPARSED -- `arrow-label-font.ts` is the ONE reader (`klimt/font/FontStyle.java`). No caller yet (D4/Batch 3). */
+/** SI26 D4/D5: `arrow { FontColor }` / `arrow { cardinality { FontColor } }`
+ *  (`GraphvizImageBuilder.java:234-241`; skinparam twin `FromSkinparamToStyle
+ *  .java:149,424-429`), merged last-declared-wins by `StyleStorage
+ *  #computeMergedStyle` (`style/StyleStorage.java:102-116`) = `resolveStyle
+ *  Cascade`'s source-order walk, no specificity. With `backgroundHex` (the
+ *  canvas the label paints on) `#?light:dark` resolves via {@link
+ *  cascadeFontColorHex}; without one, plain {@link cascadeHex}. */
+function cascadeArrowFontColor(
+  styleMap: StyleMap,
+  snames: readonly string[],
+  stereotypeTags: readonly string[],
+  backgroundHex: string | undefined,
+): string | undefined {
+  return backgroundHex === undefined
+    ? cascadeHex(styleMap, snames, 'fontcolor', stereotypeTags)
+    : cascadeFontColorHex(styleMap, snames, backgroundHex, stereotypeTags);
+}
+
+/** D3: arrow `labelFont` (`GraphvizImageBuilder.java:234-235`); `fontstyle` rides UNPARSED -- `arrow-label-font.ts` is the ONE reader (`klimt/font/FontStyle.java`). SI26: `arrowFontColor` via {@link cascadeArrowFontColor}. */
 export function computeArrowFontOverride(
   styleMap: StyleMap,
   stereotypeTags: readonly string[] = [],
-): { arrowFontSize?: number; arrowFontFamily?: string; arrowFontStyle?: string } {
+  backgroundHex?: string,
+): { arrowFontSize?: number; arrowFontFamily?: string; arrowFontStyle?: string; arrowFontColor?: string } {
   const size = Number(resolveStyleCascade(styleMap, ARROW_SNAMES, 'fontsize', stereotypeTags));
   const family = resolveStyleCascade(styleMap, ARROW_SNAMES, 'fontname', stereotypeTags);
   const style = resolveStyleCascade(styleMap, ARROW_SNAMES, 'fontstyle', stereotypeTags);
+  const color = cascadeArrowFontColor(styleMap, ARROW_SNAMES, stereotypeTags, backgroundHex);
   return {
     ...(Number.isFinite(size) && size > 0 ? { arrowFontSize: size } : {}),
     ...(family !== undefined ? { arrowFontFamily: family } : {}),
     ...(style !== undefined ? { arrowFontStyle: style } : {}),
+    ...(color !== undefined ? { arrowFontColor: color } : {}),
   };
 }
 

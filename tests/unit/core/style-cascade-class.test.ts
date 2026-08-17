@@ -539,3 +539,45 @@ describe('computeArrowFontOverride (T2, D3)', () => {
     expect(override.arrowFontSize).toBeUndefined();
   });
 });
+
+// ---------------------------------------------------------------------------
+// SI26 T2 (D4/D5): `arrow { FontColor }` / `arrow { cardinality { FontColor } }`
+// -- oracle experiment ids refer to `plans/arrow-label-font-colour/
+// decisions.md`. Precedence is `resolveStyleCascade`'s source-order walk
+// (`StyleStorage#computeMergedStyle`, `style/StyleStorage.java:102-116`),
+// no specificity: i/k/l/m fall out with no new logic.
+// ---------------------------------------------------------------------------
+describe('computeArrowFontOverride / computeCardinalityFontOverride -- FontColor (SI26 T2)', () => {
+  it('f/e: arrow { FontColor blue } -> arrowFontColor #0000FF, cardinality colour absent (inherits)', () => {
+    const map = styleMap({ arrow: { fontcolor: 'blue' } });
+    expect(computeArrowFontOverride(map).arrowFontColor).toBe('#0000FF');
+    // CARDINALITY_SNAMES is a superset of ARROW_SNAMES, so the bare `arrow`
+    // declaration satisfies it too -- the cardinality override CARRIES it.
+    // `resolveCardinalityFontColor`'s `?? arrow` covers the absent case.
+    expect(computeCardinalityFontOverride(map).cardinalityFontColor).toBe('#0000FF');
+  });
+
+  it("camuna: arrow { FontColor Blue ... cardinality { FontColor red } } -> #0000FF and #FF0000", () => {
+    const map = styleMap({
+      arrow: { fontcolor: 'Blue', fontsize: '14', fontstyle: 'bold' },
+      'arrow.cardinality': { fontcolor: 'red', fontsize: '10', fontstyle: 'italic' },
+    });
+    expect(computeArrowFontOverride(map).arrowFontColor).toBe('#0000FF');
+    expect(computeCardinalityFontOverride(map).cardinalityFontColor).toBe('#FF0000');
+  });
+
+  it('with a background, #?light:dark resolves against it; without one the plain path runs', () => {
+    const map = styleMap({ arrow: { fontcolor: '#?red:green' } });
+    expect(computeArrowFontOverride(map, [], '#FFFFFF').arrowFontColor).toBe('#FF0000');
+    expect(computeArrowFontOverride(map, [], '#000000').arrowFontColor).toBe('#008000');
+    expect(computeCardinalityFontOverride(map, [], '#000000').cardinalityFontColor).toBe('#008000');
+    // `cascadeHex` (no background) drops the unresolvable-as-plain token.
+    expect(computeArrowFontOverride(map).arrowFontColor).toBeUndefined();
+  });
+
+  it('a StyleMap that never touches arrow yields no colour field on either override', () => {
+    const map = styleMap({ class: { fontcolor: 'red' } });
+    expect(computeArrowFontOverride(map)).toEqual({});
+    expect(computeCardinalityFontOverride(map)).toEqual({});
+  });
+});

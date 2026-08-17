@@ -5,6 +5,7 @@ import { classPlugin } from '../../../src/diagrams/class/index.js';
 import type { ClassGeometry, ClassifierGeo, EdgeGeo, NamespaceGeo } from '../../../src/diagrams/class/layout.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
+import { shortenColor } from '../../../src/core/svg-format.js';
 import { visibilityIconOriginY } from '../../../src/diagrams/class/class-visibility-icon.js';
 import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
@@ -1197,6 +1198,93 @@ describe('renderClass — edges', () => {
     // Element order: glyph polygon BEFORE the label text, matching jar's
     // real golden SVG (`lojepe-37-liri985`).
     expect(svg.indexOf('<polygon points="75.68')).toBeLessThan(svg.indexOf('>ok<'));
+  });
+
+  // T3 (`plans/arrow-label-font-colour/decisions.md` D2/D3/D5/D6, oracle
+  // experiment "a"): the main label/glyph fill is `resolveArrowLabelFont
+  // (theme).color`; the tail/head cardinality fill is
+  // `resolveCardinalityFontColor(theme)`, which inherits the label colour
+  // absent its own override (D5). `shortenColor` (never hand-typed) is
+  // the SAME rule-2 shortening `core/svg.ts#formatAttrValue` applies to
+  // every `fill`/`stroke` -- `#FF0000`/`#0000FF` both have equal
+  // channel-byte pairs and so shorten too, exactly like `#000000` -> `#000`.
+  it('threads an `arrowFontColor` override into the label, glyph, and ' +
+    'cardinality fills alike (D2/D3/D5)', () => {
+    const theme = {
+      ...defaultTheme,
+      colors: {
+        ...defaultTheme.colors,
+        graph: { ...defaultTheme.colors.graph, arrowFontColor: '#FF0000' },
+      },
+    };
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          label: { text: 'uses', x: 70, y: 105, width: 26.325 },
+          arrowGlyph: {
+            points: [{ x: 75.68, y: 20.5 }, { x: 66.6349, y: 17.5611 }, { x: 66.6349, y: 23.4389 }],
+          },
+          tailLabel: { text: '1', x: 60, y: 65, width: 7 },
+          headLabel: { text: '*', x: 60, y: 145, width: 7 },
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, theme));
+    const expectedFill = shortenColor('#FF0000');
+    expect(svg).toContain(`fill="${expectedFill}" textLength="26.325">uses</text>`);
+    expect(svg).toContain(`fill="${expectedFill}" stroke="${expectedFill}"`);
+    expect(svg).toContain(`fill="${expectedFill}">1</text>`);
+    expect(svg).toContain(`fill="${expectedFill}">*</text>`);
+  });
+
+  it('`cardinalityFontColor` overrides ONLY the tail/head fills, leaving ' +
+    'the main label at the arrow-font colour (D5/D6)', () => {
+    const theme = {
+      ...defaultTheme,
+      colors: {
+        ...defaultTheme.colors,
+        graph: { ...defaultTheme.colors.graph, arrowFontColor: '#FF0000' },
+      },
+      cardinalityFontColor: '#0000FF',
+    };
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          label: { text: 'uses', x: 70, y: 105, width: 26.325 },
+          tailLabel: { text: '1', x: 60, y: 65, width: 7 },
+          headLabel: { text: '*', x: 60, y: 145, width: 7 },
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, theme));
+    const expectedLabelFill = shortenColor('#FF0000');
+    const expectedCardinalityFill = shortenColor('#0000FF');
+    expect(svg).toContain(`fill="${expectedLabelFill}" textLength="26.325">uses</text>`);
+    expect(svg).toContain(`fill="${expectedCardinalityFill}">1</text>`);
+    expect(svg).toContain(`fill="${expectedCardinalityFill}">*</text>`);
+  });
+
+  it('pins the default arrow-font colour to `#000000` (D3) -- NEVER ' +
+    '`theme.colors.text` (`#181818`)', () => {
+    expect(defaultTheme.colors.text).not.toBe('#000000');
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          label: { text: 'uses', x: 70, y: 105, width: 26.325 },
+          arrowGlyph: {
+            points: [{ x: 75.68, y: 20.5 }, { x: 66.6349, y: 17.5611 }, { x: 66.6349, y: 23.4389 }],
+          },
+          tailLabel: { text: '1', x: 60, y: 65, width: 7 },
+          headLabel: { text: '*', x: 60, y: 145, width: 7 },
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    const expectedFill = shortenColor('#000000');
+    expect(svg).toContain(`fill="${expectedFill}" textLength="26.325">uses</text>`);
+    expect(svg).toContain(`fill="${expectedFill}" stroke="${expectedFill}"`);
+    expect(svg).toContain(`fill="${expectedFill}">1</text>`);
+    expect(svg).toContain(`fill="${expectedFill}">*</text>`);
   });
 
   it('draws one glyph <polygon> per guide line, each BEFORE its own <text> (SI25 D1)', () => {

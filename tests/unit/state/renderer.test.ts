@@ -685,6 +685,53 @@ describe('renderState — transitions', () => {
     expect(result).not.toContain('<ellipse');
     expect(result).toContain('id="A-to-B"');
   });
+
+  // SI26/T5: the transition-label fill colour comes from
+  // `resolveArrowLabelFont(theme).color` (D2/D3), NOT `theme.colors.text`.
+  // Oracle experiments d/e (`plans/arrow-label-font-colour/decisions.md`):
+  // `<style> stateDiagram { arrow { FontColor blue } }` and bare
+  // `arrow { FontColor blue }` both draw `#00F` on the transition label.
+  it('transition label fill follows theme.colors.graph.arrowFontColor (D2/D3, oracle d/e)', () => {
+    const theme = deepMergeTheme(defaultTheme, {
+      colors: { graph: { arrowFontColor: '#0000FF' } },
+    });
+    const t = makeTransition({ label: { text: 'trigger', x: 55, y: 80 } });
+    const geo = makeGeo({ transitions: [t] });
+    const result = assembleSvg(renderState(geo, theme));
+    const textMatch = /<text[^>]*>trigger<\/text>/.exec(result);
+    expect(textMatch).not.toBeNull();
+    // core/svg.ts#resolvePaint shortens #RRGGBB -> #RGB when possible.
+    expect(textMatch![0]).toContain('fill="#00F"');
+  });
+
+  // D3 pin: with no override the label defaults to the jar's root
+  // `FontColor black` (`skin/plantuml.skin:9`), `#000000` -- NEVER
+  // `theme.colors.text` (`#181818`, the canvas/body text colour).
+  it('transition label fill defaults to #000000, not theme.colors.text (D3 pin)', () => {
+    const t = makeTransition({ label: { text: 'trigger', x: 55, y: 80 } });
+    const geo = makeGeo({ transitions: [t] });
+    const result = assembleSvg(renderState(geo, defaultTheme));
+    const textMatch = /<text[^>]*>trigger<\/text>/.exec(result);
+    expect(textMatch).not.toBeNull();
+    // core/svg.ts#resolvePaint shortens #000000 -> #000.
+    expect(textMatch![0]).toContain('fill="#000"');
+    expect(textMatch![0]).not.toContain(defaultTheme.colors.text);
+  });
+
+  // D3: `theme.colors.text` alone does not route into the arrow-label
+  // resolver -- only `arrowFontColor` (set directly, or by the
+  // `skinparam defaultFontColor` handler at the skinparam layer, tested
+  // there, not here) does.
+  it('transition label fill ignores theme.colors.text overrides (D3)', () => {
+    const theme = deepMergeTheme(defaultTheme, { colors: { text: '#FF0000' } });
+    const t = makeTransition({ label: { text: 'trigger', x: 55, y: 80 } });
+    const geo = makeGeo({ transitions: [t] });
+    const result = assembleSvg(renderState(geo, theme));
+    const textMatch = /<text[^>]*>trigger<\/text>/.exec(result);
+    expect(textMatch).not.toBeNull();
+    // core/svg.ts#resolvePaint shortens #000000 -> #000.
+    expect(textMatch![0]).toContain('fill="#000"');
+  });
 });
 
 // ---------------------------------------------------------------------------

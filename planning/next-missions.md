@@ -1,6 +1,6 @@
 # Next Missions (in order)
 
-**Refreshed 2026-08-17 (after SI25).** Treat this file as the *ordered, human-readable*
+**Refreshed 2026-08-17 (after SI26).** Treat this file as the *ordered, human-readable*
 what-next; `planning/mission-index.md` is the executable grind queue with exit
 bars and measurements, and `plans/<name>/README.md` is the brief for anything
 with a name. **When they disagree, the brief and the tree win — verify before
@@ -11,14 +11,15 @@ two shipped missions as "not started", and the 2026-08-15 version was out of
 date within a day (both of its top two entries landed on main that same
 evening). Verify against `git log` and the tree before acting on any line here.
 
-Standing corpus signals, **measured at SI25's close-out 2026-08-17** on a clean
-tree at `3fe4aca4` (not carried forward from a previous refresh):
+Standing corpus signals, **measured at SI26's close-out 2026-08-17** on a clean
+tree at `756ae57c` (not carried forward from a previous refresh):
 `shape-match-report.ts` **785 doc-size-exact / 26,256 matched-shapes** of 1,074
 fixtures. DOT EQUAL **class 705/711 · state 266/268 · component 259/263 ·
 usecase 92/93 · object 78/80**. `label-size-backlog` totals **11** (class 5 ·
-description 4 · state 2 · object 0 — untouched by SI25). svg-state ratchet 59
-pins; svg-class ratchet 315 pins; **14,508 tests** across 595 files, coverage
-95.37/90.35/96.93/96.46.
+description 4 · state 2 · object 0 — untouched by SI25/SI26). svg-state ratchet
+**60** pins; svg-class ratchet **314** pins (`ratchet.json` entries); **14,533**
+tests across 595 files (+2 ratchet cases from the SI26 pins), coverage
+95.37/90.36/96.93/96.47.
 
 Two corrections to what this block used to say. The long-standing
 "**25952 rigid-aligned shapes**" figure **matches no metric the report emits** —
@@ -60,10 +61,29 @@ has four conditions, not two. Both recorded in the brief's `decisions.md`.
    on the way (`magicArrowGlyphPoints` ink radius now `(int)(size*.80)` of the
    resolved font, `TextBlockArrow2.java:64-65` — `fix(T1)` `722c2bee`, flagged
    for review in its journal).
-2. **Arrow-label font COLOUR** — `camuna` (`<style> arrow { FontColor Blue }`),
-   `ticuxa` (`skinparam ClassArrowFontColor`) still draw `fill="#000000"`;
-   D3's cascade carries family/size/style only. `resolveArrowLabelFont` is the
-   seam. Not in any backlog (size-only).
+2. ~~**Arrow-label font COLOUR**~~ — **DONE 2026-08-17 as
+   `arrow-label-font-colour` (mission-index SI26, 3 of 4 as written; clause 2
+   not met literally and left so).** Branch `feat/arrow-label-font-colour`,
+   merge with a merge commit. `resolveArrowLabelFont(theme).color` +
+   `resolveCardinalityFontColor(theme)` (D2/D3/D5) drive class label/glyph/
+   cardinality, description label and state transition ink; skinparam
+   (`arrowFontColor`, `defaultFontColor`) and `<style>` (`arrow { FontColor }`,
+   `arrow { cardinality { FontColor } }`) paths land in
+   `colors.graph.arrowFontColor`/`theme.cardinalityFontColor`. **97 fixtures
+   moved, all `<text fill>` only** — the 12 named plus `lurevi`/`banatu`/
+   `golati`/`kokodo`/`koxeca` (in scope, uncensused) and **80 state fixtures
+   whose transition labels went `#181818 → #000` = jar** (state was never
+   byte-identical; the brief's premise was wrong). Full scored bar, moved
+   table and named gaps in
+   `plans/arrow-label-font-colour/README.md#close-out-2026-08-17`. It names in
+   turn: per-tag arrow FontColor in three unported forms (skinparam
+   `Color<<tag>> text:Red`; description `<style> arrow { .tag { FontColor } }`
+   — description reads no `arrowTagCascade` at all; positional `<style>`
+   blocks in description); `skin-loader.ts` expanding no `!define`
+   (`reddress`); description quantifier labels never drawn; 236/266 component
+   oracle SVGs of an older jar generation; `!theme` arrow FontColor
+   unverified; and `fix(T1)` `756ae57c` (unresolvable colour tokens → unset,
+   where the jar draws white — flagged for review).
 3. **Note-on-link SVG note shape** (`svek/image/EntityImageNoteLink` draw) for
    class, state and description — D2's other mission. Description now draws
    the note *text* inside the merged box; class/state still drop it.

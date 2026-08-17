@@ -109,11 +109,15 @@ function localScopeName(scopeId: string, concurrentGlobalIds: ReadonlyMap<string
   return i === -1 ? scopeId : scopeId.slice(i + 2);
 }
 
-/** T7/D3/D4: the transition-label `<text>` font attrs, resolved the SAME
- *  way `state-dot-graph.ts`/`state-composite-pass.ts` resolve the DOT-
- *  measurement font (`resolveArrowLabelFont`, D3) so the reserved box and
- *  the drawn glyph never disagree (`GraphvizImageBuilder.java:234-235`),
- *  NOT `theme.fontSize` (14, the STATE body/title-text default). Mirrors
+/** T7/D3/D4/T5: the transition-label `<text>` font attrs (family/size/
+ *  weight/style) AND fill colour, resolved the SAME way
+ *  `state-dot-graph.ts`/`state-composite-pass.ts` resolve the DOT-
+ *  measurement font (`resolveArrowLabelFont`, D2/D3) so the reserved box
+ *  and the drawn glyph never disagree (`GraphvizImageBuilder.java:234-235`),
+ *  NOT `theme.fontSize`/`theme.colors.text` (14/`#181818`, the STATE
+ *  body/title-text defaults). `color` defaults to `#000000`, the jar's
+ *  root `FontColor black` (`skin/plantuml.skin:9`; the `arrow` block at
+ *  `:306-310` sets no FontColor of its own -- D3). Mirrors
  *  `description/renderer-edge.ts#arrowLabelFontConfig`'s weight/style
  *  mapping. */
 function transitionLabelFontAttrs(theme: Theme): {
@@ -121,6 +125,7 @@ function transitionLabelFontAttrs(theme: Theme): {
   fontSize: number;
   fontWeight?: 'bold';
   fontStyle?: 'italic';
+  color: string;
 } {
   const font = resolveArrowLabelFont(theme);
   return {
@@ -128,7 +133,20 @@ function transitionLabelFontAttrs(theme: Theme): {
     fontSize: font.size,
     ...(font.weight === 'bold' ? { fontWeight: 'bold' } : {}),
     ...(font.style === 'italic' ? { fontStyle: 'italic' } : {}),
+    color: font.color,
   };
+}
+
+/** Split out of {@link buildTransitionInnerMarkup} to stay under this
+ *  project's per-function NLOC cap -- the transition label `<text>`,
+ *  font AND fill both from {@link transitionLabelFontAttrs} (T5/D3). */
+function buildTransitionLabelMarkup(transition: TransitionGeo, theme: Theme): string {
+  if (transition.label === undefined) return '';
+  const { color, ...fontAttrs } = transitionLabelFontAttrs(theme);
+  return text(transition.label.x, transition.label.y, transition.label.text, {
+    ...fontAttrs,
+    fill: color,
+  });
 }
 
 /** Path + inline arrowhead + optional label — the wrapped `<g class=
@@ -183,13 +201,7 @@ function buildTransitionInnerMarkup(
     ? buildCrossStartMarkup(transition, arrowHeadColor, decorBackground)
     : '';
 
-  const labelEl =
-    transition.label === undefined
-      ? ''
-      : text(transition.label.x, transition.label.y, transition.label.text, {
-          ...transitionLabelFontAttrs(theme),
-          fill: theme.colors.text,
-        });
+  const labelEl = buildTransitionLabelMarkup(transition, theme);
 
   return pathEl + crossStartEl + arrowhead.markup + circleEndEl + labelEl;
 }

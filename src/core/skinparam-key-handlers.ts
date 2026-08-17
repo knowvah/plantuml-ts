@@ -21,6 +21,26 @@ import {
   parseShadowingValue,
 } from './skinparam-element-buckets.js';
 import { resolveColor } from './skinparam-key-normalize.js';
+import { resolveColorToSvgHex, parseSimpleColor } from './klimt/color/HColorSet.js';
+
+/**
+ * SI26 D1: the arrow-label FontColor value as the theme carries it --
+ * RESOLVED hex (`XColor#toSvg`), or `undefined` for a token that is not a
+ * colour at all (an unexpanded skin macro such as `reddress`'s
+ * `ARROWFONTCOLOR`, a typo). The same guard `style-cascade-class.ts
+ * #cascadeHex` applies on the `<style>` path, for the same reason: an
+ * unresolvable raw string as an SVG `fill` is worse than the `#000000`
+ * default. Named divergence: the jar draws such tokens WHITE
+ * (`HColorSet#getColorOrWhite`; oracle experiment `bad` in
+ * `plans/arrow-label-font-colour/decision-journal.md`).
+ */
+function arrowFontColorValue(color: string): string | undefined {
+  const lower = color.toLowerCase();
+  if (lower !== 'transparent' && lower !== 'background' && parseSimpleColor(color) === undefined) {
+    return undefined;
+  }
+  return resolveColorToSvgHex(color);
+}
 
 type KeyHandler = (
   acc: SkinparamAccumulator,
@@ -99,7 +119,17 @@ function applyGuillemet(acc: SkinparamAccumulator, value: string): void {
 const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   [['backgroundcolor'], (acc, _v, color) => { acc.background = color; }],
   [['bordercolor'], (acc, _v, color) => { acc.border = color; }],
-  [['fontcolor', 'defaultfontcolor'], (acc, _v, color) => { acc.text = color; }],
+  // SI26 D4: `defaultFontColor` -> root FontColor (`FromSkinparamToStyle
+  // .java:157`), which the arrow signature inherits -- so it ALSO sets the
+  // arrow-label colour. Handlers run in source order, so `ArrowFontColor
+  // green` then `defaultFontColor red` -> red, and the reverse -> green
+  // (`StyleStorage#computeMergedStyle`'s OVERWRITE_EXISTING_VALUE, oracle
+  // experiments b/g in plans/arrow-label-font-colour/decisions.md).
+  [['fontcolor', 'defaultfontcolor'], (acc, _v, color) => {
+    acc.text = color;
+    const hex = arrowFontColorValue(color);
+    if (hex !== undefined) acc.arrowFontColor = hex;
+  }],
   [['arrowcolor', 'defaultarrowcolor'], (acc, _v, color) => { acc.arrow = color; }],
   // `FontParam.ARROW` size override. Sibling of arrowcolor above, NOT a
   // bucket key -- `ELEMENT_BUCKET_SNAMES` has no 'arrow' entry and does not
@@ -116,6 +146,16 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
   // that maps it onto weight/style (`klimt/font/FontStyle.java`).
   [['arrowfontname'], (acc, value) => { acc.arrowFontFamily = value; }],
   [['arrowfontstyle'], (acc, value) => { acc.arrowFontStyle = value; }],
+  // SI26 D1: `FromSkinparamToStyle.java:424-429` (`addConFont`) registers
+  // `arrowFontColor` as `PName.FontColor` on `SName.arrow`.
+  // Stored RESOLVED (`resolveColorToSvgHex`, `XColor#toSvg`) unlike its
+  // raw-valued neighbours: the `<style>` path (`style-cascade-class.ts
+  // #cascadeFontColorHex`) lands hex in the same field, and the renderers
+  // (T3-T5) draw it verbatim.
+  [['arrowfontcolor'], (acc, _v, color) => {
+    const hex = arrowFontColorValue(color);
+    if (hex !== undefined) acc.arrowFontColor = hex;
+  }],
   [['notebackgroundcolor'], (acc, _v, color) => { acc.noteBackground = color; }],
   [['pathhovercolor'], (acc, _v, color) => { acc.pathHoverColor = color; }],
   [['diagrambordercolor'], (acc, _v, color) => { acc.diagramBorderColor = color; }],

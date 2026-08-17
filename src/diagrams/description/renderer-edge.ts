@@ -9,15 +9,18 @@ import type { Theme } from '../../core/theme.js';
 import { SvekEdge, type SvekEdgeInput, type SvekLinkStyle } from '../../core/svek/SvekEdge.js';
 import type { DescriptionEdgeGeo } from './layout-helpers.js';
 import { bareEntityName } from './namespace-groups.js';
-import { JAR_DEFAULT_TEXT_COLOR } from './renderer-symbol.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
 
 /**
- * D4: the main-label `<text>` font, resolved the SAME way `layout.ts`
- * resolves the DOT-measurement font (`resolveArrowLabelFont`, D3) so the
- * reserved box and the drawn glyph never disagree
- * (`GraphvizImageBuilder.java:234-235`). `weight`/`style` map to
+ * D2/D4: the main-label `<text>` font AND colour, resolved the SAME way
+ * `layout.ts` resolves the DOT-measurement font (`resolveArrowLabelFont`,
+ * D2/D3) so the reserved box and the drawn glyph never disagree
+ * (`GraphvizImageBuilder.java:234-236`: upstream's `labelFont` is ONE
+ * `FontConfiguration` carrying font AND colour). `color` is the resolver's
+ * `arrowFontColor` cascade result, defaulting to `#000000`
+ * (`ARROW_LABEL_DEFAULT_COLOR`) — NEVER `theme.colors.text` (D3; that is
+ * `#181818`, a different role). `weight`/`style` map to
  * `FontStyle.BOLD`/`FontStyle.ITALIC` the same way
  * `class-member-creole.ts:207-209` already does for the class engine.
  */
@@ -26,7 +29,7 @@ function arrowLabelFontConfig(theme: Theme): FontConfiguration {
   const styles = new Set<FontStyle>();
   if (font.weight === 'bold') styles.add(FontStyle.BOLD);
   if (font.style === 'italic') styles.add(FontStyle.ITALIC);
-  return { family: font.family, size: font.size, color: JAR_DEFAULT_TEXT_COLOR, styles };
+  return { family: font.family, size: font.size, color: font.color, styles };
 }
 
 /**
