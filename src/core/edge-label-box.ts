@@ -10,10 +10,9 @@
  * Relocated from `diagrams/state/` (2026-08-14, mission
  * `edge-label-box-and-class-ports` T1) because it was correct and reachable
  * only by the state engine, while class and description each measured their
- * labels a different, wrong way. A pure move: the state engine's DOT output is
- * byte-identical across the relocation, which its DOT-parity suite proves.
- * `state-sizing.ts` and `state-transition-label.ts` re-export from here, so no
- * state-side import changed.
+ * labels a different, wrong way. A pure move: the state engine's DOT output
+ * is byte-identical across the relocation. `state-sizing.ts`/
+ * `state-transition-label.ts` re-export from here, so no import changed.
  */
 import type { FontSpec, StringMeasurer } from './measurer.js';
 // `src/core/` already imports from `src/diagrams/` elsewhere (`assemble-svg
@@ -289,34 +288,70 @@ export interface QuantifierBox {
   readonly reservedHeight: number;
 }
 
+/** `CharHidder#isToBeHidden` (`utils/CharHidder.java:84-90`): the ten
+ *  characters a leading `~` can escape. NOT `VisibilityModifier`'s char set
+ *  (`-#+~*`, `skin/VisibilityModifier.java:219-232`) — overlap only at `*`. */
+const CHAR_HIDDER_ESCAPE_TARGETS = '_-"#][*./<';
+
+/**
+ * `~X` where `X` is one of {@link CHAR_HIDDER_ESCAPE_TARGETS} is a creole
+ * ESCAPE sequence (`CharHidder#hide`, `utils/CharHidder.java:59-75`), not a
+ * UML visibility marker on the quantifier/role arm: `hide` folds the pair
+ * into one placeholder char during markup scanning, consuming the `~`;
+ * `#unhide` (`:106-126`) restores `X` literally after. Called
+ * unconditionally on every creole line by `StripeSimple#analyzeAndAdd`
+ * (`klimt/creole/legacy/StripeSimple.java:150`) — main label AND
+ * quantifier/role both reach it via `Display#create` ->
+ * `CreoleStripeSimpleParser` -> `StripeSimple`.
+ *
+ * DIFFERENT from {@link applyVisibilityIcon} (`Display.java:415-416`),
+ * which runs ONLY from `LinkArg#build` on the MAIN label and is absent
+ * from quantifier construction (`SvekEdge.java:329-351` never touches
+ * `LinkArg`) — no `VisibilityModifier` reference exists under `klimt
+ * /creole/` outside `Display.java`. A visibility-strip reading would ALSO
+ * strip a leading `+`/`-`/`#`, and a bare `~` before any non-escape char;
+ * solo `scripts/oracle-render.sh` renders disprove both: `"+
+ * initiators"`/`"# initiators"` measure literal, UNSTRIPPED (56/62px);
+ * `"~ initiators"`/`"~initiators"` both measure 56, tilde rendered.
+ * `"~* initiators"`/`"~*initiators"` both measure 53 — the escape consumes
+ * exactly the `~`; the surviving `*` renders literally, NOT the creole
+ * list-bullet markup a BARE leading `*` triggers (`CreoleStripeSimpleParser
+ * .ASTERISK_PREFIXED_LINE_PATTERN`, `:69` — measures 60, not reproduced).
+ *
+ * Scoped to a LEADING escape only — no fixture needs mid-line, and the
+ * list-bullet path is out of scope.
+ */
+function stripLeadingEscapedChar(line: string): string {
+  if (line.length < 2 || line[0] !== '~') return line;
+  return CHAR_HIDDER_ESCAPE_TARGETS.includes(line[1]!) ? line.slice(1) : line;
+}
+
 /**
  * The box formula for an edge's QUANTIFIER (multiplicity) and ROLE labels —
  * `startTailText`/`endHeadText`/`startTailRoleText`/`endHeadRoleText`,
  * measured at the CARDINALITY font, not the arrow label font.
  *
- * Construction (`SvekEdge.java:330-351`): each is
- * `Display.getWithNewlines(pragma, text).create(cardinalityFont, CENTER,
- * skinParam)` — split on `\n`, same mechanism `splitEdgeLabelLines` already
- * ports (reused here rather than duplicated, per this task's boundary).
+ * Construction (`SvekEdge.java:330-351`): `Display.getWithNewlines(pragma,
+ * text).create(cardinalityFont, CENTER, skinParam)` — split on `\n`
+ * (`splitEdgeLabelLines`), then {@link stripLeadingEscapedChar} on EVERY
+ * line (not gated to line 0 — see its doc comment for the mechanism).
  *
- * Emission (`SvekEdge.java:447-467`) is the point of this function existing
- * separately from {@link computeReservedLabelBox}: `appendTable(sb,
- * startTailText.calculateDimension(stringBounder), ...)` passes the RAW
- * dimension straight through. Unlike the main label at `:440-445`, which adds
- * `2 * labelShield` before its own `appendTable` call, the quantifier/role
- * arms add nothing — no shield, no `marginLabel`. `appendTable`'s `(int)`
- * cast (`:504-507`) truncates toward zero, mirrored here with `Math.floor`
- * (measured widths are never negative, so floor and trunc agree).
+ * Emission (`SvekEdge.java:447-467`), why this exists apart from
+ * {@link computeReservedLabelBox}: `appendTable` passes the RAW dimension
+ * through — no shield, no `marginLabel` (unlike the main label at
+ * `:440-445`). Its `(int)` cast (`:504-507`) truncates toward zero,
+ * mirrored with `Math.floor` (widths are never negative).
  *
- * `font` is the resolved CARDINALITY font — this function does not resolve
- * it; the caller (T6/T7) reads it through T1's style cascade.
+ * `font` is the resolved CARDINALITY font — the caller (T6/T7) reads it
+ * through the style cascade.
  */
 export function computeQuantifierBox(
   text: string,
   font: FontSpec,
   measurer: StringMeasurer,
 ): QuantifierBox {
-  const { lines } = splitEdgeLabelLines(text);
+  const { lines: rawLines } = splitEdgeLabelLines(text);
+  const lines = rawLines.map(stripLeadingEscapedChar);
   const measuredWidth = Math.max(...lines.map((l) => measurer.measure(l, font).width));
   const reservedWidth = Math.floor(measuredWidth);
   const reservedHeight = lines.length * font.size;

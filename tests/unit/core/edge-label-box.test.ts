@@ -303,6 +303,54 @@ describe('computeQuantifierBox — jar-measured cases, no shield/margin', () => 
 });
 
 /**
+ * `class/focaci-80-suzu938`'s headlabel `"~* initiators"` at the default
+ * cardinality font (`CARDINALITY_FONT_SIZE`, `graph-layout-build-edges.ts
+ * :19` = 13, `svek/SvekEdge.java` cardinality default) measures 61x13
+ * unstripped vs the oracle's 53x13 — `~*` is `CharHidder`'s escape
+ * sequence (`utils/CharHidder.java:59-90`), not a `VisibilityModifier`
+ * strip (see `stripLeadingEscapedChar`'s doc comment for the full
+ * mechanism and the oracle renders that disprove the visibility reading).
+ */
+describe('computeQuantifierBox — the CharHidder escape is not a visibility strip', () => {
+  const DEFAULT_CARDINALITY_FONT = { family: 'SansSerif', size: 13 };
+
+  it('strips a leading ~* escape, keeping the * as a literal glyph (focaci-80-suzu938)', () => {
+    const box = computeQuantifierBox('~* initiators', DEFAULT_CARDINALITY_FONT, measurer);
+    expect(box.lines).toEqual(['* initiators']);
+    expect(box.reservedWidth).toBe(53);
+    expect(box.reservedHeight).toBe(13);
+  });
+
+  it('leaves a quantifier with no escape sequence unchanged', () => {
+    const box = computeQuantifierBox('initiators', DEFAULT_CARDINALITY_FONT, measurer);
+    expect(box.lines).toEqual(['initiators']);
+    expect(box.reservedWidth).toBe(Math.floor(measurer.measure('initiators', DEFAULT_CARDINALITY_FONT).width));
+  });
+
+  it('does not strip a bare ~ before a non-escape character (space)', () => {
+    // Solo oracle render of "~ initiators": 56, tilde rendered literally —
+    // `~` only escapes when immediately followed by an isToBeHidden char.
+    const box = computeQuantifierBox('~ initiators', DEFAULT_CARDINALITY_FONT, measurer);
+    expect(box.lines).toEqual(['~ initiators']);
+    expect(box.reservedWidth).toBe(56);
+  });
+
+  it('does not strip a leading UML visibility char that is not a ~ escape', () => {
+    // `applyVisibilityIcon` would strip `+`/`-`/`#` too; the quantifier arm
+    // must not, since VisibilityModifier never reaches it (SvekEdge.java
+    // :329-351 never calls LinkArg#build). Assert against the FULL literal
+    // string's own measurement (not a hardcoded oracle number — this
+    // measurer's `#`-glyph width table entry is a separate, untouched
+    // concern from this task's escape-vs-visibility distinction).
+    for (const text of ['+ initiators', '# initiators']) {
+      const box = computeQuantifierBox(text, DEFAULT_CARDINALITY_FONT, measurer);
+      expect(box.lines).toEqual([text]);
+      expect(box.reservedWidth).toBe(Math.floor(measurer.measure(text, DEFAULT_CARDINALITY_FONT).width));
+    }
+  });
+});
+
+/**
  * `computeMergedLabelBox` — the note-on-link arm (`SvekEdge.java:302-325,
  * 440-445, 485-489`). `noteDim` stands in for the note sizer's decorated
  * image output (T9/T10 wire the real sizer); the values below are chosen
