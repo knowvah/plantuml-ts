@@ -11,8 +11,9 @@
  */
 import type { Relationship } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
+import { type GuideLine, type MagicArrowDirection, magicArrowGlyphPoints } from './class-magic-arrow.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
 import type { EdgeGeo } from './layout.js';
 import type { Positionable } from '../../core/klimt/geom/Positionable.js';
@@ -37,31 +38,36 @@ import { addMargin, intersect, moveAwayFrom } from '../../core/klimt/geom/Positi
  * edge by `0` (LEFT), `maxWidth-lineWidth` (RIGHT), or
  * `(maxWidth-lineWidth)/2` (CENTER) -- exactly `portLabelAnchor`'s own
  * `center.x - width/2` formula generalized from a single `width` to the
- * block's `maxWidth`. Line spacing is `CARDINALITY_FONT_SIZE` (13) exactly
- * -- jar's real per-line `y` delta on every sampled fixture. `totalHeight`
- * folds the extra `(lines.length-1)` rows into the SAME single-line
- * `m.height`/`baselineOffset` formula `portLabelAnchor` already uses, so at
- * `lines.length === 1` this function's `x`/`y` are algebraically identical
- * to `portLabelAnchor`'s. Still bound by the SAME gvts-genuine
- * label-placement residual N25/N62 already named (@knowvah/dot-engine's own
- * box-center doesn't match jar's sub-pixel placement) -- structurally
- * correct, not guaranteed byte-exact.
+ * block's `maxWidth`. Line spacing is `labelFont.size` (13 by default,
+ * `CARDINALITY_FONT_SIZE`) exactly -- jar's real per-line `y` delta on
+ * every sampled fixture. `totalHeight` folds the extra `(lines.length-1)`
+ * rows into the SAME single-line `m.height`/`baselineOffset` formula
+ * `portLabelAnchor` already uses, so at `lines.length === 1` this
+ * function's `x`/`y` are algebraically identical to `portLabelAnchor`'s.
+ * Still bound by the SAME gvts-genuine label-placement residual N25/N62
+ * already named (@knowvah/dot-engine's own box-center doesn't match jar's
+ * sub-pixel placement) -- structurally correct, not guaranteed byte-exact.
+ *
+ * SI25 D2: `labelFont` is `resolveArrowLabelFont(theme)` (`GraphvizImage
+ * Builder.java:234-235`'s `labelFont`), the SAME font the DOT reservation
+ * is measured with (`class-layout-edge-labels.ts#computeMeasuredLabelAttrs`)
+ * -- box and ink cannot drift on an `arrow { FontSize }` override.
  */
 export function multiLineLabelAnchor(
   lines: string[],
   align: 'center' | 'left' | 'right',
   center: { x: number; y: number },
   measurer: StringMeasurer,
-  fontFamily: string,
+  labelFont: FontSpec,
 ): Array<{ text: string; x: number; y: number; width: number }> {
-  const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
+  const font = labelFont;
   const widths = lines.map((l) => measurer.measure(l, font).width);
   const maxWidth = Math.max(...widths);
   const blockLeft = center.x - maxWidth / 2;
   const firstLine = lines[0] ?? '';
   const m0 = measurer.measure(firstLine, font);
-  const baselineOffset = CARDINALITY_FONT_SIZE - measurer.getDescent(font, firstLine);
-  const totalHeight = (lines.length - 1) * CARDINALITY_FONT_SIZE + m0.height;
+  const baselineOffset = font.size - measurer.getDescent(font, firstLine);
+  const totalHeight = (lines.length - 1) * font.size + m0.height;
   const blockTop = center.y - totalHeight / 2;
   return lines.map((text, i) => {
     const width = widths[i]!;
@@ -69,8 +75,92 @@ export function multiLineLabelAnchor(
     return {
       text,
       x: blockLeft + offset,
-      y: blockTop + baselineOffset + i * CARDINALITY_FONT_SIZE,
+      y: blockTop + baselineOffset + i * font.size,
       width,
+    };
+  });
+}
+
+/** The label's centre (dot-engine's `label=` placement), measurer and
+ *  resolved arrow font (`resolveArrowLabelFont(theme)`, D2) -- the inputs
+ *  every main-label anchor shares. */
+export interface LabelAnchorContext {
+  readonly center: { x: number; y: number };
+  readonly measurer: StringMeasurer;
+  readonly labelFont: FontSpec;
+}
+
+/** One positioned line of a multi-line edge label -- `EdgeGeo.labelLines[i]`. */
+export type LabelLineGeo = {
+  text: string;
+  x: number;
+  y: number;
+  width: number;
+  glyph?: { points: Array<{ x: number; y: number }> };
+};
+
+/** `TextBlockVertical#drawU`'s per-block `dx` (`klimt/shape/TextBlockVertical
+ *  .java:91-98`): LEFT 0, CENTER `(W-w)/2`, RIGHT `W-w`. */
+function alignedOffset(align: 'center' | 'left' | 'right', total: number, own: number): number {
+  return align === 'left' ? 0 : align === 'right' ? total - own : (total - own) / 2;
+}
+
+/**
+ * SI25 D4: lay out a multi-line label that `hasSeveralGuideLines` -- one
+ * per-line magic-arrow glyph -- mirroring `StringWithArrow
+ * #addSeveralMagicArrows` (`descdiagram/command/StringWithArrow.java:115-
+ * 127`) over the ONE per-line walk `class-magic-arrow.ts#splitGuideLines`
+ * already produced for the DOT box (D3). Per line: iff the line carried a
+ * token, `mergeLR(TextBlockArrow2(size x size), text, CENTER)` puts the
+ * arrow block at the line block's left edge with `dy = (H - size)/2` and
+ * the text at `x += size` with `dy = (H - textHeight)/2`
+ * (`klimt/shape/TextBlockHorizontal.java:79-91`; `H = blockHeight =
+ * max(size, textHeight)`, so the arrow's `dy` is `(blockHeight-size)/2`
+ * and the text's is 0 under this port's `height === font.size` measurers,
+ * `core/measurer.ts` ADR-001, so the text baseline is the SAME
+ * `size - descent` from the line top `multiLineLabelAnchor` uses); then
+ * `mergeTB(result, block, alignment)` stacks the blocks top-to-bottom,
+ * each offset by {@link alignedOffset} inside the merged `max(blockWidth)`
+ * (`TextBlockVertical.java:79-102`; nested `mergeTB`s compose to the same
+ * per-line offset since each alignment rule is linear in the widths). The
+ * merged block is centred on `center` exactly as `multiLineLabelAnchor`
+ * centres its own. Jar's `gobuco-16-ruke239` confirms: text x 79.68/
+ * 80.046/81.508/79.68 = block left + 13 + `(maxWidth-blockWidth)/2`, and
+ * one `<polygon>` per line at `y` step 13. `angleOf` is `magicArrowAngle
+ * (fromToPoints, direction)`: `LinkArrow#mute` (`abel/LinkArrow.java:55-
+ * 71`) hands DIRECT_NORMAL the edge guide unchanged and BACKWARD `Math.PI
+ * +` it -- and a multi-guide-line link's OWN `LinkArrow` is
+ * `NONE_OR_SEVERAL` (`StringWithArrow.java:63-65` via `Labels.java:64`),
+ * so the guide carries the un-reversed internal angle: byte-for-byte the
+ * whole-label path (`class-edge-geo.ts#attachMagicArrow`).
+ */
+export function guideLinesAnchor(
+  guideLines: readonly GuideLine[],
+  align: 'center' | 'left' | 'right',
+  angleOf: (direction: MagicArrowDirection) => number,
+  ctx: LabelAnchorContext,
+): LabelLineGeo[] {
+  const { center, measurer, labelFont } = ctx;
+  const size = labelFont.size;
+  const maxWidth = Math.max(...guideLines.map((g) => g.blockWidth));
+  const totalHeight = guideLines.reduce((acc, g) => acc + g.blockHeight, 0);
+  const blockLeft = center.x - maxWidth / 2;
+  let lineTop = center.y - totalHeight / 2;
+  return guideLines.map((g) => {
+    const lineLeft = blockLeft + alignedOffset(align, maxWidth, g.blockWidth);
+    const top = lineTop;
+    lineTop += g.blockHeight;
+    const baselineOffset = size - measurer.getDescent(labelFont, g.text);
+    if (g.direction === undefined) {
+      return { text: g.text, x: lineLeft, y: top + baselineOffset, width: g.textWidth };
+    }
+    const arrowTop = top + (g.blockHeight - size) / 2;
+    return {
+      text: g.text,
+      x: lineLeft + size,
+      y: top + baselineOffset,
+      width: g.textWidth,
+      glyph: { points: magicArrowGlyphPoints(lineLeft, arrowTop, angleOf(g.direction), size) },
     };
   });
 }
@@ -137,16 +227,18 @@ export function portLabelAnchor(
   text: string,
   center: { x: number; y: number },
   measurer: StringMeasurer,
-  fontFamily: string,
+  // SI25 D2: the MAIN label passes `resolveArrowLabelFont(theme)`; the
+  // tail/head cardinality callers (`attachPortLabels`) pass
+  // `{ fontFamily, CARDINALITY_FONT_SIZE }` -- their pre-D2 font, unchanged.
+  font: FontSpec,
   // Tail/head labels ONLY -- `manageCollision` tests `startTailText`/
   // `endHeadText` and never `labelXY`, so the CENTRE label is deliberately
   // left un-pushed even when it overlaps a node. Omitted at those call
   // sites, which is what keeps that upstream asymmetry visible here.
   collisionNodes?: DotLayoutResult['nodes'],
 ): { text: string; x: number; y: number; width: number } {
-  const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
   const m = measurer.measure(text, font);
-  const baselineOffset = CARDINALITY_FONT_SIZE - measurer.getDescent(font, text);
+  const baselineOffset = font.size - measurer.getDescent(font, text);
   // G2 N35 (superseded by ADR-1): the `19.418750000000003` vs jar's
   // `19.4188` mismatch that once motivated pre-rounding this width is now
   // resolved at emission -- `core/svg.ts` formats every numeric attribute
@@ -196,6 +288,7 @@ export function attachPortLabels(
   ctx: PortLabelContext,
 ): void {
   const { measurer, fontFamily, nodes } = ctx;
+  const cardinalityFont: FontSpec = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
   // T11: `edgeResult.tailLabelX/Y` and `headLabelX/Y` are @knowvah/dot-engine's
   // placement for the DOT `taillabel`/`headlabel` attributes -- which
   // `class-dot-edges.ts#buildDotEdgeAttrs` now reserves from the SWAPPED
@@ -211,12 +304,12 @@ export function attachPortLabels(
   const headMultiplicity = swap ? rel.fromMultiplicity : rel.toMultiplicity;
   if (tailMultiplicity !== undefined && edgeResult.tailLabelX !== undefined && edgeResult.tailLabelY !== undefined) {
     edgeGeo.tailLabel = portLabelAnchor(
-      tailMultiplicity, { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY }, measurer, fontFamily, nodes,
+      tailMultiplicity, { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY }, measurer, cardinalityFont, nodes,
     );
   }
   if (headMultiplicity !== undefined && edgeResult.headLabelX !== undefined && edgeResult.headLabelY !== undefined) {
     edgeGeo.headLabel = portLabelAnchor(
-      headMultiplicity, { x: edgeResult.headLabelX, y: edgeResult.headLabelY }, measurer, fontFamily, nodes,
+      headMultiplicity, { x: edgeResult.headLabelX, y: edgeResult.headLabelY }, measurer, cardinalityFont, nodes,
     );
   }
 }
