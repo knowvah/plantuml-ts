@@ -234,6 +234,15 @@ export interface ThemeGraphColorsA {
    *  `FontSpec.weight`/`style` (`klimt/font/FontStyle.java`'s independent
    *  bold/italic axes). No caller yet (D4/Batch 3). */
   arrowFontStyle?: string;
+  /** SI26 D1: `<style> arrow { FontColor X }` / `skinparam arrowFontColor X`
+   *  -- resolved hex. `FromSkinparamToStyle.java:149` (`addConFont("arrow",
+   *  SName.arrow)`) -> `:424-429` registers `arrowFontColor` as
+   *  `PName.FontColor` on `SName.arrow`; the root default is `FontColor
+   *  black` (`plantuml.skin:9`, the `arrow` block sets none). Also set by
+   *  `skinparam defaultFontColor` (`:157`, root FontColor the arrow
+   *  signature inherits), last-declared-wins (D4). Read ONLY by
+   *  `arrow-label-font.ts#resolveArrowLabelFont`. */
+  arrowFontColor?: string;
   /** G2 N23/N32: `skinparam class { AttributeFontSize N }` / `skinparam
    *  classAttributeFontSize N` -- upstream `FontParam.CLASS_ATTRIBUTE`'s
    *  dedicated size override, style-mapped by `FromSkinparamToStyle

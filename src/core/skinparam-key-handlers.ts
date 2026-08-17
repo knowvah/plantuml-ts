@@ -21,6 +21,7 @@ import {
   parseShadowingValue,
 } from './skinparam-element-buckets.js';
 import { resolveColor } from './skinparam-key-normalize.js';
+import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 
 type KeyHandler = (
   acc: SkinparamAccumulator,
@@ -99,7 +100,16 @@ function applyGuillemet(acc: SkinparamAccumulator, value: string): void {
 const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   [['backgroundcolor'], (acc, _v, color) => { acc.background = color; }],
   [['bordercolor'], (acc, _v, color) => { acc.border = color; }],
-  [['fontcolor', 'defaultfontcolor'], (acc, _v, color) => { acc.text = color; }],
+  // SI26 D4: `defaultFontColor` -> root FontColor (`FromSkinparamToStyle
+  // .java:157`), which the arrow signature inherits -- so it ALSO sets the
+  // arrow-label colour. Handlers run in source order, so `ArrowFontColor
+  // green` then `defaultFontColor red` -> red, and the reverse -> green
+  // (`StyleStorage#computeMergedStyle`'s OVERWRITE_EXISTING_VALUE, oracle
+  // experiments b/g in plans/arrow-label-font-colour/decisions.md).
+  [['fontcolor', 'defaultfontcolor'], (acc, _v, color) => {
+    acc.text = color;
+    acc.arrowFontColor = resolveColorToSvgHex(color);
+  }],
   [['arrowcolor', 'defaultarrowcolor'], (acc, _v, color) => { acc.arrow = color; }],
   // `FontParam.ARROW` size override. Sibling of arrowcolor above, NOT a
   // bucket key -- `ELEMENT_BUCKET_SNAMES` has no 'arrow' entry and does not
@@ -116,6 +126,13 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
   // that maps it onto weight/style (`klimt/font/FontStyle.java`).
   [['arrowfontname'], (acc, value) => { acc.arrowFontFamily = value; }],
   [['arrowfontstyle'], (acc, value) => { acc.arrowFontStyle = value; }],
+  // SI26 D1: `FromSkinparamToStyle.java:424-429` (`addConFont`) registers
+  // `arrowFontColor` as `PName.FontColor` on `SName.arrow`.
+  // Stored RESOLVED (`resolveColorToSvgHex`, `XColor#toSvg`) unlike its
+  // raw-valued neighbours: the `<style>` path (`style-cascade-class.ts
+  // #cascadeFontColorHex`) lands hex in the same field, and the renderers
+  // (T3-T5) draw it verbatim.
+  [['arrowfontcolor'], (acc, _v, color) => { acc.arrowFontColor = resolveColorToSvgHex(color); }],
   [['notebackgroundcolor'], (acc, _v, color) => { acc.noteBackground = color; }],
   [['pathhovercolor'], (acc, _v, color) => { acc.pathHoverColor = color; }],
   [['diagrambordercolor'], (acc, _v, color) => { acc.diagramBorderColor = color; }],

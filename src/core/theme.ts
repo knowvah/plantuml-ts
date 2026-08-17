@@ -20,6 +20,8 @@ export interface Theme {
   /** GraphvizImageBuilder.java:124-126 cascade font (`getStyleArrowCardinality`); default 13 = plantuml.skin:307 arrow FontSize, family = root's SansSerif (plantuml.skin:6, arrow sets no FontName). Optional so pre-existing hand-built `Theme` literals elsewhere stay valid; `defaultTheme`/`darkTheme` always set both. No consumer yet — T5/T6, decisions.md#D3. */
   cardinalityFontSize?: number;
   cardinalityFontFamily?: string;
+  /** SI26 D5: `<style> arrow { cardinality { FontColor } }`, resolved hex. Absent = inherit the arrow label colour (`GraphvizImageBuilder.java:124-126` signature `{root,element,<diagram>,arrow,cardinality}`; `plantuml.skin` has no `cardinality` block). Read by `arrow-label-font.ts#resolveCardinalityFontColor`. */
+  cardinalityFontColor?: string;
   /** R2j: EXPLICIT `skinparam defaultFontSize` marker (set only when the key
    *  was seen) — `SkinParam#getFontSize`'s middle tier between per-param
    *  skinparams and each FontParam's own default (SkinParam.java:441-448),
@@ -99,13 +101,11 @@ export interface Theme {
    *  `UGraphic`) -- consumed as a single post-processing pass over the
    *  ASSEMBLED SVG fragment instead (`class-monochrome.ts
    *  #applyMonochromeToFragment`, `renderer.ts#renderClass`'s own return
-   *  point). Class is this field's first consumer this iteration; NOT
-   *  wired into description/other diagram types (no corpus sample exercised
-   *  this iteration -- same "no evidence it's wrong elsewhere" scoping this
-   *  file's other fields already establish, e.g. `strictUml`'s doc comment).
-   *  `SkinParam.isDark(...)`'s own DARK_MODE branch (jar's FIRST check,
-   *  ahead of `monochrome`) is unmodeled -- `!theme dark`-interaction
-   *  untraced this iteration, named remainder. */
+   *  point). Class is this field's first consumer; NOT wired into
+   *  description/other diagram types (no corpus sample exercised it -- same
+   *  scoping as `strictUml`'s doc comment). `SkinParam.isDark(...)`'s own
+   *  DARK_MODE branch (jar's FIRST check, ahead of `monochrome`) is
+   *  unmodeled -- `!theme dark`-interaction untraced, named remainder. */
   monochrome?: 'true' | 'reverse';
   strictUml?: boolean;
   /**
@@ -135,10 +135,8 @@ export interface Theme {
    * `StyleSignatureBasic` subset-match semantics for the common case where
    * only the two UNIVERSAL selectors (root, element) are in play. A
    * per-bucket-type Shadowing override (`<style> node { Shadowing 2.0 } }`)
-   * is NOT modeled here -- out of this batch's scope (D3), a later
-   * increment if a fixture needs it. Absent = 0 (no shadow) -- Batch 2
-   * consumes this value to draw the shadow filter + reserve ink; this
-   * batch only resolves it.
+   * is NOT modeled here (D3, a later increment if a fixture needs it).
+   * Absent = 0 (no shadow); Batch 2 draws the shadow filter + reserves ink.
    */
   shadowing?: number;
   /** G2 N59: `skinparam packageStyle rect|rectangle` -- selects the plain
@@ -382,6 +380,7 @@ export type ThemeOverride = {
   fontSize?: number;
   cardinalityFontSize?: number;
   cardinalityFontFamily?: string;
+  cardinalityFontColor?: string;
   diagramMargin?: { top: number; right: number; bottom: number; left: number };
   /** See {@link Theme.styleOverrides}. */
   styleOverrides?: Record<string, Record<string, string>>;
@@ -474,6 +473,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'shadowing', 'packageStyle', 'nodeSep', 'rankSep', 'wrapWidth',
   'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize',
   'cardinalityFontSize', 'cardinalityFontFamily', // T1 (edge-label-box-backlog, D3)
+  'cardinalityFontColor', // SI26 T1 (D5)
   // `diagramMargin` is the one non-scalar here. It rides this list because the
   // merge is a whole-value replacement, which is exactly right for a margin:
   // a theme that sets one replaces all four sides, it does not blend with the

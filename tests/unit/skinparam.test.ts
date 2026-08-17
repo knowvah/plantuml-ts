@@ -275,6 +275,31 @@ describe('resolveSkinparam — direct key matches', () => {
     expect(unknown).toEqual([]);
   });
 
+  // SI26 T1 (D1/D4): `arrowfontcolor` -- `FromSkinparamToStyle.java:424-429`
+  // (`addConFont`) -- and `defaultfontcolor` (`:157`, root FontColor the
+  // arrow signature inherits) both land in `colors.graph.arrowFontColor`,
+  // source order deciding (oracle experiments b/g/h/j in
+  // `plans/arrow-label-font-colour/decisions.md`). `classArrowFontColor`
+  // normalises to `arrowfontcolor` (`normaliseKey` step 3) -- `ticuxa`.
+  it('maps arrowfontcolor and defaultfontcolor to colors.graph.arrowFontColor, last wins', () => {
+    const h = resolveSkinparam(new Map([['classArrowFontColor', '#FF0000']]), defaultTheme);
+    expect(h.theme.colors.graph.arrowFontColor).toBe('#FF0000');
+    expect(h.unknown).toEqual([]);
+    const b = resolveSkinparam(
+      new Map([['arrowfontcolor', 'green'], ['defaultfontcolor', 'red']]),
+      defaultTheme,
+    );
+    expect(b.theme.colors.graph.arrowFontColor).toBe('#FF0000');
+    expect(b.theme.colors.text).toBe('red'); // raw, as before -- only arrowFontColor is pre-resolved
+    const g = resolveSkinparam(
+      new Map([['defaultfontcolor', 'red'], ['arrowfontcolor', 'green']]),
+      defaultTheme,
+    );
+    expect(g.theme.colors.graph.arrowFontColor).toBe('#008000');
+    const j = resolveSkinparam(new Map([['classfontcolor', 'red']]), defaultTheme);
+    expect(j.theme.colors.graph.arrowFontColor).toBeUndefined();
+  });
+
   // G2 N54: `skinparam icon<Kind>Color`/`icon<Kind>BackgroundColor` --
   // see theme.ts#iconPrivateColor's doc comment for the full upstream
   // mapping (FromSkinparamToStyle.java:232-239).
