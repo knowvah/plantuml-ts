@@ -73,10 +73,10 @@ export type {
 import type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-types.js';
 export type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-types.js';
 
-/** `FontParam.ARROW(13, normal)` (klimt/font/FontParam.java:54) -- see
- *  `layoutDescription`'s `edgeFontSpec` construction for the full
- *  jar-verified derivation (G5/C0). */
-import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+/** D3/D4: the arrow-label font resolver -- `layoutDescription`'s
+ *  `edgeFontSpec` construction (below) is its measurement-site wiring;
+ *  `renderer-edge.ts#arrowLabelFontConfig` is the matching SVG-text site. */
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 
 // ── Phase 1: AST classification ──
@@ -376,16 +376,16 @@ export function layoutDescription(
   // with node/title measurement (buildDotNodes,
   // buildPortClusterInfoByAstId) and must stay at theme.fontSize; unlike
   // state/class, this engine has no separate per-role font construction
-  // site to swap in place. No `skinparam ArrowFontSize` override path
-  // exists yet (`core/skinparam.ts#ELEMENT_BUCKET_SNAMES` omits
-  // `'arrow'`) -- bare DEFAULT only.
-  // T3: `skinparam arrowFontSize N` overrides `FontParam.ARROW`'s 13 default.
-  // This spec feeds edge-label MEASUREMENT, so the override changes the
-  // reserved DOT box and therefore rank separation -- not only how text draws.
-  const edgeFontSpec: FontSpec = {
-    family: theme.fontFamily,
-    size: theme.colors.graph.arrowFontSize ?? ARROW_LABEL_FONT_SIZE,
-  };
+  // site to swap in place.
+  // T6/D4: `resolveArrowLabelFont(theme)` -- the SAME resolver
+  // `renderer-edge.ts#arrowLabelFontConfig` uses for the SVG `<text>` --
+  // folds `skinparam arrowFontSize`/`arrowFontName`/`arrowFontStyle` and
+  // `<style> arrow { FontSize/FontName/FontStyle }` (D3) into this
+  // MEASUREMENT site, so the reserved DOT box and the drawn glyph never
+  // disagree (`GraphvizImageBuilder.java:234-235`). Retires the prior
+  // ad hoc `theme.colors.graph.arrowFontSize ?? ARROW_LABEL_FONT_SIZE` read,
+  // which saw only the skinparam-bridged size.
+  const edgeFontSpec: FontSpec = resolveArrowLabelFont(theme);
   // T14/D3: `theme.cardinalityFontFamily`/`cardinalityFontSize` are optional
   // in the `Theme` TYPE (pre-existing hand-built Theme literals elsewhere
   // stay valid, `theme.ts:21-22`'s own doc comment), but `defaultTheme`/

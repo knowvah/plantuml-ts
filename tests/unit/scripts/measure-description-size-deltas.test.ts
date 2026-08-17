@@ -166,10 +166,10 @@ describe('unexcusedFailures (dot-parity-backlog-data, shared with the ratchets)'
     expect(unexcusedFailures(d, ['labelSizeOk'])).toEqual(['portOk']);
   });
 
-  it('the description goldens name exactly the 5 label-size slugs and no direction slugs', () => {
+  it('the description goldens name exactly the 4 label-size slugs and no direction slugs', () => {
     const backlogs = loadStructuralBacklogs(join(REPO, 'oracle', 'goldens', 'description'));
     expect(expectedBacklogFailures('berelu-46-namo819', backlogs)).toEqual(['labelSizeOk']);
-    expect(expectedBacklogFailures('zosuje-43-zebi775', backlogs)).toEqual(['labelSizeOk']);
+    expect(expectedBacklogFailures('zosuje-43-zebi775', backlogs)).toEqual([]);
     expect(expectedBacklogFailures('zusota-76-jagu564', backlogs)).toEqual([]);
     // Was 10 until `edge-label-box-backlog` T12c ported cause D (the `<`/`>`
     // magic-arrow token and its `TextBlockArrow2` triangle block, sized at the
@@ -184,9 +184,15 @@ describe('unexcusedFailures (dot-parity-backlog-data, shared with the ratchets)'
     // `label`. That cleared `dikexa-30-jobu917`, `fogiku-22-gone205`,
     // `jafuke-47-xepe403` and `zavitu-69-cemu013` -- every box exact.
     //
+    // Was 5 until `edge-label-box-followups` T6 wired `resolveArrowLabelFont`
+    // (D3) into this engine's edge-label MEASUREMENT site (D4), folding
+    // `<style> arrow { FontSize/FontStyle }` into the reserved box. That
+    // cleared `zosuje-43-zebi775` (`arrow { FontSize 10 FontStyle bold }`) --
+    // 5x12/9x12/12x12, exact.
+    //
     // This count is deliberately hardcoded rather than derived from the file:
     // the backlog is shrink-only, so a bare `.size` assertion is what catches
     // a slug being ADDED. Lower it as slugs legitimately clear; never raise it.
-    expect(backlogs.get('label-size-backlog.json')!.size).toBe(5);
+    expect(backlogs.get('label-size-backlog.json')!.size).toBe(4);
   });
 });

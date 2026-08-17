@@ -181,21 +181,20 @@ describe('applyStyleMap -- cardinality font fold (T14, D3)', () => {
 });
 
 /**
- * T2/D3: `applyStyleMap`'s fold of `computeArrowFontOverride`
+ * T2/T6/D3/D4: `applyStyleMap`'s fold of `computeArrowFontOverride`
  * (`style-cascade-class.ts`) into `theme.colors.graph.arrowFontFamily`/
- * `arrowFontStyle`. `arrowFontSize` is DELIBERATELY excluded from this live
- * fold -- `style-map-theme.ts#computeGraphOverride`'s own doc comment for
- * the diagnosed reason (`description/layout.ts:354`'s pre-existing
- * skinparam-only consumer, `zosuje-43-zebi775`'s zero-movement bar).
- * `resolveArrowLabelFont` (`arrow-label-font.test.ts`) covers the full
- * three-field resolution against a hand-built Theme.
+ * `arrowFontSize`/`arrowFontStyle`. T2 deliberately excluded `arrowFontSize`
+ * from this fold (`description/layout.ts`'s pre-existing skinparam-only
+ * consumer); T6 lifted that exclusion when it rewired that consumer through
+ * `resolveArrowLabelFont` (`arrow-label-font.test.ts` covers the full
+ * three-field resolution against a hand-built Theme).
  */
-describe('applyStyleMap -- arrow-label font fold (T2, D3)', () => {
-  it('camuna shape: arrow { FontSize 14  FontStyle bold } resolves FontStyle, NOT FontSize (scoped exclusion)', () => {
+describe('applyStyleMap -- arrow-label font fold (T2, T6, D3, D4)', () => {
+  it('camuna shape: arrow { FontSize 14  FontStyle bold } resolves BOTH FontSize and FontStyle', () => {
     const styleMap = parseStyleBlock('arrow {\n  FontSize 14\n  FontStyle bold\n}');
     const theme = applyStyleMap(styleMap, defaultTheme);
     expect(theme.colors.graph.arrowFontStyle).toBe('bold');
-    expect(theme.colors.graph.arrowFontSize).toBe(defaultTheme.colors.graph.arrowFontSize);
+    expect(theme.colors.graph.arrowFontSize).toBe(14);
   });
 
   it('ticuxa shape: arrow { FontName Courier } resolves arrowFontFamily', () => {

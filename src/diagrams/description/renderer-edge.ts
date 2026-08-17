@@ -10,15 +10,24 @@ import { SvekEdge, type SvekEdgeInput, type SvekLinkStyle } from '../../core/sve
 import type { DescriptionEdgeGeo } from './layout-helpers.js';
 import { bareEntityName } from './namespace-groups.js';
 import { JAR_DEFAULT_TEXT_COLOR } from './renderer-symbol.js';
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
+import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
 
-/** Edge/link label font size — `klimt/font/FontParam.java:54`,
- *  `ARROW(13, UFontFace.normal())`. A FIXED constant, NOT derived from
- *  `theme.fontSize` (G1 I2 finding: a prior `theme.fontSize - 2`
- *  convention here happened to also equal 13 under this port's default
- *  `theme.fontSize` of 14, but diverges from the jar the moment
- *  `theme.fontSize` differs from 14 — `FontParam.ARROW`'s default size is
- *  independent of every other `FontParam` entry). */
-import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+/**
+ * D4: the main-label `<text>` font, resolved the SAME way `layout.ts`
+ * resolves the DOT-measurement font (`resolveArrowLabelFont`, D3) so the
+ * reserved box and the drawn glyph never disagree
+ * (`GraphvizImageBuilder.java:234-235`). `weight`/`style` map to
+ * `FontStyle.BOLD`/`FontStyle.ITALIC` the same way
+ * `class-member-creole.ts:207-209` already does for the class engine.
+ */
+function arrowLabelFontConfig(theme: Theme): FontConfiguration {
+  const font = resolveArrowLabelFont(theme);
+  const styles = new Set<FontStyle>();
+  if (font.weight === 'bold') styles.add(FontStyle.BOLD);
+  if (font.style === 'italic') styles.add(FontStyle.ITALIC);
+  return { family: font.family, size: font.size, color: JAR_DEFAULT_TEXT_COLOR, styles };
+}
 
 /**
  * Fallback raw decor token when `DescriptionEdgeGeo.tailDecor`/`.headDecor`
@@ -89,23 +98,7 @@ function buildInput(edge: DescriptionEdgeGeo, theme: Theme, uid: string, fromUid
     ...(headDecor !== undefined ? { headDecor } : {}),
     ...(visibleStereotype !== undefined ? { stereotype: visibleStereotype } : {}),
     ...(edge.label !== undefined ? { label: edge.label } : {}),
-    ...(hasLabelText
-      ? {
-          labelFont: {
-            family: theme.fontFamily,
-            size: ARROW_LABEL_FONT_SIZE,
-            // Jar default text color (`FontParamConstant.COLOR = "black"`,
-            // `klimt/font/FontParam.java:44` — `ARROW` has no color
-            // override entry, so it resolves to this default), NOT
-            // `theme.colors.graph.edgeLabel` (`#444444` — that field is a
-            // SHARED default across class/state/dot renderers with a
-            // different jar-verified role there; out of this fix's scope
-            // to change, see `theme.ts`).
-            color: JAR_DEFAULT_TEXT_COLOR,
-            styles: new Set(),
-          },
-        }
-      : {}),
+    ...(hasLabelText ? { labelFont: arrowLabelFontConfig(theme) } : {}),
   };
 }
 
