@@ -45,7 +45,7 @@ Score clause by clause with a measurement; do not reword a clause.
 | Batch | What | Tasks | Done |
 |---|---|---|---|
 | [1](batch-1/overview.md) | Shared per-line walk (zero movement) | T1 | [x] |
-| [2](batch-2/overview.md) | Geometry: per-line glyph + FontSpec threading | T2 | [ ] |
+| [2](batch-2/overview.md) | Geometry: per-line glyph + FontSpec threading | T2 | [x] |
 | [3](batch-3/overview.md) | Renderer: draw the glyphs | T3 | [ ] |
 | [4](batch-4/overview.md) | Close-out | T4 | [ ] |
 
