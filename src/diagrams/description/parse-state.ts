@@ -137,7 +137,7 @@ export interface PendingElementState {
 
 /** Discriminated multi-line note block in progress; see `ParseState.pendingNote`. */
 export type PendingNoteState =
-  | { kind: 'on-link'; terminator: NoteTerminator; lines: string[] }
+  | { kind: 'on-link'; terminator: NoteTerminator; lines: string[]; position: NotePosition | undefined }
   | { kind: 'floating'; terminator: NoteTerminator; lines: string[]; id: string }
   | {
       kind: 'on-entity';
@@ -362,21 +362,46 @@ function attachNoteToEntity(
 
 /** Runs a fully-resolved single-line note command, or opens a pending
  *  multi-line block for the parser loop to accumulate lines into. */
-/** CommandFactoryNoteOnLink: in svek DOT the note text becomes the LAST
- *  link's label table (SvekEdge.hasNoteLabelText — fogiku-22 oracle). */
-function attachNoteToLastLink(state: ParseState, text: string): void {
+/**
+ * `CommandFactoryNoteOnLink#executeInternal`: `diagram.getLastLink()`, error
+ * out when there is none, then `link.addNote(CucaNote.build(display,
+ * position, colors))`.
+ *
+ * The note is a FIELD, never appended to `link.label` (mission
+ * `edge-label-box-followups` D1): upstream keeps `Link#getNote()` separate
+ * and `SvekEdge.java:307-326` merges a note IMAGE into the label block --
+ * `EntityImageNoteLink`'s own padding is ~31x20 larger than the raw text, so
+ * folding the text in under-reserved every `note on link` box in the corpus
+ * (`fogiku-22-gone205` 51x15 against the jar's 80x33).
+ *
+ * `Link#addNote` is a plain `this.note = note` (`abel/Link.java:332-334`) --
+ * NOT an append -- so a second `note on link` targeting the same last link
+ * REPLACES the first, including its position. Mirrored by assignment.
+ *
+ * `position ?? 'bottom'` is upstream's own default, applied here (the
+ * executor) rather than in the grammar: `Position position = Position.BOTTOM;
+ * if (arg.get("POSITION", 0) != null) position = Position.valueOf(...)`.
+ */
+function attachNoteToLastLink(
+  state: ParseState,
+  text: string,
+  position: NotePosition | undefined,
+): void {
   const link = state.ast.links[state.ast.links.length - 1];
   if (link === undefined) return;
-  link.label = link.label === undefined ? text : link.label + '\n' + text;
+  link.linkNote = text;
+  link.linkNotePosition = position ?? 'bottom';
 }
 
 export function executeNoteOpen(state: ParseState, m: NoteOpenMatch): void {
   if (m.kind === 'on-link-single') {
-    attachNoteToLastLink(state, m.text);
+    attachNoteToLastLink(state, m.text, m.position);
     return;
   }
   if (m.kind === 'on-link-open') {
-    state.pendingNote = { kind: 'on-link', terminator: 'endnote', lines: [] };
+    state.pendingNote = {
+      kind: 'on-link', terminator: 'endnote', lines: [], position: m.position,
+    };
     return;
   }
   if (m.kind === 'floating-single') {
@@ -407,7 +432,7 @@ export function closePendingNote(state: ParseState): void {
   if (pending === undefined) return;
   state.pendingNote = undefined;
   if (pending.kind === 'on-link') {
-    attachNoteToLastLink(state, pending.lines.join('\n'));
+    attachNoteToLastLink(state, pending.lines.join('\n'), pending.position);
     return;
   }
   const text = pending.lines.join('\n');

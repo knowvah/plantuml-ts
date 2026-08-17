@@ -14,6 +14,7 @@ import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { ResolvedColor } from '../../core/klimt/color/HColorSet.js';
+import type { NotePosition } from './note-grammar.js';
 
 /**
  * The sprite half of a parsed `<<...>>` run: `StereotypeDecoration
@@ -327,6 +328,22 @@ export interface DescriptiveLink {
    * still burns its value.
    */
   creationIndex?: number;
+  /**
+   * `note [pos] on|of link` -- upstream `Link#getNote()`'s `CucaNote`
+   * display, kept OUT of `label` (`abel/Link.java:328-334`;
+   * `CommandFactoryNoteOnLink#executeInternal` calls `link.addNote(CucaNote
+   * .build(display, position, colors))`). `SvekEdge.java:307-326` merges an
+   * `EntityImageNoteLink` sized from it INTO the label block rather than
+   * concatenating text, which is why this is a field and not more `label`.
+   * `addNote` REPLACES (`this.note = note`), so two `note on link` on the
+   * same last link keep only the second.
+   */
+  linkNote?: string;
+  /** `CucaNote#getPosition()` -- BOTTOM when the regex's optional `POSITION`
+   *  group is absent (`CommandFactoryNoteOnLink.java`'s `executeInternal`:
+   *  `Position position = Position.BOTTOM;`). Selects the merge operand order
+   *  in `SvekEdge.java:318-325`. */
+  linkNotePosition?: NotePosition;
 }
 
 // ---------------------------------------------------------------------------

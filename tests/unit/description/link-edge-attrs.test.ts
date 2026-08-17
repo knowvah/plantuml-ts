@@ -12,6 +12,7 @@ import {
 } from '../../../src/diagrams/description/link-edge-attrs.js';
 import type { DescriptiveLink } from '../../../src/diagrams/description/ast.js';
 import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
+import { defaultTheme } from '../../../src/core/theme.js';
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 12 };
 const measurer: StringMeasurer = {
@@ -83,5 +84,80 @@ describe('buildLinkEdgeAttributes — magic-arrow main label (M4 cause D)', () =
     const attrs = buildLinkEdgeAttributes(link, fonts, charMeasurer);
     expect(attrs.labelWidth).toBe(30); // 'demo'.length(4)*7=28 + 2*1
     expect(attrs.labelHeight).toBe(15); // 13 + 2*1
+  });
+});
+
+/**
+ * M2/T3: `note on link` reserves the MERGED box (`SvekEdge.java:307-326`),
+ * not the note's raw text. The note operand is an `EntityImageNoteLink`
+ * (`ComponentRoseNote`), so it is `pure + 31` wide / `pure + 20` tall --
+ * `core/rose-note-dim.ts`.
+ */
+describe('buildLinkEdgeAttributes — note on link (merged label box)', () => {
+  const arrowFontSpec: FontSpec = { family: 'Helvetica', size: 13 };
+  const fonts: EdgeFontSpecs = {
+    label: arrowFontSpec, cardinality: arrowFontSpec, noteTheme: defaultTheme,
+  };
+  // 7px per character, 13px tall — so every expectation below is arithmetic
+  // on the cited formula, not a recorded output.
+  const charMeasurer: StringMeasurer = {
+    measure: (s: string) => ({ width: s.length * 7, height: 13 }),
+    getDescent: () => 3,
+  };
+
+  it('reserves the note box alone when the link has no label', () => {
+    // `Display.isNull(link.getLabel())` => `labelOnly = EMPTY_TEXT_BLOCK`
+    // (`SvekEdge.java:281-283`); `mergeTB` short-circuits to the note.
+    // pure 'hi' = 2*7 = 14 x 13 => 14+31 = 45, 13+20 = 33.
+    const link = {
+      from: 'a', to: 'b', length: 2, arrowHead: 'none',
+      linkNote: 'hi', linkNotePosition: 'bottom',
+    } as DescriptiveLink;
+    const attrs = buildLinkEdgeAttributes(link, fonts, charMeasurer);
+    expect(attrs.labelWidth).toBe(45);
+    expect(attrs.labelHeight).toBe(33);
+  });
+
+  it('stacks label above note for the BOTTOM position — mergeTB', () => {
+    // label 'x': 7 + 2*marginLabel(1) = 9 wide, 13 + 2 = 15 tall.
+    // mergeTB(label, note) => width max(9, 45) = 45, height 15 + 33 = 48.
+    const link = {
+      from: 'a', to: 'b', length: 2, arrowHead: 'none', label: 'x',
+      linkNote: 'hi', linkNotePosition: 'bottom',
+    } as DescriptiveLink;
+    const attrs = buildLinkEdgeAttributes(link, fonts, charMeasurer);
+    expect(attrs.labelWidth).toBe(45);
+    expect(attrs.labelHeight).toBe(48);
+  });
+
+  it('places the note beside the label for the LEFT position — mergeLR', () => {
+    // mergeLR(note, label) => width 45 + 9 = 54, height max(33, 15) = 33.
+    const link = {
+      from: 'a', to: 'b', length: 2, arrowHead: 'none', label: 'x',
+      linkNote: 'hi', linkNotePosition: 'left',
+    } as DescriptiveLink;
+    const attrs = buildLinkEdgeAttributes(link, fonts, charMeasurer);
+    expect(attrs.labelWidth).toBe(54);
+    expect(attrs.labelHeight).toBe(33);
+  });
+
+  it('leaves the label text itself untouched — only the box grows', () => {
+    const link = {
+      from: 'a', to: 'b', length: 2, arrowHead: 'none', label: 'x',
+      linkNote: 'hi', linkNotePosition: 'bottom',
+    } as DescriptiveLink;
+    expect(buildLinkEdgeAttributes(link, fonts, charMeasurer).label).toBe('x');
+  });
+
+  it('emits no label at all for a note-bearing link when no theme is supplied', () => {
+    // The note operand cannot be sized without the `note` element font;
+    // hand-built callers that pass no theme keep their pre-T3 behaviour.
+    const noThemeFonts: EdgeFontSpecs = { label: arrowFontSpec, cardinality: arrowFontSpec };
+    const link = {
+      from: 'a', to: 'b', length: 2, arrowHead: 'none', linkNote: 'hi',
+    } as DescriptiveLink;
+    const attrs = buildLinkEdgeAttributes(link, noThemeFonts, charMeasurer);
+    expect(attrs.labelWidth).toBeUndefined();
+    expect(attrs.label).toBeUndefined();
   });
 });

@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { roseNoteDim } from '../../../src/core/rose-note-dim.js';
 import {
   computeReservedLabelBox,
   computeQuantifierBox,
@@ -581,5 +582,56 @@ describe('computeMergedLabelBox — mergeLR/mergeTB, shield, halving', () => {
       measurer,
     });
     expect(box.reservedWidth).toBe(127);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// roseNoteDim -- the `EntityImageNoteLink` operand `computeMergedLabelBox`
+// merges (mission `edge-label-box-followups` D5). Lives in
+// `core/rose-note-dim.ts` rather than `core/edge-label-box.ts` only because
+// that file sits at the project's 500-line cap; tested here, beside the merge
+// it feeds.
+// ---------------------------------------------------------------------------
+
+describe('roseNoteDim', () => {
+  // `ComponentRoseNote#getPreferredWidth` (`skin/rose/ComponentRoseNote.java
+  // :81-85`) = getTextWidth + 2 * paddingX; `getTextWidth`
+  // (`AbstractTextualComponent`) already added the STYLE padding
+  // `topRightBottomLeft(5, 15, 5, 6)` from the `super(...)` call
+  // (`ComponentRoseNote.java:66-70`) -- so 6 + 15 -- and `paddingX` is 5
+  // (`skin/rose/Rose.java:65`, passed at `Rose.java:114`). 6 + 15 + 2*5 = 31.
+  it('adds Opale 6+15 plus 2 * Rose paddingX (5) = 31 to the width', () => {
+    expect(roseNoteDim({ width: 49, height: 13 }).width).toBe(80);
+  });
+
+  // `getPreferredHeight` (`ComponentRoseNote.java:87-90`) = getTextHeight +
+  // 2 * paddingY; `getTextHeight` added the style padding's top+bottom
+  // (5 + 5), `paddingY` is 5 (`Rose.java:66`). 2*5 + 2*5 = 20.
+  it('adds 2 * Opale marginY (5) plus 2 * Rose paddingY (5) = 20 to the height', () => {
+    expect(roseNoteDim({ width: 49, height: 13 }).height).toBe(33);
+  });
+
+  it('is exact on fractional pure dimensions -- it never rounds', () => {
+    expect(roseNoteDim({ width: 12.25, height: 6.5 })).toEqual({
+      width: 43.25,
+      height: 26.5,
+    });
+  });
+
+  it('feeds computeMergedLabelBox: a bottom note under an empty label', () => {
+    // `Display.isNull(link.getLabel())` => `labelOnly = EMPTY_TEXT_BLOCK`
+    // (`SvekEdge.java:281-283`), so `mergeTB` short-circuits to the note
+    // alone; `labelShield` 0 => the box IS the note dimension.
+    const box = computeMergedLabelBox({
+      label: '',
+      noteDim: roseNoteDim({ width: 49, height: 13 }),
+      position: 'bottom',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(box.reservedWidth).toBe(80);
+    expect(box.reservedHeight).toBe(33);
   });
 });

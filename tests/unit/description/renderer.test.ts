@@ -27,6 +27,9 @@ import type {
 import type { DescriptionNodeGeo } from '../../../src/diagrams/description/layout-helpers.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { ActorStyle } from '../../../src/core/skin/ActorStyle.js';
+import { parseDescription } from '../../../src/diagrams/description/parser.js';
+import { layoutDescription } from '../../../src/diagrams/description/layout.js';
+import { FormulaMeasurer } from '../../../src/core/measurer.js';
 
 // ---------------------------------------------------------------------------
 // Geometry builder helpers
@@ -1479,5 +1482,42 @@ describe('renderDescription — entity/cluster shadow (deferred D3 item)', () =>
     });
     const svg = renderDescription(geo, theme);
     expect(svg).toContain('filter="url(#');
+  });
+});
+
+/**
+ * D2 (mission `edge-label-box-followups`): splitting `note on link` out of
+ * `DescriptiveLink.label` must NOT make the note text disappear from the
+ * SVG. End-to-end (parse -> layout -> render) because the fold that keeps it
+ * visible lives at the layout->geometry boundary, not in the renderer.
+ */
+describe('note on link — text stays in the SVG (D2)', () => {
+  const renderSrc = (lines: string[]): string => {
+    const ast = parseDescription({ lines, type: 'description' });
+    const geo = layoutDescription(ast, defaultTheme, new FormulaMeasurer());
+    return renderDescription(geo, defaultTheme);
+  };
+
+  // `usecase/fogiku-22-gone205`, the fixture this mission cleared.
+  it('renders the note body of a label-less link', () => {
+    const svg = renderSrc([
+      'usecase uU1 as " "',
+      'usecase uU2 as " "',
+      'uU1 .> uU2',
+      'note bottom of link',
+      '    Link note',
+      'end note',
+    ]);
+    expect(svg).toContain('Link note');
+  });
+
+  it('renders BOTH the link label and the note body', () => {
+    const svg = renderSrc([
+      'component toto',
+      'toto --> titi : foo',
+      'note on link #red: note red',
+    ]);
+    expect(svg).toContain('foo');
+    expect(svg).toContain('note red');
   });
 });

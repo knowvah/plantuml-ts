@@ -166,7 +166,7 @@ describe('unexcusedFailures (dot-parity-backlog-data, shared with the ratchets)'
     expect(unexcusedFailures(d, ['labelSizeOk'])).toEqual(['portOk']);
   });
 
-  it('the description goldens name exactly the 9 label-size slugs and no direction slugs', () => {
+  it('the description goldens name exactly the 5 label-size slugs and no direction slugs', () => {
     const backlogs = loadStructuralBacklogs(join(REPO, 'oracle', 'goldens', 'description'));
     expect(expectedBacklogFailures('berelu-46-namo819', backlogs)).toEqual(['labelSizeOk']);
     expect(expectedBacklogFailures('zosuje-43-zebi775', backlogs)).toEqual(['labelSizeOk']);
@@ -177,9 +177,16 @@ describe('unexcusedFailures (dot-parity-backlog-data, shared with the ratchets)'
     // `:65`). That cleared `usecase/funeme-74-tenu200`, whose two edges went
     // 21->16 and 22->16 to match the oracle exactly.
     //
+    // Was 9 until `edge-label-box-followups` T3 ported the description
+    // engine's `note on link` arm: the note is now a `DescriptiveLink`
+    // field merged into the label reservation as a sized
+    // `EntityImageNoteLink` (`SvekEdge.java:307-326`), not text folded into
+    // `label`. That cleared `dikexa-30-jobu917`, `fogiku-22-gone205`,
+    // `jafuke-47-xepe403` and `zavitu-69-cemu013` -- every box exact.
+    //
     // This count is deliberately hardcoded rather than derived from the file:
     // the backlog is shrink-only, so a bare `.size` assertion is what catches
     // a slug being ADDED. Lower it as slugs legitimately clear; never raise it.
-    expect(backlogs.get('label-size-backlog.json')!.size).toBe(9);
+    expect(backlogs.get('label-size-backlog.json')!.size).toBe(5);
   });
 });

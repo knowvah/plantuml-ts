@@ -14,12 +14,15 @@
  */
 
 import type { DescriptiveLink } from './ast.js';
+import type { Theme } from '../../core/theme.js';
+import { measureLinkNoteDim } from './link-note-box.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import { resolveInlineLinks } from './parse-helpers.js';
 import {
   computeReservedLabelBox,
   computeQuantifierBox,
+  computeMergedLabelBox,
   splitCreoleLines,
   parseMagicArrowLabel,
 } from '../../core/edge-label-box.js';
@@ -63,6 +66,10 @@ interface MeasureCtx {
   cardinalityFontSpec: FontSpec;
   measurer: StringMeasurer;
   sprites: SpriteDimsLookup | undefined;
+  /** Only the `note on link` operand needs it ({@link measureLinkNoteDim}
+   *  resolves the `note` element's own font from it). Absent for callers
+   *  that never build one -- see {@link EdgeFontSpecs.noteTheme}. */
+  theme: Theme | undefined;
 }
 
 /**
@@ -77,6 +84,19 @@ interface MeasureCtx {
 export interface EdgeFontSpecs {
   readonly label: FontSpec;
   readonly cardinality: FontSpec;
+  /**
+   * The diagram theme, carried on this bundle rather than as a sixth
+   * parameter of {@link buildLinkEdgeAttributes}: `note on link` sizing needs
+   * the `note` element's font (`measureLinkNoteDim`), the function is already
+   * at the project's 5-parameter cap, and the one intermediate call site
+   * (`layout-dot-tree.ts#buildDotEdges`) forwards this bundle opaquely -- so
+   * widening it costs no signature change there. The class engine threads the
+   * same context as a separate `NoteBoxContext` param
+   * (`class-layout-edge-labels.ts`) because it has the parameter budget.
+   * Optional: pre-existing hand-built callers (`tests/unit/creole-img.test.ts`)
+   * pass no theme, and a link with no `linkNote` never reads it.
+   */
+  readonly noteTheme?: Theme;
 }
 
 /** Head-decor margin for a link's arrowHead (tail decor is always NONE — we
@@ -173,7 +193,9 @@ export function computeGraphSpacing(
   // task does not touch (see this file's own T7 doc comment above
   // `dzetaTexts`). Filled with `fontSpec` only to satisfy `MeasureCtx`'s
   // shape -- never read.
-  const ctx: MeasureCtx = { fontSpec, cardinalityFontSpec: fontSpec, measurer, sprites };
+  const ctx: MeasureCtx = {
+    fontSpec, cardinalityFontSpec: fontSpec, measurer, sprites, theme: undefined,
+  };
   let maxHorizontal = 0;
   let maxVertical = 0;
   for (const link of links) {
@@ -290,10 +312,55 @@ function computeMainLabelDims(
   return { width: ctx.fontSpec.size + rest.width, height: Math.max(ctx.fontSpec.size, rest.height) };
 }
 
+/**
+ * M2/T3: `note on link` merges the note IMAGE into the label reservation
+ * (`SvekEdge.java:307-326`) instead of contributing text to it -- routes
+ * through T8's shared {@link computeMergedLabelBox}, whose arithmetic is
+ * never re-derived here, with the note operand from
+ * {@link measureLinkNoteDim}.
+ *
+ * `halfWidth` is fixed `false`: `NoteLinkStrategy.HALF_NOT_PRINTED`/
+ * `HALF_PRINTED_FULL` (`SvekEdge.java:314-317`) are only ever set by
+ * `Link#addNoteFrom` (`abel/Link.java:336-339`), which the description
+ * command set never calls -- `CommandFactoryNoteOnLink` builds
+ * `CucaNote.build(...)`, i.e. `NoteLinkStrategy.NORMAL` (`abel/CucaNote
+ * .java:56-58`).
+ *
+ * `hasMiddleDecor` is fixed `false`, so `labelShield` is 0
+ * (`SvekEdge.java:353-356`). Upstream's description grammar DOES have a
+ * middle-decor token (`descdiagram/command/CommandLinkElement.java:104`'s
+ * `INSIDE` group -> `withMiddleCircle()` at `:149-157`), but this port
+ * parses no such group and `DescriptiveLink` carries no field for it, so no
+ * link this engine can construct reaches a non-`NONE` `LinkMiddleDecor`.
+ * Journalled as a verified 0, not an assumed one.
+ */
+function computeNoteMergedDims(
+  label: string,
+  noteDim: { width: number; height: number },
+  link: DescriptiveLink,
+  ctx: MeasureCtx,
+): { width: number; height: number } {
+  const box = computeMergedLabelBox({
+    label,
+    noteDim,
+    position: link.linkNotePosition ?? 'bottom',
+    halfWidth: false,
+    hasMiddleDecor: false,
+    font: ctx.fontSpec,
+    measurer: ctx.measurer,
+  });
+  return { width: box.reservedWidth, height: box.reservedHeight };
+}
+
 /** Applies the main label (`label`/`labelWidth`/`labelHeight`, or the
  *  `xlabel*` triple under `skinparam linetype ortho` — SvekEdge.java:434-441)
  *  to `attrs`, resolving `[[url]]` markup (I5) and img/sprite atoms (D9)
- *  before measuring. No-op when the link has no stereotype/label. */
+ *  before measuring. No-op when the link has no stereotype/label AND no
+ *  `note on link`: a note ALONE still produces a label table upstream, since
+ *  `labelText` is then `mergeTB(EMPTY_TEXT_BLOCK, noteOnly)` -- a real block,
+ *  so `hasNoteLabelText()` (`SvekEdge.java:383-385`) is true and `:430`
+ *  emits the reservation (`fogiku-22-gone205`, whose only edge text is the
+ *  note, carries an 80x33 `label` table in the oracle DOT). */
 function applyMainLabel(
   attrs: NonNullable<DotInputEdge['attributes']>,
   link: DescriptiveLink,
@@ -301,9 +368,14 @@ function applyMainLabel(
   linetype: 'ortho' | 'polyline' | undefined,
 ): void {
   const labelText = mainLabelText(link);
-  if (labelText === undefined) return;
-  const resolvedLabelText = resolveInlineLinks(labelText);
-  const m = computeMainLabelDims(resolvedLabelText, link.from === link.to, ctx);
+  const noteDim = link.linkNote !== undefined && ctx.theme !== undefined
+    ? measureLinkNoteDim(link.linkNote, ctx.theme, ctx.measurer)
+    : undefined;
+  if (labelText === undefined && noteDim === undefined) return;
+  const resolvedLabelText = labelText === undefined ? '' : resolveInlineLinks(labelText);
+  const m = noteDim !== undefined
+    ? computeNoteMergedDims(resolvedLabelText, noteDim, link, ctx)
+    : computeMainLabelDims(resolvedLabelText, link.from === link.to, ctx);
   if (linetype === 'ortho') {
     attrs.xlabel = resolvedLabelText;
     attrs.xlabelWidth = m.width;
@@ -387,6 +459,7 @@ export function buildLinkEdgeAttributes(
 ): NonNullable<DotInputEdge['attributes']> {
   const ctx: MeasureCtx = {
     fontSpec: fonts.label, cardinalityFontSpec: fonts.cardinality, measurer, sprites,
+    theme: fonts.noteTheme,
   };
   const attrs: NonNullable<DotInputEdge['attributes']> = { minLen: link.length - 1 };
   // `-[hidden]-` does NOT produce `style=invis`, despite the name. Upstream

@@ -1811,6 +1811,73 @@ describe('notes — on link (CommandFactoryNoteOnLink, parsed and dropped)', () 
     const ast = parse('component a\ncomponent b\na --> b\nnote on link\ntext\nend note');
     expect(ast.nodes.some((n) => n.symbol === 'note')).toBe(false);
   });
+
+  // D1: `Link#addNote` keeps the note OUT of the label
+  // (`abel/Link.java:328-334`); `SvekEdge.java:307-326` merges a sized
+  // `EntityImageNoteLink` in instead of concatenating text.
+  it('single-line `note on link: text` sets linkNote, never label', () => {
+    const ast = parse('component a\ncomponent b\na --> b\nnote on link: text');
+    expect(ast.links[0]!.linkNote).toBe('text');
+    expect(ast.links[0]!.label).toBeUndefined();
+  });
+
+  it('keeps an existing link label untouched beside the note', () => {
+    const ast = parse('component a\ncomponent b\na --> b : rel\nnote on link: text');
+    expect(ast.links[0]!.label).toBe('rel');
+    expect(ast.links[0]!.linkNote).toBe('text');
+  });
+
+  // `CommandFactoryNoteOnLink#executeInternal`: `Position position =
+  // Position.BOTTOM;` before the optional POSITION group overrides it.
+  it('defaults the note position to bottom when the POSITION group is absent', () => {
+    const ast = parse('component a\ncomponent b\na --> b\nnote on link: text');
+    expect(ast.links[0]!.linkNotePosition).toBe('bottom');
+  });
+
+  it('captures an explicit position and a #color from a block opener', () => {
+    const ast = parse(
+      'component a\ncomponent b\na --> b\nnote left on link #blue\ntext\nend note',
+    );
+    expect(ast.links[0]!.linkNotePosition).toBe('left');
+    expect(ast.links[0]!.linkNote).toBe('text');
+    expect(ast.links[0]!.label).toBeUndefined();
+  });
+
+  it('captures an explicit position on the single-line form', () => {
+    const ast = parse('component a\ncomponent b\na --> b\nnote top of link #red: text');
+    expect(ast.links[0]!.linkNotePosition).toBe('top');
+    expect(ast.links[0]!.linkNote).toBe('text');
+  });
+
+  it('joins a multi-line note body with newlines', () => {
+    const ast = parse(
+      'component a\ncomponent b\na --> b\nnote on link\none\ntwo\nend note',
+    );
+    expect(ast.links[0]!.linkNote).toBe('one\ntwo');
+  });
+
+  // `Link#addNote` is `this.note = note` (`abel/Link.java:332-334`) -- a
+  // REPLACE, not an append: a second note on the same last link wins.
+  it('a second note on the same link replaces the first, position included', () => {
+    const ast = parse(
+      'component a\ncomponent b\na --> b\nnote on link: first\nnote left on link: second',
+    );
+    expect(ast.links[0]!.linkNote).toBe('second');
+    expect(ast.links[0]!.linkNotePosition).toBe('left');
+  });
+
+  it('attaches to the LAST link only', () => {
+    const ast = parse(
+      'component a\ncomponent b\na --> b\nb --> a\nnote on link: text',
+    );
+    expect(ast.links[0]!.linkNote).toBeUndefined();
+    expect(ast.links[1]!.linkNote).toBe('text');
+  });
+
+  it('is a no-op when no link has been declared yet', () => {
+    const ast = parse('component a\nnote on link: text');
+    expect(ast.links).toEqual([]);
+  });
 });
 
 

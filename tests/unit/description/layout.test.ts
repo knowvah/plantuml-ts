@@ -2021,3 +2021,41 @@ describe('layoutDescription — scale directive passthrough', () => {
     expect(ast.scale).toEqual({ kind: 'simple', factor: 2 });
   });
 });
+
+/**
+ * D2 (mission `edge-label-box-followups`): the note text stays visible.
+ * `note on link` no longer lands in `DescriptiveLink.label` (D1), so the
+ * layout->geometry boundary folds it back into the DRAWN label lines,
+ * ordered by the merge operand order (`SvekEdge.java:318-325`).
+ */
+describe('note on link — drawn label lines (D2)', () => {
+  const layoutOf = (src: string) => {
+    const source: UmlSource = { lines: src.split('\n'), type: 'description' };
+    return layoutDescription(parseDescription(source), defaultTheme, new FormulaMeasurer());
+  };
+
+  it('draws the note text when the link has no label of its own', () => {
+    const geo = layoutOf('component a\ncomponent b\na --> b\nnote on link: hi');
+    expect(geo.edges[0]!.label?.text).toBe('hi');
+  });
+
+  it('draws the note BELOW the label for the bottom position', () => {
+    const geo = layoutOf('component a\ncomponent b\na --> b : rel\nnote on link: hi');
+    expect(geo.edges[0]!.label?.text).toBe('rel\nhi');
+  });
+
+  it('draws the note ABOVE the label for the top position — mergeTB(note, label)', () => {
+    const geo = layoutOf('component a\ncomponent b\na --> b : rel\nnote top on link: hi');
+    expect(geo.edges[0]!.label?.text).toBe('hi\nrel');
+  });
+
+  it('draws the note FIRST for the left position — mergeLR(note, label)', () => {
+    const geo = layoutOf('component a\ncomponent b\na --> b : rel\nnote left on link: hi');
+    expect(geo.edges[0]!.label?.text).toBe('hi\nrel');
+  });
+
+  it('leaves a link without a note untouched', () => {
+    const geo = layoutOf('component a\ncomponent b\na --> b : rel');
+    expect(geo.edges[0]!.label?.text).toBe('rel');
+  });
+});
