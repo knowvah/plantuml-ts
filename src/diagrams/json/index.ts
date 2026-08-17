@@ -28,8 +28,8 @@ export const jsonPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
 
   accepts(lines: readonly string[]): boolean {
     // #lizard forgives -- pre-existing violation (16 CCN vs. this repo's 10
-    // cap), untouched by A5/T4: this mission only added the `jsonShell` line
-    // in `render()` below. The complexity is one flat keyword-dispatch chain
+    // cap), untouched by A5/T4/T8: those missions only touched the
+    // `diagramType` line in `render()` below. The complexity is one flat keyword-dispatch chain
     // mirroring upstream's StyleExtractor pre-filtering; splitting it is a
     // separate change with its own risk, not a drive-by.
     // Skip leading directive lines that appear before the JSON body in
@@ -66,12 +66,13 @@ export const jsonPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   },
 
   render(geo, theme) {
-    // A5 / T4: `jsonShell` routes the fragment through the shared
-    // jar-faithful document shell instead of the generic `svgRoot`, and
-    // carries the jar's own `data-diagram-type` value. Set HERE rather than
-    // inside `renderJson` because one renderer serves three diagram types --
-    // yaml and hcl import it directly and pass their own -- and the plugin is
-    // the thing that knows which type it is.
-    return { ...renderJson(geo, theme), jsonShell: DIAGRAM_TYPE_JSON };
+    // A5 / T4, T8: `diagramType` routes the fragment through the shared
+    // jar-faithful document shell (`core/assemble-svg.ts`) instead of the
+    // generic `svgRoot`, and carries the jar's own `data-diagram-type`
+    // value. Set HERE rather than inside `renderJson` because one renderer
+    // serves three diagram types -- yaml and hcl import it directly and
+    // pass their own -- and the plugin is the thing that knows which type
+    // it is.
+    return { ...renderJson(geo, theme), diagramType: DIAGRAM_TYPE_JSON };
   },
 };

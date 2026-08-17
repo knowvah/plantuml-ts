@@ -39,8 +39,8 @@ export const hclPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   },
 
   render(geo, theme) {
-    // A5 / T4. hcl has no renderer of its own — `renderJson` above is json's.
-    // The jar still tags the document `data-diagram-type="HCL"`.
-    return { ...renderJson(geo, theme), jsonShell: DIAGRAM_TYPE_HCL };
+    // A5 / T4, T8. hcl has no renderer of its own — `renderJson` above is
+    // json's. The jar still tags the document `data-diagram-type="HCL"`.
+    return { ...renderJson(geo, theme), diagramType: DIAGRAM_TYPE_HCL };
   },
 };

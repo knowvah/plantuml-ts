@@ -28,6 +28,12 @@ import { buildClassShadowFilterDef } from './class-shadow.js';
 import { renderUsecaseOrActorEntity } from './renderer-usymbol-entity.js';
 import { mergeFragmentDefs, type DrawableFragment } from '../../core/klimt/document-shell.js';
 
+/** `net.sourceforge.plantuml.core.DiagramType#CLASS` -- verified against
+ *  every cached jar class-diagram fixture's `data-diagram-type` root
+ *  attribute (e.g. `test-results/dot-cache/class/bajotu-30-soku184/in.svg`).
+ *  T8: was `class/renderer-shell.ts`'s own copy of this constant. */
+const DIAGRAM_TYPE_CLASS = 'CLASS';
+
 // ---------------------------------------------------------------------------
 // Association-class-couple "point" entity (`(A,B) .. C`)
 // ---------------------------------------------------------------------------
@@ -193,10 +199,11 @@ import { renderEdge } from './renderer-edge.js';
  * Render a class diagram geometry into an SVG string.
  *
  * G2 N1 (mechanism 2, "SVG root shell"): the background is folded into the
- * root `<svg style="...background:...;">` attribute (`renderer-
- * shell.ts#assembleClassShell`) -- `background` travels on the returned
- * fragment so the shell assembler's `style` attribute picks up the theme's
- * real color.
+ * root `<svg style="...background:...;">` attribute (`core/klimt/document-
+ * shell.ts#assembleDocumentShell`, reached via `core/assemble-svg.ts`'s
+ * `diagramType: 'CLASS'` dispatch, T8) -- `background` travels on the
+ * returned fragment so the shell assembler's `style` attribute picks up the
+ * theme's real color.
  *
  * G2 N4: `theme.colors.background` is the RAW skinparam value (e.g.
  * `"red"`, `resolveColor()`'s gradient-tail extraction only, never a
@@ -232,8 +239,9 @@ import { renderEdge } from './renderer-edge.js';
  *
  * @param geo   - Pre-computed geometry from layoutClass().
  * @param theme - Visual theme.
- * @returns     RenderFragment carrying `classShell: true` (routes through
- *              `assembleClassShell`, never the generic `svgRoot`).
+ * @returns     RenderFragment carrying `diagramType: 'CLASS'` (T8: routes
+ *              through `core/assemble-svg.ts`'s class finalize function,
+ *              never the generic `svgRoot`).
  */
 export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // #lizard forgives(nloc, cyclomatic_complexity) -- pre-existing (verified
@@ -296,9 +304,9 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // `<rect x="0" y="0" width="81" height="213".../>` precedes `<g
   // class="title">`) -- this function only knows the PRE-chrome body
   // dims, so it can no longer draw the rect itself. Threaded instead as
-  // `documentBackgroundRect` on the fragment; `renderer-shell.ts
-  // #assembleClassShell` (which runs AFTER chrome/margin) draws it at the
-  // correct final size and position. A no-title fixture's `width`/`height`
+  // `documentBackgroundRect` on the fragment; `core/assemble-svg.ts`'s
+  // class finalize function (which runs AFTER chrome/margin) draws it at
+  // the correct final size and position. A no-title fixture's `width`/`height`
   // already equal the final canvas at that point too (chrome is a no-op
   // there), so this is a strict behavior-preserving move for every
   // already-passing non-title fixture (jar-verified unchanged:
@@ -470,16 +478,17 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       ? { preChromeWidth: geo.rawWidth, preChromeHeight: geo.rawHeight }
       : {}),
     // G2 N48: see this function's own doc comment above -- drawn by
-    // `assembleClassShell` at the FINAL (post-chrome) canvas size, not
-    // here.
+    // `core/assemble-svg.ts`'s class finalize function at the FINAL
+    // (post-chrome) canvas size, not here.
     ...(documentBackgroundRect !== undefined ? { documentBackgroundRect } : {}),
     // G2 N66: `skinparam diagramBorderColor` -- resolved to an SVG-ready
     // hex HERE (mirrors `canonicalBackground`'s own resolution), drawn by
-    // `assembleClassShell` (`RenderFragment.diagramBorderColor`'s own doc
-    // comment for the chrome-scope guard).
+    // `core/assemble-svg.ts`'s class finalize function
+    // (`RenderFragment.diagramBorderColor`'s own doc comment for the
+    // chrome-scope guard).
     ...(theme.colors.graph.diagramBorderColor !== undefined
       ? { diagramBorderColor: resolveColorToSvgHex(theme.colors.graph.diagramBorderColor) }
       : {}),
-    classShell: true,
+    diagramType: DIAGRAM_TYPE_CLASS,
   };
 }

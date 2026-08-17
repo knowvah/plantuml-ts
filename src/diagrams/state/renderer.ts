@@ -5,7 +5,7 @@
  * No DOM, no async.
  *
  * mission G4 S1: routes through the CucaDiagram-family document shell
- * (`renderer-shell.ts#assembleStateShell`, mechanism 1) with one outer
+ * (T8: `core/assemble-svg.ts`'s state finalize function, mechanism 1) with one outer
  * content `<g>` and per-entity/per-link `<g>` wrapping (`renderer-
  * group.ts`, mechanism 2), inline-`<polygon>` transition arrowheads
  * (`renderer-arrowhead.ts`, mechanism 3), and the real `SvekResult`-style
@@ -25,6 +25,12 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 import { line } from '../../core/svg.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import {} from './state-dot-graph.js';
+
+/** `net.sourceforge.plantuml.core.DiagramType#STATE` -- verified against
+ *  every cached jar state-diagram fixture's `data-diagram-type` root
+ *  attribute (e.g. `test-results/dot-cache/state/jocela-05-niba392/in.svg`).
+ *  T8: was `state/renderer-shell.ts`'s own copy of this constant. */
+const DIAGRAM_TYPE_STATE = 'STATE';
 
 /** `plantuml.skin`'s `arrow { FontSize 13 }` block -- the transition/edge-
  *  label font this file's own transition-label draw site renders at (G8
@@ -293,8 +299,8 @@ export function renderState(geo: StateGeometry, theme: Theme): RenderFragment {
   });
 
   // mission G4 S1 mechanism 1: background is communicated via the shell's
-  // own root `style="...background:...;"` attribute (`renderer-shell.ts`
-  // / `core/klimt/document-shell.ts#assembleDocumentShell`) -- jar draws
+  // own root `style="...background:...;"` attribute (T8: `core/assemble-
+  // svg.ts` / `core/klimt/document-shell.ts#assembleDocumentShell`) -- jar draws
   // NO explicit full-canvas `<rect>` for it (verified: every sampled state
   // fixture's `<defs/>` is immediately followed by the content `<g>`, no
   // background rect). The pre-S1 renderer's own manual background `<rect>`
@@ -313,7 +319,7 @@ export function renderState(geo: StateGeometry, theme: Theme): RenderFragment {
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: resolveColorToSvgHex(theme.colors.background),
-    stateShell: true,
+    diagramType: DIAGRAM_TYPE_STATE,
     ...(extraDefs !== undefined ? { extraDefs } : {}),
   };
 }

@@ -34,8 +34,8 @@ export const yamlPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
 
   accepts(lines: readonly string[]): boolean {
     // #lizard forgives -- pre-existing violation (17 CCN vs. this repo's 10
-    // cap), untouched by A5/T4: this mission only added the `jsonShell` line
-    // in `render()` below. Same flat keyword-dispatch chain as json's own
+    // cap), untouched by A5/T4/T8: those missions only touched the
+    // `diagramType` line in `render()` below. Same flat keyword-dispatch chain as json's own
     // `accepts`; splitting it is a separate change with its own risk.
     // Skip leading directive lines that appear before the YAML body in
     // @startyaml blocks (title, skinparam, scale, hide, skin, !assume, !pragma,
@@ -80,10 +80,10 @@ export const yamlPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   },
 
   render(geo, theme) {
-    // A5 / T4. yaml has no renderer of its own — `renderJson` above is json's.
-    // The jar still tags the document `data-diagram-type="YAML"`, so the type
-    // is supplied here, by the plugin that knows it, rather than baked into
-    // the shared renderer.
-    return { ...renderJson(geo, theme), jsonShell: DIAGRAM_TYPE_YAML };
+    // A5 / T4, T8. yaml has no renderer of its own — `renderJson` above is
+    // json's. The jar still tags the document `data-diagram-type="YAML"`,
+    // so the type is supplied here, by the plugin that knows it, rather
+    // than baked into the shared renderer.
+    return { ...renderJson(geo, theme), diagramType: DIAGRAM_TYPE_YAML };
   },
 };

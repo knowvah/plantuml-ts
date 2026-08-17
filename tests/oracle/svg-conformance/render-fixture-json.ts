@@ -87,8 +87,9 @@ function parseForType(block: UmlSource): JsonDiagramAST {
 }
 
 /**
- * The jar's `data-diagram-type`, and the `jsonShell` discriminant that routes
- * the fragment through the shared jar-faithful document shell.
+ * The jar's `data-diagram-type`, and the `RenderFragment.diagramType`
+ * discriminant that routes the fragment through the shared jar-faithful
+ * document shell (T8: was `jsonShell`).
  *
  * This helper renders through the LOW-LEVEL pipeline, so it calls `renderJson`
  * directly and never reaches the plugin's own `render()` — which is where
@@ -126,7 +127,7 @@ export function renderFixtureJson(
 
   const ast = parseForType(block);
   const geo = layoutJson(ast, theme, measurer);
-  const fragment = { ...renderJson(geo, theme), jsonShell: shellTypeFor(block) };
+  const fragment = { ...renderJson(geo, theme), diagramType: shellTypeFor(block) };
 
   const annotations = ast.annotations;
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
