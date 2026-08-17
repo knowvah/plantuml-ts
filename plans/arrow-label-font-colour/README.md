@@ -47,7 +47,7 @@ Score clause by clause with a measurement; do not reword a clause.
 
 | Batch | What | Tasks | Done |
 |---|---|---|---|
-| [1](batch-1/overview.md) | Theme fields, skinparam path, resolver (zero movement) | T1 | [ ] |
+| [1](batch-1/overview.md) | Theme fields, skinparam path, resolver (zero movement) | T1 | [x] |
 | [2](batch-2/overview.md) | `<style>` cascade ∥ class / description / state renderers | T2 T3 T4 T5 | [ ] |
 | [3](batch-3/overview.md) | Close-out | T6 | [ ] |
 
