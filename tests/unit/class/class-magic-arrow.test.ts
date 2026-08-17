@@ -7,6 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   ARROW_GLYPH_SIZE,
+  magicArrowTriSize,
   parseMagicArrowLabel,
   magicArrowAngle,
   magicArrowGlyphPoints,
@@ -101,6 +102,19 @@ describe('magicArrowGlyphPoints (G2 item 44)', () => {
     // y-translate is the FULL font size, never the draw-only ink triangle.
     const [tip] = magicArrowGlyphPoints(0, 0, Math.PI / 2, 20);
     expect(tip!.y).toBeCloseTo(10, 6); // 20/2, not ARROW_GLYPH_SIZE/2
+  });
+
+  it('the ink radius follows the CALLER\'s arrowFontSize -- (int)(size*.80), TextBlockArrow2.java:64-65', () => {
+    // At 20: triSize = trunc(16) = 16, so the tip sits at originX + 16 and
+    // each back corner is (16/2)*(1-cos(4PI/5)) = 14.472 behind it -- the
+    // 13-based ARROW_GLYPH_SIZE (10) would leave both at 10 / 9.045.
+    const [tip, a] = magicArrowGlyphPoints(0, 0, Math.PI / 2, 20);
+    expect(magicArrowTriSize(20)).toBe(16);
+    expect(tip!.x).toBeCloseTo(16, 6);
+    expect(tip!.x - a!.x).toBeCloseTo(8 * (1 - Math.cos((Math.PI * 4) / 5)), 6);
+    // Default 13 is byte-identical to before: ARROW_GLYPH_SIZE IS triSize(13).
+    expect(magicArrowTriSize(13)).toBe(ARROW_GLYPH_SIZE);
+    expect(magicArrowTriSize(58)).toBe(46); // trunc(46.4)
   });
 
   it('rotating by PI mirrors the tip to the opposite side', () => {

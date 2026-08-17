@@ -45,6 +45,7 @@ import {
 } from '../../core/edge-label-box.js';
 import { splitEdgeLabelLines } from './class-edge-label-lines.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 export { type MagicArrowDirection, type MagicArrowLabel, parseMagicArrowLabel };
 
@@ -163,7 +164,21 @@ export function computeGuideLinesBox(
  * size, never this constant — see {@link magicArrowGlyphPoints}'s `y`
  * parameter and `class-edge-geo.ts#attachMagicArrow`.
  */
-export const ARROW_GLYPH_SIZE = Math.trunc(13 * 0.8);
+export const ARROW_GLYPH_SIZE = magicArrowTriSize(ARROW_LABEL_FONT_SIZE);
+
+/**
+ * `triSize` for an arbitrary arrow font size -- `(int) (size * .80)`
+ * (`klimt/shape/TextBlockArrow2.java:64-65`), `size` = `fontConfiguration
+ * .getFont().getSize2D()` (`:57`), i.e. the RESOLVED arrow font
+ * (`resolveArrowLabelFont(theme)`, `GraphvizImageBuilder.java:234-235`).
+ * {@link ARROW_GLYPH_SIZE} is this at the default 13; an `arrow { FontSize }`
+ * override scales the ink triangle exactly as it scales the block
+ * (SI25 D2 -- previously the radius stayed pinned at the 13-based constant
+ * while the block followed the caller's size).
+ */
+export function magicArrowTriSize(arrowFontSize: number): number {
+  return Math.trunc(arrowFontSize * 0.8);
+}
 
 /**
  * M4 cause D bare-arrow sub-case (`.agent-notes/m4-single-line-width.md`,
@@ -219,7 +234,7 @@ function arrowPoint(len: number, alpha: number): { x: number; y: number } {
  * draw-only, `:64-65`) — see `class-geo-builders.ts#attachEdgeLabel`'s doc
  * comment for the block layout this glyph sits within. `cx` uses
  * `triSize/2` (`UTranslate(triSize/2, ...)`, `:68`, x-translate is
- * draw-only and stays `ARROW_GLYPH_SIZE`-based); `cy` uses
+ * draw-only, {@link magicArrowTriSize} of the SAME `arrowFontSize`); `cy` uses
  * `arrowFontSize/2` (`UTranslate(..., size/2)`, same line, y-translate is
  * the FULL font size, not `triSize`).
  */
@@ -229,7 +244,7 @@ export function magicArrowGlyphPoints(
   angleRadians: number,
   arrowFontSize: number,
 ): Array<{ x: number; y: number }> {
-  const half = ARROW_GLYPH_SIZE / 2;
+  const half = magicArrowTriSize(arrowFontSize) / 2;
   const beta = (Math.PI * 4) / 5;
   const cx = originX + half;
   const cy = originY + arrowFontSize / 2;
