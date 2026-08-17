@@ -50,7 +50,7 @@ object 78/80 (SI26 close-out; re-measured at T0, 321bfb8b — unchanged).
 | [0](batch-0/overview.md) | Evidence harness + fitness test + baseline | T0 | [x] |
 | [1a](batch-1a/overview.md) | Display unification ∥ USymbol/atom helpers ∥ color-override | T1 T2 T4 | [x] |
 | [1b](batch-1b/overview.md) | FrontierCalculator ∥ link-note dim ∥ Command<S> ∥ assemble-svg | T5 T6 T7 T8 | [x] |
-| [2](batch-2/overview.md) | leaf-sizing family (needs T2) ∥ CommandCreateJson (needs T7) | T3 T9 | [ ] |
+| [2](batch-2/overview.md) | leaf-sizing family (needs T2) ∥ CommandCreateJson (needs T7) | T3 T9 | [x] |
 | [3](batch-3/overview.md) | Retire debt, docs, close-out | T10 | [ ] |
 
 Batches 1a and 1b have disjoint write-sets and MAY run as one 7-way parallel
