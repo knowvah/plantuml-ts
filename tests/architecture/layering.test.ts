@@ -77,19 +77,11 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
 /** Measured 2026-08-17 at 321bfb8b (T0). Each entry names the task that
  *  retires its edge; T10 (README batch 3) empties this array. */
 export const KNOWN_DEBT: readonly DebtEntry[] = [
-  { from: 'src/core/edge-label-box.ts', to: 'src/diagrams/class/class-layout-edge-labels.ts', retiredBy: 'T1' },
-  { from: 'src/core/assemble-svg.ts', to: 'src/diagrams/description/renderer.ts', retiredBy: 'T8' },
-  { from: 'src/core/assemble-svg.ts', to: 'src/diagrams/class/renderer-shell.ts', retiredBy: 'T8' },
-  { from: 'src/core/assemble-svg.ts', to: 'src/diagrams/state/renderer-shell.ts', retiredBy: 'T8' },
-  { from: 'src/core/assemble-svg.ts', to: 'src/diagrams/json/renderer-shell.ts', retiredBy: 'T8' },
   { from: 'src/diagrams/class/class-geo-types.ts', to: 'src/diagrams/description/leaf-sizing.ts', retiredBy: 'T3' },
   { from: 'src/diagrams/class/class-layout-leaf-shapes.ts', to: 'src/diagrams/description/leaf-sizing.ts', retiredBy: 'T3' },
   { from: 'src/diagrams/class/class-layout-generic-classifier.ts', to: 'src/diagrams/description/leaf-sizing.ts', retiredBy: 'T3' },
   { from: 'src/diagrams/class/class-layout-generic-classifier.ts', to: 'src/diagrams/description/ast.ts', retiredBy: 'T3' },
   { from: 'src/diagrams/class/class-layout-helpers.ts', to: 'src/diagrams/description/leaf-sizing.ts', retiredBy: 'T3' },
-  { from: 'src/diagrams/class/renderer-usymbol-entity.ts', to: 'src/diagrams/description/renderer-symbol.ts', retiredBy: 'T2' },
-  { from: 'src/diagrams/class/renderer-usymbol-entity.ts', to: 'src/diagrams/description/render-atoms.ts', retiredBy: 'T2' },
-  { from: 'src/diagrams/state/state-render-colors.ts', to: 'src/diagrams/class/class-color-override.ts', retiredBy: 'T4' },
 ];
 
 /** `true` when `edge` is covered by `entry` — prefix match on both sides so
