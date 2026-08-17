@@ -6,9 +6,9 @@
  * (`measureFolderLeaf`) plus the three `mergeTB` block helpers it composes.
  */
 
-import type { DescriptiveNode } from './ast.js';
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
+import type { LeafSizingSubject } from './LeafSizingSubject.js';
+import type { StringMeasurer, FontSpec } from '../../measurer.js';
+import type { SpriteDimsLookup } from '../../creole-atoms.js';
 import { textBlockHeight, maxLineWidth, atomHeightBonus } from './leaf-sizing-text.js';
 import { measureShownFolderTitle } from './leaf-sizing-folder-title.js';
 import {
@@ -59,7 +59,7 @@ import {
  * `FOLDER_SHOWN_TITLE_EXTRA_WIDTH` flat constant (deleted).
  */
 export function measureFolderLeaf(
-  node: DescriptiveNode,
+  node: LeafSizingSubject,
   fontSpec: FontSpec,
   measurer: StringMeasurer,
   opts: BoxSizingOpts | undefined,
@@ -112,7 +112,7 @@ function folderTextBlock(
 /** `dimStereo` — the third mergeTB block: widest guillemet label, one line of
  *  height per tag (the same rule `measureBox` applies). */
 function folderStereoBlock(
-  node: DescriptiveNode,
+  node: LeafSizingSubject,
   fontSpec: FontSpec,
   measurer: StringMeasurer,
   lineH: number,

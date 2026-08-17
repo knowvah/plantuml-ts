@@ -5,13 +5,13 @@
  *  - a creole horizontal-rule line (`----`/`====`) contributes the thin
  *    `CREOLE_HR_HEIGHT` (8px), not a full text line (S1L-b ADR-4).
  *
- * See `src/diagrams/description/leaf-sizing.ts`.
+ * See `src/core/svek/image/leaf-sizing.ts`.
  */
 
 import { describe, it, expect } from 'vitest';
-import { measureLeafNode } from '../../../src/diagrams/description/leaf-sizing.js';
-import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
-import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
+import { measureLeafNode } from '../../../../../src/core/svek/image/leaf-sizing.js';
+import type { FontSpec, StringMeasurer } from '../../../../../src/core/measurer.js';
+import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 14 };
 

@@ -30,7 +30,7 @@ import {
 import { RAW_GLYPHS } from '../../src/core/openiconic-glyphs-data.js';
 import { scanLineForAtoms, matchAtomAt } from '../../src/core/creole-atoms.js';
 import { measureInlineAtom } from '../../src/core/creole-atoms-measure.js';
-import { measureLeafNode } from '../../src/diagrams/description/leaf-sizing.js';
+import { measureLeafNode } from '../../src/core/svek/image/leaf-sizing.js';
 import { WidthTableMeasurer } from '../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../src/diagrams/description/ast.js';
 

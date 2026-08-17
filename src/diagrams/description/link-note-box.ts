@@ -9,7 +9,8 @@
  *
  * Two operands, one shared padding rule:
  *
- * - **Pure text** comes from {@link buildNoteBody} (`leaf-sizing.ts`), this
+ * - **Pure text** comes from {@link buildNoteBody}
+ *   (`core/svek/image/leaf-sizing.ts`, shared-seam-extraction T3), this
  *   engine's REAL creole `TextBlock` for a note body -- the same
  *   `BodyFactory.create3`/`BodyEnhanced2` route `EntityImageNote.java:116-117`
  *   takes, and the same object the description RENDERER draws from
@@ -39,8 +40,8 @@ import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import { resolveElementFontSize } from '../../core/theme-element-resolve.js';
 import type { RoseNoteDim } from '../../core/rose-note-dim.js';
 import { measureLinkNoteDim as coreMeasureLinkNoteDim } from '../../core/svek/image/EntityImageNoteLink.js';
-import { buildNoteBody } from './leaf-sizing.js';
-import { NOTE_FONT_SIZE } from './leaf-sizing-consts.js';
+import { buildNoteBody } from '../../core/svek/image/leaf-sizing.js';
+import { NOTE_FONT_SIZE } from '../../core/svek/image/leaf-sizing-consts.js';
 
 /**
  * The `note` element's font, resolved the way `renderer-entity.ts#noteFont`

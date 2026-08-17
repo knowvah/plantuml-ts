@@ -15,10 +15,10 @@
  * number traces to.
  */
 import { describe, it, expect } from 'vitest';
-import { measureLeafNode, type BoxSizingOpts } from '../../../src/diagrams/description/leaf-sizing.js';
-import { ActorStyle } from '../../../src/core/skin/ActorStyle.js';
-import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
-import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
+import { measureLeafNode, type BoxSizingOpts } from '../../../../../src/core/svek/image/leaf-sizing.js';
+import { ActorStyle } from '../../../../../src/core/skin/ActorStyle.js';
+import type { FontSpec, StringMeasurer } from '../../../../../src/core/measurer.js';
+import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 14 };
 

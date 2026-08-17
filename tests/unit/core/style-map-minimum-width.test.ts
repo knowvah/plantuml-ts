@@ -6,7 +6,7 @@
  *
  * See `src/core/theme-element-resolve.ts#resolveElementMinimumWidth`,
  * `src/core/style-map-element.ts`, and the leaf-sizing floor in
- * `src/diagrams/description/leaf-sizing.ts#measureBox`.
+ * `src/core/svek/image/leaf-sizing.ts#measureBox`.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -14,7 +14,7 @@ import { collectElementStyleBuckets } from '../../../src/core/style-map-element.
 import { applyStyleMap } from '../../../src/core/style-map-theme.js';
 import { defaultTheme, resolveElementMinimumWidth } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
-import { measureLeafNode } from '../../../src/diagrams/description/leaf-sizing.js';
+import { measureLeafNode } from '../../../src/core/svek/image/leaf-sizing.js';
 import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
 

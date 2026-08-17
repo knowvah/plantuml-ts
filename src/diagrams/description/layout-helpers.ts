@@ -71,21 +71,23 @@ export {
 } from './layout-helpers-shape-endpoint.js';
 
 // ---------------------------------------------------------------------------
-// Leaf sizing + title-label sizing (leaf-sizing.js / title-label-sizing.js)
+// Leaf sizing + title-label sizing (core/svek/image/leaf-sizing.js /
+// title-label-sizing.js)
 // ---------------------------------------------------------------------------
 
 // Leaf-node box sizing (measureLeafNode + its per-symbol USymbol margin table)
-// lives in ./leaf-sizing.js; title-bar sizing (measureTitleLabel) lives in
-// ./title-label-sizing.js. Both are used internally here and by layout.ts;
-// re-exported so existing importers keep their `layout-helpers` import path.
-import { measureLeafNode, type BoxSizingOpts } from './leaf-sizing.js';
+// lives in core/svek/image/leaf-sizing.js (shared-seam-extraction T3); title-
+// bar sizing (measureTitleLabel) lives in ./title-label-sizing.js. Both are
+// used internally here and by layout.ts; re-exported so existing importers
+// keep their `layout-helpers` import path.
+import { measureLeafNode, type BoxSizingOpts } from '../../core/svek/image/leaf-sizing.js';
 export {
   measureLeafNode,
   ACTOR_WIDTH,
   ACTOR_HEIGHT,
   USECASE_HEIGHT,
   PORT_SIZE,
-} from './leaf-sizing.js';
+} from '../../core/svek/image/leaf-sizing.js';
 export { measureTitleLabel, measureShadowAnchorDims } from './title-label-sizing.js';
 
 // ---------------------------------------------------------------------------

@@ -27,7 +27,7 @@
  * mechanism.
  */
 import { describe, it, expect } from 'vitest';
-import { measureUsecase, measureUsecaseOrActorLeaf } from '../../../src/diagrams/description/leaf-sizing.js';
+import { measureUsecase, measureUsecaseOrActorLeaf } from '../../../src/core/svek/image/leaf-sizing.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import type { SpriteDimsLookup } from '../../../src/core/creole-atoms.js';

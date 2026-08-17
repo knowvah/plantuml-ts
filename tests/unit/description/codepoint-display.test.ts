@@ -13,12 +13,12 @@
  *     exactly as its decoded glyph (output-neutral vs the old decode-before-
  *     split path).
  *
- * See `src/diagrams/description/leaf-sizing.ts` and
+ * See `src/core/svek/image/leaf-sizing.ts` and
  * `src/diagrams/description/parse-helpers-strings.ts#finalizeDisplay`.
  */
 
 import { describe, it, expect } from 'vitest';
-import { measureLeafNode } from '../../../src/diagrams/description/leaf-sizing.js';
+import { measureLeafNode } from '../../../src/core/svek/image/leaf-sizing.js';
 import { finalizeDisplay } from '../../../src/diagrams/description/parse-helpers.js';
 import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';

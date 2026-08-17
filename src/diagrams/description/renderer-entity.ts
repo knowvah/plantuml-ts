@@ -57,8 +57,8 @@ import {
 import { type SpriteRegistry, spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
-import { buildNoteBody } from './leaf-sizing.js';
-import { NOTE_FONT_SIZE } from './leaf-sizing-consts.js';
+import { buildNoteBody } from '../../core/svek/image/leaf-sizing.js';
+import { NOTE_FONT_SIZE } from '../../core/svek/image/leaf-sizing-consts.js';
 
 /** Jar-verified default entity corner radius / stroke width for the
  *  rectangle-family `USymbol`s (`test-results/dot-cache/component/

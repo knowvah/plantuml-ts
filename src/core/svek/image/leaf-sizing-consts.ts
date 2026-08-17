@@ -7,9 +7,9 @@
  * it, the numbers live here.
  */
 
-import type { USymbol } from '../../core/descriptive-keywords.js';
-import type { GuillemetPair } from '../../core/text/Guillemet.js';
-import type { ActorStyle } from '../../core/skin/ActorStyle.js';
+import type { USymbol } from '../../descriptive-keywords.js';
+import type { GuillemetPair } from '../../text/Guillemet.js';
+import type { ActorStyle } from '../../skin/ActorStyle.js';
 
 /** `skinparam componentStyle` — only `uml2` (the default) draws the corner
  *  component icon; `uml1` and `rectangle` render a plain box. */
@@ -245,7 +245,7 @@ export const INTERFACE_CIRCLE_SIZE = 18;
 // EntityImageNote sizing. Notes use FontParam.NOTE — a fixed 13px font, not the
 // theme's default. Total horizontal margin (text padding + folded corner) and
 // vertical margin measured exactly against the deterministic oracle.
-export { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+export { NOTE_FONT_SIZE } from '../../klimt/font/FontParam.js';
 export const NOTE_MARGIN_H = 21;
 export const NOTE_MARGIN_V = 10;
 

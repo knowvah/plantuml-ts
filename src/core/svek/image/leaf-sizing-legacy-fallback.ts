@@ -45,9 +45,9 @@
  * file is mechanically relocated pre-T6 `measureBox`/`boxIcon` logic, not a
  * new upstream divergence.
  */
-import type { DescriptiveNode } from './ast.js';
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
+import type { LeafSizingSubject } from './LeafSizingSubject.js';
+import type { StringMeasurer, FontSpec } from '../../measurer.js';
+import type { SpriteDimsLookup } from '../../creole-atoms.js';
 import { measureTextBlock } from './leaf-sizing-text.js';
 import {
   type BoxSizingOpts,
@@ -70,7 +70,7 @@ export function hasUnroutedBoxMarkup(display: string): boolean {
 
 /** Decoration allowance `[w, h]` for a box symbol. Only the default `uml2`
  *  component draws the corner icon; `uml1`/`rectangle` render a plain box. */
-function boxIcon(symbol: DescriptiveNode['symbol'], componentStyle: BoxSizingOpts['componentStyle']): readonly [number, number] {
+function boxIcon(symbol: LeafSizingSubject['symbol'], componentStyle: BoxSizingOpts['componentStyle']): readonly [number, number] {
   if (symbol === 'component' && componentStyle !== undefined && componentStyle !== 'uml2') {
     return [0, 0];
   }
@@ -93,7 +93,7 @@ export interface LegacyBoxFallbackCtx {
  *  case still needs it. `asSmall.calculateDimension = margin.addDimension
  *  (stereo ⊕ textBlock)`: content is the stereotype line stacked above the
  *  label, + per-symbol margin and icon, floored at `minimumWidth`. */
-export function measureLegacyBoxFallback(node: DescriptiveNode, fontSpec: FontSpec, ctx: LegacyBoxFallbackCtx): Dim {
+export function measureLegacyBoxFallback(node: LeafSizingSubject, fontSpec: FontSpec, ctx: LegacyBoxFallbackCtx): Dim {
   const { measurer, opts, sprites, defaultFont } = ctx;
   const [marginH, marginV] = SYMBOL_BOX_MARGIN[node.symbol] ?? DEFAULT_BOX_MARGIN;
   const [iconW, iconH] = boxIcon(node.symbol, opts?.componentStyle);

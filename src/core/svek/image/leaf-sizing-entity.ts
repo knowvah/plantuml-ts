@@ -12,28 +12,28 @@
  * `measureUsecaseOrActorLeaf`, not this raw primitive).
  */
 
-import type { DescriptiveNode } from './ast.js';
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import { measureInlineAtom } from '../../core/creole-atoms-measure.js';
-import type { SpriteDimsLookup, AtomImageResolver } from '../../core/creole-atoms.js';
-import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
-import { LimitFinder } from '../../core/klimt/drawing/LimitFinder.js';
+import type { LeafSizingSubject } from './LeafSizingSubject.js';
+import type { StringMeasurer, FontSpec } from '../../measurer.js';
+import { measureInlineAtom } from '../../creole-atoms-measure.js';
+import type { SpriteDimsLookup, AtomImageResolver } from '../../creole-atoms.js';
+import { MeasurerStringBounder } from '../../measurer-bounder.js';
+import { LimitFinder } from '../../klimt/drawing/LimitFinder.js';
 import {
   EntityImageDescription,
   type EntityImageDescriptionParams,
   type EntityImageDescriptionStereotypeSprite,
-} from '../../core/svek/image/EntityImageDescription.js';
-import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
-import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.js';
-import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { UStroke } from '../../core/klimt/UStroke.js';
-import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
-import { resolveSvgSpriteAtom } from '../../core/creole-atoms-image-resolver.js';
+} from './EntityImageDescription.js';
+import { resolveStereotypeSprite } from './EntityImageDescriptionDelegates.js';
+import type { FontConfiguration, FontStyle } from '../../klimt/shape/UText.js';
+import { HorizontalAlignment } from '../../klimt/geom/HorizontalAlignment.js';
+import { UStroke } from '../../klimt/UStroke.js';
+import { GUILLEMET_DEFAULT } from '../../text/Guillemet.js';
+import { resolveSvgSpriteAtom } from '../../creole-atoms-image-resolver.js';
 import {
   upstreamKeyword,
   mapComponentStyle,
   resolveActorStyle,
-} from '../../core/decoration/symbol/usymbol-resolve.js';
+} from '../../decoration/symbol/usymbol-resolve.js';
 import { type BoxSizingOpts, type Dim, DEFAULT_SIZING_STROKE_THICKNESS } from './leaf-sizing-consts.js';
 
 /** No style flags -- `StringBounder.calculateDimension`'s font param is narrowed to `family`/`size` only. */
@@ -174,7 +174,7 @@ function sizingPaint(
 
 /**
  * Assembles `EntityImageDescriptionParams` for ONE leaf, from exactly what
- * `BoxSizingOpts`/`DescriptiveNode` already carry — mirrors
+ * `BoxSizingOpts`/`LeafSizingSubject` already carry — mirrors
  * `renderer-entity.ts#buildEntityParams`'s field-for-field shape (a parallel
  * assembly of the SAME params, not a call to it).
  *
@@ -200,7 +200,7 @@ function sizingPaint(
  *  own call so the sizer and renderer cannot resolve one name to two boxes
  *  (`planning/sizer-renderer-parity.md`). */
 function spriteLabel(
-  node: DescriptiveNode,
+  node: LeafSizingSubject,
   sprites: SpriteDimsLookup | undefined,
 ): { stereotypeSprite?: EntityImageDescriptionStereotypeSprite } {
   const resolved = resolveStereotypeSprite(node.stereotypeSprite, sprites);
@@ -208,7 +208,7 @@ function spriteLabel(
 }
 
 function buildSizingEntityParams(
-  node: DescriptiveNode,
+  node: LeafSizingSubject,
   fontSpec: FontSpec,
   ctx: EntityLeafCtx,
 ): EntityImageDescriptionParams {
@@ -251,10 +251,10 @@ function buildSizingEntityParams(
 /** The margin+icon-only baseline `measureEntityLeaf`'s `MinimumWidth` floor
  *  needs: the SAME symbol at zero content/stereotype/minimumWidth, so its
  *  width is exactly the fixed allowance real content adds on top. */
-function minWidthFloorBaseline(node: DescriptiveNode, fontSpec: FontSpec, ctx: EntityLeafCtx, bounder: MeasurerStringBounder): number {
+function minWidthFloorBaseline(node: LeafSizingSubject, fontSpec: FontSpec, ctx: EntityLeafCtx, bounder: MeasurerStringBounder): number {
   // `stereotype` omitted, not set to `undefined` (`exactOptionalPropertyTypes`).
   const { stereotype: _dropped, ...rest } = node;
-  const baselineNode: DescriptiveNode = { ...rest, display: '' };
+  const baselineNode: LeafSizingSubject = { ...rest, display: '' };
   const baselineCtx: EntityLeafCtx = { ...ctx, opts: ctx.opts === undefined ? undefined : { ...ctx.opts, minimumWidth: 0 } };
   const params = buildSizingEntityParams(baselineNode, fontSpec, baselineCtx);
   return new EntityImageDescription(params).calculateDimensionSlow(bounder).getWidth();
@@ -273,7 +273,7 @@ function minWidthFloorBaseline(node: DescriptiveNode, fontSpec: FontSpec, ctx: E
  * WIDEN, never shrink below upstream's own margin+icon, skipped when unset.
  */
 export function measureEntityLeaf(
-  node: DescriptiveNode,
+  node: LeafSizingSubject,
   fontSpec: FontSpec,
   ctx: EntityLeafCtx,
   applyMinWidthFloor: boolean,
@@ -296,7 +296,7 @@ export function measureEntityLeaf(
  * upstream sizes both symbols via `EntityImageDescription` regardless of
  * host diagram type, and that port lives in THIS engine -- external callers
  * route in here rather than reimplementing the routing decision. Synthesizes
- * the minimal `DescriptiveNode` `measureEntityLeaf` needs and calls the SAME
+ * the minimal `LeafSizingSubject` `measureEntityLeaf` needs and calls the SAME
  * faithful path `measureLeafNode`'s own `actor`/non-`<latex>` `usecase`
  * cases use, `applyMinWidthFloor: false` to match. Callers needing
  * `stereotype`/`BoxSizingOpts` call `measureLeafNode` directly instead.
@@ -312,7 +312,7 @@ export function measureUsecaseOrActorLeaf(
   measurer: StringMeasurer,
   sprites?: SpriteDimsLookup,
 ): Dim {
-  const node: DescriptiveNode = { id: '', display, symbol, children: [] };
+  const node: LeafSizingSubject = { id: '', display, symbol };
   return measureEntityLeaf(node, fontSpec, { opts: undefined, sprites, measurer }, false);
 }
 
@@ -357,7 +357,7 @@ export function measureUsecaseOrActorLeafInk(
   measurer: StringMeasurer,
   sprites?: SpriteDimsLookup,
 ): LeafSymbolInk | undefined {
-  const node: DescriptiveNode = { id: '', display, symbol, children: [] };
+  const node: LeafSizingSubject = { id: '', display, symbol };
   const bounder = new MeasurerStringBounder(measurer);
   const params = buildSizingEntityParams(node, fontSpec, { opts: undefined, sprites, measurer });
   const finder = LimitFinder.create(bounder, false);

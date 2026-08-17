@@ -58,32 +58,32 @@
  *   Quark/Bodier construction no description-engine sizer has (the same
  *   adaptation seam `EntityImageDescription.ts`'s params document).
  */
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
-import type { SpriteDimsLookup, AtomImageResolver } from '../../core/creole-atoms.js';
-import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
-import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.js';
-import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
-import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
-import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
-import { Display } from '../../core/klimt/creole/Display.js';
-import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
-import { MONOSPACED } from '../../core/klimt/creole/Parser.js';
-import type { AtomOps } from '../../core/klimt/creole/Sea.js';
-import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
-import type { Atom } from '../../core/klimt/creole/SheetBlock1.js';
-import { emojiBoxDim } from '../../core/klimt/creole/atom/AtomEmoji.js';
-import type { NestedDiagramRenderer } from '../../core/EmbeddedDiagram.js';
-import { Pragma } from '../../core/skin/Pragma.js';
-import { GUILLEMET_DEFAULT, type GuillemetPair } from '../../core/text/Guillemet.js';
-import { renderLatexAsImage } from '../../core/latex.js';
-import { measureLine } from '../../core/svek/image/EntityImageDescriptionSupport.js';
-import { BodyFactory } from '../../core/cucadiagram/BodyFactory.js';
-import type { BodyEnhanced1Style } from '../../core/cucadiagram/BodyEnhanced1Config.js';
-import type { MethodsOrFieldsAreaSkinParam } from '../../core/cucadiagram/MethodsOrFieldsAreaConfig.js';
-import type { Entity } from '../../core/abel/Entity.js';
-import { LeafType } from '../../core/abel/LeafType.js';
+import type { StringMeasurer, FontSpec } from '../../measurer.js';
+import { MeasurerStringBounder } from '../../measurer-bounder.js';
+import type { SpriteDimsLookup, AtomImageResolver } from '../../creole-atoms.js';
+import type { StringBounder } from '../../klimt/font/StringBounder.js';
+import type { FontConfiguration, FontStyle } from '../../klimt/shape/UText.js';
+import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
+import { HorizontalAlignment } from '../../klimt/geom/HorizontalAlignment.js';
+import { ClockwiseTopRightBottomLeft } from '../../klimt/geom/ClockwiseTopRightBottomLeft.js';
+import { LineBreakStrategy } from '../../klimt/LineBreakStrategy.js';
+import { Display } from '../../klimt/creole/Display.js';
+import { CreoleParser } from '../../klimt/creole/legacy/CreoleParser.js';
+import { MONOSPACED } from '../../klimt/creole/Parser.js';
+import type { AtomOps } from '../../klimt/creole/Sea.js';
+import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
+import type { Atom } from '../../klimt/creole/SheetBlock1.js';
+import { emojiBoxDim } from '../../klimt/creole/atom/AtomEmoji.js';
+import type { NestedDiagramRenderer } from '../../EmbeddedDiagram.js';
+import { Pragma } from '../../skin/Pragma.js';
+import { GUILLEMET_DEFAULT, type GuillemetPair } from '../../text/Guillemet.js';
+import { renderLatexAsImage } from '../../latex.js';
+import { measureLine } from './EntityImageDescriptionSupport.js';
+import { BodyFactory } from '../../cucadiagram/BodyFactory.js';
+import type { BodyEnhanced1Style } from '../../cucadiagram/BodyEnhanced1Config.js';
+import type { MethodsOrFieldsAreaSkinParam } from '../../cucadiagram/MethodsOrFieldsAreaConfig.js';
+import type { Entity } from '../../abel/Entity.js';
+import { LeafType } from '../../abel/LeafType.js';
 import { sizingAtomImageResolverFor } from './leaf-sizing-entity.js';
 import type { BoxSizingOpts } from './leaf-sizing-consts.js';
 

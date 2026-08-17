@@ -14,10 +14,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { measureLeafNode } from '../../../src/diagrams/description/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
-import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
+import { measureLeafNode } from '../../../../../src/core/svek/image/leaf-sizing.js';
+import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import type { FontSpec, StringMeasurer } from '../../../../../src/core/measurer.js';
+import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 14 };
 

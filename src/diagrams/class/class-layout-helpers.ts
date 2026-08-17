@@ -25,7 +25,7 @@
  * that module imports `LIKE_CLASS_KINDS` back from here).
  */
 
-import type { LeafSymbolInk } from '../description/leaf-sizing.js';
+import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing.js';
 import type { Classifier, ClassifierKind } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';

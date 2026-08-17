@@ -49,18 +49,18 @@
  * `plans/si14-usymbol-measurement-sharing/decisions.md` (ADR-3/4).
  */
 
-import type { DescriptiveNode } from './ast.js';
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import { measureNodeLabel } from '../../core/latex.js';
-import type { SpriteDimsLookup, AtomImageResolver } from '../../core/creole-atoms.js';
-import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
-import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.js';
-import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
-import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { UStroke } from '../../core/klimt/UStroke.js';
-import type { GuillemetPair } from '../../core/text/Guillemet.js';
-import { buildDesc } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
-import { USymbols } from '../../core/decoration/symbol/USymbols.js';
+import type { LeafSizingSubject } from './LeafSizingSubject.js';
+import type { StringMeasurer, FontSpec } from '../../measurer.js';
+import { measureNodeLabel } from '../../latex.js';
+import type { SpriteDimsLookup, AtomImageResolver } from '../../creole-atoms.js';
+import { MeasurerStringBounder } from '../../measurer-bounder.js';
+import type { FontConfiguration, FontStyle } from '../../klimt/shape/UText.js';
+import type { TextBlock } from '../../klimt/shape/TextBlock.js';
+import { HorizontalAlignment } from '../../klimt/geom/HorizontalAlignment.js';
+import { UStroke } from '../../klimt/UStroke.js';
+import type { GuillemetPair } from '../../text/Guillemet.js';
+import { buildDesc } from './EntityImageDescriptionDelegates.js';
+import { USymbols } from '../../decoration/symbol/USymbols.js';
 import { measureFolderLeaf } from './leaf-sizing-folder.js';
 import { measureLegacyBoxFallback } from './leaf-sizing-legacy-fallback.js';
 import { measureEntityLeaf, sizingAtomImageResolverFor } from './leaf-sizing-entity.js';
@@ -106,7 +106,7 @@ export type { LeafSymbolInk } from './leaf-sizing-entity.js';
  * `measureInlineAtom`) when a display line embeds a `<$sprite>` atom.
  */
 export function measureLeafNode(
-  node: DescriptiveNode,
+  node: LeafSizingSubject,
   baseFont: FontSpec,
   measurer: StringMeasurer,
   opts?: BoxSizingOpts,
@@ -418,11 +418,10 @@ export function measureUsecase(
   if (display.includes('<latex>')) {
     return measureNodeLabel(display, measurer, fontSpec);
   }
-  const node: DescriptiveNode = {
+  const node: LeafSizingSubject = {
     id: '',
     display,
     symbol: 'usecase',
-    children: [],
     ...(stereotype === undefined ? {} : { stereotype }),
   };
   return measureEntityLeaf(node, fontSpec, { opts: undefined, sprites, measurer }, false);

@@ -22,8 +22,8 @@ import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-comm
 import type { ClassifierGeo } from './layout.js';
 import { formatMemberText, type MeasuredClassifier, type MemberSuppression } from './class-layout-helpers.js';
 import { resolveVisibleStereotypeLabels, type GuillemetPair } from './class-stereotype.js';
-import { measureLeafNode } from '../description/leaf-sizing.js';
-import type { DescriptiveNode } from '../description/ast.js';
+import { measureLeafNode } from '../../core/svek/image/leaf-sizing.js';
+import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import {
   resolveElementFontSize,
@@ -91,8 +91,8 @@ export function tryMeasureDescriptionLeaf(
   if (symbol === undefined || symbol === 'actor') return undefined;
   if (classifier.members.some((m) => m.hidden !== true)) return undefined;
   const stereotype = resolveVisibleStereotypeLabels(classifier);
-  const node: DescriptiveNode = {
-    id: classifier.id, display: classifier.display, symbol, children: [],
+  const node: LeafSizingSubject = {
+    id: classifier.id, display: classifier.display, symbol,
     ...(stereotype.length > 0 ? { stereotype } : {}),
   };
   const dim = measureLeafNode(
@@ -112,7 +112,7 @@ export function tryMeasureDescriptionLeaf(
  *  own DOT builder performs (`layout-dot-tree.ts:171-181` via `ClassifyCtx
  *  .minimumWidthFor`/`.fontSizeFor`, `layout.ts:435-441`) -- split out of
  *  {@link tryMeasureDescriptionLeaf} purely for the per-function CCN cap. */
-function buildDescriptionLeafOpts(theme: Theme, symbol: DescriptiveNode['symbol']) {
+function buildDescriptionLeafOpts(theme: Theme, symbol: LeafSizingSubject['symbol']) {
   return {
     componentStyle: theme.componentStyle,
     actorStyle: theme.actorStyle,

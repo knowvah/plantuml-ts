@@ -3,7 +3,7 @@
  * ./layout.ts (which re-exports them) to keep layout.ts under the
  * project's 500-line cap — mirrors `state/state-geo-types.ts`'s split.
  */
-import type { LeafSymbolInk } from '../description/leaf-sizing.js';
+import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing.js';
 import type { ClassifierKind, LinkDecor, UrlInfo, Visibility } from './ast.js';
 import type { ClassLeafGeo } from './class-leaf-geo.js';
 import type { GenericTagGeo } from './class-stereotype.js';

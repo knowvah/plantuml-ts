@@ -28,13 +28,13 @@
  *   produces the IDENTICAL dimension the legacy fallback used to.
  */
 import { describe, it, expect } from 'vitest';
-import { measureLeafNode, measureUsecase, measureUsecaseOrActorLeaf } from '../../../src/diagrams/description/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import type { FontSpec } from '../../../src/core/measurer.js';
-import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
-import type { SpriteDims, SpriteDimsLookup } from '../../../src/core/creole-atoms.js';
-import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../src/core/sprite-commands.js';
-import { SpriteSvg } from '../../../src/core/klimt/sprite/SpriteSvg.js';
+import { measureLeafNode, measureUsecase, measureUsecaseOrActorLeaf } from '../../../../../src/core/svek/image/leaf-sizing.js';
+import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import type { FontSpec } from '../../../../../src/core/measurer.js';
+import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
+import type { SpriteDims, SpriteDimsLookup } from '../../../../../src/core/creole-atoms.js';
+import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../../../src/core/sprite-commands.js';
+import { SpriteSvg } from '../../../../../src/core/klimt/sprite/SpriteSvg.js';
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 14 };
 const measurer = new WidthTableMeasurer();

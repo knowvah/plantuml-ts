@@ -49,11 +49,11 @@
  * `Sea`/`SheetBlock` draw-vs-measure seam.
  */
 import { describe, it, expect } from 'vitest';
-import { renderSync } from '../../../src/index.js';
-import { measureLeafNode } from '../../../src/diagrams/description/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import type { FontSpec } from '../../../src/core/measurer.js';
-import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
+import { renderSync } from '../../../../../src/index.js';
+import { measureLeafNode } from '../../../../../src/core/svek/image/leaf-sizing.js';
+import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import type { FontSpec } from '../../../../../src/core/measurer.js';
+import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 
 /** The diagram-wide font `measureLeafNode` receives — deliberately 14, NOT
  *  the note's 13: `leaf-sizing.ts:109` has already collapsed "no per-element

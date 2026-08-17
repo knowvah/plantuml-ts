@@ -14,20 +14,20 @@
  * drift apart.
  */
 
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
+import type { StringMeasurer, FontSpec } from '../../measurer.js';
 import {
   type SpriteDimsLookup,
-} from '../../core/creole-atoms.js';
+} from '../../creole-atoms.js';
 import {
   measureInlineAtom,
   lineAtomHeightExcess,
-} from '../../core/creole-atoms-measure.js';
-import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
-import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
-import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
-import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
-import { getSplitted } from '../../core/klimt/creole/Fission.js';
-import { manageGuillemet, type GuillemetPair } from '../../core/text/Guillemet.js';
+} from '../../creole-atoms-measure.js';
+import { classifyStripeLine } from '../../klimt/creole/legacy/CreoleStripeSimpleParser.js';
+import { buildLineAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
+import type { FontConfiguration } from '../../klimt/shape/UText.js';
+import { JAR_DEFAULT_TEXT_COLOR } from '../../decoration/symbol/usymbol-resolve.js';
+import { getSplitted } from '../../klimt/creole/Fission.js';
+import { manageGuillemet, type GuillemetPair } from '../../text/Guillemet.js';
 
 /** Number of display lines (upstream text block splits on hard newlines).
  *  An EMPTY display has NO lines, not one blank one: `node C [ ]` draws a box
