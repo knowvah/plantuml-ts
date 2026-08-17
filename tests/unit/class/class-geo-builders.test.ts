@@ -18,6 +18,7 @@ import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { computeGuideLinesBox, magicArrowTriSize } from '../../../src/diagrams/class/class-magic-arrow.js';
 
 const measurer = new WidthTableMeasurer();
 
@@ -393,5 +394,123 @@ describe('buildEdgeGeos — magic-arrow edge label (G2 item 44)', () => {
     const expectedWidth = new WidthTableMeasurer()
       .measure('«alias»', { family: defaultTheme.fontFamily, size: 13 }).width;
     expect(edge.label!.width).toBeCloseTo(expectedWidth, 5);
+  });
+});
+
+/**
+ * SI25 (class-guide-line-glyphs) T2: a multi-line label that
+ * `hasSeveralGuideLines` (`gobuco-16-ruke239`/`lapoma-04-vaga142`, `A -> B :
+ * ab >\ncd <\n< ef\n> gh`) gets ONE magic-arrow glyph per token line --
+ * `StringWithArrow#addSeveralMagicArrows` (`descdiagram/command/StringWithArrow
+ * .java:115-127`): per line `mergeLR(TextBlockArrow2(size x size), text,
+ * CENTER)`, then `mergeTB` per the label's alignment. `A -> B` under the
+ * default TB rankdir is a DOWNWARD edge, so `magicArrowAngle` is ~0 (SVG
+ * y-down "compass" angle) for a forward token and ~PI for a backward one:
+ * a forward tip sits at `(cx, cy + triSize/2)`, `cx = lineLeft + triSize/2`.
+ */
+describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
+  const measurer = new DeterministicMeasurer();
+  const cls = (id: string): ClassDiagramAST['classifiers'][number] =>
+    ({ id, display: id, kind: 'class', typeParams: [], members: [] });
+  const astFor = (label: string): ClassDiagramAST => ({
+    classifiers: [cls('A'), cls('B')],
+    namespaces: [],
+    directives: [],
+    notes: [],
+    relationships: [{ from: 'A', to: 'B', type: 'association', label }],
+  });
+  const GOBUCO = 'ab >\\ncd <\\n< ef\\n> gh';
+
+  it("gobuco: 4 labelLines, each with a 3-point glyph, text stripped, x = block left + font.size", () => {
+    const geo = layoutClass(astFor(GOBUCO), defaultTheme, measurer);
+    const lines = geo.edges[0]!.labelLines!;
+    expect(geo.edges[0]!.label).toBeUndefined();
+    expect(geo.edges[0]!.arrowGlyph).toBeUndefined();
+    expect(lines.map((l) => l.text)).toEqual(['ab', 'cd', 'ef', 'gh']);
+    for (const l of lines) {
+      expect(l.glyph).toBeDefined();
+      expect(l.glyph!.points).toHaveLength(3);
+      // Downward edge: the tip's x IS cx = lineLeft + triSize/2 (sin 0 / sin PI
+      // = 0), and the text sits at lineLeft + font.size (`x += dimb.getWidth()`,
+      // TextBlockHorizontal.java:91) -- 13 - 10/2 = 8 to the right of the tip.
+      expect(l.x - l.glyph!.points[0]!.x).toBeCloseTo(13 - magicArrowTriSize(13) / 2, 6);
+      // textLength is the STRIPPED text's own width, not the raw line's.
+      expect(l.width).toBeCloseTo(measurer.measure(l.text, { family: defaultTheme.fontFamily, size: 13 }).width, 6);
+    }
+  });
+
+  it('gobuco: directions right/left/left/right -- forward tip below its centre, backward above', () => {
+    const geo = layoutClass(astFor(GOBUCO), defaultTheme, measurer);
+    const lines = geo.edges[0]!.labelLines!;
+    // Line block top = baseline - (13 - descent); glyph cy = top + 13/2. A
+    // forward (angle ~0) tip is at cy + 5, a backward (angle ~PI) at cy - 5.
+    const descent = measurer.getDescent({ family: defaultTheme.fontFamily, size: 13 }, 'ab');
+    const cyOf = (l: NonNullable<typeof lines>[number]) => l.y - (13 - descent) + 13 / 2;
+    const tipDy = lines.map((l) => l.glyph!.points[0]!.y - cyOf(l));
+    expect(tipDy[0]).toBeCloseTo(+5, 6);
+    expect(tipDy[1]).toBeCloseTo(-5, 6);
+    expect(tipDy[2]).toBeCloseTo(-5, 6);
+    expect(tipDy[3]).toBeCloseTo(+5, 6);
+    // Lines stack by font.size (mergeTB sums heights; height === size).
+    expect(lines[1]!.y - lines[0]!.y).toBeCloseTo(13, 6);
+    expect(lines[3]!.y - lines[2]!.y).toBeCloseTo(13, 6);
+  });
+
+  it('gobuco: per-line blocks are CENTRED inside the merged block (jar x 79.68/80.046/81.508/79.68)', () => {
+    const geo = layoutClass(astFor(GOBUCO), defaultTheme, measurer);
+    const lines = geo.edges[0]!.labelLines!;
+    // block left = text.x - 13; block width = 13 + textWidth; every block's
+    // centre coincides -- TextBlockVertical.java:94's `(W - w)/2`.
+    const centres = lines.map((l) => (l.x - 13) + (13 + l.width) / 2);
+    for (const c of centres) expect(c).toBeCloseTo(centres[0]!, 6);
+    // Jar's own deltas between successive text x values, to the thousandth.
+    expect(lines[1]!.x - lines[0]!.x).toBeCloseTo(80.046 - 79.68, 3);
+    expect(lines[2]!.x - lines[0]!.x).toBeCloseTo(81.508 - 79.68, 3);
+    expect(lines[3]!.x - lines[0]!.x).toBeCloseTo(0, 6);
+  });
+
+  it('a two-line label with NO token keeps the exact pre-T2 create0 path (pinned)', () => {
+    const geo = layoutClass(astFor('this is\\non several\\nlines'), defaultTheme, measurer);
+    const lines = geo.edges[0]!.labelLines!;
+    for (const l of lines) expect(l.glyph).toBeUndefined();
+    // Values captured on main at 7ba67fcd before T2 (same AST, same measurer).
+    expect(lines.map((l) => [l.text, l.x, l.y, l.width])).toEqual([
+      ['this is', 41.853125, 96.11112311111111, 29.65625],
+      ['on several', 28.4875, 109.11112311111111, 56.387499999999996],
+      ['lines', 43.275, 122.11112311111111, 26.8125],
+    ]);
+  });
+
+  it('single-line "ok >" keeps the exact T12c whole-label path (pinned)', () => {
+    const geo = layoutClass(astFor('ok >'), defaultTheme, measurer);
+    const edge = geo.edges[0]!;
+    expect(edge.labelLines).toBeUndefined();
+    // Values captured on main at 7ba67fcd before T2.
+    expect(edge.label).toEqual({ text: 'ok', x: 41.68125, y: 96.11112311111113, width: 13.73125 });
+    expect(edge.arrowGlyph!.points).toEqual([
+      { x: 33.315625, y: 97.50001200000001 },
+      { x: 36.25455126146237, y: 88.45492702812527 },
+      { x: 30.37669873853763, y: 88.45492702812527 },
+    ]);
+  });
+
+  it('arrow { FontSize 20 }: the geo merged width equals computeGuideLinesBox and the glyph is 20px (D2)', () => {
+    const theme = deepMergeTheme(defaultTheme, { colors: { graph: { arrowFontSize: 20 } } });
+    const font = { family: theme.fontFamily, size: 20 };
+    const geo = layoutClass(astFor(GOBUCO), theme, measurer);
+    const lines = geo.edges[0]!.labelLines!;
+    const box = computeGuideLinesBox(['ab >', 'cd <', '< ef', '> gh'], font, measurer);
+    // Merged width = max(blockWidth); block left = text.x - 20 (the arrow slot
+    // is font.size wide, TextBlockArrow2.java:87-89), block right = text end.
+    const lefts = lines.map((l) => l.x - 20);
+    const rights = lines.map((l) => l.x + l.width);
+    expect(Math.max(...rights) - Math.min(...lefts)).toBeCloseTo(box.width, 6);
+    // Line pitch is the font size; total height = box height.
+    expect(lines[3]!.y - lines[0]!.y).toBeCloseTo(box.height - 20, 6);
+    // Glyph slot: cy = lineTop + 20/2, tip 8 (= trunc(20*.8)/2) below it.
+    const descent = measurer.getDescent(font, 'ab');
+    const cy0 = lines[0]!.y - (20 - descent) + 10;
+    expect(lines[0]!.glyph!.points[0]!.y - cy0).toBeCloseTo(magicArrowTriSize(20) / 2, 6);
+    expect(lines[0]!.x - lines[0]!.glyph!.points[0]!.x).toBeCloseTo(20 - magicArrowTriSize(20) / 2, 6);
   });
 });

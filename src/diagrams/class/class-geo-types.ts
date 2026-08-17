@@ -40,16 +40,11 @@ export interface ClassifierGeo {
      *  (`class-visibility-icon.ts#renderVisibilityIcon`'s own doc comment).
      *  Present only alongside `visibilityIcon`. */
     visibilityIsField?: boolean;
-    /**
-     * G2 N4: the row text's own pre-measured (unmargined) width, from the
-     * SAME measurer `layoutClass` used for box sizing -- feeds the rendered
-     * `<text textLength="..." lengthAdjust="spacing">` attributes
-     * (`renderer.ts#renderRow`), matching jar's `-DPLANTUML_DETERMINISTIC_
-     * TEXT=true` output exactly rather than leaving per-character rendering
-     * up to the SVG viewer's own font. Optional: rows built by hand in unit
-     * tests (bypassing layoutClass) simply omit `textLength` -- the
-     * attribute is additive on `core/svg.ts#text()`.
-     */
+    /** G2 N4: the row text's pre-measured (unmargined) width, from the SAME
+     *  measurer `layoutClass` sized the box with -- feeds `<text
+     *  textLength="..." lengthAdjust="spacing">` (`renderer.ts#renderRow`),
+     *  jar's `-DPLANTUML_DETERMINISTIC_TEXT=true` output. Optional: hand-
+     *  built test rows omit it (additive on `core/svg.ts#text()`). */
     width?: number;
     /** G2 N16: this row's source member's OWN parsed `[[url]]`/`[[[url]]]`
      *  link suffix -- `Member.ownUrl`'s doc comment (N15 tracked presence
@@ -62,42 +57,33 @@ export interface ClassifierGeo {
     /**
      * G2 N22: this row's text run through the shared creole atom engine
      * (`class-member-creole.ts#buildMemberRow`) -- present on EVERY member
-     * row `layoutClass` builds (a hand-built test geometry that bypasses
-     * `measureGenericClassifier` may omit it, same optionality precedent as
+     * row `layoutClass` builds (hand-built test geometries may omit it, as
      * `width`). ABSENT on the header row (upstream's `EntityImageClassHeader`
-     * name text is a separate, non-creole mechanism -- `italic` above is its
-     * own, narrower styling hook). `renderer-classifier-box.ts#renderRowText`
-     * draws one `<text>`/`<image>` per atom, left-to-right, x-advancing by
-     * each atom's own measured width -- mirrors `EntityImageDescriptionSupport
-     * .ts#drawAtoms`'s identical reconstruction for description.
+     * name text is a separate, non-creole mechanism). `renderer-classifier-
+     * box.ts#renderRowText` draws one `<text>`/`<image>` per atom, x-
+     * advancing by each atom's measured width -- mirrors
+     * `EntityImageDescriptionSupport.ts#drawAtoms`.
      */
     atoms?: readonly MemberRenderAtom[];
     /**
-     * G2 N23: the header row's own kind-badge `<ellipse>` cx position,
-     * relative to `geo.x` -- `HeaderLayout#drawU`'s `xCircle = h1` term
-     * (`h1`/`h2` derived in `class-layout-helpers.ts#buildHeaderRow`'s doc
-     * comment), PLUS the badge's own internal left-margin+radius inset
-     * (`BADGE_LEFT_MARGIN + BADGE_RADIUS`). Present ONLY on the header row
-     * (rows[0]); `renderer-classifier-box.ts#renderBadge` reads it directly
-     * instead of back-solving from the header TEXT row's `indent` (which,
-     * post-N23, no longer shares the same offset -- `h1 !== h1 + h2` once
-     * `h2 > 0`, the wider-box-centering case). Optional: hand-built test
-     * geometries that bypass `measureGenericClassifier` omit it, falling
-     * back to `renderBadge`'s own pre-N23 constant.
+     * G2 N23: the header row's kind-badge `<ellipse>` cx, relative to
+     * `geo.x` -- `HeaderLayout#drawU`'s `xCircle = h1` term (`h1`/`h2` in
+     * `class-layout-helpers.ts#buildHeaderRow`'s doc comment) PLUS
+     * `BADGE_LEFT_MARGIN + BADGE_RADIUS`. Header row (rows[0]) only;
+     * `renderer-classifier-box.ts#renderBadge` reads it directly rather
+     * than back-solving from the header text `indent` (`h1 !== h1 + h2`
+     * once `h2 > 0`). Optional: hand-built test geometries omit it and
+     * `renderBadge` falls back to its pre-N23 constant.
      */
     badgeIndent?: number;
     /**
      * G2 N23: `skinparam class { AttributeFontSize/AttributeFontName }`
-     * (`FontParam.CLASS_ATTRIBUTE`) override -- present ONLY on the header
-     * row (rows[0]) when the classifier's `measureGenericClassifier` box
-     * uses a non-default font (jar-verified `jisanu-32-gado231`: overrides
-     * the header text's OWN `<text>` attrs too, not just member rows -- see
-     * `class-layout-helpers.ts`'s `buildHeaderRow` doc comment). Member rows
-     * carry their own per-atom font via `atoms` instead
-     * (`class-member-creole.ts#buildMemberRow` already receives the SAME
-     * overridden fontSpec). Absent (falls back to `theme.fontFamily`/
-     * `theme.fontSize`) for every classifier with no override -- zero
-     * behavior change for the common case.
+     * (`FontParam.CLASS_ATTRIBUTE`) override -- header row (rows[0]) only,
+     * when `measureGenericClassifier` used a non-default font (jar-verified
+     * `jisanu-32-gado231`: the header's OWN `<text>` attrs move too --
+     * `class-layout-helpers.ts#buildHeaderRow`'s doc comment). Member rows
+     * carry theirs per atom (`class-member-creole.ts#buildMemberRow`).
+     * Absent = `theme.fontFamily`/`theme.fontSize`.
      */
     fontFamily?: string;
     fontSize?: number;
@@ -296,10 +282,20 @@ export interface EdgeGeo {
    *  text carried a `\n`/`\l`/`\r` line-break escape sequence
    *  (`class-layout-helpers.ts#splitEdgeLabelLines`) -- one entry per line,
    *  in top-to-bottom order, each already positioned/aligned by
-   *  `class-geo-builders.ts#multiLineLabelAnchor`'s doc comment. Mutually
-   *  exclusive with `label` (`attachEdgeLabel` sets exactly one of the two
-   *  for a labeled edge). */
-  labelLines?: Array<{ text: string; x: number; y: number; width: number }>;
+   *  `class-edge-label-anchor.ts#multiLineLabelAnchor`. Mutually exclusive
+   *  with `label` (`attachEdgeLabel` sets exactly one of the two).
+   *  SI25 D1: `glyph` is present iff the label `hasSeveralGuideLines` AND
+   *  that line carried a `< `/`> `/` <`/` >` token -- one magic-arrow
+   *  triangle per line (`StringWithArrow#addSeveralMagicArrows`,
+   *  `descdiagram/command/StringWithArrow.java:115-127`), 3 points in the
+   *  same tip-then-two-back-corners order as {@link arrowGlyph}. */
+  labelLines?: Array<{
+    text: string;
+    x: number;
+    y: number;
+    width: number;
+    glyph?: { points: Array<{ x: number; y: number }> };
+  }>;
   /** G2 item 44: the magic-arrow glyph (`class-magic-arrow.ts`) -- a small
    *  filled triangle drawn ALONGSIDE `label` (present together when the
    *  arrow token carried remaining text, e.g. `"foo >"`) or ALONE (a bare

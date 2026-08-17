@@ -7,11 +7,13 @@
 import { describe, it, expect } from 'vitest';
 import {
   ARROW_GLYPH_SIZE,
+  magicArrowTriSize,
   parseMagicArrowLabel,
   magicArrowAngle,
   magicArrowGlyphPoints,
   hasSeveralGuideLines,
   computeGuideLinesBox,
+  splitGuideLines,
 } from '../../../src/diagrams/class/class-magic-arrow.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 
@@ -102,6 +104,19 @@ describe('magicArrowGlyphPoints (G2 item 44)', () => {
     expect(tip!.y).toBeCloseTo(10, 6); // 20/2, not ARROW_GLYPH_SIZE/2
   });
 
+  it('the ink radius follows the CALLER\'s arrowFontSize -- (int)(size*.80), TextBlockArrow2.java:64-65', () => {
+    // At 20: triSize = trunc(16) = 16, so the tip sits at originX + 16 and
+    // each back corner is (16/2)*(1-cos(4PI/5)) = 14.472 behind it -- the
+    // 13-based ARROW_GLYPH_SIZE (10) would leave both at 10 / 9.045.
+    const [tip, a] = magicArrowGlyphPoints(0, 0, Math.PI / 2, 20);
+    expect(magicArrowTriSize(20)).toBe(16);
+    expect(tip!.x).toBeCloseTo(16, 6);
+    expect(tip!.x - a!.x).toBeCloseTo(8 * (1 - Math.cos((Math.PI * 4) / 5)), 6);
+    // Default 13 is byte-identical to before: ARROW_GLYPH_SIZE IS triSize(13).
+    expect(magicArrowTriSize(13)).toBe(ARROW_GLYPH_SIZE);
+    expect(magicArrowTriSize(58)).toBe(46); // trunc(46.4)
+  });
+
   it('rotating by PI mirrors the tip to the opposite side', () => {
     const [tipRight] = magicArrowGlyphPoints(0, 0, Math.PI / 2, 13);
     const [tipLeft] = magicArrowGlyphPoints(0, 0, Math.PI / 2 + Math.PI, 13);
@@ -163,5 +178,59 @@ describe('computeGuideLinesBox (D6, StringWithArrow.java:115-127)', () => {
     // block wrongly added to 'q' too, the max would be pulled higher still.
     expect(box.width).toBeCloseTo(font.size + abWidth, 6);
     expect(box.height).toBe(font.size + font.size); // sum, not max, across lines
+  });
+});
+
+describe('splitGuideLines (D3, StringWithArrow.java:115-127)', () => {
+  const measurer = new WidthTableMeasurer();
+  const font = { family: 'sans-serif', size: 13 };
+  const gobuco = ['ab >', 'cd <', '< ef', '> gh'];
+
+  it("splits gobuco's 4-line label into one entry per line, direction per token", () => {
+    const lines = splitGuideLines(gobuco, font, measurer);
+    expect(lines.map((l) => l.text)).toEqual(['ab', 'cd', 'ef', 'gh']);
+    expect(lines.map((l) => l.direction)).toEqual([
+      'forward', // 'ab >' -> right
+      'backward', // 'cd <' -> left
+      'backward', // '< ef' -> left
+      'forward', // '> gh' -> right
+    ]);
+    for (const l of lines) {
+      // TextBlockArrow2.calculateDimension is (size, size), TextBlockArrow2.java:87-89
+      expect(l.textWidth).toBe(measurer.measure(l.text, font).width);
+      expect(l.blockWidth).toBe(font.size + l.textWidth);
+      expect(l.blockHeight).toBe(Math.max(font.size, measurer.measure(l.text, font).height));
+    }
+  });
+
+  it('a line with no token has no direction and a bare text block', () => {
+    const [q] = splitGuideLines(['q'], font, measurer);
+    expect(q!.text).toBe('q');
+    expect(q!.direction).toBeUndefined();
+    expect(q!.blockWidth).toBe(q!.textWidth);
+    expect(q!.blockHeight).toBe(measurer.measure('q', font).height);
+  });
+
+  it('a bare token line has empty text and a size x size block', () => {
+    const [bare] = splitGuideLines(['<'], font, measurer);
+    expect(bare!.text).toBe('');
+    expect(bare!.direction).toBe('backward');
+    expect(bare!.textWidth).toBe(0);
+    expect(bare!.blockWidth).toBe(font.size);
+    expect(bare!.blockHeight).toBe(font.size);
+  });
+
+  it('computeGuideLinesBox is exactly max(blockWidth) x sum(blockHeight) over the walk', () => {
+    for (const input of [gobuco, ['ab >', 'q'], ['<', 'plain', 'x >']]) {
+      const walk = splitGuideLines(input, font, measurer);
+      expect(computeGuideLinesBox(input, font, measurer)).toEqual({
+        width: Math.max(...walk.map((l) => l.blockWidth)),
+        height: walk.reduce((acc, l) => acc + l.blockHeight, 0),
+      });
+    }
+    // The pre-T1 pinned value (SI24 T4): 27.4625 x 52 pre-margin = 29x54 DOT box.
+    const box = computeGuideLinesBox(gobuco, font, measurer);
+    expect(box.width).toBeCloseTo(27.4625, 4);
+    expect(box.height).toBe(52);
   });
 });

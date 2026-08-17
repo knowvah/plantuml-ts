@@ -7,14 +7,38 @@
 
 import type { ClassDiagramAST, Relationship } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
 import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
-import { attachPortLabels, multiLineLabelAnchor, portLabelAnchor } from './class-edge-label-anchor.js';
-import { CARDINALITY_FONT_SIZE, splitEdgeLabelLines } from './class-layout-helpers.js';
-import { parseMagicArrowLabel, magicArrowAngle, magicArrowGlyphPoints, type MagicArrowLabel } from './class-magic-arrow.js';
+import {
+  attachPortLabels, guideLinesAnchor, multiLineLabelAnchor, portLabelAnchor, type LabelAnchorContext,
+} from './class-edge-label-anchor.js';
+import { splitEdgeLabelLines } from './class-layout-helpers.js';
+import {
+  hasSeveralGuideLines, magicArrowAngle, magicArrowGlyphPoints, parseMagicArrowLabel, splitGuideLines,
+  type MagicArrowDirection, type MagicArrowLabel,
+} from './class-magic-arrow.js';
 import { applyGuillemet } from '../../core/edge-label-box.js';
 import type { EdgeGeo } from './layout.js';
+
+/**
+ * The text inputs `buildEdgeGeos` threads to every label anchor. SI25 D2:
+ * `labelFont` is `resolveArrowLabelFont(theme)` (`GraphvizImageBuilder
+ * .java:234-235`'s `labelFont` -- the `arrow` style's font) and positions
+ * the MAIN label's ink at the SAME font the DOT box was measured with;
+ * `fontFamily` (`theme.fontFamily`) stays the tail/head cardinality
+ * labels' family, paired with `CARDINALITY_FONT_SIZE` inside
+ * `portLabelAnchor` exactly as before (SI25 D2 scope: main label only).
+ * Upstream's `cardinalityFont` (`:237-238`, the `arrow.cardinality`
+ * signature) is resolved for the DOT box as `theme.cardinalityFontFamily`/
+ * `cardinalityFontSize` (`class-dot-graph.ts`) but NOT yet threaded to the
+ * tail/head ink here -- a named follow-on, not this mission's.
+ */
+export interface EdgeGeoTextContext {
+  readonly measurer: StringMeasurer;
+  readonly labelFont: FontSpec;
+  readonly fontFamily: string;
+}
 
 /**
  * Attach the edge label if present, positioned from @knowvah/dot-engine's own
@@ -48,8 +72,12 @@ function attachEdgeLabel(
   edgeGeo: EdgeGeo,
   rel: Relationship,
   edgeResult: DotLayoutResult['edges'][number],
-  measurer: StringMeasurer,
-  fontFamily: string,
+  // SI25 D2: `labelFont` = `resolveArrowLabelFont(theme)` -- the SAME font
+  // the DOT reservation is measured with (`class-layout-edge-labels.ts`);
+  // replaces a bare `fontFamily` + `CARDINALITY_FONT_SIZE` on every
+  // MAIN-label path below (tail/head cardinality labels keep their own,
+  // `attachPortLabels`).
+  text: EdgeGeoTextContext,
   // G2 item 44: the edge's OWN from-to-ordered points (post-`normalizeEdgePoints`,
   // reversed to entity1->entity2 order when that function flipped the raw
   // dot points) -- ONLY consumed by the magic-arrow angle formula below,
@@ -60,6 +88,8 @@ function attachEdgeLabel(
   if (rel.label === undefined) return;
   if (edgeResult.labelX === undefined || edgeResult.labelY === undefined) return;
   const center = { x: edgeResult.labelX, y: edgeResult.labelY };
+  const { measurer, labelFont } = text;
+  const ctx: LabelAnchorContext = { center, measurer, labelFont };
 
   // M4 cause C (T12b follow-on, `.agent-notes/m4-single-line-width.md`):
   // rewrite `<<x>>` -> `«x»` ONCE, here, before any of the three branches
@@ -89,7 +119,7 @@ function attachEdgeLabel(
   // unchanged (`EdgeGeo.label`, N62).
   const { lines, align } = splitEdgeLabelLines(label);
   if (lines.length > 1) {
-    edgeGeo.labelLines = multiLineLabelAnchor(lines, align, center, measurer, fontFamily);
+    attachMultiLineLabel(edgeGeo, lines, align, (direction) => magicArrowAngle(fromToPoints, direction), ctx);
     return;
   }
 
@@ -103,11 +133,36 @@ function attachEdgeLabel(
   // `applyGuillemet` rewrites -- no corpus fixture combines the two.
   const magic = parseMagicArrowLabel(label);
   if (magic !== undefined) {
-    attachMagicArrow(edgeGeo, magic, fromToPoints, center, measurer, fontFamily);
+    attachMagicArrow(edgeGeo, magic, fromToPoints, ctx);
     return;
   }
 
-  edgeGeo.label = portLabelAnchor(label, center, measurer, fontFamily);
+  edgeGeo.label = portLabelAnchor(label, center, measurer, labelFont);
+}
+
+/**
+ * SI25 D3/D4: the multi-line branch. A label `hasSeveralGuideLines`
+ * (`Display.java:715-740`) takes `StringWithArrow#addSeveralMagicArrows`'
+ * per-line-glyph layout (`guideLinesAnchor`) over the SAME `splitGuideLines`
+ * walk `class-layout-edge-labels.ts#computeMeasuredLabelAttrs` sized the
+ * DOT box from (`SvekEdge.java:288,296-297` -- the ONE `hasSeveralGuideLines`
+ * read that selects between `addSeveralMagicArrows` and `create0`); every
+ * other multi-line label keeps the EXACT pre-existing `create0` path
+ * (`multiLineLabelAnchor`), unchanged.
+ */
+function attachMultiLineLabel(
+  edgeGeo: EdgeGeo,
+  lines: string[],
+  align: 'center' | 'left' | 'right',
+  angleOf: (direction: MagicArrowDirection) => number,
+  ctx: LabelAnchorContext,
+): void {
+  if (hasSeveralGuideLines(lines)) {
+    const walk = splitGuideLines(lines, ctx.labelFont, ctx.measurer);
+    edgeGeo.labelLines = guideLinesAnchor(walk, align, angleOf, ctx);
+    return;
+  }
+  edgeGeo.labelLines = multiLineLabelAnchor(lines, align, ctx.center, ctx.measurer, ctx.labelFont);
 }
 
 /**
@@ -142,13 +197,15 @@ function attachMagicArrow(
   edgeGeo: EdgeGeo,
   magic: MagicArrowLabel,
   fromToPoints: Array<{ x: number; y: number }>,
-  center: { x: number; y: number },
-  measurer: StringMeasurer,
-  fontFamily: string,
+  ctx: LabelAnchorContext,
 ): void {
+  const { center, measurer } = ctx;
   const angle = magicArrowAngle(fromToPoints, magic.direction);
   const hasText = magic.text !== undefined && magic.text !== '';
-  const font = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
+  // SI25 D2: the resolved arrow font (`GraphvizImageBuilder.java:234-235`'s
+  // `labelFont`, `TextBlockArrow2.java:57` reads `getSize2D()` off it) --
+  // `{ theme.fontFamily, 13 }` with no override, byte-identical to before.
+  const font = ctx.labelFont;
   const textWidth = hasText ? measurer.measure(magic.text, font).width : 0;
   const blockLeft = center.x - (font.size + textWidth) / 2;
   edgeGeo.arrowGlyph = {
@@ -159,7 +216,7 @@ function attachMagicArrow(
       magic.text,
       { x: blockLeft + font.size + textWidth / 2, y: center.y },
       measurer,
-      fontFamily,
+      font,
     );
   }
 }
@@ -304,8 +361,7 @@ export function buildEdgeGeos(
   ast: ClassDiagramAST,
   result: DotLayoutResult,
   swappedEdges: Set<number>,
-  measurer: StringMeasurer,
-  fontFamily: string,
+  text: EdgeGeoTextContext,
   posMap: Map<string, DotLayoutResult['nodes'][number]>,
   anchors: Map<string, string>,
   // G2 N51: `theme.colors.graph.arrowThickness` (`skinparam arrowThickness
@@ -352,14 +408,11 @@ export function buildEdgeGeos(
       ...buildStrokeOverride(rel, dashed, defaultArrowThickness),
     };
 
-    attachEdgeLabel(
-      edgeGeo, rel, edgeResult, measurer, fontFamily,
-      matchesFromTo ? pts : [...pts].reverse(),
-    );
+    attachEdgeLabel(edgeGeo, rel, edgeResult, text, matchesFromTo ? pts : [...pts].reverse());
     // `result.nodes` is the collision set — the closest analogue to
     // upstream's `getBibliotekon().allNodes()` (`DotStringFactory.java:466`),
     // which is likewise every laid-out node, in layout order.
-    attachPortLabels(edgeGeo, rel, edgeResult, { measurer, fontFamily, nodes: result.nodes });
+    attachPortLabels(edgeGeo, rel, edgeResult, { measurer: text.measurer, fontFamily: text.fontFamily, nodes: result.nodes });
     edges.push(edgeGeo);
   }
   return edges;

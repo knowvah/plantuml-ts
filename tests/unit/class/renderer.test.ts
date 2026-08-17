@@ -1199,6 +1199,80 @@ describe('renderClass — edges', () => {
     expect(svg.indexOf('<polygon points="75.68')).toBeLessThan(svg.indexOf('>ok<'));
   });
 
+  it('draws one glyph <polygon> per guide line, each BEFORE its own <text> (SI25 D1)', () => {
+    // Geo shape as T2's `guideLinesAnchor` produces it for gobuco-16-ruke239
+    // (`A -> B : ab >\\ncd <\\n< ef\\n> gh`); the points here are jar's own
+    // four `<polygon>`s from that fixture's oracle SVG.
+    const tri = (tip: [number, number], a: [number, number], b: [number, number]) =>
+      ({ points: [{ x: tip[0], y: tip[1] }, { x: a[0], y: a[1] }, { x: b[0], y: b[1] }] });
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          labelLines: [
+            { text: 'ab', x: 79.68, y: 17.5, width: 14.4625, glyph: tri([76.68, 13.889], [67.635, 10.95], [67.635, 16.828]) },
+            { text: 'cd', x: 80.046, y: 30.5, width: 13.7313, glyph: tri([67.046, 26.889], [76.091, 29.828], [76.091, 23.95]) },
+            { text: 'ef', x: 81.508, y: 43.5, width: 10.8063, glyph: tri([68.508, 39.889], [77.553, 42.828], [77.553, 36.95]) },
+            { text: 'gh', x: 79.68, y: 56.5, width: 14.4625, glyph: tri([76.68, 52.889], [67.635, 49.95], [67.635, 55.828]) },
+          ],
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    const glyphAttrs = 'fill="#000" stroke="#000" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>';
+    const polygons = [
+      '<polygon points="76.68,13.889,67.635,10.95,67.635,16.828,76.68,13.889" ' + glyphAttrs,
+      '<polygon points="67.046,26.889,76.091,29.828,76.091,23.95,67.046,26.889" ' + glyphAttrs,
+      '<polygon points="68.508,39.889,77.553,42.828,77.553,36.95,68.508,39.889" ' + glyphAttrs,
+      '<polygon points="76.68,52.889,67.635,49.95,67.635,55.828,76.68,52.889" ' + glyphAttrs,
+    ];
+    for (const p of polygons) expect(svg).toContain(p);
+    // Same attribute set as the whole-label glyph (one emitter), and jar's
+    // interleaved order: polygon, text, polygon, text... per line
+    // (`TextBlockHorizontal#drawU`, `mergeLR(arrow, label)` arrow first).
+    const idx = (needle: string): number => svg.indexOf(needle);
+    expect(idx(polygons[0]!)).toBeLessThan(idx('>ab<'));
+    expect(idx('>ab<')).toBeLessThan(idx(polygons[1]!));
+    expect(idx(polygons[1]!)).toBeLessThan(idx('>cd<'));
+    expect(idx('>cd<')).toBeLessThan(idx(polygons[2]!));
+    expect(idx(polygons[2]!)).toBeLessThan(idx('>ef<'));
+    expect(idx('>ef<')).toBeLessThan(idx(polygons[3]!));
+    expect(idx(polygons[3]!)).toBeLessThan(idx('>gh<'));
+    expect((svg.match(/<polygon points="7[67]\.|<polygon points="6[78]\./g) ?? []).length).toBe(4);
+  });
+
+  it('a bare-token guide line draws its glyph and NO empty <text> (mergeLR b2==EMPTY arm)', () => {
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          labelLines: [
+            { text: '', x: 79.68, y: 17.5, width: 0, glyph: { points: [{ x: 76.68, y: 13.889 }, { x: 67.635, y: 10.95 }, { x: 67.635, y: 16.828 }] } },
+            { text: 'cd', x: 80.046, y: 30.5, width: 13.7313 },
+          ],
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).toContain('<polygon points="76.68,13.889,');
+    expect(svg).not.toContain('textLength="0"');
+    expect(svg).toContain('>cd</text>');
+  });
+
+  it('a multi-line label with NO glyph renders exactly as before (no <polygon> at all)', () => {
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          labelLines: [
+            { text: 'this is', x: 44, y: 100, width: 29.6563 },
+            { text: 'lines', x: 46, y: 126, width: 26.8125 },
+          ],
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).not.toContain('stroke-linejoin="miter"');
+    expect(svg).toContain('<text x="44" y="100" font-size="13" fill="#000" textLength="29.656">this is</text>');
+  });
+
   it('does not emit a <path> when points array is empty', () => {
     // An edge with no points produces no <path>
     const geo = makeMinimalGeo({

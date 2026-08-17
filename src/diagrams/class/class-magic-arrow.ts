@@ -44,7 +44,8 @@ import {
   parseMagicArrowLabel,
 } from '../../core/edge-label-box.js';
 import { splitEdgeLabelLines } from './class-edge-label-lines.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 export { type MagicArrowDirection, type MagicArrowLabel, parseMagicArrowLabel };
 
@@ -68,40 +69,83 @@ export function hasSeveralGuideLines(lines: readonly string[]): boolean {
 }
 
 /**
- * `StringWithArrow.addSeveralMagicArrows` (`descdiagram/command/
- * StringWithArrow.java:115-127`, D6): per line, construct a fresh
- * `StringWithArrow` — reused here as {@link parseMagicArrowLabel}, the SAME
- * single-line token rule that class's own constructor already applies
- * (`StringWithArrow.java:56-91`; per-line re-checking is safe because a
- * single line, having no embedded newline, can never itself satisfy
- * `hasSeveralGuideLines`, so the constructor's own internal guard is always
- * false at this call depth) — then `create9` measures the line's
+ * One line of a multi-guide-line label as `StringWithArrow
+ * #addSeveralMagicArrows` builds it (`descdiagram/command/StringWithArrow
+ * .java:115-127`, D3): `text` is the line's own already-stripped text (or
+ * the raw line when it carries no token), `direction` the per-line token's
+ * direction (undefined when the line has none), `textWidth` the measured
+ * width of `text`, and `blockWidth`/`blockHeight` the size of the per-line
+ * `mergeLR(arrow, line)` block — `font.size + textWidth` × `max(font.size,
+ * textHeight)` iff the line has a token (`TextBlockArrow2.calculateDimension`
+ * is `(size, size)`, `klimt/shape/TextBlockArrow2.java:87-89`; `mergeLR`
+ * sums widths and maxes heights, `XDimension2D.java:108-112`), else the bare
+ * text size. `.80` (`ARROW_GLYPH_SIZE`) never enters this walk — it is
+ * draw-only (`TextBlockArrow2.java:64-65`).
+ */
+export interface GuideLine {
+  text: string;
+  direction?: MagicArrowDirection;
+  textWidth: number;
+  blockWidth: number;
+  blockHeight: number;
+}
+
+/**
+ * The single per-line walk behind both the DOT box
+ * ({@link computeGuideLinesBox}) and the per-line glyph/text ink (D3: the
+ * same string measured and drawn must share one path). Per line, construct
+ * a fresh `StringWithArrow` — reused here as {@link parseMagicArrowLabel},
+ * the SAME single-line token rule that class's own constructor already
+ * applies (`StringWithArrow.java:56-91`; per-line re-checking is safe
+ * because a single line, having no embedded newline, can never itself
+ * satisfy `hasSeveralGuideLines`, so the constructor's own internal guard
+ * is always false at this call depth) — then `create9` measures the line's
  * (already-stripped) remaining text at `font`, and iff that line carried a
  * token, `mergeLR`s a `font.size x font.size` arrow block onto it
  * (`TextBlockArrow2.calculateDimension`, `klimt/shape/TextBlockArrow2.java
  * :57,87` — `.80`/`ARROW_GLYPH_SIZE` is draw-only, `:64-65`, and never
  * enters a measurement, the same rule the single-line magic-arrow path
- * already follows). The per-line blocks then `mergeTB` top-to-bottom: width
- * MAXES, height SUMS (`XDimension2D.java:94-98`) — mirrored inline rather
- * than importing `core/edge-label-box.ts`'s private `mergeTB`, which that
- * module does not export (T4 write-set boundary: `core/edge-label-box.ts`
- * is read-only here).
+ * already follows).
+ */
+export function splitGuideLines(
+  lines: readonly string[],
+  font: FontSpec,
+  measurer: StringMeasurer,
+): GuideLine[] {
+  return lines.map((line) => {
+    const magic = parseMagicArrowLabel(line);
+    const text = magic === undefined ? line : (magic.text ?? '');
+    const m = text !== '' ? measurer.measure(text, font) : { width: 0, height: 0 };
+    const hasToken = magic !== undefined;
+    return {
+      text,
+      ...(hasToken ? { direction: magic.direction } : {}),
+      textWidth: m.width,
+      blockWidth: hasToken ? font.size + m.width : m.width,
+      blockHeight: hasToken ? Math.max(font.size, m.height) : m.height,
+    };
+  });
+}
+
+/**
+ * `StringWithArrow.addSeveralMagicArrows` (`descdiagram/command/
+ * StringWithArrow.java:115-127`, D6): the per-line blocks of
+ * {@link splitGuideLines} `mergeTB` top-to-bottom: width MAXES, height SUMS
+ * (`XDimension2D.java:94-98`) — mirrored inline rather than importing
+ * `core/edge-label-box.ts`'s private `mergeTB`, which that module does not
+ * export (T4 write-set boundary: `core/edge-label-box.ts` is read-only
+ * here).
  */
 export function computeGuideLinesBox(
   lines: readonly string[],
-  font: { family: string; size: number },
+  font: FontSpec,
   measurer: StringMeasurer,
 ): { width: number; height: number } {
   let width = 0;
   let height = 0;
-  for (const line of lines) {
-    const magic = parseMagicArrowLabel(line);
-    const text = magic === undefined ? line : (magic.text ?? '');
-    const m = text !== '' ? measurer.measure(text, font) : { width: 0, height: 0 };
-    const lineWidth = magic !== undefined ? font.size + m.width : m.width;
-    const lineHeight = magic !== undefined ? Math.max(font.size, m.height) : m.height;
-    width = Math.max(width, lineWidth);
-    height += lineHeight;
+  for (const gl of splitGuideLines(lines, font, measurer)) {
+    width = Math.max(width, gl.blockWidth);
+    height += gl.blockHeight;
   }
   return { width, height };
 }
@@ -120,7 +164,21 @@ export function computeGuideLinesBox(
  * size, never this constant — see {@link magicArrowGlyphPoints}'s `y`
  * parameter and `class-edge-geo.ts#attachMagicArrow`.
  */
-export const ARROW_GLYPH_SIZE = Math.trunc(13 * 0.8);
+export const ARROW_GLYPH_SIZE = magicArrowTriSize(ARROW_LABEL_FONT_SIZE);
+
+/**
+ * `triSize` for an arbitrary arrow font size -- `(int) (size * .80)`
+ * (`klimt/shape/TextBlockArrow2.java:64-65`), `size` = `fontConfiguration
+ * .getFont().getSize2D()` (`:57`), i.e. the RESOLVED arrow font
+ * (`resolveArrowLabelFont(theme)`, `GraphvizImageBuilder.java:234-235`).
+ * {@link ARROW_GLYPH_SIZE} is this at the default 13; an `arrow { FontSize }`
+ * override scales the ink triangle exactly as it scales the block
+ * (SI25 D2 -- previously the radius stayed pinned at the 13-based constant
+ * while the block followed the caller's size).
+ */
+export function magicArrowTriSize(arrowFontSize: number): number {
+  return Math.trunc(arrowFontSize * 0.8);
+}
 
 /**
  * M4 cause D bare-arrow sub-case (`.agent-notes/m4-single-line-width.md`,
@@ -176,7 +234,7 @@ function arrowPoint(len: number, alpha: number): { x: number; y: number } {
  * draw-only, `:64-65`) — see `class-geo-builders.ts#attachEdgeLabel`'s doc
  * comment for the block layout this glyph sits within. `cx` uses
  * `triSize/2` (`UTranslate(triSize/2, ...)`, `:68`, x-translate is
- * draw-only and stays `ARROW_GLYPH_SIZE`-based); `cy` uses
+ * draw-only, {@link magicArrowTriSize} of the SAME `arrowFontSize`); `cy` uses
  * `arrowFontSize/2` (`UTranslate(..., size/2)`, same line, y-translate is
  * the FULL font size, not `triSize`).
  */
@@ -186,7 +244,7 @@ export function magicArrowGlyphPoints(
   angleRadians: number,
   arrowFontSize: number,
 ): Array<{ x: number; y: number }> {
-  const half = ARROW_GLYPH_SIZE / 2;
+  const half = magicArrowTriSize(arrowFontSize) / 2;
   const beta = (Math.PI * 4) / 5;
   const cx = originX + half;
   const cy = originY + arrowFontSize / 2;

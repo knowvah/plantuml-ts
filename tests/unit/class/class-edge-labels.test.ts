@@ -24,6 +24,7 @@ import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { edgeLabelAttrs } from '../../../src/diagrams/class/class-layout-edge-labels.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { Relationship } from '../../../src/diagrams/class/class-relationship-ast.js';
+import { deepMergeTheme } from '../../../src/core/theme.js';
 
 const measurer = new FormulaMeasurer();
 
@@ -192,5 +193,31 @@ describe('M4 cause C — guillemet rewrite (xopuku-46-nefa571, tebore-53-tese080
     // hardcoded pixel count (no corpus oracle covers this synthetic label).
     const expectedWidth = Math.trunc(oracleMeasurer.measure('see «delegate» now', font).width + 2 * 1);
     expect(Math.trunc(attrs.labelWidth!)).toBe(expectedWidth);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SI25 D2/D3 -- the DOT reservation and the ink share one font and one walk
+// ---------------------------------------------------------------------------
+
+describe('SI25 — guide-line label: DOT box and geo ink agree at the resolved arrow font (D2/D3)', () => {
+  const oracleMeasurer = new DeterministicMeasurer();
+  const guideRel: Relationship = { from: 'A', to: 'B', type: 'association', label: 'ab >\\ncd <\\n< ef\\n> gh' };
+
+  it.each([13, 20])('at arrow FontSize %i the reserved box width is the geo merged block width + 2*marginLabel', (size) => {
+    const theme = deepMergeTheme(defaultTheme, { colors: { graph: { arrowFontSize: size } } });
+    const font = { family: theme.fontFamily, size };
+    // The DOT side: `edgeLabelAttrs` measures via `computeGuideLinesBox`
+    // (`class-layout-edge-labels.ts`) then adds `2 * marginLabel` (1 each side).
+    const attrs = edgeLabelAttrs(guideRel, font, { family: theme.fontFamily, size: 13 }, oracleMeasurer);
+    // The ink side: `buildEdgeGeos` -> `guideLinesAnchor` over `splitGuideLines`.
+    const geo = layoutClass(makeAST({ relationships: [guideRel] }), theme, oracleMeasurer);
+    const lines = geo.edges[0]!.labelLines!;
+    expect(lines).toHaveLength(4);
+    const merged = Math.max(...lines.map((l) => l.x + l.width)) - Math.min(...lines.map((l) => l.x - size));
+    expect(attrs.labelWidth!).toBeCloseTo(merged + 2, 6);
+    expect(attrs.labelHeight!).toBeCloseTo(4 * size + 2, 6);
+    // Every line carries a glyph whose slot is `size` wide (text = left + size).
+    for (const l of lines) expect(l.glyph).toBeDefined();
   });
 });

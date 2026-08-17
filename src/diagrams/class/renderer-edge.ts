@@ -198,6 +198,32 @@ function resolveArrowTagStyle(
   return found;
 }
 
+/**
+ * G2 item 44 / SI25 D1: the magic-arrow glyph `<polygon>` -- jar's
+ * `TextBlockArrow2#drawU` (`klimt/shape/TextBlockArrow2.java:63-77`), the
+ * ONE emitter for both the whole-label glyph (`geo.arrowGlyph`) and the
+ * per-line glyphs (`geo.labelLines[i].glyph`). `fill`/`stroke` are ALWAYS
+ * `#000000` (the label font's own color, `FontConfiguration#getColor()` --
+ * NOT the edge's own `strokeColor`, unlike the main arrowhead polygons),
+ * jar-verified against `lojepe-37-liri985`'s golden `<polygon>`. Drawn as
+ * separate presentation attributes (not one `style="..."` string like
+ * jar's own klimt-pipeline output) -- semantically identical post-
+ * normalization (`tests/oracle/svg-conformance/normalize.ts` expands
+ * `style` into individual attributes before comparing). T7b: routed
+ * through `attrs()` so each coordinate is formatted (ADR-1). Returns
+ * `undefined` for a malformed (non-3-point) glyph.
+ */
+function magicArrowPolygon(points: ReadonlyArray<{ x: number; y: number }>): string | undefined {
+  const [p0, p1, p2] = points;
+  if (p0 === undefined || p1 === undefined || p2 === undefined) return undefined;
+  const fmt = (n: number): string => formatDecimal(n, DEFAULT_SVG_DECIMALS);
+  const pts = [p0, p1, p2, p0].map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(',');
+  return `<polygon${attrs([
+    ['points', pts], ['fill', '#000000'], ['stroke', '#000000'],
+    ['stroke-width', 1], ['stroke-linejoin', 'miter'], ['stroke-miterlimit', 10],
+  ])}/>`;
+}
+
 export function renderEdge(
   geo: EdgeGeo,
   theme: Theme,
@@ -275,36 +301,12 @@ export function renderEdge(
     );
   }
   parts.push(arrowheads.tail, arrowheads.head);
-  // G2 item 44: the magic-arrow glyph -- a small filled triangle, jar's
-  // `TextBlockArrow2#drawU` (klimt/shape/TextBlockArrow2.java:63-77).
-  // `fill`/`stroke` are ALWAYS `#000000` (the cardinality/label font's own
-  // color, `FontConfiguration#getColor()` -- NOT the edge's own
-  // `strokeColor`, unlike the main arrowhead polygons above), jar-verified
-  // against `lojepe-37-liri985`'s golden `<polygon>`. Drawn as separate
-  // presentation attributes (not one `style="..."` string like jar's own
-  // klimt-pipeline output) -- semantically identical post-normalization
-  // (`tests/oracle/svg-conformance/normalize.ts` expands `style` into
-  // individual attributes before comparing), so the format difference
-  // costs nothing.
+  // G2 item 44: the whole-label magic-arrow glyph -- see {@link
+  // magicArrowPolygon}. Drawn before the label text (`mergeLR(arrow,
+  // label)`, `SvekEdge.java:284,304`).
   if (geo.arrowGlyph !== undefined) {
-    const [p0, p1, p2] = geo.arrowGlyph.points;
-    if (p0 !== undefined && p1 !== undefined && p2 !== undefined) {
-      // T7b: routed through `attrs()` (was a raw template literal) --
-      // formats each coordinate (ADR-1) while preserving the discrete
-      // presentation-attribute shape the doc comment above already
-      // documents as a deliberate, tested-equivalent divergence from
-      // jar's combined `style=` (normalize.ts expands `style` before
-      // comparing, so the attribute SHAPE is unaffected; only the raw
-      // numeric formatting was the defect).
-      const fmt = (n: number): string => formatDecimal(n, DEFAULT_SVG_DECIMALS);
-      const pts = [p0, p1, p2, p0].map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(',');
-      parts.push(
-        `<polygon${attrs([
-          ['points', pts], ['fill', '#000000'], ['stroke', '#000000'],
-          ['stroke-width', 1], ['stroke-linejoin', 'miter'], ['stroke-miterlimit', 10],
-        ])}/>`,
-      );
-    }
+    const glyph = magicArrowPolygon(geo.arrowGlyph.points);
+    if (glyph !== undefined) parts.push(glyph);
   }
   // G2/N25 (tailLabel/headLabel) + G2/N62 (label): a relationship's plain
   // text label AND its tail/head multiplicity-role labels shared ONE
@@ -330,7 +332,21 @@ export function renderEdge(
   // G2 item 43: `geo.labelLines` (multi-line `label`) draws one `<text>`
   // per line -- mutually exclusive with `geo.label`
   // (`class-geo-builders.ts#attachEdgeLabel` sets exactly one of the two).
+  // SI25 D1: a guide-line label's per-line glyph (`labelLines[i].glyph`,
+  // `StringWithArrow#addSeveralMagicArrows`) draws BEFORE its line's
+  // `<text>` -- `mergeLR(arrow, label, ...)` puts the arrow block first and
+  // `TextBlockHorizontal#drawU` walks its blocks in order
+  // (`klimt/shape/TextBlockHorizontal.java:79-91`); jar's `gobuco-16-
+  // ruke239` SVG interleaves `<polygon>`, `<text>`, `<polygon>`, `<text>`...
+  // per line. A bare-token line (`text === ''`, T2's `splitGuideLines`) is
+  // the arrow block alone (`mergeLR`'s `b2 == EMPTY` arm, `TextBlockUtils
+  // .java:112-119`), so no `<text>` is emitted for it.
   for (const line of geo.labelLines ?? []) {
+    if (line.glyph !== undefined) {
+      const glyph = magicArrowPolygon(line.glyph.points);
+      if (glyph !== undefined) parts.push(glyph);
+      if (line.text === '') continue;
+    }
     parts.push(
       text(line.x, line.y, line.text, {
         fill: '#000000', ...labelFontAttrs,

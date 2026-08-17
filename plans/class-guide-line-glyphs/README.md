@@ -44,10 +44,10 @@ Score clause by clause with a measurement; do not reword a clause.
 
 | Batch | What | Tasks | Done |
 |---|---|---|---|
-| [1](batch-1/overview.md) | Shared per-line walk (zero movement) | T1 | [ ] |
-| [2](batch-2/overview.md) | Geometry: per-line glyph + FontSpec threading | T2 | [ ] |
-| [3](batch-3/overview.md) | Renderer: draw the glyphs | T3 | [ ] |
-| [4](batch-4/overview.md) | Close-out | T4 | [ ] |
+| [1](batch-1/overview.md) | Shared per-line walk (zero movement) | T1 | [x] |
+| [2](batch-2/overview.md) | Geometry: per-line glyph + FontSpec threading | T2 | [x] |
+| [3](batch-3/overview.md) | Renderer: draw the glyphs | T3 | [x] |
+| [4](batch-4/overview.md) | Close-out | T4 | [x] |
 
 ## Quality gates
 
@@ -116,3 +116,90 @@ in.svg`; new oracles only via `scripts/oracle-render.sh`.
   [diagrams/data-flow.md](diagrams/data-flow.md)
 - Predecessor: `plans/edge-label-box-followups/` (D6, corrections, T4 spec and
   journal row), `plans/edge-label-box-backlog/batch-6/T12c-magic-arrow.md`
+
+## Close-out (2026-08-17)
+
+Every number below was measured on a clean tree at **`3fe4aca4`** (the last
+code commit; the commits after it are planning docs) — `shape-match-report`
+and `dot-sync-report` in a detached worktree (`.agent-notes/si24-census-
+worktree-needs-ignored-assets.md` recipe), the four gates in the repo. The
+start baseline was captured the same way at `7ba67fcd` and matched this
+README's starting state exactly (785 / 26,255; class 705/711).
+
+### Exit bar, scored clause by clause
+
+| # | Clause | | Measurement |
+|---|---|---|---|
+| 1 | `gobuco`/`lapoma` class SVG each carry **four** glyph `<polygon>`s, one per line, right/left/left/right, shape byte-exact to jar's | **✓** | Both SVGs: 4 glyph polygons, interleaved `<polygon>`,`<text>` per line as jar's. Directions forward/backward/backward/forward. Shape: tip-to-back deltas 9.045 / ±2.939 identical to jar; every glyph and text sits **0.23 px** right of jar — the same offset jar's own arrowhead shows (`111.722` vs `111.72`), the accepted N25/N62 residual, not chased. |
+| 2 | Every other class fixture byte-identical in DOT and SVG, except `camuna`/`ticuxa`/`nafiki` moving toward jar under D2 | **✓** | Full 722-fixture class SVG dump at `7ba67fcd` vs `3fe4aca4`: **exactly 4 differ** — `gobuco`, `lapoma`, `camuna`, `ticuxa`. `camuna`: `foo1`/`foo2` `textLength` 25.269 → **27.213** (= jar), baseline fraction `.611` → **`.889`** (= jar). `ticuxa`: `toto` x/y/textLength **39.969/131.111/96.425** vs jar 39.97/131.111/96.425, doc 114 → **151** vs jar 152. `nafiki` has no main label — unmoved, correctly. DOT: class 705/711 unchanged (T1/T2 zero-movement on the DOT side, by construction — same walk). |
+| 3 | Class DOT EQUAL ≥ 705/711; ratchet pins hold or move toward jar; `shape-match-report` no fixture rises (per fixture, vs the start baseline) | **✓** | Class DOT **705/711**; state 266 · component 259 · usecase 92 · object 78 (all unchanged). Class SVG ratchet **315/315** hold (none of the four moved fixtures is a zero-diff pin). Census 785 doc-size-exact (unchanged) / 26,255 → **26,256** matched-shapes; per-fixture diff: **2 rows changed, both upward** (`ticuxa` 13/14 → **14/14**, `lapoma` doc 68 → **70** vs jar 72), zero fell. `gobuco` stays 14/22 because its texts and new polygons all carry the 0.23 px residual against `POSITION_TOL` 0.05. |
+| 4 | All four quality gates green | **✓** | `npm test` 595 files / **14,508** passed / 1 todo, coverage **95.37 / 90.35 / 96.93 / 96.46** · `npm run typecheck` exit 0 · `npm run lint` exit 0 · `npm run build` exit 0. |
+
+**Scored 4 of 4.** No clause reworded.
+
+### Fixtures moved (each toward jar)
+
+| slug | before → after | jar | what moved |
+|---|---|---|---|
+| `class/gobuco-16-ruke239` | 0 → **4** glyph polygons; text `ab >` → `ab` (stripped, textLength 22.1 → 14.463); doc 168x102 | 4 polygons; 168x102 | per-line glyphs + stripped text |
+| `class/lapoma-04-vaga142` | 0 → **4** glyph polygons; doc 68x232 → **70x232** | 72x232 | as `gobuco`; doc +2 |
+| `class/camuna-58-veca254` | `foo1`/`foo2` textLength 25.269 → **27.213**, baseline `.611` → `.889` | 27.213 / `.889` | main-label ink at 14 bold (D2) |
+| `class/ticuxa-26-tixo262` | `toto` at 13/sans → **58/Courier/italic** at jar's x/y; doc 114 → **151**; matched 13/14 → **14/14** | 152 | main-label ink at 58 (D2) |
+
+### Decisions and reading, beyond D1–D6 (all journalled)
+
+- **`LinkArrow#mute` (`abel/LinkArrow.java:55-71`)** — DIRECT_NORMAL returns
+  the guide unchanged, BACKWARD wraps it with `Math.PI +`; a multi-guide-line
+  link's own `LinkArrow` is `NONE_OR_SEVERAL` (`StringWithArrow.java:63-65`
+  via `Labels.java:64`), so the guide carries the un-reversed internal angle
+  and the per-line direction reduces to `magicArrowAngle(fromToPoints, dir)`
+  — the whole-label path, byte-for-byte.
+- **Text baseline in the guide-line block** — `mergeLR`'s `(H - textHeight)/2`
+  centring is identically 0 under this port's `height === font.size`
+  measurers, so the baseline is the existing `size - descent` from the line
+  top; the arrow slot's `(blockHeight - size)/2` IS mirrored.
+- **D2 seam shape** — `buildEdgeGeos`/`attachEdgeLabel` take one
+  `EdgeGeoTextContext { measurer, labelFont, fontFamily }` (8 → 7 params)
+  because tail/head must keep `theme.fontFamily`, which differs from
+  `labelFont.family` under `ArrowFontName`; `portLabelAnchor` takes a
+  `FontSpec` (tail/head pass `{fontFamily, 13}` — unchanged behaviour).
+- **`fix(T1)` `722c2bee`, flagged for review** — `magicArrowGlyphPoints` used
+  the 13-based `ARROW_GLYPH_SIZE` (10) as its ink radius for every font size;
+  `TextBlockArrow2.java:64-65` derives `triSize = (int)(size * .80)` from the
+  resolved font (`:57`). New `magicArrowTriSize(size)`; byte-identical at 13
+  (proven by the full SVG dump). Committed separately in T1's write-set so
+  each commit's diff matches its own task's files.
+
+### Tasks: 4 planned → 4 executed (+ one `fix(T1)` commit)
+
+All four executed directly by the orchestrator (single-task batches, no
+parallel sibling; the Java reading stays in one context). Commits: `a9e40bc6`
+T1 · `722c2bee` fix(T1) · `ca590920` T2 · `3fe4aca4` T3.
+
+### Follow-ons (named, not widened)
+
+1. **Description/state per-line glyphs** — description's `link-edge-attrs.ts`
+   already shares `parseMagicArrowLabel` (SI23 T12c D1); neither engine draws
+   the whole-label glyph, let alone per-line. Corpus reach unmeasured.
+2. **Tail/head cardinality ink font** — anchored at `theme.fontFamily` +
+   `CARDINALITY_FONT_SIZE` while the DOT box uses
+   `theme.cardinalityFontFamily/Size` (`class-dot-graph.ts:390`): an ink/box
+   drift under `arrow.cardinality { FontSize }` (`camuna`, `nafiki`). D2
+   scoped this mission to the main label.
+3. **`class-ink-box.ts#addEdgeTextInk`** uses the constant 13 as the text
+   ascent for every edge label regardless of its font (`ticuxa` doc 151 vs
+   152 is the likely residue).
+4. **`lapoma` doc width 70 vs 72** — a text-ink extent rule for the guide-line
+   block, not the glyph (every element differs by exactly the 0.23 residual;
+   only the document width differs by 2). Mechanism not established.
+5. **Arrow-label font colour** — still `fill="#000000"` for both text and glyph
+   (`camuna` Blue, `ticuxa` `#FF0000`); carried from SI24.
+6. **A bare-token guide line** (`<` alone inside a multi-guide-line label) is
+   handled (glyph, no `<text>`) but has zero corpus reach — author a fixture
+   and oracle when a mission next touches this seam.
+
+### Landing state
+
+Branch `feat/class-guide-line-glyphs`, all four gates green at head. Merge
+with a **merge commit** (per-task ids above are cited throughout the journal).
+No PR was opened by the executor.

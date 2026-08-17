@@ -325,9 +325,16 @@ export function buildInkBox(
     }
     // G2 item 44: the magic-arrow glyph's own 3 vertices -- unlike the
     // single-point simplification above, the WHOLE triangle is cheap to
-    // bound exactly (only 3 points), so every vertex is added.
+    // bound exactly (only 3 points), so every vertex is added. SI25 D1: the
+    // per-line glyphs of a multi-guide-line label (`labelLines[i].glyph`)
+    // get the identical rule -- `UPolygon` through `LimitFinder` either way.
     if (e.arrowGlyph !== undefined) {
       for (const p of e.arrowGlyph.points) addPoint(box, p.x, p.y);
+    }
+    for (const line of e.labelLines ?? []) {
+      if (line.glyph !== undefined) {
+        for (const p of line.glyph.points) addPoint(box, p.x, p.y);
+      }
     }
     // G2 N54: arrowhead-polygon ink (`UPolygon`/`HACK_X_FOR_POLYGON=10` and
     // every other decor shape's own `LimitFinder` rule) -- see

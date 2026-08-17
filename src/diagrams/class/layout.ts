@@ -31,6 +31,7 @@ import type { ClassDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as layout } from '../../core/graph-layout.js';
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { filterRemovedEntities, computeHiddenIds } from './class-directives.js';
 import { foldEffectiveActions } from './class-directives-removal.js';
 import { collapseEmptyNamespacesFinal } from './class-namespace.js';
@@ -168,7 +169,16 @@ function shiftEdgeGeo(edge: EdgeGeo, dx: number, dy: number): EdgeGeo {
       ? { label: { ...edge.label, x: edge.label.x + dx, y: edge.label.y + dy } }
       : {}),
     ...(edge.labelLines !== undefined
-      ? { labelLines: edge.labelLines.map((l) => ({ ...l, x: l.x + dx, y: l.y + dy })) }
+      ? {
+        labelLines: edge.labelLines.map((l) => ({
+          ...l,
+          x: l.x + dx,
+          y: l.y + dy,
+          ...(l.glyph !== undefined
+            ? { glyph: { points: l.glyph.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) } }
+            : {}),
+        })),
+      }
       : {}),
     ...(edge.arrowGlyph !== undefined
       ? { arrowGlyph: { points: edge.arrowGlyph.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) } }
@@ -285,9 +295,14 @@ function layoutSinglePage(
   // graphviz cluster polygon (`result.clusters`), not a member-bbox walk --
   // see `class-geo-builders.ts#buildNamespaceGeos`'s own doc comment.
   const namespaces = buildNamespaceGeos(effAst, theme, measurer, result.clusters, clusterIdByNs);
+  // SI25 D2: the MAIN label's ink follows `resolveArrowLabelFont(theme)` --
+  // the SAME font `class-layout-edge-labels.ts` measured the DOT box with;
+  // tail/head cardinality labels stay at `theme.fontFamily` (see
+  // `class-edge-geo.ts#EdgeGeoTextContext`).
   const edges = buildEdgeGeos(
-    effAst, result, swappedEdges, measurer, theme.fontFamily, posMap, anchors,
-    theme.colors.graph.arrowThickness,
+    effAst, result, swappedEdges,
+    { measurer, labelFont: resolveArrowLabelFont(theme), fontFamily: theme.fontFamily },
+    posMap, anchors, theme.colors.graph.arrowThickness,
   );
   // Mission note-leaf-model D3: `mapNoteGeos` reads NO classifier -- a
   // member-tip (`::member`) note's notch is resolved inside the draw passes
