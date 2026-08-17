@@ -16,11 +16,11 @@ import type { DiagramCtx } from './state-composite-pass.js';
 import type { ReservedLabelBox } from '../../core/edge-label-box.js';
 import { computeReservedLabelBox } from './state-transition-label.js';
 import { computeMergedLabelBox } from '../../core/edge-label-box.js';
-// `EntityImageNoteLink`'s own margins — see `measureLinkNoteDim`'s doc in
-// ./state-dot-graph.ts (duplicated here per this file's own D1 rationale,
-// avoid-import-cycle) for the full derivation.
-import { OPALE_MARGIN_X1, OPALE_MARGIN_X2, OPALE_MARGIN_Y } from '../../core/svek/image/Opale.js';
-import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+// `EntityImageNoteLink`'s real dimension — shared-seam-extraction T6, D1:
+// ONE port, `core/svek/image/EntityImageNoteLink.ts`, replacing this file's
+// former private copy (was duplicated from ./state-dot-graph.ts to avoid an
+// import cycle; the core module has no such cycle, both files import it).
+import { measureLinkNoteDim } from '../../core/svek/image/EntityImageNoteLink.js';
 
 /** Guard/action/plain label — same precedence as ./state-dot-graph.ts's
  *  `transitionLabelText` (duplicated to avoid an import cycle: layout.ts
@@ -34,36 +34,13 @@ function transitionLabelOf(t: Transition): string | undefined {
   return undefined;
 }
 
-/** `EntityImageNoteLink`'s own dimension — duplicated from
- *  ./state-dot-graph.ts's `measureLinkNoteDim` (D1, same avoid-import-cycle
- *  rationale as `transitionLabelOf` above); see that file's doc comment for
- *  the full `ComponentRoseNote`/`Opale` derivation and its numeric proof
- *  against `fotigo-12-gufu949`. `ROSE_NOTE_PADDING` = `Rose.java:65-66`. */
-const ROSE_NOTE_PADDING = 5;
-
-interface LabelDims {
-  width: number;
-  height: number;
-}
-
-function measureLinkNoteDim(text: string, fontFamily: string, measurer: StringMeasurer): LabelDims {
-  const font = { family: fontFamily, size: NOTE_FONT_SIZE };
-  const lines = text.split('\n');
-  let maxW = 0;
-  for (const ln of lines) maxW = Math.max(maxW, measurer.measure(ln, font).width);
-  return {
-    width: maxW + OPALE_MARGIN_X1 + OPALE_MARGIN_X2 + 2 * ROSE_NOTE_PADDING,
-    height: lines.length * NOTE_FONT_SIZE + 2 * OPALE_MARGIN_Y + 2 * ROSE_NOTE_PADDING,
-  };
-}
-
 type EdgeAttrs = NonNullable<DotInputEdge['attributes']>;
 
 /** See ./state-dot-graph.ts's `computeEdgeLabelBox` (same split rationale:
  *  keep `edgeLabelAttrs`'s own optional-presence branching separate from
  *  this one's which-formula branching). `halfWidth`/`hasMiddleDecor` are
- *  always false for state — see ./state-dot-graph.ts's
- *  `measureLinkNoteDim` doc for the citations. */
+ *  always false for state — see `core/svek/image/EntityImageNoteLink.ts`'s
+ *  doc comment for the `measureLinkNoteDim` citations. */
 function computeEdgeLabelBox(
   t: Transition,
   text: string | undefined,
@@ -73,7 +50,7 @@ function computeEdgeLabelBox(
   if (t.linkNote === undefined) return computeReservedLabelBox(text!, font, measurer, t.from === t.to);
   return computeMergedLabelBox({
     label: text ?? '',
-    noteDim: measureLinkNoteDim(t.linkNote, font.family, measurer),
+    noteDim: measureLinkNoteDim(t.linkNote, { family: font.family }, measurer),
     position: t.linkNotePosition ?? 'bottom',
     halfWidth: false,
     hasMiddleDecor: false,
