@@ -1029,6 +1029,35 @@ describe('renderDescription — edges', () => {
     expect(defaultTheme.colors.graph.edgeLabel).not.toBe('#000000');
   });
 
+  // SI26 T4 -- `arrowLabelFontConfig` (renderer-edge.ts) now reads its
+  // colour off `resolveArrowLabelFont` (D2: one resolver, one reader) rather
+  // than the jar-default-text constant, mirroring upstream's `labelFont`
+  // `FontConfiguration` carrying font AND colour together
+  // (`svek/GraphvizImageBuilder.java:234-236`). Oracle experiment f
+  // (`plans/arrow-label-font-colour/decisions.md`): component
+  // `[A] --> [B] : lab` under `<style> arrow { FontColor blue }` draws the
+  // label `fill="#00F"` -- the klimt pipeline canonicalizes `#0000FF` to its
+  // 3-digit shorthand (see this file's `#F00`/`#000` pins above), so the
+  // assertion targets what the pipeline actually emits, not a hand-typed
+  // `#00F`.
+  it('an arrowFontColor theme override colours the edge label text', () => {
+    const theme = deepMergeTheme(defaultTheme, { colors: { graph: { arrowFontColor: '#0000FF' } } });
+    const svg = renderDescription(twoNodeGeo({ label: { text: 'lab', x: 80, y: 45 } }), theme);
+    const labelText = svg.match(/<text[^>]*>lab<\/text>/)?.[0];
+    expect(labelText).toContain('fill="#00F"');
+  });
+
+  // D3 pin: with no arrowFontColor override the label stays at the jar's
+  // root `FontColor black` default (`ARROW_LABEL_DEFAULT_COLOR`,
+  // `skin/plantuml.skin:9`) -- NEVER `theme.colors.text` (`#181818`, canvas
+  // text, a different role).
+  it('with no arrowFontColor override the edge label stays the jar default #000000', () => {
+    const svg = renderDescription(twoNodeGeo({ label: { text: 'lab', x: 80, y: 45 } }), defaultTheme);
+    const labelText = svg.match(/<text[^>]*>lab<\/text>/)?.[0];
+    expect(labelText).toContain('fill="#000"');
+    expect(labelText).not.toContain(defaultTheme.colors.text);
+  });
+
   // G1 I3 -- path/@id family mechanism A: SvekEdge#setSharedIds (SvekEdge.
   // java:826, wired per-diagram in SvekResult.java:93-101) was never called
   // from this renderer's edge loop, so `SvekEdge`'s own per-instance default
