@@ -21,7 +21,26 @@ import {
   parseShadowingValue,
 } from './skinparam-element-buckets.js';
 import { resolveColor } from './skinparam-key-normalize.js';
-import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
+import { resolveColorToSvgHex, parseSimpleColor } from './klimt/color/HColorSet.js';
+
+/**
+ * SI26 D1: the arrow-label FontColor value as the theme carries it --
+ * RESOLVED hex (`XColor#toSvg`), or `undefined` for a token that is not a
+ * colour at all (an unexpanded skin macro such as `reddress`'s
+ * `ARROWFONTCOLOR`, a typo). The same guard `style-cascade-class.ts
+ * #cascadeHex` applies on the `<style>` path, for the same reason: an
+ * unresolvable raw string as an SVG `fill` is worse than the `#000000`
+ * default. Named divergence: the jar draws such tokens WHITE
+ * (`HColorSet#getColorOrWhite`; oracle experiment `bad` in
+ * `plans/arrow-label-font-colour/decision-journal.md`).
+ */
+function arrowFontColorValue(color: string): string | undefined {
+  const lower = color.toLowerCase();
+  if (lower !== 'transparent' && lower !== 'background' && parseSimpleColor(color) === undefined) {
+    return undefined;
+  }
+  return resolveColorToSvgHex(color);
+}
 
 type KeyHandler = (
   acc: SkinparamAccumulator,
@@ -108,7 +127,8 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
   // experiments b/g in plans/arrow-label-font-colour/decisions.md).
   [['fontcolor', 'defaultfontcolor'], (acc, _v, color) => {
     acc.text = color;
-    acc.arrowFontColor = resolveColorToSvgHex(color);
+    const hex = arrowFontColorValue(color);
+    if (hex !== undefined) acc.arrowFontColor = hex;
   }],
   [['arrowcolor', 'defaultarrowcolor'], (acc, _v, color) => { acc.arrow = color; }],
   // `FontParam.ARROW` size override. Sibling of arrowcolor above, NOT a
@@ -132,7 +152,10 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
   // raw-valued neighbours: the `<style>` path (`style-cascade-class.ts
   // #cascadeFontColorHex`) lands hex in the same field, and the renderers
   // (T3-T5) draw it verbatim.
-  [['arrowfontcolor'], (acc, _v, color) => { acc.arrowFontColor = resolveColorToSvgHex(color); }],
+  [['arrowfontcolor'], (acc, _v, color) => {
+    const hex = arrowFontColorValue(color);
+    if (hex !== undefined) acc.arrowFontColor = hex;
+  }],
   [['notebackgroundcolor'], (acc, _v, color) => { acc.noteBackground = color; }],
   [['pathhovercolor'], (acc, _v, color) => { acc.pathHoverColor = color; }],
   [['diagrambordercolor'], (acc, _v, color) => { acc.diagramBorderColor = color; }],

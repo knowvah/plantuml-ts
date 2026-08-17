@@ -300,6 +300,21 @@ describe('resolveSkinparam — direct key matches', () => {
     expect(j.theme.colors.graph.arrowFontColor).toBeUndefined();
   });
 
+  // SI26 fix(T1): an unresolvable token (e.g. the `reddress` skin's
+  // unexpanded `ARROWFONTCOLOR` macro) leaves the field unset -- the same
+  // guard `style-cascade-class.ts#cascadeHex` applies -- rather than landing
+  // a non-colour string in `fill`. Named divergence: the jar draws it white.
+  it('leaves arrowFontColor unset for an unresolvable colour token', () => {
+    const r = resolveSkinparam(
+      new Map([['arrowfontcolor', 'ARROWFONTCOLOR'], ['defaultfontcolor', 'NOTACOLOUR']]),
+      defaultTheme,
+    );
+    expect(r.theme.colors.graph.arrowFontColor).toBeUndefined();
+    expect(r.theme.colors.text).toBe('NOTACOLOUR'); // raw, as before
+    const ok = resolveSkinparam(new Map([['arrowfontcolor', '333']]), defaultTheme);
+    expect(ok.theme.colors.graph.arrowFontColor).toBe('#333333');
+  });
+
   // G2 N54: `skinparam icon<Kind>Color`/`icon<Kind>BackgroundColor` --
   // see theme.ts#iconPrivateColor's doc comment for the full upstream
   // mapping (FromSkinparamToStyle.java:232-239).
