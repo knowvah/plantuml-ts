@@ -26,6 +26,7 @@ import {
 import {
   computeClassStyleCascadeOverrides,
   computeCardinalityFontOverride,
+  computeArrowFontOverride,
 } from './style-cascade-class.js';
 import { computeSimpleSelectorOverrides } from './style-map-simple-fields.js';
 import {
@@ -80,6 +81,23 @@ function computeGraphOverride(styleMap: StyleMap, base: Theme): Partial<GraphCol
   // B4 (A2s): `skinparam wrapWidth` seeds the MaximumWidth cascade defaults;
   // an explicit <style> MaximumWidth still wins (per-field ??= inside).
   Object.assign(graphOverride, computeClassStyleCascadeOverrides(styleMap, base.wrapWidth));
+  // D3 (edge-label-box-followups T2): `<style> arrow { FontName/FontStyle }`
+  // cascade -- lands in `graphOverride`, mirroring `arrowFontSize`'s own
+  // skinparam-only carriage (`skinparam-theme-builder.ts`'s
+  // `GRAPH_OVERRIDE_FIELDS`). `arrowFontSize` itself is DELIBERATELY
+  // excluded from this merge (diagnosed during T2, not a task-2 feature):
+  // `description/layout.ts:354` is a PRE-EXISTING (T3) direct consumer of
+  // `graph.arrowFontSize`, skinparam-only until now; merging the <style>
+  // cascade's arrowFontSize into that SAME live field would activate T6's
+  // own D4 measurement change early and move `zosuje-43-zebi775` (`arrow {
+  // FontSize 10 FontStyle bold }`) off its pinned oracle-parity backlog
+  // entry -- this task's own zero-fixture-movement bar. `computeArrowFontOverride`
+  // still RESOLVES arrowFontSize (needed once `resolveArrowLabelFont` is
+  // wired); T6 (D4) re-examines this exclusion when it retires
+  // `description/layout.ts:354`'s ad hoc read in favor of that resolver.
+  const arrowFont = computeArrowFontOverride(styleMap);
+  if (arrowFont.arrowFontFamily !== undefined) graphOverride.arrowFontFamily = arrowFont.arrowFontFamily;
+  if (arrowFont.arrowFontStyle !== undefined) graphOverride.arrowFontStyle = arrowFont.arrowFontStyle;
   // mission skin-file-loading Batch 1 (D3): see `style-map-element.ts
   // #resolveGlobalBackground`'s own doc comment for the bare root/element
   // selector precedence this resolves.

@@ -179,3 +179,41 @@ describe('applyStyleMap -- cardinality font fold (T14, D3)', () => {
     expect(theme.cardinalityFontFamily).toBe(defaultTheme.cardinalityFontFamily);
   });
 });
+
+/**
+ * T2/D3: `applyStyleMap`'s fold of `computeArrowFontOverride`
+ * (`style-cascade-class.ts`) into `theme.colors.graph.arrowFontFamily`/
+ * `arrowFontStyle`. `arrowFontSize` is DELIBERATELY excluded from this live
+ * fold -- `style-map-theme.ts#computeGraphOverride`'s own doc comment for
+ * the diagnosed reason (`description/layout.ts:354`'s pre-existing
+ * skinparam-only consumer, `zosuje-43-zebi775`'s zero-movement bar).
+ * `resolveArrowLabelFont` (`arrow-label-font.test.ts`) covers the full
+ * three-field resolution against a hand-built Theme.
+ */
+describe('applyStyleMap -- arrow-label font fold (T2, D3)', () => {
+  it('camuna shape: arrow { FontSize 14  FontStyle bold } resolves FontStyle, NOT FontSize (scoped exclusion)', () => {
+    const styleMap = parseStyleBlock('arrow {\n  FontSize 14\n  FontStyle bold\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.colors.graph.arrowFontStyle).toBe('bold');
+    expect(theme.colors.graph.arrowFontSize).toBe(defaultTheme.colors.graph.arrowFontSize);
+  });
+
+  it('ticuxa shape: arrow { FontName Courier } resolves arrowFontFamily', () => {
+    const styleMap = parseStyleBlock('arrow {\n  FontName Courier\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.colors.graph.arrowFontFamily).toBe('Courier');
+  });
+
+  it("arrow { cardinality { FontStyle italic } } alone does NOT set the arrow-level font", () => {
+    const styleMap = parseStyleBlock('arrow {\n  cardinality {\n    FontStyle italic\n  }\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.colors.graph.arrowFontStyle).toBeUndefined();
+  });
+
+  it('a StyleMap that never touches arrow leaves the base Theme arrow font unchanged -- no fixture moves', () => {
+    const styleMap = parseStyleBlock('class {\n  BackgroundColor yellow\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.colors.graph.arrowFontSize).toBe(defaultTheme.colors.graph.arrowFontSize);
+    expect(theme.colors.graph.arrowFontFamily).toBe(defaultTheme.colors.graph.arrowFontFamily);
+  });
+});

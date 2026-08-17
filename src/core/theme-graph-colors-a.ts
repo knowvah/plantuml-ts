@@ -223,6 +223,17 @@ export interface ThemeGraphColorsA {
    *  `usecase/jecici-56-bimu826` measured its labels at 13 where the fixture
    *  asks for 10. */
   arrowFontSize?: number;
+  /** D3: `<style> arrow { FontName X }` / `skinparam arrowFontName X` --
+   *  `arrow-label-font.ts#resolveArrowLabelFont`'s `family` fallback tier,
+   *  above `theme.fontFamily`. Sibling of {@link arrowFontSize}; see that
+   *  field's own doc comment. No caller yet (D4/Batch 3). */
+  arrowFontFamily?: string;
+  /** D3: `<style> arrow { FontStyle bold|italic|... }` / `skinparam
+   *  arrowFontStyle X` -- the RAW cascade value, unparsed. `arrow-label-
+   *  font.ts#resolveArrowLabelFont` is the ONE reader that maps it onto
+   *  `FontSpec.weight`/`style` (`klimt/font/FontStyle.java`'s independent
+   *  bold/italic axes). No caller yet (D4/Batch 3). */
+  arrowFontStyle?: string;
   /** G2 N23/N32: `skinparam class { AttributeFontSize N }` / `skinparam
    *  classAttributeFontSize N` -- upstream `FontParam.CLASS_ATTRIBUTE`'s
    *  dedicated size override, style-mapped by `FromSkinparamToStyle
