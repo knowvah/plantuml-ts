@@ -38,22 +38,16 @@ export const INITIAL_ID = '__initial__';
 export const FINAL_ID = '__final__';
 
 /**
- * `plantuml.skin`'s `arrow { FontSize 13 }` block -- upstream's
- * `klimt/font/FontParam.java:54`, `ARROW(13, normal)` -- the transition/
- * edge-label default, distinct from `STATE(14, normal)` (body/entity-name
- * text, `theme.fontSize`'s own default). Mission G5/C0 jar-verified this
- * exact gap: `WidthTableMeasurer` is jar-exact at BOTH sizes (0.000% mean
- * error corpus-wide) -- the bug was this call site handing it size 14 for
- * text jar renders at size 13 (`bemena-23-zebu249`'s `"EvNewValueSaved"`:
- * 120.05px at 14 vs jar's real 111.475px at 13). Same pattern already
- * proven safe: `class-layout-helpers.ts#CARDINALITY_FONT_SIZE`,
- * `description/renderer-edge.ts`'s `ARROW_LABEL_FONT_SIZE` (both = 13).
- * No `skinparam ArrowFontSize` override path exists in this port yet
- * (`ELEMENT_BUCKET_SNAMES` in `core/skinparam.ts` does not include
- * `'arrow'`) -- this is the bare DEFAULT only, matching current behavior
- * for every fixture (none of which had a working override to lose).
+ * T7/D3/D4: the transition/edge-label font, resolved through the shared
+ * resolver -- `GraphvizImageBuilder.java:234-235`'s `labelFont`, distinct
+ * from `STATE(14, normal)` (body/entity-name text, `theme.fontSize`'s own
+ * default). Mission G5/C0 jar-verified the size-14-vs-13 gap this replaced
+ * (`bemena-23-zebu249`'s `"EvNewValueSaved"`: 120.05px at 14 vs jar's real
+ * 111.475px at 13); `resolveArrowLabelFont` now also bridges
+ * `<style> arrow { ... }` / `skinparam arrowFont*` (D3), which the bare
+ * `ARROW_LABEL_FONT_SIZE` constant this replaces could not.
  */
-import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 /** Resolve a transition endpoint id, redirecting the anonymous `[*]` token
  *  to the shared start (`from` position) or end (`to` position) anchor.
@@ -261,7 +255,7 @@ function buildDotEdges(
   theme: Theme,
   measurer: StringMeasurer,
 ): DotInputEdge[] {
-  const font = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
+  const font = resolveArrowLabelFont(theme);
   return ast.transitions.map((t, i) => {
     // minlen = arrow dash-count - 1 (SvekEdge.java) — shared convention with
     // class/object, not state-specific (mechanisms.md §4).
