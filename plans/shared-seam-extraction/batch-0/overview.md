@@ -6,4 +6,4 @@ on the branch point.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | render-manifest script, layering test (ALLOWLIST + KNOWN_DEBT), baseline capture, DOT EQUAL re-measure | typescript-pro | `scripts/render-manifest.ts`, `tests/architecture/layering.test.ts`, `package.json` (script), `test-results/shared-seam-baseline-manifest.json`, `plans/shared-seam-extraction/README.md` (starting-state numbers) | — | [ ] |
+| T0 | render-manifest script, layering test (ALLOWLIST + KNOWN_DEBT), baseline capture, DOT EQUAL re-measure | typescript-pro | `scripts/render-manifest.ts`, `tests/architecture/layering.test.ts`, `package.json` (script), `test-results/shared-seam-baseline-manifest.json`, `plans/shared-seam-extraction/README.md` (starting-state numbers) | — | [x] |

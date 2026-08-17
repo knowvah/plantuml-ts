@@ -47,7 +47,7 @@ object 78/80 (SI26 close-out; re-measured at T0, 321bfb8b — unchanged).
 
 | Batch | What | Tasks | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md) | Evidence harness + fitness test + baseline | T0 | [ ] |
+| [0](batch-0/overview.md) | Evidence harness + fitness test + baseline | T0 | [x] |
 | [1a](batch-1a/overview.md) | Display unification ∥ USymbol/atom helpers ∥ color-override | T1 T2 T4 | [ ] |
 | [1b](batch-1b/overview.md) | FrontierCalculator ∥ link-note dim ∥ Command<S> ∥ assemble-svg | T5 T6 T7 T8 | [ ] |
 | [2](batch-2/overview.md) | leaf-sizing family (needs T2) ∥ CommandCreateJson (needs T7) | T3 T9 | [ ] |
