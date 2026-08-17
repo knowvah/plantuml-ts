@@ -32,9 +32,10 @@ import { packageEndpointAnchors, shieldedClassifierIds } from './class-shield-he
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
 import { applyShapeAndPorts, classPortShortNamesById } from './class-port-rows.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
-import { ARROW_LABEL_FONT_SIZE, buildDotEdges } from './class-dot-edges.js';
+import { buildDotEdges } from './class-dot-edges.js';
 import { clusterWrapperLevel } from './class-cluster-levels.js';
 import { namespaceTitleTableDims } from './class-namespace-title-table.js';
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 export interface DotGraphParts {
   dotGraph: DotInputGraph;
@@ -369,7 +370,14 @@ function buildDotNodesAndEdges(
   const dotNodes = buildDotNodes(
     ast, measuredMap, anchors, groupInheritance.protectedIds, classPortShortNames,
   );
-  const labelFont = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
+  // D3/D4: resolved arrow-label font (`GraphvizImageBuilder.java:234-235`'s
+  // `labelFont`). No override -> byte-identical to the prior
+  // `{family:theme.fontFamily,size:ARROW_LABEL_FONT_SIZE}` literal (see the
+  // resolver's own doc comment). `weight`/`style` ride the `FontSpec` for
+  // `renderer-edge.ts`'s SVG site (D4, same commit) but widen no type here:
+  // `StringBounderFromWidthTable#calculateDimension` (klimt/drawing/font/
+  // StringBounderFromWidthTable.java:67-79) has no bold/italic branch.
+  const labelFont = resolveArrowLabelFont(theme);
   // T14/D3: `theme.cardinalityFontFamily`/`cardinalityFontSize` are optional
   // in the `Theme` TYPE (pre-existing hand-built Theme literals elsewhere
   // stay valid, `theme.ts:21-22`'s own doc comment), but `defaultTheme`/

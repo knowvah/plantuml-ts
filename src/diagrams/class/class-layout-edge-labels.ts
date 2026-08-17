@@ -57,8 +57,10 @@ const CONSTRAINT_SPOT = 10;
  * below now measures QUANTIFIER/ROLE boxes with via `computeQuantifierBox`
  * (T6) -- **corrected T6** (was: claimed a `theme.fontSize` = 14 mismatch
  * against the main-LABEL font; T4 (`decision-journal.md`) proved that stale:
- * `class-dot-graph.ts:371` builds the label font at `ARROW_LABEL_FONT_SIZE`
- * = 13, not 14, and `gikipi`'s 68px measurement only reproduces at 13). The
+ * `class-dot-graph.ts` built the label font at `ARROW_LABEL_FONT_SIZE` = 13,
+ * not 14 (`gikipi`'s 68px measurement only reproduces at 13); T5 now
+ * resolves it via `resolveArrowLabelFont` (D3/D4, `core/arrow-label-font.ts`
+ * -- 13 absent an override). The
  * comment's other half stays true: `skinparam ArrowFontSize` has no cascade
  * path yet (`core/skinparam.ts#ELEMENT_BUCKET_SNAMES` omits `'arrow'`).
  *
