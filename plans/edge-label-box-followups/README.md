@@ -56,7 +56,7 @@ measurement, as SI22/SI23 did.
 | Batch | What | Tasks | Done |
 |---|---|---|---|
 | [1](batch-1/overview.md) | Core building blocks (2 parallel) | T1 T2 | [x] |
-| [2](batch-2/overview.md) | Description M2 + class multi-line branch (2 parallel) | T3 T4 | [ ] |
+| [2](batch-2/overview.md) | Description M2 + class multi-line branch (2 parallel) | T3 T4 | [x] |
 | [3](batch-3/overview.md) | Arrow-font engine wiring (3 parallel; T7 optional) | T5 T6 T7 | [ ] |
 | [4](batch-4/overview.md) | Close-out | T8 | [ ] |
 
