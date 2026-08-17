@@ -5,7 +5,7 @@
  */
 
 import type { Member } from './class-member-ast.js';
-import type { JsonNode } from './class-json-ast.js';
+import type { JsonNode } from '../../core/command/JsonNode.js';
 import type { UrlInfo } from './class-url.js';
 import type { MapRow } from './ast.js';
 

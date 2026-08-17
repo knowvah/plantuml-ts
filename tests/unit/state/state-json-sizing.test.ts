@@ -10,7 +10,7 @@ import { measureJsonState } from '../../../src/diagrams/state/state-json-sizing.
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { State } from '../../../src/diagrams/state/ast.js';
-import type { JsonNode } from '../../../src/diagrams/state/state-json-ast.js';
+import type { JsonNode } from '../../../src/core/command/JsonNode.js';
 
 const measurer = new WidthTableMeasurer();
 

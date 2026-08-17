@@ -24,7 +24,7 @@ import { parseMemberLine } from './class-member-parser.js';
 import { isMethodMember } from './class-layout-helpers.js';
 import { parseObjectField } from './class-object-commands.js';
 import { applyMapBodyLine } from './class-map-commands.js';
-import { finalizeJsonBody } from './class-json-commands.js';
+import { finalizeJsonBody } from '../../core/command/CommandCreateJson.js';
 import { dedentRawLines } from './class-body-enhanced.js';
 import { stripQuotes } from './class-relationship-parser.js';
 import { COMMANDS } from './class-commands.js';

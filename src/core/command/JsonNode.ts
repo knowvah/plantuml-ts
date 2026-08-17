@@ -1,14 +1,4 @@
 /**
- * JSON leaf value type for `kind: 'json'` classifiers.
- *
- * Split out of ast.ts purely to keep that file under the repo's
- * 500-line-per-file cap (mirrors class-layout-helpers.ts / class-dot-graph.ts's
- * own "split out of a capped file, behavior unchanged" precedent) — ast.ts
- * re-exports {@link JsonNode} so callers can still `import type { JsonNode }
- * from './ast.js'`.
- */
-
-/**
  * Parsed value of a `json Name { ... }` / `json Name value` leaf (upstream
  * `JsonValue` — `net.sourceforge.plantuml.json.JsonValue`). A tagged union
  * rather than a plain JS object/array so:
@@ -19,7 +9,12 @@
  *    `JsonValue#isString`/`isNumber`/`isTrue`/`isFalse`/`isNull`/`isArray`/
  *    `isObject` does (`TextBlockCucaJSon#getTextBlockValue`,
  *    class-json-sizing.ts's recursive measurement).
- * @see ~/git/plantuml/.../json/JsonValue.java
+ *
+ * ONE definition shared by the class and state engines (formerly
+ * byte-identical `class-json-ast.ts` / `state-json-ast.ts` copies — mission
+ * shared-seam-extraction D7).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/json/JsonValue.java
  */
 export type JsonNode =
   | { kind: 'scalar'; value: string | number | boolean | null }

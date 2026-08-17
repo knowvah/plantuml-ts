@@ -48,7 +48,8 @@ import type { UmlSource } from '../../core/block-extractor.js';
 import type { StateDiagramAST } from './ast.js';
 import { COMMANDS } from './state-commands.js';
 import { finalizePendingNote, isNoteCloser, type PendingNote } from './state-notes.js';
-import { finalizeJsonBody, isJsonCloser } from './state-json-commands.js';
+import { isJsonCloser } from './state-json-commands.js';
+import { finalizeJsonBody } from '../../core/command/CommandCreateJson.js';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import {

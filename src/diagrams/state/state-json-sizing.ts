@@ -27,7 +27,7 @@
  */
 
 import type { State } from './ast.js';
-import type { JsonNode } from './state-json-ast.js';
+import type { JsonNode } from '../../core/command/JsonNode.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import {
