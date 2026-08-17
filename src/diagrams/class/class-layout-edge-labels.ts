@@ -27,7 +27,10 @@ import {
   hasSeveralGuideLines,
   computeGuideLinesBox,
 } from './class-magic-arrow.js';
-import { splitEdgeLabelLines } from './class-edge-label-lines.js';
+// T1: the ONE `Display#getWithNewlines` port -- replaces this file's own
+// `splitEdgeLabelLines` re-export, see `class-edge-label-lines.ts`'s own
+// doc comment.
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 // T10: the note operand's REAL dimension -- `EntityImageNoteLink` builds a
 // `ComponentRoseNote`, a DIFFERENT upstream component from the one
 // `measureNote` models -- see `class-note-link-box.ts`'s own doc comment for
@@ -75,21 +78,19 @@ const CONSTRAINT_SPOT = 10;
 export { CARDINALITY_FONT_SIZE };
 
 /**
- * `EdgeLabelAlign`/`EdgeLabelLines`/`splitEdgeLabelLines`/`wrapPlainTextLine`
- * moved to `class-edge-label-lines.ts` (2026-08-16, mission
- * `edge-label-box-backlog` T12b) purely to keep THIS file under the
+ * `wrapPlainTextLine` moved to `class-edge-label-lines.ts` (2026-08-16,
+ * mission `edge-label-box-backlog` T12b) purely to keep THIS file under the
  * project's 500-line cap without trimming any upstream-citation comment --
  * a pure move, re-exported below so every existing import of this file
- * (`core/edge-label-box.ts`, `class-magic-arrow.ts`, `class-edge-geo.ts`,
- * etc.) keeps working unchanged. See that file's own header for the full
+ * keeps working unchanged. See that file's own header for the full
  * rationale; precedent: `core/klimt/creole/DisplayNewlines.ts`.
+ *
+ * T1 retired the SIBLING `splitEdgeLabelLines` export that used to live
+ * here too -- every former caller now imports `splitDisplayLines` from
+ * `core/klimt/creole/DisplayNewlines.ts` directly (see that file's own doc
+ * comment).
  */
-export {
-  type EdgeLabelAlign,
-  type EdgeLabelLines,
-  splitEdgeLabelLines,
-  wrapPlainTextLine,
-} from './class-edge-label-lines.js';
+export { wrapPlainTextLine } from './class-edge-label-lines.js';
 
 /**
  * Edge label attributes from a relationship's label + multiplicities. The Svek
@@ -266,7 +267,7 @@ function computeMeasuredLabelAttrs(
   measurer: StringMeasurer,
   classAttributeIconSize?: number,
 ): LabelAttrs {
-  const { lines } = splitEdgeLabelLines(label);
+  const { lines } = splitDisplayLines(label);
   if (lines.length > 1) {
     // D6 (`SvekEdge.java:290-297`): a multi-line label whose lines include a
     // leading/trailing `< `/`> `/` <`/` >` guide-line token takes the
@@ -456,7 +457,7 @@ export function edgeLabelAttrs(
  * The values are the ALREADY-margined ones `withLabelMargin` produced, which
  * is this engine's equivalent of `computeReservedLabelBox`'s reserved box --
  * class measures multi-line labels correctly on its own
- * (`splitEdgeLabelLines`, max width, lineHeight * lineCount). The consumer
+ * (`splitDisplayLines`, max width, lineHeight * lineCount). The consumer
  * floors, matching the jar's truncation (`SvekEdge.java:504-507`).
  *
  * Skipped for the `linkConstraint` spot, whose EMPTY `label` marks the

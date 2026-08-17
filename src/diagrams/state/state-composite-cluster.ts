@@ -16,7 +16,7 @@
 import type { State } from './ast.js';
 import type { FontSpec } from '../../core/measurer.js';
 import type { DotInputNode, DotInputCluster, DotLayoutResult } from '../../core/graph-layout.js';
-import { splitCreoleLines } from './state-sizing.js';
+import { splitStateDisplayLines } from './state-sizing.js';
 import {
   measureLines,
   measureClusterTitle,
@@ -295,7 +295,7 @@ export function resolveClusterComposite(
   // autonom shape's own action-zone height (the composite's OWN
   // entry/exit/body lines, jar's `getStateDescription()`, NOT nested
   // children's own bodies).
-  const attrTextLines = (s.description ?? []).flatMap(splitCreoleLines);
+  const attrTextLines = (s.description ?? []).flatMap(splitStateDisplayLines);
   const attrLines = attrTextLines.length;
   // Stereotype term: ALWAYS zero for a state-diagram cluster header,
   // regardless of `s.stereotype` -- diagnosed this task (pesita-10-dene726's

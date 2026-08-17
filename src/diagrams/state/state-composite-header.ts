@@ -10,7 +10,7 @@
  */
 
 import type { FontSpec } from '../../core/measurer.js';
-import { splitCreoleLines } from './state-sizing.js';
+import { splitStateDisplayLines } from './state-sizing.js';
 import type { DiagramCtx } from './state-composite-pass.js';
 
 /** Per-line max-width / summed-height text-block measurement — the shared
@@ -42,7 +42,7 @@ export function measureLines(lines: readonly string[], font: FontSpec, ctx: Diag
  *  single-line title. */
 export function measureClusterTitle(display: string, ctx: DiagramCtx): { width: number; height: number; lineCount: number } {
   const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
-  const lines = splitCreoleLines(display);
+  const lines = splitStateDisplayLines(display);
   const dim = measureLines(lines, font, ctx);
   return { width: dim.width, height: dim.height, lineCount: lines.length };
 }

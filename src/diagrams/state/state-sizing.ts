@@ -37,7 +37,12 @@
  */
 
 import type { State, StateKind } from './ast.js';
-import { splitCreoleLines } from '../../core/edge-label-box.js';
+// T1: the ONE `Display#getWithNewlines` port -- upstream builds a state's
+// display/description text via the SAME method (`CommandCreateState.java
+// :195,204`, `BodierSimple.java:61`'s `getWithNewlines2`), not the former
+// real-newline-splitting `splitCreoleLines` this replaced (`core/edge-
+// label-box.ts`).
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { DotInputNodeShape } from '../../core/graph-layout.js';
@@ -50,11 +55,19 @@ import { isBorderPoint } from './state-entity-position.js';
 // Creole line splitting
 // ---------------------------------------------------------------------------
 
-// Relocated to `core/edge-label-box.ts` (T1) so class and description can
-// reach it too; imported-and-re-exported (not `export ... from`, which would
-// not bind the name for this module's OWN callers below). See that module's
-// header for why one formula now serves every engine.
-export { splitCreoleLines };
+/**
+ * T1: `splitDisplayLines(text).lines`, `align` discarded -- state body/name
+ * text renders LEFT-aligned unconditionally (`renderer-box.ts`'s own doc
+ * comment on body-line placement), never derived from a `\l`/`\r` escape
+ * here (a pre-existing, out-of-scope gap, unaffected by this rewire). Local
+ * wrapper, not a re-export of the retired `splitCreoleLines`
+ * (`core/edge-label-box.ts`) -- every one of this file's own 6 call sites
+ * below and its 3 re-export consumers (`state-composite-{header,sizing,
+ * cluster}.ts`) only ever need the line array.
+ */
+export function splitStateDisplayLines(text: string): readonly string[] {
+  return splitDisplayLines(text).lines;
+}
 
 // ---------------------------------------------------------------------------
 // Fixed-size pseudostate table (§1 of mechanisms.md)
@@ -175,7 +188,7 @@ function measureLines(lines: readonly string[], font: FontSpec, measurer: String
 
 /** EntityImageState2 sizing (approximate — see SDL_MARGIN doc). */
 function measureSdlReceive(state: State, font: FontSpec, measurer: StringMeasurer): Dim {
-  const label = measureLines(splitCreoleLines(state.display), font, measurer);
+  const label = measureLines(splitStateDisplayLines(state.display), font, measurer);
   return {
     width: label.width + SDL_MARGIN.x1 + SDL_MARGIN.x2 + 2 * BODY_MARGIN_X,
     height: label.height + SDL_MARGIN.y1 + SDL_MARGIN.y2,
@@ -184,7 +197,7 @@ function measureSdlReceive(state: State, font: FontSpec, measurer: StringMeasure
 
 /** EntityImageStateEmptyDescription: `hide empty description` + no body lines. */
 function measureEmptyDescription(state: State, font: FontSpec, measurer: StringMeasurer): Dim {
-  const name = measureLines(splitCreoleLines(state.display), font, measurer);
+  const name = measureLines(splitStateDisplayLines(state.display), font, measurer);
   const width = Math.max(name.width + EMPTY_DESC_MARGIN_DELTA, EMPTY_DESC_MIN_WIDTH);
   const height = Math.max(name.height + EMPTY_DESC_MARGIN_DELTA, EMPTY_DESC_MIN_HEIGHT);
   return { width, height };
@@ -192,8 +205,8 @@ function measureEmptyDescription(state: State, font: FontSpec, measurer: StringM
 
 /** EntityImageState: name + fields (body/description lines), MIN 50x50. */
 function measureNormalState(state: State, font: FontSpec, measurer: StringMeasurer): Dim {
-  const name = measureLines(splitCreoleLines(state.display), font, measurer);
-  const bodyLines = (state.description ?? []).flatMap(splitCreoleLines);
+  const name = measureLines(splitStateDisplayLines(state.display), font, measurer);
+  const bodyLines = (state.description ?? []).flatMap(splitStateDisplayLines);
   const fields = measureLines(bodyLines, font, measurer);
   const merged = { width: Math.max(name.width, fields.width), height: name.height + fields.height };
   const width = Math.max(merged.width + STATE_MARGIN_DELTA, STATE_MIN_WIDTH);
@@ -282,7 +295,7 @@ export function measureState(
  *  Jar-verified jocela-05-niba392 (1 line), votoki-67-gufa610 (1 line,
  *  centered against a WIDER body-dominated box). */
 export function measureTextLines(displayText: string, font: FontSpec, measurer: StringMeasurer): StateTextLine[] {
-  return splitCreoleLines(displayText).map((ln) => ({ text: ln, width: measurer.measure(ln, font).width }));
+  return splitStateDisplayLines(displayText).map((ln) => ({ text: ln, width: measurer.measure(ln, font).width }));
 }
 
 /**
@@ -307,7 +320,7 @@ export function measureBodyTextLines(
   font: FontSpec,
   measurer: StringMeasurer,
 ): StateTextLine[] {
-  const lines = (description ?? []).flatMap(splitCreoleLines).map((ln) => (ln === '' ? NBSP : ln));
+  const lines = (description ?? []).flatMap(splitStateDisplayLines).map((ln) => (ln === '' ? NBSP : ln));
   return lines.map((ln) => ({ text: ln, width: measurer.measure(ln, font).width }));
 }
 

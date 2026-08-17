@@ -6,7 +6,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Display } from '../../../../../src/core/klimt/creole/Display.js';
-import { getWithNewlines3, jawsWarningToWarning, JawsWarning } from '../../../../../src/core/klimt/creole/DisplayNewlines.js';
+import { getWithNewlines3, jawsWarningToWarning, JawsWarning, splitDisplayLines } from '../../../../../src/core/klimt/creole/DisplayNewlines.js';
 import { HorizontalAlignment } from '../../../../../src/core/klimt/geom/HorizontalAlignment.js';
 import { Pragma } from '../../../../../src/core/skin/Pragma.js';
 import { PragmaKey } from '../../../../../src/core/skin/PragmaKey.js';
@@ -141,6 +141,71 @@ describe('Display.getWithNewlines3 -- the simpler pragma-free scanner (java:233-
 
   it('an unrecognized c2 (e.g. "r") is silently dropped -- neither branch appends it (java:244-251, verbatim)', () => {
     expect(Display.getWithNewlines3('a\\rb')).toEqual(['ab']);
+  });
+});
+
+/**
+ * T1 (mission `shared-seam-extraction`): migrated verbatim from
+ * `tests/unit/class/class-layout-helpers.test.ts`'s former
+ * `splitEdgeLabelLines` describe block (`class-edge-label-lines.ts`,
+ * retired) -- every assertion is unchanged, only the function under test
+ * is now the ONE shared adapter. Jar citations preserved from the
+ * original: `sicile-99-pefa679`'s own 3-line `\n` label
+ * (`cl1 -- cl2 : this is\non several\nlines`).
+ */
+describe('splitDisplayLines (G2 item 43 / T1 shared adapter)', () => {
+  it('returns a single line with center alignment when no escape is present', () => {
+    expect(splitDisplayLines('demo')).toEqual({ lines: ['demo'], align: 'center' });
+  });
+
+  it('splits on \\n with no alignment change (default CENTER)', () => {
+    expect(splitDisplayLines('this is\\non several\\nlines')).toEqual({
+      lines: ['this is', 'on several', 'lines'],
+      align: 'center',
+    });
+  });
+
+  it('splits on \\l and sets alignment to left', () => {
+    expect(splitDisplayLines('this is\\lon several\\llines')).toEqual({
+      lines: ['this is', 'on several', 'lines'],
+      align: 'left',
+    });
+  });
+
+  it('splits on \\r and sets alignment to right', () => {
+    expect(splitDisplayLines('this is\\ron several\\rlines')).toEqual({
+      lines: ['this is', 'on several', 'lines'],
+      align: 'right',
+    });
+  });
+
+  it('the LAST \\l/\\r occurrence wins, matching jar\'s overwritten field', () => {
+    expect(splitDisplayLines('a\\rb\\lc')).toEqual({ lines: ['a', 'b', 'c'], align: 'left' });
+  });
+
+  it('\\t becomes a literal tab within the current line', () => {
+    expect(splitDisplayLines('a\\tb')).toEqual({ lines: ['a\tb'], align: 'center' });
+  });
+
+  it('\\\\ becomes a literal backslash', () => {
+    expect(splitDisplayLines('a\\\\b')).toEqual({ lines: ['a\\b'], align: 'center' });
+  });
+
+  it('an unrecognized \\x pair is kept as-is (both characters)', () => {
+    expect(splitDisplayLines('a\\zb')).toEqual({ lines: ['a\\zb'], align: 'center' });
+  });
+
+  it('a trailing lone backslash is kept as-is', () => {
+    expect(splitDisplayLines('abc\\')).toEqual({ lines: ['abc\\'], align: 'center' });
+  });
+
+  // T1: unlike the retired `core/edge-label-box.ts#splitCreoleLines`, a REAL
+  // newline character is NOT a break -- matches Java exactly
+  // (`Display.java:262-346` only breaks on the literal two-char `\n` token
+  // or a BLOCK_E1 sentinel; a raw `\n` char falls through to the default
+  // `current.append(c)` branch, same as any other plain character).
+  it('a real newline character is NOT a line break (unlike the retired splitCreoleLines)', () => {
+    expect(splitDisplayLines('a\nb')).toEqual({ lines: ['a\nb'], align: 'center' });
   });
 });
 

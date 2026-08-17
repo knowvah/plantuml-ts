@@ -9,7 +9,10 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import { BADGE_LEFT_MARGIN, NAME_LEFT_MARGIN } from './class-badge.js';
 import { CLASS_STEREOTYPE_FONT_SIZE } from './class-stereotype.js';
-import { splitEdgeLabelLines } from './class-layout-edge-labels.js';
+// T1: the ONE `Display#getWithNewlines` port -- replaces this file's own
+// `splitEdgeLabelLines` import, see `class-edge-label-lines.ts`'s own doc
+// comment.
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 
 /** Every creole text atom's line height floors at 10px --
  *  `AtomText#calculateDimensionSlow`'s `if (h < 10) h = 10;`. Observable
@@ -81,11 +84,11 @@ export function computeHeaderInfo(classifier: Classifier): HeaderInfo {
 /**
  * G2 N64 item 45: generalizes `buildHeaderRow` (single name row) to N name
  * rows -- a classifier display name split on `\n`/`\l`/`\r`
- * ({@link splitEdgeLabelLines}, already-split `lines`/`align` passed in by
+ * ({@link splitDisplayLines}, already-split `lines`/`align` passed in by
  * the caller, which owns the `StringMeasurer` this module has never needed
  * before). Reduces to the OLD single-row formula exactly when
  * `lines.length === 1` (`align` is always `'center'` in that case --
- * `splitEdgeLabelLines` only sets `'left'`/`'right'` on an ACTUAL `\l`/`\r`
+ * `splitDisplayLines` only sets `'left'`/`'right'` on an ACTUAL `\l`/`\r`
  * split, which requires at least 2 lines): `lineIndent` offset is `0`, `y`'s
  * `i * fontSpec.size` term is `0`, `badgeIndent` still lands on the (only)
  * row.
@@ -111,7 +114,7 @@ export function computeHeaderInfo(classifier: Classifier): HeaderInfo {
  */
 export function buildHeaderRows(input: {
   header: HeaderInfo;
-  /** G2 N64: already-split via {@link splitEdgeLabelLines} -- this module
+  /** G2 N64: already-split via {@link splitDisplayLines} -- this module
    *  never imports that function itself (would cycle back to
    *  `class-layout-helpers.ts`, which already imports FROM this module). */
   lines: string[];
@@ -157,7 +160,7 @@ export function buildHeaderRows(input: {
     // G2 N64 (item 45 corollary, jar-verified `julixi-10-jide878`'s own
     // golden -- a `class "Name\n<Generic>" as x` declaration's generic-tag
     // extraction (`extractGenericFromDisplay`) leaves a TRAILING `\n` on
-    // the base display, so `splitEdgeLabelLines` produces a genuinely
+    // the base display, so `splitDisplayLines` produces a genuinely
     // BLANK final line): `DriverTextSvg.java`'s `text.matches("^\s*$")`
     // RENDER-time NBSP substitution (N57 item 38's already-landed
     // mechanism, `class-member-creole.ts#resolveOneAtom`'s doc comment)
@@ -285,7 +288,7 @@ export function measureGenericTagDim(
   // 4-line generic at 12pt -> 4*12+4 = 52px tall; `ps/g4f`: at 6pt ->
   // 4*10+4 = 44, the AtomText 10px line floor). Single-line input reduces
   // to the pre-existing `fontSize + 4` byte-identically at >=10pt.
-  const lines = splitEdgeLabelLines(text).lines;
+  const lines = splitDisplayLines(text).lines;
   const rawTextWidth = Math.max(
     ...lines.map((l) => measurer.measure(l, { family: fontFamily, size: fontSize }).width),
   );
