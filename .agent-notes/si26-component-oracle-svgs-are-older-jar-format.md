@@ -1,0 +1,5 @@
+## Observation: 236/266 component oracle SVGs in `test-results/dot-cache` are an older jar generation
+- **Context**: SI26 close-out, scoring edge-label `<text fill>` values against `test-results/dot-cache/component/<slug>/in.svg`.
+- **Finding**: `banatu-09-koce254`, `figika-36-sola271` and 234 other component oracles carry `fill="#000000"`, per-`<text>` `font-family`/`lengthAdjust` — output from before upstream's `SvgGraphics#shortenColor`/root-`<g>` hoisting. The pinned jar (`scripts/oracle-render.sh`) renders the same sources with `fill="#F00"`/`#000` and no per-text family. `normalize.ts` does NOT canonicalise colours, so every text `fill` in those 236 files counts as a diff vs this port's `shortenColor` output; class/state/object caches are current-format (0 files with `fill="#000000"`).
+- **Impact**: description census/ratchet under-reads for those fixtures; re-render with `oracle-render.sh` before trusting a component `fill`/font-attribute mismatch, or recapture the component cache (`oracle-freshness.test.ts`).
+- **Confidence**: High.
