@@ -61,7 +61,7 @@
 
 import { createGraph, render, getLayout } from '@knowvah/dot-engine';
 import '../../core/dot-engine-measurer.js';
-import type { RectangleArea, Point } from './frontier-calculator.js';
+import type { RectangleArea, Point } from '../../core/svek/FrontierCalculator.js';
 
 // The measurer pin now lives in `core/dot-engine-measurer.ts`, imported above
 // for its side effect (A5/T7). This module used to install its own, which was

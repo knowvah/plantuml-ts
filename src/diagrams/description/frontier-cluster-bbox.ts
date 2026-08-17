@@ -1,8 +1,8 @@
 /**
- * frontier-cluster-bbox.ts — wires `frontier-calculator.ts` (`Cluster.java
- * #manageEntryExitPoint`/`FrontierCalculator.java`) and `frontier-shadow-
- * layout.ts` (the `initial` rect source) together into one `Bbox` a port
- * cluster's `buildGeoNode` (layout.ts) can drop in place of
+ * frontier-cluster-bbox.ts — wires `core/svek/FrontierCalculator.ts`
+ * (`Cluster.java#manageEntryExitPoint`/`FrontierCalculator.java`) and
+ * `frontier-shadow-layout.ts` (the `initial` rect source) together into one
+ * `Bbox` a port cluster's `buildGeoNode` (layout.ts) can drop in place of
  * `computeContainerBbox`'s result.
  *
  * Mirrors `Cluster.manageEntryExitPoint` (java:410-430): split the
@@ -11,7 +11,7 @@
  * shadow layout to get `initial`, align its frame to the real, already-
  * resolved port positions (see `frontier-shadow-layout.ts`'s doc comment
  * for why this alignment step is needed instead of reusing the shadow
- * calc's own port positions directly), then apply `manageEntryExitPoint`
+ * calc's own port positions directly), then apply `frontierCalculator`
  * + `ensureMinWidth` (java:427-428's `getTitleAndAttributeWidth() + 10`
  * guard, reproduced verbatim).
  *
@@ -34,8 +34,8 @@
 import type { DescriptionNodeGeo, Bbox } from './layout-helpers.js';
 import { computeContainerBbox } from './layout-helpers.js';
 import {
-  manageEntryExitPoint, ensureMinWidth, type RectangleArea, type Point, type FrontierRankdir,
-} from './frontier-calculator.js';
+  frontierCalculator, ensureMinWidth, type RectangleArea, type Point, type FrontierRankdir,
+} from '../../core/svek/FrontierCalculator.js';
 import {
   computePortClusterInitialRect, type ShadowRankSpec, type ShadowPortSpec,
 } from './frontier-shadow-layout.js';
@@ -151,7 +151,7 @@ export function computePortClusterBbox(
   if (shadowRanks.length === 0 || insides.length > 0) return computeContainerBbox([...children]);
 
   const initial = computeAlignedInitial(shadowRanks, pointsById, info, spacing);
-  let core = manageEntryExitPoint(initial, insides, [...pointsById.values()], spacing.rankdir);
+  let core = frontierCalculator(initial, insides, [...pointsById.values()], spacing.rankdir);
   if (info.titleWidth > 0 && info.titleHeight > 0) {
     core = ensureMinWidth(core, initial, info.titleWidth + 10);
   }

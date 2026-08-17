@@ -1,35 +1,51 @@
 /**
- * frontier-calculator.ts — faithful port of upstream's port-cluster sizing
- * subsystem: `Cluster.java#manageEntryExitPoint` (java:410-430) +
- * `svek/FrontierCalculator.java` (the whole file).
+ * FrontierCalculator — the post-layout box-correction jar applies to a
+ * cluster's own graphviz-assigned rectangle before drawing it, whenever the
+ * cluster carries `<<entrypoint>>`/`<<exitpoint>>` (port) members alongside
+ * or instead of normal-position members. Every cuca-family cluster (svek/
+ * `Cluster.java`, used by description/component/usecase AND state diagrams)
+ * routes through this ONE calculator; this file is that ONE shared port —
+ * previously duplicated as `diagrams/description/frontier-calculator.ts` and
+ * `diagrams/state/state-composite-frontier.ts` (mission shared-seam-
+ * extraction T5; D1 — shared code lives in `core/`, never in one engine for
+ * another to import).
  *
- * Upstream splits a cluster's member `SvekNode`s into `insides`
- * (normal-position entities — full `RectangleArea` merged into the
- * boundary) vs `points` (entry/exit-point ports, `isNormalPosition==false`
- * — only their CENTER point merged), then `FrontierCalculator` computes the
- * cluster's real drawn rectangle: when `insides` is EMPTY (a port-only
- * container), `core` falls back to a 2x2 box centered on the cluster's OWN
- * graphviz-assigned rectangle (`initial` — see `frontier-shadow-layout.ts`
- * for how this port obtains that value), merges each port's center, then a
- * push step (`DELTA = 3 * EntityPosition.RADIUS = 18`, java:47,97-146)
- * expands the boundary by `DELTA` on whichever edge a port's center sits
- * within `DELTA` of, except the rankdir-perpendicular corner case.
+ * Upstream splits a cluster's member `SvekNode`s into `insides` (normal-
+ * position entities — full `RectangleArea` merged into the boundary) vs
+ * `points` (entry/exit-point ports, `isNormalPosition==false` — only their
+ * CENTER point merged), then `FrontierCalculator` computes the cluster's
+ * real drawn rectangle: when `insides` is EMPTY (a port-only container),
+ * `core` falls back to a 2x2 box centered on the cluster's OWN graphviz-
+ * assigned rectangle (`initial`), merges each port's center, then a push
+ * step (`DELTA = 3 * EntityPosition.RADIUS = 18`, java:47,97-146) expands
+ * the boundary by `DELTA` on whichever edge a port's center sits within
+ * `DELTA` of, except the rankdir-perpendicular corner case.
  *
- * This module operates entirely in the SAME y-DOWN (screen/SVG) coordinate
- * convention `DescriptionNodeGeo` already uses — unlike jar's own klimt
- * geometry, upstream's `RectangleArea`/`Cluster` machinery already runs
- * post-`DotStringFactory` SVG-coordinate extraction (y-down), so no
- * y-flip is needed to stay faithful; the push/touch logic is exact-equality
- * based and therefore orientation-agnostic as long as callers stay
- * internally consistent (verified against jar's raw graphviz-native (y-up)
- * numbers AND jar's final SVG (y-down) numbers for `component/
- * gafegu-06-nito976` — both reduce to the same 177x99 result).
+ * Both former ports independently hand-traced every Java line (the
+ * description port additionally cross-checked jar's raw graphviz-native
+ * (y-up) numbers AND jar's final SVG (y-down) numbers for `component/
+ * gafegu-06-nito976`, confirming the algorithm is orientation-agnostic — its
+ * touch/push logic is exact-equality based and depends only on callers
+ * staying internally consistent about which frame `initial`/`insides`/
+ * `points` are all expressed in) and produced textually different but
+ * ALGORITHMICALLY IDENTICAL implementations (one step-by-step immutable
+ * `RectangleArea`, one batched-`Rect`-with-a-`Box`-adapter) — the Java fully
+ * settles every branch, so this merge is a pure textual unification, not a
+ * behavioural choice between the two (shared-seam-extraction T5, README
+ * stop 5 does not apply).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/FrontierCalculator.java (whole file, 169 lines)
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/Cluster.java#manageEntryExitPoint (:410-436)
  */
 
-/** Mirrors upstream `klimt/geom/RectangleArea` (the axis-aligned-box
- *  subset `FrontierCalculator` actually uses). Immutable — every mutator
- *  below returns a new value, matching `RectangleArea`'s own immutable
- *  `with*`/`add*`/`merge` methods. */
+/**
+ * Mirrors upstream `klimt/geom/RectangleArea` (the axis-aligned-box subset
+ * `FrontierCalculator` actually uses — `core/klimt/geom/` has no port of the
+ * full class yet, so this declares only that subset rather than redefining
+ * `RectangleArea`'s unrelated members). Immutable — every mutator below
+ * returns a new value, matching `RectangleArea`'s own immutable `with*`/
+ * `add*`/`merge` methods.
+ */
 export interface RectangleArea {
   readonly minX: number;
   readonly minY: number;
@@ -77,7 +93,7 @@ function addMinY(r: RectangleArea, d: number): RectangleArea { return { ...r, mi
 function addMaxY(r: RectangleArea, d: number): RectangleArea { return { ...r, maxY: r.maxY + d }; }
 
 /** `DotStringFactory`'s `Rankdir` — only the two values `FrontierCalculator`
- *  branches on (`svek/FrontierCalculator.java:120`). */
+ *  branches on (svek/FrontierCalculator.java:120). */
 export type FrontierRankdir = 'TB' | 'LR';
 
 /** Seed `core` when `insides` is empty: `FrontierCalculator`'s constructor,
@@ -88,15 +104,16 @@ function seedCore(initial: RectangleArea): RectangleArea {
   return buildRect(cx - 1, cy - 1, cx + 1, cy + 1);
 }
 
-/** Faithful port of `FrontierCalculator`'s constructor
- *  (svek/FrontierCalculator.java:51-148) — computes the cluster's real
- *  drawn rectangle from its graphviz-assigned `initial` rect, its
- *  normal-position member rects (`insides`), and its port center points
- *  (`points`). Callers needing `ensureMinWidth` (java:154-167) apply it to
- *  this function's result separately (mirrors `Cluster
- *  .manageEntryExitPoint`'s own two-call sequence, java:425-430).
+/**
+ * Faithful port of `FrontierCalculator`'s constructor + `getSuggestedPosition`
+ * (svek/FrontierCalculator.java:51-152) — computes the cluster's real drawn
+ * rectangle from its graphviz-assigned `initial` rect, its normal-position
+ * member rects (`insides`), and its port center points (`points`). Callers
+ * needing `ensureMinWidth` (java:154-167) apply it to this function's result
+ * separately (mirrors `Cluster#manageEntryExitPoint`'s own two-call
+ * sequence, java:425-430).
  */
-export function manageEntryExitPoint(
+export function frontierCalculator(
   initial: RectangleArea,
   insides: readonly RectangleArea[],
   points: readonly Point[],
