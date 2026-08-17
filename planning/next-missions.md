@@ -1,6 +1,6 @@
 # Next Missions (in order)
 
-**Refreshed 2026-08-16 (evening, after SI24).** Treat this file as the *ordered, human-readable*
+**Refreshed 2026-08-17 (after SI25).** Treat this file as the *ordered, human-readable*
 what-next; `planning/mission-index.md` is the executable grind queue with exit
 bars and measurements, and `plans/<name>/README.md` is the brief for anything
 with a name. **When they disagree, the brief and the tree win — verify before
@@ -11,13 +11,13 @@ two shipped missions as "not started", and the 2026-08-15 version was out of
 date within a day (both of its top two entries landed on main that same
 evening). Verify against `git log` and the tree before acting on any line here.
 
-Standing corpus signals, **measured at SI24's close-out 2026-08-16** on a clean
-tree at `cb4de5c7` (not carried forward from a previous refresh):
-`shape-match-report.ts` **785 doc-size-exact / 26,255 matched-shapes** of 1,074
+Standing corpus signals, **measured at SI25's close-out 2026-08-17** on a clean
+tree at `3fe4aca4` (not carried forward from a previous refresh):
+`shape-match-report.ts` **785 doc-size-exact / 26,256 matched-shapes** of 1,074
 fixtures. DOT EQUAL **class 705/711 · state 266/268 · component 259/263 ·
 usecase 92/93 · object 78/80**. `label-size-backlog` totals **11** (class 5 ·
-description 4 · state 2 · object 0). svg-state ratchet 59 pins; svg-class
-ratchet 315 pins; **14,492 tests** across 595 files, coverage
+description 4 · state 2 · object 0 — untouched by SI25). svg-state ratchet 59
+pins; svg-class ratchet 315 pins; **14,508 tests** across 595 files, coverage
 95.37/90.35/96.93/96.46.
 
 Two corrections to what this block used to say. The long-standing
@@ -44,13 +44,22 @@ reading the Java:** the quantifier strip is `CharHidder`'s creole escape
 number for `focaci`, wrong for `+`/`-`/`#` prefixes; and `hasSeveralGuideLines`
 has four conditions, not two. Both recorded in the brief's `decisions.md`.
 
-**Follow-ons it names (none started):**
+**Follow-ons it names:**
 
-1. **T4 step 3 — per-line magic-arrow SVG glyphs in class** (`gobuco`,
-   `lapoma`): DOT boxes are exact at 29x54; the SVG draws no per-line glyph.
-   Needs `EdgeGeo` in `src/diagrams/class/class-geo-types.ts` extended (a
-   `labelLines` glyph slot or `arrowGlyphs[]`) plus `class/renderer-edge.ts`.
-   Stopped on write-set, not difficulty — a one-task follow-on.
+1. ~~**T4 step 3 — per-line magic-arrow SVG glyphs in class**~~ — **DONE
+   2026-08-17 as `class-guide-line-glyphs` (mission-index SI25, 4 of 4).**
+   Branch `feat/class-guide-line-glyphs`, merge with a merge commit.
+   `gobuco`/`lapoma` draw four glyphs each (`EdgeGeo.labelLines[i].glyph`,
+   D1); class main-label ink now follows `resolveArrowLabelFont(theme)` (D2),
+   landing `ticuxa`'s `toto` and `camuna`'s `foo1`/`foo2` on jar's numbers.
+   Full scored bar and follow-ons in
+   `plans/class-guide-line-glyphs/README.md#close-out-2026-08-17`. It names
+   in turn: description/state per-line glyphs; tail/head cardinality ink font
+   vs the `theme.cardinalityFont*` DOT box; `class-ink-box.ts#addEdgeTextInk`'s
+   constant-13 ascent; `lapoma` doc 70 vs 72; and it fixed a latent defect
+   on the way (`magicArrowGlyphPoints` ink radius now `(int)(size*.80)` of the
+   resolved font, `TextBlockArrow2.java:64-65` — `fix(T1)` `722c2bee`, flagged
+   for review in its journal).
 2. **Arrow-label font COLOUR** — `camuna` (`<style> arrow { FontColor Blue }`),
    `ticuxa` (`skinparam ClassArrowFontColor`) still draw `fill="#000000"`;
    D3's cascade carries family/size/style only. `resolveArrowLabelFont` is the
