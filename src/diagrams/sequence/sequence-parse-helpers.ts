@@ -19,6 +19,7 @@ import type {
   SequenceDiagramAST,
   SequenceEvent,
 } from './ast.js';
+import type { Command as CoreCommand } from '../../core/command/Command.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 
@@ -47,10 +48,8 @@ export interface ParseState {
 // Command dispatch entry shape
 // ---------------------------------------------------------------------------
 
-export interface Command {
-  pattern: RegExp;
-  execute(state: ParseState, match: RegExpExecArray): void;
-}
+/** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/Command.java:42-58 */
+export type Command = CoreCommand<ParseState>;
 
 // ---------------------------------------------------------------------------
 // Helpers

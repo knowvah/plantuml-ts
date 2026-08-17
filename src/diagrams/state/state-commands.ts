@@ -34,6 +34,24 @@ import { NOTE_COMMANDS } from './state-commands-notes.js';
 import { JSON_COMMANDS } from './state-json-commands.js';
 import { DECLARATION_COMMANDS } from './state-commands-declarations.js';
 
+/**
+ * Shares field NAMES (`pattern`/`execute`/`passes`) with the generic
+ * `core/command/Command.ts`, but is deliberately NOT an alias of
+ * `CoreCommand<ParseState>`: `execute` here keeps the 3rd `pass` argument
+ * upstream's real `execute(D, BlocLines, ParserPass)` takes
+ * (`Command.java:44`) because several state commands (the concurrent-region
+ * separator, the multi-line note closers) branch on it; `passes` is
+ * required (every state command needs an explicit eligibility list) and
+ * typed `Pass[]` (`'one' | 'two'`, `state-parse-state.ts`), not the core
+ * 3-value `ParserPass`, since state's own 2-pass architecture predates and
+ * is coarser than the shared 3-value model. Verified empirically: aliasing
+ * to `CoreCommand<ParseState>` breaks ~40 call sites across this file,
+ * `state-commands-declarations.ts`, `state-commands-notes.ts`, and
+ * `state-json-commands.ts` (extra required `execute` param, `Pass` vs
+ * `ParserPass` literal mismatch) — all outside this task's write-set, so
+ * left as a documented divergence rather than forced.
+ * @see ../../core/command/Command.ts
+ */
 export interface Command {
   pattern: RegExp;
   /**
