@@ -20,7 +20,7 @@ import { UTranslate } from '../../../../src/core/klimt/UTranslate.js';
 import type { UGraphic } from '../../../../src/core/klimt/UGraphic.js';
 import type { UDrawable } from '../../../../src/core/klimt/shape/UDrawable.js';
 import type { StringBounder } from '../../../../src/core/klimt/font/StringBounder.js';
-import { makeAtomImageResolverFor } from '../../../../src/diagrams/description/render-atoms.js';
+import { makeAtomImageResolverFor } from '../../../../src/core/creole-atoms-image-resolver.js';
 import { measureUsecaseOrActorLeaf } from '../../../../src/diagrams/description/leaf-sizing.js';
 import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
 import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../../src/core/sprite-commands.js';

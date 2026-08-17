@@ -28,8 +28,12 @@ import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
-import { resolveSvgSpriteAtom } from './render-atoms.js';
-import { upstreamKeyword, mapComponentStyle, resolveActorStyle } from './renderer-symbol.js';
+import { resolveSvgSpriteAtom } from '../../core/creole-atoms-image-resolver.js';
+import {
+  upstreamKeyword,
+  mapComponentStyle,
+  resolveActorStyle,
+} from '../../core/decoration/symbol/usymbol-resolve.js';
 import { type BoxSizingOpts, type Dim, DEFAULT_SIZING_STROKE_THICKNESS } from './leaf-sizing-consts.js';
 
 /** No style flags -- `StringBounder.calculateDimension`'s font param is narrowed to `family`/`size` only. */

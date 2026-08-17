@@ -25,7 +25,7 @@ import {
 import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
-import { JAR_DEFAULT_TEXT_COLOR } from './renderer-symbol.js';
+import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
 import { manageGuillemet, type GuillemetPair } from '../../core/text/Guillemet.js';
 

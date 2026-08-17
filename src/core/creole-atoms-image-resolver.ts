@@ -1,8 +1,16 @@
 /**
- * render-atoms.ts — SI5b+E2r T7: builds the `AtomImageResolver` factory
- * that turns creole `<img>`/`<$sprite>` atoms (T6, `core/creole-atoms.ts`)
- * into actual SVG `<image>` geometry at render time, reconciling seams
- * (a)/(b) flagged in the batch-2 decision-journal row:
+ * creole-atoms-image-resolver.ts — SI5b+E2r T7 (moved from `diagrams/
+ * description/render-atoms.ts` by SI27 T2 — upstream's `AtomSprite`/
+ * `SvgNanoParser` decomposition is ONE shared place both the description
+ * engine (`renderer-entity.ts`) and the class engine
+ * (`class/renderer-usymbol-entity.ts`, its usecase/actor leaves) call
+ * through `makeAtomImageResolverFor`): builds the `AtomImageResolver`
+ * factory that turns creole `<img>`/`<$sprite>` atoms (T6, `core/creole-
+ * atoms.ts`) into actual SVG `<image>` geometry at render time,
+ * reconciling seams (a)/(b) flagged in the batch-2 decision-journal row:
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/AtomSprite.java#calculateDimensionSlow
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svg/parser/SvgNanoParser.java#drawU
  *
  * - `img` atoms: never need a sprite registry at all. Dims come straight
  *   off `measureInlineAtom` (T6) — the SAME numbers `leaf-sizing.ts`
@@ -48,29 +56,29 @@
  * (T7's jar-verification scope pins RELATIONS, not tint bytes — see the
  * mission brief).
  */
-import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
-import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup } from '../../core/creole-atoms.js';
+import type { FontConfiguration } from './klimt/shape/UText.js';
+import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup } from './creole-atoms.js';
 import {
   measureInlineAtom,
   spriteAtomScale,
-} from '../../core/creole-atoms-measure.js';
-import type { SpriteRegistry } from '../../core/sprite-commands.js';
-import { getSpriteMonochrome, getSpriteSvg, spriteDimsLookupFor } from '../../core/sprite-commands.js';
-import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
-import { SvgNanoParser } from '../../core/klimt/sprite/SvgNanoParser.js';
-import type { DrawablePrimitive } from '../../core/creole-atoms.js';
-import type { UGraphic } from '../../core/klimt/UGraphic.js';
-import type { UChange } from '../../core/klimt/UChange.js';
-import type { UShape } from '../../core/klimt/UShape.js';
-import type { UParam } from '../../core/klimt/UParam.js';
-import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
-import { UTranslate } from '../../core/klimt/UTranslate.js';
-import { UStroke } from '../../core/klimt/UStroke.js';
-import { Fore } from '../../core/klimt/Fore.js';
-import { Back } from '../../core/klimt/Back.js';
-import type { ResolvedColor } from '../../core/klimt/color/HColorSet.js';
-import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
-import type { Paint } from '../../core/paint.js';
+} from './creole-atoms-measure.js';
+import type { SpriteRegistry } from './sprite-commands.js';
+import { getSpriteMonochrome, getSpriteSvg, spriteDimsLookupFor } from './sprite-commands.js';
+import { spriteToPngDataUri, spriteMonochromeAsLike } from './klimt/sprite/sprite-raster.js';
+import { SvgNanoParser } from './klimt/sprite/SvgNanoParser.js';
+import type { DrawablePrimitive } from './creole-atoms.js';
+import type { UGraphic } from './klimt/UGraphic.js';
+import type { UChange } from './klimt/UChange.js';
+import type { UShape } from './klimt/UShape.js';
+import type { UParam } from './klimt/UParam.js';
+import type { StringBounder } from './klimt/font/StringBounder.js';
+import { UTranslate } from './klimt/UTranslate.js';
+import { UStroke } from './klimt/UStroke.js';
+import { Fore } from './klimt/Fore.js';
+import { Back } from './klimt/Back.js';
+import type { ResolvedColor } from './klimt/color/HColorSet.js';
+import { parseSimpleColor } from './klimt/color/HColorSet.js';
+import type { Paint } from './paint.js';
 
 type ResolvedAtomImage =
   | {

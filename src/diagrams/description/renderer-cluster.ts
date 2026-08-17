@@ -23,7 +23,7 @@ import {
 import { PackageStyle } from '../../core/svek/PackageStyle.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
-import { resolveSymbol, textFont } from './renderer-symbol.js';
+import { resolveSymbol, textFont } from '../../core/decoration/symbol/usymbol-resolve.js';
 
 /** Jar-observed default cluster border width for `package`/`folder`
  *  (folder-tab-decorated) containers only (`test-results/dot-cache/

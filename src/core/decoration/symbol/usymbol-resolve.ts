@@ -1,20 +1,27 @@
 /**
- * renderer-symbol.ts — shared symbol/style/font resolution for the
- * klimt-backed description renderer (T17). Both `renderer-entity.ts` (leaf
- * entities) and `renderer-cluster.ts` (containers) resolve their `USymbol`
- * and text paint through these same helpers — upstream's `Entity#getUSymbol`
- * and font-color defaults are shared across both draw paths too (a group
- * entity and a leaf entity are both `Entity` objects upstream).
+ * usymbol-resolve.ts — shared symbol/style/font resolution for `USymbol`
+ * draw paths (SI27 T2: moved from `diagrams/description/renderer-symbol.ts`
+ * — upstream keeps this ONE place, `Entity#getUSymbol`, for every factory;
+ * the class engine's `renderer-usymbol-entity.ts` and the description
+ * engine's `renderer-entity.ts`/`renderer-cluster.ts`/`leaf-sizing-entity.ts`/
+ * `leaf-sizing-text.ts` all resolve their `USymbol` and text paint through
+ * these same helpers — upstream's `Entity#getUSymbol` and font-color
+ * defaults are shared across every draw path too (a group entity, a leaf
+ * entity, and a class-diagram usecase/actor are all `Entity` objects
+ * upstream).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/Entity.java#getUSymbol (:408)
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/ISkinParam.java#actorStyle (:196)
  */
-import type { Theme } from '../../core/theme.js';
-import { resolveElementFontSize } from '../../core/theme.js';
-import { isTransparentColor } from '../../core/paint.js';
-import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.js';
-import { ActorStyle } from '../../core/skin/ActorStyle.js';
-import { ComponentStyle } from '../../core/decoration/symbol/USymbols.js';
-import { resolveDescriptionUSymbol } from '../../core/svek/image/EntityImageDescription.js';
-import type { USymbol as UpstreamUSymbol } from '../../core/decoration/symbol/USymbol.js';
-import type { USymbol } from '../../core/descriptive-keywords.js';
+import type { Theme } from '../../theme.js';
+import { resolveElementFontSize } from '../../theme.js';
+import { isTransparentColor } from '../../paint.js';
+import type { FontConfiguration, FontStyle } from '../../klimt/shape/UText.js';
+import { ActorStyle } from '../../skin/ActorStyle.js';
+import { ComponentStyle } from './USymbols.js';
+import { resolveDescriptionUSymbol } from '../../svek/image/EntityImageDescription.js';
+import type { USymbol as UpstreamUSymbol } from './USymbol.js';
+import type { USymbol } from '../../descriptive-keywords.js';
 
 /**
  * `SkinParam.actorStyle()` (`SkinParam.java:1209-1218`) — resolves

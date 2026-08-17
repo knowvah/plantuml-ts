@@ -48,10 +48,15 @@ import {
   type EntityDecorationInfo,
   type UGraphicWithGroups,
 } from '../../core/svek/DecorateEntityImage.js';
-import { upstreamKeyword, mapComponentStyle, textFont, resolveActorStyle } from './renderer-symbol.js';
+import {
+  upstreamKeyword,
+  mapComponentStyle,
+  textFont,
+  resolveActorStyle,
+} from '../../core/decoration/symbol/usymbol-resolve.js';
 import { type SpriteRegistry, spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
-import { makeAtomImageResolverFor } from './render-atoms.js';
+import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
 import { buildNoteBody } from './leaf-sizing.js';
 import { NOTE_FONT_SIZE } from './leaf-sizing-consts.js';
 
