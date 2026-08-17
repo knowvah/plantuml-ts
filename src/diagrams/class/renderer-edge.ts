@@ -24,7 +24,7 @@ import {} from './renderer-classifier-box.js';
 import {} from './class-namespace-shape.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
 import {} from './class-shadow.js';
-import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
+import { resolveArrowLabelFont, resolveCardinalityFontColor } from '../../core/arrow-label-font.js';
 
 /**
  * G2 N5: `EdgeGeo.points` is a well-formed `1 + 3*n` cubic-bezier spline
@@ -202,26 +202,132 @@ function resolveArrowTagStyle(
  * G2 item 44 / SI25 D1: the magic-arrow glyph `<polygon>` -- jar's
  * `TextBlockArrow2#drawU` (`klimt/shape/TextBlockArrow2.java:63-77`), the
  * ONE emitter for both the whole-label glyph (`geo.arrowGlyph`) and the
- * per-line glyphs (`geo.labelLines[i].glyph`). `fill`/`stroke` are ALWAYS
- * `#000000` (the label font's own color, `FontConfiguration#getColor()` --
- * NOT the edge's own `strokeColor`, unlike the main arrowhead polygons),
- * jar-verified against `lojepe-37-liri985`'s golden `<polygon>`. Drawn as
- * separate presentation attributes (not one `style="..."` string like
- * jar's own klimt-pipeline output) -- semantically identical post-
- * normalization (`tests/oracle/svg-conformance/normalize.ts` expands
- * `style` into individual attributes before comparing). T7b: routed
- * through `attrs()` so each coordinate is formatted (ADR-1). Returns
- * `undefined` for a malformed (non-3-point) glyph.
+ * per-line glyphs (`geo.labelLines[i].glyph`). `fill`/`stroke` are BOTH
+ * the label font's own colour (`FontConfiguration#getColor()`, default
+ * `#000000` -- `TextBlockArrow2.java:66-67`'s `ug.apply(color)` +
+ * `ug.apply(color.bg())`) -- NOT the edge's own `strokeColor`, unlike the
+ * main arrowhead polygons -- jar-verified against `lojepe-37-liri985`'s
+ * golden `<polygon>`. Drawn as separate presentation attributes (not one
+ * `style="..."` string like jar's own klimt-pipeline output) --
+ * semantically identical post-normalization (`tests/oracle/svg-
+ * conformance/normalize.ts` expands `style` into individual attributes
+ * before comparing). T7b: routed through `attrs()` so each coordinate is
+ * formatted (ADR-1). Returns `undefined` for a malformed (non-3-point)
+ * glyph.
  */
-function magicArrowPolygon(points: ReadonlyArray<{ x: number; y: number }>): string | undefined {
+function magicArrowPolygon(
+  points: ReadonlyArray<{ x: number; y: number }>,
+  color: string,
+): string | undefined {
   const [p0, p1, p2] = points;
   if (p0 === undefined || p1 === undefined || p2 === undefined) return undefined;
   const fmt = (n: number): string => formatDecimal(n, DEFAULT_SVG_DECIMALS);
   const pts = [p0, p1, p2, p0].map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(',');
   return `<polygon${attrs([
-    ['points', pts], ['fill', '#000000'], ['stroke', '#000000'],
+    ['points', pts], ['fill', color], ['stroke', color],
     ['stroke-width', 1], ['stroke-linejoin', 'miter'], ['stroke-miterlimit', 10],
   ])}/>`;
+}
+
+/**
+ * G2/N25 (tailLabel/headLabel) + G2/N62 (label): a relationship's plain
+ * text label AND its tail/head multiplicity-role labels shared ONE
+ * jar-verified byte-exact attribute set (`kipure-14-suli112`/`dokego-92-
+ * zilu832` `in.svg` for tail/head; `siteza-47-lixe343` for a plain
+ * label -- see `class-geo-builders.ts#attachEdgeLabel`'s doc comment) --
+ * `font-size="13"`, `lengthAdjust="spacing"` + `textLength`,
+ * `font-family="sans-serif"`, NO `text-anchor` (SVG default "start" --
+ * see `renderer-classifier-box.ts#renderRowText`'s identical omission for
+ * the same reason) -- true ONLY because both drew from `plantuml.skin`'s
+ * SAME default `arrow { FontSize 13 }` block
+ * (`GraphvizImageBuilder.java:235-238`). **D3/D4 (T5):** upstream resolves
+ * the main label's font and the cardinality font SEPARATELY
+ * (`GraphvizImageBuilder.java:124-126,234-241`), so a diagram overriding
+ * ONLY `arrow { FontSize/FontStyle/FontName }` (not `arrow.cardinality`)
+ * now diverges the two -- `geo.label`/`geo.labelLines` (the main label)
+ * draw at `labelFontAttrs` (caller's {@link arrowLabelTextAttrs});
+ * `geo.tailLabel`/`geo.headLabel` (cardinality/quantifier) keep the
+ * untouched `CARDINALITY_FONT_SIZE` literal below. **T3 (D2/D3/D5/D6,
+ * `plans/arrow-label-font-colour/decisions.md`, oracle experiment "a"):**
+ * `fill` is no longer a shared `#000000` literal -- the main label/
+ * per-line glyph fill is `labelColor`
+ * (`resolveArrowLabelFont(theme).color`, D2/D3), the tail/head fill is
+ * `cardinalityColor` (`resolveCardinalityFontColor(theme)`, D5 -- inherits
+ * `labelColor` absent a `theme.cardinalityFontColor` override, D6). Absent
+ * any override both still resolve to `#000000` (D3: NEVER
+ * `theme.colors.text`), so every fixture with no arrow font override
+ * renders byte-identical to before.
+ *
+ * G2 item 43: `geo.labelLines` (multi-line `label`) draws one `<text>`
+ * per line -- mutually exclusive with `geo.label`
+ * (`class-geo-builders.ts#attachEdgeLabel` sets exactly one of the two).
+ * SI25 D1: a guide-line label's per-line glyph (`labelLines[i].glyph`,
+ * `StringWithArrow#addSeveralMagicArrows`) draws BEFORE its line's
+ * `<text>` -- `mergeLR(arrow, label, ...)` puts the arrow block first and
+ * `TextBlockHorizontal#drawU` walks its blocks in order
+ * (`klimt/shape/TextBlockHorizontal.java:79-91`); jar's `gobuco-16-
+ * ruke239` SVG interleaves `<polygon>`, `<text>`, `<polygon>`, `<text>`...
+ * per line. A bare-token line (`text === ''`, T2's `splitGuideLines`) is
+ * the arrow block alone (`mergeLR`'s `b2 == EMPTY` arm, `TextBlockUtils
+ * .java:112-119`), so no `<text>` is emitted for it.
+ *
+ * Hoisted out of `renderEdge` (T3, split further into this function plus
+ * {@link renderEdgeCardinalityLabels}) to keep both under the lizard
+ * NLOC/CCN caps -- pure extraction, no behavior change beyond the `fill`
+ * values above.
+ */
+function renderEdgeMainLabel(
+  geo: EdgeGeo,
+  labelFontAttrs: ReturnType<typeof arrowLabelTextAttrs>,
+  labelColor: string,
+): string[] {
+  const parts: string[] = [];
+  for (const line of geo.labelLines ?? []) {
+    if (line.glyph !== undefined) {
+      const glyph = magicArrowPolygon(line.glyph.points, labelColor);
+      if (glyph !== undefined) parts.push(glyph);
+      if (line.text === '') continue;
+    }
+    parts.push(
+      text(line.x, line.y, line.text, {
+        fill: labelColor, ...labelFontAttrs,
+        lengthAdjust: 'spacing', textLength: line.width,
+      }),
+    );
+  }
+  if (geo.label !== undefined) {
+    parts.push(
+      text(geo.label.x, geo.label.y, geo.label.text, {
+        fill: labelColor, ...labelFontAttrs,
+        lengthAdjust: 'spacing', textLength: geo.label.width,
+      }),
+    );
+  }
+  return parts;
+}
+
+/**
+ * The tail/head multiplicity-role labels' half of {@link
+ * renderEdgeMainLabel}'s doc comment (shared attribute set, D3/D4 font
+ * split, T3's D5/D6 `cardinalityColor` fill) -- split into its own
+ * function purely to stay under the lizard NLOC/CCN caps.
+ */
+function renderEdgeCardinalityLabels(
+  geo: EdgeGeo,
+  theme: Theme,
+  cardinalityColor: string,
+): string[] {
+  const parts: string[] = [];
+  for (const portLabel of [geo.tailLabel, geo.headLabel]) {
+    if (portLabel === undefined) continue;
+    parts.push(
+      text(portLabel.x, portLabel.y, portLabel.text, {
+        fill: cardinalityColor, fontSize: CARDINALITY_FONT_SIZE, fontFamily: theme.fontFamily,
+        lengthAdjust: 'spacing', textLength: portLabel.width,
+      }),
+    );
+  }
+  return parts;
 }
 
 export function renderEdge(
@@ -301,77 +407,32 @@ export function renderEdge(
     );
   }
   parts.push(arrowheads.tail, arrowheads.head);
+  // T3: resolved here (not up front) -- `labelColor` feeds both the
+  // whole-label glyph below and {@link renderEdgeMainLabel}'s main-label/
+  // per-line-glyph `<text>`/`<polygon>` fills; `cardinalityColor` feeds
+  // only {@link renderEdgeCardinalityLabels}'s tail/head labels. See
+  // `arrow-label-font.ts`'s own doc comments (D2/D5) for the upstream
+  // citations -- never computed by hand.
+  const labelColor = resolveArrowLabelFont(theme).color;
+  const cardinalityColor = resolveCardinalityFontColor(theme);
   // G2 item 44: the whole-label magic-arrow glyph -- see {@link
   // magicArrowPolygon}. Drawn before the label text (`mergeLR(arrow,
   // label)`, `SvekEdge.java:284,304`).
   if (geo.arrowGlyph !== undefined) {
-    const glyph = magicArrowPolygon(geo.arrowGlyph.points);
+    const glyph = magicArrowPolygon(geo.arrowGlyph.points, labelColor);
     if (glyph !== undefined) parts.push(glyph);
   }
-  // G2/N25 (tailLabel/headLabel) + G2/N62 (label): a relationship's plain
-  // text label AND its tail/head multiplicity-role labels shared ONE
-  // jar-verified byte-exact attribute set (`kipure-14-suli112`/`dokego-92-
-  // zilu832` `in.svg` for tail/head; `siteza-47-lixe343` for a plain
-  // label -- see `class-geo-builders.ts#attachEdgeLabel`'s doc comment) --
-  // `fill="#000000"`, `font-size="13"`, `lengthAdjust="spacing"` +
-  // `textLength`, `font-family="sans-serif"`, NO `text-anchor` (SVG default
-  // "start" -- see `renderer-classifier-box.ts#renderRowText`'s identical
-  // omission for the same reason) -- true ONLY because both drew from
-  // `plantuml.skin`'s SAME default `arrow { FontSize 13 }` block
-  // (`GraphvizImageBuilder.java:235-238`). **D3/D4 (T5):** upstream resolves
-  // the main label's font and the cardinality font SEPARATELY
-  // (`GraphvizImageBuilder.java:124-126,234-241`), so a diagram overriding
-  // ONLY `arrow { FontSize/FontStyle/FontName }` (not `arrow.cardinality`)
-  // now diverges the two -- `geo.label`/`geo.labelLines` (the main label)
-  // draw at {@link arrowLabelTextAttrs}; `geo.tailLabel`/`geo.headLabel`
-  // (cardinality/quantifier) keep the untouched `CARDINALITY_FONT_SIZE`
-  // literal below (T14's path). Absent an override both still resolve to
-  // the SAME `13`/`theme.fontFamily` pair, so every fixture with no arrow
-  // font override renders byte-identical to before.
   const labelFontAttrs = arrowLabelTextAttrs(theme);
-  // G2 item 43: `geo.labelLines` (multi-line `label`) draws one `<text>`
-  // per line -- mutually exclusive with `geo.label`
-  // (`class-geo-builders.ts#attachEdgeLabel` sets exactly one of the two).
-  // SI25 D1: a guide-line label's per-line glyph (`labelLines[i].glyph`,
-  // `StringWithArrow#addSeveralMagicArrows`) draws BEFORE its line's
-  // `<text>` -- `mergeLR(arrow, label, ...)` puts the arrow block first and
-  // `TextBlockHorizontal#drawU` walks its blocks in order
-  // (`klimt/shape/TextBlockHorizontal.java:79-91`); jar's `gobuco-16-
-  // ruke239` SVG interleaves `<polygon>`, `<text>`, `<polygon>`, `<text>`...
-  // per line. A bare-token line (`text === ''`, T2's `splitGuideLines`) is
-  // the arrow block alone (`mergeLR`'s `b2 == EMPTY` arm, `TextBlockUtils
-  // .java:112-119`), so no `<text>` is emitted for it.
-  for (const line of geo.labelLines ?? []) {
-    if (line.glyph !== undefined) {
-      const glyph = magicArrowPolygon(line.glyph.points);
-      if (glyph !== undefined) parts.push(glyph);
-      if (line.text === '') continue;
-    }
-    parts.push(
-      text(line.x, line.y, line.text, {
-        fill: '#000000', ...labelFontAttrs,
-        lengthAdjust: 'spacing', textLength: line.width,
-      }),
-    );
-  }
-  if (geo.label !== undefined) {
-    parts.push(
-      text(geo.label.x, geo.label.y, geo.label.text, {
-        fill: '#000000', ...labelFontAttrs,
-        lengthAdjust: 'spacing', textLength: geo.label.width,
-      }),
-    );
-  }
-  for (const portLabel of [geo.tailLabel, geo.headLabel]) {
-    if (portLabel === undefined) continue;
-    parts.push(
-      text(portLabel.x, portLabel.y, portLabel.text, {
-        fill: '#000000', fontSize: CARDINALITY_FONT_SIZE, fontFamily: theme.fontFamily,
-        lengthAdjust: 'spacing', textLength: portLabel.width,
-      }),
-    );
-  }
+  parts.push(...renderEdgeMainLabel(geo, labelFontAttrs, labelColor));
+  parts.push(...renderEdgeCardinalityLabels(geo, theme, cardinalityColor));
   return { body: parts.join(''), extraDefs: arrowheads.extraDefs };
+  // #lizard forgives -- pre-existing (unrelated to T3): the
+  // strokeColor/edgeStrokeWidth cascade (bracket override > tag style >
+  // classCascadeArrowColor > default) plus the path/arrowhead/glyph/label
+  // assembly mirror SvekEdge#drawU's own branching (comments above); T3
+  // only added two `resolve*(theme)` reads and hoisted the label/
+  // cardinality drawing into {@link renderEdgeMainLabel}/{@link
+  // renderEdgeCardinalityLabels} -- see their own doc comments.
 }
 
 // ---------------------------------------------------------------------------
