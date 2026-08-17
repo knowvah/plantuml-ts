@@ -58,7 +58,7 @@ measurement, as SI22/SI23 did.
 | [1](batch-1/overview.md) | Core building blocks (2 parallel) | T1 T2 | [x] |
 | [2](batch-2/overview.md) | Description M2 + class multi-line branch (2 parallel) | T3 T4 | [x] |
 | [3](batch-3/overview.md) | Arrow-font engine wiring (3 parallel; T7 optional) | T5 T6 T7 | [x] |
-| [4](batch-4/overview.md) | Close-out | T8 | [ ] |
+| [4](batch-4/overview.md) | Close-out | T8 | [x] |
 
 ## Quality gates
 
@@ -147,3 +147,106 @@ Rose-note copies (`shared-seam-extraction`).
 - [diagrams/data-flow.md](diagrams/data-flow.md)
 - Predecessor: `plans/edge-label-box-backlog/` (README close-out + residue,
   `decision-journal.md`, T7/T9/T10/T12c specs as templates)
+
+## Close-out (2026-08-16)
+
+Every number below was measured on a clean tree at **`cb4de5c7`** (the last
+code commit; the commits after it are planning docs) — `shape-match-report`
+and `dot-sync-report` in a detached worktree, the four gates in the repo.
+
+### Exit bar, scored clause by clause
+
+| # | Clause | | Measurement |
+|---|---|---|---|
+| 1 | Backlogs go from **22 to ≤ 13** | **✓** | **11** — class 5, description 4, state 2, object 0. Eleven slugs targeted, eleven cleared; the two slack slots for `dikexa`/`zavitu` were not needed (both cleared whole). |
+| 2 | Every remaining slug carries a named mechanism or an explicit "undiagnosed" | **✓** | 11 of 11 carry a named mechanism; **zero undiagnosed** — SI23's two (`vuresa`, `ticuxa`) were diagnosed in planning and cleared in T4/T5. |
+| 3 | DOT EQUAL non-decreasing for every type | **✓** | class 699 → **705** · state 266 → **266** · component 257 → **259** · usecase 89 → **92** · object 78 → **78**. Nothing decreased. |
+| 4 | No fixture rises in `shape-match-report` (per fixture) | **✓** | **Zero fixtures regressed; 6 improved** (`focaci`, `gobuco`, `lapoma`, `vuresa`, `camuna`, `ticuxa` — all toward jar), verified by per-fixture diff against the mission's own baseline captured at `9c4ed349`. Census 783 → **785** doc-size-exact, 26,206 → **26,255** matched-shapes. |
+| 5 | All four quality gates green | **✓** | `npm test` 595 files / **14,492** passed / 1 todo, coverage 95.37 / 90.35 / 96.93 / 96.46 · `npm run typecheck` exit 0 · `npm run lint` exit 0 · `npm run build` exit 0. |
+
+**Scored 5 of 5.** No clause reworded.
+
+### Residue — all 11, each with its mechanism (SI23's out-of-scope entries carried forward verbatim)
+
+| backlog | slug | mechanism | owner |
+|---|---|---|---|
+| class | `nagega-30-poso418` | `!define` macro label never expanded | separate |
+| class | `nuvake-96-gofe203` | `NOTE_COLOR` regex backtracks past a `;`-colour spec's embedded colons | separate |
+| class | `tunelu-64-xica833` | `AssociationClass` routes note text via `class-assoc-couple.ts`'s `.label` substitution, never `.linkNote` | separate |
+| class | `vonago-16-zime449` | same as `tunelu` | separate |
+| class | `xamule-03-jeda376` | per-run `<size:30>` font change inside a label — needs a real creole `TextBlock` | Phase 4h |
+| description | `berelu-46-namo819` | inline creole (`**missing**`) measured literally; the deltas do not fit a literal-`**` story | separate |
+| description | `gevozu-46-sasu860` | `<latex>` block sizing | separate |
+| description | `sunuju-01-pote718` | `<latex>` block sizing | separate |
+| description | `kafexo-72-xupa679` | `skinparam maxMessageSize` word-wrap unported | separate |
+| state | `lurage-50-kobo763` | multi-line label measured as one line (472x15 vs 125x54) — creole `TextBlock` | Phase 4h |
+| state | `xetase-70-zaza808` | `{{ }}` embedded sub-diagram in an edge label — `EmbeddedDiagram.ts#NestedDiagramRenderer` unbuilt | separate |
+
+**Not in any backlog but failing `labelSizeOk`:** `component/ruciga-77-ruja233`
+(found by T6; fails at the pre-mission baseline too; no arrow-font override).
+The shrink-only rule forbids adding it; recorded here so it is not lost.
+
+### Corrections this mission owed, and paid
+
+- **`decisions.md#quantifier-visibility-strip-focaci` named the wrong mechanism.**
+  The strip is `CharHidder`'s creole escape (`utils/CharHidder.java:59-90`, run
+  on every creole line by `StripeSimple.java:150`), not `Display`'s visibility
+  strip — `Display#manageGuillemet(true)` has exactly one caller,
+  `abel/LinkArg.java:71`, the main label. Same 53 for `focaci`; different for
+  `+`/`-`/`#`-prefixed quantifiers, which the port now correctly leaves alone.
+  T1's agent read the call path, disproved the brief with solo oracle renders,
+  and was right to disobey. Recorded in `decisions.md`'s corrections section.
+- **`decisions.md#d6` under-stated `hasSeveralGuideLines`:** four conditions
+  (`startsWith("< ")`, `startsWith("> ")`, `endsWith(" <")`, `endsWith(" >")`,
+  `Display.java:729-747`), not two. All four ported.
+- **SI23's README `vuresa` line reasoned the sign backwards** — corrected there
+  (one line) per T8 step 5.
+
+### Tasks: 8 planned → 8 executed (T7, optional, executed)
+
+Plan amendments, all journalled: T3's `roseNoteDim` landed in a new
+`src/core/rose-note-dim.ts` (`edge-label-box.ts` at 500/500 lines) and T3
+lowered the description backlog count pin in
+`tests/unit/scripts/measure-description-size-deltas.test.ts`; T2 withheld the
+`<style> arrow { FontSize }` cascade from the live theme merge (stop 8), so
+Batch 3 ran **T6 first** with `style-map-theme.ts` added to its write-set to
+lift it, then T5 ∥ T7. **One sub-step stopped, unfixed:** T4 step 3 (per-line
+magic-arrow SVG glyph) needs `EdgeGeo` in `src/diagrams/class/class-geo-types.ts`
+extended — in no task's write-set (stop 2). `gobuco`/`lapoma` DOT boxes are
+exact; their SVG draws no per-line glyph. Human write-set decision required.
+
+### Known issues and follow-ups
+
+1. **Note-on-link SVG note shape** (`EntityImageNoteLink` draw) for class,
+   state and description — D2's other mission; description now draws the note
+   *text* inside the merged box, class/state still drop it.
+2. **`shared-seam-extraction` now has four Rose-note copies** —
+   `src/core/rose-note-dim.ts` (T3) plus `state-dot-graph.ts:178`,
+   `state-composite-edge-label.ts:49`, `class-note-link-box.ts:70`.
+3. **T4 step 3** — per-line magic-arrow glyphs in class SVG (`class-geo-types.ts`
+   `EdgeGeo` extension + `class/renderer-edge.ts`); DOT/SVG agree on the box,
+   not on the ink.
+4. **Arrow-label font colour** — `camuna` (`FontColor Blue`) and `ticuxa`
+   (`ClassArrowFontColor`) still draw `fill="#000000"`; D3's cascade carries
+   family/size/style only. New mechanism, no backlog (size-only backlog).
+5. **Description `computeLinkDzeta` flat-measures the main label** where
+   upstream eats the merged block (`SvekEdge.java:1169-1171,1193-1194`) —
+   inert on the corpus (all four fixtures at the nodesep/ranksep floors).
+6. **`component/ruciga-77-ruja233`** — unbacklogged `labelSizeOk` failure.
+7. **`.claude/catalog.md` still does not exist** (re-verified 2026-08-16);
+   new public surface this mission: `stripLeadingEscapedChar` (internal),
+   `roseNoteDim` (`src/core/rose-note-dim.ts`), `resolveArrowLabelFont`
+   (`src/core/arrow-label-font.ts`), `computeArrowFontOverride`
+   (`style-cascade-class.ts`), `hasSeveralGuideLines`/`computeGuideLinesBox`
+   (`class-magic-arrow.ts`), `measureLinkNoteDim` (`description/link-note-box.ts`),
+   `DescriptiveLink.linkNote/linkNotePosition`, skinparam `arrowfontname`/
+   `arrowfontstyle`, `colors.graph.arrowFontFamily/arrowFontStyle`.
+8. **`src/core/edge-label-box.ts` and `style-cascade-class.ts` have no line
+   budget left** under the complexity hook (500/500 and ~500).
+
+### Landing state
+
+Branch `feat/edge-label-box-followups`, all four gates green at head. Merge
+with a **merge commit** (per-task commit ids `151b5317` T1, `48c572b3` T2,
+`608a0c32` T3, `d24fd288` T4, `cb4de5c7` T5, `a5eff6c6` T6, `1a17ab96` T7 are
+cited throughout the journal). No PR was opened by the executor.

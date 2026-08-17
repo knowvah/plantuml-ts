@@ -132,3 +132,22 @@ diagnosed both (above). **The `vuresa` note in SI23's README is wrong in
 sign**: it says "failing to strip `<b>` would make us *narrower*" — not
 stripping keeps 7 extra glyphs and makes us **wider**, which is what we are
 (142 vs 128). T8 corrects that line in `plans/edge-label-box-backlog/README.md`.
+
+## Corrections found during execution (2026-08-16)
+
+- **`#quantifier-visibility-strip-focaci` is wrong about the mechanism.**
+  `Display#manageGuillemet(manageVisibilityModifier)` (`Display.java:410-419`)
+  has one caller, `abel/LinkArg.java:71` — the main label. The quantifier arm
+  never reaches it. What strips the `~` in `~* initiators` is `CharHidder.hide`
+  (`utils/CharHidder.java:59-90`), run on every creole line by
+  `StripeSimple#analyzeAndAdd` (`klimt/creole/legacy/StripeSimple.java:150`):
+  `~` + one of `_-"#][*./<` is a creole escape. Same 53 here; a visibility
+  strip would wrongly narrow `+`/`-`/`#`-prefixed quantifiers (oracle: `+
+  initiators` 56, `# initiators` 62, `~initiators` 56, all unstripped). Ported
+  as `stripLeadingEscapedChar` (T1, `151b5317`).
+- **`#d6` under-states `hasSeveralGuideLines`:** `Display.java:729-747` tests
+  `startsWith("< ")`, `startsWith("> ")`, `endsWith(" <")`, `endsWith(" >")` —
+  four conditions. All four ported (T4, `d24fd288`).
+- **`#d3`/`#d4` did not foresee** that `description/layout.ts` already read
+  `graph.arrowFontSize` directly, so merging the `<style>` cascade in T2 would
+  have moved `zosuje` early; T2 withheld it, T6 lifted it (`a5eff6c6`).

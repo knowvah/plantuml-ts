@@ -193,7 +193,7 @@ done. M4 alone grew from 4 slugs to ~13 once diagnosed.
 | `ticuxa-26-tixo262` | **undiagnosed** — our 23 correctly measures `toto`; the oracle's 98x60 comes from something in the file we are not reading |
 | `tunelu-64-xica833` | `AssociationClass` routes note text via `class-assoc-couple.ts`'s `.label` substitution, never `.linkNote` |
 | `vonago-16-zime449` | same as `tunelu` |
-| `vuresa-33-kumu160` | **undiagnosed** — 14px too wide on a multi-line label with inline `<b>`; failing to strip `<b>` would make us *narrower*, so that hypothesis is ruled out by the sign of the error |
+| `vuresa-33-kumu160` | **undiagnosed** at close-out — 14px too wide on a multi-line label with inline `<b>`. *(Corrected by SI24 planning: the sign argument was backwards — NOT stripping `<b>…</b>` keeps 7 extra glyphs and makes us WIDER, 142 vs 128, which is exactly the observed error; fixed in SI24 T4.)* |
 | `xamule-03-jeda376` | per-run `<size:30>` font change inside a label — needs a real creole `TextBlock` (Phase 4h) |
 
 ### description (9)
