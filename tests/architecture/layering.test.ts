@@ -76,13 +76,7 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
 
 /** Measured 2026-08-17 at 321bfb8b (T0). Each entry names the task that
  *  retires its edge; T10 (README batch 3) empties this array. */
-export const KNOWN_DEBT: readonly DebtEntry[] = [
-  { from: 'src/diagrams/class/class-geo-types.ts', to: 'src/diagrams/description/leaf-sizing.ts', retiredBy: 'T3' },
-  { from: 'src/diagrams/class/class-layout-leaf-shapes.ts', to: 'src/diagrams/description/leaf-sizing.ts', retiredBy: 'T3' },
-  { from: 'src/diagrams/class/class-layout-generic-classifier.ts', to: 'src/diagrams/description/leaf-sizing.ts', retiredBy: 'T3' },
-  { from: 'src/diagrams/class/class-layout-generic-classifier.ts', to: 'src/diagrams/description/ast.ts', retiredBy: 'T3' },
-  { from: 'src/diagrams/class/class-layout-helpers.ts', to: 'src/diagrams/description/leaf-sizing.ts', retiredBy: 'T3' },
-];
+export const KNOWN_DEBT: readonly DebtEntry[] = [];
 
 /** `true` when `edge` is covered by `entry` — prefix match on both sides so
  *  a directory-level entry (hcl/yaml → json) covers every file under it,
