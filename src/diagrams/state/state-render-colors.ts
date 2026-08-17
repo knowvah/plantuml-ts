@@ -14,7 +14,7 @@
  */
 import type { StateNodeGeo } from './state-geo-types.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { resolveBareOrBackColor } from '../class/class-color-override.js';
+import { resolveBareOrBackColor } from '../../core/color-override.js';
 import type { Theme } from '../../core/theme.js';
 
 /** Default box fill (`skinparam stateBackgroundColor`'s own terminal

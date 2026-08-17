@@ -13,7 +13,7 @@ import type { Paint } from '../../core/paint.js';
 import { text, path, polygon, image, linkWrap, ellipse, rect } from '../../core/svg.js';
 import { moveTo, lineTo, cubicTo } from '../../core/svg-path-builder.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { resolveBareOrBackColor } from './class-color-override.js';
+import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { splitStereotypeStyleTags } from './class-stereotype.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import {
