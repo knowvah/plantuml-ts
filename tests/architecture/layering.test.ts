@@ -74,8 +74,11 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
   },
 ];
 
-/** Measured 2026-08-17 at 321bfb8b (T0). Each entry names the task that
- *  retires its edge; T10 (README batch 3) empties this array. */
+/** Measured 2026-08-17 at 321bfb8b (T0): 13 edges, each naming the task
+ *  that retired it (T1 ×1, T2 ×2, T3 ×5, T4 ×1, T8 ×4). Emptied as the tasks
+ *  landed; T10 (README batch 3) pins it empty below so it cannot regrow —
+ *  a new core→diagrams or engine→engine import must be ALLOWLISTed with a
+ *  written upstream justification, never parked here. */
 export const KNOWN_DEBT: readonly DebtEntry[] = [];
 
 /** `true` when `edge` is covered by `entry` — prefix match on both sides so
@@ -181,6 +184,10 @@ describe('layering fitness function (SI27 D5)', () => {
   it('every ALLOWLIST entry has a non-empty why', () => {
     const empty = ALLOWLIST.filter((a) => a.why.trim().length === 0);
     expect(empty).toEqual([]);
+  });
+
+  it('KNOWN_DEBT stays empty after SI27 T10 (README exit bar 1)', () => {
+    expect(KNOWN_DEBT).toEqual([]);
   });
 });
 
