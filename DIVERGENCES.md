@@ -657,6 +657,27 @@ captured class body inside a `note` into loose top-level lines). Without a Jaws
 decoder that separator renders as an invisible character rather than a label
 line break.
 
+### `\t` in labels — a real tab, but no tab-stop indentation (limitation)
+
+**Upstream:** `Display.getWithNewlines` expands the two-character `\t` escape
+to a real tab (`klimt/creole/Display.java:305`), and the text renderer then
+indents each line to `skinparam tabSize`-driven tab stops (jar `x` moves
+12 → 68 → 124 for one, two tabs in `lokija-02-dipe348`).
+
+**This port:** since SI27 T1 (2026-08-17) the ONE `Display.getWithNewlines`
+port (`core/klimt/creole/DisplayNewlines.ts#splitDisplayLines`) expands `\t`
+to a real tab exactly as upstream does — the glyph run and `textLength` are
+now byte-identical to the jar's — but the tab-stop x-indentation is not
+implemented, so every line still starts at the same x. Before SI27 the retired
+class/core copies left the literal backslash-t glyph pair in the text.
+
+**Why:** the escape scan and the tab-stop layout are two different upstream
+mechanisms; SI27 was a pure-move mission and ported the former only.
+**Category:** limitation, small. **Reach:** 4 state fixtures in the corpus
+(`duzazu-41-telu529`, `juvagu-33-dupa212`, `lokija-02-dipe348`,
+`vixobo-14-jole910`); `duzazu`/`vixobo` additionally hit the unported
+trailing-backslash line continuation of the state parser (pre-existing).
+
 ## Descriptive diagrams
 
 <!--

@@ -51,7 +51,7 @@ object 78/80 (SI26 close-out; re-measured at T0, 321bfb8b — unchanged).
 | [1a](batch-1a/overview.md) | Display unification ∥ USymbol/atom helpers ∥ color-override | T1 T2 T4 | [x] |
 | [1b](batch-1b/overview.md) | FrontierCalculator ∥ link-note dim ∥ Command<S> ∥ assemble-svg | T5 T6 T7 T8 | [x] |
 | [2](batch-2/overview.md) | leaf-sizing family (needs T2) ∥ CommandCreateJson (needs T7) | T3 T9 | [x] |
-| [3](batch-3/overview.md) | Retire debt, docs, close-out | T10 | [ ] |
+| [3](batch-3/overview.md) | Retire debt, docs, close-out | T10 | [x] |
 
 Batches 1a and 1b have disjoint write-sets and MAY run as one 7-way parallel
 batch if the executor prefers; they are split only to keep each gate run
@@ -133,3 +133,67 @@ run is always the full set. Oracle renders only via
   `LeafSizingSubject` → `abel/Entity` convergence (SI-1).
 - Predecessors: `planning/next-missions.md §2`, `plans/edge-label-box-and-
   class-ports/` (T1 relocation precedent), `plans/edge-label-box-backlog/`.
+
+## Close-out (2026-08-17)
+
+**Tasks:** 11 of 11 (T0–T10) on `refactor/shared-seam-extraction`; per-task
+commits `28d18ee8` T0 · `ee3c4163` T6 · `2e107fd8` T7 · `497cbd24` T4 ·
+`46b11a22` T2 · `6584addc` T5 · `2b0c0891` T1 · `d26269f5` T8 · `ca884222`
+fix(T1) · `54060b49`/`87bc23e6` debt retirement · `12fec795` T3 · `6313cac6`
+T9 · T10 = this commit. Batches 1a+1b ran as one 7-way batch; batch 2 as a
+2-way batch; T10 by the orchestrator. Merge with a **merge commit**.
+
+**Exit bar, scored clause by clause (measured at the T10 tree):**
+
+1. ✅ `src/core/**` → `src/diagrams/**`: none (registry lives in
+   `src/index.ts`, ALLOWLISTed as documentation); engine → engine: only
+   hcl/yaml → json. `tests/architecture/layering.test.ts` passes, 3 ALLOWLIST
+   entries each with a `why`, `KNOWN_DEBT = []` and pinned empty.
+2. ✅ with one **flag**: ONE core port each of `Display.getWithNewlines`
+   (`DisplayNewlines.ts#splitDisplayLines`), `FrontierCalculator`
+   (`core/svek/FrontierCalculator.ts`), `measureLinkNoteDim`
+   (`core/svek/image/EntityImageNoteLink.ts`), `Command<S>`
+   (`core/command/Command.ts` — class/description/sequence alias it; **state
+   keeps its own 3-arg `execute(state, match, pass)`**, faithful to
+   `command/Command.java:44`, documented + type-tested; D4's "engines alias"
+   clause is 3/4 literal), `CommandCreateJson`/`JsonNode`
+   (`core/command/`), leaf-sizing family (`core/svek/image/leaf-sizing*.ts` +
+   `LeafSizingSubject.ts`), `resolveBareOrBackColor` (`core/color-override.ts`),
+   USymbol/atom helpers (`core/decoration/symbol/usymbol-resolve.ts`,
+   `core/creole-atoms-image-resolver.ts`). Every file `@see`s its Java.
+3. ✅ Manifest (2014 fixtures, `dot` on 1634): **2010 byte-identical**; the 4
+   differing (`state/duzazu-41-telu529`, `juvagu-33-dupa212`,
+   `lokija-02-dipe348`, `vixobo-14-jole910`) are T1's `\t` fix, jar-ward
+   (`Display.java:305`; `<text>` glyphs + `textLength` now = jar; only
+   tab-stop x remains — `DIVERGENCES.md` "`\t` in labels"). Journalled with
+   before/after evidence.
+4. ✅ DOT EQUAL class **705**/711 · state **266**/268 · component **259**/263 ·
+   usecase **92**/93 · object **78**/80 — unchanged; every ratchet holds
+   (`npm test` green); `shape-match-report` **785** doc-size-exact / **26,256**
+   matched-shapes, per-fixture diff vs a 321bfb8b worktree census: 0 matched
+   counts moved, 2 doc-width rows moved (`juvagu` 139 → 131 vs jar 104,
+   toward; `lokija` 87 → 72 vs jar 183 — width away because the literal `\t`
+   glyph pair was wider than the real tab, text content toward). No fixture
+   rises.
+5. ✅ typecheck · lint · build · `npm test` 601 files / 14,599 tests, coverage
+   95.41 / 90.40 / 96.93 / 96.50.
+
+**Decisions:** 20 journal rows; **flagged for the maintainer:** (a) T7 state
+`Command` divergence above; (b) `fix(T1)` `ca884222` edited
+`tests/unit/state/layout.test.ts` outside every write-set (stop 1 weighed;
+2-line test-input correction, mechanism verified on `sosoxe-55-demi451`);
+(c) T8 kept the class background/border finalize in `core/assemble-svg.ts`
+dispatched on `diagramType` (D2's "inside the engine renderer" prose is not
+reachable: both rects need the post-chrome canvas) — the D2 goal (one shell
+call, zero engine imports, four shell files gone) is met; (d) T3 rewired 9
+consumer test files' import paths beyond its literal write-set (pure move
+consequence); (e) batch-1 git-index incident: a bare `git commit` swept other
+agents' auto-staged renames — re-sliced by pathspec, tree byte-identical.
+
+**Known issues / follow-ups:** the deferred families in the Index above
+(unchanged); `skinparam tabSize` tab-stop indentation; state-parser
+trailing-backslash continuation; `tests/architecture/sizer-renderer-parity
+.test.ts` glob scans zero files post-move; description JSON wiring;
+`.claude/catalog.md` still absent (stop 9 honoured — not created);
+`src/core/klimt/document-shell.ts` doc prose still names the deleted
+`assemble*Shell` helpers.
