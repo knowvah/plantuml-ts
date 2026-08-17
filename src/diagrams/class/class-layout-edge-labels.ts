@@ -19,8 +19,14 @@ import {
   computeMergedLabelBox,
   applyVisibilityIcon,
   applyGuillemet,
+  stripCreoleMarkup,
 } from '../../core/edge-label-box.js';
-import { isBareMagicArrowLabel, parseMagicArrowLabel } from './class-magic-arrow.js';
+import {
+  isBareMagicArrowLabel,
+  parseMagicArrowLabel,
+  hasSeveralGuideLines,
+  computeGuideLinesBox,
+} from './class-magic-arrow.js';
 import { splitEdgeLabelLines } from './class-edge-label-lines.js';
 // T10: the note operand's REAL dimension -- `EntityImageNoteLink` builds a
 // `ComponentRoseNote`, a DIFFERENT upstream component from the one
@@ -246,11 +252,12 @@ function computeNoteMergedLabelAttrs(
 /** The plain (non-note, non-constraint-spot) measured label -- multi-line,
  *  magic-arrow, or a single plain string. Plain single-line now ports M4
  *  causes A+B+C ({@link applyVisibilityIcon}, {@link applyGuillemet},
- *  `core/edge-label-box.ts`); multi-line gets C only (no fixture combines
- *  a leading visibility char with a multi-line label); magic-arrow gets
- *  neither (cause D territory, out of this task's scope -- no fixture
- *  combines a magic-arrow token with `<<x>>` either). `label` stays RAW:
- *  only width/height change. */
+ *  `core/edge-label-box.ts`); multi-line ports C, the D6 per-line
+ *  guide-line-arrow branch, and (T4) a per-line creole-tag strip; plain
+ *  single-line magic-arrow gets neither A/B/C nor a creole strip (cause D
+ *  territory, out of this task's scope -- no fixture combines a magic-arrow
+ *  token with `<<x>>` or a creole tag). `label` stays RAW: only
+ *  width/height change. */
 function computeMeasuredLabelAttrs(
   label: string,
   font: { family: string; size: number },
@@ -259,12 +266,32 @@ function computeMeasuredLabelAttrs(
 ): LabelAttrs {
   const { lines } = splitEdgeLabelLines(label);
   if (lines.length > 1) {
+    // D6 (`SvekEdge.java:290-297`): a multi-line label whose lines include a
+    // leading/trailing `< `/`> `/` <`/` >` guide-line token takes the
+    // PER-LINE arrow path (`Display.hasSeveralGuideLines`,
+    // `klimt/creole/Display.java:715-740`) instead of the plain stacked-text
+    // formula below -- see {@link hasSeveralGuideLines}/
+    // {@link computeGuideLinesBox}'s own doc comments.
+    if (hasSeveralGuideLines(lines)) {
+      const box = computeGuideLinesBox(lines, font, measurer);
+      return { label, labelWidth: box.width, labelHeight: box.height };
+    }
     // M4 cause C applies to EVERY line, unconditionally
     // (`Display.manageGuillemet`'s loop body, `Display.java:413-419` --
     // no `first`-only gate on the guillemet call, unlike the visibility
-    // strip). No corpus fixture combines this with a multi-line label; the
-    // per-line call is still correct upstream behavior, not speculation.
-    const guillemetLines = lines.map(applyGuillemet);
+    // strip). T4 (`vuresa-33-kumu160`): a real creole TextBlock upstream
+    // RENDERS `<b>..</b>` as bold formatting rather than measuring the tag
+    // as glyphs (`Display.java:413-419` runs at Display-construction time,
+    // BEFORE the later `create()`/`create9()` creole render this port
+    // stands in for via {@link stripCreoleMarkup}) -- so the strip runs
+    // AFTER guillemet, mirroring that same construct-then-render order.
+    // Bold contributes no width delta in deterministic mode either way:
+    // `StringBounderFromWidthTable#calculateDimension` (`klimt/drawing/font
+    // /StringBounderFromWidthTable.java:63-79`) derives width from `font
+    // .getSize2D()` and a fixed per-codepoint table alone -- no branch on
+    // `FontStyle`/bold/italic exists in that class -- so stop 10 does not
+    // fire here.
+    const guillemetLines = lines.map(applyGuillemet).map(stripCreoleMarkup);
     const widths = guillemetLines.map((l) => measurer.measure(l, font).width);
     const lineHeight = measurer.measure(guillemetLines[0] ?? '', font).height;
     return { label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };

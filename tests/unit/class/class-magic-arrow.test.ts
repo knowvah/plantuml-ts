@@ -10,7 +10,10 @@ import {
   parseMagicArrowLabel,
   magicArrowAngle,
   magicArrowGlyphPoints,
+  hasSeveralGuideLines,
+  computeGuideLinesBox,
 } from '../../../src/diagrams/class/class-magic-arrow.js';
+import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 
 describe('parseMagicArrowLabel (G2 item 44)', () => {
   it('returns undefined for a plain label with no arrow token', () => {
@@ -104,5 +107,61 @@ describe('magicArrowGlyphPoints (G2 item 44)', () => {
     const [tipLeft] = magicArrowGlyphPoints(0, 0, Math.PI / 2 + Math.PI, 13);
     // sin(angle+PI) = -sin(angle) -- the tip's x-offset flips sign.
     expect(tipLeft!.x - ARROW_GLYPH_SIZE / 2).toBeCloseTo(-(tipRight!.x - ARROW_GLYPH_SIZE / 2), 6);
+  });
+});
+
+describe('hasSeveralGuideLines (D6, Display.java:715-740)', () => {
+  it('is false for a single line, even one carrying a token', () => {
+    expect(hasSeveralGuideLines(['> foo'])).toBe(false);
+  });
+
+  it('is false for a multi-line label where no line carries a token', () => {
+    expect(hasSeveralGuideLines(['this is', 'on several', 'lines'])).toBe(false);
+  });
+
+  it('is true when a line STARTS WITH "< "', () => {
+    expect(hasSeveralGuideLines(['a', '< ef'])).toBe(true);
+  });
+
+  it('is true when a line STARTS WITH "> "', () => {
+    expect(hasSeveralGuideLines(['a', '> gh'])).toBe(true);
+  });
+
+  it('is true when a line ENDS WITH " <"', () => {
+    expect(hasSeveralGuideLines(['a', 'cd <'])).toBe(true);
+  });
+
+  it('is true when a line ENDS WITH " >"', () => {
+    expect(hasSeveralGuideLines(['a', 'ab >'])).toBe(true);
+  });
+
+  it('gobuco/lapoma\'s exact 4-line label is a several-guide-line label', () => {
+    expect(hasSeveralGuideLines(['ab >', 'cd <', '< ef', '> gh'])).toBe(true);
+  });
+});
+
+describe('computeGuideLinesBox (D6, StringWithArrow.java:115-127)', () => {
+  const measurer = new WidthTableMeasurer();
+  const font = { family: 'sans-serif', size: 13 };
+
+  // jar-verified structurally EQUAL against gobuco-16-ruke239/lapoma-04-
+  // vaga142's oracle svek DOT (`npx jiti scripts/dot-sync-report.ts --slug
+  // gobuco-16-ruke239 class`): WIDTH="29" HEIGHT="54" after edgeLabelAttrs'
+  // own +2*marginLabel and floor -- this function returns the PRE-margin
+  // block (29.4625 x 54), matching computeMeasuredLabelAttrs' contract.
+  it('sizes gobuco/lapoma\'s 4-line all-token label to the oracle box', () => {
+    const box = computeGuideLinesBox(['ab >', 'cd <', '< ef', '> gh'], font, measurer);
+    expect(box.width).toBeCloseTo(27.4625, 4); // + 2*1 margin = 29.4625 -> floors to 29
+    expect(box.height).toBe(52); // + 2*1 margin = 54
+  });
+
+  it('a line with no token measures its own text only, no arrow block added', () => {
+    const box = computeGuideLinesBox(['ab >', 'q'], font, measurer);
+    const abWidth = measurer.measure('ab', font).width;
+    // 'ab >' -> 13 (arrow block) + 'ab' text width; 'q' has no token, so its
+    // OWN line width is just measurer.measure('q').width -- were the arrow
+    // block wrongly added to 'q' too, the max would be pulled higher still.
+    expect(box.width).toBeCloseTo(font.size + abWidth, 6);
+    expect(box.height).toBe(font.size + font.size); // sum, not max, across lines
   });
 });
