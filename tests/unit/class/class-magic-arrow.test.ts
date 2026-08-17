@@ -12,6 +12,7 @@ import {
   magicArrowGlyphPoints,
   hasSeveralGuideLines,
   computeGuideLinesBox,
+  splitGuideLines,
 } from '../../../src/diagrams/class/class-magic-arrow.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 
@@ -163,5 +164,59 @@ describe('computeGuideLinesBox (D6, StringWithArrow.java:115-127)', () => {
     // block wrongly added to 'q' too, the max would be pulled higher still.
     expect(box.width).toBeCloseTo(font.size + abWidth, 6);
     expect(box.height).toBe(font.size + font.size); // sum, not max, across lines
+  });
+});
+
+describe('splitGuideLines (D3, StringWithArrow.java:115-127)', () => {
+  const measurer = new WidthTableMeasurer();
+  const font = { family: 'sans-serif', size: 13 };
+  const gobuco = ['ab >', 'cd <', '< ef', '> gh'];
+
+  it("splits gobuco's 4-line label into one entry per line, direction per token", () => {
+    const lines = splitGuideLines(gobuco, font, measurer);
+    expect(lines.map((l) => l.text)).toEqual(['ab', 'cd', 'ef', 'gh']);
+    expect(lines.map((l) => l.direction)).toEqual([
+      'forward', // 'ab >' -> right
+      'backward', // 'cd <' -> left
+      'backward', // '< ef' -> left
+      'forward', // '> gh' -> right
+    ]);
+    for (const l of lines) {
+      // TextBlockArrow2.calculateDimension is (size, size), TextBlockArrow2.java:87-89
+      expect(l.textWidth).toBe(measurer.measure(l.text, font).width);
+      expect(l.blockWidth).toBe(font.size + l.textWidth);
+      expect(l.blockHeight).toBe(Math.max(font.size, measurer.measure(l.text, font).height));
+    }
+  });
+
+  it('a line with no token has no direction and a bare text block', () => {
+    const [q] = splitGuideLines(['q'], font, measurer);
+    expect(q!.text).toBe('q');
+    expect(q!.direction).toBeUndefined();
+    expect(q!.blockWidth).toBe(q!.textWidth);
+    expect(q!.blockHeight).toBe(measurer.measure('q', font).height);
+  });
+
+  it('a bare token line has empty text and a size x size block', () => {
+    const [bare] = splitGuideLines(['<'], font, measurer);
+    expect(bare!.text).toBe('');
+    expect(bare!.direction).toBe('backward');
+    expect(bare!.textWidth).toBe(0);
+    expect(bare!.blockWidth).toBe(font.size);
+    expect(bare!.blockHeight).toBe(font.size);
+  });
+
+  it('computeGuideLinesBox is exactly max(blockWidth) x sum(blockHeight) over the walk', () => {
+    for (const input of [gobuco, ['ab >', 'q'], ['<', 'plain', 'x >']]) {
+      const walk = splitGuideLines(input, font, measurer);
+      expect(computeGuideLinesBox(input, font, measurer)).toEqual({
+        width: Math.max(...walk.map((l) => l.blockWidth)),
+        height: walk.reduce((acc, l) => acc + l.blockHeight, 0),
+      });
+    }
+    // The pre-T1 pinned value (SI24 T4): 27.4625 x 52 pre-margin = 29x54 DOT box.
+    const box = computeGuideLinesBox(gobuco, font, measurer);
+    expect(box.width).toBeCloseTo(27.4625, 4);
+    expect(box.height).toBe(52);
   });
 });
