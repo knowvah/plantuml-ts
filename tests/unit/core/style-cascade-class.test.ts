@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  computeArrowFontOverride,
   computeCardinalityFontOverride,
   computeClassStyleCascadeOverrides,
   computeClassTagCascadeGenerations,
@@ -480,5 +481,61 @@ describe('computeCardinalityFontOverride (T1, D3)', () => {
   it("defaultTheme's own cardinality font is 13/sans-serif -- the plantuml.skin arrow default (:307/:6), used when no override resolves", () => {
     expect(defaultTheme.cardinalityFontSize).toBe(13);
     expect(defaultTheme.cardinalityFontFamily).toBe('sans-serif');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T2 (edge-label-box-followups, D3): `computeArrowFontOverride` --
+// `{root,element,classDiagram,arrow}` (`GraphvizImageBuilder.java:234-235`,
+// SvekEdge's `labelFont`). Building block only -- no caller yet (D4/Batch 3
+// wires it).
+// ---------------------------------------------------------------------------
+describe('computeArrowFontOverride (T2, D3)', () => {
+  it('returns nothing for an empty StyleMap -- the caller keeps the Theme default', () => {
+    expect(computeArrowFontOverride(styleMap({}))).toEqual({});
+  });
+
+  it('camuna shape: arrow { FontSize 14  FontStyle bold } resolves size/style, no family', () => {
+    const override = computeArrowFontOverride(
+      styleMap({ arrow: { fontsize: '14', fontstyle: 'bold' } }),
+    );
+    expect(override).toEqual({ arrowFontSize: 14, arrowFontStyle: 'bold' });
+  });
+
+  it("arrow { cardinality { FontSize 10 } } alone (no plain arrow FontSize) does NOT leak into the arrow font", () => {
+    const override = computeArrowFontOverride(
+      styleMap({ 'arrow.cardinality': { fontsize: '10' } }),
+    );
+    expect(override).toEqual({});
+  });
+
+  it('a plain arrow { FontSize N } declaration is NOT shadowed by a sibling arrow.cardinality block', () => {
+    const override = computeArrowFontOverride(
+      styleMap({
+        arrow: { fontsize: '14' },
+        'arrow.cardinality': { fontsize: '10' },
+      }),
+    );
+    expect(override.arrowFontSize).toBe(14);
+  });
+
+  it('ticuxa shape: resolves FontName alongside FontSize/FontStyle', () => {
+    const override = computeArrowFontOverride(
+      styleMap({ arrow: { fontsize: '58', fontname: 'Courier', fontstyle: 'italic' } }),
+    );
+    expect(override).toEqual({
+      arrowFontSize: 58,
+      arrowFontFamily: 'Courier',
+      arrowFontStyle: 'italic',
+    });
+  });
+
+  it('a bare class {} declaration never leaks into the arrow font -- class is not an arrow ancestor', () => {
+    expect(computeArrowFontOverride(styleMap({ class: { fontsize: '30' } }))).toEqual({});
+  });
+
+  it('non-numeric FontSize is dropped, matching every sibling cascade\'s guard', () => {
+    const override = computeArrowFontOverride(styleMap({ arrow: { fontsize: 'not-a-number' } }));
+    expect(override.arrowFontSize).toBeUndefined();
   });
 });

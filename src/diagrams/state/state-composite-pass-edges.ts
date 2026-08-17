@@ -24,13 +24,12 @@ import { resolveEndpoint } from './state-composite-classify.js';
 import { buildEdgeAttrs } from './state-composite-edge-label.js';
 import { levelEndpointId } from './state-composite-pseudo.js';
 
-/** `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13,
- *  normal)`, klimt/font/FontParam.java:54) -- the transition/edge-label
- *  font, distinct from `theme.fontSize`/`STATE(14, normal)` (state
- *  body/title text). Duplicated locally (D1, avoid-import-cycle convention)
- *  rather than imported from `state-dot-graph.ts` -- same value as
- *  `description/renderer-edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
-import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+/** T7/D3/D4: the transition/edge-label font, distinct from
+ *  `theme.fontSize`/`STATE(14, normal)` (state body/title text), resolved
+ *  through the shared resolver -- same call as
+ *  `description/renderer-edge.ts#arrowLabelFontConfig`'s own DOT-
+ *  measurement site. */
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 let edgeCounter = 0;
 function nextEdgeId(): string {
@@ -101,11 +100,11 @@ function isReversedDirection(direction: TransitionDirection | undefined): boolea
 }
 
 export function addLevelEdges(scopeId: string, transitions: readonly Transition[], acc: PassAccumulator, ctx: DiagramCtx): void {
-  // G5/C1 + G8 T2: `FontParam.ARROW(13)`, not `theme.fontSize` (14, the
-  // STATE body/title-text default) -- WIDTH-ONLY in the sense that this
-  // swaps ONLY the edge-label measurement call site, not state's body/title
-  // text elsewhere (state-sizing.ts etc., unaffected).
-  const font: FontSpec = { family: ctx.theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
+  // T7/D3/D4: shared resolver, not `theme.fontSize` (14, the STATE
+  // body/title-text default) -- WIDTH-ONLY in the sense that this swaps
+  // ONLY the edge-label measurement call site, not state's body/title text
+  // elsewhere (state-sizing.ts etc., unaffected).
+  const font: FontSpec = resolveArrowLabelFont(ctx.theme);
   for (const t of transitions) {
     const edgeId = nextEdgeId();
     const from = levelEndpointId(t.from, true, scopeId, ctx);
@@ -197,8 +196,8 @@ export function collectRegularTransitions(ast: StateDiagramAST): Transition[] {
  */
 export function sweepOrphanEdges(acc: PassAccumulator, ctx: DiagramCtx): void {
   const nodeIds = new Set(acc.nodes.map((n) => n.id));
-  // G5/C1 + G8 T2: same ARROW(13) width-only fix as `addLevelEdges` above.
-  const font: FontSpec = { family: ctx.theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
+  // T7/D3/D4: same shared-resolver width-only fix as `addLevelEdges` above.
+  const font: FontSpec = resolveArrowLabelFont(ctx.theme);
   for (const t of ctx.pool) {
     if (ctx.consumed.has(t)) continue;
     const from = resolveEndpoint(t.from, ctx.classify);

@@ -88,13 +88,12 @@ export type { DiagramCtx, GeoSpec, PassAccumulator };
  *  this same constant, not a re-derived copy. */
 export const ANCHOR_SIZE = 0.72;
 
-/** `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13,
- *  normal)`, klimt/font/FontParam.java:54) -- the transition/edge-label
- *  font, distinct from `theme.fontSize`/`STATE(14, normal)` (state
- *  body/title text). Duplicated locally (D1, avoid-import-cycle convention)
- *  rather than imported from `state-dot-graph.ts` -- same value as
- *  `description/renderer-edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
-import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+/** T7/D3/D4: the transition/edge-label font, distinct from
+ *  `theme.fontSize`/`STATE(14, normal)` (state body/title text), resolved
+ *  through the shared resolver -- same call as
+ *  `description/renderer-edge.ts#arrowLabelFontConfig`'s own DOT-
+ *  measurement site. */
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 export function newAccumulator(labelFont?: FontSpec, measurer?: StringMeasurer): PassAccumulator {
   return { nodes: [], edges: [], clusters: [], edgeSources: [], ...(labelFont !== undefined ? { labelFont } : {}), ...(measurer !== undefined ? { measurer } : {}) };
@@ -279,7 +278,7 @@ export function buildTopLevelPass(
     pseudoCreationIndex: ast.pseudoCreationIndex ?? new Map(),
   };
   resolveAllAutonomPasses(ctx);
-  const acc = newAccumulator({ family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE }, measurer);
+  const acc = newAccumulator(resolveArrowLabelFont(theme), measurer);
   const specs = ast.states.map((s) => resolveMember(s, acc, ctx, undefined));
   const pseudoSpecs = addLocalPseudoNodes('', ast.transitions, acc, ctx.pseudoCreationIndex);
   addScopeNotes('', ctx, acc);

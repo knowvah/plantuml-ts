@@ -179,3 +179,40 @@ describe('applyStyleMap -- cardinality font fold (T14, D3)', () => {
     expect(theme.cardinalityFontFamily).toBe(defaultTheme.cardinalityFontFamily);
   });
 });
+
+/**
+ * T2/T6/D3/D4: `applyStyleMap`'s fold of `computeArrowFontOverride`
+ * (`style-cascade-class.ts`) into `theme.colors.graph.arrowFontFamily`/
+ * `arrowFontSize`/`arrowFontStyle`. T2 deliberately excluded `arrowFontSize`
+ * from this fold (`description/layout.ts`'s pre-existing skinparam-only
+ * consumer); T6 lifted that exclusion when it rewired that consumer through
+ * `resolveArrowLabelFont` (`arrow-label-font.test.ts` covers the full
+ * three-field resolution against a hand-built Theme).
+ */
+describe('applyStyleMap -- arrow-label font fold (T2, T6, D3, D4)', () => {
+  it('camuna shape: arrow { FontSize 14  FontStyle bold } resolves BOTH FontSize and FontStyle', () => {
+    const styleMap = parseStyleBlock('arrow {\n  FontSize 14\n  FontStyle bold\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.colors.graph.arrowFontStyle).toBe('bold');
+    expect(theme.colors.graph.arrowFontSize).toBe(14);
+  });
+
+  it('ticuxa shape: arrow { FontName Courier } resolves arrowFontFamily', () => {
+    const styleMap = parseStyleBlock('arrow {\n  FontName Courier\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.colors.graph.arrowFontFamily).toBe('Courier');
+  });
+
+  it("arrow { cardinality { FontStyle italic } } alone does NOT set the arrow-level font", () => {
+    const styleMap = parseStyleBlock('arrow {\n  cardinality {\n    FontStyle italic\n  }\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.colors.graph.arrowFontStyle).toBeUndefined();
+  });
+
+  it('a StyleMap that never touches arrow leaves the base Theme arrow font unchanged -- no fixture moves', () => {
+    const styleMap = parseStyleBlock('class {\n  BackgroundColor yellow\n}');
+    const theme = applyStyleMap(styleMap, defaultTheme);
+    expect(theme.colors.graph.arrowFontSize).toBe(defaultTheme.colors.graph.arrowFontSize);
+    expect(theme.colors.graph.arrowFontFamily).toBe(defaultTheme.colors.graph.arrowFontFamily);
+  });
+});

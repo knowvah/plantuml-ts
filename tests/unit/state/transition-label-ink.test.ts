@@ -26,10 +26,18 @@ import { describe, it, expect } from 'vitest';
 
 import { attachTransitionLabel } from '../../../src/diagrams/state/state-transition-label.js';
 import { computeSvekResultGeometry, computeStateDocumentDims } from '../../../src/diagrams/state/layout-ink-extent.js';
+import { layoutState } from '../../../src/diagrams/state/layout.js';
+import { renderState } from '../../../src/diagrams/state/renderer.js';
+import { assembleSvg } from '../../../src/index.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
+import { computeReservedLabelBox } from '../../../src/core/edge-label-box.js';
+import { resolveArrowLabelFont } from '../../../src/core/arrow-label-font.js';
+import { parseStyleBlock } from '../../../src/core/skinparam.js';
+import { applyStyleMap } from '../../../src/core/style-map-theme.js';
+import { defaultTheme } from '../../../src/core/theme.js';
 import type { TransitionGeo } from '../../../src/diagrams/state/state-geo-types.js';
-import type { Transition } from '../../../src/diagrams/state/ast.js';
+import type { Transition, StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
 
 const measurer = new WidthTableMeasurer();
 /** The transition-label font every state fixture uses (13pt sans). */
@@ -125,5 +133,59 @@ describe('computeSvekResultGeometry — the composite ink folds that box', () =>
       [{ from: 'a', to: 'b', points: [{ x: 0, y: 0 }], label: { text: l.text, x: l.x, y: l.y } }],
     );
     expect(withBox).toEqual(withoutBox);
+  });
+});
+
+/**
+ * T7/D3/D4: state's six `ARROW_LABEL_FONT_SIZE` call sites now resolve
+ * through the shared `resolveArrowLabelFont` (D3) instead of a hardcoded
+ * 13pt, so a `<style> arrow { FontSize N } }` override reaches BOTH the
+ * DOT-measurement site (`layout.ts#buildFlatTransitionGeos`, the flat
+ * pipeline `layoutState` exercises for a composite-free AST) and the SVG
+ * renderer site (`state-renderer-transitions.ts`'s `transitionLabelFontAttrs`)
+ * in the SAME commit (D4's "layout and ink never disagree" bar). No
+ * fixture in the corpus carries this override (orchestrator grep of every
+ * cached state fixture's own in.puml for `skinparam *ArrowFont*` /
+ * `<style> arrow { Font* }` found none) -- this is the only coverage.
+ */
+describe('state engine — <style> arrow { FontSize 20 } reaches both the DOT box and the SVG font (T7)', () => {
+  function makeState(id: string): State {
+    return { id, display: id, kind: 'normal', children: [], concurrentRegions: [], transitions: [] };
+  }
+
+  const theme = applyStyleMap(parseStyleBlock('arrow {\n  FontSize 20\n}'), defaultTheme);
+
+  function ast(): StateDiagramAST {
+    return {
+      states: [makeState('A'), makeState('B')],
+      transitions: [{ from: 'A', to: 'B', label: 'trigger' }],
+    };
+  }
+
+  it('resolves to size 20, not the bare ARROW_LABEL_FONT_SIZE default (13)', () => {
+    expect(resolveArrowLabelFont(theme).size).toBe(20);
+  });
+
+  it('the DOT box (layoutState -> layout.ts:buildFlatTransitionGeos) reserves the SAME box computeReservedLabelBox gives the resolved font', () => {
+    const measurer = new WidthTableMeasurer();
+    const geo = layoutState(ast(), theme, measurer);
+    const label = geo.transitions.find((t) => t.label !== undefined)!.label!;
+    const expectedBox = computeReservedLabelBox('trigger', resolveArrowLabelFont(theme), measurer, false);
+    expect(label.width).toBe(expectedBox.reservedWidth);
+    expect(label.height).toBe(expectedBox.reservedHeight);
+    // Sanity: strictly larger than the 13pt default box -- proves the
+    // override actually moved the measurement, not just agreement-by-luck.
+    const defaultBox = computeReservedLabelBox('trigger', resolveArrowLabelFont(defaultTheme), measurer, false);
+    expect(label.height).toBeGreaterThan(defaultBox.reservedHeight);
+  });
+
+  it('the SVG <text> (renderState -> state-renderer-transitions.ts) draws the label at the SAME resolved size, from the SAME geometry the DOT box test used', () => {
+    const measurer = new WidthTableMeasurer();
+    const geo = layoutState(ast(), theme, measurer);
+    const svg = assembleSvg(renderState(geo, theme));
+    expect(svg).toContain('trigger');
+    const textMatch = /<text[^>]*>trigger<\/text>/.exec(svg);
+    expect(textMatch).not.toBeNull();
+    expect(textMatch![0]).toContain('font-size="20"');
   });
 });

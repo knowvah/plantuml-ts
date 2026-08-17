@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { roseNoteDim } from '../../../src/core/rose-note-dim.js';
 import {
   computeReservedLabelBox,
   computeQuantifierBox,
@@ -303,6 +304,54 @@ describe('computeQuantifierBox — jar-measured cases, no shield/margin', () => 
 });
 
 /**
+ * `class/focaci-80-suzu938`'s headlabel `"~* initiators"` at the default
+ * cardinality font (`CARDINALITY_FONT_SIZE`, `graph-layout-build-edges.ts
+ * :19` = 13, `svek/SvekEdge.java` cardinality default) measures 61x13
+ * unstripped vs the oracle's 53x13 — `~*` is `CharHidder`'s escape
+ * sequence (`utils/CharHidder.java:59-90`), not a `VisibilityModifier`
+ * strip (see `stripLeadingEscapedChar`'s doc comment for the full
+ * mechanism and the oracle renders that disprove the visibility reading).
+ */
+describe('computeQuantifierBox — the CharHidder escape is not a visibility strip', () => {
+  const DEFAULT_CARDINALITY_FONT = { family: 'SansSerif', size: 13 };
+
+  it('strips a leading ~* escape, keeping the * as a literal glyph (focaci-80-suzu938)', () => {
+    const box = computeQuantifierBox('~* initiators', DEFAULT_CARDINALITY_FONT, measurer);
+    expect(box.lines).toEqual(['* initiators']);
+    expect(box.reservedWidth).toBe(53);
+    expect(box.reservedHeight).toBe(13);
+  });
+
+  it('leaves a quantifier with no escape sequence unchanged', () => {
+    const box = computeQuantifierBox('initiators', DEFAULT_CARDINALITY_FONT, measurer);
+    expect(box.lines).toEqual(['initiators']);
+    expect(box.reservedWidth).toBe(Math.floor(measurer.measure('initiators', DEFAULT_CARDINALITY_FONT).width));
+  });
+
+  it('does not strip a bare ~ before a non-escape character (space)', () => {
+    // Solo oracle render of "~ initiators": 56, tilde rendered literally —
+    // `~` only escapes when immediately followed by an isToBeHidden char.
+    const box = computeQuantifierBox('~ initiators', DEFAULT_CARDINALITY_FONT, measurer);
+    expect(box.lines).toEqual(['~ initiators']);
+    expect(box.reservedWidth).toBe(56);
+  });
+
+  it('does not strip a leading UML visibility char that is not a ~ escape', () => {
+    // `applyVisibilityIcon` would strip `+`/`-`/`#` too; the quantifier arm
+    // must not, since VisibilityModifier never reaches it (SvekEdge.java
+    // :329-351 never calls LinkArg#build). Assert against the FULL literal
+    // string's own measurement (not a hardcoded oracle number — this
+    // measurer's `#`-glyph width table entry is a separate, untouched
+    // concern from this task's escape-vs-visibility distinction).
+    for (const text of ['+ initiators', '# initiators']) {
+      const box = computeQuantifierBox(text, DEFAULT_CARDINALITY_FONT, measurer);
+      expect(box.lines).toEqual([text]);
+      expect(box.reservedWidth).toBe(Math.floor(measurer.measure(text, DEFAULT_CARDINALITY_FONT).width));
+    }
+  });
+});
+
+/**
  * `computeMergedLabelBox` — the note-on-link arm (`SvekEdge.java:302-325,
  * 440-445, 485-489`). `noteDim` stands in for the note sizer's decorated
  * image output (T9/T10 wire the real sizer); the values below are chosen
@@ -533,5 +582,56 @@ describe('computeMergedLabelBox — mergeLR/mergeTB, shield, halving', () => {
       measurer,
     });
     expect(box.reservedWidth).toBe(127);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// roseNoteDim -- the `EntityImageNoteLink` operand `computeMergedLabelBox`
+// merges (mission `edge-label-box-followups` D5). Lives in
+// `core/rose-note-dim.ts` rather than `core/edge-label-box.ts` only because
+// that file sits at the project's 500-line cap; tested here, beside the merge
+// it feeds.
+// ---------------------------------------------------------------------------
+
+describe('roseNoteDim', () => {
+  // `ComponentRoseNote#getPreferredWidth` (`skin/rose/ComponentRoseNote.java
+  // :81-85`) = getTextWidth + 2 * paddingX; `getTextWidth`
+  // (`AbstractTextualComponent`) already added the STYLE padding
+  // `topRightBottomLeft(5, 15, 5, 6)` from the `super(...)` call
+  // (`ComponentRoseNote.java:66-70`) -- so 6 + 15 -- and `paddingX` is 5
+  // (`skin/rose/Rose.java:65`, passed at `Rose.java:114`). 6 + 15 + 2*5 = 31.
+  it('adds Opale 6+15 plus 2 * Rose paddingX (5) = 31 to the width', () => {
+    expect(roseNoteDim({ width: 49, height: 13 }).width).toBe(80);
+  });
+
+  // `getPreferredHeight` (`ComponentRoseNote.java:87-90`) = getTextHeight +
+  // 2 * paddingY; `getTextHeight` added the style padding's top+bottom
+  // (5 + 5), `paddingY` is 5 (`Rose.java:66`). 2*5 + 2*5 = 20.
+  it('adds 2 * Opale marginY (5) plus 2 * Rose paddingY (5) = 20 to the height', () => {
+    expect(roseNoteDim({ width: 49, height: 13 }).height).toBe(33);
+  });
+
+  it('is exact on fractional pure dimensions -- it never rounds', () => {
+    expect(roseNoteDim({ width: 12.25, height: 6.5 })).toEqual({
+      width: 43.25,
+      height: 26.5,
+    });
+  });
+
+  it('feeds computeMergedLabelBox: a bottom note under an empty label', () => {
+    // `Display.isNull(link.getLabel())` => `labelOnly = EMPTY_TEXT_BLOCK`
+    // (`SvekEdge.java:281-283`), so `mergeTB` short-circuits to the note
+    // alone; `labelShield` 0 => the box IS the note dimension.
+    const box = computeMergedLabelBox({
+      label: '',
+      noteDim: roseNoteDim({ width: 49, height: 13 }),
+      position: 'bottom',
+      halfWidth: false,
+      hasMiddleDecor: false,
+      font: ARROW_FONT,
+      measurer,
+    });
+    expect(box.reservedWidth).toBe(80);
+    expect(box.reservedHeight).toBe(33);
   });
 });

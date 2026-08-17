@@ -88,6 +88,53 @@ describe('edgeLabelAttrs — multi-line label sizing (G2 item 43)', () => {
     expect(attrs.labelWidth).toBe(72); // 'on several'.length(10) * 7 + 2
     expect(attrs.labelHeight).toBe(44); // 14 * 3 lines + 2 (block margin, not per line)
   });
+
+  // T4/vuresa-33-kumu160: a creole formatting tag on one line must not be
+  // measured as literal glyphs (`stripCreoleMarkup`, `core/edge-label-box
+  // .ts:71`) -- upstream RENDERS `<b>..</b>` as bold formatting at
+  // `create()`/`create9()` time rather than counting its 7 tag characters
+  // (`Display.java:413-419` fixes the ORDER: guillemet at Display-
+  // construction time, creole rendering later -- the strip below mirrors
+  // that by running AFTER `applyGuillemet`, not before).
+  it('strips inline creole tags per line before measuring (T4)', () => {
+    const attrs = edgeLabelAttrs(rel('<b>bold</b>\\nlonger plain line'), font, font, measurer);
+    // '<b>bold</b>' stripped -> 'bold' (4 chars); 'longer plain line' (17
+    // chars) is the real widest line, dominating over the tag-inflated
+    // literal width the tag would otherwise contribute.
+    expect(attrs.labelWidth).toBe(121); // 'longer plain line'.length(17) * 7 + 2
+  });
+});
+
+describe('edgeLabelAttrs — per-line magic arrows, D6 (SvekEdge.java:290-297)', () => {
+  // jar-verified structurally EQUAL against gobuco-16-ruke239/lapoma-04-
+  // vaga142's oracle svek DOT once fed the REAL WidthTableMeasurer -- this
+  // file's own mock measurer (`s.length * 7`) is used here only to assert
+  // the BRANCH taken (per-line arrow path vs plain stacked-text), not the
+  // oracle's exact 29x54 (see class-magic-arrow.test.ts for that).
+  it('takes the per-line arrow path when a line starts/ends with a guide-line token', () => {
+    const attrs = edgeLabelAttrs(rel('ab >\\ncd <\\n< ef\\n> gh'), font, font, measurer);
+    // Each line strips its token (2 letters) and adds a font.size(14) arrow
+    // block -- 14 + 2*7 = 28 width per line, height sums across 4 lines:
+    // 4 * max(14, 14) = 56, then +2 margin on each axis.
+    expect(attrs.labelWidth).toBe(30); // 28 + 2
+    expect(attrs.labelHeight).toBe(58); // 56 + 2
+  });
+
+  it('a two-line label with no guide-line token keeps the plain stacked-text path', () => {
+    const attrs = edgeLabelAttrs(rel('ab cd\\nef gh'), font, font, measurer);
+    // Neither line starts with "< "/"> " or ends with " <"/" >" -- the
+    // plain per-line-width-max/height-sum formula from the test above runs
+    // unchanged, NOT computeGuideLinesBox.
+    expect(attrs.labelWidth).toBe(37); // 'ab cd'.length(5) * 7 + 2
+    expect(attrs.labelHeight).toBe(30); // 14 * 2 lines + 2
+  });
+
+  it('a single line with a token stays on T12c\'s whole-label path, unchanged', () => {
+    const attrs = edgeLabelAttrs(rel('> foo'), font, font, measurer);
+    // hasSeveralGuideLines requires >= 2 lines -- single-line labels never
+    // reach computeGuideLinesBox regardless of token presence.
+    expect(attrs.labelWidth).toBe(37); // 14 (arrow) + 'foo'.length(3)*7 + 2
+  });
 });
 
 describe('edgeLabelAttrs — magic-arrow label sizing (G2 item 44 / M4 cause D)', () => {

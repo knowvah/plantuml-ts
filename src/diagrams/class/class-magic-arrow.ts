@@ -44,8 +44,67 @@ import {
   parseMagicArrowLabel,
 } from '../../core/edge-label-box.js';
 import { splitEdgeLabelLines } from './class-edge-label-lines.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 
 export { type MagicArrowDirection, type MagicArrowLabel, parseMagicArrowLabel };
+
+/**
+ * D6 (`decisions.md#d6`): `Display#hasSeveralGuideLines()` / its static
+ * overload (`klimt/creole/Display.java:715-740`) — true only when a label
+ * has 2+ lines AND at least one line starts with `"< "`/`"> "` or ends with
+ * `" <"`/`" >"` (all four forms checked independently; upstream's own
+ * `hasSeveralGuideLines(Collection)` tests each in that order, `:730-739`).
+ * Read on the caller's own already-split lines (`class-layout-edge-labels.ts
+ * #computeMeasuredLabelAttrs`'s `splitEdgeLabelLines(label).lines`) — the
+ * same timing as upstream's `displayData`, which is split+guillemet'd by
+ * `LinkArg.build` (`abel/LinkArg.java:71`) before `SvekEdge` ever reads
+ * `link.getLabel()`.
+ */
+export function hasSeveralGuideLines(lines: readonly string[]): boolean {
+  if (lines.length <= 1) return false;
+  return lines.some(
+    (l) => l.startsWith('< ') || l.startsWith('> ') || l.endsWith(' <') || l.endsWith(' >'),
+  );
+}
+
+/**
+ * `StringWithArrow.addSeveralMagicArrows` (`descdiagram/command/
+ * StringWithArrow.java:115-127`, D6): per line, construct a fresh
+ * `StringWithArrow` — reused here as {@link parseMagicArrowLabel}, the SAME
+ * single-line token rule that class's own constructor already applies
+ * (`StringWithArrow.java:56-91`; per-line re-checking is safe because a
+ * single line, having no embedded newline, can never itself satisfy
+ * `hasSeveralGuideLines`, so the constructor's own internal guard is always
+ * false at this call depth) — then `create9` measures the line's
+ * (already-stripped) remaining text at `font`, and iff that line carried a
+ * token, `mergeLR`s a `font.size x font.size` arrow block onto it
+ * (`TextBlockArrow2.calculateDimension`, `klimt/shape/TextBlockArrow2.java
+ * :57,87` — `.80`/`ARROW_GLYPH_SIZE` is draw-only, `:64-65`, and never
+ * enters a measurement, the same rule the single-line magic-arrow path
+ * already follows). The per-line blocks then `mergeTB` top-to-bottom: width
+ * MAXES, height SUMS (`XDimension2D.java:94-98`) — mirrored inline rather
+ * than importing `core/edge-label-box.ts`'s private `mergeTB`, which that
+ * module does not export (T4 write-set boundary: `core/edge-label-box.ts`
+ * is read-only here).
+ */
+export function computeGuideLinesBox(
+  lines: readonly string[],
+  font: { family: string; size: number },
+  measurer: StringMeasurer,
+): { width: number; height: number } {
+  let width = 0;
+  let height = 0;
+  for (const line of lines) {
+    const magic = parseMagicArrowLabel(line);
+    const text = magic === undefined ? line : (magic.text ?? '');
+    const m = text !== '' ? measurer.measure(text, font) : { width: 0, height: 0 };
+    const lineWidth = magic !== undefined ? font.size + m.width : m.width;
+    const lineHeight = magic !== undefined ? Math.max(font.size, m.height) : m.height;
+    width = Math.max(width, lineWidth);
+    height += lineHeight;
+  }
+  return { width, height };
+}
 
 /**
  * `TextBlockArrow2#drawU`'s DRAW-ONLY ink size — `(int) (size * .80)`

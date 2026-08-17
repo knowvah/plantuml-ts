@@ -38,14 +38,15 @@ import { computeStateDocumentDims, computeStateInkShift } from './layout-ink-ext
 import { buildStateGeoTextFields } from './state-sizing.js';
 import { buildFlatNoteGeos, type FlatNoteGeoCtx } from './renderer-note.js';
 
-/** `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13, normal)`,
- *  klimt/font/FontParam.java:54) -- the transition/edge-label font, distinct
- *  from `STATE(14, normal)` (`theme.fontSize`, body/entity-name text).
- *  Duplicated locally rather than imported from `state-dot-graph.ts` (D1,
- *  same avoid-import-cycle convention that file's own `transitionLabelText`
- *  re-export already documents) -- same value as `description/renderer-
- *  edge.ts`'s own `ARROW_LABEL_FONT_SIZE`. */
-import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+/** T7/D3/D4: the transition/edge-label font, resolved through the SAME
+ *  shared resolver `description/renderer-edge.ts#arrowLabelFontConfig`
+ *  (D4) uses for its own DOT-measurement site --
+ *  `GraphvizImageBuilder.java:234-235`'s `labelFont`. With no
+ *  `<style> arrow { ... }` / `skinparam arrowFont*` override this resolves
+ *  to EXACTLY `{ family: theme.fontFamily, size: 13 }`
+ *  (`ARROW_LABEL_FONT_SIZE`, `klimt/font/FontParam.java:54`) -- byte-
+ *  identical to the hardcoded value this replaces. */
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 /** A state (or top-level ast) is composite-free iff no state anywhere has
  *  local content (`hasLocalContent`, state-composite-detect.ts) OR its OWN
@@ -144,13 +145,9 @@ function buildFlatTransitionGeos(
   measurer: StringMeasurer,
 ): TransitionGeo[] {
   const edgePosMap = new Map(result.edges.map((e) => [e.id, e]));
-  // `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13)`,
-  // klimt/font/FontParam.java:54) -- the transition/edge-label font, distinct
-  // from `theme.fontSize` (state body/entity-name text). Duplicated locally
-  // (not imported from state-dot-graph.ts) per this file's own D1
-  // avoid-import-cycle convention -- same value as description/renderer-
-  // edge.ts's own `ARROW_LABEL_FONT_SIZE`.
-  const font = { family: theme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
+  // T7/D3/D4: shared resolver, not `theme.fontSize` (state body/entity-name
+  // text) -- see the import's own doc comment above.
+  const font = resolveArrowLabelFont(theme);
   const geos: TransitionGeo[] = [];
   for (let i = 0; i < ast.transitions.length; i++) {
     const t = ast.transitions[i]!;

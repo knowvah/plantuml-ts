@@ -11,7 +11,7 @@
  * cross-container endpoints clipped at the container bbox. No DOM/SVG/async.
  */
 
-import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
+import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementFontSize, resolveElementLineThickness, resolveElementMinimumWidth } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
@@ -73,10 +73,10 @@ export type {
 import type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-types.js';
 export type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-types.js';
 
-/** `FontParam.ARROW(13, normal)` (klimt/font/FontParam.java:54) -- see
- *  `layoutDescription`'s `edgeFontSpec` construction for the full
- *  jar-verified derivation (G5/C0). */
-import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+/** D3/D4: the arrow-label font resolver -- `layoutDescription`'s
+ *  `edgeFontSpec` construction (below) is its measurement-site wiring;
+ *  `renderer-edge.ts#arrowLabelFontConfig` is the matching SVG-text site. */
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 
 // ── Phase 1: AST classification ──
@@ -272,6 +272,38 @@ function runLayout(
   return { result: layoutGraph(input), edgeDotBuild, portClusterInfoByAstId, spacing };
 }
 
+/**
+ * D2 (mission `edge-label-box-followups`): the DRAWN text for a link
+ * carrying a `note on link`. The note is no longer folded into
+ * `DescriptiveLink.label` at parse time (D1) -- the DOT reservation now
+ * comes from the merged box (`link-edge-attrs.ts#computeNoteMergedDims`),
+ * which is the whole point -- but the note text must still reach the SVG:
+ * before this mission the description engine was the ONLY engine that showed
+ * it at all, and silently dropping it to match class/state would be a
+ * regression a long-time user would notice.
+ *
+ * A DISPLAY-ONLY fold, applied at the layout->geometry boundary so nothing
+ * upstream of it (DOT attributes, dzeta, `single`-dedup) sees a synthesized
+ * label. Line order mirrors the merge operand order
+ * (`SvekEdge.java:318-325`): note first for LEFT/TOP, label first for
+ * RIGHT/BOTTOM.
+ *
+ * NOT the note POLYGON -- `EntityImageNoteLink`'s own drawn shape is a
+ * separate mission for all three engines (D2), so the text lands inside the
+ * (now correctly sized) label box as plain label lines, exactly as it
+ * rendered before this mission.
+ */
+function withLinkNoteDrawn(links: readonly DescriptiveLink[]): readonly DescriptiveLink[] {
+  return links.map((link) => {
+    if (link.linkNote === undefined) return link;
+    const noteFirst = link.linkNotePosition === 'left' || link.linkNotePosition === 'top';
+    const parts = link.label === undefined
+      ? [link.linkNote]
+      : noteFirst ? [link.linkNote, link.label] : [link.label, link.linkNote];
+    return { ...link, label: parts.join('\n') };
+  });
+}
+
 function buildGeoAndEdges(
   ast: DescriptionDiagramAST,
   result: DotLayoutResult,
@@ -303,12 +335,13 @@ function buildGeoAndEdges(
     geoIndex,
     dx: 0, dy: 0,
   };
-  const rawEdges = buildEdgeGeos(ast.links, result.edges, rawMapping, hidden);
+  const drawLinks = withLinkNoteDrawn(ast.links);
+  const rawEdges = buildEdgeGeos(drawLinks, result.edges, rawMapping, hidden);
   const { dx, dy } = computeInkShift(rawNodes, rawEdges, theme, measurer, ast.sprites);
   const nodes = rawNodes.map((n) => shiftGeo(n, dx, dy));
   const edges = (dx === 0 && dy === 0)
     ? rawEdges
-    : buildEdgeGeos(ast.links, result.edges, { ...rawMapping, dx, dy }, hidden);
+    : buildEdgeGeos(drawLinks, result.edges, { ...rawMapping, dx, dy }, hidden);
   // #lizard forgives -- pre-existing (8 params): the cohesive geo-tree +
   // edge-geometry assembly context threaded from layoutDescription's own
   // single call site -- mission G5/C1 500-line split (pure move), not
@@ -343,16 +376,16 @@ export function layoutDescription(
   // with node/title measurement (buildDotNodes,
   // buildPortClusterInfoByAstId) and must stay at theme.fontSize; unlike
   // state/class, this engine has no separate per-role font construction
-  // site to swap in place. No `skinparam ArrowFontSize` override path
-  // exists yet (`core/skinparam.ts#ELEMENT_BUCKET_SNAMES` omits
-  // `'arrow'`) -- bare DEFAULT only.
-  // T3: `skinparam arrowFontSize N` overrides `FontParam.ARROW`'s 13 default.
-  // This spec feeds edge-label MEASUREMENT, so the override changes the
-  // reserved DOT box and therefore rank separation -- not only how text draws.
-  const edgeFontSpec: FontSpec = {
-    family: theme.fontFamily,
-    size: theme.colors.graph.arrowFontSize ?? ARROW_LABEL_FONT_SIZE,
-  };
+  // site to swap in place.
+  // T6/D4: `resolveArrowLabelFont(theme)` -- the SAME resolver
+  // `renderer-edge.ts#arrowLabelFontConfig` uses for the SVG `<text>` --
+  // folds `skinparam arrowFontSize`/`arrowFontName`/`arrowFontStyle` and
+  // `<style> arrow { FontSize/FontName/FontStyle }` (D3) into this
+  // MEASUREMENT site, so the reserved DOT box and the drawn glyph never
+  // disagree (`GraphvizImageBuilder.java:234-235`). Retires the prior
+  // ad hoc `theme.colors.graph.arrowFontSize ?? ARROW_LABEL_FONT_SIZE` read,
+  // which saw only the skinparam-bridged size.
+  const edgeFontSpec: FontSpec = resolveArrowLabelFont(theme);
   // T14/D3: `theme.cardinalityFontFamily`/`cardinalityFontSize` are optional
   // in the `Theme` TYPE (pre-existing hand-built Theme literals elsewhere
   // stay valid, `theme.ts:21-22`'s own doc comment), but `defaultTheme`/
@@ -368,6 +401,9 @@ export function layoutDescription(
       family: theme.cardinalityFontFamily!,
       size: theme.cardinalityFontSize!,
     },
+    // T3/M2: the `note on link` operand is sized from the `note` element's
+    // own font, not the arrow font -- see `EdgeFontSpecs.noteTheme`.
+    noteTheme: theme,
   };
   // Container-scoped identity (mission I1b): the set of TRUE cross-scope
   // colliding bare ids, computed from the ORIGINAL (un-grouped) tree once --

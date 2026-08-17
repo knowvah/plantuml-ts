@@ -22,7 +22,7 @@ import {} from './renderer-composite-box.js';
 import {} from './renderer-note.js';
 import {} from './state-shadow.js';
 
-import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 /**
  * mission G4 S8 (mechanism 19): `TransitionGeo.points` is a well-formed
@@ -109,6 +109,28 @@ function localScopeName(scopeId: string, concurrentGlobalIds: ReadonlyMap<string
   return i === -1 ? scopeId : scopeId.slice(i + 2);
 }
 
+/** T7/D3/D4: the transition-label `<text>` font attrs, resolved the SAME
+ *  way `state-dot-graph.ts`/`state-composite-pass.ts` resolve the DOT-
+ *  measurement font (`resolveArrowLabelFont`, D3) so the reserved box and
+ *  the drawn glyph never disagree (`GraphvizImageBuilder.java:234-235`),
+ *  NOT `theme.fontSize` (14, the STATE body/title-text default). Mirrors
+ *  `description/renderer-edge.ts#arrowLabelFontConfig`'s weight/style
+ *  mapping. */
+function transitionLabelFontAttrs(theme: Theme): {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight?: 'bold';
+  fontStyle?: 'italic';
+} {
+  const font = resolveArrowLabelFont(theme);
+  return {
+    fontFamily: font.family,
+    fontSize: font.size,
+    ...(font.weight === 'bold' ? { fontWeight: 'bold' } : {}),
+    ...(font.style === 'italic' ? { fontStyle: 'italic' } : {}),
+  };
+}
+
 /** Path + inline arrowhead + optional label — the wrapped `<g class=
  *  "link">`'s inner content, split out of {@link renderTransitionWrapped}
  *  to stay under this project's per-function NLOC cap. mission G4 S1
@@ -165,12 +187,7 @@ function buildTransitionInnerMarkup(
     transition.label === undefined
       ? ''
       : text(transition.label.x, transition.label.y, transition.label.text, {
-          fontFamily: theme.fontFamily,
-          // `FontParam.ARROW(13)` (klimt/font/FontParam.java:54), NOT
-          // `theme.fontSize` (14, the STATE body/title-text default) --
-          // G8 T2, same jar-verified constant `state-transition-
-          // label.ts`/`state-composite-pass.ts` measure this SAME text at.
-          fontSize: ARROW_LABEL_FONT_SIZE,
+          ...transitionLabelFontAttrs(theme),
           fill: theme.colors.text,
         });
 

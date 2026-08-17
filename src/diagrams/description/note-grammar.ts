@@ -130,8 +130,8 @@ export function noteAttachment(
 // ---------------------------------------------------------------------------
 
 export type NoteOpenMatch =
-  | { kind: 'on-link-single'; text: string }
-  | { kind: 'on-link-open' }
+  | { kind: 'on-link-single'; position: NotePosition | undefined; text: string }
+  | { kind: 'on-link-open'; position: NotePosition | undefined }
   | { kind: 'floating-single'; id: string; text: string }
   | { kind: 'floating-open'; id: string }
   | { kind: 'on-entity-single'; position: NotePosition; targetId: string | undefined; text: string }
@@ -144,12 +144,34 @@ export type NoteOpenMatch =
 
 /** `note [pos] on|of link [#color][: text]` — CommandFactoryNoteOnLink. In
  *  svek DOT the note becomes the LINK's label table (SvekEdge
- *  hasNoteLabelText — fogiku-22's oracle counts it as label [1,0,0,0]). */
+ *  hasNoteLabelText — fogiku-22's oracle counts it as label [1,0,0,0]).
+ *
+ *  `position` mirrors upstream's OPTIONAL `POSITION` regex group
+ *  (`(right|left|top|bottom)?`, in BOTH `getRegexConcatSingleLine` and
+ *  `getRegexConcatMultiLine`) and is `undefined` when it does not match --
+ *  the BOTTOM default is applied by the EXECUTOR, not the grammar, exactly
+ *  as upstream splits it (`CommandFactoryNoteOnLink#executeInternal`).
+ *
+ *  The `COLOR` group upstream also captures (`ColorParser.simpleColor
+ *  (ColorType.BACK)`, reaching `CucaNote#getColors()`) is deliberately NOT
+ *  returned: its only upstream consumer is `EntityImageNoteLink`'s note
+ *  POLYGON fill, and this port draws no note polygon on a link (mission
+ *  `edge-label-box-followups` D2 -- the polygon is a separate mission).
+ *  Adding an unread field now would be speculative. */
 function matchOnLink(line: string): NoteOpenMatch | undefined {
   const single = RE_NOTE_ON_LINK_SINGLE.exec(line);
-  if (single !== null) return { kind: 'on-link-single', text: single[2]! };
-  if (RE_NOTE_ON_LINK_OPEN.test(line)) return { kind: 'on-link-open' };
+  if (single !== null) {
+    return { kind: 'on-link-single', position: onLinkPosition(single[1]), text: single[2]! };
+  }
+  const open = RE_NOTE_ON_LINK_OPEN.exec(line);
+  if (open !== null) return { kind: 'on-link-open', position: onLinkPosition(open[1]) };
   return undefined;
+}
+
+/** `StringUtils.goUpperCase` + `Position.valueOf` on a matched group; the
+ *  regex alternation already restricts it to the four legal names. */
+function onLinkPosition(raw: string | undefined): NotePosition | undefined {
+  return raw === undefined ? undefined : (raw.toLowerCase() as NotePosition);
 }
 
 function matchFloating(line: string): NoteOpenMatch | undefined {

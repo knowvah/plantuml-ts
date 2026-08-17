@@ -142,3 +142,22 @@ describe('edgeLabelAttrs — note-on-link merge, activated via noteCtx (T10)', (
     expect(attrs.labelHeight).toBeLessThan(135);
   });
 });
+
+describe('edgeLabelAttrs — multi-line creole strip, T4 (vuresa-33-kumu160)', () => {
+  // jar-verified structurally EQUAL against vuresa-33-kumu160's oracle svek
+  // DOT (`npx jiti scripts/dot-sync-report.ts --slug vuresa-33-kumu160
+  // class`): WIDTH="128" HEIGHT="41". `<b>Person-Meeting</b>` measured
+  // LITERALLY (142) before `stripCreoleMarkup` reached the multi-line
+  // branch; `Fk=Meeting.PersonID` (126.1) is the real widest line once the
+  // tag comes out -- `core/edge-label-box.ts#stripCreoleMarkup`,
+  // `Display.java:413-419` (order: guillemet at Display-construction time,
+  // creole rendering later, mirrored here as guillemet-then-strip).
+  it("strips vuresa's <b> tag before measuring, matching the oracle's 128x41", () => {
+    const label = '<b>Person-Meeting</b>\\nMeetings/Person\\nFk=Meeting.PersonID';
+    const attrs = edgeLabelAttrs(rel({ label }), font, font, measurer);
+    const strippedWidest = measurer.measure('Fk=Meeting.PersonID', font).width;
+    expect(attrs.labelWidth).toBeCloseTo(strippedWidest + 2 * LINK_LABEL_MARGIN, 4);
+    expect(Math.floor(attrs.labelWidth!)).toBe(128);
+    expect(attrs.labelHeight).toBe(3 * font.size + 2 * LINK_LABEL_MARGIN); // 41
+  });
+});

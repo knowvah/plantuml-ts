@@ -36,12 +36,11 @@ import { resolveEndpoint } from './state-composite-classify.js';
 
 type ExtractAutonomSpec = Extract<GeoSpec, { kind: 'autonom' }>;
 
-/** `plantuml.skin`'s `arrow { FontSize 13 }` block (`FontParam.ARROW(13,
- *  normal)`) -- the transition/edge-label font this pass's own accumulator
- *  needs for `buildLevelTransitionGeos`'s label-anchor conversion (G8 T2).
- *  Duplicated locally (D1, avoid-import-cycle convention) -- same value as
- *  `state-composite-pass.ts`'s own identical constant. */
-import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+/** T7/D3/D4: the transition/edge-label font this pass's own accumulator
+ *  needs for `buildLevelTransitionGeos`'s label-anchor conversion (G8 T2),
+ *  resolved through the shared resolver -- same call as
+ *  `state-composite-pass.ts`'s own identical site. */
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 /** Uniformly translate a pass's own raw layout result — mission G4 S4,
  *  mechanism 7's own position-offset half: reproduces `SvekResult
@@ -157,7 +156,7 @@ export function shiftDotLayoutResult(result: DotLayoutResult, dx: number, dy: nu
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java#buildImage (attempts
  *      EVERY diagram link; a missing SvekNode drops it at THIS pass only) */
 export function buildPlainAutonomSpec(s: State, ctx: DiagramCtx): ExtractAutonomSpec {
-  const acc = newAccumulator({ family: ctx.theme.fontFamily, size: ARROW_LABEL_FONT_SIZE }, ctx.measurer);
+  const acc = newAccumulator(resolveArrowLabelFont(ctx.theme), ctx.measurer);
   // G5 C3, mechanism 16 shape half: `insideAutonomPass` -- see that field's
   // own doc comment (state-composite-pass.ts) for why a nested cluster
   // inside THIS pass must stay title-table-ineligible this iteration

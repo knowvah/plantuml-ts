@@ -250,6 +250,21 @@ export function computeCardinalityFontOverride(
   return override;
 }
 
+/** D3: arrow `labelFont` (`GraphvizImageBuilder.java:234-235`); `fontstyle` rides UNPARSED -- `arrow-label-font.ts` is the ONE reader (`klimt/font/FontStyle.java`). No caller yet (D4/Batch 3). */
+export function computeArrowFontOverride(
+  styleMap: StyleMap,
+  stereotypeTags: readonly string[] = [],
+): { arrowFontSize?: number; arrowFontFamily?: string; arrowFontStyle?: string } {
+  const size = Number(resolveStyleCascade(styleMap, ARROW_SNAMES, 'fontsize', stereotypeTags));
+  const family = resolveStyleCascade(styleMap, ARROW_SNAMES, 'fontname', stereotypeTags);
+  const style = resolveStyleCascade(styleMap, ARROW_SNAMES, 'fontstyle', stereotypeTags);
+  return {
+    ...(Number.isFinite(size) && size > 0 ? { arrowFontSize: size } : {}),
+    ...(family !== undefined ? { arrowFontFamily: family } : {}),
+    ...(style !== undefined ? { arrowFontStyle: style } : {}),
+  };
+}
+
 /**
  * B4 (mission A2s): `skinparam wrapWidth` bridged into the MaximumWidth
  * cascade DEFAULTS. Upstream `FromSkinparamToStyle.java:250` converts the

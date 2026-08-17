@@ -108,6 +108,14 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
     const v = parseFiniteNumber(value);
     if (v !== undefined) acc.arrowFontSize = v;
   }],
+  // D3: siblings of `arrowfontsize` above -- `FromSkinparamToStyle.java:149`
+  // (`addConFont("arrow", SName.arrow)`) registers `arrowFontName`/
+  // `arrowFontStyle` the SAME way as `arrowFontSize` (PName.FontName/
+  // FontStyle on SName.arrow). `arrowfontstyle` rides through UNPARSED (raw
+  // string) -- `arrow-label-font.ts#resolveArrowLabelFont` is the ONE reader
+  // that maps it onto weight/style (`klimt/font/FontStyle.java`).
+  [['arrowfontname'], (acc, value) => { acc.arrowFontFamily = value; }],
+  [['arrowfontstyle'], (acc, value) => { acc.arrowFontStyle = value; }],
   [['notebackgroundcolor'], (acc, _v, color) => { acc.noteBackground = color; }],
   [['pathhovercolor'], (acc, _v, color) => { acc.pathHoverColor = color; }],
   [['diagrambordercolor'], (acc, _v, color) => { acc.diagramBorderColor = color; }],

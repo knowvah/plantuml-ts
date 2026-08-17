@@ -24,6 +24,7 @@ import {} from './renderer-classifier-box.js';
 import {} from './class-namespace-shape.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
 import {} from './class-shadow.js';
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 /**
  * G2 N5: `EdgeGeo.points` is a well-formed `1 + 3*n` cubic-bezier spline
@@ -139,6 +140,37 @@ export function uniqLinkId(ids: Set<string>, base: string): string {
   }
 }
 
+
+/**
+ * D3/D4: the main-label `<text>` font attrs, resolved the SAME way
+ * `class-dot-graph.ts` resolves the DOT-measurement font
+ * (`resolveArrowLabelFont`, D3) so the reserved box and the drawn glyph
+ * never disagree (`GraphvizImageBuilder.java:234-235`). Absent any
+ * `<style> arrow { ... }` / `skinparam ClassArrowFont*` override this
+ * resolves to `{fontSize:13, fontFamily:theme.fontFamily}` -- byte-identical
+ * to the pre-T5 hardcoded `CARDINALITY_FONT_SIZE` literal every `label`/
+ * `labelLines` `<text>` used before. `font-weight="700"` (the raw numeric
+ * jar's deterministic-text SVG emits, never the `"bold"` keyword --
+ * `core/svg.ts`'s own `fontWeight` doc comment, corpus-verified 184/184
+ * class fixtures) matches `camuna-58-veca254`'s oracle `foo1`/`foo2` labels
+ * exactly. Applies ONLY to the main label -- `tailLabel`/`headLabel`
+ * (cardinality/quantifier) keep their own untouched `CARDINALITY_FONT_SIZE`
+ * font below (T14's path, out of this task's scope).
+ */
+function arrowLabelTextAttrs(theme: Theme): {
+  fontSize: number;
+  fontFamily: string;
+  fontWeight?: '700';
+  fontStyle?: 'italic';
+} {
+  const font = resolveArrowLabelFont(theme);
+  return {
+    fontSize: font.size,
+    fontFamily: font.family,
+    ...(font.weight === 'bold' ? { fontWeight: '700' as const } : {}),
+    ...(font.style === 'italic' ? { fontStyle: 'italic' as const } : {}),
+  };
+}
 
 /**
  * B7/M8: the arrow style a link's own `<<tag>>` labels resolve to, or
@@ -275,28 +307,46 @@ export function renderEdge(
     }
   }
   // G2/N25 (tailLabel/headLabel) + G2/N62 (label): a relationship's plain
-  // text label AND its tail/head multiplicity-role labels all share ONE
+  // text label AND its tail/head multiplicity-role labels shared ONE
   // jar-verified byte-exact attribute set (`kipure-14-suli112`/`dokego-92-
   // zilu832` `in.svg` for tail/head; `siteza-47-lixe343` for a plain
-  // label -- see `class-geo-builders.ts#attachEdgeLabel`'s doc comment):
+  // label -- see `class-geo-builders.ts#attachEdgeLabel`'s doc comment) --
   // `fill="#000000"`, `font-size="13"`, `lengthAdjust="spacing"` +
   // `textLength`, `font-family="sans-serif"`, NO `text-anchor` (SVG default
   // "start" -- see `renderer-classifier-box.ts#renderRowText`'s identical
-  // omission for the same reason). Both draw from `plantuml.skin`'s SAME
-  // `arrow { FontSize 13 }` block (`GraphvizImageBuilder.java:235-238`).
+  // omission for the same reason) -- true ONLY because both drew from
+  // `plantuml.skin`'s SAME default `arrow { FontSize 13 }` block
+  // (`GraphvizImageBuilder.java:235-238`). **D3/D4 (T5):** upstream resolves
+  // the main label's font and the cardinality font SEPARATELY
+  // (`GraphvizImageBuilder.java:124-126,234-241`), so a diagram overriding
+  // ONLY `arrow { FontSize/FontStyle/FontName }` (not `arrow.cardinality`)
+  // now diverges the two -- `geo.label`/`geo.labelLines` (the main label)
+  // draw at {@link arrowLabelTextAttrs}; `geo.tailLabel`/`geo.headLabel`
+  // (cardinality/quantifier) keep the untouched `CARDINALITY_FONT_SIZE`
+  // literal below (T14's path). Absent an override both still resolve to
+  // the SAME `13`/`theme.fontFamily` pair, so every fixture with no arrow
+  // font override renders byte-identical to before.
+  const labelFontAttrs = arrowLabelTextAttrs(theme);
   // G2 item 43: `geo.labelLines` (multi-line `label`) draws one `<text>`
-  // per line with the SAME jar-verified attribute set as the single-line
-  // `portLabel` loop below -- mutually exclusive with `geo.label`
+  // per line -- mutually exclusive with `geo.label`
   // (`class-geo-builders.ts#attachEdgeLabel` sets exactly one of the two).
   for (const line of geo.labelLines ?? []) {
     parts.push(
       text(line.x, line.y, line.text, {
-        fill: '#000000', fontSize: CARDINALITY_FONT_SIZE, fontFamily: theme.fontFamily,
+        fill: '#000000', ...labelFontAttrs,
         lengthAdjust: 'spacing', textLength: line.width,
       }),
     );
   }
-  for (const portLabel of [geo.label, geo.tailLabel, geo.headLabel]) {
+  if (geo.label !== undefined) {
+    parts.push(
+      text(geo.label.x, geo.label.y, geo.label.text, {
+        fill: '#000000', ...labelFontAttrs,
+        lengthAdjust: 'spacing', textLength: geo.label.width,
+      }),
+    );
+  }
+  for (const portLabel of [geo.tailLabel, geo.headLabel]) {
     if (portLabel === undefined) continue;
     parts.push(
       text(portLabel.x, portLabel.y, portLabel.text, {

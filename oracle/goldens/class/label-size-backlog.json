@@ -1,16 +1,10 @@
 {
   "_doc": "Slugs whose svek DOT differs from the oracle's ONLY in the SIZE of one or more edge-label FIXEDSIZE boxes (`label`/`taillabel`/`headlabel`/`xlabel` `<TABLE WIDTH=.. HEIGHT=..>`). Until 2026-08-15 the structural comparison checked label PRESENCE only (`hasLabel`), so a 336-vs-72 box scored EQUAL -- the blind spot that let edge-label-box-and-class-ports batch 1's bug through, and the fourth of its kind (ports, sametail, constraint/invis before it). D7 of that mission added `labelSizeOk` (tests/oracle/svek-dot.ts#sortedLabelBoxes: a sorted multiset of kind:WIDTHxHEIGHT), and these slugs are what it surfaced -- pre-existing measurement gaps, NOT regressions introduced by the gate. A listed slug is NOT skipped: the parity suite asserts it fails `labelSizeOk` and NOTHING else, so every other structural check stays live for it. Remove a slug the moment its label boxes match; the list is shrink-only. Dominant shapes seen at capture (survey in plans/edge-label-box-and-class-ports/decision-journal.md, 2026-08-15): a multi-line or creole label measured as ONE line (jar HxW like 137x135 / 125x54 vs ours 33x15 / 472x15); a few-px width delta on single-line labels (font/creole width); tail/head boxes of 7x13 vs 19x13 on ONE edge in the givoli/nadepi/tekena/tiguma family; and `<<stereotype>>`-style head labels (23x10/41x20 vs 31x13/71x13).",
   "slugs": [
-    "camuna-58-veca254",
-    "focaci-80-suzu938",
-    "gobuco-16-ruke239",
-    "lapoma-04-vaga142",
     "nagega-30-poso418",
     "nuvake-96-gofe203",
-    "ticuxa-26-tixo262",
     "tunelu-64-xica833",
     "vonago-16-zime449",
-    "vuresa-33-kumu160",
     "xamule-03-jeda376"
   ]
 }

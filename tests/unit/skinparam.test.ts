@@ -257,6 +257,24 @@ describe('resolveSkinparam — direct key matches', () => {
     expect(unknown).toEqual([]);
   });
 
+  // T2 (edge-label-box-followups, D3): `arrowfontname`/`arrowfontstyle` --
+  // siblings of the pre-existing `arrowfontsize` handler above
+  // (`FromSkinparamToStyle.java:149`, `addConFont("arrow", SName.arrow)`).
+  it('maps arrowfontname/arrowfontsize/arrowfontstyle to colors.graph.arrowFont*', () => {
+    const { theme, unknown } = resolveSkinparam(
+      new Map([
+        ['arrowfontname', 'Courier'],
+        ['arrowfontsize', '14'],
+        ['arrowfontstyle', 'bold'],
+      ]),
+      defaultTheme,
+    );
+    expect(theme.colors.graph.arrowFontFamily).toBe('Courier');
+    expect(theme.colors.graph.arrowFontSize).toBe(14);
+    expect(theme.colors.graph.arrowFontStyle).toBe('bold');
+    expect(unknown).toEqual([]);
+  });
+
   // G2 N54: `skinparam icon<Kind>Color`/`icon<Kind>BackgroundColor` --
   // see theme.ts#iconPrivateColor's doc comment for the full upstream
   // mapping (FromSkinparamToStyle.java:232-239).
@@ -739,6 +757,25 @@ describe('resolveSkinparam — key normalisation', () => {
       defaultTheme,
     );
     expect(theme.colors.arrow).toBe('#BBBBBB');
+    expect(unknown).toEqual([]);
+  });
+
+  // T2 (edge-label-box-followups, D3), ticuxa shape: `ClassArrowFontSize`/
+  // `ClassArrowFontName`/`ClassArrowFontStyle` collapse via the SAME
+  // "classarrow" → "arrow" prefix rule as `classArrowColor` above, landing
+  // on `arrowFontSize`/`arrowFontFamily`/`arrowFontStyle`.
+  it('normalises ClassArrowFontSize/Name/Style to arrowfont* (arrow prefix collapse)', () => {
+    const { theme, unknown } = resolveSkinparam(
+      new Map([
+        ['ClassArrowFontSize', '58'],
+        ['ClassArrowFontName', 'Courier'],
+        ['ClassArrowFontStyle', 'Italic'],
+      ]),
+      defaultTheme,
+    );
+    expect(theme.colors.graph.arrowFontSize).toBe(58);
+    expect(theme.colors.graph.arrowFontFamily).toBe('Courier');
+    expect(theme.colors.graph.arrowFontStyle).toBe('Italic');
     expect(unknown).toEqual([]);
   });
 

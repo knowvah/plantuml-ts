@@ -1,6 +1,6 @@
 # Next Missions (in order)
 
-**Refreshed 2026-08-16.** Treat this file as the *ordered, human-readable*
+**Refreshed 2026-08-16 (evening, after SI24).** Treat this file as the *ordered, human-readable*
 what-next; `planning/mission-index.md` is the executable grind queue with exit
 bars and measurements, and `plans/<name>/README.md` is the brief for anything
 with a name. **When they disagree, the brief and the tree win — verify before
@@ -11,13 +11,14 @@ two shipped missions as "not started", and the 2026-08-15 version was out of
 date within a day (both of its top two entries landed on main that same
 evening). Verify against `git log` and the tree before acting on any line here.
 
-Standing corpus signals, **measured at SI23's close-out 2026-08-16** on a clean
-tree (not carried forward from a previous refresh): `shape-match-report.ts`
-**783 doc-size-exact / 26,206 matched-shapes** of 1,074 fixtures. DOT EQUAL
-**class 699/711 · state 266/268 · component 257/263 · usecase 89/93 · object
-78/80**. `label-size-backlog` totals **22** (class 11 · description 9 · state 2
-· object **0**, cleared). svg-state ratchet 59 pins; svg-class ratchet 292+;
-**14,426 tests** across 594 files, coverage 95.35/90.33/96.92/96.45.
+Standing corpus signals, **measured at SI24's close-out 2026-08-16** on a clean
+tree at `cb4de5c7` (not carried forward from a previous refresh):
+`shape-match-report.ts` **785 doc-size-exact / 26,255 matched-shapes** of 1,074
+fixtures. DOT EQUAL **class 705/711 · state 266/268 · component 259/263 ·
+usecase 92/93 · object 78/80**. `label-size-backlog` totals **11** (class 5 ·
+description 4 · state 2 · object 0). svg-state ratchet 59 pins; svg-class
+ratchet 315 pins; **14,492 tests** across 595 files, coverage
+95.37/90.35/96.93/96.46.
 
 Two corrections to what this block used to say. The long-standing
 "**25952 rigid-aligned shapes**" figure **matches no metric the report emits** —
@@ -28,63 +29,54 @@ post-D7 measurements.
 
 ---
 
-## 1. `edge-label-box-followups` — NAMED 2026-08-16, needs `/plan-mission`
+## 1. `edge-label-box-followups` — DONE 2026-08-16 (mission-index SI24), 5 of 5
 
-`edge-label-box-backlog` **closed 2026-08-16** (mission-index SI23) at **3 of 5
-exit-bar clauses**: backlogs 50 → **22** against a ≤ 12 bar, DOT EQUAL class
-680 → **699**, state 259 → **266**, usecase 88 → **89**, object 76 → **78**
-(target met, backlog empty), component unmoved at 257. **Zero fixtures
-regressed, 24 improved.** Full residue table with a named mechanism per slug is
-in `plans/edge-label-box-backlog/README.md`'s close-out section.
+Executed the same day it was planned. Branch `feat/edge-label-box-followups`,
+all four gates green at head; **merge with a merge commit** (per-task ids are
+cited in its journal). Backlogs 22 → **11**, DOT EQUAL class 699 → **705**,
+component 257 → **259**, usecase 89 → **92**, state/object held; zero fixtures
+regressed, six improved. Full scored bar, residue table and corrections in
+`plans/edge-label-box-followups/README.md#close-out-2026-08-16`.
 
-**Landing state:** branch `feat/edge-label-box-backlog` (38 commits) is up as
-PR #29 against `main`, all four gates green at head (2026-08-16). Merge with a
-merge commit before starting this follow-on.
+**The brief was wrong once and under-read once, and both were caught by
+reading the Java:** the quantifier strip is `CharHidder`'s creole escape
+(`utils/CharHidder.java:59-90`), not `Display`'s visibility strip — same
+number for `focaci`, wrong for `+`/`-`/`#` prefixes; and `hasSeveralGuideLines`
+has four conditions, not two. Both recorded in the brief's `decisions.md`.
 
-It missed ≤ 12 because **the brief's premise was wrong**: four mechanisms do not
-cover the 50 slugs. That is the finding, not an excuse — 9 of the 22 belong to
-mechanisms the brief never named. The residue is now fully specified, which
-makes this follow-on cheap to plan.
+**Follow-ons it names (none started):**
 
-**Ordered by cost, cheapest first — all four are small and independently
-shippable:**
+1. **T4 step 3 — per-line magic-arrow SVG glyphs in class** (`gobuco`,
+   `lapoma`): DOT boxes are exact at 29x54; the SVG draws no per-line glyph.
+   Needs `EdgeGeo` in `src/diagrams/class/class-geo-types.ts` extended (a
+   `labelLines` glyph slot or `arrowGlyphs[]`) plus `class/renderer-edge.ts`.
+   Stopped on write-set, not difficulty — a one-task follow-on.
+2. **Arrow-label font COLOUR** — `camuna` (`<style> arrow { FontColor Blue }`),
+   `ticuxa` (`skinparam ClassArrowFontColor`) still draw `fill="#000000"`;
+   D3's cascade carries family/size/style only. `resolveArrowLabelFont` is the
+   seam. Not in any backlog (size-only).
+3. **Note-on-link SVG note shape** (`svek/image/EntityImageNoteLink` draw) for
+   class, state and description — D2's other mission. Description now draws
+   the note *text* inside the merged box; class/state still drop it.
+4. **`shared-seam-extraction`** (section 2 below) now has **four** Rose-note
+   copies to collapse: `src/core/rose-note-dim.ts` (SI24 T3) +
+   `state-dot-graph.ts:178`, `state-composite-edge-label.ts:49`,
+   `class-note-link-box.ts:70`.
+5. **Description `computeLinkDzeta`** flat-measures the main label where
+   upstream eats the merged note+label block (`SvekEdge.java:1169-1171,
+   1193-1194`) — inert on the corpus today (all four fixtures sit at the
+   nodesep/ranksep floors); a real gap the moment one does not.
+6. **`component/ruciga-77-ruja233`** fails `labelSizeOk`, is in no backlog and
+   has no arrow-font override — pre-existing (verified at the pre-mission
+   baseline). Shrink-only forbids adding it; diagnose it in the next
+   edge-label mission.
 
-1. **M2 for the description engine** (4 slugs: `dikexa-30-jobu917`,
-   `fogiku-22-gone205`, `jafuke-47-xepe403`, `zavitu-69-cemu013`).
-   `link-edge-attrs.ts` has no `computeMergedLabelBox`, no `linkNote`, no
-   `noteDim` — Batch 5 wired state (T9) and class (T10) and never scoped a
-   description arm. The shared function already exists and two engines are
-   already wired. **Read T9's trap first:** the correct note sizer is
-   `ComponentRoseNote` (`pureText + 31`, `Rose.java:65-66` +
-   `ComponentRoseNote.java:82-91`), **not** the `Opale`-based `measureNote`
-   (`+21`) that both its brief and its prompt named. Following the brief there
-   would have been 10px short on every box.
-2. **Cause A for quantifier labels** (1 slug: `focaci-80-suzu938`). Quantifiers
-   take the visibility-char **strip** but not the icon block, because the
-   quantifier arm never calls `addVisibilityModifier`. Confirmed arithmetically
-   at close-out: `~* initiators` = 61.1 → strip `~` → 53.46 → **53** = oracle.
-3. **`<style> arrow { FontSize }` on main-label measurement** (2 slugs:
-   `camuna-58-veca254`, `zosuje-43-zebi775`). Cheap now that SI23's T1 built the
-   arrow/cardinality cascade — the cascade exists, the main-label path just does
-   not consult it.
-4. **Cause D per-line inside multi-line labels** (2 slugs:
-   `gobuco-16-ruke239`, `lapoma-04-vaga142`). SI23's T12c handles the
-   magic-arrow token per-label; these carry one per line.
-
-**Two slugs are explicitly UNDIAGNOSED** and should be diagnosed before being
-scoped: `vuresa-33-kumu160` (14px too wide on a multi-line label with inline
-`<b>`; note the sign — failing to strip `<b>` would make us *narrower*, so that
-hypothesis is already ruled out) and `ticuxa-26-tixo262` (our 23 correctly
-measures `toto`; the oracle's 98x60 comes from something in the file we are not
-reading).
-
-**Out of scope for this follow-on, each owned elsewhere:** `xamule-03-jeda376`
-and `lurage-50-kobo763` need a real creole `TextBlock` (Phase 4h);
-`xetase-70-zaza808` needs `EmbeddedDiagram.ts#NestedDiagramRenderer`, unbuilt;
-`nagega-30-poso418` (`!define` macro), `nuvake-96-gofe203` (`NOTE_COLOR` regex
-backtracking past a `;`-colour spec), `tunelu`/`vonago` (`AssociationClass`
-routes note text through `class-assoc-couple.ts`'s `.label`, never `.linkNote`),
-`gevozu`/`sunuju` (`<latex>` sizing), `kafexo` (`skinparam maxMessageSize`).
+**Still out of scope, each owned elsewhere (unchanged from SI23):** `xamule` and
+`lurage` (creole `TextBlock`, Phase 4h); `xetase` (`EmbeddedDiagram`);
+`nagega` (`!define`); `nuvake` (`NOTE_COLOR` regex); `tunelu`/`vonago`
+(`AssociationClass` label route); `gevozu`/`sunuju` (`<latex>`); `kafexo`
+(`maxMessageSize`); `berelu` (`**x**` creole, deltas do not fit the literal-`**`
+story).
 
 ## Unowned, and it is a live trap: `.claude/catalog.md` does not exist
 
@@ -100,7 +92,10 @@ the rule. SI23's own new public surface is recorded in its brief instead:
 `computeQuantifierBox`, `computeMergedLabelBox`, `applyVisibilityIcon`,
 `applyGuillemet`, `parseMagicArrowLabel` (all `src/core/edge-label-box.ts`),
 `computeCardinalityFontOverride` (`src/core/style-cascade-class.ts`),
-`class-edge-label-lines.ts`, `scripts/label-box-triage.ts`.
+`class-edge-label-lines.ts`, `scripts/label-box-triage.ts`. SI24's is in its
+README close-out (item 7): `roseNoteDim`, `resolveArrowLabelFont`,
+`computeArrowFontOverride`, `hasSeveralGuideLines`, `measureLinkNoteDim`,
+`DescriptiveLink.linkNote`.
 
 ## Done since the 2026-08-15 refresh
 

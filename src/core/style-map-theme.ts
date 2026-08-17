@@ -26,6 +26,7 @@ import {
 import {
   computeClassStyleCascadeOverrides,
   computeCardinalityFontOverride,
+  computeArrowFontOverride,
 } from './style-cascade-class.js';
 import { computeSimpleSelectorOverrides } from './style-map-simple-fields.js';
 import {
@@ -80,6 +81,17 @@ function computeGraphOverride(styleMap: StyleMap, base: Theme): Partial<GraphCol
   // B4 (A2s): `skinparam wrapWidth` seeds the MaximumWidth cascade defaults;
   // an explicit <style> MaximumWidth still wins (per-field ??= inside).
   Object.assign(graphOverride, computeClassStyleCascadeOverrides(styleMap, base.wrapWidth));
+  // D3/D4 (T2 + T6): `<style> arrow { FontName/FontSize/FontStyle }` cascade
+  // -- all three fields land in `graphOverride`, mirroring
+  // `skinparam-theme-builder.ts`'s `GRAPH_OVERRIDE_FIELDS`. `arrowFontSize`
+  // was T2-excluded from this merge (its only reader,
+  // `description/layout.ts`, was skinparam-only) until T6 retired that read
+  // in favor of `resolveArrowLabelFont`, which now wires the cascade into
+  // both the DOT-measurement and SVG-text sites in the same commit (D4).
+  const arrowFont = computeArrowFontOverride(styleMap);
+  if (arrowFont.arrowFontFamily !== undefined) graphOverride.arrowFontFamily = arrowFont.arrowFontFamily;
+  if (arrowFont.arrowFontSize !== undefined) graphOverride.arrowFontSize = arrowFont.arrowFontSize;
+  if (arrowFont.arrowFontStyle !== undefined) graphOverride.arrowFontStyle = arrowFont.arrowFontStyle;
   // mission skin-file-loading Batch 1 (D3): see `style-map-element.ts
   // #resolveGlobalBackground`'s own doc comment for the bare root/element
   // selector precedence this resolves.
