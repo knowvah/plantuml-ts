@@ -15,8 +15,8 @@ fibudu-53-bode309
 # T4 (note on link)
 tumaba-64-tosu281
 # T5 (dotted id + G24 guards)
-# fovafu-44-mifu394 — G10 held (journal T5)
-# tubojo-49-tudu915 — G10 held (journal T5)
+fovafu-44-mifu394
+tubojo-49-tudu915
 cagego-53-vemo516
 xacona-99-peze211
 zecivu-62-pagu681
@@ -58,3 +58,8 @@ gokife-89-boja382
 mazuzu-54-mene929
 duzazu-41-telu529
 vixobo-14-jole910
+# T5/G10 general mechanism — any dotted leaf declared without `as` (journal T5, ruling (a))
+cesifo-37-rugu443
+matezo-28-duka427
+tuvugi-94-gapi519
+zoxutu-11-giru788

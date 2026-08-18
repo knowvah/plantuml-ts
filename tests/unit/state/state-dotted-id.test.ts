@@ -145,6 +145,31 @@ describe('dotted-id hierarchy — LEAF-style declare auto-creates STATE-type (au
     expect(a?.children.map((c) => c.id)).toEqual(['X', 'Y']);
   });
 
+  it('G10 (state-declared-size-fix/T5): a dotted leaf declared WITHOUT an "as" alias displays its own SPLIT local name, not the full dotted id (CommandCreateState.java:181-183 -- display re-derives from the post-split quark name) -- fovafu-44-mifu394#a / tubojo-49-tudu915', () => {
+    const ast = parse(`
+      state B.A.X
+      state B.A.Y
+    `);
+
+    const a = findState(ast, 'B')?.children[0];
+    const [x, y] = a?.children ?? [];
+    expect(x?.id).toBe('X');
+    expect(x?.display).toBe('X');
+    expect(y?.id).toBe('Y');
+    expect(y?.display).toBe('Y');
+  });
+
+  it('G10: an EXPLICIT "as" alias on a dotted leaf still wins outright (no defaulted-display heuristic false positive)', () => {
+    const ast = parse(`
+      state B.A.X as "Executing"
+    `);
+
+    const a = findState(ast, 'B')?.children[0];
+    const x = a?.children[0];
+    expect(x?.id).toBe('X');
+    expect(x?.display).toBe('Executing');
+  });
+
   it('cesifo-37-rugu443 -- "state 1.2" / "state a.b" / "1 -> b": auto-created ancestors "1" and "a" are structurally EQUAL to the oracle (2 svek passes -- "1" autonom, "a" a cluster)', () => {
     expectDotParity('cesifo-37-rugu443');
   });

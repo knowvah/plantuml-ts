@@ -394,7 +394,21 @@ export function ensureState(
  *  side effects once). */
 function applyDeclaredContent(target: State, source: State, pass: Pass): void {
   if (pass !== 'one') return;
-  target.display = source.display;
+  // Upstream `CommandCreateState.java:181-183`: `display = arg.getLazzy(
+  // "DISPLAY", 0); if (display == null) display = quark.getName();` -- an
+  // EXPLICIT `as "..."` alias always wins outright; a DEFAULTED display (no
+  // `as` clause -- `extractDisplayAndId`'s `display ?? bareId` fallback,
+  // state-parse-helpers.ts -- always sets `source.display === source.id`,
+  // since both come from the SAME raw token) is re-derived from the
+  // QUARK's own POST-SPLIT local name (`quark.getName()`), never the
+  // pre-split full dotted id. `target.id` IS that local name already --
+  // `resolveOrCreateDottedPath`'s `makeState(seg, seg, ...)` set it to the
+  // FINAL segment when this declaration walked a dotted path, and for a
+  // flat (non-dotted) declaration `target.id === source.id` trivially, so
+  // this is a no-op there. Without this, `state B.A.X` (no alias) clobbered
+  // leaf "X"'s correctly-split display back to the full "B.A.X" (G10,
+  // fovafu-44-mifu394#a / tubojo-49-tudu915).
+  target.display = source.display === source.id ? target.id : source.display;
   target.kind = source.kind;
   if (source.color !== undefined) target.color = source.color;
   if (source.stereotype !== undefined) target.stereotype = source.stereotype;
