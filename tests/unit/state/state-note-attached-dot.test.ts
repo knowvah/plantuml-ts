@@ -29,6 +29,14 @@
  *     PARENT pass (graph #1/svek-2) — verifies scope-based note placement
  *     and `resolveEndpoint`-based host resolution across the composite
  *     pipeline's per-pass accumulators.
+ *   - tumaba-64-tosu281 (T4, `note-on-link`/`state-declared-size-fix`) —
+ *     `note right on link` INSIDE a composite scope (`State1-->State2`,
+ *     nested in `state SubState { ... }`) + a SECOND `note ... on link` at
+ *     the diagram's top scope (`OtherState-->OtherState2`) — verifies BOTH
+ *     the DOT label box (`labelWidth`/`labelHeight`, unchanged by this
+ *     task) AND the real `TransitionGeo.label`/rendered note box
+ *     `attachTransitionLabel`'s `t.linkNote` arm now attaches
+ *     (`findings/note.md#tumaba-64-tosu281`).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -128,5 +136,38 @@ describe('notes attached to states — composite pipeline (scope-based placement
     expect(topLevel.nodes).toHaveLength(4); // NewValuePreview, Other, note-left, note-right
     expect(topLevel.edges).toHaveLength(2);
     expect(topLevel.edges.every((e) => e.minlen === 0)).toBe(true);
+  });
+});
+
+describe('note ... on link (T4, state-declared-size-fix)', () => {
+  it('tumaba-64-tosu281: both svek passes (composite + top-level) EQUAL the oracle DOT', () => {
+    expectAllPassesEqual('tumaba-64-tosu281');
+  });
+
+  it('tumaba-64-tosu281: the composite-scope note draws as a folded-corner box, not a plain <text>', () => {
+    const svg = renderSync(readPuml('tumaba-64-tosu281'), { measurer });
+    // The State1-->State2 transition's `note right on link \n hi1 \n end
+    // note` (findings/note.md#tumaba-64-tosu281): the fold-corner outline +
+    // corner triangle (both fill #FEFFDD, stroke-width 0.5 -- symmetric,
+    // unlike a freestanding note's asymmetric split) plus the LEFT-anchored
+    // body text, byte-exact against jar's own canonical SVG
+    // (test-results/visual-qa-svg/canonical/state/tumaba-64-tosu281.svg).
+    expect(svg).toContain(
+      '<path d="M54.213,315 L54.213,338 L92.213,338 L92.213,325 L82.213,315 L54.213,315" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
+    );
+    expect(svg).toContain(
+      '<path d="M82.213,315 L82.213,325 L92.213,325 L82.213,315" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
+    );
+    expect(svg).toContain('<text x="60.213" y="330.111" font-size="13" fill="#000" textLength="17.388">hi1</text>');
+  });
+
+  it('tumaba-64-tosu281: SubState (the composite host) reserves the note\'s real width', () => {
+    // findings/note.md#tumaba-64-tosu281's own mechanism: `SubState`'s DOT
+    // node width was undersized by exactly the note's own reserved
+    // labelWidth (48px) before this task -- assert the rect the harness
+    // measures carries the jar-verified value (svek-2.dot / declared-size
+    // harness scope 2, axis width, idx 3: 109.21px === 1.516806in).
+    const svg = renderSync(readPuml('tumaba-64-tosu281'), { measurer });
+    expect(svg).toContain('<rect x="7" y="150" width="109.21" height="361"');
   });
 });

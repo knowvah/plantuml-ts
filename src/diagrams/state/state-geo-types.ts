@@ -323,6 +323,23 @@ export interface TransitionGeo {
     width?: number;
     height?: number;
     inkBox?: LabelInkBox;
+    /** T4 (`note-on-link`, `state-declared-size-fix`): present exactly when
+     *  this label carries a `note ... on link` (`Transition.linkNote`) --
+     *  the note's own per-line text/width (mirrors `StateNodeGeo.noteLines`'s
+     *  shape/naive-measurement convention, `state-note-layout.ts#measureNote`)
+     *  so the renderer draws the real `EntityImageNoteLink`/`ComponentRoseNote`
+     *  folded-corner box instead of a plain `<text>` glyph
+     *  (`state-renderer-transitions.ts#buildTransitionLabelMarkup`). `x`/`y`
+     *  are then the box's own TOP-LEFT corner (no `marginLabel`/ascent
+     *  inset -- `SvekEdge.java:741-747`'s `labelText` is the RAW
+     *  `EntityImageNoteLink` block when the inline label is empty, `Display
+     *  .isNull` -> `EMPTY_TEXT_BLOCK` -> `TextBlockUtils.mergeTB`'s
+     *  short-circuit, `:302,318-325`), and `width`/`height`/`inkBox` are the
+     *  SAME reserved box `state-dot-graph.ts#computeEdgeLabelBox` already
+     *  feeds the DOT graph, so `layout-ink-extent.ts#addTransitionInk`'s
+     *  existing `label.inkBox` fold (unchanged by this task) reserves it
+     *  for free once populated. `undefined` for an ordinary inline label. */
+    noteLines?: readonly StateTextLine[];
   };
   /** mission G4 S7 -- see `StateNodeGeo.creationIndex`'s own doc comment;
    *  same raw-value contract, sourced from `Transition.creationIndex`. */
