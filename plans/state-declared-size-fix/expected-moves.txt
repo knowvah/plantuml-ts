@@ -63,3 +63,22 @@ cesifo-37-rugu443
 matezo-28-duka427
 tuvugi-94-gapi519
 zoxutu-11-giru788
+# Batch 3
+# T8 (G4 clusterPosMap)
+bajelo-54-dixe684
+cupesu-59-sajo991
+lojeju-04-fadu517
+nuvura-69-mafe604
+darime-88-moda428
+giniti-22-fexo000
+lumamo-63-zupa263
+jetuse-93-gopi146
+fotuje-06-fifa085
+# T9 (G5+G6 ink extent)
+pacami-67-dafe414
+tofezi-64-koda860
+xojudi-20-keco020
+decede-10-buvu414
+pebepi-32-cati486
+taxile-56-goca422
+tigibi-80-zidi137
