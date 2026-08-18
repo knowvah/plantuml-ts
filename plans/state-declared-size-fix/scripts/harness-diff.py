@@ -79,6 +79,12 @@ def diff_rows(baseline, now):
             )
         elif base_row.get("match") is False and now_row.get("match") is True:
             went_exact += 1
+    # Under `--mismatched-only` an exact row is simply ABSENT from `now`, so a
+    # baseline row with no `now` counterpart also went exact (or its fixture
+    # became unmatched — visible in the per-fixture counts either way).
+    for key, base_row in baseline.items():
+        if key not in now and base_row.get("match") is False:
+            went_exact += 1
     return went_exact, offenders
 
 

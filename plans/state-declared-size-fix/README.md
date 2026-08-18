@@ -26,7 +26,7 @@ scope by design.
 | Batch | What | Tasks | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | Harness gates + baselines (pairing stays sorted, D4 amended) | T0 | [x] |
-| [1](batch-1/overview.md) | Core creole seam · leaf sizing · line continuation · note-on-link · parse guards (parallel) | T1 T2 T3 T4 T5 | [ ] |
+| [1](batch-1/overview.md) | Core creole seam · leaf sizing · line continuation · note-on-link · parse guards (parallel) | T1 T2 T3 T4 T5 | [x] |
 | [2](batch-2/overview.md) | State text (G1+G8+G23) · note bodies (G2) — consume T1 | T6 T7 | [ ] |
 | [3](batch-3/overview.md) | Composite geometry: clusterPosMap (G4) · ink extent (G5+G6) | T8 T9 | [ ] |
 | [4](batch-4/overview.md) | Overlapping tail: `\|\|` orientation (G11) · label position (G13) | T10 T11 | [ ] |
