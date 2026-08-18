@@ -294,20 +294,23 @@ catch generically) — it is an **absent jar-side oracle artifact**. No
 subset of scopes can be paired because there is nothing on the jar side to
 pair against at any index. This looks like a caching gap in whatever
 populated `test-results/dot-cache` for these 4 slugs specifically, not a
-structural divergence in the diagrams themselves — worth re-running the
-oracle dump for just these 4 before T12's bucket is treated as a genuine
-"jar and ours structurally disagree" class. Not independently verified
-beyond the file-existence check (re-running the oracle capture is outside
-this task's read-only probe boundary).
+structural divergence in the diagrams themselves.
+
+> **Superseded (orchestrator, T14 close-out):** T12 (`findings/unmatched.md`)
+> established that all four `in.svg` are jar ERROR renders — the jar refused
+> the diagram (`checkConcurrentStateOk`, root-only dotted-path lookup,
+> sequence-before-state dispatch), so no `svek-N.dot` was ever produced.
+> There is nothing to re-cache; the four are `divergence-proposed` (ADR-6),
+> and the "caching gap" reading above is withdrawn.
 
 ## 6. Proposed harness improvements (PROPOSED, not implemented — ADR-2)
 
 1. **Adopt Candidate B (declaration-order pairing, §3)** — zero risk to the
    reported numbers (proven by §2), strictly better attribution. The
    natural next step once proposed.
-2. **Re-cache the 4 unmatched fixtures' jar `svek-N.dot`** (§5) — likely a
-   one-line re-run of whatever produced `test-results/dot-cache` for the
-   other 268 state fixtures, not a real structural divergence.
+2. ~~Re-cache the 4 unmatched fixtures' jar `svek-N.dot`~~ — **withdrawn**
+   (see §5 note): the jar errors on all four, so no oracle DOT exists; T12
+   proposes them as divergences instead.
 3. **Emit a `tiedWith` field on rows in a tie cluster** — the harness
    already discards the information that would make a `possible`
    pairingRisk visible (two nodes sharing a value); tagging it removes the
