@@ -128,6 +128,7 @@
   | scope | axis | idx | ours (in) | jar (in) | Δpx |
   |---|---|---|---|---|---|
   | 2 | width | 2 | 2.14434 | 2.133924 | +0.750 |
+  | 2 | height | 2 | 3.555555 | 3.555556 | -0.000 |
 - **status:** unresolved
 - **mechanism:** `skinparam linetype polyline` — the composite "NotShooting"
   cluster's own declared size (fed to the OUTER dot pass as a fixed node) is
