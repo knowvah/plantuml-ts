@@ -318,14 +318,11 @@ Ordered by how ready they are, not by size.
   tally 17 → 1 fixture. Byte-conformance is not the target for this family;
   what is left is the M6 singleton and any readability items. Low priority
   unless a user-facing json defect surfaces.
-- **S1L-i / S1L-j** (description; mission-index Phase B, `todo`) — two small,
-  fully-scoped sizing gaps: creole *titled* separators (`--title--` sizes the
-  title, not the markup; 3 fixtures) and multi-line quoted display
-  (`CommandCreateElementMultilines`; 2 fixtures). Sizer and renderer move
-  together. Each is a half-day, not a mission.
-- **S1L-e** (`wip`) — the container-cluster bucket, 47 → 13; the residue is
-  ~5 genuine `computeContainerBbox`, 4 sprite, 2 creole `{{ }}` embedded
-  sub-diagram (unimplemented subsystem, ledgered), rest misc.
+- ~~**S1L-i / S1L-j / S1L-e**~~ — **already DONE, rows corrected 2026-08-18.**
+  All three closed inside `s1l-tail-fix` (F1-b `7e8d101c` for the multi-line
+  display; codabo/nixura/xufexu conformant; description at 352/356 with only
+  the 4 permanent exclusions). Their mission-index rows had never been
+  flipped from `todo`/`wip`; nothing to plan here.
 - **`state-composite-inner-canvas`** — HALTED 2026-08-15; premise false
   (composite size is already a faithful `SvekResult#calculateDimension`
   port). Its T1 harness `scripts/measure-composite-declared-size.ts` is real
