@@ -22,7 +22,7 @@ cached `svek-N.dot`. Scopes pair by index; nodes pair by SORTED value per
 axis, so a mis-pairing is possible and every row carries both values.
 `npx jiti scripts/measure-composite-declared-size.ts --mismatched-only`.
 
-## Starting state (pre-planning 2026-08-18 at `d9f0ddda`; T0 re-measures)
+## Starting state (pre-planning 2026-08-18 at `d9f0ddda`; verified unchanged at T0, branch point `e544038d`, baseline sha256 `b790fabc…505e0`)
 
 272 fixtures · **2654** declarations · **2481** exact · 173 inexact =
 **120 rows / 63 fixtures** with |Δ| ≥ 0.05 px + **53 sub-pixel rows / 27
@@ -32,7 +32,7 @@ composite 20 · concurrent-region 8 · pseudo-state 7 · skinparam-style 7 ·
 attribute-line 6 · stereotype 5 · other 4 · note 3 · creole-sprite+escape 3.
 Repeated |Δ|: 36 px ×7, 28 ×6, 10 ×5, 12/40/21 ×3, 445 ×2, 80 ×2 — an
 identical delta is ONE shared cause until evidence says otherwise.
-Preview slices: [findings/PARTITION-preview.md](findings/PARTITION-preview.md).
+Preview slices: [findings/PARTITION-preview.md](findings/PARTITION-preview.md); final slices (T0): [findings/PARTITION.md](findings/PARTITION.md) — identical to the preview.
 
 ## Exit bar (score clause by clause; do not reword)
 
@@ -56,7 +56,7 @@ Preview slices: [findings/PARTITION-preview.md](findings/PARTITION-preview.md).
 
 | Batch | What | Tasks | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md) | Baseline + PARTITION + SCHEMA check | T0 | [ ] |
+| [0](batch-0/overview.md) | Baseline + PARTITION + SCHEMA check | T0 | [x] |
 | [1a](batch-1a/overview.md) | Bucket diagnosis (parallel) | T1 T2 T3 T4 T5 T6 T7 | [ ] |
 | [1b](batch-1b/overview.md) | Bucket diagnosis + precision + unmatched + audit (parallel) | T8 T9 T10 T11 T12 T13 | [ ] |
 | [2](batch-2/overview.md) | SYNTHESIS + close-out | T14 | [ ] |
