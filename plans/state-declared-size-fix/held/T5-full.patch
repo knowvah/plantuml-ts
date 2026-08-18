@@ -1,0 +1,325 @@
+diff --git a/oracle/goldens/state/size-backlog.json b/oracle/goldens/state/size-backlog.json
+index 689d1262..79cfb576 100644
+--- a/oracle/goldens/state/size-backlog.json
++++ b/oracle/goldens/state/size-backlog.json
+@@ -1,5 +1,5 @@
+ {
+-  "_doc": "Per-fixture node-size ratchet for the state DOT-parity suite (decisions.md#d4, A4). Same convention as oracle/goldens/object/size-backlog.json: structurally EQUAL fixtures whose maxSizeDeltaIn (inches, max across their svek-N graphs) is not yet 0; the test asserts delta <= pinned + 1e-6 per graph, so deltas only shrink. Phase L size iterations drive entries to 0 and DELETE them (absent slug = 0 required). Captured 2026-07-11 at ratchet creation. skin-loading B2 note (nimana-36-veco708): the G8 tracked exception is RESOLVED. The skin-file-loading mission landed `skin <name>` stylesheet loading + state drop-shadow rendering/ink (skin rose Shadowing=4.0 now draws the filter and reserves 2*shadow=8px), so this entry improved 0.111111 -> 0.043169 (below its pre-G8 0.090278). The remaining 0.043169 is a pre-existing NON-shadow size gap on another svek graph of this fixture (a separate size-parity follow-up, not skin/shadow), pinned tighten-only here. INHERENT-TOLERANCE EXCLUSIONS (added 2026-08-10): corumi-91-mizo869 and gupeto-19-mesa256 are NOT defects and must not be driven to 0. Both carry the same <math>S<=1/(F+(1-F)/N)</math> label and both pin at the identical 1.106597, the signature of one shared inherent cause: <math> renders through KaTeX where the jar uses JLaTeXMath, a PERMANENT maintainer-approved divergence (DIVERGENCES.md, 'LaTeX rendering engine'). They stay pinned shrink-only for non-regression but are excluded from the conformant denominator, exactly as the description suite treats gevozu-46/sunuju-01. Before this note the state backlog had NO divergence language at all, so these two read as ordinary work items. TRANSITION-LABEL-INK RE-PIN (2026-08-15, mission plans/transition-label-ink T3): bajelo-54-dixe684, bunade-42-fudu910, fotuje-06-fifa085, nimana-36-veco708, nimise-04-jove070 and pavuzo-79-zodu430 were LOOSENED, which this file otherwise never does. The transition-label ink fold became jar-faithful -- upstream folds TextBlockMarged's own UEmpty (the marged block, measuredWidth + 2*marginLabel, anchored at the reserved box corner: TextBlockMarged.java:79-87 + LimitFinder.java:159-162), not the floored DOT reservation at the text anchor. All six composites were ALREADY smaller than jar's by a SEPARATE mechanism, and the old over-wide fold was partly cancelling that; correcting it unmasks the residual. The rule is not in doubt: on bunade-42-fudu910 jar's own SVG puts its rightmost label box at 90.464 + 54.8125 = 145.2765 and its ink min at 25.72, extent 119.5565 against the 119.557 its declared 154.557 - 35 implies. The same commit took measure-composite-declared-size from 2454 to 2469 exact with zero exact->non-exact, and shape-match-report from 776/25695 to 779/25952. What remains on these six is a label-POSITION divergence (~0.165px on bunade), which is its own mission -- drive these entries down there, and do not loosen any entry again without an equivalent jar-verified account. T3 RE-PIN (2026-08-18, mission state-declared-size-fix/T3, decisions.md#D3): ported `ReadFilterMergeLines` (preproc2/ReadFilterMergeLines.java:57-81) at both its chain positions (`BlockUmlBuilder.ts`'s `buildBlockUmls`, matching `Preprocessor.java:50-54`; `IncludeExecutor.ts#executeIncludesub`, matching `TContext.java:661`) -- a trailing-`\\` physical line now merges with the next before block splitting / command dispatch, as the jar does. duzazu-41-telu529 and vixobo-14-jole910's `Active` composite HEIGHT rows are now byte-exact (were the G3 mechanism: 3 dropped continuation lines under `state Active { Active: SEND_MSG (...) / \\` never reached `measureAutonomWrapper`'s description text at all). Each fixture's entry TIGHTENED, not removed: a residual WIDTH-only delta remains (duzazu-41 0.311805 -> 0.194444in; vixobo-14 0.388889 -> 0.194444in), confirmed by direct probe of the merged content (`buildBlockUmls` output matches entry/exit's already-correct `\\n\\t` pattern byte-for-byte) that the join itself is correct and `measureLines`/`splitStateDisplayLines` (shared by `state-sizing.ts` and `state-composite-sizing.ts`) receive it -- so this residual is the SAME class of gap as fibudu-53-bode309's #b row below (`measureAutonomWrapper`'s width computation, not the merge), out of T3's write-set. fibudu-53-bode309's #a row (the same merge mechanism, `attribute-line.md`) is likewise now exact; its #b row (0.388888 -> 0.173785in) is the pre-identified T6 residual, left untouched per the batch overview.",
++  "_doc": "Per-fixture node-size ratchet for the state DOT-parity suite (decisions.md#d4, A4). Same convention as oracle/goldens/object/size-backlog.json: structurally EQUAL fixtures whose maxSizeDeltaIn (inches, max across their svek-N graphs) is not yet 0; the test asserts delta <= pinned + 1e-6 per graph, so deltas only shrink. Phase L size iterations drive entries to 0 and DELETE them (absent slug = 0 required). Captured 2026-07-11 at ratchet creation. skin-loading B2 note (nimana-36-veco708): the G8 tracked exception is RESOLVED. The skin-file-loading mission landed `skin <name>` stylesheet loading + state drop-shadow rendering/ink (skin rose Shadowing=4.0 now draws the filter and reserves 2*shadow=8px), so this entry improved 0.111111 -> 0.043169 (below its pre-G8 0.090278). The remaining 0.043169 is a pre-existing NON-shadow size gap on another svek graph of this fixture (a separate size-parity follow-up, not skin/shadow), pinned tighten-only here. INHERENT-TOLERANCE EXCLUSIONS (added 2026-08-10): corumi-91-mizo869 and gupeto-19-mesa256 are NOT defects and must not be driven to 0. Both carry the same <math>S<=1/(F+(1-F)/N)</math> label and both pin at the identical 1.106597, the signature of one shared inherent cause: <math> renders through KaTeX where the jar uses JLaTeXMath, a PERMANENT maintainer-approved divergence (DIVERGENCES.md, 'LaTeX rendering engine'). They stay pinned shrink-only for non-regression but are excluded from the conformant denominator, exactly as the description suite treats gevozu-46/sunuju-01. Before this note the state backlog had NO divergence language at all, so these two read as ordinary work items. TRANSITION-LABEL-INK RE-PIN (2026-08-15, mission plans/transition-label-ink T3): bajelo-54-dixe684, bunade-42-fudu910, fotuje-06-fifa085, nimana-36-veco708, nimise-04-jove070 and pavuzo-79-zodu430 were LOOSENED, which this file otherwise never does. The transition-label ink fold became jar-faithful -- upstream folds TextBlockMarged's own UEmpty (the marged block, measuredWidth + 2*marginLabel, anchored at the reserved box corner: TextBlockMarged.java:79-87 + LimitFinder.java:159-162), not the floored DOT reservation at the text anchor. All six composites were ALREADY smaller than jar's by a SEPARATE mechanism, and the old over-wide fold was partly cancelling that; correcting it unmasks the residual. The rule is not in doubt: on bunade-42-fudu910 jar's own SVG puts its rightmost label box at 90.464 + 54.8125 = 145.2765 and its ink min at 25.72, extent 119.5565 against the 119.557 its declared 154.557 - 35 implies. The same commit took measure-composite-declared-size from 2454 to 2469 exact with zero exact->non-exact, and shape-match-report from 776/25695 to 779/25952. What remains on these six is a label-POSITION divergence (~0.165px on bunade), which is its own mission -- drive these entries down there, and do not loosen any entry again without an equivalent jar-verified account. T5 RE-PIN (2026-08-18, mission state-declared-size-fix/T5, decisions.md#D5): fixing G10 (state-parse-resolve.ts's applyDeclaredContent -- a dotted leaf declared without `as` was clobbering its correctly-split display back to the full dotted id, widening its measured text) tightened fovafu-44-mifu394's scope-1 leaf-width rows and tubojo-49-tudu915's scope-1 rows (all now byte-exact, 0.080382 -> 0 -- tubojo-49-tudu915 REMOVED below) but PROPAGATES into fovafu-44-mifu394's still-unresolved scope-2 wrapper (plans/state-declared-size-diagnosis/findings/other.md#fovafu-44-mifu394%23b, `measureAutonomWrapper`, out of T5's write-set): the narrower leaf shrinks scope-2's width delta (7.714224px -> 4.179528px, improved) but WIDENS its height delta (10.594224px -> 11.996136px, 0.147142 -> 0.166613in), because B's own recursive wrapper measurement depends on A's now-narrower cluster. Loosened tighten-elsewhere: this entry is now bound by the #b residual alone, not by the (now-fixed) G10 leaf-width bug. Batch 5 (fovafu #b) inherits the new value. T3 RE-PIN (2026-08-18, mission state-declared-size-fix/T3, decisions.md#D3): ported `ReadFilterMergeLines` (preproc2/ReadFilterMergeLines.java:57-81) at both its chain positions (`BlockUmlBuilder.ts`'s `buildBlockUmls`, matching `Preprocessor.java:50-54`; `IncludeExecutor.ts#executeIncludesub`, matching `TContext.java:661`) -- a trailing-`\\` physical line now merges with the next before block splitting / command dispatch, as the jar does. duzazu-41-telu529 and vixobo-14-jole910's `Active` composite HEIGHT rows are now byte-exact (were the G3 mechanism: 3 dropped continuation lines under `state Active { Active: SEND_MSG (...) / \\` never reached `measureAutonomWrapper`'s description text at all). Each fixture's entry TIGHTENED, not removed: a residual WIDTH-only delta remains (duzazu-41 0.311805 -> 0.194444in; vixobo-14 0.388889 -> 0.194444in), confirmed by direct probe of the merged content (`buildBlockUmls` output matches entry/exit's already-correct `\\n\\t` pattern byte-for-byte) that the join itself is correct and `measureLines`/`splitStateDisplayLines` (shared by `state-sizing.ts` and `state-composite-sizing.ts`) receive it -- so this residual is the SAME class of gap as fibudu-53-bode309's #b row below (`measureAutonomWrapper`'s width computation, not the merge), out of T3's write-set. fibudu-53-bode309's #a row (the same merge mechanism, `attribute-line.md`) is likewise now exact; its #b row (0.388888 -> 0.173785in) is the pre-identified T6 residual, left untouched per the batch overview.",
+   "bajelo-54-dixe684": 0.167084,
+   "bemena-23-zebu249": 0.0073150000000001825,
+   "bitaxo-18-tamo974": 0.1388879999999999,
+@@ -21,7 +21,7 @@
+   "fojisi-40-zogo372": 0.0026460000000003703,
+   "fomusu-59-fupe538": 0.07584999999999997,
+   "fotuje-06-fifa085": 0.949897,
+-  "fovafu-44-mifu394": 0.1471420000000001,
++  "fovafu-44-mifu394": 0.16661300000000034,
+   "gifasa-23-zile558": 5.199999999971894e-05,
+   "giniti-22-fexo000": 5.305591,
+   "gokife-89-boja382": 0.013889000000000706,
+@@ -74,7 +74,6 @@
+   "tegali-39-molu382": 5.199999999994098e-05,
+   "tigibi-80-zidi137": 0.018616999999999884,
+   "tofezi-64-koda860": 0.013887999999999678,
+-  "tubojo-49-tudu915": 0.08038200000000006,
+   "viguto-81-gana093": 0.13888900000000004,
+   "vixobo-14-jole910": 0.19444399999999984,
+   "xasoka-58-temi462": 0.213889,
+diff --git a/src/diagrams/state/state-parse-helpers.ts b/src/diagrams/state/state-parse-helpers.ts
+index 6c33a3a9..1498526e 100644
+--- a/src/diagrams/state/state-parse-helpers.ts
++++ b/src/diagrams/state/state-parse-helpers.ts
+@@ -1,11 +1,17 @@
+ /**
+- * Pure grammar-decoding helpers for the state parser's command bodies —
+- * split out of `state-parse-state.ts` (which owns the scope-stack/mutation
+- * machinery) purely to stay under the file-size cap; these functions touch
+- * no `ParseState`.
++ * Grammar-decoding helpers for the state parser's command bodies — split
++ * out of `state-parse-state.ts` (which owns the scope-stack/mutation
++ * machinery) purely to stay under the file-size cap; `extractDisplayAndId`/
++ * `parseLabel` touch no `ParseState`. The concurrent-region guard below
++ * (mission state-declared-size-fix/T5, decisions.md#D2) was placed here
++ * instead of `state-parse-resolve.ts` purely to keep THAT file under the
++ * same file-size cap — it is read-only over `ParseState`/`Scope`, same
++ * discipline as everything else in this repo's parser layer.
+  */
+ 
+-import type { Transition } from './ast.js';
++import type { State, Transition } from './ast.js';
++import { type ParseState, type Scope, currentScope, rootScope } from './state-parse-state.js';
++import { DiagramRefusal } from '../../core/error/error-diagrams.js';
+ 
+ /**
+  * Extract display name and id from a regex match built from `ID_ALT`
+@@ -45,6 +51,104 @@ export function extractDisplayAndId(
+   return { display: quoted, id: quotedId ?? quoted };
+ }
+ 
++/** A group a registered `State` belongs to -- `scope` + which region within
++ *  it (`0` = the owner's own, never-concurrent group; `N >= 1` = the `N`th
++ *  `--`/`||`-delimited `CONCURRENT_STATE` region). Stands in for upstream's
++ *  `Entity#getParentContainer()`/`getCurrentGroup()` identity, which our
++ *  port has no single object for (a concurrent region is a `Scope.regions`
++ *  slot, not its own `Scope`). */
++interface GroupKey {
++  scope: Scope;
++  region: number;
++}
++
++function sameGroup(a: GroupKey, b: GroupKey): boolean {
++  return a.scope === b.scope && a.region === b.region;
++}
++
++/**
++ * Find the scope+region a REGISTERED state currently lives in. Every State
++ * this port ever creates passes through the single `registerStateInto`
++ * chokepoint (state-parse-resolve.ts), which pushes it into exactly one
++ * `scope.regions[N]` array -- so this scan always finds a match for a
++ * `state` that came from `resolveExistingState`/`globalByName`/a scope's
++ * own `stateIndex`. Root first (never keyed in `scopeByOwner`, whose keys
++ * are composite OWNERS only), then every composite's own scope.
++ */
++function findParentGroup(ps: ParseState, state: State): GroupKey | undefined {
++  const scopes: Scope[] = [rootScope(ps), ...ps.scopeByOwner.values()];
++  for (const scope of scopes) {
++    for (let region = 0; region < scope.regions.length; region++) {
++      if (scope.regions[region]!.includes(state)) return { scope, region };
++    }
++  }
++  return undefined;
++}
++
++/**
++ * Port of `StateDiagram#checkConcurrentStateOk`/`checkConcurrentStateOkInternal`
++ * (`StateDiagram.java:70-90`): true when reusing `existing` from the CURRENT
++ * scope's region is legitimate. `existing === undefined` is upstream's
++ * `code.getData() == null` early return -- a not-yet-created id has no
++ * conflicting parent to violate. Otherwise upstream's two symmetric branches
++ * (current group concurrent-and-different / existing's own parent
++ * concurrent-and-different) collapse to one predicate: false exactly when
++ * EITHER side is a concurrent region AND the two groups differ; a boundary
++ * crossing between two ordinary (non-concurrent) groups is always fine, and
++ * self-reference within the SAME region is always fine.
++ * @see ~/git/plantuml/.../statediagram/StateDiagram.java:70-90
++ */
++function checkConcurrentStateOk(ps: ParseState, existing: State | undefined): boolean {
++  if (existing === undefined) return true;
++  const current: GroupKey = { scope: currentScope(ps), region: currentScope(ps).regionCursor };
++  // Guaranteed to resolve -- see findParentGroup's own doc comment.
++  const owner = findParentGroup(ps, existing)!;
++  if (current.region === 0 && owner.region === 0) return true;
++  return sameGroup(current, owner);
++}
++
++/**
++ * Throw `DiagramRefusal` when {@link checkConcurrentStateOk} rejects
++ * `existing` -- factored out so `state-parse-resolve.ts` call sites add one
++ * non-branching statement instead of their own `if`, keeping their CCN
++ * unchanged (decisions.md#D2: our error names STATE at the real line, but
++ * this parser tracks no per-line position at all -- unlike the class
++ * engine's `ast.errorLine` -- so `line` is `undefined` and {@link errorSvg}
++ * falls back to the source's last line; the jar's own `mergeV2` banner text
++ * may also differ). Exported for `state-parse-resolve.ts`'s `ensureState`/
++ * `declareState`/`resolveOrCreateDottedPath` call sites.
++ */
++export function assertConcurrentStateOk(ps: ParseState, existing: State | undefined, message: string): void {
++  if (checkConcurrentStateOk(ps, existing)) return;
++  throw new DiagramRefusal(message, undefined, 'state');
++}
++
++/**
++ * Throw `DiagramRefusal` when a `mode==='neutral'` (transition-endpoint,
++ * `ensureState`) dotted resolution manufactured its FINAL segment's DIRECT
++ * parent brand-new -- upstream's `CommandLinkStateCommon.java:277-278` gate
++ * (`quark.getParent().getData() == null`). `Quark#child`'s per-segment walk
++ * (`plasma/Quark.java:116-132`) never assigns Entity DATA to a
++ * freshly-manufactured intermediate quark, so a `getEntity`-routed
++ * reference whose resolution needed one is a parse error, not a valid
++ * resolution (fugedo-34-fice721: `ChildMode1.A` from sibling `ChildMode2`
++ * manufactures a phantom `ChildMode2 > ChildMode1` distinct from the real
++ * `ParentMode > ChildMode1`). `'phantom'`/`'promote'` mode (composite/frame
++ * block opener, leaf-style declare -- `isNeutralMode: false`) never trip
++ * this: upstream's `CommandCreatePackageState`/`CommandCreateState` reach
++ * the ancestor walk directly via `quarkInContext`, never through
++ * `getEntity`, so a brand-new ancestor there is a legitimate declaration.
++ * @see ~/git/plantuml/.../statediagram/command/CommandLinkStateCommon.java:277-278
++ */
++export function assertDottedParentHasData(
++  isNeutralMode: boolean,
++  directParentWasFreshlyCreated: boolean,
++  fullId: string,
++): void {
++  if (!isNeutralMode || !directParentWasFreshlyCreated) return;
++  throw new DiagramRefusal(`The state ${fullId} cannot be used here.`, undefined, 'state');
++}
++
+ /**
+  * Parse a transition label into guard / action / label fields.
+  *
+diff --git a/src/diagrams/state/state-parse-resolve.ts b/src/diagrams/state/state-parse-resolve.ts
+index 1e6da85e..077c8de3 100644
+--- a/src/diagrams/state/state-parse-resolve.ts
++++ b/src/diagrams/state/state-parse-resolve.ts
+@@ -27,6 +27,7 @@ import {
+   noteScopeId,
+ } from './state-parse-state.js';
+ import { stripSyncBarEquals } from './state-transitions.js';
++import { assertConcurrentStateOk, assertDottedParentHasData } from './state-parse-helpers.js';
+ 
+ /** True iff `id` should be resolved via the dotted hierarchical-split
+  *  branch of `quarkInContextSafe` — the active separator is set (`set
+@@ -116,11 +117,11 @@ function registerNewState(ps: ParseState, state: State): void {
+  * (`Somp.entry1`, written outside any block) reach into an
+  * already-declared composite's children. Otherwise the path resolves
+  * relative to the CURRENT scope (`currentQuark.child(full)`) — new,
+- * scope-local nesting (mission A4 Phase L iter 10's fugedo-34-fice721:
+- * a dotted reference whose first segment is a SIBLING, not a root-level
+- * or current-scope entity, auto-creates a brand new nested duplicate
+- * instead of reaching across — a genuine upstream parse-error case in that
+- * fixture, ledgered separately, not fixed here).
++ * scope-local nesting (fugedo-34-fice721: a dotted reference whose first
++ * segment is a SIBLING, not root-level/current-scope, manufactures a brand
++ * new nested duplicate instead of reaching across. A `mode==='neutral'`
++ * walk that freshly creates the duplicate's DIRECT parent refuses the
++ * diagram instead — `assertDottedParentHasData`, T5).
+  *
+  * The FINAL segment itself is NEVER marked phantom or upgraded (it is the
+  * thing actually being declared/referenced) regardless of caller — see
+@@ -150,10 +151,19 @@ function registerNewState(ps: ParseState, state: State): void {
+  */
+ type DottedAncestorMode = 'phantom' | 'promote' | 'neutral';
+ 
+-function resolveOrCreateDottedPath(ps: ParseState, segments: readonly string[], mode: DottedAncestorMode): State {
++function resolveOrCreateDottedPath(
++  ps: ParseState,
++  segments: readonly string[],
++  mode: DottedAncestorMode,
++  fullId: string,
++): State {
+   const anchorIsRoot = rootScope(ps).stateIndex.has(segments[0]!);
+   let scope: Scope = anchorIsRoot ? rootScope(ps) : currentScope(ps);
+   let state: State | undefined;
++  // Whether the FINAL segment's DIRECT parent (the second-to-last segment)
++  // was manufactured brand-new by THIS walk -- see `assertDottedParentHasData`'s
++  // doc for why only the direct parent (not any earlier ancestor) matters.
++  let directParentWasFreshlyCreated = false;
+   for (let i = 0; i < segments.length; i++) {
+     const seg = segments[i]!;
+     const isLast = i === segments.length - 1;
+@@ -161,12 +171,15 @@ function resolveOrCreateDottedPath(ps: ParseState, segments: readonly string[],
+     if (existing !== undefined) {
+       if (!isLast && mode === 'promote') delete existing.autoPhantom;
+       state = existing;
++      if (!isLast) directParentWasFreshlyCreated = false;
+     } else {
+       state = makeState(seg, seg, 'normal', !isLast && mode === 'phantom' ? { autoPhantom: true } : undefined);
+       registerStateInto(ps, scope, state);
++      if (!isLast) directParentWasFreshlyCreated = true;
+     }
+     scope = scopeOf(ps, state);
+   }
++  assertDottedParentHasData(mode === 'neutral', directParentWasFreshlyCreated, fullId);
+   return state!;
+ }
+ 
+@@ -350,13 +363,18 @@ export function ensureState(
+   if (compound !== undefined) return ensureCompoundHistory(ps, compound.idShort, compound.kind);
+ 
+   if (dotted) {
+-    const state = resolveOrCreateDottedPath(ps, canonicalId.split(ps.separator!), 'neutral');
++    const state = resolveOrCreateDottedPath(ps, canonicalId.split(ps.separator!), 'neutral', canonicalId);
+     ps.lastEntity = state.id;
+     return state;
+   }
+ 
+   const existing = resolveExistingState(ps, canonicalId);
+-  if (existing !== undefined) return existing;
++  if (existing !== undefined) {
++    // decisions.md#D2, StateDiagram.java:70-90 via CommandLinkStateCommon
++    // .java:166-174,271 (cagego-53, xacona-99, zecivu-62).
++    assertConcurrentStateOk(ps, existing, `The state ${canonicalId} cannot be used here.`);
++    return existing;
++  }
+ 
+   const s = makeState(canonicalId, canonicalId, pseudoKind ?? kind);
+   registerNewState(ps, s);
+@@ -376,7 +394,21 @@ export function ensureState(
+  *  side effects once). */
+ function applyDeclaredContent(target: State, source: State, pass: Pass): void {
+   if (pass !== 'one') return;
+-  target.display = source.display;
++  // Upstream `CommandCreateState.java:181-183`: `display = arg.getLazzy(
++  // "DISPLAY", 0); if (display == null) display = quark.getName();` -- an
++  // EXPLICIT `as "..."` alias always wins outright; a DEFAULTED display (no
++  // `as` clause -- `extractDisplayAndId`'s `display ?? bareId` fallback,
++  // state-parse-helpers.ts -- always sets `source.display === source.id`,
++  // since both come from the SAME raw token) is re-derived from the
++  // QUARK's own POST-SPLIT local name (`quark.getName()`), never the
++  // pre-split full dotted id. `target.id` IS that local name already --
++  // `resolveOrCreateDottedPath`'s `makeState(seg, seg, ...)` set it to the
++  // FINAL segment when this declaration walked a dotted path, and for a
++  // flat (non-dotted) declaration `target.id === source.id` trivially, so
++  // this is a no-op there. Without this, `state B.A.X` (no alias) clobbered
++  // leaf "X"'s correctly-split display back to the full "B.A.X" (G10,
++  // fovafu-44-mifu394#a / tubojo-49-tudu915).
++  target.display = source.display === source.id ? target.id : source.display;
+   target.kind = source.kind;
+   if (source.color !== undefined) target.color = source.color;
+   if (source.stereotype !== undefined) target.stereotype = source.stereotype;
+@@ -425,6 +457,7 @@ export function declareState(
+       ps,
+       state.id.split(ps.separator!),
+       opts?.phantomAncestors === true ? 'phantom' : 'promote',
++      state.id,
+     );
+     applyDeclaredContent(resolved, state, pass);
+     ps.lastEntity = resolved.id;
+@@ -433,6 +466,10 @@ export function declareState(
+ 
+   const existing = resolveExistingState(ps, state.id);
+   if (existing !== undefined) {
++    // decisions.md#D2, StateDiagram.java:70-90 via CommandCreateState
++    // .java:189-191 -- same guard as ensureState's (upstream calls it from
++    // both commands); zecivu-62's ensureState touch fires first here.
++    assertConcurrentStateOk(ps, existing, `The state ${state.id} has been created in a concurrent state : it cannot be used here.`);
+     applyDeclaredContent(existing, state, pass);
+     ps.lastEntity = existing.id;
+     return existing;
+diff --git a/tests/unit/state/state-dotted-id.test.ts b/tests/unit/state/state-dotted-id.test.ts
+index 1e5fbd66..be21ca47 100644
+--- a/tests/unit/state/state-dotted-id.test.ts
++++ b/tests/unit/state/state-dotted-id.test.ts
+@@ -145,6 +145,31 @@ describe('dotted-id hierarchy — LEAF-style declare auto-creates STATE-type (au
+     expect(a?.children.map((c) => c.id)).toEqual(['X', 'Y']);
+   });
+ 
++  it('G10 (state-declared-size-fix/T5): a dotted leaf declared WITHOUT an "as" alias displays its own SPLIT local name, not the full dotted id (CommandCreateState.java:181-183 -- display re-derives from the post-split quark name) -- fovafu-44-mifu394#a / tubojo-49-tudu915', () => {
++    const ast = parse(`
++      state B.A.X
++      state B.A.Y
++    `);
++
++    const a = findState(ast, 'B')?.children[0];
++    const [x, y] = a?.children ?? [];
++    expect(x?.id).toBe('X');
++    expect(x?.display).toBe('X');
++    expect(y?.id).toBe('Y');
++    expect(y?.display).toBe('Y');
++  });
++
++  it('G10: an EXPLICIT "as" alias on a dotted leaf still wins outright (no defaulted-display heuristic false positive)', () => {
++    const ast = parse(`
++      state B.A.X as "Executing"
++    `);
++
++    const a = findState(ast, 'B')?.children[0];
++    const x = a?.children[0];
++    expect(x?.id).toBe('X');
++    expect(x?.display).toBe('Executing');
++  });
++
+   it('cesifo-37-rugu443 -- "state 1.2" / "state a.b" / "1 -> b": auto-created ancestors "1" and "a" are structurally EQUAL to the oracle (2 svek passes -- "1" autonom, "a" a cluster)', () => {
+     expectDotParity('cesifo-37-rugu443');
+   });
