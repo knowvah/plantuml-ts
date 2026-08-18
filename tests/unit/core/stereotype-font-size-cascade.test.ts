@@ -27,7 +27,7 @@ import { defaultTheme, deepMergeTheme, resolveElementFontSize } from '../../../s
 import type { Theme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
-import { measureLeafNode } from '../../../src/diagrams/description/leaf-sizing.js';
+import { measureLeafNode } from '../../../src/core/svek/image/leaf-sizing.js';
 import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
 import { ActorStyle } from '../../../src/core/skin/ActorStyle.js';
 
@@ -228,7 +228,7 @@ describe('BoxSizingOpts.lineThickness — the SIZER slot (G5)', () => {
   // = 62x83px, an `awesome` actor at LineThickness 4 with a 15pt label.
   const actorAt = (thickness: number | undefined) =>
     measureLeafNode(
-      { id: 'a', display: 'a', symbol: 'actor', children: [] },
+      { id: 'a', display: 'a', symbol: 'actor' },
       { family: 'sans-serif', size: 15 },
       measurer(),
       thickness === undefined

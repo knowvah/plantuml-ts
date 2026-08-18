@@ -10,7 +10,7 @@ import {} from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import {} from '../../core/svg.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { resolveBareOrBackColor } from './class-color-override.js';
+import { resolveBareOrBackColor } from '../../core/color-override.js';
 import {} from './class-map-sizing.js';
 import {} from './class-badge.js';
 import {} from './class-visibility-icon.js';
@@ -120,9 +120,10 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
   // G2 N31: `geo.color` is the RAW space-joined `COLOR [LINECOLOR]` capture
   // from `class-declaration-parser.ts#extractDecorations`; `resolveBareOr
   // BackColor` reads only the COLOR half's background component (G2 N34:
-  // moved to `class-color-override.ts` so `renderer-note.ts` can reuse the
-  // SAME grammar for a note's own `#color` override -- see that module's
-  // doc comment for the full extraction rule).
+  // moved to `core/color-override.ts` (T4, SI27) so `renderer-note.ts` AND
+  // state's `state-render-colors.ts` can reuse the SAME grammar for a
+  // note's/state's own `#color` override -- see that module's doc comment
+  // for the full extraction rule).
   const override = resolveBareOrBackColor(geo.color);
   if (override !== undefined) return resolveColorToSvgHex(override);
   // G3/O1: `object`/`map`/`json` each carry their OWN StyleSignature

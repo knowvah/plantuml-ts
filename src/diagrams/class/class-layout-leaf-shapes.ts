@@ -11,7 +11,7 @@
 
 import type { Classifier } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { measureUsecaseOrActorLeaf, measureUsecaseOrActorLeafInk } from '../description/leaf-sizing.js';
+import { measureUsecaseOrActorLeaf, measureUsecaseOrActorLeafInk } from '../../core/svek/image/leaf-sizing.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE } from './class-lollipop.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';

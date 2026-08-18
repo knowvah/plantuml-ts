@@ -7,9 +7,8 @@
  * create a cycle, since class-commands.ts imports those groups).
  */
 
+import type { Command as CoreCommand } from '../../core/command/Command.js';
 import type { ParseState } from './parser.js';
 
-export interface Command {
-  pattern: RegExp;
-  execute(state: ParseState, match: RegExpExecArray): void;
-}
+/** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/Command.java:42-58 */
+export type Command = CoreCommand<ParseState>;

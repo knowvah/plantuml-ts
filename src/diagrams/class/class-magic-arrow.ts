@@ -20,7 +20,7 @@
  * `magicArrowGlyphPoints`, `ARROW_GLYPH_SIZE`) stays HERE: only the class
  * engine draws the glyph, so it is not shared behavior under D1.
  *
- * Scope: single-line labels only (`splitEdgeLabelLines(label).lines.length
+ * Scope: single-line labels only (`splitDisplayLines(label).lines.length
  * === 1`) — jar itself only strips a top-level arrow when
  * `Display.hasSeveralGuideLines(completeLabel)` is false
  * (`StringWithArrow.java:63-65`); a multi-line label defers arrow-parsing
@@ -43,7 +43,10 @@ import {
   type MagicArrowLabel,
   parseMagicArrowLabel,
 } from '../../core/edge-label-box.js';
-import { splitEdgeLabelLines } from './class-edge-label-lines.js';
+// T1: the ONE `Display#getWithNewlines` port -- replaces this file's own
+// `splitEdgeLabelLines` import, see `class-edge-label-lines.ts`'s own doc
+// comment.
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { ARROW_LABEL_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
@@ -56,7 +59,7 @@ export { type MagicArrowDirection, type MagicArrowLabel, parseMagicArrowLabel };
  * `" <"`/`" >"` (all four forms checked independently; upstream's own
  * `hasSeveralGuideLines(Collection)` tests each in that order, `:730-739`).
  * Read on the caller's own already-split lines (`class-layout-edge-labels.ts
- * #computeMeasuredLabelAttrs`'s `splitEdgeLabelLines(label).lines`) — the
+ * #computeMeasuredLabelAttrs`'s `splitDisplayLines(label).lines`) — the
  * same timing as upstream's `displayData`, which is split+guillemet'd by
  * `LinkArg.build` (`abel/LinkArg.java:71`) before `SvekEdge` ever reads
  * `link.getLabel()`.
@@ -193,7 +196,7 @@ export function magicArrowTriSize(arrowFontSize: number): number {
  * arrow token upstream, whatever its first line looks like.
  */
 export function isBareMagicArrowLabel(label: string): boolean {
-  if (splitEdgeLabelLines(label).lines.length !== 1) return false;
+  if (splitDisplayLines(label).lines.length !== 1) return false;
   const magic = parseMagicArrowLabel(label);
   return magic !== undefined && magic.text === undefined;
 }

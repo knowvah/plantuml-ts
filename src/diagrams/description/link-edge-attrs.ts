@@ -23,9 +23,10 @@ import {
   computeReservedLabelBox,
   computeQuantifierBox,
   computeMergedLabelBox,
-  splitCreoleLines,
   parseMagicArrowLabel,
 } from '../../core/edge-label-box.js';
+// T1: the ONE `Display#getWithNewlines` port (retires `splitCreoleLines`).
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import {
   type SpriteDimsLookup,
 } from '../../core/creole-atoms.js';
@@ -228,6 +229,9 @@ export function computeGraphSpacing(
  *  endpoint stereotype (e.g. `A --> B<<tag>>`) contributes NEITHER visible
  *  text NOR DOT label-dimension weight; only `stereotypeIsLinkLabel`
  *  (the post-colon-embedded case) does. */
+// T1: the `\n` join below is a port artefact -- `applyMainLabel` rewrites
+// it to the literal token before SIZING; render is unaffected
+// (`layout-geo-post.ts:114` reads `link.label` directly).
 function mainLabelText(link: DescriptiveLink): string | undefined {
   const parts: string[] = [];
   if (link.stereotypeIsLinkLabel === true && link.stereotype !== undefined) parts.push(`«${link.stereotype}»`);
@@ -294,14 +298,15 @@ function measureMainLabelBox(
  * `descdiagram/command/Labels.java:59-64`), so detection runs on the
  * assembled, `[[url]]`-resolved text here -- no corpus fixture combines a
  * magic arrow with `[[url]]` markup, so this is a verified no-op ordering
- * simplification, not a guess.
+ * simplification, not a guess. `resolvedLabelText`: pre-sanitized by the
+ * caller (`applyMainLabel`'s own doc comment).
  */
 function computeMainLabelDims(
   resolvedLabelText: string,
   isSelfLoop: boolean,
   ctx: MeasureCtx,
 ): { width: number; height: number } {
-  const magic = splitCreoleLines(resolvedLabelText).length === 1
+  const magic = splitDisplayLines(resolvedLabelText).lines.length === 1
     ? parseMagicArrowLabel(resolvedLabelText)
     : undefined;
   if (magic === undefined) return measureMainLabelBox(resolvedLabelText, isSelfLoop, ctx);
@@ -360,7 +365,11 @@ function computeNoteMergedDims(
  *  `labelText` is then `mergeTB(EMPTY_TEXT_BLOCK, noteOnly)` -- a real block,
  *  so `hasNoteLabelText()` (`SvekEdge.java:383-385`) is true and `:430`
  *  emits the reservation (`fogiku-22-gone205`, whose only edge text is the
- *  note, carries an 80x33 `label` table in the oracle DOT). */
+ *  note, carries an 80x33 `label` table in the oracle DOT).
+ *
+ *  T1: `sizingText` rewrites `mainLabelText`'s `\n` join (port artefact) to
+ *  the literal token before SIZING; `attrs.label`/`xlabel` keep the
+ *  unchanged `resolvedLabelText` (harmless, unread at render time). */
 function applyMainLabel(
   attrs: NonNullable<DotInputEdge['attributes']>,
   link: DescriptiveLink,
@@ -373,9 +382,10 @@ function applyMainLabel(
     : undefined;
   if (labelText === undefined && noteDim === undefined) return;
   const resolvedLabelText = labelText === undefined ? '' : resolveInlineLinks(labelText);
+  const sizingText = resolvedLabelText.replace(/\n/g, '\\n');
   const m = noteDim !== undefined
-    ? computeNoteMergedDims(resolvedLabelText, noteDim, link, ctx)
-    : computeMainLabelDims(resolvedLabelText, link.from === link.to, ctx);
+    ? computeNoteMergedDims(sizingText, noteDim, link, ctx)
+    : computeMainLabelDims(sizingText, link.from === link.to, ctx);
   if (linetype === 'ortho') {
     attrs.xlabel = resolvedLabelText;
     attrs.xlabelWidth = m.width;

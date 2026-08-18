@@ -979,7 +979,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
   // different, unverified-but-algebraically-identical line count.
   it('a multi-line title composite is now titleTableEligible (G6 T7 relax) with a formula-computed HEIGHT, not the flat old constant', () => {
     const child = makeState('Child');
-    const a = makeState('A', { display: 'line1\nline2', children: [child] });
+    const a = makeState('A', { display: 'line1\\nline2', children: [child] });
     const ext = makeState('External');
     const ast: StateDiagramAST = {
       states: [a, ext],
@@ -992,7 +992,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
     } finally {
       setLayoutInputObserver(undefined);
     }
-    const cluster = captured[0]?.clusters?.find((c) => c.label === 'line1\nline2');
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'line1\\nline2');
     expect(cluster?.titleTableHeight).toBe(23);
     // titleTableWidth = max line width across both lines ('line2' is wider
     // than 'line1' under the stub measurer's per-char width) -- unaffected
@@ -1005,7 +1005,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
   // `title-height-derivation.md` §3.
   it('a 3-line title composite (jar-verified sosoxe-55-demi451/teseci-80-sivi292 shape) reduces to HEIGHT=37', () => {
     const child = makeState('Child');
-    const a = makeState('A', { display: 'line1\nline2\nline3', children: [child] });
+    const a = makeState('A', { display: 'line1\\nline2\\nline3', children: [child] });
     const ext = makeState('External');
     const ast: StateDiagramAST = {
       states: [a, ext],
@@ -1018,7 +1018,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
     } finally {
       setLayoutInputObserver(undefined);
     }
-    const cluster = captured[0]?.clusters?.find((c) => c.label === 'line1\nline2\nline3');
+    const cluster = captured[0]?.clusters?.find((c) => c.label === 'line1\\nline2\\nline3');
     expect(cluster?.titleTableHeight).toBe(37);
   });
 

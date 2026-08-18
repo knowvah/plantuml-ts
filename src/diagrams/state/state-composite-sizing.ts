@@ -12,7 +12,7 @@
 import type { State } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import { splitCreoleLines } from './state-sizing.js';
+import { splitStateDisplayLines } from './state-sizing.js';
 
 interface Dim {
   width: number;
@@ -69,8 +69,8 @@ export function measureAutonomWrapper(
   measurer: StringMeasurer,
 ): AutonomWrapper {
   const font: FontSpec = { family: theme.fontFamily, size: theme.fontSize };
-  const text = measureLines(splitCreoleLines(state.display), font, measurer);
-  const bodyLines = (state.description ?? []).flatMap(splitCreoleLines);
+  const text = measureLines(splitStateDisplayLines(state.display), font, measurer);
+  const bodyLines = (state.description ?? []).flatMap(splitStateDisplayLines);
   const attr = measureLines(bodyLines, font, measurer);
   const marginForFields = attr.height > 0 ? MARGIN : 0;
 

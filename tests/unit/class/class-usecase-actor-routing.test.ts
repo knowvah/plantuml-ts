@@ -18,7 +18,7 @@
 import { describe, it, expect } from 'vitest';
 import { measureUsecaseOrActor } from '../../../src/diagrams/class/class-layout-leaf-shapes.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
-import { measureUsecaseOrActorLeaf, measureLeafNode } from '../../../src/diagrams/description/leaf-sizing.js';
+import { measureUsecaseOrActorLeaf, measureLeafNode } from '../../../src/core/svek/image/leaf-sizing.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../src/core/sprite-commands.js';
 import { SpriteSvg } from '../../../src/core/klimt/sprite/SpriteSvg.js';

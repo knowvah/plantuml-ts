@@ -61,12 +61,13 @@ export interface MapRow {
 }
 
 // ---------------------------------------------------------------------------
-// JSON leaf value type — split into class-json-ast.ts to keep this file
-// under the line cap; re-exported here so `import type { JsonNode } from
-// './ast.js'` still works for existing/expected import sites.
+// JSON leaf value type — ONE definition shared by class and state, under
+// core/command/JsonNode.ts (mission shared-seam-extraction D7). Re-exported
+// here so `import type { JsonNode } from './ast.js'` still works for
+// existing/expected import sites.
 // ---------------------------------------------------------------------------
 
-import type { JsonNode } from './class-json-ast.js';
+import type { JsonNode } from '../../core/command/JsonNode.js';
 export type { JsonNode };
 
 // ---------------------------------------------------------------------------

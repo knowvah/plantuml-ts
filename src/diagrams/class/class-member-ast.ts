@@ -2,8 +2,9 @@
  * `Member`/`Visibility` types for class/interface/enum/object leaves.
  *
  * Split out of ast.ts purely to keep that file under the repo's
- * 500-line-per-file cap (mirrors class-json-ast.ts's own "split out of a
- * capped file, behavior unchanged" precedent) — ast.ts re-exports both
+ * 500-line-per-file cap (the same "split out of a capped file, behavior
+ * unchanged" precedent core/command/JsonNode.ts's move followed) — ast.ts
+ * re-exports both
  * symbols so callers can still `import type { Member, Visibility } from
  * './ast.js'`.
  */

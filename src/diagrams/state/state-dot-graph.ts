@@ -23,11 +23,11 @@ import { measureState, CIRCLE_START_SIZE, CIRCLE_END_SIZE } from './state-sizing
 import { buildNoteGraphPartsByScope } from './state-note-layout.js';
 import type { ReservedLabelBox } from '../../core/edge-label-box.js';
 import { computeReservedLabelBox, computeMergedLabelBox } from '../../core/edge-label-box.js';
-// `EntityImageNoteLink`'s own margins — see `measureLinkNoteDim`'s doc below
-// for why these are shared with (and NOT the whole story of) the plain-note
-// sizer's `Opale` constants.
-import { OPALE_MARGIN_X1, OPALE_MARGIN_X2, OPALE_MARGIN_Y } from '../../core/svek/image/Opale.js';
-import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
+// `EntityImageNoteLink`'s real dimension — shared-seam-extraction T6, D1:
+// ONE port, `core/svek/image/EntityImageNoteLink.ts`, replacing this file's
+// former private copy. See that module's doc comment for the full
+// `ComponentRoseNote`/Opale derivation.
+import { measureLinkNoteDim } from '../../core/svek/image/EntityImageNoteLink.js';
 
 // ---------------------------------------------------------------------------
 // [*] pseudostate anchors — one shared start/end node per (flat) diagram,
@@ -124,23 +124,12 @@ export function transitionLabelText(t: Transition): string | undefined {
  * from the one `state-note-layout.ts#measureNote` sizes (`EntityImageNote`/
  * `Opale`, for a plain `note right of X`): `note on link` builds a
  * `ComponentRoseNote` via `Rose#createComponentNote`
- * (`svek/image/EntityImageNoteLink.java:61-66`), not an `Opale`.
- *
- * `ComponentRoseNote#getPreferredWidth`/`getPreferredHeight`
- * (`skin/rose/ComponentRoseNote.java:82-91`) add its OWN `2 * paddingX`/
- * `2 * paddingY` (`skin/rose/Rose.java:65-66`, both 5) ON TOP of
- * `AbstractTextualComponent`'s own text-margin arithmetic
- * (`skin/AbstractTextualComponent.java:107-113`, `getTextWidth` =
- * pureText + left + right). For the default, non-`OVER_SEVERAL`,
- * left-aligned note text (`AlignmentParam.java:45` — `noteTextAlignment`
- * defaults LEFT; `EntityImageNoteLink.java:63-64` never passes a
- * `NotePosition`, so `Rose.java:95`'s 5-arg overload always takes the
- * non-`OVER_SEVERAL` branch), the padding resolves to
- * `ClockwiseTopRightBottomLeft.topRightBottomLeft(5, 15, 5, 6)`
- * (`skin/rose/ComponentRoseNote.java:70-73`) — left=6/right=15/top=bottom=5,
- * the SAME three numbers as `Opale#marginX1`/`marginX2`/`marginY`, so those
- * ARE shared with `measureNote`'s formula — but `ComponentRoseNote`'s extra
- * `2 * padding` is not: `pureText + 21` (Opale) vs `pureText + 31` (here).
+ * (`svek/image/EntityImageNoteLink.java:61-66`), not an `Opale`. Ported once,
+ * shared across engines, at `core/svek/image/EntityImageNoteLink.ts`
+ * (shared-seam-extraction T6, D1) — see that module's doc comment for the
+ * full `ComponentRoseNote`/Opale padding derivation; state supplies no
+ * `pureText` strategy, so the core port's naive fontFamily-only fallback
+ * reproduces this file's former private copy byte-identically.
  *
  * Numerically confirmed against BOTH of `fotigo-12-gufu949`'s notes
  * (`oracle/goldens/state/fotigo-12-gufu949/svek-1.dot`): "Should be red"
@@ -162,23 +151,6 @@ export function transitionLabelText(t: Transition): string | undefined {
  * builders that produce a non-`NONE` middle decor are never reached from a
  * state diagram.
  */
-const ROSE_NOTE_PADDING = 5; // skin/rose/Rose.java:65-66 (paddingX, paddingY)
-
-interface LabelDims {
-  width: number;
-  height: number;
-}
-
-function measureLinkNoteDim(text: string, fontFamily: string, measurer: StringMeasurer): LabelDims {
-  const font = { family: fontFamily, size: NOTE_FONT_SIZE };
-  const lines = text.split('\n');
-  let maxW = 0;
-  for (const ln of lines) maxW = Math.max(maxW, measurer.measure(ln, font).width);
-  return {
-    width: maxW + OPALE_MARGIN_X1 + OPALE_MARGIN_X2 + 2 * ROSE_NOTE_PADDING,
-    height: lines.length * NOTE_FONT_SIZE + 2 * OPALE_MARGIN_Y + 2 * ROSE_NOTE_PADDING,
-  };
-}
 
 /** Edge label attrs (HTML-table label, svek convention — mirrors class
  *  engine's edgeLabelAttrs). Widths/heights are ASSERTED by the DOT gate
@@ -208,7 +180,7 @@ function computeEdgeLabelBox(
   if (t.linkNote === undefined) return computeReservedLabelBox(text!, font, measurer, t.from === t.to);
   return computeMergedLabelBox({
     label: text ?? '',
-    noteDim: measureLinkNoteDim(t.linkNote, font.family, measurer),
+    noteDim: measureLinkNoteDim(t.linkNote, { family: font.family }, measurer),
     position: t.linkNotePosition ?? 'bottom',
     halfWidth: false,
     hasMiddleDecor: false,

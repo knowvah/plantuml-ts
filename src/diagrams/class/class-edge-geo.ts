@@ -13,7 +13,10 @@ import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 import {
   attachPortLabels, guideLinesAnchor, multiLineLabelAnchor, portLabelAnchor, type LabelAnchorContext,
 } from './class-edge-label-anchor.js';
-import { splitEdgeLabelLines } from './class-layout-helpers.js';
+// T1: the ONE `Display#getWithNewlines` port -- replaces the former
+// `splitEdgeLabelLines` re-export chain through `class-layout-helpers.js`,
+// see `class-edge-label-lines.ts`'s own doc comment.
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import {
   hasSeveralGuideLines, magicArrowAngle, magicArrowGlyphPoints, parseMagicArrowLabel, splitGuideLines,
   type MagicArrowDirection, type MagicArrowLabel,
@@ -117,7 +120,12 @@ function attachEdgeLabel(
   // comment for the jar-verified per-line layout formula. A label with no
   // line breaks keeps the EXACT pre-existing single-`<text>` path below,
   // unchanged (`EdgeGeo.label`, N62).
-  const { lines, align } = splitEdgeLabelLines(label);
+  // `splitDisplayLines` returns `readonly string[]` -- materialize a
+  // mutable copy since `attachMultiLineLabel`'s downstream callee
+  // (`class-edge-label-anchor.ts#multiLineLabelAnchor`, outside T1's
+  // write-set) still declares a mutable `string[]` parameter.
+  const { lines: splitLines, align } = splitDisplayLines(label);
+  const lines = [...splitLines];
   if (lines.length > 1) {
     attachMultiLineLabel(edgeGeo, lines, align, (direction) => magicArrowAngle(fromToPoints, direction), ctx);
     return;

@@ -2,7 +2,7 @@
  * Class-diagram `<style>` ancestor cascade (G2 N36) -- computes every
  * `theme.colors.graph.classCascade*`/`spotCascade*` field from a raw
  * StyleMap, pre-resolved to SVG-ready hex via {@link resolveColorToSvgHex}
- * (the inline-`#color`-override precedent, `class-color-override.ts`). Own
+ * (the inline-`#color`-override precedent, `core/color-override.ts`). Own
  * module because `style-map-theme.ts` sits at the 500-line cap. See
  * `theme.ts`'s field doc comments for the upstream style-signature
  * derivation (`EntityImageClass.getStyleSignature()`, `SvekEdge.java:819`,

@@ -360,7 +360,7 @@ export function collectStyleTagNames(styleMap: StyleMap): ReadonlySet<string> {
  * callers resolve through
  * {@link import('./klimt/color/HColorSet.js').resolveColorToSvgHex}
  * themselves, matching the existing inline-override precedent
- * (`class-color-override.ts`).
+ * (`core/color-override.ts`).
  */
 export function resolveStyleCascade(
   styleMap: StyleMap,

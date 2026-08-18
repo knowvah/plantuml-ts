@@ -276,8 +276,8 @@ export function applyChrome(
   // explicitly assigning `background: undefined`), then override the
   // fields chrome composition actually changed. `bodyWrapped: true` (G2
   // N1) records that THIS call performed the single bare `<g>` wrap --
-  // `class/renderer-shell.ts#assembleClassShell` reads it to avoid
-  // wrapping a second time; every other engine ignores it.
+  // `core/assemble-svg.ts`'s per-`diagramType` finalize functions (T8)
+  // read it to avoid wrapping a second time; every other engine ignores it.
   return {
     ...fragment,
     body: group(block.body),

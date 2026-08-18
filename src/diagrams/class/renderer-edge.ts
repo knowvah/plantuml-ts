@@ -51,9 +51,10 @@ function buildPathData(points: EdgeGeo['points']): string {
  * `plans/g2-class-svg/ledger.md` N0) -- the old `targetMarker`/
  * `sourceMarker` (`url(#...)` SVG-`<marker>`-reference) functions are
  * removed, not just unused, since `svgRoot`'s automatic `ALL_ARROW_TYPES`
- * marker-def injection no longer runs for class at all (`renderClass`
- * bypasses `svgRoot` entirely via `classShell` -- `assembleClassShell`
- * emits an empty `<defs/>`, matching jar).
+ * marker-def injection no longer runs for class at all (`renderClass` sets
+ * `diagramType: 'CLASS'`, bypassing `svgRoot` entirely -- `core/assemble-
+ * svg.ts` routes through `assembleDocumentShell`, which emits an empty
+ * `<defs/>`, matching jar).
  *
  * Returns `extraDefs` alongside `body` so `renderClass` can thread any
  * non-empty extremity `<defs>` payload (gradients -- see

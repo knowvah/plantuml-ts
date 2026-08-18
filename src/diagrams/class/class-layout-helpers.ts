@@ -25,7 +25,7 @@
  * that module imports `LIKE_CLASS_KINDS` back from here).
  */
 
-import type { LeafSymbolInk } from '../description/leaf-sizing.js';
+import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing.js';
 import type { Classifier, ClassifierKind } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
@@ -52,11 +52,8 @@ import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { JsonBodyItem } from './class-geo-types.js';
 import {
   CARDINALITY_FONT_SIZE,
-  splitEdgeLabelLines,
   wrapPlainTextLine,
   edgeLabelAttrs,
-  type EdgeLabelAlign,
-  type EdgeLabelLines,
   type NoteBoxContext,
 } from './class-layout-edge-labels.js';
 import { measureGenericClassifier, tryMeasureDescriptionLeaf } from './class-layout-generic-classifier.js';
@@ -74,12 +71,16 @@ import { measureUsecaseOrActor, measureLollipop, measureAssociationDiamond } fro
 // note-layout.ts) -- G2/N14 moved the implementations to class-member-rows.ts
 // to keep this file under the 500-line cap; the public import path is unchanged.
 export { ROW_TEXT_LEFT_MARGIN, isMethodMember };
-// Re-exported for existing external consumers (class-edge-geo.ts,
-// renderer-edge.ts, tests) -- moved to class-layout-edge-labels.ts to keep
-// this file under the 500-line cap; the public import path is unchanged.
+// Re-exported for existing external consumers (renderer-edge.ts, tests) --
+// moved to class-layout-edge-labels.ts to keep this file under the 500-line
+// cap; the public import path is unchanged. T1 retired the SIBLING
+// `splitEdgeLabelLines`/`EdgeLabelAlign`/`EdgeLabelLines` re-exports that
+// used to live here -- `class-edge-geo.ts` (this re-export's only other
+// consumer) now imports `splitDisplayLines` from
+// `core/klimt/creole/DisplayNewlines.ts` directly.
 export {
-  CARDINALITY_FONT_SIZE, splitEdgeLabelLines, wrapPlainTextLine, edgeLabelAttrs,
-  type EdgeLabelAlign, type EdgeLabelLines, type NoteBoxContext,
+  CARDINALITY_FONT_SIZE, wrapPlainTextLine, edgeLabelAttrs,
+  type NoteBoxContext,
 };
 
 /**

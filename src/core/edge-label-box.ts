@@ -15,25 +15,13 @@
  * `state-transition-label.ts` re-export from here, so no import changed.
  */
 import type { FontSpec, StringMeasurer } from './measurer.js';
-// `src/core/` already imports from `src/diagrams/` elsewhere (`assemble-svg
-// .ts` imports each engine's `renderer.js`), so reusing the existing
-// `\n`/`\l`/`\r` splitter here is not a new or backwards layering — see D1
-// and this task's boundary note.
-import { splitEdgeLabelLines } from '../diagrams/class/class-layout-edge-labels.js';
-
-/**
- * Split a display/description string on PlantUML's literal `\n` line-break
- * token (two source characters: backslash, n — NOT a real newline; our
- * parser never converts it, mirroring upstream's Creole renderer which
- * treats the literal token as a line break at draw time). A raw newline
- * character (if one ever appears) is also treated as a break, since no
- * upstream state-diagram source produces one but defensive parity costs
- * nothing here.
- * @see ~/git/plantuml/.../klimt/creole/Display.java (line splitting on `\n`)
- */
-export function splitCreoleLines(text: string): string[] {
-  return text.split(/\\n|\n/);
-}
+// mission `shared-seam-extraction` T1: the ONE `Display#getWithNewlines`
+// port every engine's edge-label line-splitting now reaches, replacing
+// this file's own `splitCreoleLines` (real-newline-splitting, escape-blind)
+// AND `diagrams/class/class-edge-label-lines.ts`'s `splitEdgeLabelLines`
+// (an independent, narrower re-derivation of the SAME upstream scan) --
+// see `DisplayNewlines.ts#splitDisplayLines`'s own doc comment.
+import { splitDisplayLines } from './klimt/creole/DisplayNewlines.js';
 
 /**
  * Inline creole tags that change FORMATTING and contribute no glyphs, so a
@@ -257,6 +245,13 @@ export function parseMagicArrowLabel(label: string): MagicArrowLabel | undefined
  * icon block, see {@link applyVisibilityIcon}) on LINE 0 only — every other
  * line is unaffected, matching `Display#manageGuillemet`'s `first`-only
  * guard (`klimt/creole/Display.java:414-416`).
+ *
+ * T1: `text` is split via {@link splitDisplayLines} (`Display#getWithNewlines`,
+ * `klimt/creole/Display.java:262-346`) -- every caller's own upstream site
+ * builds its input via that SAME method (class: `CommandLinkClass.java:413`;
+ * state: `CommandCreateState.java:195`/`BodierSimple.java:61`; description:
+ * `CommandLinkElement.java:320`), not the narrower real-newline-splitting
+ * `splitCreoleLines` this replaced.
  */
 export function computeReservedLabelBox(
   text: string,
@@ -266,7 +261,7 @@ export function computeReservedLabelBox(
   classAttributeIconSize: number = CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT,
 ): ReservedLabelBox {
   const marginLabel = isSelfLoop ? 6 : 1;
-  const rawLines = splitCreoleLines(text);
+  const rawLines = splitDisplayLines(text).lines;
   const vis = applyVisibilityIcon(rawLines[0] ?? '', classAttributeIconSize);
   // Strip BEFORE measuring: a colour tag is a formatting change upstream, not
   // glyphs. `lines` carries the stripped text because its only consumer is a
@@ -333,7 +328,7 @@ function stripLeadingEscapedChar(line: string): string {
  *
  * Construction (`SvekEdge.java:330-351`): `Display.getWithNewlines(pragma,
  * text).create(cardinalityFont, CENTER, skinParam)` — split on `\n`
- * (`splitEdgeLabelLines`), then {@link stripLeadingEscapedChar} on EVERY
+ * ({@link splitDisplayLines}), then {@link stripLeadingEscapedChar} on EVERY
  * line (not gated to line 0 — see its doc comment for the mechanism).
  *
  * Emission (`SvekEdge.java:447-467`), why this exists apart from
@@ -350,7 +345,7 @@ export function computeQuantifierBox(
   font: FontSpec,
   measurer: StringMeasurer,
 ): QuantifierBox {
-  const { lines: rawLines } = splitEdgeLabelLines(text);
+  const { lines: rawLines } = splitDisplayLines(text);
   const lines = rawLines.map(stripLeadingEscapedChar);
   const measuredWidth = Math.max(...lines.map((l) => measurer.measure(l, font).width));
   const reservedWidth = Math.floor(measuredWidth);

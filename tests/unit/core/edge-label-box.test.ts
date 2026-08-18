@@ -15,11 +15,13 @@ import {
   computeReservedLabelBox,
   computeQuantifierBox,
   computeMergedLabelBox,
-  splitCreoleLines,
   stripCreoleMarkup,
   applyVisibilityIcon,
   applyGuillemet,
 } from '../../../src/core/edge-label-box.js';
+// T1: the ONE `Display#getWithNewlines` port -- replaces the former
+// `splitCreoleLines` import (retired).
+import { splitDisplayLines } from '../../../src/core/klimt/creole/DisplayNewlines.js';
 
 /** M4 causes A+B (`.agent-notes/m4-single-line-width.md`) at the default
  *  `classAttributeIconSize` (10, `SkinParam.java:555`), the arrow-label font
@@ -60,12 +62,10 @@ describe('stripCreoleMarkup', () => {
   });
 });
 
-describe('splitCreoleLines', () => {
-  it('splits on the literal two-character token and on a real newline', () => {
-    expect(splitCreoleLines(String.raw`a\nb`)).toEqual(['a', 'b']);
-    expect(splitCreoleLines('a\nb')).toEqual(['a', 'b']);
-  });
-});
+// T1: `splitCreoleLines` retired -- `computeReservedLabelBox` now splits via
+// the ONE `Display#getWithNewlines` port (`splitDisplayLines`), which,
+// matching upstream, does NOT treat a real newline as a break (only the
+// retired function did) -- see `DisplayNewlines.test.ts`'s own coverage.
 
 describe('computeReservedLabelBox — jar-measured cases', () => {
   it('two-line label with colour tags reserves the oracle box', () => {
@@ -106,7 +106,7 @@ describe('computeReservedLabelBox — jar-measured cases', () => {
    */
   it('the oracle numbers depend on stripping — unstripped text measures far wider', () => {
     const raw = String.raw`<color:green>Purchase Price\n<color:green>Payment of $100`;
-    const unstripped = splitCreoleLines(raw);
+    const unstripped = splitDisplayLines(raw).lines;
     const widestUnstripped = Math.max(
       ...unstripped.map((l) => measurer.measure(l, ARROW_FONT).width),
     );

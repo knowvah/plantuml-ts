@@ -48,8 +48,13 @@ import {
   EntityImageDescription,
   type EntityImageDescriptionParams,
 } from '../../core/svek/image/EntityImageDescription.js';
-import { upstreamKeyword, mapComponentStyle, textFont, resolveActorStyle } from '../description/renderer-symbol.js';
-import { makeAtomImageResolverFor } from '../description/render-atoms.js';
+import {
+  upstreamKeyword,
+  mapComponentStyle,
+  textFont,
+  resolveActorStyle,
+} from '../../core/decoration/symbol/usymbol-resolve.js';
+import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
 
 /** Jar default line thickness for an `EntityImageDescription`-family shape
  *  with no `LineThickness` skinparam override — see `renderer-entity.ts

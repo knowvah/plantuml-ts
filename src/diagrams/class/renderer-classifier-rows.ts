@@ -10,7 +10,7 @@ import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import { text, image } from '../../core/svg.js';
 import {} from '../../core/klimt/color/HColorSet.js';
-import {} from './class-color-override.js';
+import {} from '../../core/color-override.js';
 import {} from './class-map-sizing.js';
 import {} from './class-badge.js';
 import { renderVisibilityIcon, visibilityIconOriginY } from './class-visibility-icon.js';

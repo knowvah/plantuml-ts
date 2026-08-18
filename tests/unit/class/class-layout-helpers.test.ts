@@ -1,63 +1,20 @@
 /**
- * Unit tests for class-layout-helpers.ts#splitEdgeLabelLines/edgeLabelAttrs
- * -- G2 item 43 (multi-line edge labels): a relationship label containing
- * `\n`/`\l`/`\r` escape sequences (upstream line-break markers) must split
- * into one line per segment, with the LAST `\l`/`\r` occurrence setting the
- * WHOLE block's alignment (default CENTER when neither appears) --
- * `Display#getWithNewlines`, `klimt/creole/Display.java:259-343`.
+ * Unit tests for class-layout-helpers.ts#edgeLabelAttrs -- G2 item 43
+ * (multi-line edge labels): a relationship label containing `\n`/`\l`/`\r`
+ * escape sequences (upstream line-break markers) must split into one line
+ * per segment, with the LAST `\l`/`\r` occurrence setting the WHOLE block's
+ * alignment (default CENTER when neither appears) -- `Display
+ * #getWithNewlines`, `klimt/creole/Display.java:259-343`.
+ *
+ * T1 (mission `shared-seam-extraction`): the escape-scan coverage that used
+ * to live here as `splitEdgeLabelLines` tests moved to `core/klimt/creole/
+ * DisplayNewlines.ts`'s own test (`splitDisplayLines`, the ONE port) --
+ * every assertion below is unchanged, this file now only exercises the
+ * composed `edgeLabelAttrs`/`wrapPlainTextLine` behavior.
  */
 import { describe, it, expect } from 'vitest';
-import { splitEdgeLabelLines, edgeLabelAttrs, wrapPlainTextLine } from '../../../src/diagrams/class/class-layout-helpers.js';
+import { edgeLabelAttrs, wrapPlainTextLine } from '../../../src/diagrams/class/class-layout-helpers.js';
 import type { Relationship } from '../../../src/diagrams/class/ast.js';
-
-describe('splitEdgeLabelLines (G2 item 43)', () => {
-  it('returns a single line with center alignment when no escape is present', () => {
-    expect(splitEdgeLabelLines('demo')).toEqual({ lines: ['demo'], align: 'center' });
-  });
-
-  // Jar-verified against `sicile-99-pefa679`'s own 3-line `\n` label
-  // (`cl1 -- cl2 : this is\non several\nlines`).
-  it('splits on \\n with no alignment change (default CENTER)', () => {
-    expect(splitEdgeLabelLines('this is\\non several\\nlines')).toEqual({
-      lines: ['this is', 'on several', 'lines'],
-      align: 'center',
-    });
-  });
-
-  it('splits on \\l and sets alignment to left', () => {
-    expect(splitEdgeLabelLines('this is\\lon several\\llines')).toEqual({
-      lines: ['this is', 'on several', 'lines'],
-      align: 'left',
-    });
-  });
-
-  it('splits on \\r and sets alignment to right', () => {
-    expect(splitEdgeLabelLines('this is\\ron several\\rlines')).toEqual({
-      lines: ['this is', 'on several', 'lines'],
-      align: 'right',
-    });
-  });
-
-  it('the LAST \\l/\\r occurrence wins, matching jar\'s overwritten field', () => {
-    expect(splitEdgeLabelLines('a\\rb\\lc')).toEqual({ lines: ['a', 'b', 'c'], align: 'left' });
-  });
-
-  it('\\t becomes a literal tab within the current line', () => {
-    expect(splitEdgeLabelLines('a\\tb')).toEqual({ lines: ['a\tb'], align: 'center' });
-  });
-
-  it('\\\\ becomes a literal backslash', () => {
-    expect(splitEdgeLabelLines('a\\\\b')).toEqual({ lines: ['a\\b'], align: 'center' });
-  });
-
-  it('an unrecognized \\x pair is kept as-is (both characters)', () => {
-    expect(splitEdgeLabelLines('a\\zb')).toEqual({ lines: ['a\\zb'], align: 'center' });
-  });
-
-  it('a trailing lone backslash is kept as-is', () => {
-    expect(splitEdgeLabelLines('abc\\')).toEqual({ lines: ['abc\\'], align: 'center' });
-  });
-});
 
 const measurer = {
   measure: (s: string) => ({ width: s.length * 7, height: 14 }),

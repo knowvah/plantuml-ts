@@ -9,7 +9,7 @@ import type { DescriptiveNode } from './ast.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { EdgeContainerEndpoints } from './layout-helpers.js';
-import type { ComponentStyle } from './leaf-sizing.js';
+import type { ComponentStyle } from '../../core/svek/image/leaf-sizing.js';
 import type { ActorStyle } from '../../core/skin/ActorStyle.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import type { GuillemetPair } from '../../core/text/Guillemet.js';

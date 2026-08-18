@@ -17,7 +17,7 @@ import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, text, line, ellipse, path } from '../../core/svg.js';
 import {} from '../../core/klimt/color/HColorSet.js';
-import {} from './class-color-override.js';
+import {} from '../../core/color-override.js';
 import { MAP_CELL_MARGIN_X } from './class-map-sizing.js';
 import { hasBadge, resolveBadgeFill, resolveBadgeBorder, resolveBadgeGlyphColor, spotSnameForKind, badgeGlyphPath, resolveBadgeRadius, BADGE_LEFT_MARGIN } from './class-badge.js';
 import { renderVisibilityIcon, renderVisibilityUrlBackground, visibilityIconOriginY } from './class-visibility-icon.js';

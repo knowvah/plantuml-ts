@@ -13,7 +13,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseDescription } from '../../../src/diagrams/description/parser.js';
-import { measureLeafNode } from '../../../src/diagrams/description/leaf-sizing.js';
+import { measureLeafNode } from '../../../src/core/svek/image/leaf-sizing.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import { effectiveRemovedIds } from '../../../src/diagrams/description/element-grammar.js';

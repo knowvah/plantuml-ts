@@ -14,7 +14,7 @@ import { parsePngIhdrFromDataUri } from '../../src/core/klimt/sprite/png-ihdr.js
 import { buildLinkEdgeAttributes } from '../../src/diagrams/description/link-edge-attrs.js';
 import type { DescriptiveLink } from '../../src/diagrams/description/ast.js';
 import type { DescriptiveNode } from '../../src/diagrams/description/ast.js';
-import { measureLeafNode } from '../../src/diagrams/description/leaf-sizing.js';
+import { measureLeafNode } from '../../src/core/svek/image/leaf-sizing.js';
 import type { FontSpec, StringMeasurer } from '../../src/core/measurer.js';
 
 // ---------------------------------------------------------------------------

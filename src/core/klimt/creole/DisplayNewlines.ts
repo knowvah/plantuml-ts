@@ -331,3 +331,43 @@ export function hasSeveralGuideLinesOfString(s: string): boolean {
   const split = Pragma.legacyReplaceBackslashNByNewline() ? s.split('\\n') : s.split(BackSlash.hiddenNewLine());
   return hasSeveralGuideLinesOfAll(split);
 }
+
+/**
+ * `splitDisplayLines` -- mission `shared-seam-extraction` T1's ONE shared
+ * adapter over {@link parseWithNewlines} (`Display#getWithNewlines(Pragma,
+ * String)`, java:262-346) for every caller that needs "split this display
+ * text into lines and resolve the whole block's alignment" but has no live
+ * `Pragma` reference to thread through (every T1 caller measures at LAYOUT
+ * time, not parse time). `Pragma.createEmpty()` mirrors upstream's own
+ * zero-pragma convenience overload (`Display.getWithNewlines(Quark)`,
+ * java:223-225) -- a fresh empty `Pragma` behaves identically to a real one
+ * for every branch except the (opt-in, off by default) deprecation-warning
+ * emission, which none of this adapter's callers observe.
+ *
+ * `naturalHorizontalAlignment === null` (no `\l`/`\r` in the text) maps to
+ * `'center'` -- `SvekEdge#getMessageTextAlignment`'s own default
+ * (`getDefaultTextAlignment(CENTER)`, `svek/SvekEdge.java:376-381`), the
+ * only alignment source this adapter's callers share (a relationship/
+ * transition/link label with no explicit alignment escape).
+ *
+ * Retires THREE separate re-derivations this mission's T0 survey found:
+ * `core/edge-label-box.ts`'s `splitCreoleLines` (real-newline-splitting,
+ * escape-blind), `diagrams/class/class-edge-label-lines.ts`'s
+ * `splitEdgeLabelLines`/`resolveLabelEscape` (an independent, narrower
+ * re-implementation of THIS function's own escape scan), and the class
+ * engine's inverted `core/` -> `diagrams/class/` import
+ * (`edge-label-box-backlog` T5) that motivated this mission.
+ */
+export function splitDisplayLines(text: string): { readonly lines: readonly string[]; readonly align: 'center' | 'left' | 'right' } {
+  // `text` is a `string`, never `null` here -- `parseWithNewlines` only
+  // returns `null` for a `null` input (java:263-264), which this adapter's
+  // signature does not accept.
+  const parsed = parseWithNewlines(Pragma.createEmpty(), text)!;
+  const align =
+    parsed.naturalHorizontalAlignment === HorizontalAlignment.LEFT
+      ? 'left'
+      : parsed.naturalHorizontalAlignment === HorizontalAlignment.RIGHT
+        ? 'right'
+        : 'center';
+  return { lines: parsed.lines, align };
+}

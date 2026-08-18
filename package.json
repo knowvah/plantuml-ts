@@ -54,6 +54,7 @@
     "visual:build": "vite build && jiti scripts/build-pages.ts",
     "visual:upload": "jiti scripts/upload-references.ts  --type dot",
     "visual": "npm run visual:build && npx serve .",
+    "manifest": "jiti scripts/render-manifest.ts",
     "svg:survey": "jiti scripts/svg-parity-survey.ts",
     "svg:dashboard": "jiti scripts/svg-parity-dashboard.ts",
     "docs:copy-reports": "node docs-site/copy-reports.mjs",

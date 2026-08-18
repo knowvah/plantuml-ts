@@ -19,7 +19,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { renderDescription, unwrapKlimtSvg, assembleKlimtShell } from '../../../src/diagrams/description/renderer.js';
+import { renderDescription, unwrapKlimtSvg } from '../../../src/diagrams/description/renderer.js';
 import type {
   DescriptionGeometry,
   DescriptionEdgeGeo,
@@ -1317,18 +1317,18 @@ describe('renderDescription — per-entity inline color override (T19)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// G1 I1 -- unwrapKlimtSvg's klimtShell marker + assembleKlimtShell's own
-// root-attribute/prolog/defs shell (the root-attr-loss fix)
+// G1 I1 -- unwrapKlimtSvg's diagramType marker (T8: was `klimtShell`), the
+// root-attr-loss fix
 // ---------------------------------------------------------------------------
 
-describe('unwrapKlimtSvg — klimtShell marker (G1 I1)', () => {
-  it('sets klimtShell: true unconditionally (every call site is already annotated-only)', () => {
+describe('unwrapKlimtSvg — diagramType marker (G1 I1, T8)', () => {
+  it('sets diagramType: DESCRIPTION unconditionally (every call site is already annotated-only)', () => {
     const svg = renderDescription(makeGeo({ nodes: [makeDNode()] }), defaultTheme);
     const fragment = unwrapKlimtSvg(svg, defaultTheme.colors.background);
-    expect(fragment.klimtShell).toBe(true);
+    expect(fragment.diagramType).toBe('DESCRIPTION');
   });
 
-  it('sets klimtShell: true on the extraDefs branch too', () => {
+  it('sets diagramType: DESCRIPTION on the extraDefs branch too', () => {
     // A degenerate (empty) geometry still produces a complete klimt
     // document with a self-closing <defs/> -- exercises the "extraDefs
     // absent" branch, which the OTHER unit test above already covers via
@@ -1343,7 +1343,7 @@ describe('unwrapKlimtSvg — klimtShell marker (G1 I1)', () => {
       '<?plantuml $version$?><defs><linearGradient id="g0"/></defs>' +
       '<g><rect/></g></svg>';
     const fragment = unwrapKlimtSvg(klimtSvg, '#FFFFFF');
-    expect(fragment.klimtShell).toBe(true);
+    expect(fragment.diagramType).toBe('DESCRIPTION');
     expect(fragment.extraDefs).toBe('<linearGradient id="g0"/>');
   });
 
@@ -1387,66 +1387,13 @@ describe('unwrapKlimtSvg — klimtShell marker (G1 I1)', () => {
   });
 });
 
-describe('assembleKlimtShell (G1 I1)', () => {
-  it('carries every root attribute the generic svgRoot omits', () => {
-    const doc = assembleKlimtShell({ body: '<g/>', width: 100, height: 50, background: '#FFFFFF' });
-    expect(doc).toContain('xmlns:xlink="http://www.w3.org/1999/xlink"');
-    expect(doc).toContain('version="1.1"');
-    expect(doc).toContain('data-diagram-type="DESCRIPTION"');
-    expect(doc).toContain('zoomAndPan="magnify"');
-    expect(doc).toContain('preserveAspectRatio="none"');
-    expect(doc).toContain('contentStyleType="text/css"');
-    expect(doc).toContain('<?plantuml $version$?>');
-  });
-
-  it('folds background into the root style attribute, not a separate <rect> (matches finalizeRootAttributes)', () => {
-    const doc = assembleKlimtShell({ body: '<g/>', width: 100, height: 50, background: '#FF0000' });
-    expect(doc).toContain('style="width:100px;height:50px;background:#FF0000;"');
-    expect(doc).not.toContain('<rect');
-  });
-
-  it('omits the background segment of style for a transparent/none background', () => {
-    const doc = assembleKlimtShell({ body: '<g/>', width: 100, height: 50, background: 'transparent' });
-    expect(doc).toContain('style="width:100px;height:50px;"');
-    expect(doc).not.toContain('background:');
-  });
-
-  it('defaults background to #FFFFFF when omitted (matches svgRoot\'s own default)', () => {
-    const doc = assembleKlimtShell({ body: '<g/>', width: 100, height: 50 });
-    expect(doc).toContain('background:#FFFFFF;');
-  });
-
-  it('emits width/height/viewBox truncated to integers (Math.trunc, matching finalizeRootAttributes)', () => {
-    const doc = assembleKlimtShell({ body: '<g/>', width: 100.7, height: 50.2, background: '#FFFFFF' });
-    expect(doc).toContain('width="100px"');
-    expect(doc).toContain('height="50px"');
-    expect(doc).toContain('viewBox="0 0 100 50"');
-  });
-
-  it('splices extraDefs into the single <defs> block with no ALL_ARROW_TYPES marker injection', () => {
-    const doc = assembleKlimtShell({
-      body: '<g/>',
-      width: 10,
-      height: 10,
-      background: '#FFFFFF',
-      extraDefs: '<linearGradient id="g0"/>',
-    });
-    expect(doc).toContain('<defs><linearGradient id="g0"/></defs>');
-    expect(doc).not.toContain('arrow-sync');
-    expect(doc).not.toContain('marker');
-  });
-
-  it('emits an empty <defs> block when extraDefs is absent', () => {
-    const doc = assembleKlimtShell({ body: '<g/>', width: 10, height: 10, background: '#FFFFFF' });
-    // Self-closing when empty — the jar's own form (`document-shell.ts`).
-    expect(doc).toContain('<defs/>');
-  });
-
-  it('places the body verbatim after defs, before the closing tag', () => {
-    const doc = assembleKlimtShell({ body: '<g class="mark">X</g>', width: 10, height: 10, background: '#FFFFFF' });
-    expect(doc.endsWith('<g class="mark">X</g></svg>')).toBe(true);
-  });
-});
+// T8: `assembleKlimtShell` (a pure `assembleDocumentShell(fragment,
+// 'DESCRIPTION')` passthrough) is deleted -- its assertions above were
+// already generic `assembleDocumentShell` coverage, now exercised via
+// `tests/unit/core/klimt/document-shell.test.ts` (structural cases) and
+// `tests/unit/core/assemble-svg.test.ts`'s routing describe block
+// (attribute/background/truncation/defs cases, retargeted through the
+// public `assembleSvg` entry point with `diagramType: 'DESCRIPTION'`).
 
 // ---------------------------------------------------------------------------
 // mission skin-file-loading (deferred D3 item): entity + cluster drop

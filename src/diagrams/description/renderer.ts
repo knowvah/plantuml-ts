@@ -94,7 +94,6 @@ import { collectByKind, drawClusters, drawEntities, drawEdges } from './renderer
 import { computeDocumentDims, driverBounderFor } from './renderer-ink-extent.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import {
-  assembleDocumentShell,
   extractViewBoxDims,
   extractFlatContent,
   VERSION_PLACEHOLDER,
@@ -272,27 +271,6 @@ export function unwrapKlimtSvg(svg: string, background: string): RenderFragment 
   const { width, height } = extractViewBoxDims(svg);
   const { body, extraDefs } = extractFlatContent(svg);
   return extraDefs.length > 0
-    ? { body, width, height, background, extraDefs, klimtShell: true }
-    : { body, width, height, background, klimtShell: true };
-}
-
-// ---------------------------------------------------------------------------
-// G1 I1 -- klimt document-shell reassembly (root-attr-loss fix)
-// ---------------------------------------------------------------------------
-
-/**
- * `assembleKlimtShell` — reassembles a `klimtShell`-marked `RenderFragment`
- * (i.e. an ANNOTATED description-diagram fragment, `unwrapKlimtSvg`'s only
- * producer) using klimt's OWN root-attribute/prolog/defs conventions —
- * see `core/klimt/document-shell.ts#assembleDocumentShell` (the shared,
- * diagram-type-parameterized mechanics this function now delegates to,
- * extracted during mission G2 N1 so the class engine can reuse the same
- * assembly instead of duplicating it) instead of the generic `svgRoot`
- * (core/svg.ts) every other engine's `RenderFragment` goes through.
- *
- * @see plans/g1-description-svg/decision-journal.md (I1)
- * @see plans/g2-class-svg/ledger.md (N1)
- */
-export function assembleKlimtShell(fragment: RenderFragment): string {
-  return assembleDocumentShell(fragment, DIAGRAM_TYPE_DESCRIPTION);
+    ? { body, width, height, background, extraDefs, diagramType: DIAGRAM_TYPE_DESCRIPTION }
+    : { body, width, height, background, diagramType: DIAGRAM_TYPE_DESCRIPTION };
 }

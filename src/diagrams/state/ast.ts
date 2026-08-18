@@ -3,10 +3,11 @@
  */
 
 // ---------------------------------------------------------------------------
-// JSON leaf value type (split out of this file — see state-json-ast.ts)
+// JSON leaf value type — ONE definition shared by class and state, under
+// core/command/JsonNode.ts (mission shared-seam-extraction D7).
 // ---------------------------------------------------------------------------
 
-import type { JsonNode } from './state-json-ast.js';
+import type { JsonNode } from '../../core/command/JsonNode.js';
 export type { JsonNode };
 
 import type { DiagramAnnotations } from '../../core/annotations/index.js';

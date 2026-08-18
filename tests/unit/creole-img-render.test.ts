@@ -47,7 +47,7 @@ import { encodePng, toBase64DataUri } from '../../src/core/klimt/sprite/png-enco
 import { pathBBox } from '../../src/core/klimt/sprite/svg-path-bbox.js';
 import { UPath } from '../../src/core/klimt/shape/UPath.js';
 import { UEllipse } from '../../src/core/klimt/shape/UEllipse.js';
-import { makeAtomImageResolverFor } from '../../src/diagrams/description/render-atoms.js';
+import { makeAtomImageResolverFor } from '../../src/core/creole-atoms-image-resolver.js';
 import { buildTextBlock } from '../../src/core/svek/image/EntityImageDescriptionSupport.js';
 import { HorizontalAlignment } from '../../src/core/klimt/geom/HorizontalAlignment.js';
 import type { FontConfiguration } from '../../src/core/klimt/shape/UText.js';

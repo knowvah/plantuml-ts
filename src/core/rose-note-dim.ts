@@ -6,9 +6,13 @@
  * `edge-label-box-followups` D5 asked for the latter) only because that file
  * sits at exactly the project's 500-line cap and every line in it carries an
  * upstream citation; the seam is unchanged -- the merge model still owns its
- * operand's padding, and `shared-seam-extraction` collapses the three engine
- * copies (`state-dot-graph.ts:178`, `state-composite-edge-label.ts:49`,
- * `class-note-link-box.ts:70`) onto this function.
+ * operand's padding. `shared-seam-extraction` T6 collapsed the former three
+ * engine copies (`state-dot-graph.ts:172`, `state-composite-edge-label.ts
+ * :49`, `class-note-link-box.ts:70`) onto ONE shared entry point,
+ * `core/svek/image/EntityImageNoteLink.ts#measureLinkNoteDim`, which applies
+ * THIS module's padding formula to whatever pure text dimension the caller
+ * supplies (or its own naive fallback) -- this file's own seam (padding
+ * only) is unchanged by that move.
  *
  * `EntityImageNoteLink` is NOT the plain-note component every engine's own
  * note sizer models. Its constructor (`svek/image/EntityImageNoteLink.java

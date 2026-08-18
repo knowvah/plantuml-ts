@@ -4,14 +4,18 @@
  *
  * `CommandCreateJson`/`CommandCreateJsonSingleLine` are registered verbatim
  * by `StateDiagramFactory` (shared `objectdiagram.command` package). Covers
- * both the full-parser integration path (multiline body accumulation via
- * `ps.pendingJson`, single-line grammar) and the hand-rolled JSON parser's
- * branches directly (`parseJsonNode`).
+ * the full-parser integration path (multiline body accumulation via
+ * `ps.pendingJson`, single-line grammar) — this is state's "engine adapter
+ * smoke test" per mission shared-seam-extraction T9's quality bar. The
+ * hand-rolled JSON parser's own branches (`parseJsonNode`) and
+ * `finalizeJsonBody` now live (and are tested) at
+ * `tests/unit/core/command/CommandCreateJson.test.ts`, shared with the class
+ * engine (D7).
  * @see ~/git/plantuml/.../statediagram/StateDiagramFactory.java:115-116
  */
 import { describe, it, expect } from 'vitest';
 import { parseState } from '../../../src/diagrams/state/parser.js';
-import { parseJsonNode, isJsonCloser, finalizeJsonBody } from '../../../src/diagrams/state/state-json-commands.js';
+import { isJsonCloser } from '../../../src/diagrams/state/state-json-commands.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
 
@@ -209,56 +213,6 @@ describe('json single-line declaration (CommandCreateJsonSingleLine)', () => {
   });
 });
 
-describe('parseJsonNode (hand-rolled order-preserving parser)', () => {
-  it('returns null for empty/malformed input', () => {
-    expect(parseJsonNode('')).toBeNull();
-    expect(parseJsonNode('{')).toBeNull();
-    expect(parseJsonNode('{"a": }')).toBeNull();
-    expect(parseJsonNode('[1, 2')).toBeNull();
-    expect(parseJsonNode('{"a" 1}')).toBeNull();
-    expect(parseJsonNode('true extra')).toBeNull();
-  });
-
-  it('parses every named escape sequence inside a string', () => {
-    const parsed = parseJsonNode(String.raw`"a\\b\/c\bd\fe\nf\rg\thA"`);
-    expect(parsed).toEqual({ kind: 'scalar', value: 'a\\b/c\bd\fe\nf\rg\th' + 'A' });
-  });
-
-  it('parses an escaped double-quote inside a string', () => {
-    const parsed = parseJsonNode(String.raw`"say \"hi\""`);
-    expect(parsed).toEqual({ kind: 'scalar', value: 'say "hi"' });
-  });
-
-  it('passes an unrecognized escape sequence through literally', () => {
-    const parsed = parseJsonNode(String.raw`"a\qb"`);
-    expect(parsed).toEqual({ kind: 'scalar', value: 'a\\qb' });
-  });
-
-  it('parses a \\u unicode escape sequence', () => {
-    const parsed = parseJsonNode(String.raw`"\u0041\u0042"`);
-    expect(parsed).toEqual({ kind: 'scalar', value: 'AB' });
-  });
-
-  it('rejects an object body missing a comma or closing brace between members', () => {
-    expect(parseJsonNode('{"a":1 "b":2}')).toBeNull();
-  });
-
-  it('parses decimal and exponent numeric forms', () => {
-    expect(parseJsonNode('3.14')).toEqual({ kind: 'scalar', value: 3.14 });
-    expect(parseJsonNode('1e3')).toEqual({ kind: 'scalar', value: 1000 });
-    expect(parseJsonNode('-2.5e-1')).toEqual({ kind: 'scalar', value: -0.25 });
-  });
-
-  it('parses an empty array and an empty object', () => {
-    expect(parseJsonNode('[]')).toEqual({ kind: 'array', items: [] });
-    expect(parseJsonNode('{}')).toEqual({ kind: 'object', entries: [] });
-  });
-
-  it('rejects trailing data after a complete value', () => {
-    expect(parseJsonNode('1 2')).toBeNull();
-  });
-});
-
 describe('isJsonCloser', () => {
   it('matches a bare closing brace, with or without surrounding whitespace', () => {
     expect(isJsonCloser('}')).toBe(true);
@@ -268,15 +222,5 @@ describe('isJsonCloser', () => {
   it('rejects anything else', () => {
     expect(isJsonCloser('"a": 1')).toBe(false);
     expect(isJsonCloser('} extra')).toBe(false);
-  });
-});
-
-describe('finalizeJsonBody', () => {
-  it('leaves jsonValue unset on total parse failure (both wrapped and unwrapped attempts fail)', () => {
-    const target: State = {
-      id: 't', display: 't', kind: 'json', children: [], concurrentRegions: [], transitions: [],
-    };
-    finalizeJsonBody(target, ['not json at all }{']);
-    expect(target.jsonValue).toBeUndefined();
   });
 });

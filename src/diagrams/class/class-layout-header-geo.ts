@@ -16,7 +16,11 @@
 import type { Classifier } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
-import { splitEdgeLabelLines, wrapPlainTextLine } from './class-layout-edge-labels.js';
+import { wrapPlainTextLine } from './class-layout-edge-labels.js';
+// T1: the ONE `Display#getWithNewlines` port -- replaces this file's own
+// `splitEdgeLabelLines` import, see `class-edge-label-lines.ts`'s own doc
+// comment.
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import {
   hasBadge,
@@ -104,9 +108,16 @@ export function computeHeaderNameGeo(
   const { badgeCharField, badgeColorField } = buildBadgeCharFields(classifier);
   // G2 N64 item 45: a classifier display name can itself carry `\n`/`\l`/
   // `\r` line-break escapes -- jar routes it through the SAME
-  // `Display.getWithNewlines` state machine a relationship label uses, so
-  // `splitEdgeLabelLines` (class-layout-edge-labels.ts) is reused verbatim.
-  const rawHeaderSplit = splitEdgeLabelLines(header.headerText);
+  // `Display.getWithNewlines` state machine a relationship label uses
+  // (T1: `splitDisplayLines`, `core/klimt/creole/DisplayNewlines.ts`).
+  // `header.headerText === classifier.display`, which for a COLLAPSED
+  // namespace/package leaf (`class-container.ts#closeContainer`) is already
+  // a `parseWithNewlines` result REJOINED with a real `\n` -- harmless here:
+  // neither this call nor its T1 predecessor (`splitEdgeLabelLines`) ever
+  // treated a real newline as a break (upstream doesn't either,
+  // `Display.java:262-346` only breaks on the literal two-char token/BLOCK_E1
+  // sentinels), so behavior is unchanged for that case too.
+  const rawHeaderSplit = splitDisplayLines(header.headerText);
   // G2 N65 item 35: word-wraps EACH already-split line via `wrapPlainTextLine`
   // (Fission) when a `MaximumWidth` cascade is in effect -- a no-op at
   // `headerMaxWidth<=0` (the overwhelming majority of classifiers).

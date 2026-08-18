@@ -56,72 +56,37 @@ export interface RenderFragment {
   /** svgRoot's `extraDefs` argument. Omit to take svgRoot's own default. */
   extraDefs?: string;
   /**
-   * G1 I1: set ONLY by `description/renderer.ts#unwrapKlimtSvg` (never by
-   * any other `RenderFragment` producer) — tells `assembleSvg` (src/index.ts)
-   * to reassemble via `description/renderer.ts#assembleKlimtShell` (klimt's
-   * OWN root-attribute/prolog/defs conventions) instead of the generic
-   * `svgRoot` (core/svg.ts) every other engine uses. `unwrapKlimtSvg` only
-   * ever runs on an ANNOTATED description-diagram fragment (its own doc
-   * comment), so this never touches an unannotated klimt document or any
-   * other engine's fragment — `svgRoot`'s own behavior is unchanged.
+   * T8 (decisions.md D2): the jar's `data-diagram-type` root attribute
+   * value (`CLASS`, `STATE`, `DESCRIPTION`, `JSON`, `YAML`, `HCL`, ...).
+   * Set by the producing engine's own renderer/plugin -- never by
+   * `assembleSvg` itself. When present, `assembleSvg` (`core/assemble-
+   * svg.ts`) reassembles the document via `core/klimt/document-shell.ts
+   * #assembleDocumentShell(fragment, diagramType)` -- jar's shared
+   * root-attribute/prolog/defs conventions, `TextBlockExporter
+   * .java:293`'s `withRootAttribute("data-diagram-type", ...)` -- instead
+   * of the generic `svgRoot` (`core/svg.ts`) that a `diagramType`-less
+   * fragment (sequence, dot, chart, ...) still goes through. Replaces the
+   * four separate per-engine boolean/string discriminant fields T8
+   * collapsed into this one field -- see
+   * `core/assemble-svg.ts`'s own doc comment for the per-diagram-type body
+   * finalization (background/border-rect splice, single-`<g>`-wrap) that
+   * used to live in four separate `diagrams/<engine>/renderer-shell.ts`
+   * files and now runs there, generically, keyed off this field's value.
    */
-  klimtShell?: true;
-  /**
-   * G2 N1 ("SVG root shell" mechanism): set ONLY by
-   * `class/renderer.ts#renderClass` -- tells `assembleSvg` (src/index.ts) to
-   * reassemble via `class/renderer-shell.ts#assembleClassShell` (jar's
-   * class-diagram root-attribute/prolog/defs conventions, the SAME literal
-   * shape `assembleKlimtShell` uses for description -- see
-   * `core/klimt/document-shell.ts#assembleDocumentShell`, the shared
-   * mechanics both delegate to) instead of the generic `svgRoot`
-   * (core/svg.ts). Never set by any other engine's fragment -- `svgRoot`'s
-   * own behavior for every other engine is unchanged.
-   */
-  classShell?: true;
-  /**
-   * mission G4 S1 ("SVG root shell" mechanism 1): set ONLY by
-   * `state/renderer.ts#renderState` -- tells `assembleSvg` (src/index.ts) to
-   * reassemble via `state/renderer-shell.ts#assembleStateShell` (jar's
-   * state-diagram root-attribute/prolog/defs conventions, the SAME shared
-   * `core/klimt/document-shell.ts#assembleDocumentShell` mechanics
-   * `classShell`/`klimtShell` already delegate to) instead of the generic
-   * `svgRoot` (core/svg.ts). Never set by any other engine's fragment.
-   */
-  stateShell?: true;
-  /**
-   * A5 / T4: set by `json/renderer.ts#renderJson` -- tells `assembleSvg` to
-   * reassemble via the SAME shared `core/klimt/document-shell.ts
-   * #assembleDocumentShell` that `classShell`/`stateShell`/`klimtShell`
-   * delegate to, instead of the generic `svgRoot` (core/svg.ts), which json
-   * had been falling through to. Falling through cost every root attribute
-   * the jar emits (`xmlns:xlink`, `version`, `data-diagram-type`, `style`,
-   * `px` units, `zoomAndPan`, `preserveAspectRatio`, `contentStyleType`),
-   * the `<?plantuml?>` prolog, and the root `<g>` font attributes, AND
-   * added 13 arrowhead `<marker>` defs the jar does not emit -- a root
-   * `childCount` mismatch that stopped `compare.ts` recursing, leaving all
-   * 92 fixtures' interiors unmeasured.
-   *
-   * Unlike its three siblings this is a STRING, not `true`, and carries the
-   * `data-diagram-type` value: one renderer serves three diagram types
-   * (`yaml`/`hcl` import `renderJson` directly), and the jar emits `JSON`,
-   * `YAML` and `HCL` respectively. A boolean would have needed a second
-   * field beside it.
-   */
-  jsonShell?: string;
+  diagramType?: string;
   /**
    * G2 N1: set by `core/annotations/chrome.ts#applyChrome` whenever it
    * added its OWN single bare `<g>` wrap around a decorated fragment's body
-   * (i.e. `decorated === true` inside that function). A klimt-shaped
-   * fragment (`klimtShell`) never reads this flag -- `unwrapKlimtSvg`
-   * already strips klimt's own content `<g>` before chrome runs, so
-   * `applyChrome`'s wrap is the ONLY one for that path. A class-shaped
-   * fragment (`classShell`) DOES read it: `assembleClassShell` must wrap
-   * `fragment.body` in exactly one bare `<g>` itself for the UNANNOTATED
-   * case (nothing else would), but must NOT wrap a second time when chrome
-   * already did -- this flag is the signal that distinguishes the two.
-   * `stateShell`'s `assembleStateShell` reads it identically (mission G4
-   * S1, mirrors `assembleClassShell`'s own mechanism). Every other engine
-   * ignores it (harmless, unread).
+   * (i.e. `decorated === true` inside that function). A description-engine
+   * fragment never reads this flag -- `unwrapKlimtSvg` already strips
+   * klimt's own content `<g>` before chrome runs, so `applyChrome`'s wrap
+   * is the ONLY one for that path. A class/state/json-shaped fragment DOES
+   * read it (`core/assemble-svg.ts`'s per-type finalize functions): the
+   * finalizer must wrap `fragment.body` in exactly one bare `<g>` itself
+   * for the UNANNOTATED case (nothing else would), but must NOT wrap a
+   * second time when chrome already did -- this flag is the signal that
+   * distinguishes the two. Every other engine ignores it (harmless,
+   * unread).
    */
   bodyWrapped?: true;
   /**
@@ -146,30 +111,32 @@ export interface RenderFragment {
    * hex to fill a full-FINAL-canvas background `<rect>` with, when the
    * diagram background is neither the default black/white nor fully
    * transparent (this function's own doc comment carries the jar-verified
-   * exclusion list). `class/renderer-shell.ts#assembleClassShell` draws
+   * exclusion list). `core/assemble-svg.ts`'s class finalize function draws
    * this rect as the outer `<g>`'s FIRST child, sized to `width`/`height`
    * ABOVE (the FINAL, post-chrome/post-document-margin canvas) -- not
    * `renderClass` itself, which only ever sees the PRE-chrome body size
    * (jar-verified `xalaco-64-vuzu312`: the rect spans the WHOLE canvas,
    * including the title strip above the diagram body, and precedes
-   * `<g class="title">`). `undefined` for every other engine (unread,
-   * harmless) and for class's own default-background diagrams.
+   * `<g class="title">` -- this is WHY the splice cannot run inside
+   * `renderClass`: chrome has not composed the title band yet at that
+   * point). `undefined` for every other engine (unread, harmless) and for
+   * class's own default-background diagrams.
    */
   documentBackgroundRect?: string;
   /**
    * G2 N66: set ONLY by `class/renderer.ts#renderClass` -- the resolved SVG
    * hex for `skinparam diagramBorderColor` (`theme.ts#diagramBorderColor`'s
-   * own doc comment). `class/renderer-shell.ts#assembleClassShell` draws a
-   * whole-canvas `<rect fill="none">` border as the outer `<g>`'s FIRST
-   * child (OUTSIDE `documentBackgroundRect`, matching jar's `TextBlock
-   * Exporter#maybeDrawBorder` wrapping the ENTIRE diagram export, including
-   * its own background) -- ONLY when `preChromeWidth`/`preChromeHeight`
-   * are set AND chrome did not inflate the canvas beyond them (a chrome-
-   * present + diagramBorderColor combination has zero corpus reach and is
-   * declared out of this item's verified scope -- see `renderer-shell.ts
-   * #withDiagramBorderRect`'s own doc comment). `undefined` for every other
-   * engine (unread, harmless) and for class diagrams with no such
-   * skinparam.
+   * own doc comment). `core/assemble-svg.ts`'s class finalize function
+   * draws a whole-canvas `<rect fill="none">` border as the outer `<g>`'s
+   * FIRST child (OUTSIDE `documentBackgroundRect`, matching jar's
+   * `TextBlockExporter#maybeDrawBorder` wrapping the ENTIRE diagram export,
+   * including its own background) -- ONLY when `preChromeWidth`/
+   * `preChromeHeight` are set AND chrome did not inflate the canvas beyond
+   * them (a chrome-present + diagramBorderColor combination has zero
+   * corpus reach and is declared out of this item's verified scope -- see
+   * `core/assemble-svg.ts`'s own `withDiagramBorderRect` doc comment).
+   * `undefined` for every other engine (unread, harmless) and for class
+   * diagrams with no such skinparam.
    */
   diagramBorderColor?: string;
 }

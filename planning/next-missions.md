@@ -186,7 +186,35 @@ parity unmoved, all pins hold). Batch 2 (Opale resolution at draw time) is the
 load-bearing one; if it cannot be done byte-identically, stop there with the
 mechanism recorded rather than force batch 3.
 
-## 2. `shared-seam-extraction` — NAMED 2026-08-16, needs `/plan-mission`
+## 2. `shared-seam-extraction` — DONE 2026-08-17 (mission-index SI27), 11 of 11
+
+Planned and executed the same day. Branch `refactor/shared-seam-extraction`,
+commits `28d18ee8` (T0) … `87bc23e6` (last debt retirement) + T10 close-out;
+all four gates green at head; **merge with a merge commit** (per-task ids are
+cited in `plans/shared-seam-extraction/decision-journal.md`). Scored bar,
+numbers and flags in `plans/shared-seam-extraction/README.md#close-out-2026-08-17`.
+Result: `src/core/**` imports nothing from `src/diagrams/**`; no engine imports
+another except hcl/yaml → json; `tests/architecture/layering.test.ts` pins it
+with an empty `KNOWN_DEBT`; ONE port each of `Display.getWithNewlines`,
+`FrontierCalculator`, `measureLinkNoteDim`, `Command<S>` (state keeps its own
+3-arg `execute`, upstream-faithful — flagged), `CommandCreateJson`/`JsonNode`,
+the leaf-sizing family (`LeafSizingSubject`), `resolveBareOrBackColor`, the
+USymbol/atom helpers. Output byte-identical on 2010 of 2014 corpus fixtures;
+the 4 movers are T1's `\t` fix, jar-ward (`DIVERGENCES.md` "`\t` in labels").
+
+**Follow-on queue it names (deferred families, verbatim from the brief — NOT
+done here):** notes command family (`command/note/CommandFactoryNote*`),
+remove/restore + hide/show (`classdiagram/command/CommandRemoveRestore`,
+`CommandHideShow2`), DOT graph builders (`svek/DotStringFactory`),
+`renderer-group` `<g>` wrappers, cluster header/levels (`svek/ClusterHeader`),
+description JSON wiring (`CommandCreateJson` sink for description),
+`LeafSizingSubject` → `abel/Entity` convergence (SI-1). Also surfaced:
+`skinparam tabSize` tab-stop indentation; state-parser trailing-backslash line
+continuation; `tests/architecture/sizer-renderer-parity.test.ts` glob scans
+zero files after the leaf-sizing move.
+
+<details><summary>Original brief-request text (2026-08-16), kept for the record</summary>
+
 
 **Pull code that upstream puts in a shared package, and this port put in a
 diagram engine, back into the shared area.** Queued by the maintainer during
@@ -277,6 +305,8 @@ that may not agree on edge cases (#3 handles a literal newline; #2 handles
 alignment escapes; #1 handles tabs, guide lines and Jaws sentinels). **Their
 disagreements are the mission's real content** — and any one of them may be a
 latent bug in a caller today. Do not scope this by the import count.
+
+</details>
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
 

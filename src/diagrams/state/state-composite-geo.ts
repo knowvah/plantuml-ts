@@ -227,8 +227,9 @@ function materializeAutonom(
  * G7 T14b (`Cluster#manageEntryExitPoint`, `Cluster.java:410-436`): a
  * border-point (`hasBorderPointChildren`) composite's final box is NOT
  * graphviz's raw cluster polygon directly -- it is that polygon corrected
- * by `frontierCalculator`/`ensureMinWidth` (`state-composite-frontier.ts`,
- * a faithful, unmodified port). `children` are already materialized
+ * by `frontierCalculator`/`ensureMinWidth` (`core/svek/FrontierCalculator
+ * .ts` via this engine's own `state-composite-frontier.ts` Box adapter).
+ * `children` are already materialized
  * (absolute-frame `StateNodeGeo`s) by the time this runs, so this partitions
  * them by `borderPointMemberIds` into the SAME two terms jar's own
  * `Cluster.entityPositions(NORMAL)`/`entityPositionsExceptNormal()` split
