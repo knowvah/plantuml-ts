@@ -46,15 +46,28 @@
  * the class engine. It now sits in the package upstream puts it in, and
  * neither engine reaches into the other for it.
  *
+ * `note ... on link` (embedded in the transition's OWN `<g class="link">`,
+ * no host `<g class="entity">` at all — a THIRD, structurally different
+ * shape, jar-verified `vateco-92-pece508`) landed separately (T4,
+ * `note-on-link`/`state-declared-size-fix`, `renderNoteOnLink` below).
+ *
+ * T7 (`state-declared-size-fix`, SI28 `findings/note.md`) closed the SIZING
+ * half of "creole markup / table content inside a note body"
+ * (`fatupo-62-bemu777`/`xeziki-47-zomo866`): `state-note-layout.ts
+ * #measureNote` now sizes through the real creole/table pipeline
+ * (`buildNoteBody`) instead of measuring raw markup as literal text, and
+ * its own `buildRenderLines` strips markup / joins table cells for the
+ * `<text>` this module draws — a real improvement over the prior literal-
+ * markup draw, but NOT jar's true per-run color/bold/italic decoration or
+ * `AtomTable#drawU`'s bordered grid (`StateTextLine`'s `{text,width}` shape
+ * has no room for either without a `state-geo-types.ts` change; named,
+ * deferred gap, `state-note-layout.ts#buildRenderLines`'s own doc comment).
+ *
  * NOT built this iteration (queued in full, `plans/g4-state-svg/ledger.md`
- * S10): `note ... on link` (embedded in the transition's OWN `<g
- * class="link">`, no host `<g class="entity">` at all — a THIRD,
- * structurally different shape, jar-verified `vateco-92-pece508`); creole
- * markup / table content inside a note body (`fatupo-62-bemu777`); `#color`
- * overrides on notes (the grammar's own `NOTE_COLOR` capture group is
- * non-capturing today, `state-notes.ts`'s own doc comment); the composite
- * pipeline's own note materialization (`state-composite-pass.ts` never
- * calls into this module yet — every target fixture this iteration is
+ * S10): `#color` overrides on notes (the grammar's own `NOTE_COLOR` capture
+ * group is non-capturing today, `state-notes.ts`'s own doc comment); the
+ * composite pipeline's own note materialization (`state-composite-pass.ts`
+ * never calls into this module yet — every target fixture this iteration is
  * FLAT, `layout.ts#hasAnyComposite` false for all three).
  */
 import { lineTo, moveTo } from '../../core/svg-path-builder.js';

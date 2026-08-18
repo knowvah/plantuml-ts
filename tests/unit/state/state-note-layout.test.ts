@@ -11,11 +11,22 @@
  */
 import { describe, it, expect } from 'vitest';
 import type { StateNote } from '../../../src/diagrams/state/ast.js';
-import { buildNoteGraphPartsByScope, sweepOrphanNoteEdges } from '../../../src/diagrams/state/state-note-layout.js';
+import {
+  buildNoteGraphPartsByScope,
+  sweepOrphanNoteEdges,
+  measureNote,
+} from '../../../src/diagrams/state/state-note-layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { parseState } from '../../../src/diagrams/state/parser.js';
+import type { UmlSource } from '../../../src/core/block-extractor.js';
 
 const measurer = new WidthTableMeasurer();
+
+function parse(source: string): ReturnType<typeof parseState> {
+  const block: UmlSource = { lines: source.trim().split('\n'), type: 'state' };
+  return parseState(block);
+}
 
 function note(overrides: Partial<StateNote> & Pick<StateNote, 'id' | 'text' | 'scopeId'>): StateNote {
   return overrides;
@@ -124,6 +135,74 @@ describe('sweepOrphanNoteEdges — opportunistic per-pass attach', () => {
     // must not add a duplicate edge — the candidate is already consumed.
     sweepOrphanNoteEdges(acc, parts.candidates, consumed, (id) => id);
     expect(acc.edges).toHaveLength(1);
+  });
+});
+
+/**
+ * T7 (SI28 `findings/note.md`, `state-declared-size-fix`): `measureNote`
+ * routed through the real creole/table pipeline (`buildNoteBody`), replacing
+ * a raw `text.split('\n')` model that measured `|=…|` table syntax and
+ * `<color:…>` tags as literal text. Real `in.puml` bodies (not hand-typed
+ * approximations), pinned against the jar's own DOT-declared node size
+ * (`oracle/goldens/state/<slug>/svek-1.dot`), matching this test file's own
+ * `parseState`-direct convention (`state-decl-grammar.test.ts` precedent).
+ */
+describe('measureNote — creole/table body sizing (T7, SI28 findings/note.md)', () => {
+  it('fatupo-62-bemu777: table body sizes via AtomTable\'s column/row-max grid, not raw pipe syntax', () => {
+    const ast = parse(`
+state X
+note right of X #FFF
+|= header 1 |= header 2 |= header 3 |
+| //A// | abc | def |
+| //B// | qwe | |
+end note
+`);
+    const note = ast.notes![0]!;
+    const m = measureNote(note.text, defaultTheme, measurer);
+    // oracle/goldens/state/fatupo-62-bemu777/svek-1.dot sh0007: width=2.278906in, height=0.736111in (*72 = px).
+    expect(m.width).toBeCloseTo(2.278906 * 72, 3);
+    expect(m.height).toBeCloseTo(0.736111 * 72, 3);
+    // Render side: no raw pipe/header markup leaks into the drawn lines (was
+    // "|= header 1 |= header 2 |= header 3 |" verbatim before this task).
+    for (const line of m.lines) expect(line.text).not.toMatch(/[|=]/);
+    expect(m.lines[0]!.text).toContain('header 1');
+    expect(m.lines[1]!.text).toContain('abc');
+  });
+
+  it('xeziki-47-zomo866#a: <color:...> tags strip to visible text for both sizing and drawing', () => {
+    const ast = parse(`
+note as n
+  <color:#FF000020>12⬤</color>
+  <color:#FF000080>13⬤</color>
+  <color:#FF0000FF>14⬤</color>
+end note
+`);
+    const note = ast.notes!.find((n) => n.id === 'n')!;
+    const m = measureNote(note.text, defaultTheme, measurer);
+    // oracle/goldens/state/xeziki-47-zomo866/svek-1.dot sh0006: width=0.641493in, height=0.680556in (*72 = px).
+    expect(m.width).toBeCloseTo(0.641493 * 72, 3);
+    expect(m.height).toBeCloseTo(0.680556 * 72, 3);
+    // Render side: literal "<color:#FF000020>12⬤</color>" no longer leaks —
+    // only the visible glyphs remain.
+    expect(m.lines.map((l) => l.text)).toEqual(['12⬤', '13⬤', '14⬤']);
+  });
+
+  it('a markup-free note is unaffected by the pipeline swap (NO-OP for plain text)', () => {
+    const ast = parse(`
+note as n2
+plain line one
+plain line two
+end note
+`);
+    const note = ast.notes!.find((n) => n.id === 'n2')!;
+    const m = measureNote(note.text, defaultTheme, measurer);
+    const rawWidth = Math.max(
+      measurer.measure('plain line one', { family: defaultTheme.fontFamily, size: 13 }).width,
+      measurer.measure('plain line two', { family: defaultTheme.fontFamily, size: 13 }).width,
+    );
+    expect(m.width).toBeCloseTo(rawWidth + 6 + 15, 3);
+    expect(m.height).toBeCloseTo(2 * 13 + 2 * 5, 3);
+    expect(m.lines.map((l) => l.text)).toEqual(['plain line one', 'plain line two']);
   });
 });
 
