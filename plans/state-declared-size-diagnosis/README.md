@@ -57,8 +57,8 @@ Preview slices: [findings/PARTITION-preview.md](findings/PARTITION-preview.md); 
 | Batch | What | Tasks | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | Baseline + PARTITION + SCHEMA check | T0 | [x] |
-| [1a](batch-1a/overview.md) | Bucket diagnosis (parallel) | T1 T2 T3 T4 T5 T6 T7 | [ ] |
-| [1b](batch-1b/overview.md) | Bucket diagnosis + precision + unmatched + audit (parallel) | T8 T9 T10 T11 T12 T13 | [ ] |
+| [1a](batch-1a/overview.md) | Bucket diagnosis (parallel) | T1 T2 T3 T4 T5 T6 T7 | [x] |
+| [1b](batch-1b/overview.md) | Bucket diagnosis + precision + unmatched + audit (parallel) | T8 T9 T10 T11 T12 T13 | [x] |
 | [2](batch-2/overview.md) | SYNTHESIS + close-out | T14 | [ ] |
 
 1a and 1b are disjoint and MAY run as one 13-way batch.
