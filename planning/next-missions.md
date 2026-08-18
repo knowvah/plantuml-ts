@@ -323,12 +323,20 @@ Ordered by how ready they are, not by size.
   display; codabo/nixura/xufexu conformant; description at 352/356 with only
   the 4 permanent exclusions). Their mission-index rows had never been
   flipped from `todo`/`wip`; nothing to plan here.
-- **`state-composite-inner-canvas`** — HALTED 2026-08-15; premise false
-  (composite size is already a faithful `SvekResult#calculateDimension`
-  port). Its T1 harness `scripts/measure-composite-declared-size.ts` is real
-  and stays (2469/2642 exact after `transition-label-ink`). The remaining
-  173 inexact composites have no diagnosis yet — a survey with that harness
-  is the next move there, not a fix.
+- ~~**`state-composite-inner-canvas`**~~ — **DONE (diagnosis), 2026-08-18.**
+  The halt stands (its premise was false); the survey it asked for is
+  `plans/state-declared-size-diagnosis/` (**SI28**, closed), which took the
+  173 inexact composites through that same T1 harness and gave every one of
+  the **94 mismatched fixtures** a `file:line` mechanism. Read
+  **`plans/state-declared-size-diagnosis/findings/SYNTHESIS.md`**: 100 records
+  re-partitioned into **24 true-cause groups**, 75 fixtures fully resolved,
+  14 unresolved with a named next instrument, 4 divergences awaiting a
+  maintainer ruling. The fix is now plannable straight off §4 of that file:
+  **`state-declared-size-fix`, 5 batches** (0 harness attribution · 1 six
+  parallel text/leaf tasks, incl. the 445 px `wrapWidth`/creole group · 2 two
+  composite-geometry tasks · 3 two overlapping-tail tasks · 4 eight
+  re-diagnosis tasks), pairwise-disjoint write-sets, biggest-delta-first.
+  That is the next move here, and it is a fix mission, not another survey.
 - **`usymbol-ink-rule` residual** — `cacoma-43-poxu615` exact on height and
   every shape, 1px wide. Named in the mission's Outcome; unowned.
 - **`class-edge-spline-conformance`** — CLOSED 2026-08-08 by maintainer
