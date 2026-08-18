@@ -27,3 +27,34 @@ jaxuxe-73-sije305
 kupexa-94-dude266
 vateco-92-pece508
 xupefu-98-roni234
+# Batch 2
+# T6 (G1+G8+G23 state text through creoleTextLines)
+corumi-91-mizo869
+gupeto-19-mesa256
+juvagu-33-dupa212
+kubona-45-boso556
+lokija-02-dipe348
+fibudu-53-bode309
+papifi-44-caxo706
+rovado-96-boda672
+xasoka-58-temi462
+feziva-71-gufo538
+mujipe-99-fume794
+nixoja-06-guxe431
+jafazu-60-leca675
+rejike-58-rote606
+mefici-97-tudu030
+xeziki-47-zomo866
+dogeji-46-sapo750
+mosigo-88-rove013
+rijoki-89-teno556
+viguto-81-gana093
+resido-15-reza040
+kinuca-03-nice683
+# T7 (G2 note bodies)
+fatupo-62-bemu777
+# T6 general mechanism — `**bold**` in a state/composite description (journal T6, byte-matches jar in.svg text runs)
+gokife-89-boja382
+mazuzu-54-mene929
+duzazu-41-telu529
+vixobo-14-jole910

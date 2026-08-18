@@ -83,6 +83,10 @@ import { roundedBottomRectD, roundedTopRectD } from '../../core/svg-path-builder
 import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line, text, path } from '../../core/svg.js';
+// G1/G8/G23: one engine, one text/table/symbol emitter -- see
+// `renderer-box.ts`'s own doc comments for each.
+import { renderStateTextLines, renderOOSymbol, isOOSymbolStereotype } from './renderer-box.js';
+import { styledLines } from './state-sizing-creole.js';
 import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
 import { stateShadowFilterUrl } from './state-shadow.js';
 
@@ -134,6 +138,9 @@ function compositeBodyPath(x0: number, y0: number, width: number, height: number
   return path(d, { fill });
 }
 
+/** G1/G23: the composite box draws the SAME styled runs / creole table the
+ *  sizer measured, through `renderer-box.ts`'s shared emitter (one engine,
+ *  one helper -- no duplication across the two state box shapes). */
 function renderCompositeTextLines(
   lines: readonly StateTextLine[],
   xForLine: (ln: StateTextLine) => number,
@@ -146,16 +153,16 @@ function renderCompositeTextLines(
   // pre-T4 call site's unchanged behavior).
   fill: string = '#000000',
 ): string {
-  let out = '';
-  lines.forEach((ln, i) => {
-    out += text(xForLine(ln), startY + i * theme.fontSize, ln.text, {
-      fill,
-      fontFamily: theme.fontFamily,
-      fontSize: theme.fontSize,
-      lengthAdjust: 'spacing',
-      textLength: ln.width,
-    });
-  });
+  return renderStateTextLines(lines, xForLine, startY, theme, { fill });
+}
+
+/** `InnerStateAutonom.drawU`'s own attribute-zone height -- the summed
+ *  measured line heights, not `count * fontSize`: a creole TABLE stripe is
+ *  one line whose height is the whole grid box (`state-sizing-creole.ts
+ *  #tableLine`). Identical to `count * fontSize` for every ordinary line. */
+function textBlockHeight(lines: readonly StateTextLine[], theme: Theme): number {
+  let out = 0;
+  for (const ln of styledLines(lines)) out += ln.height === 0 ? theme.fontSize : ln.height;
   return out;
 }
 
@@ -260,7 +267,7 @@ function buildActionZone(
   const bodyLines = node.bodyLines ?? [];
   if (bodyLines.length === 0) return EMPTY_ACTION_ZONE;
   const border = resolveStateBorder(node, theme);
-  const actionZoneHeight = bodyLines.length * theme.fontSize + MARGIN;
+  const actionZoneHeight = textBlockHeight(bodyLines, theme) + MARGIN;
   const dividerY2 = dividerY1 + actionZoneHeight;
   const bg = rect(node.x, dividerY1, node.width, actionZoneHeight, { fill, stroke: fill, strokeWidth: 1 });
   const divider2 = line(node.x, dividerY2, node.x + node.width, dividerY2, { stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH });
@@ -277,7 +284,14 @@ function renderCompositeMeasured(node: StateNodeGeo, theme: Theme): string {
   // `RoundedContainer.drawU` order (shadow rect, then header/action-zone
   // panels, then the border-only `outline` on top) -- see
   // `buildCoreLayers`'s own doc comment.
-  return core.shadowRect + core.header + action.bg + core.outline + core.divider1 + action.divider2 + core.title + action.text;
+  // G8: `InnerStateAutonom.drawU:162-163` calls the SAME
+  // `EntityImageState.drawSymbol` at the wrapper's own bottom-right corner
+  // (draw-only -- `calculateDimensionSlow:186-197` has no `heightSymbol`
+  // term, unlike the leaf `EntityImageState`).
+  const symbol = isOOSymbolStereotype(node.stereotype)
+    ? renderOOSymbol(node.x + node.width, node.y + node.height, core.fill, resolveStateBorder(node, theme))
+    : '';
+  return core.shadowRect + core.header + action.bg + core.outline + core.divider1 + action.divider2 + core.title + action.text + symbol;
 }
 
 /**

@@ -13,6 +13,13 @@ import type { State } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { splitStateDisplayLines } from './state-sizing.js';
+// G1/G23 (mission state-declared-size-fix, D1): a composite's own title and
+// attribute block go through the SAME creole seam the leaf sizer uses --
+// `InnerStateAutonom.java:97` (`group.getDisplay().create(...)`) and
+// `Entity.java:631` (`getStateDescription` -> `display.create(...)`), both
+// `Display.create` (`Display.java:614`, `LineBreakStrategy.NONE`), so NO
+// `wrapWidth` here, unlike the leaf `create8` path.
+import { stateCreoleBlock, stateCreoleOpts } from './state-sizing-creole.js';
 
 interface Dim {
   width: number;
@@ -26,16 +33,10 @@ import {
   ENTITY_IMAGE_MARGIN_LINE as MARGIN_LINE,
 } from '../../core/svek/IEntityImage.js';
 
-function measureLines(lines: readonly string[], font: FontSpec, measurer: StringMeasurer): Dim {
+function measureLines(lines: readonly string[], font: FontSpec, measurer: StringMeasurer, theme: Theme): Dim {
   if (lines.length === 0) return { width: 0, height: 0 };
-  let width = 0;
-  let height = 0;
-  for (const line of lines) {
-    const m = measurer.measure(line, font);
-    if (m.width > width) width = m.width;
-    height += m.height;
-  }
-  return { width, height };
+  const block = stateCreoleBlock(lines, font, measurer, stateCreoleOpts(theme, false));
+  return { width: block.width, height: block.height };
 }
 
 /** The vertical offset at which an InnerStateAutonom's wrapped child image is
@@ -69,9 +70,9 @@ export function measureAutonomWrapper(
   measurer: StringMeasurer,
 ): AutonomWrapper {
   const font: FontSpec = { family: theme.fontFamily, size: theme.fontSize };
-  const text = measureLines(splitStateDisplayLines(state.display), font, measurer);
+  const text = measureLines(splitStateDisplayLines(state.display), font, measurer, theme);
   const bodyLines = (state.description ?? []).flatMap(splitStateDisplayLines);
-  const attr = measureLines(bodyLines, font, measurer);
+  const attr = measureLines(bodyLines, font, measurer, theme);
   const marginForFields = attr.height > 0 ? MARGIN : 0;
 
   const nameHeight = MARGIN + text.height + MARGIN_LINE;
