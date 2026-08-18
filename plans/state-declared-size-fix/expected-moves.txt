@@ -1,0 +1,23 @@
+# Batch 1
+# T2 (G7 EXPANSION_* rankdir, G9 hide empty description)
+bujuta-44-rovo666
+mimaga-15-doze740
+nijugi-19-jazi166
+rinisi-79-peko570
+# bitaxo-18-tamo974 — G9 deferred (journal T2), does not move
+# T3 (ReadFilterMergeLines, trailing-\ fixtures)
+fokudo-49-xiki231
+mocoda-55-take697
+vubofi-17-dedi529
+duzazu-41-telu529
+vixobo-14-jole910
+fibudu-53-bode309
+# T4 (note on link)
+tumaba-64-tosu281
+# T5 (dotted id + G24 guards)
+fovafu-44-mifu394
+tubojo-49-tudu915
+cagego-53-vemo516
+xacona-99-peze211
+zecivu-62-pagu681
+fugedo-34-fice721

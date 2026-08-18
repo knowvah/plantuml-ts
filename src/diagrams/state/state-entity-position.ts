@@ -107,7 +107,32 @@ export function isOutputPosition(pos: EntityPositionKind): boolean {
   return OUTPUT_POSITIONS.has(pos);
 }
 
-/** EntityPosition.RADIUS*2 — border-point box, both axes (ENTRY_POINT/
- *  EXIT_POINT/INPUT_PIN/OUTPUT_PIN all share this; EXPANSION_* differ but no
- *  state-diagram fixture in the corpus exercises them — RADIUS*2 stands in). */
+/** EntityPosition.RADIUS*2 (RADIUS=6, EntityPosition.java:56) — border-point
+ *  box, both axes for ENTRY_POINT/EXIT_POINT/INPUT_PIN/OUTPUT_PIN. Also the
+ *  SHORT axis of EXPANSION_INPUT/EXPANSION_OUTPUT's rankdir-swapped box —
+ *  see `getBorderPointDimension` below. */
 export const BORDER_POINT_SIZE = 12;
+
+/** EntityPosition.RADIUS*2*4 (EntityPosition.java:123,125) — the LONG axis
+ *  of EXPANSION_INPUT/EXPANSION_OUTPUT's box only. */
+export const EXPANSION_POINT_LONG = 48;
+
+/** `EntityPosition.getDimension(Rankdir)` (EntityPosition.java:120-128) —
+ *  every border-point kind is a fixed `BORDER_POINT_SIZE` square EXCEPT
+ *  EXPANSION_INPUT/EXPANSION_OUTPUT, which swap wide/tall by rankdir: wide
+ *  (48x12) under `TOP_TO_BOTTOM`, tall (12x48) otherwise. SI28
+ *  `findings/pseudo-state.md` (bujuta-44-rovo666/mimaga-15-doze740/
+ *  nijugi-19-jazi166/rinisi-79-peko570): this port previously stood in
+ *  RADIUS*2 for every kind — false, four corpus fixtures exercise the
+ *  EXPANSION_* branch. */
+export function getBorderPointDimension(
+  pos: EntityPositionKind,
+  rankdir: 'TB' | 'LR',
+): { width: number; height: number } {
+  if (pos === 'expansioninput' || pos === 'expansionoutput') {
+    return rankdir === 'TB'
+      ? { width: EXPANSION_POINT_LONG, height: BORDER_POINT_SIZE }
+      : { width: BORDER_POINT_SIZE, height: EXPANSION_POINT_LONG };
+  }
+  return { width: BORDER_POINT_SIZE, height: BORDER_POINT_SIZE };
+}
