@@ -8,11 +8,13 @@
  *
  * and `preproc2.Preprocessor` is NOT the TIM preprocessor: it applies only
  * `ReadFilterAddConfig` (CLI `-config` lines, which this port has no equivalent
- * of) and `ReadFilterMergeLines` (backslash continuation). So `@start` / `@end`
- * are detected on NEAR-RAW lines, where a conditional structurally CANNOT
- * swallow them. TIM (`TContext`, `!ifdef`, ...) runs afterwards, per block, over
- * that block's own lines -- `BlockUml`'s constructor, which hands them to
- * `TimLoader#load`.
+ * of) and `ReadFilterMergeLines` (backslash continuation -- ported at
+ * `tim/ReadFilterMergeLines.ts`, applied below via `mergeEndingBackslashLines`
+ * BEFORE the split, matching `Preprocessor.java:50-54`'s chain position). So
+ * `@start` / `@end` are detected on NEAR-RAW (merged) lines, where a
+ * conditional structurally CANNOT swallow them. TIM (`TContext`, `!ifdef`,
+ * ...) runs afterwards, per block, over that block's own lines -- `BlockUml`'s
+ * constructor, which hands them to `TimLoader#load`.
  *
  * plantuml-ts had this inverted (TIM over the whole document, then split), and
  * the inversion is load-bearing, not cosmetic: an unclosed `!ifdef` ate the
@@ -43,6 +45,7 @@ import type {
 } from './preprocessor.js';
 import { isEndDirective, isStartDirective } from './tim/StartUtils.js';
 import { readLines } from './tim/ReadLineReader.js';
+import { mergeEndingBackslashLines } from './tim/ReadFilterMergeLines.js';
 import type { StringLocated } from './tim/StringLocated.js';
 
 /** The `@start<suffix>` word, lowercased -- `uml`, `json`, `mindmap`, ... */
@@ -99,7 +102,9 @@ export type BlockUml = BlockUmlOk | BlockUmlErr;
  * synthesizes the missing `@end`), not in the library.
  */
 export function buildBlockUmls(source: string, options?: PreprocessOptions): BlockUml[] {
-  return splitRawBlocks(readLines(source)).map((raw) => buildBlockUml(raw, options));
+  return splitRawBlocks(mergeEndingBackslashLines(readLines(source))).map((raw) =>
+    buildBlockUml(raw, options),
+  );
 }
 
 /**

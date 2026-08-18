@@ -30,6 +30,7 @@ import {
   type IncludeStore,
 } from './IncludeStore.js';
 import { readLines } from './ReadLineReader.js';
+import { mergeEndingBackslashLines } from './ReadFilterMergeLines.js';
 import type { StringLocated } from './StringLocated.js';
 import type { TContext } from './TContext.js';
 import type { TMemory } from './TMemory.js';
@@ -96,7 +97,12 @@ export class IncludeExecutor {
     if (idx !== -1) {
       const filename = what.substring(0, idx);
       const blocname = what.substring(idx + 1);
-      const lines = readLines(this.load(filename, '!includesub'), filename, s.getLocation());
+      // `TContext.java:659-661`: an `!includesub`d file's reader is wrapped in
+      // `ReadFilterMergeLines` directly -- unlike `executeInclude` /
+      // `executeIncludeDef` below, which are NOT (upstream never wraps those).
+      const lines = mergeEndingBackslashLines(
+        readLines(this.load(filename, '!includesub'), filename, s.getLocation()),
+      );
       sub = Sub.fromLines(lines, blocname, context, memory);
     }
     sub ??= this.subs.get(what);
