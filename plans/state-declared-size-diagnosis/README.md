@@ -227,8 +227,9 @@ violations` · no `src/ tests/ oracle/ scripts/` path in the diff. SI28 row adde
   "dispatch order" mechanism was wrong; the jar tries every factory and its
   state factory trips the same guard); fugedo dotted-path → it is a **walking
   error** (we build and draw the same phantom `Quark#child` builds) —
-  recommended: port the `parent.getData()==null` gate, **maintainer pick
-  pending**; dispatch order → withdrawn.
+  **RULED: port the `parent.getData()==null` gate** (same write-set as the
+  concurrent guard); dispatch order → withdrawn. Both guards are fix-mission
+  tasks; no `DIVERGENCES.md` entry needed.
 - **`docs/graphviz-issues/` candidates**: G20 (`linetype polyline`/`ortho`
   composite ink) and G21 (`zacajo-09`, byte-identical DOT, different geometry)
   are likely dot-engine findings, which must be filed as a self-contained

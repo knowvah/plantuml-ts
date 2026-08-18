@@ -145,9 +145,9 @@ four can feed T13's per-row `pairingRisk` catalogue.
   (`resolveOrCreateDottedPath` / `ensureState`: mirror
   `CommandLinkStateCommon.java:277-278`'s `parent.getData()==null` gate —
   a dotted reference whose walk manufactures a data-less intermediate is
-  a parse error, as in the jar). Alternative ruling (documented
-  divergence): resolve to the real nested `ChildMode1` diagram-wide; that
-  is a deliberate improvement over the jar, not fidelity.
+  a parse error, as in the jar). **RULED 2026-08-18: port the gate.** The
+  alternative (resolve to the real nested `ChildMode1` diagram-wide, a
+  documented divergence) was rejected.
 - **sizeEstimate:** medium — same shape as cagego's estimate; this is a
   second, independent validation gap in the same function family, so a
   fix mission could plausibly batch both under one write-set review even

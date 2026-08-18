@@ -439,13 +439,12 @@ port and found the T12 readings wrong — see `findings/unmatched.md`, the
 1. `checkConcurrentStateOk` — **RULED: port the guard** (we error as the jar
    does). Covers cagego, xacona and zecivu; one write-set
    (`state-parse-resolve.ts#ensureState`). Goes into the fix mission.
-2. fugedo dotted phantom — the maintainer's question "is that a walking
-   error or are we OK?" is answered: **it is a walking error** (duplicate
-   phantom rendered). Recommended ruling: mirror the jar's
-   `getData()==null` gate (error), same write-set as ruling 1; the
-   alternative — resolve diagram-wide to the real nested `ChildMode1` — is
-   a deliberate improvement over the jar and would need a `DIVERGENCES.md`
-   entry. Awaiting the maintainer's pick between the two.
+2. fugedo dotted phantom — **RULED: port the gate.** It is a walking error
+   (duplicate phantom rendered); mirror `CommandLinkStateCommon.java:277-278`'s
+   `parent.getData()==null` gate so the diagram errors as the jar does.
+   Same write-set as ruling 1 (`state-parse-resolve.ts`); the
+   resolve-diagram-wide alternative was considered and rejected (fidelity
+   over improvement).
 3. dispatch order — **withdrawn**: not a mechanism for any fixture in this
    corpus. The port's first-match `accepts()` registry vs the jar's
    try-all-factories-then-best-error loop remains a real structural
@@ -678,7 +677,8 @@ size delta. **Rulings recorded 2026-08-18 (see G24 for the evidence):**
    Recommended: port `CommandLinkStateCommon.java:277-278`'s
    `parent.getData()==null` gate (error, fidelity). Alternative: resolve
    diagram-wide to the real nested state (improvement, needs
-   `DIVERGENCES.md`). **Awaiting maintainer pick.**
+   `DIVERGENCES.md`). **RULED: port the gate** (fidelity); fix-mission
+   task alongside ruling 1, one write-set.
 3. ~~Diagram-type dispatch order~~ — **withdrawn**; zecivu is ruling 1.
 
 No other record proposes a divergence. Notably, T6 considered and **rejected**
