@@ -221,10 +221,14 @@ violations` · no `src/ tests/ oracle/ scripts/` path in the diff. SI28 row adde
 - **`state-declared-size-fix`** (5 batches, SYNTHESIS §4) — the whole point of
   this mission. Start with Batch 0 (harness attribution) so every later row
   names a declared node.
-- **Maintainer ruling wanted** on the three G24 divergences (SYNTHESIS §6):
-  the `checkConcurrentStateOk` guard (2 fixtures), root-only dotted-path
-  resolution (1), and diagram-type dispatch order (1, already a documented
-  trade-off — recommended accept-and-document).
+- **G24 divergences — rulings 2026-08-18** (SYNTHESIS §6, records corrected
+  after orchestrator re-verification against the jar): `checkConcurrentStateOk`
+  guard → **RULED: port it** (covers cagego, xacona AND zecivu — zecivu's
+  "dispatch order" mechanism was wrong; the jar tries every factory and its
+  state factory trips the same guard); fugedo dotted-path → it is a **walking
+  error** (we build and draw the same phantom `Quark#child` builds) —
+  recommended: port the `parent.getData()==null` gate, **maintainer pick
+  pending**; dispatch order → withdrawn.
 - **`docs/graphviz-issues/` candidates**: G20 (`linetype polyline`/`ortho`
   composite ink) and G21 (`zacajo-09`, byte-identical DOT, different geometry)
   are likely dot-engine findings, which must be filed as a self-contained

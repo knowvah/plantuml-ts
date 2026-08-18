@@ -50,7 +50,7 @@ Max |Δpx| is the largest single row in the group — the fix-ordering key.
 | G21 | our DOT is byte-identical to jar's; the geometry still differs | `state-composite-sizing.ts:121-128` (not the site) | 1 | 1 | 2 | 3.733 | **unresolved** |
 | G22 | residual survives every ink-extent hypothesis | n/a | 1 | 1 | 1 | 2.033 | **unresolved** |
 | G23 | creole TABLE in a composite's own description measured raw | `state-composite-sizing.ts:73-74` | 1 | 1 | 2 | 39.375 | resolved |
-| G24 | jar ERROR renders — four parse/dispatch guards absent | `state-parse-resolve.ts` / `index.ts` | 4 | 4 | 0 | — | divergence-proposed |
+| G24 | jar ERROR renders — two parse guards absent (concurrent-state guard ×3, dotted-phantom gate ×1) | `state-parse-resolve.ts` | 4 | 4 | 0 | — | divergence-proposed |
 | | | **totals** | **100** | **94** | **172** | | |
 
 ### G1 — state text is measured raw, never through `Display.create8`
@@ -425,20 +425,33 @@ Max |Δpx| is the largest single row in the group — the fix-ordering key.
 
 All four "unmatched" fixtures have **zero cached `svek-N.dot`** because the
 jar itself errored on the source — there is no oracle geometry to pair
-against, at any index. Three distinct mechanisms:
+against, at any index. **Two** distinct mechanisms (corrected at close-out;
+the orchestrator re-verified both non-guard records against the jar and the
+port and found the T12 readings wrong — see `findings/unmatched.md`, the
+"Corrected at close-out" paragraphs, and the decision journal):
 
 | fixture | mechanism | our site | javaRef |
 |---|---|---|---|
-| `cagego-53-vemo516`, `xacona-99-peze211` | `StateDiagram#checkConcurrentStateOk` guard absent — a state whose real parent differs from the current concurrent-region group is accepted here, rejected there | `state-parse-resolve.ts:358-363` | `StateDiagram.java:70-90` |
-| `fugedo-34-fice721` | jar resolves a dotted path root-only for the first segment; we walk hierarchically and succeed where jar fails | `state-parse-resolve.ts:153` | `net/atmp/CucaDiagram.java:250-288` |
-| `zecivu-62-pagu681` | diagram-type dispatch: jar tries factories in registration order and `SequenceDiagramFactory` claims the leading `XA13 --> Y1`; we scan the whole document and claim it for state | `src/diagrams/state/index.ts:31-35`, `src/index.ts:70-87` | `PSystemBuilder.java:135,139,258-282` |
+| `cagego-53-vemo516`, `xacona-99-peze211`, **`zecivu-62-pagu681`** | `StateDiagram#checkConcurrentStateOk` guard absent — a state whose real parent differs from the current concurrent-region group is accepted here, rejected there. zecivu: line 1 creates root `XA13`, `state XA13` inside XA6's `--` region trips the guard; the jar's "assumed sequence" banner is `PSystemErrorUtils#mergeV2` showing the highest-scoring factory error, NOT dispatch order (jar tries every factory; the same source without `--` renders as state) | `state-parse-resolve.ts:358-363` | `StateDiagram.java:70-90`, `PSystemBuilder.java:258-282`, `PSystemErrorUtils.java:140-147` |
+| `fugedo-34-fice721` | jar's `quarkInContextSafe` walks a non-root first segment from the CURRENT group and `Quark#child` manufactures a phantom `ChildMode2 > ChildMode1 > A`; then `getEntity`'s `parent.getData()==null` gate errors. **We build the identical phantom** (`resolveOrCreateDottedPath` walks from the current scope too) but lack the gate, so we DRAW it — the SVG contains `ChildMode1`/`A` twice. Not a successful resolution; a walking error | `state-parse-resolve.ts:153` (walk) + `ensureState`/`CommandLinkStateCommon.java:277-278` gate missing | `net/atmp/CucaDiagram.java:250-288`, `Quark.java:116-132`, `CommandLinkStateCommon.java:277-278` |
 
-**Ruling requested (ADR-6).** Each is "we render a diagram where the jar
-errors". Options per fixture: port the guard (ours becomes an error too), or
-accept and document. `zecivu-62` is already an explicitly documented
-specificity-order trade-off (`src/index.ts:66-69`) and is the strongest
-accept-and-document candidate; the two `checkConcurrentStateOk` fixtures share
-one guard and one fix.
+**Maintainer rulings (2026-08-18):**
+1. `checkConcurrentStateOk` — **RULED: port the guard** (we error as the jar
+   does). Covers cagego, xacona and zecivu; one write-set
+   (`state-parse-resolve.ts#ensureState`). Goes into the fix mission.
+2. fugedo dotted phantom — the maintainer's question "is that a walking
+   error or are we OK?" is answered: **it is a walking error** (duplicate
+   phantom rendered). Recommended ruling: mirror the jar's
+   `getData()==null` gate (error), same write-set as ruling 1; the
+   alternative — resolve diagram-wide to the real nested `ChildMode1` — is
+   a deliberate improvement over the jar and would need a `DIVERGENCES.md`
+   entry. Awaiting the maintainer's pick between the two.
+3. dispatch order — **withdrawn**: not a mechanism for any fixture in this
+   corpus. The port's first-match `accepts()` registry vs the jar's
+   try-all-factories-then-best-error loop remains a real structural
+   difference (`src/index.ts:66-69`), but no fixture here turns on it; the
+   sequence engine (`src/diagrams/sequence/`) exists and is registered last,
+   so "add sequence" is not what these fixtures need.
 
 ## 2. Repeated |Δpx| reconciliation (exit bar 2)
 
@@ -653,18 +666,20 @@ runnable with tools already in the repo.
 
 ## 6. Proposed divergences for maintainer ruling (ADR-6)
 
-Four, all from G24, all "the jar errors and we render". None is a size delta.
+Four fixtures, all from G24, all "the jar errors and we render". None is a
+size delta. **Rulings recorded 2026-08-18 (see G24 for the evidence):**
 
 1. **`checkConcurrentStateOk` guard** (`cagego-53-vemo516`,
-   `xacona-99-peze211`) — port the guard (we start erroring too) or accept and
-   document. One guard covers both. `StateDiagram.java:70-90`.
-2. **Root-only dotted-path resolution** (`fugedo-34-fice721`) — jar searches
-   only from the diagram root for a dotted first segment; our hierarchical
-   walk succeeds. Replicating the restriction means deliberately failing a
-   resolution we can perform. `CucaDiagram.java:250-288`.
-3. **Diagram-type dispatch order** (`zecivu-62-pagu681`) — already a
-   documented specificity-order trade-off (`src/index.ts:66-69`). Recommended
-   ruling: accept, add the `DIVERGENCES.md` entry, no source change.
+   `xacona-99-peze211`, `zecivu-62-pagu681`) — **RULED: port the guard.**
+   `StateDiagram.java:70-90` → `state-parse-resolve.ts#ensureState`. Fix
+   mission task (small; three fixtures become jar-identical errors).
+2. **Dotted-path phantom** (`fugedo-34-fice721`) — we manufacture the same
+   phantom as `Quark#child` and draw it (duplicate `ChildMode1 { A }`).
+   Recommended: port `CommandLinkStateCommon.java:277-278`'s
+   `parent.getData()==null` gate (error, fidelity). Alternative: resolve
+   diagram-wide to the real nested state (improvement, needs
+   `DIVERGENCES.md`). **Awaiting maintainer pick.**
+3. ~~Diagram-type dispatch order~~ — **withdrawn**; zecivu is ruling 1.
 
 No other record proposes a divergence. Notably, T6 considered and **rejected**
 routing `skinparam tabSize` to a divergence: the tab stop is part of the same
@@ -763,7 +778,7 @@ creole pipeline.
 | note (3) | 3 | G1 (1 record), G2 (2 records), G12 (1) — **3 groups** |
 | creole-sprite-escape (3) | 3 | G1 (3) — **1 group** |
 | precision (27) | 27 | G14 — **1 group** |
-| unmatched (4) | 4 | G24 — **1 group, 3 mechanisms** |
+| unmatched (4) | 4 | G24 — **1 group, 2 mechanisms** (corrected at close-out) |
 
 Only `creole-sprite-escape`, `precision` and `unmatched` survived as
 single-mechanism buckets. `composite` fanned out into eight. Conversely G1

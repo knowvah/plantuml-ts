@@ -101,10 +101,15 @@ four can feed T13's per-row `pairingRisk` catalogue.
   real `ParentMode > ChildMode1 > A`. Because the phantom `ChildMode1`
   segment has no `Entity` data, `getEntity`'s
   `quark.getParent().getData() == null` check fires for `A` → `null` →
-  error. This port's `resolveOrCreateDottedPath` instead performs a real
-  hierarchical walk that correctly finds the ALREADY-DECLARED
-  `ChildMode1` wherever it is nested, so `ChildMode1.A` resolves to the
-  real entity and rendering proceeds.
+  error. **Corrected at close-out (orchestrator re-verification):** this
+  port's `resolveOrCreateDottedPath` mirrors that same walk — `anchorIsRoot`
+  is false (`ChildMode1` is not in the root scope), so it walks from the
+  CURRENT scope (`ChildMode2`) and `makeState`s a NEW `ChildMode1` there,
+  then `A` under it — the identical phantom `ChildMode2 > ChildMode1 > A`.
+  The divergence is only that jar then refuses the diagram while we keep
+  the phantom and DRAW it: our SVG carries `ChildMode1`/`A` twice (probe,
+  2026-08-18). The earlier "finds the already-declared ChildMode1 wherever
+  nested" reading was wrong.
 - **originFileLine:** `src/diagrams/state/state-parse-resolve.ts:153`
   (`resolveOrCreateDottedPath`)
 - **javaRef:** `~/git/plantuml/src/main/java/net/atmp/CucaDiagram.java:250-288`
@@ -118,9 +123,12 @@ four can feed T13's per-row `pairingRisk` catalogue.
   null` gate)
 - **causalChain:** jar: phantom-parent-has-no-data → `getEntity` returns
   `null` for `ChildMode1.A` → parse-time error → 0 svek scopes cached.
-  Ours: real hierarchical resolution succeeds → the transition parses →
-  3 `DotInputGraph`s recorded → `dots.length(0) !== inputs.length(3)` →
-  `unmatched`.
+  Ours: the same phantom is created but no `getData()==null` gate exists →
+  the transition parses against the phantom `A` → 3 `DotInputGraph`s
+  recorded (root, ParentMode, ChildMode2 with the phantom composite inside)
+  → `dots.length(0) !== inputs.length(3)` → `unmatched`. Rendered output
+  is a duplicate `ChildMode1 { A }` inside `ChildMode2` — a walking
+  error, not a successful resolution.
 - **ruledOut:** not the same mechanism as cagego/xacona — `ChildMode1`/
   `ChildMode2` are plain nested composites with no `--` divider, so
   `checkConcurrentStateOk`'s `GroupType.CONCURRENT_STATE` branches never
@@ -134,10 +142,12 @@ four can feed T13's per-row `pairingRisk` catalogue.
 - **sharedCauseWith:** none (dotted-path root-only resolution is a
   distinct jar quirk from the concurrent-region guard)
 - **proposedWriteSet:** `src/diagrams/state/state-parse-resolve.ts`
-  (`resolveOrCreateDottedPath` would need to replicate jar's
-  root-only-first-segment restriction, or more narrowly: detect when the
-  hierarchical walk's first segment is NOT itself a root-level composite
-  and fail the reference the way jar does).
+  (`resolveOrCreateDottedPath` / `ensureState`: mirror
+  `CommandLinkStateCommon.java:277-278`'s `parent.getData()==null` gate —
+  a dotted reference whose walk manufactures a data-less intermediate is
+  a parse error, as in the jar). Alternative ruling (documented
+  divergence): resolve to the real nested `ChildMode1` diagram-wide; that
+  is a deliberate improvement over the jar, not fidelity.
 - **sizeEstimate:** medium — same shape as cagego's estimate; this is a
   second, independent validation gap in the same function family, so a
   fix mission could plausibly batch both under one write-set review even
@@ -199,64 +209,50 @@ four can feed T13's per-row `pairingRisk` catalogue.
   | — | — | — | — | — | — |
   |---|---|---|---|---|---|
 - **status:** divergence-proposed
-- **mechanism:** This fixture opens with `XA13 --> Y1` (valid sequence-
-  diagram message syntax) BEFORE any `state` keyword. Jar's diagram-type
-  dispatch (`PSystemBuilder#createPSystem`) tries registered
-  `PSystemFactory`s in REGISTRATION ORDER and takes the first whose
-  `createSystem` does not itself return a `PSystemError`;
-  `SequenceDiagramFactory` is registered before `StateDiagramFactory`
-  (`PSystemBuilder.java:135` vs `:139`), so it claims the diagram as
-  SEQUENCE on line 1, then fails on line 2 (`state XA6 {`, not valid
-  sequence syntax) — confirmed directly in the cached `in.svg`: the
-  wavy-underlined failing line is literally `state XA6 {`, and the error
-  text reads "Syntax Error? (Assumed diagram type: sequence)". This
-  port's dispatcher instead scans the WHOLE-DOCUMENT first 20 lines for
-  state-diagram keywords (`statePlugin.accepts`,
-  `state/index.ts:31-35`, testing `/^state\s/i` etc.) BEFORE ever trying
-  the sequence plugin (registered last, `src/index.ts:70-87`) — a
-  deliberate, already-documented architecture choice
-  (`src/index.ts:66-69`: "graph plugins match unique structural keywords
-  that sequence diagrams never contain"). For this fixture the state
-  keyword appears on line 2, so `statePlugin` claims it and the state
-  parser successfully builds 2 scopes; jar never gets that far because
-  its per-factory-first-line-success model locks in SEQUENCE one line
-  earlier.
-- **originFileLine:** `src/diagrams/state/index.ts:31-35`
-  (`statePlugin.accepts`) + `src/index.ts:70-87` (registration order —
-  state before sequence)
-- **javaRef:** `~/git/plantuml/src/main/java/net/sourceforge/plantuml/PSystemBuilder.java:135,139,258-282`
-  (`factories.add(new SequenceDiagramFactory())` before
-  `factories.add(new StateDiagramFactory())`, and the `createPSystem`
-  loop that takes the first factory whose `createSystem` result
-  `isOk(sys)`)
-- **causalChain:** jar: `SequenceDiagramFactory` claims the diagram type
-  on line 1, then errors on line 2 → `PSystemError`, no svek stage ever
-  runs → 0 `svek-N.dot` cached. Ours: `statePlugin.accepts` (whole-doc
-  keyword scan) matches line 2's `state` keyword before dispatch commits
-  to any plugin, so the STATE parser runs instead and succeeds → 2
-  `DotInputGraph`s recorded → `dots.length(0) !== inputs.length(2)` →
-  `unmatched`.
-- **ruledOut:** not a state-diagram semantic-validation gap like the
-  other three — jar's own error explicitly names the ASSUMED diagram
-  type as "sequence", not "state", and the wavy-underlined failing line
-  is the `state XA6 {` line itself (a syntax error under sequence
-  grammar, not a state-diagram entity-resolution error); not a crash on
-  our side — `probe.ts` shows a clean 2-scope render.
+- **mechanism:** **Corrected at close-out (orchestrator re-verification;
+  the T12 "dispatch order" reading below is withdrawn).** Line 1
+  `XA13 --> Y1` creates `XA13` at the diagram root; line 5 `state XA13`
+  inside XA6's concurrent region (`--`) then re-references it, and jar's
+  `StateDiagram#checkConcurrentStateOk` (`StateDiagram.java:70-90`)
+  refuses it — current group is `CONCURRENT_STATE` and is not the existing
+  entity's parent — so the STATE factory errors. Jar's `PSystemBuilder`
+  does not "lock in" the first factory: it tries EVERY factory of the
+  `@startuml` type set and returns the first that `isOk`
+  (`PSystemBuilder.java:258-282`); when none is, it shows the merged error
+  with the highest `score()` (`PSystemErrorUtils.java:140-147`,
+  `PSystemError.java:382-385`) — here sequence's line-2 error, which is
+  why the cached SVG says "Assumed diagram type: sequence". Proof from the
+  jar (oracle-render, 2026-08-18): the same source WITHOUT the `--`
+  divider renders as a state diagram (1 svek dot; sequence-first order did
+  not block it), and the same source WITHOUT line 1 renders too (2 svek
+  dots); only root-level `XA13` + `--` + `state XA13` errors. Our
+  `ensureState` has no such guard (`state-parse-resolve.ts:358-363`) — the
+  same gap as cagego-53/xacona-99. (Aside: moving line 1 AFTER the block
+  makes the jar CRASH with `IllegalArgumentException ... too many levels
+  of indirection` — an upstream bug, not in scope.)
+- **originFileLine:** `src/diagrams/state/state-parse-resolve.ts:358-363`
+  (`ensureState` — no `checkConcurrentStateOk` equivalent)
+- **javaRef:** `~/git/plantuml/src/main/java/net/sourceforge/plantuml/statediagram/StateDiagram.java:70-90`
+  (`checkConcurrentStateOk`/`checkConcurrentStateOkInternal`) +
+  `~/git/plantuml/src/main/java/net/sourceforge/plantuml/PSystemBuilder.java:258-282`
+  (try-all-factories loop) +
+  `~/git/plantuml/src/main/java/net/sourceforge/plantuml/error/PSystemErrorUtils.java:140-147`
+  (`mergeV2` picks the highest score)
+- **causalChain:** jar: state factory fails the concurrent guard, every
+  other factory fails on syntax → merged error (sequence's scores highest)
+  → 0 `svek-N.dot`. Ours: no guard → `state XA13` re-parents/references
+  the root `XA13` inside the region → 2 `DotInputGraph`s → `unmatched`.
+- **ruledOut:** dispatch order (T12's original mechanism) — refuted by the
+  no-`--` variant rendering as STATE under the jar's sequence-first
+  registration; a plain sequence-syntax failure — refuted by the no-line-1
+  variant rendering; our-side crash — clean 2-scope render.
 - **pairingRisk:** none — 0 jar rows exist on either side.
-- **sharedCauseWith:** none (diagram-type dispatch-order divergence is
-  architecturally distinct from the other three's state-diagram entity
-  resolution gaps, and is already a KNOWN, documented trade-off per
-  `src/index.ts:66-69`, not a newly discovered one)
-- **proposedWriteSet:** none proposed as a source fix — this is the
-  documented specificity-order trade-off (`src/index.ts:66-69`)
-  operating as designed; the fixture is simply an edge case where jar's
-  line-by-line-first-success model and this port's whole-document
-  keyword scan disagree on ambiguous `@startuml` input that starts with
-  a bare arrow and only reveals its `state` keyword on a later line.
-  Any fix would mean replicating jar's full per-factory incremental-parse
-  dispatch loop, which the codebase deliberately does not do.
-- **sizeEstimate:** n/a — no fix proposed; flag for `DIVERGENCES.md` per
-  ADR-6 (maintainer ruling: accept as a known dispatch-order trade-off,
-  or invest in line-by-line factory-trial dispatch).
+- **sharedCauseWith:** cagego-53-vemo516, xacona-99-peze211 (same missing
+  guard; one fix covers all three)
+- **proposedWriteSet:** `src/diagrams/state/state-parse-resolve.ts`
+  (`ensureState`: port `checkConcurrentStateOk`, error the diagram as jar
+  does) — same write-set as cagego/xacona.
+- **sizeEstimate:** small — one guard function + error path; three
+  fixtures move from `unmatched` to jar-identical error behaviour.
 - **confidence:** high
 - **nextStep:** n/a (resolved to a stated mechanism; not unresolved)
