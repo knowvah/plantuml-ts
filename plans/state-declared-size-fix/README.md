@@ -25,7 +25,7 @@ scope by design.
 
 | Batch | What | Tasks | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md) | Harness attribution (declaration-order pairing) | T0 | [ ] |
+| [0](batch-0/overview.md) | Harness gates + baselines (pairing stays sorted, D4 amended) | T0 | [x] |
 | [1](batch-1/overview.md) | Core creole seam · leaf sizing · line continuation · note-on-link · parse guards (parallel) | T1 T2 T3 T4 T5 | [ ] |
 | [2](batch-2/overview.md) | State text (G1+G8+G23) · note bodies (G2) — consume T1 | T6 T7 | [ ] |
 | [3](batch-3/overview.md) | Composite geometry: clusterPosMap (G4) · ink extent (G5+G6) | T8 T9 | [ ] |
@@ -55,7 +55,7 @@ parallel with Batch 4 (no shared write-set: they write only `findings/`).
 - command: npx jiti scripts/measure-composite-declared-size.ts --mismatched-only > /tmp/sds-now.jsonl && python3 plans/state-declared-size-fix/scripts/harness-diff.py test-results/state-declared-size-baseline.jsonl /tmp/sds-now.jsonl
   pass: prints "OK: N rows went exact, 0 rows appeared or grew" — then re-pin: cp /tmp/sds-now.jsonl test-results/state-declared-size-baseline.jsonl
   on_fail: stop            # a row appeared or grew: README stop 3
-- command: npx jiti scripts/render-manifest.ts > /tmp/manifest-now.json && python3 plans/state-declared-size-fix/scripts/manifest-diff.py test-results/render-manifest-baseline.json /tmp/manifest-now.json plans/state-declared-size-fix/expected-moves.txt
+- command: npx jiti scripts/render-manifest.ts --out /tmp/manifest-now.json && python3 plans/state-declared-size-fix/scripts/manifest-diff.py test-results/render-manifest-baseline.json /tmp/manifest-now.json plans/state-declared-size-fix/expected-moves.txt
   pass: every moved fixture is listed in expected-moves.txt for the batch — then re-pin the manifest baseline
   on_fail: stop            # collateral outside the batch's fixtures: README stop 4
 - command: git diff --name-only <last-batch-commit>..HEAD

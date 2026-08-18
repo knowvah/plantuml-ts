@@ -35,6 +35,15 @@
  * size and one of them is wrong. Rows are therefore reported with both
  * values, so a mis-pairing is visible rather than silent.
  *
+ * Declaration-order pairing (METRIC-AUDIT §3 "Candidate B") was tried in
+ * SI29/T0 and rejected: our DOT declares nested-cluster siblings in a
+ * different relative order than the jar (the `[*]` pseudo-node lands
+ * elsewhere — `bemena-23-zebu249/svek-2.dot:10-11` vs ours), so positional
+ * pairing swaps sizes between real nodes and 38/148 mismatched groups change.
+ * METRIC-AUDIT proved sorted is the error-minimising bijection (§2) and
+ * that real-node COUNTS align (§3), never ORDER. Ruling: `plans/
+ * state-declared-size-fix/decisions.md` D4 (amended 2026-08-18).
+ *
  * Usage:
  *   npx tsx scripts/measure-composite-declared-size.ts            all state fixtures
  *   npx tsx scripts/measure-composite-declared-size.ts <slug>…    named fixtures
