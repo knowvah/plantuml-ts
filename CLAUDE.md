@@ -85,8 +85,10 @@ geometry delta. Settled; not re-argued per case.
   `position.c`, `dotsplines.c`, `acyclic.c`).
 - `~/git/pdiff/` — 5600+ `.puml`, one per upstream issue. `tests/corpus/` —
   classified, gitignored (`python3 scripts/populate-corpus.py`).
-- `.claude/catalog.md` — every module + public API. **Check before
-  implementing anything**; agents routinely rebuild what exists.
+- `docs/catalog.md` — every module + its public API, generated (`npm run
+  catalog`) and drift-gated. **Check before implementing anything**; agents
+  routinely rebuild what exists. For *where is symbol Y*, prefer Serena's
+  `find_symbol`/`ast-grep` — the catalog answers *does a module for X exist*.
   `planning/mission-guide.md` before drafting a `/plan-mission` prompt.
 - Ported symbols carry a JSDoc `@see` to their Java origin.
 - Verified `@knowvah/dot-engine` findings: a self-contained `.md` in
