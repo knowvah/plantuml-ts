@@ -48,7 +48,7 @@ describe('creoleTextLines', () => {
     expect(lines[0]!.width).toBeCloseTo(measurer.measure('entry', font).width, 10);
   });
 
-  it('<math>x</math> and <sup>2</sup> are NOT ported (CommandCreoleBuilder.java:104-105,111 registers CommandCreoleExposantChange/CommandCreoleMath; this port never added either) -- both measure as literal, tag-inclusive text', () => {
+  it('<math>x</math> is NOT ported (CommandCreoleBuilder.java:111 registers CommandCreoleMath; this port has not added it, D6) -- measures as literal, tag-inclusive text; <sup> is ported since SI30 T1 and is covered by its own tests below', () => {
     const measurer = new WidthTableMeasurer();
 
     const mathLines = creoleTextLines('<math>x</math>', font, measurer);
@@ -56,11 +56,6 @@ describe('creoleTextLines', () => {
     expect(mathLines[0]!.runs).toHaveLength(1);
     expect(mathLines[0]!.runs[0]!.text).toBe('<math>x</math>');
     expect(mathLines[0]!.width).toBeCloseTo(measurer.measure('<math>x</math>', font).width, 10);
-
-    const supLines = creoleTextLines('<sup>2</sup>', font, measurer);
-    expect(supLines).toHaveLength(1);
-    expect(supLines[0]!.runs).toHaveLength(1);
-    expect(supLines[0]!.runs[0]!.text).toBe('<sup>2</sup>');
   });
 
   it('[[http://x]] -> one run, visible text defaults to the url itself, hyperlink color+underline, url set (CommandCreoleUrl.java / Url label-defaulting ctor)', () => {
