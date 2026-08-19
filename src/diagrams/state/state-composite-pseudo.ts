@@ -13,7 +13,7 @@
  * establish for this file pair (S3/S6 decision journal entries).
  */
 
-import type { Transition } from './ast.js';
+import type { State, Transition } from './ast.js';
 import type { GeoSpec, PassAccumulator, DiagramCtx } from './state-composite-pass.js';
 import { CIRCLE_START_SIZE, CIRCLE_END_SIZE } from './state-sizing.js';
 import { resolveEndpoint } from './state-composite-classify.js';
@@ -144,4 +144,91 @@ export function levelEndpointId(raw: string, isFrom: boolean, scopeId: string, c
     return isFrom ? initialId : finalId;
   }
   return resolveEndpoint(raw, ctx.classify);
+}
+
+/** One contiguous run of `PassAccumulator.nodes` contributed by a single
+ *  sibling of one composite scope — a member's own `resolveMember` call
+ *  (which pushes ONE node for a leaf or a packed autonom composite, but a
+ *  whole nested subtree for a `'cluster'`-classified one) or one `[*]`
+ *  circle. `creationIndex` is that sibling's parse-time tick, i.e. the key
+ *  {@link sortSpecsByCreationIndex} already orders `GeoSpec` siblings by. */
+interface NodeRun {
+  readonly from: number;
+  readonly to: number;
+  readonly creationIndex?: number;
+}
+
+/** Rewrites the `[min(from), max(to))` window of `acc.nodes` into
+ *  creation-index order, moving each run's nodes together. Nodes outside the
+ *  window (a caller that had already pushed before these siblings) are left
+ *  exactly where they were. */
+function reorderAccNodes(acc: PassAccumulator, runs: readonly NodeRun[]): void {
+  if (runs.length < 2) return;
+  const head = runs.reduce((m, r) => Math.min(m, r.from), Infinity);
+  const tail = runs.reduce((m, r) => Math.max(m, r.to), 0);
+  const reordered = sortSpecsByCreationIndex(runs).flatMap((r) => acc.nodes.slice(r.from, r.to));
+  acc.nodes.splice(head, tail - head, ...reordered);
+}
+
+/**
+ * SI31 T6 (G20a): pushes one composite scope's member nodes AND its own
+ * `[*]` circles onto `acc.nodes` in the jar's real Entity creation order,
+ * then returns both spec lists unchanged for the caller's own
+ * {@link sortSpecsByCreationIndex} materialization step.
+ *
+ * **Why the raw push order matters at all.** `state-composite-pass.ts
+ * #runPass` feeds `acc.nodes` to `layoutGraph` verbatim, and real graphviz's
+ * edge-label force-search reads node/edge declaration order — so a pass that
+ * declares `[Idle, Configuring, __init_NotShooting]` where jar declared
+ * `[circle, Idle, Configuring]` gets a different label box out of the SAME
+ * `dot -Txdot` binary on otherwise byte-identical input (0.750 px on
+ * `kejabo-83-vinu490`'s scope-2 width, G20's `causalChain`). The caller's
+ * later `sortSpecsByCreationIndex([...pseudoSpecs, ...memberSpecs])` cannot
+ * fix that: it reorders the `GeoSpec` list for materialization only, and it
+ * runs AFTER `runPass` has already laid out.
+ *
+ * **Why creation index, not a swap.** Upstream creates a scope's `[*]`
+ * entity lazily on FIRST REFERENCE (`~/git/plantuml/src/main/java/net/
+ * sourceforge/plantuml/statediagram/StateDiagram.java:92-107` — `getStart`
+ * calls `reallyCreateLeaf` only `if (quark.getData() == null)`), and
+ * `svek/SvekResult.java#drawU` then walks `Bibliotekon`'s registration-
+ * ordered `LinkedHashMap` (this file's own {@link sortSpecsByDocumentOrder}
+ * doc comment has that Java read in full). So the circle leads only when the
+ * scope's first transition line references `[*]`; a scope opening with
+ * `Idle --> Configuring` declares `Idle` first and its `[*]` wherever the
+ * later line put it. Hoisting the pseudo unconditionally would be right for
+ * `kejabo-83` and wrong for that scope — the tick is the thing that encodes
+ * jar order, which is why this reuses {@link sortSpecsByCreationIndex}
+ * (same stable rule, same "no tick sorts last" fallback) rather than
+ * reordering the two calls.
+ *
+ * `acc.nodes` therefore comes out in the same order as the caller's own
+ * sorted `localSpecs`, pseudo-before-member on a tie, matching that call's
+ * `[...pseudoSpecs, ...memberSpecs]` pre-sort input.
+ */
+export function pushLocalNodesInCreationOrder(
+  acc: PassAccumulator,
+  states: readonly State[],
+  resolveOne: (s: State) => GeoSpec,
+  scope: { id: string; transitions: readonly Transition[]; pseudoCreationIndex: ReadonlyMap<string, number> },
+): { memberSpecs: GeoSpec[]; pseudoSpecs: GeoSpec[] } {
+  const memberRuns: NodeRun[] = [];
+  const memberSpecs = states.map((s) => {
+    const from = acc.nodes.length;
+    const spec = resolveOne(s);
+    memberRuns.push({ from, to: acc.nodes.length, ...(spec.creationIndex !== undefined ? { creationIndex: spec.creationIndex } : {}) });
+    return spec;
+  });
+  const pseudoAt = acc.nodes.length;
+  const pseudoSpecs = addLocalPseudoNodes(scope.id, scope.transitions, acc, scope.pseudoCreationIndex);
+  // `addLocalPseudoNodes` pushes exactly ONE node per returned spec, in the
+  // same order (see its body directly above) -- so spec `i` owns node
+  // `pseudoAt + i`.
+  const pseudoRuns = pseudoSpecs.map((p, i) => ({
+    from: pseudoAt + i,
+    to: pseudoAt + i + 1,
+    ...(p.creationIndex !== undefined ? { creationIndex: p.creationIndex } : {}),
+  }));
+  reorderAccNodes(acc, [...pseudoRuns, ...memberRuns]);
+  return { memberSpecs, pseudoSpecs };
 }

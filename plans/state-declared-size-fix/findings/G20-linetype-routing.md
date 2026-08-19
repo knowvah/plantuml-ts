@@ -94,6 +94,32 @@ mechanisms, neither one is dot-engine's arithmetic.
   corpus re-run to bound the blast radius, not a 1-fixture fix.
 - **confidence:** high
 - **nextStep:** N/A (resolved)
+- **CORRECTION 2026-08-19 (SI31 T6) — this record's diagnosis is INCOMPLETE
+  and its `status: resolved` / `confidence: high` overstate it.** The
+  declaration-order divergence described above is REAL and has now been fixed
+  (both composite passes push `acc.nodes` in jar creation order; our inner DOT
+  now declares `__init_NotShooting, Idle, Configuring`, matching the jar's own
+  cached `svek-1.dot:5-7` in both order and widths, verified). **It did not
+  move this row**: `+0.749952` before and after, byte-identical.
+
+  The reason is that this record's `causalChain` established order-sensitivity
+  by feeding both DOTs through **real `dot -Txdot`**, which is order-sensitive
+  — but this port lays out through `@knowvah/dot-engine`, which on this graph
+  is order-INVARIANT: the same captured `DotInputGraph` under both node orders
+  returns identical `width`, `height` and per-edge `labelX`/`labelY`. So the
+  order fix could not, even in principle, close the row.
+
+  The residual `+0.750 px` therefore lives in a dot-engine-vs-native
+  label-placement difference, not in our declaration order. That attribution is
+  a HYPOTHESIS, not a filed finding: a clean A/B is confounded here because
+  under `linetype polyline` this port emits `xlabel` where the jar's cached DOT
+  emits `label`, so the two inputs are not the same graph. Establishing it
+  needs a controlled comparison that holds the label form fixed. Until then it
+  is deliberately NOT filed in `docs/graphviz-issues/`.
+
+  Row status: OPEN. The order fix was kept anyway — it is jar-correct and
+  measured at zero risk (0 declared-size rows moved, 0 of 2017 rendered SVGs
+  changed) — but it is a faithfulness fix, not the closure this record predicted.
 
 ### pavuzo-79-zodu430
 

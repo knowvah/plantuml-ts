@@ -102,3 +102,51 @@ fajegu-17-joba577 # size-only, non-target: `RUNNING -down-> STOPPING` (HEAD bran
 mefici-97-tudu030 # size-only, non-target: `Timer --> Stopwatch[H]` — source composite Timer (TAIL branch), target inside composite Stopwatch. Canvas width 873 -> 854 against jar's 816 (|error| 57 -> 38); the remaining 38px is a pre-existing, unrelated gap this term neither caused nor widened. Declared-size rows unchanged (DOT hash unchanged).
 
 # Batch 6 (T6 — G20a declaration order)
+
+# Every entry below moved on the emitted-svek-DOT hash ONLY — the rendered
+# SVG is byte-identical for all of them (verified: 42 manifest entries moved,
+# 42 DOT-only, 0 SVG), and not one declared-size row changed (harness summary
+# 273/2660/2576/47/37/0/39, identical to the Batch 5 baseline).
+#
+# Jar-side account, shared by all: each is a composite/concurrent scope whose
+# local `[*]` circle is now DECLARED to graphviz at its real parse-time
+# creation tick instead of always last. Upstream creates a scope's `[*]`
+# Entity lazily on FIRST REFERENCE — `StateDiagram.java:92-107` (`getStart`:
+# `if (quark.getData() == null) reallyCreateLeaf(...)`) — and
+# `svek/SvekResult.java#drawU` then walks `Bibliotekon`'s registration-ordered
+# `LinkedHashMap`. Jar-verified for the `[*]`-first case by
+# `test-results/dot-cache/state/kejabo-83-vinu490/svek-1.dot:5-7`
+# (`sh0006`=circle, `sh0007`=Idle, `sh0008`=Configuring), which our DOT now
+# matches. Fixtures whose scope references a member first keep members ahead
+# of the circle — the order follows the creation tick, not a hoist.
+lalava-26-zosi801
+leloja-87-tebi184
+mazize-40-paxi649
+nelupe-49-xova546
+pexiku-77-japi217
+sapelo-46-jafe280
+sizife-41-buje191
+tegali-39-molu382
+bemena-23-zebu249
+bunade-42-fudu910
+duzazu-41-telu529
+fomusu-59-fupe538
+gojuja-90-pune699
+jaxebo-54-nifi592
+jelusa-98-nexa591
+jetuse-93-gopi146
+jorere-75-peja265
+kejabo-83-vinu490
+ketibo-84-juzo029
+mifuti-36-jine785
+mosigo-88-rove013
+nibelu-74-pido796
+nimise-04-jove070
+nufigo-87-pivi558
+pajefo-95-neri955
+pesita-10-dene726
+pifido-37-jipu349
+rifefi-73-rofo730
+tumaba-64-tosu281
+xepafa-33-lazi826
+zitifa-97-bizo337

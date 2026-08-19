@@ -71,13 +71,15 @@ import {
   type GeoSpec,
   newAccumulator,
   resolveMember,
-  addLocalPseudoNodes,
   addLevelEdges,
   addScopeNotes,
   runPass,
   buildLevelTransitionGeos,
   sortSpecsByCreationIndex,
 } from './state-composite-pass.js';
+// SI31 T6 (G20a): imported DIRECTLY, not through `state-composite-pass.ts`'s
+// re-export barrel -- that file is outside this task's write-set.
+import { pushLocalNodesInCreationOrder } from './state-composite-pseudo.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { concurrentRegionScopeId } from './state-parse-state.js';
 import { shiftDotLayoutResult } from './state-composite-autonom.js';
@@ -305,8 +307,15 @@ function buildConcurrentBranchAcc(
   // `measureAutonomWrapper`/`stackConcurrentRegions` -- the SAME class of
   // ALREADY-PARKED floor-formula risk, deferred for the same reason.
   const childCtx: DiagramCtx = { ...ctx, insideAutonomPass: true };
-  const memberSpecs = states.map((c) => resolveMember(c, acc, childCtx, undefined));
-  const pseudoSpecs = addLocalPseudoNodes(scopeId, transitions, acc, ctx.pseudoCreationIndex);
+  // SI31 T6 (G20a): mirrors `state-composite-autonom.ts#buildPlainAutonomSpec`
+  // -- a region's own pass declares its nodes to graphviz in jar creation
+  // order too (`pushLocalNodesInCreationOrder`'s doc comment has the read).
+  const { memberSpecs, pseudoSpecs } = pushLocalNodesInCreationOrder(
+    acc,
+    states,
+    (c: State) => resolveMember(c, acc, childCtx, undefined),
+    { id: scopeId, transitions, pseudoCreationIndex: ctx.pseudoCreationIndex },
+  );
   addScopeNotes(noteScopeId, childCtx, acc);
   addLevelEdges(scopeId, transitions, acc, childCtx);
   return { acc, specs: sortSpecsByCreationIndex([...pseudoSpecs, ...memberSpecs]) };
