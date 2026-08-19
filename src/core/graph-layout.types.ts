@@ -249,6 +249,30 @@ export interface DotInputEdge {
     headLabel?: string;
     /** Invisible constraint edge (Svek `style=invis`). Emitter-only. */
     invis?: boolean;
+    /**
+     * G20b (`docs/graphviz-issues/16-edge-xlabel-position-not-in-getlayout
+     * .md`, SI31 T1): `label` moved to `xlabel` under `linetype ortho`
+     * (`state-dot-graph.ts#moveLabelToXlabel`, `class-dot-edges.ts
+     * #moveLabelToXlabel` — both mirror `SvekEdge.java:433-437`'s
+     * `dotSplines == ORTHO` fork). Like `tailLabel`/`headLabel` above, this
+     * text IS fed into the real @knowvah/dot-engine layout call
+     * (`graph-layout-build-edges.ts#addEdges`) — no longer emitter-only —
+     * so @knowvah/dot-engine's own external-label force-placement search
+     * (`label/xlabels.ts`, `lib/label/xlabels.c:placeLabels`/`xladjust`,
+     * the SAME algorithm `tailLabel`/`headLabel` drive) computes the
+     * position graphviz would, and `graph-layout.ts#toEdgeEntry` maps the
+     * result onto the edge's `labelX`/`labelY` (not a new field — for an
+     * ortho edge the xlabel IS the transition's label). `xlabelWidth`/
+     * `xlabelHeight` play the SAME `labelBoxWidth`/`labelBoxHeight` role as
+     * `label`'s own FIXEDSIZE-table variant above: `moveLabelToXlabel`
+     * always sets both alongside `xlabel`, so the box branch is the one
+     * that fires in this port. Before dot-engine 1.6.0 these three fields
+     * were declared here but dead on the layout path — `getLayout()`
+     * published no `xlabel` position for anything to read, so every ortho
+     * transition's inline label fell through to
+     * `state-transition-label.ts#perpendicularOffsetLabel`, the spline-
+     * midpoint heuristic that fallback exists for.
+     */
     xlabel?: string;
     xlabelWidth?: number;
     xlabelHeight?: number;

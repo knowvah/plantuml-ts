@@ -237,6 +237,13 @@ function toEdgeEntry(
     entry.epY = ge.ep.y;
   }
   assignLabelPos(entry, ge.label, 'labelX', 'labelY');
+  // G20b (docs/graphviz-issues/16, SI31 T1): `xlabel` maps onto the SAME
+  // `labelX`/`labelY` fields as `label`, not a new field -- for an
+  // ortho/polyline-routed edge the xlabel IS the transition's label
+  // (`moveLabelToXlabel` deletes `label` when it sets `xlabel`), so the two
+  // are mutually exclusive per edge and `assignLabelPos`'s early return on
+  // `undefined` makes the order here safe either way.
+  assignLabelPos(entry, ge.xlabel, 'labelX', 'labelY');
   assignLabelPos(entry, ge.tailLabel, 'tailLabelX', 'tailLabelY');
   assignLabelPos(entry, ge.headLabel, 'headLabelX', 'headLabelY');
   // @knowvah/dot-engine returns only the label position; echo back the caller's

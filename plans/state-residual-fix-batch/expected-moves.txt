@@ -35,6 +35,10 @@
 #                        rather than growing this list.
 
 # Batch 1 (T1 — G20b xlabel consumption)
+pavuzo-79-zodu430 # G20b's own target: NotShooting's ortho EvConfig labels now anchor at dot-engine's real xlabel force-search position instead of the perpendicularOffsetLabel heuristic, narrowing scope2/width/idx2 from -2.460024px to -1.579968px. NOT yet exact: the residual is a dot-engine defect, filed as docs/graphviz-issues/17 -- under splines=ortho the engine reserves ~1.58pt less canvas for xlabels than native graphviz on byte-identical input, and jar-side arithmetic is verified faithful and ruled out. DOT text changes too (jar-ward: the composite's own declared width, now closer to jar's 1.988368in, is an INPUT literal in the outer scope's emitted DOT statement).
+bujedi-30-cize673 # class, `linetype ortho`: relationship label moves off the perpendicularOffsetLabel spline-midpoint fallback onto the real graphviz-searched xlabel position via `class-dot-edges.ts`'s own `moveLabelToXlabel`, sharing this fix's core seam; DOT text unchanged (SVG label position only), class-dot-parity ratchet still 721/721.
+jakapi-64-tine258 # class, `linetype ortho`: same mechanism as bujedi-30-cize673 -- ortho relationship label repositioned to the real graphviz xlabel placement; DOT text unchanged, class-dot-parity ratchet still 721/721.
+zosaxo-93-nici652 # component, `linetype ortho`: link label repositioned via `description/link-edge-attrs.ts`'s own xlabel/xlabelWidth/xlabelHeight (a third, independent caller of this shared core seam); DOT text unchanged, description-parity ratchet still 357/357.
 
 # Batch 2 (T2 — G17 note-only region)
 
