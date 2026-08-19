@@ -146,3 +146,30 @@ Until then the `xlabel`/`xlabelWidth`/`xlabelHeight` fields on
 dead on the layout path — note that the doc comment there explicitly promises
 `tailLabel`/`headLabel` reach the real layout call and says nothing about
 `xlabel`, which is the asymmetry that exposed this.
+
+---
+
+**FIXED upstream 2026-08-19.** `EdgeGeometry` now carries
+`xlabel?: { x: number; y: number }`, populated in `snapshotEdge` from
+`edge.info.xlabel` through the same `flipY` as every other coordinate.
+
+Implemented exactly as requested, including the gate: it reuses the
+`placedLabelPos` helper issue 13 introduced, so presence is `lp->set`, not
+attribute-declared. That gate is reachable and load-bearing here —
+`writeBackLabels` (`src/common/xlabels-place.ts:421-431`) sets `set` only for
+labels the search placed, and `applyBestPos` returns without setting when the
+best candidate still overlaps and `force` is off — so an xlabel the search
+could not fit reads as absent rather than as a label at the origin.
+
+Oracle-verified rather than asserted: on this file's own repro, native
+`dot -Tdot` reports `xlp="30.945,98.35"` and the snapshot returns
+`{x: 30.94482…, y: 98.34964…}` in the `up` frame. The filing's second point is
+confirmed too — `label="X"` on the identical graph places at `x=41.06` against
+the xlabel's `30.94`, so no arithmetic on `label` or `points` reproduces it.
+
+Scope held to the filing: **edge** xlabels only. Node xlabels (`ND_xlabel`) are
+typed `unknown` on `nodeInfo` and were not asked for.
+
+Not yet consumable here: the field ships in `src/`, but this repo pins a
+published `.tgz`. The plantuml-ts half (steps 1–4 above) waits on that release,
+per TRACKER.md's own rule.

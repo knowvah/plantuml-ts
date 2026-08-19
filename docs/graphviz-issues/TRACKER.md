@@ -81,5 +81,35 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         rather than being ticked on the strength of the fix existing.
         (A trailing line here said "this repo is still on ^1.4.0" — stale the
         moment T7 landed the bump recorded above, and removed 2026-08-15.) -->
-- [ ] 15-cluster-anchor-point-ranked-with-target.md  <!-- filed 2026-08-18, SI29 T8: fovafu-44 +7.82 px, anchor point node ranked with its target instead of the cluster border -->
-- [ ] 16-edge-xlabel-position-not-in-getlayout.md  <!-- filed 2026-08-19, while planning the SI29 follow-on fix batch (G20b). EdgeGeometry carries no xlabel field, so every `linetype ortho`/`polyline` transition label falls back to perpendicularOffsetLabel instead of graphviz's force-search; pavuzo-79-zodu430 scope 2 width is -2.460 px because of it. Verified live on the installed 1.5.0, not inferred from the types: with `xlabel="X"` render() DOES emit the <text> (x=30.94) while getLayout()'s edge has no label field at all, and the x differs from the `label="X"` control (41.06) — so the engine places it by the real xlabels.c search and simply does not publish it. Same shape as 13 and 06. Consumption here is blocked until this lands and the .tgz moves; the plantuml-ts half (forward a?.xlabel in graph-layout-build-edges.ts, map ge.xlabel in toEdgeEntry) is deliberately NOT written in the meantime, since no fixture could exercise it. -->
+- [~] 15-cluster-anchor-point-ranked-with-target.md  <!-- RECLASSIFIED 2026-08-19:
+        NOT a dot-engine defect. The filing compared two different quantities --
+        the jar's DRAWN spline start (88.187, i.e. where PlantUML clips the path
+        at cluster A's rectangle) against our UNCLIPPED spline start (112). The
+        anchor never moved: on this fixture's own jar-emitted svek-1.dot the
+        port's -Tdot is byte-identical to the native oracle (same cluster bbs,
+        same zaent0002 pos 190,73, same spline), as it is on five hand-built
+        variants of the shape. Mapping the oracle's spline into the jar's frame
+        (dx=-5, dy=+45.09) reproduces the jar's own knots EXACTLY from the third
+        segment on, and the jar's arrow tip 70.83,128.99 IS the oracle's
+        endpoint -- same curve, both engines. The +7.82 is arithmetic: the
+        oracle's control point 205.82 maps to 200.820, minus A's frontier 193 =
+        7.820. Mechanism is PlantUML's Java-side DotPath#simulateCompound clip
+        (SvekEdge.java:671-672), which graphviz's own dot_compoundEdges cannot
+        supply for this shape -- with compound=true+ltail added, the head is
+        inside the tail cluster's bb so makeCompoundEdge (compound.c:378-383)
+        warns and leaves the spline alone (verified: output unchanged). No
+        upstream fix to wait for -- work is ours, applying the simulateCompound
+        clip we already ship (DIVERGENCES.md:688) to state composite-anchor
+        transitions before LimitFinder folds the spline into the ink extent. -->
+- [ ] 16-edge-xlabel-position-not-in-getlayout.md  <!-- FIXED upstream
+        2026-08-19: EdgeGeometry carries `xlabel {x, y}`, snapshotted from
+        edge.info.xlabel through the same flipY as every other coordinate and
+        gated on the SAME `lp->set` flag issue 13 introduced (an xlabel the
+        force search could not fit reads as absent, not as a label at the
+        origin). Oracle-verified on the filing's own repro: native `dot -Tdot`
+        reports xlp="30.945,98.35" against our {30.94482, 98.34964}. EDGE
+        xlabels only -- node xlabels (ND_xlabel) are typed `unknown` upstream
+        and were not asked for. UNCHECKED until the pinned .tgz moves and the
+        consumer half lands (a?.xlabel in addEdges, ge.xlabel in toEdgeEntry,
+        then pavuzo-79-zodu430 scope 2 -2.460 px -> 0). ORIGINAL FILING:
+        filed 2026-08-19, while planning the SI29 follow-on fix batch (G20b). EdgeGeometry carries no xlabel field, so every `linetype ortho`/`polyline` transition label falls back to perpendicularOffsetLabel instead of graphviz's force-search; pavuzo-79-zodu430 scope 2 width is -2.460 px because of it. Verified live on the installed 1.5.0, not inferred from the types: with `xlabel="X"` render() DOES emit the <text> (x=30.94) while getLayout()'s edge has no label field at all, and the x differs from the `label="X"` control (41.06) — so the engine places it by the real xlabels.c search and simply does not publish it. Same shape as 13 and 06. Consumption here is blocked until this lands and the .tgz moves; the plantuml-ts half (forward a?.xlabel in graph-layout-build-edges.ts, map ge.xlabel in toEdgeEntry) is deliberately NOT written in the meantime, since no fixture could exercise it. -->
