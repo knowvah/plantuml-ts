@@ -1,0 +1,22 @@
+# expected-moves.txt — state-anchor-clip-retire (SI32)
+#
+# Fixtures allowed to move `render-manifest`'s SHA-256 between batches (the
+# `manifest-diff.py` gate). One bare slug per line; `#` comments and blank
+# lines are ignored. A move by a fixture NOT listed here is stop 4.
+#
+# Each appended slug carries a one-line jar-side account of WHAT moved and why
+# it is jar-ward. An unaccounted move is never resolved by adding the slug.
+#
+# Expected movers by batch:
+#   Batch 0 (T0)  — none. Baselines only; zero fixtures may move.
+#   Batch 1 (T1)  — none. Investigation only, NO CODE.
+#   Batch 2 (T2)  — DRAWN OUTPUT MOVES, the mission's main event. Any state
+#                   fixture with a composite-anchor transition can move: the
+#                   spline itself is clipped, and arrowheads follow it (D3).
+#                   Expect MORE than SI31's 4 ink-only movers
+#                   (fovafu-44-mifu394, tubojo-49-tudu915, fajegu-17-joba577,
+#                   mefici-97-tudu030) — those 4 are the floor, not the ceiling.
+#   Batch 3 (T3)  — none. Docs only.
+#   Batch 4 (T4)  — none. Close-out.
+
+# Batch 2 (T2 — clip once, in solve()'s edge pass)

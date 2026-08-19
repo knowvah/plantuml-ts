@@ -9,9 +9,10 @@ Per-phase reference for drafting `/plan-mission` prompts. For each phase:
 The Java source is the spec. Read every file in the listed packages before
 designing anything. One task per observable behavior; 5–15 min of AI work each.
 
-Completed phases are tracked in `.claude/catalog.md` (Status: Done). They are
-not listed here. If you need to understand a completed implementation, read the
-source files directly.
+Completed phases are not listed here. For what already exists, read
+`docs/catalog.md` (generated, `npm run catalog`) — one row per module with its
+exported surface — then the source files directly. (This used to point at
+`.claude/catalog.md`, which never existed; fixed 2026-08-19.)
 
 ---
 
