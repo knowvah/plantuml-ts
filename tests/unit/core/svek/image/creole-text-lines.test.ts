@@ -157,7 +157,7 @@ describe('creoleTextLines', () => {
     expect(lines[0]!.height).toBe(0);
   });
 
-  it('<:rocket:> emoji -> no run, width/height from emojiBoxDim (AtomEmoji.java:57-64: 36*factor / 39*factor)', () => {
+  it('<:rocket:> alone on its line -> no run, the 36*factor SQUARE both ways (AtomEmoji.java:57-59); Sea supplies both bounds, so the -3*factor hang does NOT grow it (SI30 T3)', () => {
     const measurer = new WidthTableMeasurer();
     const lines = creoleTextLines('<:rocket:>', font, measurer);
     const factor = font.size / 24; // AtomEmoji.MAGIC, AtomEmoji.java:46
@@ -165,6 +165,20 @@ describe('creoleTextLines', () => {
     expect(lines).toHaveLength(1);
     expect(lines[0]!.runs).toEqual([]);
     expect(lines[0]!.width).toBeCloseTo(36 * factor, 10);
+    // Was 39*factor while this seam pre-combined the hang into the DIMENSION
+    // (`emojiBoxDim`). Now it drives the real `Sea`: `minY = -36f + (-3f)`,
+    // `maxY = -3f` -> `getHeight() == 36f` when the emoji is alone on the
+    // line, and 39*factor only when a text atom (maxY 0) shares it -- the
+    // jar-probed split `AtomEmoji.ts#emojiLineHeightFactor` documents
+    // (`rectangle "<:rocket:>"` measures 41x41, not 41x42.75).
+    expect(lines[0]!.height).toBeCloseTo(36 * factor, 10);
+  });
+
+  it('<:rocket:> WITH a text atom on the line -> 39*factor (Sea: emoji minY -39f vs text maxY 0, AtomEmoji.java:57-64)', () => {
+    const measurer = new WidthTableMeasurer();
+    const lines = creoleTextLines('<:rocket:>x', font, measurer);
+    const factor = font.size / 24;
+
     expect(lines[0]!.height).toBeCloseTo(39 * factor, 10);
   });
 
@@ -176,5 +190,139 @@ describe('creoleTextLines', () => {
     expect(lines[0]!.runs).toEqual([]);
     expect(lines[0]!.width).toBe(0);
     expect(lines[0]!.height).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SI30 T3 — `<sup>`/`<sub>` sizing + `Sea` placement (`decisions.md#D1/#D2`).
+// Written before the implementation; every expectation is DERIVED from the
+// measurer and the cited Java rule, never a captured number.
+// ---------------------------------------------------------------------------
+
+describe('creoleTextLines — FontPosition runs through Sea (SI30 D1/D2)', () => {
+  const measurer = new WidthTableMeasurer();
+  /** `StringBounder#getDescent`, this port's `size/4.5` (`measurer.ts:195-197`,
+   *  D3 — no new constant). `AtomText#drawU` reads it at java:214. */
+  const descent = (size: number): number => measurer.getDescent({ ...font, size }, 'x');
+  /** `FontPosition#mute` (`FontPosition.java:51-60`): −3, floored at 2. */
+  const muted = (size: number): number => Math.max(size - 3, 2);
+
+  it('NORMAL-only lines are byte-identical to the pre-Sea seam: width = Σ atom widths, height = MAX atom height, dy = 0 (README stop 9)', () => {
+    // The identity proof. Each display below exercises a different atom
+    // cascade the old sum/max loop handled: plain, styled, an inline
+    // `<size:N>` (two different NORMAL sizes on one line), and a heading
+    // (`StripeSimple.ts:271`'s +4/+2/+1 cascade).
+    for (const display of ['plain text', '**bold** and //italic//', '<size:20>big</size> small', '==heading', 'x']) {
+      const line = creoleTextLines(display, font, measurer)[0]!;
+      const widths = line.runs.map((r) => measurer.measure(r.text, { ...font, size: r.size }).width);
+      const heights = line.runs.map((r) =>
+        // `AtomText.java:176-181` — measured height, floored at 10.
+        Math.max(measurer.measure(r.text, { ...font, size: r.size }).height, 10),
+      );
+
+      expect(line.width).toBeCloseTo(
+        widths.reduce((a, b) => a + b, 0),
+        10,
+      );
+      expect(line.height).toBeCloseTo(Math.max(...heights), 10);
+      for (const run of line.runs) expect(run.dy).toBe(0);
+    }
+  });
+
+  it('a NORMAL run reports its own cascaded size unchanged (getFont is the identity for FontPosition.NORMAL, FontPosition.java:51-53)', () => {
+    const line = creoleTextLines('<size:20>big</size> small', font, measurer)[0]!;
+    expect(line.runs.map((r) => r.size)).toEqual([20, 14]);
+  });
+
+  it("juvagu-33's `\\t<sup>1</sup>`: the sup run measures at the MUTED size 11, and the tab stop still comes from the NORMAL run's own 14 (AtomText.java:251,271-273)", () => {
+    const line = creoleTextLines('\t<sup>1</sup>', font, measurer)[0]!;
+
+    expect(line.runs.map((r) => r.text)).toEqual(['\t', '1']);
+    expect(line.runs.map((r) => r.size)).toEqual([font.size, muted(font.size)]);
+    // Tab stop = `getFont().getSize2D() * 4` (`AtomText.java:273` — the
+    // zero-width-space fallback that always fires under the deterministic
+    // width table), on the NORMAL run's own font: 14*4 = 56. Then the sup
+    // glyph at its muted size.
+    expect(line.width).toBeCloseTo(font.size * 4 + measurer.measure('1', { ...font, size: 11 }).width, 10);
+    // Pre-mute this line measured `'1'` at 14 — 1.67px wider, exactly the
+    // jar delta T0 recorded for `s1 width idx1` (1.163715in vs 1.140538in).
+    expect(line.width).toBeLessThan(font.size * 4 + measurer.measure('1', font).width);
+  });
+
+  it("juvagu-33's line: Sea grows the line to the sup's box + its raise, and dy is the sup's own baseline (Sea.java:72-80, AtomText.java:213-215,321-323)", () => {
+    const line = creoleTextLines('\t<sup>1</sup>', font, measurer)[0]!;
+    // Sea: normal atom y = -14, sup atom y = -11 + (-6) = -17 ->
+    // minY = -17, maxY = max(0, -6) = 0 -> height 17 (was 14).
+    expect(line.height).toBeCloseTo(Math.max(14, 11 + 6), 10);
+    expect(line.runs[0]!.dy).toBe(0);
+    // The raise, net of the two descents: the run draws at its own muted
+    // descent while the renderer's reference baseline uses the UNMUTED one.
+    expect(line.runs[1]!.dy).toBeCloseTo(-6 - descent(11) + descent(14), 10);
+    expect(line.runs[1]!.dy).toBeLessThan(0); // raised, not lowered
+  });
+
+  it('<sub> lowers by +3 and grows the line at the BOTTOM, so the NORMAL runs sit 3px above it (FontPosition.java:41-49, Sea.java:72-80)', () => {
+    const line = creoleTextLines('H<sub>2</sub>O', font, measurer)[0]!;
+
+    expect(line.runs.map((r) => r.text)).toEqual(['H', '2', 'O']);
+    expect(line.runs.map((r) => r.size)).toEqual([14, 11, 14]);
+    // minY = -14 (the H/O atoms), maxY = +3 (the sub's own altitude).
+    expect(line.height).toBeCloseTo(14 + 3, 10);
+    // maxY moved off 0, so the bottom-anchored reference baseline every
+    // renderer reconstructs (`lineTop + height - size/4.5`) now sits 3px
+    // too low for the NORMAL runs — `Sea` says so, and `dy` carries it.
+    expect(line.runs[0]!.dy).toBeCloseTo(-3, 10);
+    expect(line.runs[2]!.dy).toBeCloseTo(-3, 10);
+    // The sub itself: 3 lower than the normal runs, net of the descents.
+    expect(line.runs[1]!.dy).toBeCloseTo(descent(14) - descent(11), 10);
+    expect(line.runs[1]!.dy - line.runs[0]!.dy).toBeGreaterThan(0); // lowered
+  });
+
+  it('<size:20><sup>x</sup></size> and the reverse nesting both mute the CASCADED size -> 17 (FontConfiguration.java:98-104 mutes at READ time, D1)', () => {
+    for (const display of ['<size:20><sup>x</sup></size>', '<sup><size:20>x</size></sup>']) {
+      const line = creoleTextLines(display, font, measurer)[0]!;
+      expect(line.runs).toHaveLength(1);
+      expect(line.runs[0]!.size).toBe(17);
+      expect(line.width).toBeCloseTo(measurer.measure('x', { ...font, size: 17 }).width, 10);
+      // Alone on its line: minY = -17-6, maxY = -6 -> height 17, and the
+      // run keeps its own baseline (nothing NORMAL shares the line).
+      expect(line.height).toBeCloseTo(17, 10);
+      expect(line.runs[0]!.dy).toBeCloseTo(descent(20) - descent(17), 10);
+    }
+  });
+
+  it('an emoji and a <sup> on one line: the emoji sets the line height (39*factor) without moving the sup off its own baseline (AtomEmoji.java:57-64)', () => {
+    const line = creoleTextLines('<:rocket:> a<sup>b</sup>', font, measurer)[0]!;
+    const factor = font.size / 24;
+
+    expect(line.runs.map((r) => r.size)).toEqual([14, 11]);
+    // Emoji minY = -36f-3f, text maxY = 0.
+    expect(line.height).toBeCloseTo(39 * factor, 10);
+    expect(line.width).toBeCloseTo(
+      36 * factor + measurer.measure(' a', font).width + measurer.measure('b', { ...font, size: 11 }).width,
+      10,
+    );
+    expect(line.runs[0]!.dy).toBe(0);
+    // Identical to the same sup on a text-only line: `dy` is measured
+    // against the line's own reference baseline, so a taller neighbour
+    // shifts both terms equally.
+    expect(line.runs[1]!.dy).toBeCloseTo(-6 - descent(11) + descent(14), 10);
+  });
+
+  it('a run measured under the 10px floor draws at its REAL height inside the floored box (AtomText.java:178-179 floors the DIMENSION, java:213 reads the unfloored rect)', () => {
+    // `<size:8>`: dimension 10 (floored), draw height 8 — upstream's own
+    // asymmetry, so `dy` is -2 even though the run is NORMAL. Named here
+    // rather than smoothed away; the same 10px floor is what makes a
+    // `<sup>` muted below 10 (e.g. class font 12 -> 9) carry an extra -1.
+    const line = creoleTextLines('<size:8>tiny</size>', font, measurer)[0]!;
+    expect(line.runs[0]!.size).toBe(8);
+    expect(line.height).toBe(10);
+    expect(line.runs[0]!.dy).toBeCloseTo(8 - 10, 10);
+  });
+
+  it('a table row reports one NORMAL run at the caller font (not lexed, CreoleParser.java:91-100)', () => {
+    const line = creoleTextLines('|= h |= h2 |', font, measurer)[0]!;
+    expect(line.runs[0]!.size).toBe(font.size);
+    expect(line.runs[0]!.dy).toBe(0);
   });
 });
