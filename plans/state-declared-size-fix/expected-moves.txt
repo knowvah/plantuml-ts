@@ -82,3 +82,9 @@ decede-10-buvu414
 pebepi-32-cati486
 taxile-56-goca422
 tigibi-80-zidi137
+# T8 general mechanism — nested clusters now folded/translated (journal T8; rovese/zoriza 0 rows, SVG byte-exact after scale; zizemo byte-exact)
+rovese-43-tadu368
+zizemo-86-gisa766
+zoriza-41-rege543
+# T9 self-loop arrowhead ink — dapunu-39 s3 width −2.03 → +0.0013 px (orchestrator-verified)
+dapunu-39-kava045
