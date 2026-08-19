@@ -132,6 +132,24 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
       // Measure with a LUT-known font (graphviz's default "Times,serif" warns).
       attrs.fontname = 'Times';
     }
+    // G20b (docs/graphviz-issues/16): `label` moved to `xlabel` under
+    // `linetype ortho` (`state-dot-graph.ts#moveLabelToXlabel`,
+    // `class-dot-edges.ts#moveLabelToXlabel` -- SvekEdge.java:433-437's
+    // `dotSplines == ORTHO` fork) had no forwarding branch here at all, so
+    // @knowvah/dot-engine never saw the text and placed nothing --
+    // `getLayout()` published no position for the label to read (dot-engine
+    // 1.6.0 fixed the snapshot side; this is the consumption side). Both
+    // callers always set `xlabelWidth`/`xlabelHeight` alongside `xlabel`
+    // (mirrors `moveLabelToXlabel`'s own `attrs.xlabelWidth = attrs
+    // .labelWidth!` assignment), so the box variant below is the one that
+    // actually fires in this port; the plain-text branch here exists for
+    // the same reason `label`'s does -- `DotInputEdge.attributes` declares
+    // the three xlabel fields independently optional.
+    const hasXlabelBox = a?.xlabelWidth !== undefined && a?.xlabelHeight !== undefined;
+    if (a?.xlabel !== undefined && !hasXlabelBox) {
+      attrs.xlabel = a.xlabel;
+      attrs.fontname = 'Times';
+    }
     // G2/N25: feed the ACTUAL text (not just DOT-gate sizing) into the real
     // layout call so @knowvah/dot-engine's own `placeLabels`/`xladjust` (`label/
     // xlabels.ts`, a faithful port of `lib/label/xlabels.c`) computes the
@@ -182,6 +200,9 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
     }
     if (a?.headLabel !== undefined && hasHeadBox) {
       edge.setHtmlAttr('headlabel', fixedSizeTable(a.headLabelWidth!, a.headLabelHeight!));
+    }
+    if (a?.xlabel !== undefined && hasXlabelBox) {
+      edge.setHtmlAttr('xlabel', fixedSizeTable(a.xlabelWidth!, a.xlabelHeight!));
     }
 
     const k = edgeKey(e.from, e.to);

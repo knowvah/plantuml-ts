@@ -23,7 +23,6 @@ import {
   type GeoSpec,
   newAccumulator,
   resolveMember,
-  addLocalPseudoNodes,
   addScopeNotes,
   addLevelEdges,
   sweepOrphanEdges,
@@ -31,6 +30,9 @@ import {
   buildLevelTransitionGeos,
   sortSpecsByCreationIndex,
 } from './state-composite-pass.js';
+// SI31 T6 (G20a): imported DIRECTLY, not through `state-composite-pass.ts`'s
+// re-export barrel -- that file is outside this task's write-set.
+import { pushLocalNodesInCreationOrder } from './state-composite-pseudo.js';
 import { sweepOrphanNoteEdges } from './state-note-layout.js';
 import { resolveEndpoint } from './state-composite-classify.js';
 
@@ -212,8 +214,15 @@ export function buildPlainAutonomSpec(s: State, ctx: DiagramCtx): ExtractAutonom
   // deleted: the field itself lives in `state-composite-pass-types.ts`,
   // outside this task's write-set.
   const childCtx: DiagramCtx = { ...ctx, insideAutonomPass: true };
-  const memberSpecs = s.children.map((c) => resolveMember(c, acc, childCtx, undefined));
-  const pseudoSpecs = addLocalPseudoNodes(s.id, s.transitions, acc, ctx.pseudoCreationIndex);
+  // SI31 T6 (G20a): `acc.nodes` must reach `runPass` in jar creation order --
+  // see `pushLocalNodesInCreationOrder`'s own doc comment for the mechanism
+  // and the `StateDiagram#getStart` read behind it.
+  const { memberSpecs, pseudoSpecs } = pushLocalNodesInCreationOrder(
+    acc,
+    s.children,
+    (c: State) => resolveMember(c, acc, childCtx, undefined),
+    { id: s.id, transitions: s.transitions, pseudoCreationIndex: ctx.pseudoCreationIndex },
+  );
   addScopeNotes(s.id, childCtx, acc);
   const localTransitions = s.transitions.filter((t) => t.from !== s.id && t.to !== s.id);
   addLevelEdges(s.id, localTransitions, acc, childCtx);

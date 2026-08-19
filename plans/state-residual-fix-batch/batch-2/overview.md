@@ -8,4 +8,4 @@ Six rows on one fixture, arithmetic closing to the pixel on one constant.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | `regionInkGeometry` degenerate-ink branch seeds from raw node boxes + `SvekResult.java:135`'s 15 | typescript-pro (sonnet) | `src/diagrams/state/state-composite-concurrent.ts`, `tests/unit/state/state-composite-concurrent.test.ts` (or the nearest existing unit test for this module) | T1 | [ ] |
+| T2 | `regionInkGeometry` degenerate-ink branch seeds from raw node boxes + `SvekResult.java:135`'s 15 | typescript-pro (sonnet) | `src/diagrams/state/state-composite-concurrent.ts`, `tests/unit/state/state-composite-concurrent.test.ts` (or the nearest existing unit test for this module) | T1 | [x] |

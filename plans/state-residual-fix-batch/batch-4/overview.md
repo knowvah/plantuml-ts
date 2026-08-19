@@ -15,4 +15,4 @@ source-verified; what *gates* it is not. Settle that first — stop 9.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4 | Settle the opacity gate against the Java, then thread a south-opacity boolean to the ink walk and apply the +1 | general-purpose (opus) | `src/diagrams/state/state-geo-types.ts`, `src/diagrams/state/state-composite-pass.ts`, `src/diagrams/state/state-composite-pass-types.ts`, `src/diagrams/state/state-composite-geo.ts`, `src/diagrams/state/layout-ink-extent.ts`, their unit tests | T3 | [ ] |
+| T4 | Settle the opacity gate against the Java, then thread a south-opacity boolean to the ink walk and apply the +1 | general-purpose (opus) | `src/diagrams/state/state-geo-types.ts`, `src/diagrams/state/state-composite-pass.ts`, `src/diagrams/state/state-composite-pass-types.ts`, `src/diagrams/state/state-composite-geo.ts`, `src/diagrams/state/layout-ink-extent.ts`, their unit tests | T3 | [x] |

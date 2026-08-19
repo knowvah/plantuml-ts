@@ -1,12 +1,20 @@
-import { type Bbox } from './layout-helpers.js';
-
 /**
  * spline-clip.ts — faithful port of upstream's compound-edge boundary
- * clipping (`DotPath#simulateCompound`,
- * klimt/shape/DotPath.java), applied by the description engine when an
- * edge endpoint is a container/group. Split out of `layout-helpers.ts` to
- * keep that file within this project's 500-line cap (reported split,
- * matching the `svek-edge-geometry.ts` precedent).
+ * clipping (`DotPath#simulateCompound`, klimt/shape/DotPath.java), applied
+ * when an edge endpoint is a container/group.
+ *
+ * SI31 T5 (`plans/state-residual-fix-batch/decisions.md#d9`): moved here
+ * from `src/diagrams/description/` unchanged — the SI27 shared-seam
+ * pattern. Upstream calls `simulateCompound` from `SvekEdge#solveLine`
+ * (`SvekEdge.java:671-672`), which is `CucaDiagram`-family machinery every
+ * svek engine shares, so the port belongs in `src/core/` too: the state
+ * engine's composite-anchor transitions need the same clip
+ * (`state/layout-ink-extent.ts`), and `tests/architecture/layering.test.ts`
+ * Rule 2 forbids state importing it from description. There is exactly ONE
+ * port of `simulateCompound` in this repo and this is it — copying it is
+ * forbidden (CLAUDE.md, D9). It was originally split out of description's
+ * `layout-helpers.ts` to keep that file within this project's 500-line cap
+ * (reported split, matching the `svek-edge-geometry.ts` precedent).
  *
  * Upstream `SvekEdge#solveLine` calls
  * `dotPath.simulateCompound(lhead.getRectangleArea(), ltail.getRectangleArea())`
@@ -15,12 +23,13 @@ import { type Bbox } from './layout-helpers.js';
  * sits *inside* the cluster — `ClusterDotString.java:149`,
  * `Cluster#getSpecialPointId`). The two exported functions here are the
  * `tail` (`clipSplineStart`) and `head` (`clipSplineEnd`) branches of that
- * one method, kept separate because this port's caller
- * (`layout-geo-post.ts#clipEdgePoints`) applies them independently.
+ * one method, kept separate because this port's callers
+ * (description's `layout-geo-post.ts#clipEdgePoints`, state's
+ * `layout-ink-extent.ts#addTransitionInk`) apply them independently.
  *
  * The point array they operate on is the flat graphviz-spline shape
- * `DescriptionEdgeGeo.points` carries: a start anchor followed by
- * `(cp1, cp2, endpoint)` cubic-bezier triples — `1 + 3*n` points for `n`
+ * `DescriptionEdgeGeo.points`/`TransitionGeo.points` carry: a start anchor
+ * followed by `(cp1, cp2, endpoint)` cubic-bezier triples — `1 + 3*n` points for `n`
  * segments — the same convention `buildDotPathFromSplinePoints`
  * (`svek-edge-geometry.ts`) consumes. Clipping is done bezier-by-bezier
  * (upstream operates on `DotPath.beziers`), so the `1 + 3*n` invariant is
@@ -35,6 +44,24 @@ import { type Bbox } from './layout-helpers.js';
  * crossing point, not a more precise one.
  */
 
+/**
+ * The rectangle the clips test against — upstream's `RectangleArea`
+ * (klimt/geom/RectangleArea.java), which is what `SvekEdge.java:671-672`
+ * passes as `lhead.getRectangleArea()` / `ltail.getRectangleArea()`.
+ *
+ * Declared structurally here rather than imported so `src/core/` keeps no
+ * dependency on `src/diagrams/` (`layering.test.ts` Rule 1). Description's
+ * own bbox type (`description/layout-helpers-types.ts`) and the state
+ * engine's composite rectangle both satisfy it by structure, so no caller
+ * changes shape.
+ */
+export interface ClipRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 type Pt = { x: number; y: number };
 
 /** One cubic bezier segment: `[start, cp1, cp2, end]`. */
@@ -47,10 +74,11 @@ const SUBDIVIDE_ITERS = 8;
 /**
  * `RectangleArea#contains(x, y)` (klimt/geom/RectangleArea.java): the
  * boundary is **half-open** — closed on min, open on max. Not the same as
- * `layout-helpers.ts#insideBbox` (closed on both), so the clip carries its
- * own predicate to match upstream's subdivision decisions exactly.
+ * description's `layout-helpers.ts#insideBbox` (closed on both), so the
+ * clip carries its own predicate to match upstream's subdivision decisions
+ * exactly.
  */
-function contains(p: Pt, b: Bbox): boolean {
+function contains(p: Pt, b: ClipRect): boolean {
   return p.x >= b.x && p.x < b.x + b.width && p.y >= b.y && p.y < b.y + b.height;
 }
 
@@ -105,7 +133,7 @@ function isSpline(points: readonly Pt[]): boolean {
  * start is already outside `tail`, when the whole spline stays inside
  * (upstream's "strange1" no-op), or when `points` is not a spline.
  */
-export function clipSplineStart(points: Array<Pt>, tail: Bbox): Array<Pt> {
+export function clipSplineStart(points: Array<Pt>, tail: ClipRect): Array<Pt> {
   if (!isSpline(points)) return points;
   const beziers = toBeziers(points);
   if (!contains(beziers[0]![0], tail)) return points; // tail.contains(getStartPoint()) == false
@@ -134,7 +162,7 @@ export function clipSplineStart(points: Array<Pt>, tail: Bbox): Array<Pt> {
  * already outside `head`, when a segment is wholly inside `head`
  * (upstream's early `return me`), or when `points` is not a spline.
  */
-export function clipSplineEnd(points: Array<Pt>, head: Bbox): Array<Pt> {
+export function clipSplineEnd(points: Array<Pt>, head: ClipRect): Array<Pt> {
   if (!isSpline(points)) return points;
   const beziers = toBeziers(points);
   if (!contains(beziers[beziers.length - 1]![3], head)) return points; // end outside head

@@ -58,6 +58,9 @@ import type { TransitionGeo } from './state-geo-types.js';
 import { attachTransitionLabel } from './state-transition-label.js';
 import { resolveAllAutonomPasses } from './state-composite-autonom.js';
 import { resolveClusterComposite } from './state-composite-cluster.js';
+import { isTransparentColor } from '../../core/paint.js';
+import { resolveBareOrBackColor } from '../../core/color-override.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { buildNoteGraphPartsByScope, sweepOrphanNoteEdges } from './state-note-layout.js';
 // mission G4 S7: pseudo-anchor id resolution + creation-order sibling
 // sorting moved to ./state-composite-pseudo.ts (500-line file-cap
@@ -106,6 +109,95 @@ export function newAccumulator(labelFont?: FontSpec, measurer?: StringMeasurer):
  *  is a pure LOOKUP (mission A4 Phase L iter 17) -- `resolveAllAutonomPasses`
  *  has already fired every autonom composite's own pass, in the correct
  *  GLOBAL order, before any `resolveMember` walk begins. */
+/** `stateDiagram { state { RoundCorner 25 } }` -- the jar's own default
+ *  corner radius for every state-diagram box shape
+ *  (`~/git/plantuml/src/main/resources/skin/plantuml.skin:266-268`, and
+ *  identically `rose.skin:265-268`). Read RAW here (not halved) because
+ *  {@link resolvesSouthCapInk} mirrors `RoundedSouth.drawU`'s own
+ *  `rounded == 0` test, which upstream applies to the unhalved
+ *  `PName.RoundCorner` value (`svek/Cluster.java:321`). */
+const STATE_DEFAULT_ROUND_CORNER = 25;
+
+/**
+ * SI31 T4 (G5, "mechanism 8"): does this composite's `RoundedSouth` south
+ * cap actually get DRAWN, so that `LimitFinder#drawUPath`'s zero ink inset
+ * applies at its max-Y? See `StateNodeGeo.southCapInk`'s own doc comment
+ * (state-geo-types.ts) for the geometry; this is the GATE half.
+ *
+ * `RoundedSouth.drawU` (`~/git/plantuml/.../svek/RoundedSouth.java:65-83`)
+ * draws nothing at all when `backColor.isTransparent()` (lines 66-67), and
+ * falls back to a plain `URectangle` -- whose ink goes through
+ * `LimitFinder#drawRectangle`'s `-1` inset, contributing NO extra px -- when
+ * `rounded == 0` (lines 68-70). Both guards are mirrored here.
+ *
+ * `southBackcolor` is resolved at `~/git/plantuml/.../svek/Cluster.java:459
+ * -471`: `group.getColors().getColor(ColorType.BACK)` if the group carries an
+ * explicit inline override, else the `stateDiagram.state.body` style bucket,
+ * which `src/main/resources/skin/plantuml.skin:266-271` defaults to
+ * `transparent`. `StyleSignatureBasic#matchAll`
+ * (`~/git/plantuml/.../style/StyleSignatureBasic.java:212-216`) admits any
+ * declaration whose style names are a SUBSET of the `{root, element,
+ * stateDiagram, state, body}` query and whose stereotypes the element
+ * carries, and `StyleStorage#computeMergedStyle`
+ * (`.../style/StyleStorage.java:102-116`) keeps the higher-PRIORITY value
+ * (`.../style/DarkString.java:50-58`), priority being the monotonic load
+ * counter -- so every user-authored `state`/`stateDiagram`/`root`/`element`
+ * BackGroundColor declaration, loaded after the skin file, beats the skin's
+ * `body { transparent }` default and reaches the south cap. That is exactly
+ * the tier stack `state-render-colors.ts#resolveStateFillBucketed` already
+ * models, read here for "did ANY tier resolve" rather than for a value:
+ *   1. `#color`/`#back:color` inline (`Colors#getColor(ColorType.BACK)`),
+ *   2. `skinparam stateBackgroundColor<<stereo>>` (jar signature `{state}` +
+ *      stereotype -- `.../style/FromSkinparamToStyle.java:204,395-407`),
+ *   3. the bare `state`-element bucket (`skinparam stateBackgroundColor`,
+ *      `<style> state { BackGroundColor }`, and the `<style> stateDiagram {
+ *      BackgroundColor }` cascade alias),
+ *   4. the universal `skin <name>`/`<style> root {}`/`<style> element {}`
+ *      cascade (`rose.skin:13`'s `root { BackGroundColor #FEFECE }` reaches
+ *      the body query because rose.skin declares NO `state.body` bucket at
+ *      all, and `TitledDiagram#loadSkin:167` REPLACES the style builder).
+ * A tier that resolves to an explicitly transparent color still leaves the
+ * cap undrawn, which `isTransparentColor` (`HColorSimple#isTransparent`)
+ * decides.
+ */
+function resolvesSouthCapInk(s: State, theme: Theme): boolean {
+  // `RoundedSouth.drawU:68-70` -- a ZERO corner radius draws a `URectangle`,
+  // not a `UPath`, so `drawRectangle`'s `-1` inset applies and there is no
+  // extra px. `Cluster.java:321` reads the radius off `PName.RoundCorner`
+  // and `Cluster.java:323-324` forces it to 0 under `strictUmlStyle()`.
+  const rounded = theme.strictUml === true ? 0 : (theme.colors.graph.stateCascadeRoundCorner ?? STATE_DEFAULT_ROUND_CORNER);
+  if (rounded === 0) return false;
+  const resolved = resolveSouthBackColor(s, theme);
+  return resolved !== undefined && !isTransparentColor(resolved);
+}
+
+/** {@link resolvesSouthCapInk}'s colour half -- `Cluster.java:459-471`'s own
+ *  resolution order, `undefined` when NO tier fires (the skin default, i.e.
+ *  `body { BackGroundColor transparent }`). Split out to keep
+ *  `resolvesSouthCapInk` under the project's per-function complexity cap. */
+function resolveSouthBackColor(s: State, theme: Theme): string | undefined {
+  const inline = resolveBareOrBackColor(s.color);
+  if (inline !== undefined) return resolveColorToSvgHex(inline);
+  const byStereo =
+    s.stereotype !== undefined
+      ? theme.colors.graph.stateBackgroundColorByStereo?.[s.stereotype.toLowerCase()]
+      : undefined;
+  const bucket = theme.colors.elements?.['state']?.background;
+  const raw = byStereo ?? (typeof bucket === 'string' ? bucket : undefined) ?? theme.colors.graph.rootElementBackground;
+  return raw !== undefined ? resolveColorToSvgHex(raw) : undefined;
+}
+
+/** Attaches {@link resolvesSouthCapInk}'s verdict to a COMPOSITE GeoSpec
+ *  (`'autonom'`/`'cluster'`). A `'state'` spec is a leaf, which upstream
+ *  never wraps in a `RoundedContainer` at all
+ *  (`~/git/plantuml/.../svek/Cluster.java:354` reaches `drawUState` only for
+ *  a group), so it is returned untouched. Only ever ADDS the field, never
+ *  sets it `false`, keeping the transparent-south path byte-identical. */
+function withSouthCapInk(spec: GeoSpec, southCap: boolean): GeoSpec {
+  if (!southCap || spec.kind === 'state') return spec;
+  return { ...spec, southCapInk: true };
+}
+
 export function resolveMember(s: State, acc: PassAccumulator, ctx: DiagramCtx, parentClusterId: string | undefined): GeoSpec {
   // `hasLocalContent`, not bare children.length -- mission A4 Phase L
   // iter 5, its doc (state-composite-detect.ts) has the full mechanism
@@ -119,6 +211,7 @@ export function resolveMember(s: State, acc: PassAccumulator, ctx: DiagramCtx, p
       ...(s.creationIndex !== undefined ? { creationIndex: s.creationIndex } : {}),
     };
   }
+  const southCap = resolvesSouthCapInk(s, ctx.theme);
   if (ctx.classify.kindOf.get(s.id) === 'autonom') {
     const spec = ctx.resolvedAutonom.get(s.id);
     if (spec === undefined) {
@@ -132,9 +225,13 @@ export function resolveMember(s: State, acc: PassAccumulator, ctx: DiagramCtx, p
       throw new Error(`autonom composite "${s.id}" resolved out of firing order`);
     }
     acc.nodes.push({ id: spec.id, width: spec.width, height: spec.height, shape: 'rounded' });
-    return spec;
+    // SI31 T4 (G5): the south-cap ink bit is the only thing this walk knows
+    // that the autonom pass (fired earlier, from `resolveAllAutonomPasses`)
+    // did not -- attached here, where BOTH the `State` AST node and
+    // `ctx.theme` are in scope. See `StateNodeGeo.southCapInk`'s doc comment.
+    return withSouthCapInk(spec, southCap);
   }
-  return resolveClusterComposite(s, acc, ctx, parentClusterId);
+  return withSouthCapInk(resolveClusterComposite(s, acc, ctx, parentClusterId), southCap);
 }
 
 export function runPass(acc: PassAccumulator, ctx: DiagramCtx): DotLayoutResult {

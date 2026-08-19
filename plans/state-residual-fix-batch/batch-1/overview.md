@@ -24,4 +24,4 @@ attributable to one cause.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Bump to `^1.6.0`, prove the bump inert, forward `xlabel`, map `ge.xlabel` | typescript-pro (sonnet) | `package.json`, `package-lock.json`, `src/core/graph-layout-build-edges.ts`, `src/core/graph-layout.ts`, `src/core/graph-layout.types.ts` (doc only), their unit tests, `docs/graphviz-issues/TRACKER.md` | T0 | [ ] |
+| T1 | Bump to `^1.6.0`, prove the bump inert, forward `xlabel`, map `ge.xlabel` | typescript-pro (sonnet) | `package.json`, `package-lock.json`, `src/core/graph-layout-build-edges.ts`, `src/core/graph-layout.ts`, `src/core/graph-layout.types.ts` (doc only), their unit tests, `docs/graphviz-issues/TRACKER.md` | T0 | [x] |

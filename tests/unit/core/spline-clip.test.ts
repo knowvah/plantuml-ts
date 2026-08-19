@@ -1,6 +1,6 @@
 /**
  * Unit + integration tests for compound-edge boundary clipping
- * (`src/diagrams/description/spline-clip.ts`), a faithful port of upstream
+ * (`src/core/spline-clip.ts`), a faithful port of upstream
  * `DotPath#simulateCompound` + `XCubicCurve2D#subdivide`.
  *
  * The clip operates on the `1 + 3*n` graphviz-spline point shape (start
@@ -17,8 +17,8 @@ import {
   subdivide,
   clipSplineStart,
   clipSplineEnd,
-} from '../../../src/diagrams/description/spline-clip.js';
-import type { Bbox } from '../../../src/diagrams/description/layout-helpers.js';
+  type ClipRect as Bbox,
+} from '../../../src/core/spline-clip.js';
 import { renderFixture } from '../../oracle/svg-conformance/render-fixture.js';
 import { jarMeasurer } from '../../../src/core/measurer-jar.js';
 

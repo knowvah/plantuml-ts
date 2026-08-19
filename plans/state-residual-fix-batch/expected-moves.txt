@@ -35,13 +35,118 @@
 #                        rather than growing this list.
 
 # Batch 1 (T1 — G20b xlabel consumption)
+pavuzo-79-zodu430 # G20b's own target: NotShooting's ortho EvConfig labels now anchor at dot-engine's real xlabel force-search position instead of the perpendicularOffsetLabel heuristic, narrowing scope2/width/idx2 from -2.460024px to -1.579968px. NOT yet exact: the residual is a dot-engine defect, filed as docs/graphviz-issues/17 -- under splines=ortho the engine reserves ~1.58pt less canvas for xlabels than native graphviz on byte-identical input, and jar-side arithmetic is verified faithful and ruled out. DOT text changes too (jar-ward: the composite's own declared width, now closer to jar's 1.988368in, is an INPUT literal in the outer scope's emitted DOT statement).
+bujedi-30-cize673 # class, `linetype ortho`: relationship label moves off the perpendicularOffsetLabel spline-midpoint fallback onto the real graphviz-searched xlabel position via `class-dot-edges.ts`'s own `moveLabelToXlabel`, sharing this fix's core seam; DOT text unchanged (SVG label position only), class-dot-parity ratchet still 721/721.
+jakapi-64-tine258 # class, `linetype ortho`: same mechanism as bujedi-30-cize673 -- ortho relationship label repositioned to the real graphviz xlabel placement; DOT text unchanged, class-dot-parity ratchet still 721/721.
+zosaxo-93-nici652 # component, `linetype ortho`: link label repositioned via `description/link-edge-attrs.ts`'s own xlabel/xlabelWidth/xlabelHeight (a third, independent caller of this shared core seam); DOT text unchanged, description-parity ratchet still 357/357.
 
 # Batch 2 (T2 — G17 note-only region)
+joleju-94-maru748 # size-only: its three note-only trailing `--` regions (OS1.IS2, OS1.IS1, OS1) now size from SvekResult.java:135's real +15/+15 margin instead of dot-engine's raw +12/+12 graph canvas, closing scope9/scope11/scope12's declared width+height to jar exactly (measure-composite-declared-size.ts: 6/6 target rows now exact, fixture no longer dirty); DOT text changes too (jar-ward: each composite's own declared width/height, now matching jar, is an INPUT literal in its parent scope's emitted DOT statement), state-dot-parity ratchet still 270/270.
 
 # Batch 3 (T3 — G21 accumulator wiring)
+zacajo-09-tamu628 # T3's own target (scope4 width idx1, -3.732624px -> exact): ScrollLock's region-2-local reverse guard transition (ScrollLockOn->ScrollLockOff) now reads dot-engine's real edgeResult.labelX=203.095 instead of falling back to perpendicularOffsetLabel, folding the real label box into regionInkGeometry's ink walk instead of only an anchor point; DOT text changes too (jar-ward: the region's own declared width, now matching jar exactly via measure-composite-declared-size.ts, is an INPUT literal in the outer scope's emitted DOT statement).
+giniti-22-fexo000 # Radio_Root's own `[*] --> Vendor_Radio_Root : [set]` is a region-0-local labeled transition (Vendor_Radio_Root is a direct child of Radio_Root, which owns a `--`-delimited second region `Radio_Commit_Root`) -- buildConcurrentBranchAcc's newAccumulator() call now supplies labelFont/measurer for region-0's own pass exactly like buildPlainAutonomSpec/buildTopLevelPass already did, so this transition's `[set]` label reads graphviz's real position instead of the perpendicular-offset fallback, moving the label (and, via regionInkGeometry's ink fold, the surrounding layout) to jar's real placement; DOT text changes too (jar-ward: Radio_Root's own declared size is an INPUT literal upstream), state-dot-parity ratchet still 270/270.
 
 # Batch 4 (T4 — G5 south-cap opacity)
+# Every mover below is the SAME jar-side mechanism: with a resolved
+# non-transparent southBackcolor (Cluster.java:459-471) and a non-zero
+# RoundCorner, RoundedContainer.drawU:89-91 draws the south cap as a UPath
+# whose ink LimitFinder#drawUPath:164-167 folds with ZERO inset, 1px past the
+# outline URectangle's y+h-1 from #drawRectangle:184-188. EVERY one of the 20
+# grows the document canvas by +1px on HEIGHT ONLY (gokife-89 by +2, two
+# nested composites), in the jar's direction; 18 of the 20 now match the jar's
+# own canvas height EXACTLY. Width is unchanged everywhere -- the cap's UPath
+# reaches x+width, which addStateBoxInk's own uninset divider term already
+# contributed. The 15 non-target fixtures below were already declared-size
+# exact (harness-diff.py: 5 rows went exact, 0 appeared or grew), so they
+# surface only here, in the render manifest.
+
+pacami-67-dafe414 # T4 target (scope3 height idx2, -0.999936px -> exact). `<style> state { BackGroundColor yellow }` resolves southBackcolor non-transparent, so RoundedSouth.drawU takes its UPath branch and LimitFinder#drawUPath folds the cap's max-Y with ZERO inset -- 1px past the outline URectangle's y+h-1. Canvas height 204 -> 206, jar 206 EXACT. DOT text changes too (jar-ward: the composite's own declared height is an INPUT literal in its parent scope's emitted DOT statement).
+tofezi-64-koda860 # T4 target (scope3 height idx3, -0.999936px -> exact); `<style> stateDiagram { BackgroundColor cyan }`, same mechanism as pacami-67. Canvas height 279 -> 280, jar 280 EXACT. DOT text changes too (declared height is an upstream INPUT literal).
+xojudi-20-keco020 # T4 target (scope3 height idx3, -0.999936px -> exact); `stateDiagram { RoundCorner 2, BackgroundColor cyan }` -- non-zero radius, so still the UPath branch. Canvas height 279 -> 280, jar 280 EXACT. DOT text changes too.
+decede-10-buvu414 # T4 target (scope3 height idx3, -0.999936px -> exact); same `<style>` cascade as xojudi-20 plus LineColor/FontColor. Canvas height 279 -> 280, jar 280 EXACT. DOT text changes too.
+gokife-89-boja382 # T4 target (scope3 height idx0, -1.000008px -> exact); `skinparam state { backgroundColor White, backgroundColor<<stereo>> ... }` -- FromSkinparamToStyle.java:204 targets SName.state, which matchAll admits into the ...state.body query, so BOTH the plain and the stereotyped forms reach southBackcolor. Two nested composites each gain their cap: canvas height 311 -> 313, jar 313 EXACT. DOT text changes too.
+
+beguxu-19-tize774 # size-only, non-target: an opaque-south composite whose canvas height goes 496 -> 497, jar 497 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+dapuko-98-zuzo096 # size-only, non-target: an opaque-south composite whose canvas height goes 120 -> 121, jar 121 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+lojeju-04-fadu517 # size-only, non-target: an opaque-south composite whose canvas height goes 274 -> 275, jar 275 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+nijugi-19-jazi166 # size-only, non-target: an opaque-south composite whose canvas height goes 136 -> 137, jar 137 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+niveno-60-tiro789 # size-only, non-target: an opaque-south composite whose canvas height goes 230 -> 231, jar 263 -- still short by a PRE-EXISTING, unrelated 32px gap this term neither caused nor widened. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+nuvura-69-mafe604 # size-only, non-target: an opaque-south composite whose canvas height goes 274 -> 275, jar 275 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+pebepi-32-cati486 # size-only, non-target: an opaque-south composite whose canvas height goes 120 -> 121, jar 121 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+rufosi-58-kegi649 # size-only, non-target: an opaque-south composite whose canvas height goes 230 -> 231, jar 231 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+sumiri-68-suvo696 # size-only, non-target: an opaque-south composite whose canvas height goes 192 -> 193 against jar's 183. The ONLY fixture of the 20 that moves AWAY from jar: it was already 9px too TALL from a pre-existing, unrelated, opposite-signed defect, and this term widens that gap to 10px. Kept deliberately -- the +1 is the source-verified RoundedSouth/LimitFinder rule (the jar adds it here too), so suppressing it on this fixture would be fitting the gate to a symptom of a different bug. Its declared-size rows were already exact and stay exact; only the rendered SVG moves. Contrast the other 19, which all move jar-ward (18 to an EXACT canvas height, niveno-60 from 33px short to 32px).
+taxile-56-goca422 # size-only, non-target: an opaque-south composite whose canvas height goes 120 -> 121, jar 121 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+tigibi-80-zidi137 # size-only, non-target: an opaque-south composite whose canvas height goes 120 -> 121, jar 121 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+vakama-53-jata958 # size-only, non-target: an opaque-south composite whose canvas height goes 180 -> 181, jar 181 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+vekoja-22-made430 # size-only, non-target: an opaque-south composite whose canvas height goes 180 -> 181, jar 181 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+xomize-22-poro350 # size-only, non-target: an opaque-south composite whose canvas height goes 206 -> 207, jar 207 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+zumeri-82-julo078 # size-only, non-target: an opaque-south composite whose canvas height goes 180 -> 181, jar 181 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+
 
 # Batch 5 (T5 — G15 composite-anchor spline clip)
+#
+# `DotPath#simulateCompound(lhead.getRectangleArea(), ltail.getRectangleArea())`
+# — `SvekEdge.java:671-672` — now runs on every state transition whose own
+# endpoint id addresses a CLUSTER rather than a real node (this port's
+# `Cluster.CENTER_ID` analogue is `state-composite-classify.ts#zaentId`,
+# substituted by `#edgeEndpointId`), before the spline is folded into the ink
+# extent. Upstream clips BEFORE drawing, so `LimitFinder`/`SvekResult
+# #calculateDimension` never see the in-cluster segment; we were folding it,
+# and its control points reach past the cluster frontier. Exactly 4 of 2017
+# fixtures carry that shape, and all four move JAR-WARD on canvas width.
+
+fovafu-44-mifu394 # T5 target (scope2 width idx0, +7.820496px -> EXACT). `A -> Y`, source composite A, so `ltail != null` and the TAIL branch fires. The discarded in-cluster segment's control point sits at x=157.820 where A's own right frontier is 150.000 — the whole +7.820496. Canvas width 239 -> 232, jar 232 EXACT. Its scope2 HEIGHT row is untouched at +0.003816 (the G14 sub-pixel band): the clip keeps the segment carrying the y=0 control points, so the ink box's minY/maxY do not move. DOT text changes too (jar-ward: a composite's declared width is an INPUT literal in its parent scope's emitted DOT statement).
+tubojo-49-tudu915 # size-only, non-target: `B -> Y`, source composite B — same TAIL branch as fovafu-44 one nesting level out. Canvas width 262 -> 261, jar 261 EXACT. Its declared-size rows were already exact and stay exact (DOT hash unchanged), so only the rendered SVG moves.
+fajegu-17-joba577 # size-only, non-target: `RUNNING -down-> STOPPING` (HEAD branch, target composite) plus two edges leaving the STARTING cluster (TAIL branch). Canvas width 609 -> 555 against jar's 561 — the largest single jar-ward move in the corpus (|error| 48 -> 6). It lands 6px SHORT rather than exact because a residual, pre-existing width term on this fixture is opposite-signed; the clip itself is the source-verified upstream rule, not a fitted amount. Declared-size rows unchanged (DOT hash unchanged).
+mefici-97-tudu030 # size-only, non-target: `Timer --> Stopwatch[H]` — source composite Timer (TAIL branch), target inside composite Stopwatch. Canvas width 873 -> 854 against jar's 816 (|error| 57 -> 38); the remaining 38px is a pre-existing, unrelated gap this term neither caused nor widened. Declared-size rows unchanged (DOT hash unchanged).
 
 # Batch 6 (T6 — G20a declaration order)
+
+# Every entry below moved on the emitted-svek-DOT hash ONLY — the rendered
+# SVG is byte-identical for all of them (verified: 42 manifest entries moved,
+# 42 DOT-only, 0 SVG), and not one declared-size row changed (harness summary
+# 273/2660/2576/47/37/0/39, identical to the Batch 5 baseline).
+#
+# Jar-side account, shared by all: each is a composite/concurrent scope whose
+# local `[*]` circle is now DECLARED to graphviz at its real parse-time
+# creation tick instead of always last. Upstream creates a scope's `[*]`
+# Entity lazily on FIRST REFERENCE — `StateDiagram.java:92-107` (`getStart`:
+# `if (quark.getData() == null) reallyCreateLeaf(...)`) — and
+# `svek/SvekResult.java#drawU` then walks `Bibliotekon`'s registration-ordered
+# `LinkedHashMap`. Jar-verified for the `[*]`-first case by
+# `test-results/dot-cache/state/kejabo-83-vinu490/svek-1.dot:5-7`
+# (`sh0006`=circle, `sh0007`=Idle, `sh0008`=Configuring), which our DOT now
+# matches. Fixtures whose scope references a member first keep members ahead
+# of the circle — the order follows the creation tick, not a hoist.
+lalava-26-zosi801
+leloja-87-tebi184
+mazize-40-paxi649
+nelupe-49-xova546
+pexiku-77-japi217
+sapelo-46-jafe280
+sizife-41-buje191
+tegali-39-molu382
+bemena-23-zebu249
+bunade-42-fudu910
+duzazu-41-telu529
+fomusu-59-fupe538
+gojuja-90-pune699
+jaxebo-54-nifi592
+jelusa-98-nexa591
+jetuse-93-gopi146
+jorere-75-peja265
+kejabo-83-vinu490
+ketibo-84-juzo029
+mifuti-36-jine785
+mosigo-88-rove013
+nibelu-74-pido796
+nimise-04-jove070
+nufigo-87-pivi558
+pajefo-95-neri955
+pesita-10-dene726
+pifido-37-jipu349
+rifefi-73-rofo730
+tumaba-64-tosu281
+xepafa-33-lazi826
+zitifa-97-bizo337

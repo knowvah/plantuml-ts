@@ -126,6 +126,40 @@ describe('layoutGraph — edge labels', () => {
     expect(e.labelX).toBeGreaterThanOrEqual(0);
     expect(e.labelY).toBeGreaterThanOrEqual(0);
   });
+
+  // SI31 T1 (docs/graphviz-issues/16): an `xlabel`-carrying edge (what
+  // `linetype ortho`'s `moveLabelToXlabel` sends instead of `label`) must
+  // ALSO get a real placed position back — before dot-engine 1.6.0, `getLayout`
+  // published no `xlabel` field at all, so `attachInlineTransitionLabel`'s
+  // `edgeResult?.labelX !== undefined` gate silently failed for every ortho
+  // transition and it fell through to the perpendicular-offset heuristic
+  // (pavuzo-79-zodu430's -2.460px scope2 width residual).
+  it('positions an xlabel-only edge the same way a label edge is positioned (G20b)', () => {
+    const g: DotInputGraph = {
+      nodes: [box('a'), box('b')],
+      edges: [
+        {
+          id: 'e0',
+          from: 'a',
+          to: 'b',
+          attributes: { xlabel: 'go', xlabelWidth: 20, xlabelHeight: 12 },
+        },
+      ],
+    };
+    const e = layoutGraph(g).edges[0]!;
+    expect(e.labelX).toBeGreaterThanOrEqual(0);
+    expect(e.labelY).toBeGreaterThanOrEqual(0);
+  });
+
+  it('an edge with neither label nor xlabel gets no labelX/labelY (no regression)', () => {
+    const g: DotInputGraph = {
+      nodes: [box('a'), box('b')],
+      edges: [{ id: 'e0', from: 'a', to: 'b' }],
+    };
+    const e = layoutGraph(g).edges[0]!;
+    expect(e.labelX).toBeUndefined();
+    expect(e.labelY).toBeUndefined();
+  });
 });
 
 describe('layoutGraph — defensive and option paths', () => {

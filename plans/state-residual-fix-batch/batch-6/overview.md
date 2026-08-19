@@ -14,4 +14,4 @@ own mission. No per-fixture human ruling.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T6 | Push pseudo nodes in jar creation order in both composite passes | general-purpose (opus) | `src/diagrams/state/state-composite-autonom.ts`, `src/diagrams/state/state-composite-concurrent.ts`, `src/diagrams/state/state-composite-pseudo.ts` (only if the ordering helper itself must change), their unit tests | T5 | [ ] |
+| T6 | Push pseudo nodes in jar creation order in both composite passes | general-purpose (opus) | `src/diagrams/state/state-composite-autonom.ts`, `src/diagrams/state/state-composite-concurrent.ts`, `src/diagrams/state/state-composite-pseudo.ts` (only if the ordering helper itself must change), their unit tests | T5 | [x] |

@@ -109,7 +109,137 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         origin). Oracle-verified on the filing's own repro: native `dot -Tdot`
         reports xlp="30.945,98.35" against our {30.94482, 98.34964}. EDGE
         xlabels only -- node xlabels (ND_xlabel) are typed `unknown` upstream
-        and were not asked for. UNCHECKED until the pinned .tgz moves and the
-        consumer half lands (a?.xlabel in addEdges, ge.xlabel in toEdgeEntry,
-        then pavuzo-79-zodu430 scope 2 -2.460 px -> 0). ORIGINAL FILING:
+        and were not asked for.
+        SI31 T1 (2026-08-19): pinned to 1.6.0 (bump verified inert -- 0 rows,
+        0 fixtures moved on the version bump alone). Consumer half landed:
+        `addEdges` (graph-layout-build-edges.ts) forwards `a.xlabel` as a
+        FIXEDSIZE HTML table (mirrors `label`'s own box variant), and
+        `toEdgeEntry` (graph-layout.ts) maps `ge.xlabel` onto `labelX`/
+        `labelY`. A `labelWidth`/`labelHeight` echo from the `xlabel` pair
+        was also drafted and then REMOVED before commit: measured both ways
+        it changed 0 of 2660 harness rows and 0 of 2017 rendered fixtures,
+        and the comment justifying it claimed it drove pavuzo-79-zodu430 to
+        exact, which direct measurement disproved. Unrequested and provably
+        inert, so it did not land.
+
+        STILL UNCHECKED: pavuzo-79-zodu430 scope 2 width idx 2 moved
+        -2.460024 px -> -1.579968 px, not the exact 0 this issue's own
+        "Verification when it lands" section predicted. Diagnosed to the
+        four-part standard (rules/diagnosis.md):
+
+        MECHANISM: for this exact fixture's inner scope (Idle/Configuring +
+        2 xlabeled EvConfig edges, splines=ortho), @knowvah/dot-engine's
+        xlabel-driven canvas/rank-centring reserves ~1.58pt LESS horizontal
+        room than native graphviz 15.1.1 does on the byte-identical input --
+        confirmed by a controlled A/B, not the single-repro spot-check this
+        entry previously relied on (that check used a hand-typed node width
+        of 1.2731in instead of the real 1.273090in and coincidentally
+        matched dot-engine's own output because of it -- a same-precision-
+        error-on-both-sides artifact, not a genuine fidelity proof; the
+        prior "dot-engine xlp matches native exactly" claim here was WRONG
+        and is corrected below, not repeated).
+
+        ORIGIN (jar side, verified faithful, not the cause): SvekResult
+        .java:130-133 (calculateDimension: minMax.getDimension()
+        .delta(15,15)), InnerStateAutonom.java:186-195
+        (calculateDimensionSlow: text.mergeTB(attr,img).delta(MARGIN*2+
+        2*MARGIN_LINE+marginForFields), MARGIN=MARGIN_LINE=5 -> delta=20),
+        XDimension2D.java:101-105 (mergeTB 3-arg = Math.max of the three
+        widths). This port's own computeSvekResultGeometry
+        (layout-ink-extent.ts) + measureAutonomWrapper
+        (state-composite-sizing.ts) reproduce this chain byte-for-byte
+        (gated tracing, reverted): ink 106.5825 + 15 + 20 = 141.5825,
+        matching the harness's measured "ours" exactly. SvekEdge.java
+        :433-437 (ortho fork) and :504-521 (appendTable's (int)
+        truncation) are also faithfully mirrored -- the 54x15 reservation
+        this port emits is byte-identical to the jar's own cached
+        svek-1.dot. None of jar's OWN arithmetic is the cause.
+
+        ORIGIN (real cause, upstream of jar and this port both): native
+        dot -Txdot, fed jar's own cached node widths (0.694444/1.273090)
+        for this reduced sub-graph, reports xlp="27,75.558" (matching this
+        issue's ORIGINAL FILING's own quoted repro value) and
+        xlp="43.667,60.442", bb="0,0,108.16,192". The SAME graph built
+        through this port's OWN addNodes/addEdges and read back via
+        getLayout() (not text-serialized, full float precision) reports
+        xlabel={x:27,y:75.47} / {x:40.5,y:60.47}, node centres at x=60.75,
+        bb width=106.581. The first edge's xlp.x matches (27); the second
+        diverges by 3.17pt (40.5 vs 43.667) and the node centring itself
+        (not just the label) diverges by 1.58pt (60.75 vs 62.333).
+        Removing the xlabel attributes entirely from the SAME native input
+        drops its bb back to 91.662 (bare node width, centred at 45.831) --
+        so xlabels genuinely widen native's canvas/centring by +16.502pt,
+        against this port's own +14.919pt for the identical input. This is
+        graphviz's splines=ortho xlabel canvas-reservation path
+        (~/git/graphviz/lib/dotgen/dotsplines.c's EDGETYPE_ORTHO branch,
+        setEdgeLabelPos/orthoEdges, ~line 249; lib/common/postproc.c
+        :405-616's addXLabels), which @knowvah/dot-engine ports in
+        label/xlabels.ts -- NOT a ~/git/plantuml file, so this is filed as
+        a dot-engine geometry gap, not a jar mismatch.
+
+        CAUSAL CHAIN (exact arithmetic): ink width = maxX - minX, where
+        maxX is Configuring's own right edge (dominant on both sides,
+        translation-invariant) and minX is the Idle->Configuring label's
+        box left edge (dominant on both sides; the second edge's own 3.17pt
+        drift never binds either bound, verified by direct computation on
+        both geometries). Configuring's right edge = centre + halfWidth;
+        halfWidth is identical (45.831, same node dims both sides), so the
+        ENTIRE gap is the centre-x shift: native/jar centre 62.333 vs this
+        port's 60.75, a delta of 1.583. Ink width: jar 108.164 vs ours
+        106.581 (delta 1.583). This delta propagates UNCHANGED through +15
+        (SvekResult margin) and +20 (InnerStateAutonom chrome, both
+        additive and both verified identical above) to the composite's
+        declared width: 108.164+35=143.164 (jar, matches the harness's
+        1.988368in x 72 = 143.162 to display rounding) vs 106.581+35=
+        141.581 (ours, matches 1.966424in x 72 = 141.583). 143.164-141.581=
+        1.583 =~ -1.579968 px deltaPx (the ~0.003 residual is the harness's
+        own 6-decimal-place rounding on both "ours" and "jar", not a third
+        cause).
+
+        RULED OUT: (1) getMinXY's 2-decimal SVG-scrape quantization
+        (state-transition-label.ts#svgPrecision) -- bounded at <=0.005px,
+        two orders of magnitude too small. (2) labelShield
+        (SvekEdge.java:353-356) -- proven 0 via jar's own cached DOT
+        (WIDTH="54" matches this port's unshielded reservation exactly; a
+        nonzero shield would inflate BOTH). (3)
+        divideLabelWidthByTwo/eventuallyDivideByTwo
+        (SvekEdge.java:314-316,485-490) -- gated on NoteLinkStrategy
+        .HALF_*, never set for a plain inline label. (4) appendTable's
+        (int) truncation (SvekEdge.java:504-521) -- both sides truncate 54
+        identically, proven via the byte-identical cached DOT. (5) the
+        composite title text "NotShooting" dominating Math.max instead of
+        childImg -- measured 77.0875 on this port, 77.087 (textLength) in
+        jar's own cached SVG; nowhere near the ~123pt needed to dominate on
+        either side. (6) this task's own consumption seam
+        (addEdges/toEdgeEntry) -- unit-tested, and the reservation box and
+        xlp.x for the FIRST edge match jar exactly, ruling out a
+        forwarding/mapping bug specifically (a systematic seam bug would
+        show on both edges, not one).
+
+        NEXT INSTRUMENTATION (not yet done): isolate whether
+        @knowvah/dot-engine's shortfall is in canvas-width reservation (a
+        fixed per-xlabel margin term) or in the force-search's candidate
+        set for the SECOND edge specifically (whose 3.17pt drift may or may
+        not be the same root cause as the 1.58pt centring shortfall -- not
+        yet proven to be one mechanism versus two coincident ones). File as
+        a new docs/graphviz-issues/ entry with this A/B (native-with-vs-
+        without-xlabel bb) as the repro; that filing, not this task, is
+        where dot-engine's own label/xlabels.ts source would actually be
+        read. ORIGINAL FILING:
         filed 2026-08-19, while planning the SI29 follow-on fix batch (G20b). EdgeGeometry carries no xlabel field, so every `linetype ortho`/`polyline` transition label falls back to perpendicularOffsetLabel instead of graphviz's force-search; pavuzo-79-zodu430 scope 2 width is -2.460 px because of it. Verified live on the installed 1.5.0, not inferred from the types: with `xlabel="X"` render() DOES emit the <text> (x=30.94) while getLayout()'s edge has no label field at all, and the x differs from the `label="X"` control (41.06) — so the engine places it by the real xlabels.c search and simply does not publish it. Same shape as 13 and 06. Consumption here is blocked until this lands and the .tgz moves; the plantuml-ts half (forward a?.xlabel in graph-layout-build-edges.ts, map ge.xlabel in toEdgeEntry) is deliberately NOT written in the meantime, since no fixture could exercise it. -->
+- [ ] 17-ortho-xlabel-canvas-reservation-short.md  <!-- FILED 2026-08-19
+        (SI31 T1). Split out of issue 16's diagnosis: 16's fix (publish the
+        xlabel position) landed in 1.6.0 and is consumed here, but
+        pavuzo-79-zodu430 stopped at -1.579968 px instead of 0. Under
+        splines=ortho the engine reserves ~1.58pt LESS horizontal canvas for
+        an edge's xlabels than native graphviz 15.1.1 on byte-identical
+        input (node centre 60.75 vs 62.333; bb 106.581 vs 108.16), and that
+        shift propagates unchanged through SvekResult's +15 and
+        InnerStateAutonom's +20 into the composite's declared width. Jar-side
+        arithmetic verified faithful and ruled out; the cause is in
+        lib/dotgen/dotsplines.c's EDGETYPE_ORTHO branch / postproc.c's
+        addXLabels as ported in label/xlabels.ts. Unchecked pending an
+        upstream fix; nothing to consume here when it lands. NOTE: an earlier
+        claim under issue 16 that dot-engine's xlp matched native exactly was
+        WRONG -- it compared a hand-typed 1.2731in node width against the
+        real 1.273090in on both sides -- and is retracted there and here. -->

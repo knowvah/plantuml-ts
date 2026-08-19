@@ -72,25 +72,15 @@
  * while the document-level functions keep the pre-existing unconditional
  * fold.
  *
- * T9 also investigated mechanism 8 (`RoundedContainer.drawU`'s SEPARATE
- * `RoundedSouth` south-cap `UPath`, `~/git/plantuml/.../svek/
- * RoundedContainer.java:89-92`, whose uninset `LimitFinder#drawUPath` walk
- * reaches 1px past a composite's `y+h-1` corner, `pacami-67-dafe414`/
- * `tofezi-64-koda860`/`xojudi-20-keco020`/`decede-10-buvu414`, SI28 T1/T2's
- * `findings/composite-{a,b}.md`) but did NOT land it: `RoundedSouth.drawU`
- * early-returns when `southBackcolor` is transparent, and the DEFAULT skin
- * sets exactly that (`~/git/plantuml/src/main/resources/skin/plantuml
- * .skin:266-271`, `stateDiagram{state{body{BackGroundColor transparent}}}`).
- * Applying the +1 unconditionally regressed 9 previously-exact, DEFAULT-
- * styled fixtures (`kenuci-20-cane702`/`nelupe-49-xova546`/`sizife-41-
- * buje191`/`lasasi-13-nona547`/`lonuti-97-voko521`/`sapelo-46-jafe280`/
- * `soxene-95-domu248`/`pexiku-77-japi217`/`nivanu-50-zajo916`, none of
- * which set a state background — `harness-diff.py`, full corpus;
- * `lasasi-13`/`soxene-95` set `RoundCorner` alone and still regress, ruling
- * that out as the gate). This module has no resolved-color signal on
- * `StateNodeGeo` to gate the +1 correctly (only the renderer resolves fill,
- * via `theme`, out of this write-set), so mechanism 8 is deferred — a
- * follow-on should thread a resolved south-opacity bit onto `StateNodeGeo`.
+ * Mechanism 8 (the composite south cap) was diagnosed by T9 and deferred:
+ * an UNCONDITIONAL +1 regressed 9 exact, default-styled fixtures
+ * (`kenuci-20-cane702`/`nelupe-49-xova546`/`sizife-41-buje191`/`lasasi-13-
+ * nona547`/`lonuti-97-voko521`/`sapelo-46-jafe280`/`soxene-95-domu248`/
+ * `pexiku-77-japi217`/`nivanu-50-zajo916`; `lasasi-13`/`soxene-95` set
+ * `RoundCorner` alone and still regressed, ruling THAT out as the gate).
+ * SI31 T4 landed it gated ({@link addSouthCapInk} + `state-composite-pass
+ * .ts#resolvesSouthCapInk`, keeping this module theme-free), closing the five
+ * G5 fixtures (SI28 T1/T2's `findings/composite-{a,b}.md`), those 9 flat.
  *
  * @see plans/g4-state-svg/ledger.md (S1, mechanism 4; S4, mechanism 7)
  * @see class/layout-ink-extent.ts (the class-engine precedent this mirrors)
@@ -98,7 +88,14 @@
 import type { StateNodeGeo, TransitionGeo } from './state-geo-types.js';
 import { svekDimension, svekInkShift } from '../../core/svek/SvekResult.js';
 import { applyCucaDocumentMargin } from '../../core/TextBlockExporter.js';
-import { transitionArrowheadInk } from './renderer-arrowhead.js';
+import {
+  type InkBox,
+  newInkBox,
+  addPoint,
+  addTransitionInk,
+  buildCompositeAnchorRects,
+} from './layout-ink-transition.js';
+import type { ClipRect } from '../../core/spline-clip.js';
 import { positionFromStereotype, usesPortShape } from './state-entity-position.js';
 import { textAscent } from './state-render-colors.js';
 
@@ -119,24 +116,6 @@ import { textAscent } from './state-render-colors.js';
  *  imported, per `class/layout-ink-extent.ts`'s own established
  *  klimt-free-module convention. */
 const HACK_X_FOR_POLYGON = 10;
-
-interface InkBox {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-}
-
-function newInkBox(): InkBox {
-  return { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
-}
-
-function addPoint(box: InkBox, x: number, y: number): void {
-  if (x < box.minX) box.minX = x;
-  if (y < box.minY) box.minY = y;
-  if (x > box.maxX) box.maxX = x;
-  if (y > box.maxY) box.maxY = y;
-}
 
 /** Leaf `normal`/`json` state box + composite (best-effort) — see module
  *  doc comment for the jar-verified asymmetric-per-axis mechanism.
@@ -290,11 +269,20 @@ function addNoteInk(box: InkBox, x: number, y: number, w: number, h: number): vo
   addPoint(box, x + w, y + h);
 }
 
-// G5 (RoundedSouth south-cap ink, `pacami-67-dafe414`/`tofezi-64-koda860`/
-// `xojudi-20-keco020`/`decede-10-buvu414`) was investigated and NOT landed
-// this task -- see the module doc comment's mechanism-8 paragraph for the
-// full, jar-cited diagnosis (background-color-cascade dependent, not
-// reachable from this module's pure `StateNodeGeo` geometry).
+/** SI31 T4 (G5, mechanism 8): the composite south cap's own uninset ink.
+ *  The cap is a SEPARATE shape reaching the container's FULL `y + height`
+ *  (`~/git/plantuml/.../svek/RoundedContainer.java:89-91`) and, on
+ *  `RoundedSouth.drawU`'s `rounded != 0` branch, a `UPath` — so
+ *  `LimitFinder#drawUPath` folds it with ZERO inset (`.../klimt/drawing/
+ *  LimitFinder.java:164-167`), exactly 1 px past the outline `URectangle`'s
+ *  `y + height - 1` from `#drawRectangle` (`LimitFinder.java:184-188`). That
+ *  difference IS this term — no constant. X already reaches `x + width` via
+ *  the composite branch's own `addStateBoxInk`. Gate and full derivation:
+ *  `StateNodeGeo.southCapInk` (state-geo-types.ts). */
+function addSouthCapInk(box: InkBox, node: StateNodeGeo): void {
+  if (node.southCapInk !== true) return;
+  addPoint(box, node.x + node.width, node.y + node.height);
+}
 
 /** One node's own ink contribution (recurses into composite children AND
  *  this node's own nested `.transitions` — `state-composite-geo.ts`
@@ -312,6 +300,7 @@ function addNodeInk(
   node: StateNodeGeo,
   labelInk: boolean,
   arrowheadInk: 'always' | 'self-loop',
+  anchorRects: ReadonlyMap<string, ClipRect>,
 ): void {
   if (node.children.length > 0) {
     // A composite's own outer box draws no divider line, but this call is
@@ -327,8 +316,9 @@ function addNodeInk(
       addPoint(box, node.x - over.left - 1, node.y - over.top - 1);
       addPoint(box, node.x + node.width + over.right, node.y + node.height + over.bottom - 1);
     }
-    for (const child of node.children) addNodeInk(box, child, labelInk, arrowheadInk);
-    for (const t of node.transitions) addTransitionInk(box, t, labelInk, arrowheadInk);
+    addSouthCapInk(box, node);
+    for (const child of node.children) addNodeInk(box, child, labelInk, arrowheadInk, anchorRects);
+    for (const t of node.transitions) addTransitionInk(box, t, labelInk, arrowheadInk, anchorRects);
     return;
   }
   // G9/T7: a border point is a different image class upstream, not a state
@@ -368,44 +358,6 @@ function addNodeInk(
   }
 }
 
-/** One transition's own ink contribution — plain points
- *  (`LimitFinder#drawDotPath`-equivalent: no inset), its label box, and,
- *  gated by `arrowheadInk`, the head-side arrowhead's own ink
- *  (`renderer-arrowhead.ts#transitionArrowheadInk`, `HACK_X_FOR_POLYGON`-
- *  padded internally via its own `LimitFinder` walk). `'always'` (document-
- *  level, pre-existing, unchanged) vs `'self-loop'` (`from===to` only,
- *  composite-level, mission T9) — see the module doc comment's mechanism-7
- *  paragraph for why the latter is scoped, not unconditional. */
-function addTransitionInk(
-  box: InkBox,
-  transition: TransitionGeo,
-  labelInk: boolean,
-  arrowheadInk: 'always' | 'self-loop',
-): void {
-  for (const p of transition.points) addPoint(box, p.x, p.y);
-  // G8 T2: fold the label's own BOX at the RETURNED (graphviz) position, not
-  // just its anchor POINT -- only when present AND opted in (`labelInk`);
-  // `computeStateDocumentDims`/`computeStateInkShift` pass `false` and keep
-  // the point-only fold. `transition-label-ink` T3: `TextBlockMarged#drawU`'s
-  // own `UEmpty` (`klimt/shape/TextBlockMarged.java:79-87`), so this is
-  // `drawEmpty` over `label.inkBox` (`LimitFinder.java:159-162`).
-  if (transition.label !== undefined) {
-    const ink = transition.label.inkBox;
-    if (labelInk && ink !== undefined) {
-      addPoint(box, ink.x, ink.y);
-      addPoint(box, ink.x + ink.width, ink.y + ink.height);
-    } else {
-      addPoint(box, transition.label.x, transition.label.y);
-    }
-  }
-  if (arrowheadInk === 'self-loop' && transition.from !== transition.to) return;
-  const arrowInk = transitionArrowheadInk(transition);
-  if (arrowInk !== undefined) {
-    addPoint(box, arrowInk.minX, arrowInk.minY);
-    addPoint(box, arrowInk.maxX, arrowInk.maxY);
-  }
-}
-
 /** The shared ink-point accumulation walk {@link computeStateDocumentDims},
  *  {@link computeStateInkShift}, and {@link computeSvekResultGeometry} consume. */
 function buildInkBox(
@@ -415,8 +367,9 @@ function buildInkBox(
   arrowheadInk: 'always' | 'self-loop',
 ): InkBox {
   const box = newInkBox();
-  for (const n of states) addNodeInk(box, n, labelInk, arrowheadInk);
-  for (const t of transitions) addTransitionInk(box, t, labelInk, arrowheadInk);
+  const anchorRects = buildCompositeAnchorRects(states);
+  for (const n of states) addNodeInk(box, n, labelInk, arrowheadInk, anchorRects);
+  for (const t of transitions) addTransitionInk(box, t, labelInk, arrowheadInk, anchorRects);
   return box;
 }
 

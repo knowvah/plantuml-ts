@@ -14,4 +14,4 @@ a jar-side account.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Pass `labelFont`/`measurer` at the third `newAccumulator` call site; verify `jetuse-93` under the same hypothesis | typescript-pro (sonnet) | `src/diagrams/state/state-composite-concurrent.ts`, `tests/unit/state/state-composite-concurrent.test.ts` | T2 | [ ] |
+| T3 | Pass `labelFont`/`measurer` at the third `newAccumulator` call site; verify `jetuse-93` under the same hypothesis | typescript-pro (sonnet) | `src/diagrams/state/state-composite-concurrent.ts`, `tests/unit/state/state-composite-concurrent.test.ts` | T2 | [x] |

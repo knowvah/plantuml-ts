@@ -347,18 +347,57 @@ Ordered by how ready they are, not by size.
     literal there — no creole pipeline, D6), `TileText` (unported, no
     consumer), `<math>`/KaTeX (D6), and T5's documented ~0.667 px sup/sub
     baseline residual (`renderer-box.ts#runBaseline`).
-  - **the follow-on fix batch** — SI29's Batch-5 records carry the
-    proposedWriteSet for each: **G20a** pseudo-node declaration order
-    (`state-composite-autonom.ts:215-216`), **G20b** `xlabel` never forwarded
-    (`graph-layout-build-edges.ts:129-176`), **G21** accumulator built without
-    a measurer (`state-composite-concurrent.ts:235`; likely also closes
-    `jetuse-93`), **G17** region canvas margin 12 vs jar's `.delta(15,15)`
-    (`state-composite-concurrent.ts:139-140`), **G5** `RoundedSouth` south cap
-    (needs a resolved-colour signal on `StateNodeGeo`; 5 fixtures).
+  - ~~**the follow-on fix batch**~~ — **DONE 2026-08-19 (mission-index SI31,
+    branch `fix/state-residual-fix-batch`).** All five diagnosed fixes
+    landed (G20a, G20b, G21, G17, G5) plus G15 (joined mid-mission,
+    reclassified out of `docs/graphviz-issues/15-*`). **13 of 16 target rows
+    exact**; 3 stayed open with a jar-cited or hypothesis mechanism
+    (`pavuzo-79-zodu430` — dot-engine defect, filed
+    `docs/graphviz-issues/17-ortho-xlabel-canvas-reservation-short.md`;
+    `jetuse-93-gopi146` — G21 structurally inert, hypothesis journaled;
+    `kejabo-83-vinu490` — dot-engine order-invariant on this graph,
+    hypothesis journaled, G20a's fix kept anyway per D5's flat-net rule).
+    Full scoring: `plans/state-residual-fix-batch/README.md`'s "Close-out
+    (2026-08-19)" section. **What it spun out, in the order to pick it up:**
+    - **retire the T5 ink-only-clip divergence** — `DIVERGENCES.md:1021-1054`
+      ("State diagrams — Composite-anchor transitions: `simulateCompound`
+      clip applied to ink, not to the drawn path"). Upstream clips a
+      cluster-sourced edge ONCE, before drawing, so the same clipped path is
+      measured and drawn; this port clips only for the ink fold and still
+      draws the unclipped in-cluster segment. The entry names the faithful
+      end state (clip once, draw the clipped path) — close it by moving the
+      draw site onto the same clip, not by keeping the divergence.
+    - **`pavuzo-79-zodu430`** — consume the dot-engine fix for
+      `docs/graphviz-issues/17-*` once the engine ships a corrected ortho
+      `xlabel` canvas reservation (currently ~1.58pt short of native
+      graphviz on byte-identical input).
+    - **`jetuse-93-gopi146`** — verify T3's nested-cluster sizing hypothesis
+      against a controlled native-`dot` A/B before filing as a dot-engine
+      issue (D6: journaled, not chased, until then).
+    - **`kejabo-83-vinu490`** — verify T6's order-invariance hypothesis with
+      a clean, non-confounded A/B (same label-emission mode — `xlabel` vs
+      `label` — on both sides) before filing.
+    - **`oracle/goldens/state/size-backlog.json`'s five G5 ceilings**
+      (`pacami-67-dafe414`, `tofezi-64-koda860`, `xojudi-20-keco020`,
+      `decede-10-buvu414`, `gokife-89-boja382`), still pinned at ~0.013888
+      each though the declared-size row they bounded closed — tighten or
+      delete, never loosen.
+    - **T3's two stale doc comments** (`state-composite-pass-types.ts:46`,
+      `state-transition-label.ts:207,372`) still describe the pre-G21 world
+      ("outside this task's write-set") — correct or hand on in a dedicated
+      pass.
   - **DOT emission-order divergence** — un-filed. Our DOT declares
     nested-cluster siblings in a different relative order than the jar
     (`bemena-23-zebu249/svek-2.dot:10-11`); this is what forced D4's amendment
-    to sorted pairing. A real candidate mission, not a nicety.
+    to sorted pairing. SI31/T6 fixed the SAME class of divergence for the
+    two composite passes only (`state-composite-pass.ts`,
+    `state-composite-autonom.ts`, matching jar's `[*]`-on-first-reference
+    creation-tick order) and confirmed it did NOT close `kejabo-83-vinu490`
+    for an unrelated reason (dot-engine order-invariance). The **top-level**
+    pass is still untouched: jar's outer `svek-2.dot` declares
+    `NotShooting, [*], Shooting`; this port still emits
+    `NotShooting, Shooting, __initial__`. A real candidate mission, not a
+    nicety.
   - **small, unowned** — G9 explicit-composite marker on `State`
     (`state-parse-state.ts`), state note table-grid drawing,
     `Transition.linkNoteColor`, state parser line tracking for
