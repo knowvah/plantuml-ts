@@ -323,20 +323,46 @@ Ordered by how ready they are, not by size.
   display; codabo/nixura/xufexu conformant; description at 352/356 with only
   the 4 permanent exclusions). Their mission-index rows had never been
   flipped from `todo`/`wip`; nothing to plan here.
-- ~~**`state-composite-inner-canvas`**~~ — **DONE (diagnosis), 2026-08-18.**
+- ~~**`state-composite-inner-canvas`** / **`state-declared-size-fix`**~~ —
+  **DONE 2026-08-18 (mission-index SI28 diagnosis, SI29 fix).**
   The halt stands (its premise was false); the survey it asked for is
-  `plans/state-declared-size-diagnosis/` (**SI28**, closed), which took the
-  173 inexact composites through that same T1 harness and gave every one of
-  the **94 mismatched fixtures** a `file:line` mechanism. Read
-  **`plans/state-declared-size-diagnosis/findings/SYNTHESIS.md`**: 100 records
-  re-partitioned into **24 true-cause groups**, 75 fixtures fully resolved,
-  14 unresolved with a named next instrument, 4 divergences awaiting a
-  maintainer ruling. The fix is now plannable straight off §4 of that file:
-  **`state-declared-size-fix`, 5 batches** (0 harness attribution · 1 six
-  parallel text/leaf tasks, incl. the 445 px `wrapWidth`/creole group · 2 two
-  composite-geometry tasks · 3 two overlapping-tail tasks · 4 eight
-  re-diagnosis tasks), pairwise-disjoint write-sets, biggest-delta-first.
-  That is the next move here, and it is a fix mission, not another survey.
+  `plans/state-declared-size-diagnosis/` (**SI28**, closed), which gave each of
+  the **94 mismatched fixtures** a `file:line` mechanism and re-partitioned
+  them into **24 true-cause groups**. The fix mission it named,
+  `plans/state-declared-size-fix/` (**SI29**, closed, branch
+  `fix/state-declared-size`), executed all 5 batches: **74 harness rows went
+  exact**, corpus **2481 → 2555 exact** declarations, mismatched 144 → 62,
+  unmatched fixtures 4 → 0, `size-backlog.json` 91 → 63 entries, DOT EQUAL
+  state 268/268. Two rows grew, both ruled and journaled. Full scoring:
+  **`plans/state-declared-size-fix/findings/CLOSE-OUT.md`**.
+  **What is left here, in the order to pick it up:**
+  - **`creole-exposant-port`** — `<sup>`/`<sub>`: register
+    `CommandCreoleExposantChange` in `CommandCreoleBuilder.ts`
+    (`CommandCreoleBuilder.java:104-105,111`), add `FontPosition` to
+    `FontConfiguration.ts`, mute font in `AtomText`, baseline shift per
+    engine's text emitter. Core + multi-engine — that is why SI29 could not
+    do it, and it is the one ruled grown row (`juvagu-33`, 83.57 px).
+  - **the follow-on fix batch** — SI29's Batch-5 records carry the
+    proposedWriteSet for each: **G20a** pseudo-node declaration order
+    (`state-composite-autonom.ts:215-216`), **G20b** `xlabel` never forwarded
+    (`graph-layout-build-edges.ts:129-176`), **G21** accumulator built without
+    a measurer (`state-composite-concurrent.ts:235`; likely also closes
+    `jetuse-93`), **G17** region canvas margin 12 vs jar's `.delta(15,15)`
+    (`state-composite-concurrent.ts:139-140`), **G5** `RoundedSouth` south cap
+    (needs a resolved-colour signal on `StateNodeGeo`; 5 fixtures).
+  - **DOT emission-order divergence** — un-filed. Our DOT declares
+    nested-cluster siblings in a different relative order than the jar
+    (`bemena-23-zebu249/svek-2.dot:10-11`); this is what forced D4's amendment
+    to sorted pairing. A real candidate mission, not a nicety.
+  - **small, unowned** — G9 explicit-composite marker on `State`
+    (`state-parse-state.ts`), state note table-grid drawing,
+    `Transition.linkNoteColor`, state parser line tracking for
+    `DiagramRefusal.line`, the dead `insideAutonomPass` flag.
+  - **unresolved with a nextStep** — G16 (`jijuze-43`), G13 (`nimana-36`,
+    `bunade-42`, `nimise-04`).
+  - **G14 stays deliberately unscheduled** — 30 records / 27 fixtures, every
+    row ≤ 0.005 px (`graph-layout.ts:189-194`); 69 of SI29's 99 remaining
+    rows are this band. Blast radius is every graph diagram type.
 - **`usymbol-ink-rule` residual** — `cacoma-43-poxu615` exact on height and
   every shape, 1px wide. Named in the mission's Outcome; unowned.
 - **`class-edge-spline-conformance`** — CLOSED 2026-08-08 by maintainer

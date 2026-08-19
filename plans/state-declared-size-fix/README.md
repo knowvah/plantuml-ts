@@ -32,7 +32,7 @@ scope by design.
 | [4](batch-4/overview.md) | Overlapping tail: `\|\|` orientation (G11) · label position (G13) | T10 T11 | [x] |
 | [5a](batch-5a/overview.md) | Re-diagnosis D1–D4 (docs-only) | T12 T13 T14 T15 | [x] |
 | [5b](batch-5b/overview.md) | Re-diagnosis D5–D8 (docs-only) | T16 T17 T18 T19 | [x] |
-| [6](batch-6/overview.md) | Close-out | T20 | [ ] |
+| [6](batch-6/overview.md) | Close-out | T20 | [x] |
 
 5a and 5b are disjoint and MAY run as one 8-way batch, and MAY run in
 parallel with Batch 4 (no shared write-set: they write only `findings/`).
@@ -110,3 +110,61 @@ tracing in `src/` only if reverted · minor/patch dep bumps.
 - Precedents: SI28 (shape, ADR-8 commit discipline), SI27
   (`plans/shared-seam-extraction/` — core-seam extraction, layering test),
   `planning/sizer-renderer-parity.md`.
+
+## Close-out (2026-08-18)
+
+Full scoring in **[findings/CLOSE-OUT.md](findings/CLOSE-OUT.md)**. Branch
+`fix/state-declared-size`, tip `32ef2834`, 29 commits off main `285b7fd8`.
+
+**Result: the exit criterion is met — 74 harness rows went exact, 0 appeared,
+2 grew and both are ruled exceptions.** Corpus **2481 → 2555 exact**
+(+74 declarations); mismatched 144 → 62; last-digit 29 → 37; unmatched
+fixtures 4 → 0; dirty fixtures 79 → 43. 99 rows remain over 61 fixtures, of
+which **69 are the G14 sub-pixel band** (≤ 0.005 px) that SI28 deliberately
+left unscheduled — **30 rows above 0.005 px** are the real residual.
+
+**Groups.** Of SI28's 24 true-cause groups, this mission closed **G1, G2, G3,
+G4 (7 of 9 fixtures), G6, G7, G8, G10, G11, G12, G23, G24** (12 groups), plus
+**G15** and **G22** closed incidentally (T8 / T9) and **G19** resolved as
+engine-side. **Open:** G5 (deferred with mechanism, now 5 fixtures incl.
+gokife-89 reclassified from G18), G9 (one fixture, reverted with mechanism),
+G13 (unresolved, nextStep), G16 (unresolved, nextStep), G17 / G20a / G20b /
+G21 (resolved with proposed fixes — the follow-on fix batch), G14
+(deliberately unscheduled).
+
+**The two grown rows, both ruled and journaled** — `juvagu-33` s1 width
+27.57 → 83.57 px (human ruling (a): `<sup>`/`<sub>` unported anywhere,
+`CommandCreoleBuilder.java:104-105,111`; ratchet loosened once with the
+jar-verified account) and `fovafu-44` s2 width 7.71 → 7.82 px (T8: its height
+went exact, the residual is `@knowvah/dot-engine` ranking a point anchor on
+its target's rank — `docs/graphviz-issues/15-…md`; DOT-parity ratchet
+tightened). Baselines re-pinned once with them: the sole exception to D4.
+
+**Manifest.** `manifest-diff.py` over 2014 fixtures: **63 expected moves,
+0 unexpected**; every move attributable to a task through
+`expected-moves.txt`. **No unattributed move.**
+
+**Schema.** `check-schema.py` over `findings/G*.md`: **14 records,
+0 violations**.
+
+**Gates on the final tree.** `npm test` **608 files / 14670 pass**, 54.8 s,
+coverage 95.41/90.34/96.93/96.50 · state DOT-parity **268/268 EQUAL** ·
+class 720 / description 356 / object 80 tests, all unchanged ·
+svg-state goldens **60** (unchanged; rise-only) · `size-backlog.json`
+**91 → 63 entries** · typecheck / lint / build green at the batch-4/5 gate.
+
+**Flags:** three grown-row rulings (two human, one applied by the orchestrator
+by extension at T8, flagged for veto) · **D4 amended in-mission** (T0, README
+stop 8 — sorted pairing retained; the DOT emission-order divergence it exposed
+is an un-filed candidate mission) · T4 wrote one additive optional field in
+`state-geo-types.ts`, outside every write-set · T4's "byte-identical jar SVG"
+claim was verified only as note-fill parity on 4 of 5 fixtures · T7's
+`measureNotePureText` is exported but unwired.
+
+**Follow-ups:** `creole-exposant-port` (`<sup>`/`<sub>`, FontPosition) as a
+named mission; a follow-on fix batch for **G20a, G20b, G21, G17, G5**
+(each carrying its proposedWriteSet in its record); smaller unowned items —
+G9 explicit-composite marker, state note table-grid drawing, `linkNoteColor`,
+state parser line tracking for `DiagramRefusal.line`, the dead
+`insideAutonomPass` flag; **G16** and **G13** unresolved with a nextStep;
+**G14** deliberately unscheduled.

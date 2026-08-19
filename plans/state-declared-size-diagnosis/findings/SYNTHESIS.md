@@ -786,3 +786,18 @@ draws from six different buckets and G8 from two. ADR-3 earned its keep: a
 fix mission batched on T0's labels would have collided on
 `state-sizing.ts` from five directions and split `layout-ink-extent.ts`
 across three.
+
+## 10. Outcome (SI29)
+
+The fix mission proposed in §4, **`state-declared-size-fix`** (mission-index
+**SI29**), executed all five batches and closed 2026-08-18 on branch
+`fix/state-declared-size`. Corpus **2481 → 2555 exact** declarations
+(mismatched 144 → 62, unmatched fixtures 4 → 0); **74 harness rows went
+exact**, 2 grew and both are ruled, journaled exceptions. Groups closed: G1,
+G2, G3, G4 (7 of 9 fixtures), G6, G7, G8, G10, G11, G12, G23, G24, plus G15
+and G22 closed incidentally and G19 resolved as engine-side. Still open: G5,
+G9, G13, G16, G17, G20a/G20b, G21, and **G14 — still deliberately
+unscheduled**, exactly as §4 stated.
+
+Full scoring, per-task results, ratchet totals and the follow-up list:
+**`plans/state-declared-size-fix/findings/CLOSE-OUT.md`**.
