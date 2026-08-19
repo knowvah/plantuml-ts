@@ -78,6 +78,7 @@ import {
   buildLevelTransitionGeos,
   sortSpecsByCreationIndex,
 } from './state-composite-pass.js';
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { concurrentRegionScopeId } from './state-parse-state.js';
 import { shiftDotLayoutResult } from './state-composite-autonom.js';
 
@@ -288,7 +289,15 @@ function buildConcurrentBranchAcc(
   noteScopeId: string,
   ctx: DiagramCtx,
 ): { acc: PassAccumulator; specs: GeoSpec[] } {
-  const acc = newAccumulator();
+  // SI31 T3 (G21, plans/state-declared-size-fix/findings/G21-dot-identical-
+  // geometry.md): mirrors both sibling `newAccumulator` call sites
+  // (state-composite-pass.ts:281, state-composite-autonom.ts:195) -- a
+  // region's own pass needs the same `labelFont`/`measurer` its
+  // `buildLevelTransitionGeos` call (below) threads into
+  // `attachTransitionLabel` so a region-local labeled transition reads
+  // graphviz's real `labelX`/`labelY` instead of falling back to
+  // `perpendicularOffsetLabel` (state-transition-label.ts:377-388).
+  const acc = newAccumulator(resolveArrowLabelFont(ctx.theme), ctx.measurer);
   // G5 C3, mechanism 16 shape half: `insideAutonomPass` -- a concurrent
   // region/branch is its OWN separately-fired pass (mirrors
   // `buildPlainAutonomSpec`'s identical scoping, state-composite-

@@ -15,6 +15,9 @@ import { renderSync } from '../../../src/index.js';
 import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { dotInputToStructural, parseSvekDot, type StructuralGraph } from '../../oracle/svek-dot.js';
+import { buildTopLevelPass } from '../../../src/diagrams/state/state-composite-pass.js';
+import { defaultTheme } from '../../../src/core/theme.js';
+import { resolveArrowLabelFont } from '../../../src/core/arrow-label-font.js';
 
 function parse(source: string): StateDiagramAST {
   const lines = source
@@ -416,6 +419,51 @@ describe('note-only concurrent region sizes from SvekResult margin, not raw canv
       for (let i = 0; i < jarAxis.length; i++) {
         expect(Math.abs(ourAxis[i]! - jarAxis[i]!)).toBeLessThan(EXACT_EPSILON);
       }
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SI31 T3 (G21, plans/state-declared-size-fix/findings/G21-dot-identical-
+// geometry.md): `buildConcurrentBranchAcc` (state-composite-concurrent.ts)
+// called `newAccumulator()` with NO arguments, so a `--`-delimited region's
+// own `PassAccumulator` carried neither `labelFont` nor `measurer` -- the
+// SAME two arguments its sibling call sites (state-composite-pass.ts:281,
+// state-composite-autonom.ts:195) both pass. Without them,
+// `attachInlineTransitionLabel`'s `measured !== undefined` gate
+// (state-transition-label.ts:377-386) always fails for a region-local
+// labeled transition, discarding graphviz's real `labelX`/`labelY` and
+// folding only a fallback anchor POINT (never the label's real box) into
+// the region's ink extent (`layout-ink-extent.ts#addTransitionInk`).
+// ---------------------------------------------------------------------------
+
+describe('concurrent-region PassAccumulator carries labelFont/measurer (G21, zacajo-09-tamu628)', () => {
+  const MARKUP = `
+    state S {
+      A -> B : guard1
+      --
+      C -> D : guard2
+    }
+  `;
+
+  it('every resolved region pass\'s accumulator carries both labelFont and measurer', () => {
+    const ast = parse(MARKUP);
+    const measurer = new WidthTableMeasurer();
+    const { ctx } = buildTopLevelPass(ast, defaultTheme, measurer);
+    expect(ctx.resolvedRegions.size).toBeGreaterThan(0);
+    for (const [key, region] of ctx.resolvedRegions) {
+      expect(region.acc.labelFont, `region "${key}" missing labelFont`).toBeDefined();
+      expect(region.acc.measurer, `region "${key}" missing measurer`).toBe(measurer);
+    }
+  });
+
+  it('the region accumulator\'s labelFont matches resolveArrowLabelFont(theme), like both sibling call sites', () => {
+    const ast = parse(MARKUP);
+    const measurer = new WidthTableMeasurer();
+    const { ctx } = buildTopLevelPass(ast, defaultTheme, measurer);
+    const expectedFont = resolveArrowLabelFont(defaultTheme);
+    for (const region of ctx.resolvedRegions.values()) {
+      expect(region.acc.labelFont).toEqual(expectedFont);
     }
   });
 });
