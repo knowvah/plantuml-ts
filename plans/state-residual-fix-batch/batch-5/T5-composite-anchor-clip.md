@@ -1,4 +1,4 @@
-# T4 — G15: clip composite-anchor splines before they reach the ink extent
+# T5 — G15: clip composite-anchor splines before they reach the ink extent
 
 ## Context
 Repo `/Users/scottseely/git/knowvah/plantuml-ts`, branch
@@ -51,7 +51,7 @@ folded into the ink extent (`layout-ink-extent.ts`'s transition-ink path).
 Clip against the source composite's own rectangle, mirroring what
 `SvekEdge.java:671-672` passes.
 
-Note T3 (Batch 3) has already edited `layout-ink-extent.ts` for the G5
+Note T4 (Batch 4) has already edited `layout-ink-extent.ts` for the G5
 south-cap term. Do not disturb it.
 
 ## Write-set
@@ -80,7 +80,7 @@ south-cap term. Do not disturb it.
   seam into `src/core/` without changing behaviour
 
 ## Architecture decisions (locked)
-D4's spirit applies: T3 owns `layout-ink-extent.ts`'s south-cap term in the
+D4's spirit applies: T4 owns `layout-ink-extent.ts`'s south-cap term in the
 prior batch; you own its transition-ink path. Stop 6 governs layering — no
 ALLOWLIST entry, no `KNOWN_DEBT`.
 
@@ -98,7 +98,7 @@ ALLOWLIST entry, no `KNOWN_DEBT`.
   the change is journaled.
 - Given the harness, then `0 rows appeared or grew`.
 - Given `render-manifest`, then every moved fixture is on
-  `expected-moves.txt` under a `# Batch 4` heading with a jar-side account.
+  `expected-moves.txt` under a `# Batch 5` heading with a jar-side account.
   Clipping changes drawn splines, so moves are expected here.
 
 ## Interface contracts
@@ -129,7 +129,7 @@ and 2 are both required; neither is optional scope.
   the state call site.
 - **Ask first:** nothing.
 - **Never:** copy `spline-clip.ts` instead of moving it; add an ALLOWLIST or
-  `KNOWN_DEBT` entry; loosen the `fovafu-44` backlog pin; disturb T3's
+  `KNOWN_DEBT` entry; loosen the `fovafu-44` backlog pin; disturb T4's
   south-cap term; run git.
 
 ## Report (<=500 tokens)

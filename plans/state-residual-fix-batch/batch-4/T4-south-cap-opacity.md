@@ -1,4 +1,4 @@
-# T3 — G5: south-cap ink, gated on a resolved south opacity
+# T4 — G5: south-cap ink, gated on a resolved south opacity
 
 ## Context
 Repo `/Users/scottseely/git/knowvah/plantuml-ts`, branch

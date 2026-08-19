@@ -1,18 +1,17 @@
-# Batch 3 — G5 south-cap opacity thread (serial)
+# Batch 3 — G21 accumulator wiring (serial)
 
-When a state composite's south background is non-transparent, the jar draws
-the south cap as a `UPath`, and `LimitFinder#drawUPath` applies **zero** ink
-inset where `drawRectangle` applies −1 on both corners — so the cap's ink
-reaches the composite's full height, 1 px past the outline rect's inset max.
-Our ink walk has no south-cap term at all. Five fixtures, −1.000 px each.
+`buildConcurrentBranchAcc` calls `newAccumulator()` with no arguments, so a
+concurrent region's `PassAccumulator` carries neither `labelFont` nor
+`measurer`. Every region-local labeled transition therefore fails
+`attachInlineTransitionLabel`'s `measured !== undefined` gate, silently
+discards graphviz's real `labelX/labelY`, and falls back to a
+perpendicular-offset heuristic — so the label's real box never reaches the
+region's ink extent. The two sibling call sites both pass the arguments.
 
-SI29 deferred this because `StateNodeGeo` carries no resolved colour to gate
-the +1 on, and applying it unconditionally regressed nine previously-exact
-default-styled fixtures.
-
-**This batch opens with a pre-condition, not with code.** The +1 px is
-source-verified; what *gates* it is not. Settle that first — stop 9.
+**This changes drawn output**, not only declared size: every such label moves
+to graphviz's real placement. Manifest moves are expected and must each carry
+a jar-side account.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Settle the opacity gate against the Java, then thread a south-opacity boolean to the ink walk and apply the +1 | general-purpose (opus) | `src/diagrams/state/state-geo-types.ts`, `src/diagrams/state/state-composite-pass.ts`, `src/diagrams/state/state-composite-pass-types.ts`, `src/diagrams/state/state-composite-geo.ts`, `src/diagrams/state/layout-ink-extent.ts`, their unit tests | T2 | [ ] |
+| T3 | Pass `labelFont`/`measurer` at the third `newAccumulator` call site; verify `jetuse-93` under the same hypothesis | typescript-pro (sonnet) | `src/diagrams/state/state-composite-concurrent.ts`, `tests/unit/state/state-composite-concurrent.test.ts` | T2 | [ ] |

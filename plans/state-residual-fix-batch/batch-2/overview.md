@@ -1,17 +1,11 @@
-# Batch 2 — G21 accumulator wiring (serial)
+# Batch 2 — G17 note-only region (serial)
 
-`buildConcurrentBranchAcc` calls `newAccumulator()` with no arguments, so a
-concurrent region's `PassAccumulator` carries neither `labelFont` nor
-`measurer`. Every region-local labeled transition therefore fails
-`attachInlineTransitionLabel`'s `measured !== undefined` gate, silently
-discards graphviz's real `labelX/labelY`, and falls back to a
-perpendicular-offset heuristic — so the label's real box never reaches the
-region's ink extent. The two sibling call sites both pass the arguments.
-
-**This changes drawn output**, not only declared size: every such label moves
-to graphviz's real placement. Manifest moves are expected and must each carry
-a jar-side account.
+A `--`-delimited concurrent region containing ONLY a note has no materialized
+states, so `regionInkGeometry`'s ink is the degenerate `{0,0}` and its
+`Math.max` falls through to dot-engine's raw graph canvas — which bakes in a
+flat +12 margin where the jar applies `SvekResult#calculateDimension`'s +15.
+Six rows on one fixture, arithmetic closing to the pixel on one constant.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Pass `labelFont`/`measurer` at the third `newAccumulator` call site; verify `jetuse-93` under the same hypothesis | typescript-pro (sonnet) | `src/diagrams/state/state-composite-concurrent.ts`, `tests/unit/state/state-composite-concurrent.test.ts` | T1 | [ ] |
+| T2 | `regionInkGeometry` degenerate-ink branch seeds from raw node boxes + `SvekResult.java:135`'s 15 | typescript-pro (sonnet) | `src/diagrams/state/state-composite-concurrent.ts`, `tests/unit/state/state-composite-concurrent.test.ts` (or the nearest existing unit test for this module) | T1 | [ ] |

@@ -1,11 +1,11 @@
-# T2 — G21: concurrent-region accumulator gets its font and measurer
+# T3 — G21: concurrent-region accumulator gets its font and measurer
 
 ## Context
 Repo `/Users/scottseely/git/knowvah/plantuml-ts`, branch
 `fix/state-residual-fix-batch`. Faithful TypeScript port of PlantUML; the Java
 at `~/git/plantuml` is the spec. vitest, tests under `tests/unit/state/`.
 
-Batch 1 (T1) already edited a DIFFERENT function in this same file
+Batch 2 (T2) already edited a DIFFERENT function in this same file
 (`regionInkGeometry`). Your edit is `buildConcurrentBranchAcc`, ~95 lines
 away. Do not disturb T1's work.
 
@@ -57,7 +57,7 @@ call sites currently read:
   **Read both method bodies.**
 
 ## Architecture decisions (locked)
-D4 (T1 owns `regionInkGeometry`; you own `buildConcurrentBranchAcc`), D6
+D4 (T2 owns `regionInkGeometry`; you own `buildConcurrentBranchAcc`), D6
 (`jetuse-93` verified, not assumed).
 
 ## Acceptance
@@ -70,7 +70,7 @@ D4 (T1 owns `regionInkGeometry`; you own `buildConcurrentBranchAcc`), D6
   `labelFont` and a `measurer` (assert in a unit test that a
   concurrent-region accumulator carries both).
 - Given `render-manifest`, then every moved fixture is on
-  `expected-moves.txt` under a `# Batch 2` heading, each with a one-line
+  `expected-moves.txt` under a `# Batch 3` heading, each with a one-line
   jar-side account of what moved and why it is jar-ward. A move you cannot
   account for is stop 4.
 - Given the harness, then `0 rows appeared or grew`.
@@ -94,7 +94,7 @@ accumulator carries both keys should fail first.
 ## Boundaries
 - **Always:** account for every manifest move against the jar's own render.
 - **Ask first:** nothing.
-- **Never:** touch `regionInkGeometry` (T1's); revert a manifest move blindly
+- **Never:** touch `regionInkGeometry` (T2's); revert a manifest move blindly
   to make the gate pass; run git.
 
 ## Report (<=500 tokens)

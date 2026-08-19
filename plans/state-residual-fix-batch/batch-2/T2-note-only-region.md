@@ -1,4 +1,4 @@
-# T1 — G17: note-only region uses the jar's SvekResult margin
+# T2 — G17: note-only region uses the jar's SvekResult margin
 
 ## Context
 Repo `/Users/scottseely/git/knowvah/plantuml-ts`, branch
@@ -83,7 +83,7 @@ stop 8.
 - Given the full harness, when `harness-diff.py` runs, then
   `0 rows appeared or grew`.
 - Given `render-manifest`, then any moved fixture is appended to
-  `expected-moves.txt` under a `# Batch 1` heading with a one-line jar-side
+  `expected-moves.txt` under a `# Batch 2` heading with a one-line jar-side
   account.
 
 ## Interface contracts

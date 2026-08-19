@@ -1,4 +1,4 @@
-# T5 — G20a: pseudo-node declaration order matches the jar's creation order
+# T6 — G20a: pseudo-node declaration order matches the jar's creation order
 
 ## Context
 Repo `/Users/scottseely/git/knowvah/plantuml-ts`, branch
@@ -43,7 +43,7 @@ reference is a member.
 ## Write-set
 - `src/diagrams/state/state-composite-autonom.ts`
 - `src/diagrams/state/state-composite-concurrent.ts` — `buildConcurrentBranchAcc`
-  only. T1, T2 and T4 already own other functions in this file in earlier batches;
+  only. T2, T3 and T5 already own other functions in this file in earlier batches;
   do not disturb their work.
 - `src/diagrams/state/state-composite-pseudo.ts` — only if the ordering helper
   itself must change to support pre-`runPass` ordering.
@@ -82,7 +82,7 @@ D5 — last batch, full-corpus gate, revert-the-batch on net growth.
   `planning/next-missions.md`.** That is a successful outcome of this task,
   not a failure — do not iterate toward a green gate.
 - Given `render-manifest`, then every moved fixture is on `expected-moves.txt`
-  under a `# Batch 5` heading with a jar-side account.
+  under a `# Batch 6` heading with a jar-side account.
 
 ## Interface contracts
 None — `acc.nodes` ordering is internal to the pass. No type changes.
@@ -108,8 +108,8 @@ and both files are enumerated requirements, not optional scope.
   non-shrink-only net as the revert trigger, not as something to tune toward.
 - **Ask first:** nothing — D5 already decided the failure branch.
 - **Never:** hand-swap the two call lines without the creation index if that
-  would only be right for `[*]`-first composites; disturb T1's
-  `regionInkGeometry` or T2's `buildConcurrentBranchAcc` accumulator args;
+  would only be right for `[*]`-first composites; disturb T2's
+  `regionInkGeometry` or T3's `buildConcurrentBranchAcc` accumulator args;
   run git.
 
 ## Report (<=500 tokens)

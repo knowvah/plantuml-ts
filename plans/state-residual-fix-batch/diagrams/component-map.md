@@ -40,7 +40,7 @@ CONC --> PSEUDO : same
 PASS --> GLAYOUT : layoutGraph(acc)
 GLAYOUT --> BUILDEDGES : addEdges
 BUILDEDGES --> ENGINE : createGraph / render / getLayout
-DOTGRAPH --> BUILDEDGES : xlabel attr\n(never read)
+DOTGRAPH --> BUILDEDGES : xlabel attr\n(Batch 1 forwards it)
 PASS --> GEO : materializeSpecs
 GEO --> TYPES : builds StateNodeGeo
 GEO --> INK : states + transitions
@@ -77,10 +77,11 @@ note bottom of CLIP
 end note
 
 note bottom of ENGINE
-  **G20b** EdgeGeometry has no xlabel,
-  so the placed position is never
-  published. Filed as issue 16.
-  NOT FIXABLE IN THIS REPO.
+  **G20b** EdgeGeometry had no xlabel,
+  so the placed position was never
+  published. Filed as issue 16,
+  RELEASED in 1.6.0 — Batch 1 bumps
+  the pin and consumes it.
 end note
 
 @enduml

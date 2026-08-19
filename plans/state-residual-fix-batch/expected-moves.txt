@@ -10,29 +10,38 @@
 # unaccounted move is never resolved by adding the slug.
 #
 # Expected movers by batch, from the source records:
-#   Batch 1 (T1, G17)  — size-only; joleju-94-maru748 may move.
-#   Batch 2 (T2, G21)  — DRAWN OUTPUT MOVES. Every concurrent-region
+#   Batch 1 (T1, G20b) — DRAWN OUTPUT MOVES. Every `linetype ortho`/
+#                        `polyline` composite with an inline transition
+#                        label moves to graphviz's real xlabel placement.
+#                        The 1.5->1.6 bump itself must be INERT: if any
+#                        fixture moves before the consumption code is
+#                        written, that is a stop, not a new allow-list
+#                        entry.
+#   Batch 2 (T2, G17)  — size-only; joleju-94-maru748 may move.
+#   Batch 3 (T3, G21)  — DRAWN OUTPUT MOVES. Every concurrent-region
 #                        fixture with a region-local labeled transition
 #                        can move its label position. ~18 fixtures carry
 #                        concurrent regions; not all have labeled
 #                        transitions.
-#   Batch 3 (T3, G5)   — size-only; the five G5 fixtures.
-#   Batch 4 (T4, G15)  — DRAWN OUTPUT MOVES. Clipping changes the spline
+#   Batch 4 (T4, G5)   — size-only; the five G5 fixtures.
+#   Batch 5 (T5, G15)  — DRAWN OUTPUT MOVES. Clipping changes the spline
 #                        itself, so any state fixture with a
 #                        composite-anchor transition can move.
 #                        Step 1 (the core move) must be inert: if any
 #                        fixture moves before the state consumer is
 #                        added, something in the move was not faithful.
-#   Batch 5 (T5, G20a) — UNBOUNDED, up to 83 fixtures, either direction.
+#   Batch 6 (T6, G20a) — UNBOUNDED, up to 83 fixtures, either direction.
 #                        Per D5 a non-shrink-only net reverts the batch
 #                        rather than growing this list.
 
-# Batch 1 (T1 — G17 note-only region)
+# Batch 1 (T1 — G20b xlabel consumption)
 
-# Batch 2 (T2 — G21 accumulator wiring)
+# Batch 2 (T2 — G17 note-only region)
 
-# Batch 3 (T3 — G5 south-cap opacity)
+# Batch 3 (T3 — G21 accumulator wiring)
 
-# Batch 4 (T4 — G15 composite-anchor spline clip)
+# Batch 4 (T4 — G5 south-cap opacity)
 
-# Batch 5 (T5 — G20a declaration order)
+# Batch 5 (T5 — G15 composite-anchor spline clip)
+
+# Batch 6 (T6 — G20a declaration order)

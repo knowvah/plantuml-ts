@@ -1,4 +1,4 @@
-# T6 — Close-out
+# T7 — Close-out
 
 ## Context
 Repo `/Users/scottseely/git/knowvah/plantuml-ts`, branch

@@ -14,43 +14,40 @@ each task by pathspec.
 
 ## The exit
 
-**15 rows across 10 fixtures, all re-measured 2026-08-19 against `main` and
+**16 rows across 11 fixtures, all re-measured 2026-08-19 against `main` and
 byte-identical to the records they come from** (SI30 moved none of them):
 
 | Group | Fixture | Rows | Δ today | Batch |
 |---|---|---|---|---|
-| G17 | `joleju-94-maru748` | 6 | −3 ×5, −9 | 1 |
-| G21 | `zacajo-09-tamu628` | 1 | −3.733 | 2 |
-| G21? | `jetuse-93-gopi146` | 1 | −5.000 | 2 (verify, D6) |
-| G5 | `pacami-67-dafe414` | 1 | −1.000 | 3 |
-| G5 | `tofezi-64-koda860` | 1 | −1.000 | 3 |
-| G5 | `xojudi-20-keco020` | 1 | −1.000 | 3 |
-| G5 | `decede-10-buvu414` | 1 | −1.000 | 3 |
-| G5 | `gokife-89-boja382` | 1 | −1.000 | 3 |
-| G15 | `fovafu-44-mifu394` | 1 | +7.820 | 4 |
-| G20a | `kejabo-83-vinu490` | 1 | +0.750 | 5 |
+| G20b | `pavuzo-79-zodu430` | 1 | −2.460 | 1 |
+| G17 | `joleju-94-maru748` | 6 | −3 ×5, −9 | 2 |
+| G21 | `zacajo-09-tamu628` | 1 | −3.733 | 3 |
+| G21? | `jetuse-93-gopi146` | 1 | −5.000 | 3 (verify, D6) |
+| G5 | `pacami-67-dafe414` | 1 | −1.000 | 4 |
+| G5 | `tofezi-64-koda860` | 1 | −1.000 | 4 |
+| G5 | `xojudi-20-keco020` | 1 | −1.000 | 4 |
+| G5 | `decede-10-buvu414` | 1 | −1.000 | 4 |
+| G5 | `gokife-89-boja382` | 1 | −1.000 | 4 |
+| G15 | `fovafu-44-mifu394` | 1 | +7.820 | 5 |
+| G20a | `kejabo-83-vinu490` | 1 | +0.750 | 6 |
 
 Exit = every row above exact, **or** carrying a jar-cited mechanism for the
 residual; the harness net shrink-only; no fixture outside `expected-moves.txt`
 moved.
 
-**G20b is NOT in this mission.** `pavuzo-79-zodu430`'s −2.460 px cannot be
-closed here: `@knowvah/dot-engine`'s public `EdgeGeometry` has no `xlabel`
-field, so the position the engine computes and draws is never published.
-Verified live on the installed 1.5.0, filed 2026-08-19 as
+**G20b joined the mission on 2026-08-19.** It was planned out — the engine's
+public `EdgeGeometry` had no `xlabel`, so the position it computed and drew was
+never published — and filed as
 [`docs/graphviz-issues/16-edge-xlabel-position-not-in-getlayout.md`](../../docs/graphviz-issues/16-edge-xlabel-position-not-in-getlayout.md)
-+ TRACKER line (commit `1fd425e0`).
+(commit `1fd425e0`). **Released in `@knowvah/dot-engine@1.6.0`**, implemented
+as requested including the `placedLabelPos` (`lp->set`) gate, and verified
+here on the published tarball: `xlabel` returns `{x: 30.94482…,
+y: 98.34964…}` against the oracle's `xlp="30.945,98.35"`. Batch 1.
 
-**Status as of 2026-08-19: FIXED upstream, NOT YET PUBLISHED.** dot-engine
-added `xlabel?: {x, y}` to `EdgeGeometry`, populated in `snapshotEdge` and
-gated on `placedLabelPos`'s `set` flag exactly as the filing asked — see the
-resolution note at the foot of issue 16. But this repo pins a published
-package, and npm's latest is still **1.5.0 with no `xlabel`** (checked
-2026-08-19). So it remains not consumable, and **this mission does not start
-it** — the port-side half would be untestable, and the 90/90/90 coverage gate
-would flag unreachable code. When the release lands it becomes a short
-follow-on mission: issue 16's own "Verification when it lands" section already
-carries its four steps. T6 records that in `next-missions.md`.
+The 1.5.0 → 1.6.0 bump is **provably inert** — the whole `dist/index.js` diff
+is two added lines in `snapshotEdge`, the only `src/` change is the geometry
+type and its doc, and the compound modules are byte-identical. T1 proves it
+anyway before consuming.
 
 **G15 joined the mission on 2026-08-19**, reclassified out of
 `docs/graphviz-issues/15-*` (commit `6199b5f3`). It was filed as a dot-engine
@@ -64,17 +61,20 @@ the `simulateCompound` clip we already ship. Batch 4.
 | Batch | What | Tasks | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | Baselines + allow-list | T0 | [ ] |
-| [1](batch-1/overview.md) | G17 note-only region (+15 per `SvekResult.java:135`) | T1 | [ ] |
-| [2](batch-2/overview.md) | G21 accumulator wiring + verify `jetuse-93` | T2 | [ ] |
-| [3](batch-3/overview.md) | G5 south-cap opacity thread | T3 | [ ] |
-| [4](batch-4/overview.md) | G15 composite-anchor spline clip (core extraction) | T4 | [ ] |
-| [5](batch-5/overview.md) | G20a declaration order (revert-on-net-growth) | T5 | [ ] |
-| [6](batch-6/overview.md) | Close-out | T6 | [ ] |
+| [1](batch-1/overview.md) | dot-engine 1.6 + G20b `xlabel` consumption | T1 | [ ] |
+| [2](batch-2/overview.md) | G17 note-only region (+15 per `SvekResult.java:135`) | T2 | [ ] |
+| [3](batch-3/overview.md) | G21 accumulator wiring + verify `jetuse-93` | T3 | [ ] |
+| [4](batch-4/overview.md) | G5 south-cap opacity thread | T4 | [ ] |
+| [5](batch-5/overview.md) | G15 composite-anchor spline clip (core extraction) | T5 | [ ] |
+| [6](batch-6/overview.md) | G20a declaration order (revert-on-net-growth) | T6 | [ ] |
+| [7](batch-7/overview.md) | Close-out | T7 | [ ] |
 
-Serial. Batches 1 and 2 both write `state-composite-concurrent.ts` in disjoint
-functions ~95 lines apart, and Batches 3 and 4 both write
+Serial. Batches 2 and 3 both write `state-composite-concurrent.ts` in disjoint
+functions ~95 lines apart, and Batches 4 and 5 both write
 `layout-ink-extent.ts` (south-cap term vs transition-ink path) — separate
-batches keeps every blast radius isolated (D4).
+batches keeps every blast radius isolated (D4). Batches 1 and 3 both move
+label positions, which is why they are not adjacent to each other's
+attribution.
 
 ## Quality gates (after every batch)
 
@@ -114,7 +114,7 @@ Honest current sample is **58.9 s** (55.0 s on a quiet machine).
    `decision-journal.md`, this brief.
 2. Two consecutive gate failures on the same check.
 3. Harness: any row appears or grows vs the previous baseline — **except
-   Batch 5**, where D5's revert rule replaces this.
+   Batch 6**, where D5's revert rule replaces this.
 4. `render-manifest` moves a fixture not on `expected-moves.txt`.
 5. A DOT-parity ratchet falls (state < 270, class < 721, description < 357,
    object < 80) or an svg-conformance golden count drops.

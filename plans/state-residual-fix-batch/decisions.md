@@ -92,7 +92,7 @@ Up to **83 of 273** state fixtures carry a composite plus a `[*]` transition,
 and graphviz's label force-search is non-monotonic in declaration order, so
 they can move either way. The row it closes is worth +0.750 px.
 
-**Decision.** Batch 5, last, after every other fix has landed and re-pinned.
+**Decision.** Batch 6, last, after every other fix has landed and re-pinned.
 Full-corpus gate. If the net is not shrink-only: **revert the whole batch** and
 file G20a as its own tracked mission. Do not halt for a fixture-by-fixture
 human ruling.
@@ -110,7 +110,7 @@ needs its own re-measurement").
 journal that mechanism with a `file:line` and leave the row open. No fix
 outside a diagnosed mechanism.
 
-**Consequences.** Exit is 13 or 14 rows depending on the answer; both pass.
+**Consequences.** Exit is 15 or 16 rows depending on the answer; both pass.
 
 ## D7 — If the complexity hook blocks `addNodeInk`, extract a helper
 
@@ -142,13 +142,13 @@ an ALLOWLIST or `KNOWN_DEBT` entry to let state reach into description. Either
 would give this repo two ports of one upstream method, which is the exact
 condition SI27 existed to remove. An ALLOWLIST entry here is stop 6.
 
-**Consequences.** Batch 4 is an extraction plus a consumer, not a one-line
+**Consequences.** Batch 5 is an extraction plus a consumer, not a one-line
 patch — larger, but it leaves one port and a reusable core seam.
 
 ## D8 — Routing
 
-Autonomous execution on `claude-fable-5`. T3 (the 4-file thread), T4 (the core
-extraction) and T5 (the risky reorder) get Opus; T0, T1, T2, T6 get Sonnet. Every agent prompt carries
+Autonomous execution on `claude-fable-5`. T4 (the 4-file thread), T5 (the core
+extraction) and T6 (the risky reorder) get Opus; T0, T1, T2, T3, T7 get Sonnet. Every agent prompt carries
 the Opus behavioural compensation from `~/.claude/rules/parallelism.md` when
 routed to Opus — with its stated carve-out: **a record enumerating required
 behaviour is not ambiguous scope**, so nothing on the row list may be trimmed
