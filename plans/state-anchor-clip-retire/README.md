@@ -57,7 +57,7 @@ See [decisions.md#d1](decisions.md).
 | [0](batch-0/overview.md) | Baselines (incl. a **tracked** copy — SI31's gap) | T0 | [x] |
 | [1](batch-1/overview.md) | Pre-conditions, NO CODE — D1 stands or falls here | T1 | [x] |
 | [2](batch-2/overview.md) | Port `solve()`'s edge pass; clip once; consumers follow | T2 | [x] |
-| [3](batch-3/overview.md) | Delete the divergence; fix `overview.md`; file two gaps | T3 | [ ] |
+| [3](batch-3/overview.md) | Delete the divergence; fix `overview.md`; file two gaps | T3 | [x] |
 | [4](batch-4/overview.md) | Close-out | T4 | [ ] |
 
 Serial. Batch 1 is a real gate, not ceremony: if node geos are not final and

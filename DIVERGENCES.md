@@ -1020,38 +1020,52 @@ itself is broken here.
 
 ## State diagrams
 
-### Composite-anchor transitions: `simulateCompound` clip applied to ink, not to the drawn path
+### Composite-anchor transitions: clip-rect family unported for border-point children
 
-**Divergence.** Upstream clips a cluster-sourced edge ONCE, in
-`SvekEdge#solveLine` (`SvekEdge.java:671-672`, calling
-`DotPath#simulateCompound(lhead.getRectangleArea(), ltail.getRectangleArea())`),
-and everything downstream — both the ink measurement via `LimitFinder` and the
-drawn path — sees the already-clipped spline. This port (SI31 T5) applies the
-same clip, from the same single port at `src/core/spline-clip.ts`, only where
-the spline is folded into a state composite's ink extent
-(`state/layout-ink-transition.ts`). The state renderer still draws the
-UNCLIPPED path, so a composite-anchor transition is drawn with the in-cluster
-segment the jar discards.
+**Divergence.** Upstream clips a cluster-sourced edge against
+`lhead.getRectangleArea()` / `ltail.getRectangleArea()`
+(`SvekEdge.java:671-672`), and for most composites that rect is the raw
+graphviz cluster bounding box (`DotStringFactory.java:425-434`,
+`Cluster.java:511-512`) — which is exactly what this port's
+`state-transition-clip.ts` derives from `result.clusters` (SI32 T2). But for
+composites with border-point children, `SvekEdge.java:660-663` first calls
+`projectionCluster.manageEntryExitPoint(stringBounder)`, and
+`Cluster.java:410-430` reassigns `this.rectangleArea =
+frontierCalculator.getSuggestedPosition()` — applying `ensureMinWidth(
+getTitleAndAttributeWidth() + 10)` when the cluster is titled — before the
+`:671` clip runs. `ClusterDotString.java:101-105` sets `projectionCluster`
+only when `entityPositionsExceptNormal().size() > 0` (a composite with
+border-point children), on every line that cluster is `lhead`/`ltail` for. It
+is an order-dependent mutation of shared cluster state inside the per-line
+loop: a later line clipping against the same cluster sees the already-
+adjusted rect. This port always clips against the raw box; it does not port
+`FrontierCalculator` or the projection-cluster mutation.
 
-**Consequence.** Declared sizes now match the jar (this closed
-`fovafu-44-mifu394`'s +7.820 px scope-2 width, and narrowed three more
-fixtures' canvases toward the jar's), but the drawn spline still enters the
-source composite's rectangle, and the canvas it is drawn on is now narrower
-than it was. On the four fixtures this currently affects, no on-curve ink falls
-outside the narrowed canvas — verified per fixture, which is a check, not a
-structural guarantee.
+**Reachability, measured.** Of the 41 fixtures SI32 T2's clip fires on,
+exactly two have a clipped-anchor composite with a direct border-point
+child, determined with the port's own `hasDirectBorderPointChild` (not
+inferred from the `.puml`): `pesita-10-dene726`'s `AA` and
+`viroxo-69-fito663`'s `comp1`.
 
-**Why it is here rather than fixed.** SI31's Batch 5 was scoped to the ink
-path; the state renderer was deliberately outside its write-set, because
-drawing the clipped path changes rendered output for every composite-anchor
-transition in the corpus and deserves its own measured mission rather than
-riding along inside a declared-size fix. `transitionArrowheadInk` likewise
-still reads raw points on purpose — folding a clipped-derived arrowhead would
-reserve ink for a marker that is not painted.
+**Measured rect delta** (raw box vs the frontier-adjusted box
+`state-composite-geo.ts#borderPointBox` already computes, shift-invariant):
+`AA` 156x118.720 raw vs 126x104.720 adjusted (30 px wider, 14.000012 px
+taller); `comp1` 123x277.000 vs 109x277.000 (14 px wider).
 
-**This is a structural divergence and should be retired, not kept.** The
-faithful end state is upstream's: clip once, then measure and draw the same
-clipped path. Follow-on scoped in `.agent-notes/si31-T5.md`.
+**Consequence.** Both fixtures still move TOWARD the jar under T2's clip
+(orchestrator-measured summed path-endpoint distance: `pesita` 761.735 ->
+663.541, `viroxo` 121.133 -> 77.401), so the unported adjustment narrows the
+error without closing it. `pesita` retains the largest residual of any
+fixture spot-checked in this mission, consistent with the unported
+adjustment being a real remaining term there. **What is NOT known:** nobody
+has measured what the frontier-adjusted rect would do to the clip *result*
+on these two fixtures — only what the rects themselves are. The residual is
+not fully explained by this gap; it is a candidate contributor.
 
-**Affects:** state diagrams with a transition anchored on a composite.
+**Why it is here rather than fixed.** Porting `FrontierCalculator` is a
+second port of upstream arithmetic (a distinct geometry algorithm from the
+clip itself) and was out of SI32 T2's scope.
+
+**Affects:** state diagrams whose clipped-anchor composite has a direct
+border-point child (`<<exitpoint>>`/`<<entrypoint>>`-style member).
 

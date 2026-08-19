@@ -369,14 +369,50 @@ Ordered by how ready they are, not by size.
     hypothesis journaled, G20a's fix kept anyway per D5's flat-net rule).
     Full scoring: `plans/state-residual-fix-batch/README.md`'s "Close-out
     (2026-08-19)" section. **What it spun out, in the order to pick it up:**
-    - **retire the T5 ink-only-clip divergence** — `DIVERGENCES.md:1021-1054`
-      ("State diagrams — Composite-anchor transitions: `simulateCompound`
-      clip applied to ink, not to the drawn path"). Upstream clips a
-      cluster-sourced edge ONCE, before drawing, so the same clipped path is
-      measured and drawn; this port clips only for the ink fold and still
-      draws the unclipped in-cluster segment. The entry names the faithful
-      end state (clip once, draw the clipped path) — close it by moving the
-      draw site onto the same clip, not by keeping the divergence.
+    - ~~**retire the T5 ink-only-clip divergence**~~ — **DONE 2026-08-19
+      (mission-index SI32, branch `fix/state-anchor-clip-retire`).** T2
+      ported `DotStringFactory.solve`'s edge loop at its true scope — per
+      graphviz layout result, clipping at construction
+      (`state-composite-pass.ts:370`, `layout.ts:178`) — so the ink walk and
+      the renderer now read the same clipped `TransitionGeo.points`; the old
+      `DIVERGENCES.md` entry was deleted (T3) because its premise (renderer
+      draws unclipped, ink walk clips) is now false. T3 filed a NEW, narrower
+      divergence in its place: `DIVERGENCES.md` under "State diagrams" —
+      this port always clips against the raw `result.clusters` box, but
+      upstream adjusts that box first for composites with a direct
+      border-point child (`SvekEdge.java:660-663` →
+      `Cluster.java:410-430`'s `FrontierCalculator`); reachable on exactly
+      2 of the 41 moved fixtures (`pesita-10-dene726`/`AA`,
+      `viroxo-69-fito663`/`comp1`), both still moving toward the jar under
+      T2's clip, `pesita` retaining the largest residual spot-checked this
+      mission. Porting `FrontierCalculator` is unscoped (candidate below).
+    - **port `FrontierCalculator`'s border-point clip-rect adjustment** —
+      `Cluster.java:410-430` (`manageEntryExitPoint`, called from
+      `SvekEdge.java:660-663` before the `:671` clip). This port's state
+      clip (`state-transition-clip.ts`) always uses the raw graphviz cluster
+      box; upstream reassigns it for composites with border-point children,
+      gated by `ClusterDotString.java:101-105`
+      (`entityPositionsExceptNormal().size() > 0`). Reachable on 2 fixtures
+      today (`pesita-10-dene726`, `viroxo-69-fito663`); see the
+      `DIVERGENCES.md` "State diagrams" entry filed by SI32 T3 for measured
+      rect deltas. Unmeasured: what the adjusted rect would do to the clip
+      *result*, not just what the rects are. Second port of upstream
+      arithmetic (`FrontierCalculator` itself, not just its call site) —
+      scope it as its own task before starting.
+    - **port `alignEdgesAtLabelNodes`** — `svek/DotStringFactory.java:461-463`
+      runs it between the clip loop and `manageCollision`, gated on
+      `DotSplines.ORTHO`; it collects nodes whose entity name starts with
+      `transition_` and aligns edges through them
+      (`DotStringFactory.java:475-508`). Unported anywhere in this repo.
+      Relevant because state's `linetype ortho`/`polyline` path is where
+      SI31 left `pavuzo-79-zodu430` open — **but SI31 attributed that
+      residual to a dot-engine canvas-reservation gap
+      (`docs/graphviz-issues/17`), and the relationship between the two is
+      UNEXAMINED — do not assume they are the same mechanism.**
+    - **port `manageCollision` for the state engine** — ported for the class
+      engine only, at `class-edge-label-anchor.ts:199` (from
+      `SvekEdge.java:1205-1216`). State has no equivalent pass. Whether
+      state needs it is not assessed here.
     - **`pavuzo-79-zodu430`** — consume the dot-engine fix for
       `docs/graphviz-issues/17-*` once the engine ships a corrected ortho
       `xlabel` canvas reservation (currently ~1.58pt short of native

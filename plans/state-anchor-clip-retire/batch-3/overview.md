@@ -18,4 +18,4 @@ entry.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Delete the old divergence; record the new border-point one; fix `overview.md`'s stale pin; file the gaps | typescript-pro (sonnet) | `DIVERGENCES.md`, `docs/architecture/overview.md`, `planning/next-missions.md`, `.agent-notes/si32-T3.md` | T2 | [ ] |
+| T3 | Delete the old divergence; record the new border-point one; fix `overview.md`'s stale pin; file the gaps | typescript-pro (sonnet) | `DIVERGENCES.md`, `docs/architecture/overview.md`, `planning/next-missions.md`, `.agent-notes/si32-T3.md` | T2 | [x] |
