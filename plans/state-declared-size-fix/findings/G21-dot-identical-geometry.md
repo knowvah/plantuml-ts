@@ -6,7 +6,7 @@
   |---|---|---|---|---|---|
   | 4 | width | 1 | 4.112429 | 4.164271 | -3.733 |
   | 4 | height | 1 | 7.388888 | 7.388889 | -0.000 |
-- **status:** unresolved (mechanism identified and evidenced; fix proposed, not applied — D6)
+- **status:** unresolved
 - **mechanism:** NOT a dot-engine geometry finding — ruled out directly (see
   evidence below). It is an ours-side accumulator-wiring bug:
   `buildConcurrentBranchAcc` (`state-composite-concurrent.ts:235`) calls

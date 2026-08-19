@@ -13,7 +13,7 @@
   not literally "last-digit" by that narrow test, but 0.0013 px is 26x under
   SCHEMA rule 5 / ADR-7's 0.05 px sub-pixel floor.)
 
-- **status:** already-conformant (closed by T9, commit `26fd56ce`)
+- **status:** already-conformant
 - **mechanism:** T9 landed the self-loop-scoped arrowhead-ink fold
   (`addTransitionInk`'s `arrowheadInk==='self-loop'` gate) inside
   `computeSvekResultGeometry`'s composite ink walk. dapunu-39 has exactly one
