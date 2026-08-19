@@ -1,0 +1,97 @@
+# Batch 1
+# T2 (G7 EXPANSION_* rankdir, G9 hide empty description)
+bujuta-44-rovo666
+mimaga-15-doze740
+nijugi-19-jazi166
+rinisi-79-peko570
+# bitaxo-18-tamo974 — G9 deferred (journal T2), does not move
+# T3 (ReadFilterMergeLines, trailing-\ fixtures)
+fokudo-49-xiki231
+mocoda-55-take697
+vubofi-17-dedi529
+duzazu-41-telu529
+vixobo-14-jole910
+fibudu-53-bode309
+# T4 (note on link)
+tumaba-64-tosu281
+# T5 (dotted id + G24 guards)
+fovafu-44-mifu394
+tubojo-49-tudu915
+cagego-53-vemo516
+xacona-99-peze211
+zecivu-62-pagu681
+fugedo-34-fice721
+# T4 general mechanism — every `note ... on link` fixture (journal T4, jar-ward: note now drawn, fill count == jar)
+fotigo-12-gufu949
+jaxuxe-73-sije305
+kupexa-94-dude266
+vateco-92-pece508
+xupefu-98-roni234
+# Batch 2
+# T6 (G1+G8+G23 state text through creoleTextLines)
+corumi-91-mizo869
+gupeto-19-mesa256
+juvagu-33-dupa212
+kubona-45-boso556
+lokija-02-dipe348
+fibudu-53-bode309
+papifi-44-caxo706
+rovado-96-boda672
+xasoka-58-temi462
+feziva-71-gufo538
+mujipe-99-fume794
+nixoja-06-guxe431
+jafazu-60-leca675
+rejike-58-rote606
+mefici-97-tudu030
+xeziki-47-zomo866
+dogeji-46-sapo750
+mosigo-88-rove013
+rijoki-89-teno556
+viguto-81-gana093
+resido-15-reza040
+kinuca-03-nice683
+# T7 (G2 note bodies)
+fatupo-62-bemu777
+# T6 general mechanism — `**bold**` in a state/composite description (journal T6, byte-matches jar in.svg text runs)
+gokife-89-boja382
+mazuzu-54-mene929
+duzazu-41-telu529
+vixobo-14-jole910
+# T5/G10 general mechanism — any dotted leaf declared without `as` (journal T5, ruling (a))
+cesifo-37-rugu443
+matezo-28-duka427
+tuvugi-94-gapi519
+zoxutu-11-giru788
+# Batch 3
+# T8 (G4 clusterPosMap)
+bajelo-54-dixe684
+cupesu-59-sajo991
+lojeju-04-fadu517
+nuvura-69-mafe604
+darime-88-moda428
+giniti-22-fexo000
+lumamo-63-zupa263
+jetuse-93-gopi146
+fotuje-06-fifa085
+# T9 (G5+G6 ink extent)
+pacami-67-dafe414
+tofezi-64-koda860
+xojudi-20-keco020
+decede-10-buvu414
+pebepi-32-cati486
+taxile-56-goca422
+tigibi-80-zidi137
+# T8 general mechanism — nested clusters now folded/translated (journal T8; rovese/zoriza 0 rows, SVG byte-exact after scale; zizemo byte-exact)
+rovese-43-tadu368
+zizemo-86-gisa766
+zoriza-41-rege543
+# T9 self-loop arrowhead ink — dapunu-39 s3 width −2.03 → +0.0013 px (orchestrator-verified)
+dapunu-39-kava045
+# Batch 4
+# T10 (G11 || orientation) — only corpus fixture using ||
+fimivu-15-vogi904
+# T11 (G13 label position) — only if the mechanism closes
+nimana-36-veco708
+bunade-42-fudu910
+nimise-04-jove070

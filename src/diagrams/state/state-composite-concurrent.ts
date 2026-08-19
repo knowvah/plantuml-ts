@@ -63,7 +63,7 @@ import type { TransitionGeo } from './state-geo-types.js';
 import { buildStateGeoTextFields } from './state-sizing.js';
 import { measureAutonomWrapper, stackConcurrentRegions, type AutonomWrapper } from './state-composite-sizing.js';
 import { computeSvekResultGeometry } from './layout-ink-extent.js';
-import { materializeSpecs, type PosMap } from './state-composite-geo.js';
+import { materializeSpecs, clusterPosMapOf, type PosMap } from './state-composite-geo.js';
 import {
   type DiagramCtx,
   type PassAccumulator,
@@ -126,7 +126,13 @@ function regionInkGeometry(
   // accumulator -- see `state-composite-geo.ts#materializeAutonom`'s own
   // doc comment; `computeSvekResultGeometry`'s ink walk recurses into each
   // materialized node's own `.transitions` field directly.
-  const states = materializeSpecs(p.specs, posMap, undefined, shadowing);
+  // SI29 F7 (SI28 G4): this region's OWN `clusterPosMapOf(p.result)` -- see
+  // the identical fix at `state-composite-autonom.ts#buildPlainAutonomSpec`
+  // for the jar derivation. `ConcurrentStates#calculateDimensionSlow` sums
+  // each region's `inner.calculateDimension()` (`ConcurrentStates.java:
+  // 133-141`), and jar's `inner` is the REAL laid-out SvekResult with every
+  // cluster's header-inclusive `rectangleArea` already painted into it.
+  const states = materializeSpecs(p.specs, posMap, clusterPosMapOf(p.result), shadowing);
   const transitions = buildLevelTransitionGeos(p.acc, p.result);
   const ink = computeSvekResultGeometry(states, transitions);
   return {
@@ -201,9 +207,17 @@ export function buildConcurrentAutonomSpec(s: State, ctx: DiagramCtx): Extract<G
   // now takes a second `shadowing` param, and `Array#map`'s own callback
   // signature `(item, index, array)` would otherwise silently pass the
   // per-pass INDEX as `shadowing`.
-  const stacked = stackConcurrentRegions(passes.map((p) => regionInkGeometry(p, ctx.theme.shadowing ?? 0)));
+  // G11 (state-declared-size-fix T10): `undefined` only when `passes` is
+  // empty (no separator was ever seen, so `stackConcurrentRegions` returns
+  // {0,0} regardless) -- HORIZONTAL matches the pre-G11 formula this port
+  // always applied.
+  const separator = s.concurrentSeparator ?? 'HORIZONTAL';
+  const stacked = stackConcurrentRegions(
+    passes.map((p) => regionInkGeometry(p, ctx.theme.shadowing ?? 0)),
+    separator,
+  );
   const wrapper = measureAutonomWrapper(s, stacked, ctx.theme, ctx.measurer);
-  return combineConcurrentPasses(s, passes, wrapper, stacked.width, ctx);
+  return combineConcurrentPasses(s, passes, wrapper, stacked, ctx);
 }
 
 /** Build and run ONE region's (or region-0's) pass — called either directly
@@ -284,37 +298,57 @@ function shiftTransitionY(t: TransitionGeo, dy: number): TransitionGeo {
   };
 }
 
+/** G11 (state-declared-size-fix T10): the `||` (VERTICAL separator)
+ *  counterpart to `shiftTransitionY` — regions stack side-by-side, so the
+ *  stack offset moves along x instead of y. */
+function shiftTransitionX(t: TransitionGeo, dx: number): TransitionGeo {
+  return {
+    ...t,
+    points: t.points.map((pt) => ({ x: pt.x + dx, y: pt.y })),
+    ...(t.label !== undefined ? { label: { ...t.label, x: t.label.x + dx } } : {}),
+  };
+}
+
 /**
  * mission G4 S6, mechanism 13: builds BOTH the flat `localStates`/
  * `localTransitions` (unchanged shape/consumers, a plain region-order
  * concatenation) AND the per-region-grouped `regions` field, plus the
  * dashed `separators` between each pair of stacked regions --
  * `ConcurrentStates.java#drawU`'s own loop: draw region i's content, move
- * the cursor down by region i's own height, THEN (if not the last region)
- * draw a separator spanning the FULL content width at the new cursor y.
+ * the cursor by region i's own extent, THEN (if not the last region) draw a
+ * separator spanning the FULL content extent at the new cursor position.
  *
- * Separator x1/x2 are LOCAL (pre dx/dy-shift, matching `localPositions`'s
- * own convention): x1=0 (the composite's own wrapped-child-content origin,
- * `InnerStateAutonom.getSpaceYforURL`'s `MARGIN` offset — already folded
- * into `spec.offset.x`/`materializeAutonom`'s `dx`, so 0 here is correct,
- * not a placeholder), x2=`contentWidth + SEPARATOR_LINE_DASH` (the SAME
- * `dimTotal.getWidth()` `stackConcurrentRegions` already returns, passed in
- * as `contentWidth`). jar-verified `nelupe-49-xova546`: composite box
- * x=7, `spec.offset.x`=`MARGIN`=5 -> absolute x1=12 (jar's own `x1="12"`);
- * contentWidth=102 -> absolute x2=12+102+8=122 (jar's own `x2="122"`).
+ * G11 (state-declared-size-fix T10): `Separator.move`/`drawSeparator`
+ * (`ConcurrentStates.java:75-89`) key the STACK AXIS on the same
+ * `s.concurrentSeparator` `stackConcurrentRegions` already branched on --
+ * HORIZONTAL (`--`) moves the cursor down (y) and draws a horizontal rule;
+ * VERTICAL (`||`) moves it right (x) and draws a vertical rule. Separator
+ * x1/y1/x2/y2 are LOCAL (pre dx/dy-shift, matching `localPositions`'s own
+ * convention): the cross-axis coordinate is 0 (the composite's own
+ * wrapped-child-content origin, `InnerStateAutonom.getSpaceYforURL`'s
+ * `MARGIN` offset — already folded into `spec.offset.x`/
+ * `materializeAutonom`'s `dx`, so 0 here is correct, not a placeholder);
+ * the rule's own length is `stackExtent + SEPARATOR_LINE_DASH` (the SAME
+ * `dimTotal.getWidth()`/`getHeight()` `stackConcurrentRegions` already
+ * returns, passed in as `stacked`). jar-verified `nelupe-49-xova546`
+ * (HORIZONTAL): composite box x=7, `spec.offset.x`=`MARGIN`=5 -> absolute
+ * x1=12 (jar's own `x1="12"`); contentWidth=102 -> absolute x2=12+102+8=122
+ * (jar's own `x2="122"`).
  */
 function combineConcurrentPasses(
   s: State,
   passes: readonly ConcurrentRegionPassResult[],
   wrapper: AutonomWrapper,
-  contentWidth: number,
+  stacked: { width: number; height: number },
   ctx: DiagramCtx,
 ): Extract<GeoSpec, { kind: 'autonom' }> {
+  const vertical = s.concurrentSeparator === 'VERTICAL';
+  const stackExtent = vertical ? stacked.height : stacked.width;
   const localStates: GeoSpec[] = [];
   const localTransitions: TransitionGeo[] = [];
   const regions: { specs: readonly GeoSpec[]; transitions: readonly TransitionGeo[] }[] = [];
   const separators: { x1: number; y1: number; x2: number; y2: number }[] = [];
-  let yShift = 0;
+  let shift = 0;
   const allNodes: DotLayoutResult['nodes'] = [];
   for (let i = 0; i < passes.length; i++) {
     const p = passes[i]!;
@@ -324,14 +358,22 @@ function combineConcurrentPasses(
     // pre-S6 (a consistent +7,+7 absolute-position gap, jar-verified).
     const geom = regionInkGeometry(p, ctx.theme.shadowing ?? 0);
     const shiftedResult = shiftDotLayoutResult(p.result, geom.dx, geom.dy);
-    for (const n of shiftedResult.nodes) allNodes.push({ ...n, y: n.y + yShift });
-    const regionTransitions = buildLevelTransitionGeos(p.acc, shiftedResult).map((t) => shiftTransitionY(t, yShift));
+    for (const n of shiftedResult.nodes) {
+      allNodes.push(vertical ? { ...n, x: n.x + shift } : { ...n, y: n.y + shift });
+    }
+    const regionTransitions = buildLevelTransitionGeos(p.acc, shiftedResult).map((t) =>
+      vertical ? shiftTransitionX(t, shift) : shiftTransitionY(t, shift),
+    );
     localStates.push(...p.specs);
     localTransitions.push(...regionTransitions);
     regions.push({ specs: p.specs, transitions: regionTransitions });
-    yShift += geom.height;
+    shift += vertical ? geom.width : geom.height;
     if (i < passes.length - 1) {
-      separators.push({ x1: 0, y1: yShift, x2: contentWidth + SEPARATOR_LINE_DASH, y2: yShift });
+      separators.push(
+        vertical
+          ? { x1: shift, y1: 0, x2: shift, y2: stackExtent + SEPARATOR_LINE_DASH }
+          : { x1: 0, y1: shift, x2: stackExtent + SEPARATOR_LINE_DASH, y2: shift },
+      );
     }
   }
   return {

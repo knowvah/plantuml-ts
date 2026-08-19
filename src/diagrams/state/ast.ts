@@ -58,6 +58,15 @@ export interface HistoryPseudostate {
   depth: 'shallow' | 'deep';
 }
 
+/**
+ * `--`/`||` separator orientation — name/members mirror upstream
+ * `ConcurrentStates.Separator` verbatim. `HORIZONTAL` (`--`, a horizontal
+ * LINE) stacks regions top-to-bottom; `VERTICAL` (`||`, a vertical LINE)
+ * stacks regions side-by-side.
+ * @see ~/git/plantuml/.../svek/ConcurrentStates.java:63-89 (fromChar, .add)
+ */
+export type Separator = 'HORIZONTAL' | 'VERTICAL';
+
 // ---------------------------------------------------------------------------
 // State node
 // ---------------------------------------------------------------------------
@@ -73,6 +82,11 @@ export interface State {
    * Each sub-array is one region. Empty unless `--` was present.
    */
   concurrentRegions: State[][];
+  /** Orientation of the `--`/`||` line(s) that produced `concurrentRegions`
+   *  (undefined until one is seen). Last-write-wins, mirroring upstream
+   *  `Entity#setConcurrentSeparator`, called on every eligible visit.
+   *  @see ~/git/plantuml/.../statediagram/StateDiagram.java:194-206 */
+  concurrentSeparator?: Separator;
   /**
    * Transitions that belong to this composite state's inner scope.
    * Empty for leaf states. Inner transitions are NOT hoisted to the

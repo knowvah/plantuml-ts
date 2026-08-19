@@ -40,10 +40,22 @@ trailing-`\` line (grep first, list in the batch overview) may move.
 nothing else moved. Rejected: a state-only merge in `state-commands.ts`.
 
 ## D4 — Harness baseline: F0 first, then re-pin downward only
-**Decision.** T0 lands Candidate B pairing (METRIC-AUDIT §3) with counters
-provably identical (272/2654/2481/144/29/4/79) and re-pins. Every later task
+**Decision (amended 2026-08-18, T0).** Pairing stays SORTED per axis. T0
+lands `harness-diff.py` and pins both baselines with counters identical to
+SI28's (272/2654/2481/144/29/4/79, sha b790fabc…505e0). Every later task
 re-pins only after `harness-diff.py` prints `0 rows appeared or grew`; task
 exit = its fixtures' rows exact. **Consequences.** README stop 3 is mechanical.
+`idx` is a sort rank, not a declared position — attribution within a scope
+stays visible through the paired `(ours, jar)` values, as before.
+**Superseded text.** The original D4 required Candidate B (declaration-order
+pairing after a `shape==='point'` filter, METRIC-AUDIT §3) "with counters
+provably identical". T0 showed it is not: our DOT declares nested-cluster
+siblings in a different relative order than the jar (`[*]` pseudo-node
+position; `bemena-23-zebu249/svek-2.dot:10-11`), so positional pairing swaps
+sizes between real nodes (counters 272/2474/1745/700/29/4/142; 38/148 groups
+change). METRIC-AUDIT proved sorted is error-minimising (§2) and count parity
+(§3), never order parity. Ruled by the human (option a): revert, amend, resume.
+The emission-order divergence itself is a candidate follow-on mission.
 
 ## D5 — Ratchets tighten in-task
 **Decision.** Each F-task removes/tightens its fixtures' entries in

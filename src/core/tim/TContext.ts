@@ -261,6 +261,12 @@ export class TContext implements TContextInterface {
    * filesystem. `IncludeExecutor` holds the state upstream keeps on `TContext`
    * for them (`filesUsedCurrent`, the path system); the dispatch order below is
    * upstream's own (`executeOneLineNotSafe`).
+   *
+   * `TContext.java:661`'s `ReadFilterMergeLines` wrap on the `!includesub`
+   * reader (this method's `INCLUDESUB` branch) lives at
+   * `IncludeExecutor.ts#executeIncludesub` now, alongside the file read it
+   * wraps -- `executeInclude` / `executeIncludeDef` are NOT wrapped, matching
+   * upstream (see that method's comment).
    */
   private executeIncludeDirective(memory: TMemory, s: StringLocated, type: TLineType): boolean {
     if (type === 'INCLUDESUB') this.includeExecutor.executeIncludesub(this, memory, s);

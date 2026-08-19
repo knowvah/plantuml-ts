@@ -50,6 +50,11 @@ import type { StateTextLine } from './state-geo-types.js';
 import { measureJsonState } from './state-json-sizing.js';
 import { resolveStateFontSize } from './state-render-colors.js';
 import { isBorderPoint } from './state-entity-position.js';
+// G1/G23 (mission state-declared-size-fix, D1): the ONE creole seam. Every
+// `measurer.measure` this file used to run on display/description/field
+// text is now a `stateCreoleBlock` call -- see that module's doc comment.
+import type { StateCreoleOpts, StateStyledTextLine } from './state-sizing-creole.js';
+import { stateCreoleBlock, stateCreoleOpts } from './state-sizing-creole.js';
 
 // ---------------------------------------------------------------------------
 // Creole line splitting
@@ -174,21 +179,43 @@ const SDL_MARGIN = { x1: 15, x2: 25, y1: 20, y2: 10 };
 /** `BodyEnhanced1#getMarginX` — see {@link SDL_MARGIN}'s own doc comment. */
 const BODY_MARGIN_X = 6;
 
-function measureLines(lines: readonly string[], font: FontSpec, measurer: StringMeasurer): Dim {
+/** `Stereotype#isWithOOSymbol` (`Stereotype.java:119-121`):
+ *  `"<<O-O>>".equalsIgnoreCase(decoration.label)`. This port's parser
+ *  stores the stereotype label WITHOUT its `<<`/`>>` guillemets, so the
+ *  case-insensitive comparison is against the bare `O-O`. */
+function isWithOOSymbol(stereotype: string | undefined): boolean {
+  return stereotype !== undefined && stereotype.toUpperCase() === 'O-O';
+}
+
+/** `EntityImageState.java:71,74` (`smallRadius = 3`, `smallMarginY = 4`) —
+ *  `:107-109`'s `heightSymbol += 2 * smallRadius + smallMarginY`, added to
+ *  the SAME `dim.delta(...)` single-value form as `MARGIN*2 + 2*MARGIN_LINE`
+ *  (`:111`), i.e. to BOTH axes, BEFORE `atLeast(MIN_WIDTH, MIN_HEIGHT)`
+ *  (`:112`). Reserves the two small `<<O-O>>` circles `drawSymbol` paints at
+ *  the box's bottom-right corner (`:174-181`). */
+const OO_SYMBOL_SMALL_RADIUS = 3;
+const OO_SYMBOL_SMALL_MARGIN_Y = 4;
+const OO_SYMBOL_DELTA = 2 * OO_SYMBOL_SMALL_RADIUS + OO_SYMBOL_SMALL_MARGIN_Y;
+
+/** The per-call creole measurement context — bundled so no function below
+ *  needs more than this project's 5-parameter ceiling once `font`,
+ *  `measurer` AND the `wrapWidth`/`tabSize` options all have to reach the
+ *  same leaf (`creole-text-lines.ts#MeasureCtx`'s identical precedent). */
+interface TextCtx {
+  readonly font: FontSpec;
+  readonly measurer: StringMeasurer;
+  readonly opts: StateCreoleOpts;
+}
+
+function measureLines(lines: readonly string[], ctx: TextCtx): Dim {
   if (lines.length === 0) return { width: 0, height: 0 };
-  let width = 0;
-  let height = 0;
-  for (const line of lines) {
-    const m = measurer.measure(line, font);
-    if (m.width > width) width = m.width;
-    height += m.height;
-  }
-  return { width, height };
+  const block = stateCreoleBlock(lines, ctx.font, ctx.measurer, ctx.opts);
+  return { width: block.width, height: block.height };
 }
 
 /** EntityImageState2 sizing (approximate — see SDL_MARGIN doc). */
-function measureSdlReceive(state: State, font: FontSpec, measurer: StringMeasurer): Dim {
-  const label = measureLines(splitStateDisplayLines(state.display), font, measurer);
+function measureSdlReceive(state: State, ctx: TextCtx): Dim {
+  const label = measureLines(splitStateDisplayLines(state.display), ctx);
   return {
     width: label.width + SDL_MARGIN.x1 + SDL_MARGIN.x2 + 2 * BODY_MARGIN_X,
     height: label.height + SDL_MARGIN.y1 + SDL_MARGIN.y2,
@@ -196,21 +223,23 @@ function measureSdlReceive(state: State, font: FontSpec, measurer: StringMeasure
 }
 
 /** EntityImageStateEmptyDescription: `hide empty description` + no body lines. */
-function measureEmptyDescription(state: State, font: FontSpec, measurer: StringMeasurer): Dim {
-  const name = measureLines(splitStateDisplayLines(state.display), font, measurer);
+function measureEmptyDescription(state: State, ctx: TextCtx): Dim {
+  const name = measureLines(splitStateDisplayLines(state.display), ctx);
   const width = Math.max(name.width + EMPTY_DESC_MARGIN_DELTA, EMPTY_DESC_MIN_WIDTH);
   const height = Math.max(name.height + EMPTY_DESC_MARGIN_DELTA, EMPTY_DESC_MIN_HEIGHT);
   return { width, height };
 }
 
-/** EntityImageState: name + fields (body/description lines), MIN 50x50. */
-function measureNormalState(state: State, font: FontSpec, measurer: StringMeasurer): Dim {
-  const name = measureLines(splitStateDisplayLines(state.display), font, measurer);
+/** EntityImageState: name + fields (body/description lines), MIN 50x50,
+ *  plus the `<<O-O>>` symbol reservation (see {@link OO_SYMBOL_DELTA}). */
+function measureNormalState(state: State, ctx: TextCtx): Dim {
+  const name = measureLines(splitStateDisplayLines(state.display), ctx);
   const bodyLines = (state.description ?? []).flatMap(splitStateDisplayLines);
-  const fields = measureLines(bodyLines, font, measurer);
+  const fields = measureLines(bodyLines, ctx);
   const merged = { width: Math.max(name.width, fields.width), height: name.height + fields.height };
-  const width = Math.max(merged.width + STATE_MARGIN_DELTA, STATE_MIN_WIDTH);
-  const height = Math.max(merged.height + STATE_MARGIN_DELTA, STATE_MIN_HEIGHT);
+  const heightSymbol = isWithOOSymbol(state.stereotype) ? OO_SYMBOL_DELTA : 0;
+  const width = Math.max(merged.width + STATE_MARGIN_DELTA + heightSymbol, STATE_MIN_WIDTH);
+  const height = Math.max(merged.height + STATE_MARGIN_DELTA + heightSymbol, STATE_MIN_HEIGHT);
   return { width, height };
 }
 
@@ -226,17 +255,25 @@ function measureNormalState(state: State, font: FontSpec, measurer: StringMeasur
 function measureNormalKind(
   state: State,
   hideEmptyDescription: boolean,
-  font: FontSpec,
-  measurer: StringMeasurer,
+  ctx: TextCtx,
 ): { dim: Dim; shape: DotInputNodeShape } {
   const hasBody = (state.description?.length ?? 0) > 0;
   if (hideEmptyDescription && !hasBody) {
-    return { dim: measureEmptyDescription(state, font, measurer), shape: 'rounded' };
+    return { dim: measureEmptyDescription(state, ctx), shape: 'rounded' };
   }
   if (state.stereotype?.toLowerCase() === 'sdlreceive') {
-    return { dim: measureSdlReceive(state, font, measurer), shape: 'rect' };
+    return { dim: measureSdlReceive(state, ctx), shape: 'rect' };
   }
-  return { dim: measureNormalState(state, font, measurer), shape: 'rounded' };
+  return { dim: measureNormalState(state, ctx), shape: 'rounded' };
+}
+
+/** `EntityImageState*` is the LEAF branch of
+ *  `GeneralImageBuilder#createEntityImageBlockInternal`; a state with
+ *  children/concurrent regions becomes an `InnerStateAutonom`/cluster
+ *  instead, whose title and attribute block go through `Display.create`
+ *  (no `wrapWidth`) — see `state-sizing-creole.ts#stateCreoleOpts`. */
+function isLeafState(state: State): boolean {
+  return state.children.length === 0 && state.concurrentRegions.length === 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -276,7 +313,8 @@ export function measureState(
   // <<X>>` siblings, which are render-time-only.
   const fontSize = resolveStateFontSize(state, theme, theme.fontSize);
   const font: FontSpec = { family: theme.fontFamily, size: fontSize };
-  const { dim, shape } = measureNormalKind(state, hideEmptyDescription, font, measurer);
+  const ctx: TextCtx = { font, measurer, opts: stateCreoleOpts(theme, true) };
+  const { dim, shape } = measureNormalKind(state, hideEmptyDescription, ctx);
   return { ...dim, shape };
 }
 
@@ -294,8 +332,15 @@ export function measureState(
 /** Header (display/name) lines, pre-measured — `kind:'normal'` leaf boxes.
  *  Jar-verified jocela-05-niba392 (1 line), votoki-67-gufa610 (1 line,
  *  centered against a WIDER body-dominated box). */
-export function measureTextLines(displayText: string, font: FontSpec, measurer: StringMeasurer): StateTextLine[] {
-  return splitStateDisplayLines(displayText).map((ln) => ({ text: ln, width: measurer.measure(ln, font).width }));
+export function measureTextLines(
+  displayText: string,
+  font: FontSpec,
+  measurer: StringMeasurer,
+  // G1: the SAME creole options the SIZER measured this text with -- the
+  // sizer and the renderer must see one block, not two (D1).
+  opts: StateCreoleOpts = {},
+): readonly StateStyledTextLine[] {
+  return stateCreoleBlock(splitStateDisplayLines(displayText), font, measurer, opts).lines;
 }
 
 /**
@@ -314,14 +359,17 @@ export function measureTextLines(displayText: string, font: FontSpec, measurer: 
  * not string emptiness — a blank description line already contributes one
  * full `theme.fontSize` of height either way).
  */
-const NBSP = '\u00A0';
 export function measureBodyTextLines(
   description: readonly string[] | undefined,
   font: FontSpec,
   measurer: StringMeasurer,
-): StateTextLine[] {
-  const lines = (description ?? []).flatMap(splitStateDisplayLines).map((ln) => (ln === '' ? NBSP : ln));
-  return lines.map((ln) => ({ text: ln, width: measurer.measure(ln, font).width }));
+  // G1: see {@link measureTextLines}'s own `opts` note.
+  opts: StateCreoleOpts = {},
+): readonly StateStyledTextLine[] {
+  // The NBSP substitution for a truly empty captured line now lives in
+  // `state-sizing-creole.ts#blankLine` (the seam reports NO line at all for
+  // an empty string), so every consumer of a creole block gets it.
+  return stateCreoleBlock((description ?? []).flatMap(splitStateDisplayLines), font, measurer, opts).lines;
 }
 
 /** `EntityImagePseudoState`/`EntityImageDeepHistory`'s own "H"/"H*" glyph —
@@ -374,16 +422,19 @@ export function buildStateGeoTextFields(
   // attribute matches jar's own larger/smaller glyph metrics.
   const fontSize = resolveStateFontSize(state, theme, theme.fontSize);
   const font: FontSpec = { family: theme.fontFamily, size: fontSize };
+  // G1: `wrapWidth` only on the LEAF `EntityImageState*` branch, matching
+  // the SIZER's own `measureState` call above -- see `isLeafState`.
+  const opts = stateCreoleOpts(theme, isLeafState(state));
   const fields: StateGeoTextFields = {};
   const hasBody = (state.description?.length ?? 0) > 0;
   if (state.kind === 'normal' && hideEmptyDescription && !hasBody) {
-    fields.headerLines = measureTextLines(state.display, font, measurer);
+    fields.headerLines = measureTextLines(state.display, font, measurer, opts);
     fields.emptyDescription = true;
   } else if (state.kind === 'normal') {
-    fields.headerLines = measureTextLines(state.display, font, measurer);
-    fields.bodyLines = measureBodyTextLines(state.description, font, measurer);
+    fields.headerLines = measureTextLines(state.display, font, measurer, opts);
+    fields.bodyLines = measureBodyTextLines(state.description, font, measurer, opts);
   } else if (state.kind === 'history' || state.kind === 'deepHistory') {
-    fields.headerLines = measureTextLines(historyLabelText(state.kind), font, measurer);
+    fields.headerLines = measureTextLines(historyLabelText(state.kind), font, measurer, opts);
   }
   if (state.color !== undefined) fields.color = state.color;
   if (state.stereotype !== undefined) fields.stereotype = state.stereotype;

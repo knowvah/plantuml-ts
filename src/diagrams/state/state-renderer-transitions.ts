@@ -19,7 +19,7 @@ import {} from './renderer-pseudostate.js';
 import {} from './renderer-box.js';
 import { resolveStateArrowLineColor, resolveStateArrowHeadColor } from './state-render-colors.js';
 import {} from './renderer-composite-box.js';
-import {} from './renderer-note.js';
+import { renderNoteOnLink } from './renderer-note.js';
 import {} from './state-shadow.js';
 
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
@@ -139,9 +139,20 @@ function transitionLabelFontAttrs(theme: Theme): {
 
 /** Split out of {@link buildTransitionInnerMarkup} to stay under this
  *  project's per-function NLOC cap -- the transition label `<text>`,
- *  font AND fill both from {@link transitionLabelFontAttrs} (T5/D3). */
+ *  font AND fill both from {@link transitionLabelFontAttrs} (T5/D3).
+ *
+ *  T4 (`note-on-link`): `transition.label.noteLines !== undefined` ⇒ a
+ *  `note ... on link` -- draw the real `EntityImageNoteLink`/
+ *  `ComponentRoseNote` folded-corner box (`renderer-note.ts#renderNoteOnLink`)
+ *  instead of a plain `<text>` glyph; `label.x`/`label.y`/`label.width`/
+ *  `label.height` are then the box's own top-left corner + dims
+ *  (`TransitionGeo.label`'s own doc comment), not a baseline anchor. */
 function buildTransitionLabelMarkup(transition: TransitionGeo, theme: Theme): string {
   if (transition.label === undefined) return '';
+  if (transition.label.noteLines !== undefined) {
+    const { x, y, width = 0, height = 0, noteLines } = transition.label;
+    return renderNoteOnLink({ x, y, width, height }, noteLines, theme);
+  }
   const { color, ...fontAttrs } = transitionLabelFontAttrs(theme);
   return text(transition.label.x, transition.label.y, transition.label.text, {
     ...fontAttrs,

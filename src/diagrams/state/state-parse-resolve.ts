@@ -27,6 +27,7 @@ import {
   noteScopeId,
 } from './state-parse-state.js';
 import { stripSyncBarEquals } from './state-transitions.js';
+import { assertConcurrentStateOk, assertDottedParentHasData } from './state-parse-helpers.js';
 
 /** True iff `id` should be resolved via the dotted hierarchical-split
  *  branch of `quarkInContextSafe` — the active separator is set (`set
@@ -116,11 +117,11 @@ function registerNewState(ps: ParseState, state: State): void {
  * (`Somp.entry1`, written outside any block) reach into an
  * already-declared composite's children. Otherwise the path resolves
  * relative to the CURRENT scope (`currentQuark.child(full)`) — new,
- * scope-local nesting (mission A4 Phase L iter 10's fugedo-34-fice721:
- * a dotted reference whose first segment is a SIBLING, not a root-level
- * or current-scope entity, auto-creates a brand new nested duplicate
- * instead of reaching across — a genuine upstream parse-error case in that
- * fixture, ledgered separately, not fixed here).
+ * scope-local nesting (fugedo-34-fice721: a dotted reference whose first
+ * segment is a SIBLING, not root-level/current-scope, manufactures a brand
+ * new nested duplicate instead of reaching across. A `mode==='neutral'`
+ * walk that freshly creates the duplicate's DIRECT parent refuses the
+ * diagram instead — `assertDottedParentHasData`, T5).
  *
  * The FINAL segment itself is NEVER marked phantom or upgraded (it is the
  * thing actually being declared/referenced) regardless of caller — see
@@ -150,10 +151,19 @@ function registerNewState(ps: ParseState, state: State): void {
  */
 type DottedAncestorMode = 'phantom' | 'promote' | 'neutral';
 
-function resolveOrCreateDottedPath(ps: ParseState, segments: readonly string[], mode: DottedAncestorMode): State {
+function resolveOrCreateDottedPath(
+  ps: ParseState,
+  segments: readonly string[],
+  mode: DottedAncestorMode,
+  fullId: string,
+): State {
   const anchorIsRoot = rootScope(ps).stateIndex.has(segments[0]!);
   let scope: Scope = anchorIsRoot ? rootScope(ps) : currentScope(ps);
   let state: State | undefined;
+  // Whether the FINAL segment's DIRECT parent (the second-to-last segment)
+  // was manufactured brand-new by THIS walk -- see `assertDottedParentHasData`'s
+  // doc for why only the direct parent (not any earlier ancestor) matters.
+  let directParentWasFreshlyCreated = false;
   for (let i = 0; i < segments.length; i++) {
     const seg = segments[i]!;
     const isLast = i === segments.length - 1;
@@ -161,12 +171,15 @@ function resolveOrCreateDottedPath(ps: ParseState, segments: readonly string[], 
     if (existing !== undefined) {
       if (!isLast && mode === 'promote') delete existing.autoPhantom;
       state = existing;
+      if (!isLast) directParentWasFreshlyCreated = false;
     } else {
       state = makeState(seg, seg, 'normal', !isLast && mode === 'phantom' ? { autoPhantom: true } : undefined);
       registerStateInto(ps, scope, state);
+      if (!isLast) directParentWasFreshlyCreated = true;
     }
     scope = scopeOf(ps, state);
   }
+  assertDottedParentHasData(mode === 'neutral', directParentWasFreshlyCreated, fullId);
   return state!;
 }
 
@@ -350,13 +363,18 @@ export function ensureState(
   if (compound !== undefined) return ensureCompoundHistory(ps, compound.idShort, compound.kind);
 
   if (dotted) {
-    const state = resolveOrCreateDottedPath(ps, canonicalId.split(ps.separator!), 'neutral');
+    const state = resolveOrCreateDottedPath(ps, canonicalId.split(ps.separator!), 'neutral', canonicalId);
     ps.lastEntity = state.id;
     return state;
   }
 
   const existing = resolveExistingState(ps, canonicalId);
-  if (existing !== undefined) return existing;
+  if (existing !== undefined) {
+    // decisions.md#D2, StateDiagram.java:70-90 via CommandLinkStateCommon
+    // .java:166-174,271 (cagego-53, xacona-99, zecivu-62).
+    assertConcurrentStateOk(ps, existing, `The state ${canonicalId} cannot be used here.`);
+    return existing;
+  }
 
   const s = makeState(canonicalId, canonicalId, pseudoKind ?? kind);
   registerNewState(ps, s);
@@ -376,7 +394,21 @@ export function ensureState(
  *  side effects once). */
 function applyDeclaredContent(target: State, source: State, pass: Pass): void {
   if (pass !== 'one') return;
-  target.display = source.display;
+  // Upstream `CommandCreateState.java:181-183`: `display = arg.getLazzy(
+  // "DISPLAY", 0); if (display == null) display = quark.getName();` -- an
+  // EXPLICIT `as "..."` alias always wins outright; a DEFAULTED display (no
+  // `as` clause -- `extractDisplayAndId`'s `display ?? bareId` fallback,
+  // state-parse-helpers.ts -- always sets `source.display === source.id`,
+  // since both come from the SAME raw token) is re-derived from the
+  // QUARK's own POST-SPLIT local name (`quark.getName()`), never the
+  // pre-split full dotted id. `target.id` IS that local name already --
+  // `resolveOrCreateDottedPath`'s `makeState(seg, seg, ...)` set it to the
+  // FINAL segment when this declaration walked a dotted path, and for a
+  // flat (non-dotted) declaration `target.id === source.id` trivially, so
+  // this is a no-op there. Without this, `state B.A.X` (no alias) clobbered
+  // leaf "X"'s correctly-split display back to the full "B.A.X" (G10,
+  // fovafu-44-mifu394#a / tubojo-49-tudu915).
+  target.display = source.display === source.id ? target.id : source.display;
   target.kind = source.kind;
   if (source.color !== undefined) target.color = source.color;
   if (source.stereotype !== undefined) target.stereotype = source.stereotype;
@@ -425,6 +457,7 @@ export function declareState(
       ps,
       state.id.split(ps.separator!),
       opts?.phantomAncestors === true ? 'phantom' : 'promote',
+      state.id,
     );
     applyDeclaredContent(resolved, state, pass);
     ps.lastEntity = resolved.id;
@@ -433,6 +466,10 @@ export function declareState(
 
   const existing = resolveExistingState(ps, state.id);
   if (existing !== undefined) {
+    // decisions.md#D2, StateDiagram.java:70-90 via CommandCreateState
+    // .java:189-191 -- same guard as ensureState's (upstream calls it from
+    // both commands); zecivu-62's ensureState touch fires first here.
+    assertConcurrentStateOk(ps, existing, `The state ${state.id} has been created in a concurrent state : it cannot be used here.`);
     applyDeclaredContent(existing, state, pass);
     ps.lastEntity = existing.id;
     return existing;

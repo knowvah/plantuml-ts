@@ -9,10 +9,17 @@
  * @see ~/git/plantuml/.../svek/ConcurrentStates.java (region image stacking)
  */
 
-import type { State } from './ast.js';
+import type { Separator, State } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { splitStateDisplayLines } from './state-sizing.js';
+// G1/G23 (mission state-declared-size-fix, D1): a composite's own title and
+// attribute block go through the SAME creole seam the leaf sizer uses --
+// `InnerStateAutonom.java:97` (`group.getDisplay().create(...)`) and
+// `Entity.java:631` (`getStateDescription` -> `display.create(...)`), both
+// `Display.create` (`Display.java:614`, `LineBreakStrategy.NONE`), so NO
+// `wrapWidth` here, unlike the leaf `create8` path.
+import { stateCreoleBlock, stateCreoleOpts } from './state-sizing-creole.js';
 
 interface Dim {
   width: number;
@@ -26,16 +33,10 @@ import {
   ENTITY_IMAGE_MARGIN_LINE as MARGIN_LINE,
 } from '../../core/svek/IEntityImage.js';
 
-function measureLines(lines: readonly string[], font: FontSpec, measurer: StringMeasurer): Dim {
+function measureLines(lines: readonly string[], font: FontSpec, measurer: StringMeasurer, theme: Theme): Dim {
   if (lines.length === 0) return { width: 0, height: 0 };
-  let width = 0;
-  let height = 0;
-  for (const line of lines) {
-    const m = measurer.measure(line, font);
-    if (m.width > width) width = m.width;
-    height += m.height;
-  }
-  return { width, height };
+  const block = stateCreoleBlock(lines, font, measurer, stateCreoleOpts(theme, false));
+  return { width: block.width, height: block.height };
 }
 
 /** The vertical offset at which an InnerStateAutonom's wrapped child image is
@@ -69,9 +70,9 @@ export function measureAutonomWrapper(
   measurer: StringMeasurer,
 ): AutonomWrapper {
   const font: FontSpec = { family: theme.fontFamily, size: theme.fontSize };
-  const text = measureLines(splitStateDisplayLines(state.display), font, measurer);
+  const text = measureLines(splitStateDisplayLines(state.display), font, measurer, theme);
   const bodyLines = (state.description ?? []).flatMap(splitStateDisplayLines);
-  const attr = measureLines(bodyLines, font, measurer);
+  const attr = measureLines(bodyLines, font, measurer, theme);
   const marginForFields = attr.height > 0 ? MARGIN : 0;
 
   const nameHeight = MARGIN + text.height + MARGIN_LINE;
@@ -90,9 +91,16 @@ export function measureAutonomWrapper(
   // formula; CCN 2, length driven by the doc comment + straight-line math.
 }
 
-/** ConcurrentStates: per-region images stacked vertically (TB rankdir) --
- *  width is the widest region, height is the PLAIN SUM of region heights,
- *  ZERO extra gap between them.
+/** ConcurrentStates: per-region images stacked either top-to-bottom (`--`,
+ *  HORIZONTAL separator LINE — width is the widest region, height is the
+ *  PLAIN SUM of region heights) or side-by-side (`||`, VERTICAL separator
+ *  LINE — width is the PLAIN SUM of region widths, height is the widest
+ *  region) — the exact axis swap `Separator.add` performs, keyed by which
+ *  separator character produced the regions (G11, mission
+ *  state-declared-size-fix T10, jar-verified `fimivu-15-vogi904`: this port
+ *  used to apply the HORIZONTAL/`--` formula unconditionally, so a `||`
+ *  composite came out identically sized to an equivalent `--` one instead
+ *  of swapped). ZERO extra gap between regions on either axis.
  *
  *  Mission G4 S4 (mechanism 7's own concurrent-composite companion,
  *  diagnosed while chasing `nelupe-49-xova546`'s regression): direct read of
@@ -118,11 +126,20 @@ export function measureAutonomWrapper(
  */
 const CONCURRENT_SEPARATOR_GAP = 0;
 
-export function stackConcurrentRegions(regionDims: readonly Dim[]): Dim {
+/** `Separator.add` (`ConcurrentStates.java:79-84`): VERTICAL (`||`) sums
+ *  WIDTH and maxes HEIGHT; HORIZONTAL (`--`) maxes WIDTH and sums HEIGHT --
+ *  the exact axis swap G11 restores (state-declared-size-fix T10). */
+export function stackConcurrentRegions(regionDims: readonly Dim[], separator: Separator): Dim {
   if (regionDims.length === 0) return { width: 0, height: 0 };
-  const width = Math.max(...regionDims.map((d) => d.width));
-  const height =
-    regionDims.reduce((sum, d) => sum + d.height, 0) +
-    CONCURRENT_SEPARATOR_GAP * (regionDims.length - 1);
-  return { width, height };
+  const gap = CONCURRENT_SEPARATOR_GAP * (regionDims.length - 1);
+  if (separator === 'VERTICAL') {
+    return {
+      width: regionDims.reduce((sum, d) => sum + d.width, 0) + gap,
+      height: Math.max(...regionDims.map((d) => d.height)),
+    };
+  }
+  return {
+    width: Math.max(...regionDims.map((d) => d.width)),
+    height: regionDims.reduce((sum, d) => sum + d.height, 0) + gap,
+  };
 }

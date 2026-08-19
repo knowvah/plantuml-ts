@@ -4,8 +4,8 @@ Serialized after Batch 1 (both import `creoleTextLines`). Disjoint write-sets.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T6 | F1 — route state display/description/field text through the seam; `<<O-O>>` +10; composite own-description table; sizer+renderer lockstep | general-purpose (Opus, effort high) | `src/diagrams/state/state-sizing.ts`, `state-composite-sizing.ts`, `renderer-box.ts`, `renderer-composite-box.ts`, `tests/unit/state/state-sizing-creole.test.ts` (+ existing state tests it must update), ratchet entries | T1 | [ ] |
-| T7 | F2 — note bodies through the seam (creole + table rows), sizer+renderer lockstep | typescript-pro | `src/diagrams/state/state-note-layout.ts`, `state-composite-edge-label.ts`, `renderer-note.ts`, `tests/unit/state/state-note-layout.test.ts`, ratchet entries | T1 | [ ] |
+| T6 | F1 — route state display/description/field text through the seam; `<<O-O>>` +10; composite own-description table; sizer+renderer lockstep | general-purpose (Opus, effort high) | `src/diagrams/state/state-sizing.ts`, `state-composite-sizing.ts`, `renderer-box.ts`, `renderer-composite-box.ts`, `tests/unit/state/state-sizing-creole.test.ts` (+ existing state tests it must update), ratchet entries | T1 | [x] |
+| T7 | F2 — note bodies through the seam (creole + table rows), sizer+renderer lockstep | typescript-pro | `src/diagrams/state/state-note-layout.ts`, `state-composite-edge-label.ts`, `renderer-note.ts`, `tests/unit/state/state-note-layout.test.ts`, ratchet entries | T1 | [x] |
 
 **Expected manifest moves.** T6 → the 22 fixtures: G1 `corumi-91-mizo869`,
 `gupeto-19-mesa256`, `juvagu-33-dupa212`, `kubona-45-boso556`,

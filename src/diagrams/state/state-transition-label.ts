@@ -20,9 +20,15 @@
 import type { Transition } from './ast.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { ReservedLabelBox } from '../../core/edge-label-box.js';
-import type { LabelInkBox } from './state-geo-types.js';
+import type { LabelInkBox, StateTextLine } from './state-geo-types.js';
 import { transitionLabelText } from './state-dot-graph.js';
-import { computeReservedLabelBox } from '../../core/edge-label-box.js';
+import { computeReservedLabelBox, computeMergedLabelBox } from '../../core/edge-label-box.js';
+// T4 (`note-on-link`, `state-declared-size-fix`): the SAME `EntityImageNoteLink`
+// dimension `state-dot-graph.ts#computeEdgeLabelBox`/`state-composite-edge-
+// label.ts#computeEdgeLabelBox` already feed the DOT graph -- reused here so
+// the DRAWN box (this file) and the RESERVED box (DOT) never disagree.
+import { measureLinkNoteDim } from '../../core/svek/image/EntityImageNoteLink.js';
+import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
 
 /** Label offset perpendicular to the edge direction -- legacy fallback only
  *  (D1): still used verbatim when the layout result carries no label
@@ -182,24 +188,184 @@ interface LabelEdgeResult {
   readonly labelY?: number;
 }
 
-/** Attach a transition's label. D1: when the layout result placed the label
- *  (graphviz read the FIXEDSIZE box back) AND a font/measurer is available,
- *  convert its centre to a draw anchor via {@link transitionLabelAnchor};
- *  otherwise fall back to the legacy perpendicular-offset formula,
- *  unchanged. Pure function of the transition, the routed points, and the
- *  layout result. */
-export function attachTransitionLabel(
+/** {@link attachTransitionLabel}'s return shape -- shared by the inline-label
+ *  and note-on-link arms (T4). */
+type TransitionLabelResult = {
+  text: string;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  inkBox?: LabelInkBox;
+  noteLines?: readonly StateTextLine[];
+};
+
+/** `font`+`measurer` as a single optional pair -- collapses both label arms'
+ *  param count under this project's 5-param cap (mirrors `FlatNoteGeoCtx`'s
+ *  own bundling precedent, `renderer-note.ts`). `undefined` for a pass whose
+ *  accumulator was built outside this task's write-set
+ *  (`state-composite-concurrent.ts`'s own `newAccumulator()`, concurrent-
+ *  region passes) -- both arms degrade to their box-less legacy shape then. */
+interface LabelMeasureCtx {
+  readonly font: FontSpec;
+  readonly measurer: StringMeasurer;
+}
+
+// ---------------------------------------------------------------------------
+// `note ... on link` (T4, `note-on-link`/`state-declared-size-fix`)
+// ---------------------------------------------------------------------------
+
+/** Per-line text+width for a `note ... on link`'s body -- the SAME naive
+ *  split `core/svek/image/EntityImageNoteLink.ts#naivePureTextDim` measures
+ *  for the DOT box (that function returns only the aggregate max width; the
+ *  renderer additionally needs each line's own text/width, mirroring
+ *  `StateNodeGeo.noteLines`'s shape, to draw the note body) -- duplicated
+ *  rather than exported cross-file (D1, avoids a new public seam for one
+ *  caller). */
+function noteLinesOf(text: string, font: FontSpec, measurer: StringMeasurer): StateTextLine[] {
+  return text.split('\n').map((line) => ({
+    text: line,
+    width: measurer.measure(line, { family: font.family, size: NOTE_FONT_SIZE }).width,
+  }));
+}
+
+/** The `note on link` box: the SAME `computeMergedLabelBox` formula
+ *  `state-dot-graph.ts#computeEdgeLabelBox`/`state-composite-edge-label.ts
+ *  #computeEdgeLabelBox` already feed the DOT graph's `labelWidth`/
+ *  `labelHeight`, so the drawn box and the DOT reservation never disagree
+ *  (`SvekEdge.java:741-747`, `hasNoteLabelText()` folds the SAME merged
+ *  `labelText` block both places). */
+function measureNoteBox(
   t: Transition,
+  labelText: string | undefined,
+  font: FontSpec,
+  measurer: StringMeasurer,
+): ReservedLabelBox {
+  return computeMergedLabelBox({
+    label: labelText ?? '',
+    noteDim: measureLinkNoteDim(t.linkNote!, { family: font.family }, measurer),
+    position: t.linkNotePosition ?? 'bottom',
+    halfWidth: false,
+    hasMiddleDecor: false,
+    font,
+    measurer,
+  });
+}
+
+/** `note on link`'s anchor is the box's own TOP-LEFT corner -- no
+ *  `marginLabel`/ascent inset, unlike an inline label's baseline anchor.
+ *  `SvekEdge.java:741-747`'s `labelText` is the RAW `EntityImageNoteLink`
+ *  block whenever the inline label is empty (`Display.isNull` ->
+ *  `EMPTY_TEXT_BLOCK` -> `TextBlockUtils.mergeLR`/`mergeTB`'s own
+ *  short-circuit, `:281-282,318-325`) -- the merged block then carries NO
+ *  extra `addVisibilityModifier`/`TextBlockMarged` wrap, so `labelXY`'s own
+ *  dimension IS the note's preferred box, positioned at the graphviz-read
+ *  centre with no further inset. A non-empty inline label merged with a note
+ *  (`mergeLR`/`mergeTB` over two REAL blocks) is a wider case this task's
+ *  sole target fixture (tumaba-64-tosu281) never exercises -- out of scope,
+ *  same `DIVERGENCES.md`-worthy residue `computeMergedLabelBox`'s own doc
+ *  comment already flags for the merge-order term. */
+function noteAnchorFromCentre(
+  centre: { x: number; y: number },
+  box: ReservedLabelBox,
+): { x: number; y: number } {
+  return { x: centre.x - box.reservedWidth / 2, y: centre.y - box.reservedHeight / 2 };
+}
+
+/** `Rose.java:65-66` -- `paddingX`/`paddingY`, both 5, `Rose#createComponentNote`
+ *  passes into every `ComponentRoseNote` (`Rose.java:114-115`); the SAME
+ *  constant `renderer-note.ts`'s own (unexported) copy uses as a DRAW offset
+ *  -- duplicated here (D1) because the ink fold below needs it too, and this
+ *  file has no import path to the renderer without a cycle
+ *  (`renderer-note.ts` -> `state-geo-types.ts`, not this file). */
+const ROSE_NOTE_PADDING = 5;
+
+/** {@link labelBoxFields}'s note-on-link counterpart. The ink box is NOT the
+ *  full preferred box `width`/`height` carry (`EntityImageNoteLink
+ *  #calculateDimensionSlow` reports the FULL `ComponentRoseNote` preferred
+ *  size, `pure+31`/`pure+20`) -- `ComponentRoseNote#drawInternalU` only
+ *  PAINTS pixels within the INSET `getTextWidth`x`getTextHeight` polygon
+ *  (`Opale.getPolygonNormal(x2, textHeight, ...)`, `x2`/`textHeight` both
+ *  already `2 * ROSE_NOTE_PADDING` smaller than the preferred box -- see
+ *  `renderer-note.ts#renderNoteOnLink`'s own derivation), so a REAL
+ *  `LimitFinder` ink walk over the drawn primitives (`InnerStateAutonom
+ *  .java:186-193`) sees only that smaller box, not the logical `calculate
+ *  Dimension()` one. Jar-verified against `tumaba-64-tosu281`'s own
+ *  canonical SVG (`test-results/visual-qa-svg/canonical/state/tumaba-64-
+ *  tosu281.svg`): the drawn note polygon is `M54.21,315 ... L92.21,338`
+ *  (38x23 -- `reservedWidth-2*ROSE_NOTE_PADDING` x `reservedHeight-2*
+ *  ROSE_NOTE_PADDING` exactly), and folding THAT box (not the full 48x33
+ *  one) is what closes `SubState`'s declared width to the jar-verified
+ *  target (`findings/note.md#tumaba-64-tosu281`'s own `childImg.width=
+ *  89.21px`) -- the full box overshoots by exactly `ROSE_NOTE_PADDING`. */
+function noteBoxFields(
+  anchor: { x: number; y: number },
+  box: ReservedLabelBox,
+  noteText: string,
+  ctx: LabelMeasureCtx,
+): { width: number; height: number; inkBox: LabelInkBox; noteLines: readonly StateTextLine[] } {
+  return {
+    width: box.reservedWidth,
+    height: box.reservedHeight,
+    inkBox: {
+      x: svgPrecision(anchor.x + ROSE_NOTE_PADDING),
+      y: svgPrecision(anchor.y + ROSE_NOTE_PADDING),
+      width: box.reservedWidth - 2 * ROSE_NOTE_PADDING,
+      height: box.reservedHeight - 2 * ROSE_NOTE_PADDING,
+    },
+    noteLines: noteLinesOf(noteText, ctx.font, ctx.measurer),
+  };
+}
+
+/** The note box's own anchor: the graphviz-read centre when the layout
+ *  result placed the label, else the legacy perpendicular-offset point
+ *  (D1's fallback, unchanged formula) -- same precedence as the inline-label
+ *  arm's own gate. */
+function resolveNoteAnchor(
   points: ReadonlyArray<{ x: number; y: number }>,
   edgeResult: LabelEdgeResult | undefined,
-  font: FontSpec | undefined,
-  measurer: StringMeasurer | undefined,
-):
-  | { text: string; x: number; y: number; width?: number; height?: number; inkBox?: LabelInkBox }
-  | undefined {
-  const labelText = transitionLabelText(t);
-  if (labelText === undefined) return undefined;
+  measured: ReservedLabelBox | undefined,
+): { x: number; y: number } | undefined {
+  if (edgeResult?.labelX !== undefined && measured !== undefined) {
+    return noteAnchorFromCentre({ x: edgeResult.labelX, y: edgeResult.labelY! }, measured);
+  }
+  return perpendicularOffsetLabel(points);
+}
 
+/** {@link attachTransitionLabel}'s `t.linkNote !== undefined` arm -- same
+ *  measured/anchor/boxFields shape as the inline-label arm below, so a
+ *  reviewer can read the two side by side. */
+function attachNoteOnLinkLabel(
+  t: Transition,
+  labelText: string | undefined,
+  points: ReadonlyArray<{ x: number; y: number }>,
+  edgeResult: LabelEdgeResult | undefined,
+  ctx: LabelMeasureCtx | undefined,
+): TransitionLabelResult | undefined {
+  const text = labelText ?? t.linkNote!;
+  const measured = ctx !== undefined ? measureNoteBox(t, labelText, ctx.font, ctx.measurer) : undefined;
+  const anchor = resolveNoteAnchor(points, edgeResult, measured);
+  if (anchor === undefined) return undefined;
+  const boxFields =
+    measured !== undefined && ctx !== undefined ? noteBoxFields(anchor, measured, t.linkNote!, ctx) : {};
+  return { text, x: anchor.x, y: anchor.y, ...boxFields };
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+/** {@link attachTransitionLabel}'s inline-label arm (guard/action/`label`) --
+ *  split out so the public dispatcher stays a thin, low-complexity routing
+ *  function (this project's per-function CCN cap); body otherwise unchanged
+ *  from the pre-T4 `attachTransitionLabel`. */
+function attachInlineTransitionLabel(
+  t: Transition,
+  labelText: string,
+  points: ReadonlyArray<{ x: number; y: number }>,
+  edgeResult: LabelEdgeResult | undefined,
+  ctx: LabelMeasureCtx | undefined,
+): TransitionLabelResult | undefined {
   const isSelfLoop = t.from === t.to;
   // `font`/`measurer` are unavailable only for a pass whose accumulator was
   // built outside this task's write-set (state-composite-concurrent.ts's
@@ -208,10 +374,7 @@ export function attachTransitionLabel(
   // pre-existing perpendicular-only, no-box shape (D1's own "absent falls
   // back unchanged" spirit, generalized to a missing measurer rather than
   // just a missing layout position).
-  const measured =
-    font !== undefined && measurer !== undefined
-      ? measureLabel(labelText, font, measurer, isSelfLoop)
-      : undefined;
+  const measured = ctx !== undefined ? measureLabel(labelText, ctx.font, ctx.measurer, isSelfLoop) : undefined;
 
   // D1: gate on `labelX !== undefined` specifically, never truthiness (0 is
   // a valid coordinate) -- `labelY` is present together with `labelX`
@@ -229,4 +392,33 @@ export function attachTransitionLabel(
   // convention rather than a second one.
   const boxFields = measured !== undefined ? labelBoxFields(legacy, measured) : {};
   return { text: labelText, x: legacy.x, y: legacy.y, ...boxFields };
+}
+
+/** Attach a transition's label. D1: when the layout result placed the label
+ *  (graphviz read the FIXEDSIZE box back) AND a font/measurer is available,
+ *  convert its centre to a draw anchor via {@link transitionLabelAnchor};
+ *  otherwise fall back to the legacy perpendicular-offset formula,
+ *  unchanged. Pure function of the transition, the routed points, and the
+ *  layout result.
+ *
+ *  T4: `t.linkNote !== undefined` routes to {@link attachNoteOnLinkLabel}
+ *  instead -- gated ALONGSIDE `labelText` (mirrors `state-dot-graph.ts
+ *  #edgeLabelAttrs`'s own `text === undefined && t.linkNote === undefined`
+ *  gate) so a note-only transition (no inline `label`/`guard`/`action`)
+ *  still attaches a real `TransitionGeo.label`, closing the gap
+ *  `findings/note.md#tumaba-64-tosu281` named: `transitionLabelText` itself
+ *  is UNCHANGED (still `undefined` for a note-only transition) -- both
+ *  callers already treat `linkNote` as a separate, sibling concern. */
+export function attachTransitionLabel(
+  t: Transition,
+  points: ReadonlyArray<{ x: number; y: number }>,
+  edgeResult: LabelEdgeResult | undefined,
+  font: FontSpec | undefined,
+  measurer: StringMeasurer | undefined,
+): TransitionLabelResult | undefined {
+  const labelText = transitionLabelText(t);
+  if (labelText === undefined && t.linkNote === undefined) return undefined;
+  const ctx = font !== undefined && measurer !== undefined ? { font, measurer } : undefined;
+  if (t.linkNote !== undefined) return attachNoteOnLinkLabel(t, labelText, points, edgeResult, ctx);
+  return attachInlineTransitionLabel(t, labelText!, points, edgeResult, ctx);
 }

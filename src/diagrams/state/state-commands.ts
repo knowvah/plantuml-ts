@@ -171,11 +171,20 @@ export const COMMANDS: readonly Command[] = [
   // @see ~/git/plantuml/.../statediagram/command/CommandConcurrentState.java
   // -------------------------------------------------------------------------
   {
-    pattern: /^(?:--+|\|\|+)\s*$/,
+    pattern: /^(--+|\|\|+)\s*$/,
     passes: ['one', 'two'],
     execute(ps, match, pass) {
       const scope = currentScope(ps);
       scope.hasConcurrency = true;
+      // G11 (mission state-declared-size-fix T10): `Separator.fromChar`
+      // (`ConcurrentStates.java:63-89`) reads the FIRST character of the
+      // matched run: '|' -> VERTICAL, '-' -> HORIZONTAL. jar's own
+      // `concurrentState()` sets this on EVERY eligible visit (last write
+      // wins), unconditionally -- mirrored here outside the pass-one-only
+      // block below (`StateDiagram.java:194-206`).
+      if (scope.owner) {
+        scope.owner.concurrentSeparator = match[1]!.startsWith('|') ? 'VERTICAL' : 'HORIZONTAL';
+      }
       if (pass === 'one') {
         scope.regions.push([]);
         // mission G4 S7 (mechanism 10, sub-pattern a): jar's own

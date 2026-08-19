@@ -1,0 +1,55 @@
+{
+ "_doc": "SI29 Batch 5 re-diagnosis partition (decisions.md D6). `real` = the D1-D8 slugs; T11's G13 record (nimana-36/bunade-42/nimise-04) was added by the orchestrator: T11 wrote findings/G13.md (unresolved) and changed no src/.",
+ "real": [
+  "rovese-43-tadu368",
+  "zoriza-41-rege543",
+  "zizemo-86-gisa766",
+  "fovafu-44-mifu394",
+  "joleju-94-maru748",
+  "zacajo-09-tamu628",
+  "kejabo-83-vinu490",
+  "pavuzo-79-zodu430",
+  "dapunu-39-kava045",
+  "gokife-89-boja382",
+  "jijuze-43-ceva131",
+  "nimana-36-veco708",
+  "bunade-42-fudu910",
+  "nimise-04-jove070"
+ ],
+ "precision": [],
+ "unmatched": [],
+ "buckets": {
+  "G15-cluster-header-ink": [
+   "rovese-43-tadu368",
+   "zoriza-41-rege543",
+   "zizemo-86-gisa766"
+  ],
+  "G19-nested-wrapper-margin": [
+   "fovafu-44-mifu394"
+  ],
+  "G17-note-only-region": [
+   "joleju-94-maru748"
+  ],
+  "G21-dot-identical-geometry": [
+   "zacajo-09-tamu628"
+  ],
+  "G20-linetype-routing": [
+   "kejabo-83-vinu490",
+   "pavuzo-79-zodu430"
+  ],
+  "G22-dapunu-residual": [
+   "dapunu-39-kava045"
+  ],
+  "G18-single-node-autonom": [
+   "gokife-89-boja382"
+  ],
+  "G16-region-leaf-margin": [
+   "jijuze-43-ceva131"
+  ],
+  "G13": [
+   "nimana-36-veco708",
+   "bunade-42-fudu910",
+   "nimise-04-jove070"
+  ]
+ }
+}

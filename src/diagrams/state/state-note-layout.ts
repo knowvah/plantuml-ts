@@ -39,8 +39,13 @@
 
 import type { NotePosition, StateNote } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { DotInputNode } from '../../core/graph-layout.js';
+import type { FontConfiguration, FontStyle } from '../../core/klimt/shape/UText.js';
+import { buildNoteBody } from '../../core/svek/image/leaf-sizing.js';
+import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
+import { creoleTextLines, type CreoleTextLine } from '../../core/svek/image/creole-text-lines.js';
+import type { PureNoteTextDim } from '../../core/svek/image/EntityImageNoteLink.js';
 
 /**
  * mission G4 S10: `Opale.java`'s real `EntityImageNote`/`Opale` margin
@@ -69,28 +74,152 @@ import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js'
 /** One measured line's own text + advance width — parallel data the S10
  *  note renderer (`renderer-note.ts`) needs for per-line `textLength`;
  *  the DOT-sizing consumer (`buildScopeParts`) only reads the aggregate
- *  `width`/`height` below. */
+ *  `width`/`height` below. `text`/`width` are the RENDER-time approximation
+ *  (see {@link buildRenderLines}'s own doc comment) — the authoritative
+ *  content dimension the box is actually sized to is `NoteMeasurement.width`/
+ *  `.height` below (T7, SI28 `findings/note.md`), not a sum/max of these. */
+interface NoteRenderLine {
+  readonly text: string;
+  readonly width: number;
+}
+
 interface NoteMeasurement {
-  readonly lines: readonly { readonly text: string; readonly width: number }[];
+  readonly lines: readonly NoteRenderLine[];
   readonly width: number;
   readonly height: number;
 }
 
-/** `EntityImageNote#getTextWidth`/`getTextHeight` (see this module's own
- *  doc comment above for the jar-verified derivation). Exported: mission G4
- *  S10's `renderer-note.ts#buildFlatNoteGeos` re-measures each note
- *  individually (post-layout) to recover its own per-line `lines` array —
- *  cheap, deterministic, avoids threading this function's own Map result
- *  through an extra layer. */
+/** `note { FontSize 13 }`'s plain style set (`plantuml.skin` default,
+ *  `EntityImageNote.java` never applies bold/italic/underline to the note's
+ *  OWN base font — per-run styling comes from creole markup INSIDE the body,
+ *  not the base `FontConfiguration`) — same empty-set precedent
+ *  `leaf-sizing.ts`'s own (private, description-engine) `NOTE_FONT_STYLES`
+ *  constant already establishes for the identical jar font. */
+const NOTE_FONT_STYLES: ReadonlySet<FontStyle> = new Set();
+
+/**
+ * SI28 `findings/note.md` (fatupo-62-bemu777, xeziki-47-zomo866#a): the note
+ * body's CONTENT dimension now routes through `buildNoteBody`
+ * (`core/svek/image/leaf-sizing.ts`) — the SAME `BodyFactory.create3` ->
+ * `BodyEnhanced2` real creole/table pipeline `EntityImageNote.java:114-118`
+ * itself calls (`AtomTable.java:90-96`'s column/row-max grid box,
+ * `StripeTable.java:82-84`'s `AtomWithMargin(table,2,2)` for a `|=…|` table
+ * body; `StripeSimple`/`CreoleParser`'s `<color:…>` tag recognizer for plain
+ * styled text) — replacing the RAW `text.split('\n')` + literal
+ * `measurer.measure` model that measured pipe-table syntax and `<color:…>`
+ * tags as literal glyphs. `leaf-sizing.ts`'s own doc comment already
+ * jar-pins this exact call shape for the description engine's notes
+ * (`"Hello" 50.74x23`, unchanged from the old flat model for markup-free
+ * text — the swap is a NO-OP for every plain note, only markup/table bodies
+ * move); this task reuses it rather than re-deriving the same pipeline a
+ * second time inside `diagrams/state/`, per D1's "one core seam" principle
+ * (this seam sits in `core/`, not the class engine, so no D8 cross-engine
+ * import). Margins stay state's own `Opale.java`-derived constants (module
+ * doc comment above) — `buildNoteBody`'s returned `TextBlock` is the PURE
+ * (un-padded) content box, `EntityImageNote.java:176-181`'s own split.
+ */
 export function measureNote(text: string, theme: Theme, measurer: StringMeasurer): NoteMeasurement {
-  const fontSpec = { family: theme.fontFamily, size: NOTE_FONT_SIZE };
-  const lines = text.split('\n').map((t) => ({ text: t, width: measurer.measure(t, fontSpec).width }));
-  const maxW = lines.reduce((m, l) => Math.max(m, l.width), 0);
+  const pure = measureNotePureText(text, theme.fontFamily, measurer);
   return {
-    lines,
-    width: maxW + NOTE_MARGIN_X1 + NOTE_MARGIN_X2,
-    height: lines.length * NOTE_FONT_SIZE + NOTE_MARGIN_Y * 2,
+    lines: buildRenderLines(text, theme, measurer),
+    width: pure.width + NOTE_MARGIN_X1 + NOTE_MARGIN_X2,
+    height: pure.height + NOTE_MARGIN_Y * 2,
   };
+}
+
+/**
+ * The note body's PURE (un-padded) content dimension — the shared half of
+ * {@link measureNote} above. Exported (not yet consumed elsewhere) as the
+ * ready-made `pureText` strategy for `core/svek/image/EntityImageNoteLink.ts
+ * #measureLinkNoteDim` (`shared-seam-extraction`/SI27's D1 extension point):
+ * NOT wired into `state-composite-edge-label.ts`'s own `measureLinkNoteDim`
+ * call this task, because `state-dot-graph.ts` (the FLAT pipeline's
+ * byte-identical call, `computeEdgeLabelBox`, out of this task's write-set)
+ * would then diverge from it — wiring only one of the two note-on-link call
+ * sites breaks sizer/renderer LOCKSTEP (D1) between the flat and composite
+ * pipelines, worse than the naive-default status quo both already share.
+ * `state-composite-edge-label.ts`'s own SI28-flagged "duplicate" was already
+ * resolved by SI27 into `EntityImageNoteLink.ts`'s one shared body (this
+ * file's own top-of-file comment); the ONLY remaining gap is that shared
+ * body's naive default for state, and closing it is a task for whoever owns
+ * BOTH `state-dot-graph.ts` and `state-composite-edge-label.ts` at once. A
+ * no-op today regardless: `EntityImageNoteLink.ts`'s own doc comment records
+ * that no `note ... on link` fixture in the corpus carries creole markup. */
+export function measureNotePureText(text: string, fontFamily: string, measurer: StringMeasurer): PureNoteTextDim {
+  const font: FontConfiguration = { family: fontFamily, size: NOTE_FONT_SIZE, color: null, styles: NOTE_FONT_STYLES };
+  const dim = buildNoteBody(text, font).calculateDimension(new MeasurerStringBounder(measurer));
+  return { width: dim.getWidth(), height: dim.getHeight() };
+}
+
+/**
+ * Per-visible-line render text + advance width for {@link renderStateNote}'s
+ * flat `<text>`-per-line draw (`renderer-note.ts#renderNoteTextLines`) — kept
+ * separate from the authoritative content dimension above because the
+ * existing render contract (`StateTextLine`-shaped, `state-geo-types.ts`, out
+ * of this task's write-set) has no room for a real per-run/per-cell payload.
+ * Reuses the T1 seam (`creoleTextLines`, D1) for a TEXT/HR line's own
+ * markup-stripped visible text + correct width — a genuine, jar-ward
+ * improvement over drawing the literal `<color:…>` source (xeziki-47's own
+ * target shape). A TABLE-kind line (T1's own `tableRowLine` doc comment:
+ * "T7 owns per-cell parsing") draws as its markup-stripped cells joined by
+ * two spaces — closer to jar than the previous literal `|= a | b |` text,
+ * though still NOT jar's real bordered grid (`AtomTable#drawU`'s per-cell
+ * rule lines) — that remains a named, deferred gap (`renderer-note.ts`'s own
+ * module doc comment), since a real grid draw needs per-cell/per-column
+ * geometry `StateTextLine` cannot carry without a `state-geo-types.ts`
+ * change outside this task's write-set.
+ */
+function buildRenderLines(
+  text: string,
+  theme: Theme,
+  measurer: StringMeasurer,
+): readonly NoteRenderLine[] {
+  const font: FontSpec = { family: theme.fontFamily, size: NOTE_FONT_SIZE };
+  return creoleTextLines(text, font, measurer).map((ln) =>
+    ln.kind === 'table-row' ? tableRowRenderLine(ln, font, measurer) : textRenderLine(ln),
+  );
+}
+
+/** A TEXT/HR `CreoleTextLine` -> its own markup-stripped visible text (the
+ *  concatenation of every styled run's own `text`) + the seam's own measured
+ *  `width` — per-run color/bold/italic decoration is NOT drawn (module doc
+ *  comment's named gap: `StateTextLine` carries no per-run field). */
+function textRenderLine(ln: CreoleTextLine): NoteRenderLine {
+  return { text: ln.runs.map((r) => r.text).join(''), width: ln.width };
+}
+
+/** `StringTokenizer(line, "|")` (`StripeTable.java:139`, ported once already
+ *  as `StripeTable.ts`'s own private `tokenizeByPipe` — duplicated here, not
+ *  imported, since that helper is module-private and this is a SEPARATE,
+ *  render-only per-cell join, not the real grid `StripeTable`/`AtomTable`
+ *  builds (module doc comment)). Never produces an empty token, matching
+ *  Java `StringTokenizer`'s own no-empty-token contract. */
+function tokenizeByPipe(line: string): string[] {
+  return line.split('|').filter((t) => t.length > 0);
+}
+
+/** One raw `|cell|cell|` line -> its cells' markup-stripped visible text
+ *  (`= `-header marker stripped per `StripeTable.java:150-151`, width-inert
+ *  per this module's doc comment — header BOLD styling is not drawn, same
+ *  named gap), joined with two spaces standing in for jar's real column
+ *  rules. */
+function tableRowRenderLine(
+  ln: CreoleTextLine,
+  font: FontSpec,
+  measurer: StringMeasurer,
+): NoteRenderLine {
+  const raw = ln.runs[0]?.text ?? '';
+  const cells = tokenizeByPipe(raw).map((cell) => (cell.startsWith('=') ? cell.slice(1) : cell));
+  const visible = cells.map((cell) => textRenderLine(creoleTextLines(cell, font, measurer)[0] ?? emptyLine()).text);
+  const joined = visible.join('  ');
+  return { text: joined, width: measurer.measure(joined, font).width };
+}
+
+/** `creoleTextLines('')` reports NO lines (module doc comment: "an empty
+ *  `display` reports NO lines") — an empty table CELL still needs one, so
+ *  this stands in for that case in {@link tableRowRenderLine}'s per-cell map. */
+function emptyLine(): CreoleTextLine {
+  return { runs: [], width: 0, height: 0, kind: 'text' };
 }
 
 /** `Position.withRankdir` (utils/Position.java:49-66) — under `left to right

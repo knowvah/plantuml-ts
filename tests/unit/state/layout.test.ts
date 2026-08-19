@@ -257,6 +257,25 @@ describe('layoutState — composite state with 2 children', () => {
 // Mission G4 S3, mechanism 6: composite headerLines/bodyLines threading
 // ---------------------------------------------------------------------------
 
+/**
+ * SI29 T6 (G1): a measured state text line is now the creole seam's own
+ * `StateStyledTextLine` -- the established `{text,width}` contract PLUS the
+ * per-line `height` and the styled `runs` the renderer draws (one `<text>`
+ * per run, `EntityImageStateCommon.java:80-81`'s `Display.create8(...,
+ * CreoleMode.FULL, ...)` block). A plain, markup-free line is exactly one
+ * unstyled run at the line's own measured width, which is what these
+ * mechanism-6 threading assertions describe.
+ */
+function styledLine(text: string): unknown {
+  const width = measurer.measure(text, { family: theme.fontFamily, size: theme.fontSize }).width;
+  return {
+    text,
+    width,
+    height: theme.fontSize,
+    runs: [{ text, width, bold: false, italic: false, underline: false, strike: false }],
+  };
+}
+
 describe('layoutState -- composite headerLines/bodyLines (mechanism 6)', () => {
   it('an autonom composite (no crossing links) carries measured headerLines for its own title', () => {
     const child = makeState('Child');
@@ -264,7 +283,7 @@ describe('layoutState -- composite headerLines/bodyLines (mechanism 6)', () => {
     const ast: StateDiagramAST = { states: [composite], transitions: [] };
     const result = layoutState(ast, theme, measurer);
     const comp = result.states.find((s) => s.id === 'Composite');
-    expect(comp?.headerLines).toEqual([{ text: 'Composite', width: measurer.measure('Composite', { family: theme.fontFamily, size: theme.fontSize }).width }]);
+    expect(comp?.headerLines).toEqual([styledLine('Composite')]);
   });
 
   it('an autonom composite with a description line carries measured bodyLines', () => {
@@ -273,9 +292,7 @@ describe('layoutState -- composite headerLines/bodyLines (mechanism 6)', () => {
     const ast: StateDiagramAST = { states: [composite], transitions: [] };
     const result = layoutState(ast, theme, measurer);
     const comp = result.states.find((s) => s.id === 'Composite');
-    expect(comp?.bodyLines).toEqual([
-      { text: 'entry / go();', width: measurer.measure('entry / go();', { family: theme.fontFamily, size: theme.fontSize }).width },
-    ]);
+    expect(comp?.bodyLines).toEqual([styledLine('entry / go();')]);
   });
 
   it('an autonom composite with NO description line carries an empty bodyLines array', () => {
@@ -326,7 +343,7 @@ describe('layoutState -- composite headerLines/bodyLines (mechanism 6)', () => {
     const ast: StateDiagramAST = { states: [composite], transitions: [] };
     const result = layoutState(ast, theme, measurer);
     const comp = result.states.find((s) => s.id === 'Composite');
-    expect(comp?.headerLines).toEqual([{ text: 'Composite', width: measurer.measure('Composite', { family: theme.fontFamily, size: theme.fontSize }).width }]);
+    expect(comp?.headerLines).toEqual([styledLine('Composite')]);
   });
 
   it('a NON-autonom (cluster) composite with a single-line title DOES carry headerLines (G5 C3, mechanism 16 shape half)', () => {

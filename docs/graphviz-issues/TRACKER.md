@@ -81,3 +81,4 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         rather than being ticked on the strength of the fix existing.
         (A trailing line here said "this repo is still on ^1.4.0" — stale the
         moment T7 landed the bump recorded above, and removed 2026-08-15.) -->
+- [ ] 15-cluster-anchor-point-ranked-with-target.md  <!-- filed 2026-08-18, SI29 T8: fovafu-44 +7.82 px, anchor point node ranked with its target instead of the cluster border -->

@@ -5,53 +5,43 @@
  * TextBlockExporter.java:200-202,751-753), ported for STATE's own
  * pure-string layout — mirrors `class/layout-ink-extent.ts` (G2 N5's own
  * identical mechanism, shared `CucaDiagram`/`SvekResult` base-class recipe)
- * but with STATE's own per-shape ink rules (state draws entirely different
- * shapes than class's classifier boxes).
+ * but with STATE's own per-shape ink rules.
  *
  * Margin constants (`CucaDiagram#getDefaultMargins()`, `.delta(15,15)`,
  * `JAR_INK_MARGIN=6`, `SvgGraphics#ensureVisible`'s truncating `+1`) are
  * IDENTICAL to class's own — `net/atmp/CucaDiagram.java` is shared base
- * machinery for the whole `CucaDiagram` family (component/usecase/class/
- * object/state), grep-verified no `StateDiagram`-local override exists
- * (`~/git/plantuml/.../statediagram/*.java`).
+ * machinery for the whole `CucaDiagram` family, grep-verified no
+ * `StateDiagram`-local override exists.
  *
  * STATE-SPECIFIC ink rule (jar-verified via 3 independent zero-transition,
  * zero-composite samples — `jocela-05-niba392`, `votoki-67-gufa610`,
- * `gupeto-19-mesa256`, all `svg/@width`+`svg/@height` byte-exact once
- * applied): a `normal`/`json` leaf state's rendered box (rounded rect +
- * horizontal divider line + name text, `renderer.ts#renderNormal`) does
- * NOT follow class's own `addRectInk` rule (`[x-1,x+w] × [y-1,y+h]`) —
- * instead the ink box is `[x-1, x+w] × [y-1, y+h-1]`: the divider `<line>`
- * (upstream `ULine`, `LimitFinder#drawULine` — plain, UNINSET ink) spans
- * the box's FULL uninset width (`x1=x` to `x2=x+w`, confirmed against
- * `jocela-05-niba392`'s own `<line x1="7" y1="31" x2="65.0625" y2="31"/>`
- * where `x2` equals the rect's own `x+width` exactly, not `x+width-1`) and
- * so DOMINATES the rect's own `-1`-inset right edge on the WIDTH axis —
- * but the line's `y` coordinate sits well INSIDE the box's own vertical
- * span, so it never reaches (let alone dominates) the rect's own `y+h-1`
- * bottom edge on the HEIGHT axis. Net: max-X uninset (`x+w`), max-Y
- * classic-inset (`y+h-1`) — an asymmetric-per-AXIS rule, not class's own
- * asymmetric-per-CORNER rule. Verified robust across a plain, a multi-line
- * (`\n`-body), and a `<math>`(KaTeX)-body fixture — the divider-line
- * mechanism holds regardless of body content complexity.
+ * `gupeto-19-mesa256`, all `svg/@width`+`svg/@height` byte-exact): a
+ * `normal`/`json` leaf state's rendered box (rounded rect + horizontal
+ * divider line + name text, `renderer.ts#renderNormal`) does NOT follow
+ * class's own `addRectInk` rule (`[x-1,x+w] × [y-1,y+h]`) — instead the ink
+ * box is `[x-1, x+w] × [y-1, y+h-1]`: the divider `<line>` (upstream
+ * `ULine`, `LimitFinder#drawULine` — plain, UNINSET ink) spans the box's
+ * FULL uninset width (`x1=x` to `x2=x+w`, confirmed against `jocela-05-
+ * niba392`'s own `<line x1="7" y1="31" x2="65.0625" y2="31"/>`, `x2` ==
+ * the rect's own `x+width` exactly) and so DOMINATES the rect's own
+ * `-1`-inset right edge on WIDTH — but the line's `y` sits well INSIDE the
+ * box's own span, never dominating the rect's own `y+h-1` on HEIGHT. Net:
+ * max-X uninset (`x+w`), max-Y classic-inset (`y+h-1`) — asymmetric per
+ * AXIS, not per CORNER as in class. Verified robust across a plain, a
+ * multi-line, and a `<math>`(KaTeX)-body fixture.
  *
  * NOT jar-verified this iteration (documented simplification, not silently
  * dropped — see individual ink-rule functions below for the specific
  * upstream `LimitFinder` dispatch each one reproduces):
  *   - `composite` states (dashed outer box, NO divider line —
  *     `renderer.ts#renderComposite`): reuses the SAME leaf-box rule as a
- *     best-effort default (composite states share the classifier-family
- *     `EntityImageState`-ish box+text ink shape in spirit), NOT
- *     independently confirmed against a jar sample this iteration (every
- *     sampled composite fixture also carries children/edges whose own ink
- *     dominates the canvas, masking any 1px composite-box-specific
- *     residual — see S1 ledger for the specific fixtures checked). Mission
- *     G4 S4: this rule is now ALSO reused (via {@link computeSvekResultGeometry}
- *     below) to compute a wrapped composite child pass's OWN ink extent —
- *     jar-verified correct there (S4 ledger), which is strong indirect
- *     evidence this document-level reuse is ALSO correct, though still not
- *     independently isolated from every other mechanism at the document
- *     level.
+ *     best-effort default, NOT independently confirmed against a jar
+ *     sample (sampled composite fixtures carry children/edges whose own
+ *     ink masks any 1px composite-box residual — S1 ledger). Mission G4 S4:
+ *     ALSO reused (via {@link computeSvekResultGeometry}) for a wrapped
+ *     composite child pass's OWN ink extent — jar-verified correct there
+ *     (S4 ledger); mission T9's own mechanism-8 paragraph below is the one
+ *     confirmed gap in this reuse (a background-transparency-gated term).
  *   - `fork`/`join`/`syncBar` (plain bar `URectangle`, no divider line):
  *     the classic symmetric `LimitFinder#drawRectangle` rule (`[x-1,x+w-1]
  *     × [y-1,y+h-1]`) — the REAL upstream rule for a bare `URectangle` with
@@ -69,28 +59,38 @@
  *     from `LimitFinder.ts#drawUPolygon`, the SAME constant class's own
  *     `addFolderPolygonInk`/`renderer-arrowhead.ts#edgeExtremityInk` reuse).
  *
- * Mission G4 S4 (mechanism 7, discovered while landing it — see
- * {@link computeSvekResultGeometry}'s own doc comment for the composite-
- * sizing consequence): `transitionArrowheadInk`'s own `LimitFinder` walk
- * over a placed `ExtremityArrow` occasionally reports a MUCH wider ink span
- * than the arrowhead's own ~9px `xWing` geometry should allow — jar-verified
- * via `taxile-56-goca422`/`pebepi-32-cati486`/`tigibi-80-zidi137` (all the
- * IDENTICAL `state parent { child --> child }` self-loop shape): a ~10-13px
- * span became a ~30px span once fed through a composite's own tight
- * ink-based sizing (previously invisible — mechanism 3's own document-level
- * reuse is normally dominated by far larger node-box ink, masking this).
- * NOT root-caused to a specific line in `ExtremityArrow`/`rotate-point.ts`
- * this iteration (ruled out: not `place()`'s own `trim` field, which
- * `transitionArrowheadInk` never reads) — named as a real, pre-existing,
- * NOT-YET-FIXED bug in the arrowhead-ink primitive itself, not a new one
- * this iteration introduced. Worked around, not fixed: `addTransitionInk`
- * now takes an `includeArrowheadInk` flag; {@link computeSvekResultGeometry}
- * passes `false` (arrowheads are small and rarely the deciding factor for a
- * composite's own reported size — the point-based path ink, which already
- * captures a self-loop's own full routed bulge, remains the dominant,
- * correct signal), while `computeStateDocumentDims`/`computeStateInkShift`
- * (the document-level mechanism-4 functions, already jar-verified) keep
- * `true`, UNCHANGED, zero risk to their own already-pinned fixtures.
+ * Mission G4 S4 (mechanism 7) excluded ALL arrowhead ink from a composite's
+ * childImg pass over a suspected `transitionArrowheadInk` over-reach.
+ * Mission state-declared-size-fix T9 (SI28 T2's `findings/composite-b.md`)
+ * found the over-reach real but NOT self-loop-specific: unioning arrowhead
+ * ink unconditionally closes `pebepi-32-cati486`/`taxile-56-goca422`/
+ * `tigibi-80-zidi137` (self-loops) to float-noise precision, but GROWS
+ * `fovafu-44-mifu394` (`A-->Y`) and `kejabo-83-vinu490` (`Idle-->
+ * Configuring`) — plain transitions (full-corpus `harness-diff.py`
+ * evidence). {@link addTransitionInk}'s `arrowheadInk` param narrows the
+ * fold to `from===to` for a composite pass, matching what T2 jar-verified,
+ * while the document-level functions keep the pre-existing unconditional
+ * fold.
+ *
+ * T9 also investigated mechanism 8 (`RoundedContainer.drawU`'s SEPARATE
+ * `RoundedSouth` south-cap `UPath`, `~/git/plantuml/.../svek/
+ * RoundedContainer.java:89-92`, whose uninset `LimitFinder#drawUPath` walk
+ * reaches 1px past a composite's `y+h-1` corner, `pacami-67-dafe414`/
+ * `tofezi-64-koda860`/`xojudi-20-keco020`/`decede-10-buvu414`, SI28 T1/T2's
+ * `findings/composite-{a,b}.md`) but did NOT land it: `RoundedSouth.drawU`
+ * early-returns when `southBackcolor` is transparent, and the DEFAULT skin
+ * sets exactly that (`~/git/plantuml/src/main/resources/skin/plantuml
+ * .skin:266-271`, `stateDiagram{state{body{BackGroundColor transparent}}}`).
+ * Applying the +1 unconditionally regressed 9 previously-exact, DEFAULT-
+ * styled fixtures (`kenuci-20-cane702`/`nelupe-49-xova546`/`sizife-41-
+ * buje191`/`lasasi-13-nona547`/`lonuti-97-voko521`/`sapelo-46-jafe280`/
+ * `soxene-95-domu248`/`pexiku-77-japi217`/`nivanu-50-zajo916`, none of
+ * which set a state background — `harness-diff.py`, full corpus;
+ * `lasasi-13`/`soxene-95` set `RoundCorner` alone and still regress, ruling
+ * that out as the gate). This module has no resolved-color signal on
+ * `StateNodeGeo` to gate the +1 correctly (only the renderer resolves fill,
+ * via `theme`, out of this write-set), so mechanism 8 is deferred — a
+ * follow-on should thread a resolved south-opacity bit onto `StateNodeGeo`.
  *
  * @see plans/g4-state-svg/ledger.md (S1, mechanism 4; S4, mechanism 7)
  * @see class/layout-ink-extent.ts (the class-engine precedent this mirrors)
@@ -256,8 +256,7 @@ function addBorderPointInk(box: InkBox, node: StateNodeGeo): void {
   const labelHeight = node.borderPointLabelHeight;
   if (lines.length === 0 || labelHeight === undefined) return;
   const labelWidth = Math.max(...lines.map((ln) => ln.width));
-  const top =
-    node.borderPointLabelAbove === true ? node.y - node.height - labelHeight : node.y + node.height;
+  const top = node.borderPointLabelAbove === true ? node.y - node.height - labelHeight : node.y + node.height;
   // One `UText` per line, each contributing `LimitFinder#drawText`'s own box
   // (see {@link TEXT_INK_BASELINE_DROP}). `labelHeight` is `lines * fontSize`
   // by construction (`state-sizing.ts#buildStateGeoTextFields`), so the
@@ -291,6 +290,12 @@ function addNoteInk(box: InkBox, x: number, y: number, w: number, h: number): vo
   addPoint(box, x + w, y + h);
 }
 
+// G5 (RoundedSouth south-cap ink, `pacami-67-dafe414`/`tofezi-64-koda860`/
+// `xojudi-20-keco020`/`decede-10-buvu414`) was investigated and NOT landed
+// this task -- see the module doc comment's mechanism-8 paragraph for the
+// full, jar-cited diagnosis (background-color-cascade dependent, not
+// reachable from this module's pure `StateNodeGeo` geometry).
+
 /** One node's own ink contribution (recurses into composite children AND
  *  this node's own nested `.transitions` — `state-composite-geo.ts`
  *  already positions both in the SAME absolute coordinate space
@@ -302,7 +307,12 @@ function addNoteInk(box: InkBox, x: number, y: number, w: number, h: number): vo
  *  covered before the restructuring (previously via a flat
  *  `outTransitions` accumulator merged into the top-level `transitions`
  *  array by the caller). */
-function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolean, labelInk: boolean): void {
+function addNodeInk(
+  box: InkBox,
+  node: StateNodeGeo,
+  labelInk: boolean,
+  arrowheadInk: 'always' | 'self-loop',
+): void {
   if (node.children.length > 0) {
     // A composite's own outer box draws no divider line, but this call is
     // deliberately left at the pre-existing `hasDivider: true` ink: the
@@ -310,16 +320,15 @@ function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolea
     // comment, and flipping it is a separate, separately-evidenced change.
     addStateBoxInk(box, node, true);
     // G9/T8: a border-point composite reserves ink OUTSIDE the frame it draws
-    // — jar's ink pass and its draw pass frontier it against different child
-    // rectangles. Same `-1`/`+0` insets as the rect ink above, applied to the
-    // overflowed corners. See `StateNodeGeo.inkOverflow`.
+    // -- jar's ink/draw passes frontier it against different child rectangles.
+    // Same `-1`/`+0` insets as the rect ink above. See `StateNodeGeo.inkOverflow`.
     const over = node.inkOverflow;
     if (over !== undefined) {
       addPoint(box, node.x - over.left - 1, node.y - over.top - 1);
       addPoint(box, node.x + node.width + over.right, node.y + node.height + over.bottom - 1);
     }
-    for (const child of node.children) addNodeInk(box, child, includeArrowheadInk, labelInk);
-    for (const t of node.transitions) addTransitionInk(box, t, includeArrowheadInk, labelInk);
+    for (const child of node.children) addNodeInk(box, child, labelInk, arrowheadInk);
+    for (const t of node.transitions) addTransitionInk(box, t, labelInk, arrowheadInk);
     return;
   }
   // G9/T7: a border point is a different image class upstream, not a state
@@ -360,29 +369,26 @@ function addNodeInk(box: InkBox, node: StateNodeGeo, includeArrowheadInk: boolea
 }
 
 /** One transition's own ink contribution — plain points
- *  (`LimitFinder#drawDotPath`-equivalent: no inset) and its label box,
- *  plus, when `includeArrowheadInk` is true, the head-side arrowhead's own
- *  ink (`renderer-arrowhead.ts#transitionArrowheadInk`, already
- *  `HACK_X_FOR_POLYGON`-padded internally via a real `LimitFinder` walk
- *  over the placed `ExtremityArrow`) — see the module doc comment's
- *  mechanism-7 note for why {@link computeSvekResultGeometry} passes
- *  `false`. */
+ *  (`LimitFinder#drawDotPath`-equivalent: no inset), its label box, and,
+ *  gated by `arrowheadInk`, the head-side arrowhead's own ink
+ *  (`renderer-arrowhead.ts#transitionArrowheadInk`, `HACK_X_FOR_POLYGON`-
+ *  padded internally via its own `LimitFinder` walk). `'always'` (document-
+ *  level, pre-existing, unchanged) vs `'self-loop'` (`from===to` only,
+ *  composite-level, mission T9) — see the module doc comment's mechanism-7
+ *  paragraph for why the latter is scoped, not unconditional. */
 function addTransitionInk(
   box: InkBox,
   transition: TransitionGeo,
-  includeArrowheadInk: boolean,
   labelInk: boolean,
+  arrowheadInk: 'always' | 'self-loop',
 ): void {
   for (const p of transition.points) addPoint(box, p.x, p.y);
-  // G8 T2 (mission g7-borderpoint-rank T20b): fold the label's own BOX at
-  // the RETURNED (graphviz) position, not just its anchor POINT -- only
-  // when the box is present AND the caller opted in (`labelInk`, mirroring
-  // `includeArrowheadInk` below); `computeStateDocumentDims`/
-  // `computeStateInkShift` pass `false` and keep the point-only fold.
-  // `transition-label-ink` T3: upstream folds neither the drawn text nor
-  // the floored DOT reservation but `TextBlockMarged#drawU`'s own `UEmpty`
-  // (`klimt/shape/TextBlockMarged.java:79-87`), so the lines below are
-  // `drawEmpty` over `label.inkBox` (`klimt/drawing/LimitFinder.java:159-162`).
+  // G8 T2: fold the label's own BOX at the RETURNED (graphviz) position, not
+  // just its anchor POINT -- only when present AND opted in (`labelInk`);
+  // `computeStateDocumentDims`/`computeStateInkShift` pass `false` and keep
+  // the point-only fold. `transition-label-ink` T3: `TextBlockMarged#drawU`'s
+  // own `UEmpty` (`klimt/shape/TextBlockMarged.java:79-87`), so this is
+  // `drawEmpty` over `label.inkBox` (`LimitFinder.java:159-162`).
   if (transition.label !== undefined) {
     const ink = transition.label.inkBox;
     if (labelInk && ink !== undefined) {
@@ -392,7 +398,7 @@ function addTransitionInk(
       addPoint(box, transition.label.x, transition.label.y);
     }
   }
-  if (!includeArrowheadInk) return;
+  if (arrowheadInk === 'self-loop' && transition.from !== transition.to) return;
   const arrowInk = transitionArrowheadInk(transition);
   if (arrowInk !== undefined) {
     addPoint(box, arrowInk.minX, arrowInk.minY);
@@ -400,17 +406,17 @@ function addTransitionInk(
   }
 }
 
-/** The shared ink-point accumulation walk both {@link computeStateDocumentDims}
- *  and {@link computeStateInkShift} consume. */
+/** The shared ink-point accumulation walk {@link computeStateDocumentDims},
+ *  {@link computeStateInkShift}, and {@link computeSvekResultGeometry} consume. */
 function buildInkBox(
   states: readonly StateNodeGeo[],
   transitions: readonly TransitionGeo[],
-  includeArrowheadInk: boolean,
   labelInk: boolean,
+  arrowheadInk: 'always' | 'self-loop',
 ): InkBox {
   const box = newInkBox();
-  for (const n of states) addNodeInk(box, n, includeArrowheadInk, labelInk);
-  for (const t of transitions) addTransitionInk(box, t, includeArrowheadInk, labelInk);
+  for (const n of states) addNodeInk(box, n, labelInk, arrowheadInk);
+  for (const t of transitions) addTransitionInk(box, t, labelInk, arrowheadInk);
   return box;
 }
 
@@ -433,7 +439,7 @@ export function computeStateDocumentDims(
   // `labelInk: false` -- this function is already jar-verified/pinned
   // (57 svg-state goldens) at the pre-existing point-only label fold;
   // G8 T2's box fold is scoped to `computeSvekResultGeometry` below.
-  const raw = svekDimension(buildInkBox(states, transitions, true, false));
+  const raw = svekDimension(buildInkBox(states, transitions, false, 'always'));
   // Empty diagram (no ink at all): stay {0, 0} rather than applying the
   // margin to nothing, which would yield 6x6. The pre-refactor code got this
   // from an early `return {width: 0, height: 0}` before the margin
@@ -465,7 +471,7 @@ export function computeStateInkShift(
   // `labelInk: false` -- same already-pinned point-only fold as
   // `computeStateDocumentDims` above (shares its own ink-extent bbox
   // mechanism, must stay consistent with it).
-  return svekInkShift(buildInkBox(states, transitions, true, false));
+  return svekInkShift(buildInkBox(states, transitions, false, 'always'));
 }
 
 export interface SvekResultGeometry {
@@ -493,23 +499,16 @@ export interface SvekResultGeometry {
  *
  * This function reproduces the REAL upstream mechanism (both halves driven
  * by the SAME ink-extent bbox, not two independent formulas) — jar-verified
- * byte-exact width/height/child-position on BOTH `coteta-47-mare883` (1
- * nesting level, mixed leaf-with-description content) and `lonuti-97-
- * voko521` (2 nesting levels, mixed leaf+nested-composite content): both
- * fixtures' composite outer box width/height AND their innermost leaf
- * child's own absolute position matched jar exactly once wired through
- * `state-composite-autonom.ts#buildPlainAutonomSpec`. See
- * plans/g4-state-svg/ledger.md S4 for the full hand-derivation (including
- * why the shift is `(7,7)` — `JAR_INK_MARGIN(6)` plus the leaf-box ink
- * rule's own `-1` min-corner offset — not the naively-expected `(6,6)`).
+ * byte-exact width/height/child-position on `coteta-47-mare883` (1 nesting
+ * level) and `lonuti-97-voko521` (2 levels) once wired through
+ * `state-composite-autonom.ts#buildPlainAutonomSpec`. See plans/g4-state-svg
+ * /ledger.md S4 for the full hand-derivation (why the shift is `(7,7)`, not
+ * the naively-expected `(6,6)`).
  *
- * Passes `includeArrowheadInk: false` to {@link buildInkBox} — see this
- * module's own doc comment ("Mission G4 S4 (mechanism 7, discovered while
- * landing it)") for the jar-verified `transitionArrowheadInk` over-reach bug
- * this works around. `buildPlainAutonomSpec`'s own `Math.max(geometry.*,
- * result.*)` floor is a SEPARATE, second guard (against the still-not-fully-
- * closed edge-label-width gap, a different residual — see that call site's
- * own doc comment).
+ * Folds arrowhead ink for `from===to` transitions via {@link buildInkBox}
+ * (mission T9, this module's own mechanism-7 paragraph). `buildPlainAutonom
+ * Spec`'s own `Math.max(geometry.*, result.*)` floor is a SEPARATE, second
+ * guard (the still-not-fully-closed edge-label-width gap — see that site).
  * @see ~/git/plantuml/.../svek/SvekResult.java:130-135
  */
 export function computeSvekResultGeometry(
@@ -525,6 +524,6 @@ export function computeSvekResultGeometry(
   // The SAME `SvekResult#calculateDimension` recipe the document-level
   // functions above use — dimension and moveDelta together, which is what
   // that one upstream method returns. This was a third inline copy.
-  const box = buildInkBox(states, transitions, false, true);
+  const box = buildInkBox(states, transitions, true, 'self-loop');
   return { ...svekDimension(box), ...svekInkShift(box) };
 }

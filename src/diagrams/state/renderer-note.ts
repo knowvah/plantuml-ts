@@ -46,20 +46,33 @@
  * the class engine. It now sits in the package upstream puts it in, and
  * neither engine reaches into the other for it.
  *
+ * `note ... on link` (embedded in the transition's OWN `<g class="link">`,
+ * no host `<g class="entity">` at all — a THIRD, structurally different
+ * shape, jar-verified `vateco-92-pece508`) landed separately (T4,
+ * `note-on-link`/`state-declared-size-fix`, `renderNoteOnLink` below).
+ *
+ * T7 (`state-declared-size-fix`, SI28 `findings/note.md`) closed the SIZING
+ * half of "creole markup / table content inside a note body"
+ * (`fatupo-62-bemu777`/`xeziki-47-zomo866`): `state-note-layout.ts
+ * #measureNote` now sizes through the real creole/table pipeline
+ * (`buildNoteBody`) instead of measuring raw markup as literal text, and
+ * its own `buildRenderLines` strips markup / joins table cells for the
+ * `<text>` this module draws — a real improvement over the prior literal-
+ * markup draw, but NOT jar's true per-run color/bold/italic decoration or
+ * `AtomTable#drawU`'s bordered grid (`StateTextLine`'s `{text,width}` shape
+ * has no room for either without a `state-geo-types.ts` change; named,
+ * deferred gap, `state-note-layout.ts#buildRenderLines`'s own doc comment).
+ *
  * NOT built this iteration (queued in full, `plans/g4-state-svg/ledger.md`
- * S10): `note ... on link` (embedded in the transition's OWN `<g
- * class="link">`, no host `<g class="entity">` at all — a THIRD,
- * structurally different shape, jar-verified `vateco-92-pece508`); creole
- * markup / table content inside a note body (`fatupo-62-bemu777`); `#color`
- * overrides on notes (the grammar's own `NOTE_COLOR` capture group is
- * non-capturing today, `state-notes.ts`'s own doc comment); the composite
- * pipeline's own note materialization (`state-composite-pass.ts` never
- * calls into this module yet — every target fixture this iteration is
+ * S10): `#color` overrides on notes (the grammar's own `NOTE_COLOR` capture
+ * group is non-capturing today, `state-notes.ts`'s own doc comment); the
+ * composite pipeline's own note materialization (`state-composite-pass.ts`
+ * never calls into this module yet — every target fixture this iteration is
  * FLAT, `layout.ts#hasAnyComposite` false for all three).
  */
 import { lineTo, moveTo } from '../../core/svg-path-builder.js';
 import type { StateDiagramAST, StateNote } from './ast.js';
-import type { StateNodeGeo } from './state-geo-types.js';
+import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotLayoutResult } from '../../core/graph-layout.types.js';
@@ -261,4 +274,97 @@ export function renderStateNoteOpale(node: StateNodeGeo, theme: Theme): string {
  *  (freestanding, or an attached note whose connector never resolved). */
 export function renderStateNote(node: StateNodeGeo, theme: Theme): string {
   return node.noteOpale !== undefined ? renderStateNoteOpale(node, theme) : renderStateNoteFreestanding(node, theme);
+}
+
+// ---------------------------------------------------------------------------
+// `note ... on link` (T4, `note-on-link`/`state-declared-size-fix`) — drawn
+// INSIDE the transition's own `<g class="link">`, no host `<g class="entity">`
+// at all: the THIRD note shape this module's own top doc comment queued
+// (`vateco-92-pece508`).
+// ---------------------------------------------------------------------------
+
+/** `Rose.java:65-66` — `paddingX`/`paddingY`, both 5, `Rose#createComponentNote`
+ *  passes into every `ComponentRoseNote` (`Rose.java:114-115`); the SAME
+ *  constant `core/rose-note-dim.ts`'s own (unexported) `ROSE_NOTE_PADDING`
+ *  sizes into `measureLinkNoteDim`'s box — duplicated here (not exported
+ *  cross-file, D1) because the renderer additionally needs it as a DRAW
+ *  offset, not just a dimension term. */
+const ROSE_NOTE_PADDING = 5;
+
+/** `ComponentRoseNote#drawInternalU` (`skin/rose/ComponentRoseNote.java`):
+ *  `box` is `TransitionGeo.label`'s own `{x,y,width,height}` — already the
+ *  FULL preferred box (`core/rose-note-dim.ts#roseNoteDim`'s derivation,
+ *  `pure + 31` wide / `pure + 20` tall). The polygon+corner are inset by
+ *  {@link ROSE_NOTE_PADDING} on every side (`getPolygonNormal`/`getCorner`
+ *  draw at `x2 = getTextWidth`, `textHeight = getTextHeight` — both already
+ *  `2 * ROSE_NOTE_PADDING` SMALLER than the preferred box); the text a
+ *  further `NOTE_MARGIN_X1`/`NOTE_MARGIN_Y` inside that (`drawInternalU`'s
+ *  `position === LEFT` translate by `(getOldPaddingX1, getOldPaddingY)` —
+ *  state's own default `noteTextAlignment`, non-CENTER). BOTH `<path>`s
+ *  share ONE stroke-width (0.5) — `drawInternalU` draws the polygon AND the
+ *  corner through the SAME `ug` (`symbolContext.apply(ug)`), unlike
+ *  {@link renderStateNoteFreestanding}'s asymmetric split (module doc
+ *  comment) — jar-verified against `vateco-92-pece508`'s own canonical SVG
+ *  (both `<path>`s there carry `stroke-width:0.5`).
+ *
+ *  Scoped to this task's sole target (tumaba-64-tosu281): a single-line note
+ *  merged with an EMPTY inline label, where `labelText` reduces to the RAW
+ *  `EntityImageNoteLink` block (`TransitionGeo.label`'s own doc comment) and
+ *  `drawInternalU`'s `x2` never stretches past `getTextWidth` (`area.width >
+ *  getPreferredWidth` never holds). A note merged with a NON-empty inline
+ *  label — where the polygon DOES stretch — is out of scope, same residue
+ *  `computeMergedLabelBox`'s own doc comment already flags for the merge
+ *  term; no note fill/color override either (`Transition.linkNoteColor`
+ *  gap, `state-notes.ts`'s own doc comment). */
+export function renderNoteOnLink(
+  box: { x: number; y: number; width: number; height: number },
+  lines: readonly StateTextLine[],
+  theme: Theme,
+): string {
+  const px = box.x + ROSE_NOTE_PADDING;
+  const py = box.y + ROSE_NOTE_PADDING;
+  const pw = box.width - 2 * ROSE_NOTE_PADDING;
+  const ph = box.height - 2 * ROSE_NOTE_PADDING;
+  const c = NOTE_FOLD;
+  const outline = [
+    moveTo(px, py), lineTo(px, py + ph), lineTo(px + pw, py + ph),
+    lineTo(px + pw, py + c), lineTo(px + pw - c, py), lineTo(px, py),
+  ].join(' ');
+  const corner = [
+    moveTo(px + pw - c, py), lineTo(px + pw - c, py + c),
+    lineTo(px + pw, py + c), lineTo(px + pw - c, py),
+  ].join(' ');
+  const shapeMarkup =
+    path(outline, { fill: NOTE_FILL, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }) +
+    path(corner, { fill: NOTE_FILL, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH });
+  return shapeMarkup + renderNoteOnLinkTextLines(px, py, lines, theme);
+}
+
+/** Split out of {@link renderNoteOnLink} to stay under this project's
+ *  per-function NLOC cap — the note body text, one `<text>` per line,
+ *  LEFT-anchored (mirrors {@link renderNoteTextLines}'s own loop, offset
+ *  from the INSET polygon origin `(px, py)` rather than a `StateNodeGeo`'s
+ *  own `x`/`y`). */
+function renderNoteOnLinkTextLines(
+  px: number,
+  py: number,
+  lines: readonly StateTextLine[],
+  theme: Theme,
+): string {
+  const parts: string[] = [];
+  let lineTop = py + NOTE_MARGIN_Y;
+  for (const ln of lines) {
+    const y = lineTop + textAscent(NOTE_FONT_SIZE);
+    parts.push(
+      svgText(px + NOTE_MARGIN_X1, y, ln.text, {
+        fontFamily: theme.fontFamily,
+        fontSize: NOTE_FONT_SIZE,
+        fill: '#000000',
+        lengthAdjust: 'spacing',
+        textLength: ln.width,
+      }),
+    );
+    lineTop += NOTE_FONT_SIZE;
+  }
+  return parts.join('');
 }

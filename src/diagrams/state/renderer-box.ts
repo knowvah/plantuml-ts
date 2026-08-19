@@ -36,7 +36,11 @@
 import { lineTo, moveTo } from '../../core/svg-path-builder.js';
 import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
-import { rect, line, text, path } from '../../core/svg.js';
+import { rect, line, text, path, ellipse, linkWrap } from '../../core/svg.js';
+// G1/G8/G23 (mission state-declared-size-fix): the renderer draws the SAME
+// styled runs / table the sizer measured -- see `state-sizing-creole.ts`.
+import type { StateTableGeo, StateTextRun } from './state-sizing-creole.js';
+import { styledLines } from './state-sizing-creole.js';
 import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateFontSize, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
 import { stateShadowFilterUrl } from './state-shadow.js';
 
@@ -52,7 +56,98 @@ import {
 const SDL_MARGIN = { x1: 15, x2: 25, y1: 20, y2: 10 };
 const BODY_MARGIN_X = 6;
 
-function renderTextLines(
+/** `FontStyle` set -> the SVG `text-decoration` attribute value -- mirrors
+ *  `core/klimt/drawing/svg/driver-text-svg.ts#textDecorationOf` (same
+ *  keywords, same join order), duplicated for the same reason
+ *  `class/renderer-classifier-rows.ts#memberAtomDecoration` documents: the
+ *  state renderer has no `UDriver`/`UGraphic` seam to share one from. */
+function runDecoration(run: StateTextRun): string | undefined {
+  const parts: string[] = [];
+  if (run.underline) parts.push('underline');
+  if (run.strike) parts.push('line-through');
+  return parts.length > 0 ? parts.join(' ') : undefined;
+}
+
+/**
+ * One creole line's styled runs, left to right, x-advancing by each run's
+ * OWN measured width -- the SAME per-`<text>`-element sequence the jar
+ * emits (`AtomText#drawU` once per atom; jar-verified `xasoka-58-temi462`
+ * and `papifi-44-caxo706`). A `[[url]]` run wraps in its own `<a href>`
+ * (`class/renderer-classifier-rows.ts#renderRowAtoms`'s identical rule).
+ * `run.color` is set only when the creole resolved one, so the caller's
+ * `StateFontColor` cascade still supplies the default.
+ */
+export function renderStateRuns(
+  runs: readonly StateTextRun[],
+  startX: number,
+  y: number,
+  style: { readonly fontFamily: string; readonly fontSize: number; readonly fill: string },
+): string {
+  let x = startX;
+  let out = '';
+  for (const run of runs) {
+    // `AtomText#drawU`'s tab-stop skip (`AtomText.java:216-221`) -- see
+    // `StateTextRun.dx`'s own doc comment.
+    x += run.dx ?? 0;
+    if (run.text === '') continue;
+    const decoration = runDecoration(run);
+    const drawn = text(x, y, run.text, {
+      fill: run.color ?? style.fill,
+      fontFamily: style.fontFamily,
+      fontSize: style.fontSize,
+      lengthAdjust: 'spacing',
+      textLength: run.width,
+      ...(run.bold ? { fontWeight: '700' as const } : {}),
+      ...(run.italic ? { fontStyle: 'italic' as const } : {}),
+      ...(decoration !== undefined ? { textDecoration: decoration } : {}),
+    });
+    out += run.url !== undefined ? linkWrap(drawn, { url: run.url, tooltip: run.url }) : drawn;
+    x += run.width;
+  }
+  return out;
+}
+
+/**
+ * A creole TABLE stripe (`AtomTable#drawU`, `AtomTable.java:106-158`):
+ * every cell's own runs at its `Position` (LEFT-aligned, no padding), then
+ * the grid -- one horizontal rule per row boundary spanning the full table
+ * width, one vertical rule per column boundary spanning the full height.
+ * `x`/`y` are the table's own origin, i.e. the block's top-left PLUS
+ * `AtomWithMargin`'s own `marginY1` (`AtomWithMargin.java:65`).
+ * jar-verified `kinuca-03-nice683` byte-for-byte (cells at x=12/63.363/
+ * 114.725, baselines 43.889/57.889/71.889, rules at y=33/47/61/75 and
+ * x=12/63.363/114.725/166.087, `stroke:#000;stroke-width:1`).
+ */
+export function renderStateTable(
+  table: StateTableGeo,
+  x: number,
+  y: number,
+  style: { readonly fontFamily: string; readonly fontSize: number; readonly fill: string; readonly ascent: number },
+): string {
+  let out = '';
+  for (const cell of table.cells) {
+    out += renderStateRuns(cell.runs, x + cell.x, y + cell.y + style.ascent, style);
+  }
+  const lastX = x + (table.colX[table.colX.length - 1] as number);
+  const lastY = y + (table.rowY[table.rowY.length - 1] as number);
+  const stroke = { stroke: style.fill, strokeWidth: TABLE_RULE_WIDTH };
+  for (const ry of table.rowY) out += line(x, y + ry, lastX, y + ry, stroke);
+  for (const cx of table.colX) out += line(x + cx, y, x + cx, lastY, stroke);
+  return out;
+}
+
+/** `AtomTable#drawU`'s grid rules are drawn with the ambient `UStroke`,
+ *  which for a creole block is the 1px default (`UStroke.simple()`) --
+ *  jar-verified `kinuca-03-nice683`'s `stroke-width:1`. */
+const TABLE_RULE_WIDTH = 1;
+
+/**
+ * Draws a measured text block: one line per entry, each line's own styled
+ * runs starting at `xForLine(ln)`, advancing the baseline by each line's
+ * OWN measured height (`fontSize` for an ordinary line, the whole grid box
+ * for a creole TABLE stripe).
+ */
+export function renderStateTextLines(
   lines: readonly StateTextLine[],
   xForLine: (ln: StateTextLine) => number,
   startY: number,
@@ -61,24 +156,43 @@ function renderTextLines(
   // `state-render-colors.ts#resolveStateFontColor`'s own doc comment.
   // Defaults to jar's own hardcoded `#000000` label-text default (every
   // pre-S15 call site's unchanged behavior).
-  fill: string = '#000000',
+  opts: { readonly fill?: string; readonly fontSize?: number } = {},
+): string {
   // mission G4 S16: `skinparam stateFontSize<<X>>` -- see
   // `state-render-colors.ts#resolveStateFontSize`'s own doc comment.
-  // Defaults to `theme.fontSize` (every pre-S16 call site's unchanged
-  // behavior).
+  const fontSize = opts.fontSize ?? theme.fontSize;
+  const style = { fontFamily: theme.fontFamily, fontSize, fill: opts.fill ?? '#000000' };
+  const ascent = textAscent(fontSize);
+  let out = '';
+  let y = startY;
+  for (const ln of styledLines(lines)) {
+    if (ln.table !== undefined) {
+      out += renderStateTable(ln.table, xForLine(ln), y - ascent + TABLE_STRIPE_MARGIN_Y, { ...style, ascent });
+      y += ln.height;
+      continue;
+    }
+    out += renderStateRuns(ln.runs, xForLine(ln), y, style);
+    y += ln.height === 0 ? fontSize : ln.height;
+  }
+  return out;
+}
+
+/** `StripeTable`'s own `new AtomWithMargin(table, 2, 2)`
+ *  (`StripeTable.java:82`) -- the grid starts `marginY1` below the stripe's
+ *  own top edge. Duplicated from `state-sizing-creole.ts#TABLE_MARGIN_Y`,
+ *  this codebase's established per-module constant convention (see
+ *  `SDL_MARGIN` above). */
+const TABLE_STRIPE_MARGIN_Y = 2;
+
+function renderTextLines(
+  lines: readonly StateTextLine[],
+  xForLine: (ln: StateTextLine) => number,
+  startY: number,
+  theme: Theme,
+  fill: string = '#000000',
   fontSize: number = theme.fontSize,
 ): string {
-  let out = '';
-  lines.forEach((ln, i) => {
-    out += text(xForLine(ln), startY + i * fontSize, ln.text, {
-      fill,
-      fontFamily: theme.fontFamily,
-      fontSize,
-      lengthAdjust: 'spacing',
-      textLength: ln.width,
-    });
-  });
-  return out;
+  return renderStateTextLines(lines, xForLine, startY, theme, { fill, fontSize });
 }
 
 /**
@@ -202,6 +316,52 @@ export function renderSdlReceive(node: StateNodeGeo, theme: Theme): string {
   return box + notch + label;
 }
 
+/** `EntityImageState#drawSymbol` (`EntityImageState.java:174-181`) with
+ *  `smallRadius = 3`, `smallLine = 3`, `smallMarginX = 7`, `smallMarginY = 4`
+ *  (`:71-74`): the box's bottom-right corner is walked back by
+ *  `4*smallRadius + smallLine + smallMarginX` (22) in x and
+ *  `2*smallRadius + smallMarginY` (10) in y -- the SAME 10 px
+ *  `state-sizing.ts#OO_SYMBOL_DELTA` reserves on both axes -- then two
+ *  `2*smallRadius` circles and a `smallLine`-long horizontal connector are
+ *  drawn. `ug.apply(borderColor)` sets only the FOREGROUND, so the circles
+ *  keep the box's own background fill. jar-verified `resido-15-reza040`'s
+ *  `comp3` (box 7,14.611 72x50): ellipses at cx=60/69 cy=57.611 r=3, line
+ *  63,57.611 -> 66,57.611, all `stroke:#181818;stroke-width:0.5`.
+ * @see ~/git/plantuml/.../svek/image/EntityImageState.java#drawSymbol */
+const OO_SMALL_RADIUS = 3;
+const OO_SMALL_LINE = 3;
+const OO_SMALL_MARGIN_X = 7;
+const OO_SMALL_MARGIN_Y = 4;
+
+/** `Stereotype#isWithOOSymbol` (`Stereotype.java:119-121`) -- the SAME
+ *  predicate `state-sizing.ts#isWithOOSymbol` reserves space with. */
+export function isOOSymbolStereotype(stereotype: string | undefined): boolean {
+  return stereotype !== undefined && stereotype.toUpperCase() === 'O-O';
+}
+
+export function renderOOSymbol(
+  right: number,
+  bottom: number,
+  fill: string,
+  stroke: string,
+): string {
+  const x = right - (4 * OO_SMALL_RADIUS + OO_SMALL_LINE + OO_SMALL_MARGIN_X);
+  const y = bottom - (2 * OO_SMALL_RADIUS + OO_SMALL_MARGIN_Y);
+  // `ellipse`'s own paint bag is keyed by the HYPHENATED SVG attribute name
+  // (unlike `rect`/`line`'s camelCase `TextStyle`) -- see
+  // `renderer-border-point.ts`'s identical note.
+  const paint = { fill, stroke, 'stroke-width': STATE_BORDER_STROKE_WIDTH };
+  const cy = y + OO_SMALL_RADIUS;
+  return (
+    ellipse(x + OO_SMALL_RADIUS, cy, OO_SMALL_RADIUS, OO_SMALL_RADIUS, paint) +
+    ellipse(x + OO_SMALL_LINE + 3 * OO_SMALL_RADIUS, cy, OO_SMALL_RADIUS, OO_SMALL_RADIUS, paint) +
+    line(x + 2 * OO_SMALL_RADIUS, cy, x + 2 * OO_SMALL_RADIUS + OO_SMALL_LINE, cy, {
+      stroke,
+      strokeWidth: STATE_BORDER_STROKE_WIDTH,
+    })
+  );
+}
+
 export function renderNormal(node: StateNodeGeo, theme: Theme): string {
   // mission G4 S10: `state`-element bucket tier -- see `resolveStateFillBucketed`'s own doc comment.
   const fill = resolveStateFillBucketed(node, theme, STATE_DEFAULT_BACKGROUND);
@@ -263,5 +423,11 @@ export function renderNormal(node: StateNodeGeo, theme: Theme): string {
   const bodyLines = node.bodyLines ?? [];
   const bodyMarkup = renderTextLines(bodyLines, () => node.x + MARGIN, dividerY + MARGIN_LINE + ascent, theme, fontColor, fontSize);
 
-  return box + divider + headerMarkup + bodyMarkup;
+  // G8: `EntityImageState.drawU`'s own order -- shape, divider hline,
+  // SYMBOL, name, fields (`EntityImageState.java:142-166`).
+  const symbol = isOOSymbolStereotype(node.stereotype)
+    ? renderOOSymbol(node.x + node.width, node.y + node.height, fill, border)
+    : '';
+
+  return box + divider + symbol + headerMarkup + bodyMarkup;
 }
