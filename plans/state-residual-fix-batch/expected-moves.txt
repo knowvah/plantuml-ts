@@ -1,0 +1,30 @@
+# expected-moves.txt — state-residual-fix-batch (SI31)
+#
+# Fixtures allowed to move `render-manifest`'s SHA-256 between batches
+# (the `manifest-diff.py` gate). One bare slug per line; `#` comments and
+# blank lines are ignored. A move by a fixture NOT listed here is stop 4.
+#
+# T0 seeds this file with the per-batch headings only. Each batch APPENDS
+# its own slugs when its gate runs, and every appended slug carries a
+# one-line jar-side account of what moved and why it is jar-ward. An
+# unaccounted move is never resolved by adding the slug.
+#
+# Expected movers by batch, from the source records:
+#   Batch 1 (T1, G17)  — size-only; joleju-94-maru748 may move.
+#   Batch 2 (T2, G21)  — DRAWN OUTPUT MOVES. Every concurrent-region
+#                        fixture with a region-local labeled transition
+#                        can move its label position. ~18 fixtures carry
+#                        concurrent regions; not all have labeled
+#                        transitions.
+#   Batch 3 (T3, G5)   — size-only; the five G5 fixtures.
+#   Batch 4 (T4, G20a) — UNBOUNDED, up to 83 fixtures, either direction.
+#                        Per D5 a non-shrink-only net reverts the batch
+#                        rather than growing this list.
+
+# Batch 1 (T1 — G17 note-only region)
+
+# Batch 2 (T2 — G21 accumulator wiring)
+
+# Batch 3 (T3 — G5 south-cap opacity)
+
+# Batch 4 (T4 — G20a declaration order)
