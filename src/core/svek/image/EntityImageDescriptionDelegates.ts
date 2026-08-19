@@ -20,7 +20,8 @@ import { UTranslate } from '../../klimt/UTranslate.js';
 import { Fore } from '../../klimt/Fore.js';
 import { Back } from '../../klimt/Back.js';
 import type { FontConfiguration } from '../../klimt/shape/UText.js';
-import { UText } from '../../klimt/shape/UText.js';
+import { UText, getFont } from '../../klimt/shape/UText.js';
+import { atomTextStartingAltitude } from '../../klimt/creole/legacy/AtomText.js';
 import { UImage } from '../../klimt/shape/UImage.js';
 import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import { TextBlockUtils } from '../../klimt/shape/TextBlockUtils.js';
@@ -138,22 +139,29 @@ function isCreoleAtomData(x: CreoleAtom | Atom): x is CreoleAtom {
   return 'kind' in x;
 }
 
+/** MEASUREMENT-only muted font (`AtomText.java`'s own `fontConfiguration
+ *  .getFont()` reads, D1). `UText.build`/`drawU` keep the UNMUTED config
+ *  (upstream's `useFontConfiguration`, java:205) -- `DriverTextSvg.draw`
+ *  mutes again at render time (`driver-text-svg.ts:135`, SI30). */
+function measuringFont(fc: FontConfiguration): FontConfiguration {
+  return { ...fc, size: getFont(fc).size };
+}
+
 /**
- * `AtomOps` for `desc`'s real Sea/SheetBlock1 pipeline (`Sea.ts`'s own doc
- * comment). `getStartingAltitude` is 0 for every `CreoleAtom` kind: upstream's
- * `AtomImg`/`AtomSprite`/`AtomMath` all `return 0` (java, grep-verified); its
- * `AtomText` returns `fontConfiguration.getSpace()` (`FontPosition#getSpace`,
- * 0 for `NORMAL`, nonzero only for `EXPOSANT`/`INDICE`) -- this port's
- * `FontConfiguration` (`UText.ts`) has no `FontPosition`/superscript concept
- * anywhere, so `NORMAL` (0) is the only reachable state, not a shortcut.
- * `drawU`'s per-atom baseline shift (`height - descent`, text only) mirrors
- * `AtomText.java`'s own `ypos = rect.getHeight() - descent` exactly. */
+ * `AtomOps` for `desc`'s real Sea/SheetBlock1 pipeline. `getStartingAltitude`:
+ * 0 for `AtomImg`/`AtomSprite`/`AtomMath` (upstream `return 0`); `AtomEmoji`
+ * its own `-3 * factor` (below); `AtomText` `getSpace()` via
+ * `atomTextStartingAltitude` (`AtomText.java:321-323`) -- 0 NORMAL, -6/+3
+ * EXPOSANT/INDICE, reachable via `<sup>`/`<sub>` (SI30, D1/D2).
+ * `calculateDimension` measures text via `measuringFont`. `drawU`'s baseline
+ * shift mirrors `ypos` (java:213-215) -- its commented-out `getSpace()`
+ * (java:212) confirms the altitude reaches the page via `Sea` alone (D2). */
 function descAtomOps(
   resolveAtomImage: AtomImageResolver | undefined,
   resolveEmojiArtwork: EmojiArtworkResolver | undefined,
 ): AtomOps {
   function dimensionOf(atom: CreoleAtom, stringBounder: StringBounder): { width: number; height: number } {
-    if (atom.kind === 'text') return measureLine(stringBounder, atom.text, atom.font);
+    if (atom.kind === 'text') return measureLine(stringBounder, atom.text, measuringFont(atom.font));
     if (atom.kind === 'latex') return renderLatexAsImage(atom.expr, atom.color ?? '#000000');
     // A2s R2i: a `<:name:>` emoji sizes as `AtomEmoji`'s exact contract
     // (`klimt/creole/atom/AtomEmoji.ts`); description previously measured
@@ -181,15 +189,10 @@ function descAtomOps(
     getStartingAltitude(creoleAtom: CreoleAtom, stringBounder: StringBounder): number {
       const atom = creoleAtom as CreoleAtom | Atom;
       if (!isCreoleAtomData(atom)) return atom.getStartingAltitude(stringBounder);
-      // F4-b: `AtomEmoji#getStartingAltitude` is the ONE `CreoleAtom` kind
-      // whose altitude is NOT 0 upstream (`AtomEmoji.java:62-64`,
-      // `-3 * factor`) -- the doc comment above enumerates `AtomImg`/
-      // `AtomSprite`/`AtomMath` as `return 0` and `AtomText` as
-      // `getSpace()` (0 for `NORMAL`, this port's only reachable state),
-      // but predates the emoji atom kind. Reporting it here is what lets
-      // `Sea#doAlign` derive the mixed (39*factor) and emoji-only
-      // (36*factor) line heights instead of a baked-in constant.
+      // F4-b: `Sea#doAlign` derives the mixed/emoji-only line height from
+      // these reported altitudes (`AtomEmoji.java:62-64`, `-3 * factor`).
       if (atom.kind === 'emoji') return emojiStartingAltitude(atom.factor);
+      if (atom.kind === 'text') return atomTextStartingAltitude(atom.font); // SI30/D2
       return 0;
     },
     drawU(creoleAtom: CreoleAtom, ug: UGraphic): void {
@@ -199,7 +202,7 @@ function descAtomOps(
         return;
       }
       if (atom.kind === 'text') {
-        const m = measureLine(ug.getStringBounder(), atom.text, atom.font);
+        const m = measureLine(ug.getStringBounder(), atom.text, measuringFont(atom.font));
         ug.apply(new UTranslate(0, m.height - m.descent)).draw(UText.build(atom.text, atom.font));
         return;
       }
