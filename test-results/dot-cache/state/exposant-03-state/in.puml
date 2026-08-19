@@ -1,0 +1,8 @@
+@startuml
+[*] --> one
+one: H<sub>2</sub>O
+one: <size:20><sup>x</sup></size>
+note right of one
+  y<sup>2</sup>
+end note
+@enduml

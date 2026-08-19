@@ -1,0 +1,9 @@
+@startuml
+class Molecule {
+  x<sup>2</sup>
+  H<sub>2</sub>O
+}
+note right of Molecule
+  **bold <sub>sub</sub> and <sup>sup</sup> text**
+end note
+@enduml

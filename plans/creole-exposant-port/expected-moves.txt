@@ -1,0 +1,41 @@
+# expected-moves.txt — creole-exposant-port (SI30)
+#
+# Fixtures allowed to move `render-manifest`'s SHA-256 between batches
+# (`manifest-diff.py` gate). Per D5/D7: only the three T0-authored
+# fixtures plus juvagu-33-dupa212 — the corpus's only pre-existing
+# `<sup>`/`<sub>` fixture reachable by a klimt-lexed engine — may move.
+# No other fixture may move; a move outside this list is stop 4.
+#
+# T0 grep evidence (2026-08-18), corpus-wide, no filtering by engine
+# (none found outside class/state/usecase, so no engine filter was
+# needed to reach this list):
+#   grep -rlE '<sup>|<sub>' test-results/dot-cache/*/*/in.puml
+#     -> test-results/dot-cache/class/exposant-01-class/in.puml
+#     -> test-results/dot-cache/state/exposant-03-state/in.puml
+#     -> test-results/dot-cache/state/juvagu-33-dupa212/in.puml
+#     -> test-results/dot-cache/usecase/exposant-02-usecase/in.puml
+#   grep -rlE '<sup>|<sub>' oracle/goldens/*/*/input.puml oracle/goldens/*/*/in.puml
+#     -> oracle/goldens/class/exposant-01-class/input.puml
+#     -> oracle/goldens/description/exposant-02-usecase/input.puml
+#     -> oracle/goldens/state/exposant-03-state/input.puml
+#     -> oracle/goldens/state/juvagu-33-dupa212/input.puml
+# No other dot-cache/goldens fixture (json/yaml/hcl/dot/object/component
+# included) contains `<sup>` or `<sub>`.
+
+# Batch 1 (T1 klimt core: FontPosition, exposant command, getFont mute)
+exposant-01-class
+exposant-02-usecase
+exposant-03-state
+juvagu-33-dupa212
+
+# Batch 2 (T2 description AtomOps + T3 core seams through Sea)
+exposant-02-usecase
+juvagu-33-dupa212
+exposant-01-class
+exposant-03-state
+
+# Batch 3 (T4 class consumers + T5 state consumers; usecase/description
+# is not touched by either task, so it does not move here)
+exposant-01-class
+juvagu-33-dupa212
+exposant-03-state

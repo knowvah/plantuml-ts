@@ -32,7 +32,7 @@ task by pathspec.
 
 | Batch | What | Tasks | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md) | Authored fixtures + oracles + baselines | T0 | [ ] |
+| [0](batch-0/overview.md) | Authored fixtures + oracles + baselines | T0 | [x] |
 | [1](batch-1/overview.md) | klimt core: `FontPosition`, exposant command, `getFont` mute | T1 | [ ] |
 | [2](batch-2/overview.md) | Description `AtomOps` · core seams through `Sea` (parallel) | T2 T3 | [ ] |
 | [3](batch-3/overview.md) | Class consumers · State consumers (parallel) | T4 T5 | [ ] |
