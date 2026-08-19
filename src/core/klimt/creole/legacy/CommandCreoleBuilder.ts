@@ -34,6 +34,7 @@
  *   itself is therefore not ported as a type.
  */
 import { FontStyle } from '../../shape/UText.js';
+import { FontPosition } from '../../font/FontPosition.js';
 import type { Command } from '../command/Command.js';
 import {
   createStyleCommands,
@@ -43,6 +44,7 @@ import {
 import { createSizeChangeCommands } from '../command/CommandCreoleSizeChange.js';
 import { createColorChangeCommands } from '../command/CommandCreoleColorChange.js';
 import { createColorAndSizeChangeCommands } from '../command/CommandCreoleColorAndSizeChange.js';
+import { createExposantChangeCommand } from '../command/CommandCreoleExposantChange.js';
 import { createFontFamilyChangeCommands } from '../command/CommandCreoleFontFamilyChange.js';
 import { createEmojiCommand } from '../command/CommandCreoleEmoji.js';
 import { createLatexCommand } from '../command/CommandCreoleLatex.js';
@@ -74,8 +76,9 @@ const L1_STYLES: readonly FontStyle[] = [
 
 /** L2 additions (mission `plans/e2r-creole/`), registered in upstream's own
  *  `CommandCreoleBuilder` ctor order (java :98-117, minus the not-ported
- *  entries -- exposant/img-adjacent commands, see this file's module doc
- *  comment): size, color, font(size/color), then font(family) LAST among
+ *  entries -- the img-adjacent commands, see this file's module doc
+ *  comment): size, color, font(size/color), exposant (SI30), then
+ *  font(family) LAST among
  *  the `<f` starter's two claimants (`CommandCreoleColorAndSizeChange` must
  *  be tried first -- its pattern requires a `size=`/`color=` attr, so a
  *  bare `<font:Name>` correctly falls through to `CommandCreoleFontFamily
@@ -101,6 +104,15 @@ function buildCommandMap(mode: 'FULL' | 'OTHER'): Map<string, Command[]> {
   for (const cmd of createSizeChangeCommands()) addCommand(map, cmd);
   for (const cmd of createColorChangeCommands()) addCommand(map, cmd);
   for (const cmd of createColorAndSizeChangeCommands()) addCommand(map, cmd);
+  // SI30: upstream ctor position (java :104-105) — immediately after the
+  // color/size commands, before `CommandCreoleImg` (java :106). Both
+  // positions share the `<s` starter with `CommandCreoleSizeChange` and the
+  // legacy STRIKE forms, which are registered EARLIER and therefore tried
+  // first; neither of their patterns can match a `<sup>`/`<sub>` tag, so the
+  // scan falls through to these two. Registered in BOTH maps (upstream has no
+  // mode gate here), so member rows and headers parse it too.
+  addCommand(map, createExposantChangeCommand(FontPosition.EXPOSANT));
+  addCommand(map, createExposantChangeCommand(FontPosition.INDICE));
   // A2s R2i: upstream ctor position (java :109) — after the color commands
   // (relative order preserved: color/colorAndSize claim their starters
   // first), before math/latex. Registered in BOTH maps (no mode gate), so

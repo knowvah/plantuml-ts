@@ -47,12 +47,39 @@
  * This is why {@link atomTextWidth} takes no tab-size parameter: threading one
  * would be a lever upstream does not have on this path.
  *
+ * ## Every font size on this module's surface is the MUTED size
+ *
+ * Upstream reads the run's font through `fontConfiguration.getFont()`
+ * (java:176, java:191-192, java:251, java:271-273), which mutes the size for a
+ * `<sup>`/`<sub>` run before either the measurement or the tab-stop fallback
+ * sees it (`FontConfiguration.java:98-104` -> `FontPosition.java:51-60`).
+ * SI30 (decisions.md#D1) therefore fixes the contract for this module:
+ * `fontSize` parameters take `getFont(fc).size`, never `fc.size`, and the
+ * `measure` callback must be bound to that same muted font. For a NORMAL run
+ * the two are identical, which is why no signature changed.
+ *
  * `Jaws.BLOCK_E1_REAL_TABULATION` (`jaws/Jaws.java:53`, `U+E111`) is a
  * second delimiter upstream's tokenizer treats identically to `\t`. This port
  * has no Jaws preprocessor, so nothing emits that sentinel today; it is ported
  * anyway because it is upstream's own delimiter set, and a run that ever does
  * carry it must advance the same way.
  */
+
+import { getSpace, type FontConfiguration } from '../../shape/UText.js';
+
+/** Upstream `AtomText#getStartingAltitude(StringBounder)` (java:321-323) —
+ *  a straight `return fontConfiguration.getSpace()`, i.e. the run's
+ *  `FontPosition` space (−6 EXPOSANT / +3 INDICE / 0 NORMAL). The
+ *  `StringBounder` parameter is unused upstream and has no counterpart here.
+ *
+ *  This is the ONLY place the raise/lower is applied: `AtomText#drawU`'s own
+ *  `final int ypos = fontConfiguration.getSpace();` line is COMMENTED OUT
+ *  upstream (java:212, and the live line is java:213-215) and the draw baseline is `height - descent` alone,
+ *  so the altitude reaches the page through `Sea` and must not be applied a
+ *  second time at draw (decisions.md#D2). */
+export function atomTextStartingAltitude(fc: FontConfiguration): number {
+  return getSpace(fc);
+}
 
 /** Upstream `AtomText#getTabSize`'s zero-width fallback multiplier
  *  (java:273, `fontConfiguration.getFont().getSize2D() * 4`). */
@@ -89,7 +116,8 @@ export function hasTabulation(text: string): boolean {
 /** Upstream `AtomText#getTabSize` (java:270-275). `tabStringWidth` is the
  *  caller's measurement of {@link TAB_STRING} in the run's own font; a zero
  *  measurement (always, under the deterministic width table — see this
- *  module's doc comment) falls back to `fontSize * 4`. */
+ *  module's doc comment) falls back to `fontSize * 4`. `fontSize` is the
+ *  MUTED size (`getFont(fc).size`) — see this module's doc comment. */
 export function tabStopWidth(tabStringWidth: number, fontSize: number): number {
   return tabStringWidth === 0 ? fontSize * TAB_STOP_FONT_SIZE_FACTOR : tabStringWidth;
 }
@@ -130,6 +158,9 @@ function tokenizeOnTabs(text: string): TabToken[] {
  * Width of one creole text run, expanding tabulations to tab stops —
  * upstream `AtomText#calculateDimensionSlow`'s width term (java:183-184)
  * delegating to `#getWidth` (java:239-256).
+ *
+ * `fontSize` and `measure` must BOTH be bound to the run's muted font
+ * (`getFont(fc)`) — see this module's doc comment.
  *
  * `measure` is the caller's own font-bound string measurement (the sizer's
  * `StringMeasurer`, the renderer's `StringBounder`); it is called with

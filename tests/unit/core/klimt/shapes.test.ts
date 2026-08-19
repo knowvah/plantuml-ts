@@ -4,7 +4,7 @@ import { URectangle } from '../../../../src/core/klimt/shape/URectangle.js';
 import { UEllipse } from '../../../../src/core/klimt/shape/UEllipse.js';
 import { ULine } from '../../../../src/core/klimt/shape/ULine.js';
 import { UPolygon } from '../../../../src/core/klimt/shape/UPolygon.js';
-import { UText, FontStyle } from '../../../../src/core/klimt/shape/UText.js';
+import { UText, FontStyle, getFont, getSpace } from '../../../../src/core/klimt/shape/UText.js';
 import type { FontConfiguration } from '../../../../src/core/klimt/shape/UText.js';
 import { UComment } from '../../../../src/core/klimt/shape/UComment.js';
 import { UGroup, UGroupType, getSvgKeyAttributeName } from '../../../../src/core/klimt/shape/UGroup.js';
@@ -418,6 +418,56 @@ describe('UText', () => {
 
   it('toString reports the raw text', () => {
     expect(UText.build('hi', font).toString()).toBe('UText[hi]');
+  });
+});
+
+// SI30 T1 — `FontConfiguration#getFont()` (FontConfiguration.java:98-104,
+// whose last act is `fontPosition.mute(result)`) and `#getSpace()`
+// (FontConfiguration.java:370-372) as free functions over this port's
+// plain-data `FontConfiguration` (decisions.md#D1).
+describe('getFont / getSpace (FontConfiguration.java:98-104, :370-372)', () => {
+  const base: FontConfiguration = {
+    family: 'sans-serif',
+    size: 12,
+    color: '#000000',
+    styles: new Set<FontStyle>(),
+  };
+
+  it('an fc with no fontPosition reads back identically (undefined = NORMAL)', () => {
+    expect(getFont(base)).toEqual({ family: 'sans-serif', size: 12 });
+    expect(getSpace(base)).toBe(0);
+  });
+
+  it('an explicitly NORMAL fc is identical too', () => {
+    const fc: FontConfiguration = { ...base, fontPosition: 'NORMAL' };
+    expect(getFont(fc)).toEqual({ family: 'sans-serif', size: 12 });
+    expect(getSpace(fc)).toBe(0);
+  });
+
+  it('EXPOSANT mutes the size by 3 and raises by 6', () => {
+    const fc: FontConfiguration = { ...base, fontPosition: 'EXPOSANT' };
+    expect(getFont(fc)).toEqual({ family: 'sans-serif', size: 9 });
+    expect(getSpace(fc)).toBe(-6);
+  });
+
+  it('INDICE mutes the size by 3 and lowers by 3', () => {
+    const fc: FontConfiguration = { ...base, fontPosition: 'INDICE' };
+    expect(getFont(fc)).toEqual({ family: 'sans-serif', size: 9 });
+    expect(getSpace(fc)).toBe(3);
+  });
+
+  it('the mute clamps at 2 (FontPosition.java:56-57)', () => {
+    expect(getFont({ ...base, size: 4, fontPosition: 'EXPOSANT' }).size).toBe(2);
+  });
+
+  it('the family is never touched by the mute', () => {
+    expect(getFont({ ...base, family: 'Courier', fontPosition: 'INDICE' }).family).toBe('Courier');
+  });
+
+  it('reads LAZILY — a later size change still mutes off the stored size', () => {
+    const fc: FontConfiguration = { ...base, fontPosition: 'EXPOSANT', size: 20 };
+    expect(fc.size).toBe(20);
+    expect(getFont(fc).size).toBe(17);
   });
 });
 
