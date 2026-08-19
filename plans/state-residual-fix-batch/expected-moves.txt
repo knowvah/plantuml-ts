@@ -85,5 +85,20 @@ zumeri-82-julo078 # size-only, non-target: an opaque-south composite whose canva
 
 
 # Batch 5 (T5 — G15 composite-anchor spline clip)
+#
+# `DotPath#simulateCompound(lhead.getRectangleArea(), ltail.getRectangleArea())`
+# — `SvekEdge.java:671-672` — now runs on every state transition whose own
+# endpoint id addresses a CLUSTER rather than a real node (this port's
+# `Cluster.CENTER_ID` analogue is `state-composite-classify.ts#zaentId`,
+# substituted by `#edgeEndpointId`), before the spline is folded into the ink
+# extent. Upstream clips BEFORE drawing, so `LimitFinder`/`SvekResult
+# #calculateDimension` never see the in-cluster segment; we were folding it,
+# and its control points reach past the cluster frontier. Exactly 4 of 2017
+# fixtures carry that shape, and all four move JAR-WARD on canvas width.
+
+fovafu-44-mifu394 # T5 target (scope2 width idx0, +7.820496px -> EXACT). `A -> Y`, source composite A, so `ltail != null` and the TAIL branch fires. The discarded in-cluster segment's control point sits at x=157.820 where A's own right frontier is 150.000 — the whole +7.820496. Canvas width 239 -> 232, jar 232 EXACT. Its scope2 HEIGHT row is untouched at +0.003816 (the G14 sub-pixel band): the clip keeps the segment carrying the y=0 control points, so the ink box's minY/maxY do not move. DOT text changes too (jar-ward: a composite's declared width is an INPUT literal in its parent scope's emitted DOT statement).
+tubojo-49-tudu915 # size-only, non-target: `B -> Y`, source composite B — same TAIL branch as fovafu-44 one nesting level out. Canvas width 262 -> 261, jar 261 EXACT. Its declared-size rows were already exact and stay exact (DOT hash unchanged), so only the rendered SVG moves.
+fajegu-17-joba577 # size-only, non-target: `RUNNING -down-> STOPPING` (HEAD branch, target composite) plus two edges leaving the STARTING cluster (TAIL branch). Canvas width 609 -> 555 against jar's 561 — the largest single jar-ward move in the corpus (|error| 48 -> 6). It lands 6px SHORT rather than exact because a residual, pre-existing width term on this fixture is opposite-signed; the clip itself is the source-verified upstream rule, not a fitted amount. Declared-size rows unchanged (DOT hash unchanged).
+mefici-97-tudu030 # size-only, non-target: `Timer --> Stopwatch[H]` — source composite Timer (TAIL branch), target inside composite Stopwatch. Canvas width 873 -> 854 against jar's 816 (|error| 57 -> 38); the remaining 38px is a pre-existing, unrelated gap this term neither caused nor widened. Declared-size rows unchanged (DOT hash unchanged).
 
 # Batch 6 (T6 — G20a declaration order)

@@ -20,4 +20,4 @@ the SI27 pattern — then both engines consume it. Duplicating it is forbidden.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T5 | Move `spline-clip.ts` to `src/core/`, repoint description, clip state composite-anchor transitions before the ink walk | general-purpose (opus) | `src/core/spline-clip.ts` (new), `src/diagrams/description/spline-clip.ts` (deleted), description's importers, `src/diagrams/state/layout-ink-extent.ts`, their unit tests | T4 | [ ] |
+| T5 | Move `spline-clip.ts` to `src/core/`, repoint description, clip state composite-anchor transitions before the ink walk | general-purpose (opus) | `src/core/spline-clip.ts` (new), `src/diagrams/description/spline-clip.ts` (deleted), description's importers, `src/diagrams/state/layout-ink-extent.ts`, their unit tests | T4 | [x] |

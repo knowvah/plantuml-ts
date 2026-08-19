@@ -157,9 +157,12 @@ export function insideBbox(p: { x: number; y: number }, b: Bbox): boolean {
 }
 
 // Spline↔container-bbox clipping (`clipSplineStart`/`clipSplineEnd`) lives in
-// `spline-clip.ts`: it needs `insideBbox`/`Bbox` from here, and was split out
-// both to stay under the 500-line cap and because the bezier-aware rewrite
-// (de Casteljau boundary split, follow-up F1) grew past a one-liner.
+// `src/core/spline-clip.ts`. It was split out of this file both to stay under
+// the 500-line cap and because the bezier-aware rewrite (de Casteljau boundary
+// split, follow-up F1) grew past a one-liner; SI31 T5 then moved it to core so
+// the state engine could share the one `DotPath#simulateCompound` port
+// (`decisions.md#d9`). It declares its own structural `ClipRect` rather than
+// importing `Bbox` from here, so core keeps no dependency on `src/diagrams/`.
 
 // ---------------------------------------------------------------------------
 // Node-geo index (flat id → geo, including descendants)

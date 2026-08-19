@@ -1015,3 +1015,43 @@ itself is broken here.
 
 **Affects:** any diagram using `skin sonyxperiadev` (fully) or `skin reddress`
 (bare only). No upstream corpus fixture uses either.
+
+---
+
+## State diagrams
+
+### Composite-anchor transitions: `simulateCompound` clip applied to ink, not to the drawn path
+
+**Divergence.** Upstream clips a cluster-sourced edge ONCE, in
+`SvekEdge#solveLine` (`SvekEdge.java:671-672`, calling
+`DotPath#simulateCompound(lhead.getRectangleArea(), ltail.getRectangleArea())`),
+and everything downstream — both the ink measurement via `LimitFinder` and the
+drawn path — sees the already-clipped spline. This port (SI31 T5) applies the
+same clip, from the same single port at `src/core/spline-clip.ts`, only where
+the spline is folded into a state composite's ink extent
+(`state/layout-ink-transition.ts`). The state renderer still draws the
+UNCLIPPED path, so a composite-anchor transition is drawn with the in-cluster
+segment the jar discards.
+
+**Consequence.** Declared sizes now match the jar (this closed
+`fovafu-44-mifu394`'s +7.820 px scope-2 width, and narrowed three more
+fixtures' canvases toward the jar's), but the drawn spline still enters the
+source composite's rectangle, and the canvas it is drawn on is now narrower
+than it was. On the four fixtures this currently affects, no on-curve ink falls
+outside the narrowed canvas — verified per fixture, which is a check, not a
+structural guarantee.
+
+**Why it is here rather than fixed.** SI31's Batch 5 was scoped to the ink
+path; the state renderer was deliberately outside its write-set, because
+drawing the clipped path changes rendered output for every composite-anchor
+transition in the corpus and deserves its own measured mission rather than
+riding along inside a declared-size fix. `transitionArrowheadInk` likewise
+still reads raw points on purpose — folding a clipped-derived arrowhead would
+reserve ink for a marker that is not painted.
+
+**This is a structural divergence and should be retired, not kept.** The
+faithful end state is upstream's: clip once, then measure and draw the same
+clipped path. Follow-on scoped in `.agent-notes/si31-T5.md`.
+
+**Affects:** state diagrams with a transition anchored on a composite.
+

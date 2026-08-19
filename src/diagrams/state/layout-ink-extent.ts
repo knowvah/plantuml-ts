@@ -88,7 +88,14 @@
 import type { StateNodeGeo, TransitionGeo } from './state-geo-types.js';
 import { svekDimension, svekInkShift } from '../../core/svek/SvekResult.js';
 import { applyCucaDocumentMargin } from '../../core/TextBlockExporter.js';
-import { transitionArrowheadInk } from './renderer-arrowhead.js';
+import {
+  type InkBox,
+  newInkBox,
+  addPoint,
+  addTransitionInk,
+  buildCompositeAnchorRects,
+} from './layout-ink-transition.js';
+import type { ClipRect } from '../../core/spline-clip.js';
 import { positionFromStereotype, usesPortShape } from './state-entity-position.js';
 import { textAscent } from './state-render-colors.js';
 
@@ -109,24 +116,6 @@ import { textAscent } from './state-render-colors.js';
  *  imported, per `class/layout-ink-extent.ts`'s own established
  *  klimt-free-module convention. */
 const HACK_X_FOR_POLYGON = 10;
-
-interface InkBox {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-}
-
-function newInkBox(): InkBox {
-  return { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
-}
-
-function addPoint(box: InkBox, x: number, y: number): void {
-  if (x < box.minX) box.minX = x;
-  if (y < box.minY) box.minY = y;
-  if (x > box.maxX) box.maxX = x;
-  if (y > box.maxY) box.maxY = y;
-}
 
 /** Leaf `normal`/`json` state box + composite (best-effort) — see module
  *  doc comment for the jar-verified asymmetric-per-axis mechanism.
@@ -311,6 +300,7 @@ function addNodeInk(
   node: StateNodeGeo,
   labelInk: boolean,
   arrowheadInk: 'always' | 'self-loop',
+  anchorRects: ReadonlyMap<string, ClipRect>,
 ): void {
   if (node.children.length > 0) {
     // A composite's own outer box draws no divider line, but this call is
@@ -327,8 +317,8 @@ function addNodeInk(
       addPoint(box, node.x + node.width + over.right, node.y + node.height + over.bottom - 1);
     }
     addSouthCapInk(box, node);
-    for (const child of node.children) addNodeInk(box, child, labelInk, arrowheadInk);
-    for (const t of node.transitions) addTransitionInk(box, t, labelInk, arrowheadInk);
+    for (const child of node.children) addNodeInk(box, child, labelInk, arrowheadInk, anchorRects);
+    for (const t of node.transitions) addTransitionInk(box, t, labelInk, arrowheadInk, anchorRects);
     return;
   }
   // G9/T7: a border point is a different image class upstream, not a state
@@ -368,44 +358,6 @@ function addNodeInk(
   }
 }
 
-/** One transition's own ink contribution — plain points
- *  (`LimitFinder#drawDotPath`-equivalent: no inset), its label box, and,
- *  gated by `arrowheadInk`, the head-side arrowhead's own ink
- *  (`renderer-arrowhead.ts#transitionArrowheadInk`, `HACK_X_FOR_POLYGON`-
- *  padded internally via its own `LimitFinder` walk). `'always'` (document-
- *  level, pre-existing, unchanged) vs `'self-loop'` (`from===to` only,
- *  composite-level, mission T9) — see the module doc comment's mechanism-7
- *  paragraph for why the latter is scoped, not unconditional. */
-function addTransitionInk(
-  box: InkBox,
-  transition: TransitionGeo,
-  labelInk: boolean,
-  arrowheadInk: 'always' | 'self-loop',
-): void {
-  for (const p of transition.points) addPoint(box, p.x, p.y);
-  // G8 T2: fold the label's own BOX at the RETURNED (graphviz) position, not
-  // just its anchor POINT -- only when present AND opted in (`labelInk`);
-  // `computeStateDocumentDims`/`computeStateInkShift` pass `false` and keep
-  // the point-only fold. `transition-label-ink` T3: `TextBlockMarged#drawU`'s
-  // own `UEmpty` (`klimt/shape/TextBlockMarged.java:79-87`), so this is
-  // `drawEmpty` over `label.inkBox` (`LimitFinder.java:159-162`).
-  if (transition.label !== undefined) {
-    const ink = transition.label.inkBox;
-    if (labelInk && ink !== undefined) {
-      addPoint(box, ink.x, ink.y);
-      addPoint(box, ink.x + ink.width, ink.y + ink.height);
-    } else {
-      addPoint(box, transition.label.x, transition.label.y);
-    }
-  }
-  if (arrowheadInk === 'self-loop' && transition.from !== transition.to) return;
-  const arrowInk = transitionArrowheadInk(transition);
-  if (arrowInk !== undefined) {
-    addPoint(box, arrowInk.minX, arrowInk.minY);
-    addPoint(box, arrowInk.maxX, arrowInk.maxY);
-  }
-}
-
 /** The shared ink-point accumulation walk {@link computeStateDocumentDims},
  *  {@link computeStateInkShift}, and {@link computeSvekResultGeometry} consume. */
 function buildInkBox(
@@ -415,8 +367,9 @@ function buildInkBox(
   arrowheadInk: 'always' | 'self-loop',
 ): InkBox {
   const box = newInkBox();
-  for (const n of states) addNodeInk(box, n, labelInk, arrowheadInk);
-  for (const t of transitions) addTransitionInk(box, t, labelInk, arrowheadInk);
+  const anchorRects = buildCompositeAnchorRects(states);
+  for (const n of states) addNodeInk(box, n, labelInk, arrowheadInk, anchorRects);
+  for (const t of transitions) addTransitionInk(box, t, labelInk, arrowheadInk, anchorRects);
   return box;
 }
 
