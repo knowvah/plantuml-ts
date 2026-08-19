@@ -217,3 +217,57 @@ manifest alone. The cost is accepted by the user's ruling; the mitigation is
 that T2 must diagnose each mover to a mechanism rather than inferring one from
 the fact that it moved. D6 (a mover away from the jar is a finding, not a
 tuning target) is unchanged and now carries more weight, not less.
+
+## D2'a — Correction to D2's provenance claim (2026-08-19, same day)
+
+**What was wrong with how D2' was reached.** D2' asserted that
+`lhead.getRectangleArea()` / `ltail.getRectangleArea()` are "`Cluster`
+rectangles from the layout, not measured image boxes". That was inferred from
+the CALL SITE (`SvekEdge.java:671`) without opening `getRectangleArea()` or the
+code that populates it — on a decision whose entire subject is provenance.
+CLAUDE.md's most-violated rule, violated. Corrected here from method bodies
+rather than quietly patched.
+
+**The general case: D2' holds, now for a read reason.**
+`DotStringFactory.java:425-434`, immediately before the `solveLine` loop, walks
+every non-packed cluster, extracts its polygon from the graphviz SVG by the
+cluster's own color, takes `min`/`max`, and calls `cluster.setPosition(min,
+max)`; `Cluster.java:511-512` assigns `rectangleArea = RectangleArea.build(min,
+max)`. So when the clip runs, the rect IS the raw graphviz cluster bbox —
+which is exactly what `result.clusters[]` carries. `result.clusters` is the
+faithful source.
+
+**The exception: border-point composites.** `solveLine` mutates the rect before
+clipping, for one family only:
+
+```java
+if (projectionCluster != null)
+    projectionCluster.manageEntryExitPoint(stringBounder);   // :660-663
+dotPath = dotPath.simulateCompound(lhead..., ltail...);      // :671
+```
+
+`Cluster.java:410-430` — `manageEntryExitPoint` reassigns
+`this.rectangleArea = frontierCalculator.getSuggestedPosition()`, applying
+`ensureMinWidth(getTitleAndAttributeWidth() + 10)` when the cluster has a
+title. `ClusterDotString.java:101-105` sets `projectionCluster` only when
+`entityPositionsExceptNormal().size() > 0` — a composite with border-point
+children — and sets it on every line `isLinkFromOrTo` that cluster, i.e. the
+lines whose `lhead`/`ltail` it is.
+
+So for border-point composites upstream clips against a FrontierCalculator-
+adjusted rect. It is also an order-dependent mutation of shared cluster state
+inside the per-line loop: a later line clipping against the same cluster sees
+the already-adjusted rect.
+
+**Decision.** `result.clusters` (the raw box) stays the source for this
+mission, including for border-point composites. Porting `FrontierCalculator`
+is a second port of upstream arithmetic and is out of T2's scope. T2 must
+establish whether the family is reachable for a clipped endpoint and, if it
+is, record the gap as a scoped finding with measured effect — a
+`DIVERGENCES.md` candidate for T3, not a silent approximation.
+
+**Consequence.** A moving fixture whose endpoint composite has border-point
+children may be moving because of the rect family rather than the timing. That
+is now a third confounder alongside the provenance/timing pair D2' already
+spent, and it is the reason T2's mover accounting must be diagnosed rather
+than inferred.
