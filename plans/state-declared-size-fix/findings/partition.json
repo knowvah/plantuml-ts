@@ -1,5 +1,5 @@
 {
- "_doc": "SI29 Batch 5 re-diagnosis partition (decisions.md D6). `real` = the D1-D8 slugs; T11's G13 record (nimana-36/bunade-42/nimise-04) is added here by the orchestrator only if T11 writes findings/G13.md instead of fixing in src/.",
+ "_doc": "SI29 Batch 5 re-diagnosis partition (decisions.md D6). `real` = the D1-D8 slugs; T11's G13 record (nimana-36/bunade-42/nimise-04) was added by the orchestrator: T11 wrote findings/G13.md (unresolved) and changed no src/.",
  "real": [
   "rovese-43-tadu368",
   "zoriza-41-rege543",
@@ -11,7 +11,10 @@
   "pavuzo-79-zodu430",
   "dapunu-39-kava045",
   "gokife-89-boja382",
-  "jijuze-43-ceva131"
+  "jijuze-43-ceva131",
+  "nimana-36-veco708",
+  "bunade-42-fudu910",
+  "nimise-04-jove070"
  ],
  "precision": [],
  "unmatched": [],
@@ -42,6 +45,11 @@
   ],
   "G16-region-leaf-margin": [
    "jijuze-43-ceva131"
+  ],
+  "G13": [
+   "nimana-36-veco708",
+   "bunade-42-fudu910",
+   "nimise-04-jove070"
   ]
  }
 }
