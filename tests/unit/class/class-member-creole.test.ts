@@ -17,8 +17,9 @@ import {
   atomsToPlainText,
   splitMemberDisplayLines,
 } from '../../../src/diagrams/class/class-member-creole.js';
-import { FontStyle } from '../../../src/core/klimt/shape/UText.js';
+import { FontStyle, getFont } from '../../../src/core/klimt/shape/UText.js';
 import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
+import type { MemberRenderAtom } from '../../../src/diagrams/class/class-member-creole.js';
 import { FormulaMeasurer, WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
@@ -472,5 +473,58 @@ describe('atomsToPlainText (G2 N65 item 35)', () => {
 
   test('an empty atom list yields an empty string', () => {
     expect(atomsToPlainText([])).toBe('');
+  });
+});
+
+// SI30 T4: member `<sup>`/`<sub>` runs measure at the EFFECTIVE (muted)
+// size and carry the Sea `dy` correction (`decisions.md#D1/D2/D3`) -- paired
+// with `renderer-classifier-rows.test.ts`'s render-side assertion that the
+// SAME numbers reach the drawn `<text>`.
+describe('resolveMemberAtoms — <sup>/<sub> mute + Sea dy (SI30 T4)', () => {
+  const FONT12: FontConfiguration = { family: 'sans-serif', size: 12, color: null, styles: new Set() };
+
+  test('x<sup>2</sup> at font 12: the sup run measures at muted size 9, not the declared 12', () => {
+    const atoms = buildMemberAtoms('x<sup>2</sup>', FONT12);
+    const build = resolveMemberAtoms(atoms, FONT12, measurer);
+    expect(build.atoms).toHaveLength(2);
+    const sup = build.atoms[1] as Extract<MemberRenderAtom, { kind: 'text' }>;
+    expect(sup.text).toBe('2');
+    // D1: `font.size` stays the DECLARED (unmuted) 12 -- mute at read time.
+    expect(sup.font.size).toBe(12);
+    expect(getFont(sup.font).size).toBe(9);
+    expect(sup.width).toBe(measurer.measure('2', { family: 'sans-serif', size: 9 }).width);
+    // SI30 T4 (jar-verified against `exposant-01-class`'s own golden): a
+    // member row's `dy` corrects against the ROW's base-font reference
+    // (`baseFont.size - baseFont.size / 4.5`), NOT the line's own Sea
+    // height -- `class-member-creole-sea.ts#textAtomDy`'s own doc comment
+    // has the full derivation and why notes differ. "x" (NORMAL) is NOT 0
+    // here: the `<sup>` widens the line's Sea span enough (16 vs the
+    // NORMAL-only 12) to shift "x" off the row baseline too.
+    const x = build.atoms[0] as Extract<MemberRenderAtom, { kind: 'text' }>;
+    const reference = 12 - 12 / 4.5;
+    expect(x.dy).toBeCloseTo(4, 6);
+    expect(sup.dy).toBeCloseTo(7 - reference, 6); // top(0)+drawHeight(9)-descent(2) - reference
+    expect(sup.dy).toBeLessThan(0);
+  });
+
+  test('H<sub>2</sub>O at font 12: the sub run measures at muted size 9, floored line height 10', () => {
+    const atoms = buildMemberAtoms('H<sub>2</sub>O', FONT12);
+    const build = resolveMemberAtoms(atoms, FONT12, measurer);
+    const sub = build.atoms[1] as Extract<MemberRenderAtom, { kind: 'text' }>;
+    expect(sub.text).toBe('2');
+    expect(sub.font.size).toBe(12);
+    expect(getFont(sub.font).size).toBe(9);
+    expect(sub.width).toBe(measurer.measure('2', { family: 'sans-serif', size: 9 }).width);
+    // The line's own height grows to accommodate the `<sub>`'s +3 altitude
+    // (AtomText.java:321-323) -- taller than a plain all-NORMAL 12pt line.
+    expect(build.height).toBeGreaterThan(12);
+  });
+
+  test('an all-NORMAL line keeps every dy at 0 (identity property)', () => {
+    const atoms = buildMemberAtoms('plain text', FONT12);
+    const build = resolveMemberAtoms(atoms, FONT12, measurer);
+    for (const atom of build.atoms) {
+      if (atom.kind === 'text') expect(atom.dy).toBe(0);
+    }
   });
 });

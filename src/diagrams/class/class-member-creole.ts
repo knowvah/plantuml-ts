@@ -50,6 +50,8 @@
  */
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
+import { FontPosition, fontPositionSpace } from '../../core/klimt/font/FontPosition.js';
+import { mutedAtomFontSpec, seaLineHeightAndSpan, textAtomDy } from './class-member-creole-sea.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
 import { splitMemberDisplayLines } from './class-member-display.js';
 import {
@@ -67,7 +69,7 @@ import {
 } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import { type SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
 
 /**
@@ -119,6 +121,22 @@ export type MemberRenderAtom =
        *  `renderer-classifier-box.ts#renderRowAtoms` wraps the emitted
        *  `<text>` in `<a href>` when present. */
       readonly url?: CreoleAtomUrl;
+      /** SI30 D2/D3: baseline correction from the row's per-line `Sea`
+       *  placement (`core/svek/image/creole-sea-line.ts`'s doc comment has
+       *  the full derivation) — 0 for every atom on an all-NORMAL line
+       *  (identity property), non-zero only when a `<sup>`/`<sub>` run
+       *  shares the line (`FontPosition.getSpace()`, `AtomText.java:
+       *  321-323`). Renderers draw at `lineTop + lineHeight -
+       *  atom.font.size / 4.5 + dy` — the UNMUTED descent term stays
+       *  unchanged (`AtomText.java:213-215`'s own commented-out altitude
+       *  line; the real altitude reaches the page through `dy` alone, per
+       *  `decisions.md#D2`'s "must not be applied twice" rule). `undefined`
+       *  only for a `'text'` atom built directly by a resolver that never
+       *  routes through {@link resolveMemberAtoms}'s own Sea pass (today:
+       *  {@link resolveEmojiAtom} in `class-member-atom-resolve.ts`, whose
+       *  underlying raw atom is `'emoji'`-kind and therefore always gets
+       *  `dy = 0` from `Sea` anyway — renderers read `atom.dy ?? 0`). */
+      readonly dy?: number;
     }
   | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
   /** G2 N41: an OpenIconic `<&glyph>` atom -- `name`/`factor` feed
@@ -160,19 +178,26 @@ export interface MemberRowBuild {
    *  upstream of that boundary pre-rounds; `sectionWidth`'s max-width scan
    *  and `buildSectionRows`'s stored `row.width` both consume this raw). */
   readonly width: number;
-  /** A2s R2i (lozego-15-coci435): this row's own line height -- the MAX of
-   *  every atom's line contribution (text -> `atomTextLineHeight(font.size)`
+  /** A2s R2i (lozego-15-coci435): this row's own line height. SI30 D2/D3:
+   *  now `Sea`'s own reduction (`Sea.java:72-91`'s `doAlign`/
+   *  `translateMinYto`/`getHeight`, algebraically `max(altitude) +
+   *  max(height - altitude)` for a single stripe stacked at y=0 — see
+   *  {@link seaLineHeightAndSpan}) rather than a flat MAX, so a line mixing
+   *  a `<sub>` (altitude +3) with NORMAL runs grows correctly. Altitude is
+   *  0 for every atom except a `'text'` one with a non-NORMAL
+   *  `FontPosition` (`decisions.md#D2`'s literal scope — "Text atoms report
+   *  the getStartingAltitude"; emoji/image/vector/bullet keep the PRE-SI30
+   *  altitude-0 treatment, unchanged, so this is additive: for an
+   *  all-NORMAL line every atom's altitude is 0 and the reduction collapses
+   *  back to the original flat MAX (text -> `atomTextLineHeight(font.size)`
    *  i.e. font size floored 10, AtomText.java:179-181; img/sprite/vector ->
    *  the atom's scaled pixel height; emoji -> `39*factor`,
-   *  `atom/AtomEmoji.ts`). Upstream: `MethodsOrFieldsArea#
+   *  `atom/AtomEmoji.ts`) byte-identical. Upstream: `MethodsOrFieldsArea#
    *  calculateDimensionOnlyMembers` advances `y += dim.getHeight()` PER
    *  MEMBER (java:161-166) where `dim` is that member's own TextBlock
    *  dimension -- a 100px sprite row advances 100*scale, not the uniform
    *  text row height (jar: lozego's `<$test>` field row = 100*14/13 =
-   *  107.6923px; node 2.162393in golden-exact). Identical to the uniform
-   *  `memberRowHeight` for every atom-free row (the overwhelming common
-   *  case): a plain row's lone text atom contributes exactly
-   *  `atomTextLineHeight(fontSpec.size)`. */
+   *  107.6923px; node 2.162393in golden-exact). */
   readonly height: number;
 }
 
@@ -233,15 +258,6 @@ export function buildMemberAtoms(text: string, font: FontConfiguration): readonl
   return [{ kind: 'text', text, font }];
 }
 
-function atomFontSpec(font: FontConfiguration): FontSpec {
-  return {
-    family: font.family,
-    size: font.size,
-    ...(font.styles.has(FontStyle.BOLD) ? { weight: 'bold' as const } : {}),
-    ...(font.styles.has(FontStyle.ITALIC) ? { style: 'italic' as const } : {}),
-  };
-}
-
 /**
  * Resolves a raw `CreoleAtom[]` (from `buildMemberAtoms`) into render-ready
  * `MemberRenderAtom[]` + their summed width -- text atoms measure via the
@@ -259,21 +275,47 @@ export function resolveMemberAtoms(
 ): MemberRowBuild {
   const spriteDims: SpriteDimsLookup | undefined = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
   const rendered: MemberRenderAtom[] = [];
+  // SI30 D2/D3: parallel to `rendered` -- each kept atom's own `{altitude,
+  // height}` for the line's `Sea` reduction (`seaLineHeightAndSpan`).
+  // Altitude is 0 for every non-`'text'` atom and for a `'text'` atom with
+  // no `FontPosition` (or NORMAL) -- the pre-SI30 flat-MAX height this
+  // reduces to when no `<sup>`/`<sub>` shares the line.
+  const heightEntries: { altitude: number; height: number }[] = [];
   let width = 0;
-  // A2s R2i: the row's own line height -- MAX over atom contributions (see
-  // `MemberRowBuild.height`'s doc comment). Seeded 0: `buildStripeAtoms`
-  // never returns an empty atom list (its empty-stripe fallback is one
-  // space atom, which contributes the plain text line height), so a
-  // measurable row always ends > 0.
-  let height = 0;
   for (const atom of atoms) {
     const resolved = resolveOneAtom(atom, baseFont, measurer, sprites, spriteDims);
     if (resolved === undefined) continue;
     rendered.push(resolved.atom);
     width += resolved.width;
-    if (resolved.lineHeight > height) height = resolved.lineHeight;
+    const altitude =
+      resolved.atom.kind === 'text'
+        ? fontPositionSpace(resolved.atom.font.fontPosition ?? FontPosition.NORMAL)
+        : 0;
+    heightEntries.push({ altitude, height: resolved.lineHeight });
   }
-  return { atoms: rendered, width, height };
+  const { height } = seaLineHeightAndSpan(heightEntries);
+  // SI30 D2: `dy`'s own `maxSpan` reduction is TEXT-ONLY -- an img/sprite/
+  // vector atom is drawn via its own INDEPENDENT placement rule
+  // (`renderer-classifier-rows.ts#renderRowAtoms`'s image/vector branches
+  // never read `dy`), never through the text-baseline `Sea` stack, so a
+  // tall icon sharing a row must not perturb its text siblings' baseline
+  // (jar-verified regression: `rotisi-30-loge424`/`cuzoga-39-tufu259`'s
+  // `<&x{scale=2.25}> someBadField`-shaped rows moved when the FULL
+  // (all-kind) `maxSpan` was used, `<sup>`/`<sub>`-free). The row's own
+  // `height` above still uses every kind (correct, DOT-parity-verified);
+  // only the per-atom `top` computation is restricted.
+  const textEntries = heightEntries.filter((_, i) => rendered[i]!.kind === 'text');
+  const { maxSpan: textMaxSpan } = seaLineHeightAndSpan(textEntries);
+  // SI30 D2: `dy` corrects against the ROW's own pre-existing baseline
+  // reference (`baseFont`, a per-classifier constant), NOT this line's own
+  // `Sea` height -- see `textAtomDy`'s own doc comment for why the two
+  // diverge and which one member rows need.
+  const withDy = rendered.map((atom, i) => {
+    if (atom.kind !== 'text') return atom;
+    const dy = textAtomDy(atom, heightEntries[i]!, textMaxSpan, baseFont, measurer);
+    return { ...atom, dy };
+  });
+  return { atoms: withDy, width, height };
 }
 
 /** One loop-body iteration of {@link resolveMemberAtoms} -- factored out to
@@ -289,7 +331,12 @@ function resolveOneAtom(
 ): ResolvedMemberAtom | undefined {
   if (atom.kind === 'emoji') return resolveEmojiAtom(atom);
   if (atom.kind === 'text') {
-    const width = measurer.measure(atom.text, atomFontSpec(atom.font)).width;
+    // SI30 D1: measure at the EFFECTIVE (muted) size -- `getFont(atom.font)`
+    // shrinks a `<sup>`/`<sub>` run by 3 (floor 2) before either the layout
+    // width or the drawn glyph sees it; identical to the pre-SI30
+    // `atomFontSpec` for every NORMAL run.
+    const spec = mutedAtomFontSpec(atom.font);
+    const width = measurer.measure(atom.text, spec).width;
     // G2 N57 item 38: `DriverTextSvg.java`'s `text.matches("^\\s*$")`
     // RENDER-time-only NBSP substitution -- gated on the run being
     // ENTIRELY whitespace (non-empty; an empty string trivially matches
@@ -298,13 +345,15 @@ function resolveOneAtom(
     // see `MemberRenderAtom`'s own doc comment for why that is correct,
     // not a bug, per this item's own jar-table provenance verification.
     const isWhitespaceOnly = atom.text.length > 0 && /^\s*$/.test(atom.text);
-    const renderText = isWhitespaceOnly ? atom.text.split(' ').join('\u00A0') : undefined;
-    const renderWidth =
-      renderText !== undefined ? measurer.measure(renderText, atomFontSpec(atom.font)).width : undefined;
+    const renderText = isWhitespaceOnly ? atom.text.split(' ').join(' ') : undefined;
+    const renderWidth = renderText !== undefined ? measurer.measure(renderText, spec).width : undefined;
     // Per-atom width stored on the atom itself (not just summed into the row
     // total) so `renderer-classifier-box.ts` can emit each atom's OWN
     // `<text textLength>` and x-advance -- matches jar's real one-`<text>`-
-    // per-styled-run SVG output (this file's module doc comment).
+    // per-styled-run SVG output (this file's module doc comment). `font`
+    // stays the atom's UNMUTED `FontConfiguration` (D1: mute at read time,
+    // never eagerly) -- `dy` is filled in by `resolveMemberAtoms`'s own
+    // Sea pass below, after every atom on the line is known.
     return {
       atom: {
         kind: 'text',
@@ -315,7 +364,7 @@ function resolveOneAtom(
         ...(atom.url !== undefined ? { url: atom.url } : {}),
       },
       width,
-      lineHeight: atomTextLineHeight(atom.font.size),
+      lineHeight: atomTextLineHeight(spec.size),
     };
   }
   if (atom.kind === 'inline') {

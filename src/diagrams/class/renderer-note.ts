@@ -26,8 +26,9 @@ import {
   type OpaleConnector,
   type OpaleDirection,
 } from './note-opale.js';
-import { FontStyle } from '../../core/klimt/shape/UText.js';
+import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
+import { noteLineAtomDy } from './class-member-creole-sea.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
 
 /**
@@ -227,6 +228,22 @@ export function renderBulletAtom(
  * notes had no per-tag/theme cascade fallback the way classifier rows did,
  * G2 N36's own now-superseded framing).
  */
+/** SI30 D2: a note text atom's drawn Y -- the pre-existing UNMUTED `lineTop +
+ *  lineHeight - atom.font.size / 4.5` reconstruction plus `dy`, the CALLER's
+ *  own `noteLineAtomDy(atoms, lineHeight)[i]` -- NOT `atom.dy` (that field is
+ *  `class-member-creole-sea.ts#textAtomDy`'s MEMBER-row correction, a
+ *  different reference; see its own doc comment). Split out purely to keep
+ *  {@link renderNoteLineAtoms}'s CCN from growing (mirrors `renderer-
+ *  classifier-rows.ts#textAtomRowY`'s identical precedent). */
+function noteTextAtomY(
+  lineTop: number,
+  lineHeight: number,
+  atom: Extract<MemberRenderAtom, { kind: 'text' }>,
+  dy: number,
+): number {
+  return lineTop + lineHeight - atom.font.size / 4.5 + dy;
+}
+
 function renderNoteLineAtoms(
   atoms: readonly MemberRenderAtom[],
   startX: number,
@@ -251,7 +268,11 @@ function renderNoteLineAtoms(
   let x = startX;
   let out = '';
   const legacyY = lineTop + baselineOffset;
-  for (const atom of atoms) {
+  // SI30 D2: one Sea reduction for the whole line -- needs every atom's own
+  // `{altitude, height}` to find the shared `maxSpan`, so it is computed once.
+  const dys = noteLineAtomDy(atoms, lineHeight);
+  for (let i = 0; i < atoms.length; i++) {
+    const atom = atoms[i]!;
     if (atom.kind === 'text') {
       // G2 N56: jar's real per-atom baseline -- `lineTop + lineHeight -
       // descent(atom)`, `descent == atom.font.size / 4.5` (the SAME formula
@@ -259,17 +280,21 @@ function renderNoteLineAtoms(
       // applied PER ATOM instead of once per line) -- every atom's own
       // measured-rect BOTTOM aligns to `lineTop + lineHeight`, jar-verified
       // against `fogexa-30-zupo141`'s mixed-size line (`note-layout.ts
-      // #noteLineHeight`'s own doc comment has the full derivation).
-      const y = lineTop + lineHeight - atom.font.size / 4.5;
+      // #noteLineHeight`'s own doc comment has the full derivation). SI30
+      // D2: the UNMUTED `atom.font.size / 4.5` term stays unchanged --
+      // {@link noteTextAtomY} adds the atom's own `Sea` correction on top
+      // (`dys[i]`, `decisions.md#D2`'s "must not be applied twice").
+      const y = noteTextAtomY(lineTop, lineHeight, atom, dys[i]!);
       const decoration = noteAtomDecoration(atom.font.styles);
       // G2 N57 item 38: `atom.renderText`/`renderWidth` are set ONLY for a
       // whitespace-only run (`DriverTextSvg.java`'s NBSP-substitution
       // branch, `class-member-creole.ts#MemberRenderAtom`'s own doc
       // comment) -- the DRAWN text/textLength use them when present, but
       // x-advance below stays on `atom.width` (the LAYOUT value) always.
+      // SI30 D1: drawn at the EFFECTIVE (muted) size (`getFont`).
       const rendered = text(x, y, atom.renderText ?? atom.text, {
         fontFamily: atom.font.family,
-        fontSize: atom.font.size,
+        fontSize: getFont(atom.font).size,
         fill: atom.font.color ?? theme.colors.graph.noteCascadeFontColor ?? '#000000',
         lengthAdjust: 'spacing',
         textLength: atom.renderWidth ?? atom.width,

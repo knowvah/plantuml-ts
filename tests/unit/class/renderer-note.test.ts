@@ -3,7 +3,14 @@ import { renderNote } from '../../../src/diagrams/class/renderer-note.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FontStyle } from '../../../src/core/klimt/shape/UText.js';
-import type { MemberRenderAtom } from '../../../src/diagrams/class/class-member-creole.js';
+import {
+  buildMemberAtoms,
+  resolveMemberAtoms,
+  memberBaseFont,
+  type MemberRenderAtom,
+} from '../../../src/diagrams/class/class-member-creole.js';
+import { noteLineAtomDy } from '../../../src/diagrams/class/class-member-creole-sea.js';
+import { FormulaMeasurer } from '../../../src/core/measurer.js';
 
 const baseNote: NoteGeo = {
   id: '__note_0',
@@ -228,5 +235,59 @@ describe('renderNote — per-atom baseline on a mixed-font-size line (G2 N56)', 
     expect(ys[2]).toBeCloseTo(y13, 2); // " "
     expect(ys[3]).toBeCloseTo(y13, 2); // "class"
     expect(y13 - y18).toBeCloseTo(1.1111, 2); // jar: 26.1111 - 25 == 1.1111
+  });
+});
+
+// SI30 T4: a note line with `<sub>` -- `renderNote` draws the EXACT
+// `MemberRenderAtom[]` `resolveMemberAtoms` (`class-member-creole.ts`)
+// produced (never a hand-built literal), so "measure and render use the
+// SAME runs" is enforced by construction, not just by separate assertions.
+describe('renderNote — <sub> note line: measure and render share the same runs (SI30 T4)', () => {
+  const measurer = new FormulaMeasurer();
+  const font = memberBaseFont({ family: 'sans-serif', size: 13 }, {});
+  const atoms = buildMemberAtoms('A<sub>1</sub> B', font);
+  const build = resolveMemberAtoms(atoms, font, measurer);
+
+  const subNote: NoteGeo = {
+    id: '__note_0',
+    kind: 'note',
+    x: 6,
+    y: 6,
+    width: build.width + 20,
+    height: build.height + 20,
+    lines: ['A1 B'],
+    lineWidths: [build.width],
+    lineAtoms: [build.atoms],
+    lineHeights: [build.height],
+    connector: [],
+  };
+
+  it('draws the sub run at its sizer-measured muted size and dy', () => {
+    const svg = renderNote(subNote, defaultTheme);
+    const texts = [...svg.matchAll(/<text x="[^"]*" y="([^"]*)" font-size="([^"]*)"/g)];
+    expect(texts).toHaveLength(3);
+    const [a, sub, b] = texts as [RegExpMatchArray, RegExpMatchArray, RegExpMatchArray];
+    // note.y(6) + NOTE_MARGIN_Y(5) + this line's own Sea height.
+    const lineTop = 6 + 5;
+    // D1: muted 13 - 3 = 10.
+    expect(sub.at(2)).toBe('10');
+    expect(a.at(2)).toBe('13');
+    expect(b.at(2)).toBe('13');
+    // SI30 T4: the RENDERER (`renderer-note.ts#renderNoteLineAtoms`) draws
+    // via `noteLineAtomDy` -- NOT `atom.dy` (that field carries `class-
+    // member-creole-sea.ts#textAtomDy`'s MEMBER-row reference, a DIFFERENT
+    // value; `noteLineAtomDy`'s own doc comment has the full derivation of
+    // why notes and members need separate corrections). This test asserts
+    // the SAME primitive the renderer calls, over the SAME atoms the sizer
+    // built -- "measure and render use the same runs", jar-verified against
+    // `exposant-01-class`'s own note line (`bold <sub>sub</sub> ...`).
+    const dys = noteLineAtomDy(build.atoms, build.height);
+    for (const [i, m] of [a, sub, b].entries()) {
+      const atom = build.atoms[i] as Extract<MemberRenderAtom, { kind: 'text' }>;
+      const expectedY = lineTop + build.height - atom.font.size / 4.5 + dys[i]!;
+      expect(Number(m.at(1))).toBeCloseTo(expectedY, 2);
+    }
+    // The `<sub>` (altitude +3) sinks the sub run below its NORMAL siblings.
+    expect(dys[1]).toBeGreaterThan(dys[0]!);
   });
 });
