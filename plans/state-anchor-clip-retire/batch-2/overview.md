@@ -24,4 +24,4 @@ only the canvas around it. SI31's four ink-only movers are the floor.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Clip at construction per layout result, delete the ink-walk clip, correct the consumers' docs and tests | general-purpose (opus) | `src/diagrams/state/state-composite-pass.ts`, `src/diagrams/state/layout.ts`, `src/diagrams/state/layout-ink-transition.ts`, `src/diagrams/state/layout-ink-extent.ts`, `src/diagrams/state/renderer-arrowhead.ts`, their tests, `plans/state-anchor-clip-retire/expected-moves.txt` | T1 | [ ] |
+| T2 | Clip at construction per layout result, delete the ink-walk clip, correct the consumers' docs and tests | general-purpose (opus) | `src/diagrams/state/state-composite-pass.ts`, `src/diagrams/state/layout.ts`, `src/diagrams/state/layout-ink-transition.ts`, `src/diagrams/state/layout-ink-extent.ts`, `src/diagrams/state/renderer-arrowhead.ts`, their tests, `plans/state-anchor-clip-retire/expected-moves.txt` | T1 | [x] |

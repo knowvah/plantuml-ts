@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1009 modules · 3506 exported names.
+1010 modules · 3507 exported names.
 
 ## `src/`
 
@@ -1263,7 +1263,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ast.ts` | `JsonNode`, `StateKind`, `HistoryPseudostate`, `Separator`, `State`, `TransitionDirection`, `Transition`, `NotePosition`, `StateNote`, `RemoveRestoreDirective`, `StateDiagramAST` | AST type definitions for PlantUML state diagrams. |
 | `index.ts` | `statePlugin` | State diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout-ink-extent.ts` | `StateDocumentDims`, `computeStateDocumentDims`, `StateInkShift`, `computeStateInkShift`, `SvekResultGeometry`, `computeSvekResultGeometry` | layout-ink-extent.ts — mission G4 S1, mechanism 4 ("document-margin / ink-extent computation gap"): the `SvekResult`/`TextBlockExporter` document-dimension recipe (svek/SvekResult.java:126-133, core/ TextBlockExporter.java:200-202,751-753), |
-| `layout-ink-transition.ts` | `InkBox`, `newInkBox`, `addPoint`, `buildCompositeAnchorRects`, `addTransitionInk` | layout-ink-transition.ts — the state engine's TRANSITION ink path, plus the `InkBox` accumulator primitives it and `layout-ink-extent.ts`'s per-shape node adders share. |
+| `layout-ink-transition.ts` | `InkBox`, `newInkBox`, `addPoint`, `addTransitionInk` | layout-ink-transition.ts — the state engine's TRANSITION ink path, plus the `InkBox` accumulator primitives it and `layout-ink-extent.ts`'s per-shape node adders share. |
 | `layout.ts` | `StateNodeGeo`, `TransitionGeo`, `StateGeometry`, `layoutState` | State diagram layout engine. |
 | `parser.ts` | `parseState` | Parser for PlantUML state diagrams. |
 | `renderer-arrowhead.ts` | `TransitionArrowhead`, `buildTransitionArrowhead`, `applyHeadTrim`, `TransitionArrowheadInk`, `transitionArrowheadInk`, `buildCircleEndMarkup`, `buildCrossStartMarkup` | renderer-arrowhead.ts — mission G4 S1, mechanism 3 ("arrowhead-drawing mechanism"): replaces `state/renderer.ts`'s SVG-`<marker>`-reference arrowhead (`markerEnd: 'url(#arrow-dependency)'`) with the SAME inline-`<polygon>` extremity shape t |
@@ -1311,6 +1311,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `state-shadow.ts` | `STATE_SHADOW_FILTER_ID`, `buildStateShadowFilterDef`, `stateShadowFilterUrl` | state-shadow.ts — mission skin-file-loading Batch 2 (D3's rendering half, STATE-scoped): the `<filter>` def markup for a state diagram's drop shadow, as a plain STRING (state's own renderer emits SVG strings directly, not via klimt's `XmlNo |
 | `state-sizing-creole.ts` | `StateTextRun`, `StateTableCell`, `StateTableGeo`, `StateStyledTextLine`, `StateCreoleBlock`, `StateCreoleOpts`, `stateCreoleOpts`, `toStyledLine`, `stateCreoleBlock`, `styledLines` | state-sizing-creole — the state engine's consumer of the ONE core creole seam (`core/svek/image/creole-text-lines.ts`, mission `state-declared-size-fix` D1). |
 | `state-sizing.ts` | `splitStateDisplayLines`, `CIRCLE_START_SIZE`, `CIRCLE_END_SIZE`, `HISTORY_SIZE`, `BRANCH_SIZE`, `SYNCHRO_BAR_LONG`, `SYNCHRO_BAR_SHORT`, `MeasuredState`, `measureState`, `measureTextLines`, `measureBodyTextLines`, `historyLabelText`, `StateGeoTextFields`, `buildStateGeoTextFields` | State-node sizing — svek-faithful dimension formulas for the state diagram layout engine (./layout.ts). |
+| `state-transition-clip.ts` | `clusterAnchorRectsOf`, `clipTransitionSpline` | state-transition-clip.ts — this port of the edge loop in `DotStringFactory#solve` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ DotStringFactory.java:458-459`): ```java for (SvekEdge line : getBibliotekon().allLines()) line. |
 | `state-transition-label.ts` | `computeReservedLabelBox`, `transitionLabelAnchor`, `attachTransitionLabel` | Transition label placement — shared by every state-layout pipeline (flat, T3; composite, T4) so antiparallel transitions don't overlap their labels. |
 | `state-transitions.ts` | `ParsedTransition`, `parseTransitionLine`, `isSyncBarId`, `stripSyncBarEquals` | Transition (arrow) grammar for the state parser — `A --> B`, the left-pointing reverse form `A <-- B`, and their decorations (cross-start, circle-end, `[style]` brackets, direction abbreviations, `<<stereotype>>`). |
 

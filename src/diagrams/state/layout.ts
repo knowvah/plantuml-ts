@@ -31,6 +31,8 @@ import { pseudoTickKey } from './state-parse-state.js';
 import { sortSpecsByCreationIndex } from './state-composite-pass.js';
 import { layoutComposite } from './state-composite-geo.js';
 import { attachTransitionLabel } from './state-transition-label.js';
+import { clusterAnchorRectsOf, clipTransitionSpline } from './state-transition-clip.js';
+import type { ClipRect } from '../../core/spline-clip.js';
 import type { StateNodeGeo, TransitionGeo, StateGeometry, StateRegionGeo } from './state-geo-types.js';
 
 export type { StateNodeGeo, TransitionGeo, StateGeometry } from './state-geo-types.js';
@@ -138,11 +140,21 @@ function buildFlatStateGeos(ast: StateDiagramAST, ctx: FlatNoteGeoCtx): StateNod
   return sortSpecsByCreationIndex(geos);
 }
 
+/** SI32 T2 (D1'): the flat pipeline's own half of `DotStringFactory#solve`'s
+ *  edge loop (`DotStringFactory.java:458-459` -> `SvekEdge.java:671-672`).
+ *  `buildDotGraph` emits NO clusters for a composite-free diagram
+ *  (`state-dot-graph.ts`'s own module doc comment), so `anchorRects` is empty
+ *  here and the clip is a structural no-op today -- it is wired anyway
+ *  because upstream runs one `solve()` per layout result unconditionally, and
+ *  because leaving one of this port's two `TransitionGeo` construction paths
+ *  unclipped is exactly the asymmetry this task exists to remove. See
+ *  `state-transition-clip.ts`. */
 function buildFlatTransitionGeos(
   ast: StateDiagramAST,
   result: DotLayoutResult,
   theme: Theme,
   measurer: StringMeasurer,
+  anchorRects: ReadonlyMap<string, ClipRect>,
 ): TransitionGeo[] {
   const edgePosMap = new Map(result.edges.map((e) => [e.id, e]));
   // T7/D3/D4: shared resolver, not `theme.fontSize` (state body/entity-name
@@ -153,6 +165,8 @@ function buildFlatTransitionGeos(
     const t = ast.transitions[i]!;
     const edgeResult = edgePosMap.get(`edge-${i}`);
     if (edgeResult === undefined) continue;
+    // D1'a: label from the UNCLIPPED points, exactly as before -- see
+    // `state-composite-pass.ts#buildLevelTransitionGeos`'s own note.
     const label = attachTransitionLabel(t, edgeResult.points, edgeResult, font, measurer);
     // mission G4 S2: resolve `'[*]'` through the SAME shared start/end
     // anchor id `buildDotEdges` (state-dot-graph.ts) already uses for the
@@ -161,7 +175,8 @@ function buildFlatTransitionGeos(
     const from = endpointId(t.from, true);
     const to = endpointId(t.to, false);
     geos.push({
-      from, to, points: edgeResult.points, ...(label !== undefined ? { label } : {}),
+      from, to, points: clipTransitionSpline(edgeResult.points, from, to, anchorRects),
+      ...(label !== undefined ? { label } : {}),
       ...(t.creationIndex !== undefined ? { creationIndex: t.creationIndex } : {}),
       ...(t.crossStart !== undefined ? { crossStart: t.crossStart } : {}),
       ...(t.circleEnd !== undefined ? { circleEnd: t.circleEnd } : {}),
@@ -184,7 +199,7 @@ function layoutFlat(ast: StateDiagramAST, theme: Theme, measurer: StringMeasurer
     totalWidth: result.width,
     totalHeight: result.height,
     states: buildFlatStateGeos(ast, { posMap, edgePosMap, theme, measurer }),
-    transitions: buildFlatTransitionGeos(ast, result, theme, measurer),
+    transitions: buildFlatTransitionGeos(ast, result, theme, measurer, clusterAnchorRectsOf(dotGraph.clusters, result)),
   };
 }
 

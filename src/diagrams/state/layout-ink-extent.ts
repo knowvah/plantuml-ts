@@ -93,9 +93,7 @@ import {
   newInkBox,
   addPoint,
   addTransitionInk,
-  buildCompositeAnchorRects,
 } from './layout-ink-transition.js';
-import type { ClipRect } from '../../core/spline-clip.js';
 import { positionFromStereotype, usesPortShape } from './state-entity-position.js';
 import { textAscent } from './state-render-colors.js';
 
@@ -300,7 +298,6 @@ function addNodeInk(
   node: StateNodeGeo,
   labelInk: boolean,
   arrowheadInk: 'always' | 'self-loop',
-  anchorRects: ReadonlyMap<string, ClipRect>,
 ): void {
   if (node.children.length > 0) {
     // A composite's own outer box draws no divider line, but this call is
@@ -317,8 +314,8 @@ function addNodeInk(
       addPoint(box, node.x + node.width + over.right, node.y + node.height + over.bottom - 1);
     }
     addSouthCapInk(box, node);
-    for (const child of node.children) addNodeInk(box, child, labelInk, arrowheadInk, anchorRects);
-    for (const t of node.transitions) addTransitionInk(box, t, labelInk, arrowheadInk, anchorRects);
+    for (const child of node.children) addNodeInk(box, child, labelInk, arrowheadInk);
+    for (const t of node.transitions) addTransitionInk(box, t, labelInk, arrowheadInk);
     return;
   }
   // G9/T7: a border point is a different image class upstream, not a state
@@ -367,9 +364,8 @@ function buildInkBox(
   arrowheadInk: 'always' | 'self-loop',
 ): InkBox {
   const box = newInkBox();
-  const anchorRects = buildCompositeAnchorRects(states);
-  for (const n of states) addNodeInk(box, n, labelInk, arrowheadInk, anchorRects);
-  for (const t of transitions) addTransitionInk(box, t, labelInk, arrowheadInk, anchorRects);
+  for (const n of states) addNodeInk(box, n, labelInk, arrowheadInk);
+  for (const t of transitions) addTransitionInk(box, t, labelInk, arrowheadInk);
   return box;
 }
 
