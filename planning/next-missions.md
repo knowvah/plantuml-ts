@@ -107,24 +107,34 @@ has four conditions, not two. Both recorded in the brief's `decisions.md`.
 (`maxMessageSize`); `berelu` (`**x**` creole, deltas do not fit the literal-`**`
 story).
 
-## Unowned, and it is a live trap: `.claude/catalog.md` does not exist
+## ~~Unowned, and it is a live trap: `.claude/catalog.md` does not exist~~ — FIXED 2026-08-19
 
-`CLAUDE.md` tells every agent "**Check before implementing anything**; agents
-routinely rebuild what exists" and points at `.claude/catalog.md`. **That file
-is not in the repo** (verified 2026-08-16), and `.claude/` is gitignored, so
-anything written there would never commit. A rule pointing at a nonexistent
-file is exactly the stale-premise failure this mission line keeps paying for —
-three premises went stale inside SI23 alone.
+**Closed.** The rule now points at **`docs/catalog.md`**, which exists, is
+committed, and is generated from `src/` by `scripts/generate-catalog.ts`
+(`npm run catalog`). `tests/architecture/catalog.test.ts` fails if it drifts,
+so it cannot quietly become the same stale premise a hand-written file would
+have. 1009 modules, one row each: exported surface plus the first sentence of
+the module's own header docblock (731 of 1009 have one; the rest show blank
+rather than borrowing an unrelated symbol's comment, since a catalog that
+misdescribes a module is worse than one that says nothing).
 
-Either create a committed catalog somewhere that is not gitignored, or delete
-the rule. SI23's own new public surface is recorded in its brief instead:
-`computeQuantifierBox`, `computeMergedLabelBox`, `applyVisibilityIcon`,
+Scope, deliberately: it answers *does a module for X already exist?* — the
+question SI31's T5 had to answer to obey "move the `simulateCompound` port,
+never copy it". For *where is symbol Y defined*, Serena's `find_symbol` and
+`ast-grep` are better and the rule now says so.
+
+The pre-existing surface lists below were the stopgap while no catalog
+existed; they are now redundant with the generated file but left as a record.
+SI23's: `computeQuantifierBox`, `computeMergedLabelBox`, `applyVisibilityIcon`,
 `applyGuillemet`, `parseMagicArrowLabel` (all `src/core/edge-label-box.ts`),
 `computeCardinalityFontOverride` (`src/core/style-cascade-class.ts`),
-`class-edge-label-lines.ts`, `scripts/label-box-triage.ts`. SI24's is in its
-README close-out (item 7): `roseNoteDim`, `resolveArrowLabelFont`,
-`computeArrowFontOverride`, `hasSeveralGuideLines`, `measureLinkNoteDim`,
-`DescriptiveLink.linkNote`.
+`class-edge-label-lines.ts`, `scripts/label-box-triage.ts`. SI24's:
+`roseNoteDim`, `resolveArrowLabelFont`, `computeArrowFontOverride`,
+`hasSeveralGuideLines`, `measureLinkNoteDim`, `DescriptiveLink.linkNote`.
+
+Note for anyone reading an older mission's task file: several closed briefs
+still name `.claude/catalog.md` in their read-sets. Those are historical
+records, deliberately not rewritten — the live pointer is `CLAUDE.md`'s.
 
 ## Done since the 2026-08-15 refresh
 
