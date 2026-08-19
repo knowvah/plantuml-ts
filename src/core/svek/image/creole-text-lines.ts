@@ -44,21 +44,27 @@
  *   8), so `tokenizeOnTabs`/`tabString` are re-derived locally (small, pure,
  *   not exported by that out-of-write-set file — see each helper's own doc).
  * - Word-wrap: `klimt/creole/Fission.ts#getSplitted` (`Fission.java`).
+ * - Vertical placement: `creole-sea-line.ts` — the real `Sea`
+ *   (`SheetBlock1.java:130-152`), which is what gives each line its height
+ *   and each run its `dy` (SI30 `decisions.md#D2`).
  *
- * Not ported here (flagged in T1's report, not silently dropped): `<math>`/
- * `<sup>`/`<sub>` markup. `CommandCreoleBuilder.java:104-105,111` registers
- * `CommandCreoleExposantChange`/`CommandCreoleMath`; this port's
- * `CommandCreoleBuilder.ts` never added either (an undocumented gap, not a
- * journaled deferral) — out of this write-set to add. Such markup therefore
- * measures as LITERAL, tag-inclusive text (no command recognizes it, so
- * `StripeSimple.ts#modifyStripe`'s fallthrough accumulates it verbatim).
+ * `<sup>`/`<sub>` are ported since SI30 T1: `CommandCreoleBuilder.java:
+ * 104-105` registers `CommandCreoleExposantChange`, so the lexer strips the
+ * tags and the run carries a `FontPosition` (`FontConfiguration.java:98-104`
+ * mutes its size by 3, `AtomText.java:321-323` reports its altitude to
+ * `Sea`). `<math>` remains unported (`CommandCreoleBuilder.java:111`
+ * registers `CommandCreoleMath`; this port's `CommandCreoleBuilder.ts` never
+ * added it — SI30 `decisions.md#D6` names it out of scope), so THAT markup
+ * still measures as LITERAL, tag-inclusive text: no command recognizes it,
+ * so `StripeSimple.ts#modifyStripe`'s fallthrough accumulates it verbatim.
  */
 import type { FontSpec, StringMeasurer } from '../../measurer.js';
 import type { SpriteDimsLookup } from '../../creole-atoms.js';
 import { measureInlineAtom } from '../../creole-atoms-measure.js';
-import { emojiBoxDim } from '../../klimt/creole/atom/AtomEmoji.js';
+import { emojiSquareDim } from '../../klimt/creole/atom/AtomEmoji.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
-import { FontStyle } from '../../klimt/shape/UText.js';
+import { FontStyle, getFont } from '../../klimt/shape/UText.js';
+import { ATOM_TEXT_MIN_HEIGHT, layoutLineThroughSea, measurerSeaLineOps } from './creole-sea-line.js';
 import { buildLineAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
 import {
   hasTabulation,
@@ -92,6 +98,18 @@ export interface CreoleTextRun {
   readonly style: FontStyleFlags;
   readonly color?: string;
   readonly url?: string;
+  /** The run's EFFECTIVE font size — `getFont(atom.font).size`
+   *  (`FontConfiguration.java:98-104`), i.e. already muted by 3 for a
+   *  `<sup>`/`<sub>` run (`FontPosition.java:51-60`) and equal to the
+   *  cascaded size for every NORMAL run (SI30 `decisions.md#D1/#D3`). The
+   *  size this seam MEASURED with, so a renderer must draw with it too. */
+  readonly size: number;
+  /** Baseline offset from the line's NORMAL baseline, from `Sea`
+   *  (`decisions.md#D2`): a renderer draws this run at
+   *  `lineTop + line.height - atom-unmuted-size/4.5 + dy`. 0 for every run
+   *  of an all-NORMAL line — see `creole-sea-line.ts`'s doc comment for the
+   *  two cases where a NORMAL run's `dy` is legitimately non-zero. */
+  readonly dy: number;
 }
 
 export interface CreoleTextLine {
@@ -103,13 +121,14 @@ export interface CreoleTextLine {
 
 const NO_STYLE: FontStyleFlags = { bold: false, italic: false, underline: false, strike: false };
 
-/** `AtomText#calculateDimensionSlow`'s own floor (`AtomText.java:178-179`:
- *  `if (h < 10) h = 10`) — applied to every TEXT run's own measured height. */
-const ATOM_TEXT_MIN_HEIGHT = 10;
-
 /** `SkinParam#getTabSize` default (`SkinParam.java:1073`,
  *  `getAsInt("tabsize", 8)`). */
 const DEFAULT_TAB_SIZE = 8;
+
+/** Defensive only — every atom handed to `Sea` below was measured into the
+ *  same map one statement earlier; `Map#get`'s `undefined` arm is
+ *  unreachable, not a real dimension. */
+const ZERO_DIM = { width: 0, height: 0 };
 
 /** Bundles the per-call measurement context (font/measurer/tabSize/sprites)
  *  so no helper below needs more than a couple of positional params — this
@@ -147,7 +166,10 @@ function isTableLine(line: string): boolean {
 function tableRowLine(raw: string, ctx: MeasureCtx): CreoleTextLine {
   const dim = ctx.measurer.measure(raw, ctx.font);
   return {
-    runs: [{ text: raw, style: NO_STYLE, color: JAR_DEFAULT_TEXT_COLOR }],
+    // Not lexed, so no `FontPosition` can reach it: the whole raw line is
+    // one NORMAL run at the caller's own font (`size`), sitting on the
+    // line's own baseline (`dy: 0`).
+    runs: [{ text: raw, style: NO_STYLE, color: JAR_DEFAULT_TEXT_COLOR, size: ctx.font.size, dy: 0 }],
     width: dim.width,
     height: Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT),
     kind: 'table-row',
@@ -222,8 +244,12 @@ function styleFlagsFromSet(styles: ReadonlySet<FontStyle>): FontStyleFlags {
   };
 }
 
+/** A run before `Sea` has placed it: `dy` is not knowable atom-by-atom (it
+ *  depends on every OTHER atom's altitude and height on the same line). */
+type UnplacedRun = Omit<CreoleTextRun, 'dy'>;
+
 interface AtomMeasured {
-  readonly run: CreoleTextRun | null;
+  readonly run: UnplacedRun | null;
   readonly width: number;
   readonly height: number;
 }
@@ -238,14 +264,23 @@ interface AtomMeasured {
  *  (this seam's `FontStyleFlags`) is the renderer's ONLY source of bold/
  *  italic/underline/strike, kept separate from the measurement `FontSpec`. */
 function textAtomMeasured(atom: Extract<CreoleAtom, { kind: 'text' }>, ctx: MeasureCtx): AtomMeasured {
-  const runFont: FontSpec = { ...ctx.font, size: atom.font.size };
-  const width = runTextWidth(atom.text, atom.font.size, ctx.tabSizeNb, (s) => ctx.measurer.measure(s, runFont).width);
+  // SI30 D1: the EFFECTIVE size, i.e. `fontConfiguration.getFont()`
+  // (`FontConfiguration.java:98-104`), which mutes a `<sup>`/`<sub>` run by
+  // 3 points. Upstream reads it at every one of this function's mirrored
+  // sites — `AtomText.java:176` (the dimension), `:251` (the per-token
+  // width) and `:271-273` (the tab-stop fallback) — so the measurement
+  // callback below is bound to the SAME muted font, per `AtomText.ts`'s
+  // own contract note.
+  const size = getFont(atom.font).size;
+  const runFont: FontSpec = { ...ctx.font, size };
+  const width = runTextWidth(atom.text, size, ctx.tabSizeNb, (s) => ctx.measurer.measure(s, runFont).width);
   const height = Math.max(ctx.measurer.measure(atom.text, runFont).height, ATOM_TEXT_MIN_HEIGHT);
-  const run: CreoleTextRun = {
+  const run: UnplacedRun = {
     text: atom.text,
     style: styleFlagsFromSet(atom.font.styles),
     ...(atom.font.color !== null ? { color: atom.font.color } : {}),
     ...(atom.url !== undefined ? { url: atom.url.url } : {}),
+    size,
   };
   return { run, width, height };
 }
@@ -266,23 +301,43 @@ function atomMeasured(atom: CreoleAtom, ctx: MeasureCtx): AtomMeasured {
     return { run: null, width: dims.width, height: dims.height };
   }
   if (atom.kind === 'emoji') {
-    const dims = emojiBoxDim(atom.factor);
+    // `AtomEmoji#calculateDimensionSlow` VERBATIM — the `36*factor` SQUARE
+    // (`AtomEmoji.java:57-59`), NOT `emojiBoxDim`'s pre-combined `39*factor`
+    // line height. Since SI30 this seam drives the real `Sea`, which derives
+    // that hang itself from the atom's own `-3*factor` altitude
+    // (`AtomEmoji.java:62-64`): 39*factor when a text atom shares the line,
+    // 36*factor when the emoji is alone on it. Folding the hang into the
+    // DIMENSION double-counted it for an emoji-only line — the identical
+    // correction `EntityImageDescriptionDelegates.ts#descAtomOps` already
+    // carries, jar-probed in `AtomEmoji.ts`'s own doc comment.
+    const dims = emojiSquareDim(atom.factor);
     return { run: null, width: dims.width, height: dims.height };
   }
   return { run: null, width: 0, height: 0 };
 }
 
+/**
+ * One physical line's runs + box, laid out through the real `Sea`
+ * (`SheetBlock1.java:130-152`, via `creole-sea-line.ts`): the width is the
+ * x-cursor sum `Sea#add` accumulates, the height is `Sea#getHeight` (so a
+ * raised `<sup>` or a hanging emoji grows its own line), and each run's
+ * `dy` is that run's baseline relative to the line's NORMAL one.
+ */
 function atomsToLine(atoms: readonly CreoleAtom[], ctx: MeasureCtx): CreoleTextLine {
+  const measured = atoms.map((atom) => atomMeasured(atom, ctx));
+  // Keyed by atom identity, exactly as `Sea`'s own `positions` map is
+  // (`Sea.java:53`) — so a line is measured once, not once per `Sea` call.
+  const dims = new Map<CreoleAtom, { width: number; height: number }>();
+  atoms.forEach((atom, i) => dims.set(atom, measured[i] as AtomMeasured));
+  const layout = layoutLineThroughSea(
+    atoms,
+    measurerSeaLineOps(ctx.font, ctx.measurer, (atom) => dims.get(atom) ?? ZERO_DIM),
+  );
   const runs: CreoleTextRun[] = [];
-  let width = 0;
-  let height = 0;
-  for (const atom of atoms) {
-    const measured = atomMeasured(atom, ctx);
-    if (measured.run !== null) runs.push(measured.run);
-    width += measured.width;
-    if (measured.height > height) height = measured.height;
-  }
-  return { runs, width, height, kind: 'text' };
+  measured.forEach((m, i) => {
+    if (m.run !== null) runs.push({ ...m.run, dy: layout.dy[i] as number });
+  });
+  return { runs, width: layout.width, height: layout.height, kind: 'text' };
 }
 
 // ---------------------------------------------------------------------------

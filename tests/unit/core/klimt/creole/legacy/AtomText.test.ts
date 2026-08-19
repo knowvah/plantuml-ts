@@ -15,6 +15,7 @@ import {
   TAB_STOP_FONT_SIZE_FACTOR,
   TAB_STRING,
   advanceToTabStop,
+  atomTextStartingAltitude,
   atomTextWidth,
   hasTabulation,
   tabStopWidth,
@@ -160,5 +161,32 @@ describe('atomTextWidth', () => {
     const measure = (s: string): number => (s === TAB_STRING ? 0 : 0);
     expect(atomTextWidth('\t', 12, measure)).toBe(48);
     expect(atomTextWidth('\t', 20, measure)).toBe(80);
+  });
+});
+
+/**
+ * SI30 T1 — `AtomText#getStartingAltitude(StringBounder)` (java:321-323) is
+ * a straight `return fontConfiguration.getSpace()`. It is the ONLY place the
+ * raise/lower is applied: `drawU`'s own `getSpace()` line is commented out
+ * upstream (java:212), so the altitude reaches the page through `Sea`
+ * (decisions.md#D2).
+ */
+describe('atomTextStartingAltitude (AtomText.java:321-323)', () => {
+  const base = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set<never>() };
+
+  test('a run with no fontPosition sits on the normal baseline', () => {
+    expect(atomTextStartingAltitude(base)).toBe(0);
+  });
+
+  test('an EXPOSANT run is raised 6 (FontPosition.java:42-43)', () => {
+    expect(atomTextStartingAltitude({ ...base, fontPosition: 'EXPOSANT' })).toBe(-6);
+  });
+
+  test('an INDICE run is lowered 3 (FontPosition.java:45-46)', () => {
+    expect(atomTextStartingAltitude({ ...base, fontPosition: 'INDICE' })).toBe(3);
+  });
+
+  test('the altitude is independent of the run size (no scaling upstream)', () => {
+    expect(atomTextStartingAltitude({ ...base, size: 40, fontPosition: 'EXPOSANT' })).toBe(-6);
   });
 });

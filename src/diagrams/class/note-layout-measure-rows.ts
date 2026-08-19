@@ -10,6 +10,8 @@
  */
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { getFont } from '../../core/klimt/shape/UText.js';
+import { FontPosition, fontPositionSpace } from '../../core/klimt/font/FontPosition.js';
 import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
 import {
@@ -18,6 +20,7 @@ import {
   memberBaseFont,
   type MemberRenderAtom,
 } from './class-member-creole.js';
+import { atomTextLineHeight } from './class-stereotype-layout.js';
 import { EmbeddedDiagram, type NestedDiagramRenderer } from '../../core/EmbeddedDiagram.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
@@ -56,40 +59,69 @@ export interface NoteLineBuildContext {
 /**
  * G2 N56: one note line's own height -- jar's real `Sea`/`Position` math
  * (`SheetBlock1#initMap`'s `sea.doAlign()` + `getHeight() == getMaxY() -
- * getMinY()`) reduces, for every NORMAL (non-superscript/subscript,
- * `FontPosition.getSpace() == 0`) atom, to a flat MAX over each atom's OWN
- * `AtomText#calculateDimensionSlow` height (`stringBounder.calculateDimension
- * (...).getHeight()`, floored at 10) -- NOT an ascent/descent-weighted SUM
- * (confirmed algebraically: every atom's measured-rect BOTTOM edge aligns to
- * the SAME shared y=0, so the stripe's total span is exactly the tallest
- * atom's own height; re-derivation cross-checked against `fogexa-30-
- * zupo141`'s real per-run baselines -- "In java," @ y=26.1111 (13pt),
- * "every" @ y=25 (18pt, `<size:18>`) on the SAME physical line, delta
- * 1.1111 == the two sizes' own `size/4.5` descent difference, and the NEXT
- * line's baseline sits EXACTLY 18 (not 13) below this line's own top,
- * proving the cumulative stack advances by each line's own MAX height).
- * A2s R2h: 'image' atoms (sprite/`<img:...>`) now contribute their OWN raw
- * height to the same max -- `AtomImg`/`AtomSprite` both have
+ * getMinY()`), algebraically closed-formed as `max(altitude) + max(height -
+ * altitude)` (same reduction as `class-member-creole-sea.ts
+ * #seaLineHeightAndSpan`, this function's row-height sibling for member
+ * text -- kept as an independent formula here because this function only
+ * ever sees the ALREADY-RESOLVED `MemberRenderAtom[]`, not the raw
+ * `CreoleAtom[]` `resolveMemberAtoms` builds `dy` from). For every NORMAL
+ * (non-superscript/subscript, `FontPosition.getSpace() == 0`) atom every
+ * altitude is 0 and this collapses to the PRE-SI30 flat MAX over each
+ * atom's own `AtomText#calculateDimensionSlow` height (floored at 10) --
+ * NOT an ascent/descent-weighted SUM (confirmed algebraically: every atom's
+ * measured-rect BOTTOM edge aligns to the SAME shared y=0, so the stripe's
+ * total span is exactly the tallest atom's own height; re-derivation
+ * cross-checked against `fogexa-30-zupo141`'s real per-run baselines --
+ * "In java," @ y=26.1111 (13pt), "every" @ y=25 (18pt, `<size:18>`) on the
+ * SAME physical line, delta 1.1111 == the two sizes' own `size/4.5` descent
+ * difference, and the NEXT line's baseline sits EXACTLY 18 (not 13) below
+ * this line's own top, proving the cumulative stack advances by each
+ * line's own MAX height). SI30 D2/D3: a `<sup>`/`<sub>` run's own non-zero
+ * altitude (`FontPosition.getSpace()`, `AtomText.java:321-323`) now grows
+ * the line correctly instead of being floor-clipped away -- jar-verified
+ * against `exposant-01-class`'s `**bold <sub>sub</sub> and <sup>sup</sup>
+ * text**` note line (0.402778in target note height, only reachable via this
+ * reduction, not the flat MAX).
+ * A2s R2h: 'image' atoms (sprite/`<img:...>`) contribute their OWN raw
+ * height at altitude 0 -- `AtomImg`/`AtomSprite` both have
  * `getStartingAltitude == 0` (AtomImg.java:242-244, AtomSprite.java:69-71),
- * so the identical "align bottoms to 0" derivation applies, and is
  * jar-confirmed by rotisi-30-loge424's `note left : <$printer4>` node:
  * 0.347222in = 15 (sprite height, no 10-floor -- that floor is
  * `AtomText`-specific) + 2*5 Opale margins. 'vector' (open-iconic) atoms
- * stay excluded: `AtomOpenIconic#getStartingAltitude` is `-3*factor`, NOT
- * 0, so the derivation does not transfer without independent verification
- * (see `renderer-note.ts#renderNoteLineAtoms`'s matching scope note). A
- * line with NO counted atom falls back to `fallbackFontSize`, matching
- * this function's pre-N56 flat behavior for that case.
+ * stay excluded from the reduction entirely (not merely altitude-0): `Atom
+ * OpenIconic#getStartingAltitude` is `-3*factor`, NOT 0, so the derivation
+ * does not transfer without independent verification (see `renderer-note.ts
+ * #renderNoteLineAtoms`'s matching scope note) -- {@link noteLineHeightEntry}
+ * returns `undefined` for it, same as before this task. A line with NO
+ * counted atom falls back to `fallbackFontSize`, matching this function's
+ * pre-N56 flat behavior for that case.
  */
 export function noteLineHeight(atoms: readonly MemberRenderAtom[], fallbackFontSize: number): number {
-  let max = -Infinity;
+  let maxAltitude = -Infinity;
+  let maxSpan = -Infinity;
+  let counted = false;
   for (const atom of atoms) {
-    const h = atom.kind === 'text' ? Math.max(atom.font.size, 10)
-      : atom.kind === 'image' ? atom.height
-      : undefined;
-    if (h !== undefined && h > max) max = h;
+    const entry = noteLineHeightEntry(atom);
+    if (entry === undefined) continue;
+    counted = true;
+    if (entry.altitude > maxAltitude) maxAltitude = entry.altitude;
+    const span = entry.height - entry.altitude;
+    if (span > maxSpan) maxSpan = span;
   }
-  return max === -Infinity ? Math.max(fallbackFontSize, 10) : max;
+  return counted ? maxAltitude + maxSpan : Math.max(fallbackFontSize, 10);
+}
+
+/** One atom's `{altitude, height}` contribution to {@link noteLineHeight}'s
+ *  `Sea` reduction -- `undefined` for a kind that does not count (matches
+ *  the pre-SI30 exclusion of 'vector'/'bullet', see {@link noteLineHeight}'s
+ *  own doc comment). Factored out to keep that function's own CCN from
+ *  growing (mirrors `class-member-creole-sea.ts`'s identical split). */
+function noteLineHeightEntry(atom: MemberRenderAtom): { altitude: number; height: number } | undefined {
+  if (atom.kind === 'text') {
+    return { altitude: fontPositionSpace(atom.font.fontPosition ?? FontPosition.NORMAL), height: atomTextLineHeight(getFont(atom.font).size) };
+  }
+  if (atom.kind === 'image') return { altitude: 0, height: atom.height };
+  return undefined;
 }
 
 /**

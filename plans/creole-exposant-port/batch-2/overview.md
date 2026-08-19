@@ -4,8 +4,8 @@ Disjoint write-sets. Both consume T1's `getFont`/`getSpace`/`fontPosition`.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Description/component/usecase `AtomOps`: text-atom `getStartingAltitude = getSpace`; measure/draw via `getFont` (both impls) | typescript-pro | `src/core/svek/image/EntityImageDescriptionDelegates.ts`, `src/core/svek/image/leaf-sizing-folder-title.ts`, description/core unit tests, ratchet/golden entries for the usecase fixture | T1 | [ ] |
-| T3 | Core seams: `creole-text-lines.ts` + `leaf-sizing-text.ts` lay lines through `Sea`; runs gain `size`/`dy`; line height from `Sea` | general-purpose (Opus, effort high) | `src/core/svek/image/creole-text-lines.ts`, `src/core/svek/image/leaf-sizing-text.ts`, their tests | T1 | [ ] |
+| T2 | Description/component/usecase `AtomOps`: text-atom `getStartingAltitude = getSpace`; measure/draw via `getFont` (both impls) | typescript-pro | `src/core/svek/image/EntityImageDescriptionDelegates.ts`, `src/core/svek/image/leaf-sizing-folder-title.ts`, description/core unit tests, ratchet/golden entries for the usecase fixture | T1 | [x] |
+| T3 | Core seams: `creole-text-lines.ts` + `leaf-sizing-text.ts` lay lines through `Sea`; runs gain `size`/`dy`; line height from `Sea` | general-purpose (Opus, effort high) | `src/core/svek/image/creole-text-lines.ts`, `src/core/svek/image/leaf-sizing-text.ts`, their tests | T1 | [x] |
 
 **Interface contract (T3 → T4, T5)** — locked shape:
 ```ts

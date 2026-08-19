@@ -63,6 +63,8 @@ import { MeasurerStringBounder } from '../../measurer-bounder.js';
 import type { SpriteDimsLookup, AtomImageResolver } from '../../creole-atoms.js';
 import type { StringBounder } from '../../klimt/font/StringBounder.js';
 import type { FontConfiguration, FontStyle } from '../../klimt/shape/UText.js';
+import { getFont } from '../../klimt/shape/UText.js';
+import { atomTextStartingAltitude } from '../../klimt/creole/legacy/AtomText.js';
 import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
 import { HorizontalAlignment } from '../../klimt/geom/HorizontalAlignment.js';
 import { ClockwiseTopRightBottomLeft } from '../../klimt/geom/ClockwiseTopRightBottomLeft.js';
@@ -119,19 +121,30 @@ function isCreoleAtomData(x: CreoleAtom | Atom): x is CreoleAtom {
   return 'kind' in x;
 }
 
+/** MEASUREMENT-only muted font — `EntityImageDescriptionDelegates.ts
+ *  #measuringFont`'s identical convention (`AtomText.java`'s own
+ *  `fontConfiguration.getFont()` reads, D1); this ops bundle's `drawU`
+ *  throws unconditionally, so there is no unmuted-vs-muted draw split to
+ *  mirror here — every text read on this path is a measurement. */
+function measuringFont(fc: FontConfiguration): FontConfiguration {
+  return { ...fc, size: getFont(fc).size };
+}
+
 /**
  * Sizing-only `AtomOps` for the title's creole pipeline — the dimension
  * half of `EntityImageDescriptionDelegates.ts#descAtomOps` (text →
  * `measureLine`, latex → real KaTeX box, emoji → `AtomEmoji`'s exact
- * contract, sprite/img → the sizing resolver's declared box). `drawU`
- * throws: `calculateDimension` never draws for a folder-family title
- * (`inEllipse` is false, so no eager `Footprint` fit exists on this
- * path), and a reach would mean this sizing-only ops object leaked into
- * a render path — fail loudly, per the typed-deferral idiom.
+ * contract, sprite/img → the sizing resolver's declared box). `getStartingAltitude`
+ * reports `AtomText.java:321-323`'s `getSpace()` via `atomTextStartingAltitude`
+ * for text atoms (0 NORMAL, -6/+3 EXPOSANT/INDICE, SI30 D1/D2), 0 otherwise
+ * as before. `drawU` throws: `calculateDimension` never draws for a
+ * folder-family title (`inEllipse` is false, so no eager `Footprint` fit
+ * exists on this path), and a reach would mean this sizing-only ops object
+ * leaked into a render path — fail loudly, per the typed-deferral idiom.
  */
 function titleAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps {
   function dimensionOf(atom: CreoleAtom, stringBounder: StringBounder): { width: number; height: number } {
-    if (atom.kind === 'text') return measureLine(stringBounder, atom.text, atom.font);
+    if (atom.kind === 'text') return measureLine(stringBounder, atom.text, measuringFont(atom.font));
     if (atom.kind === 'latex') return renderLatexAsImage(atom.expr, atom.color ?? '#000000');
     if (atom.kind === 'emoji') return emojiBoxDim(atom.factor);
     const resolved = resolveAtomImage?.(atom.atom);
@@ -147,6 +160,7 @@ function titleAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps 
     getStartingAltitude(creoleAtom: CreoleAtom, stringBounder: StringBounder): number {
       const atom = creoleAtom as CreoleAtom | Atom;
       if (!isCreoleAtomData(atom)) return atom.getStartingAltitude(stringBounder);
+      if (atom.kind === 'text') return atomTextStartingAltitude(atom.font); // SI30/D2
       return 0;
     },
     drawU(): void {

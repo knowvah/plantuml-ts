@@ -32,11 +32,11 @@ task by pathspec.
 
 | Batch | What | Tasks | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md) | Authored fixtures + oracles + baselines | T0 | [ ] |
-| [1](batch-1/overview.md) | klimt core: `FontPosition`, exposant command, `getFont` mute | T1 | [ ] |
-| [2](batch-2/overview.md) | Description `AtomOps` · core seams through `Sea` (parallel) | T2 T3 | [ ] |
-| [3](batch-3/overview.md) | Class consumers · State consumers (parallel) | T4 T5 | [ ] |
-| [4](batch-4/overview.md) | Close-out | T6 | [ ] |
+| [0](batch-0/overview.md) | Authored fixtures + oracles + baselines | T0 | [x] |
+| [1](batch-1/overview.md) | klimt core: `FontPosition`, exposant command, `getFont` mute | T1 | [x] |
+| [2](batch-2/overview.md) | Description `AtomOps` · core seams through `Sea` (parallel) | T2 T3 | [x] |
+| [3](batch-3/overview.md) | Class consumers · State consumers (parallel) | T4 T5 | [x] |
+| [4](batch-4/overview.md) | Close-out | T6 | [x] |
 
 ## Quality gates (after every batch)
 
@@ -116,3 +116,76 @@ reverted · minor/patch dep bumps.
   277-280,370-372`, `klimt/creole/legacy/AtomText.java:175-193,197-233,321-323`,
   `klimt/creole/Sea.java:60-80`, `klimt/creole/SheetBlock1.java:114-150`,
   `klimt/creole/legacy/CommandCreoleBuilder.java:104-105`.
+
+## Close-out (2026-08-19)
+
+**Exit criterion MET.** `juvagu-33-dupa212`'s `s1 width idx1` row (SI29's one
+ruled-grown row, 27.57 → 83.57 px) went **exact** at the T3 gate (Batch 2) and
+stays exact now; all three authored fixtures' declared sizes match their
+`svek-N.dot` (exposant-01-class byte-identical `y`/`font-size` vs the jar's
+`in.svg`; exposant-02-usecase `maxSizeDeltaIn=0`; exposant-03-state exact).
+
+**Harness**, `test-results/state-declared-size-baseline.jsonl` (T0 ORIGINAL
+pin `273/2660/2558/65/37/0/44` → now `273/2660/2563/60/37/0/42`; exact +5,
+mismatched −5, dirty −2): `harness-diff.py` vs the current (already re-pinned)
+baseline: **`OK: 0 rows went exact, 0 rows appeared or grew`** — identical,
+confirming Batch 3 was the last row-moving batch.
+
+**Manifest**, 2017 fixtures: `manifest-diff.py` vs the current (already
+re-pinned) baseline: **`OK: 0 expected moves, 0 unexpected`**. Every fixture
+on `expected-moves.txt` was already accounted for at the last re-pin,
+including `xeziki-47-zomo866` (Batch 3 T5 collateral, human-accepted at
+STOP-4 — state notes now honour per-run `<color:>`, jar draws `#F00` there).
+No fixture outside the allow-list moved at any point (grep confirms 0 rows
+mentioning `exposant-0*`/`juvagu` remain in the mismatched harness output).
+
+**Ratchets.** Backlog pins removed: class 1 (`exposant-01-class`, T4),
+description 1 (`exposant-02-usecase`, T2), state 2 (`juvagu-33-dupa212` +
+`exposant-03-state`, T5) — state backlog 63 → 62 entries net. DOT-parity:
+state **270/270 EQUAL** (SI29's 268 + 2 new), class **721/721** (+1), object
+**80/80** (unchanged), description ratchet **357/357 conformant** (+1);
+svg-conformance goldens unchanged (state 60 fixtures/62 tests, rise-only —
+no rise needed this mission).
+
+**Coverage / wall-clock.** `npm test`: **613 files / 14,747 pass** (1 todo).
+Coverage 95.41 / 90.34 / 96.93 / 96.50 — ≥ 90/90/90, unchanged from the
+Batch 3 gate. Wall-clock was sampled twice: **55.0 s** at the first close-out
+run and **58.91 s** on the post-reboot re-run (60.26 s including npm), against
+SI29's 54.8 s reference — +0.4 % and +7.5 %. Both are under stop 11's +10 %
+(60.28 s), so the gate holds, but the spread is machine contention, not a
+stable measurement; treat 58.9 s as the honest upper sample.
+
+**Per-task commits** (branch `feat/creole-exposant-port`, off main
+`c7ede890`): `dbb283b4` T0 (fixtures+oracles+baselines), `066718ce` T1
+(`FontPosition`, exposant command, `getFont`/`getSpace`) + `6f1bf446` fix(T1)
+(dropped a stale `<sup>`-is-literal pin), `edce8381` T2 (description
+`AtomOps` altitude/mute), `db9d99e2` T3 (`creole-sea-line.ts` — core seams
+through `Sea`), `bdd2a54a` T4 (class members/notes, closed-form Sea
+specialization), `d19ca450` T5 (state per-run size/dy + `expandRun` width
+fix); batch-close docs `812784b5`, `4a4106af`, `e779fb74`, `e7851a1d`.
+
+**Flags for the maintainer.**
+1. T4's class consumer uses a closed-form Sea specialization
+   (`class-member-creole-sea.ts`) rather than T3's general `leafTextLineLayout`
+   seam — jar-verified exact, journaled at gate-2 for human confirmation
+   against D2's "through the ported Sea" letter; orchestrator's assessment
+   was within D2's intent. Unresolved as a formal ruling, not blocking.
+2. T5's sup/sub run baseline carries a documented **~0.667 px residual**
+   (`renderer-box.ts#runBaseline`: `CreoleTextRun` exposes no unmuted size
+   for the reference descent) — cosmetic, not gated by any ratchet.
+3. T3's emoji atoms now report `emojiSquareDim`, journaled as a flag; no
+   NORMAL fixture moved.
+4. `xeziki-47-zomo866` collateral move (state note colour) — human-accepted,
+   see Manifest above.
+
+**Follow-ups.**
+- Sequence/activity/WBS creole (`<sup>` stays literal there — D6, no creole
+  pipeline; a separate mission).
+- `TileText` (unported, no consumer) and `<math>` (KaTeX divergence) — D6.
+- T5's ~0.667 px sup/sub baseline residual (flag 2 above).
+- `render-manifest.ts` only tracks files literally named `in.puml`; an
+  `oracle/goldens/**/input.puml`-only fixture is invisible to the manifest
+  gate (T0 note) — mirror into `test-results/dot-cache/` if manifest
+  coverage is needed.
+- `scripts/oracle-render.sh -o <out>` resolves a relative out-dir against
+  the **input file's** directory, not cwd (T0 note).

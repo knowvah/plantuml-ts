@@ -24,7 +24,10 @@ import {
 } from '../../creole-atoms-measure.js';
 import { classifyStripeLine } from '../../klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import { buildLineAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
-import type { FontConfiguration } from '../../klimt/shape/UText.js';
+import { getFont, type FontConfiguration } from '../../klimt/shape/UText.js';
+import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
+import { emojiSquareDim } from '../../klimt/creole/atom/AtomEmoji.js';
+import { ATOM_TEXT_MIN_HEIGHT, layoutLineThroughSea, measurerSeaLineOps } from './creole-sea-line.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../decoration/symbol/usymbol-resolve.js';
 import { getSplitted } from '../../klimt/creole/Fission.js';
 import { manageGuillemet, type GuillemetPair } from '../../text/Guillemet.js';
@@ -89,7 +92,12 @@ function lineTextMetrics(
   let height = 0;
   for (const atom of built.atoms) {
     if (atom.kind !== 'text') continue;
-    const size = atom.font.size;
+    // SI30 D1: the EFFECTIVE size — `fontConfiguration.getFont()`
+    // (`FontConfiguration.java:98-104`) mutes a `<sup>`/`<sub>` run by 3
+    // points before either `AtomText#calculateDimensionSlow` (java:176) or
+    // `#drawU` (java:213) sees it. Identical to `atom.font.size` for every
+    // NORMAL run, which is why no measured box moves for plain text.
+    const size = getFont(atom.font).size;
     width += measurer.measure(atom.text, { ...fontSpec, size }).width;
     if (size > height) height = size;
   }
@@ -138,6 +146,98 @@ export function textBlockHeight(
  *  well-formed, not visually accurate. */
 export function baseFontConfiguration(fontSpec: FontSpec): FontConfiguration {
   return { family: fontSpec.family, size: fontSpec.size, color: JAR_DEFAULT_TEXT_COLOR, styles: new Set() };
+}
+
+// ---------------------------------------------------------------------------
+// `Sea`-placed line layout (SI30 T3, `decisions.md#D2`) — the seam the CLASS
+// engine's member/note text consumes.
+// ---------------------------------------------------------------------------
+
+/** One atom's resolved font/placement on its line. Parallel to
+ *  {@link LeafTextLineLayout.atoms}, so a caller that already has the atom
+ *  list (every class text path builds it with `buildLineAtoms`) can index
+ *  straight into it. */
+export interface LeafTextAtomPlacement {
+  /** The atom's EFFECTIVE font size: `getFont(atom.font).size` for a text
+   *  atom (`FontConfiguration.java:98-104` — muted by 3 for `<sup>`/`<sub>`,
+   *  unchanged for NORMAL), and the ambient size for a non-text atom, which
+   *  is what scales it (`creole-atoms-measure.ts#measureInlineAtom`). */
+  readonly size: number;
+  /** Baseline offset from the line's NORMAL baseline (`Sea`): draw at
+   *  `lineTop + height - atom.font.size/4.5 + dy`, the formula
+   *  `class/renderer-note.ts:263` already uses plus this correction. 0 for
+   *  every atom of an all-NORMAL line, and for non-text atoms (which have
+   *  no baseline — their box IS their placement). */
+  readonly dy: number;
+}
+
+/** One creole line's `Sea` geometry (`SheetBlock1.java:130-152`). */
+export interface LeafTextLineLayout {
+  /** `buildLineAtoms`' own atom sequence, in source order. */
+  readonly atoms: readonly CreoleAtom[];
+  /** Parallel to {@link atoms}. */
+  readonly placements: readonly LeafTextAtomPlacement[];
+  /** `Sea#getWidth` — the x-cursor sum over EVERY atom, text and inline
+   *  alike (i.e. `lineTextMetrics().width + inlineAtomWidth()` in one). */
+  readonly width: number;
+  /** `Sea#getHeight` — grows for a raised `<sup>` or a hanging emoji. */
+  readonly height: number;
+}
+
+/** `Atom#calculateDimension` for this seam: the measurer's own box at the
+ *  atom's EFFECTIVE font, floored at `AtomText#calculateDimensionSlow`'s own
+ *  10px (`AtomText.java:178-179`). Tab stops (`AtomText.java:239-256`) are
+ *  deliberately absent — no class/description text path has ever measured
+ *  them (only the state seam, `creole-text-lines.ts#runTextWidth`, ports
+ *  that loop), and adding one here would move boxes this task must leave
+ *  byte-identical. */
+function leafAtomDim(
+  atom: CreoleAtom,
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  sprites: SpriteDimsLookup | undefined,
+): { width: number; height: number } {
+  if (atom.kind === 'text') {
+    const dim = measurer.measure(atom.text, { ...fontSpec, size: getFont(atom.font).size });
+    return { width: dim.width, height: Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT) };
+  }
+  if (atom.kind === 'inline') return measureInlineAtom(atom.atom, sprites, fontSpec.size);
+  // `AtomEmoji#calculateDimensionSlow` VERBATIM (`AtomEmoji.java:57-59`) —
+  // the square, never `emojiBoxDim`'s pre-combined line height: `Sea`
+  // derives the hang from the atom's own altitude (`AtomEmoji.ts`).
+  if (atom.kind === 'emoji') return emojiSquareDim(atom.factor);
+  // `latex` is measured through a separate LaTeX path, not this atom stream
+  // — the same divergence `creoleVisibleText` below already documents.
+  return { width: 0, height: 0 };
+}
+
+/**
+ * One display line's atoms, laid out through the real `Sea`
+ * (`SheetBlock1.java:130-152` with the stripe's stacking `y` at 0) — the
+ * per-atom `{size, dy}` + line height the CLASS engine's member and note
+ * text draw with (SI30 `decisions.md#D2/#D3`).
+ *
+ * Additive: no pre-existing export changes behavior, and for an all-NORMAL
+ * line every `dy` is 0 and every `size` is the size that path already used,
+ * so a consumer adopting this reproduces its current output exactly.
+ */
+export function leafTextLineLayout(
+  line: string,
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+  sprites?: SpriteDimsLookup,
+  guillemet?: GuillemetPair,
+): LeafTextLineLayout {
+  const built = buildLineAtoms(manageGuillemet(line, guillemet), baseFontConfiguration(fontSpec));
+  const layout = layoutLineThroughSea(
+    built.atoms,
+    measurerSeaLineOps(fontSpec, measurer, (atom) => leafAtomDim(atom, fontSpec, measurer, sprites)),
+  );
+  const placements = built.atoms.map((atom, i) => ({
+    size: atom.kind === 'text' ? getFont(atom.font).size : fontSpec.size,
+    dy: layout.dy[i] as number,
+  }));
+  return { atoms: built.atoms, placements, width: layout.width, height: layout.height };
 }
 
 /** Visible (glyph-bearing) text of a creole line: routes through the SAME

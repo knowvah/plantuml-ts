@@ -17,7 +17,7 @@ import { renderVisibilityIcon, visibilityIconOriginY } from './class-visibility-
 import {} from './renderer-url.js';
 import { linkWrap } from '../../core/svg.js';
 import { renderBulletAtom } from './renderer-note.js';
-import { FontStyle } from '../../core/klimt/shape/UText.js';
+import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
@@ -226,6 +226,13 @@ export function memberAtomDecoration(styles: ReadonlySet<FontStyle>): string | u
  * element `SvgGraphics#format` rounding; callers pass raw measured widths
  * and no longer round before handing them to `core/svg.ts`.
  */
+/** SI30 D2: a text atom's own drawn Y -- the row's baseline `y` plus its
+ *  `Sea` correction (`atom.dy ?? 0`). Factored out of {@link renderRowAtoms}
+ *  purely to keep that already-over-cap function's own CCN from growing. */
+function textAtomRowY(y: number, atom: Extract<MemberRenderAtom, { kind: 'text' }>): number {
+  return y + (atom.dy ?? 0);
+}
+
 export function renderRowAtoms(
   atoms: readonly MemberRenderAtom[],
   startX: number,
@@ -254,9 +261,13 @@ export function renderRowAtoms(
       // branch, `class-member-creole.ts#MemberRenderAtom`'s own doc
       // comment) -- the DRAWN text/textLength use them when present, but
       // x-advance below stays on `atom.width` (the LAYOUT value) always.
-      const rendered = text(x, y, atom.renderText ?? atom.text, {
+      // SI30 D1/D2: drawn at the EFFECTIVE (muted) size (`getFont`), at the
+      // row's own baseline `y` PLUS the atom's own Sea correction
+      // ({@link textAtomRowY} -- 0 for every atom of an all-NORMAL row, the
+      // identity property `creole-sea-line.ts`'s doc comment names).
+      const rendered = text(x, textAtomRowY(y, atom), atom.renderText ?? atom.text, {
         fontFamily: atom.font.family,
-        fontSize: atom.font.size,
+        fontSize: getFont(atom.font).size,
         fill: atom.font.color ?? fallbackFontColor,
         lengthAdjust: 'spacing',
         textLength: atom.renderWidth ?? atom.width,

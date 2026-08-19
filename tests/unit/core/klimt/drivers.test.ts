@@ -317,6 +317,51 @@ describe('DriverTextSvg', () => {
     // have swallowed them.
     expect(root.getSvgString()).toContain('>   </text>');
   });
+
+  // SI30 T1 — `DriverTextSvg.java:96` binds ONE `font` local from
+  // `fontConfiguration.getFont()` and uses it for the leading-space measure
+  // (java:118), the dimension measure (java:126) and the emitted
+  // `font.getSize()` (java:179). A `<sup>` run must therefore be measured AND
+  // emitted at the MUTED size, never at the stored one.
+  it('an EXPOSANT run emits the MUTED font-size and measures its width with it', () => {
+    const root = newGraphic();
+    const font = {
+      family: 'sans-serif',
+      size: 14,
+      color: '#000000',
+      styles: new Set<FontStyle>(),
+      fontPosition: 'EXPOSANT' as const,
+    };
+    root.draw(UText.build('abcd', font));
+    // stub bounder: width = len * size * 0.5 -> muted 11 gives 4*11*0.5 = 22
+    // (the unmuted 14 would have given 28).
+    expect(root.getSvgString()).toContain('font-size="11" textLength="22"');
+  });
+
+  it('an INDICE leading space shifts x by the MUTED space width', () => {
+    const root = newGraphic();
+    const font = {
+      family: 'sans-serif',
+      size: 14,
+      color: '#000000',
+      styles: new Set<FontStyle>(),
+      fontPosition: 'INDICE' as const,
+    };
+    root.apply(new UTranslate(10, 0)).draw(UText.build(' hi', font));
+    // muted space width = 1 * 11 * 0.5 = 5.5 -> x = 10 + 5.5 = 15.5
+    // (the unmuted 14 would have given 17).
+    expect(root.getSvgString()).toContain('<text x="15.5"');
+  });
+
+  it('a NORMAL run is byte-identical to the pre-SI30 output (no fontPosition)', () => {
+    const font = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set<FontStyle>() };
+    const withoutField = newGraphic();
+    withoutField.draw(UText.build('abcd', font));
+    const withNormal = newGraphic();
+    withNormal.draw(UText.build('abcd', { ...font, fontPosition: 'NORMAL' as const }));
+    expect(withNormal.getSvgString()).toBe(withoutField.getSvgString());
+    expect(withoutField.getSvgString()).toContain('font-size="14" textLength="28"');
+  });
 });
 
 describe('UComment / UGroup dispatch (u-graphic-svg.ts)', () => {

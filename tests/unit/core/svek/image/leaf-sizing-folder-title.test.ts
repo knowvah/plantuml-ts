@@ -69,4 +69,17 @@ describe('SI1 T12 — folder/package title via create2/BodyEnhanced1 (jar-pinned
     expect(w).toBeCloseTo(lineW + 12, 6);
     expect(h).toBeCloseTo(28, 6);
   });
+
+  // SI30/T2: `titleAtomOps`'s text-atom `getStartingAltitude`/muted-font
+  // measurement — the same `Sea#doAlign` math
+  // `EntityImageDescriptionDelegates.test.ts` derives for `descAtomOps`
+  // ('x' NORMAL spans [-14,0]; '2' EXPOSANT muted-height-11 spans [-17,-6];
+  // getHeight = 0 - (-17) = 17, decisions.md#D1/D2).
+  it('title x<sup>2</sup>: EXPOSANT altitude grows height 14->17; <sup> measures at the muted width', () => {
+    const [w, h] = measureShownFolderTitle('x<sup>2</sup>', fontSpec, measurer, undefined, undefined);
+    const expectedTextWidth =
+      measurer.measure('x', fontSpec).width + measurer.measure('2', { family: fontSpec.family, size: 11 }).width;
+    expect(w).toBeCloseTo(expectedTextWidth + 12, 6);
+    expect(h).toBeCloseTo(17, 6);
+  });
 });

@@ -1,4 +1,5 @@
 import type { UShape } from '../UShape.js';
+import { FontPosition, fontPositionSpace, muteFontSize } from '../font/FontPosition.js';
 
 /**
  * FontStyle — the seven style flags a `FontConfiguration` can carry.
@@ -48,6 +49,41 @@ export interface FontConfiguration {
   readonly size: number;
   readonly color: string | null;
   readonly styles: ReadonlySet<FontStyle>;
+  /** Upstream's own `FontConfiguration.fontPosition` field
+   *  (`FontConfiguration.java:145`, set by `changeFontPosition`, java:277-280).
+   *  `undefined` means `FontPosition.NORMAL` — the ~28 existing
+   *  `FontConfiguration` object literals in this port predate the field and
+   *  stay valid unchanged, which is why it is optional rather than required.
+   */
+  readonly fontPosition?: FontPosition;
+}
+
+/**
+ * The EFFECTIVE drawing font of a configuration — upstream
+ * `FontConfiguration#getFont()` (`FontConfiguration.java:98-104`), whose
+ * last act is `return fontPosition.mute(result)`.
+ *
+ * Upstream keeps `currentFont` UNMUTED and mutes at READ time; this port
+ * does the same (decisions.md#D1, `plans/creole-exposant-port/`), so a
+ * nested `<sup><size:20>x</size></sup>` stores size 20 + EXPOSANT and
+ * yields 17 here, exactly as the jar does — an eagerly-muted stored size
+ * would instead yield 20.
+ *
+ * Every measure/draw site reads the font through this function; only
+ * `size` can differ from the stored configuration (upstream's style-flag
+ * `mutateFont` loop, java:99-101, has no equivalent on this port's
+ * `FontConfiguration` — the style flags are consumed directly by the SVG
+ * driver).
+ */
+export function getFont(fc: FontConfiguration): { readonly family: string; readonly size: number } {
+  return { family: fc.family, size: muteFontSize(fc.size, fc.fontPosition ?? FontPosition.NORMAL) };
+}
+
+/** Upstream `FontConfiguration#getSpace()` (`FontConfiguration.java:370-372`)
+ *  — a straight delegation to `fontPosition.getSpace()`. This is the value
+ *  `AtomText#getStartingAltitude` reports to `Sea` (decisions.md#D2). */
+export function getSpace(fc: FontConfiguration): number {
+  return fontPositionSpace(fc.fontPosition ?? FontPosition.NORMAL);
 }
 
 // Upstream constants from jaws/Jaws.java — UText's constructor replaces

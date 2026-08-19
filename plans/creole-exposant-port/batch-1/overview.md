@@ -2,7 +2,7 @@
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | `FontPosition`, `FontConfiguration.fontPosition?` + `getFont`/`getSpace`, `CommandCreoleExposantChange` registered, `AtomText` muted width + starting altitude, `driver-text-svg` via `getFont` | general-purpose (Opus, effort high) | `src/core/klimt/font/FontPosition.ts` (new), `src/core/klimt/shape/UText.ts`, `src/core/klimt/creole/command/CommandCreoleExposantChange.ts` (new), `src/core/klimt/creole/legacy/CommandCreoleBuilder.ts`, `src/core/klimt/creole/legacy/AtomText.ts`, `src/core/klimt/drawing/svg/driver-text-svg.ts`, tests under `tests/unit/core/klimt/` | T0 | [ ] |
+| T1 | `FontPosition`, `FontConfiguration.fontPosition?` + `getFont`/`getSpace`, `CommandCreoleExposantChange` registered, `AtomText` muted width + starting altitude, `driver-text-svg` via `getFont` | general-purpose (Opus, effort high) | `src/core/klimt/font/FontPosition.ts` (new), `src/core/klimt/shape/UText.ts`, `src/core/klimt/creole/command/CommandCreoleExposantChange.ts` (new), `src/core/klimt/creole/legacy/CommandCreoleBuilder.ts`, `src/core/klimt/creole/legacy/AtomText.ts`, `src/core/klimt/drawing/svg/driver-text-svg.ts`, tests under `tests/unit/core/klimt/` | T0 | [x] |
 
 **Interface contract (T1 → T2, T3, T4, T5)** — locked shape, names may be
 refined by T1 and echoed in its report:

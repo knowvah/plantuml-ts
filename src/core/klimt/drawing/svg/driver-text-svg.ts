@@ -63,7 +63,7 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
-import { FontStyle } from '../../shape/UText.js';
+import { FontStyle, getFont } from '../../shape/UText.js';
 import type { UText, FontConfiguration } from '../../shape/UText.js';
 import type { SvgGraphics } from './svg-graphics.js';
 
@@ -125,12 +125,20 @@ export class DriverTextSvg implements UDriver<UText> {
     const y = param.getTranslate().getDy();
     const { text, x } = this.leadingSpaceAdjust(shape.getText(), param.getTranslate().getDx(), font);
     const trimmed = trin(text); // Upstream: StringUtils.trin(text).
-    const dim = this.stringBounder.calculateDimension({ family: font.family, size: font.size }, trimmed);
+    // SI30: every read of the drawing font goes through `getFont`
+    // (upstream: `fontConfiguration.getFont()`, FontConfiguration.java:98-104
+    // — DriverTextSvg.java:96 binds ONE `font` local from it and uses that
+    // same local for the leading-space measure (java:118), the dimension
+    // measure (java:126) and the emitted `font.getSize()` (java:179)), so a
+    // `<sup>`/`<sub>` run measures AND renders at the muted size. Identical to
+    // `font` for a NORMAL run.
+    const drawFont = getFont(font);
+    const dim = this.stringBounder.calculateDimension(drawFont, trimmed);
 
     this.svg.setFillColor(font.color);
     this.svg.text(trimmed, x, y, {
-      fontFamily: font.family,
-      fontSize: font.size,
+      fontFamily: drawFont.family,
+      fontSize: drawFont.size,
       fontWeight: fontWeightOf(font.styles),
       fontStyle: fontStyleOf(font.styles),
       textDecoration: textDecorationOf(font.styles),
@@ -152,7 +160,7 @@ export class DriverTextSvg implements UDriver<UText> {
     let text = /^\s*$/.test(rawText) ? rawText.split(' ').join(NBSP) : rawText;
     let x = x0;
     if (text.startsWith(' ')) {
-      const space = this.stringBounder.calculateDimension({ family: font.family, size: font.size }, ' ').width;
+      const space = this.stringBounder.calculateDimension(getFont(font), ' ').width;
       while (text.startsWith(' ')) {
         x += space;
         text = text.slice(1);

@@ -30,10 +30,16 @@
  * "Render-time text metrics" doc comment), which is why per-run advances
  * are computed HERE, at layout time, and threaded through.
  *
- * NOT closed by this module (T1's own report; journaled, not silent):
- * `<math>`/`<sup>`/`<sub>` are unported in this port's
- * `CommandCreoleBuilder.ts` (`CommandCreoleBuilder.java:104-105,111`
- * registers `CommandCreoleExposantChange`/`CommandCreoleMath`), so such
+ * SI30 (`creole-exposant-port`, T5): `<sup>`/`<sub>` are ported since T1/T3
+ * (`CommandCreoleBuilder.java:104-105` registers
+ * `CommandCreoleExposantChange`) — the seam's own `CreoleTextRun` now
+ * reports `size` (effective, post-mute, `decisions.md#D1/#D3`) and `dy`
+ * (baseline offset from the line's own NORMAL baseline, via the real `Sea`,
+ * `decisions.md#D2`), both widened onto {@link StateTextRun} below so the
+ * renderer draws a `<sup>`/`<sub>` run at its own muted size and raised/
+ * lowered baseline instead of the line's single shared font size. `<math>`
+ * remains unported (`CommandCreoleBuilder.java:111` registers
+ * `CommandCreoleMath`; `decisions.md#D6` names it out of scope), so THAT
  * markup still measures as literal, tag-inclusive text.
  */
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
@@ -85,6 +91,17 @@ export interface StateTextRun {
   readonly strike: boolean;
   readonly color?: string;
   readonly url?: string;
+  /** The seam's own `CreoleTextRun.size` (`decisions.md#D3`) — EFFECTIVE
+   *  font size, muted by 3 for `<sup>`/`<sub>` (`FontPosition.java:51-60`),
+   *  else the cascaded size. Drawn as this run's own `<text font-size>`. */
+  readonly size: number;
+  /** The seam's own `CreoleTextRun.dy` (`decisions.md#D2`): baseline offset
+   *  from the line's NORMAL baseline. Rendered via `renderer-box.ts
+   *  #runBaseline`, which also names the one bounded divergence this
+   *  carries (~0.667px on a `<sup>`/`<sub>` run's OWN baseline — no
+   *  unmuted-size field to reconstruct it exactly). 0 for every run of an
+   *  all-NORMAL line. */
+  readonly dy: number;
 }
 
 /** One laid-out creole table cell: its styled runs plus the cell's own
@@ -206,6 +223,11 @@ function toRun(run: CreoleTextRun, text: string, width: number, dx: number): Sta
     strike: run.style.strike,
     ...(run.color !== undefined && run.color !== JAR_DEFAULT_TEXT_COLOR ? { color: run.color } : {}),
     ...(run.url !== undefined ? { url: run.url } : {}),
+    // SI30 D3: a tab-split token still belongs to the SAME atom, so every
+    // piece {@link expandRun} fans one seam run out into carries that run's
+    // OWN size/dy unchanged (tabs never cross an atom boundary).
+    size: run.size,
+    dy: run.dy,
   };
 }
 
@@ -213,11 +235,22 @@ function toRun(run: CreoleTextRun, text: string, width: number, dx: number): Sta
  *  no tab is one drawable run; a tabbed one becomes one run per non-tab
  *  token, each carrying the advance its preceding tab(s) snapped over. The
  *  run widths still SUM to `AtomText#getWidth`'s aggregate, so the sizer's
- *  line width and the renderer's x-advance stay one number. */
+ *  line width and the renderer's x-advance stay one number.
+ *
+ *  SI30 D1/D3 fix: `getWidth`/`drawU`/`getTabSize`/`tabString`
+ *  (`AtomText.java:239-275`) all read `fontConfiguration.getFont()` — the
+ *  ATOM's OWN (muted) font, not the line's shared one. Pre-fix, `measure`/
+ *  `tabStop` closed over the caller's outer `font`, so a `<sup>`/`<sub>`
+ *  run's glyph width measured at the LINE's size (jar-probed: `measure('2',
+ *  {size:11})` is 6.11875, matching jar's own `O` x on `exposant-03-state`;
+ *  pre-fix code measured 7.7875 — "2" at the line's 14pt — landing `O`
+ *  1.669px too far right). `runFont` is the fix: every measurement in this
+ *  function now reads the run's OWN `size`. */
 function expandRun(run: CreoleTextRun, font: FontSpec, measurer: StringMeasurer, tabSizeNb: number): StateTextRun[] {
-  const measure = (s: string): number => measurer.measure(s, font).width;
+  const runFont: FontSpec = { ...font, size: run.size };
+  const measure = (s: string): number => measurer.measure(s, runFont).width;
   if (!hasTabulation(run.text)) return [toRun(run, run.text, measure(run.text), 0)];
-  const tabStop = tabStopWidth(measure(tabStringFor(tabSizeNb)), font.size);
+  const tabStop = tabStopWidth(measure(tabStringFor(tabSizeNb)), runFont.size);
   const out: StateTextRun[] = [];
   let x = 0;
   let pendingDx = 0;
@@ -237,7 +270,11 @@ function expandRun(run: CreoleTextRun, font: FontSpec, measurer: StringMeasurer,
   return out;
 }
 
-function toStyledLine(line: CreoleTextLine, font: FontSpec, measurer: StringMeasurer, tabSizeNb: number): StateStyledTextLine {
+/** Exported for {@link ../state-note-layout.js} (SI30 T5) — the note engine
+ *  reuses the SAME per-run size/dy/tab-stop conversion the header/body path
+ *  uses, rather than re-deriving a second, narrower one (D1's "one core
+ *  seam" principle extended to this state-local helper). */
+export function toStyledLine(line: CreoleTextLine, font: FontSpec, measurer: StringMeasurer, tabSizeNb: number): StateStyledTextLine {
   const runs = line.runs.flatMap((r) => expandRun(r, font, measurer, tabSizeNb));
   return {
     text: runs.map((r) => r.text).join(''),
@@ -260,7 +297,7 @@ function blankLine(font: FontSpec): StateStyledTextLine {
     text: NBSP,
     width: 0,
     height: font.size,
-    runs: [{ text: NBSP, width: 0, bold: false, italic: false, underline: false, strike: false }],
+    runs: [{ text: NBSP, width: 0, bold: false, italic: false, underline: false, strike: false, size: font.size, dy: 0 }],
   };
 }
 
@@ -424,17 +461,36 @@ export function stateCreoleBlock(
   return { width, height, lines: out };
 }
 
-/** The renderer reads `StateNodeGeo.headerLines`/`bodyLines`, typed as the
- *  narrower `StateTextLine` (`state-geo-types.ts`) — every state-engine
- *  producer of those arrays is `state-sizing.ts`, which builds them through
- *  {@link stateCreoleBlock}, so the runs are always present at runtime.
- *  This narrows back to the styled shape at the one place that needs it,
- *  falling back to a single unstyled run for any line that somehow carries
- *  none (the `kind:'json'`/unmeasured fallback paths never reach here). */
-export function styledLines(lines: readonly StateTextLine[]): readonly StateStyledTextLine[] {
+/** The renderer reads `StateNodeGeo.headerLines`/`bodyLines`/`noteLines`,
+ *  typed as the narrower `StateTextLine` (`state-geo-types.ts`, deliberately
+ *  NOT widened — SI30 T5 read-set, `state-geo-types.ts` out of write-set) —
+ *  every state-engine producer of those arrays is `state-sizing.ts`/
+ *  `state-note-layout.ts`, which build them through {@link stateCreoleBlock}/
+ *  {@link toStyledLine}, so the runs are always present at runtime. This
+ *  narrows back to the styled shape at the one place that needs it, falling
+ *  back to a single unstyled run at `fallbackFontSize` (a hand-built test
+ *  geometry's own declared font size, since a bare `{text,width}` line
+ *  carries no `size`/`dy` of its own to recover) for any line that somehow
+ *  carries none. */
+export function styledLines(lines: readonly StateTextLine[], fallbackFontSize = 0): readonly StateStyledTextLine[] {
   return lines.map((ln) =>
     'runs' in ln
       ? (ln as StateStyledTextLine)
-      : { ...ln, height: 0, runs: [{ text: ln.text, width: ln.width, bold: false, italic: false, underline: false, strike: false }] },
+      : {
+          ...ln,
+          height: 0,
+          runs: [
+            {
+              text: ln.text,
+              width: ln.width,
+              bold: false,
+              italic: false,
+              underline: false,
+              strike: false,
+              size: fallbackFontSize,
+              dy: 0,
+            },
+          ],
+        },
   );
 }

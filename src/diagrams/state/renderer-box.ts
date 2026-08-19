@@ -69,6 +69,33 @@ function runDecoration(run: StateTextRun): string | undefined {
 }
 
 /**
+ * SI30 D2/D3: `Sea`'s own baseline reconstruction (`creole-sea-line.ts`'s
+ * own doc comment) -- `lineTop + lineHeight - run.size/4.5 + run.dy`. Uses
+ * the run's own (possibly MUTED, `<sup>`/`<sub>`) `size` for the descent
+ * term rather than the TRUE unmuted `atom.font.size` Sea itself measured
+ * with: `StateTextRun` carries no unmuted-size field to recover, since the
+ * locked seam contract it consumes (`CreoleTextRun`, `decisions.md#D3`)
+ * doesn't expose one either -- only the effective (post-mute) `size` and the
+ * already-`Sea`-computed `dy`.
+ *
+ * Exact for every NORMAL run (muted === unmuted there, D1) -- algebraically
+ * confirmed against `juvagu-33-dupa212`'s own jar SVG (`H`/`O` both at
+ * `font-size="14"`, `y="125.889"`, matching `lineTop + lineHeight -
+ * 14/4.5 + (-3)` exactly for the `<sub>`-adjacent NORMAL runs). For the
+ * `<sub>` run itself (`"2"`, muted 11 from 14) this formula's own
+ * `run.size`-for-descent substitution differs from the jar's true
+ * `129.556` by a FIXED (mute delta 3) / 4.5 ~= 0.667px -- a bounded,
+ * documented residual, not a fitted constant: 3 is `FontPosition.java
+ * :51-60`'s own mute amount, and 4.5 is `StringMeasurer.getDescent`'s
+ * documented fallback divisor (`core/measurer.ts:19-22`), so the whole
+ * expression is two already-cited upstream numbers, never adjusted to
+ * shrink this residual.
+ */
+function runBaseline(lineTop: number, lineHeight: number, run: StateTextRun): number {
+  return lineTop + lineHeight - run.size / 4.5 + run.dy;
+}
+
+/**
  * One creole line's styled runs, left to right, x-advancing by each run's
  * OWN measured width -- the SAME per-`<text>`-element sequence the jar
  * emits (`AtomText#drawU` once per atom; jar-verified `xasoka-58-temi462`
@@ -76,12 +103,21 @@ function runDecoration(run: StateTextRun): string | undefined {
  * (`class/renderer-classifier-rows.ts#renderRowAtoms`'s identical rule).
  * `run.color` is set only when the creole resolved one, so the caller's
  * `StateFontColor` cascade still supplies the default.
+ *
+ * SI30 D3: each run now draws at its OWN `font-size` (`run.size`) and its
+ * own `<sup>`/`<sub>`-adjusted baseline ({@link runBaseline}) instead of one
+ * shared `style.fontSize`/`y` for the whole line -- the per-run `<size:N>`
+ * fix this task's own report names (a `<size:20>` NORMAL run inside an
+ * otherwise-14pt line now draws at 20, not the line's shared size).
+ * `lineTop`/`lineHeight` are the line's own top edge and `Sea`-computed
+ * height (`state-sizing-creole.ts#StateStyledTextLine.height`).
  */
 export function renderStateRuns(
   runs: readonly StateTextRun[],
   startX: number,
-  y: number,
-  style: { readonly fontFamily: string; readonly fontSize: number; readonly fill: string },
+  lineTop: number,
+  lineHeight: number,
+  style: { readonly fontFamily: string; readonly fill: string },
 ): string {
   let x = startX;
   let out = '';
@@ -91,10 +127,11 @@ export function renderStateRuns(
     x += run.dx ?? 0;
     if (run.text === '') continue;
     const decoration = runDecoration(run);
+    const y = runBaseline(lineTop, lineHeight, run);
     const drawn = text(x, y, run.text, {
       fill: run.color ?? style.fill,
       fontFamily: style.fontFamily,
-      fontSize: style.fontSize,
+      fontSize: run.size,
       lengthAdjust: 'spacing',
       textLength: run.width,
       ...(run.bold ? { fontWeight: '700' as const } : {}),
@@ -126,7 +163,15 @@ export function renderStateTable(
 ): string {
   let out = '';
   for (const cell of table.cells) {
-    out += renderStateRuns(cell.runs, x + cell.x, y + cell.y + style.ascent, style);
+    // `lineTop = y + cell.y`, `lineHeight = style.fontSize` reproduces the
+    // pre-SI30 `y + cell.y + style.ascent` baseline byte-for-byte for every
+    // NORMAL cell run (`runBaseline`'s own doc comment) -- a table cell
+    // carries no `<sup>`/`<sub>` in this corpus, so this is the SAME number,
+    // not a new one.
+    out += renderStateRuns(cell.runs, x + cell.x, y + cell.y, style.fontSize, {
+      fontFamily: style.fontFamily,
+      fill: style.fill,
+    });
   }
   const lastX = x + (table.colX[table.colX.length - 1] as number);
   const lastY = y + (table.rowY[table.rowY.length - 1] as number);
@@ -146,6 +191,15 @@ const TABLE_RULE_WIDTH = 1;
  * runs starting at `xForLine(ln)`, advancing the baseline by each line's
  * OWN measured height (`fontSize` for an ordinary line, the whole grid box
  * for a creole TABLE stripe).
+ *
+ * SI30 D2/D3: tracks the running `lineTop` (the line's own TOP edge, not a
+ * pre-computed baseline) so each line's -- and, inside it, each run's --
+ * baseline can be reconstructed independently via {@link runBaseline} from
+ * the `Sea`-computed `line.height` and per-run `dy`, rather than one shared
+ * per-block offset. `startY` keeps its pre-SI30 meaning (the FIRST line's
+ * own baseline, `ascent` below the block's top) for every existing caller;
+ * `lineTop = startY - ascent` recovers the top once, since `ascent` is a
+ * caller-supplied CONSTANT (not itself `Sea`-derived).
  */
 export function renderStateTextLines(
   lines: readonly StateTextLine[],
@@ -161,18 +215,24 @@ export function renderStateTextLines(
   // mission G4 S16: `skinparam stateFontSize<<X>>` -- see
   // `state-render-colors.ts#resolveStateFontSize`'s own doc comment.
   const fontSize = opts.fontSize ?? theme.fontSize;
-  const style = { fontFamily: theme.fontFamily, fontSize, fill: opts.fill ?? '#000000' };
+  const style = { fontFamily: theme.fontFamily, fill: opts.fill ?? '#000000' };
   const ascent = textAscent(fontSize);
   let out = '';
-  let y = startY;
-  for (const ln of styledLines(lines)) {
+  let lineTop = startY - ascent;
+  for (const ln of styledLines(lines, fontSize)) {
+    const height = ln.height === 0 ? fontSize : ln.height;
     if (ln.table !== undefined) {
-      out += renderStateTable(ln.table, xForLine(ln), y - ascent + TABLE_STRIPE_MARGIN_Y, { ...style, ascent });
-      y += ln.height;
+      out += renderStateTable(ln.table, xForLine(ln), lineTop + TABLE_STRIPE_MARGIN_Y, {
+        fontFamily: theme.fontFamily,
+        fontSize,
+        fill: style.fill,
+        ascent,
+      });
+      lineTop += height;
       continue;
     }
-    out += renderStateRuns(ln.runs, xForLine(ln), y, style);
-    y += ln.height === 0 ? fontSize : ln.height;
+    out += renderStateRuns(ln.runs, xForLine(ln), lineTop, height, style);
+    lineTop += height;
   }
   return out;
 }

@@ -46,6 +46,10 @@ import { buildNoteBody } from '../../core/svek/image/leaf-sizing.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import { creoleTextLines, type CreoleTextLine } from '../../core/svek/image/creole-text-lines.js';
 import type { PureNoteTextDim } from '../../core/svek/image/EntityImageNoteLink.js';
+// SI30 T5: the SAME per-run size/dy/tab-stop conversion the header/body
+// path uses -- one core-vs-state-local seam, not a second one for notes
+// (`state-sizing-creole.ts#toStyledLine`'s own doc comment).
+import { toStyledLine, type StateStyledTextLine } from './state-sizing-creole.js';
 
 /**
  * mission G4 S10: `Opale.java`'s real `EntityImageNote`/`Opale` margin
@@ -71,20 +75,15 @@ import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.j
 import { OPALE_MARGIN_X2 as NOTE_MARGIN_X2 } from '../../core/svek/image/Opale.js';
 import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
 
-/** One measured line's own text + advance width — parallel data the S10
- *  note renderer (`renderer-note.ts`) needs for per-line `textLength`;
- *  the DOT-sizing consumer (`buildScopeParts`) only reads the aggregate
- *  `width`/`height` below. `text`/`width` are the RENDER-time approximation
+/** One measured line's own styled runs (SI30 T5: {@link StateStyledTextLine},
+ *  the SAME per-run size/dy shape the header/body path draws with) — the
+ *  DOT-sizing consumer (`buildScopeParts`) only reads the aggregate
+ *  `width`/`height` below. `text`/`runs` are the RENDER-time approximation
  *  (see {@link buildRenderLines}'s own doc comment) — the authoritative
  *  content dimension the box is actually sized to is `NoteMeasurement.width`/
  *  `.height` below (T7, SI28 `findings/note.md`), not a sum/max of these. */
-interface NoteRenderLine {
-  readonly text: string;
-  readonly width: number;
-}
-
 interface NoteMeasurement {
-  readonly lines: readonly NoteRenderLine[];
+  readonly lines: readonly StateStyledTextLine[];
   readonly width: number;
   readonly height: number;
 }
@@ -151,41 +150,41 @@ export function measureNotePureText(text: string, fontFamily: string, measurer: 
   return { width: dim.getWidth(), height: dim.getHeight() };
 }
 
+/** `SkinParam#getTabSize` default (`SkinParam.java:1073`) — notes have no
+ *  `theme.tabSize` cascade of their own threaded to this path (pre-existing
+ *  scope limit, unchanged by SI30 T5); restated locally per this codebase's
+ *  established per-module constant convention (`state-sizing-creole.ts`'s
+ *  own `DEFAULT_TAB_SIZE`). */
+const NOTE_TAB_SIZE_NB = 8;
+
 /**
- * Per-visible-line render text + advance width for {@link renderStateNote}'s
- * flat `<text>`-per-line draw (`renderer-note.ts#renderNoteTextLines`) — kept
- * separate from the authoritative content dimension above because the
- * existing render contract (`StateTextLine`-shaped, `state-geo-types.ts`, out
- * of this task's write-set) has no room for a real per-run/per-cell payload.
- * Reuses the T1 seam (`creoleTextLines`, D1) for a TEXT/HR line's own
- * markup-stripped visible text + correct width — a genuine, jar-ward
- * improvement over drawing the literal `<color:…>` source (xeziki-47's own
- * target shape). A TABLE-kind line (T1's own `tableRowLine` doc comment:
- * "T7 owns per-cell parsing") draws as its markup-stripped cells joined by
- * two spaces — closer to jar than the previous literal `|= a | b |` text,
- * though still NOT jar's real bordered grid (`AtomTable#drawU`'s per-cell
- * rule lines) — that remains a named, deferred gap (`renderer-note.ts`'s own
- * module doc comment), since a real grid draw needs per-cell/per-column
- * geometry `StateTextLine` cannot carry without a `state-geo-types.ts`
- * change outside this task's write-set.
+ * Per-visible-line render runs for {@link renderStateNote}'s per-run
+ * `<text>` draw (`renderer-note.ts#renderNoteTextLines`) — kept separate
+ * from the authoritative content dimension above because a note's own
+ * `BodyFactory`/real-grid `AtomTable` pipeline ({@link measureNotePureText})
+ * and this render-time approximation are independently derived (module doc
+ * comment). Reuses the SAME {@link toStyledLine} conversion the header/body
+ * path draws with (SI30 T5) for a TEXT/HR line's own per-run size/dy/color/
+ * bold/italic/underline — a genuine, jar-ward improvement over the pre-T5
+ * markup-stripped-and-joined single run (xeziki-47's own target shape). A
+ * TABLE-kind line (T1's own `tableRowLine` doc comment: "T7 owns per-cell
+ * parsing") still draws as its markup-stripped cells joined by two spaces,
+ * unchanged by this task (SI29 T7 precedent: do not regress) — closer to
+ * jar than the literal `|= a | b |` text, though still NOT jar's real
+ * bordered grid (`AtomTable#drawU`'s per-cell rule lines), a named, deferred
+ * gap since a real grid draw needs per-cell/per-column geometry
+ * `StateTextLine` cannot carry without a `state-geo-types.ts` change outside
+ * this task's write-set.
  */
 function buildRenderLines(
   text: string,
   theme: Theme,
   measurer: StringMeasurer,
-): readonly NoteRenderLine[] {
+): readonly StateStyledTextLine[] {
   const font: FontSpec = { family: theme.fontFamily, size: NOTE_FONT_SIZE };
   return creoleTextLines(text, font, measurer).map((ln) =>
-    ln.kind === 'table-row' ? tableRowRenderLine(ln, font, measurer) : textRenderLine(ln),
+    ln.kind === 'table-row' ? tableRowRenderLine(ln, font, measurer) : toStyledLine(ln, font, measurer, NOTE_TAB_SIZE_NB),
   );
-}
-
-/** A TEXT/HR `CreoleTextLine` -> its own markup-stripped visible text (the
- *  concatenation of every styled run's own `text`) + the seam's own measured
- *  `width` — per-run color/bold/italic decoration is NOT drawn (module doc
- *  comment's named gap: `StateTextLine` carries no per-run field). */
-function textRenderLine(ln: CreoleTextLine): NoteRenderLine {
-  return { text: ln.runs.map((r) => r.text).join(''), width: ln.width };
 }
 
 /** `StringTokenizer(line, "|")` (`StripeTable.java:139`, ported once already
@@ -202,17 +201,24 @@ function tokenizeByPipe(line: string): string[] {
  *  (`= `-header marker stripped per `StripeTable.java:150-151`, width-inert
  *  per this module's doc comment — header BOLD styling is not drawn, same
  *  named gap), joined with two spaces standing in for jar's real column
- *  rules. */
+ *  rules, wrapped as ONE run at the note's own font size (`dy: 0` — a table
+ *  row line is never a `<sup>`/`<sub>` in this corpus). */
 function tableRowRenderLine(
   ln: CreoleTextLine,
   font: FontSpec,
   measurer: StringMeasurer,
-): NoteRenderLine {
+): StateStyledTextLine {
   const raw = ln.runs[0]?.text ?? '';
   const cells = tokenizeByPipe(raw).map((cell) => (cell.startsWith('=') ? cell.slice(1) : cell));
-  const visible = cells.map((cell) => textRenderLine(creoleTextLines(cell, font, measurer)[0] ?? emptyLine()).text);
+  const visible = cells.map((cell) => toStyledLine(creoleTextLines(cell, font, measurer)[0] ?? emptyLine(), font, measurer, NOTE_TAB_SIZE_NB).text);
   const joined = visible.join('  ');
-  return { text: joined, width: measurer.measure(joined, font).width };
+  const width = measurer.measure(joined, font).width;
+  return {
+    text: joined,
+    width,
+    height: font.size,
+    runs: [{ text: joined, width, bold: false, italic: false, underline: false, strike: false, size: font.size, dy: 0 }],
+  };
 }
 
 /** `creoleTextLines('')` reports NO lines (module doc comment: "an empty

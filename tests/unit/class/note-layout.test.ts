@@ -198,6 +198,9 @@ describe('buildNoteGraphParts — note-creole-markup cutover (G2 N55)', () => {
         width: blank.width,
         renderText: '\u00A0',
         renderWidth: measurer.measure('\u00A0', { family: blank.font.family, size: blank.font.size }).width,
+        // SI30 D2/D3: 0 -- a lone atom's own line is all-NORMAL, the
+        // identity property `creole-sea-line.ts`'s doc comment names.
+        dy: 0,
       },
     ]);
   });
