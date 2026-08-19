@@ -39,3 +39,9 @@ exposant-03-state
 exposant-01-class
 juvagu-33-dupa212
 exposant-03-state
+
+# Batch 3 — T5 collateral, human-accepted 2026-08-19 (journal STOP-4 ruling):
+# state notes now render through the shared run emitter and honour
+# <color:> per run (old note path hardcoded fill #000); only `fill`
+# attributes differ, jar draws #F00 there.
+xeziki-47-zomo866
