@@ -8,6 +8,10 @@ import { describe, it, expect } from 'vitest';
 import { parseState } from '../../../src/diagrams/state/parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
+import { renderSync } from '../../../src/index.js';
+import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
+import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { dotInputToStructural } from '../../oracle/svek-dot.js';
 
 function parse(source: string): StateDiagramAST {
   const lines = source
@@ -65,6 +69,31 @@ describe('concurrent region separator — pipe form', () => {
     `);
     const s = findState(ast, 'S');
     expect(s?.concurrentRegions).toHaveLength(1);
+  });
+
+  // G11 (SI28 concurrent-region/fimivu-15-vogi904): jar's `Separator.fromChar`
+  // (`svek/ConcurrentStates.java:63-89`) reads '-' -> HORIZONTAL, '|' ->
+  // VERTICAL from the FIRST character of the matched run.
+  it('-- records a HORIZONTAL separator on the owner', () => {
+    const ast = parse(`
+      state S {
+        [*] --> A
+        --
+        [*] --> B
+      }
+    `);
+    expect(findState(ast, 'S')?.concurrentSeparator).toBe('HORIZONTAL');
+  });
+
+  it('|| records a VERTICAL separator on the owner', () => {
+    const ast = parse(`
+      state S {
+        [*] --> A
+        ||
+        [*] --> B
+      }
+    `);
+    expect(findState(ast, 'S')?.concurrentSeparator).toBe('VERTICAL');
   });
 
   it('three regions via two || separators', () => {
@@ -235,5 +264,65 @@ describe('stray closer with no open composite', () => {
       A --> B
     `);
     expect(ast.transitions).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// G11 (SI28 concurrent-region/fimivu-15-vogi904, mission
+// state-declared-size-fix T10): `--` stacks regions top-to-bottom
+// (width=max, height=sum); `||` stacks regions side-by-side (width=sum,
+// height=max) -- the exact axis swap `ConcurrentStates.java:63-89`'s
+// `Separator.add` performs. Pre-fix, this port applied the `--` formula
+// unconditionally, so `A` (`--`) and `D` (`||`) below came out identically
+// sized (both 86x164px); jar gives them swapped shapes.
+// ---------------------------------------------------------------------------
+
+describe('|| stacks regions horizontally, unlike -- (G11, fimivu-15-vogi904)', () => {
+  // test-results/dot-cache/state/fimivu-15-vogi904/in.puml, verbatim.
+  const FIMIVU = `@startuml
+state A {
+  state B
+  --
+  state C
+}
+
+state D {
+  state E
+  ||
+  state F
+}
+@enduml`;
+
+  const PX_PER_INCH = 72;
+  // jar svek-5.dot:6-7 (both scope-5 nodes). A (--) is unaffected by this
+  // fix and stays 86x164px; D (||) becomes 152x99px (width=sum of regions,
+  // height=max of regions) instead of the pre-fix 86x164px this port used
+  // to declare via the -- formula applied unconditionally.
+  const JAR_A = { width: 1.194444, height: 2.277778 };
+  const JAR_D = { width: 2.111111, height: 1.375 };
+
+  function declaredScopes(markup: string): DotInputGraph[] {
+    const inputs: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => inputs.push(g));
+    try {
+      renderSync(markup, { measurer: new WidthTableMeasurer() });
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    return inputs;
+  }
+
+  it("declares A (--) and D (||) at jar's swapped-axis sizes, not identically", () => {
+    const scopes = declaredScopes(FIMIVU);
+    const outer = dotInputToStructural(scopes[scopes.length - 1]!);
+    expect(outer.nodes).toHaveLength(2);
+    const a = outer.nodes.find((n) => Math.abs(n.width - JAR_A.width) < 1e-5);
+    const d = outer.nodes.find((n) => Math.abs(n.width - JAR_D.width) < 1e-5);
+    expect(a, 'no node at A (--) width').toBeDefined();
+    expect(d, 'no node at D (||) width').toBeDefined();
+    expect(Math.abs(a!.width - JAR_A.width) * PX_PER_INCH).toBeLessThan(0.001);
+    expect(Math.abs(a!.height - JAR_A.height) * PX_PER_INCH).toBeLessThan(0.001);
+    expect(Math.abs(d!.width - JAR_D.width) * PX_PER_INCH).toBeLessThan(0.001);
+    expect(Math.abs(d!.height - JAR_D.height) * PX_PER_INCH).toBeLessThan(0.001);
   });
 });

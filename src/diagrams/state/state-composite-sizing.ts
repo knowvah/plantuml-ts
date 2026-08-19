@@ -9,7 +9,7 @@
  * @see ~/git/plantuml/.../svek/ConcurrentStates.java (region image stacking)
  */
 
-import type { State } from './ast.js';
+import type { Separator, State } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { splitStateDisplayLines } from './state-sizing.js';
@@ -91,9 +91,16 @@ export function measureAutonomWrapper(
   // formula; CCN 2, length driven by the doc comment + straight-line math.
 }
 
-/** ConcurrentStates: per-region images stacked vertically (TB rankdir) --
- *  width is the widest region, height is the PLAIN SUM of region heights,
- *  ZERO extra gap between them.
+/** ConcurrentStates: per-region images stacked either top-to-bottom (`--`,
+ *  HORIZONTAL separator LINE — width is the widest region, height is the
+ *  PLAIN SUM of region heights) or side-by-side (`||`, VERTICAL separator
+ *  LINE — width is the PLAIN SUM of region widths, height is the widest
+ *  region) — the exact axis swap `Separator.add` performs, keyed by which
+ *  separator character produced the regions (G11, mission
+ *  state-declared-size-fix T10, jar-verified `fimivu-15-vogi904`: this port
+ *  used to apply the HORIZONTAL/`--` formula unconditionally, so a `||`
+ *  composite came out identically sized to an equivalent `--` one instead
+ *  of swapped). ZERO extra gap between regions on either axis.
  *
  *  Mission G4 S4 (mechanism 7's own concurrent-composite companion,
  *  diagnosed while chasing `nelupe-49-xova546`'s regression): direct read of
@@ -119,11 +126,20 @@ export function measureAutonomWrapper(
  */
 const CONCURRENT_SEPARATOR_GAP = 0;
 
-export function stackConcurrentRegions(regionDims: readonly Dim[]): Dim {
+/** `Separator.add` (`ConcurrentStates.java:79-84`): VERTICAL (`||`) sums
+ *  WIDTH and maxes HEIGHT; HORIZONTAL (`--`) maxes WIDTH and sums HEIGHT --
+ *  the exact axis swap G11 restores (state-declared-size-fix T10). */
+export function stackConcurrentRegions(regionDims: readonly Dim[], separator: Separator): Dim {
   if (regionDims.length === 0) return { width: 0, height: 0 };
-  const width = Math.max(...regionDims.map((d) => d.width));
-  const height =
-    regionDims.reduce((sum, d) => sum + d.height, 0) +
-    CONCURRENT_SEPARATOR_GAP * (regionDims.length - 1);
-  return { width, height };
+  const gap = CONCURRENT_SEPARATOR_GAP * (regionDims.length - 1);
+  if (separator === 'VERTICAL') {
+    return {
+      width: regionDims.reduce((sum, d) => sum + d.width, 0) + gap,
+      height: Math.max(...regionDims.map((d) => d.height)),
+    };
+  }
+  return {
+    width: Math.max(...regionDims.map((d) => d.width)),
+    height: regionDims.reduce((sum, d) => sum + d.height, 0) + gap,
+  };
 }
