@@ -199,6 +199,11 @@ export type GeoSpec =
        *  separator-line coordinates between stacked regions -- see
        *  `StateNodeGeo.separators`'s own doc comment (state-geo-types.ts). */
       separators?: readonly { x1: number; y1: number; x2: number; y2: number }[];
+      /** SI31 T4 (G5) -- see `StateNodeGeo.southCapInk`'s own doc comment
+       *  (state-geo-types.ts) for the full jar derivation. Attached in
+       *  `state-composite-pass.ts#resolveMember`, copied straight through by
+       *  `state-composite-geo.ts`. */
+      southCapInk?: boolean;
       /** mission G4 S7 -- see `StateNodeGeo.creationIndex`'s own doc comment. */
       creationIndex?: number;
     }
@@ -267,6 +272,11 @@ export type GeoSpec =
        *  `state-composite-frontier.ts` but has zero fixture coverage. Always
        *  set together with `borderPointMemberIds`. */
       rankdir?: 'TB' | 'LR';
+      /** SI31 T4 (G5) -- see `StateNodeGeo.southCapInk`'s own doc comment
+       *  (state-geo-types.ts) for the full jar derivation. Attached in
+       *  `state-composite-pass.ts#resolveMember`, copied straight through by
+       *  `state-composite-geo.ts`. */
+      southCapInk?: boolean;
     };
 
 /** `DiagramCtx.resolvedAutonom`'s own value type -- exported so callers

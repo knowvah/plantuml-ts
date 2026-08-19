@@ -68,7 +68,9 @@ state parent {
 }
 @enduml`;
 
-/** jar `svek-3.dot:6` — `A`'s declared box, in inches (G5, unresolved). */
+/** jar `svek-3.dot:6` — `A`'s declared box, in inches (G5, CLOSED by
+ *  SI31 T4 on the height axis; the width residual is a separate ~0.0025px
+ *  rounding gap, never part of G5). */
 const JAR_A = { width: 2.744931, height: 2.069444 };
 /** jar `svek-2.dot:6` — `parent`'s declared box, in inches (G6, resolved). */
 const JAR_PARENT = { width: 1.463061, height: 1.375 };
@@ -84,17 +86,21 @@ function declaredScopes(markup: string): DotInputGraph[] {
   return inputs;
 }
 
-describe('RoundedSouth south-cap ink (G5, diagnosed, NOT landed)', () => {
-  it("pins A's outer box at its current (still 1px short of jar) height", () => {
+describe('RoundedSouth south-cap ink (G5, mechanism 8, LANDED by SI31 T4)', () => {
+  it("declares A's outer box at jar's own height, south cap included", () => {
     const scopes = declaredScopes(PACAMI);
     expect(scopes).toHaveLength(3);
     const outer = dotInputToStructural(scopes[2]!);
     // `A` (state B{}/C{c}) is the widest node in the outermost scope --
     // `S1`/`S2` are plain leaves, far narrower.
     const a = [...outer.nodes].sort((x, y) => y.width - x.width)[0]!;
-    // Height stays 1px short of jar (2.069444in) -- mechanism 8 deferred.
-    expect(a.height).toBeCloseTo(2.055556, 6);
-    expect(a.height).not.toBeCloseTo(JAR_A.height, 6);
+    // PACAMI's `<style> state { BackGroundColor yellow }` resolves
+    // `southBackcolor` non-transparent (`Cluster.java:459-471`), so
+    // `RoundedSouth.drawU` draws its `UPath` cap and `LimitFinder
+    // #drawUPath`'s ZERO inset reaches `y + height` -- 1px past the outline
+    // `URectangle`'s own `y + height - 1`. That closes the height axis to
+    // jar's 2.069444in exactly (it used to pin at 2.055556in).
+    expect(a.height).toBeCloseTo(JAR_A.height, 6);
     // Width carries a pre-existing ~0.0025px residual, unrelated to G5.
     expect(a.width).toBeCloseTo(JAR_A.width, 4);
   });

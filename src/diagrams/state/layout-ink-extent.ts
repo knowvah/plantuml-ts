@@ -72,25 +72,15 @@
  * while the document-level functions keep the pre-existing unconditional
  * fold.
  *
- * T9 also investigated mechanism 8 (`RoundedContainer.drawU`'s SEPARATE
- * `RoundedSouth` south-cap `UPath`, `~/git/plantuml/.../svek/
- * RoundedContainer.java:89-92`, whose uninset `LimitFinder#drawUPath` walk
- * reaches 1px past a composite's `y+h-1` corner, `pacami-67-dafe414`/
- * `tofezi-64-koda860`/`xojudi-20-keco020`/`decede-10-buvu414`, SI28 T1/T2's
- * `findings/composite-{a,b}.md`) but did NOT land it: `RoundedSouth.drawU`
- * early-returns when `southBackcolor` is transparent, and the DEFAULT skin
- * sets exactly that (`~/git/plantuml/src/main/resources/skin/plantuml
- * .skin:266-271`, `stateDiagram{state{body{BackGroundColor transparent}}}`).
- * Applying the +1 unconditionally regressed 9 previously-exact, DEFAULT-
- * styled fixtures (`kenuci-20-cane702`/`nelupe-49-xova546`/`sizife-41-
- * buje191`/`lasasi-13-nona547`/`lonuti-97-voko521`/`sapelo-46-jafe280`/
- * `soxene-95-domu248`/`pexiku-77-japi217`/`nivanu-50-zajo916`, none of
- * which set a state background — `harness-diff.py`, full corpus;
- * `lasasi-13`/`soxene-95` set `RoundCorner` alone and still regress, ruling
- * that out as the gate). This module has no resolved-color signal on
- * `StateNodeGeo` to gate the +1 correctly (only the renderer resolves fill,
- * via `theme`, out of this write-set), so mechanism 8 is deferred — a
- * follow-on should thread a resolved south-opacity bit onto `StateNodeGeo`.
+ * Mechanism 8 (the composite south cap) was diagnosed by T9 and deferred:
+ * an UNCONDITIONAL +1 regressed 9 exact, default-styled fixtures
+ * (`kenuci-20-cane702`/`nelupe-49-xova546`/`sizife-41-buje191`/`lasasi-13-
+ * nona547`/`lonuti-97-voko521`/`sapelo-46-jafe280`/`soxene-95-domu248`/
+ * `pexiku-77-japi217`/`nivanu-50-zajo916`; `lasasi-13`/`soxene-95` set
+ * `RoundCorner` alone and still regressed, ruling THAT out as the gate).
+ * SI31 T4 landed it gated ({@link addSouthCapInk} + `state-composite-pass
+ * .ts#resolvesSouthCapInk`, keeping this module theme-free), closing the five
+ * G5 fixtures (SI28 T1/T2's `findings/composite-{a,b}.md`), those 9 flat.
  *
  * @see plans/g4-state-svg/ledger.md (S1, mechanism 4; S4, mechanism 7)
  * @see class/layout-ink-extent.ts (the class-engine precedent this mirrors)
@@ -290,11 +280,20 @@ function addNoteInk(box: InkBox, x: number, y: number, w: number, h: number): vo
   addPoint(box, x + w, y + h);
 }
 
-// G5 (RoundedSouth south-cap ink, `pacami-67-dafe414`/`tofezi-64-koda860`/
-// `xojudi-20-keco020`/`decede-10-buvu414`) was investigated and NOT landed
-// this task -- see the module doc comment's mechanism-8 paragraph for the
-// full, jar-cited diagnosis (background-color-cascade dependent, not
-// reachable from this module's pure `StateNodeGeo` geometry).
+/** SI31 T4 (G5, mechanism 8): the composite south cap's own uninset ink.
+ *  The cap is a SEPARATE shape reaching the container's FULL `y + height`
+ *  (`~/git/plantuml/.../svek/RoundedContainer.java:89-91`) and, on
+ *  `RoundedSouth.drawU`'s `rounded != 0` branch, a `UPath` — so
+ *  `LimitFinder#drawUPath` folds it with ZERO inset (`.../klimt/drawing/
+ *  LimitFinder.java:164-167`), exactly 1 px past the outline `URectangle`'s
+ *  `y + height - 1` from `#drawRectangle` (`LimitFinder.java:184-188`). That
+ *  difference IS this term — no constant. X already reaches `x + width` via
+ *  the composite branch's own `addStateBoxInk`. Gate and full derivation:
+ *  `StateNodeGeo.southCapInk` (state-geo-types.ts). */
+function addSouthCapInk(box: InkBox, node: StateNodeGeo): void {
+  if (node.southCapInk !== true) return;
+  addPoint(box, node.x + node.width, node.y + node.height);
+}
 
 /** One node's own ink contribution (recurses into composite children AND
  *  this node's own nested `.transitions` — `state-composite-geo.ts`
@@ -327,6 +326,7 @@ function addNodeInk(
       addPoint(box, node.x - over.left - 1, node.y - over.top - 1);
       addPoint(box, node.x + node.width + over.right, node.y + node.height + over.bottom - 1);
     }
+    addSouthCapInk(box, node);
     for (const child of node.children) addNodeInk(box, child, labelInk, arrowheadInk);
     for (const t of node.transitions) addTransitionInk(box, t, labelInk, arrowheadInk);
     return;

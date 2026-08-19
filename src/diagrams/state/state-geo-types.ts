@@ -253,6 +253,41 @@ export interface StateNodeGeo {
    * @see renderer-box.ts#renderNormal / renderer-composite-box.ts#renderCompositeMeasured (draw)
    */
   shadowing?: number;
+  /**
+   * SI31 T4 (G5, "mechanism 8"): `true` when `RoundedContainer.drawU`
+   * (`~/git/plantuml/.../svek/RoundedContainer.java:89-91`) actually DRAWS
+   * this composite's `RoundedSouth` south cap as a `UPath`, so that
+   * `LimitFinder#drawUPath`'s ZERO ink inset
+   * (`~/git/plantuml/.../klimt/drawing/LimitFinder.java:164-167`) applies at
+   * the cap's own max-Y -- which, since the cap is translated by
+   * `nameHeight + descriptionHeight` and is `height - nameHeight -
+   * descriptionHeight` tall, is the container's FULL `y + height`, 1 px past
+   * the outline `URectangle`'s own `y + height - 1`
+   * (`LimitFinder.java:184-188`).
+   *
+   * Set ONLY when BOTH of `RoundedSouth.drawU`'s own guards pass
+   * (`~/git/plantuml/.../svek/RoundedSouth.java:65-83`): the resolved
+   * `southBackcolor` is non-transparent (`if (backColor.isTransparent())
+   * return;`, lines 66-67), AND the corner radius is non-zero (a zero radius
+   * takes the `URectangle` branch at lines 68-70, whose ink goes through
+   * `drawRectangle`'s `-1` inset instead and therefore adds nothing).
+   * `southBackcolor` itself is resolved at `svek/Cluster.java:459-471` --
+   * an explicit `ColorType.BACK` override on the group, else the
+   * `stateDiagram.state.body` style bucket, which
+   * `src/main/resources/skin/plantuml.skin:266-271` defaults to
+   * `transparent`.
+   *
+   * Populated ONLY for the node kinds jar wraps in a `RoundedContainer` at
+   * all -- COMPOSITES (`kind:'autonom'`/`'cluster'` GeoSpecs, i.e. nodes
+   * with `children`), computed in `state-composite-pass.ts#resolveMember`
+   * where `theme` is in scope. Every leaf box and pseudostate is left
+   * `undefined`, and `undefined`/`false` behave identically (no extra ink),
+   * so the default-skin path is byte-identical to before this field
+   * existed.
+   * @see layout-ink-extent.ts#addSouthCapInk (ink reservation)
+   * @see state-composite-pass.ts#resolvesSouthCapInk (the gate)
+   */
+  southCapInk?: boolean;
 }
 
 /** One stacked concurrent region's own materialized content -- see

@@ -466,12 +466,14 @@ export function materializeSpecs(
           ? { shadowing }
           : {}),
       });
-    } else if (spec.kind === 'autonom') {
-      const g = materializeAutonom(spec, posMap, shadowing);
-      if (g !== undefined) out.push(g);
     } else {
-      const g = materializeCluster(spec, posMap, clusterPosMap, shadowing);
-      if (g !== undefined) out.push(g);
+      const g = spec.kind === 'autonom'
+        ? materializeAutonom(spec, posMap, shadowing)
+        : materializeCluster(spec, posMap, clusterPosMap, shadowing);
+      // SI31 T4 (G5): the south-cap ink bit rides the spec through BOTH
+      // composite shapes, so it is folded once here rather than in each
+      // shape's own return -- see `StateNodeGeo.southCapInk` (state-geo-types).
+      if (g !== undefined) out.push(spec.southCapInk === true ? { ...g, southCapInk: true } : g);
     }
   }
   return out;

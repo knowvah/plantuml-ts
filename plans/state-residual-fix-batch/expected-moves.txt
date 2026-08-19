@@ -48,6 +48,41 @@ zacajo-09-tamu628 # T3's own target (scope4 width idx1, -3.732624px -> exact): S
 giniti-22-fexo000 # Radio_Root's own `[*] --> Vendor_Radio_Root : [set]` is a region-0-local labeled transition (Vendor_Radio_Root is a direct child of Radio_Root, which owns a `--`-delimited second region `Radio_Commit_Root`) -- buildConcurrentBranchAcc's newAccumulator() call now supplies labelFont/measurer for region-0's own pass exactly like buildPlainAutonomSpec/buildTopLevelPass already did, so this transition's `[set]` label reads graphviz's real position instead of the perpendicular-offset fallback, moving the label (and, via regionInkGeometry's ink fold, the surrounding layout) to jar's real placement; DOT text changes too (jar-ward: Radio_Root's own declared size is an INPUT literal upstream), state-dot-parity ratchet still 270/270.
 
 # Batch 4 (T4 — G5 south-cap opacity)
+# Every mover below is the SAME jar-side mechanism: with a resolved
+# non-transparent southBackcolor (Cluster.java:459-471) and a non-zero
+# RoundCorner, RoundedContainer.drawU:89-91 draws the south cap as a UPath
+# whose ink LimitFinder#drawUPath:164-167 folds with ZERO inset, 1px past the
+# outline URectangle's y+h-1 from #drawRectangle:184-188. EVERY one of the 20
+# grows the document canvas by +1px on HEIGHT ONLY (gokife-89 by +2, two
+# nested composites), in the jar's direction; 18 of the 20 now match the jar's
+# own canvas height EXACTLY. Width is unchanged everywhere -- the cap's UPath
+# reaches x+width, which addStateBoxInk's own uninset divider term already
+# contributed. The 15 non-target fixtures below were already declared-size
+# exact (harness-diff.py: 5 rows went exact, 0 appeared or grew), so they
+# surface only here, in the render manifest.
+
+pacami-67-dafe414 # T4 target (scope3 height idx2, -0.999936px -> exact). `<style> state { BackGroundColor yellow }` resolves southBackcolor non-transparent, so RoundedSouth.drawU takes its UPath branch and LimitFinder#drawUPath folds the cap's max-Y with ZERO inset -- 1px past the outline URectangle's y+h-1. Canvas height 204 -> 206, jar 206 EXACT. DOT text changes too (jar-ward: the composite's own declared height is an INPUT literal in its parent scope's emitted DOT statement).
+tofezi-64-koda860 # T4 target (scope3 height idx3, -0.999936px -> exact); `<style> stateDiagram { BackgroundColor cyan }`, same mechanism as pacami-67. Canvas height 279 -> 280, jar 280 EXACT. DOT text changes too (declared height is an upstream INPUT literal).
+xojudi-20-keco020 # T4 target (scope3 height idx3, -0.999936px -> exact); `stateDiagram { RoundCorner 2, BackgroundColor cyan }` -- non-zero radius, so still the UPath branch. Canvas height 279 -> 280, jar 280 EXACT. DOT text changes too.
+decede-10-buvu414 # T4 target (scope3 height idx3, -0.999936px -> exact); same `<style>` cascade as xojudi-20 plus LineColor/FontColor. Canvas height 279 -> 280, jar 280 EXACT. DOT text changes too.
+gokife-89-boja382 # T4 target (scope3 height idx0, -1.000008px -> exact); `skinparam state { backgroundColor White, backgroundColor<<stereo>> ... }` -- FromSkinparamToStyle.java:204 targets SName.state, which matchAll admits into the ...state.body query, so BOTH the plain and the stereotyped forms reach southBackcolor. Two nested composites each gain their cap: canvas height 311 -> 313, jar 313 EXACT. DOT text changes too.
+
+beguxu-19-tize774 # size-only, non-target: an opaque-south composite whose canvas height goes 496 -> 497, jar 497 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+dapuko-98-zuzo096 # size-only, non-target: an opaque-south composite whose canvas height goes 120 -> 121, jar 121 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+lojeju-04-fadu517 # size-only, non-target: an opaque-south composite whose canvas height goes 274 -> 275, jar 275 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+nijugi-19-jazi166 # size-only, non-target: an opaque-south composite whose canvas height goes 136 -> 137, jar 137 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+niveno-60-tiro789 # size-only, non-target: an opaque-south composite whose canvas height goes 230 -> 231, jar 263 -- still short by a PRE-EXISTING, unrelated 32px gap this term neither caused nor widened. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+nuvura-69-mafe604 # size-only, non-target: an opaque-south composite whose canvas height goes 274 -> 275, jar 275 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+pebepi-32-cati486 # size-only, non-target: an opaque-south composite whose canvas height goes 120 -> 121, jar 121 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+rufosi-58-kegi649 # size-only, non-target: an opaque-south composite whose canvas height goes 230 -> 231, jar 231 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+sumiri-68-suvo696 # size-only, non-target: an opaque-south composite whose canvas height goes 192 -> 193 against jar's 183. The ONLY fixture of the 20 that moves AWAY from jar: it was already 9px too TALL from a pre-existing, unrelated, opposite-signed defect, and this term widens that gap to 10px. Kept deliberately -- the +1 is the source-verified RoundedSouth/LimitFinder rule (the jar adds it here too), so suppressing it on this fixture would be fitting the gate to a symptom of a different bug. Its declared-size rows were already exact and stay exact; only the rendered SVG moves. Contrast the other 19, which all move jar-ward (18 to an EXACT canvas height, niveno-60 from 33px short to 32px).
+taxile-56-goca422 # size-only, non-target: an opaque-south composite whose canvas height goes 120 -> 121, jar 121 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+tigibi-80-zidi137 # size-only, non-target: an opaque-south composite whose canvas height goes 120 -> 121, jar 121 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+vakama-53-jata958 # size-only, non-target: an opaque-south composite whose canvas height goes 180 -> 181, jar 181 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+vekoja-22-made430 # size-only, non-target: an opaque-south composite whose canvas height goes 180 -> 181, jar 181 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+xomize-22-poro350 # size-only, non-target: an opaque-south composite whose canvas height goes 206 -> 207, jar 207 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+zumeri-82-julo078 # size-only, non-target: an opaque-south composite whose canvas height goes 180 -> 181, jar 181 EXACT. Same mechanism as the five targets above; its declared-size rows were already exact, so only the rendered SVG moves.
+
 
 # Batch 5 (T5 — G15 composite-anchor spline clip)
 
