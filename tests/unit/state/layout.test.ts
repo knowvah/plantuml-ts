@@ -272,7 +272,7 @@ function styledLine(text: string): unknown {
     text,
     width,
     height: theme.fontSize,
-    runs: [{ text, width, bold: false, italic: false, underline: false, strike: false }],
+    runs: [{ text, width, bold: false, italic: false, underline: false, strike: false, size: theme.fontSize, dy: 0 }],
   };
 }
 

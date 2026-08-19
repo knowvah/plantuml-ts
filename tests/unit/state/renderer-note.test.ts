@@ -58,7 +58,28 @@ describe('buildFlatNoteGeos', () => {
       creationIndex: 3,
     });
     expect(geos[0]!.noteOpale).toBeUndefined();
-    expect(geos[0]!.noteLines).toEqual([{ text: 'hi there', width: expect.any(Number) as number }]);
+    // SI30 T5: `noteLines` now carries the SAME per-run size/dy shape the
+    // header/body path draws with (`state-note-layout.ts#buildRenderLines`)
+    // — a plain NORMAL run reports `size: NOTE_FONT_SIZE` (13), `dy: 0`.
+    expect(geos[0]!.noteLines).toEqual([
+      {
+        text: 'hi there',
+        width: expect.any(Number) as number,
+        height: 13,
+        runs: [
+          {
+            text: 'hi there',
+            width: expect.any(Number) as number,
+            bold: false,
+            italic: false,
+            underline: false,
+            strike: false,
+            size: 13,
+            dy: 0,
+          },
+        ],
+      },
+    ]);
   });
 
   it('skips a composite-scoped note entirely (scopeId !== "") — flat pipeline only this iteration', () => {

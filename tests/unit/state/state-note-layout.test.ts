@@ -16,6 +16,8 @@ import {
   sweepOrphanNoteEdges,
   measureNote,
 } from '../../../src/diagrams/state/state-note-layout.js';
+import { renderStateNoteFreestanding } from '../../../src/diagrams/state/renderer-note.js';
+import type { StateNodeGeo } from '../../../src/diagrams/state/state-geo-types.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { parseState } from '../../../src/diagrams/state/parser.js';
@@ -203,6 +205,59 @@ end note
     expect(m.width).toBeCloseTo(rawWidth + 6 + 15, 3);
     expect(m.height).toBeCloseTo(2 * 13 + 2 * 5, 3);
     expect(m.lines.map((l) => l.text)).toEqual(['plain line one', 'plain line two']);
+  });
+});
+
+/**
+ * SI30 D2/D3 (creole-exposant-port, T5): a note body draws the SAME per-run
+ * `size`/`dy` shape the header/body path draws with
+ * (`state-sizing-creole.ts#toStyledLine`, reused here via
+ * `buildRenderLines`) — a paired sizer/renderer test mirroring
+ * `state-sizing-creole.test.ts`'s own convention: what `measureNote`
+ * measured is exactly what `renderStateNoteFreestanding` then draws.
+ */
+describe('measureNote / renderStateNoteFreestanding — <sub> per-run size+dy (SI30 T5)', () => {
+  it('H<sub>2</sub>O: the SUB run mutes to its own size, both flanking NORMAL runs share dy=-3', () => {
+    const m = measureNote('H<sub>2</sub>O', defaultTheme, measurer);
+    const [h, two, o] = m.lines[0]!.runs;
+    // `<sub>` mutes NOTE_FONT_SIZE 13 -> 10 (`FontPosition.java:51-60`); the
+    // `<sub>` grows the line's BOTTOM only, so both NORMAL runs keep dy=-3
+    // (the SAME worked example `creole-sea-line.ts` documents for the
+    // header/body path — one Sea, one formula, every state-engine consumer).
+    expect(h).toMatchObject({ text: 'H', size: 13, dy: -3 });
+    expect(two).toMatchObject({ text: '2', size: 10 });
+    expect(o).toMatchObject({ text: 'O', size: 13, dy: -3 });
+
+    const geo: StateNodeGeo = {
+      id: 'N1',
+      kind: 'note',
+      display: '',
+      x: 10,
+      y: 20,
+      width: m.width,
+      height: m.height,
+      children: [],
+      transitions: [],
+      noteLines: m.lines,
+    };
+    const svg = renderStateNoteFreestanding(geo, defaultTheme);
+    // Sizer/renderer lockstep: every run's own measured width sums to the
+    // line's declared width (the SAME pairing invariant
+    // `state-sizing-creole.test.ts`'s `xasoka-58-temi462` case asserts).
+    expect(m.lines[0]!.runs.reduce((sum, r) => sum + r.width, 0)).toBeCloseTo(m.lines[0]!.width, 6);
+    // Each run draws at its OWN `font-size` (13/10/13), not one shared note
+    // font-size for the whole body -- the per-run `<size:N>` fix this task
+    // brings to notes too (pre-T5: one flat `<text>` of markup-stripped,
+    // joined text at a single size).
+    expect(svg).toContain('font-size="13" fill="#000">H<');
+    expect(svg).toContain('font-size="10" fill="#000">2<');
+    expect(svg).toContain('font-size="13" fill="#000">O<');
+    // The two NORMAL runs land on the IDENTICAL baseline (dy=-3 for both) --
+    // jar-verified shape from `creole-sea-line.ts`'s own worked example.
+    const hY = /x="16" y="([\d.]+)" font-size="13"/.exec(svg)?.[1];
+    const oY = /x="[\d.]+" y="([\d.]+)" font-size="13" fill="#000">O</.exec(svg)?.[1];
+    expect(hY).toBeDefined();
+    expect(oY).toBe(hY);
   });
 });
 

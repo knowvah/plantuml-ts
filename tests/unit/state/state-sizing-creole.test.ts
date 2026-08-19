@@ -282,3 +282,85 @@ describe('G23 — creole table (`StripeTable`/`AtomTable`) in a composite descri
     expect(svg).toContain('font-weight="700"');
   });
 });
+
+// ---------------------------------------------------------------------------
+// SI30 D2/D3 (creole-exposant-port, T5) — `<sup>`/`<sub>` size+dy threaded
+// onto `StateTextRun` and drawn per-run (not one shared line font size).
+// ---------------------------------------------------------------------------
+
+describe('SI30 D2/D3 — <sup>/<sub> per-run size+dy (T5)', () => {
+  it('juvagu-33-dupa212: a tab-then-<sup> description line draws the sup run at its OWN muted size after the jar-exact tab advance', () => {
+    const state = makeState({ id: 'one', display: 'one', description: ['\t<sup>1</sup>'] });
+    const dim = measureState(state, false, theme, measurer, 'TB');
+    // jar: svek-1.dot sh0006 width=1.140538in height=0.708333in (*72).
+    expect(dim.width).toBeCloseTo(1.140538 * 72, 3);
+    expect(dim.height).toBeCloseTo(0.708333 * 72, 3);
+
+    const geo = leafGeo(state);
+    const line = geo.bodyLines![0] as unknown as { runs: readonly { text: string; size: number; dy: number }[] };
+    // The tab collapses to an empty placeholder run (pure `dx`) + the <sup>
+    // run itself -- `<sup>` mutes 14 -> 11 (`FontPosition.java:51-60`).
+    expect(line.runs.map((r) => ({ text: r.text, size: r.size }))).toEqual([
+      { text: '', size: 14 },
+      { text: '1', size: 11 },
+    ]);
+
+    const svg = renderNormal(geo, theme);
+    // jar draws the sup at x=68 (12 + the 56px tab stop) -- unaffected by
+    // this task, already jar-exact since T6. The `<text>` now carries the
+    // RUN's own font-size (11), not the line's shared 14.
+    expect(svg).toContain('<text x="68" y="45.222" font-size="11" fill="#000">1</text>');
+  });
+
+  it('exposant-03-state: H<sub>2</sub>O draws the SUB run at its own muted size/width, and the flanking NORMAL runs stay jar-exact (dy=-3)', () => {
+    const state = makeState({ id: 'one', display: 'one', description: ['H<sub>2</sub>O'] });
+    const geo = leafGeo(state);
+    const line = geo.bodyLines![0] as unknown as {
+      runs: readonly { text: string; size: number; dy: number; width: number }[];
+    };
+    const [h, two, o] = line.runs;
+    // `<sub>` mutes 14 -> 11; both flanking NORMAL runs share dy=-3 -- the
+    // `<sub>` grows the line's BOTTOM only, so the NORMAL baseline must not
+    // sink with it (`creole-sea-line.ts`'s own worked example).
+    expect(h).toMatchObject({ text: 'H', size: 14, dy: -3 });
+    expect(two).toMatchObject({ text: '2', size: 11 });
+    expect(o).toMatchObject({ text: 'O', size: 14, dy: -3 });
+    // T5 fix: the "2" run's own WIDTH is measured at its MUTED size (11),
+    // not the line's 14 -- jar-probed `measurer.measure('2',{size:11})` =
+    // 6.11875, matching jar's own `O` x-position on this fixture exactly
+    // (`x="28.269"` below); the pre-fix code measured 7.7875 (size 14) and
+    // drew `O` 1.669px too far right.
+    expect(two!.width).toBeCloseTo(6.11875, 5);
+
+    const svg = renderNormal(geo, theme);
+    // jar (`exposant-03-state/in.svg`, node.y=86): H@x=12/y=125.889/14,
+    // 2@x=22.15/y=129.556/11, O@x=28.269/y=125.889/14 -- `leafGeo` places
+    // this node at y=7 instead of jar's 86, a CONSTANT -79 shift on every
+    // baseline below, so only the y values differ from the cited jar ones.
+    expect(svg).toContain('<text x="12" y="46.889" font-size="14" fill="#000">H</text>');
+    expect(svg).toContain('<text x="28.269" y="46.889" font-size="14" fill="#000">O</text>');
+    expect(svg).toContain('<text x="22.15" y="51.222" font-size="11" fill="#000">2</text>');
+    // The SUB run's OWN baseline (51.222) is jar's 129.556-79=50.556 PLUS a
+    // documented, bounded ~0.667px residual (`renderer-box.ts#runBaseline`'s
+    // own doc comment: `run.size` is MUTED where Sea's true reference
+    // descent is unmuted, a fixed mute-delta/4.5 this seam cannot close
+    // without a field the locked `CreoleTextRun` contract doesn't expose).
+    expect(svg).toContain('y="51.222"');
+  });
+
+  it('exposant-03-state: a nested <size:20><sup> draws at the CASCADED-then-muted size (20 -> 17), not the line font', () => {
+    const state = makeState({ id: 'one', display: 'one', description: ['<size:20><sup>x</sup></size>'] });
+    const geo = leafGeo(state);
+    const line = geo.bodyLines![0] as unknown as { runs: readonly { text: string; size: number; width: number }[] };
+    // 20 (the <size:20> cascade) muted by 3 (FontPosition.java:51-60) = 17.
+    expect(line.runs).toEqual([expect.objectContaining({ text: 'x', size: 17 })]);
+    // T5 fix: measured at its OWN size (17), not the line's 14 -- jar-probed
+    // `measurer.measure('x',{size:17})` = 8.5, matching this fixture's own
+    // jar SVG run width exactly (`textLength` is omitted for a single char,
+    // `svg-shapes.ts#textLengthOf`, so width is verified via the geo field).
+    expect(line.runs[0]!.width).toBeCloseTo(8.5, 5);
+
+    const svg = renderNormal(geo, theme);
+    expect(svg).toContain('<text x="12" y="49.889" font-size="17" fill="#000">x</text>');
+  });
+});

@@ -76,9 +76,14 @@ import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotLayoutResult } from '../../core/graph-layout.types.js';
-import { path, text as svgText } from '../../core/svg.js';
+import { path } from '../../core/svg.js';
 import { measureNote } from './state-note-layout.js';
-import { resolveStateFill, textAscent } from './state-render-colors.js';
+import { resolveStateFill } from './state-render-colors.js';
+// SI30 T5: notes draw the SAME per-run styled sequence the header/body path
+// draws with -- one emitter, one baseline formula (`renderer-box.ts
+// #runBaseline`'s own doc comment), no per-engine-zone duplication.
+import { renderStateRuns } from './renderer-box.js';
+import { styledLines } from './state-sizing-creole.js';
 import {
   opalePolygonLeft,
   opalePolygonRight,
@@ -197,26 +202,25 @@ export function buildFlatNoteGeos(ast: StateDiagramAST, ctx: FlatNoteGeoCtx): St
 // Rendering
 // ---------------------------------------------------------------------------
 
-/** Note body text, one `<text>` per line, LEFT-anchored — mirrors
- *  `../class/renderer-note.ts#renderNoteText`'s plain (no creole atoms)
- *  fallback shape; no target fixture this iteration carries inline markup
- *  in a note body (module doc comment). */
+/** Note body text, one `<text>` per RUN, LEFT-anchored — SI30 T5: draws the
+ *  SAME per-run styled sequence {@link StateNodeGeo.noteLines} carries
+ *  (`state-note-layout.ts#buildRenderLines`, `state-sizing-creole.ts
+ *  #toStyledLine`), so a `<sup>`/`<sub>`/`**bold**`/`<color:…>` run inside a
+ *  note body now draws at its own size/baseline/decoration instead of one
+ *  flat `<text>` of the markup-stripped-and-joined line (pre-T5 shape). */
 function renderNoteTextLines(node: StateNodeGeo, theme: Theme): string {
-  const lines = node.noteLines ?? [];
+  const lines = styledLines(node.noteLines ?? [], NOTE_FONT_SIZE);
   const parts: string[] = [];
   let lineTop = node.y + NOTE_MARGIN_Y;
   for (const ln of lines) {
-    const y = lineTop + textAscent(NOTE_FONT_SIZE);
+    const height = ln.height === 0 ? NOTE_FONT_SIZE : ln.height;
     parts.push(
-      svgText(node.x + NOTE_MARGIN_X1, y, ln.text, {
+      renderStateRuns(ln.runs, node.x + NOTE_MARGIN_X1, lineTop, height, {
         fontFamily: theme.fontFamily,
-        fontSize: NOTE_FONT_SIZE,
         fill: '#000000',
-        lengthAdjust: 'spacing',
-        textLength: ln.width,
       }),
     );
-    lineTop += NOTE_FONT_SIZE;
+    lineTop += height;
   }
   return parts.join('');
 }
@@ -341,30 +345,31 @@ export function renderNoteOnLink(
 }
 
 /** Split out of {@link renderNoteOnLink} to stay under this project's
- *  per-function NLOC cap — the note body text, one `<text>` per line,
- *  LEFT-anchored (mirrors {@link renderNoteTextLines}'s own loop, offset
- *  from the INSET polygon origin `(px, py)` rather than a `StateNodeGeo`'s
- *  own `x`/`y`). */
+ *  per-function NLOC cap — the note body text, one `<text>` per RUN,
+ *  LEFT-anchored (mirrors {@link renderNoteTextLines}'s own per-run loop,
+ *  offset from the INSET polygon origin `(px, py)` rather than a
+ *  `StateNodeGeo`'s own `x`/`y`). `lines` narrows through {@link styledLines}
+ *  the SAME way `renderNoteTextLines` does — this label's own producer
+ *  (`state-composite-edge-label.ts#measureLinkNoteDim`'s
+ *  `state-note-layout.ts#measureNote` reuse) already builds the styled shape. */
 function renderNoteOnLinkTextLines(
   px: number,
   py: number,
   lines: readonly StateTextLine[],
   theme: Theme,
 ): string {
+  const styled = styledLines(lines, NOTE_FONT_SIZE);
   const parts: string[] = [];
   let lineTop = py + NOTE_MARGIN_Y;
-  for (const ln of lines) {
-    const y = lineTop + textAscent(NOTE_FONT_SIZE);
+  for (const ln of styled) {
+    const height = ln.height === 0 ? NOTE_FONT_SIZE : ln.height;
     parts.push(
-      svgText(px + NOTE_MARGIN_X1, y, ln.text, {
+      renderStateRuns(ln.runs, px + NOTE_MARGIN_X1, lineTop, height, {
         fontFamily: theme.fontFamily,
-        fontSize: NOTE_FONT_SIZE,
         fill: '#000000',
-        lengthAdjust: 'spacing',
-        textLength: ln.width,
       }),
     );
-    lineTop += NOTE_FONT_SIZE;
+    lineTop += height;
   }
   return parts.join('');
 }
