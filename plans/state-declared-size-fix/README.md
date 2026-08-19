@@ -29,9 +29,9 @@ scope by design.
 | [1](batch-1/overview.md) | Core creole seam · leaf sizing · line continuation · note-on-link · parse guards (parallel) | T1 T2 T3 T4 T5 | [x] |
 | [2](batch-2/overview.md) | State text (G1+G8+G23) · note bodies (G2) — consume T1 | T6 T7 | [x] |
 | [3](batch-3/overview.md) | Composite geometry: clusterPosMap (G4) · ink extent (G5+G6) | T8 T9 | [x] |
-| [4](batch-4/overview.md) | Overlapping tail: `\|\|` orientation (G11) · label position (G13) | T10 T11 | [ ] |
-| [5a](batch-5a/overview.md) | Re-diagnosis D1–D4 (docs-only) | T12 T13 T14 T15 | [ ] |
-| [5b](batch-5b/overview.md) | Re-diagnosis D5–D8 (docs-only) | T16 T17 T18 T19 | [ ] |
+| [4](batch-4/overview.md) | Overlapping tail: `\|\|` orientation (G11) · label position (G13) | T10 T11 | [x] |
+| [5a](batch-5a/overview.md) | Re-diagnosis D1–D4 (docs-only) | T12 T13 T14 T15 | [x] |
+| [5b](batch-5b/overview.md) | Re-diagnosis D5–D8 (docs-only) | T16 T17 T18 T19 | [x] |
 | [6](batch-6/overview.md) | Close-out | T20 | [ ] |
 
 5a and 5b are disjoint and MAY run as one 8-way batch, and MAY run in
