@@ -63,7 +63,7 @@ import type { TransitionGeo } from './state-geo-types.js';
 import { buildStateGeoTextFields } from './state-sizing.js';
 import { measureAutonomWrapper, stackConcurrentRegions, type AutonomWrapper } from './state-composite-sizing.js';
 import { computeSvekResultGeometry } from './layout-ink-extent.js';
-import { materializeSpecs, type PosMap } from './state-composite-geo.js';
+import { materializeSpecs, clusterPosMapOf, type PosMap } from './state-composite-geo.js';
 import {
   type DiagramCtx,
   type PassAccumulator,
@@ -126,7 +126,13 @@ function regionInkGeometry(
   // accumulator -- see `state-composite-geo.ts#materializeAutonom`'s own
   // doc comment; `computeSvekResultGeometry`'s ink walk recurses into each
   // materialized node's own `.transitions` field directly.
-  const states = materializeSpecs(p.specs, posMap, undefined, shadowing);
+  // SI29 F7 (SI28 G4): this region's OWN `clusterPosMapOf(p.result)` -- see
+  // the identical fix at `state-composite-autonom.ts#buildPlainAutonomSpec`
+  // for the jar derivation. `ConcurrentStates#calculateDimensionSlow` sums
+  // each region's `inner.calculateDimension()` (`ConcurrentStates.java:
+  // 133-141`), and jar's `inner` is the REAL laid-out SvekResult with every
+  // cluster's header-inclusive `rectangleArea` already painted into it.
+  const states = materializeSpecs(p.specs, posMap, clusterPosMapOf(p.result), shadowing);
   const transitions = buildLevelTransitionGeos(p.acc, p.result);
   const ink = computeSvekResultGeometry(states, transitions);
   return {

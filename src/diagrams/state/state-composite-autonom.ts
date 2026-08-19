@@ -16,7 +16,7 @@ import type { DotLayoutResult } from '../../core/graph-layout.js';
 import { buildStateGeoTextFields } from './state-sizing.js';
 import { measureAutonomWrapper } from './state-composite-sizing.js';
 import { computeSvekResultGeometry } from './layout-ink-extent.js';
-import { materializeSpecs, type PosMap } from './state-composite-geo.js';
+import { materializeSpecs, clusterPosMapOf, type PosMap } from './state-composite-geo.js';
 import { buildConcurrentAutonomSpec, buildConcurrentRegionPass } from './state-composite-concurrent.js';
 import {
   type DiagramCtx,
@@ -42,17 +42,44 @@ type ExtractAutonomSpec = Extract<GeoSpec, { kind: 'autonom' }>;
  *  `state-composite-pass.ts`'s own identical site. */
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
+type OutCluster = NonNullable<DotLayoutResult['clusters']>[number];
+
+/** `Cluster#moveDelta` (`Cluster.java:127-136`) — the cluster's own box and
+ *  its title anchor ride the same translation. Extracted so
+ *  {@link shiftDotLayoutResult} stays one flat field-by-field literal. */
+function shiftCluster(c: OutCluster, dx: number, dy: number): OutCluster {
+  return {
+    ...c,
+    x: c.x + dx,
+    y: c.y + dy,
+    ...(c.label !== undefined ? { label: { ...c.label, x: c.label.x + dx, y: c.label.y + dy } } : {}),
+  };
+}
+
 /** Uniformly translate a pass's own raw layout result — mission G4 S4,
  *  mechanism 7's own position-offset half: reproduces `SvekResult
  *  #calculateDimension()`'s `clusterManager.moveDelta(...)` side effect
  *  (which mutates a wrapped child pass's own node/edge positions in place,
  *  BEFORE that pass is ever drawn — see `layout-ink-extent.ts
  *  #computeSvekResultGeometry`'s own doc comment) as a pure, non-mutating
- *  transform over our own `DotLayoutResult`. */
+ *  transform over our own `DotLayoutResult`.
+ *
+ *  SI29 F7: `clusters` moves too. `DotStringFactory#moveDelta` — the exact
+ *  method `SvekResult#calculateDimension` invokes (`SvekResult.java:133`) —
+ *  runs THREE loops: `allNodes()`, `allLines()`, `allCluster()`
+ *  (`DotStringFactory.java:653-663`), and `Cluster#moveDelta`
+ *  (`Cluster.java:127-136`) translates the cluster's own `rectangleArea`
+ *  and `xyTitle`. This port carried only the first two loops, so a nested
+ *  cluster's box stayed in the PRE-shift frame while its own member nodes
+ *  moved — visible as a nested composite drawn `(dx,dy)` off its children
+ *  (`fovafu-44-mifu394`: `A` at x=7 outside `B` at x=26) and, once the
+ *  ink walk started reading real cluster boxes, as a phantom 157 px of
+ *  ink above `giniti-22-fexo000`'s `Radio_Root` content. */
 export function shiftDotLayoutResult(result: DotLayoutResult, dx: number, dy: number): DotLayoutResult {
   if (dx === 0 && dy === 0) return result;
   return {
     ...result,
+    ...(result.clusters !== undefined ? { clusters: result.clusters.map((c) => shiftCluster(c, dx, dy)) } : {}),
     nodes: result.nodes.map((n) => ({
       ...n,
       x: n.x + dx,
@@ -111,11 +138,20 @@ export function shiftDotLayoutResult(result: DotLayoutResult, dx: number, dy: nu
  *  (via `state-composite-geo.ts#materializeSpecs`, reused rather than
  *  re-derived, so nested autonom/cluster composites get the SAME real
  *  ink-box treatment `addNodeInk` already gives them at the top level).
- *  Jar-verified byte-exact (outer box width/height AND innermost leaf
- *  child's own absolute position) on `coteta-47-mare883` (1 level),
- *  `lonuti-97-voko521` (2 levels, mixed leaf+nested-composite), and
- *  `bajelo-54-dixe684` (3 levels, unchanged/non-regressing) — see
- *  plans/g4-state-svg/ledger.md S4.
+ *  Verified against the jar on `coteta-47-mare883` (1 level) and
+ *  `lonuti-97-voko521` (2 levels, mixed leaf+nested-composite): both are
+ *  exact on every declared-size row today (`scripts/measure-composite-
+ *  declared-size.ts`), except lonuti's scope-3 width at 0.0024 px. SI28
+ *  flagged the ORIGINAL wording here — "jar-verified byte-exact … and
+ *  `bajelo-54-dixe684` (3 levels, unchanged/non-regressing)" — as stale,
+ *  and it was: at that time bajelo's own `Track_FSM` was 12.030 px narrow
+ *  and 12.000 px short, because a nested CLUSTER inside this pass hit the
+ *  `clusterPosMap: undefined` fallback below (SI28 G4). SI29 F7 closed it;
+ *  bajelo now reads 0.0012 px on width and −0.0001 px on height, and its
+ *  rendered `Run`/`Do_Sector` cluster rectangles match jar's own `in.svg`
+ *  (19,241,414×230 and 154.75,315,246.498×132) — pinned by
+ *  `tests/unit/state/state-composite-cluster-ink.test.ts`. See
+ *  plans/g4-state-svg/ledger.md S4 for the original derivation.
  *
  *  `childImg` is `geometry.*` alone (G8 T2 CLOSED this iteration's own
  *  Queued-for-S5 item): the composite-width gap S4 named above --
@@ -157,11 +193,24 @@ export function shiftDotLayoutResult(result: DotLayoutResult, dx: number, dy: nu
  *      EVERY diagram link; a missing SvekNode drops it at THIS pass only) */
 export function buildPlainAutonomSpec(s: State, ctx: DiagramCtx): ExtractAutonomSpec {
   const acc = newAccumulator(resolveArrowLabelFont(ctx.theme), ctx.measurer);
-  // G5 C3, mechanism 16 shape half: `insideAutonomPass` -- see that field's
-  // own doc comment (state-composite-pass.ts) for why a nested cluster
-  // inside THIS pass must stay title-table-ineligible this iteration
+  // `insideAutonomPass` marks this as a FIRED pass boundary -- see that
+  // field's own doc comment (state-composite-pass-types.ts). It no longer
+  // gates title-table eligibility: G8 T2 removed the
+  // `ctx.insideAutonomPass !== true` clause from
+  // `state-composite-cluster.ts#resolveClusterComposite` (:388) together
+  // with the `Math.max(geometry.*, result.*)` floor the clause guarded, so
+  // the old note here -- "must stay title-table-ineligible this iteration
   // (jar-verified `fotuje-06-fifa085`/`rovese-43-tadu368` size-backlog
-  // regression, traced to the ALREADY-PARKED `Math.max` floor below).
+  // regression, traced to the ALREADY-PARKED `Math.max` floor below)" --
+  // describes code that is gone. Neither fixture regresses today: rovese-43
+  // has no mismatched declared-size row at all, and fotuje-06's two
+  // remaining rows are −0.393 px (they were −68.393/−38.373/−25.793/−19.373
+  // px before SI29 F7 fixed the `clusterPosMap` fallback below). With that
+  // clause gone the flag has NO remaining reader -- it is set here and in
+  // `state-composite-concurrent.ts:234`, and only mentioned in prose
+  // elsewhere (`state-composite-pseudo.ts:100`). Left in place rather than
+  // deleted: the field itself lives in `state-composite-pass-types.ts`,
+  // outside this task's write-set.
   const childCtx: DiagramCtx = { ...ctx, insideAutonomPass: true };
   const memberSpecs = s.children.map((c) => resolveMember(c, acc, childCtx, undefined));
   const pseudoSpecs = addLocalPseudoNodes(s.id, s.transitions, acc, ctx.pseudoCreationIndex);
@@ -192,7 +241,20 @@ export function buildPlainAutonomSpec(s: State, ctx: DiagramCtx): ExtractAutonom
   // CONTAINING (top-level) pass. See `oracle/goldens/state/size-backlog
   // .json`'s own nimana-36-veco708 note for the jar-verified root cause this
   // closes.
-  const inkStates = materializeSpecs(localSpecs, rawPosMap, undefined, ctx.theme.shadowing ?? 0);
+  //
+  // SI29 F7 (SI28 G4): this pass's OWN `clusterPosMapOf(result)` -- not the
+  // `undefined` this call carried until now. A nested 'cluster' composite
+  // inside this pass is a real graphviz cluster, and jar paints its
+  // `rectangleArea` (graphviz's box after `FrontierCalculator` +
+  // `ensureMinWidth(getTitleAndAttributeWidth() + 10)`, `Cluster.java:
+  // 408-436`) inside the SvekResult that `InnerStateAutonom
+  // .calculateDimensionSlow`'s `im.calculateDimension()` measures
+  // (`InnerStateAutonom.java:186-197` -> `SvekResult.java:71-74,129-135`).
+  // With `undefined` every lookup missed and `materializeCluster` fell back
+  // to `boundingBox(children)`, dropping the nested cluster's title bar and
+  // frontier margin from `childImg` -- worth up to 300 px (giniti-22-fexo000
+  // scope 5 height).
+  const inkStates = materializeSpecs(localSpecs, rawPosMap, clusterPosMapOf(result), ctx.theme.shadowing ?? 0);
   const inkTransitions = buildLevelTransitionGeos(acc, result);
   const geometry = computeSvekResultGeometry(inkStates, inkTransitions);
   const childImg = {

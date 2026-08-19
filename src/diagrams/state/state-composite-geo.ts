@@ -40,7 +40,13 @@ export type ClusterPosMap = ReadonlyMap<string, NonNullable<DotLayoutResult['clu
 
 const EMPTY_CLUSTER_POS_MAP: ClusterPosMap = new Map();
 
-function clusterPosMapOf(result: DotLayoutResult): ClusterPosMap {
+/** Exported (SI29 F7): the ink-extent seams in
+ *  `state-composite-autonom.ts#buildPlainAutonomSpec` and
+ *  `state-composite-concurrent.ts#regionInkGeometry` build their own
+ *  `ClusterPosMap` from their own pass's `DotLayoutResult` the SAME way
+ *  `layoutComposite` below does for the top-level pass — see
+ *  {@link materializeSpecs}'s own doc comment for why they must. */
+export function clusterPosMapOf(result: DotLayoutResult): ClusterPosMap {
   return result.clusters !== undefined ? new Map(result.clusters.map((c) => [c.id, c])) : EMPTY_CLUSTER_POS_MAP;
 }
 
@@ -397,13 +403,22 @@ function materializeCluster(
  *  ink walk (`layout-ink-extent.ts#addNodeInk`) recurses into this SAME
  *  `.transitions` field, so ink coverage is unchanged.
  *
- *  G5 C3: `clusterPosMap` defaults to empty (mission G4 S4/S6's two
- *  external callers -- `state-composite-autonom.ts`'s own ink-extent
- *  computation, `state-composite-concurrent.ts`'s region materialization --
- *  don't pass one, so a nested cluster inside those SPECIFIC contexts keeps
- *  the pre-C3 `boundingBox` shape; this iteration's real-bbox/real-shape
- *  adoption is scoped to the render path only, `layoutComposite`/
- *  `materializeAutonom` below). */
+ *  `clusterPosMap` defaults to empty only for a caller whose pass genuinely
+ *  laid out no clusters; every real call site now passes its OWN pass's
+ *  {@link clusterPosMapOf}. SI29 F7 (SI28 G4, 9 fixtures, up to 300 px)
+ *  closed the two that used to pass `undefined` -- `state-composite-
+ *  autonom.ts#buildPlainAutonomSpec` and `state-composite-concurrent.ts
+ *  #regionInkGeometry`, both ink-extent seams. Upstream draws a nested
+ *  cluster's `rectangleArea` -- graphviz's box widened by
+ *  `FrontierCalculator` + `ensureMinWidth(getTitleAndAttributeWidth() + 10)`
+ *  (`Cluster.java:408-436`, `ClusterHeader.java:81-95`) -- for EVERY
+ *  cluster in `SvekResult#drawU` (`SvekResult.java:71-74`), with no
+ *  "nested inside an autonom pass" special case, so `SvekResult
+ *  #calculateDimension`'s `getMinMax` walk (`SvekResult.java:129-135`)
+ *  folds that title/frontier ink at every seam that reads it
+ *  (`InnerStateAutonom.java:186-197`, `ConcurrentStates.java:133-141`).
+ *  With `undefined` the lookup missed, `materializeCluster` fell back to
+ *  `boundingBox(children)`, and precisely that ink was dropped. */
 export function materializeSpecs(
   specs: readonly GeoSpec[],
   posMap: PosMap,
