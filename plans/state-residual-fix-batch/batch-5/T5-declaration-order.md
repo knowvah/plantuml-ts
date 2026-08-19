@@ -1,4 +1,4 @@
-# T4 — G20a: pseudo-node declaration order matches the jar's creation order
+# T5 — G20a: pseudo-node declaration order matches the jar's creation order
 
 ## Context
 Repo `/Users/scottseely/git/knowvah/plantuml-ts`, branch
@@ -43,7 +43,7 @@ reference is a member.
 ## Write-set
 - `src/diagrams/state/state-composite-autonom.ts`
 - `src/diagrams/state/state-composite-concurrent.ts` — `buildConcurrentBranchAcc`
-  only. T1 and T2 already own other functions in this file in earlier batches;
+  only. T1, T2 and T4 already own other functions in this file in earlier batches;
   do not disturb their work.
 - `src/diagrams/state/state-composite-pseudo.ts` — only if the ordering helper
   itself must change to support pre-`runPass` ordering.
@@ -82,7 +82,7 @@ D5 — last batch, full-corpus gate, revert-the-batch on net growth.
   `planning/next-missions.md`.** That is a successful outcome of this task,
   not a failure — do not iterate toward a green gate.
 - Given `render-manifest`, then every moved fixture is on `expected-moves.txt`
-  under a `# Batch 4` heading with a jar-side account.
+  under a `# Batch 5` heading with a jar-side account.
 
 ## Interface contracts
 None — `acc.nodes` ordering is internal to the pass. No type changes.

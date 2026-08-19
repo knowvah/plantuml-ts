@@ -19,16 +19,22 @@ re-pinned by the orchestrator after each batch's gate passes.
 2. Run `npx jiti scripts/render-manifest.ts --out
    test-results/render-manifest-baseline.json`. Record its `sha256` and the
    fixture count (expected 2017).
-3. Re-measure the 9 target fixtures individually and record each target row
+3. Re-measure the 10 target fixtures individually and record each target row
    verbatim (fixture, scope, axis, index, ours, jar, deltaPx) in
    `.agent-notes/si31-T0.md`:
    `joleju-94-maru748` (6 rows), `zacajo-09-tamu628` (1),
    `jetuse-93-gopi146` (1), `pacami-67-dafe414` (1), `tofezi-64-koda860` (1),
    `xojudi-20-keco020` (1), `decede-10-buvu414` (1), `gokife-89-boja382` (1),
-   `kejabo-83-vinu490` (1).
+   `fovafu-44-mifu394` (1 — its scope2 WIDTH row; its scope2 height row is the
+   G14 sub-pixel band and is not a target, but record it so T4 can prove it
+   did not grow), `kejabo-83-vinu490` (1).
+
+   Also record `fovafu-44-mifu394`'s current entry in
+   `oracle/goldens/state/size-backlog.json` (currently `0.108618`) — T4 must
+   remove or tighten it, never loosen it.
 4. Seed `plans/state-residual-fix-batch/expected-moves.txt` with a header
    explaining the file's contract and an empty per-batch section for each of
-   Batches 1–4. Do NOT pre-populate slugs — each batch appends its own, with
+   Batches 1–5. Do NOT pre-populate slugs — each batch appends its own, with
    a jar-side account, when its gate runs.
 5. Also record in `.agent-notes/si31-T0.md`, for T3's later use, the current
    harness rows of SI29 T9's nine regression fixtures — the ones an
@@ -64,8 +70,8 @@ manifestFixtureCount, targetRows: [...], guardRows: [...] }`.
 - Given the newly-written manifest baseline, when `manifest-diff.py` runs
   baseline vs a fresh manifest, then it prints `OK: 0 expected moves, 0
   unexpected`.
-- Given `.agent-notes/si31-T0.md`, then all 14 target rows and all 9 guard
-  fixtures' current rows are recorded with ours/jar/Δ.
+- Given `.agent-notes/si31-T0.md`, then all 15 target rows, all 9 guard
+  fixtures' current rows, and `fovafu-44`'s backlog pin are recorded.
 
 ## Observability
 N/A — no new observable operations. This task *establishes* the mission's

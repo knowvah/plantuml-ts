@@ -17,7 +17,13 @@
 #                        concurrent regions; not all have labeled
 #                        transitions.
 #   Batch 3 (T3, G5)   — size-only; the five G5 fixtures.
-#   Batch 4 (T4, G20a) — UNBOUNDED, up to 83 fixtures, either direction.
+#   Batch 4 (T4, G15)  — DRAWN OUTPUT MOVES. Clipping changes the spline
+#                        itself, so any state fixture with a
+#                        composite-anchor transition can move.
+#                        Step 1 (the core move) must be inert: if any
+#                        fixture moves before the state consumer is
+#                        added, something in the move was not faithful.
+#   Batch 5 (T5, G20a) — UNBOUNDED, up to 83 fixtures, either direction.
 #                        Per D5 a non-shrink-only net reverts the batch
 #                        rather than growing this list.
 
@@ -27,4 +33,6 @@
 
 # Batch 3 (T3 — G5 south-cap opacity)
 
-# Batch 4 (T4 — G20a declaration order)
+# Batch 4 (T4 — G15 composite-anchor spline clip)
+
+# Batch 5 (T5 — G20a declaration order)

@@ -92,7 +92,7 @@ Up to **83 of 273** state fixtures carry a composite plus a `[*]` transition,
 and graphviz's label force-search is non-monotonic in declaration order, so
 they can move either way. The row it closes is worth +0.750 px.
 
-**Decision.** Batch 4, last, after every other fix has landed and re-pinned.
+**Decision.** Batch 5, last, after every other fix has landed and re-pinned.
 Full-corpus gate. If the net is not shrink-only: **revert the whole batch** and
 file G20a as its own tracked mission. Do not halt for a fixture-by-fixture
 human ruling.
@@ -124,10 +124,31 @@ exemption or add a new one.
 suppressing a hook-enforced limit, which is how the limit stops meaning
 anything.
 
+## D9 — G15's clip moves to `src/core/`; it is never copied
+
+The faithful `DotPath#simulateCompound` port already exists at
+`src/diagrams/description/spline-clip.ts` (161 lines, exporting `subdivide` /
+`clipSplineStart` / `clipSplineEnd`, its only import a `Bbox` **type**).
+`layering.test.ts` Rule 2 forbids `src/diagrams/state/` importing from
+`src/diagrams/description/`, and `KNOWN_DEBT` is `[]`.
+
+**Decision.** Move the file to `src/core/spline-clip.ts` and repoint
+description's importers — the SI27 shared-seam pattern — then have state
+consume it from core. The move must be provably inert before the state
+consumer is added.
+
+**Explicitly forbidden:** copying the file into the state engine, and adding
+an ALLOWLIST or `KNOWN_DEBT` entry to let state reach into description. Either
+would give this repo two ports of one upstream method, which is the exact
+condition SI27 existed to remove. An ALLOWLIST entry here is stop 6.
+
+**Consequences.** Batch 4 is an extraction plus a consumer, not a one-line
+patch — larger, but it leaves one port and a reusable core seam.
+
 ## D8 — Routing
 
-Autonomous execution on `claude-fable-5`. T3 (the 4-file thread) and T4 (the
-risky reorder) get Opus; T0, T1, T2, T5 get Sonnet. Every agent prompt carries
+Autonomous execution on `claude-fable-5`. T3 (the 4-file thread), T4 (the core
+extraction) and T5 (the risky reorder) get Opus; T0, T1, T2, T6 get Sonnet. Every agent prompt carries
 the Opus behavioural compensation from `~/.claude/rules/parallelism.md` when
 routed to Opus — with its stated carve-out: **a record enumerating required
 behaviour is not ambiguous scope**, so nothing on the row list may be trimmed

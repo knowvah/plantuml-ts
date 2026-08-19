@@ -1,17 +1,23 @@
-# Batch 4 — G20a declaration order (serial, LAST, revert-on-net-growth)
+# Batch 4 — G15 composite-anchor spline clip (serial)
 
-Our autonom pass pushes member nodes onto `acc.nodes` before the `[*]` pseudo
-circle; the jar creates the init pseudo FIRST, because `[*] --> Idle` is the
-composite's first transition line and `reallyCreateLeaf` fires on first
-reference. `runPass` consumes that raw push order, and real graphviz's own
-label force-search reacts to it — 0.750 px on `kejabo-83-vinu490`.
+PlantUML clips a cluster-sourced edge at the cluster rectangle **in Java** —
+`DotPath#simulateCompound`, called from `SvekEdge.java:671-672` — not through
+graphviz. We keep the in-cluster segment the jar clips away, so its control
+point lands inside the composite and inflates the ink extent by exactly the
+distance from that control point to the cluster's frontier: **+7.820 px** on
+`fovafu-44-mifu394`.
 
-**Deliberately last, and deliberately reversible.** Up to **83 of 273** state
-fixtures carry a composite plus a `[*]` transition, and the force-search is
-not monotonic in declaration order, so they can move either way. Per D5: if
-the corpus net is not shrink-only, revert the whole batch and file G20a as its
-own mission. No per-fixture human ruling.
+Reclassified 2026-08-19 from `docs/graphviz-issues/15-*` — originally filed as
+a dot-engine ranking defect, proven not to be one. dot-engine reproduces native
+graphviz byte-for-byte on this fixture's own DOT and on five hand-built
+variants; the jar and graphviz compute the same curve. The work is ours.
+
+**This is a shared-seam extraction, not a local patch.** The faithful
+`simulateCompound` port already exists at
+`src/diagrams/description/spline-clip.ts`, and `layering.test.ts` Rule 2
+forbids `src/diagrams/state/` importing it. It moves to `src/core/` first —
+the SI27 pattern — then both engines consume it. Duplicating it is forbidden.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4 | Push pseudo nodes in jar creation order in both composite passes | general-purpose (opus) | `src/diagrams/state/state-composite-autonom.ts`, `src/diagrams/state/state-composite-concurrent.ts`, `src/diagrams/state/state-composite-pseudo.ts` (only if the ordering helper itself must change), their unit tests | T3 | [ ] |
+| T4 | Move `spline-clip.ts` to `src/core/`, repoint description, clip state composite-anchor transitions before the ink walk | general-purpose (opus) | `src/core/spline-clip.ts` (new), `src/diagrams/description/spline-clip.ts` (deleted), description's importers, `src/diagrams/state/layout-ink-extent.ts`, their unit tests | T3 | [ ] |

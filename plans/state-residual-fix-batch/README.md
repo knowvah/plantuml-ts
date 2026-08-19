@@ -14,8 +14,8 @@ each task by pathspec.
 
 ## The exit
 
-**14 rows across 9 fixtures, all re-measured 2026-08-19 against `main` at
-`99e4364a` and byte-identical to SI29's records** (SI30 moved none of them):
+**15 rows across 10 fixtures, all re-measured 2026-08-19 against `main` and
+byte-identical to the records they come from** (SI30 moved none of them):
 
 | Group | Fixture | Rows | Δ today | Batch |
 |---|---|---|---|---|
@@ -27,7 +27,8 @@ each task by pathspec.
 | G5 | `xojudi-20-keco020` | 1 | −1.000 | 3 |
 | G5 | `decede-10-buvu414` | 1 | −1.000 | 3 |
 | G5 | `gokife-89-boja382` | 1 | −1.000 | 3 |
-| G20a | `kejabo-83-vinu490` | 1 | +0.750 | 4 |
+| G15 | `fovafu-44-mifu394` | 1 | +7.820 | 4 |
+| G20a | `kejabo-83-vinu490` | 1 | +0.750 | 5 |
 
 Exit = every row above exact, **or** carrying a jar-cited mechanism for the
 residual; the harness net shrink-only; no fixture outside `expected-moves.txt`
@@ -49,7 +50,14 @@ package, and npm's latest is still **1.5.0 with no `xlabel`** (checked
 it** — the port-side half would be untestable, and the 90/90/90 coverage gate
 would flag unreachable code. When the release lands it becomes a short
 follow-on mission: issue 16's own "Verification when it lands" section already
-carries its four steps. T5 records that in `next-missions.md`.
+carries its four steps. T6 records that in `next-missions.md`.
+
+**G15 joined the mission on 2026-08-19**, reclassified out of
+`docs/graphviz-issues/15-*` (commit `6199b5f3`). It was filed as a dot-engine
+anchor-ranking defect and disproven: the port reproduces native graphviz
+byte-for-byte on the fixture's own DOT, and the filing compared the jar's
+*clipped* spline start against our *unclipped* one. The work is ours — apply
+the `simulateCompound` clip we already ship. Batch 4.
 
 ## Batches
 
@@ -59,12 +67,14 @@ carries its four steps. T5 records that in `next-missions.md`.
 | [1](batch-1/overview.md) | G17 note-only region (+15 per `SvekResult.java:135`) | T1 | [ ] |
 | [2](batch-2/overview.md) | G21 accumulator wiring + verify `jetuse-93` | T2 | [ ] |
 | [3](batch-3/overview.md) | G5 south-cap opacity thread | T3 | [ ] |
-| [4](batch-4/overview.md) | G20a declaration order (revert-on-net-growth) | T4 | [ ] |
-| [5](batch-5/overview.md) | Close-out | T5 | [ ] |
+| [4](batch-4/overview.md) | G15 composite-anchor spline clip (core extraction) | T4 | [ ] |
+| [5](batch-5/overview.md) | G20a declaration order (revert-on-net-growth) | T5 | [ ] |
+| [6](batch-6/overview.md) | Close-out | T6 | [ ] |
 
 Serial. Batches 1 and 2 both write `state-composite-concurrent.ts` in disjoint
-functions ~95 lines apart — separate batches keeps their blast radii isolated
-(D4).
+functions ~95 lines apart, and Batches 3 and 4 both write
+`layout-ink-extent.ts` (south-cap term vs transition-ink path) — separate
+batches keeps every blast radius isolated (D4).
 
 ## Quality gates (after every batch)
 
@@ -104,7 +114,7 @@ Honest current sample is **58.9 s** (55.0 s on a quiet machine).
    `decision-journal.md`, this brief.
 2. Two consecutive gate failures on the same check.
 3. Harness: any row appears or grows vs the previous baseline — **except
-   Batch 4**, where D5's revert rule replaces this.
+   Batch 5**, where D5's revert rule replaces this.
 4. `render-manifest` moves a fixture not on `expected-moves.txt`.
 5. A DOT-parity ratchet falls (state < 270, class < 721, description < 357,
    object < 80) or an svg-conformance golden count drops.

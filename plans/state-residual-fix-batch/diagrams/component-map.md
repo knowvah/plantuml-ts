@@ -20,6 +20,10 @@ package "src/diagrams/state" {
   component "state-dot-graph.ts\nmoveLabelToXlabel" as DOTGRAPH
 }
 
+package "src/diagrams/description" {
+  component "spline-clip.ts\nsimulateCompound port" as CLIP
+}
+
 package "src/core" {
   component "graph-layout.ts\nthe single engine seam" as GLAYOUT
   component "graph-layout-build-edges.ts\naddEdges" as BUILDEDGES
@@ -61,6 +65,15 @@ note right of INK
   **G5** no south-cap term; needs a
   south-opacity bit on StateNodeGeo
   — 5 rows
+  **G15** composite-anchor splines are
+  folded UNCLIPPED — 1 row, +7.820 px
+end note
+
+note bottom of CLIP
+  **G15** the clip state needs already
+  exists here. Rule 2 forbids state
+  importing it, so Batch 4 moves it to
+  src/core/ first (D9).
 end note
 
 note bottom of ENGINE
