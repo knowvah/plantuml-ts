@@ -5,13 +5,16 @@
  * CommandCreatePackageState / CommandCreatePackage2 / CommandEndState.
  */
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseState } from '../../../src/diagrams/state/parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
 import { renderSync } from '../../../src/index.js';
 import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { dotInputToStructural } from '../../oracle/svek-dot.js';
+import { dotInputToStructural, parseSvekDot, type StructuralGraph } from '../../oracle/svek-dot.js';
 
 function parse(source: string): StateDiagramAST {
   const lines = source
@@ -324,5 +327,95 @@ state D {
     expect(Math.abs(a!.height - JAR_A.height) * PX_PER_INCH).toBeLessThan(0.001);
     expect(Math.abs(d!.width - JAR_D.width) * PX_PER_INCH).toBeLessThan(0.001);
     expect(Math.abs(d!.height - JAR_D.height) * PX_PER_INCH).toBeLessThan(0.001);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SI31 T2 (G17, plans/state-declared-size-fix/findings/G17-note-only-region.md):
+// a `--`-delimited region with NO materialized `State` members (a note-only
+// trailing region — `regionInkGeometry`'s `ink` stays the degenerate {0,0}
+// sentinel) must size from the region's own raw declared node boxes +
+// SvekResult's real `.delta(15, 15)` margin (`SvekResult.java:135`), not
+// dot-engine's raw graph canvas (`graph-layout.ts#canvasSize`'s flat
+// `CANVAS_MARGIN=12`). Pins directly against the cached jar oracle
+// `svek-N.dot` dumps -- same scope/axis/index pairing
+// `scripts/measure-composite-declared-size.ts` uses -- so this test is
+// self-verifying against the real oracle file, not a transcribed number.
+// ---------------------------------------------------------------------------
+
+describe('note-only concurrent region sizes from SvekResult margin, not raw canvas (G17, joleju-94-maru748)', () => {
+  const SLUG = 'joleju-94-maru748';
+  const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/state', SLUG);
+
+  // scripts/measure-composite-declared-size.ts's own tolerance: both sides
+  // emit 6 decimal places, so anything under this is formatting noise.
+  const EXACT_EPSILON = 5e-7;
+
+  function jarScope(scope: number): StructuralGraph {
+    return parseSvekDot(readFileSync(join(CACHE, `svek-${scope}.dot`), 'utf8'));
+  }
+
+  function captureAll(): DotInputGraph[] {
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      renderSync(readFileSync(join(CACHE, 'in.puml'), 'utf8'), { measurer: new WidthTableMeasurer() });
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    return captured;
+  }
+
+  const captured = captureAll();
+  const ourScope = (scope: number): StructuralGraph => dotInputToStructural(captured[scope - 1]!);
+  const sortedAxis = (g: StructuralGraph, axis: 'width' | 'height'): number[] =>
+    g.nodes.map((n) => n[axis]).sort((a, b) => a - b);
+
+  // scope9=OS1.IS2's own note-only trailing region, scope11=OS1.IS1's,
+  // scope12=OS1's -- the three composites in this fixture that each own a
+  // `--`-delimited region containing ONLY a `note` (finding's own
+  // `mechanism` paragraph). idx picks out the composite's own declared
+  // node within that scope's sorted width/height array (widest for the
+  // width rows since the note dominates; scope12 has a single node so idx0
+  // covers both axes).
+  const TARGET_ROWS: { scope: number; axis: 'width' | 'height'; idx: number }[] = [
+    { scope: 9, axis: 'width', idx: 2 },
+    { scope: 9, axis: 'height', idx: 2 },
+    { scope: 11, axis: 'width', idx: 2 },
+    { scope: 11, axis: 'height', idx: 2 },
+    { scope: 12, axis: 'width', idx: 0 },
+    { scope: 12, axis: 'height', idx: 0 },
+  ];
+
+  it.each(TARGET_ROWS)(
+    'scope$scope $axis idx$idx: our declared size matches jar exactly',
+    ({ scope, axis, idx }) => {
+      const jar = sortedAxis(jarScope(scope), axis)[idx]!;
+      const ours = sortedAxis(ourScope(scope), axis)[idx]!;
+      expect(Math.abs(ours - jar)).toBeLessThan(EXACT_EPSILON);
+    },
+  );
+
+  // Regression guard for the non-degenerate path (D3/acceptance: "byte-
+  // identical to before this change"). Every OTHER scope in this fixture
+  // already matched jar exactly before this fix (finding's own `ruledOut`
+  // paragraph: "scopes 1-8,10 all EXACT on re-measurement") -- these are
+  // regions WITH materialized states, so `regionInkGeometry`'s degenerate
+  // branch never fires for them. If the fix's `states.length === 0` gate
+  // were ever widened to also touch a non-degenerate region, one of these
+  // would stop matching jar.
+  const NON_DEGENERATE_SCOPES = [1, 2, 3, 4, 5, 6, 7, 8, 10];
+
+  it.each(NON_DEGENERATE_SCOPES)('scope%i (materialized states) stays within jar tolerance', (scope) => {
+    const jar = jarScope(scope);
+    const ours = ourScope(scope);
+    for (const axis of ['width', 'height'] as const) {
+      const jarAxis = sortedAxis(jar, axis);
+      const ourAxis = sortedAxis(ours, axis);
+      expect(ourAxis).toHaveLength(jarAxis.length);
+      for (let i = 0; i < jarAxis.length; i++) {
+        expect(Math.abs(ourAxis[i]! - jarAxis[i]!)).toBeLessThan(EXACT_EPSILON);
+      }
+    }
   });
 });

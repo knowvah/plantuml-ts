@@ -62,7 +62,7 @@ the `simulateCompound` clip we already ship. Batch 4.
 |---|---|---|---|
 | [0](batch-0/overview.md) | Baselines + allow-list | T0 | [x] |
 | [1](batch-1/overview.md) | dot-engine 1.6 + G20b `xlabel` consumption | T1 | [x] |
-| [2](batch-2/overview.md) | G17 note-only region (+15 per `SvekResult.java:135`) | T2 | [ ] |
+| [2](batch-2/overview.md) | G17 note-only region (+15 per `SvekResult.java:135`) | T2 | [x] |
 | [3](batch-3/overview.md) | G21 accumulator wiring + verify `jetuse-93` | T3 | [ ] |
 | [4](batch-4/overview.md) | G5 south-cap opacity thread | T4 | [ ] |
 | [5](batch-5/overview.md) | G15 composite-anchor spline clip (core extraction) | T5 | [ ] |

@@ -41,6 +41,7 @@ jakapi-64-tine258 # class, `linetype ortho`: same mechanism as bujedi-30-cize673
 zosaxo-93-nici652 # component, `linetype ortho`: link label repositioned via `description/link-edge-attrs.ts`'s own xlabel/xlabelWidth/xlabelHeight (a third, independent caller of this shared core seam); DOT text unchanged, description-parity ratchet still 357/357.
 
 # Batch 2 (T2 — G17 note-only region)
+joleju-94-maru748 # size-only: its three note-only trailing `--` regions (OS1.IS2, OS1.IS1, OS1) now size from SvekResult.java:135's real +15/+15 margin instead of dot-engine's raw +12/+12 graph canvas, closing scope9/scope11/scope12's declared width+height to jar exactly (measure-composite-declared-size.ts: 6/6 target rows now exact, fixture no longer dirty); DOT text changes too (jar-ward: each composite's own declared width/height, now matching jar, is an INPUT literal in its parent scope's emitted DOT statement), state-dot-parity ratchet still 270/270.
 
 # Batch 3 (T3 — G21 accumulator wiring)
 

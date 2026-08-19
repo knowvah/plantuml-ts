@@ -64,6 +64,7 @@ import { buildStateGeoTextFields } from './state-sizing.js';
 import { measureAutonomWrapper, stackConcurrentRegions, type AutonomWrapper } from './state-composite-sizing.js';
 import { computeSvekResultGeometry } from './layout-ink-extent.js';
 import { materializeSpecs, clusterPosMapOf, type PosMap } from './state-composite-geo.js';
+import { svekDimension, type InkExtent } from '../../core/svek/SvekResult.js';
 import {
   type DiagramCtx,
   type PassAccumulator,
@@ -111,6 +112,55 @@ export interface ConcurrentRegionPassResult {
  *  asymmetry — `layout-ink-extent.ts#addNodeInk` — folded into `JAR_INK_
  *  MARGIN(6) - (-1) = 7`). Renamed from `regionInkDim` to `regionInkGeometry`
  *  since it's no longer JUST a dimension. */
+/**
+ * SI31 T2 (G17, `plans/state-declared-size-fix/findings/G17-note-only-
+ * region.md`): a `--`-delimited region with NO materialized `State` members
+ * (a note-only trailing region -- `s.concurrentRegions[i]` is `[]`, its
+ * content reaches this pass exclusively via `addScopeNotes`'s raw-DOT-node
+ * push) never populates `computeSvekResultGeometry`'s ink walk, so `ink`
+ * stays the degenerate `{0,0}` sentinel and `regionInkGeometry`'s pre-fix
+ * `Math.max(ink.width, p.result.width)` fell through to `p.result.width` --
+ * dot-engine's OWN raw graph canvas (`graph-layout.ts#canvasSize`'s flat
+ * `CANVAS_MARGIN=12` on both axes). Jar never uses a raw canvas here: a
+ * note-only `CONCURRENT_STATE` sub-group gets its own real `SvekResult`
+ * (`GroupMakerState.java:110-129`'s `containsSomeConcurrentStates()==false`
+ * branch), and `ConcurrentStates#calculateDimensionSlow`
+ * (`ConcurrentStates.java:133-141`) sums every region's `inner.
+ * calculateDimension()` unconditionally -- no note-only special case, so
+ * this region's term is `SvekResult#calculateDimension()`'s real formula:
+ *
+ * ```java
+ * // SvekResult.java:130-135
+ * public XDimension2D calculateDimension(StringBounder stringBounder) {
+ *     if (minMax == null) {
+ *         minMax = TextBlockUtils.getMinMax(this, stringBounder, false);
+ *         clusterManager.moveDelta(6 - minMax.getMinX(), 6 - minMax.getMinY());
+ *     }
+ *     return minMax.getDimension().delta(15, 15);
+ * }
+ * ```
+ *
+ * `{@link svekDimension}` already ports line 135's `.delta(15, 15)` (as
+ * `INK_DELTA`, `core/svek/SvekResult.ts`) for the non-degenerate ink walk
+ * above -- reused here, not re-declared, seeded from the region's own RAW
+ * declared node boxes (`p.result.nodes`, pre-canvas-margin) instead of a
+ * materialized-state ink walk, since a note-only region has no `StateNodeGeo`
+ * to walk. Per D3 (`plans/state-residual-fix-batch/decisions.md`): the `3px`
+ * gap between the old `+12` canvas margin and the real `+15` SvekResult
+ * margin is an ARITHMETIC CONSEQUENCE of this substitution, not a separate
+ * tuned constant -- no bare `3` appears in this file.
+ */
+function rawNodeBoxDimension(nodes: DotLayoutResult['nodes']): { width: number; height: number } {
+  const box: InkExtent = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+  for (const n of nodes) {
+    box.minX = Math.min(box.minX, n.x);
+    box.minY = Math.min(box.minY, n.y);
+    box.maxX = Math.max(box.maxX, n.x + n.width);
+    box.maxY = Math.max(box.maxY, n.y + n.height);
+  }
+  return svekDimension(box);
+}
+
 function regionInkGeometry(
   p: ConcurrentRegionPassResult,
   // mission skin-file-loading Batch 2: the diagram's own resolved
@@ -135,9 +185,15 @@ function regionInkGeometry(
   const states = materializeSpecs(p.specs, posMap, clusterPosMapOf(p.result), shadowing);
   const transitions = buildLevelTransitionGeos(p.acc, p.result);
   const ink = computeSvekResultGeometry(states, transitions);
+  // SI31 T2 (G17): no materialized `State` members -- see
+  // `rawNodeBoxDimension`'s own doc comment above. Gated on `states.length
+  // === 0` so the non-degenerate path (materialized states present) is
+  // untouched: `ink` already dominates `p.result` there in every fixture
+  // this port has re-measured (D3's non-degenerate invariance).
+  const canvasFloor = states.length === 0 ? rawNodeBoxDimension(p.result.nodes) : p.result;
   return {
-    width: Math.max(ink.width, p.result.width),
-    height: Math.max(ink.height, p.result.height),
+    width: Math.max(ink.width, canvasFloor.width),
+    height: Math.max(ink.height, canvasFloor.height),
     dx: ink.dx,
     dy: ink.dy,
   };
