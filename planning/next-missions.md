@@ -336,12 +336,17 @@ Ordered by how ready they are, not by size.
   state 268/268. Two rows grew, both ruled and journaled. Full scoring:
   **`plans/state-declared-size-fix/findings/CLOSE-OUT.md`**.
   **What is left here, in the order to pick it up:**
-  - **`creole-exposant-port`** — `<sup>`/`<sub>`: register
-    `CommandCreoleExposantChange` in `CommandCreoleBuilder.ts`
-    (`CommandCreoleBuilder.java:104-105,111`), add `FontPosition` to
-    `FontConfiguration.ts`, mute font in `AtomText`, baseline shift per
-    engine's text emitter. Core + multi-engine — that is why SI29 could not
-    do it, and it is the one ruled grown row (`juvagu-33`, 83.57 px).
+  - ~~**`creole-exposant-port`**~~ — **DONE 2026-08-19 (mission-index SI30,
+    branch `feat/creole-exposant-port`).** `CommandCreoleExposantChange` +
+    `FontPosition` ported through klimt core and the description, class and
+    state text emitters; `juvagu-33`'s ruled grown row (`s1 width idx1`,
+    83.57 px) is **exact**, and the three authored fixtures
+    (`exposant-01-class`, `exposant-02-usecase`, `exposant-03-state`) match
+    their oracles. Close-out: `plans/creole-exposant-port/README.md`.
+    **What it did not cover:** sequence/activity/WBS creole (`<sup>` stays
+    literal there — no creole pipeline, D6), `TileText` (unported, no
+    consumer), `<math>`/KaTeX (D6), and T5's documented ~0.667 px sup/sub
+    baseline residual (`renderer-box.ts#runBaseline`).
   - **the follow-on fix batch** — SI29's Batch-5 records carry the
     proposedWriteSet for each: **G20a** pseudo-node declaration order
     (`state-composite-autonom.ts:215-216`), **G20b** `xlabel` never forwarded
