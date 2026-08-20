@@ -11,5 +11,5 @@ intentional baseline mutation: adding fixtures to `dot-cache/` perturbs
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | Capture the sequence oracle corpus; re-pin the manifest baseline | typescript-pro (sonnet) | `test-results/dot-cache/sequence/**`, `test-results/render-manifest-baseline.json`, `.agent-notes/g1h-T0.md` | — | [ ] |
-| T1 | The render helper + its test | typescript-pro (sonnet) | `tests/oracle/svg-conformance/render-fixture-sequence.ts`, `tests/oracle/svg-conformance/render-fixture-sequence.test.ts`, `.agent-notes/g1h-T1.md` | — | [ ] |
+| T0 | Capture the sequence oracle corpus; re-pin the manifest baseline | typescript-pro (sonnet) | `test-results/dot-cache/sequence/**`, `test-results/render-manifest-baseline.json`, `.agent-notes/g1h-T0.md` | — | [x] |
+| T1 | The render helper + its test | typescript-pro (sonnet) | `tests/oracle/svg-conformance/render-fixture-sequence.ts`, `tests/oracle/svg-conformance/render-fixture-sequence.test.ts`, `.agent-notes/g1h-T1.md` | — | [x] |
