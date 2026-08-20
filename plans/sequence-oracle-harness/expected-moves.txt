@@ -1,0 +1,18 @@
+# expected-moves.txt — sequence-oracle-harness
+#
+# Fixtures allowed to move `render-manifest`'s SHA-256 between batches
+# (`manifest-diff.py`). One bare slug per line; `#` comments ignored.
+#
+# THIS MISSION CHANGES NO `src/`, so no EXISTING fixture may move. Any moved
+# non-sequence fixture is stop 5.
+#
+# T0 ADDS ~473 sequence fixtures. `manifest-diff.py:38` treats an added key as
+# a move (absent baseline value != new value), so those additions would read as
+# `unexpected`. They are handled by RE-PINNING the manifest baseline inside
+# T0's own commit, not by listing 473 slugs here.
+#
+#   Batch 0 (T0) — additions only, absorbed by the re-pin. No existing fixture moves.
+#   Batch 0 (T1) — none.
+#   Batch 1 (T2) — none.
+#   Batch 2 (T3, T4, T5) — none.
+#   Batch 3 (T6) — none.
