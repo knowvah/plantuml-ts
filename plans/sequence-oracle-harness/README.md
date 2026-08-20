@@ -70,7 +70,7 @@ renders and compares ~473 fixtures. **T2 measures and records a new ceiling**
 | Batch | What | Tasks | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | Capture the corpus · build the render helper | T0, T1 | [x] |
-| [1](batch-1/overview.md) | Diff-baseline ratchet, pinned | T2 | [ ] |
+| [1](batch-1/overview.md) | Diff-baseline ratchet, pinned | T2 | [x] |
 | [2](batch-2/overview.md) | Golden ratchet · cause census · cross-type wiring | T3, T4, T5 | [ ] |
 | [3](batch-3/overview.md) | Close-out | T6 | [ ] |
 
