@@ -1,0 +1,9 @@
+@startuml
+participant MyParticipant order 20 [
+    =MyTitle
+    ----
+    ""MySubTitle""
+]
+participant Bob order 10
+
+@enduml

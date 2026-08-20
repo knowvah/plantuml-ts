@@ -1,0 +1,13 @@
+@startuml
+!pragma teoz true
+<style>
+sequenceDiagram {
+    LineColor blue
+    LineThickness 3
+}
+</style>
+
+participant X
+...
+X -> X
+@enduml

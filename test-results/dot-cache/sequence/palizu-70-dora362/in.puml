@@ -1,0 +1,7 @@
+@startuml
+!definelong AUTHEN()
+x -> y : hello
+y -> x : ok
+!enddefinelong
+AUTHEN()
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+'!preprocessorV2
+!function $foo($text)
+!return "ceci est la fonction"
+!endfunction
+
+!$foo = "je suis la variable"
+
+!function id($text)
+!return $text
+!endfunction
+
+
+alice -> bob : $foo( "pasvu")
+alice -> bob : $foo coucou
+alice -> bob : $foo
+alice -> bob : id($foo("pasvu"))
+@enduml

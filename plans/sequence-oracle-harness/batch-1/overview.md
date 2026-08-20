@@ -13,4 +13,4 @@ and records the new ceiling. Trimming coverage to fit the old one is forbidden.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Diff-baseline ratchet; pin the starting counts; set the new wall-clock ceiling | general-purpose (opus) | `tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts`, `oracle/goldens/svg-sequence/diff-baseline.json`, `plans/sequence-oracle-harness/README.md` (ceiling only), `.agent-notes/g1h-T2.md` | T0, T1 | [ ] |
+| T2 | Diff-baseline ratchet; pin the starting counts; set the new wall-clock ceiling | general-purpose (opus) | `tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts`, `oracle/goldens/svg-sequence/diff-baseline.json`, `plans/sequence-oracle-harness/README.md` (ceiling only), `.agent-notes/g1h-T2.md` | T0, T1 | [x] |

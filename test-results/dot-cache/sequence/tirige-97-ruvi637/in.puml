@@ -1,0 +1,12 @@
+@startuml
+'!preprocessorV2
+!function bold($text)
+!return "<b>"+$text+"</b>"
+!endfunction
+
+!procedure msg(a, b, text)
+a -> b : text
+!endprocedure
+
+msg("alice", "bob", bold("foo"))
+@enduml

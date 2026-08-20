@@ -1,0 +1,4 @@
+@startuml
+participant dummy
+participant dummy
+@enduml

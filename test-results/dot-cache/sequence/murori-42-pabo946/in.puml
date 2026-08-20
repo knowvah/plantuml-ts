@@ -1,0 +1,17 @@
+@startuml
+skinparam SequenceGroupBodyBackGroundColor transparent
+skinparam roundCorner 10
+
+box "A" #DD55DD
+participant user
+end box
+
+box "B" #55CCDD
+participant device
+end box
+
+user->device: do something
+group if condition 1 
+device->user: done
+end
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+<style>
+group {
+    BackGroundColor blue
+}
+</style>
+
+alt successful
+Server -> Client: OK
+else failure
+Server -> Client : ERROR
+end
+
+@enduml

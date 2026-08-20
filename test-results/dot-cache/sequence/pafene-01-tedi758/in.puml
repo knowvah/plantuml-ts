@@ -1,0 +1,6 @@
+@startuml
+skinparam handwritten true
+participant ":Main" as m
+create jr
+m -->> jr : create
+@enduml

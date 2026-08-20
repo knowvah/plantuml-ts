@@ -1,0 +1,35 @@
+@startuml
+participant Alice as a
+participant Bob   as b
+
+==Works==
+'
+a ->(50)     b : ""->   ""
+a ->>(50)    b : ""->>  ""
+a o->(50)    b : ""o->  ""
+
+
+==Doesn't work but still renders==
+'
+a x->(50)    b : ""x->  ""
+a <->(50)    b : ""<->  ""
+
+
+==None of these work==
+'
+' a -\(50)     b : ""-\   ""
+' a -\\(50)    b : ""-\\\\""
+' a -/(50)     b : ""-/   ""
+' a -//(50)    b : ""-//  ""
+' a ->x(50)    b : ""->x  ""
+' a ->o(50)    b : ""->o  ""
+' a o->o(50)   b : ""o->o ""
+' a o<->o(50)  b : ""o<->o""
+' a x<->x(50)  b : ""x<->x""
+' a ->>o(50)   b : ""->>o ""
+' a -\o(50)    b : ""-\o  ""
+' a -\\o(50)   b : ""-\\\\o""
+' a -/o(50)    b : ""-/o  ""
+' a -//o(50)   b : ""-//o ""
+' a x->o(50)   b : ""x->o ""
+@enduml

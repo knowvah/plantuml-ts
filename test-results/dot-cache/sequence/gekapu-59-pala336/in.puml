@@ -1,0 +1,8 @@
+@startuml
+A -> B++: Get data
+& A -> C++: 
+& A -> D++: 
+B -->> A--: Data
+& C -->> A--: 
+& D -->> A--:
+@enduml

@@ -1,0 +1,6 @@
+@startuml
+Bob -> Alice : hello
+create Dog
+Alice -> Dog : create
+Alice -> Toto : hello
+@enduml

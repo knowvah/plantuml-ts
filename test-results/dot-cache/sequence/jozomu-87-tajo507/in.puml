@@ -1,0 +1,10 @@
+@startuml
+participant MyParticipant [
+    =MyTitle
+    ----
+    ""MySubTitle""
+]
+participant Bob
+
+MyParticipant -> Bob
+@enduml

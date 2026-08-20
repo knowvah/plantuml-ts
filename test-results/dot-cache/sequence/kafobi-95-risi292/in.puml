@@ -1,0 +1,11 @@
+@startuml
+'!preprocessorV2
+
+!define DOUBLE(x) x x
+!definelong AUTHEN(x,y)
+x -> y : DOUBLE(hello)
+y -> x : ok
+!enddefinelong
+AUTHEN(Bob1,Alice)
+
+@enduml

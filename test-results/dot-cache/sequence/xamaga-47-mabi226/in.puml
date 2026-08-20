@@ -1,0 +1,5 @@
+@startuml
+'!preprocessorV2
+Alice -> Bob : expected 0 %function_exists('foo')
+Alice -> Bob : expected 1 %function_exists('%function_exists')
+@enduml

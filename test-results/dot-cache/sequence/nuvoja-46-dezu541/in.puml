@@ -1,0 +1,4 @@
+@startuml
+!includedef macro
+Alice -> Bob : hello2
+@enduml

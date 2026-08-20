@@ -1,0 +1,9 @@
+@startuml
+participant Bob
+participant Alice
+participant L as "I have a really long name"
+'Meta commentaire
+Alice->Bob: Authentication Request
+Bob->Alice: Authentication Response
+Bob->L: Log transaction
+@enduml

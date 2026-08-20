@@ -1,0 +1,13 @@
+@startuml
+<style>
+!$title_color = "#012345"
+title {
+  BackGroundColor $title_color
+  FontColor %reverse_hsluv_color($title_color)
+}
+</style>
+title
+this is a title
+endtitle
+alice->bob
+@enduml

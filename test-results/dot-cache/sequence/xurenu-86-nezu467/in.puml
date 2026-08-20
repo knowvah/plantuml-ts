@@ -1,0 +1,7 @@
+@startuml
+skinparam LegendBorderThickness 0
+Bob -> Alice : hello
+legend
+this is a legend
+endlegend
+@enduml

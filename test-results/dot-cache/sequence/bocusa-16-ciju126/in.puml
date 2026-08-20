@@ -1,0 +1,8 @@
+@startuml
+!pragma teoz true
+a->b
+note right : 1. right
+note over a,b : 2. over
+note left : 3. left
+a<-b
+@enduml

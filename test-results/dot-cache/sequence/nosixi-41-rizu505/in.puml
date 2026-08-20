@@ -1,0 +1,9 @@
+@startuml
+left header
+this is left
+endheader
+right header
+this is right
+endheader
+Alice -> Bob : hello2
+@enduml

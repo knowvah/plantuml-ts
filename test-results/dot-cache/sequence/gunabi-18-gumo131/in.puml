@@ -1,0 +1,7 @@
+@startuml
+'!preprocessorV2
+!ijk = "foo"
+Alice -> Bob : ijk
+Alice -> Bob : ijkl
+Alice -> Bob : ijk-ensuite
+@enduml

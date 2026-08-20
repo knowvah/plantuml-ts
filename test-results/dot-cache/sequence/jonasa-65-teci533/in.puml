@@ -1,0 +1,3 @@
+@startuml
+participant "AvailabilityCheckRequestor" as ACM << Singleton >>  << Startup >>  << Stateless Session Bean >>
+@enduml

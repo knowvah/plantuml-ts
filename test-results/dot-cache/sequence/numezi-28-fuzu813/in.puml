@@ -1,0 +1,8 @@
+@startuml
+!pragma teoz true
+actor Alice
+actor Bob
+actor Charlie
+actor Dave
+Charlie -> Alice & Bob & Dave : Alice & Bob & Dave
+@enduml

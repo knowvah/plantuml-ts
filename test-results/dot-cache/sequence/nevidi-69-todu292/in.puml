@@ -1,0 +1,10 @@
+@startuml
+'!preprocessorV2
+
+!definelong AUTHEN(x,y)
+x -> y : hello
+y -> x : ok
+!enddefinelong
+AUTHEN(Bob1,Alice)
+
+@enduml

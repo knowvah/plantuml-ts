@@ -1,0 +1,7 @@
+@startuml
+
+!pragma showDeprecation true
+
+Alice -> Bob : hello%n()you
+
+@enduml

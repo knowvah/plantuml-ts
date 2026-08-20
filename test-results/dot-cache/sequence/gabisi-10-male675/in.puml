@@ -1,0 +1,8 @@
+@startuml
+skinparam ParticipantPadding 30
+
+participant a
+create b
+a --> b : <<create>>
+
+@enduml

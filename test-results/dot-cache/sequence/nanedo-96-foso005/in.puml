@@ -1,0 +1,9 @@
+@startuml
+participant b
+participant a
+
+b -> a  : hello
+activate a
+deactivate a
+b -> c : self
+@enduml

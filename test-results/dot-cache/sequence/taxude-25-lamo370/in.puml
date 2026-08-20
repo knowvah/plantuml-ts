@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+title foo
+skinparam backgroundColor red
+Bob -> Alice : hello
+@enduml

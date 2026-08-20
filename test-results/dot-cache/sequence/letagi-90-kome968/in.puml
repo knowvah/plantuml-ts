@@ -1,0 +1,7 @@
+@startuml
+participant A
+participant B
+
+A ->(60) B: text 10
+B ->(60) A: text 10
+@enduml

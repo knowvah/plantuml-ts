@@ -1,0 +1,10 @@
+@startuml
+
+' hide stereotype
+
+skinparam ParticipantBorderColor<<type>> #Black
+skinparam SequenceLifeLineBorderColor<<type>> #Black
+
+participant Bob <<type>>
+
+@enduml

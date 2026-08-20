@@ -1,0 +1,11 @@
+@startuml
+autonumber
+
+Bob -> Alice : hello1\nthis\nmessage
+Bob -> Alice : hello2
+Bob -> Bob : hello3
+Bob -> Alice : hello4
+Bob -> Alice : hello5
+Bob -> Alice : hello6
+
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+'!preprocessorV2
+
+!function id($a) return $a
+
+
+alice -> bob : expected 14 for id(2+3*4)
+alice -> bob : expected 10 for id(2*3+4)
+alice -> bob : expected 20 for id((2+3)*4)
+alice -> bob : expected 14 for id(2*(3+4))
+@enduml

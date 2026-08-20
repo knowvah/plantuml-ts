@@ -1,0 +1,6 @@
+@startuml
+alice->bob
+legend
+foo
+endlegend
+@enduml

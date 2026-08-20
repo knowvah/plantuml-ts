@@ -1,0 +1,11 @@
+@startuml
+skinparam sequenceDivider {
+    BorderColor red
+    BorderThickness 3.0
+    BackgroundColor #f3e8d8
+    FontColor blue
+}
+Alice -> Bob
+== foo ==
+Alice -> Bob
+@enduml

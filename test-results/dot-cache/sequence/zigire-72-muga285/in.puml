@@ -1,0 +1,20 @@
+@startuml
+'!preprocessorV2
+!function bold($text)
+!return "<b>"+$text+"</b>"
+!endfunction
+
+!function italic($text)
+!return "<i>"+$text+"</i>"
+!endfunction
+
+!function format($format, $text)
+!if $format=="italic"
+!return italic($text)
+!endif
+!return "UNKNOW"
+!endfunction
+
+
+Alice -> Bob : format("italic","en42")pour nous
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+
+<style>
+document {
+  BackgroundColor transparent
+}
+</style>
+
+Alice -> Bob : hello
+Alice ->o Bob : hello
+Alice ->>o Bob : hello
+Alice -\o Bob : hello
+Alice -/o Bob : hello
+Alice -\\o Bob : hello
+Alice -//o Bob : hello
+
+Alice o<-- Bob : ok
+@enduml

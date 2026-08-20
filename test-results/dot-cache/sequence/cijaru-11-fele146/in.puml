@@ -1,0 +1,13 @@
+@startuml
+skinparam defaulttextalignment center
+
+Bob -> Alice : hello
+hnote right
+This is a note
+can text be aligned or maybe centered?
+endnote
+rnote left
+This is a note
+can text be aligned or maybe centered?
+endnote
+@enduml

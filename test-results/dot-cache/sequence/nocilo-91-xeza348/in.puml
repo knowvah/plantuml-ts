@@ -1,0 +1,8 @@
+@startuml
+First -> Second : message
+activate First
+activate Second
+Second ->  First: response
+deactivate First
+deactivate Second
+@enduml

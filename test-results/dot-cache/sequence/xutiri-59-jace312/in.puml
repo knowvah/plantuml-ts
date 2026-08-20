@@ -1,0 +1,16 @@
+@startuml
+<style>
+sequenceDiagram {
+  lifeLine {
+	lineColor green
+	lineThickness 5
+	lineStyle 0
+  }
+}
+</style>
+
+entity Alice
+entity Bob
+
+Alice -> Bob
+@enduml

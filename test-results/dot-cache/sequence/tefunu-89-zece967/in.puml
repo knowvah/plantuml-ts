@@ -1,0 +1,5 @@
+@startuml
+skinparam wrapMessageWidth 100
+A->B:very long long long message name
+
+@enduml

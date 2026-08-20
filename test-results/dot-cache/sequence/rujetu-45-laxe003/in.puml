@@ -1,0 +1,19 @@
+@startuml
+Entity Observer
+Entity Observable
+Entity Promise
+activate Observer
+create Observable
+Observer -> Observable : run
+activate Observable
+create Promise
+Observable -> Promise :deffer
+Observable --> Observer : return promise
+deactivate Observer
+Observable -> Promise : resolve
+deactivate Observable
+Promise -> Observer : then
+activate Observer
+Observer -> Observer : processAsync
+destroy Observable
+@enduml

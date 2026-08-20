@@ -1,0 +1,9 @@
+@startuml
+Bob -> Alice : hello
+'== Demo With A Very Long Title Which is a Problem ==
+ 
+alt Demo With A Very Long Title Which is a Problem
+Bob <- Alice : Finished
+end
+
+@enduml

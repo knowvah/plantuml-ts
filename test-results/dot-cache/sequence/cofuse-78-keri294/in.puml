@@ -1,0 +1,10 @@
+@startuml
+ 
+participant "A" as A
+participant "B" as B
+ 
+note over A: A1
+/ note over A: A2 this line throws an error
+/ note over B: B1
+ 
+@enduml

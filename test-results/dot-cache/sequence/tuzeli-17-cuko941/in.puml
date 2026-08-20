@@ -1,0 +1,22 @@
+@startuml
+
+opt
+  opt
+    Axxx ->Bxxx : message1
+    note left : this is a note
+  else
+	  Axxx ->Bxxx : message2
+	  note over Axxx, Bxxx : this a very long note
+  end
+
+  Bxxx->Cxxx : message3
+  note right : this is also long
+end
+
+opt
+  Cxxx -> Dxxx : message4
+  note left of Dxxx : this is to note
+end
+
+note left of Dxxx : this is to note
+@enduml

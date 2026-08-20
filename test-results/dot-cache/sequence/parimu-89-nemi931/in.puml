@@ -1,0 +1,9 @@
+@startuml
+title some big title
+legend top left
+  This is the legend
+  on several lines
+end legend
+
+Alice -> BobWithALongName : hello
+@enduml

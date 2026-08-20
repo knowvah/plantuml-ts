@@ -1,0 +1,5 @@
+@startuml
+skinparam titleBorderColor black
+title My Title
+Bob -> Alice : hello
+@enduml

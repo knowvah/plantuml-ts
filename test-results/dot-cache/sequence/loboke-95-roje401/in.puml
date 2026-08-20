@@ -1,0 +1,10 @@
+@startuml
+'!preprocessorV2
+!function double($a) return $a+$a
+!$ijk = "foo"
+Alice -> Bob : A
+!if ($ijk == "foo") && %strlen(double($ijk))==6
+Alice -> Bob : yes
+!endif
+Alice -> Bob : B
+@enduml

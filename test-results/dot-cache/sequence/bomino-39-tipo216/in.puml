@@ -1,0 +1,8 @@
+@startuml
+skinparam useBetaStyle true
+<style src=strictuml.skin>
+
+Alice -> Bob : hello
+note right : foo
+
+@enduml

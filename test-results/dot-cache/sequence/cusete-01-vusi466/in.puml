@@ -1,0 +1,10 @@
+@startuml
+Bob -> Alice : hello
+note left
+  this is a note
+  {{
+     A1 -> A2 : hello
+  }}
+  On the end
+end note
+@enduml

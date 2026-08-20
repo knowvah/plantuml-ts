@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+Bob -> Alice ++ #blue : hello
+note right: (3) Where does blue start?
+return Hi
+& Ken -[#red]> Jane: (4) Same level?
+@enduml

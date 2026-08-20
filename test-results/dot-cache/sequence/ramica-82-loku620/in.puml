@@ -1,0 +1,10 @@
+@startuml
+!pragma teoz true
+
+participant app
+
+alt
+  ref over app : v1
+end
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+!pragma teoz true
+  A <[#red]-o? ++
+  A -> B -- : very long\nmulti-line
+& B -> C ++ #red: single
+note over C: got it
+Deactivate C
+====
+  A <-o? ++ #green
+  A -> B -- : very long\nmulti-line
+& B -> C ++ #green : same\nheight
+note over C: got it
+Deactivate C
+====
+  A <-o? ++ #red
+  A -> B -- : single
+& B -> C ++ : very long\nmulti-line
+note over C: got it
+Deactivate C
+@enduml

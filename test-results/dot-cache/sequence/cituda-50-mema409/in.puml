@@ -1,0 +1,9 @@
+@startuml
+skinparam sequenceParticipant {
+     backgroundColor Yellow
+     backgroundColor<<st>> LightBlue
+}
+participant AA<<st>>
+participant BB
+AA -> BB
+@enduml

@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+mainframe Frame
+participant Alice
+note left of Alice: note
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+participant "Bob on\nseveral lines" as Bob
+actor Alice
+
+Bob -> Alice : hello
+
+Alice -> Bob : Is it ok\nwith a message that is\non several lines?
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+!pragma teoz true
+'Issue #1494
+'skinparam style strictuml
+
+Actor Mallory as m
+Actor Bob as b
+Actor Alice as a
+
+activate b
+b ->> a --++ : Hi Alice!
+a ->> b --++ : Bye Bob!
+
+b ->> a ++ : Bye Alice!
+& b ->> m --++ : Bye Alice!
+
+deactivate a
+deactivate m
+@enduml

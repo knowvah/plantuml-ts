@@ -1,0 +1,12 @@
+@startuml
+!pragma teoz true
+
+loop
+loop
+Bob->Alice : hello
+opt
+[->Alice : external event
+end opt
+end loop
+end loop
+@enduml

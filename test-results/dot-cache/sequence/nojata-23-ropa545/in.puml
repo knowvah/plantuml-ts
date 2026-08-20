@@ -1,0 +1,13 @@
+@startuml
+alice -> bob
+note left
+this is my note
+<code>
+main()
+{
+  foo();
+}
+</code>
+over
+end note
+@enduml

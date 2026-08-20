@@ -1,0 +1,9 @@
+@startuml
+participant Bob
+'activate Alice
+Bob->Alice: coucou2
+newpage
+Alice->Bob: ok0
+'destroy Alice
+Alice->Bob: ok1
+@enduml

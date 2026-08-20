@@ -1,0 +1,8 @@
+@startuml
+skinparam sequenceParticipantFontName Impact
+'skinparam sequenceParticipantFontNameSvg Tw Cen MT Condensed
+'skinparam sequenceParticipantFontNameEps TwCenMTCondensed
+'skinparam sequenceParticipantFontName Wide Latin
+
+Alice -> Bob: ok
+@enduml

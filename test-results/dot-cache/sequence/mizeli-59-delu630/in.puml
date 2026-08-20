@@ -1,0 +1,11 @@
+@startuml
+actor Alice
+participant Bob
+box "Titre 3" #Yellow
+participant Pluton
+participant Sun
+endbox
+Alice -> Bob
+Bob -> Pluton
+Pluton -> Sun
+@enduml

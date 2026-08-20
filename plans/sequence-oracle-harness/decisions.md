@@ -56,6 +56,72 @@ state (273) are tracked.
 rebuild with no second capture mission. Honours CLAUDE.md's "the corpus is the
 work queue **and not a ceiling**".
 
+### D3 amendment — the jar's own type stamp is the admission gate (2026-08-20)
+
+**Amended mid-mission, approved by the user, after T0 measured the classified
+set.** D3 as written names `populate-corpus.py`'s classifier as the selection
+mechanism while describing its output as "473 `participant`/`actor` fixtures".
+Those are two different populations and they diverge 3×.
+
+**Mechanism.** `populate-corpus.py:20` — `TYPE_PATTERNS[0]` is the `sequence`
+entry, its first pattern is `r"^\s*\w[\w ]*->[\w ]"`, and `detect_type`
+returns on FIRST match. Every usecase / class / state / timing fixture holding
+a plain `A -> B` line is therefore claimed by `sequence`. The classifier
+selects **1427**, not ~473.
+
+**Evidence.** Over the first 164 captured: 135 `data-diagram-type="SEQUENCE"`,
+29 not (DESCRIPTION 10, CLASS 7, TIMING 5, STATE 4). 17 slugs carried a
+`svek-*.dot` — all 17 non-SEQUENCE. The jar emits no DOT for the sequence
+engine exactly as the brief states; the strays are pure misclassification.
+
+*Corrected on the full 1427-candidate set (2026-08-20).* The sample-based
+claim "**zero** SEQUENCE fixtures emit `svek-*.dot`" is **false as stated** —
+one does. `dasutu-58-saje713` is correctly `SEQUENCE`-stamped and correctly
+admitted, yet carries `svek-1.dot`/`svek-2.dot`. Mechanism: its note contains
+a bare `{{ object o1 {…} o1 --> o2 }}` block. `EmbeddedDiagram.java` declares
+`EMBEDDED_START = "{{"` and dispatches a bare `{{` to `"uml"`, so the note
+body renders as a nested **object** diagram — graph-layout, DOT-backed — and
+`-DPLANTUML_DUMP_DOT` is a JVM-wide system property, not diagram-scoped, so
+the inner diagram's DOT lands in the outer fixture's out-dir.
+
+The *decision* below is unaffected: the outer diagram is a sequence diagram
+and belongs in the corpus. Only this empirical footnote was over-strong.
+
+**The invariant, stated exactly.** The sequence engine emits no DOT. The sole
+`svek-*.dot` under `test-results/dot-cache/sequence/` is
+`dasutu-58-saje713`'s, produced by an embedded non-sequence sub-diagram. Those
+two files are **kept, not deleted**: they are faithful jar output, a re-capture
+reproduces them, and an invariant of "zero" would therefore be violated by
+every honest re-capture. A future check asserts the singleton set, not
+emptiness. Any OTHER sequence slug acquiring a `.dot` means something changed.
+
+**Decision.** The classifier remains the *candidate generator*. A candidate is
+**admitted** to `test-results/dot-cache/sequence/` only if its jar-rendered
+`in.svg` carries `data-diagram-type="SEQUENCE"`. The gate is the jar's own
+type stamp — mechanical, jar-authored, reproducible, and never an agent
+judgment about what a diagram "looks like". Rejected candidates leave no cache
+entry; their slugs and stamped types are recorded in T0's note.
+
+**Consequences.** The committed corpus is sequence-only, so the diff-baseline
+measures the sequence engine rather than four engines under one label. The
+count is settled by measurement at capture time, not asserted here: **1427
+candidates rendered, 1141 admitted, 285 rejected** (DESCRIPTION 95, CLASS 71,
+STATE 47, UNKNOWN 46, TIMING 22, ACTIVITY 4), 1 not representable.
+
+The 46 `UNKNOWN` rejects are parse-error diagrams: the jar exits non-zero with
+"Some diagram description contains errors" and writes an error image carrying
+no `data-diagram-type` at all. Rejecting them is right under either reading —
+an error image is not a sequence-engine render, so comparing our sequence
+output against one would measure nothing.
+
+**One fixture is excluded as structurally unrepresentable, not as a failure.**
+`xobebi-29-jilu859` is `@startuml file4` + `newpage`, i.e. **multi-page**; the
+jar writes `file4.svg` and `file4_001.svg`. A cache entry whose contract is a
+single `in.svg` cannot hold two pages. This is a real gap the rebuild
+inherits: multi-page sequence has no oracle entry. It is consistent with the
+port's own state — `SequenceDiagramAST` has no `.pages` field, which is why
+T1's helper omits multi-page stripping.
+
 ## D4 — The diff-baseline reads the committed cache; it does not duplicate SVGs
 
 **Decision.** The diff-baseline ratchet reads

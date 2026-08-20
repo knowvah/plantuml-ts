@@ -1,0 +1,11 @@
+@startuml
+skinparam lengthAdjust none
+autonumber "<b>[000]"
+participant BusFMS as "FMS CAN"
+participant FMSSrv as "FMStoIP\nserivce"
+collections clients
+clients -> FMSSrv: C1 addpng(P1,ES)
+hnote over clients: dt max 1s
+FMSSrv -> clients: FMS<rt=2250, P1(no-value, rt=0)>
+note right FMSSrv: <b>Not</b> decided how to send no data.
+@enduml

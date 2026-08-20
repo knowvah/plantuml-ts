@@ -1,0 +1,10 @@
+@startuml
+skinparam useBetaStyle true
+title Styling example
+<style>
+root {
+  FontColor blue
+}
+</style>
+Alice -> Bob : hello
+@enduml

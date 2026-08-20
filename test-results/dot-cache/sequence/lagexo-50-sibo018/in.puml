@@ -1,0 +1,30 @@
+@startuml
+skinparam Actor {
+   FontStyle bold
+   FontSize 14
+   FontColor #5b9bd5
+}
+
+skinparam Entity {
+   BorderColor #c8c8c8
+   BackgroundColor #5b9bd5
+}
+
+skinparam Sequence {
+   ParticipantBorderColor #c8c8c8
+   ParticipantBackgroundColor #5b9bd5
+   ParticipantFontStyle bold
+   ParticipantFontSize 14
+   ParticipantFontColor #ffffff
+}
+
+participant Alice
+entity Bob
+
+Alice -> Bob: call 1
+Bob --> Alice: response
+
+Alice -> Bob: call 2
+Alice <-- Bob: response
+
+@enduml

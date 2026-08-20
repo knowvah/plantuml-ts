@@ -1,0 +1,6 @@
+@startuml
+participant "foo\nbar1" as foobar1
+participant foobar2 as "foo\nbar2"
+participant "foo\nbar3"
+participant "This is foobar@example.com" as foobar@example.com
+@enduml

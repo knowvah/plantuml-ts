@@ -1,0 +1,20 @@
+@startuml
+!pragma teoz true
+<style>
+sequenceDiagram {
+  LineColor blue
+  LineThickness 3
+    
+  destroy {
+    LineColor green
+  }
+}
+</style>
+
+participant X
+...
+X -> Y
+return
+destroy Y
+...
+@enduml

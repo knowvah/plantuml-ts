@@ -1,0 +1,27 @@
+@startuml
+'!pragma teoz true
+note over Bob, Alice: teoz false
+activate Bob
+Bob -> Alice ++--: not ok
+Alice-> Alice: style 1
+deactivate Alice
+
+activate Bob
+Bob -> Alice ++: not ok
+deactivate Bob
+Alice -> Alice: style 1
+deactivate Alice
+
+activate Bob
+Bob -> Alice: ok
+deactivate Bob
+activate Alice
+Alice -> Alice: style 1
+deactivate Alice
+
+activate Bob
+Bob -> Alice --: ok
+activate Alice
+Alice -> Alice: style 2
+deactivate Alice
+@enduml

@@ -1,0 +1,4 @@
+@startuml
+Alice -> Bob: Authentication Request
+Bob ->Bob
+@enduml

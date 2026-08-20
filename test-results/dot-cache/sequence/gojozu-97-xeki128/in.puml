@@ -1,0 +1,6 @@
+@startuml
+participant Bob [[http://www.yahoo.com]]
+participant Alice [[latex://interaction1]]
+Bob -> Alice [[http://www.google.com]] : hello
+Bob -> Alice [[latex://resource-interaction]] : interact
+@enduml

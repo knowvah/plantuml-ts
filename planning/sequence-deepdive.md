@@ -3,7 +3,8 @@
 This document supplements the mission-guide entry for G-1 (Sequence Diagram
 Greenfield Rebuild). Read it before drafting any agent prompt for this phase.
 
-## Prerequisites — read this before scoping G-1 (added 2026-08-20)
+## Prerequisites — read this before scoping G-1 (added 2026-08-20; measurement
+surface built 2026-08-20 — see "Update" below)
 
 **SI-1 (`src/core/cucadiagram/`) does NOT gate this mission.** The mission
 guide previously listed Sequence among SI-1's consumers; that was wrong and is
@@ -13,33 +14,54 @@ corrected. Upstream's `SequenceDiagram extends TitledDiagram`, not
 layout or drawing infrastructure with the entity-diagram line, so G-1 can be
 scheduled independently of G-2…G-7.
 
-**The real prerequisite is a measurement surface, and it does not exist yet.**
+**The real prerequisite was a measurement surface — it now exists.**
 Every state/class mission to date (SI28–SI32) was gated by some combination of
 `svek-N.dot` DOT-parity ratchets, `scripts/render-manifest.ts`,
 `harness-diff.py` and `manifest-diff.py`. **None of that transfers to
 sequence**, and the DOT ratchet cannot be made to: sequence emits no DOT at
-all, so there is nothing to compare. Concretely, today:
+all, so there is nothing to compare. `plans/sequence-oracle-harness/`
+(mission-index **SI33**, closed 2026-08-20, branch
+`feat/sequence-oracle-harness`) built the DOT-less equivalent by **extending**
+the existing `svg-conformance` family that `json`/`yaml`/`hcl` already prove
+out (D1), not by writing a second comparator. Concretely, today:
 
-- no `test-results/dot-cache/sequence/` — the corpus has class, component,
-  dot, hcl, json, object, state, usecase, yaml, and no sequence
-- no `oracle/goldens/svg-sequence/`, though `svg-class`, `svg-state`,
-  `svg-description` and others exist
-- current verification is 4 unit-test files plus one integration test
+- `test-results/dot-cache/sequence/` — **1141** committed fixtures, one
+  `in.puml`/`in.svg` pair per fixture, admitted by the jar's own
+  `data-diagram-type="SEQUENCE"` stamp (the corpus classifier over-selects 3×
+  and is only the candidate generator, per the D3 amendment). One fixture
+  (`xobebi-29-jilu859`, multi-page `newpage`) is structurally unrepresentable
+  in the single-`in.svg` cache layout and has no entry — a real gap a rebuild
+  scoring against this corpus inherits.
+- `oracle/goldens/svg-sequence/diff-baseline.json` — a per-fixture diff-count
+  ratchet that FAILS on any rise (1140 measurable fixtures, 1 error;
+  min 10 / max 139 / sum 16486). **1012 of 1140 (88.8%) sit at exactly 12
+  diffs** because `compare.ts:353` stops recursing at the first structural
+  mismatch (a root `[childCount]` diff), so the diagram body is currently
+  unmeasured for 88.8% of the corpus — the first real fix will raise that
+  plateau's counts together, and the ratchet's own failure message explains
+  why that is progress, not regression.
+- `oracle/goldens/svg-sequence/diff-census.json` — every diff bucketed into
+  six fixed, mechanically-derived categories (`missing-element` 873,
+  `extra-element` 1317, `geometry` 5124, `text-metrics` 536, `format-units`
+  0, `other` 8636) by committed, unit-tested code — a ranked work queue for
+  the rebuild, not 1140 opaque numbers.
+- `oracle/goldens/svg-sequence/ratchet.json` — the golden (zero-diff) ratchet,
+  shipped **empty** (`{"fixtures": []}`) and tested; promotion is the
+  rebuild's to earn.
+- `scripts/svg-conformance-census.ts` and
+  `tests/oracle/svg-conformance/oracle-freshness.test.ts` both know about
+  `sequence` now.
+
+None of this fixed a rendering defect, promoted a fixture, or touched `src/`
+— see `plans/sequence-oracle-harness/README.md`'s "Close-out (2026-08-20)"
+for every figure re-measured at close, and its two carried-forward follow-ons
+(the triplicated `fixtureIncludeStore` seam; an open, undiagnosed
+`stdlib-remote-e2e.test.ts` intermittent).
 
 A greenfield rebuild with no oracle is unscoreable — "it renders" is not a
-bar, and this project's bar is pleasing aesthetic alignment with the jar. So
-**Batch 1 of G-1 builds the harness, not the diagram**: jar SVG oracles plus a
-comparator that can grade sequence output without a DOT intermediate.
-
-The corpus to seed it exists: **473 fixtures** under `~/git/pdiff` declare
-`participant`/`actor`, and `scripts/populate-corpus.py:20` already carries a
-sequence classifier. Rendering those through the jar
-(`scripts/oracle-render.sh`, which sets `-DPLANTUML_DETERMINISTIC_TEXT=true`)
-is the natural first task.
-
-Decide the comparator's shape deliberately — it is the one design decision
-that constrains every later batch, and there is no upstream precedent in this
-repo to copy for a DOT-less engine.
+bar, and this project's bar is pleasing aesthetic alignment with the jar. With
+the harness now in place, **G-1's first batch builds the diagram against an
+existing oracle**, rather than building the oracle itself.
 
 ## Scale of the Java source
 

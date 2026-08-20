@@ -1,0 +1,14 @@
+@startuml
+participant Bob
+participant Alice
+
+Alice \\-: "\\\\-" Should be down1
+Alice //-: "//-" Should be up2
+\\- Alice: "\\\\-" Should be down3
+//- Alice: "//-" Should be up4
+
+Bob -// Alice: "-//" Is correct down5
+Bob -\\ Alice: "-\\\\" Is correct up6
+Bob \\- Alice: "\\\\-" Is correct down7
+Bob //- Alice: "//-" Is correct up8
+@enduml

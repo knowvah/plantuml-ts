@@ -1,0 +1,16 @@
+@startuml
+'!preprocessorV2
+!$myVar = "FOO"
+!procedure $v1()
+Alice -> Bob : from v1 $myVar
+!endprocedure
+
+!procedure $v2()
+!$myVar = "CHANGED!"
+Alice -> Bob : from v2 $myVar
+!endprocedure
+
+$v1()
+$v2()
+$v1()
+@enduml

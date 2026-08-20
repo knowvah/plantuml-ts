@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : hello tested with v 1.2021.01beta 3
+destroy Alice
+Alice -> Alice: Hello actual
+destroy Alice
+@enduml

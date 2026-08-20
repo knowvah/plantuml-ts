@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+Title aaaaaaa 
+caption aaaa.txt V0001
+Bob->Alice : hello
+@enduml

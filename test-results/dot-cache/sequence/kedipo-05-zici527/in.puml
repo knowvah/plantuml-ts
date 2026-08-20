@@ -1,0 +1,9 @@
+@startuml
+skinparam sequenceStereotypeFontSize 21
+skinparam sequenceStereotypeFontStyle bold
+skinparam sequenceStereotypeFontColor blue
+
+actor Alice <<FOO>>
+participant Bob <<DUMMY>>
+Alice -> Bob
+@enduml

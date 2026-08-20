@@ -1,0 +1,10 @@
+@startuml
+
+sprite callout1 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+  <circle cx="9" cy="9" r="9" fill="black" />
+  <text x="6" y="11" fill="yellow" font-size="10">1</text>
+</svg>
+
+Alice->Bob: <$callout1> message
+
+@enduml

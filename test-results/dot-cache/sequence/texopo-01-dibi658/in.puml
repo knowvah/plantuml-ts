@@ -1,0 +1,22 @@
+@startuml
+!pragma teoz true
+
+hide footbox
+
+participant a
+participant b
+participant c
+participant d
+participant e
+
+autonumber
+
+a->b: Msg
+& b->c: Msg
+& c->d: Msg
+
+[<- d: Msg
+
+
+a->b: Msg
+@enduml

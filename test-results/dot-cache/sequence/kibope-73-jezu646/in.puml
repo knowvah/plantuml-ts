@@ -1,0 +1,13 @@
+@startuml
+!pragma teoz true
+participant A
+participant B
+participant C
+
+note over A: "State: Initial"
+/ note over B: "State: Initial"
+/ note over C: "State: Initial"
+
+A -> B: Send Message
+& C -> B: Another Simultaneous Message
+@enduml

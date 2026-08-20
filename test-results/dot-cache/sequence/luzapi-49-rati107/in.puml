@@ -1,0 +1,24 @@
+@startuml
+
+Activate SerialManager
+Activate InputStream
+Activate ByteBuffer
+
+group PURGE RX
+    [-> SerialManager: purgeRx()
+        SerialManager -> ByteBuffer : clear()
+        ...
+        SerialManager <-- ByteBuffer
+    [<-- SerialManager: purgeRx()
+end
+
+newpage
+
+group RECEPTION DONNEES
+    [-> SerialManager : A()
+        SerialManager -> ByteBuffer : compact()
+        SerialManager <-- ByteBuffer
+    [<-- SerialManager : A()
+end
+
+@enduml

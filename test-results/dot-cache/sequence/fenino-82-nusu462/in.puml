@@ -1,0 +1,11 @@
+@startuml
+actor Foo1
+participant Foo2
+boundary Foo3
+control Foo4
+entity Foo5
+database Foo6
+
+Foo1 -> Foo2
+Foo2 --> Foo5 : test
+@enduml

@@ -1,0 +1,4 @@
+@startuml
+scale max 600*200
+Alice->Bob:hello
+@enduml

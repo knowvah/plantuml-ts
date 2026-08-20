@@ -1,0 +1,15 @@
+@startuml
+!pragma teoz true
+
+participant "party 1" as P1
+participant "party 2" as P2
+
+
+group inner2
+P1->P2: short
+note over P1,P2
+ if here is some note over both parties
+end note
+end
+
+@enduml

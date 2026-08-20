@@ -1,0 +1,13 @@
+@startuml
+
+mainframe This is a frame
+
+participant alpha
+participant beta
+
+alpha -> beta: a1
+beta <- alpha: a2
+
+beta -> alpha: b1
+alpha <- beta: b2
+@enduml

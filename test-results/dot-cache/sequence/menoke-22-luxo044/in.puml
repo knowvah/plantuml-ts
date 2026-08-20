@@ -1,0 +1,18 @@
+@startuml
+skinparam handwritten true
+
+
+a->b
+note right
+
+{{
+c->d
+note right
+     skinparam
+     handwritten
+     is not
+     inherited
+end note
+}}
+end note
+@enduml

@@ -1,0 +1,4 @@
+@startuml
+/' my comment '/ !define foo bar
+Alice -> Bob : foo
+@enduml

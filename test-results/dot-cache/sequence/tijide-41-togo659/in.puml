@@ -1,0 +1,7 @@
+@startuml
+skinparam actorBorderColor #00f
+skinparam actorBorderColor<<cooper>> #0f0
+actor Bob
+actor Alice <<cooper>>
+Bob -> Alice : hello
+@enduml

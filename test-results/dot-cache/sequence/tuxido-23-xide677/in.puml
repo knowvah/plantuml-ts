@@ -1,0 +1,5 @@
+@startuml
+'skinparam dpi 1000
+Alice o-> Bob : hello
+Alice <<--o Bob : ok
+@enduml

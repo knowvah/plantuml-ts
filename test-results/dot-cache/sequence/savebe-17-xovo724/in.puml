@@ -1,0 +1,4 @@
+@startuml
+Alice -> Bob : <#0:2630:><#F00:2630:>
+Alice -> Bob : <#F00:recycle:>
+@enduml

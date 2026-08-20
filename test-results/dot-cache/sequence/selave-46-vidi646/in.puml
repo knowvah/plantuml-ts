@@ -1,0 +1,8 @@
+@startuml
+a->b : this is a message
+alt toto
+a->b++ : msg2
+end
+b->a++ : msg3
+return msg4
+@enduml

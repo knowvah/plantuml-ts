@@ -1,0 +1,3 @@
+@startuml
+Bob -> Alice : [[javascript:alert('test') hello]]
+@enduml

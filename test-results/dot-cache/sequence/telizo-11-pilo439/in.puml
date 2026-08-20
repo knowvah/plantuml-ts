@@ -1,0 +1,12 @@
+@startuml
+!pragma teoz true
+
+participant Alice
+participant Ken
+
+Alice -> Alice : ok
+
+Alice -> Ken ** : Birth
+& note right of Ken: txt
+
+@enduml

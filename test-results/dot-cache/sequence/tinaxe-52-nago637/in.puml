@@ -1,0 +1,15 @@
+@startuml
+
+       participant A
+       participant B
+       participant C
+       participant D
+       participant E
+       participant F
+       participant G
+
+'participant H
+
+A->B
+
+@enduml

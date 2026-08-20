@@ -1,0 +1,7 @@
+@startuml
+
+!define osaPuml https://github.com/Crashedmind/PlantUML-opensecurityarchitecture-icons/tree/main
+
+Alice -> Bob : osaPuml
+
+@enduml

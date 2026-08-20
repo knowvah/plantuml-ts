@@ -1,0 +1,6 @@
+@startuml
+P -> P
+create QA
+activate QA
+P -> QA
+@enduml

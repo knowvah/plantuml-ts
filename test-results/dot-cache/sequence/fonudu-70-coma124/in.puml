@@ -1,0 +1,6 @@
+@startuml
+---
+author: foo
+---
+Alice -> Bob : hello
+@enduml

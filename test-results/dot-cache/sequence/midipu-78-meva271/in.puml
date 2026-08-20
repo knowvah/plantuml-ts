@@ -1,0 +1,19 @@
+@startuml
+
+Alice -> Bob
+note left
+  1	test	3
+  4	5	6
+end note
+note left of Bob
+  1	test	3
+  4	5	6
+end note
+note left of Bob
+123
+456
+end note
+
+note right of Bob : 1\t2\t3\n\t4
+
+@enduml

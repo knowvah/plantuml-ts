@@ -1,0 +1,5 @@
+@startuml
+autonumber "0"
+Self -> Self: callSelf
+Self --> Alice : hello!
+@enduml

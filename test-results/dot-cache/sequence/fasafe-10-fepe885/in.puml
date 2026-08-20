@@ -1,0 +1,6 @@
+@startuml
+Alice -> Bob : Hello1
+alt that is very very long
+Alice -> Bob : Hello2
+end
+@enduml

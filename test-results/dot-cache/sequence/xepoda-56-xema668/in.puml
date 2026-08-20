@@ -1,0 +1,11 @@
+@startuml
+skinparam topurl http://www.google.com
+
+Title this is a title
+participant Bob [[/search]]
+participant Alice [[http://www.sf.net{This is alice}]]
+Bob -> Alice : ok
+'url of Bob is [[/search]]
+'url of Alice is [[http://www.sf.net{This is alice}]]
+
+@enduml

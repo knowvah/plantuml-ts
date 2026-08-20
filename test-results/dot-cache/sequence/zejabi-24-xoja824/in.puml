@@ -1,0 +1,25 @@
+@startuml
+skinparam backgroundColor lightGrey
+!pragma teoz true
+[-> Bob
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob <- Alice ++:
+Bob <- Alice ++:
+Bob <- Alice ++:
+Bob <- Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+
+[-> Bob
+[-> Bob
+[-> Bob
+[-> Bob
+[<- Bob
+[<- Bob
+@enduml

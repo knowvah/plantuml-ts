@@ -1,0 +1,17 @@
+@startuml
+
+!pragma teoz false
+
+participant A
+participant B
+
+A -> B: Request1
+
+opt condition
+end
+
+activate A
+A -> B: Request2
+deactivate A
+
+@enduml

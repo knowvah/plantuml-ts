@@ -1,0 +1,10 @@
+@startuml
+title my title
+legend top
+  This is the legend
+  on several lines
+end legend
+
+Alice -> Bob : hello
+
+@enduml

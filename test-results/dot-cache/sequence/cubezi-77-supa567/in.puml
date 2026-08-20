@@ -1,0 +1,7 @@
+@startuml
+!definelong TEST(name)
+  JOIN(A,name,C)
+!enddefinelong
+!define JOIN(a,b,c) ##a##b##c
+Alice-> Bob : TEST(B)
+@enduml

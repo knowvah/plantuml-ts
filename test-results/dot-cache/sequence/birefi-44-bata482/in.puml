@@ -1,0 +1,5 @@
+@startuml
+!theme plain
+!pragma teoz true
+H1 -> C1 & C2 : Blabla
+@enduml

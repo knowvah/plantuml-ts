@@ -1,0 +1,9 @@
+@startuml
+participant ParticipantNumber1
+participant ParticipantNumber2
+participant ParticipantNumber3
+
+ParticipantNumber1 -> ParticipantNumber2 : this is a very long message that is very long 
+ParticipantNumber2 -> ParticipantNumber3 : foo2
+
+@enduml

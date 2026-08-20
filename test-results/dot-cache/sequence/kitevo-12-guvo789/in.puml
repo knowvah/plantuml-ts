@@ -1,0 +1,5 @@
+@startuml
+skinparam backgroundcolor blue/red
+scale 2
+Bob -> Alice : hello
+@enduml

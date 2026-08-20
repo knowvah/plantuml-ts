@@ -1,0 +1,12 @@
+@startuml
+note over Alice : initial state of Alice
+/ note over Bob : initial sdkfljsdfl sdf sdmf
+/ note over Alice3
+ b
+ c
+ d
+end note
+/ note over Alice4 : initial sdf sdf sdf sdfsdfds sdf
+Bob -> Alice : hello
+Bob -> Alice3 : hello
+@enduml

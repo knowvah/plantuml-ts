@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+title title
+Bob -> Alice : hello
+footer footer
+header header
+@enduml

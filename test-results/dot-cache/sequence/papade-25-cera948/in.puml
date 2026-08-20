@@ -1,0 +1,5 @@
+@startuml
+skinparam tabSize 2
+
+Bob -> Alice: "a\n\tb"
+@enduml

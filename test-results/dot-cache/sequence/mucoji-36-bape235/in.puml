@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : first
+& Alice -> Ken : second
+note right: (1) second above first
+@enduml

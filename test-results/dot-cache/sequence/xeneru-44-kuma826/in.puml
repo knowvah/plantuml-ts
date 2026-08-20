@@ -1,0 +1,20 @@
+@startuml
+skinparam BackgroundColor transparent
+skinparam shadowing false
+skinparam SequenceGroupBodyBackgroundColor 66000099
+
+participant client
+box
+  participant server
+end box
+
+opt
+client -> server : first hello //opt//
+  opt
+    client -> server : second hello //opt//\nwith more green
+  end opt
+end opt
+opt
+  client <- server : hello //opt//
+end opt
+@enduml

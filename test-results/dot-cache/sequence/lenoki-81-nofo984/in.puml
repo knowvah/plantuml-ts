@@ -1,0 +1,20 @@
+@startuml
+skinparam sequenceParticipantBorderThickness 0.5
+' skinparam sequenceBoundaryBorderThickness .7
+skinparam sequenceLifeLineBorderThickness 3
+skinparam sequenceActorBorderThickness .1
+skinparam sequenceDividerBorderThickness .3
+
+Bob -> Alice : hello1
+actor Foo1
+boundary Foo2
+control Foo3
+entity Foo4
+== First point ==
+Bob -> Alice : hello2
+alt foo
+Bob -> Alice : hello3
+end
+
+
+@enduml

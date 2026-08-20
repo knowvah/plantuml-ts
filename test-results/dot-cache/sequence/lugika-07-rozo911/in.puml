@@ -1,0 +1,23 @@
+@startuml
+!pragma teoz true
+skinparam ParticipantPadding 18
+  A -> B
+& B <- C
+== short arrows ==
+opt#transparent
+?o-> B : word
+& B <-o? : word
+end
+?o-> B : word
+& B <-o? : word
+== left edge arrow ==
+opt#transparent
+[o-> B : word
+end
+[o-> B : word
+== right edge arrow==
+opt#transparent
+& B <-o] : word
+end
+B <-o] : word
+@enduml

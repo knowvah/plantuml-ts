@@ -1,0 +1,18 @@
+@startuml
+
+== <color:red> KO ==
+Alice x->    Alice : ""x->  ""
+Alice <->    Alice : ""<->  ""
+Alice o<->o  Alice : ""o<->o""
+Alice <->o   Alice : ""<->o""
+Alice x<->x  Alice : ""x<->x""
+Alice x->o   Alice : ""x->o ""
+
+== <color:green> OK ==
+Alice x->    Bob : ""x->  ""
+Alice <->    Bob : ""<->  ""
+Alice o<->o  Bob : ""o<->o""
+Alice <->o   Bob : ""<->o""
+Alice x<->x  Bob : ""x<->x""
+Alice x->o   Bob : ""x->o ""
+@enduml

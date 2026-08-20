@@ -1,0 +1,8 @@
+@startuml
+'!preprocessorV2
+!function $inc($value, $step)
+!return $value + 2*$step
+!endfunction
+
+Alice -> Bob : expeected 234 : $inc($inc(30, 2),100)
+@enduml

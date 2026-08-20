@@ -1,0 +1,6 @@
+@startuml
+bobé -> çç : éé
+note over bobé
+	noé
+endnote
+@enduml

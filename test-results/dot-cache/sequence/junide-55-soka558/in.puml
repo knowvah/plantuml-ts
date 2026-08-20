@@ -1,0 +1,7 @@
+@startuml
+scale 70 width
+participant Bob
+participant APP
+url of APP is [[http://tomcat.apache.org/]]
+Bob -> APP : hello
+@enduml

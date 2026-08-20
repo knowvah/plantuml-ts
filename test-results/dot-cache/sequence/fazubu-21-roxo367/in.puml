@@ -1,0 +1,18 @@
+@startuml
+skinparam useBetaStyle true
+
+<style>
+arrow {
+    FontColor red
+    LineColor blue
+  }
+</style>
+
+participant Alice
+
+participant Bob
+Alice -> Bob : hello1
+
+Alice -> Bob : hello2
+
+@enduml

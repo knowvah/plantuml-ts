@@ -1,0 +1,11 @@
+@startuml
+'!preprocessorV2
+!ijk = 'foo'
+Alice -> Bob : You should see foo and not bar
+!if ijk == 'bar'
+Alice -> Bob : bar
+!elseif ijk == 'foo'
+Alice -> Bob : foo
+!endif
+Alice -> Bob : B
+@enduml

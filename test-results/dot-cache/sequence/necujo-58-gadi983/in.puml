@@ -1,0 +1,6 @@
+@startuml
+participant Abox
+participant Bbox
+create Abox
+Bbox -> Abox : create
+@enduml

@@ -1,0 +1,5 @@
+@startuml
+Bob x-> Alice : 0-4 x->
+Bob x->x Alice : 0-6 x->x
+Bob x->o Alice : 0-8 x->o
+@enduml

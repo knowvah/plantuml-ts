@@ -1,0 +1,13 @@
+@startuml
+
+
+!function $sum($a, $b)
+!return $a+$b*2
+!endfunction
+
+Alice -> Bob : 8 $sum(2, 3)
+Alice -> Bob : 8 $sum($a=2, $b=3)
+Alice -> Bob : 8 $sum($b=3, $a=2)
+
+
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+Title this is my title
+Dummy -> Alice : foo1
+note left of Alice [[http://www.google.fr]]
+  Note
+end note
+Dummy -> Alice : foo2
+@enduml

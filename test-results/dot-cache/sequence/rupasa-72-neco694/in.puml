@@ -1,0 +1,4 @@
+@startuml
+skinparam minClassWidth 400
+Alice -> Bob : hello
+@enduml

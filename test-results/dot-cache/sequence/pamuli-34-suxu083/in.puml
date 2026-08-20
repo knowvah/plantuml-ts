@@ -1,0 +1,15 @@
+@startuml
+
+skinparam useBetaStyle true
+<style>
+sequenceDiagram {
+ note {
+  backgroundColor blue
+ }
+}
+</style>
+participant A
+participant B
+note over A: test
+note over B: test
+@enduml

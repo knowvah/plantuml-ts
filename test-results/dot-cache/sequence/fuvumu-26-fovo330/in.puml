@@ -1,0 +1,15 @@
+@startuml
+skinparam participant {
+Bordercolor none
+Backgroundcolor none
+Shadowing false
+}
+actor Bob #red
+' The only difference between actor
+'and participant is the drawing
+participant "<size:30><&key>" as L
+
+Alice->Bob: Authentication Request
+Bob->Alice: Authentication Response
+Bob->L: Log transaction
+@enduml

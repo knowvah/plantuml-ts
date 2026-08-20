@@ -1,0 +1,12 @@
+@startuml
+!pragma teoz true
+
+group #red A
+ {start} Alice -> Bob : start doing things during duration
+ Bob -> Max : something
+ Max -> Bob : something else
+ {end} Bob -> Alice : finish
+
+ {start} <-> {end} : This is not plotted
+end
+@enduml

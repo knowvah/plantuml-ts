@@ -1,0 +1,14 @@
+@startuml
+box "This is the Solar system" #LightBlue
+participant Alice
+end box
+participant Bob
+participant P
+
+participant Sun
+
+Alice -> Bob
+newpage
+Bob -> P
+P -> Sun
+@enduml

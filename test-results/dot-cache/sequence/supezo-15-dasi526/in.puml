@@ -1,0 +1,5 @@
+@startuml
+!Response = "FOO"
+Alice -> Bob : AMS_to_CHE_Response_success
+Alice -> Bob : Response
+@enduml

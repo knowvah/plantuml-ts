@@ -1,0 +1,6 @@
+@startuml
+'!preprocessorV2
+Alice -> Bob : expected 0 %false()
+Alice -> Bob : expected 1 %true()
+Alice -> Bob : expected 0 %not(2+4==6)
+@enduml

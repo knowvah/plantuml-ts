@@ -1,0 +1,11 @@
+@startuml
+alt
+  vodpull->vodpull: A
+end
+alt
+  vodpull->vodpull: B
+  alt
+    vodpull->vodpull: C
+  end
+end
+@enduml

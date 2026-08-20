@@ -1,0 +1,5 @@
+@startuml
+skinparam SequenceReferenceAlign center
+Alice -> Bob : This is very long
+ref over Alice, Bob : short
+@enduml

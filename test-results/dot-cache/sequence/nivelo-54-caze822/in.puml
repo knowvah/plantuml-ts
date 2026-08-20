@@ -1,0 +1,14 @@
+@startuml
+!pragma teoz true
+box
+participant Bob
+participant Alice
+end box
+
+alt #00ff0020
+    Bob -> Alice: Authentication Accepted
+else
+   Bob -> Alice: Please repeat
+end
+
+@enduml

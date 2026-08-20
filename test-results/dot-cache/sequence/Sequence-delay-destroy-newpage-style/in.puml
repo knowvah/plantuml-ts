@@ -1,0 +1,13 @@
+@startuml
+<style>
+sequenceDiagram {
+  LineColor blue
+  LineThickness 3
+}
+</style>
+
+X -> X
+X -> Y
+newpage 
+X -> X
+@enduml

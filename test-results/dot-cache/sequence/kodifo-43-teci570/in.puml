@@ -1,0 +1,8 @@
+@startuml
+set separator none
+
+actor "User" as User
+participant "A.B" as A.B
+User -> A.B : Uses
+
+@enduml

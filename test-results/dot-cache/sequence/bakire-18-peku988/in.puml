@@ -1,0 +1,11 @@
+@startuml
+
+skinparam SequenceMessage {
+  Margin 35
+  Padding 5
+  BackgroundColor Green
+  BorderColor Blue
+}
+Alice->Bob : hello
+
+@enduml

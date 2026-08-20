@@ -1,0 +1,15 @@
+@startuml
+!pragma teoz true
+skinparam {
+lifelineStrategy solid
+}
+
+participant a
+participant b
+participant c
+participant d
+a->b : hello
+sb->c : send
+c->d : msg
+d->a : eee
+@enduml

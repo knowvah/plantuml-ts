@@ -1,0 +1,16 @@
+@startuml
+!pragma teoz true
+participant Bob
+participant Alice
+loop
+loop
+Bob->Alice : hello
+opt
+?o->Alice : "[o->" external event
+end opt
+opt
+Bob <-o] : external event <-o]
+end opt
+end
+end
+@enduml

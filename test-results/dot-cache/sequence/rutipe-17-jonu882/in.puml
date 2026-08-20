@@ -1,0 +1,9 @@
+@startuml
+skinparam SequenceLifeLineBackgroundColor #FEFEFE/#CDCDCD
+participant P
+activate P
+P -> P : ignoreme
+...
+P -> P : ignoreme
+deactivate P
+@enduml

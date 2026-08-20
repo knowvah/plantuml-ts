@@ -19,7 +19,15 @@
  * `renderState`, via `render-fixture-state.ts#renderFixtureState` — G4/S0):
  * unlike object, state diagrams DO have a separate upstream package
  * (`statediagram/`), so this is a genuinely new pipeline dispatch, not a
- * reuse. `renderFixtureFor` dispatches on `type`. Each pass injects ONE
+ * reuse. `sequence` likewise routes through its OWN dedicated engine
+ * (`parseSequence` -> `layoutSequence` -> `renderSequence`, via
+ * `render-fixture-sequence.ts#renderFixtureSequence` — T5 of
+ * sequence-oracle-harness): like state, sequence has its own upstream
+ * package (`src/diagrams/sequence/`), so this is a new dispatch, not a
+ * reuse — see that helper's own doc comment for the three structural
+ * deltas from `render-fixture-state.ts` (no multi-page stripping, no
+ * post-chrome margin re-application, no augmented-block construction for
+ * parse). `renderFixtureFor` dispatches on `type`. Each pass injects ONE
  * measurer instance into BOTH the layout and render stages, and compares
  * the result against the cached golden via `compareSvg(..., 'deterministic')`.
  *
@@ -41,7 +49,7 @@
  * same already-exported building blocks.
  *
  * Usage: npx tsx scripts/svg-conformance-census.ts [component] [usecase] [class]
- *          [object] [state] [dot] [json] [yaml] [hcl]
+ *          [object] [state] [sequence] [dot] [json] [yaml] [hcl]
  *   (defaults to component + usecase; every other type must be requested
  *   explicitly)
  *
@@ -81,6 +89,7 @@ import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
+import { renderFixtureSequence } from '../tests/oracle/svg-conformance/render-fixture-sequence.js';
 import { renderFixtureJson } from '../tests/oracle/svg-conformance/render-fixture-json.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -197,18 +206,22 @@ function renderFixtureDescription(markup: string, measurer: StringMeasurer): str
 }
 
 /**
- * N0 (G2), extended O0 (G3), extended S0 (G4): dispatches to the CLASS
- * pipeline for `class` AND `object` fixtures, to the STATE pipeline for
- * `state` fixtures, else the pre-existing description pipeline
- * (component/usecase). `parseDescription` silently "succeeds" on class/
- * object/state markup -- it just drops the native syntax (member
- * compartments, nested classifiers inside `package{}` blocks, `object`/`map`
- * declarations, state transitions) -- so each of these fixture types MUST
- * route through its own parser/layout/renderer or every downstream family/
- * error measurement is meaningless (diagnosed N0, re-confirmed for object at
- * O0, re-confirmed for state at S0: state diagrams DO have a dedicated
- * upstream engine, `statediagram/`, unlike object's reuse of `classdiagram/`
- * -- see `renderFixtureState`'s own doc comment).
+ * N0 (G2), extended O0 (G3), extended S0 (G4), extended T5 (sequence-oracle-
+ * harness): dispatches to the CLASS pipeline for `class` AND `object`
+ * fixtures, to the STATE pipeline for `state` fixtures, to the SEQUENCE
+ * pipeline for `sequence` fixtures, else the pre-existing description
+ * pipeline (component/usecase). `parseDescription` silently "succeeds" on
+ * class/object/state/sequence markup -- it just drops the native syntax
+ * (member compartments, nested classifiers inside `package{}` blocks,
+ * `object`/`map` declarations, state transitions, `->` message arrows) --
+ * so each of these fixture types MUST route through its own parser/layout/
+ * renderer or every downstream family/error measurement is meaningless
+ * (diagnosed N0, re-confirmed for object at O0, re-confirmed for state at
+ * S0: state diagrams DO have a dedicated upstream engine, `statediagram/`,
+ * unlike object's reuse of `classdiagram/` -- see `renderFixtureState`'s own
+ * doc comment; sequence likewise has its own dedicated upstream engine,
+ * `src/diagrams/sequence/`, via `render-fixture-sequence.ts#
+ * renderFixtureSequence`).
  */
 function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer): string {
   if (type === 'class' || type === 'object') {
@@ -216,6 +229,9 @@ function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer
   }
   if (type === 'state') {
     return renderFixtureState(markup, measurer, { includeStore: censusIncludeStore() });
+  }
+  if (type === 'sequence') {
+    return renderFixtureSequence(markup, measurer, { includeStore: censusIncludeStore() });
   }
   if (type === 'json' || type === 'yaml' || type === 'hcl') {
     // Mission A5. ONE helper serves all three: yaml and hcl have no layout or

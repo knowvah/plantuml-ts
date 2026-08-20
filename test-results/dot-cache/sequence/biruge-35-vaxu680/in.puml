@@ -1,0 +1,15 @@
+@startuml
+box BoxOfAlice #yellow/blue
+  participant Alice #yellow/blue
+end box
+
+box BoxOfBob #orange
+  participant Bob
+end box
+
+Alice -> Bob: Hello
+
+note over Alice #yellow/blue
+  fancy!
+end note
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+skinparam SequenceBoxBorderColor blue
+skinparam SequenceBoxBackgroundColor yellow
+
+box
+Alice->Bob: Authentication Request
+endbox
+Bob -> Other
+@enduml

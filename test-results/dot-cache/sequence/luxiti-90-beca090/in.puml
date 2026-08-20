@@ -1,0 +1,9 @@
+@startuml
+skinparam Dpi 00
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
+@enduml

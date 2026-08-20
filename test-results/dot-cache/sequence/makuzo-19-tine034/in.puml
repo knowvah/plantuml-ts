@@ -1,0 +1,14 @@
+@startuml
+participant a
+participant b
+participant c
+autonumber
+a -> b :msg
+note over a : %autonumber% 
+note over a,b : %autonumber% 
+b -> c :msg 
+note over b,c : %autonumber% 
+note over b : %autonumber% 
+return msg_ack
+a <-- b :msg_ack
+@enduml
