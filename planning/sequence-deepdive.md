@@ -3,6 +3,44 @@
 This document supplements the mission-guide entry for G-1 (Sequence Diagram
 Greenfield Rebuild). Read it before drafting any agent prompt for this phase.
 
+## Prerequisites — read this before scoping G-1 (added 2026-08-20)
+
+**SI-1 (`src/core/cucadiagram/`) does NOT gate this mission.** The mission
+guide previously listed Sequence among SI-1's consumers; that was wrong and is
+corrected. Upstream's `SequenceDiagram extends TitledDiagram`, not
+`CucaDiagram`, and no file under `sequencediagram/` imports
+`net.sourceforge.plantuml.svek` or `net.atmp.CucaDiagram`. Sequence shares no
+layout or drawing infrastructure with the entity-diagram line, so G-1 can be
+scheduled independently of G-2…G-7.
+
+**The real prerequisite is a measurement surface, and it does not exist yet.**
+Every state/class mission to date (SI28–SI32) was gated by some combination of
+`svek-N.dot` DOT-parity ratchets, `scripts/render-manifest.ts`,
+`harness-diff.py` and `manifest-diff.py`. **None of that transfers to
+sequence**, and the DOT ratchet cannot be made to: sequence emits no DOT at
+all, so there is nothing to compare. Concretely, today:
+
+- no `test-results/dot-cache/sequence/` — the corpus has class, component,
+  dot, hcl, json, object, state, usecase, yaml, and no sequence
+- no `oracle/goldens/svg-sequence/`, though `svg-class`, `svg-state`,
+  `svg-description` and others exist
+- current verification is 4 unit-test files plus one integration test
+
+A greenfield rebuild with no oracle is unscoreable — "it renders" is not a
+bar, and this project's bar is pleasing aesthetic alignment with the jar. So
+**Batch 1 of G-1 builds the harness, not the diagram**: jar SVG oracles plus a
+comparator that can grade sequence output without a DOT intermediate.
+
+The corpus to seed it exists: **473 fixtures** under `~/git/pdiff` declare
+`participant`/`actor`, and `scripts/populate-corpus.py:20` already carries a
+sequence classifier. Rendering those through the jar
+(`scripts/oracle-render.sh`, which sets `-DPLANTUML_DETERMINISTIC_TEXT=true`)
+is the natural first task.
+
+Decide the comparator's shape deliberately — it is the one design decision
+that constrains every later batch, and there is no upstream precedent in this
+repo to copy for a DOT-less engine.
+
 ## Scale of the Java source
 
 | Sub-package | File count | What it contains |

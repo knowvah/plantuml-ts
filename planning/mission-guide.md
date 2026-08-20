@@ -74,8 +74,16 @@ that produces a reusable module in `src/core/`.
 
 ### Track SI-1 — `src/core/cucadiagram/` (Entity Diagram Shared Base)
 
-**Needed by:** Sequence (G-1), Class (G-2), State (G-3), Activity (G-4),
-Component (G-5), Use Case (G-6), Object (G-7)
+**Needed by:** Class (G-2), State (G-3), Activity (G-4), Component (G-5),
+Use Case (G-6), Object (G-7)
+
+**NOT needed by Sequence (G-1)** — corrected 2026-08-20. Upstream's
+`SequenceDiagram extends TitledDiagram`, not `CucaDiagram`, and no file under
+`sequencediagram/` (130 of them) imports `net.sourceforge.plantuml.svek` or
+`net.atmp.CucaDiagram`. Sequence layout is a custom vertical-time algorithm
+with no graphviz involvement, so it consumes none of this track. G-1's own
+entry below already states its real reuse set (`svg.ts`, `creole.ts`,
+`theme.ts`); this line had contradicted it.
 
 **Java source:** `cucadiagram/` (~50 files), `svek/` (~100 files), `descdiagram/`
 
@@ -618,7 +626,21 @@ do not share the `cucadiagram`/`svek` infrastructure that upstream uses. These
 are greenfield targets — tear out and replace, do not extend.
 
 **Prerequisite:** Complete Track SI-1 (`src/core/cucadiagram/`) before starting
-any of these. Each greenfield rebuild is a consumer of that shared base.
+G-2 through G-7. Each of those is a consumer of that shared base.
+
+**G-1 (Sequence) is exempt** — corrected 2026-08-20. It does not consume
+`cucadiagram`/`svek` in upstream or here (see Track SI-1's own note), so SI-1
+does not gate it and it can be scheduled independently of the entity-diagram
+line. Its real prerequisite is different and is NOT yet met: **sequence has no
+jar-oracle coverage.** There is no `test-results/dot-cache/sequence/` and no
+`oracle/goldens/svg-sequence/`, and because sequence emits no DOT there can be
+no `svek-N.dot` parity ratchet — the gate every state/class mission has leaned
+on does not transfer. `render-manifest.ts` / `harness-diff.py` / the DOT-parity
+ratchets are all unavailable. A G-1 mission's first batch must therefore build
+that measurement surface (jar SVG oracles plus a comparator) before any rebuild
+can be scored. The corpus exists to seed it: 473 fixtures under `~/git/pdiff`
+declare `participant`/`actor`, and `scripts/populate-corpus.py:20` already
+classifies sequence.
 
 The existing source files in `src/diagrams/{type}/` are available as reference
 but should not constrain the new design. Read the Java source first; check the
