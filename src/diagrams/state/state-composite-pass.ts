@@ -56,6 +56,7 @@ import { hasLocalContent } from './state-composite-detect.js';
 import { buildLeafNode } from './state-leaf-node.js';
 import type { TransitionGeo } from './state-geo-types.js';
 import { attachTransitionLabel } from './state-transition-label.js';
+import { clusterAnchorRectsOf, clipTransitionSpline } from './state-transition-clip.js';
 import { resolveAllAutonomPasses } from './state-composite-autonom.js';
 import { resolveClusterComposite } from './state-composite-cluster.js';
 import { isTransparentColor } from '../../core/paint.js';
@@ -339,14 +340,35 @@ export function buildLevelTransitionGeos(acc: PassAccumulator, result: DotLayout
   // `id="*start*s7_2-to-chat1"` (expected) vs `id="[*]-to-chat1"` (this
   // port, pre-fix).
   const edgeEndpoints = new Map(acc.edges.map((e) => [e.id, { from: e.from, to: e.to }]));
+  // SI32 T2 (D1'/D2'): this loop IS `DotStringFactory#solve`'s own edge loop
+  // (`DotStringFactory.java:458-459`), scoped -- as upstream's is -- to ONE
+  // graphviz layout result. The clip below is `SvekEdge#solveLine`'s
+  // `dotPath = dotPath.simulateCompound(lhead..., ltail...)` reassignment
+  // (`SvekEdge.java:671-672`); see `state-transition-clip.ts`'s own module
+  // doc comment for the per-nesting-level derivation and for the two sibling
+  // passes (`alignEdgesAtLabelNodes`, `manageCollision`) it brackets there.
+  const anchorRects = clusterAnchorRectsOf(acc.clusters, result);
   const geos: TransitionGeo[] = [];
   for (const { t, edgeId, reversed } of acc.edgeSources) {
     const edgeResult = edgePosMap.get(edgeId);
     if (edgeResult === undefined) continue;
     const geo = resolveTransitionGeometry(reversed, edgeResult.points, edgeEndpoints.get(edgeId));
+    const from = geo.from ?? t.from;
+    const to = geo.to ?? t.to;
+    // D1'a: the label is attached from the UNCLIPPED points, and only the
+    // points STORED on the geo are clipped. Upstream's label position is
+    // `getXY(fullSvg, noteLabelColor)` (`SvekEdge.java:742-746`) -- read out
+    // of the graphviz SVG, never derived from `dotPath` -- so a
+    // path-independent label is the faithful outcome. This port's
+    // `attachInlineTransitionLabel` falls back to
+    // `perpendicularOffsetLabel(points)` when no measurer is present
+    // (`state-transition-label.ts:386-394`), and that arm is real (the
+    // concurrent-region passes build their accumulator without one), so
+    // feeding it the clipped path would invent a dependency upstream has not.
     const label = attachTransitionLabel(t, geo.points, edgeResult, acc.labelFont, acc.measurer);
     geos.push({
-      from: geo.from ?? t.from, to: geo.to ?? t.to, points: geo.points, ...(label !== undefined ? { label } : {}),
+      from, to, points: clipTransitionSpline(geo.points, from, to, anchorRects),
+      ...(label !== undefined ? { label } : {}),
       ...(t.creationIndex !== undefined ? { creationIndex: t.creationIndex } : {}),
       ...(t.crossStart !== undefined ? { crossStart: t.crossStart } : {}),
       ...(t.circleEnd !== undefined ? { circleEnd: t.circleEnd } : {}),

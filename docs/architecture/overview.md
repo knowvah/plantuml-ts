@@ -30,7 +30,7 @@ plantuml (Java, upstream)        graphviz (C, upstream — not in org)
         │  ports behavior/AST                 │  ports algorithms
         ▼                                      ▼
    plantuml-ts  ───── depends on ─────►   dot-engine
-   (this repo)     (file: tarball dep)   (DOT layout engine)
+   (this repo)        (npm dep)          (DOT layout engine)
 ```
 
 - **plantuml (upstream Java, `sseely/plantuml`)** — the authoritative
@@ -41,7 +41,7 @@ plantuml (Java, upstream)        graphviz (C, upstream — not in org)
   graph-topology layout (rank assignment, crossing minimization,
   coordinate assignment, edge routing) to it through a single seam,
   `src/core/graph-layout.ts`. It is consumed from npm as
-  `@knowvah/dot-engine@^1.5.0` — a published package, not a local tarball and
+  `@knowvah/dot-engine@^1.6.0` — a published package, not a local tarball and
   not live source.
 - **plantuml-ts (this repo)** — owns preprocessing, block extraction,
   diagram-type dispatch, parsing into per-type ASTs, theme/skinparam

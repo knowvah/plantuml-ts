@@ -19,4 +19,102 @@
 #   Batch 3 (T3)  — none. Docs only.
 #   Batch 4 (T4)  — none. Close-out.
 
-# Batch 2 (T2 — clip once, in solve()'s edge pass)
+# Batch 2 (T2 — clip once, per layout result)
+
+# ONE mechanism, one direction. `DotPath#simulateCompound`
+# (`SvekEdge.java:671-672`, inside `DotStringFactory#solve`'s edge loop at
+# `DotStringFactory.java:458-459`) now REASSIGNS the transition's own point
+# list at construction, so the DRAWN `<path d>` and the head arrowhead see the
+# trimmed curve, not only the ink fold. Upstream builds both extremities from
+# the reassigned `dotPath` (`SvekEdge.java:679-684`), so this is the whole
+# consumer story, not a side effect. Clip rectangles are now the layout's own
+# cluster boxes (`result.clusters`, D2') rather than materialized
+# `StateNodeGeo`s — upstream's own provenance (`lhead/ltail
+# .getRectangleArea()`), and required because three of the seven
+# `buildLevelTransitionGeos` entry points have no `StateNodeGeo` at all.
+#
+# 41 of 2017 fixtures move, and they are EXACTLY the 41 that reach a firing
+# clip (probe: instrument `clipTransitionSpline`, render all 273 cached state
+# fixtures, record every call that returned a different array — the set is
+# identical to the manifest's mover set). Every one of the 41 moves TOWARD the
+# jar and NONE moves away: summed transition-endpoint distance to the jar's own
+# `in.svg` falls 20870.24 -> 16470.99 px (-4399.26, -21.1%), measured by
+# matching `<path id>` between our SVG and jar's (normalising this port's
+# `__zaent_` prefix and jar's `X-backto-Y` reverse form). Ten fixtures land
+# effectively exact (<= 0.15 px).
+#
+# NO fixture's CANVAS moves — width and height are byte-identical before and
+# after on all 41, and the declared-size harness dump is byte-identical
+# (`0 rows appeared or grew`). SI31's four ink-only movers therefore keep the
+# canvas they had: fovafu-44-mifu394 232x230, tubojo-49-tudu915 261x256,
+# fajegu-17-joba577 561x846 and mefici-97-tudu030 816x673 — ALL FOUR exact
+# vs jar. (T2 recorded mefici as 820x673 at High confidence; that measurement
+# was wrong. Orchestrator re-measured via two render paths on this tree and at
+# two earlier commits: ours and the jar both emit width="816px" height="673px".
+# The brief's "canvas-EXACT" claim holds for all four.)
+#
+# KNOWN, PRECISELY SCOPED DIVERGENCE (D6-style finding, DIVERGENCES.md
+# candidate for T3): upstream does NOT always clip against the raw graphviz
+# cluster box. `DotStringFactory.java:424-434` sets each cluster's
+# `rectangleArea` from the graphviz polygon (`Cluster.java:511-513`) — that IS
+# `result.clusters` — but `SvekEdge#solveLine` mutates it first for one family:
+# `SvekEdge.java:660-663` calls `projectionCluster.manageEntryExitPoint(...)`
+# immediately before the clip, and `Cluster.java:409-436` REASSIGNS
+# `rectangleArea = frontierCalculator.getSuggestedPosition()` (with
+# `ensureMinWidth(getTitleAndAttributeWidth() + 10)` when titled).
+# `projectionCluster` is set only for composites with border-point children
+# (`ClusterDotString.java:101-105`, `entityPositionsExceptNormal().size() > 0`,
+# on every line `isLinkFromOrTo` that cluster). Reachability MEASURED, not
+# assumed: of the 41 fixtures' clipped-anchor composites, exactly TWO have a
+# direct border-point child — pesita-10-dene726's `AA` (`aa_ok_ex
+# <<exitpoint>>`) and viroxo-69-fito663's `comp1` (`ex <<exitpoint>>`). We clip
+# those against the raw box. Shift-invariant size gap vs the frontier-adjusted
+# box this port already computes (`state-composite-geo.ts#borderPointBox`):
+# `AA` 156x118.720 raw vs 126x104.720 adjusted (30 px wider, 14.000 px taller);
+# `comp1` 123x277.000 raw vs 109x277.000 (14 px wider). Both fixtures still
+# move TOWARD the jar (-163.97 px and -44.04 px), so this is a residual, not a
+# regression. Porting `manageEntryExitPoint` into the clip is out of T2's scope
+# (it is order-dependent mutation of shared cluster state inside the per-line
+# loop) and is left as a tracked follow-on.
+
+bajelo-54-dixe684 # clipped anchors: Run. Transition-endpoint error vs jar 47.04 -> 0.78 px (-46.26) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+bemena-23-zebu249 # clipped anchors: NotShooting. Transition-endpoint error vs jar 217.34 -> 175.62 px (-41.72) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+desebo-47-maro096 # clipped anchors: SharedMemory,Data_Discovery_Table_Memory,Data_Discovery_Table_PowerBase. Transition-endpoint error vs jar 1534.53 -> 1511.71 px (-22.82) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+dikipu-79-noko487 # clipped anchors: AbstractState. Transition-endpoint error vs jar 38.32 -> 37.06 px (-1.26) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+dogeji-46-sapo750 # clipped anchors: CONFIGURATION_FLASH,FLASH_DEVICES. Transition-endpoint error vs jar 6805.60 -> 6494.95 px (-310.65) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+fajegu-17-joba577 # clipped anchors: STOPPING,STARTING. Transition-endpoint error vs jar 662.24 -> 183.21 px (-479.03) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+figevo-73-dani805 # clipped anchors: A,B. Transition-endpoint error vs jar 178.59 -> 0.01 px (-178.58) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+fotuje-06-fifa085 # clipped anchors: XA7,XA10,XA16,XA9. Transition-endpoint error vs jar 368.06 -> 3.93 px (-364.13) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+fovafu-44-mifu394 # clipped anchors: A. Transition-endpoint error vs jar 65.72 -> 0.01 px (-65.71) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+giniti-22-fexo000 # clipped anchors: Radio_Scanning,Vendor_Radio_Enabled. Transition-endpoint error vs jar 343.06 -> 93.51 px (-249.56) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+gojuja-90-pune699 # clipped anchors: A. Transition-endpoint error vs jar 50.44 -> 0.42 px (-50.02) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+gopudo-91-bego999 # clipped anchors: A. Transition-endpoint error vs jar 37.53 -> 0.01 px (-37.52) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+jaxebo-54-nifi592 # clipped anchors: NotShooting. Transition-endpoint error vs jar 3207.16 -> 3189.71 px (-17.44) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+jetuse-93-gopi146 # clipped anchors: A1. Transition-endpoint error vs jar 50.14 -> 0.02 px (-50.12) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+kideju-07-gero206 # clipped anchors: B. Transition-endpoint error vs jar 12.27 -> 0.02 px (-12.25) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+kiniro-32-mama877 # clipped anchors: ma. Transition-endpoint error vs jar 60.70 -> 52.24 px (-8.46) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+kotagu-43-miza629 # clipped anchors: SubComposite. Transition-endpoint error vs jar 19.47 -> 0.03 px (-19.43) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+ladoni-64-boni035 # clipped anchors: A,B. Transition-endpoint error vs jar 178.59 -> 0.01 px (-178.58) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+matezo-28-duka427 # clipped anchors: A. Transition-endpoint error vs jar 65.74 -> 0.01 px (-65.73) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+mefici-97-tudu030 # clipped anchors: SActive,Timer,Stopwatch. Transition-endpoint error vs jar 249.37 -> 86.33 px (-163.05) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+mifuti-36-jine785 # clipped anchors: NotShooting. Transition-endpoint error vs jar 181.79 -> 133.23 px (-48.56) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+mokima-31-kani630 # clipped anchors: comp2. Transition-endpoint error vs jar 71.32 -> 7.03 px (-64.29) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+movuva-53-jude799 # clipped anchors: State2. Transition-endpoint error vs jar 124.62 -> 0.14 px (-124.48) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+naneba-92-pixu619 # clipped anchors: foo1. Transition-endpoint error vs jar 48.63 -> 0.01 px (-48.61) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+nevezi-29-momo816 # clipped anchors: AbstractState. Transition-endpoint error vs jar 38.32 -> 37.06 px (-1.26) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+nufigo-87-pivi558 # clipped anchors: A. Transition-endpoint error vs jar 50.44 -> 0.42 px (-50.02) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+pajefo-95-neri955 # clipped anchors: NotShooting. Transition-endpoint error vs jar 217.34 -> 175.62 px (-41.72) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+pasosa-28-zudu135 # clipped anchors: State2. Transition-endpoint error vs jar 124.62 -> 0.14 px (-124.48) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+pesita-10-dene726 # clipped anchors: AA. Transition-endpoint error vs jar 616.71 -> 452.75 px (-163.97) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+polodo-05-rene471 # clipped anchors: State3. Transition-endpoint error vs jar 906.50 -> 798.12 px (-108.37) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+rijoki-89-teno556 # clipped anchors: NotShooting. Transition-endpoint error vs jar 2308.50 -> 2302.84 px (-5.65) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+tilili-10-buca517 # clipped anchors: Initial,TissueDistribution. Transition-endpoint error vs jar 997.15 -> 408.06 px (-589.09) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+tiriku-91-kipo610 # clipped anchors: ma. Transition-endpoint error vs jar 60.70 -> 52.24 px (-8.46) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+tubojo-49-tudu915 # clipped anchors: B. Transition-endpoint error vs jar 107.67 -> 0.01 px (-107.66) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+viroxo-69-fito663 # clipped anchors: comp1. Transition-endpoint error vs jar 121.26 -> 77.22 px (-44.04) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+vogotu-43-puli923 # clipped anchors: A,B. Transition-endpoint error vs jar 178.59 -> 0.01 px (-178.58) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+xepafa-33-lazi826 # clipped anchors: NotShooting. Transition-endpoint error vs jar 217.34 -> 175.62 px (-41.72) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+zaloga-87-lonu477 # clipped anchors: comp2. Transition-endpoint error vs jar 80.18 -> 14.60 px (-65.58) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+zonuni-64-jovo214 # clipped anchors: State2. Transition-endpoint error vs jar 89.42 -> 0.14 px (-89.28) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+zoxutu-11-giru788 # clipped anchors: A. Transition-endpoint error vs jar 65.74 -> 0.01 px (-65.73) — TOWARD. Canvas unchanged; declared-size rows unchanged.
+zumuje-46-gufe080 # clipped anchors: comp2. Transition-endpoint error vs jar 71.52 -> 6.11 px (-65.41) — TOWARD. Canvas unchanged; declared-size rows unchanged.

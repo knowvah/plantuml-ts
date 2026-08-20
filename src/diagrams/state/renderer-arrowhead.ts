@@ -36,6 +36,25 @@
  * byte-exact (ellipse/line coordinates, `fill`/`stroke`/`stroke-width`) —
  * see `plans/g4-state-svg/ledger.md` S15 for the full numeric derivation.
  *
+ * **Every function here reads `transition.points`, and since SI32 T2 that is
+ * the COMPOUND-CLIPPED path** — clipped once at construction
+ * (`state-transition-clip.ts`), for both the ink walk and the renderer. That
+ * is upstream's arrangement, not an accident of ordering: `SvekEdge#solveLine`
+ * REASSIGNS `dotPath = dotPath.simulateCompound(...)`
+ * (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/SvekEdge.java
+ * :671-672`) and then builds BOTH extremities from the reassigned path —
+ * `getExtremitySimplier(dotPath.getStartPoint(), ..., dotPath.getStartAngle()
+ * + Math.PI, ...)` at `:679-681` and `getExtremitySimplier(dotPath
+ * .getEndPoint(), ..., dotPath.getEndAngle(), ...)` at `:682-684`. So an
+ * arrowhead sitting on the cluster frontier rather than at the in-cluster
+ * anchor point is the CORRECT outcome here, and no compensating offset
+ * belongs in this module. (Before SI32 the clip was ink-only, and this module
+ * deliberately read the unclipped path to match a renderer that also drew it;
+ * that asymmetry no longer exists.)
+ *
+ * "RAW"/"untrimmed" below always means *before `applyHeadTrim`'s
+ * `getDecorationLength()` shortening* — never "before the compound clip".
+ *
  * @see plans/g4-state-svg/ledger.md (S1 mechanism 3; S15 circle/cross)
  * @see class/renderer-arrowhead.ts (the class-engine precedent this mirrors)
  * @see ~/git/plantuml/.../svek/extremity/ExtremityArrowAndCircle.java

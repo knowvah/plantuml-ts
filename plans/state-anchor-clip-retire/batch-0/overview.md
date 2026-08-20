@@ -11,4 +11,4 @@ chain. T0 therefore also writes a **tracked** copy.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | Pin both baselines, add a tracked copy of the harness pin, record the target and known-mover rows | typescript-pro (sonnet) | `test-results/state-declared-size-baseline.jsonl`, `test-results/render-manifest-baseline.json`, `tests/fixtures/si32-harness-baseline.jsonl` (tracked), `.agent-notes/si32-T0.md` | — | [ ] |
+| T0 | Pin both baselines, add a tracked copy of the harness pin, record the target and known-mover rows | typescript-pro (sonnet) | `test-results/state-declared-size-baseline.jsonl`, `test-results/render-manifest-baseline.json`, `tests/fixtures/si32-harness-baseline.jsonl` (tracked), `.agent-notes/si32-T0.md` | — | [x] |

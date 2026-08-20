@@ -10,46 +10,23 @@
  * can be imported by it without an import cycle — exactly the arrangement
  * `class-ink-shapes.ts` has for the class engine.
  *
- * SI31 T5 (G15) adds the composite-anchor spline clip. Upstream trims a
- * cluster-sourced or cluster-targeted edge back to the cluster rectangle in
- * Java, not through graphviz: `SvekEdge#solveLine` calls
- *
- *   dotPath = dotPath.simulateCompound(lhead == null ? null : lhead.getRectangleArea(),
- *                                      ltail == null ? null : ltail.getRectangleArea());
- *
+ * SI31 T5 (G15) added a composite-anchor spline clip HERE, for the ink fold
+ * only. SI32 T2 retired it: the clip now runs once per layout result, at
+ * construction, in `state-composite-pass.ts#buildLevelTransitionGeos` and
+ * `layout.ts#buildFlatTransitionGeos` (`state-transition-clip.ts`), so
+ * `TransitionGeo.points` is ALREADY the trimmed curve by the time this module
+ * — or the renderer — sees it. That is upstream's own arrangement:
+ * `SvekEdge#solveLine` REASSIGNS `dotPath = dotPath.simulateCompound(...)`
  * (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/SvekEdge.java
- * :671-672`), where `ltail`/`lhead` are non-null exactly when the edge's own
- * start/end DOT id addresses a cluster instead of a real node
- * (`SvekEdge.java:252-258`: `startUid.startsWith(Cluster.CENTER_ID)` /
- * `endUid.startsWith(Cluster.CENTER_ID)`). That clip happens BEFORE the path
- * is drawn, so `LimitFinder`/`SvekResult#calculateDimension` only ever see
- * the trimmed curve — which is why the in-cluster segment we used to fold
- * inflated `fovafu-44-mifu394`'s composite by exactly the distance from the
- * discarded control point to the cluster frontier (+7.820 px: the oracle's
- * `205.82` maps to `200.820` in the jar's frame, A's right frontier is
- * `193`). See `docs/graphviz-issues/15-cluster-anchor-point-ranked-with-
- * target.md` (the 2026-08-19 reclassification note) for the full derivation
- * and for why graphviz's own `dot_compoundEdges` cannot do this clip for
- * this shape even when asked.
- *
- * This port's `Cluster.CENTER_ID` analogue is `state-composite-classify.ts
- * #zaentId` — `edgeEndpointId` (same file) substitutes `__zaent_<id>` for a
- * `'cluster'`-kind endpoint, so an endpoint id present in
- * {@link buildCompositeAnchorRects}'s map is precisely upstream's non-null
- * `ltail`/`lhead`.
- *
- * Scope note (deliberate, not an oversight): the clip is applied to the
- * spline FOLD only. `transitionArrowheadInk` still reads the raw
- * `transition.points` because the state renderer also still draws the raw
- * path — folding a clipped-derived arrowhead would reserve ink for a marker
- * we do not paint there. Clipping the DRAWN path (upstream clips `dotPath`
- * once, and every downstream extremity in `SvekEdge.java:681-735` reads the
- * clipped path) is a renderer-side follow-on.
+ * :671-672`) inside the edge loop of `DotStringFactory#solve`
+ * (`DotStringFactory.java:458-459`), and only afterwards does
+ * `GraphvizImageBuilder.java:287-288` build the `SvekResult` whose
+ * `calculateDimension` is this ink walk and whose `drawU` draws. Measuring
+ * and drawing therefore see the same curve, and this module simply folds the
+ * points it is handed.
  */
-import type { StateNodeGeo, TransitionGeo } from './state-geo-types.js';
+import type { TransitionGeo } from './state-geo-types.js';
 import { transitionArrowheadInk } from './renderer-arrowhead.js';
-import { clipSplineStart, clipSplineEnd, type ClipRect } from '../../core/spline-clip.js';
-import { zaentId } from './state-composite-classify.js';
 
 export interface InkBox {
   minX: number;
@@ -69,63 +46,6 @@ export function addPoint(box: InkBox, x: number, y: number): void {
   if (y > box.maxY) box.maxY = y;
 }
 
-/** Recursive half of {@link buildCompositeAnchorRects} — named so the public
- *  entry point stays a one-liner and neither function carries an accumulator
- *  parameter its caller has to understand. */
-function collectAnchorRects(nodes: readonly StateNodeGeo[], into: Map<string, ClipRect>): void {
-  for (const node of nodes) {
-    into.set(zaentId(node.id), {
-      x: node.x,
-      y: node.y,
-      width: node.width,
-      height: node.height,
-    });
-    collectAnchorRects(node.children, into);
-  }
-}
-
-/**
- * Every node's own rectangle keyed by the anchor id an edge endpoint carries
- * when it addresses that node's CLUSTER (`zaentId`) — this pass's lookup for
- * upstream's `ltail.getRectangleArea()` / `lhead.getRectangleArea()`.
- *
- * Keyed unconditionally rather than only for `'cluster'`-kind nodes: the
- * classification lives in the parse/layout layer, not on `StateNodeGeo`, and
- * a `__zaent_` key can only be hit by an endpoint that `edgeEndpointId`
- * already resolved to a cluster — a leaf endpoint carries its plain id and
- * never matches. Descends into `children` so a nested composite's anchor is
- * found at whatever depth the pass hands us.
- */
-export function buildCompositeAnchorRects(
-  states: readonly StateNodeGeo[],
-): ReadonlyMap<string, ClipRect> {
-  const rects = new Map<string, ClipRect>();
-  collectAnchorRects(states, rects);
-  return rects;
-}
-
-/**
- * `DotPath#simulateCompound(head, tail)` applied to one transition's spline
- * — `SvekEdge.java:671-672`. Tail branch first, then head, matching
- * `DotPath.java:424-459` (tail) and `:460-489` (head); both absent is
- * upstream's `head == null && tail == null -> return this` short-circuit.
- * Returns `transition.points` itself (not a copy) when nothing is clipped,
- * so the common case allocates nothing and no caller can mutate geometry the
- * renderer also reads.
- */
-function clipTransitionPoints(
-  transition: TransitionGeo,
-  anchorRects: ReadonlyMap<string, ClipRect>,
-): ReadonlyArray<{ x: number; y: number }> {
-  const tail = anchorRects.get(transition.from);
-  const head = anchorRects.get(transition.to);
-  if (tail === undefined && head === undefined) return transition.points;
-  let points = transition.points;
-  if (tail !== undefined) points = clipSplineStart(points, tail);
-  if (head !== undefined) points = clipSplineEnd(points, head);
-  return points;
-}
-
 /** One transition's own ink contribution — plain points
  *  (`LimitFinder#drawDotPath`-equivalent: no inset), its label box, and,
  *  gated by `arrowheadInk`, the head-side arrowhead's own ink
@@ -134,17 +54,16 @@ function clipTransitionPoints(
  *  level, pre-existing, unchanged) vs `'self-loop'` (`from===to` only,
  *  composite-level, mission T9) — see `layout-ink-extent.ts`'s module doc
  *  comment's mechanism-7 paragraph for why the latter is scoped, not
- *  unconditional. The folded spline is the COMPOUND-CLIPPED one
- *  ({@link clipTransitionPoints}, `SvekEdge.java:671-672`) — see this
- *  module's own doc comment. */
+ *  unconditional. `transition.points` arrives ALREADY compound-clipped
+ *  (`state-transition-clip.ts`, `SvekEdge.java:671-672`) — see this module's
+ *  own doc comment. */
 export function addTransitionInk(
   box: InkBox,
   transition: TransitionGeo,
   labelInk: boolean,
   arrowheadInk: 'always' | 'self-loop',
-  anchorRects: ReadonlyMap<string, ClipRect>,
 ): void {
-  for (const p of clipTransitionPoints(transition, anchorRects)) addPoint(box, p.x, p.y);
+  for (const p of transition.points) addPoint(box, p.x, p.y);
   // G8 T2: fold the label's own BOX at the RETURNED (graphviz) position, not
   // just its anchor POINT -- only when present AND opted in (`labelInk`);
   // `computeStateDocumentDims`/`computeStateInkShift` pass `false` and keep
