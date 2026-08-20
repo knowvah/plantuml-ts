@@ -63,8 +63,11 @@ interface Sentinel {
  * at the time it was added, so a failure here means the CACHE moved (or the
  * jar did), never that the sentinel was a bad pick.
  *
- * `object`'s is the fixture hand-verified during object-close planning; the
- * rest are each type's first fixture, checked by `cmp` during SI16.
+ * `object`'s is the fixture hand-verified during object-close planning;
+ * `sequence`'s (`bacupi-77-fuke586`, its cache dir's `localeCompare`-first
+ * slug, per D7 of `sequence-oracle-harness`) was `cmp`-verified against
+ * `oracle-render.sh` output during T5 of that mission; the rest are each
+ * type's first fixture, checked by `cmp` during SI16.
  *
  * **`dot` is deliberately absent.** `@startdot` is a passthrough: the jar
  * shells out to the HOST graphviz binary, so its cached SVG embeds
@@ -82,6 +85,7 @@ const SENTINELS: readonly Sentinel[] = [
   { type: 'class', slug: 'bajotu-30-soku184' },
   { type: 'object', slug: 'beruju-17-jigi548' },
   { type: 'state', slug: 'bajelo-54-dixe684' },
+  { type: 'sequence', slug: 'bacupi-77-fuke586' },
   { type: 'json', slug: 'babico-87-soxo095' },
   { type: 'yaml', slug: 'YAML-attribute-hierarchy' },
   { type: 'hcl', slug: 'citoda-80-dimi195' },
