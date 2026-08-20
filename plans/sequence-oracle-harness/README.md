@@ -107,9 +107,28 @@ pole — ~473 jar renders.
   on_fail: stop
 ```
 
-Wall-clock: report `npm test` each batch. Ceiling is **60.3 s until T2**, then
-the value T2 measures and records here. Exceeding the CURRENT ceiling is
-stop 11.
+Wall-clock: report `npm test` each batch. Ceiling is **60.3 s** — measured and
+confirmed by T2, not inherited. Exceeding it is stop 11.
+
+*Method (T2, 2026-08-20).* Four consecutive `/usr/bin/time -p npm test` runs on
+an idle tree at commit `35a7e06e`, after waiting out the Spotlight reindex of
+T0's 1141 new corpus files (`suggestd` + `corespotlightd` were at ~120% CPU,
+load1 11.7; polled down to load1 3.8 before the first run — measuring through
+that spike is what made T1's 61.5–62.6 s reading unusable). All four green,
+15959 tests, coverage 96.52 / 90.47 / 96.94.
+
+| | run 1 | run 2 | run 3 | run 4 |
+|---|---|---|---|---|
+| vitest `Duration` | 55.42 s | 55.73 s | 55.82 s | 55.56 s |
+| wrapped `real` | 56.44 s | 56.75 s | 56.80 s | 56.54 s |
+
+Range 55.42–55.82 s vitest `Duration` (spread 0.40 s); **4.5 s headroom** from
+the worst run to the 60.3 s ceiling. The ceiling is therefore **unchanged**:
+T2's suite adds 1150 tests but only ~1.7 s of test time, and the whole-run wall
+clock did not rise measurably against the 56.15 s pre-T2 idle baseline — the
+new file packs into an existing worker rather than extending the critical path.
+The brief anticipated a rise that measurement did not find; 60.3 s is kept
+rather than re-tightened so the gate does not flake on a busier machine.
 
 ## Stop conditions
 
