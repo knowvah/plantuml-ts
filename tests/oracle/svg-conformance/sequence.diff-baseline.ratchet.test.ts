@@ -12,7 +12,25 @@
  * over `oracle/goldens/svg-sequence/diff-baseline.json` instead:
  *
  *   - **rise** (live diff count > recorded baseline) -> FAIL, naming the
- *     fixture, its baseline, and its new count.
+ *     fixture, its baseline, and its new count. A rise is USUALLY a
+ *     regression, but see "the 12-diff plateau" below: it is NOT
+ *     unconditionally one, and the failure message says so.
+ *
+ * THE 12-DIFF PLATEAU — why a mass rise can mean progress.
+ * `compareNodes` short-circuits on structural mismatch: at `compare.ts:353`
+ * an unequal child count pushes one `[childCount]` diff and RETURNS without
+ * recursing into children. T4's census found **1010 of 1141** fixtures sit at
+ * exactly 12 diffs sharing ONE identical path-set, and that set includes
+ * `svg/g[1][childCount]`. So for **88.8%** of this corpus the diagram BODY is
+ * never compared at all — those 12 measure how far the comparison gets before
+ * the root chrome stops it, not body fidelity. The consequence for this gate:
+ * when someone closes the root-chrome gap, ~1010 fixtures start comparing
+ * their bodies for the first time and their counts rise sharply, all at once.
+ * That is progress and must be re-pinned deliberately, not "fixed". An
+ * isolated rise, or a rise on a fixture whose baseline is not 12, is still
+ * the regression this gate is for. The gate FAILS on a rise either way — it
+ * has no bypass, and must not acquire one; only the message distinguishes the
+ * two readings so whoever hits it can tell them apart.
  *   - **fall** (live < baseline) -> PASS, logged as `[IMPROVED]`.
  *   - **reaches 0** -> PASS, logged as `[PROMOTION READY]` -- reports
  *     eligibility ONLY. Promotion is stop 13 of this mission and belongs to
@@ -56,8 +74,57 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { buildStdlibAssetsStore } from '../../helpers/stdlib-assets-store.js';
+import { withStdlib, type StdlibStore } from '../../../src/core/tim/StdlibStore.js';
+import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
 import { compareSvg } from './compare.js';
 import { renderFixtureSequence } from './render-fixture-sequence.js';
+
+// ---------------------------------------------------------------------------
+// The include seam — mirrors `svg-conformance-census.ts#censusIncludeStore`
+// (`scripts/svg-conformance-census.ts:168`) and its sibling
+// `render-fixture.ts#fixtureIncludeStore`.
+//
+// This MUST match the census's store. T5 renders sequence fixtures through
+// `renderFixtureSequence(markup, measurer, { includeStore: censusIncludeStore() })`
+// (`svg-conformance-census.ts:234`); when this ratchet rendered with NO store
+// the two surfaces disagreed about the corpus — the census reported 1 error
+// and this baseline recorded 3, because `<tupadr3/common.puml>` and
+// `<logos/centos>` resolve under the vendored stdlib and error without it.
+// A gate that measures a different population than the census is a gate that
+// cannot be cross-checked, so the store is wired here rather than the census
+// unwired.
+//
+// Node `fs` is reached (through `buildStdlibAssetsStore`) and that is fine:
+// this is test infrastructure under `tests/`, never `src/`, which must stay
+// browser-safe (CLAUDE.md).
+//
+// Duplicated rather than imported because `render-fixture.ts`'s equivalent is
+// private and widening that module's exports is outside this task's
+// write-set — the same constraint that file's own header records at its
+// lines 16-17.
+//
+// Deferred, not eager: the `assets/stdlib/` walk costs ~888 ms and only two
+// fixtures in the 1141-strong corpus use a `<bundle/...>` include, so the
+// store is built on the first such lookup and never at all for the other
+// 1139.
+// ---------------------------------------------------------------------------
+
+let cachedAssetsStore: StdlibStore | undefined;
+let cachedIncludeStore: IncludeStore | undefined;
+
+function sequenceIncludeStore(): IncludeStore {
+  cachedIncludeStore ??= withStdlib(
+    { get: () => undefined, has: () => false },
+    {
+      getPumlResource: (fullname: string): string | undefined => {
+        cachedAssetsStore ??= buildStdlibAssetsStore();
+        return cachedAssetsStore.getPumlResource(fullname);
+      },
+    },
+  );
+  return cachedIncludeStore;
+}
 
 interface BaselineFixture {
   readonly type: string;
@@ -106,7 +173,9 @@ function measure(f: FixtureRef): MeasureResult {
   const markup = readFileSync(join(dir, 'in.puml'), 'utf8');
   const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
   try {
-    const ours = renderFixtureSequence(markup, new DeterministicMeasurer());
+    const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), {
+      includeStore: sequenceIncludeStore(),
+    });
     const { diffs } = compareSvg(ours, golden, 'deterministic');
     return { errored: false, diffCount: diffs.length };
   } catch (err) {
@@ -133,11 +202,24 @@ function checkNoRise(f: FixtureRef, baseline: number, live: number): RiseCheckRe
   return {
     ok: false,
     message:
-      `${f.type}/${f.slug}: diff count REGRESSED -- baseline=${baseline}, now=${live}. ` +
-      `A rise means this fixture's SVG emission got LESS faithful to the jar oracle. ` +
-      `If this is an intended, verified change, re-measure and update this slug's diffCount, ` +
-      `measuredAt, and measuredAgainstCommit in oracle/goldens/svg-sequence/` +
-      `diff-baseline.json deliberately -- do not paper over a real regression.`,
+      `${f.type}/${f.slug}: diff count ROSE -- baseline=${baseline}, now=${live}. ` +
+      `A rise is USUALLY a regression (this fixture's SVG got less faithful to the jar ` +
+      `oracle) and that is what this gate is for. But read the shape of the failure before ` +
+      `concluding that, because ONE case is the opposite. ` +
+      `WHY: compareNodes short-circuits on structural mismatch -- at compare.ts:353 an ` +
+      `unequal child count pushes a single \`[childCount]\` diff and RETURNS without ` +
+      `recursing. T4's census found 1010 of 1141 fixtures sit at exactly 12 diffs sharing ` +
+      `one identical path-set that includes \`svg/g[1][childCount]\`, so for 88.8% of this ` +
+      `corpus the diagram BODY is never compared at all -- their 12 measures reaching the ` +
+      `body and stopping, not body fidelity. When the root-chrome gap closes, those ~1010 ` +
+      `fixtures begin comparing their bodies for the first time and their counts rise ` +
+      `sharply and together. That signature -- a MASS rise concentrated on fixtures whose ` +
+      `baseline is 12 -- is PROGRESS, not regression: re-measure and re-pin the baseline ` +
+      `deliberately, recording why. An ISOLATED rise on one fixture, or a rise on a fixture ` +
+      `whose baseline is not 12, is the regression this gate exists to catch -- do not ` +
+      `paper over it. Either way the fix is the same file: update this slug's diffCount, ` +
+      `measuredAt and measuredAgainstCommit in oracle/goldens/svg-sequence/` +
+      `diff-baseline.json from a fresh measurement, never by hand-editing to make it pass.`,
   };
 }
 
