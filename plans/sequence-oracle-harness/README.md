@@ -72,7 +72,7 @@ renders and compares ~473 fixtures. **T2 measures and records a new ceiling**
 | [0](batch-0/overview.md) | Capture the corpus · build the render helper | T0, T1 | [x] |
 | [1](batch-1/overview.md) | Diff-baseline ratchet, pinned | T2 | [x] |
 | [2](batch-2/overview.md) | Golden ratchet · cause census · cross-type wiring | T3, T4, T5 | [x] |
-| [3](batch-3/overview.md) | Close-out | T6 | [ ] |
+| [3](batch-3/overview.md) | Close-out | T6 | [x] |
 
 Batch 0 is parallel (disjoint write-sets); Batch 2 is parallel. T0 is the long
 pole — ~473 jar renders.
@@ -177,3 +177,149 @@ and continue; do NOT promote — stop 13).
   `json-family-ratchet.ts` (the DOT-less family), `render-fixture-state.ts`
   (the helper shape), SI32 `plans/state-anchor-clip-retire/` (gate discipline,
   tracked-baseline lesson).
+
+## Close-out (2026-08-20)
+
+**Every number below was re-measured by the orchestrator this session** —
+`test-results/dot-cache/sequence/` counted on disk, `diff-baseline.json` and
+`diff-census.json` re-parsed with a script rather than quoted from a task
+report, and all four gates re-run on the committed tree. Where a figure
+disagrees with the journal, that is flagged explicitly (none did on the
+substance; two runs disagreed with each other on wall-clock, mechanism
+below).
+
+**Corpus: classified vs admitted.** `populate-corpus.py`'s classifier claims
+**1427** candidates (D3 amendment: `sequence` is `TYPE_PATTERNS[0]` and its
+first-match rule over-selects). Of those, T0's capture pass rendered **1426**
+(1 hard failure: `xobebi-29-jilu859`, `@startuml file4` + `newpage` — a
+multi-page diagram the single-`in.svg` cache slot structurally cannot hold —
+verified again this session: its `.puml` sits in `tests/corpus/sequence/` but
+has no directory under `test-results/dot-cache/sequence/`). Of the 1426
+rendered, the jar's own `data-diagram-type="SEQUENCE"` stamp — the D3
+amendment's admission gate, not the classifier — admits **1141**, rejects
+**285** (`DESCRIPTION` 95, `CLASS` 71, `STATE` 47, `UNKNOWN` 46 — parse
+errors, `TIMING` 22, `ACTIVITY` 4). Re-verified directly:
+`test-results/dot-cache/sequence/` holds exactly **1141** directories;
+`grep -L 'data-diagram-type="SEQUENCE"' .../*/in.svg | wc -l` is **0** — every
+survivor is genuinely stamped SEQUENCE. The corpus carries exactly **one**
+`svek-*.dot` pair, `dasutu-58-saje713/{svek-1,svek-2}.dot` — re-confirmed by
+`find … -name 'svek-*.dot'` returning only those two paths — produced by a
+`{{ object … }}` note dispatching through `EmbeddedDiagram.java`'s bare-`{{`
+→ nested-OBJECT path, kept deliberately as faithful, reproducible jar output
+per the corrected D3 amendment footnote, not deleted to make an invariant
+read "zero".
+
+**Diff-baseline (`oracle/goldens/svg-sequence/diff-baseline.json`), re-parsed
+with Python, not grep'd from a report.** **1141** fixtures pinned. **1** error
+(`nuvoja-46-dezu541`, `!includedef 'macro'` — not a stdlib bundle, so the
+include-store fix below does not touch it), **1140** measurable. Distribution:
+min **10**, max **139**, sum **16486**, median **12**. **1012 of 1140 (88.8%)**
+sit at exactly 12 diffs — re-confirmed the plateau is one identical path-set
+(`compare.ts:353` stops recursing on the `svg/g[1][childCount]` structural
+mismatch, so those 1012 fixtures never reach a body comparison). These figures
+match the journal's **post-fix, re-pinned** state (2026-08-20, "T2 (resumed)"
+and "T4 (resumed)" rows) — the mission's two intermediate readings (1138+3
+errors pre-fix, then a stale 1138+3 census) are superseded, not disagreed
+with; nothing here diverges from what the journal already corrected.
+
+**Census (`oracle/goldens/svg-sequence/diff-census.json`), re-parsed the
+same way.** 1140 fixtures classified, 1 error, six bucket totals:
+
+| Bucket | Count |
+|---|---|
+| `missing-element` | 873 |
+| `extra-element` | 1317 |
+| `geometry` | 5124 |
+| `text-metrics` | 536 |
+| `format-units` | 0 |
+| `other` | 8636 |
+
+Sum **16486** — matches the diff-baseline sum exactly, confirming the two
+committed artifacts describe the same population. `format-units` = 0 is a
+measurement (D2: the unitless fractional `width` normalizes numerically, so
+it never surfaces as a unit-suffix mismatch). `other` at 52% is dominated by
+6824 absent root SVG attributes and 1420 tag substitutions, per D5's rule
+against inventing a seventh bucket to shrink it.
+
+**Wall-clock — one confound caught live, mirroring T2/T3/T4/T5's Spotlight and
+sibling-`npm test` confounds.** First timed run on this docs-only tree read
+`Duration 58.49s` / wrapped `real 59.53s` — within 1.7s of the 60.3s ceiling.
+`ps`/`uptime` at that moment showed **load average 51.82**, driven by
+`webstorm` at **534.8% CPU** (an IDE indexing pass, not this task or any
+sibling agent — this mission has no other agents running). Polled down to
+load1 ≈ 8–9 over ~90s and re-ran: `Duration 55.15s` / wrapped `real 56.16s`,
+**623 files / 16001 passed + 1 skipped + 1 todo**, coverage
+**95.44 / 90.47 / 96.94 / 96.52**. This is the number to trust — it matches
+Batch 2's own clean gate reading (`Duration` in the same range, `623` files)
+almost exactly, and 4.15s of headroom remains under the 60.3s ceiling T2 set.
+**Third distinct wall-clock confound this mission** (Spotlight reindex on
+T0's corpus landing; concurrent-sibling `npm test` racing on
+`coverage/.tmp`; now a third-party IDE CPU spike) — worth a standing note for
+any future mission run on this machine.
+
+**Parity ratchets, re-run in isolation (a combined multi-file run
+double-counted one file's overhead assertion and was discarded rather than
+trusted).** `state` **270/270**, `class` **721/721**, `description`
+**357/357**, `object` **80/80** — all unchanged from SI32. `layering.test.ts`
+**9/9**, `KNOWN_DEBT` still `[]`. `catalog.test.ts` **2/2**, not drifted.
+Combined: 6 files / 1439 tests, matching Batch 2's own combined-run total.
+
+**Zero fixtures promoted; `src/` untouched.**
+`git diff --name-only main..HEAD -- src/` run this session:
+
+```
+(empty)
+```
+
+`oracle/goldens/svg-sequence/ratchet.json` re-read this session:
+`{"fixtures": []}` — the golden ratchet ships empty, exactly as D2 and stop
+13 require. No `golden.svg` exists under `oracle/goldens/svg-sequence/`.
+
+**Four gates, re-run this session on the committed tree:**
+
+| Gate | Result |
+|---|---|
+| `npm test` | exit 0, 623 files / 16001 passed + 1 skipped + 1 todo, coverage 95.44/90.47/96.94/96.52, `Duration` 55.15s / wrapped `real` 56.16s (ceiling 60.3s) |
+| `npm run typecheck` | exit 0 (both tsconfigs) |
+| `npm run lint` | exit 0 |
+| `npm run build` | exit 0 — the 3 pre-existing `[unplugin:dts]`-adjacent `node:*`/`NodeJS` TS2591/TS2503 notes reproduced, not a failure |
+
+**What this mission did NOT do.** No rendering defect was fixed — every
+divergence measured (root-chrome attributes, the `width` unit normalization,
+the 88.8% comparison-halt plateau) is recorded, not repaired. No fixture was
+promoted to the golden ratchet — it ships with an empty `fixtures` array by
+design (D2, stop 13). Not one line under `src/` was touched — confirmed by
+the empty `git diff` above, on every batch gate and again here. This mission
+built the measurement surface a G-1 rebuild needs to be scored; it did not
+build, fix, or grade the rebuild itself.
+
+**Follow-ons carried forward (not to be left in the journal only):**
+1. **The include-store seam is duplicated in three places** — the ratchet
+   (`sequence.diff-baseline.ratchet.test.ts`), `scripts/svg-conformance-
+   census.ts:168`, and `tests/oracle/svg-conformance/sequence-diff-
+   census.ts` — because `render-fixture.ts#fixtureIncludeStore` is private.
+   This exact divergence already caused one measurement disagreement
+   mid-mission (T2 vs T5's error counts, 3 vs 1). Exporting it once removes
+   the recurrence risk; scope as its own small task before a fourth copy
+   gets written.
+2. **`tests/integration/stdlib-remote-e2e.test.ts` — OPEN, undiagnosed
+   intermittent, not a flake.** T2 saw 2 test failures in 1 of 7 runs
+   (`Cannot find module .../stdlib-tupadr3/generated/tupadr3.remote.js`),
+   reproducing in neither the other 6 of its own runs nor any orchestrator
+   gate run this mission (including this close-out's runs). T2 ruled out its
+   own write-set, the sole caller of `buildStdlibPackages`, `prepack`, and a
+   controlled `npm run build && npm test` re-run — all negative — but could
+   not state a positive mechanism. Per `rules/diagnosis.md`, this stays
+   recorded as in-progress. The next person to see it should instrument
+   `globalSetup` completion vs. worker spawn ordering under load, which no
+   pass this mission tested.
+
+**What the rebuild mission (G-1) now inherits:** a committed 1141-fixture
+jar-SVG corpus with a mechanical, jar-authored admission gate; a pinned
+per-fixture diff-count baseline with a ratchet that fails on any rise and
+explains, in its own failure message, why a mass rise on the 1012-fixture
+plateau is progress rather than regression; a reproducible six-bucket cause
+census computed by committed, unit-tested code; and a ranked queue by that
+census — root-chrome attributes (873+1317+part of 5124+8636) first, since
+closing `compare.ts:353`'s short-circuit is the one change that unlocks body
+comparison for 88.8% of the corpus at once.

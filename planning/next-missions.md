@@ -318,6 +318,69 @@ latent bug in a caller today. Do not scope this by the import count.
 
 </details>
 
+## 3. `sequence-oracle-harness` — DONE 2026-08-20 (mission-index SI33), G-1 prerequisite
+
+**The sequence-harness item is done.** `planning/sequence-deepdive.md`'s
+Prerequisites section named the blocker for G-1 (Sequence Diagram Greenfield
+Rebuild) precisely: sequence emits no DOT, so none of the state/class family's
+`svek-N.dot` / `render-manifest` / `harness-diff` / `manifest-diff` gates
+transfer, and a rebuild with no oracle is unscoreable. `plans/sequence-oracle-
+harness/` (branch `feat/sequence-oracle-harness`, merge commit) built the
+missing surface by **extending**, not replacing, the existing DOT-less
+`svg-conformance` family that `json`/`yaml`/`hcl` already prove out (D1) —
+`compare.ts`/`normalize.ts` consumed unchanged, no second comparator written.
+
+**What it built, and what the rebuild now inherits:**
+- **The gate**: `test-results/dot-cache/sequence/` — a committed, 1141-fixture
+  jar-SVG oracle corpus, admitted by the jar's own `data-diagram-type=
+  "SEQUENCE"` stamp (not the corpus classifier, which over-selects 3× —
+  `populate-corpus.py:20`'s `sequence` pattern is a first-match `A -> B` rule
+  that also claims usecase/class/state/timing fixtures containing a plain
+  arrow; D3 was amended mid-mission to make the jar's own stamp the admission
+  rule instead). One structurally unrepresentable fixture excluded
+  (`xobebi-29-jilu859`, multi-page `newpage` — the single-`in.svg` cache slot
+  cannot hold two pages; multi-page sequence has no oracle entry, a gap the
+  rebuild inherits, not a defect this mission could close).
+- **The baseline**: `oracle/goldens/svg-sequence/diff-baseline.json` — a
+  monotone-improvement diff-count ratchet, pinned per fixture (1140
+  measurable, 1 error), that FAILS on any rise. Its failure message names the
+  mechanism behind the corpus's headline finding rather than just asserting a
+  number: **1012 of 1140 fixtures (88.8%) sit at exactly 12 diffs because
+  `compare.ts:353` stops recursing at the first structural mismatch
+  (`svg/g[1][childCount]`), so the diagram BODY is never compared for 88.8%
+  of the corpus.** Closing that root-chrome gap will raise those 1012 counts
+  together — the ratchet distinguishes that mass-rise signature (progress,
+  re-pin deliberately) from an isolated rise (the regression it exists to
+  catch).
+- **The census**: `oracle/goldens/svg-sequence/diff-census.json` — every diff
+  classified into six fixed, mechanically-derived buckets (`missing-element`
+  873, `extra-element` 1317, `geometry` 5124, `text-metrics` 536,
+  `format-units` 0, `other` 8636), computed by committed, unit-tested code —
+  a ranked work queue, not 1140 opaque numbers.
+- **The ranked bucket queue** the rebuild should work in order: (1) the
+  `compare.ts:353` root-chrome short-circuit — six absent root SVG
+  attributes, four root geometry values, two child counts, blocking body
+  comparison for 88.8% of the corpus; (2) `geometry` (5124, once bodies are
+  reachable); (3) `other`'s two named components (6824 absent-attribute
+  records, 1420 tag substitutions) rather than the bucket as a whole, which is
+  honest-large by design (D5) and not a single fix target.
+- **The golden ratchet** (`oracle/goldens/svg-sequence/ratchet.json`) ships
+  empty — `{"fixtures": []}` — built and tested, admitting nothing; promotion
+  is the rebuild's to earn, not this mission's to grant.
+
+**Explicitly did not happen**: no rendering defect fixed, no fixture promoted,
+zero `src/` lines touched — the port's measured divergences (including the
+unitless-fractional-`width` normalization D1 names) are recorded, not
+repaired. Full scoring, all numbers re-measured at close-out:
+`plans/sequence-oracle-harness/README.md` "Close-out (2026-08-20)".
+
+**Follow-ons, not to be lost**: export `render-fixture.ts#fixtureIncludeStore`
+once — it is duplicated in three surfaces (the ratchet, the cross-type census
+script, the cause census) and that exact duplication already caused one
+mid-mission measurement disagreement; the `stdlib-remote-e2e.test.ts` 1-in-7
+intermittent stays OPEN, undiagnosed, carried forward per `rules/
+diagnosis.md`, not written off as a flake.
+
 ## 4. Named, briefed or diagnosed — pick from here after 1
 
 Ordered by how ready they are, not by size.
@@ -467,9 +530,14 @@ From `planning/mission-index.md`; each warrants `/plan-mission` when picked:
 
 - **G5 (sequence / activity SVG conformance)** — the next *depth* pass, and
   the largest unowned tranche: neither type routes through dot-engine, so
-  there is no DOT gate and no `svek-N.dot` oracle. Blocked on **E4** (spike:
-  decide an SVG-structural oracle vs eyeball QA). E4 is the real next
-  decision once the svek family's residue is named.
+  there is no DOT gate and no `svek-N.dot` oracle. **Sequence's half of E4 is
+  now answered, not open**: `sequence-oracle-harness` (§3 above, mission-index
+  SI33) built and committed the SVG-structural oracle — corpus, diff-baseline
+  ratchet, cause census — by extending the existing DOT-less `svg-conformance`
+  family (D1), the same decision the json/yaml/hcl family already made.
+  Activity's half of E4 is still genuinely open. G5 itself (driving those
+  ratchets toward conformance) is unstarted work, distinct from the harness
+  that now exists to measure it.
 - **E1** full skinparam → theme wiring (`plans/skinparam/` exists as an older
   brief; re-scope against what S1L-h/S1L-g/G-series already wired).
 - **E3** CSS class names on SVG (`puml-*`).
