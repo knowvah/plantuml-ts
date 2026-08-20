@@ -1,0 +1,5 @@
+@startuml
+activate a
+a -> a : put
+deactivate a
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+<style>
+</style>
+a->b
+<style>
+  note {
+    BackGroundColor green
+  }
+</style>
+note over a: note\nover a
+@enduml

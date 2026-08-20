@@ -1,0 +1,11 @@
+@startuml
+A ->B: ok
+note right: note is misplaced and overwrites the message text
+A ->B: ok
+note left: note is misplaced and overwrites the message text
+A ->]: error
+note right: note is misplaced and overwrites the message text
+[-> A: error
+note right: note is misplaced and overwrites the message text
+...5 seconds...
+@enduml

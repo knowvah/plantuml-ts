@@ -1,0 +1,4 @@
+@startuml
+A->B : 6
+A->B : a
+@enduml

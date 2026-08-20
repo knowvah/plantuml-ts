@@ -1,0 +1,3 @@
+@startuml
+Alice -> Bob [[http://www.yahoo.com{{"Jason": {"firstName":"Bob", "lastName":"Smith", [foo] },\n "Carl": {"firstName":"Alice", "lastName":"Brown"}}}]] : Hello
+@enduml

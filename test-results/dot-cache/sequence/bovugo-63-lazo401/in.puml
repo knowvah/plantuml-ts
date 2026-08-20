@@ -1,0 +1,11 @@
+@startuml
+'skin net.sourceforge.plantuml.skin.bluemodern.BlueModern
+opt toto
+Bob->Alice : coucou\nit\nme
+activate Alice
+Alice->Alice: well
+else sinon
+Alice-->Bob: ok
+end
+deactivate Alice
+@enduml

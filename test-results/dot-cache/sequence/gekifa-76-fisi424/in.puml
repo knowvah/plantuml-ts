@@ -1,0 +1,10 @@
+@startuml
+!startsub XFOO1
+A->A : FOO1
+!endsub
+!startsub XFOO2
+B->B : FOO2
+!endsub
+!includesub XFOO1
+!includesub XFOO2
+@enduml

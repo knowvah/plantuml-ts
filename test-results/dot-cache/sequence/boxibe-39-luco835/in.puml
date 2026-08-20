@@ -1,0 +1,6 @@
+@startuml
+hide empty description
+
+a -> b: message
+return answer
+@enduml

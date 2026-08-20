@@ -1,0 +1,6 @@
+@startuml
+ 
+skinparam DefaultFontName Proxima Nova Cn CF, DejaVu Sans, SansSerif, sans-serif
+
+Alice -> Bob : hello
+@enduml

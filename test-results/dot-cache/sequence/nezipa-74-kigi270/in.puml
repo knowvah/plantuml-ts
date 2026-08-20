@@ -1,0 +1,8 @@
+@startuml
+Bob -> Alice ++ : hello
+Alice --> Bob -- : ok
+
+Bob -> Alice ++ : hello2
+Bob <- Alice --: ok2
+
+@enduml

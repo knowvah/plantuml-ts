@@ -1,0 +1,11 @@
+@startuml
+!definelong SEND_TO_b(from,message)
+  from -> b : MYPROT:\n##message
+!enddefinelong
+ 
+!define SEND_FROM_a_TO_b(message) SEND_TO_b(a,message)
+ 
+SEND_TO_b(a,Hello)    'Works fine
+'Does not work
+SEND_FROM_a_TO_b(Hi)
+@enduml

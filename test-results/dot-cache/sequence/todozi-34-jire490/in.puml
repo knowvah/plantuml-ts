@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+activate A
+note over A: Hello
+deactivate A
+@enduml

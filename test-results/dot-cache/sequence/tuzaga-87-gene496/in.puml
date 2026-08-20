@@ -1,0 +1,7 @@
+@startuml
+!include <logos/centos>
+
+title: running on <$centos>
+Alice->Bob : hello
+
+@enduml

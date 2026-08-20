@@ -1,0 +1,13 @@
+@startuml
+title Long title to see cropped arrow
+participant Alice 
+participant Bob   
+
+[o<-x Alice : hop
+[o<-x Bob : hop
+
+
+[x<-o Alice : hop2
+[x<-o Bob : hop2
+
+@enduml

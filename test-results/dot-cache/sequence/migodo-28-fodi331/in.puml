@@ -1,0 +1,6 @@
+@startuml
+Bob -> Alice : test
+note left of Alice
+  hello <u:#FF0000>toto</u> and <w:green>green</w> and <s:#00FFFF>strike</s> ok.
+end note
+@enduml

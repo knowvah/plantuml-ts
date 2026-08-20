@@ -1,0 +1,16 @@
+@startuml
+
+skinparam useBetaStyle true
+<style>
+note {
+  backgroundColor white
+}
+.blue {
+  backgroundColor blue
+}
+</style>
+participant A
+participant B
+note over A: test
+note<<blue>> over B: test
+@enduml

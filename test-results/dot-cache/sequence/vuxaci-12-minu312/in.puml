@@ -1,0 +1,20 @@
+@startuml
+hide unlinked
+box "b1"
+participant A
+participant B
+end box
+
+box "b2"
+participant C
+participant D
+participant E
+end box
+
+box "b3"
+participant F
+end box
+
+A -> E
+
+@enduml

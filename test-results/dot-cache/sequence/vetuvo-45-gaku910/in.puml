@@ -1,0 +1,8 @@
+@startuml
+autonumber
+hide footbox
+participant "Client" as C
+participant "Service" as S
+C->S: input
+C<--S: output
+@enduml

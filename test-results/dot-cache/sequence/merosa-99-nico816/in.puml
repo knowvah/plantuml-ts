@@ -1,0 +1,7 @@
+@startuml
+skinparam useBetaStyle true
+title title
+Bob -> Alice : hello
+footer footer
+header header
+@enduml

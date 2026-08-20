@@ -1,0 +1,13 @@
+@startuml
+skinparam sequenceDividerBackgroundColor #white-lightgrey
+skinparam sequenceLifeLineBackgroundColor #white-lightgrey
+skinparam sequenceDividerBorderColor #white|green
+skinparam sequenceLifeLineBorderColor #white|green
+
+Alice -> Bob
+== foo ==
+Alice -> Bob
+activate Alice
+Alice -> Bob
+
+@enduml

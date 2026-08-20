@@ -1,0 +1,12 @@
+@startuml
+Bob -> Alice : ok1
+Alice -> t1 : t1
+Alice -> t2 : t2
+Alice -> t3 : t3
+
+== Resource AllocationAllocationX ==
+
+Bob -> Alice : ok2
+
+
+@enduml

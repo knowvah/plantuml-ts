@@ -1,0 +1,7 @@
+@startuml
+foo o->o foo1
+foo ->o foo1
+foo o->o foo
+foo ->o foo
+foo o-> foo
+@enduml

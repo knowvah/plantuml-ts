@@ -1,0 +1,9 @@
+@startuml
+'!preprocessorV2
+Alice -> Bob : ok1
+Alice -> Bob : /'''out'''/ ok2
+/'
+Alice -> Bob : ok3
+this is a comment
+'/
+@enduml

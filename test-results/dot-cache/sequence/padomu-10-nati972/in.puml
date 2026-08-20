@@ -1,0 +1,10 @@
+@startuml
+skinparam lifelineStrategy solid
+skinparam SequenceGroupHeaderFontColor red
+skinparam SequenceGroupFontColor green
+skinparam SequenceGroupBodyBackgroundColor yellow
+loop forever
+    A -> B: ping
+    B -> A: pong
+end
+@enduml

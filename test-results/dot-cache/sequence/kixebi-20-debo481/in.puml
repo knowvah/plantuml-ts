@@ -1,0 +1,8 @@
+@startuml
+actor A #red
+
+create B
+A --> B : Create an event
+
+B --> C : Some text
+@enduml

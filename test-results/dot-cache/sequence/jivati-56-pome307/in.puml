@@ -1,0 +1,8 @@
+@startuml
+skinparam ParticipantFontColor automatic
+participant "Dark <&globe>" as dark #indigo
+participant "Light <&globe>" as light #ivory
+' The addition of an icon to the text displayed in the above participants causes
+' a crash
+dark -> light: Test 1
+@enduml

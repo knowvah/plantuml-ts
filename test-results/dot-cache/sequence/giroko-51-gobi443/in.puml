@@ -1,0 +1,13 @@
+@startuml
+a -> b : <&cog>
+a -> b : test
+a -> b : test
+a -> b : test
+newpage
+a -> b : test
+a -> b : test
+a -> b : test
+a -> b : test
+a -> b : <&wifi>
+a -> b : test
+@enduml

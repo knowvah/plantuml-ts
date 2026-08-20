@@ -1,0 +1,8 @@
+@startuml
+!pragma teoz true
+A->B
+opt
+  B->C: test
+  |||
+end
+@enduml

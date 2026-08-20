@@ -1,0 +1,6 @@
+@startuml
+foo o->o]
+[o->o foo2
+foo3 o<-o]
+[o<-o foo4
+@enduml

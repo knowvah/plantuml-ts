@@ -1,0 +1,15 @@
+@startuml
+ignorenewpage
+
+Bob -> Alice : hello
+
+newpage
+
+Bob -> Alice : hello2
+create Dog
+Alice --> Dog : creation
+Bob -> Alice : hello3
+
+newpage
+Bob -> Alice : hello4
+@enduml

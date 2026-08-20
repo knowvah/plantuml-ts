@@ -1,0 +1,10 @@
+@startuml
+skinparam useBetaStyle true
+
+<style>
+arrow {
+  LineColor green
+}
+</style>
+Alice -> Bob : hello
+@enduml

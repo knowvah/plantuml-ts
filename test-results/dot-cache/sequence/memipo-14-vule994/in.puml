@@ -1,0 +1,47 @@
+@startuml 
+'!preprocessorV2
+
+!unquoted procedure $msg($type,$sub)
+!if ($type == "A")
+!if ($sub == "X")
+A -> B: AX
+!endif
+!if ($sub == "Y")
+A -> B: AY
+!endif
+!endif
+!if ($type == "B")
+!if ($sub == "X")
+A -> B: BX
+!endif
+!if ($sub == "Y")
+A -> B: BY
+!endif
+!endif
+
+!end procedure
+
+
+!unquoted procedure $msg2($type,$sub)
+!if ($type == "A")  && ($sub == "X")
+A -> B: AX
+!endif
+!if ($type == "A")  && ($sub == "Y")
+A -> B: AY
+!endif
+
+!if ($type == "B")  && ($sub == "X")
+A -> B: BX
+!endif
+!if ($type == "B")  && ($sub == "Y")
+A -> B: BY
+!endif
+!end procedure
+
+$msg(A,X)
+$msg(B,Y)
+A -> B: type 2
+$msg2(A,X)
+$msg2(B,Y)
+
+@enduml

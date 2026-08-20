@@ -1,0 +1,9 @@
+@startuml
+Bob->Alice: coucou2
+opt
+Alice->Bob: ok0
+Alice->Bob: ok1
+else toto
+Alice->Bob: ok2
+end
+@enduml

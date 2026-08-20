@@ -1,0 +1,10 @@
+@startuml
+Alice ->]
+[-> Alice
+Alice ->o]
+[->o Alice
+Alice ->x]
+[->x Alice
+Alice x<-]
+[x<- Alice
+@enduml

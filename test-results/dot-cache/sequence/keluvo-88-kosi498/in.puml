@@ -1,0 +1,13 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : Sec\nret10
+& Alice -> Stacy : Rumors10
+
+Bob -> Alice : Sec\nret20
+& Alice -> Stacy : Rumors20
+& Stacy -> Stacy2 : Rumors220
+
+
+
+
+@enduml

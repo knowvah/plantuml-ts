@@ -1,0 +1,5 @@
+@startuml
+A -> B ++
+B -> B ++
+deactivate B
+@enduml

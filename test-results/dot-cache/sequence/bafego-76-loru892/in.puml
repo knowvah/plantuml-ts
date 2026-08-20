@@ -1,0 +1,4 @@
+@startuml
+Alice -> Bob :  remainder-of-line /' comment '/
+/' comment '/ Alice -> Bob :  second message
+@enduml

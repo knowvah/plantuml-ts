@@ -1,0 +1,10 @@
+@startuml
+Bob->Alice: coucou2
+opt cas1
+Alice -> Bob:okl
+alt cas2 long expres
+Alice -> Bob:okl
+end
+end
+Bob->Alice: coucou3
+@enduml

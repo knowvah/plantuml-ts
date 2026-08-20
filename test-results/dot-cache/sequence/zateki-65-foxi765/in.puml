@@ -1,0 +1,12 @@
+@startuml
+
+!pragma teoz true
+participant b
+participant a
+actor d
+
+b -> a  : hello
+activate a
+deactivate a
+b -> c : self
+@enduml

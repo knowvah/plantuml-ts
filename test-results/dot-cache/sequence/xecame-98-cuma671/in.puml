@@ -1,0 +1,7 @@
+@startuml
+participant Bob <<Male>>
+participant Alice <<Female>>
+Bob -> Alice : hello
+
+hide stereotype
+@enduml

@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+participant P1
+rnote over P2 : note 1
+/ note over P1 : note 2
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+<style>
+note {
+  FontSize 10
+  BackGroundColor #fff
+  .green {
+        BackgroundColor green
+   }
+}
+</style>
+
+participant A
+participant B
+note over A, B : test 0
+note over A, B <<green>> : test green
+@enduml

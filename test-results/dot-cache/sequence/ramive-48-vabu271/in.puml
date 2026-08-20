@@ -1,0 +1,13 @@
+@startuml
+!pragma teoz true
+
+legend
+    Example of simple table
+    |= |= table |= header |
+    | a | table | row |
+    | b | table | row |
+end legend
+
+foo -> bar: vers
+
+@enduml

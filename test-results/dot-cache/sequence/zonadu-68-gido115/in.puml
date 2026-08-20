@@ -1,0 +1,7 @@
+@startuml
+'!preprocessorV2
+Alice -> Bob : abcd expected %substr("abcd", 0)
+Alice -> Bob : bcd expected %substr("abcd", 1)
+Alice -> Bob : <> expected <%substr("abcd", 5)>
+Alice -> Bob : bc expected %substr("abcd", 1, 2)
+@enduml

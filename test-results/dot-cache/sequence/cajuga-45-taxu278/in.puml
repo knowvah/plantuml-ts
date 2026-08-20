@@ -1,0 +1,5 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : Secret
+Alice -> Stacy : Rumors
+@enduml

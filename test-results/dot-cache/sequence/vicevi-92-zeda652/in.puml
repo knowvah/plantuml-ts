@@ -1,0 +1,15 @@
+@startuml
+title
+Some Title
+end title
+
+right header
+<size:16>Generated date</size>
+end header
+
+legend top
+Some legend.
+end legend
+
+A -> B
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+sprite logo <svg viewBox="0 0 230 230">0
+<circle cx="115" cy="102" r="20.5" fill="#61dafb"/>
+<ellipse rx="110" ry="42"  cx="115" cy="102" stroke="#61dafb" stroke-width="10" fill="none"/>
+<g transform="rotate(60 115 102)">
+<ellipse rx="110" ry="42"  cx="115" cy="102" stroke="#61dafb" stroke-width="10" fill="none"/>
+</g>
+<g transform="rotate(-60 115 102)">
+<ellipse rx="110" ry="42"  cx="115" cy="102" stroke="#61dafb" stroke-width="10" fill="none"/>
+</g>
+</svg>
+
+a->b: <$logo>
+@enduml

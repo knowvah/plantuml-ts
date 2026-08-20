@@ -1,0 +1,11 @@
+@startuml
+skinparam participantBackgroundColor AntiqueWhite/Gold
+skinparam participantClickableBackgroundColor red
+skinparam participantClickableBorderColor green
+
+participant Alice
+participant Bob [[foo]]
+Alice -> Bob : hello
+'url of Bob is [[foo]]
+
+@enduml

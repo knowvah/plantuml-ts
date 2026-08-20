@@ -1,0 +1,5 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : hello
+hnote over Bob: text
+@enduml

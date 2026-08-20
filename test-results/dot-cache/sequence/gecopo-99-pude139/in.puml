@@ -1,0 +1,11 @@
+@startuml
+skinparam sequenceGroupBorderThickness 1
+skinparam noteBorderThickness 3
+skinparam sequenceGroupBorderColor blue
+skinparam sequenceGroupBackgroundColor red
+
+alt
+Bob -> Alice : hello
+note left: foo
+end group
+@enduml

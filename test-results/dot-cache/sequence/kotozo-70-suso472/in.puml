@@ -1,0 +1,18 @@
+@startuml
+skinparam useBetaStyle true
+<style>
+	sequenceDiagram {   
+	  actor { 
+	    FontColor Blue 
+	  }
+	 .myStyle {
+	    FontColor Red
+	 }
+	}
+} 
+</style> 
+
+actor Bob 
+' this will now be printed in Red 
+actor Sally <<myStyle>>
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+!pragma teoz true
+skinparam noteTextAlignment right
+Alice->Bob:m1
+Bob->Charlie:m2
+note across
+this right
+on several lines
+end note
+Bob->Alice
+@enduml

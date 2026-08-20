@@ -1,0 +1,7 @@
+@startuml
+Alice ->Bob: Hello
+Bob <-] : message1
+Bob <--] : message2
+Bob <<-] : message3
+Bob <<--] : message4
+@enduml

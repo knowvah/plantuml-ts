@@ -1,0 +1,6 @@
+@startuml
+participant Bob
+participant Alice
+Bob->Alice: coucou1
+activate Bob
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+participant Alice
+box "this is a very long Titre 1"
+participant Bob1
+endbox
+box "this is a very long Titre 2"
+participant Bob2
+endbox
+
+Bob1 -> Bob2
+@enduml

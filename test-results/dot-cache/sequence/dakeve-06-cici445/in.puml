@@ -1,0 +1,12 @@
+@startuml
+!pragma teoz true
+
+group g1
+P1->P2
+
+== diver 1 ==
+
+end
+
+
+@enduml

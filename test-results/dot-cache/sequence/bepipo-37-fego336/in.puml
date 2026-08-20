@@ -1,0 +1,9 @@
+@startuml
+activate A
+loop forever
+end
+deactivate A
+...
+A -> A
+activate A
+@enduml

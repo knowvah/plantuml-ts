@@ -1,0 +1,12 @@
+@startuml
+<style>
+.a {
+  LineStyle 5
+  LineThickness 2
+  Linecolor red
+}
+</style>
+participant alice
+alice -> bob : msg
+alice -> bob <<a>> : red
+@enduml

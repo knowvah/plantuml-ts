@@ -1,0 +1,9 @@
+@startuml
+'!preprocessorV2
+!ijk = "foo"
+Alice -> Bob : A
+!if ijk == "bar"
+Alice -> Bob : yes
+!endif
+Alice -> Bob : B
+@enduml

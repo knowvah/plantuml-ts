@@ -1,0 +1,8 @@
+@startuml
+'!preprocessorV2
+
+!function double($a) return $a+$a
+
+
+alice -> bob : the double of 3 is double(3)
+@enduml

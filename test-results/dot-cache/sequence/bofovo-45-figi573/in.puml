@@ -1,0 +1,15 @@
+@startuml
+!pragma teoz true
+
+box "group 1" #lightblue
+    Participant P1
+    Participant P2
+end box
+' I would like to insert an horizontal minimu space constraint here
+box "group 2 with a very long title" #lightgreen
+    Participant P3
+    Participant P4
+end box
+P1->P2
+& P3->P4
+@enduml

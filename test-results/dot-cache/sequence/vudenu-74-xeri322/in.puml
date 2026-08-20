@@ -1,0 +1,7 @@
+@startuml
+autoactivate on
+alice -> bob : hello
+bob -> bob : self call
+return success1
+return success2
+@enduml

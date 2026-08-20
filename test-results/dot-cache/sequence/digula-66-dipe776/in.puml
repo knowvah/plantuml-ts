@@ -1,0 +1,43 @@
+@startuml
+
+@startuml
+	'skinparam shadowing false
+title PlantUML Sequence newpage test
+
+participant P
+participant S
+participant U
+
+== Page 1 ==
+P -> S
+S -> S
+U -> S
+U -> U
+S -> P
+P -> S
+S -> P
+S -> U
+S -> P
+P -> S
+S -> P
+S -> U
+
+newpage
+== Page 2 ==
+
+U -> S
+S -> P
+S -> P
+P -> S
+S -> P
+S -> U
+
+newpage
+== Page 3 ==
+
+U -> S
+S -> P
+P -> S
+S -> U
+
+@enduml

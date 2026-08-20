@@ -1,0 +1,9 @@
+@startuml
+activate bob
+bob -> bob : a
+activate bob
+bob -> other : b
+bob -> bob : c
+deactivate bob
+
+@enduml

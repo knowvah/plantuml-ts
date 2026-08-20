@@ -1,0 +1,24 @@
+@startuml
+
+skinparam useBetaStyle true
+!procedure formatConnection($sequenceArrowThickness, $from, $to, $protocol)
+<style>
+arrow {
+  LineThickness $sequenceArrowThickness
+}
+</style>
+  $from<<->>$to : $protocol
+!endprocedure
+
+box "AWS " #LightBlue
+    participant "aPlatform" as ap
+   
+end box
+box "External" #Lightgreen
+    participant "External API" as extapi
+    participant "External  Service" as exts
+end box
+
+formatConnection("5", "ap", "extapi","<< MA-TLS >>")
+
+@enduml

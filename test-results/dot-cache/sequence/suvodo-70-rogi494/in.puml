@@ -1,0 +1,16 @@
+@startuml
+skinparam RoundCorner 15
+skinparam SequenceMessage {
+  Margin 35
+  Padding 5
+  BorderColor Blue
+}
+Alice->Bob : hello
+participant Bob
+participant Alice
+
+rnote over Bob
+This should be rounded
+end note
+Bob->Alice: This message should be rounded 
+@enduml

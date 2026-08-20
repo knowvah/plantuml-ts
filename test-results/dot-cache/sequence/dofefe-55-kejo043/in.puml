@@ -1,0 +1,15 @@
+@startuml
+!pragma teoz true
+hide footbox
+hide unlinked
+
+i2c -> app ++ : I2C request completed
+app -> i2c : getI2CStatus(&result)
+
+alt result == OK
+  ref over app, app : I2CJobEndProcessing()
+else
+  ref over app, app  : SecondaryErrorHandling(CommunicationError)
+end
+
+@enduml

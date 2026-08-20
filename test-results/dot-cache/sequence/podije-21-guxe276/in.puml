@@ -1,0 +1,15 @@
+@startuml
+!pragma teoz true
+
+box "QuiteLongNameforBox"
+participant abc123
+participant bcd123
+participant cde123
+end box
+
+box "Short"
+participant abc124
+participant bcd124
+participant cde124
+end box
+@enduml

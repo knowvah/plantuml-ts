@@ -1,0 +1,13 @@
+@startuml
+'!preprocessorV2
+!$a = "foo"
+Alice -> Bob : $a
+!ifdef $a
+Alice -> Bob : a is defined. ok
+!endif
+!ifdef $b
+Alice -> Bob : b is defined. not ok
+!else
+Alice -> Bob : b is not defined. ok
+!endif
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+activate a
+a -> a  : call
+||0||
+deactivate a
+@enduml

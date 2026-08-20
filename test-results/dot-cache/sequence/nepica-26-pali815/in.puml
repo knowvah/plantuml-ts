@@ -1,0 +1,5 @@
+@startuml
+
+dummy -> a **
+
+@enduml

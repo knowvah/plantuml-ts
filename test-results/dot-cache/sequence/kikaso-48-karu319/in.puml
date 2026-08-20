@@ -1,0 +1,11 @@
+@startuml
+Alice -> Bob : hello
+note left
+	this note
+	is on
+	several
+	lines
+endnote
+activate Bob
+Bob --> Alice : ok
+@enduml

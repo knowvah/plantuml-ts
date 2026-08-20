@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : hello
+newpage
+Bob -> Alice : hello page2
+@enduml

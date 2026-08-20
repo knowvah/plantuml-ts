@@ -1,0 +1,8 @@
+@startuml
+!pragma teoz false
+Bob -> Alice : hello1
+[o-> Alice: OK2
+?o-> Alice: OK3
+Bob <-o] : WTF4
+Bob <-o? : WTF5
+@enduml

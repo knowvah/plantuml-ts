@@ -1,0 +1,13 @@
+@startuml
+hide footbox
+
+Bob -> Alice : hello1
+Bob -> Alice : hello2
+newpage
+Bob -> Alice : hello3
+Bob -> Alice : hello4
+newpage
+Bob -> Alice : hello5
+Bob -> Alice : hello6
+
+@enduml

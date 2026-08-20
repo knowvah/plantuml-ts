@@ -1,0 +1,8 @@
+@startuml
+
+' !pragma teoz true
+
+activate Bob #White #Black
+Bob -> Bob
+
+@enduml

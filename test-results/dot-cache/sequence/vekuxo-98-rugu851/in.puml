@@ -1,0 +1,7 @@
+@startuml
+opt toto
+Alice ->Bob: Hello
+Bob ->] : message1
+end
+Alice ->] : This is a very long message
+@enduml

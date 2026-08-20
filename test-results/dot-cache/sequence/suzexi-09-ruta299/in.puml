@@ -1,0 +1,6 @@
+@startuml
+
+minwidth 500
+Bob -> Alice : hello
+
+@enduml

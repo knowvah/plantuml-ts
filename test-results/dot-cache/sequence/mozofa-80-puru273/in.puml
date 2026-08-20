@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : __underlined__
+note over Bob: **bold**
+/ note over Alice: //italics//
+@enduml

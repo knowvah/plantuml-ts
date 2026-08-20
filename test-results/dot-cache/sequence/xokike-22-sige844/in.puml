@@ -1,0 +1,24 @@
+@startuml
+!pragma teoz true
+
+hide footbox
+
+participant a
+participant b
+participant c
+participant d
+participant e
+
+a->b: 1
+b->c: 2
+group #Transparent Parent Group
+b->c: 2.1
+c->d: 2.2
+group #LightGrey Nested Group
+d->c: 3.1
+c->d: 3.2
+d->e: 4
+end group
+d->c: 5
+end group
+@enduml

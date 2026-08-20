@@ -1,0 +1,10 @@
+@startuml
+
+legend
+The legend
+end legend
+
+participant a
+a --> bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb 
+
+@enduml

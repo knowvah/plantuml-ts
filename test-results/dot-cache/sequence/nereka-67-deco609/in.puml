@@ -1,0 +1,15 @@
+@startuml
+
+
+!include <tupadr3/common.puml>
+!include <tupadr3/devicons2/docker.puml>
+
+'participant "Alice <$docker>" as alice
+alice -> bob
+
+legend right
+|<#blue><color:#CE93D8><$docker>    | App1 |
+'|<$docker> | App2 |
+endlegend
+
+@enduml

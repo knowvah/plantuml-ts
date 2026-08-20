@@ -1,0 +1,19 @@
+@startuml
+!pragma teoz true
+
+
+participant a
+participant b
+participant c
+participant d
+
+
+a->b: Msg1
+& b->c: Msg2
+& c->d: Msg3
+
+a<- d: Msg4
+
+
+a->b: Msg5
+@enduml

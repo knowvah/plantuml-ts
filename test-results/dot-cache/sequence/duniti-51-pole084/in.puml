@@ -1,0 +1,15 @@
+@startuml
+skinparam useBetaStyle true
+<style>
+note {
+	HorizontalAlignment center
+}
+</style>
+
+Bob -> Alice : hello
+Bob -> Alice : hello long
+note right
+This is a note
+can text be aligned or maybe centered?
+endnote
+@enduml

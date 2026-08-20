@@ -1,0 +1,7 @@
+@startuml
+skinparam backgroundColor transparent
+Bob -> Alice : hello1
+group foo
+Bob -> Alice : hello2
+end group
+@enduml

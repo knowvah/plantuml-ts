@@ -1,0 +1,3 @@
+@startuml
+Bob -> Alice [[http://www.google.com foo]]
+@enduml

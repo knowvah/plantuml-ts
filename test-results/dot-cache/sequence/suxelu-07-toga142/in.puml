@@ -1,0 +1,20 @@
+@startuml
+
+'skin BlueModern
+
+Bob -> Alice : hello
+Bob <- Alice : hello
+
+Bob ->> Alice : hello
+Bob <<- Alice : hello
+
+Bob --> Alice : hello
+Alice --> Bob : hello
+
+Bob -->> Alice : hello
+Alice -->> Bob : hello
+
+Bob -> Bob : Hello
+Bob --> Bob : Hello
+
+@enduml

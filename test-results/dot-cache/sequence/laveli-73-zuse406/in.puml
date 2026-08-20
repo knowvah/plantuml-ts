@@ -1,0 +1,12 @@
+@startuml
+<style>
+sequenceDiagram {
+	 // foo
+     participant {
+         FontColor: Blue;
+         /' LineColor: Blue; '/
+     }
+}
+</style>
+Bob -> Alice : hello
+@enduml

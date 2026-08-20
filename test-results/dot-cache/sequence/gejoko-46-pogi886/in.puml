@@ -1,0 +1,18 @@
+@startuml
+!unquoted function $lookup($id)
+!$data={"participants":[
+{"id": "cm", "label": "label cm", "desc": "desc cm"},
+{"id": "tm", "label": "label tm", "desc": "desc tm"},
+{"id": "am", "label": "label am", "desc": "desc am"}
+]}
+!foreach $part in $data.participants
+  !if $part.id == $id
+    !return "id=" + $part.id + " \nlabel=" + $part.label + "\ndesc=" + $part.desc
+  !endif
+!endfor
+!endfunction
+
+!$a="cm"
+Alice -> Bob : $lookup($a)
+
+@enduml

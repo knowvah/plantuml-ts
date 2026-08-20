@@ -1,0 +1,11 @@
+@startuml
+'skin BlueModern
+activate Bob
+Bob -> Alice : hello
+...
+Alice -> Bob : ok
+...dummy...
+Alice -> Bob : ok2
+...dummy\non\nseveral\nlines...
+Alice -> Bob : ok3
+@enduml

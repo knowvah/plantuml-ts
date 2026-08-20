@@ -1,0 +1,8 @@
+@startuml
+a->b: foo
+alt true
+    a->b: bar1
+else false
+    a->b: bar2
+end
+@enduml

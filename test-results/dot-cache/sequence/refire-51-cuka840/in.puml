@@ -1,0 +1,15 @@
+@startuml
+!pragma teoz true
+
+i2c -> app ++ : I2C request completed
+app -> i2c : getI2CStatus(&result)
+
+alt result == OK
+  app->app3 : f1
+  app->app3 : f2
+else
+  app->app2 : a1
+  app->app2 : a2
+end
+
+@enduml

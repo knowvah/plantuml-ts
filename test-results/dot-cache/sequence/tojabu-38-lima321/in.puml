@@ -1,0 +1,10 @@
+@startuml
+skinparam sequenceParticipant {
+     borderColor Black
+     borderColor<<foo>> red
+     backgroundColor<<foo>> yellow
+     backgroundColor LightBlue
+}
+participant Bob <<foo>>
+Bob -> Alice : hello
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+autonumber
+Alice -> Bob : Hello {%autonumber%}
+note right : %autonumber%
+
+Alice -> Bob : Hello {%autonumber%}
+note right of Bob : %autonumber%
+@enduml

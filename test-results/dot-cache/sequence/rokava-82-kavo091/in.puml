@@ -1,0 +1,10 @@
+@startuml
+title 
+ this <b>title</b> is <i>quite</i>
+ <font size=20>long</font>
+ and defined on several lines
+end title
+
+Bob -> Alice : hello
+
+@enduml

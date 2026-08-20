@@ -1,0 +1,18 @@
+@startuml
+Alice -> Bob [[http://www.google.fr]] : ok
+
+Alice -> Alice [[http://www.google.com]] : ok
+
+Alice -> Bob [[http://www.google.de]] : ok
+note left [[http://www.google.es]]
+  test
+end note
+
+note right of Bob [[http://www.google.es]]
+  test2
+end note
+
+Alice ->] [[http://www.google.com5]] : ok4
+
+
+@enduml

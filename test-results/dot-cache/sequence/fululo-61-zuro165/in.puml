@@ -1,0 +1,10 @@
+@startuml
+title Page One
+actor A
+actor B
+newpage
+A -> B : simple activity
+activate A
+deactivate A
+B -> A : end of it
+@enduml

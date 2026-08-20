@@ -1,0 +1,7 @@
+@startuml
+skinparam diagramBorderRoundCorner 15
+skinparam diagramBorderColor black
+skinparam diagramBorderThickness 2
+title My Title
+Bob -> Alice : hello
+@enduml

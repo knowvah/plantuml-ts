@@ -1,0 +1,10 @@
+@startuml
+A->B: start
+B-->A: ok
+A->B: initialize
+create C
+B->C: start
+activate C
+C-->A: ok
+'deactivate C
+@enduml

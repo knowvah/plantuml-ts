@@ -1,0 +1,6 @@
+@startuml
+
+title this <b>title</b>zis quite defined on several lines
+Bob -> Alice
+
+@enduml

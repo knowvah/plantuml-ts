@@ -1,0 +1,6 @@
+@startuml
+A -> B : Action ~[Single] ~[[Double]] ~[~[[Triple]]]
+A -> B: Action1 ~[[http://www.plantuml.com/plantuml/form]]
+A -> B: Action1 [[http://www.plantuml.com/plantuml/form]]
+A -> B: Action [[http://www.plantuml.com/plantuml/form foo]]
+@enduml

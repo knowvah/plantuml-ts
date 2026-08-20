@@ -1,0 +1,18 @@
+@startuml
+
+skinparam useBetaStyle true
+
+
+<style>
+stereotype {
+  FontColor green
+}
+.dummy1 {
+  FontColor red
+}
+</style>
+
+participant Bob <<dummy1>> 
+actor Alice
+
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+participant IS
+participant S1
+participant FAC
+IS -> IS: do something useful
+IS <-- FAC: response
+activate IS
+@enduml

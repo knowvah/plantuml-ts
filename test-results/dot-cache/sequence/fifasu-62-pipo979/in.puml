@@ -1,0 +1,6 @@
+@startuml
+Alice -> Bob : hello
+note over Alice, Bob
+	Importing <img:http://beta.plantuml.net/foo1.svg>
+end note
+@enduml

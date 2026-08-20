@@ -1,0 +1,6 @@
+@startuml
+skinparam SequenceMessageAlign reverseDirection
+Alice -> Bob : hello with long
+Alice -> Bob : hello
+return ok
+@enduml

@@ -1,0 +1,23 @@
+@startuml
+hide footbox
+a->f:hello
+create b
+e->b:ola
+create d
+c->d:guten tag
+d->c: auf wiedersehen
+destroy d
+b->e:adios
+destroy b
+f->a:goodbye
+a->f:hello
+create b
+e->b:ola
+create d
+c->d:guten tag
+d->c: auf wiedersehen
+destroy d
+b->e:adios
+destroy b
+f->a:goodbye
+@enduml

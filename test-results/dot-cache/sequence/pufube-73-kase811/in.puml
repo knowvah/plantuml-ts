@@ -1,0 +1,29 @@
+@startuml
+
+box
+       participant A
+end box
+
+box
+       participant B
+end box
+
+box
+       participant C
+       participant D
+end box
+
+box
+       participant E
+       participant F
+end box
+
+box
+       participant G
+end box
+
+'participant H
+
+A->B
+
+@enduml

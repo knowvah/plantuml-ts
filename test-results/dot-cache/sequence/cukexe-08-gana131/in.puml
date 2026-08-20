@@ -1,0 +1,9 @@
+@startuml
+Bob -> Last : ok
+... not working ...
+Bob -> Last : ok2
+Bob -> Last : ok3
+'... not working\nbetween 3\nand 4 ...
+Bob -> Last : ok4
+Bob -> Last : ok5
+@enduml

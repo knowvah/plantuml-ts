@@ -1,0 +1,8 @@
+@startuml
+!$var=5
+!$var=$var-1
+!log var=$var
+
+participant a
+a --> b
+@enduml

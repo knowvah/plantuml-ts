@@ -1,0 +1,9 @@
+@startuml
+actor User
+boundary API
+database storage
+User -> API
+API -> storage
+API <- storage
+User <- API
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+
+opt
+	Axxx ->Bxxx : message1
+else
+	Axxx ->Bxxx : message2
+end
+
+Bxxx->Cxxx : message3
+
+@enduml

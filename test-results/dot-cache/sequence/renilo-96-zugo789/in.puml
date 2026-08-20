@@ -1,0 +1,18 @@
+@startuml
+actor Bob
+Bob->Alice: coucou1
+activate Alice
+
+Alice->Bob: ok1
+deactivate Alice
+
+Bob->Bob: waiting
+
+Bob->Alice: coucou2
+activate Alice
+
+Alice->Bob: ok2
+destroy Alice
+
+Alice->Bob: ok3
+@enduml

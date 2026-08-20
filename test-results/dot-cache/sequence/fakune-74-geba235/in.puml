@@ -1,0 +1,14 @@
+@startuml
+ 
+!definelong a(unlinked_handling)
+participant a
+participant b
+participant c
+ 
+unlinked_handling
+a->b:hi
+!enddefinelong
+ 
+ 
+a(hide unlinked)
+@enduml

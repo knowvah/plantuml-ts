@@ -1,0 +1,4 @@
+@startuml
+skinparam wrapWidth 150
+participant "This is a long name for a participant" as P1
+@enduml
