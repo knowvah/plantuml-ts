@@ -284,6 +284,18 @@ bundling (a `node:*` type-resolution diagnostic in the dts plugin's own
 pass, not `tsc`'s own gate), the other two printed none — non-deterministic
 but never blocking, consistent with the brief's characterization.
 
+**Post-merge addendum (2026-08-20).** The first `npm test` run on `main`
+after the merge commit (`3e65ead1`) clocked **62 s** — above the 60.3 s
+stop-11 ceiling. Re-measured three times on the identical tree: vitest's own
+`Duration` **57.64 s / 56.37 s / 57.35 s** (wrapped wall 59/57/59 s). The 62 s
+reading was contention from a `npm run build` finishing moments earlier, not a
+regression — source is byte-identical to the branch tip that measured 56 s on
+three separate batches. Stop 11 did not genuinely fire, and the outlier is
+recorded here rather than discarded. **The margin is nonetheless thin**: this
+mission added a test file and ~10 tests and sits ~3 s under a ceiling set when
+the suite ran ~55 s. The next state mission should expect to renegotiate the
+ceiling rather than trim coverage to fit it.
+
 **Per-task commits** (branch `fix/state-anchor-clip-retire`, off `main` at
 or after `4895623b`, not yet merged at close-out): `1c674757` T0 (tracked +
 gitignored baselines), `e5a60bdd` T1 (stop 9 — D1's placement impossible),
