@@ -25,6 +25,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { acquireBuildLock } from './build-stdlib-packages/build-lock.js';
 import { emitAllIndexDts, emitAllIndexJs } from './build-stdlib-packages/emit-all-index.js';
 import { emitIndexDts, emitIndexJs } from './build-stdlib-packages/emit-index.js';
 import { emitModuleDts, emitModuleJs } from './build-stdlib-packages/emit-module.js';
@@ -267,7 +268,20 @@ function buildSpriteSplits(): void {
 
 /** Generates every `@knowvah/plantuml-stdlib*` package's `generated/` tree from
  * `assets/stdlib/`. Exported so `tests/unit/stdlib-packages.test.ts` can
- * invoke it directly rather than shelling out. */
+ * invoke it directly rather than shelling out.
+ *
+ * stdlib-build-race T4: the whole build runs under
+ * {@link acquireBuildLock} -- taken BEFORE any `rmSync` -- so a second,
+ * concurrently-running process (a second `npm test`/`vitest` invocation's
+ * `globalSetup`) never observes, and therefore never `rmSync`s, a tree this
+ * process has only partially rebuilt. Because T2's up-to-date predicates
+ * (`isGeneratedDirUpToDate`/`isSpriteSplitUpToDate`, called by
+ * `writeOutputs`/`buildSpriteSplits` below) run INSIDE this same critical
+ * section, the second holder re-checks them against the now-COMPLETE tree
+ * the first holder just finished, and skips -- closing D3
+ * (`plans/stdlib-build-race/decisions.md`). See
+ * `scripts/build-stdlib-packages/build-lock.ts` for the lock's on-disk
+ * representation, stale-holder recovery, and bounded-wait timeout. */
 export function buildStdlibPackages(): void {
   if (!existsSync(ASSETS_STDLIB_DIR)) {
     throw new Error(
@@ -276,11 +290,16 @@ export function buildStdlibPackages(): void {
     );
   }
 
-  for (const spec of PACKAGE_SPECS) {
-    buildPackage(spec);
+  const release = acquireBuildLock(REPO_ROOT);
+  try {
+    for (const spec of PACKAGE_SPECS) {
+      buildPackage(spec);
+    }
+    buildAllPackage();
+    buildSpriteSplits();
+  } finally {
+    release();
   }
-  buildAllPackage();
-  buildSpriteSplits();
 }
 
 const isMain = process.argv[1] !== undefined && import.meta.url === `file://${process.argv[1]}`;
