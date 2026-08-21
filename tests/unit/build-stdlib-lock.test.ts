@@ -26,7 +26,8 @@
  * OS-level concurrency around the lock, not to test anything themselves.
  */
 import { spawn, type ChildProcess } from 'node:child_process';
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -201,17 +202,44 @@ async function waitForFile(path: string, timeoutMs: number): Promise<void> {
 // ---------------------------------------------------------------------------
 
 describe('acquireBuildLock -- on-disk representation', () => {
+  // Asserts on the ONE deterministic default path, and on who owns it --
+  // deliberately not on a count of matching files in `tmpdir()`. Since
+  // stdlib-run-isolation option D, eight reader test files legitimately
+  // contend on this exact lock, so a directory-wide count is shared mutable
+  // state between workers: another worker may hold the lock when `before` is
+  // sampled, and `acquireBuildLock` would then block and re-create the same
+  // single path, leaving the count unchanged rather than incremented. The
+  // count was never the property under test; the deterministic path and the
+  // create/remove pair are.
+  //
+  // The 120s budget is for the same reason: this test acquires the REAL
+  // default lock, so it can legitimately queue behind those eight readers,
+  // and `maxWaitMs` alone is 30s -- well past vitest's 5s default.
   it('creates a lock file while held and removes it on release, at a deterministic default path', () => {
-    const prefix = 'plantuml-ts-stdlib-build-';
-    const suffix = '.lock';
-    const matching = () => readdirSync(tmpdir()).filter((name) => name.startsWith(prefix) && name.endsWith(suffix));
+    const digest = createHash('sha256').update(REPO_ROOT).digest('hex').slice(0, 16);
+    const defaultLockPath = join(tmpdir(), `plantuml-ts-stdlib-build-${digest}.lock`);
+    const ownerPidAt = (path: string): number | undefined => {
+      if (!existsSync(path)) {
+        return undefined;
+      }
+      try {
+        return (JSON.parse(readFileSync(path, 'utf8')) as { pid?: number }).pid;
+      } catch {
+        return undefined;
+      }
+    };
 
-    const before = matching().length;
     const release = acquireBuildLock(REPO_ROOT);
-    expect(matching().length).toBe(before + 1);
+    expect(existsSync(defaultLockPath)).toBe(true);
+    expect(ownerPidAt(defaultLockPath)).toBe(process.pid);
+
     release();
-    expect(matching().length).toBe(before);
-  });
+
+    // Either the file is gone, or a contending worker acquired it in the
+    // gap -- in which case it is no longer ours. Both prove OUR lock was
+    // released; neither is satisfiable if `release()` were a no-op.
+    expect(ownerPidAt(defaultLockPath)).not.toBe(process.pid);
+  }, 120_000);
 
   it('costs no measurable overhead when uncontended', () => {
     const dir = makeTempDir('build-stdlib-lock-cost-');
