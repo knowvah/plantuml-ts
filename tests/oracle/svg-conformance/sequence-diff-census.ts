@@ -60,9 +60,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { buildStdlibAssetsStore } from '../../helpers/stdlib-assets-store.js';
-import { withStdlib, type StdlibStore } from '../../../src/core/tim/StdlibStore.js';
-import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
+import { fixtureIncludeStore } from './fixture-include-store.js';
 import { compareSvg } from './compare.js';
 import type { Diff } from './compare.js';
 import { renderFixtureSequence } from './render-fixture-sequence.js';
@@ -201,48 +199,6 @@ export function tallyDiffs(diffs: readonly Diff[]): BucketCounts {
 // Census over the committed corpus
 // ---------------------------------------------------------------------------
 
-// ---------------------------------------------------------------------------
-// The include seam — the census MUST render with the same configuration as
-// the surfaces it is cross-checked against.
-//
-// Mirrors `sequence.diff-baseline.ratchet.test.ts#sequenceIncludeStore` and,
-// through it, `svg-conformance-census.ts#censusIncludeStore`
-// (`scripts/svg-conformance-census.ts:168`). This census originally rendered
-// with NO store, which is the same defect T2's ratchet carried: two fixtures
-// (`nereka-67-deco609`, `tuzaga-87-gene496`) `!include` a vendored stdlib
-// bundle (`<tupadr3/common.puml>`, `<logos/centos>`) and THROW without one,
-// so an unwired census reports them as render errors while the wired baseline
-// measures them at 12 diffs each. A census that censuses a different
-// population than the baseline it reads cannot be reconciled with it, so the
-// store is wired here rather than the baseline unwired.
-//
-// Duplicated rather than imported for the reason the ratchet records at its
-// own seam: `render-fixture.ts`'s equivalent is private and widening that
-// module's exports is outside this task's write-set.
-//
-// Deferred, not eager: the `assets/stdlib/` walk costs ~888 ms and only two
-// fixtures in the corpus use a `<bundle/...>` include, so the store is built
-// on the first such lookup and never at all for the other 1138.
-//
-// Node `fs` is reached (through `buildStdlibAssetsStore`) and that is fine:
-// this is test infrastructure under `tests/`, never `src/` (CLAUDE.md).
-// ---------------------------------------------------------------------------
-
-let cachedAssetsStore: StdlibStore | undefined;
-let cachedIncludeStore: IncludeStore | undefined;
-
-function sequenceIncludeStore(): IncludeStore {
-  cachedIncludeStore ??= withStdlib(
-    { get: () => undefined, has: () => false },
-    {
-      getPumlResource: (fullname: string): string | undefined => {
-        cachedAssetsStore ??= buildStdlibAssetsStore();
-        return cachedAssetsStore.getPumlResource(fullname);
-      },
-    },
-  );
-  return cachedIncludeStore;
-}
 
 export interface FixtureRef {
   readonly type: string;
@@ -280,7 +236,7 @@ function censusForFixture(ref: FixtureRef, cacheRoot: string): FixtureOutcome {
     const markup = readFileSync(join(dir, 'in.puml'), 'utf8');
     const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
     const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), {
-      includeStore: sequenceIncludeStore(),
+      includeStore: fixtureIncludeStore(),
     });
     const { diffs } = compareSvg(ours, golden, 'deterministic');
     return {

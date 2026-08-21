@@ -16,8 +16,8 @@
  * and not exported, and this task's write-set does not include widening
  * that module's exports.
  *
- * TWO DELTAS remain against the census, both deliberate. This comment used
- * to claim the mirroring was "exact"; it was not, and the first delta below
+ * ONE DELTA remains against the census, deliberate. This comment used
+ * to claim the mirroring was "exact"; it was not, and the delta below
  * is what that inaccurate claim concealed (si8 T5).
  *
  *   1. THE SEED. This harness seeds from the RAW block source
@@ -28,11 +28,10 @@
  *      ids for any fixture carrying `skin`/`!define`/etc. See the inline
  *      comment at the `seeded` binding. The census is the one that is behind;
  *      correcting it is outside this task's write-set.
- *   2. CONSTRUCTION TIMING of the include store. The census builds its store
- *      eagerly on first render; this one defers the `assets/stdlib/` walk to
- *      the first `<bundle/thing>` lookup (~888 ms, measured). Same store,
- *      same contents, built at most once either way — see
- *      `fixtureIncludeStore`.
+ *
+ * The include store is no longer a delta of any kind: every conformance
+ * surface now shares one seam, `fixture-include-store.ts`. It used to be
+ * copied into four places, and they drifted — see that module's header.
  *
  * The store itself is NOT a delta any more, and that is this file's other si8
  * change: `buildBlockUmls` was called here with no options at all, so no
@@ -41,9 +40,7 @@
  * `!include <bundle/thing>` a user actually writes.
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
-import { buildStdlibAssetsStore } from '../../helpers/stdlib-assets-store.js';
-import { withStdlib, type StdlibStore } from '../../../src/core/tim/StdlibStore.js';
-import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
+import { fixtureIncludeStore } from './fixture-include-store.js';
 import type { PreprocessorResult } from '../../../src/core/preprocessor.js';
 import { resolveTheme } from '../../../src/core/theme.js';
 import { resolveSkinparam, parseStyleBlock } from '../../../src/core/skinparam.js';
@@ -59,41 +56,6 @@ import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-graphics-core.js
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
-
-// ---------------------------------------------------------------------------
-// The include seam — mirrors `svg-conformance-census.ts#censusIncludeStore`.
-//
-// Node `fs` is reached here (through `buildStdlibAssetsStore`) and that is
-// fine: this is test infrastructure under `tests/`, never `src/`, which must
-// stay browser-safe (CLAUDE.md). The assets store deliberately covers EVERY
-// vendored bundle rather than the published subset — see
-// `scripts/stdlib-assets-store.ts`'s header.
-// ---------------------------------------------------------------------------
-
-let cachedAssetsStore: StdlibStore | undefined;
-let cachedIncludeStore: IncludeStore | undefined;
-
-/**
- * The fixture include store, built at most once per process.
- *
- * The `assets/stdlib/` walk costs ~888 ms (measured 2026-07-31) and the golden
- * suites render 54+ fixtures, so building per fixture is not an option. It is
- * also deferred to the first `<bundle/thing>` lookup rather than run on the
- * first render: fixtures that use no stdlib include — every fixture today —
- * then pay nothing at all.
- */
-function fixtureIncludeStore(): IncludeStore {
-  cachedIncludeStore ??= withStdlib(
-    { get: () => undefined, has: () => false },
-    {
-      getPumlResource: (fullname: string): string | undefined => {
-        cachedAssetsStore ??= buildStdlibAssetsStore();
-        return cachedAssetsStore.getPumlResource(fullname);
-      },
-    },
-  );
-  return cachedIncludeStore;
-}
 
 interface ResolvedThemeAndStyles {
   readonly theme: Theme;

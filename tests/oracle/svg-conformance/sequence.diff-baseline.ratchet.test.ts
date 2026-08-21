@@ -74,57 +74,10 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { buildStdlibAssetsStore } from '../../helpers/stdlib-assets-store.js';
-import { withStdlib, type StdlibStore } from '../../../src/core/tim/StdlibStore.js';
-import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
+import { fixtureIncludeStore } from './fixture-include-store.js';
 import { compareSvg } from './compare.js';
 import { renderFixtureSequence } from './render-fixture-sequence.js';
 
-// ---------------------------------------------------------------------------
-// The include seam — mirrors `svg-conformance-census.ts#censusIncludeStore`
-// (`scripts/svg-conformance-census.ts:168`) and its sibling
-// `render-fixture.ts#fixtureIncludeStore`.
-//
-// This MUST match the census's store. T5 renders sequence fixtures through
-// `renderFixtureSequence(markup, measurer, { includeStore: censusIncludeStore() })`
-// (`svg-conformance-census.ts:234`); when this ratchet rendered with NO store
-// the two surfaces disagreed about the corpus — the census reported 1 error
-// and this baseline recorded 3, because `<tupadr3/common.puml>` and
-// `<logos/centos>` resolve under the vendored stdlib and error without it.
-// A gate that measures a different population than the census is a gate that
-// cannot be cross-checked, so the store is wired here rather than the census
-// unwired.
-//
-// Node `fs` is reached (through `buildStdlibAssetsStore`) and that is fine:
-// this is test infrastructure under `tests/`, never `src/`, which must stay
-// browser-safe (CLAUDE.md).
-//
-// Duplicated rather than imported because `render-fixture.ts`'s equivalent is
-// private and widening that module's exports is outside this task's
-// write-set — the same constraint that file's own header records at its
-// lines 16-17.
-//
-// Deferred, not eager: the `assets/stdlib/` walk costs ~888 ms and only two
-// fixtures in the 1141-strong corpus use a `<bundle/...>` include, so the
-// store is built on the first such lookup and never at all for the other
-// 1139.
-// ---------------------------------------------------------------------------
-
-let cachedAssetsStore: StdlibStore | undefined;
-let cachedIncludeStore: IncludeStore | undefined;
-
-function sequenceIncludeStore(): IncludeStore {
-  cachedIncludeStore ??= withStdlib(
-    { get: () => undefined, has: () => false },
-    {
-      getPumlResource: (fullname: string): string | undefined => {
-        cachedAssetsStore ??= buildStdlibAssetsStore();
-        return cachedAssetsStore.getPumlResource(fullname);
-      },
-    },
-  );
-  return cachedIncludeStore;
-}
 
 interface BaselineFixture {
   readonly type: string;
@@ -174,7 +127,7 @@ function measure(f: FixtureRef): MeasureResult {
   const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
   try {
     const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), {
-      includeStore: sequenceIncludeStore(),
+      includeStore: fixtureIncludeStore(),
     });
     const { diffs } = compareSvg(ours, golden, 'deterministic');
     return { errored: false, diffCount: diffs.length };

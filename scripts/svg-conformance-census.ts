@@ -84,8 +84,7 @@ import { applyChrome, isEmpty } from '../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../src/core/annotations/style.js';
 import { assembleSvg, renderSync } from '../src/index.js';
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
-import { withStdlib } from '../src/core/tim/StdlibStore.js';
-import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
+import { fixtureIncludeStore } from '../tests/oracle/svg-conformance/fixture-include-store.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
@@ -164,15 +163,6 @@ function listFixtureDirs(type: string): FixtureDir[] {
 // Render one fixture through the low-level pipeline with a given measurer.
 // ---------------------------------------------------------------------------
 
-let cachedStore: ReturnType<typeof withStdlib> | undefined;
-function censusIncludeStore(): ReturnType<typeof withStdlib> {
-  cachedStore ??= withStdlib(
-    { get: () => undefined, has: () => false },
-    buildStdlibAssetsStore(),
-  );
-  return cachedStore;
-}
-
 // N0 (G2): renamed from `renderFixture` -- description-specific pipeline;
 // dispatched by `renderFixtureFor` below, alongside the new class pipeline.
 function renderFixtureDescription(markup: string, measurer: StringMeasurer): string {
@@ -180,7 +170,7 @@ function renderFixtureDescription(markup: string, measurer: StringMeasurer): str
   // the first block's interior.
   // SI5b: the vendored-stdlib store, so <bundle/...> fixtures render instead
   // of erroring (mirrors the dot-sync-report/parity-ratchet wiring from T9).
-  const blocks = buildBlockUmls(markup, { includeStore: censusIncludeStore() });
+  const blocks = buildBlockUmls(markup, { includeStore: fixtureIncludeStore() });
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
   if (!first.ok) throw first.failure.cause;
@@ -225,20 +215,20 @@ function renderFixtureDescription(markup: string, measurer: StringMeasurer): str
  */
 function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer): string {
   if (type === 'class' || type === 'object') {
-    return renderFixtureClass(markup, measurer, { includeStore: censusIncludeStore() });
+    return renderFixtureClass(markup, measurer, { includeStore: fixtureIncludeStore() });
   }
   if (type === 'state') {
-    return renderFixtureState(markup, measurer, { includeStore: censusIncludeStore() });
+    return renderFixtureState(markup, measurer, { includeStore: fixtureIncludeStore() });
   }
   if (type === 'sequence') {
-    return renderFixtureSequence(markup, measurer, { includeStore: censusIncludeStore() });
+    return renderFixtureSequence(markup, measurer, { includeStore: fixtureIncludeStore() });
   }
   if (type === 'json' || type === 'yaml' || type === 'hcl') {
     // Mission A5. ONE helper serves all three: yaml and hcl have no layout or
     // renderer of their own (`yaml/index.ts` and `hcl/index.ts` both import
     // `layoutJson`/`renderJson`), so only the parse differs and
     // `renderFixtureJson` dispatches that internally on the block type.
-    return renderFixtureJson(markup, measurer, { includeStore: censusIncludeStore() });
+    return renderFixtureJson(markup, measurer, { includeStore: fixtureIncludeStore() });
   }
   if (type === 'dot') {
     // Mission D14. The ONE type with no low-level pipeline to dispatch to, and
