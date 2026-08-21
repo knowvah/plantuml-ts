@@ -22,5 +22,5 @@ pack tests, which are already among the 8.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Lock helper + ownership-safe `release()`, TDD | typescript-pro (sonnet) | `tests/helpers/with-stdlib-build-lock.ts`, `tests/unit/with-stdlib-build-lock.test.ts`, `scripts/build-stdlib-packages/build-lock.ts`, `tests/unit/build-stdlib-lock.test.ts` | T2 + user approval | [ ] |
-| T4 | Convert the 8 in-worker consumers + fitness function | typescript-pro (sonnet) | the 8 census files #11-#18, plus `tests/architecture/stdlib-read-lock.test.ts` | T3 | [ ] |
+| T3 | Lock helper + ownership-safe `release()`, TDD | typescript-pro (sonnet) | `tests/helpers/with-stdlib-build-lock.ts`, `tests/unit/with-stdlib-build-lock.test.ts`, `scripts/build-stdlib-packages/build-lock.ts`, `tests/unit/build-stdlib-lock.test.ts` | T2 + user approval | [x] |
+| T4 | Convert the 8 in-worker consumers + fitness function | typescript-pro (sonnet) | the 8 census files #11-#18, plus `tests/architecture/stdlib-read-lock.test.ts` | T3 | [x] |
