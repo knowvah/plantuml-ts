@@ -1,150 +1,199 @@
 # SRE T1 — guarded repro promoted to a real test
 
-## Correction (post-review)
-First pass pointed the test at `scripts_scratch/T0/writer.ts`/`reader.ts`,
-which the mission brief has the orchestrator delete once this task lands
-(batch-0's quality bar: "The orchestrator removes it after T1 lands").
-That breaks the committed test on the next checkout. Fixed by promoting the
-harness itself into committed files:
+## Round 3 — the reader-timeout defect and its fix (this round)
 
-- `tests/helpers/stdlib-build-race-writer.ts`
-- `tests/helpers/stdlib-build-race-reader.ts`
+### Symptom
+After T2 landed the content-derived skip, the test (still using a fixed
+`READER_ATTEMPTS = 100_000` reader) could never pass or fail cleanly: the
+reader's cache-busted `import()` loop never got signalled to stop, ran out
+the clock, and vitest reported `Error: Test timed out in 120000ms`.
 
-`tests/helpers/` is this repo's existing convention for shared test
-utilities; both files are `.ts`, not `.test.ts`, so vitest's
-`include: ['tests/**/*.test.ts']` does not collect them as tests. Semantics
-are copied verbatim from `scripts_scratch/T0/` — same real
-`buildStdlibPackages` import in the writer, same cache-busting query-string
-`import()` per attempt in the reader, same `WRITER_ITERATIONS` (300),
-`WRITER_DELAY_MS` (2), `READER_ATTEMPTS` (100,000) constants. Only the
-doc-comment path references and the "committed, not scratch" framing
-changed. `tests/integration/stdlib-build-race.test.ts`'s `WRITER_SCRIPT`/
-`READER_SCRIPT` now resolve into `tests/helpers/`, not `scripts_scratch/`.
+### First attempted fix (superseded, kept here for the record)
+Round 2 replaced the fixed attempt count with a cooperative stop: the test
+awaits the writer's exit, then sends the reader `SIGTERM`; the reader
+installs `process.on('SIGTERM', () => { stopRequested = true })` and checks
+the flag between loop iterations. This looked correct and typechecked, but
+every real run still timed out (30s, 200s, 240s attempts, `WRITER_ITERATIONS`
+300 then 275) or ran far longer than the writer alone.
 
-## What was written
-`tests/integration/stdlib-build-race.test.ts` follows the repo's existing
-`describe.skipIf(...)` convention (`tests/unit/description-doc-dims.test.ts`,
-`tests/oracle/declaration-order-parity.test.ts`, `tests/oracle/
-wrapper-parity.test.ts`) — no `.test.ts` file in this repo gates on a raw
-env var directly, so the gate is
-`describe.skipIf(!process.env.STDLIB_BUILD_RACE_REPRO)`, matching that
-idiom's shape. `SVG_PARITY_TIMEOUT_MS`/`SVG_PARITY_CONCURRENCY`
-(`scripts/svg-parity-survey.ts:77-78`) confirmed the `SCREAMING_SNAKE`
-env-var naming convention used for the var name itself.
+### Mechanism (diagnosis, per rules/diagnosis.md)
+**Instrumented, not guessed.** Killed every stray process, confirmed a
+clean process table, then ran a minimal throwaway harness
+(scratchpad `calibrate.mjs`) that spawns writer(N)+reader with the same
+`SIGTERM`-then-await logic, printing elapsed times. With `N = 20` (writer
+alone finishes in ~9s), the reader did not close until **109.9 s** later —
+a **100+ second delay between `SIGTERM` and the process actually exiting**,
+confirmed independently by sending `kill -TERM` from a separate shell at a
+live reader PID and observing zero effect for 2+ minutes (`ps` showed
+`STAT=SN`/`R`, pegged at ~99% CPU the whole time, not stopped/zombie).
 
-The assertion polarity is deliberate: it asserts the ABSENCE of the race
-(reader exits 0, no `FAIL at attempt` in its stdout). That makes the test
-RED on this unfixed tree (the failure IS the evidence) and is expected to
-flip GREEN once T4's build lock lands — this matches T4's own acceptance
-criterion ("Given T1's guarded repro on this tree, then it now PASSES").
+**Origin:** `tests/helpers/stdlib-build-race-reader.ts`'s cache-busting
+technique itself — `import(url)` with a unique `?t=...` query on every
+attempt. Node's ESM loader registers each resolved specifier permanently;
+nothing ever evicts an old entry. As the loop runs, this registry (and the
+retained compiled-module graph behind it) grows without bound, and each
+subsequent `import()` call gets measurably more expensive than the last.
 
-## Interface-contract result
+**Causal chain:** by a few hundred attempts in, a single in-flight
+`import()` call can take many seconds to over a minute to settle. A JS-level
+signal handler (`process.on('SIGTERM', ...)`) can only run when the event
+loop is free to service it — it cannot interrupt a call already in flight.
+So `SIGTERM`, and the cooperative flag it set, sat unactioned for the
+entire duration of whatever `import()` call happened to be running when it
+arrived. This is exactly why smaller `N` (`WRITER_ITERATIONS`) didn't reliably
+help either: the reader's OWN attempt count (not the writer's) governs how
+deep into the "expensive" zone it has gotten by the time it's asked to stop,
+and that depends on wall-clock overlap with the writer, not on `N` alone.
+
+**Ruled out, with evidence:**
+- *Orphaned processes from earlier debugging inflating later measurements*
+  — real and independently confirmed (multiple `ps`-visible leftover
+  `stdlib-build-race-reader.ts` processes from earlier `npx jiti`-spawned
+  runs, still running minutes later, pegging CPU cores) — but killing all
+  of them and re-measuring on a verified-clean process table STILL showed
+  the 100+ second `SIGTERM`-to-close gap, so orphan contamination was a
+  real, compounding problem but not *the* root cause of the timeout itself.
+- *`npx jiti` wrapper eating the signal* — real and independently confirmed
+  separately (see below) but ruled OUT as the cause of THIS symptom, because
+  the same 100+ second gap reproduced identically when spawning the LOCAL
+  `node_modules/.bin/jiti` binary directly (no wrapper chain: confirmed via
+  `node_modules/jiti/lib/jiti-cli.mjs` source, which `await jiti.import(...)`
+  in-process, no fork/exec of a grandchild).
+- *Writer-side slowdown from disk/CPU contention* — considered, but the
+  writer's own measured duration (standalone vs. concurrent-with-reader,
+  clean process table both times) did not change materially; the growth was
+  entirely on the reader's `SIGTERM`-to-close gap, not the writer's own
+  completion time.
+
+### Fix
+Removed the cooperative `SIGTERM`/stop-flag mechanism from
+`tests/helpers/stdlib-build-race-reader.ts` entirely — it has no signal
+handler anymore, just a large `maxAttempts` safety net. The test
+(`tests/integration/stdlib-build-race.test.ts`) now kills the reader with
+**`SIGKILL`** immediately after `writer.done` resolves. `SIGKILL` cannot be
+caught, ignored, or deferred by the target process at any point, so it
+terminates the reader at the OS level regardless of what it is doing
+internally. Whatever the reader had already written to stdout before that
+instant (a `FAIL at attempt N:` line, if the race fired) was already
+captured by the parent's `data` listeners, since `console.log` in the
+`catch` block runs synchronously before the process could receive the kill.
+Measured (`calibrate2.mjs`, clean process table): kill-to-close latency is
+**2-3 milliseconds**, vs. 100+ seconds for the cooperative approach.
+
+A SEPARATE, independently real defect found and fixed in the same pass:
+an `afterEach` hook (`tests/integration/stdlib-build-race.test.ts`) now
+force-kills both children unconditionally, because vitest's per-test
+timeout does not cancel the test's in-flight promise chain — a timed-out
+run previously left both writer and/or reader running as true OS orphans
+(directly observed: reader processes still consuming ~99% CPU 10+ minutes
+after their originating `vitest run` command had already reported failure
+and exited).
+
+### WRITER_ITERATIONS: 300 -> 275, and why not lower
+Per the coordinator's evidence (every historical pre-fix failure -- T0's
+334-1297 reader attempts, mean 700.6; this mission's 888, 1036 -- exposed
+the race with the writer well short of its full 300-iteration budget, floor
+observed around iteration ~250), `WRITER_ITERATIONS` is reduced to 275 (25
+iterations / ~10% margin above that floor). This is NOT independently
+re-verified against the pre-fix builder in this task -- doing so would
+require reverting T2's skip, which needs git writes outside this task's
+scope (per the boundary the coordinator restated). If 275 proves
+insufficient, the orchestrator's own re-verification against the old
+builder will surface it directly.
+
+### Clean-run measurement (current tree, T2's skip in place)
+Isolated calibration (`calibrate2.mjs`, clean process table verified before
+and after, SIGKILL-based reader stop):
+```json
+{
+  "n": 275,
+  "writerDoneAtMs": 122930,
+  "totalMs": 122933,
+  "killToCloseMs": 3,
+  "readerCode": null,
+  "readerSignal": "SIGKILL",
+  "failLine": null
+}
+```
+i.e. **~123 s** for 275 real `buildStdlibPackages()` calls plus a
+negligible (3ms) reader-teardown cost. `RACE_TEST_TIMEOUT_MS` set to
+**180,000 ms** — roughly 46% margin over the measured 123s, not a round
+guess.
+
+### Actual vitest run on the current (T2-fixed) tree
+Command: `STDLIB_BUILD_RACE_REPRO=1 npx vitest run
+tests/integration/stdlib-build-race.test.ts --config vitest.config.ts`
+```
+[build-stdlib-packages] stdlib: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib-aws: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib-tupadr3: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib-all: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib/assets/bootstrap1.13.1: skip -- sprites already match the current source content
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  11:14:49
+   Duration  127.44s (transform 4ms, setup 0ms, import 9ms, tests 126.46s, environment 157ms)
+```
+**PASSES**, as expected: this harness exercises exactly the unchanged-inputs
+case T2's skip closes. This is a correct result, not a failure of this
+task's work -- it is NOT evidence the changed-inputs case (T4's build lock)
+is fixed, since this harness never simulates changed inputs. Verified no
+orphaned processes remained after the run, and
+`packages/stdlib-tupadr3/generated/` stayed complete and valid throughout
+(T2's skip never triggers the destructive `rmSync` on unchanged inputs).
+
+### Interface-contract result
 ```json
 {
   "envVar": "STDLIB_BUILD_RACE_REPRO",
   "testPath": "tests/integration/stdlib-build-race.test.ts",
   "writerPath": "tests/helpers/stdlib-build-race-writer.ts",
   "readerPath": "tests/helpers/stdlib-build-race-reader.ts",
-  "prefixFailureQuoted": "FAIL at attempt 1036: Cannot find module '/Users/scottseely/git/knowvah/plantuml-ts/packages/stdlib-tupadr3/generated/tupadr3.remote.js'"
+  "writerIterations": 275,
+  "raceTestTimeoutMs": 180000,
+  "cleanRunMeasuredMs": 122933,
+  "observedResultOnCurrentTree": "PASS"
 }
 ```
 
-## Verbatim pre-fix failure (this unfixed tree, guard set, NEW committed harness)
-Command: `STDLIB_BUILD_RACE_REPRO=1 npx vitest run
-tests/integration/stdlib-build-race.test.ts --config vitest.config.ts`
+### Default-skipped cost (unchanged tree, no env var)
+Settled load before measuring (`uptime` load1 3.84-4.26, all watch-list
+daemons -- `mds`, `mds_stores`, `suggestd`, `corespotlightd` -- at/near 0).
+`npm test`: `625 passed | 1 skipped (626)` files, `16026 passed | 2 skipped
+| 1 todo (16029)` tests, `Duration 56.87s` (vitest-reported), `time`
+wrapper **57.896s** total -- under the 60.3s ceiling, consistent with
+T0's own 57.687s baseline. (File/test counts are slightly higher than
+earlier rounds because other in-flight mission tasks, T2/T3, have landed
+their own committed test files in the interim -- not this task's doing.)
+Coverage: statements 95.44%, branches 90.47%, functions 96.95%, lines
+96.53% (>= 90/90/90).
 
-```
- ❯ tests/integration/stdlib-build-race.test.ts (1 test | 1 failed) 107291ms
-     × a concurrent buildStdlibPackages() rebuild does not race a tupadr3.remote.js import 107290ms
-
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
-
- FAIL  tests/integration/stdlib-build-race.test.ts > stdlib build race -- inter-process rebuild vs. import (SRE T0/T1) > a concurrent buildStdlibPackages() rebuild does not race a tupadr3.remote.js import
-AssertionError: expected 'FAIL at attempt 1036: Cannot find mod…' not to match /FAIL at attempt \d+: (Cannot find mod…/
-
-- Expected:
-/FAIL at attempt \d+: (Cannot find module|ENOENT)/
-
-+ Received:
-"FAIL at attempt 1036: Cannot find module '/Users/scottseely/git/knowvah/plantuml-ts/packages/stdlib-tupadr3/generated/tupadr3.remote.js'
-Require stack:
-- /Users/scottseely/git/knowvah/plantuml-ts/tests/helpers/stdlib-build-race-reader.ts
-"
-
- ❯ tests/integration/stdlib-build-race.test.ts:93:41
-
- Test Files  1 failed (1)
-      Tests  1 failed (1)
-   Duration  108.19s
-```
-Matches T0's signature exactly (`Cannot find module '.../tupadr3.remote.js'`),
-attempt 1036 this run (T0's mean was 700.6 across 5 runs — same order of
-magnitude, same failure mode). The require-stack line now names
-`tests/helpers/stdlib-build-race-reader.ts`, confirming the repointing
-actually took effect rather than silently still resolving scratch.
-`packages/stdlib-tupadr3/generated/` was confirmed complete and non-empty
-(`tupadr3.remote.js`, 6857 lines) after the run.
-
-## Default-skipped cost (unchanged tree, no env var)
-Two `npm test` measurements were taken across this task; both are reported
-because the second run's machine load did not settle as cleanly.
-
-**Run A (first pass, same skip code path — the describe block never
-touches `WRITER_SCRIPT`/`READER_SCRIPT`, so this measurement is unaffected
-by today's harness relocation):** load settled first (`mds` 1.1%,
-`mds_stores` 0.9%, `suggestd` 0.3%, `corespotlightd` 0%, load1 dropped from
-a transient 7.2 spike). `npm test`: 624 files passed | 1 skipped, 16006
-tests passed | 2 skipped | 1 todo, `Duration 57.05s` / `time` wrapper
-57.204s vs. T0's own 57.687s baseline — within noise, under the 60.3s
-ceiling.
-
-**Run B (re-verification after this correction):** the two race-repro runs
-above rewrote `packages/stdlib-tupadr3/generated/` several hundred times
-each in quick succession; macOS `corespotlightd`/`mds_stores` visibly
-reacted (`corespotlightd` sustained 90-280%, `mds_stores` briefly 70%)
-during and after, and did not settle to baseline within ~2 minutes of
-polling (`until` loop, 20 x 10s checks) — this is a self-induced Spotlight
-re-index of the churned directory, not a pre-existing confound. Ran `npm
-test` anyway rather than block further: `uptime` load1 5.44 (5m/15m still
-elevated at 9.00/10.73 from the churn), `corespotlightd` 95.5% at launch.
-Result: 624 passed | 1 skipped files, 16006 passed | 2 skipped | 1 todo
-tests, `Duration 58.45s`, `time` wrapper **59.448s** — still under the
-60.3s ceiling but only ~0.85s of headroom, visibly inflated versus Run A's
-57.2s under the same skip path. Coverage both runs: statements 95.44%,
-branches 90.47%, functions 96.95%, lines 96.53% (>= 90/90/90).
-
-Mechanism for the delta: the default-skip code path itself is provably
-identical between runs (the failing test's body never executes under
-`describe.skipIf`, and the guard predicate doesn't depend on where
-`WRITER_SCRIPT`/`READER_SCRIPT` point); the ~2.2s slowdown is CPU
-contention from `corespotlightd`/`mds_stores`, not a regression the new
-committed files introduced. Run A is the trustworthy measurement of "what
-does the default-skipped test cost"; Run B corroborates it stays under
-ceiling even under self-induced indexing load.
-
-## Quality gates
-- `npm test`: exit 0 both runs (Run A 57.05s/57.204s, settled load1 ~7.2
-  post-spike-settle, watch-list daemons ~0; Run B 58.45s/59.448s, load1
-  5.44 but `corespotlightd` 95.5%, unsettled from this task's own file
-  churn — see above).
+### Quality gates
+- `npm test`: exit 0, 57.896s at settled load (above) -- under 60.3s ceiling.
 - `npm run typecheck`: `tsc --noEmit && tsc --project tsconfig.node.json
-  --noEmit` — exit 0, no errors (re-run after the harness relocation).
+  --noEmit` -- exit 0, no errors.
 - `npm run lint`: `eslint --no-error-on-unmatched-pattern src tests demo`
-  scoped to the three changed files plus a full `src tests demo` pass —
-  exit 0, no warnings/errors.
-- `npm run build`: exit 0. Exactly the same 3 pre-existing TS2591/TS2503
-  notes in `src/core/include-resolver-node.ts` T0 documented — not a new
-  failure.
-- `git diff --name-only -- src/`: empty (re-checked after the correction).
-- `git status --short`: `tests/helpers/stdlib-build-race-writer.ts`,
-  `tests/helpers/stdlib-build-race-reader.ts`,
-  `tests/integration/stdlib-build-race.test.ts`, `.agent-notes/sre-T1.md`
-  (this task's write-set) plus pre-existing untouched
-  `scripts_scratch/` and an orchestrator-owned
-  `plans/stdlib-build-race/decision-journal.md` modification not made by
-  this task.
+  -- exit 0, no warnings/errors.
+- `npm run build`: exit 0. Same 3 pre-existing TS2591/TS2503 notes in
+  `src/core/include-resolver-node.ts` -- not new.
+- `git diff --name-only -- src/`: empty.
+- This task's write-set (`tests/integration/stdlib-build-race.test.ts`,
+  `tests/helpers/stdlib-build-race-writer.ts`,
+  `tests/helpers/stdlib-build-race-reader.ts`, this note) are the only
+  files this round touched; `git status --short` also shows other
+  in-flight tasks' own committed/uncommitted changes (T2's
+  `scripts/build-stdlib-packages.ts`, `tests/helpers/
+  build-stdlib-globalsetup.ts`, `tests/unit/build-stdlib-packages.test.ts`,
+  their own `.agent-notes/sre-T2.md`/`sre-T3.md`), none of which this task
+  created or modified.
 
-## Scope note
-No `src/` changes, no fix. `scripts_scratch/T0/` untouched and NOT
-deleted — per instruction, the orchestrator removes it, not this task.
-Read-only git only — no commits, no staging, no branch ops.
+### Scope note
+No `src/` changes. Did not touch `scripts/build-stdlib-packages.ts` or
+`tests/unit/build-stdlib-packages.test.ts` (owned by another task). Did not
+verify pre-fix exposure directly (would require reverting T2's skip via a
+git write outside this task's scope) -- the orchestrator re-verifies the
+red state against the old builder separately. Read-only git only -- no
+commits, no staging, no branch ops. Scratchpad calibration scripts
+(`calibrate.mjs`, `calibrate2.mjs`) lived only under
+`/private/tmp/claude-501/.../scratchpad/`, never in the repo.

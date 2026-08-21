@@ -50,7 +50,7 @@ SI33's agents demonstrably ran `npm test` concurrently during that session.
 |---|---|---|---|
 | [0](batch-0/overview.md) | Reproduce deterministically — **PIVOT GATE** | T0 | [x] |
 | [1](batch-1/overview.md) | Commit the repro, env-guarded | T1 | [x] |
-| [2](batch-2/overview.md) | Up-to-date skip · globalSetup doc (PARALLEL) | T2, T3 | [ ] |
+| [2](batch-2/overview.md) | Up-to-date skip · globalSetup doc (PARALLEL) | T2, T3 | [x] |
 | [3](batch-3/overview.md) | Cross-process lock with stale recovery | T4 | [ ] |
 | [4](batch-4/overview.md) | Verify, document the residual hole, close out | T5 | [ ] |
 
