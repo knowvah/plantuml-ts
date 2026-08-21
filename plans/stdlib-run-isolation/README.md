@@ -53,7 +53,7 @@ Both facts must be verified independently in T0. Do not inherit them.
 | Batch | What | Tasks | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | Reproduce the residual · census the readers — **PIVOT GATE** | T0, T1 | [x] |
-| [1](batch-1/overview.md) | Options ADR with measured cost — **STOPS FOR THE USER** | T2 | [ ] |
+| [1](batch-1/overview.md) | Options ADR with measured cost — **STOPS FOR THE USER** | T2 | [x] |
 | [2](batch-2/overview.md) | Implement the approved option | T3, T4 | [ ] |
 | [3](batch-3/overview.md) | Verify and close out | T5 | [ ] |
 
