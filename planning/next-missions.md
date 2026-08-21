@@ -408,15 +408,56 @@ with dead-PID and corrupt-lock stale recovery, re-checked *inside* the
 lock so the second holder skips instead of deleting (D3). Guarded repro
 5/5 green this session (Durations 127.49/123.38/124.61/124.64/126.41s);
 concurrent-builder and stale-recovery evidence in the mission close-out.
-**Known remaining limit:** if a second run's source genuinely changes
-mid-run, it still rebuilds (and `rmSync`s) once it holds the lock, while
-the first run's workers may still be importing — the per-run isolated
-output directory that would close this fully was explicitly declined by
-the user (packaging blast radius on `generated/` across every stdlib
-package's `prepack`/imports). Should now be far rarer than the original
-1-in-7 (needs concurrency AND a straddling source change) but is not
-structurally impossible; symptom would be the same `Cannot find module`
-signature or a mismatched mid-rewrite import.
+**Known remaining limit at the time — now CLOSED, see below:** if a second
+run's source genuinely changes mid-run, it still rebuilds (and `rmSync`s)
+once it holds the lock, while the first run's workers may still be
+importing — the per-run isolated output directory that would close this
+fully was explicitly declined by the user, citing two fixed-path imports
+and packaging blast radius on `generated/` across every stdlib package's
+`prepack`/imports. Should now be far rarer than the original 1-in-7 (needs
+concurrency AND a straddling source change) but is not structurally
+impossible; symptom would be the same `Cannot find module` signature or a
+mismatched mid-rewrite import.
+
+**CLOSED 2026-08-21** (`stdlib-run-isolation` mission,
+`plans/stdlib-run-isolation/README.md#close-out-2026-08-21`): the "two
+import sites" figure above was an under-count — an independent census
+found **21 total consumers / 8 concurrent readers** of
+`packages/<pkg>/generated/`, and `npm pack --dry-run`'s real-directory
+resolution means the tree could only ever be *supplemented*, never
+relocated, regardless of the count. Re-opened with that measurement, the
+user chose **option D** — extend the existing build lock to cover all 8
+in-worker readers (including the 2 `npm pack` tests A/B could not reach) —
+over the ADR's own recommendation of a lock-scoped snapshot copy. Verified
+end to end: T0's synthetic harness re-run showed `FAIL at attempt 2897`
+unlocked vs. 500/500 clean with the lock held (17 measured lock waits);
+two real concurrent full `npm test` runs straddling one genuine
+`stdlib-tupadr3` rebuild produced zero `generated/`-tree failures in
+either. Cost: suite ~7% slower, ~37 per-test timeouts raised to 120s (no
+assertion weakened). No `src/` touched, no package publish surface
+changed (`git diff --stat main..HEAD -- packages/` empty).
+
+**Separate, still-open concurrency defect found while verifying the above
+(2026-08-21, observed once, not investigated).** Closing the `generated/`
+residual does NOT make two concurrent `npm test` runs safe. A first
+end-to-end trial, with both runs sharing the default `coverage/` output
+directory, crashed Run A during coverage-report generation with:
+
+```
+Error: ENOENT: no such file or directory, open '.../coverage/.tmp/coverage-103.json'
+```
+
+Zero test failures were logged before that point, and zero
+`generated/`-tree errors on either side — this is the coverage reporter,
+not the stdlib tree. Two concurrent `vitest run --coverage` invocations
+share one `coverage/.tmp/` scratch directory, so one process's cleanup can
+delete a shard the other is still writing. Re-running with an isolated
+`--coverage.reportsDirectory` per run made both runs green, which is
+consistent with that mechanism but does not prove it — nobody has
+root-caused this, and it is a *different* shared mutable path from the one
+`stdlib-run-isolation` closed. Anyone who needs genuinely concurrent full
+runs should isolate the coverage directory, and should expect this to want
+its own diagnosis before it is called fixed.
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
 
