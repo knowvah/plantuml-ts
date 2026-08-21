@@ -395,9 +395,28 @@ lines). Their stack traces print 20 frames instead of 38 — jiti resolves the
 upper frames differently once the import graph changes — but the underlying
 warning fires 4 times in both.
 
-Still open: the `stdlib-remote-e2e.test.ts` 1-in-7 intermittent stays OPEN,
-undiagnosed, carried forward per `rules/diagnosis.md`, not written off as a
-flake.
+**CLOSED 2026-08-21** (`stdlib-build-race` mission,
+`plans/stdlib-build-race/README.md#close-out-2026-08-21`): the
+`stdlib-remote-e2e.test.ts` 1-in-7 intermittent was diagnosed and fixed.
+Mechanism: `freshGeneratedDir` (`scripts/build-stdlib-packages.ts:42-47`)
+unconditionally `rmSync`s a fixed, repo-absolute, gitignored path with no
+cross-process coordination; a second concurrently-running `vitest`
+process's `globalSetup` could `rmSync`+rewrite that same path while the
+first process's worker was mid-`import()` of it. Fixed by a content-hashed
+up-to-date skip (never a count or mtime, D4) plus a cross-process lock
+with dead-PID and corrupt-lock stale recovery, re-checked *inside* the
+lock so the second holder skips instead of deleting (D3). Guarded repro
+5/5 green this session (Durations 127.49/123.38/124.61/124.64/126.41s);
+concurrent-builder and stale-recovery evidence in the mission close-out.
+**Known remaining limit:** if a second run's source genuinely changes
+mid-run, it still rebuilds (and `rmSync`s) once it holds the lock, while
+the first run's workers may still be importing — the per-run isolated
+output directory that would close this fully was explicitly declined by
+the user (packaging blast radius on `generated/` across every stdlib
+package's `prepack`/imports). Should now be far rarer than the original
+1-in-7 (needs concurrency AND a straddling source change) but is not
+structurally impossible; symptom would be the same `Cannot find module`
+signature or a mismatched mid-rewrite import.
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
 

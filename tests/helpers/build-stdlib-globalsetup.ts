@@ -18,9 +18,30 @@
  * surfaced as a suite that passed roughly every other run (si11a T8).
  *
  * Running the build in `globalSetup` fixes the class rather than the
- * instance: `globalSetup` completes before any worker spawns, so no test ever
- * observes a half-rebuilt tree, and the ~29 MB of generated output is written
- * once per suite instead of three times.
+ * instance: `globalSetup` completes before any worker spawns WITHIN ONE
+ * VITEST PROCESS, so no test in that process ever observes a half-rebuilt
+ * tree, and the ~29 MB of generated output is written once per suite instead
+ * of three times.
+ *
+ * That guarantee does NOT extend across two concurrently-running
+ * `npm test`/vitest invocations sharing this same on-disk
+ * `packages/*\/generated/` tree -- it is scoped to a single process, full
+ * stop. `freshGeneratedDir` (`../../scripts/build-stdlib-packages.ts:42-47`)
+ * unconditionally `rmSync`s a fixed, repo-absolute, gitignored path with no
+ * cross-process coordination, so a second process's `rmSync`-to-rewrite
+ * window can overlap a first process's in-flight `import()`/read, producing
+ * the same `Cannot find module '.../tupadr3.remote.js'` signature as the
+ * intra-process race below -- proven, not merely suspected: reproduced 5/5
+ * with a two-process harness against the real builder and 5/5 with a
+ * single-process `worker_threads` pin. See `.agent-notes/sre-T0.md` for the
+ * full mechanism, origin, and repro. This is exactly the ambiguity that led
+ * an earlier task (SI33) to scope its search to intra-process writers,
+ * correctly rule them out, and stop with the real cause unfound -- the
+ * reason this scope note exists at all. This mission closes the
+ * cross-process gap with a content-derived up-to-date skip plus a
+ * cross-process build lock (see `plans/stdlib-build-race/decisions.md` D3);
+ * do not read this file's opening claim as "no half-rebuilt tree is ever
+ * observed, full stop."
  *
  * `packages/{stdlib-aws,stdlib-tupadr3}/assets/`: the SAME failure class hit
  * this sibling tree (SI12 T8). SI12 ADR-2/ADR-5 stopped generating an eager
