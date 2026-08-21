@@ -374,12 +374,24 @@ unitless-fractional-`width` normalization D1 names) are recorded, not
 repaired. Full scoring, all numbers re-measured at close-out:
 `plans/sequence-oracle-harness/README.md` "Close-out (2026-08-20)".
 
-**Follow-ons, not to be lost**: export `render-fixture.ts#fixtureIncludeStore`
-once — it is duplicated in three surfaces (the ratchet, the cross-type census
-script, the cause census) and that exact duplication already caused one
-mid-mission measurement disagreement; the `stdlib-remote-e2e.test.ts` 1-in-7
-intermittent stays OPEN, undiagnosed, carried forward per `rules/
-diagnosis.md`, not written off as a flake.
+**Follow-ons.** ~~export `render-fixture.ts#fixtureIncludeStore` once~~ —
+**DONE 2026-08-21, `62e6c1f7`.** Extracted to
+`tests/oracle/svg-conformance/fixture-include-store.ts`; all four surfaces
+(render-fixture, the cross-type census script, the diff-baseline ratchet, the
+cause census) now import it. The copies had already drifted two ways — the
+ratchet had no store at all, and the census's had gone eager while the rest
+deferred the ~888 ms `assets/stdlib/` walk. Both properties are now pinned by
+tests. No artifact moved: `diff-baseline.json` untouched, `diff-census.json`
+regenerates to the same sha256 `9950e499`.
+
+Deliberately NOT swept up: `render-manifest.ts`, `shape-match-report.ts` and
+`note-order-report.ts` build the same shape eagerly. They are not conformance
+surfaces, do not cross-check each other, and `render-manifest.ts` feeds a
+tracked gate.
+
+Still open: the `stdlib-remote-e2e.test.ts` 1-in-7 intermittent stays OPEN,
+undiagnosed, carried forward per `rules/diagnosis.md`, not written off as a
+flake.
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
 
