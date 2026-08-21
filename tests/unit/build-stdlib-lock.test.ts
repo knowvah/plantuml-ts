@@ -376,6 +376,56 @@ describe('acquireBuildLock -- stale recovery', () => {
 });
 
 // ---------------------------------------------------------------------------
+// stdlib-run-isolation T3, hazard 1: `release()` must be ownership-safe.
+// `isStale` (above) deliberately reclaims a lock older than `staleAgeMs`
+// even from a still-live holder -- correct for a builder, but option D
+// repurposes this lock for readers, whose critical section can outlive
+// that window. Before this fix, `release()` was an unconditional
+// `rmSync(opts.lockPath)`: a holder reclaimed out from under itself would,
+// on release, delete whatever lock the reclaimer had since created --
+// silently stealing mutual exclusion a second time. See
+// `planning/adr/ADR-003-stdlib-run-isolation.md` and
+// `plans/stdlib-run-isolation/decision-journal.md` (hazard 1 entry).
+// ---------------------------------------------------------------------------
+
+describe('acquireBuildLock -- ownership-safe release (hazard 1)', () => {
+  it('does not delete the lock file once it has been reclaimed by a different holder', () => {
+    const dir = makeTempDir('build-stdlib-lock-ownership-');
+    const lockPath = join(dir, 'ownership.lock');
+
+    const release = acquireBuildLock(REPO_ROOT, { lockPath });
+    expect(existsSync(lockPath)).toBe(true);
+
+    // Simulate hazard 1's real trigger: this lock aged past `staleAgeMs`
+    // while still notionally "held" by us, a different process's
+    // `reclaimIfStale` deleted it and created its OWN lock file at the
+    // same path. That file now names a different pid/acquiredAt pair --
+    // ownership has genuinely moved.
+    const reclaimerContent = JSON.stringify({ pid: 999_998, acquiredAt: Date.now() });
+    writeFileSync(lockPath, reclaimerContent, 'utf8');
+
+    release();
+
+    // Pre-fix, `release()` was `rmSync(opts.lockPath)` unconditionally and
+    // would delete this regardless of who wrote it. An ownership-safe
+    // release must recognise the file no longer names its own acquisition
+    // and leave the reclaimer's lock untouched.
+    expect(existsSync(lockPath)).toBe(true);
+    expect(readFileSync(lockPath, 'utf8')).toBe(reclaimerContent);
+  });
+
+  it('still deletes the lock file when it still names this exact acquisition', () => {
+    const dir = makeTempDir('build-stdlib-lock-ownership-self-');
+    const lockPath = join(dir, 'self.lock');
+
+    const release = acquireBuildLock(REPO_ROOT, { lockPath });
+    expect(existsSync(lockPath)).toBe(true);
+    release();
+    expect(existsSync(lockPath)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // The actual D3 composition: second builder waits, re-checks inside the
 // lock, and performs no rmSync -- proven on the filesystem, not a log line.
 // ---------------------------------------------------------------------------
