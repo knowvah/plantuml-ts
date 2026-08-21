@@ -384,10 +384,16 @@ deferred the ~888 ms `assets/stdlib/` walk. Both properties are now pinned by
 tests. No artifact moved: `diff-baseline.json` untouched, `diff-census.json`
 regenerates to the same sha256 `9950e499`.
 
-Deliberately NOT swept up: `render-manifest.ts`, `shape-match-report.ts` and
-`note-order-report.ts` build the same shape eagerly. They are not conformance
-surfaces, do not cross-check each other, and `render-manifest.ts` feeds a
-tracked gate.
+Then folded in too (`126d8bc8`): `render-manifest.ts`,
+`shape-match-report.ts` and `note-order-report.ts` built the same shape
+eagerly under the same local name. **Seven consumers now share one seam and
+no local copy remains anywhere.** Verified rather than assumed, since two of
+those scripts have no gate that would catch a silent change: `render-manifest`
+regenerates all 3158 entries byte-identically (`manifest-diff.py`: 0
+unexpected), and the other two produce identical report data (815 / 1089
+lines). Their stack traces print 20 frames instead of 38 — jiti resolves the
+upper frames differently once the import graph changes — but the underlying
+warning fires 4 times in both.
 
 Still open: the `stdlib-remote-e2e.test.ts` 1-in-7 intermittent stays OPEN,
 undiagnosed, carried forward per `rules/diagnosis.md`, not written off as a
