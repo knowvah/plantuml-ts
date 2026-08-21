@@ -470,13 +470,38 @@ Error: Timed out after 30000ms waiting for the stdlib build lock at
 ```
 
 thrown from `acquireBuildLock` (`scripts/build-stdlib-packages/build-lock.ts:315`).
-It failed real tests in 2 of 6 shared runs and 1 of 6 isolated runs. Option D
-placed 8 reader files under that lock with `maxWaitMs = 30_000`; two full
-suites contending exceed that budget, turning the disclosed "up to 30 s tail
-latency" into an outright failure. **Deliberately not fixed unilaterally** —
-raising `maxWaitMs` buys reliability at the cost of masking genuine deadlock,
-and scoping the lock differently is a design change. Needs an explicit
-decision. Until then, two concurrent full suites remain unreliable even with
+It failed real tests in 2 of 6 shared runs and 1 of 6 isolated runs.
+
+**Root-caused by measurement 2026-08-21** (full numbers in
+`.agent-notes/stdlib-lock-budget.md`). Readers acquire the lock in the same
+**exclusive** mode a builder does, but a reader only needs to exclude a
+*builder* — it has no conflict with another reader. Instrumenting
+`acquireBuildLock` gives:
+
+| | Single run | Two concurrent suites |
+|---|---|---|
+| Acquisitions | 288 | 573 |
+| Total holding | 12.4 s | 35.9 s |
+| Total **waiting** | **54.7 s** | **229.6 s** |
+| Max wait | 9.5 s | **29.7 s** (budget is 30 s) |
+
+That is **229.6 s of waiting to protect 35.9 s of holding**, almost all of it
+reader-versus-reader contention with no safety value, and a max wait grazing
+the 30 s limit on every concurrent run — which is why failures are
+intermittent rather than deterministic. Note also that a single run makes
+**288** acquisitions, not the 8 the conversion implies: the wrapped calls sit
+inside parametrized cases.
+
+**Raising `maxWaitMs` is the wrong fix** — doubling the suites roughly
+quadrupled total wait, so a bigger budget buys one more concurrent run while
+doubling how long a real deadlock takes to surface.
+
+**Recommended: a shared/exclusive (readers-writer) lock.** Readers hold in
+shared mode concurrently; the builder takes exclusive mode, draining readers
+and blocking new ones. Preserves exactly the safety property option D bought
+while removing the reader-versus-reader serialisation. This is a new lock
+mode plus tests plus call-site conversion — mission-sized, not a drive-by
+edit. Until it lands, two concurrent full suites remain unreliable even with
 `COVERAGE_ISOLATE=1`.
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
