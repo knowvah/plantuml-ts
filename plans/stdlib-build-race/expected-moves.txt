@@ -1,0 +1,14 @@
+# expected-moves.txt — stdlib-build-race
+#
+# Fixtures allowed to move `render-manifest`'s SHA-256 between batches
+# (`manifest-diff.py`). One bare slug per line; `#` comments ignored.
+#
+# THIS MISSION CHANGES NO `src/` AND NO FIXTURE. The list is intentionally
+# EMPTY: every batch must report "0 unexpected". Any movement at all means
+# something rendered differently, which this mission has no business causing.
+#
+#   Batch 0 (T0) — none.
+#   Batch 1 (T1) — none.
+#   Batch 2 (T2, T3) — none.
+#   Batch 3 (T4) — none.
+#   Batch 4 (T5) — none.
