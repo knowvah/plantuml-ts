@@ -2,9 +2,32 @@
 
 ## Status
 
-**Proposed** — awaiting the user's decision. See D4 below: the option this
-ADR most obviously points at was declined once already, and no agent may
-re-adopt it on its own authority.
+**Accepted 2026-08-21 — option D**, by the user, at the mission's stop-3
+decision gate.
+
+The user chose **D** (extend the existing build lock to cover readers) over
+this ADR's recommendation of **A**, on the grounds that D closes the two
+`npm pack` tests, which A and B structurally cannot reach. The trades D
+carries — up to 30 s of reader-side tail latency under contention, and a new
+coupling from test files to `build-lock.ts` internals — were disclosed in the
+options table below before the choice was made, and are accepted.
+
+The recommendation of A is left standing below exactly as written, rather
+than rewritten to match the decision. A future reader should be able to see
+what was recommended, what was chosen, and that the two differed.
+
+Two corrections were made after acceptance and are recorded in
+`plans/stdlib-run-isolation/decision-journal.md`:
+
+- **D's file count is 8, not the 10 stated in the options table.** The table
+  counted "the 8 concurrent-reader tests **and** the 2 pack tests"; the pack
+  tests are census rows #11 and #15, already inside the 8.
+- **Two hazards D inherits from a lock designed for a builder, not a
+  reader.** `isStale` reclaims a live holder's lock after
+  `staleAgeMs` = 60 s while `release()` is an unconditional `rmSync`, so a
+  long-held reader lock can be stolen *and* then delete a stranger's lock;
+  and acquisition uses a synchronous sleep, which blocks a vitest worker's
+  event loop for up to `maxWaitMs` = 30 s. Both are pinned into T3's brief.
 
 ## Context
 
