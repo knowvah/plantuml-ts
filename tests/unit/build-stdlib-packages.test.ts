@@ -57,6 +57,7 @@ import { PACKAGE_SPECS } from '../../scripts/build-stdlib-packages/package-specs
 import type { SpriteSplitBundleSpec } from '../../scripts/build-stdlib-packages/package-specs.js';
 import type { PackageSpec } from '../../scripts/build-stdlib-packages/types.js';
 import { splitSpriteBundle } from '../../scripts/split-sprite-bundle/split.js';
+import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const REAL_ASSETS_STDLIB_DIR = join(REPO_ROOT, 'assets', 'stdlib');
@@ -317,8 +318,14 @@ describe('acceptance 4: refactor emits byte-identical content to the pre-existin
       const generatedDir = join(REAL_PACKAGES_DIR, spec.packageDir, 'generated');
       const outputs = computePackageOutputs(spec, REAL_ASSETS_STDLIB_DIR);
 
-      expect(isGeneratedDirUpToDate(generatedDir, outputs)).toBe(true);
+      // stdlib-run-isolation T4: the only read against the REAL, shared
+      // `packages/*/generated/` tree in this file -- every other fixture
+      // above uses an isolated `mkdtempSync` scratch dir and is left alone.
+      const upToDate = withStdlibBuildLock(() => isGeneratedDirUpToDate(generatedDir, outputs));
+
+      expect(upToDate).toBe(true);
     },
+    120_000,
   );
 });
 

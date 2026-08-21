@@ -27,6 +27,8 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
+
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
@@ -59,51 +61,78 @@ function importSpecifiers(dtsSource: string): string[] {
   return [...dtsSource.matchAll(/ from '([^']+)';/g)].map((m) => m[1] as string);
 }
 
+/** Plain -- no lock of its own. Always invoked from inside a
+ * `withStdlibBuildLock` critical section (directly, or via one of the two
+ * `collect*` helpers below) so its `readdirSync` shares the SAME lock hold
+ * as the file reads that follow it; acquiring a second, nested lock from
+ * inside an already-held one would deadlock the single-holder lock (T3's
+ * `acquireBuildLock` is not reentrant), and acquiring a second SEPARATE one
+ * after releasing this one would reopen exactly the torn-read window
+ * stdlib-run-isolation option D exists to close (a rebuild could run
+ * between this listing and a later read of a name it named). */
 function generatedDtsFiles(packageDir: string): string[] {
   return readdirSync(join(PACKAGES_DIR, packageDir, 'generated'))
     .filter((name) => name.endsWith('.d.ts'))
     .sort();
 }
 
+/** stdlib-run-isolation T4: listing + every file read for one package as
+ * ONE critical section -- see `generatedDtsFiles`'s doc comment for why a
+ * shared per-package lock hold, not one lock per file, is the correct
+ * (not just narrower) shape here. */
+function collectUndeclaredSpecifiers(packageDir: string, declared: readonly string[]): string[] {
+  const undeclared: string[] = [];
+  for (const fileName of generatedDtsFiles(packageDir)) {
+    const source = readFileSync(join(PACKAGES_DIR, packageDir, 'generated', fileName), 'utf8');
+
+    // Relative specifiers are the index re-exports pointing at sibling
+    // modules -- only BARE specifiers resolve through node_modules and can
+    // therefore name a package this manifest never declared.
+    for (const specifier of importSpecifiers(source).filter((spec) => !spec.startsWith('.'))) {
+      if (!declared.includes(specifier)) {
+        undeclared.push(`${fileName}: '${specifier}' not in [${declared.join(', ')}]`);
+      }
+    }
+  }
+  return undeclared;
+}
+
+/** stdlib-run-isolation T4: same shape as {@link collectUndeclaredSpecifiers},
+ * scanning every `GENERATED_PACKAGES` package inside one lock hold. */
+function collectUnscopedSpecifierOffenders(): string[] {
+  const offenders: string[] = [];
+  for (const packageDir of GENERATED_PACKAGES) {
+    for (const fileName of generatedDtsFiles(packageDir)) {
+      const source = readFileSync(join(PACKAGES_DIR, packageDir, 'generated', fileName), 'utf8');
+      if (source.includes(`from 'plantuml-ts'`)) {
+        offenders.push(`${packageDir}/${fileName}`);
+      }
+    }
+  }
+  return offenders;
+}
+
 describe('generated .d.ts files import from the declared peer dependency', () => {
   it.each(GENERATED_PACKAGES)('%s emits at least one .d.ts to check', (packageDir) => {
-    expect(generatedDtsFiles(packageDir).length).toBeGreaterThan(0);
-  });
+    const count = withStdlibBuildLock(() => generatedDtsFiles(packageDir).length);
+    expect(count).toBeGreaterThan(0);
+  },
+    120_000);
 
   it.each(GENERATED_PACKAGES)('%s: every bare specifier is a declared dependency', (packageDir) => {
     const declared = declaredPackageNames(packageDir);
     expect(declared).toContain('@knowvah/plantuml-ts');
 
-    const undeclared: string[] = [];
-
-    for (const fileName of generatedDtsFiles(packageDir)) {
-      const source = readFileSync(join(PACKAGES_DIR, packageDir, 'generated', fileName), 'utf8');
-
-      // Relative specifiers are the index re-exports pointing at sibling
-      // modules -- only BARE specifiers resolve through node_modules and can
-      // therefore name a package this manifest never declared.
-      for (const specifier of importSpecifiers(source).filter((spec) => !spec.startsWith('.'))) {
-        if (!declared.includes(specifier)) {
-          undeclared.push(`${fileName}: '${specifier}' not in [${declared.join(', ')}]`);
-        }
-      }
-    }
+    const undeclared = withStdlibBuildLock(() => collectUndeclaredSpecifiers(packageDir, declared));
 
     expect(undeclared).toEqual([]);
-  });
+  },
+    120_000);
 
   it('the unscoped pre-rename specifier appears in no generated .d.ts', () => {
-    const offenders: string[] = [];
-
-    for (const packageDir of GENERATED_PACKAGES) {
-      for (const fileName of generatedDtsFiles(packageDir)) {
-        const source = readFileSync(join(PACKAGES_DIR, packageDir, 'generated', fileName), 'utf8');
-        if (source.includes(`from 'plantuml-ts'`)) {
-          offenders.push(`${packageDir}/${fileName}`);
-        }
-      }
-    }
+    const offenders = withStdlibBuildLock(() => collectUnscopedSpecifierOffenders());
 
     expect(offenders).toEqual([]);
-  });
+  },
+    120_000);
 });

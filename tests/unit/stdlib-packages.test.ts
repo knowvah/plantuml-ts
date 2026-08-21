@@ -33,6 +33,7 @@ import { FormulaMeasurer } from '../../src/core/measurer.js';
 import { MapIncludeStore } from '../../src/core/tim/IncludeStore.js';
 import { stdlibStore, withStdlib, type BundleData } from '../../src/core/tim/StdlibStore.js';
 import { renderSync } from '../../src/index.js';
+import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const ASSETS_STDLIB_DIR = join(REPO_ROOT, 'assets', 'stdlib');
@@ -51,9 +52,13 @@ function sha256Hex(bytes: Buffer): string {
   return createHash('sha256').update(bytes).digest('hex');
 }
 
+/** stdlib-run-isolation T4: held for exactly this one dynamic `import()` --
+ * the narrowest span that touches `packages/<pkg>/generated/`. */
 async function importGenerated<T>(packageDir: string, moduleFile: string): Promise<T> {
-  const path = join(PACKAGES_DIR, packageDir, 'generated', moduleFile);
-  return (await import(pathToFileURL(path).href)) as T;
+  return withStdlibBuildLock(() => {
+    const path = join(PACKAGES_DIR, packageDir, 'generated', moduleFile);
+    return import(pathToFileURL(path).href) as Promise<T>;
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +75,14 @@ let archimate: BundleData;
 // test files reading the same tree, because both builds `rmSync` their
 // target first and vitest runs files in parallel workers (si11a T8 for
 // `generated/`; SI12 T8 for `assets/`).
+//
+// stdlib-run-isolation T4: timeout raised from 30_000 to 120_000 -- the two
+// `importGenerated` calls below each hold the real cross-process build lock
+// (`maxWaitMs` = 30_000), and under full-suite contention (many of this
+// mission's 8 converted files acquiring the SAME lock across parallel
+// vitest workers) a single 30s budget for BOTH sequential acquisitions
+// combined was measured too tight; 120_000 matches this file's own existing
+// `npm pack` tests' headroom below.
 beforeAll(async () => {
   const stdlibC4 = await importGenerated<{ c4: BundleData }>('stdlib', 'c4.js');
   c4 = stdlibC4.c4;
@@ -80,7 +93,7 @@ beforeAll(async () => {
   // (SI12 ADR-2/ADR-5) -- their VERBATIM round-trip and alias-resolution
   // cases below read the shipped `packages/*/assets/` copy instead, already
   // populated by globalSetup above.
-}, 30_000);
+}, 120_000);
 
 // ---------------------------------------------------------------------------
 // 1. VERBATIM round-trip: runtime string bytes === disk bytes === manifest sha256.
@@ -331,17 +344,31 @@ interface PackResult {
   files: readonly { path: string }[];
 }
 
+/**
+ * stdlib-run-isolation T4: this file's own `npm pack` call, held for
+ * exactly the `execFileSync` -- the narrowest span D3's hard case allows.
+ *
+ * Not one of T1's census-counted "2 pack tests"
+ * (`sprite-package-files.test.ts:81`, `stdlib-package-files.test.ts:57`):
+ * this file packs `stdlib`/`stdlib-all` directly (see the "npm pack
+ * --dry-run" describe block below), a genuine third `npm pack`-against-the-
+ * real-package-dir call site the census missed. Converted anyway because
+ * this file is already in T4's write-set and an unwrapped call here would
+ * defeat option D's stated goal for exactly the reason D3 exists.
+ */
 function npmPackDryRun(packageDir: string): PackResult {
-  const stdout = execFileSync('npm', ['pack', '--dry-run', '--json'], {
-    cwd: join(PACKAGES_DIR, packageDir),
-    encoding: 'utf8',
+  return withStdlibBuildLock(() => {
+    const stdout = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+      cwd: join(PACKAGES_DIR, packageDir),
+      encoding: 'utf8',
+    });
+    const parsed = JSON.parse(stdout) as PackResult[];
+    const result = parsed[0];
+    if (result === undefined) {
+      throw new Error(`npm pack --dry-run produced no output for packages/${packageDir}`);
+    }
+    return result;
   });
-  const parsed = JSON.parse(stdout) as PackResult[];
-  const result = parsed[0];
-  if (result === undefined) {
-    throw new Error(`npm pack --dry-run produced no output for packages/${packageDir}`);
-  }
-  return result;
 }
 
 const BYTES_PER_MB = 1024 * 1024;

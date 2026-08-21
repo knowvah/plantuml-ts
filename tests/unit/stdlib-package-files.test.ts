@@ -22,6 +22,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
+
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
@@ -52,23 +54,35 @@ function readPackageJson(packageDir: string): PackageJson {
 
 /** Mirrors `tests/unit/stdlib-packages.test.ts`'s `npmPackDryRun` --
  * resolves what `npm pack` would actually publish, lifecycle scripts
- * (`prepack`) included. */
+ * (`prepack`) included.
+ *
+ * stdlib-run-isolation T4 (option D, `planning/adr/ADR-003-stdlib-run-isolation.md`):
+ * `npm pack` resolves `files` against the real package directory -- D3's
+ * hard case a read seam cannot reach. Held for exactly the `execFileSync`
+ * call, the narrowest span that touches the canonical tree. */
 function npmPackDryRun(packageDir: string): PackResult {
-  const stdout = execFileSync('npm', ['pack', '--dry-run', '--json'], {
-    cwd: join(PACKAGES_DIR, packageDir),
-    encoding: 'utf8',
+  return withStdlibBuildLock(() => {
+    const stdout = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+      cwd: join(PACKAGES_DIR, packageDir),
+      encoding: 'utf8',
+    });
+    const parsed = JSON.parse(stdout) as PackResult[];
+    const result = parsed[0];
+    if (result === undefined) {
+      throw new Error(`npm pack --dry-run produced no output for packages/${packageDir}`);
+    }
+    return result;
   });
-  const parsed = JSON.parse(stdout) as PackResult[];
-  const result = parsed[0];
-  if (result === undefined) {
-    throw new Error(`npm pack --dry-run produced no output for packages/${packageDir}`);
-  }
-  return result;
 }
 
+/** stdlib-run-isolation T4: the dynamic import resolves an absolute path
+ * under `packages/<pkg>/generated/`, so it is held inside the build lock --
+ * the narrowest span is exactly this one `import()`. */
 async function importGenerated<T>(packageDir: string, moduleFile: string): Promise<T> {
-  const path = join(PACKAGES_DIR, packageDir, 'generated', moduleFile);
-  return (await import(pathToFileURL(path).href)) as T;
+  return withStdlibBuildLock(() => {
+    const path = join(PACKAGES_DIR, packageDir, 'generated', moduleFile);
+    return import(pathToFileURL(path).href) as Promise<T>;
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -216,17 +230,20 @@ describe('acceptance 5: manifest modules parse with the expected shape', () => {
     const mod = await importGenerated<Record<string, RemoteManifestLike>>('stdlib-aws', 'awslib14.remote.js');
     expect(mod.awslib14Remote?.name).toBe('awslib14');
     expect(Object.keys(mod.awslib14Remote?.files ?? {}).length).toBeGreaterThan(0);
-  });
+  },
+    120_000);
 
   it('awslibRemote (alias) carries aliasOf and empty files', async () => {
     const mod = await importGenerated<Record<string, RemoteManifestLike>>('stdlib-aws', 'awslib.remote.js');
     expect(mod.awslibRemote?.aliasOf).toBe('awslib14');
     expect(Object.keys(mod.awslibRemote?.files ?? { placeholder: '' })).toHaveLength(0);
-  });
+  },
+    120_000);
 
   it('tupadr3Remote (concrete) has non-empty files', async () => {
     const mod = await importGenerated<Record<string, RemoteManifestLike>>('stdlib-tupadr3', 'tupadr3.remote.js');
     expect(mod.tupadr3Remote?.name).toBe('tupadr3');
     expect(Object.keys(mod.tupadr3Remote?.files ?? {}).length).toBeGreaterThan(0);
-  });
+  },
+    120_000);
 });

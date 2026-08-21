@@ -16,6 +16,8 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
+
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
@@ -25,6 +27,24 @@ function sha256Hex(bytes: Buffer): string {
 
 function generatedPath(packageDir: string, fileName: string): string {
   return join(PACKAGES_DIR, packageDir, 'generated', fileName);
+}
+
+// stdlib-run-isolation T4 (option D): every read of `generated/` in this
+// file is a single, hardcoded-filename fs call -- no `readdirSync`, so
+// there is no readdir-then-read window to keep atomic (contrast
+// `stdlib-dts-import-specifier.test.ts`). Each of the three accessors below
+// is therefore self-locking, held for exactly its own call.
+
+function readGeneratedText(packageDir: string, fileName: string): string {
+  return withStdlibBuildLock(() => readFileSync(generatedPath(packageDir, fileName), 'utf8'));
+}
+
+function readGeneratedBytes(packageDir: string, fileName: string): Buffer {
+  return withStdlibBuildLock(() => readFileSync(generatedPath(packageDir, fileName)));
+}
+
+function generatedExists(packageDir: string, fileName: string): boolean {
+  return withStdlibBuildLock(() => existsSync(generatedPath(packageDir, fileName)));
 }
 
 const GENERATED_HEADER =
@@ -44,49 +64,57 @@ describe('acceptance 1: stdlib-aws ships no eager module', () => {
     "export { awslibRemote } from './awslib.remote.js';\n";
 
   it('generated/index.js re-exports awslib14Remote and awslibRemote', () => {
-    const indexJs = readFileSync(generatedPath('stdlib-aws', 'index.js'), 'utf8');
+    const indexJs = readGeneratedText('stdlib-aws', 'index.js');
     expect(indexJs).toBe(EXPECTED_INDEX);
-  });
+  },
+    120_000);
 
   it('generated/index.d.ts re-exports the same bindings', () => {
-    const indexDts = readFileSync(generatedPath('stdlib-aws', 'index.d.ts'), 'utf8');
+    const indexDts = readGeneratedText('stdlib-aws', 'index.d.ts');
     expect(indexDts).toBe(EXPECTED_INDEX);
-  });
+  },
+    120_000);
 
   it('awslib14.js and awslib.js are not emitted', () => {
-    expect(existsSync(generatedPath('stdlib-aws', 'awslib14.js'))).toBe(false);
-    expect(existsSync(generatedPath('stdlib-aws', 'awslib.js'))).toBe(false);
-    expect(existsSync(generatedPath('stdlib-aws', 'awslib14.d.ts'))).toBe(false);
-    expect(existsSync(generatedPath('stdlib-aws', 'awslib.d.ts'))).toBe(false);
-  });
+    expect(generatedExists('stdlib-aws', 'awslib14.js')).toBe(false);
+    expect(generatedExists('stdlib-aws', 'awslib.js')).toBe(false);
+    expect(generatedExists('stdlib-aws', 'awslib14.d.ts')).toBe(false);
+    expect(generatedExists('stdlib-aws', 'awslib.d.ts')).toBe(false);
+  },
+    120_000);
 
   it('the remote manifest siblings are emitted instead', () => {
-    expect(existsSync(generatedPath('stdlib-aws', 'awslib14.remote.js'))).toBe(true);
-    expect(existsSync(generatedPath('stdlib-aws', 'awslib.remote.js'))).toBe(true);
-  });
+    expect(generatedExists('stdlib-aws', 'awslib14.remote.js')).toBe(true);
+    expect(generatedExists('stdlib-aws', 'awslib.remote.js')).toBe(true);
+  },
+    120_000);
 });
 
 describe('acceptance 1: stdlib-tupadr3 ships no eager module', () => {
   const EXPECTED_INDEX = GENERATED_HEADER + '\n' + "export { tupadr3Remote } from './tupadr3.remote.js';\n";
 
   it('generated/index.js re-exports tupadr3Remote', () => {
-    const indexJs = readFileSync(generatedPath('stdlib-tupadr3', 'index.js'), 'utf8');
+    const indexJs = readGeneratedText('stdlib-tupadr3', 'index.js');
     expect(indexJs).toBe(EXPECTED_INDEX);
-  });
+  },
+    120_000);
 
   it('generated/index.d.ts re-exports the same binding', () => {
-    const indexDts = readFileSync(generatedPath('stdlib-tupadr3', 'index.d.ts'), 'utf8');
+    const indexDts = readGeneratedText('stdlib-tupadr3', 'index.d.ts');
     expect(indexDts).toBe(EXPECTED_INDEX);
-  });
+  },
+    120_000);
 
   it('tupadr3.js is not emitted', () => {
-    expect(existsSync(generatedPath('stdlib-tupadr3', 'tupadr3.js'))).toBe(false);
-    expect(existsSync(generatedPath('stdlib-tupadr3', 'tupadr3.d.ts'))).toBe(false);
-  });
+    expect(generatedExists('stdlib-tupadr3', 'tupadr3.js')).toBe(false);
+    expect(generatedExists('stdlib-tupadr3', 'tupadr3.d.ts')).toBe(false);
+  },
+    120_000);
 
   it('the remote manifest sibling is emitted instead', () => {
-    expect(existsSync(generatedPath('stdlib-tupadr3', 'tupadr3.remote.js'))).toBe(true);
-  });
+    expect(generatedExists('stdlib-tupadr3', 'tupadr3.remote.js')).toBe(true);
+  },
+    120_000);
 });
 
 // ---------------------------------------------------------------------------
@@ -129,9 +157,10 @@ const STDLIB_PINNED_DIGESTS: readonly PinnedFile[] = [
 
 describe('acceptance 2: packages/stdlib is byte-identical to before this change', () => {
   it.each(STDLIB_PINNED_DIGESTS)('$fileName matches its pinned sha256', ({ fileName, sha256 }) => {
-    const bytes = readFileSync(generatedPath('stdlib', fileName));
+    const bytes = readGeneratedBytes('stdlib', fileName);
     expect(sha256Hex(bytes)).toBe(sha256);
-  });
+  },
+    120_000);
 });
 
 // ---------------------------------------------------------------------------
@@ -141,14 +170,17 @@ describe('acceptance 2: packages/stdlib is byte-identical to before this change'
 
 describe('acceptance 3: the removed eager modules do not exist', () => {
   it('packages/stdlib-aws/generated/awslib14.js does not exist', () => {
-    expect(existsSync(generatedPath('stdlib-aws', 'awslib14.js'))).toBe(false);
-  });
+    expect(generatedExists('stdlib-aws', 'awslib14.js')).toBe(false);
+  },
+    120_000);
 
   it('packages/stdlib-aws/generated/awslib.js does not exist', () => {
-    expect(existsSync(generatedPath('stdlib-aws', 'awslib.js'))).toBe(false);
-  });
+    expect(generatedExists('stdlib-aws', 'awslib.js')).toBe(false);
+  },
+    120_000);
 
   it('packages/stdlib-tupadr3/generated/tupadr3.js does not exist', () => {
-    expect(existsSync(generatedPath('stdlib-tupadr3', 'tupadr3.js'))).toBe(false);
-  });
+    expect(generatedExists('stdlib-tupadr3', 'tupadr3.js')).toBe(false);
+  },
+    120_000);
 });
