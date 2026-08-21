@@ -38,9 +38,7 @@ import { setLayoutInputObserver } from '../src/core/graph-layout.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import { toSvekDot } from '../src/core/svek-dot-emit.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
-import { withStdlib } from '../src/core/tim/StdlibStore.js';
-import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
-import type { IncludeStore } from '../src/core/tim/IncludeStore.js';
+import { fixtureIncludeStore } from '../tests/oracle/svg-conformance/fixture-include-store.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DOT_CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
@@ -88,11 +86,6 @@ export function discoverFixtures(only: readonly string[] | undefined): string[] 
 // Rendering
 // ---------------------------------------------------------------------------
 
-let cachedStore: IncludeStore | undefined;
-function includeStore(): IncludeStore {
-  cachedStore ??= withStdlib({ get: () => undefined, has: () => false }, buildStdlibAssetsStore());
-  return cachedStore;
-}
 
 /** Renders one fixture, capturing an SVG hash and — when the render drove
  *  graph layout — a DOT hash from the same input graphs the layout engine
@@ -109,7 +102,7 @@ export function renderFixture(markup: string): ManifestEntry {
   const graphs: DotInputGraph[] = [];
   setLayoutInputObserver((g) => graphs.push(g));
   try {
-    const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), includeStore: includeStore() });
+    const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), includeStore: fixtureIncludeStore() });
     const entry: { svg: string; dot?: string } = { svg: sha256(svg) };
     if (graphs.length > 0) entry.dot = sha256(graphs.map(toSvekDot).join('\n'));
     return entry;

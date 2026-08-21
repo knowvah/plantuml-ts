@@ -91,9 +91,8 @@ import type { Node as XmlNode } from '@xmldom/xmldom';
 import { buildBlockUmls } from '../src/core/BlockUmlBuilder.js';
 import type { PreprocessOptions } from '../src/core/preprocessor.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
-import { withStdlib } from '../src/core/tim/StdlibStore.js';
 import { parseClass } from '../src/diagrams/class/parser.js';
-import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
+import { fixtureIncludeStore } from '../tests/oracle/svg-conformance/fixture-include-store.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 
 const ELEMENT_NODE = 1;
@@ -128,11 +127,6 @@ function listFixtureDirs(type: string): FixtureDir[] {
 // Parse-side note identity
 // ---------------------------------------------------------------------------
 
-let cachedStore: ReturnType<typeof withStdlib> | undefined;
-function includeStore(): ReturnType<typeof withStdlib> {
-  cachedStore ??= withStdlib({ get: () => undefined, has: () => false }, buildStdlibAssetsStore());
-  return cachedStore;
-}
 
 interface NoteIdentity { readonly ids: ReadonlySet<string>; readonly tips: number }
 
@@ -215,7 +209,7 @@ function reportFixture(f: FixtureDir): FixtureLine {
   const label = `${f.type}/${f.slug}`;
   try {
     const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
-    const options: PreprocessOptions = { includeStore: includeStore() };
+    const options: PreprocessOptions = { includeStore: fixtureIncludeStore() };
     const identity = noteIdentity(markup, options);
     const svg = renderFixtureClass(markup, new DeterministicMeasurer(), options);
     const sha = createHash('sha1').update(svg).digest('hex').slice(0, SHA_PREFIX_LEN);
@@ -286,7 +280,7 @@ function compareWithJar(f: FixtureDir): 'SAME' | 'ORDER-ONLY' | 'OTHER' | 'ERR' 
   if (!existsSync(jarPath)) return 'ERR';
   try {
     const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
-    const options: PreprocessOptions = { includeStore: includeStore() };
+    const options: PreprocessOptions = { includeStore: fixtureIncludeStore() };
     const ours = uidSequence(renderFixtureClass(markup, new DeterministicMeasurer(), options));
     const jar = uidSequence(readFileSync(jarPath, 'utf-8'));
     if (ours.join(' ') === jar.join(' ')) return 'SAME';

@@ -50,8 +50,7 @@ import type { Node as XmlNode } from '@xmldom/xmldom';
 
 import type { PreprocessOptions } from '../src/core/preprocessor.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
-import { withStdlib } from '../src/core/tim/StdlibStore.js';
-import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
+import { fixtureIncludeStore } from '../tests/oracle/svg-conformance/fixture-include-store.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
 
@@ -297,14 +296,9 @@ function bestAlignmentScore(ours: readonly Shape[], jars: readonly Shape[]): num
 // Render dispatch
 // ---------------------------------------------------------------------------
 
-let cachedStore: ReturnType<typeof withStdlib> | undefined;
-function includeStore(): ReturnType<typeof withStdlib> {
-  cachedStore ??= withStdlib({ get: () => undefined, has: () => false }, buildStdlibAssetsStore());
-  return cachedStore;
-}
 
 function renderOurs(type: string, markup: string): string {
-  const options: PreprocessOptions = { includeStore: includeStore() };
+  const options: PreprocessOptions = { includeStore: fixtureIncludeStore() };
   const measurer = new DeterministicMeasurer();
   if (type === 'state') return renderFixtureState(markup, measurer, options);
   return renderFixtureClass(markup, measurer, options); // class AND object share the class engine
