@@ -12,9 +12,16 @@
  * spawns, so the race stays reproducible after `scripts_scratch/T0/` is
  * removed.
  *
+ * The test harness that spawns this process (`tests/integration/
+ * stdlib-build-race.test.ts`) treats THIS process's exit as the signal
+ * that it is safe to stop the reader half (`stdlib-build-race-reader.ts`)
+ * -- see that file's doc comment for why the reader no longer runs to a
+ * fixed attempt count.
+ *
  * Usage: jiti tests/helpers/stdlib-build-race-writer.ts <iterations> <delayMs>
  *
  * @see .agent-notes/sre-T0.md -- diagnosis artifact these constants proved
+ * @see .agent-notes/sre-T1.md -- the fix-commit that coordinates off this exit
  */
 import { buildStdlibPackages } from '../../scripts/build-stdlib-packages.js';
 
