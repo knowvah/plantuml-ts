@@ -60,7 +60,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { fixtureIncludeStore } from './fixture-include-store.js';
+import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg } from './compare.js';
 import type { Diff } from './compare.js';
 import { renderFixtureSequence } from './render-fixture-sequence.js';

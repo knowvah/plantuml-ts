@@ -50,7 +50,7 @@ import type { Node as XmlNode } from '@xmldom/xmldom';
 
 import type { PreprocessOptions } from '../src/core/preprocessor.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
-import { fixtureIncludeStore } from '../tests/oracle/svg-conformance/fixture-include-store.js';
+import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
 

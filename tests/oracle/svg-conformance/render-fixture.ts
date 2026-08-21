@@ -29,9 +29,10 @@
  *      comment at the `seeded` binding. The census is the one that is behind;
  *      correcting it is outside this task's write-set.
  *
- * The include store is no longer a delta of any kind: every conformance
- * surface now shares one seam, `fixture-include-store.ts`. It used to be
- * copied into four places, and they drifted — see that module's header.
+ * The include store is no longer a delta of any kind: every harness that
+ * renders a fixture now shares one seam,
+ * `tests/helpers/fixture-include-store.ts`. It used to be copied into seven
+ * places, and they drifted — see that module's header.
  *
  * The store itself is NOT a delta any more, and that is this file's other si8
  * change: `buildBlockUmls` was called here with no options at all, so no
@@ -40,7 +41,7 @@
  * `!include <bundle/thing>` a user actually writes.
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
-import { fixtureIncludeStore } from './fixture-include-store.js';
+import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import type { PreprocessorResult } from '../../../src/core/preprocessor.js';
 import { resolveTheme } from '../../../src/core/theme.js';
 import { resolveSkinparam, parseStyleBlock } from '../../../src/core/skinparam.js';

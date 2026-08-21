@@ -84,7 +84,7 @@ import { applyChrome, isEmpty } from '../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../src/core/annotations/style.js';
 import { assembleSvg, renderSync } from '../src/index.js';
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
-import { fixtureIncludeStore } from '../tests/oracle/svg-conformance/fixture-include-store.js';
+import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';

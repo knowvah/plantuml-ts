@@ -38,7 +38,7 @@ import { setLayoutInputObserver } from '../src/core/graph-layout.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import { toSvekDot } from '../src/core/svek-dot-emit.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
-import { fixtureIncludeStore } from '../tests/oracle/svg-conformance/fixture-include-store.js';
+import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DOT_CACHE_DIR = join(REPO, 'test-results', 'dot-cache');

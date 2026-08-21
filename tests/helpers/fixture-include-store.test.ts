@@ -9,7 +9,7 @@
  */
 import { describe, it, expect } from 'vitest';
 
-import type { StdlibStore } from '../../../src/core/tim/StdlibStore.js';
+import type { StdlibStore } from '../../src/core/tim/StdlibStore.js';
 import { createFixtureIncludeStore, fixtureIncludeStore } from './fixture-include-store.js';
 
 /** A stub assets store that records how many times it was BUILT, so a test can

@@ -1,11 +1,16 @@
 /**
- * The one include seam every svg-conformance surface renders through.
+ * The one include seam every fixture-rendering harness goes through.
  *
- * WHY THIS MODULE EXISTS. This seam used to be copy-pasted into four places —
- * `render-fixture.ts`, `scripts/svg-conformance-census.ts`, the sequence
- * diff-baseline ratchet, and `sequence-diff-census.ts` — because
- * `render-fixture.ts`'s copy was private and each task's write-set stopped at
- * widening its exports. The copies then did what copies do:
+ * Seven consumers share it: the svg-conformance surfaces (`render-fixture.ts`,
+ * the sequence diff-baseline ratchet, `sequence-diff-census.ts`) and the
+ * scripts that render fixtures for reports (`svg-conformance-census.ts`,
+ * `render-manifest.ts`, `shape-match-report.ts`, `note-order-report.ts`).
+ * It lives in `tests/helpers/` rather than beside any one of them precisely
+ * because it belongs to none of them exclusively.
+ *
+ * WHY THIS MODULE EXISTS. This seam used to be copy-pasted into seven places,
+ * because `render-fixture.ts`'s copy was private and each task's write-set
+ * stopped at widening its exports. The copies then did what copies do:
  *
  *   - The sequence diff-baseline ratchet shipped with NO store at all, so
  *     `<tupadr3/common.puml>` and `<logos/centos>` errored there while
@@ -18,6 +23,9 @@
  *     fixture used a bundle include. `render-fixture.ts`'s header carried
  *     that divergence as a documented "delta 2" rather than a defect.
  *
+ *   - The three report scripts drifted eager too, under their own local name
+ *     `includeStore()`, so each paid the walk unconditionally.
+ *
  * A measurement seam duplicated across the surfaces that are meant to
  * cross-check each other defeats the cross-check. Hence one module.
  *
@@ -27,9 +35,9 @@
  * vendored bundle rather than the published subset — see
  * `scripts/stdlib-assets-store.ts`'s header.
  */
-import { buildStdlibAssetsStore } from '../../helpers/stdlib-assets-store.js';
-import { withStdlib, type StdlibStore } from '../../../src/core/tim/StdlibStore.js';
-import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
+import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
+import { withStdlib, type StdlibStore } from '../../src/core/tim/StdlibStore.js';
+import type { IncludeStore } from '../../src/core/tim/IncludeStore.js';
 
 /**
  * Builds an include store that resolves `<bundle/thing>` through `buildAssets`,

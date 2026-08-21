@@ -92,7 +92,7 @@ import { buildBlockUmls } from '../src/core/BlockUmlBuilder.js';
 import type { PreprocessOptions } from '../src/core/preprocessor.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { parseClass } from '../src/diagrams/class/parser.js';
-import { fixtureIncludeStore } from '../tests/oracle/svg-conformance/fixture-include-store.js';
+import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 
 const ELEMENT_NODE = 1;
