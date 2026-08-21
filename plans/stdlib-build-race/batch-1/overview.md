@@ -10,4 +10,4 @@ neither belongs in every run.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Commit the repro as an env-guarded test; record its pre-fix failure | typescript-pro (sonnet) | `tests/integration/stdlib-build-race.test.ts`, `.agent-notes/sre-T1.md` | T0 | [ ] |
+| T1 | Commit the repro as an env-guarded test; record its pre-fix failure | typescript-pro (sonnet) | `tests/integration/stdlib-build-race.test.ts`, `tests/helpers/stdlib-build-race-{writer,reader}.ts`, `.agent-notes/sre-T1.md` | T0 | [x] |
