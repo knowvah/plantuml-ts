@@ -63,8 +63,8 @@ Read-only git only; no commits.
 - Given `git diff --name-only main..HEAD -- src/`, then it is empty — quote it.
 
 ## Quality bar
-Four gates on a docs-only tree. `npm test` under 60.3 s on a settled machine;
-say what the load was.
+Four gates on a docs-only tree. Report `npm test` duration and say what the
+load was; there is no hard ceiling.
 
 ## Boundaries
 - **Always:** re-measure; correct SI34's count; attribute the decision to the

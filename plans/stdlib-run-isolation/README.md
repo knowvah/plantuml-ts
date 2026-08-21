@@ -83,13 +83,21 @@ the ADR gates the implementation, and the user gates the ADR.
   on_fail: stop
 ```
 
-**Wall-clock ceiling: 60.3 s, and the headroom is now thin.** SI34 measured
-55.75–57.80 s across four batches on settled machines; the post-merge run on
-`main` was 56.85 s. That leaves roughly 3 s. Any design that adds per-run
-build work spends against this, so **measure the suite before and after** and
-report the load with every number (`uptime` plus
+**Wall-clock: measure and report it; there is no hard ceiling.** The suite is
+past 16,000 tests and the user has confirmed it may take as long as it needs —
+the 60.3 s figure inherited from earlier missions is **advisory context, not a
+gate**. Do not trade correctness, coverage, or a faithful test for speed, and
+do not skip work because it "costs too much" wall-clock.
+
+Still report `npm test` duration with the machine load (`uptime` plus
 `ps -Aceo pcpu,comm | grep -E 'suggestd|corespotlightd|mds_stores'` at ~0).
-SI34 burned two readings on self-induced Spotlight reindexing.
+That discipline is about **measurement integrity**, not budget: SI34 burned two
+readings on self-induced Spotlight reindexing, and an unexplained jump is still
+a signal worth investigating. A large, *unexplained* regression is a finding to
+report; a large, *explained* one is simply the cost of the work.
+
+For reference, SI34 measured 55.75-57.80 s on settled machines; `main`
+post-merge was 56.85 s.
 
 ## Stop conditions
 
@@ -109,7 +117,8 @@ SI34 burned two readings on self-induced Spotlight reindexing.
    (`main`, `types`, `exports`, `files`) that is not explicitly authorised
    by the approved ADR. Silently altering the published surface of four
    packages is strictly worse than the race.
-6. `npm test` exceeds 60.3 s on a settled machine.
+6. A task proposes trading test correctness, coverage, or fidelity for
+   wall-clock speed. The suite may take as long as it needs.
 7. A finding contradicts a locked decision (D1–D5).
 8. Same location changed 3x consecutively without the check clearing.
 

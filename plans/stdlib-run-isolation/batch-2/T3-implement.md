@@ -43,8 +43,9 @@ write outside it; if the work requires a file no task owns, stop and report
   quoted before and after.
 - Given `npm pack --dry-run --json` for all four packages, then the published
   file list is unchanged from `main` unless the ADR authorised a change.
-- Given the suite, then `npm test` stays under 60.3 s on a settled machine —
-  headroom is ~3 s, so measure and report it.
+- Given the suite, then `npm test` duration is measured and reported with the
+  load. There is no ceiling — but an unexplained jump is a finding, and a
+  faster suite is never a reason to weaken a test.
 - Given the pack-based tests, then they still exercise the real layout.
 
 ## Quality bar

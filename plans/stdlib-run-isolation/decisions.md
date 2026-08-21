@@ -18,7 +18,7 @@ documented acceptance, not an isolation mechanism.
 **Consequences.** The mission can legitimately end at T0 having proven the
 hole is unreachable in practice. That is a *good* result and must not be
 treated as failure. Building isolation for an unreproducible symptom would
-spend the suite's remaining ~3 s of headroom on nothing.
+add machinery, and a permanent maintenance surface, for nothing.
 
 ## D2 — The published surface of the four stdlib packages is sacred
 

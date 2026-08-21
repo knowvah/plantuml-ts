@@ -61,8 +61,8 @@ built directly on these numbers.
   disagreement here is valuable, not a problem.
 
 ## Quality bar
-Four gates green (a note-only change should move nothing). `npm test` under
-60.3 s on a settled machine, with the load reading.
+Four gates green (a note-only change should move nothing). Report `npm test`
+duration with the load reading; there is no hard ceiling.
 
 ## Boundaries
 - **Always:** cite `file:line`; justify every seam-eligible/immovable call.

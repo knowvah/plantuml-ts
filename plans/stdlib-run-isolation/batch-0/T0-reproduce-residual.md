@@ -73,8 +73,8 @@ consumes all five; `reproduced: false` is a legitimate and useful answer.
 - Given the tree, then `git status --short` is clean when you finish.
 
 ## Quality bar
-Four gates green. `npm test` under 60.3 s on a **settled** machine — report
-the load with the number; headroom is ~3 s. Do not delete
+Four gates green. Report `npm test` duration with the machine load — no hard
+ceiling; the suite may take as long as it needs. Do not delete
 `scripts_scratch/T0/`; the orchestrator removes it.
 
 ## Boundaries

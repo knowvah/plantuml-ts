@@ -41,7 +41,8 @@ recommend one, and stop.
    - **D. Anything better you find.** You are not limited to the above.
 3. For each option state: exposure closed, consumers touched, published
    surface touched (yes/no), estimated `npm test` cost against the ~3 s of
-   remaining headroom, and how it could be reverted.
+   estimated `npm test` cost (reported, not treated as a budget), and how it
+   could be reverted.
 4. Recommend one, with the reasoning that decides it. A recommendation of
    **C** is entirely acceptable if the evidence supports it — do not
    manufacture work.
@@ -74,8 +75,8 @@ Read-only git only; no commits.
   user.
 
 ## Quality bar
-Four gates green (docs-only). `npm test` under 60.3 s on a settled machine,
-with the load reading. ADR ≤ 1 page of substance.
+Four gates green (docs-only). Report `npm test` duration with the load
+reading; no hard ceiling. ADR ≤ 1 page of substance.
 
 ## Boundaries
 - **Always:** measure; state option B's packaging impact precisely; stop at
