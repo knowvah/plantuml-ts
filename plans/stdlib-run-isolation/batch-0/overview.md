@@ -14,5 +14,5 @@ the under-count.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | Reproduce the changed-inputs residual; diagnosis artifact | debugger (sonnet) | `scripts_scratch/T0/**`, `.agent-notes/sri-T0.md` | — | [ ] |
-| T1 | Census every reader of the canonical tree | typescript-pro (sonnet) | `.agent-notes/sri-T1.md` | — | [ ] |
+| T0 | Reproduce the changed-inputs residual; diagnosis artifact | debugger (sonnet) | `scripts_scratch/T0/**`, `.agent-notes/sri-T0.md` | — | [x] |
+| T1 | Census every reader of the canonical tree | typescript-pro (sonnet) | `.agent-notes/sri-T1.md` | — | [x] |
