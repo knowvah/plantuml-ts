@@ -42,6 +42,7 @@ import type { StdlibRemoteManifest } from '../../src/index.js';
 import type { IncludeFetcher } from '../../src/core/include-resolver.js';
 import { StdlibNotBundledError } from '../../src/core/tim/IncludeStore.js';
 import { FormulaMeasurer } from '../../src/core/measurer.js';
+import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
@@ -103,7 +104,7 @@ function sumDirectoryBytes(root: string): number {
 
 describe('tupadr3 -- real manifest, real assets, real render (criteria 1-2)', () => {
   it('fetches exactly 4 resources for a 3-icon diagram and draws all 3 icons', async () => {
-    const { tupadr3Remote } = (await import(pathToFileURL(TUPADR3_REMOTE_MODULE).href)) as {
+    const { tupadr3Remote } = (await withStdlibBuildLock(() => import(pathToFileURL(TUPADR3_REMOTE_MODULE).href))) as {
       tupadr3Remote: StdlibRemoteManifest;
     };
 
@@ -151,7 +152,10 @@ describe('tupadr3 -- real manifest, real assets, real render (criteria 1-2)', ()
     // the sum of the bundle's ASSET bytes, read from disk, re-measured on
     // every run. Never a hardcoded constant, never SI11a's number carried
     // forward.
-    const manifestGzipBytes = gzipSync(readFileSync(TUPADR3_REMOTE_MODULE), { level: 9 }).length;
+    const manifestGzipBytes = gzipSync(
+      withStdlibBuildLock(() => readFileSync(TUPADR3_REMOTE_MODULE)),
+      { level: 9 },
+    ).length;
     const resourceBytes = [...fetched.values()].reduce((sum, n) => sum + n, 0);
     const totalBytes = manifestGzipBytes + resourceBytes;
     const assetTreeBytes = sumDirectoryBytes(TUPADR3_ASSETS_DIR);
@@ -183,12 +187,13 @@ describe('tupadr3 -- real manifest, real assets, real render (criteria 1-2)', ()
     // future change to the manifest or asset set drops below 99%, this must
     // fail, not be relaxed.
     expect(reductionPct).toBeGreaterThan(99);
-  });
+  },
+    120_000);
 });
 
 describe('awslib14 -- uppercase multi-slash key resolves (criterion 3, ADR-3)', () => {
   it('resolves storage/simplestorageservice -> Storage/SimpleStorageService.puml and draws', async () => {
-    const { awslib14Remote } = (await import(pathToFileURL(AWSLIB14_REMOTE_MODULE).href)) as {
+    const { awslib14Remote } = (await withStdlibBuildLock(() => import(pathToFileURL(AWSLIB14_REMOTE_MODULE).href))) as {
       awslib14Remote: StdlibRemoteManifest;
     };
 
@@ -220,12 +225,13 @@ describe('awslib14 -- uppercase multi-slash key resolves (criterion 3, ADR-3)', 
 
     const imageTagCount = (svg.match(/<image /g) ?? []).length;
     expect(imageTagCount).toBe(1);
-  });
+  },
+    120_000);
 });
 
 describe('a key absent from the manifest fails offline, no request made (criterion 4)', () => {
   it('names the bundle and key with zero network requests', async () => {
-    const { tupadr3Remote } = (await import(pathToFileURL(TUPADR3_REMOTE_MODULE).href)) as {
+    const { tupadr3Remote } = (await withStdlibBuildLock(() => import(pathToFileURL(TUPADR3_REMOTE_MODULE).href))) as {
       tupadr3Remote: StdlibRemoteManifest;
     };
     expect(tupadr3Remote.files['devicons/does-not-exist']).toBeUndefined();
@@ -248,5 +254,6 @@ describe('a key absent from the manifest fails offline, no request made (criteri
     expect(err?.bundle).toBe('tupadr3');
     expect(err?.path).toBe('tupadr3/devicons/does-not-exist');
     expect(remoteFetcher).not.toHaveBeenCalled();
-  });
+  },
+    120_000);
 });

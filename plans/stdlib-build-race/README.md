@@ -238,8 +238,14 @@ $ git diff --name-only main..HEAD -- src/
 process (`ps aux` scan) and no stray lock file under `/var/folders` after
 the full repro x5 + `npm test` + typecheck + lint + build.
 
-**The residual hole (D3), documented as prominently as the fix — not
-closed.** If a second run's source genuinely changes mid-run (not the
+**The residual hole (D3), documented as prominently as the fix — CLOSED by
+a follow-on mission, `stdlib-run-isolation` (2026-08-21).** See the
+correction and outcome below; the paragraphs that follow are preserved
+exactly as this mission wrote them, because they record the reasoning that
+motivated re-opening the question, not because they are still the final
+word on the residual's status.
+
+If a second run's source genuinely changes mid-run (not the
 unchanged-inputs case this mission's repro exercises), that second run
 still rebuilds — and therefore still `rmSync`s — once it acquires the
 lock, while the first run's workers may still be importing from the tree
@@ -250,14 +256,30 @@ atomic with respect to *other builders*, not with respect to *the first
 run's own readers*, which never coordinate with a build that started
 after they began reading.
 
-**Why this was accepted rather than closed.** The mechanism that *would*
-close it — a per-run isolated output directory — was **explicitly declined
-by the user on 2026-08-21** (`decisions.md` D3). The blast radius was
-judged too large: `tests/integration/stdlib-remote-e2e.test.ts:49,51`
+**Why this was accepted rather than closed, at the time.** The mechanism
+that *would* close it — a per-run isolated output directory — was
+**explicitly declined by the user on 2026-08-21** (`decisions.md` D3). The
+blast radius was judged too large: `tests/integration/stdlib-remote-e2e.test.ts:49,51`
 import fixed absolute paths, and each stdlib package's own
 `package.json`/`prepack` step references `generated/` directly, so
 isolating it would touch packaging surface for every consumer of these
 packages, not just the test harness.
+
+> **Correction (`stdlib-run-isolation`, 2026-08-21).** This refusal was
+> judged against an under-count. The two fixed-path imports named above are
+> not "two import sites" in the sense the refusal implied — an independent
+> census (`stdlib-run-isolation` T1, cross-checked twice more in that
+> mission's T2 and T5) found **21 total consumers** of
+> `packages/<pkg>/generated/` and **8 concurrent readers** running inside
+> default vitest workers. The follow-on mission also established that
+> relocating the canonical tree was never actually available as an option
+> regardless of the count: `npm pack --dry-run` resolves against the real
+> package directory and cannot be redirected, so the tree could only ever
+> be *supplemented*, never moved — meaning no option on the table, at any
+> known import-site count, was ever going to touch `main`/`types`/`exports`/
+> `files`. See `plans/stdlib-run-isolation/README.md#close-out-2026-08-21`
+> for the full re-measurement, the options ADR, and the option the user
+> chose (extending the build lock to cover readers).
 
 **What symptom this residual would produce, so the next person recognizes
 it instead of re-opening the investigation:** the *same* signature as the
@@ -269,6 +291,18 @@ source change to `assets/stdlib/` (or the package specs) between them,
 not on every concurrent run. It should now be **far rarer** than the
 original 1-in-7 (it requires both concurrency *and* a source change
 landing in the same window) but is not structurally impossible.
+
+> **Status: CLOSED, not merely accepted (`stdlib-run-isolation`,
+> 2026-08-21).** The user approved extending the cross-process build lock
+> to cover all 8 in-worker readers (including the 2 `npm pack` tests, which
+> the originally-considered isolated-directory approach could never have
+> reached). `stdlib-run-isolation` T5 re-ran this mission's own reproduction
+> harness against the fix (`FAIL at attempt 2897` unlocked vs. 500/500
+> clean with the lock held, 17 measured lock waits) and ran two real,
+> concurrent full `npm test` invocations straddling one genuine rebuild of
+> `stdlib-tupadr3`'s tree end to end, with no `generated/`-tree failure in
+> either. Full detail, including the honest limits of that end-to-end
+> result, in `plans/stdlib-run-isolation/README.md#close-out-2026-08-21`.
 
 **Two smaller residuals carried forward from T2's note, not fixed here
 (same reasoning — closing them risks reintroducing a D4-style count-based

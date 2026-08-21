@@ -44,6 +44,7 @@ import { describe, expect, it } from 'vitest';
 import { emitModuleJs } from '../../scripts/build-stdlib-packages/emit-module.js';
 import { BOOTSTRAP_SPRITE_SPLIT, PACKAGE_SPECS } from '../../scripts/build-stdlib-packages/package-specs.js';
 import type { SpriteSplitManifest } from '../../scripts/split-sprite-bundle/split.js';
+import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
@@ -76,18 +77,25 @@ function readPackageJson(): PackageJson {
 /** Mirrors `stdlib-package-files.test.ts` / `stdlib-packages.test.ts`'s
  * `npmPackDryRun` -- resolves what `npm pack` would actually publish,
  * lifecycle scripts included (there are none for `packages/stdlib`; see the
- * file-header correction above for why that makes a second packer safe). */
+ * file-header correction above for why that makes a second packer safe).
+ *
+ * stdlib-run-isolation T4 (option D, `planning/adr/ADR-003-stdlib-run-isolation.md`):
+ * `npm pack` resolves `files: ["generated", ...]` against the real package
+ * directory, D3's hard case a read seam cannot reach -- held for exactly the
+ * `execFileSync` call, the narrowest span that touches the canonical tree. */
 function npmPackDryRun(): PackResult {
-  const stdout = execFileSync('npm', ['pack', '--dry-run', '--json'], {
-    cwd: join(PACKAGES_DIR, PACKAGE_DIR),
-    encoding: 'utf8',
+  return withStdlibBuildLock(() => {
+    const stdout = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+      cwd: join(PACKAGES_DIR, PACKAGE_DIR),
+      encoding: 'utf8',
+    });
+    const parsed = JSON.parse(stdout) as PackResult[];
+    const result = parsed[0];
+    if (result === undefined) {
+      throw new Error(`npm pack --dry-run produced no output for packages/${PACKAGE_DIR}`);
+    }
+    return result;
   });
-  const parsed = JSON.parse(stdout) as PackResult[];
-  const result = parsed[0];
-  if (result === undefined) {
-    throw new Error(`npm pack --dry-run produced no output for packages/${PACKAGE_DIR}`);
-  }
-  return result;
 }
 
 function sha256Hex(bytes: Buffer): string {
@@ -179,11 +187,16 @@ describe('acceptance 3: eager bundle modules are unaffected by the sprite-split 
   it.each(spec.modules.map((mod) => ({ label: `${mod.fileBaseName}.js`, mod })))(
     '$label is byte-identical to a fresh emit',
     ({ mod }) => {
-      const onDisk = readFileSync(join(PACKAGES_DIR, PACKAGE_DIR, 'generated', `${mod.fileBaseName}.js`));
+      // stdlib-run-isolation T4: the only fs read against `generated/` in
+      // this describe block -- held for exactly this one readFileSync.
+      const onDisk = withStdlibBuildLock(() =>
+        readFileSync(join(PACKAGES_DIR, PACKAGE_DIR, 'generated', `${mod.fileBaseName}.js`)),
+      );
       const freshlyEmitted = Buffer.from(emitModuleJs(mod, ASSETS_STDLIB_DIR), 'utf8');
 
       expect(sha256Hex(onDisk)).toBe(sha256Hex(freshlyEmitted));
     },
+    120_000,
   );
 });
 

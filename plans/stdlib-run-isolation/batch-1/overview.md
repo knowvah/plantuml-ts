@@ -12,4 +12,4 @@ recommendation and starts implementing it has violated D4.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Options ADR with measured cost; STOP for approval | architect-reviewer (sonnet) | `planning/adr/`, `.agent-notes/sri-T2.md` | T0, T1 | [ ] |
+| T2 | Options ADR with measured cost; STOP for approval | architect-reviewer (sonnet) | `planning/adr/`, `.agent-notes/sri-T2.md` | T0, T1 | [x] |

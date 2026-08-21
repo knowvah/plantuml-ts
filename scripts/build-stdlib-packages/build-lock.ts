@@ -212,10 +212,13 @@ function isStale(observation: LockObservation, opts: ResolvedBuildLockOptions): 
 }
 
 /** `wx` (`O_CREAT | O_EXCL`): atomic create-if-absent on every platform Node
- * targets, so of any number of racing callers exactly one observes `true`. */
-function tryCreateLockFile(opts: ResolvedBuildLockOptions): boolean {
+ * targets, so of any number of racing callers exactly one observes `true`.
+ * Takes `acquiredAt` as a parameter (rather than calling `opts.now()`
+ * itself) so the caller can remember the EXACT value written, to prove
+ * ownership at release time -- see {@link releaseIfOwned}. */
+function tryCreateLockFile(opts: ResolvedBuildLockOptions, acquiredAt: number): boolean {
   try {
-    writeFileSync(opts.lockPath, JSON.stringify({ pid: opts.pid, acquiredAt: opts.now() }), { flag: 'wx' });
+    writeFileSync(opts.lockPath, JSON.stringify({ pid: opts.pid, acquiredAt }), { flag: 'wx' });
     return true;
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === 'EEXIST') {
@@ -252,10 +255,38 @@ function reclaimIfStale(opts: ResolvedBuildLockOptions): boolean {
 }
 
 /**
+ * Releases `opts.lockPath` ONLY if it still names the exact acquisition
+ * identified by `ownerPid`/`ownerAcquiredAt` -- the pid/timestamp pair
+ * {@link tryCreateLockFile} wrote when this holder won the lock.
+ *
+ * Necessary because `isStale` (above) deliberately reclaims a lock older
+ * than `staleAgeMs` even from a still-live holder (correct for a ~1s
+ * builder; a real risk once this lock is held across a reader's critical
+ * section, which can run longer -- stdlib-run-isolation option D,
+ * `planning/adr/ADR-003-stdlib-run-isolation.md`). If that has already
+ * happened by the time THIS holder calls `release()`, the file at
+ * `lockPath` now belongs to whoever reclaimed it. An unconditional
+ * `rmSync` would delete that stranger's lock, silently handing out a
+ * second, overlapping grant of mutual exclusion -- worse than the original
+ * problem this module exists to prevent. A mismatch (or the file already
+ * being gone) is therefore a no-op, not an error: there is nothing this
+ * holder is entitled to remove.
+ */
+function releaseIfOwned(opts: ResolvedBuildLockOptions, ownerPid: number, ownerAcquiredAt: number): void {
+  const observation = observeLock(opts.lockPath);
+  if (observation.kind === 'parsed' && observation.pid === ownerPid && observation.acquiredAt === ownerAcquiredAt) {
+    rmSync(opts.lockPath, { force: true });
+  }
+}
+
+/**
  * Acquires the cross-process build lock, waiting (bounded) for any current
  * holder to release, or be recognised as dead/stale and reclaimed. Returns
  * a `release()` callback the caller MUST invoke (in a `finally`) once its
- * critical section is done.
+ * critical section is done. `release()` is ownership-safe -- it removes
+ * `lockPath` only if it still names THIS acquisition, and is a no-op if
+ * `isStale` has already reclaimed it out from under a holder that outlived
+ * `staleAgeMs` (see {@link releaseIfOwned}).
  *
  * Never blocks indefinitely: throws, naming `lockPath` and the elapsed
  * wait in milliseconds, once `maxWaitMs` is exceeded with the lock still
@@ -267,8 +298,9 @@ export function acquireBuildLock(repoRoot: string, options: BuildLockOptions = {
   let hasLoggedWait = false;
 
   for (;;) {
-    if (tryCreateLockFile(opts)) {
-      return () => rmSync(opts.lockPath, { force: true });
+    const acquiredAt = opts.now();
+    if (tryCreateLockFile(opts, acquiredAt)) {
+      return () => releaseIfOwned(opts, opts.pid, acquiredAt);
     }
 
     // A reclaim just cleared the path -- retry immediately. Neither
