@@ -1,4 +1,11 @@
+import { tmpdir } from 'node:os';
+
 import { defineConfig } from 'vitest/config';
+
+import {
+  COVERAGE_ISOLATE_ENV_VAR,
+  resolveCoverageReportsDirectory,
+} from './tests/helpers/coverage-reports-directory.js';
 
 export default defineConfig({
   test: {
@@ -14,6 +21,23 @@ export default defineConfig({
     passWithNoTests: true,
     coverage: {
       provider: 'v8',
+      // Vitest derives its raw-shard scratch dir as `resolve(reportsDirectory,
+      // '.tmp')` and `rm -rf`s it at run start, so two concurrent runs sharing
+      // this value delete each other's shards mid-flight -- the second run's
+      // start-of-run clean kills the first, which then dies during report
+      // generation with `ENOENT ... .tmp/coverage-<n>.json`. Vitest documents
+      // this as a usage constraint (it has a dedicated error for it) rather
+      // than fixing it, so the caller must keep the directories apart.
+      //
+      // Off by default: an ordinary `npm test`, and CI, resolve the plain
+      // 'coverage' default and are unaffected. Set COVERAGE_ISOLATE=1 when
+      // deliberately running two suites at once. See
+      // `.agent-notes/coverage-tmp-race.md`.
+      reportsDirectory: resolveCoverageReportsDirectory({
+        isolate: process.env[COVERAGE_ISOLATE_ENV_VAR],
+        pid: process.pid,
+        tmpDir: tmpdir(),
+      }),
       // Vitest 4 removed `coverage.all` (and `coverage.extensions`): reports
       // now include only files the run actually touched, which is exactly
       // what `all: false` used to select. The behaviour is unchanged; the

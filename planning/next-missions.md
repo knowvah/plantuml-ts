@@ -437,27 +437,47 @@ either. Cost: suite ~7% slower, ~37 per-test timeouts raised to 120s (no
 assertion weakened). No `src/` touched, no package publish surface
 changed (`git diff --stat main..HEAD -- packages/` empty).
 
-**Separate, still-open concurrency defect found while verifying the above
-(2026-08-21, observed once, not investigated).** Closing the `generated/`
-residual does NOT make two concurrent `npm test` runs safe. A first
-end-to-end trial, with both runs sharing the default `coverage/` output
-directory, crashed Run A during coverage-report generation with:
+**Separate concurrency defect found while verifying the above — ROOT-CAUSED
+AND FIXED 2026-08-21.** Closing the `generated/` residual did not make two
+concurrent `npm test` runs safe. Two distinct blockers were found; one is
+fixed, one is open.
+
+**(a) `coverage/.tmp` shard race — FIXED.** Vitest derives its raw-coverage
+scratch dir from `reportsDirectory`
+(`coverage.DM_a_rWm.js:654-655`), `rm -rf`s it at run start (`:719-724`), and
+names shards `coverage-${uniqueId++}.json` from a per-process counter
+(`:740`). Two runs sharing `reportsDirectory` therefore both delete each
+other's shards *and* collide on filenames. Vitest ships a dedicated error for
+this exact case (`:729`) — it is a **documented usage constraint, not an
+upstream defect**, so there is nothing to report upstream. Two failure modes,
+not the one originally hypothesised: the reported `ENOENT`, and the worse
+`SyntaxError: Unexpected non-whitespace character after JSON` from
+interleaved writes to the same filename. Fixed by resolving
+`coverage.reportsDirectory` through `tests/helpers/coverage-reports-directory.ts`:
+off by default (ordinary runs and CI write to `coverage/` exactly as before,
+thresholds unchanged), with `COVERAGE_ISOLATE=1` opting a run into
+`<os-tmpdir>/plantuml-ts-coverage-<pid>`. Measured: 2 of 6 shared runs hit the
+race, 0 of 6 isolated runs did. Full diagnosis in
+`.agent-notes/coverage-tmp-race.md`.
+
+**(b) stdlib build-lock timeout under two concurrent suites — OPEN, and a
+consequence of SI35's own fix.** With the coverage race removed, the dominant
+remaining failure is:
 
 ```
-Error: ENOENT: no such file or directory, open '.../coverage/.tmp/coverage-103.json'
+Error: Timed out after 30000ms waiting for the stdlib build lock at
+  /var/folders/.../plantuml-ts-stdlib-build-<hash>.lock
 ```
 
-Zero test failures were logged before that point, and zero
-`generated/`-tree errors on either side — this is the coverage reporter,
-not the stdlib tree. Two concurrent `vitest run --coverage` invocations
-share one `coverage/.tmp/` scratch directory, so one process's cleanup can
-delete a shard the other is still writing. Re-running with an isolated
-`--coverage.reportsDirectory` per run made both runs green, which is
-consistent with that mechanism but does not prove it — nobody has
-root-caused this, and it is a *different* shared mutable path from the one
-`stdlib-run-isolation` closed. Anyone who needs genuinely concurrent full
-runs should isolate the coverage directory, and should expect this to want
-its own diagnosis before it is called fixed.
+thrown from `acquireBuildLock` (`scripts/build-stdlib-packages/build-lock.ts:315`).
+It failed real tests in 2 of 6 shared runs and 1 of 6 isolated runs. Option D
+placed 8 reader files under that lock with `maxWaitMs = 30_000`; two full
+suites contending exceed that budget, turning the disclosed "up to 30 s tail
+latency" into an outright failure. **Deliberately not fixed unilaterally** —
+raising `maxWaitMs` buys reliability at the cost of masking genuine deadlock,
+and scoping the lock differently is a design change. Needs an explicit
+decision. Until then, two concurrent full suites remain unreliable even with
+`COVERAGE_ISOLATE=1`.
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
 
