@@ -26,6 +26,18 @@
  * lock file and defeat option D entirely. Absent an `options.lockPath`
  * override, this helper therefore contends on exactly the same lock
  * `buildStdlibPackages()` acquires.
+ *
+ * stdlib-lock-sharing T2 -- this helper now requests
+ * `acquireBuildLock`'s shared (reader) mode by default
+ * (`plans/stdlib-lock-sharing/decisions.md` D4): all 8 call sites only
+ * ever READ `generated/`, so T0's measured 319,190ms of reader-vs-reader
+ * waiting (`.agent-notes/lsh-T0.md`) was pure lock overhead with zero
+ * safety value -- readers never conflict with each other, only with the
+ * builder's exclusive (writer) acquisition. `acquireBuildLock`'s own
+ * default stays `'exclusive'` (D4 rules out changing the library
+ * default); this helper opts in for its callers instead. An explicit
+ * `options.mode` (e.g. from this file's own tests) still wins -- see
+ * {@link withStdlibBuildLock}'s implementation.
  */
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,7 +49,9 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 export function withStdlibBuildLock<T>(fn: () => Promise<T>, options?: BuildLockOptions): Promise<T>;
 export function withStdlibBuildLock<T>(fn: () => T, options?: BuildLockOptions): T;
 export function withStdlibBuildLock<T>(fn: () => T | Promise<T>, options: BuildLockOptions = {}): T | Promise<T> {
-  const release = acquireBuildLock(REPO_ROOT, options);
+  // Default to shared mode (D4); an explicit `options.mode` overrides it
+  // because object spread lets a later key win.
+  const release = acquireBuildLock(REPO_ROOT, { mode: 'shared', ...options });
   let result: T | Promise<T>;
   try {
     result = fn();
