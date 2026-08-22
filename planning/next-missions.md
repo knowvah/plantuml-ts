@@ -460,49 +460,53 @@ thresholds unchanged), with `COVERAGE_ISOLATE=1` opting a run into
 race, 0 of 6 isolated runs did. Full diagnosis in
 `.agent-notes/coverage-tmp-race.md`.
 
-**(b) stdlib build-lock timeout under two concurrent suites — OPEN, and a
-consequence of SI35's own fix.** With the coverage race removed, the dominant
-remaining failure is:
+**(b) stdlib build-lock timeout under two concurrent suites — CLOSED
+2026-08-22** (`stdlib-lock-sharing` mission,
+`plans/stdlib-lock-sharing/README.md#close-out-2026-08-22`, branch
+`fix/stdlib-lock-sharing`). The target signature —
 
 ```
 Error: Timed out after 30000ms waiting for the stdlib build lock at
   /var/folders/.../plantuml-ts-stdlib-build-<hash>.lock
 ```
 
-thrown from `acquireBuildLock` (`scripts/build-stdlib-packages/build-lock.ts:315`).
-It failed real tests in 2 of 6 shared runs and 1 of 6 isolated runs.
+thrown from `acquireBuildLock` (`scripts/build-stdlib-packages/build-lock.ts`)
+— occurred **zero times across 16 post-fix process runs** (10 from the
+mission's own trials, 6 from an independent controlled-load re-check), against
+a pre-mission reference of 2 of 6 shared-coverage and 1 of 6 isolated runs
+failing with that exact signature.
 
-**Root-caused by measurement 2026-08-21** (full numbers in
-`.agent-notes/stdlib-lock-budget.md`). Readers acquire the lock in the same
-**exclusive** mode a builder does, but a reader only needs to exclude a
-*builder* — it has no conflict with another reader. Instrumenting
-`acquireBuildLock` gives:
+**What shipped, exactly as recommended below.** `acquireBuildLock` gained
+`mode: 'shared' | 'exclusive'` (default `exclusive`, unchanged for the
+builder); the 8 in-worker readers now acquire in `shared` mode and hold
+concurrently; the builder still acquires `exclusive`, draining readers and
+blocking new ones behind a writer-intent marker before it `rmSync`s the
+tree — the exact safety property SI35's option D bought, preserved. Total
+**waiting** collapsed from 319,190 ms to a re-measured range of
+**3,737–49,804 ms across 5 concurrent-pair trials** (a ~13x spread; even the
+worst trial is 84.4% below baseline, the median 92.8% below); max single-wait
+fell from grazing the 30 s budget (29,500 ms) to a 785–12,818 ms range.
+Full before/after table, all 5 trials, and the reader/exclusive design (D1–D4)
+in the close-out linked above.
 
-| | Single run | Two concurrent suites |
-|---|---|---|
-| Acquisitions | 288 | 573 |
-| Total holding | 12.4 s | 35.9 s |
-| Total **waiting** | **54.7 s** | **229.6 s** |
-| Max wait | 9.5 s | **29.7 s** (budget is 30 s) |
-
-That is **229.6 s of waiting to protect 35.9 s of holding**, almost all of it
-reader-versus-reader contention with no safety value, and a max wait grazing
-the 30 s limit on every concurrent run — which is why failures are
-intermittent rather than deterministic. Note also that a single run makes
-**288** acquisitions, not the 8 the conversion implies: the wrapped calls sit
-inside parametrized cases.
-
-**Raising `maxWaitMs` is the wrong fix** — doubling the suites roughly
-quadrupled total wait, so a bigger budget buys one more concurrent run while
-doubling how long a real deadlock takes to surface.
-
-**Recommended: a shared/exclusive (readers-writer) lock.** Readers hold in
-shared mode concurrently; the builder takes exclusive mode, draining readers
-and blocking new ones. Preserves exactly the safety property option D bought
-while removing the reader-versus-reader serialisation. This is a new lock
-mode plus tests plus call-site conversion — mission-sized, not a drive-by
-edit. Until it lands, two concurrent full suites remain unreliable even with
-`COVERAGE_ISOLATE=1`.
+**What is NOT closed, named honestly rather than folded into "done".** A
+second, unrelated failure mode was surfaced while re-measuring: vitest's
+**default 5,000 ms per-test timeout** (no `testTimeout` override in
+`vitest.config.ts`) on two pre-existing, CPU-bound tests
+(`tests/architecture/catalog.test.ts:20`, `tests/unit/stdlib-packages.test.ts:
+429`) fired in 4 of 5 trials. A controlled experiment separated cause from
+load: at starting 1-minute load 4.37 and 28.15, 0 timeouts (4/4 processes
+clean); at load 57.07, 2 of 2 processes hit the 5,000 ms default. **This
+tracks machine load, not the lock redesign** — no lock-timeout signature
+appeared in any of the failing runs — but the redesign's own mechanism
+(removing `Atomics.wait` queueing so two suites' CPU-bound work now competes
+instead of one sleeping behind the other's mutex) is a plausible contributor
+under load, not disproven. **Follow-on candidate, not started:** either give
+those two tests an explicit, larger `testTimeout`, or (per the close-out's
+proposal) re-measure and lower SI35's ~37 per-test 120 s lock timeouts — now
+provably over-provisioned (observed worst case 12,818 ms vs. the 120 s
+ceiling) but not safe to drop to vitest's bare 5 s default, since 3 of 5
+trials exceeded 5 s on lock wait alone.
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
 

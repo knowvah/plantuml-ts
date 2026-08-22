@@ -290,7 +290,15 @@ export function buildStdlibPackages(): void {
     );
   }
 
-  const release = acquireBuildLock(REPO_ROOT);
+  // stdlib-lock-sharing T3 -- explicit, not relying on the default: this
+  // builder `rmSync`s the generated tree readers concurrently `readFileSync`
+  // (`buildPackage`/`buildAllPackage`/`buildSpriteSplits` below), so it is
+  // the one caller in the repo that must exclude every reader, not just
+  // every other writer. `mode: 'exclusive'` is redundant with
+  // `acquireBuildLock`'s own default (D4,
+  // `plans/stdlib-lock-sharing/decisions.md`) BY INTENT: if that default
+  // ever changes, this call site must not silently inherit the change.
+  const release = acquireBuildLock(REPO_ROOT, { mode: 'exclusive' });
   try {
     for (const spec of PACKAGE_SPECS) {
       buildPackage(spec);
