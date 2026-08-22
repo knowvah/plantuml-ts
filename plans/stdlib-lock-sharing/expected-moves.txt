@@ -1,0 +1,13 @@
+# expected-moves.txt — stdlib-lock-sharing
+#
+# Fixtures allowed to move `render-manifest`'s SHA-256 between batches
+# (`manifest-diff.py`). One bare slug per line; `#` comments ignored.
+#
+# THIS MISSION CHANGES NO `src/` AND NO FIXTURE. The list is intentionally
+# EMPTY: every batch must report "0 unexpected". This is test/build
+# infrastructure; any rendering movement means something is wrong.
+#
+#   Batch 0 (T0)     — none (a measurement harness).
+#   Batch 1 (T1)     — none (the lock).
+#   Batch 2 (T2, T3) — none (call-site wiring).
+#   Batch 3 (T4, T5) — none.
