@@ -36,6 +36,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { isGeneratedDirUpToDate } from '../../scripts/build-stdlib-packages.js';
 import { acquireBuildLock } from '../../scripts/build-stdlib-packages/build-lock.js';
+import { LOCK_PRESSURE_BUDGET_MS } from '../helpers/lock-pressure-budget.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const BUILD_LOCK_MODULE_URL = pathToFileURL(
@@ -292,7 +293,7 @@ describe('acquireBuildLock -- on-disk representation', () => {
     // gap -- in which case it is no longer ours. Both prove OUR lock was
     // released; neither is satisfiable if `release()` were a no-op.
     expect(ownerPidAt(defaultLockPath)).not.toBe(process.pid);
-  }, 120_000);
+  }, LOCK_PRESSURE_BUDGET_MS);
 
   it('costs no measurable overhead when uncontended', () => {
     const dir = makeTempDir('build-stdlib-lock-cost-');

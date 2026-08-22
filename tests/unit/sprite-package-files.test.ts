@@ -44,6 +44,7 @@ import { describe, expect, it } from 'vitest';
 import { emitModuleJs } from '../../scripts/build-stdlib-packages/emit-module.js';
 import { BOOTSTRAP_SPRITE_SPLIT, PACKAGE_SPECS } from '../../scripts/build-stdlib-packages/package-specs.js';
 import type { SpriteSplitManifest } from '../../scripts/split-sprite-bundle/split.js';
+import { LOCK_PRESSURE_BUDGET_MS } from '../helpers/lock-pressure-budget.js';
 import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -162,7 +163,7 @@ describe('acceptance 2: every sprite name in the real manifest is inside the res
       expect(packedPaths.has('LICENSE')).toBe(true);
       expect(packedPaths.has('LICENSES.md')).toBe(true);
     },
-    120_000,
+    LOCK_PRESSURE_BUDGET_MS,
   );
 });
 
@@ -196,7 +197,7 @@ describe('acceptance 3: eager bundle modules are unaffected by the sprite-split 
 
       expect(sha256Hex(onDisk)).toBe(sha256Hex(freshlyEmitted));
     },
-    120_000,
+    LOCK_PRESSURE_BUDGET_MS,
   );
 });
 

@@ -22,6 +22,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { emitAllIndexDts, emitAllIndexJs } from '../../scripts/build-stdlib-packages/emit-all-index.js';
+import { LOCK_PRESSURE_BUDGET_MS } from '../helpers/lock-pressure-budget.js';
 import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -96,13 +97,13 @@ describe('acceptance 2: the built index.js on disk matches the emitter', () => {
     const onDisk = withStdlibBuildLock(() => readFileSync(join(STDLIB_ALL_GENERATED_DIR, 'index.js'), 'utf8'));
     expect(onDisk).toBe(emitAllIndexJs());
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('generated/index.d.ts is byte-identical to a fresh emit', () => {
     const onDisk = withStdlibBuildLock(() => readFileSync(join(STDLIB_ALL_GENERATED_DIR, 'index.d.ts'), 'utf8'));
     expect(onDisk).toBe(emitAllIndexDts());
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 });
 
 // ---------------------------------------------------------------------------
@@ -117,28 +118,28 @@ describe("acceptance 3: stdlib-all's built index exports each binding by name", 
     expect(mod.c4.name).toBe('C4');
     expect(Object.keys(mod.c4.files).length).toBeGreaterThan(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('re-exports stdlib.archimate (eager, concrete)', async () => {
     const mod = await importBuiltIndex();
     expect(mod.archimate.name).toBe('archimate');
     expect(Object.keys(mod.archimate.files).length).toBeGreaterThan(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('re-exports stdlib.cloudinsight (eager, concrete)', async () => {
     const mod = await importBuiltIndex();
     expect(mod.cloudinsight.name).toBe('cloudinsight');
     expect(Object.keys(mod.cloudinsight.files).length).toBeGreaterThan(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('re-exports stdlib.cloudogu (eager, concrete)', async () => {
     const mod = await importBuiltIndex();
     expect(mod.cloudogu.name).toBe('cloudogu');
     expect(Object.keys(mod.cloudogu.files).length).toBeGreaterThan(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('re-exports stdlib.bootstrap (eager, alias of bootstrap1.13.1)', async () => {
     const mod = await importBuiltIndex();
@@ -146,21 +147,21 @@ describe("acceptance 3: stdlib-all's built index exports each binding by name", 
     expect(mod.bootstrap.aliasOf).toBe('bootstrap1.13.1');
     expect(Object.keys(mod.bootstrap.files)).toHaveLength(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('re-exports stdlib.bootstrap1_13_1 (eager, concrete target)', async () => {
     const mod = await importBuiltIndex();
     expect(mod.bootstrap1_13_1.name).toBe('bootstrap1.13.1');
     expect(Object.keys(mod.bootstrap1_13_1.files).length).toBeGreaterThan(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('re-exports stdlib-aws.awslib14Remote (manifest, concrete)', async () => {
     const mod = await importBuiltIndex();
     expect(mod.awslib14Remote.name).toBe('awslib14');
     expect(Object.keys(mod.awslib14Remote.files).length).toBeGreaterThan(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('re-exports stdlib-aws.awslibRemote (manifest, alias of awslib14)', async () => {
     const mod = await importBuiltIndex();
@@ -168,12 +169,12 @@ describe("acceptance 3: stdlib-all's built index exports each binding by name", 
     expect(mod.awslibRemote.aliasOf).toBe('awslib14');
     expect(Object.keys(mod.awslibRemote.files)).toHaveLength(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('re-exports stdlib-tupadr3.tupadr3Remote (manifest, concrete)', async () => {
     const mod = await importBuiltIndex();
     expect(mod.tupadr3Remote.name).toBe('tupadr3');
     expect(Object.keys(mod.tupadr3Remote.files).length).toBeGreaterThan(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 });
