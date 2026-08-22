@@ -9,5 +9,5 @@ API is wrong — stop and journal it, do not widen the write-set.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Readers acquire shared | typescript-pro (sonnet) | `tests/helpers/with-stdlib-build-lock.ts`, `tests/unit/with-stdlib-build-lock.test.ts` | T1 | [ ] |
-| T3 | Builder acquires exclusive explicitly; fitness function still holds | typescript-pro (sonnet) | `scripts/build-stdlib-packages.ts`, `tests/architecture/stdlib-read-lock.test.ts` | T1 | [ ] |
+| T2 | Readers acquire shared | typescript-pro (sonnet) | `tests/helpers/with-stdlib-build-lock.ts`, `tests/unit/with-stdlib-build-lock.test.ts` | T1 | [x] |
+| T3 | Builder acquires exclusive explicitly; fitness function still holds | typescript-pro (sonnet) | `scripts/build-stdlib-packages.ts`, `tests/architecture/stdlib-read-lock.test.ts` | T1 | [x] |

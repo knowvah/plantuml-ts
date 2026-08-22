@@ -51,7 +51,7 @@ the safety property SI35 bought — a reader is never mid-read while a builder
 |---|---|---|---|
 | [0](batch-0/overview.md) | Reusable contention harness + baseline | T0 | [x] |
 | [1](batch-1/overview.md) | Shared mode in the lock (TDD) | T1 | [x] |
-| [2](batch-2/overview.md) | Wire readers and the builder | T2, T3 | [ ] |
+| [2](batch-2/overview.md) | Wire readers and the builder | T2, T3 | [x] |
 | [3](batch-3/overview.md) | Re-measure, verify, close out | T4, T5 | [ ] |
 
 Batch 2 is parallel (disjoint write-sets). Everything else is serial. T0
