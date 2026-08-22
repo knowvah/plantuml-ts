@@ -27,7 +27,7 @@
  */
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -41,6 +41,19 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const BUILD_LOCK_MODULE_URL = pathToFileURL(
   join(REPO_ROOT, 'scripts', 'build-stdlib-packages', 'build-lock.ts'),
 ).href;
+/** stdlib-lock-sharing T1 -- `build-lock.ts` gained a relative import
+ * (`./reader-registry.ts`) once shared mode landed. Worker scripts below
+ * live under a `mkdtempSync` scratch dir OUTSIDE this repo's `node_modules`
+ * tree, so Node's native `import()` of a raw `build-lock.ts` file:// URL
+ * can no longer resolve that nested `.js`-specifier-to-`.ts`-file mapping
+ * (that remapping is a TypeScript/jiti convention, not something Node's
+ * native ESM resolver or its built-in TS type-stripping performs). Routing
+ * the import through jiti's OWN resolver (`createJiti(...).import(...)`)
+ * fixes the nested resolution -- but bare-specifier `import 'jiti'` inside
+ * a worker script resolves relative to THAT SCRIPT's own directory, which
+ * is also outside `node_modules`. Importing jiti by its absolute `file://`
+ * URL sidesteps both problems at once. */
+const JITI_MODULE_URL = pathToFileURL(join(REPO_ROOT, 'node_modules', 'jiti', 'lib', 'jiti.mjs')).href;
 
 // ---------------------------------------------------------------------------
 // Fixture + process cleanup -- every temp dir and every child process this
@@ -113,10 +126,11 @@ function buildWorkerSource(): string {
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const [, , buildLockModuleUrl, lockPath, buildDir, expectedContent] = process.argv;
+const [, , jitiModuleUrl, buildLockModuleUrl, lockPath, buildDir, expectedContent] = process.argv;
 
 async function main() {
-  const { acquireBuildLock } = await import(buildLockModuleUrl);
+  const { createJiti } = await import(jitiModuleUrl);
+  const { acquireBuildLock } = await createJiti(process.cwd()).import(buildLockModuleUrl);
   const release = acquireBuildLock('unused-repo-root', { lockPath, maxWaitMs: 15000, pollIntervalMs: 10 });
   try {
     const outputPath = join(buildDir, 'output.txt');
@@ -165,7 +179,7 @@ function holderWorkerSource(): string {
   return `
 import { writeFileSync } from 'node:fs';
 
-const [, , buildLockModuleUrl, lockPath, readySentinelPath, holdMsArg] = process.argv;
+const [, , jitiModuleUrl, buildLockModuleUrl, lockPath, readySentinelPath, holdMsArg] = process.argv;
 const holdMs = Number(holdMsArg);
 
 function sleepSync(ms) {
@@ -173,9 +187,48 @@ function sleepSync(ms) {
 }
 
 async function main() {
-  const { acquireBuildLock } = await import(buildLockModuleUrl);
+  const { createJiti } = await import(jitiModuleUrl);
+  const { acquireBuildLock } = await createJiti(process.cwd()).import(buildLockModuleUrl);
   const release = acquireBuildLock('unused-repo-root', { lockPath, maxWaitMs: 15000, pollIntervalMs: 10 });
   writeFileSync(readySentinelPath, 'ready', 'utf8');
+  sleepSync(holdMs);
+  release();
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
+`;
+}
+
+/**
+ * stdlib-lock-sharing T1 -- "shared reader" worker: acquires the lock in
+ * shared mode, writes its acquisition timestamp (not just a sentinel) to
+ * `readySentinelPath` so the test can check for genuine time-window
+ * overlap between two such workers, holds for `holdMs`, then releases.
+ */
+function sharedReaderWorkerSource(): string {
+  return `
+import { writeFileSync } from 'node:fs';
+
+const [, , jitiModuleUrl, buildLockModuleUrl, lockPath, readySentinelPath, holdMsArg] = process.argv;
+const holdMs = Number(holdMsArg);
+
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+async function main() {
+  const { createJiti } = await import(jitiModuleUrl);
+  const { acquireBuildLock } = await createJiti(process.cwd()).import(buildLockModuleUrl);
+  const release = acquireBuildLock('unused-repo-root', {
+    lockPath,
+    mode: 'shared',
+    maxWaitMs: 15000,
+    pollIntervalMs: 10,
+  });
+  writeFileSync(readySentinelPath, String(Date.now()), 'utf8');
   sleepSync(holdMs);
   release();
 }
@@ -476,6 +529,7 @@ describe('acquireBuildLock -- composed with the real up-to-date predicate', () =
       const holdMs = 200;
 
       const holder = spawnWorker(holderScriptPath, [
+        JITI_MODULE_URL,
         BUILD_LOCK_MODULE_URL,
         lockPath,
         readySentinelPath,
@@ -524,7 +578,7 @@ describe('acquireBuildLock -- concurrent builders', () => {
       const expectedContent = 'expected-fresh-output-concurrent';
 
       const children = Array.from({ length: 3 }, () =>
-        spawnWorker(workerScriptPath, [BUILD_LOCK_MODULE_URL, lockPath, buildDir, expectedContent]),
+        spawnWorker(workerScriptPath, [JITI_MODULE_URL, BUILD_LOCK_MODULE_URL, lockPath, buildDir, expectedContent]),
       );
       liveChildren = children;
 
@@ -544,4 +598,336 @@ describe('acquireBuildLock -- concurrent builders', () => {
     },
     20_000,
   );
+});
+
+// ---------------------------------------------------------------------------
+// stdlib-lock-sharing T1 -- shared (reader) mode, D1-D4
+// (`plans/stdlib-lock-sharing/decisions.md`). Readers never conflict with
+// each other, only with a writer.
+// ---------------------------------------------------------------------------
+
+describe('acquireBuildLock -- shared mode: concurrency (D1)', () => {
+  it(
+    'two shared acquisitions in DIFFERENT processes both proceed concurrently, neither waiting on the other',
+    async () => {
+      const scratch = makeTempDir('build-stdlib-lock-shared-concurrent-');
+      const workerScriptPath = join(scratch, 'shared-reader.mjs');
+      writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
+      const lockPath = join(scratch, 'shared.lock');
+      const holdMs = 400;
+      const readyA = join(scratch, 'ready-a');
+      const readyB = join(scratch, 'ready-b');
+
+      const start = Date.now();
+      const workerA = spawnWorker(workerScriptPath, [JITI_MODULE_URL, BUILD_LOCK_MODULE_URL, lockPath, readyA, String(holdMs)]);
+      const workerB = spawnWorker(workerScriptPath, [JITI_MODULE_URL, BUILD_LOCK_MODULE_URL, lockPath, readyB, String(holdMs)]);
+      liveChildren = [workerA, workerB];
+
+      const [resultA, resultB] = await Promise.all([collectExit(workerA), collectExit(workerB)]);
+      const elapsed = Date.now() - start;
+
+      expect(resultA.exitCode).toBe(0);
+      expect(resultB.exitCode).toBe(0);
+      // Serialised acquisition would take at least 2*holdMs; concurrent
+      // holding completes in about one holdMs plus process-spawn overhead.
+      expect(elapsed).toBeLessThan(holdMs * 1.6);
+
+      const acquiredA = Number(readFileSync(readyA, 'utf8'));
+      const acquiredB = Number(readFileSync(readyB, 'utf8'));
+      // Each holder's [acquired, acquired+holdMs] window must overlap the
+      // other's -- proof neither waited for the other to release.
+      expect(acquiredA).toBeLessThan(acquiredB + holdMs);
+      expect(acquiredB).toBeLessThan(acquiredA + holdMs);
+    },
+    20_000,
+  );
+
+  it(
+    'a writer waits for a held shared lock to drain, then proceeds',
+    async () => {
+      const scratch = makeTempDir('build-stdlib-lock-shared-drain-');
+      const workerScriptPath = join(scratch, 'shared-reader.mjs');
+      writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
+      const lockPath = join(scratch, 'shared.lock');
+      const readySentinelPath = join(scratch, 'reader-ready');
+      const holdMs = 200;
+
+      const reader = spawnWorker(workerScriptPath, [
+        JITI_MODULE_URL,
+        BUILD_LOCK_MODULE_URL,
+        lockPath,
+        readySentinelPath,
+        String(holdMs),
+      ]);
+      liveChildren = [reader];
+
+      await waitForFile(readySentinelPath, 5000);
+
+      const waitStart = Date.now();
+      const release = acquireBuildLock(REPO_ROOT, { lockPath, maxWaitMs: 5000, pollIntervalMs: 10 });
+      const waited = Date.now() - waitStart;
+      expect(waited).toBeGreaterThanOrEqual(holdMs * 0.5);
+
+      // The reader's presence entry must be gone by the time the writer
+      // holds -- proof the writer actually drained rather than racing past.
+      const readersDir = `${lockPath}.readers`;
+      const remaining = existsSync(readersDir) ? readdirSync(readersDir) : [];
+      expect(remaining).toEqual([]);
+
+      release();
+      await new Promise<void>((resolve) => reader.once('exit', () => resolve()));
+    },
+    15_000,
+  );
+});
+
+describe('acquireBuildLock -- shared mode: writer priority (D3)', () => {
+  it('a reader queues behind a published writer-intent marker rather than joining as a new reader', () => {
+    const dir = makeTempDir('build-stdlib-lock-intent-');
+    const lockPath = join(dir, 'intent.lock');
+    const intentDir = `${lockPath}.writer-intent`;
+    // Simulate a writer that has published intent but not yet won
+    // `lockPath` -- D3: an arriving reader must queue behind it, not
+    // register as a new reader. Uses this test's OWN pid so the default
+    // liveness check recognises it as live without needing an override.
+    mkdirSync(intentDir, { recursive: true });
+    writeFileSync(
+      join(intentDir, `${process.pid}-1`),
+      JSON.stringify({ pid: process.pid, acquiredAt: Date.now() }),
+      'utf8',
+    );
+
+    let clock = 0;
+    let thrown: unknown;
+    try {
+      acquireBuildLock(REPO_ROOT, {
+        lockPath,
+        mode: 'shared',
+        maxWaitMs: 100,
+        pollIntervalMs: 20,
+        now: () => clock,
+        sleep: (ms) => {
+          clock += ms;
+        },
+      });
+    } catch (err) {
+      thrown = err;
+    }
+
+    expect(thrown).toBeInstanceOf(Error);
+    expect((thrown as Error).message).toContain('shared');
+    // Proves the reader never registered as a live reader while intent stood.
+    const readersDir = `${lockPath}.readers`;
+    expect(existsSync(readersDir) ? readdirSync(readersDir) : []).toEqual([]);
+  });
+});
+
+describe('acquireBuildLock -- shared mode: bounded wait', () => {
+  it('throws, naming the lock path and the wait duration, once a live writer outlasts maxWaitMs (shared mode)', () => {
+    const dir = makeTempDir('build-stdlib-lock-shared-timeout-');
+    const lockPath = join(dir, 'held.lock');
+    writeFileSync(lockPath, JSON.stringify({ pid: 999_999, acquiredAt: 0 }), 'utf8');
+
+    let clock = 0;
+    let thrown: unknown;
+    try {
+      acquireBuildLock(REPO_ROOT, {
+        lockPath,
+        mode: 'shared',
+        maxWaitMs: 100,
+        pollIntervalMs: 20,
+        now: () => clock,
+        sleep: (ms) => {
+          clock += ms;
+        },
+        isProcessAlive: () => true,
+      });
+    } catch (err) {
+      thrown = err;
+    }
+
+    expect(thrown).toBeInstanceOf(Error);
+    const message = (thrown as Error).message;
+    expect(message).toContain(lockPath);
+    expect(message).toContain('100ms');
+    expect(message).toContain('shared');
+  });
+
+  it('throws, naming the readers directory and the wait duration, once a live reader outlasts maxWaitMs while a writer drains', () => {
+    const dir = makeTempDir('build-stdlib-lock-drain-timeout-');
+    const lockPath = join(dir, 'drain.lock');
+    const readersDir = `${lockPath}.readers`;
+    mkdirSync(readersDir, { recursive: true });
+    writeFileSync(join(readersDir, '999999-1'), JSON.stringify({ pid: 999_999, acquiredAt: 0 }), 'utf8');
+
+    let clock = 0;
+    let thrown: unknown;
+    try {
+      acquireBuildLock(REPO_ROOT, {
+        lockPath,
+        maxWaitMs: 100,
+        pollIntervalMs: 20,
+        now: () => clock,
+        sleep: (ms) => {
+          clock += ms;
+        },
+        isProcessAlive: () => true,
+      });
+    } catch (err) {
+      thrown = err;
+    }
+
+    expect(thrown).toBeInstanceOf(Error);
+    const message = (thrown as Error).message;
+    expect(message).toContain(readersDir);
+    expect(message).toContain('100ms');
+    // A failed drain must not leave the mutex file behind for nobody to
+    // release.
+    expect(existsSync(lockPath)).toBe(false);
+  });
+});
+
+describe('acquireBuildLock -- shared mode: stale reader reclamation', () => {
+  it(
+    'reclaims a reader entry left behind by a dead process and does not wedge a draining writer',
+    async () => {
+      const scratch = makeTempDir('build-stdlib-lock-reader-dead-');
+      const workerScriptPath = join(scratch, 'shared-reader.mjs');
+      writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
+      const lockPath = join(scratch, 'shared.lock');
+      const readySentinelPath = join(scratch, 'reader-ready');
+
+      // Long hold -- this worker is killed before it ever releases, so the
+      // value only matters in that it never elapses naturally.
+      const reader = spawnWorker(workerScriptPath, [JITI_MODULE_URL, BUILD_LOCK_MODULE_URL, lockPath, readySentinelPath, '30000']);
+      liveChildren = [reader];
+      await waitForFile(readySentinelPath, 5000);
+      reader.kill('SIGKILL');
+      await new Promise<void>((resolve) => reader.once('exit', () => resolve()));
+
+      const readersDir = `${lockPath}.readers`;
+      expect(readdirSync(readersDir).length).toBe(1);
+
+      const start = Date.now();
+      const release = acquireBuildLock(REPO_ROOT, { lockPath, maxWaitMs: 5000, pollIntervalMs: 10 });
+      const elapsed = Date.now() - start;
+
+      // Well under maxWaitMs -- proves reclaim, not a timed-out wait.
+      expect(elapsed).toBeLessThan(2000);
+      release();
+      expect(existsSync(readersDir) ? readdirSync(readersDir).length : 0).toBe(0);
+    },
+    15_000,
+  );
+});
+
+describe('acquireBuildLock -- shared mode: ownership-safe reader release', () => {
+  it('does not delete a reader entry that has been reclaimed and reused by a different holder', () => {
+    const dir = makeTempDir('build-stdlib-lock-reader-ownership-');
+    const lockPath = join(dir, 'ownership.lock');
+
+    const release = acquireBuildLock(REPO_ROOT, { lockPath, mode: 'shared' });
+    const readersDir = `${lockPath}.readers`;
+    const [entryName] = readdirSync(readersDir);
+    const entryPath = join(readersDir, entryName as string);
+    expect(existsSync(entryPath)).toBe(true);
+
+    // Simulate the real trigger, the same way the writer-lock ownership
+    // test above does: a stranger reclaimed this exact slot and wrote its
+    // own content into it before this holder's release() ran.
+    const strangerContent = JSON.stringify({ pid: 999_998, acquiredAt: Date.now() });
+    writeFileSync(entryPath, strangerContent, 'utf8');
+
+    release();
+
+    // A naive `unregisterPresenceIfOwned` that does `rmSync(entryPath)`
+    // unconditionally deletes the stranger's entry here -- verified by
+    // temporarily swapping in that implementation and re-running this
+    // test: it fails with `expect(existsSync(entryPath)).toBe(true)` --
+    // "expected false to be true" -- because the unconditional version
+    // removes the file regardless of its content.
+    expect(existsSync(entryPath)).toBe(true);
+    expect(readFileSync(entryPath, 'utf8')).toBe(strangerContent);
+  });
+
+  it('still deletes its own reader entry when it still names this exact acquisition', () => {
+    const dir = makeTempDir('build-stdlib-lock-reader-ownership-self-');
+    const lockPath = join(dir, 'self.lock');
+    const readersDir = `${lockPath}.readers`;
+
+    const release = acquireBuildLock(REPO_ROOT, { lockPath, mode: 'shared' });
+    expect(readdirSync(readersDir).length).toBe(1);
+    release();
+    expect(existsSync(readersDir) ? readdirSync(readersDir).length : 0).toBe(0);
+  });
+});
+
+describe('acquireBuildLock -- mode default and non-reentrancy', () => {
+  it('defaults to exclusive mode when `mode` is not specified', () => {
+    const dir = makeTempDir('build-stdlib-lock-default-mode-');
+    const lockPath = join(dir, 'default.lock');
+
+    const release = acquireBuildLock(REPO_ROOT, { lockPath });
+    // Exclusive mode creates the mutex file itself, not a reader entry.
+    expect(existsSync(lockPath)).toBe(true);
+    expect(existsSync(`${lockPath}.readers`)).toBe(false);
+    release();
+  });
+
+  it('does not silently succeed: a shared acquisition nested inside a held exclusive one, same process, times out', () => {
+    const dir = makeTempDir('build-stdlib-lock-reentrant-');
+    const lockPath = join(dir, 'reentrant.lock');
+
+    const releaseExclusive = acquireBuildLock(REPO_ROOT, { lockPath });
+    let clock = 0;
+    let thrown: unknown;
+    try {
+      acquireBuildLock(REPO_ROOT, {
+        lockPath,
+        mode: 'shared',
+        maxWaitMs: 100,
+        pollIntervalMs: 20,
+        now: () => clock,
+        sleep: (ms) => {
+          clock += ms;
+        },
+      });
+    } catch (err) {
+      thrown = err;
+    } finally {
+      releaseExclusive();
+    }
+
+    expect(thrown).toBeInstanceOf(Error);
+    expect((thrown as Error).message).toContain(lockPath);
+  });
+});
+
+describe('acquireBuildLock -- shared acquisitions are traced (STDLIB_LOCK_TRACE_DIR)', () => {
+  it('emits an "acquired" trace record with the same shape a builder produces', () => {
+    const traceDir = makeTempDir('build-stdlib-lock-shared-trace-');
+    const dir = makeTempDir('build-stdlib-lock-shared-trace-lock-');
+    const lockPath = join(dir, 'traced.lock');
+    const previousEnv = process.env.STDLIB_LOCK_TRACE_DIR;
+    process.env.STDLIB_LOCK_TRACE_DIR = traceDir;
+    try {
+      const release = acquireBuildLock(REPO_ROOT, { lockPath, mode: 'shared' });
+      release();
+    } finally {
+      if (previousEnv === undefined) {
+        delete process.env.STDLIB_LOCK_TRACE_DIR;
+      } else {
+        process.env.STDLIB_LOCK_TRACE_DIR = previousEnv;
+      }
+    }
+
+    const traceFile = join(traceDir, `lock-trace-${process.pid}.jsonl`);
+    const lines = readFileSync(traceFile, 'utf8').trim().split('\n');
+    const record = JSON.parse(lines[lines.length - 1] as string) as Record<string, unknown>;
+    expect(record.kind).toBe('acquired');
+    expect(record.pid).toBe(process.pid);
+    expect(typeof record.acquiredAtMs).toBe('number');
+    expect(typeof record.waitMs).toBe('number');
+    expect(typeof record.holdMs).toBe('number');
+  });
 });

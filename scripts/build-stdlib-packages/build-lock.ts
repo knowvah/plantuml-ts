@@ -1,65 +1,63 @@
 /**
  * Cross-process build lock for `buildStdlibPackages()` (stdlib-build-race
- * T4 -- D3, `plans/stdlib-build-race/decisions.md`: "the fix is a
- * cross-process lock AND an idempotent up-to-date skip"). T2
+ * T4 -- D3, `plans/stdlib-build-race/decisions.md`). T2
  * (`isGeneratedDirUpToDate` / `isSpriteSplitUpToDate`, `../build-stdlib-packages.ts`)
- * makes a SECOND run recognise a byte-identical tree and skip its
- * destructive `rmSync` -- but only if it gets to look at a COMPLETE tree.
- * Without a lock, a second run can observe a first run's *partial*,
- * in-progress tree, judge it stale, and `rmSync` it out from under the
- * first run's still-importing workers (`.agent-notes/sre-T0.md`). This
- * module closes that: only one process holds the lock at a time, so
- * whichever holder runs T2's predicates next always sees either a
- * complete tree (the common case -- skip) or no tree at all (genuinely
- * first run -- build).
+ * makes a second run recognise a byte-identical tree and skip its
+ * destructive `rmSync` -- but only if it sees a COMPLETE tree. Without a
+ * lock, a second run can observe a first run's partial tree, judge it
+ * stale, and `rmSync` it out from under the first run's still-importing
+ * workers (`.agent-notes/sre-T0.md`). This module closes that: only one
+ * writer holds the lock at a time, so whichever holder runs T2's
+ * predicates next always sees either a complete tree or none at all.
  *
- * On-disk representation: one file at `lockPath` (default: a deterministic,
- * repo-keyed path under `os.tmpdir()`, so it is never part of the git tree
- * and needs no `.gitignore` entry -- every process running this script
- * against the SAME repo computes the same path with no shared config).
- * Created with the `wx` flag (`O_CREAT | O_EXCL`) -- atomic create-if-absent
- * on every platform Node supports, so of any number of racing callers,
- * exactly one observes success. Its content is `{ pid, acquiredAt }` JSON,
- * used ONLY for stale-lock recovery below -- never for the up-to-date
- * decision itself, which stays exactly T2's content hash. D4 governs
- * whether build OUTPUT is up to date, never a count or an mtime; an
- * age/liveness check on the LOCK HOLDER is a different question about a
- * different thing and is not what D4 forbids.
+ * On-disk representation: one file at `lockPath` (default: a
+ * deterministic, repo-keyed path under `os.tmpdir()` -- every process
+ * against the same repo computes the same path with no shared config),
+ * created with `wx` (`O_CREAT | O_EXCL`) -- atomic create-if-absent, so of
+ * any number of racing callers exactly one observes success. Content is
+ * `{ pid, acquiredAt }` JSON, used ONLY for stale-lock recovery -- never
+ * for T2's up-to-date decision, which stays exactly its content hash.
  *
- * Stale recovery: a lock is reclaimed (deleted, then re-contended) if
- * either its `pid` is no longer alive (the holder crashed) or it is older
- * than `staleAgeMs` (a safety net for a live-but-wedged holder). Without
- * this, one crashed holder would wedge EVERY future run permanently --
- * strictly worse than the race this module exists to fix.
- *
- * A lock file can also exist but fail to `JSON.parse` -- a crash or a full
- * disk mid-`write()` leaves exactly this behind (`{"pid":12345,"acqui`).
- * Content-based liveness is then unavailable, so this is treated as stale
- * too, but ONLY once the file's own mtime has aged past
- * `staleUnparseableGraceMs` (short: 2s default). That grace period is
- * necessary because `writeFileSync(path, ..., {flag:'wx'})` is `open()`
- * then `write()` then `close()` -- not one atomic content-visible step --
- * so a racing reader can legitimately observe a still-empty/partial file
- * for a few microseconds right after a holder's `open()` wins. Reading the
- * grace period off the file's mtime (not the embedded `acquiredAt`, which
- * an unparseable file by definition doesn't have) is legitimate: as
- * already established above, D4 governs whether build OUTPUT is up to
- * date (content hash, never count/mtime); this is a liveness check on the
- * LOCK FILE ITSELF, the same distinction as the pid/`staleAgeMs` check
- * just above, not a second instance of the thing D4 forbids.
+ * Stale recovery: a lock is reclaimed if its `pid` is no longer alive or
+ * it is older than `staleAgeMs` (a safety net for a live-but-wedged
+ * holder) -- without this, one crashed holder wedges every future run
+ * permanently. A lock file can also exist but fail to `JSON.parse` -- a
+ * crash or full disk mid-`write()` leaves exactly this behind. That is
+ * treated as stale too, but only once its mtime outlives
+ * `staleUnparseableGraceMs` (2s default): `writeFileSync(..., {flag:'wx'})`
+ * is open-then-write-then-close, not one atomic content-visible step, so a
+ * racing reader can legitimately see a still-partial file for a few
+ * microseconds right after a holder's `open()` wins.
  *
  * Bounded wait: {@link acquireBuildLock} polls with a synchronous sleep
- * (`Atomics.wait`, so it genuinely blocks this thread rather than spinning
- * the CPU -- required because `buildStdlibPackages()` is called
- * synchronously, with no `await`, from `globalSetup`
- * (`tests/helpers/build-stdlib-globalsetup.ts`)) and throws, naming
- * `lockPath` and the elapsed wait, once `maxWaitMs` is exceeded. It never
- * blocks indefinitely.
+ * (`Atomics.wait` -- required because `buildStdlibPackages()` runs
+ * synchronously, with no `await`, from `globalSetup`) and throws, naming
+ * the path and elapsed wait, once `maxWaitMs` is exceeded. Never blocks
+ * indefinitely.
+ *
+ * stdlib-lock-sharing T1 -- `options.mode` (default `'exclusive'`) adds a
+ * shared (reader) mode per `plans/stdlib-lock-sharing/decisions.md`
+ * D1-D4: readers never conflict with each other, only with a writer, so
+ * any number may hold concurrently across any number of processes. A
+ * writer still excludes every other writer via `lockPath` as before,
+ * additionally drains all current readers before proceeding, and
+ * publishes a writer-intent marker (D3) for its whole attempt so
+ * late-arriving readers queue behind it. Presence-directory mechanics
+ * live in `./reader-registry.ts`, reused for both directories.
  */
 import { createHash } from 'node:crypto';
 import { appendFileSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
+import {
+  countLivePresence,
+  drainPresence,
+  readersDirFor,
+  registerPresence,
+  unregisterPresenceIfOwned,
+  writerIntentDirFor,
+} from './reader-registry.js';
 
 const DEFAULT_STALE_AGE_MS = 60_000;
 const DEFAULT_POLL_INTERVAL_MS = 50;
@@ -71,31 +69,18 @@ const DEFAULT_MAX_WAIT_MS = 30_000;
 const DEFAULT_STALE_UNPARSEABLE_GRACE_MS = 2_000;
 
 /**
- * stdlib-lock-sharing T0 (measurement/baseline task) -- OFF-by-default,
- * env-gated acquisition tracing. Every production caller
- * (`build-stdlib-packages.ts:293`, `with-stdlib-build-lock.ts:40`, and its
- * 8 reader call sites) invokes {@link acquireBuildLock} with no `now`/`log`
- * override, so this is the only seam through which a real, multi-process
- * `npm test` run can be observed without editing every one of those call
- * sites -- all of them out of this task's write-set. See
- * `scripts/measure-lock-contention.ts`, the harness that turns this on by
- * setting the env var to a directory.
- *
- * Cost when unset (every existing caller, always): one `process.env` read
- * plus one `!== undefined` check per acquisition, and a second `!==
- * undefined` check on the (rare) timeout-throw path -- no allocation, no
- * `fs` call, no behavioral change. Same order of magnitude as the
- * `hasLoggedWait` check already on this path.
+ * stdlib-lock-sharing T0 -- OFF-by-default, env-gated acquisition tracing.
+ * No production caller passes `now`/`log` overrides, so this is the only
+ * seam a real multi-process `npm test` run can be observed through (see
+ * `scripts/measure-lock-contention.ts`). Cost when unset: one
+ * `process.env` read plus one `!== undefined` check per acquisition -- no
+ * `fs` call, no behavioral change.
  */
 const LOCK_TRACE_DIR_ENV_VAR = 'STDLIB_LOCK_TRACE_DIR';
 
-/** One JSON line per acquisition attempt, appended to
- * `<dir>/lock-trace-<pid>.jsonl` -- a file PER PROCESS, so concurrent
- * processes never share a file handle and no cross-process append race is
- * possible (mirrors `tests/helpers/coverage-reports-directory.ts`'s
- * per-pid isolation). `waitMs` is present on both variants so a caller can
- * find "acquisitions that took at least as long as the budget" with one
- * predicate over either kind. */
+/** One JSON line per acquisition, appended to `<dir>/lock-trace-<pid>.jsonl`
+ * -- one file PER PROCESS, so concurrent processes never race on the same
+ * file. `waitMs` is on both variants for one shared "slow" predicate. */
 type LockTraceRecord =
   | {
       readonly kind: 'acquired';
@@ -121,6 +106,9 @@ interface ResolvedBuildLockOptions {
   readonly isProcessAlive: (pid: number) => boolean;
   readonly sleep: (ms: number) => void;
   readonly log: (message: string) => void;
+  /** D4 -- `'shared'` (reader) or `'exclusive'` (writer); defaults to
+   * `'exclusive'` so every pre-existing caller is untouched. */
+  readonly mode: 'shared' | 'exclusive';
 }
 
 /** Every field is optional -- a caller overrides only what a test (or a
@@ -186,6 +174,7 @@ function productionDefaults(repoRoot: string): ResolvedBuildLockOptions {
     isProcessAlive: defaultIsProcessAlive,
     sleep: sleepSync,
     log: defaultLog,
+    mode: 'exclusive',
   };
 }
 
@@ -294,24 +283,12 @@ function reclaimIfStale(opts: ResolvedBuildLockOptions): boolean {
   return true;
 }
 
-/**
- * Releases `opts.lockPath` ONLY if it still names the exact acquisition
- * identified by `ownerPid`/`ownerAcquiredAt` -- the pid/timestamp pair
- * {@link tryCreateLockFile} wrote when this holder won the lock.
- *
- * Necessary because `isStale` (above) deliberately reclaims a lock older
- * than `staleAgeMs` even from a still-live holder (correct for a ~1s
- * builder; a real risk once this lock is held across a reader's critical
- * section, which can run longer -- stdlib-run-isolation option D,
- * `planning/adr/ADR-003-stdlib-run-isolation.md`). If that has already
- * happened by the time THIS holder calls `release()`, the file at
- * `lockPath` now belongs to whoever reclaimed it. An unconditional
- * `rmSync` would delete that stranger's lock, silently handing out a
- * second, overlapping grant of mutual exclusion -- worse than the original
- * problem this module exists to prevent. A mismatch (or the file already
- * being gone) is therefore a no-op, not an error: there is nothing this
- * holder is entitled to remove.
- */
+/** Releases `opts.lockPath` ONLY if it still names the exact acquisition
+ * identified by `ownerPid`/`ownerAcquiredAt`. Necessary because `isStale`
+ * deliberately reclaims a lock older than `staleAgeMs` even from a
+ * still-live holder; if that already happened, `lockPath` now belongs to
+ * whoever reclaimed it, and an unconditional `rmSync` would delete that
+ * stranger's lock. A mismatch (or the file already gone) is a no-op. */
 function releaseIfOwned(opts: ResolvedBuildLockOptions, ownerPid: number, ownerAcquiredAt: number): void {
   const observation = observeLock(opts.lockPath);
   if (observation.kind === 'parsed' && observation.pid === ownerPid && observation.acquiredAt === ownerAcquiredAt) {
@@ -319,11 +296,36 @@ function releaseIfOwned(opts: ResolvedBuildLockOptions, ownerPid: number, ownerA
   }
 }
 
-/** Builds the `release()` closure {@link acquireBuildLock} returns on
- * success: always does the ownership-safe release ({@link releaseIfOwned}),
- * and -- only when `traceDir` is set (see {@link LOCK_TRACE_DIR_ENV_VAR}) --
- * appends one `'acquired'` timing record. Split out so `acquireBuildLock`
- * itself stays a single `for`/`if` shape. */
+/** Appends one `'acquired'` record; no-op when unset. Shared by both
+ * modes' release closures so both trace the identical shape (T4). */
+function appendAcquiredTrace(
+  opts: ResolvedBuildLockOptions,
+  acquiredAt: number,
+  waitStart: number,
+  traceDir: string | undefined,
+): void {
+  if (traceDir === undefined) {
+    return;
+  }
+  appendLockTrace(traceDir, {
+    kind: 'acquired',
+    pid: opts.pid,
+    acquiredAtMs: acquiredAt,
+    waitMs: acquiredAt - waitStart,
+    holdMs: opts.now() - acquiredAt,
+  });
+}
+
+/** Appends one `'timeout'` record; no-op when `traceDir` is unset. Shared
+ * by every throw site so all of them record the same shape. */
+function appendTimeoutTrace(opts: ResolvedBuildLockOptions, waitStart: number, traceDir: string | undefined): void {
+  if (traceDir === undefined) {
+    return;
+  }
+  appendLockTrace(traceDir, { kind: 'timeout', pid: opts.pid, waitMs: opts.now() - waitStart });
+}
+
+/** `release()` for an EXCLUSIVE acquisition: releases `lockPath` if owned, plus the trace-append. */
 function buildRelease(
   opts: ResolvedBuildLockOptions,
   acquiredAt: number,
@@ -332,56 +334,65 @@ function buildRelease(
 ): () => void {
   return () => {
     releaseIfOwned(opts, opts.pid, acquiredAt);
-    if (traceDir !== undefined) {
-      appendLockTrace(traceDir, {
-        kind: 'acquired',
-        pid: opts.pid,
-        acquiredAtMs: acquiredAt,
-        waitMs: acquiredAt - waitStart,
-        holdMs: opts.now() - acquiredAt,
-      });
-    }
+    appendAcquiredTrace(opts, acquiredAt, waitStart, traceDir);
   };
 }
 
-/**
- * Acquires the cross-process build lock, waiting (bounded) for any current
- * holder to release, or be recognised as dead/stale and reclaimed. Returns
- * a `release()` callback the caller MUST invoke (in a `finally`) once its
- * critical section is done. `release()` is ownership-safe -- it removes
- * `lockPath` only if it still names THIS acquisition, and is a no-op if
- * `isStale` has already reclaimed it out from under a holder that outlived
- * `staleAgeMs` (see {@link releaseIfOwned}).
- *
- * Never blocks indefinitely: throws, naming `lockPath` and the elapsed
- * wait in milliseconds, once `maxWaitMs` is exceeded with the lock still
- * held by a live, non-stale holder.
- */
-export function acquireBuildLock(repoRoot: string, options: BuildLockOptions = {}): () => void {
-  const opts = resolveOptions(repoRoot, options);
-  const traceDir = process.env[LOCK_TRACE_DIR_ENV_VAR];
-  const waitStart = opts.now();
-  const deadline = waitStart + opts.maxWaitMs;
-  let hasLoggedWait = false;
+/** `release()` for a SHARED acquisition: removes this reader's own entry
+ * if owned, plus the trace-append. Never touches `lockPath`. */
+function buildSharedRelease(
+  opts: ResolvedBuildLockOptions,
+  entryPath: string,
+  acquiredAt: number,
+  waitStart: number,
+  traceDir: string | undefined,
+): () => void {
+  return () => {
+    unregisterPresenceIfOwned(entryPath, opts.pid, acquiredAt);
+    appendAcquiredTrace(opts, acquiredAt, waitStart, traceDir);
+  };
+}
 
+/** Is `lockPath` held by a live writer? A stale one is reclaimed here. */
+function writerHoldsLock(opts: ResolvedBuildLockOptions): boolean {
+  const observation = observeLock(opts.lockPath);
+  if (observation.kind === 'absent') {
+    return false;
+  }
+  if (isStale(observation, opts)) {
+    reclaimIfStale(opts);
+    return false;
+  }
+  return true;
+}
+
+/** No live writer and no published writer-intent (D3) -- checked before
+ * AND after registering a reader entry (D2's re-check). */
+function noWriterPresent(opts: ResolvedBuildLockOptions, intentDir: string): boolean {
+  return !writerHoldsLock(opts) && countLivePresence(intentDir, opts) === 0;
+}
+
+/** The original exclusive acquisition loop, unchanged from before shared
+ * mode existed. Returns the winning `acquiredAt`. */
+function acquireWriterFile(
+  opts: ResolvedBuildLockOptions,
+  deadline: number,
+  traceDir: string | undefined,
+  waitStart: number,
+): number {
+  let hasLoggedWait = false;
   for (;;) {
     const acquiredAt = opts.now();
     if (tryCreateLockFile(opts, acquiredAt)) {
-      return buildRelease(opts, acquiredAt, waitStart, traceDir);
+      return acquiredAt;
     }
-
-    // A reclaim just cleared the path -- retry immediately. Neither
-    // logging "waiting" nor sleeping first is honest here: we are not
-    // blocked on a live holder, we are one `tryCreateLockFile` call away
-    // from done.
+    // A reclaim just cleared the path -- retry immediately, not a "waiting" wait.
     if (reclaimIfStale(opts)) {
       continue;
     }
 
     if (opts.now() >= deadline) {
-      if (traceDir !== undefined) {
-        appendLockTrace(traceDir, { kind: 'timeout', pid: opts.pid, waitMs: opts.now() - waitStart });
-      }
+      appendTimeoutTrace(opts, waitStart, traceDir);
       throw new Error(`Timed out after ${opts.maxWaitMs}ms waiting for the stdlib build lock at ${opts.lockPath}`);
     }
 
@@ -391,4 +402,99 @@ export function acquireBuildLock(repoRoot: string, options: BuildLockOptions = {
     }
     opts.sleep(Math.min(opts.pollIntervalMs, Math.max(0, deadline - opts.now())));
   }
+}
+
+/** Exclusive acquisition -- D3/D4. Publishes writer-intent for the whole
+ * attempt, wins `lockPath` as before, then drains readers (bounded by
+ * `deadline`); a drain timeout releases `lockPath` before throwing. */
+function acquireExclusive(
+  opts: ResolvedBuildLockOptions,
+  waitStart: number,
+  deadline: number,
+  traceDir: string | undefined,
+): () => void {
+  const intentDir = writerIntentDirFor(opts.lockPath);
+  const intentAcquiredAt = opts.now();
+  const intentEntryPath = registerPresence(intentDir, opts.pid, intentAcquiredAt);
+  try {
+    const acquiredAt = acquireWriterFile(opts, deadline, traceDir, waitStart);
+    const readersDir = readersDirFor(opts.lockPath);
+    if (!drainPresence(readersDir, opts, deadline)) {
+      releaseIfOwned(opts, opts.pid, acquiredAt);
+      appendTimeoutTrace(opts, waitStart, traceDir);
+      throw new Error(`Timed out after ${opts.maxWaitMs}ms waiting for readers to drain at ${readersDir}`);
+    }
+    return buildRelease(opts, acquiredAt, waitStart, traceDir);
+  } finally {
+    unregisterPresenceIfOwned(intentEntryPath, opts.pid, intentAcquiredAt);
+  }
+}
+
+/** D1/D2: registers a presence entry only once no writer is present, then
+ * re-verifies (the D2 re-check); a writer that won that race causes the
+ * entry to be removed. Returns the winning entry, or `undefined` to retry. */
+function tryRegisterReader(
+  opts: ResolvedBuildLockOptions,
+  readersDir: string,
+  intentDir: string,
+): { readonly entryPath: string; readonly acquiredAt: number } | undefined {
+  if (!noWriterPresent(opts, intentDir)) {
+    return undefined;
+  }
+  const acquiredAt = opts.now();
+  const entryPath = registerPresence(readersDir, opts.pid, acquiredAt);
+  if (noWriterPresent(opts, intentDir)) {
+    return { entryPath, acquiredAt };
+  }
+  unregisterPresenceIfOwned(entryPath, opts.pid, acquiredAt);
+  return undefined;
+}
+
+/** Shared acquisition -- D1/D2 via {@link tryRegisterReader}, bounded by
+ * `deadline` like every other wait path. Any number of shared
+ * acquisitions, in any number of processes, proceed concurrently. */
+function acquireShared(
+  opts: ResolvedBuildLockOptions,
+  waitStart: number,
+  deadline: number,
+  traceDir: string | undefined,
+): () => void {
+  const readersDir = readersDirFor(opts.lockPath);
+  const intentDir = writerIntentDirFor(opts.lockPath);
+  let hasLoggedWait = false;
+  for (;;) {
+    const registered = tryRegisterReader(opts, readersDir, intentDir);
+    if (registered !== undefined) {
+      return buildSharedRelease(opts, registered.entryPath, registered.acquiredAt, waitStart, traceDir);
+    }
+
+    if (opts.now() >= deadline) {
+      appendTimeoutTrace(opts, waitStart, traceDir);
+      throw new Error(
+        `Timed out after ${opts.maxWaitMs}ms waiting for the stdlib build lock (shared) at ${opts.lockPath}`,
+      );
+    }
+
+    if (!hasLoggedWait) {
+      opts.log(`waiting for the stdlib build lock (shared) at ${opts.lockPath} -- a writer is present or waiting`);
+      hasLoggedWait = true;
+    }
+    opts.sleep(Math.min(opts.pollIntervalMs, Math.max(0, deadline - opts.now())));
+  }
+}
+
+/** Acquires the cross-process build lock in either mode (`options.mode`,
+ * default `'exclusive'`) and returns a `release()` callback the caller
+ * MUST invoke (in a `finally`) once done. Never blocks indefinitely, in
+ * either mode: every wait path throws, naming the path and elapsed wait,
+ * once `maxWaitMs` is exceeded. See {@link acquireExclusive} and
+ * {@link acquireShared} for each mode's own bounded-wait behaviour. */
+export function acquireBuildLock(repoRoot: string, options: BuildLockOptions = {}): () => void {
+  const opts = resolveOptions(repoRoot, options);
+  const traceDir = process.env[LOCK_TRACE_DIR_ENV_VAR];
+  const waitStart = opts.now();
+  const deadline = waitStart + opts.maxWaitMs;
+  return opts.mode === 'shared'
+    ? acquireShared(opts, waitStart, deadline, traceDir)
+    : acquireExclusive(opts, waitStart, deadline, traceDir);
 }
