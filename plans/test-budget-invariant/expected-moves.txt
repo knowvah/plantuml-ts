@@ -1,0 +1,12 @@
+# expected-moves.txt — test-budget-invariant
+#
+# Fixtures allowed to move `render-manifest`'s SHA-256 between batches
+# (`manifest-diff.py`). One bare slug per line; `#` comments ignored.
+#
+# THIS MISSION CHANGES NO `src/` AND NO FIXTURE. The list is intentionally
+# EMPTY: every batch must report "0 unexpected". This is test/build
+# infrastructure; any rendering movement means something is wrong.
+#
+#   Batch 1 (T1, T2) — none (a timeout constant and a diagnosis).
+#   Batch 2 (T3, T4) — none (a fitness test and its outcome).
+#   Batch 3 (T5)     — none (verification and docs).
