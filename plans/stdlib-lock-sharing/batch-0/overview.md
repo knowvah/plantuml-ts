@@ -13,4 +13,4 @@ the README**; reproduce them.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | Reusable contention harness + baseline capture | typescript-pro (sonnet) | `scripts/measure-lock-contention.ts`, `.agent-notes/lsh-T0.md` | — | [ ] |
+| T0 | Reusable contention harness + baseline capture | typescript-pro (sonnet) | `scripts/measure-lock-contention.ts`, `.agent-notes/lsh-T0.md` | — | [x] |

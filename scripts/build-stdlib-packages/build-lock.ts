@@ -57,7 +57,7 @@
  * blocks indefinitely.
  */
 import { createHash } from 'node:crypto';
-import { readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { appendFileSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -69,6 +69,46 @@ const DEFAULT_MAX_WAIT_MS = 30_000;
 // while still reclaiming a genuinely abandoned corrupt lock in seconds,
 // not permanently -- see the module doc comment above.
 const DEFAULT_STALE_UNPARSEABLE_GRACE_MS = 2_000;
+
+/**
+ * stdlib-lock-sharing T0 (measurement/baseline task) -- OFF-by-default,
+ * env-gated acquisition tracing. Every production caller
+ * (`build-stdlib-packages.ts:293`, `with-stdlib-build-lock.ts:40`, and its
+ * 8 reader call sites) invokes {@link acquireBuildLock} with no `now`/`log`
+ * override, so this is the only seam through which a real, multi-process
+ * `npm test` run can be observed without editing every one of those call
+ * sites -- all of them out of this task's write-set. See
+ * `scripts/measure-lock-contention.ts`, the harness that turns this on by
+ * setting the env var to a directory.
+ *
+ * Cost when unset (every existing caller, always): one `process.env` read
+ * plus one `!== undefined` check per acquisition, and a second `!==
+ * undefined` check on the (rare) timeout-throw path -- no allocation, no
+ * `fs` call, no behavioral change. Same order of magnitude as the
+ * `hasLoggedWait` check already on this path.
+ */
+const LOCK_TRACE_DIR_ENV_VAR = 'STDLIB_LOCK_TRACE_DIR';
+
+/** One JSON line per acquisition attempt, appended to
+ * `<dir>/lock-trace-<pid>.jsonl` -- a file PER PROCESS, so concurrent
+ * processes never share a file handle and no cross-process append race is
+ * possible (mirrors `tests/helpers/coverage-reports-directory.ts`'s
+ * per-pid isolation). `waitMs` is present on both variants so a caller can
+ * find "acquisitions that took at least as long as the budget" with one
+ * predicate over either kind. */
+type LockTraceRecord =
+  | {
+      readonly kind: 'acquired';
+      readonly pid: number;
+      readonly acquiredAtMs: number;
+      readonly waitMs: number;
+      readonly holdMs: number;
+    }
+  | { readonly kind: 'timeout'; readonly pid: number; readonly waitMs: number };
+
+function appendLockTrace(dir: string, record: LockTraceRecord): void {
+  appendFileSync(join(dir, `lock-trace-${record.pid}.jsonl`), `${JSON.stringify(record)}\n`, 'utf8');
+}
 
 interface ResolvedBuildLockOptions {
   readonly lockPath: string;
@@ -279,6 +319,31 @@ function releaseIfOwned(opts: ResolvedBuildLockOptions, ownerPid: number, ownerA
   }
 }
 
+/** Builds the `release()` closure {@link acquireBuildLock} returns on
+ * success: always does the ownership-safe release ({@link releaseIfOwned}),
+ * and -- only when `traceDir` is set (see {@link LOCK_TRACE_DIR_ENV_VAR}) --
+ * appends one `'acquired'` timing record. Split out so `acquireBuildLock`
+ * itself stays a single `for`/`if` shape. */
+function buildRelease(
+  opts: ResolvedBuildLockOptions,
+  acquiredAt: number,
+  waitStart: number,
+  traceDir: string | undefined,
+): () => void {
+  return () => {
+    releaseIfOwned(opts, opts.pid, acquiredAt);
+    if (traceDir !== undefined) {
+      appendLockTrace(traceDir, {
+        kind: 'acquired',
+        pid: opts.pid,
+        acquiredAtMs: acquiredAt,
+        waitMs: acquiredAt - waitStart,
+        holdMs: opts.now() - acquiredAt,
+      });
+    }
+  };
+}
+
 /**
  * Acquires the cross-process build lock, waiting (bounded) for any current
  * holder to release, or be recognised as dead/stale and reclaimed. Returns
@@ -294,13 +359,15 @@ function releaseIfOwned(opts: ResolvedBuildLockOptions, ownerPid: number, ownerA
  */
 export function acquireBuildLock(repoRoot: string, options: BuildLockOptions = {}): () => void {
   const opts = resolveOptions(repoRoot, options);
-  const deadline = opts.now() + opts.maxWaitMs;
+  const traceDir = process.env[LOCK_TRACE_DIR_ENV_VAR];
+  const waitStart = opts.now();
+  const deadline = waitStart + opts.maxWaitMs;
   let hasLoggedWait = false;
 
   for (;;) {
     const acquiredAt = opts.now();
     if (tryCreateLockFile(opts, acquiredAt)) {
-      return () => releaseIfOwned(opts, opts.pid, acquiredAt);
+      return buildRelease(opts, acquiredAt, waitStart, traceDir);
     }
 
     // A reclaim just cleared the path -- retry immediately. Neither
@@ -312,6 +379,9 @@ export function acquireBuildLock(repoRoot: string, options: BuildLockOptions = {
     }
 
     if (opts.now() >= deadline) {
+      if (traceDir !== undefined) {
+        appendLockTrace(traceDir, { kind: 'timeout', pid: opts.pid, waitMs: opts.now() - waitStart });
+      }
       throw new Error(`Timed out after ${opts.maxWaitMs}ms waiting for the stdlib build lock at ${opts.lockPath}`);
     }
 
