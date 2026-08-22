@@ -57,6 +57,7 @@ import { PACKAGE_SPECS } from '../../scripts/build-stdlib-packages/package-specs
 import type { SpriteSplitBundleSpec } from '../../scripts/build-stdlib-packages/package-specs.js';
 import type { PackageSpec } from '../../scripts/build-stdlib-packages/types.js';
 import { splitSpriteBundle } from '../../scripts/split-sprite-bundle/split.js';
+import { LOCK_PRESSURE_BUDGET_MS } from '../helpers/lock-pressure-budget.js';
 import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -325,7 +326,7 @@ describe('acceptance 4: refactor emits byte-identical content to the pre-existin
 
       expect(upToDate).toBe(true);
     },
-    120_000,
+    LOCK_PRESSURE_BUDGET_MS,
   );
 });
 

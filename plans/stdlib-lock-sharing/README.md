@@ -232,6 +232,28 @@ this mission fixed. **This is a follow-on proposal, per the boundary
 above — not applied in this task.** A future mission should re-measure at
 a larger trial count before picking a specific lowered value.
 
+> **Correction (2026-08-22, `test-budget-invariant` mission, T5).** The
+> paragraph above is **wrong** and is left in place, unmodified, so a
+> reader can see exactly what was claimed and why it didn't hold — this is
+> not a silent rewrite.
+>
+> The comparison above reasons from **wait alone** (12,818 ms) against the
+> 120 s ceiling and calls that ~9x slack. It omits **hold time**. A
+> lock-using test's budget must cover the full time it can be blocked:
+> `maxWaitMs` (30,000 ms) it may spend queued, **plus** the time it can
+> spend actually holding the lock once acquired. This same mission's own
+> T4 measured a max **hold** of 20,029 ms
+> (`.agent-notes/lsh-T4.md`, concurrent-pair "after" row, `maxHoldMs`).
+> Legitimate worst case is therefore `30,000 + 20,029` ≈ 50,000 ms, not
+> 12,818 ms. Against that corrected figure, 120,000 ms is **~2.4x**
+> margin, not ~9x — defensible provisioning, not slack.
+>
+> `test-budget-invariant`'s D3 (`plans/test-budget-invariant/decisions.md`)
+> keeps the 120,000 ms value unchanged on exactly this corrected
+> reasoning, and that mission's stop condition 2 forbids lowering it, or
+> proposing to lower it, on the disproven ~9x claim. **Do not act on the
+> "provably over-provisioned" framing above; it has been superseded.**
+
 ### Re-measured `npm test` wall-clock, this session
 
 Load before measuring: `uptime` 13:04, load averages **7.33 25.33 31.42**

@@ -33,6 +33,7 @@ import { FormulaMeasurer } from '../../src/core/measurer.js';
 import { MapIncludeStore } from '../../src/core/tim/IncludeStore.js';
 import { stdlibStore, withStdlib, type BundleData } from '../../src/core/tim/StdlibStore.js';
 import { renderSync } from '../../src/index.js';
+import { LOCK_PRESSURE_BUDGET_MS } from '../helpers/lock-pressure-budget.js';
 import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -76,13 +77,13 @@ let archimate: BundleData;
 // target first and vitest runs files in parallel workers (si11a T8 for
 // `generated/`; SI12 T8 for `assets/`).
 //
-// stdlib-run-isolation T4: timeout raised from 30_000 to 120_000 -- the two
-// `importGenerated` calls below each hold the real cross-process build lock
-// (`maxWaitMs` = 30_000), and under full-suite contention (many of this
-// mission's 8 converted files acquiring the SAME lock across parallel
-// vitest workers) a single 30s budget for BOTH sequential acquisitions
-// combined was measured too tight; 120_000 matches this file's own existing
-// `npm pack` tests' headroom below.
+// stdlib-run-isolation T4: timeout raised from 30_000 to LOCK_PRESSURE_BUDGET_MS
+// -- the two `importGenerated` calls below each hold the real cross-process
+// build lock (`maxWaitMs` = 30_000), and under full-suite contention (many
+// of this mission's 8 converted files acquiring the SAME lock across
+// parallel vitest workers) a single 30s budget for BOTH sequential
+// acquisitions combined was measured too tight; LOCK_PRESSURE_BUDGET_MS
+// matches this file's own existing `npm pack` tests' headroom below.
 beforeAll(async () => {
   const stdlibC4 = await importGenerated<{ c4: BundleData }>('stdlib', 'c4.js');
   c4 = stdlibC4.c4;
@@ -93,7 +94,7 @@ beforeAll(async () => {
   // (SI12 ADR-2/ADR-5) -- their VERBATIM round-trip and alias-resolution
   // cases below read the shipped `packages/*/assets/` copy instead, already
   // populated by globalSetup above.
-}, 120_000);
+}, LOCK_PRESSURE_BUDGET_MS);
 
 // ---------------------------------------------------------------------------
 // 1. VERBATIM round-trip: runtime string bytes === disk bytes === manifest sha256.
@@ -422,14 +423,26 @@ describe('npm pack --dry-run: tarball ceilings + LICENSE presence', () => {
     // 'Command failed: npm pack --dry-run --json' -- a TIMEOUT wearing the
     // costume of a packaging failure. The ceiling assertion itself passes
     // (40,780,091 B < 45 MB). Raised with headroom for a loaded machine.
-    120_000,
+    LOCK_PRESSURE_BUDGET_MS,
   );
 
-  it('packages/stdlib-all ships a LICENSE and no vendored data of its own', () => {
-    const result = npmPackDryRun('stdlib-all');
+  // test-budget-invariant T1: this sibling never had an explicit budget and
+  // inherited vitest's 5,000ms default -- below the lock's own 30,000ms
+  // `maxWaitMs`, so a real lock failure could never surface; vitest's
+  // generic "Test timed out in 5000ms" fired first instead (the defect that
+  // motivated this mission, `.agent-notes/lsh-T4.md`,
+  // `plans/test-budget-invariant/diagrams/budget-invariant.md`). It also
+  // holds the lock and spawns `npm pack --dry-run` via `npmPackDryRun`, so
+  // it needs the same budget as its sibling above.
+  it(
+    'packages/stdlib-all ships a LICENSE and no vendored data of its own',
+    () => {
+      const result = npmPackDryRun('stdlib-all');
 
-    expect(result.files.some((f) => f.path === 'LICENSE')).toBe(true);
-    expect(result.files.some((f) => f.path.startsWith('generated/'))).toBe(true);
-    expect(result.files.some((f) => f.path.includes('assets'))).toBe(false);
-  });
+      expect(result.files.some((f) => f.path === 'LICENSE')).toBe(true);
+      expect(result.files.some((f) => f.path.startsWith('generated/'))).toBe(true);
+      expect(result.files.some((f) => f.path.includes('assets'))).toBe(false);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });

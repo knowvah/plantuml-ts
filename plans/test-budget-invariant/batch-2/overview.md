@@ -11,5 +11,5 @@ diagnosis supports.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Fitness test: every lock-using test's budget > `DEFAULT_MAX_WAIT_MS`, resolving one level of helper indirection | typescript-pro (sonnet) | `tests/architecture/stdlib-lock-test-budget.test.ts` (new), `.agent-notes/tbi-T3.md` | T1 | [ ] |
-| T4 | Apply T2's diagnosed outcome for `catalog.test.ts` | typescript-pro (sonnet) | `tests/architecture/catalog.test.ts`, `.agent-notes/tbi-T4.md` | T2 | [ ] |
+| T3 | Fitness test: every lock-using test's budget > `DEFAULT_MAX_WAIT_MS`, resolving one level of helper indirection | typescript-pro (sonnet) | `tests/architecture/stdlib-lock-test-budget.test.ts` (new), `.agent-notes/tbi-T3.md` | T1 | [x] |
+| T4 | Apply T2's diagnosed outcome for `catalog.test.ts` | typescript-pro (sonnet) | `tests/architecture/catalog.test.ts`, `.agent-notes/tbi-T4.md` | T2 | [x] |

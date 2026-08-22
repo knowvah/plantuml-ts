@@ -17,6 +17,19 @@ import { readFileSync } from 'node:fs';
 import { buildCatalog, CATALOG_PATH } from '../../scripts/generate-catalog.js';
 
 describe('docs/catalog.md', () => {
+  // No lock here (0 references) and no explicit testTimeout by design (see
+  // plans/test-budget-invariant/decisions.md D4/D5) — this uses vitest's
+  // unconfigured 5,000ms default against buildCatalog()'s ~400-600ms
+  // CPU-bound tree-walk-and-parse. Single `npm test`: reliable, ~12x
+  // headroom (391-406ms measured). Two concurrent `npm test` invocations on
+  // this 12-core machine can intermittently exceed 5,000ms — not a smooth
+  // function of load, but a probabilistic OS-scheduling collision between
+  // the two processes' own worker-fork startup CPU bursts landing tightly
+  // around this test's ~500ms window (every non-colliding measurement,
+  // including load1 up to 71, topped out at ~2,306ms). No budget was set:
+  // the true worst-case collision window was never reproducible to measure,
+  // and picking a number without it would be fitting a value. Full
+  // diagnosis, causal chain, and what was ruled out: `.agent-notes/tbi-T2.md`.
   it('is up to date with src/ (run `npm run catalog` if this fails)', () => {
     const committed = readFileSync(CATALOG_PATH, 'utf8');
     expect(buildCatalog()).toBe(committed);

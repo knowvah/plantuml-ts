@@ -27,6 +27,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { LOCK_PRESSURE_BUDGET_MS } from '../helpers/lock-pressure-budget.js';
 import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -117,7 +118,7 @@ describe('generated .d.ts files import from the declared peer dependency', () =>
     const count = withStdlibBuildLock(() => generatedDtsFiles(packageDir).length);
     expect(count).toBeGreaterThan(0);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it.each(GENERATED_PACKAGES)('%s: every bare specifier is a declared dependency', (packageDir) => {
     const declared = declaredPackageNames(packageDir);
@@ -127,12 +128,12 @@ describe('generated .d.ts files import from the declared peer dependency', () =>
 
     expect(undeclared).toEqual([]);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 
   it('the unscoped pre-rename specifier appears in no generated .d.ts', () => {
     const offenders = withStdlibBuildLock(() => collectUnscopedSpecifierOffenders());
 
     expect(offenders).toEqual([]);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 });

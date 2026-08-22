@@ -42,6 +42,7 @@ import type { StdlibRemoteManifest } from '../../src/index.js';
 import type { IncludeFetcher } from '../../src/core/include-resolver.js';
 import { StdlibNotBundledError } from '../../src/core/tim/IncludeStore.js';
 import { FormulaMeasurer } from '../../src/core/measurer.js';
+import { LOCK_PRESSURE_BUDGET_MS } from '../helpers/lock-pressure-budget.js';
 import { withStdlibBuildLock } from '../helpers/with-stdlib-build-lock.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -188,7 +189,7 @@ describe('tupadr3 -- real manifest, real assets, real render (criteria 1-2)', ()
     // fail, not be relaxed.
     expect(reductionPct).toBeGreaterThan(99);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 });
 
 describe('awslib14 -- uppercase multi-slash key resolves (criterion 3, ADR-3)', () => {
@@ -226,7 +227,7 @@ describe('awslib14 -- uppercase multi-slash key resolves (criterion 3, ADR-3)', 
     const imageTagCount = (svg.match(/<image /g) ?? []).length;
     expect(imageTagCount).toBe(1);
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 });
 
 describe('a key absent from the manifest fails offline, no request made (criterion 4)', () => {
@@ -255,5 +256,5 @@ describe('a key absent from the manifest fails offline, no request made (criteri
     expect(err?.path).toBe('tupadr3/devicons/does-not-exist');
     expect(remoteFetcher).not.toHaveBeenCalled();
   },
-    120_000);
+    LOCK_PRESSURE_BUDGET_MS);
 });

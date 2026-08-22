@@ -7,4 +7,4 @@ mission will act on it.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T5 | Verify under real concurrency; correct SI36's over-provisioning claim; close out | typescript-pro (sonnet) | `plans/test-budget-invariant/README.md`, `plans/stdlib-lock-sharing/README.md`, `planning/next-missions.md`, `.agent-notes/tbi-T5.md` | T3, T4 | [ ] |
+| T5 | Verify under real concurrency; correct SI36's over-provisioning claim; close out | typescript-pro (sonnet) | `plans/test-budget-invariant/README.md`, `plans/stdlib-lock-sharing/README.md`, `planning/next-missions.md`, `.agent-notes/tbi-T5.md` | T3, T4 | [x] |
