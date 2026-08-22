@@ -501,12 +501,59 @@ tracks machine load, not the lock redesign** — no lock-timeout signature
 appeared in any of the failing runs — but the redesign's own mechanism
 (removing `Atomics.wait` queueing so two suites' CPU-bound work now competes
 instead of one sleeping behind the other's mutex) is a plausible contributor
-under load, not disproven. **Follow-on candidate, not started:** either give
-those two tests an explicit, larger `testTimeout`, or (per the close-out's
-proposal) re-measure and lower SI35's ~37 per-test 120 s lock timeouts — now
-provably over-provisioned (observed worst case 12,818 ms vs. the 120 s
-ceiling) but not safe to drop to vitest's bare 5 s default, since 3 of 5
-trials exceeded 5 s on lock wait alone.
+under load, not disproven.
+
+**Follow-on — CLOSED 2026-08-22** (`test-budget-invariant` mission,
+`plans/test-budget-invariant/README.md#close-out-2026-08-22`, branch
+`fix/test-budget-invariant`). The "either/or" framed above is resolved as
+**both, differently, per test** — not a single choice:
+
+- `tests/unit/stdlib-packages.test.ts:429` — **given an explicit, larger
+  budget** (T1): `LOCK_PRESSURE_BUDGET_MS` (120,000 ms), the same named
+  constant now shared by all 41 genuine lock-pressure call sites. This was
+  the mission's root defect — an *omitted* per-test budget on a
+  lock-holding test, not a load phenomenon — and closing it means the
+  `:429` failure signature can no longer arise from that omission.
+- `tests/architecture/catalog.test.ts:20` — **declined, deliberately, with
+  a diagnosed operating limit** (T2/T4, `no-change`). `catalog.test.ts`
+  holds no lock (0 references); its ~400–600 ms CPU-bound tree-walk-and-
+  parse only trips the unconfigured 5,000 ms default under a narrow,
+  timing-dependent collision between two `npm test` processes' own
+  startup-fork CPU bursts — not a smooth function of aggregate load
+  (sampled to load1 71.09, above this mission's own 57.07 failure point,
+  without exceeding 1,544 ms). No number was set because no measured
+  worst-case exists for the colliding case; setting one anyway would have
+  been "raise it until green." Documented in place as a comment, not
+  fixed — see `.agent-notes/tbi-T2.md` for the full diagnosis.
+
+**The other half of this item — lowering SI35's ~37 per-test 120 s lock
+timeouts — is corrected, not merely closed: do not do this.** The
+"provably over-provisioned" framing above double-counted nothing and
+omitted hold time. A lock-using test's budget must cover **wait + hold**:
+`maxWaitMs` (30,000 ms) plus the max measured **hold** of 20,029 ms
+(`.agent-notes/lsh-T4.md`) ≈ 50,000 ms legitimate worst case, so 120,000 ms
+is ~2.4x margin, not the ~9x this entry claimed from wait alone. See the
+correction inline in `plans/stdlib-lock-sharing/README.md`'s close-out and
+`plans/test-budget-invariant/decisions.md` D3.
+
+**(c) NEW, opened 2026-08-22 by `test-budget-invariant` T5 — a third test
+racing the unconfigured 5,000 ms default.**
+`tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts:226`
+(fixture `sequence/zudize-61-vomi445`) failed in **3 of 8** processes across
+that mission's concurrency trials, always the same fixture:
+```
+sequence/zudize-61-vomi445: diff count never rises above its baseline (12)
+Error: Test timed out in 5000ms.
+```
+It holds no lock and declares no per-test timeout, so it inherits vitest's
+unconfigured default across 1,141 per-fixture `it()` blocks — structurally
+the same class D5 named for `catalog.test.ts`, but at a file that mission
+never scoped. **Not diagnosed and not fixed**: T5 wrote no test files, and
+it did not measure the fixture's standalone cost the way T2 measured
+`buildCatalog()`. Anyone picking this up should diagnose to a mechanism
+before choosing a budget — `catalog.test.ts` ended at `no-change` precisely
+because no measured worst case existed, and the same trap applies here.
+Full context: `plans/test-budget-invariant/README.md` close-out, residuals.
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
 
