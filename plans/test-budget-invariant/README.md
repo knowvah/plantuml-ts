@@ -58,7 +58,7 @@ each task by pathspec.
 | Batch | What | Tasks | Done |
 |---|---|---|---|
 | [1](batch-1/overview.md) | Fix the omission + one named constant; diagnose the catalog test | T1, T2 | [x] |
-| [2](batch-2/overview.md) | The fitness test; apply the catalog outcome | T3, T4 | [ ] |
+| [2](batch-2/overview.md) | The fitness test; apply the catalog outcome | T3, T4 | [x] |
 | [3](batch-3/overview.md) | Verify, correct SI36's close-out, close out | T5 | [ ] |
 
 Batches 1 and 2 are parallel (disjoint write-sets). Batch 3 is serial.
