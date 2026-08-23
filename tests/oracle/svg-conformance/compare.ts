@@ -38,6 +38,11 @@ export interface Diff {
   expected: string;
   delta?: number;  // for numeric diffs only
   tolerance: number;
+  /**
+   * How much of the document this one diff stands for, defaulting to 1 when
+   * absent. Only the three short-circuits below set it -- see `units`.
+   */
+  weight?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -131,6 +136,48 @@ function parseTransformAttr(t: string): ParsedTransform[] {
 }
 
 // ---------------------------------------------------------------------------
+// Short-circuit weighting (D5, plans/sequence-root-chrome/decisions.md)
+// ---------------------------------------------------------------------------
+//
+// `compareNodes` returns early in three places -- node-type mismatch, tag
+// mismatch, child-count mismatch -- and pushes exactly ONE diff for each,
+// however large the subtree it then skips. That makes `diffs.length`
+// non-monotonic in wrongness: a tag SUBSTITUTION costs 1 no matter how wrong
+// its subtree is, while a tag MATCH costs one diff per differing attribute
+// plus whatever recursion finds, so making a document MORE structurally
+// aligned can RAISE the count. Charging each short-circuit an upper bound on
+// what descending could have cost restores monotonicity, because descending
+// can then never cost more than stopping.
+//
+// The weight is a design choice, not a ported constant, so it carries the
+// rationale above rather than an upstream file:line. It is deliberately a
+// loose bound (a sum, not a max): a tighter one that can be exceeded buys
+// nothing, since it is exactly the "never exceeded" property that is wanted.
+//
+// `units()` stays module-private. A second caller computing a subtly
+// different number is the failure mode this weighting exists to remove.
+
+/**
+ * Size of a normalized subtree in comparable units: one for the node itself,
+ * one per attribute, plus its children. That is an upper bound on the number
+ * of diffs a descent into it could push, since every diff `compareNodes`
+ * emits below a matched pair is attributable to a node or an attribute of one
+ * of the two sides.
+ */
+function units(node: NormalizedNode): number {
+  if (node.type === 'text') return 1;
+  let total = 1 + Object.keys(node.attrs ?? {}).length;
+  for (const child of node.children ?? []) total += units(child);
+  return total;
+}
+
+function sumUnits(nodes: readonly NormalizedNode[]): number {
+  let total = 0;
+  for (const node of nodes) total += units(node);
+  return total;
+}
+
+// ---------------------------------------------------------------------------
 // Tree walker
 // ---------------------------------------------------------------------------
 
@@ -148,6 +195,7 @@ function compareNodes(
       actual: actual.type,
       expected: expected.type,
       tolerance,
+      weight: units(actual) + units(expected),
     });
     return; // structural mismatch — stop here
   }
@@ -178,6 +226,7 @@ function compareNodes(
         actual: actual.tag ?? '',
         expected: expected.tag ?? '',
         tolerance,
+        weight: units(actual) + units(expected),
       });
       return; // structural mismatch — stop here
     }
@@ -350,6 +399,9 @@ function compareNodes(
         actual: String(actualChildren.length),
         expected: String(expectedChildren.length),
         tolerance,
+        // The node and its attributes are NOT charged here: they were just
+        // compared, and only the children are skipped.
+        weight: sumUnits(actualChildren) + sumUnits(expectedChildren),
       });
       return; // structural mismatch — stop recursing into children
     }
@@ -407,6 +459,16 @@ export function compareSvg(
   compareNodes(actualNorm, refNorm, actualNorm.tag ?? 'svg', tolerance, diffs);
 
   return { pass: diffs.length === 0, diffs };
+}
+
+/**
+ * Total weight of a diff list: the share of the two documents left
+ * unexplained by the comparison. Unlike `diffs.length` this is monotone in
+ * wrongness (see the weighting note above), which is what a ratchet needs --
+ * `diffs.length` remains what every other consumer reads and is unchanged.
+ */
+export function weightedScore(diffs: readonly Diff[]): number {
+  return diffs.reduce((sum, d) => sum + (d.weight ?? 1), 0);
 }
 
 // ---------------------------------------------------------------------------

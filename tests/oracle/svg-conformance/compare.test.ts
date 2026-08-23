@@ -8,7 +8,8 @@
  * table (D7: `deterministic` band is 0.01, no other classes).
  */
 import { describe, test, expect } from 'vitest';
-import { compareSvg, TOLERANCES } from './compare.js';
+import { compareSvg, TOLERANCES, weightedScore } from './compare.js';
+import type { Diff } from './compare.js';
 
 const MINIMAL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
   <g><ellipse cx="50.0" cy="50.0" rx="20" ry="10"/></g>
@@ -84,6 +85,8 @@ describe('compareSvg', () => {
         actual: 'rect',
         expected: 'ellipse',
         tolerance: 0.01,
+        // rect{cx,cy,rx,ry} = 5 units, ellipse{cx,cy,rx,ry} = 5.
+        weight: 10,
       },
     ]);
   });
@@ -339,5 +342,174 @@ describe('compareSvg', () => {
       expect(diffs[0]!.path).toBe('svg/g[1]/path[1]/@d[2]');
       expect(diffs[0]!.delta!).toBeGreaterThan(0.01);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Weighted diff score -- D5, `plans/sequence-root-chrome/decisions.md`.
+//
+// `compareNodes` short-circuits in THREE places (node-type mismatch, tag
+// mismatch, child-count mismatch) and charged exactly 1 for each, however
+// large the subtree it skipped. That makes the raw count non-monotonic in
+// wrongness: a tag SUBSTITUTION costs 1 no matter how wrong its subtree is,
+// while a tag MATCH costs one diff per differing attribute, so making a
+// document MORE structurally aligned can RAISE it. Each short-circuit is now
+// charged an upper bound on what descending could have cost, measured in
+// `units`: one per node plus one per attribute, summed over the subtree.
+//
+// The weighting is purely additive. `diffs.length`, every `path`/`actual`/
+// `expected`/`delta`/`tolerance`, and the ORDER of the array are untouched,
+// because seven other engines' ratchets and five scripts read them.
+// ---------------------------------------------------------------------------
+
+/** `<svg>` wrapper so each pair below differs only in its body. */
+function svg(body: string): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+}
+
+describe('weightedScore', () => {
+  test('an empty diff list scores 0', () => {
+    expect(weightedScore([])).toBe(0);
+  });
+
+  test('an absent weight counts 1; a present one counts its own value', () => {
+    const diffs: Diff[] = [
+      { path: 'svg/@width', actual: '1', expected: '2', tolerance: 0.01 },
+      {
+        path: 'svg/g[1]/rect[1]',
+        actual: 'rect',
+        expected: 'text',
+        tolerance: 0.01,
+        weight: 6,
+      },
+    ];
+    expect(weightedScore(diffs)).toBe(7);
+  });
+});
+
+describe('compareSvg — short-circuit weights', () => {
+  // AC1. rect{x,y} is 1 node + 2 attrs = 3 units; text{fill} + its text node
+  // is 1 + 1 + 1 = 3 units. One diff, as before, weighted 6.
+  test('a tag mismatch is weighted units(actual) + units(expected)', () => {
+    const { diffs } = compareSvg(
+      svg('<g><rect x="1" y="2"/></g>'),
+      svg('<g><text fill="red">hi</text></g>'),
+      'deterministic',
+    );
+    expect(diffs).toHaveLength(1);
+    expect(diffs[0]?.path).toBe('svg/g[1]/rect[1]');
+    expect(diffs[0]?.weight).toBe(6);
+    expect(weightedScore(diffs)).toBe(6);
+  });
+
+  // AC2. actual children: rect{x,y} = 3 units. expected children: rect{x} = 2
+  // plus line{x1,y1,x2,y2} = 5, so 7. The node itself is not charged twice.
+  test('a child-count mismatch is weighted by both child lists', () => {
+    const { diffs } = compareSvg(
+      svg('<g><rect x="1" y="2"/></g>'),
+      svg('<g><rect x="1"/><line x1="0" y1="0" x2="1" y2="1"/></g>'),
+      'deterministic',
+    );
+    expect(diffs).toHaveLength(1);
+    expect(diffs[0]?.path).toBe('svg/g[1][childCount]');
+    expect(diffs[0]?.weight).toBe(10);
+    expect(weightedScore(diffs)).toBe(10);
+  });
+
+  // The third short-circuit, distinct from the tag one above: SVG has a
+  // `<text>` ELEMENT, so `line` vs `text` is a tag mismatch between two
+  // elements, while this fires on a text NODE aligned against an element.
+  // units(text node) = 1, units(rect{x,y}) = 3.
+  test('a node-type mismatch is weighted units(actual) + units(expected)', () => {
+    const { diffs } = compareSvg(
+      svg('hello<g/>'),
+      svg('<rect x="1" y="2"/><g/>'),
+      'deterministic',
+    );
+    expect(diffs).toHaveLength(1);
+    expect(diffs[0]?.actual).toBe('text');
+    expect(diffs[0]?.expected).toBe('element');
+    expect(diffs[0]?.weight).toBe(4);
+  });
+
+  // AC3.
+  test('an attribute diff carries no weight and scores 1', () => {
+    const { diffs } = compareSvg(
+      svg('<rect x="1"/>'),
+      svg('<rect x="9"/>'),
+      'deterministic',
+    );
+    expect(diffs).toHaveLength(1);
+    expect(diffs[0]?.weight).toBeUndefined();
+    expect(weightedScore(diffs)).toBe(1);
+  });
+
+  test('a text diff carries no weight and scores 1', () => {
+    const { diffs } = compareSvg(
+      svg('<text>a</text>'),
+      svg('<text>b</text>'),
+      'deterministic',
+    );
+    expect(diffs).toHaveLength(1);
+    expect(diffs[0]?.weight).toBeUndefined();
+    expect(weightedScore(diffs)).toBe(1);
+  });
+});
+
+// AC4 -- the property the ratchet needs: aligning a subtree that previously
+// short-circuited can never RAISE the weighted score, even though it raises
+// `diffs.length`. Each case asserts both, so a regression that restores the
+// old behaviour fails on the score rather than passing quietly.
+describe('compareSvg — weighted score is monotone in alignment', () => {
+  const tagExpected = svg('<g><text fill="green" stroke="black">hi</text></g>');
+
+  test('aligning a mismatched TAG cannot raise the weighted score', () => {
+    const before = compareSvg(
+      svg('<g><rect fill="red" stroke="blue"/></g>'),
+      tagExpected,
+      'deterministic',
+    ).diffs;
+    const after = compareSvg(
+      svg('<g><text fill="red" stroke="blue">bye</text></g>'),
+      tagExpected,
+      'deterministic',
+    ).diffs;
+
+    expect(weightedScore(before)).toBe(7);
+    expect(weightedScore(after)).toBe(3);
+    expect(weightedScore(after)).toBeLessThanOrEqual(weightedScore(before));
+    // The defect this replaces: the raw count moves the wrong way.
+    expect(before).toHaveLength(1);
+    expect(after).toHaveLength(3);
+  });
+
+  test('aligning a mismatched CHILD COUNT cannot raise the weighted score', () => {
+    const expected = svg('<g><rect x="9"/><line x1="0"/></g>');
+    const before = compareSvg(
+      svg('<g><rect x="1"/></g>'),
+      expected,
+      'deterministic',
+    ).diffs;
+    const after = compareSvg(
+      svg('<g><rect x="1"/><line x1="5"/></g>'),
+      expected,
+      'deterministic',
+    ).diffs;
+
+    expect(weightedScore(before)).toBe(6);
+    expect(weightedScore(after)).toBe(2);
+    expect(before).toHaveLength(1);
+    expect(after).toHaveLength(2);
+  });
+
+  test('aligning a mismatched NODE TYPE cannot raise the weighted score', () => {
+    const expected = svg('<text>hello</text><g/>');
+    const before = compareSvg(svg('hello<g/>'), expected, 'deterministic').diffs;
+    const after = compareSvg(expected, expected, 'deterministic').diffs;
+
+    expect(weightedScore(before)).toBe(3);
+    expect(weightedScore(after)).toBe(0);
+    expect(before).toHaveLength(1);
+    expect(after).toHaveLength(0);
   });
 });
