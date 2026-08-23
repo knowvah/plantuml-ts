@@ -55,11 +55,11 @@ families, sequence's dot-cache tree is itself committed (D4), so this is a
 convenience for a small, hand-picked promotion set, not the mechanism that
 makes the suite offline.
 
-## Current state (sequence-oracle-harness / T3, 2026-08-20)
+## Current state (sequence-root-chrome / T4, 2026-08-23)
 
 **0 fixtures pinned — ZERO fixtures are conformant.** This ratchet ships
-empty on purpose, not as a placeholder. The numbers below come from T2's
-diff-baseline measurement over the full committed corpus
+empty on purpose, not as a placeholder. The numbers below come from
+`sequence-root-chrome`'s T4 re-measurement over the full committed corpus
 (`oracle/goldens/svg-sequence/diff-baseline.json`,
 `sequence.diff-baseline.ratchet.test.ts`):
 
@@ -79,19 +79,32 @@ diff-baseline measurement over the full committed corpus
   `!include` stdlib-bundle resolution failures (the documented architecture
   boundary — `src/` vendors no PlantUML stdlib), not sequence-render
   defects.
-- **Distribution: min 10 · median 12 · max 139 · total 16486 diffs.** 1012
-  of 1140 measurable fixtures (88.8%) sit at exactly 12 — a fixed
-  per-diagram floor, not per-fixture drift. (**Corrected 2026-08-23**: this
-  line read `total 16462` and `1010 of 1138`, from a snapshot taken before
-  the committed baseline; the figures above are read from
-  `diff-baseline.json` itself.)
-- **Those 12 are not all chrome.** Re-measured 2026-08-23 on three plateau
-  fixtures, identical in shape: six absent root attributes, four root
-  GEOMETRY values, `svg/defs[1][childCount]` (12 vs 0), and
-  `svg/g[1][childCount]`. Closing the chrome half removes seven and drops
-  the plateau to ~5. It does **not** make the body comparable — the
-  `g[1][childCount]` mismatch still short-circuits `compare.ts:353` until
-  child counts MATCH, which is rebuild-scale work.
+- **SUPERSEDED 2026-08-23 by `sequence-root-chrome`.** The two bullets that
+  stood here described `diffCount` before that mission, and are kept in git
+  history rather than restated: they read "min 10 · median 12 · max 139 ·
+  total 16486" with "1012 of 1140 measurable fixtures (88.8%) at exactly
+  12". Both the numbers and the quantity changed.
+- **The gated quantity is now `weightedScore`, not `diffCount`.**
+  `compareSvg` short-circuits in three places (node-type
+  `compare.ts:144-152`, tag `:172-183`, childCount `:347-355`), charging 1
+  for each however large the subtree it skips — so the count is **not
+  monotonic in wrongness** and a better-aligned document could score worse.
+  Each short-circuit now carries a `weight` equal to the skipped subtree's
+  size, and the ratchet gates on the sum. `diffCount` is retained as an
+  informational field. Rationale and the monotonicity proof:
+  `plans/sequence-root-chrome/decisions.md` D5.
+- **Distribution: weightedScore min 57 · median 318 · max 565254 ·
+  total 1068757**, measured 2026-08-23 at `7d3361c7` over the 1140
+  measurable fixtures — down 13.2% from 1231360 for the same corpus scored
+  before the chrome fix. Informational `diffCount` now runs min 4 ·
+  total 19676, and **833 fixtures sit at exactly 5**: four root geometry
+  values plus `svg/g[1][childCount]`.
+- **The chrome half is closed.** The six absent root attributes and
+  `svg/defs[1][childCount]` are gone from every fixture. The body is still
+  **not** comparable: `g[1][childCount]` short-circuits until child counts
+  MATCH, which is rebuild-scale work. A known consequence is that adding
+  correct content can raise `weightedScore` until the counts line up — nine
+  fixtures did exactly that (`plans/sequence-root-chrome/decisions.md` D7).
 - **ZERO fixtures reach 0 diffs.** Nothing is `[PROMOTION READY]`, so there
   is nothing this task could promote even if it wanted to. This ratchet
   ships with `fixtures: []` and a `describe.skipIf(fixtures.length === 0)`

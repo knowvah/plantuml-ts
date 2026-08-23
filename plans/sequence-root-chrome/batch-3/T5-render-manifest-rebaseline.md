@@ -13,7 +13,11 @@ sequence; the other 2017 are not. Exactly the first group may move.
 ## Task
 
 1. Regenerate the manifest: `npx jiti scripts/render-manifest.ts`
-2. Diff against the committed baseline with `manifest-diff.py`
+2. Diff against the committed baseline. **Path correction 2026-08-23:**
+   `manifest-diff.py` is NOT at the repo root — it lives at
+   `plans/state-declared-size-fix/scripts/manifest-diff.py`. The simpler
+   route, and the one the orchestrator used, is the script's own diff mode:
+   `npx jiti scripts/render-manifest.ts --diff <baseline> <current>`
 3. Assert the moved set is exactly `test-results/dot-cache/sequence/**`
 4. Commit the new baseline
 5. Re-measure `zudize-61-vomi445`'s per-call cost (see below)
@@ -57,11 +61,19 @@ the test goes green — that is exactly the "raise it until green" move
 
 ## Acceptance criteria
 
-1. Given `manifest-diff.py` against the regenerated manifest, then the moved
-   entries are exactly the 1141 under `test-results/dot-cache/sequence/**`
+1. **Amended 2026-08-23.** Given the regenerated manifest, the moved set is
+   exactly **1072** entries: the **1071** under
+   `test-results/dot-cache/sequence/**` that actually route to the sequence
+   engine, plus `test-results/dot-cache/object/zuvila-56-nuda425/in.puml`.
+   Note it is 1071, not 1141 — **70** fixtures filed under `sequence/` do not
+   route to the sequence engine and must NOT move
 2. Given the same diff, then **zero** entries under class, state, component,
-   usecase, object, json, yaml, hcl, dot or any `oracle/goldens/svg-*` path
-   moved — if any did, that is a stop condition, not a re-baseline
+   usecase, json, yaml, hcl, dot or any `oracle/goldens/svg-*` path moved,
+   and **no** object entry other than `zuvila-56-nuda425` — if any did, that
+   is a stop condition, not a re-baseline. The single allowed object entry is
+   [D6](../decisions.md#d6--ruled-2026-08-23-the-one-non-sequence-manifest-entry-is-allowed);
+   it renders wholly as `data-diagram-type="SEQUENCE"`, so it is a sequence
+   render filed under an object path, not a leak
 3. Given the regenerated manifest, then it still holds 3158 entries (nothing
    added or dropped)
 4. Given `zudize-61-vomi445`, then its per-call cost is measured and

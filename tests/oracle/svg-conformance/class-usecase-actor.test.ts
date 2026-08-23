@@ -217,7 +217,13 @@ describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside clas
       { path: 'svg/@viewBox[2]', actual: '168', expected: '579', delta: 411, tolerance: 0.01 },
       { path: 'svg/@viewBox[3]', actual: '92', expected: '162', delta: 70, tolerance: 0.01 },
       { path: 'svg/@width', actual: '168', expected: '579', delta: 411, tolerance: 0.01 },
-      { path: 'svg/g[1][childCount]', actual: '2', expected: '11', tolerance: 0.01 },
+      // `weight` is T6's skipped-subtree size (`compare.ts#units`), present
+      // only on the three short-circuits -- here, the one `[childCount]`.
+      // It is NOT a fidelity number and NOT a re-pin of the deltas above:
+      // it records how much of the document this single diff stands for, so
+      // `weightedScore` can be monotone. Listed because `toEqual` is exact
+      // on extra properties; nothing measured moved when it was added.
+      { path: 'svg/g[1][childCount]', actual: '2', expected: '11', tolerance: 0.01, weight: 169 },
     ];
     expect(diffs).toEqual(expected);
   });

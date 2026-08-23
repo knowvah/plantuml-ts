@@ -11,38 +11,26 @@
  * gate would gate nothing, and D2 specifies this monotone-improvement bar
  * over `oracle/goldens/svg-sequence/diff-baseline.json` instead:
  *
- *   - **rise** (live diff count > recorded baseline) -> FAIL, naming the
- *     fixture, its baseline, and its new count. A rise is USUALLY a
- *     regression, but see "the 12-diff plateau" below: it is NOT
- *     unconditionally one, and the failure message says so.
+ *   - **rise** (live weighted score > recorded baseline) -> FAIL, naming the
+ *     fixture, its baseline, and its new score. Every rise is a regression;
+ *     the gate has no bypass and must not acquire one.
  *
- * THE 12-DIFF PLATEAU — why a mass rise can mean progress.
- * `compareNodes` short-circuits on structural mismatch: at `compare.ts:353`
- * an unequal child count pushes one `[childCount]` diff and RETURNS without
- * recursing into children. T4's census found **1012 of 1140** measurable
- * fixtures sit at exactly 12 diffs sharing ONE identical path-set, and that
- * set includes `svg/g[1][childCount]`. So for **88.8%** of this corpus the
- * diagram BODY is never compared at all — those 12 measure how far the
- * comparison gets before the root chrome stops it, not body fidelity.
+ * THE GATED QUANTITY IS `weightedScore`, NOT `diffCount` — amended 2026-08-23
+ * (D5, `plans/sequence-root-chrome/decisions.md`). This block used to explain
+ * when a mass RISE meant progress. It no longer can, because the quantity it
+ * described was not monotone in wrongness: `compareNodes` short-circuits in
+ * three places — node-type, tag and child-count mismatch — and charged
+ * exactly ONE diff for each however large the subtree it skipped, so a change
+ * that made a document MORE structurally aligned could RAISE its count. T3's
+ * chrome fix did exactly that to 255 fixtures while making no body worse.
+ * `compare.ts` now charges each short-circuit an upper bound on what
+ * descending could have cost, and `weightedScore` sums those charges. It is
+ * monotone in alignment, so a rise has no benign reading left.
  *
- * CORRECTED 2026-08-23. This block used to say the rise comes "when someone
- * closes the root-chrome gap". It does not, and the difference decides how
- * to score the first sequence mission. The 12 diffs, re-measured on three
- * plateau fixtures, are: six absent root attributes, four root GEOMETRY
- * values (`width`/`height`/`viewBox[2]`/`viewBox[3]`),
- * `svg/defs[1][childCount]` (12 vs 0), and `svg/g[1][childCount]`. Only the
- * attributes and the `defs` count are chrome. Closing those removes seven
- * diffs and drops the plateau to ~5 — a mass FALL. The body stays unreachable
- * because `svg/g[1][childCount]` (94 vs 630 on `SequenceArrows_0001_Test`)
- * still short-circuits here. Bodies become comparable when child counts
- * MATCH, which is rebuild-scale work. So the mass-RISE signature below is
- * real but belongs to whichever mission first makes bodies structurally
- * correct, not to a chrome fix.
- *
- * An isolated rise, or a rise on a fixture whose baseline is not 12, is still
- * the regression this gate is for. The gate FAILS on a rise either way — it
- * has no bypass, and must not acquire one; only the message distinguishes the
- * two readings so whoever hits it can tell them apart.
+ * `diffCount` stays in `diff-baseline.json` as an INFORMATIONAL field, and a
+ * risen `diffCount` beside a fallen `weightedScore` is the expected artefact
+ * of that weighting, not a failure: a subtree that used to cost 1 as an
+ * unexamined short-circuit now gets compared and reports its real diffs.
  *   - **fall** (live < baseline) -> PASS, logged as `[IMPROVED]`.
  *   - **reaches 0** -> PASS, logged as `[PROMOTION READY]` -- reports
  *     eligibility ONLY. Promotion is stop 13 of this mission and belongs to
@@ -87,7 +75,7 @@ import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
-import { compareSvg } from './compare.js';
+import { compareSvg, weightedScore } from './compare.js';
 import { renderFixtureSequence } from './render-fixture-sequence.js';
 
 
@@ -95,6 +83,11 @@ interface BaselineFixture {
   readonly type: string;
   readonly slug: string;
   readonly status: 'baseline' | 'error';
+  /** The GATED quantity (D5). Absent until T4 re-pins the manifest against
+   * it; an entry without one fails loudly rather than falling back to
+   * `diffCount`, which is a different unit. */
+  readonly weightedScore?: number;
+  /** Informational only, per D5 — never gated. */
   readonly diffCount: number | null;
   readonly reason?: string;
   readonly measuredAt: string;
@@ -166,7 +159,13 @@ function budgetFor(f: FixtureRef): number | undefined {
 }
 
 type MeasureResult =
-  | { readonly errored: false; readonly diffCount: number }
+  | {
+      readonly errored: false;
+      /** The gated quantity (D5). */
+      readonly weightedScore: number;
+      /** Informational only — reported in messages, never gated. */
+      readonly diffCount: number;
+    }
   | { readonly errored: true; readonly message: string };
 
 /** Renders a fixture through T1's sequence helper and compares it against the
@@ -183,7 +182,11 @@ function measure(f: FixtureRef): MeasureResult {
       includeStore: fixtureIncludeStore(),
     });
     const { diffs } = compareSvg(ours, golden, 'deterministic');
-    return { errored: false, diffCount: diffs.length };
+    return {
+      errored: false,
+      weightedScore: weightedScore(diffs),
+      diffCount: diffs.length,
+    };
   } catch (err) {
     return { errored: true, message: err instanceof Error ? err.message : String(err) };
   }
@@ -197,39 +200,59 @@ interface RiseCheckResult {
 /** Pure comparison: no rise above `baseline` is allowed. Extracted as a pure
  * function (not inlined in the `it()` body) so AC1 below can exercise rise
  * detection directly with a fabricated baseline, without ever touching
- * `diff-baseline.json` on disk. */
-function checkNoRise(f: FixtureRef, baseline: number, live: number): RiseCheckResult {
+ * `diff-baseline.json` on disk. `baseline` is `undefined` for an entry that
+ * carries no `weightedScore` pin yet — an unpinned entry FAILS rather than
+ * falling back to `diffCount`, which measures a different quantity. */
+function checkNoRise(
+  f: FixtureRef,
+  baseline: number | undefined,
+  live: number,
+): RiseCheckResult {
+  if (baseline === undefined) {
+    return {
+      ok: false,
+      message:
+        `${f.type}/${f.slug}: diff-baseline.json carries no weightedScore for this ` +
+        `fixture, and weightedScore is the gated quantity (D5). An entry pinned only ` +
+        `by diffCount pins a number that is NOT monotone in wrongness, and it cannot ` +
+        `be compared against a live weighted score without comparing two different ` +
+        `units. Re-pin this entry from a fresh measurement; never fall back to ` +
+        `diffCount to make the gate evaluate. Live weighted score is ${live}.`,
+    };
+  }
   if (live <= baseline) {
     return {
       ok: true,
-      message: `${f.type}/${f.slug}: diff count is ${live} (baseline ${baseline}) -- no regression.`,
+      message: `${f.type}/${f.slug}: weighted score is ${live} (baseline ${baseline}) -- no regression.`,
     };
   }
   return {
     ok: false,
     message:
-      `${f.type}/${f.slug}: diff count ROSE -- baseline=${baseline}, now=${live}. ` +
-      `A rise is USUALLY a regression (this fixture's SVG got less faithful to the jar ` +
-      `oracle) and that is what this gate is for. But read the shape of the failure before ` +
-      `concluding that, because ONE case is the opposite. ` +
-      `WHY: compareNodes short-circuits on structural mismatch -- at compare.ts:353 an ` +
-      `unequal child count pushes a single \`[childCount]\` diff and RETURNS without ` +
-      `recursing. T4's census found 1012 of 1140 measurable fixtures sit at exactly 12 ` +
-      `diffs sharing one identical path-set that includes \`svg/g[1][childCount]\`, so for ` +
-      `88.8% of this corpus the diagram BODY is never compared at all -- their 12 measures ` +
-      `reaching the body and stopping, not body fidelity. Bodies become comparable when ` +
-      `child counts MATCH; when that happens those ~1012 fixtures compare their bodies for ` +
-      `the first time and their counts rise sharply and together. That signature -- a MASS ` +
-      `rise concentrated on fixtures whose baseline is 12 -- is PROGRESS, not regression: ` +
-      `re-measure and re-pin the baseline deliberately, recording why. NOTE (corrected ` +
-      `2026-08-23): closing the root-CHROME gap alone does NOT produce that rise -- it ` +
-      `removes seven of the twelve and the plateau FALLS to ~5, because g[1][childCount] ` +
-      `still short-circuits. A mass fall is the expected chrome-fix outcome. ` +
-      `An ISOLATED rise on one fixture, or a rise on a fixture ` +
-      `whose baseline is not 12, is the regression this gate exists to catch -- do not ` +
-      `paper over it. Either way the fix is the same file: update this slug's diffCount, ` +
-      `measuredAt and measuredAgainstCommit in oracle/goldens/svg-sequence/` +
-      `diff-baseline.json from a fresh measurement, never by hand-editing to make it pass.`,
+      `${f.type}/${f.slug}: weighted score ROSE -- baseline=${baseline}, now=${live}. ` +
+      `This is a REGRESSION: this fixture's SVG got less faithful to the jar oracle. ` +
+      `Unlike the raw diff count this gate used to read, weightedScore has NO benign ` +
+      `reading for a rise -- not even a mass one, and not on the 12-diff plateau. ` +
+      `WHY: compareNodes short-circuits in THREE places (node-type, tag and ` +
+      `child-count mismatch) and used to charge exactly 1 for each, however large the ` +
+      `subtree it skipped -- so a tag SUBSTITUTION cost 1 while a tag MATCH cost one ` +
+      `diff per differing attribute, and aligning a document could RAISE its count. ` +
+      `compare.ts now charges each short-circuit an upper bound on what descending ` +
+      `could have cost (one unit per node, one per attribute), and weightedScore sums ` +
+      `those charges, so descending can never cost more than stopping. The score is ` +
+      `therefore MONOTONE in alignment: it falls or holds when the document gets more ` +
+      `structurally correct, and it rises only when the output genuinely got worse. ` +
+      `Do not re-pin to silence this; find the mechanism first (D5, ` +
+      `plans/sequence-root-chrome/decisions.md). WHAT IS FINE, and expected: a RISEN ` +
+      `diffCount beside a FALLEN weightedScore. That is the artefact this weighting ` +
+      `exists to explain -- a subtree that used to cost 1 unexamined now gets compared ` +
+      `and reports its real per-attribute diffs, so the RECORD COUNT goes up while the ` +
+      `unexplained share of the document goes down. diffCount stays in ` +
+      `diff-baseline.json for exactly that reading and is never gated. After a ` +
+      `deliberate change that LOWERS the score, re-pin in one file: this slug's ` +
+      `weightedScore, diffCount, measuredAt and measuredAgainstCommit in ` +
+      `oracle/goldens/svg-sequence/diff-baseline.json, from a fresh measurement and ` +
+      `never by hand-editing to make it pass.`,
   };
 }
 
@@ -247,7 +270,7 @@ function progressLog(f: FixtureRef, baseline: number, live: number): string | un
     );
   }
   if (live < baseline) {
-    return `[IMPROVED] ${f.type}/${f.slug}: diff count fell from ${baseline} to ${live}.`;
+    return `[IMPROVED] ${f.type}/${f.slug}: weighted score fell from ${baseline} to ${live}.`;
   }
   return undefined;
 }
@@ -261,7 +284,7 @@ const errorFixtures = manifest.fixtures.filter((f) => f.status === 'error');
 // and must fail loudly rather than skip 1141 assertions into silence.
 // ---------------------------------------------------------------------------
 
-describe('svg-sequence diff-count baseline ratchet — corpus presence', () => {
+describe('svg-sequence weighted-score baseline ratchet — corpus presence', () => {
   it('every manifest fixture has its committed in.puml + in.svg', () => {
     const missing = manifest.fixtures.filter((f) => !hasCachedFixture(f)).map((f) => `${f.type}/${f.slug}`);
     expect(
@@ -275,31 +298,32 @@ describe('svg-sequence diff-count baseline ratchet — corpus presence', () => {
 });
 
 // ---------------------------------------------------------------------------
-// AC1 -- every baselined fixture's diff count never rises.
+// AC1 -- every baselined fixture's weighted score never rises (D5: the gated
+// quantity is weightedScore, not the non-monotone diffCount).
 // ---------------------------------------------------------------------------
 
-describe('svg-sequence diff-count baseline ratchet', () => {
+describe('svg-sequence weighted-score baseline ratchet', () => {
   for (const f of baselineFixtures) {
-    it(`sequence/${f.slug}: diff count never rises above its baseline (${String(f.diffCount)})`, () => {
+    it(`sequence/${f.slug}: weighted score never rises above its baseline (${String(f.weightedScore ?? 'unpinned')})`, () => {
       const result = measure(f);
       if (result.errored) {
         throw new Error(
-          `${f.type}/${f.slug}: expected a measurable diff count (baseline ${String(f.diffCount)}) ` +
+          `${f.type}/${f.slug}: expected a measurable score (baseline ${String(f.weightedScore ?? 'unpinned')}) ` +
             `but rendering/comparison threw: ${result.message}. This fixture's status changed from ` +
             `"baseline" to erroring -- update diff-baseline.json deliberately (status: "error", with ` +
             `a reason); do not let this pass silently as if nothing changed.`,
         );
       }
-      // Every "baseline" entry always carries a non-null diffCount by
-      // construction (only "error" entries carry null); the `?? 0` fallback
-      // is unreachable via this manifest and required only by the field type.
-      /* v8 ignore next */
-      const baseline = f.diffCount ?? 0;
-      const live = result.diffCount;
+      const baseline = f.weightedScore;
+      const live = result.weightedScore;
       const { ok, message } = checkNoRise(f, baseline, live);
       expect(ok, message).toBe(true);
 
-      const note = progressLog(f, baseline, live);
+      // `checkNoRise` fails an unpinned entry outright, so reaching this line
+      // guarantees `baseline` is a number; the `?? 0` is required only
+      // because TS cannot narrow through `expect`.
+      /* v8 ignore next */
+      const note = progressLog(f, baseline ?? 0, live);
       if (note !== undefined) console.log(note);
     }, budgetFor(f));
   }
@@ -311,7 +335,7 @@ describe('svg-sequence diff-count baseline ratchet', () => {
 // (fabricated baselines, never a diff-baseline.json edit).
 // ---------------------------------------------------------------------------
 
-describe('svg-sequence diff-count baseline ratchet — branch discrimination', () => {
+describe('svg-sequence weighted-score baseline ratchet — branch discrimination', () => {
   const sample: FixtureRef = { type: 'sequence', slug: 'branch-probe' };
 
   it('a fabricated baseline below the live count fails, naming fixture + baseline + new count', () => {
@@ -322,6 +346,13 @@ describe('svg-sequence diff-count baseline ratchet — branch discrimination', (
     expect(message).toContain('now=7');
   });
 
+  it('an entry with no weightedScore pin fails rather than falling back', () => {
+    const { ok, message } = checkNoRise(sample, undefined, 450);
+    expect(ok).toBe(false);
+    expect(message).toContain('no weightedScore');
+    expect(message).toContain('450');
+  });
+
   it('a baseline at or above the live count does not fail', () => {
     expect(checkNoRise(sample, 7, 7).ok).toBe(true);
     expect(checkNoRise(sample, 9, 7).ok).toBe(true);
@@ -330,6 +361,7 @@ describe('svg-sequence diff-count baseline ratchet — branch discrimination', (
   it('a fall below the baseline is reported as [IMPROVED]', () => {
     expect(progressLog(sample, 12, 5)).toContain('[IMPROVED]');
     expect(progressLog(sample, 12, 5)).toContain('fell from 12 to 5');
+    expect(progressLog(sample, 12, 5)).toContain('weighted score');
   });
 
   it('reaching zero is reported as [PROMOTION READY], not as an improvement', () => {
@@ -348,7 +380,7 @@ describe('svg-sequence diff-count baseline ratchet — branch discrimination', (
     const result = measure(real!);
     expect(result.errored).toBe(false);
     // Narrowed by the assertion above; TS cannot see through `expect(...).toBe(false)`.
-    const live = (result as { errored: false; diffCount: number }).diffCount;
+    const live = (result as { errored: false; weightedScore: number }).weightedScore;
     expect(live).toBeGreaterThan(0);
     expect(checkNoRise(real!, live - 1, live).ok).toBe(false);
     expect(checkNoRise(real!, live, live).ok).toBe(true);
@@ -361,7 +393,7 @@ describe('svg-sequence diff-count baseline ratchet — branch discrimination', (
 // reportable and must fail loudly, not pass through unnoticed.
 // ---------------------------------------------------------------------------
 
-describe('svg-sequence diff-count baseline ratchet — recorded errors', () => {
+describe('svg-sequence weighted-score baseline ratchet — recorded errors', () => {
   for (const f of errorFixtures) {
     it(`sequence/${f.slug}: still errors as recorded`, () => {
       expect(f.reason, `${f.type}/${f.slug}: an "error" entry must carry a reason`).toBeTruthy();
@@ -386,7 +418,7 @@ describe('svg-sequence diff-count baseline ratchet — recorded errors', () => {
 // diffs must report eligibility and write NOTHING. Asserted, not claimed.
 // ---------------------------------------------------------------------------
 
-describe('svg-sequence diff-count baseline ratchet — promotion is never automatic', () => {
+describe('svg-sequence weighted-score baseline ratchet — promotion is never automatic', () => {
   it('classifying a zero-diff fixture leaves ratchet.json untouched', () => {
     const before = existsSync(RATCHET_PATH) ? readFileSync(RATCHET_PATH, 'utf8') : null;
 

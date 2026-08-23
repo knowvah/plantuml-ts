@@ -596,6 +596,24 @@ capture gets headroom automatically.
 
 Ordered by how ready they are, not by size.
 
+- **`sequence-engine-overclaims-nested-diagrams`** — NEW 2026-08-23, found by
+  `sequence-root-chrome`'s cross-engine manifest guard. `test-results/
+  dot-cache/object/zuvila-56-nuda425/in.puml` is an OBJECT diagram (a `map`
+  with a legend containing a nested `{{ }}` sub-diagram) and it renders as a
+  document whose **only** `data-diagram-type` is `"SEQUENCE"` — the sequence
+  plugin claims the whole source. Symmetrically, **70** of the 1141 fixtures
+  filed under `dot-cache/sequence/` do **not** route to the sequence engine
+  at all (sampled: two render `CLASS`, one `YAML`). So corpus classification
+  and actual routing disagree in **both** directions, and the sequence
+  engine's `accepts` (`src/diagrams/sequence/index.ts:36`) is the thing to
+  read first. Same defect class as the fixed activity-vs-sequence
+  registry-order bug in `.agent-notes/plantuml-sequence-group-empty.md`,
+  where `activityPlugin` being registered first let it claim any sequence
+  diagram containing a group. Not a rendering bug: every affected fixture
+  renders, just through the wrong engine, so no gate catches it. Sized as
+  small-to-medium; the risk is that fixing `accepts` moves fixtures between
+  engines and therefore moves several diff baselines at once.
+
 - **A5 json/yaml/hcl** — `wip (substantial; NOT at bar)` in mission-index and
   that is the honest label. `plans/a5-json-family-conformance/ledger.md`: M1a
   is the accepted Smetana layout delta (ADR-2b), M1b–M5 closed, M6 element

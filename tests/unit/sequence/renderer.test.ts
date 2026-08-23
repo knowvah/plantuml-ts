@@ -15,6 +15,8 @@ import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { sequencePlugin } from '../../../src/diagrams/sequence/index.js';
 import { defaultTheme, darkTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer, FixedMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -123,20 +125,235 @@ describe('renderSequence — messages', () => {
     expect(svg).toContain('3: greet');
   });
 
-  it('lost message references lost arrow marker', () => {
+  it('lost message draws an inline head, never a marker reference', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ style: 'lost' })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('arrow-lost');
+    // `lost` is a MessageExoType, which governs where the LINE terminates,
+    // not what the head looks like -- `CommandExoArrowAny.java:90-91` builds
+    // it from the same `withDirectionNormal()` as a plain `->`, so the head
+    // is dressing2's NORMAL polygon at pos2 (`ComponentRoseArrow.java:101`:
+    // pos2 = width - 2 = 140 - 2 = 138, absolute 80 + 138 = 218).
+    expect(svg).toContain('<polygon points="208,76,218,80,208,84,212,80"');
+    expect(svg).not.toContain('arrow-lost');
   });
 
-  it('found message references found arrow marker', () => {
+  it('found message draws an inline head, never a marker reference', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ style: 'found' })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('arrow-found');
+    expect(svg).toContain('<polygon points="208,76,218,80,208,84,212,80"');
+    expect(svg).not.toContain('arrow-found');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T3 (sequence-root-chrome): inline arrowheads + the document shell
+// ---------------------------------------------------------------------------
+
+/** Every `MessageStyle` the spike's grammar can produce
+ *  (`sequence-parse-helpers.ts#ARROW_STYLE_MAP`). */
+const ALL_MESSAGE_STYLES: readonly MessageGeo['style'][] = [
+  'sync', 'async', 'reply', 'replyAsync', 'lost', 'found',
+];
+
+describe('renderSequence -- inline arrowheads (T3 AC1)', () => {
+  it.each(ALL_MESSAGE_STYLES)(
+    'a %s message emits no <marker, markerEnd or markerStart token',
+    (style) => {
+      const geo = makeGeo({ events: [makeSyncMessage({ style })] });
+      const svg = assembleSvg(renderSequence(geo, defaultTheme));
+      expect(svg).not.toContain('<marker');
+      expect(svg).not.toContain('markerEnd');
+      expect(svg).not.toContain('markerStart');
+      expect(svg).not.toContain('marker-end');
+      expect(svg).not.toContain('marker-start');
+    },
+  );
+
+  it.each(ALL_MESSAGE_STYLES)(
+    'a self %s message emits no marker reference either',
+    (style) => {
+      const geo = makeGeo({
+        events: [makeSyncMessage({ style, arrowDirection: 'self', fromX: 80, toX: 110 })],
+      });
+      const svg = assembleSvg(renderSequence(geo, defaultTheme));
+      expect(svg).not.toContain('<marker');
+      expect(svg).not.toContain('markerEnd');
+      expect(svg).not.toContain('marker-end');
+    },
+  );
+});
+
+describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () => {
+  // The jar's own numbers, byte-for-byte, from
+  // `test-results/dot-cache/sequence/mebidu-16-ruve297/in.svg`: Bob's lifeline
+  // at 81.538, Alice's at 133.231, `Bob -> Alice` at y = 66.
+  const BOB_X = 81.538;
+  const ALICE_X = 133.231;
+  const MESSAGE_Y = 66;
+
+  function jarGeo(overrides?: Partial<MessageGeo>): SequenceGeometry {
+    return makeGeo({
+      events: [
+        makeSyncMessage({ fromX: BOB_X, toX: ALICE_X, y: MESSAGE_Y, ...overrides }),
+      ],
+    });
+  }
+
+  it('puts a sync head tip at pos2 = width - 2, matching the jar exactly', () => {
+    const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme));
+    expect(svg).toContain(
+      '<polygon points="121.231,62,131.231,66,121.231,70,125.231,66"',
+    );
+  });
+
+  it('trims the line by arrowDeltaX / 2, matching the jar exactly', () => {
+    const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme));
+    // start = 0, len = width - 1 - arrowDeltaX / 2 (`ComponentRoseArrow
+    // .java:96-97,126-127`) => 81.538 .. 127.231
+    expect(svg).toContain('<line x1="81.538" y1="66" x2="127.231" y2="66"');
+  });
+
+  it('reverses the configuration for a right-to-left message', () => {
+    // `CommunicationTile.java:145-146` reverses when point1 > point2, so the
+    // head moves to pos1 = 1 and points left; the line starts at
+    // start = arrowDeltaX / 2 (`ComponentRoseArrow.java:129-131`).
+    const geo = makeGeo({
+      events: [
+        makeSyncMessage({ fromX: ALICE_X, toX: BOB_X, y: MESSAGE_Y, arrowDirection: 'left' }),
+      ],
+    });
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).toContain(
+      '<polygon points="92.538,62,82.538,66,92.538,70,88.538,66"',
+    );
+    expect(svg).toContain('<line x1="86.538" y1="66" x2="132.231" y2="66"');
+  });
+
+  it('draws an async head as two open strokes, not a polygon', () => {
+    const svg = assembleSvg(renderSequence(jarGeo({ style: 'async' }), defaultTheme));
+    // `asyncLinesNormal` at pos2 = 131.231: two ULines to (-10, -+4).
+    expect(svg).toContain('<line x1="131.231" y1="66" x2="121.231" y2="62"');
+    expect(svg).toContain('<line x1="131.231" y1="66" x2="121.231" y2="70"');
+    expect(svg).not.toContain('<polygon');
+  });
+
+  it('leaves an async line untrimmed -- only FULL+NORMAL trims', () => {
+    const svg = assembleSvg(renderSequence(jarGeo({ style: 'async' }), defaultTheme));
+    // len = width - 1 only (`ComponentRoseArrow.java:97`; `:126` needs NORMAL)
+    expect(svg).toContain('<line x1="81.538" y1="66" x2="132.231" y2="66"');
+  });
+
+  it('paints the head with the theme arrow colour, filled and stroked', () => {
+    const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme));
+    expect(svg).toContain(
+      '<polygon points="121.231,62,131.231,66,121.231,70,125.231,66" ' +
+        `fill="${shortenColor(defaultTheme.colors.arrow)}" ` +
+        `stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1"`,
+    );
+  });
+
+  it('drops the nice-arrow notch under skinparam style strictuml', () => {
+    // `Rose.java:340` passes `param.strictUmlStyle() == false` as niceArrow.
+    const svg = assembleSvg(
+      renderSequence(jarGeo(), { ...defaultTheme, strictUml: true }),
+    );
+    expect(svg).toContain('<polygon points="121.231,62,131.231,66,121.231,70"');
+  });
+});
+
+describe('renderSequence -- self-message heads (T3 AC3)', () => {
+  const SELF_Y = 80;
+  const SELF_X = 80;
+  // The loop's returning segment ends at fromX, so the head tip sits there
+  // (`ComponentRoseSelfArrow.java:126` draws the bottom hline from x2 and
+  // `:172` puts the polygon's tip at that same x2).
+  const LOOP_BOTTOM_Y = SELF_Y + 20;
+
+  function selfGeo(style: MessageGeo['style']): SequenceGeometry {
+    return makeGeo({
+      events: [makeSyncMessage({ style, arrowDirection: 'self', fromX: SELF_X, toX: 110, y: SELF_Y })],
+    });
+  }
+
+  it('emits the getPolygon() shape at the loop foot for a sync self message', () => {
+    const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
+    // direction = +1 (reverseDefine is unreachable from this parser), so
+    // (10,-4) (0,0) (10,4) (6,0) about (80, 100).
+    expect(svg).toContain('<polygon points="90,96,80,100,90,104,86,100"');
+    expect(svg).not.toContain('arrow-sync');
+  });
+
+  it('still draws the loop path itself', () => {
+    const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
+    expect(svg).toContain(`<path d="M ${SELF_X} ${SELF_Y} H 120 V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none"`);
+  });
+
+  it('draws a self async head as two open strokes', () => {
+    const svg = assembleSvg(renderSequence(selfGeo('async'), defaultTheme));
+    // `ComponentRoseSelfArrow.java:161-169` -- ULine(+arrowDeltaX, -+arrowDeltaY)
+    expect(svg).toContain('<line x1="80" y1="100" x2="90" y2="96"');
+    expect(svg).toContain('<line x1="80" y1="100" x2="90" y2="104"');
+    expect(svg).not.toContain('<polygon points="90,96,80,100,90,104,86,100"');
+  });
+
+  it('dashes a self reply loop', () => {
+    const svg = assembleSvg(renderSequence(selfGeo('reply'), defaultTheme));
+    expect(svg).toContain(
+      `<path d="M ${SELF_X} ${SELF_Y} H 120 V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none" ` +
+        `stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` +
+        'stroke-dasharray="5,5"',
+    );
+  });
+});
+
+describe('renderSequence -- fragment shape (T3 AC4)', () => {
+  it('tags the fragment SEQUENCE and leaves the body unwrapped', () => {
+    const fragment = renderSequence(makeGeo({ events: [makeSyncMessage()] }), defaultTheme);
+    expect(fragment.diagramType).toBe('SEQUENCE');
+    expect(fragment.body.startsWith('<g')).toBe(false);
+    expect(fragment.bodyWrapped).toBeUndefined();
+  });
+
+  it('lets assembleSvg supply the content group and the background rect', () => {
+    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme));
+    expect(svg).toContain('data-diagram-type="SEQUENCE"');
+  });
+});
+
+describe('renderSequence -- the document shell (T3 AC5)', () => {
+  const SHELL_FIXTURE = [
+    '@startuml',
+    'Bob -> Alice : hello',
+    '@enduml',
+  ].join('\n');
+
+  it('carries every shell root attribute and an empty defs block', () => {
+    const svg = renderFixtureSequence(SHELL_FIXTURE, new DeterministicMeasurer());
+    for (const attr of [
+      'xmlns:xlink="http://www.w3.org/1999/xlink"',
+      'version="1.1"',
+      'data-diagram-type="SEQUENCE"',
+      'zoomAndPan="magnify"',
+      'preserveAspectRatio="none"',
+      'contentStyleType="text/css"',
+    ]) {
+      expect(svg).toContain(attr);
+    }
+    expect(svg).toMatch(/ style="width:\d/);
+    expect(svg).toMatch(/ width="\d+px"/);
+    expect(svg).toMatch(/ height="\d+px"/);
+    expect(svg).toMatch(/ viewBox="0 0 \d+ \d+"/);
+    expect(svg).toContain('<defs/>');
+  });
+
+  it('renders that fixture with an inline head and no marker', () => {
+    const svg = renderFixtureSequence(SHELL_FIXTURE, new DeterministicMeasurer());
+    expect(svg).toContain('<polygon points=');
+    expect(svg).not.toContain('<marker');
   });
 });
 
@@ -583,16 +800,22 @@ describe('renderSequence — box backgrounds', () => {
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     // After the defs block, box background must precede participant rects.
-    // svgRoot now emits a background fill rect first; box rect is second.
-    const bodyStart = svg.indexOf('</defs>');
+    // Anchored on `<defs/>`, not `</defs>`: the SEQUENCE fragment now routes
+    // through `assembleDocumentShell`, whose empty defs block is
+    // self-closing (T3 AC5), so the closing-tag form no longer occurs.
+    const bodyStart = svg.indexOf('<defs/>');
+    expect(bodyStart).toBeGreaterThanOrEqual(0);
     const body = svg.slice(bodyStart);
     // G1c: named colors resolve to their canonical jar hex (LightBlue -> #ADD8E6).
     const boxIdx = body.indexOf('#ADD8E6');
     expect(boxIdx).toBeGreaterThanOrEqual(0);
-    // Background rect is first; box rect is second — verify box appears before participants
+    // The box rect leads the content group; every participant header rect
+    // follows it, so the box colour belongs to the FIRST rect.
     const firstRectPos = body.indexOf('<rect');
     const secondRectPos = body.indexOf('<rect', firstRectPos + 1);
-    expect(boxIdx).toBeLessThan(secondRectPos + body.indexOf('>', secondRectPos));
+    expect(firstRectPos).toBeLessThan(secondRectPos);
+    expect(boxIdx).toBeGreaterThan(firstRectPos);
+    expect(boxIdx).toBeLessThan(secondRectPos);
   });
 });
 

@@ -2,23 +2,27 @@
 
 ## Context
 
-`sequence.diff-baseline.ratchet.test.ts` fails only on a diff-count **rise**.
-T3 makes ~1140 counts fall, which passes silently and leaves every pin stale
-— bounding nothing. This task re-pins them deliberately, from a fresh
-measurement, and regenerates the cause census.
+**Amended 2026-08-23.** This task originally re-pinned `diffCount`. It now
+re-pins `weightedScore`, the monotone quantity T6 introduces — read
+[`../decisions.md#d5`](../decisions.md) first, and do not start until T6 has
+landed. Re-pinning against `diffCount` is what the amendment exists to
+prevent: a pin taken against a metric that rewards structural misalignment is
+worse than no pin at all.
 
-The ratchet's own failure message (`:200-214`) explains the one case where a
-rise is progress: when bodies become reachable, the 12-cohort rises together.
-**That is not what this mission does** — see `../README.md`'s scope note.
-Here, the expected signature is a mass *fall* from 12 to ~5.
+`sequence.diff-baseline.ratchet.test.ts` fails only on a **rise**. T3 moved
+~1140 fixtures, which under the old metric passed silently for the fallers
+and failed spuriously for 255 risers. This task re-pins deliberately from a
+fresh measurement and regenerates the cause census.
 
 ## Task
 
 1. Re-measure every fixture:
    `npx vitest run tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts`
 2. Rewrite `oracle/goldens/svg-sequence/diff-baseline.json` from that
-   measurement — each changed entry gets a new `diffCount`, `measuredAt` and
-   `measuredAgainstCommit`. Never hand-edit a count to make a test pass.
+   measurement — each changed entry gets a new `weightedScore` (the gated
+   quantity), a refreshed `diffCount` (informational only, per D5),
+   `measuredAt` and `measuredAgainstCommit`. Never hand-edit either number to
+   make a test pass.
 3. Regenerate the census:
    `npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts`
 4. Record the before/after plateau histogram and bucket totals in the
@@ -45,11 +49,14 @@ Here, the expected signature is a mass *fall* from 12 to ~5.
 
 ## Acceptance criteria
 
-1. Given a fresh measurement, when the plateau cohort is re-read, then those
-   1012 fixtures have fallen from 12 to ~5, and `other` has dropped by
-   roughly six records per fixture
-2. Given any fixture whose count **rose**, then it is investigated and named
-   in the journal with a mechanism — never re-pinned to silence it
+1. Given a fresh measurement, then every fixture's `weightedScore` is at or
+   below its pre-T3 weighted score. **Amended 2026-08-23**: the original
+   criterion ("those 1012 fixtures have fallen from 12 to ~5") was met and is
+   now recorded as a result in `../README.md`'s exit bar, not re-verified here
+2. Given any fixture whose **`weightedScore`** rose, then it is investigated
+   and named in the journal with a mechanism — never re-pinned to silence it.
+   A risen `diffCount` alongside a fallen `weightedScore` is the D5 artifact
+   and is explicitly fine
 3. Given `oracle/goldens/svg-sequence/ratchet.json`, then it is still
    `{"fixtures": []}` — no fixture reaches zero, nothing is promoted (D4)
 4. Given `sequence-diff-census.ts` run twice, then `diff-census.json` is

@@ -14,7 +14,7 @@
 import { describe, it, expect } from 'vitest';
 import { assembleSvg } from '../../../src/core/assemble-svg.js';
 import type { RenderFragment } from '../../../src/core/dispatcher.js';
-import { ROOT_GROUP_OPEN, rect } from '../../../src/core/svg.js';
+import { ROOT_GROUP_OPEN, rect, svgRoot } from '../../../src/core/svg.js';
 import { applyCucaDocumentMargin } from '../../../src/core/TextBlockExporter.js';
 
 const INNER = '<text x="1" y="2">A</text>';
@@ -289,5 +289,212 @@ describe('assembleSvg — JSON background rect (isSolidNonDefault)', () => {
     });
     expect(svg).toContain('data-diagram-type="HCL"');
     expect(svg).toContain('fill="#0B58A8"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SEQUENCE finalize (T2) — unreachable until T3 sets `diagramType:'SEQUENCE'`
+// on the fragment, so every fixture below is synthetic. Jar evidence is the
+// cached golden named in each case (`test-results/dot-cache/sequence/<slug>/
+// in.svg`); the mechanism is `klimt/drawing/svg/SvgGraphics.java:186-191`
+// (paint guard) + `:207-212` (rect appended to the root `<g>` FIRST).
+// ---------------------------------------------------------------------------
+
+/** The dims every SEQUENCE fixture below uses — `dakake-85-nemi992`'s own. */
+const SEQ_DIMS = { width: 114, height: 313 };
+
+function sequenceFragment(overrides: Partial<RenderFragment> = {}): RenderFragment {
+  return { body: INNER, ...SEQ_DIMS, diagramType: 'SEQUENCE', ...overrides };
+}
+
+describe('assembleSvg — SEQUENCE root <g> shape (AC1)', () => {
+  it('wraps an unwrapped body in ONE bare <g>, upgraded to ROOT_GROUP_OPEN', () => {
+    const svg = assembleSvg(sequenceFragment());
+    expect(svg).toContain('<defs/>' + ROOT_GROUP_OPEN + INNER + '</g></svg>');
+  });
+
+  it('emits exactly one root <g> open tag', () => {
+    const svg = assembleSvg(sequenceFragment());
+    expect(svg.split(ROOT_GROUP_OPEN)).toHaveLength(2);
+  });
+
+  it('leaves an already-wrapped (chrome-present) body’s own <g> in place', () => {
+    const svg = assembleSvg(
+      sequenceFragment({ body: ROOT_GROUP_OPEN + INNER + '</g>', bodyWrapped: true }),
+    );
+    expect(svg).toContain('<defs/>' + ROOT_GROUP_OPEN + INNER + '</g></svg>');
+  });
+
+  it('carries data-diagram-type="SEQUENCE" and the klimt prolog', () => {
+    const svg = assembleSvg(sequenceFragment());
+    expect(svg).toContain('data-diagram-type="SEQUENCE"');
+    expect(svg).toContain('<?plantuml $version$?>');
+  });
+});
+
+describe('assembleSvg — SEQUENCE background rect (AC2/AC3/AC4)', () => {
+  it('draws the rect as the content group’s FIRST child (dakake-85-nemi992)', () => {
+    const svg = assembleSvg(sequenceFragment({ background: '#FF0000' }));
+    // Golden: `<rect x="0" y="0" width="114" height="313" fill="#F00"
+    // style="stroke:none;"/>` — this port emits the stroke as an ATTRIBUTE
+    // (`stroke="none"`), a pre-existing `core/svg-shapes.ts#rect` form shared
+    // with STATE/JSON, not something this case introduces.
+    expect(rootGroupChildren(svg)).toBe(
+      '<rect x="0" y="0" width="114" height="313" fill="#F00" stroke="none"/>' + INNER,
+    );
+    expect(svg).toContain('background:#FF0000;');
+  });
+
+  it('draws no rect for the default white background (bakire-18-peku988)', () => {
+    const svg = assembleSvg(sequenceFragment({ background: '#FFFFFF' }));
+    expect(rootGroupChildren(svg)).toBe(INNER);
+    expect(svg).toContain('background:#FFFFFF;');
+  });
+
+  it('draws no rect when the fragment carries no background at all', () => {
+    expect(rootGroupChildren(assembleSvg(sequenceFragment()))).toBe(INNER);
+  });
+
+  it('draws no rect and omits background: from the root style for transparent (badoba-13-cuba151)', () => {
+    const svg = assembleSvg(sequenceFragment({ background: 'transparent' }));
+    expect(rootGroupChildren(svg)).toBe(INNER);
+    expect(svg).toContain('style="width:114px;height:313px;"');
+    expect(svg).not.toContain('background:');
+  });
+
+  it('draws no rect for the `none` spelling of transparent either', () => {
+    expect(rootGroupChildren(assembleSvg(sequenceFragment({ background: 'none' })))).toBe(INNER);
+  });
+
+  it('draws no rect for the canonical transparent hex #00000000', () => {
+    const svg = assembleSvg(sequenceFragment({ background: '#00000000' }));
+    expect(rootGroupChildren(svg)).toBe(INNER);
+    expect(svg).not.toContain('background:');
+  });
+
+  it('draws no rect for a BLACK background, which jar excludes alongside white (zuravu-52-mike252)', () => {
+    const svg = assembleSvg(sequenceFragment({ background: '#000000' }));
+    expect(rootGroupChildren(svg)).toBe(INNER);
+    expect(svg).toContain('background:#000000;');
+  });
+
+  it('truncates the rect dims to integers, matching every non-white golden', () => {
+    const svg = assembleSvg(sequenceFragment({ width: 114.7, height: 313.2, background: '#808080' }));
+    expect(rootGroupChildren(svg)).toBe(
+      '<rect x="0" y="0" width="114" height="313" fill="#808080" stroke="none"/>' + INNER,
+    );
+  });
+
+  it('splices the rect into an already-wrapped body ahead of chrome (fazaba-22-nusi829)', () => {
+    const header = '<g class="header"><text x="5" y="12">h</text></g>';
+    const svg = assembleSvg(
+      sequenceFragment({
+        body: ROOT_GROUP_OPEN + header + INNER + '</g>',
+        bodyWrapped: true,
+        background: '#AAAAAA',
+      }),
+    );
+    expect(rootGroupChildren(svg)).toBe(
+      '<rect x="0" y="0" width="114" height="313" fill="#AAA" stroke="none"/>' + header + INNER,
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AC5 — the other five diagram types (and the diagramType-less path) are
+// byte-identical to their pre-T2 output. Every literal below was captured
+// from the implementation BEFORE the SEQUENCE case was added and pinned
+// verbatim; a change to any shared helper breaks these, not just a change to
+// the dispatch switch.
+// ---------------------------------------------------------------------------
+
+const SHELL_HEAD = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" data-diagram-type=';
+
+/** `<svg …>…<defs/>` prolog for one diagram type at one canvas size. */
+function pinnedPrologue(type: string, w: number, h: number, style: string): string {
+  return (
+    `${SHELL_HEAD}"${type}" style="${style}" width="${String(w)}px" height="${String(h)}px"` +
+    ` viewBox="0 0 ${String(w)} ${String(h)}" zoomAndPan="magnify" preserveAspectRatio="none"` +
+    ' contentStyleType="text/css"><?plantuml $version$?><defs/>'
+  );
+}
+
+describe('assembleSvg — AC5: the other diagram types are byte-unchanged', () => {
+  it('CLASS (border rect + background rect + chrome-wrapped body)', () => {
+    const svg = assembleSvg(
+      chromedClassFragment({
+        documentBackgroundRect: '#EEEEEE',
+        diagramBorderColor: '#FF0000',
+        background: '#EEEEEE',
+      }),
+    );
+    expect(svg).toBe(
+      pinnedPrologue('CLASS', 66, 46, 'width:66px;height:46px;background:#EEEEEE;') +
+        ROOT_GROUP_OPEN +
+        '<rect x="0" y="0" width="64" height="44" fill="none" stroke="#F00" stroke-width="1"/>' +
+        '<rect x="0" y="0" width="66" height="46" fill="#EEE" stroke="none"/>' +
+        INNER +
+        '</g></svg>',
+    );
+  });
+
+  it('STATE (non-default background, unwrapped body)', () => {
+    const svg = assembleSvg({
+      body: INNER, width: 100, height: 80, background: '#808080', diagramType: 'STATE',
+    });
+    expect(svg).toBe(
+      pinnedPrologue('STATE', 100, 80, 'width:100px;height:80px;background:#808080;') +
+        ROOT_GROUP_OPEN +
+        '<rect x="0" y="0" width="100" height="80" fill="#808080" stroke="none"/>' +
+        INNER +
+        '</g></svg>',
+    );
+  });
+
+  it('JSON (theme-named white canonicalizes, no rect)', () => {
+    const svg = assembleSvg({
+      body: INNER, width: 50, height: 30, background: 'white', diagramType: 'JSON',
+    });
+    expect(svg).toBe(
+      pinnedPrologue('JSON', 50, 30, 'width:50px;height:30px;background:#FFFFFF;') +
+        ROOT_GROUP_OPEN + INNER + '</g></svg>',
+    );
+  });
+
+  it('YAML (chrome-wrapped body, rect spliced in)', () => {
+    const svg = assembleSvg({
+      body: ROOT_GROUP_OPEN + INNER + '</g>',
+      width: 50, height: 30, background: '#0B58A8', bodyWrapped: true, diagramType: 'YAML',
+    });
+    expect(svg).toBe(
+      pinnedPrologue('YAML', 50, 30, 'width:50px;height:30px;background:#0B58A8;') +
+        ROOT_GROUP_OPEN +
+        '<rect x="0" y="0" width="50" height="30" fill="#0B58A8" stroke="none"/>' +
+        INNER +
+        '</g></svg>',
+    );
+  });
+
+  it('HCL (same finalize as JSON/YAML)', () => {
+    const svg = assembleSvg({
+      body: INNER, width: 50, height: 30, background: '#0B58A8', diagramType: 'HCL',
+    });
+    expect(svg).toBe(
+      pinnedPrologue('HCL', 50, 30, 'width:50px;height:30px;background:#0B58A8;') +
+        ROOT_GROUP_OPEN +
+        '<rect x="0" y="0" width="50" height="30" fill="#0B58A8" stroke="none"/>' +
+        INNER +
+        '</g></svg>',
+    );
+  });
+
+  it('a diagramType-less fragment still goes through svgRoot verbatim (markers and all)', () => {
+    // `svgRoot` is untouched by T2, so equality with it IS the byte-identity
+    // statement: had the dispatch stolen this path, the marker `<defs>` block
+    // alone would differ by ~3kB.
+    const svg = assembleSvg({ body: INNER, width: 50, height: 30, background: '#0B58A8' });
+    expect(svg).toBe(svgRoot(50, 30, [INNER], '#0B58A8'));
+    expect(svg).toContain('<marker id="arrow-sync"');
+    expect(svg).not.toContain('data-diagram-type');
   });
 });

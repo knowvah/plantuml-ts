@@ -63,6 +63,7 @@ const DIAGRAM_TYPE_STATE = 'STATE';
 const DIAGRAM_TYPE_JSON = 'JSON';
 const DIAGRAM_TYPE_YAML = 'YAML';
 const DIAGRAM_TYPE_HCL = 'HCL';
+const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
 
 // ---------------------------------------------------------------------------
 // class finalize (formerly class/renderer-shell.ts#assembleClassShell)
@@ -280,6 +281,81 @@ function finalizeJsonFragment(fragment: RenderFragment): RenderFragment {
 }
 
 // ---------------------------------------------------------------------------
+// sequence finalize (decisions.md D1)
+// ---------------------------------------------------------------------------
+
+/** The default (unset) diagram background -- jar's own `TextBlockExporter
+ *  .Builder` field initializer, `HColors.WHITE.withDark(HColors.BLACK)`
+ *  (`core/TextBlockExporter.java:413`), which reaches `SvgGraphics` as
+ *  `#FFFFFF` and so takes the no-rect branch of
+ *  {@link SEQUENCE_UNPAINTED_BACKGROUNDS}. Same value as state's and json's
+ *  sibling constants above, declared separately so a per-engine correction
+ *  to one cannot silently move the other four. */
+const SEQUENCE_DEFAULT_BACKGROUND = '#FFFFFF';
+
+/**
+ * Every resolved background for which the jar draws NO content-level rect.
+ * `SvgGraphics`'s constructor guards its `paintBackcolor(color)` call with
+ * `color.equals("#00000000") == false && color.equals("#000000") == false
+ * && color.equals("#FFFFFF") == false` (`klimt/drawing/svg/SvgGraphics.java:
+ * 189-191`) -- note BLACK is excluded alongside white and transparent, which
+ * neither {@link maybeStateBackgroundRect} nor {@link isSolidNonDefault}
+ * models. Jar-verified across the whole cached sequence corpus: of the 19
+ * goldens whose root style carries a non-`#FFFFFF` `background:`, the 18
+ * non-black ones all open their content `<g>` with the rect, and the single
+ * black one (`sequence/zuravu-52-mike252`, `background:#000000;`) does not.
+ * `transparent`/`none` are this port's un-resolved spellings of jar's
+ * `#00000000` -- the same pair `document-shell.ts#assembleDocumentShell`'s
+ * own `isSolid` test already accepts.
+ */
+const SEQUENCE_UNPAINTED_BACKGROUNDS: ReadonlySet<string> = new Set([
+  SEQUENCE_DEFAULT_BACKGROUND,
+  '#000000',
+  '#00000000',
+  'transparent',
+  'none',
+]);
+
+/**
+ * The whole-canvas rect `SvgGraphics#paintBackcolor` appends to the root
+ * `<g>` (`:207-212`), later resized to the FINAL `maxX`/`maxY` (`:817-819`)
+ * -- hence `fragment.width`/`height`, post-chrome, truncated the way
+ * `assembleDocumentShell` truncates the root's own `width`/`height` (every
+ * one of the 17 painted goldens carries integral dims, so the two agree).
+ */
+function maybeSequenceBackgroundRect(fragment: RenderFragment): string {
+  const background = fragment.background ?? SEQUENCE_DEFAULT_BACKGROUND;
+  if (SEQUENCE_UNPAINTED_BACKGROUNDS.has(background)) return '';
+  return rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
+    fill: background, stroke: 'none', strokeWidth: 1,
+  });
+}
+
+/**
+ * sequence's per-diagram body finalization. Sequence reaches this module
+ * with `bodyWrapped` unset in the common case -- unlike description it has
+ * no `CompleteSvg` escape hatch and unlike class no wrap of its own -- so
+ * this is the ONE place that guarantees the single content `<g>`
+ * `document-shell.ts#withRootGroupAttributes` then upgrades to
+ * `ROOT_GROUP_OPEN`.
+ *
+ * Follows json's shape rather than state's for the chrome-present case:
+ * `paintBackcolor` runs in `SvgGraphics`'s CONSTRUCTOR, before any diagram
+ * or chrome draw, so the rect is the content group's first child whether or
+ * not chrome wrapped the body. State's `bodyWrapped ? '' : ...` carve-out
+ * records that state's corpus had no such combination; sequence's has six
+ * (`fazaba-22-nusi829`, `ganefo-61-leka777`, `jogeto-89-zaco078`,
+ * `solivu-37-vika919`, `taxude-25-lamo370`, `zerovu-57-cumo773` -- all
+ * `<g class="header">`/`<g class="title">` behind a 0,0 background rect).
+ */
+function finalizeSequenceBody(fragment: RenderFragment): string {
+  const backgroundRect = maybeSequenceBackgroundRect(fragment);
+  return fragment.bodyWrapped === true
+    ? spliceIntoContentGroup(fragment.body, backgroundRect)
+    : group(backgroundRect + fragment.body);
+}
+
+// ---------------------------------------------------------------------------
 // Dispatch
 // ---------------------------------------------------------------------------
 
@@ -299,6 +375,7 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
   switch (fragment.diagramType) {
     case DIAGRAM_TYPE_CLASS: return { ...fragment, body: finalizeClassBody(fragment) };
     case DIAGRAM_TYPE_STATE: return { ...fragment, body: finalizeStateBody(fragment) };
+    case DIAGRAM_TYPE_SEQUENCE: return { ...fragment, body: finalizeSequenceBody(fragment) };
     case DIAGRAM_TYPE_JSON:
     case DIAGRAM_TYPE_YAML:
     case DIAGRAM_TYPE_HCL:
