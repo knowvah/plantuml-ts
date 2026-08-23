@@ -19,15 +19,27 @@
  * THE 12-DIFF PLATEAU — why a mass rise can mean progress.
  * `compareNodes` short-circuits on structural mismatch: at `compare.ts:353`
  * an unequal child count pushes one `[childCount]` diff and RETURNS without
- * recursing into children. T4's census found **1010 of 1141** fixtures sit at
- * exactly 12 diffs sharing ONE identical path-set, and that set includes
- * `svg/g[1][childCount]`. So for **88.8%** of this corpus the diagram BODY is
- * never compared at all — those 12 measure how far the comparison gets before
- * the root chrome stops it, not body fidelity. The consequence for this gate:
- * when someone closes the root-chrome gap, ~1010 fixtures start comparing
- * their bodies for the first time and their counts rise sharply, all at once.
- * That is progress and must be re-pinned deliberately, not "fixed". An
- * isolated rise, or a rise on a fixture whose baseline is not 12, is still
+ * recursing into children. T4's census found **1012 of 1140** measurable
+ * fixtures sit at exactly 12 diffs sharing ONE identical path-set, and that
+ * set includes `svg/g[1][childCount]`. So for **88.8%** of this corpus the
+ * diagram BODY is never compared at all — those 12 measure how far the
+ * comparison gets before the root chrome stops it, not body fidelity.
+ *
+ * CORRECTED 2026-08-23. This block used to say the rise comes "when someone
+ * closes the root-chrome gap". It does not, and the difference decides how
+ * to score the first sequence mission. The 12 diffs, re-measured on three
+ * plateau fixtures, are: six absent root attributes, four root GEOMETRY
+ * values (`width`/`height`/`viewBox[2]`/`viewBox[3]`),
+ * `svg/defs[1][childCount]` (12 vs 0), and `svg/g[1][childCount]`. Only the
+ * attributes and the `defs` count are chrome. Closing those removes seven
+ * diffs and drops the plateau to ~5 — a mass FALL. The body stays unreachable
+ * because `svg/g[1][childCount]` (94 vs 630 on `SequenceArrows_0001_Test`)
+ * still short-circuits here. Bodies become comparable when child counts
+ * MATCH, which is rebuild-scale work. So the mass-RISE signature below is
+ * real but belongs to whichever mission first makes bodies structurally
+ * correct, not to a chrome fix.
+ *
+ * An isolated rise, or a rise on a fixture whose baseline is not 12, is still
  * the regression this gate is for. The gate FAILS on a rise either way — it
  * has no bypass, and must not acquire one; only the message distinguishes the
  * two readings so whoever hits it can tell them apart.
@@ -202,14 +214,18 @@ function checkNoRise(f: FixtureRef, baseline: number, live: number): RiseCheckRe
       `concluding that, because ONE case is the opposite. ` +
       `WHY: compareNodes short-circuits on structural mismatch -- at compare.ts:353 an ` +
       `unequal child count pushes a single \`[childCount]\` diff and RETURNS without ` +
-      `recursing. T4's census found 1010 of 1141 fixtures sit at exactly 12 diffs sharing ` +
-      `one identical path-set that includes \`svg/g[1][childCount]\`, so for 88.8% of this ` +
-      `corpus the diagram BODY is never compared at all -- their 12 measures reaching the ` +
-      `body and stopping, not body fidelity. When the root-chrome gap closes, those ~1010 ` +
-      `fixtures begin comparing their bodies for the first time and their counts rise ` +
-      `sharply and together. That signature -- a MASS rise concentrated on fixtures whose ` +
-      `baseline is 12 -- is PROGRESS, not regression: re-measure and re-pin the baseline ` +
-      `deliberately, recording why. An ISOLATED rise on one fixture, or a rise on a fixture ` +
+      `recursing. T4's census found 1012 of 1140 measurable fixtures sit at exactly 12 ` +
+      `diffs sharing one identical path-set that includes \`svg/g[1][childCount]\`, so for ` +
+      `88.8% of this corpus the diagram BODY is never compared at all -- their 12 measures ` +
+      `reaching the body and stopping, not body fidelity. Bodies become comparable when ` +
+      `child counts MATCH; when that happens those ~1012 fixtures compare their bodies for ` +
+      `the first time and their counts rise sharply and together. That signature -- a MASS ` +
+      `rise concentrated on fixtures whose baseline is 12 -- is PROGRESS, not regression: ` +
+      `re-measure and re-pin the baseline deliberately, recording why. NOTE (corrected ` +
+      `2026-08-23): closing the root-CHROME gap alone does NOT produce that rise -- it ` +
+      `removes seven of the twelve and the plateau FALLS to ~5, because g[1][childCount] ` +
+      `still short-circuits. A mass fall is the expected chrome-fix outcome. ` +
+      `An ISOLATED rise on one fixture, or a rise on a fixture ` +
       `whose baseline is not 12, is the regression this gate exists to catch -- do not ` +
       `paper over it. Either way the fix is the same file: update this slug's diffCount, ` +
       `measuredAt and measuredAgainstCommit in oracle/goldens/svg-sequence/` +

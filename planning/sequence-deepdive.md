@@ -36,10 +36,27 @@ out (D1), not by writing a second comparator. Concretely, today:
   ratchet that FAILS on any rise (1140 measurable fixtures, 1 error;
   min 10 / max 139 / sum 16486). **1012 of 1140 (88.8%) sit at exactly 12
   diffs** because `compare.ts:353` stops recursing at the first structural
-  mismatch (a root `[childCount]` diff), so the diagram body is currently
-  unmeasured for 88.8% of the corpus — the first real fix will raise that
-  plateau's counts together, and the ratchet's own failure message explains
-  why that is progress, not regression.
+  mismatch, so the diagram body is currently unmeasured for 88.8% of the
+  corpus.
+
+  **CORRECTED 2026-08-23.** This bullet used to end "the first real fix will
+  raise that plateau's counts together, and the ratchet's own failure message
+  explains why that is progress, not regression." That is wrong, and acting
+  on it would mis-score the first mission to touch sequence. The 12 diffs
+  were re-measured on three plateau fixtures (`SequenceArrows_0001_Test`,
+  `SequenceArrows_0002_Test`, `mebidu-16-ruve297`) and are identical in
+  shape: **six absent root attributes** (`background`, `contentStyleType`,
+  `preserveAspectRatio`, `version`, `xmlns:xlink`, `zoomAndPan`), **four root
+  geometry values** (`width`, `height`, `viewBox[2]`, `viewBox[3]`),
+  **`svg/defs[1][childCount]`** (12 vs 0), and **`svg/g[1][childCount]`**.
+  Only the first and third groups are chrome. Closing them removes seven
+  diffs and drops the plateau to **~5** — it does NOT make the body
+  comparable, because `svg/g[1][childCount]` (measured 94 vs 630 on
+  `SequenceArrows_0001_Test`, 13 vs 76 on `mebidu-16-ruve297`) short-circuits
+  at the same `compare.ts:353` and keeps doing so until the body is
+  substantially correct. Bodies become reachable when child counts MATCH,
+  which is rebuild-scale work, not a chrome fix. The root geometry values are
+  likewise body-driven and will not move until layout does.
 - `oracle/goldens/svg-sequence/diff-census.json` — every diff bucketed into
   six fixed, mechanically-derived categories (`missing-element` 873,
   `extra-element` 1317, `geometry` 5124, `text-metrics` 536, `format-units`

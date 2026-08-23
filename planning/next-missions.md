@@ -348,10 +348,24 @@ missing surface by **extending**, not replacing, the existing DOT-less
   number: **1012 of 1140 fixtures (88.8%) sit at exactly 12 diffs because
   `compare.ts:353` stops recursing at the first structural mismatch
   (`svg/g[1][childCount]`), so the diagram BODY is never compared for 88.8%
-  of the corpus.** Closing that root-chrome gap will raise those 1012 counts
-  together — the ratchet distinguishes that mass-rise signature (progress,
-  re-pin deliberately) from an isolated rise (the regression it exists to
-  catch).
+  of the corpus.**
+
+  **CORRECTION 2026-08-23** (re-measured on a clean tree at `fc499de2`; the
+  original sentence is preserved below this file's amend-don't-rewrite
+  convention). This bullet used to continue: "Closing that root-chrome gap
+  will raise those 1012 counts together — the ratchet distinguishes that
+  mass-rise signature (progress, re-pin deliberately) from an isolated rise
+  (the regression it exists to catch)." **The premise is false.** The 12
+  diffs, identical across three plateau fixtures spot-checked, are six absent
+  root attributes + four root geometry values + `svg/defs[1][childCount]`
+  (12 vs 0) + `svg/g[1][childCount]`. Closing the chrome half removes seven
+  and drops the plateau to **~5**; it does not raise anything, because
+  `svg/g[1][childCount]` (94 vs 630 on `SequenceArrows_0001_Test`) still
+  short-circuits at the same `compare.ts:353`. Bodies become reachable when
+  child counts MATCH — rebuild-scale work. The mass-rise signature the
+  ratchet describes is real, but it belongs to whichever mission first makes
+  bodies structurally correct, NOT to the chrome fix. Expect a mass FALL from
+  the first sequence mission and re-pin for that.
 - **The census**: `oracle/goldens/svg-sequence/diff-census.json` — every diff
   classified into six fixed, mechanically-derived buckets (`missing-element`
   873, `extra-element` 1317, `geometry` 5124, `text-metrics` 536,
@@ -359,8 +373,11 @@ missing surface by **extending**, not replacing, the existing DOT-less
   a ranked work queue, not 1140 opaque numbers.
 - **The ranked bucket queue** the rebuild should work in order: (1) the
   `compare.ts:353` root-chrome short-circuit — six absent root SVG
-  attributes, four root geometry values, two child counts, blocking body
-  comparison for 88.8% of the corpus; (2) `geometry` (5124, once bodies are
+  attributes, four root geometry values, two child counts. **Amended
+  2026-08-23:** only the attributes and `defs[1][childCount]` are chrome and
+  closable here; the four geometry values and `g[1][childCount]` are
+  body-driven, so this item does NOT unblock body comparison (see the
+  correction above). (2) `geometry` (5124, once bodies are
   reachable); (3) `other`'s two named components (6824 absent-attribute
   records, 1420 tag substitutions) rather than the bucket as a whole, which is
   honest-large by design (D5) and not a single fix target.

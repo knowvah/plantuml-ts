@@ -79,9 +79,19 @@ diff-baseline measurement over the full committed corpus
   `!include` stdlib-bundle resolution failures (the documented architecture
   boundary — `src/` vendors no PlantUML stdlib), not sequence-render
   defects.
-- **Distribution: min 10 · median 12 · max 139 · total 16462 diffs.** 1010
-  of 1138 (88.8%) sit at exactly 12 — a fixed per-diagram floor, not
-  per-fixture drift.
+- **Distribution: min 10 · median 12 · max 139 · total 16486 diffs.** 1012
+  of 1140 measurable fixtures (88.8%) sit at exactly 12 — a fixed
+  per-diagram floor, not per-fixture drift. (**Corrected 2026-08-23**: this
+  line read `total 16462` and `1010 of 1138`, from a snapshot taken before
+  the committed baseline; the figures above are read from
+  `diff-baseline.json` itself.)
+- **Those 12 are not all chrome.** Re-measured 2026-08-23 on three plateau
+  fixtures, identical in shape: six absent root attributes, four root
+  GEOMETRY values, `svg/defs[1][childCount]` (12 vs 0), and
+  `svg/g[1][childCount]`. Closing the chrome half removes seven and drops
+  the plateau to ~5. It does **not** make the body comparable — the
+  `g[1][childCount]` mismatch still short-circuits `compare.ts:353` until
+  child counts MATCH, which is rebuild-scale work.
 - **ZERO fixtures reach 0 diffs.** Nothing is `[PROMOTION READY]`, so there
   is nothing this task could promote even if it wanted to. This ratchet
   ships with `fixtures: []` and a `describe.skipIf(fixtures.length === 0)`
