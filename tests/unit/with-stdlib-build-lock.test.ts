@@ -294,12 +294,40 @@ describe('withStdlibBuildLock -- shared mode across processes (D1)', () => {
 
       expect(resultA.exitCode).toBe(0);
       expect(resultB.exitCode).toBe(0);
-      // Serialised acquisition would take at least 2*holdMs; concurrent
-      // holding completes in about one holdMs plus process-spawn overhead.
-      expect(elapsed).toBeLessThan(holdMs * 1.6);
 
       const acquiredA = Number(readFileSync(readyA, 'utf8'));
       const acquiredB = Number(readFileSync(readyB, 'utf8'));
+
+      // Serialised acquisition would take at least 2*holdMs; concurrent
+      // holding completes in about one holdMs.
+      //
+      // Measured from the FIRST acquisition, not from `start`, and that
+      // distinction is the whole point. Each worker boots node, imports
+      // jiti, and has jiti TRANSPILE the helper module before it can
+      // acquire anything -- startup cost that has nothing to do with the
+      // lock. Timing from `start` charges that to the lock and makes the
+      // threshold a measure of the runner's CPU: this assertion read
+      // `expect(elapsed).toBeLessThan(holdMs * 1.6)` and failed on CI three
+      // consecutive runs at 660, 769 and 793 ms while passing locally at
+      // 483 ms, because startup costs ~64 ms on a 12-core dev machine and
+      // 260-390 ms on a 2-core runner -- consuming the entire 240 ms of
+      // slack the 1.6 multiplier leaves above holdMs.
+      //
+      // The concurrent phase itself is load-independent, which is what
+      // makes it the right thing to bound. Instrumented locally
+      // (`.agent-notes/shared-mode-timing-is-spawn-bound.md`): 420 ms quiet
+      // at load1 16, and 413/430/413 ms at load1 41-50, while spawn moved
+      // 64 -> 79-100 ms over the same range.
+      //
+      // Discrimination is unchanged: serialisation puts the second acquire
+      // after the first release, so this quantity becomes ~2*holdMs and
+      // still blows the same 1.6*holdMs threshold. Narrowing WHAT is timed
+      // is not a loosening -- the serialisation floor it must stay under is
+      // identical, and the overlap assertions below remain the rigorous
+      // proof in any case.
+      const firstAcquired = Math.min(acquiredA, acquiredB);
+      const concurrentPhaseMs = elapsed - (firstAcquired - start);
+      expect(concurrentPhaseMs).toBeLessThan(holdMs * 1.6);
       // Each holder's [acquired, acquired+holdMs] window must overlap the
       // other's -- proof neither waited for the other, with no `lockPath`-
       // adjacent `mode` override anywhere in this worker script.
