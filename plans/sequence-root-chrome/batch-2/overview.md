@@ -11,4 +11,4 @@ change that caused it.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|---|---|---|---|---|
-| T3 | [Renderer wiring](T3-renderer-wiring.md) | typescript-pro | `src/diagrams/sequence/renderer.ts`, `tests/unit/sequence/renderer.test.ts` | T1, T2 | [ ] |
+| T3 | [Renderer wiring](T3-renderer-wiring.md) | typescript-pro | `src/diagrams/sequence/renderer.ts`, `src/diagrams/sequence/renderer-arrowhead.ts`, `tests/unit/sequence/renderer.test.ts`, `docs/catalog.md` | T1, T2 | code done, **BLOCKED** |
