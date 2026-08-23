@@ -87,3 +87,112 @@ promotion is not this mission's to grant.
 artifact files must revert *together with* the `src/` change. Reverting
 `src/` alone leaves baselines pinned to output that no longer exists, and the
 ratchet would then read as a mass regression.
+
+---
+
+# Amendment — 2026-08-23, mid-mission
+
+Batch 2 halted on two stop conditions. The maintainer ruled: amend the brief
+to make the ratchet's measure monotonic **before** anything is re-pinned.
+D5 records that ruling. D6 is the second stop, still open.
+
+## D5 — the ratchet scores skipped subtrees, not diff records
+
+**Context.** T3 landed the chrome fix exactly as briefed — 803 of the 1010
+plateau fixtures fell to an identical 5-diff path set, the six absent root
+attributes and `svg/defs[1][childCount]` gone. But 255 fixtures *rose*, 83 of
+them from a baseline other than 12, tripping a stop condition.
+
+The mechanism is not a regression. `compareSvg`'s count is **not monotonic in
+wrongness**, because it short-circuits in two places and charges 1 for each:
+
+- `compare.ts:172-183` — tags differ: push one diff, `return`. Attributes and
+  children are never examined.
+- `compare.ts:347-355` — child counts differ: push one `[childCount]` diff,
+  `return`. The entire subtree is never examined.
+
+So a tag *substitution* costs 1 however wrong the subtree is, while a tag
+*match* with N differing attributes costs N. Adopting the shell changed the
+content group's child list; wherever a positional pair flipped from
+substitution to match, the charge went 1 → ~10 on an element equally wrong
+before and simply not being measured. The clinching evidence is
+`zuluja-50-zore143` (31 → 50), where the comparator reports
+`svg/g[1]/text[5]/text()[1] actual="Bob" expected="hello"` — our *participant*
+label positionally aligned against the jar's *message* label. The pairing is
+coincidental, not semantic.
+
+**Decision.** Charge each short-circuit an **upper bound on what descending
+could have cost**, and ratchet on the sum of those weights.
+
+```
+units(text)     = 1
+units(element)  = 1 + |attrs| + sum(units(children))
+
+weight(tag mismatch)        = units(actual) + units(expected)
+weight(childCount mismatch) = sum(units(actual children))
+                            + sum(units(expected children))
+weight(every other diff)    = 1
+```
+
+**Both** short-circuits are weighted, not just the tag one. Chosen by the
+maintainer 2026-08-23 over a tag-only variant. Weighting tags alone fixes the
+255 rises visible today but leaves the identical defect live in the childCount
+path — which governs **803 of 1141** fixtures, whose entire body costs 1 diff.
+The next mission that makes body element counts match would trip the same mass
+false rise. Fixing one short-circuit and not the other treats the symptom.
+
+**Why this is monotone**, by induction on the tree. When tags match and the
+comparator descends, its total charge is at most
+`|union(attrs_a, attrs_e)|` plus the charges from the children; both are
+bounded by `units(a) + units(e)`, which is exactly what the short-circuit
+charges. So descending can never cost more than short-circuiting, and making
+the document *more* structurally aligned can never raise the score. That is
+the property the ratchet needs and the one it does not currently have.
+
+The weight is a design choice, not a ported constant, so it carries a
+rationale rather than an upstream `file:line`. It is deliberately a loose
+upper bound (a sum, not a max) because a strict bound is what buys
+monotonicity; a tighter formula that can be exceeded buys nothing.
+
+**Blast radius — the binding constraint.** `compareSvg` is consumed by the
+class, state, description, dot, object, skin and json-family ratchets, and by
+five `scripts/`. Every one of them reads `diffs.length`. So the change is
+**additive**: a new optional `weight` field on `Diff`, defaulted to 1, and
+`diffs.length` left untouched. No other engine's baseline may move. That is
+T6's AC5 and it is the acceptance criterion that matters most.
+
+**Consequences.** Sequence's baselines stop being small readable integers
+(~5) and become large ones (~450-670 for the plateau) that honestly read as
+"this much of the document is unexplained". They fall as the body is ported.
+`diffCount` stays in `diff-baseline.json` as an informational field; the
+**gated** quantity becomes `weightedScore`. A rising `diffCount` alongside a
+falling `weightedScore` is exactly the artifact diagnosed above, and is no
+longer a failure.
+
+## D6 — PROPOSED, NOT RULED: the one non-sequence manifest entry
+
+**Status: open. Needs a maintainer ruling before T5 commits anything.**
+
+`test-results/dot-cache/object/zuvila-56-nuda425/in.puml` moved, tripping the
+mission's highest-consequence stop. The evidence says it is **not** the
+`assemble-svg.ts` leak that stop was written to catch:
+
+1. Batch 1 — which contains the **entire** `assemble-svg.ts` change — moved
+   **0** fixtures.
+2. T3's commit touches only `renderer.ts`, the new `renderer-arrowhead.ts`,
+   its test and `docs/catalog.md`. No parser, dispatcher, `accepts` or
+   `index.ts`, so routing is untouched by this mission.
+3. Rendering that fixture produces a document whose **only**
+   `data-diagram-type` is `"SEQUENCE"`. The whole fixture is claimed by the
+   sequence engine; it is a sequence render filed under an object path.
+
+Symmetrically, **70** fixtures filed under `sequence/` did *not* move; the
+three sampled render as `YAML`, `CLASS` and `CLASS`. Corpus classification and
+actual routing disagree in both directions, and 1071 + 1 = the 1072 fixtures
+the sequence engine actually renders.
+
+**Proposal** (not yet authority to act): amend T5's AC2 to permit exactly this
+one enumerated slug, with the three facts above recorded, and file the
+routing mismatch as its own tracked issue. T5's own boundary states that
+explaining a non-sequence move "does not make it one you may proceed past",
+so this stays blocked until ruled on.

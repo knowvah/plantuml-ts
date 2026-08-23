@@ -15,10 +15,25 @@ all 1140 measurable sequence fixtures.
 
 ## Exit bar
 
-The 1012-fixture plateau at 12 diffs falls to **~5**, with the six absent
-root-attribute diffs and `svg/defs[1][childCount]` gone from every fixture,
-**zero** non-sequence entries moved in `render-manifest`, and all four gates
-green.
+**Amended 2026-08-23** — the original bar was written against `diffCount`,
+which [D5](decisions.md#d5--the-ratchet-scores-skipped-subtrees-not-diff-records)
+shows is not monotonic. The structural half of it was **met exactly** by T3
+and is now a recorded result rather than a target:
+
+> 803 of the 1010-fixture plateau fell to an identical 5-diff path set —
+> `svg/@width`, `@height`, `@viewBox[2]`, `@viewBox[3]`, `svg/g[1][childCount]`.
+> The six absent root attributes and `svg/defs[1][childCount]` are gone from
+> every fixture. Measured over 1138 fixtures, 2026-08-23.
+
+The remaining bar:
+
+- `compareSvg` scores skipped subtrees by size, and **no** fixture's
+  `weightedScore` rises against its pre-T3 value
+- **zero** non-sequence entries moved in `render-manifest`, or exactly the
+  one enumerated in [D6](decisions.md#d6--proposed-not-ruled-the-one-non-sequence-manifest-entry)
+  once ruled on
+- no other engine's baseline moved by T6's change to the shared comparator
+- all four gates green
 
 ## What this mission does NOT do — read before scoring it
 
@@ -64,8 +79,13 @@ Also explicitly out of scope, named rather than assumed:
 | Batch | Tasks | Parallel | Status |
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 arrow shape vocabulary · T2 document shell | yes | [x] |
-| [2](batch-2/overview.md) | T3 renderer wiring | — | code done, **BLOCKED** |
+| [2](batch-2/overview.md) | T3 renderer wiring | — | [x] |
+| [2b](batch-2b/overview.md) | T6 weighted diff score | — | [ ] |
 | [3](batch-3/overview.md) | T4 re-pin ratchet · T5 manifest re-baseline | yes | [ ] |
+
+Batch 2b was inserted by the [2026-08-23 amendment](decisions.md#amendment--2026-08-23-mid-mission).
+T3's code is correct and landed; the batch halted on the *measure*, not the
+change. See [D5](decisions.md#d5--the-ratchet-scores-skipped-subtrees-not-diff-records).
 
 ## Stop conditions
 
@@ -76,10 +96,20 @@ Also explicitly out of scope, named rather than assumed:
   code turns out to require
 - **Any non-sequence entry moves in `render-manifest`** — that is an
   `assemble-svg.ts` leak into class/state/json/description, the single
-  highest-consequence failure this mission can cause
-- **An ISOLATED diff-count rise**, or a rise on a fixture whose baseline is
-  not 12. A mass fall is expected; a mass rise on the 12-cohort would mean
-  bodies became reachable (report it, do not re-pin silently)
+  highest-consequence failure this mission can cause. **Triggered
+  2026-08-23** by one entry, `object/zuvila-56-nuda425`; diagnosed as a
+  corpus-classification mismatch rather than a leak, and still awaiting a
+  ruling — see [D6](decisions.md#d6--proposed-not-ruled-the-one-non-sequence-manifest-entry)
+- **Any other engine's diff baseline moves** when T6 changes the shared
+  `compare.ts`. Added 2026-08-23: seven ratchets and five `scripts/` read
+  `diffs.length`, so the weighting must be additive
+- **Any `weightedScore` rise, on any fixture.** Amended 2026-08-23: the old
+  condition read "an ISOLATED diff-count rise, or a rise on a fixture whose
+  baseline is not 12", which assumed a mass rise on the 12-cohort meant
+  bodies had become reachable. D5 disproves that — a rise could equally be
+  the comparator charging more for a *better*-aligned document. Once
+  `weightedScore` is monotone (T6) that ambiguity is gone and **every** rise
+  is a real regression. `diffCount` may rise freely and is no longer gated
 - **A constant is needed that has no upstream `file:line` citation.** Never
   fit a value. No citation means unfinished
 - `zudize-61-vomi445`'s measured per-call cost moves materially and no
