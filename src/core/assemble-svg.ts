@@ -300,8 +300,8 @@ const SEQUENCE_DEFAULT_BACKGROUND = '#FFFFFF';
  * && color.equals("#FFFFFF") == false` (`klimt/drawing/svg/SvgGraphics.java:
  * 189-191`) -- note BLACK is excluded alongside white and transparent, which
  * neither {@link maybeStateBackgroundRect} nor {@link isSolidNonDefault}
- * models. Jar-verified across the whole cached sequence corpus: of the 18
- * goldens whose root style carries a non-`#FFFFFF` `background:`, the 17
+ * models. Jar-verified across the whole cached sequence corpus: of the 19
+ * goldens whose root style carries a non-`#FFFFFF` `background:`, the 18
  * non-black ones all open their content `<g>` with the rect, and the single
  * black one (`sequence/zuravu-52-mike252`, `background:#000000;`) does not.
  * `transparent`/`none` are this port's un-resolved spellings of jar's
