@@ -179,9 +179,12 @@ T6's AC5 and it is the acceptance criterion that matters most.
 falling `weightedScore` is exactly the artifact diagnosed above, and is no
 longer a failure.
 
-## D6 — PROPOSED, NOT RULED: the one non-sequence manifest entry
+## D6 — RULED 2026-08-23: the one non-sequence manifest entry is allowed
 
-**Status: open. Needs a maintainer ruling before T5 commits anything.**
+**Status: ruled by the maintainer 2026-08-23.** T5's AC2 permits exactly the
+one enumerated slug below; every other non-sequence move remains a stop.
+The routing mismatch is filed as its own follow-on mission,
+`sequence-engine-overclaims-nested-diagrams`, in `planning/next-missions.md`.
 
 `test-results/dot-cache/object/zuvila-56-nuda425/in.puml` moved, tripping the
 mission's highest-consequence stop. The evidence says it is **not** the
@@ -201,8 +204,53 @@ three sampled render as `YAML`, `CLASS` and `CLASS`. Corpus classification and
 actual routing disagree in both directions, and 1071 + 1 = the 1072 fixtures
 the sequence engine actually renders.
 
-**Proposal** (not yet authority to act): amend T5's AC2 to permit exactly this
-one enumerated slug, with the three facts above recorded, and file the
-routing mismatch as its own tracked issue. T5's own boundary states that
-explaining a non-sequence move "does not make it one you may proceed past",
-so this stays blocked until ruled on.
+**Decision.** Amend T5's AC2 to permit exactly this one enumerated slug, with
+the three facts above recorded, and file the routing mismatch as a tracked
+follow-on. The cross-engine guard stays intact for every other entry — an
+unenumerated non-sequence move is still a stop condition.
+
+**Consequences.** The guard now has a named exception, which is a small
+permanent cost: a future `assemble-svg.ts` leak that happened to land on this
+one slug would not be caught. Accepted because the slug is enumerated rather
+than the check being loosened, and because the leak hypothesis is already
+refuted by batch 1 moving zero fixtures.
+
+## D7 — RULED 2026-08-23: the nine weighted risers are re-pinned, each named
+
+**Context.** T6's weighting did what it was for — all 256 fixtures whose
+`diffCount` rose had their `weightedScore` **fall**, with zero exceptions. But
+9 of 1140 fixtures' `weightedScore` rose, tripping the amended stop condition.
+
+**The stop condition's stated rationale was wrong**, and this decision
+corrects it. It claimed that once the score is monotone "every rise is a real
+regression". The score is monotone with respect to *structural alignment* —
+descending can never cost more than short-circuiting, which is what the 255
+spurious rises needed. It is **not** monotone with respect to *our document
+growing toward the oracle*, because `weight` sums both sides. T3's inline
+arrowheads are correct growth — the jar draws them too — so adding them
+raises the unexplained-content total until the counts actually match.
+
+Measured directly in both trees, not inferred:
+
+| fixture | ours pre → post | jar | reading |
+|---|---|---|---|
+| `tatesu-03-zozo948` | 825 → 1037 | 1390 | moved **closer**, +1130 |
+| `turixi-21-mufe557` | 71 → 95 | 73 | **overshot**, +2 |
+| `vifobo-88-gona211` | 38 → 41 | 38 | was **coincidentally exact**, +5 |
+
+The jar wraps each lifeline in `<g><title>…</title>…</g>` — one child of the
+content group — where this port emits a `<rect>` and a `<line>` separately.
+So `vifobo`'s pre-T3 equality was never structural; it was the same
+coincidence D5 diagnosed, running the other way.
+
+**Decision.** Re-pin all 1141, with the 9 risers each named individually in
+the journal with its mechanism. This is what T4's own AC2 already required —
+it forbids re-pinning a riser *silently*, not re-pinning one at all.
+
+**Consequences.** The gate can rise when the port adds correct-but-not-yet-
+matching content. That is documented rather than hidden, and it resolves as
+the body is ported: at full fidelity the counts match, the comparator
+descends, and the score goes to zero. The alternative — scoring only the
+expected side — was considered and rejected: it is not an upper bound on what
+descending charges, so it would trade D5's provable property for an intuitive
+one.

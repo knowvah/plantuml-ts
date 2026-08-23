@@ -27,11 +27,13 @@ and is now a recorded result rather than a target:
 
 The remaining bar:
 
-- `compareSvg` scores skipped subtrees by size, and **no** fixture's
-  `weightedScore` rises against its pre-T3 value
-- **zero** non-sequence entries moved in `render-manifest`, or exactly the
-  one enumerated in [D6](decisions.md#d6--proposed-not-ruled-the-one-non-sequence-manifest-entry)
-  once ruled on
+- `compareSvg` scores skipped subtrees by size, and every fixture whose
+  `weightedScore` rises against its pre-T3 value is named with a mechanism
+  ([D7](decisions.md#d7--ruled-2026-08-23-the-nine-weighted-risers-are-re-pinned-each-named)
+  — there are 9, all our content group growing)
+- non-sequence entries moved in `render-manifest`: **only**
+  `object/zuvila-56-nuda425`, allowed by
+  [D6](decisions.md#d6--ruled-2026-08-23-the-one-non-sequence-manifest-entry-is-allowed)
 - no other engine's baseline moved by T6's change to the shared comparator
 - all four gates green
 
@@ -80,7 +82,7 @@ Also explicitly out of scope, named rather than assumed:
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 arrow shape vocabulary · T2 document shell | yes | [x] |
 | [2](batch-2/overview.md) | T3 renderer wiring | — | [x] |
-| [2b](batch-2b/overview.md) | T6 weighted diff score | — | [ ] |
+| [2b](batch-2b/overview.md) | T6 weighted diff score | — | [x] |
 | [3](batch-3/overview.md) | T4 re-pin ratchet · T5 manifest re-baseline | yes | [ ] |
 
 Batch 2b was inserted by the [2026-08-23 amendment](decisions.md#amendment--2026-08-23-mid-mission).
@@ -94,22 +96,28 @@ change. See [D5](decisions.md#d5--the-ratchet-scores-skipped-subtrees-not-diff-r
 - Two consecutive quality-gate failures on the same check
 - A decision in [decisions.md](decisions.md) is contradicted by what the
   code turns out to require
-- **Any non-sequence entry moves in `render-manifest`** — that is an
-  `assemble-svg.ts` leak into class/state/json/description, the single
-  highest-consequence failure this mission can cause. **Triggered
-  2026-08-23** by one entry, `object/zuvila-56-nuda425`; diagnosed as a
-  corpus-classification mismatch rather than a leak, and still awaiting a
-  ruling — see [D6](decisions.md#d6--proposed-not-ruled-the-one-non-sequence-manifest-entry)
+- **Any non-sequence entry moves in `render-manifest`, other than the one
+  enumerated slug** — that is an `assemble-svg.ts` leak into
+  class/state/json/description, the single highest-consequence failure this
+  mission can cause. Triggered 2026-08-23 by `object/zuvila-56-nuda425`,
+  diagnosed as a corpus-classification mismatch rather than a leak and
+  **allowed by name** — see
+  [D6](decisions.md#d6--ruled-2026-08-23-the-one-non-sequence-manifest-entry-is-allowed).
+  The routing bug it exposed is filed as
+  `sequence-engine-overclaims-nested-diagrams` in `planning/next-missions.md`
 - **Any other engine's diff baseline moves** when T6 changes the shared
   `compare.ts`. Added 2026-08-23: seven ratchets and five `scripts/` read
   `diffs.length`, so the weighting must be additive
-- **Any `weightedScore` rise, on any fixture.** Amended 2026-08-23: the old
-  condition read "an ISOLATED diff-count rise, or a rise on a fixture whose
-  baseline is not 12", which assumed a mass rise on the 12-cohort meant
-  bodies had become reachable. D5 disproves that — a rise could equally be
-  the comparator charging more for a *better*-aligned document. Once
-  `weightedScore` is monotone (T6) that ambiguity is gone and **every** rise
-  is a real regression. `diffCount` may rise freely and is no longer gated
+- **A `weightedScore` rise that is not explained by our own content group
+  growing.** Twice amended. The original read "an ISOLATED diff-count rise,
+  or a rise on a fixture whose baseline is not 12"; D5 disproved that. The
+  first amendment then over-corrected to "every rise is a real regression",
+  which [D7](decisions.md#d7--ruled-2026-08-23-the-nine-weighted-risers-are-re-pinned-each-named)
+  disproves in turn: `weightedScore` is monotone with respect to *structural
+  alignment*, not with respect to *our document growing toward the oracle*,
+  because the weight sums both sides. A rise therefore needs its mechanism
+  established before it is called a regression. `diffCount` may rise freely
+  and is no longer gated
 - **A constant is needed that has no upstream `file:line` citation.** Never
   fit a value. No citation means unfinished
 - `zudize-61-vomi445`'s measured per-call cost moves materially and no
@@ -126,7 +134,8 @@ change. See [D5](decisions.md#d5--the-ratchet-scores-skipped-subtrees-not-diff-r
 
 ## Index
 
-- [decisions.md](decisions.md) — D1–D4, with the evidence for each
+- [decisions.md](decisions.md) — D1–D4 from planning, D5–D7 from the
+  2026-08-23 mid-mission amendment, with the evidence for each
 - [diagrams/component-map.md](diagrams/component-map.md) — what routes where
 - [diagrams/data-flow.md](diagrams/data-flow.md) — the assembly call order
 - [decision-journal.md](decision-journal.md) — appended during execution

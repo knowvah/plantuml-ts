@@ -14,4 +14,4 @@ not parallel with anything.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|---|---|---|---|---|
-| T6 | [Weighted diff score](T6-weighted-diff-score.md) | typescript-pro | `tests/oracle/svg-conformance/compare.ts`, `tests/oracle/svg-conformance/compare.test.ts`, `tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts` | T3 | [ ] |
+| T6 | [Weighted diff score](T6-weighted-diff-score.md) | typescript-pro | `tests/oracle/svg-conformance/compare.ts`, `tests/oracle/svg-conformance/compare.test.ts`, `tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts`, `tests/oracle/svg-conformance/class-usecase-actor.test.ts` | T3 | [x] |
