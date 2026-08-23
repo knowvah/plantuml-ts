@@ -113,13 +113,6 @@ jobs:
       # Includes the 90/90/90 coverage thresholds, the 389 svg goldens and the
       # 54-fixture description ratchet — all enforced inside vitest.
       # Observed 2.45-3.88 min; 12 catches a hung worker without hiding creep.
-      # TEMPORARY diagnostic (remove with scripts/ci-catalog-probe.ts):
-      # catalog.test.ts times out at 5,000 ms here but runs 404-406 ms
-      # locally at both 1 and 12 workers, so the amplifier is only visible
-      # on the runner.
-      - name: catalog probe (temporary)
-        run: npx jiti scripts/ci-catalog-probe.ts
-
       - name: test
         timeout-minutes: 12
         run: npm test

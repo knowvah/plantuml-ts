@@ -353,6 +353,31 @@ evidence" section:
   test; this session's single trip adds one more data point in the
   direction T2 already predicted, nothing more.
 
+### Correction (2026-08-23) — `catalog.test.ts` did get a budget after all
+
+T2's `no-change` and T4's application of it are **superseded**, and the
+original reasoning is left standing above rather than rewritten, on the same
+terms this mission demanded of SI36's close-out.
+
+The mission measured one 12-core dev machine and characterised a single
+`npm test` as "reliable, ~12x headroom". **CI disproved that the next day**:
+`tests/architecture/catalog.test.ts` failed 3 of 6 `ubuntu-latest` runs in an
+ordinary single, non-concurrent `npm test` — the case T2 called reliable. The
+concurrency framing was not the operative variable on that machine at all.
+
+The number T2 correctly refused to invent has now been measured, on the
+machine that actually fails, by temporarily lifting the budget so the call
+could finish instead of being aborted at 5,000 ms (CI run 32611966134):
+**4,419 ms in-suite**, against 389-692 ms isolated on the same runner and
+392-406 ms in-suite locally. At 4,419 ms it sat at 88% of the 5,000 ms
+default — grazing it on every run, which is the profile of an intermittent
+failure. Budget set to 30,000 ms with the derivation recorded at the call
+site and in `.agent-notes/catalog-ci-budget.md`.
+
+**T2's reasoning was sound; its evidence base was incomplete.** Refusing to
+name an unmeasured number was right, and D5 was right to permit it. The gap
+was that CI was never in the sample, and CI is where the test was failing.
+
 ### Residuals, recorded honestly
 
 - **D2's fitness test stops at same-file indirection by design.** A
