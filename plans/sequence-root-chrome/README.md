@@ -63,7 +63,7 @@ Also explicitly out of scope, named rather than assumed:
 
 | Batch | Tasks | Parallel | Status |
 |---|---|---|---|
-| [1](batch-1/overview.md) | T1 arrow shape vocabulary · T2 document shell | yes | [ ] |
+| [1](batch-1/overview.md) | T1 arrow shape vocabulary · T2 document shell | yes | [x] |
 | [2](batch-2/overview.md) | T3 renderer wiring | — | [ ] |
 | [3](batch-3/overview.md) | T4 re-pin ratchet · T5 manifest re-baseline | yes | [ ] |
 

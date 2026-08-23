@@ -11,5 +11,5 @@ the end of the batch. That is the check that both tasks stayed in their lane.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|---|---|---|---|---|
-| T1 | [Arrow shape vocabulary](T1-arrow-shape-vocabulary.md) | typescript-pro | `src/diagrams/sequence/sequence-arrowhead.ts`, `tests/unit/sequence/sequence-arrowhead.test.ts` | — | [ ] |
-| T2 | [Sequence document shell](T2-sequence-document-shell.md) | typescript-pro | `src/core/assemble-svg.ts`, `tests/unit/core/assemble-svg.test.ts` | — | [ ] |
+| T1 | [Arrow shape vocabulary](T1-arrow-shape-vocabulary.md) | typescript-pro | `src/diagrams/sequence/sequence-arrowhead.ts`, `tests/unit/sequence/sequence-arrowhead.test.ts`, `docs/catalog.md` | — | [x] |
+| T2 | [Sequence document shell](T2-sequence-document-shell.md) | typescript-pro | `src/core/assemble-svg.ts`, `tests/unit/core/assemble-svg.test.ts` | — | [x] |
