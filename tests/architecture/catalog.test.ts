@@ -30,10 +30,22 @@ describe('docs/catalog.md', () => {
   // the true worst-case collision window was never reproducible to measure,
   // and picking a number without it would be fitting a value. Full
   // diagnosis, causal chain, and what was ruled out: `.agent-notes/tbi-T2.md`.
-  it('is up to date with src/ (run `npm run catalog` if this fails)', () => {
-    const committed = readFileSync(CATALOG_PATH, 'utf8');
-    expect(buildCatalog()).toBe(committed);
-  });
+  it(
+    'is up to date with src/ (run `npm run catalog` if this fails)',
+    () => {
+      const committed = readFileSync(CATALOG_PATH, 'utf8');
+      const t = performance.now();
+      const built = buildCatalog();
+      // TEMPORARY (with the deliberately over-generous budget below): the
+      // real cost of this call INSIDE the running suite on CI is the one
+      // number nobody has -- the 5,000 ms default aborts before it can be
+      // observed. Measured here so the final budget is derived from the
+      // machine that actually fails, not from a margin picked off-runner.
+      console.log(`[catalog-probe] buildCatalog ms=${(performance.now() - t).toFixed(0)}`);
+      expect(built).toBe(committed);
+    },
+    120_000,
+  );
 
   it('indexes a known shared seam, so the catalog can answer "does this exist?"', () => {
     // The worked example from SI31 T5: the faithful `DotPath#simulateCompound`
