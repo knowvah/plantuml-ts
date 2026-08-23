@@ -26,9 +26,14 @@ import {
   path,
   noteBox,
   circle,
-  arrowHeadRef,
 } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
+import { arrowConfigurationFor } from './sequence-arrowhead.js';
+import type { ArrowConfiguration } from './sequence-arrowhead.js';
+import {
+  renderFlatMessageArrow,
+  renderSelfMessageHead,
+} from './renderer-arrowhead.js';
 
 // ---------------------------------------------------------------------------
 // Activation constants
@@ -176,80 +181,76 @@ function renderLifeline(
 // Message helpers
 // ---------------------------------------------------------------------------
 
-function arrowStyleForMessage(style: MessageGeo['style']): {
-  dashed: boolean;
-  markerEnd?: string;
-  markerStart?: string;
-} {
-  switch (style) {
-    case 'sync':
-      return { dashed: false, markerEnd: `url(#${arrowHeadRef('sync')})` };
-    case 'async':
-      return { dashed: false, markerEnd: `url(#${arrowHeadRef('async')})` };
-    case 'reply':
-      return { dashed: true, markerEnd: `url(#${arrowHeadRef('reply')})` };
-    case 'replyAsync':
-      return { dashed: true, markerEnd: `url(#${arrowHeadRef('replyAsync')})` };
-    case 'lost':
-      return { dashed: false, markerEnd: `url(#${arrowHeadRef('lost')})` };
-    case 'found':
-      return { dashed: false, markerStart: `url(#${arrowHeadRef('found')})` };
-  }
+/**
+ * The self-message loop's own geometry. Upstream's is `arrowWidth = 45` with
+ * the vertical stroke at `xRight = 42` (`ComponentRoseSelfArrow.java:59-60`);
+ * this port keeps the spike's 40 (Gap SQ-5, out of this task's scope), so the
+ * loop is 5 px narrower than the jar's and the head below is placed against
+ * THIS loop's returning segment rather than against upstream's `x2`.
+ */
+const SELF_LOOP_WIDTH = 40;
+const SELF_LOOP_HEIGHT = 20;
+
+/**
+ * The self branch: three strokes clockwise off the lifeline and back, then
+ * the head at the foot. Upstream draws the strokes FIRST and the head after
+ * (`ComponentRoseSelfArrow.java:124-126` then `:131-173`) -- the reverse of
+ * the flat component's order, and the order `botoku-28-cupe920` shows.
+ *
+ * Emitted as one `<path>` where upstream emits three `<line>`s; that is the
+ * spike's existing shape, left alone here because this task owns the HEADS.
+ */
+function renderSelfMessage(
+  msg: MessageGeo,
+  configuration: ArrowConfiguration,
+  theme: Theme,
+): string {
+  const x1 = msg.fromX;
+  const y1 = msg.y;
+  const d =
+    `M ${x1} ${y1} ` +
+    `H ${x1 + SELF_LOOP_WIDTH} ` +
+    `V ${y1 + SELF_LOOP_HEIGHT} ` +
+    `H ${x1}`;
+  const loop = path(d, {
+    stroke: theme.colors.arrow,
+    strokeWidth: 1,
+    ...(configuration.dashed ? { strokeDasharray: '5,5' } : {}),
+  });
+  return loop + renderSelfMessageHead(msg, configuration, theme, y1 + SELF_LOOP_HEIGHT);
 }
 
-function renderMessage(msg: MessageGeo, theme: Theme): string {
+/** The message's label. Upstream draws it last, after the arrow
+ *  (`ComponentRoseArrow.java:175`, `ComponentRoseSelfArrow.java:88`). */
+function renderMessageLabel(msg: MessageGeo, theme: Theme): string {
   const label =
     msg.sequenceNumber !== undefined
       ? `${msg.sequenceNumber}: ${msg.label}`
       : msg.label;
-
-  const { dashed, markerEnd, markerStart } = arrowStyleForMessage(msg.style);
-  const strokeDasharray = dashed ? '5,5' : undefined;
-
-  let lineEl: string;
-
-  if (msg.arrowDirection === 'self') {
-    // Three-segment right-loop path: right, down, back left
-    const loopWidth = 40;
-    const loopHeight = 20;
-    const x1 = msg.fromX;
-    const y1 = msg.y;
-    const d =
-      `M ${x1} ${y1} ` +
-      `H ${x1 + loopWidth} ` +
-      `V ${y1 + loopHeight} ` +
-      `H ${x1}`;
-    lineEl = path(d, {
-      stroke: theme.colors.arrow,
-      strokeWidth: 1,
-      ...(strokeDasharray !== undefined ? { strokeDasharray } : {}),
-      ...(markerEnd !== undefined ? { markerEnd } : {}),
-    });
-  } else {
-    lineEl = line(msg.fromX, msg.y, msg.toX, msg.y, {
-      stroke: theme.colors.arrow,
-      strokeWidth: 1,
-      ...(strokeDasharray !== undefined ? { strokeDasharray } : {}),
-      ...(markerEnd !== undefined ? { markerEnd } : {}),
-      ...(markerStart !== undefined ? { markerStart } : {}),
-    });
-  }
-
   const midX = msg.arrowDirection === 'self'
     ? msg.fromX + 20
     : (msg.fromX + msg.toX) / 2;
-  const labelEl = text(midX, msg.y - 5, label, {
+  return text(midX, msg.y - 5, label, {
     fontFamily: theme.fontFamily,
     fontSize: theme.fontSize,
     fill: theme.colors.text,
     textAnchor: 'middle',
   });
+}
 
-  return lineEl + labelEl;
-  // #lizard forgives -- pre-existing violation (45 NLOC vs this repo's 30
-  // cap), untouched by the alt/else fix: `git diff` shows zero overlap with
-  // this function. Restructuring ported drawing code mid-change is what
-  // CLAUDE.md's "do not refactor while porting" exists to prevent.
+/**
+ * One message: its arrow, then its label. The arrow's heads are inline
+ * polygons/strokes, never an SVG `<marker>` reference -- `assembleDocument
+ * Shell` injects no marker defs, and the jar's own sequence corpus contains
+ * none either.
+ */
+function renderMessage(msg: MessageGeo, theme: Theme): string {
+  const configuration = arrowConfigurationFor(msg.style);
+  const arrow =
+    msg.arrowDirection === 'self'
+      ? renderSelfMessage(msg, configuration, theme)
+      : renderFlatMessageArrow(msg, configuration, theme);
+  return arrow + renderMessageLabel(msg, theme);
 }
 
 // ---------------------------------------------------------------------------
@@ -427,6 +428,11 @@ function renderBoxBackground(box: BoxGeo, theme: Theme): string {
 // Public API
 // ---------------------------------------------------------------------------
 
+/** The jar's `data-diagram-type` value for this engine
+ *  (`TextBlockExporter.java:293`), which routes `assembleSvg` through
+ *  `assembleDocumentShell` instead of the generic `svgRoot`. */
+const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
+
 /**
  * Render a sequence diagram geometry into an SVG string.
  */
@@ -463,5 +469,8 @@ export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragm
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,
+    // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
+    // `<g>` wrap and the background rect, so the body is handed over bare.
+    diagramType: DIAGRAM_TYPE_SEQUENCE,
   };
 }

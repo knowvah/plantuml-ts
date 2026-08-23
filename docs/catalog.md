@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1011 modules · 3525 exported names.
+1012 modules · 3528 exported names.
 
 ## `src/`
 
@@ -1249,6 +1249,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `index.ts` | `sequencePlugin` | Sequence diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |
+| `renderer-arrowhead.ts` | `reverseArrowConfiguration`, `renderFlatMessageArrow`, `renderSelfMessageHead` | renderer-arrowhead.ts — the sequence engine's arrow EMISSION layer. |
 | `renderer.ts` | `renderSequence` | Sequence diagram SVG renderer. |
 | `sequence-arrowhead.ts` | `ArrowHeadKind`, `ArrowPart`, `ArrowDecoration`, `ArrowDressing`, `ArrowConfiguration`, `ArrowSegment`, `ArrowCircle`, `HeadGeometry`, `ARROW_DELTA_X`, `ARROW_DELTA_Y`, `NICE_ARROW_INSET`, `DIAM_CIRCLE`, `THIN_CIRCLE`, `SPACE_CROSS_X`, `headGeometryNormalSide`, `headGeometryReverseSide`, `headGeometrySelf`, `arrowConfigurationFor` | sequence-arrowhead.ts — the sequence engine's arrow SHAPE vocabulary. |
 | `sequence-commands.ts` | `COMMANDS` | Command dispatch table for the sequence diagram parser. |
