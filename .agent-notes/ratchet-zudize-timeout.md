@@ -118,3 +118,52 @@ need, shrinking it attacks the 407 ms `compareSvg` term at its source rather
 than raising a budget around it. That is a performance question, out of this
 diagnosis's scope, and it is the one lead that would remove the problem
 instead of accommodating it.
+
+---
+
+## FIXED 2026-08-23
+
+Budget applied, keyed on **golden size** rather than on the slug.
+
+Corpus distribution, which is what makes the threshold unambiguous
+(1,141 fixtures, `in.svg` bytes):
+
+| | bytes |
+|---|---|
+| largest (`zudize-61-vomi445`) | **8,256,409** |
+| second largest | 174,317 |
+| median | 3,152 |
+| fixtures > 500 KB | **1** |
+
+The largest is **47x** the second and 2,600x the median. `LARGE_GOLDEN_BYTES
+= 1_000_000` sits in that gap — 5.7x above the runner-up, 8.2x below the
+outlier — so a fixture would have to grow 5.7x to newly qualify, and a future
+giant capture gets headroom automatically instead of reproducing this bug.
+Keying on the slug would rot the first time the corpus is regenerated.
+
+`LARGE_GOLDEN_BUDGET_MS = 30_000`, derived from the 3,711 ms measured at the
+22-worker condition, with a wide margin because the real failing worker also
+runs the rest of the suite so the tail lies above the base. Same reasoning and
+value as `tests/architecture/catalog.test.ts`.
+
+**Discrimination proof.** Setting `LARGE_GOLDEN_BUDGET_MS = 1` fails exactly
+one case — `sequence/zudize-61-vomi445: Test timed out in 1ms` — with the
+other **1,149 passing untouched**. So the budget reaches the intended fixture
+and no other; the 1,140 small fixtures keep vitest's tight default, which is
+a ~300x guard for them and still catches a hang.
+
+**Verification under the condition that actually failed.** 2 concurrent pairs
+(`COVERAGE_ISOLATE=1` on both members), 4 processes, all exit 0, **zero**
+zudize timeouts, at post-run load1 38.67 and 52.35. Against T5's baseline of
+3 of 8 processes failing, this is *consistent with* the fix, not proof of it —
+4 processes is a small sample and the failure was always probabilistic.
+
+**The cheaper lead in the recommendation above is closed: it does not exist.**
+The 8.26 MB golden is not bloat. Element census: 57,729 `<text>`, 7,019
+`<line>`, 5,222 `<rect>`, 1,741 `<title>`. It is a genuinely enormous diagram
+faithfully captured from the jar, and `in.puml` is 1.19 MB of real input.
+There is nothing to shrink, so the budget is the fix rather than the
+accommodation I suspected it might be.
+
+Never reproduced on CI: checked the 5 most recent `ubuntu-latest` runs, zero
+occurrences. It only ever failed under two concurrent local suites.

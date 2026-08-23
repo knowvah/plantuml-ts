@@ -69,7 +69,7 @@
  *   npx vitest run tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -110,6 +110,47 @@ function fixtureDir(f: FixtureRef): string {
 function hasCachedFixture(f: FixtureRef): boolean {
   const dir = fixtureDir(f);
   return existsSync(join(dir, 'in.puml')) && existsSync(join(dir, 'in.svg'));
+}
+
+/**
+ * Per-fixture budget. Almost every case here needs none: the median golden is
+ * 3,152 bytes and a typical fixture measures ~16 ms, so vitest's unconfigured
+ * 5,000 ms default is a ~300x guard that usefully catches a hang.
+ *
+ * `sequence/zudize-61-vomi445` is not typical. Its golden is **8,256,409
+ * bytes** -- 47x the second-largest fixture in the corpus (174,317) and 2,600x
+ * the median, and the only one above 500 KB. It measures ~650 ms per call,
+ * steady state, dominated by `compareSvg` over that golden
+ * (`read~8 render~232 cmp~407`), against ~16 ms for the next-slowest real
+ * fixture. That is 7.5x from the default rather than 300x, and unlike the
+ * others it degrades super-linearly with concurrent worker count -- 682 ms at
+ * 1 copy, 1,374 ms at 12, **3,711 ms at 22**, where CPU share alone predicts
+ * 1.83x. Two full `npm test` suites put exactly 22 forks on 12 cores, and in
+ * that condition it failed 3 of 8 processes. Full diagnosis, including what
+ * was ruled out: `.agent-notes/ratchet-zudize-timeout.md`.
+ *
+ * Derivation of 30,000: base is the 3,711 ms measured at that 22-worker
+ * condition. The real failing worker also runs the rest of the suite, so the
+ * tail lies above the base rather than at it -- the margin is wide for that
+ * reason, not because a smaller number went red. Matches the same reasoning
+ * and value used for `tests/architecture/catalog.test.ts`. A hang still
+ * surfaces in 30 s, well inside CI's 12-minute job cap.
+ *
+ * Keyed on golden SIZE, not on the slug: the 47x gap between this fixture and
+ * the next makes the threshold unambiguous, a fixture would have to grow 5.7x
+ * to newly qualify, and a future giant capture gets headroom automatically
+ * instead of reproducing this bug. Keying on the name would rot silently the
+ * first time the corpus is regenerated.
+ */
+const LARGE_GOLDEN_BYTES = 1_000_000;
+const LARGE_GOLDEN_BUDGET_MS = 30_000;
+
+/** `undefined` leaves vitest's default in place -- the 1,140 small fixtures
+ * keep their tight guard; only an outlier golden buys headroom. */
+function budgetFor(f: FixtureRef): number | undefined {
+  return statSync(join(fixtureDir(f), 'in.svg')).size > LARGE_GOLDEN_BYTES
+    ? LARGE_GOLDEN_BUDGET_MS
+    : undefined;
 }
 
 type MeasureResult =
@@ -244,7 +285,7 @@ describe('svg-sequence diff-count baseline ratchet', () => {
 
       const note = progressLog(f, baseline, live);
       if (note !== undefined) console.log(note);
-    });
+    }, budgetFor(f));
   }
 });
 

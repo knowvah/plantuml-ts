@@ -548,8 +548,9 @@ Error: Test timed out in 5000ms.
 It holds no lock and declares no per-test timeout, so it inherits vitest's
 unconfigured default across 1,141 per-fixture `it()` blocks — structurally
 the same class D5 named for `catalog.test.ts`, but at a file that mission
-never scoped. **DIAGNOSED 2026-08-22** (`.agent-notes/ratchet-zudize-timeout.md`);
-still unfixed. T5's guess that this is "the same class as `catalog.test.ts`"
+never scoped. **DIAGNOSED AND FIXED 2026-08-23** (`.agent-notes/ratchet-zudize-timeout.md`;
+fix keyed on golden size, `LARGE_GOLDEN_BYTES`/`LARGE_GOLDEN_BUDGET_MS`).
+Closed — kept here for the reasoning. T5's guess that this is "the same class as `catalog.test.ts`"
 is **wrong**, and the difference decides the fix. `zudize-61-vomi445` is the
 only fixture in the 1,141-case corpus with a large *stable* cost — ~650 ms
 every call (`read~8 render~232 cmp~407`), against a next-slowest real
@@ -567,10 +568,12 @@ measured worst case existed — **this one has one**, so a budget derived from
 3,711 ms is derived, not fitted. Apply it to this fixture's case only, never
 to all 1,141 (D4's argument, at file scope).
 
-Before raising a budget, price the cheaper lead: the golden is **8.26 MB**
-while our render is **317 KB**, a 26x asymmetry yielding only 12 diffs. If
-that golden carries formatting the comparison does not need, shrinking it
-removes the 407 ms `compareSvg` term instead of accommodating it.
+The cheaper lead was priced and **does not exist**: the 8.26 MB golden is not
+bloat but a genuinely enormous diagram (57,729 `<text>`, 1,741 `<title>`)
+faithfully captured from a 1.19 MB `in.puml`. Nothing to shrink. The budget is
+keyed on golden size rather than slug — the largest fixture is 47x the second
+and 2,600x the median, so the threshold is unambiguous and a future giant
+capture gets headroom automatically.
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
 
