@@ -7,5 +7,5 @@ shared by six diagram types — did not leak into the other five.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|---|---|---|---|---|
-| T4 | [Re-pin sequence ratchet](T4-repin-sequence-ratchet.md) | typescript-pro | `oracle/goldens/svg-sequence/diff-baseline.json`, `oracle/goldens/svg-sequence/diff-census.json` | T3 | [ ] |
-| T5 | [Manifest re-baseline](T5-render-manifest-rebaseline.md) | typescript-pro | `test-results/render-manifest-baseline.json` | T3 | [ ] |
+| T4 | [Re-pin sequence ratchet](T4-repin-sequence-ratchet.md) | typescript-pro | `oracle/goldens/svg-sequence/diff-baseline.json`, `oracle/goldens/svg-sequence/diff-census.json` | T3, T6 | [x] |
+| T5 | [Manifest re-baseline](T5-render-manifest-rebaseline.md) | typescript-pro | `test-results/render-manifest-baseline.json` (gitignored -- no commit possible, see D4 correction) | T3 | [x] |

@@ -83,6 +83,27 @@ re-pinned from a fresh measurement with updated `measuredAt` and
 sequence fixture reaches zero diffs, so there is nothing to promote and
 promotion is not this mission's to grant.
 
+**CORRECTION 2026-08-23 — `render-manifest-baseline.json` is not a committed
+output and never was.** Found by T5, verified independently. `.gitignore:24`
+(`test-results/*`, with a single deliberate re-include for `dot-cache/`)
+matches it, `git cat-file -e HEAD:<path>` fails, and
+`git log --all -- <path>` is empty for the repo's entire history. Nothing
+reads it either: no test, no script and no CI workflow references it — the
+only `render-manifest` consumers are `scripts/render-manifest.ts` itself and
+its unit test.
+
+So it is an **operator-driven guard**, not a pinned artifact: you regenerate a
+manifest, diff it against your local copy, and read the result. "Commit the
+new baseline" (T5 step 4) was never achievable, and D4's inclusion of it in
+the list above was wrong at planning time.
+
+Resolution: the file is left untracked on disk and the *evidence* is recorded
+in the decision journal — both sha256s and the verbatim diff summary. That is
+the SI28/SI31 pattern. Rejected alternatives: `git add -f`, which silently
+reverses a documented policy and would make every future local `--out` run
+dirty the tree; and SI32's tracked-copy-under-`tests/fixtures/` pattern, which
+existed because a *test* read that harness baseline — nothing reads this one.
+
 **Consequences.** Rollback is Reversible, with one constraint: the three
 artifact files must revert *together with* the `src/` change. Reverting
 `src/` alone leaves baselines pinned to output that no longer exists, and the

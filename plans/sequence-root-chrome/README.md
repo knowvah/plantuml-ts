@@ -83,7 +83,7 @@ Also explicitly out of scope, named rather than assumed:
 | [1](batch-1/overview.md) | T1 arrow shape vocabulary · T2 document shell | yes | [x] |
 | [2](batch-2/overview.md) | T3 renderer wiring | — | [x] |
 | [2b](batch-2b/overview.md) | T6 weighted diff score | — | [x] |
-| [3](batch-3/overview.md) | T4 re-pin ratchet · T5 manifest re-baseline | yes | [ ] |
+| [3](batch-3/overview.md) | T4 re-pin ratchet · T5 manifest re-baseline | yes | [x] |
 
 Batch 2b was inserted by the [2026-08-23 amendment](decisions.md#amendment--2026-08-23-mid-mission).
 T3's code is correct and landed; the batch halted on the *measure*, not the
@@ -154,3 +154,109 @@ It is the standard template minus playwright, web access and the unused
 language toolchains, plus `sed`/`awk`/`jq`, `scripts/oracle-render.sh` and
 `manifest-diff.py`. Web access is dropped deliberately: the specification for
 this mission is the Java on disk at `~/git/plantuml`, not the internet.
+
+
+---
+
+# Mission summary — completed 2026-08-23
+
+**All 6 tasks done** (5 planned + T6 added by the mid-mission amendment).
+Branch `feat/sequence-root-chrome`, 16 commits from `6bb82d1d`.
+
+## Tasks completed vs planned
+
+| | planned | done |
+|---|---|---|
+| T1 arrow shape vocabulary | yes | `474c06ff` |
+| T2 document shell | yes | `21b075c1` |
+| T3 renderer wiring | yes | `9aa04d3d` |
+| **T6 weighted diff score** | **no — added by amendment** | `667852df` |
+| T4 re-pin ratchet + census | yes | `b49553ec` |
+| T5 manifest guard | yes | no commit — see below |
+
+## Result
+
+The chrome half landed exactly as briefed. All 803 fixtures of the fallen
+plateau now share an **identical** 5-diff path set — `svg/@width`,
+`@height`, `@viewBox[2]`, `@viewBox[3]`, `svg/g[1][childCount]` — with the
+six absent root attributes and `svg/defs[1][childCount]` gone everywhere.
+Sequence now emits the eight-attribute shell, the `<?plantuml $version$?>`
+prolog, an empty `<defs/>`, and inline arrowhead polygons; no `<marker>`
+token remains in any sequence output.
+
+Aggregate `weightedScore` **1,231,360 → 1,068,757 (−13.2%)** over the 1140
+measurable fixtures.
+
+## The mission's real finding
+
+The brief's exit bar was written against `diffCount`, and `diffCount` is
+**not monotonic in wrongness**. `compareSvg` short-circuits in three places
+and charges 1 for each however large the subtree it skips, so a change that
+makes a document *more* structurally aligned can *raise* its score. T3 hit
+this on 255 fixtures and halted the mission.
+
+That is now fixed at its origin (D5, T6): each short-circuit carries the
+skipped subtree's size and the ratchet gates on the sum. Proof it worked —
+**all 256 fixtures whose `diffCount` rose had their `weightedScore` fall,
+zero exceptions.**
+
+## Decisions
+
+10 non-trivial judgment calls logged. Three flagged for review:
+
+- **D5/D7 — the metric.** `weightedScore` is monotone under *structural
+  alignment* but not under *our document growing toward the oracle*, because
+  the weight sums both sides. Nine fixtures rose for that reason and were
+  re-pinned with mechanisms, per a maintainer ruling. Of the nine, six moved
+  *closer* to the jar's child count; only `pibefe-94-cibu835` is genuinely
+  further away.
+- **D6 — the manifest exception.** `object/zuvila-56-nuda425` is allowed by
+  name. It is a corpus-classification mismatch, not a leak, but the guard now
+  carries a named exception.
+- **D4 correction — `render-manifest-baseline.json` is gitignored** and has
+  never been tracked; nothing reads it. T5 produced no commit because none
+  was possible. The evidence is in the journal instead.
+
+## Quality gates
+
+`npm test` **exit 0** — 631 files passed / 1 skipped, **16,184 tests passed**,
+0 failures; coverage 95.43 / 90.44 / 96.95 / 96.51.
+`npm run typecheck` 0 · `npm run lint` 0 · `npm run build` 0.
+
+**Cross-engine guard passed**, the mission's highest-consequence check:
+`1072 fixtures differ`, all modifications (0 added, 0 removed) — 1071
+`dot-cache/sequence` plus the one D6-enumerated object slug. **Zero** entries
+moved under class, state, component, usecase, json, yaml, hcl, dot or any
+`oracle/goldens/svg-*` path.
+
+## Known issues and follow-ups
+
+1. **`sequence-engine-overclaims-nested-diagrams`** — filed in
+   `planning/next-missions.md` §4. Corpus classification and actual routing
+   disagree in both directions: one `object/` fixture renders as SEQUENCE,
+   and 70 fixtures under `sequence/` do not route to the sequence engine at
+   all. Nothing catches this, because every affected fixture renders — just
+   through the wrong engine.
+2. **`weightedScore` can rise on correct growth.** Documented in D7, resolves
+   as the body is ported. Worth revisiting if it obscures a real regression.
+3. **`gadiva-05-pogi376`'s 8-digit ARGB background** — the jar splits
+   `#803D1414` into `fill="#803D14" fill-opacity="0.078"`; `shortenColor`
+   returns any non-7-char string unchanged. Affects every engine's background
+   rect. Filed in `.agent-notes/si33-T2-document-background-rect.md`.
+4. **Black-background exclusion is a latent divergence in STATE/JSON/YAML/HCL**
+   — they model white and transparent but not `#000000`. Same note.
+5. **Do not run Prettier in this repo** — no config, not a dependency, and it
+   rewrites every single-quoted string with no gate catching it.
+   `.agent-notes/si33-T1-no-prettier-config.md`.
+6. **`docs/catalog.md` belongs in the write-set** of any task adding a `src/`
+   module. It is drift-gated and blocked two agents this mission.
+7. **The `coverage/.tmp` race** makes a second concurrent `npm test` exit 1
+   with no `Test Files` line — indistinguishable from a real failure by exit
+   code. Parallel batch tasks must not both run it.
+
+## Out of scope, unchanged
+
+The body is still not comparable: `svg/g[1][childCount]` short-circuits until
+child counts match, which is rebuild-scale work. The `<g><title>` lifeline
+grouping, Gap SQ-5's 40 px self-loop, the unparsed arrow syntaxes and
+multi-page `newpage` are all untouched, as briefed.
