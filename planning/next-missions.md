@@ -548,12 +548,29 @@ Error: Test timed out in 5000ms.
 It holds no lock and declares no per-test timeout, so it inherits vitest's
 unconfigured default across 1,141 per-fixture `it()` blocks — structurally
 the same class D5 named for `catalog.test.ts`, but at a file that mission
-never scoped. **Not diagnosed and not fixed**: T5 wrote no test files, and
-it did not measure the fixture's standalone cost the way T2 measured
-`buildCatalog()`. Anyone picking this up should diagnose to a mechanism
-before choosing a budget — `catalog.test.ts` ended at `no-change` precisely
-because no measured worst case existed, and the same trap applies here.
-Full context: `plans/test-budget-invariant/README.md` close-out, residuals.
+never scoped. **DIAGNOSED 2026-08-22** (`.agent-notes/ratchet-zudize-timeout.md`);
+still unfixed. T5's guess that this is "the same class as `catalog.test.ts`"
+is **wrong**, and the difference decides the fix. `zudize-61-vomi445` is the
+only fixture in the 1,141-case corpus with a large *stable* cost — ~650 ms
+every call (`read~8 render~232 cmp~407`), against a next-slowest real
+fixture of ~16 ms. `nereka-67-deco609`, which *reports* slower in vitest
+(1,178 ms), measures 2-4 ms steady state; its number is one-time warmup
+landing on whichever fixture renders first. That is why the failure always
+names this one fixture.
+
+It degrades **super-linearly with concurrent worker count**, and that IS
+reproducible: 682 ms at 1 copy → 1,374 ms at 12 → **3,711 ms at 22**, where
+CPU share alone predicts 1.83x. Two full suites put exactly 22 forks on 12
+cores. Aggregate load is ruled out (a single copy at load1 32.7 measured
+1.0x). Unlike `catalog.test.ts` — which ended `no-change` because no
+measured worst case existed — **this one has one**, so a budget derived from
+3,711 ms is derived, not fitted. Apply it to this fixture's case only, never
+to all 1,141 (D4's argument, at file scope).
+
+Before raising a budget, price the cheaper lead: the golden is **8.26 MB**
+while our render is **317 KB**, a 26x asymmetry yielding only 12 diffs. If
+that golden carries formatting the comparison does not need, shrinking it
+removes the 407 ms `compareSvg` term instead of accommodating it.
 
 ## 4. Named, briefed or diagnosed — pick from here after 1
 
