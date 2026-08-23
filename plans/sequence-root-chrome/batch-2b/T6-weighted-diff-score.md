@@ -9,7 +9,7 @@ to read and no upstream `file:line` to cite. The rationale lives in
 [`../decisions.md#d5`](../decisions.md) — read it before writing anything.
 
 Batch 2 halted because `compareSvg`'s diff count is **not monotonic in
-wrongness**. It short-circuits in two places and charges 1 for each, so a
+wrongness**. It short-circuits in three places and charges 1 for each, so a
 change that makes the document *more* structurally aligned can *raise* the
 score. T3's chrome fix did exactly that on 255 fixtures. Until the measure is
 monotonic, no baseline may be re-pinned — a stale pin is recoverable, a pin
@@ -19,7 +19,10 @@ taken against a metric that rewards misalignment is not.
 
 1. Add an optional `weight` field to `Diff` in
    `tests/oracle/svg-conformance/compare.ts`, **defaulting to 1**.
-2. Compute `units()` and charge both short-circuits by it, per D5's formula.
+2. Compute `units()` and charge **all three** short-circuits by it, per D5's
+   formula — the node-type branch (`compare.ts:144-152`) as well as the tag
+   and childCount ones. The node-type branch was added to this task on
+   2026-08-23 after it was found mid-execution.
 3. Export a `weightedScore(diffs)` helper — `diffs.reduce((s, d) => s + (d.weight ?? 1), 0)`.
 4. Switch `sequence.diff-baseline.ratchet.test.ts` to gate on `weightedScore`,
    and **rewrite its failure message** (`:196-214`) — the current text tells
@@ -37,6 +40,7 @@ will be red at the end of this task, on `weightedScore` rather than
 ## Read-set
 
 - `tests/oracle/svg-conformance/compare.ts:35-41` — the `Diff` type
+- `.../compare.ts:144-152` — the node-type short-circuit
 - `.../compare.ts:169-195` — the tag-mismatch short-circuit
 - `.../compare.ts:340-356` — the childCount short-circuit
 - `.../normalize.ts:112-118` — `NormalizedNode`, the shape `units()` walks
@@ -73,6 +77,9 @@ appears.
 
 ## Acceptance criteria
 
+0. Given a text node aligned against an element, then exactly one diff is
+   pushed (unchanged) and its `weight` is `units(actual) + units(expected)`,
+   the text side contributing 1
 1. Given two elements with different tags, when compared, then exactly one
    diff is pushed (unchanged) and its `weight` is
    `units(actual) + units(expected)`

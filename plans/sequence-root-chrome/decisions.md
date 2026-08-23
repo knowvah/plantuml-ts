@@ -104,12 +104,21 @@ attributes and `svg/defs[1][childCount]` gone. But 255 fixtures *rose*, 83 of
 them from a baseline other than 12, tripping a stop condition.
 
 The mechanism is not a regression. `compareSvg`'s count is **not monotonic in
-wrongness**, because it short-circuits in two places and charges 1 for each:
+wrongness**, because it short-circuits in three places and charges 1 for each:
 
+- `compare.ts:144-152` — node *types* differ (a text node aligned against an
+  element): push one diff, `return`. The element's whole subtree is never
+  examined. Distinct from the tag case below: SVG has a `<text>` **element**,
+  so `line` vs `text` is a tag mismatch between two elements, while this
+  branch fires on `element` vs `text` node types.
 - `compare.ts:172-183` — tags differ: push one diff, `return`. Attributes and
   children are never examined.
 - `compare.ts:347-355` — child counts differ: push one `[childCount]` diff,
   `return`. The entire subtree is never examined.
+
+The third was found during T6's execution, after this decision was first
+written; the amendment originally said "two places". Weighting only two of
+three would have left a latent copy of the same defect.
 
 So a tag *substitution* costs 1 however wrong the subtree is, while a tag
 *match* with N differing attributes costs N. Adopting the shell changed the
@@ -128,13 +137,14 @@ could have cost**, and ratchet on the sum of those weights.
 units(text)     = 1
 units(element)  = 1 + |attrs| + sum(units(children))
 
+weight(node-type mismatch)  = units(actual) + units(expected)
 weight(tag mismatch)        = units(actual) + units(expected)
 weight(childCount mismatch) = sum(units(actual children))
                             + sum(units(expected children))
 weight(every other diff)    = 1
 ```
 
-**Both** short-circuits are weighted, not just the tag one. Chosen by the
+**All three** short-circuits are weighted, not just the tag one. Chosen by the
 maintainer 2026-08-23 over a tag-only variant. Weighting tags alone fixes the
 255 rises visible today but leaves the identical defect live in the childCount
 path — which governs **803 of 1141** fixtures, whose entire body costs 1 diff.
