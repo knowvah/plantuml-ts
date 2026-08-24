@@ -78,7 +78,7 @@ measured.
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | T0 refusal-coverage gate | — | SLI 2's instrument, baseline 1 | [x] |
 | [1](batch-1/overview.md) | T1 refusal type · T2 candidate set | yes | two new modules, unwired | [x] |
-| [2](batch-2/overview.md) | T3 wire the contract | — | `parse()` widened, `detectUmlType` deleted; **moves nothing** | [ ] |
+| [2](batch-2/overview.md) | T3 wire the contract | — | `parse()` widened, candidate set adopted; **moves nothing** | [x] |
 | [3a](batch-3a/overview.md) | T4–T11 refusal in 8 engines | yes | strict parse loops | [ ] |
 | [3b](batch-3b/overview.md) | T12 dispatch + order + `accepts()` removal | — | parse-attempt live; kokebo closes | [ ] |
 | [4](batch-4/overview.md) | T13–T15 coverage: sequence, class, description | yes | SLI 2 → 0 for those engines | [ ] |
