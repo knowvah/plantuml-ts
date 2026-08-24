@@ -10,4 +10,4 @@ classifies a fixture whose golden is an upstream error image.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|---|---|---|---|---|
-| T1 | [Jar-error classification](T1-jar-error-classification.md) | typescript-pro | `tests/oracle/svg-conformance/routing-conformance.test.ts`, `oracle/goldens/svg-conformance/routing-baseline.json` | — | [ ] |
+| T1 | [Jar-error classification](T1-jar-error-classification.md) | typescript-pro | `tests/oracle/svg-conformance/routing-conformance.test.ts`, `oracle/goldens/svg-conformance/routing-baseline.json` | — | [x] |

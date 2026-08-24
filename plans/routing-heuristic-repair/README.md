@@ -117,7 +117,7 @@ ordered the way they are and not simply run in parallel:
 
 | Batch | Tasks | Parallel | Closes | Status |
 |---|---|---|---|---|
-| [1](batch-1/overview.md) | T1 jar-error classification | — | 4 non-defects | [ ] |
+| [1](batch-1/overview.md) | T1 jar-error classification | — | 4 non-defects (8 measured, see decision journal) | [x] |
 | [2](batch-2/overview.md) | T2 activity · T3 json/yaml | yes | 25 | [ ] |
 | [3](batch-3/overview.md) | T4 descriptive signal | — | 36 | [ ] |
 | [4](batch-4/overview.md) | T5 `detectUmlType` | — | 9 | [ ] |

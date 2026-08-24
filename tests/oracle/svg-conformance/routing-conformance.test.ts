@@ -83,7 +83,11 @@ interface BaselineFixture {
    *  `jarType`); for a `known-misroute` entry it records WHICH wrong engine
    *  claimed the source, which is what the bucket table is built from. */
   readonly ourType: string;
-  readonly status: 'agree' | 'known-misroute';
+  /** True iff this fixture's golden is one of PlantUML's OWN error pages, so
+   *  `jarType` records "the jar never exported a diagram" rather than "the jar
+   *  chose that engine". Present only on `jar-error` entries (D4). */
+  readonly jarErrored?: boolean;
+  readonly status: 'agree' | 'known-misroute' | 'jar-error';
   readonly measuredAt: string;
   readonly measuredAgainstCommit: string;
 }
@@ -112,6 +116,37 @@ const NO_DIAGRAM_TYPE = 'NONE';
 
 export function diagramTypeOf(head: string): string {
   return DIAGRAM_TYPE_ATTR_RE.exec(head)?.[1] ?? NO_DIAGRAM_TYPE;
+}
+
+/**
+ * Upstream's two graphical error pages, keyed on the text PlantUML itself
+ * writes into them. NOT on the slug, and NOT on the absence of
+ * `data-diagram-type` -- that absence is a legitimate `NONE` for `@startdot`
+ * passthrough and for several of our own engines, and must keep comparing as
+ * a real value everywhere else (D4).
+ *
+ *   1. `PSystemError.header()` (`PSystemError.java:148-155`) opens EVERY
+ *      graphical error page with `Version.fullDescription()`
+ *      (`Version.java:51-54`) -- `"PlantUML version " + version + " / " +
+ *      commit + " [" + compileTime + "]"`. `getGraphicalFormatted()`
+ *      (`PSystemError.java:126-146`) lays that header out first, on a black
+ *      ground in `HColors.MY_GREEN`.
+ *   2. The crash page prepends `ReportLog.anErrorHasOccurred`
+ *      (`ReportLog.java:103-108`), whose first line is
+ *      `"An error has occurred : " + exception`.
+ *
+ * Each upstream line becomes one whole `<text>` element, so both markers are
+ * anchored at BOTH ends -- `>` opens the element and `</text>` closes it.
+ * That is what stops either firing on a real diagram: a label merely
+ * MENTIONING the phrase leaves other characters inside the element, and a
+ * label whose entire content is `PlantUML version X / Y [Z]` is upstream's
+ * own banner by construction. Measured over all 3158 committed goldens: 8
+ * fire, 3150 do not, and each of the 8 is a black-ground error image.
+ */
+const JAR_ERROR_PAGE_RE = />(?:PlantUML version [^<]*\[[^<]*\]|An error has occurred[^<]*)<\/text>/;
+
+export function isJarErrorPage(head: string): boolean {
+  return JAR_ERROR_PAGE_RE.test(head);
 }
 
 function readHead(path: string): string {
@@ -193,7 +228,16 @@ function collectFixtures(): FixtureRef[] {
 interface LiveRouting {
   readonly jarType: string;
   readonly ourType: string;
+  /** Derived from the golden's own content by `isJarErrorPage`, never from
+   *  the manifest. The pin is checked AGAINST this, not the other way. */
+  readonly jarErrored: boolean;
 }
+
+/** The pair the routing comparison itself needs. Split out because only the
+ *  jar-error classification reads `jarErrored`, and keeping the other three
+ *  helpers on the narrower type lets them be exercised with the two values
+ *  they actually use. */
+type RoutingPair = Pick<LiveRouting, 'jarType' | 'ourType'>;
 
 /** Routes ONE fixture the way production does: `renderSync` over the raw
  *  source, then read the root attribute off our own document. Deliberately
@@ -215,7 +259,12 @@ function measure(f: FixtureRef, store: ReturnType<typeof fixtureIncludeStore>): 
     includeStore: store,
     measurer: new DeterministicMeasurer(),
   }).slice(0, HEAD_BYTES);
-  return { jarType: diagramTypeOf(readHead(goldenPath(f))), ourType: diagramTypeOf(ours) };
+  const golden = readHead(goldenPath(f));
+  return {
+    jarType: diagramTypeOf(golden),
+    ourType: diagramTypeOf(ours),
+    jarErrored: isJarErrorPage(golden),
+  };
 }
 
 let measured: Map<string, LiveRouting> | undefined;
@@ -243,7 +292,7 @@ interface CheckResult {
 /** A fixture pinned `agree` must still agree. Nothing else can fail this gate:
  *  a pinned misroute is already counted, and no movement of one can raise the
  *  count. */
-export function checkNoNewMisroute(f: BaselineFixture, now: LiveRouting | undefined): CheckResult {
+export function checkNoNewMisroute(f: BaselineFixture, now: RoutingPair | undefined): CheckResult {
   const at = `${f.tree} ${f.type}/${f.slug}`;
   if (now === undefined) {
     return {
@@ -269,7 +318,7 @@ export function checkNoNewMisroute(f: BaselineFixture, now: LiveRouting | undefi
 
 /** Progress classification for an already-pinned misroute. `undefined` when it
  *  is still wrong in exactly the way it was pinned. */
-export function progressNote(f: BaselineFixture, now: LiveRouting): string | undefined {
+export function progressNote(f: BaselineFixture, now: RoutingPair): string | undefined {
   const at = `${f.tree} ${f.type}/${f.slug}`;
   if (now.ourType === now.jarType) {
     return (
@@ -289,9 +338,54 @@ export function progressNote(f: BaselineFixture, now: LiveRouting): string | und
   return undefined;
 }
 
+/**
+ * The pin must agree with what the GOLDEN says, in both directions.
+ *
+ *   - pinned `jar-error`, golden is no longer an error page -> FAIL. A jar
+ *     upgrade that stops crashing is a real change to the oracle; letting it
+ *     pass silently would leave a fixture permanently excused from the
+ *     misroute count for a reason that has ceased to hold.
+ *   - pinned `agree` or `known-misroute`, golden IS an error page -> FAIL.
+ *     A jar crash is not a routing answer, and pinning one as a misroute
+ *     floors this mission's SLI above zero for a reason no repair can move
+ *     (D4).
+ *
+ * Absence from the live walk is not this check's business -- the corpus
+ * completeness gate above already fails on it, and failing twice for one
+ * cause names the same fixture in two places.
+ */
+export function checkJarErrorClassification(
+  f: BaselineFixture,
+  now: LiveRouting | undefined,
+): CheckResult {
+  const at = `${f.tree} ${f.type}/${f.slug}`;
+  if (now === undefined) return { ok: true, message: `${at}: absent; owned by the walk gate.` };
+  const pinned = f.status === 'jar-error';
+  if (pinned && !now.jarErrored)
+    return {
+      ok: false,
+      message:
+        `${at}: pinned "jar-error", but its golden is NO LONGER an upstream error page. ` +
+        `The jar now routes this source to ${now.jarType} and we route it to ${now.ourType}. ` +
+        `Re-measure and re-pin it as "agree" or "known-misroute" — a fixture excused from ` +
+        `the misroute count must keep earning the excuse.`,
+    };
+  if (!pinned && now.jarErrored)
+    return {
+      ok: false,
+      message:
+        `${at}: pinned "${f.status}", but its golden IS an upstream error page ` +
+        `(PSystemError.java:148-155 / ReportLog.java:103-108). The jar never exported a ` +
+        `diagram for it, so its jarType of "${now.jarType}" is not a routing answer. Pin it ` +
+        `"jar-error" with jarErrored: true — the classification comes from the golden, ` +
+        `never from the pin (D4).`,
+    };
+  return { ok: true, message: `${at}: classification matches its golden.` };
+}
+
 /** The jar->ours bucket table (AC5), so a failure names the mechanism class
  *  that moved rather than only the fixture. */
-export function bucketTable(rows: readonly LiveRouting[]): string {
+export function bucketTable(rows: readonly RoutingPair[]): string {
   const buckets = new Map<string, number>();
   for (const r of rows) {
     const k = `${r.jarType} -> ${r.ourType}`;
@@ -305,6 +399,9 @@ export function bucketTable(rows: readonly LiveRouting[]): string {
 
 const pinnedAgree = manifest.fixtures.filter((f) => f.status === 'agree');
 const pinnedMisroutes = manifest.fixtures.filter((f) => f.status === 'known-misroute');
+/** Excluded from the misroute count by D4, and watched by the classification
+ *  gate below so the exclusion cannot go stale. */
+const pinnedJarErrors = manifest.fixtures.filter((f) => f.status === 'jar-error');
 
 // ---------------------------------------------------------------------------
 // AC2 -- warm-up + corpus completeness in BOTH directions. Runs first, so it
@@ -417,9 +514,54 @@ describe('routing conformance — pinned misroutes', () => {
       .filter((r): r is LiveRouting => r !== undefined && r.ourType !== r.jarType);
     console.log(
       `[ROUTING SLI] ${still.length} of ${pinnedMisroutes.length} pinned misroutes remain ` +
-        `(target 0, ratcheting down only).\n${bucketTable(still)}`,
+        `(target 0, ratcheting down only). ${pinnedJarErrors.length} further fixtures are ` +
+        `pinned "jar-error" and are DELIBERATELY EXCLUDED from that count: the jar itself ` +
+        `produced an error page for them, so it never chose an engine and there is no ` +
+        `routing defect to repair (D4).\n${bucketTable(still)}`,
     );
     expect(still.length).toBeLessThanOrEqual(pinnedMisroutes.length);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AC1 + AC3 + AC4 -- the jar-error split, derived from the goldens and
+// checked against the pins in BOTH directions.
+// ---------------------------------------------------------------------------
+
+describe('routing conformance — jar-error classification', () => {
+  it('every pin matches what its own golden says about the jar erroring', () => {
+    const seen = live();
+    const wrong = manifest.fixtures
+      .map((f) => checkJarErrorClassification(f, seen.get(keyOf(f))))
+      .filter((r) => !r.ok);
+    expect(
+      wrong.map((r) => r.message),
+      `${wrong.length} fixture(s) are pinned inconsistently with their golden's own content.`,
+    ).toEqual([]);
+  });
+
+  it('the manifest splits into 3075 agree, 75 known-misroute and 8 jar-error', () => {
+    // 8, not the brief's 4: the brief scanned only WITHIN the 79 disagreements,
+    // so the four `state/` banner pages — which agree at NONE == NONE and were
+    // therefore never disagreements — went unexamined. The mission's
+    // denominator is unmoved: all four are `agree`, none was ever a misroute,
+    // and the 75 real defects the later batches are scored against stand.
+    expect(pinnedAgree.length).toBe(3075);
+    expect(pinnedMisroutes.length).toBe(75);
+    expect(pinnedJarErrors.length).toBe(8);
+    expect(manifest.fixtures.length).toBe(3158);
+  });
+
+  it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
+    expect(pinnedJarErrors.filter((f) => f.jarErrored !== true)).toEqual([]);
+    expect(
+      [...pinnedAgree, ...pinnedMisroutes].filter((f) => f.jarErrored !== undefined),
+    ).toEqual([]);
+  });
+
+  it('no jar-error fixture is counted in the misroute total', () => {
+    const misrouteKeys = new Set(pinnedMisroutes.map(keyOf));
+    expect(pinnedJarErrors.filter((f) => misrouteKeys.has(keyOf(f)))).toEqual([]);
   });
 });
 
@@ -497,6 +639,88 @@ describe('routing conformance — branch discrimination', () => {
     expect(table).toContain('CLASS -> SEQUENCE: 1');
     expect(table.indexOf('SEQUENCE -> DESCRIPTION')).toBeLessThan(table.indexOf('CLASS ->'));
     expect(table).toContain('3 disagreeing');
+  });
+
+  it('recognises the version-banner error page, whole text element only', () => {
+    const banner =
+      '<text x="5" y="17" fill="#33FF02" font-size="12" font-style="italic">' +
+      'PlantUML version $version$ / $git.commit.id$ [Unknown compile time]</text>';
+    expect(isJarErrorPage(banner)).toBe(true);
+    // The same phrase INSIDE a longer label is a diagram, not a banner.
+    expect(isJarErrorPage('<text x="5">Upgrade to PlantUML version 1.2024 [see wiki] now</text>')).toBe(
+      false,
+    );
+  });
+
+  it('recognises the crash page, and does not fire on a label that merely mentions it', () => {
+    expect(
+      isJarErrorPage('<text x="5" y="14">An error has occurred : java.lang.NullPointerException</text>'),
+    ).toBe(true);
+    expect(isJarErrorPage('<text x="5">Retry when An error has occurred : then log</text>')).toBe(
+      false,
+    );
+  });
+
+  it('a plain diagram with no root attribute is NOT an error page', () => {
+    expect(isJarErrorPage('<svg width="10"><text x="5">Alice</text><text x="5">Bob</text>')).toBe(
+      false,
+    );
+  });
+
+  const JAR_ERROR_SAMPLE: BaselineFixture = {
+    ...SAMPLE,
+    type: 'class',
+    jarType: 'NONE',
+    ourType: 'CLASS',
+    jarErrored: true,
+    status: 'jar-error',
+  };
+
+  it('a jar-error pin whose golden is still an error page passes', () => {
+    expect(
+      checkJarErrorClassification(JAR_ERROR_SAMPLE, {
+        jarType: 'NONE',
+        ourType: 'CLASS',
+        jarErrored: true,
+      }).ok,
+    ).toBe(true);
+  });
+
+  it('a jar-error pin whose golden stopped erroring FAILS, so a jar fix is never silent', () => {
+    const { ok, message } = checkJarErrorClassification(JAR_ERROR_SAMPLE, {
+      jarType: 'CLASS',
+      ourType: 'CLASS',
+      jarErrored: false,
+    });
+    expect(ok).toBe(false);
+    expect(message).toContain('NO LONGER an upstream error page');
+    expect(message).toContain('branch-probe');
+  });
+
+  it('an agree pin whose golden IS an error page fails, naming it', () => {
+    const { ok, message } = checkJarErrorClassification(SAMPLE, {
+      jarType: 'NONE',
+      ourType: 'NONE',
+      jarErrored: true,
+    });
+    expect(ok).toBe(false);
+    expect(message).toContain('IS an upstream error page');
+    expect(message).toContain('jarErrored: true');
+  });
+
+  it('a known-misroute pin whose golden IS an error page fails too', () => {
+    const pinned: BaselineFixture = { ...SAMPLE, status: 'known-misroute', ourType: 'CLASS' };
+    expect(
+      checkJarErrorClassification(pinned, {
+        jarType: 'NONE',
+        ourType: 'CLASS',
+        jarErrored: true,
+      }).ok,
+    ).toBe(false);
+  });
+
+  it('an absent fixture is left to the completeness gate rather than failed twice', () => {
+    expect(checkJarErrorClassification(JAR_ERROR_SAMPLE, undefined).ok).toBe(true);
   });
 
   it('a document with no root attribute reads as NONE, and one with it reads that value', () => {
