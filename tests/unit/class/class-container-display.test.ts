@@ -18,7 +18,7 @@
  * standalone (non-dotted) branch already threaded it.
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
 function parse(lines: string[]): ReturnType<typeof parseClass> {

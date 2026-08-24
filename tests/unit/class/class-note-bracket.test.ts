@@ -9,7 +9,7 @@
  * @see ~/git/plantuml/.../classdiagram/ClassDiagramFactory.java:150-157
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
 function parse(source: string): ReturnType<typeof parseClass> {

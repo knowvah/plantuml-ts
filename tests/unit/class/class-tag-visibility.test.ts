@@ -26,7 +26,7 @@
  *    themselves. @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:762-797
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import {
   computeRemovedIds,

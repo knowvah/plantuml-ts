@@ -30,7 +30,7 @@
  * only — no cluster-title stereotype display is wired (out of A8 scope).
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { collapseEmptyNamespacesFinal } from '../../../src/diagrams/class/class-namespace.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 

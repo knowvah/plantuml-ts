@@ -10,7 +10,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { parseClassifierDecl } from '../../../src/diagrams/class/class-declaration-parser.js';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
 function parse(source: string): ReturnType<typeof parseClass> {

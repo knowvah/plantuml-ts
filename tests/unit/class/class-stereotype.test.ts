@@ -21,7 +21,7 @@ import {
   resolveStyleStereotypeTags,
 } from '../../../src/diagrams/class/class-stereotype.js';
 import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';

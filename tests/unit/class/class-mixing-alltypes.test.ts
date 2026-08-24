@@ -16,7 +16,7 @@
  * @see ~/git/plantuml/.../classdiagram/command/CommandCreateElementFull2.java:84,239-241
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 

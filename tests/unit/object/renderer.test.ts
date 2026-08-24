@@ -24,7 +24,11 @@
 import { describe, it, expect } from 'vitest';
 import { registry } from '../../../src/core/dispatcher.js';
 import { assembleSvg } from '../../../src/index.js';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+// The object engine IS the class parser (upstream: `ObjectDiagramFactory`
+// shares `AbstractClassOrObjectDiagram`). Route through the class engine's
+// narrowing seam, which throws naming the refusal rather than letting an
+// unexpected `ParseRefusal` surface as a missing-property failure.
+import { parseClass } from '../class/parse-helper.js';
 import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';

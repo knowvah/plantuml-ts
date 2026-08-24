@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 

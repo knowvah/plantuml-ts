@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import { resolveTheme } from '../../../src/core/theme.js';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { layoutClass, classifierLeaves, noteLeaves } from '../../../src/diagrams/class/layout.js';
 import {
   buildClassUidPlan,

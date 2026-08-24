@@ -15,7 +15,7 @@
  * nested), both jar-verified via `scripts/oracle-render.sh`.
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { collapseEmptyNamespacesFinal } from '../../../src/diagrams/class/class-namespace.js';
 import { computeLeafDrawOrder } from '../../../src/diagrams/class/class-leaf-order.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';

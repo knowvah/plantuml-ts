@@ -19,7 +19,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST, Classifier } from '../../../src/diagrams/class/ast.js';

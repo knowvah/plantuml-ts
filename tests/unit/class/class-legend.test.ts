@@ -25,7 +25,7 @@ import { describe, it, expect } from 'vitest';
 import { classAccepts } from '../../../src/diagrams/class/class-dispatch.js';
 import { classPlugin } from '../../../src/diagrams/class/index.js';
 import { descriptionPlugin } from '../../../src/diagrams/description/index.js';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
