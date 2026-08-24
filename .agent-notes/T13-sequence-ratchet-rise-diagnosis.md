@@ -59,3 +59,20 @@
   independently wrong. `scale` needs to scale coordinates and dimensions at
   emission, as upstream does, not wrap them.
 - **Confidence**: High — golden and our output read side by side.
+
+## Resolution: the scale defect is fixed; the metric artefact is not a defect
+
+- **Fixed** (`fix(T13)`, 2026-08-24): `scale` now multiplies the geometry and
+  the theme at the layout->render boundary (`sequence/scale-geo.ts`, mirroring
+  `json/scale-geo.ts`), and emits no transform. Jar-verified with
+  `scripts/oracle-render.sh`: `scale 2` doubles dimensions and font sizes and
+  emits zero transforms; `scale 3` triples them.
+- **Effect, measured over the 1140 baselined fixtures**: risers 242 -> 217,
+  genuinely-less-aligned 35 -> 25, fallers 36 -> 46, ratchet failures
+  421 -> 396. Zero fixtures rose. All ten single-child collapses recovered;
+  `caxuke-64-femu351` now matches the golden's child count exactly.
+- **Still open**: 217 risers, of which 162 have a child count CLOSER to the
+  golden than before the mission — those are the metric artefact and should be
+  re-pinned, not "fixed". The 25 that moved further and the 12 with no
+  childCount short-circuit are the remaining real work, and they have no
+  single shared mechanism.
