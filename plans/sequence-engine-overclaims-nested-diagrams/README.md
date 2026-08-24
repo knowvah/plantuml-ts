@@ -91,7 +91,7 @@ Three confirmed per-bucket mechanisms, each from source:
 
 | Batch | Tasks | Parallel | Status |
 |---|---|---|---|
-| [1](batch-1/overview.md) | T1 routing-conformance gate | — | [ ] |
+| [1](batch-1/overview.md) | T1 routing-conformance gate | — | [x] |
 | [2](batch-2/overview.md) | T2 registration order | — | [ ] |
 | [3](batch-3/overview.md) | T3 candidate-type filter | — | [ ] |
 | [4](batch-4/overview.md) | T4 · T5 · T6 · T7 heuristic repair | yes | [ ] |
