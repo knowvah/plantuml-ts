@@ -99,10 +99,14 @@ describe('descriptive-keywords — DESCRIPTIVE_ONLY_KEYWORDS (D3)', () => {
     },
   );
 
-  it('excludes exactly interface, package, and actor from ALL_TYPES', () => {
-    expect(DESCRIPTIVE_ONLY_KEYWORDS.size).toBe(ALL_TYPES.length - 3);
+  it('excludes interface/package/actor plus the T4 sequence-type overlap', () => {
+    // interface, package, actor (D3) + boundary, control, entity, database,
+    // collections, queue (T4, SEQUENCE_TYPE_OVERLAP) = 9.
+    expect(DESCRIPTIVE_ONLY_KEYWORDS.size).toBe(ALL_TYPES.length - 9);
     // The business actor `actor/` stays descriptive-only.
     expect(DESCRIPTIVE_ONLY_KEYWORDS.has('actor/')).toBe(true);
+    expect(DESCRIPTIVE_ONLY_KEYWORDS.has('entity')).toBe(false);
+    expect(DESCRIPTIVE_ONLY_KEYWORDS.has('queue')).toBe(false);
   });
 });
 
@@ -324,6 +328,156 @@ describe('descriptive-keywords — BARE_ALIAS_DECL_RE (keyword-less alias declar
     expect(
       sequencePlugin.accepts(['SDK -> Website: /loginstart', 'Website -> SDK: /select']),
     ).toBe(true);
+  });
+});
+
+describe('descriptive-keywords — sequence/descdiagram participant-type overlap (T4)', () => {
+  // `boundary|control|entity|database|collections|queue` are BOTH descdiagram
+  // ALL_TYPES keywords AND sequence's own CommandParticipant TYPE alternation
+  // (sequencediagram/command/CommandParticipant.java:79-83, mirrored locally
+  // by SEQUENCE_PATTERNS[1] in src/diagrams/sequence/index.ts). Every shape a
+  // CommandParticipantA/A2/A3/A4 variant accepts is matched, shape-for-shape,
+  // by descdiagram's CommandCreateElementFull (CommandCreateElementFull.java
+  // :84-100) too -- there is no per-line grammar telling them apart. A bare
+  // declaration of one of these six must not, by itself, decide the block is
+  // descriptive.
+  it('does not fire hasDescriptiveSignal on a bare overlap-keyword declaration', () => {
+    expect(hasDescriptiveSignal(['queue bar as q'])).toBe(false);
+    expect(hasDescriptiveSignal(['database Foo5 #Pink'])).toBe(false);
+    expect(hasDescriptiveSignal(['boundary boundary1'])).toBe(false);
+    expect(hasDescriptiveSignal(['control control1'])).toBe(false);
+    expect(hasDescriptiveSignal(['collections B'])).toBe(false);
+    expect(hasDescriptiveSignal(['entity "This is my Entity" as entity1'])).toBe(
+      false,
+    );
+  });
+
+  it('does not fire hasDescriptiveElement on a bare overlap-keyword declaration', () => {
+    expect(hasDescriptiveElement(['queue bar as q'])).toBe(false);
+    expect(hasDescriptiveElement(['database postgresql as db101_postgresql'])).toBe(
+      false,
+    );
+  });
+
+  it('AC1: sequence accepts an unambiguous sequence diagram using `queue` as a participant type', () => {
+    const lines = [
+      'participant foo as f',
+      'queue bar as q',
+      'participant baz as b',
+      'f -> q: Enqueue',
+    ];
+    expect(sequencePlugin.accepts(lines)).toBe(true);
+  });
+
+  it('AC2: the guard still declines the use-case/deployment shape it was added for', () => {
+    expect(sequencePlugin.accepts(['actor Bob', '(Login)'])).toBe(false);
+  });
+
+  it('an unambiguous descriptive-only keyword elsewhere still wins (zotake-65-cabi912 shape)', () => {
+    // `node`/`component`/`cloud` are NOT in the overlap set, so they still
+    // decide the block is descriptive even though `database ... as ...`
+    // alone would not.
+    const lines = [
+      'node "db101" {',
+      'database postgresql as db101_postgresql',
+      '}',
+      'app101_app --> db101_postgresql',
+    ];
+    expect(hasDescriptiveSignal(lines)).toBe(true);
+    expect(descriptionPlugin.accepts(lines)).toBe(true);
+  });
+
+  it('an unambiguous descriptive-only keyword elsewhere still wins (vibunu-17-guso486 shape)', () => {
+    const lines = [
+      'usecase UC_THIS_IS_MY_DISPLAY_TO_SHOW as UC',
+      'boundary boundary1',
+      'control control1',
+      'entity1 --> control1 : test',
+    ];
+    expect(descriptionPlugin.accepts(lines)).toBe(true);
+  });
+
+  it('a bracket shorthand elsewhere still wins over a bare overlap-keyword line', () => {
+    const lines = ['[First Component]', 'database "MySql" {'];
+    expect(hasDescriptiveSignal(lines)).toBe(true);
+    expect(descriptionPlugin.accepts(lines)).toBe(true);
+  });
+});
+
+describe('descriptive-keywords — bracket shorthand excludes nested brackets (T4)', () => {
+  // The residual 3 of the 34 SEQUENCE -> DESCRIPTION misroutes, after the
+  // overlap-keyword fix above, are a SEPARATE mechanism: the `[Component]`
+  // shorthand pattern was `/^\[.+\]/`, un-anchored at the end and greedy, so
+  // it also matched anything starting with `[` that had a `]` ANYWHERE later
+  // on the line. Upstream's own bracket grammar
+  // (`descdiagram/command/CommandCreateElementFull.java:126`'s CODE_CORE,
+  // the `\[[^\[\]]+\]` alternative) explicitly excludes nested brackets. Two
+  // real sequence-only shapes tripped the loose version: a `[[url]]`
+  // double-bracket hyperlink (inside `ref over`/`note` bodies, cusiro-03-
+  // mebe823 and nibiju-55-kavu710) and sequence's own `[<[#color]-Node`
+  // found-message bracket-arrow syntax (repudi-21-rovo448).
+  it('does not fire on a [[url]] double-bracket hyperlink', () => {
+    expect(hasDescriptiveSignal(['[[http://www.google.com]]'])).toBe(false);
+    expect(
+      hasDescriptiveSignal(['[[http://www.cot{cloud} my link]] hello']),
+    ).toBe(false);
+  });
+
+  it('does not fire on a found-message bracket-arrow line', () => {
+    expect(hasDescriptiveSignal(['[<[#blue]-Node: Succ'])).toBe(false);
+    expect(hasDescriptiveSignal(['[<[#red]--Node: Fail'])).toBe(false);
+  });
+
+  it('still fires on a genuine single-level bracket shorthand', () => {
+    expect(hasDescriptiveSignal(['[Comp]'])).toBe(true);
+    expect(hasDescriptiveSignal(['[First Component]'])).toBe(true);
+  });
+
+  it('AC3: the three residual fixtures route to sequence', () => {
+    expect(
+      sequencePlugin.accepts([
+        'Dummy -> Alice : foo1',
+        'ref over Alice, Dummy',
+        '[[http://www.google.com]]',
+        'end',
+      ]),
+    ).toBe(true);
+    expect(
+      sequencePlugin.accepts([
+        'Alice -> Bob : hello',
+        'note left',
+        '[[http://www.cot{cloud} my link]] hello',
+        'end note',
+      ]),
+    ).toBe(true);
+    expect(
+      sequencePlugin.accepts([
+        '[-> Node: Start TC',
+        'Node -> SUT : RAR',
+        '[<[#blue]-Node: Succ',
+      ]),
+    ).toBe(true);
+  });
+});
+
+describe('descriptive-keywords — keyword-prefix does not swallow an arrow line (T4)', () => {
+  // repudi-21-rovo448's second line, `Node -> SUT : RAR`: the participant is
+  // NAMED "Node", which happens to be a descriptive-only keyword too. Upstream
+  // `CommandCreateElementFull`'s CODE_CORE (`descdiagram/command/
+  // CommandCreateElementFull.java:126`) never allows `-` or `<` as the first
+  // character after SYMBOL — no CODE_CORE alternative starts with either, so
+  // "keyword immediately followed by an arrow token" can never be a real
+  // descdiagram declaration. `buildKeywordPattern` matched on the keyword
+  // prefix alone, with no check on what followed it.
+  it('does not fire when a keyword-named identifier starts an arrow line', () => {
+    expect(hasDescriptiveSignal(['Node -> SUT : RAR'])).toBe(false);
+    expect(hasDescriptiveSignal(['queue <- foo'])).toBe(false);
+    expect(hasDescriptiveElement(['Node -> SUT : RAR'])).toBe(false);
+  });
+
+  it('still fires on the genuine declaration form of the same keyword', () => {
+    expect(hasDescriptiveSignal(['node Server'])).toBe(true);
+    expect(hasDescriptiveSignal(['node "Server 1"'])).toBe(true);
   });
 });
 

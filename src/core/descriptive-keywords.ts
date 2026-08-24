@@ -4,9 +4,9 @@
  *
  * Mirrors upstream PlantUML's `CommandCreateElementFull.ALL_TYPES`
  * (`net.sourceforge.plantuml.descdiagram.command`), which keys every descriptive
- * element off one keyword set, each carrying a `USymbol` shape. This module is
- * consumed by the Phase-1 dispatch guard (`class`/`sequence` `accepts()`) and the
- * Phase-2 description engine (AST, parser, layout, renderer).
+ * element off one keyword set, each carrying a `USymbol` shape. Consumed by the
+ * Phase-1 dispatch guard (`class`/`sequence` `accepts()`) and the Phase-2
+ * description engine (AST, parser, layout, renderer).
  *
  * See plans/consolidate-description-engine/decisions.md — D2 (full `ALL_TYPES`),
  * D3 (descriptive-signal guard, exclusions `interface`/`package`/`actor`).
@@ -127,9 +127,8 @@ const KEYWORD_SYMBOL_ENTRIES: readonly (readonly [string, USymbol])[] = [
 ];
 
 /** The descriptive keyword list (lowercase), in upstream declaration order. */
-export const ALL_TYPES: readonly string[] = KEYWORD_SYMBOL_ENTRIES.map(
-  ([keyword]) => keyword,
-);
+export const ALL_TYPES: readonly string[] =
+  KEYWORD_SYMBOL_ENTRIES.map(([keyword]) => keyword);
 
 /** Keyword → `USymbol` shape lookup. */
 export const KEYWORD_TO_SYMBOL: ReadonlyMap<string, USymbol> = new Map(
@@ -137,21 +136,33 @@ export const KEYWORD_TO_SYMBOL: ReadonlyMap<string, USymbol> = new Map(
 );
 
 /**
- * Keywords `class`/`sequence` legitimately parse, excluded from the descriptive
- * signal per D3: a pure `interface`/`package` block stays a class diagram, and a
- * bare `actor` + messages stays a sequence diagram. The business form `actor/`
- * is *not* excluded — it only appears in descriptive (use-case) diagrams.
+ * `ALL_TYPES` keywords sequence's own `CommandParticipant` TYPE alternation
+ * also claims (`CommandParticipant.java:79-83` vs. `CommandCreateElementFull
+ * .java:84-100`, mirrored by `SEQUENCE_PATTERNS[1]`, `sequence/index.ts`): no
+ * per-line grammar tells a `queue bar as q` participant from a `queue bar as
+ * q` element apart, so upstream resolves it purely by factory order
+ * (`SequenceDiagramFactory` before `DescriptionDiagramFactory`,
+ * `PSystemBuilder.java:135,138`; D1). Excluded (T4) from BOTH the decline
+ * signal below and description's own accept signal
+ * ({@link DESCRIPTION_ACCEPTS_KEYWORDS}): a bare declaration of one of these
+ * six decides nothing alone — any OTHER unambiguous marker in the block
+ * still wins, and a block whose only signal is these six falls to sequence.
  */
+const SEQUENCE_TYPE_OVERLAP: ReadonlySet<string> = new Set([
+  'boundary', 'control', 'entity', 'database', 'collections', 'queue',
+]);
+
+/** D3 exclusions, plus {@link SEQUENCE_TYPE_OVERLAP} (T4, same reason). */
 const SIGNAL_EXCLUSIONS: ReadonlySet<string> = new Set([
   'interface',
   'package',
   'actor',
+  ...SEQUENCE_TYPE_OVERLAP,
 ]);
 
-/** `ALL_TYPES` minus `interface`, `package`, `actor` (per D3). */
-export const DESCRIPTIVE_ONLY_KEYWORDS: ReadonlySet<string> = new Set(
-  ALL_TYPES.filter((keyword) => !SIGNAL_EXCLUSIONS.has(keyword)),
-);
+/** `ALL_TYPES` minus `SIGNAL_EXCLUSIONS` (D3 + T4). */
+export const DESCRIPTIVE_ONLY_KEYWORDS: ReadonlySet<string> =
+  new Set(ALL_TYPES.filter((keyword) => !SIGNAL_EXCLUSIONS.has(keyword)));
 
 /** Number of leading lines scanned, matching the existing `accepts()` slice. */
 const SCAN_LINE_LIMIT = 20;
@@ -161,10 +172,13 @@ function escapeRegExp(source: string): string {
 }
 
 /**
- * Build a case-insensitive regex matching a trimmed line that starts with any of
- * `keywords` followed by whitespace or end-of-line (word-boundary). Longest
- * keywords first so `actor/` wins over `actor` and `portin` over `port`. Derived
- * from the keyword set — never hand-duplicated.
+ * Build a case-insensitive regex matching a trimmed line that starts with any
+ * of `keywords` followed by whitespace or end-of-line. Longest keywords first
+ * so `actor/` wins over `actor` and `portin` over `port`. The whitespace must
+ * not be immediately followed by `-`/`<` (T4): no `CommandCreateElementFull`
+ * CODE_CORE alternative (`CommandCreateElementFull.java:126`) starts with
+ * either, so a keyword-named identifier starting an arrow line (`Node ->
+ * SUT`, participant literally named `Node`) can't be a real declaration.
  */
 function buildKeywordPattern(keywords: readonly string[]): RegExp {
   return new RegExp(
@@ -173,7 +187,7 @@ function buildKeywordPattern(keywords: readonly string[]): RegExp {
         .sort((a, b) => b.length - a.length)
         .map(escapeRegExp)
         .join('|') +
-      ')(?=\\s|$)',
+      ')(?=$|\\s(?!\\s*[-<]))',
     'i',
   );
 }
@@ -191,9 +205,15 @@ const DESCRIPTIVE_KEYWORD_PATTERN = buildKeywordPattern([
  * `package` IS kept (unlike the D3 guard set) so empty component packages route
  * here; the business forms `actor/`/`usecase/` are kept (unambiguous), and the
  * `:User:` colon actor is handled by ACTOR_COLON_SHORTHAND below.
+ *
+ * {@link SEQUENCE_TYPE_OVERLAP} (T4) is ALSO excluded, unlike `package` — see
+ * that constant's comment for the mechanism.
  */
 const DESCRIPTION_ACCEPTS_KEYWORDS = ALL_TYPES.filter(
-  (keyword) => keyword !== 'actor' && keyword !== 'interface',
+  (keyword) =>
+    keyword !== 'actor' &&
+    keyword !== 'interface' &&
+    !SEQUENCE_TYPE_OVERLAP.has(keyword),
 );
 const DESCRIPTIVE_ELEMENT_PATTERN = buildKeywordPattern(
   DESCRIPTION_ACCEPTS_KEYWORDS,
@@ -201,13 +221,17 @@ const DESCRIPTIVE_ELEMENT_PATTERN = buildKeywordPattern(
 
 /**
  * Element shorthands that are themselves descriptive signals, mirroring the
- * existing component/usecase `accepts()` patterns:
- * `[Comp]` (component), `(Use Case)` / `()` (use-case / interface).
+ * existing component/usecase `accepts()` patterns: `[Comp]` (component),
+ * `(Use Case)` / `()` (use-case / interface). The bracket form excludes
+ * nested brackets (T4), matching upstream's own grammar
+ * (`CommandCreateElementFull.java:126`'s CODE_CORE: `\[[^\[\]]+\]`, not
+ * `\[.+\]`) — un-anchored/greedy also matched a `[[url]]` hyperlink and
+ * sequence's own `[<[#color]-Node` found-message bracket-arrow syntax.
  */
 const ELEMENT_SHORTHAND_PATTERNS: readonly RegExp[] = [
-  /^\[.+\]/, // [Component] bracket notation
-  /^\(.+\)/, // (Use Case) parens notation
-  /^\(\)/, //   () interface shorthand
+  /^\[[^[\]]+\]/, // [Component] bracket notation, no nested brackets
+  /^\(.+\)/, //       (Use Case) parens notation
+  /^\(\)/, //         () interface shorthand
 ];
 
 /**
@@ -220,11 +244,10 @@ const ELEMENT_SHORTHAND_PATTERNS: readonly RegExp[] = [
  * (`ARROW_HEAD1`/`ARROW_BODY1`, `[-=.]+` at minimum) on the same line.
  * Descdiagram's own parens grammar (`CommandCreateElementFull.CODE_CORE`,
  * `\([^()]+\)/?`) is a single opaque phrase with no comma requirement and is
- * never followed by an arrow on the same line (the descdiagram command's
- * regex ends right after the entity + optional decorations). The two
- * grammars are therefore structurally distinguishable by "does a
- * comma-separated pair in parens immediately precede an arrow", which is
- * what this pattern reproduces (decision-journal.md T1 cat. 2 / T5b).
+ * never followed by an arrow on the same line. The two grammars are
+ * therefore distinguishable by "does a comma-separated pair in parens
+ * immediately precede an arrow", which is what this pattern reproduces
+ * (decision-journal.md T1 cat. 2 / T5b).
  */
 const ASSOCIATION_CLASS_COUPLE = /^\([^(),]+,[^(),]+\)\s*[-.=<>|*o]/;
 
@@ -258,12 +281,10 @@ function matchesElementShorthand(trimmed: string): boolean {
  * `legend` optionally followed by one VALIGN token (`top`|`bottom`) and
  * independently one ALIGN token (`left`|`right`|`center`), end-anchored — a
  * bare `legend`, `legend top`, `legend left`, or `legend top left` all open
- * the block. Any trailing content beyond those optional tokens (e.g.
- * `legend: "text"` or `legend some text`) is the *single-line* `CommandLegend`
- * form instead — a complete one-line command with no body — so the opener
- * pattern is end-anchored to exclude it; single-line legend text is left in
- * place for the descriptive scan (unclaimed by any fixture, and inert if it
- * were — the line itself is a Display string, not a keyword line).
+ * the block. Trailing content beyond those tokens (`legend: "text"`, `legend
+ * some text`) is the *single-line* `CommandLegend` form instead, so the
+ * opener is end-anchored to exclude it; that text is left for the
+ * descriptive scan (unclaimed by any fixture, inert either way).
  *
  * Closer grammar mirrors `CommandMultilinesLegend.END`:
  * `^end[%s]?legend$` — `endlegend` (no space) or `end legend` (exactly one
@@ -281,7 +302,6 @@ const LEGEND_CLOSE_RE = /^end\s?legend$/i;
 export function isLegendOpenLine(trimmed: string): boolean {
   return LEGEND_OPEN_RE.test(trimmed);
 }
-
 /** True when `trimmed` closes a `legend` … `endlegend` block. */
 export function isLegendCloseLine(trimmed: string): boolean {
   return LEGEND_CLOSE_RE.test(trimmed);
@@ -316,15 +336,13 @@ export function stripLegendRegions(lines: readonly string[]): string[] {
 /**
  * Remove `sprite $name [WxH/N] { ... }` multiline block regions (opener,
  * body, and closer lines) from `lines` — a sibling of {@link
- * stripLegendRegions} for the same reason: a vendored stdlib sprite (now
- * that `!include <bundle/thing>` actually resolves, plans/si5b-stdlib/
- * batch-4/overview.md T9) commonly runs 30-50 body lines, which pushed the
- * REAL diagram content (`title`, `rectangle`, …) past {@link
- * SCAN_LINE_LIMIT} and made `hasDescriptiveSignal`/`hasDescriptiveElement`
- * blind to it — `class`'s decline guard (`class-dispatch.ts`) then failed
- * to decline and mis-claimed the block (vivido-49-nisu863). Single-line
- * `sprite $name [WxH/N] DATA` forms need no stripping (one line can't blow
- * the scan window) and are left untouched, matching {@link
+ * stripLegendRegions} for the same reason: a vendored stdlib sprite commonly
+ * runs 30-50 body lines, which pushed the REAL diagram content (`title`,
+ * `rectangle`, …) past {@link SCAN_LINE_LIMIT} and made
+ * `hasDescriptiveSignal`/`hasDescriptiveElement` blind to it — `class`'s
+ * decline guard then failed to decline and mis-claimed the block
+ * (vivido-49-nisu863). Single-line `sprite $name [WxH/N] DATA` forms need no
+ * stripping and are left untouched, matching {@link
  * isSpriteMultilineOpenLine}'s multiline-only grammar.
  */
 export function stripSpriteRegions(lines: readonly string[]): string[] {
@@ -381,9 +399,8 @@ const ACTOR_COLON_SHORTHAND = /^:[^:;]+:/;
  * (CommandCreateElementFull.getRegexConcat:95-100), e.g. `Admin as :Main
  * Admin:` or `Use as (Use the application)`. Neither `ACTOR_COLON_SHORTHAND`
  * nor `ELEMENT_SHORTHAND_PATTERNS` catch this: the line doesn't *start* with
- * the decoration, it ends with it, after a bare id and `as`. Owned only by the
- * description plugin's `accepts()`, mirroring `ACTOR_COLON_SHORTHAND` above —
- * this is a description-only dispatch signal, not a class/sequence exclusion.
+ * the decoration, it ends with it, after a bare id and `as`. Description-only
+ * dispatch signal, mirroring `ACTOR_COLON_SHORTHAND` above.
  */
 const ALIAS_DECORATED_DISPLAY = /\bas\s+(?::[^:;]+:\/?|\([^)]+\)\/?)\s*$/i;
 
@@ -398,14 +415,11 @@ const ALIAS_DECORATED_DISPLAY = /\bas\s+(?::[^:;]+:\/?|\([^)]+\)\/?)\s*$/i;
  * (CommandCreateElementFull.java:273-275). Neither sequence's `CommandArrow`/
  * `CommandParticipant*` nor class's declaration commands have an equivalent
  * keyword-less alias form, so a bare alias line alone is what makes
- * upstream's SequenceDiagramFactory fail on it and fall through to
+ * upstream's SequenceDiagramFactory fail and fall through to
  * DescriptionDiagramFactory (xacaxe-43-bupe002: `"Website/Webview" as
- * Website` is the sole non-arrow line in an otherwise all-bare-arrow
- * source — every other line already parses as either a sequence message or
- * a descdiagram link, so this one line alone decides the factory). Owned
- * only by the description plugin's `accepts()`, like
- * {@link ALIAS_DECORATED_DISPLAY} above — a description-only dispatch
- * signal, not a class/sequence exclusion.
+ * Website` is the sole non-arrow line in an otherwise all-bare-arrow source,
+ * so it alone decides the factory). Description-only dispatch signal, like
+ * {@link ALIAS_DECORATED_DISPLAY} above.
  */
 const BARE_ALIAS_DECL_RE = /^(?:"[^"]+"\s+as\s+\S+|\S+\s+as\s+"[^"]+")$/;
 
@@ -431,8 +445,8 @@ const BARE_QUOTED_DECL_RE = new RegExp(
 /**
  * True when any of the first {@link SCAN_LINE_LIMIT} lines, trimmed, carries a
  * descriptive-only keyword or an element shorthand. Used by `class`/`sequence`
- * `accepts()` to decline descriptive blocks (D3) and mirrors upstream's outcome
- * (the class/sequence factories fail on `node`/`cloud`/`usecase`/… lines).
+ * `accepts()` to decline descriptive blocks (D3), mirroring upstream (the
+ * class/sequence factories fail on `node`/`cloud`/`usecase`/… lines).
  */
 export function hasDescriptiveSignal(lines: readonly string[]): boolean {
   return stripNonContentRegions(lines)
@@ -450,43 +464,29 @@ export function hasDescriptiveSignal(lines: readonly string[]): boolean {
  * A `(Use Case)` decorated TARGET immediately following an arrow body —
  * `CommandLinkElement`'s `LINK_ENT_ALT` (`link-grammar.ts`'s `LINK_ENT_ALT`,
  * the `\((?!\*\))[^)]+\)/?` alternative) — is not a legal sequence-diagram
- * PART2 (`sequencediagram/command/CommandArrow.java`'s `PART2CODE`
- * `([%pLN_.@]+)` / `PART2LONG` requires guillemet quotes; bare parens are
- * never allowed), so `foo --> (Use case)` cannot parse as a sequence message
- * no matter how eagerly `sequencePlugin`'s `isSequenceLine` matches the
- * `-->` token. `matchesElementShorthand` only catches this decoration at the
- * line START (the ENT1/source side, e.g. `(Use Case) --> foo`); this catches
- * it as the ENT2/target side, anywhere after an arrow run — the shape that
- * was falling through every `accepts()` (including `descriptionPlugin`'s
- * own) straight to `sequencePlugin`, the last-registered, most permissive
- * fallback (index.ts's registration-order comment).
+ * PART2 (`CommandArrow.java`'s `PART2CODE`/`PART2LONG`: bare parens are never
+ * allowed), so `foo --> (Use case)` cannot parse as a sequence message no
+ * matter how eagerly `isSequenceLine` matches `-->`. `matchesElementShorthand`
+ * only catches this decoration at the line START (ENT1); this catches it as
+ * ENT2, anywhere after an arrow run — the shape that was falling through
+ * every `accepts()` straight to `sequencePlugin` (last-registered, most
+ * permissive fallback).
  *
- * Deliberately narrow, to avoid firing on arbitrary prose containing a
- * parenthetical remark (e.g. "Fixed the bug. (#130)"):
- *  - the arrow-body run must be at least 2 characters total (dash/dot/tilde/
- *    equals run, optionally plus an arrowhead decor char) — a single `.` or
- *    `=` immediately before a parenthetical is far too common in free text
- *    (a lone sentence-ending period, or a math/label expression) to be a
- *    reliable signal; every real PlantUML arrow token is >= 2 characters.
- *  - `(?!\d+\))` excludes pure-digit content — upstream's arrow-inclination
- *    dressing (`CommandArrow.java`'s `ARROW_DRESSING2`'s trailing `\(\d+\)`),
- *    a legal SEQUENCE token, not a descdiagram endpoint.
- *  - `(?!\*)` excludes content starting with `*` — legacy activity's
- *    `(*)`/`(*1)`/`(*2)` start/stop markers (`activitydiagram/` `(*)` node
- *    syntax), not a descdiagram endpoint.
+ * Deliberately narrow, to avoid firing on prose with a parenthetical remark
+ * (e.g. "Fixed the bug. (#130)"):
+ *  - arrow-body run >= 2 chars (a lone `.`/`=` before a paren is common free
+ *    text; every real PlantUML arrow token is >= 2 chars)
+ *  - `(?!\d+\))` excludes pure-digit content — `CommandArrow.java`'s
+ *    `ARROW_DRESSING2` inclination dressing, a legal SEQUENCE token
+ *  - `(?!\*)` excludes legacy activity's `(*)`/`(*1)`/`(*2)` markers
  *  - no comma in the paren content — mirrors {@link ASSOCIATION_CLASS_COUPLE}
- *    above: a comma-separated pair immediately after an arrow could be the
- *    classdiagram association-class COUPLE form (`(A,B) .. R1`; also
- *    covers the reversed `R1 .. (A,B)` shape this function's caller must
- *    not misroute — verified by the existing association-class-couple
- *    dispatch test).
+ *    (a comma pair after an arrow could be the classdiagram COUPLE form,
+ *    reversed shape included; verified by that dispatch test)
  *
- * Used only by {@link hasDescriptiveElement} (not {@link hasDescriptiveSignal}):
- * `descriptionPlugin` is registered before `sequencePlugin` (index.ts), so
- * making `descriptionPlugin.accepts()` positively claim these lines is
- * sufficient — `sequencePlugin.accepts()` is never reached for them. Keeping
- * `hasDescriptiveSignal` (the class/sequence decline guard) unchanged avoids
- * widening `class`'s decline surface for a signal only description needs.
+ * Used only by {@link hasDescriptiveElement}: `descriptionPlugin` is
+ * registered before `sequencePlugin`, so claiming these lines there is
+ * sufficient. `hasDescriptiveSignal` stays unchanged — no reason to widen
+ * `class`'s decline surface for a signal only description needs.
  */
 const ARROW_BODY_RUN =
   '(?:[-=.~]{2,4}[<>ox^*|{}0@#+\\/]{0,3}|[-=.~][<>ox^*|{}0@#+\\/]{1,3})';
