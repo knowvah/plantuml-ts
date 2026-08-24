@@ -51,12 +51,14 @@ import type { Theme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
 import { parseDescription } from '../../../src/diagrams/description/parser.js';
+import type { DescriptionDiagramAST } from '../../../src/diagrams/description/ast.js';
 import { layoutDescription } from '../../../src/diagrams/description/layout.js';
 import { renderDescription, unwrapKlimtSvg } from '../../../src/diagrams/description/renderer.js';
 import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-graphics-core.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 
 interface ResolvedThemeAndStyles {
   readonly theme: Theme;
@@ -106,7 +108,23 @@ export function renderFixture(markup: string, measurer: StringMeasurer): string 
   const preprocessed = first.preprocessed;
   const { theme, styleMap } = buildThemeForFixture(preprocessed);
   const block = { ...first.source, rawStyles: preprocessed.styles };
-  const ast = parseDescription(block);
+  const parsed = parseDescription(block);
+  // T7 (dispatch-by-parse-attempt): `parseDescription` now returns
+  // `AST | ParseRefusal` (D1). Every fixture this harness renders is
+  // expected to parse to completion -- a refusal here is SLI 2 (this
+  // engine now erroring on a fixture the jar renders), surfaced loudly
+  // rather than silently spread into a malformed "AST".
+  const refusal = parseRefusalOf(parsed);
+  if (refusal !== undefined) {
+    throw new Error(
+      `description parser refused line ${String(refusal.line)} ` +
+        `(${refusal.kind}): ${refusal.message}`,
+    );
+  }
+  // `parseRefusalOf` takes `unknown` and cannot carry the narrowing back
+  // out through its own signature -- same cast `tests/helpers/parse-ast.ts
+  // #parseAst` uses for the identical reason.
+  const ast = parsed as DescriptionDiagramAST;
   // Seed over the RAW block source (directives + @start/@end included),
   // matching the jar's `UmlSource.seed()` and production
   // `descriptionPlugin.parse` -- `block.lines` is directive-stripped, which

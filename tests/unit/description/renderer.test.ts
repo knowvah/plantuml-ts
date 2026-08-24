@@ -29,6 +29,7 @@ import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme
 import { ActorStyle } from '../../../src/core/skin/ActorStyle.js';
 import { parseDescription } from '../../../src/diagrams/description/parser.js';
 import { layoutDescription } from '../../../src/diagrams/description/layout.js';
+import { descriptionAst } from './parse-description-ast.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 
 // ---------------------------------------------------------------------------
@@ -1469,7 +1470,7 @@ describe('renderDescription — entity/cluster shadow (deferred D3 item)', () =>
  */
 describe('note on link — text stays in the SVG (D2)', () => {
   const renderSrc = (lines: string[]): string => {
-    const ast = parseDescription({ lines, type: 'description' });
+    const ast = descriptionAst(parseDescription({ lines, type: 'description' }));
     const geo = layoutDescription(ast, defaultTheme, new FormulaMeasurer());
     return renderDescription(geo, defaultTheme);
   };

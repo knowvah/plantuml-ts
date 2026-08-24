@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { parseDescription } from '../../../src/diagrams/description/parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { DescriptionDiagramAST, DescriptiveNode } from '../../../src/diagrams/description/ast.js';
+import { descriptionAst } from './parse-description-ast.js';
 
 function parse(source: string): DescriptionDiagramAST {
   const lines = source
@@ -18,7 +19,7 @@ function parse(source: string): DescriptionDiagramAST {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   const block: UmlSource = { lines, type: 'description' };
-  return parseDescription(block);
+  return descriptionAst(parseDescription(block));
 }
 
 function nodeById(ast: DescriptionDiagramAST, id: string): DescriptiveNode | undefined {

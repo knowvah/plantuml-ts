@@ -19,6 +19,7 @@ import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
 import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
+import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
 import {
   ELEMENT_MULTILINE_END0_RE,
@@ -65,6 +66,7 @@ function makeInitialState(internal?: InternalSpriteStore, emoji?: InternalEmojiS
     pages: [],
     namespaceSeparator: null,
     uidCounter: 0,
+    executionError: undefined,
   };
 }
 
@@ -348,13 +350,26 @@ function tryArchimate(state: ParseState, line: string): LineOutcome {
  * so those directives are never misread as entity declarations. Operates on
  * the raw (untrimmed) `lines` array/index so a matched multiline block's
  * body keeps its original indentation for `removeEmptyColumns`.
+ *
+ * T7 (dispatch-by-parse-attempt, D0/D1): the two upstream refusal points
+ * this factory actually has both surface here. When no `COMMANDS` pattern
+ * matches, that mirrors `getCandidate` returning `null` --
+ * `PSystemCommandFactory.java:169-175`, `SYNTAX_ERROR "Syntax Error?"`,
+ * score 0. When a pattern DOES match but the handler set
+ * `state.executionError` (currently only the root-level `port`/`portin`/
+ * `portout` case, `CommandCreateElementFull.java:316-317`), that mirrors
+ * `result.isOk() == false` -- `:180-186`, `EXECUTION_ERROR`. `rawLine` is
+ * the ORIGINAL source line index (see `parseDescription`'s doc), distinct
+ * from `i`, the index into the directive-stripped `lines` array this loop
+ * walks.
  */
 function dispatchCommand(
   state: ParseState,
   lines: readonly string[],
   i: number,
   line: string,
-): number {
+  rawLine: number,
+): number | ParseRefusal {
   const annotationMatch = matchAnnotationCommand(lines, i, state.ast.annotations!);
   if (annotationMatch !== null) return annotationMatch.consumed;
 
@@ -373,10 +388,14 @@ function dispatchCommand(
     const match = cmd.pattern.exec(line);
     if (match !== null) {
       cmd.execute(state, match);
-      break;
+      if (state.executionError !== undefined) {
+        const message = state.executionError;
+        return refuse('execution', rawLine, i + 1, message);
+      }
+      return 1;
     }
   }
-  return 1;
+  return refuse('syntax', rawLine, i + 1, 'Syntax Error?');
 }
 
 /**
@@ -385,9 +404,12 @@ function dispatchCommand(
  * .plantuml.preproc) — the preprocessor directive that halts all further
  * line processing (confirmed against the pinned oracle golden for
  * jesibe-85-sozu187: a link past `!exit` referring to an undeclared
- * endpoint must NOT spuriously auto-create that endpoint). Otherwise
- * returns the number of lines consumed (>= 1) — greater than 1 only when
- * the shared annotation/sprite matchers consumed a multi-line block (see
+ * endpoint must NOT spuriously auto-create that endpoint). Returns a
+ * `ParseRefusal` (T7) when no phase recognised the line, or a command
+ * matched but reported execution failure — see `dispatchCommand`'s doc for
+ * the two upstream refusal points this factory has. Otherwise returns the
+ * number of lines consumed (>= 1) — greater than 1 only when the shared
+ * annotation/sprite matchers consumed a multi-line block (see
  * `dispatchCommand`). Phases run in upstream-priority order: element
  * block, pending/open note, `archimate` (T8 — must run before the ordinary
  * command table so its own color-first grammar is parsed before the
@@ -397,7 +419,12 @@ function dispatchCommand(
  * `dispatchCommand`, so a sprite-shaped line inside a note body is never
  * stolen from note accumulation -- see `dispatchCommand`'s doc).
  */
-function processLine(state: ParseState, lines: readonly string[], i: number): number | false {
+function processLine(
+  state: ParseState,
+  lines: readonly string[],
+  i: number,
+  rawLine: number,
+): number | false | ParseRefusal {
   const line = lines[i]!.trim();
   if (/^!exit\b/i.test(line)) return false;
 
@@ -410,18 +437,32 @@ function processLine(state: ParseState, lines: readonly string[], i: number): nu
   const archimateResult = tryArchimate(state, line);
   if (archimateResult !== null) return archimateResult;
 
-  return dispatchCommand(state, lines, i, line);
+  return dispatchCommand(state, lines, i, line, rawLine);
 }
 
 /**
  * Parse a UmlSource block for a descriptive diagram (component / use-case /
  * deployment) into a DescriptionDiagramAST.
+ *
+ * T7 (dispatch-by-parse-attempt, D0/D1): returns a `ParseRefusal` instead of
+ * an AST the moment any line is refused (see `dispatchCommand`'s doc for the
+ * two refusal points this factory has) — mirroring `executeFewLines`
+ * returning a `PSystemError` immediately, aborting the rest of the document
+ * (`PSystemCommandFactory.java:136-139`). `rawLine` — the line index handed
+ * to `refuse()` — is `block.linePositions[i]`, the ORIGINAL source line
+ * `lines[i]` came from before directive-stripping, falling back to `i` for a
+ * hand-built literal fixture with no `linePositions` (many unit tests
+ * construct `UmlSource` directly) — the same fallback contract
+ * `UmlSource.linePositions`'s own doc documents, and the same source
+ * `DiagramRefusal`'s "0-indexed into the source as errorSvg reads it"
+ * expects (`error-diagrams.ts`), mirroring `class/parser.ts`'s identical
+ * `state.currentLine = merged.positions[i]` read of the same field.
  */
 export function parseDescription(
   block: UmlSource,
   internalSprites?: InternalSpriteStore,
   internalEmoji?: InternalEmojiStore,
-): DescriptionDiagramAST {
+): DescriptionDiagramAST | ParseRefusal {
   const state = makeInitialState(internalSprites, internalEmoji);
   const lines = block.lines;
 
@@ -430,8 +471,10 @@ export function parseDescription(
       i++;
       continue;
     }
-    const result = processLine(state, lines, i);
+    const rawLine = block.linePositions?.[i] ?? i;
+    const result = processLine(state, lines, i, rawLine);
     if (result === false) break;
+    if (typeof result !== 'number') return result;
     i += result;
   }
 

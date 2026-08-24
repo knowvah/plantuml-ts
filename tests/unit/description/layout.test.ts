@@ -29,6 +29,7 @@ import type { DotInputEdge } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { parseDescription } from '../../../src/diagrams/description/parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { descriptionAst } from './parse-description-ast.js';
 
 const measurer = new FormulaMeasurer();
 
@@ -1621,7 +1622,7 @@ describe('layoutDescription — edge minlen (= link length - 1)', () => {
 
 function parseLine(line: string): DescriptionDiagramAST {
   const source: UmlSource = { lines: [line], type: 'description' };
-  return parseDescription(source);
+  return descriptionAst(parseDescription(source));
 }
 
 describe('layoutDescription — link-grammar wiring', () => {
@@ -2031,7 +2032,7 @@ describe('layoutDescription — scale directive passthrough', () => {
 describe('note on link — drawn label lines (D2)', () => {
   const layoutOf = (src: string) => {
     const source: UmlSource = { lines: src.split('\n'), type: 'description' };
-    return layoutDescription(parseDescription(source), defaultTheme, new FormulaMeasurer());
+    return layoutDescription(descriptionAst(parseDescription(source)), defaultTheme, new FormulaMeasurer());
   };
 
   it('draws the note text when the link has no label of its own', () => {

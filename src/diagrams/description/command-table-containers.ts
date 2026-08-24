@@ -135,7 +135,20 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       const kw = match[1]!.toLowerCase();
       const symbol = KEYWORD_TO_SYMBOL.get(kw);
       if (symbol === undefined) return;
-      if (symbol === 'port' && state.containerStack.length === 0) return;
+      if (symbol === 'port' && state.containerStack.length === 0) {
+        // CommandCreateElementFull.java:316-317: PORTIN/PORTOUT at root
+        // level is an EXECUTION_ERROR upstream ("Port can only be used
+        // inside an element and not at root level"), not a silent no-op --
+        // the whole diagram fails to build. T7 (dispatch-by-parse-attempt):
+        // this branch used to create nothing and return, silently accepting
+        // the line; it now signals failure through
+        // `ParseState.executionError`, which `dispatchCommand` (parser.ts)
+        // turns into a `kind: 'execution'` `ParseRefusal`, score 0 --
+        // `CommandExecutionResult.error(String)` is the single-arg overload,
+        // whose score is always 0 (CommandExecutionResult.java:81-83).
+        state.executionError = 'Port can only be used inside an element and not at root level';
+        return;
+      }
       // CommandCreateElementFull's CODE-can-be-`[bracket]` alternative
       // (getRegexConcat CODE1, codeChar `[`): a keyword-prefixed bracket
       // declaration whose alias follows the bracket -- `component [Disp] as Id`

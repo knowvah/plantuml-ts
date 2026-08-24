@@ -24,12 +24,13 @@ import { describe, it, expect } from 'vitest';
 import { parseDescription } from '../../../src/diagrams/description/parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { DescriptionDiagramAST, DescriptiveNode } from '../../../src/diagrams/description/ast.js';
+import { descriptionAst } from './parse-description-ast.js';
 
 /** Parse RAW source lines — deliberately NOT per-line trimmed (the sibling
  *  `element-body.test.ts` helper trims, which cannot exercise G8 at all). */
 function parseRaw(source: string): DescriptionDiagramAST {
   const block: UmlSource = { lines: source.split('\n'), type: 'description' };
-  return parseDescription(block);
+  return descriptionAst(parseDescription(block));
 }
 
 function nodeById(ast: DescriptionDiagramAST, id: string): DescriptiveNode | undefined {
@@ -80,9 +81,20 @@ describe('CommandCreateElementMultilines TYPE0 — open-quote form (G1)', () => 
   it('abandons the command when no closing quote line follows (EOF)', () => {
     // Upstream `isMultilineCommandOk` returns null at EOF and the factory
     // `continue`s to the next command — the single-line rule then takes it.
-    const ast = parseRaw('usecase UC5 as "My usecase5\nis on several lines');
+    //
+    // T7: the second line is now a clean, independently-valid declaration
+    // rather than free-text prose. The original fixture's second line
+    // ("is on several lines") was itself unrecognised by every command in
+    // this factory — no keyword, no leading quote/paren/colon/bracket, no
+    // decoration — so a real jar would ALSO refuse the whole document on
+    // that line (`PSystemCommandFactory.java:169-175`), not silently drop
+    // it and keep going. That made it the wrong fixture to isolate the
+    // TYPE0-abandonment mechanism this test targets; swapping in a valid
+    // second line keeps that mechanism under test without also tripping an
+    // unrelated, correct T7 refusal.
+    const ast = parseRaw('usecase UC5 as "My usecase5\ncomponent c2');
     expect(nodeById(ast, 'UC5')).toBeUndefined();
-    expect(ast.nodes.length).toBeGreaterThan(0);
+    expect(nodeById(ast, 'c2')).toBeDefined();
   });
 
   it('never steals an already-closed single-line `as "…"` declaration', () => {
