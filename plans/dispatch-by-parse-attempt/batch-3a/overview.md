@@ -28,3 +28,9 @@ engines whose upstream factory extends `PSystemCommandFactory`
 ([D6](../decisions.md#d6)). json, yaml, hcl and files extend
 `PSystemAbstractFactory` and keep their own document-parser error semantics;
 dot is passthrough. None of those four is in scope.
+
+**Closed 2026-08-24**, all eight. Typecheck, lint and build green; `npm test`
+red by design (D3'). SLI 2 at 3a's close, before the dispatch switch: **728**
+— sequence 634, class 60, description 33, nuvoja 1. One extra commit,
+`fix(3a)`, reconciles the shared multi-engine test seams six of the eight
+engines are driven through.
