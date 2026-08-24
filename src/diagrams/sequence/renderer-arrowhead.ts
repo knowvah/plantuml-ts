@@ -65,6 +65,8 @@ import type {
   ArrowSegment,
   HeadGeometry,
 } from './sequence-arrowhead.js';
+import type { ScaledTheme } from './scale-geo.js';
+import { scaleHeadGeometry, scaledDashPattern } from './scale-geo.js';
 
 // ---------------------------------------------------------------------------
 // Paint
@@ -128,12 +130,13 @@ function headPolygonMarkup(
   points: readonly Point2D[],
   tip: Point2D,
   paint: ArrowPaint,
+  k: number,
 ): string {
   const translated = points.map((p) => ({ x: tip.x + p.x, y: tip.y + p.y }));
   return polygon(translated, {
     fill: paint.color,
     stroke: paint.color,
-    strokeWidth: ARROW_THICKNESS,
+    strokeWidth: ARROW_THICKNESS * k,
   });
 }
 
@@ -143,8 +146,9 @@ function headLinesMarkup(
   kind: ArrowHeadKind,
   tip: Point2D,
   paint: ArrowPaint,
+  k: number,
 ): string {
-  const thickness = lineThicknessOf(kind);
+  const thickness = lineThicknessOf(kind) * k;
   return segments
     .map(([a, b]) =>
       line(tip.x + a.x, tip.y + a.y, tip.x + b.x, tip.y + b.y, {
@@ -184,14 +188,20 @@ function renderArrowHead(
   kind: ArrowHeadKind,
   tip: Point2D,
   paint: ArrowPaint,
+  k: number,
 ): string {
+  // `head` is `sequence-arrowhead.ts`'s tip-local, unscaled vocabulary —
+  // scaled here, once, before use (see scale-geo.ts's header for why
+  // scaling this OUTPUT is arithmetically identical to threading `k`
+  // through every constant that module builds it from).
+  const scaled = scaleHeadGeometry(head, k);
   const circleMarkup =
-    head.circle === undefined ? '' : headCircleMarkup(head.circle, tip, paint);
+    scaled.circle === undefined ? '' : headCircleMarkup(scaled.circle, tip, paint);
   const shapeMarkup =
-    head.polygon !== undefined
-      ? headPolygonMarkup(head.polygon, tip, paint)
-      : head.lines !== undefined
-        ? headLinesMarkup(head.lines, kind, tip, paint)
+    scaled.polygon !== undefined
+      ? headPolygonMarkup(scaled.polygon, tip, paint, k)
+      : scaled.lines !== undefined
+        ? headLinesMarkup(scaled.lines, kind, tip, paint, k)
         : '';
   return circleMarkup + shapeMarkup;
 }
@@ -257,10 +267,10 @@ export function reverseArrowConfiguration(
  * this on the HEAD being absent, not on the decoration.
  * @see skin/rose/ComponentRoseArrow.java:103-109
  */
-function decorationTrim2(configuration: ArrowConfiguration): number {
+function decorationTrim2(configuration: ArrowConfiguration, k: number): number {
   if (configuration.decoration2 !== 'CIRCLE') return 0;
-  if (configuration.dressing2.head === 'NONE') return DIAM_CIRCLE / 2;
-  return DIAM_CIRCLE / 2 + THIN_CIRCLE;
+  if (configuration.dressing2.head === 'NONE') return (DIAM_CIRCLE / 2) * k;
+  return (DIAM_CIRCLE / 2 + THIN_CIRCLE) * k;
 }
 
 /**
@@ -270,12 +280,12 @@ function decorationTrim2(configuration: ArrowConfiguration): number {
  * three — trims nothing at all.
  * @see skin/rose/ComponentRoseArrow.java:111-124
  */
-function decorationTrim1(configuration: ArrowConfiguration): number {
+function decorationTrim1(configuration: ArrowConfiguration, k: number): number {
   if (configuration.decoration1 !== 'CIRCLE') return 0;
   const head = configuration.dressing1.head;
-  if (head === 'NONE') return DIAM_CIRCLE / 2;
-  if (head === 'ASYNC') return DIAM_CIRCLE / 2 + THIN_CIRCLE;
-  if (head === 'NORMAL') return DIAM_CIRCLE / 2 + THIN_CIRCLE;
+  if (head === 'NONE') return (DIAM_CIRCLE / 2) * k;
+  if (head === 'ASYNC') return (DIAM_CIRCLE / 2 + THIN_CIRCLE) * k;
+  if (head === 'NORMAL') return (DIAM_CIRCLE / 2 + THIN_CIRCLE) * k;
   return 0;
 }
 
@@ -286,11 +296,11 @@ function decorationTrim1(configuration: ArrowConfiguration): number {
  * `:134-135` / `:137-140` for the saltire).
  * @see skin/rose/ComponentRoseArrow.java:126-140
  */
-function dressingTrim(dressing: ArrowDressing): number {
+function dressingTrim(dressing: ArrowDressing, k: number): number {
   let trim = 0;
   if (dressing.part === 'FULL' && dressing.head === 'NORMAL')
-    trim += ARROW_DELTA_X / 2;
-  if (dressing.head === 'CROSSX') trim += 2 * SPACE_CROSS_X;
+    trim += (ARROW_DELTA_X / 2) * k;
+  if (dressing.head === 'CROSSX') trim += 2 * SPACE_CROSS_X * k;
   return trim;
 }
 
@@ -313,17 +323,18 @@ interface ArrowExtent {
 function arrowExtent(
   configuration: ArrowConfiguration,
   width: number,
+  k: number,
 ): ArrowExtent {
   let start = 0;
-  let len = width - 1;
-  const pos1 = start + 1;
-  const pos2 = len - 1;
-  len -= decorationTrim2(configuration);
-  const decoration1 = decorationTrim1(configuration);
+  let len = width - 1 * k;
+  const pos1 = start + 1 * k;
+  const pos2 = len - 1 * k;
+  len -= decorationTrim2(configuration, k);
+  const decoration1 = decorationTrim1(configuration, k);
   start += decoration1;
   len -= decoration1;
-  len -= dressingTrim(configuration.dressing2);
-  const dressing1 = dressingTrim(configuration.dressing1);
+  len -= dressingTrim(configuration.dressing2, k);
+  const dressing1 = dressingTrim(configuration.dressing1, k);
   start += dressing1;
   len -= dressing1;
   return { start, len, pos1, pos2 };
@@ -348,14 +359,15 @@ function arrowExtent(
 export function renderFlatMessageArrow(
   msg: MessageGeo,
   configuration: ArrowConfiguration,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
+  const k = theme.scaleK;
   // `CommunicationTile#isReverse` compares the two lifeline positions, not
   // the participants' declaration order (`:125-131`).
   const drawn =
     msg.fromX > msg.toX ? reverseArrowConfiguration(configuration) : configuration;
   const origin = { x: Math.min(msg.fromX, msg.toX), y: msg.y };
-  const extent = arrowExtent(drawn, Math.abs(msg.toX - msg.fromX));
+  const extent = arrowExtent(drawn, Math.abs(msg.toX - msg.fromX), k);
   const body = line(
     origin.x + extent.start,
     origin.y,
@@ -363,8 +375,8 @@ export function renderFlatMessageArrow(
     origin.y,
     {
       stroke: theme.colors.arrow,
-      strokeWidth: ARROW_THICKNESS,
-      ...(configuration.dashed ? { strokeDasharray: '5,5' } : {}),
+      strokeWidth: ARROW_THICKNESS * k,
+      ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
     },
   );
   return flatArrowHeads(drawn, origin, extent, theme) + body;
@@ -376,21 +388,24 @@ function flatArrowHeads(
   drawn: ArrowConfiguration,
   origin: Point2D,
   extent: ArrowExtent,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
   const paint = paintOf(theme);
   const niceArrow = niceArrowOf(theme);
+  const k = theme.scaleK;
   const head1 = renderArrowHead(
     headGeometryReverseSide(drawn.dressing1, drawn.decoration1, niceArrow),
     drawn.dressing1.head,
     { x: origin.x + extent.pos1, y: origin.y },
     paint,
+    k,
   );
   const head2 = renderArrowHead(
     headGeometryNormalSide(drawn.dressing2, drawn.decoration2, niceArrow),
     drawn.dressing2.head,
     { x: origin.x + extent.pos2, y: origin.y },
     paint,
+    k,
   );
   return head1 + head2;
 }
@@ -448,7 +463,7 @@ const SELF_REVERSE_DEFINE = false;
 export function renderSelfMessageHead(
   msg: MessageGeo,
   configuration: ArrowConfiguration,
-  theme: Theme,
+  theme: ScaledTheme,
   tipY: number,
 ): string {
   const niceArrow = niceArrowOf(theme);
@@ -457,5 +472,6 @@ export function renderSelfMessageHead(
     configuration.dressing2.head,
     { x: msg.fromX, y: tipY },
     paintOf(theme),
+    theme.scaleK,
   );
 }

@@ -185,10 +185,12 @@ export interface SequenceDiagramAST {
   };
   /** `scale ...` (`command/CommandScale*.java`, 6 forms via
    *  `CommonCommands#addCommonScaleCommands`) — resolved to a factor and
-   *  applied as an SVG `<g transform="scale(...)">` wrap at render time
-   *  (`renderSequence`), since this engine's shared `assembleDocumentShell`
-   *  emission path (unlike `description`'s `SvgGraphicsCore`) has no
-   *  per-primitive scale multiplier to hook into `src/core/` for.
+   *  applied by multiplying the GEOMETRY AND THEME at the layout→render
+   *  boundary (`scale-geo.ts`), which is arithmetically what upstream's
+   *  `SvgGraphics#format` does on the way out. No `transform` is emitted:
+   *  jar-measured, `scale 2` doubles every coordinate, font size and the
+   *  root dimensions, and emits zero transforms.
+   *  @see scale-geo.ts
    *  @see scale-command.ts */
   scale?: ScaleSpec;
   /** Box groups declared with `box` / `end box`. */

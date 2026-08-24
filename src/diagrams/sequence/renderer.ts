@@ -3,6 +3,19 @@
  *
  * Pure function: SequenceGeometry + Theme → SVG string.
  * No DOM, no async.
+ *
+ * T13 (dispatch-by-parse-attempt): `scale ...` is applied at the
+ * layout→render boundary, mirroring `json/renderer.ts` — `scale-geo.ts`
+ * scales `SequenceGeometry` and `Theme.fontSize` as pure data BEFORE this
+ * module ever sees them, and every OTHER local pixel-literal constant this
+ * file owns (`ACTIVATION_HALF_WIDTH`, `SELF_LOOP_WIDTH`/`HEIGHT`,
+ * `BOX_LABEL_FONT_SIZE`/`PADDING`, and the small inline offsets throughout)
+ * is scaled at its point of use via the `ScaledTheme.scaleK` this module
+ * threads everywhere `theme` already flowed. See `scale-geo.ts`'s header
+ * for the full rationale and the jar measurements this replaces (a
+ * `<g transform="scale(...)">` wrap around unscaled coordinates, which
+ * upstream never emits for a document body — `manageScale`,
+ * `SvgGraphics.java:1035-1051`, is for embedded sprites only).
  */
 
 import type {
@@ -18,16 +31,7 @@ import type {
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import {
-  rect,
-  line,
-  ellipse,
-  text,
-  path,
-  noteBox,
-  circle,
-} from '../../core/svg.js';
-import { fmt } from '../../core/svg-format.js';
+import { rect, line, text, path, noteBox } from '../../core/svg.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { arrowConfigurationFor } from './sequence-arrowhead.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
@@ -36,6 +40,9 @@ import {
   renderFlatMessageArrow,
   renderSelfMessageHead,
 } from './renderer-arrowhead.js';
+import { renderActorShape, renderDatabaseShape } from './renderer-participant-shapes.js';
+import type { ScaledTheme } from './scale-geo.js';
+import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 
 // ---------------------------------------------------------------------------
 // Activation constants
@@ -57,77 +64,18 @@ function renderLabel(cx: number, cy: number, label: string, theme: Theme): strin
   });
 }
 
-function renderActorShape(cx: number, topY: number, height: number, theme: Theme): string {
-  const headR = 10;
-  const bodyTop = topY + headR * 2 + 2;
-  const bodyLen = height * 0.35;
-  const bodyBot = bodyTop + bodyLen;
-  const armY = bodyTop + bodyLen * 0.3;
-  const armSpan = 14;
-  const legSpan = 12;
-  const parts: string[] = [];
-  // Head
-  parts.push(circle(cx, topY + headR, headR, { fill: theme.colors.background, stroke: theme.colors.border, strokeWidth: 1.5 }));
-  // Body
-  parts.push(line(cx, bodyTop, cx, bodyBot, { stroke: theme.colors.border, strokeWidth: 1.5 }));
-  // Arms
-  parts.push(line(cx - armSpan, armY, cx + armSpan, armY, { stroke: theme.colors.border, strokeWidth: 1.5 }));
-  // Legs — end 8px above the label zone so the label has clear breathing room
-  parts.push(line(cx, bodyBot, cx - legSpan, topY + height - theme.fontSize - 8, { stroke: theme.colors.border, strokeWidth: 1.5 }));
-  parts.push(line(cx, bodyBot, cx + legSpan, topY + height - theme.fontSize - 8, { stroke: theme.colors.border, strokeWidth: 1.5 }));
-  return parts.join('');
-}
-
-function renderDatabaseShape(x: number, topY: number, width: number, height: number, theme: Theme): string {
-  // With sweep=1 the arc nadir sits capRy below bodyBot. labelH must satisfy
-  // labelH > 1.15*(capRy_fraction*height) + fontSize + 4 to keep the label
-  // top clear of the arc. fontSize+12 gives ~3 px of clearance at fontSize=14.
-  const labelH = theme.fontSize + 14;
-  const bodyH = height - labelH;
-  const capRy = Math.max(4, bodyH * 0.15);
-  const bodyTop = topY + capRy;
-  const bodyBot = topY + bodyH;
-  const cx = x + width / 2;
-  const rx = width / 2 - 2;
-  const parts: string[] = [];
-  // Body rect
-  parts.push(rect(x + 2, bodyTop, width - 4, bodyH - capRy, {
-    fill: theme.colors.background,
-    stroke: 'none',
-  }));
-  // Top ellipse (full, visible)
-  parts.push(ellipse(cx, bodyTop, rx, capRy, {
-    fill: theme.colors.background,
-    stroke: theme.colors.border,
-    'stroke-width': '1.5',
-  }));
-  // Side lines
-  parts.push(line(x + 2, bodyTop, x + 2, bodyBot, { stroke: theme.colors.border, strokeWidth: 1.5 }));
-  parts.push(line(x + width - 2, bodyTop, x + width - 2, bodyBot, { stroke: theme.colors.border, strokeWidth: 1.5 }));
-  // Bottom arc — sweep=0 (counter-clockwise from left to right) routes through
-  // (cx, bodyBot+capRy), bowing the arc downward for a convex cylinder bottom.
-  parts.push(
-    path(`M ${fmt(x + 2)},${fmt(bodyBot)} A ${fmt(rx)},${fmt(capRy)} 0 0,0 ${fmt(x + width - 2)},${fmt(bodyBot)}`, {
-      fill: theme.colors.background,
-      stroke: theme.colors.border,
-      strokeWidth: 1.5,
-    }),
-  );
-  return parts.join('');
-}
-
-function renderParticipantBox(p: ParticipantGeo, theme: Theme): string {
-  const labelY = p.y + p.height - theme.fontSize / 2 - 4;
+function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
+  const labelYOffset = theme.fontSize / 2 + 4 * theme.scaleK;
   if (p.type === 'actor') {
     return (
       renderActorShape(p.centerX, p.y, p.height, theme) +
-      renderLabel(p.centerX, labelY, p.display, theme)
+      renderLabel(p.centerX, p.y + p.height - labelYOffset, p.display, theme)
     );
   }
   if (p.type === 'database') {
     return (
       renderDatabaseShape(p.x, p.y, p.width, p.height, theme) +
-      renderLabel(p.centerX, p.y + p.height - theme.fontSize / 2 - 4, p.display, theme)
+      renderLabel(p.centerX, p.y + p.height - labelYOffset, p.display, theme)
     );
   }
   const box = rect(p.x, p.y, p.width, p.height, {
@@ -141,20 +89,19 @@ function renderFooterBox(
   p: ParticipantGeo,
   lifelineEndY: number,
   footerShapeY: number,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
   // Rectangular participants: box starts at lifelineEndY, label inside.
   // Non-rectangular (actor, database): label above the shape at lifelineEndY,
   // shape starts at footerShapeY (= lifelineEndY + label-zone height).
+  const labelY = lifelineEndY + theme.fontSize / 2 + 4 * theme.scaleK;
   if (p.type === 'actor') {
-    const labelY = lifelineEndY + theme.fontSize / 2 + 4;
     return (
       renderLabel(p.centerX, labelY, p.display, theme) +
       renderActorShape(p.centerX, footerShapeY, p.height, theme)
     );
   }
   if (p.type === 'database') {
-    const labelY = lifelineEndY + theme.fontSize / 2 + 4;
     return (
       renderLabel(p.centerX, labelY, p.display, theme) +
       renderDatabaseShape(p.x, footerShapeY, p.width, p.height, theme)
@@ -170,12 +117,12 @@ function renderFooterBox(
 function renderLifeline(
   p: ParticipantGeo,
   lifelineEndY: number,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
   const startY = p.y + p.height;
   return line(p.centerX, startY, p.centerX, lifelineEndY, {
     stroke: theme.colors.lifeline,
-    strokeDasharray: '5,5',
+    strokeDasharray: scaledDashPattern(theme.scaleK),
   });
 }
 
@@ -205,26 +152,29 @@ const SELF_LOOP_HEIGHT = 20;
 function renderSelfMessage(
   msg: MessageGeo,
   configuration: ArrowConfiguration,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
+  const k = theme.scaleK;
   const x1 = msg.fromX;
   const y1 = msg.y;
+  const loopWidth = SELF_LOOP_WIDTH * k;
+  const loopHeight = SELF_LOOP_HEIGHT * k;
   const d =
     `M ${x1} ${y1} ` +
-    `H ${x1 + SELF_LOOP_WIDTH} ` +
-    `V ${y1 + SELF_LOOP_HEIGHT} ` +
+    `H ${x1 + loopWidth} ` +
+    `V ${y1 + loopHeight} ` +
     `H ${x1}`;
   const loop = path(d, {
     stroke: theme.colors.arrow,
-    strokeWidth: 1,
-    ...(configuration.dashed ? { strokeDasharray: '5,5' } : {}),
+    strokeWidth: 1 * k,
+    ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
   });
-  return loop + renderSelfMessageHead(msg, configuration, theme, y1 + SELF_LOOP_HEIGHT);
+  return loop + renderSelfMessageHead(msg, configuration, theme, y1 + loopHeight);
 }
 
 /** The message's label. Upstream draws it last, after the arrow
  *  (`ComponentRoseArrow.java:175`, `ComponentRoseSelfArrow.java:88`). */
-function renderMessageLabel(msg: MessageGeo, theme: Theme): string {
+function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
   const label =
     msg.sequenceLabel !== undefined
       ? `${msg.sequenceLabel}: ${msg.label}`
@@ -232,9 +182,9 @@ function renderMessageLabel(msg: MessageGeo, theme: Theme): string {
         ? `${msg.sequenceNumber}: ${msg.label}`
         : msg.label;
   const midX = msg.arrowDirection === 'self'
-    ? msg.fromX + 20
+    ? msg.fromX + 20 * theme.scaleK
     : (msg.fromX + msg.toX) / 2;
-  return text(midX, msg.y - 5, label, {
+  return text(midX, msg.y - 5 * theme.scaleK, label, {
     fontFamily: theme.fontFamily,
     fontSize: theme.fontSize,
     fill: theme.colors.text,
@@ -248,7 +198,7 @@ function renderMessageLabel(msg: MessageGeo, theme: Theme): string {
  * Shell` injects no marker defs, and the jar's own sequence corpus contains
  * none either.
  */
-function renderMessage(msg: MessageGeo, theme: Theme): string {
+function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
   const configuration = applyMessageDecorations(arrowConfigurationFor(msg.style), msg);
   const arrow =
     msg.arrowDirection === 'self'
@@ -261,10 +211,11 @@ function renderMessage(msg: MessageGeo, theme: Theme): string {
 // Activation helpers
 // ---------------------------------------------------------------------------
 
-function renderActivation(act: ActivationGeo, theme: Theme): string {
-  const x = act.lifelineX - ACTIVATION_HALF_WIDTH;
+function renderActivation(act: ActivationGeo, theme: ScaledTheme): string {
+  const half = ACTIVATION_HALF_WIDTH * theme.scaleK;
+  const x = act.lifelineX - half;
   const fill = act.color ?? theme.colors.activation;
-  return rect(x, act.y, ACTIVATION_HALF_WIDTH * 2, act.height, {
+  return rect(x, act.y, half * 2, act.height, {
     fill,
     stroke: theme.colors.border,
   });
@@ -274,18 +225,19 @@ function renderActivation(act: ActivationGeo, theme: Theme): string {
 // Note helpers
 // ---------------------------------------------------------------------------
 
-function renderNote(note: NoteGeo, theme: Theme): string {
+function renderNote(note: NoteGeo, theme: ScaledTheme): string {
   const fill = note.color ?? theme.colors.noteBackground;
   const { x, y, width: w, height: h } = note;
+  const strokeWidth = 1.5 * theme.scaleK;
   // T13: `rnote`/`hnote` (`NoteEvent.shape`) draw as a plain rectangle,
   // never the folded-corner `note` shape -- see `ast.ts`'s `NoteEvent.shape`
   // doc comment for the hexagon-vs-rectangle scope cut.
   const noteShape =
     note.shape === 'rect'
-      ? rect(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth: 1.5 })
-      : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth: 1.5 });
+      ? rect(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth })
+      : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth });
   const lines = note.text.split('\n');
-  const lineHeight = theme.fontSize * 1.4;
+  const lineHeight = theme.fontSize * 1.4; // ratio of an already-scaled fontSize: self-scaling
   const textCenterX = x + w / 2;
   const textEls = lines
     .map((lineText, i) =>
@@ -304,16 +256,27 @@ function renderNote(note: NoteGeo, theme: Theme): string {
 // Frame helpers
 // ---------------------------------------------------------------------------
 
-function renderFrame(frame: FrameGeo, theme: Theme): string {
-  const border = rect(frame.x, frame.y, frame.width, frame.height, {
-    fill: 'none',
-    stroke: theme.colors.frame,
-    strokeDasharray: '5,5',
-  });
-  // Small tab at top-left for label
-  const tabWidth = Math.min(80, frame.width);
-  const tabHeight = 20;
-  const tab = rect(frame.x, frame.y, tabWidth, tabHeight, {
+/** The tab's own geometry -- factored out so {@link renderFrame} stays
+ *  under the 30-NLOC function cap. */
+interface FrameTabGeo {
+  readonly tabWidth: number;
+  readonly tabHeight: number;
+  readonly labelFontSize: number;
+}
+
+function computeFrameTabGeo(frame: FrameGeo, theme: ScaledTheme): FrameTabGeo {
+  const k = theme.scaleK;
+  return {
+    tabWidth: Math.min(80 * k, frame.width),
+    tabHeight: 20 * k,
+    labelFontSize: theme.fontSize - 2 * k,
+  };
+}
+
+/** The tab rectangle + its TYPE label + the first branch's `[condition]`. */
+function renderFrameTab(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): string {
+  const k = theme.scaleK;
+  const rectEl = rect(frame.x, frame.y, tab.tabWidth, tab.tabHeight, {
     fill: theme.colors.frame,
     stroke: theme.colors.frame,
   });
@@ -321,39 +284,49 @@ function renderFrame(frame: FrameGeo, theme: Theme): string {
   // beside it as a bracketed `[condition]` -- two separate runs, not one
   // `alt first case` string. Each subsequent `else` repeats that condition
   // form against a dashed separator (`GroupingTile`).
-  const typeEl = text(frame.x + 4, frame.y + tabHeight - 4, frame.frameType, {
+  const typeEl = text(frame.x + 4 * k, frame.y + tab.tabHeight - 4 * k, frame.frameType, {
     fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize - 2,
+    fontSize: tab.labelFontSize,
     fill: theme.colors.background,
   });
   const condition = frame.label.trim();
   const conditionEl =
     condition === ''
       ? ''
-      : text(frame.x + tabWidth + 6, frame.y + tabHeight - 4, `[${condition}]`, {
+      : text(frame.x + tab.tabWidth + 6 * k, frame.y + tab.tabHeight - 4 * k, `[${condition}]`, {
           fontFamily: theme.fontFamily,
-          fontSize: theme.fontSize - 2,
+          fontSize: tab.labelFontSize,
           fill: theme.colors.text,
         });
+  return rectEl + typeEl + conditionEl;
+}
 
-  return border + tab + typeEl + conditionEl + renderBranchSeparators(frame, theme);
+function renderFrame(frame: FrameGeo, theme: ScaledTheme): string {
+  const border = rect(frame.x, frame.y, frame.width, frame.height, {
+    fill: 'none',
+    stroke: theme.colors.frame,
+    strokeDasharray: scaledDashPattern(theme.scaleK),
+  });
+  const tab = computeFrameTabGeo(frame, theme);
+  return border + renderFrameTab(frame, tab, theme) + renderBranchSeparators(frame, tab, theme);
 }
 
 /** The dashed rule + bracketed condition each `else` branch opens with. */
-function renderBranchSeparators(frame: FrameGeo, theme: Theme): string {
+function renderBranchSeparators(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): string {
+  const k = theme.scaleK;
   return frame.branchSeparators
     .map((sep) => {
       const rule = line(frame.x, sep.y, frame.x + frame.width, sep.y, {
         stroke: theme.colors.frame,
-        strokeDasharray: '5,5',
+        strokeDasharray: scaledDashPattern(k),
       });
       const condition = sep.label.trim();
       if (condition === '') return rule;
       return (
         rule +
-        text(frame.x + 6, sep.y + theme.fontSize, `[${condition}]`, {
+        text(frame.x + 6 * k, sep.y + theme.fontSize, `[${condition}]`, {
           fontFamily: theme.fontFamily,
-          fontSize: theme.fontSize - 2,
+          fontSize: tab.labelFontSize,
           fill: theme.colors.text,
         })
       );
@@ -365,13 +338,14 @@ function renderBranchSeparators(frame: FrameGeo, theme: Theme): string {
 // Divider helpers
 // ---------------------------------------------------------------------------
 
-function renderDivider(divider: DividerGeo, theme: Theme): string {
+function renderDivider(divider: DividerGeo, theme: ScaledTheme): string {
+  const k = theme.scaleK;
   const lineEl = line(0, divider.y, divider.totalWidth, divider.y, {
     stroke: theme.colors.divider,
-    strokeWidth: 1,
+    strokeWidth: 1 * k,
   });
   const midX = divider.totalWidth / 2;
-  const textEl = text(midX, divider.y - 4, divider.text, {
+  const textEl = text(midX, divider.y - 4 * k, divider.text, {
     fontFamily: theme.fontFamily,
     fontSize: theme.fontSize,
     fill: theme.colors.text,
@@ -384,7 +358,7 @@ function renderDivider(divider: DividerGeo, theme: Theme): string {
 // Event dispatcher
 // ---------------------------------------------------------------------------
 
-function renderEvent(event: EventGeo, theme: Theme): string {
+function renderEvent(event: EventGeo, theme: ScaledTheme): string {
   switch (event.kind) {
     case 'message':
       return renderMessage(event, theme);
@@ -410,20 +384,23 @@ const BOX_DEFAULT_COLOR = '#EEEEEE';
 const BOX_LABEL_FONT_SIZE = 11;
 const BOX_LABEL_PADDING = 4;
 
-function renderBoxBackground(box: BoxGeo, theme: Theme): string {
+function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
+  const k = theme.scaleK;
   const fill = box.color !== '' ? box.color : BOX_DEFAULT_COLOR;
   const boxRect = rect(box.x, box.y, box.width, box.height, {
     fill,
     stroke: theme.colors.border,
   });
   if (box.label === '') return boxRect;
+  const padding = BOX_LABEL_PADDING * k;
+  const labelFontSize = BOX_LABEL_FONT_SIZE * k;
   const labelEl = text(
-    box.x + BOX_LABEL_PADDING,
-    box.y + BOX_LABEL_FONT_SIZE + BOX_LABEL_PADDING,
+    box.x + padding,
+    box.y + labelFontSize + padding,
     box.label,
     {
       fontFamily: theme.fontFamily,
-      fontSize: BOX_LABEL_FONT_SIZE,
+      fontSize: labelFontSize,
       fill: theme.colors.text,
     },
   );
@@ -443,48 +420,42 @@ const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
  * Render a sequence diagram geometry into an SVG string.
  */
 export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragment {
+  // T13: `resolveScaleFactor` needs the UNSCALED document dims -- `geo`
+  // itself, before `scaleSequenceGeometry` runs below.
+  const k = resolveScaleFactor(geo.scale, geo.totalWidth, geo.totalHeight);
+  const scaledGeo = scaleSequenceGeometry(geo, k);
+  const scaledTheme = scaleSequenceTheme(theme, k);
   const children: string[] = [];
 
   // 0. Box backgrounds (lowest z-order — behind lifelines and participants)
-  for (const box of geo.boxes) {
-    children.push(renderBoxBackground(box, theme));
+  for (const box of scaledGeo.boxes) {
+    children.push(renderBoxBackground(box, scaledTheme));
   }
 
   // 1. Lifelines (behind everything else)
-  for (const p of geo.participants) {
-    children.push(renderLifeline(p, geo.lifelineEndY, theme));
+  for (const p of scaledGeo.participants) {
+    children.push(renderLifeline(p, scaledGeo.lifelineEndY, scaledTheme));
   }
 
   // 2. Participant header boxes
-  for (const p of geo.participants) {
-    children.push(renderParticipantBox(p, theme));
+  for (const p of scaledGeo.participants) {
+    children.push(renderParticipantBox(p, scaledTheme));
   }
 
   // 3. Events (messages, activations, notes, frames, dividers)
-  for (const event of geo.events) {
-    children.push(renderEvent(event, theme));
+  for (const event of scaledGeo.events) {
+    children.push(renderEvent(event, scaledTheme));
   }
 
   // 4. Footer boxes (always emitted — see design note in task spec)
-  for (const p of geo.participants) {
-    children.push(renderFooterBox(p, geo.lifelineEndY, geo.footerShapeY, theme));
+  for (const p of scaledGeo.participants) {
+    children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledGeo.footerShapeY, scaledTheme));
   }
 
-  // T13: `scale ...` (see `ast.ts`'s `SequenceDiagramAST.scale` doc comment
-  // for why this engine applies the factor itself, as an SVG transform,
-  // rather than through `src/core/`'s per-primitive multiplier).
-  // `resolveScaleFactor` needs the UNSCALED document dims -- `geo.totalWidth`/
-  // `totalHeight` ARE those dims; nothing above this point has scaled them.
-  const scaleFactor = resolveScaleFactor(geo.scale, geo.totalWidth, geo.totalHeight);
-  const body =
-    scaleFactor === 1
-      ? children.join('')
-      : `<g transform="scale(${fmt(scaleFactor)})">${children.join('')}</g>`;
-
   return {
-    body,
-    width: geo.totalWidth * scaleFactor,
-    height: geo.totalHeight * scaleFactor,
+    body: children.join(''),
+    width: scaledGeo.totalWidth,
+    height: scaledGeo.totalHeight,
     background: theme.colors.background,
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.
