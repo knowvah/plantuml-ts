@@ -3,11 +3,11 @@ import { renderBoard } from '../../../src/diagrams/board/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
 import { boardPlugin } from '../../../src/diagrams/board/index.js';
 import { layoutBoard } from '../../../src/diagrams/board/layout.js';
-import { parseBoard } from '../../../src/diagrams/board/parser.js';
 import { resolveTheme } from '../../../src/core/theme.js';
 import type { BoardGeometry, ActivityGeometry, CardGeometry } from '../../../src/diagrams/board/ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { expectNoErrorDiagram } from '../../helpers/error-diagram.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 
 const theme = resolveTheme('default');
 
@@ -97,7 +97,7 @@ describe('renderBoard', () => {
       lines: ['@startboard', 'World', '+Card', '@endboard'],
       type: 'board',
     };
-    const ast = parseBoard(source);
+    const ast = parseAst(boardPlugin, source);
     const geo = layoutBoard(ast);
     const svg = assembleSvg(renderBoard(geo, theme));
     expect(svg).toMatch(/^<svg/);
