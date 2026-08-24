@@ -1,0 +1,131 @@
+{
+  "fallbackModel": [
+    "opus",
+    "sonnet"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(awk *:*)",
+      "Bash(cat:*)",
+      "Bash(chmod *:*)",
+      "Bash(cmp *:*)",
+      "Bash(command -v:*)",
+      "Bash(cp *:*)",
+      "Bash(curl -s https://raw.githubusercontent.com/**:*)",
+      "Bash(diff *:*)",
+      "Bash(find *:*)",
+      "Bash(gh *:*)",
+      "Bash(git *:*)",
+      "Bash(grep *:*)",
+      "Bash(head *:*)",
+      "Bash(jq *:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir *:*)",
+      "Bash(mv *:*)",
+      "Bash(node *:*)",
+      "Bash(npm *:*)",
+      "Bash(npx *:*)",
+      "Bash(openssl *:*)",
+      "Bash(plans/state-declared-size-fix/scripts/manifest-diff.py *:*)",
+      "Bash(pnpm *:*)",
+      "Bash(python3 *:*)",
+      "Bash(rg:*)",
+      "Bash(scripts/oracle-render.sh *:*)",
+      "Bash(sed *:*)",
+      "Bash(shasum *:*)",
+      "Bash(shellcheck:*)",
+      "Bash(sort *:*)",
+      "Bash(tail *:*)",
+      "Bash(uv run:*)",
+      "Bash(wc *:*)",
+      "Bash(~/.claude/hooks/quality-gate.sh:*)",
+      "Edit(**)",
+      "Glob(**)",
+      "Grep(**)",
+      "Read(**)",
+      "Write(**)",
+      "mcp__serena__find_file",
+      "mcp__serena__find_referencing_symbols",
+      "mcp__serena__find_symbol",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__insert_after_symbol",
+      "mcp__serena__insert_before_symbol",
+      "mcp__serena__list_dir",
+      "mcp__serena__rename_symbol",
+      "mcp__serena__replace_symbol_body",
+      "mcp__serena__safe_delete_symbol",
+      "mcp__serena__search_for_pattern"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-start.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/record-turn-start.sh",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/project-init.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat ~/.claude/post-compact-context.md"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '-- COMPACTING: verify open TODOs are committed --'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/check-complexity.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify-on-stop.sh",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}
