@@ -56,16 +56,22 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
 
   // 11b. Quoted display with wrapped alias: `"another use case" as (uc4)` —
   //      the alias notation picks the symbol (paren→usecase, colon→actor,
-  //      bracket→component), mirroring getDummy's codeChar dispatch.
+  //      bracket→component, `()`→interface), mirroring getDummy's codeChar
+  //      dispatch. `()bareword` / `()"quoted"` is CommandCreateElementMultilines
+  //      TYPE0's CODE2 alternative (`\(\)[%s]*[%pLN_.]+` /
+  //      `\(\)[%s]*[%g][^%g]+[%g]`, CommandCreateElementFull.java:126) — tried
+  //      BEFORE the bare-paren alternative below since `()...` also starts
+  //      with `(`.
   {
     pattern: new RegExp(
-      '^("[^"]+"\\s+as\\s+(\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]))' +
+      '^("[^"]+"\\s+as\\s+(\\(\\)\\s*(?:"[^"]+"|\\S+)|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]))' +
         SHORTHAND_TRAILER + '$',
     ),
     execute(state, match) {
       const alias = match[2]!;
-      const symbol =
-        alias.startsWith('(') ? 'usecase' : alias.startsWith(':') ? 'actor' : 'component';
+      const symbol = alias.startsWith('()')
+        ? 'interface'
+        : alias.startsWith('(') ? 'usecase' : alias.startsWith(':') ? 'actor' : 'component';
       shorthandNode(state, match[1]!.trim(), symbol, match[3]);
     },
   },

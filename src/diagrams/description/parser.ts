@@ -23,6 +23,7 @@ import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
 import {
   ELEMENT_MULTILINE_END0_RE,
+  ELEMENT_MULTILINE_END1_RE,
   ELEMENT_MULTILINE_OPEN_RE,
   ELEMENT_MULTILINE_OPEN_TYPE0_RE,
   extractColor,
@@ -30,6 +31,7 @@ import {
   stripFullWrap,
   makeNode,
   parseNameSection,
+  trySkinparamBlock,
 } from './parse-helpers.js';
 import { classifyNoteOpen, isNoteTerminator } from './note-grammar.js';
 import {
@@ -165,7 +167,7 @@ function continueElementBlock(
   const end =
     pending.terminator === 'quote'
       ? ELEMENT_MULTILINE_END0_RE.exec(trimmed)
-      : /^(.*)\]$/.exec(trimmed);
+      : ELEMENT_MULTILINE_END1_RE.exec(trimmed);
   if (end === null) {
     pushElementBody(pending, raw);
     return 1;
@@ -417,7 +419,8 @@ function dispatchCommand(
  * `tryArchimate`'s doc), then title/caption/legend/…/sprite and the
  * ordinary command table (sprite defs are tried LAST, inside
  * `dispatchCommand`, so a sprite-shaped line inside a note body is never
- * stolen from note accumulation -- see `dispatchCommand`'s doc).
+ * stolen from note accumulation -- see `dispatchCommand`'s doc). `skinparam
+ * { ... }` (T13, `parse-helpers.ts#trySkinparamBlockConsume`) runs next.
  */
 function processLine(
   state: ParseState,
@@ -430,6 +433,9 @@ function processLine(
 
   const elementResult = tryElementBlock(state, lines, i, line);
   if (elementResult !== null) return elementResult;
+
+  const skinResult = trySkinparamBlock(lines, i, line);
+  if (skinResult !== null) return skinResult;
 
   const noteResult = tryNoteHandling(state, line);
   if (noteResult !== null) return noteResult;

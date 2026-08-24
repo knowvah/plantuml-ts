@@ -2288,23 +2288,23 @@ describe('parseDescription — multi-line [ … ] element bodies', () => {
     expect(ast.nodes[0]!.symbol).toBe('component');
   });
 
-  it('a body line that itself contains a bracket refuses, exposing a pre-existing closer-regex bug (T7)', () => {
-    // `continueElementBlock`'s TYPE1 closer test (parser.ts) is
-    // `/^(.*)\]$/` -- upstream's own `END1` is `^([^\[\]]*)\]$`
-    // (`CommandCreateElementMultilines.java:80-81`, already cited by
-    // `ParseState.pendingElement`'s own doc comment in parse-state.ts).
-    // `[^\[\]]*` cannot consume a `[`, so upstream's closer does NOT match a
-    // body line that itself contains a bracket -- `[bracket]` stays body
-    // text and the block closes on the standalone `]` two lines later,
-    // matching this test's ORIGINAL expectation (`['r', 'A']`). Our port's
-    // unrestricted `.*` DOES match `[bracket]`, closing the block one line
-    // early; the orphaned standalone `]` then matches no command and
-    // (T7) correctly refuses. Pre-existing bug, not introduced or fixed
-    // here -- CLAUDE.md forbids narrowing/changing an existing recognition
-    // branch inside this additive-only task; reported for a follow-up.
-    const refusal = parseRefusal('rectangle r [\ncomponent fake\n[bracket]\n]\nactor A');
-    expect(refusal.kind).toBe('syntax');
-    expect(refusal.line).toBe(3);
+  it('a body line that itself contains a bracket does NOT close the block early (T13)', () => {
+    // `continueElementBlock`'s TYPE1 closer regex (parser.ts) now mirrors
+    // upstream's own `END1 = ^([^\[\]]*)\]$` exactly
+    // (`ELEMENT_MULTILINE_END1_RE`, parse-helpers.ts;
+    // `CommandCreateElementMultilines.java:80-84`). `[^\[\]]*` cannot
+    // consume a `[`, so a body line that itself contains a bracket --
+    // `[bracket]` -- does NOT satisfy the closer; it stays body text and the
+    // block closes on the standalone `]` two lines later. Previously the
+    // port's unrestricted `.*` matched `[bracket]` too, closing the block
+    // one line early and orphaning the standalone `]` (a syntax refusal,
+    // T7) -- fixed here.
+    const ast = parse('rectangle r [\ncomponent fake\n[bracket]\n]\nactor A');
+    expect(ast.nodes.map((n) => n.id)).toEqual(['r', 'A']);
+    // `stripFullWrap` strips the body line's OWN full `[...]` wrap (the same
+    // treatment every other body line already gets, `pushElementBody`), so
+    // the display carries `bracket`, not the literal `[bracket]`.
+    expect(ast.nodes[0]!.display).toBe('component fake\nbracket');
   });
 
   it('single-line bracket body closes on the same line', () => {

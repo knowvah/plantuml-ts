@@ -130,7 +130,13 @@ const RE_SQ_AS_ALIAS = /^'([^']+)'\s+as\s+(\S+)$/;
 const RE_ID_AS_DQ   = /^(\S+)\s+as\s+("[^"]+")$/;
 const RE_ID_AS_SQ   = /^(\S+)\s+as\s+'([^']+)'$/;
 const RE_PAREN_ALIAS = /^\(([^)]+)\)\s+as\s+(\S+|\([^)]+\)|:[^:]+:)$/;
-const RE_DQ_AS_WRAPPED = /^("[^"]+")\s*as\s+(\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
+// `()bareword` / `()"quoted"` (interface shorthand -- CommandCreateElementFull
+// CODE_CORE's `\(\)[%s]*[%pLN_.]+` / `\(\)[%s]*[%g][^%g]+[%g]` alternatives,
+// java:126) is tried BEFORE the bare-paren alternative since it also starts
+// with `(`; `cleanId` (parseAliasForms's m5b branch) already strips the `()`
+// prefix and any quotes.
+const RE_DQ_AS_WRAPPED =
+  /^("[^"]+")\s*as\s+(\(\)\s*(?:"[^"]+"|\S+)|\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
 // CODE as :wrapped: — bare code, colon/paren/bracket-wrapped display
 // (`Admin as :Main Admin:`). Display keeps its notation stripped by cleanId.
 const RE_ID_AS_WRAPPED = /^(\S+)\s+as\s+(\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
@@ -426,3 +432,45 @@ export const ELEMENT_MULTILINE_OPEN_TYPE0_RE = new RegExp(
  *  and group 1 is that line's pre-quote prefix.
  *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:80-81 */
 export const ELEMENT_MULTILINE_END0_RE = new RegExp(`^(.*)[${QUOTE_CHARS}]$`, 'u');
+
+/** TYPE1's `END1 = ^([^\[\]]*)\]$`, applied to the `Trim.BOTH`-trimmed last
+ *  line: the block closes on the first line ENDING with `]` whose prefix
+ *  contains NO `[` or `]` — a body line that itself contains a bracket (e.g.
+ *  a nested `[bracket]`) does not close the block early, unlike a naive
+ *  `^(.*)\]$`.
+ *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:80-84 */
+export const ELEMENT_MULTILINE_END1_RE = /^([^[\]]*)\]$/;
+
+// ---------------------------------------------------------------------------
+// skinparam block: skinparam [NAME] { ... } (CommandSkinParamMultilines)
+// ---------------------------------------------------------------------------
+
+/**
+ * `skinparam [NAME] { ... }` (CommandSkinParamMultilines.java, registered on
+ * every factory via `CommonCommands.addCommonCommands1` ->
+ * `addCommonCommands2`, `:66-68`). T13 (dispatch-by-parse-attempt):
+ * `skinparam <<verb>> { roundCorner 25 }`'s BODY line newly refused once
+ * unrecognised lines stopped being silently dropped -- `roundCorner 25`
+ * matches no other command, so the whole block must be consumed as a unit
+ * rather than dispatched line-by-line. Every skinparam setting is already a
+ * no-op in this port (`command-table-directives.ts` rule 3, the blanket
+ * single-line `skinparam` ignore); the block form gets the identical
+ * disposition -- the body is discarded UNREAD, never dispatched through
+ * COMMANDS.
+ * @see ~/git/plantuml/.../command/CommandSkinParamMultilines.java:50
+ *
+ * Mirrors `tryElementBlockType0`'s EOF-lookahead contract (parser.ts): when
+ * no closing `}` exists in the rest of the document, this phase declines
+ * (returns `null`) so the opener line falls through to the generic
+ * single-line `skinparam` ignore instead of swallowing the remainder.
+ * Returns the number of lines consumed (opener through closer, inclusive).
+ */
+const SKINPARAM_BLOCK_OPEN_RE = /^skinparam\s*(?:\s+[\w.]*(?:<<.*>>)?[\w.]*)?\s*\{$/i;
+
+export function trySkinparamBlock(lines: readonly string[], i: number, line: string): number | null {
+  if (!SKINPARAM_BLOCK_OPEN_RE.test(line)) return null;
+  for (let j = i + 1; j < lines.length; j++) {
+    if (lines[j]!.trim() === '}') return j - i + 1;
+  }
+  return null;
+}
