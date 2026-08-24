@@ -14,9 +14,27 @@
 import type { SequenceDiagramAST } from './ast.js';
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
-import { makeDefaultAST, type ParseState } from './sequence-parse-helpers.js';
+import {
+  applyHideUnlinked,
+  emit,
+  makeDefaultAST,
+  type ParseState,
+} from './sequence-parse-helpers.js';
 import { COMMANDS } from './sequence-commands.js';
+import { COMMANDS_2 } from './sequence-commands-2.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
+
+/**
+ * `COMMANDS` (the original spike table plus T4/T13's in-place widenings)
+ * tried in full before `COMMANDS_2` (T13's net-new commands) — mirrors
+ * `PSystemCommandFactory#getCandidate` (`:225-246`), which returns the
+ * first matching `Command` out of ONE registration-ordered list; the split
+ * across two arrays is a file-size accommodation (`CLAUDE.md`'s 500-line
+ * hook), not a second dispatch tier, so every T13 rule was checked against
+ * `COMMANDS` for pattern overlap before being added here (see
+ * `sequence-commands-2.ts`'s module doc).
+ */
+const ALL_COMMANDS: readonly (typeof COMMANDS)[number][] = [...COMMANDS, ...COMMANDS_2];
 
 // ---------------------------------------------------------------------------
 // Line-dispatch helpers
@@ -35,8 +53,8 @@ function handlePendingNote(state: ParseState, line: string): boolean {
   // same way ordinary commands are, but only close the note if this really
   // is the "end note" command — any other pattern match here is ignored and
   // the line still accumulates into the note text below.
-  const endNoteCmd = COMMANDS.find((c) => c.pattern.test(line));
-  if (endNoteCmd !== undefined && /^end\s+note\s*$/i.test(line)) {
+  const endNoteCmd = ALL_COMMANDS.find((c) => c.pattern.test(line));
+  if (endNoteCmd !== undefined && /^end\s*(?:note|hnote|rnote)\s*$/i.test(line)) {
     const m = endNoteCmd.pattern.exec(line)!;
     endNoteCmd.execute(state, m);
     return true;
@@ -47,6 +65,26 @@ function handlePendingNote(state: ParseState, line: string): boolean {
   } else {
     state.pendingNote.text += '\n' + line;
   }
+  return true;
+}
+
+/**
+ * T13: the `ref over ... / end ref` multi-line body — same shape as
+ * {@link handlePendingNote}, kept separate because a `ref`'s accumulated
+ * text lands on `FrameEvent.label`, not a `NoteEvent.text`.
+ * @see command/sequencediagram/command/CommandReferenceMultilinesOverSeveral.java:79-80
+ */
+function handlePendingRef(state: ParseState, line: string): boolean {
+  if (state.pendingRef === null) return false;
+
+  if (/^end\s*(?:ref)?\s*$/i.test(line)) {
+    emit(state, state.pendingRef);
+    state.pendingRef = null;
+    return true;
+  }
+
+  state.pendingRef.label = state.pendingRef.label === '' ? line : `${state.pendingRef.label}\n${line}`;
+  state.pendingRef.branchLabels[0] = state.pendingRef.label;
   return true;
 }
 
@@ -91,7 +129,7 @@ function dispatchAnnotationOrSprite(
  * on the first matching `Command` or `null` when none of `cmds` matches.
  */
 function dispatchCommand(state: ParseState, line: string): boolean {
-  for (const cmd of COMMANDS) {
+  for (const cmd of ALL_COMMANDS) {
     const match = cmd.pattern.exec(line);
     if (match !== null) {
       cmd.execute(state, match);
@@ -132,6 +170,7 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
     // annotation matcher, so a `title`/`legend`-shaped line inside
     // `note ... end note` stays note text (decisions.md D3).
     if (handlePendingNote(state, line)) continue;
+    if (handlePendingRef(state, line)) continue;
 
     const consumed = dispatchAnnotationOrSprite(state, trimmedLines, i);
     if (consumed !== null) {
@@ -189,6 +228,7 @@ export function parseSequence(lines: readonly string[]): SequenceDiagramAST | Pa
     frameStack: [],
     participantIndex: new Map(),
     pendingNote: null,
+    pendingRef: null,
     lastMessageFrom: null,
     lastMessageTo: null,
     currentBox: null,
@@ -202,5 +242,6 @@ export function parseSequence(lines: readonly string[]): SequenceDiagramAST | Pa
     return refuse('incomplete', lines.length, lines.length, 'Sequence diagram has no participants');
   }
 
+  applyHideUnlinked(state.ast);
   return state.ast;
 }

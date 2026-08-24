@@ -36,7 +36,7 @@ function src(lines: string[]): UmlSource {
 
 /** The refusal arm, for the forms upstream has no command for. */
 function refusalOf(lines: readonly string[]) {
-  return parseRefusalOf(parseClassRaw(src(lines)));
+  return parseRefusalOf(parseClassRaw(src([...lines])));
 }
 
 describe('parseClass (object diagram) — bare object declaration', () => {

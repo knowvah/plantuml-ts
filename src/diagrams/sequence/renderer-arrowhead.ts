@@ -201,6 +201,41 @@ function renderArrowHead(
 // ---------------------------------------------------------------------------
 
 /**
+ * T13 (mission dispatch-by-parse-attempt): overlay the `o`/`x` decorations
+ * `decoratedArrowCommand` (`sequence-commands-2.ts`) parsed onto `msg` —
+ * `dressing1`/`decoration1` is the TAIL (source) end, `dressing2`/
+ * `decoration2` the HEAD (destination) end, matching this module's own
+ * "dressing1 is the tail side ... dressing2 is the head side" convention
+ * (module doc comment above). Applied BEFORE the `fromX > toX` reverse in
+ * {@link renderFlatMessageArrow}, so `headCircle`/`headCross` always mean
+ * "at the participant `msg.to` names", independent of which lifeline ends
+ * up left of the other on the page.
+ * @see sequencediagram/command/CommandArrow.java:367-371,373-387
+ */
+export function applyMessageDecorations(
+  configuration: ArrowConfiguration,
+  msg: MessageGeo,
+): ArrowConfiguration {
+  if (
+    msg.headCircle !== true &&
+    msg.tailCircle !== true &&
+    msg.headCross !== true &&
+    msg.tailCross !== true
+  )
+    return configuration;
+
+  return {
+    ...configuration,
+    decoration1: msg.tailCircle === true ? 'CIRCLE' : configuration.decoration1,
+    decoration2: msg.headCircle === true ? 'CIRCLE' : configuration.decoration2,
+    dressing1:
+      msg.tailCross === true ? { ...configuration.dressing1, head: 'CROSSX' } : configuration.dressing1,
+    dressing2:
+      msg.headCross === true ? { ...configuration.dressing2, head: 'CROSSX' } : configuration.dressing2,
+  };
+}
+
+/**
  * `ArrowConfiguration#reverse` — both dressings and both decorations swap.
  * `dashed` (upstream's `body`) is direction-independent and does not.
  * @see skin/ArrowConfiguration.java:110-113

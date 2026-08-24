@@ -87,6 +87,7 @@ function assembleGeometry(
     lifelineEndY,
     footerShapeY,
     boxes: boxGeos,
+    ...(ast.scale !== undefined ? { scale: ast.scale } : {}),
   };
 }
 

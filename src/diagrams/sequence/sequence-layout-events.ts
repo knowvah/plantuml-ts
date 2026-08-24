@@ -123,6 +123,11 @@ function buildMessageGeo(
     ...(event.sequenceNumber !== undefined
       ? { sequenceNumber: event.sequenceNumber }
       : {}),
+    ...(event.sequenceLabel !== undefined ? { sequenceLabel: event.sequenceLabel } : {}),
+    ...(event.headCircle === true ? { headCircle: true } : {}),
+    ...(event.tailCircle === true ? { tailCircle: true } : {}),
+    ...(event.headCross === true ? { headCross: true } : {}),
+    ...(event.tailCross === true ? { tailCross: true } : {}),
   };
 }
 
@@ -418,6 +423,7 @@ function buildNoteGeo(
     height: noteHeight,
     text: event.text,
     ...(event.color !== undefined ? { color: event.color } : {}),
+    ...(event.shape !== undefined ? { shape: event.shape } : {}),
   };
 }
 

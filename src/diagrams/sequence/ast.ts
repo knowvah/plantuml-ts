@@ -4,6 +4,7 @@
 
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 // ---------------------------------------------------------------------------
 // AST Types
@@ -46,6 +47,24 @@ export interface MessageEvent {
   activates?: string; // participant id to auto-activate (++ shorthand)
   deactivates?: string; // participant id to auto-deactivate (-- shorthand)
   sequenceNumber?: number;
+  /** See `MessageGeo.sequenceLabel`'s doc comment — populated by
+   *  `applyAutonumber` from `SequenceDiagramAST.autonumber`'s `prefix`/
+   *  `format`. */
+  sequenceLabel?: string;
+  /**
+   * T13 (mission dispatch-by-parse-attempt): the `o`/`x` arrow decorations
+   * from `CommandArrow.java:99-116` (`ARROW_DRESSING1`/`ARROW_DRESSING2`),
+   * scoped to the two literal forms the corpus bucket actually carries
+   * (`->o`/`->x` at the head, `o->`/`x->` at the tail) rather than the full
+   * dressing grammar (multi-char `<<`/`\\`/`//` async heads, inclination,
+   * per-side `[style]` brackets — not ported; see T13's report). Fed into
+   * `arrowConfigurationFor`'s override at render time.
+   * @see sequencediagram/command/CommandArrow.java:229-235
+   */
+  headCircle?: boolean;
+  tailCircle?: boolean;
+  headCross?: boolean;
+  tailCross?: boolean;
 }
 
 export interface NoteEvent {
@@ -54,6 +73,14 @@ export interface NoteEvent {
   participants: string[];
   text: string;
   color?: string;
+  /**
+   * `rnote`/`hnote` vs. plain `note` (`FactorySequenceNoteCommand.java:81`,
+   * `NoteStyle.java`). This port draws both non-default shapes as a plain
+   * rectangle (no folded corner) — the RECTANGLE/HEXAGON distinction upstream
+   * makes between them is not carried further, a documented simplification
+   * (T13, dispatch-by-parse-attempt) rather than a full hexagon-path port.
+   */
+  shape?: 'rect';
 }
 
 export interface FrameEvent {
@@ -63,9 +90,13 @@ export interface FrameEvent {
     | 'alt'
     | 'opt'
     | 'par'
+    | 'par2'
     | 'break'
     | 'critical'
-    | 'group';
+    | 'group'
+    /** `ref over A, B : text` (`CommandReferenceOverSeveral.java`) — modelled
+     *  as a one-branch, label-only frame; see `sequence-commands-2.ts`. */
+    | 'ref';
   label: string;
   branches: SequenceEvent[][]; // alt has multiple; others have one
   /**
@@ -123,11 +154,43 @@ export interface BoxGroup {
 export interface SequenceDiagramAST {
   participants: Participant[];
   events: SequenceEvent[];
-  autonumber: { enabled: boolean; start: number; current: number };
+  /**
+   * `current`/`start` are `DottedNumber.incrementMinor`'s LAST segment only
+   * (`DottedNumber.java:75-79`); `prefix` carries every segment before it
+   * verbatim (e.g. `"1."` for a `1.1` start) so a dotted start renders as
+   * `1.1`, `1.2`, `1.3`, … without this port modelling the full
+   * multi-segment increment (`incrementIntermediate`, never called by the
+   * message-numbering path — `AutoNumber.java:75-79`). `format`, when set,
+   * is `CommandAutonumber.java`'s quoted FORMAT group, applied by
+   * {@link import('./sequence-parse-helpers.js').formatAutonumber} — only
+   * the `DecimalFormat` `0`-run (zero-pad) subset is honoured, not the full
+   * `java.text.DecimalFormat` pattern language.
+   * @see sequencediagram/command/CommandAutonumber.java:58-74
+   */
+  autonumber: {
+    enabled: boolean;
+    start: number;
+    current: number;
+    step: number;
+    prefix: string;
+    format?: string;
+  };
   options: {
     hideFootbox: boolean;
     messageAlign: 'left' | 'center' | 'right';
+    /** `hide unlinked` / `show unlinked` (`CommandHideUnlinked.java`) —
+     *  participants not referenced by any event are dropped post-parse
+     *  (`applyHideUnlinked`, `parser.ts`). */
+    hideUnlinked?: boolean;
   };
+  /** `scale ...` (`command/CommandScale*.java`, 6 forms via
+   *  `CommonCommands#addCommonScaleCommands`) — resolved to a factor and
+   *  applied as an SVG `<g transform="scale(...)">` wrap at render time
+   *  (`renderSequence`), since this engine's shared `assembleDocumentShell`
+   *  emission path (unlike `description`'s `SvgGraphicsCore`) has no
+   *  per-primitive scale multiplier to hook into `src/core/` for.
+   *  @see scale-command.ts */
+  scale?: ScaleSpec;
   /** Box groups declared with `box` / `end box`. */
   boxes: BoxGroup[];
   /**
@@ -174,7 +237,16 @@ export interface MessageGeo {
   label: string;
   style: MessageStyle;
   sequenceNumber?: number;
+  /** `AutoNumber#getNextMessageNumber`'s formatted text
+   *  (`DottedNumber#format`), when the source's `autonumber` carries a dotted
+   *  start or a quoted `FORMAT`; the renderer prefers this over the bare
+   *  `sequenceNumber` when present. */
+  sequenceLabel?: string;
   arrowDirection: 'right' | 'left' | 'self';
+  headCircle?: boolean;
+  tailCircle?: boolean;
+  headCross?: boolean;
+  tailCross?: boolean;
 }
 
 export interface NoteGeo {
@@ -185,6 +257,7 @@ export interface NoteGeo {
   height: number;
   text: string;
   color?: string;
+  shape?: 'rect';
 }
 
 export interface ActivationGeo {
@@ -255,4 +328,7 @@ export interface SequenceGeometry {
   footerShapeY: number;
   /** Background rectangles for box groups (rendered at z=0, behind lifelines). */
   boxes: BoxGeo[];
+  /** Passthrough of `SequenceDiagramAST.scale` — resolved to a factor and
+   *  applied at `renderSequence` (see that field's doc comment). */
+  scale?: ScaleSpec;
 }

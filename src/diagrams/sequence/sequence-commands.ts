@@ -25,6 +25,7 @@ import {
   applyAutonumber,
   emit,
   ensureParticipant,
+  parseDottedStart,
   parseParticipantDeclaration,
   type Command,
 } from './sequence-parse-helpers.js';
@@ -51,12 +52,19 @@ export const COMMANDS: readonly Command[] = [
     },
   },
 
-  // 3a. box — opens a named/colored participant group
+  // 3a. box — opens a named/colored participant group. T13 (mission
+  //     dispatch-by-parse-attempt): widened to accept an unquoted label
+  //     (`box BoxOfAlice #yellow/blue`) and a trailing `<<stereotype>>`
+  //     (`box "Tier 1" <<Client>>`) between the label and color, matching
+  //     `CommandBoxStart`'s NAME1/NAME2/STEREOTYPE/color order. The
+  //     stereotype is matched and discarded -- `BoxGroup` has no field for
+  //     it and nothing in this port's renderer draws a box's stereotype.
+  // @see sequencediagram/command/CommandBoxStart.java:65-77
   {
-    pattern: /^box(?:\s+"([^"]*)")?(?:\s+(#\w+))?\s*$/i,
+    pattern: /^box(?:\s+"([^"]*)"|\s+([^#<\s][^#<]*?))?(?:\s*<<[^>]*>>)?(?:\s+(#\S+))?\s*$/i,
     execute(state, match) {
-      const label = match[1] ?? '';
-      const color = match[2] ?? '';
+      const label = (match[1] ?? match[2] ?? '').trim();
+      const color = match[3] ?? '';
       const id = `box-${++state.boxCounter}`;
       const box: BoxGroup = { id, label, color, participantIds: [] };
       state.ast.boxes.push(box);
@@ -64,22 +72,35 @@ export const COMMANDS: readonly Command[] = [
     },
   },
 
-  // 3b. end box — closes the current participant group
+  // 3b. end box — closes the current participant group. `\s*` (not `\s+`)
+  //     between "end" and "box" mirrors `CommandBoxEnd`'s
+  //     `RegexLeaf.spaceZeroOrMore()`, so the unspaced `endbox` form matches
+  //     too (T13, mission dispatch-by-parse-attempt).
+  // @see sequencediagram/command/CommandBoxEnd.java:56-59
   {
-    pattern: /^end\s+box\s*$/i,
+    pattern: /^end\s*box\s*$/i,
     execute(state) {
       state.currentBox = null;
     },
   },
 
-  // 3. autonumber
+  // 3. autonumber. T13: widened for `autonumber START STEP "FORMAT"`, where
+  //    START may be a dotted number (`1.1`, `1-1:1`) and FORMAT a quoted
+  //    DecimalFormat pattern -- see `parseDottedStart`/`formatAutonumber`.
+  // @see sequencediagram/command/CommandAutonumber.java:58-74
   {
-    pattern: /^autonumber(?:\s+(\d+))?\s*$/i,
+    pattern: /^autonumber(?:\s+([\d][^\s"]*))?(?:\s+(\d+))?(?:\s+"([^"]+)")?\s*$/i,
     execute(state, match) {
-      const start = match[1] !== undefined ? parseInt(match[1], 10) : 1;
-      state.ast.autonumber.enabled = true;
-      state.ast.autonumber.start = start;
-      state.ast.autonumber.current = start;
+      const { prefix, value } = parseDottedStart(match[1] ?? '1');
+      const step = match[2] !== undefined ? parseInt(match[2], 10) : 1;
+      state.ast.autonumber = {
+        enabled: true,
+        start: value,
+        current: value,
+        step,
+        prefix,
+        ...(match[3] !== undefined ? { format: match[3] } : {}),
+      };
     },
   },
 
@@ -100,11 +121,17 @@ export const COMMANDS: readonly Command[] = [
     },
   },
 
-  // 5. activate
+  // 5. activate. T13 (mission dispatch-by-parse-attempt): the participant
+  //    token accepts a quoted, space-carrying name (`activate "actor 1"
+  //    #Olive`), and a SECOND trailing `#color` is matched and discarded --
+  //    `CommandActivate`'s regex (`command/CommandActivate.java`, not read
+  //    in full for this pass) is not the two-color source; the corpus
+  //    fixture pairs it with a `activate X #C1 #C2` line whose second color
+  //    this port's single-color `ActivationEvent.color` has no field for.
   {
-    pattern: /^activate\s+(\S+)(?:\s+(#\w+))?\s*$/i,
+    pattern: /^activate\s+("[^"]+"|\S+)(?:\s+(#\w+))?(?:\s+#\w+)*\s*$/i,
     execute(state, match) {
-      const participantId = match[1]!;
+      const participantId = match[1]!.replace(/^"(.*)"$/, '$1');
       const color = match[2];
       const ev: ActivationEvent = {
         kind: 'activate',
@@ -202,9 +229,13 @@ export const COMMANDS: readonly Command[] = [
     },
   },
 
-  // 9. end note — closes a multi-line note
+  // 9. end note — closes a multi-line note. T13: also accepts the
+  //    style-qualified closers `end hnote`/`end rnote` and the unspaced
+  //    `endnote`/`endhnote`/`endrnote` forms, mirroring
+  //    `Pattern2.cmpile("^end[%s]?(note|hnote|rnote)$")`.
+  // @see command/note/sequence/FactorySequenceNoteCommand.java:117
   {
-    pattern: /^end\s+note\s*$/i,
+    pattern: /^end\s*(?:note|hnote|rnote)\s*$/i,
     execute(state) {
       if (state.pendingNote !== null) {
         emit(state, state.pendingNote);
@@ -213,13 +244,20 @@ export const COMMANDS: readonly Command[] = [
     },
   },
 
-  // 10. Frame types (loop, alt, opt, par, break, critical, group)
+  // 10. Frame types (loop, alt, opt, par, par2, break, critical, group).
+  //     T13: added `par2` (`GroupingType.getType`, a same-visual-class START
+  //     alongside `par`) and an optional COLORS pair mirroring
+  //     `CommandGrouping`'s `#header[ #body]` -- captured so the label group
+  //     doesn't absorb them, but not modelled on `FrameGeo` (no colored-frame
+  //     rendering in this engine yet), same documented scope cut as `ref`'s
+  //     `REF` color group below.
+  // @see sequencediagram/command/CommandGrouping.java:64-73
   {
     pattern:
-      /^(loop|alt|opt|par|break|critical|group)(?:\s+(.+))?\s*$/i,
+      /^(loop|alt|opt|par2|par|break|critical|group)(#\w+)?(?:\s+(#\w+))?(?:\s+(.+))?\s*$/i,
     execute(state, match) {
       const frameType = match[1]!.toLowerCase() as FrameEvent['frameType'];
-      const label = match[2]?.trim() ?? '';
+      const label = match[4]?.trim() ?? '';
       const frame: FrameEvent = {
         kind: 'frame',
         frameType,
@@ -231,12 +269,15 @@ export const COMMANDS: readonly Command[] = [
     },
   },
 
-  // 11. else — adds a new branch to the current alt/par frame.
+  // 11. else — adds a new branch to the current alt/par frame. T13: `also`
+  //     is `else`'s documented alias (`GroupingType.getType`'s ELSE case
+  //     covers both).
   // The condition was captured but DISCARDED before SI-alt: `execute(state)`
   // ignored `match`, so `else other case` lost "other case" at parse time and
   // no downstream stage could draw it.
+  // @see sequencediagram/GroupingType.java:52-53
   {
-    pattern: /^else(?:\s+(.+))?\s*$/i,
+    pattern: /^(?:else|also)(?:\s+(.+))?\s*$/i,
     execute(state, match) {
       const top = state.frameStack[state.frameStack.length - 1];
       if (top !== undefined) {
@@ -246,9 +287,17 @@ export const COMMANDS: readonly Command[] = [
     },
   },
 
-  // 12. end — closes the current frame
+  // 12. end — closes the current frame. T13: widened from bare `end` to
+  //     accept a trailing keyword/comment (`end opt`, `end group`, `end
+  //     par2`, …) -- `CommandGrouping`'s single TYPE token covers `end`
+  //     exactly like every open keyword, with everything after it captured
+  //     as an optional COMMENT that upstream's own `executeArg` never reads
+  //     for the END case (`GroupingType.END` takes no branch that consults
+  //     `comment`). Trailing text is matched and discarded here for the same
+  //     reason.
+  // @see sequencediagram/command/CommandGrouping.java:64-73,129-159
   {
-    pattern: /^end\s*$/i,
+    pattern: /^end(?:\s+.+)?\s*$/i,
     execute(state) {
       const frame = state.frameStack.pop();
       if (frame !== undefined) {
@@ -323,19 +372,33 @@ export const COMMANDS: readonly Command[] = [
 
   // 17. Arrow messages — must come after frame keywords to avoid conflicts.
   //     Supports: ->, -->, ->>, -->>, ->?, ?->
-  //     Optionally: ++ (activates) or -- (deactivates) after target
+  //     Optionally: ++/--/**/!!/--++/++-- (activation spec) after target
   //     Optionally: : label
+  //     T13 (mission dispatch-by-parse-attempt): the two separate `++`/`--`
+  //     optional groups widened to one combined ACTIVATION group accepting
+  //     `**`/`!!`/the two 4-char combos too, mirroring
+  //     `CommandArrow.java:126` (`(\+\+|\*\*|!!|--|--\+\+|\+\+--)?`) --
+  //     `**`/`!!` (create/destroy life events) still only ACTIVATE/
+  //     DEACTIVATE here, since this port's `ActivationEvent.kind` has no
+  //     CREATE/DESTROY variant (`manageActivations`, `:446-467`).
   {
+    // T13: `(?:&\s*)?` accepts the leading PARALLEL marker (`& A -> B`,
+    // `CommandArrow.java:90`), discarded (see `sequence-commands-2.ts`'s
+    // `decoratedArrowCommand`, the sibling rule that also drops it).
+    // Quoted endpoints (`"Application thread" -> "DB connection"`) are
+    // unquoted at use.
     pattern:
-      /^(\S+)\s*(->|-->>|->>|-->|->\?|\?->)\s*(\S+?)(\s*\+\+)?(\s*--)?\s*(?::\s*(.*))?$/,
+      /^(?:&\s*)?("[^"]+"|\S+)\s*(->|-->>|->>|-->|->\?|\?->)\s*("[^"]+"|\S+?)(\s*(?:\+\+|--\+\+|\+\+--|--|\*\*|!!))?\s*(?::\s*(.*))?$/,
     execute(state, match) {
-      const from = match[1]!;
+      const from = match[1]!.replace(/^"(.*)"$/, '$1');
       const arrowToken = match[2]!;
-      const to = match[3]!;
-      const activatesFlag = match[4] !== undefined && match[4].trim() === '++';
+      const to = match[3]!.replace(/^"(.*)"$/, '$1');
+      const activation = match[4]?.trim() ?? '';
+      const activatesFlag =
+        activation === '++' || activation === '**' || activation === '--++' || activation === '++--';
       const deactivatesFlag =
-        match[5] !== undefined && match[5].trim() === '--';
-      const label = match[6]?.trim() ?? '';
+        activation === '--' || activation === '!!' || activation === '--++' || activation === '++--';
+      const label = match[5]?.trim() ?? '';
 
       const style = ARROW_STYLE_MAP[arrowToken] ?? 'sync';
 

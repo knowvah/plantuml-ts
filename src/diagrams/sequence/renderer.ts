@@ -28,9 +28,11 @@ import {
   circle,
 } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
+import { resolveScaleFactor } from '../../core/scale-command.js';
 import { arrowConfigurationFor } from './sequence-arrowhead.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import {
+  applyMessageDecorations,
   renderFlatMessageArrow,
   renderSelfMessageHead,
 } from './renderer-arrowhead.js';
@@ -224,9 +226,11 @@ function renderSelfMessage(
  *  (`ComponentRoseArrow.java:175`, `ComponentRoseSelfArrow.java:88`). */
 function renderMessageLabel(msg: MessageGeo, theme: Theme): string {
   const label =
-    msg.sequenceNumber !== undefined
-      ? `${msg.sequenceNumber}: ${msg.label}`
-      : msg.label;
+    msg.sequenceLabel !== undefined
+      ? `${msg.sequenceLabel}: ${msg.label}`
+      : msg.sequenceNumber !== undefined
+        ? `${msg.sequenceNumber}: ${msg.label}`
+        : msg.label;
   const midX = msg.arrowDirection === 'self'
     ? msg.fromX + 20
     : (msg.fromX + msg.toX) / 2;
@@ -245,7 +249,7 @@ function renderMessageLabel(msg: MessageGeo, theme: Theme): string {
  * none either.
  */
 function renderMessage(msg: MessageGeo, theme: Theme): string {
-  const configuration = arrowConfigurationFor(msg.style);
+  const configuration = applyMessageDecorations(arrowConfigurationFor(msg.style), msg);
   const arrow =
     msg.arrowDirection === 'self'
       ? renderSelfMessage(msg, configuration, theme)
@@ -273,11 +277,13 @@ function renderActivation(act: ActivationGeo, theme: Theme): string {
 function renderNote(note: NoteGeo, theme: Theme): string {
   const fill = note.color ?? theme.colors.noteBackground;
   const { x, y, width: w, height: h } = note;
-  const noteShape = noteBox(x, y, w, h, {
-    fill,
-    stroke: theme.colors.border,
-    strokeWidth: 1.5,
-  });
+  // T13: `rnote`/`hnote` (`NoteEvent.shape`) draw as a plain rectangle,
+  // never the folded-corner `note` shape -- see `ast.ts`'s `NoteEvent.shape`
+  // doc comment for the hexagon-vs-rectangle scope cut.
+  const noteShape =
+    note.shape === 'rect'
+      ? rect(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth: 1.5 })
+      : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth: 1.5 });
   const lines = note.text.split('\n');
   const lineHeight = theme.fontSize * 1.4;
   const textCenterX = x + w / 2;
@@ -464,10 +470,21 @@ export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragm
     children.push(renderFooterBox(p, geo.lifelineEndY, geo.footerShapeY, theme));
   }
 
+  // T13: `scale ...` (see `ast.ts`'s `SequenceDiagramAST.scale` doc comment
+  // for why this engine applies the factor itself, as an SVG transform,
+  // rather than through `src/core/`'s per-primitive multiplier).
+  // `resolveScaleFactor` needs the UNSCALED document dims -- `geo.totalWidth`/
+  // `totalHeight` ARE those dims; nothing above this point has scaled them.
+  const scaleFactor = resolveScaleFactor(geo.scale, geo.totalWidth, geo.totalHeight);
+  const body =
+    scaleFactor === 1
+      ? children.join('')
+      : `<g transform="scale(${fmt(scaleFactor)})">${children.join('')}</g>`;
+
   return {
-    body: children.join(''),
-    width: geo.totalWidth,
-    height: geo.totalHeight,
+    body,
+    width: geo.totalWidth * scaleFactor,
+    height: geo.totalHeight * scaleFactor,
     background: theme.colors.background,
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.

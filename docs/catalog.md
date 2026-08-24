@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1016 modules · 3542 exported names.
+1018 modules · 3557 exported names.
 
 ## `src/`
 
@@ -55,6 +55,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `include-resolver.ts` | `MapIncludeStore`, `IncludeNotFoundError`, `StdlibNotBundledError`, `EMPTY_INCLUDE_STORE`, `IncludeStore`, `IncludeFetcher`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `fetchInclude`, `prefetchIncludes`, `IncludeWarmupOptions`, `prepareIncludeStore` | The ASYNC half of the include seam. |
 | `internal-emoji-store.ts` | `INTERNAL_EMOJI_ASSET_PREFIX`, `internalEmojiAssetKey`, `InternalEmojiStore`, `EmojiArtworkResolver`, `emojiArtworkResolverFor`, `internalEmojiStoreFrom` | The Twemoji artwork half of `<:name:>` emoji rendering. |
 | `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
+| `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
 | `latex.ts` | `measureNodeLabel`, `renderNodeLabel`, `LabelSpan`, `parseLatexLabel`, `measureLatex`, `renderLatexMathML`, `renderLatexAsImage` | LaTeX label parsing, sizing, and rendering utilities. |
 | `layout-epsilon.ts` | `absorbLayoutEpsilon` | Round away the sub-thousandth float noise this port's own unit conversion introduces, so it cannot flip a truncating integer cast. |
 | `magma.ts` | `computeBranch`, `MagmaGroupInput`, `buildMagmaEdges` | "Magma" standalone chaining — the shared cucadiagram/svek layout feature that arranges link-less ("standalone") leaves into a square grid of INVISIBLE edges so graphviz packs them compactly. |
@@ -726,7 +727,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `PreprocessingArtifact.ts` | `PreprocessingArtifact` | `PreprocessingArtifact` + `ConfigurationStore<OptionKey>` -- the two `net.sourceforge.plantuml.preproc` types `EaterOption` (`!option`) needs. |
 | `ReadFilterMergeLines.ts` | `mergeEndingBackslashLines` | Trailing-`\` line continuation: a source line ending in a bare `\` merges with the NEXT physical line, before `@start`/`@end` block splitting or command dispatch sees the document. |
 | `ReadLineReader.ts` | `SOURCE_STRING_DESCRIPTION`, `readLines` | Raw text -> the `StringLocated` list the interpreter executes. |
-| `StartUtils.ts` | `isStartDirective`, `isEndDirective` | The two directive probes `DiagramExtractor` needs: is this line a `@start...` / `@end...` (or the backslash spelling, `\startuml`)? |
+| `StartUtils.ts` | `isStartDirective`, `isEndDirective`, `isPauseDirective`, `isUnpauseDirective`, `isExit`, `possibleAppend` | The two directive probes `DiagramExtractor` needs: is this line a `@start...` / `@end...` (or the backslash spelling, `\startuml`)? |
 | `stdlib-path.ts` | `StdlibPathParts`, `splitStdlibPath` | `Stdlib.java`'s stdlib-path key transform, in one place. |
 | `StdlibRegistry.ts` | `StdlibChunkLoadError`, `StdlibRegistry`, `stdlibRegistry` | Lazy, per-bundle registration for the `<bundle/thing>` stdlib seam. |
 | `StdlibRemote.ts` | `StdlibRemoteManifest`, `RemoteBundle`, `StdlibResourceFetchError`, `remoteStdlib` | Per-RESOURCE, fetch-backed stdlib bundle source (si11a T1). |
@@ -1174,7 +1175,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `namespace-groups.ts` | `splitNamespacePath`, `leafDisplayName`, `QualifiedNodeMatch`, `resolveQualifiedNode`, `SCOPE_KEY_SEP`, `scopedKey`, `bareEntityName`, `findCollidingIds`, `dotKeyFor`, `buildNamespaceGroups` | `set separator`-driven namespace splitting for descriptive diagrams (component / use-case / deployment) — the shared `Quark<Entity>` resolution behind `CucaDiagram#quarkInContext`/`quarkInContextSafe` (net/atmp/CucaDiagram.java:244-283), po |
 | `note-grammar.ts` | `NotePosition`, `NoteTerminator`, `isNoteTerminator`, `resolvePosition`, `noteAttachment`, `NoteOpenMatch`, `classifyNoteOpen` | Note-command grammar for the descriptive-diagram parser — a faithful port of `CommandFactoryNote`, `CommandFactoryNoteOnEntity`, and `CommandFactoryNoteOnLink` (`net.sourceforge.plantuml.command.note`), as wired by `DescriptionDiagramFactor |
 | `parse-helpers-strings.ts` | `StereotypeSpriteRef`, `StereotypeResult`, `ColorResult`, `LinkStereoResult`, `TagsResult`, `stripFullWrap`, `cleanId`, `resolveTextEscapes`, `resolveNewlineEscapes`, `finalizeDisplay`, `extractNodeStereotype`, `stripUrl`, `splitLeadingQuote`, `stripTrailingUrl`, `resolveInlineLinks`, `extractColor`, `extractTags`, `extractLinkStereotype` | Pure, stateless STRING-LEVEL primitives for the descriptive-diagram parser: quote/wrap stripping, id cleaning, url/link token resolution, and the stereotype/color/tag extractors that operate on a raw remainder string. |
-| `parse-helpers.ts` | `stripFullWrap`, `cleanId`, `resolveTextEscapes`, `resolveNewlineEscapes`, `finalizeDisplay`, `extractNodeStereotype`, `stripUrl`, `resolveInlineLinks`, `extractColor`, `extractTags`, `extractLinkStereotype`, `StereotypeResult`, `StereotypeSpriteRef`, `ColorResult`, `LinkStereoResult`, `TagsResult`, `CONTAINER_SYMBOLS`, `NameSection`, `makeNode`, `parseNameSection`, `parseInlineBody`, `CONTAINER_INLINE_RE`, `CONTAINER_OPEN_RE`, `KEYWORD_RE`, `ELEMENT_MULTILINE_OPEN_RE`, `ELEMENT_MULTILINE_OPEN_TYPE0_RE`, `ELEMENT_MULTILINE_END0_RE` | Pure, stateless helpers for the descriptive-diagram parser. |
+| `parse-helpers.ts` | `stripFullWrap`, `cleanId`, `resolveTextEscapes`, `resolveNewlineEscapes`, `finalizeDisplay`, `extractNodeStereotype`, `stripUrl`, `resolveInlineLinks`, `extractColor`, `extractTags`, `extractLinkStereotype`, `StereotypeResult`, `StereotypeSpriteRef`, `ColorResult`, `LinkStereoResult`, `TagsResult`, `CONTAINER_SYMBOLS`, `NameSection`, `makeNode`, `parseNameSection`, `parseInlineBody`, `CONTAINER_INLINE_RE`, `CONTAINER_OPEN_RE`, `KEYWORD_RE`, `ELEMENT_MULTILINE_OPEN_RE`, `ELEMENT_MULTILINE_OPEN_TYPE0_RE`, `ELEMENT_MULTILINE_END0_RE`, `ELEMENT_MULTILINE_END1_RE`, `trySkinparamBlock` | Pure, stateless helpers for the descriptive-diagram parser. |
 | `parse-state.ts` | `NoteOpenMatch`, `ParseState`, `ElementBlockTerminator`, `PendingElementState`, `PendingNoteState`, `makeDefaultAST`, `nextCreationIndex`, `emitNode`, `ensureEndpoint`, `addLink`, `resolveStillUnknown`, `startNewPage`, `executeNoteOpen`, `closePendingNote` | Mutable parse state + entity/note mutation helpers for the descriptive diagram parser (component / use-case / deployment). |
 | `parser.ts` | `CONTAINER_SYMBOLS`, `parseDescription` | Parser for PlantUML descriptive diagrams (component / use-case / deployment). |
 | `renderer-cluster.ts` | `buildCluster` | renderer-cluster.ts — T17: assembles `Cluster` (T12) for one container `DescriptionNodeGeo` (`children.length > 0`). |
@@ -1252,14 +1253,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `index.ts` | `sequencePlugin` | Sequence diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |
-| `renderer-arrowhead.ts` | `reverseArrowConfiguration`, `renderFlatMessageArrow`, `renderSelfMessageHead` | renderer-arrowhead.ts — the sequence engine's arrow EMISSION layer. |
+| `renderer-arrowhead.ts` | `applyMessageDecorations`, `reverseArrowConfiguration`, `renderFlatMessageArrow`, `renderSelfMessageHead` | renderer-arrowhead.ts — the sequence engine's arrow EMISSION layer. |
 | `renderer.ts` | `renderSequence` | Sequence diagram SVG renderer. |
 | `sequence-arrowhead.ts` | `ArrowHeadKind`, `ArrowPart`, `ArrowDecoration`, `ArrowDressing`, `ArrowConfiguration`, `ArrowSegment`, `ArrowCircle`, `HeadGeometry`, `ARROW_DELTA_X`, `ARROW_DELTA_Y`, `NICE_ARROW_INSET`, `DIAM_CIRCLE`, `THIN_CIRCLE`, `SPACE_CROSS_X`, `headGeometryNormalSide`, `headGeometryReverseSide`, `headGeometrySelf`, `arrowConfigurationFor` | sequence-arrowhead.ts — the sequence engine's arrow SHAPE vocabulary. |
+| `sequence-commands-2.ts` | `COMMANDS_2` | Second command dispatch table for the sequence diagram parser (T13, mission dispatch-by-parse-attempt/batch-4). |
 | `sequence-commands.ts` | `COMMANDS` | Command dispatch table for the sequence diagram parser. |
 | `sequence-layout-events.ts` | `EventProcessingContext`, `processEvents` | Sequence diagram layout — event geometry (Step 2 of layoutSequence). |
 | `sequence-layout-participants.ts` | `ParticipantLayoutResult`, `computeParticipantLayout` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
 | `sequence-layout-shared.ts` | `fontSpecOf` | Small shared leaf utilities for sequence diagram layout. |
-| `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `ARROW_STYLE_MAP`, `ParticipantDeclaration`, `parseParticipantDeclaration` | Mutable parse state and shared helpers for the sequence diagram parser. |
+| `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `formatAutonumber`, `ARROW_STYLE_MAP`, `REVERSE_ARROW_STYLE_MAP`, `ParticipantDeclaration`, `parseParticipantDeclaration`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
 
 ## `src/diagrams/state/`
 

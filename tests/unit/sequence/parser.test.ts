@@ -618,7 +618,13 @@ describe('default AST shape', () => {
 
   it('autonumber defaults to disabled with start 1', () => {
     const ast = parse(['participant Alice']);
-    expect(ast.autonumber).toEqual({ enabled: false, start: 1, current: 1 });
+    expect(ast.autonumber).toEqual({
+      enabled: false,
+      start: 1,
+      current: 1,
+      step: 1,
+      prefix: '',
+    });
   });
 });
 
