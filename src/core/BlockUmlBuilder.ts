@@ -43,10 +43,17 @@ import type {
   PreprocessorFailure,
   PreprocessorResult,
 } from './preprocessor.js';
-import { isEndDirective, isStartDirective } from './tim/StartUtils.js';
+import {
+  isEndDirective,
+  isExit,
+  isPauseDirective,
+  isStartDirective,
+  isUnpauseDirective,
+  possibleAppend,
+} from './tim/StartUtils.js';
 import { readLines } from './tim/ReadLineReader.js';
 import { mergeEndingBackslashLines } from './tim/ReadFilterMergeLines.js';
-import type { StringLocated } from './tim/StringLocated.js';
+import { StringLocated } from './tim/StringLocated.js';
 
 /** The `@start<suffix>` word, lowercased -- `uml`, `json`, `mindmap`, ... */
 function startSuffix(line: string): string {
@@ -93,6 +100,22 @@ export interface BlockUmlErr extends BlockUmlBase {
 export type BlockUml = BlockUmlOk | BlockUmlErr;
 
 /**
+ * `@append <text>` while paused: the remainder joins the block, the directive
+ * does not. Upstream reaches `current.add(append)` with `current` possibly
+ * null — a `@pause` before any `@start` NPEs there. This port cannot throw out
+ * of block extraction, so the caller guards on `current` instead; the guarded
+ * case is upstream's crash, not upstream's behaviour.
+ * @see ~/git/plantuml/.../BlockUmlBuilder.java:115-120
+ */
+function appendWhilePaused(current: StringLocated[], s: StringLocated): void {
+  const text = possibleAppend(s.getString());
+  if (text === undefined) return;
+  current.push(
+    new StringLocated(text, s.getLocation(), s.getType(), s.getPreprocessorError()),
+  );
+}
+
+/**
  * Read a document, split it into `@start...@end` blocks, and run the
  * preprocessor over each block on its own.
  *
@@ -108,28 +131,57 @@ export function buildBlockUmls(source: string, options?: PreprocessOptions): Blo
 }
 
 /**
- * Upstream's reader loop, verbatim in shape: open a block on a `@start`
- * directive, accumulate every line into it, close it on an `@end` directive.
- * (`@pause` / `@unpause` / `@append` / `!exit` are not ported -- no caller.)
- * @see ~/git/plantuml/.../BlockUmlBuilder.java
+ * Upstream's reader loop, verbatim in shape AND in statement order: open a
+ * block on a `@start` directive, accumulate every line into it, close it on an
+ * `@end` directive — with the pause family layered in exactly where upstream
+ * layers it (`BlockUmlBuilder.java:100-134`).
+ *
+ * The order of the four tests is load-bearing and is why they are written as
+ * four separate `if`s rather than a chain:
+ *
+ *   - `@pause` sets `paused` BEFORE the accumulate test, so the `@pause` line
+ *     itself is not part of the block;
+ *   - `@unpause` clears it AFTER, so the `@unpause` line is not either;
+ *   - `@end` while paused IS added, by its own explicit `if (paused)`;
+ *   - `!exit` pauses exactly as `@pause` does — upstream gives them the same
+ *     two-line body.
+ *
+ * While paused, only an `@append <text>` line contributes, and it contributes
+ * the remainder rather than itself.
+ *
+ * ONE DELIBERATE DIVERGENCE: upstream also calls `reader.setPaused(...)`,
+ * which suppresses `!include` processing in the includer while paused. This
+ * port's include resolution is a separate seam that never sees this loop, so
+ * a paused `!include` is still resolved here and is not in the jar. No corpus
+ * fixture pairs `@pause` with `!include`; recorded rather than guessed at.
+ *
+ * @see ~/git/plantuml/.../BlockUmlBuilder.java#include
  */
 function splitRawBlocks(lines: readonly StringLocated[]): RawBlock[] {
   const blocks: RawBlock[] = [];
   let current: StringLocated[] | undefined;
   let suffix = '';
+  let paused = false;
 
   for (const s of lines) {
     const line = s.getString();
     if (isStartDirective(line)) {
       current = [];
       suffix = startSuffix(line);
+      paused = false;
     }
-    if (current === undefined) continue;
+    if (isPauseDirective(line) || isExit(line)) paused = true;
 
-    current.push(s);
-    if (isEndDirective(line)) {
+    if (current !== undefined && !paused) current.push(s);
+    else if (paused && current !== undefined) appendWhilePaused(current, s);
+
+    if (isUnpauseDirective(line)) paused = false;
+
+    if (isEndDirective(line) && current !== undefined) {
+      if (paused) current.push(s);
       blocks.push({ suffix, lines: current });
       current = undefined;
+      paused = false;
     }
   }
   return blocks;
