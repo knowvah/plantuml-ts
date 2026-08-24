@@ -832,6 +832,10 @@ describe('renderSequence — box integration', () => {
       'end box',
       'Alice -> Alice: self',
     ]);
+    // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
+    // (D1); this fixture is a complete, valid diagram, so refusal is a
+    // test defect.
+    if ('refused' in ast) throw new Error(`parseSequence refused (${ast.kind}): ${ast.message}`);
     expect(ast.boxes).toHaveLength(1);
     expect(ast.boxes[0]?.label).toBe('Frontend');
     expect(ast.boxes[0]?.color).toBe('#LightBlue');

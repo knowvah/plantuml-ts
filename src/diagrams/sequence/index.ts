@@ -5,6 +5,7 @@
 
 import type { DiagramPlugin, RenderFragment } from '../../core/dispatcher.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { SequenceDiagramAST, SequenceGeometry } from './ast.js';
 import { hasDescriptiveSignal } from '../../core/descriptive-keywords.js';
 import { parseSequence } from './parser.js';
@@ -59,7 +60,10 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry>
       return lines.slice(0, 20).some((l) => isSequenceLine(l));
     },
 
-    parse(source: UmlSource): SequenceDiagramAST {
+    // T4: widened to match `DiagramPlugin.parse`'s `AST | ParseRefusal`
+    // contract (D1) now that `parseSequence` can return a `ParseRefusal`.
+    // `accepts()` above is untouched -- T12 owns dispatch/routing.
+    parse(source: UmlSource): SequenceDiagramAST | ParseRefusal {
       return parseSequence(source.lines);
     },
 

@@ -85,7 +85,17 @@ describe('sequence grouping constructs are not stolen by the activity engine', (
 
 describe('alt/else branch conditions survive to the SVG', () => {
   it('the else condition is kept by the parser, not discarded', () => {
-    const ast = parseSequence(GROUPED.alt.split('\n'));
+    // T4: `parseSequence`'s real contract is `UmlSource.lines` -- the
+    // INTERIOR of the block, `@start`/`@end` already stripped by the block
+    // extractor. Upstream's own command loop never sees those two lines
+    // either: `createSystem` consumes the start line via `it.next()` before
+    // the loop starts and the loop itself stops at `isEndDirective`
+    // (`PSystemCommandFactory.java:114-134`). The permissive parser used to
+    // tolerate feeding it the raw `@startuml`/`@enduml` lines by silently
+    // dropping them; strict refusal does not, so strip them here to match
+    // the real contract rather than weaken the refusal.
+    const ast = parseSequence(GROUPED.alt.split('\n').slice(1, -1));
+    if ('refused' in ast) throw new Error(`sequence refused at line ${String(ast.line)}: ${ast.message}`);
     const frame = ast.events.find((e) => e.kind === 'frame');
     expect(frame).toBeDefined();
     expect(frame?.kind === 'frame' ? frame.branchLabels : undefined).toEqual([

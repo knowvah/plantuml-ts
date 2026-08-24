@@ -120,7 +120,16 @@ export function renderFixtureSequence(
   const preprocessed = first.preprocessed;
   const rawSourceLines = first.rawSource.map((s) => s.getString());
   const { theme, styleMap } = buildThemeForFixture(preprocessed, rawSourceLines);
-  const ast = parseSequence(first.source.lines);
+  const parsed = parseSequence(first.source.lines);
+  // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
+  // (D1). This harness bypasses `src/index.ts`'s production narrowing (it
+  // drives the engine directly), so a refusal surfaces the same way
+  // `tests/helpers/parse-ast.ts` does for plugin-level callers: thrown,
+  // naming line/kind/message, rather than silently swallowed.
+  if ('refused' in parsed) {
+    throw new Error(`sequence refused this source at line ${String(parsed.line)} (${parsed.kind}): ${parsed.message}`);
+  }
+  const ast = parsed;
   const geo = layoutSequence(ast, theme, measurer);
   const fragment = renderSequence(geo, theme);
 

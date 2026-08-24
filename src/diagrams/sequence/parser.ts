@@ -16,6 +16,7 @@ import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { makeDefaultAST, type ParseState } from './sequence-parse-helpers.js';
 import { COMMANDS } from './sequence-commands.js';
+import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 
 // ---------------------------------------------------------------------------
 // Line-dispatch helpers
@@ -83,40 +84,45 @@ function dispatchAnnotationOrSprite(
   return null;
 }
 
-/** Normal dispatch: run `line` through the `COMMANDS` table, first match wins. */
-function dispatchCommand(state: ParseState, line: string): void {
+/**
+ * Normal dispatch: run `line` through the `COMMANDS` table, first match
+ * wins. Returns whether some command claimed the line -- mirrors
+ * `PSystemCommandFactory#getCandidate` (`:225-246`), which returns a `Step`
+ * on the first matching `Command` or `null` when none of `cmds` matches.
+ */
+function dispatchCommand(state: ParseState, line: string): boolean {
   for (const cmd of COMMANDS) {
     const match = cmd.pattern.exec(line);
     if (match !== null) {
       cmd.execute(state, match);
-      break;
+      return true;
     }
   }
+  return false;
 }
 
-// ---------------------------------------------------------------------------
-// Main parser entry point
-// ---------------------------------------------------------------------------
+/**
+ * Trimmed, blank-filtered view (matchAnnotationCommand requires
+ * already-trimmed lines -- see commands.ts's single-line matchers, which
+ * test `^title...$` etc. with no internal trim). Each entry keeps its
+ * position in `lines` so a refusal can name the ORIGINAL 0-based line, not
+ * its position in this filtered view.
+ */
+function trimNonBlank(lines: readonly string[]): { text: string; origIndex: number }[] {
+  return lines
+    .map((l, origIndex) => ({ text: l.trim(), origIndex }))
+    .filter((e) => e.text !== '');
+}
 
 /**
- * Parse an array of preprocessed PlantUML sequence diagram lines into an AST.
+ * Runs the per-line dispatch loop against `lines`, mutating `state` as
+ * commands match. Returns a `syntax` {@link ParseRefusal} at the first line
+ * no command (nor the annotation/sprite matchers ahead of it) claims;
+ * `null` when every line was consumed successfully.
  */
-export function parseSequence(lines: readonly string[]): SequenceDiagramAST {
-  const state: ParseState = {
-    ast: makeDefaultAST(),
-    frameStack: [],
-    participantIndex: new Map(),
-    pendingNote: null,
-    lastMessageFrom: null,
-    lastMessageTo: null,
-    currentBox: null,
-    boxCounter: 0,
-  };
-
-  // Trimmed, blank-filtered view (matchAnnotationCommand requires
-  // already-trimmed lines -- see commands.ts's single-line matchers, which
-  // test `^title...$` etc. with no internal trim).
-  const trimmedLines = lines.map((l) => l.trim()).filter((l) => l !== '');
+function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefusal | null {
+  const trimmedEntries = trimNonBlank(lines);
+  const trimmedLines = trimmedEntries.map((e) => e.text);
 
   for (let i = 0; i < trimmedLines.length; i++) {
     const line = trimmedLines[i]!;
@@ -133,7 +139,67 @@ export function parseSequence(lines: readonly string[]): SequenceDiagramAST {
       continue;
     }
 
-    dispatchCommand(state, line);
+    if (!dispatchCommand(state, line)) {
+      const origIndex = trimmedEntries[i]!.origIndex;
+      return refuse('syntax', origIndex, origIndex, 'Syntax Error?');
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Main parser entry point
+// ---------------------------------------------------------------------------
+
+/**
+ * Parse an array of preprocessed PlantUML sequence diagram lines into an AST,
+ * or a {@link ParseRefusal} when the source is not a (complete, valid)
+ * sequence diagram.
+ *
+ * Two of the four upstream refusal points apply here:
+ *
+ *  - No `Command` in `COMMANDS` (nor the annotation/sprite matchers tried
+ *    ahead of it) matches a line: `kind: 'syntax'`, mirroring the
+ *    `SYNTAX_ERROR "Syntax Error?"` fallback built when `getCandidate`
+ *    returns `null`.
+ *    @see ~/git/plantuml/.../command/PSystemCommandFactory.java:169-175
+ *  - The finished diagram has no participants: `kind: 'incomplete'`,
+ *    mirroring `SequenceDiagram#isIncomplete`, which upstream's
+ *    `finalizeDiagram` checks only after every line has already been
+ *    accepted (`:159-161`), so it fires once, at the end, not per-line.
+ *    @see ~/git/plantuml/.../sequencediagram/SequenceDiagram.java:585-587
+ *
+ * The other two do not apply to this engine (see the decision journal for
+ * the citations ruling each one out):
+ *
+ *  - `execution` (`PSystemCommandFactory.java:180-186`) requires a command
+ *    that can itself report failure (`CommandExecutionResult`). Every entry
+ *    in `COMMANDS` has an `execute(state, match): void` that cannot fail --
+ *    matching is the only success/failure signal this port's `Command` type
+ *    carries, so there is no execution-failure channel to refuse from.
+ *  - `final` (`PSystemCommandFactory.java:148-152`) is
+ *    `SequenceDiagram#checkFinalError`, which only conditionally prunes
+ *    hidden participants before delegating to
+ *    `AbstractDiagram#checkFinalError` (`:161-163`), itself a hard-coded
+ *    `return null`. The override never actually returns a non-null error.
+ */
+export function parseSequence(lines: readonly string[]): SequenceDiagramAST | ParseRefusal {
+  const state: ParseState = {
+    ast: makeDefaultAST(),
+    frameStack: [],
+    participantIndex: new Map(),
+    pendingNote: null,
+    lastMessageFrom: null,
+    lastMessageTo: null,
+    currentBox: null,
+    boxCounter: 0,
+  };
+
+  const refusal = runDispatchLoop(state, lines);
+  if (refusal !== null) return refusal;
+
+  if (state.ast.participants.length === 0) {
+    return refuse('incomplete', lines.length, lines.length, 'Sequence diagram has no participants');
   }
 
   return state.ast;
