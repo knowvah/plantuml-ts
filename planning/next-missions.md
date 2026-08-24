@@ -609,12 +609,30 @@ Ordered by how ready they are, not by size.
   a registered `Command`. So this mission must first give ≥13 engines strict
   unrecognised-line handling, which changes error behaviour everywhere. Large,
   and worth doing — it would delete the heuristics rather than tune them.
-- **`sequence-engine-overclaims-nested-diagrams`** — BRIEFED 2026-08-23 at
-  `plans/sequence-engine-overclaims-nested-diagrams/README.md`, not started.
-  Measured scope is **86 misroutes of 2674**, not the 1-plus-70 the original
-  filing described — and the title is misleading: sequence *under*claims 70
-  and overclaims 1. Root cause is that `src/index.ts` registers sequence
-  **last** where `PSystemBuilder.java:133-141` puts it **first**. Original
+- **`routing-heuristic-repair`** — BRIEFED 2026-08-23 at
+  `plans/routing-heuristic-repair/README.md`, not started. **Start here of
+  the three**: its prerequisite already landed, and it is the only one of
+  them that can proceed today. Re-scoped out of
+  `sequence-engine-overclaims-nested-diagrams` batch 4 after that mission
+  halted, with **every bucket re-measured** against the live tree rather than
+  carried over. Baseline **79 disagreements of 3158**, of which **75 are real
+  defects** and 4 are fixtures where the *jar* produced an error page. Nine
+  tasks in six batches, ordered by blast radius; **registration order is
+  frozen** (its D1). Each bucket carries the file and mechanism it was traced
+  to, and — the lesson from the halt — a measurement of *where each fixture
+  lands* once its over-claimer declines, which turned up three cross-task
+  dependencies that would otherwise have scored as failures.
+- **`sequence-engine-overclaims-nested-diagrams`** — **HALTED 2026-08-23 at
+  T2**, after batch 1 landed. Do not restart it as written. Its T1 routing
+  gate shipped (`ef62ef74`) and is this repo's measuring instrument for
+  routing; its D1 is **disproven**. Mirroring `PSystemBuilder.java`'s factory
+  order moves the gate **79 → 469** — 25 fixed, **415 newly misrouted** — via
+  two measured mechanisms: `sequencePlugin.accepts()` is true for 1351 of
+  3158 fixtures, 270 of which are not sequence diagrams; and description
+  (`:138`) before state (`:139`) moves 153 fixtures the jar calls STATE. The
+  order is **load-bearing**, compensating for heuristic over-claim, not
+  merely inverted. Batches 2–5 are superseded by the two entries around this
+  one. Full diagnosis: `.agent-notes/T2-registration-order-halt.md`. Original
   filing text follows.
 - ~~**`sequence-engine-overclaims-nested-diagrams`**~~ — original filing,
   superseded by the brief above. Found by

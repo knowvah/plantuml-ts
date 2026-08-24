@@ -230,7 +230,16 @@ every fixture, and reproduced the bucket table. The routing baseline stands at
 preserved in the agent note for the deferred mission; only its consequence is
 unsafe.
 
-**Recommended next step**, for the maintainer to decide: re-file the parse-attempt
-mission (D2 option B) as the prerequisite, with this measurement as its
-justification, and re-scope batch 4's heuristic repairs — which do *not* depend
-on T2 — as a separate, independently landable mission.
+**Successor missions.** Batch 4's heuristic repairs do not depend on T2 and
+have been re-scoped as **[`routing-heuristic-repair`](../routing-heuristic-repair/README.md)**
+(briefed 2026-08-23), with every bucket re-measured against the live tree —
+the batch-4 tasks here were scoped "by the residual T3 measured", and T3 will
+never run. That mission freezes registration order, targets all 75 real
+defects, and can start today. The order change itself is blocked behind
+`dispatch-by-parse-attempt` (D2 option B), which this halt is the
+justification for.
+
+Batches 3–5 of this brief are superseded: T3's candidate-type filter is
+measured to have no reach (96.2% of the corpus is `@startuml`), and T4–T7 are
+re-scoped as that mission's T7, T4, T3 and T6 respectively — re-measured, and
+joined by three buckets this brief never identified.
