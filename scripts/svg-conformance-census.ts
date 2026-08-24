@@ -61,6 +61,7 @@
  *   --families     diff paths de-indexed into structural families, ranked by
  *                  how many fixtures each reaches.
  */
+import { astOrThrow } from '../tests/helpers/parse-ast.js';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -178,7 +179,7 @@ function renderFixtureDescription(markup: string, measurer: StringMeasurer): str
   const preprocessed = first.preprocessed;
   const { theme, styleMap } = buildThemeForFixture(preprocessed);
   const block = { ...first.source, rawStyles: preprocessed.styles };
-  const ast = parseDescription(block);
+  const ast = astOrThrow(parseDescription(block), 'description');
   const seeded = { ...ast, seed: seedOf(['@startuml', ...block.lines, '@enduml'].join('\n')) };
   const geo = layoutDescription(seeded, theme, measurer);
   const completeSvg = renderDescription(geo, theme, measurer);

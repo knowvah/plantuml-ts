@@ -81,6 +81,7 @@
  * for a fixture that fails to render (never aborts the run), followed by
  *   TOTAL fixtures-with-notes: <n>/<all>
  */
+import { astOrThrow } from '../tests/helpers/parse-ast.js';
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -140,7 +141,7 @@ function noteIdentity(markup: string, options: PreprocessOptions): NoteIdentity 
   if (!first.ok) throw first.failure.cause;
   const preprocessed = first.preprocessed;
   const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
-  const ast = parseClass(block);
+  const ast = astOrThrow(parseClass(block), 'class');
   return {
     ids: new Set(ast.notes.map((n) => n.id)),
     tips: ast.notes.filter((n) => n.targetPort !== undefined).length,

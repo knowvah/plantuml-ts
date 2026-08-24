@@ -21,7 +21,15 @@ import { parseClass } from '../../src/diagrams/class/parser.js';
 import type { UmlSource } from '../../src/core/block-extractor.js';
 import { parseState } from '../../src/diagrams/state/parser.js';
 import { parseSequence } from '../../src/diagrams/sequence/parser.js';
+import type { SequenceDiagramAST } from '../../src/diagrams/sequence/ast.js';
+
 import { isEmpty, isDisplayPositionedNull } from '../../src/core/annotations/index.js';
+import { astOrThrow } from '../helpers/parse-ast.js';
+
+/** The sequence engine's AST arm; throws naming the refusal. Every source
+ *  below is upstream-recognised throughout and must never refuse. */
+const seq = (lines: readonly string[]): SequenceDiagramAST =>
+  astOrThrow(parseSequence(lines), 'sequence');
 
 // Pinned copies, not the gitignored tests/corpus tree — see
 // tests/fixtures/corpus/README.md. Reading the regenerable tree made these
@@ -38,12 +46,12 @@ const L = (s: string): string[] =>
 
 function parseClassSource(source: string) {
   const block: UmlSource = { lines: L(source), type: 'class' };
-  return parseClass(block);
+  return astOrThrow(parseClass(block), 'class');
 }
 
 function parseStateSource(source: string) {
   const block: UmlSource = { lines: L(source), type: 'state' };
-  return parseState(block);
+  return astOrThrow(parseState(block), 'state');
 }
 
 // ---------------------------------------------------------------------------
@@ -143,7 +151,7 @@ describe('state — annotation commands land in ast.annotations', () => {
 
 describe('sequence — annotation commands land in ast.annotations', () => {
   it('a top-level `title X` line sets annotations.title and is not a message/participant', () => {
-    const ast = parseSequence(['Alice -> Bob: hi', 'title My Sequence', 'Bob -> Alice: hello']);
+    const ast = seq(['Alice -> Bob: hi', 'title My Sequence', 'Bob -> Alice: hello']);
     expect(isDisplayPositionedNull(ast.annotations!.title)).toBe(false);
     expect(ast.annotations!.title.display).toEqual(['My Sequence']);
     expect(ast.events.filter((e) => e.kind === 'message')).toHaveLength(2);
@@ -151,13 +159,13 @@ describe('sequence — annotation commands land in ast.annotations', () => {
   });
 
   it('a multiline `title ... end title` block sets annotations.title', () => {
-    const ast = parseSequence(['title', 'line one', 'line two', 'end title', 'Alice -> Bob: hi']);
+    const ast = seq(['title', 'line one', 'line two', 'end title', 'Alice -> Bob: hi']);
     expect(ast.annotations!.title.display).toEqual(['line one', 'line two']);
     expect(ast.events.filter((e) => e.kind === 'message')).toHaveLength(1);
   });
 
   it('`note over A` containing a `title inside` line keeps it as note text — annotations.title stays null (D3)', () => {
-    const ast = parseSequence([
+    const ast = seq([
       'participant A',
       'note over A',
       'title not a title',
@@ -174,7 +182,7 @@ describe('sequence — annotation commands land in ast.annotations', () => {
     const bodyLines = source
       .split('\n')
       .filter((l) => !/^@(start|end)uml/i.test(l.trim()));
-    const ast = parseSequence(bodyLines);
+    const ast = seq(bodyLines);
     expect(isEmpty(ast.annotations!)).toBe(true);
     expect(ast.participants.map((p) => p.id)).toEqual(['Bob', 'Alice']);
     expect(ast.events.filter((e) => e.kind === 'message')).toHaveLength(4);
