@@ -23,6 +23,42 @@ import { renderJson } from './renderer.js';
  *  `DIAGRAM_TYPE_DESCRIPTION`). */
 const DIAGRAM_TYPE_JSON = 'JSON';
 
+/**
+ * True when a line already known to start with `{` opens a JSON object --
+ * `{`, `{}`, or `{"key"...`. Distinguishes a JSON object literal from a
+ * sequence diagram's teoz timing-anchor label, `{start}` / `{end}`
+ * (`~/git/plantuml/.../sequencediagram/teoz/...` anchor syntax), which is
+ * `{` followed immediately by a bare, unquoted identifier and closing brace
+ * -- never a valid JSON value start.
+ */
+function looksLikeJsonObjectOpen(t: string): boolean {
+  const rest = t.slice(1).trimStart();
+  return rest === '' || rest.startsWith('}') || rest.startsWith('"');
+}
+
+/**
+ * True when a line already known to start with `[` opens a JSON array --
+ * `[`, `[]`, or `[1, 2, ...]`. Distinguishes a JSON array literal from a
+ * sequence diagram's "message from/to an actor outside the diagram" arrow
+ * syntax (`[->`, `[<-`; `~/git/plantuml/.../sequencediagram/command/
+ * CommandLinear.java`'s bracket-actor grammar), which is `[` followed
+ * immediately by an arrow -- never a valid JSON value start.
+ */
+function looksLikeJsonArrayOpen(t: string): boolean {
+  const rest = t.slice(1).trimStart();
+  return (
+    rest === '' ||
+    rest.startsWith(']') ||
+    rest.startsWith('{') ||
+    rest.startsWith('[') ||
+    rest.startsWith('"') ||
+    rest.startsWith('true') ||
+    rest.startsWith('false') ||
+    rest.startsWith('null') ||
+    /^-?[0-9]/.test(rest)
+  );
+}
+
 export const jsonPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'json',
 
@@ -41,11 +77,17 @@ export const jsonPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
       if (t === '') continue;
       if (t === '<style>') { inStyle = true; continue; }
       if (inStyle) { if (t === '</style>') inStyle = false; continue; }
-      if (/^(?:title |skinparam |scale |skin |hide |!assume |!pragma )/i.test(t)) continue;
+      // `title` accepts both the space form ("title Foo") and the colon form
+      // ("title: Foo" / "title:Foo") -- CommandTitle.java:63's grammar,
+      // `title(?:[%s]*:[%s]*|[%s]+)`, matched case-insensitively
+      // (Pattern2.java:114). Only the space form was recognised before; the
+      // colon form fell through and was misread as diagram content one line
+      // too early.
+      if (/^(?:title(?:\s*:|\s)|skinparam |scale |skin |hide |!assume |!pragma )/i.test(t)) continue;
       // Any valid JSON value: object, array, string, boolean keyword, null, number
+      if (t.startsWith('{')) return looksLikeJsonObjectOpen(t);
+      if (t.startsWith('[')) return looksLikeJsonArrayOpen(t);
       return (
-        t.startsWith('{') ||
-        t.startsWith('[') ||
         t.startsWith('#highlight') ||
         t.startsWith('"') ||
         t === 'null' ||
