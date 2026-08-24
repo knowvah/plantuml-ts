@@ -60,6 +60,36 @@ Write the test first (TDD).
   `.../sequence/rizove-01-move566/in.puml`, `.../sequence/tuxido-23-xide677/in.puml`
 - `../decisions.md#d2`, `../decisions.md#d3`
 
+## ADDED SCOPE — inherited from T4 (2026-08-24)
+
+`component/gutute-00-gaki684` (jar: CLASS, ours: DESCRIPTION) was in T4's
+bucket but is NOT fixable in T4's write-set. Its source carries:
+
+```
+protocol 093813e0_..._bbfd as "INOUT" {
+```
+
+`protocol` is a native class TYPE keyword — it appears in
+`CommandCreateClassMultilines`'s TYPE alternation
+(`protocol|struct|exception|metaclass|...`, in
+`~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/command/CommandCreateClassMultilines.java`)
+— but this port's `UNAMBIGUOUS_CLASS_DECL` / `CLASS_ACCEPTS_PATTERNS` in
+`src/diagrams/class/class-dispatch.ts` never recognised it, so description
+claims the block instead.
+
+**Read that TYPE alternation in the Java and cover the whole set**, not just
+`protocol` — omitting a sibling keyword is the same defect one fixture later.
+This is a genuine under-claim, so it widens; it is bounded by that command
+class and must cite it inline, exactly as D3 requires of T6's `map` widening.
+
+Add to this task's acceptance criteria:
+
+- Given `component/gutute-00-gaki684`, then `jarType === ourType === 'CLASS'`
+- Given the `CLASS -> DESCRIPTION` bucket, then it contains only
+  `component/kokebo-27-vafi688`, which is a recorded parse-attempt stop
+  condition (see decision-journal.md) and is NOT in scope
+
+
 ## Write-set
 
 - `src/diagrams/class/class-dispatch.ts`

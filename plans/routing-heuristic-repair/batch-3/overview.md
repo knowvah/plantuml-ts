@@ -9,4 +9,4 @@ falls through to json otherwise (measured, D2).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|---|---|---|---|---|
-| T4 | [Descriptive-signal over-decline](T4-descriptive-signal.md) | typescript-pro | `src/core/descriptive-keywords.ts`, `tests/unit/core/descriptive-keywords.test.ts` | T2, T3 | [ ] |
+| T4 | [Descriptive-signal over-decline](T4-descriptive-signal.md) | typescript-pro | `src/core/descriptive-keywords.ts`, `tests/unit/core/descriptive-keywords.test.ts` | T2, T3 | [x] |

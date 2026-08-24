@@ -119,7 +119,7 @@ ordered the way they are and not simply run in parallel:
 |---|---|---|---|---|
 | [1](batch-1/overview.md) | T1 jar-error classification | — | 4 non-defects (8 measured, see decision journal) | [x] |
 | [2](batch-2/overview.md) | T2 activity · T3 json/yaml | yes | 25 | [x] |
-| [3](batch-3/overview.md) | T4 descriptive signal | — | 36 | [ ] |
+| [3](batch-3/overview.md) | T4 descriptive signal | — | 34 of 36 (gutute -> T6; kokebo = parse-attempt stop) | [x] |
 | [4](batch-4/overview.md) | T5 `detectUmlType` | — | 9 | [ ] |
 | [5](batch-5/overview.md) | T6 class dispatch · T7 sequence arrow | yes | 4 | [ ] |
 | [6](batch-6/overview.md) | T8 re-pin · T9 preprocessor failure | yes | 1 + baselines | [ ] |
