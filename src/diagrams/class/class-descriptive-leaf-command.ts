@@ -32,16 +32,37 @@ export const ALLOW_MIXING_ERROR =
   "Use 'allowmixing' if you want to mix classes and other UML elements.";
 
 /**
- * A CONTAINER opener, which upstream claims with `CommandPackage` /
- * `CommandPackageWithUSymbol` (`ClassDiagramFactory` lines 127-130) BEFORE
- * the gated `CommandCreateElementFull2` on line 133 — so it is never gated.
+ * `CommandPackageWithUSymbol`'s own SYMBOL alternation, verbatim
+ * (`CommandPackageWithUSymbol.java:76-77`), plus the three keywords with
+ * dedicated container commands on this factory — `package` is already in the
+ * list, `namespace` has `CommandNamespace`/`CommandNamespace2`
+ * (`ClassDiagramFactory.java:138-140`) and `together` has `CommandTogether`
+ * (`:131`).
  *
- * Jar-verified 2026-08-02: `package foo {`, `package foo {}`, `state A {`,
- * `rectangle R {` and the long-description `package Application [` all render
- * without `allowmixing`, while the LEAF form of every one of the 29
- * descriptive keywords is refused without it.
+ * These are the container openers upstream claims BEFORE reaching the gated
+ * `CommandCreateElementFull2` on `:133`, so these — and only these — are
+ * never gated.
+ *
+ * `state` IS NOT IN THE LIST, and that omission is the point. An earlier note
+ * here read "jar-verified: `state A {` renders without allowmixing", which
+ * conflated two different questions: `state A {` does render, because the jar
+ * routes such a source to the STATE factory. It says nothing about whether
+ * `ClassDiagramFactory` accepts the line, and it does not — no command in its
+ * table matches. Exempting it here let the class engine claim 81 state
+ * diagrams under parse-attempt dispatch.
  */
+const CONTAINER_KEYWORD =
+  /^(?:package|rectangle|hexagon|node|artifact|folder|file|frame|cloud|action|process|database|storage|component|card|queue|stack|namespace|together)\b/i;
+
+/** The opener's own shape: a trailing `{`, `{}` or long-description `[`. */
 const CONTAINER_OPENER = /[{[]\s*\}?\s*$/;
+
+/** A container opener upstream claims before the gate: the right keyword AND
+ *  the opener shape. Either alone is not enough — `state A {` has the shape
+ *  and not the keyword; `node Foo` has the keyword and not the shape. */
+function isContainerOpener(line: string): boolean {
+  return CONTAINER_KEYWORD.test(line) && CONTAINER_OPENER.test(line);
+}
 
 /** `mix_` = Mode.WITH_MIX_PREFIX, registered UNGATED on line 134. */
 const MIX_PREFIX = /^\s*mix_/i;
@@ -101,7 +122,7 @@ export const DESCRIPTIVE_LEAF_COMMANDS: readonly Command[] = [
       if (
         !state.allowMixing &&
         !MIX_PREFIX.test(line) &&
-        !CONTAINER_OPENER.test(line.trim())
+        !isContainerOpener(line.trim())
       ) {
         // Upstream returns the error BEFORE applying anything, so the
         // declaration below must not run. `error(String)` carries score 0
