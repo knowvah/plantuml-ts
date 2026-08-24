@@ -13,5 +13,5 @@ if the other has not landed.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|---|---|---|---|---|
-| T6 | [Class dispatch, both directions](T6-class-dispatch.md) | typescript-pro | `src/diagrams/class/class-dispatch.ts`, `tests/unit/class/class-dispatch.test.ts` | T5 | [ ] |
-| T7 | [Anchor the sequence arrow](T7-sequence-arrow.md) | typescript-pro | `src/diagrams/sequence/index.ts`, `tests/unit/sequence/accepts.test.ts` | T5 | [ ] |
+| T6 | [Class dispatch, both directions](T6-class-dispatch.md) | typescript-pro | `src/diagrams/class/class-dispatch.ts`, `tests/unit/class/class-dispatch.test.ts` | T5 | [x] |
+| T7 | [Anchor the sequence arrow](T7-sequence-arrow.md) | typescript-pro | `src/diagrams/sequence/index.ts`, `tests/unit/sequence/accepts.test.ts` | T5 | [x] |
