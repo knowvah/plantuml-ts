@@ -14,7 +14,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseChart } from '../../../src/diagrams/chart/parser.js';
+import { parseChartAst } from './parse-chart-ast.js';
 import { isEmpty } from '../../../src/core/annotations/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
@@ -24,32 +24,32 @@ function src(lines: string[]): UmlSource {
 
 describe('parseChart — annotation commands (mission G0b/T6, T8)', () => {
   it('single-line `title X` populates chrome.title (T8), not a bespoke ast.title field', () => {
-    const ast = parseChart(src(['title My Chart', 'bar "sales" [10, 20]']));
+    const ast = parseChartAst(src(['title My Chart', 'bar "sales" [10, 20]']));
     expect(ast.chrome?.title.display).toEqual(['My Chart']);
     expect(ast.series).toHaveLength(1);
   });
 
   it('`legend right` still resolves as chart’s own data-series legend position, not chrome text', () => {
-    const ast = parseChart(src(['legend right', 'bar "sales" [10, 20]']));
+    const ast = parseChartAst(src(['legend right', 'bar "sales" [10, 20]']));
     expect(ast.legendPosition).toBe('right');
     expect(isEmpty(ast.chrome!)).toBe(true);
   });
 
   it('multi-line `legend ... end legend` populates chrome.legend, not the data-series legend position', () => {
-    const ast = parseChart(src(['bar "sales" [10, 20]', 'legend', 'a legend line', 'end legend']));
+    const ast = parseChartAst(src(['bar "sales" [10, 20]', 'legend', 'a legend line', 'end legend']));
     expect(ast.chrome?.legend.display).toEqual(['a legend line']);
     expect(ast.legendPosition).toBe('none');
     expect(ast.series).toHaveLength(1);
   });
 
   it('single-line caption populates chrome.caption, not a chart command', () => {
-    const ast = parseChart(src(['caption a caption', 'bar "sales" [10, 20]']));
+    const ast = parseChartAst(src(['caption a caption', 'bar "sales" [10, 20]']));
     expect(ast.chrome?.caption.display).toEqual(['a caption']);
     expect(ast.series).toHaveLength(1);
   });
 
   it('annotation-free fixture parses identically (no chrome, empty chrome annotations)', () => {
-    const ast = parseChart(src(['bar "sales" [10, 20]']));
+    const ast = parseChartAst(src(['bar "sales" [10, 20]']));
     expect(isEmpty(ast.chrome!)).toBe(true);
     expect(ast.series).toHaveLength(1);
   });
