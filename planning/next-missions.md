@@ -596,7 +596,46 @@ capture gets headroom automatically.
 
 Ordered by how ready they are, not by size.
 
-- **`sequence-engine-overclaims-nested-diagrams`** — NEW 2026-08-23, found by
+- **`dispatch-by-parse-attempt`** — NEW 2026-08-23, deferred out of
+  `sequence-engine-overclaims-nested-diagrams` by maintainer ruling (that
+  brief's D2). Upstream decides diagram ownership by **attempting the parse**
+  and taking the first factory that succeeds (`PSystemBuilder.java:258-266`);
+  this port decides by regex `accepts()` heuristics. That is the structural
+  divergence behind the whole misroute class. Blocked on a prerequisite, which
+  is why it is separate: **our parsers are permissive**. Fed the object-diagram
+  source that triggered the original bug, `parseSequence` returned a populated
+  AST (2 participants, 1 event) rather than failing, because it skips
+  unrecognised lines; upstream's equivalent fails because every line must match
+  a registered `Command`. So this mission must first give ≥13 engines strict
+  unrecognised-line handling, which changes error behaviour everywhere. Large,
+  and worth doing — it would delete the heuristics rather than tune them.
+- **`routing-heuristic-repair`** — BRIEFED 2026-08-23 at
+  `plans/routing-heuristic-repair/README.md`, not started. **Start here of
+  the three**: its prerequisite already landed, and it is the only one of
+  them that can proceed today. Re-scoped out of
+  `sequence-engine-overclaims-nested-diagrams` batch 4 after that mission
+  halted, with **every bucket re-measured** against the live tree rather than
+  carried over. Baseline **79 disagreements of 3158**, of which **75 are real
+  defects** and 4 are fixtures where the *jar* produced an error page. Nine
+  tasks in six batches, ordered by blast radius; **registration order is
+  frozen** (its D1). Each bucket carries the file and mechanism it was traced
+  to, and — the lesson from the halt — a measurement of *where each fixture
+  lands* once its over-claimer declines, which turned up three cross-task
+  dependencies that would otherwise have scored as failures.
+- **`sequence-engine-overclaims-nested-diagrams`** — **HALTED 2026-08-23 at
+  T2**, after batch 1 landed. Do not restart it as written. Its T1 routing
+  gate shipped (`ef62ef74`) and is this repo's measuring instrument for
+  routing; its D1 is **disproven**. Mirroring `PSystemBuilder.java`'s factory
+  order moves the gate **79 → 469** — 25 fixed, **415 newly misrouted** — via
+  two measured mechanisms: `sequencePlugin.accepts()` is true for 1351 of
+  3158 fixtures, 270 of which are not sequence diagrams; and description
+  (`:138`) before state (`:139`) moves 153 fixtures the jar calls STATE. The
+  order is **load-bearing**, compensating for heuristic over-claim, not
+  merely inverted. Batches 2–5 are superseded by the two entries around this
+  one. Full diagnosis: `.agent-notes/T2-registration-order-halt.md`. Original
+  filing text follows.
+- ~~**`sequence-engine-overclaims-nested-diagrams`**~~ — original filing,
+  superseded by the brief above. Found by
   `sequence-root-chrome`'s cross-engine manifest guard. `test-results/
   dot-cache/object/zuvila-56-nuda425/in.puml` is an OBJECT diagram (a `map`
   with a legend containing a nested `{{ }}` sub-diagram) and it renders as a

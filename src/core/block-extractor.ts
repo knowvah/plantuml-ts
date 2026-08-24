@@ -10,6 +10,8 @@
  * and scripts that hand it lines directly.
  */
 
+import { stripSpriteRegions } from './descriptive-keywords.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -129,6 +131,40 @@ const SEQUENCE_ACTOR_KEYWORDS = new Set([
 ]);
 
 /**
+ * T5 mechanism 2 (widening, D3 exception 1, `plans/routing-heuristic-repair/
+ * decisions.md#d3`): first-word keywords owned by `CommandActivate`
+ * (`~/git/plantuml/.../sequencediagram/command/CommandActivate.java:62`,
+ * `TYPE` group `(activate|deactivate|destroy|create)`). Bounded to the two
+ * forms the mission's fixtures actually exercise (`fonatu-29-texo854`:
+ * `activate C`; `todozi-34-jire490`: `activate A` / `deactivate A`) rather
+ * than the full TYPE alternative -- `destroy`/`create` have no fixture
+ * evidence and widening past what closes the nine is a stop condition.
+ */
+const SEQUENCE_ACTIVATION_KEYWORDS = new Set(['activate', 'deactivate']);
+
+/**
+ * T5 mechanism 2: `note over ...` -- `FactorySequenceNoteCommand.java:83,100`,
+ * the `POSITION` alternative `(right|left|over)` narrowed to `over` only.
+ * Unlike `right`/`left` (shared by every other diagram family's own note
+ * command -- `note left of X` is legal in state/class/activity diagrams
+ * too), `over` positioning does not exist outside
+ * `net/sourceforge/plantuml/command/note/sequence/` -- grepped, no other
+ * `command/note/` package defines it -- so it is a genuine sequence-only
+ * signal and safe to widen on (D3).
+ */
+const RE_NOTE_OVER = /^(?:note|hnote|rnote)\s+over\b/iu;
+
+/**
+ * T5 mechanism 2: left-pointing arrow dressing -- `CommandArrow.java:99-101`,
+ * `ARROW_DRESSING1`'s `(?:[%s][ox]|\(\d+\))?<<?_?` alternative, the reversed
+ * form of the `->`/`-->` dressing already probed below. Matches `<-`, `<--`,
+ * `<<--` (and `<<-`) -- the exact left-arrow tokens `zicadi-21-koje636`
+ * (`Test <<-- Test : …`) uses. Same command class as the right-pointing
+ * probe, just the mirrored dressing.
+ */
+const RE_LEFT_ARROW = /<<?-/u;
+
+/**
  * Collect the first N non-empty trimmed lines for detection probes.
  * This is called once and shared across all probes.
  */
@@ -160,9 +196,21 @@ function probeSequence(lines: readonly string[]): boolean {
     // Arrow patterns: ->, ->>, -->, -->>
     if (/->|-->/u.test(line)) return true;
 
+    // Left-pointing arrow patterns: <-, <--, <<-- (T5 mechanism 2, see
+    // RE_LEFT_ARROW above for the CommandArrow.java citation).
+    if (RE_LEFT_ARROW.test(line)) return true;
+
+    // `note over ...` (T5 mechanism 2, see RE_NOTE_OVER above for the
+    // FactorySequenceNoteCommand.java citation).
+    if (RE_NOTE_OVER.test(line)) return true;
+
     // Keyword-starts
     const firstWord = line.split(/\s+/u)[0]?.toLowerCase() ?? '';
-    if (SEQUENCE_ACTOR_KEYWORDS.has(firstWord)) return true;
+    if (
+      SEQUENCE_ACTOR_KEYWORDS.has(firstWord) ||
+      SEQUENCE_ACTIVATION_KEYWORDS.has(firstWord)
+    )
+      return true;
   }
   return false;
 }
@@ -199,8 +247,26 @@ function probeClass(lines: readonly string[]): boolean {
  */
 const UML_FALLBACK_TYPE: DiagramType = 'class';
 
+/**
+ * T5 mechanism 1: a `sprite $name { ... }` / `sprite name <svg ...` multiline
+ * region -- whether authored directly or landed by `!include` expansion
+ * (both are indistinguishable by the time this runs: preprocessing has
+ * already spliced the include's interior in) -- is stripped before the
+ * window is taken, so its body never crowds out the real diagram content.
+ * Same fix `stripSpriteRegions` already applies for `descriptive-keywords.ts`'s
+ * own SCAN_LINE_LIMIT (vivido-49-nisu863) -- this is the identical mechanism
+ * hitting a second window.
+ *
+ * Deliberately still windowed over the PREPROCESSED lines (not raw): the
+ * class doc comment on `finalizeBlock` records that choice, and stripping a
+ * *specific, upstream-defined* non-content region is not the same as
+ * abandoning the preprocessed-lines contract -- it only removes content
+ * that upstream itself never types on (`BlockUml#data` carries the sprite
+ * body, but no factory's `accepts()`/parse ever inspects it for typing).
+ */
 function detectUmlType(lines: readonly string[]): DiagramType {
-  const window = firstNonEmptyLines(lines, TYPE_DETECTION_WINDOW);
+  const scanLines = stripSpriteRegions(lines);
+  const window = firstNonEmptyLines(scanLines, TYPE_DETECTION_WINDOW);
   // State must be probed before sequence: "[*] -->" contains "-->" which
   // would otherwise match the sequence arrow pattern.
   if (probeState(window)) return 'state';

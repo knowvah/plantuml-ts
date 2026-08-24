@@ -149,3 +149,138 @@ describe('classAccepts — state-diagram signal disqualifies class (mission A4 P
     expect(classAccepts(L('class Foo\nstate : String'))).toBe(true);
   });
 });
+
+describe('classAccepts — T6: map declaration widening (D3 exception 2, decisions.md#d3)', () => {
+  it('claims a bare map declaration (CommandCreateMap, objectdiagram/command/CommandCreateMap.java)', () => {
+    expect(
+      classAccepts(L('map "Arrows legend " as arrows {\n"a" -> "b"\n}')),
+    ).toBe(true);
+  });
+
+  it('claims a map declaration nested inside legend+embed (object/zuvila-56-nuda425 shape)', () => {
+    // zuvila's only top-level content is `legend { {{ ... map ... }} }
+    // endlegend`; hasMapDeclaration must see the map BEFORE
+    // stripLegendRegions/scopeToEnclosingDiagram remove it.
+    expect(
+      classAccepts(
+        L(
+          'legend\n{{\nmap "Arrows legend " as arrows {\n"a" -> "b"\n}\n}}\nendlegend',
+        ),
+      ),
+    ).toBe(true);
+  });
+
+  it('declines a bare `map` with no name (unlike `object`, which allows one)', () => {
+    expect(classAccepts(L('map'))).toBe(false);
+  });
+});
+
+describe('classAccepts — T6 AC2: object declaration checked by its own grammar', () => {
+  it('claims `object Foo {` and `object Foo` (CommandCreateEntityObject)', () => {
+    expect(classAccepts(L('object Foo {\nfoo = 1\n}'))).toBe(true);
+    expect(classAccepts(L('object Foo'))).toBe(true);
+  });
+
+  it('claims a BARE `object` with no name too — map has no equivalent form', () => {
+    // `^object\s*$` (CLASS_ACCEPTS_PATTERNS) has no `map` counterpart: the
+    // two grammars are not spelled alike, per this task's own AC2.
+    expect(classAccepts(L('object'))).toBe(true);
+  });
+});
+
+describe('classAccepts — T6: scope to the enclosing diagram (over-claim narrowing)', () => {
+  it('declines a class declaration reachable only inside a note-embedded {{ }} sub-diagram (rizove-01-move566 shape)', () => {
+    expect(
+      classAccepts(
+        L(
+          'Alice -> Bob : hello1\nnote bottom\n{{\nclass Object {\nname : token\n}\n}}\nend note',
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it('declines an object declaration reachable only inside a note-embedded {{ }} sub-diagram (dasutu-58-saje713 shape)', () => {
+    expect(
+      classAccepts(
+        L(
+          'Bob -> Alice : hello\nnote left\nthis is a note\n{{\nobject o1 {\nfoo\n}\no1 --> o2\n}}\nOn the end\nend note',
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it('declines a class declaration reachable only inside a !procedure body', () => {
+    expect(
+      classAccepts(
+        L(
+          '!unquoted procedure OBJ()\nclass Object {\nname : token\n}\n!endprocedure\nAlice -> Bob : hello',
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it('still accepts a class declaration OUTSIDE the embedded/procedure region', () => {
+    expect(
+      classAccepts(L('class Real\nnote left\n{{\nobject o1\n}}\nend note')),
+    ).toBe(true);
+  });
+});
+
+describe('classAccepts — T6: sequence arrow decorations are not class relations (tuxido-23-xide677)', () => {
+  it.each([
+    ['Alice o-> Bob : hello', 'o-> dressing, CommandArrow.java ARROW_DRESSING1 "[%s][ox]"'],
+    [
+      'Alice <<--o Bob : ok',
+      '<<--o dressing, ARROW_DRESSING1 "<<?_?" + ARROW_DRESSING2 "[ox][%s]"',
+    ],
+  ])('declines "%s" (%s)', (line) => {
+    expect(classAccepts(L(line))).toBe(false);
+  });
+
+  it('declines both lines together, with no class keyword present', () => {
+    expect(
+      classAccepts(L('Alice o-> Bob : hello\nAlice <<--o Bob : ok')),
+    ).toBe(false);
+  });
+
+  it('still accepts a genuine class aggregation arrow with a single navigability glyph', () => {
+    // class/givoli-70-rade072 shape: single `<`, never doubled -- real class
+    // syntax, not sequence's `<<` dressing.
+    expect(
+      classAccepts(L('Potential "0..*" <--o "1" CompositePotential')),
+    ).toBe(true);
+  });
+});
+
+describe('classAccepts — T6 inherited scope: CommandCreateClassMultilines TYPE alternation siblings', () => {
+  it.each(['protocol', 'struct', 'exception', 'metaclass', 'dataclass', 'record'])(
+    'claims a bare `%s X {` declaration',
+    (kw) => {
+      expect(classAccepts(L(`${kw} Foo as "Bar" {\nC1\n}`))).toBe(true);
+    },
+  );
+
+  it('claims `static class X {}` and bare `abstract X {}`', () => {
+    expect(classAccepts(L('static class Foo {\n}'))).toBe(true);
+    expect(classAccepts(L('abstract Foo {\n}'))).toBe(true);
+  });
+
+  it('claims a protocol declaration nested inside container blocks (component/gutute-00-gaki684 shape)', () => {
+    expect(
+      classAccepts(
+        L('node N1 {\nnode N11 {\nprotocol X as "INOUT" {\nC1\nC2\n}\n}\n}'),
+      ),
+    ).toBe(true);
+  });
+
+  it('does NOT claim on "stereotype" — collides with <style> selectors and note prose', () => {
+    // sequence/dudeku-78-naju581, usecase/lunexo-59-fupo775: `stereotype {` /
+    // `Stereotype {` open a <style> block selector, not a class declaration;
+    // component/jegure-48-cesi766: "stereotype not working" is plain note
+    // prose. This per-line heuristic cannot disambiguate either from a
+    // genuine TYPE keyword the way CommandCreateClassMultilines's real
+    // parser can, so `stereotype` stays excluded (unlike its TYPE-alternation
+    // siblings above).
+    expect(classAccepts(L('stereotype {\nFontColor blue\n}'))).toBe(false);
+  });
+});

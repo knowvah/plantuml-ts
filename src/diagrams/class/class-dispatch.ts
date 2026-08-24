@@ -57,6 +57,7 @@ import {
   stripLegendRegions,
 } from '../../core/descriptive-keywords.js';
 import { REL_DISPATCH_RE } from './class-relationship-parser.js';
+import { getEmbeddedType } from '../../core/EmbeddedDiagram.js';
 
 /**
  * The subset of {@link CLASS_ACCEPTS_PATTERNS} that ONLY a class diagram can
@@ -64,12 +65,53 @@ import { REL_DISPATCH_RE } from './class-relationship-parser.js';
  * upstream's factory order. `interface`/`entity`/`circle` are excluded because
  * they belong to both grammars; a class-only relationship arrow is excluded
  * because it can appear inside an embedded `{{ }}` sub-diagram.
+ *
+ * T6 inherited-scope delta (`plans/routing-heuristic-repair/batch-5/
+ * T6-class-dispatch.md`'s "ADDED SCOPE — inherited from T4" section):
+ * `CommandCreateClassMultilines.java:102-103`'s TYPE alternation --
+ * `(interface|enum|annotation|abstract[%s]+class|static[%s]+class|abstract|
+ * class|entity|protocol|struct|exception|metaclass|stereotype|dataclass|
+ * record)` -- has SEVEN more class-only siblings this list never carried
+ * (`component/gutute-00-gaki684`'s `protocol X as "INOUT" {` is the fixture
+ * that surfaced the gap; the rest is covered on the same TYPE-alternation
+ * evidence, not left for one fixture per keyword). Grepped the whole corpus
+ * (`test-results/dot-cache/`, `oracle/goldens/`) for a leading-line use of
+ * each candidate: `static class`/`protocol`/`struct`/`exception`/
+ * `metaclass`/`dataclass`/`record` have ZERO hits outside `class`/`object`
+ * fixtures, so they join this list (and bare `abstract`, verified safe by
+ * three `object/` fixtures literally declaring `abstract abstract` — TYPE
+ * keyword then a class named "abstract"). `stereotype` does NOT join it,
+ * despite being in the same Java alternation: it collides with plain note
+ * prose (`component/jegure-48-cesi766`: `stereotype not working`, inside a
+ * `note … end note` body) and with `<style>` block CSS selectors
+ * (`sequence/dudeku-78-naju581`, `usecase/lunexo-59-fupo775`: `stereotype {`
+ * / `Stereotype {` opening a style rule, unrelated to
+ * `CommandCreateClassMultilines`). This port's `classAccepts` is a per-line
+ * text heuristic, not upstream's real parser, so it cannot tell those uses
+ * apart from a genuine TYPE keyword the way `CommandCreateClassMultilines`
+ * can; `stereotype` is excluded here for the identical reason
+ * `interface`/`entity` already are above -- ambiguous with a grammar this
+ * heuristic cannot see past.
+ *
+ * These siblings are NOT duplicated into {@link CLASS_ACCEPTS_PATTERNS}
+ * (the class-doc-comment's "subset" framing notwithstanding): this array is
+ * tested FIRST and returns unconditionally on a match
+ * ({@link classAccepts}'s own body), so a copy in `CLASS_ACCEPTS_PATTERNS`
+ * would be unreachable dead code for every one of them.
  */
 const UNAMBIGUOUS_CLASS_DECL: readonly RegExp[] = [
   /^class\s/i,
   /^abstract\s+class\s/i,
   /^enum\s/i,
   /^annotation\s/i,
+  /^static\s+class\s/i,
+  /^abstract\s/i,
+  /^protocol\s/i,
+  /^struct\s/i,
+  /^exception\s/i,
+  /^metaclass\s/i,
+  /^dataclass\s/i,
+  /^record\s/i,
 ];
 
 /**
@@ -82,7 +124,20 @@ const CLASS_ACCEPTS_PATTERNS: readonly RegExp[] = [
   /^interface\s/i,
   /^enum\s/i,
   /^annotation\s/i,
-  /<\|--|<\|\.\.|--\|>|\.\.\|>|\*--|o--|--\*|--o/,
+  // T6 (`tuxido-23-xide677`, sequence's `Alice <<--o Bob : ok`) — the `--o`
+  // alternative is a raw substring test with no grammar context, so it also
+  // matched sequence's OWN `<<--o` arrow dressing (`CommandArrow.java:99-116`'s
+  // ARROW_DRESSING1 `<<?_?` alternative followed by ARROW_DRESSING2 `[ox][%s]`).
+  // A genuine class aggregation arrow never doubles the navigability glyph —
+  // `<--o`/`o-->` (single `<`/`>`) are real class syntax (verified against
+  // `class/givoli-70-rade072` et al.: `Potential "0..*" <--o "1"
+  // CompositePotential`), but `<<`/`>>` never appear in
+  // `class-relationship-parser.ts`'s own arrow grammar at all — so excluding
+  // ONLY the doubled glyph (`(?<!<<)`) removes the sequence collision without
+  // narrowing the real class token. No fixture pairs `--o`/`o--` with a doubled
+  // glyph on the OTHER side (`o-->>`/`<<o--`), so that mirror case is left
+  // unguarded rather than fitted to a token nothing in the corpus exercises.
+  /<\|--|<\|\.\.|--\|>|\.\.\|>|\*--|o--|--\*|(?<!<<)--o/,
   // `object` must be followed by a token that can start nameAndCode()
   // (CODE = [^%s{}%g<>]+, or a quoted DISPLAY) — CommandCreateEntityObject
   // (objectdiagram/command/CommandCreateEntityObject.java:71-80,
@@ -93,27 +148,18 @@ const CLASS_ACCEPTS_PATTERNS: readonly RegExp[] = [
   // regex/Pattern2.java:114).
   /^object\s+[^\s{}<>]/i,
   /^object\s*$/i,
-  // `map` (CommandCreateMap) — same name-start guard as `object` above, so a
-  // class named "map" used as a relationship endpoint (`map <|-- Foo`) does
-  // not false-trigger map dispatch; that guard is enough because
-  // REL_DISPATCH_RE already strips such a line before this scan runs (it is
-  // a relationship line, recognised by its own arrow-token accept pattern
-  // above), and REL_DISPATCH_RE + MAP_MULTILINE_DECL_RE never both match one
-  // line anyway (a relationship line never ends in a bare `{`). Deliberately
-  // loose here (no requirement that the line end in `{`, unlike the real
-  // `map` grammar, which mandates it): matching class-map-commands.ts's own
-  // MAP_MULTILINE_DECL_RE exactly would just duplicate that grammar for no
-  // behavioral gain — this accept-signal only needs to route the BLOCK to
-  // the class engine, not fully validate the map header (mirrors `object`'s
-  // own loose accept pattern, which similarly does not require the
-  // conditions its own single-line/multiline split cares about).
-  /^map\s+[^\s{}<>]/i,
+  // `map` (CommandCreateMap) moved to {@link hasMapDeclaration}, T6
+  // (`decisions.md#d3` exception 2): that check runs BEFORE legend/embed
+  // narrowing so `object/zuvila-56-nuda425`'s map declaration — nested
+  // inside a `legend … endlegend` body — still claims the block, which a
+  // copy of this pattern here (tested against the narrowed `scoped` array)
+  // could never do. See that function's doc comment for the full reasoning.
   // `json` (CommandCreateJson / CommandCreateJsonSingleLine) — same
-  // name-start guard as `object`/`map` above, and same reasoning: loose on
-  // purpose (routes the block; class-json-commands.ts's own two patterns do
-  // the real header validation). A class named "json" as a relationship
-  // endpoint is already stripped by REL_DISPATCH_RE before this scan runs,
-  // same as `map`.
+  // name-start guard as `object` above (and `map`'s own, in
+  // {@link hasMapDeclaration}), and same reasoning: loose on purpose (routes
+  // the block; class-json-commands.ts's own two patterns do the real header
+  // validation). A class named "json" as a relationship endpoint is already
+  // stripped by REL_DISPATCH_RE before this scan runs, same as `map`.
   /^json\s+[^\s{}<>]/i,
 ];
 
@@ -239,6 +285,105 @@ function stripNoteBodies(lines: readonly string[]): string[] {
 }
 
 /**
+ * T6 (D3 widening exception 2, `plans/routing-heuristic-repair/
+ * decisions.md#d3`): `map "…" as x { … }` — `CommandCreateMap`
+ * (~/git/plantuml/.../objectdiagram/command/CommandCreateMap.java),
+ * registered directly on `ClassDiagramFactory` alongside the object
+ * commands — there is no separate map/object diagram engine upstream (see
+ * this module's own "object declarations" doc-comment section above).
+ * `object/zuvila-56-nuda425`'s only top-level content is a `legend …
+ * endlegend` body wrapping a `{{ }}` sub-diagram that itself contains the
+ * map declaration — a creole rendering detail the jar still parses as real
+ * `ClassDiagramFactory` content (`TextBlockExporter` stamps the WHOLE
+ * document `data-diagram-type="CLASS"`).
+ *
+ * Checked against `lines` BEFORE legend/embed narrowing for exactly that
+ * reason: routing this signal through `stripLegendRegions` or
+ * {@link scopeToEnclosingDiagram} (both applied inside {@link classAccepts}
+ * below) would strip the very declaration D3 authorises `classAccepts` to
+ * widen on. Bounded to `map` alone, matching D3's two-exception cap —
+ * `object`/`class` keep the narrower, scoped treatment those two functions
+ * apply.
+ */
+const MAP_DECL_RE = /^map\s+[^\s{}<>]/i;
+
+function hasMapDeclaration(lines: readonly string[]): boolean {
+  return lines.slice(0, SCAN_LINE_LIMIT).some((l) => MAP_DECL_RE.test(l.trim()));
+}
+
+/**
+ * T6 over-claim fix (`dasutu-58-saje713`, `rizove-01-move566`): an embedded
+ * `{{ … }}` sub-diagram body declares a DIFFERENT diagram than the one
+ * enclosing it, and a `!procedure`/`!function` … `!endprocedure`/
+ * `!endfunction` macro body is never itself diagram content — it is only
+ * substituted at CALL sites (`tim/EaterDeclareProcedure.java:66`; the
+ * declare/end pair is `text/TLineType.java:100-103`
+ * `PATTERN_DECLARE_PROCEDURE` / :95-98 `PATTERN_DECLARE_RETURN_FUNCTION`,
+ * closed by the SAME `!end(function|definelong|procedure)` pattern at
+ * java:119-122). A `class`/`object` declaration appearing ONLY inside one
+ * of these regions must not make the ENCLOSING block's `classAccepts` claim
+ * it — `dasutu-58-saje713`'s `object o1 { … }` sits inside a `{{ }}` inside
+ * a `note left … end note`, and `rizove-01-move566`'s `class Object { … }`
+ * sits inside a `{{ }}` inside a `!unquoted procedure … !endprocedure`; both
+ * read as SEQUENCE once this scoping applies.
+ *
+ * Embedded-diagram nesting reuses {@link getEmbeddedType}
+ * (`src/core/EmbeddedDiagram.ts`) rather than a second boundary notion, per
+ * this task's own boundary note: a nested embed opener (any line
+ * `getEmbeddedType` recognises) increments depth, a bare `}}`
+ * (`EmbeddedDiagram.EMBEDDED_END`, inlined below rather than importing the
+ * whole rendering-seam class for one string literal) decrements it, and
+ * only the OUTERMOST close ends the strip — `EmbeddedDiagram
+ * .createAndSkip`'s own nesting algorithm (java:97-115), reused here for
+ * the identical reason it exists there. `!procedure`/`!function` bodies are
+ * scanned to their own `!end…` unconditionally, with no depth-tracking:
+ * upstream does not permit declaring one macro inside another's body, and
+ * this port has no fixture in scope that would need it.
+ *
+ * NOT applied to the D3 `map` widening — see {@link hasMapDeclaration}'s own
+ * doc comment for why that check must see `lines` unscoped.
+ */
+const PROCEDURE_START_RE =
+  /^!(?:unquoted\s+|final\s+)*(?:procedure|function)\s+\$?\S/i;
+const PROCEDURE_END_RE = /^!end(?:procedure|function|definelong)\b/i;
+/** `EmbeddedDiagram.EMBEDDED_END` (`src/core/EmbeddedDiagram.ts`) — literal,
+ *  to avoid importing that class's renderer-seam surface for one constant. */
+const EMBEDDED_END = '}}';
+
+function scopeToEnclosingDiagram(lines: readonly string[]): string[] {
+  const out: string[] = [];
+  let region: 'none' | 'embedded' | 'procedure' = 'none';
+  let embedDepth = 0;
+  for (const line of lines) {
+    const t = line.trim();
+    if (region === 'procedure') {
+      if (PROCEDURE_END_RE.test(t)) region = 'none';
+      continue;
+    }
+    if (region === 'embedded') {
+      if (getEmbeddedType(t) !== null) {
+        embedDepth++;
+      } else if (t === EMBEDDED_END) {
+        embedDepth--;
+        if (embedDepth === 0) region = 'none';
+      }
+      continue;
+    }
+    if (PROCEDURE_START_RE.test(t)) {
+      region = 'procedure';
+      continue;
+    }
+    if (getEmbeddedType(t) !== null) {
+      region = 'embedded';
+      embedDepth = 1;
+      continue;
+    }
+    out.push(line);
+  }
+  return out;
+}
+
+/**
  * True when the class engine should own this block.
  *
  * Decline any block carrying a descriptive signal the class factory would not
@@ -251,16 +396,23 @@ function stripNoteBodies(lines: readonly string[]): string[] {
  * `descriptive-keywords.ts`'s `stripLegendRegions`): without this, a lone
  * `class foo` diagram whose trailing legend happens to contain `()`/`[...]`
  * text is misrouted to the description engine (bixogo-47-xulu385,
- * roxosu-00-pini153).
+ * roxosu-00-pini153). Embedded `{{ }}` sub-diagram and `!procedure`/
+ * `!function` macro bodies are scoped out too, by
+ * {@link scopeToEnclosingDiagram} — see its own doc comment.
  */
 export function classAccepts(lines: readonly string[]): boolean {
+  // D3 widening exception 2 — checked first and unscoped; see
+  // hasMapDeclaration's own doc comment for why it must bypass the
+  // narrowing below.
+  if (hasMapDeclaration(lines)) return true;
   const allowMixing = lines.some((l) => ALLOW_MIXING_RE.test(l.trim()));
   // Δ1 — `allowmixing` is a class-only command: the block IS a class diagram
   // permitting descriptive elements (upstream CommandAllowMixing → ClassDiagram).
   if (allowMixing) return true;
   const noLegend = stripLegendRegions(lines);
+  const scoped = scopeToEnclosingDiagram(noLegend);
   const declLines = stripNoteBodies(
-    noLegend.filter((l) => !REL_DISPATCH_RE.test(l.trim())),
+    scoped.filter((l) => !REL_DISPATCH_RE.test(l.trim())),
   ).filter((l) => {
     const t = l.trim();
     if (MEMBER_LINE_RE.test(t) || ENTITY_CIRCLE_DECL_RE.test(t)) return false;
@@ -282,7 +434,7 @@ export function classAccepts(lines: readonly string[]): boolean {
   // keyword table's own note), so `interface I` inside a `component { }` is a
   // component diagram and must keep declining to description.
   if (
-    noLegend
+    scoped
       .slice(0, SCAN_LINE_LIMIT)
       .some((l) => UNAMBIGUOUS_CLASS_DECL.some((p) => p.test(l.trim())))
   ) {
@@ -293,7 +445,7 @@ export function classAccepts(lines: readonly string[]): boolean {
   // Trimmed before testing (mirrors the rest of classAccepts, above): an
   // indented `class`/`abstract class`/… inside a namespace block is
   // otherwise invisible to CLASS_ACCEPTS_PATTERNS, which anchor on `^`.
-  return noLegend
+  return scoped
     .slice(0, SCAN_LINE_LIMIT)
     .some((l) => CLASS_ACCEPTS_PATTERNS.some((p) => p.test(l.trim())));
 }

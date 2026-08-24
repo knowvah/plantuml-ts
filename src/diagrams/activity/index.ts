@@ -17,6 +17,25 @@ import { renderActivity } from './renderer.js';
 /**
  * Keywords that appear in activity diagrams but not other diagram types.
  *
+ * The swimlane patterns below were previously one bare `/^\|.+\|/` -- "starts
+ * with a pipe, ends with a pipe" -- which also matched sequence's `|||`
+ * spacer directive, sequence's `||0||` parameterised delay, and creole table
+ * rows inside a `legend` block (`|= |= Type |`, `| Item1 | 1 | 3 |`). All
+ * nine SEQUENCE fixtures that tripped it are pinned in
+ * `tests/unit/activity/accepts.test.ts`. Narrowed to mirror upstream's own
+ * grammar instead of guessing from those fixtures:
+ *
+ * - `CommandSwimlane.java:60-67` (the `|name|` form) -- concatenates
+ *   `^\|`, an optional `(#color)\|` prefix, `([^|]+)` for the name (1+
+ *   non-pipe chars, so `||` back-to-back cannot satisfy it), a literal `\|`,
+ *   then an optional `([^|]+)?` label and `$`. Exactly two literal pipes
+ *   (three with a color) are ever consumed; `|||`, `||0||` and any line
+ *   carrying a third, unconsumed pipe (the creole rows) fail to reach `$`.
+ * - `CommandSwimlane2.java:60-75` (the `swimlane NAME [as LABEL]` keyword
+ *   form) -- `swimlane`, one-or-more spaces, an optional color, the name,
+ *   then an optional ` as LABEL`. Case-insensitive globally
+ *   (`Pattern2.java:114`), matching this file's other keyword patterns.
+ *
  * A bare `end` is deliberately NOT here, even though `end` IS a real activity
  * node (`ast.ts`'s `kind: 'end'`, the crossed circle). It is not EVIDENCE of
  * an activity diagram, because it is also the terminator of every sequence
@@ -45,7 +64,10 @@ const ACTIVITY_ACCEPTS_PATTERNS: readonly RegExp[] = [
   /^repeat\s*$/i,
   /^fork\s*$/i,
   /^split\s*$/i,
-  /^\|.+\|/,                   // |swimlane|
+  // |swimlane| or |#color|swimlane|label — CommandSwimlane.java:60-67
+  /^\|(?:#\w+[-\\|/]?\w+\|)?[^|]+\|[^|]*$/,
+  // swimlane NAME [as LABEL] — CommandSwimlane2.java:60-75
+  /^swimlane\s+(?:#\w+[-\\|/]?\w+\s*)?[^|]+?(?:\s+as\s+[^|]+)?$/i,
   /^fork\s+again\s*$/i,
   /^split\s+again\s*$/i,
 ];

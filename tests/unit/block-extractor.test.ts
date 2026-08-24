@@ -248,6 +248,86 @@ describe('extractBlocks — content-based type detection for @startuml', () => {
     const blocks = linesToBlocks('@startuml\n[*] --> Idle\nIdle --> Active\n@enduml');
     expect(blocks[0]?.type).toBe('state');
   });
+
+  // T5 mechanism 1: a `sprite $name { ... }` multiline block (or its
+  // `!include`-expanded equivalent -- both land as preprocessed content lines
+  // by the time `finalizeBlock` sees them) must not consume the detection
+  // window ahead of the real diagram body. Mirrors `stripSpriteRegions`
+  // (descriptive-keywords.ts), which solved the identical problem for
+  // `hasDescriptiveSignal`'s own SCAN_LINE_LIMIT (vivido-49-nisu863).
+  describe('sprite regions do not consume the detection window (T5 mechanism 1)', () => {
+    it('types on the body when a 24-row sprite block fills the window first', () => {
+      const spriteRows = Array.from({ length: 24 }, () => '1234567890').join('\n');
+      const src =
+        `@startuml\nsprite $disk16 {\n${spriteRows}\n}\nAlice -> Bob : hello\n@enduml`;
+      const blocks = linesToBlocks(src);
+      expect(blocks[0]?.type).toBe('sequence');
+    });
+
+    it('types on the body when a multiline svg sprite fills the window first', () => {
+      const svgRows = Array.from({ length: 24 }, (_, i) => `  <path d="M${i},0"/>`).join('\n');
+      const src =
+        `@startuml\nsprite complexsprite <svg width="1">\n${svgRows}\n</svg>\nAlice -> Bob : hello\n@enduml`;
+      const blocks = linesToBlocks(src);
+      expect(blocks[0]?.type).toBe('sequence');
+    });
+
+    it('still respects the window for content outside any sprite region', () => {
+      // A sprite region does not grant an unlimited window: 21 neutral lines
+      // AFTER the stripped sprite region still push the arrow out of range.
+      const spriteRows = Array.from({ length: 3 }, () => '111').join('\n');
+      const neutralLine = 'skinparam backgroundColor white';
+      const padding = Array.from({ length: 21 }, () => neutralLine).join('\n');
+      const src =
+        `@startuml\nsprite $x {\n${spriteRows}\n}\n${padding}\nAlice -> Bob\n@enduml`;
+      const blocks = linesToBlocks(src);
+      expect(blocks[0]?.type).toBe('class');
+    });
+  });
+
+  // T5 mechanism 2: real sequence-only tokens `probeSequence` never probed.
+  // Each row cites the upstream command class that owns the grammar.
+  describe('sequence-only tokens missed by the original probe (T5 mechanism 2)', () => {
+    it.each([
+      // CommandActivate.java:62 -- TYPE group `(activate|deactivate|destroy|create)`
+      ['activate C', 'activate C'],
+      ['deactivate A', 'deactivate A'],
+      // FactorySequenceNoteCommand.java:83,100 -- POSITION alternative
+      // `(right|left|over)`; "over" positioning is sequence-exclusive (no
+      // other diagram family's note command supports it).
+      ['note over A: Hello', 'note over A: Hello'],
+      // CommandArrow.java:99-101 -- ARROW_DRESSING1's `<<?_?` alternative,
+      // the reversed dressing of the already-probed right-pointing form.
+      ['left-pointing arrow <-', 'Alice <- Bob'],
+      ['left-pointing arrow <--', 'Alice <-- Bob'],
+      ['left-pointing arrow <<--', 'Alice <<-- Bob'],
+    ])('detects sequence type from %s', (_label, line) => {
+      const blocks = linesToBlocks(`@startuml\n${line}\n@enduml`);
+      expect(blocks[0]?.type).toBe('sequence');
+    });
+
+    it('detects the full todozi-34-jire490 shape (activate/note over/deactivate)', () => {
+      const blocks = linesToBlocks(
+        '@startuml\nactivate A\nnote over A: Hello\ndeactivate A\n@enduml',
+      );
+      expect(blocks[0]?.type).toBe('sequence');
+    });
+
+    it('detects the full zicadi-21-koje636 shape (activate/left arrow/deactivate)', () => {
+      const blocks = linesToBlocks(
+        '@startuml\nactivate Test\nTest <<-- Test : msg\ndeactivate Test\n@enduml',
+      );
+      expect(blocks[0]?.type).toBe('sequence');
+    });
+
+    it('does not treat "note left of X" as sequence-exclusive (over-only widening)', () => {
+      // D3 bounds the widening to "note over" specifically -- "note left"/
+      // "note right" are shared across diagram families and must stay out
+      // of the sequence-only probe.
+      const blocks = linesToBlocks('@startuml\nnote left of A: Hello\n@enduml');
+      expect(blocks[0]?.type).toBe('class');
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------

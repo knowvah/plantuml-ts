@@ -15,14 +15,31 @@ import { renderSequence } from './renderer.js';
 // Accepts heuristics
 // ---------------------------------------------------------------------------
 
-/** Patterns that appear in sequence diagrams but not other diagram types. */
-const SEQUENCE_PATTERNS: readonly RegExp[] = [
-  /->>?|-->>?/,
-  /^(participant|actor|boundary|control|entity|database|collections|queue)\s/,
-];
+const ARROW_PATTERN = /->>?|-->>?/;
+const SEQUENCE_KEYWORD_PATTERN =
+  /^(participant|actor|boundary|control|entity|database|collections|queue)\s/;
+
+/**
+ * Upstream's arrow grammar (`CommandArrow.java:88-133`) matches a whole
+ * line — `RegexLeaf.start()` … `RegexLeaf.end()` — and its quoted
+ * participant form (`:94`, `[%g]([^%g]+)[%g]`) consumes an entire `"..."`
+ * span as ONE atomic PART token before the arrow leaf is ever tried. Dash
+ * characters inside a quote are therefore never candidates for the arrow
+ * itself upstream; only dashes OUTSIDE any quote can be "in arrow
+ * position". `object/zuvila-56-nuda425` (a CLASS diagram per the jar)
+ * carries `$arrow("-->")` — a `!procedure` argument — whose `-->` sits
+ * entirely inside a quoted string and is not an arrow at all. Strip quoted
+ * spans before testing so a trapped arrow token can't satisfy the pattern.
+ */
+function stripQuotedSpans(line: string): string {
+  return line.replace(/"[^"]*"/g, '');
+}
 
 function isSequenceLine(line: string): boolean {
-  return SEQUENCE_PATTERNS.some((p) => p.test(line));
+  return (
+    ARROW_PATTERN.test(stripQuotedSpans(line)) ||
+    SEQUENCE_KEYWORD_PATTERN.test(line)
+  );
 }
 
 // ---------------------------------------------------------------------------
