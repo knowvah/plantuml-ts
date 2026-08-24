@@ -122,7 +122,7 @@ ordered the way they are and not simply run in parallel:
 | [3](batch-3/overview.md) | T4 descriptive signal | — | 34 of 36 (gutute -> T6; kokebo = parse-attempt stop) | [x] |
 | [4](batch-4/overview.md) | T5 `detectUmlType` | — | 9 | [x] |
 | [5](batch-5/overview.md) | T6 class dispatch · T7 sequence arrow | yes | 5 (incl. T4's gutute) | [x] |
-| [6](batch-6/overview.md) | T8 re-pin · T9 preprocessor failure | yes | 1 + baselines | [ ] |
+| [6](batch-6/overview.md) | T8 re-pin · T9 preprocessor failure | sequential | baselines re-pinned; T9 stopped (diagnosed) | [x] |
 
 **Batch order is by blast radius, ascending, with one exception.** T3 is in
 batch 2 rather than later because two other batches' fixtures fall through to
@@ -182,3 +182,75 @@ for a large share of the corpus.
   — why the parent halted
 - `.agent-notes/T2-registration-order-halt.md` — the full halt diagnosis,
   including the plugin↔factory↔line derivation this mission must NOT apply
+
+---
+
+## Mission summary — closed 2026-08-24
+
+**Routing misroutes: 79 pinned at the start → 75 real defects → 2 remaining.**
+
+| Batch | Task | Closed | SLI after |
+|---|---|---|---|
+| 1 | T1 jar-error classification | 4 non-defects split out (8 found, see below) | 75 |
+| 2 | T2 activity swimlane · T3 json/yaml braces | 25 | 50 |
+| 3 | T4 descriptive signal | 34 of 36 | 16 |
+| 4 | T5 `detectUmlType` | 9 | 7 |
+| 5 | T6 class dispatch · T7 sequence arrow | 5 (incl. T4's `gutute`) | 2 |
+| 6 | T8 re-pin · T9 diagnosis | 73 re-pinned; T9 stopped | 2 |
+
+### Exit bar — met, except one clause, deliberately
+
+- ❌ **0 real misroutes** — landed at **2**. Both diagnosed, neither pinned
+  away. See "Residual" below. This clause was not reachable within D1.
+- ✅ **Zero fixtures newly misroute** — the gate's 3148-fixture `agree` check
+  reports 0 broken at every batch boundary.
+- ✅ **Zero de-promotions** across the 482 promoted zero-diff fixtures. In
+  fact *no* `ratchet.json`/`diff-baseline.json` needed touching at all: the
+  per-engine render helpers call their engine directly rather than
+  `renderSync`, so those populations never passed through the dispatcher this
+  mission repaired.
+- ✅ **`src/index.ts` registration order unchanged** (D1), throughout.
+- ✅ **All four gates green** — `npm test` 635 files / 16293 tests,
+  `typecheck`, `lint`, `build` all exit 0; coverage 95.45 / 90.49 / 96.96 /
+  96.53, above the 90/90/90 floor.
+
+### Residual — 2 fixtures, both structural, both handed on
+
+1. **`component/kokebo-27-vafi688`** (`CLASS → DESCRIPTION`) — no line-text
+   discriminator exists. `CommandPackageWithUSymbol`
+   (`ClassDiagramFactory.java:130`, `DescriptionDiagramFactory.java:96`) and
+   `CommandRemoveRestore` (`:114`, `:94`) are registered on **both**
+   factories, so every line parses under both. Upstream breaks the tie by
+   class-tries-first plus whole-document parse success, which D1 forbids
+   copying here. → **`dispatch-by-parse-attempt`**.
+2. **`sequence/nuvoja-46-dezu541`** (`SEQUENCE → NONE`) — a preprocessor
+   failure, not a routing one. `!includedef` is routed through this port's
+   file/include-store seam and throws (`IncludeExecutor.ts:127`, throw at
+   `:179`); upstream's `!includedef` is a same-document `@startdef(id=NAME)`
+   scan returning `Collections.emptyList()` on a miss
+   (`TContext.java:687-709`, `BlockUmlBuilder.java:150-156`,
+   `BlockUml.java:241-244`). A conforming fix needs an unported `@startdef`
+   block concept plus a cross-block definitions container. → **a new
+   preprocessor mission**. Artifact:
+   `.agent-notes/T9-includedef-definitions-container.md`.
+
+### Corrections this mission made to its own brief
+
+- **jar-error fixtures are 8, not 4.** The brief scanned only within the 79
+  disagreements; four `state/` banner pages agree at `NONE == NONE` and were
+  never examined. The 75-defect denominator is unaffected.
+- **`sequencePlugin.accepts()` was 1346 / 247, not 1351 / 270**, before T7 —
+  the brief's figures predate batches 2–4. Now **1343 / 244**. These are the
+  standing measure of how far `dispatch-by-parse-attempt` still has to go.
+- **T8's AC1 was unachievable as written** (0 misroutes, 4 jar-errors);
+  restated to 2 and 8 before dispatch.
+- **Batch 6 is not parallelisable** — both tasks write the decision journal,
+  and T8's manifest depends on T9's outcome. Run sequentially.
+
+### Note for future missions
+
+`stereotype` is deliberately **excluded** from the class TYPE alternation in
+`class-dispatch.ts`, though it is in
+`CommandCreateClassMultilines.java:102-103`. Including it newly misroutes
+`sequence/dudeku-78-naju581`, where `stereotype {` is a `<style>` block
+selector. Do not "complete" the set without re-reading that fixture.
