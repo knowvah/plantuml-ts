@@ -1,0 +1,33 @@
+dot-cache	component/balipa-82-feto843	syntax	1	component AA_ok {
+dot-cache	component/diduxa-76-zimu664	syntax	9	
+dot-cache	component/dirofi-81-cuga514	syntax	1	
+dot-cache	component/dugovi-24-kupu658	syntax	1	node {
+dot-cache	component/fogexa-24-lavi583	syntax	1	[A] - interface
+dot-cache	component/fojamu-08-veku866	syntax	1	!pragma kermor on
+dot-cache	component/fopako-15-labi027	syntax	2	
+dot-cache	component/givape-84-xano421	syntax	7	
+dot-cache	component/gurive-62-ricu497	syntax	1	
+dot-cache	component/lobute-63-tizi096	syntax	6	
+dot-cache	component/nadocu-64-juba262	syntax	1	[Component 1] <-> bar_interface
+dot-cache	component/nedapu-57-dife142	syntax	1	[Object1] - Interface1
+dot-cache	component/pepego-30-kati324	syntax	1	node "V" {
+dot-cache	component/perapa-23-mobu798	syntax	2	
+dot-cache	component/purevo-74-pamo264	syntax	1	node n1 {
+dot-cache	component/repite-70-vabe533	syntax	1	
+dot-cache	component/repoge-41-demu604	syntax	1	
+dot-cache	component/siseda-71-napu395	syntax	1	!pragma kermor on
+dot-cache	component/sojika-99-dopa449	syntax	1	card c
+dot-cache	component/tajuki-26-bime046	syntax	1	cloud "local network" as LocalNet {
+dot-cache	component/tatofi-90-vali632	syntax	1	card c
+dot-cache	component/texacu-57-daci050	syntax	1	package AA_ok {
+dot-cache	component/tizuza-93-xeto109	syntax	1	left to right direction
+dot-cache	component/tukipe-82-ziva562	syntax	5	
+dot-cache	component/tuliba-37-liza126	syntax	2	}
+dot-cache	component/vapalu-27-muxa300	syntax	1	!pragma aspect 2,5
+dot-cache	component/vosapi-62-mugu541	syntax	1	package "Package" {
+dot-cache	component/vosuxa-11-tapu784	syntax	1	[MIDI Keyboard] as MIDDevIn
+dot-cache	component/xirika-05-beju263	syntax	1	() Database
+dot-cache	component/zibumo-62-rije152	syntax	1	
+dot-cache	component/zubujo-87-xaxa087	syntax	1	!pragma kermor on
+dot-cache	component/zucufi-77-vabo990	syntax	1	component server
+goldens	svg-description/component/vapalu-27-muxa300	syntax	1	!pragma aspect 2,5

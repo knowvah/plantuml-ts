@@ -1,0 +1,60 @@
+dot-cache	class/baneru-00-kuro607	syntax	1	class class1
+dot-cache	class/befasi-62-vimu310	syntax	8	end note
+dot-cache	class/bujedi-30-cize673	syntax	1	class A
+dot-cache	class/cadutu-02-lazu601	syntax	1	class foo1
+dot-cache	class/cexibu-81-bize688	syntax	1	package A {
+dot-cache	class/cidepu-54-bemo048	syntax	1	class pack.ClassA {
+dot-cache	class/cirojo-62-dubo306	syntax	1	
+dot-cache	class/comaxe-39-goza236	syntax	1	class class1
+dot-cache	class/coxose-20-nifu136	syntax	1	class HashMap<K,V>
+dot-cache	class/daxeno-00-kasu166	syntax	6	
+dot-cache	class/deboga-81-zuza232	syntax	4	class bar1
+dot-cache	class/delasa-80-jusu462	syntax	2	
+dot-cache	class/dimisi-54-dula946	syntax	1	class Forum
+dot-cache	class/dudimi-83-mimo845	syntax	2	class BaseClass
+dot-cache	class/galili-87-zivo129	syntax	1	header some header
+dot-cache	class/gamevo-26-runo973	syntax	10	class osgGroup << (O,lightblue) >>
+dot-cache	class/gokoru-18-daba136	syntax	1	
+dot-cache	class/gujigi-63-roki030	syntax	1	allowmixing
+dot-cache	class/jiceke-84-xoze695	syntax	1	class VGP_Golden_Attribute << Configuration >> {
+dot-cache	class/jojime-80-savu279	syntax	1	package A {
+dot-cache	class/kadifi-56-bili996	syntax	1	class class1
+dot-cache	class/kopida-02-vaje995	syntax	1	class class1
+dot-cache	class/kuxato-79-muno809	syntax	1	
+dot-cache	class/lagudi-03-rucu383	syntax	1	class foo1
+dot-cache	class/lelabe-72-zate295	syntax	14	
+dot-cache	class/mububu-79-nalu431	syntax	8	end note
+dot-cache	class/nuvake-96-gofe203	syntax	8	end note
+dot-cache	class/pisake-59-jugi837	syntax	3	
+dot-cache	class/pumocu-32-fiji248	syntax	1	class class1
+dot-cache	class/rekazo-16-jola519	syntax	1	
+dot-cache	class/ribove-58-tefu515	syntax	8	end note
+dot-cache	class/rutefe-49-xeju709	syntax	1	class foo1
+dot-cache	class/sekame-22-meze147	syntax	1	!pragma defaultLabelangle 30
+dot-cache	class/soboro-52-pevi612	syntax	8	end note
+dot-cache	class/tebito-30-cozi447	syntax	1	
+dot-cache	class/tegefa-14-koxo759	syntax	1	
+dot-cache	class/temofi-63-vega763	syntax	1	class foo1
+dot-cache	class/tibatu-28-jiro743	syntax	1	
+dot-cache	class/tucesi-19-xato263	syntax	1	title diagram 1
+dot-cache	class/vekime-22-buru589	syntax	14	
+dot-cache	class/vinujo-78-kapo329	syntax	2	
+dot-cache	class/vorimi-67-gudu296	syntax	1	class class1
+dot-cache	class/vuneta-67-gija125	syntax	1	namespace issues {
+dot-cache	class/xefeme-77-fagu709	syntax	1	class Foo {
+dot-cache	class/xosisa-09-tine238	syntax	1	A <|-- B
+dot-cache	class/zakuta-81-pese010	syntax	8	end note
+dot-cache	class/ziruni-05-fona846	syntax	8	end note
+dot-cache	class/zosaxa-86-mora157	syntax	7	OpenSceneGraph
+dot-cache	component/gutute-00-gaki684	syntax	1	node 8e1b16cc_d726_4065_8df7_92dbd56d56aa as "N1" {
+dot-cache	object/diveje-52-xefe514	syntax	1	object London
+goldens	svg-class/deboga-81-zuza232	syntax	4	class bar1
+goldens	svg-class/jiceke-84-xoze695	syntax	1	class VGP_Golden_Attribute << Configuration >> {
+goldens	svg-class/lelabe-72-zate295	syntax	14	
+goldens	svg-class/pisake-59-jugi837	syntax	3	
+goldens	svg-class/rekazo-16-jola519	syntax	1	
+goldens	svg-class/tebito-30-cozi447	syntax	1	
+goldens	svg-class/tucesi-19-xato263	syntax	1	title diagram 1
+goldens	svg-class/vekime-22-buru589	syntax	14	
+goldens	svg-class/vinujo-78-kapo329	syntax	2	
+goldens	svg-class/xosisa-09-tine238	syntax	1	A <|-- B
