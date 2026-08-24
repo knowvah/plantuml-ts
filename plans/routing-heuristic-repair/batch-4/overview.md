@@ -11,4 +11,4 @@ closes both is for the task to establish, not assume.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|---|---|---|---|---|
-| T5 | [`detectUmlType` window and signals](T5-detect-uml-type.md) | typescript-pro | `src/core/block-extractor.ts`, `tests/unit/block-extractor.test.ts` | T4 | [ ] |
+| T5 | [`detectUmlType` window and signals](T5-detect-uml-type.md) | typescript-pro | `src/core/block-extractor.ts`, `tests/unit/block-extractor.test.ts` | T4 | [x] |
