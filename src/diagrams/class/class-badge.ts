@@ -362,12 +362,17 @@ const BADGE_GLYPH_D: Record<BadgeLetter, string> = {
 
 
 /** `getCircledChar(LeafType)`: which glyph letter a classifier kind draws. */
-export function badgeLetter(kind: ClassifierKind): 'C' | 'I' | 'A' | 'E' | '@' {
+export function badgeLetter(kind: ClassifierKind): 'C' | 'I' | 'A' | 'E' | '@' | 'P' {
   switch (kind) {
     case 'interface':  return 'I';
     case 'abstract':   return 'A';
     case 'enum':       return 'E';
     case 'annotation': return '@';
+    // T14 (dispatch-by-parse-attempt): `protocol`'s own badge letter --
+    // `getCircledChar` returns 'P' for `LeafType.PROTOCOL`, distinct from
+    // the 'C' every other un-surveyed kind falls to below.
+    // @see ~/git/plantuml/.../svek/image/EntityImageClassHeader.java:243
+    case 'protocol':   return 'P';
     default:           return 'C';
   }
 }

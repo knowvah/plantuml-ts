@@ -22,6 +22,8 @@ import { describe, it, expect } from 'vitest';
 // narrowing seam, which throws naming the refusal rather than letting an
 // unexpected `ParseRefusal` surface as a missing-property failure.
 import { parseClass } from '../class/parse-helper.js';
+import { parseClass as parseClassRaw } from '../../../src/diagrams/class/parser.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
 function src(lines: string[]): UmlSource {
@@ -31,6 +33,11 @@ function src(lines: string[]): UmlSource {
 // ---------------------------------------------------------------------------
 // 1. Basic object declaration — no body
 // ---------------------------------------------------------------------------
+
+/** The refusal arm, for the forms upstream has no command for. */
+function refusalOf(lines: readonly string[]) {
+  return parseRefusalOf(parseClassRaw(src(lines)));
+}
 
 describe('parseClass (object diagram) — bare object declaration', () => {
   it('creates a classifier with kind object', () => {
@@ -48,10 +55,12 @@ describe('parseClass (object diagram) — bare object declaration', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseClass (object diagram) — quoted display and alias', () => {
-  it('sets display and id separately', () => {
-    const ast = parseClass(src(['"User : Alice" as alice']));
-    // Line doesn't start with "object" so it should be ignored
-    expect(ast.classifiers).toHaveLength(0);
+  it('refuses a bare quoted-as line: it starts with no keyword at all', () => {
+    // Was "should be ignored" — the permissive-parser assumption. T5 made the
+    // class parser strict, so a line no command matches is now a refusal, not
+    // a silent skip. Upstream agrees: `NameAndCodeParser`'s four `as`
+    // alternatives all require a leading element keyword.
+    expect(refusalOf(['"User : Alice" as alice'])?.kind).toBe('syntax');
   });
 
   it('parses object with quoted display and alias', () => {
@@ -111,20 +120,20 @@ describe('parseClass (object diagram) — multi-line body', () => {
 //      - CommandCreateEntityObjectMultilines.java extends CommandMultilines2
 //        unconditionally — there is no single-line inline-`{ ... }` form;
 //        the body is always closed by a `}` alone on its own line.
-//    This parser has no error-reporting channel (see class-object-commands.ts
-//    doc), so the observable behavior for either unmatched form is a silent
-//    no-op: no classifier is created at all.
+//    T5 (dispatch-by-parse-attempt) gave this parser an error-reporting
+//    channel. The observable behaviour for either unmatched form is now a
+//    `ParseRefusal`, matching upstream, where `getCandidate` returning null
+//    is a SYNTAX_ERROR that fails the whole document
+//    (`PSystemCommandFactory.java:169-175`) — not a silent no-op.
 // ---------------------------------------------------------------------------
 
 describe('parseClass (object diagram) — divergent plugin-era syntax is no longer accepted', () => {
-  it('does not create a classifier for an inline single-line body (upstream has no such form)', () => {
-    const ast = parseClass(src(['object Foo { x = 1; y = 2 }']));
-    expect(ast.classifiers).toHaveLength(0);
+  it('refuses an inline single-line body (upstream has no such form)', () => {
+    expect(refusalOf(['object Foo { x = 1; y = 2 }'])?.kind).toBe('syntax');
   });
 
-  it('does not create a classifier for an unquoted "as" alias (upstream requires a quoted display)', () => {
-    const ast = parseClass(src(['object MyObject as obj']));
-    expect(ast.classifiers).toHaveLength(0);
+  it('refuses an unquoted "as" alias (upstream requires a quoted display)', () => {
+    expect(refusalOf(['object MyObject as obj'])?.kind).toBe('syntax');
   });
 });
 
@@ -203,11 +212,12 @@ describe('parseClass (object diagram) — parse loop edge cases', () => {
     expect(ast.classifiers).toHaveLength(1);
   });
 
-  it('ignores object declaration whose id resolves to empty (e.g. only stereotype+color+empty body)', () => {
-    // After stripping stereotype, color, and empty body, rest="" so id="" → decl is null
-    const ast = parseClass(src(['object << entity >> #pink {}', 'object Valid']));
-    expect(ast.classifiers).toHaveLength(1);
-    expect(ast.classifiers[0]!.id).toBe('Valid');
+  it('refuses an object declaration whose id resolves to empty', () => {
+    // After stripping stereotype, colour and empty body nothing is left, so no
+    // command matches. Was asserted as "ignored, later lines still parse" —
+    // the permissive assumption; strict parsing refuses the document at that
+    // line and never reaches `object Valid`.
+    expect(refusalOf(['object << entity >> #pink {}', 'object Valid'])?.kind).toBe('syntax');
   });
 });
 

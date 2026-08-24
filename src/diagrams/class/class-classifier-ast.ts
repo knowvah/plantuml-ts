@@ -62,6 +62,32 @@ export type ClassifierKind =
    */
   | 'entity'
   /**
+   * `protocol Foo` — a native class-factory keyword (upstream
+   * `CommandCreateClassMultilines` / `CommandCreateClass`'s TYPE
+   * alternation, `LeafType.PROTOCOL`). T14 (dispatch-by-parse-attempt):
+   * ported to close gutute-00-gaki684 (`protocol X as "INOUT" { ... }`,
+   * newly refused once unrecognised lines stopped being silently dropped).
+   * Renders as a plain rect, like `class`/`entity` -- `PROTOCOL` appears in
+   * NO svek shape switch, only `EntityImageClassHeader`'s badge-letter/
+   * spot-style-name switch (`getCircledChar`/`spotStyleSignature`), so the
+   * only observable difference from a bare `class` is the badge glyph ('P',
+   * `class-badge.ts#badgeLetter`). No `spotProtocol` default color exists in
+   * upstream's own `rose.skin` (unlike `spotClass`/`spotInterface`/…), so
+   * this port's badge fill falls to `badgeFill`'s existing "default/
+   * unsurveyed kind" branch, matching every other un-surveyed kind already
+   * on that path (`entity`, `circle`, `object`, …) -- not a new gap.
+   * struct/exception/metaclass/stereotype/dataclass/record share the same
+   * TYPE alternation upstream but are NOT ported here: none is exercised by
+   * this engine's refusal-coverage bucket, and each needs its own captured
+   * badge-glyph outline (`class-badge.ts#BADGE_GLYPH_D` has no S/X/D/R
+   * entry) that no fixture in scope can verify.
+   * @see ~/git/plantuml/.../classdiagram/command/CommandCreateClassMultilines.java:103
+   * @see ~/git/plantuml/.../classdiagram/command/CommandCreateClass.java:87
+   * @see ~/git/plantuml/.../abel/LeafType.java:48
+   * @see ~/git/plantuml/.../svek/image/EntityImageClassHeader.java:211,243
+   */
+  | 'protocol'
+  /**
    * `circle Foo` — a native class-factory keyword (upstream `CommandCreateClass`
    * TYPE alternation). Rendered as the small circle table (svek `shape=plaintext`),
    * the same node shape as a `()` interface lollipop.

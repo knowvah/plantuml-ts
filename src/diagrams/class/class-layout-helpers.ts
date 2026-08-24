@@ -408,14 +408,20 @@ function resolveMinClassWidth(theme: Theme, kind: ClassifierKind): number {
  * The `ClassifierKind`s upstream's `LeafType#isLikeClass` covers
  * (LeafType.java:85-96: ANNOTATION, ABSTRACT_CLASS, CLASS, INTERFACE, ENUM,
  * ENTITY, PROTOCOL, STRUCT, EXCEPTION, METACLASS, STEREOTYPE, DATACLASS,
- * RECORD -- this port folds the last seven into the five base kinds via the
- * declaration keyword's badge, so the set here is the kinds that exist).
+ * RECORD -- struct/exception/metaclass/stereotype/dataclass/record are still
+ * unported (no fixture exercises them; see `ClassifierKind`'s `'protocol'`
+ * member doc, class-classifier-ast.ts, T14 dispatch-by-parse-attempt), so
+ * the set here is the kinds that exist -- PROTOCOL joined it as its own
+ * distinct kind rather than folding into `class`, matching how `entity` and
+ * `circle` are already handled: `badgeLetter`/`ClassifierKind` is the
+ * natural home for "which keyword was declared", not a synthesized
+ * stereotype decoration).
  * Gates `EntityImageClass`-only behavior: the `minClassWidth` /
  * `sameClassWidth` width floors (EntityImageClass.java:104-110) and the
  * groupInheritance `EntityImageProtected` wrap (GeneralImageBuilder
  * .java:110-116).
  */
 export const LIKE_CLASS_KINDS: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>([
-  'class', 'abstract', 'interface', 'enum', 'annotation', 'entity',
+  'class', 'abstract', 'interface', 'enum', 'annotation', 'entity', 'protocol',
 ]);
 

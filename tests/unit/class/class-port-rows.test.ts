@@ -237,7 +237,7 @@ const ALL_KINDS_BY_NAME: Record<ClassifierKind, true> = {
   class: true, abstract: true, interface: true, enum: true, annotation: true,
   object: true, map: true, json: true, entity: true, circle: true,
   descriptive: true, usecase: true, state: true, association: true,
-  'assoc-circle': true, lollipop: true,
+  'assoc-circle': true, lollipop: true, protocol: true,
 };
 
 describe('row-port kind set is pinned (isRowPortKind <-> electionTextFor)', () => {
@@ -246,7 +246,7 @@ describe('row-port kind set is pinned (isRowPortKind <-> electionTextFor)', () =
       .filter(isRowPortKind)
       .sort();
     expect(rowPort).toEqual([
-      'abstract', 'annotation', 'class', 'entity', 'enum', 'interface', 'object',
+      'abstract', 'annotation', 'class', 'entity', 'enum', 'interface', 'object', 'protocol',
     ]);
   });
 
