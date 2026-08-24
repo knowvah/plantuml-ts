@@ -7,9 +7,6 @@ import { renderChronology } from './renderer.js';
 export const chronologyPlugin: SyncPlugin<ChronologyDiagramAST, ChronologyGeometry> = {
   type: 'chronology',
 
-  accepts(_lines: readonly string[]): boolean {
-    return false;
-  },
 
   parse(source) {
     return parseChronology(source);

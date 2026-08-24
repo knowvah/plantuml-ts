@@ -302,10 +302,6 @@ describe('AC7: chartPlugin registered — renderSync handles @startchart', () =>
     expect(chartPlugin.type).toBe('chart');
   });
 
-  it('chartPlugin.accepts returns false (resolved by type, not heuristics)', () => {
-    expect(chartPlugin.accepts(['h-axis ["A","B"]', 'bar [1,2]'])).toBe(false);
-  });
-
   it('chartPlugin round-trips parse→layout→render without throwing', () => {
     const source = src([
       'h-axis ["Jan","Feb","Mar","Apr"]',

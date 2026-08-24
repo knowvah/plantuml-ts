@@ -1,3 +1,4 @@
+import { refuse } from '../../src/core/parse-refusal.js';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { extractBlocks, upstreamTypeOf } from '../../src/core/block-extractor.js';
 import { DiagramType as UpstreamDiagramType } from '../../src/core/diagram-type-set.js';
@@ -14,14 +15,20 @@ import { assembleSvg } from '../../src/index.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * T12: a plugin no longer declares interest with `accepts()`; it declares it
+ * by PARSING, and declines by returning a `ParseRefusal`. `wantsFn` keeps
+ * every test below reading the same way -- true means "this plugin claims the
+ * source", which is now expressed as a successful parse.
+ */
 function makePlugin(
   diagramType: DiagramType,
-  acceptsFn: (lines: readonly string[]) => boolean,
+  wantsFn: (lines: readonly string[]) => boolean,
 ): SyncPlugin {
   return {
     type: diagramType,
-    accepts: acceptsFn,
-    parse: (_source: UmlSource) => ({}),
+    parse: (source: UmlSource) =>
+      wantsFn(source.lines) ? {} : refuse('syntax', 0, 0, 'Syntax Error?'),
     layoutSync: (_ast: unknown) => ({}),
     render: (_geo: unknown) => ({ completeSvg: '<svg/>' }),
   };
@@ -343,7 +350,7 @@ describe('DiagramRegistry', () => {
     registry = new DiagramRegistry();
   });
 
-  it('resolves a registered plugin by accepts()', () => {
+  it('resolves a registered plugin by attempting the parse', () => {
     const plugin = makePlugin('sequence', (lines) =>
       lines.some((l) => l.includes('->')),
     );
@@ -354,24 +361,24 @@ describe('DiagramRegistry', () => {
       type: 'sequence',
     };
 
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
     expect(resolved.type).toBe('sequence');
   });
 
-  it('returns an error-sentinel plugin when no plugin accepts', () => {
+  it('returns an error-sentinel plugin when no candidate parses', () => {
     const source: UmlSource = {
       lines: ['some unknown syntax'],
       type: 'unknown',
     };
 
     // No plugins registered — should not throw
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
     expect(() => resolved.render({}, defaultTheme)).not.toThrow();
     const svg = assembleSvg(resolved.render({}, defaultTheme));
     expect(svg).toContain('<svg');
   });
 
-  it('calls accepts() on registered plugins to find a match', () => {
+  it('calls parse() on registered plugins to find a match', () => {
     let calledWith: readonly string[] | undefined;
     const plugin = makePlugin('class', (lines) => {
       calledWith = lines;
@@ -383,7 +390,7 @@ describe('DiagramRegistry', () => {
       lines: ['class Foo'],
       type: 'class',
     };
-    registry.resolve(source);
+    void registry.resolve(source).plugin;
     expect(calledWith).toEqual(['class Foo']);
   });
 
@@ -407,7 +414,7 @@ describe('DiagramRegistry', () => {
     registry.register(p3);
 
     const source: UmlSource = { lines: [], type: 'unknown' };
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
 
     // Should stop after p2 matched
     expect(calls).toEqual(['sequence', 'class']);
@@ -416,37 +423,31 @@ describe('DiagramRegistry', () => {
 
   it('error-sentinel plugin renders an SVG containing error text', () => {
     const source: UmlSource = { lines: ['???'], type: 'unknown' };
-    const sentinel = registry.resolve(source);
+    const sentinel = registry.resolve(source).plugin;
     const svg = assembleSvg(sentinel.render({}, defaultTheme));
     // Must be valid SVG and communicate an error
     expect(svg).toContain('<svg');
     expect(svg.toLowerCase()).toMatch(/error|unknown/);
   });
 
-  it('error-sentinel plugin accepts() always returns false', () => {
-    // Verify the sentinel's accepts() method is callable and returns false
-    const source: UmlSource = { lines: ['Alice -> Bob'], type: 'sequence' };
-    const sentinel = registry.resolve(source); // no plugins registered → sentinel
-    expect(sentinel.accepts(['Alice -> Bob'])).toBe(false);
-  });
 
   it('parse() on sentinel plugin returns empty object without throwing', () => {
     const source: UmlSource = { lines: [], type: 'unknown' };
-    const sentinel = registry.resolve(source);
+    const sentinel = registry.resolve(source).plugin;
     expect(() => sentinel.parse(source)).not.toThrow();
   });
 
   it('error-sentinel plugin is a SyncPlugin (has layoutSync, no async layout)', () => {
     // The sentinel uses layoutSync; it does not expose an async layout method.
     const source: UmlSource = { lines: [], type: 'unknown' };
-    const sentinel = registry.resolve(source);
+    const sentinel = registry.resolve(source).plugin;
     expect('layoutSync' in sentinel).toBe(true);
     expect('layout' in sentinel).toBe(false);
   });
 
   it('layoutSync() on sentinel plugin returns without throwing', () => {
     const source: UmlSource = { lines: [], type: 'unknown' };
-    const sentinel = registry.resolve(source);
+    const sentinel = registry.resolve(source).plugin;
     if ('layoutSync' in sentinel) {
       expect(() =>
         sentinel.layoutSync({}, defaultTheme, measurer),

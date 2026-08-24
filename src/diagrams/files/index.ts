@@ -7,9 +7,6 @@ import { renderFiles } from './renderer.js';
 export const filesPlugin: SyncPlugin<FilesDiagramAST, FilesGeometry> = {
   type: 'files',
 
-  accepts(_lines: readonly string[]): boolean {
-    return false;
-  },
 
   parse(source) {
     return parseFiles(source);

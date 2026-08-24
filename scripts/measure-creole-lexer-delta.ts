@@ -225,7 +225,7 @@ function parseDisplays(puml: string): Array<{ id: string; display: string }> | u
   const first = blocks[0];
   if (first === undefined || !first.ok) return undefined;
   try {
-    const ast: unknown = registry.resolve(first.source).parse(first.source);
+    const ast: unknown = registry.resolve(first.source).plugin.parse(first.source);
     if (!hasNodesArray(ast)) return undefined;
     return collectDisplays(ast.nodes);
   } catch {

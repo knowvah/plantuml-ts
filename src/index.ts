@@ -1,7 +1,7 @@
 import { buildBlockUmls, isBlockEmpty } from './core/BlockUmlBuilder.js';
 import type { BlockUml, BlockUmlOk } from './core/BlockUmlBuilder.js';
-import { registry, parseRefusalOf } from './core/dispatcher.js';
-import type { AssembledSvg, DiagramPlugin } from './core/dispatcher.js';
+import { registry } from './core/dispatcher.js';
+import type { AssembledSvg, Resolution } from './core/dispatcher.js';
 import { buildTheme } from './core/build-theme.js';
 import { applyChrome, isEmpty as isAnnotationsEmpty } from './core/annotations/index.js';
 import type { DiagramAnnotations } from './core/annotations/index.js';
@@ -64,17 +64,39 @@ export { spriteSplitStdlib, SpriteNotBundledError, type SpriteSplitManifest } fr
 // ADR-2 (plans/s1l-tail-fix/decisions.md): the sync-fillable asset seam F4-a/F4-b both consume via options.assetStore.
 export { combineAssetStores, type AssetPayload, type AssetStore } from './core/asset-store.js';
 
-// Register plugins in specificity order — most specific first, sequence last.
-// Sequence plugin uses broad arrow heuristics (-->) that overlap with graph
-// diagram types; graph plugins match unique structural keywords that sequence
-// diagrams never contain.
+// Registration order IS upstream's factory order (`PSystemBuilder.java:134-141`),
+// re-mirrored here now that dispatch attempts the parse. Under the old
+// `accepts()` heuristics this order was frozen the other way round --
+// mirroring upstream moved the routing gate 79 -> 469, 25 fixed and 415 newly
+// misrouted (`.agent-notes/T2-registration-order-halt.md`) -- because the
+// order was compensating for `sequencePlugin.accepts()` claiming 1343 of 3158
+// fixtures, 244 of them not sequence diagrams. With refusal live that
+// compensation is unnecessary and the upstream order is simply correct, which
+// is why D3' makes the order change and the dispatch switch one unit.
+//
+// Upstream's legacy-UML run is: SequenceDiagramFactory, ClassDiagramFactory,
+// ActivityDiagramFactory, DescriptionDiagramFactory, StateDiagramFactory,
+// ActivityDiagramFactory3, BpmDiagramFactory.
+//
+// THIS PORT'S ACTIVITY ENGINE SITS AT ActivityDiagramFactory3's SLOT, after
+// state -- not at the legacy factory's slot, which is where T12's own brief
+// put it. The engine mirrors `ActivityDiagramFactory3`: `trySwimlane`,
+// `tryAction`, `tryIf`, `tryRepeat`, `tryFork`, `trySplit` map 1:1 onto
+// `CommandSwimlane`, `CommandActivity3`, `CommandIf4`, `CommandRepeat3`,
+// `CommandFork3`, `CommandSplit3` (`ActivityDiagramFactory3.java:105-165`),
+// while the legacy factory's arrow-based `UBrexCommandIf` /
+// `CommandLinkActivity` / `CommandLinkLongActivity`
+// (`ActivityDiagramFactory.java:76-97`) have no counterpart anywhere here.
+// Putting it at slot 5 would let it claim `@startuml` sources upstream gives
+// to description or state.
+//
+// The engines below the legacy-UML run are not in `@startuml`'s candidate set
+// at all (`DiagramType.java:198-201`), so their relative order can never
+// decide a tie; they keep their existing order.
+registry.register(sequencePlugin);
 registry.register(classPlugin);
-registry.register(statePlugin);
-// Consolidated descriptive engine — replaces the old component + usecase
-// plugins (upstream's single DescriptionDiagramFactory). Registered in the
-// old component slot; accepts() is order-independent vs activity (activity's
-// patterns exclude :actor: and the descriptive keyword/shorthand set).
 registry.register(descriptionPlugin);
+registry.register(statePlugin);
 registry.register(activityPlugin);
 registry.register(yamlPlugin);
 registry.register(jsonPlugin);
@@ -85,7 +107,6 @@ registry.register(filesPlugin);
 registry.register(packetdiagPlugin);
 registry.register(chartPlugin);
 registry.register(dotPlugin);
-registry.register(sequencePlugin);
 
 
 
@@ -205,7 +226,7 @@ function applyAnnotationChrome(
 }
 
 /**
- * The one place a returned `ParseRefusal` becomes an error diagram.
+ * The one place a `ParseRefusal` becomes an error diagram.
  *
  * D1 makes refusal a RETURN, not a throw, because upstream reserves `throw`
  * for its `catch (Throwable t)` crash path (`PSystemBuilder.java:275-281`),
@@ -216,20 +237,15 @@ function applyAnnotationChrome(
  * throw here is an internal jump to the surrounding `catch`, not the plugin
  * contract — plugins still return.
  *
- * No plugin returns a refusal yet (T4-T11 give them the ability), so today
- * this is a typechecked pass-through. It is exercised by
- * `tests/unit/dispatch/parse-refusal-wiring.test.ts`, which registers a
- * refusing plugin rather than waiting for a real one.
+ * The refusal reaching this point is the MERGED one: every candidate refused,
+ * and `resolve()` already applied upstream's max-score tie-break (D2), so the
+ * engine named on the page is the one that got furthest.
  */
-function parseOrRefuse(
-  plugin: DiagramPlugin,
-  umlSource: UmlSource,
-  options?: RenderOptions,
-): unknown {
-  const parsed = plugin.parse(umlSource, { assetStore: options?.assetStore });
-  const refusal = parseRefusalOf(parsed);
-  if (refusal === undefined) return parsed;
-  throw new DiagramRefusal(refusal.message, refusal.line, plugin.type);
+function astOf(resolution: Resolution, options?: RenderOptions): unknown {
+  if (resolution.refusal === undefined) return resolution.ast;
+  const { message, line } = resolution.refusal;
+  void options;
+  throw new DiagramRefusal(message, line, resolution.plugin.type);
 }
 
 export function renderSync(source: string, options?: RenderOptions): string {
@@ -259,12 +275,15 @@ export function renderSync(source: string, options?: RenderOptions): string {
     const { theme, styleMap } = buildTheme(
       block.preprocessed, options, block.rawSource.map((s) => s.getString()),
     );
-    const plugin = registry.resolve(umlSource);
+    // The parse happens HERE, inside resolution: upstream picks a factory by
+    // attempting the parse, and D0 forbids a second parse path.
+    const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore });
+    const plugin = resolution.plugin;
     if (!('layoutSync' in plugin))
       throw new Error('renderSync() is not supported for this diagram type — use render()');
 
     const measurer = resolveMeasurer(plugin.type, options);
-    const ast = parseOrRefuse(plugin, umlSource, options);
+    const ast = astOf(resolution, options);
     surfaceSpriteWarnings(ast, options?.onWarning);
     const geo = plugin.layoutSync(ast, theme, measurer);
     const fragment = plugin.render(geo, theme);
@@ -324,9 +343,10 @@ async function renderBlock(block: BlockUml, options?: RenderOptions): Promise<st
     const { theme, styleMap } = buildTheme(
       block.preprocessed, options, block.rawSource.map((s) => s.getString()),
     );
-    const plugin = registry.resolve(umlSource);
+    const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore });
+    const plugin = resolution.plugin;
     const measurer = resolveMeasurer(plugin.type, options);
-    const ast = parseOrRefuse(plugin, umlSource, options);
+    const ast = astOf(resolution, options);
     surfaceSpriteWarnings(ast, options?.onWarning);
     const geo =
       'layoutSync' in plugin

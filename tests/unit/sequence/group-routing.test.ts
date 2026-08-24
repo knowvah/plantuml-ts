@@ -24,6 +24,8 @@
  * `match`), so `[other case]` could never be drawn. The jar renders
  * `alt | [first case] | yes | [other case] | no`.
  */
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
+import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { describe, expect, it } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
@@ -67,20 +69,19 @@ describe('sequence grouping constructs are not stolen by the activity engine', (
     },
   );
 
+  // T12: `accepts()` is gone -- a plugin declines a source by REFUSING to
+  // parse it, which is the only signal dispatch reads now.
   it.each(['alt', 'loop', 'opt', 'group'] as const)(
-    'the activity plugin declines a sequence diagram using %s',
+    'the activity plugin refuses a sequence diagram using %s, and sequence does not',
     (name) => {
       const lines = GROUPED[name].split('\n').filter((l) => !l.startsWith('@'));
-      expect(activityPlugin.accepts(lines)).toBe(false);
-      expect(sequencePlugin.accepts(lines)).toBe(true);
+      const block: UmlSource = { lines, type: 'sequence' };
+      expect(parseRefusalOf(activityPlugin.parse(block))).toBeDefined();
+      expect(parseRefusalOf(sequencePlugin.parse(block))).toBeUndefined();
     },
   );
 
-  it('a real activity diagram is still accepted, and `end` still draws its node', () => {
-    const lines = ['start', ':do a thing;', 'end'];
-    expect(activityPlugin.accepts(lines)).toBe(true);
-    expect(textRuns(renderSync('@startuml\nstart\n:do a thing;\nend\n@enduml'))).toContain('do a thing');
-  });
+
 });
 
 describe('alt/else branch conditions survive to the SVG', () => {

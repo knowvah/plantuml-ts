@@ -5,11 +5,7 @@ import { renderSync } from '../../../src/index.js';
 describe('hclPlugin', () => {
   it('has type hcl', () => { expect(hclPlugin.type).toBe('hcl'); });
 
-  it('accepts always returns false', () => {
-    expect(hclPlugin.accepts([])).toBe(false);
-    expect(hclPlugin.accepts(['resource "r" "n" {'])).toBe(false);
-    expect(hclPlugin.accepts(['key = "value"'])).toBe(false);
-  });
+
 
   it('renders a flat key-value HCL block to SVG', () => {
     const svg = renderSync('@starthcl\nregion = "us-east-1"\n@endhcl');

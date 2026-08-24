@@ -409,7 +409,14 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     // construct claims is skipped here, exactly as when the pre-pass
     // dropped them all -- command dispatch never sees a blank line.
     if (line === '') continue;
-    if (dispatchCommand(state, line)) continue;
+    if (dispatchCommand(state, line)) {
+      // A command matched but reported failure. Upstream builds the
+      // EXECUTION_ERROR and `createSystem` returns it at once
+      // (`PSystemCommandFactory.java:180-186`, `:136-139`); it never carries
+      // on to later lines.
+      if (state.executionRefusal !== undefined) return state.executionRefusal;
+      continue;
+    }
     // makeDefaultAST() always sets annotations; the field is optional on
     // ClassDiagramAST only so hand-authored literal fixtures elsewhere need
     // not include it (see ast.ts's doc on the field).

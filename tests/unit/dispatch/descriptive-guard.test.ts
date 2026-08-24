@@ -21,7 +21,7 @@ function resolveType(puml: string): string {
   expect(blocks).toHaveLength(1);
   const [block] = blocks;
   if (block === undefined) throw new Error('no block extracted');
-  return registry.resolve(block).type;
+  return registry.resolve(block).plugin.type;
 }
 
 // The cocice fixture: one of every descriptive element keyword, including

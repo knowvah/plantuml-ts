@@ -9,9 +9,6 @@ import {
   isLegendOpenLine,
   isLegendCloseLine,
 } from '../../../src/core/descriptive-keywords.js';
-import { classPlugin } from '../../../src/diagrams/class/index.js';
-import { descriptionPlugin } from '../../../src/diagrams/description/index.js';
-import { sequencePlugin } from '../../../src/diagrams/sequence/index.js';
 
 describe('descriptive-keywords — ALL_TYPES / KEYWORD_TO_SYMBOL', () => {
   it('covers the full upstream ALL_TYPES keyword set, plus `archimate` (T8)', () => {
@@ -177,18 +174,6 @@ describe('descriptive-keywords — association-class couple exclusion (T5b)', ()
     // not followed by an arrow, is not the association-class couple.
     expect(hasDescriptiveSignal(['(Login, Logout)'])).toBe(true);
   });
-
-  it('routes the association-class fixture to the class engine', () => {
-    const lines = ['class R1', 'class R2', 'A-B', '(A,B) .. R1', 'R2 .. (A,B)'];
-    expect(classPlugin.accepts(lines)).toBe(true);
-    expect(descriptionPlugin.accepts(lines)).toBe(false);
-  });
-
-  it('still routes a bare use-case shorthand to the description engine', () => {
-    const lines = ['(Use Case)'];
-    expect(classPlugin.accepts(lines)).toBe(false);
-    expect(descriptionPlugin.accepts(lines)).toBe(true);
-  });
 });
 
 describe('descriptive-keywords — legend-region exclusion (iter 23b)', () => {
@@ -292,11 +277,6 @@ describe('descriptive-keywords — hasArrowDecoratedTarget (arrow-then-paren dis
   it('does not widen the class/sequence decline guard (hasDescriptiveSignal untouched)', () => {
     expect(hasDescriptiveSignal(['foo --> (Use case)'])).toBe(false);
   });
-
-  it('routes a usecase-arrow-only block to description ahead of sequence (registration order)', () => {
-    const lines = ['actor foo', 'foo --> (Use case) : a label'];
-    expect(descriptionPlugin.accepts(lines)).toBe(true);
-  });
 });
 
 describe('descriptive-keywords — BARE_ALIAS_DECL_RE (keyword-less alias declaration, A1 P2/i25)', () => {
@@ -313,21 +293,6 @@ describe('descriptive-keywords — BARE_ALIAS_DECL_RE (keyword-less alias declar
 
   it('does not fire on an arrow line (not a bare alias declaration)', () => {
     expect(hasDescriptiveElement(['SDK -> Website: /loginstart'])).toBe(false);
-  });
-
-  it('routes an all-bare-arrow block with one bare-alias line to description', () => {
-    const lines = [
-      '"Website/Webview" as Website',
-      'SDK -> Website: /loginstart?clientid=?',
-      'Website -> SDK: /selectprovider',
-    ];
-    expect(descriptionPlugin.accepts(lines)).toBe(true);
-    // Without the bare-alias line, sequence's own heuristic still claims a
-    // pure bare-to-bare arrow chain (genuinely ambiguous; unaffected by this
-    // fix — description does not steal ordinary sequence diagrams).
-    expect(
-      sequencePlugin.accepts(['SDK -> Website: /loginstart', 'Website -> SDK: /select']),
-    ).toBe(true);
   });
 });
 
@@ -358,50 +323,6 @@ describe('descriptive-keywords — sequence/descdiagram participant-type overlap
       false,
     );
   });
-
-  it('AC1: sequence accepts an unambiguous sequence diagram using `queue` as a participant type', () => {
-    const lines = [
-      'participant foo as f',
-      'queue bar as q',
-      'participant baz as b',
-      'f -> q: Enqueue',
-    ];
-    expect(sequencePlugin.accepts(lines)).toBe(true);
-  });
-
-  it('AC2: the guard still declines the use-case/deployment shape it was added for', () => {
-    expect(sequencePlugin.accepts(['actor Bob', '(Login)'])).toBe(false);
-  });
-
-  it('an unambiguous descriptive-only keyword elsewhere still wins (zotake-65-cabi912 shape)', () => {
-    // `node`/`component`/`cloud` are NOT in the overlap set, so they still
-    // decide the block is descriptive even though `database ... as ...`
-    // alone would not.
-    const lines = [
-      'node "db101" {',
-      'database postgresql as db101_postgresql',
-      '}',
-      'app101_app --> db101_postgresql',
-    ];
-    expect(hasDescriptiveSignal(lines)).toBe(true);
-    expect(descriptionPlugin.accepts(lines)).toBe(true);
-  });
-
-  it('an unambiguous descriptive-only keyword elsewhere still wins (vibunu-17-guso486 shape)', () => {
-    const lines = [
-      'usecase UC_THIS_IS_MY_DISPLAY_TO_SHOW as UC',
-      'boundary boundary1',
-      'control control1',
-      'entity1 --> control1 : test',
-    ];
-    expect(descriptionPlugin.accepts(lines)).toBe(true);
-  });
-
-  it('a bracket shorthand elsewhere still wins over a bare overlap-keyword line', () => {
-    const lines = ['[First Component]', 'database "MySql" {'];
-    expect(hasDescriptiveSignal(lines)).toBe(true);
-    expect(descriptionPlugin.accepts(lines)).toBe(true);
-  });
 });
 
 describe('descriptive-keywords — bracket shorthand excludes nested brackets (T4)', () => {
@@ -431,32 +352,6 @@ describe('descriptive-keywords — bracket shorthand excludes nested brackets (T
   it('still fires on a genuine single-level bracket shorthand', () => {
     expect(hasDescriptiveSignal(['[Comp]'])).toBe(true);
     expect(hasDescriptiveSignal(['[First Component]'])).toBe(true);
-  });
-
-  it('AC3: the three residual fixtures route to sequence', () => {
-    expect(
-      sequencePlugin.accepts([
-        'Dummy -> Alice : foo1',
-        'ref over Alice, Dummy',
-        '[[http://www.google.com]]',
-        'end',
-      ]),
-    ).toBe(true);
-    expect(
-      sequencePlugin.accepts([
-        'Alice -> Bob : hello',
-        'note left',
-        '[[http://www.cot{cloud} my link]] hello',
-        'end note',
-      ]),
-    ).toBe(true);
-    expect(
-      sequencePlugin.accepts([
-        '[-> Node: Start TC',
-        'Node -> SUT : RAR',
-        '[<[#blue]-Node: Succ',
-      ]),
-    ).toBe(true);
   });
 });
 

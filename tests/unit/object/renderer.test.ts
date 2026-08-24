@@ -58,17 +58,17 @@ describe('registry dispatch — object diagrams', () => {
   it('routes a block typed "object" (the @startobject keyword suffix) to the class plugin', () => {
     const block = src(['object Foo']);
     const typedBlock: UmlSource = { ...block, type: 'object' };
-    const plugin = registry.resolve(typedBlock);
+    const plugin = registry.resolve(typedBlock).plugin;
     expect(plugin.type).toBe('class');
   });
 
   it('routes a pure "object ..." block probed under an untyped/class-typed block to the class plugin', () => {
-    const plugin = registry.resolve(src(['object Foo', 'object Bar', 'Foo --> Bar']));
+    const plugin = registry.resolve(src(['object Foo', 'object Bar', 'Foo --> Bar'])).plugin;
     expect(plugin.type).toBe('class');
   });
 
   it('also routes an ordinary class diagram (no object/map keyword) to the class plugin', () => {
-    const plugin = registry.resolve(src(['class Foo', 'interface Bar']));
+    const plugin = registry.resolve(src(['class Foo', 'interface Bar'])).plugin;
     expect(plugin.type).toBe('class');
   });
 });

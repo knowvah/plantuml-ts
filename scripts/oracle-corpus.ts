@@ -54,7 +54,7 @@ function detectType(puml: string): string {
   const blocks = buildBlockUmls(puml);
   const first = blocks[0];
   if (first === undefined || !first.ok) return 'none';
-  return registry.resolve(first.source).type;
+  return registry.resolve(first.source).plugin.type;
 }
 
 function svekCount(dir: string): number {

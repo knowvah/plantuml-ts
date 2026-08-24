@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
-import { classPlugin } from '../../../src/diagrams/class/index.js';
 import type { ClassGeometry, ClassifierGeo, EdgeGeo, NamespaceGeo } from '../../../src/diagrams/class/layout.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
@@ -1686,55 +1685,6 @@ describe('renderClass — diagramBorderColor (G2 N66)', () => {
     const geo = makeMinimalGeo({ totalWidth: 200, totalHeight: 150, rawWidth: 109.7875, rawHeight: 62 });
     const svg = assembleSvg(renderClass(geo, theme));
     expect(svg).not.toContain('fill="none" stroke=');
-  });
-});
-
-describe('classPlugin.accepts()', () => {
-  it('returns true for ["class Foo"]', () => {
-    expect(classPlugin.accepts(['class Foo'])).toBe(true);
-  });
-
-  it('returns true for abstract class line', () => {
-    expect(classPlugin.accepts(['abstract class Base'])).toBe(true);
-  });
-
-  it('returns true for interface line', () => {
-    expect(classPlugin.accepts(['interface IFoo'])).toBe(true);
-  });
-
-  it('returns true for enum line', () => {
-    expect(classPlugin.accepts(['enum Color'])).toBe(true);
-  });
-
-  it('returns true for annotation line', () => {
-    expect(classPlugin.accepts(['annotation MyAnnotation'])).toBe(true);
-  });
-
-  it('returns true for extension arrow <|--', () => {
-    expect(classPlugin.accepts(['Animal <|-- Dog'])).toBe(true);
-  });
-
-  it('returns false for ["Alice -> Bob: hi"] (sequence pattern)', () => {
-    expect(classPlugin.accepts(['Alice -> Bob: hi'])).toBe(false);
-  });
-
-  it('returns false for empty line array', () => {
-    expect(classPlugin.accepts([])).toBe(false);
-  });
-
-  it('returns false for unrelated lines', () => {
-    expect(classPlugin.accepts(['skinparam backgroundColor #EEEBDC'])).toBe(false);
-  });
-
-  it('only checks the first 20 lines', () => {
-    // Line 21 has a class keyword — should still return false
-    const lines = Array.from({ length: 20 }, () => 'title My Diagram');
-    lines.push('class Foo');
-    expect(classPlugin.accepts(lines)).toBe(false);
-  });
-
-  it('has type="class"', () => {
-    expect(classPlugin.type).toBe('class');
   });
 });
 

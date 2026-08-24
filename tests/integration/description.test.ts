@@ -139,32 +139,6 @@ describe('description engine — end-to-end via plugin', () => {
   });
 });
 
-describe('description engine — accepts()', () => {
-  it('accepts blocks carrying descriptive keywords or shorthands', () => {
-    expect(descriptionPlugin.accepts(['node Server'])).toBe(true);
-    expect(descriptionPlugin.accepts(['usecase UC1'])).toBe(true);
-    expect(descriptionPlugin.accepts(['[Component]'])).toBe(true);
-    expect(descriptionPlugin.accepts(['(Use Case)'])).toBe(true);
-    expect(descriptionPlugin.accepts(['package P {', '}'])).toBe(true);
-    expect(descriptionPlugin.accepts([':User:'])).toBe(true); // colon actor
-    expect(descriptionPlugin.accepts(['actor/ Biz'])).toBe(true); // business actor
-  });
-
-  it('leaves bare actor/interface to the sequence/class plugins', () => {
-    // The engine renders actors/interfaces, but a bare `actor` + messages is a
-    // sequence diagram and a pure `interface` block is a class diagram — both
-    // resolve ahead of description, so description does not claim them.
-    expect(descriptionPlugin.accepts(['actor Bob'])).toBe(false);
-    expect(descriptionPlugin.accepts(['interface Drawable'])).toBe(false);
-  });
-
-  it('declines a pure class block', () => {
-    expect(
-      descriptionPlugin.accepts(['class Foo', 'Foo : +bar()']),
-    ).toBe(false);
-  });
-});
-
 // ---------------------------------------------------------------------------
 // Jar SVG conformance (E2E) — T17 mission report deliverable.
 //

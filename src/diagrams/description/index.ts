@@ -12,7 +12,6 @@ import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
 import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import type { DescriptionDiagramAST } from './ast.js';
 import type { DescriptionGeometry } from './layout.js';
-import { hasDescriptiveElement } from '../../core/descriptive-keywords.js';
 import { seedOf } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { parseDescription } from './parser.js';
 import { layoutDescription } from './layout.js';
@@ -52,12 +51,6 @@ export const descriptionPlugin: SyncPlugin<
 > = {
   type: 'description',
 
-  accepts(lines: readonly string[]): boolean {
-    // Claim any block carrying a full ALL_TYPES keyword (incl. interface/
-    // package/actor, which this engine owns) or an element shorthand. Superset
-    // of hasDescriptiveSignal — mirrors upstream's single DESCRIPTION factory.
-    return hasDescriptiveElement(lines);
-  },
 
   parse(block, options) {
     // F4-f piece 1: ADR-2's asset channel reaches the parser here and

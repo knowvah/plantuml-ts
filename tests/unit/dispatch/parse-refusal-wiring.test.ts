@@ -30,7 +30,6 @@ const REFUSED_LINE = 1;
 
 const refusingPlugin: SyncPlugin = {
   type: 'object',
-  accepts: () => false,
   parse: () => refuse('syntax', REFUSED_LINE, 1, REFUSAL_MESSAGE),
   layoutSync: () => {
     throw new Error('layoutSync must never run on a refused source');

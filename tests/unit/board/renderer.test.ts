@@ -83,10 +83,7 @@ describe('renderBoard', () => {
     expect(xs).toContain(180);
   });
 
-  it('AC7: boardPlugin.accepts returns false', () => {
-    expect(boardPlugin.accepts([])).toBe(false);
-    expect(boardPlugin.accepts(['World', '+Card'])).toBe(false);
-  });
+
 
   it('AC8: boardPlugin.type is "board"', () => {
     expect(boardPlugin.type).toBe('board');

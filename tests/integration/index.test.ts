@@ -5,8 +5,12 @@
  * These tests register a minimal AsyncPlugin to exercise the async layout path in
  * render() and renderAll(), plus error-catch paths.
  *
- * The mock plugin accepts a unique trigger line that no other plugin matches,
- * so it does not interfere with sequence diagram tests.
+ * T12: dispatch is by parse ATTEMPT, so a mock plugin selects itself by
+ * PARSING its unique trigger line and REFUSING everything else -- there is no
+ * `accepts()` any more. The trigger lines match no real engine's command
+ * table, so every real candidate refuses them first and the mock wins; and
+ * because the mocks refuse everything else, they never interfere with the
+ * sequence-diagram tests below.
  */
 
 import { describe, it, expect, beforeAll, vi } from 'vitest';
@@ -15,6 +19,7 @@ import { MapIncludeStore } from '../../src/core/include-resolver.js';
 import { registry } from '../../src/core/dispatcher.js';
 import { defaultTheme } from '../../src/core/theme.js';
 import type { AsyncPlugin } from '../../src/core/dispatcher.js';
+import { refuse } from '../../src/core/parse-refusal.js';
 import { ERROR_BANNER, expectNoErrorDiagram } from '../helpers/error-diagram.js';
 
 // ---------------------------------------------------------------------------
@@ -36,16 +41,19 @@ const VALID_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="1
 beforeAll(() => {
   const asyncPlugin: AsyncPlugin = {
     type: 'class',
-    accepts: (lines) => lines.some((l) => l.trim() === ASYNC_TRIGGER_LINE),
-    parse: (_block) => ({ nodes: [], links: [] }),
+    parse: (block) =>
+      block.lines.some((l) => l.trim() === ASYNC_TRIGGER_LINE)
+        ? { nodes: [], links: [] }
+        : refuse('syntax', 0, 0, 'Syntax Error?'),
     layout: (_ast, _theme, _measurer) => Promise.resolve({ laid: true }),
     render: (_geo, _theme) => ({ completeSvg: VALID_SVG }),
   };
 
   const throwPlugin: AsyncPlugin = {
     type: 'state',
-    accepts: (lines) => lines.some((l) => l.trim() === THROW_TRIGGER_LINE),
-    parse: (_block) => {
+    parse: (block) => {
+      if (!block.lines.some((l) => l.trim() === THROW_TRIGGER_LINE))
+        return refuse('syntax', 0, 0, 'Syntax Error?');
       throw new Error('deliberate parse failure for coverage');
     },
     layout: (_ast, _theme, _measurer) => Promise.resolve({ laid: true }),

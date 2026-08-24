@@ -23,8 +23,6 @@
  */
 import { describe, it, expect } from 'vitest';
 import { classAccepts } from '../../../src/diagrams/class/class-dispatch.js';
-import { classPlugin } from '../../../src/diagrams/class/index.js';
-import { descriptionPlugin } from '../../../src/diagrams/description/index.js';
 import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
@@ -95,10 +93,7 @@ describe('classAccepts — legend-region exclusion (iter 23b)', () => {
     expect(classAccepts(L(lines.join('\n')))).toBe(true);
   });
 
-  it('the description engine does not steal a class+legend block (registration order)', () => {
-    const lines = ['class foo', 'legend', ...SALT_LEGEND_BODY, 'endlegend'];
-    expect(classPlugin.accepts(L(lines.join('\n')))).toBe(true);
-  });
+
 });
 
 describe('parseClass — legend block consumption (iter 23b)', () => {
@@ -208,16 +203,7 @@ describe('end-to-end: bixogo/roxosu-shaped fixture renders as a degenerate 0-gra
 });
 
 describe('description diagrams keep their own legend unaffected (iter 23b)', () => {
-  it('a genuine descriptive diagram with a legend still routes to description', () => {
-    const lines = ['component Foo', 'legend', ...SALT_LEGEND_BODY, 'endlegend'];
-    expect(descriptionPlugin.accepts(L(lines.join('\n')))).toBe(true);
-    // class declines: no class-forcing keyword and `component` is a
-    // descriptive-only signal outside the legend.
-    expect(classAccepts(L(lines.join('\n')))).toBe(false);
-  });
 
-  it('a legend-only block (no other descriptive signal) does not itself route to description', () => {
-    const lines = ['legend', ...SALT_LEGEND_BODY, 'endlegend'];
-    expect(descriptionPlugin.accepts(L(lines.join('\n')))).toBe(false);
-  });
+
+
 });

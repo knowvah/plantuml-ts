@@ -566,46 +566,6 @@ describe('renderSequence — dividers', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Acceptance criterion 8: sequencePlugin.accepts returns true
-// ---------------------------------------------------------------------------
-
-describe('sequencePlugin.accepts', () => {
-  it('returns true for -> message syntax', () => {
-    expect(sequencePlugin.accepts(['Alice -> Bob: hi'])).toBe(true);
-  });
-
-  it('returns true for ->> async message', () => {
-    expect(sequencePlugin.accepts(['Alice ->> Bob: async call'])).toBe(true);
-  });
-
-  it('returns true for --> reply', () => {
-    expect(sequencePlugin.accepts(['Bob --> Alice: ok'])).toBe(true);
-  });
-
-  it('returns true for participant keyword', () => {
-    expect(sequencePlugin.accepts(['participant Alice'])).toBe(true);
-  });
-
-  it('returns true for actor keyword', () => {
-    expect(sequencePlugin.accepts(['actor User'])).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Acceptance criterion 9: sequencePlugin.accepts returns false for non-sequence
-// ---------------------------------------------------------------------------
-
-describe('sequencePlugin.accepts — non-sequence', () => {
-  it('returns false for class diagram syntax', () => {
-    expect(sequencePlugin.accepts(['class Foo'])).toBe(false);
-  });
-
-  it('returns false for empty lines', () => {
-    expect(sequencePlugin.accepts(['', '  '])).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Acceptance criterion 10: sequencePlugin.parse returns AST with 2 participants
 // ---------------------------------------------------------------------------
 

@@ -4,6 +4,7 @@
  * `import { ..., type ParseState } from './parser.js'` site is unchanged.
  */
 
+import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { ClassDiagramAST } from './ast.js';
 import type { PendingNote, TipGroupSeenSet } from './class-notes.js';
 
@@ -50,6 +51,15 @@ export interface ParseState {
    * a native class construct, which is the signal upstream's factory
    * selection actually turns on.
    */
+  /**
+   * Set by a command whose upstream counterpart returns
+   * `CommandExecutionResult.error(...)`. `parseClass`'s loop returns it at
+   * once, mirroring `executeFewLines` building the `ErrorUml` and
+   * `createSystem` returning on `sys instanceof PSystemError`
+   * (`PSystemCommandFactory.java:180-186`, `:136-139`) -- the parse ABORTS,
+   * it does not record and continue.
+   */
+  executionRefusal?: ParseRefusal | undefined;
   gatedLeafSeen: boolean;
   /** 0-indexed source line of the FIRST gated descriptive leaf, so a refusal
    *  can be attributed where upstream attributes it rather than to the

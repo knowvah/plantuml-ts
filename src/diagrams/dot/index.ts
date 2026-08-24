@@ -19,9 +19,6 @@ import { renderDot } from './renderer.js';
 export const dotPlugin: SyncPlugin<DotDiagramAST, DotGeometry> = {
   type: 'dot',
 
-  accepts(_lines: readonly string[]): boolean {
-    return false;
-  },
 
   parse(source: UmlSource): DotDiagramAST {
     // parseDot expects a raw string; join the extracted lines back together so

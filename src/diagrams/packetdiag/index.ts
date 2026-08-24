@@ -7,9 +7,6 @@ import { renderPacket } from './renderer.js';
 export const packetdiagPlugin: SyncPlugin<PacketDiagramAST, PacketGeometry> = {
   type: 'packetdiag',
 
-  accepts(_lines: readonly string[]): boolean {
-    return false;
-  },
 
   parse(source) {
     return parsePacket(source);

@@ -107,7 +107,5 @@ describe('dotPlugin — output shape', () => {
 });
 
 describe('dotPlugin.accepts()', () => {
-  it('always returns false (routing handled by START_SUFFIX_MAP)', () => {
-    expect(dotPlugin.accepts(['digraph { a }'])).toBe(false);
-  });
+
 });

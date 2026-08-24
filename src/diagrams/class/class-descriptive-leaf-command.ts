@@ -13,6 +13,7 @@
  * @see ~/git/plantuml/.../classdiagram/command/CommandCreateElementFull2.java
  */
 
+import { refuse } from '../../core/parse-refusal.js';
 import {
   applyClassifierDecl,
   parseClassifierDecl,
@@ -85,21 +86,34 @@ export const DESCRIPTIVE_LEAF_COMMANDS: readonly Command[] = [
       //   if (mode == Mode.NORMAL_KEYWORD && diagram.isAllowMixing() == false)
       //     return CommandExecutionResult.error(...)
       //
-      // Only RECORDED here, adjudicated in `finalizeParse` — see
-      // `gatedLeafSeen`'s doc on ParseState. The declaration is still applied,
-      // because whether this is an error depends on the whole block: upstream
-      // reaches this command only when `ClassDiagramFactory` owned the block
-      // in the first place, and this port's dispatcher is more eager than that
-      // factory (a C4 diagram, which has no class construct at all, arrives
-      // here). Deciding at the end keeps a macro-expanded descriptive diagram
-      // rendering while still refusing a genuine class+leaf mix.
+      // Refused IMMEDIATELY, as upstream refuses it. This used to be merely
+      // RECORDED and adjudicated at end of parse, gated on the block also
+      // holding a native class construct -- a compensation for this port's
+      // dispatcher being more eager than upstream's factory selection, which
+      // sent C4 and other macro-expanded descriptive diagrams here when
+      // upstream would have given them to `DescriptionDiagramFactory`.
+      //
+      // T12 removed the reason for that compensation: dispatch now attempts
+      // the parse, so refusing here is exactly what hands the block to the
+      // next candidate, which is what upstream does. Measured: deferring it
+      // cost 200 DESCRIPTION and 150 STATE fixtures, each claimed by the
+      // class engine because this gate never fired in time.
       if (
         !state.allowMixing &&
         !MIX_PREFIX.test(line) &&
         !CONTAINER_OPENER.test(line.trim())
       ) {
-        state.gatedLeafSeen = true;
-        state.gatedLeafLine ??= state.currentLine;
+        // Upstream returns the error BEFORE applying anything, so the
+        // declaration below must not run. `error(String)` carries score 0
+        // (`CommandExecutionResult.java:81-83`).
+        state.executionRefusal = refuse(
+          'execution',
+          state.currentLine ?? 0,
+          state.currentLine ?? 0,
+          ALLOW_MIXING_ERROR,
+          0,
+        );
+        return;
       }
       const decl = parseClassifierDecl(line);
       if (decl !== null) applyClassifierDecl(state, decl, false);
