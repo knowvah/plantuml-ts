@@ -157,3 +157,70 @@ describe.each([
     expect(findStartTypes(line)).toEqual(new Set([type]));
   });
 });
+
+// ---------------------------------------------------------------------------
+// The two places a JS built-in is NOT the Java predicate. Both were written
+// with the built-in first and corrected against the Java (fix(T2)); each case
+// below fails under the built-in and passes under the port. Code points are
+// spelled numerically -- a literal U+2007 in a source file is indistinguishable
+// from a space to every reviewer.
+// ---------------------------------------------------------------------------
+
+const at = (...codes: number[]): string[] => codes.map((c) => String.fromCharCode(c));
+
+/** Java accepts these four; `/\s/` matches none of them. */
+const JAVA_ONLY_WHITESPACE = at(0x1c, 0x1d, 0x1e, 0x1f);
+/** Zs but non-breaking, so `isWhitespace` is false; `/\s/` matches all three. */
+const NON_BREAKING_SPACES = at(0xa0, 0x2007, 0x202f);
+/** Breaking separators both predicates accept. */
+const SHARED_SEPARATORS = at(0x1680, 0x2000, 0x2006, 0x2008, 0x200a, 0x2028, 0x2029, 0x205f, 0x3000);
+/** U+212A KELVIN SIGN -- `toLowerCase()` folds it to `k`; Java does not. */
+const KELVIN = String.fromCharCode(0x212a);
+
+describe('findStartTypes -- Character.isWhitespace, not /\\s/ (:73-74)', () => {
+  it('skips the ASCII information separators U+001C-U+001F that /\\s/ misses', () => {
+    for (const c of JAVA_ONLY_WHITESPACE)
+      expect(findStartTypes(`${c}@startjson`)).toEqual(new Set([DiagramType.JSON]));
+  });
+
+  it('skips VT and FF, which the javadoc lists explicitly', () => {
+    for (const c of at(0x0b, 0x0c))
+      expect(findStartTypes(`${c}@startjson`)).toEqual(new Set([DiagramType.JSON]));
+  });
+
+  it('does NOT skip the three non-breaking spaces Java excludes', () => {
+    // Non-breaking, so `isWhitespace` is false and the character fails the
+    // `@`/`\` test -> EMPTY. `/\s/` would have skipped all three and returned
+    // the JSON singleton instead.
+    for (const c of NON_BREAKING_SPACES)
+      expect(findStartTypes(`${c}@startjson`)).toEqual(new Set());
+  });
+
+  it('does NOT skip U+FEFF, which is Cf rather than a separator', () => {
+    expect(findStartTypes(`${at(0xfeff)[0]}@startjson`)).toEqual(new Set());
+  });
+
+  it('skips the breaking Unicode separators Java does accept', () => {
+    for (const c of SHARED_SEPARATORS)
+      expect(findStartTypes(`${c}@startjson`)).toEqual(new Set([DiagramType.JSON]));
+  });
+});
+
+describe('findStartTypes -- check() folds ASCII only (:220-232)', () => {
+  it('matches a tag in any ASCII case', () => {
+    expect(findStartTypes('@STARTJSON')).toEqual(new Set([DiagramType.JSON]));
+    expect(findStartTypes('@StArTjSoN')).toEqual(new Set([DiagramType.JSON]));
+  });
+
+  it('does NOT fold U+212A KELVIN SIGN to k, as toLowerCase() would', () => {
+    // `c >= 'A' && c <= 'Z'` leaves U+212A alone, so `jcc<K>it` never matches
+    // `jcckit`. The tag is still a valid @start form, so the answer is
+    // {UNKNOWN} rather than the empty set.
+    expect(findStartTypes(`@startjcc${KELVIN}it`)).toEqual(new Set([DiagramType.UNKNOWN]));
+    expect(findStartTypes('@startjcckit')).toEqual(new Set([DiagramType.JCCKIT]));
+  });
+
+  it('does NOT fold the Kelvin sign inside the "start" keyword either', () => {
+    expect(findStartTypes(`@star${KELVIN}json`)).toEqual(new Set());
+  });
+});

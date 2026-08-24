@@ -146,12 +146,20 @@ const EMPTY: ReadonlySet<DiagramType> = new Set();
 
 /**
  * Case-insensitive prefix match: does `text` contain `key` starting at `p`?
+ *
+ * The fold is `c += 'a' - 'A'` guarded by `c >= 'A' && c <= 'Z'` — ASCII
+ * ONLY, deliberately, because that is what upstream does. `toLowerCase()`
+ * would be wider and therefore wrong: JS folds U+212A KELVIN SIGN to `k`, so
+ * `@startjcc\u212Ait` would match `jcckit` here and not in the jar. Matching
+ * more than upstream is still a divergence.
  * @see DiagramType.java:220-232 (`check`)
  */
 function check(key: string, text: string, p: number): boolean {
   if (p + key.length > text.length) return false;
   for (let i = 0; i < key.length; i++) {
-    if (text.charAt(p + i).toLowerCase() !== key.charAt(i)) return false;
+    const c = text.charCodeAt(p + i);
+    const folded = c >= 0x41 && c <= 0x5a ? c + 0x20 : c; // :225-226
+    if (folded !== key.charCodeAt(i)) return false;
   }
   return true;
 }
@@ -171,11 +179,31 @@ function getTypes(text: string, p: number): ReadonlySet<DiagramType> {
   return new Set([DiagramType.UNKNOWN]);
 }
 
-// Java's `Character.isWhitespace` and JS's `\s` disagree on a handful of
-// Unicode separators (e.g. non-breaking space), but agree on the ASCII
-// space/tab/newline/CR that every real `@start` line uses.
-// @see DiagramType.java:73-74
-const WHITESPACE_PATTERN = /\s/;
+/**
+ * `Character.isWhitespace(char)`, enumerated. JS's `\s` is NOT the same
+ * predicate and disagrees in BOTH directions, so it cannot stand in: `\s`
+ * matches the three non-breaking spaces Java excludes (U+00A0, U+2007,
+ * U+202F) and U+FEFF, while missing the four ASCII information separators
+ * U+001C-U+001F that Java accepts. A line opening with U+00A0 before
+ * `@startuml` would route here and return the empty set in the jar.
+ *
+ * The set is `{Zs, Zl, Zp} \ {U+00A0, U+2007, U+202F}` plus the nine control
+ * characters the javadoc lists — closed, so enumerating it is exact rather
+ * than approximate.
+ * @see java.lang.Character#isWhitespace(char)
+ * @see DiagramType.java:73-74
+ */
+const JAVA_WHITESPACE: ReadonlySet<number> = new Set([
+  0x09, 0x0a, 0x0b, 0x0c, 0x0d, // TAB, LF, VT, FF, CR
+  0x1c, 0x1d, 0x1e, 0x1f, // FILE, GROUP, RECORD, UNIT SEPARATOR
+  0x20, // SPACE
+  0x1680, // OGHAM SPACE MARK
+  0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, // Zs run, minus
+  0x2008, 0x2009, 0x200a, //                              U+2007 (non-breaking)
+  0x2028, 0x2029, // LINE / PARAGRAPH SEPARATOR
+  0x205f, // MEDIUM MATHEMATICAL SPACE
+  0x3000, // IDEOGRAPHIC SPACE
+]);
 
 /**
  * The start-tag candidate set for a diagram's first line: skip leading
@@ -193,7 +221,7 @@ const WHITESPACE_PATTERN = /\s/;
 export function findStartTypes(firstLine: string): ReadonlySet<DiagramType> {
   for (let i = 0; i < firstLine.length; i++) {
     const c = firstLine.charAt(i);
-    if (WHITESPACE_PATTERN.test(c)) continue; // :73-74
+    if (JAVA_WHITESPACE.has(firstLine.charCodeAt(i))) continue; // :73-74
 
     if (c !== '@' && c !== '\\') return EMPTY; // :76-77
 
