@@ -27,6 +27,8 @@ import { describe, it, expect } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
 import { parseState } from '../../../src/diagrams/state/parser.js';
+import { statePlugin } from '../../../src/diagrams/state/index.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 import { DiagramRefusal } from '../../../src/core/error/error-diagrams.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
@@ -107,7 +109,7 @@ describe('G24 concurrent-region guard — checkConcurrentStateOk (StateDiagram.j
   });
 
   it('a transition BETWEEN two states declared in the SAME concurrent region stays legitimate (no false positive)', () => {
-    const ast = parseState(
+    const ast = parseAst(statePlugin,
       block(`
         state S {
           state a
@@ -141,7 +143,7 @@ describe('G24 concurrent-region guard — checkConcurrentStateOk (StateDiagram.j
   });
 
   it('a transition crossing a NON-concurrent scope boundary (no "--" involved) stays legitimate (no false positive)', () => {
-    const ast = parseState(
+    const ast = parseAst(statePlugin,
       block(`
         state Outer {
           state Inner
@@ -177,13 +179,13 @@ describe('G24 dotted-phantom guard — CommandLinkStateCommon.java:277-278 (quar
   });
 
   it('a dotted DECLARATION (not a transition endpoint) manufacturing a fresh ancestor is legitimate -- the gate is neutral-mode (ensureState) only', () => {
-    const ast = parseState(block('state B.A.X'));
+    const ast = parseAst(statePlugin, block('state B.A.X'));
     const b = ast.states.find((s) => s.id === 'B');
     expect(b?.children.map((c) => c.id)).toEqual(['A']);
   });
 
   it('a dotted transition endpoint reaching an ALREADY-DECLARED nested composite (no fresh ancestor) is legitimate (bujuta-44-rovo666 shape)', () => {
-    const ast = parseState(
+    const ast = parseAst(statePlugin,
       block(`
         state Somp {
           state entry1

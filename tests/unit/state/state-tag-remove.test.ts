@@ -24,7 +24,9 @@
  * @see ~/git/plantuml/.../statediagram/command/CommandCreatePackageState.java
  */
 import { describe, it, expect } from 'vitest';
-import { parseState } from '../../../src/diagrams/state/parser.js';
+import { statePlugin } from '../../../src/diagrams/state/index.js';
+import { parseAst } from '../../helpers/parse-ast.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import { layoutState } from '../../../src/diagrams/state/layout.js';
 import { computeRemovedIds, filterRemovedEntities } from '../../../src/diagrams/state/state-directives.js';
 import { defaultTheme } from '../../../src/core/theme.js';
@@ -42,7 +44,7 @@ function parse(source: string): StateDiagramAST {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   const block: UmlSource = { lines, type: 'state' };
-  return parseState(block);
+  return parseAst(statePlugin, block);
 }
 
 function findState(ast: StateDiagramAST, id: string): State | undefined {
@@ -91,13 +93,21 @@ describe('$tag parsing on state declarations', () => {
     expect(findState(ast, 'Foo')?.tags).toEqual(['a', 'b']);
   });
 
-  it('frame declarations carry NO tags slot upstream -- $token after the id fails the whole line', () => {
+  it('frame declarations carry NO tags slot upstream -- $token after the id makes the WHOLE diagram refuse (T8, mission dispatch-by-parse-attempt)', () => {
     // CommandCreatePackage2 has no Stereotag import; a `$tag`-shaped token
-    // there is not a recognized frame decoration, so the line falls through
-    // every rule and is silently ignored (no state created) -- matches
-    // upstream's grammar exactly (no TAGS slot to match against).
-    const ast = parse('frame F $tagX {\n}');
-    expect(findState(ast, 'F')).toBeUndefined();
+    // there is not a recognized frame decoration -- upstream's own
+    // `getCandidate` finds no matching Command for this line EITHER (no
+    // other StateDiagramFactory registration's grammar accepts a bare
+    // `frame F $tagX {` line), so the jar's own parse ALSO fails the whole
+    // diagram with "Syntax Error?" (PSystemCommandFactory.java:169-175), not
+    // just this one line. Before T8 this port silently dropped the
+    // unrecognised line (no state created, rest of a one-line diagram
+    // trivially empty); that was permissive, not upstream-faithful --
+    // refusing the whole source is the correct behaviour.
+    const block: UmlSource = { lines: ['frame F $tagX {', '}'], type: 'state' };
+    const refusal = parseRefusalOf(statePlugin.parse(block));
+    expect(refusal?.kind).toBe('syntax');
+    expect(refusal?.line).toBe(0);
   });
 });
 

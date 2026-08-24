@@ -10,7 +10,7 @@
  *     doc for the class precedent, zepeki-75-pifo352).
  */
 import { describe, it, expect } from 'vitest';
-import type { StateNote } from '../../../src/diagrams/state/ast.js';
+import type { StateNote, StateDiagramAST } from '../../../src/diagrams/state/ast.js';
 import {
   buildNoteGraphPartsByScope,
   sweepOrphanNoteEdges,
@@ -20,14 +20,15 @@ import { renderStateNoteFreestanding } from '../../../src/diagrams/state/rendere
 import type { StateNodeGeo } from '../../../src/diagrams/state/state-geo-types.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { parseState } from '../../../src/diagrams/state/parser.js';
+import { statePlugin } from '../../../src/diagrams/state/index.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
 const measurer = new WidthTableMeasurer();
 
-function parse(source: string): ReturnType<typeof parseState> {
+function parse(source: string): StateDiagramAST {
   const block: UmlSource = { lines: source.trim().split('\n'), type: 'state' };
-  return parseState(block);
+  return parseAst(statePlugin, block);
 }
 
 function note(overrides: Partial<StateNote> & Pick<StateNote, 'id' | 'text' | 'scopeId'>): StateNote {

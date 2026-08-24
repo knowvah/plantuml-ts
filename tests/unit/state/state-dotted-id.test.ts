@@ -48,7 +48,8 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { parseSvekDot, dotInputToStructural, compareStructural } from '../../oracle/svek-dot.js';
-import { parseState } from '../../../src/diagrams/state/parser.js';
+import { statePlugin } from '../../../src/diagrams/state/index.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
 
@@ -61,7 +62,7 @@ function parse(source: string): StateDiagramAST {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   const block: UmlSource = { lines, type: 'state' };
-  return parseState(block);
+  return parseAst(statePlugin, block);
 }
 
 function findState(ast: StateDiagramAST, id: string): State | undefined {

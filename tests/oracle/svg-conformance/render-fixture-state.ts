@@ -31,6 +31,7 @@ import { applySkinLayer } from '../../../src/core/skin-loader.js';
 import type { Theme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
+import { astOrThrow } from '../../helpers/parse-ast.js';
 import { parseState } from '../../../src/diagrams/state/parser.js';
 import { layoutState } from '../../../src/diagrams/state/layout.js';
 import { renderState } from '../../../src/diagrams/state/renderer.js';
@@ -99,7 +100,7 @@ export function renderFixtureState(
   const rawSourceLines = first.rawSource.map((s) => s.getString());
   const { theme, styleMap } = buildThemeForFixture(preprocessed, rawSourceLines);
   const block = { ...first.source, rawStyles: preprocessed.styles };
-  const ast = parseState(block);
+  const ast = astOrThrow(parseState(block), 'state');
   const geo = layoutState(ast, theme, measurer);
   const fragment = renderState(geo, theme);
 
