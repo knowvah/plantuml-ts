@@ -540,14 +540,20 @@ describe('routing conformance — jar-error classification', () => {
     ).toEqual([]);
   });
 
-  it('the manifest splits into 3075 agree, 75 known-misroute and 8 jar-error', () => {
-    // 8, not the brief's 4: the brief scanned only WITHIN the 79 disagreements,
-    // so the four `state/` banner pages — which agree at NONE == NONE and were
-    // therefore never disagreements — went unexamined. The mission's
-    // denominator is unmoved: all four are `agree`, none was ever a misroute,
-    // and the 75 real defects the later batches are scored against stand.
-    expect(pinnedAgree.length).toBe(3075);
-    expect(pinnedMisroutes.length).toBe(75);
+  it('the manifest splits into 3148 agree, 2 known-misroute and 8 jar-error', () => {
+    // 8, not the brief's 4: the brief scanned only WITHIN the original 79
+    // disagreements, so the four `state/` banner pages — which agree at
+    // NONE == NONE and were therefore never disagreements — went unexamined.
+    // 3148/2, not the pre-repair 3075/75: routing-heuristic-repair batches
+    // 2-5 re-routed 73 of the 75 known-misroute fixtures to agree (T8
+    // re-pin, plans/routing-heuristic-repair/decision-journal.md). The
+    // residual 2 are confirmed structural stop conditions this mission
+    // cannot reach: component/kokebo-27-vafi688 (no line-text discriminator
+    // between ClassDiagramFactory and DescriptionDiagramFactory) and
+    // sequence/nuvoja-46-dezu541 (!includedef preprocessor stop,
+    // IncludeExecutor.ts:127).
+    expect(pinnedAgree.length).toBe(3148);
+    expect(pinnedMisroutes.length).toBe(2);
     expect(pinnedJarErrors.length).toBe(8);
     expect(manifest.fixtures.length).toBe(3158);
   });
