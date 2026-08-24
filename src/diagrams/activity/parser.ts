@@ -13,9 +13,10 @@
 import type { UmlSource } from '../../core/block-extractor.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
+import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { ActivityDiagramAST } from './ast.js';
 import { parseNodes } from './node-dispatch.js';
-import type { ParseContext } from './dispatch-support.js';
+import { isRefusal, type ParseContext } from './dispatch-support.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -69,7 +70,17 @@ function countParenDepth(s: string): number {
   return depth;
 }
 
-export function parseActivity(block: UmlSource): ActivityDiagramAST {
+/**
+ * Parses an activity diagram source into its AST, or refuses (mission
+ * dispatch-by-parse-attempt/T6, D0/D1) when a line matches no registered
+ * command anywhere in the document -- mirroring upstream's single
+ * `SYNTAX_ERROR "Syntax Error?"` refusal point
+ * (`~/git/plantuml/.../command/PSystemCommandFactory.java:169-175`). A
+ * successful parse is byte-identical to what this function produced before
+ * refusal existed; only the previously-silent unrecognized-line case now
+ * surfaces as a `ParseRefusal` instead of being dropped.
+ */
+export function parseActivity(block: UmlSource): ActivityDiagramAST | ParseRefusal {
   const joinedLines = joinUnbalancedLines(block.lines);
   const ctx: ParseContext = {
     lines: joinedLines,
@@ -81,6 +92,7 @@ export function parseActivity(block: UmlSource): ActivityDiagramAST {
   };
 
   const result = parseNodes(ctx, 0, []);
+  if (isRefusal(result)) return result;
 
   return {
     nodes: result.nodes,

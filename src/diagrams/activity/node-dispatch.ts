@@ -15,6 +15,7 @@
 
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
+import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type {
   ActivityAction, ActivityArrowLabel, ActivityFork, ActivityNode, ActivityNote, ActivityRepeat,
   ActivitySplit, ActivityWhile,
@@ -22,8 +23,8 @@ import type {
 import {
   RE_ACTION, RE_ACTION_CLOSE, RE_ARROW_LABEL, RE_ENDWHILE, RE_ESCAPED_NEWLINE, RE_NOTE_MULTI,
   RE_NOTE_SINGLE, RE_REPEAT_HEAD, RE_REPEAT_INLINE_TERMINATOR, RE_REPEATWHILE, RE_SWIMLANE, RE_WHILE,
-  matchesStopKeyword, setCurrentSwimlane, swimlaneSpread,
-  type DispatchResult, type LineHandler, type ParseContext, type ParseResult, type StopKeywords,
+  isRefusal, matchesStopKeyword, setCurrentSwimlane, swimlaneSpread,
+  type DispatchResult, type LineHandler, type ParseContext, type ParseOutcome, type StopKeywords,
 } from './dispatch-support.js';
 import { tryIf } from './if-dispatch.js';
 
@@ -120,13 +121,14 @@ function tryMultilineAction(ctx: ParseContext, idx: number, line: string): Dispa
 // ---------------------------------------------------------------------------
 // while / endwhile
 // ---------------------------------------------------------------------------
-function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult | ParseRefusal | null {
   const whileMatch = RE_WHILE.exec(line);
   if (whileMatch === null) return null;
   const { lines } = ctx;
   const condition = whileMatch[1]!.trim();
   const yesLabel = whileMatch[2]?.trim();
   const bodyResult = parseNodes(ctx, idx + 1, ['endwhile']);
+  if (isRefusal(bodyResult)) return bodyResult;
   let cursor = bodyResult.nextIdx;
   let exitLabel: string | undefined;
   if (cursor < lines.length) {
@@ -152,7 +154,7 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
 //   repeat :foo;  <<stereo>>
 // The action becomes the first body element.
 // ---------------------------------------------------------------------------
-function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): DispatchResult | null {
+function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): DispatchResult | ParseRefusal | null {
   const repeatHeadMatch = RE_REPEAT_HEAD.exec(line);
   if (repeatHeadMatch === null || !lc.startsWith('repeat')) return null;
   const { lines } = ctx;
@@ -182,6 +184,7 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
     }
   }
   const bodyResult = parseNodes(ctx, cursor, ['repeatwhile', 'repeat while']);
+  if (isRefusal(bodyResult)) return bodyResult;
   cursor = bodyResult.nextIdx;
   let condition = '';
   if (cursor < lines.length) {
@@ -202,7 +205,7 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
 // ---------------------------------------------------------------------------
 // fork / fork again / end fork
 // ---------------------------------------------------------------------------
-function tryFork(ctx: ParseContext, idx: number, _line: string, lc: string): DispatchResult | null {
+function tryFork(ctx: ParseContext, idx: number, _line: string, lc: string): DispatchResult | ParseRefusal | null {
   if (lc !== 'fork') return null;
   const { lines } = ctx;
   let cursor = idx + 1;
@@ -211,6 +214,7 @@ function tryFork(ctx: ParseContext, idx: number, _line: string, lc: string): Dis
   let done = false;
   while (!done) {
     const branchResult = parseNodes(ctx, cursor, FORK_STOPS);
+    if (isRefusal(branchResult)) return branchResult;
     branches.push(branchResult.nodes);
     cursor = branchResult.nextIdx;
     if (cursor >= lines.length) break;
@@ -231,7 +235,7 @@ function tryFork(ctx: ParseContext, idx: number, _line: string, lc: string): Dis
 // ---------------------------------------------------------------------------
 // split / split again / end split
 // ---------------------------------------------------------------------------
-function trySplit(ctx: ParseContext, idx: number, _line: string, lc: string): DispatchResult | null {
+function trySplit(ctx: ParseContext, idx: number, _line: string, lc: string): DispatchResult | ParseRefusal | null {
   if (lc !== 'split') return null;
   const { lines } = ctx;
   let cursor = idx + 1;
@@ -240,6 +244,7 @@ function trySplit(ctx: ParseContext, idx: number, _line: string, lc: string): Di
   let done = false;
   while (!done) {
     const branchResult = parseNodes(ctx, cursor, SPLIT_STOPS);
+    if (isRefusal(branchResult)) return branchResult;
     branches.push(branchResult.nodes);
     cursor = branchResult.nextIdx;
     if (cursor >= lines.length) break;
@@ -341,22 +346,36 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   trySplit, tryNoteSingle, tryNoteMulti, tryArrowLabel, tryAnnotation, trySprite,
 ];
 
-/** Dispatch one non-blank, pre-stripped line: the first handler in
- *  {@link LINE_HANDLERS} that recognizes it wins (same priority order as
- *  the original single-function dispatch chain). An unrecognized line is
- *  skipped silently -- one line consumed, no node produced. */
-function dispatchLine(ctx: ParseContext, idx: number, line: string, lc: string): DispatchResult {
+/**
+ * Dispatch one non-blank, pre-stripped line: the first handler in
+ * {@link LINE_HANDLERS} that recognizes it wins (same priority order as
+ * the original single-function dispatch chain).
+ *
+ * An unrecognized line now REFUSES (mission dispatch-by-parse-attempt/T6)
+ * instead of being skipped silently. This mirrors upstream's `getCandidate`
+ * returning `null` when no registered `Command` matches, at which point
+ * `executeFewLines` builds `SYNTAX_ERROR "Syntax Error?"` and the factory
+ * hands that back as the diagram
+ * (`~/git/plantuml/.../command/PSystemCommandFactory.java:169-175`).
+ *
+ * `idx` doubles as upstream's `trace.size()` (lines consumed before the
+ * failure): every line in `[0, idx)` was already accounted for by a prior
+ * dispatch match or a blank-line skip, since `parseNodes`'s cursor only
+ * ever advances forward. `consumed = idx` needs no separate counter.
+ */
+function dispatchLine(ctx: ParseContext, idx: number, line: string, lc: string): DispatchResult | ParseRefusal {
   for (const handler of LINE_HANDLERS) {
     const result = handler(ctx, idx, line, lc);
     if (result !== null) return result;
   }
-  return { idx: idx + 1 };
+  return refuse('syntax', idx, idx, 'Syntax Error?');
 }
 
 /** Read nodes from `ctx.lines` from `idx` until a trimmed lowercase line
- *  matches one of `stops`, or end-of-input; returns the collected nodes
- *  and the index of the line that triggered the stop. */
-export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords): ParseResult {
+ *  matches one of `stops`, end-of-input, or a `ParseRefusal` surfaces from
+ *  `dispatchLine` -- which this function propagates unchanged rather than
+ *  swallowing (D0/D1: refusal is the real parse path, returned not thrown). */
+export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords): ParseOutcome {
   const nodes: ActivityNode[] = [];
   const { lines } = ctx;
   let cursor = idx;
@@ -385,6 +404,7 @@ export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords):
     if (matchesStopKeyword(lc, stops)) break;
 
     const result = dispatchLine(ctx, cursor, line, lc);
+    if (isRefusal(result)) return result;
     if (result.node !== undefined) nodes.push(result.node);
     cursor = result.idx;
   }
