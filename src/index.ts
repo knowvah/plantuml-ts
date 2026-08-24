@@ -1,7 +1,7 @@
 import { buildBlockUmls, isBlockEmpty } from './core/BlockUmlBuilder.js';
 import type { BlockUml, BlockUmlOk } from './core/BlockUmlBuilder.js';
-import { registry } from './core/dispatcher.js';
-import type { AssembledSvg } from './core/dispatcher.js';
+import { registry, parseRefusalOf } from './core/dispatcher.js';
+import type { AssembledSvg, DiagramPlugin } from './core/dispatcher.js';
 import { buildTheme } from './core/build-theme.js';
 import { applyChrome, isEmpty as isAnnotationsEmpty } from './core/annotations/index.js';
 import type { DiagramAnnotations } from './core/annotations/index.js';
@@ -30,6 +30,7 @@ import { prepareIncludeStore } from './core/include-resolver.js';
 import { surfaceSpriteWarnings } from './core/sprite-commands.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
 import {
+  DiagramRefusal,
   emptySvg,
   errorSvg,
   preprocessorErrorSvg,
@@ -203,6 +204,34 @@ function applyAnnotationChrome(
   return { completeSvg: assembleSvg(applyChrome(unwrapped, annotations, styles, measurer)) };
 }
 
+/**
+ * The one place a returned `ParseRefusal` becomes an error diagram.
+ *
+ * D1 makes refusal a RETURN, not a throw, because upstream reserves `throw`
+ * for its `catch (Throwable t)` crash path (`PSystemBuilder.java:275-281`),
+ * which draws a different page — "Fatal crash error". A refusal is upstream's
+ * `PSystemError`, and this port already models that: `DiagramRefusal` carries
+ * the offending line and the assumed diagram type through to
+ * `errorSvg`/`PSystemErrorV2`, so the page lands where the jar's lands. The
+ * throw here is an internal jump to the surrounding `catch`, not the plugin
+ * contract — plugins still return.
+ *
+ * No plugin returns a refusal yet (T4-T11 give them the ability), so today
+ * this is a typechecked pass-through. It is exercised by
+ * `tests/unit/dispatch/parse-refusal-wiring.test.ts`, which registers a
+ * refusing plugin rather than waiting for a real one.
+ */
+function parseOrRefuse(
+  plugin: DiagramPlugin,
+  umlSource: UmlSource,
+  options?: RenderOptions,
+): unknown {
+  const parsed = plugin.parse(umlSource, { assetStore: options?.assetStore });
+  const refusal = parseRefusalOf(parsed);
+  if (refusal === undefined) return parsed;
+  throw new DiagramRefusal(refusal.message, refusal.line, plugin.type);
+}
+
 export function renderSync(source: string, options?: RenderOptions): string {
   try {
     // renderSync cannot fetch. With no store there is nothing to resolve an
@@ -235,7 +264,7 @@ export function renderSync(source: string, options?: RenderOptions): string {
       throw new Error('renderSync() is not supported for this diagram type — use render()');
 
     const measurer = resolveMeasurer(plugin.type, options);
-    const ast = plugin.parse(umlSource, { assetStore: options?.assetStore });
+    const ast = parseOrRefuse(plugin, umlSource, options);
     surfaceSpriteWarnings(ast, options?.onWarning);
     const geo = plugin.layoutSync(ast, theme, measurer);
     const fragment = plugin.render(geo, theme);
@@ -297,7 +326,7 @@ async function renderBlock(block: BlockUml, options?: RenderOptions): Promise<st
     );
     const plugin = registry.resolve(umlSource);
     const measurer = resolveMeasurer(plugin.type, options);
-    const ast = plugin.parse(umlSource, { assetStore: options?.assetStore });
+    const ast = parseOrRefuse(plugin, umlSource, options);
     surfaceSpriteWarnings(ast, options?.onWarning);
     const geo =
       'layoutSync' in plugin

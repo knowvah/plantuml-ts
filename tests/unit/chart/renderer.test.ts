@@ -16,6 +16,7 @@ import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ChartGeometry } from '../../../src/diagrams/chart/layout.js';
 import type { Theme } from '../../../src/core/theme.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 
 /**
  * The port's own inline error boxes draw with `fontFamily: 'monospace'`, and
@@ -313,7 +314,7 @@ describe('AC7: chartPlugin registered — renderSync handles @startchart', () =>
       'line "Target" [100,100,100,100]',
       'legend bottom',
     ]);
-    const ast = chartPlugin.parse(source);
+    const ast = parseAst(chartPlugin, source);
     expect(ast.errors).toHaveLength(0);
     const geo = chartPlugin.layoutSync(ast, theme, measurer);
     const svg = assembleSvg(chartPlugin.render(geo, theme));

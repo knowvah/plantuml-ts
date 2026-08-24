@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1014 modules · 3535 exported names.
+1014 modules · 3537 exported names.
 
 ## `src/`
 
@@ -24,7 +24,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `arrow-label-font.ts` | `ARROW_LABEL_DEFAULT_COLOR`, `ArrowLabelFont`, `resolveArrowLabelFont`, `resolveCardinalityFontColor` | D3: the arrow-label font resolver -- `GraphvizImageBuilder.java:234-235` (`getDefaultStyleDefinitionArrow(stereotype).getMergedStyle(...) .getFontConfiguration(...)`), upstream's `labelFont` argument to `SvekEdge`'s constructor. |
 | `assemble-svg.ts` | `assembleSvg` | The single central document-assembly choke point — extracted from `src/index.ts` (mission A5 / T4), which sits at the repo's 500-line hook cap. |
 | `asset-store.ts` | `AssetPayload`, `AssetStore`, `combineAssetStores` | ADR-2's asset store seam (`plans/s1l-tail-fix/decisions.md`) — the synchronous, pre-fillable channel for vendored binary/text asset payloads (the jar-internal `/sprites/**` bundle, F4-a; Twemoji artwork, F4-b). |
-| `block-extractor.ts` | `DiagramType`, `UmlSource`, `finalizeBlock`, `extractBlocks` | Block extractor: types a block's PREPROCESSED content, from the @start<type> keyword suffix or -- for plain @startuml -- by probing the first 20 non-empty content lines. |
+| `block-extractor.ts` | `DiagramType`, `UmlSource`, `finalizeBlock`, `upstreamTypeOf`, `extractBlocks` | Block extractor: types a block's PREPROCESSED content, from the @start<type> keyword suffix or -- for plain @startuml -- by probing the first 20 non-empty content lines. |
 | `BlockUmlBuilder.ts` | `BlockUmlOk`, `BlockUmlErr`, `BlockUml`, `buildBlockUmls`, `isBlockEmpty` | `BlockUmlBuilder` -- the document -> blocks stage, and the reason it runs BEFORE the preprocessor. |
 | `build-theme.ts` | `ResolvedThemeAndStyles`, `buildTheme` | Theme resolution -- extracted out of `src/index.ts` (this repo's `check-complexity.py` 500-line file cap; a MECHANICAL move, no behavior change beyond skin-reddress-variants Fix 2, documented below). |
 | `cluster-title-table.ts` | `computeTitleTableHeight` | `ClusterHeader`'s title/stereotype/attribute-text-height formula — moved out of `../diagrams/state/state-composite-header.ts` (namespace-cluster-box mission T3: the class engine needs the same formula for its own cluster title table, and no |
@@ -39,7 +39,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `creole.ts` | `CreoleSpan`, `TableCell`, `TableToken`, `measureTable`, `tableTokenToSvg`, `spansToTspan`, `CreoleToken`, `parseCreole`, `parseCreoleTokens`, `creoleToSvg` | Creole markup parser for PlantUML labels. |
 | `descriptive-keywords.ts` | `USymbol`, `ALL_TYPES`, `KEYWORD_TO_SYMBOL`, `DESCRIPTIVE_ONLY_KEYWORDS`, `isLegendOpenLine`, `isLegendCloseLine`, `stripLegendRegions`, `stripSpriteRegions`, `hasDescriptiveSignal`, `hasDescriptiveElement` | Shared descriptive-keyword table — single source of truth for the descriptive diagram engine (component / use-case / deployment). |
 | `diagram-type-set.ts` | `DiagramType`, `findStartTypes` | Faithful port of `net.sourceforge.plantuml.core.DiagramType`'s start-tag candidate set — `findStartTypes` only. |
-| `dispatcher.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`, `DiagramRegistry`, `registry` | Dispatcher: holds a registry of DiagramPlugin instances and resolves which plugin handles a given UmlSource by calling accepts() in registration order. |
+| `dispatcher.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`, `parseRefusalOf`, `DiagramRegistry`, `registry` | Dispatcher: holds a registry of DiagramPlugin instances and resolves which plugin handles a given UmlSource by calling accepts() in registration order. |
 | `dot-engine-measurer.ts` | _(none)_ | The single install point for `@knowvah/dot-engine`'s text measurer. |
 | `edge-label-box.ts` | `stripCreoleMarkup`, `ReservedLabelBox`, `CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT`, `VisibilityIconAdjustment`, `applyVisibilityIcon`, `applyGuillemet`, `MagicArrowDirection`, `MagicArrowLabel`, `parseMagicArrowLabel`, `computeReservedLabelBox`, `QuantifierBox`, `computeQuantifierBox`, `NoteOnLinkPosition`, `MergedLabelBoxInput`, `computeMergedLabelBox` | The reserved box an edge label occupies in the DOT handed to graphviz. |
 | `EmbeddedDiagram.ts` | `Line`, `NestedDiagramRenderer`, `getEmbeddedType`, `EmbeddedDiagram` | EmbeddedDiagram — a creole `{{ ... |

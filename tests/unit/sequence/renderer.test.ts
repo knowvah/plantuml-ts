@@ -17,6 +17,7 @@ import { defaultTheme, darkTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer, FixedMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -610,7 +611,7 @@ describe('sequencePlugin.accepts — non-sequence', () => {
 
 describe('sequencePlugin.parse', () => {
   it('returns AST with 2 participants for Alice -> Bob', () => {
-    const ast = sequencePlugin.parse({
+    const ast = parseAst(sequencePlugin, {
       lines: ['Alice -> Bob: hi'],
       type: 'sequence',
     });
@@ -620,7 +621,7 @@ describe('sequencePlugin.parse', () => {
   });
 
   it('returns AST with one message event', () => {
-    const ast = sequencePlugin.parse({
+    const ast = parseAst(sequencePlugin, {
       lines: ['Alice -> Bob: greet'],
       type: 'sequence',
     });
@@ -643,7 +644,7 @@ describe('sequencePlugin layout', () => {
 
   it('layoutSync returns SequenceGeometry with totalWidth > 0', () => {
     const measurer = new FormulaMeasurer();
-    const ast = syncPlugin.parse({
+    const ast = parseAst(syncPlugin, {
       lines: ['Alice -> Bob: hi'],
       type: 'sequence',
     });
@@ -653,7 +654,7 @@ describe('sequencePlugin layout', () => {
 
   it('layoutSync returns SequenceGeometry with correct participant count', () => {
     const measurer = new FixedMeasurer(8, 16);
-    const ast = syncPlugin.parse({
+    const ast = parseAst(syncPlugin, {
       lines: ['Alice -> Bob: test'],
       type: 'sequence',
     });
@@ -665,7 +666,7 @@ describe('sequencePlugin layout', () => {
     // layoutSequence is what both layout() and layoutSync() delegate to.
     // Verify they produce identical geometry by calling layoutSequence directly.
     const measurer = new FormulaMeasurer();
-    const ast = syncPlugin.parse({
+    const ast = parseAst(syncPlugin, {
       lines: ['Alice -> Bob: hello'],
       type: 'sequence',
     });
@@ -693,7 +694,7 @@ describe('sequencePlugin integration', () => {
 
   it('render delegates to renderSequence and returns valid SVG', () => {
     const measurer = new FormulaMeasurer();
-    const ast = syncPlugin.parse({
+    const ast = parseAst(syncPlugin, {
       lines: ['Alice -> Bob: hello'],
       type: 'sequence',
     });

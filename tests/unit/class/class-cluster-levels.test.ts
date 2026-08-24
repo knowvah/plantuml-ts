@@ -24,6 +24,7 @@ import { classPlugin } from '../../../src/diagrams/class/index.js';
 import { collapseEmptyNamespacesFinal } from '../../../src/diagrams/class/class-namespace.js';
 import type { ClassDiagramAST, Namespace } from '../../../src/diagrams/class/ast.js';
 import { clusterWrapperLevel } from '../../../src/diagrams/class/class-cluster-levels.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 
 const DOT_CACHE = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -77,7 +78,7 @@ function parseFixture(source: string): ClassDiagramAST {
   const blocks = buildBlockUmls(source);
   const block = blocks[0]!;
   if (!block.ok) throw new Error(`fixture failed to preprocess: ${JSON.stringify(block)}`);
-  const ast = classPlugin.parse(block.source, {});
+  const ast = parseAst(classPlugin, block.source, {});
   return collapseEmptyNamespacesFinal(ast);
 }
 

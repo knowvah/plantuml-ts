@@ -6,6 +6,9 @@
  */
 
 import type { DiagramType, UmlSource } from './block-extractor.js';
+import { upstreamTypeOf } from './block-extractor.js';
+import { DiagramType as UpstreamDiagramType } from './diagram-type-set.js';
+import type { ParseRefusal } from './parse-refusal.js';
 import { rect, text } from './svg.js';
 import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
@@ -161,7 +164,7 @@ export type AssembledSvg = RenderFragment | CompleteSvg;
 export interface SyncPlugin<AST = unknown, Geo = unknown> {
   readonly type: DiagramType;
   accepts(lines: readonly string[]): boolean;
-  parse(source: UmlSource, options?: ParseOptions): AST;
+  parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer): Geo;
   render(geo: Geo, theme: Theme): AssembledSvg;
 }
@@ -174,7 +177,7 @@ export interface SyncPlugin<AST = unknown, Geo = unknown> {
 export interface AsyncPlugin<AST = unknown, Geo = unknown> {
   readonly type: DiagramType;
   accepts(lines: readonly string[]): boolean;
-  parse(source: UmlSource, options?: ParseOptions): AST;
+  parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layout(ast: AST, theme: Theme, measurer: StringMeasurer): Promise<Geo>;
   render(geo: Geo, theme: Theme): AssembledSvg;
 }
@@ -187,6 +190,24 @@ export interface AsyncPlugin<AST = unknown, Geo = unknown> {
 export type DiagramPlugin<AST = unknown, Geo = unknown> =
   | SyncPlugin<AST, Geo>
   | AsyncPlugin<AST, Geo>;
+
+/**
+ * Narrows a `parse()` result to the refusal arm.
+ *
+ * The registry erases each plugin's AST type parameter to `unknown`, so at the
+ * pipeline's call sites `AST | ParseRefusal` collapses to `unknown` and a
+ * plain discriminant check does not typecheck. This is the same structural
+ * `in` narrowing `src/index.ts#annotationsOf` uses, and for the same reason:
+ * the value is THIS pipeline's own trusted `parse()` output, not external
+ * input, so it is a stage boundary rather than a validation boundary.
+ *
+ * `refused` is the discriminant because no engine AST carries that field (T1);
+ * absence of a field is never the test.
+ */
+export function parseRefusalOf(parsed: unknown): ParseRefusal | undefined {
+  if (typeof parsed !== 'object' || parsed === null) return undefined;
+  return 'refused' in parsed ? (parsed as ParseRefusal) : undefined;
+}
 
 // ---------------------------------------------------------------------------
 // Error-sentinel plugin
@@ -215,6 +236,37 @@ const ERROR_SENTINEL: SyncPlugin = {
   }),
 };
 
+/**
+ * The three types `detectUmlType` can assign from `@startuml` CONTENT, plus
+ * `UNKNOWN`. A block whose candidate set contains any of them must go through
+ * `accepts()` scanning rather than being claimed on its tag alone, or content
+ * probing stops being authoritative and `@startuml` sources misroute.
+ *
+ * `@startuml` is excluded by construction, not by a size test: its ten-member
+ * candidate set (`DiagramType.java:198-201`) contains SEQUENCE, CLASS and
+ * STATE. Every other tag yields a singleton, so this reads exactly as the
+ * scalar `AMBIGUOUS_TYPES.has(source.type)` test it replaces.
+ *
+ * TRANSITIONAL. T12 deletes the whole three-tier shape along with `accepts()`
+ * (D3'), replacing it with upstream's parse-attempt loop over these same
+ * candidates.
+ */
+const AMBIGUOUS_CANDIDATES: ReadonlySet<UpstreamDiagramType> = new Set([
+  UpstreamDiagramType.SEQUENCE,
+  UpstreamDiagramType.CLASS,
+  UpstreamDiagramType.STATE,
+  UpstreamDiagramType.UNKNOWN,
+]);
+
+/** True when `types` is absent — a hand-built fixture states no candidate
+ *  constraint (see `UmlSource.types`), and must not be claimed on a tag it
+ *  does not have — or when it names a type `accepts()` has to arbitrate. */
+function hasAmbiguousCandidate(types: UmlSource['types']): boolean {
+  if (types === undefined) return true;
+  for (const t of types) if (AMBIGUOUS_CANDIDATES.has(t)) return true;
+  return false;
+}
+
 // ---------------------------------------------------------------------------
 // DiagramRegistry class
 // ---------------------------------------------------------------------------
@@ -234,20 +286,20 @@ export class DiagramRegistry {
    * Resolve the plugin that handles the given source block.
    *
    * For blocks with an explicit @start<type> directive (e.g. @startjson),
-   * match by plugin.type first — this avoids false positives from broad
-   * heuristics in other plugins (e.g. the component plugin matching JSON
-   * arrays via [...]). Type-based routing is skipped for types that can also
-   * be assigned by content probing in @startuml blocks ('sequence', 'class',
-   * 'state'), where accepts() scanning must remain authoritative.
+   * match by the block's CANDIDATE SET first — this avoids false positives
+   * from broad heuristics in other plugins (e.g. the component plugin matching
+   * JSON arrays via [...]). Candidate-based routing is skipped for the types
+   * that can also be assigned by content probing in @startuml blocks
+   * ('sequence', 'class', 'state'), where accepts() scanning must remain
+   * authoritative.
    *
    * For @startuml blocks and ambiguous types, fall through to accepts() scanning.
    */
   resolve(source: UmlSource): DiagramPlugin {
-    // Types producible by detectUmlType from @startuml content probing —
-    // these must always go through accepts() to avoid misrouting.
-    const AMBIGUOUS_TYPES = new Set(['sequence', 'class', 'state', 'unknown']);
-    if (!AMBIGUOUS_TYPES.has(source.type)) {
-      const typed = this.plugins.find((p) => p.type === source.type);
+    if (!hasAmbiguousCandidate(source.types)) {
+      const typed = this.plugins.find(
+        (p) => source.types?.has(upstreamTypeOf(p.type)) === true,
+      );
       if (typed !== undefined) return typed;
     }
     for (const plugin of this.plugins) {

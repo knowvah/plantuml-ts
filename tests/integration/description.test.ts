@@ -29,13 +29,14 @@ import { defaultTheme } from '../../src/core/theme.js';
 import { FixedMeasurer } from '../../src/core/measurer.js';
 import type { UmlSource } from '../../src/core/block-extractor.js';
 import { compareSvg } from '../oracle/svg-conformance/compare.js';
+import { parseAst } from '../helpers/parse-ast.js';
 
 const measurer = new FixedMeasurer(8, 16);
 
 /** Run a block end-to-end through the plugin and return the SVG. */
 function renderViaPlugin(lines: readonly string[]): string {
   const source: UmlSource = { lines, type: 'description' };
-  const ast = descriptionPlugin.parse(source);
+  const ast = parseAst(descriptionPlugin, source);
   const geo = descriptionPlugin.layoutSync(ast, defaultTheme, measurer);
   return assembleSvg(descriptionPlugin.render(geo, defaultTheme));
 }
@@ -333,13 +334,13 @@ describe('description engine — T7 sprite/img inline-atom rendering', () => {
   });
 
   it('ast.sprites feeds D9 label measurement: a sprite-bearing label widens the entity vs. the no-sprite variant', () => {
-    const withSpriteAst = descriptionPlugin.parse({
+    const withSpriteAst = parseAst(descriptionPlugin, {
       lines: [...PLAIN_HEX_SPRITE, 'component "X <$foo>" as C1'],
       type: 'description',
     });
     const withSpriteGeo = descriptionPlugin.layoutSync(withSpriteAst, defaultTheme, measurer);
 
-    const noSpriteAst = descriptionPlugin.parse({
+    const noSpriteAst = parseAst(descriptionPlugin, {
       lines: ['component "X" as C1'],
       type: 'description',
     });

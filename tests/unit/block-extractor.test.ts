@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { extractBlocks } from '../../src/core/block-extractor.js';
+import { extractBlocks, upstreamTypeOf } from '../../src/core/block-extractor.js';
+import { DiagramType as UpstreamDiagramType } from '../../src/core/diagram-type-set.js';
 import {
   DiagramRegistry,
   type SyncPlugin,
@@ -453,5 +454,70 @@ describe('DiagramRegistry', () => {
     } else {
       throw new Error('Expected sentinel to be a SyncPlugin');
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T3 -- the candidate set replaces the single guessed type as the routing
+// input. `type` survives one batch longer as `resolve()`'s tier-3 fallback
+// (see plans/dispatch-by-parse-attempt/decision-journal.md); T12 removes it.
+// ---------------------------------------------------------------------------
+
+function typesOf(lines: readonly string[]): ReadonlySet<string> {
+  const block = extractBlocks(lines)[0];
+  if (block === undefined) throw new Error('no block extracted');
+  if (block.types === undefined) throw new Error('finalizeBlock must populate types');
+  return block.types;
+}
+
+describe('UmlSource.types -- findStartTypes of the @start line', () => {
+  it('@startuml names all ten legacy-UML factories, never one guess', () => {
+    // DiagramType.java:198-201. The whole point of D5: upstream does not
+    // guess, so neither does this field -- even though `type` still carries
+    // detectUmlType's guess alongside it until T12.
+    expect([...typesOf(['@startuml', 'Alice -> Bob: hi', '@enduml'])].sort()).toEqual([
+      'ACTIVITY', 'CLASS', 'COMPOSITE', 'DESCRIPTION', 'HELP',
+      'OBJECT', 'SEQUENCE', 'SPRITES', 'STATE', 'TIMING',
+    ]);
+  });
+
+  it('is a singleton for every tag the corpus actually uses', () => {
+    expect(typesOf(['@startjson', '{}', '@endjson'])).toEqual(new Set(['JSON']));
+    expect(typesOf(['@startyaml', 'a: 1', '@endyaml'])).toEqual(new Set(['YAML']));
+    expect(typesOf(['@starthcl', 'a = 1', '@endhcl'])).toEqual(new Set(['HCL']));
+    expect(typesOf(['@startdot', 'digraph g {}', '@enddot'])).toEqual(new Set(['DOT']));
+  });
+
+  it('an unrecognised tag is {UNKNOWN}, which is a real answer', () => {
+    expect(typesOf(['@startfoo', 'x', '@endfoo'])).toEqual(new Set(['UNKNOWN']));
+  });
+
+  it('keeps this port-only tag routing where it routes today', () => {
+    // @startcomponent is one of EIGHT tags in START_SUFFIX_MAP that upstream
+    // has never had -- the jar types it UNKNOWN and renders PSystemUnsupported.
+    // The divergence is PRE-EXISTING; T3 carries it forward unchanged rather
+    // than repairing it, because repairing it would move fixtures and this
+    // task's whole property is that it moves none.
+    expect(typesOf(['@startcomponent', '[A] --> [B]', '@endcomponent'])).toEqual(
+      new Set(['DESCRIPTION']),
+    );
+  });
+});
+
+describe('upstreamTypeOf -- the port type union mapped onto the enum', () => {
+  it('is total: every port type has an upstream member', () => {
+    const PORT_TYPES: readonly DiagramType[] = [
+      'sequence', 'class', 'state', 'description', 'activity', 'object',
+      'timing', 'mindmap', 'gantt', 'wbs', 'json', 'yaml', 'hcl', 'board',
+      'chronology', 'files', 'packetdiag', 'chart', 'dot', 'unknown',
+    ];
+    for (const t of PORT_TYPES) {
+      expect(Object.values(UpstreamDiagramType)).toContain(upstreamTypeOf(t));
+    }
+  });
+
+  it('maps packetdiag to PACKET -- the plugin is named for the tag, the enum for the diagram', () => {
+    expect(upstreamTypeOf('packetdiag')).toBe(UpstreamDiagramType.PACKET);
+    expect(upstreamTypeOf('description')).toBe(UpstreamDiagramType.DESCRIPTION);
   });
 });
