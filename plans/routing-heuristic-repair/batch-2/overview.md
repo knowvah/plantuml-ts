@@ -16,5 +16,5 @@ close with their own tasks instead of being scored as failures.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |----|---|---|---|---|---|
-| T2 | [Activity's swimlane pattern](T2-activity-swimlane.md) | typescript-pro | `src/diagrams/activity/index.ts`, `tests/unit/activity/accepts.test.ts` | T1 | [ ] |
-| T3 | [json/yaml brace claims](T3-json-yaml-braces.md) | typescript-pro | `src/diagrams/json/index.ts`, `src/diagrams/yaml/index.ts`, `tests/unit/json/accepts.test.ts` | T1 | [ ] |
+| T2 | [Activity's swimlane pattern](T2-activity-swimlane.md) | typescript-pro | `src/diagrams/activity/index.ts`, `tests/unit/activity/accepts.test.ts` | T1 | [x] |
+| T3 | [json/yaml brace claims](T3-json-yaml-braces.md) | typescript-pro | `src/diagrams/json/index.ts`, `src/diagrams/yaml/index.ts`, `tests/unit/json/accepts.test.ts` | T1 | [x] |
