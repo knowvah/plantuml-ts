@@ -92,10 +92,10 @@ Three confirmed per-bucket mechanisms, each from source:
 | Batch | Tasks | Parallel | Status |
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 routing-conformance gate | — | [x] |
-| [2](batch-2/overview.md) | T2 registration order | — | [ ] |
-| [3](batch-3/overview.md) | T3 candidate-type filter | — | [ ] |
-| [4](batch-4/overview.md) | T4 · T5 · T6 · T7 heuristic repair | yes | [ ] |
-| [5](batch-5/overview.md) | T8 re-pin · T9 integrity guard | yes | [ ] |
+| [2](batch-2/overview.md) | T2 registration order | — | **HALTED** |
+| [3](batch-3/overview.md) | T3 candidate-type filter | — | blocked by T2 |
+| [4](batch-4/overview.md) | T4 · T5 · T6 · T7 heuristic repair | yes | blocked by T2 |
+| [5](batch-5/overview.md) | T8 re-pin · T9 integrity guard | yes | blocked by T2 |
 
 **T2 and T3 are deliberately sequential** though their write-sets are
 disjoint: both change routing corpus-wide, and landing them together makes a
@@ -168,3 +168,69 @@ deliberately: this mission's specification is the Java on disk at
 `~/git/plantuml` and the cached goldens, not the internet.
 
 Execution is not gated on this — it only shapes permission prompts.
+
+## Mission halted at T2 — 2026-08-23
+
+**Batch 1 landed. Batch 2 was implemented, measured, and reverted.** Three of
+the README's own stop conditions fired at once, and the mechanism is fully
+diagnosed in [`.agent-notes/T2-registration-order-halt.md`](../../.agent-notes/T2-registration-order-halt.md).
+
+Mirroring `PSystemBuilder.java`'s order exactly moves the gate **79 → 469**:
+it fixes 25 fixtures and **newly misroutes 415**.
+
+| jar → ours | n | mechanism |
+|---|---|---|
+| STATE → DESCRIPTION | 152 | B |
+| CLASS → SEQUENCE | 151 | A |
+| STATE → SEQUENCE | 96 | A |
+| DESCRIPTION → SEQUENCE | 12 | A |
+| NONE → SEQUENCE | 3 | A |
+| NONE → DESCRIPTION | 1 | B |
+
+**Mechanism A (262).** `SEQUENCE_PATTERNS[0]` (`src/diagrams/sequence/index.ts:20`)
+is `/->>?|-->>?/` — unanchored and context-free. `sequencePlugin.accepts()` is
+true for **1351** of 3158 fixtures, **270 of which are not sequence diagrams**.
+Registering sequence first hands that 20% false-positive rate first refusal on
+the whole corpus.
+
+**Mechanism B (153).** Upstream has description (`:138`) before state (`:139`);
+this port had state first. **153** fixtures are accepted by *both* engines and
+the jar calls **152 of them STATE**. Only registration order was hiding
+description's over-claim.
+
+**The premise D1 rests on is wrong.** The brief reads the order as an
+independent variable — "Sequence is FIRST upstream and LAST here, so class,
+description, json and yaml get first refusal". It is not independent: upstream's
+order is safe *because* upstream breaks ties by attempting the parse
+(`PSystemBuilder.java:257-266`, `isOk(f.createSystem(...))`), and we break them
+with per-line regexes. **The current order is load-bearing** — it is
+compensating for heuristic over-claim, not merely inverted.
+
+**No later task rescues it**, which is why the halt is the whole mission and
+not just T2:
+
+- **T3 (D4's candidate-type filter) has no reach.** `DiagramType.java:197-201`
+  maps `@startuml` to `{SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION,
+  …}` — all candidates at once. **3039 of 3158 fixtures (96.2%) are
+  `@startuml`**; the other 119 already route correctly through the existing
+  typed fast path. The filter can only separate what is already separate.
+- **T4's arrow anchoring does not reach it.** **217 of the 262 (82.8%)**
+  fixtures mechanism A breaks carry a real arrow in real arrow position
+  (`Sally --> Bob`, `ClassA --> ClassB : -var1`). A class relation and a
+  sequence message are the same string.
+
+That leaves exactly **D2's deferred option B**, which this README already names
+as a stop: *"The residual can only be closed by parse-attempt — that is D2's
+deferred mission. Stop and record; do not start it."*
+
+**What survives.** T1's gate (`ef62ef74`) is the mission's durable deliverable
+and it works — it caught a 415-fixture regression on its first real use, named
+every fixture, and reproduced the bucket table. The routing baseline stands at
+**79**. The plugin↔factory↔line derivation T2 produced is correct and is
+preserved in the agent note for the deferred mission; only its consequence is
+unsafe.
+
+**Recommended next step**, for the maintainer to decide: re-file the parse-attempt
+mission (D2 option B) as the prerequisite, with this measurement as its
+justification, and re-scope batch 4's heuristic repairs — which do *not* depend
+on T2 — as a separate, independently landable mission.
