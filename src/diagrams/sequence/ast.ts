@@ -241,9 +241,11 @@ export interface ParticipantGeo {
   width: number;
   height: number;
   centerX: number;
-  /** Display form of {@link Participant.stereotype} -- guillemet-wrapped and
-   *  ready to draw, or absent when there is none or it is hidden. */
-  stereotype?: string;
+  /** Displayed form of {@link Participant.stereotype}: one guillemet-wrapped
+   *  entry per `<<...>>` chunk, badge specs already stripped
+   *  (`core/stereotype-decoration.ts`). Absent when there is none, when every
+   *  chunk is invisible, or when the style hides it. */
+  stereotypeLines?: readonly string[];
 }
 
 import type { TextRun } from './text-block-geo.js';

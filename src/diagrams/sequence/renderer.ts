@@ -88,12 +88,15 @@ function renderLabel(cx: number, cy: number, label: string, theme: Theme): strin
  * `geo.stereotype` unset, so this function needs no style knowledge.
  */
 function renderNameBlock(p: ParticipantGeo, cy: number, theme: ScaledTheme): string {
-  if (p.stereotype === undefined) return renderLabel(p.centerX, cy, p.display, theme);
-  const half = theme.fontSize / 2;
-  return (
-    renderLabel(p.centerX, cy - half, p.stereotype, theme) +
-    renderLabel(p.centerX, cy + half, p.display, theme)
-  );
+  const lines = p.stereotypeLines ?? [];
+  if (lines.length === 0) return renderLabel(p.centerX, cy, p.display, theme);
+  // The block is centred on `cy`: N stereotype rows then the name, each one
+  // font-size tall, so the name sits half a row below centre for a single
+  // stereotype and proportionally lower for a stacked one.
+  const rowH = theme.fontSize;
+  const top = cy - (lines.length * rowH) / 2;
+  const stereo = lines.map((l, i) => renderLabel(p.centerX, top + i * rowH, l, theme)).join('');
+  return stereo + renderLabel(p.centerX, top + lines.length * rowH, p.display, theme);
 }
 
 function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {

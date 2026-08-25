@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 473,
+    "missing-element": 472,
     "extra-element": 51,
-    "geometry": 16089,
-    "text-metrics": 5762,
+    "geometry": 16117,
+    "text-metrics": 5792,
     "format-units": 5,
-    "other": 11072
+    "other": 11085
   },
   "fixtures": [
     {
@@ -3827,14 +3827,14 @@
     },
     {
       "slug": "jonasa-65-teci533",
-      "diffCount": 5,
+      "diffCount": 75,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 32,
+        "text-metrics": 30,
         "format-units": 0,
-        "other": 0
+        "other": 13
       }
     },
     {

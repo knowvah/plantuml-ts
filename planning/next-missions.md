@@ -596,6 +596,28 @@ capture gets headroom automatically.
 
 Ordered by how ready they are, not by size.
 
+- **`sequence-participant-badge-glyph`** — NEW 2026-08-25, split out of
+  `dispatch-by-parse-attempt` T20 after the badge LABEL half landed
+  (`63a13473`/this commit). `StereotypeDecoration#buildComplex` separates a
+  `<<...>>` run into displayed label(s) and a circled-character / sprite
+  BADGE (`:143-182`). The label half is done and shared:
+  `core/stereotype-decoration.ts`, lifted out of the class engine so both
+  engines use one port. The **glyph** is not drawn. **Measured 2026-08-25:**
+  11 sequence fixtures declare a participant badge — 7 sprite, 4
+  circled-character — and each golden draws **two** per badge (participant
+  head and footer), e.g. `birocu-87-xubi808` carries two 64x64 base64-PNG
+  `<image>` elements.
+  **Why it is separate, not skipped:** the machinery exists
+  (`core/sprite-registry.ts`, `sprite-raster.ts#spriteToPngDataUri`, and the
+  class engine's own `computeBadgeSpriteBox`/`class-badge.ts`), but the
+  sequence engine cannot reach it. The shared plugin seam is
+  `layout(ast, theme, measurer)` / `render(geo, theme)`
+  (`core/dispatcher.ts:181,193`) and carries **no `SpriteRegistry`**, so
+  drawing the glyph means adding a parameter to the interface **every** engine
+  implements — a cross-cutting change to a public boundary, which is the work,
+  not an excuse. Scope it as: thread the registry through the seam, port the
+  badge box geometry beside the participant name block
+  (`renderer.ts#renderNameBlock`), then the two badge kinds.
 - **`dispatch-by-parse-attempt`** — NEW 2026-08-23, deferred out of
   `sequence-engine-overclaims-nested-diagrams` by maintainer ruling (that
   brief's D2). Upstream decides diagram ownership by **attempting the parse**

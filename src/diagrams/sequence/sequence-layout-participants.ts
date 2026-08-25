@@ -16,6 +16,10 @@ import type {
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
+import {
+  splitStereotypeLabels,
+  wrapGuillemet,
+} from '../../core/stereotype-decoration.js';
 
 const LEFT_MARGIN = 30;
 const LABEL_H_PADDING = 8; // min px between a message label edge and a lifeline
@@ -105,10 +109,9 @@ function computeParticipantWidths(
 ): number[] {
   const fontSpec = fontSpecOf(theme);
   return sortedParticipants.map((p) => {
-    const stereo = visibleStereotype(p, theme);
     const lw = Math.max(
       measurer.measure(p.display, fontSpec).width,
-      stereo === undefined ? 0 : measurer.measure(stereo, fontSpec).width,
+      ...visibleStereotypeLines(p, theme).map((l) => measurer.measure(l, fontSpec).width),
     );
     if (p.type === 'database') {
       return Math.max(DB_MIN_WIDTH, lw + theme.sequence.participantPadding);
@@ -165,14 +168,22 @@ function positionParticipants(
 }
 
 /**
- * `<<name>>` as the jar draws it: the single-glyph guillemet form.
- * `Stereotype.build` keeps the `<<`/`>>` it was given
- * (`CommandParticipant.java:180`) and the drawing layer swaps in the
- * guillemets — `birocu-87-xubi808`'s golden carries `«APIGateway»`, one
- * character each side, with the inner run trimmed.
+ * The DISPLAYED labels of a `<<...>>` run, guillemet-wrapped.
+ *
+ * `StereotypeDecoration#buildComplex` rewrites each chunk to just its LABEL
+ * group, dropping the `(CHAR[,COLOR])` / `($sprite[,COLOR])` badge spec that
+ * introduced it (`:143-182`) -- so `<< ($APIGateway, #CC2264) APIGateway >>`
+ * displays as `«APIGateway»`, which is exactly what the jar emits for
+ * `birocu-87-xubi808`. It also yields ONE label per chunk, so a stacked
+ * `<<A>><<B>>` is two rows, and 3-bracket `<<<X>>>` chunks are invisible.
+ *
+ * `core/stereotype-decoration.ts` is that port, shared rather than
+ * duplicated -- see its own header for why it no longer lives in the class
+ * engine.
  */
-function stereotypeLabel(raw: string): string {
-  return `«${raw.replace(/^<<\s*/, '').replace(/\s*>>$/, '')}»`;
+function stereotypeLabels(raw: string): string[] {
+  const inner = raw.replace(/^<</, '').replace(/>>$/, '');
+  return splitStereotypeLabels(inner).map((l) => wrapGuillemet(l));
 }
 
 /**
@@ -189,14 +200,14 @@ function stereotypeLabel(raw: string): string {
  * lookup key with the guillemets trimmed here and nothing else -- no
  * dependency on the class engine's stereotype splitter.
  */
-function visibleStereotype(p: Participant, theme: Theme): string | undefined {
-  if (p.stereotype === undefined) return undefined;
+function visibleStereotypeLines(p: Participant, theme: Theme): readonly string[] {
+  if (p.stereotype === undefined) return [];
   const byTag = theme.colors.showStereotypeByTag;
   if (byTag !== undefined) {
     const tag = p.stereotype.replace(/^<<\s*/, '').replace(/\s*>>$/, '').trim().toLowerCase();
-    if (byTag[tag] === false) return undefined;
+    if (byTag[tag] === false) return [];
   }
-  return stereotypeLabel(p.stereotype);
+  return stereotypeLabels(p.stereotype);
 }
 
 /** Build the geometry for a single participant column at a given x offset. */
@@ -212,9 +223,8 @@ function buildParticipantGeo(
   // A visible stereotype is a SECOND run above the name
   // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
   // own line in `birocu-87-xubi808`), so the head grows by one line.
-  const stereo = visibleStereotype(p, theme);
-  const stereoLines = stereo === undefined ? 0 : 1;
-  const boxHeight = measured.height * (1 + stereoLines) + 20;
+  const stereoLines = visibleStereotypeLines(p, theme);
+  const boxHeight = measured.height * (1 + stereoLines.length) + 20;
   const pHeight =
     p.type === 'actor' ? Math.max(boxHeight, SEQUENCE_ACTOR_HEIGHT) :
     p.type === 'database' ? Math.max(boxHeight, DB_HEIGHT) :
@@ -224,7 +234,7 @@ function buildParticipantGeo(
   return {
     id: p.id,
     display: p.display,
-    ...(stereo !== undefined ? { stereotype: stereo } : {}),
+    ...(stereoLines.length > 0 ? { stereotypeLines: stereoLines } : {}),
     type: p.type,
     x: currentX,
     y: 0,

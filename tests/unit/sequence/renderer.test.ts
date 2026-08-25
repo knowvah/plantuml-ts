@@ -921,6 +921,40 @@ describe('renderSequence — participant stereotype', () => {
     expect(silent).toContain('«dummy1»');
   });
 
+  // `StereotypeDecoration#buildComplex` rewrites each chunk to its LABEL
+  // group alone, dropping the `($sprite[,COLOR])` / `(CHAR[,COLOR])` badge
+  // spec that introduced it (`:143-182`). birocu-87-xubi808's golden shows
+  // `«APIGateway»` for `<< ($APIGateway, #CC2264) APIGateway >>`.
+  it('drops a sprite badge spec from the displayed label', () => {
+    const svg = render(
+      '@startuml\nparticipant P as p << ($APIGateway, #CC2264) APIGateway >>\np -> B: hi\n@enduml',
+    );
+    expect(svg).toContain('>«APIGateway»</text>');
+    expect(svg).not.toContain('CC2264');
+  });
+
+  // The COLOR group is `(#[0-9a-fA-F]{6}|\w+)` (`StereotypeDecoration.java:68`)
+  // -- a bare name or a SIX-digit hex. `#red` is neither, so upstream does not
+  // recognise it as a badge at all and the whole run stays visible text.
+  it('drops a circled-character badge spec too', () => {
+    const named = render('@startuml\nparticipant P << (C,red) Thing >>\nP -> B: hi\n@enduml');
+    expect(named).toContain('>«Thing»</text>');
+    const hex = render('@startuml\nparticipant P << (C,#CC2264) Thing >>\nP -> B: hi\n@enduml');
+    expect(hex).toContain('>«Thing»</text>');
+    const notAColor = render('@startuml\nparticipant P << (C,#red) Thing >>\nP -> B: hi\n@enduml');
+    expect(notAColor).toContain('>«(C,#red) Thing»</text>');
+  });
+
+  // One row per chunk, and a 3-bracket chunk is invisible -- both come from
+  // `cutLabels` + the 2-vs-3 bracket test in `splitStereotypeTokens`.
+  it('draws one row per stacked chunk, skipping invisible ones', () => {
+    const svg = render('@startuml\nparticipant P <<A>><<B>>\nP -> Q: hi\n@enduml');
+    expect(svg).toContain('>«A»</text>');
+    expect(svg).toContain('>«B»</text>');
+    const hidden = render('@startuml\nparticipant P <<<Zz>>>\nP -> Q: hi\n@enduml');
+    expect(hidden).not.toContain('«Zz»');
+  });
+
   it('hide stereotype removes it regardless of any style', () => {
     const svg = render('@startuml\nhide stereotype\nparticipant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml');
     expect(svg).not.toContain('«dummy1»');
