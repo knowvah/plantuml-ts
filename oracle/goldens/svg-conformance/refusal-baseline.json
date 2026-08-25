@@ -12447,11 +12447,12 @@
       "type": "sequence",
       "slug": "bagexe-03-bozo133",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `/ note over Bob : initial sdkfljsdfl sdf sdmf`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -12667,11 +12668,12 @@
       "type": "sequence",
       "slug": "bifuzu-54-gefo004",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `[-> B : label1`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -12711,11 +12713,12 @@
       "type": "sequence",
       "slug": "bipoce-87-cuki505",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -12755,11 +12758,12 @@
       "type": "sequence",
       "slug": "biruge-35-vaxu680",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 11: `note over Alice #yellow/blue`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -12832,11 +12836,12 @@
       "type": "sequence",
       "slug": "boguvi-37-ralo631",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `autonumber inc`. Unported: CommandAutonumberIncrement, whose `([A-Za-z])` names the digit group to bump (CommandAutonumberIncrement.java; SequenceDiagramFactory.java:149) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -12876,11 +12881,12 @@
       "type": "sequence",
       "slug": "bopizu-70-rese737",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `autonumber inc B`. Unported: CommandAutonumberIncrement, whose `([A-Za-z])` names the digit group to bump (CommandAutonumberIncrement.java; SequenceDiagramFactory.java:149) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -12931,11 +12937,12 @@
       "type": "sequence",
       "slug": "boxibe-39-luco835",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 1: `hide empty description`. Unported: a `hide` variant beyond CommandHideUnlinked (SequenceDiagramFactory.java:101) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -12953,11 +12960,12 @@
       "type": "sequence",
       "slug": "bozuru-10-rajo382",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 6: `Alice x->] : hop2`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix `([ox]?[?\\\\]\\\\[])?` (CommandExoArrowRight.java:75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13085,11 +13093,12 @@
       "type": "sequence",
       "slug": "busexe-78-ruzu110",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 12: `hnote left Alice: hnote\\n left \\n Alice`. Unported: FactorySequenceNoteCommand's STYLE group `(note|hnote|rnote)` -- only `note` is ported (FactorySequenceNoteCommand.java:81,98) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13118,11 +13127,12 @@
       "type": "sequence",
       "slug": "butosi-00-mali446",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `/ note over P1 : note 2`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13173,11 +13183,12 @@
       "type": "sequence",
       "slug": "caciga-47-jigu709",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13228,22 +13239,24 @@
       "type": "sequence",
       "slug": "caluni-22-noci624",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 14: `?->o main`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "camebe-75-mujo573",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 12: `hnote left Alice: hnote\\n left \\n Alice`. Unported: FactorySequenceNoteCommand's STYLE group `(note|hnote|rnote)` -- only `note` is ported (FactorySequenceNoteCommand.java:81,98) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13261,11 +13274,12 @@
       "type": "sequence",
       "slug": "carose-61-seko055",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13415,11 +13429,12 @@
       "type": "sequence",
       "slug": "celego-19-laji937",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `A ->(40) B++: text 1`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13624,22 +13639,24 @@
       "type": "sequence",
       "slug": "codeti-52-lafa397",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "cofuse-78-keri294",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `/ note over A: A2 this line throws an error`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13679,11 +13696,12 @@
       "type": "sequence",
       "slug": "comelo-49-lefi793",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `bill -> bob ++ #005500 : hello from thread 2`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13844,11 +13862,12 @@
       "type": "sequence",
       "slug": "dakake-85-nemi992",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13866,22 +13885,24 @@
       "type": "sequence",
       "slug": "dalata-11-sifu583",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 17: `& loop forever`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "damoge-62-riso387",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[/-o b : \"\"   [/-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13910,11 +13931,12 @@
       "type": "sequence",
       "slug": "databu-25-mivu307",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 7: `note <<red>> left`. Unported: FactorySequenceNoteCommand's StereotypePattern -- `note <<stereo>> left` (FactorySequenceNoteCommand.java:81-83) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -13954,11 +13976,12 @@
       "type": "sequence",
       "slug": "debufa-67-poma789",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 1: `[-> SbcMXdCtrl: startThread`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -14273,11 +14296,12 @@
       "type": "sequence",
       "slug": "dojapu-42-sali914",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[o<-o b : \"\" [o<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -14306,11 +14330,12 @@
       "type": "sequence",
       "slug": "dolefo-13-kovu702",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 11: `......`. Unported: CommandDelay -- the `...` / `\u2026` delay row (SequenceDiagramFactory.java:152) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -14339,11 +14364,12 @@
       "type": "sequence",
       "slug": "domaji-70-zini725",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[\\\\-o b : \"\"  [\\\\-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -14372,11 +14398,12 @@
       "type": "sequence",
       "slug": "donuli-07-peje262",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `deactivate`. Unported: CommandDeactivateShort -- bare `deactivate` with no participant (SequenceDiagramFactory.java:103) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -14504,22 +14531,24 @@
       "type": "sequence",
       "slug": "dugata-50-koxo354",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[x<- b : \"\"  [x<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "dugeki-47-celo546",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 33: `note over A, C#tomato: A upload le fichier telque decrit sur le lien ci-dessus : Upload_successfull\\nA recupere les infos \u00e0 envoyer a B, C`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -14581,11 +14610,12 @@
       "type": "sequence",
       "slug": "dutopa-62-jalu659",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 1: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -14834,11 +14864,12 @@
       "type": "sequence",
       "slug": "fenoli-16-peru181",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `A ->(1) B: text 1`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -15087,11 +15118,12 @@
       "type": "sequence",
       "slug": "fonatu-29-texo854",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2. Unported: CommandActivate calls getOrCreateParticipant, so a bare `activate X` DECLARES X (CommandActivate.java:109); this port requires a prior participant and refuses the whole diagram as having none Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -15109,11 +15141,12 @@
       "type": "sequence",
       "slug": "fonope-49-jodi834",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `Alice x->] : hop2`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix `([ox]?[?\\\\]\\\\[])?` (CommandExoArrowRight.java:75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -15142,11 +15175,12 @@
       "type": "sequence",
       "slug": "fotiku-67-lilu728",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `||0||`. Unported: CommandHSpace `\\|\\|(\\d+)?\\|+` -- explicit vertical spacing (CommandHSpace.java; SequenceDiagramFactory.java:143) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -15340,11 +15374,12 @@
       "type": "sequence",
       "slug": "gacujo-48-leto751",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 13: `user -[#navy]-> som: Selects a \\nkitchen drawing\\nfor import`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -15461,11 +15496,12 @@
       "type": "sequence",
       "slug": "gejeji-12-zofa866",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `[o<-x b : \"\" [o<-x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -15814,11 +15850,12 @@
       "type": "sequence",
       "slug": "gojozu-97-xeki128",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `Bob -> Alice [[http://www.google.com]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -15858,11 +15895,12 @@
       "type": "sequence",
       "slug": "gozaru-36-gejo982",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `Alice \\\\-: \"\\\\\\\\-\" Should be down1`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16045,11 +16083,12 @@
       "type": "sequence",
       "slug": "guzoco-99-ginu686",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `[o<-x Alice : hop`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16144,11 +16183,12 @@
       "type": "sequence",
       "slug": "jajobi-60-ralo350",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `A ->(10) B: text 10`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16166,11 +16206,12 @@
       "type": "sequence",
       "slug": "jalodi-19-mibi961",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `deactivate \"actor 1\"`. Unported: CommandActivate's WHO group `([%pLN_.@]+|[%g][^%g]+[%g])` -- its QUOTED alternative, for a participant name containing a space (CommandActivate.java:65) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16254,11 +16295,12 @@
       "type": "sequence",
       "slug": "jebole-52-cuvo164",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[o<- b : \"\"  [o<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16353,11 +16395,12 @@
       "type": "sequence",
       "slug": "jiliba-03-lapi286",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 1: `IT++`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16375,11 +16418,12 @@
       "type": "sequence",
       "slug": "jitesa-41-cara967",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[\\- b : \"\"   [\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16540,11 +16584,12 @@
       "type": "sequence",
       "slug": "jozomu-87-tajo507",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `=MyTitle`. Unported: CommandParticipantMultilines -- the `participant X [ ... ]` block form, whose body is creole (here a `=heading`) (SequenceDiagramFactory.java:110) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16606,11 +16651,12 @@
       "type": "sequence",
       "slug": "junide-55-soka558",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16694,11 +16740,12 @@
       "type": "sequence",
       "slug": "kakune-11-vusu073",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[<-o b : \"\"   [<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16727,11 +16774,12 @@
       "type": "sequence",
       "slug": "kapuva-33-nomi771",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[o/- b : \"\"  [o/-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16782,11 +16830,12 @@
       "type": "sequence",
       "slug": "keloje-58-ladu877",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 21: `a o/-    a`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16870,11 +16919,12 @@
       "type": "sequence",
       "slug": "kevavu-57-kifi084",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[x<->x b : \"\"[x<->x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -16903,11 +16953,12 @@
       "type": "sequence",
       "slug": "kibope-73-jezu646",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 7: `/ note over B: \"State: Initial\"`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17046,11 +17097,12 @@
       "type": "sequence",
       "slug": "kivavu-72-goju233",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[\\\\- b : \"\"  [\\\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17244,22 +17296,24 @@
       "type": "sequence",
       "slug": "koneju-77-vode355",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "kopaxi-36-dedo317",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[\\-o b : \"\"   [\\-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17354,11 +17408,12 @@
       "type": "sequence",
       "slug": "kugati-67-nuzu852",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[o<<- b : \"\" [o<<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17376,22 +17431,24 @@
       "type": "sequence",
       "slug": "kukeja-88-zida141",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 11: `Bob -> Alice ++ #blue : hello`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "kumogu-10-rigi101",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 20: `b o/-    b : \"\"o/-\"\"`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17498,11 +17555,12 @@
       "type": "sequence",
       "slug": "labudu-49-fove649",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17531,11 +17589,12 @@
       "type": "sequence",
       "slug": "lafuzo-13-xura634",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `=MyTitle`. Unported: CommandParticipantMultilines -- the `participant X [ ... ]` block form, whose body is creole (here a `=heading`) (SequenceDiagramFactory.java:110) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17663,11 +17722,12 @@
       "type": "sequence",
       "slug": "lekopo-04-sefo189",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 10: `& opt message received`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17718,22 +17778,24 @@
       "type": "sequence",
       "slug": "letagi-90-kome968",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `A ->(60) B: text 10`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "lezonu-15-cege608",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `}}`. Unported: EmbeddedDiagram's `{{` / `}}` block -- a nested diagram inside a note body (EmbeddedDiagram.java:77-78); unconsumed, its inner `end note` closes the OUTER note and the `}}` is left dangling Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17773,22 +17835,24 @@
       "type": "sequence",
       "slug": "licole-34-vejo527",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `+ XXX`. Unported: the `%newline()` preprocessor builtin (tim/builtin/Newline.java:51) -- its expansion splits the message into lines this port then cannot parse. A preprocessor gap, not a sequence command gap Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "liculu-86-goge853",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `-\\ Bob`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17817,11 +17881,12 @@
       "type": "sequence",
       "slug": "liguma-77-mume567",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 1: `sprite $mySprite data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=`. Unported: CommonCommands' CommandCreoleSprite / inline sprite data (CommonCommands.java:58) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17839,11 +17904,12 @@
       "type": "sequence",
       "slug": "liluca-64-muva178",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `autonumber stop`. Unported: CommandAutonumberStop (SequenceDiagramFactory.java:147) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17862,11 +17928,12 @@
       "type": "sequence",
       "slug": "lipuci-81-vovi162",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `[o-> B : This text extends the arrow length\\nright edge arrow`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17895,11 +17962,12 @@
       "type": "sequence",
       "slug": "loguci-83-mobe896",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `\u2026`. Unported: CommandDelay -- the `...` / `\u2026` delay row (SequenceDiagramFactory.java:152) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17928,11 +17996,12 @@
       "type": "sequence",
       "slug": "lokavu-60-peku948",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 9: `?o-> B : Pre`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -17994,11 +18063,12 @@
       "type": "sequence",
       "slug": "loteba-26-konu854",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 9: `/ note right of Alice: NOTE2`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18016,11 +18086,12 @@
       "type": "sequence",
       "slug": "lozuru-10-poba814",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[o\\\\- b : \"\" [o\\\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18071,11 +18142,12 @@
       "type": "sequence",
       "slug": "lugika-07-rozo911",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 6: `?o-> B : word`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18159,11 +18231,12 @@
       "type": "sequence",
       "slug": "lusigu-71-nipe759",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `?o->Alice : \"[o->\" external event`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18203,22 +18276,24 @@
       "type": "sequence",
       "slug": "luzapi-49-rati107",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 6: `[-> SerialManager: purgeRx()`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "maboju-34-soxi895",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `Alice -> Bob [[http://www.google.com]] : ok`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18313,11 +18388,12 @@
       "type": "sequence",
       "slug": "matoke-25-kidu719",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `A <[#red]-o? ++`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18368,11 +18444,12 @@
       "type": "sequence",
       "slug": "mebidu-16-ruve297",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 12: `hnote left Alice: hnote\\n left \\n Alice`. Unported: FactorySequenceNoteCommand's STYLE group `(note|hnote|rnote)` -- only `note` is ported (FactorySequenceNoteCommand.java:81,98) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18456,11 +18533,12 @@
       "type": "sequence",
       "slug": "menoke-22-luxo044",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 12: `}}`. Unported: EmbeddedDiagram's `{{` / `}}` block -- a nested diagram inside a note body (EmbeddedDiagram.java:77-78); unconsumed, its inner `end note` closes the OUTER note and the `}}` is left dangling Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18533,11 +18611,12 @@
       "type": "sequence",
       "slug": "mezaxa-44-siju322",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `Bob -> Alice ++ #blue : hello`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18643,22 +18722,24 @@
       "type": "sequence",
       "slug": "mitefi-27-cubo687",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `note right FMSSrv: Not decided how to send no data.`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "mitire-01-voga923",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[//- b : \"\"  [//-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18676,11 +18757,12 @@
       "type": "sequence",
       "slug": "mivuke-79-fujo526",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `autonumber stop`. Unported: CommandAutonumberStop (SequenceDiagramFactory.java:147) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18786,11 +18868,12 @@
       "type": "sequence",
       "slug": "momuxe-95-bugu296",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[o//- b : \"\" [o//-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18819,11 +18902,12 @@
       "type": "sequence",
       "slug": "movaso-17-jomi483",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `note over A #green;line:lightblue : text1`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18863,11 +18947,12 @@
       "type": "sequence",
       "slug": "mozofa-80-puru273",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `/ note over Alice: //italics//`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -18952,11 +19037,12 @@
       "type": "sequence",
       "slug": "mulofu-90-voka382",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[/- b : \"\"   [/-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -19128,11 +19214,12 @@
       "type": "sequence",
       "slug": "nanoza-23-fija616",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[o\\- b : \"\"  [o\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -19293,11 +19380,12 @@
       "type": "sequence",
       "slug": "nesuva-86-fuki568",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 7: `/ note over b: b`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -19392,11 +19480,12 @@
       "type": "sequence",
       "slug": "nidozi-08-daxa280",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `Bob -> Alice [[http://plantuml.com/start]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -19436,22 +19525,24 @@
       "type": "sequence",
       "slug": "nirolu-80-lobo780",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `& note right of David : Should be same level as \"1\"`. Unported: FactorySequenceNoteCommand's PARALLEL group `(&[%s]*)?` (FactorySequenceNoteCommand.java:78,95) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "nisogu-21-zixe139",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[<<- b : \"\"  [<<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -19524,11 +19615,12 @@
       "type": "sequence",
       "slug": "nizuzi-32-babe798",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `{start} Alice -> Bob : start doing things during duration`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -19568,11 +19660,12 @@
       "type": "sequence",
       "slug": "nofola-68-nobe068",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `bill -> bob #005500 : hello from thread 2`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -19700,22 +19793,24 @@
       "type": "sequence",
       "slug": "nukona-00-jaro456",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[<<-o b : \"\"  [<<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "numezi-28-fuzu813",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 6: `Charlie -> Alice & Bob & Dave : Alice & Bob & Dave`. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -19744,11 +19839,12 @@
       "type": "sequence",
       "slug": "nunuji-27-mosa042",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `[<--1: SomeOutgoingOperation`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -19975,11 +20071,12 @@
       "type": "sequence",
       "slug": "peduzi-80-giki495",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `note right FMSSrv: Not decided how to send no data.`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -20063,11 +20160,12 @@
       "type": "sequence",
       "slug": "pijixu-96-bago359",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 6: `Alice -> Bob & Dave: Bob & Dave`. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -20129,11 +20227,12 @@
       "type": "sequence",
       "slug": "pobasa-34-neza994",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `A ->]: ok`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix `([ox]?[?\\\\]\\\\[])?` (CommandExoArrowRight.java:75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -20207,11 +20306,12 @@
       "type": "sequence",
       "slug": "pomoxu-05-luco302",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 19: `/ note left of user1`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -20405,11 +20505,12 @@
       "type": "sequence",
       "slug": "punove-48-zugu202",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 6: `Alice -> Bob & Dave & Charlie : Bob & Dave & Charlie`. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -20603,11 +20704,12 @@
       "type": "sequence",
       "slug": "recani-60-licu962",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 1: `-> A`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -20691,11 +20793,12 @@
       "type": "sequence",
       "slug": "repudi-21-rovo448",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 1: `[-> Node: Start TC`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -20801,11 +20904,12 @@
       "type": "sequence",
       "slug": "rititi-64-vene814",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21044,22 +21148,24 @@
       "type": "sequence",
       "slug": "rugeco-70-muro754",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 6: `&opt test`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "rugoro-74-mepi153",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 1: `Bob -> Alice[[{test data test data test data test data  \\ntest data test data test data test data \\ntest data test data test data test data \\ntest data test data test data test data \\ntest data test data test data test data \\ntest data test data test data test data}]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21154,11 +21260,12 @@
       "type": "sequence",
       "slug": "ruxasu-79-puxa956",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 7: `note left <<red>>`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21209,11 +21316,12 @@
       "type": "sequence",
       "slug": "ruxuxu-75-jilu612",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `B -->? : log`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix `([ox]?[?\\\\]\\\\[])?` (CommandExoArrowRight.java:75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21231,11 +21339,12 @@
       "type": "sequence",
       "slug": "sameli-92-dape565",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `autonumber inc B`. Unported: CommandAutonumberIncrement, whose `([A-Za-z])` names the digit group to bump (CommandAutonumberIncrement.java; SequenceDiagramFactory.java:149) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21363,11 +21472,12 @@
       "type": "sequence",
       "slug": "sefako-72-jono850",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `note right A #palegreen: a link (without tooltip and label) works for all the ref area`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21440,11 +21550,12 @@
       "type": "sequence",
       "slug": "senogo-33-nuva054",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21473,22 +21584,24 @@
       "type": "sequence",
       "slug": "SequenceArrows_0001_Test",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 22: `a -\\o    b : \"\"-\\o  \"\"`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "SequenceArrows_0002_Test",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 28: `a -\\o    b : \"\"-\\o  \"\"`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21550,11 +21663,12 @@
       "type": "sequence",
       "slug": "sirabe-54-sibe468",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 1: `[-> A: DoWork`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21594,11 +21708,12 @@
       "type": "sequence",
       "slug": "sisele-83-gebe678",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `a ->(50)     b : \"\"->   \"\"`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21704,11 +21819,12 @@
       "type": "sequence",
       "slug": "sogafu-39-fone585",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `Alice <[#green]- Bob: Positive Response`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -21836,11 +21952,12 @@
       "type": "sequence",
       "slug": "sufevi-44-xipa294",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 9: `Bob o\\\\-- Alice ++:`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22155,11 +22272,12 @@
       "type": "sequence",
       "slug": "tegasu-93-fima016",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `hide << new >> stereotype`. Unported: CommandArrow's StereotypePattern.optional(\"STEREOTYPE\") (CommandArrow.java:129) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22188,22 +22306,24 @@
       "type": "sequence",
       "slug": "telavi-12-pifu671",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `||0||`. Unported: CommandHSpace `\\|\\|(\\d+)?\\|+` -- explicit vertical spacing (CommandHSpace.java; SequenceDiagramFactory.java:143) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "telizo-11-pilo439",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 9: `& note right of Ken: txt`. Unported: FactorySequenceNoteCommand's PARALLEL group `(&[%s]*)?` (FactorySequenceNoteCommand.java:78,95) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22243,22 +22363,24 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0003_Test",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `b -> a --++ #red : hello`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "TeozTimelineIssues_0004_Test",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `& note right of Alice: ok`. Unported: FactorySequenceNoteCommand's PARALLEL group `(&[%s]*)?` (FactorySequenceNoteCommand.java:78,95) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22287,11 +22409,12 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0007_Test",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `A <[#red]-o? ++`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22309,11 +22432,12 @@
       "type": "sequence",
       "slug": "terapo-81-puzi168",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 3: `alice -> bob <<a>> : red`. Unported: CommandArrow's StereotypePattern.optional(\"STEREOTYPE\") (CommandArrow.java:129) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22342,22 +22466,24 @@
       "type": "sequence",
       "slug": "texopo-01-dibi658",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 17: `[<- d: Msg`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "texoze-85-meli189",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[o<->o b : \"\"[o<->o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22386,11 +22512,12 @@
       "type": "sequence",
       "slug": "tijeba-12-zeta132",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22474,11 +22601,12 @@
       "type": "sequence",
       "slug": "titufa-76-tisa795",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `note <<myStyle>> left`. Unported: FactorySequenceNoteCommand's StereotypePattern -- `note <<stereo>> left` (FactorySequenceNoteCommand.java:81-83) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22529,11 +22657,12 @@
       "type": "sequence",
       "slug": "todozi-34-jire490",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5. Unported: CommandActivate calls getOrCreateParticipant, so a bare `activate X` DECLARES X (CommandActivate.java:109); this port requires a prior participant and refuses the whole diagram as having none Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22573,11 +22702,12 @@
       "type": "sequence",
       "slug": "tolozi-77-gere619",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `-> R : messageX`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22595,11 +22725,12 @@
       "type": "sequence",
       "slug": "tovese-18-xira071",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 11: `a <-X    a : \"\"<-x\"\"`. Unported: CommandArrow's ARROW_DRESSING `[ox]` -- matched CASE-INSENSITIVELY, because every command regex is compiled with Pattern.CASE_INSENSITIVE (Pattern2.java:114), so `<-X` is the same arrow as `<-x` (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22815,22 +22946,24 @@
       "type": "sequence",
       "slug": "vajoke-72-gizu927",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "valiva-41-fabo221",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `====`. Unported: CommandDivider `==(.*)==`, which accepts an EMPTY label (CommandDivider.java:57-62) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -22903,11 +23036,12 @@
       "type": "sequence",
       "slug": "vativa-83-bisa518",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `a <->(50)    b : \"\"<->  \"\"`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -23113,11 +23247,12 @@
       "type": "sequence",
       "slug": "vigoga-79-pita532",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[<-x b : \"\"  [<-x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -23213,11 +23348,12 @@
       "type": "sequence",
       "slug": "vixapo-60-tuzu421",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `note left \"Long Alice\" : hello`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -23268,11 +23404,12 @@
       "type": "sequence",
       "slug": "vogegu-91-mave762",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `Model <[hidden]- Management : Provides possible funding scenarios`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -23334,11 +23471,12 @@
       "type": "sequence",
       "slug": "vubato-50-gebu534",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -23367,11 +23505,12 @@
       "type": "sequence",
       "slug": "vucomo-53-gicu658",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `note right FMSSrv: Not decided how to send no data.`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -23422,11 +23561,12 @@
       "type": "sequence",
       "slug": "vuniba-19-repo187",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `note right FMSSrv: <b>Not</b> decided how to send no data.`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -23565,11 +23705,12 @@
       "type": "sequence",
       "slug": "xalofe-61-vala300",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[//-o b : \"\"  [//-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -23840,11 +23981,12 @@
       "type": "sequence",
       "slug": "xigoxi-25-paro589",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[<-o b : \"\"  [<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24028,11 +24170,12 @@
       "type": "sequence",
       "slug": "xonili-01-pure946",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[x<-o b : \"\"  [x<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24083,11 +24226,12 @@
       "type": "sequence",
       "slug": "xucibo-16-zisi974",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 6: `||50||`. Unported: CommandHSpace `\\|\\|(\\d+)?\\|+` -- explicit vertical spacing (CommandHSpace.java; SequenceDiagramFactory.java:143) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24105,11 +24249,12 @@
       "type": "sequence",
       "slug": "xujesa-13-dane303",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 2: `Bob <-] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix `([ox]?[?\\\\]\\\\[])?` (CommandExoArrowRight.java:75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24611,11 +24756,12 @@
       "type": "sequence",
       "slug": "ziloke-42-lodi019",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 9: `autonumber stop`. Unported: CommandAutonumberStop (SequenceDiagramFactory.java:147) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24655,22 +24801,24 @@
       "type": "sequence",
       "slug": "zoculi-89-nodo007",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 13: `& loop 1 to n`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
       "type": "sequence",
       "slug": "zofeda-77-xiba744",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[o<-x b : \"\" [o<-x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24699,11 +24847,12 @@
       "type": "sequence",
       "slug": "zogane-85-raja214",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `?o-> B : Pre`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24754,11 +24903,12 @@
       "type": "sequence",
       "slug": "zosulu-72-fati889",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `[<- b : \"\"   [<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24832,11 +24982,12 @@
       "type": "sequence",
       "slug": "zujani-47-femu345",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 8: `A->? : M1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix `([ox]?[?\\\\]\\\\[])?` (CommandExoArrowRight.java:75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24920,11 +25071,12 @@
       "type": "sequence",
       "slug": "zuravu-52-mike252",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 10: `& opt message received`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",
@@ -24953,11 +25105,12 @@
       "type": "sequence",
       "slug": "zuvusi-13-fika929",
       "jarRendered": true,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "sequence",
-      "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "status": "known-gap",
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "5c3cbd31",
+      "reason": "line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
     },
     {
       "tree": "dot-cache",

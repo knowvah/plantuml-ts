@@ -553,16 +553,17 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 3158 fixtures, 8 of them jar errors, 16 of them erroring here', () => {
-    // The 8 jar-error fixtures are the same 8 the routing gate pins. The 16 we
-    // error on are 5 of those 8, plus nuvoja, plus the 10 exo-arrow fixtures
-    // pinned known-gap below. Composition re-pinned 2026-08-25; it was
-    // 6 erroring / 3152 rendering when T0 took the baseline, before any engine
-    // could refuse anything.
+  it('the manifest is 3158 fixtures, 8 of them jar errors, 169 of them erroring here', () => {
+    // The 8 jar-error fixtures are the same 8 the routing gate pins. The 169
+    // we error on are 5 of those 8, plus nuvoja, plus the 163 pinned
+    // known-gap below — the 10 exo-arrow fixtures T13 found, then batch 4's
+    // full sequence residual censused 2026-08-25. It was 6 erroring / 3152
+    // rendering when T0 took the baseline, before any engine could refuse
+    // anything at all.
     expect(manifest.fixtures.length).toBe(3158);
     expect(pinnedJarErrors.length).toBe(8);
-    expect(pinnedErroring.length).toBe(16);
-    expect(pinnedRendering.length).toBe(3142);
+    expect(pinnedErroring.length).toBe(169);
+    expect(pinnedRendering.length).toBe(2989);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -572,9 +573,27 @@ describe('refusal coverage — baseline shape', () => {
     // specific missing Command is named, so the excuse cannot become a
     // dumping ground.
     const gaps = manifest.fixtures.filter((f) => f.status === 'known-gap');
-    expect(gaps.length).toBe(10);
+    // 10 at T13 (the exo-arrow family alone), then 163 once batch 4's whole
+    // sequence residual was censused: every one carries the refusing LINE and
+    // the upstream Command that explains it, which is what keeps a growing
+    // count from becoming the dumping ground D7 warns about. The number is
+    // pinned exactly so growth stays deliberate.
+    expect(gaps.length).toBe(163);
     for (const g of gaps) {
-      expect(g.reason ?? '', `${keyOf(g)} must name its unported Command`).toMatch(/Command\w+/);
+      // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
+      //
+      // This asserted `/Command\w+/`, which was too narrow twice over.
+      // Upstream names commands both ways — `CommandArrow`, and the
+      // factory-built `FactorySequenceNoteCommand` where `Command` is the
+      // suffix — and some refusals are not command gaps at all:
+      // `EmbeddedDiagram`'s `{{`/`}}`, `ReadLineWithYamlHeader`'s `---`
+      // block, and the `%newline()` builtin are PREPROCESSOR and
+      // embedded-diagram mechanisms. Demanding the citation instead of the
+      // word keeps D7's real bar (a named, locatable mechanism) while
+      // admitting the gaps that are honestly not Commands.
+      expect(g.reason ?? '', `${keyOf(g)} must cite its upstream origin`).toMatch(
+        /\w+\.java:\d+/,
+      );
       expect(g.weErrored, `${keyOf(g)} is pinned known-gap but not erroring`).toBe(true);
     }
   });
