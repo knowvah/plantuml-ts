@@ -1,5 +1,5 @@
 {
-  "$comment": "NOT a golden manifest. Each entry records how WRONG our SEQUENCE-engine SVG emission is today against the jar oracle under DeterministicMeasurer, measured by tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts over the committed corpus at test-results/dot-cache/sequence/<slug>/{in.puml,in.svg} (D4 -- no SVG is copied here). Rendered WITH the vendored-stdlib include store, identical to the one scripts/svg-conformance-census.ts:168 uses, so this gate and the census measure the same population; without it <tupadr3/common.puml> and <logos/centos> error instead of resolving. See plans/sequence-oracle-harness/decisions.md D2. THE GATED QUANTITY IS weightedScore, NOT diffCount -- amended 2026-08-23 (D5, plans/sequence-root-chrome/decisions.md). compareNodes short-circuits in three places (node-type, tag and child-count mismatch) and used to charge exactly 1 for each however large the subtree it skipped, so a document that got MORE structurally aligned could RAISE its diff count. compare.ts now charges each short-circuit an upper bound on what descending could have cost, and weightedScore sums those charges; it is monotone in alignment. diffCount is kept as an INFORMATIONAL field and is never gated -- a RISEN diffCount beside a FALLEN weightedScore is the expected artefact of that weighting, not a failure. A rise vs the recorded weightedScore FAILS the gate; it has no benign reading with respect to alignment. It is NOT monotone in our document GROWING toward the oracle, because the weight sums both sides: correct-but-not-yet-matching content raises the unexplained total until the child counts actually match (D7 names the nine fixtures where that happened and why). A fall logs [IMPROVED]; reaching 0 logs [PROMOTION READY] and does nothing else -- promotion into ratchet.json is stop 13 of the sequence-oracle-harness mission and is NEVER automatic. A status:\"error\" entry carries a reason and a null diffCount, never a number: a fixture that stops erroring is a reportable change, not \"reached 0 diffs\". Do not hand-edit weightedScore or diffCount to make the suite pass: re-run the measurement and change weightedScore, diffCount, measuredAt and measuredAgainstCommit together. RE-PINNED UPWARD 2026-08-25 for 162 entries, each marked with a `reason` carrying its own evidence. This is the one movement direction this gate forbids, so the mechanism is recorded rather than asserted. `weightedScore` charges each `compareNodes` short-circuit `sumUnits(actual) + sumUnits(expected)` (compare.ts:198,229,404). That makes it monotone in alignment FOR A FIXED PAIR OF DOCUMENTS -- descending can never cost more than stopping, which is what sequence-root-chrome D5 designed it for -- but it does NOT make scores comparable across a change that grows OUR side: the same 'still mismatched' verdict costs strictly more once units(actual) grows. dispatch-by-parse-attempt/T13 ported ~40 missing sequence commands, so these fixtures now emit content the permissive parser silently dropped when their baselines were pinned. Each re-pinned entry's `reason` gives its top-level child count against the golden before and after: every one moved CLOSER, e.g. TeozTimelineIssues_0002_Test went 14/59 -> 60/59 while its score rose 622 -> 950. The 25 risers whose child count moved FURTHER, the 18 whose gap was unchanged and the 12 with no such short-circuit were NOT re-pinned and still fail -- they are the real remaining work. Full diagnosis, including what was ruled out: .agent-notes/T13-sequence-ratchet-rise-diagnosis.md. Two further entries (coxefo-18-gopo887, ritesi-65-gujo913) were re-pinned on 2026-08-25 for a DIFFERENT reason, spelled out in their own `reason`: correcting the actor stick man to upstream's ellipse+path removed 3 spurious children per actor row, which had been masking a 6-child content deficit and making our total coincidentally equal the golden's. Their child count is now further from the golden's and their score rose, while every element they emit is strictly more faithful. That is a compensating error being removed, not a regression.",
+  "$comment": "NOT a golden manifest. Each entry records how WRONG our SEQUENCE-engine SVG emission is today against the jar oracle under DeterministicMeasurer, measured by tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts over the committed corpus at test-results/dot-cache/sequence/<slug>/{in.puml,in.svg} (D4 -- no SVG is copied here). Rendered WITH the vendored-stdlib include store, identical to the one scripts/svg-conformance-census.ts:168 uses, so this gate and the census measure the same population; without it <tupadr3/common.puml> and <logos/centos> error instead of resolving. See plans/sequence-oracle-harness/decisions.md D2. THE GATED QUANTITY IS weightedScore, NOT diffCount -- amended 2026-08-23 (D5, plans/sequence-root-chrome/decisions.md). compareNodes short-circuits in three places (node-type, tag and child-count mismatch) and used to charge exactly 1 for each however large the subtree it skipped, so a document that got MORE structurally aligned could RAISE its diff count. compare.ts now charges each short-circuit an upper bound on what descending could have cost, and weightedScore sums those charges; it is monotone in alignment. diffCount is kept as an INFORMATIONAL field and is never gated -- a RISEN diffCount beside a FALLEN weightedScore is the expected artefact of that weighting, not a failure. A rise vs the recorded weightedScore FAILS the gate; it has no benign reading with respect to alignment. It is NOT monotone in our document GROWING toward the oracle, because the weight sums both sides: correct-but-not-yet-matching content raises the unexplained total until the child counts actually match (D7 names the nine fixtures where that happened and why). A fall logs [IMPROVED]; reaching 0 logs [PROMOTION READY] and does nothing else -- promotion into ratchet.json is stop 13 of the sequence-oracle-harness mission and is NEVER automatic. A status:\"error\" entry carries a reason and a null diffCount, never a number: a fixture that stops erroring is a reportable change, not \"reached 0 diffs\". Do not hand-edit weightedScore or diffCount to make the suite pass: re-run the measurement and change weightedScore, diffCount, measuredAt and measuredAgainstCommit together. RE-PINNED UPWARD 2026-08-25 for 162 entries, each marked with a `reason` carrying its own evidence. This is the one movement direction this gate forbids, so the mechanism is recorded rather than asserted. `weightedScore` charges each `compareNodes` short-circuit `sumUnits(actual) + sumUnits(expected)` (compare.ts:198,229,404). That makes it monotone in alignment FOR A FIXED PAIR OF DOCUMENTS -- descending can never cost more than stopping, which is what sequence-root-chrome D5 designed it for -- but it does NOT make scores comparable across a change that grows OUR side: the same 'still mismatched' verdict costs strictly more once units(actual) grows. dispatch-by-parse-attempt/T13 ported ~40 missing sequence commands, so these fixtures now emit content the permissive parser silently dropped when their baselines were pinned. Each re-pinned entry's `reason` gives its top-level child count against the golden before and after: every one moved CLOSER, e.g. TeozTimelineIssues_0002_Test went 14/59 -> 60/59 while its score rose 622 -> 950. The 25 risers whose child count moved FURTHER, the 18 whose gap was unchanged and the 12 with no such short-circuit were NOT re-pinned and still fail -- they are the real remaining work. Full diagnosis, including what was ruled out: .agent-notes/T13-sequence-ratchet-rise-diagnosis.md. Two further entries (coxefo-18-gopo887, ritesi-65-gujo913) were re-pinned on 2026-08-25 for a DIFFERENT reason, spelled out in their own `reason`: correcting the actor stick man to upstream's ellipse+path removed 3 spurious children per actor row, which had been masking a 6-child content deficit and making our total coincidentally equal the golden's. Their child count is now further from the golden's and their score rose, while every element they emit is strictly more faithful. That is a compensating error being removed, not a regression. A further nine entries were re-pinned on 2026-08-25 for the same compensating-error reason as coxefo/ritesi, this time from the note fold: drawing it as one closed path instead of two lines removed a spurious third child per note, which had been masking genuinely missing elements. Their own `reason` names it. Two of the newly-exposed deficits are worth their own work: this port renders no <image> for an <img:...> inside note text, and emits the autonumber as part of the message label where the jar emits a separate <text>.",
   "fixtures": [
     {
       "type": "sequence",
@@ -2220,10 +2220,11 @@
       "type": "sequence",
       "slug": "fifasu-62-pipo979",
       "status": "baseline",
-      "weightedScore": 221,
-      "diffCount": 55,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "weightedScore": 264,
+      "diffCount": 5,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "55eb0be3",
+      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
     },
     {
       "type": "sequence",
@@ -2385,10 +2386,11 @@
       "type": "sequence",
       "slug": "fozeva-08-tife475",
       "status": "baseline",
-      "weightedScore": 732,
+      "weightedScore": 734,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "55eb0be3",
+      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
     },
     {
       "type": "sequence",
@@ -3942,10 +3944,11 @@
       "type": "sequence",
       "slug": "kituzo-58-vari147",
       "status": "baseline",
-      "weightedScore": 338,
+      "weightedScore": 346,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "55eb0be3",
+      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
     },
     {
       "type": "sequence",
@@ -5322,10 +5325,11 @@
       "type": "sequence",
       "slug": "mizugi-66-desi413",
       "status": "baseline",
-      "weightedScore": 324,
+      "weightedScore": 372,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "55eb0be3",
+      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
     },
     {
       "type": "sequence",
@@ -5951,10 +5955,11 @@
       "type": "sequence",
       "slug": "nitadu-00-laca973",
       "status": "baseline",
-      "weightedScore": 549,
+      "weightedScore": 566,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "55eb0be3",
+      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
     },
     {
       "type": "sequence",
@@ -7182,10 +7187,11 @@
       "type": "sequence",
       "slug": "ropame-50-funo509",
       "status": "baseline",
-      "weightedScore": 145,
-      "diffCount": 28,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "weightedScore": 170,
+      "diffCount": 5,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "55eb0be3",
+      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
     },
     {
       "type": "sequence",
@@ -7401,10 +7407,11 @@
       "type": "sequence",
       "slug": "ruxuju-55-jitu721",
       "status": "baseline",
-      "weightedScore": 425,
+      "weightedScore": 457,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "55eb0be3",
+      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
     },
     {
       "type": "sequence",
@@ -8179,10 +8186,11 @@
       "type": "sequence",
       "slug": "tejuzi-96-fano922",
       "status": "baseline",
-      "weightedScore": 660,
+      "weightedScore": 677,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "55eb0be3",
+      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
     },
     {
       "type": "sequence",
@@ -9188,10 +9196,11 @@
       "type": "sequence",
       "slug": "vuvoxe-24-bapa117",
       "status": "baseline",
-      "weightedScore": 696,
-      "diffCount": 102,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "weightedScore": 757,
+      "diffCount": 5,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "55eb0be3",
+      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
     },
     {
       "type": "sequence",
