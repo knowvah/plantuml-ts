@@ -500,10 +500,24 @@ describe('element-scoped <style> block wired into buildTheme', () => {
       '  BorderColor: #778899',
       '}',
       '</style>',
-      'interface IFoo {}',
-      'enum Color { RED }',
-      ':Actor:/',
-      'package "My Pkg" {}',
+      // The body must be VALID PlantUML; the point of the test is the
+      // `<style>` blocks above, not the declarations. Jar-verified: this
+      // renders clean as `data-diagram-type="CLASS"`.
+      //
+      // It used to read `interface IFoo {}` / `enum Color { RED }` /
+      // `:Actor:/` / `package "My Pkg" {}`, which the jar refuses twice over
+      // -- a single-line `enum Color { RED }` body is not a declaration, and
+      // `:Actor:/` is a DESCRIPTION shorthand that a class diagram rejects
+      // even with `allowmixing` (verified: "line 8", `>:Actor:/<`
+      // underlined). It only rendered here because unrecognised lines used
+      // to be dropped silently.
+      'interface IFoo {',
+      '}',
+      'enum Color {',
+      '  RED',
+      '}',
+      'package "My Pkg" {',
+      '}',
       '@enduml',
     ].join('\n');
     const svg = await render(source);
