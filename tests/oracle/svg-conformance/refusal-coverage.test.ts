@@ -117,6 +117,9 @@ interface BaselineFixture {
    *  4-6, each pin carrying the unported `Command` that explains it. Nothing
    *  is pinned `known-gap` at baseline. */
   readonly status: 'ok' | 'known-gap';
+  /** Required on a `known-gap` pin: the unported `Command` that explains the
+   *  refusal, with its upstream `file:line`. D7's bar for excusing one. */
+  readonly reason?: string;
   readonly measuredAt: string;
   readonly measuredAgainstCommit: string;
 }
@@ -550,22 +553,36 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 3158 fixtures, 8 of them jar errors, 6 of them erroring here', () => {
-    // The 8 jar-error fixtures are the same 8 the routing gate pins; the 6 we
-    // error on are 5 of those 8 plus nuvoja. 3150 fixtures render on both
-    // sides.
+  it('the manifest is 3158 fixtures, 8 of them jar errors, 16 of them erroring here', () => {
+    // The 8 jar-error fixtures are the same 8 the routing gate pins. The 16 we
+    // error on are 5 of those 8, plus nuvoja, plus the 10 exo-arrow fixtures
+    // pinned known-gap below. Composition re-pinned 2026-08-25; it was
+    // 6 erroring / 3152 rendering when T0 took the baseline, before any engine
+    // could refuse anything.
     expect(manifest.fixtures.length).toBe(3158);
     expect(pinnedJarErrors.length).toBe(8);
-    expect(pinnedErroring.length).toBe(6);
-    expect(pinnedRendering.length).toBe(3152);
+    expect(pinnedErroring.length).toBe(16);
+    expect(pinnedRendering.length).toBe(3142);
   });
 
-  it('nothing is pinned known-gap: no engine can refuse anything yet', () => {
-    expect(manifest.fixtures.filter((f) => f.status !== 'ok')).toEqual([]);
+  it('every known-gap pin names the unported Command that explains it', () => {
+    // T0 asserted NOTHING was pinned known-gap, because at that commit no
+    // engine could refuse anything. That is no longer the world. What must
+    // hold now is D7's actual bar: a known-gap excuses a refusal ONLY when a
+    // specific missing Command is named, so the excuse cannot become a
+    // dumping ground.
+    const gaps = manifest.fixtures.filter((f) => f.status === 'known-gap');
+    expect(gaps.length).toBe(10);
+    for (const g of gaps) {
+      expect(g.reason ?? '', `${keyOf(g)} must name its unported Command`).toMatch(/Command\w+/);
+      expect(g.weErrored, `${keyOf(g)} is pinned known-gap but not erroring`).toBe(true);
+    }
   });
 
-  it('the baseline defect count is 1, and it is nuvoja', () => {
-    const defects = manifest.fixtures.filter((f) => f.weErrored && f.jarRendered);
+  it('the only non-gapped defect is nuvoja', () => {
+    const defects = manifest.fixtures.filter(
+      (f) => f.weErrored && f.jarRendered && f.status === 'ok',
+    );
     expect(defects.map(keyOf)).toEqual(['dot-cache:sequence/nuvoja-46-dezu541']);
   });
 });

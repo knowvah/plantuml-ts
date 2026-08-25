@@ -387,8 +387,16 @@ export const COMMANDS: readonly Command[] = [
     // `decoratedArrowCommand`, the sibling rule that also drops it).
     // Quoted endpoints (`"Application thread" -> "DB connection"`) are
     // unquoted at use.
+    //
+    // The unquoted endpoint is upstream's own participant code,
+    // `PART1CODE`/`PART2CODE` = `([%pLN_.@]+)` (`CommandArrow.java:93,96`):
+    // Unicode letters and digits, `_`, `.`, `@`. NOT `\S+`, which let the
+    // token absorb a leading dash of the arrow itself -- greedy backtracking
+    // made `C-->B` parse as `C-` `->` `B`, inventing a participant named
+    // `C-`. Jar-verified: `B->C` / `C-->B` declares exactly B and C.
+    // Anything outside that class has to be quoted upstream too.
     pattern:
-      /^(?:&\s*)?("[^"]+"|\S+)\s*(->|-->>|->>|-->|->\?|\?->)\s*("[^"]+"|\S+?)(\s*(?:\+\+|--\+\+|\+\+--|--|\*\*|!!))?\s*(?::\s*(.*))?$/,
+      /^(?:&\s*)?("[^"]+"|[\p{L}\p{N}_.@]+)\s*(->|-->>|->>|-->|->\?|\?->)\s*("[^"]+"|[\p{L}\p{N}_.@]+?)(\s*(?:\+\+|--\+\+|\+\+--|--|\*\*|!!))?\s*(?::\s*(.*))?$/u,
     execute(state, match) {
       const from = match[1]!.replace(/^"(.*)"$/, '$1');
       const arrowToken = match[2]!;
