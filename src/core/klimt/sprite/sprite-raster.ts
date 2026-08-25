@@ -119,9 +119,23 @@ function computeAlpha(coef: number, maxCoef: number): number {
   return Math.trunc(FULLY_OPAQUE_ALPHA * ((coef * ALPHA_RAMP_THRESHOLD_DIVISOR) / maxCoef));
 }
 
-/** `channel = c1 + (int)(coef * (c2 - c1))` -- `HColorGradient#getColor`, truncated toward zero. */
+/**
+ * One channel of `HColorGradient#getColor`.
+ *
+ * Upstream truncates the DELTA TERM and then adds, not the sum:
+ *
+ *     final int diffGreen = c2.getGreen() - c1.getGreen();
+ *     final int vGreen = (int) (coeff * diffGreen);
+ *     final int green = c1.getGreen() + vGreen;
+ *
+ * (`HColorGradient.java:77,81,85`). Java's `(int)` truncates toward ZERO, so
+ * for a DESCENDING channel the two orders disagree by one: with c1=255,
+ * c2=34, coef=2/3 the delta term is -147.33 -> -147 -> 108, where truncating
+ * the sum gives 107.67 -> 107. Jar-verified on `birocu-87-xubi808`, whose
+ * sprite is exactly that case.
+ */
 function gradientChannel(c1: number, c2: number, coef: number): number {
-  return Math.trunc(c1 + coef * (c2 - c1));
+  return c1 + Math.trunc(coef * (c2 - c1));
 }
 
 /**

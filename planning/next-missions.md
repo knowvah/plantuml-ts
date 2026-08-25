@@ -615,22 +615,29 @@ Ordered by how ready they are, not by size.
   by construction) takes birocu's sprite 16516 -> 679 bytes, now 0.87x the
   jar's own, with pixels byte-identical. Whole-SVG output over the 8 sprite
   fixtures is 0.77x the jar.
-- **`sequence-element-style-buckets`** — NEW 2026-08-25, found while fixing
-  the sprite badge tint. The sequence engine reads **no** per-element
-  `<style>` buckets at all: `theme.colors.elements` is never consulted
-  anywhere under `src/diagrams/sequence/`. So
-  `<style> participant { BackgroundColor #FFFF00 }` reaches neither the
-  participant box fill nor anything else — `birocu-87-xubi808` fills `#FFF`
-  where the jar fills `#FF0`, and `cexeco-21-piga007` carries the same block.
-  The buckets themselves resolve correctly (`collectElementStyleBuckets`
-  already puts `participant -> {backgroundcolor, linecolor}` on the theme);
-  nothing reads them. Scope: route `elements.<kind>` through
-  `renderParticipantBox`/`renderFooterBox` for background and border, per
-  participant kind. Expect broad fixture movement — every fixture with a
-  `<style>` element block is currently rendering the default palette.
-  **Knock-on already handled:** the badge tint's gradient START is sourced
-  from the same expression that paints the box, so fixing the fill fixes the
-  badge with it rather than needing a second change.
+- **`sequence-element-style-buckets`** — DONE 2026-08-25. The sequence engine
+  read no per-element `<style>`/skinparam buckets and no inline participant
+  `#color` either; both now resolve in layout onto `ParticipantGeo`
+  (`background`/`border`) in `Participant#getUsedStyles`' own precedence
+  (inline over cascade, `Participant.java:88`). Root cause of the bucket half
+  was one missing entry: `ELEMENT_BUCKET_SNAMES` carried every OTHER sequence
+  participant kind (actor, database, boundary, control, entity, queue,
+  collections) but not `participant` itself, so `<style> participant {}`
+  resolved to no bucket at all.
+- **`gradient-paint-goes-in-defs`** — NEW 2026-08-25, surfaced by the above.
+  A gradient `Paint` is emitted as a `<linearGradient>` INLINE among the
+  drawing elements, once per referencing shape, while `<defs/>` is left
+  empty. The jar emits it ONCE inside `<defs>` and references it by id
+  (`fadage-04-xoxe727`: our 4 inline copies vs its 1 in defs; its
+  `svg/defs[1][childCount]` is 3 where ours is 0, which is also why
+  `gifope-23-jufe872` and `ravire-24-jaju542` carry a second short-circuit).
+  This is SHARED emission code, not sequence's — expect movement across
+  class/description/state too, which is why it is its own entry. Two
+  fixtures (`fadage-04-xoxe727`, `netuvi-29-jiti924`) regressed on
+  weightedScore when participants started honouring gradient backgrounds:
+  the bucket support is correct and the gradient emission underneath it is
+  not. Special-casing gradients back out of the bucket would have hidden
+  this rather than fixed it.
 - **`dispatch-by-parse-attempt`** — NEW 2026-08-23, deferred out of
   `sequence-engine-overclaims-nested-diagrams` by maintainer ruling (that
   brief's D2). Upstream decides diagram ownership by **attempting the parse**

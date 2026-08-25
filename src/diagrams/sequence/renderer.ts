@@ -147,19 +147,22 @@ function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
   const labelYOffset = theme.fontSize / 2 + 4 * theme.scaleK;
   if (p.type === 'actor') {
     return (
-      renderActorShape(p.centerX, p.y, p.height, theme) +
+      renderActorShape(p, p.y, theme) +
       renderNameBlock(p, p.y + p.height - labelYOffset, theme)
     );
   }
   if (p.type === 'database') {
     return (
-      renderDatabaseShape(p.x, p.y, p.width, p.height, theme) +
+      renderDatabaseShape(p, p.y, theme) +
       renderNameBlock(p, p.y + p.height - labelYOffset, theme)
     );
   }
   const box = rect(p.x, p.y, p.width, p.height, {
-    fill: theme.colors.background,
-    stroke: theme.colors.border,
+    // `Participant#getUsedStyles` -- the kind's `<style>` bucket merged with
+    // the participant's own inline colour, resolved in layout
+    // (`sequence-layout-participants.ts#resolveParticipantBackground`).
+    fill: p.background,
+    stroke: p.border,
   });
   return box + renderNameBlock(p, p.y + p.height / 2, theme);
 }
@@ -177,18 +180,18 @@ function renderFooterBox(
   if (p.type === 'actor') {
     return (
       renderNameBlock(p, labelY, theme) +
-      renderActorShape(p.centerX, footerShapeY, p.height, theme)
+      renderActorShape(p, footerShapeY, theme)
     );
   }
   if (p.type === 'database') {
     return (
       renderNameBlock(p, labelY, theme) +
-      renderDatabaseShape(p.x, footerShapeY, p.width, p.height, theme)
+      renderDatabaseShape(p, footerShapeY, theme)
     );
   }
   const box = rect(p.x, lifelineEndY, p.width, p.height, {
-    fill: theme.colors.background,
-    stroke: theme.colors.border,
+    fill: p.background,
+    stroke: p.border,
   });
   return box + renderNameBlock(p, lifelineEndY + p.height / 2, theme);
 }

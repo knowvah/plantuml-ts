@@ -15,6 +15,9 @@ import type {
   SequenceEvent,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
+import type { Paint } from '../../core/paint.js';
+import { resolveBareOrBackColor } from '../../core/color-override.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
 import {
@@ -131,7 +134,7 @@ function computeParticipantWidths(
   const { theme, measurer } = ctx;
   const fontSpec = fontSpecOf(theme);
   return sortedParticipants.map((p) => {
-    const badge = anyBadgeFor(p, ctx.sprites, theme);
+    const badge = anyBadgeFor(p, ctx, resolveParticipantBackground(p, theme));
     const textW = Math.max(
       measurer.measure(p.display, fontSpec).width,
       ...visibleStereotypeLines(p, theme).map((l) => measurer.measure(l, fontSpec).width),
@@ -248,6 +251,36 @@ function visibleStereotypeLines(p: Participant, theme: Theme): readonly string[]
 }
 
 
+
+/**
+ * The box's fill, in `Participant#getUsedStyles`' own precedence: the
+ * participant's inline `#color` overrides the merged style
+ * (`eventuallyOverride(getColors())`, `Participant.java:88`), which itself
+ * comes from the kind's signature `root, element, sequenceDiagram, <kind>`
+ * (`ParticipantType.java:55-80`) -- so the `<style>` bucket key IS the
+ * participant kind. Falls back to the theme's own background.
+ *
+ * A bucket value is a raw `parseColor` result: a plain NAME still needs
+ * HColorSet resolution, a Gradient is already a `Paint` and passes through
+ * (the same two cases `class/renderer-note.ts#resolveNoteBackground`
+ * handles).
+ */
+function resolveParticipantBackground(p: Participant, theme: Theme): Paint {
+  const inline = resolveBareOrBackColor(p.color);
+  if (inline !== undefined) return resolveColorToSvgHex(inline);
+  const bucket = theme.colors.elements?.[p.type]?.background;
+  if (bucket === undefined) return theme.colors.background;
+  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : bucket;
+}
+
+/** The box's stroke -- the same cascade, minus the inline override, which
+ *  `participant X #color` only ever sets the BACKGROUND with. */
+function resolveParticipantBorder(p: Participant, theme: Theme): Paint {
+  const bucket = theme.colors.elements?.[p.type]?.border;
+  if (bucket === undefined) return theme.colors.border;
+  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : bucket;
+}
+
 /**
  * `TextBlockSprited` -- the gap between the badge and the label block beside
  * it. The sprite draws at the block origin and the parent text block is
@@ -276,7 +309,7 @@ const BADGE_GAP = 6;
 function badgeFor(
   p: Participant,
   sprites: SpriteRegistry | undefined,
-  theme: Theme,
+  background: Paint,
 ): ParticipantBadge | undefined {
   if (p.stereotype === undefined || sprites === undefined) return undefined;
   const deco = parseCircledSpriteDecoration(stereotypeInner(p.stereotype));
@@ -307,7 +340,11 @@ function badgeFor(
   const png = spriteToPngDataUri(
     spriteMonochromeAsLike(sprite),
     deco.color,
-    theme.colors.background,
+    // A gradient background has no single start colour to blend from; the
+    // rasteriser's own default (white) stands in, which is also upstream's
+    // when `getBackcolor()` yields nothing usable
+    // (`SpriteMonochrome.java:181-182`).
+    typeof background === 'string' ? background : undefined,
     deco.scale,
   );
   return { kind: 'sprite', dataUri: png.dataUri, width: png.width, height: png.height };
@@ -334,10 +371,10 @@ function charBadgeFor(p: Participant, theme: Theme): ParticipantBadge | undefine
  *  before the circled character (`Display.java:671-676`). */
 function anyBadgeFor(
   p: Participant,
-  sprites: SpriteRegistry | undefined,
-  theme: Theme,
+  ctx: ParticipantLayoutCtx,
+  background: Paint,
 ): ParticipantBadge | undefined {
-  return badgeFor(p, sprites, theme) ?? charBadgeFor(p, theme);
+  return badgeFor(p, ctx.sprites, background) ?? charBadgeFor(p, ctx.theme);
 }
 
 /** Build the geometry for a single participant column at a given x offset. */
@@ -354,7 +391,8 @@ function buildParticipantGeo(
   // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
   // own line in `birocu-87-xubi808`), so the head grows by one line.
   const stereoLines = visibleStereotypeLines(p, theme);
-  const badge = anyBadgeFor(p, ctx.sprites, theme);
+  const background = resolveParticipantBackground(p, theme);
+  const badge = anyBadgeFor(p, ctx, background);
   // `TextBlockSprited#calculateDimension` takes the MAX of the badge's own
   // height and the text block's (`:57-63`).
   const textHeight = measured.height * (1 + stereoLines.length);
@@ -368,6 +406,8 @@ function buildParticipantGeo(
   return {
     id: p.id,
     display: p.display,
+    background,
+    border: resolveParticipantBorder(p, theme),
     ...(stereoLines.length > 0 ? { stereotypeLines: stereoLines } : {}),
     ...(badge !== undefined ? { badge } : {}),
     type: p.type,

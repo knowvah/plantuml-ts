@@ -39,6 +39,14 @@ export const ELEMENT_BUCKET_SNAMES = new Set([
   'control',
   'entity',
   'file',
+  // `SName.participant` (`style/SName.java:132`) -- every sequence
+  // participant kind's style signature is `root, element, sequenceDiagram,
+  // <kind>` (`ParticipantType.java:55-80`), and this is the DEFAULT kind's.
+  // Its siblings (actor, database, boundary, control, entity, queue,
+  // collections) were all already here; the one they share a diagram with
+  // was not, so `<style> participant { BackgroundColor }` resolved to no
+  // bucket at all.
+  'participant',
   'folder',
   'frame',
   'hexagon',

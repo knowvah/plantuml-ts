@@ -16,6 +16,7 @@
  */
 
 import type { ScaledTheme } from './scale-geo.js';
+import type { ParticipantGeo } from './ast.js';
 import { rect, line, ellipse, path } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
 
@@ -100,13 +101,8 @@ function actorPathD(geo: ActorGeo): string {
  * The path carries no fill: upstream applies `HColors.none().bg()` before
  * drawing it (`:95`).
  */
-export function renderActorShape(
-  cx: number,
-  topY: number,
-  height: number,
-  theme: ScaledTheme,
-): string {
-  const geo = computeActorGeo(cx, topY, height, theme);
+export function renderActorShape(p: ParticipantGeo, topY: number, theme: ScaledTheme): string {
+  const geo = computeActorGeo(p.centerX, topY, p.height, theme);
   // `ellipse` takes a RAW attribute record (unlike `circle`, which has a typed
   // `BoxStyle`), so the stroke width is spelled kebab-case here -- see
   // `state/renderer-pseudostate.ts:58` for the same call shape.
@@ -116,13 +112,15 @@ export function renderActorShape(
   // Here there IS a benefit and it is the whole point: the jar emits
   // `<ellipse cx=... rx=8 ry=8>` for an actor head (`ActorStickMan.java:73`,
   // `UEllipse.build`), so matching the element is matching upstream.
+  // `Participant#getUsedStyles` -- the `actor {}` bucket and any inline
+  // colour, resolved in layout onto the geo.
   const head = ellipse(geo.cx, geo.headCy, geo.headR, geo.headR, {
-    fill: theme.colors.background,
-    stroke: theme.colors.border,
+    fill: p.background,
+    stroke: p.border,
     'stroke-width': geo.strokeWidth,
   });
   const body = path(actorPathD(geo), {
-    stroke: theme.colors.border,
+    stroke: p.border,
     strokeWidth: geo.strokeWidth,
   });
   return head + body;
@@ -175,25 +173,25 @@ function computeDatabaseGeo(
 }
 
 /** Body rect + side lines. */
-function renderDatabaseBody(geo: DatabaseGeo, theme: ScaledTheme): string {
+function renderDatabaseBody(geo: DatabaseGeo, p: ParticipantGeo): string {
   const { x, width, inset, bodyTop, bodyBot, bodyH, capRy, strokeWidth } = geo;
   const bodyRect = rect(x + inset, bodyTop, width - 2 * inset, bodyH - capRy, {
-    fill: theme.colors.background,
+    fill: p.background,
     stroke: 'none',
   });
-  const leftLine = line(x + inset, bodyTop, x + inset, bodyBot, { stroke: theme.colors.border, strokeWidth });
+  const leftLine = line(x + inset, bodyTop, x + inset, bodyBot, { stroke: p.border, strokeWidth });
   const rightLine = line(x + width - inset, bodyTop, x + width - inset, bodyBot, {
-    stroke: theme.colors.border,
+    stroke: p.border,
     strokeWidth,
   });
   return bodyRect + leftLine + rightLine;
 }
 
 /** Top ellipse (full, visible). */
-function renderDatabaseCap(geo: DatabaseGeo, theme: ScaledTheme): string {
+function renderDatabaseCap(geo: DatabaseGeo, p: ParticipantGeo): string {
   return ellipse(geo.cx, geo.bodyTop, geo.rx, geo.capRy, {
-    fill: theme.colors.background,
-    stroke: theme.colors.border,
+    fill: p.background,
+    stroke: p.border,
     'stroke-width': fmt(geo.strokeWidth),
   });
 }
@@ -201,20 +199,14 @@ function renderDatabaseCap(geo: DatabaseGeo, theme: ScaledTheme): string {
 /** Bottom arc — sweep=0 (counter-clockwise from left to right) routes
  *  through (cx, bodyBot+capRy), bowing the arc downward for a convex
  *  cylinder bottom. */
-function renderDatabaseArc(geo: DatabaseGeo, theme: ScaledTheme): string {
+function renderDatabaseArc(geo: DatabaseGeo, p: ParticipantGeo): string {
   const { x, width, inset, bodyBot, rx, capRy, strokeWidth } = geo;
   const d =
     `M ${fmt(x + inset)},${fmt(bodyBot)} A ${fmt(rx)},${fmt(capRy)} 0 0,0 ${fmt(x + width - inset)},${fmt(bodyBot)}`;
-  return path(d, { fill: theme.colors.background, stroke: theme.colors.border, strokeWidth });
+  return path(d, { fill: p.background, stroke: p.border, strokeWidth });
 }
 
-export function renderDatabaseShape(
-  x: number,
-  topY: number,
-  width: number,
-  height: number,
-  theme: ScaledTheme,
-): string {
-  const geo = computeDatabaseGeo(x, topY, width, height, theme);
-  return renderDatabaseBody(geo, theme) + renderDatabaseCap(geo, theme) + renderDatabaseArc(geo, theme);
+export function renderDatabaseShape(p: ParticipantGeo, topY: number, theme: ScaledTheme): string {
+  const geo = computeDatabaseGeo(p.x, topY, p.width, p.height, theme);
+  return renderDatabaseBody(geo, p) + renderDatabaseCap(geo, p) + renderDatabaseArc(geo, p);
 }

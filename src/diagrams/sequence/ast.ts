@@ -2,6 +2,7 @@
  * AST and Geometry type definitions for PlantUML sequence diagrams.
  */
 
+import type { Paint } from '../../core/paint.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
@@ -261,6 +262,19 @@ export interface ParticipantGeo {
    *  (`core/stereotype-decoration.ts`). Absent when there is none, when every
    *  chunk is invisible, or when the style hides it. */
   stereotypeLines?: readonly string[];
+  /**
+   * The box's resolved fill and stroke.
+   *
+   * `Participant#getUsedStyles` merges the kind's style signature -- `root,
+   * element, sequenceDiagram, <kind>` for every kind
+   * (`ParticipantType.java:55-80`) -- and then lets the participant's OWN
+   * colours override it (`eventuallyOverride(getColors())`, `:88`). So the
+   * precedence is inline `#color` > `<style> <kind> {}` bucket > theme
+   * default, resolved in layout so the sprite badge's gradient can start
+   * from the same value the box is painted with.
+   */
+  background: Paint;
+  border: Paint;
   /** The rasterised sprite badge a `<<($name) Label>>` stereotype declares,
    *  drawn LEFT of the name block (`TextBlockSprited.java:65-77`). Absent
    *  when there is none, or when the name does not resolve in the registry. */

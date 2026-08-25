@@ -56,8 +56,8 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
     totalHeight: 300,
     showFootbox: true,
     participants: [
-      { id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80 },
-      { id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220 },
+      { id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+      { id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
     ],
     events: [],
     lifelineEndY: 260,
@@ -762,7 +762,7 @@ describe('renderSequence — actor participant shape', () => {
   it('renders an ellipse head and a single four-segment path for actor participants', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70 },
+        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -780,7 +780,7 @@ describe('renderSequence — actor participant shape', () => {
   it('renders display name below the stick figure', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70 },
+        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -792,7 +792,7 @@ describe('renderSequence — database participant shape', () => {
   it('renders an ellipse (cylinder cap) for database participants', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80 },
+        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -802,7 +802,7 @@ describe('renderSequence — database participant shape', () => {
   it('renders display name for database participant', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80 },
+        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1037,5 +1037,49 @@ describe('renderSequence — participant stereotype', () => {
   it('hide stereotype removes it regardless of any style', () => {
     const svg = render('@startuml\nhide stereotype\nparticipant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml');
     expect(svg).not.toContain('«dummy1»');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Per-element <style> buckets and inline participant colours
+// ---------------------------------------------------------------------------
+
+describe('renderSequence — participant colours', () => {
+  const render = (src: string): string =>
+    renderFixtureSequence(src, new DeterministicMeasurer());
+
+  // `Participant#getUsedStyles` merges the kind's signature -- `root,
+  // element, sequenceDiagram, <kind>` (`ParticipantType.java:55-80`) -- and
+  // then lets the participant's own colours override it
+  // (`eventuallyOverride(getColors())`, `Participant.java:88`).
+  it('honours an inline participant colour', () => {
+    expect(render('@startuml\nparticipant A #pink\nA -> B: x\n@enduml')).toContain('#FFC0CB');
+  });
+
+  it('honours a <style> bucket for background and border', () => {
+    const svg = render(
+      '@startuml\n<style>\nparticipant {\n BackgroundColor #FFFF00\n LineColor #FF9900\n}\n</style>\n' +
+        'participant A\nA -> B: x\n@enduml',
+    );
+    expect(svg).toContain('fill="#FF0"');
+    expect(svg).toContain('stroke="#F90"');
+  });
+
+  it('keys the bucket by participant KIND', () => {
+    const svg = render(
+      '@startuml\n<style>\nactor {\n BackgroundColor #00FF00\n}\n</style>\n' +
+        'actor A\nparticipant B\nA -> B: x\n@enduml',
+    );
+    expect(svg).toContain('#0F0');
+    // B is a plain participant and keeps the theme default.
+    expect(svg).toContain('fill="#FFF"');
+  });
+
+  it('lets the inline colour win over the bucket', () => {
+    const svg = render(
+      '@startuml\n<style>\nparticipant {\n BackgroundColor #FFFF00\n}\n</style>\n' +
+        'participant A #pink\nA -> B: x\n@enduml',
+    );
+    expect(svg).toContain('#FFC0CB');
   });
 });
