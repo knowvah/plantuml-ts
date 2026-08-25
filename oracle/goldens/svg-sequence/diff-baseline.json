@@ -13,20 +13,22 @@
     {
       "type": "sequence",
       "slug": "SequenceArrows_0001_Test",
-      "status": "baseline",
-      "weightedScore": 5474,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 22: `a -\\o    b : \"\"-\\o  \"\"`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "SequenceArrows_0002_Test",
-      "status": "baseline",
-      "weightedScore": 5544,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 28: `a -\\o    b : \"\"-\\o  \"\"`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -41,20 +43,22 @@
     {
       "type": "sequence",
       "slug": "TeozTimelineIssues_0003_Test",
-      "status": "baseline",
-      "weightedScore": 316,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `b -> a --++ #red : hello`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "TeozTimelineIssues_0004_Test",
-      "status": "baseline",
-      "weightedScore": 458,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `& note right of Alice: ok`. Unported: FactorySequenceNoteCommand's PARALLEL group `(&[%s]*)?` (FactorySequenceNoteCommand.java:78,95). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -79,11 +83,12 @@
     {
       "type": "sequence",
       "slug": "TeozTimelineIssues_0007_Test",
-      "status": "baseline",
-      "weightedScore": 786,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `A <[#red]-o? ++`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -98,11 +103,12 @@
     {
       "type": "sequence",
       "slug": "bacupi-77-fuke586",
-      "status": "baseline",
-      "weightedScore": 367,
-      "diffCount": 101,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `[o-> Alice: OK2`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -134,11 +140,12 @@
     {
       "type": "sequence",
       "slug": "bagexe-03-bozo133",
-      "status": "baseline",
-      "weightedScore": 512,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `/ note over Bob : initial sdkfljsdfl sdf sdmf`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -318,11 +325,12 @@
     {
       "type": "sequence",
       "slug": "bifuzu-54-gefo004",
-      "status": "baseline",
-      "weightedScore": 579,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `[-> B : label1`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -354,20 +362,22 @@
     {
       "type": "sequence",
       "slug": "bipoce-87-cuki505",
-      "status": "baseline",
-      "weightedScore": 435,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "birefi-44-bata482",
-      "status": "baseline",
-      "weightedScore": 210,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `H1 -> C1 & C2 : Blabla`. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -390,11 +400,12 @@
     {
       "type": "sequence",
       "slug": "biruge-35-vaxu680",
-      "status": "baseline",
-      "weightedScore": 322,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 11: `note over Alice #yellow/blue`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -454,11 +465,12 @@
     {
       "type": "sequence",
       "slug": "boguvi-37-ralo631",
-      "status": "baseline",
-      "weightedScore": 564,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `autonumber inc`. Unported: CommandAutonumberIncrement, whose `([A-Za-z])` names the digit group to bump (CommandAutonumberIncrement.java; SequenceDiagramFactory.java:149). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -472,11 +484,12 @@
     {
       "type": "sequence",
       "slug": "bomino-39-tipo216",
-      "status": "baseline",
-      "weightedScore": 241,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `<style src=strictuml.skin>`. Unported: CommonCommands' <style> block (CommonCommands.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -490,11 +503,12 @@
     {
       "type": "sequence",
       "slug": "bopizu-70-rese737",
-      "status": "baseline",
-      "weightedScore": 768,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `autonumber inc B`. Unported: CommandAutonumberIncrement, whose `([A-Za-z])` names the digit group to bump (CommandAutonumberIncrement.java; SequenceDiagramFactory.java:149). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -535,11 +549,12 @@
     {
       "type": "sequence",
       "slug": "boxibe-39-luco835",
-      "status": "baseline",
-      "weightedScore": 221,
-      "diffCount": 49,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `hide empty description`. Unported: a `hide` variant beyond CommandHideUnlinked (SequenceDiagramFactory.java:101). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -553,11 +568,12 @@
     {
       "type": "sequence",
       "slug": "bozuru-10-rajo382",
-      "status": "baseline",
-      "weightedScore": 323,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 6: `Alice x->] : hop2`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -663,20 +679,22 @@
     {
       "type": "sequence",
       "slug": "busexe-78-ruzu110",
-      "status": "baseline",
-      "weightedScore": 763,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 12: `hnote left Alice: hnote\\n left \\n Alice`. Unported: FactorySequenceNoteCommand's STYLE group `(note|hnote|rnote)` -- only `note` is ported (FactorySequenceNoteCommand.java:81,98). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "butali-53-kige134",
-      "status": "baseline",
-      "weightedScore": 510,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `Alice -> \"Castor doo()\" as Castor : hello`. Unported: CommandArrow's PART1LONGCODE / PART1CODELONG -- declaring a participant inline in the arrow that first names it (CommandArrow.java:95-96,121-122). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -691,11 +709,12 @@
     {
       "type": "sequence",
       "slug": "butosi-00-mali446",
-      "status": "baseline",
-      "weightedScore": 177,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `/ note over P1 : note 2`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -736,11 +755,12 @@
     {
       "type": "sequence",
       "slug": "caciga-47-jigu709",
-      "status": "baseline",
-      "weightedScore": 1028,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -792,11 +812,12 @@
     {
       "type": "sequence",
       "slug": "camebe-75-mujo573",
-      "status": "baseline",
-      "weightedScore": 830,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 12: `hnote left Alice: hnote\\n left \\n Alice`. Unported: FactorySequenceNoteCommand's STYLE group `(note|hnote|rnote)` -- only `note` is ported (FactorySequenceNoteCommand.java:81,98). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -810,11 +831,12 @@
     {
       "type": "sequence",
       "slug": "carose-61-seko055",
-      "status": "baseline",
-      "weightedScore": 1028,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -938,11 +960,12 @@
     {
       "type": "sequence",
       "slug": "celego-19-laji937",
-      "status": "baseline",
-      "weightedScore": 224,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `A ->(40) B++: text 1`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1114,20 +1137,22 @@
     {
       "type": "sequence",
       "slug": "codeti-52-lafa397",
-      "status": "baseline",
-      "weightedScore": 994,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "cofuse-78-keri294",
-      "status": "baseline",
-      "weightedScore": 255,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `/ note over A: A2 this line throws an error`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1159,11 +1184,12 @@
     {
       "type": "sequence",
       "slug": "comelo-49-lefi793",
-      "status": "baseline",
-      "weightedScore": 631,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `bill -> bob ++ #005500 : hello from thread 2`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1298,11 +1324,12 @@
     {
       "type": "sequence",
       "slug": "dakake-85-nemi992",
-      "status": "baseline",
-      "weightedScore": 450,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1316,20 +1343,22 @@
     {
       "type": "sequence",
       "slug": "dalata-11-sifu583",
-      "status": "baseline",
-      "weightedScore": 659,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 17: `& loop forever`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "damoge-62-riso387",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[/-o b : \"\"   [/-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1353,11 +1382,12 @@
     {
       "type": "sequence",
       "slug": "databu-25-mivu307",
-      "status": "baseline",
-      "weightedScore": 279,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 7: `note <<red>> left`. Unported: FactorySequenceNoteCommand's StereotypePattern -- `note <<stereo>> left` (FactorySequenceNoteCommand.java:81-83). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1389,11 +1419,12 @@
     {
       "type": "sequence",
       "slug": "debufa-67-poma789",
-      "status": "baseline",
-      "weightedScore": 909,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `[-> SbcMXdCtrl: startThread`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1554,11 +1585,12 @@
     {
       "type": "sequence",
       "slug": "dicuva-14-lini551",
-      "status": "baseline",
-      "weightedScore": 477,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `Alice ->]`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1656,11 +1688,12 @@
     {
       "type": "sequence",
       "slug": "dojapu-42-sali914",
-      "status": "baseline",
-      "weightedScore": 220,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[o<-o b : \"\" [o<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1683,11 +1716,12 @@
     {
       "type": "sequence",
       "slug": "dolefo-13-kovu702",
-      "status": "baseline",
-      "weightedScore": 1280,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 11: `......`. Unported: CommandDelay -- the `...` / `\u2026` delay row (SequenceDiagramFactory.java:152). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1701,20 +1735,22 @@
     {
       "type": "sequence",
       "slug": "dolice-60-copi767",
-      "status": "baseline",
-      "weightedScore": 240,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `Alice -> Bob [[http://www.google.fr]] : ok`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "domaji-70-zini725",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[\\\\-o b : \"\"  [\\\\-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1737,11 +1773,12 @@
     {
       "type": "sequence",
       "slug": "donuli-07-peje262",
-      "status": "baseline",
-      "weightedScore": 286,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `deactivate`. Unported: CommandDeactivateShort -- bare `deactivate` with no participant (SequenceDiagramFactory.java:103). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1848,20 +1885,22 @@
     {
       "type": "sequence",
       "slug": "dugata-50-koxo354",
-      "status": "baseline",
-      "weightedScore": 211,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[x<- b : \"\"  [x<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "dugeki-47-celo546",
-      "status": "baseline",
-      "weightedScore": 6285,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 33: `note over A, C#tomato: A upload le fichier telque decrit sur le lien ci-dessus : Upload_successfull\\nA recupere les infos \u00e0 envoyer a B, C`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1912,11 +1951,12 @@
     {
       "type": "sequence",
       "slug": "dutopa-62-jalu659",
-      "status": "baseline",
-      "weightedScore": 309,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1957,11 +1997,12 @@
     {
       "type": "sequence",
       "slug": "fajixi-56-dete708",
-      "status": "baseline",
-      "weightedScore": 129,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `Alice -> Bob [[http://www.yahoo.com{Jason: {\"firstName\":\"Bob\", \"lastName\":\"Smith\"}}]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2119,11 +2160,12 @@
     {
       "type": "sequence",
       "slug": "fenoli-16-peru181",
-      "status": "baseline",
-      "weightedScore": 296,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `A ->(1) B: text 1`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2321,20 +2363,22 @@
     {
       "type": "sequence",
       "slug": "fojomu-60-cuda302",
-      "status": "baseline",
-      "weightedScore": 416,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `{start} [-> Bob : start doing things during duration`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "fonatu-29-texo854",
-      "status": "baseline",
-      "weightedScore": 64,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2 (past the last line). Unported: CommandActivate calls getOrCreateParticipant, so a bare `activate X` DECLARES X (CommandActivate.java:109); this port requires a prior participant and refuses the whole diagram as having none. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2349,20 +2393,22 @@
     {
       "type": "sequence",
       "slug": "fonope-49-jodi834",
-      "status": "baseline",
-      "weightedScore": 237,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `Alice x->] : hop2`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "fonudu-70-coma124",
-      "status": "baseline",
-      "weightedScore": 181,
-      "diffCount": 48,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `author: foo`. Unported: ReadLineWithYamlHeader -- the `---` YAML front-matter block, stripped in the PREPROCESSOR before any command runs (ReadLineWithYamlHeader.java:91). A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2376,11 +2422,12 @@
     {
       "type": "sequence",
       "slug": "fotiku-67-lilu728",
-      "status": "baseline",
-      "weightedScore": 162,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `||0||`. Unported: CommandHSpace `\\|\\|(\\d+)?\\|+` -- explicit vertical spacing (CommandHSpace.java; SequenceDiagramFactory.java:143). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2540,11 +2587,12 @@
     {
       "type": "sequence",
       "slug": "gacujo-48-leto751",
-      "status": "baseline",
-      "weightedScore": 1084,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 13: `user -[#navy]-> som: Selects a \\nkitchen drawing\\nfor import`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2641,11 +2689,12 @@
     {
       "type": "sequence",
       "slug": "gejeji-12-zofa866",
-      "status": "baseline",
-      "weightedScore": 1312,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `[o<-x b : \"\" [o<-x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2723,11 +2772,12 @@
     {
       "type": "sequence",
       "slug": "geraku-93-roka956",
-      "status": "baseline",
-      "weightedScore": 129,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `Alice -> Bob [[http://www.yahoo.com{{\"Jason\": {\"firstName\":\"Bob\", \"lastName\":\"Smith\"},\\n \"Carl\": {\"firstName\":\"Alice\", \"lastName\":\"Brown\"}}}]] : Hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2913,11 +2963,12 @@
     {
       "type": "sequence",
       "slug": "gogise-40-juro428",
-      "status": "baseline",
-      "weightedScore": 269,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[<-> b : \"\"  [<->\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2931,11 +2982,12 @@
     {
       "type": "sequence",
       "slug": "gojozu-97-xeki128",
-      "status": "baseline",
-      "weightedScore": 260,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `Bob -> Alice [[http://www.google.com]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2967,11 +3019,12 @@
     {
       "type": "sequence",
       "slug": "gozaru-36-gejo982",
-      "status": "baseline",
-      "weightedScore": 350,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `Alice \\\\-: \"\\\\\\\\-\" Should be down1`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3031,11 +3084,12 @@
     {
       "type": "sequence",
       "slug": "gujaje-38-zoce253",
-      "status": "baseline",
-      "weightedScore": 246,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `Bob --_> Alice : hi`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3122,11 +3176,12 @@
     {
       "type": "sequence",
       "slug": "guzoco-99-ginu686",
-      "status": "baseline",
-      "weightedScore": 360,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `[o<-x Alice : hop`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3204,11 +3259,12 @@
     {
       "type": "sequence",
       "slug": "jajobi-60-ralo350",
-      "status": "baseline",
-      "weightedScore": 220,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `A ->(10) B: text 10`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3222,11 +3278,12 @@
     {
       "type": "sequence",
       "slug": "jalodi-19-mibi961",
-      "status": "baseline",
-      "weightedScore": 996,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `deactivate \"actor 1\"`. Unported: CommandActivate's WHO group `([%pLN_.@]+|[%g][^%g]+[%g])` -- its QUOTED alternative, for a participant name containing a space (CommandActivate.java:65). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3295,11 +3352,12 @@
     {
       "type": "sequence",
       "slug": "jebole-52-cuvo164",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[o<- b : \"\"  [o<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3378,11 +3436,12 @@
     {
       "type": "sequence",
       "slug": "jiliba-03-lapi286",
-      "status": "baseline",
-      "weightedScore": 340,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `IT++`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3397,11 +3456,12 @@
     {
       "type": "sequence",
       "slug": "jitesa-41-cara967",
-      "status": "baseline",
-      "weightedScore": 204,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[\\- b : \"\"   [\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3505,11 +3565,12 @@
     {
       "type": "sequence",
       "slug": "jotase-88-kiki473",
-      "status": "baseline",
-      "weightedScore": 367,
-      "diffCount": 101,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `[o-> Alice: OK2`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3533,11 +3594,12 @@
     {
       "type": "sequence",
       "slug": "jozomu-87-tajo507",
-      "status": "baseline",
-      "weightedScore": 285,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `=MyTitle`. Unported: CommandParticipantMultilines -- the `participant X [ ... ]` block form, whose body is creole (here a `=heading`) (SequenceDiagramFactory.java:110). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3587,11 +3649,12 @@
     {
       "type": "sequence",
       "slug": "junide-55-soka558",
-      "status": "baseline",
-      "weightedScore": 242,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3659,11 +3722,12 @@
     {
       "type": "sequence",
       "slug": "kakune-11-vusu073",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[<-o b : \"\"   [<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3687,11 +3751,12 @@
     {
       "type": "sequence",
       "slug": "kapuva-33-nomi771",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[o/- b : \"\"  [o/-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3734,11 +3799,12 @@
     {
       "type": "sequence",
       "slug": "keloje-58-ladu877",
-      "status": "baseline",
-      "weightedScore": 790,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 21: `a o/-    a`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3808,11 +3874,12 @@
     {
       "type": "sequence",
       "slug": "kevavu-57-kifi084",
-      "status": "baseline",
-      "weightedScore": 225,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[x<->x b : \"\"[x<->x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3835,11 +3902,12 @@
     {
       "type": "sequence",
       "slug": "kibope-73-jezu646",
-      "status": "baseline",
-      "weightedScore": 405,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 7: `/ note over B: \"State: Initial\"`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3953,11 +4021,12 @@
     {
       "type": "sequence",
       "slug": "kivavu-72-goju233",
-      "status": "baseline",
-      "weightedScore": 204,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[\\\\- b : \"\"  [\\\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4117,20 +4186,22 @@
     {
       "type": "sequence",
       "slug": "koneju-77-vode355",
-      "status": "baseline",
-      "weightedScore": 994,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "kopaxi-36-dedo317",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[\\-o b : \"\"   [\\-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4209,11 +4280,12 @@
     {
       "type": "sequence",
       "slug": "kugati-67-nuzu852",
-      "status": "baseline",
-      "weightedScore": 219,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[o<<- b : \"\" [o<<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4227,20 +4299,22 @@
     {
       "type": "sequence",
       "slug": "kukeja-88-zida141",
-      "status": "baseline",
-      "weightedScore": 1115,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 11: `Bob -> Alice ++ #blue : hello`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "kumogu-10-rigi101",
-      "status": "baseline",
-      "weightedScore": 906,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 20: `b o/-    b : \"\"o/-\"\"`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4299,12 +4373,12 @@
     {
       "type": "sequence",
       "slug": "kuzuco-40-xara309",
-      "status": "baseline",
-      "weightedScore": 453,
-      "diffCount": 5,
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
       "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "9176f739",
-      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 15/28 -> 30/28 (closer) while weightedScore rose 348 -> 453; see $comment"
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 6: `[->Alice : external event`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4327,11 +4401,12 @@
     {
       "type": "sequence",
       "slug": "labudu-49-fove649",
-      "status": "baseline",
-      "weightedScore": 450,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4345,20 +4420,22 @@
     {
       "type": "sequence",
       "slug": "ladiro-50-gume805",
-      "status": "baseline",
-      "weightedScore": 329,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `Note`. Unported: FactorySequenceNoteCommand's multiline form with UrlBuilder.OPTIONAL on the OPENER -- `note left of Alice [[url]]` (FactorySequenceNoteCommand.java:78-85; SequenceDiagramFactory.java:134). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "lafuzo-13-xura634",
-      "status": "baseline",
-      "weightedScore": 214,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `=MyTitle`. Unported: CommandParticipantMultilines -- the `participant X [ ... ]` block form, whose body is creole (here a `=heading`) (SequenceDiagramFactory.java:110). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4439,11 +4516,12 @@
     {
       "type": "sequence",
       "slug": "legole-00-givu934",
-      "status": "baseline",
-      "weightedScore": 252,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `-> Bob`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4457,20 +4535,22 @@
     {
       "type": "sequence",
       "slug": "lekari-63-rigu513",
-      "status": "baseline",
-      "weightedScore": 324,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `[-> Bob : message1`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "lekopo-04-sefo189",
-      "status": "baseline",
-      "weightedScore": 440,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 10: `& opt message received`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4511,20 +4591,22 @@
     {
       "type": "sequence",
       "slug": "letagi-90-kome968",
-      "status": "baseline",
-      "weightedScore": 220,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `A ->(60) B: text 10`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "lezonu-15-cege608",
-      "status": "baseline",
-      "weightedScore": 330,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 8: `}}`. Unported: EmbeddedDiagram's `{{` / `}}` block -- a nested diagram inside a note body (EmbeddedDiagram.java:77-78); unconsumed, its inner `end note` closes the OUTER note and the `}}` is left dangling. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4556,20 +4638,22 @@
     {
       "type": "sequence",
       "slug": "licole-34-vejo527",
-      "status": "baseline",
-      "weightedScore": 413,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `+ XXX`. Unported: the `%newline()` preprocessor builtin -- its expansion splits the message into lines this port then cannot parse. A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "liculu-86-goge853",
-      "status": "baseline",
-      "weightedScore": 350,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `-\\ Bob`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4593,11 +4677,12 @@
     {
       "type": "sequence",
       "slug": "liguma-77-mume567",
-      "status": "baseline",
-      "weightedScore": 237,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `sprite $mySprite data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=`. Unported: CommonCommands' CommandCreoleSprite / inline sprite data (CommonCommands.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4612,30 +4697,32 @@
     {
       "type": "sequence",
       "slug": "liluca-64-muva178",
-      "status": "baseline",
-      "weightedScore": 503,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `autonumber stop`. Unported: CommandAutonumberStop (SequenceDiagramFactory.java:147). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "limajo-73-kife020",
-      "status": "baseline",
-      "weightedScore": 555,
-      "diffCount": 5,
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
       "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "9176f739",
-      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/38 -> 37/38 (closer) while weightedScore rose 446 -> 555; see $comment"
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `A ->] : this goes to the very right of the diagram`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "lipuci-81-vovi162",
-      "status": "baseline",
-      "weightedScore": 477,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `[o-> B : This text extends the arrow length\\nright edge arrow`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4659,11 +4746,12 @@
     {
       "type": "sequence",
       "slug": "loguci-83-mobe896",
-      "status": "baseline",
-      "weightedScore": 357,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `\u2026`. Unported: CommandDelay -- the `...` / `\u2026` delay row (SequenceDiagramFactory.java:152). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4687,11 +4775,12 @@
     {
       "type": "sequence",
       "slug": "lokavu-60-peku948",
-      "status": "baseline",
-      "weightedScore": 1840,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 26: `[o-> B : Pre`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4742,11 +4831,12 @@
     {
       "type": "sequence",
       "slug": "loteba-26-konu854",
-      "status": "baseline",
-      "weightedScore": 628,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 9: `/ note right of Alice: NOTE2`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4760,11 +4850,12 @@
     {
       "type": "sequence",
       "slug": "lozuru-10-poba814",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[o\\\\- b : \"\" [o\\\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4805,11 +4896,12 @@
     {
       "type": "sequence",
       "slug": "lugika-07-rozo911",
-      "status": "baseline",
-      "weightedScore": 927,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 13: `[o-> B : word`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4877,11 +4969,12 @@
     {
       "type": "sequence",
       "slug": "lusigu-71-nipe759",
-      "status": "baseline",
-      "weightedScore": 414,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 11: `Bob <-o] : external event <-o]`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4913,20 +5006,22 @@
     {
       "type": "sequence",
       "slug": "luzapi-49-rati107",
-      "status": "baseline",
-      "weightedScore": 768,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 6: `[-> SerialManager: purgeRx()`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "maboju-34-soxi895",
-      "status": "baseline",
-      "weightedScore": 241,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `Alice -> Bob [[http://www.google.com]] : ok`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5006,11 +5101,12 @@
     {
       "type": "sequence",
       "slug": "matoke-25-kidu719",
-      "status": "baseline",
-      "weightedScore": 786,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `A <[#red]-o? ++`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5051,11 +5147,12 @@
     {
       "type": "sequence",
       "slug": "mebidu-16-ruve297",
-      "status": "baseline",
-      "weightedScore": 673,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 12: `hnote left Alice: hnote\\n left \\n Alice`. Unported: FactorySequenceNoteCommand's STYLE group `(note|hnote|rnote)` -- only `note` is ported (FactorySequenceNoteCommand.java:81,98). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5078,11 +5175,12 @@
     {
       "type": "sequence",
       "slug": "meguzu-44-luri459",
-      "status": "baseline",
-      "weightedScore": 345,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `[-> Bob : message1`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5123,11 +5221,12 @@
     {
       "type": "sequence",
       "slug": "menoke-22-luxo044",
-      "status": "baseline",
-      "weightedScore": 318,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 12: `}}`. Unported: EmbeddedDiagram's `{{` / `}}` block -- a nested diagram inside a note body (EmbeddedDiagram.java:77-78); unconsumed, its inner `end note` closes the OUTER note and the `}}` is left dangling. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5187,20 +5286,22 @@
     {
       "type": "sequence",
       "slug": "mezaxa-44-siju322",
-      "status": "baseline",
-      "weightedScore": 358,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `Bob -> Alice ++ #blue : hello`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "micaki-01-rexa741",
-      "status": "baseline",
-      "weightedScore": 430,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `a <- b ++`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5279,20 +5380,22 @@
     {
       "type": "sequence",
       "slug": "mitefi-27-cubo687",
-      "status": "baseline",
-      "weightedScore": 1786,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 8: `note right FMSSrv: Not decided how to send no data.`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "mitire-01-voga923",
-      "status": "baseline",
-      "weightedScore": 204,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[//- b : \"\"  [//-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5306,11 +5409,12 @@
     {
       "type": "sequence",
       "slug": "mivuke-79-fujo526",
-      "status": "baseline",
-      "weightedScore": 403,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `autonumber stop`. Unported: CommandAutonumberStop (SequenceDiagramFactory.java:147). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5361,11 +5465,12 @@
     {
       "type": "sequence",
       "slug": "mocuna-66-bica785",
-      "status": "baseline",
-      "weightedScore": 488,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `foo ->o]`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5399,11 +5504,12 @@
     {
       "type": "sequence",
       "slug": "momuxe-95-bugu296",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[o//- b : \"\" [o//-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5426,11 +5532,12 @@
     {
       "type": "sequence",
       "slug": "movaso-17-jomi483",
-      "status": "baseline",
-      "weightedScore": 280,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `note over A #green;line:lightblue : text1`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5462,11 +5569,12 @@
     {
       "type": "sequence",
       "slug": "mozofa-80-puru273",
-      "status": "baseline",
-      "weightedScore": 287,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `/ note over Alice: //italics//`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5526,21 +5634,22 @@
     {
       "type": "sequence",
       "slug": "mukebo-35-xoju095",
-      "status": "baseline",
-      "weightedScore": 1736,
-      "diffCount": 5,
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
       "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "9176f739",
-      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 100/121 -> 105/121 (closer) while weightedScore rose 1703 -> 1736; see $comment"
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 26: `[-> ssl_server.exe : browser list arg = {b1, b2, ...}`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "mulofu-90-voka382",
-      "status": "baseline",
-      "weightedScore": 204,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[/- b : \"\"   [/-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5681,11 +5790,12 @@
     {
       "type": "sequence",
       "slug": "nanoza-23-fija616",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[o\\- b : \"\"  [o\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5726,11 +5836,12 @@
     {
       "type": "sequence",
       "slug": "necofe-81-toja736",
-      "status": "baseline",
-      "weightedScore": 324,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `Bob <-] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5818,11 +5929,12 @@
     {
       "type": "sequence",
       "slug": "nesuva-86-fuki568",
-      "status": "baseline",
-      "weightedScore": 562,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 7: `/ note over b: b`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5881,11 +5993,12 @@
     {
       "type": "sequence",
       "slug": "nezipa-74-kigi270",
-      "status": "baseline",
-      "weightedScore": 358,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `Bob <- Alice --: ok2`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5900,11 +6013,12 @@
     {
       "type": "sequence",
       "slug": "nidozi-08-daxa280",
-      "status": "baseline",
-      "weightedScore": 523,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `Bob -> Alice [[http://plantuml.com/start]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5936,20 +6050,22 @@
     {
       "type": "sequence",
       "slug": "nirolu-80-lobo780",
-      "status": "baseline",
-      "weightedScore": 440,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 8: `& note right of David : Should be same level as \"1\"`. Unported: FactorySequenceNoteCommand's PARALLEL group `(&[%s]*)?` (FactorySequenceNoteCommand.java:78,95). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "nisogu-21-zixe139",
-      "status": "baseline",
-      "weightedScore": 211,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[<<- b : \"\"  [<<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5973,11 +6089,12 @@
     {
       "type": "sequence",
       "slug": "nivaje-50-tido759",
-      "status": "baseline",
-      "weightedScore": 289,
-      "diffCount": 76,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `{start} Alice -> Bob : start`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5991,11 +6108,12 @@
     {
       "type": "sequence",
       "slug": "nizime-73-xuti179",
-      "status": "baseline",
-      "weightedScore": 129,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `Alice -> Bob [[http://www.yahoo.com {this\\nthat}]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6009,11 +6127,12 @@
     {
       "type": "sequence",
       "slug": "nizuzi-32-babe798",
-      "status": "baseline",
-      "weightedScore": 479,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `{start} Alice -> Bob : start doing things during duration`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6047,11 +6166,12 @@
     {
       "type": "sequence",
       "slug": "nofola-68-nobe068",
-      "status": "baseline",
-      "weightedScore": 631,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `bill -> bob #005500 : hello from thread 2`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6157,20 +6277,22 @@
     {
       "type": "sequence",
       "slug": "nukona-00-jaro456",
-      "status": "baseline",
-      "weightedScore": 219,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[<<-o b : \"\"  [<<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "numezi-28-fuzu813",
-      "status": "baseline",
-      "weightedScore": 657,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 6: `Charlie -> Alice & Bob & Dave : Alice & Bob & Dave`. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6193,11 +6315,12 @@
     {
       "type": "sequence",
       "slug": "nunuji-27-mosa042",
-      "status": "baseline",
-      "weightedScore": 196,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `[<--1: SomeOutgoingOperation`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6386,11 +6509,12 @@
     {
       "type": "sequence",
       "slug": "peduzi-80-giki495",
-      "status": "baseline",
-      "weightedScore": 1787,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 8: `note right FMSSrv: Not decided how to send no data.`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6459,11 +6583,12 @@
     {
       "type": "sequence",
       "slug": "pijixu-96-bago359",
-      "status": "baseline",
-      "weightedScore": 692,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 6: `Alice -> Bob & Dave: Bob & Dave`. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6514,11 +6639,12 @@
     {
       "type": "sequence",
       "slug": "pobasa-34-neza994",
-      "status": "baseline",
-      "weightedScore": 663,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `A ->]: ok`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6550,11 +6676,12 @@
     {
       "type": "sequence",
       "slug": "pojofa-31-mimo042",
-      "status": "baseline",
-      "weightedScore": 451,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `Bob ->] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6578,11 +6705,12 @@
     {
       "type": "sequence",
       "slug": "pomoxu-05-luco302",
-      "status": "baseline",
-      "weightedScore": 3262,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 19: `/ note left of user1`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6744,11 +6872,12 @@
     {
       "type": "sequence",
       "slug": "punove-48-zugu202",
-      "status": "baseline",
-      "weightedScore": 706,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 6: `Alice -> Bob & Dave & Charlie : Bob & Dave & Charlie`. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6910,11 +7039,12 @@
     {
       "type": "sequence",
       "slug": "recani-60-licu962",
-      "status": "baseline",
-      "weightedScore": 390,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `-> A`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6985,20 +7115,22 @@
     {
       "type": "sequence",
       "slug": "repudi-21-rovo448",
-      "status": "baseline",
-      "weightedScore": 427,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `[-> Node: Start TC`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "rexine-04-regi170",
-      "status": "baseline",
-      "weightedScore": 976,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 7: `Bob <- Alice ++:`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7076,11 +7208,12 @@
     {
       "type": "sequence",
       "slug": "rititi-64-vene814",
-      "status": "baseline",
-      "weightedScore": 435,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7214,12 +7347,12 @@
     {
       "type": "sequence",
       "slug": "rozavo-21-cavi374",
-      "status": "baseline",
-      "weightedScore": 453,
-      "diffCount": 5,
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
       "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "9176f739",
-      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 15/28 -> 30/28 (closer) while weightedScore rose 348 -> 453; see $comment"
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 7: `[->Alice : external event`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7278,20 +7411,22 @@
     {
       "type": "sequence",
       "slug": "rugeco-70-muro754",
-      "status": "baseline",
-      "weightedScore": 437,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 6: `&opt test`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "rugoro-74-mepi153",
-      "status": "baseline",
-      "weightedScore": 408,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `Bob -> Alice[[{test data test data test data test data  \\ntest data test data test data test data \\ntest data test data test data test data \\ntest data test data test data test data \\ntest data test data test data test data \\ntest data test data test data test data}]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7369,11 +7504,12 @@
     {
       "type": "sequence",
       "slug": "ruxasu-79-puxa956",
-      "status": "baseline",
-      "weightedScore": 279,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 7: `note left <<red>>`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7435,11 +7571,12 @@
     {
       "type": "sequence",
       "slug": "sameli-92-dape565",
-      "status": "baseline",
-      "weightedScore": 768,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `autonumber inc B`. Unported: CommandAutonumberIncrement, whose `([A-Za-z])` names the digit group to bump (CommandAutonumberIncrement.java; SequenceDiagramFactory.java:149). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7462,11 +7599,12 @@
     {
       "type": "sequence",
       "slug": "sarevu-71-nona699",
-      "status": "baseline",
-      "weightedScore": 387,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `Bob ->] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7544,11 +7682,12 @@
     {
       "type": "sequence",
       "slug": "sefako-72-jono850",
-      "status": "baseline",
-      "weightedScore": 589,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `note right A #palegreen: a link (without tooltip and label) works for all the ref area`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7590,11 +7729,12 @@
     {
       "type": "sequence",
       "slug": "semepi-87-tiza126",
-      "status": "baseline",
-      "weightedScore": 332,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `foo o->o]`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7608,11 +7748,12 @@
     {
       "type": "sequence",
       "slug": "senogo-33-nuva054",
-      "status": "baseline",
-      "weightedScore": 435,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7635,11 +7776,12 @@
     {
       "type": "sequence",
       "slug": "sevaze-62-pufa040",
-      "status": "baseline",
-      "weightedScore": 122,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `Bob -> Alice [[http://www.google.com foo]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7671,11 +7813,12 @@
     {
       "type": "sequence",
       "slug": "sirabe-54-sibe468",
-      "status": "baseline",
-      "weightedScore": 464,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `[-> A: DoWork`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7708,11 +7851,12 @@
     {
       "type": "sequence",
       "slug": "sisele-83-gebe678",
-      "status": "baseline",
-      "weightedScore": 484,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `a ->(50)     b : \"\"->   \"\"`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7799,11 +7943,12 @@
     {
       "type": "sequence",
       "slug": "sogafu-39-fone585",
-      "status": "baseline",
-      "weightedScore": 552,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `Alice <[#green]- Bob: Positive Response`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7863,11 +8008,12 @@
     {
       "type": "sequence",
       "slug": "soxata-16-kafi688",
-      "status": "baseline",
-      "weightedScore": 186,
-      "diffCount": 53,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `skinParam CaptionFontSize 10`. Unported: CommonCommands' skinparam single-line form (CommonCommands.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7908,11 +8054,12 @@
     {
       "type": "sequence",
       "slug": "sufevi-44-xipa294",
-      "status": "baseline",
-      "weightedScore": 1224,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `Bob ->x Alice ++:`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8176,11 +8323,12 @@
     {
       "type": "sequence",
       "slug": "tegasu-93-fima016",
-      "status": "baseline",
-      "weightedScore": 471,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `hide << new >> stereotype`. Unported: CommandArrow's StereotypePattern.optional(\"STEREOTYPE\") (CommandArrow.java:129). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8204,20 +8352,22 @@
     {
       "type": "sequence",
       "slug": "telavi-12-pifu671",
-      "status": "baseline",
-      "weightedScore": 162,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `||0||`. Unported: CommandHSpace `\\|\\|(\\d+)?\\|+` -- explicit vertical spacing (CommandHSpace.java; SequenceDiagramFactory.java:143). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "telizo-11-pilo439",
-      "status": "baseline",
-      "weightedScore": 274,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 9: `& note right of Ken: txt`. Unported: FactorySequenceNoteCommand's PARALLEL group `(&[%s]*)?` (FactorySequenceNoteCommand.java:78,95). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8240,11 +8390,12 @@
     {
       "type": "sequence",
       "slug": "terapo-81-puzi168",
-      "status": "baseline",
-      "weightedScore": 246,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `alice -> bob <<a>> : red`. Unported: CommandArrow's StereotypePattern.optional(\"STEREOTYPE\") (CommandArrow.java:129). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8268,20 +8419,22 @@
     {
       "type": "sequence",
       "slug": "texopo-01-dibi658",
-      "status": "baseline",
-      "weightedScore": 541,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 17: `[<- d: Msg`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "texoze-85-meli189",
-      "status": "baseline",
-      "weightedScore": 227,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[o<->o b : \"\"[o<->o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8305,11 +8458,12 @@
     {
       "type": "sequence",
       "slug": "tijeba-12-zeta132",
-      "status": "baseline",
-      "weightedScore": 309,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8377,11 +8531,12 @@
     {
       "type": "sequence",
       "slug": "titufa-76-tisa795",
-      "status": "baseline",
-      "weightedScore": 241,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `note <<myStyle>> left`. Unported: FactorySequenceNoteCommand's StereotypePattern -- `note <<stereo>> left` (FactorySequenceNoteCommand.java:81-83). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8423,11 +8578,12 @@
     {
       "type": "sequence",
       "slug": "todozi-34-jire490",
-      "status": "baseline",
-      "weightedScore": 81,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5 (past the last line). Unported: CommandActivate calls getOrCreateParticipant, so a bare `activate X` DECLARES X (CommandActivate.java:109); this port requires a prior participant and refuses the whole diagram as having none. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8460,11 +8616,12 @@
     {
       "type": "sequence",
       "slug": "tolozi-77-gere619",
-      "status": "baseline",
-      "weightedScore": 431,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `-> R : messageX`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8478,11 +8635,12 @@
     {
       "type": "sequence",
       "slug": "tovese-18-xira071",
-      "status": "baseline",
-      "weightedScore": 643,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 11: `a <-X    a : \"\"<-x\"\"`. Unported: CommandArrow's ARROW_DRESSING `[ox]` -- matched CASE-INSENSITIVELY, because every command regex is compiled with Pattern.CASE_INSENSITIVE (Pattern2.java:114), so `<-X` is the same arrow as `<-x` (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8587,11 +8745,12 @@
     {
       "type": "sequence",
       "slug": "turixi-21-mufe557",
-      "status": "baseline",
-      "weightedScore": 1236,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 16: `[-> Bob`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8660,20 +8819,22 @@
     {
       "type": "sequence",
       "slug": "vajoke-72-gizu927",
-      "status": "baseline",
-      "weightedScore": 994,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "valiva-41-fabo221",
-      "status": "baseline",
-      "weightedScore": 354,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `====`. Unported: CommandDivider `==(.*)==`, which accepts an EMPTY label (CommandDivider.java:57-62). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8733,11 +8894,12 @@
     {
       "type": "sequence",
       "slug": "vativa-83-bisa518",
-      "status": "baseline",
-      "weightedScore": 211,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `a <->(50)    b : \"\"<->  \"\"`. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8787,11 +8949,12 @@
     {
       "type": "sequence",
       "slug": "vekuxo-98-rugu851",
-      "status": "baseline",
-      "weightedScore": 409,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `Bob ->] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8905,11 +9068,12 @@
     {
       "type": "sequence",
       "slug": "vigoga-79-pita532",
-      "status": "baseline",
-      "weightedScore": 218,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[<-x b : \"\"  [<-x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8950,11 +9114,12 @@
     {
       "type": "sequence",
       "slug": "vitevu-99-rali549",
-      "status": "baseline",
-      "weightedScore": 10827,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `[-> P1 : F`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8986,11 +9151,12 @@
     {
       "type": "sequence",
       "slug": "vixapo-60-tuzu421",
-      "status": "baseline",
-      "weightedScore": 218,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `note left \"Long Alice\" : hello`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9031,11 +9197,12 @@
     {
       "type": "sequence",
       "slug": "vogegu-91-mave762",
-      "status": "baseline",
-      "weightedScore": 491,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 8: `Model <[hidden]- Management : Provides possible funding scenarios`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9085,11 +9252,12 @@
     {
       "type": "sequence",
       "slug": "vubato-50-gebu534",
-      "status": "baseline",
-      "weightedScore": 707,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9113,11 +9281,12 @@
     {
       "type": "sequence",
       "slug": "vucomo-53-gicu658",
-      "status": "baseline",
-      "weightedScore": 1725,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 8: `note right FMSSrv: Not decided how to send no data.`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9158,11 +9327,12 @@
     {
       "type": "sequence",
       "slug": "vuniba-19-repo187",
-      "status": "baseline",
-      "weightedScore": 459,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 8: `note right FMSSrv: <b>Not</b> decided how to send no data.`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9232,11 +9402,12 @@
     {
       "type": "sequence",
       "slug": "xacete-63-neke615",
-      "status": "baseline",
-      "weightedScore": 345,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `[-> Bob : message1`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9278,11 +9449,12 @@
     {
       "type": "sequence",
       "slug": "xalofe-61-vala300",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[//-o b : \"\"  [//-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9505,11 +9677,12 @@
     {
       "type": "sequence",
       "slug": "xigoxi-25-paro589",
-      "status": "baseline",
-      "weightedScore": 212,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[<-o b : \"\"  [<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9615,11 +9788,12 @@
     {
       "type": "sequence",
       "slug": "xogota-37-pele078",
-      "status": "baseline",
-      "weightedScore": 547,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 5: `A ->]: error`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9663,11 +9837,12 @@
     {
       "type": "sequence",
       "slug": "xonili-01-pure946",
-      "status": "baseline",
-      "weightedScore": 219,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[x<-o b : \"\"  [x<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9709,11 +9884,12 @@
     {
       "type": "sequence",
       "slug": "xucibo-16-zisi974",
-      "status": "baseline",
-      "weightedScore": 391,
-      "diffCount": 63,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 6: `||50||`. Unported: CommandHSpace `\\|\\|(\\d+)?\\|+` -- explicit vertical spacing (CommandHSpace.java; SequenceDiagramFactory.java:143). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9728,11 +9904,12 @@
     {
       "type": "sequence",
       "slug": "xujesa-13-dane303",
-      "status": "baseline",
-      "weightedScore": 768,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `Bob <-] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9810,11 +9987,12 @@
     {
       "type": "sequence",
       "slug": "xutovo-34-bisa687",
-      "status": "baseline",
-      "weightedScore": 333,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `Bob X-- Tom : hello`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9894,11 +10072,12 @@
     {
       "type": "sequence",
       "slug": "zajovi-78-nupe067",
-      "status": "baseline",
-      "weightedScore": 345,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `Bob ->] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -10024,11 +10203,12 @@
     {
       "type": "sequence",
       "slug": "zejabi-24-xoja824",
-      "status": "baseline",
-      "weightedScore": 924,
-      "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 2: `[-> Bob`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -10060,11 +10240,12 @@
     {
       "type": "sequence",
       "slug": "zelojo-99-pucu548",
-      "status": "baseline",
-      "weightedScore": 129,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 1: `Alice -> Bob [[http://www.yahoo.com{{\"Jason\": {\"firstName\":\"Bob\", \"lastName\":\"Smith\", [foo] },\\n \"Carl\": {\"firstName\":\"Alice\", \"lastName\":\"Brown\"}}}]] : Hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -10154,11 +10335,12 @@
     {
       "type": "sequence",
       "slug": "ziloke-42-lodi019",
-      "status": "baseline",
-      "weightedScore": 606,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 9: `autonumber stop`. Unported: CommandAutonumberStop (SequenceDiagramFactory.java:147). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -10190,20 +10372,22 @@
     {
       "type": "sequence",
       "slug": "zoculi-89-nodo007",
-      "status": "baseline",
-      "weightedScore": 760,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 13: `& loop 1 to n`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "zofeda-77-xiba744",
-      "status": "baseline",
-      "weightedScore": 226,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[o<-x b : \"\" [o<-x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -10227,11 +10411,12 @@
     {
       "type": "sequence",
       "slug": "zogane-85-raja214",
-      "status": "baseline",
-      "weightedScore": 816,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 12: `[o-> B : Pre`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -10272,20 +10457,22 @@
     {
       "type": "sequence",
       "slug": "zosulu-72-fati889",
-      "status": "baseline",
-      "weightedScore": 204,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `[<- b : \"\"   [<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
       "slug": "zoturo-25-jima978",
-      "status": "baseline",
-      "weightedScore": 416,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 3: `{start} Alice -> Bob : start doing things during duration`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -10319,12 +10506,12 @@
     {
       "type": "sequence",
       "slug": "zudize-61-vomi445",
-      "status": "baseline",
-      "weightedScore": 799486,
-      "diffCount": 5,
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
       "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "9176f739",
-      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 3670/70093 -> 36882/70093 (closer) while weightedScore rose 565254 -> 799486; see $comment"
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 33: `[o-> System : control.start()`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -10410,11 +10597,12 @@
     {
       "type": "sequence",
       "slug": "zuravu-52-mike252",
-      "status": "baseline",
-      "weightedScore": 472,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 10: `& opt message received`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -10437,11 +10625,12 @@
     {
       "type": "sequence",
       "slug": "zuvusi-13-fika929",
-      "status": "baseline",
-      "weightedScore": 435,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "3e8a8af6",
+      "reason": "refuses to parse -- line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     }
   ]
 }
