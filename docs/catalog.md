@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1023 modules · 3591 exported names.
+1023 modules · 3592 exported names.
 
 ## `src/`
 
@@ -1151,7 +1151,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ast.ts` | `StereotypeSpriteRef`, `DescriptiveNode`, `DescriptiveLinkStyle`, `DescriptiveLink`, `DescriptionDiagramAST` | AST type definitions for PlantUML descriptive diagrams (component / use-case / deployment). |
 | `command-table-containers.ts` | `CONTAINER_COMMANDS` | Bracket/paren shorthand, container-block, and generic keyword-dispatch commands for the descriptive diagram dispatch table (rules 10-15 of the original command-table.ts COMMANDS array): `[Name]` bracket shorthand, `(Name)` use-case shorthan |
 | `command-table-directives.ts` | `DIRECTIVE_COMMANDS` | Directive-style commands for the descriptive diagram dispatch table (rules 1-4 of the original command-table.ts COMMANDS array): comment lines, `newpage`, direction directives, `skinparam linetype`, `set separator`, `!pragma kermor`, `scale |
-| `command-table-helpers.ts` | `SHORTHAND_TRAILER`, `shorthandNode`, `resolveEndpointNamespace` | Shared helpers for the descriptive diagram dispatch table (command-table.ts and its command-group modules). |
+| `command-table-helpers.ts` | `SHORTHAND_TRAILER`, `BRACKET_TRAILER`, `shorthandNode`, `resolveEndpointNamespace` | Shared helpers for the descriptive diagram dispatch table (command-table.ts and its command-group modules). |
 | `command-table-links.ts` | `LINK_COMMANDS` | Link-line command for the descriptive diagram dispatch table (rule 9 of the original command-table.ts COMMANDS array). |
 | `command-table-shorthand.ts` | `SHORTHAND_COMMANDS` | Bare shorthand declaration commands for the descriptive diagram dispatch table (rules 5-8b of the original command-table.ts COMMANDS array): business-actor `:Name:/`, actor `:Name:`, business-usecase `(Name)/`, interface `()Name`, and the b |
 | `command-table-types.ts` | `Command` | Shared `Command` shape for the descriptive diagram dispatch table. |

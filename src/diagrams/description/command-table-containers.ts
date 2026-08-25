@@ -11,7 +11,7 @@
 
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import type { Command } from './command-table-types.js';
-import { SHORTHAND_TRAILER, shorthandNode } from './command-table-helpers.js';
+import { BRACKET_TRAILER, SHORTHAND_TRAILER, shorthandNode } from './command-table-helpers.js';
 import {
   CONTAINER_INLINE_RE,
   CONTAINER_OPEN_RE,
@@ -33,8 +33,27 @@ import { leafDisplayName } from './namespace-groups.js';
  */
 export const CONTAINER_COMMANDS: readonly Command[] = [
   // 10. Bracket shorthand: [Name] [as Alias] [<<stereotype>>] [#color]
+  //
+  // The trailer is `as <alias>` plus {@link SHORTHAND_TRAILER}'s tag /
+  // stereotype / color / url tokens, and NOTHING else. It used to be a bare
+  // `(.*)?$`, which claimed any line whose first token was bracketed --
+  // including `[*] --> state1`, a STATE diagram's initial transition.
+  //
+  // Upstream cannot do that. `CommandCreateElementFull`'s CODE_CORE does
+  // admit `\[[^\[\]]+\]` (`:126`), so `[*]` matches its CODE -- but the
+  // regex is anchored, and after CODE its tail permits only
+  // TAGS/STEREOTYPE/TAGS/URL/COLOR before `end()` (`:108-115`). ` --> state1`
+  // matches none of those, so the command fails, the description factory
+  // refuses the source, and `PSystemBuilder`'s next factory -- StateDiagram,
+  // which follows DescriptionDiagram in its list -- takes it. That order is
+  // upstream's own and is NOT the bug; the permissive trailer was.
+  //
+  // The sibling rules 11/11b already carry exactly this guard, whose own
+  // comment says it is "restricted to tag/stereotype/color tokens so link
+  // lines never match" (`command-table-helpers.ts:16-19`).
+  // @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementFull.java:83-115
   {
-    pattern: /^\[([^\]]+)\](.*)?$/,
+    pattern: new RegExp('^\\[([^\\]]+)\\]' + BRACKET_TRAILER + '$'),
     execute(state, match) {
       const decl = parseBracketDeclaration(match[1]!.trim(), match[2] ?? '');
       emitNode(state, makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color, undefined, decl.stereotypeSprite));
