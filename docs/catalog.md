@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1022 modules · 3586 exported names.
+1022 modules · 3589 exported names.
 
 ## `src/`
 
@@ -92,7 +92,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sprite-registry.ts` | `SpriteRegistry`, `createSpriteRegistry`, `addSprite`, `surfaceSpriteWarnings`, `getSprite`, `spriteDimsLookupFor`, `getSpriteMonochrome`, `getSpriteSvg` | `SpriteRegistry` — the per-diagram sprite map and its lookup seams, split out of `sprite-commands.ts` (which owns the sprite-DEFINITION grammar) purely to keep that file under this repo's 500-line module cap; the same split precedent as `op |
 | `sprite-split-stdlib.ts` | `SpriteSplitManifest`, `SpriteNotBundledError`, `spriteSplitNamesOf`, `spriteSplitStdlib`, `assembleSpriteSplitContent` | si11b T4 -- per-sprite stdlib bundle registration, and the prefetch-side assembly it enables. |
 | `stdlib-content.ts` | `stdlibContentFor` | Resolving a `<bundle/thing>` include target to its CONTENT, for the prefetch walk's third channel (`include-resolver.ts#prefetchInner`). |
-| `stereotype-decoration.ts` | `GuillemetPair`, `DEFAULT_GUILLEMET`, `wrapGuillemet`, `splitStereotypeLabels`, `splitStereotypeStyleTags`, `CircledCharDecoration`, `parseCircledCharDecoration`, `CircledSpriteDecoration`, `parseCircledSpriteDecoration` | stereotype-decoration.ts — the port of `StereotypeDecoration#buildComplex` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/stereo/ StereotypeDecoration.java:143-182`): how a `<<...>>` run splits into the label(s) a diagram DISPLAYS |
+| `stereotype-decoration.ts` | `GuillemetPair`, `DEFAULT_GUILLEMET`, `wrapGuillemet`, `splitStereotypeLabels`, `splitStereotypeStyleTags`, `CircledCharDecoration`, `parseCircledCharDecoration`, `CircledSpriteDecoration`, `parseCircledSpriteDecoration`, `DEFAULT_CIRCLED_CHARACTER_FONT_SIZE`, `resolveBadgeRadius` | stereotype-decoration.ts — the port of `StereotypeDecoration#buildComplex` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/stereo/ StereotypeDecoration.java:143-182`): how a `<<...>>` run splits into the label(s) a diagram DISPLAYS |
 | `style-cascade-class.ts` | `computeCardinalityFontOverride`, `computeArrowFontOverride`, `computeClassStyleCascadeOverrides`, `resolveClassTagCascadeEntry`, `computeClassTagCascadeGenerations` | Class-diagram `<style>` ancestor cascade (G2 N36) -- computes every `theme.colors.graph.classCascade*`/`spotCascade*` field from a raw StyleMap, pre-resolved to SVG-ready hex via {@link resolveColorToSvgHex} (the inline-`#color`-override pr |
 | `style-map-element.ts` | `collectElementStyleBuckets`, `resolveDocumentBackground`, `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade`, `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder` | Element-scoped `<style>` block routing — decision D4. |
 | `style-map-json-diagram.ts` | `computeJsonFamilyOverride`, `computeYamlFamilyOverride`, `computeHclFamilyOverride`, `computeHighlightClassesOverride` | jsonDiagram / yamlDiagram / hclDiagram `<style>` block → `Theme.colors .graph.json` field mapping, plus the `.tagname` style-class → `#highlight` override table. |
@@ -1250,7 +1250,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ast.ts` | `ParticipantType`, `Participant`, `MessageStyle`, `MessageEvent`, `NoteEvent`, `FrameEvent`, `ActivationEvent`, `DividerEvent`, `DelayEvent`, `SpaceEvent`, `SequenceEvent`, `BoxGroup`, `SequenceDiagramAST`, `ParticipantGeo`, `TextRun`, `MessageGeo`, `NoteGeo`, `ActivationGeo`, `FrameGeo`, `DividerGeo`, `SpaceGeo`, `EventGeo`, `BoxGeo`, `SequenceGeometry` | AST and Geometry type definitions for PlantUML sequence diagrams. |
+| `ast.ts` | `ParticipantType`, `Participant`, `MessageStyle`, `MessageEvent`, `NoteEvent`, `FrameEvent`, `ActivationEvent`, `DividerEvent`, `DelayEvent`, `SpaceEvent`, `SequenceEvent`, `BoxGroup`, `SequenceDiagramAST`, `ParticipantBadge`, `ParticipantGeo`, `TextRun`, `MessageGeo`, `NoteGeo`, `ActivationGeo`, `FrameGeo`, `DividerGeo`, `SpaceGeo`, `EventGeo`, `BoxGeo`, `SequenceGeometry` | AST and Geometry type definitions for PlantUML sequence diagrams. |
 | `index.ts` | `sequencePlugin` | Sequence diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |

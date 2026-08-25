@@ -21,6 +21,7 @@
 import type {
   BoxGeo,
   SequenceGeometry,
+  ParticipantBadge,
   ParticipantGeo,
   EventGeo,
   MessageGeo,
@@ -31,7 +32,7 @@ import type {
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, line, text, path, noteBox } from '../../core/svg.js';
+import { rect, line, text, path, noteBox, image, ellipse } from '../../core/svg.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { arrowConfigurationFor } from './sequence-arrowhead.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
@@ -49,6 +50,11 @@ import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './
 // ---------------------------------------------------------------------------
 
 const ACTIVATION_HALF_WIDTH = 5; // activationWidth / 2
+
+/** `TextBlockSprited`'s badge-to-label gap (`:65-67`) -- see
+ *  `sequence-layout-participants.ts`'s own `BADGE_GAP`, which sizes the box
+ *  this places into. */
+const BADGE_GAP = 6;
 
 // ---------------------------------------------------------------------------
 // Participant helpers
@@ -87,16 +93,54 @@ function renderLabel(cx: number, cy: number, label: string, theme: Theme): strin
  * it (`sequence-layout-participants.ts#visibleStereotype`) and simply leaves
  * `geo.stereotype` unset, so this function needs no style knowledge.
  */
+/**
+ * `TextBlockSprited#drawU` -- the badge draws at the block origin and the
+ * label block is translated right by `sprite.width + 6.0` (`:70-77`). So the
+ * badge sits at the box's left padding and the name block centres in what is
+ * left, which is exactly the box layout sized it for.
+ *
+ * Jar-verified on `birocu-87-xubi808`: box x=172.938 w=177.363 with a 64-wide
+ * image gives image x=179.938 (`x + 7`) and a name block centred on 296.62 --
+ * `(179.938 + 64 + 6 + (172.938 + 177.363 - 7)) / 2`.
+ */
+function badgeGeo(p: ParticipantGeo, theme: ScaledTheme): { x: number; nameCx: number } | undefined {
+  if (p.badge === undefined) return undefined;
+  const pad = theme.sequence.participantPadding;
+  const x = p.x + pad;
+  return { x, nameCx: (x + p.badge.width + BADGE_GAP + (p.x + p.width - pad)) / 2 };
+}
+
+/**
+ * The badge itself: a rasterised `<image>` for a sprite, or the plain filled
+ * circle the jar draws for a circled character -- WITHOUT the character
+ * (`ast.ts#ParticipantBadge` carries the three goldens that show this).
+ * Vertically centred on the name block's own centre, which is what
+ * `TextBlockSprited`'s `max(spriteHeight, textHeight)` box amounts to.
+ */
+function renderBadge(badge: ParticipantBadge, x: number, cy: number, theme: ScaledTheme): string {
+  const top = cy - badge.height / 2;
+  if (badge.kind === 'sprite') return image(x, top, badge.width, badge.height, badge.dataUri);
+  const r = badge.width / 2;
+  return ellipse(x + r, cy, r, r, {
+    fill: badge.color ?? theme.colors.background,
+    stroke: theme.colors.border,
+    'stroke-width': 1 * theme.scaleK,
+  });
+}
+
 function renderNameBlock(p: ParticipantGeo, cy: number, theme: ScaledTheme): string {
+  const badge = badgeGeo(p, theme);
+  const cx = badge?.nameCx ?? p.centerX;
+  const badgeEl = badge === undefined || p.badge === undefined ? '' : renderBadge(p.badge, badge.x, cy, theme);
   const lines = p.stereotypeLines ?? [];
-  if (lines.length === 0) return renderLabel(p.centerX, cy, p.display, theme);
+  if (lines.length === 0) return badgeEl + renderLabel(cx, cy, p.display, theme);
   // The block is centred on `cy`: N stereotype rows then the name, each one
   // font-size tall, so the name sits half a row below centre for a single
   // stereotype and proportionally lower for a stacked one.
   const rowH = theme.fontSize;
   const top = cy - (lines.length * rowH) / 2;
-  const stereo = lines.map((l, i) => renderLabel(p.centerX, top + i * rowH, l, theme)).join('');
-  return stereo + renderLabel(p.centerX, top + lines.length * rowH, p.display, theme);
+  const stereo = lines.map((l, i) => renderLabel(cx, top + i * rowH, l, theme)).join('');
+  return badgeEl + stereo + renderLabel(cx, top + lines.length * rowH, p.display, theme);
 }
 
 function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {

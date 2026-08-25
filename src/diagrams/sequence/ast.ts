@@ -232,6 +232,21 @@ export interface SequenceDiagramAST {
 // Geometry Types (consumed by layout stage)
 // ---------------------------------------------------------------------------
 
+/**
+ * A participant's stereotype BADGE, in `StereotypeDecoration`'s two forms.
+ *
+ * `Display#createStereotype` picks between them on `stereotype.isSpotted()`:
+ * a `CircledCharacter` for `<<(C,#color) Label>>`, otherwise the sprite from
+ * `stereotype.getSprite(...)` (`Display.java:671-689`). Both occupy a box the
+ * name block is pushed right of, so both carry `width`/`height`.
+ */
+export type ParticipantBadge =
+  | { readonly kind: 'sprite'; readonly dataUri: string; readonly width: number; readonly height: number }
+  /** The jar draws the circle and NOT the character: across
+   *  `nimoxu-60-xale291`, `fakova-98-suze610` and `xakuro-97-tado489` no
+   *  `<text>` carries the declared letter, only a filled `<ellipse>`. */
+  | { readonly kind: 'char'; readonly color: string | undefined; readonly width: number; readonly height: number };
+
 export interface ParticipantGeo {
   id: string;
   display: string;
@@ -246,6 +261,10 @@ export interface ParticipantGeo {
    *  (`core/stereotype-decoration.ts`). Absent when there is none, when every
    *  chunk is invisible, or when the style hides it. */
   stereotypeLines?: readonly string[];
+  /** The rasterised sprite badge a `<<($name) Label>>` stereotype declares,
+   *  drawn LEFT of the name block (`TextBlockSprited.java:65-77`). Absent
+   *  when there is none, or when the name does not resolve in the registry. */
+  badge?: ParticipantBadge;
 }
 
 import type { TextRun } from './text-block-geo.js';

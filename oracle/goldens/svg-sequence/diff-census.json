@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 472,
+    "missing-element": 466,
     "extra-element": 51,
-    "geometry": 16117,
-    "text-metrics": 5792,
+    "geometry": 16379,
+    "text-metrics": 5958,
     "format-units": 5,
-    "other": 11085
+    "other": 11310
   },
   "fixtures": [
     {
@@ -383,14 +383,14 @@
     },
     {
       "slug": "birocu-87-xubi808",
-      "diffCount": 5,
+      "diffCount": 91,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 36,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 0
+        "other": 33
       }
     },
     {
@@ -1007,14 +1007,14 @@
     },
     {
       "slug": "cexeco-21-piga007",
-      "diffCount": 65,
+      "diffCount": 66,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 24,
+        "geometry": 26,
         "text-metrics": 13,
         "format-units": 0,
-        "other": 28
+        "other": 27
       }
     },
     {
@@ -2171,14 +2171,14 @@
     },
     {
       "slug": "favale-68-luzo896",
-      "diffCount": 5,
+      "diffCount": 91,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 36,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 0
+        "other": 33
       }
     },
     {
@@ -4403,14 +4403,14 @@
     },
     {
       "slug": "kobibu-84-bode360",
-      "diffCount": 5,
+      "diffCount": 161,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 70,
+        "text-metrics": 39,
         "format-units": 0,
-        "other": 0
+        "other": 52
       }
     },
     {
@@ -6863,14 +6863,14 @@
     },
     {
       "slug": "peciku-06-zuvo123",
-      "diffCount": 5,
+      "diffCount": 88,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 36,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 0
+        "other": 30
       }
     },
     {
@@ -7607,14 +7607,14 @@
     },
     {
       "slug": "ridiro-95-moro174",
-      "diffCount": 5,
+      "diffCount": 157,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 70,
+        "text-metrics": 39,
         "format-units": 0,
-        "other": 0
+        "other": 48
       }
     },
     {
@@ -10187,14 +10187,14 @@
     },
     {
       "slug": "xediki-78-dexu094",
-      "diffCount": 5,
+      "diffCount": 88,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 36,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 0
+        "other": 30
       }
     },
     {

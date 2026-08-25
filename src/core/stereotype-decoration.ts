@@ -226,3 +226,35 @@ export function parseCircledSpriteDecoration(
   }
   return result;
 }
+
+// ---------------------------------------------------------------------------
+// Badge GEOMETRY — SkinParam#getCircledCharacterRadius
+// ---------------------------------------------------------------------------
+
+/** `FontParam.CIRCLED_CHARACTER`'s own default size
+ *  (`klimt/font/FontParam.java:55`). */
+export const DEFAULT_CIRCLED_CHARACTER_FONT_SIZE = 17;
+
+/**
+ * The circled-character badge's radius.
+ *
+ * `SkinParam#getCircledCharacterRadius()` returns the explicit
+ * `circledCharacterRadius` skinparam when set, and otherwise derives one from
+ * the CIRCLED_CHARACTER font size: `getFontSize(...) / 3 + 6` -- integer
+ * division, hence the floor (`skin/SkinParam.java:548-551`).
+ *
+ * Lifted here from `diagrams/class/class-badge.ts`, which keeps re-exporting
+ * it: the formula is `SkinParam`'s, not the class engine's, and the sequence
+ * participant badge needs the same radius. Jar-verified there on 12 corpus
+ * samples, and again by two sequence goldens whose radii differ only because
+ * their font sizes do -- `nimoxu-60-xale291` (rx=11) and
+ * `fakova-98-suze610` (rx=9).
+ */
+export function resolveBadgeRadius(
+  circledCharacterFontSize?: number,
+  circledCharacterRadiusOverride?: number,
+): number {
+  if (circledCharacterRadiusOverride !== undefined) return circledCharacterRadiusOverride;
+  const fontSize = circledCharacterFontSize ?? DEFAULT_CIRCLED_CHARACTER_FONT_SIZE;
+  return Math.floor(fontSize / 3) + 6;
+}

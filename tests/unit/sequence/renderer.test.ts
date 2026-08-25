@@ -955,6 +955,37 @@ describe('renderSequence — participant stereotype', () => {
     expect(hidden).not.toContain('«Zz»');
   });
 
+  // `Display#createStereotype` wraps the label block in a `TextBlockSprited`
+  // carrying `stereotype.getSprite(...)` (`Display.java:671-689`), and
+  // `TextBlockSprited#drawU` draws it at the block origin with the label
+  // translated right by `sprite.width + 6` (`:65-77`).
+  it('draws a declared sprite badge as an <image> beside the name', () => {
+    const svg = render(
+      '@startuml\nsprite $s1 [4x4/16] {\n0123\n4567\n89AB\nCDEF\n}\n' +
+        'participant P << ($s1) Lbl >>\nP -> Q: hi\n@enduml',
+    );
+    expect(svg).toContain('<image');
+    expect(svg).toContain('data:image/png;base64,');
+    expect(svg).toContain('>«Lbl»</text>');
+  });
+
+  it('draws nothing extra when the sprite name does not resolve', () => {
+    const svg = render('@startuml\nparticipant P << ($missing) Lbl >>\nP -> Q: hi\n@enduml');
+    expect(svg).not.toContain('<image');
+    expect(svg).toContain('>«Lbl»</text>');
+  });
+
+  // The other arm of that same `if`: a circled CHARACTER. The jar draws the
+  // filled circle and NOT the letter -- no `<text>` in nimoxu-60-xale291,
+  // fakova-98-suze610 or xakuro-97-tado489 carries the declared char.
+  it('draws a circled-character badge as a filled circle, without the character', () => {
+    const svg = render('@startuml\nparticipant P << (U,#ADD1B2) Lbl >>\nP -> Q: hi\n@enduml');
+    expect(svg).toContain('<ellipse');
+    expect(svg).toContain('#ADD1B2');
+    expect(svg).toContain('>«Lbl»</text>');
+    expect(svg).not.toContain('>U</text>');
+  });
+
   it('hide stereotype removes it regardless of any style', () => {
     const svg = render('@startuml\nhide stereotype\nparticipant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml');
     expect(svg).not.toContain('«dummy1»');

@@ -97,7 +97,17 @@ const IDENTITY = 1;
 // ---------------------------------------------------------------------------
 
 function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
-  return { ...p, x: p.x * k, y: p.y * k, width: p.width * k, height: p.height * k, centerX: p.centerX * k };
+  return {
+    ...p,
+    x: p.x * k,
+    y: p.y * k,
+    width: p.width * k,
+    height: p.height * k,
+    centerX: p.centerX * k,
+    ...(p.badge !== undefined
+      ? { badge: { ...p.badge, width: p.badge.width * k, height: p.badge.height * k } }
+      : {}),
+  };
 }
 
 function scaleBox(b: BoxGeo, k: number): BoxGeo {
