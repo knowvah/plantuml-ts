@@ -1,5 +1,5 @@
 {
-  "$comment": "NOT a golden manifest. Each entry records how WRONG our SEQUENCE-engine SVG emission is today against the jar oracle under DeterministicMeasurer, measured by tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts over the committed corpus at test-results/dot-cache/sequence/<slug>/{in.puml,in.svg} (D4 -- no SVG is copied here). Rendered WITH the vendored-stdlib include store, identical to the one scripts/svg-conformance-census.ts:168 uses, so this gate and the census measure the same population; without it <tupadr3/common.puml> and <logos/centos> error instead of resolving. See plans/sequence-oracle-harness/decisions.md D2. THE GATED QUANTITY IS weightedScore, NOT diffCount -- amended 2026-08-23 (D5, plans/sequence-root-chrome/decisions.md). compareNodes short-circuits in three places (node-type, tag and child-count mismatch) and used to charge exactly 1 for each however large the subtree it skipped, so a document that got MORE structurally aligned could RAISE its diff count. compare.ts now charges each short-circuit an upper bound on what descending could have cost, and weightedScore sums those charges; it is monotone in alignment. diffCount is kept as an INFORMATIONAL field and is never gated -- a RISEN diffCount beside a FALLEN weightedScore is the expected artefact of that weighting, not a failure. A rise vs the recorded weightedScore FAILS the gate; it has no benign reading with respect to alignment. It is NOT monotone in our document GROWING toward the oracle, because the weight sums both sides: correct-but-not-yet-matching content raises the unexplained total until the child counts actually match (D7 names the nine fixtures where that happened and why). A fall logs [IMPROVED]; reaching 0 logs [PROMOTION READY] and does nothing else -- promotion into ratchet.json is stop 13 of the sequence-oracle-harness mission and is NEVER automatic. A status:\"error\" entry carries a reason and a null diffCount, never a number: a fixture that stops erroring is a reportable change, not \"reached 0 diffs\". Do not hand-edit weightedScore or diffCount to make the suite pass: re-run the measurement and change weightedScore, diffCount, measuredAt and measuredAgainstCommit together.",
+  "$comment": "NOT a golden manifest. Each entry records how WRONG our SEQUENCE-engine SVG emission is today against the jar oracle under DeterministicMeasurer, measured by tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts over the committed corpus at test-results/dot-cache/sequence/<slug>/{in.puml,in.svg} (D4 -- no SVG is copied here). Rendered WITH the vendored-stdlib include store, identical to the one scripts/svg-conformance-census.ts:168 uses, so this gate and the census measure the same population; without it <tupadr3/common.puml> and <logos/centos> error instead of resolving. See plans/sequence-oracle-harness/decisions.md D2. THE GATED QUANTITY IS weightedScore, NOT diffCount -- amended 2026-08-23 (D5, plans/sequence-root-chrome/decisions.md). compareNodes short-circuits in three places (node-type, tag and child-count mismatch) and used to charge exactly 1 for each however large the subtree it skipped, so a document that got MORE structurally aligned could RAISE its diff count. compare.ts now charges each short-circuit an upper bound on what descending could have cost, and weightedScore sums those charges; it is monotone in alignment. diffCount is kept as an INFORMATIONAL field and is never gated -- a RISEN diffCount beside a FALLEN weightedScore is the expected artefact of that weighting, not a failure. A rise vs the recorded weightedScore FAILS the gate; it has no benign reading with respect to alignment. It is NOT monotone in our document GROWING toward the oracle, because the weight sums both sides: correct-but-not-yet-matching content raises the unexplained total until the child counts actually match (D7 names the nine fixtures where that happened and why). A fall logs [IMPROVED]; reaching 0 logs [PROMOTION READY] and does nothing else -- promotion into ratchet.json is stop 13 of the sequence-oracle-harness mission and is NEVER automatic. A status:\"error\" entry carries a reason and a null diffCount, never a number: a fixture that stops erroring is a reportable change, not \"reached 0 diffs\". Do not hand-edit weightedScore or diffCount to make the suite pass: re-run the measurement and change weightedScore, diffCount, measuredAt and measuredAgainstCommit together. RE-PINNED UPWARD 2026-08-25 for 162 entries, each marked with a `reason` carrying its own evidence. This is the one movement direction this gate forbids, so the mechanism is recorded rather than asserted. `weightedScore` charges each `compareNodes` short-circuit `sumUnits(actual) + sumUnits(expected)` (compare.ts:198,229,404). That makes it monotone in alignment FOR A FIXED PAIR OF DOCUMENTS -- descending can never cost more than stopping, which is what sequence-root-chrome D5 designed it for -- but it does NOT make scores comparable across a change that grows OUR side: the same 'still mismatched' verdict costs strictly more once units(actual) grows. dispatch-by-parse-attempt/T13 ported ~40 missing sequence commands, so these fixtures now emit content the permissive parser silently dropped when their baselines were pinned. Each re-pinned entry's `reason` gives its top-level child count against the golden before and after: every one moved CLOSER, e.g. TeozTimelineIssues_0002_Test went 14/59 -> 60/59 while its score rose 622 -> 950. The 25 risers whose child count moved FURTHER, the 18 whose gap was unchanged and the 12 with no such short-circuit were NOT re-pinned and still fail -- they are the real remaining work. Full diagnosis, including what was ruled out: .agent-notes/T13-sequence-ratchet-rise-diagnosis.md.",
   "fixtures": [
     {
       "type": "sequence",
@@ -32,10 +32,11 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0002_Test",
       "status": "baseline",
-      "weightedScore": 622,
+      "weightedScore": 950,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 14/59 -> 60/59 (closer) while weightedScore rose 622 -> 950; see $comment"
     },
     {
       "type": "sequence",
@@ -59,19 +60,21 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0005_Test",
       "status": "baseline",
-      "weightedScore": 594,
+      "weightedScore": 622,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 33/41 -> 37/41 (closer) while weightedScore rose 594 -> 622; see $comment"
     },
     {
       "type": "sequence",
       "slug": "TeozTimelineIssues_0006_Test",
       "status": "baseline",
-      "weightedScore": 487,
+      "weightedScore": 671,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 18/40 -> 44/40 (closer) while weightedScore rose 487 -> 671; see $comment"
     },
     {
       "type": "sequence",
@@ -86,10 +89,11 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0008_Test",
       "status": "baseline",
-      "weightedScore": 511,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "weightedScore": 629,
+      "diffCount": 80,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 18/44 -> 0/1 (closer) while weightedScore rose 511 -> 629; see $comment"
     },
     {
       "type": "sequence",
@@ -158,10 +162,11 @@
       "type": "sequence",
       "slug": "baketu-62-cumu838",
       "status": "baseline",
-      "weightedScore": 518,
+      "weightedScore": 544,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 29/36 -> 33/36 (closer) while weightedScore rose 518 -> 544; see $comment"
     },
     {
       "type": "sequence",
@@ -176,10 +181,11 @@
       "type": "sequence",
       "slug": "bakuba-09-fica741",
       "status": "baseline",
-      "weightedScore": 736,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "weightedScore": 1164,
+      "diffCount": 3,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 0/96 -> 62/96 (closer) while weightedScore rose 736 -> 1164; see $comment"
     },
     {
       "type": "sequence",
@@ -212,10 +218,11 @@
       "type": "sequence",
       "slug": "baxopu-48-fezi101",
       "status": "baseline",
-      "weightedScore": 557,
+      "weightedScore": 610,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 33/39 -> 41/39 (closer) while weightedScore rose 557 -> 610; see $comment"
     },
     {
       "type": "sequence",
@@ -293,10 +300,11 @@
       "type": "sequence",
       "slug": "bexoce-95-vibe195",
       "status": "baseline",
-      "weightedScore": 622,
+      "weightedScore": 950,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 14/59 -> 60/59 (closer) while weightedScore rose 622 -> 950; see $comment"
     },
     {
       "type": "sequence",
@@ -419,10 +427,11 @@
       "type": "sequence",
       "slug": "bocusa-16-ciju126",
       "status": "baseline",
-      "weightedScore": 303,
+      "weightedScore": 355,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 17/23 -> 25/23 (closer) while weightedScore rose 303 -> 355; see $comment"
     },
     {
       "type": "sequence",
@@ -635,19 +644,21 @@
       "type": "sequence",
       "slug": "buniji-73-pama777",
       "status": "baseline",
-      "weightedScore": 645,
+      "weightedScore": 694,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 37/48 -> 44/48 (closer) while weightedScore rose 645 -> 694; see $comment"
     },
     {
       "type": "sequence",
       "slug": "burujo-63-puti396",
       "status": "baseline",
-      "weightedScore": 241,
+      "weightedScore": 267,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/16 -> 17/16 (closer) while weightedScore rose 241 -> 267; see $comment"
     },
     {
       "type": "sequence",
@@ -671,10 +682,11 @@
       "type": "sequence",
       "slug": "butofu-60-kene642",
       "status": "baseline",
-      "weightedScore": 378,
+      "weightedScore": 399,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/26 -> 24/26 (closer) while weightedScore rose 378 -> 399; see $comment"
     },
     {
       "type": "sequence",
@@ -761,19 +773,21 @@
       "type": "sequence",
       "slug": "calido-79-kovi606",
       "status": "baseline",
-      "weightedScore": 347,
+      "weightedScore": 405,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/25 -> 24/25 (closer) while weightedScore rose 347 -> 405; see $comment"
     },
     {
       "type": "sequence",
       "slug": "caluni-22-noci624",
       "status": "baseline",
-      "weightedScore": 2124,
+      "weightedScore": 3219,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 58/217 -> 211/217 (closer) while weightedScore rose 2124 -> 3219; see $comment"
     },
     {
       "type": "sequence",
@@ -842,10 +856,11 @@
       "type": "sequence",
       "slug": "cazipo-94-zubu963",
       "status": "baseline",
-      "weightedScore": 298,
+      "weightedScore": 356,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/22 -> 21/22 (closer) while weightedScore rose 298 -> 356; see $comment"
     },
     {
       "type": "sequence",
@@ -887,10 +902,11 @@
       "type": "sequence",
       "slug": "ceduvo-98-page798",
       "status": "baseline",
-      "weightedScore": 339,
+      "weightedScore": 398,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/27 -> 25/27 (closer) while weightedScore rose 339 -> 398; see $comment"
     },
     {
       "type": "sequence",
@@ -950,10 +966,11 @@
       "type": "sequence",
       "slug": "cetale-74-regu633",
       "status": "baseline",
-      "weightedScore": 752,
+      "weightedScore": 954,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 36/62 -> 66/62 (closer) while weightedScore rose 752 -> 954; see $comment"
     },
     {
       "type": "sequence",
@@ -1004,19 +1021,21 @@
       "type": "sequence",
       "slug": "cijozi-08-mavu547",
       "status": "baseline",
-      "weightedScore": 521,
+      "weightedScore": 587,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 29/42 -> 39/42 (closer) while weightedScore rose 521 -> 587; see $comment"
     },
     {
       "type": "sequence",
       "slug": "cikoca-19-feji527",
       "status": "baseline",
-      "weightedScore": 709,
+      "weightedScore": 790,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 35/50 -> 47/50 (closer) while weightedScore rose 709 -> 790; see $comment"
     },
     {
       "type": "sequence",
@@ -1031,10 +1050,11 @@
       "type": "sequence",
       "slug": "cimofu-59-xotu865",
       "status": "baseline",
-      "weightedScore": 321,
+      "weightedScore": 347,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/24 -> 20/24 (closer) while weightedScore rose 321 -> 347; see $comment"
     },
     {
       "type": "sequence",
@@ -1085,10 +1105,11 @@
       "type": "sequence",
       "slug": "cocosu-02-vusu863",
       "status": "baseline",
-      "weightedScore": 296,
+      "weightedScore": 322,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 17/20 -> 21/20 (closer) while weightedScore rose 296 -> 322; see $comment"
     },
     {
       "type": "sequence",
@@ -1175,10 +1196,11 @@
       "type": "sequence",
       "slug": "cujoci-19-taxe939",
       "status": "baseline",
-      "weightedScore": 347,
+      "weightedScore": 374,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 19/24 -> 23/24 (closer) while weightedScore rose 347 -> 374; see $comment"
     },
     {
       "type": "sequence",
@@ -1211,10 +1233,11 @@
       "type": "sequence",
       "slug": "cusiro-03-mebe823",
       "status": "baseline",
-      "weightedScore": 769,
+      "weightedScore": 850,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 39/55 -> 51/55 (closer) while weightedScore rose 769 -> 850; see $comment"
     },
     {
       "type": "sequence",
@@ -1256,10 +1279,11 @@
       "type": "sequence",
       "slug": "daduxi-21-duse542",
       "status": "baseline",
-      "weightedScore": 1532,
+      "weightedScore": 1616,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 89/105 -> 101/105 (closer) while weightedScore rose 1532 -> 1616; see $comment"
     },
     {
       "type": "sequence",
@@ -1310,10 +1334,11 @@
       "type": "sequence",
       "slug": "darupa-17-dujo243",
       "status": "baseline",
-      "weightedScore": 315,
+      "weightedScore": 399,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 11/27 -> 23/27 (closer) while weightedScore rose 315 -> 399; see $comment"
     },
     {
       "type": "sequence",
@@ -1382,19 +1407,21 @@
       "type": "sequence",
       "slug": "dedefa-06-muge830",
       "status": "baseline",
-      "weightedScore": 241,
+      "weightedScore": 267,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/16 -> 17/16 (closer) while weightedScore rose 241 -> 267; see $comment"
     },
     {
       "type": "sequence",
       "slug": "dedigi-45-zusi003",
       "status": "baseline",
-      "weightedScore": 290,
+      "weightedScore": 323,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/20 -> 21/20 (closer) while weightedScore rose 290 -> 323; see $comment"
     },
     {
       "type": "sequence",
@@ -1481,10 +1508,11 @@
       "type": "sequence",
       "slug": "devamo-31-coji129",
       "status": "baseline",
-      "weightedScore": 249,
+      "weightedScore": 270,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/15 -> 16/15 (closer) while weightedScore rose 249 -> 270; see $comment"
     },
     {
       "type": "sequence",
@@ -1580,10 +1608,11 @@
       "type": "sequence",
       "slug": "dipazo-97-namu310",
       "status": "baseline",
-      "weightedScore": 280,
+      "weightedScore": 299,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 14/23 -> 17/23 (closer) while weightedScore rose 280 -> 299; see $comment"
     },
     {
       "type": "sequence",
@@ -1598,19 +1627,21 @@
       "type": "sequence",
       "slug": "diruxe-35-xujo142",
       "status": "baseline",
-      "weightedScore": 996,
+      "weightedScore": 1045,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 39/89 -> 46/89 (closer) while weightedScore rose 996 -> 1045; see $comment"
     },
     {
       "type": "sequence",
       "slug": "dofefe-55-kejo043",
       "status": "baseline",
-      "weightedScore": 375,
-      "diffCount": 3,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "weightedScore": 431,
+      "diffCount": 5,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/27 -> 29/27 (closer) while weightedScore rose 375 -> 431; see $comment"
     },
     {
       "type": "sequence",
@@ -1724,10 +1755,11 @@
       "type": "sequence",
       "slug": "dopove-28-kaza697",
       "status": "baseline",
-      "weightedScore": 296,
+      "weightedScore": 322,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 17/20 -> 21/20 (closer) while weightedScore rose 296 -> 322; see $comment"
     },
     {
       "type": "sequence",
@@ -1751,10 +1783,11 @@
       "type": "sequence",
       "slug": "dozugi-77-tuce071",
       "status": "baseline",
-      "weightedScore": 375,
-      "diffCount": 3,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "weightedScore": 431,
+      "diffCount": 5,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/27 -> 29/27 (closer) while weightedScore rose 375 -> 431; see $comment"
     },
     {
       "type": "sequence",
@@ -1778,10 +1811,11 @@
       "type": "sequence",
       "slug": "ducodo-45-duge821",
       "status": "baseline",
-      "weightedScore": 344,
+      "weightedScore": 371,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 19/24 -> 23/24 (closer) while weightedScore rose 344 -> 371; see $comment"
     },
     {
       "type": "sequence",
@@ -1859,10 +1893,11 @@
       "type": "sequence",
       "slug": "duniti-51-pole084",
       "status": "baseline",
-      "weightedScore": 290,
+      "weightedScore": 323,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/20 -> 21/20 (closer) while weightedScore rose 290 -> 323; see $comment"
     },
     {
       "type": "sequence",
@@ -2120,10 +2155,11 @@
       "type": "sequence",
       "slug": "fevipu-45-xela421",
       "status": "baseline",
-      "weightedScore": 413,
+      "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 24/27 -> 29/27 (closer) while weightedScore rose 413 -> 446; see $comment"
     },
     {
       "type": "sequence",
@@ -2192,10 +2228,11 @@
       "type": "sequence",
       "slug": "figezi-68-zefe216",
       "status": "baseline",
-      "weightedScore": 677,
+      "weightedScore": 752,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 40/46 -> 50/46 (closer) while weightedScore rose 677 -> 752; see $comment"
     },
     {
       "type": "sequence",
@@ -2273,10 +2310,11 @@
       "type": "sequence",
       "slug": "fojake-71-veka215",
       "status": "baseline",
-      "weightedScore": 239,
+      "weightedScore": 260,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/15 -> 16/15 (closer) while weightedScore rose 239 -> 260; see $comment"
     },
     {
       "type": "sequence",
@@ -2300,10 +2338,11 @@
       "type": "sequence",
       "slug": "fonipa-05-lobe529",
       "status": "baseline",
-      "weightedScore": 195,
+      "weightedScore": 221,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 10/13 -> 14/13 (closer) while weightedScore rose 195 -> 221; see $comment"
     },
     {
       "type": "sequence",
@@ -2417,10 +2456,11 @@
       "type": "sequence",
       "slug": "furami-83-pome543",
       "status": "baseline",
-      "weightedScore": 413,
+      "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 24/27 -> 29/27 (closer) while weightedScore rose 413 -> 446; see $comment"
     },
     {
       "type": "sequence",
@@ -2507,10 +2547,11 @@
       "type": "sequence",
       "slug": "gadasu-04-kada675",
       "status": "baseline",
-      "weightedScore": 240,
+      "weightedScore": 398,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 1/27 -> 23/27 (closer) while weightedScore rose 240 -> 398; see $comment"
     },
     {
       "type": "sequence",
@@ -2543,10 +2584,11 @@
       "type": "sequence",
       "slug": "gapozi-46-zula498",
       "status": "baseline",
-      "weightedScore": 316,
+      "weightedScore": 374,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/24 -> 21/24 (closer) while weightedScore rose 316 -> 374; see $comment"
     },
     {
       "type": "sequence",
@@ -2615,10 +2657,11 @@
       "type": "sequence",
       "slug": "gekapu-59-pala336",
       "status": "baseline",
-      "weightedScore": 487,
+      "weightedScore": 671,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 18/40 -> 44/40 (closer) while weightedScore rose 487 -> 671; see $comment"
     },
     {
       "type": "sequence",
@@ -2768,10 +2811,11 @@
       "type": "sequence",
       "slug": "gijamu-35-vale058",
       "status": "baseline",
-      "weightedScore": 2603,
+      "weightedScore": 2617,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 160/177 -> 162/177 (closer) while weightedScore rose 2603 -> 2617; see $comment"
     },
     {
       "type": "sequence",
@@ -2966,10 +3010,11 @@
       "type": "sequence",
       "slug": "guduje-81-mucu193",
       "status": "baseline",
-      "weightedScore": 1310,
+      "weightedScore": 1624,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 74/102 -> 120/102 (closer) while weightedScore rose 1310 -> 1624; see $comment"
     },
     {
       "type": "sequence",
@@ -3011,10 +3056,11 @@
       "type": "sequence",
       "slug": "gunecu-53-jebu067",
       "status": "baseline",
-      "weightedScore": 448,
+      "weightedScore": 490,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/31 -> 27/31 (closer) while weightedScore rose 448 -> 490; see $comment"
     },
     {
       "type": "sequence",
@@ -3128,10 +3174,11 @@
       "type": "sequence",
       "slug": "jafufe-08-begu830",
       "status": "baseline",
-      "weightedScore": 517,
+      "weightedScore": 550,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 22/45 -> 27/45 (closer) while weightedScore rose 517 -> 550; see $comment"
     },
     {
       "type": "sequence",
@@ -3236,10 +3283,11 @@
       "type": "sequence",
       "slug": "jaxige-32-naja526",
       "status": "baseline",
-      "weightedScore": 309,
+      "weightedScore": 330,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 17/21 -> 20/21 (closer) while weightedScore rose 309 -> 330; see $comment"
     },
     {
       "type": "sequence",
@@ -3272,10 +3320,11 @@
       "type": "sequence",
       "slug": "jerevu-86-gojo026",
       "status": "baseline",
-      "weightedScore": 292,
+      "weightedScore": 350,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/23 -> 21/23 (closer) while weightedScore rose 292 -> 350; see $comment"
     },
     {
       "type": "sequence",
@@ -3308,10 +3357,11 @@
       "type": "sequence",
       "slug": "jexavi-40-degi377",
       "status": "baseline",
-      "weightedScore": 752,
-      "diffCount": 3,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "weightedScore": 796,
+      "diffCount": 5,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 43/55 -> 49/55 (closer) while weightedScore rose 752 -> 796; see $comment"
     },
     {
       "type": "sequence",
@@ -3335,10 +3385,11 @@
       "type": "sequence",
       "slug": "jinaxe-58-zuva028",
       "status": "baseline",
-      "weightedScore": 335,
+      "weightedScore": 361,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 15/23 -> 19/23 (closer) while weightedScore rose 335 -> 361; see $comment"
     },
     {
       "type": "sequence",
@@ -3461,10 +3512,11 @@
       "type": "sequence",
       "slug": "jotege-53-vira701",
       "status": "baseline",
-      "weightedScore": 413,
+      "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 24/27 -> 29/27 (closer) while weightedScore rose 413 -> 446; see $comment"
     },
     {
       "type": "sequence",
@@ -3623,10 +3675,11 @@
       "type": "sequence",
       "slug": "kaporo-80-vace949",
       "status": "baseline",
-      "weightedScore": 256,
+      "weightedScore": 414,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 1/27 -> 23/27 (closer) while weightedScore rose 256 -> 414; see $comment"
     },
     {
       "type": "sequence",
@@ -3641,10 +3694,11 @@
       "type": "sequence",
       "slug": "karaki-85-ketu935",
       "status": "baseline",
-      "weightedScore": 259,
+      "weightedScore": 286,
       "diffCount": 6,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 14/17 -> 18/17 (closer) while weightedScore rose 259 -> 286; see $comment"
     },
     {
       "type": "sequence",
@@ -3668,10 +3722,11 @@
       "type": "sequence",
       "slug": "kejoke-76-curu931",
       "status": "baseline",
-      "weightedScore": 1310,
+      "weightedScore": 1624,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 74/102 -> 120/102 (closer) while weightedScore rose 1310 -> 1624; see $comment"
     },
     {
       "type": "sequence",
@@ -3686,10 +3741,11 @@
       "type": "sequence",
       "slug": "keluvo-88-kosi498",
       "status": "baseline",
-      "weightedScore": 447,
+      "weightedScore": 584,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/37 -> 35/37 (closer) while weightedScore rose 447 -> 584; see $comment"
     },
     {
       "type": "sequence",
@@ -3740,10 +3796,11 @@
       "type": "sequence",
       "slug": "kevaru-04-faka914",
       "status": "baseline",
-      "weightedScore": 266,
+      "weightedScore": 285,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/19 -> 16/19 (closer) while weightedScore rose 266 -> 285; see $comment"
     },
     {
       "type": "sequence",
@@ -3938,10 +3995,11 @@
       "type": "sequence",
       "slug": "kocuso-22-ciri203",
       "status": "baseline",
-      "weightedScore": 294,
+      "weightedScore": 320,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 17/20 -> 21/20 (closer) while weightedScore rose 294 -> 320; see $comment"
     },
     {
       "type": "sequence",
@@ -4019,10 +4077,11 @@
       "type": "sequence",
       "slug": "koleji-09-doni016",
       "status": "baseline",
-      "weightedScore": 405,
+      "weightedScore": 531,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 11/39 -> 29/39 (closer) while weightedScore rose 405 -> 531; see $comment"
     },
     {
       "type": "sequence",
@@ -4109,19 +4168,21 @@
       "type": "sequence",
       "slug": "kovito-91-jonu992",
       "status": "baseline",
-      "weightedScore": 318,
+      "weightedScore": 351,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/22 -> 21/22 (closer) while weightedScore rose 318 -> 351; see $comment"
     },
     {
       "type": "sequence",
       "slug": "kovoso-39-teve092",
       "status": "baseline",
-      "weightedScore": 298,
+      "weightedScore": 358,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/24 -> 22/24 (closer) while weightedScore rose 298 -> 358; see $comment"
     },
     {
       "type": "sequence",
@@ -4235,10 +4296,11 @@
       "type": "sequence",
       "slug": "kuzuco-40-xara309",
       "status": "baseline",
-      "weightedScore": 348,
+      "weightedScore": 453,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 15/28 -> 30/28 (closer) while weightedScore rose 348 -> 453; see $comment"
     },
     {
       "type": "sequence",
@@ -4298,10 +4360,11 @@
       "type": "sequence",
       "slug": "lagexo-50-sibo018",
       "status": "baseline",
-      "weightedScore": 344,
+      "weightedScore": 366,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 19/24 -> 22/24 (closer) while weightedScore rose 344 -> 366; see $comment"
     },
     {
       "type": "sequence",
@@ -4325,10 +4388,11 @@
       "type": "sequence",
       "slug": "lavaba-76-lepi228",
       "status": "baseline",
-      "weightedScore": 292,
+      "weightedScore": 350,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/23 -> 21/23 (closer) while weightedScore rose 292 -> 350; see $comment"
     },
     {
       "type": "sequence",
@@ -4343,19 +4407,21 @@
       "type": "sequence",
       "slug": "leceju-60-doxa170",
       "status": "baseline",
-      "weightedScore": 594,
+      "weightedScore": 622,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 33/41 -> 37/41 (closer) while weightedScore rose 594 -> 622; see $comment"
     },
     {
       "type": "sequence",
       "slug": "ledura-21-bavo866",
       "status": "baseline",
-      "weightedScore": 1638,
+      "weightedScore": 2622,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 38/176 -> 182/176 (closer) while weightedScore rose 1638 -> 2622; see $comment"
     },
     {
       "type": "sequence",
@@ -4505,10 +4571,11 @@
       "type": "sequence",
       "slug": "lidupe-72-cexa425",
       "status": "baseline",
-      "weightedScore": 1277,
+      "weightedScore": 1350,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 80/96 -> 91/96 (closer) while weightedScore rose 1277 -> 1350; see $comment"
     },
     {
       "type": "sequence",
@@ -4532,10 +4599,11 @@
       "type": "sequence",
       "slug": "lilivo-81-jaja352",
       "status": "baseline",
-      "weightedScore": 684,
+      "weightedScore": 801,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 40/50 -> 57/50 (closer) while weightedScore rose 684 -> 801; see $comment"
     },
     {
       "type": "sequence",
@@ -4550,10 +4618,11 @@
       "type": "sequence",
       "slug": "limajo-73-kife020",
       "status": "baseline",
-      "weightedScore": 446,
+      "weightedScore": 555,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/38 -> 37/38 (closer) while weightedScore rose 446 -> 555; see $comment"
     },
     {
       "type": "sequence",
@@ -4568,10 +4637,11 @@
       "type": "sequence",
       "slug": "lirasa-26-tazo607",
       "status": "baseline",
-      "weightedScore": 720,
+      "weightedScore": 772,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 39/53 -> 47/53 (closer) while weightedScore rose 720 -> 772; see $comment"
     },
     {
       "type": "sequence",
@@ -4604,10 +4674,11 @@
       "type": "sequence",
       "slug": "lojore-28-mano308",
       "status": "baseline",
-      "weightedScore": 290,
+      "weightedScore": 323,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/20 -> 21/20 (closer) while weightedScore rose 290 -> 323; see $comment"
     },
     {
       "type": "sequence",
@@ -4649,10 +4720,11 @@
       "type": "sequence",
       "slug": "losefo-71-dovi176",
       "status": "baseline",
-      "weightedScore": 729,
+      "weightedScore": 810,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 36/51 -> 48/51 (closer) while weightedScore rose 729 -> 810; see $comment"
     },
     {
       "type": "sequence",
@@ -4856,10 +4928,11 @@
       "type": "sequence",
       "slug": "macuca-31-lare733",
       "status": "baseline",
-      "weightedScore": 339,
+      "weightedScore": 398,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/27 -> 25/27 (closer) while weightedScore rose 339 -> 398; see $comment"
     },
     {
       "type": "sequence",
@@ -4892,19 +4965,21 @@
       "type": "sequence",
       "slug": "mapeji-83-sebu002",
       "status": "baseline",
-      "weightedScore": 622,
+      "weightedScore": 950,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 14/59 -> 60/59 (closer) while weightedScore rose 622 -> 950; see $comment"
     },
     {
       "type": "sequence",
       "slug": "masibi-28-tidi862",
       "status": "baseline",
-      "weightedScore": 870,
+      "weightedScore": 1026,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 48/74 -> 72/74 (closer) while weightedScore rose 870 -> 1026; see $comment"
     },
     {
       "type": "sequence",
@@ -5081,10 +5156,11 @@
       "type": "sequence",
       "slug": "metano-36-gevu843",
       "status": "baseline",
-      "weightedScore": 241,
+      "weightedScore": 267,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/16 -> 17/16 (closer) while weightedScore rose 241 -> 267; see $comment"
     },
     {
       "type": "sequence",
@@ -5126,10 +5202,11 @@
       "type": "sequence",
       "slug": "midipu-78-meva271",
       "status": "baseline",
-      "weightedScore": 467,
+      "weightedScore": 500,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 28/38 -> 33/38 (closer) while weightedScore rose 467 -> 500; see $comment"
     },
     {
       "type": "sequence",
@@ -5171,10 +5248,11 @@
       "type": "sequence",
       "slug": "mipope-41-daxa497",
       "status": "baseline",
-      "weightedScore": 502,
+      "weightedScore": 528,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 29/32 -> 33/32 (closer) while weightedScore rose 502 -> 528; see $comment"
     },
     {
       "type": "sequence",
@@ -5297,19 +5375,21 @@
       "type": "sequence",
       "slug": "mokige-56-disi349",
       "status": "baseline",
-      "weightedScore": 341,
+      "weightedScore": 367,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 19/24 -> 23/24 (closer) while weightedScore rose 341 -> 367; see $comment"
     },
     {
       "type": "sequence",
       "slug": "momivo-11-pulo230",
       "status": "baseline",
-      "weightedScore": 339,
+      "weightedScore": 398,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/27 -> 25/27 (closer) while weightedScore rose 339 -> 398; see $comment"
     },
     {
       "type": "sequence",
@@ -5396,10 +5476,11 @@
       "type": "sequence",
       "slug": "mucoji-36-bape235",
       "status": "baseline",
-      "weightedScore": 314,
+      "weightedScore": 398,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/24 -> 25/24 (closer) while weightedScore rose 314 -> 398; see $comment"
     },
     {
       "type": "sequence",
@@ -5441,10 +5522,11 @@
       "type": "sequence",
       "slug": "mukebo-35-xoju095",
       "status": "baseline",
-      "weightedScore": 1703,
+      "weightedScore": 1736,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 100/121 -> 105/121 (closer) while weightedScore rose 1703 -> 1736; see $comment"
     },
     {
       "type": "sequence",
@@ -5513,10 +5595,11 @@
       "type": "sequence",
       "slug": "mutuve-86-sevi489",
       "status": "baseline",
-      "weightedScore": 171,
+      "weightedScore": 198,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 8/13 -> 12/13 (closer) while weightedScore rose 171 -> 198; see $comment"
     },
     {
       "type": "sequence",
@@ -5657,10 +5740,11 @@
       "type": "sequence",
       "slug": "nedaka-75-tiju705",
       "status": "baseline",
-      "weightedScore": 380,
+      "weightedScore": 521,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/31 -> 33/31 (closer) while weightedScore rose 380 -> 521; see $comment"
     },
     {
       "type": "sequence",
@@ -5702,10 +5786,11 @@
       "type": "sequence",
       "slug": "nepica-26-pali815",
       "status": "baseline",
-      "weightedScore": 120,
+      "weightedScore": 214,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 0/12 -> 13/12 (closer) while weightedScore rose 120 -> 214; see $comment"
     },
     {
       "type": "sequence",
@@ -5801,10 +5886,11 @@
       "type": "sequence",
       "slug": "nibiju-55-kavu710",
       "status": "baseline",
-      "weightedScore": 370,
+      "weightedScore": 445,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 15/31 -> 26/31 (closer) while weightedScore rose 370 -> 445; see $comment"
     },
     {
       "type": "sequence",
@@ -5927,10 +6013,11 @@
       "type": "sequence",
       "slug": "nobase-02-zuvu172",
       "status": "baseline",
-      "weightedScore": 290,
+      "weightedScore": 323,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/20 -> 21/20 (closer) while weightedScore rose 290 -> 323; see $comment"
     },
     {
       "type": "sequence",
@@ -5945,10 +6032,11 @@
       "type": "sequence",
       "slug": "nofegi-58-kilo738",
       "status": "baseline",
-      "weightedScore": 405,
+      "weightedScore": 531,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 11/39 -> 29/39 (closer) while weightedScore rose 405 -> 531; see $comment"
     },
     {
       "type": "sequence",
@@ -5963,10 +6051,11 @@
       "type": "sequence",
       "slug": "nojata-23-ropa545",
       "status": "baseline",
-      "weightedScore": 270,
+      "weightedScore": 345,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/20 -> 24/20 (closer) while weightedScore rose 270 -> 345; see $comment"
     },
     {
       "type": "sequence",
@@ -6008,10 +6097,11 @@
       "type": "sequence",
       "slug": "note-color",
       "status": "baseline",
-      "weightedScore": 316,
+      "weightedScore": 376,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 17/23 -> 25/23 (closer) while weightedScore rose 316 -> 376; see $comment"
     },
     {
       "type": "sequence",
@@ -6116,10 +6206,11 @@
       "type": "sequence",
       "slug": "nutuxo-22-fiza911",
       "status": "baseline",
-      "weightedScore": 218,
+      "weightedScore": 276,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 8/18 -> 16/18 (closer) while weightedScore rose 218 -> 276; see $comment"
     },
     {
       "type": "sequence",
@@ -6143,10 +6234,11 @@
       "type": "sequence",
       "slug": "nuxure-61-nida877",
       "status": "baseline",
-      "weightedScore": 357,
+      "weightedScore": 379,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 18/24 -> 21/24 (closer) while weightedScore rose 357 -> 379; see $comment"
     },
     {
       "type": "sequence",
@@ -6251,10 +6343,11 @@
       "type": "sequence",
       "slug": "paruvi-41-jano091",
       "status": "baseline",
-      "weightedScore": 258,
+      "weightedScore": 284,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 14/17 -> 18/17 (closer) while weightedScore rose 258 -> 284; see $comment"
     },
     {
       "type": "sequence",
@@ -6269,10 +6362,11 @@
       "type": "sequence",
       "slug": "pebezu-05-dufi104",
       "status": "baseline",
-      "weightedScore": 195,
+      "weightedScore": 221,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 10/13 -> 14/13 (closer) while weightedScore rose 195 -> 221; see $comment"
     },
     {
       "type": "sequence",
@@ -6350,10 +6444,11 @@
       "type": "sequence",
       "slug": "pigifu-13-kele137",
       "status": "baseline",
-      "weightedScore": 307,
-      "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "weightedScore": 388,
+      "diffCount": 3,
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 10/27 -> 22/27 (closer) while weightedScore rose 307 -> 388; see $comment"
     },
     {
       "type": "sequence",
@@ -6386,10 +6481,11 @@
       "type": "sequence",
       "slug": "pixima-27-nita000",
       "status": "baseline",
-      "weightedScore": 749,
+      "weightedScore": 777,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 41/54 -> 45/54 (closer) while weightedScore rose 749 -> 777; see $comment"
     },
     {
       "type": "sequence",
@@ -6458,10 +6554,11 @@
       "type": "sequence",
       "slug": "pokici-03-lafi659",
       "status": "baseline",
-      "weightedScore": 489,
+      "weightedScore": 548,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 28/38 -> 37/38 (closer) while weightedScore rose 489 -> 548; see $comment"
     },
     {
       "type": "sequence",
@@ -6503,10 +6600,11 @@
       "type": "sequence",
       "slug": "popoda-09-xavi089",
       "status": "baseline",
-      "weightedScore": 388,
+      "weightedScore": 491,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/37 -> 27/37 (closer) while weightedScore rose 388 -> 491; see $comment"
     },
     {
       "type": "sequence",
@@ -6521,10 +6619,11 @@
       "type": "sequence",
       "slug": "porepe-36-nebi243",
       "status": "baseline",
-      "weightedScore": 313,
+      "weightedScore": 339,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 18/21 -> 22/21 (closer) while weightedScore rose 313 -> 339; see $comment"
     },
     {
       "type": "sequence",
@@ -6575,10 +6674,11 @@
       "type": "sequence",
       "slug": "pucini-86-goti091",
       "status": "baseline",
-      "weightedScore": 352,
+      "weightedScore": 439,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 18/27 -> 30/27 (closer) while weightedScore rose 352 -> 439; see $comment"
     },
     {
       "type": "sequence",
@@ -6602,10 +6702,11 @@
       "type": "sequence",
       "slug": "pugera-36-jeza279",
       "status": "baseline",
-      "weightedScore": 380,
+      "weightedScore": 406,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 23/26 -> 27/26 (closer) while weightedScore rose 380 -> 406; see $comment"
     },
     {
       "type": "sequence",
@@ -6656,19 +6757,21 @@
       "type": "sequence",
       "slug": "putici-74-zenu027",
       "status": "baseline",
-      "weightedScore": 991,
+      "weightedScore": 1043,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 64/70 -> 72/70 (closer) while weightedScore rose 991 -> 1043; see $comment"
     },
     {
       "type": "sequence",
       "slug": "putuku-29-ziga148",
       "status": "baseline",
-      "weightedScore": 546,
+      "weightedScore": 572,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 12/71 -> 16/71 (closer) while weightedScore rose 546 -> 572; see $comment"
     },
     {
       "type": "sequence",
@@ -6701,10 +6804,11 @@
       "type": "sequence",
       "slug": "rajogu-04-suru681",
       "status": "baseline",
-      "weightedScore": 363,
+      "weightedScore": 501,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 10/35 -> 30/35 (closer) while weightedScore rose 363 -> 501; see $comment"
     },
     {
       "type": "sequence",
@@ -6728,10 +6832,11 @@
       "type": "sequence",
       "slug": "ramica-82-loku620",
       "status": "baseline",
-      "weightedScore": 171,
+      "weightedScore": 198,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 8/13 -> 12/13 (closer) while weightedScore rose 171 -> 198; see $comment"
     },
     {
       "type": "sequence",
@@ -6809,10 +6914,11 @@
       "type": "sequence",
       "slug": "refiju-27-nupe082",
       "status": "baseline",
-      "weightedScore": 696,
+      "weightedScore": 724,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 40/45 -> 44/45 (closer) while weightedScore rose 696 -> 724; see $comment"
     },
     {
       "type": "sequence",
@@ -6827,10 +6933,11 @@
       "type": "sequence",
       "slug": "refoxa-14-rusi158",
       "status": "baseline",
-      "weightedScore": 413,
+      "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 24/27 -> 29/27 (closer) while weightedScore rose 413 -> 446; see $comment"
     },
     {
       "type": "sequence",
@@ -6845,10 +6952,11 @@
       "type": "sequence",
       "slug": "remoso-59-bese968",
       "status": "baseline",
-      "weightedScore": 256,
+      "weightedScore": 278,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/17 -> 16/17 (closer) while weightedScore rose 256 -> 278; see $comment"
     },
     {
       "type": "sequence",
@@ -6971,10 +7079,11 @@
       "type": "sequence",
       "slug": "rizove-01-move566",
       "status": "baseline",
-      "weightedScore": 345,
+      "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/28 -> 31/28 (closer) while weightedScore rose 345 -> 446; see $comment"
     },
     {
       "type": "sequence",
@@ -7061,10 +7170,11 @@
       "type": "sequence",
       "slug": "romane-05-nika037",
       "status": "baseline",
-      "weightedScore": 503,
+      "weightedScore": 529,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 29/32 -> 33/32 (closer) while weightedScore rose 503 -> 529; see $comment"
     },
     {
       "type": "sequence",
@@ -7097,10 +7207,11 @@
       "type": "sequence",
       "slug": "rozavo-21-cavi374",
       "status": "baseline",
-      "weightedScore": 348,
+      "weightedScore": 453,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 15/28 -> 30/28 (closer) while weightedScore rose 348 -> 453; see $comment"
     },
     {
       "type": "sequence",
@@ -7232,10 +7343,11 @@
       "type": "sequence",
       "slug": "rusada-38-sopi026",
       "status": "baseline",
-      "weightedScore": 302,
+      "weightedScore": 354,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/22 -> 24/22 (closer) while weightedScore rose 302 -> 354; see $comment"
     },
     {
       "type": "sequence",
@@ -7268,10 +7380,11 @@
       "type": "sequence",
       "slug": "ruxiga-63-nide445",
       "status": "baseline",
-      "weightedScore": 346,
+      "weightedScore": 368,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 19/24 -> 22/24 (closer) while weightedScore rose 346 -> 368; see $comment"
     },
     {
       "type": "sequence",
@@ -7295,10 +7408,11 @@
       "type": "sequence",
       "slug": "ruxuxu-75-jilu612",
       "status": "baseline",
-      "weightedScore": 1007,
+      "weightedScore": 1231,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 50/86 -> 83/86 (closer) while weightedScore rose 1007 -> 1231; see $comment"
     },
     {
       "type": "sequence",
@@ -7403,10 +7517,11 @@
       "type": "sequence",
       "slug": "sedajo-92-docu424",
       "status": "baseline",
-      "weightedScore": 379,
+      "weightedScore": 412,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/25 -> 26/25 (closer) while weightedScore rose 379 -> 412; see $comment"
     },
     {
       "type": "sequence",
@@ -7457,10 +7572,11 @@
       "type": "sequence",
       "slug": "seloli-77-rixi778",
       "status": "baseline",
-      "weightedScore": 316,
+      "weightedScore": 376,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 17/23 -> 25/23 (closer) while weightedScore rose 316 -> 376; see $comment"
     },
     {
       "type": "sequence",
@@ -7574,10 +7690,11 @@
       "type": "sequence",
       "slug": "sisege-95-labu547",
       "status": "baseline",
-      "weightedScore": 255,
+      "weightedScore": 295,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/18 -> 19/18 (closer) while weightedScore rose 255 -> 295; see $comment"
     },
     {
       "type": "sequence",
@@ -7664,10 +7781,11 @@
       "type": "sequence",
       "slug": "sofavo-23-xuxi628",
       "status": "baseline",
-      "weightedScore": 1051,
+      "weightedScore": 1153,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 59/71 -> 74/71 (closer) while weightedScore rose 1051 -> 1153; see $comment"
     },
     {
       "type": "sequence",
@@ -7682,10 +7800,11 @@
       "type": "sequence",
       "slug": "sojufi-84-bexi933",
       "status": "baseline",
-      "weightedScore": 750,
+      "weightedScore": 879,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 36/58 -> 55/58 (closer) while weightedScore rose 750 -> 879; see $comment"
     },
     {
       "type": "sequence",
@@ -7817,10 +7936,11 @@
       "type": "sequence",
       "slug": "suleta-28-lejo742",
       "status": "baseline",
-      "weightedScore": 316,
+      "weightedScore": 342,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/23 -> 20/23 (closer) while weightedScore rose 316 -> 342; see $comment"
     },
     {
       "type": "sequence",
@@ -7853,19 +7973,21 @@
       "type": "sequence",
       "slug": "suredo-76-kaxo606",
       "status": "baseline",
-      "weightedScore": 276,
+      "weightedScore": 468,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 0/33 -> 28/33 (closer) while weightedScore rose 276 -> 468; see $comment"
     },
     {
       "type": "sequence",
       "slug": "susati-64-lako047",
       "status": "baseline",
-      "weightedScore": 588,
+      "weightedScore": 614,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 33/40 -> 37/40 (closer) while weightedScore rose 588 -> 614; see $comment"
     },
     {
       "type": "sequence",
@@ -7889,10 +8011,11 @@
       "type": "sequence",
       "slug": "suvodo-70-rogi494",
       "status": "baseline",
-      "weightedScore": 303,
+      "weightedScore": 318,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/20 -> 18/20 (closer) while weightedScore rose 303 -> 318; see $comment"
     },
     {
       "type": "sequence",
@@ -7907,10 +8030,11 @@
       "type": "sequence",
       "slug": "suxelu-07-toga142",
       "status": "baseline",
-      "weightedScore": 645,
+      "weightedScore": 694,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 37/48 -> 44/48 (closer) while weightedScore rose 645 -> 694; see $comment"
     },
     {
       "type": "sequence",
@@ -7970,19 +8094,21 @@
       "type": "sequence",
       "slug": "tapije-66-runu046",
       "status": "baseline",
-      "weightedScore": 327,
+      "weightedScore": 346,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/25 -> 19/25 (closer) while weightedScore rose 327 -> 346; see $comment"
     },
     {
       "type": "sequence",
       "slug": "taraxa-93-reno112",
       "status": "baseline",
-      "weightedScore": 1292,
+      "weightedScore": 1365,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 81/97 -> 92/97 (closer) while weightedScore rose 1292 -> 1365; see $comment"
     },
     {
       "type": "sequence",
@@ -8123,10 +8249,11 @@
       "type": "sequence",
       "slug": "tetoxu-24-mupo410",
       "status": "baseline",
-      "weightedScore": 178,
+      "weightedScore": 270,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 5/18 -> 19/18 (closer) while weightedScore rose 178 -> 270; see $comment"
     },
     {
       "type": "sequence",
@@ -8150,10 +8277,11 @@
       "type": "sequence",
       "slug": "tifexe-26-caza420",
       "status": "baseline",
-      "weightedScore": 320,
+      "weightedScore": 339,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/24 -> 19/24 (closer) while weightedScore rose 320 -> 339; see $comment"
     },
     {
       "type": "sequence",
@@ -8276,10 +8404,11 @@
       "type": "sequence",
       "slug": "todetu-82-rupo943",
       "status": "baseline",
-      "weightedScore": 664,
+      "weightedScore": 800,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 34/56 -> 54/56 (closer) while weightedScore rose 664 -> 800; see $comment"
     },
     {
       "type": "sequence",
@@ -8294,10 +8423,11 @@
       "type": "sequence",
       "slug": "togopo-38-tuza899",
       "status": "baseline",
-      "weightedScore": 275,
+      "weightedScore": 308,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 10/25 -> 15/25 (closer) while weightedScore rose 275 -> 308; see $comment"
     },
     {
       "type": "sequence",
@@ -8420,10 +8550,11 @@
       "type": "sequence",
       "slug": "tumuke-16-xomo243",
       "status": "baseline",
-      "weightedScore": 518,
+      "weightedScore": 544,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 29/36 -> 33/36 (closer) while weightedScore rose 518 -> 544; see $comment"
     },
     {
       "type": "sequence",
@@ -8483,10 +8614,11 @@
       "type": "sequence",
       "slug": "tuzeli-17-cuko941",
       "status": "baseline",
-      "weightedScore": 856,
+      "weightedScore": 908,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 54/60 -> 62/60 (closer) while weightedScore rose 856 -> 908; see $comment"
     },
     {
       "type": "sequence",
@@ -8537,10 +8669,11 @@
       "type": "sequence",
       "slug": "vamuge-84-degu929",
       "status": "baseline",
-      "weightedScore": 413,
+      "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 24/27 -> 29/27 (closer) while weightedScore rose 413 -> 446; see $comment"
     },
     {
       "type": "sequence",
@@ -8717,10 +8850,11 @@
       "type": "sequence",
       "slug": "vibazo-85-safi630",
       "status": "baseline",
-      "weightedScore": 672,
+      "weightedScore": 791,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 26/53 -> 43/53 (closer) while weightedScore rose 672 -> 791; see $comment"
     },
     {
       "type": "sequence",
@@ -8960,10 +9094,11 @@
       "type": "sequence",
       "slug": "vubibu-30-rufa077",
       "status": "baseline",
-      "weightedScore": 499,
+      "weightedScore": 541,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 26/35 -> 32/35 (closer) while weightedScore rose 499 -> 541; see $comment"
     },
     {
       "type": "sequence",
@@ -9041,10 +9176,11 @@
       "type": "sequence",
       "slug": "vuvage-72-meru492",
       "status": "baseline",
-      "weightedScore": 413,
+      "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 24/27 -> 29/27 (closer) while weightedScore rose 413 -> 446; see $comment"
     },
     {
       "type": "sequence",
@@ -9095,10 +9231,11 @@
       "type": "sequence",
       "slug": "xaduru-73-jani181",
       "status": "baseline",
-      "weightedScore": 413,
+      "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 24/27 -> 29/27 (closer) while weightedScore rose 413 -> 446; see $comment"
     },
     {
       "type": "sequence",
@@ -9185,10 +9322,11 @@
       "type": "sequence",
       "slug": "xebixi-82-duji787",
       "status": "baseline",
-      "weightedScore": 315,
+      "weightedScore": 399,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 11/27 -> 23/27 (closer) while weightedScore rose 315 -> 399; see $comment"
     },
     {
       "type": "sequence",
@@ -9275,10 +9413,11 @@
       "type": "sequence",
       "slug": "xeneru-44-kuma826",
       "status": "baseline",
-      "weightedScore": 405,
+      "weightedScore": 531,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 11/39 -> 29/39 (closer) while weightedScore rose 405 -> 531; see $comment"
     },
     {
       "type": "sequence",
@@ -9428,10 +9567,11 @@
       "type": "sequence",
       "slug": "xivoxi-68-meva932",
       "status": "baseline",
-      "weightedScore": 408,
+      "weightedScore": 524,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/35 -> 29/35 (closer) while weightedScore rose 408 -> 524; see $comment"
     },
     {
       "type": "sequence",
@@ -9446,10 +9586,11 @@
       "type": "sequence",
       "slug": "xizeto-03-nuke395",
       "status": "baseline",
-      "weightedScore": 459,
+      "weightedScore": 517,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/35 -> 21/35 (closer) while weightedScore rose 459 -> 517; see $comment"
     },
     {
       "type": "sequence",
@@ -9482,28 +9623,31 @@
       "type": "sequence",
       "slug": "xokike-22-sige844",
       "status": "baseline",
-      "weightedScore": 631,
+      "weightedScore": 811,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 31/48 -> 57/48 (closer) while weightedScore rose 631 -> 811; see $comment"
     },
     {
       "type": "sequence",
       "slug": "xolebu-95-cage107",
       "status": "baseline",
-      "weightedScore": 1129,
+      "weightedScore": 1178,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 62/85 -> 69/85 (closer) while weightedScore rose 1129 -> 1178; see $comment"
     },
     {
       "type": "sequence",
       "slug": "xonedu-05-mubu593",
       "status": "baseline",
-      "weightedScore": 335,
+      "weightedScore": 361,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 15/23 -> 19/23 (closer) while weightedScore rose 335 -> 361; see $comment"
     },
     {
       "type": "sequence",
@@ -9536,10 +9680,11 @@
       "type": "sequence",
       "slug": "xorixe-91-vaci569",
       "status": "baseline",
-      "weightedScore": 372,
+      "weightedScore": 398,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/24 -> 25/24 (closer) while weightedScore rose 372 -> 398; see $comment"
     },
     {
       "type": "sequence",
@@ -9563,10 +9708,11 @@
       "type": "sequence",
       "slug": "xujavu-00-xodi798",
       "status": "baseline",
-      "weightedScore": 1368,
+      "weightedScore": 1389,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/194 -> 24/194 (closer) while weightedScore rose 1368 -> 1389; see $comment"
     },
     {
       "type": "sequence",
@@ -9590,10 +9736,11 @@
       "type": "sequence",
       "slug": "xunoci-60-dezu033",
       "status": "baseline",
-      "weightedScore": 91,
+      "weightedScore": 153,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 0/10 -> 9/10 (closer) while weightedScore rose 91 -> 153; see $comment"
     },
     {
       "type": "sequence",
@@ -9680,19 +9827,21 @@
       "type": "sequence",
       "slug": "xuzedu-97-femo595",
       "status": "baseline",
-      "weightedScore": 378,
+      "weightedScore": 504,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 11/36 -> 29/36 (closer) while weightedScore rose 378 -> 504; see $comment"
     },
     {
       "type": "sequence",
       "slug": "xuzoxu-26-kafe830",
       "status": "baseline",
-      "weightedScore": 296,
+      "weightedScore": 322,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 17/20 -> 21/20 (closer) while weightedScore rose 296 -> 322; see $comment"
     },
     {
       "type": "sequence",
@@ -9725,10 +9874,11 @@
       "type": "sequence",
       "slug": "zajova-30-sagu653",
       "status": "baseline",
-      "weightedScore": 809,
+      "weightedScore": 891,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 32/77 -> 43/77 (closer) while weightedScore rose 809 -> 891; see $comment"
     },
     {
       "type": "sequence",
@@ -9752,10 +9902,11 @@
       "type": "sequence",
       "slug": "zalegi-22-nepi686",
       "status": "baseline",
-      "weightedScore": 594,
+      "weightedScore": 622,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 33/41 -> 37/41 (closer) while weightedScore rose 594 -> 622; see $comment"
     },
     {
       "type": "sequence",
@@ -9770,19 +9921,21 @@
       "type": "sequence",
       "slug": "zaretu-49-jomo630",
       "status": "baseline",
-      "weightedScore": 296,
+      "weightedScore": 322,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 17/20 -> 21/20 (closer) while weightedScore rose 296 -> 322; see $comment"
     },
     {
       "type": "sequence",
       "slug": "zarexe-65-xoki430",
       "status": "baseline",
-      "weightedScore": 584,
+      "weightedScore": 705,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 26/49 -> 43/49 (closer) while weightedScore rose 584 -> 705; see $comment"
     },
     {
       "type": "sequence",
@@ -9824,10 +9977,11 @@
       "type": "sequence",
       "slug": "zazaje-27-roga410",
       "status": "baseline",
-      "weightedScore": 413,
+      "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 24/27 -> 29/27 (closer) while weightedScore rose 413 -> 446; see $comment"
     },
     {
       "type": "sequence",
@@ -9923,10 +10077,11 @@
       "type": "sequence",
       "slug": "zetenu-41-rece091",
       "status": "baseline",
-      "weightedScore": 481,
+      "weightedScore": 533,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 30/36 -> 38/36 (closer) while weightedScore rose 481 -> 533; see $comment"
     },
     {
       "type": "sequence",
@@ -9941,10 +10096,11 @@
       "type": "sequence",
       "slug": "zexili-92-fifa666",
       "status": "baseline",
-      "weightedScore": 667,
+      "weightedScore": 695,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 39/49 -> 43/49 (closer) while weightedScore rose 667 -> 695; see $comment"
     },
     {
       "type": "sequence",
@@ -9959,19 +10115,21 @@
       "type": "sequence",
       "slug": "zicadi-21-koje636",
       "status": "baseline",
-      "weightedScore": 981,
+      "weightedScore": 1079,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 0/154 -> 14/154 (closer) while weightedScore rose 981 -> 1079; see $comment"
     },
     {
       "type": "sequence",
       "slug": "zidova-39-bapi223",
       "status": "baseline",
-      "weightedScore": 328,
+      "weightedScore": 370,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 16/25 -> 22/25 (closer) while weightedScore rose 328 -> 370; see $comment"
     },
     {
       "type": "sequence",
@@ -10049,10 +10207,11 @@
       "type": "sequence",
       "slug": "zofini-90-tuta329",
       "status": "baseline",
-      "weightedScore": 255,
+      "weightedScore": 295,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 13/18 -> 19/18 (closer) while weightedScore rose 255 -> 295; see $comment"
     },
     {
       "type": "sequence",
@@ -10121,19 +10280,21 @@
       "type": "sequence",
       "slug": "zovido-40-xeju664",
       "status": "baseline",
-      "weightedScore": 639,
+      "weightedScore": 819,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 31/49 -> 57/49 (closer) while weightedScore rose 639 -> 819; see $comment"
     },
     {
       "type": "sequence",
       "slug": "zuboto-07-gimo515",
       "status": "baseline",
-      "weightedScore": 372,
+      "weightedScore": 398,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 21/24 -> 25/24 (closer) while weightedScore rose 372 -> 398; see $comment"
     },
     {
       "type": "sequence",
@@ -10148,10 +10309,11 @@
       "type": "sequence",
       "slug": "zudize-61-vomi445",
       "status": "baseline",
-      "weightedScore": 565254,
+      "weightedScore": 799486,
       "diffCount": 5,
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "measuredAt": "2026-08-25",
+      "measuredAgainstCommit": "9176f739",
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 3670/70093 -> 36882/70093 (closer) while weightedScore rose 565254 -> 799486; see $comment"
     },
     {
       "type": "sequence",
