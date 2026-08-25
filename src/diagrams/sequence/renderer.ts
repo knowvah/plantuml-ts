@@ -289,7 +289,9 @@ function renderFrameTab(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): 
     fontSize: tab.labelFontSize,
     fill: theme.colors.background,
   });
-  const condition = frame.label.trim();
+  // A `ref` frame's label is BODY CONTENT, not a condition -- it is drawn
+  // inside the box by `renderRefBody`, so no bracketed run belongs here.
+  const condition = frame.frameType === 'ref' ? '' : frame.label.trim();
   const conditionEl =
     condition === ''
       ? ''
@@ -301,6 +303,48 @@ function renderFrameTab(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): 
   return rectEl + typeEl + conditionEl;
 }
 
+/**
+ * A `ref over` frame's body: its source lines, ONE `<text>` each, centred in
+ * the box below the header tab.
+ *
+ * `ComponentRoseReference#drawInternalU` draws the header at `(15, 2)` and
+ * then the body as its own text block at `(textPos, oldPaddingY +
+ * textHeaderHeight)` (`:125-136`) -- below the header, and horizontally per
+ * the component's alignment. The jar's own output for a two-line ref centres
+ * them: box x=70.3 w=76.775, lines at x=74.3 and x=76.962, i.e. each centred
+ * on 108.7.
+ *
+ * This used to emit the whole body as ONE `<text>` containing a literal
+ * newline, bracketed like an `alt` condition -- `[This can be on\nseveral
+ * lines]`. SVG collapses that newline, so it drew as a single run of text
+ * beside the tab, and it cost one child where the jar spends one per line.
+ *
+ * The `y` here is upstream's `getOldPaddingY() + textHeaderHeight` with two
+ * deliberate substitutions: `+ theme.fontSize` because an SVG `<text>` y is a
+ * BASELINE where upstream's translate is the block's top-left, and
+ * `tab.tabHeight` in place of the measured `textHeaderHeight` because that is
+ * the band this port actually draws -- one shared `20 * k` across every frame
+ * type, not `ComponentRoseReference`'s own header. Keying the body to the
+ * drawn tab is what keeps the two from colliding; the `x` needs no such
+ * substitution, so it comes straight from layout.
+ *
+ * @see ~/git/plantuml/.../skin/rose/ComponentRoseReference.java#drawInternalU
+ */
+function renderRefBody(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): string {
+  const k = theme.scaleK;
+  const lineHeight = theme.fontSize + 2 * k;
+  const top = frame.y + tab.tabHeight + theme.fontSize;
+  return frame.refBody
+    .map((line, i) =>
+      text(line.x, top + i * lineHeight, line.text, {
+        fontFamily: theme.fontFamily,
+        fontSize: theme.fontSize,
+        fill: theme.colors.text,
+      }),
+    )
+    .join('');
+}
+
 function renderFrame(frame: FrameGeo, theme: ScaledTheme): string {
   const border = rect(frame.x, frame.y, frame.width, frame.height, {
     fill: 'none',
@@ -308,7 +352,12 @@ function renderFrame(frame: FrameGeo, theme: ScaledTheme): string {
     strokeDasharray: scaledDashPattern(theme.scaleK),
   });
   const tab = computeFrameTabGeo(frame, theme);
-  return border + renderFrameTab(frame, tab, theme) + renderBranchSeparators(frame, tab, theme);
+  return (
+    border +
+    renderFrameTab(frame, tab, theme) +
+    renderRefBody(frame, tab, theme) +
+    renderBranchSeparators(frame, tab, theme)
+  );
 }
 
 /** The dashed rule + bracketed condition each `else` branch opens with. */

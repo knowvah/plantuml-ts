@@ -1234,11 +1234,11 @@
       "type": "sequence",
       "slug": "cusiro-03-mebe823",
       "status": "baseline",
-      "weightedScore": 850,
+      "weightedScore": 862,
       "diffCount": 5,
       "measuredAt": "2026-08-25",
       "measuredAgainstCommit": "9176f739",
-      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 39/55 -> 51/55 (closer) while weightedScore rose 769 -> 850; see $comment"
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 39/55 -> 51/55 (closer) while weightedScore rose 769 -> 850; see $comment; then the ref-body port (one <text> per body line, at the jar's own computed x) moved it 51/55 -> 53/55 while the score rose 850 -> 862 -- same artefact, every element type still at or under the golden"
     },
     {
       "type": "sequence",
@@ -7809,11 +7809,11 @@
       "type": "sequence",
       "slug": "sojufi-84-bexi933",
       "status": "baseline",
-      "weightedScore": 879,
+      "weightedScore": 885,
       "diffCount": 5,
       "measuredAt": "2026-08-25",
       "measuredAgainstCommit": "9176f739",
-      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 36/58 -> 55/58 (closer) while weightedScore rose 750 -> 879; see $comment"
+      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 36/58 -> 55/58 (closer) while weightedScore rose 750 -> 879; see $comment; then the ref-body port (one <text> per body line, at the jar's own computed x) moved it 55/58 -> 56/58 while the score rose 879 -> 885 -- same artefact, every element type still at or under the golden"
     },
     {
       "type": "sequence",

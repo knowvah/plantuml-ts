@@ -283,6 +283,16 @@ export interface FrameGeo {
    *  bracketed condition drawn beside it. Empty for single-branch frames
    *  (`loop`, `opt`, `group`, …). */
   branchSeparators: { y: number; label: string }[];
+  /**
+   * A `ref over` frame's body, one entry per source line, each with its own
+   * pre-centred `x`. Positioned HERE rather than with `text-anchor="middle"`
+   * at render time because that is what the jar emits: its body lines carry a
+   * computed `x` and no anchor (`x="74.3"` / `x="76.962"` for a box centred on
+   * 108.7), and the anchor attribute would be one more attribute per line than
+   * upstream has. Centring needs the measurer, which layout has and the
+   * renderer does not. Empty for every other frame type.
+   */
+  refBody: { text: string; x: number }[];
 }
 
 export interface DividerGeo {

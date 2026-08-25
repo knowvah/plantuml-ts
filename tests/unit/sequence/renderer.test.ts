@@ -473,6 +473,7 @@ describe('renderSequence — frames', () => {
       width: 300,
       height: 100,
       branchSeparators: [],
+      refBody: [],
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -490,6 +491,7 @@ describe('renderSequence — frames', () => {
       width: 300,
       height: 100,
       branchSeparators: [],
+      refBody: [],
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -506,6 +508,7 @@ describe('renderSequence — frames', () => {
       width: 300,
       height: 100,
       branchSeparators: [],
+      refBody: [],
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));

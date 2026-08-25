@@ -123,6 +123,7 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     width: f.width * k,
     height: f.height * k,
     branchSeparators: f.branchSeparators.map((s) => ({ ...s, y: s.y * k })),
+    refBody: f.refBody.map((b) => ({ ...b, x: b.x * k })),
   };
 }
 
