@@ -231,6 +231,9 @@ export interface ParticipantGeo {
   centerX: number;
 }
 
+import type { TextRun } from './text-block-geo.js';
+export type { TextRun };
+
 export interface MessageGeo {
   kind: 'message';
   fromX: number;
@@ -244,6 +247,20 @@ export interface MessageGeo {
    *  start or a quoted `FORMAT`; the renderer prefers this over the bare
    *  `sequenceNumber` when present. */
   sequenceLabel?: string;
+  /**
+   * The label as PLACED text: one entry per source line, each with its own
+   * `x`/`y`. Positioned in layout rather than at render time for the same
+   * reason `FrameGeo.refBody` is -- the jar emits a computed `x` and no
+   * `text-anchor`, and computing one needs the measurer. Empty when the
+   * message has no label: `AbstractTextualComponent` maps an empty display to
+   * a `TextBlockEmpty`, which draws nothing
+   * (`AbstractTextualComponent.java:84-85`).
+   */
+  labelLines: readonly TextRun[];
+  /** The autonumber, when present -- its OWN `<text>` beside the label lines,
+   *  vertically centred against them, with no `": "` joining the two
+   *  (`Display.java:703-712`). */
+  labelNumber?: TextRun;
   arrowDirection: 'right' | 'left' | 'self';
   headCircle?: boolean;
   tailCircle?: boolean;

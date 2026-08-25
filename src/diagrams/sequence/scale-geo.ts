@@ -77,6 +77,7 @@ import type {
   FrameGeo,
   DividerGeo,
   SpaceGeo,
+  TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type {
@@ -103,8 +104,17 @@ function scaleBox(b: BoxGeo, k: number): BoxGeo {
   return { ...b, x: b.x * k, y: b.y * k, width: b.width * k, height: b.height * k };
 }
 
+const scaleRun = (r: TextRun, k: number): TextRun => ({ ...r, x: r.x * k, y: r.y * k });
+
 function scaleMessage(m: MessageGeo, k: number): MessageGeo {
-  return { ...m, fromX: m.fromX * k, toX: m.toX * k, y: m.y * k };
+  return {
+    ...m,
+    fromX: m.fromX * k,
+    toX: m.toX * k,
+    y: m.y * k,
+    labelLines: m.labelLines.map((r) => scaleRun(r, k)),
+    ...(m.labelNumber !== undefined ? { labelNumber: scaleRun(m.labelNumber, k) } : {}),
+  };
 }
 
 function scaleNote(n: NoteGeo, k: number): NoteGeo {

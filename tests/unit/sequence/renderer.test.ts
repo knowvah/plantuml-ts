@@ -18,6 +18,7 @@ import { FormulaMeasurer, FixedMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { parseAst } from '../../helpers/parse-ast.js';
+import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -41,15 +42,27 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
 }
 
 function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
-  return {
-    kind: 'message',
+  const base = {
+    kind: 'message' as const,
     fromX: 80,
     toX: 220,
     y: 80,
     label: 'hello',
-    style: 'sync',
-    arrowDirection: 'right',
+    style: 'sync' as const,
+    arrowDirection: 'right' as const,
     ...overrides,
+  };
+  // Place the label the same way layout does, so these tests exercise the
+  // real run placement rather than a hand-written stub that renders nothing.
+  const number = base.sequenceLabel ?? (base.sequenceNumber === undefined ? undefined : String(base.sequenceNumber));
+  const block = messageLabelBlock(
+    base.label, number, (base.fromX + base.toX) / 2, base.y - 5,
+    defaultTheme, new FormulaMeasurer(),
+  );
+  return {
+    ...base,
+    labelLines: block.lines,
+    ...(block.number !== undefined ? { labelNumber: block.number } : {}),
   };
 }
 
@@ -119,12 +132,58 @@ describe('renderSequence — messages', () => {
     expect(svg).toContain('<path');
   });
 
-  it('prepends sequence number when set', () => {
+  // `getLabelNumbered` prepends the number as a `MessageNumber`
+  // (`AbstractMessage.java:200-206`) and `Display#createMessageNumber` merges
+  // it left-to-right with the label as its OWN text block
+  // (`Display.java:703-712`) -- so it is a SEPARATE `<text>`, and there is no
+  // `": "` joining the two. This used to assert the joined form.
+  it('emits the sequence number as its own text, not joined to the label', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ label: 'greet', sequenceNumber: 3 })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('3: greet');
+    expect(svg).not.toContain('3: greet');
+    expect(svg).toContain('>3</text>');
+    expect(svg).toContain('>greet</text>');
+  });
+
+  it('separates the number from the label by upstreams 4px margin', () => {
+    const geo = makeGeo({
+      events: [makeSyncMessage({ label: 'greet', sequenceNumber: 3 })],
+    });
+    const msg = geo.events[0] as MessageGeo;
+    const numberRun = msg.labelNumber;
+    expect(numberRun).toBeDefined();
+    const numberWidth = new FormulaMeasurer().measure('3', {
+      family: defaultTheme.fontFamily,
+      size: defaultTheme.fontSize,
+    }).width;
+    // `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` -- `Display.java:706`.
+    expect(msg.labelLines[0]?.x).toBeCloseTo((numberRun?.x ?? 0) + numberWidth + 4, 6);
+    // `VerticalAlignment.CENTER` against a one-line label puts both on one row.
+    expect(numberRun?.y).toBe(msg.labelLines[0]?.y);
+  });
+
+  it('emits no label text for a message with neither label nor number', () => {
+    const geo = makeGeo({ events: [makeSyncMessage({ label: '' })] });
+    const msg = geo.events[0] as MessageGeo;
+    expect(msg.labelLines).toEqual([]);
+    expect(msg.labelNumber).toBeUndefined();
+    // `AbstractTextualComponent` maps an empty display to a `TextBlockEmpty`,
+    // which draws nothing (`AbstractTextualComponent.java:84-85`).
+    expect(assembleSvg(renderSequence(geo, defaultTheme))).not.toContain('></text>');
+  });
+
+  it('emits one text per line of a multi-line label, sharing one x', () => {
+    const geo = makeGeo({ events: [makeSyncMessage({ label: 'one\ntwo\nthree' })] });
+    const msg = geo.events[0] as MessageGeo;
+    expect(msg.labelLines.map((l) => l.text)).toEqual(['one', 'two', 'three']);
+    // Lines are left-aligned WITHIN the block, exactly as upstream draws them.
+    expect(new Set(msg.labelLines.map((l) => l.x)).size).toBe(1);
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).toContain('>one</text>');
+    expect(svg).toContain('>three</text>');
+    expect(svg).not.toContain('one\ntwo');
   });
 
   it('lost message draws an inline head, never a marker reference', () => {

@@ -28,6 +28,13 @@ import type {
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
+import {
+  refBodyLines,
+  refBodyHeight,
+  refBodyWidth,
+  messageLabelBlock,
+  messageLabelRows,
+} from './text-block-geo.js';
 
 /** Pending activation-bar start record, keyed by participant id. */
 type ActivationRecord = { y: number; color?: string };
@@ -95,15 +102,29 @@ function handleMessageEvent(
   if (fromGeo === undefined || toGeo === undefined) return;
 
   const endpoints = resolveMessageEndpoints(event, fromGeo, toGeo, ctx);
-  const messageGeo = buildMessageGeo(event, endpoints, cursor.y);
+  const lineHeight = ctx.measurer.measure('M', fontSpecOf(ctx.theme)).height;
+  // A multi-line label grows UPWARD from its arrow (`text-block-geo.ts`), so
+  // the extra rows are reserved BEFORE the arrow is placed, not after.
+  const rows = messageLabelRows(event.label, numberTextOf(event));
+  cursor.y += Math.max(0, rows - 1) * lineHeight;
+
+  const messageGeo = buildMessageGeo(event, endpoints, cursor.y, ctx);
   ctx.eventGeos.push(messageGeo);
   cursor.lastMessageY = messageGeo.y;
 
-  const lineHeight = ctx.measurer.measure('M', fontSpecOf(ctx.theme)).height;
   cursor.y += ctx.theme.sequence.messageSpacing + lineHeight;
 
   // Handle auto-activate/deactivate via ++ / -- shorthand on message
   applyMessageActivation(event, messageGeo, cursor, ctx);
+}
+
+/** The autonumber run's text, when the message carries one.
+ *  `getLabelNumbered` prepends it as a `MessageNumber`
+ *  (`AbstractMessage.java:200-206`); the formatted `sequenceLabel` wins over
+ *  the bare `sequenceNumber` when both are present. */
+function numberTextOf(event: MessageEvent): string | undefined {
+  if (event.sequenceLabel !== undefined) return event.sequenceLabel;
+  return event.sequenceNumber === undefined ? undefined : String(event.sequenceNumber);
 }
 
 /** Build the MessageGeo for a resolved set of endpoints at the given y. */
@@ -111,8 +132,17 @@ function buildMessageGeo(
   event: MessageEvent,
   endpoints: MessageEndpoints,
   y: number,
+  ctx: EventProcessingContext,
 ): MessageGeo {
+  const centerX = endpoints.arrowDirection === 'self'
+    ? endpoints.fromX + 20
+    : (endpoints.fromX + endpoints.toX) / 2;
+  const block = messageLabelBlock(
+    event.label, numberTextOf(event), centerX, y - 5, ctx.theme, ctx.measurer,
+  );
   return {
+    labelLines: block.lines,
+    ...(block.number !== undefined ? { labelNumber: block.number } : {}),
     kind: 'message',
     fromX: endpoints.fromX,
     toX: endpoints.toX,
@@ -273,9 +303,9 @@ function handleFrameEvent(
   const frameEndY = cursor.y;
   const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
 
-  const body = refBodyLines(event);
+  const body = refBodyLines(event.frameType, event.label);
   const x = minCx - 20;
-  const width = Math.max(maxCx - minCx + 40, refBodyWidth(body, ctx));
+  const width = Math.max(maxCx - minCx + 40, refBodyWidth(body, ctx.theme, ctx.measurer));
   const frameGeo: FrameGeo = {
     kind: 'frame',
     frameType: event.frameType,
@@ -283,7 +313,7 @@ function handleFrameEvent(
     x,
     y: frameStartY,
     width,
-    height: Math.max(frameEndY - frameStartY, refBodyHeight(body, ctx)),
+    height: Math.max(frameEndY - frameStartY, refBodyHeight(body, ctx.theme, ctx.measurer)),
     branchSeparators,
     refBody: body.map((line) => ({
       text: line,
@@ -292,78 +322,6 @@ function handleFrameEvent(
   };
   ctx.eventGeos.push(frameGeo);
   cursor.y = frameEndY + ctx.theme.sequence.messageSpacing;
-}
-
-/**
- * A `ref over` frame's BODY, one entry per source line.
- *
- * `ref` is the one frame type whose label is content rather than a condition:
- * `CommandReferenceMultilinesOverSeveral` accumulates the block's plain-text
- * lines, and `ComponentRoseReference#drawInternalU` draws them as their own
- * text block INSIDE the box (`:126-136`), below the header — where every other
- * frame type draws a bracketed `[condition]` beside the tab. Empty for any
- * other frame type, which is what keeps this a `ref`-only path.
- * @see ~/git/plantuml/.../skin/rose/ComponentRoseReference.java#drawInternalU
- */
-function refBodyLines(event: FrameEvent): readonly string[] {
-  if (event.frameType !== 'ref') return [];
-  const label = event.label.trim();
-  return label === '' ? [] : label.split('\n').map((l) => l.trim());
-}
-
-/** The body padding `ComponentRoseReference` hands to `super` --
- *  `topRightBottomLeft(4, 4, 4, 4)`, so the same value on all four sides
- *  (`ComponentRoseReference.java:69-70`). */
-const REF_PADDING = 4;
-/** `heightFooter` -- the band below the body block
- *  (`ComponentRoseReference.java:61`). */
-const REF_HEIGHT_FOOTER = 5;
-/** `xMargin` -- the inset between the component's box and its bounds
- *  (`ComponentRoseReference.java:62`). */
-const REF_X_MARGIN = 2;
-/** `getHeaderWidth` adds a flat `30 + 15` to the header text's own width
- *  (`ComponentRoseReference.java:145-148`). */
-const REF_HEADER_EXTRA_WIDTH = 45;
-/** The header text itself: `stringsToDisplay.subList(0, 1)`, the frame's
- *  keyword (`ComponentRoseReference.java:78`). */
-const REF_HEADER_TEXT = 'ref';
-
-/** `getHeaderHeight` -- the header text's height plus `2 * 1`
- *  (`ComponentRoseReference.java:140-143`). */
-function refHeaderHeight(ctx: EventProcessingContext): number {
-  return ctx.measurer.measure(REF_HEADER_TEXT, fontSpecOf(ctx.theme)).height + 2;
-}
-
-/**
- * `getPreferredHeight` = text height + header height + footer
- * (`ComponentRoseReference.java:150-153`), where `getTextHeight` is the text
- * block's own height plus the top and bottom padding
- * (`AbstractTextualComponent.java:110-114`).
- */
-function refBodyHeight(body: readonly string[], ctx: EventProcessingContext): number {
-  if (body.length === 0) return 0;
-  const textHeight = body.length * refLineHeight(ctx) + 2 * REF_PADDING;
-  return textHeight + refHeaderHeight(ctx) + REF_HEIGHT_FOOTER;
-}
-
-/**
- * `getPreferredWidth` = max(text width, header width) + 2 * xMargin
- * (`ComponentRoseReference.java:155-159`), where `getTextWidth` is the widest
- * line plus the left and right padding
- * (`AbstractTextualComponent.java:106-108`). The shadow delta that term also
- * carries is 0 here: this port draws no shadow.
- */
-function refBodyWidth(body: readonly string[], ctx: EventProcessingContext): number {
-  if (body.length === 0) return 0;
-  const spec = fontSpecOf(ctx.theme);
-  const widest = Math.max(...body.map((l) => ctx.measurer.measure(l, spec).width));
-  const headerWidth =
-    ctx.measurer.measure(REF_HEADER_TEXT, spec).width + REF_HEADER_EXTRA_WIDTH;
-  return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN;
-}
-
-function refLineHeight(ctx: EventProcessingContext): number {
-  return ctx.measurer.measure('M', fontSpecOf(ctx.theme)).height;
 }
 
 function handleDividerEvent(

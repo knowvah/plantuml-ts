@@ -344,10 +344,17 @@ describe('fixture files', () => {
     expect(svg).toContainText('Carol');
   });
 
-  it('autonumber.puml — contains numbered labels', () => {
+  it('autonumber.puml — numbers each message in its own text run', () => {
     const svg = renderFile(join(FIXTURES_DIR, 'autonumber.puml'));
-    // autonumber prepends "1: " to messages
-    expect(svg).toContainText('1:');
+    // `getLabelNumbered` prepends the number as a `MessageNumber`
+    // (`AbstractMessage.java:200-206`), which `Display#createMessageNumber`
+    // draws as its OWN text block merged beside the label
+    // (`Display.java:703-712`) -- so there is no `"1: "` run. The jar's own
+    // output for an autonumbered diagram carries `>1</text>` and
+    // `>Message 0</text>` as separate elements; this used to assert the
+    // joined form.
+    expect(svg).toContain('>1</text>');
+    expect(svg).not.toContainText('1:');
   });
 
   it('dividers.puml — contains section label text', () => {

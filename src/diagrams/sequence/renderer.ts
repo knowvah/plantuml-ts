@@ -175,21 +175,16 @@ function renderSelfMessage(
 /** The message's label. Upstream draws it last, after the arrow
  *  (`ComponentRoseArrow.java:175`, `ComponentRoseSelfArrow.java:88`). */
 function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
-  const label =
-    msg.sequenceLabel !== undefined
-      ? `${msg.sequenceLabel}: ${msg.label}`
-      : msg.sequenceNumber !== undefined
-        ? `${msg.sequenceNumber}: ${msg.label}`
-        : msg.label;
-  const midX = msg.arrowDirection === 'self'
-    ? msg.fromX + 20 * theme.scaleK
-    : (msg.fromX + msg.toX) / 2;
-  return text(midX, msg.y - 5 * theme.scaleK, label, {
-    fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
-    fill: theme.colors.text,
-    textAnchor: 'middle',
-  });
+  const runs = msg.labelNumber === undefined ? msg.labelLines : [msg.labelNumber, ...msg.labelLines];
+  return runs
+    .map((run) =>
+      text(run.x, run.y, run.text, {
+        fontFamily: theme.fontFamily,
+        fontSize: theme.fontSize,
+        fill: theme.colors.text,
+      }),
+    )
+    .join('');
 }
 
 /**
