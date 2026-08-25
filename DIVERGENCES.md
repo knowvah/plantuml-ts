@@ -1069,3 +1069,36 @@ clip itself) and was out of SI32 T2's scope.
 **Affects:** state diagrams whose clipped-anchor composite has a direct
 border-point child (`<<exitpoint>>`/`<<entrypoint>>`-style member).
 
+
+---
+
+## Refusal error page: shape and attributed engine
+
+**Status:** accepted, deliberate.
+**Since:** 2026-08-25 (`dispatch-by-parse-attempt`).
+
+Parse-attempt dispatch gave every engine the ability to REFUSE a source it
+cannot fully parse, mirroring `PSystemCommandFactory#executeFewLines`
+(`:169-175`). When every candidate refuses, this port renders an error page
+the way the jar does — and two things about that page diverge.
+
+**1. The attributed diagram type can differ.** The page prints
+`(Assumed diagram type: X)`, and `X` comes from the MERGED refusal, which
+[D2](plans/dispatch-by-parse-attempt/decisions.md) resolves by keeping the
+highest-SCORING refusal (`PSystemError#score`: `trace.size() * 10 +
+singleError.score()`, first-wins on a tie). That is upstream's own arithmetic,
+but the scores are only equal to the jar's where the command tables are, so a
+source both ports refuse can be attributed to different engines. Measured on
+17 sequence-corpus fixtures whose refusal this port attributes to `state`
+while every one of them is a SEQUENCE command gap — the attribution is
+correct arithmetic over an incomplete table, not a routing decision.
+
+Consequence for readers of the two conformance baselines: filter a coverage
+bucket by the refusing LINE, never by the `engine` field.
+
+**2. The page's geometry is not oracle-compared.** Where the jar renders a
+diagram and this port refuses, the golden is a diagram and ours is an error
+page; the pair is not a fidelity measurement and is not pinned as one. Those
+fixtures are recorded in `refusal-baseline.json` as `known-gap`, each naming
+the unported upstream mechanism with its `File.java:line`, and in
+`routing-baseline.json` as `known-misroute` with the same citation.

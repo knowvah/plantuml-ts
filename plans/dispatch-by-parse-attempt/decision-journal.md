@@ -40,3 +40,45 @@ reasonable developer might have chosen differently, it belongs here.
 | 2026-08-24 | T13 | **`scale` is rendered as a transform group; upstream bakes it into the coordinates** — a real defect, 10-11 fixtures | `renderer.ts:476-487` wraps children in `<g transform="scale(N)">` over unscaled coordinates. The jar emits no transform group: `gebeki-18-muci858`'s golden (source `scale 2`) carries pre-multiplied coordinates (`M66.938,102`) and dimensions 454x364, where ours emits `x1="70"` inside a wrapper with dimensions 606x502. Two defects — the extra `<g>` level collapses the top-level child count to 1, maximising the short-circuit charge, and the dimensions are independently wrong | 10 of the 35 genuine regressions collapse to exactly one top-level child; 11 of the 35 use `scale`. This is the only concentrated mechanism among the real regressions; the other ~24 are over-emission (we now emit a few MORE children than the golden) with no shared cause yet |
 | 2026-08-25 | T13 | **`scale` fixed: the factor is baked into the geometry and theme, not wrapped in a transform** | Jar-measured with `scripts/oracle-render.sh`: `scale 2` doubles dimensions AND font sizes (13,14 -> 26,28) and emits **zero** transforms; `scale 3` triples them. Upstream's one multiply point is `SvgGraphics#format`; its only `transform="scale(...)"` is `manageScale` (`SvgGraphics.java:1035-1051`), for embedded sprites, never the document. Fixed the way this repo already fixed it for json — scale the INPUTS at the layout→render boundary (`json/scale-geo.ts` carries the reasoning: `format(x·k)` either way, since every derived value is linear in its inputs) | Risers 242 → 217, genuinely-less-aligned **35 → 25**, fallers 36 → 46, ratchet failures 421 → 396, zero fixtures rose. All ten single-child collapses recovered; `caxuke-64-femu351` now matches the golden's child count exactly. Flagged not fixed: the jar draws message labels at font-size 13 where participant labels use 14, and this port uses `theme.fontSize` for both — a pre-existing font-size-selection gap |
 | 2026-08-25 | T13 | **162 baselines re-pinned UPWARD**, each carrying its own evidence; 55 risers deliberately left failing | An upward re-pin is the one movement this ratchet forbids, so it is justified per entry and in the manifest `$comment` rather than asserted. The 162 are the metric artefact diagnosed above: every one has a top-level child count CLOSER to the golden than before, so the rise measures our document growing, not our fidelity falling. The 25 that moved FURTHER, the 18 with an unchanged gap and the 12 with no such short-circuit are NOT re-pinned — they were invisible underneath the 162 and are the real remaining work | Fresh whole-corpus measurement at `9176f739`. Ratchet failures **396 → 234**, exactly 162 fewer, confirming the re-pin hit the intended set and nothing else; the residual is 179 render errors + 55 risers. Checked before writing: no re-pinned entry has `diffCount: 0` (the "already promoted" assertion still holds) and sequence's `ratchet.json` is empty, so stop condition 2 cannot be tripped — no promoted zero-diff fixture was de-promoted |
+
+---
+
+## T22 close-out — 2026-08-25
+
+**The brief's proof criterion is stated backwards.** README:48 says
+`component/kokebo-27-vafi688` "routes CLASS; the jar says DESCRIPTION". The
+fixture's own golden says `data-diagram-type="CLASS"`. The criterion still
+discriminates — it asks whether parse-attempt lands where the jar lands —
+but a reader checking the stated direction would conclude the opposite.
+Recorded rather than silently re-worded, because T12 was accepted against it.
+
+**Batch 4–6 membership was a planning guess, and the guess was wrong in a
+specific, useful way.** The brief anticipated re-derivation ("the real split
+is whatever T0's gate measures after 3b"). Measured: sequence 106, class 26,
+state 17, description 4 — and every one of the 153 lives in the SEQUENCE
+corpus. The `engine` field disagrees on 17 because D2 keeps the
+highest-scoring refusal, not the engine that owns the gap. Batches 5 and 6
+therefore closed as measured no-ops, and the coverage work is one engine's,
+not six.
+
+**Strictness turned permissive regexes into routing bugs.** Three found and
+fixed, each traced to the upstream grammar it mismatched rather than patched
+at the symptom: description's bracket trailer (`(.*)?$` vs an anchored
+tags/stereotype/url/color tail), the class usymbol container's missing
+`TAGS1`/`TAGS2` runs, and class arrow style using `LINE_STYLE_MULTIPLES`
+where `CommandLinkClass` uses plain `LINE_STYLE`. The first alone was
+failing 20 state tests.
+
+**Eight tests asserted behaviour the jar does not have.** Every one was
+checked against the jar with `scripts/oracle-render.sh` before being
+rewritten, and each rewrite carries the jar's output in its comment. They
+were not wrong when written — they pinned a port that dropped unrecognised
+lines silently, which is the behaviour this mission removed.
+
+**Both conformance gates gained a citation requirement.** A `known-gap` and
+a `known-misroute` pin must now match `/\w+\.java:\d+/`. The refusal gate's
+older `/Command\w+/` was too narrow twice over: it missed the factory-built
+`FactorySequenceNoteCommand` naming, and it could not express the gaps that
+honestly are not Commands (`EmbeddedDiagram`, the `---` YAML header, the
+`%newline()` builtin). Demanding the origin is the stronger bar.
+

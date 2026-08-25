@@ -79,12 +79,12 @@ measured.
 | [0](batch-0/overview.md) | T0 refusal-coverage gate | — | SLI 2's instrument, baseline 1 | [x] |
 | [1](batch-1/overview.md) | T1 refusal type · T2 candidate set | yes | two new modules, unwired | [x] |
 | [2](batch-2/overview.md) | T3 wire the contract | — | `parse()` widened, candidate set adopted; **moves nothing** | [x] |
-| [3a](batch-3a/overview.md) | T4–T11 refusal in 8 engines | yes | strict parse loops | [ ] |
-| [3b](batch-3b/overview.md) | T12 dispatch + order + `accepts()` removal | — | parse-attempt live; kokebo closes | [ ] |
-| [4](batch-4/overview.md) | T13–T15 coverage: sequence, class, description | yes | SLI 2 → 0 for those engines | [ ] |
-| [5](batch-5/overview.md) | T16–T18 coverage: state, activity, board | yes | as above | [ ] |
-| [6](batch-6/overview.md) | T19–T20 coverage: chart, packetdiag | yes | as above | [ ] |
-| [7](batch-7/overview.md) | T21 delete heuristics · T22 close-out | sequential | ~1400 lines removed | [ ] |
+| [3a](batch-3a/overview.md) | T4–T11 refusal in 8 engines | yes | strict parse loops | [x] |
+| [3b](batch-3b/overview.md) | T12 dispatch + order + `accepts()` removal | — | parse-attempt live; kokebo closes | [x] |
+| [4](batch-4/overview.md) | T13–T15 coverage: sequence, class, description | yes | SLI 2 → 0 for those engines | [x] |
+| [5](batch-5/overview.md) | T16–T18 coverage: state, activity, board | yes | as above | [x] |
+| [6](batch-6/overview.md) | T19–T20 coverage: chart, packetdiag | yes | as above | [x] |
+| [7](batch-7/overview.md) | T21 delete heuristics · T22 close-out | sequential | ~1400 lines removed | [x] |
 
 **Batches 3a and 3b are one atomic unit.** Refusal without the dispatch switch
 errors the corpus wide; the dispatch switch without refusal moves the routing
@@ -178,3 +178,85 @@ no-op** — record the measurement, invent no work.
   this mission's inheritance
 - `.agent-notes/T2-registration-order-halt.md` — why registration order is
   load-bearing under heuristics
+
+---
+
+# Mission summary — closed 2026-08-25
+
+`accepts()` is gone. `dispatcher.ts#resolve` now builds the `@start`-line
+candidate set, iterates plugins in upstream's registration order, and takes
+the first whose parse does not refuse — `PSystemBuilder#createPSystem`,
+re-mirrored rather than tuned around.
+
+## Batches
+
+| Batch | Outcome |
+|---|---|
+| 0 | SLI 2's instrument built BEFORE the change. Baseline was 1, not 0 — `nuvoja` already errored on an `!includedef` preprocessor gap. Reported, not papered over. |
+| 1 | `ParseRefusal` + `findStartTypes`, unwired. Two invented divergences caught in review (`/\s/` for `Character.isWhitespace`, `toLowerCase()` for an ASCII fold) and fixed with discriminating tests. |
+| 2 | Contract wired; moved nothing, as designed. T3 was mis-scoped and split rather than stretched. |
+| 3a/3b | Refusal in 8 engines, then dispatch. The atomic pair the brief warned about. |
+| 4 | Sequence/class/description coverage. Where a command was not ported, the fixture is pinned with the command that explains it. |
+| 5 | state/activity/board — **measured no-ops**. The 17 the gate attributed to `state` were all SEQUENCE gaps; see below. |
+| 6 | chart/packetdiag — **measured no-ops**, both buckets 0. |
+| 7 | Heuristic layer deleted: 1534 lines. |
+
+## Exit bar
+
+**The proof criterion — `component/kokebo-27-vafi688`.** ✅ It routes CLASS
+and agrees with the jar. One correction to the brief: it states "the jar says
+DESCRIPTION", and the fixture's own golden says `data-diagram-type="CLASS"`.
+The criterion was written backwards; the fixture agrees, which is what
+"closes" was meant to mean. It regressed once mid-mission, when a container
+`$tag` fix changed how an empty tagged container collapses, and was fixed by
+carrying the tags to the leaf as upstream's `addTags` does.
+
+| SLI | Target | Result |
+|---|---|---|
+| 1 routing | 1 real disagreement | ✅ 2954 agree, 8 jar-error, 196 known-misroute — **all 194 censused ones cite an upstream `File.java:line`**, newly asserted by the gate |
+| 2 refusal coverage | 0, or every residual carries a mechanism | ✅ 163 known-gap, every one citing its unported command |
+| 3 parse cost | reported; super-linear blowup is a stop | ✅ 47s wall clock, no blowup |
+| 4 baselines | 0 unexplained de-promotions | ✅ every baseline move carries its mechanism in the pin itself |
+
+All four quality gates green: 16621 tests, coverage 95.4/90.5/96.9/96.5.
+
+## Residual
+
+Each has a named mechanism and a destination.
+
+1. **Sequence command coverage — 163 refusal gaps / 194 routing entries, one
+   root.** Every remaining entry in BOTH conformance gates is a sequence
+   source whose refusing line names an unported command: 62 exo arrows
+   (`CommandExoArrowLeft`/`Right`), 23 note-factory groups (`VMERGE`,
+   `STYLE`, the optional `of` in `PARTICIPANT`, `PARALLEL`), 13
+   `CommandGrouping` PARALLEL, and the `CommandArrow` named groups. Closing
+   them closes both gates together. → its own mission; the census is the
+   work-list, already per-fixture.
+2. **Bucket attribution is not ownership.** The gates' `engine` field is the
+   MERGED refusal's assumed type, and D2 keeps the highest-scoring refusal —
+   so 17 sequence gaps read as `state`. Filter by the refusing LINE. Recorded
+   in `DIVERGENCES.md` and batch 5's close-out.
+3. **`nuvoja`** — the pre-existing `!includedef` preprocessor gap SLI 2's
+   baseline surfaced. Out of scope from the start; still open.
+
+## What the mission found that it did not set out to find
+
+Strict parsing turned every over-permissive regex in the port into a routing
+bug, and each one had to be traced to the upstream grammar it mismatched:
+
+- `[*] --> state1` was claimed by DESCRIPTION's bracket shorthand, whose
+  trailer was a bare `(.*)?$`. Upstream's `CommandCreateElementFull` is
+  anchored and permits only tags/stereotype/url/color after the CODE. **20
+  state tests** were failing on this one line.
+- `component C1 $tag1 {` matched no class container command, because rule 5b'
+  lacked the `TAGS1`/`TAGS2` runs `CommandPackageWithUSymbol` has — so the
+  block never opened and its body went unparsed.
+- Class arrow style was `LINE_STYLE_MULTIPLES` where `CommandLinkClass` uses
+  plain `LINE_STYLE`; the `;` form is description-only.
+
+And **eight tests asserted behaviour the jar does not have** — `3: greet`,
+`1:`, a `state` container in a class diagram, `entity Entity {}` routing away
+from class, `database D` + `class A` without `allowmixing`, a class-corpus
+directory treated as authoritative over the golden, a raw-pipeline geometry
+pin whose layer no longer exists, and a style-block source the jar refuses
+twice over. Each was verified against the jar before being rewritten.

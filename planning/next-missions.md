@@ -636,19 +636,27 @@ Ordered by how ready they are, not by size.
   gradient backgrounds (`fadage-04-xoxe727`, `netuvi-29-jiti924`) came back
   301 -> 242, below their pre-bucket 253. Shared emission code, so all
   engines were re-run: no failing-test change anywhere.
-- **`dispatch-by-parse-attempt`** — NEW 2026-08-23, deferred out of
-  `sequence-engine-overclaims-nested-diagrams` by maintainer ruling (that
-  brief's D2). Upstream decides diagram ownership by **attempting the parse**
-  and taking the first factory that succeeds (`PSystemBuilder.java:258-266`);
-  this port decides by regex `accepts()` heuristics. That is the structural
-  divergence behind the whole misroute class. Blocked on a prerequisite, which
-  is why it is separate: **our parsers are permissive**. Fed the object-diagram
-  source that triggered the original bug, `parseSequence` returned a populated
-  AST (2 participants, 1 event) rather than failing, because it skips
-  unrecognised lines; upstream's equivalent fails because every line must match
-  a registered `Command`. So this mission must first give ≥13 engines strict
-  unrecognised-line handling, which changes error behaviour everywhere. Large,
-  and worth doing — it would delete the heuristics rather than tune them.
+- **`dispatch-by-parse-attempt`** — **DONE 2026-08-25**, summary at
+  `plans/dispatch-by-parse-attempt/README.md`. `accepts()` is deleted; dispatch
+  is `PSystemBuilder#createPSystem`'s parse attempt. All four gates green.
+  **This entry's own sizing was wrong and is corrected here**: it said the
+  mission "must first give ≥13 engines strict unrecognised-line handling". It
+  is 8 — the command-loop engines (batch 3a's T4–T11); the rest are
+  single-candidate or not command-loop at all, and chart/packetdiag measured
+  empty buckets for exactly that reason. The blocker it named was real, but
+  smaller than filed.
+  **Residual → `sequence-command-coverage`** (NEW, unbriefed): 163 refusal
+  gaps and 194 routing entries share ONE root — sequence commands this port
+  does not implement. 62 exo arrows (`CommandExoArrowLeft`/`Right`), 23
+  note-factory groups, 13 `CommandGrouping` PARALLEL, and the `CommandArrow`
+  named groups (dressing, inclination, lifecolor, url, style, multicast,
+  anchor, stereotype). Closing them closes BOTH conformance gates together.
+  The work-list already exists per fixture: every pin in
+  `refusal-baseline.json` and `routing-baseline.json` carries its refusing
+  LINE and the upstream `File.java:line`. **Filter by the LINE, not by the
+  gates' `engine` field** — that field is the merged refusal's assumed type
+  and D2 keeps the highest-scoring refusal, so 17 sequence gaps read as
+  `state` (`DIVERGENCES.md`).
 - **`routing-heuristic-repair`** — BRIEFED 2026-08-23 at
   `plans/routing-heuristic-repair/README.md`, not started. **Start here of
   the three**: its prerequisite already landed, and it is the only one of
