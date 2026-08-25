@@ -32,6 +32,10 @@ export interface SkinparamAccumulator {
   actorStyle: ActorStyle | undefined;
   minimumWidth: number | undefined;
   strictUml: boolean | undefined;
+  /** `skinparam footbox hide|show` — `SequenceDiagram#isShowFootbox` reads it
+   *  as a raw string and compares case-insensitively to "hide"
+   *  (`SequenceDiagram.java:478-485`). */
+  footbox: string | undefined;
   handwritten: boolean | undefined;
   monochrome: 'true' | 'reverse' | undefined;
   packageStyle: 'rect' | undefined;
@@ -125,7 +129,7 @@ export interface SkinparamAccumulator {
  */
 const SCALAR_FIELD_NAMES = [
   'fontFamily', 'fontSize', 'defaultFontSize', 'linetype', 'nodeSep', 'rankSep', 'wrapWidth',
-  'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize', 'roundCorner', 'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'handwritten', 'monochrome',
+  'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize', 'roundCorner', 'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'footbox', 'handwritten', 'monochrome',
   'packageStyle', 'fixCircleLabelOverlapping', 'shadowing', 'background',
   'border', 'text', 'arrow', 'noteBackground', 'classBackground',
   'interfaceBackground', 'enumBackground', 'actorStroke', 'packageBackground',

@@ -108,6 +108,8 @@ export interface Theme {
    *  unmodeled -- `!theme dark`-interaction untraced, named remainder. */
   monochrome?: 'true' | 'reverse';
   strictUml?: boolean;
+  /** `skinparam footbox hide|show`; see `SequenceDiagram#isShowFootbox`. */
+  footbox?: string;
   /**
    * `skinparam handwritten true` — draw every primitive through the sketchy
    * renderer (`core/klimt/drawing/hand/`).

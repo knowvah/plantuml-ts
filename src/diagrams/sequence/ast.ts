@@ -330,6 +330,13 @@ export interface SequenceGeometry {
   footerShapeY: number;
   /** Background rectangles for box groups (rendered at z=0, behind lifelines). */
   boxes: BoxGeo[];
+  /**
+   * `SequenceDiagram#isShowFootbox` (`SequenceDiagram.java:474-486`), resolved
+   * ONCE at layout so the renderer cannot disagree with the height that was
+   * reserved. False suppresses the footer participant row entirely — the jar
+   * reserves no space for it either.
+   */
+  showFootbox: boolean;
   /** Passthrough of `SequenceDiagramAST.scale` — resolved to a factor and
    *  applied at `renderSequence` (see that field's doc comment). */
   scale?: ScaleSpec;

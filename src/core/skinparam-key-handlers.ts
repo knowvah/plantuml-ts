@@ -257,6 +257,12 @@ const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: Ke
   [['style'], (acc, value) => {
     if (value.trim().toLowerCase() === 'strictuml') acc.strictUml = true;
   }],
+  [['footbox'], (acc, value) => {
+    // Kept as the raw string: upstream compares it to "hide" and treats any
+    // OTHER non-null value as show, overriding a `hide footbox` command
+    // (`SequenceDiagram.java:478-485`).
+    acc.footbox = value.trim();
+  }],
   [['handwritten'], (acc, value) => {
     // `skinparam handwritten true` — `TitledDiagram#isHandwritten` feeds
     // `JsonDiagram#drawU`'s `new UGraphicHandwritten(ug)` (and every other

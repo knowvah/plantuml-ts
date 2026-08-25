@@ -27,6 +27,7 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
   return {
     totalWidth: 400,
     totalHeight: 300,
+    showFootbox: true,
     participants: [
       { id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80 },
       { id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220 },

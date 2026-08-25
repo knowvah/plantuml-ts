@@ -447,9 +447,14 @@ export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragm
     children.push(renderEvent(event, scaledTheme));
   }
 
-  // 4. Footer boxes (always emitted — see design note in task spec)
-  for (const p of scaledGeo.participants) {
-    children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledGeo.footerShapeY, scaledTheme));
+  // 4. Footer boxes, unless suppressed. `SequenceDiagram#isShowFootbox`
+  //    (`SequenceDiagram.java:474-486`) is resolved once at layout, which is
+  //    also where the space for this row is (not) reserved -- see
+  //    `layout.ts#isShowFootbox`.
+  if (scaledGeo.showFootbox) {
+    for (const p of scaledGeo.participants) {
+      children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledGeo.footerShapeY, scaledTheme));
+    }
   }
 
   return {
