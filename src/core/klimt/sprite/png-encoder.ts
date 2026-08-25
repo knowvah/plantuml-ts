@@ -10,15 +10,25 @@
  * atom, deterministic byte output (no compression heuristics, no OS/time
  * metadata) so the same pixels always produce the same bytes.
  *
- * Compression strategy: DEFLATE stored (uncompressed) blocks only.
- * This keeps the encoder small and fully deterministic; PlantUML sprites
- * are tiny (~64x64), so the size cost of skipping LZ77/Huffman coding is
- * negligible and irrelevant to a data-URI embedded in an SVG string.
+ * Compression strategy: DEFLATE with fixed Huffman codes and LZ77
+ * (`deflate-fixed.ts`), which is deterministic by construction -- no
+ * frequency pass, no code-length table in the stream.
+ *
+ * This file previously emitted STORED blocks only, reasoning that "PlantUML
+ * sprites are tiny (~64x64), so the size cost of skipping LZ77/Huffman
+ * coding is negligible". Measured against the jar on `birocu-87-xubi808`
+ * that cost was 21x -- 16516 bytes to its 777, for pixel data of identical
+ * shape (both 8-bit RGBA, both filter 0, both 16448 bytes raw). Sprite rows
+ * are long runs of identical RGBA pixels, so the assumption was backwards:
+ * this is the input LZ77 helps most, not least. Stored blocks remain only
+ * for the empty-input edge case.
  *
  * @see https://www.rfc-editor.org/rfc/rfc2083 (PNG)
  * @see https://www.rfc-editor.org/rfc/rfc1950 (ZLIB)
  * @see https://www.rfc-editor.org/rfc/rfc1951 (DEFLATE) section 3.2.4 (stored blocks)
  */
+
+import { deflateFixed } from './deflate-fixed.js';
 
 /** 8-byte PNG file signature (RFC 2083 section 3.1). */
 const PNG_SIGNATURE: readonly number[] = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
@@ -151,10 +161,18 @@ function deflateStoredBlocks(raw: Uint8Array): Uint8Array {
   return concatBytes(blocks);
 }
 
-/** Wraps `raw` in a full zlib stream: 2-byte header, stored DEFLATE blocks, 4-byte Adler-32 trailer. */
+/**
+ * Wraps `raw` in a full zlib stream: 2-byte header, the DEFLATE payload,
+ * 4-byte Adler-32 trailer.
+ *
+ * The payload is a fixed-Huffman LZ77 block (`deflate-fixed.ts`). Empty
+ * input still takes the stored path -- a zero-length stored block is the
+ * shortest legal encoding of nothing, and it keeps that edge case free of
+ * the matcher entirely.
+ */
 function zlibWrap(raw: Uint8Array): Uint8Array {
   const header = new Uint8Array([ZLIB_CMF_BYTE, ZLIB_FLG_BYTE]);
-  const compressed = deflateStoredBlocks(raw);
+  const compressed = raw.length === 0 ? deflateStoredBlocks(raw) : deflateFixed(raw);
   const checksum = writeUint32BE(adler32(raw));
   return concatBytes([header, compressed, checksum]);
 }

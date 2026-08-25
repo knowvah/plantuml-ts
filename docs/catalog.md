@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1022 modules · 3589 exported names.
+1023 modules · 3590 exported names.
 
 ## `src/`
 
@@ -540,6 +540,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `AsciiEncoder.ts` | `AsciiEncoder` | PlantUML's own 6-bit encoding used for sprite/URL payloads -- NOT base64. |
 | `ColorResolver.ts` | `GrayLevelRange`, `ColorResolver`, `colorResolverToSvgHex` | ColorResolver — resolves a raw SVG color token (from a decomposed `<$sprite>` `<path>`'s `fill`/`stroke` attribute) to a concrete color, honouring an optional "forced" override color and the sprite's own grey-level range. |
+| `deflate-fixed.ts` | `deflateFixed` | DEFLATE with fixed Huffman codes (BTYPE=01) and LZ77 matching — RFC 1951. |
 | `png-encoder.ts` | `RGBA_BYTES_PER_PIXEL`, `crc32`, `adler32`, `encodePng`, `toBase64`, `toBase64DataUri` | Minimal deterministic PNG writer, browser-safe, zero deps, synchronous. |
 | `png-ihdr.ts` | `PngIhdr`, `parsePngIhdrFromDataUri` | PNG IHDR chunk reader for `data:image/png;base64,...` data URIs. |
 | `sprite-raster.ts` | `SpriteLike`, `spriteMonochromeAsLike`, `RgbaBitmap`, `spriteToRgba`, `SpritePngResult`, `spriteToPngDataUri` | Monochrome-sprite tint + PNG rasterization (T5 of SI5b/decisions.md D7). |

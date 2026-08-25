@@ -606,10 +606,15 @@ Ordered by how ready they are, not by size.
   sequence parser was **already** doing it (`sequence/parser.ts:121`). No
   interface change was needed. Recorded because the wrong reason nearly
   bought a deferral the work did not need.
-  **Residual, measured:** our PNG data URI is ~20x the jar's for the same
-  sprite (22046 vs 1058 bytes on `birocu-87-xubi808`) — same decoded image,
-  a much larger encoding. That is an encoder concern, not a badge one; see
-  the `svg-output-size-reduction` lineage.
+  **Residual — FIXED same day.** The PNG data URI was ~21x the jar's for the
+  same sprite. Cause was not detail: both encoders emit 8-bit RGBA, filter 0,
+  16448 raw bytes, identical alpha. `png-encoder.ts` emitted DEFLATE STORED
+  blocks by design, reasoning the size cost was "negligible" for 64x64
+  sprites — backwards, since sprite scanlines are exactly the long identical
+  runs LZ77 removes. `deflate-fixed.ts` (fixed Huffman + LZ77, deterministic
+  by construction) takes birocu's sprite 16516 -> 679 bytes, now 0.87x the
+  jar's own, with pixels byte-identical. Whole-SVG output over the 8 sprite
+  fixtures is 0.77x the jar.
 - **`dispatch-by-parse-attempt`** — NEW 2026-08-23, deferred out of
   `sequence-engine-overclaims-nested-diagrams` by maintainer ruling (that
   brief's D2). Upstream decides diagram ownership by **attempting the parse**
