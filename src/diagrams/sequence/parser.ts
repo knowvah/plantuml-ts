@@ -15,6 +15,7 @@ import type { SequenceDiagramAST } from './ast.js';
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import {
+  applyHideStereotype,
   applyHideUnlinked,
   emit,
   makeDefaultAST,
@@ -242,6 +243,7 @@ export function parseSequence(lines: readonly string[]): SequenceDiagramAST | Pa
     return refuse('incomplete', lines.length, lines.length, 'Sequence diagram has no participants');
   }
 
+  applyHideStereotype(state.ast);
   applyHideUnlinked(state.ast);
   return state.ast;
 }

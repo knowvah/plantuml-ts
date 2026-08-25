@@ -89,17 +89,17 @@ export function ensureParticipant(
   state: ParseState,
   id: string,
   type: ParticipantType = 'participant',
-  display?: string,
-  color?: string,
+  decl?: { display?: string; color?: string | undefined; stereotype?: string | undefined },
 ): void {
   if (state.participantIndex.has(id)) return;
   const order = state.ast.participants.length;
   const p: Participant = {
     id,
-    display: display ?? id,
+    display: decl?.display ?? id,
     type,
     order,
-    ...(color !== undefined ? { color } : {}),
+    ...(decl?.color !== undefined ? { color: decl.color } : {}),
+    ...(decl?.stereotype !== undefined ? { stereotype: decl.stereotype } : {}),
     ...(state.currentBox !== null ? { boxId: state.currentBox.id } : {}),
   };
   state.ast.participants.push(p);
@@ -204,28 +204,101 @@ export interface ParticipantDeclaration {
   id: string;
   display: string;
   color: string | undefined;
+  /** The `<<...>>` run, guillemets INCLUDED as upstream captures them
+   *  (`StereotypePattern.mandatory` = `(\<\<.+?\>\>)`), or undefined. */
+  stereotype: string | undefined;
 }
 
-/** Parse the trailing text of a `participant|actor|...` command into an
- *  id/display/color triple. */
+/** `([%pLN_.@]+)` -- upstream's participant CODE class, the same one
+ *  `CommandArrow`'s PART1CODE/PART2CODE use
+ *  (`CommandParticipantA.java:63`). */
+const CODE = String.raw`[\p{L}\p{N}_.@]+`;
+
+/**
+ * Strip the tail every participant form shares, right to left.
+ *
+ * All four of `CommandParticipantA`/`A2`/`A3`/`A4` end with the same run:
+ * `StereotypePattern.optional("STEREO")`, `getOrderRegex()`,
+ * `UrlBuilder.OPTIONAL`, then `ColorParser.exp1()`
+ * (`CommandParticipantA.java:63-69`, and the identical tails on the other
+ * three). Peeling it off first is what lets the NAME forms below stay simple
+ * -- and is why `participant Alice <<alice>>` used to fall through to the
+ * bare-name branch and take the stereotype into the participant's identity,
+ * so a later `Alice -> Bob` created a SECOND participant.
+ */
+function stripParticipantTail(rest: string): {
+  head: string;
+  color: string | undefined;
+  stereotype: string | undefined;
+} {
+  let head = rest.trim();
+  let color: string | undefined;
+  let stereotype: string | undefined;
+  const color1 = /^(.*?)\s+(#\w+)$/.exec(head);
+  if (color1 !== null) { head = color1[1]!.trim(); color = color1[2]; }
+  const url = /^(.*?)\s*\[\[.*\]\]$/.exec(head);
+  if (url !== null) head = url[1]!.trim();
+  const order = /^(.*?)\s+order\s+-?\d{1,7}$/i.exec(head);
+  if (order !== null) head = order[1]!.trim();
+  const stereo = /^(.*?)\s*(<<.+?>>)$/.exec(head);
+  if (stereo !== null) { head = stereo[1]!.trim(); stereotype = stereo[2]; }
+  return { head, color, stereotype };
+}
+
+/** The NAME part, in upstream's four registered forms. */
+function parseParticipantName(head: string): { id: string; display: string } {
+  const a = new RegExp(String.raw`^"([^"]+)"\s+as\s+(${CODE})$`, 'u').exec(head);
+  if (a !== null) return { display: a[1]!, id: a[2]! };
+  const a2 = new RegExp(String.raw`^(${CODE})\s+as\s+"([^"]+)"$`, 'u').exec(head);
+  if (a2 !== null) return { id: a2[1]!, display: a2[2]! };
+  const a3 = new RegExp(String.raw`^(${CODE})\s+as\s+(${CODE})$`, 'u').exec(head);
+  if (a3 !== null) return { display: a3[1]!, id: a3[2]! };
+  const a4 = /^"([^"]+)"$/.exec(head);
+  if (a4 !== null) return { id: a4[1]!, display: a4[1]! };
+  return { id: head, display: head };
+}
+
+/**
+ * Parse the trailing text of a `participant|actor|...` command.
+ *
+ * Mirrors the four registered forms -- `["FULL" as] CODE`
+ * (`CommandParticipantA`), `CODE as "FULL"` (`A2`), `FULL as CODE` (`A3`) and
+ * `"CODE"` (`A4`) -- over the shared tail stripped by
+ * {@link stripParticipantTail}.
+ */
 export function parseParticipantDeclaration(rest: string): ParticipantDeclaration {
-  // Try: "Display Name" as Alias [#color]
-  const quotedAlias = /^"([^"]+)"\s+as\s+(\S+)(?:\s+(#\w+))?$/.exec(rest);
-  if (quotedAlias !== null) {
-    return { display: quotedAlias[1]!, id: quotedAlias[2]!, color: quotedAlias[3] };
+  const { head, color, stereotype } = stripParticipantTail(rest);
+  return { ...parseParticipantName(head), color, stereotype };
+}
+
+/**
+ * `manageActivations` -- the life-event an `++`/`--`/`**`/`!!` suffix on a
+ * message produces.
+ *
+ * Upstream switches on the FIRST CHARACTER ONLY (`CommandArrow.java:443-456`),
+ * so `--++` is a plain deactivate and `++--` a plain activate; and the two
+ * directions are NOT symmetric -- `+` activates p2, the message TARGET, while
+ * `-` deactivates p1, the message SOURCE (`:447`, `:450`). `*` (CREATE, at
+ * `:396`) and `!` (DESTROY, `:453`) both act on the target; this port has no
+ * CREATE/DESTROY variant on `ActivationEvent`, so they collapse onto
+ * activate/deactivate as the pre-existing note on the arrow command records.
+ */
+export function activationFlags(
+  spec: string,
+  from: string,
+  to: string,
+): { activates?: string; deactivates?: string } {
+  switch (spec.trim().charAt(0)) {
+    case '+':
+    case '*':
+      return { activates: to };
+    case '-':
+      return { deactivates: from };
+    case '!':
+      return { deactivates: to };
+    default:
+      return {};
   }
-  // Try: unquoted Name as Alias [#color]
-  const unquotedAlias = /^(\S+)\s+as\s+(\S+)(?:\s+(#\w+))?$/.exec(rest);
-  if (unquotedAlias !== null) {
-    return { display: unquotedAlias[1]!, id: unquotedAlias[2]!, color: unquotedAlias[3] };
-  }
-  // Try: Name [#color]
-  const withColor = /^(\S+)\s+(#\w+)$/.exec(rest);
-  if (withColor !== null) {
-    return { id: withColor[1]!, display: withColor[1]!, color: withColor[2] };
-  }
-  const id = rest.trim();
-  return { id, display: id, color: undefined };
 }
 
 // ---------------------------------------------------------------------------
@@ -273,6 +346,16 @@ function collectLinkedIds(event: SequenceEvent, linked: Set<string>): void {
     for (const branch of event.branches)
       for (const inner of branch) collectLinkedIds(inner, linked);
   }
+}
+
+/** `hide stereotype` (`options.hideStereotype`): drop every participant's
+ *  stereotype so neither the layout nor the renderer sees one. Applied
+ *  post-parse for the same reason `applyHideUnlinked` is — the directive can
+ *  appear after the declarations it affects. See `hideStereotypeCommand`
+ *  (`sequence-commands-2.ts`) for the upstream registration chain. */
+export function applyHideStereotype(ast: SequenceDiagramAST): void {
+  if (ast.options.hideStereotype !== true) return;
+  for (const p of ast.participants) delete p.stereotype;
 }
 
 /** `hide unlinked` (`options.hideUnlinked`): drop participants no event

@@ -14,6 +14,7 @@
 
 import type { MessageEvent, NoteEvent, ParticipantType } from './ast.js';
 import {
+  activationFlags,
   applyAutonumber,
   emit,
   ensureParticipant,
@@ -54,18 +55,20 @@ const rotateCommand: Command = {
   },
 };
 
-/** `hide stereotype` — no dedicated upstream sequence-diagram command was
- *  found for this exact form (grepped `sequencediagram/command/` and
- *  `CommonCommands.java`); recognised here as a no-op alongside the other
- *  `hide`-family directives this engine does not visually model, matching
- *  the disposition `state/state-commands.ts` uses for its own unmodelled
- *  `hide`/`show` forms. Flagged in T13's report as a residual worth
- *  re-checking against `SkinParam#setStereotypePositionTop`/hide-stereotype
- *  wiring in a follow-up. */
+/** `hide stereotype` — reached in sequence diagrams through
+ *  `SequenceDiagramFactory:100` -> `CommonCommands#addCommonCommands1` ->
+ *  `addCommonHides` (`CommonCommands.java:103-106`) ->
+ *  `CommandHideShowByGender`, whose `stereotype` arm is `:195`. T13 recorded
+ *  this as an unmodelled no-op after grepping only `sequencediagram/command/`
+ *  and the CommonCommands ADD list, and flagged it for re-checking: the
+ *  registration is one level down, in `addCommonHides`. Now honoured —
+ *  suppresses the participant stereotype run, which the jar's own goldens
+ *  confirm both ways (`secida-27-jaco323` carries `hide stereotype` and shows
+ *  bare names; `birocu-87-xubi808` has none and shows `«APIGateway»`). */
 const hideStereotypeCommand: Command = {
   pattern: /^hide\s+stereotype\s*$/i,
-  execute() {
-    /* ignored — see doc comment above */
+  execute(state) {
+    state.ast.options.hideStereotype = true;
   },
 };
 
@@ -139,8 +142,8 @@ const createCommand: Command = {
     /^create\s+(?:(participant|actor|boundary|control|entity|queue|database|collections)\s+)?(.+)$/i,
   execute(state, match) {
     const type = (match[1]?.toLowerCase() ?? 'participant') as ParticipantType;
-    const { id, display, color } = parseParticipantDeclaration(match[2]!.trim());
-    ensureParticipant(state, id, type, display, color);
+    const { id, display, color, stereotype } = parseParticipantDeclaration(match[2]!.trim());
+    ensureParticipant(state, id, type, { display, color, stereotype });
   },
 };
 
@@ -300,8 +303,16 @@ const decoratedArrowCommand: Command = {
   // reproduced (an `ArrowPart` this port's `sequence-arrowhead.ts` already
   // models but nothing in the parser has fed until now — left unfed,
   // documented rather than wired, given T13's time budget).
+  // T20 (defect 5 of `diagnosis-24-score-rises.md`): the endpoints are
+  // upstream's own `PART1CODE`/`PART2CODE` = `([%pLN_.@]+)`
+  // (`CommandArrow.java:93,119`), and an `ACTIVATION` group
+  // `(\+\+|\*\*|!!|--|--\+\+|\+\+--)?` follows PART2 (`:126`) exactly as it
+  // does on the `->`-only sibling in `sequence-commands.ts`. Without both,
+  // `Alice <- Bob--: 500` let `--` be absorbed into the target token and
+  // declared a phantom participant named `Bob--`; the loose `[^\s[\]]+`
+  // class did the same for any endpoint abutting punctuation.
   pattern:
-    /^(?:&\s*)?("[^"]+"|[^\s[\]]+)\s*([ox]|\\{1,2}|\/{1,2})?(<<?)?(-+)(?:\[[^\]]*\])?(>>?)?([ox]|\\{1,2}|\/{1,2})?\s*("[^"]+"|[^\s[\]]+?)\s*(?::\s*(.*))?$/,
+    /^(?:&\s*)?("[^"]+"|[\p{L}\p{N}_.@]+)\s*([ox]|\\{1,2}|\/{1,2})?(<<?)?(-+)(?:\[[^\]]*\])?(>>?)?([ox]|\\{1,2}|\/{1,2})?\s*("[^"]+"|[\p{L}\p{N}_.@]+?)(\s*(?:\+\+|--\+\+|\+\+--|--|\*\*|!!))?\s*(?::\s*(.*))?$/u,
   execute(state, match) {
     if (match[3] === undefined && match[5] === undefined) return; // not an arrow
 
@@ -313,12 +324,20 @@ const decoratedArrowCommand: Command = {
       rightAngle: match[5],
       trailDecor: match[6],
       tokenB: unquote(match[7]!),
-      label: match[8]?.trim() ?? '',
+      label: match[9]?.trim() ?? '',
     });
 
     ensureParticipant(state, resolved.from);
     ensureParticipant(state, resolved.to);
-    const msg = applyAutonumber(state, { kind: 'message', ...resolved });
+    // The ACTIVATION suffix applies on this path too -- upstream has ONE
+    // `CommandArrow` for both directions, and `manageActivations` reads the
+    // RESOLVED p1/p2, i.e. the message's source and target after the
+    // reverse-define swap (`CommandArrow.java:315-338,443-456`).
+    const msg = applyAutonumber(state, {
+      kind: 'message',
+      ...resolved,
+      ...activationFlags(match[8] ?? '', resolved.from, resolved.to),
+    });
     state.lastMessageFrom = resolved.from;
     state.lastMessageTo = resolved.to;
     emit(state, msg);

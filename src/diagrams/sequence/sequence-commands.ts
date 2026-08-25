@@ -22,6 +22,7 @@ import type {
 } from './ast.js';
 import {
   ARROW_STYLE_MAP,
+  activationFlags,
   applyAutonumber,
   emit,
   ensureParticipant,
@@ -116,8 +117,8 @@ export const COMMANDS: readonly Command[] = [
     execute(state, match) {
       const type = match[1]!.toLowerCase() as ParticipantType;
       const rest = match[2]!.trim();
-      const { id, display, color } = parseParticipantDeclaration(rest);
-      ensureParticipant(state, id, type, display, color);
+      const { id, display, color, stereotype } = parseParticipantDeclaration(rest);
+      ensureParticipant(state, id, type, { display, color, stereotype });
     },
   },
 
@@ -402,10 +403,6 @@ export const COMMANDS: readonly Command[] = [
       const arrowToken = match[2]!;
       const to = match[3]!.replace(/^"(.*)"$/, '$1');
       const activation = match[4]?.trim() ?? '';
-      const activatesFlag =
-        activation === '++' || activation === '**' || activation === '--++' || activation === '++--';
-      const deactivatesFlag =
-        activation === '--' || activation === '!!' || activation === '--++' || activation === '++--';
       const label = match[5]?.trim() ?? '';
 
       const style = ARROW_STYLE_MAP[arrowToken] ?? 'sync';
@@ -419,8 +416,7 @@ export const COMMANDS: readonly Command[] = [
         to,
         label,
         style,
-        ...(activatesFlag ? { activates: to } : {}),
-        ...(deactivatesFlag ? { deactivates: to } : {}),
+        ...activationFlags(activation, from, to),
       };
       msg = applyAutonumber(state, msg);
 

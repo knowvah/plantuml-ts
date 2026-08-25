@@ -105,7 +105,10 @@ function computeParticipantWidths(
 ): number[] {
   const fontSpec = fontSpecOf(theme);
   return sortedParticipants.map((p) => {
-    const lw = measurer.measure(p.display, fontSpec).width;
+    const lw = Math.max(
+      measurer.measure(p.display, fontSpec).width,
+      p.stereotype === undefined ? 0 : measurer.measure(stereotypeLabel(p.stereotype), fontSpec).width,
+    );
     if (p.type === 'database') {
       return Math.max(DB_MIN_WIDTH, lw + theme.sequence.participantPadding);
     }
@@ -160,6 +163,17 @@ function positionParticipants(
   return { participantGeos, participantMap, participantIndex, maxParticipantHeight };
 }
 
+/**
+ * `<<name>>` as the jar draws it: the single-glyph guillemet form.
+ * `Stereotype.build` keeps the `<<`/`>>` it was given
+ * (`CommandParticipant.java:180`) and the drawing layer swaps in the
+ * guillemets — `birocu-87-xubi808`'s golden carries `«APIGateway»`, one
+ * character each side, with the inner run trimmed.
+ */
+function stereotypeLabel(raw: string): string {
+  return `«${raw.replace(/^<<\s*/, '').replace(/\s*>>$/, '')}»`;
+}
+
 /** Build the geometry for a single participant column at a given x offset. */
 function buildParticipantGeo(
   p: Participant,
@@ -170,7 +184,11 @@ function buildParticipantGeo(
 ): ParticipantGeo {
   const fontSpec = fontSpecOf(theme);
   const measured = measurer.measure(p.display, fontSpec);
-  const boxHeight = measured.height + 20;
+  // A visible stereotype is a SECOND run above the name
+  // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
+  // own line in `birocu-87-xubi808`), so the head grows by one line.
+  const stereoLines = p.stereotype === undefined ? 0 : 1;
+  const boxHeight = measured.height * (1 + stereoLines) + 20;
   const pHeight =
     p.type === 'actor' ? Math.max(boxHeight, SEQUENCE_ACTOR_HEIGHT) :
     p.type === 'database' ? Math.max(boxHeight, DB_HEIGHT) :
@@ -180,6 +198,7 @@ function buildParticipantGeo(
   return {
     id: p.id,
     display: p.display,
+    ...(p.stereotype !== undefined ? { stereotype: stereotypeLabel(p.stereotype) } : {}),
     type: p.type,
     x: currentX,
     y: 0,

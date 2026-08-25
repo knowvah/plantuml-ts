@@ -64,25 +64,60 @@ function renderLabel(cx: number, cy: number, label: string, theme: Theme): strin
   });
 }
 
+/**
+ * A participant's name, with its stereotype ABOVE it when it has a visible
+ * one — two runs, not one string.
+ *
+ * `CommandParticipant` stores the stereotype on the Participant rather than
+ * in its code (`:174-181`), and the jar draws it on its own line: the golden
+ * for `birocu-87-xubi808` carries `«APIGateway»` and `OnlyLabel` as separate
+ * `<text>` elements, stereotype first. `hide stereotype` removes it upstream
+ * of here (`applyHideStereotype`), so `geo.stereotype` being absent is the
+ * only signal this needs.
+ *
+ * Two gaps, both deliberate and both bounded:
+ *
+ *   1. The circled-character and sprite BADGE forms
+ *      (`<< ($sprite, #color) Name >>`, `StereotypeDecoration#buildComplex`).
+ *      `class-stereotype.ts` already models them, but it sits in the CLASS
+ *      engine; sharing it means lifting the helper into `core/` the way SI27
+ *      lifted the creole atom seam, not reaching across the boundary from
+ *      here. A badge renders as its plain label text until then.
+ *   2. `ShowStereotype false` in a `<style>` block (`PName.ShowStereotype`,
+ *      applied upstream by `Display#withoutStereotypeIfNeeded(style)` inside
+ *      `AbstractTextualComponent`'s constructor). Honouring it needs the
+ *      resolved style map at this point, which the sequence layout does not
+ *      yet carry. Four corpus fixtures use it; `cusiru-97-buco277` is the
+ *      one whose top-level count it moves.
+ */
+function renderNameBlock(p: ParticipantGeo, cy: number, theme: ScaledTheme): string {
+  if (p.stereotype === undefined) return renderLabel(p.centerX, cy, p.display, theme);
+  const half = theme.fontSize / 2;
+  return (
+    renderLabel(p.centerX, cy - half, p.stereotype, theme) +
+    renderLabel(p.centerX, cy + half, p.display, theme)
+  );
+}
+
 function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
   const labelYOffset = theme.fontSize / 2 + 4 * theme.scaleK;
   if (p.type === 'actor') {
     return (
       renderActorShape(p.centerX, p.y, p.height, theme) +
-      renderLabel(p.centerX, p.y + p.height - labelYOffset, p.display, theme)
+      renderNameBlock(p, p.y + p.height - labelYOffset, theme)
     );
   }
   if (p.type === 'database') {
     return (
       renderDatabaseShape(p.x, p.y, p.width, p.height, theme) +
-      renderLabel(p.centerX, p.y + p.height - labelYOffset, p.display, theme)
+      renderNameBlock(p, p.y + p.height - labelYOffset, theme)
     );
   }
   const box = rect(p.x, p.y, p.width, p.height, {
     fill: theme.colors.background,
     stroke: theme.colors.border,
   });
-  return box + renderLabel(p.centerX, p.y + p.height / 2, p.display, theme);
+  return box + renderNameBlock(p, p.y + p.height / 2, theme);
 }
 
 function renderFooterBox(
@@ -97,13 +132,13 @@ function renderFooterBox(
   const labelY = lifelineEndY + theme.fontSize / 2 + 4 * theme.scaleK;
   if (p.type === 'actor') {
     return (
-      renderLabel(p.centerX, labelY, p.display, theme) +
+      renderNameBlock(p, labelY, theme) +
       renderActorShape(p.centerX, footerShapeY, p.height, theme)
     );
   }
   if (p.type === 'database') {
     return (
-      renderLabel(p.centerX, labelY, p.display, theme) +
+      renderNameBlock(p, labelY, theme) +
       renderDatabaseShape(p.x, footerShapeY, p.width, p.height, theme)
     );
   }
@@ -111,7 +146,7 @@ function renderFooterBox(
     fill: theme.colors.background,
     stroke: theme.colors.border,
   });
-  return box + renderLabel(p.centerX, lifelineEndY + p.height / 2, p.display, theme);
+  return box + renderNameBlock(p, lifelineEndY + p.height / 2, theme);
 }
 
 function renderLifeline(

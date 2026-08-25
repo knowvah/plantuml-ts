@@ -115,6 +115,54 @@ describe('participant declarations', () => {
     const aliceEntries = ast.participants.filter((p) => p.id === 'Alice');
     expect(aliceEntries).toHaveLength(1);
   });
+
+  // Every participant form ends with the same tail --
+  // `StereotypePattern.optional("STEREO")`, `getOrderRegex()`,
+  // `UrlBuilder.OPTIONAL`, `ColorParser.exp1()`
+  // (`CommandParticipantA.java:63-69`). The stereotype belongs on the
+  // Participant (`CommandParticipant.java:174-181`), NOT in its code: baking
+  // it in made `Alice <<alice>>` and `Alice` two different participants.
+  it('keeps a stereotype out of the participant identity', () => {
+    const ast = parse(['participant Alice <<alice>>', 'Alice -> Bob: hi']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['Alice', 'Bob']);
+    expect(ast.participants[0]?.stereotype).toBe('<<alice>>');
+  });
+
+  it('strips order, url and color from the identity too', () => {
+    const ast = parse(['participant Alice <<a>> order 30 [[http://x]] #pink']);
+    expect(ast.participants[0]?.id).toBe('Alice');
+    expect(ast.participants[0]?.color).toBe('#pink');
+    expect(ast.participants[0]?.stereotype).toBe('<<a>>');
+  });
+
+  // The four registered name forms: `["FULL" as] CODE`
+  // (`CommandParticipantA`), `CODE as "FULL"` (`A2`), `FULL as CODE` (`A3`)
+  // and `"CODE"` (`A4`). A2 was previously unhandled and fell through to the
+  // bare-name branch, taking `A as "Big A"` as one id.
+  it('parses all four upstream name forms', () => {
+    expect(parse(['participant "Big A" as A']).participants[0]).toMatchObject({ id: 'A', display: 'Big A' });
+    expect(parse(['participant A as "Big A"']).participants[0]).toMatchObject({ id: 'A', display: 'Big A' });
+    expect(parse(['participant Big as A']).participants[0]).toMatchObject({ id: 'A', display: 'Big' });
+    expect(parse(['participant "Big A"']).participants[0]).toMatchObject({ id: 'Big A', display: 'Big A' });
+  });
+
+  // `hide stereotype` reaches sequence diagrams via
+  // `SequenceDiagramFactory:100` -> `CommonCommands#addCommonCommands1` ->
+  // `addCommonHides` (`CommonCommands.java:103-106`). T13 recorded it as an
+  // unmodelled no-op; the registration is one level down.
+  it('hide stereotype drops the stereotype', () => {
+    const ast = parse(['hide stereotype', 'participant Alice <<alice>>']);
+    expect(ast.participants[0]?.stereotype).toBeUndefined();
+    expect(ast.participants[0]?.id).toBe('Alice');
+  });
+
+  // The activation suffix is not part of a participant name: upstream's
+  // PART2CODE is `([%pLN_.@]+)` and `--` is taken by ACTIVATION
+  // (`CommandArrow.java:119,126`).
+  it('does not admit an activation suffix into a participant name', () => {
+    const ast = parse(['participant Alice', 'participant Bob', 'Alice <- Bob--: 500']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['Alice', 'Bob']);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -171,8 +219,39 @@ describe('message arrow styles', () => {
     expect(ev.activates).toBe('Bob');
   });
 
-  it('-- shorthand sets deactivates field', () => {
+  // `manageActivations` is NOT symmetric: `+` activates p2, the message
+  // TARGET, but `-` deactivates p1, the message SOURCE
+  // (`CommandArrow.java:447,450`). This used to assert the target.
+  it('-- shorthand deactivates the message SOURCE, not the target', () => {
     const ev = firstMessage(['Alice -> Bob --: done']);
+    expect(ev.deactivates).toBe('Alice');
+    expect(ev.activates).toBeUndefined();
+  });
+
+  it('++ shorthand activates the message TARGET', () => {
+    const ev = firstMessage(['Alice -> Bob ++: go']);
+    expect(ev.activates).toBe('Bob');
+    expect(ev.deactivates).toBeUndefined();
+  });
+
+  // `spec.charAt(0)` -- only the FIRST character is read
+  // (`CommandArrow.java:445`), so a combined suffix is one life event, not two.
+  it('reads only the first character of a combined suffix', () => {
+    const minusPlus = firstMessage(['Alice -> Bob --++: x']);
+    expect(minusPlus.deactivates).toBe('Alice');
+    expect(minusPlus.activates).toBeUndefined();
+    const plusMinus = firstMessage(['Alice -> Bob ++--: x']);
+    expect(plusMinus.activates).toBe('Bob');
+    expect(plusMinus.deactivates).toBeUndefined();
+  });
+
+  // Upstream has ONE `CommandArrow` for both directions, so the suffix
+  // applies to a reversed arrow too -- and against the RESOLVED source/target
+  // (`CommandArrow.java:315-338,443-456`). `Alice <- Bob --` is a message
+  // FROM Bob, so Bob is the one deactivated. Before T20 this path had no
+  // ACTIVATION group at all and declared a participant named `Bob--`.
+  it('applies the suffix on a reversed arrow, against the resolved source', () => {
+    const ev = firstMessage(['Alice <- Bob --: ok']);
     expect(ev.deactivates).toBe('Bob');
   });
 

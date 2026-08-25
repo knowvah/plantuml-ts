@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 486,
-    "extra-element": 72,
-    "geometry": 14525,
-    "text-metrics": 5007,
+    "missing-element": 473,
+    "extra-element": 53,
+    "geometry": 16031,
+    "text-metrics": 5740,
     "format-units": 5,
-    "other": 10074
+    "other": 11029
   },
   "fixtures": [
     {
@@ -25,8 +25,8 @@
       "slug": "TeozTimelineIssues_0002_Test",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -313,8 +313,8 @@
       "slug": "bexoce-95-vibe195",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -431,14 +431,14 @@
     },
     {
       "slug": "bocusa-16-ciju126",
-      "diffCount": 5,
+      "diffCount": 60,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 24,
+        "text-metrics": 8,
         "format-units": 0,
-        "other": 0
+        "other": 28
       }
     },
     {
@@ -611,14 +611,14 @@
     },
     {
       "slug": "bugalu-47-ludi530",
-      "diffCount": 128,
+      "diffCount": 124,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
         "geometry": 68,
         "text-metrics": 24,
         "format-units": 0,
-        "other": 36
+        "other": 32
       }
     },
     {
@@ -707,14 +707,14 @@
     },
     {
       "slug": "buxuba-45-tela497",
-      "diffCount": 5,
+      "diffCount": 47,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 24,
+        "text-metrics": 14,
         "format-units": 0,
-        "other": 0
+        "other": 9
       }
     },
     {
@@ -779,18 +779,6 @@
     },
     {
       "slug": "calido-79-kovi606",
-      "diffCount": 5,
-      "buckets": {
-        "missing-element": 1,
-        "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 0
-      }
-    },
-    {
-      "slug": "caluni-22-noci624",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -1067,14 +1055,14 @@
     },
     {
       "slug": "cijozi-08-mavu547",
-      "diffCount": 5,
+      "diffCount": 74,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 18,
+        "text-metrics": 9,
         "format-units": 0,
-        "other": 0
+        "other": 47
       }
     },
     {
@@ -1139,14 +1127,14 @@
     },
     {
       "slug": "cituda-50-mema409",
-      "diffCount": 5,
+      "diffCount": 54,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 24,
+        "text-metrics": 13,
         "format-units": 0,
-        "other": 0
+        "other": 17
       }
     },
     {
@@ -1283,14 +1271,14 @@
     },
     {
       "slug": "culegi-37-paji732",
-      "diffCount": 5,
+      "diffCount": 49,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 24,
+        "text-metrics": 14,
         "format-units": 0,
-        "other": 0
+        "other": 11
       }
     },
     {
@@ -1319,14 +1307,14 @@
     },
     {
       "slug": "cusiru-97-buco277",
-      "diffCount": 68,
+      "diffCount": 5,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 42,
-        "text-metrics": 9,
+        "extra-element": 1,
+        "geometry": 4,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 17
+        "other": 0
       }
     },
     {
@@ -1571,14 +1559,14 @@
     },
     {
       "slug": "demeli-77-cozo712",
-      "diffCount": 5,
+      "diffCount": 159,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 76,
+        "text-metrics": 48,
         "format-units": 0,
-        "other": 0
+        "other": 35
       }
     },
     {
@@ -1643,14 +1631,14 @@
     },
     {
       "slug": "dicega-90-zubu260",
-      "diffCount": 5,
+      "diffCount": 207,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 110,
+        "text-metrics": 52,
         "format-units": 0,
-        "other": 0
+        "other": 45
       }
     },
     {
@@ -1943,14 +1931,14 @@
     },
     {
       "slug": "dudeku-78-naju581",
-      "diffCount": 5,
+      "diffCount": 88,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 48,
+        "text-metrics": 21,
         "format-units": 0,
-        "other": 0
+        "other": 19
       }
     },
     {
@@ -2101,8 +2089,8 @@
       "slug": "fakova-98-suze610",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -2423,14 +2411,14 @@
     },
     {
       "slug": "figezi-68-zefe216",
-      "diffCount": 5,
+      "diffCount": 144,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 62,
+        "text-metrics": 23,
         "format-units": 0,
-        "other": 0
+        "other": 59
       }
     },
     {
@@ -2795,14 +2783,14 @@
     },
     {
       "slug": "gamefa-47-gelu047",
-      "diffCount": 5,
+      "diffCount": 156,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 92,
+        "text-metrics": 27,
         "format-units": 0,
-        "other": 0
+        "other": 37
       }
     },
     {
@@ -2951,14 +2939,14 @@
     },
     {
       "slug": "gepiju-13-negu183",
-      "diffCount": 128,
+      "diffCount": 124,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
         "geometry": 68,
         "text-metrics": 24,
         "format-units": 0,
-        "other": 36
+        "other": 32
       }
     },
     {
@@ -3181,8 +3169,8 @@
       "slug": "goceku-21-rizu768",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -3227,14 +3215,14 @@
     },
     {
       "slug": "gogivi-77-safe144",
-      "diffCount": 5,
+      "diffCount": 176,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 96,
+        "text-metrics": 43,
         "format-units": 0,
-        "other": 0
+        "other": 37
       }
     },
     {
@@ -3299,14 +3287,14 @@
     },
     {
       "slug": "gucare-93-petu502",
-      "diffCount": 5,
+      "diffCount": 310,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 106,
+        "text-metrics": 66,
         "format-units": 0,
-        "other": 0
+        "other": 138
       }
     },
     {
@@ -3479,14 +3467,14 @@
     },
     {
       "slug": "jacefu-29-didu005",
-      "diffCount": 5,
+      "diffCount": 87,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 38,
+        "text-metrics": 15,
         "format-units": 0,
-        "other": 0
+        "other": 34
       }
     },
     {
@@ -3661,8 +3649,8 @@
       "slug": "jefoke-95-jara779",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -3743,14 +3731,14 @@
     },
     {
       "slug": "jinaxe-58-zuva028",
-      "diffCount": 5,
+      "diffCount": 139,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 72,
+        "text-metrics": 40,
         "format-units": 0,
-        "other": 0
+        "other": 27
       }
     },
     {
@@ -4091,14 +4079,14 @@
     },
     {
       "slug": "kedipo-05-zici527",
-      "diffCount": 5,
+      "diffCount": 41,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 14,
+        "text-metrics": 8,
         "format-units": 0,
-        "other": 0
+        "other": 19
       }
     },
     {
@@ -4619,14 +4607,14 @@
     },
     {
       "slug": "kotozo-70-suso472",
-      "diffCount": 5,
+      "diffCount": 78,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 50,
+        "text-metrics": 10,
         "format-units": 0,
-        "other": 0
+        "other": 18
       }
     },
     {
@@ -5365,8 +5353,8 @@
       "slug": "mapeji-83-sebu002",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -5483,14 +5471,14 @@
     },
     {
       "slug": "mejupo-12-vano433",
-      "diffCount": 5,
+      "diffCount": 80,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 46,
+        "text-metrics": 17,
         "format-units": 0,
-        "other": 0
+        "other": 17
       }
     },
     {
@@ -5602,6 +5590,18 @@
       }
     },
     {
+      "slug": "micaki-01-rexa741",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "midipu-78-meva271",
       "diffCount": 5,
       "buckets": {
@@ -5699,14 +5699,14 @@
     },
     {
       "slug": "mituru-91-pato523",
-      "diffCount": 5,
+      "diffCount": 88,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 48,
+        "text-metrics": 21,
         "format-units": 0,
-        "other": 0
+        "other": 19
       }
     },
     {
@@ -6023,14 +6023,14 @@
     },
     {
       "slug": "muvaxa-46-teze620",
-      "diffCount": 5,
+      "diffCount": 47,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 30,
+        "text-metrics": 7,
         "format-units": 0,
-        "other": 0
+        "other": 10
       }
     },
     {
@@ -6263,14 +6263,14 @@
     },
     {
       "slug": "nerujo-69-xovi052",
-      "diffCount": 5,
+      "diffCount": 193,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 98,
+        "text-metrics": 52,
         "format-units": 0,
-        "other": 0
+        "other": 43
       }
     },
     {
@@ -6346,6 +6346,18 @@
       }
     },
     {
+      "slug": "nezipa-74-kigi270",
+      "diffCount": 52,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 16,
+        "text-metrics": 8,
+        "format-units": 0,
+        "other": 28
+      }
+    },
+    {
       "slug": "nibiju-55-kavu710",
       "diffCount": 5,
       "buckets": {
@@ -6385,8 +6397,8 @@
       "slug": "nimoxu-60-xale291",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -6433,8 +6445,8 @@
       "slug": "nizoxo-38-core298",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -6527,14 +6539,14 @@
     },
     {
       "slug": "nosuti-71-mida920",
-      "diffCount": 5,
+      "diffCount": 80,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 46,
+        "text-metrics": 17,
         "format-units": 0,
-        "other": 0
+        "other": 17
       }
     },
     {
@@ -6779,14 +6791,14 @@
     },
     {
       "slug": "panuvo-43-mifu020",
-      "diffCount": 5,
+      "diffCount": 90,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 46,
+        "text-metrics": 16,
         "format-units": 0,
-        "other": 0
+        "other": 28
       }
     },
     {
@@ -7558,6 +7570,18 @@
       }
     },
     {
+      "slug": "rexine-04-regi170",
+      "diffCount": 6,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 1
+      }
+    },
+    {
       "slug": "rezoma-09-vixi307",
       "diffCount": 73,
       "buckets": {
@@ -7691,14 +7715,14 @@
     },
     {
       "slug": "rodori-30-fipi183",
-      "diffCount": 5,
+      "diffCount": 80,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 46,
+        "text-metrics": 17,
         "format-units": 0,
-        "other": 0
+        "other": 17
       }
     },
     {
@@ -8038,18 +8062,6 @@
       }
     },
     {
-      "slug": "ruxuxu-75-jilu612",
-      "diffCount": 5,
-      "buckets": {
-        "missing-element": 1,
-        "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 0
-      }
-    },
-    {
       "slug": "ruzapi-75-pone297",
       "diffCount": 5,
       "buckets": {
@@ -8149,8 +8161,8 @@
       "slug": "secida-27-jaco323",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -8255,14 +8267,14 @@
     },
     {
       "slug": "sesezo-58-joce104",
-      "diffCount": 5,
+      "diffCount": 88,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 48,
+        "text-metrics": 21,
         "format-units": 0,
-        "other": 0
+        "other": 19
       }
     },
     {
@@ -8279,14 +8291,14 @@
     },
     {
       "slug": "sigefa-91-meme719",
-      "diffCount": 5,
+      "diffCount": 78,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 50,
+        "text-metrics": 10,
         "format-units": 0,
-        "other": 0
+        "other": 18
       }
     },
     {
@@ -9011,14 +9023,14 @@
     },
     {
       "slug": "tijide-41-togo659",
-      "diffCount": 5,
+      "diffCount": 30,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 6,
+        "text-metrics": 4,
         "format-units": 0,
-        "other": 0
+        "other": 20
       }
     },
     {
@@ -9143,14 +9155,14 @@
     },
     {
       "slug": "tojabu-38-lima321",
-      "diffCount": 5,
+      "diffCount": 76,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 34,
+        "text-metrics": 18,
         "format-units": 0,
-        "other": 0
+        "other": 24
       }
     },
     {
@@ -9409,8 +9421,8 @@
       "slug": "vanaci-52-gimi082",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -9479,14 +9491,14 @@
     },
     {
       "slug": "vegizu-18-zubu834",
-      "diffCount": 5,
+      "diffCount": 176,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 96,
+        "text-metrics": 43,
         "format-units": 0,
-        "other": 0
+        "other": 37
       }
     },
     {
@@ -9575,14 +9587,14 @@
     },
     {
       "slug": "vetuvo-45-gaku910",
-      "diffCount": 5,
+      "diffCount": 79,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 52,
+        "text-metrics": 14,
         "format-units": 0,
-        "other": 0
+        "other": 13
       }
     },
     {
@@ -9875,14 +9887,14 @@
     },
     {
       "slug": "vubibu-30-rufa077",
-      "diffCount": 5,
+      "diffCount": 100,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 42,
+        "text-metrics": 16,
         "format-units": 0,
-        "other": 0
+        "other": 42
       }
     },
     {
@@ -10139,14 +10151,14 @@
     },
     {
       "slug": "xecame-98-cuma671",
-      "diffCount": 5,
+      "diffCount": 48,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 22,
+        "text-metrics": 10,
         "format-units": 0,
-        "other": 0
+        "other": 16
       }
     },
     {
@@ -10523,14 +10535,14 @@
     },
     {
       "slug": "xonedu-05-mubu593",
-      "diffCount": 5,
+      "diffCount": 143,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 72,
+        "text-metrics": 40,
         "format-units": 0,
-        "other": 0
+        "other": 31
       }
     },
     {
@@ -10705,8 +10717,8 @@
       "slug": "xuxugi-47-vuzu867",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -11242,18 +11254,6 @@
       }
     },
     {
-      "slug": "zujani-47-femu345",
-      "diffCount": 5,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 0
-      }
-    },
-    {
       "slug": "zujuge-00-sida366",
       "diffCount": 5,
       "buckets": {
@@ -11442,6 +11442,10 @@
     {
       "slug": "caciga-47-jigu709",
       "reason": "refuses to parse -- line 5: `& opt`. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+    },
+    {
+      "slug": "caluni-22-noci624",
+      "reason": "refuses to parse -- `?->o main`. Unported: CommandExoArrowRight/Left -- the `?` endpoint is upstream's ARROW_SUPPCIRCLE marker for an arrow whose other end is OFF-DIAGRAM (`([?\\[\\]][ox]?)?`, CommandExoArrowLeft.java:60), the same family as the 74 `[`/`]` exo fixtures pinned in 2652df3c. Newly refused by T20 defect 5: the endpoint class is now upstream's own PART2CODE `([%pLN_.@]+)` (CommandArrow.java:119), so `?` can no longer be absorbed as a participant NAME. It previously rendered a phantom participant literally called `?`."
     },
     {
       "slug": "camebe-75-mujo573",
@@ -11772,10 +11776,6 @@
       "reason": "refuses to parse -- line 2: `Bob -> Alice ++ #blue : hello`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "micaki-01-rexa741",
-      "reason": "refuses to parse -- line 1: `a <- b ++`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "mitefi-27-cubo687",
       "reason": "refuses to parse -- line 8: `note right FMSSrv: Not decided how to send no data.`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
@@ -11822,10 +11822,6 @@
     {
       "slug": "nesuva-86-fuki568",
       "reason": "refuses to parse -- line 7: `/ note over b: b`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "nezipa-74-kigi270",
-      "reason": "refuses to parse -- line 5: `Bob <- Alice --: ok2`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "nidozi-08-daxa280",
@@ -11904,10 +11900,6 @@
       "reason": "refuses to parse -- line 1: `[-> Node: Start TC`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "rexine-04-regi170",
-      "reason": "refuses to parse -- line 7: `Bob <- Alice ++:`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "rititi-64-vene814",
       "reason": "refuses to parse -- line 4: `Alice -\\o Bob : hello`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
@@ -11926,6 +11918,10 @@
     {
       "slug": "ruxasu-79-puxa956",
       "reason": "refuses to parse -- line 7: `note left <<red>>`. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+    },
+    {
+      "slug": "ruxuxu-75-jilu612",
+      "reason": "refuses to parse -- `B -->? : log`. Unported: CommandExoArrowRight/Left -- the `?` endpoint is upstream's ARROW_SUPPCIRCLE marker for an arrow whose other end is OFF-DIAGRAM (`([?\\[\\]][ox]?)?`, CommandExoArrowLeft.java:60), the same family as the 74 `[`/`]` exo fixtures pinned in 2652df3c. Newly refused by T20 defect 5: the endpoint class is now upstream's own PART2CODE `([%pLN_.@]+)` (CommandArrow.java:119), so `?` can no longer be absorbed as a participant NAME. It previously rendered a phantom participant literally called `?`."
     },
     {
       "slug": "sameli-92-dape565",
@@ -12134,6 +12130,10 @@
     {
       "slug": "zudize-61-vomi445",
       "reason": "refuses to parse -- line 33: `[o-> System : control.start()`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+    },
+    {
+      "slug": "zujani-47-femu345",
+      "reason": "refuses to parse -- `A->? : M1`. Unported: CommandExoArrowRight/Left -- the `?` endpoint is upstream's ARROW_SUPPCIRCLE marker for an arrow whose other end is OFF-DIAGRAM (`([?\\[\\]][ox]?)?`, CommandExoArrowLeft.java:60), the same family as the 74 `[`/`]` exo fixtures pinned in 2652df3c. Newly refused by T20 defect 5: the endpoint class is now upstream's own PART2CODE `([%pLN_.@]+)` (CommandArrow.java:119), so `?` can no longer be absorbed as a participant NAME. It previously rendered a phantom participant literally called `?`."
     },
     {
       "slug": "zuravu-52-mike252",

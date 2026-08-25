@@ -28,6 +28,11 @@ export interface Participant {
   order: number; // first-appearance order (0-based)
   /** Box group id this participant belongs to (from `box` / `end box`). */
   boxId?: string;
+  /** The `<<...>>` run as written, guillemets included -- `CommandParticipant`
+   *  stores it on the Participant rather than in its code
+   *  (`CommandParticipant.java:174-181`). Rendered above the name unless
+   *  `hide stereotype` is in force. */
+  stereotype?: string;
 }
 
 export type MessageStyle =
@@ -182,6 +187,13 @@ export interface SequenceDiagramAST {
      *  participants not referenced by any event are dropped post-parse
      *  (`applyHideUnlinked`, `parser.ts`). */
     hideUnlinked?: boolean;
+    /** `hide stereotype` -- registered for sequence diagrams too, via
+     *  `SequenceDiagramFactory:100` -> `CommonCommands#addCommonCommands1`
+     *  -> `addCommonHides` (`CommonCommands.java:103-106`) ->
+     *  `CommandHideShowByGender` (`:195`). Suppresses the participant
+     *  stereotype run; the jar's goldens confirm it both ways
+     *  (secida-27-jaco323 hides, birocu-87-xubi808 shows `«APIGateway»`). */
+    hideStereotype?: boolean;
   };
   /** `scale ...` (`command/CommandScale*.java`, 6 forms via
    *  `CommonCommands#addCommonScaleCommands`) — resolved to a factor and
@@ -229,6 +241,9 @@ export interface ParticipantGeo {
   width: number;
   height: number;
   centerX: number;
+  /** Display form of {@link Participant.stereotype} -- guillemet-wrapped and
+   *  ready to draw, or absent when there is none or it is hidden. */
+  stereotype?: string;
 }
 
 import type { TextRun } from './text-block-geo.js';
