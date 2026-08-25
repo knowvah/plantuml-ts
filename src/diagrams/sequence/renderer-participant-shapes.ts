@@ -16,7 +16,7 @@
  */
 
 import type { ScaledTheme } from './scale-geo.js';
-import { rect, line, ellipse, path, circle } from '../../core/svg.js';
+import { rect, line, ellipse, path } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
 
 /** Pure geometry for {@link renderActorShape}, computed once and shared by
@@ -60,27 +60,46 @@ function computeActorGeo(cx: number, topY: number, height: number, theme: Scaled
   };
 }
 
-/** Head + torso + arms. */
-function renderActorTorso(geo: ActorGeo, theme: ScaledTheme): string {
-  const { cx, headR, headCy, bodyTop, bodyBot, armY, armSpan, strokeWidth } = geo;
-  const head = circle(cx, headCy, headR, {
-    fill: theme.colors.background,
-    stroke: theme.colors.border,
-    strokeWidth,
-  });
-  const body = line(cx, bodyTop, cx, bodyBot, { stroke: theme.colors.border, strokeWidth });
-  const arms = line(cx - armSpan, armY, cx + armSpan, armY, { stroke: theme.colors.border, strokeWidth });
-  return head + body + arms;
+/**
+ * The stick man's four strokes as ONE path, in upstream's own order and with
+ * upstream's own `moveTo`/`lineTo` sequence:
+ *
+ *   moveTo(0, 0)                 lineTo(0, bodyLenght)
+ *   moveTo(-armsLenght, armsY)   lineTo(armsLenght, armsY)
+ *   moveTo(0, bodyLenght)        lineTo(-legsX, bodyLenght + legsY)
+ *   moveTo(0, bodyLenght)        lineTo(legsX, bodyLenght + legsY)
+ *
+ * — body, arms, left leg, right leg (`ActorStickMan.java:76-85`). It is one
+ * `UPath`, drawn once, so it reaches SVG as a single `<path>`; the jar's own
+ * output for `actor 春` is
+ * `d="M80,26.5 L80,53.5 M67,34.5 L93,34.5 M80,53.5 L67,68.5 M80,53.5 L93,68.5"`.
+ *
+ * @see ~/git/plantuml/.../skin/ActorStickMan.java#drawU
+ */
+function actorPathD(geo: ActorGeo): string {
+  const { cx, bodyTop, bodyBot, armY, armSpan, legSpan, legY } = geo;
+  return (
+    `M${fmt(cx)},${fmt(bodyTop)} L${fmt(cx)},${fmt(bodyBot)}` +
+    ` M${fmt(cx - armSpan)},${fmt(armY)} L${fmt(cx + armSpan)},${fmt(armY)}` +
+    ` M${fmt(cx)},${fmt(bodyBot)} L${fmt(cx - legSpan)},${fmt(legY)}` +
+    ` M${fmt(cx)},${fmt(bodyBot)} L${fmt(cx + legSpan)},${fmt(legY)}`
+  );
 }
 
-/** The two legs. */
-function renderActorLegs(geo: ActorGeo, theme: ScaledTheme): string {
-  const { cx, bodyBot, legSpan, legY, strokeWidth } = geo;
-  const left = line(cx, bodyBot, cx - legSpan, legY, { stroke: theme.colors.border, strokeWidth });
-  const right = line(cx, bodyBot, cx + legSpan, legY, { stroke: theme.colors.border, strokeWidth });
-  return left + right;
-}
-
+/**
+ * Head + body, as the jar draws them: ONE `<ellipse>` and ONE `<path>`.
+ *
+ * `ActorStickMan#drawU` builds `UEllipse.build(headDiam, headDiam)` and a
+ * single `UPath`, and draws each exactly once (`:73`, `:77-85`, `:91`, `:95`).
+ * This used to emit a `<circle>` and FOUR `<line>`s — five top-level children
+ * where the jar has two. The excess is per-actor and per-diagram (header and
+ * footer rows both draw one), so it scaled with how much of a diagram this
+ * port managed to render, and it is what pushed 14 fixtures' top-level child
+ * count past the golden's once T13 stopped dropping their content.
+ *
+ * The path carries no fill: upstream applies `HColors.none().bg()` before
+ * drawing it (`:95`).
+ */
 export function renderActorShape(
   cx: number,
   topY: number,
@@ -88,7 +107,25 @@ export function renderActorShape(
   theme: ScaledTheme,
 ): string {
   const geo = computeActorGeo(cx, topY, height, theme);
-  return renderActorTorso(geo, theme) + renderActorLegs(geo, theme);
+  // `ellipse` takes a RAW attribute record (unlike `circle`, which has a typed
+  // `BoxStyle`), so the stroke width is spelled kebab-case here -- see
+  // `state/renderer-pseudostate.ts:58` for the same call shape.
+  //
+  // `svg-shapes.ts#circle`'s own doc says rewriting a `circle` call site as an
+  // equal-radii `ellipse` "would change the emitted element for no benefit".
+  // Here there IS a benefit and it is the whole point: the jar emits
+  // `<ellipse cx=... rx=8 ry=8>` for an actor head (`ActorStickMan.java:73`,
+  // `UEllipse.build`), so matching the element is matching upstream.
+  const head = ellipse(geo.cx, geo.headCy, geo.headR, geo.headR, {
+    fill: theme.colors.background,
+    stroke: theme.colors.border,
+    'stroke-width': geo.strokeWidth,
+  });
+  const body = path(actorPathD(geo), {
+    stroke: theme.colors.border,
+    strokeWidth: geo.strokeWidth,
+  });
+  return head + body;
 }
 
 /** Pure geometry for {@link renderDatabaseShape}, computed once and shared

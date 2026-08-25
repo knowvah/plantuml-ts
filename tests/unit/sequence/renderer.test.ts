@@ -670,14 +670,22 @@ describe('sequencePlugin integration', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderSequence — actor participant shape', () => {
-  it('renders a circle (head) for actor participants', () => {
+  it('renders an ellipse head and a single four-segment path for actor participants', () => {
     const geo = makeGeo({
       participants: [
         { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70 },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('<circle');
+    // The jar draws an actor head as an `<ellipse>` and its four strokes as
+    // ONE `<path>` (`ActorStickMan.java:73,77-85`), not a `<circle>` and four
+    // `<line>`s. Asserted on the element AND the path shape, since it is the
+    // primitive COUNT that this pins -- five top-level children where the jar
+    // has two is what made 14 corpus fixtures over-emit.
+    expect(svg).toContain('<ellipse');
+    expect(svg).not.toContain('<circle');
+    const d = /<path d="([^"]*)"/.exec(svg)?.[1] ?? '';
+    expect(d.match(/M/g) ?? [], 'body, arms, left leg, right leg').toHaveLength(4);
   });
 
   it('renders display name below the stick figure', () => {
