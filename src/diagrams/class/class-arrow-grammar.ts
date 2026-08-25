@@ -53,7 +53,25 @@ export const ARROW_DIR = String.raw`(?:left|right|down|up|le|ri|do|[lrud])`;
 // then discarded rather than carried on Relationship; see
 // decoration/LinkType.java's `linkStyle` field for where upstream keeps it
 // for later SVG rendering.
-export const ARROW_STYLE = String.raw`\[[^[\]]+\]`;
+/** `KEY1` — one style keyword (`CommandLinkElement.java:71`). */
+const LINE_STYLE_KEY = String.raw`dotted|dashed|plain|bold|hidden|norank|single|node|thickness=\d+`;
+/**
+ * `LINE_STYLE` — one `#color` or keyword, then zero or more COMMA-separated
+ * more of the same (`CommandLinkElement.java:77-80`).
+ *
+ * Deliberately NOT `LINE_STYLE_MULTIPLES`, which appends `(?:;LINE_STYLE)*`
+ * (`:82`). That semicolon form is DESCRIPTION-only: `CommandLinkElement`
+ * takes the multiples for its ARROW_STYLE1 (`:101`) while `CommandLinkClass`
+ * takes plain `LINE_STYLE` for both of its (`:134,137`). So
+ * `a -[#blue,dashed;#red]-> b` is a description link and not a class one --
+ * `component/bagoze-78-lada681` says so in its own source ("this does not
+ * work") and the jar routes it to DESCRIPTION.
+ *
+ * This was `\[[^[\]]+\]`, accepting any bracket content, which let the
+ * class engine claim that fixture.
+ */
+const LINE_STYLE = `(?:#\\w+|${LINE_STYLE_KEY})(?:,(?:#\\w+|${LINE_STYLE_KEY}))*`;
+export const ARROW_STYLE = `\\[(?:${LINE_STYLE})\\]`;
 
 const ARROW_DIR_RE = new RegExp(ARROW_DIR, 'i');
 const ARROW_DIR_RE_G = new RegExp(ARROW_DIR, 'gi');
