@@ -624,20 +624,18 @@ Ordered by how ready they are, not by size.
   participant kind (actor, database, boundary, control, entity, queue,
   collections) but not `participant` itself, so `<style> participant {}`
   resolved to no bucket at all.
-- **`gradient-paint-goes-in-defs`** — NEW 2026-08-25, surfaced by the above.
-  A gradient `Paint` is emitted as a `<linearGradient>` INLINE among the
-  drawing elements, once per referencing shape, while `<defs/>` is left
-  empty. The jar emits it ONCE inside `<defs>` and references it by id
-  (`fadage-04-xoxe727`: our 4 inline copies vs its 1 in defs; its
-  `svg/defs[1][childCount]` is 3 where ours is 0, which is also why
-  `gifope-23-jufe872` and `ravire-24-jaju542` carry a second short-circuit).
-  This is SHARED emission code, not sequence's — expect movement across
-  class/description/state too, which is why it is its own entry. Two
-  fixtures (`fadage-04-xoxe727`, `netuvi-29-jiti924`) regressed on
-  weightedScore when participants started honouring gradient backgrounds:
-  the bucket support is correct and the gradient emission underneath it is
-  not. Special-casing gradients back out of the bucket would have hidden
-  this rather than fixed it.
+- **`gradient-paint-goes-in-defs`** — DONE 2026-08-25, same day it was filed.
+  `extractGradientDefs` (`core/svg.ts`) lifts every inline
+  `<linearGradient>` out of the drawing body and into the document `<defs>`,
+  deduped by id, on BOTH assembly paths (`svgRoot` and
+  `klimt/document-shell.ts`). Dedup is exact rather than heuristic:
+  `paintToSvg`'s id is a content hash of the resolved
+  `color1|color2|policy`, so equal ids mean byte-identical defs — the design
+  already anticipated this ("so the def can be deduplicated by the caller").
+  The two fixtures that regressed when participants started honouring
+  gradient backgrounds (`fadage-04-xoxe727`, `netuvi-29-jiti924`) came back
+  301 -> 242, below their pre-bucket 253. Shared emission code, so all
+  engines were re-run: no failing-test change anywhere.
 - **`dispatch-by-parse-attempt`** — NEW 2026-08-23, deferred out of
   `sequence-engine-overclaims-nested-diagrams` by maintainer ruling (that
   brief's D2). Upstream decides diagram ownership by **attempting the parse**

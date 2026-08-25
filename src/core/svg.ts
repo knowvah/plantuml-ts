@@ -469,19 +469,34 @@ const GRADIENT_DEF_RE = new RegExp(
   'g',
 );
 
+
 /**
- * Collapse repeated inline `<linearGradient>` defs (decision D3): shapes emit
- * their gradient def inline before themselves, so a gradient shared by N shapes
- * appears N times. Because the id is a content hash, repeats are byte-identical
- * — keep the first occurrence per id and drop the rest.
+ * Lift every inline `<linearGradient>` out of `body` and return them, deduped
+ * by id in first-use order, for the document's `<defs>`.
+ *
+ * `SvgGraphics#createSvgGradient` keys a map on `(color1, color2, policy)`,
+ * creates the element once on a miss, and appends it to `defs`
+ * (`SvgGraphics.java:363-405`) -- so the jar emits ONE per distinct gradient,
+ * in `<defs>`, referenced by id from wherever it is used. This port's shape
+ * emitters each prepend their own def inline instead
+ * (`svg-shapes.ts#rect`/`line`/`text`/...), which left `<defs/>` empty and
+ * repeated the element once per referencing shape.
+ *
+ * Dedup by id is exact rather than heuristic: `paintToSvg`'s id is a content
+ * hash of the resolved `color1|color2|policy`, so equal ids mean
+ * byte-identical defs.
  */
-function dedupeGradientDefs(svg: string): string {
+export function extractGradientDefs(body: string): { body: string; defs: string } {
   const seen = new Set<string>();
-  return svg.replace(GRADIENT_DEF_RE, (match, id: string) => {
-    if (seen.has(id)) return '';
-    seen.add(id);
-    return match;
+  const found: string[] = [];
+  const stripped = body.replace(GRADIENT_DEF_RE, (match, id: string) => {
+    if (!seen.has(id)) {
+      seen.add(id);
+      found.push(match);
+    }
+    return '';
   });
+  return { body: stripped, defs: found.join('') };
 }
 
 export function svgRoot(
@@ -492,7 +507,11 @@ export function svgRoot(
   extraDefs = '',
 ): string {
   const markers = ALL_ARROW_TYPES.map((t) => arrowHead(t, bgColor));
-  const defsBlock = defs([...markers, extraDefs]);
+  // Gradients are lifted out of the children FIRST so they can ride in the
+  // same `<defs>` the markers do, as `SvgGraphics#createSvgGradient` puts
+  // them (`:404`).
+  const lifted = extractGradientDefs(children.join(''));
+  const defsBlock = defs([...markers, extraDefs, lifted.defs]);
   const isSolid = bgColor !== 'transparent' && bgColor !== PAINT_NONE;
   const bgRect = isSolid
     ? `<rect width="${fmt(width)}" height="${fmt(height)}" fill="${shortenColor(bgColor)}"/>`
@@ -502,9 +521,7 @@ export function svgRoot(
   // `<defs>` stays OUTSIDE that group, matching the jar's `<defs/><g …>`
   // child order. Gradient de-dup still spans the whole document, exactly
   // as before — the `<g>` tags are inert to `GRADIENT_DEF_RE`.
-  const body = dedupeGradientDefs(
-    defsBlock + ROOT_GROUP_OPEN + bgRect + children.join('') + ROOT_GROUP_CLOSE,
-  );
+  const body = defsBlock + ROOT_GROUP_OPEN + bgRect + lifted.body + ROOT_GROUP_CLOSE;
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" ` +
     `width="${fmt(width)}" height="${fmt(height)}" ` +

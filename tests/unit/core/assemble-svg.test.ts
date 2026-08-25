@@ -498,3 +498,51 @@ describe('assembleSvg — AC5: the other diagram types are byte-unchanged', () =
     expect(svg).not.toContain('data-diagram-type');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Gradient defs — SvgGraphics#createSvgGradient
+// ---------------------------------------------------------------------------
+
+describe('gradient defs are hoisted and deduped', () => {
+  const gradient = { color1: '#FF0000', color2: '#0000FF', policy: '\\' } as const;
+
+  // `createSvgGradient` keys a map on (color1, color2, policy), creates the
+  // element once on a miss and appends it to `defs`
+  // (`SvgGraphics.java:363-405`). This port's shape emitters each prepend
+  // their own def inline, so a gradient shared by N shapes appeared N times
+  // with `<defs/>` left empty.
+  it('emits ONE linearGradient, inside <defs>, for many shapes sharing it', () => {
+    const body =
+      rect(0, 0, 10, 10, { fill: gradient }) +
+      rect(20, 0, 10, 10, { fill: gradient }) +
+      rect(40, 0, 10, 10, { fill: gradient });
+    const svg = assembleSvg({ body, width: 100, height: 20, background: '#FFFFFF' });
+    expect((svg.match(/<linearGradient/g) ?? []).length).toBe(1);
+    const defsBlock = /<defs>([\s\S]*?)<\/defs>/.exec(svg)?.[1] ?? '';
+    expect(defsBlock).toContain('<linearGradient');
+    // ...and the shapes still reference it.
+    expect((svg.match(/url\(#/g) ?? []).length).toBe(3);
+  });
+
+  it('keeps DISTINCT gradients as separate defs', () => {
+    const other = { color1: '#00FF00', color2: '#FFFF00', policy: '|' } as const;
+    const svg = assembleSvg({
+      body: rect(0, 0, 10, 10, { fill: gradient }) + rect(20, 0, 10, 10, { fill: other }),
+      width: 100,
+      height: 20,
+      background: '#FFFFFF',
+    });
+    expect((svg.match(/<linearGradient/g) ?? []).length).toBe(2);
+  });
+
+  it('leaves no gradient behind in the drawing body', () => {
+    const svg = assembleSvg({
+      body: rect(0, 0, 10, 10, { fill: gradient }),
+      width: 100,
+      height: 20,
+      background: '#FFFFFF',
+    });
+    const afterDefs = svg.slice(svg.indexOf('</defs>'));
+    expect(afterDefs).not.toContain('<linearGradient');
+  });
+});

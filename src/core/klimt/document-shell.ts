@@ -18,6 +18,7 @@
  * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-2, T1)
  */
 
+import { extractGradientDefs } from '../svg.js';
 import { ROOT_GROUP_OPEN } from '../svg.js';
 import { UGraphicSvg } from './drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from './drawing/svg/svg-graphics.js';
@@ -142,6 +143,8 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType: stri
   const style =
     `width:${String(width)}px;height:${String(height)}px;` +
     (isSolid ? `background:${background};` : '');
+  const lifted = extractGradientDefs(fragment.body);
+  const defsBody = extraDefs + lifted.defs;
   return (
     '<svg xmlns=' + DQUOTE + 'http://www.w3.org/2000/svg' + DQUOTE +
     ' xmlns:xlink=' + DQUOTE + 'http://www.w3.org/1999/xlink' + DQUOTE +
@@ -161,8 +164,12 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType: stri
     // the open/close form all have children. `createXml` serializes an
     // empty element self-closed; this port was emitting `<defs></defs>`
     // unconditionally.
-    (extraDefs === '' ? '<defs/>' : `<defs>${extraDefs}</defs>`) +
-    withRootGroupAttributes(fragment.body) +
+    // Gradients are lifted out of the body into this same `<defs>`, deduped
+    // by id -- `SvgGraphics#createSvgGradient` emits ONE per distinct
+    // (color1, color2, policy) and appends it to `defs` (`:363-405`), where
+    // this port's shape emitters each prepended their own copy inline.
+    (defsBody === '' ? '<defs/>' : `<defs>${defsBody}</defs>`) +
+    withRootGroupAttributes(lifted.body) +
     '</svg>'
   );
 }
