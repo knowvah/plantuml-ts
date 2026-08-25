@@ -283,10 +283,31 @@ function badgeFor(
   if (deco === undefined) return undefined;
   const sprite = getSpriteMonochrome(sprites, deco.name);
   if (sprite === undefined) return undefined;
+  // `spriteToRgba`'s gradient runs backColor -> fontColor, mirroring
+  // `toUImage`'s `gradient(backcolor, color)` (`SpriteMonochrome.java:191`).
+  // `Stereotype#getSprite` passes `asTextBlock(getHtmlColor(), null, ...)`
+  // (`:116`) and `asTextBlock#drawU` resolves `color = forcedColor ?? fontColor`
+  // (`:215`), so the END is the stereotype's DECLARED colour -- or black when
+  // it declares none, which is `buildComplex`'s own
+  // `htmlColor = col == null ? HColors.BLACK : col` and already
+  // `spriteToRgba`'s default for an absent `fontColor`.
+  //
+  // The START is `ug.getParam().getBackcolor()` -- the CURRENT graphics
+  // background, i.e. whatever the participant box is filled with, so the
+  // sprite blends into it. Sourced from the same expression
+  // `renderParticipantBox` paints that box with: where our box fill diverges
+  // from the jar's the badge inherits that one divergence rather than adding
+  // a second (birocu-87-xubi808: the jar fills `#FF0` from
+  // `<style> participant { BackgroundColor }`, which this port does not yet
+  // route to the box either).
+  //
+  // These two were passed the other way round when the badge first landed,
+  // which tinted every sprite from the declared colour toward the theme's
+  // TEXT colour instead of from the box toward the declared colour.
   const png = spriteToPngDataUri(
     spriteMonochromeAsLike(sprite),
-    theme.colors.text,
     deco.color,
+    theme.colors.background,
     deco.scale,
   );
   return { kind: 'sprite', dataUri: png.dataUri, width: png.width, height: png.height };

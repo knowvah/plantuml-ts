@@ -615,6 +615,22 @@ Ordered by how ready they are, not by size.
   by construction) takes birocu's sprite 16516 -> 679 bytes, now 0.87x the
   jar's own, with pixels byte-identical. Whole-SVG output over the 8 sprite
   fixtures is 0.77x the jar.
+- **`sequence-element-style-buckets`** — NEW 2026-08-25, found while fixing
+  the sprite badge tint. The sequence engine reads **no** per-element
+  `<style>` buckets at all: `theme.colors.elements` is never consulted
+  anywhere under `src/diagrams/sequence/`. So
+  `<style> participant { BackgroundColor #FFFF00 }` reaches neither the
+  participant box fill nor anything else — `birocu-87-xubi808` fills `#FFF`
+  where the jar fills `#FF0`, and `cexeco-21-piga007` carries the same block.
+  The buckets themselves resolve correctly (`collectElementStyleBuckets`
+  already puts `participant -> {backgroundcolor, linecolor}` on the theme);
+  nothing reads them. Scope: route `elements.<kind>` through
+  `renderParticipantBox`/`renderFooterBox` for background and border, per
+  participant kind. Expect broad fixture movement — every fixture with a
+  `<style>` element block is currently rendering the default palette.
+  **Knock-on already handled:** the badge tint's gradient START is sourced
+  from the same expression that paints the box, so fixing the fill fixes the
+  badge with it rather than needing a second change.
 - **`dispatch-by-parse-attempt`** — NEW 2026-08-23, deferred out of
   `sequence-engine-overclaims-nested-diagrams` by maintainer ruling (that
   brief's D2). Upstream decides diagram ownership by **attempting the parse**

@@ -19,6 +19,32 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo.js';
+import { inflateSync } from 'node:zlib';
+
+/** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
+ *  encoder itself stays browser-safe. */
+function decodeRgba(png: Buffer): Array<[number, number, number, number]> {
+  let i = 8;
+  let idat = Buffer.alloc(0);
+  let width = 0;
+  let height = 0;
+  while (i < png.length) {
+    const len = png.readUInt32BE(i);
+    const type = png.toString('ascii', i + 4, i + 8);
+    if (type === 'IHDR') { width = png.readUInt32BE(i + 8); height = png.readUInt32BE(i + 12); }
+    if (type === 'IDAT') idat = Buffer.concat([idat, png.subarray(i + 8, i + 8 + len)]);
+    i += 12 + len;
+  }
+  const raw = inflateSync(idat);
+  const out: Array<[number, number, number, number]> = [];
+  const stride = width * 4 + 1;
+  for (let y = 0; y < height; y++)
+    for (let x = 0; x < width; x++) {
+      const o = y * stride + 1 + x * 4;
+      out.push([raw[o]!, raw[o + 1]!, raw[o + 2]!, raw[o + 3]!]);
+    }
+  return out;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -967,6 +993,28 @@ describe('renderSequence — participant stereotype', () => {
     expect(svg).toContain('<image');
     expect(svg).toContain('data:image/png;base64,');
     expect(svg).toContain('>«Lbl»</text>');
+  });
+
+  // The gradient runs backColor -> fontColor (`spriteToRgba`), mirroring
+  // `toUImage`'s `gradient(backcolor, color)` (`SpriteMonochrome.java:191`).
+  // `Stereotype#getSprite` -> `asTextBlock(getHtmlColor(), null, ...)` (`:116`)
+  // and `drawU`'s `forcedColor ?? fontColor` (`:215`) make the DECLARED colour
+  // the END; the START is the current graphics background.
+  //
+  // The corpus cannot gate this: the data URI is one attribute that differs
+  // from the jar either way, so weightedScore is identical whichever
+  // direction the gradient runs. Asserted on the decoded pixels instead.
+  it('tints the sprite from the background TOWARD the declared colour', () => {
+    const sprite = 'sprite $s1 [2x2/16] {\n0F\nF0\n}';
+    const svg = render(`@startuml\n${sprite}\nparticipant P << ($s1,#CC2264) L >>\nP -> Q: hi\n@enduml`);
+    const b64 = /xlink:href="data:image\/png;base64,([^"]*)"/.exec(svg)?.[1] ?? '';
+    expect(b64).not.toBe('');
+    const px = decodeRgba(Buffer.from(b64, 'base64'));
+    // gray 0 -> coef 0 -> the gradient's START, i.e. the box background.
+    // gray F -> coef 1 -> its END, the declared #CC2264.
+    const rgbs = px.map(([r, g, b]) => `${r},${g},${b}`);
+    expect(rgbs).toContain('204,34,100');
+    expect(rgbs).not.toContain('24,24,24');
   });
 
   it('draws nothing extra when the sprite name does not resolve', () => {
