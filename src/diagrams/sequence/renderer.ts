@@ -83,12 +83,9 @@ function renderLabel(cx: number, cy: number, label: string, theme: Theme): strin
  *      engine; sharing it means lifting the helper into `core/` the way SI27
  *      lifted the creole atom seam, not reaching across the boundary from
  *      here. A badge renders as its plain label text until then.
- *   2. `ShowStereotype false` in a `<style>` block (`PName.ShowStereotype`,
- *      applied upstream by `Display#withoutStereotypeIfNeeded(style)` inside
- *      `AbstractTextualComponent`'s constructor). Honouring it needs the
- *      resolved style map at this point, which the sequence layout does not
- *      yet carry. Four corpus fixtures use it; `cusiru-97-buco277` is the
- *      one whose top-level count it moves.
+ * `ShowStereotype false` IS honoured, upstream of here: the layout resolves
+ * it (`sequence-layout-participants.ts#visibleStereotype`) and simply leaves
+ * `geo.stereotype` unset, so this function needs no style knowledge.
  */
 function renderNameBlock(p: ParticipantGeo, cy: number, theme: ScaledTheme): string {
   if (p.stereotype === undefined) return renderLabel(p.centerX, cy, p.display, theme);

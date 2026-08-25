@@ -6,6 +6,7 @@ import {
   cleanStereotypeToken,
   collectStyleTagNames,
   computeNoteStyleTagCascade,
+  computeShowStereotypeByTag,
 } from '../../../src/core/style-map-element.js';
 import { applyStyleMap } from '../../../src/core/style-map-theme.js';
 import { defaultTheme } from '../../../src/core/theme.js';
@@ -423,5 +424,48 @@ describe('computeNoteStyleTagCascade (G2 N37)', () => {
   it('drops a tag with no note-scoped property at all', () => {
     const m = styleMap({ 'classdiagram..mystyle': { backgroundcolor: 'cyan' } });
     expect(Object.keys(computeNoteStyleTagCascade(m))).toHaveLength(0);
+  });
+});
+// ---------------------------------------------------------------------------
+// PName.ShowStereotype per `.tagname`
+// ---------------------------------------------------------------------------
+
+describe('computeShowStereotypeByTag', () => {
+  // `Display#withoutStereotypeIfNeeded` keeps the stereotype when the style's
+  // value is `ValueNull` OR truthy, and strips it ONLY on an explicit false
+  // (`Display.java:131-133`). So an absent entry must mean "show".
+  it('records only tags that declare the property', () => {
+    const m = styleMap({
+      '.dummy1': { showstereotype: 'false' },
+      '.other': { fontcolor: 'red' },
+    });
+    const got = computeShowStereotypeByTag(m);
+    expect(got).toEqual({ dummy1: false });
+    expect('other' in got).toBe(false);
+  });
+
+  it('records an explicit true as true, not as absent', () => {
+    expect(computeShowStereotypeByTag(styleMap({ '.t': { showstereotype: 'true' } }))).toEqual({ t: true });
+  });
+
+  it('reads a bare `.tag {}` block, which needs no element in the query set', () => {
+    expect(computeShowStereotypeByTag(styleMap({ '.dummy1': { showstereotype: 'false' } })).dummy1).toBe(false);
+  });
+
+  // A nested `participant { .dummy1 {} }` block is keyed `participant..dummy1`
+  // -- `parseTagSelector` splits the sname path from the tag on `..` (:301-303).
+  it('reads the participant-scoped form too', () => {
+    expect(
+      computeShowStereotypeByTag(styleMap({ 'participant..dummy1': { showstereotype: 'false' } })).dummy1,
+    ).toBe(false);
+  });
+
+  it('rides applyStyleMap onto the theme', () => {
+    const theme = applyStyleMap(styleMap({ '.dummy1': { showstereotype: 'false' } }), defaultTheme);
+    expect(theme.colors.showStereotypeByTag).toEqual({ dummy1: false });
+  });
+
+  it('leaves the theme untouched when no tag declares it', () => {
+    expect(applyStyleMap(styleMap({}), defaultTheme).colors.showStereotypeByTag).toBeUndefined();
   });
 });

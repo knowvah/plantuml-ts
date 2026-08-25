@@ -105,9 +105,10 @@ function computeParticipantWidths(
 ): number[] {
   const fontSpec = fontSpecOf(theme);
   return sortedParticipants.map((p) => {
+    const stereo = visibleStereotype(p, theme);
     const lw = Math.max(
       measurer.measure(p.display, fontSpec).width,
-      p.stereotype === undefined ? 0 : measurer.measure(stereotypeLabel(p.stereotype), fontSpec).width,
+      stereo === undefined ? 0 : measurer.measure(stereo, fontSpec).width,
     );
     if (p.type === 'database') {
       return Math.max(DB_MIN_WIDTH, lw + theme.sequence.participantPadding);
@@ -174,6 +175,30 @@ function stereotypeLabel(raw: string): string {
   return `«${raw.replace(/^<<\s*/, '').replace(/\s*>>$/, '')}»`;
 }
 
+/**
+ * The visible stereotype label, or undefined when the resolved style hides it.
+ *
+ * `AbstractTextualComponent`'s constructor runs the display through
+ * `Display#withoutStereotypeIfNeeded(style)` (`:84`), which strips the
+ * stereotype only on an explicit `ShowStereotype false` -- an unset value is
+ * `ValueNull` and keeps it (`Display.java:127-136`). `theme.colors
+ * .showStereotypeByTag` carries exactly the tags that declared the property,
+ * so an absent entry is upstream's absent value.
+ *
+ * `resolveStyleCascade` cleans the token itself, so the raw `<<tag>>` is the
+ * lookup key with the guillemets trimmed here and nothing else -- no
+ * dependency on the class engine's stereotype splitter.
+ */
+function visibleStereotype(p: Participant, theme: Theme): string | undefined {
+  if (p.stereotype === undefined) return undefined;
+  const byTag = theme.colors.showStereotypeByTag;
+  if (byTag !== undefined) {
+    const tag = p.stereotype.replace(/^<<\s*/, '').replace(/\s*>>$/, '').trim().toLowerCase();
+    if (byTag[tag] === false) return undefined;
+  }
+  return stereotypeLabel(p.stereotype);
+}
+
 /** Build the geometry for a single participant column at a given x offset. */
 function buildParticipantGeo(
   p: Participant,
@@ -187,7 +212,8 @@ function buildParticipantGeo(
   // A visible stereotype is a SECOND run above the name
   // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
   // own line in `birocu-87-xubi808`), so the head grows by one line.
-  const stereoLines = p.stereotype === undefined ? 0 : 1;
+  const stereo = visibleStereotype(p, theme);
+  const stereoLines = stereo === undefined ? 0 : 1;
   const boxHeight = measured.height * (1 + stereoLines) + 20;
   const pHeight =
     p.type === 'actor' ? Math.max(boxHeight, SEQUENCE_ACTOR_HEIGHT) :
@@ -198,7 +224,7 @@ function buildParticipantGeo(
   return {
     id: p.id,
     display: p.display,
-    ...(p.stereotype !== undefined ? { stereotype: stereotypeLabel(p.stereotype) } : {}),
+    ...(stereo !== undefined ? { stereotype: stereo } : {}),
     type: p.type,
     x: currentX,
     y: 0,

@@ -878,3 +878,51 @@ describe('renderSequence — box integration', () => {
     expect(svg).toContain('Frontend');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Participant stereotype: PName.ShowStereotype
+// ---------------------------------------------------------------------------
+
+describe('renderSequence — participant stereotype', () => {
+  const render = (src: string): string =>
+    renderFixtureSequence(src, new DeterministicMeasurer());
+
+  // `CommandParticipant` stores the stereotype on the Participant rather than
+  // in its code (`:174-181`), and the jar draws it on its own line -- the
+  // golden for `birocu-87-xubi808` carries `«APIGateway»` and `OnlyLabel` as
+  // separate elements.
+  it('draws the stereotype as its own guillemeted run', () => {
+    const svg = render('@startuml\nparticipant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml');
+    expect(svg).toContain('>«dummy1»</text>');
+    expect(svg).toContain('>Bob</text>');
+  });
+
+  // `Display#withoutStereotypeIfNeeded` strips it ONLY on an explicit false
+  // (`Display.java:131-133`).
+  it('hides it when a style tag sets ShowStereotype false', () => {
+    const svg = render(
+      '@startuml\n<style>\n.dummy1 {\n  ShowStereotype false\n}\n</style>\n' +
+        'participant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml',
+    );
+    expect(svg).not.toContain('«dummy1»');
+    expect(svg).toContain('>Bob</text>');
+  });
+
+  it('still draws it when the style says true, or says nothing about it', () => {
+    const shown = render(
+      '@startuml\n<style>\n.dummy1 {\n  ShowStereotype true\n}\n</style>\n' +
+        'participant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml',
+    );
+    expect(shown).toContain('«dummy1»');
+    const silent = render(
+      '@startuml\n<style>\n.dummy1 {\n  FontColor red\n}\n</style>\n' +
+        'participant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml',
+    );
+    expect(silent).toContain('«dummy1»');
+  });
+
+  it('hide stereotype removes it regardless of any style', () => {
+    const svg = render('@startuml\nhide stereotype\nparticipant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml');
+    expect(svg).not.toContain('«dummy1»');
+  });
+});

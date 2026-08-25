@@ -2,11 +2,11 @@
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
     "missing-element": 473,
-    "extra-element": 53,
-    "geometry": 16031,
-    "text-metrics": 5740,
+    "extra-element": 51,
+    "geometry": 16089,
+    "text-metrics": 5762,
     "format-units": 5,
-    "other": 11029
+    "other": 11072
   },
   "fixtures": [
     {
@@ -1007,14 +1007,14 @@
     },
     {
       "slug": "cexeco-21-piga007",
-      "diffCount": 5,
+      "diffCount": 65,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 24,
+        "text-metrics": 13,
         "format-units": 0,
-        "other": 0
+        "other": 28
       }
     },
     {
@@ -1307,14 +1307,14 @@
     },
     {
       "slug": "cusiru-97-buco277",
-      "diffCount": 5,
+      "diffCount": 66,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 42,
+        "text-metrics": 9,
         "format-units": 0,
-        "other": 0
+        "other": 15
       }
     },
     {
