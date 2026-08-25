@@ -32,6 +32,7 @@ import {
 } from './class-notes.js';
 import { applyUrlStatement, URL_STATEMENT_RE } from './class-url-command.js';
 import { ensureClassifier } from './parser.js';
+import { parseTagTokens } from './class-declaration-parser.js';
 
 /**
  * Order matters: patterns are tested top-to-bottom; first match wins.
@@ -92,13 +93,30 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   //      `rectangle "Y" as Z [[url]] {`. Non-empty → cluster; EMPTY → rect leaf on close.
   {
     pattern:
-      /^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{\s*$/i,
+      // `$tag` runs on BOTH sides of the stereotype, as `TAGS1`/`TAGS2`
+      // (`CommandPackageWithUSymbol.java:121,123`) -- the same pair rule 5's
+      // `package` pattern above already carries. Without them
+      // `component C1 $tag1 {` matched no container command at all, so the
+      // block never opened and its BODY went unparsed: `component C1 $tag1 {
+      // qwe rty !!! }` was accepted whole. That let the class engine claim
+      // `component/jebovo-64-rasa849` and `sodoza-93-nanu557`, which the jar
+      // routes to DESCRIPTION -- upstream's class factory refuses them on the
+      // nested `node n` leaf, via `CommandCreateElementFull2`'s allowmixing
+      // gate, and only reaches that gate because the container DID open.
+      /^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(?:<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{\s*$/i,
     execute(state, match) {
       const usymbol = match[1]!.toLowerCase();
       const name = match[2] !== undefined ? match[2] : match[3]!;
       const id = match[4] ?? name;
       const effectiveId = openNamespaceBlock(state, id, name);
       state.descriptiveContainers.set(effectiveId, usymbol);
+      // `addTags(p, arg.getLazzy("TAGS", 0))` -- upstream applies BOTH tag
+      // runs to the group it just created (`CommandPackageWithUSymbol
+      // .java:214`). `remove $tag` / `restore $tag` resolve against them, so
+      // discarding them here would leave `component a $a {}` un-removable
+      // (kokebo-27-vafi688).
+      const tags = parseTagTokens(`${match[5] ?? ''} ${match[6] ?? ''}`);
+      if (tags.length > 0) state.pendingContainerTags.set(effectiveId, tags);
     },
   },
 

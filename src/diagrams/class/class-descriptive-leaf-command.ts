@@ -13,6 +13,7 @@
  * @see ~/git/plantuml/.../classdiagram/command/CommandCreateElementFull2.java
  */
 
+import { refuse } from '../../core/parse-refusal.js';
 import {
   applyClassifierDecl,
   parseClassifierDecl,
@@ -31,16 +32,37 @@ export const ALLOW_MIXING_ERROR =
   "Use 'allowmixing' if you want to mix classes and other UML elements.";
 
 /**
- * A CONTAINER opener, which upstream claims with `CommandPackage` /
- * `CommandPackageWithUSymbol` (`ClassDiagramFactory` lines 127-130) BEFORE
- * the gated `CommandCreateElementFull2` on line 133 — so it is never gated.
+ * `CommandPackageWithUSymbol`'s own SYMBOL alternation, verbatim
+ * (`CommandPackageWithUSymbol.java:76-77`), plus the three keywords with
+ * dedicated container commands on this factory — `package` is already in the
+ * list, `namespace` has `CommandNamespace`/`CommandNamespace2`
+ * (`ClassDiagramFactory.java:138-140`) and `together` has `CommandTogether`
+ * (`:131`).
  *
- * Jar-verified 2026-08-02: `package foo {`, `package foo {}`, `state A {`,
- * `rectangle R {` and the long-description `package Application [` all render
- * without `allowmixing`, while the LEAF form of every one of the 29
- * descriptive keywords is refused without it.
+ * These are the container openers upstream claims BEFORE reaching the gated
+ * `CommandCreateElementFull2` on `:133`, so these — and only these — are
+ * never gated.
+ *
+ * `state` IS NOT IN THE LIST, and that omission is the point. An earlier note
+ * here read "jar-verified: `state A {` renders without allowmixing", which
+ * conflated two different questions: `state A {` does render, because the jar
+ * routes such a source to the STATE factory. It says nothing about whether
+ * `ClassDiagramFactory` accepts the line, and it does not — no command in its
+ * table matches. Exempting it here let the class engine claim 81 state
+ * diagrams under parse-attempt dispatch.
  */
+const CONTAINER_KEYWORD =
+  /^(?:package|rectangle|hexagon|node|artifact|folder|file|frame|cloud|action|process|database|storage|component|card|queue|stack|namespace|together)\b/i;
+
+/** The opener's own shape: a trailing `{`, `{}` or long-description `[`. */
 const CONTAINER_OPENER = /[{[]\s*\}?\s*$/;
+
+/** A container opener upstream claims before the gate: the right keyword AND
+ *  the opener shape. Either alone is not enough — `state A {` has the shape
+ *  and not the keyword; `node Foo` has the keyword and not the shape. */
+function isContainerOpener(line: string): boolean {
+  return CONTAINER_KEYWORD.test(line) && CONTAINER_OPENER.test(line);
+}
 
 /** `mix_` = Mode.WITH_MIX_PREFIX, registered UNGATED on line 134. */
 const MIX_PREFIX = /^\s*mix_/i;
@@ -85,21 +107,34 @@ export const DESCRIPTIVE_LEAF_COMMANDS: readonly Command[] = [
       //   if (mode == Mode.NORMAL_KEYWORD && diagram.isAllowMixing() == false)
       //     return CommandExecutionResult.error(...)
       //
-      // Only RECORDED here, adjudicated in `finalizeParse` — see
-      // `gatedLeafSeen`'s doc on ParseState. The declaration is still applied,
-      // because whether this is an error depends on the whole block: upstream
-      // reaches this command only when `ClassDiagramFactory` owned the block
-      // in the first place, and this port's dispatcher is more eager than that
-      // factory (a C4 diagram, which has no class construct at all, arrives
-      // here). Deciding at the end keeps a macro-expanded descriptive diagram
-      // rendering while still refusing a genuine class+leaf mix.
+      // Refused IMMEDIATELY, as upstream refuses it. This used to be merely
+      // RECORDED and adjudicated at end of parse, gated on the block also
+      // holding a native class construct -- a compensation for this port's
+      // dispatcher being more eager than upstream's factory selection, which
+      // sent C4 and other macro-expanded descriptive diagrams here when
+      // upstream would have given them to `DescriptionDiagramFactory`.
+      //
+      // T12 removed the reason for that compensation: dispatch now attempts
+      // the parse, so refusing here is exactly what hands the block to the
+      // next candidate, which is what upstream does. Measured: deferring it
+      // cost 200 DESCRIPTION and 150 STATE fixtures, each claimed by the
+      // class engine because this gate never fired in time.
       if (
         !state.allowMixing &&
         !MIX_PREFIX.test(line) &&
-        !CONTAINER_OPENER.test(line.trim())
+        !isContainerOpener(line.trim())
       ) {
-        state.gatedLeafSeen = true;
-        state.gatedLeafLine ??= state.currentLine;
+        // Upstream returns the error BEFORE applying anything, so the
+        // declaration below must not run. `error(String)` carries score 0
+        // (`CommandExecutionResult.java:81-83`).
+        state.executionRefusal = refuse(
+          'execution',
+          state.currentLine ?? 0,
+          state.currentLine ?? 0,
+          ALLOW_MIXING_ERROR,
+          0,
+        );
+        return;
       }
       const decl = parseClassifierDecl(line);
       if (decl !== null) applyClassifierDecl(state, decl, false);

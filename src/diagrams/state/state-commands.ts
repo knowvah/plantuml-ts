@@ -133,6 +133,29 @@ export const COMMANDS: readonly Command[] = [
   },
 
   // -------------------------------------------------------------------------
+  // 3a. `!pragma NAME [VALUE]` — CommandPragma, registered on EVERY factory
+  //    via CommonCommands.addCommonCommands2 -> addCommonCommands1
+  //    (StateDiagramFactory.java:118). T8 (mission dispatch-by-parse-attempt):
+  //    a corpus fixture (dobexo-69-zeki749, `!pragma svek_trace on`) newly
+  //    refused without this once unrecognised lines stopped being silently
+  //    dropped -- upstream accepts it (a real, universally-registered
+  //    Command), so this port must too. No-op body: `!pragma`'s only
+  //    non-storage side effects (svgsize, `layout smetana/elk/vizjs`
+  //    selection) have no representation in `StateDiagramAST` -- same
+  //    "recognised, no observable effect" precedent as rule 3's skinparam/
+  //    scale/hide/show above.
+  // @see ~/git/plantuml/.../command/CommandPragma.java:60-69
+  // @see ~/git/plantuml/.../command/CommonCommands.java:63
+  // -------------------------------------------------------------------------
+  {
+    pattern: /^!pragma\s+[A-Za-z_][A-Za-z_0-9]*(?:\s+.*)?$/,
+    passes: ['one'],
+    execute() {
+      /* ignored -- see rule 3a's doc comment */
+    },
+  },
+
+  // -------------------------------------------------------------------------
   // 3b. remove|restore <target> — CommandRemoveRestore. This class lives in
   //     the `classdiagram.command` package, NOT `statediagram.command` --
   //     StateDiagramFactory registers it verbatim (same shared

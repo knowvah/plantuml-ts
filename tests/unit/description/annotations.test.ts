@@ -9,6 +9,7 @@ import { parseDescription } from '../../../src/diagrams/description/parser.js';
 import { isEmpty } from '../../../src/core/annotations/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { DescriptionDiagramAST } from '../../../src/diagrams/description/ast.js';
+import { descriptionAst } from './parse-description-ast.js';
 
 function parse(source: string): DescriptionDiagramAST {
   const lines = source
@@ -16,7 +17,7 @@ function parse(source: string): DescriptionDiagramAST {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   const block: UmlSource = { lines, type: 'description' };
-  return parseDescription(block);
+  return descriptionAst(parseDescription(block));
 }
 
 describe('description parser — annotation commands (mission G0b/T6)', () => {

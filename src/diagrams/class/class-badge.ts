@@ -75,7 +75,7 @@ export const BADGE_BOX_HEIGHT = BADGE_RADIUS * 2 + BADGE_TOP_BOTTOM_MARGIN * 2;
 /** `FontParam.CIRCLED_CHARACTER`'s own default font size (17,
  *  `klimt/font/FontParam.java:55`) -- feeds {@link resolveBadgeRadius}'s
  *  formula when `skinparam circledCharacterFontSize` is unset. */
-export const DEFAULT_CIRCLED_CHARACTER_FONT_SIZE = 17;
+export { DEFAULT_CIRCLED_CHARACTER_FONT_SIZE } from '../../core/stereotype-decoration.js';
 
 /**
  * `SkinParam#getCircledCharacterRadius()` (`skin/SkinParam.java:542-545`):
@@ -109,14 +109,7 @@ export const DEFAULT_CIRCLED_CHARACTER_FONT_SIZE = 17;
  * `gateja-70-losi738` (`circledCharacterRadius 18`, fontSize 30 -- formula
  * alone would predict 16).
  */
-export function resolveBadgeRadius(
-  circledCharacterFontSize?: number,
-  circledCharacterRadiusOverride?: number,
-): number {
-  if (circledCharacterRadiusOverride !== undefined) return circledCharacterRadiusOverride;
-  const fontSize = circledCharacterFontSize ?? DEFAULT_CIRCLED_CHARACTER_FONT_SIZE;
-  return Math.floor(fontSize / 3) + 6;
-}
+export { resolveBadgeRadius } from '../../core/stereotype-decoration.js';
 
 /** `circleDim.width` for an ARBITRARY radius (generalizes {@link
  *  BADGE_BOX_WIDTH}, which stays the default-radius constant for callers
@@ -362,12 +355,17 @@ const BADGE_GLYPH_D: Record<BadgeLetter, string> = {
 
 
 /** `getCircledChar(LeafType)`: which glyph letter a classifier kind draws. */
-export function badgeLetter(kind: ClassifierKind): 'C' | 'I' | 'A' | 'E' | '@' {
+export function badgeLetter(kind: ClassifierKind): 'C' | 'I' | 'A' | 'E' | '@' | 'P' {
   switch (kind) {
     case 'interface':  return 'I';
     case 'abstract':   return 'A';
     case 'enum':       return 'E';
     case 'annotation': return '@';
+    // T14 (dispatch-by-parse-attempt): `protocol`'s own badge letter --
+    // `getCircledChar` returns 'P' for `LeafType.PROTOCOL`, distinct from
+    // the 'C' every other un-surveyed kind falls to below.
+    // @see ~/git/plantuml/.../svek/image/EntityImageClassHeader.java:243
+    case 'protocol':   return 'P';
     default:           return 'C';
   }
 }

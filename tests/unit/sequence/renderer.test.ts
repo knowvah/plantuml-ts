@@ -17,6 +17,34 @@ import { defaultTheme, darkTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer, FixedMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
+import { parseAst } from '../../helpers/parse-ast.js';
+import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo.js';
+import { inflateSync } from 'node:zlib';
+
+/** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
+ *  encoder itself stays browser-safe. */
+function decodeRgba(png: Buffer): Array<[number, number, number, number]> {
+  let i = 8;
+  let idat = Buffer.alloc(0);
+  let width = 0;
+  let height = 0;
+  while (i < png.length) {
+    const len = png.readUInt32BE(i);
+    const type = png.toString('ascii', i + 4, i + 8);
+    if (type === 'IHDR') { width = png.readUInt32BE(i + 8); height = png.readUInt32BE(i + 12); }
+    if (type === 'IDAT') idat = Buffer.concat([idat, png.subarray(i + 8, i + 8 + len)]);
+    i += 12 + len;
+  }
+  const raw = inflateSync(idat);
+  const out: Array<[number, number, number, number]> = [];
+  const stride = width * 4 + 1;
+  for (let y = 0; y < height; y++)
+    for (let x = 0; x < width; x++) {
+      const o = y * stride + 1 + x * 4;
+      out.push([raw[o]!, raw[o + 1]!, raw[o + 2]!, raw[o + 3]!]);
+    }
+  return out;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -26,9 +54,10 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
   return {
     totalWidth: 400,
     totalHeight: 300,
+    showFootbox: true,
     participants: [
-      { id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80 },
-      { id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220 },
+      { id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+      { id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
     ],
     events: [],
     lifelineEndY: 260,
@@ -39,15 +68,27 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
 }
 
 function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
-  return {
-    kind: 'message',
+  const base = {
+    kind: 'message' as const,
     fromX: 80,
     toX: 220,
     y: 80,
     label: 'hello',
-    style: 'sync',
-    arrowDirection: 'right',
+    style: 'sync' as const,
+    arrowDirection: 'right' as const,
     ...overrides,
+  };
+  // Place the label the same way layout does, so these tests exercise the
+  // real run placement rather than a hand-written stub that renders nothing.
+  const number = base.sequenceLabel ?? (base.sequenceNumber === undefined ? undefined : String(base.sequenceNumber));
+  const block = messageLabelBlock(
+    base.label, number, (base.fromX + base.toX) / 2, base.y - 5,
+    defaultTheme, new FormulaMeasurer(),
+  );
+  return {
+    ...base,
+    labelLines: block.lines,
+    ...(block.number !== undefined ? { labelNumber: block.number } : {}),
   };
 }
 
@@ -117,12 +158,58 @@ describe('renderSequence — messages', () => {
     expect(svg).toContain('<path');
   });
 
-  it('prepends sequence number when set', () => {
+  // `getLabelNumbered` prepends the number as a `MessageNumber`
+  // (`AbstractMessage.java:200-206`) and `Display#createMessageNumber` merges
+  // it left-to-right with the label as its OWN text block
+  // (`Display.java:703-712`) -- so it is a SEPARATE `<text>`, and there is no
+  // `": "` joining the two. This used to assert the joined form.
+  it('emits the sequence number as its own text, not joined to the label', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ label: 'greet', sequenceNumber: 3 })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('3: greet');
+    expect(svg).not.toContain('3: greet');
+    expect(svg).toContain('>3</text>');
+    expect(svg).toContain('>greet</text>');
+  });
+
+  it('separates the number from the label by upstreams 4px margin', () => {
+    const geo = makeGeo({
+      events: [makeSyncMessage({ label: 'greet', sequenceNumber: 3 })],
+    });
+    const msg = geo.events[0] as MessageGeo;
+    const numberRun = msg.labelNumber;
+    expect(numberRun).toBeDefined();
+    const numberWidth = new FormulaMeasurer().measure('3', {
+      family: defaultTheme.fontFamily,
+      size: defaultTheme.fontSize,
+    }).width;
+    // `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` -- `Display.java:706`.
+    expect(msg.labelLines[0]?.x).toBeCloseTo((numberRun?.x ?? 0) + numberWidth + 4, 6);
+    // `VerticalAlignment.CENTER` against a one-line label puts both on one row.
+    expect(numberRun?.y).toBe(msg.labelLines[0]?.y);
+  });
+
+  it('emits no label text for a message with neither label nor number', () => {
+    const geo = makeGeo({ events: [makeSyncMessage({ label: '' })] });
+    const msg = geo.events[0] as MessageGeo;
+    expect(msg.labelLines).toEqual([]);
+    expect(msg.labelNumber).toBeUndefined();
+    // `AbstractTextualComponent` maps an empty display to a `TextBlockEmpty`,
+    // which draws nothing (`AbstractTextualComponent.java:84-85`).
+    expect(assembleSvg(renderSequence(geo, defaultTheme))).not.toContain('></text>');
+  });
+
+  it('emits one text per line of a multi-line label, sharing one x', () => {
+    const geo = makeGeo({ events: [makeSyncMessage({ label: 'one\ntwo\nthree' })] });
+    const msg = geo.events[0] as MessageGeo;
+    expect(msg.labelLines.map((l) => l.text)).toEqual(['one', 'two', 'three']);
+    // Lines are left-aligned WITHIN the block, exactly as upstream draws them.
+    expect(new Set(msg.labelLines.map((l) => l.x)).size).toBe(1);
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).toContain('>one</text>');
+    expect(svg).toContain('>three</text>');
+    expect(svg).not.toContain('one\ntwo');
   });
 
   it('lost message draws an inline head, never a marker reference', () => {
@@ -471,6 +558,7 @@ describe('renderSequence — frames', () => {
       width: 300,
       height: 100,
       branchSeparators: [],
+      refBody: [],
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -488,6 +576,7 @@ describe('renderSequence — frames', () => {
       width: 300,
       height: 100,
       branchSeparators: [],
+      refBody: [],
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -504,6 +593,7 @@ describe('renderSequence — frames', () => {
       width: 300,
       height: 100,
       branchSeparators: [],
+      refBody: [],
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -565,52 +655,12 @@ describe('renderSequence — dividers', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Acceptance criterion 8: sequencePlugin.accepts returns true
-// ---------------------------------------------------------------------------
-
-describe('sequencePlugin.accepts', () => {
-  it('returns true for -> message syntax', () => {
-    expect(sequencePlugin.accepts(['Alice -> Bob: hi'])).toBe(true);
-  });
-
-  it('returns true for ->> async message', () => {
-    expect(sequencePlugin.accepts(['Alice ->> Bob: async call'])).toBe(true);
-  });
-
-  it('returns true for --> reply', () => {
-    expect(sequencePlugin.accepts(['Bob --> Alice: ok'])).toBe(true);
-  });
-
-  it('returns true for participant keyword', () => {
-    expect(sequencePlugin.accepts(['participant Alice'])).toBe(true);
-  });
-
-  it('returns true for actor keyword', () => {
-    expect(sequencePlugin.accepts(['actor User'])).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Acceptance criterion 9: sequencePlugin.accepts returns false for non-sequence
-// ---------------------------------------------------------------------------
-
-describe('sequencePlugin.accepts — non-sequence', () => {
-  it('returns false for class diagram syntax', () => {
-    expect(sequencePlugin.accepts(['class Foo'])).toBe(false);
-  });
-
-  it('returns false for empty lines', () => {
-    expect(sequencePlugin.accepts(['', '  '])).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Acceptance criterion 10: sequencePlugin.parse returns AST with 2 participants
 // ---------------------------------------------------------------------------
 
 describe('sequencePlugin.parse', () => {
   it('returns AST with 2 participants for Alice -> Bob', () => {
-    const ast = sequencePlugin.parse({
+    const ast = parseAst(sequencePlugin, {
       lines: ['Alice -> Bob: hi'],
       type: 'sequence',
     });
@@ -620,7 +670,7 @@ describe('sequencePlugin.parse', () => {
   });
 
   it('returns AST with one message event', () => {
-    const ast = sequencePlugin.parse({
+    const ast = parseAst(sequencePlugin, {
       lines: ['Alice -> Bob: greet'],
       type: 'sequence',
     });
@@ -643,7 +693,7 @@ describe('sequencePlugin layout', () => {
 
   it('layoutSync returns SequenceGeometry with totalWidth > 0', () => {
     const measurer = new FormulaMeasurer();
-    const ast = syncPlugin.parse({
+    const ast = parseAst(syncPlugin, {
       lines: ['Alice -> Bob: hi'],
       type: 'sequence',
     });
@@ -653,7 +703,7 @@ describe('sequencePlugin layout', () => {
 
   it('layoutSync returns SequenceGeometry with correct participant count', () => {
     const measurer = new FixedMeasurer(8, 16);
-    const ast = syncPlugin.parse({
+    const ast = parseAst(syncPlugin, {
       lines: ['Alice -> Bob: test'],
       type: 'sequence',
     });
@@ -665,7 +715,7 @@ describe('sequencePlugin layout', () => {
     // layoutSequence is what both layout() and layoutSync() delegate to.
     // Verify they produce identical geometry by calling layoutSequence directly.
     const measurer = new FormulaMeasurer();
-    const ast = syncPlugin.parse({
+    const ast = parseAst(syncPlugin, {
       lines: ['Alice -> Bob: hello'],
       type: 'sequence',
     });
@@ -693,7 +743,7 @@ describe('sequencePlugin integration', () => {
 
   it('render delegates to renderSequence and returns valid SVG', () => {
     const measurer = new FormulaMeasurer();
-    const ast = syncPlugin.parse({
+    const ast = parseAst(syncPlugin, {
       lines: ['Alice -> Bob: hello'],
       type: 'sequence',
     });
@@ -709,20 +759,28 @@ describe('sequencePlugin integration', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderSequence — actor participant shape', () => {
-  it('renders a circle (head) for actor participants', () => {
+  it('renders an ellipse head and a single four-segment path for actor participants', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70 },
+        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('<circle');
+    // The jar draws an actor head as an `<ellipse>` and its four strokes as
+    // ONE `<path>` (`ActorStickMan.java:73,77-85`), not a `<circle>` and four
+    // `<line>`s. Asserted on the element AND the path shape, since it is the
+    // primitive COUNT that this pins -- five top-level children where the jar
+    // has two is what made 14 corpus fixtures over-emit.
+    expect(svg).toContain('<ellipse');
+    expect(svg).not.toContain('<circle');
+    const d = /<path d="([^"]*)"/.exec(svg)?.[1] ?? '';
+    expect(d.match(/M/g) ?? [], 'body, arms, left leg, right leg').toHaveLength(4);
   });
 
   it('renders display name below the stick figure', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70 },
+        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -734,7 +792,7 @@ describe('renderSequence — database participant shape', () => {
   it('renders an ellipse (cylinder cap) for database participants', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80 },
+        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -744,7 +802,7 @@ describe('renderSequence — database participant shape', () => {
   it('renders display name for database participant', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80 },
+        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -831,6 +889,10 @@ describe('renderSequence — box integration', () => {
       'end box',
       'Alice -> Alice: self',
     ]);
+    // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
+    // (D1); this fixture is a complete, valid diagram, so refusal is a
+    // test defect.
+    if ('refused' in ast) throw new Error(`parseSequence refused (${ast.kind}): ${ast.message}`);
     expect(ast.boxes).toHaveLength(1);
     expect(ast.boxes[0]?.label).toBe('Frontend');
     expect(ast.boxes[0]?.color).toBe('#LightBlue');
@@ -840,5 +902,184 @@ describe('renderSequence — box integration', () => {
     // G1c: named colors resolve to their canonical jar hex (LightBlue -> #ADD8E6).
     expect(svg).toContain('#ADD8E6');
     expect(svg).toContain('Frontend');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Participant stereotype: PName.ShowStereotype
+// ---------------------------------------------------------------------------
+
+describe('renderSequence — participant stereotype', () => {
+  const render = (src: string): string =>
+    renderFixtureSequence(src, new DeterministicMeasurer());
+
+  // `CommandParticipant` stores the stereotype on the Participant rather than
+  // in its code (`:174-181`), and the jar draws it on its own line -- the
+  // golden for `birocu-87-xubi808` carries `«APIGateway»` and `OnlyLabel` as
+  // separate elements.
+  it('draws the stereotype as its own guillemeted run', () => {
+    const svg = render('@startuml\nparticipant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml');
+    expect(svg).toContain('>«dummy1»</text>');
+    expect(svg).toContain('>Bob</text>');
+  });
+
+  // `Display#withoutStereotypeIfNeeded` strips it ONLY on an explicit false
+  // (`Display.java:131-133`).
+  it('hides it when a style tag sets ShowStereotype false', () => {
+    const svg = render(
+      '@startuml\n<style>\n.dummy1 {\n  ShowStereotype false\n}\n</style>\n' +
+        'participant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml',
+    );
+    expect(svg).not.toContain('«dummy1»');
+    expect(svg).toContain('>Bob</text>');
+  });
+
+  it('still draws it when the style says true, or says nothing about it', () => {
+    const shown = render(
+      '@startuml\n<style>\n.dummy1 {\n  ShowStereotype true\n}\n</style>\n' +
+        'participant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml',
+    );
+    expect(shown).toContain('«dummy1»');
+    const silent = render(
+      '@startuml\n<style>\n.dummy1 {\n  FontColor red\n}\n</style>\n' +
+        'participant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml',
+    );
+    expect(silent).toContain('«dummy1»');
+  });
+
+  // `StereotypeDecoration#buildComplex` rewrites each chunk to its LABEL
+  // group alone, dropping the `($sprite[,COLOR])` / `(CHAR[,COLOR])` badge
+  // spec that introduced it (`:143-182`). birocu-87-xubi808's golden shows
+  // `«APIGateway»` for `<< ($APIGateway, #CC2264) APIGateway >>`.
+  it('drops a sprite badge spec from the displayed label', () => {
+    const svg = render(
+      '@startuml\nparticipant P as p << ($APIGateway, #CC2264) APIGateway >>\np -> B: hi\n@enduml',
+    );
+    expect(svg).toContain('>«APIGateway»</text>');
+    expect(svg).not.toContain('CC2264');
+  });
+
+  // The COLOR group is `(#[0-9a-fA-F]{6}|\w+)` (`StereotypeDecoration.java:68`)
+  // -- a bare name or a SIX-digit hex. `#red` is neither, so upstream does not
+  // recognise it as a badge at all and the whole run stays visible text.
+  it('drops a circled-character badge spec too', () => {
+    const named = render('@startuml\nparticipant P << (C,red) Thing >>\nP -> B: hi\n@enduml');
+    expect(named).toContain('>«Thing»</text>');
+    const hex = render('@startuml\nparticipant P << (C,#CC2264) Thing >>\nP -> B: hi\n@enduml');
+    expect(hex).toContain('>«Thing»</text>');
+    const notAColor = render('@startuml\nparticipant P << (C,#red) Thing >>\nP -> B: hi\n@enduml');
+    expect(notAColor).toContain('>«(C,#red) Thing»</text>');
+  });
+
+  // One row per chunk, and a 3-bracket chunk is invisible -- both come from
+  // `cutLabels` + the 2-vs-3 bracket test in `splitStereotypeTokens`.
+  it('draws one row per stacked chunk, skipping invisible ones', () => {
+    const svg = render('@startuml\nparticipant P <<A>><<B>>\nP -> Q: hi\n@enduml');
+    expect(svg).toContain('>«A»</text>');
+    expect(svg).toContain('>«B»</text>');
+    const hidden = render('@startuml\nparticipant P <<<Zz>>>\nP -> Q: hi\n@enduml');
+    expect(hidden).not.toContain('«Zz»');
+  });
+
+  // `Display#createStereotype` wraps the label block in a `TextBlockSprited`
+  // carrying `stereotype.getSprite(...)` (`Display.java:671-689`), and
+  // `TextBlockSprited#drawU` draws it at the block origin with the label
+  // translated right by `sprite.width + 6` (`:65-77`).
+  it('draws a declared sprite badge as an <image> beside the name', () => {
+    const svg = render(
+      '@startuml\nsprite $s1 [4x4/16] {\n0123\n4567\n89AB\nCDEF\n}\n' +
+        'participant P << ($s1) Lbl >>\nP -> Q: hi\n@enduml',
+    );
+    expect(svg).toContain('<image');
+    expect(svg).toContain('data:image/png;base64,');
+    expect(svg).toContain('>«Lbl»</text>');
+  });
+
+  // The gradient runs backColor -> fontColor (`spriteToRgba`), mirroring
+  // `toUImage`'s `gradient(backcolor, color)` (`SpriteMonochrome.java:191`).
+  // `Stereotype#getSprite` -> `asTextBlock(getHtmlColor(), null, ...)` (`:116`)
+  // and `drawU`'s `forcedColor ?? fontColor` (`:215`) make the DECLARED colour
+  // the END; the START is the current graphics background.
+  //
+  // The corpus cannot gate this: the data URI is one attribute that differs
+  // from the jar either way, so weightedScore is identical whichever
+  // direction the gradient runs. Asserted on the decoded pixels instead.
+  it('tints the sprite from the background TOWARD the declared colour', () => {
+    const sprite = 'sprite $s1 [2x2/16] {\n0F\nF0\n}';
+    const svg = render(`@startuml\n${sprite}\nparticipant P << ($s1,#CC2264) L >>\nP -> Q: hi\n@enduml`);
+    const b64 = /xlink:href="data:image\/png;base64,([^"]*)"/.exec(svg)?.[1] ?? '';
+    expect(b64).not.toBe('');
+    const px = decodeRgba(Buffer.from(b64, 'base64'));
+    // gray 0 -> coef 0 -> the gradient's START, i.e. the box background.
+    // gray F -> coef 1 -> its END, the declared #CC2264.
+    const rgbs = px.map(([r, g, b]) => `${r},${g},${b}`);
+    expect(rgbs).toContain('204,34,100');
+    expect(rgbs).not.toContain('24,24,24');
+  });
+
+  it('draws nothing extra when the sprite name does not resolve', () => {
+    const svg = render('@startuml\nparticipant P << ($missing) Lbl >>\nP -> Q: hi\n@enduml');
+    expect(svg).not.toContain('<image');
+    expect(svg).toContain('>«Lbl»</text>');
+  });
+
+  // The other arm of that same `if`: a circled CHARACTER. The jar draws the
+  // filled circle and NOT the letter -- no `<text>` in nimoxu-60-xale291,
+  // fakova-98-suze610 or xakuro-97-tado489 carries the declared char.
+  it('draws a circled-character badge as a filled circle, without the character', () => {
+    const svg = render('@startuml\nparticipant P << (U,#ADD1B2) Lbl >>\nP -> Q: hi\n@enduml');
+    expect(svg).toContain('<ellipse');
+    expect(svg).toContain('#ADD1B2');
+    expect(svg).toContain('>«Lbl»</text>');
+    expect(svg).not.toContain('>U</text>');
+  });
+
+  it('hide stereotype removes it regardless of any style', () => {
+    const svg = render('@startuml\nhide stereotype\nparticipant Bob <<dummy1>>\nBob -> Alice: hi\n@enduml');
+    expect(svg).not.toContain('«dummy1»');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Per-element <style> buckets and inline participant colours
+// ---------------------------------------------------------------------------
+
+describe('renderSequence — participant colours', () => {
+  const render = (src: string): string =>
+    renderFixtureSequence(src, new DeterministicMeasurer());
+
+  // `Participant#getUsedStyles` merges the kind's signature -- `root,
+  // element, sequenceDiagram, <kind>` (`ParticipantType.java:55-80`) -- and
+  // then lets the participant's own colours override it
+  // (`eventuallyOverride(getColors())`, `Participant.java:88`).
+  it('honours an inline participant colour', () => {
+    expect(render('@startuml\nparticipant A #pink\nA -> B: x\n@enduml')).toContain('#FFC0CB');
+  });
+
+  it('honours a <style> bucket for background and border', () => {
+    const svg = render(
+      '@startuml\n<style>\nparticipant {\n BackgroundColor #FFFF00\n LineColor #FF9900\n}\n</style>\n' +
+        'participant A\nA -> B: x\n@enduml',
+    );
+    expect(svg).toContain('fill="#FF0"');
+    expect(svg).toContain('stroke="#F90"');
+  });
+
+  it('keys the bucket by participant KIND', () => {
+    const svg = render(
+      '@startuml\n<style>\nactor {\n BackgroundColor #00FF00\n}\n</style>\n' +
+        'actor A\nparticipant B\nA -> B: x\n@enduml',
+    );
+    expect(svg).toContain('#0F0');
+    // B is a plain participant and keeps the theme default.
+    expect(svg).toContain('fill="#FFF"');
+  });
+
+  it('lets the inline colour win over the bucket', () => {
+    const svg = render(
+      '@startuml\n<style>\nparticipant {\n BackgroundColor #FFFF00\n}\n</style>\n' +
+        'participant A #pink\nA -> B: x\n@enduml',
+    );
+    expect(svg).toContain('#FFC0CB');
   });
 });

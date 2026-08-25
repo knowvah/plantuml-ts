@@ -7,7 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
 import { parseClassifierDecl } from '../../../src/diagrams/class/class-declaration-parser.js';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { edgeLabelAttrs } from '../../../src/diagrams/class/class-layout-helpers.js';
 
 describe('vegubu-29-bomu147: CommandLinkClass getInv() on up/left direction words', () => {

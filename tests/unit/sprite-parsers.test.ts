@@ -14,21 +14,41 @@ import { describe, it, expect } from 'vitest';
 import type { UmlSource } from '../../src/core/block-extractor.js';
 import { getSprite } from '../../src/core/sprite-commands.js';
 import type { SpriteMonochrome } from '../../src/core/klimt/sprite/SpriteMonochrome.js';
+// T6 (dispatch-by-parse-attempt, batch 3a): parseActivity now returns
+// `ActivityDiagramAST | ParseRefusal` (D1). Every activity fixture below is
+// fully recognised, so the refusal arm is unreachable in practice;
+// `parseAst` narrows it away the same way tests elsewhere in the suite do
+// (`tests/helpers/parse-ast.ts`), throwing with the engine/line/kind instead
+// of casting past a possible refusal.
+import { parseAst, astOrThrow } from '../helpers/parse-ast.js';
+import { activityPlugin } from '../../src/diagrams/activity/index.js';
 
-import { parseClass } from '../../src/diagrams/class/parser.js';
-import { parseState } from '../../src/diagrams/state/parser.js';
-import { parseSequence } from '../../src/diagrams/sequence/parser.js';
-import { parseDescription } from '../../src/diagrams/description/parser.js';
-import { parseActivity } from '../../src/diagrams/activity/parser.js';
-import { parseBoard } from '../../src/diagrams/board/parser.js';
+import { parseClass as raw_parseClass } from '../../src/diagrams/class/parser.js';
+import { parseState as raw_parseState } from '../../src/diagrams/state/parser.js';
+import { parseSequence as raw_parseSequence } from '../../src/diagrams/sequence/parser.js';
+import { parseDescription as raw_parseDescription } from '../../src/diagrams/description/parser.js';
+import { parseBoard as raw_parseBoard } from '../../src/diagrams/board/parser.js';
 import { parseChronology } from '../../src/diagrams/chronology/parser.js';
 import { parseFiles } from '../../src/diagrams/files/parser.js';
-import { parsePacket } from '../../src/diagrams/packetdiag/parser.js';
+import { parsePacket as raw_parsePacket } from '../../src/diagrams/packetdiag/parser.js';
 import { parseYaml } from '../../src/diagrams/yaml/parser.js';
 import { parseHcl } from '../../src/diagrams/hcl/parser.js';
 import { parseJson } from '../../src/diagrams/json/parser.js';
 import { parseDot } from '../../src/diagrams/dot/parser.js';
-import { parseChart } from '../../src/diagrams/chart/parser.js';
+import { parseChartAst } from './chart/parse-chart-ast.js';
+
+// T4-T11 widened every command-loop engine's parser to `AST | ParseRefusal`
+// (D1). This file drives SIX of those engines directly, so it cannot use any
+// one engine's local narrowing helper -- `astOrThrow` is the shared seam, and
+// it names the engine in the failure. Every source below is upstream-
+// recognised throughout and must never refuse; a refusal here is a defect in
+// that engine's command table, not in this file.
+const parseClass = (b: UmlSource) => astOrThrow(raw_parseClass(b), 'class');
+const parseState = (b: UmlSource) => astOrThrow(raw_parseState(b), 'state');
+const parseSequence = (l: readonly string[]) => astOrThrow(raw_parseSequence(l), 'sequence');
+const parseDescription = (b: UmlSource) => astOrThrow(raw_parseDescription(b), 'description');
+const parseBoard = (b: UmlSource) => astOrThrow(raw_parseBoard(b), 'board');
+const parsePacket = (b: UmlSource) => astOrThrow(raw_parsePacket(b), 'packetdiag');
 
 /** Split markup into trimmed, non-empty content lines -- same helper as
  *  `annotations-parsers-a.test.ts` (mission G0b/T5). */
@@ -87,7 +107,7 @@ describe('sprite registry population per engine', () => {
 
   it('activity: parseActivity populates ast.sprites, not an action node', () => {
     const block: UmlSource = { lines: L(`:step one;\n${SPRITE_BLOCK}\n:step two;`), type: 'activity' };
-    const ast = parseActivity(block);
+    const ast = parseAst(activityPlugin, block);
     expectIcon(ast.sprites);
     expect(ast.nodes.filter((n) => n.kind === 'action')).toHaveLength(2);
   });
@@ -118,9 +138,9 @@ describe('sprite registry population per engine', () => {
 
   it('packetdiag: parsePacket populates ast.sprites, not a field line', () => {
     const source: UmlSource = { lines: L(`0-15: Source\n${SPRITE_BLOCK}\n16-31: Dest`), type: 'packetdiag' };
-    const ast = parsePacket(source);
-    expectIcon(ast.sprites);
-    expect(ast.items.map((i) => i.label)).toEqual(['Source', 'Dest']);
+    const parsed = parsePacket(source);
+    expectIcon(parsed.sprites);
+    expect(parsed.items.map((i) => i.label)).toEqual(['Source', 'Dest']);
   });
 
   it('json: parseJson populates ast.sprites, JSON body still parses', () => {
@@ -155,7 +175,7 @@ describe('sprite registry population per engine', () => {
 
   it('chart: parseChart populates ast.sprites, series data still parses', () => {
     const source: UmlSource = { lines: [...L(SPRITE_BLOCK), 'bar [1,2,3]'], type: 'chart' };
-    const ast = parseChart(source);
+    const ast = parseChartAst(source);
     expectIcon(ast.sprites);
     expect(ast.series).toHaveLength(1);
   });
@@ -211,7 +231,7 @@ describe('sprite matcher never steals a line from an open multiline note (D3)', 
       lines: L(':step;\nnote left\nsprite $X {\nend note'),
       type: 'activity',
     };
-    const ast = parseActivity(block);
+    const ast = parseAst(activityPlugin, block);
     expect(getSprite(ast.sprites!, 'X')).toBeUndefined();
     const noteNode = ast.nodes.find((n) => n.kind === 'note');
     expect(noteNode).toBeDefined();

@@ -33,7 +33,7 @@ function makeAst(
       order: i,
     })),
     events,
-    autonumber: { enabled: false, start: 1, current: 1 },
+    autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
     options: { hideFootbox: false, messageAlign: 'center' },
     boxes: [],
   };
@@ -522,7 +522,7 @@ describe('layoutSequence — message from unknown participant', () => {
       events: [
         { kind: 'message', from: 'Alice', to: 'Ghost', label: 'ping', style: 'sync' },
       ],
-      autonumber: { enabled: false, start: 1, current: 1 },
+      autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
       options: { hideFootbox: false, messageAlign: 'center' },
       boxes: [],
     };

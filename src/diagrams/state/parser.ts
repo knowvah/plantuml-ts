@@ -50,8 +50,12 @@ import { COMMANDS } from './state-commands.js';
 import { finalizePendingNote, isNoteCloser, type PendingNote } from './state-notes.js';
 import { isJsonCloser } from './state-json-commands.js';
 import { finalizeJsonBody } from '../../core/command/CommandCreateJson.js';
-import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
-import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
+import {
+  createAnnotations,
+  matchAnnotationCommand,
+  type DiagramAnnotations,
+} from '../../core/annotations/index.js';
+import { createSpriteRegistry, matchSpriteCommand, type SpriteRegistry } from '../../core/sprite-commands.js';
 import {
   type ParseState,
   type Pass,
@@ -62,6 +66,8 @@ import {
   syncAutoScopes,
   DEFAULT_SEPARATOR,
 } from './state-parse-state.js';
+import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
+import { checkFinalError } from './state-check-final.js';
 
 /**
  * Which pass may FINALIZE (push into `ast.notes`) a given pending note
@@ -142,6 +148,67 @@ function dispatchCommand(ps: ParseState, line: string, pass: Pass): boolean {
 }
 
 /**
+ * Trimmed, blank-filtered view of `block` (matchAnnotationCommand requires
+ * already-trimmed lines -- see commands.ts's single-line matchers, which
+ * test `^title...$` etc. with no internal trim), paired with each surviving
+ * line's original `block.lines` position (T8, mission dispatch-by-parse-
+ * attempt): blank lines are filtered out here the same way upstream's own
+ * `CommandNope` (`command/CommonCommands.java:62`, a real registered Command
+ * matching `^%s*$` and doing nothing) silently no-ops them, so dropping them
+ * before the loop changes nothing observable -- but a refusal still needs to
+ * name the offending line's real position in the source, not its position
+ * in this filtered view. Rebuilt per pass (cheap, block-sized) rather than
+ * shared on ParseState, so this stays within parser.ts's write-set (T5,
+ * plans/g0b-annotations).
+ */
+function nonBlankLines(block: UmlSource): { lines: string[]; origIndex: number[] } {
+  const lines: string[] = [];
+  const origIndex: number[] = [];
+  block.lines.forEach((raw, idx) => {
+    const t = raw.trim();
+    if (t === '') return;
+    lines.push(t);
+    origIndex.push(idx);
+  });
+  return { lines, origIndex };
+}
+
+/**
+ * `dispatchCommand` declined line `i` (in `lines`, matched pairwise with
+ * `origIndex`); try the shared annotation/sprite fallback matchers, and
+ * refuse if neither claims it either (T8, mission dispatch-by-parse-attempt)
+ * -- see `runPass`'s own doc for why a fall-through here ends the whole
+ * parse, not just this line. Returns the caller's extra loop-index advance
+ * on a match (`0` when the matcher consumed just this one line), or the
+ * refusal to return. Split out of `runPass` to stay under the complexity
+ * hook's 30-NLOC cap.
+ */
+function fallbackOrRefuse(
+  lines: readonly string[],
+  origIndex: readonly number[],
+  i: number,
+  annotationTarget: DiagramAnnotations,
+  spriteTarget: SpriteRegistry,
+): number | ParseRefusal {
+  const annotationMatch = matchAnnotationCommand(lines, i, annotationTarget);
+  if (annotationMatch !== null) return annotationMatch.consumed - 1;
+  // `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4): same
+  // FALLBACK position as the annotation matcher (tried immediately after
+  // it), mirroring upstream's title-then-sprite registration order.
+  const spriteMatch = matchSpriteCommand(lines, i, spriteTarget);
+  if (spriteMatch !== null) return spriteMatch.consumed - 1;
+  // No command, annotation, or sprite matcher recognised this line --
+  // upstream's `getCandidate` returns `null` and `executeFewLines` builds a
+  // SYNTAX_ERROR "Syntax Error?" immediately. `consumed` is `origIndex[i] +
+  // 1`: upstream's `it.next()` (called AFTER building the error, BEFORE
+  // `it.getTrace()` is read) advances the trace past the offending line
+  // itself, so `trace.size()` includes it, not just the lines before it.
+  // @see ~/git/plantuml/.../command/PSystemCommandFactory.java:169-175
+  const offending = origIndex[i]!;
+  return refuse('syntax', offending, offending + 1, 'Syntax Error?');
+}
+
+/**
  * Run one full top-to-bottom walk of `block` against the SHARED `ps` for
  * the given pass. `pendingNote` resets to `null` first — it is a
  * walk-position construct (are we currently inside an unclosed block, in
@@ -149,19 +216,28 @@ function dispatchCommand(ps: ParseState, line: string, pass: Pass): boolean {
  * pass's walk into the next's (see `ParseState.pendingNote`'s doc).
  * `scopeStack`/`lastEntity`/`globalByName` are deliberately NOT reset —
  * they are diagram-level and persist across both passes.
+ *
+ * Returns a {@link ParseRefusal} the moment a line matches nothing (mission
+ * dispatch-by-parse-attempt, T8) — mirrors upstream `PSystemCommandFactory
+ * #executeFewLines`'s `getCandidate(it) == null` branch immediately
+ * short-circuiting `createSystem`'s per-pass `while` loop (`if (sys
+ * instanceof PSystemError) return sys;`, `PSystemCommandFactory.java:
+ * 136-139`) — so a fall-through here stops the REST of this pass too, not
+ * just the offending line. Line-pattern matching never depends on `pass`
+ * (only whether a MATCHED command's `passes` gates its execution does, via
+ * `dispatchCommand`/`Command.isEligibleFor`), so a line unmatched on pass
+ * 'one' is guaranteed unmatched on pass 'two' as well — `parseState` never
+ * needs to run pass 'two' once pass 'one' refuses, matching upstream never
+ * reaching its own later passes past the same `return`.
+ * @see ~/git/plantuml/.../command/PSystemCommandFactory.java:127-140
  */
-function runPass(ps: ParseState, block: UmlSource, pass: Pass): void {
+function runPass(ps: ParseState, block: UmlSource, pass: Pass): ParseRefusal | null {
   ps.pendingNote = null;
   ps.pendingJson = null;
   ps.scopeStack = [ps.scopeStack[0]];
   ps.scopeStack[0].regionCursor = 0;
 
-  // Trimmed, blank-filtered view of the block (matchAnnotationCommand
-  // requires already-trimmed lines -- see commands.ts's single-line
-  // matchers, which test `^title...$` etc. with no internal trim). Rebuilt
-  // per pass (cheap, block-sized) rather than shared on ParseState, so this
-  // stays within parser.ts's write-set (T5, plans/g0b-annotations).
-  const lines = block.lines.map((l) => l.trim()).filter((l) => l !== '');
+  const { lines, origIndex } = nonBlankLines(block);
 
   // Title/caption/legend/header/footer/mainframe are upstream `CommonCommand`s
   // registered by `StateDiagramFactory.initCommandsList` via
@@ -193,19 +269,9 @@ function runPass(ps: ParseState, block: UmlSource, pass: Pass): void {
     if (handlePendingNoteLine(ps, line, pass)) continue;
     if (handlePendingJsonLine(ps, line, pass)) continue;
     if (dispatchCommand(ps, line, pass)) continue;
-    const annotationMatch = matchAnnotationCommand(lines, i, annotationTarget);
-    if (annotationMatch !== null) {
-      i += annotationMatch.consumed - 1;
-      continue;
-    }
-    // `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4): same
-    // FALLBACK position as the annotation matcher (tried immediately after
-    // it), mirroring upstream's title-then-sprite registration order.
-    const spriteMatch = matchSpriteCommand(lines, i, spriteTarget);
-    if (spriteMatch !== null) {
-      i += spriteMatch.consumed - 1;
-      continue;
-    }
+    const result = fallbackOrRefuse(lines, origIndex, i, annotationTarget, spriteTarget);
+    if (typeof result !== 'number') return result;
+    i += result;
   }
 
   // Close any unclosed composite scopes (mirrors the pre-existing
@@ -213,16 +279,17 @@ function runPass(ps: ParseState, block: UmlSource, pass: Pass): void {
   while (ps.scopeStack.length > 1) {
     popScope(ps);
   }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
 // Main parser entry point
 // ---------------------------------------------------------------------------
 
-/**
- * Parse a PlantUML state diagram block into a StateDiagramAST.
- */
-export function parseState(block: UmlSource): StateDiagramAST {
+/** Fresh `ast`/`ps` pair for a brand-new parse -- split out of `parseState`
+ *  to stay under the complexity hook's 30-NLOC cap (T8 added two early-return
+ *  refusal checks to what was previously a straight-line function). */
+function initParseState(): { ast: StateDiagramAST; ps: ParseState } {
   const ast: StateDiagramAST = {
     states: [],
     transitions: [],
@@ -246,14 +313,38 @@ export function parseState(block: UmlSource): StateDiagramAST {
     concurrentGlobalCounter: 0,
     concurrentGlobalIds: new Map(),
   };
+  return { ast, ps };
+}
+
+/**
+ * Parse a PlantUML state diagram block into a StateDiagramAST — or a
+ * {@link ParseRefusal} (T8, mission dispatch-by-parse-attempt, D0/D1) when
+ * some line matches no registered command, or the finished diagram fails
+ * {@link checkFinalError}. A successful (non-refused) parse is byte-identical
+ * to what this function produced before T8 — refusal is strictly additive,
+ * never changing what a fully-recognised source parses to.
+ */
+export function parseState(block: UmlSource): StateDiagramAST | ParseRefusal {
+  const { ast, ps } = initParseState();
+  const topScope = ps.scopeStack[0];
 
   // PASS ONE: declaration-family commands only — builds the complete tree.
-  runPass(ps, block, 'one');
+  // A refusal here means pass TWO never runs at all — matches upstream's
+  // own `createSystem`, which never reaches a later `ParserPass` once an
+  // earlier one's line loop returns a `PSystemError` (see `runPass`'s doc).
+  const refusalOne = runPass(ps, block, 'one');
+  if (refusalOne !== null) return refusalOne;
 
   // PASS TWO: structural commands REOPEN the same scopes (identical
   // nesting, enriched in place) plus transitions/note-on-link/attached
-  // notes now fire.
-  runPass(ps, block, 'two');
+  // notes now fire. Line-pattern matching is pass-independent (`runPass`'s
+  // doc), so this can only refuse here if pass ONE's own walk somehow
+  // missed a line pass TWO's walk reaches -- it does not, but the check is
+  // kept for the same reason upstream's own per-pass loop re-checks on
+  // every pass rather than assuming the first pass's clean run predicts the
+  // rest.
+  const refusalTwo = runPass(ps, block, 'two');
+  if (refusalTwo !== null) return refusalTwo;
 
   // End-of-parse sweep (mission A4 Phase L iter 10, upstream
   // `eventuallyBuildPhantomGroups`): materializes `children` for any
@@ -272,8 +363,18 @@ export function parseState(block: UmlSource): StateDiagramAST {
   // translation map (see `StateDiagramAST.concurrentGlobalIds`'s own doc
   // comment, ast.ts) -- mirrors the `pseudoCreationIndex` handoff above.
   ast.concurrentGlobalIds = ps.concurrentGlobalIds;
-  // #lizard forgives -- straight-line ParseState literal + two-pass driver
-  // (1 CCN); SI1/T11's one-line `linkConnections: []` init nudged the
-  // length over the cap, no branching added.
+
+  // Upstream's fourth refusal point, `finalizeDiagram`'s `checkFinalError`
+  // call (`PSystemCommandFactory.java:150-153`) -- a whole-diagram validity
+  // check over the now-finished tree (T8; see state-check-final.ts for the
+  // full mechanism and its documented conservative limitation). `consumed`
+  // is `1`: upstream's `it` is reset to a fresh iterator at every pass
+  // boundary (`createSystem`'s `it = source.iterator2(); it.next();` reset
+  // dance, `PSystemCommandFactory.java:131-133`), so by the time
+  // `finalizeDiagram` reads `it.getTrace()` its size is always exactly 1,
+  // regardless of source length or pass count -- not an invented value.
+  const finalError = checkFinalError(ps, ast);
+  if (finalError !== undefined) return refuse('final', 0, 1, finalError);
+
   return ast;
 }

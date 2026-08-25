@@ -21,7 +21,6 @@ import {
   resolveReference,
 } from './class-namespace.js';
 import { parseMemberLine } from './class-member-parser.js';
-import { isMethodMember } from './class-layout-helpers.js';
 import { parseObjectField } from './class-object-commands.js';
 import { applyMapBodyLine } from './class-map-commands.js';
 import { finalizeJsonBody } from '../../core/command/CommandCreateJson.js';
@@ -29,6 +28,9 @@ import { dedentRawLines } from './class-body-enhanced.js';
 import { stripQuotes } from './class-relationship-parser.js';
 import { COMMANDS } from './class-commands.js';
 import { mergeStandaloneBraces } from './class-line-merge.js';
+import { filterPendingBodyBlanks } from './class-body-blank-filter.js';
+import type { ParseRefusal } from '../../core/parse-refusal.js';
+import { refuse } from '../../core/parse-refusal.js';
 
 // ---------------------------------------------------------------------------
 // Mutable parse state (local to each parseClass call)
@@ -246,58 +248,6 @@ function dedentPendingRawBodyLines(state: ParseState): void {
  * definition until `}` closes it. Returns true when the line was consumed
  * (i.e. a body was open).
  */
-/** True for an A3 blank-line placeholder member (real members never parse to
- *  an empty name -- `parseMemberLine` returns null for a blank/empty line). */
-function isBlankMember(m: { name: string; type?: string; rawDisplay?: string }): boolean {
-  return m.name === '' && m.type === undefined && m.rawDisplay === undefined;
-}
-
-/**
- * A2s F-A / A3: upstream's empty-row display filters for a just-closed
- * classic body (`BodierLikeClassOrObject`, java:114-172): a blank strictly
- * BETWEEN two method lines is a METHOD row (sandwich rule, java:136-142);
- * each compartment skips empties before its first real member (java:122,152)
- * and drops trailing empties (`removeFinalEmptyMembers`, java:166-170); a
- * blank surviving both (e.g. between two field rows) displays as one empty
- * row. Neighborhood = the MEMBERS array (classic bodies: every line is a
- * member, i.e. upstream's rawBody order). jar-verified: jijovu-48-gole133's
- * blank between methods and fields displays NO row, delta 0.
- */
-function filterBodyBlankMembers(members: Classifier['members']): void {
-  for (let i = 1; i < members.length - 1; i++) {
-    const m = members[i]!;
-    if (isBlankMember(m) && isMethodMember(members[i - 1]!) && isMethodMember(members[i + 1]!)) {
-      m.params = []; // sandwich rule: empty METHOD row
-    }
-  }
-  stripCompartmentEdgeBlanks(members, false);
-  stripCompartmentEdgeBlanks(members, true);
-}
-
-/** Leading-empty skip + `removeFinalEmptyMembers` for ONE compartment
- *  subsequence (entries outside [first real, last real] are blanks by
- *  construction -- see {@link filterBodyBlankMembers}). */
-function stripCompartmentEdgeBlanks(members: Classifier['members'], wantMethod: boolean): void {
-  const seq = members.filter((m) => isMethodMember(m) === wantMethod);
-  let firstReal = seq.findIndex((m) => !isBlankMember(m));
-  if (firstReal === -1) firstReal = seq.length;
-  let lastReal = seq.length - 1;
-  while (lastReal >= 0 && isBlankMember(seq[lastReal]!)) lastReal--;
-  for (let i = 0; i < seq.length; i++) {
-    if (i < firstReal || i > lastReal) members.splice(members.indexOf(seq[i]!), 1);
-  }
-}
-
-/** Close-time A3 hook: runs {@link filterBodyBlankMembers} for the classic
- *  member path only (object/map/json bodies keep their own semantics). */
-function filterPendingBodyBlanks(state: ParseState): void {
-  const idx = state.pendingBodyId !== null ? state.classifierIndex.get(state.pendingBodyId) : undefined;
-  const classifier = idx !== undefined ? state.ast.classifiers[idx] : undefined;
-  if (classifier === undefined) return;
-  if (classifier.kind === 'object' || classifier.kind === 'map' || classifier.kind === 'json') return;
-  filterBodyBlankMembers(classifier.members);
-}
-
 function handlePendingBodyLine(state: ParseState, line: string): boolean {
   if (state.pendingBodyId === null) return false;
   if (/^\}\s*$/.test(line)) {
@@ -385,7 +335,23 @@ function dispatchCommand(state: ParseState, line: string): boolean {
   return false;
 }
 
-export function parseClass(block: UmlSource): ClassDiagramAST {
+/**
+ * T5 (dispatch-by-parse-attempt): upstream's fall-through refusal point --
+ * no registered `Command` matched the line, so `getCandidate` returns `null`
+ * and the factory builds a `SYNTAX_ERROR "Syntax Error?"` at that exact
+ * line, score contribution 0 (the literal third arg to `new ErrorUml(...)`).
+ * `line`/`consumed` prefer the ORIGINAL (pre-merge) source position
+ * (`state.currentLine`, set every loop iteration from `merged.positions[i]`)
+ * over the merged-array loop index, falling back to it only for a hand-built
+ * `ParseState` fixture that bypasses position tracking.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemCommandFactory.java:169-175
+ */
+function buildSyntaxRefusal(state: ParseState, loopIndex: number): ParseRefusal {
+  const line = state.currentLine ?? loopIndex;
+  return refuse('syntax', line, line, 'Syntax Error?');
+}
+
+export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
   const state: ParseState = {
     ast: makeDefaultAST(),
     classifierIndex: new Map(),
@@ -400,6 +366,7 @@ export function parseClass(block: UmlSource): ClassDiagramAST {
     pendingNote: null,
     pendingNoteTags: [],
     descriptiveContainers: new Map(),
+    pendingContainerTags: new Map(),
     namespaceStack: [],
     togetherStack: [],
     lastEntity: null,
@@ -443,7 +410,14 @@ export function parseClass(block: UmlSource): ClassDiagramAST {
     // construct claims is skipped here, exactly as when the pre-pass
     // dropped them all -- command dispatch never sees a blank line.
     if (line === '') continue;
-    if (dispatchCommand(state, line)) continue;
+    if (dispatchCommand(state, line)) {
+      // A command matched but reported failure. Upstream builds the
+      // EXECUTION_ERROR and `createSystem` returns it at once
+      // (`PSystemCommandFactory.java:180-186`, `:136-139`); it never carries
+      // on to later lines.
+      if (state.executionRefusal !== undefined) return state.executionRefusal;
+      continue;
+    }
     // makeDefaultAST() always sets annotations; the field is optional on
     // ClassDiagramAST only so hand-authored literal fixtures elsewhere need
     // not include it (see ast.ts's doc on the field).
@@ -462,13 +436,21 @@ export function parseClass(block: UmlSource): ClassDiagramAST {
       i += spriteMatch.consumed - 1;
       continue;
     }
+
+    // T5: no command/annotation/sprite matcher claimed this line -- the
+    // upstream fall-through refusal (see buildSyntaxRefusal's doc). Mirrors
+    // `createSystem`'s abort-on-first-failure: return immediately rather
+    // than continuing to later lines.
+    return buildSyntaxRefusal(state, i);
   }
 
   return finalizeParse(state);
   // #lizard forgives -- pre-existing violation (was already 43 NLOC vs the 30
   // cap); the allowmixing gate added only two state-init lines to its object
-  // literal, which changes no branch. Restructuring ported parser dispatch
-  // mid-change is what CLAUDE.md's "do not refactor while porting" prevents.
+  // literal, and T5's refusal fall-through added one more branch delegating
+  // to buildSyntaxRefusal -- no existing branch's condition or order changed.
+  // Restructuring ported parser dispatch mid-change is what CLAUDE.md's "do
+  // not refactor while porting" prevents.
 }
 
 /** Post-processing: same-pair length normalization (checkFinalError,

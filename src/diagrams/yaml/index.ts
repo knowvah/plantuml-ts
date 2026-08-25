@@ -32,56 +32,6 @@ const DIAGRAM_TYPE_YAML = 'YAML';
 export const yamlPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'yaml',
 
-  accepts(lines: readonly string[]): boolean {
-    // #lizard forgives -- pre-existing violation (17 CCN vs. this repo's 10
-    // cap), untouched by A5/T4/T8: those missions only touched the
-    // `diagramType` line in `render()` below. Same flat keyword-dispatch chain as json's own
-    // `accepts`; splitting it is a separate change with its own risk.
-    // Skip leading directive lines that appear before the YAML body in
-    // @startyaml blocks (title, skinparam, scale, hide, skin, !assume, !pragma,
-    // <style>…</style>). Mirrors Java StyleExtractor pre-filtering.
-    let inStyle = false;
-    for (const line of lines) {
-      const t = line.trim();
-      if (t === '') continue;
-      if (t === '<style>') { inStyle = true; continue; }
-      if (inStyle) { if (t === '</style>') inStyle = false; continue; }
-      // `title` accepts both the space form ("title Foo") and the colon form
-      // ("title: Foo" / "title:Foo") -- CommandTitle.java:63's grammar,
-      // `title(?:[%s]*:[%s]*|[%s]+)`, matched case-insensitively
-      // (Pattern2.java:114). Only the space form was recognised before, so
-      // "Title: Test" fell through and was misread as a YAML mapping key
-      // one line too early.
-      if (/^(?:title(?:\s*:|\s)|skinparam |scale |skin |hide |!assume |!pragma )/i.test(t)) continue;
-      // JSON content — not YAML
-      if (t.startsWith('{') || t.startsWith('[') || t.startsWith('"')) {
-        return false;
-      }
-      if (t === 'null' || t === 'true' || t === 'false') {
-        return false;
-      }
-      if (/^-?[0-9]/.test(t)) {
-        return false;
-      }
-      // Require YAML-specific syntax to avoid matching sequence/class content
-      // that also starts with word chars:
-      //   - key-value:  "word:" pattern -- a SINGLE bare word (no interior
-      //     whitespace) immediately before the colon, matching how a YAML
-      //     plain scalar key is actually written. A multi-word run before
-      //     the colon is PlantUML command syntax, not a YAML key: "sprite
-      //     Netw jar:archimate/network" (a sprite declaration) and "note
-      //     over Alice : text" (a note command) both contain a colon
-      //     preceded by more than one word and neither is YAML.
-      //   - list item:  "- " prefix (hyphen-space)
-      //   - highlight:  "#highlight" prefix
-      return (
-        t.startsWith('#highlight') ||
-        t.startsWith('- ') ||
-        /^\w+:/.test(t)
-      );
-    }
-    return false;
-  },
 
   parse(source) {
     return parseYaml(source);

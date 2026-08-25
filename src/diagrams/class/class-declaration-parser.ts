@@ -74,7 +74,9 @@ const DECL_KIND_RE = new RegExp(
   // regex alternation is leftmost-first, so `abstract class Foo` must try
   // (and succeed at) the two-word form before the bare keyword is offered.
   // Descriptive leaves take an optional unconditional `mix_` prefix (Mode.WITH_MIX_PREFIX).
-  '^(abstract\\s+class|abstract|class|interface|enum|annotation|entity|circle|' +
+  // T14 (dispatch-by-parse-attempt): `protocol` added -- see `ClassifierKind`'s
+  // `'protocol'` member doc (class-classifier-ast.ts) for the citation.
+  '^(abstract\\s+class|abstract|class|interface|enum|annotation|entity|circle|protocol|' +
     '(?:mix_)?(?:' + ALL_DESCRIPTIVE_LEAF + ')' +
     ')\\s+(.+)$',
   'i',

@@ -1,5 +1,7 @@
+import { refuse } from '../../src/core/parse-refusal.js';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { extractBlocks } from '../../src/core/block-extractor.js';
+import { extractBlocks, upstreamTypeOf } from '../../src/core/block-extractor.js';
+import { DiagramType as UpstreamDiagramType } from '../../src/core/diagram-type-set.js';
 import {
   DiagramRegistry,
   type SyncPlugin,
@@ -13,14 +15,20 @@ import { assembleSvg } from '../../src/index.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * T12: a plugin no longer declares interest with `accepts()`; it declares it
+ * by PARSING, and declines by returning a `ParseRefusal`. `wantsFn` keeps
+ * every test below reading the same way -- true means "this plugin claims the
+ * source", which is now expressed as a successful parse.
+ */
 function makePlugin(
   diagramType: DiagramType,
-  acceptsFn: (lines: readonly string[]) => boolean,
+  wantsFn: (lines: readonly string[]) => boolean,
 ): SyncPlugin {
   return {
     type: diagramType,
-    accepts: acceptsFn,
-    parse: (_source: UmlSource) => ({}),
+    parse: (source: UmlSource) =>
+      wantsFn(source.lines) ? {} : refuse('syntax', 0, 0, 'Syntax Error?'),
     layoutSync: (_ast: unknown) => ({}),
     render: (_geo: unknown) => ({ completeSvg: '<svg/>' }),
   };
@@ -342,7 +350,7 @@ describe('DiagramRegistry', () => {
     registry = new DiagramRegistry();
   });
 
-  it('resolves a registered plugin by accepts()', () => {
+  it('resolves a registered plugin by attempting the parse', () => {
     const plugin = makePlugin('sequence', (lines) =>
       lines.some((l) => l.includes('->')),
     );
@@ -353,24 +361,24 @@ describe('DiagramRegistry', () => {
       type: 'sequence',
     };
 
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
     expect(resolved.type).toBe('sequence');
   });
 
-  it('returns an error-sentinel plugin when no plugin accepts', () => {
+  it('returns an error-sentinel plugin when no candidate parses', () => {
     const source: UmlSource = {
       lines: ['some unknown syntax'],
       type: 'unknown',
     };
 
     // No plugins registered — should not throw
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
     expect(() => resolved.render({}, defaultTheme)).not.toThrow();
     const svg = assembleSvg(resolved.render({}, defaultTheme));
     expect(svg).toContain('<svg');
   });
 
-  it('calls accepts() on registered plugins to find a match', () => {
+  it('calls parse() on registered plugins to find a match', () => {
     let calledWith: readonly string[] | undefined;
     const plugin = makePlugin('class', (lines) => {
       calledWith = lines;
@@ -382,7 +390,7 @@ describe('DiagramRegistry', () => {
       lines: ['class Foo'],
       type: 'class',
     };
-    registry.resolve(source);
+    void registry.resolve(source).plugin;
     expect(calledWith).toEqual(['class Foo']);
   });
 
@@ -406,7 +414,7 @@ describe('DiagramRegistry', () => {
     registry.register(p3);
 
     const source: UmlSource = { lines: [], type: 'unknown' };
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
 
     // Should stop after p2 matched
     expect(calls).toEqual(['sequence', 'class']);
@@ -415,37 +423,31 @@ describe('DiagramRegistry', () => {
 
   it('error-sentinel plugin renders an SVG containing error text', () => {
     const source: UmlSource = { lines: ['???'], type: 'unknown' };
-    const sentinel = registry.resolve(source);
+    const sentinel = registry.resolve(source).plugin;
     const svg = assembleSvg(sentinel.render({}, defaultTheme));
     // Must be valid SVG and communicate an error
     expect(svg).toContain('<svg');
     expect(svg.toLowerCase()).toMatch(/error|unknown/);
   });
 
-  it('error-sentinel plugin accepts() always returns false', () => {
-    // Verify the sentinel's accepts() method is callable and returns false
-    const source: UmlSource = { lines: ['Alice -> Bob'], type: 'sequence' };
-    const sentinel = registry.resolve(source); // no plugins registered → sentinel
-    expect(sentinel.accepts(['Alice -> Bob'])).toBe(false);
-  });
 
   it('parse() on sentinel plugin returns empty object without throwing', () => {
     const source: UmlSource = { lines: [], type: 'unknown' };
-    const sentinel = registry.resolve(source);
+    const sentinel = registry.resolve(source).plugin;
     expect(() => sentinel.parse(source)).not.toThrow();
   });
 
   it('error-sentinel plugin is a SyncPlugin (has layoutSync, no async layout)', () => {
     // The sentinel uses layoutSync; it does not expose an async layout method.
     const source: UmlSource = { lines: [], type: 'unknown' };
-    const sentinel = registry.resolve(source);
+    const sentinel = registry.resolve(source).plugin;
     expect('layoutSync' in sentinel).toBe(true);
     expect('layout' in sentinel).toBe(false);
   });
 
   it('layoutSync() on sentinel plugin returns without throwing', () => {
     const source: UmlSource = { lines: [], type: 'unknown' };
-    const sentinel = registry.resolve(source);
+    const sentinel = registry.resolve(source).plugin;
     if ('layoutSync' in sentinel) {
       expect(() =>
         sentinel.layoutSync({}, defaultTheme, measurer),
@@ -453,5 +455,70 @@ describe('DiagramRegistry', () => {
     } else {
       throw new Error('Expected sentinel to be a SyncPlugin');
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T3 -- the candidate set replaces the single guessed type as the routing
+// input. `type` survives one batch longer as `resolve()`'s tier-3 fallback
+// (see plans/dispatch-by-parse-attempt/decision-journal.md); T12 removes it.
+// ---------------------------------------------------------------------------
+
+function typesOf(lines: readonly string[]): ReadonlySet<string> {
+  const block = extractBlocks(lines)[0];
+  if (block === undefined) throw new Error('no block extracted');
+  if (block.types === undefined) throw new Error('finalizeBlock must populate types');
+  return block.types;
+}
+
+describe('UmlSource.types -- findStartTypes of the @start line', () => {
+  it('@startuml names all ten legacy-UML factories, never one guess', () => {
+    // DiagramType.java:198-201. The whole point of D5: upstream does not
+    // guess, so neither does this field -- even though `type` still carries
+    // detectUmlType's guess alongside it until T12.
+    expect([...typesOf(['@startuml', 'Alice -> Bob: hi', '@enduml'])].sort()).toEqual([
+      'ACTIVITY', 'CLASS', 'COMPOSITE', 'DESCRIPTION', 'HELP',
+      'OBJECT', 'SEQUENCE', 'SPRITES', 'STATE', 'TIMING',
+    ]);
+  });
+
+  it('is a singleton for every tag the corpus actually uses', () => {
+    expect(typesOf(['@startjson', '{}', '@endjson'])).toEqual(new Set(['JSON']));
+    expect(typesOf(['@startyaml', 'a: 1', '@endyaml'])).toEqual(new Set(['YAML']));
+    expect(typesOf(['@starthcl', 'a = 1', '@endhcl'])).toEqual(new Set(['HCL']));
+    expect(typesOf(['@startdot', 'digraph g {}', '@enddot'])).toEqual(new Set(['DOT']));
+  });
+
+  it('an unrecognised tag is {UNKNOWN}, which is a real answer', () => {
+    expect(typesOf(['@startfoo', 'x', '@endfoo'])).toEqual(new Set(['UNKNOWN']));
+  });
+
+  it('keeps this port-only tag routing where it routes today', () => {
+    // @startcomponent is one of EIGHT tags in START_SUFFIX_MAP that upstream
+    // has never had -- the jar types it UNKNOWN and renders PSystemUnsupported.
+    // The divergence is PRE-EXISTING; T3 carries it forward unchanged rather
+    // than repairing it, because repairing it would move fixtures and this
+    // task's whole property is that it moves none.
+    expect(typesOf(['@startcomponent', '[A] --> [B]', '@endcomponent'])).toEqual(
+      new Set(['DESCRIPTION']),
+    );
+  });
+});
+
+describe('upstreamTypeOf -- the port type union mapped onto the enum', () => {
+  it('is total: every port type has an upstream member', () => {
+    const PORT_TYPES: readonly DiagramType[] = [
+      'sequence', 'class', 'state', 'description', 'activity', 'object',
+      'timing', 'mindmap', 'gantt', 'wbs', 'json', 'yaml', 'hcl', 'board',
+      'chronology', 'files', 'packetdiag', 'chart', 'dot', 'unknown',
+    ];
+    for (const t of PORT_TYPES) {
+      expect(Object.values(UpstreamDiagramType)).toContain(upstreamTypeOf(t));
+    }
+  });
+
+  it('maps packetdiag to PACKET -- the plugin is named for the tag, the enum for the diagram', () => {
+    expect(upstreamTypeOf('packetdiag')).toBe(UpstreamDiagramType.PACKET);
+    expect(upstreamTypeOf('description')).toBe(UpstreamDiagramType.DESCRIPTION);
   });
 });

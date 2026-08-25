@@ -28,6 +28,13 @@ import type {
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
+import {
+  refBodyLines,
+  refBodyHeight,
+  refBodyWidth,
+  messageLabelBlock,
+  messageLabelRows,
+} from './text-block-geo.js';
 
 /** Pending activation-bar start record, keyed by participant id. */
 type ActivationRecord = { y: number; color?: string };
@@ -95,15 +102,29 @@ function handleMessageEvent(
   if (fromGeo === undefined || toGeo === undefined) return;
 
   const endpoints = resolveMessageEndpoints(event, fromGeo, toGeo, ctx);
-  const messageGeo = buildMessageGeo(event, endpoints, cursor.y);
+  const lineHeight = ctx.measurer.measure('M', fontSpecOf(ctx.theme)).height;
+  // A multi-line label grows UPWARD from its arrow (`text-block-geo.ts`), so
+  // the extra rows are reserved BEFORE the arrow is placed, not after.
+  const rows = messageLabelRows(event.label, numberTextOf(event));
+  cursor.y += Math.max(0, rows - 1) * lineHeight;
+
+  const messageGeo = buildMessageGeo(event, endpoints, cursor.y, ctx);
   ctx.eventGeos.push(messageGeo);
   cursor.lastMessageY = messageGeo.y;
 
-  const lineHeight = ctx.measurer.measure('M', fontSpecOf(ctx.theme)).height;
   cursor.y += ctx.theme.sequence.messageSpacing + lineHeight;
 
   // Handle auto-activate/deactivate via ++ / -- shorthand on message
   applyMessageActivation(event, messageGeo, cursor, ctx);
+}
+
+/** The autonumber run's text, when the message carries one.
+ *  `getLabelNumbered` prepends it as a `MessageNumber`
+ *  (`AbstractMessage.java:200-206`); the formatted `sequenceLabel` wins over
+ *  the bare `sequenceNumber` when both are present. */
+function numberTextOf(event: MessageEvent): string | undefined {
+  if (event.sequenceLabel !== undefined) return event.sequenceLabel;
+  return event.sequenceNumber === undefined ? undefined : String(event.sequenceNumber);
 }
 
 /** Build the MessageGeo for a resolved set of endpoints at the given y. */
@@ -111,8 +132,17 @@ function buildMessageGeo(
   event: MessageEvent,
   endpoints: MessageEndpoints,
   y: number,
+  ctx: EventProcessingContext,
 ): MessageGeo {
+  const centerX = endpoints.arrowDirection === 'self'
+    ? endpoints.fromX + 20
+    : (endpoints.fromX + endpoints.toX) / 2;
+  const block = messageLabelBlock(
+    event.label, numberTextOf(event), centerX, y - 5, ctx.theme, ctx.measurer,
+  );
   return {
+    labelLines: block.lines,
+    ...(block.number !== undefined ? { labelNumber: block.number } : {}),
     kind: 'message',
     fromX: endpoints.fromX,
     toX: endpoints.toX,
@@ -123,6 +153,11 @@ function buildMessageGeo(
     ...(event.sequenceNumber !== undefined
       ? { sequenceNumber: event.sequenceNumber }
       : {}),
+    ...(event.sequenceLabel !== undefined ? { sequenceLabel: event.sequenceLabel } : {}),
+    ...(event.headCircle === true ? { headCircle: true } : {}),
+    ...(event.tailCircle === true ? { tailCircle: true } : {}),
+    ...(event.headCross === true ? { headCross: true } : {}),
+    ...(event.tailCross === true ? { tailCross: true } : {}),
   };
 }
 
@@ -268,15 +303,22 @@ function handleFrameEvent(
   const frameEndY = cursor.y;
   const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
 
+  const body = refBodyLines(event.frameType, event.label);
+  const x = minCx - 20;
+  const width = Math.max(maxCx - minCx + 40, refBodyWidth(body, ctx.theme, ctx.measurer));
   const frameGeo: FrameGeo = {
     kind: 'frame',
     frameType: event.frameType,
     label: event.label,
-    x: minCx - 20,
+    x,
     y: frameStartY,
-    width: maxCx - minCx + 40,
-    height: frameEndY - frameStartY,
+    width,
+    height: Math.max(frameEndY - frameStartY, refBodyHeight(body, ctx.theme, ctx.measurer)),
     branchSeparators,
+    refBody: body.map((line) => ({
+      text: line,
+      x: x + (width - ctx.measurer.measure(line, fontSpecOf(ctx.theme)).width) / 2,
+    })),
   };
   ctx.eventGeos.push(frameGeo);
   cursor.y = frameEndY + ctx.theme.sequence.messageSpacing;
@@ -418,6 +460,7 @@ function buildNoteGeo(
     height: noteHeight,
     text: event.text,
     ...(event.color !== undefined ? { color: event.color } : {}),
+    ...(event.shape !== undefined ? { shape: event.shape } : {}),
   };
 }
 

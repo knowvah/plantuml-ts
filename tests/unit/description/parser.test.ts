@@ -24,6 +24,9 @@ import type {
   DescriptiveLink,
   DescriptiveNode,
 } from '../../../src/diagrams/description/ast.js';
+import { descriptionAst } from './parse-description-ast.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
+import type { ParseRefusal } from '../../../src/core/parse-refusal.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -35,7 +38,21 @@ function parse(source: string): DescriptionDiagramAST {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   const block: UmlSource = { lines, type: 'description' };
-  return parseDescription(block);
+  return descriptionAst(parseDescription(block));
+}
+
+/** T7 (dispatch-by-parse-attempt): asserts `source` is REFUSED, for cases
+ *  where upstream's own factory never produces a successful diagram either
+ *  (see each call site's comment for the upstream `file:line` basis). */
+function parseRefusal(source: string): ParseRefusal {
+  const lines = source
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  const block: UmlSource = { lines, type: 'description' };
+  const refusal = parseRefusalOf(parseDescription(block));
+  if (refusal === undefined) throw new Error('Expected a ParseRefusal');
+  return refusal;
 }
 
 function firstNode(source: string): DescriptiveNode {
@@ -2155,9 +2172,19 @@ describe('parseDescription — sprite blocks consumed whole', () => {
     expect(ast.links).toHaveLength(0);
   });
 
-  it('single-line sprite definition is ignored', () => {
-    const ast = parse('sprite $foo [16x16/16] AAAA\ncomponent c');
-    expect(ast.nodes.map((n) => n.id)).toEqual(['c']);
+  it('single-line sprite definition refuses (unported CommandFactorySprite single-line form, T7)', () => {
+    // Upstream registers BOTH `factorySpriteCommand.createMultiLine(false)`
+    // AND `.createSingleLine()` on every factory (`CommonCommands
+    // .addCommonCommands2`, `:76-77` -- called for `description` via
+    // `addCommonCommands1`, `DescriptionDiagramFactory.java:90`), so a real
+    // jar accepts this line. `matchSpriteCommand` (shared across every
+    // parser, si5b/T4) only implements the `{ ... }` block form -- the
+    // single-line pixel-data form was never ported at all, a pre-existing
+    // command-coverage gap this refusal exposes for the first time (D7,
+    // SLI 2), not a defect in T7's fall-through refusal itself.
+    const refusal = parseRefusal('sprite $foo [16x16/16] AAAA\ncomponent c');
+    expect(refusal.kind).toBe('syntax');
+    expect(refusal.line).toBe(0);
   });
 
   it('container braces still work after a sprite block', () => {
@@ -2261,9 +2288,23 @@ describe('parseDescription — multi-line [ … ] element bodies', () => {
     expect(ast.nodes[0]!.symbol).toBe('component');
   });
 
-  it('body lines do not spawn nodes even when they look like declarations', () => {
+  it('a body line that itself contains a bracket does NOT close the block early (T13)', () => {
+    // `continueElementBlock`'s TYPE1 closer regex (parser.ts) now mirrors
+    // upstream's own `END1 = ^([^\[\]]*)\]$` exactly
+    // (`ELEMENT_MULTILINE_END1_RE`, parse-helpers.ts;
+    // `CommandCreateElementMultilines.java:80-84`). `[^\[\]]*` cannot
+    // consume a `[`, so a body line that itself contains a bracket --
+    // `[bracket]` -- does NOT satisfy the closer; it stays body text and the
+    // block closes on the standalone `]` two lines later. Previously the
+    // port's unrestricted `.*` matched `[bracket]` too, closing the block
+    // one line early and orphaning the standalone `]` (a syntax refusal,
+    // T7) -- fixed here.
     const ast = parse('rectangle r [\ncomponent fake\n[bracket]\n]\nactor A');
     expect(ast.nodes.map((n) => n.id)).toEqual(['r', 'A']);
+    // `stripFullWrap` strips the body line's OWN full `[...]` wrap (the same
+    // treatment every other body line already gets, `pushElementBody`), so
+    // the display carries `bracket`, not the literal `[bracket]`.
+    expect(ast.nodes[0]!.display).toBe('component fake\nbracket');
   });
 
   it('single-line bracket body closes on the same line', () => {
@@ -2926,8 +2967,26 @@ describe('G6-a: no-SYMBOL bare CODE declaration (CommandCreateElementFull CODE1)
     expect(node.stillUnknown).toBeUndefined();
   });
 
-  it('G6-a3: a PURE bare token declares nothing (isForbidden, java:134-138)', () => {
-    expect(parse('User').nodes).toHaveLength(0);
+  it('G6-a3: a PURE bare token refuses the whole diagram (isForbidden, java:134-138, T7)', () => {
+    // Re-examined for T7: `CommandCreateElementFull`'s regex alone DOES
+    // match a bare CODE1 ("User" satisfies CODE_CORE's `[%pLN_.]+`), so
+    // `isValid` returns OK and `getCandidate` picks this command --
+    // `isForbidden` is checked only INSIDE `execute()`
+    // (`SingleLineCommand2.java:164-165`), which returns
+    // `CommandExecutionResult.error("Syntax error: " + line)`, an
+    // EXECUTION_ERROR that fails the WHOLE document
+    // (`PSystemCommandFactory.java:180-186`) -- upstream never "declares
+    // nothing and moves on" here, contrary to this test's original
+    // assumption. Our command table has no rule matching a bare,
+    // undecorated CODE1-only line at all (rule 14b requires a decoration,
+    // rule 15 requires a leading quote -- both by design, see their own
+    // doc comments), so the line reaches T7's generic fall-through instead
+    // of a dedicated execution-failure branch; the net outcome (whole
+    // document refused) matches upstream even though the `kind` differs
+    // (`syntax` here vs. upstream's `execution`) -- flagged, not invented.
+    const refusal = parseRefusal('User');
+    expect(refusal.kind).toBe('syntax');
+    expect(refusal.line).toBe(0);
   });
 
   it('G6-a4: a bare CODE with only a #color decoration still declares (jar: 29.575x74 actor)', () => {
@@ -3054,9 +3113,75 @@ describe('G6-c: first-match ordering guards for rules 10 / 11 / 11b / 15', () =>
     expect(node).toMatchObject({ id: 'Just quoted', display: 'Just quoted', symbol: 'actor' });
   });
 
-  it('G6-c5: a quoted LHS with a quoted RHS matches NO alternative upstream', () => {
+  it('G6-c5: a quoted LHS with a quoted RHS matches NO alternative upstream, so the whole diagram refuses (T7)', () => {
     // CODE_CORE has no quoted branch, so alternative 3 cannot take `"a"` as
-    // its CODE; alternative 2/4 cannot take `"b"` as their CODE either.
-    expect(parse('"a" as "b"').nodes).toHaveLength(0);
+    // its CODE; alternative 2/4 cannot take `"b"` as their CODE either. No
+    // OTHER command in the factory matches an arrow-free, keyword-free,
+    // bracket-free line either, so upstream's `getCandidate` returns `null`
+    // -- `SYNTAX_ERROR "Syntax Error?"` for the WHOLE document
+    // (`PSystemCommandFactory.java:169-175`), not a silent no-op. Re-examined
+    // for T7: the original assertion (zero nodes, no error) never matched
+    // real upstream behaviour.
+    const refusal = parseRefusal('"a" as "b"');
+    expect(refusal.kind).toBe('syntax');
+    expect(refusal.line).toBe(0);
+  });
+});
+
+// ===========================================================================
+// ── T7 (dispatch-by-parse-attempt) — strict refusal ─────────────────────────
+//    D0/D1: the parse loop refuses instead of silently dropping an
+//    unrecognised line. Acceptance criteria 1/3/4/5 (batch-3a/T4-T11).
+// ===========================================================================
+
+describe('T7 — strict refusal (dispatch-by-parse-attempt)', () => {
+  it('AC1: an unrecognised line refuses with kind syntax, naming its line index', () => {
+    const refusal = parseRefusal('component a\n@#$%^&');
+    expect(refusal.kind).toBe('syntax');
+    expect(refusal.line).toBe(1);
+    expect(refusal.consumed).toBe(2);
+    expect(refusal.message).toBe('Syntax Error?');
+  });
+
+  it('AC3: a CommonCommands line (skinparam, registered on every factory) is accepted', () => {
+    const ast = parse('skinparam monochrome true\ncomponent a');
+    expect(ast.nodes.map((n) => n.id)).toEqual(['a']);
+  });
+
+  it('AC5: portin/portout at root level refuses with kind execution, score 0', () => {
+    // CommandCreateElementFull.java:316-317: PORTIN/PORTOUT outside any
+    // container is an EXECUTION_ERROR upstream ("Port can only be used
+    // inside an element and not at root level"), CommandExecutionResult
+    // .error(String) (the single-arg overload, score always 0 --
+    // CommandExecutionResult.java:81-83). Previously this branch
+    // (command-table-containers.ts rule 14) created nothing and silently
+    // continued; T7 makes the refusal real.
+    const refusal = parseRefusal('portin br0');
+    expect(refusal.kind).toBe('execution');
+    expect(refusal.commandScore).toBe(0);
+    expect(refusal.message).toBe(
+      'Port can only be used inside an element and not at root level',
+    );
+  });
+
+  it('AC5 (contrast): the same portin inside a container still creates a node', () => {
+    const ast = parse('component c {\nportin br0\n}');
+    const c = ast.nodes.find((n) => n.id === 'c')!;
+    expect(c.children.map((n) => n.id)).toEqual(['br0']);
+  });
+
+  it("isIncomplete() and checkFinalError() carry no refusal for this factory — see decision journal", () => {
+    // DescriptionDiagram never overrides `isIncomplete()` (AbstractDiagram's
+    // default `false` stands) and its own `checkFinalError()` override
+    // (DescriptionDiagram.java:90-98) only calls the void mutators
+    // `packSomePackage()`/`applySingleStrategy()` before returning
+    // `super.checkFinalError()` -- AbstractDiagram's default `null`. Neither
+    // upstream refusal point is reachable for this factory; not implemented
+    // here per the task's "do not invent one" instruction. A normally-open
+    // element block left dangling at EOF (an "incomplete" shape in spirit)
+    // still parses to completion below, confirming no incompleteness check
+    // fires.
+    const ast = parse('component c [\nopen body, never closed');
+    expect(ast.nodes.map((n) => n.id)).toEqual(['c']);
   });
 });

@@ -393,6 +393,35 @@ export function resolveStyleCascade(
 }
 
 /**
+ * `PName.ShowStereotype` per `.tagname`, for the sequence participant header.
+ *
+ * `AbstractTextualComponent`'s constructor runs every display through
+ * `Display#withoutStereotypeIfNeeded(style)` (`:84`), and that keeps the
+ * stereotype unless the resolved style says otherwise: a `ValueNull` (unset)
+ * or truthy `ShowStereotype` returns the display unchanged, and ONLY an
+ * explicit false strips it (`Display.java:127-136`). So an absent entry here
+ * means "show", exactly as upstream's absent value does -- this returns only
+ * the tags that actually declare the property.
+ *
+ * Scoped to `participant` plus the bare `.tag {}` form, which matches
+ * regardless of the query set (a tag selector with an empty `snamePath` has
+ * no ancestor tokens to satisfy). Deliberately narrow for the same reason
+ * {@link computeNoteStyleTagCascade} is: `cusiru-97-buco277` is the corpus
+ * sample and it uses the bare form.
+ */
+export function computeShowStereotypeByTag(
+  styleMap: StyleMap,
+): Readonly<Record<string, boolean>> {
+  const result: Record<string, boolean> = {};
+  for (const tag of collectStyleTagNames(styleMap)) {
+    const raw = resolveStyleCascade(styleMap, ['participant'], 'showstereotype', [tag]);
+    if (raw === undefined) continue;
+    result[tag] = raw.trim().toLowerCase() !== 'false';
+  }
+  return result;
+}
+
+/**
  * G2 N37: the `.tagname` cascade applied to the NOTE bucket (`note {
  * .faint { BackgroundColor red } } }`) -- mirrors `style-cascade-class.ts
  * #computeClassStyleCascadeOverrides`'s `classTagCascade` precedent but

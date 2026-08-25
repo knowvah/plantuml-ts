@@ -9,6 +9,7 @@
  * - 'layoutSync' in plugin narrowing compiles with zero `any` casts
  */
 
+import { refuse } from '../../src/core/parse-refusal.js';
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   DiagramRegistry,
@@ -32,8 +33,10 @@ function makeSyncPlugin(): SyncPlugin & { layoutSyncCalled: boolean } {
   const plugin: SyncPlugin & { layoutSyncCalled: boolean } = {
     type: 'sequence',
     layoutSyncCalled: false,
-    accepts: (lines: readonly string[]) => lines.some((l) => l.includes('sync')),
-    parse: (_source: UmlSource) => ({ kind: 'sync-ast' }),
+    parse: (source: UmlSource) =>
+      source.lines.some((l) => l.includes('sync'))
+        ? { kind: 'sync-ast' }
+        : refuse('syntax', 0, 0, 'Syntax Error?'),
     layoutSync: (_ast: unknown, _theme, _measurer) => {
       plugin.layoutSyncCalled = true;
       return { kind: 'sync-geo' };
@@ -50,8 +53,10 @@ function makeAsyncPlugin(): AsyncPlugin & { layoutCalled: boolean } {
   const plugin: AsyncPlugin & { layoutCalled: boolean } = {
     type: 'class',
     layoutCalled: false,
-    accepts: (lines: readonly string[]) => lines.some((l) => l.includes('async')),
-    parse: (_source: UmlSource) => ({ kind: 'async-ast' }),
+    parse: (source: UmlSource) =>
+      source.lines.some((l) => l.includes('async'))
+        ? { kind: 'async-ast' }
+        : refuse('syntax', 0, 0, 'Syntax Error?'),
     layout: (_ast: unknown, _theme, _measurer): Promise<unknown> => {
       plugin.layoutCalled = true;
       return Promise.resolve({ kind: 'async-geo' });
@@ -79,7 +84,7 @@ describe('DiagramRegistry', () => {
     registry.register(plugin);
 
     const source: UmlSource = { lines: ['sync diagram'], type: 'sequence' };
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
     expect(resolved.type).toBe('sequence');
   });
 
@@ -88,13 +93,13 @@ describe('DiagramRegistry', () => {
     registry.register(plugin);
 
     const source: UmlSource = { lines: ['async diagram'], type: 'class' };
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
     expect(resolved.type).toBe('class');
   });
 
   it('returns error-sentinel SyncPlugin when no plugin matches', () => {
     const source: UmlSource = { lines: ['unknown content'], type: 'unknown' };
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
     // Sentinel renders an SVG — should not throw
     expect(() => resolved.render({}, defaultTheme)).not.toThrow();
     const svg = assembleSvg(resolved.render({}, defaultTheme));
@@ -104,7 +109,7 @@ describe('DiagramRegistry', () => {
 
   it('error-sentinel is a SyncPlugin (has layoutSync, no async layout)', () => {
     const source: UmlSource = { lines: [], type: 'unknown' };
-    const sentinel = registry.resolve(source);
+    const sentinel = registry.resolve(source).plugin;
     expect('layoutSync' in sentinel).toBe(true);
     expect('layout' in sentinel).toBe(false);
   });
@@ -180,7 +185,7 @@ describe('SyncPlugin — registry and layout', () => {
     registry.register(plugin);
 
     const source: UmlSource = { lines: ['sync diagram'], type: 'sequence' };
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
 
     if (!('layoutSync' in resolved)) {
       throw new Error('Expected SyncPlugin from registry');
@@ -197,7 +202,7 @@ describe('SyncPlugin — registry and layout', () => {
     registry.register(plugin);
 
     const source: UmlSource = { lines: ['sync diagram'], type: 'sequence' };
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
 
     if (!('layoutSync' in resolved)) {
       throw new Error('Expected SyncPlugin from registry');
@@ -226,7 +231,7 @@ describe('AsyncPlugin — registry and layout', () => {
     registry.register(plugin);
 
     const source: UmlSource = { lines: ['async diagram'], type: 'class' };
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
 
     if ('layoutSync' in resolved) {
       throw new Error('Expected AsyncPlugin from registry');
@@ -243,7 +248,7 @@ describe('AsyncPlugin — registry and layout', () => {
     registry.register(plugin);
 
     const source: UmlSource = { lines: ['async diagram'], type: 'class' };
-    const resolved = registry.resolve(source);
+    const resolved = registry.resolve(source).plugin;
 
     if ('layoutSync' in resolved) {
       throw new Error('Expected AsyncPlugin from registry');

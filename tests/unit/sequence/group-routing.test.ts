@@ -24,6 +24,8 @@
  * `match`), so `[other case]` could never be drawn. The jar renders
  * `alt | [first case] | yes | [other case] | no`.
  */
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
+import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { describe, expect, it } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
@@ -67,25 +69,34 @@ describe('sequence grouping constructs are not stolen by the activity engine', (
     },
   );
 
+  // T12: `accepts()` is gone -- a plugin declines a source by REFUSING to
+  // parse it, which is the only signal dispatch reads now.
   it.each(['alt', 'loop', 'opt', 'group'] as const)(
-    'the activity plugin declines a sequence diagram using %s',
+    'the activity plugin refuses a sequence diagram using %s, and sequence does not',
     (name) => {
       const lines = GROUPED[name].split('\n').filter((l) => !l.startsWith('@'));
-      expect(activityPlugin.accepts(lines)).toBe(false);
-      expect(sequencePlugin.accepts(lines)).toBe(true);
+      const block: UmlSource = { lines, type: 'sequence' };
+      expect(parseRefusalOf(activityPlugin.parse(block))).toBeDefined();
+      expect(parseRefusalOf(sequencePlugin.parse(block))).toBeUndefined();
     },
   );
 
-  it('a real activity diagram is still accepted, and `end` still draws its node', () => {
-    const lines = ['start', ':do a thing;', 'end'];
-    expect(activityPlugin.accepts(lines)).toBe(true);
-    expect(textRuns(renderSync('@startuml\nstart\n:do a thing;\nend\n@enduml'))).toContain('do a thing');
-  });
+
 });
 
 describe('alt/else branch conditions survive to the SVG', () => {
   it('the else condition is kept by the parser, not discarded', () => {
-    const ast = parseSequence(GROUPED.alt.split('\n'));
+    // T4: `parseSequence`'s real contract is `UmlSource.lines` -- the
+    // INTERIOR of the block, `@start`/`@end` already stripped by the block
+    // extractor. Upstream's own command loop never sees those two lines
+    // either: `createSystem` consumes the start line via `it.next()` before
+    // the loop starts and the loop itself stops at `isEndDirective`
+    // (`PSystemCommandFactory.java:114-134`). The permissive parser used to
+    // tolerate feeding it the raw `@startuml`/`@enduml` lines by silently
+    // dropping them; strict refusal does not, so strip them here to match
+    // the real contract rather than weaken the refusal.
+    const ast = parseSequence(GROUPED.alt.split('\n').slice(1, -1));
+    if ('refused' in ast) throw new Error(`sequence refused at line ${String(ast.line)}: ${ast.message}`);
     const frame = ast.events.find((e) => e.kind === 'frame');
     expect(frame).toBeDefined();
     expect(frame?.kind === 'frame' ? frame.branchLabels : undefined).toEqual([

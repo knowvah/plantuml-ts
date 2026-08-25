@@ -137,7 +137,36 @@ const RE_SKINPARAM_BLOCK_OPEN = /^skinparam\s*\{$/;
  *  label text (19214px wide vs the jar's 142px). Found closing S1L-f. */
 const RE_SKINPARAM_SELECTOR_BLOCK_OPEN = /^skinparam\s+(\w+)(<<[^<>]+>>)?\s*\{$/;
 /** A stereotype sub-block inside a selector block: `<<Foo1>> {`. */
-const RE_SKINPARAM_NESTED_STEREO_OPEN = /^<<([^<>]+)>>\s*\{$/;
+/**
+ * A nested scope opener inside a `skinparam` block: any name followed by `{`.
+ * Upstream's single pattern is
+ * `^([\w.]*(?:\<\<.*\>\>)?[\w.]*)[%s]+(?:(\{)|(.*))$|^\}?$`
+ * (`SkinLoader.java:50`), whose group 1 is the name and group 2 the brace —
+ * so a stereotype scope (`<<Foo1>> {`) and an element scope (`border {`) are
+ * the SAME production, not two. Upstream requires whitespace between the name
+ * and the brace; `[%s]*` here also allows none, which no fixture exercises
+ * either way.
+ */
+const RE_SKINPARAM_NESTED_OPEN = /^([\w.]*(?:<<[^<>]*>>)?[\w.]*)\s*\{$/;
+
+/**
+ * `SkinParam#cleanForKeySlow` (`SkinParam.java:283-300`), the part this port
+ * needs: lower-case the key, then move every `<<stereotype>>` out of wherever
+ * it sits and re-append it at the END. That is what makes
+ * `skinparam object { <<Foo1>> { FontSize 8 } }` key as
+ * `objectfontsize<<foo1>>` rather than `object<<foo1>>fontsize`, which the
+ * two-level model this replaced had to special-case.
+ *
+ * The other four substitutions upstream applies (`_`/`.` removal, the
+ * `sequence(participant|actor)` and `<type>arrow` collapses, `align$` ->
+ * `alignment`) are NOT ported here: this port's lookup side never produced
+ * them either, so adding them one-sided would change every existing key.
+ */
+function cleanSkinKey(key: string): string {
+  const lower = key.toLowerCase();
+  const stereos = [...lower.matchAll(/<<([^<>]*)>>/g)].map((m) => `<<${m[1]!}>>`);
+  return lower.replace(/<<[^<>]*>>/g, '') + stereos.join('');
+}
 const RE_SKINPARAM_BLOCK_ENTRY = /^\s*(\w+(?:<<[^<>]+>>)?)\s+(.+)$/;
 const RE_SKINPARAM_BLOCK_CLOSE = /^\s*\}\s*$/;
 
@@ -187,19 +216,13 @@ class StyleAndSkinparamCollector {
 
   private inStyleBlock = false;
   private readonly styleBuffer: string[] = [];
-  private inSkinparamBlock = false;
-  /** A `<<label>> {` scope open INSIDE a selector block; '' when none. */
-  private skinparamNestedStereo = '';
-  private skinparamBlockSelector = '';
-  /** `<<stereotype>>` suffix of a scoped selector block (`skinparam
-   *  rectangle<<stereo>> {`), lowercased and kept SEPARATE from the selector
-   *  because upstream's stereotype-qualified key concatenation puts the
-   *  stereotype LAST -- `param.name() + suffix + stereotype.getLabel(...)`
-   *  (`SkinParam#getColor(ColorParam, Stereotype)`, java:914-915) -- so the
-   *  sugar `rectangle<<s>> { BackgroundColor X }` keys as
-   *  `rectanglebackgroundcolor<<s>>`, NOT `rectangle<<s>>backgroundcolor`.
-   *  Empty for an unscoped block. */
-  private skinparamBlockStereo = '';
+  /**
+   * Upstream's `SkinLoader#context` (`SkinLoader.java:56`): the stack of
+   * enclosing `NAME {` scopes inside a `skinparam` block. Non-empty exactly
+   * while a block is open, at any depth. An entry's key is the whole stack
+   * concatenated plus the entry name (`getFullParam()`, `:70-76`).
+   */
+  private readonly skinparamStack: string[] = [];
 
   /** True when the line was consumed (nothing is emitted for it). `substitute`
    *  (macro/`$variable` substitution) is threaded to the skinparam-VALUE paths
@@ -213,7 +236,8 @@ class StyleAndSkinparamCollector {
 
     if (this.inStyleBlock) return this.collectStyleLine(raw, trimmed, substitute);
 
-    if (this.inSkinparamBlock) return this.collectSkinparamBlockEntry(trimmed, substitute);
+    if (this.skinparamStack.length > 0)
+      return this.collectSkinparamBlockEntry(trimmed, substitute);
 
     if (RE_STYLE_OPEN.test(trimmed)) {
       this.inStyleBlock = true;
@@ -248,53 +272,42 @@ class StyleAndSkinparamCollector {
     return true;
   }
 
+  /**
+   * One line inside a `skinparam ... { }` block, using upstream's own model:
+   * a CONTEXT STACK. `SkinLoader#execute` (`SkinLoader.java:78-110`) pushes
+   * `group1` on a `NAME {` line, pops on a bare `}`, and keys every entry as
+   * `getFullParam() + NAME` — the whole stack concatenated. Nesting is
+   * therefore unbounded and uniform; there is no special case for a
+   * stereotype scope.
+   *
+   * This replaces an ad-hoc TWO-level model (an element selector plus one
+   * nested `<<stereo>>` scope). That model had no representation for a third
+   * level, so `skinparam database { border { color grey } }` left the block
+   * one `}` early and LEAKED `BackgroundColor yellow`, `Font {`, `Color …`
+   * and the trailing braces into `source.lines`, where the class parser then
+   * refused them (`class/daxeno-00-kasu166`).
+   *
+   * The stereotype behaviour it did encode is preserved, because upstream
+   * encodes it one level down instead: `SkinParam#cleanForKeySlow`
+   * (`SkinParam.java:283-300`) strips every `<<x>>` out of the assembled key
+   * and re-appends it at the END. So `object` + `<<Foo1>>` + `FontSize` keys
+   * as `objectfontsize<<foo1>>`, exactly as before — see {@link cleanSkinKey}.
+   */
   private collectSkinparamBlockEntry(trimmed: string, substitute: (text: string) => string): boolean {
-    // A NESTED `<<label>> {` opens a stereotype scope INSIDE an element block:
-    //
-    //     skinparam object { FontSize 16
-    //       <<Foo1>> { FontSize 8 }
-    //     }
-    //
-    // Upstream reaches these as separate keys -- `SkinParam#cleanForKeySlow`
-    // moves a `<<x>>` to the END of the key, so the inner entry becomes
-    // `objectfontsize<<foo1>>` while the outer stays `objectfontsize`. Without
-    // this scope both lines flattened into ONE key and the inner value
-    // OVERWROTE the outer, so `object/tenalu-53-meri239`'s unstereotyped `B`
-    // inherited the `<<Foo1>>` font size and background
-    // (jar: 16/LightCoral, this port: 8/LightBlue).
-    const nested = RE_SKINPARAM_NESTED_STEREO_OPEN.exec(trimmed);
-    if (nested !== null && this.skinparamBlockStereo === '') {
-      this.skinparamNestedStereo = nested[1]!.toLowerCase();
+    if (RE_SKINPARAM_BLOCK_CLOSE.test(trimmed)) {
+      this.skinparamStack.pop();
       return true;
     }
-    if (RE_SKINPARAM_BLOCK_CLOSE.test(trimmed)) {
-      // The inner `}` closes only the stereotype scope; the element block
-      // stays open for the entries after it.
-      if (this.skinparamNestedStereo !== '') {
-        this.skinparamNestedStereo = '';
-        return true;
-      }
-      this.inSkinparamBlock = false;
-      this.skinparamBlockSelector = '';
-      this.skinparamBlockStereo = '';
+    const opener = RE_SKINPARAM_NESTED_OPEN.exec(trimmed);
+    if (opener !== null) {
+      this.skinparamStack.push(opener[1]!.trim());
       return true;
     }
     const entry = RE_SKINPARAM_BLOCK_ENTRY.exec(trimmed);
     if (entry !== null) {
-      const name = entry[1]!.trim();
-      // The block's `<<stereotype>>` is appended AFTER the entry name (see
-      // `skinparamBlockStereo`). An entry carrying its own guillemet suffix
-      // keeps it and the block's is not doubled.
-      const scope = this.skinparamNestedStereo !== ''
-        ? `<<${this.skinparamNestedStereo}>>`
-        : this.skinparamBlockStereo;
-      const stereo = name.includes('<<') ? '' : scope;
-      this.skinparam.set(
-        (this.skinparamBlockSelector + name + stereo).toLowerCase(),
-        substitute(entry[2]!).trim(),
-      );
+      const key = this.skinparamStack.join('') + entry[1]!.trim();
+      this.skinparam.set(cleanSkinKey(key), substitute(entry[2]!).trim());
     }
-
     return true;
   }
 
@@ -302,16 +315,12 @@ class StyleAndSkinparamCollector {
    *  otherwise capture `{` as the parameter name. */
   private openSkinparam(trimmed: string, substitute: (text: string) => string): boolean {
     if (RE_SKINPARAM_BLOCK_OPEN.test(trimmed)) {
-      this.inSkinparamBlock = true;
-      this.skinparamBlockSelector = '';
-      this.skinparamBlockStereo = '';
+      this.skinparamStack.push('');
       return true;
     }
     const selectorBlock = RE_SKINPARAM_SELECTOR_BLOCK_OPEN.exec(trimmed);
     if (selectorBlock !== null) {
-      this.inSkinparamBlock = true;
-      this.skinparamBlockSelector = selectorBlock[1]!.trim().toLowerCase();
-      this.skinparamBlockStereo = (selectorBlock[2] ?? '').toLowerCase();
+      this.skinparamStack.push(selectorBlock[1]!.trim() + (selectorBlock[2] ?? ''));
       return true;
     }
     const single = RE_SKINPARAM_LINE.exec(trimmed);

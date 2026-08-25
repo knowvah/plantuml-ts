@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
+import { parseClass as parseClassRaw } from '../../../src/diagrams/class/parser.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type {
   Classifier,
@@ -1280,11 +1282,29 @@ describe('direction directive and lollipop links', () => {
 });
 
 describe('descriptive leaf elements (database)', () => {
+  // T12: a descriptive leaf on a CLASS diagram needs `allowmixing`, because
+  // `CommandCreateElementFull2(NORMAL_KEYWORD)` fails execution without it
+  // (`CommandCreateElementFull2.java:194-197`). These tests exercise the
+  // parser's descriptive-leaf handling, so they declare it — the refusal
+  // itself is covered separately below.
   it('parses `database Foo` as kind descriptive with usymbol', () => {
-    const c = firstClassifier('database Foo');
+    const c = firstClassifier('allowmixing\ndatabase Foo');
     expect(c.kind).toBe('descriptive');
     expect(c.usymbol).toBe('database');
     expect(c.id).toBe('Foo');
+  });
+
+  it('REFUSES a descriptive leaf when `allowmixing` was not declared', () => {
+    // Upstream matches the line and then fails execution:
+    // `CommandExecutionResult.error("Use 'allowmixing' if you want to mix
+    // classes and other UML elements.")`, score 0
+    // (`CommandCreateElementFull2.java:194-197`,
+    // `CommandExecutionResult.java:81-83`). That refusal is what hands the
+    // block to the next candidate under parse-attempt dispatch.
+    const refusal = parseRefusalOf(parseClassRaw({ lines: ['database Foo'], type: 'class' }));
+    expect(refusal?.kind).toBe('execution');
+    expect(refusal?.message).toContain('allowmixing');
+    expect(refusal?.commandScore).toBe(0);
   });
 
   it('does not create a spurious descriptive element from a `X : database` member', () => {
@@ -1361,12 +1381,12 @@ describe('() interface lollipop and crow-foot links', () => {
 
 describe('usecase / actor / component leaf elements', () => {
   it('parses `usecase Foo` with kind usecase (renders ellipse)', () => {
-    expect(firstClassifier('usecase Foo').kind).toBe('usecase');
+    expect(firstClassifier('allowmixing\nusecase Foo').kind).toBe('usecase');
   });
 
   it('parses `actor Foo` / `component Foo` as descriptive rect leaves', () => {
-    expect(firstClassifier('actor Foo').kind).toBe('descriptive');
-    expect(firstClassifier('component Bar').kind).toBe('descriptive');
+    expect(firstClassifier('allowmixing\nactor Foo').kind).toBe('descriptive');
+    expect(firstClassifier('allowmixing\ncomponent Bar').kind).toBe('descriptive');
   });
 });
 
@@ -1381,7 +1401,7 @@ describe('quoted-name consistency and rectangle leaf', () => {
   });
 
   it('a bare `rectangle "foo3"` leaf inside a container joins its namespace', () => {
-    const ast = parse('rectangle "foo2" {\nrectangle "foo3"\n}');
+    const ast = parse('allowmixing\nrectangle "foo2" {\nrectangle "foo3"\n}');
     // foo2 stays a cluster (non-empty) with foo3 as a rect leaf member
     expect(ast.namespaces.map((n) => n.id)).toContain('foo2');
     expect(ast.classifiers.map((c) => c.id)).toContain('foo2.foo3');

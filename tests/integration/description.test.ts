@@ -29,13 +29,14 @@ import { defaultTheme } from '../../src/core/theme.js';
 import { FixedMeasurer } from '../../src/core/measurer.js';
 import type { UmlSource } from '../../src/core/block-extractor.js';
 import { compareSvg } from '../oracle/svg-conformance/compare.js';
+import { parseAst } from '../helpers/parse-ast.js';
 
 const measurer = new FixedMeasurer(8, 16);
 
 /** Run a block end-to-end through the plugin and return the SVG. */
 function renderViaPlugin(lines: readonly string[]): string {
   const source: UmlSource = { lines, type: 'description' };
-  const ast = descriptionPlugin.parse(source);
+  const ast = parseAst(descriptionPlugin, source);
   const geo = descriptionPlugin.layoutSync(ast, defaultTheme, measurer);
   return assembleSvg(descriptionPlugin.render(geo, defaultTheme));
 }
@@ -135,32 +136,6 @@ describe('description engine — end-to-end via plugin', () => {
     const entityIdx = svg.indexOf('<g class="entity"');
     expect(clusterIdx).toBeGreaterThanOrEqual(0);
     expect(entityIdx).toBeGreaterThan(clusterIdx);
-  });
-});
-
-describe('description engine — accepts()', () => {
-  it('accepts blocks carrying descriptive keywords or shorthands', () => {
-    expect(descriptionPlugin.accepts(['node Server'])).toBe(true);
-    expect(descriptionPlugin.accepts(['usecase UC1'])).toBe(true);
-    expect(descriptionPlugin.accepts(['[Component]'])).toBe(true);
-    expect(descriptionPlugin.accepts(['(Use Case)'])).toBe(true);
-    expect(descriptionPlugin.accepts(['package P {', '}'])).toBe(true);
-    expect(descriptionPlugin.accepts([':User:'])).toBe(true); // colon actor
-    expect(descriptionPlugin.accepts(['actor/ Biz'])).toBe(true); // business actor
-  });
-
-  it('leaves bare actor/interface to the sequence/class plugins', () => {
-    // The engine renders actors/interfaces, but a bare `actor` + messages is a
-    // sequence diagram and a pure `interface` block is a class diagram — both
-    // resolve ahead of description, so description does not claim them.
-    expect(descriptionPlugin.accepts(['actor Bob'])).toBe(false);
-    expect(descriptionPlugin.accepts(['interface Drawable'])).toBe(false);
-  });
-
-  it('declines a pure class block', () => {
-    expect(
-      descriptionPlugin.accepts(['class Foo', 'Foo : +bar()']),
-    ).toBe(false);
   });
 });
 
@@ -333,13 +308,13 @@ describe('description engine — T7 sprite/img inline-atom rendering', () => {
   });
 
   it('ast.sprites feeds D9 label measurement: a sprite-bearing label widens the entity vs. the no-sprite variant', () => {
-    const withSpriteAst = descriptionPlugin.parse({
+    const withSpriteAst = parseAst(descriptionPlugin, {
       lines: [...PLAIN_HEX_SPRITE, 'component "X <$foo>" as C1'],
       type: 'description',
     });
     const withSpriteGeo = descriptionPlugin.layoutSync(withSpriteAst, defaultTheme, measurer);
 
-    const noSpriteAst = descriptionPlugin.parse({
+    const noSpriteAst = parseAst(descriptionPlugin, {
       lines: ['component "X" as C1'],
       type: 'description',
     });

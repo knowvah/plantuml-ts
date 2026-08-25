@@ -13,6 +13,7 @@ import type { DescriptiveNode } from './ast.js';
 import { startNewPage } from './parse-state.js';
 import { removeMatching, removeMatchingLinks } from './element-grammar.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
+import { cleanId } from './parse-helpers.js';
 
 // ---------------------------------------------------------------------------
 // Module-level regex constants
@@ -56,6 +57,20 @@ const RE_HIDE_SHOW_PORTION =
  *  guillemet TEXT). See RE_HIDE_SHOW_PORTION's doc comment for why this
  *  must be tried second. */
 const RE_HIDE_SHOW_ENTITY = /^(hide|show)\s+(<<[^>]+>>|\S+)\s*$/i;
+
+/** `url [of|for] CODE [is] [[url]]` (classdiagram/command/CommandUrl.java,
+ *  registered on DescriptionDiagramFactory verbatim, `:87` — the SAME
+ *  `Command` class the class engine ports in `class-url-command.ts`).
+ *  CODE is a bare `[%pLN_.]+` token or a quoted string; `of`/`for` and `is`
+ *  are both optional keywords; the bracket allows a single embedded `]`
+ *  (not `]]`), mirroring `UrlBuilder.MANDATORY`'s own token shape (see
+ *  `parse-helpers-strings.ts`'s `RE_INLINE_URL_TOKEN`).
+ *  @see ~/git/plantuml/.../classdiagram/command/CommandUrl.java:62-75 */
+const RE_URL_STATEMENT = new RegExp(
+  '^url\\s*(?:of|for)?\\s+([\\p{L}\\p{N}_.]+|"[^"]+")\\s+(?:is\\s*)?' +
+    '(\\[\\[[^\\]]*(?:\\][^\\]]+)*\\]\\])\\s*$',
+  'iu',
+);
 
 /**
  * Order matters: patterns are tested top-to-bottom; first match wins.
@@ -127,6 +142,28 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
     },
   },
 
+  // 2e2. `!pragma NAME [VALUE]` — CommandPragma, registered on EVERY factory
+  //      via CommonCommands.addCommonCommands1 (DescriptionDiagramFactory
+  //      .java:87). T13 (dispatch-by-parse-attempt): `!pragma svek_trace on`
+  //      / `!pragma horizontalLineBetweenDifferentPackageAllowed` /
+  //      `!pragma graphattributes ...` / `!pragma aspect 2,5` / `!pragma
+  //      layout elk` are all real, universally-registered Commands upstream
+  //      accepts -- newly refused once unrecognised lines stopped being
+  //      silently dropped. No-op body, same precedent as state/
+  //      state-commands.ts rule 3a: `!pragma`'s only non-storage side
+  //      effects (svgsize, `layout smetana/elk/vizjs` selection) have no
+  //      representation in `DescriptionDiagramAST` -- this port has one
+  //      layout engine (dot-engine, CLAUDE.md ruling 2026-08-09). Must
+  //      follow rule 2e (kermor) -- `!pragma kermor on` is more specific
+  //      and sets a real AST field; this general rule is the fallback for
+  //      every OTHER pragma name.
+  // @see ~/git/plantuml/.../command/CommandPragma.java:60-69
+  // @see ~/git/plantuml/.../command/CommonCommands.java:63
+  {
+    pattern: /^!pragma\s+[A-Za-z_][A-Za-z_0-9]*(?:\s+.*)?$/,
+    execute() { /* ignored -- see rule 2e2's doc comment */ },
+  },
+
   // 2f. `scale ...` directive (net/sourceforge/plantuml/command/
   //     CommandScale*.java, 6 forms -- see scale-command.ts's module doc
   //     for the full mechanism and jar Java citations). A loose trigger
@@ -179,6 +216,32 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
       const what = match[2]!.trim();
       state.ast.hideShowRules ??= [];
       state.ast.hideShowRules.push({ what, show });
+    },
+  },
+
+  // 2i. `url [of|for] CODE [is] [[url]]` — CommandUrl.java, the standalone
+  //     statement that attaches a url to an already-declared entity. T13
+  //     (dispatch-by-parse-attempt): `url of APP is [[...]]` / `url for Foo
+  //     is [[...]]` are real, registered Commands upstream accepts, newly
+  //     refused once unrecognised lines stopped being silently dropped.
+  //     `entity.addUrl(url)` (java:100) has no observable effect in this
+  //     port -- this engine already discards every INLINE `[[url]]` token
+  //     on a declaration line unread (`parse-helpers-strings.ts`'s
+  //     `stripUrl`/`stripTrailingUrl`), an established scope boundary this
+  //     rule follows rather than introduces. `quark.getData() == null`
+  //     (java:93-94) DOES have an observable effect -- an execution error
+  //     (D1) -- so an unresolved target still refuses, matching the port's
+  //     other execution-error precedent (parser.ts's port/portin/portout
+  //     case, `CommandCreateElementFull.java:316-317`).
+  // @see ~/git/plantuml/.../classdiagram/command/CommandUrl.java:62-101
+  {
+    pattern: RE_URL_STATEMENT,
+    execute(state, match) {
+      const rawCode = match[1]!;
+      const id = cleanId(rawCode.startsWith('"') ? rawCode.slice(1, -1) : rawCode);
+      if (!state.nodesById.has(id)) {
+        state.executionError = `${id} does not exist`;
+      }
     },
   },
 

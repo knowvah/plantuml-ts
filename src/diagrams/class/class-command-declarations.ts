@@ -20,8 +20,13 @@ import type { Command } from './class-command-types.js';
  */
 export const DECLARATION_COMMANDS: readonly Command[] = [
   // 7. Classifier declarations; bare `abstract Name` also matches (murotu-83-cebo380).
+  //    T14 (dispatch-by-parse-attempt): `protocol` added to the keyword
+  //    alternation -- see `ClassifierKind`'s `'protocol'` member doc
+  //    (class-classifier-ast.ts) for the upstream citation and the sibling
+  //    keywords (struct/exception/metaclass/stereotype/dataclass/record)
+  //    deliberately left unported.
   {
-    pattern: /^(?:abstract\s+class|abstract|class|interface|enum|annotation|entity|circle)\s+/i,
+    pattern: /^(?:abstract\s+class|abstract|class|interface|enum|annotation|entity|circle|protocol)\s+/i,
     execute(state, match) {
       const decl = parseClassifierDecl(match.input);
       if (decl !== null) applyClassifierDecl(state, decl, true);

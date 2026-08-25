@@ -34,7 +34,9 @@ import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../../src/index.js';
 import { layoutState } from '../../../src/diagrams/state/layout.js';
-import { parseState } from '../../../src/diagrams/state/parser.js';
+import { statePlugin } from '../../../src/diagrams/state/index.js';
+import { parseAst } from '../../helpers/parse-ast.js';
+import type { StateDiagramAST } from '../../../src/diagrams/state/ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
@@ -63,13 +65,13 @@ function readFixture(slug: string): { puml: string; oracleDot: string } {
 
 /** Parse a `.puml` body (sans @startuml/@enduml) into a StateDiagramAST,
  *  mirroring tests/unit/state/parser.test.ts's harness. */
-function parse(puml: string): ReturnType<typeof parseState> {
+function parse(puml: string): StateDiagramAST {
   const lines = puml
     .split('\n')
     .map((l) => l.trim())
     .filter((l) => l.length > 0 && !l.startsWith('@'));
   const block: UmlSource = { lines, type: 'state' };
-  return parseState(block);
+  return parseAst(statePlugin, block);
 }
 
 /** One layoutInputObserver capture of a full-document `renderSync` call. */

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseState } from '../../../src/diagrams/state/parser.js';
+import { statePlugin } from '../../../src/diagrams/state/index.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { concurrentRegionScopeId } from '../../../src/diagrams/state/state-parse-state.js';
 
@@ -24,7 +25,7 @@ function parse(source: string) {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   const block: UmlSource = { lines, type: 'state' };
-  return parseState(block);
+  return parseAst(statePlugin, block);
 }
 
 describe('CONC-region global numbering (mission G4 S14)', () => {

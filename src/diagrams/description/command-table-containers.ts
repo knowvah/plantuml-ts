@@ -11,7 +11,7 @@
 
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import type { Command } from './command-table-types.js';
-import { SHORTHAND_TRAILER, shorthandNode } from './command-table-helpers.js';
+import { BRACKET_TRAILER, SHORTHAND_TRAILER, shorthandNode } from './command-table-helpers.js';
 import {
   CONTAINER_INLINE_RE,
   CONTAINER_OPEN_RE,
@@ -33,8 +33,27 @@ import { leafDisplayName } from './namespace-groups.js';
  */
 export const CONTAINER_COMMANDS: readonly Command[] = [
   // 10. Bracket shorthand: [Name] [as Alias] [<<stereotype>>] [#color]
+  //
+  // The trailer is `as <alias>` plus {@link SHORTHAND_TRAILER}'s tag /
+  // stereotype / color / url tokens, and NOTHING else. It used to be a bare
+  // `(.*)?$`, which claimed any line whose first token was bracketed --
+  // including `[*] --> state1`, a STATE diagram's initial transition.
+  //
+  // Upstream cannot do that. `CommandCreateElementFull`'s CODE_CORE does
+  // admit `\[[^\[\]]+\]` (`:126`), so `[*]` matches its CODE -- but the
+  // regex is anchored, and after CODE its tail permits only
+  // TAGS/STEREOTYPE/TAGS/URL/COLOR before `end()` (`:108-115`). ` --> state1`
+  // matches none of those, so the command fails, the description factory
+  // refuses the source, and `PSystemBuilder`'s next factory -- StateDiagram,
+  // which follows DescriptionDiagram in its list -- takes it. That order is
+  // upstream's own and is NOT the bug; the permissive trailer was.
+  //
+  // The sibling rules 11/11b already carry exactly this guard, whose own
+  // comment says it is "restricted to tag/stereotype/color tokens so link
+  // lines never match" (`command-table-helpers.ts:16-19`).
+  // @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementFull.java:83-115
   {
-    pattern: /^\[([^\]]+)\](.*)?$/,
+    pattern: new RegExp('^\\[([^\\]]+)\\]' + BRACKET_TRAILER + '$'),
     execute(state, match) {
       const decl = parseBracketDeclaration(match[1]!.trim(), match[2] ?? '');
       emitNode(state, makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color, undefined, decl.stereotypeSprite));
@@ -56,16 +75,22 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
 
   // 11b. Quoted display with wrapped alias: `"another use case" as (uc4)` —
   //      the alias notation picks the symbol (paren→usecase, colon→actor,
-  //      bracket→component), mirroring getDummy's codeChar dispatch.
+  //      bracket→component, `()`→interface), mirroring getDummy's codeChar
+  //      dispatch. `()bareword` / `()"quoted"` is CommandCreateElementMultilines
+  //      TYPE0's CODE2 alternative (`\(\)[%s]*[%pLN_.]+` /
+  //      `\(\)[%s]*[%g][^%g]+[%g]`, CommandCreateElementFull.java:126) — tried
+  //      BEFORE the bare-paren alternative below since `()...` also starts
+  //      with `(`.
   {
     pattern: new RegExp(
-      '^("[^"]+"\\s+as\\s+(\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]))' +
+      '^("[^"]+"\\s+as\\s+(\\(\\)\\s*(?:"[^"]+"|\\S+)|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]))' +
         SHORTHAND_TRAILER + '$',
     ),
     execute(state, match) {
       const alias = match[2]!;
-      const symbol =
-        alias.startsWith('(') ? 'usecase' : alias.startsWith(':') ? 'actor' : 'component';
+      const symbol = alias.startsWith('()')
+        ? 'interface'
+        : alias.startsWith('(') ? 'usecase' : alias.startsWith(':') ? 'actor' : 'component';
       shorthandNode(state, match[1]!.trim(), symbol, match[3]);
     },
   },
@@ -135,7 +160,20 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       const kw = match[1]!.toLowerCase();
       const symbol = KEYWORD_TO_SYMBOL.get(kw);
       if (symbol === undefined) return;
-      if (symbol === 'port' && state.containerStack.length === 0) return;
+      if (symbol === 'port' && state.containerStack.length === 0) {
+        // CommandCreateElementFull.java:316-317: PORTIN/PORTOUT at root
+        // level is an EXECUTION_ERROR upstream ("Port can only be used
+        // inside an element and not at root level"), not a silent no-op --
+        // the whole diagram fails to build. T7 (dispatch-by-parse-attempt):
+        // this branch used to create nothing and return, silently accepting
+        // the line; it now signals failure through
+        // `ParseState.executionError`, which `dispatchCommand` (parser.ts)
+        // turns into a `kind: 'execution'` `ParseRefusal`, score 0 --
+        // `CommandExecutionResult.error(String)` is the single-arg overload,
+        // whose score is always 0 (CommandExecutionResult.java:81-83).
+        state.executionError = 'Port can only be used inside an element and not at root level';
+        return;
+      }
       // CommandCreateElementFull's CODE-can-be-`[bracket]` alternative
       // (getRegexConcat CODE1, codeChar `[`): a keyword-prefixed bracket
       // declaration whose alias follows the bracket -- `component [Disp] as Id`

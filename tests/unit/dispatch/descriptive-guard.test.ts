@@ -21,7 +21,7 @@ function resolveType(puml: string): string {
   expect(blocks).toHaveLength(1);
   const [block] = blocks;
   if (block === undefined) throw new Error('no block extracted');
-  return registry.resolve(block).type;
+  return registry.resolve(block).plugin.type;
 }
 
 // The cocice fixture: one of every descriptive element keyword, including
@@ -106,12 +106,21 @@ Queue "1" -- "*" QueueEntry
     expect(resolveType(puml)).toBe('class');
   });
 
-  it('still routes a genuine descriptive element declaration to description', () => {
+  // `entity Foo { ... }` is a CLASS-diagram declaration, not a descriptive
+  // one -- `entity` is one of the class factory's own leaf types. Verified
+  // against the jar directly: this exact source renders with
+  // `data-diagram-type="CLASS"`.
+  //
+  // This asserted `not.toBe('class')` under the old `accepts()` dispatch,
+  // where description claimed the block on the keyword alone. Under
+  // parse-attempt the class engine parses it and wins, which is what the jar
+  // does.
+  it('routes an `entity` block to class, as the jar does', () => {
     const puml = `@startuml
 entity Entity {
   * id
 }
 @enduml`;
-    expect(resolveType(puml)).not.toBe('class');
+    expect(resolveType(puml)).toBe('class');
   });
 });

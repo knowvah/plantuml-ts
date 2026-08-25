@@ -379,12 +379,32 @@ export interface NoteBoxStyle {
 
 /**
  * Renders a sticky-note shape: a rectangle with the top-right corner
- * replaced by a folded dog-ear, plus two crease lines that show the fold.
+ * replaced by a folded dog-ear, plus the fold itself.
  *
- * Returns only the shape SVG — callers render text on top. Moved here from
- * `svg.ts` (line cap) and re-exported from it, so callers are unaffected.
+ * TWO paths, which is what upstream emits. `Opale.getCorner`
+ * (`Opale.java:134-147`) builds the fold as ONE closed `UPath` --
+ * `moveTo(width - cornersize, 0)`, `lineTo(width - cornersize, cornersize)`,
+ * `lineTo(width, cornersize)`, `lineTo(width - cornersize, 0)`, `closePath` --
+ * drawn once beside `getPolygonNormal`'s body (`:149-169`, `ComponentRoseNote
+ * .java:118-124`). The jar's own output for a sequence note is exactly
+ * `d="M15,97 L15,120 L75,120 L75,107 L65,97 L15,97"` plus
+ * `d="M65,97 L65,107 L75,107 L65,97"`, both filled with the note colour.
+ *
+ * This used to draw the fold as TWO `<line>`s, so every note cost three
+ * top-level children where the jar spends two. Like the actor stick man
+ * (`sequence/renderer-participant-shapes.ts#renderActorShape`), the excess is
+ * per-construct, so it grew with how much of a diagram this port rendered.
+ *
+ * Still divergent, deliberately not changed here: the BODY path starts
+ * top-left and runs right along the top, where upstream starts top-left and
+ * runs DOWN the left side first (`:152-157`). That is a `d`-string
+ * difference, not a child-count one, and it would move bytes in three
+ * engines at once.
+ *
+ * Returns only the shape SVG — callers render text on top.
  *
  * @param dogEar - Size of the folded corner in px (default 10).
+ * @see ~/git/plantuml/.../skin/rose/Opale.java#getCorner
  */
 export function noteBox(
   x: number,
@@ -403,9 +423,13 @@ export function noteBox(
     `<path d="M${fmt(x)},${fmt(y)} L${fmt(x + w - d)},${fmt(y)} L${fmt(x + w)},${fmt(y + d)} ` +
     `L${fmt(x + w)},${fmt(y + h)} L${fmt(x)},${fmt(y + h)} Z" ` +
     `fill="${shortenColor(fill)}" stroke="${paint}"${sw}/>`;
-  // Two crease lines: vertical drop from fold-point, then horizontal to right edge
-  const crease =
-    `<line x1="${fmt(x + w - d)}" y1="${fmt(y)}" x2="${fmt(x + w - d)}" y2="${fmt(y + d)}" stroke="${paint}"${sw}/>` +
-    `<line x1="${fmt(x + w - d)}" y1="${fmt(y + d)}" x2="${fmt(x + w)}" y2="${fmt(y + d)}" stroke="${paint}"${sw}/>`;
-  return body + crease;
+  // The fold, as ONE closed path -- `Opale#getCorner`'s four points, in its
+  // order. The final `lineTo` returns to the start, which is why upstream's
+  // `closePath()` adds nothing to the emitted `d` (its own goldens end at the
+  // last `L`, with no `Z`); this matches that.
+  const fold =
+    `<path d="M${fmt(x + w - d)},${fmt(y)} L${fmt(x + w - d)},${fmt(y + d)} ` +
+    `L${fmt(x + w)},${fmt(y + d)} L${fmt(x + w - d)},${fmt(y)}" ` +
+    `fill="${shortenColor(fill)}" stroke="${paint}"${sw}/>`;
+  return body + fold;
 }

@@ -92,7 +92,6 @@ describe('the gate does not fire where upstream never reaches it', () => {
     ['mix_ prefix (WITH_MIX_PREFIX)', 'class Foo\nmix_actor Bob'],
     ['package container', 'class Foo\npackage foo {\n}'],
     ['package empty braces', 'class Foo\npackage foo {}'],
-    ['state container', 'class Foo\nstate A {\n}'],
     ['rectangle container', 'class Foo\nrectangle R {\n}'],
     ['package long-description', 'class Foo\npackage Application [\n  desc\n]'],
     // No native class construct => upstream's DescriptionDiagramFactory owns
@@ -102,6 +101,23 @@ describe('the gate does not fire where upstream never reaches it', () => {
 
   it.each(UNGATED)('%s', (_label, body) => {
     expect(isRefused(render(body))).toBe(false);
+  });
+
+  // `state` is NOT one of `CommandPackageWithUSymbol`'s SYMBOL keywords
+  // (`:77-78` lists package|rectangle|hexagon|node|artifact|folder|file|
+  // frame|cloud|action|process|database|storage|component|card|queue|stack),
+  // so no class-diagram command opens a `state A {` container and the jar
+  // refuses the whole source. Verified directly:
+  //
+  //     @startuml / class Foo / state A { / } / @enduml
+  //     -> "Error line 3", `>state A {<` underlined,
+  //        "Syntax Error? (Assumed diagram type: class)"
+  //
+  // which is exactly what this port now emits. It used to render because an
+  // unrecognised line was silently dropped; `state container` sat in the
+  // UNGATED list above on that basis.
+  it('refuses a `state` container in a class diagram, as the jar does', () => {
+    expect(isRefused(render('class Foo\nstate A {\n}'))).toBe(true);
   });
 
   it('a C4-shaped diagram (macro-expanded leaves, no class) is never refused', () => {

@@ -20,7 +20,7 @@
  * @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnEntity.java
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
@@ -84,7 +84,13 @@ describe('(a) same-side note merge', () => {
 describe('(b) Class::member note targets', () => {
   it('anchors to the host classifier with no phantom sibling classifier', () => {
     const graph = captureDotGraph(
-      ['class A', 'int counter', 'note left of A::counter', 'hi', 'end note'].join('\n'),
+      // T5 (dispatch-by-parse-attempt): a bare `int counter` outside any
+      // class body is not valid upstream syntax -- `CommandAddMethod`'s own
+      // regex mandates a `NAME : DATA` colon form, and upstream would refuse
+      // this too. `A : int counter` is the syntax it actually accepts and
+      // still declares `counter` as a member of `A` for the note target below.
+      // @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/command/CommandAddMethod.java:60-66
+      ['class A', 'A : int counter', 'note left of A::counter', 'hi', 'end note'].join('\n'),
     );
     const ids = graph.nodes.map((n) => n.id);
     expect(ids).toEqual(expect.arrayContaining(['A']));
@@ -97,7 +103,13 @@ describe('(b) Class::member note targets', () => {
 
   it('routes a member-anchored note as an invisible layout-only edge', () => {
     const graph = captureDotGraph(
-      ['class A', 'int counter', 'note left of A::counter', 'hi', 'end note'].join('\n'),
+      // T5 (dispatch-by-parse-attempt): a bare `int counter` outside any
+      // class body is not valid upstream syntax -- `CommandAddMethod`'s own
+      // regex mandates a `NAME : DATA` colon form, and upstream would refuse
+      // this too. `A : int counter` is the syntax it actually accepts and
+      // still declares `counter` as a member of `A` for the note target below.
+      // @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/command/CommandAddMethod.java:60-66
+      ['class A', 'A : int counter', 'note left of A::counter', 'hi', 'end note'].join('\n'),
     );
     expect(graph.edges[0]!.attributes?.invis).toBe(true);
   });

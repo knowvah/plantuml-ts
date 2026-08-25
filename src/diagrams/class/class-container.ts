@@ -211,6 +211,11 @@ export function closeContainer(state: ParseState, nsId: string): void {
   if (idx !== undefined) {
     const leaf = state.ast.classifiers[idx]!;
     leaf.usymbol = usymbol;
+    const pending = state.pendingContainerTags.get(nsId);
+    if (pending !== undefined) {
+      leaf.tags = [...new Set([...(leaf.tags ?? []), ...pending])];
+      state.pendingContainerTags.delete(nsId);
+    }
     // A2s R2h (daxeno-00): upstream routes EVERY package/container display
     // through `Display.getWithNewlines` when the group is created
     // (CommandPackage.java:182-183's gotoGroup call), so a literal `\n`

@@ -100,6 +100,17 @@ export interface ParseState {
    *  comment). Starts at 0, matching `new AtomicInteger(0)`; the first
    *  `nextCreationIndex` call returns 1, matching `cpt1.addAndGet(1)`. */
   uidCounter: number;
+  /**
+   * T7 (dispatch-by-parse-attempt): a command whose regex MATCHED but whose
+   * upstream execution semantics reject the line sets this before returning,
+   * mirroring `CommandExecutionResult.error(...)` (`PSystemCommandFactory
+   * .java:180-186`). `dispatchCommand` (parser.ts) checks it immediately
+   * after every `execute()` call and turns it into a `kind: 'execution'`
+   * `ParseRefusal` -- never read or written anywhere else, so it carries no
+   * reset/lifecycle concern (parsing aborts the instant it is observed).
+   * `undefined` (the default) means the command that just ran succeeded.
+   */
+  executionError: string | undefined;
 }
 
 /**

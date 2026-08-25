@@ -24,7 +24,11 @@
 import { describe, it, expect } from 'vitest';
 import { registry } from '../../../src/core/dispatcher.js';
 import { assembleSvg } from '../../../src/index.js';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+// The object engine IS the class parser (upstream: `ObjectDiagramFactory`
+// shares `AbstractClassOrObjectDiagram`). Route through the class engine's
+// narrowing seam, which throws naming the refusal rather than letting an
+// unexpected `ParseRefusal` surface as a missing-property failure.
+import { parseClass } from '../class/parse-helper.js';
 import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -54,17 +58,17 @@ describe('registry dispatch — object diagrams', () => {
   it('routes a block typed "object" (the @startobject keyword suffix) to the class plugin', () => {
     const block = src(['object Foo']);
     const typedBlock: UmlSource = { ...block, type: 'object' };
-    const plugin = registry.resolve(typedBlock);
+    const plugin = registry.resolve(typedBlock).plugin;
     expect(plugin.type).toBe('class');
   });
 
   it('routes a pure "object ..." block probed under an untyped/class-typed block to the class plugin', () => {
-    const plugin = registry.resolve(src(['object Foo', 'object Bar', 'Foo --> Bar']));
+    const plugin = registry.resolve(src(['object Foo', 'object Bar', 'Foo --> Bar'])).plugin;
     expect(plugin.type).toBe('class');
   });
 
   it('also routes an ordinary class diagram (no object/map keyword) to the class plugin', () => {
-    const plugin = registry.resolve(src(['class Foo', 'interface Bar']));
+    const plugin = registry.resolve(src(['class Foo', 'interface Bar'])).plugin;
     expect(plugin.type).toBe('class');
   });
 });

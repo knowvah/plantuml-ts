@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { parseActivity } from '../../../src/diagrams/activity/parser.js';
+import { activityPlugin } from '../../../src/diagrams/activity/index.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
+import type { ParseRefusal } from '../../../src/core/parse-refusal.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type {
   ActivityDiagramAST,
@@ -19,14 +22,20 @@ import type {
   ActivityKill,
   ActivityDetach,
 } from '../../../src/diagrams/activity/ast.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 
 // ---------------------------------------------------------------------------
 // Test helpers
 // ---------------------------------------------------------------------------
 
+/** T6 (dispatch-by-parse-attempt): `parseActivity` now returns
+ *  `ActivityDiagramAST | ParseRefusal` (D1); every fixture in this file
+ *  (besides the dedicated refusal tests below) is fully recognised, so
+ *  `parseAst` narrows the refusal arm away (throwing, with engine/line/kind,
+ *  if that assumption is ever wrong). */
 function parse(lines: readonly string[]): ActivityDiagramAST {
   const block: UmlSource = { lines, type: 'activity' };
-  return parseActivity(block);
+  return parseAst(activityPlugin, block);
 }
 
 function firstNode(ast: ActivityDiagramAST): ActivityNode {
@@ -670,5 +679,71 @@ describe('parses <code>...</code> multi-line action', () => {
     const ast = parse(codeLines);
     const action = ast.nodes[0] as ActivityAction;
     expect(action.label).toContain('    "item": "value"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Unrecognised-line refusal (mission dispatch-by-parse-attempt/T6, D0/D1)
+//
+// Upstream's single flat per-line command loop has exactly one refusal
+// point when no `Command` matches: `SYNTAX_ERROR "Syntax Error?"`
+// (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/
+// PSystemCommandFactory.java:169-175`). This port's recursive descent has
+// many call sites that must all propagate that same refusal rather than
+// swallow it, so these tests exercise both the top-level dispatch loop and
+// every nested-body construct (if/while/fork) that owns its own
+// `parseNodes` call.
+// ---------------------------------------------------------------------------
+
+function refusalOf(lines: readonly string[]): ParseRefusal {
+  const block: UmlSource = { lines, type: 'activity' };
+  const refusal = parseRefusalOf(parseActivity(block));
+  if (refusal === undefined) throw new Error('expected a refusal, got a successful parse');
+  return refusal;
+}
+
+describe('unrecognised-line refusal (mission dispatch-by-parse-attempt/T6)', () => {
+  it('a top-level line no command recognises refuses with kind "syntax"', () => {
+    const refusal = refusalOf(['start', 'this is not a real activity line', 'stop']);
+    expect(refusal.kind).toBe('syntax');
+    expect(refusal.message).toBe('Syntax Error?');
+  });
+
+  it('names the 0-based index of the offending line and the lines consumed before it', () => {
+    const refusal = refusalOf(['start', 'this is not a real activity line', 'stop']);
+    expect(refusal.line).toBe(1);
+    expect(refusal.consumed).toBe(1);
+  });
+
+  it('an unrecognised line at index 0 refuses with line 0 / consumed 0', () => {
+    const refusal = refusalOf(['this is not a real activity line']);
+    expect(refusal.line).toBe(0);
+    expect(refusal.consumed).toBe(0);
+  });
+
+  it('an unrecognised line inside an if-then body still refuses, at its own line index', () => {
+    const refusal = refusalOf(['if (cond?) then (yes)', 'not a real line', 'endif']);
+    expect(refusal.kind).toBe('syntax');
+    expect(refusal.line).toBe(1);
+  });
+
+  it('an unrecognised line inside a while body still refuses, at its own line index', () => {
+    const refusal = refusalOf(['while (cond?)', 'not a real line', 'endwhile']);
+    expect(refusal.line).toBe(1);
+  });
+
+  it('an unrecognised line inside a fork branch still refuses, at its own line index', () => {
+    const refusal = refusalOf(['fork', 'not a real line', 'end fork']);
+    expect(refusal.line).toBe(1);
+  });
+
+  it('a blank line never triggers refusal', () => {
+    const ast = parse(['start', '', ':Step;', '', 'stop']);
+    expect(ast.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'stop']);
+  });
+
+  it('a fully-recognised source still parses to an AST, not a refusal', () => {
+    const ast = parse(['start', ':Step one;', 'stop']);
+    expect(ast.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'stop']);
   });
 });

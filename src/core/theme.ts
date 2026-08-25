@@ -108,6 +108,8 @@ export interface Theme {
    *  unmodeled -- `!theme dark`-interaction untraced, named remainder. */
   monochrome?: 'true' | 'reverse';
   strictUml?: boolean;
+  /** `skinparam footbox hide|show`; see `SequenceDiagram#isShowFootbox`. */
+  footbox?: string;
   /**
    * `skinparam handwritten true` — draw every primitive through the sketchy
    * renderer (`core/klimt/drawing/hand/`).
@@ -225,6 +227,11 @@ export interface Theme {
      *  #resolveNoteBackground` reads `.background` between a note's own
      *  explicit `#color` override and the bare `elements.note` bucket. */
     noteTagCascade?: Readonly<Record<string, ElementColors>>;
+    /** `PName.ShowStereotype` per `.tagname` -- see
+     *  `style-map-element.ts#computeShowStereotypeByTag`. An ABSENT entry
+     *  means show, mirroring upstream's `ValueNull` branch
+     *  (`Display.java:131-133`); only an explicit `false` lands here. */
+    showStereotypeByTag?: Readonly<Record<string, boolean>>;
     graph: ThemeGraphColors;
   };
   sequence: {

@@ -26,7 +26,7 @@ import { describe, it, expect } from 'vitest';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme, deepMergeTheme, resolveTheme } from '../../../src/core/theme.js';
 import { resolveSkinparam } from '../../../src/core/skinparam.js';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 

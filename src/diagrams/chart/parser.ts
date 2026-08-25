@@ -16,6 +16,8 @@ import { createAnnotations, matchAnnotationCommand } from '../../core/annotation
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import { extractStyleMap, makeAxis } from './parse-helpers.js';
 import type { StyleMap } from '../../core/skinparam.js';
+import { refuse } from '../../core/parse-refusal.js';
+import type { ParseRefusal } from '../../core/parse-refusal.js';
 import {
   tryArea, tryBar, tryChartAnnotation, tryChartLegend, tryGrid, tryHAxis, tryLine,
   tryOrientation, tryScatter, tryStackMode, tryV2Axis, tryVAxis,
@@ -56,7 +58,7 @@ function dispatchChartLine(
   i: number,
   line: string,
   styleMap: StyleMap,
-): number {
+): number | null {
   for (const handler of PRIMARY_HANDLERS) {
     if (handler(ast, line, styleMap)) return 1;
   }
@@ -70,13 +72,21 @@ function dispatchChartLine(
   if (spriteMatch !== null) return spriteMatch.consumed;
 
   for (const handler of SECONDARY_HANDLERS) {
-    if (handler(ast, line, styleMap)) break;
+    if (handler(ast, line, styleMap)) return 1;
   }
-  return 1;
+
+  // No registered command recognised this line -- mission
+  // dispatch-by-parse-attempt/T10 (D0/D1). The permissive fall-through
+  // that used to `return 1` unconditionally here silently dropped the
+  // line; it now signals "no candidate matched" so `parseChart` can build
+  // a `ParseRefusal` instead. Mirrors `getCandidate` returning `null` when
+  // no `Command` in `cmds` matches.
+  // @see ~/git/plantuml/.../command/PSystemCommandFactory.java:169-175,225-246
+  return null;
 }
 
-export function parseChart(source: UmlSource): ChartDiagramAST {
-  const ast: ChartDiagramAST = {
+function initChartAst(): ChartDiagramAST {
+  return {
     hAxis: makeAxis(),
     vAxis: makeAxis(),
     v2Axis: null,
@@ -89,17 +99,34 @@ export function parseChart(source: UmlSource): ChartDiagramAST {
     chrome: createAnnotations(),
     sprites: createSpriteRegistry(),
   };
+}
 
+export function parseChart(source: UmlSource): ChartDiagramAST | ParseRefusal {
+  const ast = initChartAst();
   const styleMap = extractStyleMap(source);
   const lines = source.lines;
 
+  // `consumed` mirrors upstream's `trace.size()` in spirit (D2,
+  // decisions.md): lines of `source.lines` successfully parsed before the
+  // offending one. `@startchart`/`@endchart` are already stripped from
+  // `source.lines` by the block extractor, so unlike upstream's
+  // `IteratorCounter2` (which also counts the start-directive line) there
+  // is no constant offset to add here; chart is single-candidate (T10
+  // read-set), so this score never breaks a cross-engine tie regardless.
+  let consumed = 0;
   for (let i = 0; i < lines.length; ) {
     const line = lines[i]!.trim();
     if (line === '') {
       i++;
+      consumed++;
       continue;
     }
-    i += dispatchChartLine(ast, lines, i, line, styleMap);
+    const advance = dispatchChartLine(ast, lines, i, line, styleMap);
+    if (advance === null) {
+      return refuse('syntax', i, consumed, 'Syntax Error?');
+    }
+    i += advance;
+    consumed += advance;
   }
 
   return ast;

@@ -12,6 +12,11 @@
 
 import { stripSpriteRegions } from './descriptive-keywords.js';
 
+import {
+  DiagramType as UpstreamDiagramType,
+  findStartTypes,
+} from './diagram-type-set.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -41,6 +46,22 @@ export type DiagramType =
 export interface UmlSource {
   readonly lines: readonly string[];
   readonly type: DiagramType;
+  /**
+   * Upstream's start-tag candidate set for this block: `findStartTypes` of its
+   * `@start` line (`DiagramType.java:69-92`). For every tag but `@startuml` it
+   * is a singleton; `@startuml` names all ten legacy-UML factories, because
+   * upstream never guesses one from the content (D5,
+   * `plans/dispatch-by-parse-attempt/decisions.md`).
+   *
+   * Optional for exactly the reason {@link linePositions} and {@link rawStyles}
+   * are: a hand-built literal fixture has no `@start` line to derive it from,
+   * and many unit tests construct `UmlSource` directly. {@link finalizeBlock}
+   * — the only producer in the render pipeline — always populates it. A
+   * consumer must read absence as "this fixture states no candidate
+   * constraint", NEVER as the empty set, which is a real answer meaning "not a
+   * start directive at all". T12 makes it required, once {@link type} is gone.
+   */
+  readonly types?: ReadonlySet<UpstreamDiagramType>;
   /** Raw style-block strings extracted by the preprocessor (pre-parsed). */
   readonly rawStyles?: readonly string[];
   /**
@@ -323,8 +344,75 @@ export function finalizeBlock(
     suffix === 'uml'
       ? detectUmlType(trimmed)
       : (START_SUFFIX_MAP[suffix] ?? 'unknown');
-  if (contentPositions === undefined) return { lines: trimmed, type };
-  return { lines: trimmed, type, linePositions: trimBlankLinePositions(contentLines, contentPositions) };
+  const types = candidateTypes(suffix, type);
+  if (contentPositions === undefined) return { lines: trimmed, type, types };
+  return {
+    lines: trimmed,
+    type,
+    types,
+    linePositions: trimBlankLinePositions(contentLines, contentPositions),
+  };
+}
+
+/**
+ * This port's plugin type -> upstream's enum member. Total in that direction:
+ * every type in this port's union has an upstream counterpart. The reverse is
+ * NOT true -- upstream's enum has 39 members and this port registers 14
+ * engines, so most of it maps to nothing here (D5's "the enum is the spec; a
+ * missing engine is this port's gap").
+ *
+ * Note `packetdiag` -> `PACKET`: the plugin is named for the `@startpacketdiag`
+ * tag, the enum member for the diagram (`DiagramType.java:181-182`).
+ */
+const PORT_TO_UPSTREAM: Readonly<Record<DiagramType, UpstreamDiagramType>> = {
+  sequence: UpstreamDiagramType.SEQUENCE,
+  class: UpstreamDiagramType.CLASS,
+  state: UpstreamDiagramType.STATE,
+  description: UpstreamDiagramType.DESCRIPTION,
+  activity: UpstreamDiagramType.ACTIVITY,
+  object: UpstreamDiagramType.OBJECT,
+  timing: UpstreamDiagramType.TIMING,
+  mindmap: UpstreamDiagramType.MINDMAP,
+  gantt: UpstreamDiagramType.GANTT,
+  wbs: UpstreamDiagramType.WBS,
+  json: UpstreamDiagramType.JSON,
+  yaml: UpstreamDiagramType.YAML,
+  hcl: UpstreamDiagramType.HCL,
+  board: UpstreamDiagramType.BOARD,
+  chronology: UpstreamDiagramType.CHRONOLOGY,
+  files: UpstreamDiagramType.FILES,
+  packetdiag: UpstreamDiagramType.PACKET,
+  chart: UpstreamDiagramType.CHART,
+  dot: UpstreamDiagramType.DOT,
+  unknown: UpstreamDiagramType.UNKNOWN,
+};
+
+/** @see PORT_TO_UPSTREAM */
+export function upstreamTypeOf(type: DiagramType): UpstreamDiagramType {
+  return PORT_TO_UPSTREAM[type];
+}
+
+/**
+ * The candidate set for a block, from its `@start` suffix alone.
+ *
+ * Upstream's answer, `findStartTypes`, is authoritative wherever it has one.
+ * Where it does not, this port keeps its own:
+ * {@link START_SUFFIX_MAP} carries EIGHT tags upstream has never had --
+ * `@startsequence`, `@startclass`, `@startstate`, `@startactivity`,
+ * `@startobject`, `@starttiming`, `@startcomponent`, `@startusecase`. The jar
+ * types all eight `UNKNOWN`, runs no factory for them, and renders
+ * `PSystemUnsupported` (`PSystemBuilder.java:282-283`). That divergence is
+ * PRE-EXISTING and is carried forward here unchanged rather than repaired:
+ * removing it would move fixtures, and this task's whole property is that it
+ * moves none. No corpus fixture uses any of the eight; four test sources do.
+ */
+function candidateTypes(
+  suffix: string,
+  type: DiagramType,
+): ReadonlySet<UpstreamDiagramType> {
+  const upstream = findStartTypes(`@start${suffix}`);
+  if (!upstream.has(UpstreamDiagramType.UNKNOWN)) return upstream;
+  return new Set([upstreamTypeOf(type)]);
 }
 
 // ---------------------------------------------------------------------------

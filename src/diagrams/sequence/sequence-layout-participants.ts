@@ -9,13 +9,32 @@
 
 import type {
   Participant,
+  ParticipantBadge,
   ParticipantGeo,
   SequenceDiagramAST,
   SequenceEvent,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
+import type { Paint } from '../../core/paint.js';
+import { resolveBareOrBackColor } from '../../core/color-override.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
+import {
+  parseCircledCharDecoration,
+  parseCircledSpriteDecoration,
+  resolveBadgeRadius,
+  splitStereotypeLabels,
+  splitStereotypeStyleTags,
+  wrapGuillemet,
+} from '../../core/stereotype-decoration.js';
+import { cleanStereotypeToken } from '../../core/style-map-element.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import { getSpriteMonochrome } from '../../core/sprite-registry.js';
+import {
+  spriteToPngDataUri,
+  spriteMonochromeAsLike,
+} from '../../core/klimt/sprite/sprite-raster.js';
 
 const LEFT_MARGIN = 30;
 const LABEL_H_PADDING = 8; // min px between a message label edge and a lifeline
@@ -36,6 +55,15 @@ export interface ParticipantLayoutResult {
  * Compute participant column geometry: x/width/height/centerX for every
  * participant, sorted into first-appearance order.
  */
+/** Theme + measurer + the diagram's sprite registry, bundled so the column
+ *  builders stay inside the project's 5-parameter cap. Mirrors
+ *  `EventProcessingContext`'s own role in `sequence-layout-events.ts`. */
+interface ParticipantLayoutCtx {
+  readonly theme: Theme;
+  readonly measurer: StringMeasurer;
+  readonly sprites: SpriteRegistry | undefined;
+}
+
 export function computeParticipantLayout(
   ast: SequenceDiagramAST,
   theme: Theme,
@@ -50,9 +78,10 @@ export function computeParticipantLayout(
   );
   scanMessageLabels(ast.events, sortedParticipants, theme, measurer, adjMaxLabelW);
 
-  const participantWidths = computeParticipantWidths(sortedParticipants, theme, measurer);
+  const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
+  const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
   const { participantGeos, participantMap, participantIndex, maxParticipantHeight } =
-    positionParticipants(sortedParticipants, participantWidths, adjMaxLabelW, theme, measurer);
+    positionParticipants(sortedParticipants, participantWidths, adjMaxLabelW, ctx);
 
   return {
     sortedParticipants,
@@ -100,12 +129,19 @@ function scanMessageLabels(
  */
 function computeParticipantWidths(
   sortedParticipants: Participant[],
-  theme: Theme,
-  measurer: StringMeasurer,
+  ctx: ParticipantLayoutCtx,
 ): number[] {
+  const { theme, measurer } = ctx;
   const fontSpec = fontSpecOf(theme);
   return sortedParticipants.map((p) => {
-    const lw = measurer.measure(p.display, fontSpec).width;
+    const badge = anyBadgeFor(p, ctx, resolveParticipantBackground(p, theme));
+    const textW = Math.max(
+      measurer.measure(p.display, fontSpec).width,
+      ...visibleStereotypeLines(p, theme).map((l) => measurer.measure(l, fontSpec).width),
+    );
+    // `TextBlockSprited#calculateDimension`: the badge widens the block by its
+    // own width plus the 6px gap (`:57-67`).
+    const lw = badge === undefined ? textW : textW + badge.width + BADGE_GAP;
     if (p.type === 'database') {
       return Math.max(DB_MIN_WIDTH, lw + theme.sequence.participantPadding);
     }
@@ -128,9 +164,9 @@ function positionParticipants(
   sortedParticipants: Participant[],
   participantWidths: number[],
   adjMaxLabelW: number[],
-  theme: Theme,
-  measurer: StringMeasurer,
+  ctx: ParticipantLayoutCtx,
 ): ParticipantColumnResult {
+  const { theme } = ctx;
   const participantGeos: ParticipantGeo[] = [];
   const participantMap = new Map<string, ParticipantGeo>();
   const participantIndex = new Map<string, number>();
@@ -139,7 +175,7 @@ function positionParticipants(
   for (let i = 0; i < sortedParticipants.length; i++) {
     const p = sortedParticipants[i]!;
     const width = participantWidths[i]!;
-    const geo = buildParticipantGeo(p, width, currentX, theme, measurer);
+    const geo = buildParticipantGeo(p, width, currentX, ctx);
 
     participantGeos.push(geo);
     participantMap.set(p.id, geo);
@@ -160,17 +196,207 @@ function positionParticipants(
   return { participantGeos, participantMap, participantIndex, maxParticipantHeight };
 }
 
+/**
+ * The DISPLAYED labels of a `<<...>>` run, guillemet-wrapped.
+ *
+ * `StereotypeDecoration#buildComplex` rewrites each chunk to just its LABEL
+ * group, dropping the `(CHAR[,COLOR])` / `($sprite[,COLOR])` badge spec that
+ * introduced it (`:143-182`) -- so `<< ($APIGateway, #CC2264) APIGateway >>`
+ * displays as `«APIGateway»`, which is exactly what the jar emits for
+ * `birocu-87-xubi808`. It also yields ONE label per chunk, so a stacked
+ * `<<A>><<B>>` is two rows, and 3-bracket `<<<X>>>` chunks are invisible.
+ *
+ * `core/stereotype-decoration.ts` is that port, shared rather than
+ * duplicated -- see its own header for why it no longer lives in the class
+ * engine.
+ */
+function stereotypeLabels(raw: string): string[] {
+  return splitStereotypeLabels(stereotypeInner(raw)).map((l) => wrapGuillemet(l));
+}
+
+/** The text inside the outermost guillemets, which is what every
+ *  `stereotype-decoration.ts` entry point takes (each reconstructs the
+ *  `<<...>>` wrapper itself). */
+function stereotypeInner(raw: string): string {
+  return raw.replace(/^<</, '').replace(/>>$/, '');
+}
+
+/**
+ * The visible stereotype label, or undefined when the resolved style hides it.
+ *
+ * `AbstractTextualComponent`'s constructor runs the display through
+ * `Display#withoutStereotypeIfNeeded(style)` (`:84`), which strips the
+ * stereotype only on an explicit `ShowStereotype false` -- an unset value is
+ * `ValueNull` and keeps it (`Display.java:127-136`). `theme.colors
+ * .showStereotypeByTag` carries exactly the tags that declared the property,
+ * so an absent entry is upstream's absent value.
+ *
+ * `resolveStyleCascade` cleans the token itself, so the raw `<<tag>>` is the
+ * lookup key with the guillemets trimmed here and nothing else -- no
+ * dependency on the class engine's stereotype splitter.
+ */
+function visibleStereotypeLines(p: Participant, theme: Theme): readonly string[] {
+  if (p.stereotype === undefined) return [];
+  const byTag = theme.colors.showStereotypeByTag;
+  if (byTag !== undefined) {
+    // The style tags are the chunk labels with any BADGE spec stripped and
+    // regardless of bracket count (`splitStereotypeStyleTags`), NOT the raw
+    // run: `<< ($APIGateway, #CC2264) APIGateway >>` matches `.APIGateway`.
+    // Cleaned through `cleanStereotypeToken`, which is what
+    // `collectStyleTagNames` keys the map by.
+    const tags = splitStereotypeStyleTags(stereotypeInner(p.stereotype)).map(cleanStereotypeToken);
+    if (tags.some((t) => byTag[t] === false)) return [];
+  }
+  return stereotypeLabels(p.stereotype);
+}
+
+
+
+/**
+ * The box's fill, in `Participant#getUsedStyles`' own precedence: the
+ * participant's inline `#color` overrides the merged style
+ * (`eventuallyOverride(getColors())`, `Participant.java:88`), which itself
+ * comes from the kind's signature `root, element, sequenceDiagram, <kind>`
+ * (`ParticipantType.java:55-80`) -- so the `<style>` bucket key IS the
+ * participant kind. Falls back to the theme's own background.
+ *
+ * A bucket value is a raw `parseColor` result: a plain NAME still needs
+ * HColorSet resolution, a Gradient is already a `Paint` and passes through
+ * (the same two cases `class/renderer-note.ts#resolveNoteBackground`
+ * handles).
+ */
+function resolveParticipantBackground(p: Participant, theme: Theme): Paint {
+  const inline = resolveBareOrBackColor(p.color);
+  if (inline !== undefined) return resolveColorToSvgHex(inline);
+  const bucket = theme.colors.elements?.[p.type]?.background;
+  if (bucket === undefined) return theme.colors.background;
+  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : bucket;
+}
+
+/** The box's stroke -- the same cascade, minus the inline override, which
+ *  `participant X #color` only ever sets the BACKGROUND with. */
+function resolveParticipantBorder(p: Participant, theme: Theme): Paint {
+  const bucket = theme.colors.elements?.[p.type]?.border;
+  if (bucket === undefined) return theme.colors.border;
+  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : bucket;
+}
+
+/**
+ * `TextBlockSprited` -- the gap between the badge and the label block beside
+ * it. The sprite draws at the block origin and the parent text block is
+ * translated right by `sprite.width + 6.0`
+ * (`TextBlockSprited.java:65-67,76`). Jar-verified on `birocu-87-xubi808`:
+ * a 64-wide image at x=179.938 puts its label at x=249.938, and
+ * 249.938 - (179.938 + 64) = 6.
+ */
+const BADGE_GAP = 6;
+
+/**
+ * The sprite BADGE a participant's stereotype declares, rasterised.
+ *
+ * `Participant#getDisplay` folds the `Stereotype` into the display
+ * (`:125-136`), and `Display#createStereotype` wraps the text block in a
+ * `TextBlockSprited` carrying `stereotype.getSprite(spriteContainer)`
+ * (`Display.java:671-689`). `undefined` when the run declares no sprite, or
+ * when the name does not resolve in the registry -- upstream's `getSprite`
+ * returns null there and the plain text block draws unchanged.
+ *
+ * The circled-CHARACTER badge (`<<(C,color) Name>>`) takes the other arm of
+ * that same `if` and is NOT built here: it needs `CircledCharacter`'s own
+ * circle+glyph geometry rather than an image box. Four corpus fixtures use
+ * it -- see `planning/next-missions.md`.
+ */
+function badgeFor(
+  p: Participant,
+  sprites: SpriteRegistry | undefined,
+  background: Paint,
+): ParticipantBadge | undefined {
+  if (p.stereotype === undefined || sprites === undefined) return undefined;
+  const deco = parseCircledSpriteDecoration(stereotypeInner(p.stereotype));
+  if (deco === undefined) return undefined;
+  const sprite = getSpriteMonochrome(sprites, deco.name);
+  if (sprite === undefined) return undefined;
+  // `spriteToRgba`'s gradient runs backColor -> fontColor, mirroring
+  // `toUImage`'s `gradient(backcolor, color)` (`SpriteMonochrome.java:191`).
+  // `Stereotype#getSprite` passes `asTextBlock(getHtmlColor(), null, ...)`
+  // (`:116`) and `asTextBlock#drawU` resolves `color = forcedColor ?? fontColor`
+  // (`:215`), so the END is the stereotype's DECLARED colour -- or black when
+  // it declares none, which is `buildComplex`'s own
+  // `htmlColor = col == null ? HColors.BLACK : col` and already
+  // `spriteToRgba`'s default for an absent `fontColor`.
+  //
+  // The START is `ug.getParam().getBackcolor()` -- the CURRENT graphics
+  // background, i.e. whatever the participant box is filled with, so the
+  // sprite blends into it. Sourced from the same expression
+  // `renderParticipantBox` paints that box with: where our box fill diverges
+  // from the jar's the badge inherits that one divergence rather than adding
+  // a second (birocu-87-xubi808: the jar fills `#FF0` from
+  // `<style> participant { BackgroundColor }`, which this port does not yet
+  // route to the box either).
+  //
+  // These two were passed the other way round when the badge first landed,
+  // which tinted every sprite from the declared colour toward the theme's
+  // TEXT colour instead of from the box toward the declared colour.
+  const png = spriteToPngDataUri(
+    spriteMonochromeAsLike(sprite),
+    deco.color,
+    // A gradient background has no single start colour to blend from; the
+    // rasteriser's own default (white) stands in, which is also upstream's
+    // when `getBackcolor()` yields nothing usable
+    // (`SpriteMonochrome.java:181-182`).
+    typeof background === 'string' ? background : undefined,
+    deco.scale,
+  );
+  return { kind: 'sprite', dataUri: png.dataUri, width: png.width, height: png.height };
+}
+
+/**
+ * The circled-CHARACTER badge -- `Display#createStereotype`'s other arm,
+ * taken when `stereotype.isSpotted()` (`Display.java:673-676`). Its radius is
+ * `SkinParam#getCircledCharacterRadius()` (`:548-551`), shared with the class
+ * engine via `core/stereotype-decoration.ts`.
+ */
+function charBadgeFor(p: Participant, theme: Theme): ParticipantBadge | undefined {
+  if (p.stereotype === undefined) return undefined;
+  const deco = parseCircledCharDecoration(stereotypeInner(p.stereotype));
+  if (deco === undefined) return undefined;
+  const r = resolveBadgeRadius(
+    theme.colors.graph.circledCharacterFontSize,
+    theme.colors.graph.circledCharacterRadius,
+  );
+  return { kind: 'char', color: deco.color, width: r * 2, height: r * 2 };
+}
+
+/** Either badge form, sprite first -- `createStereotype` tries the sprite
+ *  before the circled character (`Display.java:671-676`). */
+function anyBadgeFor(
+  p: Participant,
+  ctx: ParticipantLayoutCtx,
+  background: Paint,
+): ParticipantBadge | undefined {
+  return badgeFor(p, ctx.sprites, background) ?? charBadgeFor(p, ctx.theme);
+}
+
 /** Build the geometry for a single participant column at a given x offset. */
 function buildParticipantGeo(
   p: Participant,
   width: number,
   currentX: number,
-  theme: Theme,
-  measurer: StringMeasurer,
+  ctx: ParticipantLayoutCtx,
 ): ParticipantGeo {
+  const { theme, measurer } = ctx;
   const fontSpec = fontSpecOf(theme);
   const measured = measurer.measure(p.display, fontSpec);
-  const boxHeight = measured.height + 20;
+  // A visible stereotype is a SECOND run above the name
+  // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
+  // own line in `birocu-87-xubi808`), so the head grows by one line.
+  const stereoLines = visibleStereotypeLines(p, theme);
+  const background = resolveParticipantBackground(p, theme);
+  const badge = anyBadgeFor(p, ctx, background);
+  // `TextBlockSprited#calculateDimension` takes the MAX of the badge's own
+  // height and the text block's (`:57-63`).
+  const textHeight = measured.height * (1 + stereoLines.length);
+  const boxHeight = Math.max(textHeight, badge?.height ?? 0) + 20;
   const pHeight =
     p.type === 'actor' ? Math.max(boxHeight, SEQUENCE_ACTOR_HEIGHT) :
     p.type === 'database' ? Math.max(boxHeight, DB_HEIGHT) :
@@ -180,6 +406,10 @@ function buildParticipantGeo(
   return {
     id: p.id,
     display: p.display,
+    background,
+    border: resolveParticipantBorder(p, theme),
+    ...(stereoLines.length > 0 ? { stereotypeLines: stereoLines } : {}),
+    ...(badge !== undefined ? { badge } : {}),
     type: p.type,
     x: currentX,
     y: 0,

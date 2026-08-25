@@ -9,13 +9,14 @@ import { renderChart } from '../../../src/diagrams/chart/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
 import { chartPlugin } from '../../../src/diagrams/chart/index.js';
 import { layoutChart } from '../../../src/diagrams/chart/layout.js';
-import { parseChart } from '../../../src/diagrams/chart/parser.js';
+import { parseChartAst } from './parse-chart-ast.js';
 import { renderSync } from '../../../src/index.js';
 import { resolveTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ChartGeometry } from '../../../src/diagrams/chart/layout.js';
 import type { Theme } from '../../../src/core/theme.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 
 /**
  * The port's own inline error boxes draw with `fontFamily: 'monospace'`, and
@@ -46,7 +47,7 @@ function src(lines: string[]): UmlSource {
  * Callers can override any field via layoutChart or direct construction.
  */
 function makeMinimalGeo(): ChartGeometry {
-  const ast = parseChart(
+  const ast = parseChartAst(
     src([
       'h-axis ["A","B","C"]',
       'v-axis "Y" 0 --> 100',
@@ -78,7 +79,7 @@ describe('AC1: bar + line chart renders both <rect> and <line>', () => {
   });
 
   it('renderChart with bar and line geo contains rect and line', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B"]',
         'v-axis "Y" 0-->50',
@@ -99,7 +100,7 @@ describe('AC1: bar + line chart renders both <rect> and <line>', () => {
 
 describe('AC2: v-axis grid produces horizontal grid lines', () => {
   it('grid on v-axis → horizontal <line> elements at tick y positions', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B","C"]',
         'v-axis "Y" 0-->100 grid',
@@ -131,7 +132,7 @@ describe('AC2: v-axis grid produces horizontal grid lines', () => {
 
 describe('AC3: legend right positions legend beyond right edge of plot', () => {
   it('legend rect x > plotArea.x + plotArea.width', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B","C"]',
         'v-axis "Y" 0-->100',
@@ -158,7 +159,7 @@ describe('AC3: legend right positions legend beyond right edge of plot', () => {
 
 describe('AC4: annotation with hasArrow renders text and arrow line', () => {
   it('annotation produces text element and line toward arrow target', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B","C"]',
         'v-axis "Y" 0-->100',
@@ -177,7 +178,7 @@ describe('AC4: annotation with hasArrow renders text and arrow line', () => {
   });
 
   it('annotation without arrow renders text only — no extra line from annotation', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B"]',
         'v-axis "Y" 0-->100',
@@ -200,7 +201,7 @@ describe('AC4: annotation with hasArrow renders text and arrow line', () => {
 describe('AC5: AST errors produce a visually distinct error SVG', () => {
   it('chartPlugin returns error SVG when AST has errors', () => {
     const badSrc = src(['line [(1,10),(2,20)]']); // coordinate pairs require explicit h-axis range
-    const ast = parseChart(badSrc);
+    const ast = parseChartAst(badSrc);
     expect(ast.errors.length).toBeGreaterThan(0);
 
     const geo = chartPlugin.layoutSync(ast, theme, measurer);
@@ -234,7 +235,7 @@ describe('AC5: AST errors produce a visually distinct error SVG', () => {
 
 describe('AC6: primary + secondary Y-axis produces two vertical axis lines', () => {
   it('v2-axis results in two drawVAxis calls → two axis line SVG elements', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B","C"]',
         'v-axis "Y1" 0-->100',
@@ -257,7 +258,7 @@ describe('AC6: primary + secondary Y-axis produces two vertical axis lines', () 
   });
 
   it('v2Axis line x2 equals plotArea.x + plotArea.width in geo', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B"]',
         'v-axis "Y1" 0-->50',
@@ -301,10 +302,6 @@ describe('AC7: chartPlugin registered — renderSync handles @startchart', () =>
     expect(chartPlugin.type).toBe('chart');
   });
 
-  it('chartPlugin.accepts returns false (resolved by type, not heuristics)', () => {
-    expect(chartPlugin.accepts(['h-axis ["A","B"]', 'bar [1,2]'])).toBe(false);
-  });
-
   it('chartPlugin round-trips parse→layout→render without throwing', () => {
     const source = src([
       'h-axis ["Jan","Feb","Mar","Apr"]',
@@ -313,7 +310,7 @@ describe('AC7: chartPlugin registered — renderSync handles @startchart', () =>
       'line "Target" [100,100,100,100]',
       'legend bottom',
     ]);
-    const ast = chartPlugin.parse(source);
+    const ast = parseAst(chartPlugin, source);
     expect(ast.errors).toHaveLength(0);
     const geo = chartPlugin.layoutSync(ast, theme, measurer);
     const svg = assembleSvg(chartPlugin.render(geo, theme));
@@ -337,7 +334,7 @@ describe('renderChart — plot area background', () => {
 
 describe('renderChart — h-axis rendering', () => {
   it('renders h-axis tick labels for categorical axis', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["Alpha","Beta","Gamma"]',
         'v-axis "Y" 0-->100',
@@ -352,7 +349,7 @@ describe('renderChart — h-axis rendering', () => {
   });
 
   it('renders h-axis title when set', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis "Category" ["X","Y"]',
         'v-axis "Y" 0-->100',
@@ -367,7 +364,7 @@ describe('renderChart — h-axis rendering', () => {
 
 describe('renderChart — v-axis rendering', () => {
   it('renders v-axis tick labels for numeric axis', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B"]',
         'v-axis "Y" 0-->100',
@@ -382,7 +379,7 @@ describe('renderChart — v-axis rendering', () => {
   });
 
   it('renders v-axis title when set', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B"]',
         'v-axis "Revenue" 0-->100',
@@ -397,7 +394,7 @@ describe('renderChart — v-axis rendering', () => {
 
 describe('renderChart — area series', () => {
   it('renders area series as a filled path', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B","C"]',
         'v-axis "Y" 0-->100',
@@ -413,7 +410,7 @@ describe('renderChart — area series', () => {
 
 describe('renderChart — scatter series', () => {
   it('renders scatter series as circle markers', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B","C"]',
         'v-axis "Y" 0-->100',
@@ -428,7 +425,7 @@ describe('renderChart — scatter series', () => {
 
 describe('renderChart — legend top / bottom', () => {
   it('legend top → legend y is less than plotArea.y', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B"]',
         'v-axis "Y" 0-->100',
@@ -444,7 +441,7 @@ describe('renderChart — legend top / bottom', () => {
   });
 
   it('legend bottom → legend y is greater than plotArea.y + plotArea.height', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B"]',
         'v-axis "Y" 0-->100',
@@ -460,7 +457,7 @@ describe('renderChart — legend top / bottom', () => {
 
 describe('renderChart — empty series', () => {
   it('chart with no series renders without throwing', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B"]',
         'v-axis "Y" 0-->100',
@@ -491,7 +488,7 @@ describe('renderChart — SVG root structure', () => {
 
 describe('renderChart — h-axis vertical grid lines', () => {
   it('h-axis grid → vertical <line> elements with dasharray', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B","C"] grid',
         'v-axis "Y" 0-->100',
@@ -507,7 +504,7 @@ describe('renderChart — h-axis vertical grid lines', () => {
 
 describe('chartPlugin.layoutSync — error propagation', () => {
   it('errors from AST appear on returned geometry', () => {
-    const ast = parseChart(src(['line [(1,10),(2,20)]']));
+    const ast = parseChartAst(src(['line [(1,10),(2,20)]']));
     expect(ast.errors.length).toBeGreaterThan(0);
     const geo = chartPlugin.layoutSync(ast, theme, measurer);
     expect(geo.errors).toBeDefined();
@@ -515,7 +512,7 @@ describe('chartPlugin.layoutSync — error propagation', () => {
   });
 
   it('clean AST has no errors on geometry', () => {
-    const ast = parseChart(
+    const ast = parseChartAst(
       src([
         'h-axis ["A","B"]',
         'v-axis "Y" 0-->100',

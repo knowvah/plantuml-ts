@@ -9,7 +9,7 @@
  * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java#hideOrShowVisibilityModifier
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import {
   parseHideShowVisibilityDirective,
   applyVisibilityHideShow,

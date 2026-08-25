@@ -12,7 +12,7 @@
  *      (ARROW_HEAD1/ARROW_BODY1/.../INSIDE/.../ARROW_HEAD2 regex assembly)
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 

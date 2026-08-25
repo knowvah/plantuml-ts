@@ -19,6 +19,7 @@ import {
   collectElementStyleBuckets,
   resolveDocumentBackground,
   computeNoteStyleTagCascade,
+  computeShowStereotypeByTag,
   resolveGlobalShadowing,
   resolveGlobalBackground,
   resolveGlobalBorder,
@@ -111,6 +112,8 @@ interface StyleMapExtras {
   readonly elements: Record<string, ElementColors>;
   readonly hasElements: boolean;
   readonly noteTagCascade: Readonly<Record<string, ElementColors>>;
+  readonly showStereotypeByTag: Readonly<Record<string, boolean>>;
+  readonly hasShowStereotypeByTag: boolean;
   readonly hasNoteTagCascade: boolean;
   readonly shadowing: number | undefined;
   readonly rootElementBorderRaw: string | undefined;
@@ -135,12 +138,15 @@ interface StyleMapExtras {
 function computeStyleMapExtras(styleMap: StyleMap, base: Theme): StyleMapExtras {
   const elements = collectElementStyleBuckets(styleMap);
   const noteTagCascade = computeNoteStyleTagCascade(styleMap);
+  const showStereotypeByTag = computeShowStereotypeByTag(styleMap);
   return {
     documentBg: resolveDocumentBackground(styleMap),
     elements,
     hasElements: Object.keys(elements).length > 0,
     noteTagCascade,
     hasNoteTagCascade: Object.keys(noteTagCascade).length > 0,
+    showStereotypeByTag,
+    hasShowStereotypeByTag: Object.keys(showStereotypeByTag).length > 0,
     shadowing: resolveGlobalShadowing(styleMap),
     rootElementBorderRaw: resolveGlobalBorder(styleMap),
     // SI26 D5: `cardinalityFontColor` rides the same top-level fold.
@@ -156,6 +162,7 @@ function styleMapHasNoOverrides(graphOverride: Partial<GraphColors>, extras: Sty
     extras.documentBg === undefined &&
     !extras.hasElements &&
     !extras.hasNoteTagCascade &&
+    !extras.hasShowStereotypeByTag &&
     extras.shadowing === undefined &&
     extras.rootElementBorderRaw === undefined &&
     Object.keys(extras.cardinalityFont).length === 0
@@ -221,6 +228,7 @@ function buildStyleMapPartialTheme(base: Theme, graphOverride: Partial<GraphColo
       ...(extras.rootElementBorderRaw !== undefined ? { border: resolveColor(extras.rootElementBorderRaw) } : {}),
       ...(extras.hasElements ? { elements: mergeElementBuckets(base, extras.elements) } : {}),
       ...(extras.hasNoteTagCascade ? { noteTagCascade: extras.noteTagCascade } : {}),
+      ...(extras.hasShowStereotypeByTag ? { showStereotypeByTag: extras.showStereotypeByTag } : {}),
       graph: { ...base.colors.graph, ...graphOverride },
     },
   };

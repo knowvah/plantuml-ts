@@ -18,6 +18,23 @@ import type { EndpointShape } from './link-grammar.js';
 export const SHORTHAND_TRAILER =
   '((?:\\s*(?:\\$[\\w]+|<<[^>]+>>|#[\\w:;.#\\\\/|-]+|\\[\\[[^\\]]*\\]\\]))*)\\s*';
 
+/**
+ * {@link SHORTHAND_TRAILER} plus `as <alias>`, in ANY order and any number.
+ *
+ * The bracket shorthand accepts the alias and the decorations interleaved --
+ * `[Consumer] <<service>> as consumer_service` puts the stereotype FIRST
+ * (zozutu-82-pupa220), and `[C] as c <<s>>` puts it last -- so the alias
+ * belongs inside the repetition rather than pinned ahead of it.
+ *
+ * It stays a CLOSED set for the same reason the base trailer is one: a
+ * description command must not claim a line it cannot actually build.
+ * `[*] --> state1` matches no alternative here, so the rule declines and the
+ * source reaches the state factory, exactly as upstream's anchored
+ * `CommandCreateElementFull` tail does (`:108-115`).
+ */
+export const BRACKET_TRAILER =
+  '((?:\\s*(?:as\\s+\\S+|\\$[\\w]+|<<[^>]+>>|#[\\w:;.#\\\\/|-]+|\\[\\[[^\\]]*\\]\\]))*)\\s*';
+
 export function shorthandNode(
   state: ParseState,
   name: string,

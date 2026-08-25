@@ -1,7 +1,9 @@
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
+import { refuse } from '../../core/parse-refusal.js';
 import type { BoardDiagramAST, BoardActivity, BoardNode } from './ast.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseRefusal } from '../../core/parse-refusal.js';
 
 /** Counts a leading run of `+` characters (the node's nesting depth). */
 function countLeadingPlus(t: string): number {
@@ -35,7 +37,7 @@ function insertBoardNode(
   stack.push(newNode);
 }
 
-export function parseBoard(source: UmlSource): BoardDiagramAST {
+export function parseBoard(source: UmlSource): BoardDiagramAST | ParseRefusal {
   const activities: BoardActivity[] = [];
   const stack: BoardNode[] = [];
   const annotations = createAnnotations();
@@ -73,11 +75,37 @@ export function parseBoard(source: UmlSource): BoardDiagramAST {
       continue;
     }
 
-    const plusCount = countLeadingPlus(t);
-    const label = t.slice(plusCount).trim();
-    if (label !== '') insertBoardNode(activities, stack, plusCount, label);
+    const refusal = matchBoardPlusOrRefuse(t, i, activities, stack);
+    if (refusal !== null) return refusal;
     i++;
   }
 
   return { activities, annotations, sprites };
+}
+
+/**
+ * `CommandBoardPlus` (mission T9): matches `^([+]*)\s*([^%s].*)$` -- PLUS
+ * then a LABEL that must start with a non-whitespace character. `t` is
+ * already whole-line-trimmed by the caller, so the only way a non-blank line
+ * fails this is a line of `+` characters with nothing after them (LABEL has
+ * no non-whitespace character left to match). No other registered command
+ * (title/skinparam/etc., tried first in upstream's `cmds` list) matches such
+ * a line either, so this is a genuine "no candidate" fall-through, not a
+ * narrowing of an existing branch.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/board/CommandBoardPlus.java:54-59
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemCommandFactory.java:169-175
+ */
+function matchBoardPlusOrRefuse(
+  t: string,
+  i: number,
+  activities: BoardActivity[],
+  stack: BoardNode[],
+): ParseRefusal | null {
+  const plusCount = countLeadingPlus(t);
+  const label = t.slice(plusCount).trim();
+  if (label === '') {
+    return refuse('syntax', i, i, 'Syntax Error?');
+  }
+  insertBoardNode(activities, stack, plusCount, label);
+  return null;
 }

@@ -18,6 +18,7 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { assembleSvg, renderSync } from '../../../src/index.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 
 const measurer = new FormulaMeasurer();
 const theme = defaultTheme;
@@ -27,22 +28,22 @@ function makeSource(lines: string[], rawStyles: string[] = []): UmlSource {
 }
 
 function renderFull(source: UmlSource): string {
-  const ast = dotPlugin.parse(source);
+  const ast = parseAst(dotPlugin, source);
   const geo = dotPlugin.layoutSync(ast, theme, measurer);
   return assembleSvg(dotPlugin.render(geo, theme));
 }
 
 const GRAPH = ['@startdot', 'digraph G {', '  a -> b;', '}', '@enddot'];
 
-describe('dotPlugin.parse()', () => {
+describe('parseAst(dotPlugin, )', () => {
   it('passes rawStyles from UmlSource into the AST', () => {
-    const ast = dotPlugin.parse(makeSource(GRAPH, ['node { BackgroundColor: red }']));
+    const ast = parseAst(dotPlugin, makeSource(GRAPH, ['node { BackgroundColor: red }']));
     expect(ast.rawStyles).toHaveLength(1);
     expect(ast.rawStyles[0]).toContain('BackgroundColor');
   });
 
   it('rawStyles defaults to [] when UmlSource provides none', () => {
-    const ast = dotPlugin.parse({ type: 'dot', lines: GRAPH });
+    const ast = parseAst(dotPlugin, { type: 'dot', lines: GRAPH });
     expect(ast.rawStyles).toEqual([]);
   });
 });
@@ -106,7 +107,5 @@ describe('dotPlugin — output shape', () => {
 });
 
 describe('dotPlugin.accepts()', () => {
-  it('always returns false (routing handled by START_SUFFIX_MAP)', () => {
-    expect(dotPlugin.accepts(['digraph { a }'])).toBe(false);
-  });
+
 });

@@ -14,8 +14,28 @@
 import type { SequenceDiagramAST } from './ast.js';
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
-import { makeDefaultAST, type ParseState } from './sequence-parse-helpers.js';
+import {
+  applyHideStereotype,
+  applyHideUnlinked,
+  emit,
+  makeDefaultAST,
+  type ParseState,
+} from './sequence-parse-helpers.js';
 import { COMMANDS } from './sequence-commands.js';
+import { COMMANDS_2 } from './sequence-commands-2.js';
+import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
+
+/**
+ * `COMMANDS` (the original spike table plus T4/T13's in-place widenings)
+ * tried in full before `COMMANDS_2` (T13's net-new commands) — mirrors
+ * `PSystemCommandFactory#getCandidate` (`:225-246`), which returns the
+ * first matching `Command` out of ONE registration-ordered list; the split
+ * across two arrays is a file-size accommodation (`CLAUDE.md`'s 500-line
+ * hook), not a second dispatch tier, so every T13 rule was checked against
+ * `COMMANDS` for pattern overlap before being added here (see
+ * `sequence-commands-2.ts`'s module doc).
+ */
+const ALL_COMMANDS: readonly (typeof COMMANDS)[number][] = [...COMMANDS, ...COMMANDS_2];
 
 // ---------------------------------------------------------------------------
 // Line-dispatch helpers
@@ -34,8 +54,8 @@ function handlePendingNote(state: ParseState, line: string): boolean {
   // same way ordinary commands are, but only close the note if this really
   // is the "end note" command — any other pattern match here is ignored and
   // the line still accumulates into the note text below.
-  const endNoteCmd = COMMANDS.find((c) => c.pattern.test(line));
-  if (endNoteCmd !== undefined && /^end\s+note\s*$/i.test(line)) {
+  const endNoteCmd = ALL_COMMANDS.find((c) => c.pattern.test(line));
+  if (endNoteCmd !== undefined && /^end\s*(?:note|hnote|rnote)\s*$/i.test(line)) {
     const m = endNoteCmd.pattern.exec(line)!;
     endNoteCmd.execute(state, m);
     return true;
@@ -46,6 +66,26 @@ function handlePendingNote(state: ParseState, line: string): boolean {
   } else {
     state.pendingNote.text += '\n' + line;
   }
+  return true;
+}
+
+/**
+ * T13: the `ref over ... / end ref` multi-line body — same shape as
+ * {@link handlePendingNote}, kept separate because a `ref`'s accumulated
+ * text lands on `FrameEvent.label`, not a `NoteEvent.text`.
+ * @see command/sequencediagram/command/CommandReferenceMultilinesOverSeveral.java:79-80
+ */
+function handlePendingRef(state: ParseState, line: string): boolean {
+  if (state.pendingRef === null) return false;
+
+  if (/^end\s*(?:ref)?\s*$/i.test(line)) {
+    emit(state, state.pendingRef);
+    state.pendingRef = null;
+    return true;
+  }
+
+  state.pendingRef.label = state.pendingRef.label === '' ? line : `${state.pendingRef.label}\n${line}`;
+  state.pendingRef.branchLabels[0] = state.pendingRef.label;
   return true;
 }
 
@@ -83,40 +123,45 @@ function dispatchAnnotationOrSprite(
   return null;
 }
 
-/** Normal dispatch: run `line` through the `COMMANDS` table, first match wins. */
-function dispatchCommand(state: ParseState, line: string): void {
-  for (const cmd of COMMANDS) {
+/**
+ * Normal dispatch: run `line` through the `COMMANDS` table, first match
+ * wins. Returns whether some command claimed the line -- mirrors
+ * `PSystemCommandFactory#getCandidate` (`:225-246`), which returns a `Step`
+ * on the first matching `Command` or `null` when none of `cmds` matches.
+ */
+function dispatchCommand(state: ParseState, line: string): boolean {
+  for (const cmd of ALL_COMMANDS) {
     const match = cmd.pattern.exec(line);
     if (match !== null) {
       cmd.execute(state, match);
-      break;
+      return true;
     }
   }
+  return false;
 }
 
-// ---------------------------------------------------------------------------
-// Main parser entry point
-// ---------------------------------------------------------------------------
+/**
+ * Trimmed, blank-filtered view (matchAnnotationCommand requires
+ * already-trimmed lines -- see commands.ts's single-line matchers, which
+ * test `^title...$` etc. with no internal trim). Each entry keeps its
+ * position in `lines` so a refusal can name the ORIGINAL 0-based line, not
+ * its position in this filtered view.
+ */
+function trimNonBlank(lines: readonly string[]): { text: string; origIndex: number }[] {
+  return lines
+    .map((l, origIndex) => ({ text: l.trim(), origIndex }))
+    .filter((e) => e.text !== '');
+}
 
 /**
- * Parse an array of preprocessed PlantUML sequence diagram lines into an AST.
+ * Runs the per-line dispatch loop against `lines`, mutating `state` as
+ * commands match. Returns a `syntax` {@link ParseRefusal} at the first line
+ * no command (nor the annotation/sprite matchers ahead of it) claims;
+ * `null` when every line was consumed successfully.
  */
-export function parseSequence(lines: readonly string[]): SequenceDiagramAST {
-  const state: ParseState = {
-    ast: makeDefaultAST(),
-    frameStack: [],
-    participantIndex: new Map(),
-    pendingNote: null,
-    lastMessageFrom: null,
-    lastMessageTo: null,
-    currentBox: null,
-    boxCounter: 0,
-  };
-
-  // Trimmed, blank-filtered view (matchAnnotationCommand requires
-  // already-trimmed lines -- see commands.ts's single-line matchers, which
-  // test `^title...$` etc. with no internal trim).
-  const trimmedLines = lines.map((l) => l.trim()).filter((l) => l !== '');
+function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefusal | null {
+  const trimmedEntries = trimNonBlank(lines);
+  const trimmedLines = trimmedEntries.map((e) => e.text);
 
   for (let i = 0; i < trimmedLines.length; i++) {
     const line = trimmedLines[i]!;
@@ -126,6 +171,7 @@ export function parseSequence(lines: readonly string[]): SequenceDiagramAST {
     // annotation matcher, so a `title`/`legend`-shaped line inside
     // `note ... end note` stays note text (decisions.md D3).
     if (handlePendingNote(state, line)) continue;
+    if (handlePendingRef(state, line)) continue;
 
     const consumed = dispatchAnnotationOrSprite(state, trimmedLines, i);
     if (consumed !== null) {
@@ -133,8 +179,71 @@ export function parseSequence(lines: readonly string[]): SequenceDiagramAST {
       continue;
     }
 
-    dispatchCommand(state, line);
+    if (!dispatchCommand(state, line)) {
+      const origIndex = trimmedEntries[i]!.origIndex;
+      return refuse('syntax', origIndex, origIndex, 'Syntax Error?');
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Main parser entry point
+// ---------------------------------------------------------------------------
+
+/**
+ * Parse an array of preprocessed PlantUML sequence diagram lines into an AST,
+ * or a {@link ParseRefusal} when the source is not a (complete, valid)
+ * sequence diagram.
+ *
+ * Two of the four upstream refusal points apply here:
+ *
+ *  - No `Command` in `COMMANDS` (nor the annotation/sprite matchers tried
+ *    ahead of it) matches a line: `kind: 'syntax'`, mirroring the
+ *    `SYNTAX_ERROR "Syntax Error?"` fallback built when `getCandidate`
+ *    returns `null`.
+ *    @see ~/git/plantuml/.../command/PSystemCommandFactory.java:169-175
+ *  - The finished diagram has no participants: `kind: 'incomplete'`,
+ *    mirroring `SequenceDiagram#isIncomplete`, which upstream's
+ *    `finalizeDiagram` checks only after every line has already been
+ *    accepted (`:159-161`), so it fires once, at the end, not per-line.
+ *    @see ~/git/plantuml/.../sequencediagram/SequenceDiagram.java:585-587
+ *
+ * The other two do not apply to this engine (see the decision journal for
+ * the citations ruling each one out):
+ *
+ *  - `execution` (`PSystemCommandFactory.java:180-186`) requires a command
+ *    that can itself report failure (`CommandExecutionResult`). Every entry
+ *    in `COMMANDS` has an `execute(state, match): void` that cannot fail --
+ *    matching is the only success/failure signal this port's `Command` type
+ *    carries, so there is no execution-failure channel to refuse from.
+ *  - `final` (`PSystemCommandFactory.java:148-152`) is
+ *    `SequenceDiagram#checkFinalError`, which only conditionally prunes
+ *    hidden participants before delegating to
+ *    `AbstractDiagram#checkFinalError` (`:161-163`), itself a hard-coded
+ *    `return null`. The override never actually returns a non-null error.
+ */
+export function parseSequence(lines: readonly string[]): SequenceDiagramAST | ParseRefusal {
+  const state: ParseState = {
+    ast: makeDefaultAST(),
+    frameStack: [],
+    participantIndex: new Map(),
+    pendingNote: null,
+    pendingRef: null,
+    lastMessageFrom: null,
+    lastMessageTo: null,
+    currentBox: null,
+    boxCounter: 0,
+  };
+
+  const refusal = runDispatchLoop(state, lines);
+  if (refusal !== null) return refusal;
+
+  if (state.ast.participants.length === 0) {
+    return refuse('incomplete', lines.length, lines.length, 'Sequence diagram has no participants');
   }
 
+  applyHideStereotype(state.ast);
+  applyHideUnlinked(state.ast);
   return state.ast;
 }

@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderState } from '../../../src/diagrams/state/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
-import { statePlugin } from '../../../src/diagrams/state/index.js';
 import type { StateGeometry, StateNodeGeo, TransitionGeo } from '../../../src/diagrams/state/layout.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 
@@ -739,36 +738,19 @@ describe('renderState — transitions', () => {
 // ---------------------------------------------------------------------------
 
 describe('statePlugin.accepts', () => {
-  it('returns true for [*] --> Active (AC #4)', () => {
-    expect(statePlugin.accepts(['[*] --> Active'])).toBe(true);
-  });
 
-  it('returns false for sequence diagram line (AC #5)', () => {
-    expect(statePlugin.accepts(['Alice -> Bob: hello'])).toBe(false);
-  });
 
-  it('returns true for "state Idle" (AC #6)', () => {
-    expect(statePlugin.accepts(['state Idle'])).toBe(true);
-  });
 
-  it('returns true for fork stereotype', () => {
-    expect(statePlugin.accepts(['state split <<fork>>'])).toBe(true);
-  });
 
-  it('returns true for [*] in final transition', () => {
-    expect(statePlugin.accepts(['Active --> [*]'])).toBe(true);
-  });
 
-  it('returns false for class diagram line', () => {
-    expect(statePlugin.accepts(['class Animal {'])).toBe(false);
-  });
 
-  it('only scans first 20 lines', () => {
-    const lines = Array.from({ length: 25 }, (_, i) => `line ${i}`);
-    lines[21] = '[*] --> State';
-    // Pattern is beyond index 19, so accepts should return false
-    expect(statePlugin.accepts(lines)).toBe(false);
-  });
+
+
+
+
+
+
+
 });
 
 // ---------------------------------------------------------------------------

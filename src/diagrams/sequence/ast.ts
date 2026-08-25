@@ -2,8 +2,10 @@
  * AST and Geometry type definitions for PlantUML sequence diagrams.
  */
 
+import type { Paint } from '../../core/paint.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 // ---------------------------------------------------------------------------
 // AST Types
@@ -27,6 +29,11 @@ export interface Participant {
   order: number; // first-appearance order (0-based)
   /** Box group id this participant belongs to (from `box` / `end box`). */
   boxId?: string;
+  /** The `<<...>>` run as written, guillemets included -- `CommandParticipant`
+   *  stores it on the Participant rather than in its code
+   *  (`CommandParticipant.java:174-181`). Rendered above the name unless
+   *  `hide stereotype` is in force. */
+  stereotype?: string;
 }
 
 export type MessageStyle =
@@ -46,6 +53,24 @@ export interface MessageEvent {
   activates?: string; // participant id to auto-activate (++ shorthand)
   deactivates?: string; // participant id to auto-deactivate (-- shorthand)
   sequenceNumber?: number;
+  /** See `MessageGeo.sequenceLabel`'s doc comment — populated by
+   *  `applyAutonumber` from `SequenceDiagramAST.autonumber`'s `prefix`/
+   *  `format`. */
+  sequenceLabel?: string;
+  /**
+   * T13 (mission dispatch-by-parse-attempt): the `o`/`x` arrow decorations
+   * from `CommandArrow.java:99-116` (`ARROW_DRESSING1`/`ARROW_DRESSING2`),
+   * scoped to the two literal forms the corpus bucket actually carries
+   * (`->o`/`->x` at the head, `o->`/`x->` at the tail) rather than the full
+   * dressing grammar (multi-char `<<`/`\\`/`//` async heads, inclination,
+   * per-side `[style]` brackets — not ported; see T13's report). Fed into
+   * `arrowConfigurationFor`'s override at render time.
+   * @see sequencediagram/command/CommandArrow.java:229-235
+   */
+  headCircle?: boolean;
+  tailCircle?: boolean;
+  headCross?: boolean;
+  tailCross?: boolean;
 }
 
 export interface NoteEvent {
@@ -54,6 +79,14 @@ export interface NoteEvent {
   participants: string[];
   text: string;
   color?: string;
+  /**
+   * `rnote`/`hnote` vs. plain `note` (`FactorySequenceNoteCommand.java:81`,
+   * `NoteStyle.java`). This port draws both non-default shapes as a plain
+   * rectangle (no folded corner) — the RECTANGLE/HEXAGON distinction upstream
+   * makes between them is not carried further, a documented simplification
+   * (T13, dispatch-by-parse-attempt) rather than a full hexagon-path port.
+   */
+  shape?: 'rect';
 }
 
 export interface FrameEvent {
@@ -63,9 +96,13 @@ export interface FrameEvent {
     | 'alt'
     | 'opt'
     | 'par'
+    | 'par2'
     | 'break'
     | 'critical'
-    | 'group';
+    | 'group'
+    /** `ref over A, B : text` (`CommandReferenceOverSeveral.java`) — modelled
+     *  as a one-branch, label-only frame; see `sequence-commands-2.ts`. */
+    | 'ref';
   label: string;
   branches: SequenceEvent[][]; // alt has multiple; others have one
   /**
@@ -123,11 +160,52 @@ export interface BoxGroup {
 export interface SequenceDiagramAST {
   participants: Participant[];
   events: SequenceEvent[];
-  autonumber: { enabled: boolean; start: number; current: number };
+  /**
+   * `current`/`start` are `DottedNumber.incrementMinor`'s LAST segment only
+   * (`DottedNumber.java:75-79`); `prefix` carries every segment before it
+   * verbatim (e.g. `"1."` for a `1.1` start) so a dotted start renders as
+   * `1.1`, `1.2`, `1.3`, … without this port modelling the full
+   * multi-segment increment (`incrementIntermediate`, never called by the
+   * message-numbering path — `AutoNumber.java:75-79`). `format`, when set,
+   * is `CommandAutonumber.java`'s quoted FORMAT group, applied by
+   * {@link import('./sequence-parse-helpers.js').formatAutonumber} — only
+   * the `DecimalFormat` `0`-run (zero-pad) subset is honoured, not the full
+   * `java.text.DecimalFormat` pattern language.
+   * @see sequencediagram/command/CommandAutonumber.java:58-74
+   */
+  autonumber: {
+    enabled: boolean;
+    start: number;
+    current: number;
+    step: number;
+    prefix: string;
+    format?: string;
+  };
   options: {
     hideFootbox: boolean;
     messageAlign: 'left' | 'center' | 'right';
+    /** `hide unlinked` / `show unlinked` (`CommandHideUnlinked.java`) —
+     *  participants not referenced by any event are dropped post-parse
+     *  (`applyHideUnlinked`, `parser.ts`). */
+    hideUnlinked?: boolean;
+    /** `hide stereotype` -- registered for sequence diagrams too, via
+     *  `SequenceDiagramFactory:100` -> `CommonCommands#addCommonCommands1`
+     *  -> `addCommonHides` (`CommonCommands.java:103-106`) ->
+     *  `CommandHideShowByGender` (`:195`). Suppresses the participant
+     *  stereotype run; the jar's goldens confirm it both ways
+     *  (secida-27-jaco323 hides, birocu-87-xubi808 shows `«APIGateway»`). */
+    hideStereotype?: boolean;
   };
+  /** `scale ...` (`command/CommandScale*.java`, 6 forms via
+   *  `CommonCommands#addCommonScaleCommands`) — resolved to a factor and
+   *  applied by multiplying the GEOMETRY AND THEME at the layout→render
+   *  boundary (`scale-geo.ts`), which is arithmetically what upstream's
+   *  `SvgGraphics#format` does on the way out. No `transform` is emitted:
+   *  jar-measured, `scale 2` doubles every coordinate, font size and the
+   *  root dimensions, and emits zero transforms.
+   *  @see scale-geo.ts
+   *  @see scale-command.ts */
+  scale?: ScaleSpec;
   /** Box groups declared with `box` / `end box`. */
   boxes: BoxGroup[];
   /**
@@ -155,6 +233,21 @@ export interface SequenceDiagramAST {
 // Geometry Types (consumed by layout stage)
 // ---------------------------------------------------------------------------
 
+/**
+ * A participant's stereotype BADGE, in `StereotypeDecoration`'s two forms.
+ *
+ * `Display#createStereotype` picks between them on `stereotype.isSpotted()`:
+ * a `CircledCharacter` for `<<(C,#color) Label>>`, otherwise the sprite from
+ * `stereotype.getSprite(...)` (`Display.java:671-689`). Both occupy a box the
+ * name block is pushed right of, so both carry `width`/`height`.
+ */
+export type ParticipantBadge =
+  | { readonly kind: 'sprite'; readonly dataUri: string; readonly width: number; readonly height: number }
+  /** The jar draws the circle and NOT the character: across
+   *  `nimoxu-60-xale291`, `fakova-98-suze610` and `xakuro-97-tado489` no
+   *  `<text>` carries the declared letter, only a filled `<ellipse>`. */
+  | { readonly kind: 'char'; readonly color: string | undefined; readonly width: number; readonly height: number };
+
 export interface ParticipantGeo {
   id: string;
   display: string;
@@ -164,7 +257,32 @@ export interface ParticipantGeo {
   width: number;
   height: number;
   centerX: number;
+  /** Displayed form of {@link Participant.stereotype}: one guillemet-wrapped
+   *  entry per `<<...>>` chunk, badge specs already stripped
+   *  (`core/stereotype-decoration.ts`). Absent when there is none, when every
+   *  chunk is invisible, or when the style hides it. */
+  stereotypeLines?: readonly string[];
+  /**
+   * The box's resolved fill and stroke.
+   *
+   * `Participant#getUsedStyles` merges the kind's style signature -- `root,
+   * element, sequenceDiagram, <kind>` for every kind
+   * (`ParticipantType.java:55-80`) -- and then lets the participant's OWN
+   * colours override it (`eventuallyOverride(getColors())`, `:88`). So the
+   * precedence is inline `#color` > `<style> <kind> {}` bucket > theme
+   * default, resolved in layout so the sprite badge's gradient can start
+   * from the same value the box is painted with.
+   */
+  background: Paint;
+  border: Paint;
+  /** The rasterised sprite badge a `<<($name) Label>>` stereotype declares,
+   *  drawn LEFT of the name block (`TextBlockSprited.java:65-77`). Absent
+   *  when there is none, or when the name does not resolve in the registry. */
+  badge?: ParticipantBadge;
 }
+
+import type { TextRun } from './text-block-geo.js';
+export type { TextRun };
 
 export interface MessageGeo {
   kind: 'message';
@@ -174,7 +292,30 @@ export interface MessageGeo {
   label: string;
   style: MessageStyle;
   sequenceNumber?: number;
+  /** `AutoNumber#getNextMessageNumber`'s formatted text
+   *  (`DottedNumber#format`), when the source's `autonumber` carries a dotted
+   *  start or a quoted `FORMAT`; the renderer prefers this over the bare
+   *  `sequenceNumber` when present. */
+  sequenceLabel?: string;
+  /**
+   * The label as PLACED text: one entry per source line, each with its own
+   * `x`/`y`. Positioned in layout rather than at render time for the same
+   * reason `FrameGeo.refBody` is -- the jar emits a computed `x` and no
+   * `text-anchor`, and computing one needs the measurer. Empty when the
+   * message has no label: `AbstractTextualComponent` maps an empty display to
+   * a `TextBlockEmpty`, which draws nothing
+   * (`AbstractTextualComponent.java:84-85`).
+   */
+  labelLines: readonly TextRun[];
+  /** The autonumber, when present -- its OWN `<text>` beside the label lines,
+   *  vertically centred against them, with no `": "` joining the two
+   *  (`Display.java:703-712`). */
+  labelNumber?: TextRun;
   arrowDirection: 'right' | 'left' | 'self';
+  headCircle?: boolean;
+  tailCircle?: boolean;
+  headCross?: boolean;
+  tailCross?: boolean;
 }
 
 export interface NoteGeo {
@@ -185,6 +326,7 @@ export interface NoteGeo {
   height: number;
   text: string;
   color?: string;
+  shape?: 'rect';
 }
 
 export interface ActivationGeo {
@@ -208,6 +350,16 @@ export interface FrameGeo {
    *  bracketed condition drawn beside it. Empty for single-branch frames
    *  (`loop`, `opt`, `group`, …). */
   branchSeparators: { y: number; label: string }[];
+  /**
+   * A `ref over` frame's body, one entry per source line, each with its own
+   * pre-centred `x`. Positioned HERE rather than with `text-anchor="middle"`
+   * at render time because that is what the jar emits: its body lines carry a
+   * computed `x` and no anchor (`x="74.3"` / `x="76.962"` for a box centred on
+   * 108.7), and the anchor attribute would be one more attribute per line than
+   * upstream has. Centring needs the measurer, which layout has and the
+   * renderer does not. Empty for every other frame type.
+   */
+  refBody: { text: string; x: number }[];
 }
 
 export interface DividerGeo {
@@ -255,4 +407,14 @@ export interface SequenceGeometry {
   footerShapeY: number;
   /** Background rectangles for box groups (rendered at z=0, behind lifelines). */
   boxes: BoxGeo[];
+  /**
+   * `SequenceDiagram#isShowFootbox` (`SequenceDiagram.java:474-486`), resolved
+   * ONCE at layout so the renderer cannot disagree with the height that was
+   * reserved. False suppresses the footer participant row entirely — the jar
+   * reserves no space for it either.
+   */
+  showFootbox: boolean;
+  /** Passthrough of `SequenceDiagramAST.scale` — resolved to a factor and
+   *  applied at `renderSequence` (see that field's doc comment). */
+  scale?: ScaleSpec;
 }

@@ -5,14 +5,19 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseActivity } from '../../../src/diagrams/activity/parser.js';
+import { activityPlugin } from '../../../src/diagrams/activity/index.js';
 import { isEmpty } from '../../../src/core/annotations/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ActivityDiagramAST } from '../../../src/diagrams/activity/ast.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 
+/** T6 (dispatch-by-parse-attempt): `parseActivity` now returns
+ *  `ActivityDiagramAST | ParseRefusal` (D1); every fixture in this file is
+ *  fully recognised, so `parseAst` narrows the refusal arm away (throwing,
+ *  with engine/line/kind, if that assumption is ever wrong). */
 function parse(lines: readonly string[]): ActivityDiagramAST {
   const block: UmlSource = { lines, type: 'activity' };
-  return parseActivity(block);
+  return parseAst(activityPlugin, block);
 }
 
 describe('activity parser — annotation commands (mission G0b/T6)', () => {

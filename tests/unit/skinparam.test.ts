@@ -854,15 +854,21 @@ describe('resolveSkinparam — key normalisation', () => {
     expect(unknown).toEqual([]);
   });
 
-  it('normalises sequenceParticipantBackgroundColor to participantbackgroundcolor (unknown)', () => {
-    // "sequenceParticipantBackgroundColor" → lower → strip underscores →
-    // collapse "sequenceparticipant" prefix → "participantbackgroundcolor"
-    // No Theme slot for this — goes to unknown[]
-    const { unknown } = resolveSkinparam(
+  // "sequenceParticipantBackgroundColor" → lower → strip underscores →
+  // collapse "sequenceparticipant" prefix → "participantbackgroundcolor".
+  // This asserted `unknown` until T20: `participant` was the one sequence
+  // participant kind missing from ELEMENT_BUCKET_SNAMES (its siblings actor/
+  // database/boundary/control/entity/queue/collections were all present), so
+  // the key normalised correctly and then landed nowhere. It now fills the
+  // `participant` element bucket, which `Participant#getUsedStyles` reads
+  // (`ParticipantType.java:55-80`).
+  it('normalises sequenceParticipantBackgroundColor into the participant bucket', () => {
+    const { theme, unknown } = resolveSkinparam(
       new Map([['sequenceParticipantBackgroundColor', '#FFCCDD']]),
       defaultTheme,
     );
-    expect(unknown).toContain('participantbackgroundcolor');
+    expect(unknown).not.toContain('participantbackgroundcolor');
+    expect(theme.colors.elements?.['participant']?.background).toBe('#FFCCDD');
   });
 
   it('normalises sequenceMessageAlign to sequencemessagealignment', () => {
@@ -875,12 +881,13 @@ describe('resolveSkinparam — key normalisation', () => {
     expect(unknown).toContain('sequencemessagealignment');
   });
 
-  it('normalises participantbackgroundcolor to unknown (no Theme slot)', () => {
-    const { unknown } = resolveSkinparam(
+  it('routes a bare participantbackgroundcolor to the same bucket', () => {
+    const { theme, unknown } = resolveSkinparam(
       new Map([['participantbackgroundcolor', '#FFCCDD']]),
       defaultTheme,
     );
-    expect(unknown).toContain('participantbackgroundcolor');
+    expect(unknown).not.toContain('participantbackgroundcolor');
+    expect(theme.colors.elements?.['participant']?.background).toBe('#FFCCDD');
   });
 });
 

@@ -168,7 +168,7 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
     const first = blocks[0]!;
     if (!first.ok) throw new Error('expected a valid block');
     const umlSource = { ...first.source, rawStyles: first.preprocessed.styles };
-    expect(registry.resolve(umlSource)).toBe(classPlugin);
+    expect(registry.resolve(umlSource).plugin).toBe(classPlugin);
 
     const svg = renderSync(source, { measurer: MEASURER });
     expect(svg).toContain('Test SVG');

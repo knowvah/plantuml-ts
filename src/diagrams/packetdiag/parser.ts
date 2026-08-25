@@ -1,6 +1,8 @@
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
+import { refuse } from '../../core/parse-refusal.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { PacketDiagramAST, PacketItem, ScaleDirection } from './ast.js';
 
 const DEFAULT_COL_WIDTH = 16;
@@ -42,7 +44,7 @@ function intAttr(attrs: Map<string, string>, key: string, def: number): number {
   return isNaN(n) ? def : n;
 }
 
-export function parsePacket(source: UmlSource): PacketDiagramAST {
+export function parsePacket(source: UmlSource): PacketDiagramAST | ParseRefusal {
   let colWidth = DEFAULT_COL_WIDTH;
   let bitHeight = DEFAULT_BIT_HEIGHT;
   let scaleDirection: ScaleDirection = 'ltr';
@@ -132,6 +134,24 @@ export function parsePacket(source: UmlSource): PacketDiagramAST {
       // #lizard forgives -- pre-existing faithful port of PacketDiag's
       // field/config-line grammar (already over threshold before mission
       // G0b/T6 added the annotation-matcher check above).
+    } else {
+      // Fall-through: no registered packetdiag Command recognises this line
+      // (mission dispatch-by-parse-attempt, T11). Upstream's per-line loop
+      // reaches here once every Command in `initCommandsList` -- CommonCommands
+      // plus CommandPacketDiagStart/End/ColWidth/NodeHeight/ScaleDirection/
+      // ScaleInterval/SameHeight/NumRange -- has declined, and returns
+      // SYNTAX_ERROR "Syntax Error?" rather than dropping the line.
+      // `consumed` mirrors upstream's `trace.size()` at that point: `it.next()`
+      // (which appends the offending line to the trace) runs BEFORE
+      // `it.getTrace()` is read, so the offending line is itself included in
+      // the count -- i (already incremented past this line above) is exactly
+      // that count.
+      // @see PacketDiagramFactory.java:74-85 (initCommandsList)
+      // @see PSystemCommandFactory.java:169-174 (getCandidate null -> peek,
+      //      next, then getTrace)
+      // @see IteratorCounter2Impl.java:78-83,100-102 (next() appends to
+      //      trace; getTrace() returns it)
+      return refuse('syntax', i - 1, i, 'Syntax Error?');
     }
   }
 

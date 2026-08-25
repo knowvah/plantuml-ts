@@ -26,9 +26,6 @@ const DIAGRAM_TYPE_HCL = 'HCL';
 export const hclPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'hcl',
 
-  accepts(_lines: readonly string[]): boolean {
-    return false;
-  },
 
   parse(source) {
     return parseHcl(source);

@@ -6,11 +6,13 @@
  * @see ~/git/plantuml/.../NewpagedDiagram.java:61-162
  */
 import { describe, it, expect } from 'vitest';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
+import { parseClass as parseClassRaw } from '../../../src/diagrams/class/parser.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import { extractBlocks } from '../../../src/core/block-extractor.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
@@ -24,15 +26,6 @@ function parse(source: string): ReturnType<typeof parseClass> {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   const block: UmlSource = { lines, type: 'class' };
-  return parseClass(block);
-}
-
-/** Parse a raw `.puml` source (with @startuml/@enduml) via the real
- *  preprocessor entry point, mirroring how corpus fixtures are consumed. */
-function parseRaw(source: string): ReturnType<typeof parseClass> {
-  const blocks = extractBlocks(source.split('\n'));
-  const block = blocks[0];
-  if (block === undefined) throw new Error('Expected at least one @startuml block');
   return parseClass(block);
 }
 
@@ -206,50 +199,42 @@ describe('newpage — corpus fixture sadamo-18-siva346', () => {
     '../../fixtures/corpus/class/sadamo-18-siva346.puml',
   );
 
-  it('splits into one page per newpage boundary (51 pages, 50 newpages)', () => {
+  // T5 (dispatch-by-parse-attempt): this fixture used to cross-check the
+  // page count against the source's `newpage` lines. It cannot any more, and
+  // the reason is upstream's, not this port's.
+  //
+  // Line 8 is a relationship whose right-hand identifier is a run of ~1,900
+  // literal backticks. Upstream's own class identifier is
+  // `([%pLN_$]+(?:…)*|[%g][^%g]+[%g])` -- letters, digits, `_`, `$`, or a
+  // quoted form (`CommandLinkClass.java#getClassIdentifier`, :176-178).
+  // Backtick is in neither alternative, so `CommandLinkClass` cannot match
+  // the line, and nothing else in `ClassDiagramFactory` can either.
+  //
+  // The jar's own answer is on disk and agrees: this fixture's committed
+  // golden is one of PlantUML's graphical error pages -- `jarRendered: false`
+  // in `oracle/goldens/svg-conformance/refusal-baseline.json`, one of only 8
+  // such fixtures in 3,158. So BOTH parsers refuse it.
+  //
+  // Asserted rather than skipped. A conditional `return` on the refusal would
+  // pass whether or not the refusal fired, which is precisely the way a
+  // regression in the refusal mechanism would go unnoticed. The other seven
+  // tests in this file cover page splitting on hand-written sources; what
+  // this fixture pins now is the agreement with the jar.
+  // @see ~/git/plantuml/.../classdiagram/command/CommandLinkClass.java:176-178
+  it('is REFUSED, exactly as upstream refuses it', () => {
     if (!existsSync(corpusPath)) {
-      // Acceptance criteria fallback: corpus file missing — nothing to assert.
       console.warn(`skip: corpus fixture not found at ${corpusPath}`);
       return;
     }
-
     const source = readFileSync(corpusPath, 'utf8');
-    const newpageCount = (source.match(/^newpage\s*$/gim) ?? []).length;
-    expect(newpageCount).toBeGreaterThanOrEqual(10);
+    expect((source.match(/^newpage\s*$/gim) ?? []).length).toBeGreaterThanOrEqual(10);
 
-    const ast = parseRaw(source);
-    const pages = ast.pages;
-    expect(pages).toBeDefined();
-    // N newpage lines split the source into N+1 pages.
-    expect(pages!).toHaveLength(newpageCount + 1);
+    const blocks = extractBlocks(source.split('\n'));
+    const block = blocks[0];
+    expect(block, 'expected at least one @startuml block').toBeDefined();
 
-    // Cross-check against the oracle's cached svek-N.dot files, when present.
-    // No cache exists for this fixture at the time this test was written
-    // (test-results/dot-cache/class/sadamo-18-siva346/ is absent) — the
-    // acceptance criteria only prescribes a fallback for a missing corpus
-    // *source* file, so this block extends the same "skip gracefully when
-    // the comparison data isn't available" spirit to a missing dot-cache.
-    const dotCacheDir = join(
-      dirname(fileURLToPath(import.meta.url)),
-      '../../../test-results/dot-cache/class/sadamo-18-siva346',
-    );
-    if (!existsSync(dotCacheDir)) {
-      console.warn(`skip oracle cross-check: no dot-cache at ${dotCacheDir}`);
-      return;
-    }
-    const svekFileCount = readdirSync(dotCacheDir).filter((f) =>
-      /^svek-\d+\.dot$/.test(f),
-    ).length;
-    if (svekFileCount === 0) {
-      // A populated cache dir with ZERO svek dumps is not comparison data:
-      // upstream's single-image export path renders only page 0
-      // (AbstractDiagram.getNbImages() always returns 1; NewpagedDiagram
-      // never overrides it — jar-verified during A1/i25), so a multi-page
-      // fixture can legitimately produce no per-page dumps. The parser-level
-      // page-count assertion above is the real check here.
-      console.warn(`skip oracle cross-check: cache has no svek dumps at ${dotCacheDir}`);
-      return;
-    }
-    expect(pages!).toHaveLength(svekFileCount);
+    const refusal = parseRefusalOf(parseClassRaw(block!));
+    expect(refusal, 'the backtick identifier must be refused, as it is upstream').toBeDefined();
+    expect(refusal?.kind).toBe('syntax');
   });
 });

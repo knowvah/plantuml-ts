@@ -1,6 +1,7 @@
 import { fmt } from '../../../src/core/svg-format.js';
 import { describe, it, expect } from 'vitest';
-import { parseState } from '../../../src/diagrams/state/parser.js';
+import { statePlugin } from '../../../src/diagrams/state/index.js';
+import { parseAst } from '../../helpers/parse-ast.js';
 import { layoutState } from '../../../src/diagrams/state/layout.js';
 import { renderState } from '../../../src/diagrams/state/renderer.js';
 import { resolveTheme } from '../../../src/core/theme.js';
@@ -21,7 +22,7 @@ function parse(source: string) {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   const block: UmlSource = { lines, type: 'state' };
-  return parseState(block);
+  return parseAst(statePlugin, block);
 }
 
 describe('<<sdlreceive>> folded-frame shape (mission G4 S14)', () => {

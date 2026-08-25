@@ -1,0 +1,634 @@
+dot-cache	sequence/bacupi-77-fuke586	syntax	0	!pragma teoz false
+dot-cache	sequence/badolo-34-lesi912	syntax	0	rotate
+dot-cache	sequence/bagexe-03-bozo133	syntax	1	/ note over Bob : initial sdkfljsdfl sdf sdmf
+dot-cache	sequence/baketu-62-cumu838	syntax	302	note left : This is not <$disk16>
+dot-cache	sequence/bakuba-09-fica741	syntax	1	Alice x->    Alice : ""x->  ""
+dot-cache	sequence/baxopu-48-fezi101	syntax	6	opt#red #blue this is a test
+dot-cache	sequence/baxuxa-14-puvo950	syntax	3	create a
+dot-cache	sequence/bedaja-09-gezu912	syntax	3	create Dog
+dot-cache	sequence/bepopi-29-dobu802	syntax	1	note<<st1>> over A : text 1
+dot-cache	sequence/bexoce-95-vibe195	syntax	0	!pragma teoz true
+dot-cache	sequence/bifuzu-54-gefo004	syntax	0	!pragma teoz true
+dot-cache	sequence/binupo-93-begi656	syntax	0	!pragma teoz true
+dot-cache	sequence/bipoce-87-cuki505	syntax	1	Alice ->o Bob : hello
+dot-cache	sequence/birefi-44-bata482	syntax	0	!pragma teoz true
+dot-cache	sequence/birike-24-lete111	syntax	3	create C
+dot-cache	sequence/biruge-35-vaxu680	syntax	0	box BoxOfAlice #yellow/blue
+dot-cache	sequence/bocudo-94-jode371	syntax	0	rotate
+dot-cache	sequence/bocusa-16-ciju126	syntax	0	!pragma teoz true
+dot-cache	sequence/bofovo-45-figi573	syntax	0	!pragma teoz true
+dot-cache	sequence/boguvi-37-ralo631	syntax	0	autonumber 1.1
+dot-cache	sequence/bomino-39-tipo216	syntax	0	<style src=strictuml.skin>
+dot-cache	sequence/bopizu-70-rese737	syntax	0	autonumber 1-1:1
+dot-cache	sequence/bosedo-77-loge384	syntax	2	bob <- alice : さようなら
+dot-cache	sequence/boxibe-39-luco835	syntax	0	hide empty description
+dot-cache	sequence/bozuru-10-rajo382	syntax	4	Alice x->o Bob : hop1
+dot-cache	sequence/bucebo-91-xavo442	syntax	0	!pragma svgparser sax
+dot-cache	sequence/bugafa-93-duzi514	syntax	0	!pragma svgparser sax
+dot-cache	sequence/bulixe-06-boge494	syntax	2	rnote left of actor: "field1 = valA"
+dot-cache	sequence/bumoda-17-giza778	syntax	0	!pragma teoz true
+dot-cache	sequence/buniji-73-pama777	syntax	1	Bob <- Alice : hello
+dot-cache	sequence/busexe-78-ruzu110	syntax	0	!pragma teoz true
+dot-cache	sequence/butali-53-kige134	syntax	0	Alice -> "Bob\non 2 lines" : hello
+dot-cache	sequence/butofu-60-kene642	syntax	4	q <- b: Dequeue
+dot-cache	sequence/butosi-00-mali446	syntax	0	!pragma teoz true
+dot-cache	sequence/buximi-21-xima965	syntax	3	create Client
+dot-cache	sequence/cabedu-56-lasa287	syntax	0	scale 1.5
+dot-cache	sequence/caciga-47-jigu709	syntax	0	!pragma teoz true
+dot-cache	sequence/cajuga-45-taxu278	syntax	0	!pragma teoz true
+dot-cache	sequence/cakelu-69-muza643	syntax	0	!pragma teoz true
+dot-cache	sequence/calaja-69-tusu214	syntax	9	newpage
+dot-cache	sequence/calido-79-kovi606	syntax	0	!pragma teoz true
+dot-cache	sequence/caluni-22-noci624	syntax	13	?->o main
+dot-cache	sequence/camebe-75-mujo573	syntax	0	!pragma teoz true
+dot-cache	sequence/carose-61-seko055	syntax	0	!pragma teoz true
+dot-cache	sequence/caxali-40-cotu420	syntax	0	!pragma teoz true
+dot-cache	sequence/caxuke-64-femu351	syntax	0	scale 30
+dot-cache	sequence/cazipo-94-zubu963	syntax	0	!pragma teoz true
+dot-cache	sequence/cazusa-73-masi168	syntax	5	create FilesToDeviceDownloader
+dot-cache	sequence/ceduvo-98-page798	syntax	0	!pragma teoz true
+dot-cache	sequence/cekora-30-diso384	syntax	1	ref over Alice, Bob : short
+dot-cache	sequence/celego-19-laji937	syntax	3	A ->(40) B++: text 1
+dot-cache	sequence/cepase-93-cane941	syntax	5	create C
+dot-cache	sequence/cesipe-96-luze402	syntax	6	opt#blue #AAAAAA this is a test
+dot-cache	sequence/cetale-74-regu633	syntax	0	!pragma teoz true
+dot-cache	sequence/cijaru-11-fele146	syntax	1	hnote right
+dot-cache	sequence/cijozi-08-mavu547	syntax	3	note left
+dot-cache	sequence/cikoca-19-feji527	syntax	1	ref over Alice, Dummy : [[http://www.google.com]] Foo2
+dot-cache	sequence/cilore-76-sedu666	syntax	0	!pragma teoz true
+dot-cache	sequence/cimofu-59-xotu865	syntax	3	create Second
+dot-cache	sequence/cinilo-67-macu207	syntax	1	hnote over Alice : Answer
+dot-cache	sequence/cocosu-02-vusu863	syntax	1	note right: Note
+dot-cache	sequence/codeti-52-lafa397	syntax	0	!pragma teoz true
+dot-cache	sequence/cofuse-78-keri294	syntax	4	/ note over A: A2 this line throws an error
+dot-cache	sequence/cokaci-31-gera999	syntax	0	!pragma svgparser sax
+dot-cache	sequence/colexo-68-luko506	syntax	2	newpage
+dot-cache	sequence/comelo-49-lefi793	syntax	2	bill -> bob ++ #005500 : hello from thread 2
+dot-cache	sequence/covuco-47-sotu151	syntax	0	!pragma teoz true
+dot-cache	sequence/cujoci-19-taxe939	syntax	5	ref over Alice,Bob
+dot-cache	sequence/cusete-01-vusi466	syntax	1	note left
+dot-cache	sequence/cusiro-03-mebe823	syntax	2	ref over Alice, Dummy
+dot-cache	sequence/daduxi-21-duse542	syntax	2	par2
+dot-cache	sequence/dakake-85-nemi992	syntax	1	Alice ->o Bob : hello
+dot-cache	sequence/dakeve-06-cici445	syntax	0	!pragma teoz true
+dot-cache	sequence/dalata-11-sifu583	syntax	0	!pragma teoz true
+dot-cache	sequence/damoge-62-riso387	syntax	3	[/-o b : ""   [/-o""
+dot-cache	sequence/darupa-17-dujo243	syntax	10	end opt
+dot-cache	sequence/dasutu-58-saje713	syntax	1	note left
+dot-cache	sequence/databu-25-mivu307	syntax	6	note <<red>> left
+dot-cache	sequence/datetu-47-vunu236	syntax	0	box Internal Service #LightBlue
+dot-cache	sequence/dazuzi-04-zexu620	syntax	0	rotate
+dot-cache	sequence/debufa-67-poma789	syntax	7	[<-- SbcMXdCtrl: break
+dot-cache	sequence/decace-28-majo724	syntax	0	!pragma teoz true
+dot-cache	sequence/dedefa-06-muge830	syntax	3	note<<myStyle>> over Alice
+dot-cache	sequence/dedigi-45-zusi003	syntax	2	note right
+dot-cache	sequence/dedude-72-xuta800	syntax	0	!pragma svgparser sax
+dot-cache	sequence/deluve-26-kaxa424	syntax	0	!pragma svgparser sax
+dot-cache	sequence/demeli-77-cozo712	syntax	0	}
+dot-cache	sequence/deteku-57-peba055	syntax	1	create QA
+dot-cache	sequence/devamo-31-coji129	syntax	1	newpage
+dot-cache	sequence/dicuva-14-lini551	syntax	3	[->o Alice
+dot-cache	sequence/digula-66-dipe776	syntax	20	newpage
+dot-cache	sequence/dimili-48-vaka933	syntax	3	create ThisIsTheLongNameOfAnInstance as T
+dot-cache	sequence/dipazo-97-namu310	syntax	5	a <- a : This [now works]
+dot-cache	sequence/dipede-53-nina209	syntax	0	!pragma teoz true
+dot-cache	sequence/diruxe-35-xujo142	syntax	8	ref over User: ввод имени пользователя, \n эл. почты, \n номера телефона, \n нажатие кнопки регистрации \n на форме
+dot-cache	sequence/dofefe-55-kejo043	syntax	0	!pragma teoz true
+dot-cache	sequence/dojapu-42-sali914	syntax	3	[o<-o b : "" [o<-o""
+dot-cache	sequence/dolefo-13-kovu702	syntax	8	scale 3.0
+dot-cache	sequence/dolice-60-copi767	syntax	0	Alice -> Bob [[http://www.google.fr]] : ok
+dot-cache	sequence/domaji-70-zini725	syntax	3	[\\-o b : ""  [\\-o""
+dot-cache	sequence/donuli-07-peje262	syntax	0	autoactivate on
+dot-cache	sequence/dopove-28-kaza697	syntax	4	note right
+dot-cache	sequence/dototo-68-bexa421	syntax	0	!pragma teoz true
+dot-cache	sequence/dozugi-77-tuce071	syntax	1	hide unlinked
+dot-cache	sequence/ducodo-45-duge821	syntax	5	ref over Alice,Bob
+dot-cache	sequence/dudure-98-cote516	syntax	0	Bob x-> Alice : 0-4 x->
+dot-cache	sequence/dugata-50-koxo354	syntax	3	[x<- b : ""  [x<-""
+dot-cache	sequence/dugeki-47-celo546	syntax	32	note over A, C#tomato: A upload le fichier telque decrit sur le lien ci-dessus : Upload_successfull\nA recupere les infos à envoyer a B, C
+dot-cache	sequence/duniti-51-pole084	syntax	2	note right
+dot-cache	sequence/dutopa-62-jalu659	syntax	0	[-> A ++ #ff0000 : No lifeline color with\n<b>!pragma teoz true</b>
+dot-cache	sequence/fajixi-56-dete708	syntax	0	Alice -> Bob [[http://www.yahoo.com{Jason: {"firstName":"Bob", "lastName":"Smith"}}]] : hello
+dot-cache	sequence/fakune-74-geba235	syntax	4	hide unlinked
+dot-cache	sequence/falolu-20-sepu020	syntax	5	newpage
+dot-cache	sequence/faviki-72-kete653	syntax	0	!pragma teoz true
+dot-cache	sequence/fenoli-16-peru181	syntax	3	A ->(1) B: text 1
+dot-cache	sequence/fevipu-45-xela421	syntax	2	note across
+dot-cache	sequence/ficiru-65-geda551	syntax	4	note right: This is a note1
+dot-cache	sequence/figezi-68-zefe216	syntax	0	!pragma teoz true
+dot-cache	sequence/fijeco-97-zozu841	syntax	0	!pragma teoz true
+dot-cache	sequence/fobube-11-nifo424	syntax	0	!pragma teoz true
+dot-cache	sequence/fobuke-12-dopi544	syntax	2	note left : this is a note
+dot-cache	sequence/focaso-89-zaxu091	syntax	1	ref over Alice, Bob : short
+dot-cache	sequence/fojake-71-veka215	syntax	1	TaxiManager <-- SpeedyCab:
+dot-cache	sequence/fojomu-60-cuda302	syntax	0	!pragma teoz true
+dot-cache	sequence/fonatu-29-texo854	incomplete	1	
+dot-cache	sequence/fonipa-05-lobe529	syntax	2	note<<red>> over A, B : test
+dot-cache	sequence/fonope-49-jodi834	syntax	4	Alice x->] : hop2
+dot-cache	sequence/fonudu-70-coma124	syntax	0	---
+dot-cache	sequence/fotiku-67-lilu728	syntax	0	!pragma teoz true
+dot-cache	sequence/fozeva-08-tife475	syntax	12	note right
+dot-cache	sequence/fugilu-74-jivu585	syntax	0	!pragma teoz true
+dot-cache	sequence/fululo-61-zuro165	syntax	3	newpage
+dot-cache	sequence/funado-58-dene546	syntax	0	!pragma teoz true
+dot-cache	sequence/furami-83-pome543	syntax	2	note across
+dot-cache	sequence/furara-28-sode432	syntax	2	create toto
+dot-cache	sequence/fusavi-61-disa620	syntax	3	@newpage
+dot-cache	sequence/futaxe-10-xonu513	syntax	0	!pragma teoz true
+dot-cache	sequence/gabisi-10-male675	syntax	1	create b
+dot-cache	sequence/gacujo-48-leto751	syntax	0	!pragma teoz true
+dot-cache	sequence/gadasu-04-kada675	syntax	2	"Application thread" -> "DB connection": SQL query A
+dot-cache	sequence/gapozi-46-zula498	syntax	0	!pragma teoz true
+dot-cache	sequence/gebeki-18-muci858	syntax	0	scale 2
+dot-cache	sequence/gecopo-99-pude139	syntax	2	note left: foo
+dot-cache	sequence/gejeji-12-zofa866	syntax	4	[o<-x b : "" [o<-x""
+dot-cache	sequence/gekapu-59-pala336	syntax	1	& A -> C++:
+dot-cache	sequence/gepuce-64-pivu656	syntax	2	scale 0.50
+dot-cache	sequence/geraku-93-roka956	syntax	0	Alice -> Bob [[http://www.yahoo.com{{"Jason": {"firstName":"Bob", "lastName":"Smith"},\n "Carl": {"firstName":"Alice", "lastName":"Brown"}}}]] : Hello
+dot-cache	sequence/gibuxa-28-kale997	syntax	2	create Other
+dot-cache	sequence/gidibo-31-cugi403	syntax	1	note right : foo
+dot-cache	sequence/gifope-23-jufe872	syntax	4	note left #green-white : ok
+dot-cache	sequence/gijamu-35-vale058	syntax	5	box Actor
+dot-cache	sequence/giloko-85-gapa789	syntax	8	newpage page 1
+dot-cache	sequence/ginifi-74-faso689	syntax	4	newpage
+dot-cache	sequence/giroko-51-gobi443	syntax	4	newpage
+dot-cache	sequence/gizinu-51-rexo332	syntax	0	!pragma svgparser sax
+dot-cache	sequence/gojozu-97-xeki128	syntax	2	Bob -> Alice [[http://www.google.com]] : hello
+dot-cache	sequence/gojuro-44-nono843	syntax	6	create D
+dot-cache	sequence/gosigu-85-raku124	syntax	3	note<<blue>> over B: test
+dot-cache	sequence/gozaru-36-gejo982	syntax	3	Alice \\-: "\\\\-" Should be down1
+dot-cache	sequence/gozobo-83-zuci344	syntax	0	!pragma teoz true
+dot-cache	sequence/gucare-93-petu502	syntax	15	autonumber "<b>[0]"
+dot-cache	sequence/gudidu-67-pene708	syntax	3	note right : long
+dot-cache	sequence/guduje-81-mucu193	syntax	0	!pragma teoz true
+dot-cache	sequence/gujaje-38-zoce253	syntax	1	Bob --_> Alice : hi
+dot-cache	sequence/gukaki-49-boko579	syntax	7	activate Bob #Green #Blue
+dot-cache	sequence/gunecu-53-jebu067	syntax	6	beta <- alpha: a2
+dot-cache	sequence/gupuze-37-xelo563	syntax	5	ref over Bob
+dot-cache	sequence/guzoco-99-ginu686	syntax	4	[o<-x Alice : hop
+dot-cache	sequence/h-rnote-style	syntax	2	rnote left of actor: "field1 = valA"
+dot-cache	sequence/jabise-46-luge773	syntax	5	ref over Bob
+dot-cache	sequence/jafufe-08-begu830	syntax	8	note right
+dot-cache	sequence/jagusu-12-turu662	syntax	2	note<<test>> over Bob: test note 2
+dot-cache	sequence/jajobi-60-ralo350	syntax	3	A ->(10) B: text 10
+dot-cache	sequence/jalodi-19-mibi961	syntax	0	activate "actor 1" #Olive
+dot-cache	sequence/jatali-99-bajo946	syntax	0	!pragma teoz true
+dot-cache	sequence/javedu-98-pibi325	syntax	0	rotate
+dot-cache	sequence/javiki-44-cija459	syntax	7	endbox
+dot-cache	sequence/jaxige-32-naja526	syntax	3	Bob <- Alice : Finished
+dot-cache	sequence/jebole-52-cuvo164	syntax	3	[o<- b : ""  [o<-""
+dot-cache	sequence/jerevu-86-gojo026	syntax	3	C ->x S : GET()
+dot-cache	sequence/jerika-28-senu049	syntax	0	!pragma teoz true
+dot-cache	sequence/jesari-34-mudu065	syntax	4	scale 100 width
+dot-cache	sequence/jexavi-40-degi377	syntax	4	par2
+dot-cache	sequence/jiliba-03-lapi286	syntax	0	IT++
+dot-cache	sequence/jinaxe-58-zuva028	syntax	0	box "Tier 1"  <<Client>>
+dot-cache	sequence/jitesa-41-cara967	syntax	3	[\- b : ""   [\-""
+dot-cache	sequence/jiveji-28-butu482	syntax	0	!pragma teoz true
+dot-cache	sequence/jobadi-87-jegi648	syntax	0	activate Bob #White #Black
+dot-cache	sequence/jomemi-46-zazi815	syntax	4	endbox
+dot-cache	sequence/jonoja-01-zani191	syntax	5	@newpage
+dot-cache	sequence/joroli-85-vace726	syntax	2	newpage
+dot-cache	sequence/jotase-88-kiki473	syntax	0	!pragma teoz true
+dot-cache	sequence/jotege-53-vira701	syntax	0	!pragma teoz true
+dot-cache	sequence/jozete-34-kete358	syntax	3	newpage Second Page
+dot-cache	sequence/jozomu-87-tajo507	syntax	1	=MyTitle
+dot-cache	sequence/jugami-52-timi786	syntax	0	!pragma teoz true
+dot-cache	sequence/jujigi-41-zodo151	syntax	3	scale 1.2
+dot-cache	sequence/jujimu-79-mugu916	syntax	0	!pragma teoz true
+dot-cache	sequence/junide-55-soka558	syntax	0	scale 70 width
+dot-cache	sequence/juputo-08-febo295	syntax	0	scale max 60*20
+dot-cache	sequence/kafupo-63-cula092	syntax	3	create b
+dot-cache	sequence/kakune-11-vusu073	syntax	3	[<-o b : ""   [<-o""
+dot-cache	sequence/kaporo-80-vace949	syntax	5	"Application thread" -> "DB connection": SQL query A
+dot-cache	sequence/kapuva-33-nomi771	syntax	3	[o/- b : ""  [o/-""
+dot-cache	sequence/karaki-85-ketu935	syntax	1	note left : foo
+dot-cache	sequence/kejoke-76-curu931	syntax	0	!pragma teoz true
+dot-cache	sequence/keloje-58-ladu877	syntax	0	!pragma teoz true
+dot-cache	sequence/keluvo-88-kosi498	syntax	0	!pragma teoz true
+dot-cache	sequence/kemira-27-jaxe643	syntax	0	hide @unlinked
+dot-cache	sequence/kepuxa-88-juxu405	syntax	4	scale 100x30
+dot-cache	sequence/kerezi-79-cepe665	syntax	4	create Dog
+dot-cache	sequence/kevaru-04-faka914	syntax	1	Alice <- Alice : hello I have a lot to say so let me start... \nBla Bla Bla Bla
+dot-cache	sequence/kevavu-57-kifi084	syntax	3	[x<->x b : ""[x<->x""
+dot-cache	sequence/kibijo-61-vijo950	syntax	1	newpage
+dot-cache	sequence/kibope-73-jezu646	syntax	0	!pragma teoz true
+dot-cache	sequence/kikaso-48-karu319	syntax	1	note left
+dot-cache	sequence/kikuba-19-varo358	syntax	0	!pragma teoz true
+dot-cache	sequence/kiledu-77-reto787	syntax	0	!pragma teoz true
+dot-cache	sequence/kilepu-67-seji640	syntax	5	create C
+dot-cache	sequence/kitevo-12-guvo789	syntax	0	scale 2
+dot-cache	sequence/kituzo-58-vari147	syntax	2	note right : %autonumber%
+dot-cache	sequence/kivavu-72-goju233	syntax	3	[\\- b : ""  [\\-""
+dot-cache	sequence/kixani-97-giji283	syntax	0	scale 1.5
+dot-cache	sequence/kixebi-20-debo481	syntax	2	create B
+dot-cache	sequence/kocuso-22-ciri203	syntax	4	note right: toto1
+dot-cache	sequence/kodifo-43-teci570	syntax	0	set separator none
+dot-cache	sequence/kofuti-29-goti188	syntax	0	scale 2
+dot-cache	sequence/kogoce-55-goge576	syntax	0	!pragma teoz false
+dot-cache	sequence/kojigi-18-jexu940	syntax	0	!pragma teoz true
+dot-cache	sequence/koleji-09-doni016	syntax	9	end opt
+dot-cache	sequence/komafa-88-zutu920	syntax	0	!pragma svgparser sax
+dot-cache	sequence/koneju-77-vode355	syntax	0	!pragma teoz true
+dot-cache	sequence/kopaxi-36-dedo317	syntax	3	[\-o b : ""   [\-o""
+dot-cache	sequence/kotixe-11-cufa733	syntax	2	rnote left of actor: "field1 = valA"
+dot-cache	sequence/kovito-91-jonu992	syntax	2	note left
+dot-cache	sequence/kovoso-39-teve092	syntax	4	end group
+dot-cache	sequence/kozova-44-lore387	syntax	0	!pragma teoz true
+dot-cache	sequence/kubini-17-jemo957	syntax	0	!pragma showDeprecation true
+dot-cache	sequence/kugati-67-nuzu852	syntax	3	[o<<- b : "" [o<<-""
+dot-cache	sequence/kukeja-88-zida141	syntax	0	!pragma teoz true
+dot-cache	sequence/kumogu-10-rigi101	syntax	0	!pragma teoz true
+dot-cache	sequence/kuniko-53-rilu801	syntax	0	!pragma teoz true
+dot-cache	sequence/kuzuco-40-xara309	syntax	0	!pragma teoz true
+dot-cache	sequence/labima-56-kone976	syntax	2	newpage
+dot-cache	sequence/labite-99-lufe939	syntax	0	!pragma svgparser sax
+dot-cache	sequence/labudu-49-fove649	syntax	1	Alice ->o Bob : hello
+dot-cache	sequence/lacoje-26-lubu678	syntax	0	!pragma teoz true
+dot-cache	sequence/ladiro-50-gume805	syntax	3	Note
+dot-cache	sequence/lafuzo-13-xura634	syntax	1	=MyTitle
+dot-cache	sequence/lagexo-50-sibo018	syntax	7	Alice <-- Bob: response
+dot-cache	sequence/lalite-31-joxu896	syntax	2	newpage
+dot-cache	sequence/lavaba-76-lepi228	syntax	3	C ->x S : GET()
+dot-cache	sequence/leceju-60-doxa170	syntax	0	!pragma teoz true
+dot-cache	sequence/ledura-21-bavo866	syntax	46	end group
+dot-cache	sequence/legeme-58-daxi851	syntax	0	!pragma teoz true
+dot-cache	sequence/legole-00-givu934	syntax	0	-> Bob
+dot-cache	sequence/lekari-63-rigu513	syntax	2	[<- Alice : dummy1 quite long
+dot-cache	sequence/lekopo-04-sefo189	syntax	0	!pragma teoz true
+dot-cache	sequence/letagi-90-kome968	syntax	3	A ->(60) B: text 10
+dot-cache	sequence/lezonu-15-cege608	syntax	1	note right
+dot-cache	sequence/licole-34-vejo527	syntax	3	+ XXX
+dot-cache	sequence/liculu-86-goge853	syntax	3	-\ Bob
+dot-cache	sequence/lidupe-72-cexa425	syntax	10	note right
+dot-cache	sequence/lifene-24-xaca574	syntax	5	newpage
+dot-cache	sequence/liguma-77-mume567	syntax	0	sprite $mySprite data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=
+dot-cache	sequence/lilivo-81-jaja352	syntax	0	!pragma teoz true
+dot-cache	sequence/liluca-64-muva178	syntax	0	autonumber 10 10 "<b>[000]"
+dot-cache	sequence/limajo-73-kife020	syntax	1	note right : this is right of the user B
+dot-cache	sequence/lipuci-81-vovi162	syntax	0	!pragma teoz true
+dot-cache	sequence/lirasa-26-tazo607	syntax	4	Bob<-Alice : hello2
+dot-cache	sequence/loguci-83-mobe896	syntax	1	…
+dot-cache	sequence/lojore-28-mano308	syntax	2	note right
+dot-cache	sequence/lokavu-60-peku948	syntax	0	!pragma teoz true
+dot-cache	sequence/lokole-97-moji784	syntax	0	!pragma teoz true
+dot-cache	sequence/lokonu-29-zafi019	syntax	0	!pragma svgparser sax
+dot-cache	sequence/losefo-71-dovi176	syntax	2	ref over Alice, Dummy : [[http://www.google.com]] Foo2
+dot-cache	sequence/loteba-26-konu854	syntax	0	!pragma teoz true
+dot-cache	sequence/lozuru-10-poba814	syntax	3	[o\\- b : "" [o\\-""
+dot-cache	sequence/ludize-84-fopa558	syntax	1	create Dog
+dot-cache	sequence/lugika-07-rozo911	syntax	0	!pragma teoz true
+dot-cache	sequence/lukivo-17-cose300	syntax	0	!pragma svgparser sax
+dot-cache	sequence/lukomo-68-kuxo704	syntax	0	rotate
+dot-cache	sequence/luleji-91-jera958	syntax	0	scale max 600*200
+dot-cache	sequence/lupomi-26-vigu795	syntax	0	!pragma svgparser sax
+dot-cache	sequence/lusigu-71-nipe759	syntax	0	!pragma teoz true
+dot-cache	sequence/luzapi-49-rati107	syntax	8	SerialManager <-- ByteBuffer
+dot-cache	sequence/maboju-34-soxi895	syntax	2	Alice -> Bob [[http://www.google.com]] : ok
+dot-cache	sequence/macuca-31-lare733	syntax	0	!pragma teoz true
+dot-cache	sequence/makuzo-19-tine034	syntax	11	a <-- b :msg_ack
+dot-cache	sequence/mapeji-83-sebu002	syntax	0	!pragma teoz true
+dot-cache	sequence/masibi-28-tidi862	syntax	4	note left: <i>to</i>to1
+dot-cache	sequence/mataga-73-xape348	syntax	0	!pragma svgparser sax
+dot-cache	sequence/matoka-21-jisu767	syntax	1	note<<st1>> over A : text 1
+dot-cache	sequence/matoke-25-kidu719	syntax	0	!pragma teoz true
+dot-cache	sequence/maxuzu-48-vopa106	syntax	0	!pragma teoz true
+dot-cache	sequence/mebidu-16-ruve297	syntax	0	!pragma teoz true
+dot-cache	sequence/meleno-54-zume276	syntax	0	!pragma teoz true
+dot-cache	sequence/menire-56-rase375	syntax	1	ref over Alice, Dummy : Foo2
+dot-cache	sequence/menoke-22-luxo044	syntax	1	note right
+dot-cache	sequence/mepaxe-79-lima141	syntax	0	!pragma teoz true
+dot-cache	sequence/metano-36-gevu843	syntax	1	note left: ok
+dot-cache	sequence/metaro-33-tivu315	syntax	0	!pragma svgparser sax
+dot-cache	sequence/metuso-48-siti946	syntax	0	ActorBorderColor DeepSkyBlue
+dot-cache	sequence/mezaxa-44-siju322	syntax	0	!pragma teoz true
+dot-cache	sequence/micaki-01-rexa741	syntax	0	a <- b ++
+dot-cache	sequence/midipu-78-meva271	syntax	1	note left
+dot-cache	sequence/mifeve-32-bone848	syntax	0	!pragma teoz true
+dot-cache	sequence/mipope-41-daxa497	syntax	1	create Dog
+dot-cache	sequence/mitedi-05-riso357	syntax	0	hide unlinked
+dot-cache	sequence/mitefi-27-cubo687	syntax	0	autonumber "<b>[000]"
+dot-cache	sequence/mitire-01-voga923	syntax	3	[//- b : ""  [//-""
+dot-cache	sequence/mivuke-79-fujo526	syntax	0	autonumber "<b>[000]"
+dot-cache	sequence/mizeli-59-delu630	syntax	5	endbox
+dot-cache	sequence/mizugi-66-desi413	syntax	1	note right: The test is:\nsomething
+dot-cache	sequence/mobeji-49-faki497	syntax	0	!pragma teoz true
+dot-cache	sequence/mobobu-53-vita034	syntax	7	autonumber 120 10
+dot-cache	sequence/mocuna-66-bica785	syntax	2	foo3 <-o]
+dot-cache	sequence/mokige-56-disi349	syntax	3	note left : this is a note
+dot-cache	sequence/momivo-11-pulo230	syntax	1	note bottom : my note
+dot-cache	sequence/momuxe-95-bugu296	syntax	3	[o//- b : "" [o//-""
+dot-cache	sequence/mopidi-45-pudu787	syntax	2	endbox
+dot-cache	sequence/movaso-17-jomi483	syntax	1	note over A #green;line:lightblue : text1
+dot-cache	sequence/moxazi-74-bosi297	syntax	8	autonumber 120 10
+dot-cache	sequence/mozofa-80-puru273	syntax	0	!pragma teoz true
+dot-cache	sequence/mozoza-90-biru865	syntax	2	scale 4
+dot-cache	sequence/mucoji-36-bape235	syntax	0	!pragma teoz true
+dot-cache	sequence/mukebo-35-xoju095	syntax	0	!pragma teoz true
+dot-cache	sequence/mulofu-90-voka382	syntax	3	[/- b : ""   [/-""
+dot-cache	sequence/mumagu-62-jicu083	syntax	0	!pragma teoz true
+dot-cache	sequence/mupugi-53-xuna043	syntax	0	!pragma teoz true
+dot-cache	sequence/musive-74-reva838	syntax	0	!pragma svgparser sax
+dot-cache	sequence/mutuve-86-sevi489	syntax	0	!pragma teoz true
+dot-cache	sequence/nabesa-52-nufu501	syntax	4	scale 300*200
+dot-cache	sequence/nadode-16-budi136	syntax	1	Bob /- Alice
+dot-cache	sequence/najuro-83-tuze073	syntax	5	create Dog
+dot-cache	sequence/nanoza-23-fija616	syntax	3	[o\- b : ""  [o\-""
+dot-cache	sequence/natidi-64-kuzo035	syntax	0	!pragma teoz true
+dot-cache	sequence/nazuki-76-dave810	syntax	1	ref over Alice, Bob : short
+dot-cache	sequence/necofe-81-toja736	syntax	1	Bob <-] : message1
+dot-cache	sequence/necujo-58-gadi983	syntax	2	create Abox
+dot-cache	sequence/nedaka-75-tiju705	syntax	0	!pragma teoz true
+dot-cache	sequence/nekeso-74-tebe680	syntax	0	!pragma teoz true
+dot-cache	sequence/nemeji-70-xupi983	syntax	0	!pragma svgparser sax
+dot-cache	sequence/nepica-26-pali815	syntax	0	dummy -> a **
+dot-cache	sequence/nereka-67-deco609	syntax	0	hide stereotype
+dot-cache	sequence/nesuva-86-fuki568	syntax	0	!pragma teoz true
+dot-cache	sequence/netanu-37-vovi884	syntax	0	scale 1.5
+dot-cache	sequence/nezipa-74-kigi270	syntax	4	Bob <- Alice --: ok2
+dot-cache	sequence/nibiju-55-kavu710	syntax	1	note left
+dot-cache	sequence/nidozi-08-daxa280	syntax	2	Bob -> Alice [[http://plantuml.com/start]] : hello
+dot-cache	sequence/nifixi-65-cebi612	syntax	0	!pragma teoz true
+dot-cache	sequence/nijilu-37-zofe547	syntax	0	!pragma svgparser sax
+dot-cache	sequence/nirolu-80-lobo780	syntax	0	!pragma teoz true
+dot-cache	sequence/nisogu-21-zixe139	syntax	3	[<<- b : ""  [<<-""
+dot-cache	sequence/nitadu-00-laca973	syntax	2	create Other
+dot-cache	sequence/nitubo-28-pugo834	syntax	5	API <- storage
+dot-cache	sequence/nivaje-50-tido759	syntax	0	!pragma teoz true
+dot-cache	sequence/nivelo-54-caze822	syntax	0	!pragma teoz true
+dot-cache	sequence/nizime-73-xuti179	syntax	0	Alice -> Bob [[http://www.yahoo.com {this\nthat}]] : hello
+dot-cache	sequence/nizuzi-32-babe798	syntax	0	!pragma teoz true
+dot-cache	sequence/nobase-02-zuvu172	syntax	2	note right
+dot-cache	sequence/nofegi-58-kilo738	syntax	9	end opt
+dot-cache	sequence/nofola-68-nobe068	syntax	0	autoactivate on
+dot-cache	sequence/nojata-23-ropa545	syntax	1	note left
+dot-cache	sequence/noneda-45-tutu738	syntax	0	!pragma teoz true
+dot-cache	sequence/note-color	syntax	2	rnote left of actor: red note
+dot-cache	sequence/notube-22-jera587	syntax	5	create FilesToDeviceDownloader
+dot-cache	sequence/nucumi-51-posa953	syntax	6	rnote over Member37 : Clock = 1342
+dot-cache	sequence/nukona-00-jaro456	syntax	3	[<<-o b : ""  [<<-o""
+dot-cache	sequence/numezi-28-fuzu813	syntax	0	!pragma teoz true
+dot-cache	sequence/numugo-16-luca722	syntax	2	note<<test>> over Bob: test note 2
+dot-cache	sequence/nunuji-27-mosa042	syntax	2	[<--1: SomeOutgoingOperation
+dot-cache	sequence/nutuxo-22-fiza911	syntax	0	!pragma teoz true
+dot-cache	sequence/nuxure-61-nida877	syntax	4	IS <-- FAC: response
+dot-cache	sequence/pafene-01-tedi758	syntax	1	create jr
+dot-cache	sequence/pagujo-10-pafe397	syntax	0	minwidth 600
+dot-cache	sequence/paruvi-41-jano091	syntax	5	note left: toto5
+dot-cache	sequence/patute-88-dena554	syntax	0	!pragma svgparser sax
+dot-cache	sequence/pebezu-05-dufi104	syntax	2	note<<red>> over A, B : test
+dot-cache	sequence/peduzi-80-giki495	syntax	0	autonumber "<b>[000]"
+dot-cache	sequence/pexona-78-kede899	syntax	0	!pragma teoz true
+dot-cache	sequence/pibefe-94-cibu835	syntax	0	newpage Customer 'Future Gadget Lab' Jobcard
+dot-cache	sequence/pidadu-86-cuda807	syntax	0	newpage
+dot-cache	sequence/pidici-36-jicu872	syntax	0	!pragma teoz true
+dot-cache	sequence/pigifu-13-kele137	syntax	2	end group
+dot-cache	sequence/pijixu-96-bago359	syntax	0	!pragma teoz true
+dot-cache	sequence/pimoci-15-jite516	syntax	0	!pragma svgparser sax
+dot-cache	sequence/pixifi-75-gulu822	syntax	0	rotate
+dot-cache	sequence/pixima-27-nita000	syntax	6	b ->> c **: message 3
+dot-cache	sequence/pixopo-04-zitu732	syntax	3	end group
+dot-cache	sequence/pobasa-34-neza994	syntax	1	A <<-- B: response
+dot-cache	sequence/poceko-81-dofe354	syntax	5	endbox
+dot-cache	sequence/podata-90-rike047	syntax	0	ignorenewpage
+dot-cache	sequence/podije-21-guxe276	syntax	0	!pragma teoz true
+dot-cache	sequence/pokici-03-lafi659	syntax	1	note left: test note
+dot-cache	sequence/pomoxu-05-luco302	syntax	18	/ note left of user1
+dot-cache	sequence/ponalu-70-nusa123	syntax	1	create Dog
+dot-cache	sequence/ponugi-73-xuzo000	syntax	2	note left : 燕燕燕
+dot-cache	sequence/popoda-09-xavi089	syntax	1	rnote over Bob
+dot-cache	sequence/porepe-36-nebi243	syntax	3	note right: hello, world
+dot-cache	sequence/porulu-24-ciga586	syntax	0	autonumber "<font color=red>[000]</font>"
+dot-cache	sequence/posura-78-koji601	syntax	0	!pragma svgparser sax
+dot-cache	sequence/poxugi-46-feba577	syntax	0	!pragma teoz true
+dot-cache	sequence/pucini-86-goti091	syntax	1	hnote over caller : idle
+dot-cache	sequence/pugera-36-jeza279	syntax	5	note right
+dot-cache	sequence/pukebe-27-xadi418	syntax	2	A <- B : Response
+dot-cache	sequence/punove-48-zugu202	syntax	0	!pragma teoz true
+dot-cache	sequence/pupini-69-doko713	syntax	0	!pragma teoz true
+dot-cache	sequence/putici-74-zenu027	syntax	3	note left : this is a note
+dot-cache	sequence/putuku-29-ziga148	syntax	0	!pragma teoz true
+dot-cache	sequence/rajogu-04-suru681	syntax	4	end loop
+dot-cache	sequence/ralucu-86-voxa492	syntax	0	!pragma svgparser sax
+dot-cache	sequence/ramica-82-loku620	syntax	0	!pragma teoz true
+dot-cache	sequence/ramive-48-vabu271	syntax	0	!pragma teoz true
+dot-cache	sequence/ravire-24-jaju542	syntax	1	note left : this <back:red>foo</back> and <b><back:green>XXXX</back></b>
+dot-cache	sequence/raxeca-83-rotu897	syntax	0	scale 1000 width
+dot-cache	sequence/recani-60-licu962	syntax	0	-> A
+dot-cache	sequence/refiju-27-nupe082	syntax	0	par2
+dot-cache	sequence/refire-51-cuka840	syntax	0	!pragma teoz true
+dot-cache	sequence/refoxa-14-rusi158	syntax	2	note across
+dot-cache	sequence/regate-07-rore899	syntax	3	scale 4
+dot-cache	sequence/remoso-59-bese968	syntax	0	autoactivate on
+dot-cache	sequence/repudi-21-rovo448	syntax	3	Node <- SUT : RAA
+dot-cache	sequence/rexine-04-regi170	syntax	0	!pragma teoz true
+dot-cache	sequence/rezoma-09-vixi307	syntax	4	note right: This is a note1
+dot-cache	sequence/rifazu-14-fede536	syntax	2	create Other
+dot-cache	sequence/rititi-64-vene814	syntax	1	Alice ->o Bob : hello
+dot-cache	sequence/rizove-01-move566	syntax	0	!pragma teoz true
+dot-cache	sequence/rogube-67-sova611	syntax	1	hnote over caller : idle
+dot-cache	sequence/rolota-48-cedi081	syntax	0	!pragma svgparser sax
+dot-cache	sequence/romane-05-nika037	syntax	1	create Dog
+dot-cache	sequence/ropame-50-funo509	syntax	0	!pragma teoz true
+dot-cache	sequence/rotila-89-juri637	syntax	0	!pragma teoz true
+dot-cache	sequence/rozavo-21-cavi374	syntax	0	!pragma teoz true
+dot-cache	sequence/ruboxu-79-joxa034	syntax	0	!pragma svgparser sax
+dot-cache	sequence/rudola-01-bibi608	syntax	0	scale 0.5
+dot-cache	sequence/rufoko-60-jori485	syntax	3	create Second
+dot-cache	sequence/rugeco-70-muro754	syntax	0	!pragma teoz true
+dot-cache	sequence/rugoro-74-mepi153	syntax	0	Bob -> Alice[[{test data test data test data test data  \ntest data test data test data test data \ntest data test data test data test data \ntest data test data test data test data \ntest data test data test data test data \ntest data test data test data test data}]] : hello
+dot-cache	sequence/rujetu-45-laxe003	syntax	4	create Observable
+dot-cache	sequence/rujimo-45-dato973	syntax	0	!pragma teoz true
+dot-cache	sequence/rulepa-49-pisa733	syntax	0	!pragma teoz true
+dot-cache	sequence/rusada-38-sopi026	syntax	0	!pragma teoz true
+dot-cache	sequence/ruxasu-79-puxa956	syntax	6	note left <<red>>
+dot-cache	sequence/ruxazu-24-nagu486	syntax	0	scale 2
+dot-cache	sequence/ruxiga-63-nide445	syntax	7	Alice <-- Bob: response
+dot-cache	sequence/ruxuju-55-jitu721	syntax	1	note left: test note
+dot-cache	sequence/ruxuxu-75-jilu612	syntax	0	!pragma teoz true
+dot-cache	sequence/ruzapi-75-pone297	syntax	0	!pragma svgparser sax
+dot-cache	sequence/sameli-92-dape565	syntax	0	autonumber 1.1.1
+dot-cache	sequence/saroli-53-vafu511	syntax	0	!pragma svgparser sax
+dot-cache	sequence/sazaxe-79-beka218	syntax	2	newpage
+dot-cache	sequence/sebafe-48-pepu053	syntax	0	!pragma svgparser sax
+dot-cache	sequence/secida-27-jaco323	syntax	0	!pragma teoz true
+dot-cache	sequence/sedajo-92-docu424	syntax	0	!pragma teoz true
+dot-cache	sequence/sefako-72-jono850	syntax	1	note right A #palegreen: a link (without tooltip and label) works for all the ref area
+dot-cache	sequence/seloli-77-rixi778	syntax	2	rnote left of actor: red note
+dot-cache	sequence/semepi-87-tiza126	syntax	0	foo o->o]
+dot-cache	sequence/senogo-33-nuva054	syntax	1	Alice ->o Bob : hello
+dot-cache	sequence/sepeti-78-zido700	syntax	0	!pragma teoz true
+dot-cache	sequence/Sequence-delay-destroy-newpage-style	syntax	2	newpage
+dot-cache	sequence/SequenceArrows_0001_Test	syntax	0	!pragma teoz true
+dot-cache	sequence/SequenceArrows_0002_Test	syntax	0	!pragma teoz true
+dot-cache	sequence/sevaze-62-pufa040	syntax	0	Bob -> Alice [[http://www.google.com foo]]
+dot-cache	sequence/sirabe-54-sibe468	syntax	8	A<--] : RequestCreated
+dot-cache	sequence/sisege-95-labu547	syntax	1	note right
+dot-cache	sequence/sisele-83-gebe678	syntax	4	a ->(50)     b : ""->   ""
+dot-cache	sequence/sizumo-60-ziba310	syntax	4	beta <- alpha: a2
+dot-cache	sequence/sobiga-51-damo304	syntax	0	!pragma teoz true
+dot-cache	sequence/socode-71-sige450	syntax	0	!pragma teoz true
+dot-cache	sequence/sodovo-72-kudu756	syntax	0	!pragma svgparser sax
+dot-cache	sequence/sofavo-23-xuxi628	syntax	35	end group
+dot-cache	sequence/sogafu-39-fone585	syntax	1	Alice <[#green]- Bob: Positive Response
+dot-cache	sequence/sojufi-84-bexi933	syntax	2	ref#770000 over Alice, Dummy #006600
+dot-cache	sequence/soxata-16-kafi688	syntax	0	skinParam CaptionFontSize 10
+dot-cache	sequence/sufevi-44-xipa294	syntax	0	!pragma teoz true
+dot-cache	sequence/sufire-57-dari792	syntax	0	rotate
+dot-cache	sequence/sukuno-50-kiru529	syntax	0	hide @unlinked
+dot-cache	sequence/suleta-28-lejo742	syntax	1	note left
+dot-cache	sequence/suredo-76-kaxo606	syntax	0	foo o->o foo1
+dot-cache	sequence/susati-64-lako047	syntax	2	Bob<-Alice : hello
+dot-cache	sequence/suvodo-70-rogi494	syntax	4	rnote over Bob
+dot-cache	sequence/suxelu-07-toga142	syntax	1	Bob <- Alice : hello
+dot-cache	sequence/suzexi-09-ruta299	syntax	0	minwidth 500
+dot-cache	sequence/suzumi-85-nuzo693	syntax	3	scale 1/4
+dot-cache	sequence/tapije-66-runu046	syntax	1	Alice <- Alice : hello I have a lot to say so let me start... \nBla Bla Bla Bla
+dot-cache	sequence/taraxa-93-reno112	syntax	12	note right
+dot-cache	sequence/tatesu-03-zozo948	syntax	0	scale 0.5
+dot-cache	sequence/taxoza-93-sugi547	syntax	4	newpage
+dot-cache	sequence/taxude-25-lamo370	syntax	0	!pragma teoz true
+dot-cache	sequence/tefixi-07-xacu656	syntax	3	note left: àéè
+dot-cache	sequence/tegasu-93-fima016	syntax	1	hide << new >> stereotype
+dot-cache	sequence/tejuzi-96-fano922	syntax	0	autoactivate on
+dot-cache	sequence/telavi-12-pifu671	syntax	0	!pragma teoz true
+dot-cache	sequence/telizo-11-pilo439	syntax	0	!pragma teoz true
+dot-cache	sequence/tenifo-99-roxi031	syntax	5	Bob -\ Bob
+dot-cache	sequence/TeozTimelineIssues_0002_Test	syntax	0	!pragma teoz true
+dot-cache	sequence/TeozTimelineIssues_0003_Test	syntax	0	!pragma teoz true
+dot-cache	sequence/TeozTimelineIssues_0004_Test	syntax	0	!pragma teoz true
+dot-cache	sequence/TeozTimelineIssues_0005_Test	syntax	0	!pragma teoz true
+dot-cache	sequence/TeozTimelineIssues_0006_Test	syntax	0	!pragma teoz true
+dot-cache	sequence/TeozTimelineIssues_0007_Test	syntax	0	!pragma teoz true
+dot-cache	sequence/TeozTimelineIssues_0008_Test	syntax	0	!pragma teoz true
+dot-cache	sequence/terapo-81-puzi168	syntax	2	alice -> bob <<a>> : red
+dot-cache	sequence/tetemo-66-paku531	syntax	0	autonumber "0"
+dot-cache	sequence/tetoxu-24-mupo410	syntax	0	!pragma teoz true
+dot-cache	sequence/texopo-01-dibi658	syntax	0	!pragma teoz true
+dot-cache	sequence/texoze-85-meli189	syntax	3	[o<->o b : ""[o<->o""
+dot-cache	sequence/tifexe-26-caza420	syntax	0	!pragma teoz true
+dot-cache	sequence/tijeba-12-zeta132	syntax	0	!pragma teoz true
+dot-cache	sequence/tiniva-46-fozu745	syntax	1	create Dog
+dot-cache	sequence/tipido-16-xide828	syntax	3	endbox
+dot-cache	sequence/titufa-76-tisa795	syntax	3	note <<myStyle>> left
+dot-cache	sequence/tixune-73-xoca786	syntax	0	autonumber "<font color=red>[000]</font>"
+dot-cache	sequence/tixuze-43-pano940	syntax	0	!pragma teoz true
+dot-cache	sequence/todetu-82-rupo943	syntax	3	note left
+dot-cache	sequence/todozi-34-jire490	syntax	0	!pragma teoz true
+dot-cache	sequence/togopo-38-tuza899	syntax	3	note across
+dot-cache	sequence/tolake-96-duve519	syntax	0	autonewpage 140
+dot-cache	sequence/tolozi-77-gere619	syntax	1	-> R : messageX
+dot-cache	sequence/totebu-75-jata404	syntax	2	scale 0.8
+dot-cache	sequence/tovese-18-xira071	syntax	0	!pragma teoz true
+dot-cache	sequence/tukivo-05-vuvi835	syntax	0	!pragma teoz true
+dot-cache	sequence/tukobo-89-zebi935	syntax	0	!pragma teoz true
+dot-cache	sequence/tumuke-16-xomo243	syntax	0	rotate
+dot-cache	sequence/turixi-21-mufe557	syntax	0	!pragma teoz true
+dot-cache	sequence/tuxido-23-xide677	syntax	0	Alice o-> Bob : hello
+dot-cache	sequence/tuzeli-17-cuko941	syntax	3	note left : this is a note
+dot-cache	sequence/tuzufi-65-xafe699	syntax	2	create toto
+dot-cache	sequence/vacigu-68-jize640	syntax	2	newpage
+dot-cache	sequence/vajoke-72-gizu927	syntax	0	!pragma teoz true
+dot-cache	sequence/valiva-41-fabo221	syntax	3	====
+dot-cache	sequence/vamuge-84-degu929	syntax	0	!pragma teoz true
+dot-cache	sequence/vanaci-52-gimi082	syntax	0	!pragma teoz true
+dot-cache	sequence/vasuvo-82-boxu402	syntax	0	!pragma teoz true
+dot-cache	sequence/vativa-83-bisa518	syntax	3	a <->(50)    b : ""<->  ""
+dot-cache	sequence/vekami-41-sane093	syntax	3	create aaa
+dot-cache	sequence/vekivu-99-pijo983	syntax	0	!pragma teoz true
+dot-cache	sequence/vemako-00-lecu427	syntax	9	Note right: should be active for a little while
+dot-cache	sequence/vesaze-51-ceji187	syntax	0	!pragma teoz true
+dot-cache	sequence/vetuvo-45-gaku910	syntax	5	C<--S: output
+dot-cache	sequence/vibaru-39-gebo741	syntax	0	!pragma svgparser sax
+dot-cache	sequence/vibazo-85-safi630	syntax	0	!pragma teoz true
+dot-cache	sequence/vidibe-48-pole993	syntax	0	!pragma teoz true
+dot-cache	sequence/vifobo-88-gona211	syntax	0	!pragma teoz true
+dot-cache	sequence/vigoga-79-pita532	syntax	3	[<-x b : ""  [<-x""
+dot-cache	sequence/vikelu-53-faga789	syntax	4	scale 100 height
+dot-cache	sequence/vinefa-69-lufo631	syntax	0	!pragma teoz true
+dot-cache	sequence/vivava-25-vuba802	syntax	0	!pragma svgparser sax
+dot-cache	sequence/vixapo-60-tuzu421	syntax	0	Bob -> "Long Alice"
+dot-cache	sequence/vogegu-91-mave762	syntax	7	Model <[hidden]- Management : Provides possible funding scenarios
+dot-cache	sequence/vubato-50-gebu534	syntax	1	url of RepoxServer is [[http://www.google.com]]
+dot-cache	sequence/vubibu-30-rufa077	syntax	0	!pragma teoz true
+dot-cache	sequence/vucomo-53-gicu658	syntax	0	autonumber "<b>[000]"
+dot-cache	sequence/vudenu-74-xeri322	syntax	0	autoactivate on
+dot-cache	sequence/vuniba-19-repo187	syntax	0	autonumber "<b>[000]"
+dot-cache	sequence/vuniko-49-fige634	syntax	2	endbox
+dot-cache	sequence/vutazu-28-xogu304	syntax	0	!pragma teoz true
+dot-cache	sequence/vuvage-72-meru492	syntax	2	note across
+dot-cache	sequence/vuxaci-12-minu312	syntax	0	hide unlinked
+dot-cache	sequence/xaduru-73-jani181	syntax	0	!pragma teoz true
+dot-cache	sequence/xalofe-61-vala300	syntax	3	[//-o b : ""  [//-o""
+dot-cache	sequence/xatotu-85-tusi683	syntax	5	note right
+dot-cache	sequence/xebixi-82-duji787	syntax	10	end opt
+dot-cache	sequence/xecame-98-cuma671	syntax	4	hide stereotype
+dot-cache	sequence/xedomi-77-libu804	syntax	18	newpage
+dot-cache	sequence/xejeda-63-dobe217	syntax	6	opt#blue this is a test
+dot-cache	sequence/xeneru-44-kuma826	syntax	9	end opt
+dot-cache	sequence/xezipe-17-tima059	syntax	1	!pragma teoz true
+dot-cache	sequence/xidako-83-lidu532	syntax	0	!pragma teoz true
+dot-cache	sequence/xigoxi-25-paro589	syntax	3	[<-o b : ""  [<-o""
+dot-cache	sequence/xikuro-71-cadu306	syntax	1	create C
+dot-cache	sequence/xinote-88-dace690	syntax	2	Bob -\ Alice
+dot-cache	sequence/xivoxi-68-meva932	syntax	0	!pragma teoz true
+dot-cache	sequence/xizeto-03-nuke395	syntax	0	!pragma teoz true
+dot-cache	sequence/xogota-37-pele078	syntax	1	note right: note is misplaced and overwrites the message text
+dot-cache	sequence/xojavo-26-jezu088	syntax	4	note right: This is a note1
+dot-cache	sequence/xokike-22-sige844	syntax	0	!pragma teoz true
+dot-cache	sequence/xolebu-95-cage107	syntax	8	ref over User: ввод имени пользователя, \n эл. почты, \n номера телефона, \n нажатие кнопки регистрации \n на форме
+dot-cache	sequence/xonedu-05-mubu593	syntax	0	box "Tier 1"  <<Client>>
+dot-cache	sequence/xonili-01-pure946	syntax	3	[x<-o b : ""  [x<-o""
+dot-cache	sequence/xonimo-63-fure722	syntax	0	!pragma teoz true
+dot-cache	sequence/xorixe-91-vaci569	syntax	2	note across: foo
+dot-cache	sequence/xucibo-16-zisi974	syntax	5	||50||
+dot-cache	sequence/xujavu-00-xodi798	syntax	4	a <- b : ack
+dot-cache	sequence/xujesa-13-dane303	syntax	1	Bob <-] : message1
+dot-cache	sequence/xujoga-62-lacu610	syntax	0	!pragma teoz true
+dot-cache	sequence/xunoci-60-dezu033	syntax	0	Bob ->x Bob
+dot-cache	sequence/xunolu-07-kuxo189	syntax	1	!exit
+dot-cache	sequence/xupufa-46-romu811	syntax	2	ref over Alice
+dot-cache	sequence/xutovo-34-bisa687	syntax	1	Bob <- Alice : hello
+dot-cache	sequence/xutuvu-44-zoko423	syntax	0	!pragma teoz true
+dot-cache	sequence/xuxugi-47-vuzu867	syntax	0	hide stereotype
+dot-cache	sequence/xuzedu-97-femo595	syntax	9	end opt
+dot-cache	sequence/xuzoxu-26-kafe830	syntax	1	note right: Note
+dot-cache	sequence/xuzusu-30-tixu002	syntax	2	create Other
+dot-cache	sequence/zacoco-81-robo032	syntax	2	hnote over A,B : Comment ...
+dot-cache	sequence/zajova-30-sagu653	syntax	6	hnote over a : %autonumber% aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaaa
+dot-cache	sequence/zalegi-22-nepi686	syntax	0	!pragma teoz true
+dot-cache	sequence/zaretu-49-jomo630	syntax	4	note right
+dot-cache	sequence/zarexe-65-xoki430	syntax	0	!pragma teoz true
+dot-cache	sequence/zateki-65-foxi765	syntax	0	!pragma teoz true
+dot-cache	sequence/zavacu-31-dola792	syntax	1	scale 4
+dot-cache	sequence/zazaje-27-roga410	syntax	0	!pragma teoz true
+dot-cache	sequence/zejabi-24-xoja824	syntax	0	!pragma teoz true
+dot-cache	sequence/zelexo-73-movu971	syntax	4	create B
+dot-cache	sequence/zelojo-99-pucu548	syntax	0	Alice -> Bob [[http://www.yahoo.com{{"Jason": {"firstName":"Bob", "lastName":"Smith", [foo] },\n "Carl": {"firstName":"Alice", "lastName":"Brown"}}}]] : Hello
+dot-cache	sequence/zetele-98-tafo132	syntax	0	!pragma teoz true
+dot-cache	sequence/zetenu-41-rece091	syntax	1	note right #OliveDrab
+dot-cache	sequence/zexaja-95-zofi201	syntax	0	!pragma svgparser sax
+dot-cache	sequence/zexili-92-fifa666	syntax	0	alt#660000 #blue
+dot-cache	sequence/zicadi-21-koje636	syntax	1	Test <<-- Test : the arrow and text are located inside the Lifeline because they are counted from the right side of the active member's column bar (Lifeline). Which is an incorrect display, right?
+dot-cache	sequence/zidova-39-bapi223	syntax	6	beta <- alpha: a2
+dot-cache	sequence/ziloke-42-lodi019	syntax	0	autonumber 1.1
+dot-cache	sequence/zimoci-54-sedi066	syntax	0	!pragma svgparser sax
+dot-cache	sequence/zisuri-53-punu876	syntax	2	create b
+dot-cache	sequence/zoculi-89-nodo007	syntax	0	!pragma teoz true
+dot-cache	sequence/zofeda-77-xiba744	syntax	3	[o<-x b : "" [o<-x""
+dot-cache	sequence/zofini-90-tuta329	syntax	1	note left
+dot-cache	sequence/zogane-85-raja214	syntax	0	!pragma teoz true
+dot-cache	sequence/zolude-08-leka122	syntax	0	!pragma svgparser sax
+dot-cache	sequence/zosulu-72-fati889	syntax	3	[<- b : ""   [<-""
+dot-cache	sequence/zoturo-25-jima978	syntax	0	!pragma teoz true
+dot-cache	sequence/zovido-40-xeju664	syntax	0	!pragma teoz true
+dot-cache	sequence/zuboto-07-gimo515	syntax	1	create Dog
+dot-cache	sequence/zudize-61-vomi445	syntax	10	hnote over System
+dot-cache	sequence/zujani-47-femu345	syntax	0	!pragma teoz true
+dot-cache	sequence/zumila-29-nulo712	syntax	1	bob -> charlie --++ : hello2
+dot-cache	sequence/zunile-23-zezi158	syntax	1	scale 4
+dot-cache	sequence/zupiba-94-gevi986	syntax	4	create T
+dot-cache	sequence/zupora-06-pazi006	syntax	1	note<<st1>> over A : text 1
+dot-cache	sequence/zuravu-52-mike252	syntax	0	!pragma teoz true
+dot-cache	sequence/zutesu-04-xevu025	syntax	0	!pragma teoz true
+dot-cache	sequence/zuvusi-13-fika929	syntax	1	Alice ->o Bob : hello

@@ -73,8 +73,9 @@ function assembleGeometry(
   const { participantGeos, maxParticipantHeight } = participantLayout;
   const { eventGeos, dividerGeos, currentY } = eventLayout;
 
+  const showFootbox = isShowFootbox(ast, theme);
   const { lifelineEndY, footerShapeY, totalHeight } =
-    computeVerticalTotals(participantGeos, maxParticipantHeight, currentY, theme);
+    computeVerticalTotals(participantGeos, maxParticipantHeight, currentY, theme, showFootbox);
   const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
   backfillDividerWidth(dividerGeos, totalWidth);
   const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight);
@@ -86,7 +87,9 @@ function assembleGeometry(
     events: eventGeos,
     lifelineEndY,
     footerShapeY,
+    showFootbox,
     boxes: boxGeos,
+    ...(ast.scale !== undefined ? { scale: ast.scale } : {}),
   };
 }
 
@@ -129,6 +132,7 @@ function emptyGeometry(): SequenceGeometry {
     events: [],
     lifelineEndY: 0,
     footerShapeY: 0,
+    showFootbox: true,
     boxes: [],
   };
 }
@@ -150,17 +154,43 @@ function computeVerticalTotals(
   maxParticipantHeight: number,
   currentY: number,
   theme: Theme,
+  showFootbox: boolean,
 ): VerticalTotals {
   const lifelineEndY = currentY + theme.sequence.lifelineExtension;
+  const BOTTOM_MARGIN = 5;
+  // No footer row: reserve nothing for it. Upstream does not lay one out
+  // either, so the document ends just past the lifelines.
+  if (!showFootbox)
+    return { lifelineEndY, footerShapeY: lifelineEndY, totalHeight: lifelineEndY + BOTTOM_MARGIN };
+
   const hasNonRectFooter = participantGeos.some(
     (p) => p.type === 'actor' || p.type === 'database',
   );
   const footerLabelH = hasNonRectFooter ? theme.fontSize + 8 : 0;
   const footerShapeY = lifelineEndY + footerLabelH;
-  const BOTTOM_MARGIN = 5;
   const totalHeight = footerShapeY + maxParticipantHeight + BOTTOM_MARGIN;
 
   return { lifelineEndY, footerShapeY, totalHeight };
+}
+
+/**
+ * `SequenceDiagram#isShowFootbox` (`SequenceDiagram.java:474-486`), ported in
+ * upstream's own precedence order:
+ *
+ *   1. `skinparam style strictuml` suppresses it outright, before anything
+ *      else is consulted (`:475-476`);
+ *   2. otherwise `skinparam footbox` decides if present -- "hide" (compared
+ *      case-insensitively) suppresses, and ANY other value shows, which is
+ *      what lets `skinparam footbox show` override a `hide footbox` command
+ *      (`:478-485`);
+ *   3. otherwise the `hide footbox` command's own flag, default show
+ *      (`:480-481`, `:488`).
+ */
+function isShowFootbox(ast: SequenceDiagramAST, theme: Theme): boolean {
+  if (theme.strictUml === true) return false;
+  const footbox = theme.footbox;
+  if (footbox === undefined) return !ast.options.hideFootbox;
+  return footbox.toLowerCase() !== 'hide';
 }
 
 /**

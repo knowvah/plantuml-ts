@@ -22,10 +22,7 @@
  * outcome.
  */
 import { describe, it, expect } from 'vitest';
-import { classAccepts } from '../../../src/diagrams/class/class-dispatch.js';
-import { classPlugin } from '../../../src/diagrams/class/index.js';
-import { descriptionPlugin } from '../../../src/diagrams/description/index.js';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
@@ -63,43 +60,6 @@ const SALT_LEGEND_BODY = [
   '}}',
 ];
 
-describe('classAccepts — legend-region exclusion (iter 23b)', () => {
-  it('accepts a lone class + legend whose body carries salt-widget shorthand', () => {
-    const lines = ['class foo', '', 'legend', ...SALT_LEGEND_BODY, 'endlegend'];
-    expect(classAccepts(L(lines.join('\n')))).toBe(true);
-  });
-
-  it.each(['legend', 'legend top', 'legend bottom', 'legend left', 'legend right', 'legend center', 'legend top left', 'legend bottom right'])(
-    'opener variant %s does not defeat class routing',
-    (opener) => {
-      const lines = ['class foo', opener, '[ok]', 'endlegend'];
-      expect(classAccepts(L(lines.join('\n')))).toBe(true);
-    },
-  );
-
-  it.each(['endlegend', 'end legend', 'ENDLEGEND', 'END LEGEND'])(
-    'closer spelling %s correctly ends the legend region',
-    (closer) => {
-      const lines = ['class foo', 'legend', '[ok]', closer];
-      expect(classAccepts(L(lines.join('\n')))).toBe(true);
-    },
-  );
-
-  it('a descriptive keyword AFTER endlegend is still seen (stripping does not overrun the closer)', () => {
-    const lines = ['class foo', 'legend', '[ok]', 'endlegend', 'node Server'];
-    // `node` outside the legend IS still seen -- the stripping does not overrun
-    // the closer, which is what this test guards. What changed is the verdict:
-    // an unambiguous `class foo` means the block is claimed by class and the
-    // `node` leaf is refused by the allowmixing gate (jar-verified), instead of
-    // the whole block being re-routed to description.
-    expect(classAccepts(L(lines.join('\n')))).toBe(true);
-  });
-
-  it('the description engine does not steal a class+legend block (registration order)', () => {
-    const lines = ['class foo', 'legend', ...SALT_LEGEND_BODY, 'endlegend'];
-    expect(classPlugin.accepts(L(lines.join('\n')))).toBe(true);
-  });
-});
 
 describe('parseClass — legend block consumption (iter 23b)', () => {
   it('consumes a salt-widget legend body without inventing classifiers, relationships, or notes', () => {
@@ -208,16 +168,7 @@ describe('end-to-end: bixogo/roxosu-shaped fixture renders as a degenerate 0-gra
 });
 
 describe('description diagrams keep their own legend unaffected (iter 23b)', () => {
-  it('a genuine descriptive diagram with a legend still routes to description', () => {
-    const lines = ['component Foo', 'legend', ...SALT_LEGEND_BODY, 'endlegend'];
-    expect(descriptionPlugin.accepts(L(lines.join('\n')))).toBe(true);
-    // class declines: no class-forcing keyword and `component` is a
-    // descriptive-only signal outside the legend.
-    expect(classAccepts(L(lines.join('\n')))).toBe(false);
-  });
 
-  it('a legend-only block (no other descriptive signal) does not itself route to description', () => {
-    const lines = ['legend', ...SALT_LEGEND_BODY, 'endlegend'];
-    expect(descriptionPlugin.accepts(L(lines.join('\n')))).toBe(false);
-  });
+
+
 });

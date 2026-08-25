@@ -9,6 +9,7 @@
 
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { ActivityNode } from './ast.js';
 
 // ---------------------------------------------------------------------------
@@ -155,6 +156,24 @@ export interface ParseResult {
   nextIdx: number;
 }
 
+/**
+ * `parseNodes`'s full outcome (mission dispatch-by-parse-attempt/T6): a
+ * successful body parse, or a refusal propagated up from a line that no
+ * command recognised anywhere inside that body. Every recursive body (if
+ * then/elseif/else, while, repeat, fork branch, split branch) must check
+ * this arm and propagate it unchanged -- upstream's single flat per-line
+ * loop has exactly one refusal point (`PSystemCommandFactory.java:169-175`);
+ * this port's recursive descent has many call sites that must all forward
+ * the same refusal rather than swallowing it.
+ */
+export type ParseOutcome = ParseResult | ParseRefusal;
+
+/** Narrows a `ParseOutcome`-shaped union to its refusal arm. `refused` is
+ *  the discriminant (T1): no success shape in this file ever carries it. */
+export function isRefusal<T>(x: T | ParseRefusal): x is ParseRefusal {
+  return typeof x === 'object' && x !== null && 'refused' in x;
+}
+
 // ---------------------------------------------------------------------------
 // Line-dispatch shared shapes (node-dispatch.ts, if-dispatch.ts)
 // ---------------------------------------------------------------------------
@@ -169,9 +188,12 @@ export interface DispatchResult {
   node?: ActivityNode;
 }
 
+/** A handler either declines (`null`), matches (`DispatchResult`), or --
+ *  for the five handlers owning a nested body (if/while/repeat/fork/split)
+ *  -- propagates a `ParseRefusal` surfaced from within that body. */
 export type LineHandler = (
   ctx: ParseContext,
   idx: number,
   line: string,
   lc: string,
-) => DispatchResult | null;
+) => DispatchResult | ParseRefusal | null;

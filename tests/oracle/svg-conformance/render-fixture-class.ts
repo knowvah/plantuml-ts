@@ -26,6 +26,7 @@ import { computeClassTagCascadeGenerations } from '../../../src/core/style-casca
 import type { Theme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
+import { astOrThrow } from '../../helpers/parse-ast.js';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
@@ -120,7 +121,7 @@ export function renderFixtureClass(
   const preprocessed = first.preprocessed;
   const { theme, styleMap } = buildThemeForFixture(preprocessed);
   const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
-  const fullAst = parseClass(block);
+  const fullAst = astOrThrow(parseClass(block), 'class');
   // G2 N28: page-1-only view -- see this function's own doc comment.
   const { pages: _pages, ...firstPageAst } = fullAst;
   // SI14 T3/T4: mirrors `class/index.ts#classPlugin.layoutSync`'s own

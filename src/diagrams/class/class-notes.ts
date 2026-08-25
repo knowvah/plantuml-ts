@@ -322,6 +322,34 @@ export function isNoteId(ast: ClassDiagramAST, id: string): boolean {
   return ast.notes.some((n) => n.id === id);
 }
 
+// T14 (dispatch-by-parse-attempt): `note on link`'s color group cannot reuse
+// the shared `NOTE_COLOR` approximation below -- that charset admits a bare
+// `:` anywhere, so on a multi-attribute color (`#blue;line:yellow;text:purple`,
+// nuvake-96-gofe203) the single-line rule's trailing `\s*:\s*(.+)$` backtracks
+// INTO the color, splitting off "purple" as fake note text and leaving
+// `NOTE_ON_LINK_MULTI_RE` (the line's real match) never tried -- the
+// multi-line note body then dispatches as an ordinary line and refuses.
+// Upstream never has this ambiguity: `CommandFactoryNoteOnLink`'s color group
+// is `ColorParser.simpleColor(ColorType.BACK).getRegex()`
+// (CommandFactoryNoteOnLink.java:106-108), whose grammar is bounded to a
+// fixed attribute-keyword vocabulary, so a color string fully consumes every
+// `keyword:value` pair it contains and leaves no interior `:` for the
+// single-line rule to find. Ported verbatim (COLOR_REGEXP/PART2/
+// COLORS_REGEXP), scoped to these two regexes only -- the shared `NOTE_COLOR`
+// constant has 5 other call sites (class-command-notes.ts,
+// class-container.ts) with no fixture evidence of the same ambiguity, and
+// CLAUDE.md's "do not refactor while porting" counsels against widening it
+// speculatively.
+// @see ~/git/plantuml/.../klimt/color/ColorParser.java:43-46
+const NOTE_ON_LINK_COLOR_REGEXP = String.raw`#\w+[-\\|/]?\w+`;
+const NOTE_ON_LINK_COLOR_PART2 =
+  String.raw`#(?:\w+[-\\|/]?\w+;)?(?:(?:text|back|header|line|line\.dashed|line\.dotted|line\.bold|shadowing)` +
+  String.raw`(?::\w+[-\\|/]?\w+)?(?:;|(?![\w;:.])))+`;
+const NOTE_ON_LINK_COLOR =
+  String.raw`(?:\s*(` +
+  `(?:${NOTE_ON_LINK_COLOR_PART2})|(?:${NOTE_ON_LINK_COLOR_REGEXP})` +
+  String.raw`))?`;
+
 /**
  * `note [pos] on|of link [#color] : text` (CommandFactoryNoteOnLink,
  * single-line form) — a note attached to the LAST relationship parsed, not
@@ -331,12 +359,14 @@ export function isNoteId(ast: ClassDiagramAST, id: string): boolean {
  * `note <pos>` targeting `lastEntity`, or read `link` as a literal entity
  * id. T10: position is now CAPTURED (group 1, optional) rather than
  * discarded -- mirrors the state engine's identical
- * `state-notes.ts#NOTE_ON_LINK_RE`; NOTE_COLOR's own capture (group 2) and
- * the text group (group 3) shift accordingly.
+ * `state-notes.ts#NOTE_ON_LINK_RE`; the color group's own capture (group 2)
+ * and the text group (group 3) shift accordingly.
  * @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnLink.java:76-91
  */
 export const NOTE_ON_LINK_RE = new RegExp(
-  String.raw`^note\s+(left|right|top|bottom)?\s*(?:on|of)\s+link` + NOTE_COLOR + String.raw`\s*:\s*(.+)$`,
+  String.raw`^note\s+(left|right|top|bottom)?\s*(?:on|of)\s+link` +
+    NOTE_ON_LINK_COLOR +
+    String.raw`\s*:\s*(.+)$`,
   'i',
 );
 
@@ -353,7 +383,7 @@ export const NOTE_ON_LINK_RE = new RegExp(
  * @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnLink.java:93-102
  */
 export const NOTE_ON_LINK_MULTI_RE = new RegExp(
-  String.raw`^note\s+(left|right|top|bottom)?\s*(?:on|of)\s+link` + NOTE_COLOR + String.raw`\s*$`,
+  String.raw`^note\s+(left|right|top|bottom)?\s*(?:on|of)\s+link` + NOTE_ON_LINK_COLOR + String.raw`\s*$`,
   'i',
 );
 

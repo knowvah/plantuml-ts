@@ -1,11 +1,28 @@
 /**
- * Dispatcher: holds a registry of DiagramPlugin instances and resolves
- * which plugin handles a given UmlSource by calling accepts() in
- * registration order. Unknown types produce an error-sentinel plugin
- * that renders a graceful error SVG.
+ * Dispatcher: holds a registry of DiagramPlugin instances and resolves which
+ * one owns a given UmlSource **by attempting the parse**, exactly as upstream
+ * does (`PSystemBuilder#createPSystem`, `:257-283`).
+ *
+ * There is no `accepts()` any more, and no heuristic of any kind. The block's
+ * `@start` line yields a candidate set (`DiagramType#findStartTypes`); every
+ * plugin whose type is not in that set is skipped, as upstream skips a factory
+ * whose `getDiagramType()` is not in `diagramTypes` (`:259-260`); the rest are
+ * tried in registration order and **the first whose parse does not refuse
+ * wins** (`:264-273`, `isOk` at `:298-303`). When every candidate refuses, the
+ * highest-scoring refusal owns the error page (`PSystemErrorUtils#mergeV2`,
+ * `:140-147`); when there is no candidate at all, upstream returns
+ * `PSystemUnsupported` (`:282-283`) and this port returns its error sentinel.
+ *
+ * The parse performed during resolution IS the parse the render pipeline uses
+ * — `resolve()` hands the AST back with the plugin. Parsing twice would be
+ * two parse paths, which D0 forbids, and would double the cost D3 asks us to
+ * measure rather than prefilter.
  */
 
 import type { DiagramType, UmlSource } from './block-extractor.js';
+import { upstreamTypeOf } from './block-extractor.js';
+import type { ParseRefusal } from './parse-refusal.js';
+import { mergeRefusals } from './parse-refusal.js';
 import { rect, text } from './svg.js';
 import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
@@ -160,8 +177,7 @@ export type AssembledSvg = RenderFragment | CompleteSvg;
  */
 export interface SyncPlugin<AST = unknown, Geo = unknown> {
   readonly type: DiagramType;
-  accepts(lines: readonly string[]): boolean;
-  parse(source: UmlSource, options?: ParseOptions): AST;
+  parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer): Geo;
   render(geo: Geo, theme: Theme): AssembledSvg;
 }
@@ -173,8 +189,7 @@ export interface SyncPlugin<AST = unknown, Geo = unknown> {
  */
 export interface AsyncPlugin<AST = unknown, Geo = unknown> {
   readonly type: DiagramType;
-  accepts(lines: readonly string[]): boolean;
-  parse(source: UmlSource, options?: ParseOptions): AST;
+  parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layout(ast: AST, theme: Theme, measurer: StringMeasurer): Promise<Geo>;
   render(geo: Geo, theme: Theme): AssembledSvg;
 }
@@ -188,6 +203,24 @@ export type DiagramPlugin<AST = unknown, Geo = unknown> =
   | SyncPlugin<AST, Geo>
   | AsyncPlugin<AST, Geo>;
 
+/**
+ * Narrows a `parse()` result to the refusal arm.
+ *
+ * The registry erases each plugin's AST type parameter to `unknown`, so at the
+ * pipeline's call sites `AST | ParseRefusal` collapses to `unknown` and a
+ * plain discriminant check does not typecheck. This is the same structural
+ * `in` narrowing `src/index.ts#annotationsOf` uses, and for the same reason:
+ * the value is THIS pipeline's own trusted `parse()` output, not external
+ * input, so it is a stage boundary rather than a validation boundary.
+ *
+ * `refused` is the discriminant because no engine AST carries that field (T1);
+ * absence of a field is never the test.
+ */
+export function parseRefusalOf(parsed: unknown): ParseRefusal | undefined {
+  if (typeof parsed !== 'object' || parsed === null) return undefined;
+  return 'refused' in parsed ? (parsed as ParseRefusal) : undefined;
+}
+
 // ---------------------------------------------------------------------------
 // Error-sentinel plugin
 // ---------------------------------------------------------------------------
@@ -195,7 +228,6 @@ export type DiagramPlugin<AST = unknown, Geo = unknown> =
 /** Returned when no registered plugin accepts a source block. */
 const ERROR_SENTINEL: SyncPlugin = {
   type: 'unknown',
-  accepts: (_lines: readonly string[]) => false,
   parse: (_source: UmlSource) => ({}),
   layoutSync: (
     _ast: unknown,
@@ -216,6 +248,27 @@ const ERROR_SENTINEL: SyncPlugin = {
 };
 
 // ---------------------------------------------------------------------------
+// Resolution
+// ---------------------------------------------------------------------------
+
+/**
+ * What `resolve()` hands back: the winning plugin and the parse it won with,
+ * or — when every candidate refused — the refusal that owns the error page and
+ * the plugin that produced it, whose type names the assumed diagram type on
+ * that page (`ErrorUml#getError`).
+ */
+export type Resolution =
+  | { readonly plugin: DiagramPlugin; readonly ast: unknown; readonly refusal?: undefined }
+  | { readonly plugin: DiagramPlugin; readonly ast?: undefined; readonly refusal: ParseRefusal };
+
+/** One candidate's failed attempt, kept paired so the merge winner can be
+ *  traced back to the plugin that produced it. */
+interface Attempt {
+  readonly plugin: DiagramPlugin;
+  readonly refusal: ParseRefusal;
+}
+
+// ---------------------------------------------------------------------------
 // DiagramRegistry class
 // ---------------------------------------------------------------------------
 
@@ -223,51 +276,53 @@ export class DiagramRegistry {
   private readonly plugins: DiagramPlugin[] = [];
 
   /**
-   * Register a plugin. Plugins are probed in registration order;
-   * the first plugin whose accepts() returns true wins.
+   * Register a plugin. Registration order IS upstream's factory order and is
+   * load-bearing: it decides which candidate gets to try first, and therefore
+   * which one wins a source both could parse. See `src/index.ts`.
    */
   register(plugin: DiagramPlugin): void {
     this.plugins.push(plugin);
   }
 
   /**
-   * Resolve the plugin that handles the given source block.
+   * Attempt the parse with each candidate in registration order; the first
+   * that does not refuse owns the source.
    *
-   * For blocks with an explicit @start<type> directive (e.g. @startjson),
-   * match by plugin.type first — this avoids false positives from broad
-   * heuristics in other plugins (e.g. the component plugin matching JSON
-   * arrays via [...]). Type-based routing is skipped for types that can also
-   * be assigned by content probing in @startuml blocks ('sequence', 'class',
-   * 'state'), where accepts() scanning must remain authoritative.
-   *
-   * For @startuml blocks and ambiguous types, fall through to accepts() scanning.
+   * A plugin whose type is not in `source.types` is skipped — upstream's
+   * `if (!diagramTypes.contains(f.getDiagramType())) continue;`
+   * (`PSystemBuilder.java:259-260`). A source with no candidate set at all
+   * (a hand-built fixture, see `UmlSource.types`) states no constraint, so
+   * every plugin is a candidate.
    */
-  resolve(source: UmlSource): DiagramPlugin {
-    // Types producible by detectUmlType from @startuml content probing —
-    // these must always go through accepts() to avoid misrouting.
-    const AMBIGUOUS_TYPES = new Set(['sequence', 'class', 'state', 'unknown']);
-    if (!AMBIGUOUS_TYPES.has(source.type)) {
-      const typed = this.plugins.find((p) => p.type === source.type);
-      if (typed !== undefined) return typed;
-    }
+  resolve(source: UmlSource, options?: ParseOptions): Resolution {
+    const attempts: Attempt[] = [];
     for (const plugin of this.plugins) {
-      if (plugin.accepts(source.lines)) {
-        return plugin;
-      }
+      if (source.types !== undefined && !source.types.has(upstreamTypeOf(plugin.type))) continue;
+      const parsed = plugin.parse(source, options);
+      const refusal = parseRefusalOf(parsed);
+      if (refusal === undefined) return { plugin, ast: parsed };
+      attempts.push({ plugin, refusal });
     }
-    // Nothing claimed the content. Upstream still has a diagram type in hand
-    // (`DiagramType.findStartTypes` on the `@start` line) and still runs the
-    // factories for it -- `@startuml` + `title X` is a CLASS diagram in the jar
-    // even though no keyword in it says "class". So: fall back to the plugin
-    // for the block's OWN type (for `@startuml`, the type `detectUmlType`
-    // settled on, whose fallback is upstream's factory order). Only a type no
-    // plugin implements reaches the sentinel.
-    // @see ~/git/plantuml/.../PSystemBuilder.java#createPSystem
-    const typed = this.plugins.find((p) => p.type === source.type);
-    if (typed !== undefined) return typed;
-
-    return ERROR_SENTINEL;
+    return resolveAllRefused(attempts);
   }
+}
+
+/**
+ * Every candidate refused, or there were none.
+ *
+ * With none, upstream returns `PSystemUnsupported` (`PSystemBuilder.java:282-283`)
+ * — a document that is neither a diagram nor a syntax-error page. This port's
+ * nearest equivalent is the error sentinel.
+ *
+ * Otherwise the winner is the highest-scoring refusal (D2, ported verbatim in
+ * `mergeRefusals`), and the pair it came from is recovered by identity so the
+ * error page can name the engine that got furthest.
+ */
+function resolveAllRefused(attempts: readonly Attempt[]): Resolution {
+  if (attempts.length === 0) return { plugin: ERROR_SENTINEL, ast: {} };
+  const winner = mergeRefusals(attempts.map((a) => a.refusal));
+  const owner = attempts.find((a) => a.refusal === winner) ?? attempts[0]!;
+  return { plugin: owner.plugin, refusal: winner };
 }
 
 // ---------------------------------------------------------------------------

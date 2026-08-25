@@ -60,11 +60,10 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { compareSvg, type Diff } from './compare.js';
+import { compareSvg } from './compare.js';
 import { renderFixtureClass } from './render-fixture-class.js';
 import { renderSync } from '../../../src/index.js';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
-import { classAccepts } from '../../../src/diagrams/class/class-dispatch.js';
 
 /**
  * The port's own inline error boxes draw with `fontFamily: 'monospace'`, and
@@ -91,16 +90,20 @@ function readGolden(slug: string): string {
   return readFileSync(join(GOLDENS_ROOT, slug, 'golden.svg'), 'utf8');
 }
 
-/** Verifies production routing: the block's `classAccepts()` decision AND
- *  the full `renderSync` pipeline's `data-diagram-type` root attribute both
- *  agree the CLASS engine (not description) owns this fixture. */
+/** Verifies production routing: the full `renderSync` pipeline's
+ *  `data-diagram-type` root attribute says the CLASS engine (not
+ *  description) owns this fixture.
+ *
+ *  This also asserted `classAccepts(...)`, the pre-parse heuristic. T21
+ *  deleted that layer: dispatch is now the parse attempt itself
+ *  (`PSystemBuilder#createPSystem`), so the rendered type IS the routing
+ *  decision and there is no second opinion to cross-check against. */
 function assertRoutesToClassEngine(markup: string): void {
   const blocks = buildBlockUmls(markup);
   const first = blocks[0];
   expect(first, 'expected exactly one diagram block').toBeDefined();
   expect(first!.ok, 'expected the block to parse cleanly').toBe(true);
   if (!first!.ok) return;
-  expect(classAccepts(first!.source.lines)).toBe(true);
 
   const svg = renderSync(markup);
   const m = /data-diagram-type="([^"]+)"/.exec(svg);
@@ -176,56 +179,28 @@ describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside clas
   });
 
   /**
-   * Still pinned, but note WHICH layer it measures: `renderFixtureClass` drives
-   * the class engine's low-level pipeline (parseClass -> layoutClass ->
-   * renderClass) directly, BYPASSING the plugin wrapper where the refusal is
-   * emitted. So this measures the renderer's raw output against the jar's
-   * error page and stays a characterisation guard on the underlying geometry.
-   * The user-visible behaviour is asserted by the two tests above.
+   * This used to pin the RAW pipeline's geometry against the jar's error
+   * page, on the stated basis that `renderFixtureClass` drives
+   * `parseClass -> layoutClass -> renderClass` directly and so BYPASSES the
+   * plugin wrapper where the refusal was emitted.
+   *
+   * That layering is gone. The allowmixing gate now refuses inside the
+   * PARSER, as an execution refusal, because that is where upstream refuses:
+   * `CommandCreateElementFull2#executeArg` returns
+   * `CommandExecutionResult.error(...)` while the command runs (`:198`), not
+   * afterwards. There is no longer a path that reaches layout with this
+   * source, so there is no raw geometry left to characterise — and the
+   * pinned deltas measured a rendering the jar never produces anyway (its
+   * `expected` column was the 579x162 error page).
+   *
+   * What is worth asserting instead is that the low-level path refuses too,
+   * with upstream's own words. The two tests above already cover what users
+   * see.
    */
-  it('the raw class pipeline (bypassing the plugin gate) keeps its pinned diff', () => {
-    const golden = readGolden(slug);
-    const ours = renderFixtureClass(readSource(slug), new DeterministicMeasurer());
-    const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
-    expect(pass).toBe(false);
-    // UNCHANGED by the size-reduction mission, and that is the point: this
-    // pin was briefly "re-measured" to 5 diffs (height 288, childCount 18)
-    // against a golden T9 had written from an anomalous jar capture -- a
-    // 16031-byte error page carrying two embedded PlantUML banner PNGs that
-    // nine consecutive re-captures of the same invocation do not reproduce
-    // (they give 2147 bytes, deterministically). The golden is restored and
-    // this pin with it. The error page's own geometry never moved.
-    // Re-pinned 2026-08-15 (usymbol-ink-rule): 96 -> 92 high, 169 -> 168
-    // wide. This fixture draws an ACTOR, and an actor's ink is now its own
-    // drawn head/body/label union rather than `addRectInk`'s box corner
-    // (`class-ink-box.ts#addClassifierInk`), which sat 1.5 above the head's
-    // real top. The geometry moving here is the fix reaching this fixture,
-    // not a regression.
-    //
-    // Re-pinning is legitimate specifically because of what the `expected`
-    // column IS: the jar's own 579x162 ERROR PAGE, emitted because upstream
-    // REFUSES a bare `actor` without `allowmixing` (the two tests above
-    // assert that refusal is what users see). This path bypasses that gate,
-    // so the golden is not a rendering of this diagram and the deltas are
-    // not a fidelity measure — the same 4px that reads as "further from
-    // 162" here is what makes `cezaka-60-jado323` land EXACTLY on jar,
-    // where jar does draw the diagram. Do NOT treat this as a target to
-    // close, and do not re-pin it to make an unrelated gate pass.
-    const expected: Diff[] = [
-      { path: 'svg/@background', actual: '#FFFFFF', expected: '#000000', tolerance: 0.01 },
-      { path: 'svg/@height', actual: '92', expected: '162', delta: 70, tolerance: 0.01 },
-      { path: 'svg/@viewBox[2]', actual: '168', expected: '579', delta: 411, tolerance: 0.01 },
-      { path: 'svg/@viewBox[3]', actual: '92', expected: '162', delta: 70, tolerance: 0.01 },
-      { path: 'svg/@width', actual: '168', expected: '579', delta: 411, tolerance: 0.01 },
-      // `weight` is T6's skipped-subtree size (`compare.ts#units`), present
-      // only on the three short-circuits -- here, the one `[childCount]`.
-      // It is NOT a fidelity number and NOT a re-pin of the deltas above:
-      // it records how much of the document this single diff stands for, so
-      // `weightedScore` can be monotone. Listed because `toEqual` is exact
-      // on extra properties; nothing measured moved when it was added.
-      { path: 'svg/g[1][childCount]', actual: '2', expected: '11', tolerance: 0.01, weight: 169 },
-    ];
-    expect(diffs).toEqual(expected);
+  it('the low-level pipeline refuses it as well, in upstream\'s words', () => {
+    expect(() => renderFixtureClass(readSource(slug), new DeterministicMeasurer())).toThrow(
+      /Use 'allowmixing' if you want to mix classes and other UML elements\./,
+    );
   });
 });
 

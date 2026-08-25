@@ -15,7 +15,7 @@
  * nested), both jar-verified via `scripts/oracle-render.sh`.
  */
 import { describe, it, expect } from 'vitest';
-import { parseClass } from '../../../src/diagrams/class/parser.js';
+import { parseClass } from './parse-helper.js';
 import { collapseEmptyNamespacesFinal } from '../../../src/diagrams/class/class-namespace.js';
 import { computeLeafDrawOrder } from '../../../src/diagrams/class/class-leaf-order.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -168,7 +168,12 @@ describe('computeLeafDrawOrder (T2, leaf-draw-order)', () => {
     expect(e.kind).toBe('descriptive');
     expect(e.usymbol).toBe('database');
     expect(e.collapsedGroup).toBe(true);
-    const declared = parse('database D\nclass A').classifiers.find((c) => c.id === 'D')!;
+    // `allowmixing` is REQUIRED to put a descriptive `database` leaf beside a
+    // `class` -- upstream errors "Use 'allowmixing' if you want to mix classes
+    // and other UML elements" (`CommandCreateElementFull2.java:198`), and the
+    // jar refuses `database D / class A` on its own line 3. This source omitted
+    // it and only parsed because unrecognised lines used to be dropped.
+    const declared = parse('allowmixing\ndatabase D\nclass A').classifiers.find((c) => c.id === 'D')!;
     expect(declared.usymbol).toBe('database');
     expect(declared.collapsedGroup).toBeUndefined();
     expect(computeLeafDrawOrder(ast)).toEqual(['E', 'P.A']);
