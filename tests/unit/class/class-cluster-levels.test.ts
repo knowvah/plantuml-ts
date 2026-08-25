@@ -1,6 +1,6 @@
 /**
  * `clusterWrapperLevel` proven against every cached oracle DOT that carries a
- * cluster — 123 class + 3 object fixtures under `test-results/dot-cache/`
+ * cluster — 122 class + 3 object fixtures under `test-results/dot-cache/`
  * (`grep -l "subgraph cluster"`, all single-graph `svek-1.dot`).
  *
  * The oracle DOT numbers clusters by SVEK's own internal entity-creation
@@ -53,6 +53,22 @@ function loadFixtures(engine: 'class' | 'object'): Fixture[] {
       continue;
     }
     if (!/subgraph cluster\d/.test(dotText)) continue;
+    // The corpus populator over-selects: a directory name "builds a path and
+    // does nothing else" (routing gate D6). The GOLDEN's own
+    // `data-diagram-type` is what the jar actually rendered, so it decides
+    // membership -- `sokevu-87-toce485` sits under `class/` but its golden
+    // says DESCRIPTION (`interface i` + a `node n { port ... }` container),
+    // and driving the class parser at it now raises upstream's own
+    // allowmixing error rather than silently dropping the lines.
+    let goldenType = '';
+    try {
+      goldenType = /data-diagram-type="([^"]*)"/.exec(readFileSync(join(root, slug, 'in.svg'), 'utf8'))?.[1] ?? '';
+    } catch { continue; }
+    // Both families stamp CLASS -- `ObjectDiagram extends ClassDiagram`
+    // upstream, so an object golden carries `data-diagram-type="CLASS"` too.
+    // The filter exists to drop fixtures the jar rendered as a DIFFERENT
+    // family, not to distinguish these two.
+    if (goldenType !== 'CLASS') continue;
     out.push({ engine, slug, puml: pumlText, dot: dotText });
   }
   return out;
@@ -123,9 +139,11 @@ function oracleClusterLevels(dot: string): Array<1 | 2> {
 
 const fixtures = [...loadFixtures('class'), ...loadFixtures('object')];
 
-describe('clusterWrapperLevel — 126-fixture oracle agreement', () => {
-  it('covers 123 class + 3 object fixtures', () => {
-    expect(fixtures.filter((f) => f.engine === 'class')).toHaveLength(123);
+describe('clusterWrapperLevel — 125-fixture oracle agreement', () => {
+  // 122, not 123: `sokevu-87-toce485` lives under `class/` but its golden
+  // says DESCRIPTION, so it is not a class fixture and the loader drops it.
+  it('covers 122 class + 3 object fixtures', () => {
+    expect(fixtures.filter((f) => f.engine === 'class')).toHaveLength(122);
     expect(fixtures.filter((f) => f.engine === 'object')).toHaveLength(3);
   });
 
