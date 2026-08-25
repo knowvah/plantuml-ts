@@ -366,6 +366,7 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     pendingNote: null,
     pendingNoteTags: [],
     descriptiveContainers: new Map(),
+    pendingContainerTags: new Map(),
     namespaceStack: [],
     togetherStack: [],
     lastEntity: null,

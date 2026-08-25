@@ -94,6 +94,11 @@ export interface ParseState {
    * an empty descriptive-element box as a rect, whereas an empty package vanishes).
    */
   descriptiveContainers: Map<string, string>;
+  /** `$tag` runs captured on a container opener, applied to the leaf an EMPTY
+   *  container collapses to — upstream's `addTags(p, ...)`
+   *  (`CommandPackageWithUSymbol.java:214`). Keyed by the container's
+   *  effective id; consumed and cleared by `closeContainer`. */
+  pendingContainerTags: Map<string, string[]>;
   /**
    * Enclosing-container ids saved when a brace container opens, so a `}`
    * restores the parent container. The flat `activeNamespace` alone cannot nest
