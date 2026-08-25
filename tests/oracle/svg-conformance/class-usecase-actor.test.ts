@@ -60,11 +60,10 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { compareSvg, type Diff } from './compare.js';
+import { compareSvg } from './compare.js';
 import { renderFixtureClass } from './render-fixture-class.js';
 import { renderSync } from '../../../src/index.js';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
-import { classAccepts } from '../../../src/diagrams/class/class-dispatch.js';
 
 /**
  * The port's own inline error boxes draw with `fontFamily: 'monospace'`, and
@@ -91,16 +90,20 @@ function readGolden(slug: string): string {
   return readFileSync(join(GOLDENS_ROOT, slug, 'golden.svg'), 'utf8');
 }
 
-/** Verifies production routing: the block's `classAccepts()` decision AND
- *  the full `renderSync` pipeline's `data-diagram-type` root attribute both
- *  agree the CLASS engine (not description) owns this fixture. */
+/** Verifies production routing: the full `renderSync` pipeline's
+ *  `data-diagram-type` root attribute says the CLASS engine (not
+ *  description) owns this fixture.
+ *
+ *  This also asserted `classAccepts(...)`, the pre-parse heuristic. T21
+ *  deleted that layer: dispatch is now the parse attempt itself
+ *  (`PSystemBuilder#createPSystem`), so the rendered type IS the routing
+ *  decision and there is no second opinion to cross-check against. */
 function assertRoutesToClassEngine(markup: string): void {
   const blocks = buildBlockUmls(markup);
   const first = blocks[0];
   expect(first, 'expected exactly one diagram block').toBeDefined();
   expect(first!.ok, 'expected the block to parse cleanly').toBe(true);
   if (!first!.ok) return;
-  expect(classAccepts(first!.source.lines)).toBe(true);
 
   const svg = renderSync(markup);
   const m = /data-diagram-type="([^"]+)"/.exec(svg);

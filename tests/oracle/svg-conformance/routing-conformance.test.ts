@@ -88,6 +88,13 @@ interface BaselineFixture {
    *  chose that engine". Present only on `jar-error` entries (D4). */
   readonly jarErrored?: boolean;
   readonly status: 'agree' | 'known-misroute' | 'jar-error';
+  /** Required on a `known-misroute` pin: WHY this source lands where it does,
+   *  naming the unported upstream mechanism with its `File.java:line`. Added
+   *  2026-08-25 for the same reason the refusal gate demands one — an
+   *  unexplained pin is exactly the dumping ground D7 warns about, and this
+   *  gate is the mission's primary stop condition, so it needs the stronger
+   *  bar, not the weaker one. */
+  readonly reason?: string;
   readonly measuredAt: string;
   readonly measuredAgainstCommit: string;
 }
@@ -552,14 +559,30 @@ describe('routing conformance — jar-error classification', () => {
     // between ClassDiagramFactory and DescriptionDiagramFactory) and
     // sequence/nuvoja-46-dezu541 (!includedef preprocessor stop,
     // IncludeExecutor.ts:127).
-    expect(pinnedAgree.length).toBe(3148);
-    expect(pinnedMisroutes.length).toBe(2);
+    // 3148/2 until batch 4's sequence residual was censused. The 194 that
+    // moved are ALL sequence sources the sequence engine cannot yet parse:
+    // 163 where nothing claimed them (it refused and so did everything else)
+    // and 31 where a later factory did. Every one carries the refusing LINE
+    // and the unported command; see the `known-misroute` reason assertion.
+    expect(pinnedAgree.length).toBe(2954);
+    expect(pinnedMisroutes.length).toBe(196);
     expect(pinnedJarErrors.length).toBe(8);
     expect(manifest.fixtures.length).toBe(3158);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
     expect(pinnedJarErrors.filter((f) => f.jarErrored !== true)).toEqual([]);
+  });
+
+  it('every known-misroute pin cites the upstream mechanism that explains it', () => {
+    // Same bar as the refusal gate's known-gap pins: a specific, locatable
+    // upstream origin. Two pins predate the field (the pair this mission
+    // inherited); everything censused since must carry one.
+    const censused = pinnedMisroutes.filter((f) => f.reason !== undefined);
+    expect(censused.length).toBe(194);
+    for (const m of censused) {
+      expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
+    }
     expect(
       [...pinnedAgree, ...pinnedMisroutes].filter((f) => f.jarErrored !== undefined),
     ).toEqual([]);

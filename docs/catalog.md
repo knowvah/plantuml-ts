@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1023 modules · 3592 exported names.
+1022 modules · 3585 exported names.
 
 ## `src/`
 
@@ -37,7 +37,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `creole-svg.ts` | `spansToTspan` | Creole span → SVG `<tspan>` serialisation. |
 | `creole-table.ts` | `TableCell`, `TableToken`, `parseTableRow`, `isTableLine`, `DEFAULT_LINE_HEIGHT`, `measureTable`, `tableTokenToSvg` | Creole table parsing, measurement, and SVG rendering. |
 | `creole.ts` | `CreoleSpan`, `TableCell`, `TableToken`, `measureTable`, `tableTokenToSvg`, `spansToTspan`, `CreoleToken`, `parseCreole`, `parseCreoleTokens`, `creoleToSvg` | Creole markup parser for PlantUML labels. |
-| `descriptive-keywords.ts` | `USymbol`, `ALL_TYPES`, `KEYWORD_TO_SYMBOL`, `DESCRIPTIVE_ONLY_KEYWORDS`, `isLegendOpenLine`, `isLegendCloseLine`, `stripLegendRegions`, `stripSpriteRegions`, `hasDescriptiveSignal`, `hasDescriptiveElement` | Shared descriptive-keyword table — single source of truth for the descriptive diagram engine (component / use-case / deployment). |
+| `descriptive-keywords.ts` | `USymbol`, `ALL_TYPES`, `KEYWORD_TO_SYMBOL`, `stripSpriteRegions` | Shared descriptive-keyword table — single source of truth for the descriptive diagram engine (component / use-case / deployment). |
 | `diagram-type-set.ts` | `DiagramType`, `findStartTypes` | Faithful port of `net.sourceforge.plantuml.core.DiagramType`'s start-tag candidate set — `findStartTypes` only. |
 | `dispatcher.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`, `parseRefusalOf`, `Resolution`, `DiagramRegistry`, `registry` | Dispatcher: holds a registry of DiagramPlugin instances and resolves which one owns a given UmlSource **by attempting the parse**, exactly as upstream does (`PSystemBuilder#createPSystem`, `:257-283`). |
 | `dot-engine-measurer.ts` | _(none)_ | The single install point for `@knowvah/dot-engine`'s text measurer. |
@@ -1051,7 +1051,6 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-descriptive-leaf-keywords.ts` | `DESCRIPTIVE_LEAF_KEYWORDS`, `USECASE_LEAF_KEYWORDS`, `STATE_LEAF_KEYWORD`, `ALL_DESCRIPTIVE_LEAF` | Class-engine descriptive-leaf keyword tables — upstream `CommandCreateElementFull2`'s full leaf set (`(state\|` + descdiagram's shared `CommandCreateElementFull.ALL_TYPES` + `)`). |
 | `class-directives-removal.ts` | `directiveAppliesTo`, `applyDirectives`, `foldEffectiveActions`, `computeRemovedIds`, `computeHiddenIds`, `filterRemovedEntities` | Directive APPLICATION + removal/hidden-id computation for class diagrams (applyDirectives, computeRemovedIds/HiddenIds, filterRemovedEntities and their link/pattern helpers). |
 | `class-directives.ts` | `parseHideStereotypeDirective`, `applyStereotypeHideShow`, `parseHideShowDirective`, `parseHideShowPatternDirective`, `parseHideShowEntityDirective`, `applyHideShowEntityDirectives`, `parseHideShowKindDirective`, `applyHideShowKindDirectives`, `parseHideShowVisibilityDirective`, `applyVisibilityHideShow`, `applyDirectives`, `computeRemovedIds`, `computeHiddenIds`, `filterRemovedEntities` | Hide/show directive parsing and post-processing for class diagrams. |
-| `class-dispatch.ts` | `classAccepts` | Class-vs-description routing discriminator (mission A3; ADR-2 amended 2026-08-03 -- the decline-on-descriptive-signal half is superseded, see `planning/mission-a3-class-superset/decisions.md`). |
 | `class-dot-edge-order.ts` | `HIERARCHICAL`, `dotEdgeRunsReversed` | Which direction a relationship's dot edge is emitted in. |
 | `class-dot-edges.ts` | `EDGE_DECORATION_MAP`, `ARROW_LABEL_FONT_SIZE`, `buildDotEdges` | Class diagram DOT-edge construction -- split out of ./class-dot-graph.ts (S-A, pure relocation, no logic change) to keep that file under the repo's 500-line-per-file cap, same split rationale as ./class-object-fields.ts's own module doc (sp |
 | `class-dot-graph.ts` | `DotGraphParts`, `ThemeGroupInheritance`, `ThemeSameClassWidth`, `applySameClassWidthFloor`, `buildDotGraph` | Class diagram DOT-graph construction. |
