@@ -118,3 +118,55 @@ to upstream. Verified element-for-element against each golden, not asserted.
 The note BODY path starts top-left and runs right along the top; upstream runs
 DOWN the left side first (`Opale.java:152-157`). A `d`-string difference, not a
 child-count one, and it would move bytes in three engines at once.
+
+## Resolution 3: the remaining 13 — 4 fixed, 1 known-gapped, 8 open
+
+Three more mechanisms, each ported from the Java rather than inferred.
+
+- **`hide footbox` was dead** — parsed into `ast.options.hideFootbox` and never
+  read; renderer.ts's comment said the footer row was "always emitted".
+  `SequenceDiagram#isShowFootbox` (`SequenceDiagram.java:474-486`) has THREE
+  suppression paths and the port now mirrors all of them in order: `skinparam
+  style strictuml` first and unconditionally, then `skinparam footbox`
+  (case-insensitive "hide", any other value SHOWS and overrides the command),
+  then the command's own flag. Resolved once at layout and carried on the
+  geometry, so the renderer cannot disagree with the height reserved.
+  `skinparam footbox` had no plumbing at all and was threaded like `strictUml`.
+  Fixed `gidibo-31-cugi403` (child count now EXACT, 12/12, score 207 -> 117)
+  and `tukobo-89-zebi935` (57 -> 43 children against 44, 772 -> 705).
+- **Endpoint token was `\S+`** — so `C-->B` parsed as a participant named
+  `C-`, the token absorbing the arrow's own dash by greedy backtracking. It is
+  now upstream's `PART1CODE` = `([%pLN_.@]+)` (`CommandArrow.java:93,96`).
+  Jar-verified both ways: `C-->B` declares B and C, and `A->oB` really does
+  declare `oB` (the o/x decoration is `[%s][ox]` — it needs a space), so that
+  half was already right and was left alone.
+- **Frame/ref label tab** is drawn as a `<rect>` where
+  `ComponentRoseGroupingHeader#getCorner` (`:161-171`) builds a clipped-corner
+  `UPath` — `(0,0) → (w,0) → (w,h−10) → (w−10,h) → (0,h) → (0,0)`, cornersize
+  10. Diagnosed, NOT fixed: rect→path is 1:1, so it moves no child count.
+
+### The exo-arrow trade, stated plainly
+The endpoint fix stops 15 exo-arrow fixtures (`[->`, `->]`, `[<->`) from
+rendering: `\S+` had let the endpoint swallow the bracket and invent a
+participant named `[`, so they drew a WRONG diagram instead of refusing. 10
+now reach an error page. They are pinned `known-gap` naming
+`CommandExoArrowLeft/Right/Any` (`CommandExoArrowAny.java:62-220`), which
+returns SLI 2 to 152. Exo-arrows need a `MessageExo` event kind
+`SequenceEvent` has no member for — a separable feature, already on T13's
+residual list.
+
+### Still open: 8, with named mechanisms
+- `ficiru`/`mupugi`/`xojavo`: **`ref over` body text is parsed but never
+  rendered.** `state.pendingRef.label` accumulates the body lines
+  (`parser.ts:86`), and `renderFrameTab` draws only the frame TYPE and a
+  bracketed condition — the body never reaches the SVG. Golden has "This can
+  be on" / "several lines" as two `<text>`; we emit neither.
+- `secida`/`xuxugi`, `bofovo`/`jugami`, `vanaci`: over-emit `rect`/`text`
+  pairs, cause not yet isolated.
+
+### A shared fidelity gap, no count effect
+The jar wraps each lifeline in `<g><title>NAME</title><rect …/><line/></g>` and
+each activation box in `<g><title>…</title><rect/></g>`; this port emits the
+bare primitives. One child either way, so it moves no ratchet — but it is a
+real structural difference, and it is why every one of the 13 showed `g-N` in
+its element histogram.
