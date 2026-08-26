@@ -16,8 +16,6 @@ import type {
   EventGeo,
   FrameEvent,
   FrameGeo,
-  MessageEvent,
-  MessageGeo,
   NoteEvent,
   NoteGeo,
   ParticipantGeo,
@@ -28,13 +26,8 @@ import type {
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
-import {
-  refBodyLines,
-  refBodyHeight,
-  refBodyWidth,
-  messageLabelBlock,
-  messageLabelRows,
-} from './text-block-geo.js';
+import { refBodyLines, refBodyHeight, refBodyWidth } from './text-block-geo.js';
+import { handleMessageEvent } from './sequence-layout-message.js';
 
 /** Pending activation-bar start record, keyed by participant id. */
 type ActivationRecord = { y: number; color?: string };
@@ -56,7 +49,7 @@ export interface EventProcessingContext {
 }
 
 /** Running Y cursor plus the y of the most recent message arrow. */
-interface EventCursor {
+export interface EventCursor {
   y: number;
   lastMessageY: number | undefined;
 }
@@ -88,138 +81,6 @@ function dispatchEvent(event: SequenceEvent, cursor: EventCursor, ctx: EventProc
     case 'divider': handleDividerEvent(event, cursor, ctx); return;
     case 'delay': handleDelayEvent(event, cursor, ctx); return;
     case 'space': handleSpaceEvent(event, cursor, ctx); return;
-  }
-}
-
-function handleMessageEvent(
-  event: MessageEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
-  const fromGeo = ctx.participantMap.get(event.from);
-  const toGeo = ctx.participantMap.get(event.to);
-  // Skip gracefully if either participant is unknown
-  if (fromGeo === undefined || toGeo === undefined) return;
-
-  const endpoints = resolveMessageEndpoints(event, fromGeo, toGeo, ctx);
-  const lineHeight = ctx.measurer.measure('M', fontSpecOf(ctx.theme)).height;
-  // A multi-line label grows UPWARD from its arrow (`text-block-geo.ts`), so
-  // the extra rows are reserved BEFORE the arrow is placed, not after.
-  const rows = messageLabelRows(event.label, numberTextOf(event));
-  cursor.y += Math.max(0, rows - 1) * lineHeight;
-
-  const messageGeo = buildMessageGeo(event, endpoints, cursor.y, ctx);
-  ctx.eventGeos.push(messageGeo);
-  cursor.lastMessageY = messageGeo.y;
-
-  cursor.y += ctx.theme.sequence.messageSpacing + lineHeight;
-
-  // Handle auto-activate/deactivate via ++ / -- shorthand on message
-  applyMessageActivation(event, messageGeo, cursor, ctx);
-}
-
-/** The autonumber run's text, when the message carries one.
- *  `getLabelNumbered` prepends it as a `MessageNumber`
- *  (`AbstractMessage.java:200-206`); the formatted `sequenceLabel` wins over
- *  the bare `sequenceNumber` when both are present. */
-function numberTextOf(event: MessageEvent): string | undefined {
-  if (event.sequenceLabel !== undefined) return event.sequenceLabel;
-  return event.sequenceNumber === undefined ? undefined : String(event.sequenceNumber);
-}
-
-/** Build the MessageGeo for a resolved set of endpoints at the given y. */
-function buildMessageGeo(
-  event: MessageEvent,
-  endpoints: MessageEndpoints,
-  y: number,
-  ctx: EventProcessingContext,
-): MessageGeo {
-  const centerX = endpoints.arrowDirection === 'self'
-    ? endpoints.fromX + 20
-    : (endpoints.fromX + endpoints.toX) / 2;
-  const block = messageLabelBlock(
-    event.label, numberTextOf(event), centerX, y - 5, ctx.theme, ctx.measurer,
-  );
-  return {
-    labelLines: block.lines,
-    ...(block.number !== undefined ? { labelNumber: block.number } : {}),
-    kind: 'message',
-    fromX: endpoints.fromX,
-    toX: endpoints.toX,
-    y,
-    label: event.label,
-    style: event.style,
-    arrowDirection: endpoints.arrowDirection,
-    ...(event.sequenceNumber !== undefined
-      ? { sequenceNumber: event.sequenceNumber }
-      : {}),
-    ...(event.sequenceLabel !== undefined ? { sequenceLabel: event.sequenceLabel } : {}),
-    ...(event.headCircle === true ? { headCircle: true } : {}),
-    ...(event.tailCircle === true ? { tailCircle: true } : {}),
-    ...(event.headCross === true ? { headCross: true } : {}),
-    ...(event.tailCross === true ? { tailCross: true } : {}),
-  };
-}
-
-/** Arrow endpoints/direction resolved for a single message. */
-interface MessageEndpoints {
-  fromX: number;
-  toX: number;
-  arrowDirection: 'right' | 'left' | 'self';
-}
-
-/** Resolve arrow endpoints/direction for a message, including self-messages. */
-function resolveMessageEndpoints(
-  event: MessageEvent,
-  fromGeo: ParticipantGeo,
-  toGeo: ParticipantGeo,
-  ctx: EventProcessingContext,
-): MessageEndpoints {
-  const fromX = fromGeo.centerX;
-
-  if (event.from === event.to) {
-    // Self-message: offset toX to the right of the lifeline.
-    // activationWidth (10) + offset (20) = 30 per spec.
-    return {
-      fromX,
-      toX: fromX + ctx.theme.sequence.activationWidth + 20,
-      arrowDirection: 'self',
-    };
-  }
-
-  const toX = toGeo.centerX;
-  // participantIndex always has both keys when participantMap does
-  const fromIdx = ctx.participantIndex.get(event.from) ?? 0;
-  const toIdx = ctx.participantIndex.get(event.to) ?? 0;
-  // Note: the ternary is hoisted to its own statement (not inlined into the
-  // object literal below) because lizard's TS tokenizer misparses a `<`/`>`
-  // comparison used as an object-literal property value as a generic type
-  // argument, corrupting function-boundary detection for the rest of the file.
-  const arrowDirection: 'right' | 'left' = fromIdx < toIdx ? 'right' : 'left';
-  return { fromX, toX, arrowDirection };
-}
-
-/** Apply the `++`/`--` auto-activate/deactivate shorthand on a message. */
-function applyMessageActivation(
-  event: MessageEvent,
-  messageGeo: MessageGeo,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
-  if (event.activates !== undefined) {
-    // Activation starts at the arrow y, not after the post-arrow spacing advance.
-    ctx.activationStart.set(event.activates, { y: messageGeo.y });
-  }
-  if (event.deactivates !== undefined) {
-    // End at the arrow y. If that would give zero/negative height (the
-    // activate and deactivate land at the same y), fall back to the
-    // post-spacing cursor.y so the bar is always visible.
-    const deactStartY = ctx.activationStart.get(event.deactivates)?.y;
-    const deactEndY =
-      deactStartY !== undefined && messageGeo.y <= deactStartY
-        ? cursor.y
-        : messageGeo.y;
-    emitActivation(event.deactivates, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
   }
 }
 
@@ -469,7 +330,7 @@ function buildNoteGeo(
  * start record. When no record exists, height is 0 (deactivate without prior
  * activate).
  */
-function emitActivation(
+export function emitActivation(
   participantId: string,
   currentY: number,
   participantMap: Map<string, ParticipantGeo>,
