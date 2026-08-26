@@ -7,7 +7,7 @@ T17 render).
 
 | ID | Description | Writes | Depends On | Done |
 |---|---|---|---|---|
-| T17 | Draw exo arrows from border-anchored geometry | `renderer-message.ts`, `renderer-arrowhead.ts`, tests | T14, T15, T16 | [ ] |
+| T17 | Draw exo arrows from border-anchored geometry | `renderer-message.ts`, `renderer-arrowhead.ts`, tests | T14, T15, T16 | [x] |
 
 ## Batch gate
 

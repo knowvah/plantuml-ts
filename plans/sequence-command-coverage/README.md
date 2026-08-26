@@ -42,7 +42,7 @@ the source of truth, never the compacted summary.
 | 3 | [Parse wave](./batch-3/overview.md) | T7–T11 | 5 ∥ | [x] |
 | 4 | [Dressing + exo parse](./batch-4/overview.md) | T12–T13 | 2 ∥ | [x] |
 | 5 | [Layout + arrow render](./batch-5/overview.md) | T14–T16 | 3 ∥ | [x] |
-| 6 | [Exo render](./batch-6/overview.md) | T17 | alone | [ ] |
+| 6 | [Exo render](./batch-6/overview.md) | T17 | alone | [x] |
 | 7 | [Adjudicate, re-pin, close out](./batch-7/overview.md) | T18–T20 | sequential | [ ] |
 
 Exo arrows are **strictly sequential** across batches 4 → 5 → 6 (parse →
