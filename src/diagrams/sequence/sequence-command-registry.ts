@@ -42,7 +42,12 @@
 
 import type { Command } from './sequence-parse-helpers.js';
 import { arrowCommand, decoratedArrowCommand, returnCommand } from './command-arrow.js';
-import { autonumberCommand } from './command-autonumber.js';
+import {
+  autonumberCommand,
+  autonumberIncrementCommand,
+  autonumberResumeCommand,
+  autonumberStopCommand,
+} from './command-autonumber.js';
 import {
   hideStereotypeCommand,
   hideUnlinkedCommand,
@@ -58,12 +63,18 @@ import {
   endCommand,
   groupingCommand,
 } from './command-grouping.js';
-import { activateCommand, deactivateCommand, destroyCommand } from './command-lifeline.js';
+import {
+  activateCommand,
+  deactivateCommand,
+  deactivateShortCommand,
+  destroyCommand,
+} from './command-lifeline.js';
 import {
   autoactivateCommand,
   bareDelayCommand,
   delayWithTextCommand,
   dividerCommand,
+  hideEmptyDescriptionCommand,
   hideFootboxCommand,
   refOverCommand,
   refOverMultilineCommand,
@@ -98,10 +109,14 @@ export const SEQUENCE_COMMANDS: readonly SequenceCommand[] = [
   boxStartCommand, //              :124 CommandBoxStart
   boxEndCommand, //                :125 CommandBoxEnd
   autonumberCommand, //            :146 CommandAutonumber
+  autonumberStopCommand, //        :147 CommandAutonumberStop
+  autonumberResumeCommand, //      :148 CommandAutonumberResume
+  autonumberIncrementCommand, //   :149 CommandAutonumberIncrement
   participantCommand, //           :106 CommandParticipantA..A4
   activateCommand, //              :103 CommandActivate (TYPE=activate)
   deactivateCommand, //            :103 CommandActivate (TYPE=deactivate)
   destroyCommand, //               :103 CommandActivate (TYPE=destroy)
+  deactivateShortCommand, //       :104 CommandDeactivateShort
   noteCommand, //                  :117 FactorySequenceNoteCommand.createSingleLine
   endNoteCommand, //               :134 FactorySequenceNoteCommand.createMultiLine
   groupingCommand, //              :126 CommandGrouping (TYPE=loop|alt|opt|...)
@@ -115,6 +130,7 @@ export const SEQUENCE_COMMANDS: readonly SequenceCommand[] = [
   arrowCommand, //                 :111 CommandArrow
   pragmaCommand, //                :100 CommandPragma (addCommonCommands2)
   rotateCommand, //                :100 CommandRotate (addCommonCommands2)
+  hideEmptyDescriptionCommand, //  :100 CommandHideEmptyDescription (addCommonHides)
   hideStereotypeCommand, //        :100 CommandHideShowByGender (addCommonHides)
   hideUnlinkedCommand, //          :101 CommandHideUnlinked
   autoactivateCommand, //          :150 CommandAutoactivate

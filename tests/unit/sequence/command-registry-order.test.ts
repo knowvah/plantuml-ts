@@ -23,7 +23,12 @@ import {
   decoratedArrowCommand,
   returnCommand,
 } from '../../../src/diagrams/sequence/command-arrow.js';
-import { autonumberCommand } from '../../../src/diagrams/sequence/command-autonumber.js';
+import {
+  autonumberCommand,
+  autonumberIncrementCommand,
+  autonumberResumeCommand,
+  autonumberStopCommand,
+} from '../../../src/diagrams/sequence/command-autonumber.js';
 import {
   hideStereotypeCommand,
   hideUnlinkedCommand,
@@ -42,6 +47,7 @@ import {
 import {
   activateCommand,
   deactivateCommand,
+  deactivateShortCommand,
   destroyCommand,
 } from '../../../src/diagrams/sequence/command-lifeline.js';
 import {
@@ -49,6 +55,7 @@ import {
   bareDelayCommand,
   delayWithTextCommand,
   dividerCommand,
+  hideEmptyDescriptionCommand,
   hideFootboxCommand,
   refOverCommand,
   refOverMultilineCommand,
@@ -90,10 +97,14 @@ const EXPECTED: readonly RegistryEntry[] = [
   { name: 'boxStartCommand', command: boxStartCommand, upstreamLine: 124 },
   { name: 'boxEndCommand', command: boxEndCommand, upstreamLine: 125 },
   { name: 'autonumberCommand', command: autonumberCommand, upstreamLine: 146 },
+  { name: 'autonumberStopCommand', command: autonumberStopCommand, upstreamLine: 147 },
+  { name: 'autonumberResumeCommand', command: autonumberResumeCommand, upstreamLine: 148 },
+  { name: 'autonumberIncrementCommand', command: autonumberIncrementCommand, upstreamLine: 149 },
   { name: 'participantCommand', command: participantCommand, upstreamLine: 106 },
   { name: 'activateCommand', command: activateCommand, upstreamLine: 103 },
   { name: 'deactivateCommand', command: deactivateCommand, upstreamLine: 103 },
   { name: 'destroyCommand', command: destroyCommand, upstreamLine: 103 },
+  { name: 'deactivateShortCommand', command: deactivateShortCommand, upstreamLine: 104 },
   { name: 'noteCommand', command: noteCommand, upstreamLine: 117 },
   { name: 'endNoteCommand', command: endNoteCommand, upstreamLine: 134 },
   { name: 'groupingCommand', command: groupingCommand, upstreamLine: 126 },
@@ -107,6 +118,11 @@ const EXPECTED: readonly RegistryEntry[] = [
   { name: 'arrowCommand', command: arrowCommand, upstreamLine: 111 },
   { name: 'pragmaCommand', command: pragmaCommand, upstreamLine: 100 },
   { name: 'rotateCommand', command: rotateCommand, upstreamLine: 100 },
+  {
+    name: 'hideEmptyDescriptionCommand',
+    command: hideEmptyDescriptionCommand,
+    upstreamLine: 100,
+  },
   { name: 'hideStereotypeCommand', command: hideStereotypeCommand, upstreamLine: 100 },
   { name: 'hideUnlinkedCommand', command: hideUnlinkedCommand, upstreamLine: 101 },
   { name: 'autoactivateCommand', command: autoactivateCommand, upstreamLine: 150 },
@@ -143,7 +159,7 @@ const EXPECTED: readonly RegistryEntry[] = [
  */
 const KNOWN_DESCENTS: readonly (readonly [string, string])[] = [
   ['hideFootboxCommand', 'boxStartCommand'],
-  ['autonumberCommand', 'participantCommand'],
+  ['autonumberIncrementCommand', 'participantCommand'],
   ['participantCommand', 'activateCommand'],
   ['endNoteCommand', 'groupingCommand'],
   ['bareDelayCommand', 'spaceCommand'],
@@ -179,14 +195,14 @@ describe('sequence command registry — frozen registration order', () => {
     );
   });
 
-  it('holds 36 commands — one array, not two tiers', () => {
-    expect(SEQUENCE_COMMANDS).toHaveLength(36);
-    expect(new Set(SEQUENCE_COMMANDS).size).toBe(36);
+  it('holds 41 commands — one array, not two tiers', () => {
+    expect(SEQUENCE_COMMANDS).toHaveLength(41);
+    expect(new Set(SEQUENCE_COMMANDS).size).toBe(41);
   });
 
   it('cites only lines inside initCommandsList (99-155) upstream', () => {
     const cited = EXPECTED.map((e) => e.upstreamLine).filter((l): l is number => l !== null);
-    expect(cited).toHaveLength(35);
+    expect(cited).toHaveLength(40);
     expect(cited.filter((l) => l < 99 || l > 155)).toEqual([]);
   });
 

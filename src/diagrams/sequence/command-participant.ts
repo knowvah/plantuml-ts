@@ -103,24 +103,27 @@ const PARTICIPANT_MULTILINE_CLOSE_RE = /^[^[\]]*\]$/;
  * note), so a repeat declaration is silently a no-op here too — inherited,
  * not introduced.
  *
- * **Not yet wired into the dispatch loop.** `parser.ts`'s `runDispatchLoop`
- * has no call site for this matcher: multi-line commands in this port are
- * intercepted BEFORE the regular one-line-at-a-time `Command` table, the
- * same way `handlePendingNote`/`handlePendingRef`/`dispatchAnnotationOrSprite`
- * are (see `parser.ts`), and `parser.ts` is T11's write-set this batch, not
- * T10's. Reported in the T10 mission return rather than shipped: the
- * required call, inserted in `runDispatchLoop` immediately before
- * `dispatchCommand(state, line)` (mirroring upstream's `:110` registration,
- * before `CommandArrow` at `:111`), is
- * ```ts
- * const participantMultiConsumed = matchParticipantMultilineCommand(state, trimmedLines, i);
- * if (participantMultiConsumed !== null) { i += participantMultiConsumed - 1; continue; }
- * ```
- * Without this hook, `jozomu-87-tajo507` and `lafuzo-13-xura634`'s opening
- * `participant NAME [` line is instead matched by the plain
- * {@link participantCommand} above (whose `(.+)` capture is greedy enough to
- * swallow the trailing `[` into the participant id), so both fixtures still
- * refuse on their body's first line — unchanged from their pinned reason.
+ * **Intercepted before the `Command` table, not registered in it.** Multi-line
+ * commands in this port are handled ahead of the regular one-line-at-a-time
+ * table, the same way `handlePendingNote`/`handlePendingRef`/
+ * `dispatchAnnotationOrSprite` are; `runDispatchLoop` calls this matcher
+ * immediately before `dispatchCommand(state, line)`, mirroring upstream's
+ * `:110` registration ahead of `CommandArrow` at `:111`.
+ *
+ * It cannot live in `SEQUENCE_COMMANDS` at all: that table dispatches one
+ * line at a time, and this port has no equivalent of upstream's `OK_PARTIAL`
+ * seam, where `isMultilineCommandOk` (`PSystemCommandFactory.java:238`)
+ * consumes a whole block including its closer. See `decisions.md` D2 as
+ * amended 2026-08-26.
+ *
+ * The pre-table position also compensates for a divergence in the plain
+ * {@link participantCommand} above, NOT for upstream's ordering: upstream's
+ * `CommandParticipantA..A4` capture `CODE` as `([%pLN_.@]+)`
+ * (`CommandParticipantA.java:63`) and their only bracket alternative is
+ * `UrlBuilder.OPTIONAL`'s DOUBLE `[[…]]`, so a line ending in a single `[`
+ * genuinely fails all four upstream. This port's `participantCommand`
+ * captures `(.+)`, which is greedy enough to swallow the trailing `[` into
+ * the participant id, so it must not see the line first.
  *
  * @see sequencediagram/command/CommandParticipantMultilines.java:66-171
  */
