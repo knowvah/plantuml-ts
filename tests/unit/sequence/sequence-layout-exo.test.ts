@@ -307,6 +307,24 @@ describe('exo layout: label and carried data', () => {
     expect(numbered.totalWidth - bare.totalWidth).toBe(5 * CHAR_W + 4);
   });
 
+  it('numbers a bare autonumber run with no format', () => {
+    const numbered = layoutWith([exo('TO_RIGHT', { sequenceNumber: 12 })]);
+    const msg = onlyMessage(numbered);
+    expect(msg.labelNumber?.text).toBe('12');
+    // Two digits plus the number margin, over the undecorated width.
+    expect(numbered.totalWidth - layoutWith([exo('TO_RIGHT')]).totalWidth).toBe(
+      2 * CHAR_W + 4,
+    );
+  });
+
+  it('carries the stereotype and lifecolor through untouched', () => {
+    const msg = onlyMessage(
+      layoutWith([exo('TO_LEFT', { stereotype: '<<x>>', lifeColor: '#red' })]),
+    );
+    expect(msg.stereotype).toBe('<<x>>');
+    expect(msg.lifeColor).toBe('#red');
+  });
+
   it('carries the exo type, short flag and url through to the geometry', () => {
     const msg = onlyMessage(
       layoutWith([exo('FROM_RIGHT', { shortArrow: true, url: 'http://x' })]),
