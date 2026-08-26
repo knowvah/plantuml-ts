@@ -72,6 +72,19 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
       '(parser/layout/renderer); upstream JsonDiagram is one class shared ' +
       'by json/yaml/hcl.',
   },
+  {
+    from: 'src/diagrams/sequence/sequence-arrow-regex.ts',
+    to: 'src/diagrams/description/link-grammar-regex.ts',
+    why:
+      'upstream CommandArrow.java:49 imports ' +
+      'net.sourceforge.plantuml.descdiagram.command.CommandLinkElement to ' +
+      'reach LINE_STYLE (CommandLinkElement.java:77), which it wraps at ' +
+      'CommandArrow.getColorOrStylePattern():84-86 — the sequence arrow ' +
+      'grammar shares the link-style grammar with the description engine ' +
+      'in the canonical spec, so this edge mirrors upstream rather than ' +
+      'shortcutting around it. Re-spelling LINE_STYLE here would duplicate ' +
+      'a ported constant and violate no-magic-strings.',
+  },
 ];
 
 /** Measured 2026-08-17 at 321bfb8b (T0): 13 edges, each naming the task
