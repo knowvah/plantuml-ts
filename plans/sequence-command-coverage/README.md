@@ -37,7 +37,7 @@ the source of truth, never the compacted summary.
 
 | # | Batch | Tasks | Parallel | Done |
 |---|---|---|---|---|
-| 1 | [Instruments and headroom](./batch-1/overview.md) | T1–T5 | 5 ∥ | [ ] |
+| 1 | [Instruments and headroom](./batch-1/overview.md) | T1–T5 | 5 ∥ | [x] |
 | 2 | [AST migration](./batch-2/overview.md) | T6 | alone | [ ] |
 | 3 | [Parse wave](./batch-3/overview.md) | T7–T11 | 5 ∥ | [ ] |
 | 4 | [Dressing + exo parse](./batch-4/overview.md) | T12–T13 | 2 ∥ | [ ] |

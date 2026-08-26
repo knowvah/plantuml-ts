@@ -11,11 +11,11 @@ of headroom — both must be split before the tasks that add to them.
 
 | ID | Description | Writes | Depends On | Done |
 |---|---|---|---|---|
-| T1 | Split `renderer.ts` (595 → under cap) | `renderer.ts`, `renderer-message.ts` | — | [ ] |
-| T2 | Split `sequence-layout-events.ts` | `sequence-layout-events.ts`, `sequence-layout-message.ts` | — | [ ] |
-| T3 | Shared arrow regex fragments | `sequence-arrow-regex.ts` + test | — | [ ] |
-| T4 | Ratchet adjudicator (D5 instrument) | `scripts/sequence-ratchet-adjudicate.ts` + test | — | [ ] |
-| T5 | Per-family command modules + frozen registry | `sequence-command-registry.ts`, ~9 `command-*.ts`, `sequence-commands.ts`, `sequence-commands-2.ts`, `parser.ts` | — | [ ] |
+| T1 | Split `renderer.ts` (595 → under cap) | `renderer.ts`, `renderer-message.ts` | — | [x] |
+| T2 | Split `sequence-layout-events.ts` | `sequence-layout-events.ts`, `sequence-layout-message.ts` | — | [x] |
+| T3 | Shared arrow regex fragments | `sequence-arrow-regex.ts` + test | — | [x] |
+| T4 | Ratchet adjudicator (D5 instrument) | `scripts/sequence-ratchet-adjudicate.ts` + test | — | [x] |
+| T5 | Per-family command modules + frozen registry | `sequence-command-registry.ts`, ~9 `command-*.ts`, `sequence-commands.ts`, `sequence-commands-2.ts`, `parser.ts` | — | [x] |
 
 All five run in parallel. Every write-set is disjoint; verify before launching.
 
