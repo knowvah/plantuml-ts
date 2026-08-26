@@ -5,9 +5,9 @@ in batches 3–4 into geometry and ink.
 
 | ID | Description | Writes | Depends On | Done |
 |---|---|---|---|---|
-| T14 | Exo layout: border-anchored x, diagram-width participation | `sequence-layout-exo.ts`, `layout.ts`, `sequence-layout-events.ts`, tests | T13 | [ ] |
-| T15 | Dressing render: `o`/`x` heads, half-heads, inclination | `sequence-arrowhead.ts`, `renderer-arrowhead.ts`, tests | T12 | [ ] |
-| T16 | Lifecolor, url, stereotype render | `renderer-message.ts`, `sequence-layout-message.ts`, tests | T12 | [ ] |
+| T14 | Exo layout: border-anchored x, diagram-width participation | `sequence-layout-exo.ts`, `layout.ts`, `sequence-layout-events.ts`, tests | T13 | [x] |
+| T15 | Dressing render: `o`/`x` heads, half-heads, inclination | `sequence-arrowhead.ts`, `renderer-arrowhead.ts`, tests | T12 | [x] |
+| T16 | Lifecolor, url, stereotype render | `renderer-message.ts`, `sequence-layout-message.ts`, tests | T12 | [x] |
 
 Write-sets were checked: T14 is layout-only, T15 owns both arrowhead modules,
 T16 owns `renderer-message.ts`. **T17 (batch 6) writes `renderer-message.ts`
