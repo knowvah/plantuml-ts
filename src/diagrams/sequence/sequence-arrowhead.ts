@@ -18,17 +18,20 @@
  * `ArrowDecoration`. This module ports that model as-is; the parser builds
  * one directly (`sequence-parse-helpers.ts#arrowConfigurationOf`, D1 of
  * mission sequence-command-coverage), which replaced the lossy
- * flat-enum adapter this file used to carry. TOP_PART and BOTTOM_PART
- * remain correct but unfed until the dressing grammar lands. D3 keeps the
- * three polygon builders separate despite reading as near-duplicates — the
- * self variant differs by a sign convention and a `-1` nudge.
+ * flat-enum adapter this file used to carry, so CROSSX, TOP_PART and
+ * BOTTOM_PART — correct here but unfed while the flat enum stood — are now
+ * reachable. D3 keeps the three polygon builders separate despite reading as
+ * near-duplicates: the self variant differs by a sign convention and a `-1`
+ * nudge.
  *
- * NOT ported here, deliberately: the inclination rotation
- * (`:212,216,228,249,253,265`) — `ArrowConfiguration.inclination` is
- * declared but nothing in this port's parser sets it yet, so the unrotated
- * shape IS upstream's zero-inclination result. Line thickness is likewise
- * the renderer's: upstream strokes the CROSSX saltire at 2 (`:219,256`), and
- * only the circle's thickness is expressible here.
+ * The inclination rotation (`:212,216,228,249,253,265`) IS ported, as
+ * {@link inclinationAngle1}/{@link inclinationAngle2} plus the rotation the
+ * two flat head builders apply. Only the polygon and the ASYNC stroke pair
+ * rotate; upstream leaves the CROSSX saltire (`:218-223,255-260`) and the
+ * `o` circle (`:202-204,240-241`) square, and the self component reads no
+ * inclination at all (verified by grep over `src/main/java/net/`). Line
+ * thickness stays the renderer's: upstream strokes the saltire at 2
+ * (`:219,256`), and only the circle's thickness is expressible here.
  *
  * Every `file:line` below is relative to
  * `~/git/plantuml/src/main/java/net/sourceforge/plantuml/`; a bare `:NNN` is
@@ -192,15 +195,77 @@ function pt(x: number, y: number): Point2D {
   return { x, y };
 }
 
-function shiftPoints(points: readonly Point2D[], dx: number): Point2D[] {
-  return points.map((p) => pt(p.x + dx, p.y));
+/**
+ * Rotate about the tip, THEN shift along x — the order upstream imposes: it
+ * rotates the shape (`:228,265`) and draws it into a `ug` already translated
+ * by the circle's push-off (`:206,243`). The rotation is
+ * `XAffineTransform.getRotateInstance`'s `(cos, sin, -sin, cos, 0, 0)`, i.e.
+ * `x' = x·cos − y·sin`, `y' = x·sin + y·cos`, about the tip-local origin.
+ * @see klimt/awt/XAffineTransform.java:110-114
+ * @see klimt/shape/UPolygon.java:113-117
+ * @see klimt/shape/ULine.java:59-65
+ */
+function place(p: Point2D, theta: number, dx: number): Point2D {
+  if (theta === 0) return pt(p.x + dx, p.y);
+  const cos = Math.cos(theta);
+  const sin = Math.sin(theta);
+  return pt(p.x * cos - p.y * sin + dx, p.x * sin + p.y * cos);
 }
 
-function shiftSegments(
-  segments: readonly ArrowSegment[],
-  dx: number,
-): ArrowSegment[] {
-  return segments.map(([a, b]) => [pt(a.x + dx, a.y), pt(b.x + dx, b.y)]);
+function placePoints(points: readonly Point2D[], theta: number, dx: number): Point2D[] {
+  return points.map((p) => place(p, theta, dx));
+}
+
+function placeSegments(segs: readonly ArrowSegment[], theta: number, dx: number): ArrowSegment[] {
+  return segs.map(([a, b]) => [place(a, theta, dx), place(b, theta, dx)]);
+}
+
+// ---------------------------------------------------------------------------
+// Inclination — one stored offset, resolved per side
+// ---------------------------------------------------------------------------
+
+/**
+ * `ArrowConfiguration#getInclination1` — the stored offset reaches the TAIL
+ * dressing only when the head side carries nothing that would slope instead.
+ * An absent `inclination` is upstream's 0.
+ * @see skin/ArrowConfiguration.java:285-289
+ */
+export function inclination1Of(configuration: ArrowConfiguration): number {
+  const head = configuration.dressing2.head;
+  if (head === 'NONE' || head === 'CROSSX') return configuration.inclination ?? 0;
+  return 0;
+}
+
+/**
+ * `ArrowConfiguration#getInclination2`. Upstream's second test reads
+ * `NORMAL || NORMAL` (`:294`) — the same member twice — so ASYNC is the only
+ * head that falls through to 0. Kept as two branches, as upstream writes it.
+ * @see skin/ArrowConfiguration.java:291-297
+ */
+export function inclination2Of(configuration: ArrowConfiguration): number {
+  const inclination = configuration.inclination ?? 0;
+  const head = configuration.dressing1.head;
+  if (head === 'NONE' || head === 'CROSSX') return inclination;
+  if (head === 'NORMAL') return inclination;
+  return 0;
+}
+
+/**
+ * The tail side's rotation, `atan2` over the FULL component width `lenFull`
+ * (`:98`) rather than the trimmed line. The two sides differ in sign because
+ * their heads point opposite ways: `drawDressing1` negates, `drawDressing2`
+ * does not. Both arguments are lengths in one unit, so scaling the pair
+ * uniformly leaves the angle unchanged.
+ * @see skin/rose/ComponentRoseArrow.java:212,216,228
+ */
+export function inclinationAngle1(inclination1: number, lenFull: number): number {
+  return Math.atan2(-inclination1, lenFull);
+}
+
+/** The head side's rotation.
+ *  @see skin/rose/ComponentRoseArrow.java:249,253,265 */
+export function inclinationAngle2(inclination2: number, lenFull: number): number {
+  return Math.atan2(inclination2, lenFull);
 }
 
 // ---------------------------------------------------------------------------
@@ -319,37 +384,26 @@ function crossxLinesNormal(): ArrowSegment[] {
 // Head dispatch
 // ---------------------------------------------------------------------------
 
-/** `drawDressing2`'s head branch, pre-shifted by `dx`. */
-function normalSideShape(
-  dressing: ArrowDressing,
-  niceArrow: boolean,
-  dx: number,
-): HeadGeometry {
+/** `drawDressing2`'s head branch, rotated by `theta` then shifted by `dx`.
+ *  The saltire passes 0: upstream never rotates it (`:255-260`). */
+function normalSideShape(dressing: ArrowDressing, niceArrow: boolean, dx: number, theta: number): HeadGeometry {
   if (dressing.head === 'ASYNC')
-    return { lines: shiftSegments(asyncLinesNormal(dressing.part), dx) };
+    return { lines: placeSegments(asyncLinesNormal(dressing.part), theta, dx) };
   if (dressing.head === 'CROSSX')
-    return { lines: shiftSegments(crossxLinesNormal(), dx) };
+    return { lines: placeSegments(crossxLinesNormal(), 0, dx) };
   if (dressing.head === 'NORMAL')
-    return {
-      polygon: shiftPoints(getPolygonNormal(dressing.part, niceArrow), dx),
-    };
+    return { polygon: placePoints(getPolygonNormal(dressing.part, niceArrow), theta, dx) };
   return {};
 }
 
-/** `drawDressing1`'s head branch, pre-shifted by `dx`. */
-function reverseSideShape(
-  dressing: ArrowDressing,
-  niceArrow: boolean,
-  dx: number,
-): HeadGeometry {
+/** `drawDressing1`'s head branch; the saltire again passes 0 (`:218-223`). */
+function reverseSideShape(dressing: ArrowDressing, niceArrow: boolean, dx: number, theta: number): HeadGeometry {
   if (dressing.head === 'ASYNC')
-    return { lines: shiftSegments(asyncLinesReverse(dressing.part), dx) };
+    return { lines: placeSegments(asyncLinesReverse(dressing.part), theta, dx) };
   if (dressing.head === 'CROSSX')
-    return { lines: shiftSegments(crossxLinesReverse(), dx) };
+    return { lines: placeSegments(crossxLinesReverse(), 0, dx) };
   if (dressing.head === 'NORMAL')
-    return {
-      polygon: shiftPoints(getPolygonReverse(dressing.part, niceArrow), dx),
-    };
+    return { polygon: placePoints(getPolygonReverse(dressing.part, niceArrow), theta, dx) };
   return {};
 }
 
@@ -365,10 +419,11 @@ export function headGeometryNormalSide(
   dressing: ArrowDressing,
   decoration: ArrowDecoration,
   niceArrow: boolean,
+  theta: number,
 ): HeadGeometry {
-  if (decoration !== 'CIRCLE') return normalSideShape(dressing, niceArrow, 0);
+  if (decoration !== 'CIRCLE') return normalSideShape(dressing, niceArrow, 0, theta);
   return {
-    ...normalSideShape(dressing, niceArrow, -CIRCLE_HEAD_SHIFT),
+    ...normalSideShape(dressing, niceArrow, -CIRCLE_HEAD_SHIFT, theta),
     circle: CIRCLE_NORMAL_SIDE,
   };
 }
@@ -384,12 +439,13 @@ export function headGeometryReverseSide(
   dressing: ArrowDressing,
   decoration: ArrowDecoration,
   niceArrow: boolean,
+  theta: number,
 ): HeadGeometry {
-  if (decoration !== 'CIRCLE') return reverseSideShape(dressing, niceArrow, 0);
+  if (decoration !== 'CIRCLE') return reverseSideShape(dressing, niceArrow, 0, theta);
   let dx = CIRCLE_HEAD_SHIFT;
   if (dressing.head === 'CROSSX') dx = 0;
   return {
-    ...reverseSideShape(dressing, niceArrow, dx),
+    ...reverseSideShape(dressing, niceArrow, dx, theta),
     circle: CIRCLE_REVERSE_SIDE,
   };
 }

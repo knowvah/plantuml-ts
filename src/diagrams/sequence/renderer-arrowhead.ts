@@ -56,6 +56,10 @@ import {
   headGeometryNormalSide,
   headGeometryReverseSide,
   headGeometrySelf,
+  inclination1Of,
+  inclination2Of,
+  inclinationAngle1,
+  inclinationAngle2,
 } from './sequence-arrowhead.js';
 import type {
   ArrowCircle,
@@ -211,19 +215,24 @@ function renderArrowHead(
 // ---------------------------------------------------------------------------
 
 /**
- * `ArrowConfiguration#reverse` — both dressings and both decorations swap.
- * `dashed` (upstream's `body`) is direction-independent and does not.
+ * `ArrowConfiguration#reverse` — both dressings and both decorations swap,
+ * and upstream's constructor call passes EVERY other field straight through:
+ * `body`, `color`, `isSelf`, `thickness`, `reverseDefine` and `inclination`.
+ * Spread-then-override rather than a field list, so a future addition to
+ * `ArrowConfiguration` survives the reverse instead of being silently
+ * dropped — which is exactly what happened to `inclination` while this was a
+ * field list and nothing produced one.
  * @see skin/ArrowConfiguration.java:110-113
  */
 export function reverseArrowConfiguration(
   configuration: ArrowConfiguration,
 ): ArrowConfiguration {
   return {
+    ...configuration,
     dressing1: configuration.dressing2,
     dressing2: configuration.dressing1,
     decoration1: configuration.decoration2,
     decoration2: configuration.decoration1,
-    dashed: configuration.dashed,
   };
 }
 
@@ -279,6 +288,54 @@ interface ArrowExtent {
 }
 
 /**
+ * The `(n)` slope, resolved per side. `incl1`/`incl2` are the y offsets
+ * `drawInternalU` adds to each dressing's translate (`:152-155`); `theta1`/
+ * `theta2` are the rotations the heads at those positions take.
+ *
+ * SCALED HERE. `scale-geo.ts` carries `inclination` through untouched (it
+ * spreads `MessageGeo`), so this is the "renderer scales its own remaining
+ * literals in place, where each is combined with already-scaled geometry"
+ * seam that module's header describes. `incl` and `lenFull` are both
+ * multiplied by `k`, so the ANGLE is unchanged — `atan2(i·k, w·k) ==
+ * atan2(i, w)` — and only the y offsets grow, as upstream's `format()`
+ * would have grown them on the way out.
+ */
+interface ArrowSlope {
+  readonly incl1: number;
+  readonly incl2: number;
+  readonly theta1: number;
+  readonly theta2: number;
+}
+
+function arrowSlope(configuration: ArrowConfiguration, lenFull: number, k: number): ArrowSlope {
+  const incl1 = inclination1Of(configuration) * k;
+  const incl2 = inclination2Of(configuration) * k;
+  return {
+    incl1,
+    incl2,
+    theta1: inclinationAngle1(incl1, lenFull),
+    theta2: inclinationAngle2(incl2, lenFull),
+  };
+}
+
+/**
+ * The body's two ends, in the local frame. Upstream draws the flat
+ * `ULine(len, 0)` only when BOTH inclinations are zero; each sloped branch
+ * has its own ends, and neither is the flat line's — `inclination1` runs the
+ * segment back to local x 0 rather than to `start`, and `inclination2` runs
+ * it out to `pos2` rather than to `start + len`. `inclination1` wins when
+ * both are set, because upstream tests it first.
+ * @see skin/rose/ComponentRoseArrow.java:157-162,182-186
+ */
+function arrowBodyEnds(extent: ArrowExtent, slope: ArrowSlope): readonly [Point2D, Point2D] {
+  const lineEnd = { x: extent.start + extent.len, y: 0 };
+  const lineStart = { x: extent.start, y: 0 };
+  if (slope.incl1 === 0 && slope.incl2 === 0) return [lineStart, lineEnd];
+  if (slope.incl1 !== 0) return [lineEnd, { x: 0, y: slope.incl1 }];
+  return [lineStart, { x: extent.pos2, y: slope.incl2 }];
+}
+
+/**
  * `drawInternalU`'s opening arithmetic, verbatim. `pos1` and `pos2` are read
  * off the UNTRIMMED `start`/`len` (`:100-101` runs before every adjustment at
  * `:103-140`), which is why a head sits at `width - 2` however much the line
@@ -315,11 +372,9 @@ function arrowExtent(
  * cached goldens agree: every one of them writes the `<polygon>` before the
  * `<line>` it belongs to.
  *
- * `inclination1`/`inclination2` are zero for every arrow this port's parser
- * can build (nothing calls `ArrowConfiguration#withInclination`), so `:157`'s
- * first branch is the only reachable one and the two rotated variants at
- * `:159-162` are not ported.
- * @see skin/rose/ComponentRoseArrow.java:151-157
+ * `lenFull` (`:98`) is the FULL component width, untrimmed — it is what the
+ * two head rotations are taken against, and it is not `extent.len`.
+ * @see skin/rose/ComponentRoseArrow.java:151-162
  */
 export function renderFlatMessageArrow(
   msg: MessageGeo,
@@ -332,43 +387,43 @@ export function renderFlatMessageArrow(
   const drawn =
     msg.fromX > msg.toX ? reverseArrowConfiguration(configuration) : configuration;
   const origin = { x: Math.min(msg.fromX, msg.toX), y: msg.y };
-  const extent = arrowExtent(drawn, Math.abs(msg.toX - msg.fromX), k);
-  const body = line(
-    origin.x + extent.start,
-    origin.y,
-    origin.x + extent.start + extent.len,
-    origin.y,
-    {
-      stroke: theme.colors.arrow,
-      strokeWidth: ARROW_THICKNESS * k,
-      ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
-    },
-  );
-  return flatArrowHeads(drawn, origin, extent, theme) + body;
+  const lenFull = Math.abs(msg.toX - msg.fromX);
+  const extent = arrowExtent(drawn, lenFull, k);
+  const slope = arrowSlope(drawn, lenFull, k);
+  const [from, to] = arrowBodyEnds(extent, slope);
+  const body = line(origin.x + from.x, origin.y + from.y, origin.x + to.x, origin.y + to.y, {
+    stroke: theme.colors.arrow,
+    strokeWidth: ARROW_THICKNESS * k,
+    ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
+  });
+  return flatArrowHeads(drawn, origin, extent, slope, theme) + body;
 }
 
-/** `drawDressing1` at `pos1` then `drawDressing2` at `pos2`, in that order.
+/** `drawDressing1` at `(pos1, inclination1)` then `drawDressing2` at
+ *  `(pos2, inclination2)`, in that order — the y term is upstream's, at
+ *  `:152` and `:154`, and is read off the UNTRIMMED positions like the x.
  *  @see skin/rose/ComponentRoseArrow.java:151-156 */
 function flatArrowHeads(
   drawn: ArrowConfiguration,
   origin: Point2D,
   extent: ArrowExtent,
+  slope: ArrowSlope,
   theme: ScaledTheme,
 ): string {
   const paint = paintOf(theme);
   const niceArrow = niceArrowOf(theme);
   const k = theme.scaleK;
   const head1 = renderArrowHead(
-    headGeometryReverseSide(drawn.dressing1, drawn.decoration1, niceArrow),
+    headGeometryReverseSide(drawn.dressing1, drawn.decoration1, niceArrow, slope.theta1),
     drawn.dressing1.head,
-    { x: origin.x + extent.pos1, y: origin.y },
+    { x: origin.x + extent.pos1, y: origin.y + slope.incl1 },
     paint,
     k,
   );
   const head2 = renderArrowHead(
-    headGeometryNormalSide(drawn.dressing2, drawn.decoration2, niceArrow),
+    headGeometryNormalSide(drawn.dressing2, drawn.decoration2, niceArrow, slope.theta2),
     drawn.dressing2.head,
-    { x: origin.x + extent.pos2, y: origin.y },
+    { x: origin.x + extent.pos2, y: origin.y + slope.incl2 },
     paint,
     k,
   );
@@ -398,7 +453,10 @@ function selfHeadGeometry(
   const dressing = configuration.dressing2;
   if (dressing.head === 'NORMAL')
     return headGeometrySelf(configuration, reverseDefine, niceArrow);
-  return headGeometryReverseSide(dressing, 'NONE', niceArrow);
+  // 0, not `slope.theta*`: no self component reads an inclination — the
+  // token appears nowhere under `net/` outside `ArrowConfiguration` and
+  // `ComponentRoseArrow` (verified by grep), so a self `(n)` draws square.
+  return headGeometryReverseSide(dressing, 'NONE', niceArrow, 0);
 }
 
 /**

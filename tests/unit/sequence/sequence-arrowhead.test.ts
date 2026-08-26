@@ -14,7 +14,14 @@ import {
   headGeometryNormalSide,
   headGeometryReverseSide,
   headGeometrySelf,
+  inclination1Of,
+  inclination2Of,
+  inclinationAngle1,
+  inclinationAngle2,
 } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
+import { reverseArrowConfiguration } from '../../../src/diagrams/sequence/renderer-arrowhead.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import type {
   ArrowConfiguration,
   ArrowDecoration,
@@ -29,6 +36,10 @@ import type {
 
 const NO_DECORATION = 'NONE';
 const CIRCLE_DECORATION = 'CIRCLE';
+
+/** The rotation an un-inclined arrow passes: upstream's `rotate` is a no-op
+ *  at 0 (`UPolygon.java:114`), which is the shape every `->`/`<-` draws. */
+const NO_INCLINE = 0;
 
 /** Circle-induced head shift: `diamCircle / 2 + thinCircle`
  *  (ComponentRoseArrow.java:206, :243). */
@@ -317,6 +328,7 @@ describe('headGeometryNormalSide', () => {
       dressing('NORMAL', 'FULL'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.polygon).toEqual([pt(-10, -4), pt(0, 0), pt(-10, 4), pt(-6, 0)]);
     expect(geo.lines).toBeUndefined();
@@ -328,6 +340,7 @@ describe('headGeometryNormalSide', () => {
       dressing('NORMAL', 'FULL'),
       NO_DECORATION,
       false,
+      NO_INCLINE,
     );
     expect(geo.polygon).toEqual([pt(-10, -4), pt(0, 0), pt(-10, 4)]);
   });
@@ -337,6 +350,7 @@ describe('headGeometryNormalSide', () => {
       dressing('NORMAL', 'TOP_PART'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.polygon).toEqual([pt(-10, -4), pt(0, 0), pt(-10, 0)]);
   });
@@ -346,6 +360,7 @@ describe('headGeometryNormalSide', () => {
       dressing('NORMAL', 'BOTTOM_PART'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.polygon).toEqual([pt(-10, 0), pt(0, 0), pt(-10, 4)]);
   });
@@ -355,6 +370,7 @@ describe('headGeometryNormalSide', () => {
       dressing('ASYNC', 'FULL'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([
       [pt(0, 0), pt(-10, -4)],
@@ -368,6 +384,7 @@ describe('headGeometryNormalSide', () => {
       dressing('ASYNC', 'TOP_PART'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([[pt(0, 0), pt(-10, -4)]]);
   });
@@ -377,6 +394,7 @@ describe('headGeometryNormalSide', () => {
       dressing('ASYNC', 'BOTTOM_PART'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([[pt(0, 0), pt(-10, 4)]]);
   });
@@ -386,6 +404,7 @@ describe('headGeometryNormalSide', () => {
       dressing('CROSSX', 'FULL'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([
       [pt(-16, -5), pt(-6, 5)],
@@ -398,6 +417,7 @@ describe('headGeometryNormalSide', () => {
       dressing('NONE', 'FULL'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo).toEqual({});
   });
@@ -407,6 +427,7 @@ describe('headGeometryNormalSide', () => {
       dressing('NORMAL', 'FULL'),
       CIRCLE_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.circle).toEqual({
       cx: 1.5,
@@ -427,6 +448,7 @@ describe('headGeometryNormalSide', () => {
       dressing('CROSSX', 'FULL'),
       CIRCLE_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([
       [pt(-16 - CIRCLE_SHIFT, -5), pt(-6 - CIRCLE_SHIFT, 5)],
@@ -439,6 +461,7 @@ describe('headGeometryNormalSide', () => {
       dressing('NONE', 'FULL'),
       CIRCLE_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.circle).toEqual({ cx: 1.5, cy: -0.75, d: 8, thickness: 1.5 });
     expect(geo.polygon).toBeUndefined();
@@ -456,6 +479,7 @@ describe('headGeometryReverseSide', () => {
       dressing('NORMAL', 'FULL'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.polygon).toEqual([pt(10, -4), pt(0, 0), pt(10, 4), pt(6, 0)]);
   });
@@ -465,6 +489,7 @@ describe('headGeometryReverseSide', () => {
       dressing('NORMAL', 'FULL'),
       NO_DECORATION,
       false,
+      NO_INCLINE,
     );
     expect(geo.polygon).toEqual([pt(10, -4), pt(0, 0), pt(10, 4)]);
   });
@@ -474,6 +499,7 @@ describe('headGeometryReverseSide', () => {
       dressing('NORMAL', 'TOP_PART'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.polygon).toEqual([pt(10, -4), pt(0, 0), pt(10, 0)]);
   });
@@ -483,6 +509,7 @@ describe('headGeometryReverseSide', () => {
       dressing('NORMAL', 'BOTTOM_PART'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.polygon).toEqual([pt(10, 0), pt(0, 0), pt(10, 4)]);
   });
@@ -492,6 +519,7 @@ describe('headGeometryReverseSide', () => {
       dressing('ASYNC', 'FULL'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([
       [pt(0, 0), pt(10, -4)],
@@ -504,6 +532,7 @@ describe('headGeometryReverseSide', () => {
       dressing('ASYNC', 'TOP_PART'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([[pt(0, 0), pt(10, -4)]]);
   });
@@ -513,6 +542,7 @@ describe('headGeometryReverseSide', () => {
       dressing('ASYNC', 'BOTTOM_PART'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([[pt(0, 0), pt(10, 4)]]);
   });
@@ -522,6 +552,7 @@ describe('headGeometryReverseSide', () => {
       dressing('CROSSX', 'FULL'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([
       [pt(6, -5), pt(16, 5)],
@@ -534,6 +565,7 @@ describe('headGeometryReverseSide', () => {
       dressing('NONE', 'FULL'),
       NO_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo).toEqual({});
   });
@@ -543,6 +575,7 @@ describe('headGeometryReverseSide', () => {
       dressing('NORMAL', 'FULL'),
       CIRCLE_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.circle).toEqual({
       cx: -1.5,
@@ -563,6 +596,7 @@ describe('headGeometryReverseSide', () => {
       dressing('CROSSX', 'FULL'),
       CIRCLE_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.circle).toEqual({ cx: -1.5, cy: -0.75, d: 8, thickness: 1.5 });
     expect(geo.lines).toEqual([
@@ -576,6 +610,7 @@ describe('headGeometryReverseSide', () => {
       dressing('ASYNC', 'FULL'),
       CIRCLE_DECORATION,
       true,
+      NO_INCLINE,
     );
     expect(geo.lines).toEqual([
       [pt(CIRCLE_SHIFT, 0), pt(10 + CIRCLE_SHIFT, -4)],
@@ -637,5 +672,343 @@ describe('headGeometrySelf', () => {
     };
     const geo = headGeometrySelf(cfg, false, true);
     expect(geo.polygon).toEqual([pt(9, -4), pt(-1, 0), pt(9, 0)]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Inclination — the `(n)` dressing (T15 of sequence-command-coverage)
+// ---------------------------------------------------------------------------
+
+/** A flat config with both dressings and the stored `(n)` offset spelled
+ *  out, so each `getInclination*` branch can be driven independently. */
+function inclinedConfig(
+  head1: ArrowHeadKind,
+  head2: ArrowHeadKind,
+  inclination: number,
+): ArrowConfiguration {
+  return {
+    dressing1: dressing(head1, 'FULL'),
+    dressing2: dressing(head2, 'FULL'),
+    decoration1: NO_DECORATION,
+    decoration2: NO_DECORATION,
+    dashed: false,
+    inclination,
+  };
+}
+
+describe('inclination1Of — ArrowConfiguration.java:285-289', () => {
+  it.each<[ArrowHeadKind, number]>([
+    ['NONE', 30],
+    ['CROSSX', 30],
+    ['NORMAL', 0],
+    ['ASYNC', 0],
+  ])('dressing2 %s routes %i to the tail side', (head2, expected) => {
+    expect(inclination1Of(inclinedConfig('NORMAL', head2, 30))).toBe(expected);
+  });
+
+  it('reads an absent inclination as upstream’s 0', () => {
+    const cfg = inclinedConfig('NONE', 'NONE', 0);
+    const { inclination, ...withoutInclination } = cfg;
+    expect(inclination).toBe(0);
+    expect(inclination1Of(withoutInclination)).toBe(0);
+  });
+});
+
+describe('inclination2Of — ArrowConfiguration.java:291-297', () => {
+  it.each<[ArrowHeadKind, number]>([
+    ['NONE', 30],
+    ['CROSSX', 30],
+    ['NORMAL', 30],
+    ['ASYNC', 0],
+  ])('dressing1 %s routes %i to the head side', (head1, expected) => {
+    expect(inclination2Of(inclinedConfig(head1, 'NORMAL', 30))).toBe(expected);
+  });
+
+  it('is the ONLY head that falls through — upstream tests NORMAL twice', () => {
+    // `:294` reads `NORMAL || NORMAL`. Transcribed as written: ASYNC alone
+    // reaches the trailing `return 0`.
+    expect(inclination2Of(inclinedConfig('ASYNC', 'NORMAL', 45))).toBe(0);
+    expect(inclination2Of(inclinedConfig('NORMAL', 'NORMAL', 45))).toBe(45);
+  });
+});
+
+describe('inclinationAngle1/2 — ComponentRoseArrow.java:212,228,249,265', () => {
+  it('negates on the tail side and does not on the head side', () => {
+    expect(inclinationAngle1(30, 40)).toBeCloseTo(Math.atan2(-30, 40), 12);
+    expect(inclinationAngle2(30, 40)).toBeCloseTo(Math.atan2(30, 40), 12);
+    expect(inclinationAngle1(30, 40)).toBe(-inclinationAngle2(30, 40));
+  });
+
+  it('is invariant under a uniform scale of both arguments', () => {
+    // Why `renderer-arrowhead.ts` may multiply the inclination by `k` in
+    // place: the angle it feeds is unchanged, only the y offset grows.
+    expect(inclinationAngle2(30 * 3, 40 * 3)).toBeCloseTo(inclinationAngle2(30, 40), 12);
+  });
+
+  it('is zero when the arrow carries no `(n)`', () => {
+    // `atan2(-0, len)` is NEGATIVE zero, and vitest's `toBe` distinguishes
+    // it. Pinned as such rather than papered over: `-0 === 0` is true, so
+    // the `theta === 0` short-circuit both rotate paths inherit from
+    // `UPolygon.java:114` still fires, and no un-inclined arrow rotates.
+    expect(inclinationAngle1(0, 40)).toBe(-0);
+    expect(inclinationAngle1(0, 40) === 0).toBe(true);
+    expect(inclinationAngle2(0, 40)).toBe(0);
+  });
+});
+
+/** `atan2(30, 40)` is the 3-4-5 angle: `cos = 0.8`, `sin = 0.6`, so every
+ *  rotated point below is exact in decimal and readable as arithmetic. */
+const THETA_3_4_5 = Math.atan2(30, 40);
+
+describe('the head builders rotate by theta', () => {
+  it('turns the head-side FULL polygon about its tip', () => {
+    const geo = headGeometryNormalSide(
+      dressing('NORMAL', 'FULL'),
+      NO_DECORATION,
+      true,
+      THETA_3_4_5,
+    );
+    // (-10,-4) (0,0) (-10,4) (-6,0) under x' = 0.8x - 0.6y, y' = 0.6x + 0.8y
+    expect(geo.polygon?.map((p) => [p.x, p.y])).toEqual([
+      [expect.closeTo(-5.6, 9), expect.closeTo(-9.2, 9)],
+      [expect.closeTo(0, 9), expect.closeTo(0, 9)],
+      [expect.closeTo(-10.4, 9), expect.closeTo(-2.8, 9)],
+      [expect.closeTo(-4.8, 9), expect.closeTo(-3.6, 9)],
+    ]);
+  });
+
+  it('turns the tail-side FULL polygon the other way', () => {
+    const geo = headGeometryReverseSide(
+      dressing('NORMAL', 'FULL'),
+      NO_DECORATION,
+      true,
+      -THETA_3_4_5,
+    );
+    expect(geo.polygon?.map((p) => [p.x, p.y])).toEqual([
+      [expect.closeTo(5.6, 9), expect.closeTo(-9.2, 9)],
+      [expect.closeTo(0, 9), expect.closeTo(0, 9)],
+      [expect.closeTo(10.4, 9), expect.closeTo(-2.8, 9)],
+      [expect.closeTo(4.8, 9), expect.closeTo(-3.6, 9)],
+    ]);
+  });
+
+  it('turns the ASYNC stroke pair, both strokes leaving the tip', () => {
+    const geo = headGeometryNormalSide(
+      dressing('ASYNC', 'FULL'),
+      NO_DECORATION,
+      true,
+      THETA_3_4_5,
+    );
+    expect(geo.lines?.map(([a, b]) => [a.x, a.y, b.x, b.y])).toEqual([
+      [expect.closeTo(0, 9), expect.closeTo(0, 9), expect.closeTo(-5.6, 9), expect.closeTo(-9.2, 9)],
+      [expect.closeTo(0, 9), expect.closeTo(0, 9), expect.closeTo(-10.4, 9), expect.closeTo(-2.8, 9)],
+    ]);
+  });
+
+  it('leaves the CROSSX saltire square — upstream never rotates it', () => {
+    // `:255-260` builds the two ULines with no `.rotate(...)` call, unlike
+    // the ASYNC pair at `:249,253` and the polygon at `:265`.
+    const turned = headGeometryNormalSide(dressing('CROSSX', 'FULL'), NO_DECORATION, true, THETA_3_4_5);
+    const square = headGeometryNormalSide(dressing('CROSSX', 'FULL'), NO_DECORATION, true, NO_INCLINE);
+    expect(turned.lines).toEqual(square.lines);
+    expect(turned.lines).toEqual([
+      [pt(-SPACE_CROSS_X - ARROW_DELTA_X, -ARROW_DELTA_X / 2), pt(-SPACE_CROSS_X, ARROW_DELTA_X / 2)],
+      [pt(-SPACE_CROSS_X - ARROW_DELTA_X, ARROW_DELTA_X / 2), pt(-SPACE_CROSS_X, -ARROW_DELTA_X / 2)],
+    ]);
+  });
+
+  it('leaves the `o` circle square, and still pushes the head off the tip', () => {
+    // `:240-241` draws the ellipse from a `ug` the rotation never touched;
+    // `:243`'s dx is applied AFTER the polygon is rotated (`:265`).
+    const geo = headGeometryNormalSide(
+      dressing('NORMAL', 'FULL'),
+      CIRCLE_DECORATION,
+      true,
+      THETA_3_4_5,
+    );
+    expect(geo.circle).toEqual({
+      cx: THIN_CIRCLE,
+      cy: -THIN_CIRCLE / 2,
+      d: DIAM_CIRCLE,
+      thickness: THIN_CIRCLE,
+    });
+    expect(geo.polygon?.[0]?.x).toBeCloseTo(-5.6 - CIRCLE_SHIFT, 9);
+    expect(geo.polygon?.[0]?.y).toBeCloseTo(-9.2, 9);
+  });
+});
+
+describe('reverseArrowConfiguration carries every unswapped field', () => {
+  it('keeps the inclination — ArrowConfiguration.java:110-113', () => {
+    const cfg = inclinedConfig('NONE', 'NORMAL', 30);
+    const reversed = reverseArrowConfiguration(cfg);
+    expect(reversed.inclination).toBe(30);
+    expect(reversed.dressing1).toEqual(cfg.dressing2);
+    expect(reversed.dressing2).toEqual(cfg.dressing1);
+  });
+
+  it('swaps the two decorations with their dressings', () => {
+    const reversed = reverseArrowConfiguration({
+      ...inclinedConfig('NONE', 'NORMAL', 0),
+      decoration1: CIRCLE_DECORATION,
+      dashed: true,
+    });
+    expect(reversed.decoration2).toBe(CIRCLE_DECORATION);
+    expect(reversed.decoration1).toBe(NO_DECORATION);
+    expect(reversed.dashed).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// End to end — every dressing form reaches the SVG (T15)
+// ---------------------------------------------------------------------------
+
+function svgOf(arrow: string): string {
+  return renderFixtureSequence(
+    `@startuml\n${arrow}\n@enduml\n`,
+    new DeterministicMeasurer(),
+  );
+}
+
+function attrs(tag: string, svg: string): Array<Record<string, string>> {
+  return [...svg.matchAll(new RegExp(`<${tag}\\s([^>]*?)/>`, 'g'))].map((m) =>
+    Object.fromEntries(
+      [...m[1]!.matchAll(/([\w:-]+)="([^"]*)"/g)].map((a) => [a[1]!, a[2]!]),
+    ),
+  );
+}
+
+/** The message body and the two head strokes, i.e. every `<line>` that is not
+ *  a lifeline (lifelines are the only dashed lines a two-party diagram has). */
+function solidLines(svg: string): Array<Record<string, string>> {
+  return attrs('line', svg).filter((l) => l['stroke-dasharray'] === undefined);
+}
+
+/** The body is the LAST line upstream writes: `drawDressing1`/`2` run at
+ *  `:152-155`, the body at `:157-162`. @see ComponentRoseArrow.java:151-162 */
+interface Segment {
+  readonly x1: number;
+  readonly y1: number;
+  readonly x2: number;
+  readonly y2: number;
+}
+
+function bodyLine(svg: string): Segment {
+  const all = solidLines(svg);
+  const last = all[all.length - 1]!;
+  return {
+    x1: Number(last['x1']),
+    y1: Number(last['y1']),
+    x2: Number(last['x2']),
+    y2: Number(last['y2']),
+  };
+}
+
+function polygonPoints(svg: string): Array<[number, number]> {
+  const raw = attrs('polygon', svg)[0]?.['points'] ?? '';
+  const n = raw.split(',').map(Number);
+  return n.slice(0, n.length - (n.length % 2)).reduce<Array<[number, number]>>(
+    (acc, _v, i) => (i % 2 === 0 ? [...acc, [n[i]!, n[i + 1]!]] : acc),
+    [],
+  );
+}
+
+const INCLINATION = 30;
+
+describe('the `(n)` inclination reaches the SVG', () => {
+  it('draws a FLAT body when no dressing carries one', () => {
+    const body = bodyLine(svgOf('A -> B'));
+    expect(body.y2 - body.y1).toBe(0);
+    expect(body.x2).toBeGreaterThan(body.x1);
+  });
+
+  it('slopes `A ->(30) B` down to `pos2` — ComponentRoseArrow.java:162', () => {
+    const svg = svgOf(`A ->(${String(INCLINATION)}) B`);
+    const body = bodyLine(svg);
+    expect(body.y2 - body.y1).toBe(INCLINATION);
+    // `:154` translates dressing2 to `(pos2, posArrow + inclination2)`, the
+    // very point `:162` ends the body at, so the tip lands ON the line's end.
+    expect(polygonPoints(svg)[1]).toEqual([body.x2, body.y2]);
+  });
+
+  it('slopes `A (30)<- B` back to local x 0 — ComponentRoseArrow.java:160', () => {
+    const svg = svgOf(`A (${String(INCLINATION)})<- B`);
+    const body = bodyLine(svg);
+    expect(body.y2 - body.y1).toBe(INCLINATION);
+    // The `inclination1` branch runs the line back to LOCAL 0, not to
+    // `start`, so it ends left of where it began and one pixel left of the
+    // head, which sits at `pos1 = start + 1` (`:100`).
+    expect(body.x2).toBeLessThan(body.x1);
+    expect(polygonPoints(svg)[1]).toEqual([body.x2 + 1, body.y2]);
+  });
+
+  it('turns the head polygon off the horizontal', () => {
+    const flat = polygonPoints(svgOf('A -> B'));
+    const turned = polygonPoints(svgOf(`A ->(${String(INCLINATION)}) B`));
+    expect(flat[0]![1]).toBe(flat[1]![1] - ARROW_DELTA_Y);
+    expect(turned[0]![1]).not.toBe(turned[1]![1] - ARROW_DELTA_Y);
+    expect(turned).toHaveLength(flat.length);
+  });
+
+  it('leaves the saltire square while the far head turns', () => {
+    // `A x->(30) B`: dressing1 CROSSX (`getInclination1` -> 0 because
+    // dressing2 is NORMAL), dressing2 NORMAL at inclination 30.
+    const svg = svgOf(`A x->(${String(INCLINATION)}) B`);
+    const saltire = solidLines(svg).filter((l) => l['stroke-width'] === '2');
+    expect(saltire).toHaveLength(2);
+    const mid = (Number(saltire[0]!['y1']) + Number(saltire[0]!['y2'])) / 2;
+    expect(mid).toBe(bodyLine(svg).y1);
+  });
+});
+
+describe('the `x`, `o` and half-head dressings reach the SVG', () => {
+  it('`A -x B` draws the saltire and no polygon at all', () => {
+    const svg = svgOf('A -x B');
+    const saltire = solidLines(svg).filter((l) => l['stroke-width'] === '2');
+    expect(saltire).toHaveLength(2);
+    expect(attrs('polygon', svg)).toHaveLength(0);
+    // `:257-260` — two ULines of (deltaX, ±deltaX) from x = -spaceCrossX -
+    // deltaX, so each stroke spans deltaX on both axes.
+    expect(Number(saltire[0]!['x2']) - Number(saltire[0]!['x1'])).toBe(ARROW_DELTA_X);
+    expect(Number(saltire[0]!['y2']) - Number(saltire[0]!['y1'])).toBe(ARROW_DELTA_X);
+    expect(Number(saltire[1]!['y2']) - Number(saltire[1]!['y1'])).toBe(-ARROW_DELTA_X);
+  });
+
+  it('`A ->o B` draws the circle right of the tip', () => {
+    const svg = svgOf('A ->o B');
+    const circle = attrs('ellipse', svg);
+    expect(circle).toHaveLength(1);
+    expect(Number(circle[0]!['rx'])).toBe(DIAM_CIRCLE / 2);
+    expect(Number(circle[0]!['stroke-width'])).toBe(THIN_CIRCLE);
+    // `:241` centres it at (+thinCircle, -thinCircle / 2) from the tip, and
+    // `:243` pushes the head left by diamCircle / 2 + thinCircle.
+    const tip = polygonPoints(svg)[1]!;
+    expect(Number(circle[0]!['cx'])).toBe(tip[0] + CIRCLE_SHIFT + THIN_CIRCLE);
+    expect(Number(circle[0]!['cy'])).toBe(tip[1] - THIN_CIRCLE / 2);
+  });
+
+  it('`A o-> B` draws the circle left of the tail', () => {
+    const circle = attrs('ellipse', svgOf('A o-> B'));
+    expect(circle).toHaveLength(1);
+    expect(Number(circle[0]!['rx'])).toBe(DIAM_CIRCLE / 2);
+  });
+
+  it('`A -\\ B` and `A -/ B` each draw one half, and they differ', () => {
+    // Jar-verified (T12): `-\` emits the half ABOVE the shaft, `-/` below.
+    const top = polygonPoints(svgOf('A -\\ B'));
+    const bottom = polygonPoints(svgOf('A -/ B'));
+    expect(top).toHaveLength(3);
+    expect(bottom).toHaveLength(3);
+    expect(top).not.toEqual(bottom);
+    const shaft = bodyLine(svgOf('A -\\ B')).y1;
+    expect(top.map(([, y]) => y - shaft)).toEqual([-ARROW_DELTA_Y, 0, 0]);
+    expect(bottom.map(([, y]) => y - shaft)).toEqual([0, 0, ARROW_DELTA_Y]);
+  });
+
+  it('leaves the half-head`s share of the line untrimmed — :126-127', () => {
+    // The `arrowDeltaX / 2` trim is gated on `part == FULL`, so a half head
+    // reaches a pixel further right than a whole one does.
+    expect(bodyLine(svgOf('A -\\ B')).x2 - bodyLine(svgOf('A -> B')).x2).toBe(
+      ARROW_DELTA_X / 2,
+    );
   });
 });
