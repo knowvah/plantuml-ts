@@ -16,6 +16,49 @@
 import type { NoteEvent } from './ast.js';
 import { emit, type Command } from './sequence-parse-helpers.js';
 
+// ---------------------------------------------------------------------------
+// Shared fragments: `ColorParser`'s two grammars and the `<<stereo>>` token.
+// ---------------------------------------------------------------------------
+
+/**
+ * `ColorParser.COLOR_REGEXP` — a plain `#name` background color, OR a
+ * two-stop gradient like `#yellow/blue` (one `-`/`\`/`|`/`/` separator
+ * between two word runs).
+ * @see klimt/color/ColorParser.java:44
+ */
+const NOTE_COLOR_ATOM = String.raw`#\w+[-\\|/]?\w+`;
+
+/**
+ * `ColorParser.PART2` — the compound `key:value(;key:value)*` form used by
+ * `#green;line:lightblue` and `#back:green;line:lightblue`: an optional
+ * leading plain color plus `;`, then one-or-more `keyword[:value]` pairs
+ * drawn from the fixed `ColorParam`-backed keyword set.
+ * @see klimt/color/ColorParser.java:45
+ */
+const NOTE_COLOR_COMPOUND =
+  String.raw`#(?:\w+[-\\|/]?\w+;)?(?:(?:text|back|header|line|line\.dashed|line\.dotted|line\.bold|shadowing)(?::\w+[-\\|/]?\w+)?(?:;|(?![\w;:.])))+`;
+
+/**
+ * `ColorParser.COLORS_REGEXP = PART2 | COLOR_REGEXP` — compound tried
+ * first, same alternation order upstream uses.
+ * @see klimt/color/ColorParser.java:46
+ */
+const NOTE_COLOR = `(?:${NOTE_COLOR_COMPOUND})|(?:${NOTE_COLOR_ATOM})`;
+
+/** `StereotypePattern.mandatory` — `<<...>>`, non-greedy so two
+ *  stereotype-shaped runs on one line don't merge into one match.
+ *  @see stereo/StereotypePattern.java:67 */
+const NOTE_STEREO = String.raw`<<.+?>>`;
+
+/** `StringUtils#eventuallyRemoveStartingAndEndingDoubleQuote` — strip one
+ *  layer of matching double quotes off a participant token, so a quoted
+ *  note target (`note left "Long Alice"`) resolves to the SAME id a
+ *  quoted arrow endpoint creates (`command-arrow.ts`'s local `unquote`
+ *  ports the identical upstream method for that command family). */
+function unquote(token: string): string {
+  return token.replace(/^"(.*)"$/, '$1');
+}
+
 // 8. note left of / right of / over
 //
 //    Single-line form (inline text after colon):
@@ -31,11 +74,25 @@ import { emit, type Command } from './sequence-parse-helpers.js';
 //    Groups:
 //      1 — position keyword (left of | right of | over)
 //      2 — participant list (stops before : or #)
-//      3 — optional color (#word)
+//      3 — optional color (NOTE_COLOR — plain or compound)
 //      4 — optional inline text (everything after ": ")
+//
+// T8: the color group now shares `NOTE_COLOR` with `styledNoteCommand`
+// rather than a bare `#\w+`. A plain `#\w+` color group left this command
+// (tried FIRST in the registry) able to PARTIALLY match a compound color
+// spec like `#back:green;line:lightblue` -- it captured only `#back` and
+// swallowed the rest of the line (`:green;line:lightblue : text2`) as if
+// it were a second `:`-prefixed text block, producing a wrong AST instead
+// of falling through to `styledNoteCommand`'s correct compound handling.
+// The participant class also now excludes `<`, same as `styledNoteCommand`
+// -- this command models no stereotype, so a line carrying one (`note over
+// Alice <<red>>: x`) must FAIL here and fall through, not silently swallow
+// the `<<red>>` run into the participant id.
 export const noteCommand: Command = {
-  pattern:
-    /^note\s+(left of|right of|over)\s+([^:#\n]+?)(?:\s+(#\w+))?(?:\s*:\s*(.+))?\s*$/i,
+  pattern: new RegExp(
+    String.raw`^note\s+(left of|right of|over)\s+([^:#<\n]+?)(?:\s*(${NOTE_COLOR}))?(?:\s*:\s*(.+))?\s*$`,
+    'i',
+  ),
   execute(state, match) {
     const rawPos = match[1]!.toLowerCase();
     const position: NoteEvent['position'] =
@@ -48,9 +105,12 @@ export const noteCommand: Command = {
     const color = match[3];
     const inlineText = match[4];
 
+    // T8: unquote each entry so a quoted participant (`note over Bob,
+    // "Long Alice"`) resolves to the SAME id `"Long Alice" -> Bob` created,
+    // rather than a second, quote-literal participant.
     const participants = rawParticipants
       .split(',')
-      .map((s) => s.trim())
+      .map((s) => unquote(s.trim()))
       .filter((s) => s.length > 0);
 
     if (inlineText !== undefined) {
@@ -108,16 +168,34 @@ export const endNoteCommand: Command = {
  * above/below-the-arrow geometry. Silently does nothing when there is no
  * prior message, mirroring `executeInternal`'s own `if (event == null)
  * return ok()`.
- * @see command/note/sequence/FactorySequenceNoteOnArrowCommand.java:209-213
+ *
+ * T8: the `<<stereo>>` group is `StereotypePattern.optional`, which wraps
+ * BOTH sides in `spaceZeroOrMore()` — so `note <<red>> left` (stereotype
+ * BEFORE the position) needs a space allowed between `note` and `<<red>>`,
+ * which the original `(?:<<[^>]*>>)?` (no leading `\s*`) did not permit.
+ * A second, independent stereotype slot exists AFTER the position too
+ * (`note left <<red>>`) — upstream's STEREO2 — previously unported.
+ * `arg.getLazzy("STEREO", 0)` returns whichever of STEREO1/STEREO2 fired.
+ * `style` is now stored on the event too — `executeInternal` resolves
+ * `NoteStyle.getNoteStyle(STYLE)` and feeds it straight into `new
+ * Note(display, position, style, ...)` (`:221,225`), same as every other
+ * note command in this family.
+ * @see command/note/sequence/FactorySequenceNoteOnArrowCommand.java:78-103,221,225
  */
 export const noteOnArrowCommand: Command = {
-  pattern: /^(note|hnote|rnote)(?:<<[^>]*>>)?\s+(left|right|top|bottom)(?:\s+(#\S+))?\s*(?::\s*(.*))?\s*$/i,
+  pattern: new RegExp(
+    String.raw`^(note|hnote|rnote)\s*(${NOTE_STEREO})?\s*(left|right|top|bottom)\s*(${NOTE_STEREO})?(?:\s*(${NOTE_COLOR}))?\s*(?::\s*(.*))?\s*$`,
+    'i',
+  ),
   execute(state, match) {
     if (state.lastMessageFrom === null || state.lastMessageTo === null) return;
     const style = match[1]!.toLowerCase();
-    const rawPosition = match[2]!.toLowerCase();
-    const color = match[3];
-    const inlineText = match[4];
+    const stereo1 = match[2];
+    const rawPosition = match[3]!.toLowerCase();
+    const stereo2 = match[4];
+    const color = match[5];
+    const inlineText = match[6];
+    const stereotype = stereo1 ?? stereo2;
     const position: NoteEvent['position'] =
       rawPosition === 'left' ? 'left' : rawPosition === 'right' ? 'right' : 'over';
     const participants =
@@ -129,8 +207,10 @@ export const noteOnArrowCommand: Command = {
       kind: 'note' as const,
       position,
       participants,
+      style: style as 'note' | 'hnote' | 'rnote',
       ...shape,
       ...(color !== undefined ? { color } : {}),
+      ...(stereotype !== undefined ? { stereotype } : {}),
     };
 
     if (inlineText !== undefined) {
@@ -142,33 +222,68 @@ export const noteOnArrowCommand: Command = {
 };
 
 /**
- * `note<<stereotype>> left of X` / `rnote over X` / `hnote over X, Y` —
- * `FactorySequenceNoteCommand` (single participant, "of" optional) and
- * `FactorySequenceNoteOverSeveralCommand` (comma list). `COMMANDS`'s rule 8
- * already covers the plain `note left of|right of|over` shape; this rule
- * covers what it does not: a `<<stereotype>>` between the STYLE keyword and
- * the position, and the `rnote`/`hnote` STYLE keywords themselves. The
- * stereotype is matched and discarded — neither shape is modelled on
- * `NoteEvent` (no long-time-user-visible regression: the note itself still
- * renders with its text, only the small stereotype badge is absent).
- * @see command/note/sequence/FactorySequenceNoteCommand.java:81-91
+ * `[&][/] (note|hnote|rnote) [<<stereo>>] (left|right|over) [of] X[,Y] [<<stereo>>]
+ * [#color] [: text]` — `FactorySequenceNoteCommand`, the fully general form.
+ * `COMMANDS`'s rule 8 (`noteCommand`) already fast-paths the common
+ * `note left of|right of|over` shape with no markers; this rule is the
+ * canonical one and catches everything that needs at least one of the four
+ * previously-unported groups:
+ *
+ *  - PARALLEL `(&[%s]*)?` — a leading `&` marks the note concurrent with the
+ *    arrow above it (teoz-only rendering, D4: parsed and stored, not drawn).
+ *  - VMERGE `(/)?` — a leading `/` merges this note vertically with the
+ *    previous one (`tryMerge` -> `diagram.addNote(note, tryMerge)`).
+ *  - PARTICIPANT `(?:of[%s]+)?(...)` — `of` is OPTIONAL: `note left Alice`
+ *    is as valid as `note left of Alice`. This port keeps its own
+ *    pre-existing generalization of allowing a comma list here (upstream
+ *    splits that into a SEPARATE two-participant-only class,
+ *    `FactorySequenceNoteOverSeveralCommand`, itself PARALLEL/VMERGE/STYLE
+ *    symmetric with this one at `:76-117`) — a superset, not a regression.
+ *  - STYLE `(note|hnote|rnote)` — `hnote`/`rnote` were already accepted
+ *    here; what was missing is `of`-optional PARTICIPANT and PARALLEL/VMERGE
+ *    applying to them too (`hnote left Alice`, `& rnote over Bob`).
+ *  - StereotypePattern (STEREO1 before POSITION, STEREO2 after PARTICIPANT)
+ *    — `note <<stereo>> left of X` / `note left of X <<stereo>>`.
+ *    `arg.getLazzy("STEREO", 0)` picks whichever fired.
+ *
+ * COLOR now accepts `ColorParser`'s full grammar (`NOTE_COLOR`), not just a
+ * single `#word` preceded by whitespace — `C#tomato` (zero space) and
+ * `#green;line:lightblue` (compound spec) both parse.
+ * @see command/note/sequence/FactorySequenceNoteCommand.java:76-98
  */
 export const styledNoteCommand: Command = {
-  pattern:
-    /^(note|hnote|rnote)(?:<<[^>]*>>)?\s+(left of|right of|over)\s+([^:#\n]+?)(?:\s+(#\w+))?(?:\s*:\s*(.+))?\s*$/i,
+  pattern: new RegExp(
+    String.raw`^(?:(&)\s*)?(?:(/)\s*)?(note|hnote|rnote)\s*(${NOTE_STEREO})?\s*(left|right|over)\s+(?:of\s+)?([^:#<\n]+?)\s*(${NOTE_STEREO})?(?:\s*(${NOTE_COLOR}))?\s*(?::\s*(.+))?\s*$`,
+    'i',
+  ),
   execute(state, match) {
-    const style = match[1]!.toLowerCase();
-    const rawPos = match[2]!.toLowerCase();
+    const parallel = match[1] !== undefined;
+    const vmerge = match[2] !== undefined;
+    const style = match[3]!.toLowerCase();
+    const stereo1 = match[4];
+    const rawPos = match[5]!.toLowerCase();
+    const stereo2 = match[7];
+    const color = match[8];
+    const inlineText = match[9];
     const position: NoteEvent['position'] =
-      rawPos === 'left of' ? 'left' : rawPos === 'right of' ? 'right' : 'over';
-    const participants = match[3]!
+      rawPos === 'left' ? 'left' : rawPos === 'right' ? 'right' : 'over';
+    const participants = match[6]!
       .split(',')
-      .map((s) => s.trim())
+      .map((s) => unquote(s.trim()))
       .filter((s) => s.length > 0);
-    const color = match[4];
-    const inlineText = match[5];
+    const stereotype = stereo1 ?? stereo2;
     const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
-    const base = { kind: 'note' as const, position, participants, ...shape, ...(color !== undefined ? { color } : {}) };
+    const base = {
+      kind: 'note' as const,
+      position,
+      participants,
+      style: style as 'note' | 'hnote' | 'rnote',
+      ...shape,
+      ...(color !== undefined ? { color } : {}),
+      ...(stereotype !== undefined ? { stereotype } : {}),
+      ...(vmerge ? { vmerge: true } : {}),
+      ...(parallel ? { parallel: true } : {}),
+    };
 
     if (inlineText !== undefined) {
       emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
