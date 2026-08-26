@@ -9,7 +9,7 @@ unread; later tasks fill them.
 
 | ID | Description | Writes | Depends On | Done |
 |---|---|---|---|---|
-| T6 | `ArrowConfiguration` + `MessageExoEvent` + all new fields; `MessageStyle` deleted | `ast.ts`, `sequence-parse-helpers.ts`, `sequence-arrowhead.ts`, `renderer-message.ts`, `sequence-layout-message.ts`, `command-arrow.ts`, 2 test files | T1, T2, T5 | [ ] |
+| T6 | `ArrowConfiguration` + `MessageExoEvent` + all new fields; `MessageStyle` deleted | `ast.ts`, `sequence-parse-helpers.ts`, `sequence-arrowhead.ts`, `renderer-message.ts`, `sequence-layout-message.ts`, `command-arrow.ts`, 2 test files | T1, T2, T5 | [x] |
 
 ## Batch gate
 

@@ -23,6 +23,11 @@ draws them yet.
 ## Write-set
 
 - `src/diagrams/sequence/renderer-message.ts`
+- `src/diagrams/sequence/sequence-layout-message.ts` — **ADDED 2026-08-26 by
+  the batch-2 close.** T6 declared `url`/`stereotype`/`lifeColor` on
+  `MessageGeo` but does NOT copy them through `buildMessageGeo` (a passthrough
+  then would have been three always-false branches with no way to exercise
+  them). This task must populate them there before it can render them.
 - `tests/unit/sequence/renderer.test.ts`
 
 Not `sequence-arrowhead.ts` or `renderer-arrowhead.ts` (T15 owns both this
