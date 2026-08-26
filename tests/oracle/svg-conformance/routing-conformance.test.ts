@@ -567,10 +567,11 @@ describe('routing conformance — jar-error classification', () => {
     // 2954 -> 3050 agree and 196 -> 100 misroutes at
     // `sequence-command-coverage` batch 3, which ported the note factory,
     // grouping/autonumber/lifeline, misc and sprite command families and
-    // rebuilt CommandArrow compositionally. The remaining 100 are dominated
-    // by the exo-arrow family (`[->`, `->]`, `?->`), which batches 4-6 own.
-    expect(pinnedAgree.length).toBe(3050);
-    expect(pinnedMisroutes.length).toBe(100);
+    // rebuilt CommandArrow compositionally; then 3050 -> 3132 and 100 -> 18
+    // at batch 4, which ported the exogenous arrow family that dominated
+    // the batch-3 remainder.
+    expect(pinnedAgree.length).toBe(3132);
+    expect(pinnedMisroutes.length).toBe(18);
     expect(pinnedJarErrors.length).toBe(8);
     expect(manifest.fixtures.length).toBe(3158);
   });
@@ -584,10 +585,11 @@ describe('routing conformance — jar-error classification', () => {
     // upstream origin. Two pins predate the field (the pair this mission
     // inherited); everything censused since must carry one.
     const censused = pinnedMisroutes.filter((f) => f.reason !== undefined);
-    // 194 -> 98 at `sequence-command-coverage` batch 3. Still exactly two
-    // short of `pinnedMisroutes`: the same inherited pair that predates the
-    // `reason` field, neither of which this mission closed.
-    expect(censused.length).toBe(98);
+    // 194 -> 98 at `sequence-command-coverage` batch 3, then 98 -> 16 at
+    // batch 4. Still exactly two short of `pinnedMisroutes`: the same
+    // inherited pair that predates the `reason` field, neither of which this
+    // mission closed.
+    expect(censused.length).toBe(16);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

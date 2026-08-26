@@ -553,7 +553,7 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 3158 fixtures, 8 of them jar errors, 104 of them erroring here', () => {
+  it('the manifest is 3158 fixtures, 8 of them jar errors, 22 of them erroring here', () => {
     // The 8 jar-error fixtures are the same 8 the routing gate pins. The 104
     // we error on are 5 of those 8, plus nuvoja, plus the 98 pinned
     // known-gap below — the 10 exo-arrow fixtures T13 found, then batch 4's
@@ -563,11 +563,13 @@ describe('refusal coverage — baseline shape', () => {
     //
     // 169 -> 104 at `sequence-command-coverage` batch 3, which ported the
     // note factory, grouping/autonumber/lifeline, misc and sprite command
-    // families and rebuilt CommandArrow compositionally.
+    // families and rebuilt CommandArrow compositionally; then 104 -> 22 at
+    // batch 4, which ported the exogenous arrow family (`[-> Bob`, `Bob ->]`)
+    // -- the single largest bucket in that mission at 82 fixtures.
     expect(manifest.fixtures.length).toBe(3158);
     expect(pinnedJarErrors.length).toBe(8);
-    expect(pinnedErroring.length).toBe(104);
-    expect(pinnedRendering.length).toBe(3054);
+    expect(pinnedErroring.length).toBe(22);
+    expect(pinnedRendering.length).toBe(3136);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -598,7 +600,9 @@ describe('refusal coverage — baseline shape', () => {
     // `nuvoja-46-dezu541` deliberately stays OUT of this set: its defect is a
     // fixture-include-store gap (`!includedef macro`), not an unported
     // Command, so it remains the single non-gapped defect SLI 2 reports.
-    expect(gaps.length).toBe(98);
+    //
+    // 98 -> 16 at batch 4 (the exogenous arrow family).
+    expect(gaps.length).toBe(16);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

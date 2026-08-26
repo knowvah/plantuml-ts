@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 504,
-    "extra-element": 68,
-    "geometry": 18403,
-    "text-metrics": 6909,
+    "missing-element": 583,
+    "extra-element": 61,
+    "geometry": 19388,
+    "text-metrics": 7098,
     "format-units": 5,
-    "other": 12678
+    "other": 13128
   },
   "fixtures": [
     {
@@ -22,7 +22,7 @@
       }
     },
     {
-      "slug": "TeozTimelineIssues_0002_Test",
+      "slug": "SequenceArrows_0001_Test",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -31,6 +31,30 @@
         "text-metrics": 0,
         "format-units": 0,
         "other": 0
+      }
+    },
+    {
+      "slug": "SequenceArrows_0002_Test",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "TeozTimelineIssues_0002_Test",
+      "diffCount": 103,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 19,
+        "text-metrics": 17,
+        "format-units": 0,
+        "other": 67
       }
     },
     {
@@ -82,7 +106,31 @@
       }
     },
     {
+      "slug": "TeozTimelineIssues_0007_Test",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "TeozTimelineIssues_0008_Test",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "bacupi-77-fuke586",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -347,14 +395,14 @@
     },
     {
       "slug": "bexoce-95-vibe195",
-      "diffCount": 5,
+      "diffCount": 103,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 19,
+        "text-metrics": 17,
         "format-units": 0,
-        "other": 0
+        "other": 67
       }
     },
     {
@@ -367,6 +415,18 @@
         "text-metrics": 10,
         "format-units": 0,
         "other": 16
+      }
+    },
+    {
+      "slug": "bifuzu-54-gefo004",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -407,14 +467,14 @@
     },
     {
       "slug": "bipoce-87-cuki505",
-      "diffCount": 5,
+      "diffCount": 149,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 90,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 0
+        "other": 37
       }
     },
     {
@@ -655,6 +715,18 @@
         "text-metrics": 10,
         "format-units": 0,
         "other": 16
+      }
+    },
+    {
+      "slug": "bozuru-10-rajo382",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -935,6 +1007,18 @@
     },
     {
       "slug": "calido-79-kovi606",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "caluni-22-noci624",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -1607,14 +1691,14 @@
     },
     {
       "slug": "dakake-85-nemi992",
-      "diffCount": 6,
+      "diffCount": 152,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 92,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 1
+        "other": 38
       }
     },
     {
@@ -1631,6 +1715,18 @@
     },
     {
       "slug": "dalata-11-sifu583",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "damoge-62-riso387",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -1707,6 +1803,18 @@
       "buckets": {
         "missing-element": 0,
         "extra-element": 1,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "debufa-67-poma789",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -1918,6 +2026,18 @@
       }
     },
     {
+      "slug": "dicuva-14-lini551",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "digula-66-dipe776",
       "diffCount": 5,
       "buckets": {
@@ -2038,6 +2158,18 @@
       }
     },
     {
+      "slug": "dojapu-42-sali914",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "dokuse-50-dobi947",
       "diffCount": 5,
       "buckets": {
@@ -2062,11 +2194,35 @@
       }
     },
     {
+      "slug": "dolefo-13-kovu702",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "doleso-00-deme832",
       "diffCount": 5,
       "buckets": {
         "missing-element": 0,
         "extra-element": 1,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "domaji-70-zini725",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -2242,6 +2398,18 @@
       }
     },
     {
+      "slug": "dugata-50-koxo354",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "dugeki-47-celo546",
       "diffCount": 5,
       "buckets": {
@@ -2303,6 +2471,18 @@
     },
     {
       "slug": "durapi-97-jupo864",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "dutopa-62-jalu659",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -2866,6 +3046,18 @@
       }
     },
     {
+      "slug": "fonope-49-jodi834",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "foporo-86-nego484",
       "diffCount": 59,
       "buckets": {
@@ -3226,6 +3418,18 @@
       }
     },
     {
+      "slug": "gejeji-12-zofa866",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "gejoko-46-pogi886",
       "diffCount": 5,
       "buckets": {
@@ -3574,6 +3778,18 @@
       }
     },
     {
+      "slug": "gogise-40-juro428",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "gogivi-77-safe144",
       "diffCount": 176,
       "buckets": {
@@ -3631,6 +3847,18 @@
         "text-metrics": 8,
         "format-units": 0,
         "other": 20
+      }
+    },
+    {
+      "slug": "gozaru-36-gejo982",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -3815,6 +4043,18 @@
     },
     {
       "slug": "guvisi-28-voju934",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "guzoco-99-ginu686",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -4042,6 +4282,18 @@
       }
     },
     {
+      "slug": "jebole-52-cuvo164",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "jedado-35-lobi482",
       "diffCount": 5,
       "buckets": {
@@ -4147,6 +4399,18 @@
         "text-metrics": 40,
         "format-units": 0,
         "other": 21
+      }
+    },
+    {
+      "slug": "jitesa-41-cara967",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -4275,6 +4539,18 @@
       "buckets": {
         "missing-element": 0,
         "extra-element": 1,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "jotase-88-kiki473",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -4462,6 +4738,18 @@
       }
     },
     {
+      "slug": "kakune-11-vusu073",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "kaluna-08-rubu301",
       "diffCount": 5,
       "buckets": {
@@ -4483,6 +4771,18 @@
         "text-metrics": 23,
         "format-units": 0,
         "other": 30
+      }
+    },
+    {
+      "slug": "kapuva-33-nomi771",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -4619,6 +4919,18 @@
     },
     {
       "slug": "kevaru-04-faka914",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "kevavu-57-kifi084",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -4807,6 +5119,18 @@
         "text-metrics": 17,
         "format-units": 0,
         "other": 31
+      }
+    },
+    {
+      "slug": "kivavu-72-goju233",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -5026,6 +5350,18 @@
       }
     },
     {
+      "slug": "kopaxi-36-dedo317",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "koresa-77-jasi418",
       "diffCount": 47,
       "buckets": {
@@ -5111,6 +5447,18 @@
     },
     {
       "slug": "kubini-17-jemo957",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "kugati-67-nuzu852",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -5230,6 +5578,18 @@
       }
     },
     {
+      "slug": "kuzuco-40-xara309",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "labima-56-kone976",
       "diffCount": 5,
       "buckets": {
@@ -5255,14 +5615,14 @@
     },
     {
       "slug": "labudu-49-fove649",
-      "diffCount": 6,
+      "diffCount": 152,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 92,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 1
+        "other": 38
       }
     },
     {
@@ -5386,6 +5746,18 @@
       }
     },
     {
+      "slug": "legole-00-givu934",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "lejafe-21-niga299",
       "diffCount": 91,
       "buckets": {
@@ -5395,6 +5767,18 @@
         "text-metrics": 18,
         "format-units": 0,
         "other": 34
+      }
+    },
+    {
+      "slug": "lekari-63-rigu513",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -5518,6 +5902,18 @@
       }
     },
     {
+      "slug": "liculu-86-goge853",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "lidupe-72-cexa425",
       "diffCount": 5,
       "buckets": {
@@ -5578,6 +5974,30 @@
       }
     },
     {
+      "slug": "limajo-73-kife020",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "lipuci-81-vovi162",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "lirasa-26-tazo607",
       "diffCount": 5,
       "buckets": {
@@ -5635,6 +6055,18 @@
         "text-metrics": 13,
         "format-units": 0,
         "other": 24
+      }
+    },
+    {
+      "slug": "lokavu-60-peku948",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -5710,6 +6142,18 @@
       }
     },
     {
+      "slug": "lozuru-10-poba814",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "lubuxu-38-jomi891",
       "diffCount": 33,
       "buckets": {
@@ -5755,6 +6199,18 @@
         "text-metrics": 12,
         "format-units": 0,
         "other": 16
+      }
+    },
+    {
+      "slug": "lugika-07-rozo911",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -5842,6 +6298,18 @@
       }
     },
     {
+      "slug": "lusigu-71-nipe759",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "luvudi-06-cire238",
       "diffCount": 5,
       "buckets": {
@@ -5875,6 +6343,18 @@
         "text-metrics": 15,
         "format-units": 0,
         "other": 23
+      }
+    },
+    {
+      "slug": "luzapi-49-rati107",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -5939,14 +6419,14 @@
     },
     {
       "slug": "mapeji-83-sebu002",
-      "diffCount": 5,
+      "diffCount": 103,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
+        "geometry": 19,
+        "text-metrics": 17,
         "format-units": 0,
-        "other": 0
+        "other": 67
       }
     },
     {
@@ -5983,6 +6463,18 @@
         "text-metrics": 8,
         "format-units": 0,
         "other": 34
+      }
+    },
+    {
+      "slug": "matoke-25-kidu719",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -6067,6 +6559,18 @@
         "text-metrics": 10,
         "format-units": 0,
         "other": 16
+      }
+    },
+    {
+      "slug": "meguzu-44-luri459",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -6334,6 +6838,18 @@
       }
     },
     {
+      "slug": "mitire-01-voga923",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "mituru-91-pato523",
       "diffCount": 88,
       "buckets": {
@@ -6418,6 +6934,18 @@
       }
     },
     {
+      "slug": "mocuna-66-bica785",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "modamu-43-juci519",
       "diffCount": 5,
       "buckets": {
@@ -6443,6 +6971,18 @@
     },
     {
       "slug": "momivo-11-pulo230",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "momuxe-95-bugu296",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -6610,6 +7150,30 @@
       }
     },
     {
+      "slug": "mukebo-35-xoju095",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "mulofu-90-voka382",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "mumagu-62-jicu083",
       "diffCount": 52,
       "buckets": {
@@ -6731,11 +7295,11 @@
     },
     {
       "slug": "nadode-16-budi136",
-      "diffCount": 64,
+      "diffCount": 67,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 42,
+        "geometry": 45,
         "text-metrics": 6,
         "format-units": 0,
         "other": 16
@@ -6790,6 +7354,18 @@
       }
     },
     {
+      "slug": "nanoza-23-fija616",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "naruxe-19-copi353",
       "diffCount": 51,
       "buckets": {
@@ -6835,6 +7411,18 @@
         "text-metrics": 12,
         "format-units": 0,
         "other": 23
+      }
+    },
+    {
+      "slug": "necofe-81-toja736",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -7102,6 +7690,18 @@
       }
     },
     {
+      "slug": "nisogu-21-zixe139",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "nitadu-00-laca973",
       "diffCount": 5,
       "buckets": {
@@ -7354,6 +7954,18 @@
       }
     },
     {
+      "slug": "nukona-00-jaro456",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "numezi-28-fuzu813",
       "diffCount": 5,
       "buckets": {
@@ -7379,6 +7991,18 @@
     },
     {
       "slug": "nunozo-09-zoce623",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "nunuji-27-mosa042",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -7786,6 +8410,18 @@
       }
     },
     {
+      "slug": "pobasa-34-neza994",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "poceko-81-dofe354",
       "diffCount": 103,
       "buckets": {
@@ -7819,6 +8455,18 @@
         "text-metrics": 42,
         "format-units": 0,
         "other": 48
+      }
+    },
+    {
+      "slug": "pojofa-31-mimo042",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -8362,6 +9010,18 @@
       }
     },
     {
+      "slug": "repudi-21-rovo448",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "rexine-04-regi170",
       "diffCount": 6,
       "buckets": {
@@ -8471,14 +9131,14 @@
     },
     {
       "slug": "rititi-64-vene814",
-      "diffCount": 5,
+      "diffCount": 149,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 90,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 0
+        "other": 37
       }
     },
     {
@@ -8647,6 +9307,18 @@
         "text-metrics": 5,
         "format-units": 0,
         "other": 22
+      }
+    },
+    {
+      "slug": "rozavo-21-cavi374",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -8902,6 +9574,18 @@
       }
     },
     {
+      "slug": "ruxuxu-75-jilu612",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "ruzapi-75-pone297",
       "diffCount": 5,
       "buckets": {
@@ -8947,6 +9631,18 @@
         "text-metrics": 10,
         "format-units": 0,
         "other": 16
+      }
+    },
+    {
+      "slug": "sarevu-71-nona699",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -9106,6 +9802,18 @@
       }
     },
     {
+      "slug": "semepi-87-tiza126",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "semika-67-covi892",
       "diffCount": 63,
       "buckets": {
@@ -9119,14 +9827,14 @@
     },
     {
       "slug": "senogo-33-nuva054",
-      "diffCount": 5,
+      "diffCount": 149,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 90,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 0
+        "other": 37
       }
     },
     {
@@ -9191,6 +9899,18 @@
     },
     {
       "slug": "sijuso-90-zaje372",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "sirabe-54-sibe468",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -9487,6 +10207,18 @@
         "text-metrics": 0,
         "format-units": 0,
         "other": 0
+      }
+    },
+    {
+      "slug": "sufevi-44-xipa294",
+      "diffCount": 6,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 1
       }
     },
     {
@@ -9934,6 +10666,30 @@
       }
     },
     {
+      "slug": "texopo-01-dibi658",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "texoze-85-meli189",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "tifexe-26-caza420",
       "diffCount": 5,
       "buckets": {
@@ -9955,6 +10711,18 @@
         "text-metrics": 10,
         "format-units": 0,
         "other": 19
+      }
+    },
+    {
+      "slug": "tijeba-12-zeta132",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -10150,6 +10918,18 @@
       }
     },
     {
+      "slug": "tolozi-77-gere619",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "totebu-75-jata404",
       "diffCount": 5,
       "buckets": {
@@ -10303,6 +11083,18 @@
         "text-metrics": 9,
         "format-units": 0,
         "other": 15
+      }
+    },
+    {
+      "slug": "turixi-21-mufe557",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -10558,6 +11350,18 @@
       }
     },
     {
+      "slug": "vekuxo-98-rugu851",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "vemako-00-lecu427",
       "diffCount": 5,
       "buckets": {
@@ -10702,6 +11506,18 @@
       }
     },
     {
+      "slug": "vigoga-79-pita532",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "vijito-33-mora824",
       "diffCount": 6,
       "buckets": {
@@ -10739,6 +11555,18 @@
     },
     {
       "slug": "vinefa-69-lufo631",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "vitevu-99-rali549",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -11098,6 +11926,18 @@
       }
     },
     {
+      "slug": "xacete-63-neke615",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "xaduru-73-jani181",
       "diffCount": 84,
       "buckets": {
@@ -11143,6 +11983,18 @@
         "text-metrics": 12,
         "format-units": 0,
         "other": 19
+      }
+    },
+    {
+      "slug": "xalofe-61-vala300",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -11434,6 +12286,18 @@
       }
     },
     {
+      "slug": "xigoxi-25-paro589",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "xikuro-71-cadu306",
       "diffCount": 5,
       "buckets": {
@@ -11495,14 +12359,14 @@
     },
     {
       "slug": "xinote-88-dace690",
-      "diffCount": 5,
+      "diffCount": 124,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 93,
+        "text-metrics": 6,
         "format-units": 0,
-        "other": 0
+        "other": 25
       }
     },
     {
@@ -11566,6 +12430,18 @@
       }
     },
     {
+      "slug": "xogota-37-pele078",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "xojavo-26-jezu088",
       "diffCount": 70,
       "buckets": {
@@ -11611,6 +12487,18 @@
         "text-metrics": 40,
         "format-units": 0,
         "other": 31
+      }
+    },
+    {
+      "slug": "xonili-01-pure946",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -11675,6 +12563,18 @@
     },
     {
       "slug": "xujavu-00-xodi798",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "xujesa-13-dane303",
       "diffCount": 5,
       "buckets": {
         "missing-element": 1,
@@ -11890,6 +12790,18 @@
       }
     },
     {
+      "slug": "zajovi-78-nupe067",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "zakuti-75-kute096",
       "diffCount": 14,
       "buckets": {
@@ -12043,6 +12955,18 @@
         "text-metrics": 10,
         "format-units": 0,
         "other": 25
+      }
+    },
+    {
+      "slug": "zejabi-24-xoja824",
+      "diffCount": 6,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 1
       }
     },
     {
@@ -12262,6 +13186,18 @@
       }
     },
     {
+      "slug": "zofeda-77-xiba744",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "zofibo-80-kisi168",
       "diffCount": 5,
       "buckets": {
@@ -12283,6 +13219,18 @@
         "text-metrics": 17,
         "format-units": 0,
         "other": 23
+      }
+    },
+    {
+      "slug": "zogane-85-raja214",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -12334,6 +13282,18 @@
       }
     },
     {
+      "slug": "zosulu-72-fati889",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "zovido-40-xeju664",
       "diffCount": 5,
       "buckets": {
@@ -12370,6 +13330,18 @@
       }
     },
     {
+      "slug": "zudize-61-vomi445",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "zufido-27-laru296",
       "diffCount": 52,
       "buckets": {
@@ -12379,6 +13351,18 @@
         "text-metrics": 10,
         "format-units": 0,
         "other": 16
+      }
+    },
+    {
+      "slug": "zujani-47-femu345",
+      "diffCount": 5,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {
@@ -12503,413 +13487,85 @@
     },
     {
       "slug": "zuvusi-13-fika929",
-      "diffCount": 5,
+      "diffCount": 149,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 90,
+        "text-metrics": 22,
         "format-units": 0,
-        "other": 0
+        "other": 37
       }
     }
   ],
   "errors": [
     {
-      "slug": "SequenceArrows_0001_Test",
-      "reason": "refuses to parse -- line 22: `a -\\o    b : \"\"-\\o  \"\"`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "SequenceArrows_0002_Test",
-      "reason": "refuses to parse -- line 28: `a -\\o    b : \"\"-\\o  \"\"`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "TeozTimelineIssues_0007_Test",
-      "reason": "refuses to parse -- line 2: `A <[#red]-o? ++`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "bacupi-77-fuke586",
-      "reason": "refuses to parse -- line 3: `[o-> Alice: OK2`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "bifuzu-54-gefo004",
-      "reason": "refuses to parse -- line 3: `[-> B : label1`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "bomino-39-tipo216",
       "reason": "refuses to parse -- line 1: `<style src=strictuml.skin>`. Unported: CommonCommands' <style> block (CommonCommands.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "bozuru-10-rajo382",
-      "reason": "refuses to parse -- line 6: `Alice x->] : hop2`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "caluni-22-noci624",
-      "reason": "refuses to parse -- `?->o main`. Unported: CommandExoArrowRight/Left -- the `?` endpoint is upstream's ARROW_SUPPCIRCLE marker for an arrow whose other end is OFF-DIAGRAM (`([?\\[\\]][ox]?)?`, CommandExoArrowLeft.java:60), the same family as the 74 `[`/`]` exo fixtures pinned in 2652df3c. Newly refused by T20 defect 5: the endpoint class is now upstream's own PART2CODE `([%pLN_.@]+)` (CommandArrow.java:119), so `?` can no longer be absorbed as a participant NAME. It previously rendered a phantom participant literally called `?`."
-    },
-    {
-      "slug": "damoge-62-riso387",
-      "reason": "refuses to parse -- line 4: `[/-o b : \"\"   [/-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "debufa-67-poma789",
-      "reason": "refuses to parse -- line 1: `[-> SbcMXdCtrl: startThread`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "dicuva-14-lini551",
-      "reason": "refuses to parse -- line 1: `Alice ->]`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "dojapu-42-sali914",
-      "reason": "refuses to parse -- line 4: `[o<-o b : \"\" [o<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "dolefo-13-kovu702",
-      "reason": "refuses to parse -- line 11: `......`. Unported: CommandDelay -- the `...` / `…` delay row (SequenceDiagramFactory.java:152). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "dolice-60-copi767",
       "reason": "refuses to parse -- line 1: `Alice -> Bob [[http://www.google.fr]] : ok`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "domaji-70-zini725",
-      "reason": "refuses to parse -- line 4: `[\\\\-o b : \"\"  [\\\\-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "dugata-50-koxo354",
-      "reason": "refuses to parse -- line 4: `[x<- b : \"\"  [x<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "dutopa-62-jalu659",
-      "reason": "refuses to parse -- line 1: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "fojomu-60-cuda302",
       "reason": "refuses to parse -- line 3: `{start} [-> Bob : start doing things during duration`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "fonope-49-jodi834",
-      "reason": "refuses to parse -- line 5: `Alice x->] : hop2`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "fonudu-70-coma124",
       "reason": "refuses to parse -- line 2: `author: foo`. Unported: ReadLineWithYamlHeader -- the `---` YAML front-matter block, stripped in the PREPROCESSOR before any command runs (ReadLineWithYamlHeader.java:91). A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "gejeji-12-zofa866",
-      "reason": "refuses to parse -- line 5: `[o<-x b : \"\" [o<-x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "gogise-40-juro428",
-      "reason": "refuses to parse -- line 4: `[<-> b : \"\"  [<->\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "gozaru-36-gejo982",
-      "reason": "refuses to parse -- line 4: `Alice \\\\-: \"\\\\\\\\-\" Should be down1`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "guzoco-99-ginu686",
-      "reason": "refuses to parse -- line 5: `[o<-x Alice : hop`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "jebole-52-cuvo164",
-      "reason": "refuses to parse -- line 4: `[o<- b : \"\"  [o<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "jiliba-03-lapi286",
       "reason": "refuses to parse -- line 1: `IT++`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "jitesa-41-cara967",
-      "reason": "refuses to parse -- line 4: `[\\- b : \"\"   [\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "jotase-88-kiki473",
-      "reason": "refuses to parse -- line 3: `[o-> Alice: OK2`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "junide-55-soka558",
       "reason": "refuses to parse -- line 4: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "kakune-11-vusu073",
-      "reason": "refuses to parse -- line 4: `[<-o b : \"\"   [<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "kapuva-33-nomi771",
-      "reason": "refuses to parse -- line 4: `[o/- b : \"\"  [o/-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "kevavu-57-kifi084",
-      "reason": "refuses to parse -- line 4: `[x<->x b : \"\"[x<->x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "kivavu-72-goju233",
-      "reason": "refuses to parse -- line 4: `[\\\\- b : \"\"  [\\\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "kopaxi-36-dedo317",
-      "reason": "refuses to parse -- line 4: `[\\-o b : \"\"   [\\-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "kugati-67-nuzu852",
-      "reason": "refuses to parse -- line 4: `[o<<- b : \"\" [o<<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "kuzuco-40-xara309",
-      "reason": "refuses to parse -- line 6: `[->Alice : external event`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "ladiro-50-gume805",
       "reason": "refuses to parse -- line 4: `Note`. Unported: FactorySequenceNoteCommand's multiline form with UrlBuilder.OPTIONAL on the OPENER -- `note left of Alice [[url]]` (FactorySequenceNoteCommand.java:78-85; SequenceDiagramFactory.java:134). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "legole-00-givu934",
-      "reason": "refuses to parse -- line 1: `-> Bob`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "lekari-63-rigu513",
-      "reason": "refuses to parse -- line 1: `[-> Bob : message1`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "licole-34-vejo527",
       "reason": "refuses to parse -- line 4: `+ XXX`. Unported: the `%newline()` preprocessor builtin -- its expansion splits the message into lines this port then cannot parse. A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "liculu-86-goge853",
-      "reason": "refuses to parse -- line 4: `-\\ Bob`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "limajo-73-kife020",
-      "reason": "refuses to parse -- line 4: `A ->] : this goes to the very right of the diagram`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "lipuci-81-vovi162",
-      "reason": "refuses to parse -- line 5: `[o-> B : This text extends the arrow length\\nright edge arrow`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "lokavu-60-peku948",
-      "reason": "refuses to parse -- line 26: `[o-> B : Pre`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "loteba-26-konu854",
       "reason": "refuses to parse -- line 9: `/ note right of Alice: NOTE2`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "lozuru-10-poba814",
-      "reason": "refuses to parse -- line 4: `[o\\\\- b : \"\" [o\\\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "lugika-07-rozo911",
-      "reason": "refuses to parse -- line 13: `[o-> B : word`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "lusigu-71-nipe759",
-      "reason": "refuses to parse -- line 11: `Bob <-o] : external event <-o]`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "luzapi-49-rati107",
-      "reason": "refuses to parse -- line 6: `[-> SerialManager: purgeRx()`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "matoke-25-kidu719",
-      "reason": "refuses to parse -- line 2: `A <[#red]-o? ++`. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "meguzu-44-luri459",
-      "reason": "refuses to parse -- line 1: `[-> Bob : message1`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "mitire-01-voga923",
-      "reason": "refuses to parse -- line 4: `[//- b : \"\"  [//-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "mocuna-66-bica785",
-      "reason": "refuses to parse -- line 1: `foo ->o]`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "momuxe-95-bugu296",
-      "reason": "refuses to parse -- line 4: `[o//- b : \"\" [o//-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "mukebo-35-xoju095",
-      "reason": "refuses to parse -- line 26: `[-> ssl_server.exe : browser list arg = {b1, b2, ...}`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "mulofu-90-voka382",
-      "reason": "refuses to parse -- line 4: `[/- b : \"\"   [/-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "nanoza-23-fija616",
-      "reason": "refuses to parse -- line 4: `[o\\- b : \"\"  [o\\-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "necofe-81-toja736",
-      "reason": "refuses to parse -- line 2: `Bob <-] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "nidozi-08-daxa280",
       "reason": "refuses to parse -- line 3: `Bob -> Alice [[http://plantuml.com/start]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "nisogu-21-zixe139",
-      "reason": "refuses to parse -- line 4: `[<<- b : \"\"  [<<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "nizuzi-32-babe798",
       "reason": "refuses to parse -- line 4: `{start} Alice -> Bob : start doing things during duration`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "nukona-00-jaro456",
-      "reason": "refuses to parse -- line 4: `[<<-o b : \"\"  [<<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "nunuji-27-mosa042",
-      "reason": "refuses to parse -- line 3: `[<--1: SomeOutgoingOperation`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "nuvoja-46-dezu541",
       "reason": "Cannot resolve !includedef 'macro': it is not in the IncludeStore. Includes are resolved synchronously from a pre-populated store. Either call render() (which prefetches includes for you), or pass options.includeStore with an entry for 'mac"
     },
     {
-      "slug": "pobasa-34-neza994",
-      "reason": "refuses to parse -- line 3: `A ->]: ok`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "pojofa-31-mimo042",
-      "reason": "refuses to parse -- line 3: `Bob ->] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "recani-60-licu962",
       "reason": "refuses to parse -- line 1: `-> A`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "repudi-21-rovo448",
-      "reason": "refuses to parse -- line 1: `[-> Node: Start TC`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "rozavo-21-cavi374",
-      "reason": "refuses to parse -- line 7: `[->Alice : external event`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "ruxuxu-75-jilu612",
-      "reason": "refuses to parse -- `B -->? : log`. Unported: CommandExoArrowRight/Left -- the `?` endpoint is upstream's ARROW_SUPPCIRCLE marker for an arrow whose other end is OFF-DIAGRAM (`([?\\[\\]][ox]?)?`, CommandExoArrowLeft.java:60), the same family as the 74 `[`/`]` exo fixtures pinned in 2652df3c. Newly refused by T20 defect 5: the endpoint class is now upstream's own PART2CODE `([%pLN_.@]+)` (CommandArrow.java:119), so `?` can no longer be absorbed as a participant NAME. It previously rendered a phantom participant literally called `?`."
-    },
-    {
-      "slug": "sarevu-71-nona699",
-      "reason": "refuses to parse -- line 2: `Bob ->] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "semepi-87-tiza126",
-      "reason": "refuses to parse -- line 1: `foo o->o]`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "sirabe-54-sibe468",
-      "reason": "refuses to parse -- line 1: `[-> A: DoWork`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "soxata-16-kafi688",
       "reason": "refuses to parse -- line 1: `skinParam CaptionFontSize 10`. Unported: CommonCommands' skinparam single-line form (CommonCommands.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "sufevi-44-xipa294",
-      "reason": "refuses to parse -- line 2: `Bob ->x Alice ++:`. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "tegasu-93-fima016",
       "reason": "refuses to parse -- line 2: `hide << new >> stereotype`. Unported: CommandArrow's StereotypePattern.optional(\"STEREOTYPE\") (CommandArrow.java:129). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "texopo-01-dibi658",
-      "reason": "refuses to parse -- line 17: `[<- d: Msg`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "texoze-85-meli189",
-      "reason": "refuses to parse -- line 4: `[o<->o b : \"\"[o<->o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "tijeba-12-zeta132",
-      "reason": "refuses to parse -- line 2: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "tolozi-77-gere619",
-      "reason": "refuses to parse -- line 2: `-> R : messageX`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "turixi-21-mufe557",
-      "reason": "refuses to parse -- line 16: `[-> Bob`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "vekuxo-98-rugu851",
-      "reason": "refuses to parse -- line 3: `Bob ->] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "vigoga-79-pita532",
-      "reason": "refuses to parse -- line 4: `[<-x b : \"\"  [<-x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "vitevu-99-rali549",
-      "reason": "refuses to parse -- line 1: `[-> P1 : F`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "vubato-50-gebu534",
       "reason": "refuses to parse -- line 2: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "xacete-63-neke615",
-      "reason": "refuses to parse -- line 1: `[-> Bob : message1`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "xalofe-61-vala300",
-      "reason": "refuses to parse -- line 4: `[//-o b : \"\"  [//-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "xigoxi-25-paro589",
-      "reason": "refuses to parse -- line 4: `[<-o b : \"\"  [<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "xogota-37-pele078",
-      "reason": "refuses to parse -- line 5: `A ->]: error`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "xonili-01-pure946",
-      "reason": "refuses to parse -- line 4: `[x<-o b : \"\"  [x<-o\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "xujesa-13-dane303",
-      "reason": "refuses to parse -- line 2: `Bob <-] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "zajovi-78-nupe067",
-      "reason": "refuses to parse -- line 2: `Bob ->] : message1`. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, the mirrored ARROW_SUPPCIRCLE suffix (CommandExoArrowRight.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "zejabi-24-xoja824",
-      "reason": "refuses to parse -- line 2: `[-> Bob`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "zofeda-77-xiba744",
-      "reason": "refuses to parse -- line 4: `[o<-x b : \"\" [o<-x\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "zogane-85-raja214",
-      "reason": "refuses to parse -- line 12: `[o-> B : Pre`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "zosulu-72-fati889",
-      "reason": "refuses to parse -- line 4: `[<- b : \"\"   [<-\"\"`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "zoturo-25-jima978",
       "reason": "refuses to parse -- line 3: `{start} Alice -> Bob : start doing things during duration`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "zudize-61-vomi445",
-      "reason": "refuses to parse -- line 33: `[o-> System : control.start()`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "zujani-47-femu345",
-      "reason": "refuses to parse -- `A->? : M1`. Unported: CommandExoArrowRight/Left -- the `?` endpoint is upstream's ARROW_SUPPCIRCLE marker for an arrow whose other end is OFF-DIAGRAM (`([?\\[\\]][ox]?)?`, CommandExoArrowLeft.java:60), the same family as the 74 `[`/`]` exo fixtures pinned in 2652df3c. Newly refused by T20 defect 5: the endpoint class is now upstream's own PART2CODE `([%pLN_.@]+)` (CommandArrow.java:119), so `?` can no longer be absorbed as a participant NAME. It previously rendered a phantom participant literally called `?`."
     }
   ]
 }

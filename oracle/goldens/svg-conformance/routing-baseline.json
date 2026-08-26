@@ -11279,10 +11279,10 @@
       "type": "sequence",
       "slug": "bacupi-77-fuke586",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 3: `[o-> Alice: OK2`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -11521,10 +11521,10 @@
       "type": "sequence",
       "slug": "bifuzu-54-gefo004",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 3: `[-> B : label1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -11789,10 +11789,10 @@
       "type": "sequence",
       "slug": "bozuru-10-rajo382",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 6: `Alice x->] : hop2`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -12044,10 +12044,10 @@
       "type": "sequence",
       "slug": "caluni-22-noci624",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 14: `?->o main`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -12643,10 +12643,10 @@
       "type": "sequence",
       "slug": "damoge-62-riso387",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[/-o b : \"\"   [/-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -12715,10 +12715,10 @@
       "type": "sequence",
       "slug": "debufa-67-poma789",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `[-> SbcMXdCtrl: startThread`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -12896,10 +12896,10 @@
       "type": "sequence",
       "slug": "dicuva-14-lini551",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `Alice ->]`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -13007,10 +13007,10 @@
       "type": "sequence",
       "slug": "dojapu-42-sali914",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[o<-o b : \"\" [o<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -13038,10 +13038,10 @@
       "type": "sequence",
       "slug": "dolefo-13-kovu702",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 11: `......`, so nothing claimed it — every engine refused. Unported: CommandDelay -- the `...` / `…` delay row (SequenceDiagramFactory.java:152) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -13070,10 +13070,10 @@
       "type": "sequence",
       "slug": "domaji-70-zini725",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[\\\\-o b : \"\"  [\\\\-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -13222,10 +13222,10 @@
       "type": "sequence",
       "slug": "dugata-50-koxo354",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[x<- b : \"\"  [x<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -13294,10 +13294,10 @@
       "type": "sequence",
       "slug": "dutopa-62-jalu659",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -13779,10 +13779,10 @@
       "type": "sequence",
       "slug": "fonope-49-jodi834",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 5: `Alice x->] : hop2`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -14103,10 +14103,10 @@
       "type": "sequence",
       "slug": "gejeji-12-zofa866",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 5: `[o<-x b : \"\" [o<-x\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -14405,10 +14405,10 @@
       "type": "sequence",
       "slug": "gogise-40-juro428",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[<-> b : \"\"  [<->\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -14467,10 +14467,10 @@
       "type": "sequence",
       "slug": "gozaru-36-gejo982",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `Alice \\\\-: \"\\\\\\\\-\" Should be down1`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -14639,10 +14639,10 @@
       "type": "sequence",
       "slug": "guzoco-99-ginu686",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 5: `[o<-x Alice : hop`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -14832,10 +14832,10 @@
       "type": "sequence",
       "slug": "jebole-52-cuvo164",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[o<- b : \"\"  [o<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -14944,10 +14944,10 @@
       "type": "sequence",
       "slug": "jitesa-41-cara967",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[\\- b : \"\"   [\\-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -15065,10 +15065,10 @@
       "type": "sequence",
       "slug": "jotase-88-kiki473",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 3: `[o-> Alice: OK2`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -15238,10 +15238,10 @@
       "type": "sequence",
       "slug": "kakune-11-vusu073",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[<-o b : \"\"   [<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -15269,10 +15269,10 @@
       "type": "sequence",
       "slug": "kapuva-33-nomi771",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[o/- b : \"\"  [o/-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -15401,10 +15401,10 @@
       "type": "sequence",
       "slug": "kevavu-57-kifi084",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[x<->x b : \"\"[x<->x\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -15563,10 +15563,10 @@
       "type": "sequence",
       "slug": "kivavu-72-goju233",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[\\\\- b : \"\"  [\\\\-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -15755,10 +15755,10 @@
       "type": "sequence",
       "slug": "kopaxi-36-dedo317",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[\\-o b : \"\"   [\\-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -15846,10 +15846,10 @@
       "type": "sequence",
       "slug": "kugati-67-nuzu852",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[o<<- b : \"\" [o<<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -15949,10 +15949,10 @@
       "type": "sequence",
       "slug": "kuzuco-40-xara309",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 6: `[->Alice : external event`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16103,10 +16103,10 @@
       "type": "sequence",
       "slug": "legole-00-givu934",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `-> Bob`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16124,10 +16124,10 @@
       "type": "sequence",
       "slug": "lekari-63-rigu513",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `[-> Bob : message1`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16249,10 +16249,10 @@
       "type": "sequence",
       "slug": "liculu-86-goge853",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `-\\ Bob`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16312,10 +16312,10 @@
       "type": "sequence",
       "slug": "limajo-73-kife020",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `A ->] : this goes to the very right of the diagram`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16323,10 +16323,10 @@
       "type": "sequence",
       "slug": "lipuci-81-vovi162",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 5: `[o-> B : This text extends the arrow length\\nright edge arrow`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16385,10 +16385,10 @@
       "type": "sequence",
       "slug": "lokavu-60-peku948",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 9: `?o-> B : Pre`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16467,10 +16467,10 @@
       "type": "sequence",
       "slug": "lozuru-10-poba814",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[o\\\\- b : \"\" [o\\\\-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16518,10 +16518,10 @@
       "type": "sequence",
       "slug": "lugika-07-rozo911",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 6: `?o-> B : word`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16599,10 +16599,10 @@
       "type": "sequence",
       "slug": "lusigu-71-nipe759",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 8: `?o->Alice : \"[o->\" external event`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16640,10 +16640,10 @@
       "type": "sequence",
       "slug": "luzapi-49-rati107",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 6: `[-> SerialManager: purgeRx()`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16742,10 +16742,10 @@
       "type": "sequence",
       "slug": "matoke-25-kidu719",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 2: `A <[#red]-o? ++`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -16824,10 +16824,10 @@
       "type": "sequence",
       "slug": "meguzu-44-luri459",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `[-> Bob : message1`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -17058,10 +17058,10 @@
       "type": "sequence",
       "slug": "mitire-01-voga923",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[//- b : \"\"  [//-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -17140,10 +17140,10 @@
       "type": "sequence",
       "slug": "mocuna-66-bica785",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `foo ->o]`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -17181,10 +17181,10 @@
       "type": "sequence",
       "slug": "momuxe-95-bugu296",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[o//- b : \"\" [o//-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -17324,10 +17324,10 @@
       "type": "sequence",
       "slug": "mukebo-35-xoju095",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 26: `[-> ssl_server.exe : browser list arg = {b1, b2, ...}`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -17335,10 +17335,10 @@
       "type": "sequence",
       "slug": "mulofu-90-voka382",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[/- b : \"\"   [/-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -17496,10 +17496,10 @@
       "type": "sequence",
       "slug": "nanoza-23-fija616",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[o\\- b : \"\"  [o\\-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -17547,10 +17547,10 @@
       "type": "sequence",
       "slug": "necofe-81-toja736",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 2: `Bob <-] : message1`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -17791,10 +17791,10 @@
       "type": "sequence",
       "slug": "nisogu-21-zixe139",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[<<- b : \"\"  [<<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -18026,10 +18026,10 @@
       "type": "sequence",
       "slug": "nukona-00-jaro456",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[<<-o b : \"\"  [<<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -18068,10 +18068,10 @@
       "type": "sequence",
       "slug": "nunuji-27-mosa042",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 3: `[<--1: SomeOutgoingOperation`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -18421,10 +18421,10 @@
       "type": "sequence",
       "slug": "pobasa-34-neza994",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 3: `A ->]: ok`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -18462,10 +18462,10 @@
       "type": "sequence",
       "slug": "pojofa-31-mimo042",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 3: `Bob ->] : message1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -18936,10 +18936,10 @@
       "type": "sequence",
       "slug": "repudi-21-rovo448",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `[-> Node: Start TC`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -19188,10 +19188,10 @@
       "type": "sequence",
       "slug": "rozavo-21-cavi374",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 7: `[->Alice : external event`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -19412,10 +19412,10 @@
       "type": "sequence",
       "slug": "ruxuxu-75-jilu612",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 5: `B -->? : log`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -19464,10 +19464,10 @@
       "type": "sequence",
       "slug": "sarevu-71-nona699",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 2: `Bob ->] : message1`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -19606,10 +19606,10 @@
       "type": "sequence",
       "slug": "semepi-87-tiza126",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `foo o->o]`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -19658,10 +19658,10 @@
       "type": "sequence",
       "slug": "SequenceArrows_0001_Test",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 22: `a -\\o    b : \"\"-\\o  \"\"`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -19669,10 +19669,10 @@
       "type": "sequence",
       "slug": "SequenceArrows_0002_Test",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 28: `a -\\o    b : \"\"-\\o  \"\"`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -19731,10 +19731,10 @@
       "type": "sequence",
       "slug": "sirabe-54-sibe468",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `[-> A: DoWork`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -19995,10 +19995,10 @@
       "type": "sequence",
       "slug": "sufevi-44-xipa294",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 9: `Bob o\\\\-- Alice ++:`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -20411,10 +20411,10 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0007_Test",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 2: `A <[#red]-o? ++`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -20463,10 +20463,10 @@
       "type": "sequence",
       "slug": "texopo-01-dibi658",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 17: `[<- d: Msg`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -20474,10 +20474,10 @@
       "type": "sequence",
       "slug": "texoze-85-meli189",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[o<->o b : \"\"[o<->o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -20505,10 +20505,10 @@
       "type": "sequence",
       "slug": "tijeba-12-zeta132",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 2: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -20678,10 +20678,10 @@
       "type": "sequence",
       "slug": "tolozi-77-gere619",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 2: `-> R : messageX`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -20820,10 +20820,10 @@
       "type": "sequence",
       "slug": "turixi-21-mufe557",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 16: `[-> Bob`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -21044,10 +21044,10 @@
       "type": "sequence",
       "slug": "vekuxo-98-rugu851",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 3: `Bob ->] : message1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -21175,10 +21175,10 @@
       "type": "sequence",
       "slug": "vigoga-79-pita532",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[<-x b : \"\"  [<-x\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -21226,10 +21226,10 @@
       "type": "sequence",
       "slug": "vitevu-99-rali549",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `[-> P1 : F`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -21542,10 +21542,10 @@
       "type": "sequence",
       "slug": "xacete-63-neke615",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 1: `[-> Bob : message1`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -21593,10 +21593,10 @@
       "type": "sequence",
       "slug": "xalofe-61-vala300",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[//-o b : \"\"  [//-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -21844,10 +21844,10 @@
       "type": "sequence",
       "slug": "xigoxi-25-paro589",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[<-o b : \"\"  [<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -21965,10 +21965,10 @@
       "type": "sequence",
       "slug": "xogota-37-pele078",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 5: `A ->]: error`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -22016,10 +22016,10 @@
       "type": "sequence",
       "slug": "xonili-01-pure946",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[x<-o b : \"\"  [x<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -22088,10 +22088,10 @@
       "type": "sequence",
       "slug": "xujesa-13-dane303",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 2: `Bob <-] : message1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -22270,10 +22270,10 @@
       "type": "sequence",
       "slug": "zajovi-78-nupe067",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 2: `Bob ->] : message1`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -22411,10 +22411,10 @@
       "type": "sequence",
       "slug": "zejabi-24-xoja824",
       "jarType": "SEQUENCE",
-      "ourType": "STATE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 2: `[-> Bob`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -22605,10 +22605,10 @@
       "type": "sequence",
       "slug": "zofeda-77-xiba744",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[o<-x b : \"\" [o<-x\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -22636,10 +22636,10 @@
       "type": "sequence",
       "slug": "zogane-85-raja214",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 8: `?o-> B : Pre`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -22687,10 +22687,10 @@
       "type": "sequence",
       "slug": "zosulu-72-fati889",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 4: `[<- b : \"\"   [<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -22739,10 +22739,10 @@
       "type": "sequence",
       "slug": "zudize-61-vomi445",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 33: `[o-> System : control.start()`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
@@ -22760,10 +22760,10 @@
       "type": "sequence",
       "slug": "zujani-47-femu345",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "15acd5d9",
       "reason": "the SEQUENCE engine refuses this source at line 8: `A->? : M1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
     },
     {
