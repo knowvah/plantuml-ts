@@ -596,6 +596,41 @@ capture gets headroom automatically.
 
 Ordered by how ready they are, not by size.
 
+- **`sequence-participant-g-wrapper`** — FILED 2026-08-26 by
+  `sequence-command-coverage` T15, mechanism measured and verified twice.
+  **The sequence comparator cannot measure arrow fidelity at all today.** The
+  jar wraps each participant in `<g><title>A</title><rect/><line/></g>`; this
+  port emits the bare primitives, so child 0 under `svg/g[1]` is a TAG
+  mismatch and `compare.ts:222-231` returns — `// structural mismatch — stop
+  here`. The wrapper also shifts every following child index, so the whole
+  sibling run mismatches by tag.
+  Verified by dumping all 30 diffs of `celego-19-laji937`: 4 root dimensions,
+  the rest tag mismatches (`line vs g`, `rect vs g`, `text vs rect`, `polygon
+  vs text`), and **not one `polygon/@points` record**.
+  **Why it matters beyond tidiness**: correct arrow work produces no ratchet
+  movement — and neither does incorrect arrow work. The whole dressing bucket
+  is invisible, `diff-census.json`'s sequence buckets describe the tag cascade
+  rather than arrow quality, and any task told to "make the dressing fixtures
+  fall" is given an unreachable target, which is precisely the pressure that
+  produces a fitted value.
+  Emitting the wrapper should unblock descent for the entire sequence corpus
+  at once, so this is likely the highest-leverage single change available to
+  sequence fidelity. Size it against the participant renderer before starting.
+  See `.agent-notes/T15-comparator-blocks-arrow-descent.md`, and note it
+  supersedes the conclusion in
+  `.agent-notes/T13-sequence-ratchet-rise-diagnosis.md:167-172`.
+
+- **`sequence-arrow-background-colour`** — FILED 2026-08-26 by
+  `sequence-command-coverage` T15, mechanism isolated by probe. The `o`
+  circle decoration fills `#FFF` in this port and `#000` in the jar. The fill
+  is the **arrow style's** `BackGroundColor`, not the diagram background:
+  `<style> arrow { BackGroundColor #00FF00 }` changes it to `#0F0`, while
+  `skinparam backgroundColor #FFAA00` does not change it at all. The port's
+  `paintOf` (`renderer-arrowhead.ts:87`) reads `theme.colors.background`.
+  Fixing it needs an arrow-background field on `Theme` — `src/core/theme.ts`,
+  outside any `sequence-command-coverage` write-set. Small, but it crosses the
+  shared theme seam, so it wants its own change.
+
 - **`sequence-multiline-command-seam`** — FILED 2026-08-26 by
   `sequence-command-coverage` T5, with the mechanism already measured.
   **The port has no equivalent of upstream's `OK_PARTIAL` dispatch seam.**
