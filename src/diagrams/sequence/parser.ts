@@ -4,11 +4,11 @@
  * Uses a command-dispatch table: an array of { pattern, execute } objects
  * tested against each trimmed line in priority order. First match wins.
  *
- * The command dispatch table (COMMANDS) and the mutable-state helpers
- * (ParseState, emit, ensureParticipant, …) live in `sequence-commands.ts` /
- * `sequence-parse-helpers.ts` respectively — split out of this file purely
- * to stay under the project's 500-line file cap; this file owns only the
- * top-level line loop and its dispatch priority.
+ * The command list (`SEQUENCE_COMMANDS`) lives in
+ * `sequence-command-registry.ts`, one entry per registered command over the
+ * per-family `command-*.ts` modules; the mutable-state helpers (ParseState,
+ * emit, ensureParticipant, …) live in `sequence-parse-helpers.ts`. This file
+ * owns only the top-level line loop and its dispatch priority.
  */
 
 import type { SequenceDiagramAST } from './ast.js';
@@ -21,21 +21,8 @@ import {
   makeDefaultAST,
   type ParseState,
 } from './sequence-parse-helpers.js';
-import { COMMANDS } from './sequence-commands.js';
-import { COMMANDS_2 } from './sequence-commands-2.js';
+import { SEQUENCE_COMMANDS } from './sequence-command-registry.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
-
-/**
- * `COMMANDS` (the original spike table plus T4/T13's in-place widenings)
- * tried in full before `COMMANDS_2` (T13's net-new commands) — mirrors
- * `PSystemCommandFactory#getCandidate` (`:225-246`), which returns the
- * first matching `Command` out of ONE registration-ordered list; the split
- * across two arrays is a file-size accommodation (`CLAUDE.md`'s 500-line
- * hook), not a second dispatch tier, so every T13 rule was checked against
- * `COMMANDS` for pattern overlap before being added here (see
- * `sequence-commands-2.ts`'s module doc).
- */
-const ALL_COMMANDS: readonly (typeof COMMANDS)[number][] = [...COMMANDS, ...COMMANDS_2];
 
 // ---------------------------------------------------------------------------
 // Line-dispatch helpers
@@ -54,7 +41,7 @@ function handlePendingNote(state: ParseState, line: string): boolean {
   // same way ordinary commands are, but only close the note if this really
   // is the "end note" command — any other pattern match here is ignored and
   // the line still accumulates into the note text below.
-  const endNoteCmd = ALL_COMMANDS.find((c) => c.pattern.test(line));
+  const endNoteCmd = SEQUENCE_COMMANDS.find((c) => c.pattern.test(line));
   if (endNoteCmd !== undefined && /^end\s*(?:note|hnote|rnote)\s*$/i.test(line)) {
     const m = endNoteCmd.pattern.exec(line)!;
     endNoteCmd.execute(state, m);
@@ -96,7 +83,7 @@ function handlePendingRef(state: ParseState, line: string): boolean {
  * 100, before `CommandParticipantA`/`CommandArrow`/note commands) -- unlike
  * class/state, where the equivalent call is registered LAST (see
  * class/parser.ts and state/parser.ts's docs on that divergence). Tried
- * here, before the ordinary `COMMANDS` table and its silent drop of
+ * here, before the ordinary command table and its silent drop of
  * unrecognized lines, mirroring that registration order exactly. Returns
  * the number of trimmed lines consumed (>1 for a multi-line sprite block),
  * or `null` when neither matcher claimed the line.
@@ -114,7 +101,8 @@ function dispatchAnnotationOrSprite(
 
   // `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4): same
   // FIRST position as the annotation matcher (tried immediately after it,
-  // both before `COMMANDS`), mirroring upstream's `addCommonCommands1`
+  // both before `SEQUENCE_COMMANDS`), mirroring upstream's
+  // `addCommonCommands1`
   // (addTitleCommands then addCommonCommands2/sprite) being registered
   // FIRST by SequenceDiagramFactory.
   const spriteMatch = matchSpriteCommand(trimmedLines, i, state.ast.sprites!);
@@ -124,13 +112,13 @@ function dispatchAnnotationOrSprite(
 }
 
 /**
- * Normal dispatch: run `line` through the `COMMANDS` table, first match
- * wins. Returns whether some command claimed the line -- mirrors
+ * Normal dispatch: run `line` through `SEQUENCE_COMMANDS`, first match wins.
+ * Returns whether some command claimed the line -- mirrors
  * `PSystemCommandFactory#getCandidate` (`:225-246`), which returns a `Step`
  * on the first matching `Command` or `null` when none of `cmds` matches.
  */
 function dispatchCommand(state: ParseState, line: string): boolean {
-  for (const cmd of ALL_COMMANDS) {
+  for (const cmd of SEQUENCE_COMMANDS) {
     const match = cmd.pattern.exec(line);
     if (match !== null) {
       cmd.execute(state, match);
@@ -198,7 +186,7 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
  *
  * Two of the four upstream refusal points apply here:
  *
- *  - No `Command` in `COMMANDS` (nor the annotation/sprite matchers tried
+ *  - No `Command` in `SEQUENCE_COMMANDS` (nor the annotation/sprite matchers tried
  *    ahead of it) matches a line: `kind: 'syntax'`, mirroring the
  *    `SYNTAX_ERROR "Syntax Error?"` fallback built when `getCandidate`
  *    returns `null`.
@@ -214,7 +202,8 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
  *
  *  - `execution` (`PSystemCommandFactory.java:180-186`) requires a command
  *    that can itself report failure (`CommandExecutionResult`). Every entry
- *    in `COMMANDS` has an `execute(state, match): void` that cannot fail --
+ *    in `SEQUENCE_COMMANDS` has an `execute(state, match): void` that cannot
+ *    fail --
  *    matching is the only success/failure signal this port's `Command` type
  *    carries, so there is no execution-failure channel to refuse from.
  *  - `final` (`PSystemCommandFactory.java:148-152`) is
