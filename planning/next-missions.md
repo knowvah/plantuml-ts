@@ -596,6 +596,31 @@ capture gets headroom automatically.
 
 Ordered by how ready they are, not by size.
 
+- **`sequence-multiline-command-seam`** — FILED 2026-08-26 by
+  `sequence-command-coverage` T5, with the mechanism already measured.
+  **The port has no equivalent of upstream's `OK_PARTIAL` dispatch seam.**
+  Upstream's `getCandidate` (`PSystemCommandFactory.java:225-246`) lets a
+  command claim a multi-line block by returning `OK_PARTIAL`, after which
+  `isMultilineCommandOk` (`:238`) consumes the whole block **including its
+  closing line** from the iterator — so the closer never re-enters dispatch.
+  This port instead re-dispatches the closer through the flat command list
+  (`parser.ts:44`'s `handlePendingNote`, which takes the FIRST `.find()`
+  match).
+  **Consequence, and why it is worth a mission:** the port's sequence command
+  order *cannot* mirror `SequenceDiagramFactory#initCommandsList:99-155`.
+  Upstream registers `CommandGrouping` at `:126` and the multi-line note
+  closers at `:134-137`; because the port's `endCommand`
+  (`/^end(?:\s+.+)?\s*$/i`, `command-grouping.ts:103`) also matches
+  `end note`, mirroring that order would make a multi-line note pop a
+  grouping frame instead of closing. The port's order is therefore
+  load-bearing compensation, and `sequence-command-registry.ts` diverges from
+  upstream's registration order at **13 seams**, each pinned by
+  `tests/unit/sequence/command-registry-order.test.ts`.
+  Porting the seam would let the registry be re-mirrored exactly and would
+  retire those 13 divergences. Scope is the shared dispatch loop, so it likely
+  touches more than the sequence engine — size it before starting.
+  See `plans/sequence-command-coverage/decisions.md` D2 (amended 2026-08-26).
+
 - **`sequence-participant-badge-glyph`** — DONE 2026-08-25, same day it was
   filed. Both forms draw: the sprite badge as a rasterised `<image>` and the
   circled character as the filled circle the jar actually emits (three

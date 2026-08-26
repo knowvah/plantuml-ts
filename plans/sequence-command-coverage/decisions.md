@@ -44,6 +44,48 @@ also dissolves the write-set conflict that would otherwise serialize every
 command task onto two files. **Registration order is FROZEN** (see
 `constraints.md` stop 2).
 
+### AMENDED 2026-08-26 (T5, maintainer-approved) — the order is NOT mirrored
+
+D2 as first written required the registry to be "ONE ordered list mirroring
+`initCommandsList:99-155`". **T5 measured that this is not behavior-neutral,
+and the amendment is that the port's own order stands.** The registry holds
+36 entries in the port's dispatch order, each carrying its upstream
+registration line as a trailing comment; those lines descend at **13 seams**.
+`tests/unit/sequence/command-registry-order.test.ts` asserts the exact order,
+the exact descent set, and that every citation lies inside `99-155` — so the
+divergence is pinned rather than merely tolerated.
+
+**Mechanism** (verified on all three legs, not inferred):
+
+1. The port's `endCommand` is `/^end(?:\s+.+)?\s*$/i`
+   (`command-grouping.ts:103`) and DOES match `end note`; `handlePendingNote`
+   (`parser.ts:44`) selects the FIRST matching command via `.find()`.
+2. Upstream registers `CommandGrouping` at
+   `SequenceDiagramFactory.java:126` but the multi-line note closers at
+   `:134-137` — so upstream really does put grouping first.
+3. Upstream is nonetheless safe because `getCandidate` returns `OK_PARTIAL`
+   and `isMultilineCommandOk` (`PSystemCommandFactory.java:238`) consumes the
+   whole block INCLUDING its closer from the iterator, so `CommandGrouping`
+   never sees `end note`.
+
+**This port has no `OK_PARTIAL` seam** — it re-dispatches the closer through
+the flat list. Mirroring upstream's order exactly would therefore make a
+multi-line note pop a grouping frame instead of closing.
+
+So the order divergence is compensating for a *deeper* divergence — a missing
+dispatch seam — that D2 was written without knowledge of. Closing the real
+gap means porting `OK_PARTIAL` / `isMultilineCommandOk` into the dispatch
+loop, which is its own mission; it is filed in `planning/next-missions.md`
+§4 as `sequence-multiline-command-seam`.
+
+**What D2 still delivers, unchanged:** the two-tier `COMMANDS` /`COMMANDS_2`
+divergence `parser.ts:31` documented is gone, and the write-set conflict that
+would have serialized all ten command-adding tasks onto two files is
+dissolved. Those were D2's operational goals and both are met.
+
+**Registration order remains FROZEN** (`constraints.md` stop 2) — this
+amendment records why it cannot be mirrored, and is not licence to reorder.
+
 ## D3 — Exo arrows get their own `SequenceEvent` member
 
 **Context.** `MessageExo.isSelfMessage()` returns `false` even though
