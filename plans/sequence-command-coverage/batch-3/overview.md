@@ -10,11 +10,11 @@ rather than treating them as regressions or as noise.
 
 | ID | Description | Writes | Fixtures | Depends On | Done |
 |---|---|---|---|---|---|
-| T7 | `CommandArrow` rebuilt compositionally, at behavior parity | `command-arrow.ts`, `sequence-command-registry.ts`, tests | ~12 | T3, T5, T6 | [ ] |
-| T8 | Note factory: optional `of`, VMERGE, `&`, hnote/rnote, stereotype | `command-note-factory.ts`, tests | ~24 | T5, T6 | [ ] |
-| T9 | Grouping `&`, autonumber inc/stop/resume, activate family | `command-grouping.ts`, `command-autonumber.ts`, `command-lifeline.ts`, tests | ~20 | T5, T6 | [ ] |
-| T10 | hspace, delay, divider-empty, `hide` variant, participant-multilines | `command-misc.ts`, `command-participant.ts`, tests | ~9 | T5, T6 | [ ] |
-| T11 | Inline sprite, `EmbeddedDiagram` `{{ }}`, `%newline()` | `command-sprite.ts`, `parser.ts`, tests | ~6 | T5, T6 | [ ] |
+| T7 | `CommandArrow` rebuilt compositionally, at behavior parity | `command-arrow.ts`, `sequence-command-registry.ts`, tests | ~12 | T3, T5, T6 | [x] |
+| T8 | Note factory: optional `of`, VMERGE, `&`, hnote/rnote, stereotype | `command-note-factory.ts`, tests | ~24 | T5, T6 | [x] |
+| T9 | Grouping `&`, autonumber inc/stop/resume, activate family | `command-grouping.ts`, `command-autonumber.ts`, `command-lifeline.ts`, tests | ~20 | T5, T6 | [x] |
+| T10 | hspace, delay, divider-empty, `hide` variant, participant-multilines | `command-misc.ts`, `command-participant.ts`, tests | ~9 | T5, T6 | [x] |
+| T11 | Inline sprite, `EmbeddedDiagram` `{{ }}`, `%newline()` | `command-sprite.ts`, `parser.ts`, tests | ~6 | T5, T6 | [x] |
 
 Write-sets were checked for collisions: T11 owns `command-sprite.ts` (inline
 sprite is `CommonCommands`, not misc) and `parser.ts` (the note-body block
