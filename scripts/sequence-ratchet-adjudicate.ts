@@ -72,6 +72,7 @@ import { execFileSync } from 'node:child_process';
 import {
   copyFileSync,
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   readdirSync,
@@ -370,11 +371,39 @@ function measureTree(repo: string): FixtureMeasurement[] {
 // held fixed while the code UNDER measurement varies. `node_modules` is
 // symlinked rather than installed — node resolves the link by realpath, so
 // the child loads the same dependency tree the parent did.
+//
+// `assets/stdlib/` gets the SAME treatment, and must: it is gitignored
+// (`.gitignore:66`), so a detached worktree checks out WITHOUT it. Every
+// `!include <...>` fixture then fails to resolve at the base ref only,
+// scoring `null` there and measurable here — a false `error -> measurable`
+// transition that reads exactly like a closure. Measured by T11
+// (`sequence-command-coverage`): `nereka-67-deco609` and
+// `tuzaga-87-gene496` were reported as closures by the worktree leg, but
+// measure identically (245 and 202) at both refs when only `src/` is
+// swapped in place. Without this link the whole-corpus census overcounts.
+
+/** Link a gitignored asset directory into a detached worktree.
+ *
+ *  A worktree checkout contains tracked files only, so anything in
+ *  `.gitignore` is simply absent there. For asset trees the renderer READS
+ *  (rather than builds), that absence is indistinguishable from a rendering
+ *  failure — see the note above `runChildMeasurement`. Silent when the
+ *  directory does not exist in the parent either, since then both refs are
+ *  equally without it and the comparison stays honest. */
+function linkIgnoredAsset(tree: string, relative: string): void {
+  const source = join(REPO, relative);
+  if (!existsSync(source)) return;
+  const target = join(tree, relative);
+  mkdirSync(dirname(target), { recursive: true });
+  if (existsSync(target)) return;
+  symlinkSync(source, target);
+}
 
 function runChildMeasurement(tree: string, out: string): void {
   const script = join(tree, 'scripts', basename(SELF));
   copyFileSync(SELF, script);
   symlinkSync(join(REPO, 'node_modules'), join(tree, 'node_modules'));
+  linkIgnoredAsset(tree, 'assets/stdlib');
   execFileSync(join(REPO, 'node_modules', '.bin', 'jiti'), [script, '--snapshot', out], {
     cwd: tree,
     stdio: ['ignore', 'inherit', 'inherit'],
