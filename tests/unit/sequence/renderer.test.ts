@@ -19,6 +19,8 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo.js';
+import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { inflateSync } from 'node:zlib';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
@@ -67,6 +69,20 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
   };
 }
 
+/** The six shapes the DELETED `MessageStyle` enum named, as the
+ *  `ArrowConfiguration` the parser now builds for each. Kept as a naming
+ *  convenience for the fixtures below; the exhaustive proof that these ARE
+ *  the configurations the deleted adapter produced lives in
+ *  `sequence-arrowhead.test.ts`. */
+function arrowOf(style: RenderStyle): ArrowConfiguration {
+  return arrowConfigurationOf({
+    dashed: style === 'reply' || style === 'replyAsync',
+    async2: style === 'async' || style === 'replyAsync',
+  });
+}
+
+type RenderStyle = 'sync' | 'async' | 'reply' | 'replyAsync' | 'lost' | 'found';
+
 function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
   const base = {
     kind: 'message' as const,
@@ -74,7 +90,7 @@ function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
     toX: 220,
     y: 80,
     label: 'hello',
-    style: 'sync' as const,
+    arrow: arrowOf('sync'),
     arrowDirection: 'right' as const,
     ...overrides,
   };
@@ -136,7 +152,7 @@ describe('renderSequence — messages', () => {
 
   it('reply message uses dashed line style', () => {
     const geo = makeGeo({
-      events: [makeSyncMessage({ style: 'reply', arrowDirection: 'left', fromX: 220, toX: 80 })],
+      events: [makeSyncMessage({ arrow: arrowOf('reply'), arrowDirection: 'left', fromX: 220, toX: 80 })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('stroke-dasharray');
@@ -144,7 +160,7 @@ describe('renderSequence — messages', () => {
 
   it('replyAsync message uses dashed line style', () => {
     const geo = makeGeo({
-      events: [makeSyncMessage({ style: 'replyAsync', arrowDirection: 'left', fromX: 220, toX: 80 })],
+      events: [makeSyncMessage({ arrow: arrowOf('replyAsync'), arrowDirection: 'left', fromX: 220, toX: 80 })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('stroke-dasharray');
@@ -214,7 +230,7 @@ describe('renderSequence — messages', () => {
 
   it('lost message draws an inline head, never a marker reference', () => {
     const geo = makeGeo({
-      events: [makeSyncMessage({ style: 'lost' })],
+      events: [makeSyncMessage({ arrow: arrowOf('lost') })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     // `lost` is a MessageExoType, which governs where the LINE terminates,
@@ -228,7 +244,7 @@ describe('renderSequence — messages', () => {
 
   it('found message draws an inline head, never a marker reference', () => {
     const geo = makeGeo({
-      events: [makeSyncMessage({ style: 'found' })],
+      events: [makeSyncMessage({ arrow: arrowOf('found') })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('<polygon points="208,76,218,80,208,84,212,80"');
@@ -240,9 +256,9 @@ describe('renderSequence — messages', () => {
 // T3 (sequence-root-chrome): inline arrowheads + the document shell
 // ---------------------------------------------------------------------------
 
-/** Every `MessageStyle` the spike's grammar can produce
- *  (`sequence-parse-helpers.ts#ARROW_STYLE_MAP`). */
-const ALL_MESSAGE_STYLES: readonly MessageGeo['style'][] = [
+/** Every arrow the spike's enumerated token table could produce, by its
+ *  pre-T6 `MessageStyle` name. */
+const ALL_MESSAGE_STYLES: readonly RenderStyle[] = [
   'sync', 'async', 'reply', 'replyAsync', 'lost', 'found',
 ];
 
@@ -250,7 +266,7 @@ describe('renderSequence -- inline arrowheads (T3 AC1)', () => {
   it.each(ALL_MESSAGE_STYLES)(
     'a %s message emits no <marker, markerEnd or markerStart token',
     (style) => {
-      const geo = makeGeo({ events: [makeSyncMessage({ style })] });
+      const geo = makeGeo({ events: [makeSyncMessage({ arrow: arrowOf(style) })] });
       const svg = assembleSvg(renderSequence(geo, defaultTheme));
       expect(svg).not.toContain('<marker');
       expect(svg).not.toContain('markerEnd');
@@ -264,7 +280,7 @@ describe('renderSequence -- inline arrowheads (T3 AC1)', () => {
     'a self %s message emits no marker reference either',
     (style) => {
       const geo = makeGeo({
-        events: [makeSyncMessage({ style, arrowDirection: 'self', fromX: 80, toX: 110 })],
+        events: [makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: 80, toX: 110 })],
       });
       const svg = assembleSvg(renderSequence(geo, defaultTheme));
       expect(svg).not.toContain('<marker');
@@ -321,7 +337,7 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
   });
 
   it('draws an async head as two open strokes, not a polygon', () => {
-    const svg = assembleSvg(renderSequence(jarGeo({ style: 'async' }), defaultTheme));
+    const svg = assembleSvg(renderSequence(jarGeo({ arrow: arrowOf('async') }), defaultTheme));
     // `asyncLinesNormal` at pos2 = 131.231: two ULines to (-10, -+4).
     expect(svg).toContain('<line x1="131.231" y1="66" x2="121.231" y2="62"');
     expect(svg).toContain('<line x1="131.231" y1="66" x2="121.231" y2="70"');
@@ -329,7 +345,7 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
   });
 
   it('leaves an async line untrimmed -- only FULL+NORMAL trims', () => {
-    const svg = assembleSvg(renderSequence(jarGeo({ style: 'async' }), defaultTheme));
+    const svg = assembleSvg(renderSequence(jarGeo({ arrow: arrowOf('async') }), defaultTheme));
     // len = width - 1 only (`ComponentRoseArrow.java:97`; `:126` needs NORMAL)
     expect(svg).toContain('<line x1="81.538" y1="66" x2="132.231" y2="66"');
   });
@@ -360,9 +376,9 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   // `:172` puts the polygon's tip at that same x2).
   const LOOP_BOTTOM_Y = SELF_Y + 20;
 
-  function selfGeo(style: MessageGeo['style']): SequenceGeometry {
+  function selfGeo(style: RenderStyle): SequenceGeometry {
     return makeGeo({
-      events: [makeSyncMessage({ style, arrowDirection: 'self', fromX: SELF_X, toX: 110, y: SELF_Y })],
+      events: [makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: SELF_X, toX: 110, y: SELF_Y })],
     });
   }
 

@@ -13,22 +13,22 @@
  * `UGraphic` to before drawing a head: `pos1` for `dressing1`, `pos2` for
  * `dressing2` (`ComponentRoseArrow.java:153-156`).
  *
- * Upstream's model is orthogonal where the spike's `MessageStyle` is flat: an
- * `ArrowConfiguration` is a pair of `ArrowDressing`s (tail side, head side),
- * each an `ArrowHead` x `ArrowPart`, plus a per-side `ArrowDecoration`. D2
- * ports that model as-is and derives it from `MessageStyle` at exactly one
- * adapter, `arrowConfigurationFor`; CROSSX, TOP_PART and BOTTOM_PART are
- * therefore correct but unreachable until a later batch ports the syntaxes
- * that produce them. D3 keeps the three polygon builders separate despite
- * reading as near-duplicates — the self variant differs by a sign convention
- * and a `-1` nudge.
+ * An `ArrowConfiguration` is a pair of `ArrowDressing`s (tail side, head
+ * side), each an `ArrowHead` x `ArrowPart`, plus a per-side
+ * `ArrowDecoration`. This module ports that model as-is; the parser builds
+ * one directly (`sequence-parse-helpers.ts#arrowConfigurationOf`, D1 of
+ * mission sequence-command-coverage), which replaced the lossy
+ * flat-enum adapter this file used to carry. TOP_PART and BOTTOM_PART
+ * remain correct but unfed until the dressing grammar lands. D3 keeps the
+ * three polygon builders separate despite reading as near-duplicates — the
+ * self variant differs by a sign convention and a `-1` nudge.
  *
  * NOT ported here, deliberately: the inclination rotation
- * (`:212,216,228,249,253,265`) — `inclination` comes from
- * `ArrowConfiguration#withInclination`, which nothing in this port's parser
- * sets, so the unrotated shape IS upstream's zero-inclination result. Line
- * thickness is likewise the renderer's: upstream strokes the CROSSX saltire
- * at 2 (`:219,256`), and only the circle's thickness is expressible here.
+ * (`:212,216,228,249,253,265`) — `ArrowConfiguration.inclination` is
+ * declared but nothing in this port's parser sets it yet, so the unrotated
+ * shape IS upstream's zero-inclination result. Line thickness is likewise
+ * the renderer's: upstream strokes the CROSSX saltire at 2 (`:219,256`), and
+ * only the circle's thickness is expressible here.
  *
  * Every `file:line` below is relative to
  * `~/git/plantuml/src/main/java/net/sourceforge/plantuml/`; a bare `:NNN` is
@@ -40,7 +40,6 @@
  */
 
 import type { Point2D } from '../../core/klimt/UTranslate.js';
-import type { MessageStyle } from './ast.js';
 
 // ---------------------------------------------------------------------------
 // The drawing model (D2)
@@ -77,8 +76,8 @@ export interface ArrowDressing {
  * reverse-pointing; `dressing2` is the head side, drawn normal-pointing
  * (`ComponentRoseArrow.java:153-156`). `dashed` is upstream's `isDotted()`,
  * i.e. `body == ArrowBody.DOTTED` (`ArrowConfiguration.java:198-200`). Only
- * the fields the drawing layer reads are carried; `color`, `thickness`,
- * `isSelf` and `inclination` stay with the renderer and the caller.
+ * the fields the drawing layer reads are carried; `color`, `thickness` and
+ * `isSelf` stay with the renderer and the caller.
  * @see skin/ArrowConfiguration.java:45-61
  */
 export interface ArrowConfiguration {
@@ -87,6 +86,11 @@ export interface ArrowConfiguration {
   readonly decoration1: ArrowDecoration;
   readonly decoration2: ArrowDecoration;
   readonly dashed: boolean;
+  /** `withInclination(inclination1 + inclination2)`
+   *  (`CommandArrow.java:393`) — the `->(10)` pixel offset summed over both
+   *  dressings. Absent where upstream carries 0.
+   *  @see skin/ArrowConfiguration.java:279-283 */
+  readonly inclination?: number;
 }
 
 /** A line segment: an ordered start/end pair in tip-local coordinates. */
@@ -422,76 +426,5 @@ export function headGeometrySelf(
       direction,
       niceArrow,
     ),
-  };
-}
-
-// ---------------------------------------------------------------------------
-// The single MessageStyle adapter (D2)
-// ---------------------------------------------------------------------------
-
-/** `ArrowDressing.create()` — the empty dressing. */
-const DRESSING_NONE: ArrowDressing = { head: 'NONE', part: 'FULL' };
-
-/** `ArrowDressing.create().withHead(ArrowHead.NORMAL)`. */
-const DRESSING_NORMAL: ArrowDressing = { head: 'NORMAL', part: 'FULL' };
-
-/** The result of `withHead2(ArrowHead.ASYNC)` on a normal-direction arrow. */
-const DRESSING_ASYNC: ArrowDressing = { head: 'ASYNC', part: 'FULL' };
-
-/**
- * Which head `dressing2` carries per `MessageStyle`. `>>` sets `sync2`, which
- * becomes `withHead2(ArrowHead.ASYNC)` (`CommandArrow.java:337,358-359`);
- * everything else keeps `withDirectionNormal`'s NORMAL head
- * (`ArrowConfiguration.java:88-92`).
- */
-const HEAD_BY_STYLE: Readonly<Record<MessageStyle, ArrowDressing>> = {
-  sync: DRESSING_NORMAL,
-  async: DRESSING_ASYNC,
-  reply: DRESSING_NORMAL,
-  replyAsync: DRESSING_ASYNC,
-  lost: DRESSING_NORMAL,
-  found: DRESSING_NORMAL,
-};
-
-/**
- * Which styles set `ArrowBody.DOTTED`. Upstream derives it from arrow LENGTH —
- * `dotted = getLength(arg) > 1` (`CommandArrow.java:340,353-354`), i.e. `--`
- * rather than `-` — exactly the pair the spike's `ARROW_STYLE_MAP` spells
- * `-->` and `-->>` (`sequence-parse-helpers.ts:131-132`).
- */
-const DASHED_STYLES: Readonly<Record<MessageStyle, boolean>> = {
-  sync: false,
-  async: false,
-  reply: true,
-  replyAsync: true,
-  lost: false,
-  found: false,
-};
-
-/**
- * Derive the drawing configuration from the spike's flat `MessageStyle`. D2's
- * ONE adapter seam: a later batch that ports `CommandArrow` /
- * `CommandExoArrowAny` properly deletes this rather than growing it.
- *
- * Every style the spike can produce comes from
- * `ArrowConfiguration.withDirectionNormal()` — empty `dressing1`,
- * head-bearing `dressing2` — with at most a body and a head-2 override. In
- * particular BOTH decorations are always NONE: `ArrowDecoration.CIRCLE` is
- * set only by an explicit `o` in the arrow text (`CommandArrow.java:367-371`,
- * `CommandExoArrowAny.java:109-132`), and `lost`/`found` are
- * `MessageExoType`, which governs where the LINE terminates rather than what
- * the head looks like — `CommandExoArrowAny.java:90-91` builds them from the
- * same `withDirectionNormal()` as a plain `->`. The spike's grammar has no
- * `o` token at all, so no `MessageStyle` maps to CIRCLE.
- * @see sequencediagram/command/CommandArrow.java:351-359
- * @see sequencediagram/command/CommandExoArrowAny.java:90-96
- */
-export function arrowConfigurationFor(style: MessageStyle): ArrowConfiguration {
-  return {
-    dressing1: DRESSING_NONE,
-    dressing2: HEAD_BY_STYLE[style],
-    decoration1: 'NONE',
-    decoration2: 'NONE',
-    dashed: DASHED_STYLES[style],
   };
 }

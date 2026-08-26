@@ -20,10 +20,9 @@
 
 import type { MessageEvent } from './ast.js';
 import {
-  ARROW_STYLE_MAP,
-  REVERSE_ARROW_STYLE_MAP,
   activationFlags,
   applyAutonumber,
+  arrowConfigurationOf,
   emit,
   ensureParticipant,
   type Command,
@@ -38,12 +37,18 @@ export const returnCommand: Command = {
     const to = state.lastMessageFrom ?? '';
     ensureParticipant(state, from);
     ensureParticipant(state, to);
+    // Upstream inherits the ACTIVATING message's configuration and only dots
+    // its body -- `message1.getArrowConfiguration().withBody(DOTTED)`
+    // (`CommandReturn.java:120`). This port has no `getActivatingMessage()`
+    // yet, so it emits the dotted plain-head arrow the spike always emitted;
+    // carrying the inheritance is T7's, not this representation change's.
+    // @see sequencediagram/command/CommandReturn.java:109-133
     let msg: MessageEvent = {
       kind: 'message',
       from,
       to,
       label,
-      style: 'reply',
+      arrow: arrowConfigurationOf({ dashed: true }),
     };
     msg = applyAutonumber(state, msg);
     emit(state, msg);
@@ -84,7 +89,15 @@ export const arrowCommand: Command = {
     const activation = match[4]?.trim() ?? '';
     const label = match[5]?.trim() ?? '';
 
-    const style = ARROW_STYLE_MAP[arrowToken] ?? 'sync';
+    // The dressings, read off the token the way `executeArg` reads them off
+    // ARROW_DRESSING1/2: a `--` shaft is `dotted` (`getLength(arg) > 1`,
+    // `CommandArrow.java:340`) and a `>>` head is `sync2`
+    // (`contains(dressing2, ">>", …)`, `:330,337`). The pattern above admits
+    // only the six enumerated tokens, so no other dressing can reach here.
+    const arrow = arrowConfigurationOf({
+      dashed: (arrowToken.match(/-/g) ?? []).length > 1,
+      async2: arrowToken.endsWith('>>'),
+    });
 
     ensureParticipant(state, from);
     ensureParticipant(state, to);
@@ -94,7 +107,7 @@ export const arrowCommand: Command = {
       from,
       to,
       label,
-      style,
+      arrow,
       ...activationFlags(activation, from, to),
     };
     msg = applyAutonumber(state, msg);
@@ -137,17 +150,14 @@ interface DecoratedArrowMatch {
   readonly label: string;
 }
 
-/** Decoration/style/direction resolved from a `DecoratedArrowMatch` — the
- *  pure half of `decoratedArrowCommand`, split out to stay under the
+/** Endpoints and `ArrowConfiguration` resolved from a `DecoratedArrowMatch`
+ *  — the pure half of `decoratedArrowCommand`, split out to stay under the
  *  complexity hook's per-function limit. Mirrors `CommandArrow`'s
  *  `reverseDefine` swap of `circleAtStart`/`circleAtEnd`
- *  (`CommandArrow.java:322-338`). */
+ *  (`CommandArrow.java:322-338`), so the spec it hands
+ *  {@link arrowConfigurationOf} is already in the arrow's own orientation. */
 function resolveDecoratedArrow(m: DecoratedArrowMatch): Omit<MessageEvent, 'kind'> {
   const reversed = m.leftAngle !== undefined;
-  const arrowKey = `${m.leftAngle ?? ''}${m.dashes}${m.rightAngle ?? ''}`;
-  const style =
-    (reversed ? REVERSE_ARROW_STYLE_MAP[arrowKey] : undefined) ??
-    (m.dashes.length > 1 ? 'reply' : 'sync');
   const head = reversed ? m.leadDecor : m.trailDecor;
   const tail = reversed ? m.trailDecor : m.leadDecor;
 
@@ -155,11 +165,20 @@ function resolveDecoratedArrow(m: DecoratedArrowMatch): Omit<MessageEvent, 'kind
     from: reversed ? m.tokenB : m.tokenA,
     to: reversed ? m.tokenA : m.tokenB,
     label: m.label,
-    style,
-    ...(head === 'o' ? { headCircle: true } : {}),
-    ...(tail === 'o' ? { tailCircle: true } : {}),
-    ...(head === 'x' ? { headCross: true } : {}),
-    ...(tail === 'x' ? { tailCross: true } : {}),
+    arrow: arrowConfigurationOf({
+      dashed: m.dashes.length > 1,
+      // `sync2` off the LEFT dressing, which is where a reverse-defined
+      // arrow's head lives (`sync2 = contains(dressing1, "<<", …)`,
+      // `CommandArrow.java:329`). Only when the RIGHT dressing is absent:
+      // with both angles present upstream's `hasDressing2butx` forces
+      // `reverseDefine` false (`:306-307`), a case the enumerated table
+      // never covered and T7 rebuilds properly rather than guessing at here.
+      async2: reversed && m.rightAngle === undefined && m.leftAngle === '<<',
+      circle1: tail === 'o',
+      circle2: head === 'o',
+      cross1: tail === 'x',
+      cross2: head === 'x',
+    }),
   };
 }
 
@@ -173,8 +192,8 @@ function unquote(token: string): string {
 export const decoratedArrowCommand: Command = {
   // T13: `(?:&\s*)?` accepts the leading PARALLEL marker
   // (`CommandArrow.java:90`, `ARROW_DRESSING1` group's sibling `PARALLEL`)
-  // discarded here — `MessageEvent` has no `goParallel()` flag to carry it
-  // to. `(?:\[[^\]]*\])?` skips an inline `[#color]`/`[bold]` style bracket
+  // discarded here — `MessageEvent.parallel` is declared but T7 populates
+  // it. `(?:\[[^\]]*\])?` skips an inline `[#color]`/`[bold]` style bracket
   // between the dash run and the arrowhead (`CommandArrow.java:106`,
   // `getColorOrStylePattern`) — matched and discarded, same scope cut as
   // the `ref`/`box` color groups elsewhere in this file. Quoted endpoints
@@ -182,11 +201,10 @@ export const decoratedArrowCommand: Command = {
   // {@link unquote}. The decoration groups also accept `/`/`//`/`\`/`\\`
   // (upstream's TOP_PART/BOTTOM_PART half-head dressings,
   // `CommandArrow.java:361-365`) so a line carrying one is recognised
-  // rather than refused; only `o`/`x` are mapped onto
-  // `headCircle`/`headCross` below, so the half-head effect itself is not
-  // reproduced (an `ArrowPart` this port's `sequence-arrowhead.ts` already
-  // models but nothing in the parser has fed until now — left unfed,
-  // documented rather than wired, given T13's time budget).
+  // rather than refused; only `o`/`x` reach the `ArrowConfiguration` below,
+  // so the half-head effect itself is not reproduced (an `ArrowPart` this
+  // port's `sequence-arrowhead.ts` already models but nothing in the parser
+  // has fed yet — T12 wires it).
   // T20 (defect 5 of `diagnosis-24-score-rises.md`): the endpoints are
   // upstream's own `PART1CODE`/`PART2CODE` = `([%pLN_.@]+)`
   // (`CommandArrow.java:93,119`), and an `ACTIVATION` group

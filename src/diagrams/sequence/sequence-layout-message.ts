@@ -2,8 +2,17 @@
  * Sequence diagram layout — message-arrow geometry, split out of
  * sequence-layout-events.ts to keep both files under the size cap.
  *
+ * Handles `MessageEvent` ONLY. A `MessageExoEvent` is a separate
+ * `SequenceEvent` member (D3) and never reaches here: upstream's
+ * `MessageExo.isSelfMessage()` returns false even though its two participants
+ * are the same object (`MessageExo.java:99-101`), so `resolveMessageEndpoints`
+ * below — which reads `event.from === event.to` as "self" — would place every
+ * exo arrow on a self loop. Exo geometry is `MessageExoArrow`'s, laid out in
+ * its own module against the diagram BORDER.
+ *
  * @see .../sequencediagram/SequenceDiagram.java (upstream advances a running
  * Y cursor as it visits each event in source order)
+ * @see .../sequencediagram/graphic/MessageExoArrow.java
  */
 
 import type { MessageEvent, MessageGeo, ParticipantGeo } from './ast.js';
@@ -69,16 +78,12 @@ function buildMessageGeo(
     toX: endpoints.toX,
     y,
     label: event.label,
-    style: event.style,
+    arrow: event.arrow,
     arrowDirection: endpoints.arrowDirection,
     ...(event.sequenceNumber !== undefined
       ? { sequenceNumber: event.sequenceNumber }
       : {}),
     ...(event.sequenceLabel !== undefined ? { sequenceLabel: event.sequenceLabel } : {}),
-    ...(event.headCircle === true ? { headCircle: true } : {}),
-    ...(event.tailCircle === true ? { tailCircle: true } : {}),
-    ...(event.headCross === true ? { headCross: true } : {}),
-    ...(event.tailCross === true ? { tailCross: true } : {}),
   };
 }
 

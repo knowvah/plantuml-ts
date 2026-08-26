@@ -231,22 +231,26 @@ describe('ref over', () => {
 describe('reverse and decorated arrows', () => {
   it('swaps from/to for a plain reverse arrow', () => {
     const [msg] = messages(parse(['Bob <- Alice : hello']).events);
-    expect(msg).toMatchObject({ from: 'Alice', to: 'Bob', style: 'sync' });
+    expect(msg).toMatchObject({ from: 'Alice', to: 'Bob' });
+    expect(msg?.arrow.dressing2).toEqual({ head: 'NORMAL', part: 'FULL' });
   });
 
   it('a dashed reverse arrow is a reply', () => {
     const [msg] = messages(parse(['Alice <-- Bob : response']).events);
-    expect(msg).toMatchObject({ from: 'Bob', to: 'Alice', style: 'reply' });
+    expect(msg).toMatchObject({ from: 'Bob', to: 'Alice' });
+    expect(msg?.arrow.dashed).toBe(true);
   });
 
   it('places a circle decoration at the arrowhead for ->o', () => {
     const [msg] = messages(parse(['Alice ->o Bob : hello']).events);
-    expect(msg).toMatchObject({ from: 'Alice', to: 'Bob', headCircle: true });
+    expect(msg).toMatchObject({ from: 'Alice', to: 'Bob' });
+    expect(msg?.arrow.decoration2).toBe('CIRCLE');
   });
 
   it('places a cross decoration at the tail for x->', () => {
     const [msg] = messages(parse(['Bob x-> Alice : hop']).events);
-    expect(msg).toMatchObject({ from: 'Bob', to: 'Alice', tailCross: true });
+    expect(msg).toMatchObject({ from: 'Bob', to: 'Alice' });
+    expect(msg?.arrow.dressing1.head).toBe('CROSSX');
   });
 
   it('does not mis-parse an exo-arrow bracket form as a participant', () => {

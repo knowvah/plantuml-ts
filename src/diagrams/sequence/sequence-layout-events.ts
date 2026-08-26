@@ -74,6 +74,12 @@ export function processEvents(
 function dispatchEvent(event: SequenceEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   switch (event.kind) {
     case 'message': handleMessageEvent(event, cursor, ctx); return;
+    // Exo messages have no layout yet. Named explicitly rather than left to
+    // fall through the switch, so the gap is visible: `handleMessageEvent`
+    // reads `from === to` as a self message and `MessageExo.isSelfMessage()`
+    // is FALSE (`MessageExo.java:99-101`, D3), so routing one there would be
+    // wrong, not merely incomplete. `MessageExoArrow` is its own geometry.
+    case 'messageExo': return;
     case 'note': handleNoteEvent(event, cursor, ctx); return;
     case 'activate': handleActivateEvent(event, cursor, ctx); return;
     case 'deactivate': handleDeactivateEvent(event, cursor, ctx); return;

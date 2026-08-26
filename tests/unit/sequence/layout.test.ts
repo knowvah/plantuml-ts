@@ -2,10 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { FixedMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import {
+  arrowConfigurationOf,
+  linkedParticipantIds,
+} from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type {
   SequenceDiagramAST,
   SequenceEvent,
   MessageEvent,
+  MessageExoEvent,
   MessageGeo,
   NoteGeo,
   ActivationGeo,
@@ -39,13 +44,17 @@ function makeAst(
   };
 }
 
+/** The configuration `Alice -> Bob` parses to — a plain solid arrow with a
+ *  NORMAL head on `dressing2` and nothing else. */
+const SYNC_ARROW = arrowConfigurationOf({});
+
 function msg(
   from: string,
   to: string,
   label = 'hello',
   extras: Partial<MessageEvent> = {},
 ): SequenceEvent {
-  return { kind: 'message', from, to, label, style: 'sync', ...extras };
+  return { kind: 'message', from, to, label, arrow: SYNC_ARROW, ...extras };
 }
 
 function isMessage(e: EventGeo): e is MessageGeo {
@@ -475,7 +484,7 @@ describe('layoutSequence — sequence numbers', () => {
         from: 'Alice',
         to: 'Bob',
         label: 'go',
-        style: 'sync',
+        arrow: SYNC_ARROW,
         sequenceNumber: 42,
       } satisfies SequenceEvent,
     ]);
@@ -520,7 +529,7 @@ describe('layoutSequence — message from unknown participant', () => {
     const ast: SequenceDiagramAST = {
       participants: [{ id: 'Alice', display: 'Alice', type: 'participant', order: 0 }],
       events: [
-        { kind: 'message', from: 'Alice', to: 'Ghost', label: 'ping', style: 'sync' },
+        { kind: 'message', from: 'Alice', to: 'Ghost', label: 'ping', arrow: SYNC_ARROW },
       ],
       autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
       options: { hideFootbox: false, messageAlign: 'center' },
@@ -542,5 +551,55 @@ describe('layoutSequence — auto-deactivate without prior activation record', (
     expect(activation).toBeDefined();
     // No activation start recorded — height should be 0 or very small
     expect(activation!.height).toBeGreaterThanOrEqual(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T6 / D3: how the two participant walkers treat a `messageExo` event
+//
+// Nothing parses one yet -- T13 does -- so these build the event directly.
+// They pin the two DELIBERATE readings T6 encoded, so a later task that
+// changes either has to change a test rather than drift silently.
+// ---------------------------------------------------------------------------
+
+function exo(participant: string, label = 'in'): MessageExoEvent {
+  return {
+    kind: 'messageExo',
+    participant,
+    exoType: 'FROM_LEFT',
+    shortArrow: false,
+    label,
+    arrow: SYNC_ARROW,
+  };
+}
+
+describe('exo messages in the participant walkers', () => {
+  // `isAlone` asks each event `dealWith(p)`, and `MessageExo.dealWith`
+  // answers `participant == someone` (`MessageExo.java:90-92`).
+  it('links its one endpoint, and no other participant', () => {
+    expect([...linkedParticipantIds([exo('Bob')])]).toEqual(['Bob']);
+  });
+
+  it('links the endpoint even from inside a frame branch', () => {
+    const frame: SequenceEvent = {
+      kind: 'frame', frameType: 'loop', label: 'l',
+      branches: [[exo('Carol')]], branchLabels: ['l'],
+    };
+    expect([...linkedParticipantIds([frame])]).toEqual(['Carol']);
+  });
+
+  // The adjacent-pair label scan skips it: an exo message has one endpoint
+  // and the diagram border for the other, so there is no pair to widen. A
+  // very long exo label must therefore NOT push Alice and Bob apart.
+  it('does not widen the gap between two adjacent lifelines', () => {
+    const plain = makeAst(['Alice', 'Bob'], []);
+    const withExo = makeAst(['Alice', 'Bob'], [
+      exo('Alice', 'a very long exo label indeed, quite long'),
+    ]);
+    const gap = (ast: SequenceDiagramAST): number => {
+      const geo = layoutSequence(ast, defaultTheme, measurer);
+      return geo.participants[1]!.centerX - geo.participants[0]!.centerX;
+    };
+    expect(gap(withExo)).toBe(gap(plain));
   });
 });

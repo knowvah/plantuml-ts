@@ -169,38 +169,51 @@ describe('participant declarations', () => {
 // Message events — arrow styles
 // ---------------------------------------------------------------------------
 
+// T6: `MessageEvent.style` is gone; the parser builds an
+// `ArrowConfiguration` (D1). These pin the shape each token produces; the
+// EXHAUSTIVE parity proof against the deleted adapter is in
+// `sequence-arrowhead.test.ts`.
 describe('message arrow styles', () => {
-  it('-> produces sync style', () => {
+  it('-> produces a solid NORMAL head on dressing2', () => {
     const ev = firstMessage(['Alice -> Bob: hello']);
-    expect(ev.style).toBe('sync');
+    expect(ev.arrow.dressing2).toEqual({ head: 'NORMAL', part: 'FULL' });
+    expect(ev.arrow.dressing1).toEqual({ head: 'NONE', part: 'FULL' });
+    expect(ev.arrow.dashed).toBe(false);
     expect(ev.from).toBe('Alice');
     expect(ev.to).toBe('Bob');
     expect(ev.label).toBe('hello');
   });
 
-  it('->> produces async style', () => {
+  it('->> produces an ASYNC head, still solid', () => {
     const ev = firstMessage(['Alice ->> Bob: go']);
-    expect(ev.style).toBe('async');
+    expect(ev.arrow.dressing2).toEqual({ head: 'ASYNC', part: 'FULL' });
+    expect(ev.arrow.dashed).toBe(false);
   });
 
-  it('--> produces reply style', () => {
+  it('--> produces a dashed body with a NORMAL head', () => {
     const ev = firstMessage(['Alice --> Bob: ok']);
-    expect(ev.style).toBe('reply');
+    expect(ev.arrow.dashed).toBe(true);
+    expect(ev.arrow.dressing2).toEqual({ head: 'NORMAL', part: 'FULL' });
   });
 
-  it('-->> produces replyAsync style', () => {
+  it('-->> produces a dashed body with an ASYNC head', () => {
     const ev = firstMessage(['Alice -->> Bob: ok']);
-    expect(ev.style).toBe('replyAsync');
+    expect(ev.arrow.dashed).toBe(true);
+    expect(ev.arrow.dressing2).toEqual({ head: 'ASYNC', part: 'FULL' });
   });
 
-  it('->? produces lost style', () => {
+  // `->?`/`?->` are the spike's lost/found shorthand. Neither is a dressing
+  // upstream recognises, and neither ever carried a distinct
+  // `ArrowConfiguration` -- `ArrowDecoration.CIRCLE` comes only from an
+  // explicit `o` (`CommandArrow.java:367-371`).
+  it('->? produces the same plain arrow as ->', () => {
     const ev = firstMessage(['Alice ->? Bob: lost']);
-    expect(ev.style).toBe('lost');
+    expect(ev.arrow).toEqual(firstMessage(['Alice -> Bob: lost']).arrow);
   });
 
-  it('?-> produces found style', () => {
+  it('?-> produces the same plain arrow as ->', () => {
     const ev = firstMessage(['Alice ?-> Bob: found']);
-    expect(ev.style).toBe('found');
+    expect(ev.arrow).toEqual(firstMessage(['Alice -> Bob: found']).arrow);
   });
 
   it('self-message: from === to', () => {
@@ -663,7 +676,8 @@ describe('return command', () => {
     expect(returnMsg?.kind).toBe('message');
     expect(returnMsg?.from).toBe('Bob');
     expect(returnMsg?.to).toBe('Alice');
-    expect(returnMsg?.style).toBe('reply');
+    expect(returnMsg?.arrow.dashed).toBe(true);
+    expect(returnMsg?.arrow.dressing2).toEqual({ head: 'NORMAL', part: 'FULL' });
     expect(returnMsg?.label).toBe('result');
   });
 

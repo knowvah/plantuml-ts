@@ -116,6 +116,12 @@ function scaleBox(b: BoxGeo, k: number): BoxGeo {
 
 const scaleRun = (r: TextRun, k: number): TextRun => ({ ...r, x: r.x * k, y: r.y * k });
 
+/**
+ * A message's geometry, scaled. Covers exo messages too: they emit a
+ * `MessageGeo` whose `exoType`/`shortArrow`/`arrow` are drawing DATA, not
+ * coordinates, so the border-anchored `fromX`/`toX` scale by `k` exactly as
+ * a between-lifelines message's do and nothing else needs touching.
+ */
 function scaleMessage(m: MessageGeo, k: number): MessageGeo {
   return {
     ...m,

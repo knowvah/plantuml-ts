@@ -11,10 +11,8 @@ import type { MessageGeo } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
 import { text, path } from '../../core/svg.js';
-import { arrowConfigurationFor } from './sequence-arrowhead.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import {
-  applyMessageDecorations,
   renderFlatMessageArrow,
   renderSelfMessageHead,
 } from './renderer-arrowhead.js';
@@ -85,9 +83,15 @@ function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
  * polygons/strokes, never an SVG `<marker>` reference -- `assembleDocument
  * Shell` injects no marker defs, and the jar's own sequence corpus contains
  * none either.
+ *
+ * The configuration is read straight off the geometry: the parser builds the
+ * whole `ArrowConfiguration` (D1), so there is no style-to-shape adapter and
+ * no decoration overlay left at render time. `msg.exoType`, when set, marks
+ * geometry an exo message produced -- a distinct drawing path
+ * (`MessageExoArrow`), not this one.
  */
 export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
-  const configuration = applyMessageDecorations(arrowConfigurationFor(msg.style), msg);
+  const configuration = msg.arrow;
   const arrow =
     msg.arrowDirection === 'self'
       ? renderSelfMessage(msg, configuration, theme)
