@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1033 modules · 3643 exported names.
+1034 modules · 3654 exported names.
 
 ## `src/`
 
@@ -1251,15 +1251,16 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `ast.ts` | `ParticipantType`, `Participant`, `MessageExoType`, `AbstractMessageEvent`, `MessageEvent`, `MessageExoEvent`, `NoteEvent`, `FrameEvent`, `ActivationEvent`, `DividerEvent`, `DelayEvent`, `SpaceEvent`, `SequenceEvent`, `BoxGroup`, `SequenceDiagramAST`, `ParticipantBadge`, `ParticipantGeo`, `TextRun`, `MessageGeo`, `NoteGeo`, `ActivationGeo`, `FrameGeo`, `DividerGeo`, `SpaceGeo`, `EventGeo`, `BoxGeo`, `SequenceGeometry` | AST and Geometry type definitions for PlantUML sequence diagrams. |
-| `command-arrow.ts` | `returnCommand`, `arrowCommand`, `decoratedArrowCommand` | `CommandArrow` (`SequenceDiagramFactory.java:111`) — ONE upstream command covering both directions, split here into a forward-only rule and a reverse/decorated rule (see each one's own notes). |
-| `command-autonumber.ts` | `autonumberCommand` | `CommandAutonumber` (`SequenceDiagramFactory.java:146`), the first of the four autonumber commands upstream registers in a row: `CommandAutonumber` (`:146`), `CommandAutonumberStop` (`:147`), `CommandAutonumberResume` (`:148`) and `CommandA |
+| `command-arrow.ts` | `returnCommand`, `ARROW_SOURCE`, `UNDRESSED_ARROW_SOURCE`, `DRESSED_ARROW_SOURCE`, `getInclination`, `arrowCommand`, `decoratedArrowCommand` | `CommandArrow` (`SequenceDiagramFactory.java:111`) — ONE upstream command, rebuilt here from the composed named groups of `sequence-arrow-regex.ts` rather than from an enumerated token table (`->`, `-->>`, `->>`, `-->`). |
+| `command-autonumber.ts` | `autonumberCommand`, `autonumberStopCommand`, `autonumberResumeCommand`, `autonumberIncrementCommand` | The autonumber block: `CommandAutonumber` (`SequenceDiagramFactory .java:146`), `CommandAutonumberStop` (`:147`), `CommandAutonumberResume` (`:148`) and `CommandAutonumberIncrement` (`:149`), registered as four consecutive entries. |
 | `command-common.ts` | `skinParamMessageAlignCommand`, `pragmaCommand`, `rotateCommand`, `hideStereotypeCommand`, `hideUnlinkedCommand`, `scaleCommand` | The `CommonCommands.addCommonCommands1(cmds)` block — the VERY FIRST thing `SequenceDiagramFactory#initCommandsList` registers (`:100`), ahead of every sequence-specific command — plus `CommandHideUnlinked` (`:101`), the single command regi |
 | `command-grouping.ts` | `boxStartCommand`, `boxEndCommand`, `groupingCommand`, `elseCommand`, `endCommand` | The box/grouping block: `CommandBoxStart` (`:124`), `CommandBoxEnd` (`:125`) and `CommandGrouping` (`:126`), registered consecutively as one group between the single-line note factories and the `CommandActivate2`/`CommandReturn` pair. |
-| `command-lifeline.ts` | `activateCommand`, `deactivateCommand`, `destroyCommand` | The life-line block: `CommandActivate` (`SequenceDiagramFactory.java:103`) and `CommandDeactivateShort` (`:104`), registered as their own group immediately after `addCommonCommands1`/`CommandHideUnlinked` and before the participant declarat |
-| `command-misc.ts` | `hideFootboxCommand`, `dividerCommand`, `delayWithTextCommand`, `bareDelayCommand`, `spaceCommand`, `autoactivateCommand`, `setSeparatorCommand`, `refOverCommand`, `refOverMultilineCommand` | The individually-registered commands of `initCommandsList`'s trailing run that are neither pagination nor autonumber: `CommandDivider` (`:142`), `CommandHSpace` (`:143`), `CommandReferenceOverSeveral` (`:144`), `CommandReferenceMultilinesOv |
+| `command-lifeline.ts` | `activateCommand`, `deactivateCommand`, `destroyCommand`, `deactivateShortCommand` | The life-line block: `CommandActivate` (`SequenceDiagramFactory.java:103`) and `CommandDeactivateShort` (`:104`), registered as their own group immediately after `addCommonCommands1`/`CommandHideUnlinked` and before the participant declarat |
+| `command-misc.ts` | `hideFootboxCommand`, `hideEmptyDescriptionCommand`, `dividerCommand`, `delayWithTextCommand`, `bareDelayCommand`, `spaceCommand`, `autoactivateCommand`, `setSeparatorCommand`, `refOverCommand`, `refOverMultilineCommand` | The individually-registered commands of `initCommandsList`'s trailing run that are neither pagination nor autonumber: `CommandDivider` (`:142`), `CommandHSpace` (`:143`), `CommandReferenceOverSeveral` (`:144`), `CommandReferenceMultilinesOv |
 | `command-note-factory.ts` | `noteCommand`, `endNoteCommand`, `noteOnArrowCommand`, `styledNoteCommand`, `noteAcrossCommand` | The note-command factories. |
 | `command-page.ts` | `newpageCommand`, `minwidthOrPagingCommand` | The pagination block: `CommandNewpage` (`:139`), `CommandIgnoreNewpage` (`:140`) and `CommandAutoNewpage` (`:141`), the three commands that open `initCommandsList`'s trailing run. |
-| `command-participant.ts` | `participantCommand`, `createCommand` | The participant-declaration family: `CommandParticipantA` (`:106`), `CommandParticipantA2` (`:107`), `CommandParticipantA3` (`:108`), `CommandParticipantA4` (`:109`) and `CommandParticipantMultilines` (`:110`) — four single-line arities of |
+| `command-participant.ts` | `participantCommand`, `createCommand`, `matchParticipantMultilineCommand` | The participant-declaration family: `CommandParticipantA` (`:106`), `CommandParticipantA2` (`:107`), `CommandParticipantA3` (`:108`), `CommandParticipantA4` (`:109`) and `CommandParticipantMultilines` (`:110`) — four single-line arities of |
+| `command-sprite.ts` | `matchSpriteBase64Command` | `CommandSpriteBase64` — `sprite $name data:image/png;base64,<payload>`, the inline-image sprite definition. |
 | `index.ts` | `sequencePlugin` | Sequence diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |
