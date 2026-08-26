@@ -28,6 +28,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
 import { refBodyLines, refBodyHeight, refBodyWidth } from './text-block-geo.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
+import { handleMessageExoEvent } from './sequence-layout-exo.js';
 
 /** Pending activation-bar start record, keyed by participant id. */
 type ActivationRecord = { y: number; color?: string };
@@ -74,12 +75,11 @@ export function processEvents(
 function dispatchEvent(event: SequenceEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   switch (event.kind) {
     case 'message': handleMessageEvent(event, cursor, ctx); return;
-    // Exo messages have no layout yet. Named explicitly rather than left to
-    // fall through the switch, so the gap is visible: `handleMessageEvent`
-    // reads `from === to` as a self message and `MessageExo.isSelfMessage()`
-    // is FALSE (`MessageExo.java:99-101`, D3), so routing one there would be
-    // wrong, not merely incomplete. `MessageExoArrow` is its own geometry.
-    case 'messageExo': return;
+    // Exo geometry is its own module, never `handleMessageEvent`'s:
+    // `MessageExo.isSelfMessage()` is FALSE (`MessageExo.java:99-101`, D3)
+    // although both of its participants are the same, so the `from === to`
+    // reading there would put every exo arrow on a self loop.
+    case 'messageExo': handleMessageExoEvent(event, cursor, ctx); return;
     case 'note': handleNoteEvent(event, cursor, ctx); return;
     case 'activate': handleActivateEvent(event, cursor, ctx); return;
     case 'deactivate': handleDeactivateEvent(event, cursor, ctx); return;
