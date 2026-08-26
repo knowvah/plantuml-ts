@@ -20,16 +20,27 @@
  * the same `executeArrow`, so the split is a dispatch-position artefact, not
  * two behaviours.
  *
- * **What this module does NOT carry yet.** `withPart(TOP_PART/BOTTOM_PART)`
- * (`:361-365`), `withInclination` (`:393`), `applyStyle`'s `withColor` and
- * `ArrowBody.HIDDEN` (`:496-503`), `config.reverseDefine()` (`:389-390`),
- * LIFECOLOR (`:427`), STEREOTYPE (`:137-140`) and the URL (`:133-135`) are
- * MATCHED — so a line carrying them is recognised rather than refused — and
- * then discarded, because this port's `ArrowConfiguration`
- * (`sequence-arrowhead.ts:84`) has no field for the first four and T12 owns
- * wiring the trailing modifiers onto the AST. `PART1ANCHOR`/`PART2ANCHOR`
- * (`:418-419`) are matched and dropped for the same reason: `MessageEvent`
- * declares one `anchor`, which carries the leading `ANCHOR` group.
+ * **What this module still does NOT carry.** `applyStyle`'s `withColor` and
+ * `ArrowBody.HIDDEN` (`:496-503`) and `config.reverseDefine()` (`:389-390`)
+ * are MATCHED — so a line carrying them is recognised rather than refused —
+ * and then discarded: this port's `ArrowConfiguration`
+ * (`sequence-arrowhead.ts:84`) has no field for any of the three.
+ * `PART1ANCHOR`/`PART2ANCHOR` (`:418-419`) are matched and dropped because
+ * `MessageEvent` declares one `anchor`, which carries the leading `ANCHOR`
+ * group. `**` (CREATE, `:396`) and `!!` (DESTROY, `:453`) collapse onto plain
+ * activate/deactivate: `ActivationEvent.kind` (`ast.ts:186`) has no
+ * CREATE/DESTROY variant, and adding one is AST, layout and renderer work.
+ *
+ * **One measured residual in the ACTIVATION group.** `manageActivations`
+ * reads a SECOND life event out of `spec.charAt(2)` when the spec is four
+ * characters long — only `--++` and `++--` are (`:457-466`). The shared
+ * `activationFlags` (`sequence-parse-helpers.ts:313`) implements upstream's
+ * outer switch only, so `Bob -> Carol --++` closes Bob's bar and never opens
+ * Carol's. Jar-verified: the pinned oracle draws TWO activation rectangles
+ * for that line, `y 66..93` and `y 93..138`. Completing it is two lines in
+ * `activationFlags` plus the pin at `tests/unit/sequence/parser.test.ts:253`,
+ * whose comment cites `:445` and asserts the first character is all that is
+ * read — both files outside this module's write-set.
  *
  * Upstream's `executeArg` returns `CommandExecutionResult.error("Illegal
  * sequence arrow")` when neither dressing carries a direction (`:314`). This
@@ -49,7 +60,7 @@
  */
 
 import type { MessageEvent } from './ast.js';
-import type { ArrowConfiguration } from './sequence-arrowhead.js';
+import type { ArrowConfiguration, ArrowPart } from './sequence-arrowhead.js';
 import {
   ARROW_DRESSING1,
   ARROW_SKELETON_SOURCE,
@@ -216,8 +227,11 @@ function getDressing(value: string | undefined): string {
 }
 
 /**
- * The `(n)` pixel offset inside a dressing. Ported for completeness — nothing
- * consumes the sum yet (see the module header).
+ * The `(n)` pixel offset inside a dressing, read from the RAW group rather
+ * than {@link getDressing}'s lower-cased form, exactly as upstream reads it
+ * (`:299-300`). Only two of the eight dressing alternatives admit it — `(n)<`
+ * on the tail (`:101`) and `>(n)` on the head (`:113`) — so `A -(30)-> B` is
+ * a syntax error upstream, verified against the pinned jar.
  * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:192-203
  */
 export function getInclination(key: string | undefined): number {
@@ -257,6 +271,22 @@ function applyStyle(
     .split(',')
     .some((s) => s.toLowerCase() === 'dashed' || s.toLowerCase() === 'dotted');
   return dotted ? { ...config, dashed: true } : config;
+}
+
+/**
+ * `ArrowConfiguration#withPart` — the part lands on `dressing2`, falling back
+ * to `dressing1` only when the head side carries no head at all. It lives
+ * here rather than on {@link ArrowConfiguration} because
+ * `sequence-arrowhead.ts` is outside this task's write-set. The fallback is
+ * unreachable from `executeArg` — every `withDirection*` leaves `dressing2`
+ * NORMAL (`ArrowConfiguration.java:88-98`) — and is kept because upstream's
+ * method is shared with the exo commands.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/ArrowConfiguration.java:149-156
+ */
+export function withPart(config: ArrowConfiguration, part: ArrowPart): ArrowConfiguration {
+  if (config.dressing2.head !== 'NONE')
+    return { ...config, dressing2: { ...config.dressing2, part } };
+  return { ...config, dressing1: { ...config.dressing1, part } };
 }
 
 // ---------------------------------------------------------------------------
@@ -376,27 +406,77 @@ function arrowSpecOf(f: DressingFacts, dotted: boolean): ArrowSpec {
   };
 }
 
+/**
+ * `executeArg`'s config chain (`:351-393`). {@link arrowConfigurationOf}
+ * covers `withDirection*` through the CROSSX heads (`:351-359,367-387`); the
+ * two {@link withPart} calls are `:361-365`, applied after those heads
+ * instead of between them because `withHead*` preserves `part`
+ * (`ArrowDressing.java:65-67`) and every head reachable here is non-NONE, so
+ * both orders build the same object.
+ *
+ * The half-heads are NOT a mirrored pair and must not be collapsed: upstream
+ * reads the same slash as TOP on one side and BOTTOM on the other — a `\\` on
+ * dressing2 or a `/` on dressing1 is TOP_PART (`:361-362`), a `/` on
+ * dressing2 or a `\\` on dressing1 is BOTTOM_PART (`:364-365`) — and both
+ * `if`s run, so a dressing carrying both slashes ends BOTTOM_PART. The
+ * dressings are as WRITTEN, before the reverse-define swap, exactly as
+ * upstream has them at `:361` (`reverseDefine()` is `:389`). Jar-verified on
+ * the head polygon, the only place TOP/BOTTOM is observable: `A -\\ B` emits
+ * `43.838,62 53.838,66 43.838,66` — the half ABOVE the shaft, whose y is 66 —
+ * and `A -/ B` emits `43.838,66 53.838,66 43.838,70`, below it.
+ *
+ * `inclination` is `withInclination(inclination1 + inclination2)` (`:393`),
+ * left ABSENT rather than `0` where upstream carries zero
+ * (`sequence-arrowhead.ts:89-93`).
+ */
+function arrowOf(g: Groups, facts: DressingFacts): ArrowConfiguration {
+  let config = applyStyle(
+    g['ARROW_STYLE1'] ?? g['ARROW_STYLE2'],
+    arrowConfigurationOf(arrowSpecOf(facts, getLength(g) > 1)),
+  );
+  if (facts.dressing2.includes('\\') || facts.dressing1.includes('/'))
+    config = withPart(config, 'TOP_PART');
+  if (facts.dressing2.includes('/') || facts.dressing1.includes('\\'))
+    config = withPart(config, 'BOTTOM_PART');
+  const sum = getInclination(g['ARROW_DRESSING1']) + getInclination(g['ARROW_DRESSING2']);
+  return sum === 0 ? config : { ...config, inclination: sum };
+}
+
 // ---------------------------------------------------------------------------
 // executeArg
 // ---------------------------------------------------------------------------
 
 /**
- * The AST fields that only some arrows carry. `parallel` and `anchor` are
- * stored and NOT drawn: every upstream consumer of `isParallel()` and
- * `getAnchor()` lives under `sequencediagram/teoz/`, and the classic renderer
- * reads neither (D4). `PART1ANCHOR`/`PART2ANCHOR` have no AST field.
- * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:404,413-419
+ * The AST fields that only some arrows carry, in one place because upstream
+ * sets them all in one run of `executeArg` (`:404-415,427`). `parallel` and
+ * `anchor` are stored and NOT drawn: every upstream consumer of
+ * `isParallel()` and `getAnchor()` lives under `sequencediagram/teoz/`, and
+ * the classic renderer reads neither (D4). `PART1ANCHOR`/`PART2ANCHOR` have
+ * no AST field.
+ *
+ * LIFECOLOR (`:126`), STEREOTYPE (`:129`) and the URL (`:130`) are each
+ * stored exactly as `arg.get(KEY, 0)` yields them: the raw `#colour` token,
+ * the `<<…>>` run WITH its guillemets (`StereotypePattern.mandatory` captures
+ * them, `StereotypePattern.java:66-68`), and the whole `[[…]]` run — which
+ * upstream itself keeps undecomposed and re-parses through
+ * `UrlBuilder#getUrl` (`:407-410`) rather than storing a split form.
+ * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:404-419,427
  */
-function optionalFields(
-  state: ParseState,
-  g: Groups,
-): Pick<MessageEvent, 'multicast' | 'parallel' | 'anchor'> {
+type OptionalMessageFields = Pick<
+  MessageEvent,
+  'multicast' | 'parallel' | 'anchor' | 'url' | 'stereotype' | 'lifeColor'
+>;
+
+function optionalFields(state: ParseState, g: Groups): OptionalMessageFields {
   const multicast = getMulticasts(state, g['MULTICAST']);
   const anchor = g['ANCHOR1'];
   return {
     ...(multicast.length > 0 ? { multicast } : {}),
     ...(g['PARALLEL'] !== undefined ? { parallel: true } : {}),
     ...(anchor !== undefined ? { anchor } : {}),
+    ...(g['URL'] !== undefined ? { url: g['URL'] } : {}),
+    ...(g['STEREOTYPE'] !== undefined ? { stereotype: g['STEREOTYPE'] } : {}),
+    ...(g['LIFECOLOR'] !== undefined ? { lifeColor: g['LIFECOLOR'] } : {}),
   };
 }
 
@@ -426,10 +506,7 @@ function executeArrow(state: ParseState, match: RegExpExecArray): void {
     from,
     to,
     label: g['MESSAGE'] ?? '',
-    arrow: applyStyle(
-      g['ARROW_STYLE1'] ?? g['ARROW_STYLE2'],
-      arrowConfigurationOf(arrowSpecOf(facts, getLength(g) > 1)),
-    ),
+    arrow: arrowOf(g, facts),
     ...optionalFields(state, g),
     ...activationFlags(g['ACTIVATION'] ?? '', from, to),
   });

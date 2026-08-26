@@ -16,6 +16,9 @@
  *     leaves out of its skeleton.
  *  3. The two-branch dispatch split, which must stay disjoint and must not
  *     change the frozen registry order (D2).
+ *  4. T12's groups: the `o`/`x` decorations, the `/` and `\` half-heads and
+ *     their `ArrowPart` mapping, the `(n)` inclination, and the ACTIVATION /
+ *     LIFECOLOR / STEREOTYPE / URL modifiers now carried onto the AST.
  *
  * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:87-133,296-430
  */
@@ -31,7 +34,9 @@ import {
   decoratedArrowCommand,
   getInclination,
   returnCommand,
+  withPart,
 } from '../../../src/diagrams/sequence/command-arrow.js';
+import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { SEQUENCE_COMMANDS } from '../../../src/diagrams/sequence/sequence-command-registry.js';
 import { LIFECOLOR } from '../../../src/diagrams/sequence/sequence-arrow-regex.js';
 
@@ -141,13 +146,14 @@ describe('CommandArrow — the forms the deleted enumerated table got wrong', ()
     expect(shape(firstMessage(`${src} : hi`))).toEqual(expected);
   });
 
-  // `ArrowPart` (`:361-365`) and `withInclination` (`:393`) are matched and
-  // not carried yet -- T12 wires them. Pinned so the gap is visible rather
-  // than silent: the jar draws `/->`'s right head as a THREE-point half
-  // polygon, this port draws the full four-point one.
-  it('leaves the half-head ArrowPart at FULL until T12 wires it', () => {
-    expect(firstMessage('Alice /-> Bob : hi').arrow.dressing2.part).toBe('FULL');
-    expect(firstMessage('Alice ->(40) Bob : hi').arrow.inclination).toBeUndefined();
+  // `/->` carries a direction on BOTH ends, so `withDirectionBoth` gives
+  // dressing1 a NORMAL head too -- but `withPart` still lands on dressing2
+  // (`ArrowConfiguration.java:149-151`), which is why only the RIGHT head is
+  // halved. Jar-confirmed: the oracle emits one three-point polygon.
+  it('halves only dressing2 even when both ends carry a head', () => {
+    const arrow = firstMessage('Alice /-> Bob : hi').arrow;
+    expect(arrow.dressing1).toEqual({ head: 'NORMAL', part: 'FULL' });
+    expect(arrow.dressing2).toEqual({ head: 'NORMAL', part: 'TOP_PART' });
   });
 });
 
@@ -348,6 +354,245 @@ describe('getInclination', () => {
 });
 
 // ---------------------------------------------------------------------------
+// 2b. T12 — the decorated dressing and the trailing modifiers
+// ---------------------------------------------------------------------------
+
+/**
+ * `withPart` lands on dressing2 unless that side has NO head at all
+ * (`ArrowConfiguration.java:149-156`). `executeArg` can never reach the
+ * fallback — every `withDirection*` leaves dressing2 NORMAL (`:88-98`) — so
+ * it is exercised directly rather than through a source line that cannot
+ * exist.
+ */
+describe('withPart', () => {
+  const bare = (head: 'NONE' | 'NORMAL'): ArrowConfiguration => ({
+    dressing1: { head: 'NORMAL', part: 'FULL' },
+    dressing2: { head, part: 'FULL' },
+    decoration1: 'NONE',
+    decoration2: 'NONE',
+    dashed: false,
+  });
+
+  it('puts the part on dressing2 when the head side carries a head', () => {
+    const out = withPart(bare('NORMAL'), 'TOP_PART');
+    expect(out.dressing2).toEqual({ head: 'NORMAL', part: 'TOP_PART' });
+    expect(out.dressing1).toEqual({ head: 'NORMAL', part: 'FULL' });
+  });
+
+  it('falls back to dressing1 when dressing2 has no head (:154-155)', () => {
+    const out = withPart(bare('NONE'), 'BOTTOM_PART');
+    expect(out.dressing1).toEqual({ head: 'NORMAL', part: 'BOTTOM_PART' });
+    expect(out.dressing2).toEqual({ head: 'NONE', part: 'FULL' });
+  });
+});
+
+/**
+ * The half-heads. `\` and `/` do NOT mean the same thing on the two sides:
+ * `:361-362` reads dressing2's `\` and dressing1's `/` as TOP, `:364-365`
+ * dressing2's `/` and dressing1's `\` as BOTTOM. Two independent
+ * confirmations, neither of them the Java:
+ *
+ *  - the pinned oracle's polygons for `A -\ B` and `A -/ B` are
+ *    `43.838,62 53.838,66 43.838,66` and `43.838,66 53.838,66 43.838,70` --
+ *    above and below a shaft at y 66;
+ *  - corpus fixture `sequence/gozaru-36-gejo982` LABELS its own rows, and
+ *    calls `Bob -// Alice` "correct down5", `Bob -\\ Alice` "up6",
+ *    `Bob \\- Alice` "down7" and `Bob //- Alice` "up8".
+ */
+describe('CommandArrow — `/` and `\\` half-heads (:361-365)', () => {
+  it.each([
+    ['A -\\ B : hi', 'TOP_PART', 'NORMAL', 'A', 'B'],
+    ['A -/ B : hi', 'BOTTOM_PART', 'NORMAL', 'A', 'B'],
+    ['A -\\\\ B : hi', 'TOP_PART', 'ASYNC', 'A', 'B'],
+    ['A -// B : hi', 'BOTTOM_PART', 'ASYNC', 'A', 'B'],
+    // Written right-to-left: `withPart` still lands on dressing2, which is
+    // the head drawn at the message TARGET after the reverse (`:322-323`).
+    ['A \\- B : hi', 'BOTTOM_PART', 'NORMAL', 'B', 'A'],
+    ['A /- B : hi', 'TOP_PART', 'NORMAL', 'B', 'A'],
+    ['A \\\\- B : hi', 'BOTTOM_PART', 'ASYNC', 'B', 'A'],
+    ['A //- B : hi', 'TOP_PART', 'ASYNC', 'B', 'A'],
+  ])('%s halves the head as %s', (line, part, head, from, to) => {
+    const msg = firstMessage(line);
+    expect(msg.arrow.dressing2).toEqual({ head, part });
+    expect([msg.from, msg.to]).toEqual([from, to]);
+  });
+
+  it('leaves an undecorated arrow FULL on both ends', () => {
+    const arrow = firstMessage('A -> B : hi').arrow;
+    expect(arrow.dressing1.part).toBe('FULL');
+    expect(arrow.dressing2.part).toBe('FULL');
+  });
+
+  // Both `if`s run in order and the second overwrites the first, so a form
+  // that satisfies BOTH tests ends BOTTOM_PART. `A /-/ B` is one: the LEFT
+  // `/` fires `:362` (TOP) and the RIGHT `/` then fires `:365` (BOTTOM).
+  it('lets the BOTTOM_PART test overwrite TOP_PART when both fire', () => {
+    expect(firstMessage('A /-/ B : hi').arrow.dressing2.part).toBe('BOTTOM_PART');
+    expect(firstMessage('A \\\\-\\\\ B : hi').arrow.dressing2.part).toBe('BOTTOM_PART');
+  });
+});
+
+/**
+ * `o` and `x`. The decoration pattern is `[%s][ox]` on the tail and
+ * `[ox][%s]` on the head (`:100,116`) -- the SPACE is part of it, which is
+ * the whole difference between decorating an arrow and naming a participant.
+ * Case-insensitivity is `Pattern2.cmpile`'s `CASE_INSENSITIVE`
+ * (`regex/Pattern2.java:114`); corpus `sequence/viguto-81-gana093:5-6` is
+ * pinned on it (`State1 -->O HandleFailure`).
+ */
+describe('CommandArrow — the o/x dressing decorations', () => {
+  it('reads `A ->o B` as a circle at the head end (:328,368)', () => {
+    expect(firstMessage('A ->o B : hi').arrow.decoration2).toBe('CIRCLE');
+  });
+
+  it('reads `A->oB` as a participant named oB, because the space is required', () => {
+    const ast = parsed('A->oB : hi');
+    expect(ast.participants.map((p) => p.id)).toEqual(['A', 'oB']);
+    expect(firstMessage('A->oB : hi').arrow.decoration2).toBe('NONE');
+  });
+
+  it('reads `A o-> B` as a circle at the tail end (:327,371)', () => {
+    const arrow = firstMessage('A o-> B : hi').arrow;
+    expect(arrow.decoration1).toBe('CIRCLE');
+    expect(arrow.decoration2).toBe('NONE');
+  });
+
+  it('reads `A ->x B` as a CROSSX head (:385)', () => {
+    expect(firstMessage('A ->x B : hi').arrow.dressing2.head).toBe('CROSSX');
+  });
+
+  it.each([
+    ['State1 -->O HandleFailure : error1/', 'decoration2', 'CIRCLE'],
+    ['A ->X B : hi', 'head2', 'CROSSX'],
+  ])('matches %s case-insensitively', (line, field, expected) => {
+    const arrow = firstMessage(line).arrow;
+    expect(field === 'head2' ? arrow.dressing2.head : arrow.decoration2).toBe(expected);
+  });
+});
+
+/**
+ * The `(n)` inclination. It is legal in exactly two of the eight dressing
+ * alternatives -- `(n)<` on the tail (`:101`) and `>(n)` on the head
+ * (`:113`) -- and `executeArg` stores the SUM (`:393`). `A -(30)-> B` puts it
+ * between the dashes, where no alternative admits it; the pinned oracle
+ * renders that source as an error page, so refusing it is the faithful
+ * answer, not a gap.
+ */
+describe('CommandArrow — inclination (:299-300,393)', () => {
+  it.each([
+    ['A ->(30) B : hi', 30],
+    ['A (30)<- B : hi', 30],
+    ['A (10)<->(20) B : hi', 30],
+  ])('%s carries inclination %i', (line, expected) => {
+    expect(firstMessage(line).arrow.inclination).toBe(expected);
+  });
+
+  it('leaves inclination absent, not 0, when no dressing carries one', () => {
+    expect(firstMessage('A -> B : hi').arrow.inclination).toBeUndefined();
+  });
+
+  it('refuses `A -(30)-> B`, which the pinned jar also refuses', () => {
+    expect(refused('A -(30)-> B : hi')).toBe(true);
+  });
+});
+
+/**
+ * LIFECOLOR, STEREOTYPE and the URL, stored as `arg.get(KEY, 0)` yields them
+ * (`:406-415,427`). Upstream's concatenation order is ACTIVATION, LIFECOLOR,
+ * STEREOTYPE, URL, MESSAGE (`:126-132`) and that order is load-bearing:
+ * `A -> B ++ #red [[http://x]] <<s>> : hi`, with the URL before the
+ * stereotype, is NOT a sequence arrow -- the pinned oracle renders it as a
+ * description diagram whose second node is literally named `B ++ #red`.
+ */
+describe('CommandArrow — LIFECOLOR, STEREOTYPE and URL on the message', () => {
+  it('lands all four trailing modifiers on one message, in upstream order', () => {
+    const msg = firstMessage('A -> B ++ #red <<s>> [[http://x]] : hi');
+    expect(msg.activates).toBe('B');
+    expect(msg.lifeColor).toBe('#red');
+    expect(msg.stereotype).toBe('<<s>>');
+    expect(msg.url).toBe('[[http://x]]');
+    expect(msg.label).toBe('hi');
+  });
+
+  it('does not read the same line with URL and STEREOTYPE swapped', () => {
+    expect(refused('A -> B ++ #red [[http://x]] <<s>> : hi')).toBe(true);
+  });
+
+  it('keeps the whole `[[…]]` run, which upstream re-parses at :407-410', () => {
+    expect(firstMessage('A -> B [[http://x.example {tip} lbl]] : hi').url).toBe(
+      '[[http://x.example {tip} lbl]]',
+    );
+  });
+
+  it('keeps the guillemets on the stereotype (StereotypePattern.java:66-68)', () => {
+    expect(firstMessage('A -> B <<a b>> : hi').stereotype).toBe('<<a b>>');
+  });
+
+  it('leaves all three absent on a plain arrow', () => {
+    const msg = firstMessage('A -> B : hi');
+    expect(msg.url).toBeUndefined();
+    expect(msg.stereotype).toBeUndefined();
+    expect(msg.lifeColor).toBeUndefined();
+  });
+
+  it('carries LIFECOLOR even without an activation, as `:427` reads it', () => {
+    expect(firstMessage('A -> B #005500 : hi').lifeColor).toBe('#005500');
+  });
+});
+
+/**
+ * `manageActivations` (`:444-468`). The first character decides one life
+ * event and, for the two four-character specs, index 2 decides a second
+ * (`:457-466`). `+` acts on the TARGET and `-` on the SOURCE, so neither
+ * four-character spec is a no-op pair.
+ */
+describe('CommandArrow — ACTIVATION (:126,444-468)', () => {
+  it.each([
+    ['A -> B ++ : hi', 'B', undefined],
+    ['A -> B -- : hi', undefined, 'A'],
+    ['A -> B : hi', undefined, undefined],
+  ])('%s activates %s and deactivates %s', (line, activates, deactivates) => {
+    const msg = firstMessage(line);
+    expect(msg.activates).toBe(activates);
+    expect(msg.deactivates).toBe(deactivates);
+  });
+
+  // PINNED GAP, not a claim about upstream. `manageActivations` reads a
+  // SECOND life event out of `spec.charAt(2)` when the spec is four
+  // characters (`:457-466`), and the shared `activationFlags`
+  // (`sequence-parse-helpers.ts:313`) implements the outer switch only. So
+  // `--++` closes the source's bar and never opens the target's. Jar-verified
+  // against `Alice -> Bob ++ / Bob -> Carol --++ / Carol -> Alice`: the
+  // pinned oracle draws TWO activation rectangles, `y 66..93` (Bob, closed by
+  // `--`) and `y 93..138` (Carol, opened by `++`); this port draws one.
+  // Both files that must change are outside this module's write-set, so the
+  // gap is pinned here rather than silently left.
+  it.each([
+    ['A -> B --++ : hi', undefined, 'A'],
+    ['A -> B ++-- : hi', 'B', undefined],
+  ])('reads only the first character of %s — a measured residual', (line, act, deact) => {
+    const msg = firstMessage(line);
+    expect(msg.activates).toBe(act);
+    expect(msg.deactivates).toBe(deact);
+  });
+
+  // `**` is LifeEventType.CREATE (`:396`) and `!!` DESTROY (`:453`). This
+  // port's `ActivationEvent.kind` (`ast.ts:186`) has neither, so both
+  // collapse onto the target's activate/deactivate. Measured cost: 5 corpus
+  // fixtures render the create/destroy as an ordinary activation bar --
+  // comelo-49-lefi793, nepica-26-pali815, nofola-68-nobe068,
+  // pixima-27-nita000, telizo-11-pilo439. All five parse and route SEQUENCE.
+  it.each([
+    ['A -> B ** : hi', 'B', undefined],
+    ['A -> B !! : hi', undefined, 'B'],
+  ])('collapses %s onto activate/deactivate, having no CREATE/DESTROY', (line, act, deact) => {
+    const msg = firstMessage(line);
+    expect(msg.activates).toBe(act);
+    expect(msg.deactivates).toBe(deact);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // 3. The two-branch dispatch split
 // ---------------------------------------------------------------------------
 
@@ -373,12 +618,15 @@ describe('CommandArrow — one grammar behind two frozen registry entries', () =
     expect(claims).toHaveLength(1);
   });
 
+  // Only the RELATIVE order belongs to this module: the undressed branch must
+  // be tried first, or `A <- B` would be claimed by the branch that cannot
+  // read its left dressing. The ABSOLUTE positions are pinned, entry by
+  // entry, in `command-registry-order.test.ts`, which is the D2 instrument.
   it('keeps both entries in the frozen registry, undressed first (D2)', () => {
     const iUndressed = SEQUENCE_COMMANDS.indexOf(arrowCommand);
     const iDressed = SEQUENCE_COMMANDS.indexOf(decoratedArrowCommand);
     expect(iUndressed).toBeGreaterThanOrEqual(0);
     expect(iDressed).toBeGreaterThan(iUndressed);
-    expect(iDressed).toBe(SEQUENCE_COMMANDS.length - 1);
   });
 
   // Behavioural, not by identity: every group `executeArg` reads has to come
