@@ -9,8 +9,8 @@ or render forward into this batch.
 
 | ID | Description | Writes | Fixtures | Depends On | Done |
 |---|---|---|---|---|---|
-| T12 | Decorated dressing + ACTIVATION/LIFECOLOR/STEREOTYPE/URL | `command-arrow.ts`, tests | ~45 | T7 | [ ] |
-| T13 | `CommandExoArrowLeft`/`Right` over `CommandExoArrowAny` | `command-exo-arrow.ts`, `sequence-command-registry.ts`, tests | ~77 | T3, T5, T6 | [ ] |
+| T12 | Decorated dressing + ACTIVATION/LIFECOLOR/STEREOTYPE/URL | `command-arrow.ts`, tests | ~45 | T7 | [x] |
+| T13 | `CommandExoArrowLeft`/`Right` over `CommandExoArrowAny` | `command-exo-arrow.ts`, `sequence-command-registry.ts`, tests | ~77 | T3, T5, T6 | [x] |
 
 ## Expected gate behavior
 
