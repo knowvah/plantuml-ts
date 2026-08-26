@@ -596,6 +596,47 @@ capture gets headroom automatically.
 
 Ordered by how ready they are, not by size.
 
+- **`sequence-parallel-anchor-draw`** — FILED 2026-08-26 by
+  `sequence-command-coverage` batch 5, maintainer-approved as a residual.
+  The `&` (parallel) prefix and `{name}` anchors are parsed and stored on the
+  AST but **not drawn**. That mission's D4 originally justified this as
+  matching upstream; **the justification was disproved** (see below) and D4 is
+  amended. Drawing them is real, unported behaviour.
+  Upstream consumers, all live: `isParallel()` selects
+  `YGauge.createParallel` over `createWithContact`
+  (`teoz/CommunicationTile.java:113-116`), changing vertical position so
+  parallel messages share a contact line; `GroupingTile.java:145` uses it for
+  group chaining; a non-null anchor forces an early `return` from `drawU`
+  (`teoz/CommunicationTile.java:316-319`).
+  13 fixtures (10 grouping-`&`, 3 anchor). They already parse and route
+  SEQUENCE, so this is fidelity, not coverage.
+  **Sequence this AFTER `sequence-participant-g-wrapper`** — until that lands
+  the comparator cannot see the difference, so the work would be
+  unverifiable.
+
+- **`sequence-newpage-pagination`** — FILED 2026-08-26 by
+  `sequence-command-coverage` T14, mechanism measured. This port ignores
+  `newpage` (`src/diagrams/sequence/command-page.ts:26-31`, pre-existing and
+  documented) and renders every page into ONE document; the jar emits page 1
+  only. Invisible until exo arrows started drawing, which made
+  `dolefo-13-kovu702` overshoot: its source splits 8 exo messages across two
+  pages, the golden has 4 polygons, and the port now draws 8 (measured: base
+  0, live 8, golden 4). Re-pinned at the higher score with this mechanism
+  recorded. Any fixture using `newpage` carries the same overshoot.
+
+- **NOTE FOR ANY SEQUENCE MISSION — the `sequencediagram/graphic/` package is
+  DEAD.** Established 2026-08-26 by three independent
+  `sequence-command-coverage` tasks and verified leg by leg:
+  `SequenceDiagram.java:306-309` returns `SequenceDiagramFileMakerTeoz`
+  unconditionally (both the `modeTeoz()` guard and the `Puma2` line are
+  commented out); `Step1MessageExo.java` and `DrawableSet.java` do not exist;
+  and nothing constructs `MessageExoArrow`, `MessageArrow` or
+  `MessageSelfArrow`. **Sequence pixels come from
+  `net/sourceforge/plantuml/sequencediagram/teoz/`.** Reading `graphic/` to
+  answer "what does upstream draw?" gives confidently wrong answers — it cost
+  one mission a wrong constant (caught), one throwaway commit (caught by the
+  ratchet), and one locked decision's premise.
+
 - **`sequence-participant-g-wrapper`** — FILED 2026-08-26 by
   `sequence-command-coverage` T15, mechanism measured and verified twice.
   **The sequence comparator cannot measure arrow fidelity at all today.** The

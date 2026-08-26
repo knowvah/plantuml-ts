@@ -123,6 +123,52 @@ no layout or render component. **No divergence to document** — writing one
 would misrepresent upstream. If `!pragma teoz` ever lands, the AST already
 carries what it needs.
 
+### AMENDED 2026-08-26 (batch 5, maintainer-approved) — the REASON above is wrong
+
+**The outcome stands; the justification does not.** D4 argues parse-only
+because "every upstream consumer lives under `sequencediagram/teoz/`" and "the
+classic `sequencediagram/graphic/` renderer reads neither" — i.e. it treats
+teoz as an optional, non-default path.
+
+**There is no classic renderer.** Three batch-5 tasks reached this
+independently and each leg was verified:
+
+1. `SequenceDiagram.java:306-309` returns `SequenceDiagramFileMakerTeoz`
+   **unconditionally**. Both the `// if (modeTeoz())` guard and the
+   `SequenceDiagramFileMakerPuma2` return beside it are commented out.
+2. `Step1MessageExo.java` and `DrawableSet.java` **do not exist** in the
+   source tree.
+3. Nothing constructs `MessageExoArrow`, `MessageArrow` or
+   `MessageSelfArrow` — grep for `new MessageArrow(` / `new MessageSelfArrow(`
+   over `src/main/java/net/` returns nothing, and `MessageExoArrow`'s only
+   references are itself and a type mention in `InGroupableList.java`.
+
+So "every consumer lives under `teoz/`" means every consumer is **live code**,
+not dead code — the opposite of what D4 concluded. Those consumers do affect
+drawing: `isParallel()` selects `YGauge.createParallel` over
+`createWithContact` (`teoz/CommunicationTile.java:113-116`), which changes
+vertical position so parallel messages share a contact line, and a non-null
+anchor forces an early `return` from `drawU` (`:316-319`).
+
+**What changes:** nothing in the code, and the `DIVERGENCES.md` guidance still
+holds — but for a different reason. Not drawing `&`/anchor is now a
+**deliberate D6 fidelity residual**, filed as follow-on
+`sequence-parallel-anchor-draw`, NOT a claim that upstream behaves this way.
+Anyone citing D4 to argue "upstream does not draw these" is citing a
+disproved premise.
+
+**Why the outcome still stands** (maintainer decision, 2026-08-26): the 13
+fixtures already parse and route `SEQUENCE`, so they are closed under D6;
+drawing them is unplanned scope in the mission's last implementation batch and
+would touch layout T14 has just landed; and per
+`.agent-notes/T15-comparator-blocks-arrow-descent.md` the comparator cannot
+currently measure the difference, so the work would be unverifiable until
+`sequence-participant-g-wrapper` lands.
+
+**Read this amendment before trusting any other "the classic renderer does X"
+statement in this brief.** The same dead-code premise appears in T14's and
+T16's read-sets, and both were wrong there too.
+
 ## D5 — Ratchet rises are adjudicated by child-count distance
 
 **Context.** `.agent-notes/T13-sequence-ratchet-rise-diagnosis.md` measured
