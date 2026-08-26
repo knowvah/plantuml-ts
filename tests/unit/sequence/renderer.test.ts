@@ -287,48 +287,52 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
     expect(activations[0]?.color).toBe('#red');
   });
 
-  it('[[url]] wraps the arrow and label in an anchor built by linkWrap', () => {
+  // `[[url]]` is parsed and carried onto `MessageGeo.url` (T12/T16) but
+  // deliberately NOT drawn as an `<a>` wrap -- verified against the golden
+  // jar, not inferred from `MessageArrow.java`'s `startUrl`/`endUrl` alone:
+  // that class is DEAD CODE in the shipped jar (`SequenceDiagram.java`
+  // imports only `teoz.SequenceDiagramFileMakerTeoz`, and no
+  // `new MessageArrow(`/`new MessageSelfArrow(` call exists anywhere), and
+  // `teoz/CommunicationTile.java` -- what actually draws a message -- never
+  // reads `AbstractMessage#getUrl()`. Confirmed on `fajixi-56-dete708`
+  // (`Alice -> Bob [[http://www.yahoo.com{...}]] : hello` renders `hello`
+  // as plain `fill="#000"` text, no `<a>` anywhere) and the self-message
+  // case `sefako-72-jono850`.
+  it('carries [[url]] onto the geometry but draws no anchor', () => {
     const geo = makeGeo({ events: [makeSyncMessage({ url: 'http://example.com' })] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('href="http://example.com"');
-    expect(svg).toContain('xlink:href="http://example.com"');
-    // Both the arrow head polygon and the label text sit inside the anchor.
-    const anchorStart = svg.indexOf('<a ');
-    const anchorEnd = svg.indexOf('</a>');
-    expect(anchorStart).toBeGreaterThan(-1);
-    expect(svg.indexOf('<polygon')).toBeGreaterThan(anchorStart);
-    expect(svg.indexOf('<polygon')).toBeLessThan(anchorEnd);
-    expect(svg.indexOf('>hello</text>')).toBeLessThan(anchorEnd);
-  });
-
-  it('a message with no url emits no anchor', () => {
-    const geo = makeGeo({ events: [makeSyncMessage()] });
+    const msg = geo.events[0] as MessageGeo;
+    expect(msg.url).toBe('http://example.com');
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).not.toContain('<a ');
+    expect(svg).not.toContain('http://example.com');
   });
 
-  it('<<stereo>> is drawn as guillemet text beside the label', () => {
+  // `<<stereotype>>` is, per the Java, ONLY a style-signature lookup key
+  // (`AbstractMessage.java:60-65,74-77`) -- never drawn as text by any
+  // component. Confirmed on `terapo-81-puzi168`: `<style>.a{Linecolor red}`
+  // + `alice -> bob <<a>> : red` turns the ARROW LINE `stroke:#F00` in the
+  // golden, but the label stays plain `fill="#000"` -- no guillemet run
+  // anywhere. Wiring the stereotype to the arrow's line style is real work
+  // (a `<style>`-bucket lookup touching `sequence-arrowhead.ts`/
+  // `renderer-arrowhead.ts`) out of this task's write-set this batch (T15).
+  it('carries <<stereotype>> onto the geometry but draws no guillemet text', () => {
     const geo = makeGeo({ events: [makeSyncMessage({ stereotype: '<<stereo>>' })] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    // `escapeXmlText` only entity-encodes `&` and `<` in TEXT content --
-    // jar-verified (`core/svg.ts:148-158`); `>` comes through raw.
-    expect(svg).toContain('&lt;&lt;stereo>></text>');
-  });
-
-  it('a message with no stereotype draws no extra stereotype text', () => {
-    const geo = makeGeo({ events: [makeSyncMessage()] });
+    const msg = geo.events[0] as MessageGeo;
+    expect(msg.stereotype).toBe('<<stereo>>');
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).not.toContain('&lt;&lt;');
   });
 
-  it('end-to-end: <<stereo>> parses, lays out and renders visibly', () => {
-    const ast = parseSequence(['Alice -> Bob <<stereo>>: hi']);
+  it('end-to-end: url and stereotype parse and lay out onto MessageGeo', () => {
+    const ast = parseSequence(['Alice -> Bob <<stereo>> [[http://example.com]]: hi']);
     if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
     const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
     const msg = geo.events.find((e): e is MessageGeo => e.kind === 'message');
+    expect(msg?.url).toBe('http://example.com');
     expect(msg?.stereotype).toBe('<<stereo>>');
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('&lt;&lt;stereo>></text>');
+    expect(svg).not.toContain('<a ');
+    expect(svg).not.toContain('&lt;&lt;');
   });
 });
 

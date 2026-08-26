@@ -10,7 +10,7 @@
 import type { MessageGeo } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
-import { text, path, linkWrap } from '../../core/svg.js';
+import { text, path } from '../../core/svg.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import {
   renderFlatMessageArrow,
@@ -79,34 +79,10 @@ function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
 }
 
 /**
- * `<<stereotype>>` beside the message label. Upstream stores this ONLY as a
- * style-signature lookup key -- `msg.getStereotype(stereotype)` feeds
- * `getStyleSignature().withTOBECHANGED(stereotype)`
- * (`AbstractMessage.java:60-65,74-77`); no `sequencediagram/graphic/`
- * component ever draws it as text. This port renders the stored (already
- * guillemet-wrapped, `StereotypePattern.java:66-68`) run as visible text
- * instead, mirroring the participant-stereotype precedent already in this
- * engine (`renderer.ts:128`, `stereotypeLines`), so the field this task was
- * asked to exercise is actually visible rather than silently inert --
- * a deliberate coverage choice (D6), not a fidelity claim.
- */
-function renderMessageStereotype(msg: MessageGeo, theme: ScaledTheme): string {
-  if (msg.stereotype === undefined) return '';
-  const lastLine = msg.labelLines[msg.labelLines.length - 1];
-  const x = lastLine?.x ?? (msg.fromX + msg.toX) / 2;
-  const y = (lastLine?.y ?? msg.y) + theme.fontSize + 2 * theme.scaleK;
-  return text(x, y, msg.stereotype, {
-    fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
-    fill: theme.colors.text,
-  });
-}
-
-/**
- * One message: its arrow, then its label, then its stereotype (when set).
- * The arrow's heads are inline polygons/strokes, never an SVG `<marker>`
- * reference -- `assembleDocumentShell` injects no marker defs, and the
- * jar's own sequence corpus contains none either.
+ * One message: its arrow, then its label. The arrow's heads are inline
+ * polygons/strokes, never an SVG `<marker>` reference -- `assembleDocument
+ * Shell` injects no marker defs, and the jar's own sequence corpus contains
+ * none either.
  *
  * The configuration is read straight off the geometry: the parser builds the
  * whole `ArrowConfiguration` (D1), so there is no style-to-shape adapter and
@@ -114,14 +90,36 @@ function renderMessageStereotype(msg: MessageGeo, theme: ScaledTheme): string {
  * geometry an exo message produced -- a distinct drawing path
  * (`MessageExoArrow`), not this one.
  *
- * `[[http://example.com]]`: `startUrl`/`endUrl` wraps the WHOLE arrow draw --
- * arrow AND label together (`MessageArrow.java:150-158`, `drawInternalU`).
- * Reuses this port's existing url primitive, `linkWrap`
- * (`core/svg.ts:390`) -- already the class engine's `[[url]]` anchor-wrap
- * (`renderer-url.ts`'s `wrapClassifierBody`) -- rather than inventing a
- * second shape. `MessageGeo.url` already holds the resolved href (`urlOf`,
- * `sequence-parse-helpers.ts:341-344`), so the tooltip defaults to the href
- * itself, matching `Url`'s own default (`Url.java:53-54`).
+ * `msg.url`/`msg.stereotype` are carried onto the geometry (`sequence-
+ * layout-message.ts`) but deliberately NOT drawn here -- verified against
+ * the oracle jar, not inferred from `CommandArrow.java`/`MessageArrow.java`
+ * alone. Both `MessageArrow`/`MessageSelfArrow` (the classic
+ * `sequencediagram/graphic/` engine `startUrl`/`endUrl` lives in) are DEAD
+ * CODE in the shipped jar: `SequenceDiagram.java` imports only
+ * `teoz.SequenceDiagramFileMakerTeoz`, and no `new MessageSelfArrow(`/`new
+ * MessageArrow(` call exists anywhere in the source tree. `teoz/
+ * CommunicationTile.java` -- the component that actually draws messages --
+ * never reads `AbstractMessage#getUrl()`. Confirmed on the golden SVGs:
+ * `Alice -> Bob [[http://www.yahoo.com{...}]] : hello` (`fajixi-56-dete708`)
+ * and the self-message `A -> A [[link{link with tooltip}]]: here is a OK
+ * example` (`sefako-72-jono850`) both render their label as plain
+ * `fill="#000"` text with NO `<a>` anywhere near the arrow -- an `<a>` wrap
+ * here would be fabricated output the jar never produces (D4's PARALLEL/
+ * ANCHOR treatment: parse-only, no divergence to document, because that is
+ * exactly what upstream does).
+ *
+ * `<<stereotype>>` is, per the Java, ONLY a style-signature lookup key
+ * (`AbstractMessage.java:60-65,74-77`, `getStyleSignature().
+ * withTOBECHANGED(stereotype)`) -- confirmed on `terapo-81-puzi168`
+ * (`<style>.a { Linecolor red }` + `alice -> bob <<a>> : red`): the golden
+ * arrow LINE turns `stroke:#F00`, but the label text stays plain
+ * `fill="#000"` with no guillemet run drawn anywhere. Wiring the stereotype
+ * to the arrow's line style is a real feature (a `<style>`-bucket lookup
+ * keyed by stereotype, mirroring the participant-color bucket this engine
+ * already has) but touches `sequence-arrowhead.ts`/`renderer-arrowhead.ts`,
+ * which are out of this task's write-set this batch (T15). Left parsed and
+ * carried on `MessageGeo`, not drawn, matching upstream's own dead-visually
+ * behavior until that bucket is ported.
  */
 export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
   const configuration = msg.arrow;
@@ -129,6 +127,5 @@ export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
     msg.arrowDirection === 'self'
       ? renderSelfMessage(msg, configuration, theme)
       : renderFlatMessageArrow(msg, configuration, theme);
-  const body = arrow + renderMessageLabel(msg, theme) + renderMessageStereotype(msg, theme);
-  return msg.url === undefined ? body : linkWrap(body, { url: msg.url, tooltip: msg.url });
+  return arrow + renderMessageLabel(msg, theme);
 }
