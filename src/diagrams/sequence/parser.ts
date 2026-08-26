@@ -15,6 +15,7 @@ import type { SequenceDiagramAST } from './ast.js';
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { matchSpriteBase64Command } from './command-sprite.js';
+import { matchParticipantMultilineCommand } from './command-participant.js';
 import { EmbeddedDiagram, getEmbeddedType } from '../../core/EmbeddedDiagram.js';
 import {
   applyHideStereotype,
@@ -222,6 +223,30 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
     const consumed = dispatchAnnotationOrSprite(state, trimmedLines, i);
     if (consumed !== null) {
       i += consumed - 1;
+      continue;
+    }
+
+    // `CommandParticipantMultilines` (`SequenceDiagramFactory.java:110`),
+    // T10's matcher. Intercepted HERE, ahead of the whole flat table, rather
+    // than at its upstream slot between `participantCommand` (`:106`) and
+    // `arrowCommand` (`:111`): this port has no `OK_PARTIAL` seam (D2's
+    // amendment), so a multi-line command cannot sit inside `SEQUENCE_COMMANDS`
+    // at all -- `dispatchCommand` only ever sees one line. The registry order
+    // is untouched.
+    //
+    // Position ahead of `participantCommand` is load-bearing, and compensates
+    // for a divergence in THAT command, not for upstream's order: upstream's
+    // `CommandParticipantA..A4` capture `CODE` as `([%pLN_.@]+)`
+    // (`CommandParticipantA.java:63`) and their only bracket alternative is
+    // `UrlBuilder.OPTIONAL`'s DOUBLE `[[...]]`, so a line ending in a single
+    // `[` genuinely fails all four and falls through to `:110`. This port's
+    // `participantCommand` instead captures the whole remainder as `(.+)`
+    // (`command-participant.ts:31-32`), which swallows the trailing `[` into
+    // the participant id -- so leaving the matcher after it would reproduce
+    // the pinned refusal.
+    const participantMultiConsumed = matchParticipantMultilineCommand(state, trimmedLines, i);
+    if (participantMultiConsumed !== null) {
+      i += participantMultiConsumed - 1;
       continue;
     }
 
