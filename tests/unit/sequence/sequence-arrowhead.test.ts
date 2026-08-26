@@ -213,11 +213,27 @@ describe('arrowConfigurationOf — exhaustive parity with the deleted adapter', 
  * `applyMessageDecorations(arrowConfigurationFor(style), msg)`; all 48 rows
  * matched the new parser's `arrow` field byte for byte.
  *
- * Some rows pin quirks of the deleted table rather than upstream behavior --
- * `o->>` resolves to `sync`, not `async`, because the decorated rule fell
- * back to the shaft length and ignored the right dressing, and `<->` takes
- * the same fallback. They are pinned here so T7's rebuild has to CHOOSE to
+ * Some rows pinned quirks of the deleted table rather than upstream behavior --
+ * `o->>` resolved to `sync`, not `async`, because the decorated rule fell
+ * back to the shaft length and ignored the right dressing, and `<->` took
+ * the same fallback. They were pinned here so T7's rebuild had to CHOOSE to
  * change them.
+ *
+ * T7 CHOSE, on jar evidence rather than on the deleted table. Thirteen rows
+ * left this list:
+ *
+ *  - `->?`, `?->`, `->\\`, `->/` moved to the refusal case below. The jar
+ *    reports `Error line 2` for all four (`scripts/oracle-render.sh`, T7):
+ *    `?` is `CommandExoArrow*`'s ARROW_SUPPCIRCLE marker and neither
+ *    `>\\` nor `>/` is an ARROW_DRESSING2 alternative
+ *    (`CommandArrow.java:112-116`), so upstream's own regex declines them.
+ *  - `o->>`, `->>o`, `o-->>`, `<->`, `<<->`, `<->>`, `o<->x`, `\\->`, `/->`
+ *    moved to `command-arrow.test.ts`, which asserts each against
+ *    `executeArg`'s real `sync1`/`sync2`/`reverseDefine` algebra
+ *    (`CommandArrow.java:300-390`) instead of against the deleted enum. The
+ *    legacy oracle CANNOT express what they actually are: `withDirectionBoth`
+ *    gives dressing1 a NORMAL head and `sync1` gives it an ASYNC one, and
+ *    `LEGACY_HEAD_BY_STYLE` has no way to say either.
  */
 const LEGACY_TOKEN_ORACLE: readonly {
   readonly src: string;
@@ -230,8 +246,6 @@ const LEGACY_TOKEN_ORACLE: readonly {
   { src: 'Alice ->> Bob', from: 'Alice', to: 'Bob', style: 'async' },
   { src: 'Alice --> Bob', from: 'Alice', to: 'Bob', style: 'reply' },
   { src: 'Alice -->> Bob', from: 'Alice', to: 'Bob', style: 'replyAsync' },
-  { src: 'Alice ->? Bob', from: 'Alice', to: 'Bob', style: 'lost' },
-  { src: 'Alice ?-> Bob', from: 'Alice', to: 'Bob', style: 'found' },
   { src: 'Alice <- Bob', from: 'Bob', to: 'Alice', style: 'sync' },
   { src: 'Alice <<- Bob', from: 'Bob', to: 'Alice', style: 'async' },
   { src: 'Alice <-- Bob', from: 'Bob', to: 'Alice', style: 'reply' },
@@ -259,21 +273,10 @@ const LEGACY_TOKEN_ORACLE: readonly {
   { src: 'Alice <<--o Bob', from: 'Bob', to: 'Alice', style: 'replyAsync', decorations: { tailCircle: true } },
   { src: 'Alice o<<-- Bob', from: 'Bob', to: 'Alice', style: 'replyAsync', decorations: { headCircle: true } },
   { src: 'Alice o<<--x Bob', from: 'Bob', to: 'Alice', style: 'replyAsync', decorations: { headCircle: true, tailCross: true } },
-  { src: 'Alice o->> Bob', from: 'Alice', to: 'Bob', style: 'sync', decorations: { tailCircle: true } },
-  { src: 'Alice ->>o Bob', from: 'Alice', to: 'Bob', style: 'sync', decorations: { headCircle: true } },
-  { src: 'Alice o-->> Bob', from: 'Alice', to: 'Bob', style: 'reply', decorations: { tailCircle: true } },
   { src: 'Alice -->>x Bob', from: 'Alice', to: 'Bob', style: 'reply', decorations: { headCross: true } },
-  { src: 'Alice <-> Bob', from: 'Bob', to: 'Alice', style: 'sync' },
-  { src: 'Alice <<-> Bob', from: 'Bob', to: 'Alice', style: 'sync' },
-  { src: 'Alice <->> Bob', from: 'Bob', to: 'Alice', style: 'sync' },
-  { src: 'Alice o<->x Bob', from: 'Bob', to: 'Alice', style: 'sync', decorations: { headCircle: true, tailCross: true } },
   { src: 'Alice -> Alice', from: 'Alice', to: 'Alice', style: 'sync' },
   { src: 'Alice ->o Alice', from: 'Alice', to: 'Alice', style: 'sync', decorations: { headCircle: true } },
   { src: 'Alice <- Alice', from: 'Alice', to: 'Alice', style: 'sync' },
-  { src: 'Alice \\\\-> Bob', from: 'Alice', to: 'Bob', style: 'sync' },
-  { src: 'Alice ->\\\\ Bob', from: 'Alice', to: 'Bob', style: 'sync' },
-  { src: 'Alice /-> Bob', from: 'Alice', to: 'Bob', style: 'sync' },
-  { src: 'Alice ->/ Bob', from: 'Alice', to: 'Bob', style: 'sync' },
 ];
 
 describe('parsed arrow tokens carry the legacy ArrowConfiguration', () => {
@@ -287,9 +290,18 @@ describe('parsed arrow tokens carry the legacy ArrowConfiguration', () => {
     expect(msg?.arrow).toEqual(legacyArrowConfiguration(style, decorations ?? {}));
   });
 
-  // The two forms the pre-T6 parser refused; T6 must not start accepting
-  // them, since that alone would move the corpus.
-  it.each(['Alice <\\\\- Bob', 'Alice -\\\\> Bob'])('still refuses %s', (src) => {
+  // The two forms the pre-T6 parser refused, plus the four T7's composed
+  // grammar stopped accepting. All six are `Error line 2` from the jar --
+  // measured with `scripts/oracle-render.sh`, T7 -- so refusing is the
+  // faithful answer, not a capability loss.
+  it.each([
+    'Alice <\\\\- Bob',
+    'Alice -\\\\> Bob',
+    'Alice ->? Bob',
+    'Alice ?-> Bob',
+    'Alice ->\\\\ Bob',
+    'Alice ->/ Bob',
+  ])('still refuses %s', (src) => {
     const result = parseSequence([`${src} : hi`]);
     expect('refused' in result).toBe(true);
   });

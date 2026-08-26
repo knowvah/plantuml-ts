@@ -202,19 +202,21 @@ describe('message arrow styles', () => {
     expect(ev.arrow.dressing2).toEqual({ head: 'ASYNC', part: 'FULL' });
   });
 
-  // `->?`/`?->` are the spike's lost/found shorthand. Neither is a dressing
-  // upstream recognises, and neither ever carried a distinct
-  // `ArrowConfiguration` -- `ArrowDecoration.CIRCLE` comes only from an
-  // explicit `o` (`CommandArrow.java:367-371`).
-  it('->? produces the same plain arrow as ->', () => {
-    const ev = firstMessage(['Alice ->? Bob: lost']);
-    expect(ev.arrow).toEqual(firstMessage(['Alice -> Bob: lost']).arrow);
-  });
-
-  it('?-> produces the same plain arrow as ->', () => {
-    const ev = firstMessage(['Alice ?-> Bob: found']);
-    expect(ev.arrow).toEqual(firstMessage(['Alice -> Bob: found']).arrow);
-  });
+  // `->?`/`?->` were the spike's lost/found shorthand. Neither is a dressing
+  // upstream recognises: `?` is `CommandExoArrowLeft`'s ARROW_SUPPCIRCLE2
+  // marker `([?\[\]][ox]?)?` (`CommandExoArrowLeft.java:60`) for an arrow
+  // whose other end is OFF-DIAGRAM, and `PART1CODE`/`PART2CODE`
+  // (`CommandArrow.java:93,119`) cannot absorb it. The jar answers `Error
+  // line 2` for both (measured with `scripts/oracle-render.sh`, T7), so once
+  // T7 rebuilt this command from upstream's own groups they became refusals
+  // -- and the exo family that owns them is still unported.
+  it.each(['Alice ->? Bob: lost', 'Alice ?-> Bob: found'])(
+    'refuses %s, which is the exo family, not an arrow dressing',
+    (line) => {
+      const result = parseSequence([line]);
+      expect('refused' in result).toBe(true);
+    },
+  );
 
   it('self-message: from === to', () => {
     const ev = firstMessage(['Alice -> Alice: think']);
