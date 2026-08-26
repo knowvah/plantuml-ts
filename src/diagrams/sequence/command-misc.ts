@@ -3,14 +3,26 @@
  * that are neither pagination nor autonumber: `CommandDivider` (`:142`),
  * `CommandHSpace` (`:143`), `CommandReferenceOverSeveral` (`:144`),
  * `CommandReferenceMultilinesOverSeveral` (`:145`), `CommandAutoactivate`
- * (`:150`), `CommandFootbox` (`:151`) and `CommandDelay` (`:152`).
+ * (`:150`), `CommandFootbox` (`:151`) and `CommandDelay` (`:152`) — plus
+ * `CommandHideEmptyDescription`, reached via `SequenceDiagramFactory.java:100`
+ * -> `CommonCommands#addCommonCommands1` (`command/CommonCommands.java:58`)
+ * -> `addCommonHides` (`:104`), the same `addCommonHides` fan-out that
+ * `command-common.ts` already documents for `hide stereotype`/`hide
+ * unlinked` (T13). Grouped here rather than in `command-common.ts` because
+ * that module is outside this task's write-set (T10, misc-commands).
  *
  * `CommandFootboxOld` (`:153`), `CommandUrl` (`:154`) and
  * `CommandLinkAnchor` (`:155`) close that run upstream and have no rule here
  * yet. `setSeparatorCommand` has no counterpart anywhere in the sequence
  * registration list — see its own doc comment.
  *
- * @see ~/git/plantuml/.../sequencediagram/SequenceDiagramFactory.java:142-153
+ * `dividerCommand`, `delayWithTextCommand`/`bareDelayCommand` and
+ * `spaceCommand` were widened by T10 to match their upstream regex exactly
+ * (empty divider label, the `…` ellipsis alternative on `CommandDelay`, and
+ * `CommandHSpace`'s `\|+` one-or-more trailing pipes) — each cites its Java
+ * `file:line` at its own declaration below.
+ *
+ * @see ~/git/plantuml/.../sequencediagram/SequenceDiagramFactory.java:100-153
  */
 
 import type { DelayEvent, DividerEvent, SpaceEvent } from './ast.js';
@@ -29,9 +41,36 @@ export const hideFootboxCommand: Command = {
   },
 };
 
-// 13. Divider: == text ==
+/**
+ * `hide|show empty description` — `CommandHideEmptyDescription`. Sequence
+ * diagrams have no state "description" compartment (that concept belongs to
+ * `StateDiagram`), so this port has nothing to suppress: recognised as a
+ * no-op, same "recognised, no observable effect" precedent as
+ * `command-common.ts`'s `pragmaCommand`/`rotateCommand`. T10 measured the
+ * only pinned fixture (`boxibe-39-luco835`) reaching this line and confirmed
+ * it is exactly this command, not `CommandHideShowByGender`'s `hide
+ * stereotype` arm (`command-common.ts`'s `hideStereotypeCommand`) or
+ * `CommandHideUnlinked`'s `hide unlinked` arm — those are distinct keywords
+ * ("stereotype"/"unlinked" vs. "empty description") with no overlap.
+ * @see command/CommonCommands.java:58,104
+ * @see statediagram/command/CommandHideEmptyDescription.java:57-63
+ */
+export const hideEmptyDescriptionCommand: Command = {
+  pattern: /^(?:hide|show)\s+empty\s+description\s*$/i,
+  execute() {
+    /* ignored — no state descriptions exist in a sequence diagram */
+  },
+};
+
+/**
+ * `== text ==` — `CommandDivider`. The LABEL group is `(.*)` upstream, i.e.
+ * it accepts an EMPTY label (`====` with nothing between the two `==` runs);
+ * this port previously required at least one character (`(.+?)`), which
+ * refused `valiva-41-fabo221`'s line 4 `====`. Widened to `(.*?)` to match.
+ * @see sequencediagram/command/CommandDivider.java:57-62
+ */
 export const dividerCommand: Command = {
-  pattern: /^==\s*(.+?)\s*==\s*$/,
+  pattern: /^==\s*(.*?)\s*==\s*$/,
   execute(state, match) {
     const ev: DividerEvent = {
       kind: 'divider',
@@ -41,30 +80,65 @@ export const dividerCommand: Command = {
   },
 };
 
-// 14a. Delay with text: ...text...
+/**
+ * `...text...` / `…text…` — `CommandDelay`'s labelled form. Upstream is ONE
+ * regex, `^(?:\.{3}|…)(?:(.*)(?:\.{3}|…))?$` (leading delimiter, then an
+ * OPTIONAL [LABEL + trailing delimiter] group); this port keeps the
+ * pre-existing two-entry split (`delayWithTextCommand` / `bareDelayCommand`
+ * below) rather than consolidating into one dispatch entry, to avoid
+ * renaming exports `sequence-command-registry.ts` (T7's write-set this
+ * batch) already references — not a structural divergence, since the two
+ * patterns are provably disjoint (this one requires >=1 char or an ellipsis
+ * after the leading delimiter; the bare form below requires exactly zero),
+ * so dispatch order between them is immaterial. Widened over the prior
+ * version in two ways: (1) either delimiter, independently, on either side
+ * — neither side has to match the other, since upstream's regex does not
+ * require it; (2) the LABEL group may be EMPTY (`......` — six transcribed
+ * dots: leading `...` + trailing `...` with nothing between), which the
+ * previous `(.+?)\s*\.\.\.\s*$` `(.+?)` (1-or-more) refused.
+ * `loguci-83-mobe896`'s `…title…` (line 4) needed the delimiter widening;
+ * `dolefo-13-kovu702`'s `......` (line 11, times three) needed the
+ * empty-label widening. The anchored `$` means the split between LABEL and
+ * its trailing delimiter is unique regardless of greedy vs. lazy, so a
+ * direct transcription of upstream's greedy `(.*)` is faithful.
+ * @see sequencediagram/command/CommandDelay.java:57-61
+ */
 export const delayWithTextCommand: Command = {
-  pattern: /^\.\.\.\s*(.+?)\s*\.\.\.\s*$/,
+  pattern: /^(?:\.{3}|…)(.*)(?:\.{3}|…)$/,
   execute(state, match) {
-    const ev: DelayEvent = {
-      kind: 'delay',
-      text: match[1]!,
-    };
+    const ev: DelayEvent = { kind: 'delay', text: match[1]! };
     emit(state, ev);
   },
 };
 
-// 14b. Bare delay: ...
+/**
+ * Bare `...` / `…` — `CommandDelay`'s unlabelled form (upstream's optional
+ * LABEL group absent entirely, `arg.get("LABEL", 0) == null` ->
+ * `Display.empty()`). Widened to accept the Unicode ellipsis alternative,
+ * which the prior `/^\.\.\.\s*$/` did not — `loguci-83-mobe896`'s bare `…`
+ * (line 2).
+ * @see sequencediagram/command/CommandDelay.java:57-61
+ */
 export const bareDelayCommand: Command = {
-  pattern: /^\.\.\.\s*$/,
+  pattern: /^(?:\.{3}|…)$/,
   execute(state) {
     const ev: DelayEvent = { kind: 'delay' };
     emit(state, ev);
   },
 };
 
-// 15. Space: |||  or  ||N|
+/**
+ * `||N||` / `|||` — `CommandHSpace`. The trailing pipe run is `\|+`
+ * upstream (one or more), not exactly one; this port required exactly one
+ * trailing pipe, which refused `xucibo-16-zisi974`'s `||50||` (two trailing
+ * pipes) and `fotiku-67-lilu728`/`telavi-12-pifu671`'s `||0||`. Widened to
+ * `\|+` to match. The default-pixel value (5 here vs. upstream's documented
+ * 25, `CommandHSpace.java:69`) is untouched — out of this widening's scope,
+ * and none of the pinned fixtures exercise the bare-default path.
+ * @see sequencediagram/command/CommandHSpace.java:56-61
+ */
 export const spaceCommand: Command = {
-  pattern: /^\|\|(\d+)?\|\s*$/,
+  pattern: /^\|\|(\d+)?\|+$/,
   execute(state, match) {
     const pixels = match[1] !== undefined ? parseInt(match[1], 10) : 5;
     const ev: SpaceEvent = { kind: 'space', pixels };
