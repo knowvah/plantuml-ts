@@ -162,6 +162,18 @@ describe('CommandArrow — forms upstream itself refuses', () => {
     },
   );
 
+  // The THIRD reverseDefine branch (`:311`): neither dressing carries a
+  // `<`/`>`/`\\`/`/` direction, but one carries an `x`, so the arrow is
+  // defined left-to-right after all. Jar-verified: `A -x B` draws a saltire
+  // at the RIGHT end and no head at the left, `A x- B` a saltire at the left
+  // and a full NORMAL polygon at the right.
+  it.each([
+    ['A -x B : hi', { from: 'A', to: 'B', head1: 'NONE', head2: 'CROSSX' }],
+    ['A x- B : hi', { from: 'A', to: 'B', head1: 'CROSSX', head2: 'NORMAL' }],
+  ])('reads %s as a forward arrow decided by the x alone', (line, expected) => {
+    expect(shape(firstMessage(line))).toMatchObject(expected);
+  });
+
   // `CommandExecutionResult.error("Illegal sequence arrow")` (`:314`): a body
   // with no direction on either end. This port has no execution-refusal
   // channel, so the line is consumed and emits nothing -- leaving the
