@@ -253,6 +253,86 @@ describe('renderSequence — messages', () => {
 });
 
 // ---------------------------------------------------------------------------
+// T16 (sequence-command-coverage batch 5): lifecolor, url, stereotype
+// ---------------------------------------------------------------------------
+
+describe('renderSequence — message lifecolor, url and stereotype', () => {
+  it('++ #red wraps a fresh activation bar in the LIFECOLOR fill', () => {
+    // `CommandArrow.java:427-439`: `s = arg.get("LIFECOLOR", 0)` resolves to
+    // an `HColor` that only reaches `diagram.activate` on the `+` leg. The
+    // bar itself is only ever emitted on close (no end-of-diagram sweep for
+    // dangling activations in this port), so the fixture must close it.
+    const ast = parseSequence(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']);
+    if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
+    const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
+    const activation = geo.events.find((e): e is ActivationGeo => e.kind === 'activation');
+    expect(activation?.color).toBe('#red');
+    // `renderActivation` -> `rect()` -> `resolvePaint` -> `HColorSet`
+    // resolves the NAMED token to its hex, then `shortenColor` collapses
+    // `#FF0000` to `#F00` -- the SAME generic pipeline every other fill
+    // goes through (`core/svg.ts:223-232`), reused here for free.
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).toContain('fill="#F00"');
+  });
+
+  it('-- never carries a LIFECOLOR onto the closing bar', () => {
+    // `manageActivations`'s `-`/`!` legs always pass `null`
+    // (`CommandArrow.java:445-450`) -- a deactivate is never colored, even
+    // when the opening `++` supplied one.
+    const ast = parseSequence(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']);
+    if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
+    const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
+    const activations = geo.events.filter((e): e is ActivationGeo => e.kind === 'activation');
+    expect(activations).toHaveLength(1);
+    expect(activations[0]?.color).toBe('#red');
+  });
+
+  it('[[url]] wraps the arrow and label in an anchor built by linkWrap', () => {
+    const geo = makeGeo({ events: [makeSyncMessage({ url: 'http://example.com' })] });
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).toContain('href="http://example.com"');
+    expect(svg).toContain('xlink:href="http://example.com"');
+    // Both the arrow head polygon and the label text sit inside the anchor.
+    const anchorStart = svg.indexOf('<a ');
+    const anchorEnd = svg.indexOf('</a>');
+    expect(anchorStart).toBeGreaterThan(-1);
+    expect(svg.indexOf('<polygon')).toBeGreaterThan(anchorStart);
+    expect(svg.indexOf('<polygon')).toBeLessThan(anchorEnd);
+    expect(svg.indexOf('>hello</text>')).toBeLessThan(anchorEnd);
+  });
+
+  it('a message with no url emits no anchor', () => {
+    const geo = makeGeo({ events: [makeSyncMessage()] });
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).not.toContain('<a ');
+  });
+
+  it('<<stereo>> is drawn as guillemet text beside the label', () => {
+    const geo = makeGeo({ events: [makeSyncMessage({ stereotype: '<<stereo>>' })] });
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    // `escapeXmlText` only entity-encodes `&` and `<` in TEXT content --
+    // jar-verified (`core/svg.ts:148-158`); `>` comes through raw.
+    expect(svg).toContain('&lt;&lt;stereo>></text>');
+  });
+
+  it('a message with no stereotype draws no extra stereotype text', () => {
+    const geo = makeGeo({ events: [makeSyncMessage()] });
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).not.toContain('&lt;&lt;');
+  });
+
+  it('end-to-end: <<stereo>> parses, lays out and renders visibly', () => {
+    const ast = parseSequence(['Alice -> Bob <<stereo>>: hi']);
+    if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
+    const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
+    const msg = geo.events.find((e): e is MessageGeo => e.kind === 'message');
+    expect(msg?.stereotype).toBe('<<stereo>>');
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).toContain('&lt;&lt;stereo>></text>');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // T3 (sequence-root-chrome): inline arrowheads + the document shell
 // ---------------------------------------------------------------------------
 

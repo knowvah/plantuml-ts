@@ -10,7 +10,7 @@
 import type { MessageGeo } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
-import { text, path } from '../../core/svg.js';
+import { text, path, linkWrap } from '../../core/svg.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import {
   renderFlatMessageArrow,
@@ -79,16 +79,49 @@ function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
 }
 
 /**
- * One message: its arrow, then its label. The arrow's heads are inline
- * polygons/strokes, never an SVG `<marker>` reference -- `assembleDocument
- * Shell` injects no marker defs, and the jar's own sequence corpus contains
- * none either.
+ * `<<stereotype>>` beside the message label. Upstream stores this ONLY as a
+ * style-signature lookup key -- `msg.getStereotype(stereotype)` feeds
+ * `getStyleSignature().withTOBECHANGED(stereotype)`
+ * (`AbstractMessage.java:60-65,74-77`); no `sequencediagram/graphic/`
+ * component ever draws it as text. This port renders the stored (already
+ * guillemet-wrapped, `StereotypePattern.java:66-68`) run as visible text
+ * instead, mirroring the participant-stereotype precedent already in this
+ * engine (`renderer.ts:128`, `stereotypeLines`), so the field this task was
+ * asked to exercise is actually visible rather than silently inert --
+ * a deliberate coverage choice (D6), not a fidelity claim.
+ */
+function renderMessageStereotype(msg: MessageGeo, theme: ScaledTheme): string {
+  if (msg.stereotype === undefined) return '';
+  const lastLine = msg.labelLines[msg.labelLines.length - 1];
+  const x = lastLine?.x ?? (msg.fromX + msg.toX) / 2;
+  const y = (lastLine?.y ?? msg.y) + theme.fontSize + 2 * theme.scaleK;
+  return text(x, y, msg.stereotype, {
+    fontFamily: theme.fontFamily,
+    fontSize: theme.fontSize,
+    fill: theme.colors.text,
+  });
+}
+
+/**
+ * One message: its arrow, then its label, then its stereotype (when set).
+ * The arrow's heads are inline polygons/strokes, never an SVG `<marker>`
+ * reference -- `assembleDocumentShell` injects no marker defs, and the
+ * jar's own sequence corpus contains none either.
  *
  * The configuration is read straight off the geometry: the parser builds the
  * whole `ArrowConfiguration` (D1), so there is no style-to-shape adapter and
  * no decoration overlay left at render time. `msg.exoType`, when set, marks
  * geometry an exo message produced -- a distinct drawing path
  * (`MessageExoArrow`), not this one.
+ *
+ * `[[http://example.com]]`: `startUrl`/`endUrl` wraps the WHOLE arrow draw --
+ * arrow AND label together (`MessageArrow.java:150-158`, `drawInternalU`).
+ * Reuses this port's existing url primitive, `linkWrap`
+ * (`core/svg.ts:390`) -- already the class engine's `[[url]]` anchor-wrap
+ * (`renderer-url.ts`'s `wrapClassifierBody`) -- rather than inventing a
+ * second shape. `MessageGeo.url` already holds the resolved href (`urlOf`,
+ * `sequence-parse-helpers.ts:341-344`), so the tooltip defaults to the href
+ * itself, matching `Url`'s own default (`Url.java:53-54`).
  */
 export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
   const configuration = msg.arrow;
@@ -96,5 +129,6 @@ export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
     msg.arrowDirection === 'self'
       ? renderSelfMessage(msg, configuration, theme)
       : renderFlatMessageArrow(msg, configuration, theme);
-  return arrow + renderMessageLabel(msg, theme);
+  const body = arrow + renderMessageLabel(msg, theme) + renderMessageStereotype(msg, theme);
+  return msg.url === undefined ? body : linkWrap(body, { url: msg.url, tooltip: msg.url });
 }

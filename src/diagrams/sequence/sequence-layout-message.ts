@@ -57,6 +57,25 @@ function numberTextOf(event: MessageEvent): string | undefined {
   return event.sequenceNumber === undefined ? undefined : String(event.sequenceNumber);
 }
 
+/**
+ * Optional scalar fields carried from `event` onto its `MessageGeo`
+ * unchanged. `sequenceNumber`/`sequenceLabel` predate this task;
+ * `url`/`stereotype`/`lifeColor` were declared by T6 but never copied
+ * through here -- carried unchanged from `AbstractMessageEvent`
+ * (`CommandArrow.java:404-413`) so the renderer can draw them (T16).
+ */
+function passthroughFields(
+  event: MessageEvent,
+): Pick<MessageGeo, 'sequenceNumber' | 'sequenceLabel' | 'url' | 'stereotype' | 'lifeColor'> {
+  return {
+    ...(event.sequenceNumber !== undefined ? { sequenceNumber: event.sequenceNumber } : {}),
+    ...(event.sequenceLabel !== undefined ? { sequenceLabel: event.sequenceLabel } : {}),
+    ...(event.url !== undefined ? { url: event.url } : {}),
+    ...(event.stereotype !== undefined ? { stereotype: event.stereotype } : {}),
+    ...(event.lifeColor !== undefined ? { lifeColor: event.lifeColor } : {}),
+  };
+}
+
 /** Build the MessageGeo for a resolved set of endpoints at the given y. */
 function buildMessageGeo(
   event: MessageEvent,
@@ -80,10 +99,7 @@ function buildMessageGeo(
     label: event.label,
     arrow: event.arrow,
     arrowDirection: endpoints.arrowDirection,
-    ...(event.sequenceNumber !== undefined
-      ? { sequenceNumber: event.sequenceNumber }
-      : {}),
-    ...(event.sequenceLabel !== undefined ? { sequenceLabel: event.sequenceLabel } : {}),
+    ...passthroughFields(event),
   };
 }
 
@@ -133,8 +149,14 @@ function applyMessageActivation(
   ctx: EventProcessingContext,
 ): void {
   if (event.activates !== undefined) {
-    // Activation starts at the arrow y, not after the post-arrow spacing advance.
-    ctx.activationStart.set(event.activates, { y: messageGeo.y });
+    // Activation starts at the arrow y, not after the post-arrow spacing
+    // advance. LIFECOLOR rides along on the `+`/`*` activate leg only --
+    // `manageActivations`'s `-`/`!` legs always pass `null`
+    // (`CommandArrow.java:439,445-450`), so a deactivate never recolors.
+    ctx.activationStart.set(event.activates, {
+      y: messageGeo.y,
+      ...(event.lifeColor !== undefined ? { color: event.lifeColor } : {}),
+    });
   }
   if (event.deactivates !== undefined) {
     // End at the arrow y. If that would give zero/negative height (the
