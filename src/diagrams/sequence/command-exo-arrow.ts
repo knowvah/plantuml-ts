@@ -44,8 +44,7 @@
 
 import type { ActivationEvent, MessageExoEvent, MessageExoType } from './ast.js';
 import type { ArrowConfiguration, ArrowPart } from './sequence-arrowhead.js';
-import { UrlBuilder, getRegexp, transform } from '../../core/url/UrlBuilder.js';
-import { UrlMode } from '../../core/url/UrlMode.js';
+import { getRegexp, transform } from '../../core/url/UrlBuilder.js';
 import { eventuallyRemoveStartingAndEndingDoubleQuote } from '../../core/url/Url.js';
 import {
   ARROW_SUPPCIRCLE1_LEFT,
@@ -64,6 +63,7 @@ import {
   type ArrowSpec,
   type Command,
   type ParseState,
+  urlOf,
 } from './sequence-parse-helpers.js';
 
 // ---------------------------------------------------------------------------
@@ -315,15 +315,6 @@ function activationEventOf(
     default:
       return undefined;
   }
-}
-
-/** `new UrlBuilder(skinParam("topurl"), STRICT).getUrl(raw)`, reduced to the
- *  href `Url#getUrl()` returns. `topurl` is `null`: this port's sequence
- *  parser carries no skinparam lookup at command time.
- *  @see ~/git/plantuml/.../command/CommandExoArrowAny.java:138-142 */
-function urlOf(raw: string | undefined): string | undefined {
-  if (raw === undefined) return undefined;
-  return new UrlBuilder(null, UrlMode.STRICT).getUrl(raw)?.getUrl();
 }
 
 /**

@@ -23,12 +23,6 @@ function parse(lines: string[]): SequenceDiagramAST {
   return result;
 }
 
-function refusalLine(lines: string[]): number {
-  const result = parseSequence(lines);
-  if (!('refused' in result)) throw new Error('expected a refusal');
-  return result.line;
-}
-
 function messages(events: SequenceEvent[]): MessageEvent[] {
   return events.filter((e): e is MessageEvent => e.kind === 'message');
 }
@@ -254,11 +248,14 @@ describe('reverse and decorated arrows', () => {
   });
 
   it('does not mis-parse an exo-arrow bracket form as a participant', () => {
-    // `[o<-x b` is CommandExoArrowAny's syntax (unported, T13 residual);
-    // this asserts the bracketed token is REFUSED, not swallowed as a
+    // `[o<-x b` is CommandExoArrowAny's syntax. T13 ported it, so this now
+    // PARSES rather than refusing -- but the pin's intent is unchanged and
+    // still worth holding: the bracketed token must not be swallowed as a
     // literal participant named "[o<-x".
-    const line = refusalLine(['participant b', '[o<-x b : hop']);
-    expect(line).toBe(1);
+    const ast = parse(['participant b', '[o<-x b : hop']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['b']);
+    const exo = ast.events.find((e) => e.kind === 'messageExo');
+    expect(exo).toMatchObject({ participant: 'b', exoType: 'TO_LEFT' });
   });
 });
 

@@ -8,6 +8,8 @@
  * that both `parser.ts` and the `command-*.ts` modules depend on.
  */
 
+import { UrlBuilder } from '../../core/url/UrlBuilder.js';
+import { UrlMode } from '../../core/url/UrlMode.js';
 import type {
   BoxGroup,
   FrameEvent,
@@ -302,30 +304,77 @@ export function parseParticipantDeclaration(rest: string): ParticipantDeclaratio
  * `manageActivations` -- the life-event an `++`/`--`/`**`/`!!` suffix on a
  * message produces.
  *
- * Upstream switches on the FIRST CHARACTER ONLY (`CommandArrow.java:443-456`),
- * so `--++` is a plain deactivate and `++--` a plain activate; and the two
- * directions are NOT symmetric -- `+` activates p2, the message TARGET, while
- * `-` deactivates p1, the message SOURCE (`:447`, `:450`). `*` (CREATE, at
- * `:396`) and `!` (DESTROY, `:453`) both act on the target; this port has no
- * CREATE/DESTROY variant on `ActivationEvent`, so they collapse onto
- * activate/deactivate as the pre-existing note on the arrow command records.
+ * Upstream switches on `spec.charAt(0)` (`CommandArrow.java:446-456`) and
+ * then, WHEN THE SPEC IS FOUR CHARACTERS LONG, switches a second time on
+ * `spec.charAt(2)` (`:457-466`). So `--++` is TWO life events -- deactivate
+ * p1 and activate p2 -- not one, and `++--` likewise. An earlier version of
+ * this comment claimed upstream "switches on the FIRST CHARACTER ONLY" and
+ * cited `:443-456`, stopping one line short of the code that refutes it; the
+ * jar draws two activation rectangles for `Bob -> Carol --++` where this port
+ * drew one. Found by T12 of `sequence-command-coverage`.
+ *
+ * The two directions are NOT symmetric -- `+` activates p2, the message
+ * TARGET, while `-` deactivates p1, the message SOURCE (`:447`, `:450`).
+ * `*` (CREATE, at `:396`) and `!` (DESTROY, `:453`) both act on the target;
+ * this port has no CREATE/DESTROY variant on `ActivationEvent`, so they
+ * collapse onto activate/deactivate as the pre-existing note on the arrow
+ * command records.
+ *
+ * Ordering between the two events is not expressible in this return shape and
+ * does not need to be: `sequence-layout-message.ts:135-148` keys both to the
+ * same `messageGeo.y`, so the closing bar ends and the opening bar starts at
+ * one y -- which is what the jar draws (Bob's bar closes at y 93, Carol's
+ * opens at y 93).
  */
+/**
+ * `new UrlBuilder(skinParam("topurl"), STRICT).getUrl(raw)`, reduced to the
+ * href `Url#getUrl()` returns. `topurl` is `null`: this port's sequence
+ * parser carries no skinparam lookup at command time.
+ *
+ * Shared by the ordinary and exogenous arrow commands because upstream does
+ * the same thing in both -- `msg.setUrl(urlBuilder.getUrl(url))` at
+ * `CommandArrow.java:406-408` and `CommandExoArrowAny.java:140-141`. Both
+ * store the RESOLVED url, never the raw `[[...]]` run.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:48-49,82-88
+ */
+export function urlOf(raw: string | undefined): string | undefined {
+  if (raw === undefined) return undefined;
+  return new UrlBuilder(null, UrlMode.STRICT).getUrl(raw)?.getUrl();
+}
+
 export function activationFlags(
   spec: string,
   from: string,
   to: string,
 ): { activates?: string; deactivates?: string } {
-  switch (spec.trim().charAt(0)) {
+  const trimmed = spec.trim();
+  const flags: { activates?: string; deactivates?: string } = {};
+  switch (trimmed.charAt(0)) {
     case '+':
     case '*':
-      return { activates: to };
+      flags.activates = to;
+      break;
     case '-':
-      return { deactivates: from };
+      flags.deactivates = from;
+      break;
     case '!':
-      return { deactivates: to };
-    default:
-      return {};
+      flags.deactivates = to;
+      break;
   }
+  // `if (spec.length() == 4)` (`CommandArrow.java:457-466`) -- the second
+  // life event of a doubled suffix such as `--++` / `++--`.
+  if (trimmed.length === 4) {
+    switch (trimmed.charAt(2)) {
+      case '+':
+        flags.activates = to;
+        break;
+      case '-':
+        flags.deactivates = from;
+        break;
+    }
+  }
+  return flags;
 }
 
 // ---------------------------------------------------------------------------

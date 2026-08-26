@@ -249,15 +249,20 @@ describe('message arrow styles', () => {
     expect(ev.deactivates).toBeUndefined();
   });
 
-  // `spec.charAt(0)` -- only the FIRST character is read
-  // (`CommandArrow.java:445`), so a combined suffix is one life event, not two.
-  it('reads only the first character of a combined suffix', () => {
+  // A four-character suffix carries TWO life events: upstream switches on
+  // `spec.charAt(0)` (`CommandArrow.java:446-456`) and then again on
+  // `spec.charAt(2)` when `spec.length() == 4` (`:457-466`).
+  //
+  // This previously pinned the opposite -- "reads only the first character"
+  // -- on a reading that stopped one line short of `:457`. The jar draws two
+  // activation rectangles for `Alice -> Bob --++`, this port drew one.
+  it('reads both life events of a four-character suffix', () => {
     const minusPlus = firstMessage(['Alice -> Bob --++: x']);
     expect(minusPlus.deactivates).toBe('Alice');
-    expect(minusPlus.activates).toBeUndefined();
+    expect(minusPlus.activates).toBe('Bob');
     const plusMinus = firstMessage(['Alice -> Bob ++--: x']);
     expect(plusMinus.activates).toBe('Bob');
-    expect(plusMinus.deactivates).toBeUndefined();
+    expect(plusMinus.deactivates).toBe('Alice');
   });
 
   // Upstream has ONE `CommandArrow` for both directions, so the suffix

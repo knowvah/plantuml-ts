@@ -68,6 +68,7 @@ import {
 } from './sequence-arrow-regex.js';
 import {
   activationFlags,
+  urlOf,
   applyAutonumber,
   arrowConfigurationOf,
   emit,
@@ -470,11 +471,12 @@ type OptionalMessageFields = Pick<
 function optionalFields(state: ParseState, g: Groups): OptionalMessageFields {
   const multicast = getMulticasts(state, g['MULTICAST']);
   const anchor = g['ANCHOR1'];
+  const url = urlOf(g['URL']);
   return {
     ...(multicast.length > 0 ? { multicast } : {}),
     ...(g['PARALLEL'] !== undefined ? { parallel: true } : {}),
     ...(anchor !== undefined ? { anchor } : {}),
-    ...(g['URL'] !== undefined ? { url: g['URL'] } : {}),
+    ...(url !== undefined ? { url } : {}),
     ...(g['STEREOTYPE'] !== undefined ? { stereotype: g['STEREOTYPE'] } : {}),
     ...(g['LIFECOLOR'] !== undefined ? { lifeColor: g['LIFECOLOR'] } : {}),
   };

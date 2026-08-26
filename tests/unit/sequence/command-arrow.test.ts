@@ -510,7 +510,7 @@ describe('CommandArrow — LIFECOLOR, STEREOTYPE and URL on the message', () => 
     expect(msg.activates).toBe('B');
     expect(msg.lifeColor).toBe('#red');
     expect(msg.stereotype).toBe('<<s>>');
-    expect(msg.url).toBe('[[http://x]]');
+    expect(msg.url).toBe('http://x');
     expect(msg.label).toBe('hi');
   });
 
@@ -518,9 +518,12 @@ describe('CommandArrow — LIFECOLOR, STEREOTYPE and URL on the message', () => 
     expect(refused('A -> B ++ #red [[http://x]] <<s>> : hi')).toBe(true);
   });
 
-  it('keeps the whole `[[…]]` run, which upstream re-parses at :407-410', () => {
+  it('stores the RESOLVED href, as upstream does at :406-408', () => {
+    // `msg.setUrl(urlBuilder.getUrl(url))` -- upstream stores the resolved
+    // `Url`, never the raw run. `CommandExoArrowAny.java:140-141` does the
+    // same, and both now share `urlOf` in `sequence-parse-helpers.ts`.
     expect(firstMessage('A -> B [[http://x.example {tip} lbl]] : hi').url).toBe(
-      '[[http://x.example {tip} lbl]]',
+      'http://x.example',
     );
   });
 
@@ -557,20 +560,17 @@ describe('CommandArrow — ACTIVATION (:126,444-468)', () => {
     expect(msg.deactivates).toBe(deactivates);
   });
 
-  // PINNED GAP, not a claim about upstream. `manageActivations` reads a
-  // SECOND life event out of `spec.charAt(2)` when the spec is four
-  // characters (`:457-466`), and the shared `activationFlags`
-  // (`sequence-parse-helpers.ts:313`) implements the outer switch only. So
-  // `--++` closes the source's bar and never opens the target's. Jar-verified
-  // against `Alice -> Bob ++ / Bob -> Carol --++ / Carol -> Alice`: the
-  // pinned oracle draws TWO activation rectangles, `y 66..93` (Bob, closed by
-  // `--`) and `y 93..138` (Carol, opened by `++`); this port draws one.
-  // Both files that must change are outside this module's write-set, so the
-  // gap is pinned here rather than silently left.
+  // `manageActivations` reads a SECOND life event out of `spec.charAt(2)`
+  // when the spec is four characters (`CommandArrow.java:457-466`). T12
+  // measured this gap and pinned it here; the batch-4 close fixed
+  // `activationFlags` (`sequence-parse-helpers.ts`), so both events now land.
+  // Jar-verified against `Alice -> Bob ++ / Bob -> Carol --++ / Carol ->
+  // Alice`: the oracle draws TWO activation rectangles, `y 66..93` (Bob,
+  // closed by `--`) and `y 93..138` (Carol, opened by `++`).
   it.each([
-    ['A -> B --++ : hi', undefined, 'A'],
-    ['A -> B ++-- : hi', 'B', undefined],
-  ])('reads only the first character of %s — a measured residual', (line, act, deact) => {
+    ['A -> B --++ : hi', 'B', 'A'],
+    ['A -> B ++-- : hi', 'B', 'A'],
+  ])('reads both life events of %s', (line, act, deact) => {
     const msg = firstMessage(line);
     expect(msg.activates).toBe(act);
     expect(msg.deactivates).toBe(deact);
