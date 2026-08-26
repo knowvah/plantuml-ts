@@ -54,19 +54,32 @@ export const boxEndCommand: Command = {
 //     doesn't absorb them, but not modelled on `FrameGeo` (no colored-frame
 //     rendering in this engine yet), same documented scope cut as `ref`'s
 //     `REF` color group below.
-// @see sequencediagram/command/CommandGrouping.java:64-73
+//
+//     T9: leading `(&\s*)?` mirrors the PARALLEL group upstream's single
+//     `CommandGrouping` regex carries ahead of TYPE (`&[%s]*`, zero-or-more
+//     spaces so `&opt` and `& opt` both match). Per D4 it is stored on
+//     `FrameEvent.parallel` and never drawn: every consumer of
+//     `isParallel()` lives under `sequencediagram/teoz/`
+//     (`teoz/GroupingTile.java:145,864`), which this classic-renderer port
+//     does not implement, and upstream's own classic renderer ignores it
+//     too. Only the opening TYPE alternation carries the marker here --
+//     `elseCommand`/`endCommand` split off the same upstream regex's
+//     ELSE/ALSO/END arm, but no corpus fixture exercises `& else`/`& end`,
+//     so that combination is left unported rather than guessed at.
+// @see sequencediagram/command/CommandGrouping.java:64-73,66,151-152
 export const groupingCommand: Command = {
   pattern:
-    /^(loop|alt|opt|par2|par|break|critical|group)(#\w+)?(?:\s+(#\w+))?(?:\s+(.+))?\s*$/i,
+    /^(&\s*)?(loop|alt|opt|par2|par|break|critical|group)(#\w+)?(?:\s+(#\w+))?(?:\s+(.+))?\s*$/i,
   execute(state, match) {
-    const frameType = match[1]!.toLowerCase() as FrameEvent['frameType'];
-    const label = match[4]?.trim() ?? '';
+    const frameType = match[2]!.toLowerCase() as FrameEvent['frameType'];
+    const label = match[5]?.trim() ?? '';
     const frame: FrameEvent = {
       kind: 'frame',
       frameType,
       label,
       branches: [[]],
       branchLabels: [label],
+      ...(match[1] !== undefined ? { parallel: true } : {}),
     };
     state.frameStack.push(frame);
   },
