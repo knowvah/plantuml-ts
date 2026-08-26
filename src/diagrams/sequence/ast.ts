@@ -101,7 +101,7 @@ export interface FrameEvent {
     | 'critical'
     | 'group'
     /** `ref over A, B : text` (`CommandReferenceOverSeveral.java`) — modelled
-     *  as a one-branch, label-only frame; see `sequence-commands-2.ts`. */
+     *  as a one-branch, label-only frame; see `command-misc.ts`. */
     | 'ref';
   label: string;
   branches: SequenceEvent[][]; // alt has multiple; others have one

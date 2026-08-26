@@ -20,7 +20,7 @@
  * caught this: https://github.com/sseely/plantuml-ts/issues/25
  *
  * Second defect pinned here: `else <condition>` captured its label and threw
- * it away (`sequence-commands.ts`'s handler took `(state)` and ignored
+ * it away (`command-grouping.ts`'s handler took `(state)` and ignored
  * `match`), so `[other case]` could never be drawn. The jar renders
  * `alt | [first case] | yes | [other case] | no`.
  */

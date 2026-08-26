@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1022 modules · 3585 exported names.
+1033 modules · 3643 exported names.
 
 ## `src/`
 
@@ -1251,17 +1251,28 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `ast.ts` | `ParticipantType`, `Participant`, `MessageStyle`, `MessageEvent`, `NoteEvent`, `FrameEvent`, `ActivationEvent`, `DividerEvent`, `DelayEvent`, `SpaceEvent`, `SequenceEvent`, `BoxGroup`, `SequenceDiagramAST`, `ParticipantBadge`, `ParticipantGeo`, `TextRun`, `MessageGeo`, `NoteGeo`, `ActivationGeo`, `FrameGeo`, `DividerGeo`, `SpaceGeo`, `EventGeo`, `BoxGeo`, `SequenceGeometry` | AST and Geometry type definitions for PlantUML sequence diagrams. |
+| `command-arrow.ts` | `returnCommand`, `arrowCommand`, `decoratedArrowCommand` | `CommandArrow` (`SequenceDiagramFactory.java:111`) — ONE upstream command covering both directions, split here into a forward-only rule and a reverse/decorated rule (see each one's own notes). |
+| `command-autonumber.ts` | `autonumberCommand` | `CommandAutonumber` (`SequenceDiagramFactory.java:146`), the first of the four autonumber commands upstream registers in a row: `CommandAutonumber` (`:146`), `CommandAutonumberStop` (`:147`), `CommandAutonumberResume` (`:148`) and `CommandA |
+| `command-common.ts` | `skinParamMessageAlignCommand`, `pragmaCommand`, `rotateCommand`, `hideStereotypeCommand`, `hideUnlinkedCommand`, `scaleCommand` | The `CommonCommands.addCommonCommands1(cmds)` block — the VERY FIRST thing `SequenceDiagramFactory#initCommandsList` registers (`:100`), ahead of every sequence-specific command — plus `CommandHideUnlinked` (`:101`), the single command regi |
+| `command-grouping.ts` | `boxStartCommand`, `boxEndCommand`, `groupingCommand`, `elseCommand`, `endCommand` | The box/grouping block: `CommandBoxStart` (`:124`), `CommandBoxEnd` (`:125`) and `CommandGrouping` (`:126`), registered consecutively as one group between the single-line note factories and the `CommandActivate2`/`CommandReturn` pair. |
+| `command-lifeline.ts` | `activateCommand`, `deactivateCommand`, `destroyCommand` | The life-line block: `CommandActivate` (`SequenceDiagramFactory.java:103`) and `CommandDeactivateShort` (`:104`), registered as their own group immediately after `addCommonCommands1`/`CommandHideUnlinked` and before the participant declarat |
+| `command-misc.ts` | `hideFootboxCommand`, `dividerCommand`, `delayWithTextCommand`, `bareDelayCommand`, `spaceCommand`, `autoactivateCommand`, `setSeparatorCommand`, `refOverCommand`, `refOverMultilineCommand` | The individually-registered commands of `initCommandsList`'s trailing run that are neither pagination nor autonumber: `CommandDivider` (`:142`), `CommandHSpace` (`:143`), `CommandReferenceOverSeveral` (`:144`), `CommandReferenceMultilinesOv |
+| `command-note-factory.ts` | `noteCommand`, `endNoteCommand`, `noteOnArrowCommand`, `styledNoteCommand`, `noteAcrossCommand` | The note-command factories. |
+| `command-page.ts` | `newpageCommand`, `minwidthOrPagingCommand` | The pagination block: `CommandNewpage` (`:139`), `CommandIgnoreNewpage` (`:140`) and `CommandAutoNewpage` (`:141`), the three commands that open `initCommandsList`'s trailing run. |
+| `command-participant.ts` | `participantCommand`, `createCommand` | The participant-declaration family: `CommandParticipantA` (`:106`), `CommandParticipantA2` (`:107`), `CommandParticipantA3` (`:108`), `CommandParticipantA4` (`:109`) and `CommandParticipantMultilines` (`:110`) — four single-line arities of |
 | `index.ts` | `sequencePlugin` | Sequence diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |
 | `renderer-arrowhead.ts` | `applyMessageDecorations`, `reverseArrowConfiguration`, `renderFlatMessageArrow`, `renderSelfMessageHead` | renderer-arrowhead.ts — the sequence engine's arrow EMISSION layer. |
+| `renderer-message.ts` | `renderMessage` | Sequence diagram message-drawing path. |
 | `renderer-participant-shapes.ts` | `renderActorShape`, `renderDatabaseShape` | renderer-participant-shapes.ts — the `actor`/`database` participant ICONS, split out of `renderer.ts` (which was already at 493 of the repo's 500-line cap — the same reason `renderer-arrowhead.ts` split off its own file, see that module's h |
 | `renderer.ts` | `renderSequence` | Sequence diagram SVG renderer. |
 | `scale-geo.ts` | `scaleSequenceGeometry`, `ScaledTheme`, `scaleSequenceTheme`, `scaleHeadGeometry`, `scaledDashPattern` | The `scale …` directive for the sequence engine, applied at the layout→render boundary — mirrors `json/scale-geo.ts` exactly (same rationale, same "why scaling inputs equals scaling outputs" argument); see that file's header for the full de |
+| `sequence-arrow-regex.ts` | `ANCHOR`, `anchor`, `COLOR_OR_STYLE_PATTERN`, `colorOrStylePattern`, `ARROW_DRESSING1`, `ARROW_DRESSING2`, `ARROW_BODY_OR`, `PART1`, `PART2`, `ARROW_SUPPCIRCLE2_LEFT`, `ARROW_SUPPCIRCLE1_LEFT`, `ARROW_SUPPCIRCLE1_RIGHT`, `ARROW_SUPPCIRCLE2_RIGHT`, `MULTICAST`, `ACTIVATION`, `LIFECOLOR`, `ARROW_SKELETON_SOURCE`, `ARROW_SKELETON_RE` | Shared regex fragments behind the sequence-diagram arrow commands. |
 | `sequence-arrowhead.ts` | `ArrowHeadKind`, `ArrowPart`, `ArrowDecoration`, `ArrowDressing`, `ArrowConfiguration`, `ArrowSegment`, `ArrowCircle`, `HeadGeometry`, `ARROW_DELTA_X`, `ARROW_DELTA_Y`, `NICE_ARROW_INSET`, `DIAM_CIRCLE`, `THIN_CIRCLE`, `SPACE_CROSS_X`, `headGeometryNormalSide`, `headGeometryReverseSide`, `headGeometrySelf`, `arrowConfigurationFor` | sequence-arrowhead.ts — the sequence engine's arrow SHAPE vocabulary. |
-| `sequence-commands-2.ts` | `COMMANDS_2` | Second command dispatch table for the sequence diagram parser (T13, mission dispatch-by-parse-attempt/batch-4). |
-| `sequence-commands.ts` | `COMMANDS` | Command dispatch table for the sequence diagram parser. |
-| `sequence-layout-events.ts` | `EventProcessingContext`, `processEvents` | Sequence diagram layout — event geometry (Step 2 of layoutSequence). |
+| `sequence-command-registry.ts` | `SequenceCommand`, `SEQUENCE_COMMANDS` | THE sequence command list — one registration-ordered array, tried top-to-bottom with first match winning, mirroring `PSystemCommandFactory#getCandidate` (`:225-246`), which walks the single `cmds` list `SequenceDiagramFactory#initCommandsLi |
+| `sequence-layout-events.ts` | `EventProcessingContext`, `EventCursor`, `processEvents`, `emitActivation` | Sequence diagram layout — event geometry (Step 2 of layoutSequence). |
+| `sequence-layout-message.ts` | `handleMessageEvent` | Sequence diagram layout — message-arrow geometry, split out of sequence-layout-events.ts to keep both files under the size cap. |
 | `sequence-layout-participants.ts` | `ParticipantLayoutResult`, `computeParticipantLayout` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
 | `sequence-layout-shared.ts` | `fontSpecOf` | Small shared leaf utilities for sequence diagram layout. |
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `formatAutonumber`, `ARROW_STYLE_MAP`, `REVERSE_ARROW_STYLE_MAP`, `ParticipantDeclaration`, `parseParticipantDeclaration`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |

@@ -1,7 +1,7 @@
 /**
  * T13 (mission dispatch-by-parse-attempt): unit coverage for the commands
- * ported in `sequence-commands.ts` (in-place widenings) and
- * `sequence-commands-2.ts` (net-new commands) to close the sequence
+ *  ported across the `command-*.ts` family modules, registered in
+  * `sequence-command-registry.ts`, to close the sequence
  * engine's refusal-coverage bucket. Each `describe` block cites the
  * upstream `Command` it exercises.
  */

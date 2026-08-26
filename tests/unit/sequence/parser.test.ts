@@ -306,7 +306,7 @@ describe('autonumber', () => {
 // participant via `getOrCreateParticipant` (`CommandActivate.java:107-108`),
 // so a bare `activate Alice` is a COMPLETE document upstream. This port's
 // `activate`/`deactivate`/`destroy` commands do not yet call
-// `ensureParticipant` (a pre-existing gap in `sequence-commands.ts`, out of
+// `ensureParticipant` (a pre-existing gap in `command-participant.ts`, out of
 // T4's additive-only scope -- fixing it would change successful-parse AST
 // shape, which acceptance criterion 2 forbids); without the prefix these
 // fixtures have zero registered participants and trip the new `isIncomplete`

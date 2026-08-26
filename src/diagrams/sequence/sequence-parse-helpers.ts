@@ -2,10 +2,10 @@
  * Mutable parse state and shared helpers for the sequence diagram parser.
  *
  * Split out of `parser.ts` (the `COMMANDS` dispatch table lives in
- * `sequence-commands.ts`) purely to stay under the project's 500-line file
+ * the `command-*.ts` family modules) purely to stay under the 500-line file
  * cap; this file owns `ParseState`, the `Command` dispatch-entry shape, and
  * the mutation helpers (`ensureParticipant`, `emit`, `applyAutonumber`, …)
- * that both `parser.ts` and `sequence-commands.ts` depend on.
+ * that both `parser.ts` and the `command-*.ts` modules depend on.
  */
 
 import type {
@@ -352,7 +352,7 @@ function collectLinkedIds(event: SequenceEvent, linked: Set<string>): void {
  *  stereotype so neither the layout nor the renderer sees one. Applied
  *  post-parse for the same reason `applyHideUnlinked` is — the directive can
  *  appear after the declarations it affects. See `hideStereotypeCommand`
- *  (`sequence-commands-2.ts`) for the upstream registration chain. */
+ *  (`command-arrow.ts`) for the upstream registration chain. */
 export function applyHideStereotype(ast: SequenceDiagramAST): void {
   if (ast.options.hideStereotype !== true) return;
   for (const p of ast.participants) delete p.stereotype;

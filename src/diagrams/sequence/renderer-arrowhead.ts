@@ -212,7 +212,7 @@ function renderArrowHead(
 
 /**
  * T13 (mission dispatch-by-parse-attempt): overlay the `o`/`x` decorations
- * `decoratedArrowCommand` (`sequence-commands-2.ts`) parsed onto `msg` —
+ * `decoratedArrowCommand` (`command-arrow.ts`) parsed onto `msg` —
  * `dressing1`/`decoration1` is the TAIL (source) end, `dressing2`/
  * `decoration2` the HEAD (destination) end, matching this module's own
  * "dressing1 is the tail side ... dressing2 is the head side" convention
