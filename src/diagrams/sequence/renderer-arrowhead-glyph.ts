@@ -35,8 +35,35 @@ interface ArrowPaint {
   readonly background: string;
 }
 
+/**
+ * `getBackgroundColor()` — the ARROW STYLE's own `BackGroundColor`, which the
+ * default skin pins to **black**, NOT the document background:
+ *
+ *   `arrow { FontSize 13 / LineThickness 1.0 / BackGroundColor black }`
+ *   (`~/git/plantuml/skin/plantuml.skin:306-310`)
+ *
+ * reached through `getColorBackGround()`
+ * (`skin/rose/AbstractComponentRoseArrow.java:66,84-86`) ->
+ * `getColor(PName.BackGroundColor)` (`skin/AbstractComponent.java:105-107`).
+ *
+ * Not fitted, and not read off one fixture: all 51 sequence corpus goldens
+ * carrying an `rx="4"` decoration circle emit `fill="#000"`, including
+ * `dakake-85-nemi992`/`labudu-49-fove649` (`background:#FF0000`) and
+ * `sufevi-44-xipa294` (`background:#D3D3D3`) — so the fill cannot be the
+ * document background. Nor is it the line colour: `TeozTimelineIssues_
+ * 0007_Test` emits `<ellipse ... fill="#000" style="stroke:#F00;...">`, a red
+ * arrow with a black dot, because a per-message `-[#red]->` overrides
+ * `PName.LineColor` only (`sequencediagram/AbstractMessage.java:69-70`).
+ *
+ * A literal rather than a theme slot because the port models no `arrow`
+ * style bucket for it; `resolveElementPaint(theme, 'arrow', 'background')`
+ * would cascade to `nodeBackground`, a different wrong answer. Wiring a real
+ * `<style> arrow { BackGroundColor }` override belongs with the style layer.
+ */
+const ARROW_STYLE_BACKGROUND = '#000000';
+
 export function paintOf(theme: Theme): ArrowPaint {
-  return { color: theme.colors.arrow, background: theme.colors.background };
+  return { color: theme.colors.arrow, background: ARROW_STYLE_BACKGROUND };
 }
 
 /**

@@ -1183,3 +1183,143 @@ describe('renderSequence — participant colours', () => {
     expect(svg).toContain('#FFC0CB');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Exogenous arrows — the render path (T17, sequence-command-coverage)
+// ---------------------------------------------------------------------------
+
+/** The horizontal `<line>`s that are message bodies: `y1 === y2` (a lifeline
+ *  is vertical, `x1 === x2`). Returned as `[x1, x2]` in document order. */
+function messageBodies(svg: string): Array<[number, number]> {
+  const out: Array<[number, number]> = [];
+  for (const tag of svg.match(/<line[^>]*>/g) ?? []) {
+    const n = (a: string): number =>
+      Number(new RegExp(`${a}="([-\\d.]+)"`).exec(tag)?.[1]);
+    if (n('y1') === n('y2') && n('x1') !== n('x2')) out.push([n('x1'), n('x2')]);
+  }
+  return out;
+}
+
+/** Every arrow-head polygon's TIP — the second point, which upstream always
+ *  emits as `(0, 0)` in tip-local coordinates
+ *  (`ComponentRoseArrow.java#getPolygonNormal/getPolygonReverse`). */
+function headTips(svg: string): number[] {
+  return (svg.match(/<polygon[^>]*points="([^"]+)"/g) ?? []).map((tag) => {
+    const pts = /points="([^"]+)"/.exec(tag)?.[1] ?? '';
+    return Number(pts.split(',')[2]);
+  });
+}
+
+/** The dashed lifeline x of every participant, in document order. */
+function lifelines(svg: string): number[] {
+  return (svg.match(/<line[^>]*stroke-dasharray[^>]*>/g) ?? []).map((tag) =>
+    Number(/x1="([-\d.]+)"/.exec(tag)?.[1]),
+  );
+}
+
+function docWidth(svg: string): number {
+  return Number(/viewBox="0 0 ([\d.]+) /.exec(svg)?.[1]);
+}
+
+describe('renderSequence — exogenous arrows', () => {
+  const render = (src: string): string =>
+    renderFixtureSequence(src, new DeterministicMeasurer());
+
+  // `CommunicationExoTile#getPoint1Value` returns `tileArguments.getBorder1()`
+  // for a non-short left-border message (`:213-217`), and the component then
+  // puts its head at `pos2 = width - 2` (`ComponentRoseArrow.java:99-101`),
+  // i.e. two pixels short of the participant's lifeline. Verified against the
+  // jar on `[-> Bob : hello`: body `x1="10" x2="55.544"`, polygon tip
+  // `59.544`, lifeline `61.544` -- the same two relations this asserts.
+  it('anchors a FROM_LEFT body at the left edge and ends it on the lifeline', () => {
+    const svg = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
+    const [body] = messageBodies(svg);
+    expect(body?.[0]).toBe(0);
+    expect(headTips(svg)).toEqual([lifelines(svg)[0]! - 2]);
+  });
+
+  // The mirror: `getPoint2Value` reads `getBorder2()` (`:219-226`), which
+  // `PlayingSpace` maxes over every tile AND every participant's own box
+  // (`PlayingSpace.java:75-96,322-324`). With a second participant to the
+  // right, that box wins, so the arrow stops two pixels short of ITS right
+  // edge rather than of the document's.
+  it('anchors a TO_RIGHT head two pixels short of the right content edge', () => {
+    const svg = render('@startuml\nparticipant Bob\nparticipant Carol\nBob ->] : hello\n@enduml');
+    const rights = (svg.match(/<rect[^>]*>/g) ?? []).map(
+      (t) => Number(/x="([-\d.]+)"/.exec(t)?.[1]) + Number(/width="([-\d.]+)"/.exec(t)?.[1]),
+    );
+    expect(headTips(svg)).toEqual([Math.max(...rights) - 2]);
+  });
+
+  // `CommunicationExoTile#getMaxX` is `getPoint2()` = `posC + preferredWidth`
+  // (`:207-212,230-232`), so a right-border exo whose stretch exceeds every
+  // box widens the document.
+  it('widens the document when a TO_RIGHT exo out-reaches every participant', () => {
+    const without = render('@startuml\nparticipant Bob\nparticipant Carol\nBob -> Carol : hello\n@enduml');
+    const withExo = render(
+      '@startuml\nparticipant Bob\nparticipant Carol\nBob -> Carol : hello\nCarol ->] : bye\n@enduml',
+    );
+    expect(docWidth(without)).toBe(240);
+    expect(docWidth(withExo)).toBe(246);
+  });
+
+  // `drawU` insets the BORDER end by `diamCircle / 2 + 2` when the matching
+  // decoration is a circle (`CommunicationExoTile.java:137-147`), and each
+  // `drawDressing` draws its own (`ComponentRoseArrow.java:199-205,235-242`).
+  // Jar on `[o->o Bob : hello`: circles at `cx="15.5"` and `cx="61.044"`
+  // against a body of `x1="20" x2="50.044"` and a lifeline of `61.544` --
+  // one 4.5 left of the body start, one half a pixel left of the lifeline.
+  it('draws both circles when an exo is decorated on both sides', () => {
+    const svg = render('@startuml\nparticipant Bob\n[o->o Bob : hello\n@enduml');
+    const centres = (svg.match(/<ellipse[^>]*>/g) ?? []).map((t) =>
+      Number(/cx="([-\d.]+)"/.exec(t)?.[1]),
+    );
+    const [body] = messageBodies(svg);
+    expect(centres).toEqual([body![0] - 4.5, lifelines(svg)[0]! - 0.5]);
+  });
+
+  // Upstream fills the `o` with the ARROW STYLE's `BackGroundColor`, which
+  // `plantuml.skin:306-310` pins to `black` -- NOT the document background.
+  // All 51 sequence corpus goldens carrying an `rx="4"` decoration circle
+  // emit `fill="#000"`, including three whose page background is red or grey.
+  it('fills the o decoration black, not with the document background', () => {
+    const svg = render('@startuml\nskinparam backgroundColor #FF0000\n[o-> Bob : hello\n@enduml');
+    expect(svg).toContain('<ellipse cx="5.5" cy="53.25" rx="4" ry="4" fill="#000"');
+    expect(svg).not.toContain('rx="4" ry="4" fill="#F00"');
+  });
+
+  // A CROSSX end draws the saltire and no polygon at all
+  // (`ComponentRoseArrow.java:216-222,253-259`); the exo path reaches it
+  // through the same component, so `[x-> Bob` must emit four stroked lines
+  // beyond the body and the lifeline, and zero heads.
+  it('draws a CROSSX exo end as a saltire and no polygon', () => {
+    const svg = render('@startuml\nparticipant Bob\n[x-> Bob : hello\n@enduml');
+    expect(headTips(svg)).toHaveLength(1); // the participant-side head only
+    const saltire = svg.match(/<line[^>]*stroke-width="2"[^>]*>/g) ?? [];
+    expect(saltire).toHaveLength(2);
+    // Two crossing diagonals, `spaceCrossX` right of the border end.
+    expect(messageBodies(svg)[0]).toEqual([12, 64]);
+    expect(saltire.map((t) => Number(/x1="([-\d.]+)"/.exec(t)?.[1]))).toEqual([7, 7]);
+  });
+
+  // `getComponent` reverses the configuration when `getDirection() == -1`
+  // (`:96-104`), so a TO_LEFT exo's head lands on the BORDER end. Jar on
+  // `[<- Bob : hello`: polygon tip `11`, body `x1="15" x2="60.544"` -- the
+  // head is to the LEFT of the body, at `pos1 = 1` off the border.
+  it('puts a TO_LEFT head on the border end, left of the body', () => {
+    const svg = render('@startuml\nparticipant Bob\n[<- Bob : hello\n@enduml');
+    const [body] = messageBodies(svg);
+    expect(headTips(svg)).toEqual([1]);
+    expect(body).toEqual([5, 69]);
+  });
+
+  // `isFromLeftBorderMessage()` is "this border AND not a short arrow"
+  // (`:249-255`), so `?-> Bob` keeps `getPoint1()` = `posC - preferredWidth`
+  // instead of stretching to the border.
+  it('starts a short FROM_LEFT arrow at its own width, not at the border', () => {
+    const long = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
+    const short = render('@startuml\nparticipant Bob\n?-> Bob : hello\n@enduml');
+    expect(messageBodies(long)[0]).toEqual([0, 64]);
+    expect(messageBodies(short)[0]).toEqual([16.337, 64]);
+  });
+});
