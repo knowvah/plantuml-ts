@@ -24,6 +24,10 @@ import {
   returnCommand,
 } from '../../../src/diagrams/sequence/command-arrow.js';
 import {
+  exoArrowLeftCommand,
+  exoArrowRightCommand,
+} from '../../../src/diagrams/sequence/command-exo-arrow.js';
+import {
   autonumberCommand,
   autonumberIncrementCommand,
   autonumberResumeCommand,
@@ -137,6 +141,8 @@ const EXPECTED: readonly RegistryEntry[] = [
   { name: 'styledNoteCommand', command: styledNoteCommand, upstreamLine: 117 },
   { name: 'noteAcrossCommand', command: noteAcrossCommand, upstreamLine: 122 },
   { name: 'decoratedArrowCommand', command: decoratedArrowCommand, upstreamLine: 111 },
+  { name: 'exoArrowLeftCommand', command: exoArrowLeftCommand, upstreamLine: 113 },
+  { name: 'exoArrowRightCommand', command: exoArrowRightCommand, upstreamLine: 114 },
 ];
 
 /**
@@ -195,14 +201,14 @@ describe('sequence command registry — frozen registration order', () => {
     );
   });
 
-  it('holds 41 commands — one array, not two tiers', () => {
-    expect(SEQUENCE_COMMANDS).toHaveLength(41);
-    expect(new Set(SEQUENCE_COMMANDS).size).toBe(41);
+  it('holds 43 commands — one array, not two tiers', () => {
+    expect(SEQUENCE_COMMANDS).toHaveLength(43);
+    expect(new Set(SEQUENCE_COMMANDS).size).toBe(43);
   });
 
   it('cites only lines inside initCommandsList (99-155) upstream', () => {
     const cited = EXPECTED.map((e) => e.upstreamLine).filter((l): l is number => l !== null);
-    expect(cited).toHaveLength(40);
+    expect(cited).toHaveLength(42);
     expect(cited.filter((l) => l < 99 || l > 155)).toEqual([]);
   });
 
@@ -222,13 +228,19 @@ describe('sequence command registry — frozen registration order', () => {
     // `CommandArrow` (`:111`) is registered BEFORE `CommandExoArrowLeft`/
     // `CommandExoArrowRight` (`:113-114`) and declines `[-> Bob` because its
     // PART1 group is absent entirely — which is why the exo commands get that
-    // line. Neither exo command is ported yet; when one lands it belongs
-    // after both arrow entries, and this assertion is where that is checked.
+    // line. Both exo entries therefore sit after BOTH arrow entries, and the
+    // decline is asserted rather than assumed.
+    const iExoLeft = SEQUENCE_COMMANDS.indexOf(exoArrowLeftCommand);
+    const iExoRight = SEQUENCE_COMMANDS.indexOf(exoArrowRightCommand);
     expect(SEQUENCE_COMMANDS.indexOf(arrowCommand)).toBeLessThan(
       SEQUENCE_COMMANDS.indexOf(decoratedArrowCommand),
     );
+    expect(SEQUENCE_COMMANDS.indexOf(decoratedArrowCommand)).toBeLessThan(iExoLeft);
+    expect(iExoLeft).toBeLessThan(iExoRight);
     expect(arrowCommand.pattern.test('[-> Bob')).toBe(false);
     expect(decoratedArrowCommand.pattern.test('[-> Bob')).toBe(false);
+    expect(arrowCommand.pattern.test('Bob ->]')).toBe(false);
+    expect(decoratedArrowCommand.pattern.test('Bob ->]')).toBe(false);
   });
 
   it('measureDescents reports a descent only when the upstream line drops', () => {
