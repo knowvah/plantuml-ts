@@ -450,10 +450,17 @@ function arrowOf(g: Groups, facts: DressingFacts): ArrowConfiguration {
 /**
  * The AST fields that only some arrows carry, in one place because upstream
  * sets them all in one run of `executeArg` (`:404-415,427`). `parallel` and
- * `anchor` are stored and NOT drawn: every upstream consumer of
- * `isParallel()` and `getAnchor()` lives under `sequencediagram/teoz/`, and
- * the classic renderer reads neither (D4). `PART1ANCHOR`/`PART2ANCHOR` have
- * no AST field.
+ * `anchor` are stored and NOT drawn -- a deliberate, filed residual, NOT
+ * upstream's behaviour. An earlier version of this comment said the
+ * consumers "live under `sequencediagram/teoz/`, and the classic renderer
+ * reads neither"; there IS no classic renderer
+ * (`SequenceDiagram.java:306-309` builds Teoz unconditionally), so those
+ * consumers are live code: `isParallel()` picks `YGauge.createParallel` over
+ * `createWithContact` (`teoz/CommunicationTile.java:113-116`) and an anchor
+ * returns early from `drawU` (`:316-319`). See D4 as amended 2026-08-26 and
+ * follow-on `sequence-parallel-anchor-draw`. `PART1ANCHOR`/`PART2ANCHOR`
+ * likewise have no AST field, which is why a part-anchored message still
+ * draws where upstream suppresses it.
  *
  * LIFECOLOR (`:126`), STEREOTYPE (`:129`) and the URL (`:130`) are each
  * stored exactly as `arg.get(KEY, 0)` yields them: the raw `#colour` token,

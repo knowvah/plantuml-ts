@@ -366,10 +366,14 @@ function exoArrowConfiguration(g: Groups, type: MessageExoType, dressing: string
 
 /**
  * The AST fields only some exo messages carry. `parallel` and `anchor` are
- * stored and NOT drawn: every upstream consumer of `isParallel()` and
- * `getAnchor()` lives under `sequencediagram/teoz/`, and the classic renderer
- * reads neither (D4). `PART1ANCHOR`/`PART2ANCHOR` (`:146-147`) have no AST
- * field, so they are matched and dropped as they are for `CommandArrow`.
+ * stored and NOT drawn -- a deliberate, filed residual, NOT upstream's
+ * behaviour. An earlier version of this comment said the consumers "live
+ * under `sequencediagram/teoz/`, and the classic renderer reads neither";
+ * there IS no classic renderer (`SequenceDiagram.java:306-309` builds Teoz
+ * unconditionally), so those consumers are live. See D4 as amended
+ * 2026-08-26 and follow-on `sequence-parallel-anchor-draw`.
+ * `PART1ANCHOR`/`PART2ANCHOR` (`:146-147`) have no AST field, so they are
+ * matched and dropped as they are for `CommandArrow`.
  * @see ~/git/plantuml/.../command/CommandExoArrowAny.java:138-147
  */
 function exoOptionalFields(
